@@ -17,6 +17,7 @@ import lava.data.api.repository.VisitedRepository
 import lava.data.api.service.ConnectionService
 import lava.data.api.service.FavoritesService
 import lava.data.api.service.ForumService
+import lava.data.api.service.LocalNetworkDiscoveryService
 import lava.data.api.service.SearchService
 import lava.data.api.service.StoreService
 import lava.data.api.service.TopicService
@@ -34,6 +35,7 @@ import lava.data.impl.repository.VisitedRepositoryImpl
 import lava.data.impl.service.ConnectionServiceImpl
 import lava.data.impl.service.FavoritesServiceImpl
 import lava.data.impl.service.ForumServiceImpl
+import lava.data.impl.service.LocalNetworkDiscoveryServiceImpl
 import lava.data.impl.service.SearchServiceImpl
 import lava.data.impl.service.StoreServiceImpl
 import lava.data.impl.service.TopicServiceImpl
@@ -66,6 +68,10 @@ internal interface DataModule {
     @Binds
     @Singleton
     fun forumService(impl: ForumServiceImpl): ForumService
+
+    @Binds
+    @Singleton
+    fun localNetworkDiscoveryService(impl: LocalNetworkDiscoveryServiceImpl): LocalNetworkDiscoveryService
 
     @Binds
     @Singleton

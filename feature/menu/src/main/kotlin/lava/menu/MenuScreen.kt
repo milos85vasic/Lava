@@ -85,11 +85,15 @@ private fun MenuScreen(
     ConfirmationDialog(confirmationDialogState)
     val aboutDialogState = rememberVisibilityState()
     AboutAppDialog(aboutDialogState)
+    var openConnectionSettings by remember { mutableStateOf(false) }
     viewModel.collectSideEffect { sideEffect ->
         when (sideEffect) {
             is MenuSideEffect.OpenLogin -> openLogin()
             is MenuSideEffect.OpenLink -> openLinkHandler.openLink(sideEffect.link)
             is MenuSideEffect.ShowAbout -> aboutDialogState.show()
+            is MenuSideEffect.OpenConnectionSettings -> {
+                openConnectionSettings = true
+            }
             is MenuSideEffect.ShowConfirmation -> {
                 confirmationDialogState.show(
                     title = sideEffect.title,
@@ -101,13 +105,17 @@ private fun MenuScreen(
         }
     }
     val state by viewModel.collectAsState()
-    MenuScreen(state, viewModel::perform)
+    MenuScreen(state, viewModel::perform, openConnectionSettings) {
+        openConnectionSettings = false
+    }
 }
 
 @Composable
 private fun MenuScreen(
     state: MenuState,
     onAction: (MenuAction) -> Unit,
+    openConnectionSettings: Boolean = false,
+    onConnectionSettingsShown: () -> Unit = {},
 ) = Scaffold(
     topBar = { appBarState ->
         AppBar(
@@ -141,7 +149,7 @@ private fun MenuScreen(
             },
             onSelect = { theme -> onAction(SetTheme(theme)) },
         )
-        endpointSelectionItem()
+        endpointSelectionItem(openConnectionSettings, onConnectionSettingsShown)
         menuSyncSelectionItem(
             title = { Text(stringResource(R.string.menu_settings_favorites_sync)) },
             items = SyncPeriod.entries,
@@ -222,7 +230,15 @@ private fun LazyListScope.menuItem(
     onClick: () -> Unit,
 ) = item { MenuItem(text, onClick) }
 
-private fun LazyListScope.endpointSelectionItem() = item { ConnectionItem() }
+private fun LazyListScope.endpointSelectionItem(
+    openConnectionSettings: Boolean,
+    onConnectionSettingsShown: () -> Unit,
+) = item {
+    ConnectionItem(
+        requestShowDialog = openConnectionSettings,
+        onDialogShown = onConnectionSettingsShown,
+    )
+}
 
 private fun <T> LazyListScope.menuSelectionItem(
     title: @Composable () -> Unit,

@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -23,13 +24,28 @@ import org.orbitmvi.orbit.compose.collectAsState
 import org.orbitmvi.orbit.compose.collectSideEffect
 
 @Composable
-fun ConnectionItem() = ConnectionItem(
+fun ConnectionItem(
+    requestShowDialog: Boolean = false,
+    onDialogShown: () -> Unit = {},
+) = ConnectionItem(
     viewModel = viewModel(),
+    requestShowDialog = requestShowDialog,
+    onDialogShown = onDialogShown,
 )
 
 @Composable
-private fun ConnectionItem(viewModel: ConnectionsViewModel) {
+private fun ConnectionItem(
+    viewModel: ConnectionsViewModel,
+    requestShowDialog: Boolean,
+    onDialogShown: () -> Unit,
+) {
     var showDialog by remember { mutableStateOf(false) }
+    LaunchedEffect(requestShowDialog) {
+        if (requestShowDialog) {
+            showDialog = true
+            onDialogShown()
+        }
+    }
     viewModel.collectSideEffect { sideEffect ->
         when (sideEffect) {
             is ConnectionsSideEffect.ShowConnectionDialog -> {

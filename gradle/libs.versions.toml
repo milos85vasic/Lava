@@ -24,6 +24,7 @@ firebaseCrashlyticsGradlePlugin = "3.0.4"
 googleServicesGradlePlugin = "4.4.2"
 hilt = "2.54"
 hiltExt = "1.2.0"
+jmdns = "3.5.9"
 jsoup = "1.15.3"
 junit4 = "4.13.2"
 koin = "3.4.0"
@@ -82,6 +83,7 @@ hilt-dagger-compiler = { group = "com.google.dagger", name = "dagger-compiler", 
 hilt-work = { group = "androidx.hilt", name = "hilt-work", version.ref = "hiltExt" }
 javax-inject = { group = "javax.inject", name = "javax.inject", version = "1" }
 json = { group = "org.json", name = "json", version = "20220924" }
+jmdns = { group = "org.jmdns", name = "jmdns", version.ref = "jmdns" }
 jsoup = { group = "org.jsoup", name = "jsoup", version.ref = "jsoup" }
 junit4 = { group = "junit", name = "junit", version.ref = "junit4" }
 koin = { group = "io.insert-koin", name = "koin-core", version.ref = "koin" }

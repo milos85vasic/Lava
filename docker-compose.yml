@@ -1,0 +1,18 @@
+services:
+  lava-proxy:
+    build:
+      context: ./proxy
+      dockerfile: Dockerfile
+    image: digital.vasic.lava.api:latest
+    container_name: lava-proxy
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+    environment:
+      - JAVA_OPTS=-Xmx512m
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s

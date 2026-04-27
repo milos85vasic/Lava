@@ -6,6 +6,8 @@ import kotlinx.coroutines.flow.collectLatest
 import lava.domain.usecase.ClearBookmarksUseCase
 import lava.domain.usecase.ClearHistoryUseCase
 import lava.domain.usecase.ClearLocalFavoritesUseCase
+import lava.domain.usecase.DiscoverLocalEndpointsResult
+import lava.domain.usecase.DiscoverLocalEndpointsUseCase
 import lava.domain.usecase.ObserveSettingsUseCase
 import lava.domain.usecase.SetBookmarksSyncPeriodUseCase
 import lava.domain.usecase.SetEndpointUseCase
@@ -28,6 +30,7 @@ internal class MenuViewModel @Inject constructor(
     private val clearBookmarksUseCase: ClearBookmarksUseCase,
     private val clearLocalFavoritesUseCase: ClearLocalFavoritesUseCase,
     private val clearHistoryUseCase: ClearHistoryUseCase,
+    private val discoverLocalEndpointsUseCase: DiscoverLocalEndpointsUseCase,
     private val observeSettingsUseCase: ObserveSettingsUseCase,
     private val setBookmarksSyncPeriodUseCase: SetBookmarksSyncPeriodUseCase,
     private val setEndpointUseCase: SetEndpointUseCase,
@@ -39,7 +42,10 @@ internal class MenuViewModel @Inject constructor(
 
     override val container: Container<MenuState, MenuSideEffect> = container(
         initialState = MenuState(),
-        onCreate = { observeSettings() },
+        onCreate = {
+            observeSettings()
+            discoverLocalEndpoints()
+        },
     )
 
     fun perform(action: MenuAction) {
@@ -58,6 +64,21 @@ internal class MenuViewModel @Inject constructor(
             is MenuAction.SetEndpoint -> onSetEndpoint(action.endpoint)
             is MenuAction.SetFavoritesSyncPeriod -> onSetFavoritesSyncPeriod(action.syncPeriod)
             is MenuAction.SetTheme -> onSetTheme(action.theme)
+        }
+    }
+
+    private fun discoverLocalEndpoints() = intent {
+        when (val result = discoverLocalEndpointsUseCase()) {
+            is DiscoverLocalEndpointsResult.Discovered -> {
+                logger.i { "Local endpoint discovered: ${result.endpoint.host}" }
+                postSideEffect(MenuSideEffect.OpenConnectionSettings)
+            }
+            DiscoverLocalEndpointsResult.NotFound -> {
+                logger.d { "No local endpoint discovered" }
+            }
+            DiscoverLocalEndpointsResult.AlreadyConfigured -> {
+                logger.d { "Local endpoint already configured" }
+            }
         }
     }
 

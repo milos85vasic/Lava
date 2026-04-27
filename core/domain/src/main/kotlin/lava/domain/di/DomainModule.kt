@@ -10,6 +10,8 @@ import lava.domain.usecase.AppLaunchedUseCase
 import lava.domain.usecase.AppLaunchedUseCaseImpl
 import lava.domain.usecase.DisableRatingRequestUseCase
 import lava.domain.usecase.DisableRatingRequestUseCaseImpl
+import lava.domain.usecase.DiscoverLocalEndpointsUseCase
+import lava.domain.usecase.DiscoverLocalEndpointsUseCaseImpl
 import lava.domain.usecase.GetRatingStoreUseCase
 import lava.domain.usecase.GetRatingStoreUseCaseImpl
 import lava.domain.usecase.LogoutUseCase
@@ -36,6 +38,10 @@ internal interface DomainModule {
     @Binds
     @Singleton
     fun addEndpointUseCase(impl: AddEndpointUseCaseImpl): AddEndpointUseCase
+
+    @Binds
+    @Singleton
+    fun discoverLocalEndpointsUseCase(impl: DiscoverLocalEndpointsUseCaseImpl): DiscoverLocalEndpointsUseCase
 
     @Binds
     @Singleton
