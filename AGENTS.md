@@ -49,7 +49,7 @@ Flow/
 ├── app/                    # Android application module
 ├── proxy/                  # Ktor proxy server module
 ├── buildSrc/               # Custom Gradle convention plugins
-├── core/                   # 17 core library modules
+├── core/                   # 17 core library module directories
 │   ├── auth/api, auth/impl
 │   ├── common, data, database, designsystem, dispatchers, domain, downloads, logger, models, navigation, notifications, preferences, testing, ui
 │   └── network/api, network/impl, network/rutracker
@@ -59,6 +59,7 @@ Flow/
 ├── gradle/
 │   └── libs.versions.toml  # Version catalog
 ├── build_and_push_docker_image.sh
+├── Upstreams/              # Upstream repository push scripts
 └── settings.gradle.kts
 ```
 
@@ -66,7 +67,7 @@ Flow/
 
 - `:app` — Entry point. Contains `Application`, `MainActivity`, `TvActivity`, and the top-level navigation graph. Depends on every core and feature module.
 - `:proxy` — Ktor/Netty server exposing REST endpoints. Built as a fat JAR and containerized with Docker.
-- `core:*` — Shared libraries. Pure Kotlin modules (`models`, `common`, `auth/api`, `network/api`, `network/rutracker`, `work/api`) have **no Android dependency**.
+- `core:*` — Shared libraries. Pure Kotlin modules (`models`, `common`, `auth/api`, `network/api`, `network:rutracker`, `work/api`) have **no Android dependency**.
 - `feature:*` — Screen-level modules. Each feature typically contains a ViewModel (Orbit MVI), Compose screens, and a navigation contract.
 
 ## Build System & Convention Plugins
@@ -95,7 +96,7 @@ Shared build constants live in `buildSrc/src/main/kotlin/flow/conventions/`:
 
 - `settings.gradle.kts` — Includes `:app`, `:proxy`, all `core:*` and `feature:*` modules.
 - `gradle/libs.versions.toml` — Version catalog with libraries, plugins, and bundles (`coil`, `ktor`, `orbit`, `room`, `work`).
-- `gradle.properties` — Standard Android properties (`android.useAndroidX=true`, `kotlin.code.style=official`, etc.).
+- `gradle.properties` — Standard Android properties (`android.useAndroidX=true`, `kotlin.code.style=official`, `android.nonFinalResIds=false`, etc.).
 
 ## Build Commands
 
@@ -174,7 +175,7 @@ Example: `feature/forum/src/main/kotlin/flow/forum/ForumViewModel.kt`
   - Routes are built with a Kotlin DSL using **context receivers** (enabled in several modules).
   - Each feature exposes `addXxx()` and `openXxx()` extension functions.
   - Deep links for `rutracker.org/forum/viewtopic.php`, `viewforum.php`, and `tracker.php` are handled in `app/src/main/AndroidManifest.xml` and wired into the navigation graph.
-- **TV support** — `TvActivity` extends `MainActivity` and changes `PlatformType` to `TV`. Leanback launcher intent is declared in the manifest.
+- **TV support** — `TvActivity` extends `MainActivity` and changes `PlatformType` to `TV`. Leanback launcher intent is declared in the manifest. The app also declares `android.software.leanback` as not required and `android.hardware.touchscreen` as not required.
 
 ## Testing Strategy
 
