@@ -7,67 +7,24 @@ cd "$SCRIPT_DIR"
 # ------------------------------------------------------------------------------
 # Lava Container Start Script
 # ------------------------------------------------------------------------------
-# Uses digital.vasic.containers technology to bring up the Lava proxy service
-# on the current host and make it accessible to the local network.
+# Delegates to the Containers Go module (digital.vasic.containers) to bring
+# up the Lava proxy service with full LAN discoverability via mDNS.
 # ------------------------------------------------------------------------------
 
-CONTAINERS_BOOT="/tmp/Containers/bin/boot"
-SERVICE_NAME="lava-proxy"
-PORT="8080"
+CONTAINERS_BIN="$SCRIPT_DIR/containers/bin/lava-containers"
+
+# Build the containers Go tool if not present
+if [ ! -f "$CONTAINERS_BIN" ]; then
+    echo "[containers] Building containers management tool..."
+    mkdir -p "$SCRIPT_DIR/containers/bin"
+    cd "$SCRIPT_DIR/containers"
+    go build -o "$CONTAINERS_BIN" ./cmd/lava-containers
+    cd "$SCRIPT_DIR"
+fi
 
 echo "========================================"
 echo "  Lava Container Boot"
 echo "========================================"
 
-# Detect container runtime (Docker or Podman)
-RUNTIME=""
-if command -v docker &> /dev/null; then
-    RUNTIME="docker"
-elif command -v podman &> /dev/null; then
-    RUNTIME="podman"
-else
-    echo "Error: Neither Docker nor Podman found. Please install one."
-    exit 1
-fi
-echo "  Runtime: $RUNTIME"
-
-# Build proxy fat JAR if not present
-if [ ! -f "proxy/build/libs/app.jar" ]; then
-    echo "[1/3] Building proxy fat JAR..."
-    ./gradlew :proxy:buildFatJar
-else
-    echo "[1/3] Proxy fat JAR already built."
-fi
-
-# Build container image
-echo "[2/3] Building container image..."
-$RUNTIME build -t digital.vasic.lava.api:latest ./proxy
-
-# Start container using compose
-echo "[3/3] Starting container..."
-$RUNTIME compose up -d --build
-
-# Wait for service to be ready
-echo "  Waiting for service to be ready..."
-for i in {1..30}; do
-    if curl -fsS http://localhost:$PORT/ > /dev/null 2>&1; then
-        echo "  Service is healthy!"
-        break
-    fi
-    sleep 1
-done
-
-# Detect host LAN IP for mDNS advertisement
-LOCAL_IP=$(hostname -I | awk '{print $1}')
-export ADVERTISE_HOST="$LOCAL_IP"
-
-echo ""
-echo "========================================"
-echo "  Lava Proxy is running"
-echo "========================================"
-echo "  Local:   http://localhost:$PORT"
-echo "  Network: http://$LOCAL_IP:$PORT"
-echo "  mDNS:    advertising on $LOCAL_IP:$PORT"
-echo "========================================"
-echo ""
-echo "To stop: $RUNTIME compose down"
+# Delegate to Go module
+exec "$CONTAINERS_BIN" -cmd=start -project-dir="$SCRIPT_DIR"

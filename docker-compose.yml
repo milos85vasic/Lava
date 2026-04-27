@@ -5,8 +5,9 @@ services:
       dockerfile: Dockerfile
     image: digital.vasic.lava.api:latest
     container_name: lava-proxy
-    ports:
-      - "8080:8080"
+    # Host networking is required for mDNS discovery to work.
+    # The proxy must broadcast on the LAN so Android clients can discover it.
+    network_mode: host
     restart: unless-stopped
     environment:
       - JAVA_OPTS=-Xmx512m
