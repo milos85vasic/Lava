@@ -71,11 +71,11 @@ This software is open source, licensed under the [MIT License][6].
 
 [1]: https://lava-app.tech/copyrights.html
 
-[2]: https://play.google.com/store/apps/details?id=me.rutrackersearch.app
+[2]: https://play.google.com/store/apps/details?id=digital.vasic.lava.client
 
 [3]: https://github.com/andrikeev/Lava/releases
 
-[4]: https://apps.rustore.ru/app/me.rutrackersearch.app
+[4]: https://apps.rustore.ru/app/digital.vasic.lava.client
 
 [5]: https://lava-app.tech/privacy-policy.html
 

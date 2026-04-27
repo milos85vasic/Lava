@@ -21,10 +21,10 @@ val keystorePassword = env["KEYSTORE_PASSWORD"] ?: "l@vAfl0wZ!"
 val keystoreRootDir = env["KEYSTORE_ROOT_DIR"] ?: "keystores"
 
 android {
-    namespace = "me.rutrackersearch.app"
+    namespace = "digital.vasic.lava.client"
 
     defaultConfig {
-        applicationId = "me.rutrackersearch.app"
+        applicationId = "digital.vasic.lava.client"
         versionCode = 1000
         versionName = "1.0.0"
     }

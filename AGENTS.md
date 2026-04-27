@@ -11,7 +11,7 @@
 
 The project is a fork of `andrikeev/Flow`, maintained under `milos85vasic/Lava`. All source code, comments, and documentation are in **English**.
 
-- **App ID:** `me.rutrackersearch.app`
+- **App ID:** `digital.vasic.lava.client`
 - **App Version:** `1.0.0` (`versionCode = 1000`)
 - **Proxy Version:** `1.0.0`
 - **License:** MIT (see `LICENSE`)
@@ -118,6 +118,21 @@ Because there is no root build script, you invoke tasks via the Gradle wrapper a
 
 # Run all tests (there is very little test coverage today)
 ./gradlew test
+
+# Build all artifacts and copy to releases/
+./build_and_release.sh
+```
+
+The `build_and_release.sh` script produces:
+```
+releases/
+└── {version}/
+    ├── android-debug/
+    │   └── digital.vasic.lava.client-{version}-debug.apk
+    ├── android-release/
+    │   └── digital.vasic.lava.client-{version}-release.apk
+    └── proxy/
+        └── digital.vasic.lava.api-{version}.jar
 ```
 
 ### App build types

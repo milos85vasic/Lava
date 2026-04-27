@@ -2,11 +2,11 @@ plugins {
     id("lava.ktor.application")
 }
 
-group = "lava.proxy.rutracker"
+group = "digital.vasic.lava.api"
 version = "1.0.0"
 
 application {
-    mainClass.set("lava.proxy.rutracker.ApplicationKt")
+    mainClass.set("digital.vasic.lava.api.ApplicationKt")
 }
 
 ktor {

@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Lava is an unofficial Android client for **rutracker.org**, plus a companion **Ktor proxy server** that scrapes the site and exposes a JSON API to the app. Two artifacts share one Gradle build:
 
-- `:app` — Android app, Kotlin + Jetpack Compose, App ID `me.rutrackersearch.app`.
+- `:app` — Android app, Kotlin + Jetpack Compose, App ID `digital.vasic.lava.client`.
 - `:proxy` — Ktor/Netty headless server, packaged as a fat JAR + Docker image.
 
 The repo is a fork of `andrikeev/Flow`, rebranded to Lava. All code/comments/docs are English.
@@ -23,6 +23,9 @@ The repo is a fork of `andrikeev/Flow`, rebranded to Lava. All code/comments/doc
 # Proxy server
 ./gradlew :proxy:buildFatJar          # → proxy/build/libs/app.jar
 ./build_and_push_docker_image.sh      # builds + pushes to DigitalOcean registry
+
+# Build all artifacts and copy to releases/
+./build_and_release.sh                # → releases/{version}/android-{debug|release}/, releases/{version}/proxy/
 
 # Code style (Spotless + ktlint — the only enforced checker)
 ./gradlew spotlessApply               # run before committing
