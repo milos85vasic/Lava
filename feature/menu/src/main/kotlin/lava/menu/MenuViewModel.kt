@@ -152,8 +152,8 @@ internal class MenuViewModel @Inject constructor(
         MenuSideEffect.ShowConfirmation(title, confirmationMessage, onConfirmAction)
 
     companion object {
-        private const val DeveloperEmail = "mailto:developer@lava-app.tech"
-        private const val Copyrights = "https://lava-app.tech/copyrights.html"
-        private const val PrivacyPolicy = "https://lava-app.tech/privacy-policy.html"
+        private const val DeveloperEmail = "mailto:vasicdigital@mail.ru"
+        private const val Copyrights = "https://gitflic.ru/project/milosvasic/lava/blob/master/docs/copyright_holders.md"
+        private const val PrivacyPolicy = "https://gitflic.ru/project/milosvasic/lava/blob/master/docs/privacy_policy.md"
     }
 }
