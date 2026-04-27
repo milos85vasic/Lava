@@ -9,6 +9,7 @@ import io.ktor.client.plugins.logging.Logging
 import io.ktor.serialization.kotlinx.json.json
 import lava.data.api.repository.SettingsRepository
 import lava.models.settings.Endpoint
+import lava.models.settings.isLocalHost
 import lava.network.api.NetworkApi
 import lava.network.api.RuTrackerApiFactory
 import lava.network.impl.ProxyNetworkApi
@@ -27,41 +28,63 @@ internal class NetworkApiRepositoryImpl @Inject constructor(
     override suspend fun getApi(): NetworkApi {
         val endpoint = endpoint()
         return apiMap.getOrPut(endpoint) {
-            when (endpoint) {
-                is Endpoint.Proxy -> proxyApi(endpoint.host)
-                is Endpoint.RutrackerEndpoint -> rutrackerApi(endpoint.host)
+            val host = endpoint.host
+            when {
+                endpoint is Endpoint.Proxy -> proxyApi(host)
+                host.isLocalHost() -> proxyApi(host)
+                endpoint is Endpoint.RutrackerEndpoint -> rutrackerApi(host)
+                else -> rutrackerApi(host)
             }
         }
     }
 
     override suspend fun getCaptchaUrl(url: String): String {
         return when (val endpoint = endpoint()) {
-            is Endpoint.Proxy -> "https://${endpoint.host}/captcha/${url.encode()}"
-            is Endpoint.RutrackerEndpoint -> url
+            is Endpoint.Proxy -> proxyUrl(endpoint.host, "/captcha/${url.encode()}")
+            is Endpoint.RutrackerEndpoint -> {
+                if (endpoint.host.isLocalHost()) {
+                    proxyUrl(endpoint.host, "/captcha/${url.encode()}")
+                } else {
+                    url
+                }
+            }
         }
     }
 
     override suspend fun getDownloadUri(id: String): String {
         return when (val endpoint = endpoint()) {
-            is Endpoint.Proxy -> "https://${endpoint.host}/download/$id"
-            is Endpoint.RutrackerEndpoint -> "https://${endpoint.host}/forum/dl.php?t=$id"
+            is Endpoint.Proxy -> proxyUrl(endpoint.host, "/download/$id")
+            is Endpoint.RutrackerEndpoint -> {
+                if (endpoint.host.isLocalHost()) {
+                    proxyUrl(endpoint.host, "/download/$id")
+                } else {
+                    "https://${endpoint.host}/forum/dl.php?t=$id"
+                }
+            }
         }
     }
 
     override suspend fun getAuthHeader(token: String): Pair<String, String> {
-        return when (endpoint()) {
+        return when (val endpoint = endpoint()) {
             is Endpoint.Proxy -> "Auth-Token" to token
-            is Endpoint.RutrackerEndpoint -> "Cookie" to token
+            is Endpoint.RutrackerEndpoint -> {
+                if (endpoint.host.isLocalHost()) {
+                    "Auth-Token" to token
+                } else {
+                    "Cookie" to token
+                }
+            }
         }
     }
 
     private suspend fun endpoint() = settingsRepository.getSettings().endpoint
 
     private fun proxyApi(host: String): NetworkApi {
+        val scheme = if (host.isLocalHost()) "http" else "https"
         return ProxyNetworkApi(
             HttpClient(OkHttp) {
                 engine { preconfigured = okHttpClient }
-                defaultRequest { url(scheme = "https", host = host) }
+                defaultRequest { url(scheme = scheme, host = host) }
                 install(Logging) {
                     logger = networkLogger
                     level = LogLevel.INFO
@@ -84,6 +107,11 @@ internal class NetworkApiRepositoryImpl @Inject constructor(
                 }
             },
         )
+    }
+
+    private fun proxyUrl(host: String, path: String): String {
+        val scheme = if (host.isLocalHost()) "http" else "https"
+        return "$scheme://$host$path"
     }
 
     private fun String.encode(): String {

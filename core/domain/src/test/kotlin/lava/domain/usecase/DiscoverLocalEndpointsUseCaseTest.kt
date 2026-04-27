@@ -52,9 +52,11 @@ class DiscoverLocalEndpointsUseCaseTest {
     }
 
     @Test
-    fun `returns AlreadyConfigured when same endpoint already exists in repository`() = runTest {
+    fun `returns AlreadyConfigured when same endpoint already exists and is selected`() = runTest {
         val useCase = createUseCase()
-        endpointsRepository.add(Endpoint.Mirror("192.168.1.100:8080"))
+        val mirror = Endpoint.Mirror("192.168.1.100:8080")
+        endpointsRepository.add(mirror)
+        settingsRepository.setEndpoint(mirror)
         val discovered = DiscoveredEndpoint(
             host = "192.168.1.100:8080",
             port = 8080,
@@ -67,7 +69,30 @@ class DiscoverLocalEndpointsUseCaseTest {
 
         val result = useCase()
 
-        assertEquals(DiscoverLocalEndpointsResult.AlreadyConfigured, result)
+        assertTrue(result is DiscoverLocalEndpointsResult.AlreadyConfigured)
+        assertEquals(mirror, (result as DiscoverLocalEndpointsResult.AlreadyConfigured).endpoint)
+    }
+
+    @Test
+    fun `selects existing endpoint when discovered but not currently selected`() = runTest {
+        val useCase = createUseCase()
+        val mirror = Endpoint.Mirror("192.168.1.100:8080")
+        endpointsRepository.add(mirror)
+        settingsRepository.setEndpoint(Endpoint.Proxy)
+        val discovered = DiscoveredEndpoint(
+            host = "192.168.1.100:8080",
+            port = 8080,
+            name = "lava-proxy",
+        )
+        launch {
+            discoveryService.emit(discovered)
+            discoveryService.complete()
+        }
+
+        val result = useCase()
+
+        assertTrue(result is DiscoverLocalEndpointsResult.Discovered)
+        assertEquals(mirror, settingsRepository.getSettings().endpoint)
     }
 
     @Test

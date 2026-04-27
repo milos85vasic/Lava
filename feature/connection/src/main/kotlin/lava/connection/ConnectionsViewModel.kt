@@ -65,10 +65,10 @@ internal class ConnectionsViewModel @Inject constructor(
                     ),
                 )
             }
-            DiscoverLocalEndpointsResult.AlreadyConfigured -> {
+            is DiscoverLocalEndpointsResult.AlreadyConfigured -> {
                 postSideEffect(
                     ConnectionsSideEffect.ShowMessage(
-                        "Local endpoint already added",
+                        "Local API active: ${result.endpoint.host}",
                     ),
                 )
             }

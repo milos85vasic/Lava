@@ -3,6 +3,7 @@ package lava.menu
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.os.Build
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,7 +13,9 @@ import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -21,7 +24,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withStyle
 import lava.account.AccountItem
 import lava.connection.ConnectionItem
 import lava.designsystem.component.AppBar
@@ -439,14 +447,18 @@ private fun <T> MenuSelectionDialog(
 private fun AboutAppDialog(state: VisibilityState) {
     if (state.visible) {
         val packageInfo = getPackageInfo()
+        val openLinkHandler = LocalOpenLinkHandler.current
+        val year = Calendar.getInstance().get(Calendar.YEAR)
         Dialog(
             icon = {
-                Icon(
-                    icon = LavaIcons.AppIcon,
+                androidx.compose.foundation.Image(
+                    painter = androidx.compose.ui.res.painterResource(
+                        R.drawable.ic_logo_about,
+                    ),
                     contentDescription = null,
+                    modifier = Modifier.size(AppTheme.sizes.extraLarge),
                 )
             },
-            iconContentColor = AppTheme.colors.primary,
             title = { Text(packageInfo.getAppName()) },
             text = {
                 Column(
@@ -454,10 +466,23 @@ private fun AboutAppDialog(state: VisibilityState) {
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Text(stringResource(R.string.app_version, packageInfo.getAppVersionName()))
-                    Text(
-                        stringResource(
-                            R.string.app_copyright,
-                            Calendar.getInstance().get(Calendar.YEAR),
+                    Text(stringResource(R.string.app_copyright_original, year))
+                    androidx.compose.foundation.text.ClickableText(
+                        text = androidx.compose.ui.text.buildAnnotatedString {
+                            append("© ")
+                            withStyle(
+                                style = androidx.compose.ui.text.SpanStyle(
+                                    color = AppTheme.colors.primary,
+                                    textDecoration = androidx.compose.ui.text.style.TextDecoration.Underline,
+                                ),
+                            ) {
+                                append("Milos Vasic")
+                            }
+                            append(", $year")
+                        },
+                        onClick = { openLinkHandler.openLink("https://www.milosvasic.ru") },
+                        style = AppTheme.typography.bodyMedium.copy(
+                            color = AppTheme.colors.onSurface,
                         ),
                     )
                 }

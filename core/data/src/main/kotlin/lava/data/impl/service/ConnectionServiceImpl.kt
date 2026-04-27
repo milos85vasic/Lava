@@ -17,10 +17,11 @@ import kotlinx.coroutines.withContext
 import lava.data.api.service.ConnectionService
 import lava.dispatchers.api.Dispatchers
 import lava.logger.api.LoggerFactory
+import lava.models.settings.isLocalHost
 import java.io.IOException
+import java.net.HttpURLConnection
 import java.net.URL
 import javax.inject.Inject
-import javax.net.ssl.HttpsURLConnection
 
 internal class ConnectionServiceImpl @Inject constructor(
     @ApplicationContext context: Context,
@@ -71,8 +72,9 @@ internal class ConnectionServiceImpl @Inject constructor(
 
     override suspend fun isReachable(host: String) = withContext(dispatchers.io) {
         runCatching {
-            val url = URL("https://$host")
-            val connection = url.openConnection() as HttpsURLConnection
+            val scheme = if (host.isLocalHost()) "http" else "https"
+            val url = URL("$scheme://$host")
+            val connection = url.openConnection() as HttpURLConnection
             try {
                 connection.connectTimeout = 5_000
                 connection.connect()

@@ -104,7 +104,6 @@ class MenuViewModelTest {
             endpointsRepository = lava.testing.repository.TestEndpointsRepository(),
             settingsRepository = settingsRepository,
             dispatchers = testDispatchers,
-            discoveryTimeoutMs = 100L,
         )
         return MenuViewModel(
             clearBookmarksUseCase = clearBookmarksUseCase,

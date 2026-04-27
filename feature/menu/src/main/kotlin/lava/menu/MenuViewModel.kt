@@ -76,8 +76,8 @@ internal class MenuViewModel @Inject constructor(
             DiscoverLocalEndpointsResult.NotFound -> {
                 logger.d { "No local endpoint discovered" }
             }
-            DiscoverLocalEndpointsResult.AlreadyConfigured -> {
-                logger.d { "Local endpoint already configured" }
+            is DiscoverLocalEndpointsResult.AlreadyConfigured -> {
+                logger.d { "Local endpoint already configured: ${result.endpoint.host}" }
             }
         }
     }

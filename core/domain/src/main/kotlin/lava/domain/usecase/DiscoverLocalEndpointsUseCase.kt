@@ -16,7 +16,7 @@ interface DiscoverLocalEndpointsUseCase : suspend () -> DiscoverLocalEndpointsRe
 sealed interface DiscoverLocalEndpointsResult {
     data class Discovered(val endpoint: Endpoint.Mirror) : DiscoverLocalEndpointsResult
     data object NotFound : DiscoverLocalEndpointsResult
-    data object AlreadyConfigured : DiscoverLocalEndpointsResult
+    data class AlreadyConfigured(val endpoint: Endpoint.Mirror) : DiscoverLocalEndpointsResult
 }
 
 class DiscoverLocalEndpointsUseCaseImpl @Inject constructor(
@@ -32,16 +32,23 @@ class DiscoverLocalEndpointsUseCaseImpl @Inject constructor(
         } ?: return@withContext DiscoverLocalEndpointsResult.NotFound
 
         val mirror = Endpoint.Mirror(discovered.host)
-
         val existing = endpointsRepository.observeAll().first()
-        if (existing.any { it == mirror }) {
-            return@withContext DiscoverLocalEndpointsResult.AlreadyConfigured
+        val alreadyInRepo = existing.any { it == mirror }
+
+        if (alreadyInRepo) {
+            val currentEndpoint = settingsRepository.getSettings().endpoint
+            return@withContext if (currentEndpoint == mirror) {
+                DiscoverLocalEndpointsResult.AlreadyConfigured(mirror)
+            } else {
+                // Endpoint exists but is not selected — select it and report discovery
+                settingsRepository.setEndpoint(mirror)
+                DiscoverLocalEndpointsResult.Discovered(mirror)
+            }
         }
 
         endpointsRepository.add(mirror)
 
-        val currentSettings = settingsRepository.getSettings()
-        val currentEndpoint = currentSettings.endpoint
+        val currentEndpoint = settingsRepository.getSettings().endpoint
         if (currentEndpoint !is Endpoint.Mirror || currentEndpoint.host.contains("rutracker")) {
             settingsRepository.setEndpoint(mirror)
         }

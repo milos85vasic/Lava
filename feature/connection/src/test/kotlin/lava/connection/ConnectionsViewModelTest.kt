@@ -65,7 +65,6 @@ class ConnectionsViewModelTest {
             endpointsRepository = endpointsRepository,
             settingsRepository = settingsRepository,
             dispatchers = TestDispatchers(),
-            discoveryTimeoutMs = 100L,
         )
         return ConnectionsViewModel(
             addEndpointUseCase = addEndpointUseCase,
@@ -181,10 +180,12 @@ class ConnectionsViewModelTest {
     }
 
     @Test
-    fun `discover local endpoints already configured shows message`() = runTest {
+    fun `discover local endpoints already configured shows active message`() = runTest {
         val viewModel = createViewModel()
-        // Seed the repository with the endpoint that will be discovered.
-        endpointsRepository.add(Endpoint.Mirror("192.168.1.100:8080"))
+        // Seed the repository and select the endpoint that will be discovered.
+        val mirror = Endpoint.Mirror("192.168.1.100:8080")
+        endpointsRepository.add(mirror)
+        settingsRepository.setEndpoint(mirror)
         val discovered = lava.data.api.service.DiscoveredEndpoint(
             host = "192.168.1.100:8080",
             port = 8080,
@@ -203,7 +204,7 @@ class ConnectionsViewModelTest {
             val doneState = awaitState()
             assertFalse("Should hide loading", doneState.discovering)
             expectSideEffect(
-                ConnectionsSideEffect.ShowMessage("Local endpoint already added"),
+                ConnectionsSideEffect.ShowMessage("Local API active: 192.168.1.100:8080"),
             )
         }
     }
