@@ -2,6 +2,7 @@ package lava.domain.usecase
 
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import lava.data.api.repository.EndpointsRepository
 import lava.data.api.repository.SettingsRepository
 import lava.data.api.service.LocalNetworkDiscoveryService
@@ -31,8 +32,9 @@ internal class DiscoverLocalEndpointsUseCaseImpl @Inject constructor(
             return@withContext DiscoverLocalEndpointsResult.AlreadyConfigured
         }
 
-        val discovered = discoveryService.discover().firstOrNull()
-            ?: return@withContext DiscoverLocalEndpointsResult.NotFound
+        val discovered = withTimeoutOrNull(5_000) {
+            discoveryService.discover().firstOrNull()
+        } ?: return@withContext DiscoverLocalEndpointsResult.NotFound
 
         val mirror = Endpoint.Mirror(discovered.host)
         endpointsRepository.add(mirror)

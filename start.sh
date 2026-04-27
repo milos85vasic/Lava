@@ -57,14 +57,17 @@ for i in {1..30}; do
     sleep 1
 done
 
-# Display local network info
+# Detect host LAN IP for mDNS advertisement
 LOCAL_IP=$(hostname -I | awk '{print $1}')
+export ADVERTISE_HOST="$LOCAL_IP"
+
 echo ""
 echo "========================================"
 echo "  Lava Proxy is running"
 echo "========================================"
 echo "  Local:   http://localhost:$PORT"
 echo "  Network: http://$LOCAL_IP:$PORT"
+echo "  mDNS:    advertising on $LOCAL_IP:$PORT"
 echo "========================================"
 echo ""
 echo "To stop: $RUNTIME compose down"

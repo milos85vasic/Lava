@@ -11,7 +11,8 @@ object ServiceAdvertisement {
 
     fun start(port: Int) {
         try {
-            val address = InetAddress.getLocalHost()
+            val address = System.getenv("ADVERTISE_HOST")?.let { InetAddress.getByName(it) }
+                ?: InetAddress.getLocalHost()
             jmDNS = JmDNS.create(address, SERVICE_NAME)
             val serviceInfo = ServiceInfo.create(
                 SERVICE_TYPE,
