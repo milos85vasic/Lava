@@ -1,12 +1,12 @@
 package lava.domain.usecase
 
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import lava.data.api.repository.BookmarksRepository
 import lava.data.api.repository.FavoritesRepository
 import lava.data.api.repository.VisitedRepository
 import lava.models.topic.Topic
 import lava.models.topic.TopicModel
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.combine
 import javax.inject.Inject
 
 class EnrichTopicUseCase @Inject constructor(

@@ -1,9 +1,9 @@
 package lava.testing.repository
 
+import kotlinx.coroutines.flow.Flow
 import lava.data.api.repository.BookmarksRepository
 import lava.models.forum.Category
 import lava.models.forum.CategoryModel
-import kotlinx.coroutines.flow.Flow
 
 class TestBookmarksRepository : BookmarksRepository {
     override fun observeBookmarks(): Flow<List<CategoryModel>> {

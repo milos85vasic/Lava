@@ -6,7 +6,6 @@ import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.rememberTransition
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.core.updateTransition
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Box
@@ -52,7 +51,7 @@ fun DropdownMenu(
         ) {
             val transition = rememberTransition(
                 transitionState = transitionState,
-                label = "DropdownMenu_Transition"
+                label = "DropdownMenu_Transition",
             )
             val elevation by transition.animateDp(
                 label = "DropdownMenu_Elevation",

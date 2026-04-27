@@ -1,5 +1,8 @@
 package lava.auth.impl
 
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.onStart
 import lava.auth.api.AuthService
 import lava.auth.api.TokenProvider
 import lava.common.SingleItemMutableSharedFlow
@@ -11,9 +14,6 @@ import lava.network.dto.auth.AuthResponseDto
 import lava.network.dto.auth.CaptchaDto
 import lava.securestorage.PreferencesStorage
 import lava.securestorage.model.Account
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.onStart
 import javax.inject.Inject
 import javax.inject.Singleton
 

@@ -1,9 +1,9 @@
 package lava.data.api.repository
 
+import kotlinx.coroutines.flow.Flow
 import lava.models.topic.Topic
 import lava.models.topic.TopicModel
 import lava.models.topic.Torrent
-import kotlinx.coroutines.flow.Flow
 
 interface FavoritesRepository {
     fun observeTopics(): Flow<List<TopicModel<out Topic>>>

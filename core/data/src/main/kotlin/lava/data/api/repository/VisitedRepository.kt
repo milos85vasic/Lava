@@ -1,8 +1,8 @@
 package lava.data.api.repository
 
+import kotlinx.coroutines.flow.Flow
 import lava.models.topic.Topic
 import lava.models.topic.TopicPage
-import kotlinx.coroutines.flow.Flow
 
 interface VisitedRepository {
     fun observeTopics(): Flow<List<Topic>>

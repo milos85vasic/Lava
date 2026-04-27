@@ -1,9 +1,9 @@
 package lava.domain.usecase
 
-import lava.data.api.repository.BookmarksRepository
-import lava.models.forum.CategoryModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import lava.data.api.repository.BookmarksRepository
+import lava.models.forum.CategoryModel
 import javax.inject.Inject
 
 class ObserveCategoryModelUseCase @Inject constructor(

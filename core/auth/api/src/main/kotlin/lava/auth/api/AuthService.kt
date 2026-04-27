@@ -1,8 +1,8 @@
 package lava.auth.api
 
+import kotlinx.coroutines.flow.Flow
 import lava.models.auth.AuthResult
 import lava.models.auth.AuthState
-import kotlinx.coroutines.flow.Flow
 
 interface AuthService {
     fun observeAuthState(): Flow<AuthState>

@@ -1,9 +1,9 @@
 package lava.search.result.domain
 
+import kotlinx.coroutines.withContext
 import lava.dispatchers.api.Dispatchers
 import lava.domain.usecase.GetForumUseCase
 import lava.models.forum.Category
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 internal class GetCategoriesByGroupIdUseCase @Inject constructor(

@@ -1,5 +1,9 @@
 package lava.domain.usecase
 
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.onStart
 import lava.data.api.service.SearchService
 import lava.domain.model.PagingAction
 import lava.domain.model.PagingData
@@ -9,10 +13,6 @@ import lava.logger.api.LoggerFactory
 import lava.models.search.Filter
 import lava.models.topic.TopicModel
 import lava.models.topic.Torrent
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.onStart
 import javax.inject.Inject
 
 class ObserveSearchPagingDataUseCase @Inject constructor(

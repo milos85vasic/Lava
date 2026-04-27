@@ -1,14 +1,14 @@
 package lava.data.impl.repository
 
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.onStart
 import lava.data.api.repository.EndpointsRepository
 import lava.data.converters.toEntity
 import lava.data.converters.toModel
 import lava.database.dao.EndpointDao
 import lava.database.entity.EndpointEntity
 import lava.models.settings.Endpoint
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.mapLatest
-import kotlinx.coroutines.flow.onStart
 import javax.inject.Inject
 
 class EndpointsRepositoryImpl @Inject constructor(

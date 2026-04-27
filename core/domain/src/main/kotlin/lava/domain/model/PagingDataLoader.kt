@@ -1,8 +1,5 @@
 package lava.domain.model
 
-import lava.logger.api.Logger
-import lava.models.LoadState
-import lava.models.Page
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -12,6 +9,9 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
+import lava.logger.api.Logger
+import lava.models.LoadState
+import lava.models.Page
 
 class PagingDataLoader<Item : Any, Data>(
     private val fetchData: suspend (Int) -> Page<Item>,

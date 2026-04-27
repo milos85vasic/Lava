@@ -1,11 +1,11 @@
 package lava.testing.service
 
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import lava.auth.api.AuthService
 import lava.auth.api.TokenProvider
 import lava.models.auth.AuthResult
 import lava.models.auth.AuthState
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
 
 class TestAuthService : AuthService, TokenProvider {
     var response: AuthResult = AuthResult.Error(Throwable())

@@ -2,6 +2,7 @@ package lava.rating
 
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.collectLatest
 import lava.domain.model.rating.RatingRequest
 import lava.domain.usecase.AppLaunchedUseCase
 import lava.domain.usecase.DisableRatingRequestUseCase
@@ -9,7 +10,6 @@ import lava.domain.usecase.GetRatingStoreUseCase
 import lava.domain.usecase.ObserveRatingRequestUseCase
 import lava.domain.usecase.PostponeRatingRequestUseCase
 import lava.logger.api.LoggerFactory
-import kotlinx.coroutines.flow.collectLatest
 import org.orbitmvi.orbit.Container
 import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.syntax.simple.intent

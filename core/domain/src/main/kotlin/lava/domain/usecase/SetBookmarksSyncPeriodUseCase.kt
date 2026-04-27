@@ -1,10 +1,10 @@
 package lava.domain.usecase
 
+import kotlinx.coroutines.withContext
 import lava.data.api.repository.SettingsRepository
 import lava.dispatchers.api.Dispatchers
 import lava.models.settings.SyncPeriod
 import lava.work.api.BackgroundService
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 class SetBookmarksSyncPeriodUseCase @Inject constructor(

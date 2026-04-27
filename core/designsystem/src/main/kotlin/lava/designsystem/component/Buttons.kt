@@ -18,8 +18,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import lava.designsystem.R
-import lava.designsystem.drawables.LavaIcons
 import lava.designsystem.drawables.Icon
+import lava.designsystem.drawables.LavaIcons
 import lava.designsystem.theme.AppTheme
 import lava.designsystem.theme.LavaTheme
 import lava.designsystem.theme.contentColorFor

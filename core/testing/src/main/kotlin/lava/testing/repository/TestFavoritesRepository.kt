@@ -1,10 +1,10 @@
 package lava.testing.repository
 
+import kotlinx.coroutines.flow.Flow
 import lava.data.api.repository.FavoritesRepository
 import lava.models.topic.Topic
 import lava.models.topic.TopicModel
 import lava.models.topic.Torrent
-import kotlinx.coroutines.flow.Flow
 
 class TestFavoritesRepository : FavoritesRepository {
     override fun observeTopics(): Flow<List<TopicModel<out Topic>>> {

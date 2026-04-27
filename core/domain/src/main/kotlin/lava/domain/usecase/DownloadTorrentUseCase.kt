@@ -1,11 +1,11 @@
 package lava.domain.usecase
 
+import kotlinx.coroutines.withContext
 import lava.auth.api.TokenProvider
 import lava.dispatchers.api.Dispatchers
 import lava.downloads.api.DownloadRequest
 import lava.downloads.api.DownloadService
 import lava.network.data.NetworkApiRepository
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 class DownloadTorrentUseCase @Inject constructor(

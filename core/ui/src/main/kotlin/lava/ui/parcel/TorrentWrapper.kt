@@ -2,11 +2,11 @@ package lava.ui.parcel
 
 import android.os.Parcel
 import android.os.Parcelable
-import lava.models.topic.Torrent
-import lava.models.topic.TorrentStatus
 import kotlinx.parcelize.Parceler
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.TypeParceler
+import lava.models.topic.Torrent
+import lava.models.topic.TorrentStatus
 
 @Parcelize
 @TypeParceler<Torrent, TorrentParceler>()

@@ -1,8 +1,8 @@
 package lava.domain.usecase
 
+import kotlinx.coroutines.withContext
 import lava.dispatchers.api.Dispatchers
 import lava.models.search.Filter
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 class EnrichFilterUseCase @Inject constructor(

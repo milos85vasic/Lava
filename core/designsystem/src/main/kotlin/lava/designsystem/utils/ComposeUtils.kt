@@ -8,8 +8,8 @@ import androidx.activity.SystemBarStyle
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
-import lava.designsystem.theme.AppTheme
 import kotlinx.coroutines.job
+import lava.designsystem.theme.AppTheme
 
 @Composable
 fun RunOnFirstComposition(block: () -> Unit) {

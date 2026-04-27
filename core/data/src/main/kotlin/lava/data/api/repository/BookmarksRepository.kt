@@ -1,8 +1,8 @@
 package lava.data.api.repository
 
+import kotlinx.coroutines.flow.Flow
 import lava.models.forum.Category
 import lava.models.forum.CategoryModel
-import kotlinx.coroutines.flow.Flow
 
 interface BookmarksRepository {
     fun observeBookmarks(): Flow<List<CategoryModel>>

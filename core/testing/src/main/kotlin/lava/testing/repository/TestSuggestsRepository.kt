@@ -1,7 +1,7 @@
 package lava.testing.repository
 
-import lava.data.api.repository.SuggestsRepository
 import kotlinx.coroutines.flow.Flow
+import lava.data.api.repository.SuggestsRepository
 
 class TestSuggestsRepository : SuggestsRepository {
     override fun observeSuggests(): Flow<List<String>> {

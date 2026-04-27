@@ -1,10 +1,5 @@
 package lava.network.impl
 
-import lava.network.api.RuTrackerInnerApi
-import lava.network.dto.FileDto
-import lava.network.dto.search.SearchPeriodDto
-import lava.network.dto.search.SearchSortOrderDto
-import lava.network.dto.search.SearchSortTypeDto
 import io.ktor.client.HttpClient
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.forms.formData
@@ -24,6 +19,11 @@ import io.ktor.http.Parameters
 import io.ktor.http.content.OutgoingContent
 import io.ktor.http.withCharset
 import io.ktor.utils.io.core.toByteArray
+import lava.network.api.RuTrackerInnerApi
+import lava.network.dto.FileDto
+import lava.network.dto.search.SearchPeriodDto
+import lava.network.dto.search.SearchSortOrderDto
+import lava.network.dto.search.SearchSortTypeDto
 import java.net.URLEncoder
 
 internal class RuTrackerInnerApiImpl(private val httpClient: HttpClient) : RuTrackerInnerApi {

@@ -1,12 +1,12 @@
 package lava.domain.usecase
 
+import kotlinx.coroutines.withContext
 import lava.auth.api.AuthService
 import lava.dispatchers.api.Dispatchers
 import lava.models.auth.AuthResult
 import lava.models.auth.Captcha
 import lava.network.data.NetworkApiRepository
 import lava.work.api.BackgroundService
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 class LoginUseCase @Inject constructor(

@@ -3,8 +3,8 @@ package lava.ui.component
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import lava.designsystem.drawables.LavaIcons
 import lava.designsystem.drawables.Icon
+import lava.designsystem.drawables.LavaIcons
 import lava.designsystem.theme.AppTheme
 import lava.models.search.Order
 import lava.models.search.Period

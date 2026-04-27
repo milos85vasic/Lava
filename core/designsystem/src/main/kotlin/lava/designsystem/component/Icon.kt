@@ -12,8 +12,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import lava.designsystem.R
-import lava.designsystem.drawables.LavaIcons
 import lava.designsystem.drawables.Icon
+import lava.designsystem.drawables.LavaIcons
 
 @Composable
 fun Icon(

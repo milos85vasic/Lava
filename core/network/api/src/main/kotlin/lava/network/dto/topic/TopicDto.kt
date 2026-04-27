@@ -1,8 +1,8 @@
 package lava.network.dto.topic
 
-import lava.network.dto.forum.CategoryDto
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import lava.network.dto.forum.CategoryDto
 
 @Serializable
 sealed interface ForumTopicDto {

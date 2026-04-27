@@ -1,9 +1,9 @@
 package lava.domain.usecase
 
+import kotlinx.coroutines.withContext
 import lava.data.api.service.StoreService
 import lava.dispatchers.api.Dispatchers
 import lava.models.Store
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 interface GetRatingStoreUseCase : suspend () -> Store

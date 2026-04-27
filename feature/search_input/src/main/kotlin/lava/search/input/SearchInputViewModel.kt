@@ -6,13 +6,13 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.collectLatest
 import lava.common.newCancelableScope
 import lava.common.relaunch
 import lava.domain.usecase.AddSuggestUseCase
 import lava.domain.usecase.ObserveSuggestsUseCase
 import lava.logger.api.LoggerFactory
 import lava.models.search.Suggest
-import kotlinx.coroutines.flow.collectLatest
 import org.orbitmvi.orbit.Container
 import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.syntax.simple.intent

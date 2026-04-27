@@ -10,11 +10,11 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.navigation.NavDeepLinkRequest
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import lava.logger.api.LoggerFactory
-import lava.ui.platform.LocalLoggerFactory
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
+import lava.logger.api.LoggerFactory
+import lava.ui.platform.LocalLoggerFactory
 
 interface NavigationController {
     val navHostController: NavHostController

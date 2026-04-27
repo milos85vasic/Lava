@@ -37,6 +37,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withLink
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.launch
 import lava.designsystem.component.Divider
 import lava.designsystem.component.ExpandCollapseIcon
 import lava.designsystem.component.LocalSnackbarHostState
@@ -60,7 +61,6 @@ import lava.ui.R
 import lava.ui.component.RemoteImage
 import lava.ui.platform.LocalOpenLinkHandler
 import lava.ui.platform.OpenLinkHandler
-import kotlinx.coroutines.launch
 
 @Composable
 internal fun Post(
@@ -131,7 +131,7 @@ private fun AnnotatedString.Builder.append(
                             textDecoration = TextDecoration.Underline,
                         ),
                     ),
-                    linkInteractionListener = { openLinkHandler.invoke(content.src) }
+                    linkInteractionListener = { openLinkHandler.invoke(content.src) },
                 ),
                 block = { append(content.content, colors, openLinkHandler) },
             )
@@ -395,7 +395,8 @@ private fun rememberLinkHandler(): (String) -> Unit {
         linkErrorMessage,
         coroutinesScope,
     ) {
-        { link ->
+        {
+                link ->
             openLinkHandler
                 .runCatching { openLink(link) }
                 .onFailure { coroutinesScope.launch { snackbarState.showSnackbar(linkErrorMessage) } }

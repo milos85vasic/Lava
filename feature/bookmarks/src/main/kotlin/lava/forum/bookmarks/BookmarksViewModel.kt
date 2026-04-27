@@ -2,9 +2,9 @@ package lava.forum.bookmarks
 
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.collectLatest
 import lava.domain.usecase.ObserveBookmarksUseCase
 import lava.logger.api.LoggerFactory
-import kotlinx.coroutines.flow.collectLatest
 import org.orbitmvi.orbit.Container
 import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.syntax.simple.intent

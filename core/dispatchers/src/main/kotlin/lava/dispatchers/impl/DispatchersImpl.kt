@@ -1,7 +1,7 @@
 package lava.dispatchers.impl
 
-import lava.dispatchers.api.Dispatchers
 import kotlinx.coroutines.CoroutineDispatcher
+import lava.dispatchers.api.Dispatchers
 import javax.inject.Inject
 
 internal class DispatchersImpl @Inject constructor() : Dispatchers {

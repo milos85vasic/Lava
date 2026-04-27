@@ -2,6 +2,7 @@ package lava.search.result.categories
 
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.coroutineScope
 import lava.logger.api.LoggerFactory
 import lava.models.forum.Category
 import lava.search.result.categories.CategorySelectionAction.ExpandClick
@@ -10,7 +11,6 @@ import lava.search.result.categories.CategorySelectionAction.SelectClick
 import lava.search.result.domain.GetCategoriesByGroupIdUseCase
 import lava.search.result.domain.GetFlattenForumTreeUseCase
 import lava.search.result.domain.models.ForumTreeItem
-import kotlinx.coroutines.coroutineScope
 import org.orbitmvi.orbit.Container
 import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.syntax.simple.intent

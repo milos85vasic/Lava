@@ -1,11 +1,11 @@
 package lava.domain.usecase
 
+import kotlinx.coroutines.withContext
 import lava.data.api.repository.FavoriteSearchRepository
 import lava.data.api.repository.SearchHistoryRepository
 import lava.data.api.repository.SuggestsRepository
 import lava.data.api.repository.VisitedRepository
 import lava.dispatchers.api.Dispatchers
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 class ClearHistoryUseCase @Inject constructor(

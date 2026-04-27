@@ -1,15 +1,15 @@
 package lava.domain.usecase
 
-import lava.data.api.repository.SettingsRepository
-import lava.data.api.service.ConnectionService
-import lava.domain.model.endpoint.EndpointState
-import lava.domain.model.endpoint.EndpointStatus
-import lava.models.settings.Endpoint
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.transformLatest
+import lava.data.api.repository.SettingsRepository
+import lava.data.api.service.ConnectionService
+import lava.domain.model.endpoint.EndpointState
+import lava.domain.model.endpoint.EndpointStatus
+import lava.models.settings.Endpoint
 import javax.inject.Inject
 
 interface ObserveEndpointStatusUseCase : (Endpoint) -> Flow<EndpointState>

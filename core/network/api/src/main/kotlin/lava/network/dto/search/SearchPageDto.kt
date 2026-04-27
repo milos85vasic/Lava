@@ -1,7 +1,7 @@
 package lava.network.dto.search
 
-import lava.network.dto.topic.TorrentDto
 import kotlinx.serialization.Serializable
+import lava.network.dto.topic.TorrentDto
 
 @Serializable
 data class SearchPageDto(

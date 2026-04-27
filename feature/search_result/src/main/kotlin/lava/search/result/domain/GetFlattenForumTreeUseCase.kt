@@ -1,11 +1,11 @@
 package lava.search.result.domain
 
+import kotlinx.coroutines.withContext
 import lava.dispatchers.api.Dispatchers
 import lava.domain.usecase.GetForumUseCase
 import lava.models.forum.ForumCategory
 import lava.search.result.domain.models.ForumTreeItem
 import lava.search.result.domain.models.SelectState
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 internal class GetFlattenForumTreeUseCase @Inject constructor(

@@ -1,10 +1,10 @@
 package lava.domain.usecase
 
+import kotlinx.coroutines.withContext
 import lava.data.api.repository.BookmarksRepository
 import lava.data.api.service.ForumService
 import lava.dispatchers.api.Dispatchers
 import lava.notifications.NotificationService
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 class SyncBookmarksUseCase @Inject constructor(

@@ -1,11 +1,5 @@
 package lava.network.data
 
-import lava.data.api.repository.SettingsRepository
-import lava.models.settings.Endpoint
-import lava.network.api.NetworkApi
-import lava.network.api.RuTrackerApiFactory
-import lava.network.impl.ProxyNetworkApi
-import lava.network.serialization.JsonFactory
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -13,6 +7,12 @@ import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logging
 import io.ktor.serialization.kotlinx.json.json
+import lava.data.api.repository.SettingsRepository
+import lava.models.settings.Endpoint
+import lava.network.api.NetworkApi
+import lava.network.api.RuTrackerApiFactory
+import lava.network.impl.ProxyNetworkApi
+import lava.network.serialization.JsonFactory
 import okhttp3.OkHttpClient
 import javax.inject.Inject
 import kotlin.io.encoding.Base64

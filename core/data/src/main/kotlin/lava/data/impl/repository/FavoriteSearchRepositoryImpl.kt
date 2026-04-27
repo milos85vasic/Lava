@@ -1,10 +1,10 @@
 package lava.data.impl.repository
 
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import lava.data.api.repository.FavoriteSearchRepository
 import lava.database.dao.FavoriteSearchDao
 import lava.database.entity.FavoriteSearchEntity
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 class FavoriteSearchRepositoryImpl @Inject constructor(

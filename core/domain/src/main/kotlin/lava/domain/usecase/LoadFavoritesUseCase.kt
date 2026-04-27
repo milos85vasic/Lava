@@ -1,11 +1,11 @@
 package lava.domain.usecase
 
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.withContext
 import lava.data.api.repository.FavoritesRepository
 import lava.data.api.service.FavoritesService
 import lava.dispatchers.api.Dispatchers
 import lava.models.topic.Topic
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 class LoadFavoritesUseCase @Inject constructor(

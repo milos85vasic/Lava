@@ -1,8 +1,8 @@
 package lava.domain.usecase
 
+import kotlinx.coroutines.withContext
 import lava.data.api.repository.RatingRepository
 import lava.dispatchers.api.Dispatchers
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 interface PostponeRatingRequestUseCase : suspend () -> Unit

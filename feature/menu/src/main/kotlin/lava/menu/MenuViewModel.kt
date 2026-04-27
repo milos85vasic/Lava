@@ -2,6 +2,7 @@ package lava.menu
 
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.collectLatest
 import lava.domain.usecase.ClearBookmarksUseCase
 import lava.domain.usecase.ClearHistoryUseCase
 import lava.domain.usecase.ClearLocalFavoritesUseCase
@@ -14,7 +15,6 @@ import lava.logger.api.LoggerFactory
 import lava.models.settings.Endpoint
 import lava.models.settings.SyncPeriod
 import lava.models.settings.Theme
-import kotlinx.coroutines.flow.collectLatest
 import org.orbitmvi.orbit.Container
 import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.syntax.simple.intent

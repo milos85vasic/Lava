@@ -1,10 +1,10 @@
 package lava.data.api.repository
 
+import kotlinx.coroutines.flow.Flow
 import lava.models.settings.Endpoint
 import lava.models.settings.Settings
 import lava.models.settings.SyncPeriod
 import lava.models.settings.Theme
-import kotlinx.coroutines.flow.Flow
 
 interface SettingsRepository {
     suspend fun getSettings(): Settings

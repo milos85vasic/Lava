@@ -1,5 +1,15 @@
 package lava.network.impl
 
+import io.ktor.client.HttpClient
+import io.ktor.client.call.body
+import io.ktor.client.request.HttpRequestBuilder
+import io.ktor.client.request.forms.submitForm
+import io.ktor.client.request.get
+import io.ktor.client.request.header
+import io.ktor.client.request.parameter
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.http.Parameters
 import lava.network.api.NetworkApi
 import lava.network.dto.auth.AuthResponseDto
 import lava.network.dto.forum.CategoryPageDto
@@ -13,16 +23,6 @@ import lava.network.dto.topic.ForumTopicDto
 import lava.network.dto.topic.TopicPageDto
 import lava.network.dto.topic.TorrentDto
 import lava.network.dto.user.FavoritesDto
-import io.ktor.client.HttpClient
-import io.ktor.client.call.body
-import io.ktor.client.request.HttpRequestBuilder
-import io.ktor.client.request.forms.submitForm
-import io.ktor.client.request.get
-import io.ktor.client.request.header
-import io.ktor.client.request.parameter
-import io.ktor.client.request.post
-import io.ktor.client.request.setBody
-import io.ktor.http.Parameters
 
 internal class ProxyNetworkApi(private val httpClient: HttpClient) : NetworkApi {
     override suspend fun checkAuthorized(token: String) = error("Not implemented")

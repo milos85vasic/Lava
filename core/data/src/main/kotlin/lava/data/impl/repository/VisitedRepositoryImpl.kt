@@ -1,5 +1,7 @@
 package lava.data.impl.repository
 
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import lava.data.api.repository.VisitedRepository
 import lava.data.converters.toTopic
 import lava.data.converters.toVisitedEntity
@@ -7,8 +9,6 @@ import lava.database.dao.VisitedTopicDao
 import lava.database.entity.VisitedTopicEntity
 import lava.models.topic.Topic
 import lava.models.topic.TopicPage
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 class VisitedRepositoryImpl @Inject constructor(

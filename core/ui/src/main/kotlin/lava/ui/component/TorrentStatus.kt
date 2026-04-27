@@ -23,8 +23,8 @@ import androidx.compose.ui.unit.Dp
 import lava.designsystem.component.Icon
 import lava.designsystem.component.Surface
 import lava.designsystem.component.Text
-import lava.designsystem.drawables.LavaIcons
 import lava.designsystem.drawables.Icon
+import lava.designsystem.drawables.LavaIcons
 import lava.designsystem.theme.AppTheme
 import lava.designsystem.theme.LavaTheme
 import lava.models.forum.Category

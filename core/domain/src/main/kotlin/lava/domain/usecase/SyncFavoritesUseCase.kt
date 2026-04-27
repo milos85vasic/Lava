@@ -1,11 +1,11 @@
 package lava.domain.usecase
 
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.withContext
 import lava.data.api.repository.FavoritesRepository
 import lava.data.api.service.TorrentService
 import lava.dispatchers.api.Dispatchers
 import lava.notifications.NotificationService
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 class SyncFavoritesUseCase @Inject constructor(

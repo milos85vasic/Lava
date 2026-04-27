@@ -2,11 +2,11 @@ package lava.ui.parcel
 
 import android.os.Parcel
 import android.os.Parcelable
-import lava.models.topic.BaseTopic
-import lava.models.topic.Topic
 import kotlinx.parcelize.Parceler
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.TypeParceler
+import lava.models.topic.BaseTopic
+import lava.models.topic.Topic
 
 @Parcelize
 @TypeParceler<Topic, TopicParceler>()

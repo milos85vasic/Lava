@@ -1,5 +1,6 @@
 package lava.network.api
 
+import io.ktor.client.HttpClient
 import lava.network.domain.AddCommentUseCase
 import lava.network.domain.AddFavoriteUseCase
 import lava.network.domain.CheckAuthorisedUseCase
@@ -26,7 +27,6 @@ import lava.network.domain.WithFormTokenUseCase
 import lava.network.domain.WithTokenVerificationUseCase
 import lava.network.impl.RuTrackerInnerApiImpl
 import lava.network.impl.RuTrackerNetworkApi
-import io.ktor.client.HttpClient
 
 object RuTrackerApiFactory {
     fun create(httpClient: HttpClient): NetworkApi {

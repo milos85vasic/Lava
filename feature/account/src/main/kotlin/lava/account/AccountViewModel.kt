@@ -2,11 +2,11 @@ package lava.account
 
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.collectLatest
 import lava.domain.usecase.LogoutUseCase
 import lava.domain.usecase.ObserveAuthStateUseCase
 import lava.logger.api.LoggerFactory
 import lava.models.auth.AuthState
-import kotlinx.coroutines.flow.collectLatest
 import org.orbitmvi.orbit.Container
 import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.syntax.simple.intent

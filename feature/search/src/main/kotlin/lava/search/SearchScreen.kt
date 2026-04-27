@@ -35,6 +35,7 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
 import lava.designsystem.component.AppBar
 import lava.designsystem.component.AppBarState
 import lava.designsystem.component.Body
@@ -64,7 +65,6 @@ import lava.models.search.Sort
 import lava.models.topic.Author
 import lava.ui.component.loadingItem
 import lava.ui.component.resId
-import kotlinx.coroutines.launch
 import org.orbitmvi.orbit.compose.collectAsState
 import org.orbitmvi.orbit.compose.collectSideEffect
 

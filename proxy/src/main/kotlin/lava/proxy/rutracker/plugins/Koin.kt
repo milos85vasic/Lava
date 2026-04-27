@@ -1,6 +1,5 @@
 package lava.proxy.rutracker.plugins
 
-import lava.proxy.rutracker.di.appModule
 import io.ktor.events.EventDefinition
 import io.ktor.server.application.Application
 import io.ktor.server.application.ApplicationStopping
@@ -9,6 +8,7 @@ import io.ktor.server.application.install
 import io.ktor.server.application.pluginOrNull
 import io.ktor.util.AttributeKey
 import io.ktor.util.KtorDsl
+import lava.proxy.rutracker.di.appModule
 import org.koin.core.KoinApplication
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin

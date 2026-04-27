@@ -29,8 +29,8 @@ import lava.designsystem.component.Surface
 import lava.designsystem.component.Text
 import lava.designsystem.component.TextButton
 import lava.designsystem.component.ThemePreviews
-import lava.designsystem.drawables.LavaIcons
 import lava.designsystem.drawables.Icon
+import lava.designsystem.drawables.LavaIcons
 import lava.designsystem.theme.AppTheme
 import lava.designsystem.theme.LavaTheme
 import lava.domain.model.rating.RatingRequest

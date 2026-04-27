@@ -2,12 +2,12 @@ package lava.visited
 
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.collectLatest
 import lava.domain.usecase.ObserveVisitedUseCase
 import lava.domain.usecase.ToggleFavoriteUseCase
 import lava.logger.api.LoggerFactory
 import lava.models.topic.Topic
 import lava.models.topic.TopicModel
-import kotlinx.coroutines.flow.collectLatest
 import org.orbitmvi.orbit.Container
 import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.syntax.simple.intent

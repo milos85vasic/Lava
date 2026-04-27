@@ -3,9 +3,9 @@ package me.rutrackersearch.app.platform
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import androidx.core.net.toUri
 import lava.logger.api.LoggerFactory
 import lava.ui.platform.OpenLinkHandler
-import androidx.core.net.toUri
 
 class OpenLinkHandlerImpl(
     private val context: Context,

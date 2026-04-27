@@ -1,10 +1,10 @@
 package lava.domain.usecase
 
+import kotlinx.coroutines.withContext
 import lava.data.api.repository.FavoritesRepository
 import lava.data.api.repository.VisitedRepository
 import lava.dispatchers.api.Dispatchers
 import lava.models.topic.TopicPage
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 class VisitTopicUseCase @Inject constructor(

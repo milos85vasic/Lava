@@ -1,6 +1,7 @@
 package lava.securestorage
 
 import android.content.SharedPreferences
+import kotlinx.coroutines.withContext
 import lava.dispatchers.api.Dispatchers
 import lava.models.settings.Endpoint
 import lava.models.settings.Settings
@@ -11,7 +12,6 @@ import lava.securestorage.model.EndpointConverter
 import lava.securestorage.preferences.SharedPreferencesFactory
 import lava.securestorage.utils.clear
 import lava.securestorage.utils.edit
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 internal class PreferencesStorageImpl @Inject constructor(

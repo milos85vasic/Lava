@@ -2,8 +2,8 @@ package lava.main
 
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
-import lava.domain.usecase.ObserveSettingsUseCase
 import kotlinx.coroutines.flow.map
+import lava.domain.usecase.ObserveSettingsUseCase
 import javax.inject.Inject
 
 @HiltViewModel

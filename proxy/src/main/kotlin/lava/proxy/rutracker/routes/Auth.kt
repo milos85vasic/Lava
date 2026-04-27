@@ -1,7 +1,5 @@
 package lava.proxy.rutracker.routes
 
-import lava.network.api.NetworkApi
-import lava.proxy.rutracker.di.inject
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.statement.readBytes
@@ -16,6 +14,8 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.routing
 import io.ktor.server.util.getOrFail
+import lava.network.api.NetworkApi
+import lava.proxy.rutracker.di.inject
 import kotlin.io.encoding.Base64
 
 internal fun Application.configureAuthRoutes() {

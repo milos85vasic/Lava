@@ -1,10 +1,10 @@
 package lava.data.impl.repository
 
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.onStart
 import lava.common.SingleItemMutableSharedFlow
 import lava.data.api.repository.RatingRepository
 import lava.securestorage.PreferencesStorage
-import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.onStart
 import javax.inject.Inject
 
 internal class RatingRepositoryImpl @Inject constructor(

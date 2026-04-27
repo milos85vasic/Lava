@@ -1,9 +1,9 @@
 package lava.domain.usecase
 
+import kotlinx.coroutines.withContext
 import lava.data.api.repository.FavoritesRepository
 import lava.dispatchers.api.Dispatchers
 import lava.work.api.BackgroundService
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 class ToggleFavoriteUseCase @Inject constructor(

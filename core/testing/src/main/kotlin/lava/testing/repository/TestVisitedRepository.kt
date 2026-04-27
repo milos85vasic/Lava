@@ -1,9 +1,9 @@
 package lava.testing.repository
 
+import kotlinx.coroutines.flow.Flow
 import lava.data.api.repository.VisitedRepository
 import lava.models.topic.Topic
 import lava.models.topic.TopicPage
-import kotlinx.coroutines.flow.Flow
 
 class TestVisitedRepository : VisitedRepository {
     override fun observeTopics(): Flow<List<Topic>> {

@@ -1,9 +1,9 @@
 package lava.domain.usecase
 
-import lava.data.api.repository.SuggestsRepository
-import lava.models.search.Suggest
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import lava.data.api.repository.SuggestsRepository
+import lava.models.search.Suggest
 import javax.inject.Inject
 
 class ObserveSuggestsUseCase @Inject constructor(

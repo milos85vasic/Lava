@@ -1,8 +1,8 @@
 package lava.ui.parcel
 
 import android.os.Parcel
-import lava.models.topic.Author
 import kotlinx.parcelize.Parceler
+import lava.models.topic.Author
 
 object OptionalAuthorParceler : OptionalParceler<Author>(AuthorParceler)
 

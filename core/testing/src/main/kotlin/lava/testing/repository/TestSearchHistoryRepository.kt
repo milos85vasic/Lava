@@ -1,11 +1,11 @@
 package lava.testing.repository
 
-import lava.data.api.repository.SearchHistoryRepository
-import lava.models.search.Filter
-import lava.models.search.Search
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
+import lava.data.api.repository.SearchHistoryRepository
+import lava.models.search.Filter
+import lava.models.search.Search
 
 class TestSearchHistoryRepository : SearchHistoryRepository {
     private val searchFlow: MutableStateFlow<List<Search>> = MutableStateFlow(emptyList())

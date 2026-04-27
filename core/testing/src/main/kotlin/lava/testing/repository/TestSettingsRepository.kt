@@ -1,13 +1,13 @@
 package lava.testing.repository
 
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import lava.data.api.repository.SettingsRepository
 import lava.models.settings.Endpoint
 import lava.models.settings.Settings
 import lava.models.settings.SyncPeriod
 import lava.models.settings.Theme
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 
 class TestSettingsRepository : SettingsRepository {
     private val mutableSettings = MutableStateFlow(Settings())

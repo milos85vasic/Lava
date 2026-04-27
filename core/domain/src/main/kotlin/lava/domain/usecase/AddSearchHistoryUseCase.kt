@@ -1,9 +1,9 @@
 package lava.domain.usecase
 
+import kotlinx.coroutines.withContext
 import lava.data.api.repository.SearchHistoryRepository
 import lava.dispatchers.api.Dispatchers
 import lava.models.search.Filter
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 class AddSearchHistoryUseCase @Inject constructor(

@@ -1,7 +1,7 @@
 package lava.data.api.repository
 
-import lava.models.settings.Endpoint
 import kotlinx.coroutines.flow.Flow
+import lava.models.settings.Endpoint
 
 interface EndpointsRepository {
     suspend fun observeAll(): Flow<List<Endpoint>>

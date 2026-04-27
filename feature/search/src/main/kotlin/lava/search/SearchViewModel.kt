@@ -3,6 +3,8 @@ package lava.search
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import lava.domain.model.search.isEmpty
 import lava.domain.usecase.ObserveAuthStateUseCase
 import lava.domain.usecase.ObserveSearchHistoryUseCase
@@ -12,8 +14,6 @@ import lava.domain.usecase.UnpinSearchHistoryUseCase
 import lava.logger.api.LoggerFactory
 import lava.models.auth.isAuthorized
 import lava.models.search.Search
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
 import org.orbitmvi.orbit.Container
 import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.syntax.simple.intent

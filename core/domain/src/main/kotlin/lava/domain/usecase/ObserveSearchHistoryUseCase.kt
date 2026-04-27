@@ -1,13 +1,13 @@
 package lava.domain.usecase
 
-import lava.data.api.repository.FavoriteSearchRepository
-import lava.data.api.repository.SearchHistoryRepository
-import lava.dispatchers.api.Dispatchers
-import lava.domain.model.search.SearchHistory
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.withContext
+import lava.data.api.repository.FavoriteSearchRepository
+import lava.data.api.repository.SearchHistoryRepository
+import lava.dispatchers.api.Dispatchers
+import lava.domain.model.search.SearchHistory
 import javax.inject.Inject
 
 class ObserveSearchHistoryUseCase @Inject constructor(

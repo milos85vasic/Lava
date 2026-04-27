@@ -27,8 +27,8 @@ import lava.designsystem.component.LazyList
 import lava.designsystem.component.LocalSnackbarHostState
 import lava.designsystem.component.Scaffold
 import lava.designsystem.component.ScrollBackFloatingActionButton
-import lava.designsystem.drawables.LavaIcons
 import lava.designsystem.drawables.Icon
+import lava.designsystem.drawables.LavaIcons
 import lava.designsystem.theme.AppTheme
 import lava.models.LoadState
 import lava.models.search.Filter

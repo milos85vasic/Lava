@@ -7,8 +7,8 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import lava.designsystem.drawables.Icon
 import kotlinx.coroutines.launch
+import lava.designsystem.drawables.Icon
 
 @Composable
 fun PagesScreen(

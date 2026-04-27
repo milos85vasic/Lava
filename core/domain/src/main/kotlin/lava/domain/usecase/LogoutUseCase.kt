@@ -1,5 +1,6 @@
 package lava.domain.usecase
 
+import kotlinx.coroutines.withContext
 import lava.auth.api.AuthService
 import lava.data.api.repository.BookmarksRepository
 import lava.data.api.repository.FavoritesRepository
@@ -8,7 +9,6 @@ import lava.data.api.repository.SuggestsRepository
 import lava.data.api.repository.VisitedRepository
 import lava.dispatchers.api.Dispatchers
 import lava.work.api.BackgroundService
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 interface LogoutUseCase : suspend () -> Unit

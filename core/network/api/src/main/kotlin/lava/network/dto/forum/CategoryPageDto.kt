@@ -1,7 +1,7 @@
 package lava.network.dto.forum
 
-import lava.network.dto.topic.ForumTopicDto
 import kotlinx.serialization.Serializable
+import lava.network.dto.topic.ForumTopicDto
 
 @Serializable
 data class CategoryPageDto(

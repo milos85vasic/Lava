@@ -1,5 +1,8 @@
 package lava.data.impl.repository
 
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import lava.data.api.repository.FavoritesRepository
 import lava.data.converters.toFavoriteEntity
 import lava.data.converters.toTopic
@@ -10,9 +13,6 @@ import lava.logger.api.LoggerFactory
 import lava.models.topic.Topic
 import lava.models.topic.TopicModel
 import lava.models.topic.Torrent
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
 
 class FavoritesRepositoryImpl @Inject constructor(

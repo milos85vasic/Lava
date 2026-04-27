@@ -1,10 +1,10 @@
 package lava.domain.usecase
 
-import lava.data.api.repository.EndpointsRepository
-import lava.domain.model.endpoint.EndpointState
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
+import lava.data.api.repository.EndpointsRepository
+import lava.domain.model.endpoint.EndpointState
 import javax.inject.Inject
 
 interface ObserveEndpointsStatusUseCase : suspend () -> Flow<List<EndpointState>>

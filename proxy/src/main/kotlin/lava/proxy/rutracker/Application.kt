@@ -1,5 +1,7 @@
 package lava.proxy.rutracker
 
+import io.ktor.server.engine.embeddedServer
+import io.ktor.server.netty.Netty
 import lava.proxy.rutracker.plugins.configureKoin
 import lava.proxy.rutracker.plugins.configureMonitoring
 import lava.proxy.rutracker.plugins.configureSerialization
@@ -12,8 +14,6 @@ import lava.proxy.rutracker.routes.configureSearchRoutes
 import lava.proxy.rutracker.routes.configureStaticRoutes
 import lava.proxy.rutracker.routes.configureTopicRoutes
 import lava.proxy.rutracker.routes.configureTorrentRoutes
-import io.ktor.server.engine.embeddedServer
-import io.ktor.server.netty.Netty
 
 fun main() {
     embeddedServer(Netty, port = 8080, host = "0.0.0.0") {

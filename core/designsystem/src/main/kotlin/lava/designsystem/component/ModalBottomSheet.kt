@@ -7,7 +7,6 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.rememberTransition
-import androidx.compose.animation.core.updateTransition
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
@@ -61,7 +60,7 @@ fun ModalBottomSheet(
     if (transitionState.currentState || transitionState.targetState) {
         val transition = rememberTransition(
             transitionState = transitionState,
-            label = "ModalBottomSheet_Transition"
+            label = "ModalBottomSheet_Transition",
         )
         val scrimAlpha by transition.animateFloat(
             targetValueByState = { if (it) 0.37f else 0.0f },

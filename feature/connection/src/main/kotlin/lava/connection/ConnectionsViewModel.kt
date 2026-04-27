@@ -2,13 +2,13 @@ package lava.connection
 
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.collectLatest
 import lava.domain.model.endpoint.EndpointState
 import lava.domain.usecase.AddEndpointUseCase
 import lava.domain.usecase.ObserveEndpointsStatusUseCase
 import lava.domain.usecase.RemoveEndpointUseCase
 import lava.domain.usecase.SetEndpointUseCase
 import lava.models.settings.Endpoint
-import kotlinx.coroutines.flow.collectLatest
 import org.orbitmvi.orbit.Container
 import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.syntax.simple.intent

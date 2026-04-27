@@ -19,6 +19,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.TextFieldValue
+import kotlinx.coroutines.launch
 import lava.designsystem.component.LocalSnackbarHostState
 import lava.designsystem.component.Scaffold
 import lava.designsystem.component.ThemePreviews
@@ -26,7 +27,6 @@ import lava.designsystem.theme.AppTheme
 import lava.designsystem.theme.LavaTheme
 import lava.login.LoginAction.SubmitClick
 import lava.models.auth.Captcha
-import kotlinx.coroutines.launch
 import org.orbitmvi.orbit.compose.collectAsState
 import org.orbitmvi.orbit.compose.collectSideEffect
 

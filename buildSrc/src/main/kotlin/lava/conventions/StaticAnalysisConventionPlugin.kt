@@ -16,12 +16,12 @@ internal class StaticAnalysisConventionPlugin : Plugin<Project> {
                 kotlin {
                     target("**/*.kt")
                     targetExclude("${layout.buildDirectory}/**/*.kt")
-                    ktlint()
+                    ktlint("0.50.0")
                 }
 
                 kotlinGradle {
                     target("*.gradle.kts")
-                    ktlint()
+                    ktlint("0.50.0")
                 }
             }
         }

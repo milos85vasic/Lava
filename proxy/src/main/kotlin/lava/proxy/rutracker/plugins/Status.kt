@@ -1,13 +1,5 @@
 package lava.proxy.rutracker.plugins
 
-import lava.network.model.BadRequest
-import lava.network.model.LavaProxyError
-import lava.network.model.Forbidden
-import lava.network.model.NoConnection
-import lava.network.model.NoData
-import lava.network.model.NotFound
-import lava.network.model.Unauthorized
-import lava.network.model.Unknown
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
 import io.ktor.server.application.install
@@ -15,6 +7,14 @@ import io.ktor.server.engine.logError
 import io.ktor.server.plugins.MissingRequestParameterException
 import io.ktor.server.plugins.statuspages.StatusPages
 import io.ktor.server.response.respond
+import lava.network.model.BadRequest
+import lava.network.model.Forbidden
+import lava.network.model.LavaProxyError
+import lava.network.model.NoConnection
+import lava.network.model.NoData
+import lava.network.model.NotFound
+import lava.network.model.Unauthorized
+import lava.network.model.Unknown
 import java.io.IOException
 
 internal fun Application.configureStatusPages() {

@@ -1,9 +1,9 @@
 package lava.testing
 
-import lava.dispatchers.api.Dispatchers
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import lava.dispatchers.api.Dispatchers
 
 class TestDispatchers(
     testDispatcher: TestDispatcher = UnconfinedTestDispatcher(),

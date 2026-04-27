@@ -1,11 +1,11 @@
 package lava.domain.usecase
 
-import lava.data.api.repository.RatingRepository
-import lava.domain.model.rating.RatingRequest
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
+import lava.data.api.repository.RatingRepository
+import lava.domain.model.rating.RatingRequest
 import javax.inject.Inject
 
 interface ObserveRatingRequestUseCase : suspend () -> Flow<RatingRequest>

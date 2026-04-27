@@ -1,5 +1,9 @@
 package lava.domain.usecase
 
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 import lava.common.mapInstanceOf
 import lava.data.api.service.ForumService
 import lava.domain.model.PagingAction
@@ -9,10 +13,6 @@ import lava.domain.model.category.CategoryPage
 import lava.domain.model.refresh
 import lava.logger.api.LoggerFactory
 import lava.models.forum.ForumItem
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onStart
 import javax.inject.Inject
 
 class ObserveCategoryPagingDataUseCase @Inject constructor(

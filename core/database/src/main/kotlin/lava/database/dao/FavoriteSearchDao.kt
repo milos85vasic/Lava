@@ -5,8 +5,8 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import lava.database.entity.FavoriteSearchEntity
 import kotlinx.coroutines.flow.Flow
+import lava.database.entity.FavoriteSearchEntity
 
 @Dao
 interface FavoriteSearchDao {

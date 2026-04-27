@@ -1,11 +1,11 @@
 package lava.data.impl.repository
 
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import lava.data.api.repository.SuggestsRepository
 import lava.data.converters.toEntity
 import lava.database.dao.SuggestDao
 import lava.database.entity.SuggestEntity
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 class SuggestsRepositoryImpl @Inject constructor(

@@ -1,8 +1,8 @@
 package lava.ui.parcel
 
 import android.os.Parcel
-import lava.models.forum.Category
 import kotlinx.parcelize.Parceler
+import lava.models.forum.Category
 
 object OptionalCategoryParceler : OptionalParceler<Category>(CategoryParceler)
 

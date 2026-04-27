@@ -1,7 +1,7 @@
 package lava.domain.usecase
 
-import lava.dispatchers.api.Dispatchers
 import kotlinx.coroutines.withContext
+import lava.dispatchers.api.Dispatchers
 import javax.inject.Inject
 
 class RefreshFavoritesUseCase @Inject constructor(

@@ -1,8 +1,8 @@
 package lava.domain.usecase
 
-import lava.data.api.repository.FavoritesRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import lava.data.api.repository.FavoritesRepository
 import javax.inject.Inject
 
 class ObserveFavoriteStateUseCase @Inject constructor(

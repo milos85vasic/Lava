@@ -4,6 +4,8 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.collectLatest
 import lava.domain.model.PagingAction
 import lava.domain.model.append
 import lava.domain.model.category.CategoryPage
@@ -19,8 +21,6 @@ import lava.models.auth.AuthState
 import lava.models.forum.Category
 import lava.models.topic.Topic
 import lava.models.topic.TopicModel
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.collectLatest
 import org.orbitmvi.orbit.Container
 import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.syntax.simple.intent

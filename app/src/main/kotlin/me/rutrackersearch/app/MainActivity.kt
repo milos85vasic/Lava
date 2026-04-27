@@ -23,6 +23,8 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import lava.designsystem.platform.LocalPlatformType
 import lava.designsystem.platform.PlatformType
 import lava.logger.api.LoggerFactory
@@ -40,8 +42,6 @@ import lava.ui.platform.LocalShareLinkHandler
 import lava.ui.platform.OpenFileHandler
 import lava.ui.platform.OpenLinkHandler
 import lava.ui.platform.ShareLinkHandler
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
 import me.rutrackersearch.app.navigation.MobileNavigation
 import me.rutrackersearch.app.platform.OpenFileHandlerImpl
 import me.rutrackersearch.app.platform.OpenLinkHandlerImpl

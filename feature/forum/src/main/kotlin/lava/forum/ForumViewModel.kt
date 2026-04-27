@@ -2,10 +2,10 @@ package lava.forum
 
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.coroutineScope
 import lava.domain.usecase.GetForumUseCase
 import lava.logger.api.LoggerFactory
 import lava.models.forum.ForumCategory
-import kotlinx.coroutines.coroutineScope
 import org.orbitmvi.orbit.Container
 import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.syntax.simple.intent

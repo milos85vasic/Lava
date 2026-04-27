@@ -1,13 +1,13 @@
 package lava.data.impl.repository
 
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import lava.data.api.repository.BookmarksRepository
 import lava.data.converters.toBookmarkEntity
 import lava.database.dao.BookmarkDao
 import lava.database.entity.BookmarkEntity
 import lava.models.forum.Category
 import lava.models.forum.CategoryModel
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 import org.json.JSONArray
 import javax.inject.Inject
 

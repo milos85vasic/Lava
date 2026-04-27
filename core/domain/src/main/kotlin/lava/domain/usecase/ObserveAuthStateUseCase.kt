@@ -1,9 +1,9 @@
 package lava.domain.usecase
 
-import lava.auth.api.AuthService
-import lava.models.auth.AuthState
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import lava.auth.api.AuthService
+import lava.models.auth.AuthState
 import javax.inject.Inject
 
 interface ObserveAuthStateUseCase : () -> Flow<AuthState>

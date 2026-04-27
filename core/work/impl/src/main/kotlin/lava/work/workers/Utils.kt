@@ -7,9 +7,9 @@ import androidx.work.ListenableWorker
 import androidx.work.ListenableWorker.Result.failure
 import androidx.work.ListenableWorker.Result.retry
 import androidx.work.ListenableWorker.Result.success
-import lava.notifications.NotificationService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.coroutineScope
+import lava.notifications.NotificationService
 
 private const val BackgroundWorkNotificationId = 0
 private const val RetryAttemptsMaxCount = 3
