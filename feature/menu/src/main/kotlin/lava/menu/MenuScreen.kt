@@ -466,7 +466,7 @@ private fun AboutAppDialog(state: VisibilityState) {
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Text(stringResource(R.string.app_version, packageInfo.getAppVersionName()))
-                    Text(stringResource(R.string.app_copyright_original, year))
+                    Text(stringResource(R.string.app_copyright_original))
                     androidx.compose.foundation.text.ClickableText(
                         text = androidx.compose.ui.text.buildAnnotatedString {
                             append("© ")
