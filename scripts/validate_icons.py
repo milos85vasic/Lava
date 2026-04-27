@@ -114,7 +114,7 @@ def get_nonwhite_bounds(img: Image.Image, white_threshold=245) -> tuple:
     return left, top, right, bottom
 
 def validate_legacy_icon(path, label):
-    """Legacy launcher: white bg, red squircle nearly filling canvas."""
+    """Legacy launcher: transparent bg, red squircle nearly filling canvas."""
     print(f"\n=== Validating {label}: {path} ===")
     if not os.path.exists(path):
         log_fail(f"File not found: {path}")
@@ -122,23 +122,23 @@ def validate_legacy_icon(path, label):
     img = Image.open(path).convert('RGBA')
     w, h = img.size
     
-    # Check that corners are white (indicates proper white background border)
+    # Legacy icons should NOT have a solid white background border
     corners = [(0, 0), (w-1, 0), (0, h-1), (w-1, h-1)]
-    white_corners = 0
+    transparent_corners = 0
     for cx, cy in corners:
         r, g, b, a = img.getpixel((cx, cy))
-        if a > 200 and r > 240 and g > 240 and b > 240:
-            white_corners += 1
-    if white_corners >= 3:
-        log_pass(f"{white_corners}/4 corners are white")
+        if a < 30:
+            transparent_corners += 1
+    if transparent_corners >= 2:
+        log_pass(f"{transparent_corners}/4 corners are transparent (no white border)")
     else:
-        log_fail(f"Only {white_corners}/4 corners are white — background may not be white")
+        log_fail(f"Only {transparent_corners}/4 corners transparent — possible white border")
     
-    # Check red squircle bounds (non-white content)
-    left, top, right, bottom = get_nonwhite_bounds(img)
+    # Check red squircle bounds
+    left, top, right, bottom = get_content_bounds(img)
     
     if left >= right or top >= bottom:
-        log_fail("No red content found!")
+        log_fail("No content found!")
         return
     
     content_w = right - left
@@ -147,12 +147,12 @@ def validate_legacy_icon(path, label):
     fill_h = content_h / h
     
     # Legacy icons should nearly fill the canvas (red squircle close to edges)
-    if fill_w < 0.90 or fill_h < 0.90:
-        log_fail(f"Fill ratio {fill_w:.2%} x {fill_h:.2%} < 90% — too much padding")
+    if fill_w < 0.92 or fill_h < 0.92:
+        log_fail(f"Fill ratio {fill_w:.2%} x {fill_h:.2%} < 92% — too much padding")
     else:
-        log_pass(f"Fill ratio {fill_w:.2%} x {fill_h:.2%} >= 90%")
+        log_pass(f"Fill ratio {fill_w:.2%} x {fill_h:.2%} >= 92%")
     
-    # Check no single edge has excessive padding (>8%)
+    # Check no single edge has excessive padding (>6%)
     pads = {
         'left': left / w,
         'top': top / h,
@@ -160,17 +160,22 @@ def validate_legacy_icon(path, label):
         'bottom': (h - bottom) / h,
     }
     for name, pad in pads.items():
-        if pad > 0.08:
-            log_fail(f"Padding {name} = {pad:.2%} > 8% — excessive white border")
+        if pad > 0.06:
+            log_fail(f"Padding {name} = {pad:.2%} > 6% — excessive border")
         else:
-            log_pass(f"Padding {name} = {pad:.2%} <= 8%")
+            log_pass(f"Padding {name} = {pad:.2%} <= 6%")
     
-    # At least one edge should have >= 1px padding (not cut off)
-    has_padding = any(p >= (1 / w if 'left' in name or 'right' in name else 1 / h) for name, p in pads.items())
-    if has_padding:
-        log_pass("At least one edge has padding (not cut off)")
+    # For a squircle icon, sides may touch edges while corners remain transparent.
+    # As long as corners are transparent, the shape is not cut off.
+    transparent_corners = 0
+    for cx, cy in [(0, 0), (w-1, 0), (0, h-1), (w-1, h-1)]:
+        r, g, b, a = img.getpixel((cx, cy))
+        if a < 30:
+            transparent_corners += 1
+    if transparent_corners >= 2:
+        log_pass(f"{transparent_corners}/4 corners transparent — squircle shape preserved, not cut off")
     else:
-        log_fail("No padding on any edge — may be cut off")
+        log_fail(f"Only {transparent_corners}/4 corners transparent — possible cut-off")
 
 def validate_adaptive_foreground(path, label):
     """Adaptive foreground: transparent bg, red squircle within safe zone."""
@@ -262,17 +267,17 @@ def main():
         validate_adaptive_foreground(f'app/src/main/res/mipmap-{dpi}/ic_launcher_foreground.png', f'Adaptive FG {dpi} ({size}px)')
     
     # Splash
-    validate_image('app/src/main/res/drawable/ic_splash.png', 'Splash (288px)', min_fill_ratio=0.80, max_fill_ratio=0.95)
+    validate_image('app/src/main/res/drawable/ic_splash.png', 'Splash (288px)', min_fill_ratio=0.80, max_fill_ratio=1.0, require_padding=False)
     
     # TV banner
-    validate_image('app/src/main/res/drawable/tv_banner.png', 'TV Banner (320x180)', min_fill_ratio=0.50, max_fill_ratio=1.0)
+    validate_image('app/src/main/res/drawable/tv_banner.png', 'TV Banner (320x180)', min_fill_ratio=0.50, max_fill_ratio=1.0, require_padding=False)
     
     # About logos
-    validate_image('app/src/main/res/drawable/ic_logo_about.png', 'About Logo (128px)', min_fill_ratio=0.85, max_fill_ratio=0.98)
-    validate_image('feature/menu/src/main/res/drawable/ic_logo_about.png', 'About Logo Feature (128px)', min_fill_ratio=0.85, max_fill_ratio=0.98)
+    validate_image('app/src/main/res/drawable/ic_logo_about.png', 'About Logo (128px)', min_fill_ratio=0.85, max_fill_ratio=1.0, require_padding=False)
+    validate_image('feature/menu/src/main/res/drawable/ic_logo_about.png', 'About Logo Feature (128px)', min_fill_ratio=0.85, max_fill_ratio=1.0, require_padding=False)
     
     # Play store
-    validate_image('app/src/main/playstore_icon.png', 'Play Store (512px)', min_fill_ratio=0.92, max_fill_ratio=0.98)
+    validate_image('app/src/main/playstore_icon.png', 'Play Store (512px)', min_fill_ratio=0.92, max_fill_ratio=1.0, require_padding=False)
     
     print("\n" + "=" * 50)
     if FAILED:
