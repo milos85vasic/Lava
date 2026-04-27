@@ -1,17 +1,17 @@
-# Flow
+# Lava
 
-Flow is an Android mobile app that is an unofficial client for the popular
-Russian torrent tracker website – rutracker.org. With Flow, users can easily
+Lava is an Android mobile app that is an unofficial client for the popular
+Russian torrent tracker website – rutracker.org. With Lava, users can easily
 search and download torrent files, manage their downloads, and stay up-to-date
 with the latest forum posts and discussions on the site, all from their mobile
 device.
 
-Flow is designed to provide a fast, intuitive, and seamless user experience
+Lava is designed to provide a fast, intuitive, and seamless user experience
 for rutracker.org users on the go. The app is open source and free to use,
 with no ads or tracking, and is constantly being updated and improved by
 a small community of developers and contributors.
 
-Disclaimer: Flow is not affiliated with or endorsed by rutracker.org in any way.
+Disclaimer: Lava is not affiliated with or endorsed by rutracker.org in any way.
 The app is provided for personal, non-commercial use only, and users are
 responsible for complying with all applicable laws and regulations regarding
 copyright and file sharing.
@@ -53,13 +53,13 @@ didn't behave as you expected. We can't fix what we don't know about, so please
 report liberally. If you're not sure if something is a bug or not, feel free to
 file a bug anyway.
 
-**Issue tracker:** <https://github.com/andrikeev/Flow/issues>
+**Issue tracker:** <https://github.com/andrikeev/Lava/issues>
 
 **Forum 4PDA:** <https://4pda.to/forum/index.php?showtopic=729411>
 
 ## Sources
 
-All the code and the content is available on github: <https://github.com/andrikeev/Flow>
+All the code and the content is available on github: <https://github.com/andrikeev/Lava>
 
 ## Privacy Policy
 
@@ -69,14 +69,14 @@ All the code and the content is available on github: <https://github.com/andrike
 
 This software is open source, licensed under the [MIT License][6].
 
-[1]: https://flow-app.tech/copyrights.html
+[1]: https://lava-app.tech/copyrights.html
 
 [2]: https://play.google.com/store/apps/details?id=me.rutrackersearch.app
 
-[3]: https://github.com/andrikeev/Flow/releases
+[3]: https://github.com/andrikeev/Lava/releases
 
 [4]: https://apps.rustore.ru/app/me.rutrackersearch.app
 
-[5]: https://flow-app.tech/privacy-policy.html
+[5]: https://lava-app.tech/privacy-policy.html
 
 [6]: https://opensource.org/licenses/MIT 

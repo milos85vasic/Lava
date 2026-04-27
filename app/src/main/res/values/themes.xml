@@ -1,12 +1,12 @@
 <resources>
-    <style name="Theme.Flow" parent="Theme.Flow.DesignSystem"/>
+    <style name="Theme.Lava" parent="Theme.Lava.DesignSystem"/>
 
-    <style name="Theme.Flow.Leanback"/>
+    <style name="Theme.Lava.Leanback"/>
 
-    <style name="Theme.Flow.Splash" parent="Theme.SplashScreen">
+    <style name="Theme.Lava.Splash" parent="Theme.SplashScreen">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher_animated</item>
         <item name="windowSplashScreenBackground">@color/splash_screen_background</item>
         <item name="windowSplashScreenAnimationDuration">600</item>
-        <item name="postSplashScreenTheme">@style/Theme.Flow</item>
+        <item name="postSplashScreenTheme">@style/Theme.Lava</item>
     </style>
 </resources>

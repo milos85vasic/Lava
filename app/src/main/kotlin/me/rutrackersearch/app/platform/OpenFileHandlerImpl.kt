@@ -3,7 +3,7 @@ package me.rutrackersearch.app.platform
 import android.content.Context
 import android.content.Intent
 import androidx.core.content.FileProvider
-import flow.ui.platform.OpenFileHandler
+import lava.ui.platform.OpenFileHandler
 import java.io.File
 import java.net.URI
 

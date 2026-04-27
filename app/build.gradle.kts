@@ -1,8 +1,8 @@
 @file:Suppress("UnstableApiUsage")
 
 plugins {
-    id("flow.android.application")
-    id("flow.android.hilt")
+    id("lava.android.application")
+    id("lava.android.hilt")
 }
 
 android {

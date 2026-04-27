@@ -29,39 +29,39 @@ kotlin {
 gradlePlugin {
     plugins {
         register("androidApplication") {
-            id = "flow.android.application"
+            id = "lava.android.application"
             implementationClass = "AndroidApplicationConventionPlugin"
         }
         register("androidLibraryCompose") {
-            id = "flow.android.library"
+            id = "lava.android.library"
             implementationClass = "AndroidLibraryConventionPlugin"
         }
         register("androidLibrary") {
-            id = "flow.android.library.compose"
+            id = "lava.android.library.compose"
             implementationClass = "AndroidLibraryComposeConventionPlugin"
         }
         register("androidHilt") {
-            id = "flow.android.hilt"
+            id = "lava.android.hilt"
             implementationClass = "AndroidHiltConventionPlugin"
         }
         register("androidFeature") {
-            id = "flow.android.feature"
+            id = "lava.android.feature"
             implementationClass = "AndroidFeatureConventionPlugin"
         }
         register("kotlinKsp") {
-            id = "flow.kotlin.ksp"
+            id = "lava.kotlin.ksp"
             implementationClass = "KotlinKspConventionPlugin"
         }
         register("kotlinLibrary") {
-            id = "flow.kotlin.library"
+            id = "lava.kotlin.library"
             implementationClass = "KotlinLibraryConventionPlugin"
         }
         register("kotlinSerialization") {
-            id = "flow.kotlin.serialization"
+            id = "lava.kotlin.serialization"
             implementationClass = "KotlinSerializationConventionPlugin"
         }
         register("ktorApplication") {
-            id = "flow.ktor.application"
+            id = "lava.ktor.application"
             implementationClass = "KtorApplicationConventionPlugin"
         }
     }

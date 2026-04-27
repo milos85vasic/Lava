@@ -5,8 +5,8 @@ class KtorApplicationConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
             with(pluginManager) {
-                apply("flow.kotlin.library")
-                apply("flow.kotlin.serialization")
+                apply("lava.kotlin.library")
+                apply("lava.kotlin.serialization")
                 apply("org.gradle.application")
                 apply("io.ktor.plugin")
             }

@@ -1,11 +1,11 @@
 plugins {
-    id("flow.android.library")
-    id("flow.android.library.compose")
+    id("lava.android.library")
+    id("lava.android.library.compose")
     id("kotlin-parcelize")
 }
 
 android {
-    namespace = "flow.navigation"
+    namespace = "lava.navigation"
 }
 
 kotlin {

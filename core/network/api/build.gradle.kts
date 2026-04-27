@@ -1,4 +1,4 @@
 plugins {
-    id("flow.kotlin.library")
-    id("flow.kotlin.serialization")
+    id("lava.kotlin.library")
+    id("lava.kotlin.serialization")
 }

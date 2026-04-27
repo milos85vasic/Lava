@@ -1,10 +1,10 @@
 plugins {
-    id("flow.android.library")
-    id("flow.android.hilt")
+    id("lava.android.library")
+    id("lava.android.hilt")
 }
 
 android {
-    namespace = "flow.domain"
+    namespace = "lava.domain"
 }
 
 dependencies {

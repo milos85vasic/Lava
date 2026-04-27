@@ -1,0 +1,20 @@
+package lava.domain.usecase
+
+import lava.data.api.repository.ForumRepository
+import lava.dispatchers.api.Dispatchers
+import kotlinx.coroutines.withContext
+import javax.inject.Inject
+
+class EnsureForumLoadUseCase @Inject constructor(
+    private val refreshForumUseCase: RefreshForumUseCase,
+    private val forumRepository: ForumRepository,
+    private val dispatchers: Dispatchers,
+) {
+    suspend operator fun invoke() {
+        withContext(dispatchers.default) {
+            if (!forumRepository.isNotEmpty() || !forumRepository.isForumFresh()) {
+                refreshForumUseCase.invoke()
+            }
+        }
+    }
+}

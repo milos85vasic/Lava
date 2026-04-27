@@ -1,12 +1,12 @@
 plugins {
-    id("flow.ktor.application")
+    id("lava.ktor.application")
 }
 
-group = "flow.proxy.rutracker"
+group = "lava.proxy.rutracker"
 version = "3.1.0"
 
 application {
-    mainClass.set("flow.proxy.rutracker.ApplicationKt")
+    mainClass.set("lava.proxy.rutracker.ApplicationKt")
 }
 
 ktor {

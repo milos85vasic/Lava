@@ -1,8 +1,8 @@
 plugins {
-    id("flow.android.feature")
-    id("flow.android.library.compose")
+    id("lava.android.feature")
+    id("lava.android.library.compose")
 }
 
 android {
-    namespace = "flow.search.input"
+    namespace = "lava.search.input"
 }

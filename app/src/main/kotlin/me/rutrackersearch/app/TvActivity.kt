@@ -1,7 +1,7 @@
 package me.rutrackersearch.app
 
 import dagger.hilt.android.AndroidEntryPoint
-import flow.designsystem.platform.PlatformType
+import lava.designsystem.platform.PlatformType
 
 @AndroidEntryPoint
 class TvActivity : MainActivity() {

@@ -1,7 +1,7 @@
 import com.android.build.gradle.LibraryExtension
-import flow.conventions.StaticAnalysisConventionPlugin
-import flow.conventions.configureAndroidCommon
-import flow.conventions.configureKotlinAndroid
+import lava.conventions.StaticAnalysisConventionPlugin
+import lava.conventions.configureAndroidCommon
+import lava.conventions.configureKotlinAndroid
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.configure

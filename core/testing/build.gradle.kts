@@ -1,11 +1,11 @@
 plugins {
-    id("flow.android.library")
-    id("flow.android.library.compose")
-    id("flow.android.hilt")
+    id("lava.android.library")
+    id("lava.android.library.compose")
+    id("lava.android.hilt")
 }
 
 android {
-    namespace = "flow.testing"
+    namespace = "lava.testing"
 }
 
 kotlin {

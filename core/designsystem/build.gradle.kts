@@ -1,10 +1,10 @@
 plugins {
-    id("flow.android.library")
-    id("flow.android.library.compose")
+    id("lava.android.library")
+    id("lava.android.library.compose")
 }
 
 android {
-    namespace = "flow.designsystem"
+    namespace = "lava.designsystem"
 }
 
 kotlin {

@@ -4,37 +4,37 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import flow.designsystem.component.Page
-import flow.designsystem.component.PagesScreen
-import flow.designsystem.drawables.FlowIcons
-import flow.favorites.FavoritesScreen
-import flow.forum.ForumScreen
-import flow.forum.bookmarks.BookmarksScreen
-import flow.forum.category.addCategory
-import flow.forum.category.openCategory
-import flow.login.addLogin
-import flow.login.openLogin
-import flow.menu.MenuScreen
-import flow.navigation.NavigationController
-import flow.navigation.model.NavigationBarItem
-import flow.navigation.model.NavigationGraphBuilder
-import flow.navigation.model.buildRoute
-import flow.navigation.rememberNestedNavigationController
-import flow.navigation.ui.MobileNavigation
-import flow.navigation.ui.NavigationAnimations
-import flow.navigation.ui.NavigationAnimations.Companion.slideInLeft
-import flow.navigation.ui.NavigationAnimations.Companion.slideInRight
-import flow.navigation.ui.NavigationAnimations.Companion.slideOutLeft
-import flow.navigation.ui.NavigationAnimations.Companion.slideOutRight
-import flow.navigation.ui.NestedMobileNavigation
-import flow.search.addSearchHistory
-import flow.search.input.addSearchInput
-import flow.search.input.openSearchInput
-import flow.search.result.addSearchResult
-import flow.search.result.openSearchResult
-import flow.topic.addTopic
-import flow.topic.openTopic
-import flow.visited.VisitedScreen
+import lava.designsystem.component.Page
+import lava.designsystem.component.PagesScreen
+import lava.designsystem.drawables.LavaIcons
+import lava.favorites.FavoritesScreen
+import lava.forum.ForumScreen
+import lava.forum.bookmarks.BookmarksScreen
+import lava.forum.category.addCategory
+import lava.forum.category.openCategory
+import lava.login.addLogin
+import lava.login.openLogin
+import lava.menu.MenuScreen
+import lava.navigation.NavigationController
+import lava.navigation.model.NavigationBarItem
+import lava.navigation.model.NavigationGraphBuilder
+import lava.navigation.model.buildRoute
+import lava.navigation.rememberNestedNavigationController
+import lava.navigation.ui.MobileNavigation
+import lava.navigation.ui.NavigationAnimations
+import lava.navigation.ui.NavigationAnimations.Companion.slideInLeft
+import lava.navigation.ui.NavigationAnimations.Companion.slideInRight
+import lava.navigation.ui.NavigationAnimations.Companion.slideOutLeft
+import lava.navigation.ui.NavigationAnimations.Companion.slideOutRight
+import lava.navigation.ui.NestedMobileNavigation
+import lava.search.addSearchHistory
+import lava.search.input.addSearchInput
+import lava.search.input.openSearchInput
+import lava.search.result.addSearchResult
+import lava.search.result.openSearchResult
+import lava.topic.addTopic
+import lava.topic.openTopic
+import lava.visited.VisitedScreen
 import me.rutrackersearch.app.R
 
 @Composable
@@ -176,12 +176,12 @@ private fun addForum(
             pages = listOf(
                 Page(
                     labelResId = R.string.tab_title_forum,
-                    icon = FlowIcons.Forum,
+                    icon = LavaIcons.Forum,
                     content = { ForumScreen { openCategory(it) } },
                 ),
                 Page(
                     labelResId = R.string.tab_title_bookmarks,
-                    icon = FlowIcons.Bookmarks,
+                    icon = LavaIcons.Bookmarks,
                     content = { BookmarksScreen { openCategory(it) } },
                 ),
             ),
@@ -200,12 +200,12 @@ private fun addTopics(
         pages = listOf(
             Page(
                 labelResId = R.string.tab_title_favorites,
-                icon = FlowIcons.Favorite,
+                icon = LavaIcons.Favorite,
                 content = { FavoritesScreen(openTopic = openTopic) },
             ),
             Page(
                 labelResId = R.string.tab_title_recents,
-                icon = FlowIcons.History,
+                icon = LavaIcons.History,
                 content = { VisitedScreen(openTopic = openTopic) },
             ),
         ),
@@ -226,28 +226,28 @@ private enum class BottomRoute(val navigationBarItem: NavigationBarItem) {
         navigationBarItem = NavigationBarItem(
             route = "search",
             labelResId = R.string.label_search,
-            icon = FlowIcons.Search,
+            icon = LavaIcons.Search,
         ),
     ),
     Forum(
         navigationBarItem = NavigationBarItem(
             route = "forum",
             labelResId = R.string.label_forum,
-            icon = FlowIcons.Forum,
+            icon = LavaIcons.Forum,
         ),
     ),
     Topics(
         navigationBarItem = NavigationBarItem(
             route = "topics",
             labelResId = R.string.label_topics,
-            icon = FlowIcons.Topics,
+            icon = LavaIcons.Topics,
         ),
     ),
     Menu(
         navigationBarItem = NavigationBarItem(
             route = "menu",
             labelResId = R.string.label_menu,
-            icon = FlowIcons.Menu,
+            icon = LavaIcons.Menu,
         ),
     ),
     ;

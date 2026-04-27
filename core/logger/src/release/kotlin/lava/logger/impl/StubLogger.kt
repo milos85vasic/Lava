@@ -1,0 +1,11 @@
+package lava.logger.impl
+
+import lava.logger.api.Logger
+
+internal object StubLogger : Logger {
+    override fun i(message: () -> String) = Unit
+    override fun d(message: () -> String) = Unit
+    override fun d(t: Throwable?, message: () -> String) = Unit
+    override fun e(message: () -> String) = Unit
+    override fun e(t: Throwable?, message: () -> String) = Unit
+}

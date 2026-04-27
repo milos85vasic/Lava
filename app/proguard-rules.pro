@@ -29,7 +29,7 @@
 -dontwarn org.slf4j.impl.StaticLoggerBinder
 
 -keep class com.google.crypto.tink.** { *; }
--keep class flow.network.dto.** { *; }
+-keep class lava.network.dto.** { *; }
 
 -keepattributes SourceFile,LineNumberTable,RuntimeVisibleAnnotations,AnnotationDefault
 -renamesourcefileattribute SourceFile

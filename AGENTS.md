@@ -1,15 +1,15 @@
-# Flow — Agent Guide
+# Lava — Agent Guide
 
 > This file is intended for AI coding agents. It describes the project structure, build system, conventions, and things you need to know before modifying code.
 
 ## Project Overview
 
-**Flow** is an unofficial Android client for [rutracker.org](https://rutracker.org). It consists of two main artifacts:
+**Lava** is an unofficial Android client for [rutracker.org](https://rutracker.org). It consists of two main artifacts:
 
 1. **Android App** (`:app`) — a modular Android application written in Kotlin, using Jetpack Compose for the UI.
 2. **Proxy Server** (`:proxy`) — a headless Ktor server that scrapes rutracker.org and exposes a JSON REST API for the app.
 
-The project is a fork of `andrikeev/Flow`, maintained under `milos85vasic/Flow`. All source code, comments, and documentation are in **English**.
+The project is a fork of `andrikeev/Flow`, maintained under `milos85vasic/Lava`. All source code, comments, and documentation are in **English**.
 
 - **App ID:** `me.rutrackersearch.app`
 - **App Version:** `4.7.0` (`versionCode = 46`)
@@ -45,7 +45,7 @@ The project is a fork of `andrikeev/Flow`, maintained under `milos85vasic/Flow`.
 The repository is a **multi-module Gradle project**. There is **no root `build.gradle.kts`**; all build logic is centralized in `buildSrc` as custom convention plugins.
 
 ```
-Flow/
+Lava/
 ├── app/                    # Android application module
 ├── proxy/                  # Ktor proxy server module
 ├── buildSrc/               # Custom Gradle convention plugins
@@ -76,17 +76,17 @@ All modules apply one or more custom convention plugins defined in `buildSrc`. T
 
 | Plugin ID | Applied To | What it does |
 |-----------|------------|--------------|
-| `flow.android.application` | `:app` | Android app plugin, Firebase/Crashlytics, static analysis, Compose compiler |
-| `flow.android.library` | Most `core:*` and `feature:*` | Android library + Kotlin Android + Spotless |
-| `flow.android.library.compose` | Compose-enabled modules | Adds Compose BOM dependencies and compiler settings |
-| `flow.android.feature` | All `feature:*` | Applies library + Hilt, wires standard core dependencies, Orbit, enables `-Xcontext-receivers` |
-| `flow.android.hilt` | Android modules needing DI | Dagger Hilt plugin + KSP compilers |
-| `flow.kotlin.library` | Pure Kotlin modules | `java-library` + Kotlin JVM + Spotless |
-| `flow.kotlin.serialization` | Modules needing JSON serialization | Kotlin serialization plugin + `kotlinx-serialization-json` |
-| `flow.kotlin.ksp` | Modules using KSP (e.g. Room) | KSP Gradle plugin |
-| `flow.ktor.application` | `:proxy` | Kotlin library + serialization + `application` plugin + Ktor plugin |
+| `lava.android.application` | `:app` | Android app plugin, Firebase/Crashlytics, static analysis, Compose compiler |
+| `lava.android.library` | Most `core:*` and `feature:*` | Android library + Kotlin Android + Spotless |
+| `lava.android.library.compose` | Compose-enabled modules | Adds Compose BOM dependencies and compiler settings |
+| `lava.android.feature` | All `feature:*` | Applies library + Hilt, wires standard core dependencies, Orbit, enables `-Xcontext-receivers` |
+| `lava.android.hilt` | Android modules needing DI | Dagger Hilt plugin + KSP compilers |
+| `lava.kotlin.library` | Pure Kotlin modules | `java-library` + Kotlin JVM + Spotless |
+| `lava.kotlin.serialization` | Modules needing JSON serialization | Kotlin serialization plugin + `kotlinx-serialization-json` |
+| `lava.kotlin.ksp` | Modules using KSP (e.g. Room) | KSP Gradle plugin |
+| `lava.ktor.application` | `:proxy` | Kotlin library + serialization + `application` plugin + Ktor plugin |
 
-Shared build constants live in `buildSrc/src/main/kotlin/flow/conventions/`:
+Shared build constants live in `buildSrc/src/main/kotlin/lava/conventions/`:
 - `AndroidCommon.kt` — `compileSdk = 35`, `minSdk = 21`, `targetSdk = 35`
 - `KotlinAndroid.kt` — Java / Kotlin target `VERSION_17`
 - `AndroidCompose.kt` — Compose compiler plugin + experimental opt-ins
@@ -127,7 +127,7 @@ Because there is no root build script, you invoke tasks via the Gradle wrapper a
 
 ## Code Style & Static Analysis
 
-- **Spotless + ktlint** is the only enforced code-quality tool. It is configured programmatically in `buildSrc/src/main/kotlin/flow/conventions/StaticAnalysisConventionPlugin.kt`.
+- **Spotless + ktlint** is the only enforced code-quality tool. It is configured programmatically in `buildSrc/src/main/kotlin/lava/conventions/StaticAnalysisConventionPlugin.kt`.
 - There is **no Detekt**, **no Checkstyle**, and **no `.editorconfig`**.
 - Spotless targets:
   - All `**/*.kt` files (excluding `build/`)
@@ -165,12 +165,12 @@ Every feature module uses **Orbit MVI**:
 - `XxxAction` — `sealed interface` for user intents.
 - `XxxSideEffect` — `sealed interface` for one-time events (navigation, toasts, etc.).
 
-Example: `feature/forum/src/main/kotlin/flow/forum/ForumViewModel.kt`
+Example: `feature/forum/src/main/kotlin/lava/forum/ForumViewModel.kt`
 
 ### UI & Navigation
 
 - **100 % Jetpack Compose**. There are no XML layouts or Fragments in feature modules.
-- **Custom design system** lives in `:core:designsystem` (`FlowTheme`, `AppBar`, custom text fields, etc.).
+- **Custom design system** lives in `:core:designsystem` (`LavaTheme`, `AppBar`, custom text fields, etc.).
 - **Custom navigation wrapper** in `:core:navigation` sits on top of Jetpack Navigation Compose.
   - Routes are built with a Kotlin DSL using **context receivers** (enabled in several modules).
   - Each feature exposes `addXxx()` and `openXxx()` extension functions.
@@ -181,7 +181,7 @@ Example: `feature/forum/src/main/kotlin/flow/forum/ForumViewModel.kt`
 
 > ⚠️ **Test coverage is minimal.** The repository currently contains almost no tests.
 
-- **Only one unit-test file exists:** `core/preferences/src/test/kotlin/flow/securestorage/EndpointConverterTest.kt` (JUnit 4).
+- **Only one unit-test file exists:** `core/preferences/src/test/kotlin/lava/securestorage/EndpointConverterTest.kt` (JUnit 4).
 - **No tests** exist in `:app`, any `feature:*` module, or most `core:*` modules.
 - A shared test-utilities module — `:core:testing` — provides:
   - `MainDispatcherRule` (JUnit 4 `TestWatcher`)
@@ -216,9 +216,9 @@ The proxy is built as a Ktor fat JAR and deployed as a Docker image.
 
    The script does the following:
    ```bash
-   docker build -t flow-app-proxy ./proxy
-   docker tag flow-app-proxy registry.digitalocean.com/flow-app/flow-app-proxy
-   docker push registry.digitalocean.com/flow-app/flow-app-proxy
+   docker build -t lava-app-proxy ./proxy
+   docker tag lava-app-proxy registry.digitalocean.com/lava-app/lava-app-proxy
+   docker push registry.digitalocean.com/lava-app/lava-app-proxy
    ```
 
 3. **Dockerfile** (`proxy/Dockerfile`):
@@ -234,13 +234,13 @@ There are no Docker Compose files, Kubernetes manifests, or other orchestration 
 - **Encrypted preferences** — `core:preferences` uses `androidx.security:security-crypto-ktx` (`1.1.0-alpha03`) to store credentials and settings.
 - **Cleartext traffic** — `android:usesCleartextTraffic="true"` is enabled in the app manifest. Be cautious when changing this.
 - **Debug signing in release** — The release build type uses `signingConfig = signingConfigs.getByName("debug")`. This is convenient for local builds but is **not a secure release signing setup** for production distribution.
-- **ProGuard** — `isObfuscate = false` in release. The ProGuard rules in `app/proguard-rules.pro` keep network DTOs (`flow.network.dto.**`) and Tink classes.
+- **ProGuard** — `isObfuscate = false` in release. The ProGuard rules in `app/proguard-rules.pro` keep network DTOs (`lava.network.dto.**`) and Tink classes.
 - **Deep links** — The app handles `rutracker.org` deep links. Any Intent processing should validate URLs to avoid injection.
 
 ## Useful Notes for Agents
 
 - **No root `build.gradle.kts`** — Do not create one. Use or extend the convention plugins in `buildSrc` instead.
-- **Adding a new module?** Register it in `settings.gradle.kts` and apply the appropriate convention plugin (`flow.android.feature`, `flow.kotlin.library`, etc.).
+- **Adding a new module?** Register it in `settings.gradle.kts` and apply the appropriate convention plugin (`lava.android.feature`, `lava.kotlin.library`, etc.).
 - **Adding a dependency?** Prefer adding it to `gradle/libs.versions.toml` first, then referencing it via `libs.findLibrary(...)` or `libs.findBundle(...)` in the convention plugin or module `build.gradle.kts`.
 - **Compose compiler** is managed via the Kotlin Compose compiler plugin (BOM `2025.06.01`). Do not add the old `composeOptions` block.
 - **Context receivers** are enabled in several modules (`-Xcontext-receivers`). If you see `context(NavigationGraphBuilder)` DSL calls, that is why.

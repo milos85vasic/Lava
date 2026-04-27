@@ -3,8 +3,8 @@ package me.rutrackersearch.app.platform
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import flow.logger.api.LoggerFactory
-import flow.ui.platform.OpenLinkHandler
+import lava.logger.api.LoggerFactory
+import lava.ui.platform.OpenLinkHandler
 import androidx.core.net.toUri
 
 class OpenLinkHandlerImpl(

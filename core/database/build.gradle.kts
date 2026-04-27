@@ -1,12 +1,12 @@
 plugins {
-    id("flow.android.library")
-    id("flow.android.hilt")
-    id("flow.kotlin.ksp")
+    id("lava.android.library")
+    id("lava.android.hilt")
+    id("lava.kotlin.ksp")
     id("androidx.room")
 }
 
 android {
-    namespace = "flow.database"
+    namespace = "lava.database"
 
     room {
         schemaDirectory("$projectDir/schemas")

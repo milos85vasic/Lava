@@ -1,5 +1,5 @@
 import com.android.build.gradle.LibraryExtension
-import flow.conventions.libs
+import lava.conventions.libs
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.configure
@@ -11,8 +11,8 @@ class AndroidFeatureConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
             pluginManager.apply {
-                apply("flow.android.library")
-                apply("flow.android.hilt")
+                apply("lava.android.library")
+                apply("lava.android.hilt")
             }
 
             extensions.configure<LibraryExtension> {

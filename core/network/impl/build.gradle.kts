@@ -1,11 +1,11 @@
 plugins {
-    id("flow.android.library")
-    id("flow.android.hilt")
-    id("flow.kotlin.serialization")
+    id("lava.android.library")
+    id("lava.android.hilt")
+    id("lava.kotlin.serialization")
 }
 
 android {
-    namespace = "flow.network"
+    namespace = "lava.network"
 }
 
 kotlin {

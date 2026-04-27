@@ -2,7 +2,7 @@ package me.rutrackersearch.app.platform
 
 import android.content.Context
 import android.content.Intent
-import flow.ui.platform.ShareLinkHandler
+import lava.ui.platform.ShareLinkHandler
 
 class ShareLinkHandlerImpl(
     private val context: Context,
