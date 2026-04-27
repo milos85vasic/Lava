@@ -24,11 +24,10 @@ class DiscoverLocalEndpointsUseCaseImpl @Inject constructor(
     private val endpointsRepository: EndpointsRepository,
     private val settingsRepository: SettingsRepository,
     private val dispatchers: Dispatchers,
-    private val discoveryTimeoutMs: Long = 5_000,
 ) : DiscoverLocalEndpointsUseCase {
 
     override suspend fun invoke(): DiscoverLocalEndpointsResult = withContext(dispatchers.io) {
-        val discovered = withTimeoutOrNull(discoveryTimeoutMs) {
+        val discovered = withTimeoutOrNull(5_000) {
             discoveryService.discover().firstOrNull()
         } ?: return@withContext DiscoverLocalEndpointsResult.NotFound
 

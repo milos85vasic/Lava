@@ -34,14 +34,11 @@ class DiscoverLocalEndpointsUseCaseTest {
         settingsRepository = TestSettingsRepository()
     }
 
-    private fun createUseCase(
-        timeoutMs: Long = 100L,
-    ): DiscoverLocalEndpointsUseCase = DiscoverLocalEndpointsUseCaseImpl(
+    private fun createUseCase(): DiscoverLocalEndpointsUseCase = DiscoverLocalEndpointsUseCaseImpl(
         discoveryService = discoveryService,
         endpointsRepository = endpointsRepository,
         settingsRepository = settingsRepository,
         dispatchers = TestDispatchers(),
-        discoveryTimeoutMs = timeoutMs,
     )
 
     @Test
