@@ -12,8 +12,8 @@
 The project is a fork of `andrikeev/Flow`, maintained under `milos85vasic/Lava`. All source code, comments, and documentation are in **English**.
 
 - **App ID:** `me.rutrackersearch.app`
-- **App Version:** `4.7.0` (`versionCode = 46`)
-- **Proxy Version:** `3.1.0`
+- **App Version:** `1.0.0` (`versionCode = 1000`)
+- **Proxy Version:** `1.0.0`
 - **License:** MIT (see `LICENSE`)
 
 ## Technology Stack
@@ -122,13 +122,14 @@ Because there is no root build script, you invoke tasks via the Gradle wrapper a
 
 ### App build types
 
-- **Debug** — `isMinifyEnabled = false`, signed with debug key, `applicationIdSuffix = ".dev"`.
-- **Release** — `isRemoveUnusedCode = true`, `isRemoveUnusedResources = true`, `isOptimizeCode = true`, **but `isObfuscate = false`**. Uses ProGuard rules from `app/proguard-rules.pro` and is signed with the **debug signing config** (not a separate release keystore).
+- **Debug** — `isMinifyEnabled = false`, signed with the custom debug keystore (`keystores/debug.keystore`), `applicationIdSuffix = ".dev"`.
+- **Release** — `isRemoveUnusedCode = true`, `isRemoveUnusedResources = true`, `isOptimizeCode = true`, **but `isObfuscate = false`**. Uses ProGuard rules from `app/proguard-rules.pro` and is signed with the custom release keystore (`keystores/release.keystore`).
 
 ## Code Style & Static Analysis
 
 - **Spotless + ktlint** is the only enforced code-quality tool. It is configured programmatically in `buildSrc/src/main/kotlin/lava/conventions/StaticAnalysisConventionPlugin.kt`.
-- There is **no Detekt**, **no Checkstyle**, and **no `.editorconfig`**.
+- There is **no Detekt** and **no Checkstyle**.
+- **`.editorconfig`** exists at the project root and configures ktlint rules (e.g. allowing PascalCase for `@Composable` functions).
 - Spotless targets:
   - All `**/*.kt` files (excluding `build/`)
   - All `*.gradle.kts` files
@@ -233,7 +234,7 @@ There are no Docker Compose files, Kubernetes manifests, or other orchestration 
 - **Proxy auth** — The proxy expects an `Auth-Token` header (`ApplicationRequest.authToken`) but does not implement OAuth or JWT; it forwards rutracker session state.
 - **Encrypted preferences** — `core:preferences` uses `androidx.security:security-crypto-ktx` (`1.1.0-alpha03`) to store credentials and settings.
 - **Cleartext traffic** — `android:usesCleartextTraffic="true"` is enabled in the app manifest. Be cautious when changing this.
-- **Debug signing in release** — The release build type uses `signingConfig = signingConfigs.getByName("debug")`. This is convenient for local builds but is **not a secure release signing setup** for production distribution.
+- **Signing configuration** — Both debug and release builds use dedicated keystores located under `keystores/`. Keystore paths and passwords are loaded from a `.env` file via `KEYSTORE_ROOT_DIR` and `KEYSTORE_PASSWORD`. See `.env.example` for the required variables. Never commit the `.env` file or the `keystores/` directory.
 - **ProGuard** — `isObfuscate = false` in release. The ProGuard rules in `app/proguard-rules.pro` keep network DTOs (`lava.network.dto.**`) and Tink classes.
 - **Deep links** — The app handles `rutracker.org` deep links. Any Intent processing should validate URLs to avoid injection.
 

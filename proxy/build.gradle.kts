@@ -3,7 +3,7 @@ plugins {
 }
 
 group = "lava.proxy.rutracker"
-version = "3.1.0"
+version = "1.0.0"
 
 application {
     mainClass.set("lava.proxy.rutracker.ApplicationKt")

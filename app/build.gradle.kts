@@ -5,22 +5,52 @@ plugins {
     id("lava.android.hilt")
 }
 
+fun loadEnv(file: File = rootProject.file(".env")): Map<String, String> {
+    if (!file.exists()) return emptyMap()
+    return file.readLines()
+        .filter { it.isNotBlank() && !it.startsWith("#") }
+        .mapNotNull { line ->
+            val parts = line.split("=", limit = 2)
+            if (parts.size == 2) parts[0].trim() to parts[1].trim() else null
+        }
+        .toMap()
+}
+
+val env = loadEnv()
+val keystorePassword = env["KEYSTORE_PASSWORD"] ?: "l@vAfl0wZ!"
+val keystoreRootDir = env["KEYSTORE_ROOT_DIR"] ?: "keystores"
+
 android {
     namespace = "me.rutrackersearch.app"
 
     defaultConfig {
         applicationId = "me.rutrackersearch.app"
-        versionCode = 46
-        versionName = "4.7.0"
+        versionCode = 1000
+        versionName = "1.0.0"
     }
 
     buildFeatures {
         buildConfig = true
     }
 
+    signingConfigs {
+        getByName("debug") {
+            storeFile = rootProject.file("$keystoreRootDir/debug.keystore")
+            storePassword = keystorePassword
+            keyAlias = "debug"
+            keyPassword = keystorePassword
+        }
+        create("release") {
+            storeFile = rootProject.file("$keystoreRootDir/release.keystore")
+            storePassword = keystorePassword
+            keyAlias = "release"
+            keyPassword = keystorePassword
+        }
+    }
+
     buildTypes {
         release {
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.getByName("release")
             postprocessing {
                 isRemoveUnusedCode = true
                 isRemoveUnusedResources = true
