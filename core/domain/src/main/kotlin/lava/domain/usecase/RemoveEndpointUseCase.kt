@@ -7,7 +7,7 @@ import javax.inject.Inject
 
 interface RemoveEndpointUseCase : suspend (Endpoint) -> Unit
 
-internal class RemoveEndpointUseCaseImpl @Inject constructor(
+class RemoveEndpointUseCaseImpl @Inject constructor(
     private val endpointsRepository: EndpointsRepository,
     private val settingsRepository: SettingsRepository,
 ) : RemoveEndpointUseCase {

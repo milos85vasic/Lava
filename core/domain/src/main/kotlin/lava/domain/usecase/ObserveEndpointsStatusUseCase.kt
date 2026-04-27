@@ -9,7 +9,7 @@ import javax.inject.Inject
 
 interface ObserveEndpointsStatusUseCase : suspend () -> Flow<List<EndpointState>>
 
-internal class ObserveEndpointsStatusUseCaseImpl @Inject constructor(
+class ObserveEndpointsStatusUseCaseImpl @Inject constructor(
     private val endpointsRepository: EndpointsRepository,
     private val observeEndpointStatusUseCase: ObserveEndpointStatusUseCase,
 ) : ObserveEndpointsStatusUseCase {

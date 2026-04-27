@@ -19,15 +19,16 @@ sealed interface DiscoverLocalEndpointsResult {
     data object AlreadyConfigured : DiscoverLocalEndpointsResult
 }
 
-internal class DiscoverLocalEndpointsUseCaseImpl @Inject constructor(
+class DiscoverLocalEndpointsUseCaseImpl @Inject constructor(
     private val discoveryService: LocalNetworkDiscoveryService,
     private val endpointsRepository: EndpointsRepository,
     private val settingsRepository: SettingsRepository,
     private val dispatchers: Dispatchers,
+    private val discoveryTimeoutMs: Long = 5_000,
 ) : DiscoverLocalEndpointsUseCase {
 
     override suspend fun invoke(): DiscoverLocalEndpointsResult = withContext(dispatchers.io) {
-        val discovered = withTimeoutOrNull(5_000) {
+        val discovered = withTimeoutOrNull(discoveryTimeoutMs) {
             discoveryService.discover().firstOrNull()
         } ?: return@withContext DiscoverLocalEndpointsResult.NotFound
 

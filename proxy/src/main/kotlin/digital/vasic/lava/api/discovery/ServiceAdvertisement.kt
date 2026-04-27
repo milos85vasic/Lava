@@ -8,6 +8,12 @@ object ServiceAdvertisement {
     private const val SERVICE_TYPE = "_lava._tcp.local."
     private const val SERVICE_NAME = "Lava Proxy"
     private var jmDNS: JmDNS? = null
+    private var registeredServiceInfo: ServiceInfo? = null
+
+    /**
+     * Exposes the last registered service info for testing and verification.
+     */
+    fun getServiceInfo(): ServiceInfo? = registeredServiceInfo
 
     fun start(port: Int) {
         try {
@@ -26,6 +32,7 @@ object ServiceAdvertisement {
                 ),
             )
             jmDNS?.registerService(serviceInfo)
+            registeredServiceInfo = serviceInfo
             println("mDNS service registered: $SERVICE_NAME on $address:$port")
         } catch (e: Exception) {
             println("Failed to register mDNS service: ${e.message}")
@@ -38,6 +45,7 @@ object ServiceAdvertisement {
             jmDNS?.unregisterAllServices()
             jmDNS?.close()
             jmDNS = null
+            registeredServiceInfo = null
             println("mDNS service unregistered")
         } catch (e: Exception) {
             println("Failed to unregister mDNS service: ${e.message}")

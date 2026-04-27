@@ -67,13 +67,45 @@ Dependency direction: `app → feature:* → core:domain → core:data → core:
 
 `isMinifyEnabled = true` but `isObfuscate = false`. ProGuard rules in `app/proguard-rules.pro` keep `lava.network.dto.**` and Tink classes. `android:usesCleartextTraffic="true"` is set in the manifest — be deliberate if changing it.
 
+## Anti-Bluff Testing Pact (Constitutional Law)
+
+This project adheres to **Anti-Bluff Testing**. A "bluff test" is one that passes while the corresponding real feature is broken for end users. Bluff tests are worse than no tests because they create a false sense of security. They are forbidden.
+
+### First Law — Tests Must Guarantee Real User-Visible Behavior
+- Every test MUST verify an outcome that matters to end users (data correctness, UI state, persistence, network behavior).
+- A test that only asserts "function did not crash" or "mock was called" is a bluff test.
+- If a bug ships to production, there MUST be a retroactive test that would have caught it before the fix is merged.
+
+### Second Law — No Mocking of Internal Business Logic
+- **ViewModel tests MUST use real UseCase implementations**, not stubbed or mocked use cases.
+- **UseCase tests MUST use real Repository implementations** (or fakes that enforce identical constraints to the real database / network layer).
+- Mocking is permitted ONLY at the outermost boundaries (Android system services, actual HTTP sockets, hardware sensors).
+- If a bug exists in a UseCase, a ViewModel test wired to the real UseCase MUST fail.
+
+### Third Law — Fakes Must Be Behaviorally Equivalent
+- A test fake that is "simpler" than reality in a way that could hide a bug is a bluff fake.
+- `TestEndpointsRepository` MUST enforce duplicate rejection (Room primary-key conflict) and default-endpoint seeding just like `EndpointsRepositoryImpl`.
+- `TestLocalNetworkDiscoveryService` MUST simulate real NsdManager behaviors (e.g., `_lava._tcp.local.` service-type suffix) that affect production parsing logic.
+- If the real implementation has a branch, the fake MUST have a matching branch or a documented limitation.
+
+### Fourth Law — Integration Challenge Tests
+- Every feature MUST include at least one **Integration Challenge Test** that exercises the real implementation stack end-to-end: ViewModel → UseCase → Repository → (Fake) Service.
+- Challenge Tests must use the **actual production classes** at every layer; only external boundaries may be faked.
+- A Challenge Test that passes MUST guarantee the feature works for a real user under the tested conditions.
+
+### Fifth Law — Regression Immunity
+- When a production bug is discovered, the fix commit MUST include a test that would have failed before the fix.
+- If such a test cannot be written, the code is untestable and must be refactored for testability before the fix is accepted.
+- Code coverage metrics are meaningless if the tests are bluffs; behavioral guarantees are the only metric that matters.
+
 ## Testing
 
 Test coverage is essentially zero today. The only existing unit test is `core/preferences/src/test/kotlin/lava/securestorage/EndpointConverterTest.kt` (JUnit 4). New tests should:
 
 - Use **JUnit 4** to match the existing `MainDispatcherRule` in `core:testing`.
-- Reuse fakes from `core:testing` (`TestBookmarksRepository`, `TestAuthService`, `TestDispatchers`, …).
+- Reuse fakes from `core:testing` (`TestBookmarksRepository`, `TestAuthService`, `TestDispatchers`, …) — **but verify those fakes obey the Anti-Bluff Pact** (behavioral equivalence to real implementations).
 - For Orbit ViewModels, use `orbit-test` — already wired as `testImplementation` in every feature module but currently unused.
+- Write **Integration Challenge Tests** for every new feature using real UseCase and Repository implementations.
 
 ## Things to avoid
 

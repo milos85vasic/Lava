@@ -14,7 +14,7 @@ import javax.inject.Inject
 
 interface ObserveEndpointStatusUseCase : (Endpoint) -> Flow<EndpointState>
 
-internal class ObserveEndpointStatusUseCaseImpl @Inject constructor(
+class ObserveEndpointStatusUseCaseImpl @Inject constructor(
     private val connectionService: ConnectionService,
     private val settingsRepository: SettingsRepository,
 ) : ObserveEndpointStatusUseCase {

@@ -29,4 +29,6 @@ dependencies {
     implementation(libs.jsoup)
     implementation(libs.koin)
     implementation(project(":core:network:rutracker"))
+
+    testImplementation(libs.junit4)
 }

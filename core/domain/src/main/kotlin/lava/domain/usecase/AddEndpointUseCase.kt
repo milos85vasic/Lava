@@ -6,7 +6,7 @@ import javax.inject.Inject
 
 interface AddEndpointUseCase : suspend (String) -> Unit
 
-internal class AddEndpointUseCaseImpl @Inject constructor(
+class AddEndpointUseCaseImpl @Inject constructor(
     private val endpointsRepository: EndpointsRepository,
 ) : AddEndpointUseCase {
     override suspend operator fun invoke(endpoint: String) {

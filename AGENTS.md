@@ -193,6 +193,35 @@ Example: `feature/forum/src/main/kotlin/lava/forum/ForumViewModel.kt`
   - Deep links for `rutracker.org/forum/viewtopic.php`, `viewforum.php`, and `tracker.php` are handled in `app/src/main/AndroidManifest.xml` and wired into the navigation graph.
 - **TV support** — `TvActivity` extends `MainActivity` and changes `PlatformType` to `TV`. Leanback launcher intent is declared in the manifest. The app also declares `android.software.leanback` as not required and `android.hardware.touchscreen` as not required.
 
+## Anti-Bluff Testing Pact (Constitutional Law)
+
+This project adheres to **Anti-Bluff Testing**. A "bluff test" is one that passes while the corresponding real feature is broken for end users. Bluff tests create false confidence and are strictly forbidden.
+
+### First Law — Tests Must Guarantee Real User-Visible Behavior
+Every test MUST verify an outcome that matters to end users. A test that only asserts "function did not crash" or "mock was called" is a bluff test and must be rewritten.
+
+### Second Law — No Mocking of Internal Business Logic
+- **ViewModel tests MUST use real UseCase implementations** wired to realistic fakes, never mocked use cases.
+- **UseCase tests MUST use real Repository implementations** (or fakes that enforce identical invariants to the real database / network layer).
+- Mocking is permitted ONLY at the outermost system boundaries (Android `NsdManager`, actual HTTP sockets, hardware).
+- If a UseCase contains a bug, a ViewModel Integration Challenge Test wired to the real UseCase MUST fail.
+
+### Third Law — Fakes Must Be Behaviorally Equivalent
+- A fake that is "simpler" than reality in a way that could hide a bug is a bluff fake.
+- `TestEndpointsRepository` MUST reject duplicates (Room primary-key conflict) and seed defaults just like `EndpointsRepositoryImpl`.
+- `TestLocalNetworkDiscoveryService` MUST simulate real NsdManager behaviors (e.g., `_lava._tcp.local.` service-type suffix).
+- Every fake MUST document any behavioral simplifications that differ from production.
+
+### Fourth Law — Integration Challenge Tests
+- Every feature MUST include at least one **Integration Challenge Test** that exercises the real implementation stack end-to-end: ViewModel → UseCase → Repository → (Fake) Service.
+- Challenge Tests use actual production classes at every layer; only external boundaries are faked.
+- A passing Challenge Test MUST guarantee the feature works for a real user under the tested scenario.
+
+### Fifth Law — Regression Immunity
+- Every production bug fix MUST be accompanied by a test that would have failed before the fix.
+- If such a test cannot be written, the architecture is untestable and must be refactored before the fix is accepted.
+- Code coverage numbers are meaningless if the tests are bluffs; behavioral guarantees are the only valid metric.
+
 ## Testing Strategy
 
 > ⚠️ **Test coverage is minimal.** The repository currently contains almost no tests.
@@ -207,7 +236,7 @@ Example: `feature/forum/src/main/kotlin/lava/forum/ForumViewModel.kt`
 - Orbit test library (`orbit-test`) is already wired as a `testImplementation` in every feature module, but is unused.
 - `testInstrumentationRunner` is set to `androidx.test.runner.AndroidJUnitRunner` for all feature modules.
 
-If you add tests, prefer **JUnit 4** (to match the existing `MainDispatcherRule`) and place them in `src/test/kotlin/` for unit tests or `src/androidTest/kotlin/` for instrumentation tests.
+If you add tests, prefer **JUnit 4** (to match the existing `MainDispatcherRule`) and place them in `src/test/kotlin/` for unit tests or `src/androidTest/kotlin/` for instrumentation tests. **Always write at least one Integration Challenge Test per feature using real UseCase and Repository implementations.**
 
 ## Deployment
 
