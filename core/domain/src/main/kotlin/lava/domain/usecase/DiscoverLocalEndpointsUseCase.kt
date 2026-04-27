@@ -1,5 +1,6 @@
 package lava.domain.usecase
 
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
@@ -26,19 +27,24 @@ internal class DiscoverLocalEndpointsUseCaseImpl @Inject constructor(
 ) : DiscoverLocalEndpointsUseCase {
 
     override suspend fun invoke(): DiscoverLocalEndpointsResult = withContext(dispatchers.io) {
-        val currentSettings = settingsRepository.getSettings()
-        val currentEndpoint = currentSettings.endpoint
-        if (currentEndpoint is Endpoint.Mirror && !currentEndpoint.host.contains("rutracker")) {
-            return@withContext DiscoverLocalEndpointsResult.AlreadyConfigured
-        }
-
         val discovered = withTimeoutOrNull(5_000) {
             discoveryService.discover().firstOrNull()
         } ?: return@withContext DiscoverLocalEndpointsResult.NotFound
 
         val mirror = Endpoint.Mirror(discovered.host)
+
+        val existing = endpointsRepository.observeAll().first()
+        if (existing.any { it == mirror }) {
+            return@withContext DiscoverLocalEndpointsResult.AlreadyConfigured
+        }
+
         endpointsRepository.add(mirror)
-        settingsRepository.setEndpoint(mirror)
+
+        val currentSettings = settingsRepository.getSettings()
+        val currentEndpoint = currentSettings.endpoint
+        if (currentEndpoint !is Endpoint.Mirror || currentEndpoint.host.contains("rutracker")) {
+            settingsRepository.setEndpoint(mirror)
+        }
 
         DiscoverLocalEndpointsResult.Discovered(mirror)
     }

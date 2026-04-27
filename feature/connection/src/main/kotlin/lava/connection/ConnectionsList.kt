@@ -26,12 +26,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
+import lava.connection.ConnectionsAction.DiscoverLocalEndpoints
 import lava.connection.ConnectionsAction.DoneClick
 import lava.connection.ConnectionsAction.EditClick
 import lava.connection.ConnectionsAction.RemoveEndpoint
 import lava.connection.ConnectionsAction.SelectEndpoint
 import lava.connection.ConnectionsAction.SubmitEndpoint
 import lava.designsystem.component.BodyLarge
+import lava.designsystem.component.CircularProgressIndicator
 import lava.designsystem.component.Icon
 import lava.designsystem.component.IconButton
 import lava.designsystem.component.Surface
@@ -78,6 +80,17 @@ private fun ConnectionsList(
             text = stringResource(R.string.connection_item_title),
             style = AppTheme.typography.headlineSmall,
         )
+        if (state.discovering) {
+            CircularProgressIndicator(
+                modifier = Modifier.padding(horizontal = AppTheme.spaces.medium),
+            )
+        } else {
+            IconButton(
+                icon = LavaIcons.Reload,
+                contentDescription = "Discover local endpoints",
+                onClick = { onAction(DiscoverLocalEndpoints) },
+            )
+        }
         if (state.edit) {
             TextButton(
                 text = stringResource(DsR.string.designsystem_action_done),

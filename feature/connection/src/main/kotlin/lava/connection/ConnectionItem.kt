@@ -1,5 +1,6 @@
 package lava.connection
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,6 +14,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import lava.designsystem.component.Body
 import lava.designsystem.component.BodyLarge
@@ -39,6 +41,7 @@ private fun ConnectionItem(
     requestShowDialog: Boolean,
     onDialogShown: () -> Unit,
 ) {
+    val context = LocalContext.current
     var showDialog by remember { mutableStateOf(false) }
     LaunchedEffect(requestShowDialog) {
         if (requestShowDialog) {
@@ -50,6 +53,9 @@ private fun ConnectionItem(
         when (sideEffect) {
             is ConnectionsSideEffect.ShowConnectionDialog -> {
                 showDialog = true
+            }
+            is ConnectionsSideEffect.ShowMessage -> {
+                Toast.makeText(context, sideEffect.message, Toast.LENGTH_SHORT).show()
             }
         }
     }

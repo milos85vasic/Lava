@@ -37,7 +37,7 @@ internal class LocalNetworkDiscoveryServiceImpl @Inject constructor(
 
             @Suppress("DEPRECATION")
             override fun onServiceFound(serviceInfo: NsdServiceInfo) {
-                if (serviceInfo.serviceType != SERVICE_TYPE) return
+                if (!serviceInfo.serviceType.contains("_lava._tcp")) return
                 nsd.resolveService(
                     serviceInfo,
                     object : NsdManager.ResolveListener {

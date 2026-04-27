@@ -6,6 +6,8 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import lava.domain.model.endpoint.EndpointState
 import lava.domain.usecase.AddEndpointUseCase
+import lava.domain.usecase.DiscoverLocalEndpointsResult
+import lava.domain.usecase.DiscoverLocalEndpointsUseCase
 import lava.domain.usecase.ObserveEndpointsStatusUseCase
 import lava.domain.usecase.RemoveEndpointUseCase
 import lava.domain.usecase.SetEndpointUseCase
@@ -57,8 +59,13 @@ class ConnectionsViewModelTest {
         }
     }
 
-    private fun createViewModel(): ConnectionsViewModel = ConnectionsViewModel(
+    private fun createViewModel(
+        discoverResult: DiscoverLocalEndpointsResult = DiscoverLocalEndpointsResult.NotFound,
+    ): ConnectionsViewModel = ConnectionsViewModel(
         addEndpointUseCase = addEndpointUseCase,
+        discoverLocalEndpointsUseCase = object : DiscoverLocalEndpointsUseCase {
+            override suspend fun invoke() = discoverResult
+        },
         removeEndpointUseCase = removeEndpointUseCase,
         setEndpointUseCase = setEndpointUseCase,
         observeEndpointsStatusUseCase = observeEndpointsStatusUseCase,
@@ -120,5 +127,37 @@ class ConnectionsViewModelTest {
             viewModel.perform(ConnectionsAction.SelectEndpoint(endpoint))
         }
         assertEquals(endpoint, settingsRepository.getSettings().endpoint)
+    }
+
+    @Test
+    fun `discover local endpoints shows loading and emits message`() = runTest {
+        val viewModel = createViewModel(
+            discoverResult = DiscoverLocalEndpointsResult.Discovered(Endpoint.Mirror("192.168.1.100")),
+        )
+        viewModel.test(this) {
+            expectInitialState()
+            viewModel.perform(ConnectionsAction.DiscoverLocalEndpoints)
+            val loadingState = awaitState()
+            assertTrue(loadingState.discovering)
+            val doneState = awaitState()
+            assertFalse(doneState.discovering)
+            expectSideEffect(ConnectionsSideEffect.ShowMessage("Discovered local endpoint: 192.168.1.100"))
+        }
+    }
+
+    @Test
+    fun `discover local endpoints not found shows message`() = runTest {
+        val viewModel = createViewModel(
+            discoverResult = DiscoverLocalEndpointsResult.NotFound,
+        )
+        viewModel.test(this) {
+            expectInitialState()
+            viewModel.perform(ConnectionsAction.DiscoverLocalEndpoints)
+            val loadingState = awaitState()
+            assertTrue(loadingState.discovering)
+            val doneState = awaitState()
+            assertFalse(doneState.discovering)
+            expectSideEffect(ConnectionsSideEffect.ShowMessage("No local endpoint found"))
+        }
     }
 }

@@ -13,9 +13,10 @@ The Lava proxy advertises itself on the local network using **mDNS** (multicast 
 ### Discovery Flow
 
 1. **Proxy Advertises**: When the proxy server starts, it registers an mDNS service announcing its IP address and port.
-2. **App Scans**: When you open the Settings menu, the app starts a 5-second network scan.
-3. **Auto-Connect**: If a proxy is found and you are not already using a custom mirror, the app automatically adds it to your endpoints and opens the connection settings dialog.
-4. **Manual Selection**: You can always switch endpoints manually in the connection settings.
+2. **App Scans**: When you open the Settings menu, the app automatically starts a 5-second network scan.
+3. **Manual Refresh**: In the connection settings bottom sheet, tap the **refresh icon** (↻) next to the edit button to manually scan for local endpoints at any time.
+4. **Auto-Connect**: If a proxy is found and you are not already using a custom mirror, the app automatically adds it to your endpoints and opens the connection settings dialog.
+5. **Manual Selection**: You can always switch endpoints manually in the connection settings.
 
 ## Running a Local Proxy
 
@@ -50,7 +51,7 @@ The proxy listens on `0.0.0.0:8080` and advertises itself via mDNS.
 
 | Issue | Solution |
 |-------|----------|
-| Proxy not discovered | Ensure both devices are on the same network. Check firewall rules for mDNS (port 5353/UDP). |
+| Proxy not discovered | Tap the **refresh icon** in connection settings to trigger a manual scan. Ensure both devices are on the same network. Check firewall rules for mDNS (port 5353/UDP). |
 | Discovery is slow | mDNS can take a few seconds. The scan timeout is 5 seconds. |
 | Auto-connect didn't happen | If you already have a custom mirror configured, the app will not auto-switch. Manually select the discovered endpoint in connection settings. |
 | mDNS blocked on corporate networks | Some corporate networks block multicast. Use manual endpoint entry instead. |

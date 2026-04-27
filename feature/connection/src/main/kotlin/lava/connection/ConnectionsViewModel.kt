@@ -5,6 +5,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.collectLatest
 import lava.domain.model.endpoint.EndpointState
 import lava.domain.usecase.AddEndpointUseCase
+import lava.domain.usecase.DiscoverLocalEndpointsResult
+import lava.domain.usecase.DiscoverLocalEndpointsUseCase
 import lava.domain.usecase.ObserveEndpointsStatusUseCase
 import lava.domain.usecase.RemoveEndpointUseCase
 import lava.domain.usecase.SetEndpointUseCase
@@ -20,6 +22,7 @@ import javax.inject.Inject
 @HiltViewModel
 internal class ConnectionsViewModel @Inject constructor(
     private val addEndpointUseCase: AddEndpointUseCase,
+    private val discoverLocalEndpointsUseCase: DiscoverLocalEndpointsUseCase,
     private val removeEndpointUseCase: RemoveEndpointUseCase,
     private val setEndpointUseCase: SetEndpointUseCase,
     private val observeEndpointsStatusUseCase: ObserveEndpointsStatusUseCase,
@@ -32,6 +35,7 @@ internal class ConnectionsViewModel @Inject constructor(
     fun perform(action: ConnectionsAction) {
         when (action) {
             is ConnectionsAction.ConnectionItemClick -> onClickConnectionItem()
+            is ConnectionsAction.DiscoverLocalEndpoints -> onDiscoverLocalEndpoints()
             is ConnectionsAction.DoneClick -> onDoneClick()
             is ConnectionsAction.EditClick -> onEditClick()
             is ConnectionsAction.RemoveEndpoint -> onRemoveEndpoint(action.endpoint)
@@ -43,6 +47,34 @@ internal class ConnectionsViewModel @Inject constructor(
     private fun onDoneClick() = intent { reduce { state.copy(edit = false) } }
 
     private fun onEditClick() = intent { reduce { state.copy(edit = true) } }
+
+    private fun onDiscoverLocalEndpoints() = intent {
+        reduce { state.copy(discovering = true) }
+        when (val result = discoverLocalEndpointsUseCase()) {
+            is DiscoverLocalEndpointsResult.Discovered -> {
+                postSideEffect(
+                    ConnectionsSideEffect.ShowMessage(
+                        "Discovered local endpoint: ${result.endpoint.host}",
+                    ),
+                )
+            }
+            DiscoverLocalEndpointsResult.NotFound -> {
+                postSideEffect(
+                    ConnectionsSideEffect.ShowMessage(
+                        "No local endpoint found",
+                    ),
+                )
+            }
+            DiscoverLocalEndpointsResult.AlreadyConfigured -> {
+                postSideEffect(
+                    ConnectionsSideEffect.ShowMessage(
+                        "Local endpoint already added",
+                    ),
+                )
+            }
+        }
+        reduce { state.copy(discovering = false) }
+    }
 
     private fun observeConnections() = intent {
         observeEndpointsStatusUseCase().collectLatest { connections ->
