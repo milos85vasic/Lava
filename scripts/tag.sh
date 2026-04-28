@@ -346,8 +346,10 @@ fi
 # ----------------------------------------------------------------------
 log "----------------------------------------"
 log "Summary:"
+_label="created tag"
+$DRY_RUN && _label="would create tag"
 if (( ${#CREATED_TAGS[@]} > 0 )); then
-  for t in "${CREATED_TAGS[@]}"; do log "  created tag: $t"; done
+  for t in "${CREATED_TAGS[@]}"; do log "  $_label: $t"; done
 else
   log "  no new tags created"
 fi
