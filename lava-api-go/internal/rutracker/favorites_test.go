@@ -658,6 +658,99 @@ func TestRemoveFavorite_UpstreamSilentReject(t *testing.T) {
 	}
 }
 
+// TestRemoveFavorite_EmptyCookie_ErrUnauthorized — empty cookie
+// short-circuits before any upstream traffic. Mirror of the Add-side
+// TestAddFavorite_EmptyCookie_ErrUnauthorized; the Remove path's
+// `if cookie == ""` guard is structurally identical to Add's, but a
+// future refactor (e.g. extracting a shared pre-check helper) could
+// silently regress one branch without the other. This test pins the
+// Remove side specifically.
+func TestRemoveFavorite_EmptyCookie_ErrUnauthorized(t *testing.T) {
+	var hits int32
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		atomic.AddInt32(&hits, 1)
+	}))
+	defer srv.Close()
+
+	c := NewClient(srv.URL)
+	ok, err := c.RemoveFavorite(context.Background(), "t1", "")
+	if !errors.Is(err, ErrUnauthorized) {
+		t.Fatalf("RemoveFavorite err=%v want ErrUnauthorized", err)
+	}
+	if ok {
+		t.Errorf("RemoveFavorite: ok=true, want false on ErrUnauthorized")
+	}
+	if got := atomic.LoadInt32(&hits); got != 0 {
+		t.Errorf("server hits=%d want 0", got)
+	}
+}
+
+// TestRemoveFavorite_NotAuthorised_ErrUnauthorized — GET response has
+// no "logged-in-username" marker → ErrUnauthorized; the POST to
+// /bookmarks.php MUST NOT be reached. Mirror of the Add-side
+// not-authorised semantics; counter-asserts zero POST traffic so a
+// future refactor can't silently let an unauthenticated call through
+// to the bookmark mutation.
+func TestRemoveFavorite_NotAuthorised_ErrUnauthorized(t *testing.T) {
+	var postHits int32
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch {
+		case r.Method == http.MethodGet && r.URL.Path == "/index.php":
+			w.WriteHeader(http.StatusOK)
+			_, _ = w.Write([]byte("<html><body>guest page, no marker</body></html>"))
+		case r.Method == http.MethodPost && r.URL.Path == "/bookmarks.php":
+			atomic.AddInt32(&postHits, 1)
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer srv.Close()
+
+	c := NewClient(srv.URL)
+	ok, err := c.RemoveFavorite(context.Background(), "t1", "cookie=v")
+	if !errors.Is(err, ErrUnauthorized) {
+		t.Fatalf("RemoveFavorite err=%v want ErrUnauthorized", err)
+	}
+	if ok {
+		t.Errorf("RemoveFavorite: ok=true, want false on ErrUnauthorized")
+	}
+	if got := atomic.LoadInt32(&postHits); got != 0 {
+		t.Errorf("/bookmarks.php POST hits=%d want 0", got)
+	}
+}
+
+// TestRemoveFavorite_FormTokenMissing_ErrUnauthorized — GET response
+// has the marker but no form_token; RemoveFavorite must abort before
+// POST. Mirror of the Add-side
+// TestAddFavorite_FormTokenMissing_ErrUnauthorized.
+func TestRemoveFavorite_FormTokenMissing_ErrUnauthorized(t *testing.T) {
+	var postHits int32
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch {
+		case r.Method == http.MethodGet && r.URL.Path == "/index.php":
+			w.WriteHeader(http.StatusOK)
+			_, _ = w.Write([]byte("<div id='logged-in-username'>milos</div>"))
+		case r.Method == http.MethodPost && r.URL.Path == "/bookmarks.php":
+			atomic.AddInt32(&postHits, 1)
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer srv.Close()
+
+	c := NewClient(srv.URL)
+	ok, err := c.RemoveFavorite(context.Background(), "t1", "cookie=v")
+	if !errors.Is(err, ErrUnauthorized) {
+		t.Fatalf("RemoveFavorite err=%v want ErrUnauthorized", err)
+	}
+	if ok {
+		t.Errorf("RemoveFavorite: ok=true, want false on ErrUnauthorized")
+	}
+	if got := atomic.LoadInt32(&postHits); got != 0 {
+		t.Errorf("/bookmarks.php POST hits=%d want 0", got)
+	}
+}
+
 // TestFavoritesPagePath_StartParam is a small unit-level pin on the
 // page → path mapping. Page 1 omits ?start= entirely; page 2 emits
 // start=50; page 3 emits start=100. Wire-equivalent to Kotlin's
