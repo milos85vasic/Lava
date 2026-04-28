@@ -105,6 +105,50 @@ func (c *Client) Fetch(ctx context.Context, path, cookie string) ([]byte, int, e
 	return body, status, nil
 }
 
+// FetchWithHeaders behaves like Fetch but additionally returns the upstream
+// response headers. Used by GET /download/{id} which forwards the
+// rutracker.org Content-Disposition (filename) and Content-Type
+// (application/x-bittorrent) verbatim to the API client. Mirrors Fetch's
+// breaker semantics: 5xx responses still trip the breaker, transient I/O
+// errors still count as breaker-relevant failures.
+func (c *Client) FetchWithHeaders(ctx context.Context, path, cookie string) ([]byte, int, http.Header, error) {
+	var (
+		body    []byte
+		status  int
+		headers http.Header
+	)
+	err := c.breaker.Execute(func() error {
+		req, err := http.NewRequestWithContext(ctx, http.MethodGet, c.base+path, nil)
+		if err != nil {
+			return err
+		}
+		if cookie != "" {
+			req.Header.Set("Cookie", cookie)
+		}
+		resp, err := c.http.Do(req)
+		if err != nil {
+			return err
+		}
+		defer func() { _ = resp.Body.Close() }()
+		b, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return err
+		}
+		body = b
+		status = resp.StatusCode
+		headers = resp.Header.Clone()
+		// Treat 5xx as breaker-relevant errors — same policy as Fetch.
+		if resp.StatusCode >= 500 {
+			return fmt.Errorf("rutracker upstream %d", resp.StatusCode)
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, 0, nil, err
+	}
+	return body, status, headers, nil
+}
+
 // PostForm performs a POST against base+path with the given form values
 // and cookie value (may be empty). Behaves like Fetch — wrapped by the
 // same circuit breaker, 5xx still trips the breaker, transient I/O

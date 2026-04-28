@@ -173,11 +173,13 @@ func (c *Client) GetTopicPage(ctx context.Context, id string, page *int, cookie 
 // ForumTopicDto discriminated union — Topic, Torrent, or CommentsPage.
 //
 // Detection: if the page body contains the literal substring "magnet:?",
-// we are looking at a torrent (the OP carries the magnet link). The
-// torrent variant is owned by Task 6.6 (ParseTorrentUseCase port). For
-// 6.4, the dispatcher returns a partial ForumTopicDtoTopic populated
-// from the topic-page parser's identification fields. Task 6.6 will
-// upgrade this branch to the full Torrent variant.
+// we are looking at a torrent (the OP carries the magnet link) and we
+// dispatch to ParseTorrent for the full TorrentDto shape (id, title,
+// author, category, seeds, leeches, status, size, magnetLink,
+// description). Otherwise we dispatch to ParseCommentsPage.
+//
+// Task 6.6 upgraded the magnet branch from the Task 6.4 partial-Topic
+// stub to the full Torrent variant — see torrent.go's ParseTorrent.
 func (c *Client) GetTopic(ctx context.Context, id string, page *int, cookie string) (*gen.ForumTopicDto, error) {
 	body, err := c.fetchTopic(ctx, id, page, cookie)
 	if err != nil {
@@ -186,24 +188,12 @@ func (c *Client) GetTopic(ctx context.Context, id string, page *int, cookie stri
 
 	out := &gen.ForumTopicDto{}
 	if bytes.Contains(body, []byte("magnet:?")) {
-		// TODO(SP-2 Task 6.6): replace this partial Topic-shape stub with
-		// the full ParseTorrentUseCase result. For now the dispatcher
-		// signals "this is a torrent" by populating the topic-shape
-		// identification fields from the topic-page parser; downstream
-		// callers that need the magnet/seeds/etc. should use /topic2.
-		page, perr := ParseTopicPage(body)
+		torrent, perr := ParseTorrent(body)
 		if perr != nil {
 			return nil, perr
 		}
-		topicVariant := gen.ForumTopicDtoTopic{
-			Id:       page.Id,
-			Title:    page.Title,
-			Author:   page.Author,
-			Category: page.Category,
-			Type:     gen.Topic,
-		}
-		if err := out.FromForumTopicDtoTopic(topicVariant); err != nil {
-			return nil, fmt.Errorf("rutracker: marshal Topic variant: %w", err)
+		if err := out.FromForumTopicDtoTorrent(*torrent); err != nil {
+			return nil, fmt.Errorf("rutracker: marshal Torrent variant: %w", err)
 		}
 		return out, nil
 	}

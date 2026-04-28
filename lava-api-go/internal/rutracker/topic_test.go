@@ -150,7 +150,17 @@ func TestParseTopicPage_SizeFromLoggedIn(t *testing.T) {
 	}
 }
 
-func TestGetTopic_DispatchTorrentToPartialTopic(t *testing.T) {
+// TestGetTopic_DispatchTorrentToFullTorrent verifies that the /topic/{id}
+// dispatcher returns the FULL ForumTopicDtoTorrent shape (id, title,
+// author, category, magnet, status, seeds, leeches, size, description)
+// when the page body contains a magnet link — the Task 6.6 upgrade of
+// the Task 6.4 partial-Topic stub.
+//
+// Sixth Law clause 1: same surface the user touches — the production
+// dispatcher (no shortcut into ParseTorrent), via the production
+// (*Client).Fetch path, against an httptest.Server returning the same
+// HTML rutracker.org would.
+func TestGetTopic_DispatchTorrentToFullTorrent(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		_, _ = w.Write(loadTopicFixture(t, "topic_torrent.html"))
@@ -168,18 +178,34 @@ func TestGetTopic_DispatchTorrentToPartialTopic(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Discriminator: %v", err)
 	}
-	if d != "Topic" {
-		t.Fatalf("discriminator: got %q, want \"Topic\" (Task 6.4 stub for the torrent branch)", d)
+	if d != "Torrent" {
+		t.Fatalf("discriminator: got %q, want \"Torrent\" (Task 6.6 upgrade — magnet:? branch now returns full TorrentDto)", d)
 	}
-	topic, err := out.AsForumTopicDtoTopic()
+	torrent, err := out.AsForumTopicDtoTorrent()
 	if err != nil {
-		t.Fatalf("AsForumTopicDtoTopic: %v", err)
+		t.Fatalf("AsForumTopicDtoTorrent: %v", err)
 	}
-	if topic.Id != "42" {
-		t.Errorf("Id: got %q, want \"42\"", topic.Id)
+	if torrent.Id != "42" {
+		t.Errorf("Id: got %q, want \"42\"", torrent.Id)
 	}
-	if topic.Title != "Movie" {
-		t.Errorf("Title: got %q, want \"Movie\"", topic.Title)
+	if torrent.Title != "Movie" {
+		t.Errorf("Title: got %q, want \"Movie\" (getTitle MUST strip [Drama] and [1080p])", torrent.Title)
+	}
+	if torrent.Author == nil || torrent.Author.Name != "uploader" {
+		t.Errorf("Author: got %v, want Name=uploader", torrent.Author)
+	}
+	if torrent.MagnetLink == nil || !strings.HasPrefix(*torrent.MagnetLink, "magnet:?") {
+		gotML := "<nil>"
+		if torrent.MagnetLink != nil {
+			gotML = *torrent.MagnetLink
+		}
+		t.Errorf("MagnetLink: got %q, want magnet:? prefix", gotML)
+	}
+	if torrent.Description == nil {
+		t.Fatal("Description: nil; expected non-nil for full TorrentDto")
+	}
+	if len(torrent.Description.Children) == 0 {
+		t.Errorf("Description.Children: empty; expected at least 1 element from the OP .post_body")
 	}
 }
 

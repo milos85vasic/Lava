@@ -1,0 +1,39 @@
+<!-- torrent_no_author.html: empty .nick, everything else populated. ParseTorrent MUST emit author=nil. -->
+<!DOCTYPE html>
+<html>
+<head><title>RuTracker - No author</title></head>
+<body>
+<span id="logged-in-username">testUser</span>
+<a id="topic-title" href="viewtopic.php?t=55">Anonymous Upload</a>
+<div class="nav w100 pad_2">
+  <a href="index.php">Root</a>
+  <a href="viewforum.php?f=702">Misc</a>
+</div>
+
+<table class="forumline dl_list">
+  <tbody>
+    <tr>
+      <td class="seed"><b>1</b></td>
+      <td class="leech"><b>0</b></td>
+    </tr>
+  </tbody>
+</table>
+
+<span id="tor-status-resp"><span class="tor-approved">approved</span></span>
+<span id="tor-size-humn">700 MB</span>
+
+<a class="magnet-link" href="magnet:?xt=urn:btih:abcdef">magnet</a>
+
+<table>
+  <tbody id="post55">
+    <tr>
+      <td>
+        <span class="poster_btn"><a class="txtb" href="profile.php?mode=viewprofile&amp;u=12">profile</a></span>
+        <span class="nick"></span>
+        <div class="post_body" id="p-1">Body without author</div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</body>
+</html>
