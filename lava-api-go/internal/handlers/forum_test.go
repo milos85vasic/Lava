@@ -156,6 +156,18 @@ type fakeScraper struct {
 	lastAddCommentCookie  string
 	addCommentResult      bool
 	addCommentErr         error
+
+	torrentCalls    int
+	lastTorrentID   string
+	lastTorrentCk   string
+	torrentReturn   *gen.ForumTopicDtoTorrent
+	torrentErr      error
+
+	torrentFileCalls  int
+	lastTorrentFileID string
+	lastTorrentFileCk string
+	torrentFileReturn *rutracker.TorrentFile
+	torrentFileErr    error
 }
 
 func (f *fakeScraper) GetForum(_ context.Context, cookie string) (*gen.ForumDto, error) {
@@ -296,6 +308,35 @@ func (f *fakeScraper) AddComment(_ context.Context, topicID, message, cookie str
 	f.lastAddCommentMessage = message
 	f.lastAddCommentCookie = cookie
 	r, e := f.addCommentResult, f.addCommentErr
+	f.mu.Unlock()
+	return r, e
+}
+
+// GetTorrent records (id, cookie) so torrent_test.go can assert the
+// path-param id and the upstream-cookie pass-through. torrentReturn /
+// torrentErr are programmable so tests cover happy-path, the four
+// writeUpstreamError sentinel branches (NotFound / Forbidden /
+// Unauthorized / CircuitOpen), and the default-→502 branch.
+func (f *fakeScraper) GetTorrent(_ context.Context, id, cookie string) (*gen.ForumTopicDtoTorrent, error) {
+	f.mu.Lock()
+	f.torrentCalls++
+	f.lastTorrentID = id
+	f.lastTorrentCk = cookie
+	r, e := f.torrentReturn, f.torrentErr
+	f.mu.Unlock()
+	return r, e
+}
+
+// GetTorrentFile records (id, cookie) and returns the programmed
+// *TorrentFile / error pair. torrent_test.go uses torrentFileCalls to
+// pin the spec §6 "never cached at the API tier" rule for /download/{id}
+// — two GETs MUST produce two scraper calls regardless of any cache.
+func (f *fakeScraper) GetTorrentFile(_ context.Context, id, cookie string) (*rutracker.TorrentFile, error) {
+	f.mu.Lock()
+	f.torrentFileCalls++
+	f.lastTorrentFileID = id
+	f.lastTorrentFileCk = cookie
+	r, e := f.torrentFileReturn, f.torrentFileErr
 	f.mu.Unlock()
 	return r, e
 }

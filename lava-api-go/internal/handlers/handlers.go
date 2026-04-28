@@ -59,7 +59,9 @@ type ScraperClient interface {
 	GetTopicPage(ctx context.Context, id string, page *int, cookie string) (*gen.TopicPageDto, error)
 	GetCommentsPage(ctx context.Context, id string, page *int, cookie string) (*gen.CommentsPageDto, error)
 	AddComment(ctx context.Context, topicID, message, cookie string) (bool, error)
-	// Phase 7.5-7.7 will append more methods here.
+	GetTorrent(ctx context.Context, id, cookie string) (*gen.ForumTopicDtoTorrent, error)
+	GetTorrentFile(ctx context.Context, id, cookie string) (*rutracker.TorrentFile, error)
+	// Phase 7.6-7.7 will append more methods here.
 }
 
 // Compile-time assertion that the production scraper type satisfies the
@@ -109,7 +111,11 @@ func Register(router *gin.Engine, deps *Deps) {
 
 	comments := NewCommentsAddHandler(deps)
 	router.POST("/comments/:id/add", comments.AddComment)
-	// Phase 7.5-7.7 will append more route registrations here.
+
+	torrent := NewTorrentHandler(deps)
+	router.GET("/torrent/:id", torrent.GetTorrent)
+	router.GET("/download/:id", torrent.GetDownload)
+	// Phase 7.6-7.7 will append more route registrations here.
 }
 
 // writeUpstreamError maps the rutracker package's sentinel errors to
