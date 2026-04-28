@@ -20,7 +20,44 @@ import (
 	"time"
 
 	"digital.vasic.recovery/pkg/breaker"
+	"golang.org/x/net/html/charset"
 )
+
+// readBodyDecoded reads resp.Body and transcodes it from the upstream's
+// declared charset to UTF-8. rutracker.org serves
+// `text/html; charset=Windows-1251` (and a `<meta charset="Windows-1251">`
+// inside the HTML); passing the raw bytes to goquery — which assumes
+// UTF-8 — produces mojibake on Cyrillic content. This was caught by the
+// Phase 14 cross-backend parity test against the Kotlin Ktor proxy
+// (which decodes via its HttpClient's `bodyAsText()` charset path):
+//   ktor: "VPN-сервисы"   (correctly decoded UTF-8 of Russian text)
+//   go:   "VPN-�������"   (windows-1251 bytes interpreted as UTF-8)
+//
+// charset.NewReader sniffs the Content-Type header AND any
+// <meta charset="..."> tag before returning a UTF-8-emitting io.Reader.
+// For non-HTML responses (e.g. /dl.php binary) the charset.NewReader
+// passes bytes through unchanged.
+func readBodyDecoded(resp *http.Response) ([]byte, error) {
+	ct := resp.Header.Get("Content-Type")
+	// Only transcode text-ish payloads. Binary endpoints (notably
+	// /dl.php's application/x-bittorrent) MUST pass through verbatim —
+	// running charset detection on a torrent file would either be a
+	// no-op (best case) or corrupt the wire bytes (worst case).
+	mt := strings.ToLower(strings.TrimSpace(strings.SplitN(ct, ";", 2)[0]))
+	textish := strings.HasPrefix(mt, "text/") || mt == "application/xhtml+xml" || mt == "application/xml" || mt == "application/json"
+	if !textish {
+		// Empty Content-Type, binary payload, or anything goquery wouldn't
+		// parse: pass through. charset.NewReader on an empty body returns
+		// EOF instead of (nil, nil), which would surface as a spurious
+		// error to callers like /dl.php (404 path).
+		return io.ReadAll(resp.Body)
+	}
+	r, err := charset.NewReader(resp.Body, ct)
+	if err != nil {
+		return nil, err
+	}
+	return io.ReadAll(r)
+}
 
 // ErrCircuitOpen is returned when the breaker is in OPEN state and the
 // request was not attempted. Exposed as a sentinel so callers can map it
@@ -97,7 +134,7 @@ func (c *Client) Fetch(ctx context.Context, path, cookie string) ([]byte, int, e
 			return err
 		}
 		defer func() { _ = resp.Body.Close() }()
-		b, err := io.ReadAll(resp.Body)
+		b, err := readBodyDecoded(resp)
 		if err != nil {
 			return err
 		}
@@ -142,7 +179,7 @@ func (c *Client) FetchWithHeaders(ctx context.Context, path, cookie string) ([]b
 			return err
 		}
 		defer func() { _ = resp.Body.Close() }()
-		b, err := io.ReadAll(resp.Body)
+		b, err := readBodyDecoded(resp)
 		if err != nil {
 			return err
 		}
@@ -188,7 +225,7 @@ func (c *Client) PostFormWithHeaders(ctx context.Context, path string, form url.
 			return err
 		}
 		defer func() { _ = resp.Body.Close() }()
-		b, err := io.ReadAll(resp.Body)
+		b, err := readBodyDecoded(resp)
 		if err != nil {
 			return err
 		}
@@ -231,7 +268,7 @@ func (c *Client) GetURL(ctx context.Context, fullURL, cookie string) ([]byte, in
 			return err
 		}
 		defer func() { _ = resp.Body.Close() }()
-		b, err := io.ReadAll(resp.Body)
+		b, err := readBodyDecoded(resp)
 		if err != nil {
 			return err
 		}
@@ -278,7 +315,7 @@ func (c *Client) PostForm(ctx context.Context, path string, form url.Values, coo
 			return err
 		}
 		defer func() { _ = resp.Body.Close() }()
-		b, err := io.ReadAll(resp.Body)
+		b, err := readBodyDecoded(resp)
 		if err != nil {
 			return err
 		}

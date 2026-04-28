@@ -40,6 +40,7 @@ package parity
 
 import (
 	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -52,8 +53,29 @@ import (
 	"testing"
 	"time"
 
+	"github.com/quic-go/quic-go/http3"
 	"gopkg.in/yaml.v3"
 )
+
+// transportFor returns the right http.RoundTripper for the parity backend
+// at u. The Go API serves HTTP/3 only (per spec §8.1 the TCP/HTTP-2
+// fallback is "fallback" — currently not enabled in the listener; only
+// UDP/QUIC is bound), so HTTPS targets get a quic-go http3.Transport.
+// HTTP targets (the legacy Ktor proxy on :8080 plain) keep the stdlib
+// default. Self-signed certs are accepted for both via InsecureSkipVerify.
+func transportFor(u *url.URL) http.RoundTripper {
+	switch u.Scheme {
+	case "https":
+		return &http3.Transport{
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: true,
+				NextProtos:         []string{"h3"},
+			},
+		}
+	default:
+		return &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: true}}
+	}
+}
 
 // ComparisonMode selects how the response body is compared between the two
 // backends. Three modes are supported:
@@ -178,7 +200,7 @@ func runRequest(t *testing.T, baseURL string, c ParityCase) (status int, body []
 	for k, v := range c.Headers {
 		req.Header.Set(k, v)
 	}
-	client := &http.Client{Timeout: requestTimeout}
+	client := &http.Client{Timeout: requestTimeout, Transport: transportFor(u)}
 	resp, err := client.Do(req)
 	if err != nil {
 		t.Fatalf("request %s %s: %v", c.Method, u.String(), err)
