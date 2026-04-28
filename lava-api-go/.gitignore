@@ -1,0 +1,11 @@
+bin/
+*.test
+*.out
+coverage.*
+docker/tls/*.crt
+docker/tls/*.key
+.idea/
+.vscode/
+*.swp
+.DS_Store
+testdata/fuzz/.cache/
