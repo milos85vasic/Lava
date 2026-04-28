@@ -36,6 +36,18 @@ var ErrCircuitOpen = errors.New("rutracker: circuit breaker OPEN")
 // VerifyAuthorisedUseCase and WithFormTokenUseCase.
 var ErrUnauthorized = errors.New("rutracker: unauthorized")
 
+// ErrNoData is returned by Login when the rutracker login response carries
+// neither a Set-Cookie token nor the login-form HTML — i.e. the upstream
+// is reachable but said something the Kotlin LoginUseCase doesn't know how
+// to interpret. Maps to Kotlin's `throw NoData` branch in LoginUseCase.
+var ErrNoData = errors.New("rutracker: login response contained neither token nor login form")
+
+// ErrUnknown is returned by Login when the rutracker login response carries
+// the login form (so we know we got there) but the embedded captcha cannot
+// be parsed AND the response does not contain "неверный пароль". Maps to
+// Kotlin's `throw Unknown` branch in LoginUseCase.
+var ErrUnknown = errors.New("rutracker: login form present but neither captcha parseable nor wrong-credits indicated")
+
 // Client is the rutracker.org HTTP client wrapped with a circuit breaker.
 type Client struct {
 	base    string
@@ -138,6 +150,94 @@ func (c *Client) FetchWithHeaders(ctx context.Context, path, cookie string) ([]b
 		status = resp.StatusCode
 		headers = resp.Header.Clone()
 		// Treat 5xx as breaker-relevant errors — same policy as Fetch.
+		if resp.StatusCode >= 500 {
+			return fmt.Errorf("rutracker upstream %d", resp.StatusCode)
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, 0, nil, err
+	}
+	return body, status, headers, nil
+}
+
+// PostFormWithHeaders behaves like PostForm but additionally returns the
+// upstream response headers. Used by POST /login.php which needs the
+// Set-Cookie headers (the auth token) AND the response body (the login
+// form HTML if the credentials were rejected). Mirrors PostForm's
+// breaker semantics: 5xx responses still trip the breaker, transient I/O
+// errors still count as breaker-relevant failures.
+func (c *Client) PostFormWithHeaders(ctx context.Context, path string, form url.Values, cookie string) ([]byte, int, http.Header, error) {
+	var (
+		body    []byte
+		status  int
+		headers http.Header
+	)
+	encoded := form.Encode()
+	err := c.breaker.Execute(func() error {
+		req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.base+path, strings.NewReader(encoded))
+		if err != nil {
+			return err
+		}
+		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+		if cookie != "" {
+			req.Header.Set("Cookie", cookie)
+		}
+		resp, err := c.http.Do(req)
+		if err != nil {
+			return err
+		}
+		defer func() { _ = resp.Body.Close() }()
+		b, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return err
+		}
+		body = b
+		status = resp.StatusCode
+		headers = resp.Header.Clone()
+		// Treat 5xx as breaker-relevant errors — same policy as PostForm.
+		if resp.StatusCode >= 500 {
+			return fmt.Errorf("rutracker upstream %d", resp.StatusCode)
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, 0, nil, err
+	}
+	return body, status, headers, nil
+}
+
+// GetURL fetches an absolute URL (NOT prefixed with c.base) wrapped by the
+// same circuit breaker as Fetch. Used for resources rutracker hosts on
+// auxiliary domains — most notably the captcha images on static.t-ru.org
+// referenced from the login form. Cookie may be empty (captcha images
+// are public per rutracker's design).
+func (c *Client) GetURL(ctx context.Context, fullURL, cookie string) ([]byte, int, http.Header, error) {
+	var (
+		body    []byte
+		status  int
+		headers http.Header
+	)
+	err := c.breaker.Execute(func() error {
+		req, err := http.NewRequestWithContext(ctx, http.MethodGet, fullURL, nil)
+		if err != nil {
+			return err
+		}
+		if cookie != "" {
+			req.Header.Set("Cookie", cookie)
+		}
+		resp, err := c.http.Do(req)
+		if err != nil {
+			return err
+		}
+		defer func() { _ = resp.Body.Close() }()
+		b, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return err
+		}
+		body = b
+		status = resp.StatusCode
+		headers = resp.Header.Clone()
 		if resp.StatusCode >= 500 {
 			return fmt.Errorf("rutracker upstream %d", resp.StatusCode)
 		}
