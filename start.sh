@@ -87,6 +87,25 @@ if [ ! -f "$CONTAINERS_BIN" ]; then
     cd "$SCRIPT_DIR"
 fi
 
+# Provision TLS material for lava-api-go's HTTPS/HTTP3 listener if absent.
+# Skipped for the legacy-only profile because the Ktor proxy doesn't need it.
+if [ "$PROFILE" != "legacy" ]; then
+    if [ ! -s "$SCRIPT_DIR/lava-api-go/docker/tls/server.crt" ] || [ ! -s "$SCRIPT_DIR/lava-api-go/docker/tls/server.key" ]; then
+        bash "$SCRIPT_DIR/lava-api-go/scripts/gen-cert.sh"
+    fi
+fi
+
+# LAVA_PG_PASSWORD is required by the api-go / both profiles' compose stanzas
+# (see docker-compose.yml). Provide a deterministic LAN-only default if the
+# operator hasn't set one in .env. Anything more sensitive than a LAN
+# deployment should override via .env.
+if [ "$PROFILE" != "legacy" ]; then
+    if [ -f "$SCRIPT_DIR/.env" ] && ! grep -qE '^LAVA_PG_PASSWORD=' "$SCRIPT_DIR/.env"; then
+        echo "LAVA_PG_PASSWORD=l@vAfl0wZ-pg" >> "$SCRIPT_DIR/.env"
+        echo "[start.sh] appended default LAVA_PG_PASSWORD to .env (LAN-deployment use)"
+    fi
+fi
+
 echo "========================================"
 echo "  Lava Container Boot"
 echo "  profile=$PROFILE observability=$WITH_OBSERVABILITY dev-docs=$WITH_DEV_DOCS"
