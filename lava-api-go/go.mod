@@ -28,6 +28,7 @@ require (
 	digital.vasic.cache v0.0.0-00010101000000-000000000000
 	digital.vasic.http3 v0.0.0-00010101000000-000000000000
 	digital.vasic.observability v0.0.0-00010101000000-000000000000
+	digital.vasic.ratelimiter v0.0.0-00010101000000-000000000000
 	github.com/getkin/kin-openapi v0.133.0
 	github.com/gin-gonic/gin v1.12.0
 	github.com/oapi-codegen/runtime v1.4.0
