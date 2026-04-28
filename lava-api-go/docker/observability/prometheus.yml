@@ -1,0 +1,28 @@
+# Prometheus scrape config for the Lava observability stack
+# (SP-2 Phase 11 / Task 11.2).
+#
+# `host.containers.internal` is the podman/docker-bridge pseudo-host that
+# resolves to the container host's IP from inside a bridged container.
+# lava-api-go runs with network_mode: host (its private metrics listener is
+# bound to 127.0.0.1:9091 on the host), so the bridged Prometheus container
+# reaches it via this name on port 9091.
+#
+# If running outside podman/docker (or on a runtime that doesn't inject this
+# alias), substitute the host's LAN IP via `extra_hosts:` in compose.
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: lava-api-go
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['host.containers.internal:9091']
+        labels:
+          service: lava-api-go
+  - job_name: prometheus
+    static_configs:
+      - targets: ['localhost:9090']
+        labels:
+          service: prometheus

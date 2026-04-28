@@ -1,0 +1,27 @@
+# Grafana datasource provisioning (SP-2 Phase 11 / Task 11.2).
+# Three datasources auto-loaded at Grafana startup.
+
+apiVersion: 1
+
+datasources:
+  - name: Prometheus
+    uid: prometheus
+    type: prometheus
+    access: proxy
+    url: http://lava-prometheus:9090
+    isDefault: true
+    editable: false
+
+  - name: Loki
+    uid: loki
+    type: loki
+    access: proxy
+    url: http://lava-loki:3100
+    editable: false
+
+  - name: Tempo
+    uid: tempo
+    type: tempo
+    access: proxy
+    url: http://lava-tempo:3200
+    editable: false

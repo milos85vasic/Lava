@@ -1,0 +1,22 @@
+# Promtail config (SP-2 Phase 11 / Task 11.2).
+# Tails everything under /var/log (the bind-mount declared in
+# docker-compose.yml) and pushes to Loki on the lava-net bridge.
+
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://lava-loki:3100/loki/api/v1/push
+
+scrape_configs:
+  - job_name: varlog
+    static_configs:
+      - targets: [localhost]
+        labels:
+          job: varlogs
+          host: lava-host
+          __path__: /var/log/**/*.log

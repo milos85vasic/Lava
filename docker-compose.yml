@@ -1,20 +1,166 @@
+# Lava root docker-compose file (SP-2 Phase 11 / Task 11.1).
+#
+# Five profiles:
+#   api-go         (default) — lava-postgres + lava-migrate + lava-api-go
+#   legacy                   — legacy Ktor proxy only
+#   both                     — api-go + legacy (Postgres + migrate + Go API + Ktor)
+#   observability            — Prometheus + Loki + Promtail + Tempo + Grafana
+#   dev-docs                 — Swagger UI mounting api/openapi.yaml
+#
+# lava-api-go and lava-proxy use network_mode: host so JmDNS / mDNS
+# advertisements reach the LAN; Postgres + observability containers use the
+# lava-net bridge.
+#
+# Observability container images are pinned to specific LTS tags rather than
+# :latest so reproduction across machines is deterministic. The pins are an
+# adjustment over the spec sketch (which used :latest) — see
+# docs/superpowers/specs/2026-04-28-sp2-go-api-migration-design.md §12.1.
+#
+# Verified parse: `docker compose -f docker-compose.yml config --quiet`.
+#
+# DO NOT bring this file up directly — orchestration is owned by
+# tools/lava-containers/cmd/lava-containers (see start.sh / stop.sh).
+
 services:
+
+  # Profile: api-go (default) -----------------------------------------------
+  lava-postgres:
+    profiles: [api-go, both]
+    image: postgres:16-alpine
+    container_name: lava-postgres
+    environment:
+      POSTGRES_DB: lava_api
+      POSTGRES_USER: lava
+      POSTGRES_PASSWORD: ${LAVA_PG_PASSWORD:?required}
+    networks: [lava-net]
+    ports: ["127.0.0.1:5432:5432"]
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "lava", "-d", "lava_api"]
+      interval: 5s
+      retries: 12
+
+  lava-migrate:
+    profiles: [api-go, both]
+    container_name: lava-migrate
+    build:
+      context: ./lava-api-go
+      target: migrate
+    networks: [lava-net]
+    depends_on:
+      lava-postgres: { condition: service_healthy }
+    environment:
+      LAVA_API_PG_URL: "postgres://lava:${LAVA_PG_PASSWORD}@lava-postgres:5432/lava_api?sslmode=disable"
+    restart: "no"
+
+  lava-api-go:
+    profiles: [api-go, both]
+    container_name: lava-api-go
+    build:
+      context: ./lava-api-go
+      target: runtime
+    network_mode: host                     # mDNS requires host net
+    depends_on:
+      lava-migrate: { condition: service_completed_successfully }
+    environment:
+      LAVA_API_PG_URL: "postgres://lava:${LAVA_PG_PASSWORD}@127.0.0.1:5432/lava_api?sslmode=disable"
+      LAVA_API_LISTEN: ":8443"                        # public LAN listener (HTTP/3 + HTTP/2)
+      LAVA_API_METRICS_LISTEN: "127.0.0.1:9091"       # private metrics listener
+      LAVA_API_TLS_CERT: /etc/lava-api-go/tls/server.crt
+      LAVA_API_TLS_KEY:  /etc/lava-api-go/tls/server.key
+      LAVA_API_OTLP_ENDPOINT: "http://127.0.0.1:4318" # tempo OTLP HTTP receiver (published from bridge)
+    volumes:
+      - ./lava-api-go/docker/tls:/etc/lava-api-go/tls:ro
+    healthcheck:
+      test: ["CMD", "/usr/local/bin/healthprobe", "--http3", "https://localhost:8443/health"]
+      interval: 10s
+      retries: 6
+
+  # Profile: legacy ---------------------------------------------------------
   lava-proxy:
+    profiles: [legacy, both]
+    container_name: lava-proxy
     build:
       context: ./proxy
       dockerfile: Dockerfile
     image: digital.vasic.lava.api:latest
-    container_name: lava-proxy
-    # Host networking is required for mDNS discovery to work.
-    # The proxy must broadcast on the LAN so Android clients can discover it.
     network_mode: host
     restart: unless-stopped
     environment:
-      - JAVA_OPTS=-Xmx512m
-      - ADVERTISE_HOST=${ADVERTISE_HOST:-}
+      JAVA_OPTS: "-Xmx512m"
+      ADVERTISE_HOST: "${ADVERTISE_HOST:-}"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/"]
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 10s
+
+  # Profile: observability --------------------------------------------------
+  lava-prometheus:
+    profiles: [observability]
+    image: prom/prometheus:v2.51.0
+    container_name: lava-prometheus
+    networks: [lava-net]
+    ports: ["127.0.0.1:9090:9090"]
+    volumes:
+      - "./lava-api-go/docker/observability/prometheus.yml:/etc/prometheus/prometheus.yml:ro"
+
+  lava-loki:
+    profiles: [observability]
+    image: grafana/loki:2.9.6
+    container_name: lava-loki
+    networks: [lava-net]
+    ports: ["127.0.0.1:3100:3100"]
+    volumes:
+      - "./lava-api-go/docker/observability/loki-config.yaml:/etc/loki/local-config.yaml:ro"
+
+  lava-promtail:
+    profiles: [observability]
+    image: grafana/promtail:2.9.6
+    container_name: lava-promtail
+    networks: [lava-net]
+    volumes:
+      - "/var/log:/var/log:ro"
+      - "./lava-api-go/docker/observability/promtail-config.yaml:/etc/promtail/config.yml:ro"
+    depends_on: [lava-loki]
+
+  lava-tempo:
+    profiles: [observability]
+    image: grafana/tempo:2.4.0
+    container_name: lava-tempo
+    networks: [lava-net]
+    ports:
+      - "127.0.0.1:3200:3200"   # query / API
+      - "127.0.0.1:4318:4318"   # OTLP HTTP receiver — lava-api-go (host net) ships traces here
+    volumes:
+      - "./lava-api-go/docker/observability/tempo.yaml:/etc/tempo.yaml:ro"
+    command: ["-config.file=/etc/tempo.yaml"]
+
+  lava-grafana:
+    profiles: [observability]
+    image: grafana/grafana:10.4.2
+    container_name: lava-grafana
+    networks: [lava-net]
+    ports: ["127.0.0.1:3000:3000"]
+    environment:
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: "Viewer"
+    volumes:
+      - "./lava-api-go/docker/observability/grafana/provisioning:/etc/grafana/provisioning:ro"
+      - "./lava-api-go/docker/observability/grafana/dashboards:/var/lib/grafana/dashboards:ro"
+    depends_on: [lava-prometheus, lava-loki, lava-tempo]
+
+  # Profile: dev-docs -------------------------------------------------------
+  lava-swagger-ui:
+    profiles: [dev-docs]
+    image: swaggerapi/swagger-ui:v5.17.14
+    container_name: lava-swagger-ui
+    networks: [lava-net]
+    ports: ["127.0.0.1:8081:8080"]
+    environment:
+      SWAGGER_JSON: /openapi.yaml
+    volumes:
+      - "./lava-api-go/api/openapi.yaml:/openapi.yaml:ro"
+
+networks:
+  lava-net: {}

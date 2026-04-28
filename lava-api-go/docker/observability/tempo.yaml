@@ -1,0 +1,35 @@
+# Tempo single-binary config (SP-2 Phase 11 / Task 11.2).
+# OTLP HTTP receiver on :4318 (lava-api-go ships traces there); local
+# filesystem storage; 24h retention.
+
+server:
+  http_listen_port: 3200
+  grpc_listen_port: 9095
+
+distributor:
+  receivers:
+    otlp:
+      protocols:
+        http:
+          endpoint: 0.0.0.0:4318
+        grpc:
+          endpoint: 0.0.0.0:4317
+
+ingester:
+  trace_idle_period: 10s
+  max_block_duration: 5m
+
+compactor:
+  compaction:
+    block_retention: 24h            # 24-hour retention
+
+storage:
+  trace:
+    backend: local
+    wal:
+      path: /tmp/tempo/wal
+    local:
+      path: /tmp/tempo/blocks
+
+usage_report:
+  reporting_enabled: false

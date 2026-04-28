@@ -1,0 +1,16 @@
+# Grafana dashboard provisioning (SP-2 Phase 11 / Task 11.2).
+# Loads any *.json under /var/lib/grafana/dashboards on Grafana startup.
+
+apiVersion: 1
+
+providers:
+  - name: lava-dashboards
+    orgId: 1
+    folder: Lava
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 30
+    allowUiUpdates: false
+    options:
+      path: /var/lib/grafana/dashboards
+      foldersFromFilesStructure: false
