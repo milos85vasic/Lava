@@ -70,7 +70,7 @@ func NewAuthHandler(deps *Deps) *AuthHandler {
 //	Scraper success → 200 OK + JSON of *gen.AuthResponseDto.
 func (h *AuthHandler) PostLogin(c *gin.Context) {
 	if err := c.Request.ParseForm(); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "parse form: " + err.Error()})
+		writeJSON(c, http.StatusBadRequest, gin.H{"error": "parse form: " + err.Error()})
 		return
 	}
 
@@ -81,7 +81,7 @@ func (h *AuthHandler) PostLogin(c *gin.Context) {
 		// the upstream. Mirrors Sixth Law clause 1: zero upstream
 		// traffic on bad input is itself a user-visible behaviour
 		// (the breaker can never trip on client-induced badness).
-		c.JSON(http.StatusBadRequest, gin.H{"error": "username and password required"})
+		writeJSON(c, http.StatusBadRequest, gin.H{"error": "username and password required"})
 		return
 	}
 
@@ -115,5 +115,5 @@ func (h *AuthHandler) PostLogin(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, resp)
+	writeJSON(c, http.StatusOK, resp)
 }

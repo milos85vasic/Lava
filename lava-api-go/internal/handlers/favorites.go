@@ -107,7 +107,7 @@ func (h *FavoritesHandler) GetFavorites(c *gin.Context) {
 	}
 	body, err := json.Marshal(favs)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "marshal favorites: " + err.Error()})
+		writeJSON(c, http.StatusInternalServerError, gin.H{"error": "marshal favorites: " + err.Error()})
 		return
 	}
 	// cache.Set error is non-fatal: response succeeds even if the write fails (caller already has the body).
@@ -167,7 +167,7 @@ func (h *FavoritesHandler) AddFavorite(c *gin.Context) {
 	// and the next GET must see fresh data either way.
 	invalidateFavoritesCacheKey(c.Request.Context(), h.cache, realm)
 
-	c.JSON(http.StatusOK, ok)
+	writeJSON(c, http.StatusOK, ok)
 }
 
 // RemoveFavorite implements POST /favorites/remove/{id}. Identical
@@ -188,5 +188,5 @@ func (h *FavoritesHandler) RemoveFavorite(c *gin.Context) {
 
 	invalidateFavoritesCacheKey(c.Request.Context(), h.cache, realm)
 
-	c.JSON(http.StatusOK, ok)
+	writeJSON(c, http.StatusOK, ok)
 }

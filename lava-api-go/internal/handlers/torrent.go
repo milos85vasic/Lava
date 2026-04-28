@@ -90,7 +90,7 @@ func (h *TorrentHandler) GetTorrent(c *gin.Context) {
 	}
 	body, err := json.Marshal(torrent)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "marshal torrent: " + err.Error()})
+		writeJSON(c, http.StatusInternalServerError, gin.H{"error": "marshal torrent: " + err.Error()})
 		return
 	}
 	// cache.Set error is non-fatal: response succeeds even if the write fails (caller already has the body).

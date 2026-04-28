@@ -70,5 +70,5 @@ func (h *IndexHandler) GetIndex(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, ok)
+	writeJSON(c, http.StatusOK, ok)
 }

@@ -100,7 +100,7 @@ func (h *TopicHandler) GetTopic(c *gin.Context) {
 	}
 	body, err := json.Marshal(topic)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "marshal topic: " + err.Error()})
+		writeJSON(c, http.StatusInternalServerError, gin.H{"error": "marshal topic: " + err.Error()})
 		return
 	}
 	// cache.Set error is non-fatal: response succeeds even if the write fails (caller already has the body).
@@ -132,7 +132,7 @@ func (h *TopicHandler) GetTopicPage(c *gin.Context) {
 	}
 	body, err := json.Marshal(page)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "marshal topic page: " + err.Error()})
+		writeJSON(c, http.StatusInternalServerError, gin.H{"error": "marshal topic page: " + err.Error()})
 		return
 	}
 	// cache.Set error is non-fatal: response succeeds even if the write fails (caller already has the body).
@@ -197,7 +197,7 @@ func (h *TopicHandler) GetCommentsPage(c *gin.Context) {
 	}
 	body, err := json.Marshal(page)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "marshal comments page: " + err.Error()})
+		writeJSON(c, http.StatusInternalServerError, gin.H{"error": "marshal comments page: " + err.Error()})
 		return
 	}
 	// cache.Set error is non-fatal: response succeeds even if the write fails (caller already has the body).

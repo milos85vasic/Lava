@@ -36,6 +36,7 @@ package handlers
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"net/http"
 	"time"
@@ -137,6 +138,25 @@ func Register(router *gin.Engine, deps *Deps) {
 	router.GET("/captcha/:path", captcha.GetCaptcha)
 }
 
+// writeJSON emits a JSON response with Content-Type "application/json"
+// (no `charset=utf-8` suffix) so the wire shape matches what the legacy
+// Ktor proxy emits. Gin's c.JSON appends "; charset=utf-8" via its
+// MIMEJSON constant; the parity test surfaced this as a Content-Type
+// divergence between the two backends. Use writeJSON anywhere a handler
+// would have used c.JSON to keep the wire bytes parity-clean.
+func writeJSON(c *gin.Context, code int, v any) {
+	body, err := json.Marshal(v)
+	if err != nil {
+		// json.Marshal failure is effectively impossible for the shapes
+		// we serialise (gin.H{}, bool, gen.* DTOs). Fall back to
+		// c.JSON so the failure surfaces something rather than a
+		// blank body.
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "marshal: " + err.Error()})
+		return
+	}
+	c.Data(code, "application/json", body)
+}
+
 // writeUpstreamError maps the rutracker package's sentinel errors to
 // the matching HTTP status. Subsequent Phase 7 tasks reuse this helper
 // from their own handler files. The mapping matches spec §6 / Ktor
@@ -157,14 +177,14 @@ func Register(router *gin.Engine, deps *Deps) {
 func writeUpstreamError(c *gin.Context, err error) {
 	switch {
 	case errors.Is(err, rutracker.ErrNotFound):
-		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		writeJSON(c, http.StatusNotFound, gin.H{"error": err.Error()})
 	case errors.Is(err, rutracker.ErrForbidden):
-		c.JSON(http.StatusForbidden, gin.H{"error": err.Error()})
+		writeJSON(c, http.StatusForbidden, gin.H{"error": err.Error()})
 	case errors.Is(err, rutracker.ErrUnauthorized):
-		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		writeJSON(c, http.StatusUnauthorized, gin.H{"error": err.Error()})
 	case errors.Is(err, rutracker.ErrCircuitOpen):
-		c.JSON(http.StatusServiceUnavailable, gin.H{"error": err.Error()})
+		writeJSON(c, http.StatusServiceUnavailable, gin.H{"error": err.Error()})
 	default:
-		c.JSON(http.StatusBadGateway, gin.H{"error": err.Error()})
+		writeJSON(c, http.StatusBadGateway, gin.H{"error": err.Error()})
 	}
 }

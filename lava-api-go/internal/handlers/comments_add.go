@@ -81,7 +81,7 @@ func (h *CommentsAddHandler) AddComment(c *gin.Context) {
 	// any form-decoding, matching Ktor's call.receiveText() behaviour.
 	body, err := c.GetRawData()
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "read body: " + err.Error()})
+		writeJSON(c, http.StatusBadRequest, gin.H{"error": "read body: " + err.Error()})
 		return
 	}
 
@@ -101,5 +101,5 @@ func (h *CommentsAddHandler) AddComment(c *gin.Context) {
 	// the realm-scoping trade-off.
 	invalidateTopicCacheKeys(c.Request.Context(), h.cache, id, realm)
 
-	c.JSON(http.StatusOK, ok)
+	writeJSON(c, http.StatusOK, ok)
 }
