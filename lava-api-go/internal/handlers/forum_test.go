@@ -185,6 +185,23 @@ type fakeScraper struct {
 	lastRemoveFavoriteCk  string
 	removeFavoriteResult  bool
 	removeFavoriteErr     error
+
+	// Phase 7 task 7.7 — index/login/captcha recording fields.
+
+	checkAuthCalls    int
+	lastCheckAuthCk   string
+	checkAuthResult   bool
+	checkAuthErr      error
+
+	loginCalls    int
+	lastLoginParams rutracker.LoginParams
+	loginReturn   *gen.AuthResponseDto
+	loginErr      error
+
+	captchaCalls    int
+	lastCaptchaPath string
+	captchaReturn   *rutracker.CaptchaImage
+	captchaErr      error
 }
 
 func (f *fakeScraper) GetForum(_ context.Context, cookie string) (*gen.ForumDto, error) {
@@ -390,6 +407,62 @@ func (f *fakeScraper) RemoveFavorite(_ context.Context, id, cookie string) (bool
 	f.lastRemoveFavoriteID = id
 	f.lastRemoveFavoriteCk = cookie
 	r, e := f.removeFavoriteResult, f.removeFavoriteErr
+	f.mu.Unlock()
+	return r, e
+}
+
+// CheckAuthorised records the cookie pass-through. index_test.go uses
+// checkAuthCalls to pin the "no cache" rule for / and /index — two
+// consecutive GETs MUST produce two scraper calls regardless of any
+// caching layer.
+func (f *fakeScraper) CheckAuthorised(_ context.Context, cookie string) (bool, error) {
+	f.mu.Lock()
+	f.checkAuthCalls++
+	f.lastCheckAuthCk = cookie
+	r, e := f.checkAuthResult, f.checkAuthErr
+	f.mu.Unlock()
+	return r, e
+}
+
+// Login records the LoginParams (deep-copying the *string pointers so
+// later caller mutations cannot poison the recorded value) and returns
+// the programmed (*AuthResponseDto, error) pair. login_test.go asserts
+// the form-field-to-LoginParams mapping AND the all-three-or-none
+// captcha-pointer guard at the wire-shape level.
+func (f *fakeScraper) Login(_ context.Context, p rutracker.LoginParams) (*gen.AuthResponseDto, error) {
+	f.mu.Lock()
+	copied := rutracker.LoginParams{
+		Username: p.Username,
+		Password: p.Password,
+	}
+	if p.CaptchaSid != nil {
+		v := *p.CaptchaSid
+		copied.CaptchaSid = &v
+	}
+	if p.CaptchaCode != nil {
+		v := *p.CaptchaCode
+		copied.CaptchaCode = &v
+	}
+	if p.CaptchaValue != nil {
+		v := *p.CaptchaValue
+		copied.CaptchaValue = &v
+	}
+	f.loginCalls++
+	f.lastLoginParams = copied
+	r, e := f.loginReturn, f.loginErr
+	f.mu.Unlock()
+	return r, e
+}
+
+// FetchCaptcha records the encoded path verbatim. captcha_test.go
+// asserts the path goes through to the scraper EXACTLY as it appeared
+// on the wire (no Gin-side URL-decoding) so the scraper-owned Base64
+// decode step sees what the OpenAPI contract promises it would.
+func (f *fakeScraper) FetchCaptcha(_ context.Context, encodedPath string) (*rutracker.CaptchaImage, error) {
+	f.mu.Lock()
+	f.captchaCalls++
+	f.lastCaptchaPath = encodedPath
+	r, e := f.captchaReturn, f.captchaErr
 	f.mu.Unlock()
 	return r, e
 }

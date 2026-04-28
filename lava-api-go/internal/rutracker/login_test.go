@@ -486,6 +486,94 @@ func TestLogin_PartialCaptchaOmitted(t *testing.T) {
 	}
 }
 
+// TestCheckAuthorised_AnonymousReturnsFalse — empty cookie MUST NOT
+// short-circuit (unlike AddComment / AddFavorite). Upstream is queried
+// anonymously and the response — without a `logged-in-username` marker
+// — yields `false`. This pins the OpenAPI-mandated divergence between
+// the health probes and the state-mutating routes (Sixth Law clause 3
+// — primary assertion is on the boolean wire value the client
+// receives, NOT on a "did the cookie get checked" mock).
+func TestCheckAuthorised_AnonymousReturnsFalse(t *testing.T) {
+	var (
+		hits      int32
+		gotCookie string
+	)
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		atomic.AddInt32(&hits, 1)
+		gotCookie = r.Header.Get("Cookie")
+		if r.URL.Path != "/index.php" {
+			t.Errorf("unexpected path %q want /index.php", r.URL.Path)
+		}
+		w.WriteHeader(http.StatusOK)
+		// No "logged-in-username" marker → IsAuthorised returns false.
+		_, _ = w.Write([]byte("<html><body>Anonymous index page</body></html>"))
+	}))
+	defer srv.Close()
+
+	c := NewClient(srv.URL)
+	got, err := c.CheckAuthorised(context.Background(), "")
+	if err != nil {
+		t.Fatalf("CheckAuthorised err=%v want nil", err)
+	}
+	if got != false {
+		t.Errorf("CheckAuthorised=%v want false (anonymous request)", got)
+	}
+	if h := atomic.LoadInt32(&hits); h != 1 {
+		t.Errorf("upstream hits=%d want 1 (empty cookie MUST traverse to upstream, not short-circuit)", h)
+	}
+	if gotCookie != "" {
+		t.Errorf("upstream Cookie header=%q want empty (no cookie was supplied)", gotCookie)
+	}
+}
+
+// TestCheckAuthorised_LoggedInReturnsTrue — when the upstream body
+// carries the `logged-in-username` marker, CheckAuthorised returns
+// true. The cookie is forwarded verbatim to /index.php.
+func TestCheckAuthorised_LoggedInReturnsTrue(t *testing.T) {
+	const cookie = "bb_session=opaque-token"
+	var gotCookie string
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		gotCookie = r.Header.Get("Cookie")
+		if r.URL.Path != "/index.php" {
+			t.Errorf("unexpected path %q want /index.php", r.URL.Path)
+		}
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte(`<html><body><a id="logged-in-username" href="profile.php?u=42">alice</a></body></html>`))
+	}))
+	defer srv.Close()
+
+	c := NewClient(srv.URL)
+	got, err := c.CheckAuthorised(context.Background(), cookie)
+	if err != nil {
+		t.Fatalf("CheckAuthorised err=%v want nil", err)
+	}
+	if got != true {
+		t.Errorf("CheckAuthorised=%v want true (logged-in-username marker present)", got)
+	}
+	if gotCookie != cookie {
+		t.Errorf("upstream Cookie=%q want %q (cookie must be forwarded verbatim)", gotCookie, cookie)
+	}
+}
+
+// TestCheckAuthorised_Upstream500_Errors — pin the breaker semantics
+// for /index.php. A 5xx upstream MUST surface as a non-nil error so
+// the breaker counts it as a failure and the handler returns 502.
+func TestCheckAuthorised_Upstream500_Errors(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	}))
+	defer srv.Close()
+
+	c := NewClient(srv.URL)
+	got, err := c.CheckAuthorised(context.Background(), "")
+	if err == nil {
+		t.Errorf("CheckAuthorised err=nil for 500 response, want non-nil (breaker semantics)")
+	}
+	if got != false {
+		t.Errorf("CheckAuthorised=%v want false on error", got)
+	}
+}
+
 // TestLogin_RusEvenInQuery — defensive: the wire-form-encoded "Вход"
 // value MUST decode back to the same bytes server-side. Caught a
 // would-be regression where strings.NewReader plus url.Values.Encode

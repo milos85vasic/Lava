@@ -64,7 +64,9 @@ type ScraperClient interface {
 	GetFavorites(ctx context.Context, cookie string) (*gen.FavoritesDto, error)
 	AddFavorite(ctx context.Context, id, cookie string) (bool, error)
 	RemoveFavorite(ctx context.Context, id, cookie string) (bool, error)
-	// Phase 7.7 will append more methods here.
+	CheckAuthorised(ctx context.Context, cookie string) (bool, error)
+	Login(ctx context.Context, p rutracker.LoginParams) (*gen.AuthResponseDto, error)
+	FetchCaptcha(ctx context.Context, encodedPath string) (*rutracker.CaptchaImage, error)
 }
 
 // Compile-time assertion that the production scraper type satisfies the
@@ -123,7 +125,16 @@ func Register(router *gin.Engine, deps *Deps) {
 	router.GET("/favorites", fav.GetFavorites)
 	router.POST("/favorites/add/:id", fav.AddFavorite)
 	router.POST("/favorites/remove/:id", fav.RemoveFavorite)
-	// Phase 7.7 will append more route registrations here.
+
+	index := NewIndexHandler(deps)
+	router.GET("/", index.GetIndex)
+	router.GET("/index", index.GetIndex)
+
+	auth := NewAuthHandler(deps)
+	router.POST("/login", auth.PostLogin)
+
+	captcha := NewCaptchaHandler(deps)
+	router.GET("/captcha/:path", captcha.GetCaptcha)
 }
 
 // writeUpstreamError maps the rutracker package's sentinel errors to

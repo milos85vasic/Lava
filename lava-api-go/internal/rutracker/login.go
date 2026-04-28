@@ -233,6 +233,37 @@ func (c *Client) Login(ctx context.Context, p LoginParams) (*gen.AuthResponseDto
 	return &out, nil
 }
 
+// CheckAuthorised performs the lightweight authorisation probe used by
+// the GET / and GET /index health endpoints. It does a GET /index.php
+// with the supplied cookie (which may be empty) and returns IsAuthorised
+// over the body bytes.
+//
+// Divergence from AddComment / AddFavorite: those flows short-circuit
+// on cookie == "" with ErrUnauthorized BEFORE issuing any upstream
+// request, because they are state-mutating operations that cannot
+// proceed anonymously. CheckAuthorised does NOT short-circuit — the
+// OpenAPI explicitly defines / and /index as health probes that work
+// anonymously: "If absent or empty, upstream rutracker is queried with
+// no cookie and the response will typically be `false`." A regression
+// that copy-pasted the empty-cookie short-circuit here would change
+// observable wire behaviour from 200 + JSON `false` to 401, silently
+// breaking the Android client's liveness check.
+//
+// Upstream 4xx/5xx surface as a generic error: 5xx already trips the
+// breaker via Fetch, and 4xx (rare on /index.php — it usually 200s
+// regardless of auth state) is mapped to the default writeUpstreamError
+// arm by the handler (502).
+func (c *Client) CheckAuthorised(ctx context.Context, cookie string) (bool, error) {
+	body, status, err := c.Fetch(ctx, "/index.php", cookie)
+	if err != nil {
+		return false, err
+	}
+	if status >= 400 {
+		return false, fmt.Errorf("rutracker: GET /index.php → %d", status)
+	}
+	return IsAuthorised(body), nil
+}
+
 // fetchUserProfile is the two-step port of
 // GetCurrentProfileUseCase + GetProfileUseCase. It runs after a
 // successful login — the bb_data-style cookie returned by /login.php is
