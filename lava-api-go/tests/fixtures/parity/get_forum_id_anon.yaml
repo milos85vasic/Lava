@@ -1,0 +1,15 @@
+# GET /forum/{id} — anonymous category page.
+# Path 1500 is rutracker's "Pop Music" subforum, a moderately-sized page
+# guaranteed to exist on both backends. Exercises the path-param-only GET
+# shape and the 50-topics-per-page pagination handler.
+name: get_forum_id_anon
+method: GET
+path: /forum/1500
+query: {}
+headers: {}
+body: ""
+content_type: ""
+expected_status: 200
+compare: json_unordered
+header_allowlist:
+  - Content-Type

@@ -1,0 +1,15 @@
+# GET /torrent/{id} — anonymous torrent metadata.
+# Path 1 is the lowest-numbered topic on rutracker; pin to 1 to make the
+# fixture stable even if the Phase 14 acceptance run picks a different
+# concrete dataset.
+name: get_torrent_id_anon
+method: GET
+path: /torrent/1
+query: {}
+headers: {}
+body: ""
+content_type: ""
+expected_status: 200
+compare: json_unordered
+header_allowlist:
+  - Content-Type

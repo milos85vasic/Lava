@@ -1,0 +1,19 @@
+# POST /login with empty body — error path.
+# The Go side short-circuits to HTTP 400 with zero upstream traffic when
+# username/password are missing (see internal/handlers/login.go). The
+# Ktor proxy may have a slightly different error envelope. Both backends
+# MUST agree on the wire shape; if this case fails on the Phase 14 run,
+# the parity gate is doing its job — the fix is to converge the error
+# semantics, not to weaken the test. compare:json_unordered is the
+# safest mode for an error envelope where field ordering may differ.
+name: post_login_missing
+method: POST
+path: /login
+query: {}
+headers: {}
+body: ""
+content_type: application/x-www-form-urlencoded
+expected_status: 400
+compare: json_unordered
+header_allowlist:
+  - Content-Type

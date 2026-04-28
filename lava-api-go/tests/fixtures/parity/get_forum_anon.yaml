@@ -1,0 +1,15 @@
+# GET /forum — anonymous full forum tree.
+# Largest JSON payload in the API. json_unordered tolerates any key-order
+# divergence between Kotlin's kotlinx.serialization (insertion order) and
+# Go's encoding/json (sorted ascending).
+name: get_forum_anon
+method: GET
+path: /forum
+query: {}
+headers: {}
+body: ""
+content_type: ""
+expected_status: 200
+compare: json_unordered
+header_allowlist:
+  - Content-Type

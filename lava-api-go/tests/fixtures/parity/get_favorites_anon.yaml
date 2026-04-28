@@ -1,0 +1,16 @@
+# GET /favorites — anonymous bookmarks list.
+# Without an upstream cookie the bookmarks list is necessarily empty, so
+# both backends MUST emit an empty JSON array (not null, not an empty
+# object). This catches a class of bug where one backend silently emits
+# `null` instead of `[]`.
+name: get_favorites_anon
+method: GET
+path: /favorites
+query: {}
+headers: {}
+body: ""
+content_type: ""
+expected_status: 200
+compare: json_unordered
+header_allowlist:
+  - Content-Type

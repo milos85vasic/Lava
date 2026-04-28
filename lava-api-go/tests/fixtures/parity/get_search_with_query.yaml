@@ -1,0 +1,15 @@
+# GET /search?query=... — anonymous search.
+# Exercises the query-string handling path and confirms both backends
+# encode query parameters identically before forwarding upstream.
+name: get_search_with_query
+method: GET
+path: /search
+query:
+  query: linux
+headers: {}
+body: ""
+content_type: ""
+expected_status: 200
+compare: json_unordered
+header_allowlist:
+  - Content-Type

@@ -1,0 +1,14 @@
+# GET / — anonymous health probe.
+# Returns a JSON boolean (CheckAuthorised on the upstream session). Both
+# backends MUST agree on the boolean and on the Content-Type header.
+name: get_root_anon
+method: GET
+path: /
+query: {}
+headers: {}
+body: ""
+content_type: ""
+expected_status: 200
+compare: json_unordered
+header_allowlist:
+  - Content-Type

@@ -1,0 +1,15 @@
+# GET /index — anonymous health probe (twin of GET /).
+# Both routes resolve to CheckAuthorised on the upstream session; carrying
+# a separate fixture for /index protects us against a backend silently
+# returning a different shape on one of the two health endpoints.
+name: get_index_anon
+method: GET
+path: /index
+query: {}
+headers: {}
+body: ""
+content_type: ""
+expected_status: 200
+compare: json_unordered
+header_allowlist:
+  - Content-Type
