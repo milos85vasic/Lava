@@ -1,0 +1,51 @@
+<!-- comments_no_magnet.html: same shape as comments_page1.html but with NO magnet-link in any post. Used by the dispatcher's comments-branch test (the GetTopic dispatcher must NOT route this to the torrent path). -->
+<!DOCTYPE html>
+<html>
+<head><title>RuTracker — Topic 23456</title></head>
+<body>
+<a id="topic-title" href="viewtopic.php?t=23456">Discussion Topic</a>
+<div class="nav w100 pad_2">
+  <a href="index.php">Root</a>
+  <a href="viewforum.php?f=800">Discussions Forum</a>
+</div>
+
+<table id="pagination">
+  <tbody>
+    <tr>
+      <td>
+        <p><b>1</b> <b>1</b></p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table>
+  <tbody id="post111111">
+    <tr>
+      <td>
+        <span class="poster_btn"><a class="txtb" href="profile.php?mode=viewprofile&amp;u=11">profile</a></span>
+        <span class="nick">first</span>
+        <span class="avatar"><img src="https://avatars/11.png"/></span>
+        <span class="p-link">2024-02-01 10:00</span>
+        <div class="post_body" id="p-200">
+          Plain discussion post.
+        </div>
+      </td>
+    </tr>
+  </tbody>
+  <tbody id="post222222">
+    <tr>
+      <td>
+        <span class="poster_btn"><a class="txtb" href="profile.php?mode=viewprofile&amp;u=22">profile</a></span>
+        <span class="nick">second</span>
+        <span class="avatar"><img src="https://avatars/22.png"/></span>
+        <span class="p-link">2024-02-02 10:00</span>
+        <div class="post_body" id="p-201">
+          Another reply.
+        </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</body>
+</html>

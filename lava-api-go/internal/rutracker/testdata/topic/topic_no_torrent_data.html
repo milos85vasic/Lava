@@ -1,0 +1,38 @@
+<!-- topic_no_torrent_data.html: a /topic2/{id} response with NO torrent data — no seeds, leeches, status, size. parseTorrentData MUST return nil. (Includes a magnet:? sentence elsewhere just to ensure the dispatcher logic is independent of torrentData presence; in practice a real comments topic has no magnet, but parseTopicPage parses regardless.) -->
+<!DOCTYPE html>
+<html>
+<head><title>RuTracker — Discussion Topic</title></head>
+<body>
+<a id="topic-title" href="viewtopic.php?t=99">Discussion Topic</a>
+<div class="nav w100 pad_2">
+  <a href="index.php">Root</a>
+  <a href="viewforum.php?f=900">Discussion Category</a>
+</div>
+
+<table id="pagination">
+  <tbody>
+    <tr>
+      <td>
+        <p><b>1</b> <b>1</b></p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table>
+  <tbody id="post500">
+    <tr>
+      <td>
+        <span class="poster_btn"><a class="txtb" href="profile.php?mode=viewprofile&amp;u=50">profile</a></span>
+        <span class="nick">opener</span>
+        <span class="avatar"><img src="https://avatars/50.png"/></span>
+        <span class="p-link">2024-03-01 10:00</span>
+        <div class="post_body" id="p-500">
+          Discussion start.
+        </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</body>
+</html>

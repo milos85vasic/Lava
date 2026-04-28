@@ -1,0 +1,65 @@
+<!-- comments_page1.html: page 1 of 2, 3 tbody[id^=post] rows. The first carries a .magnet-link[href] (the OP torrent), so the parser MUST drop it from the comments list, leaving 2 user posts. -->
+<!DOCTYPE html>
+<html>
+<head><title>RuTracker — Topic 12345</title></head>
+<body>
+<a id="topic-title" href="viewtopic.php?t=12345">Topic Title</a>
+<div class="nav w100 pad_2">
+  <a href="index.php">Root</a>
+  <a href="viewforum.php?f=700">Drama Forum</a>
+</div>
+
+<table id="pagination">
+  <tbody>
+    <tr>
+      <td>
+        <p><b>1</b> <b>2</b></p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table>
+  <tbody id="post123456">
+    <tr>
+      <td>
+        <span class="poster_btn"><a class="txtb" href="profile.php?mode=viewprofile&amp;u=1">profile</a></span>
+        <span class="nick">opUser</span>
+        <span class="avatar"><img src="https://avatars/1.png"/></span>
+        <span class="p-link">2024-01-01 10:00</span>
+        <a class="magnet-link" href="magnet:?xt=urn:btih:abcd1234">magnet</a>
+        <div class="post_body" id="p-100">
+          OP body — first comment which is the torrent itself.
+        </div>
+      </td>
+    </tr>
+  </tbody>
+  <tbody id="post234567">
+    <tr>
+      <td>
+        <span class="poster_btn"><a class="txtb" href="profile.php?mode=viewprofile&amp;u=2">profile</a></span>
+        <span class="nick">alice</span>
+        <span class="avatar"><img src="https://avatars/2.png"/></span>
+        <span class="p-link">2024-01-02 11:00</span>
+        <div class="post_body" id="p-101">
+          Reply from alice.
+        </div>
+      </td>
+    </tr>
+  </tbody>
+  <tbody id="post345678">
+    <tr>
+      <td>
+        <span class="poster_btn"><a class="txtb" href="profile.php?mode=viewprofile&amp;u=3">profile</a></span>
+        <span class="nick">bob</span>
+        <span class="avatar"><img src="https://avatars/3.png"/></span>
+        <span class="p-link">2024-01-03 12:00</span>
+        <div class="post_body" id="p-102">
+          Reply from bob.
+        </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</body>
+</html>
