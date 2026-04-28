@@ -87,7 +87,11 @@ openssl req -x509 -nodes -newkey rsa:2048 \
   -config "$CONFIG" \
   -extensions v3_req >/dev/null 2>&1
 
-chmod 600 "$KEY"
+# Mode 644 on the key (not the more-defensive 600) so the distroless
+# `nonroot` user inside the container can read the volume-mounted file.
+# Acceptable for LAN deployment; rotate to a stricter umask + bind-mount
+# strategy if hardening for non-LAN use.
+chmod 644 "$KEY"
 chmod 644 "$CRT"
 
 log "wrote $CRT"

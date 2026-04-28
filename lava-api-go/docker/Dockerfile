@@ -40,8 +40,10 @@ WORKDIR /src
 COPY . .
 RUN cd /src/lava-api-go && \
     go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
-ENTRYPOINT ["/go/bin/migrate"]
-CMD ["-path", "/src/lava-api-go/migrations", "-database", "$LAVA_API_PG_URL", "up"]
+# Shell-form ENTRYPOINT so $LAVA_API_PG_URL gets expanded at container start.
+# JSON array form (the previous shape) passes the literal string and the
+# migrate binary errors with "no scheme".
+ENTRYPOINT ["/bin/sh", "-c", "exec /go/bin/migrate -path /src/lava-api-go/migrations -database \"$LAVA_API_PG_URL\" up"]
 
 # --- runtime stage ----------------------------------------------------
 FROM gcr.io/distroless/static-debian12:nonroot AS runtime
