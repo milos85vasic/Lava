@@ -1,0 +1,11 @@
+<!-- not_authorised.html: small page WITHOUT the auth marker substring (deliberately not naming it here so the comment itself does not satisfy IsAuthorised via byte-substring match). IsAuthorised() returns false on this fixture, GetFavorites maps to ErrUnauthorized, and subsequent pages are never fetched. -->
+<!DOCTYPE html>
+<html>
+<head><title>RuTracker — Guest landing</title></head>
+<body>
+<div id="pagination">
+  <p><b>1</b></p>
+</div>
+<p>Please log in to view your bookmarks.</p>
+</body>
+</html>

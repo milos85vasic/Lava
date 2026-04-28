@@ -1,0 +1,30 @@
+<!-- page1_multi.html: page 1 of 3. Pagination declares current b=1 and three .pg page-number links (followed by a "next" .pg) — ParseFavoritesPagesCount returns 3 (second-to-last of [1,2,3,next] is "3"). Two distinct rows used to verify page-walk order. The "logged-in-username" marker is present. -->
+<!DOCTYPE html>
+<html>
+<head><title>RuTracker — Bookmarks (multi)</title></head>
+<body>
+<div id="logged-in-username">milos</div>
+<div id="pagination">
+  <p><b>1</b></p>
+  <a class="pg" href="bookmarks.php">1</a>
+  <a class="pg" href="bookmarks.php?start=50">2</a>
+  <a class="pg" href="bookmarks.php?start=100">3</a>
+  <a class="pg" href="bookmarks.php?start=50">Next</a>
+</div>
+<table>
+  <tbody>
+    <tr class="hl-tr">
+      <td><span class="topic-selector" data-topic_id="3001">.</span></td>
+      <td>
+        <a class="torTopic ts-text" href="viewtopic.php?t=3001">[P1] Item One</a>
+        <a class="topicAuthor" href="profile.php?mode=viewprofile&amp;u=11"><span class="topicAuthor">u11</span></a>
+        <span class="t-forum-cell">
+          <a href="viewforum.php?f=1">Forum1</a>
+          <span class="ts-text">Forum1</span>
+        </span>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</body>
+</html>

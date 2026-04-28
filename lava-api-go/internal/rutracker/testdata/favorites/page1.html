@@ -1,0 +1,41 @@
+<!-- page1.html: bookmarks page 1 of 1. The "logged-in-username" marker is required so IsAuthorised() returns true. Pagination declares b=1 with no .pg links → ParseFavoritesPagesCount returns 1. Two .hl-tr rows: the first carries .tor-approved (Torrent variant with size/seeds/leeches); the second has no torrent-status class (Topic variant — fullTitle preserved with brackets). Each row carries .topic-selector[data-topic_id], .torTopic.ts-text, .topicAuthor (outer anchor with ?u= href and inner .topicAuthor span for the visible name), and .t-forum-cell with a final ?f= anchor + .ts-text span. -->
+<!DOCTYPE html>
+<html>
+<head><title>RuTracker — Bookmarks</title></head>
+<body>
+<div id="logged-in-username">milos</div>
+<div id="pagination">
+  <p><b>1</b></p>
+</div>
+<table>
+  <tbody>
+    <tr class="hl-tr">
+      <td><span class="topic-selector" data-topic_id="2001">.</span></td>
+      <td>
+        <span class="tor-approved">approved</span>
+        <a class="torTopic ts-text" href="viewtopic.php?t=2001">[Drama] Movie One [1080p]</a>
+        <a class="topicAuthor" href="profile.php?mode=viewprofile&amp;u=42"><span class="topicAuthor">alice</span></a>
+        <span class="seedmed">12</span>
+        <span class="leechmed">3</span>
+        <span class="f-dl">2.4 GB</span>
+        <span class="t-forum-cell">
+          <a href="viewforum.php?f=7">Movies</a>
+          <span class="ts-text">Movies</span>
+        </span>
+      </td>
+    </tr>
+    <tr class="hl-tr">
+      <td><span class="topic-selector" data-topic_id="2002">.</span></td>
+      <td>
+        <a class="torTopic ts-text" href="viewtopic.php?t=2002">[Discussion] A General Thread</a>
+        <a class="topicAuthor" href="profile.php?mode=viewprofile&amp;u=99"><span class="topicAuthor">bob</span></a>
+        <span class="t-forum-cell">
+          <a href="viewforum.php?f=8">Talk</a>
+          <span class="ts-text">Talk</span>
+        </span>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</body>
+</html>

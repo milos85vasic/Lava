@@ -1,0 +1,13 @@
+<!-- pagesCount_3pages.html: minimal page used JUST for ParseFavoritesPagesCount tests. Declares b=2 (current page) and three .pg page-number links (1, 3, 5) plus a "next" .pg. takeLast(2).firstOrNull() of [1,3,5,next] yields "5"; max(5, 2) = 5. -->
+<!DOCTYPE html>
+<html>
+<body>
+<div id="pagination">
+  <p><b>2</b></p>
+  <a class="pg" href="bookmarks.php">1</a>
+  <a class="pg" href="bookmarks.php?start=100">3</a>
+  <a class="pg" href="bookmarks.php?start=200">5</a>
+  <a class="pg" href="bookmarks.php?start=100">Next</a>
+</div>
+</body>
+</html>
