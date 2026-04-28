@@ -1,0 +1,33 @@
+{
+  "name": "GET /forum",
+  "method": "GET",
+  "path": "/forum",
+  "query": {},
+  "headers": {},
+  "status": 200,
+  "response_body": {
+    "children": [
+      {
+        "id": "100",
+        "name": "Movies",
+        "children": [
+          {
+            "id": "101",
+            "name": "Action",
+            "children": []
+          },
+          {
+            "id": "102",
+            "name": "Drama",
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "200",
+        "name": "Music",
+        "children": []
+      }
+    ]
+  }
+}

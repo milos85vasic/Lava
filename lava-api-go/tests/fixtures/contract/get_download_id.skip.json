@@ -1,0 +1,6 @@
+{
+  "name": "GET /download/{id}",
+  "method": "GET",
+  "path": "/download/9001",
+  "skip_reason": "binary route — covered by e2e (no JSON response body)"
+}

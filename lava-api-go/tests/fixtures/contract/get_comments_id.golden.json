@@ -1,0 +1,49 @@
+{
+  "name": "GET /comments/{id}",
+  "method": "GET",
+  "path": "/comments/42",
+  "query": {"page": "1"},
+  "headers": {},
+  "status": 200,
+  "response_body": {
+    "type": "CommentsPage",
+    "id": "42",
+    "title": "Sample Topic",
+    "author": {
+      "id": "u7",
+      "name": "topic-author",
+      "avatarUrl": null
+    },
+    "category": {
+      "id": "10",
+      "name": "Discussion",
+      "children": null
+    },
+    "page": 1,
+    "pages": 2,
+    "posts": [
+      {
+        "id": "p1",
+        "author": {
+          "id": "u9",
+          "name": "commenter",
+          "avatarUrl": null
+        },
+        "date": "2024-01-16",
+        "children": [
+          {
+            "type": "Text",
+            "value": "Hello"
+          },
+          {
+            "type": "Br"
+          },
+          {
+            "type": "Text",
+            "value": "world"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "name": "GET /",
+  "method": "GET",
+  "path": "/",
+  "query": {},
+  "headers": {},
+  "status": 200,
+  "response_body": false
+}

@@ -1,0 +1,11 @@
+{
+  "name": "GET /favorites",
+  "method": "GET",
+  "path": "/favorites",
+  "query": {},
+  "headers": {"Auth-Token": "test-token"},
+  "status": 200,
+  "response_body": {
+    "topics": []
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "name": "GET /search",
+  "method": "GET",
+  "path": "/search",
+  "query": {
+    "query": "ubuntu",
+    "sort": "Date",
+    "order": "Descending",
+    "period": "AllTime",
+    "page": "1"
+  },
+  "headers": {},
+  "status": 200,
+  "response_body": {
+    "page": 1,
+    "pages": 10,
+    "torrents": [
+      {
+        "type": "Torrent",
+        "id": "9001",
+        "title": "Ubuntu 24.04 LTS Desktop",
+        "author": {
+          "id": "u42",
+          "name": "uploader",
+          "avatarUrl": null
+        },
+        "category": {
+          "id": "10",
+          "name": "Linux",
+          "children": null
+        },
+        "tags": "amd64,desktop",
+        "status": "Approved",
+        "date": 1700000000,
+        "size": "4.5 GB",
+        "seeds": 100,
+        "leeches": 5,
+        "magnetLink": "magnet:?xt=urn:btih:abcdef",
+        "description": null
+      }
+    ]
+  }
+}

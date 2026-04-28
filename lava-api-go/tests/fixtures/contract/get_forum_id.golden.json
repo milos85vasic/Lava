@@ -1,0 +1,51 @@
+{
+  "name": "GET /forum/{id}",
+  "method": "GET",
+  "path": "/forum/123",
+  "query": {"page": "1"},
+  "headers": {},
+  "status": 200,
+  "response_body": {
+    "category": {
+      "id": "123",
+      "name": "Action Movies",
+      "children": []
+    },
+    "page": 1,
+    "pages": 5,
+    "sections": [
+      {
+        "name": "Sticky",
+        "topics": ["1001", "1002"]
+      }
+    ],
+    "children": [
+      {
+        "id": "124",
+        "name": "Subforum",
+        "children": []
+      }
+    ],
+    "topics": [
+      {
+        "type": "Torrent",
+        "id": "5001",
+        "title": "Sample Torrent",
+        "author": {
+          "id": "u1",
+          "name": "user1",
+          "avatarUrl": null
+        },
+        "category": null,
+        "tags": null,
+        "status": "Approved",
+        "date": 1700000000,
+        "size": "1.2 GB",
+        "seeds": 42,
+        "leeches": 3,
+        "magnetLink": null,
+        "description": null
+      }
+    ]
+  }
+}

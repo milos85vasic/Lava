@@ -1,0 +1,53 @@
+{
+  "name": "GET /topic2/{id}",
+  "method": "GET",
+  "path": "/topic2/42",
+  "query": {"page": "1"},
+  "headers": {},
+  "status": 200,
+  "response_body": {
+    "id": "42",
+    "title": "Sample Topic Page",
+    "author": {
+      "id": "u7",
+      "name": "topic-author",
+      "avatarUrl": null
+    },
+    "category": {
+      "id": "10",
+      "name": "Discussion",
+      "children": null
+    },
+    "torrentData": {
+      "tags": "test",
+      "posterUrl": null,
+      "status": "Approved",
+      "date": "2024-01-15",
+      "size": "1.0 GB",
+      "seeds": 5,
+      "leeches": 1,
+      "magnetLink": null
+    },
+    "commentsPage": {
+      "page": 1,
+      "pages": 1,
+      "posts": [
+        {
+          "id": "p1",
+          "author": {
+            "id": "u9",
+            "name": "commenter",
+            "avatarUrl": null
+          },
+          "date": "2024-01-16",
+          "children": [
+            {
+              "type": "Text",
+              "value": "First!"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

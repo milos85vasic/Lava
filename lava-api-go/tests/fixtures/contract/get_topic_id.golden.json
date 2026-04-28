@@ -1,0 +1,23 @@
+{
+  "name": "GET /topic/{id}",
+  "method": "GET",
+  "path": "/topic/42",
+  "query": {},
+  "headers": {},
+  "status": 200,
+  "response_body": {
+    "type": "Topic",
+    "id": "42",
+    "title": "Sample Topic",
+    "author": {
+      "id": "u7",
+      "name": "topic-author",
+      "avatarUrl": null
+    },
+    "category": {
+      "id": "10",
+      "name": "Discussion",
+      "children": null
+    }
+  }
+}

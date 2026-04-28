@@ -1,0 +1,6 @@
+{
+  "name": "GET /captcha/{path}",
+  "method": "GET",
+  "path": "/captcha/aHR0cHM6Ly9leGFtcGxlLmNvbS9jYXB0Y2hhLnBuZw",
+  "skip_reason": "binary route — covered by e2e (no JSON response body)"
+}
