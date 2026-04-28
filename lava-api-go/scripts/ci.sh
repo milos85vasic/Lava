@@ -33,7 +33,7 @@ fail() { printf '\033[1;31m[ci:fail]\033[0m %s\n' "$*" >&2; exit 1; }
 # than sha256sum because it (a) doesn't silently pass when sha256sum is missing
 # from PATH, (b) doesn't depend on go.sum existing, (c) shows the actual diff
 # in CI output when the invariant fails.
-log "step 1/4  go mod tidy invariant"
+log "step 1/5  go mod tidy invariant"
 go mod tidy
 if ! git diff --exit-code -- go.mod go.sum >/dev/null 2>&1; then
   git --no-pager diff -- go.mod go.sum
@@ -44,7 +44,7 @@ fi
 #
 # Regenerate server + client from api/openapi.yaml and assert no diff.
 # Same `git diff --exit-code` pattern as step 1.
-log "step 2/4  oapi-codegen invariant"
+log "step 2/5  oapi-codegen invariant"
 ./scripts/generate.sh >/dev/null
 if ! git diff --exit-code -- internal/gen/ >/dev/null 2>&1; then
   git --no-pager diff -- internal/gen/
@@ -52,15 +52,20 @@ if ! git diff --exit-code -- internal/gen/ >/dev/null 2>&1; then
 fi
 
 # 3. go vet
-log "step 3/4  go vet ./..."
+log "step 3/5  go vet ./..."
 go vet ./...
 
 # 4. go build
-log "step 4/4  go build ./..."
+log "step 4/5  go build ./..."
 go build ./...
 
+# 5. go test (race-detected, single-iteration). Tests run in BOTH modes —
+# --quick still runs the full unit-test suite. --quick only skips the
+# heavyweight gates (fuzz, gosec, govulncheck, k6 load, image build).
+log "step 5/5  go test -race -count=1 ./..."
+go test -race -count=1 ./...
+
 # Later phases append to this script as features land:
-#   - go test -race -count=1 ./...    (Phase 3+)
 #   - fuzz                            (Phase 6+)
 #   - gosec                           (Phase 13)
 #   - govulncheck                     (Phase 13)
@@ -70,7 +75,7 @@ go build ./...
 # Steps are added in the phase that produces the corresponding code.
 
 if $QUICK; then
-  log "ci OK (quick — only steps 1-4)"
+  log "ci OK (quick — only steps 1-5)"
   exit 0
 fi
 
