@@ -1,0 +1,19 @@
+# oapi-codegen v2 config — typed HTTP client + types.
+#
+# Generates:
+#   - HTTP request/response types (mirrors of the server-side types but in a
+#     separate package so they can be imported by `tests/parity/` and any
+#     consumer that only needs a typed client)
+#   - A `ClientWithResponses` wrapper over net/http (used by tests/parity/
+#     to call BOTH the Go service and the legacy Ktor proxy with the same
+#     code path).
+#
+# Output is committed to internal/gen/client/api.gen.go; ci.sh enforces
+# "regenerate produces empty diff".
+package: client
+output: internal/gen/client/api.gen.go
+generate:
+  models: true
+  client: true
+output-options:
+  skip-prune: false

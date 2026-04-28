@@ -1,0 +1,18 @@
+# oapi-codegen v2 config — Gin server interfaces + types.
+#
+# Generates:
+#   - HTTP request/response types for every operation
+#   - The Gin handler interface that route implementations must satisfy
+#   - Embedded copy of the spec (used by `tests/contract/` to validate live
+#     responses against the schema without a separate file load).
+#
+# Output is committed to internal/gen/server/api.gen.go; ci.sh enforces
+# "regenerate produces empty diff".
+package: server
+output: internal/gen/server/api.gen.go
+generate:
+  models: true
+  gin-server: true
+  embedded-spec: true
+output-options:
+  skip-prune: false

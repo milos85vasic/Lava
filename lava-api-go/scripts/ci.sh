@@ -40,12 +40,23 @@ if ! git diff --exit-code -- go.mod go.sum >/dev/null 2>&1; then
   fail "go mod tidy produced a diff; commit the tidied result"
 fi
 
-# 2. go vet
-log "step 2/N  go vet ./..."
+# 2. oapi-codegen invariant
+#
+# Regenerate server + client from api/openapi.yaml and assert no diff.
+# Same `git diff --exit-code` pattern as step 1.
+log "step 2/N  oapi-codegen invariant"
+./scripts/generate.sh >/dev/null
+if ! git diff --exit-code -- internal/gen/ >/dev/null 2>&1; then
+  git --no-pager diff -- internal/gen/
+  fail "oapi-codegen produced a diff; run scripts/generate.sh and commit the result"
+fi
+
+# 3. go vet
+log "step 3/N  go vet ./..."
 go vet ./...
 
-# 3. go build
-log "step 3/N  go build ./..."
+# 4. go build
+log "step 4/N  go build ./..."
 go build ./...
 
 # Later phases append to this script as features land:
@@ -60,7 +71,7 @@ go build ./...
 # Steps are added in the phase that produces the corresponding code.
 
 if $QUICK; then
-  log "ci OK (quick — only steps 1-3)"
+  log "ci OK (quick — only steps 1-4)"
   exit 0
 fi
 
