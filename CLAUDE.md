@@ -221,12 +221,40 @@ Test coverage is essentially zero today. The only existing unit test is `core/pr
 ### Why This Matters
 AI agents may run long-duration tasks (builds, tests, container operations). If the host suspends or the user is signed out, all progress is lost, builds fail, and the development session is corrupted. This has happened before and must never happen again.
 
-### What Agents Must NOT Do
-- Never execute `systemctl suspend`, `systemctl hibernate`, `pm-suspend`, or equivalent
+### What Agents Must NOT Do — Explicit Forbidden Command List
+
+The following invocations are **categorically forbidden** in any committed script, any subagent's planned action, or any agent's tool call. Each is a constitutional violation and a release blocker:
+
+```
+systemctl  {suspend, hibernate, hybrid-sleep, suspend-then-hibernate,
+            poweroff, halt, reboot, kexec, kill-user, kill-session}
+loginctl   {suspend, hibernate, hybrid-sleep, suspend-then-hibernate,
+            poweroff, halt, reboot, kill-user, kill-session,
+            terminate-user, terminate-session}
+pm-suspend  pm-hibernate  pm-suspend-hybrid
+shutdown   {-h, -r, -P, -H, now, --halt, --poweroff, --reboot}
+dbus-send / busctl  →  org.freedesktop.login1.Manager.{Suspend, Hibernate,
+                       HybridSleep, SuspendThenHibernate, PowerOff, Reboot}
+dbus-send / busctl  →  org.freedesktop.UPower.{Suspend, Hibernate, HybridSleep}
+gsettings set       →  *.power.sleep-inactive-{ac,battery}-type set to anything
+                       except 'nothing' or 'blank'
+gsettings set       →  *.power.power-button-action  set to anything except
+                       'nothing' or 'interactive'
+```
+
+Additional rules (broader than the explicit list):
 - Never modify power-management settings (sleep timers, lid-close behavior, screensaver activation)
 - Never trigger a full-screen exclusive mode that might interfere with session keep-alive
 - Never run commands that could exhaust system RAM and trigger an OOM kill of the desktop session
 - Never execute `killall`, `pkill`, or mass-process-termination targeting session processes
+
+### Forensic record: incident 2026-04-28 18:37 (host poweroff)
+
+A user-space-initiated graceful poweroff occurred via GNOME Shell at 18:37:14 during an active SP-2 implementation session. Root-cause investigation confirmed the trigger was **external to this codebase** (manual GNOME power-button click, hardware power-button press, or out-of-scope scheduled task). Forensic detail and the recovery procedure that worked are recorded in `docs/INCIDENT_2026-04-28-HOST-POWEROFF.md`. Key takeaways now binding on every future agent session:
+
+- The commit-and-push-after-every-phase discipline preserved all completed SP-2 work; the incident was a non-event for the work output. **Maintain that discipline.**
+- A pre-push verification (`git ls-files | xargs grep -lE '<forbidden-command-pattern>'` returns empty) is now part of the recovery checklist. The exact regex is in the incident doc.
+- After any host power event (whatever the cause), recovery procedure lives in the incident doc — do not skip the orphan-container audit.
 
 ### What Agents SHOULD Do
 - Keep sessions alive: prefer short, bounded operations over indefinite waits

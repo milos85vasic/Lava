@@ -386,12 +386,36 @@ There are no Docker Compose files, Kubernetes manifests, or other orchestration 
 ### Why This Matters
 AI agents may run long-duration tasks (builds, tests, container operations). If the host suspends or the user is signed out, all progress is lost, builds fail, and the development session is corrupted. This has happened before and must never happen again.
 
-### What Agents Must NOT Do
-- Never execute `systemctl suspend`, `systemctl hibernate`, `pm-suspend`, or equivalent
+### What Agents Must NOT Do — Explicit Forbidden Command List
+
+The following invocations are **categorically forbidden** in any committed script, any subagent's planned action, or any agent's tool call:
+
+```
+systemctl  {suspend, hibernate, hybrid-sleep, suspend-then-hibernate,
+            poweroff, halt, reboot, kexec, kill-user, kill-session}
+loginctl   {suspend, hibernate, hybrid-sleep, suspend-then-hibernate,
+            poweroff, halt, reboot, kill-user, kill-session,
+            terminate-user, terminate-session}
+pm-suspend  pm-hibernate  pm-suspend-hybrid
+shutdown   {-h, -r, -P, -H, now, --halt, --poweroff, --reboot}
+dbus-send / busctl  →  org.freedesktop.login1.Manager.{Suspend, Hibernate,
+                       HybridSleep, SuspendThenHibernate, PowerOff, Reboot}
+dbus-send / busctl  →  org.freedesktop.UPower.{Suspend, Hibernate, HybridSleep}
+gsettings set       →  *.power.sleep-inactive-{ac,battery}-type set to anything
+                       except 'nothing' or 'blank'
+gsettings set       →  *.power.power-button-action  set to anything except
+                       'nothing' or 'interactive'
+```
+
+Additional rules:
 - Never modify power-management settings (sleep timers, lid-close behavior, screensaver activation)
 - Never trigger a full-screen exclusive mode that might interfere with session keep-alive
 - Never run commands that could exhaust system RAM and trigger an OOM kill of the desktop session
 - Never execute `killall`, `pkill`, or mass-process-termination targeting session processes
+
+### Forensic record: incident 2026-04-28 18:37 (host poweroff)
+
+See `docs/INCIDENT_2026-04-28-HOST-POWEROFF.md` for the full investigation. A user-space-initiated graceful poweroff via GNOME Shell occurred at 18:37:14 during SP-2 implementation. **Not a suspend, not a hibernate, not an OOM kill, not a kernel panic.** Root cause was external to this codebase (operator GNOME power-button click, hardware power-button, or out-of-scope scheduled task). The commit-and-push-per-phase discipline preserved every completed phase. After-incident recovery procedure (state verify → mirror parity → orphan container cleanup → resume from last commit) is documented in the incident file.
 
 ### What Agents SHOULD Do
 - Keep sessions alive: prefer short, bounded operations over indefinite waits
