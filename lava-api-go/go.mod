@@ -6,6 +6,7 @@ replace (
 	digital.vasic.auth => ../Submodules/Auth
 	digital.vasic.cache => ../Submodules/Cache
 	digital.vasic.challenges => ../Submodules/Challenges
+	digital.vasic.concurrency => ../Submodules/Concurrency
 	digital.vasic.config => ../Submodules/Config
 	digital.vasic.containers => ../Submodules/Containers
 	digital.vasic.database => ../Submodules/Database
@@ -29,6 +30,7 @@ require (
 	digital.vasic.http3 v0.0.0-00010101000000-000000000000
 	digital.vasic.observability v0.0.0-00010101000000-000000000000
 	digital.vasic.ratelimiter v0.0.0-00010101000000-000000000000
+	digital.vasic.recovery v0.0.0-00010101000000-000000000000
 	github.com/getkin/kin-openapi v0.133.0
 	github.com/gin-gonic/gin v1.12.0
 	github.com/oapi-codegen/runtime v1.4.0
@@ -47,6 +49,7 @@ require (
 	cloud.google.com/go/monitoring v1.24.2 // indirect
 	cloud.google.com/go/spanner v1.85.0 // indirect
 	cloud.google.com/go/storage v1.56.0 // indirect
+	digital.vasic.concurrency v0.0.0 // indirect
 	github.com/99designs/go-keychain v0.0.0-20191008050251-8e49817e8af4 // indirect
 	github.com/99designs/keyring v1.2.1 // indirect
 	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.4.0 // indirect

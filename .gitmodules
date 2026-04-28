@@ -40,3 +40,6 @@
 [submodule "Submodules/Mdns"]
 	path = Submodules/Mdns
 	url = git@github.com:vasic-digital/Mdns.git
+[submodule "Submodules/Concurrency"]
+	path = Submodules/Concurrency
+	url = git@github.com:vasic-digital/Concurrency.git
