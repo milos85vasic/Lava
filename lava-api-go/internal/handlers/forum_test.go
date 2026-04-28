@@ -111,6 +111,27 @@ type fakeScraper struct {
 	lastSearchCk   string
 	searchReturn   *gen.SearchPageDto
 	searchErr      error
+
+	topicCalls    int
+	lastTopicID   string
+	lastTopicPage *int
+	lastTopicCk   string
+	topicReturn   *gen.ForumTopicDto
+	topicErr      error
+
+	topicPageCalls    int
+	lastTopicPageID   string
+	lastTopicPagePage *int
+	lastTopicPageCk   string
+	topicPageReturn   *gen.TopicPageDto
+	topicPageErr      error
+
+	commentsCalls    int
+	lastCommentsID   string
+	lastCommentsPage *int
+	lastCommentsCk   string
+	commentsReturn   *gen.CommentsPageDto
+	commentsErr      error
 }
 
 func (f *fakeScraper) GetForum(_ context.Context, cookie string) (*gen.ForumDto, error) {
@@ -183,6 +204,57 @@ func (f *fakeScraper) GetSearchPage(_ context.Context, opts rutracker.SearchOpts
 	f.lastSearchOpts = copied
 	f.lastSearchCk = cookie
 	r, e := f.searchReturn, f.searchErr
+	f.mu.Unlock()
+	return r, e
+}
+
+// GetTopic, GetTopicPage, GetCommentsPage: each records the (id, page,
+// cookie) tuple the scraper saw. *int page is deep-copied so callers'
+// later mutations cannot poison the recorded value.
+func (f *fakeScraper) GetTopic(_ context.Context, id string, page *int, cookie string) (*gen.ForumTopicDto, error) {
+	f.mu.Lock()
+	f.topicCalls++
+	f.lastTopicID = id
+	if page != nil {
+		v := *page
+		f.lastTopicPage = &v
+	} else {
+		f.lastTopicPage = nil
+	}
+	f.lastTopicCk = cookie
+	r, e := f.topicReturn, f.topicErr
+	f.mu.Unlock()
+	return r, e
+}
+
+func (f *fakeScraper) GetTopicPage(_ context.Context, id string, page *int, cookie string) (*gen.TopicPageDto, error) {
+	f.mu.Lock()
+	f.topicPageCalls++
+	f.lastTopicPageID = id
+	if page != nil {
+		v := *page
+		f.lastTopicPagePage = &v
+	} else {
+		f.lastTopicPagePage = nil
+	}
+	f.lastTopicPageCk = cookie
+	r, e := f.topicPageReturn, f.topicPageErr
+	f.mu.Unlock()
+	return r, e
+}
+
+func (f *fakeScraper) GetCommentsPage(_ context.Context, id string, page *int, cookie string) (*gen.CommentsPageDto, error) {
+	f.mu.Lock()
+	f.commentsCalls++
+	f.lastCommentsID = id
+	if page != nil {
+		v := *page
+		f.lastCommentsPage = &v
+	} else {
+		f.lastCommentsPage = nil
+	}
+	f.lastCommentsCk = cookie
+	r, e := f.commentsReturn, f.commentsErr
 	f.mu.Unlock()
 	return r, e
 }
