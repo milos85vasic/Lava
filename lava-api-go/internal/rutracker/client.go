@@ -15,6 +15,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
+	"strings"
 	"time"
 
 	"digital.vasic.recovery/pkg/breaker"
@@ -24,6 +26,15 @@ import (
 // request was not attempted. Exposed as a sentinel so callers can map it
 // to HTTP 503 instead of the generic "upstream error" path.
 var ErrCircuitOpen = errors.New("rutracker: circuit breaker OPEN")
+
+// ErrUnauthorized is returned by the comment-posting / favorite mutating
+// flows when the supplied auth cookie is missing, the upstream main page
+// no longer reports a logged-in user, or the rotating form_token is not
+// present. Phase 7 handlers map this to HTTP 401.
+//
+// Ports the Kotlin `Unauthorized` exception thrown by VerifyTokenUseCase,
+// VerifyAuthorisedUseCase and WithFormTokenUseCase.
+var ErrUnauthorized = errors.New("rutracker: unauthorized")
 
 // Client is the rutracker.org HTTP client wrapped with a circuit breaker.
 type Client struct {
@@ -83,6 +94,55 @@ func (c *Client) Fetch(ctx context.Context, path, cookie string) ([]byte, int, e
 		// Treat 5xx as breaker-relevant errors: a flaky upstream that
 		// returns 502/503/504 should trip the breaker just like a TCP-
 		// level failure would.
+		if resp.StatusCode >= 500 {
+			return fmt.Errorf("rutracker upstream %d", resp.StatusCode)
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, 0, err
+	}
+	return body, status, nil
+}
+
+// PostForm performs a POST against base+path with the given form values
+// and cookie value (may be empty). Behaves like Fetch — wrapped by the
+// same circuit breaker, 5xx still trips the breaker, transient I/O
+// errors still count as breaker-relevant failures.
+//
+// The Content-Type is fixed to application/x-www-form-urlencoded — the
+// rutracker.org POST endpoints (postMessage, addBookmark, removeBookmark)
+// all consume url-encoded form data via $_POST. Mirrors Ktor's
+// `httpClient.submitForm(... formData { ... })` call shape.
+func (c *Client) PostForm(ctx context.Context, path string, form url.Values, cookie string) ([]byte, int, error) {
+	var (
+		body   []byte
+		status int
+	)
+	encoded := form.Encode()
+	err := c.breaker.Execute(func() error {
+		req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.base+path, strings.NewReader(encoded))
+		if err != nil {
+			return err
+		}
+		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+		if cookie != "" {
+			req.Header.Set("Cookie", cookie)
+		}
+		resp, err := c.http.Do(req)
+		if err != nil {
+			return err
+		}
+		defer func() { _ = resp.Body.Close() }()
+		b, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return err
+		}
+		body = b
+		status = resp.StatusCode
+		// Treat 5xx as breaker-relevant errors for parity with Fetch:
+		// a flaky upstream that returns 502/503/504 should trip the
+		// breaker just like a TCP-level failure would.
 		if resp.StatusCode >= 500 {
 			return fmt.Errorf("rutracker upstream %d", resp.StatusCode)
 		}
