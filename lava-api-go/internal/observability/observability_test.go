@@ -12,6 +12,8 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/testutil"
 )
 
 func TestLoggerRedactsAuthToken(t *testing.T) {
@@ -193,6 +195,70 @@ func TestMetricsHandlerScrapeContainsRequiredNames(t *testing.T) {
 		if !strings.Contains(body, name) {
 			t.Errorf("metric %q missing from scrape output", name)
 		}
+	}
+}
+
+// TestGinMiddlewareInstrumentsRequests verifies that the middleware
+// returned by (*Metrics).GinMiddleware() actually increments
+// HTTPRequestsTotal and observes a histogram value when a real
+// request flows through a Gin router. The test uses the production
+// Metrics with a fresh per-call registry — no fakes, no global
+// state.
+//
+// Sixth Law primary assertion: read the registered Prometheus
+// collector's value AFTER the request and assert it changed in the
+// expected way (counter went from 0 to 1, histogram observed exactly
+// one sample). A regression that drops the .Inc() call or labels the
+// counter wrongly fails on the testutil.ToFloat64 check.
+func TestGinMiddlewareInstrumentsRequests(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	m := NewMetrics(prometheus.NewRegistry())
+
+	r := gin.New()
+	r.Use(m.GinMiddleware())
+	r.GET("/probe", func(c *gin.Context) { c.String(http.StatusOK, "ok") })
+
+	// Pre-flight: counter for this label triple does not yet exist /
+	// is zero. ToFloat64 on a *CounterVec child created lazily by
+	// WithLabelValues would create+register a zero series; instead
+	// we drive the request first and read the resulting child.
+
+	req := httptest.NewRequest(http.MethodGet, "/probe", nil)
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("status=%d want 200", w.Code)
+	}
+	if w.Body.String() != "ok" {
+		t.Fatalf("body=%q want %q", w.Body.String(), "ok")
+	}
+
+	counter, err := m.HTTPRequestsTotal.GetMetricWithLabelValues("GET", "/probe", "2xx")
+	if err != nil {
+		t.Fatalf("GetMetricWithLabelValues counter: %v", err)
+	}
+	if got := testutil.ToFloat64(counter); got != 1 {
+		t.Fatalf("HTTPRequestsTotal{GET,/probe,2xx}=%v, want 1", got)
+	}
+
+	// CollectAndCount on the HistogramVec returns the number of
+	// distinct child time-series — exactly one after the request
+	// above (label set {GET,/probe}). A regression that fails to
+	// observe (or observes against a different label combo) drops
+	// this to 0 or pushes it above 1.
+	if got := testutil.CollectAndCount(m.HTTPRequestDurationSeconds); got != 1 {
+		t.Fatalf("HTTPRequestDurationSeconds child count=%d, want 1", got)
+	}
+
+	// Second request increments the counter again; this catches a
+	// regression that re-registers the metric per-request (or only
+	// observes once and short-circuits further .Inc() calls).
+	req2 := httptest.NewRequest(http.MethodGet, "/probe", nil)
+	w2 := httptest.NewRecorder()
+	r.ServeHTTP(w2, req2)
+	if got := testutil.ToFloat64(counter); got != 2 {
+		t.Fatalf("after second request, counter=%v, want 2", got)
 	}
 }
 

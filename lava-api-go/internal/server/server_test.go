@@ -109,6 +109,86 @@ func TestServerStartAndServeHTTP3(t *testing.T) {
 	}
 }
 
+// TestServerMetricsListenerServes200 verifies the dedicated localhost
+// metrics listener actually serves the metrics handler with a 200
+// response. The metrics handler is provided by the caller
+// (cmd/lava-api-go wires obsmetrics.MetricsHandler); here we use a
+// stub handler that emits a known body, drive a real GET via stdlib
+// net/http (HTTP/1.1, plain text, NOT HTTP/3 — that's the public
+// listener's job), and assert the body round-trips.
+//
+// Sixth Law primary assertion: body bytes — a regression that wires
+// nil, the wrong handler, or the wrong port fails on the body read.
+func TestServerMetricsListenerServes200(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	r := gin.New()
+	r.GET("/_unused", func(c *gin.Context) { c.String(http.StatusOK, "ok") })
+
+	tlsConf, _ := selfSignedTLS(t)
+
+	publicPort := freeUDPPort(t)
+	metricsPort := freeTCPPort(t)
+	publicAddr := "127.0.0.1:" + strconv.Itoa(publicPort)
+	metricsAddr := "127.0.0.1:" + strconv.Itoa(metricsPort)
+
+	const stubBody = "metrics-stub-OK"
+
+	srv, err := server.New(server.Config{
+		Listen:        publicAddr,
+		MetricsListen: metricsAddr,
+		Engine:        r,
+		MetricsHandler: http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			w.WriteHeader(http.StatusOK)
+			_, _ = w.Write([]byte(stubBody))
+		}),
+		TLSConfig: tlsConf,
+	})
+	if err != nil {
+		t.Fatalf("New: %v", err)
+	}
+
+	go func() { _ = srv.Start() }()
+	t.Cleanup(func() {
+		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+		defer cancel()
+		_ = srv.Shutdown(ctx)
+	})
+
+	// Wait for the TCP metrics listener to bind. Same shape as the
+	// HTTP/3 wait loop above, but on TCP.
+	deadline := time.Now().Add(2 * time.Second)
+	for time.Now().Before(deadline) {
+		c, derr := net.Dial("tcp", metricsAddr)
+		if derr == nil {
+			c.Close()
+			break
+		}
+		time.Sleep(20 * time.Millisecond)
+	}
+
+	if got := srv.MetricsAddr(); got != metricsAddr {
+		t.Fatalf("MetricsAddr()=%q want %q", got, metricsAddr)
+	}
+
+	cli := &http.Client{Timeout: 2 * time.Second}
+	resp, err := cli.Get("http://" + metricsAddr + "/metrics")
+	if err != nil {
+		t.Fatalf("metrics GET: %v", err)
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		t.Fatalf("read body: %v", err)
+	}
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("status=%d want 200", resp.StatusCode)
+	}
+	if !strings.Contains(string(body), stubBody) {
+		t.Fatalf("body=%q want substring %q", string(body), stubBody)
+	}
+}
+
 // TestServerRejectsMissingTLSConfig sanity-checks the New() validation
 // path. If the TLSConfig requirement is ever softened (it shouldn't —
 // HTTP/3 mandates TLS 1.3) this test fails.
