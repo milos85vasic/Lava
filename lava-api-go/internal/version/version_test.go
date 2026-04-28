@@ -19,13 +19,9 @@ func TestCodeIsPositive(t *testing.T) {
 	}
 }
 
-func TestNameAndCodeMatchInitialRelease(t *testing.T) {
-	// Pinned to spec §15 — initial release is 2.0.0 / 2000.
-	// When we cut a new release, this test gets bumped along with the constants.
-	if Name != "2.0.0" {
-		t.Errorf("Name = %q, want 2.0.0 for initial SP-2 release", Name)
-	}
-	if Code != 2000 {
-		t.Errorf("Code = %d, want 2000 for initial SP-2 release", Code)
-	}
-}
+// Removed: TestNameAndCodeMatchInitialRelease was the test-re-asserts-the-constant
+// anti-pattern. It would have rotted at every release tag because scripts/tag.sh
+// rewrites Name/Code mechanically — and a self-asserting test would just have to
+// be rewritten in lockstep, providing zero behavioural guarantee beyond what
+// TestNameIsStrictSemver and TestCodeIsPositive already enforce. The format
+// invariants are the real properties; the literal value is a moving target.

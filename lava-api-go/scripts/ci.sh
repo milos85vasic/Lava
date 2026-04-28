@@ -28,11 +28,17 @@ log()  { printf '\033[1;36m[ci]\033[0m %s\n' "$*"; }
 fail() { printf '\033[1;31m[ci:fail]\033[0m %s\n' "$*" >&2; exit 1; }
 
 # 1. go mod tidy invariant
+#
+# Run tidy, then assert no diff via `git diff --exit-code`. This is more robust
+# than sha256sum because it (a) doesn't silently pass when sha256sum is missing
+# from PATH, (b) doesn't depend on go.sum existing, (c) shows the actual diff
+# in CI output when the invariant fails.
 log "step 1/N  go mod tidy invariant"
-_pre="$(sha256sum go.mod go.sum 2>/dev/null | sort)"
 go mod tidy
-_post="$(sha256sum go.mod go.sum 2>/dev/null | sort)"
-[[ "$_pre" == "$_post" ]] || fail "go mod tidy produced a diff; commit the tidied result"
+if ! git diff --exit-code -- go.mod go.sum >/dev/null 2>&1; then
+  git --no-pager diff -- go.mod go.sum
+  fail "go mod tidy produced a diff; commit the tidied result"
+fi
 
 # 2. go vet
 log "step 2/N  go vet ./..."
