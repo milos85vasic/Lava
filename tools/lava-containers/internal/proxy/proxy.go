@@ -1,3 +1,12 @@
+// Package proxy is the Lava-domain orchestrator for the legacy Ktor proxy
+// container. Lava-specific by design: it knows about :proxy:buildFatJar, the
+// digital.vasic.lava.api image tag, the ADVERTISE_HOST env wiring, and the
+// _lava._tcp mDNS expectations.
+//
+// SP-2 will introduce a sibling orchestrator for the new Go API service, also
+// living under tools/lava-containers/internal/, and will rewire shared concerns
+// (runtime detection, IP scanning, lifecycle) to delegate to the
+// vasic-digital/Containers submodule.
 package proxy
 
 import (
@@ -9,38 +18,27 @@ import (
 	"path/filepath"
 	"time"
 
-	"digital.vasic.containers/internal/runtime"
+	"digital.vasic.lava.tools.containers/internal/runtime"
 )
 
-// ServiceName is the container/compose service name.
 const ServiceName = "lava-proxy"
-
-// DefaultPort is the proxy HTTP port.
 const DefaultPort = "8080"
 
-// Manager handles the lifecycle of the Lava proxy container.
 type Manager struct {
 	Runtime    *runtime.Runtime
 	ProjectDir string
 	Port       string
 }
 
-// NewManager creates a new proxy manager.
 func NewManager(projectDir string) (*Manager, error) {
 	r, err := runtime.Detect()
 	if err != nil {
 		return nil, err
 	}
-	return &Manager{
-		Runtime:    r,
-		ProjectDir: projectDir,
-		Port:       DefaultPort,
-	}, nil
+	return &Manager{Runtime: r, ProjectDir: projectDir, Port: DefaultPort}, nil
 }
 
-// DetectLANIP returns the host's primary LAN IP address.
 func DetectLANIP() string {
-	// Try to find a non-loopback, non-docker interface with an IPv4 address.
 	addrs, err := net.InterfaceAddrs()
 	if err != nil {
 		return "127.0.0.1"
@@ -57,7 +55,6 @@ func DetectLANIP() string {
 	return "127.0.0.1"
 }
 
-// BuildJar builds the proxy fat JAR using Gradle.
 func (m *Manager) BuildJar() error {
 	fmt.Println("[1/4] Building proxy fat JAR...")
 	gradlew := filepath.Join(m.ProjectDir, "gradlew")
@@ -68,7 +65,6 @@ func (m *Manager) BuildJar() error {
 	return cmd.Run()
 }
 
-// BuildImage builds the container image.
 func (m *Manager) BuildImage() error {
 	fmt.Println("[2/4] Building container image...")
 	cmd := m.Runtime.Run("build", "-t", "digital.vasic.lava.api:latest", "./proxy")
@@ -78,7 +74,6 @@ func (m *Manager) BuildImage() error {
 	return cmd.Run()
 }
 
-// Start brings up the proxy container with network discoverability.
 func (m *Manager) Start() error {
 	lanIP := DetectLANIP()
 	os.Setenv("ADVERTISE_HOST", lanIP)
@@ -109,7 +104,6 @@ func (m *Manager) Start() error {
 	return fmt.Errorf("service did not become healthy within 30 seconds")
 }
 
-// Stop shuts down the proxy container.
 func (m *Manager) Stop() error {
 	fmt.Println("Stopping Lava proxy container...")
 	composeFile := filepath.Join(m.ProjectDir, m.Runtime.ComposeFile())
@@ -124,7 +118,6 @@ func (m *Manager) Stop() error {
 	return nil
 }
 
-// Status prints the current status of the proxy container.
 func (m *Manager) Status() error {
 	fmt.Println("Lava Proxy Container Status")
 	fmt.Println("===========================")
@@ -138,7 +131,6 @@ func (m *Manager) Status() error {
 	return nil
 }
 
-// Logs streams the container logs.
 func (m *Manager) Logs(follow bool) error {
 	args := []string{"logs"}
 	if follow {

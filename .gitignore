@@ -13,4 +13,4 @@ local.properties
 keystores/
 .claude/
 releases/
-containers/bin/
+tools/lava-containers/bin/

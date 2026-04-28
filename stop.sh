@@ -10,11 +10,11 @@ cd "$SCRIPT_DIR"
 # Delegates to the Containers Go module to cleanly shut down the Lava proxy.
 # ------------------------------------------------------------------------------
 
-CONTAINERS_BIN="$SCRIPT_DIR/containers/bin/lava-containers"
+CONTAINERS_BIN="$SCRIPT_DIR/tools/lava-containers/bin/lava-containers"
 
 if [ ! -f "$CONTAINERS_BIN" ]; then
-    echo "Error: Containers tool not found. Run ./start.sh first or build it manually:"
-    echo "  cd containers && go build -o bin/lava-containers ./cmd/lava-containers"
+    echo "Error: Lava containers CLI not found. Run ./start.sh first or build it manually:"
+    echo "  cd tools/lava-containers && go build -o bin/lava-containers ./cmd/lava-containers"
     exit 1
 fi
 

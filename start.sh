@@ -7,17 +7,18 @@ cd "$SCRIPT_DIR"
 # ------------------------------------------------------------------------------
 # Lava Container Start Script
 # ------------------------------------------------------------------------------
-# Delegates to the Containers Go module (digital.vasic.containers) to bring
-# up the Lava proxy service with full LAN discoverability via mDNS.
+# Delegates to the Lava-domain CLI (tools/lava-containers) to bring up the
+# Lava proxy service with full LAN discoverability via mDNS. The Lava CLI is
+# thin glue; generic container-runtime concerns live in the upstream
+# vasic-digital/Containers submodule (Submodules/Containers/, pinned).
 # ------------------------------------------------------------------------------
 
-CONTAINERS_BIN="$SCRIPT_DIR/containers/bin/lava-containers"
+CONTAINERS_BIN="$SCRIPT_DIR/tools/lava-containers/bin/lava-containers"
 
-# Build the containers Go tool if not present
 if [ ! -f "$CONTAINERS_BIN" ]; then
-    echo "[containers] Building containers management tool..."
-    mkdir -p "$SCRIPT_DIR/containers/bin"
-    cd "$SCRIPT_DIR/containers"
+    echo "[lava-containers] Building Lava containers CLI..."
+    mkdir -p "$SCRIPT_DIR/tools/lava-containers/bin"
+    cd "$SCRIPT_DIR/tools/lava-containers"
     go build -o "$CONTAINERS_BIN" ./cmd/lava-containers
     cd "$SCRIPT_DIR"
 fi

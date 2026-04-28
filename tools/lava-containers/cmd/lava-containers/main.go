@@ -1,3 +1,10 @@
+// Lava-domain CLI: orchestrates the legacy Ktor proxy container's lifecycle.
+//
+// This is intentionally Lava-specific (knows about gradlew, the proxy module,
+// the digital.vasic.lava.api image). Generic container-runtime concerns are
+// handled by vasic-digital/Containers (mounted at /Submodules/Containers/);
+// SP-2 will rewire this CLI to delegate runtime detection / IP scanning /
+// lifecycle to upstream APIs.
 package main
 
 import (
@@ -6,7 +13,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"digital.vasic.containers/internal/proxy"
+	"digital.vasic.lava.tools.containers/internal/proxy"
 )
 
 func main() {
@@ -61,30 +68,25 @@ func main() {
 }
 
 func runStart(mgr *proxy.Manager) error {
-	// Build JAR if missing
 	jarPath := filepath.Join(mgr.ProjectDir, "proxy", "build", "libs", "app.jar")
 	if _, err := os.Stat(jarPath); os.IsNotExist(err) {
 		if err := mgr.BuildJar(); err != nil {
 			return err
 		}
 	}
-	// Build image
 	if err := mgr.BuildImage(); err != nil {
 		return err
 	}
-	// Start container
 	return mgr.Start()
 }
 
 func autoDetectProjectDir() string {
-	// If running from containers/ directory, go up one level.
 	exe, err := os.Executable()
 	if err != nil {
 		wd, _ := os.Getwd()
 		return wd
 	}
 	dir := filepath.Dir(exe)
-	// Walk up until we find gradlew or proxy/ directory
 	for {
 		if _, err := os.Stat(filepath.Join(dir, "gradlew")); err == nil {
 			return dir

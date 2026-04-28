@@ -33,7 +33,7 @@ The repo is a fork of `andrikeev/Flow`, rebranded to Lava. All code/comments/doc
 # Run the proxy locally (with LAN mDNS discovery)
 ./start.sh                            # builds JAR + image, starts container, advertises _lava._tcp
 ./stop.sh                             # stops + removes the container
-./containers/bin/lava-containers -cmd=status   # runtime, health, advertised IPs
+./tools/lava-containers/bin/lava-containers -cmd=status   # runtime, health, advertised IPs
 
 # Code style (Spotless + ktlint — the only enforced checker)
 ./gradlew spotlessApply               # run before committing
@@ -44,7 +44,7 @@ The repo is a fork of `andrikeev/Flow`, rebranded to Lava. All code/comments/doc
 ./gradlew :core:preferences:test --tests "lava.securestorage.EndpointConverterTest"
 ```
 
-`./start.sh` delegates to the `containers/` Go module (`digital.vasic.containers`), which auto-detects Podman or Docker, builds the proxy fat JAR + image, and runs it via `docker-compose.yml`. The compose file uses **`network_mode: host`** so JmDNS broadcasts reach the LAN — the Android debug build then auto-discovers the proxy via `NsdManager` (`_lava._tcp.local.`).
+`./start.sh` delegates to the Lava-domain CLI at `tools/lava-containers/`, which auto-detects Podman or Docker, builds the proxy fat JAR + image, and runs it via `docker-compose.yml`. Generic container-runtime concerns are owned by the upstream `vasic-digital/Containers` submodule mounted at `Submodules/Containers/` (pinned hash); the local CLI is thin glue per the Decoupled Reusable Architecture constitutional rule. The compose file uses **`network_mode: host`** so JmDNS broadcasts reach the LAN — the Android debug build then auto-discovers the proxy via `NsdManager` (`_lava._tcp.local.`).
 
 Signing requires a `.env` at the repo root with `KEYSTORE_PASSWORD` and `KEYSTORE_ROOT_DIR` (see `.env.example`); keystores live in `keystores/` (gitignored). The app build also expects `app/google-services.json` (gitignored) for Firebase.
 
