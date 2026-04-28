@@ -54,7 +54,8 @@ import (
 type ScraperClient interface {
 	GetForum(ctx context.Context, cookie string) (*gen.ForumDto, error)
 	GetCategoryPage(ctx context.Context, forumID string, page *int, cookie string) (*gen.CategoryPageDto, error)
-	// Phase 7.2-7.7 will append more methods here.
+	GetSearchPage(ctx context.Context, opts rutracker.SearchOpts, cookie string) (*gen.SearchPageDto, error)
+	// Phase 7.3-7.7 will append more methods here.
 }
 
 // Compile-time assertion that the production scraper type satisfies the
@@ -93,7 +94,10 @@ func Register(router *gin.Engine, deps *Deps) {
 	forum := NewForumHandler(deps)
 	router.GET("/forum", forum.GetForum)
 	router.GET("/forum/:id", forum.GetCategoryPage)
-	// Phase 7.2-7.7 will append more route registrations here.
+
+	search := NewSearchHandler(deps)
+	router.GET("/search", search.GetSearch)
+	// Phase 7.3-7.7 will append more route registrations here.
 }
 
 // writeUpstreamError maps the rutracker package's sentinel errors to

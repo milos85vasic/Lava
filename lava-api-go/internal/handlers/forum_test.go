@@ -105,6 +105,12 @@ type fakeScraper struct {
 	lastCategoryCk   string
 	categoryReturn   *gen.CategoryPageDto
 	categoryErr      error
+
+	searchCalls    int
+	lastSearchOpts rutracker.SearchOpts
+	lastSearchCk   string
+	searchReturn   *gen.SearchPageDto
+	searchErr      error
 }
 
 func (f *fakeScraper) GetForum(_ context.Context, cookie string) (*gen.ForumDto, error) {
@@ -128,6 +134,55 @@ func (f *fakeScraper) GetCategoryPage(_ context.Context, forumID string, page *i
 	}
 	f.lastCategoryCk = cookie
 	r, e := f.categoryReturn, f.categoryErr
+	f.mu.Unlock()
+	return r, e
+}
+
+// GetSearchPage records the eight-field SearchOpts pointer-by-pointer so
+// search_test.go can deep-equal each forwarded parameter. Pointer fields
+// are deep-copied (the handler may rewrite the pointed-to memory after
+// return).
+func (f *fakeScraper) GetSearchPage(_ context.Context, opts rutracker.SearchOpts, cookie string) (*gen.SearchPageDto, error) {
+	f.mu.Lock()
+	f.searchCalls++
+	// Deep-copy the SearchOpts so callers' subsequent mutations cannot
+	// poison the recorded value.
+	copied := rutracker.SearchOpts{}
+	if opts.Query != nil {
+		v := *opts.Query
+		copied.Query = &v
+	}
+	if opts.Categories != nil {
+		v := *opts.Categories
+		copied.Categories = &v
+	}
+	if opts.Author != nil {
+		v := *opts.Author
+		copied.Author = &v
+	}
+	if opts.AuthorID != nil {
+		v := *opts.AuthorID
+		copied.AuthorID = &v
+	}
+	if opts.SortType != nil {
+		v := *opts.SortType
+		copied.SortType = &v
+	}
+	if opts.SortOrder != nil {
+		v := *opts.SortOrder
+		copied.SortOrder = &v
+	}
+	if opts.Period != nil {
+		v := *opts.Period
+		copied.Period = &v
+	}
+	if opts.Page != nil {
+		v := *opts.Page
+		copied.Page = &v
+	}
+	f.lastSearchOpts = copied
+	f.lastSearchCk = cookie
+	r, e := f.searchReturn, f.searchErr
 	f.mu.Unlock()
 	return r, e
 }
