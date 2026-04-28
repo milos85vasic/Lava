@@ -4,18 +4,29 @@
 //	stop.sh
 //	scripts/tag.sh
 //	build_and_release.sh
+//	lava-api-go/scripts/pretag-verify.sh   (Phase 13.1)
+//	lava-api-go/scripts/mutation.sh        (Phase 13.2)
+//	lava-api-go/scripts/ci.sh              (Phase 13.3 — security gates)
 //
 // (a) parse with `bash -n` (no syntax errors), and
-// (b) contain the SP-2 Phase 12 wiring strings the production flow depends on:
+// (b) contain the SP-2 Phase 12 + Phase 13 wiring strings the production flow
+//     depends on:
 //   - start.sh forwards --legacy / --both / --with-observability / --dev-docs
 //   - tag.sh registers the api-go app with prefix Lava-API-Go-
+//   - tag.sh refuses to operate without .lava-ci-evidence/<commit>.json
+//     for api-go (bypass: --no-evidence-required)
 //   - build_and_release.sh populates releases/{version}/api-go/
+//   - pretag-verify.sh emits .lava-ci-evidence/<commit>.json with checks/
+//     timestamp/base_url/exit_code
+//   - mutation.sh wraps go-mutesting
+//   - ci.sh appends gosec / govulncheck / trivy with LAVA_CI_SKIP_<TOOL>
+//     and --strict
 //
 // (c) `scripts/tag.sh --dry-run --app api-go` prints the expected tag string
-// without performing any git mutations. This is the falsifiability target:
-// dropping `api-go` from SUPPORTED_APPS in tag.sh, or stripping the
-// Lava-API-Go- prefix wiring, makes TestTagShContainsApiGo or
-// TestTagShDryRunApiGoEmitsTag fail loudly.
+// without performing any git mutations. This is the falsifiability target
+// for Phase 12; Phase 13 adds TestTagShReferencesEvidenceGate as the
+// falsifiability target for the evidence-required gate (drop the
+// require_evidence_for_apigo call → that test fails).
 //
 // These tests are pure shell-text inspection plus one safe invocation of
 // tag.sh in --dry-run mode (which is documented as not touching git or
@@ -257,5 +268,122 @@ func extractFirstNumber(t *testing.T, src, key string) string {
 			continue
 		}
 		return tail[:end]
+	}
+}
+
+// ----------------------------------------------------------------------
+// SP-2 Phase 13 tests
+//
+// (1) lava-api-go/scripts/pretag-verify.sh exists, is executable, parses,
+//     and contains the load-bearing strings (.lava-ci-evidence, commit,
+//     the JSON-emit shape).
+// (2) lava-api-go/scripts/mutation.sh exists, parses, and references
+//     go-mutesting.
+// (3) lava-api-go/scripts/ci.sh references gosec, govulncheck, and trivy
+//     (Phase 13.3 security gates).
+// (4) scripts/tag.sh references the pretag evidence gate
+//     (`pretag-verify` AND `.lava-ci-evidence`) — falsifiability target:
+//     dropping the require_evidence_for_apigo call from the api-go
+//     dispatch, or removing the .lava-ci-evidence reference, makes
+//     TestTagShReferencesEvidenceGate fail.
+// ----------------------------------------------------------------------
+
+func TestPretagVerifyShParses(t *testing.T) {
+	bashSyntaxCheck(t, repoRoot(t), "lava-api-go/scripts/pretag-verify.sh")
+}
+
+func TestPretagVerifyShIsExecutable(t *testing.T) {
+	root := repoRoot(t)
+	rel := "lava-api-go/scripts/pretag-verify.sh"
+	info, err := os.Stat(filepath.Join(root, rel))
+	if err != nil {
+		t.Fatalf("stat %s: %v", rel, err)
+	}
+	// Any execute bit (owner/group/other) is sufficient — exec.LookPath
+	// resolves a script as runnable if the OS would run it. We assert at
+	// least the owner-execute bit (0o100) is set.
+	if info.Mode()&0o100 == 0 {
+		t.Fatalf("%s is not executable; mode=%v", rel, info.Mode())
+	}
+}
+
+func TestPretagVerifyShContainsExpectedStrings(t *testing.T) {
+	body := readScript(t, repoRoot(t), "lava-api-go/scripts/pretag-verify.sh")
+	for _, want := range []string{
+		// Evidence directory — load-bearing for the tag.sh gate.
+		".lava-ci-evidence",
+		// Computes the commit SHA to key the evidence file.
+		"git rev-parse HEAD",
+		"commit",
+		// Five user-flow steps.
+		"/forum",
+		"/search",
+		"/torrent/",
+		"/favorites",
+		// JSON-emit pattern (the recorded fields from spec §13.1).
+		`"checks"`,
+		`"exit_code"`,
+		`"timestamp"`,
+		`"base_url"`,
+		// Operator-bypass discipline: must NOT auto-start the stack.
+		"./start.sh",
+	} {
+		if !strings.Contains(body, want) {
+			t.Errorf("pretag-verify.sh missing expected substring %q", want)
+		}
+	}
+}
+
+func TestMutationShParses(t *testing.T) {
+	bashSyntaxCheck(t, repoRoot(t), "lava-api-go/scripts/mutation.sh")
+}
+
+func TestMutationShReferencesGoMutesting(t *testing.T) {
+	body := readScript(t, repoRoot(t), "lava-api-go/scripts/mutation.sh")
+	for _, want := range []string{
+		"go-mutesting",
+		"github.com/zimmski/go-mutesting",
+		"mutation-report",
+	} {
+		if !strings.Contains(body, want) {
+			t.Errorf("mutation.sh missing expected substring %q", want)
+		}
+	}
+}
+
+func TestCiShReferencesSecurityGates(t *testing.T) {
+	body := readScript(t, repoRoot(t), "lava-api-go/scripts/ci.sh")
+	for _, want := range []string{
+		"gosec",
+		"govulncheck",
+		"trivy",
+		// Per-tool bypass env vars must be honoured.
+		"LAVA_CI_SKIP_GOSEC",
+		"LAVA_CI_SKIP_GOVULNCHECK",
+		"LAVA_CI_SKIP_TRIVY",
+		// --strict mode flag (Phase 14 acceptance).
+		"--strict",
+	} {
+		if !strings.Contains(body, want) {
+			t.Errorf("ci.sh missing expected substring %q", want)
+		}
+	}
+}
+
+// TestTagShReferencesEvidenceGate is the falsifiability anchor for the
+// Phase 13 wiring: removing the require_evidence_for_apigo call from
+// scripts/tag.sh's api-go dispatch, or stripping the .lava-ci-evidence
+// reference, must make this test fail loudly.
+func TestTagShReferencesEvidenceGate(t *testing.T) {
+	body := readScript(t, repoRoot(t), "scripts/tag.sh")
+	for _, want := range []string{
+		"pretag-verify",
+		".lava-ci-evidence",
+		"require_evidence_for_apigo",
+		"--no-evidence-required",
+	} {
+		if !strings.Contains(body, want) {
+			t.Errorf("tag.sh missing expected substring %q (Phase 13.1 evidence-required gate)", want)
+		}
 	}
 }

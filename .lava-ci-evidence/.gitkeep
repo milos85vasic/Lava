@@ -1,0 +1,9 @@
+# SP-2 Phase 13.1 — pretag verification evidence trail.
+#
+# lava-api-go/scripts/pretag-verify.sh writes <commit>.json files into this
+# directory after a successful real-device user-flow run. scripts/tag.sh's
+# api-go dispatch refuses to operate without a matching evidence file
+# (Sixth Law clause 5: release tag gate).
+#
+# These JSON files ARE committed to git — the audit trail is durable per
+# spec §15. Do NOT add `*.json` to .gitignore for this directory.

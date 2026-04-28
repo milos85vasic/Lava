@@ -22,6 +22,7 @@ DO_BUMP=true
 DO_PUSH=true
 BUMP_PART="patch"
 TARGET_APP="all"
+NO_EVIDENCE_REQUIRED=false
 declare -a EXPLICIT_REMOTES=()
 
 # Default upstreams (used if --remote is not given).
@@ -69,6 +70,12 @@ OPTIONS
                           versionCode is always incremented by 1.
       --no-bump           Skip the post-tag version bump.
       --no-push           Do not push tags or bump commit; tag/commit locally only.
+      --no-evidence-required
+                          (api-go only) Bypass the .lava-ci-evidence/<commit>.json
+                          requirement. Reserved for --dry-run rehearsals and
+                          documented operator emergencies; routine releases
+                          MUST run lava-api-go/scripts/pretag-verify.sh first
+                          to produce the evidence file.
       --remote <name>     Push only to this named git remote. Repeat to push to
                           a custom subset (e.g. --remote github --remote gitlab).
                           When omitted, every default upstream that is
@@ -109,6 +116,7 @@ while [[ $# -gt 0 ]]; do
     --bump)           BUMP_PART="${2:-}"; shift 2 ;;
     --no-bump)        DO_BUMP=false; shift ;;
     --no-push)        DO_PUSH=false; shift ;;
+    --no-evidence-required) NO_EVIDENCE_REQUIRED=true; shift ;;
     --remote)         EXPLICIT_REMOTES+=("${2:-}"); shift 2 ;;
     *)                die "Unknown option: $1 (try --help)" ;;
   esac
@@ -187,6 +195,28 @@ read_apigo_version_code() {
     '^[[:space:]]*Code *= *[0-9]+' \
     's/.*Code *= *([0-9]+).*/\1/' \
     "API-Go Code"
+}
+
+# Sixth Law clause 5: refuse to tag api-go without a matching pretag
+# evidence file produced by lava-api-go/scripts/pretag-verify.sh against
+# the current HEAD. Bypass with --no-evidence-required for --dry-run
+# rehearsals and documented operator emergencies.
+require_evidence_for_apigo() {
+  if $NO_EVIDENCE_REQUIRED; then
+    warn "[api-go] --no-evidence-required: bypassing .lava-ci-evidence/<commit>.json gate"
+    return 0
+  fi
+  if $DRY_RUN; then
+    warn "[api-go] --dry-run: bypassing .lava-ci-evidence/<commit>.json gate"
+    return 0
+  fi
+  local commit
+  commit="$(git rev-parse HEAD)"
+  local evidence_file="$REPO_ROOT/.lava-ci-evidence/${commit}.json"
+  if [[ ! -f "$evidence_file" ]]; then
+    die "Cannot tag api-go: no pretag evidence file found at $evidence_file. Run lava-api-go/scripts/pretag-verify.sh first."
+  fi
+  log "[api-go] pretag evidence found: $evidence_file"
 }
 
 bump_semver() {
@@ -316,6 +346,7 @@ for app in "${TARGETS[@]}"; do
       writer=write_api_versions
       ;;
     api-go)
+      require_evidence_for_apigo
       tag_suffix="API-Go"
       vname=$(read_apigo_version_name)
       vcode=$(read_apigo_version_code)
