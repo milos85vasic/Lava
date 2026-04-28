@@ -2,7 +2,10 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-> **See also:** `AGENTS.md` contains a more detailed agent guide (tech stack versions, deployment, security notes). Read it for anything not covered here.
+> **See also:**
+> - `AGENTS.md` — detailed agent guide (tech stack versions, deployment, security notes).
+> - `core/CLAUDE.md` and `feature/CLAUDE.md` — scoped Anti-Bluff rules that apply only inside those trees.
+> - `docs/ARCHITECTURE.md`, `docs/LOCAL_NETWORK_DISCOVERY.md` — architecture diagrams and the mDNS discovery flow.
 
 ## Project
 
@@ -27,6 +30,11 @@ The repo is a fork of `andrikeev/Flow`, rebranded to Lava. All code/comments/doc
 # Build all artifacts and copy to releases/
 ./build_and_release.sh                # → releases/{version}/android-{debug|release}/, releases/{version}/proxy/
 
+# Run the proxy locally (with LAN mDNS discovery)
+./start.sh                            # builds JAR + image, starts container, advertises _lava._tcp
+./stop.sh                             # stops + removes the container
+./containers/bin/lava-containers -cmd=status   # runtime, health, advertised IPs
+
 # Code style (Spotless + ktlint — the only enforced checker)
 ./gradlew spotlessApply               # run before committing
 ./gradlew spotlessCheck
@@ -35,6 +43,8 @@ The repo is a fork of `andrikeev/Flow`, rebranded to Lava. All code/comments/doc
 ./gradlew test
 ./gradlew :core:preferences:test --tests "lava.securestorage.EndpointConverterTest"
 ```
+
+`./start.sh` delegates to the `containers/` Go module (`digital.vasic.containers`), which auto-detects Podman or Docker, builds the proxy fat JAR + image, and runs it via `docker-compose.yml`. The compose file uses **`network_mode: host`** so JmDNS broadcasts reach the LAN — the Android debug build then auto-discovers the proxy via `NsdManager` (`_lava._tcp.local.`).
 
 Signing requires a `.env` at the repo root with `KEYSTORE_PASSWORD` and `KEYSTORE_ROOT_DIR` (see `.env.example`); keystores live in `keystores/` (gitignored). The app build also expects `app/google-services.json` (gitignored) for Firebase.
 
@@ -62,6 +72,7 @@ Dependency direction: `app → feature:* → core:domain → core:data → core:
 - **Serialization:** `kotlinx-serialization-json` — apply `lava.kotlin.serialization` rather than configuring it ad hoc.
 - **Versions / deps:** add to `gradle/libs.versions.toml` and reference via the version catalog (`libs.findLibrary(...)` in convention plugins, `libs.xxx` in module scripts). Don't hard-code versions.
 - **TV support:** `TvActivity` extends `MainActivity` and flips `PlatformType` to `TV`; manifest declares `android.software.leanback` and `android.hardware.touchscreen` as not required.
+- **Local network discovery:** `core:data` exposes `LocalNetworkDiscoveryService` (Android `NsdManager`, service type `_lava._tcp.local.`) consumed by `DiscoverLocalEndpointsUseCase` in `core:domain` and triggered from `feature:menu`. See `docs/LOCAL_NETWORK_DISCOVERY.md` for the full flow.
 
 ### Release build quirks
 
@@ -113,6 +124,7 @@ Test coverage is essentially zero today. The only existing unit test is `core/pr
 - Adding XML layouts or Fragment-based screens.
 - Adding a `composeOptions { kotlinCompilerExtensionVersion = ... }` block — Compose is managed by the Kotlin Compose compiler plugin + BOM.
 - Committing `.env`, `keystores/`, or `app/google-services.json`.
+- Letting a `Test*` fake in `:core:testing` drift from its real counterpart — that is a "bluff fake" under the Anti-Bluff Pact and must be updated in the same commit as the real implementation.
 
 ---
 
