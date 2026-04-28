@@ -22,8 +22,10 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
+	"net/url"
 	"strconv"
 	"time"
 
@@ -136,6 +138,39 @@ func (h *TopicHandler) GetTopicPage(c *gin.Context) {
 	// cache.Set error is non-fatal: response succeeds even if the write fails (caller already has the body).
 	_ = h.cache.Set(c.Request.Context(), key, body, topicGroupTTL)
 	c.Data(http.StatusOK, "application/json", body)
+}
+
+// invalidateTopicCacheKeys is the Phase 7 task 7.4 cache-invalidation
+// helper. POST /comments/{id}/add MUST invalidate the cached read
+// responses for the same topic id across the three sibling routes —
+// /topic/{id}, /topic2/{id}, and /comments/{id} — so the next GET
+// reflects the post-write state.
+//
+// The keys produced here MUST match exactly the keys the three GET
+// handlers above produce when called with NO query parameters: same
+// (method, routeTemplate, pathVars, query, realm) tuple. Paginated GETs
+// (?page=2 etc.) hash to different keys and are NOT invalidated; the
+// 5-minute topicGroupTTL keeps the cross-page staleness window short
+// and the Phase 10 cross-backend parity test pins the wire shape.
+//
+// Realm scope: invalidation is realm-keyed — only the writer's realm
+// hash is invalidated, NOT every realm's cached view of the topic. This
+// keeps the cache.Key API deterministic (no "delete by prefix" needed)
+// at the cost of a brief cross-user staleness window bounded by
+// topicGroupTTL.
+//
+// Each Invalidate error is intentionally `_ =`'d: cache invalidation
+// is best-effort, the comment-post itself is what matters, and the
+// caller's response should still go out on a cache outage.
+func invalidateTopicCacheKeys(ctx context.Context, c Cache, topicID, realm string) {
+	pathVars := map[string]string{"id": topicID}
+	emptyQuery := url.Values{}
+	for _, route := range []string{topicRouteTemplate, topicPageRouteTemplate, commentsRouteTemplate} {
+		key := cache.Key(http.MethodGet, route, pathVars, emptyQuery, realm)
+		// Best-effort: Invalidate may fail on a transient cache outage;
+		// the comment was already posted upstream.
+		_ = c.Invalidate(ctx, key)
+	}
 }
 
 // GetCommentsPage implements GET /comments/{id}. Returns the pure

@@ -47,9 +47,15 @@ import (
 // fakeCache is a minimal in-memory Cache that satisfies the handlers.Cache
 // surface. No TTL expiry simulation — handler tests don't need it (the
 // cache.Client integration test pins TTL semantics against real Postgres).
+//
+// invalidateCalls counts Invalidate() invocations so Phase 7 task 7.4
+// tests can assert the comments-add handler ran its three-key
+// invalidation even when the underlying entries weren't cached yet (a
+// silently-rejected post still triggers invalidation, per spec §6.1).
 type fakeCache struct {
-	mu    sync.Mutex
-	store map[string][]byte
+	mu              sync.Mutex
+	store           map[string][]byte
+	invalidateCalls int
 }
 
 func newFakeCache() *fakeCache { return &fakeCache{store: map[string][]byte{}} }
@@ -79,8 +85,19 @@ func (f *fakeCache) Set(_ context.Context, key string, value []byte, _ time.Dura
 func (f *fakeCache) Invalidate(_ context.Context, key string) error {
 	f.mu.Lock()
 	defer f.mu.Unlock()
+	f.invalidateCalls++
 	delete(f.store, key)
 	return nil
+}
+
+// has reports whether `key` is present in the store. Used by
+// comments_add_test.go to assert the three topic-related cache keys
+// were removed by the handler's invalidation pass.
+func (f *fakeCache) has(key string) bool {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	_, ok := f.store[key]
+	return ok
 }
 
 func (f *fakeCache) size() int {
@@ -132,6 +149,13 @@ type fakeScraper struct {
 	lastCommentsCk   string
 	commentsReturn   *gen.CommentsPageDto
 	commentsErr      error
+
+	addCommentCalls       int
+	lastAddCommentID      string
+	lastAddCommentMessage string
+	lastAddCommentCookie  string
+	addCommentResult      bool
+	addCommentErr         error
 }
 
 func (f *fakeScraper) GetForum(_ context.Context, cookie string) (*gen.ForumDto, error) {
@@ -255,6 +279,23 @@ func (f *fakeScraper) GetCommentsPage(_ context.Context, id string, page *int, c
 	}
 	f.lastCommentsCk = cookie
 	r, e := f.commentsReturn, f.commentsErr
+	f.mu.Unlock()
+	return r, e
+}
+
+// AddComment records (topicID, message, cookie) so comments_add_test.go
+// can assert the handler forwarded the path-param id and the raw body
+// bytes verbatim. addCommentResult / addCommentErr are programmable so
+// tests cover happy-path-true, silent-reject-false, ErrUnauthorized
+// (both empty-cookie and missing-form-token branches), and generic
+// upstream errors.
+func (f *fakeScraper) AddComment(_ context.Context, topicID, message, cookie string) (bool, error) {
+	f.mu.Lock()
+	f.addCommentCalls++
+	f.lastAddCommentID = topicID
+	f.lastAddCommentMessage = message
+	f.lastAddCommentCookie = cookie
+	r, e := f.addCommentResult, f.addCommentErr
 	f.mu.Unlock()
 	return r, e
 }
