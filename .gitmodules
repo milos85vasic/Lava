@@ -34,3 +34,6 @@
 [submodule "Submodules/Discovery"]
 	path = Submodules/Discovery
 	url = git@github.com:vasic-digital/Discovery.git
+[submodule "Submodules/HTTP3"]
+	path = Submodules/HTTP3
+	url = git@github.com:vasic-digital/HTTP3.git
