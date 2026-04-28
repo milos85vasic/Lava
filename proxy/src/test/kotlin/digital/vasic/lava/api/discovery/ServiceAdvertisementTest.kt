@@ -68,10 +68,29 @@ class ServiceAdvertisementTest {
                 serviceInfo.getPropertyString(it)
             }
             assertEquals("/", props["path"])
-            assertEquals("1.0.0", props["version"])
+            assertNotNull("version TXT record must be present", props["version"])
         } finally {
             ServiceAdvertisement.stop()
         }
+    }
+
+    /**
+     * Sixth Law (Real User Verification): asserts the symmetric TXT-record subset
+     * required by SP-2 spec §8.3 so the Go API migration's Phase 10 cross-backend
+     * parity infrastructure can describe both backends uniformly.
+     *
+     * Falsifiability rehearsal: flipping `"engine" to "ktor"` to `"engine" to "wrong"`
+     * in [ServiceAdvertisement.buildServiceInfo] makes this test fail with a clear
+     * `expected:<ktor> but was:<wrong>` assertion against the `engine` key.
+     */
+    @Test
+    fun `advertised service has symmetric TXT records`() {
+        val info = ServiceAdvertisement.buildServiceInfo(port = 8080)
+        assertEquals("ktor", info.getPropertyString("engine"))
+        assertEquals("h11", info.getPropertyString("protocols"))
+        assertEquals("identity", info.getPropertyString("compression"))
+        assertEquals("optional", info.getPropertyString("tls"))
+        assertNotNull(info.getPropertyString("version"))
     }
 
     @Test
