@@ -1,0 +1,1305 @@
+openapi: 3.1.0
+
+info:
+  title: Lava API
+  version: "2.0.0"
+  summary: Unofficial JSON API for the rutracker.org tracker.
+  description: |
+    Lava API is the JSON-REST surface consumed by the Lava Android client. It
+    proxies and structures content from rutracker.org, applying response caching,
+    audit logging, and per-IP rate limiting at the API tier.
+
+    This OpenAPI 3.1 document is the source of truth for the wire contract.
+    The legacy Kotlin/Ktor proxy (Lava-API 1.x, default port 8080, mDNS
+    `_lava._tcp`) and the Go service (Lava-API-Go 2.x, default port 8443,
+    mDNS `_lava-api._tcp`) MUST produce byte-equivalent responses for every
+    route below. This is enforced by `lava-api-go/tests/parity/`.
+
+    Sealed-class hierarchies (e.g., AuthResponseDto, PostElementDto, ForumTopicDto,
+    ColorValue) are encoded by kotlinx.serialization with the default class
+    discriminator field `type`. The discriminator value is the @SerialName
+    of the concrete subclass. Schemas below mirror that on-the-wire shape
+    via `oneOf` + `discriminator`.
+
+    See `docs/superpowers/specs/2026-04-28-sp2-go-api-migration-design.md` for
+    the architectural backdrop and the constitutional rules that bind the
+    implementation.
+  license:
+    name: MIT
+    identifier: MIT
+
+servers:
+  - url: https://localhost:8443
+    description: Local development (Go service over HTTP/3)
+  - url: http://localhost:8080
+    description: Local development (legacy Kotlin proxy)
+
+components:
+  parameters:
+    AuthToken:
+      name: Auth-Token
+      in: header
+      required: false
+      schema:
+        type: string
+      description: |
+        Opaque rutracker session identifier (forwarded as cookie to upstream).
+        Read in Ktor today via `call.request.headers["Auth-Token"].orEmpty()`,
+        so an absent or empty value is permitted. Routes that genuinely require
+        authentication (favorites, post comment) will return an error response
+        from rutracker upstream when the token is missing.
+
+  schemas:
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
+        details:
+          type: string
+
+    # --- auth/UserDto.kt ---
+    UserDto:
+      type: object
+      required: [id, token, avatarUrl]
+      properties:
+        id:
+          type: string
+        token:
+          type: string
+        avatarUrl:
+          type: string
+
+    # --- auth/CaptchaDto.kt ---
+    CaptchaDto:
+      type: object
+      required: [id, code, url]
+      properties:
+        id:
+          type: string
+        code:
+          type: string
+        url:
+          type: string
+
+    # --- auth/AuthResponseDto.kt (sealed interface, classDiscriminator "type") ---
+    AuthResponseDto:
+      oneOf:
+        - $ref: '#/components/schemas/AuthResponseDtoSuccess'
+        - $ref: '#/components/schemas/AuthResponseDtoWrongCredits'
+        - $ref: '#/components/schemas/AuthResponseDtoCaptchaRequired'
+      discriminator:
+        propertyName: type
+        mapping:
+          Success: '#/components/schemas/AuthResponseDtoSuccess'
+          WrongCredits: '#/components/schemas/AuthResponseDtoWrongCredits'
+          CaptchaRequired: '#/components/schemas/AuthResponseDtoCaptchaRequired'
+
+    AuthResponseDtoSuccess:
+      type: object
+      required: [type, user]
+      properties:
+        type:
+          type: string
+          const: Success
+        user:
+          $ref: '#/components/schemas/UserDto'
+
+    AuthResponseDtoWrongCredits:
+      type: object
+      required: [type]
+      properties:
+        type:
+          type: string
+          const: WrongCredits
+        captcha:
+          oneOf:
+            - $ref: '#/components/schemas/CaptchaDto'
+            - type: 'null'
+
+    AuthResponseDtoCaptchaRequired:
+      type: object
+      required: [type]
+      properties:
+        type:
+          type: string
+          const: CaptchaRequired
+        captcha:
+          oneOf:
+            - $ref: '#/components/schemas/CaptchaDto'
+            - type: 'null'
+
+    # --- forum/CategoryDto.kt (recursive) ---
+    CategoryDto:
+      type: object
+      required: [name]
+      properties:
+        id:
+          oneOf:
+            - type: string
+            - type: 'null'
+        name:
+          type: string
+        children:
+          oneOf:
+            - type: array
+              items:
+                $ref: '#/components/schemas/CategoryDto'
+            - type: 'null'
+
+    # --- forum/SectionDto.kt ---
+    SectionDto:
+      type: object
+      required: [name, topics]
+      properties:
+        name:
+          type: string
+        topics:
+          type: array
+          items:
+            type: string
+
+    # --- forum/ForumDto.kt ---
+    ForumDto:
+      type: object
+      required: [children]
+      properties:
+        children:
+          type: array
+          items:
+            $ref: '#/components/schemas/CategoryDto'
+
+    # --- forum/CategoryPageDto.kt ---
+    CategoryPageDto:
+      type: object
+      required: [category, page, pages]
+      properties:
+        category:
+          $ref: '#/components/schemas/CategoryDto'
+        page:
+          type: integer
+          format: int32
+        pages:
+          type: integer
+          format: int32
+        sections:
+          oneOf:
+            - type: array
+              items:
+                $ref: '#/components/schemas/SectionDto'
+            - type: 'null'
+        children:
+          oneOf:
+            - type: array
+              items:
+                $ref: '#/components/schemas/CategoryDto'
+            - type: 'null'
+        topics:
+          oneOf:
+            - type: array
+              items:
+                $ref: '#/components/schemas/ForumTopicDto'
+            - type: 'null'
+
+    # --- topic/AuthorDto.kt ---
+    AuthorDto:
+      type: object
+      required: [name]
+      properties:
+        id:
+          oneOf:
+            - type: string
+            - type: 'null'
+        name:
+          type: string
+        avatarUrl:
+          oneOf:
+            - type: string
+            - type: 'null'
+
+    # --- topic/TorrentStatusDto.kt (enum, name-as-string) ---
+    TorrentStatusDto:
+      type: string
+      enum:
+        - Approved
+        - Checking
+        - Closed
+        - Consumed
+        - Duplicate
+        - NeedEdit
+        - NoDescription
+        - NotApproved
+
+    # --- topic/PostElementDto.kt sealed interface (discriminator "type") ---
+    PostElementDto:
+      oneOf:
+        - $ref: '#/components/schemas/PostElementText'
+        - $ref: '#/components/schemas/PostElementBox'
+        - $ref: '#/components/schemas/PostElementAlign'
+        - $ref: '#/components/schemas/PostElementSize'
+        - $ref: '#/components/schemas/PostElementColor'
+        - $ref: '#/components/schemas/PostElementBold'
+        - $ref: '#/components/schemas/PostElementItalic'
+        - $ref: '#/components/schemas/PostElementUnderscore'
+        - $ref: '#/components/schemas/PostElementCrossed'
+        - $ref: '#/components/schemas/PostElementQuote'
+        - $ref: '#/components/schemas/PostElementCode'
+        - $ref: '#/components/schemas/PostElementSpoiler'
+        - $ref: '#/components/schemas/PostElementImage'
+        - $ref: '#/components/schemas/PostElementImageAligned'
+        - $ref: '#/components/schemas/PostElementLink'
+        - $ref: '#/components/schemas/PostElementList'
+        - $ref: '#/components/schemas/PostElementHr'
+        - $ref: '#/components/schemas/PostElementBr'
+        - $ref: '#/components/schemas/PostElementPostBr'
+      discriminator:
+        propertyName: type
+        mapping:
+          Text: '#/components/schemas/PostElementText'
+          Box: '#/components/schemas/PostElementBox'
+          Align: '#/components/schemas/PostElementAlign'
+          Size: '#/components/schemas/PostElementSize'
+          Color: '#/components/schemas/PostElementColor'
+          Bold: '#/components/schemas/PostElementBold'
+          Italic: '#/components/schemas/PostElementItalic'
+          Underscore: '#/components/schemas/PostElementUnderscore'
+          Crossed: '#/components/schemas/PostElementCrossed'
+          Quote: '#/components/schemas/PostElementQuote'
+          Code: '#/components/schemas/PostElementCode'
+          Spoiler: '#/components/schemas/PostElementSpoiler'
+          Image: '#/components/schemas/PostElementImage'
+          ImageAligned: '#/components/schemas/PostElementImageAligned'
+          Link: '#/components/schemas/PostElementLink'
+          List: '#/components/schemas/PostElementList'
+          Hr: '#/components/schemas/PostElementHr'
+          Br: '#/components/schemas/PostElementBr'
+          PostBr: '#/components/schemas/PostElementPostBr'
+
+    # PostElementDto subtype shapes (Kotlin: PostElementDto.kt)
+    PostElementText:
+      type: object
+      required: [type, value]
+      properties:
+        type: { type: string, const: Text }
+        value: { type: string }
+
+    PostElementBox:
+      type: object
+      required: [type, children]
+      properties:
+        type: { type: string, const: Box }
+        children:
+          type: array
+          items: { $ref: '#/components/schemas/PostElementDto' }
+
+    PostElementAlign:
+      type: object
+      required: [type, alignment, children]
+      properties:
+        type: { type: string, const: Align }
+        alignment:
+          type: string
+          enum: [Left, Right, Center, Justify]
+        children:
+          type: array
+          items: { $ref: '#/components/schemas/PostElementDto' }
+
+    PostElementSize:
+      type: object
+      required: [type, size, children]
+      properties:
+        type: { type: string, const: Size }
+        size:
+          type: integer
+          format: int32
+        children:
+          type: array
+          items: { $ref: '#/components/schemas/PostElementDto' }
+
+    PostElementColor:
+      type: object
+      required: [type, color, children]
+      properties:
+        type: { type: string, const: Color }
+        color:
+          $ref: '#/components/schemas/ColorValue'
+        children:
+          type: array
+          items: { $ref: '#/components/schemas/PostElementDto' }
+
+    PostElementBold:
+      type: object
+      required: [type, children]
+      properties:
+        type: { type: string, const: Bold }
+        children:
+          type: array
+          items: { $ref: '#/components/schemas/PostElementDto' }
+
+    PostElementItalic:
+      type: object
+      required: [type, children]
+      properties:
+        type: { type: string, const: Italic }
+        children:
+          type: array
+          items: { $ref: '#/components/schemas/PostElementDto' }
+
+    PostElementUnderscore:
+      type: object
+      required: [type, children]
+      properties:
+        type: { type: string, const: Underscore }
+        children:
+          type: array
+          items: { $ref: '#/components/schemas/PostElementDto' }
+
+    PostElementCrossed:
+      type: object
+      required: [type, children]
+      properties:
+        type: { type: string, const: Crossed }
+        children:
+          type: array
+          items: { $ref: '#/components/schemas/PostElementDto' }
+
+    PostElementQuote:
+      type: object
+      required: [type, title, id, children]
+      properties:
+        type: { type: string, const: Quote }
+        title: { type: string }
+        id: { type: string }
+        children:
+          type: array
+          items: { $ref: '#/components/schemas/PostElementDto' }
+
+    PostElementCode:
+      type: object
+      required: [type, title, children]
+      properties:
+        type: { type: string, const: Code }
+        title: { type: string }
+        children:
+          type: array
+          items: { $ref: '#/components/schemas/PostElementDto' }
+
+    PostElementSpoiler:
+      type: object
+      required: [type, title, children]
+      properties:
+        type: { type: string, const: Spoiler }
+        title: { type: string }
+        children:
+          type: array
+          items: { $ref: '#/components/schemas/PostElementDto' }
+
+    PostElementImage:
+      type: object
+      required: [type, src]
+      properties:
+        type: { type: string, const: Image }
+        src: { type: string }
+
+    PostElementImageAligned:
+      type: object
+      required: [type, src, alignment]
+      properties:
+        type: { type: string, const: ImageAligned }
+        src: { type: string }
+        alignment:
+          type: string
+          enum: [Start, Top, End, Bottom]
+
+    PostElementLink:
+      type: object
+      required: [type, src, children]
+      properties:
+        type: { type: string, const: Link }
+        src: { type: string }
+        children:
+          type: array
+          items: { $ref: '#/components/schemas/PostElementDto' }
+
+    PostElementList:
+      type: object
+      required: [type, children]
+      properties:
+        type: { type: string, const: List }
+        children:
+          type: array
+          items: { $ref: '#/components/schemas/PostElementDto' }
+
+    PostElementHr:
+      type: object
+      required: [type]
+      properties:
+        type: { type: string, const: Hr }
+
+    PostElementBr:
+      type: object
+      required: [type]
+      properties:
+        type: { type: string, const: Br }
+
+    PostElementPostBr:
+      type: object
+      required: [type]
+      properties:
+        type: { type: string, const: PostBr }
+
+    # --- topic/PostElementDto.kt: ColorValue sealed interface ---
+    ColorValue:
+      oneOf:
+        - $ref: '#/components/schemas/ColorValueHex'
+        - $ref: '#/components/schemas/ColorValueName'
+      discriminator:
+        propertyName: type
+        mapping:
+          Hex: '#/components/schemas/ColorValueHex'
+          Name: '#/components/schemas/ColorValueName'
+
+    ColorValueHex:
+      type: object
+      required: [type, hex]
+      properties:
+        type: { type: string, const: Hex }
+        hex:
+          type: integer
+          format: int64
+          description: kotlinx serialises Long as JSON number; decoders that round-trip must preserve precision.
+
+    ColorValueName:
+      type: object
+      required: [type, name]
+      properties:
+        type: { type: string, const: Name }
+        name: { type: string }
+
+    # --- topic/PostDto.kt ---
+    PostDto:
+      type: object
+      required: [id, author, date, children]
+      properties:
+        id: { type: string }
+        author:
+          $ref: '#/components/schemas/AuthorDto'
+        date: { type: string }
+        children:
+          type: array
+          items: { $ref: '#/components/schemas/PostElementDto' }
+
+    # --- topic/TorrentDescriptionDto.kt ---
+    TorrentDescriptionDto:
+      type: object
+      required: [children]
+      properties:
+        children:
+          type: array
+          items: { $ref: '#/components/schemas/PostElementDto' }
+
+    # --- topic/TopicDto.kt: sealed interface ForumTopicDto ---
+    ForumTopicDto:
+      oneOf:
+        - $ref: '#/components/schemas/ForumTopicDtoTopic'
+        - $ref: '#/components/schemas/ForumTopicDtoTorrent'
+        - $ref: '#/components/schemas/ForumTopicDtoCommentsPage'
+      discriminator:
+        propertyName: type
+        mapping:
+          Topic: '#/components/schemas/ForumTopicDtoTopic'
+          Torrent: '#/components/schemas/ForumTopicDtoTorrent'
+          CommentsPage: '#/components/schemas/ForumTopicDtoCommentsPage'
+
+    ForumTopicDtoTopic:
+      type: object
+      required: [type, id, title]
+      properties:
+        type: { type: string, const: Topic }
+        id: { type: string }
+        title: { type: string }
+        author:
+          oneOf:
+            - $ref: '#/components/schemas/AuthorDto'
+            - type: 'null'
+        category:
+          oneOf:
+            - $ref: '#/components/schemas/CategoryDto'
+            - type: 'null'
+
+    ForumTopicDtoTorrent:
+      type: object
+      required: [type, id, title]
+      properties:
+        type: { type: string, const: Torrent }
+        id: { type: string }
+        title: { type: string }
+        author:
+          oneOf:
+            - $ref: '#/components/schemas/AuthorDto'
+            - type: 'null'
+        category:
+          oneOf:
+            - $ref: '#/components/schemas/CategoryDto'
+            - type: 'null'
+        tags:
+          oneOf:
+            - type: string
+            - type: 'null'
+        status:
+          oneOf:
+            - $ref: '#/components/schemas/TorrentStatusDto'
+            - type: 'null'
+        date:
+          oneOf:
+            - type: integer
+              format: int64
+            - type: 'null'
+        size:
+          oneOf:
+            - type: string
+            - type: 'null'
+        seeds:
+          oneOf:
+            - type: integer
+              format: int32
+            - type: 'null'
+        leeches:
+          oneOf:
+            - type: integer
+              format: int32
+            - type: 'null'
+        magnetLink:
+          oneOf:
+            - type: string
+            - type: 'null'
+        description:
+          oneOf:
+            - $ref: '#/components/schemas/TorrentDescriptionDto'
+            - type: 'null'
+
+    ForumTopicDtoCommentsPage:
+      type: object
+      required: [type, id, title, page, pages, posts]
+      properties:
+        type: { type: string, const: CommentsPage }
+        id: { type: string }
+        title: { type: string }
+        author:
+          oneOf:
+            - $ref: '#/components/schemas/AuthorDto'
+            - type: 'null'
+        category:
+          oneOf:
+            - $ref: '#/components/schemas/CategoryDto'
+            - type: 'null'
+        page:
+          type: integer
+          format: int32
+        pages:
+          type: integer
+          format: int32
+        posts:
+          type: array
+          items: { $ref: '#/components/schemas/PostDto' }
+
+    # CommentsPageDto is the @SerialName("CommentsPage") variant of ForumTopicDto.
+    # NetworkApi.getCommentsPage returns the concrete CommentsPageDto type which
+    # is still serialised polymorphically via the ForumTopicDto sealed interface
+    # if the response targets ForumTopicDto. The /comments/{id} route returns
+    # CommentsPageDto directly, which kotlinx serialises with the same shape as
+    # ForumTopicDtoCommentsPage above (the @SerialName is applied to the
+    # data class itself, so the discriminator IS emitted for any sealed-context
+    # serialization).
+    # x-fidelity-note: When the type is the static, non-polymorphic
+    # CommentsPageDto, kotlinx.serialization MAY emit without the "type"
+    # discriminator field (Phase 10 parity test will pin this). Documenting
+    # both variants here; the Go implementation must follow whichever is
+    # observed on the wire.
+    CommentsPageDto:
+      $ref: '#/components/schemas/ForumTopicDtoCommentsPage'
+
+    TopicDto:
+      $ref: '#/components/schemas/ForumTopicDtoTopic'
+
+    TorrentDto:
+      $ref: '#/components/schemas/ForumTopicDtoTorrent'
+
+    # --- topic/TopicPageDto.kt ---
+    TorrentDataDto:
+      type: object
+      properties:
+        tags:
+          oneOf:
+            - type: string
+            - type: 'null'
+        posterUrl:
+          oneOf:
+            - type: string
+            - type: 'null'
+        status:
+          oneOf:
+            - $ref: '#/components/schemas/TorrentStatusDto'
+            - type: 'null'
+        date:
+          oneOf:
+            - type: string
+            - type: 'null'
+        size:
+          oneOf:
+            - type: string
+            - type: 'null'
+        seeds:
+          oneOf:
+            - type: integer
+              format: int32
+            - type: 'null'
+        leeches:
+          oneOf:
+            - type: integer
+              format: int32
+            - type: 'null'
+        magnetLink:
+          oneOf:
+            - type: string
+            - type: 'null'
+
+    TopicPageCommentsDto:
+      type: object
+      required: [page, pages, posts]
+      properties:
+        page:
+          type: integer
+          format: int32
+        pages:
+          type: integer
+          format: int32
+        posts:
+          type: array
+          items: { $ref: '#/components/schemas/PostDto' }
+
+    TopicPageDto:
+      type: object
+      required: [id, title, commentsPage]
+      properties:
+        id: { type: string }
+        title: { type: string }
+        author:
+          oneOf:
+            - $ref: '#/components/schemas/AuthorDto'
+            - type: 'null'
+        category:
+          oneOf:
+            - $ref: '#/components/schemas/CategoryDto'
+            - type: 'null'
+        torrentData:
+          oneOf:
+            - $ref: '#/components/schemas/TorrentDataDto'
+            - type: 'null'
+        commentsPage:
+          $ref: '#/components/schemas/TopicPageCommentsDto'
+
+    # --- search/SearchPageDto.kt ---
+    SearchPageDto:
+      type: object
+      required: [page, pages, torrents]
+      properties:
+        page:
+          type: integer
+          format: int32
+        pages:
+          type: integer
+          format: int32
+        torrents:
+          type: array
+          items: { $ref: '#/components/schemas/ForumTopicDtoTorrent' }
+
+    # Search/period/sort enums (string name; kotlinx serialises by enum NAME by default,
+    # not by the .value property). x-fidelity-note: the Kotlin `value` property on each
+    # enum constant is NOT serialised — kotlinx writes the @SerialName/name token.
+    SearchPeriodDto:
+      type: string
+      enum:
+        - AllTime
+        - Today
+        - LastThreeDays
+        - LastWeek
+        - LastTwoWeeks
+        - LastMonth
+
+    SearchSortOrderDto:
+      type: string
+      enum:
+        - Ascending
+        - Descending
+
+    SearchSortTypeDto:
+      type: string
+      enum:
+        - Date
+        - Title
+        - Downloaded
+        - Seeds
+        - Leeches
+        - Size
+
+    # --- user/FavoritesDto.kt ---
+    FavoritesDto:
+      type: object
+      required: [topics]
+      properties:
+        topics:
+          type: array
+          items: { $ref: '#/components/schemas/ForumTopicDto' }
+
+    # --- user/ProfileDto.kt (not currently routed; kept for completeness) ---
+    ProfileDto:
+      type: object
+      required: [id, name, avatarUrl]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        avatarUrl: { type: string }
+
+    # FileDto from FileDto.kt is NOT serialised as JSON; it's the carrier for
+    # binary download responses. The /download/{id} route emits the bytes with
+    # Content-Type and Content-Disposition headers populated from FileDto fields.
+
+paths:
+  /:
+    get:
+      operationId: getRoot
+      summary: Health probe (root).
+      description: |
+        Returns the result of `NetworkApi.checkAuthorized(token)` as a JSON
+        boolean. The Auth-Token header is optional; if absent or empty,
+        upstream rutracker is queried with no cookie and the response will
+        typically be `false`. Used by the Android client as a liveness check
+        against a configured endpoint.
+      parameters:
+        - $ref: '#/components/parameters/AuthToken'
+      responses:
+        '200':
+          description: JSON boolean indicating whether the supplied Auth-Token currently authorises a rutracker session.
+          content:
+            application/json:
+              schema:
+                type: boolean
+        '500':
+          description: Upstream error.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /index:
+    get:
+      operationId: getIndex
+      summary: Health probe (alias of `/`).
+      description: |
+        Identical behaviour to `GET /`. Returns the result of
+        `NetworkApi.checkAuthorized(token)` as a JSON boolean. Auth-Token
+        header is optional.
+      parameters:
+        - $ref: '#/components/parameters/AuthToken'
+      responses:
+        '200':
+          description: JSON boolean indicating session validity.
+          content:
+            application/json:
+              schema:
+                type: boolean
+        '500':
+          description: Upstream error.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /login:
+    post:
+      operationId: postLogin
+      summary: Log in to rutracker; returns an AuthResponseDto.
+      description: |
+        Accepts an `application/x-www-form-urlencoded` body with
+        `username`/`password` (required) and optional captcha fields
+        (`cap_sid`, `cap_code`, `cap_val`). The response is a polymorphic
+        `AuthResponseDto` (sealed interface): `Success` (carrying a `UserDto`),
+        `WrongCredits` (optional `CaptchaDto`), or `CaptchaRequired`
+        (optional `CaptchaDto`). The discriminator is the `type` field whose
+        value is the @SerialName of the variant. Never cached.
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [username, password]
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+                cap_sid:
+                  type: string
+                  description: Captcha session id (rutracker `cap_sid_*` field).
+                cap_code:
+                  type: string
+                  description: Captcha hidden code parameter.
+                cap_val:
+                  type: string
+                  description: Captcha solution submitted by the user.
+      responses:
+        '200':
+          description: Login attempt processed; payload variant depends on outcome.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AuthResponseDto' }
+        '400':
+          description: Missing required form parameters (Ktor `getOrFail` will throw).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /forum:
+    get:
+      operationId: getForum
+      summary: Top-level forum category tree.
+      description: |
+        Returns the rutracker forum tree as a `ForumDto` (a single object
+        carrying `children: List<CategoryDto>`). Auth-Token is not consumed
+        by the Ktor handler today, but is permitted as a header for clients
+        that always send it.
+      parameters:
+        - $ref: '#/components/parameters/AuthToken'
+      responses:
+        '200':
+          description: Forum tree.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ForumDto' }
+        '500':
+          description: Upstream error.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /forum/{id}:
+    get:
+      operationId: getCategoryPage
+      summary: Paginated category page (subforums and torrent listings).
+      description: |
+        Returns a `CategoryPageDto` for the given category id. The optional
+        `page` query parameter is a 1-based page index; if omitted, the
+        first page is returned (Ktor parses with `toIntOrNull()`, so
+        invalid values silently fall back to null).
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: rutracker forum/category identifier.
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+          description: 1-based page index; `null` selects the first page.
+        - $ref: '#/components/parameters/AuthToken'
+      responses:
+        '200':
+          description: Category page.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CategoryPageDto' }
+        '404':
+          description: Unknown category id.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /search:
+    get:
+      operationId: getSearch
+      summary: Search torrents by query, category, author, and time period.
+      description: |
+        Returns a `SearchPageDto`. All query parameters are optional; the
+        upstream defaults apply when a value is omitted. `sort`, `order`,
+        and `period` MUST match the Kotlin enum constant NAMES exactly
+        (`Date`/`Title`/`Downloaded`/`Seeds`/`Leeches`/`Size`,
+        `Ascending`/`Descending`, and the period names). The `page`
+        parameter is a 1-based page index. Auth-Token is forwarded so
+        the upstream can scope results to the user.
+      parameters:
+        - $ref: '#/components/parameters/AuthToken'
+        - name: query
+          in: query
+          required: false
+          schema: { type: string }
+          description: Free-text search string.
+        - name: categories
+          in: query
+          required: false
+          schema: { type: string }
+          description: Comma-separated rutracker category ids.
+        - name: author
+          in: query
+          required: false
+          schema: { type: string }
+          description: Author display name filter.
+        - name: authorId
+          in: query
+          required: false
+          schema: { type: string }
+          description: Numeric author id filter.
+        - name: sort
+          in: query
+          required: false
+          schema: { $ref: '#/components/schemas/SearchSortTypeDto' }
+        - name: order
+          in: query
+          required: false
+          schema: { $ref: '#/components/schemas/SearchSortOrderDto' }
+        - name: period
+          in: query
+          required: false
+          schema: { $ref: '#/components/schemas/SearchPeriodDto' }
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: Search page.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SearchPageDto' }
+        '400':
+          description: Invalid enum constant in `sort`/`order`/`period`.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /topic/{id}:
+    get:
+      operationId: getTopic
+      summary: Topic page (legacy ForumTopicDto polymorphic shape).
+      description: |
+        Returns a `ForumTopicDto` (sealed interface; the variant depends on
+        the upstream content — `Topic`, `Torrent`, or `CommentsPage`). The
+        polymorphic discriminator is the `type` field. Use `topic2/{id}`
+        for the structurally simpler `TopicPageDto`.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+        - $ref: '#/components/parameters/AuthToken'
+      responses:
+        '200':
+          description: Topic, torrent, or comments-page payload (discriminated).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ForumTopicDto' }
+        '404':
+          description: Unknown topic id.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /topic2/{id}:
+    get:
+      operationId: getTopicPage
+      summary: Topic page (modern TopicPageDto shape).
+      description: |
+        Returns a `TopicPageDto` — a non-polymorphic, single-variant
+        wrapper that always exposes id/title/author/category plus an
+        optional `torrentData` and a `commentsPage`. Preferred by newer
+        Android client builds.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+        - $ref: '#/components/parameters/AuthToken'
+      responses:
+        '200':
+          description: Topic page.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TopicPageDto' }
+        '404':
+          description: Unknown topic id.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /comments/{id}:
+    get:
+      operationId: getCommentsPage
+      summary: Paginated comments for a topic.
+      description: |
+        Returns a `CommentsPageDto` (the `CommentsPage` variant of
+        `ForumTopicDto`). Page is a 1-based index; absent → first page.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+        - $ref: '#/components/parameters/AuthToken'
+      responses:
+        '200':
+          description: Comments page.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CommentsPageDto' }
+        '404':
+          description: Unknown topic id.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /comments/{id}/add:
+    post:
+      operationId: postComment
+      summary: Submit a comment on a topic.
+      description: |
+        The request body is the raw comment text (Ktor reads it via
+        `call.receiveText()`, so any Content-Type is accepted as long as
+        the body is the message string). Returns a JSON boolean
+        indicating whether the upstream accepted the post. Auth-Token
+        is required — anonymous comment posting is rejected by rutracker.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+          description: Topic id.
+        - $ref: '#/components/parameters/AuthToken'
+      requestBody:
+        required: true
+        content:
+          text/plain:
+            schema:
+              type: string
+              description: Raw comment text (BB-coded as required by rutracker).
+      responses:
+        '200':
+          description: True if the comment was accepted by rutracker; false otherwise.
+          content:
+            application/json:
+              schema:
+                type: boolean
+        '401':
+          description: Auth-Token absent or invalid.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /torrent/{id}:
+    get:
+      operationId: getTorrent
+      summary: Torrent metadata (TorrentDto).
+      description: |
+        Returns a `TorrentDto` (the `Torrent` variant of `ForumTopicDto`)
+        with full metadata: tags, status, date, size, seeders, leechers,
+        magnet link, description (post-element tree).
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+        - $ref: '#/components/parameters/AuthToken'
+      responses:
+        '200':
+          description: Torrent metadata.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TorrentDto' }
+        '404':
+          description: Unknown torrent id.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /download/{id}:
+    get:
+      operationId: getDownload
+      summary: Download .torrent file (binary).
+      description: |
+        Streams the .torrent binary for the given torrent id. The handler
+        sets `Content-Disposition` (with filename) and `Content-Type` from
+        the upstream response. Auth-Token is required for non-public
+        torrents. Never cached at the API tier.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+        - $ref: '#/components/parameters/AuthToken'
+      responses:
+        '200':
+          description: Binary .torrent payload.
+          headers:
+            Content-Disposition:
+              schema:
+                type: string
+              description: e.g. `attachment; filename="rutracker_<id>.torrent"`.
+            Content-Type:
+              schema:
+                type: string
+              description: Typically `application/x-bittorrent`, forwarded from upstream.
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        '401':
+          description: Auth-Token required for this torrent.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '404':
+          description: Unknown torrent id or upstream refused.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /captcha/{path}:
+    get:
+      operationId: getCaptcha
+      summary: Fetch a captcha image, identified by URL-safe Base64.
+      description: |
+        `path` is a URL-safe Base64-encoded full upstream image URL.
+        The Ktor handler decodes it (`Base64.UrlSafe.decode(...).decodeToString()`),
+        fetches the image with the configured HttpClient, and returns
+        the bytes verbatim with the upstream Content-Type. Auth-Token
+        is not consumed.
+      parameters:
+        - name: path
+          in: path
+          required: true
+          schema:
+            type: string
+          description: |
+            URL-safe Base64 encoding of the upstream captcha image URL.
+            Decoded server-side and fetched verbatim. No padding/format
+            normalisation is performed (Ktor's `Base64.UrlSafe` is strict).
+      responses:
+        '200':
+          description: Captcha image bytes (Content-Type forwarded from upstream).
+          headers:
+            Content-Type:
+              schema:
+                type: string
+                example: image/png
+              description: Forwarded from the upstream image response.
+          content:
+            image/*:
+              schema:
+                type: string
+                format: binary
+        '400':
+          description: Path is not a valid URL-safe Base64 string.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /favorites:
+    get:
+      operationId: getFavorites
+      summary: User's favorited topics.
+      description: |
+        Returns a `FavoritesDto` carrying a list of `ForumTopicDto`
+        entries (polymorphic — typically `Topic` or `Torrent` variants).
+        Auth-Token is required; without it rutracker returns an empty
+        bookmarks page and the API mirrors that.
+      parameters:
+        - $ref: '#/components/parameters/AuthToken'
+      responses:
+        '200':
+          description: Favorites list.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FavoritesDto' }
+        '401':
+          description: Auth-Token absent or invalid.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /favorites/add/{id}:
+    post:
+      operationId: postFavoritesAdd
+      summary: Add a topic to the user's favorites.
+      description: |
+        Returns a JSON boolean indicating whether the upstream accepted
+        the bookmark add. Idempotent in practice (rutracker returns
+        success when the topic is already bookmarked). Auth-Token is
+        required.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+        - $ref: '#/components/parameters/AuthToken'
+      responses:
+        '200':
+          description: True on success.
+          content:
+            application/json:
+              schema:
+                type: boolean
+        '401':
+          description: Auth-Token absent or invalid.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /favorites/remove/{id}:
+    post:
+      operationId: postFavoritesRemove
+      summary: Remove a topic from the user's favorites.
+      description: |
+        Returns a JSON boolean indicating whether the upstream accepted
+        the bookmark removal. Idempotent in practice. Auth-Token is
+        required.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+        - $ref: '#/components/parameters/AuthToken'
+      responses:
+        '200':
+          description: True on success.
+          content:
+            application/json:
+              schema:
+                type: boolean
+        '401':
+          description: Auth-Token absent or invalid.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
