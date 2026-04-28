@@ -28,7 +28,7 @@ declare -a EXPLICIT_REMOTES=()
 DEFAULT_REMOTES=(github gitflic gitlab gitverse)
 
 # Apps registry.
-SUPPORTED_APPS=(android api)
+SUPPORTED_APPS=(android api api-go)
 
 # ----------------------------------------------------------------------
 # Logging
@@ -57,12 +57,13 @@ Tag format
   examples
     Lava-Android-1.0.0-1008
     Lava-API-1.0.1-1001
+    Lava-API-Go-2.0.0-2000
 
 OPTIONS
   -h, --help              Show this help and exit.
   -n, --dry-run           Print every action; perform no git or file changes.
-  -a, --app <name>        Restrict to a single app: 'android', 'api', or 'all'
-                          (default: all).
+  -a, --app <name>        Restrict to a single app: 'android', 'api', 'api-go',
+                          or 'all' (default: all).
       --bump <part>       Which semver part of versionName to bump after
                           tagging: 'major' | 'minor' | 'patch'   (default: patch).
                           versionCode is always incremented by 1.
@@ -175,6 +176,18 @@ read_api_version_code() {
     's/^val apiVersionCode *= *([0-9]+).*/\1/' \
     "API apiVersionCode"
 }
+read_apigo_version_name() {
+  read_value "$REPO_ROOT/lava-api-go/internal/version/version.go" \
+    '^[[:space:]]*Name *= *"[^"]+"' \
+    's/.*Name *= *"([^"]+)".*/\1/' \
+    "API-Go Name"
+}
+read_apigo_version_code() {
+  read_value "$REPO_ROOT/lava-api-go/internal/version/version.go" \
+    '^[[:space:]]*Code *= *[0-9]+' \
+    's/.*Code *= *([0-9]+).*/\1/' \
+    "API-Go Code"
+}
 
 bump_semver() {
   local v="$1" part="$2"
@@ -216,6 +229,19 @@ write_api_versions() {
   [[ "$(read_api_version_code)" == "$new_code" ]] || die "Failed to write API apiVersionCode"
 }
 
+write_apigo_versions() {
+  local new_name="$1" new_code="$2"
+  local f="$REPO_ROOT/lava-api-go/internal/version/version.go"
+  if $DRY_RUN; then
+    dry "would update $f → Name=\"$new_name\", Code=$new_code"
+    return
+  fi
+  sed -i -E "s|(^[[:space:]]*Name *= *\")[^\"]+(\")|\1$new_name\2|" "$f"
+  sed -i -E "s|(^[[:space:]]*Code *= *)[0-9]+|\1$new_code|" "$f"
+  [[ "$(read_apigo_version_name)" == "$new_name" ]] || die "Failed to write API-Go Name"
+  [[ "$(read_apigo_version_code)" == "$new_code" ]] || die "Failed to write API-Go Code"
+}
+
 # ----------------------------------------------------------------------
 # Pre-flight: working directory, target apps, remotes
 # ----------------------------------------------------------------------
@@ -225,7 +251,11 @@ git rev-parse --is-inside-work-tree >/dev/null 2>&1 \
   || die "Not inside a git working tree: $REPO_ROOT"
 
 if [[ -n "$(git status --porcelain)" ]]; then
-  die "Working tree is dirty. Commit or stash changes first (or run with --dry-run)."
+  if $DRY_RUN; then
+    warn "Working tree is dirty — proceeding because --dry-run is set (no mutations will occur)."
+  else
+    die "Working tree is dirty. Commit or stash changes first (or run with --dry-run)."
+  fi
 fi
 
 # Resolve target apps (validation already done above).
@@ -284,6 +314,12 @@ for app in "${TARGETS[@]}"; do
       vname=$(read_api_version_name)
       vcode=$(read_api_version_code)
       writer=write_api_versions
+      ;;
+    api-go)
+      tag_suffix="API-Go"
+      vname=$(read_apigo_version_name)
+      vcode=$(read_apigo_version_code)
+      writer=write_apigo_versions
       ;;
     *) die "Unsupported app: $app" ;;
   esac

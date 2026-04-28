@@ -19,12 +19,13 @@
 
 ## Overview
 
-Lava ships two independently versioned artifacts:
+Lava ships three independently versioned artifacts:
 
 | App key | Tag prefix | Source of truth                          | Description                              |
 |---------|------------|------------------------------------------|------------------------------------------|
 | `android` | `Lava-Android` | `app/build.gradle.kts` (`versionName` / `versionCode`) | Android client (`digital.vasic.lava.client`) |
 | `api`     | `Lava-API`     | `proxy/build.gradle.kts` (`apiVersionName` / `apiVersionCode`) | Ktor proxy server (`digital.vasic.lava.api`) |
+| `api-go`  | `Lava-API-Go`  | `lava-api-go/internal/version/version.go` (`Name` / `Code`) | Go API service (SP-2 successor to the Ktor proxy) |
 
 `scripts/tag.sh` automates the release process for either or both of them:
 
@@ -50,10 +51,12 @@ Concrete examples:
 | `Lava-Android-1.0.1-1009` | Android client, the next patch       |
 | `Lava-API-1.0.0-1000`     | Proxy server, first tagged release   |
 | `Lava-API-1.1.0-1001`     | Proxy server, minor bump             |
+| `Lava-API-Go-2.0.0-2000`  | Go API service, first tagged release |
+| `Lava-API-Go-2.0.1-2001`  | Go API service, the next patch       |
 
 Rules:
 
-- `<App>` is one of `Android`, `API` (case sensitive). Add new ones via the registry — see [Adding a new app/service](#adding-a-new-appservice).
+- `<App>` is one of `Android`, `API`, `API-Go` (case sensitive). Add new ones via the registry — see [Adding a new app/service](#adding-a-new-appservice).
 - `<versionName>` is a strict three-component semver `MAJOR.MINOR.PATCH`. Pre-release suffixes (e.g. `-rc1`) are **not** supported by the bump logic; if you need one, run with `--no-bump`.
 - `<versionCode>` is a positive integer. The script always advances it by `+1` after a release.
 
@@ -82,7 +85,7 @@ Before any of the above runs:
 - The working tree must be **clean** (`git status --porcelain` empty). Otherwise the script aborts.
 - Every requested remote must exist (`git remote get-url`) — otherwise it aborts before any push.
 - `--bump` value must be `major`, `minor`, or `patch`.
-- `--app` value must be `android`, `api`, or `all`.
+- `--app` value must be `android`, `api`, `api-go`, or `all`.
 
 ### Dry run
 
@@ -94,6 +97,7 @@ Before any of the above runs:
 |---------|--------------------------|-------------------------------------------------|-------------------------------------------|
 | android | `app/build.gradle.kts`   | `versionName = "X.Y.Z"` (inside `defaultConfig`)| `versionCode = NNNN` (inside `defaultConfig`) |
 | api     | `proxy/build.gradle.kts` | `val apiVersionName = "X.Y.Z"` (top level)      | `val apiVersionCode = NNNN` (top level)   |
+| api-go  | `lava-api-go/internal/version/version.go` | `Name = "X.Y.Z"` (inside the `const (...)` block) | `Code = NNNN` (inside the `const (...)` block) |
 
 Both sets of identifiers are owned by `tag.sh`. **Do not edit them by hand for routine releases** — let the script bump them. Manual edits are appropriate only for cherry-picking a release version (e.g. cutting `1.1.0` deliberately) before running the script with `--no-bump`.
 
@@ -125,7 +129,7 @@ scripts/tag.sh --remote github
 |------|----------|---------|---------|
 | `-h`, `--help` | — | — | Print help and exit. |
 | `-n`, `--dry-run` | — | off | Show actions; do not change anything. |
-| `-a`, `--app` | `android` \| `api` \| `all` | `all` | Restrict the run to a specific app. |
+| `-a`, `--app` | `android` \| `api` \| `api-go` \| `all` | `all` | Restrict the run to a specific app. |
 | `--bump` | `major` \| `minor` \| `patch` | `patch` | Which semver part to advance after tagging. versionCode is always `+1`. |
 | `--no-bump` | — | bump on | Skip the post-tag bump and bump-commit entirely. |
 | `--no-push` | — | push on | Tag/commit locally only; do not push. |
