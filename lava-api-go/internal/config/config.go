@@ -66,7 +66,13 @@ func Load() (*Config, error) {
 		MDNSInstanceName:   envDefault("LAVA_API_MDNS_INSTANCE", "Lava API"),
 		MDNSServiceType:    envDefault("LAVA_API_MDNS_TYPE", "_lava-api._tcp"),
 		MDNSPort:           envInt("LAVA_API_MDNS_PORT", 8443),
-		RutrackerBaseURL:   envDefault("LAVA_API_RUTRACKER_URL", "https://rutracker.org"),
+		// Kotlin's HttpClientFactory.DefaultUrl is "https://rutracker.org/forum/" —
+		// every endpoint path the rutracker package emits (/index.php,
+		// /tracker.php, /viewforum.php, /viewtopic.php, /bookmarks.php,
+		// /login.php, /posting.php, /dl.php) lives under /forum/. The trailing
+		// slash is omitted here because Client.Fetch builds c.base + path
+		// where path starts with `/`.
+		RutrackerBaseURL: envDefault("LAVA_API_RUTRACKER_URL", "https://rutracker.org/forum"),
 	}
 
 	if cfg.PGUrl == "" {

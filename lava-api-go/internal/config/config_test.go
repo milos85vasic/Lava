@@ -76,7 +76,7 @@ func TestLoadFromEnvHappy(t *testing.T) {
 	if cfg.MDNSPort != 8443 {
 		t.Errorf("MDNSPort default wrong: %d", cfg.MDNSPort)
 	}
-	if cfg.RutrackerBaseURL != "https://rutracker.org" {
+	if cfg.RutrackerBaseURL != "https://rutracker.org/forum" {
 		t.Errorf("RutrackerBaseURL default wrong: %q", cfg.RutrackerBaseURL)
 	}
 	if cfg.OTLPEndpoint != "http://127.0.0.1:4318" {
