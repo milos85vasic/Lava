@@ -2,8 +2,12 @@ plugins {
     id("lava.ktor.application")
 }
 
+// Managed by scripts/tag.sh — do not edit manually.
+val apiVersionName = "1.0.0"
+val apiVersionCode = 1000
+
 group = "digital.vasic.lava.api"
-version = "1.0.0"
+version = apiVersionName
 
 application {
     mainClass.set("digital.vasic.lava.api.ApplicationKt")

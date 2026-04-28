@@ -1,0 +1,354 @@
+#!/usr/bin/env bash
+#
+# tag.sh — Lava release-tagging tool.
+#
+# Tags each app/service with `Lava-<App>-<versionName>-<versionCode>`,
+# pushes every tag to all configured upstream remotes, then bumps the
+# corresponding versionName/versionCode in source files and pushes the
+# bump commit.
+#
+# See docs/TAGGING.md for the full operator guide.
+
+set -Eeuo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+
+# ----------------------------------------------------------------------
+# Defaults
+# ----------------------------------------------------------------------
+DRY_RUN=false
+DO_BUMP=true
+DO_PUSH=true
+BUMP_PART="patch"
+TARGET_APP="all"
+declare -a EXPLICIT_REMOTES=()
+
+# Default upstreams (used if --remote is not given).
+DEFAULT_REMOTES=(github gitflic gitlab gitverse)
+
+# Apps registry.
+SUPPORTED_APPS=(android api)
+
+# ----------------------------------------------------------------------
+# Logging
+# ----------------------------------------------------------------------
+_color() { [[ -t 1 ]]; }
+
+log()   { if _color; then printf '\033[1;36m[tag]\033[0m %s\n'      "$*"; else printf '[tag] %s\n'      "$*"; fi; }
+warn()  { if _color; then printf '\033[1;33m[tag:warn]\033[0m %s\n' "$*" >&2; else printf '[tag:warn] %s\n' "$*" >&2; fi; }
+err()   { if _color; then printf '\033[1;31m[tag:err]\033[0m %s\n'  "$*" >&2; else printf '[tag:err] %s\n'  "$*" >&2; fi; }
+dry()   { if _color; then printf '\033[1;35m[dry]\033[0m %s\n'      "$*"; else printf '[dry] %s\n'      "$*"; fi; }
+die()   { err "$*"; exit 1; }
+
+# ----------------------------------------------------------------------
+# Help
+# ----------------------------------------------------------------------
+print_help() {
+  cat <<'EOF'
+Usage: scripts/tag.sh [OPTIONS]
+
+Tag every Lava app/service at its current version, push the tags to all
+configured upstream remotes, then bump versionName/versionCode for the
+tagged apps and push the bump commit.
+
+Tag format
+    Lava-<App>-<versionName>-<versionCode>
+  examples
+    Lava-Android-1.0.0-1008
+    Lava-API-1.0.1-1001
+
+OPTIONS
+  -h, --help              Show this help and exit.
+  -n, --dry-run           Print every action; perform no git or file changes.
+  -a, --app <name>        Restrict to a single app: 'android', 'api', or 'all'
+                          (default: all).
+      --bump <part>       Which semver part of versionName to bump after
+                          tagging: 'major' | 'minor' | 'patch'   (default: patch).
+                          versionCode is always incremented by 1.
+      --no-bump           Skip the post-tag version bump.
+      --no-push           Do not push tags or bump commit; tag/commit locally only.
+      --remote <name>     Push only to this named git remote. Repeat to push to
+                          a custom subset (e.g. --remote github --remote gitlab).
+                          When omitted, every default upstream that is
+                          configured is used: github, gitflic, gitlab, gitverse.
+
+EXAMPLES
+  # Preview a full tag pass; no git mutations are performed.
+  scripts/tag.sh --dry-run
+
+  # Tag the Android app only and bump its minor version afterwards.
+  scripts/tag.sh --app android --bump minor
+
+  # Tag locally without pushing anywhere (useful for rehearsals).
+  scripts/tag.sh --no-push
+
+  # Tag and push only to GitHub and GitLab.
+  scripts/tag.sh --remote github --remote gitlab
+
+  # Tag without bumping (useful for re-tagging the same release commit).
+  scripts/tag.sh --no-bump
+
+EXIT CODES
+  0   Success.
+  1   Misuse, validation failure, dirty working tree, or git error.
+
+For the full operator guide see docs/TAGGING.md.
+EOF
+}
+
+# ----------------------------------------------------------------------
+# Argument parsing
+# ----------------------------------------------------------------------
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -h|--help)        print_help; exit 0 ;;
+    -n|--dry-run)     DRY_RUN=true; shift ;;
+    -a|--app)         TARGET_APP="${2:-}"; shift 2 ;;
+    --bump)           BUMP_PART="${2:-}"; shift 2 ;;
+    --no-bump)        DO_BUMP=false; shift ;;
+    --no-push)        DO_PUSH=false; shift ;;
+    --remote)         EXPLICIT_REMOTES+=("${2:-}"); shift 2 ;;
+    *)                die "Unknown option: $1 (try --help)" ;;
+  esac
+done
+
+case "$BUMP_PART" in
+  major|minor|patch) ;;
+  *) die "--bump must be one of: major, minor, patch (got: '$BUMP_PART')" ;;
+esac
+
+# Validate --app early (before any git operations).
+case "$TARGET_APP" in
+  all) ;;
+  *)
+    _ok=false
+    for s in "${SUPPORTED_APPS[@]}"; do
+      [[ "$s" == "$TARGET_APP" ]] && _ok=true
+    done
+    $_ok || die "--app must be one of: ${SUPPORTED_APPS[*]}, all (got: '$TARGET_APP')"
+    ;;
+esac
+
+# ----------------------------------------------------------------------
+# Helpers
+# ----------------------------------------------------------------------
+run() {
+  if $DRY_RUN; then
+    dry "$*"
+  else
+    log "$*"
+    "$@"
+  fi
+}
+
+# Read a value from a build file; abort the script if it cannot be parsed.
+read_value() {
+  local file="$1" pattern="$2" extract="$3" label="$4"
+  local val
+  val="$(grep -E "$pattern" "$file" | head -n1 | sed -E "$extract" || true)"
+  [[ -n "$val" ]] || die "Failed to read $label from $file (pattern: $pattern)"
+  printf '%s' "$val"
+}
+
+read_android_version_name() {
+  read_value "$REPO_ROOT/app/build.gradle.kts" \
+    'versionName *= *"[^"]+"' \
+    's/.*versionName *= *"([^"]+)".*/\1/' \
+    "Android versionName"
+}
+read_android_version_code() {
+  read_value "$REPO_ROOT/app/build.gradle.kts" \
+    'versionCode *= *[0-9]+' \
+    's/.*versionCode *= *([0-9]+).*/\1/' \
+    "Android versionCode"
+}
+read_api_version_name() {
+  read_value "$REPO_ROOT/proxy/build.gradle.kts" \
+    '^val apiVersionName *= *"[^"]+"' \
+    's/^val apiVersionName *= *"([^"]+)".*/\1/' \
+    "API apiVersionName"
+}
+read_api_version_code() {
+  read_value "$REPO_ROOT/proxy/build.gradle.kts" \
+    '^val apiVersionCode *= *[0-9]+' \
+    's/^val apiVersionCode *= *([0-9]+).*/\1/' \
+    "API apiVersionCode"
+}
+
+bump_semver() {
+  local v="$1" part="$2"
+  if [[ ! "$v" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
+    die "Cannot bump non-semver version: '$v'"
+  fi
+  local major="${BASH_REMATCH[1]}" minor="${BASH_REMATCH[2]}" patch="${BASH_REMATCH[3]}"
+  case "$part" in
+    major) printf '%d.0.0' $((major + 1)) ;;
+    minor) printf '%d.%d.0' "$major" $((minor + 1)) ;;
+    patch) printf '%d.%d.%d' "$major" "$minor" $((patch + 1)) ;;
+  esac
+}
+
+write_android_versions() {
+  local new_name="$1" new_code="$2"
+  local f="$REPO_ROOT/app/build.gradle.kts"
+  if $DRY_RUN; then
+    dry "would update $f → versionName=\"$new_name\", versionCode=$new_code"
+    return
+  fi
+  sed -i -E "s|(versionName *= *\")[^\"]+(\")|\1$new_name\2|" "$f"
+  sed -i -E "s|(versionCode *= *)[0-9]+|\1$new_code|" "$f"
+  # Verify changes landed.
+  [[ "$(read_android_version_name)" == "$new_name" ]] || die "Failed to write Android versionName"
+  [[ "$(read_android_version_code)" == "$new_code" ]] || die "Failed to write Android versionCode"
+}
+
+write_api_versions() {
+  local new_name="$1" new_code="$2"
+  local f="$REPO_ROOT/proxy/build.gradle.kts"
+  if $DRY_RUN; then
+    dry "would update $f → apiVersionName=\"$new_name\", apiVersionCode=$new_code"
+    return
+  fi
+  sed -i -E "s|(^val apiVersionName *= *\")[^\"]+(\")|\1$new_name\2|" "$f"
+  sed -i -E "s|(^val apiVersionCode *= *)[0-9]+|\1$new_code|" "$f"
+  [[ "$(read_api_version_name)" == "$new_name" ]] || die "Failed to write API apiVersionName"
+  [[ "$(read_api_version_code)" == "$new_code" ]] || die "Failed to write API apiVersionCode"
+}
+
+# ----------------------------------------------------------------------
+# Pre-flight: working directory, target apps, remotes
+# ----------------------------------------------------------------------
+cd "$REPO_ROOT"
+
+git rev-parse --is-inside-work-tree >/dev/null 2>&1 \
+  || die "Not inside a git working tree: $REPO_ROOT"
+
+if [[ -n "$(git status --porcelain)" ]]; then
+  die "Working tree is dirty. Commit or stash changes first (or run with --dry-run)."
+fi
+
+# Resolve target apps (validation already done above).
+declare -a TARGETS=()
+if [[ "$TARGET_APP" == "all" ]]; then
+  TARGETS=("${SUPPORTED_APPS[@]}")
+else
+  TARGETS=("$TARGET_APP")
+fi
+
+# Resolve remotes.
+declare -a REMOTES=()
+if (( ${#EXPLICIT_REMOTES[@]} > 0 )); then
+  REMOTES=("${EXPLICIT_REMOTES[@]}")
+else
+  while IFS= read -r r; do
+    for d in "${DEFAULT_REMOTES[@]}"; do
+      [[ "$r" == "$d" ]] && REMOTES+=("$r")
+    done
+  done < <(git remote)
+fi
+
+if $DO_PUSH; then
+  (( ${#REMOTES[@]} > 0 )) \
+    || die "No usable git remotes found (looked for: ${DEFAULT_REMOTES[*]})"
+  for r in "${REMOTES[@]}"; do
+    git remote get-url "$r" >/dev/null 2>&1 || die "Configured remote '$r' does not exist"
+  done
+fi
+
+current_branch=$(git rev-parse --abbrev-ref HEAD)
+log "Repo:        $REPO_ROOT"
+log "Branch:      $current_branch"
+log "Apps:        ${TARGETS[*]}"
+log "Bump part:   $BUMP_PART (post-tag)"
+log "Push:        $($DO_PUSH && echo enabled || echo disabled)"
+log "Bump:        $($DO_BUMP && echo enabled || echo disabled)"
+log "Dry run:     $($DRY_RUN && echo YES || echo no)"
+$DO_PUSH && log "Remotes:     ${REMOTES[*]}"
+
+# ----------------------------------------------------------------------
+# Per-app: read versions, plan tag, create + push, bump
+# ----------------------------------------------------------------------
+declare -a CREATED_TAGS=()
+
+for app in "${TARGETS[@]}"; do
+  case "$app" in
+    android)
+      tag_suffix="Android"
+      vname=$(read_android_version_name)
+      vcode=$(read_android_version_code)
+      writer=write_android_versions
+      ;;
+    api)
+      tag_suffix="API"
+      vname=$(read_api_version_name)
+      vcode=$(read_api_version_code)
+      writer=write_api_versions
+      ;;
+    *) die "Unsupported app: $app" ;;
+  esac
+
+  tag="Lava-${tag_suffix}-${vname}-${vcode}"
+  log "[$app] current ${vname}-${vcode} → tag '$tag'"
+
+  if git rev-parse -q --verify "refs/tags/$tag" >/dev/null; then
+    warn "[$app] tag '$tag' already exists locally — skipping creation"
+  else
+    run git tag -a "$tag" -m "Release $tag_suffix $vname (versionCode $vcode)"
+    CREATED_TAGS+=("$tag")
+  fi
+
+  if $DO_PUSH; then
+    for remote in "${REMOTES[@]}"; do
+      run git push "$remote" "refs/tags/$tag"
+    done
+  else
+    log "[$app] --no-push: skipping tag push"
+  fi
+
+  if $DO_BUMP; then
+    new_vname=$(bump_semver "$vname" "$BUMP_PART")
+    new_vcode=$((vcode + 1))
+    log "[$app] bump → ${new_vname}-${new_vcode}"
+    "$writer" "$new_vname" "$new_vcode"
+  fi
+done
+
+# ----------------------------------------------------------------------
+# Commit + push the bump
+# ----------------------------------------------------------------------
+if $DO_BUMP; then
+  if $DRY_RUN; then
+    dry "would commit version bump for: ${TARGETS[*]} (--bump $BUMP_PART)"
+    if $DO_PUSH; then
+      for remote in "${REMOTES[@]}"; do
+        dry "would push HEAD to $remote/$current_branch"
+      done
+    fi
+  else
+    if [[ -n "$(git status --porcelain)" ]]; then
+      bump_msg="Bump versions after release: ${TARGETS[*]} (--bump $BUMP_PART)"
+      run git add -A
+      run git commit -m "$bump_msg"
+      if $DO_PUSH; then
+        for remote in "${REMOTES[@]}"; do
+          run git push "$remote" "HEAD:$current_branch"
+        done
+      fi
+    else
+      warn "No version-file changes to commit (already at target versions?)"
+    fi
+  fi
+fi
+
+# ----------------------------------------------------------------------
+# Summary
+# ----------------------------------------------------------------------
+log "----------------------------------------"
+log "Summary:"
+if (( ${#CREATED_TAGS[@]} > 0 )); then
+  for t in "${CREATED_TAGS[@]}"; do log "  created tag: $t"; done
+else
+  log "  no new tags created"
+fi
+log "Done."
