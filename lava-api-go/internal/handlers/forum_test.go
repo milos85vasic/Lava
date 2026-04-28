@@ -30,6 +30,8 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -162,7 +164,7 @@ func TestForumHandler_GetForum_HappyPath_HitsScraperOnFirstCall_HitsCacheOnSecon
 
 	want, _ := json.Marshal(sampleForum())
 
-	for i, label := range []string{"first", "second"} {
+	for _, label := range []string{"first", "second"} {
 		w := httptest.NewRecorder()
 		req := httptest.NewRequest(http.MethodGet, "/forum", nil)
 		r.ServeHTTP(w, req)
@@ -176,7 +178,6 @@ func TestForumHandler_GetForum_HappyPath_HitsScraperOnFirstCall_HitsCacheOnSecon
 		if ct := w.Header().Get("Content-Type"); ct != "application/json" {
 			t.Fatalf("%s: Content-Type=%q want application/json", label, ct)
 		}
-		_ = i
 	}
 
 	if scraper.forumCalls != 1 {
@@ -240,35 +241,51 @@ func TestForumHandler_GetCategoryPage_PathParamIdForwarded(t *testing.T) {
 }
 
 func TestForumHandler_GetCategoryPage_PageQueryForwarded(t *testing.T) {
-	scraper := &fakeScraper{categoryReturn: sampleCategory("123", 2)}
-	r := newTestRouter(&Deps{Cache: newFakeCache(), Scraper: scraper})
-
-	w := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodGet, "/forum/123?page=2", nil)
-	r.ServeHTTP(w, req)
-
-	if w.Code != http.StatusOK {
-		t.Fatalf("status=%d want 200; body=%s", w.Code, w.Body.String())
+	// Table-driven so subsequent Phase 7 tasks can mirror this shape when
+	// they add their own optional-int parameters (search?page=, etc).
+	// Empty ?page= MUST forward as nil (NOT &0): a copy-paste regression
+	// vector that an `if pageStr := c.Query("page"); pageStr != ""` guard
+	// is meant to prevent.
+	two := 2
+	cases := []struct {
+		name    string
+		url     string
+		wantPtr *int
+	}{
+		{name: "explicit_page_2", url: "/forum/123?page=2", wantPtr: &two},
+		{name: "absent_page_query", url: "/forum/123", wantPtr: nil},
+		{name: "empty_page_value", url: "/forum/123?page=", wantPtr: nil},
+		{name: "invalid_page_value", url: "/forum/123?page=notanumber", wantPtr: nil},
 	}
-	if scraper.lastCategoryPage == nil || *scraper.lastCategoryPage != 2 {
-		got := "nil"
-		if scraper.lastCategoryPage != nil {
-			got = "&" + http.StatusText(*scraper.lastCategoryPage)
-		}
-		t.Fatalf("page ptr=%v want &2", got)
-	}
 
-	// Sub-case: invalid value → falls back to nil (Ktor parity).
-	scraper2 := &fakeScraper{categoryReturn: sampleCategory("123", 1)}
-	r2 := newTestRouter(&Deps{Cache: newFakeCache(), Scraper: scraper2})
-	w2 := httptest.NewRecorder()
-	req2 := httptest.NewRequest(http.MethodGet, "/forum/123?page=notanumber", nil)
-	r2.ServeHTTP(w2, req2)
-	if w2.Code != http.StatusOK {
-		t.Fatalf("invalid page: status=%d want 200", w2.Code)
-	}
-	if scraper2.lastCategoryPage != nil {
-		t.Fatalf("invalid page should fall back to nil; got %d", *scraper2.lastCategoryPage)
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			scraper := &fakeScraper{categoryReturn: sampleCategory("123", 1)}
+			r := newTestRouter(&Deps{Cache: newFakeCache(), Scraper: scraper})
+
+			w := httptest.NewRecorder()
+			req := httptest.NewRequest(http.MethodGet, tc.url, nil)
+			r.ServeHTTP(w, req)
+
+			if w.Code != http.StatusOK {
+				t.Fatalf("status=%d want 200; body=%s", w.Code, w.Body.String())
+			}
+
+			got := scraper.lastCategoryPage
+			if (got == nil) != (tc.wantPtr == nil) {
+				gotStr, wantStr := "nil", "nil"
+				if got != nil {
+					gotStr = "&" + strconv.Itoa(*got)
+				}
+				if tc.wantPtr != nil {
+					wantStr = "&" + strconv.Itoa(*tc.wantPtr)
+				}
+				t.Fatalf("page ptr=%s want %s", gotStr, wantStr)
+			}
+			if got != nil && tc.wantPtr != nil && *got != *tc.wantPtr {
+				t.Fatalf("page ptr=&%s want &%s", strconv.Itoa(*got), strconv.Itoa(*tc.wantPtr))
+			}
+		})
 	}
 }
 
@@ -311,6 +328,31 @@ func TestForumHandler_GetCategoryPage_CircuitOpen_Returns503(t *testing.T) {
 	}
 }
 
+// TestForumHandler_GetCategoryPage_Unauthorized_Returns401 pins the
+// writeUpstreamError 401 arm. NotFound, Forbidden, and CircuitOpen each
+// have dedicated tests above; this one closes the gap on Unauthorized.
+// The body assertion on "rutracker" guards against the sentinel's text
+// drifting silently — if rutracker.ErrUnauthorized.Error() ever stops
+// mentioning rutracker, this assertion surfaces it. Subsequent Phase 7
+// task authors: mirror this test for your own routes (per the comment
+// above writeUpstreamError in handlers.go).
+func TestForumHandler_GetCategoryPage_Unauthorized_Returns401(t *testing.T) {
+	scraper := &fakeScraper{categoryErr: rutracker.ErrUnauthorized}
+	r := newTestRouter(&Deps{Cache: newFakeCache(), Scraper: scraper})
+
+	w := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "/forum/42", nil)
+	r.ServeHTTP(w, req)
+
+	if w.Code != http.StatusUnauthorized {
+		t.Fatalf("status=%d want 401; body=%s", w.Code, w.Body.String())
+	}
+	body := w.Body.String()
+	if !strings.Contains(body, "rutracker") {
+		t.Fatalf("body=%q does not mention %q (sentinel text=%q)", body, "rutracker", rutracker.ErrUnauthorized.Error())
+	}
+}
+
 func TestForumHandler_GetForum_AuthRealmHashAffectsCacheKey(t *testing.T) {
 	scraper := &fakeScraper{forumReturn: sampleForum()}
 	c := newFakeCache()
@@ -350,6 +392,59 @@ func TestForumHandler_GetForum_AuthRealmHashAffectsCacheKey(t *testing.T) {
 	}
 	if scraper.forumCalls != 2 {
 		t.Fatalf("auth-2: scraper calls=%d want 2 (realm-keyed entry should have served the second hit)", scraper.forumCalls)
+	}
+
+	// Two cache entries: one anon, one realm.
+	if got := c.size(); got != 2 {
+		t.Fatalf("cache size=%d want 2 (anon entry + realm entry)", got)
+	}
+}
+
+// TestForumHandler_GetCategoryPage_AuthRealmHashAffectsCacheKey is the
+// path-parametrised companion to GetForum_AuthRealmHashAffectsCacheKey.
+// /forum (no path vars) and /forum/{id} (with path vars) flow through
+// different branches of cache.Key — a regression where path-vars
+// overwrite the realm hash would slip past the existing /forum-only
+// test, so this pins the path-param + realm-hash combined surface.
+func TestForumHandler_GetCategoryPage_AuthRealmHashAffectsCacheKey(t *testing.T) {
+	scraper := &fakeScraper{categoryReturn: sampleCategory("123", 1)}
+	c := newFakeCache()
+	r := newTestRouter(&Deps{Cache: c, Scraper: scraper})
+
+	// Step 1: anonymous GET /forum/123 — first scraper call, anon entry stored.
+	wAnon := httptest.NewRecorder()
+	rAnon := httptest.NewRequest(http.MethodGet, "/forum/123", nil)
+	r.ServeHTTP(wAnon, rAnon)
+	if wAnon.Code != http.StatusOK {
+		t.Fatalf("anon: status=%d want 200", wAnon.Code)
+	}
+	if scraper.categoryCalls != 1 {
+		t.Fatalf("anon: scraper calls=%d want 1", scraper.categoryCalls)
+	}
+
+	// Step 2: realm-keyed GET /forum/123 with Auth-Token: secret —
+	// different cache key → cache miss → second scraper call.
+	wAuth := httptest.NewRecorder()
+	rAuth := httptest.NewRequest(http.MethodGet, "/forum/123", nil)
+	rAuth.Header.Set(auth.HeaderName, "secret")
+	r.ServeHTTP(wAuth, rAuth)
+	if wAuth.Code != http.StatusOK {
+		t.Fatalf("auth: status=%d want 200", wAuth.Code)
+	}
+	if scraper.categoryCalls != 2 {
+		t.Fatalf("auth: scraper calls=%d want 2 (anon and realm-keyed must use distinct cache slots)", scraper.categoryCalls)
+	}
+
+	// Step 3: same Auth-Token again → cache hit, scraper count unchanged.
+	wAuth2 := httptest.NewRecorder()
+	rAuth2 := httptest.NewRequest(http.MethodGet, "/forum/123", nil)
+	rAuth2.Header.Set(auth.HeaderName, "secret")
+	r.ServeHTTP(wAuth2, rAuth2)
+	if wAuth2.Code != http.StatusOK {
+		t.Fatalf("auth-2: status=%d want 200", wAuth2.Code)
+	}
+	if scraper.categoryCalls != 2 {
+		t.Fatalf("auth-2: scraper calls=%d want 2 (realm-keyed entry should have served the second hit)", scraper.categoryCalls)
 	}
 
 	// Two cache entries: one anon, one realm.

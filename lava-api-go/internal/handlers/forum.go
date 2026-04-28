@@ -71,6 +71,7 @@ func (h *ForumHandler) GetForum(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "marshal forum: " + err.Error()})
 		return
 	}
+	// cache.Set error is non-fatal: response succeeds even if the write fails (caller already has the body).
 	_ = h.cache.Set(c.Request.Context(), key, body, forumTreeTTL)
 	c.Data(http.StatusOK, "application/json", body)
 }
@@ -108,6 +109,7 @@ func (h *ForumHandler) GetCategoryPage(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "marshal category: " + err.Error()})
 		return
 	}
+	// cache.Set error is non-fatal: response succeeds even if the write fails (caller already has the body).
 	_ = h.cache.Set(c.Request.Context(), key, body, categoryPageTTL)
 	c.Data(http.StatusOK, "application/json", body)
 }

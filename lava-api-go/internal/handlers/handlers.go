@@ -107,6 +107,12 @@ func Register(router *gin.Engine, deps *Deps) {
 //	ErrCircuitOpen  → 503 Service Unavailable (upstream tripped)
 //	anything else   → 502 Bad Gateway (upstream returned something we
 //	                                   couldn't make sense of)
+//
+// Each Phase 7 task MUST add per-route tests covering all five branches
+// for at least one of its routes (NotFound/Forbidden/Unauthorized/
+// CircuitOpen/default-→502). The forum handler tests in forum_test.go
+// are the reference shape; mirror them when adding search/topic/comments/
+// torrent/favorites/login routes.
 func writeUpstreamError(c *gin.Context, err error) {
 	switch {
 	case errors.Is(err, rutracker.ErrNotFound):
