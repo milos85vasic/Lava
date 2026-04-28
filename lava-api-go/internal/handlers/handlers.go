@@ -61,7 +61,10 @@ type ScraperClient interface {
 	AddComment(ctx context.Context, topicID, message, cookie string) (bool, error)
 	GetTorrent(ctx context.Context, id, cookie string) (*gen.ForumTopicDtoTorrent, error)
 	GetTorrentFile(ctx context.Context, id, cookie string) (*rutracker.TorrentFile, error)
-	// Phase 7.6-7.7 will append more methods here.
+	GetFavorites(ctx context.Context, cookie string) (*gen.FavoritesDto, error)
+	AddFavorite(ctx context.Context, id, cookie string) (bool, error)
+	RemoveFavorite(ctx context.Context, id, cookie string) (bool, error)
+	// Phase 7.7 will append more methods here.
 }
 
 // Compile-time assertion that the production scraper type satisfies the
@@ -115,7 +118,12 @@ func Register(router *gin.Engine, deps *Deps) {
 	torrent := NewTorrentHandler(deps)
 	router.GET("/torrent/:id", torrent.GetTorrent)
 	router.GET("/download/:id", torrent.GetDownload)
-	// Phase 7.6-7.7 will append more route registrations here.
+
+	fav := NewFavoritesHandler(deps)
+	router.GET("/favorites", fav.GetFavorites)
+	router.POST("/favorites/add/:id", fav.AddFavorite)
+	router.POST("/favorites/remove/:id", fav.RemoveFavorite)
+	// Phase 7.7 will append more route registrations here.
 }
 
 // writeUpstreamError maps the rutracker package's sentinel errors to

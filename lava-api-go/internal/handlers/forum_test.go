@@ -168,6 +168,23 @@ type fakeScraper struct {
 	lastTorrentFileCk string
 	torrentFileReturn *rutracker.TorrentFile
 	torrentFileErr    error
+
+	favoritesCalls       int
+	lastFavoritesCookie  string
+	favoritesReturn      *gen.FavoritesDto
+	favoritesErr         error
+
+	addFavoriteCalls   int
+	lastAddFavoriteID  string
+	lastAddFavoriteCk  string
+	addFavoriteResult  bool
+	addFavoriteErr     error
+
+	removeFavoriteCalls   int
+	lastRemoveFavoriteID  string
+	lastRemoveFavoriteCk  string
+	removeFavoriteResult  bool
+	removeFavoriteErr     error
 }
 
 func (f *fakeScraper) GetForum(_ context.Context, cookie string) (*gen.ForumDto, error) {
@@ -337,6 +354,42 @@ func (f *fakeScraper) GetTorrentFile(_ context.Context, id, cookie string) (*rut
 	f.lastTorrentFileID = id
 	f.lastTorrentFileCk = cookie
 	r, e := f.torrentFileReturn, f.torrentFileErr
+	f.mu.Unlock()
+	return r, e
+}
+
+// GetFavorites records the cookie pass-through. favorites_test.go uses
+// favoritesCalls to pin the cache hit-on-second-call short-circuit and
+// the realm-hash-affects-cache-key foundation requirement.
+func (f *fakeScraper) GetFavorites(_ context.Context, cookie string) (*gen.FavoritesDto, error) {
+	f.mu.Lock()
+	f.favoritesCalls++
+	f.lastFavoritesCookie = cookie
+	r, e := f.favoritesReturn, f.favoritesErr
+	f.mu.Unlock()
+	return r, e
+}
+
+// AddFavorite / RemoveFavorite record (id, cookie) and the programmable
+// (bool, error) return so favorites_test.go covers happy-path-true,
+// silent-reject-false, ErrUnauthorized (empty cookie), generic errors,
+// and the realm-scoped cache invalidation contract.
+func (f *fakeScraper) AddFavorite(_ context.Context, id, cookie string) (bool, error) {
+	f.mu.Lock()
+	f.addFavoriteCalls++
+	f.lastAddFavoriteID = id
+	f.lastAddFavoriteCk = cookie
+	r, e := f.addFavoriteResult, f.addFavoriteErr
+	f.mu.Unlock()
+	return r, e
+}
+
+func (f *fakeScraper) RemoveFavorite(_ context.Context, id, cookie string) (bool, error) {
+	f.mu.Lock()
+	f.removeFavoriteCalls++
+	f.lastRemoveFavoriteID = id
+	f.lastRemoveFavoriteCk = cookie
+	r, e := f.removeFavoriteResult, f.removeFavoriteErr
 	f.mu.Unlock()
 	return r, e
 }
