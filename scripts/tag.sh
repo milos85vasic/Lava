@@ -210,13 +210,31 @@ require_evidence_for_apigo() {
     warn "[api-go] --dry-run: bypassing .lava-ci-evidence/<commit>.json gate"
     return 0
   fi
-  local commit
-  commit="$(git rev-parse HEAD)"
-  local evidence_file="$REPO_ROOT/.lava-ci-evidence/${commit}.json"
-  if [[ ! -f "$evidence_file" ]]; then
-    die "Cannot tag api-go: no pretag evidence file found at $evidence_file. Run lava-api-go/scripts/pretag-verify.sh first."
+  # Search up to 10 ancestors for an evidence file. If the evidence is
+  # for an ancestor (not HEAD itself), every commit since that ancestor
+  # MUST have only touched .lava-ci-evidence/ — otherwise code has
+  # changed and the evidence is stale. This handles the natural workflow
+  # where pretag-verify writes evidence for HEAD, the operator commits
+  # the evidence file (changing HEAD), then runs tag.sh.
+  local head_commit ancestor_with_evidence="" candidate
+  head_commit="$(git rev-parse HEAD)"
+  for candidate in $(git log -n 10 --format=%H); do
+    if [[ -f "$REPO_ROOT/.lava-ci-evidence/${candidate}.json" ]]; then
+      ancestor_with_evidence="$candidate"
+      break
+    fi
+  done
+  if [[ -z "$ancestor_with_evidence" ]]; then
+    die "Cannot tag api-go: no pretag evidence file found in .lava-ci-evidence/ for HEAD or any of its 10 most-recent ancestors. Run lava-api-go/scripts/pretag-verify.sh first."
   fi
-  log "[api-go] pretag evidence found: $evidence_file"
+  if [[ "$ancestor_with_evidence" != "$head_commit" ]]; then
+    if git diff --name-only "${ancestor_with_evidence}..HEAD" -- | grep -qvE '^\.lava-ci-evidence/'; then
+      die "Cannot tag api-go: evidence is from $ancestor_with_evidence but non-evidence files have changed since. Re-run lava-api-go/scripts/pretag-verify.sh."
+    fi
+    log "[api-go] pretag evidence found at ancestor $ancestor_with_evidence (only .lava-ci-evidence/ changed since)"
+  else
+    log "[api-go] pretag evidence found: .lava-ci-evidence/${head_commit}.json"
+  fi
 }
 
 bump_semver() {
