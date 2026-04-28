@@ -91,6 +91,7 @@ class ServiceAdvertisementTest {
         assertEquals("identity", info.getPropertyString("compression"))
         assertEquals("optional", info.getPropertyString("tls"))
         assertNotNull(info.getPropertyString("version"))
+        assertEquals("1.0.1", info.getPropertyString("version"))
     }
 
     @Test

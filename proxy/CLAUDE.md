@@ -29,6 +29,10 @@ The `:proxy` module MUST obey the root Anti-Bluff Testing Pact. In addition:
 - Uses Koin for DI.
 - mDNS advertisement via JmDNS (`_lava._tcp`).
 
+## Follow-ups (tracked SP-2 outstanding work)
+
+- **Wire `apiVersionName` → `BuildConfig.VERSION_NAME` → `ServiceAdvertisement.API_VERSION`.** SP-2 Task 0.1 hardcoded `API_VERSION = "1.0.1"` in `proxy/src/main/kotlin/digital/vasic/lava/api/discovery/ServiceAdvertisement.kt` because exposing gradle's `apiVersionName` via Kotlin `BuildConfig` requires a `buildConfigField` mechanism that wasn't in scope for that task. The constants in those two files MUST stay in sync until this is wired. Until then, every release that bumps `apiVersionName` MUST also bump `API_VERSION`.
+
 ### Sixth Law — Real User Verification (Anti-Pseudo-Test Rule)
 
 A test that passes while the feature it covers is broken for end users is the most expensive kind of test in this codebase — it converts unknown breakage into believed safety. This has happened in this project before: tests and Integration Challenge Tests executed green while large parts of the product were unusable on a real device. That outcome is a constitutional failure, not a coverage failure, and it MUST NOT recur.
