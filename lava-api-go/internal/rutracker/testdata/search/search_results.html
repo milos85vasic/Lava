@@ -1,0 +1,45 @@
+<!-- search_results.html: search-results page 1 of 3, two .hl-tr rows.
+     Row 1: tor-approved status, full populated metadata. Title carries
+     [Drama] and [1080p] tag runs so getTitle/getTags get exercised.
+     Author anchor uses ?pid=42; category anchor uses ?f=7. Size attr
+     1610612736 → "1.5 GB" via formatSize. Date present via [style]
+     [data-ts_text]. Row 2: tor-need-edit status, terse metadata. -->
+<!DOCTYPE html>
+<html>
+<head><title>RuTracker — Search</title></head>
+<body>
+<div id="main_content_wrap">
+  <div class="bottom_info">
+    <div class="nav">
+      <p><b>1</b> <b>3</b></p>
+    </div>
+  </div>
+  <table>
+    <tr class="hl-tr">
+      <td>
+        <span class="tor-approved">approved</span>
+        <span class="t-title"><a data-topic_id="t1001" href="viewtopic.php?t=1001">[Drama] Movie Title [1080p]</a></span>
+        <span class="u-name"><a href="profile.php?mode=viewprofile&amp;pid=42">alice</a></span>
+        <a class="f" href="tracker.php?f=7">Movies</a>
+        <span class="tor-size" data-ts_text="1610612736">1.5 GB</span>
+        <span style="color:#aaa" data-ts_text="1700000000">2023-11-14</span>
+        <span class="seedmed">12</span>
+        <span class="leechmed">3</span>
+      </td>
+    </tr>
+    <tr class="hl-tr">
+      <td>
+        <span class="tor-need-edit">needs edit</span>
+        <span class="t-title"><a data-topic_id="t1002" href="viewtopic.php?t=1002">Plain Title</a></span>
+        <span class="u-name"><a href="profile.php?mode=viewprofile&amp;pid=99">bob</a></span>
+        <a class="f" href="tracker.php?f=8">Music</a>
+        <span class="tor-size" data-ts_text="2048">2 KB</span>
+        <span style="color:#aaa" data-ts_text="1700000500">later</span>
+        <span class="seedmed">1</span>
+        <span class="leechmed">0</span>
+      </td>
+    </tr>
+  </table>
+</div>
+</body>
+</html>

@@ -1,0 +1,31 @@
+<!-- search_no_status.html: page 1 of 1, single .hl-tr row that carries
+     NO `.tor-*` status class. The search parser MUST default this to
+     TorrentStatusDto.Checking — opposite of the forum scraper's "no
+     status ⇒ Topic, not Torrent" rule. Pinned by
+     TestParseSearchPage_StatusDefaultsToChecking. -->
+<!DOCTYPE html>
+<html>
+<head><title>RuTracker — Search</title></head>
+<body>
+<div id="main_content_wrap">
+  <div class="bottom_info">
+    <div class="nav">
+      <p><b>1</b> <b>1</b></p>
+    </div>
+  </div>
+  <table>
+    <tr class="hl-tr">
+      <td>
+        <span class="t-title"><a data-topic_id="t5001" href="viewtopic.php?t=5001">No Status Row</a></span>
+        <span class="u-name"><a href="profile.php?mode=viewprofile&amp;pid=7">eve</a></span>
+        <a class="f" href="tracker.php?f=9">Books</a>
+        <span class="tor-size" data-ts_text="1024">1 KB</span>
+        <span style="color:#aaa" data-ts_text="1700001000">date</span>
+        <span class="seedmed">5</span>
+        <span class="leechmed">1</span>
+      </td>
+    </tr>
+  </table>
+</div>
+</body>
+</html>

@@ -1,0 +1,30 @@
+<!-- search_no_date.html: single .hl-tr row whose date cell is missing
+     entirely (no element with `style` attribute carrying data-ts_text).
+     Parser MUST surface Date as nil pointer (Kotlin's `.toLongOrNull()`
+     returning null). Pinned by TestParseSearchPage_DateAbsent. -->
+<!DOCTYPE html>
+<html>
+<head><title>RuTracker — Search</title></head>
+<body>
+<div id="main_content_wrap">
+  <div class="bottom_info">
+    <div class="nav">
+      <p><b>1</b> <b>1</b></p>
+    </div>
+  </div>
+  <table>
+    <tr class="hl-tr">
+      <td>
+        <span class="tor-approved">approved</span>
+        <span class="t-title"><a data-topic_id="t6001" href="viewtopic.php?t=6001">Dateless Title</a></span>
+        <span class="u-name"><a href="profile.php?mode=viewprofile&amp;pid=11">frank</a></span>
+        <a class="f" href="tracker.php?f=12">Games</a>
+        <span class="tor-size" data-ts_text="1024">1 KB</span>
+        <span class="seedmed">2</span>
+        <span class="leechmed">0</span>
+      </td>
+    </tr>
+  </table>
+</div>
+</body>
+</html>

@@ -12,6 +12,8 @@
 package rutracker
 
 import (
+	"fmt"
+	"math"
 	"net/url"
 	"regexp"
 	"strconv"
@@ -188,6 +190,37 @@ var torrentStatusClasses = []struct {
 // tagBracketRe matches a `[...]` run, non-greedy. Mirrors the Kotlin
 // regex `(\[[^]]*])`.
 var tagBracketRe = regexp.MustCompile(`\[[^]]*]`)
+
+// formatSize ports Utils.kt's `formatSize(sizeBytes: Long): String`. Used
+// by the search scraper (Task 6.3) to render the .tor-size data-ts_text
+// byte count as a human-readable "1.5 GB"-style string.
+//
+// Locale note: Kotlin's `String.format("%.1f %sB", …)` uses the JVM
+// default locale, which in production runs in en_US/C inside the
+// container. Go's `fmt.Sprintf` is locale-independent and always emits
+// `.` as the decimal separator — TestFormatSize_Cases pins this so a
+// stray `,` decimal separator from a locale change can never ship.
+//
+// Boundary: `< 1024` returns "<n> B" (no decimals). Otherwise the
+// exponent is `floor(log_1024(sizeBytes))`, capped implicitly at 6
+// (KMGTPE). Negative or zero inputs go through the "< 1024" branch as
+// in the Kotlin original.
+func formatSize(sizeBytes int64) string {
+	if sizeBytes < 1024 {
+		return fmt.Sprintf("%d B", sizeBytes)
+	}
+	exp := int(math.Log(float64(sizeBytes)) / math.Log(1024.0))
+	const prefixes = "KMGTPE"
+	if exp < 1 {
+		exp = 1
+	}
+	if exp > len(prefixes) {
+		exp = len(prefixes)
+	}
+	pre := string(prefixes[exp-1])
+	value := float64(sizeBytes) / math.Pow(1024.0, float64(exp))
+	return fmt.Sprintf("%.1f %sB", value, pre)
+}
 
 // collapseWhitespace mimics Jsoup's `Element.text()` whitespace policy:
 // any run of ASCII whitespace (incl. NBSP) collapses to a single space,
