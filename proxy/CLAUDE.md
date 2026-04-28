@@ -20,6 +20,7 @@ The `:proxy` module MUST obey the root Anti-Bluff Testing Pact. In addition:
 ### Docker & Deployment Tests
 - The Docker build MUST be verified (at minimum compile the fat JAR and build the image locally).
 - Environment variable handling (`ADVERTISE_HOST`) MUST be tested.
+- Image build, scan, and run-through MUST execute on a developer machine or a local self-hosted runner — see **Local-Only CI/CD** in `/CLAUDE.md`. Hosted CI for `:proxy` is forbidden.
 
 ## Proxy Architecture
 
