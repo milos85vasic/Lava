@@ -311,6 +311,35 @@ func TestParseCategoryPage_BlankAuthor(t *testing.T) {
 	}
 }
 
+// TestParseCategoryPage_SeedsOverflowAbsent pins the int32-clamp
+// guarantee added in the Phase-6.2 code-quality fix. An adversarial /
+// corrupt-upstream Seed count of 9999999999 (greater than math.MaxInt32)
+// previously wrapped silently to a negative int32 because forum.go did
+// `int32(seedsVal)` without bounds checking; the wrapped value then
+// round-tripped through the OpenAPI int32 field on the wire. Post-fix,
+// the parser MUST treat out-of-range values as ABSENT — Seeds and
+// Leeches are nil pointers, never negative noise.
+func TestParseCategoryPage_SeedsOverflowAbsent(t *testing.T) {
+	html := loadFixture(t, "category_seeds_overflow.html")
+	out, err := ParseCategoryPage(html, "9000")
+	if err != nil {
+		t.Fatalf("ParseCategoryPage error: %v", err)
+	}
+	if out.Topics == nil || len(*out.Topics) != 1 {
+		t.Fatalf("expected 1 topic, got %d", lenTopicsOrZero(out.Topics))
+	}
+	tor, err := (*out.Topics)[0].AsForumTopicDtoTorrent()
+	if err != nil {
+		t.Fatalf("expected Torrent, got %v", err)
+	}
+	if tor.Seeds != nil {
+		t.Errorf("Seeds: got %d, want nil (out-of-int32 upstream value MUST be absent, NOT wrapped)", *tor.Seeds)
+	}
+	if tor.Leeches != nil {
+		t.Errorf("Leeches: got %d, want nil (out-of-int32 upstream value MUST be absent, NOT wrapped)", *tor.Leeches)
+	}
+}
+
 func TestParseCategoryPage_NotFound(t *testing.T) {
 	html := loadFixture(t, "category_not_found.html")
 	out, err := ParseCategoryPage(html, "999")

@@ -76,6 +76,46 @@ func TestQueryParam_ReturnsValue(t *testing.T) {
 	}
 }
 
+// TestNodeText_MultiMatchJoinsWithSpace pins the multi-element join
+// semantics that were missing before the Phase-6.2 code-quality fix.
+// goquery's Selection.Text() concatenates the text of every matched
+// element WITHOUT a separator; Jsoup's Elements.text() (which the Kotlin
+// parser uses) joins with " ". A row carrying two `.seedmed` siblings
+// ("12" and "34") MUST yield "12 34", not "1234". Without this guarantee
+// nodeIntOrNil silently parses 1234 from what the Kotlin code rightly
+// rejects as non-numeric.
+func TestNodeText_MultiMatchJoinsWithSpace(t *testing.T) {
+	html := `<table><tbody><tr><td><span class="seedmed">12</span><span class="seedmed">34</span></td></tr></tbody></table>`
+	d := docFromHTML(t, html)
+	sel := d.Find("tr").Find(".seedmed")
+	if sel.Length() != 2 {
+		t.Fatalf("setup: expected 2 .seedmed siblings, got %d", sel.Length())
+	}
+	got := nodeText(sel)
+	want := "12 34"
+	if got != want {
+		t.Errorf("nodeText multi-match: got %q, want %q (Jsoup Elements.text() joins with single space)", got, want)
+	}
+}
+
+// TestNodeIntOrNil_MultiMatchReturnsAbsent verifies the integer parser
+// inherits the multi-match join — "12 34" is non-numeric, so the helper
+// MUST return (0, false), matching Kotlin's `"12 34".toIntOrNull() == null`.
+// A pre-fix nodeText returns "1234" and nodeIntOrNil silently produces
+// (1234, true). That is exactly the silent corruption guarded against.
+func TestNodeIntOrNil_MultiMatchReturnsAbsent(t *testing.T) {
+	html := `<table><tbody><tr><td><span class="seedmed">12</span><span class="seedmed">34</span></td></tr></tbody></table>`
+	d := docFromHTML(t, html)
+	sel := d.Find("tr").Find(".seedmed")
+	v, ok := nodeIntOrNil(sel)
+	if ok {
+		t.Errorf("nodeIntOrNil multi-match: got (%d, true), want (0, false) — Kotlin's toIntOrNull on \"12 34\" is null", v)
+	}
+	if v != 0 {
+		t.Errorf("nodeIntOrNil multi-match: value should be 0 on miss, got %d", v)
+	}
+}
+
 // TestParseTorrentStatus_PriorityOrder verifies that when a row carries
 // multiple status classes simultaneously, the FIRST entry in the priority
 // table wins (matching Kotlin's `when` block). Duplicate must outrank

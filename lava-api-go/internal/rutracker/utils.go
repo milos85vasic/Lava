@@ -20,18 +20,31 @@ import (
 	"github.com/PuerkitoBio/goquery"
 )
 
-// nodeText returns the trimmed text of the given selection. Equivalent to
-// Kotlin's `Element?.toStr()` / `Elements?.toStr()` (both delegate to
-// Jsoup's `Element.text()` which collapses whitespace and trims). When
-// the selection is empty the empty string is returned, never an error.
+// nodeText returns the trimmed text of the given selection.
+//
+// Equivalent to Kotlin's `Element?.toStr()` / `Elements?.toStr()` —
+// both delegate to Jsoup. For a SINGLE-element selection Jsoup's
+// `Element.text()` is the obvious behaviour. For a MULTI-element
+// selection Jsoup's `Elements.text()` joins the per-element text with
+// a SINGLE SPACE separator; goquery's `Selection.Text()` is NOT
+// equivalent — it concatenates the text of every matched element with
+// no separator at all. To preserve Kotlin parity we walk the matched
+// elements ourselves and join with " " before collapsing whitespace.
+// This matters in production: a row carrying two `.seedmed` siblings
+// ("12" and "34") MUST yield "12 34" (then nil through toIntOrNull),
+// not "1234" (a wrong, plausible-looking 1,234).
+//
+// When the selection is empty the empty string is returned, never an
+// error.
 func nodeText(s *goquery.Selection) string {
 	if s == nil || s.Length() == 0 {
 		return ""
 	}
-	// goquery's Text() concatenates descendant text nodes the same way
-	// Jsoup's Element.text() does, but does NOT collapse internal
-	// whitespace runs. Mirror Jsoup's behaviour explicitly.
-	return collapseWhitespace(s.Text())
+	parts := make([]string, 0, s.Length())
+	s.Each(func(_ int, e *goquery.Selection) {
+		parts = append(parts, e.Text())
+	})
+	return collapseWhitespace(strings.Join(parts, " "))
 }
 
 // nodeInt parses the trimmed text of the selection as a base-10 integer
@@ -47,12 +60,15 @@ func nodeInt(s *goquery.Selection, def int) int {
 
 // nodeIntOrNil parses the trimmed text of the selection as a base-10
 // integer. Returns (value, true) on success, (0, false) otherwise.
-// Equivalent to Kotlin's `Elements?.toIntOrNull()`.
+// Equivalent to Kotlin's `Elements?.toIntOrNull()`. Reads through
+// nodeText so the multi-match join semantics apply uniformly — a
+// two-sibling selection of "12" and "34" yields "12 34", which fails
+// strconv.Atoi and returns (0, false).
 func nodeIntOrNil(s *goquery.Selection) (int, bool) {
 	if s == nil || s.Length() == 0 {
 		return 0, false
 	}
-	t := strings.TrimSpace(s.Text())
+	t := nodeText(s)
 	if t == "" {
 		return 0, false
 	}

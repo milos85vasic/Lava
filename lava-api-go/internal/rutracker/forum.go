@@ -22,6 +22,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math"
 	"net/url"
 	"strconv"
 	"strings"
@@ -237,11 +238,18 @@ func ParseCategoryPage(html []byte, forumID string) (*gen.CategoryPageDto, error
 				Status: (*gen.TorrentStatusDto)(status),
 				Type:   "Torrent",
 			}
-			if hasSeeds {
+			// int32 clamp: the OpenAPI contract types Seeds / Leeches as
+			// int32, but `nodeIntOrNil` returns a host int (64 bits on
+			// modern targets). Adversarial / corrupt upstream values
+			// such as "9999999999" would otherwise wrap silently to a
+			// negative int32. Treat out-of-range values as ABSENT — the
+			// same wire-shape the parser uses when the field is
+			// missing entirely.
+			if hasSeeds && seedsVal >= math.MinInt32 && seedsVal <= math.MaxInt32 {
 				v := int32(seedsVal)
 				tt.Seeds = &v
 			}
-			if hasLeeches {
+			if hasLeeches && leechesVal >= math.MinInt32 && leechesVal <= math.MaxInt32 {
 				v := int32(leechesVal)
 				tt.Leeches = &v
 			}

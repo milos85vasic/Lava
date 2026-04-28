@@ -1,0 +1,30 @@
+<!-- category_seeds_overflow.html: single Torrent row whose .seedmed text
+     ("9999999999") exceeds int32 range. Adversarial / corrupt-upstream
+     fixture used by TestParseCategoryPage_SeedsOverflowAbsent to pin
+     the int32-clamp semantics: out-of-range counts MUST surface as
+     "absent" (nil pointer), NEVER a silently-wrapped negative int32. -->
+<!DOCTYPE html>
+<html>
+<head><title>RuTracker — Overflow</title></head>
+<body>
+<div id="pagination">
+  <p><b>1</b> <b>1</b></p>
+</div>
+<h1 class="maintitle">Overflow Forum</h1>
+<table class="vf-table forum">
+  <tbody>
+    <tr class="hl-tr">
+      <td id="t9001">9001</td>
+      <td>
+        <span class="tor-approved">approved</span>
+        <span class="tt-text">Overflow Test</span>
+        <span class="vf-col-author"><a class="topicAuthor" href="profile.php?mode=viewprofile&amp;u=42">alice</a></span>
+        <span class="seedmed">9999999999</span>
+        <span class="leechmed">9999999999</span>
+        <span class="f-dl">1&nbsp;GB</span>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</body>
+</html>
