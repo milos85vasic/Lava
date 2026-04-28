@@ -27,8 +27,8 @@ func seedSearchFuzzCorpus(f *testing.F) {
 		}
 		f.Add(b)
 	}
-	// Adversarial seeds: truncated, deeply nested, invalid UTF-8,
-	// empty data-ts_text, malformed numerics in the .seedmed slot.
+	// Adversarial seeds: truncated, invalid UTF-8, empty data-ts_text,
+	// malformed numerics in the .seedmed slot.
 	f.Add([]byte(""))
 	f.Add([]byte("<html"))
 	f.Add([]byte(`<div class="hl-tr"><span class="tor-size" data-ts_text=""></span></div>`))

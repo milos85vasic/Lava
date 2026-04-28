@@ -253,7 +253,9 @@ func TestFormatSize_Cases(t *testing.T) {
 // TestGetSearchPage_BuildsUpstreamURL checks the full upstream URL shape:
 // path, every parameter mapping, and the 50-results-per-page math. Sixth
 // Law clause 1: same surface (Client.GetSearchPage) the Phase 7 handler
-// will call.
+// will call. Distinct, recognisable values for Categories/Author/AuthorID
+// pin the f/pn/pid plumbing too — a swap between those three in
+// Client.GetSearchPage would otherwise ship silently.
 func TestGetSearchPage_BuildsUpstreamURL(t *testing.T) {
 	fixture := loadSearchFixture(t, "search_results.html")
 	var captured *url.URL
@@ -267,16 +269,22 @@ func TestGetSearchPage_BuildsUpstreamURL(t *testing.T) {
 
 	c := NewClient(srv.URL)
 	q := strPtr("foo")
-	page := intPtr2(2)
+	cats := strPtr("9")
+	author := strPtr("alice")
+	authorID := strPtr("42")
+	page := intPtr(2)
 	st := sortTypePtr(gen.SearchSortTypeDtoSize)
 	so := sortOrderPtr(gen.Descending)
 	per := periodPtr(gen.LastWeek)
 	_, err := c.GetSearchPage(context.Background(), SearchOpts{
-		Query:     q,
-		Page:      page,
-		SortType:  st,
-		SortOrder: so,
-		Period:    per,
+		Query:      q,
+		Categories: cats,
+		Author:     author,
+		AuthorID:   authorID,
+		Page:       page,
+		SortType:   st,
+		SortOrder:  so,
+		Period:     per,
 	}, "")
 	if err != nil {
 		t.Fatalf("GetSearchPage error: %v", err)
@@ -290,10 +298,13 @@ func TestGetSearchPage_BuildsUpstreamURL(t *testing.T) {
 	got := captured.Query()
 	checks := map[string]string{
 		"nm":    "foo",
-		"o":     "7",  // Size
-		"s":     "2",  // Descending
-		"tm":    "7",  // LastWeek
-		"start": "50", // page=2 → 50*(2-1)
+		"f":     "9",     // Categories
+		"pn":    "alice", // Author
+		"pid":   "42",    // AuthorID
+		"o":     "7",     // Size
+		"s":     "2",     // Descending
+		"tm":    "7",     // LastWeek
+		"start": "50",    // page=2 → 50*(2-1)
 	}
 	for k, want := range checks {
 		if g := got.Get(k); g != want {
@@ -338,7 +349,7 @@ func TestGetSearchPage_NilParamsOmitted(t *testing.T) {
 // --- helpers ----------------------------------------------------------
 
 func strPtr(s string) *string                                  { return &s }
-func intPtr2(i int) *int                                       { return &i }
+func intPtr(i int) *int                                        { return &i }
 func sortTypePtr(t gen.SearchSortTypeDto) *gen.SearchSortTypeDto { return &t }
 func sortOrderPtr(o gen.SearchSortOrderDto) *gen.SearchSortOrderDto {
 	return &o
