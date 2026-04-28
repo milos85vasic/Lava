@@ -3589,7 +3589,6 @@ type PostCommentResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *bool
-	JSON401      *Error
 }
 
 // Status returns HTTPResponse.Status
@@ -3611,7 +3610,6 @@ func (r PostCommentResponse) StatusCode() int {
 type GetDownloadResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON401      *Error
 	JSON404      *Error
 }
 
@@ -3635,7 +3633,6 @@ type GetFavoritesResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *FavoritesDto
-	JSON401      *Error
 }
 
 // Status returns HTTPResponse.Status
@@ -3658,7 +3655,6 @@ type PostFavoritesAddResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *bool
-	JSON401      *Error
 }
 
 // Status returns HTTPResponse.Status
@@ -3681,7 +3677,6 @@ type PostFavoritesRemoveResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *bool
-	JSON401      *Error
 }
 
 // Status returns HTTPResponse.Status
@@ -4157,13 +4152,6 @@ func ParsePostCommentResponse(rsp *http.Response) (*PostCommentResponse, error) 
 		}
 		response.JSON200 = &dest
 
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
-		var dest Error
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON401 = &dest
-
 	}
 
 	return response, nil
@@ -4183,13 +4171,6 @@ func ParseGetDownloadResponse(rsp *http.Response) (*GetDownloadResponse, error) 
 	}
 
 	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
-		var dest Error
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON401 = &dest
-
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
 		var dest Error
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
@@ -4223,13 +4204,6 @@ func ParseGetFavoritesResponse(rsp *http.Response) (*GetFavoritesResponse, error
 		}
 		response.JSON200 = &dest
 
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
-		var dest Error
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON401 = &dest
-
 	}
 
 	return response, nil
@@ -4256,13 +4230,6 @@ func ParsePostFavoritesAddResponse(rsp *http.Response) (*PostFavoritesAddRespons
 		}
 		response.JSON200 = &dest
 
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
-		var dest Error
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON401 = &dest
-
 	}
 
 	return response, nil
@@ -4288,13 +4255,6 @@ func ParsePostFavoritesRemoveResponse(rsp *http.Response) (*PostFavoritesRemoveR
 			return nil, err
 		}
 		response.JSON200 = &dest
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
-		var dest Error
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON401 = &dest
 
 	}
 

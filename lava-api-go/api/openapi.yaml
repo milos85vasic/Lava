@@ -1281,12 +1281,6 @@ paths:
             application/json:
               schema:
                 type: boolean
-        '401':
-          description: Auth-Token absent or invalid.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
   /torrent/{id}:
     get:
       operationId: getTorrent
@@ -1355,12 +1349,6 @@ paths:
               schema:
                 type: string
                 format: binary
-        '401':
-          description: Auth-Token required for this torrent.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
         '404':
           description: Unknown torrent id or upstream refused.
           content:
@@ -1429,12 +1417,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/FavoritesDto'
-        '401':
-          description: Auth-Token absent or invalid.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
   /favorites/add/{id}:
     post:
       operationId: postFavoritesAdd
@@ -1462,12 +1444,6 @@ paths:
             application/json:
               schema:
                 type: boolean
-        '401':
-          description: Auth-Token absent or invalid.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
   /favorites/remove/{id}:
     post:
       operationId: postFavoritesRemove
@@ -1493,9 +1469,3 @@ paths:
             application/json:
               schema:
                 type: boolean
-        '401':
-          description: Auth-Token absent or invalid.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'

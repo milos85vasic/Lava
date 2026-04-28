@@ -33,7 +33,7 @@ fail() { printf '\033[1;31m[ci:fail]\033[0m %s\n' "$*" >&2; exit 1; }
 # than sha256sum because it (a) doesn't silently pass when sha256sum is missing
 # from PATH, (b) doesn't depend on go.sum existing, (c) shows the actual diff
 # in CI output when the invariant fails.
-log "step 1/N  go mod tidy invariant"
+log "step 1/4  go mod tidy invariant"
 go mod tidy
 if ! git diff --exit-code -- go.mod go.sum >/dev/null 2>&1; then
   git --no-pager diff -- go.mod go.sum
@@ -44,7 +44,7 @@ fi
 #
 # Regenerate server + client from api/openapi.yaml and assert no diff.
 # Same `git diff --exit-code` pattern as step 1.
-log "step 2/N  oapi-codegen invariant"
+log "step 2/4  oapi-codegen invariant"
 ./scripts/generate.sh >/dev/null
 if ! git diff --exit-code -- internal/gen/ >/dev/null 2>&1; then
   git --no-pager diff -- internal/gen/
@@ -52,21 +52,20 @@ if ! git diff --exit-code -- internal/gen/ >/dev/null 2>&1; then
 fi
 
 # 3. go vet
-log "step 3/N  go vet ./..."
+log "step 3/4  go vet ./..."
 go vet ./...
 
 # 4. go build
-log "step 4/N  go build ./..."
+log "step 4/4  go build ./..."
 go build ./...
 
 # Later phases append to this script as features land:
-#   - oapi-codegen invariant
-#   - go test -race -count=1 ./...
-#   - fuzz
-#   - gosec
-#   - govulncheck
-#   - load (k6)
-#   - image build + trivy
+#   - go test -race -count=1 ./...    (Phase 3+)
+#   - fuzz                            (Phase 6+)
+#   - gosec                           (Phase 13)
+#   - govulncheck                     (Phase 13)
+#   - load (k6)                       (Phase 10)
+#   - image build + trivy             (Phase 13)
 #
 # Steps are added in the phase that produces the corresponding code.
 
