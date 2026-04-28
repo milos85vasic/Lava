@@ -818,6 +818,179 @@ For traceability — every locked decision in this document, with the brainstorm
 
 ---
 
+## Appendix A.1 — Implementation provenance (commit hashes per phase)
+
+Recorded post-implementation per Phase 14 / Task 14.3 step 1. Every commit listed
+landed on `master` and is mirrored to all four upstreams (github, gitflic, gitlab,
+gitverse). Review-feedback fix commits are listed inline with their primary task.
+
+### Phase 1 — `lava-api-go/` skeleton
+
+| Task | Commit | Subject |
+|---|---|---|
+| 1.1 + 1.2 docs | `4d20524` | doc set (CONSTITUTION, README, CLAUDE, AGENTS, LICENSE, SECURITY) |
+| 1.3 ci skeleton | `3ad2953` | initial Makefile + scripts/ci.sh skeleton |
+| 1.4 version | `5ba8a01` | internal/version package — Name/Code single source of truth |
+| 1.x review fix | `afc1604` | Phase 1 review — git-diff tidy invariant + drop bluff test |
+
+### Phase 2 — OpenAPI + oapi-codegen
+
+| Task | Commit | Subject |
+|---|---|---|
+| 2.1 spec | `30d1563` | hand-author OpenAPI 3.1 from Ktor proxy + Kotlin DTOs |
+| 2.2 codegen | `7a59d4b` | oapi-codegen v2 wired; gen committed |
+| 2.x review fix | `bf93f96` | Phase 2 review — drop aspirational 401s; ci.sh tweaks |
+
+### Phase 3 — Foundation: config + observability + server
+
+| Task | Commit | Subject |
+|---|---|---|
+| 3.1 config | `e9811f2` | internal/config — env-driven Config with validation |
+| 3.2 observability | `c2ad154` | internal/observability — logger / metrics / tracing / health |
+| 3.3 server | `eddc0c5` | internal/server — Gin engine over HTTP/3 + dual listener |
+| 3.x review fix | `3078285` | Phase 3 review — extraction tracker + 2 tests |
+
+### Phase 4 — Postgres + cache
+
+| Task | Commit | Subject |
+|---|---|---|
+| 4.1 migrations | `057d76b` | golang-migrate SQL for the 4 runtime tables |
+| 4.2 migrate.sh + test-pg.sh | `d3c9dab` | scripts wrappers; up/down 4 cleanly verified |
+| 4.3 cache | `3ae9568` | internal/cache facade over Submodules/Cache/pkg/postgres |
+
+### Phase 5 — Auth + rate limit
+
+| Task | Commit | Subject |
+|---|---|---|
+| 5.1 auth | `3ce69ab` | internal/auth — A2 pass-through + H1 audit hashing |
+| 5.2 ratelimit | `4df0e82` | internal/ratelimit — Submodules/RateLimiter sliding-window glue |
+
+### Incident hardening (interleaved before Phase 6)
+
+| Commit | Subject |
+|---|---|
+| `06b8e4a` | Incident response — host-poweroff forensics + forbidden-command list |
+
+### Phase 6 — Rutracker scrapers (the Lava-domain scraper layer)
+
+| Task | Section | Commit | Subject |
+|---|---|---|---|
+| 6.1 | client + breaker | `6faf59a` | internal/rutracker/client — circuit-breaker-wrapped HTTP client |
+| 6.1.b | submodule pin | `08d906c` | bump Submodules/Concurrency to aaca1c2 |
+| 6.2 | forum | `03a3853` | internal/rutracker/forum + utils — forum-tree + category-page parsers |
+| 6.2.fix | review fix | `4fca329` | nodeText multi-match space-join + int32 clamp on Seeds/Leeches |
+| 6.3 | search | `1711e00` | internal/rutracker/search — search-results parser + formatSize |
+| 6.3.fix | review fix | `c964f58` | f/pn/pid URL plumbing test + intPtr rename + fuzz-seed comment |
+| 6.4 | topic | `592e497` | internal/rutracker/{post,comments,topic} — recursive PostElementDto |
+| 6.5 | comments-add | `0fc56eb` | internal/rutracker/comments_add — three-step posting flow |
+| 6.6 | torrent | `fbfef3d` | internal/rutracker/torrent — TorrentDto + binary download flow |
+| 6.7 | favorites | `46d0013` | internal/rutracker/favorites — multi-page bookmarks walk + add/remove |
+| 6.7.fix | review fix | `311e219` | symmetric Remove negative-branch tests |
+| 6.8 | login + captcha | `55aac71` | internal/rutracker/{login,captcha} — AuthResponseDto + captcha proxy |
+
+### Phase 7 — Route handlers (13 routes)
+
+| Task | Section | Commit | Subject |
+|---|---|---|---|
+| 7.1 | forum handlers | `438912f` | internal/handlers/{handlers,forum} — establishes the Phase 7 pattern |
+| 7.1.fix | foundation review | `fd2f5d3` | Unauthorized 401 test + realm-hash test on /forum/{id} + empty-page sub-case + StatusText→Itoa |
+| 7.2 | search handler | `8886411` | internal/handlers/search — 8 optional params, server-side enum validation |
+| 7.3 | topic handlers | `e23393e` | internal/handlers/topic — 3 routes, shared TTL, helper for cache invalidation |
+| 7.4 | comments-add | `627fc5d` | internal/handlers/comments_add — invalidates 3 topic cache keys |
+| 7.5 | torrent handlers | `fd7fd29` | internal/handlers/torrent — never-cached binary stream |
+| 7.6 | favorites handlers | `e0951f4` | internal/handlers/favorites — realm-scoped invalidation on writes |
+| 7.7 | login + captcha + index | `8606791` | internal/handlers/{index,login,captcha} — finishes the 13-route surface |
+
+### Phase 8 — mDNS + healthprobe
+
+| Task | Commit | Subject |
+|---|---|---|
+| 8.1 + 8.2 | `03988c8` | internal/discovery/mdns + cmd/healthprobe (single bundled commit) |
+
+### Phase 9 — Main entry point + Dockerfile
+
+| Task | Commit | Subject |
+|---|---|---|
+| 9.1 + 9.2 | `6c58770` | cmd/lava-api-go + docker/Dockerfile (single bundled commit) |
+
+### Phase 10 — Test infrastructure
+
+| Task | Commit | Subject |
+|---|---|---|
+| 10.1 contract | `88c2365` | tests/contract — golden fixtures + kin-openapi schema validation |
+| 10.2 e2e | `1c9b4af` | tests/e2e — fake-rutracker httptest + transient podman Postgres |
+| 10.3 parity | `5e1debb` | tests/parity — Sixth-Law load-bearing gate framework (skip-on-unset env) |
+| 10.4 load | `ab41849` | tests/load + scripts/load-quick.sh — k6-quick + k6-soak |
+
+### Phase 11 — Container topology
+
+| Task | Commit | Subject |
+|---|---|---|
+| 11.1 + 11.2 + 11.3 | `9c4c462` | docker-compose profiles + observability configs + lava-containers profile flags |
+
+### Phase 12 — Lifecycle scripts
+
+| Task | Commit | Subject |
+|---|---|---|
+| 12.1 + 12.2 + 12.3 | `312f162` | start.sh/stop.sh + tag.sh api-go registry + build_and_release.sh Go step |
+
+### Phase 13 — Pretag + mutation + security gates
+
+| Task | Commit | Subject |
+|---|---|---|
+| 13.1 + 13.2 + 13.3 | `2891c01` | pretag-verify.sh + mutation.sh + ci.sh{gosec,govulncheck,trivy} |
+
+### Phase 14 — Acceptance + first tag (operator-driven, in progress)
+
+Tasks 14.1 (full local CI gate) and 14.2 (cut + push the `Lava-API-Go-2.0.0-2000`
+tag) are operator actions per Sixth Law clause 5: a release tag MUST follow a
+real-environment acceptance run that the operator (or a scripted black-box
+runner) drives. Tag scripts MUST NOT be cut autonomously.
+
+Task 14.3 step 1 (this Appendix update) — autonomous documentation work — is the
+commit that lands this provenance table.
+
+---
+
+## Appendix A.2 — Acceptance-readiness audit (spec §18)
+
+Audit of the 11 acceptance criteria from §18 against the implementation as of
+the Phase 13 commit `2891c01`. Items marked **DONE** are verified by tests in
+the codebase; items marked **OPERATOR** require a real-environment run during
+Phase 14.1 / 14.2.
+
+| # | Criterion | Status | Evidence |
+|---|---|---|---|
+| 1 | Behavioural parity verified — cross-backend parity test passes for every fixture | OPERATOR | tests/parity framework landed at 5e1debb; the comprehensive 16-route × {anon,auth} × {body sizes} fixture matrix is populated by the operator during 14.1 against running services |
+| 2 | Anti-bluff falsifiability documented for every type-3, type-4, type-5 test | DONE for type 3 (contract) + framework for type 4 / type 5 | 88c2365 records type-3 rehearsal; the three plan-mandated type-5 rehearsals (corrupt body / reorder JSON / drop header) are deferred to 14.1 per 5e1debb's commit body |
+| 3 | `lava-api-go/scripts/ci.sh` green end-to-end | OPERATOR | scripts/ci.sh in 2891c01 includes all 10 plan-defined steps; full strict-mode pass requires gosec / govulncheck / trivy installed locally |
+| 4 | `scripts/tag.sh --app api-go --dry-run` reports the expected tag | DONE | verified during Phase 12 implementation: `[tag] [api-go] current 2.0.0-2000 → tag 'Lava-API-Go-2.0.0-2000'` |
+| 5 | `./start.sh` brings up lava-api-go + Postgres + migrate; mDNS advertises `_lava-api._tcp` | OPERATOR | start.sh + docker-compose.yml + lava-containers all wired (commits 9c4c462 + 312f162); first real run is the 14.1 step |
+| 6 | `./start.sh --legacy` brings up the Ktor proxy on `:8080` with symmetric TXT records | OPERATOR | start.sh `--legacy` flag wired in 312f162; symmetric TXT records were added in the pre-Phase-1 ServiceAdvertisement.kt update |
+| 7 | `./start.sh --both` brings up both APIs simultaneously | OPERATOR | `--both` flag wired in 312f162 routing through compose `--profile both` |
+| 8 | `./start.sh --with-observability` brings up Prometheus / Loki / Promtail / Tempo / Grafana with non-empty graphs | OPERATOR | observability profile + 5 service configs + 4-panel dashboard committed in 9c4c462 |
+| 9 | `docs/api/` renders the OpenAPI spec via Swagger UI under profile `dev-docs` | OPERATOR | `dev-docs` profile + lava-swagger-ui service committed in 9c4c462 |
+| 10 | First real-device pre-tag verification recorded under `.lava-ci-evidence/<commit>.json` and tag pushed to all four upstreams | OPERATOR | pretag-verify.sh + tag.sh evidence-required gate committed in 2891c01; first evidence record + first tag are the 14.1 + 14.2 steps |
+| 11 | Four-upstream mirror policy honoured for every commit | DONE | every Phase-1-through-13 commit has been verified as `git ls-remote refs/heads/master` returning the same SHA on github / gitflic / gitlab / gitverse |
+
+**Operator handoff for Phase 14 (next steps):**
+
+1. Provision TLS cert + key under `lava-api-go/docker/tls/server.{crt,key}` (self-signed for LAN deployment).
+2. Set `LAVA_PG_PASSWORD` in `.env` (used by docker-compose).
+3. `./start.sh --with-observability` — bring up the api-go profile + observability stack.
+4. Wait for `/health` to return 200 (via healthprobe); verify the four upstream-route happy-paths via `curl -k --http3-only https://localhost:8443/...`.
+5. `cd lava-api-go && ./scripts/ci.sh` — must complete green in strict mode (Phase 14.1 step 1).
+6. `lava-api-go/scripts/pretag-verify.sh` — produces `.lava-ci-evidence/<HEAD>.json`. Commit that file.
+7. `./start.sh --both` — additionally bring up the legacy Ktor proxy. Run the parity gate by setting `LAVA_PARITY_KTOR_URL=http://localhost:8080` and `LAVA_PARITY_GO_URL=https://localhost:8443` then `cd lava-api-go && go test -count=1 ./tests/parity/...`. The three plan-mandated parity rehearsals (corrupt body / reorder JSON / drop header) get recorded in the Phase 14.1 step 3 walk-through.
+8. Walk through the 11 §18 criteria above and confirm each.
+9. `scripts/tag.sh --app api-go --dry-run` — verify the tag output matches `Lava-API-Go-2.0.0-2000`.
+10. `scripts/tag.sh --app api-go` — creates the tag and pushes to all four upstreams. (`scripts/tag.sh` enforces the evidence-required gate from step 6.)
+11. Verify the tag appears on all four remotes: `for r in github gitflic gitlab gitverse; do printf '%-10s ' "$r"; git ls-remote --tags "$r" 'refs/tags/Lava-API-Go-*'; done`.
+12. (14.3 step 2) Final commit + push (post-tag bump moves versions to 2.0.1 / 2001).
+13. (14.3 step 3) Open SP-3 brainstorm (Android dual-backend support) when ready.
+
+---
+
 ## Appendix B — File-and-path inventory for the implementation plan
 
 A flat list of every new file SP-2 implementation will create, for the writing-plans skill's consumption:
