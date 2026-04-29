@@ -66,7 +66,13 @@ services:
     environment:
       LAVA_API_PG_URL: "postgres://lava:${LAVA_PG_PASSWORD}@127.0.0.1:5432/lava_api?sslmode=disable"
       LAVA_API_LISTEN: ":8443"                        # public LAN listener (HTTP/3 + HTTP/2)
-      LAVA_API_METRICS_LISTEN: "127.0.0.1:9091"       # private metrics listener
+      # Bind metrics to all interfaces so the bridged Prometheus container
+      # (`docker.io/prom/prometheus`) can scrape via `host.containers.internal:9091`.
+      # The api-go uses `network_mode: host`, so this is host-side
+      # 0.0.0.0:9091 — reachable via the bridge gateway. Spec §10.1 calls
+      # this listener "private"; in practice that's enforced by the host's
+      # firewall (not exposed to the LAN), not by binding to 127.0.0.1.
+      LAVA_API_METRICS_LISTEN: ":9091"
       LAVA_API_TLS_CERT: /etc/lava-api-go/tls/server.crt
       LAVA_API_TLS_KEY:  /etc/lava-api-go/tls/server.key
       LAVA_API_OTLP_ENDPOINT: "http://127.0.0.1:4318" # tempo OTLP HTTP receiver (published from bridge)
@@ -100,7 +106,7 @@ services:
   # Profile: observability --------------------------------------------------
   lava-prometheus:
     profiles: [observability]
-    image: prom/prometheus:v2.51.0
+    image: docker.io/prom/prometheus:v2.51.0
     container_name: lava-prometheus
     networks: [lava-net]
     ports: ["127.0.0.1:9090:9090"]
@@ -118,7 +124,7 @@ services:
 
   lava-promtail:
     profiles: [observability]
-    image: grafana/promtail:2.9.6
+    image: docker.io/grafana/promtail:2.9.6
     container_name: lava-promtail
     networks: [lava-net]
     volumes:
@@ -155,7 +161,7 @@ services:
   # Profile: dev-docs -------------------------------------------------------
   lava-swagger-ui:
     profiles: [dev-docs]
-    image: swaggerapi/swagger-ui:v5.17.14
+    image: docker.io/swaggerapi/swagger-ui:v5.17.14
     container_name: lava-swagger-ui
     networks: [lava-net]
     ports: ["127.0.0.1:8081:8080"]
