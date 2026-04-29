@@ -227,6 +227,13 @@ func searchPeriodValue(p gen.SearchPeriodDto) string {
 // nil/<=1 omits the start parameter (rutracker pages are 50 results each,
 // matching RuTrackerInnerApiImpl.kt's `search(...)`).
 func (c *Client) GetSearchPage(ctx context.Context, opts SearchOpts, cookie string) (*gen.SearchPageDto, error) {
+	// Kotlin parity: GetSearchPageUseCase wraps the call in
+	// withTokenVerificationUseCase + withAuthorisedCheckUseCase, which
+	// throw `Unauthorized` on an empty token. Match that here so the
+	// Phase 14 parity gate sees identical 401 behaviour on anon /search.
+	if cookie == "" {
+		return nil, ErrUnauthorized
+	}
 	q := url.Values{}
 	if opts.Query != nil {
 		q.Set("nm", *opts.Query)

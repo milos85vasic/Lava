@@ -68,7 +68,7 @@ func (h *ForumHandler) GetForum(c *gin.Context) {
 	}
 	body, err := json.Marshal(forum)
 	if err != nil {
-		writeJSON(c, http.StatusInternalServerError, gin.H{"error": "marshal forum: " + err.Error()})
+		writeJSON(c, http.StatusInternalServerError, gin.H{})
 		return
 	}
 	// cache.Set error is non-fatal: response succeeds even if the write fails (caller already has the body).
@@ -106,7 +106,7 @@ func (h *ForumHandler) GetCategoryPage(c *gin.Context) {
 	}
 	body, err := json.Marshal(page)
 	if err != nil {
-		writeJSON(c, http.StatusInternalServerError, gin.H{"error": "marshal category: " + err.Error()})
+		writeJSON(c, http.StatusInternalServerError, gin.H{})
 		return
 	}
 	// cache.Set error is non-fatal: response succeeds even if the write fails (caller already has the body).

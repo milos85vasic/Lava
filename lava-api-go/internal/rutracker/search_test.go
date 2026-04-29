@@ -285,7 +285,7 @@ func TestGetSearchPage_BuildsUpstreamURL(t *testing.T) {
 		SortType:   st,
 		SortOrder:  so,
 		Period:     per,
-	}, "")
+	}, "tok-test")
 	if err != nil {
 		t.Fatalf("GetSearchPage error: %v", err)
 	}
@@ -328,7 +328,7 @@ func TestGetSearchPage_NilParamsOmitted(t *testing.T) {
 	defer srv.Close()
 
 	c := NewClient(srv.URL)
-	_, err := c.GetSearchPage(context.Background(), SearchOpts{}, "")
+	_, err := c.GetSearchPage(context.Background(), SearchOpts{}, "tok-test")
 	if err != nil {
 		t.Fatalf("GetSearchPage error: %v", err)
 	}

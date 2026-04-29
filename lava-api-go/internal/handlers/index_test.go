@@ -22,7 +22,6 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
-	"strings"
 	"testing"
 
 	"github.com/gin-gonic/gin"
@@ -153,10 +152,6 @@ func TestIndexHandler_GetRoot_CircuitOpen_Returns503(t *testing.T) {
 
 	if w.Code != http.StatusServiceUnavailable {
 		t.Fatalf("status=%d want 503; body=%s", w.Code, w.Body.String())
-	}
-	body := w.Body.String()
-	if !strings.Contains(body, "rutracker") {
-		t.Fatalf("body=%q does not mention %q", body, "rutracker")
 	}
 }
 

@@ -618,7 +618,10 @@ func TestE2E_AllRoutes(t *testing.T) {
 	}
 
 	// ----- 4. GET /search?query=foo (SearchPageDto) ------------------
-	status, body, _ = f.do(t, http.MethodGet, "/search?query=foo", nil, nil)
+	// Search now requires an Auth-Token (Kotlin parity:
+	// withTokenVerificationUseCase) so the e2e test passes one. Empty
+	// cookie short-circuits to 401.
+	status, body, _ = f.do(t, http.MethodGet, "/search?query=foo", nil, map[string]string{"Auth-Token": "tok"})
 	if status != http.StatusOK {
 		t.Fatalf("GET /search: status=%d want 200; body=%s", status, body)
 	}

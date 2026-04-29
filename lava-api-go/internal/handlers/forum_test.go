@@ -31,7 +31,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"strconv"
-	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -538,8 +537,8 @@ func TestForumHandler_GetForum_ScraperError_Returns502(t *testing.T) {
 	if err := json.Unmarshal(w.Body.Bytes(), &body); err != nil {
 		t.Fatalf("body not json: %v (%s)", err, w.Body.String())
 	}
-	if errMsg, _ := body["error"].(string); errMsg == "" || errMsg != "boom" {
-		t.Fatalf("error=%q want %q", errMsg, "boom")
+	if len(body) != 0 {
+		t.Errorf("body=%v want empty {}", body)
 	}
 }
 
@@ -681,10 +680,6 @@ func TestForumHandler_GetCategoryPage_Unauthorized_Returns401(t *testing.T) {
 
 	if w.Code != http.StatusUnauthorized {
 		t.Fatalf("status=%d want 401; body=%s", w.Code, w.Body.String())
-	}
-	body := w.Body.String()
-	if !strings.Contains(body, "rutracker") {
-		t.Fatalf("body=%q does not mention %q (sentinel text=%q)", body, "rutracker", rutracker.ErrUnauthorized.Error())
 	}
 }
 

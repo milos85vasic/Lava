@@ -81,7 +81,7 @@ func (h *CommentsAddHandler) AddComment(c *gin.Context) {
 	// any form-decoding, matching Ktor's call.receiveText() behaviour.
 	body, err := c.GetRawData()
 	if err != nil {
-		writeJSON(c, http.StatusBadRequest, gin.H{"error": "read body: " + err.Error()})
+		writeJSON(c, http.StatusBadRequest, gin.H{})
 		return
 	}
 

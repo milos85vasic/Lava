@@ -28,7 +28,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"strconv"
-	"strings"
 	"testing"
 
 	"github.com/gin-gonic/gin"
@@ -204,10 +203,6 @@ func TestTopicHandler_GetTopic_Unauthorized_Returns401(t *testing.T) {
 
 	if w.Code != http.StatusUnauthorized {
 		t.Fatalf("/topic status=%d want 401; body=%s", w.Code, w.Body.String())
-	}
-	body := w.Body.String()
-	if !strings.Contains(body, "rutracker") {
-		t.Fatalf("/topic body=%q does not mention %q (sentinel text=%q)", body, "rutracker", rutracker.ErrUnauthorized.Error())
 	}
 }
 
@@ -404,10 +399,6 @@ func TestTopicHandler_GetTopicPage_Unauthorized_Returns401(t *testing.T) {
 	if w.Code != http.StatusUnauthorized {
 		t.Fatalf("/topic2 status=%d want 401; body=%s", w.Code, w.Body.String())
 	}
-	body := w.Body.String()
-	if !strings.Contains(body, "rutracker") {
-		t.Fatalf("/topic2 body=%q does not mention %q (sentinel text=%q)", body, "rutracker", rutracker.ErrUnauthorized.Error())
-	}
 }
 
 func TestTopicHandler_GetTopicPage_ScraperError_Returns502(t *testing.T) {
@@ -557,10 +548,6 @@ func TestTopicHandler_GetCommentsPage_Unauthorized_Returns401(t *testing.T) {
 
 	if w.Code != http.StatusUnauthorized {
 		t.Fatalf("/comments status=%d want 401; body=%s", w.Code, w.Body.String())
-	}
-	body := w.Body.String()
-	if !strings.Contains(body, "rutracker") {
-		t.Fatalf("/comments body=%q does not mention %q (sentinel text=%q)", body, "rutracker", rutracker.ErrUnauthorized.Error())
 	}
 }
 

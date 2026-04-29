@@ -107,7 +107,7 @@ func (h *FavoritesHandler) GetFavorites(c *gin.Context) {
 	}
 	body, err := json.Marshal(favs)
 	if err != nil {
-		writeJSON(c, http.StatusInternalServerError, gin.H{"error": "marshal favorites: " + err.Error()})
+		writeJSON(c, http.StatusInternalServerError, gin.H{})
 		return
 	}
 	// cache.Set error is non-fatal: response succeeds even if the write fails (caller already has the body).

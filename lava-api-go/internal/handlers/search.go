@@ -80,7 +80,7 @@ func (h *SearchHandler) GetSearch(c *gin.Context) {
 	if v := c.Query("sort"); v != "" {
 		typed := gen.SearchSortTypeDto(v)
 		if !typed.Valid() {
-			writeJSON(c, http.StatusBadRequest, gin.H{"error": "invalid sort"})
+			writeJSON(c, http.StatusBadRequest, gin.H{})
 			return
 		}
 		opts.SortType = &typed
@@ -88,7 +88,7 @@ func (h *SearchHandler) GetSearch(c *gin.Context) {
 	if v := c.Query("order"); v != "" {
 		typed := gen.SearchSortOrderDto(v)
 		if !typed.Valid() {
-			writeJSON(c, http.StatusBadRequest, gin.H{"error": "invalid order"})
+			writeJSON(c, http.StatusBadRequest, gin.H{})
 			return
 		}
 		opts.SortOrder = &typed
@@ -96,7 +96,7 @@ func (h *SearchHandler) GetSearch(c *gin.Context) {
 	if v := c.Query("period"); v != "" {
 		typed := gen.SearchPeriodDto(v)
 		if !typed.Valid() {
-			writeJSON(c, http.StatusBadRequest, gin.H{"error": "invalid period"})
+			writeJSON(c, http.StatusBadRequest, gin.H{})
 			return
 		}
 		opts.Period = &typed
@@ -125,7 +125,7 @@ func (h *SearchHandler) GetSearch(c *gin.Context) {
 	}
 	body, err := json.Marshal(page)
 	if err != nil {
-		writeJSON(c, http.StatusInternalServerError, gin.H{"error": "marshal search: " + err.Error()})
+		writeJSON(c, http.StatusInternalServerError, gin.H{})
 		return
 	}
 	// cache.Set error is non-fatal: response succeeds even if the write fails (caller already has the body).

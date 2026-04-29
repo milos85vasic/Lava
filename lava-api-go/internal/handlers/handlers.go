@@ -175,16 +175,22 @@ func writeJSON(c *gin.Context, code int, v any) {
 // are the reference shape; mirror them when adding search/topic/comments/
 // torrent/favorites/login routes.
 func writeUpstreamError(c *gin.Context, err error) {
+	// Body shape: empty `{}` for parity with the Ktor proxy's StatusPages
+	// plugin (proxy/.../plugins/Status.kt), which calls
+	// `call.respond(status = ..., message = Unit)`. Ktor's kotlinx-serialization
+	// JSON content-negotiator serialises `Unit` as `{}`. The HTTP status
+	// code carries the error semantics; the body deliberately does not
+	// echo err.Error() — which Ktor doesn't either.
 	switch {
 	case errors.Is(err, rutracker.ErrNotFound):
-		writeJSON(c, http.StatusNotFound, gin.H{"error": err.Error()})
+		writeJSON(c, http.StatusNotFound, gin.H{})
 	case errors.Is(err, rutracker.ErrForbidden):
-		writeJSON(c, http.StatusForbidden, gin.H{"error": err.Error()})
+		writeJSON(c, http.StatusForbidden, gin.H{})
 	case errors.Is(err, rutracker.ErrUnauthorized):
-		writeJSON(c, http.StatusUnauthorized, gin.H{"error": err.Error()})
+		writeJSON(c, http.StatusUnauthorized, gin.H{})
 	case errors.Is(err, rutracker.ErrCircuitOpen):
-		writeJSON(c, http.StatusServiceUnavailable, gin.H{"error": err.Error()})
+		writeJSON(c, http.StatusServiceUnavailable, gin.H{})
 	default:
-		writeJSON(c, http.StatusBadGateway, gin.H{"error": err.Error()})
+		writeJSON(c, http.StatusBadGateway, gin.H{})
 	}
 }

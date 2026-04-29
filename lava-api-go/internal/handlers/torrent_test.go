@@ -154,8 +154,8 @@ func TestTorrentHandler_GetTorrent_ScraperError_Returns502(t *testing.T) {
 	if err := json.Unmarshal(w.Body.Bytes(), &body); err != nil {
 		t.Fatalf("body not json: %v (%s)", err, w.Body.String())
 	}
-	if errMsg, _ := body["error"].(string); errMsg != "boom" {
-		t.Fatalf("error=%q want %q", errMsg, "boom")
+	if len(body) != 0 {
+		t.Errorf("body=%v want empty {}", body)
 	}
 }
 

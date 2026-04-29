@@ -19,7 +19,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"strconv"
-	"strings"
 	"testing"
 
 	"github.com/gin-gonic/gin"
@@ -267,9 +266,6 @@ func TestSearchHandler_GetSearch_InvalidSort_Returns400(t *testing.T) {
 	if w.Code != http.StatusBadRequest {
 		t.Fatalf("status=%d want 400; body=%s", w.Code, w.Body.String())
 	}
-	if !strings.Contains(w.Body.String(), "invalid sort") {
-		t.Fatalf("body=%q does not contain %q", w.Body.String(), "invalid sort")
-	}
 	if scraper.searchCalls != 0 {
 		t.Fatalf("scraper calls=%d want 0 (validation must short-circuit before upstream)", scraper.searchCalls)
 	}
@@ -286,9 +282,6 @@ func TestSearchHandler_GetSearch_InvalidOrder_Returns400(t *testing.T) {
 	if w.Code != http.StatusBadRequest {
 		t.Fatalf("status=%d want 400; body=%s", w.Code, w.Body.String())
 	}
-	if !strings.Contains(w.Body.String(), "invalid order") {
-		t.Fatalf("body=%q does not contain %q", w.Body.String(), "invalid order")
-	}
 	if scraper.searchCalls != 0 {
 		t.Fatalf("scraper calls=%d want 0", scraper.searchCalls)
 	}
@@ -304,9 +297,6 @@ func TestSearchHandler_GetSearch_InvalidPeriod_Returns400(t *testing.T) {
 
 	if w.Code != http.StatusBadRequest {
 		t.Fatalf("status=%d want 400; body=%s", w.Code, w.Body.String())
-	}
-	if !strings.Contains(w.Body.String(), "invalid period") {
-		t.Fatalf("body=%q does not contain %q", w.Body.String(), "invalid period")
 	}
 	if scraper.searchCalls != 0 {
 		t.Fatalf("scraper calls=%d want 0", scraper.searchCalls)
@@ -351,8 +341,8 @@ func TestSearchHandler_GetSearch_ScraperError_Returns502(t *testing.T) {
 	if err := json.Unmarshal(w.Body.Bytes(), &body); err != nil {
 		t.Fatalf("body not json: %v (%s)", err, w.Body.String())
 	}
-	if errMsg, _ := body["error"].(string); errMsg != "boom" {
-		t.Fatalf("error=%q want %q", errMsg, "boom")
+	if len(body) != 0 {
+		t.Errorf("body=%v want empty {}", body)
 	}
 }
 
@@ -370,10 +360,6 @@ func TestSearchHandler_GetSearch_Unauthorized_Returns401(t *testing.T) {
 
 	if w.Code != http.StatusUnauthorized {
 		t.Fatalf("status=%d want 401; body=%s", w.Code, w.Body.String())
-	}
-	body := w.Body.String()
-	if !strings.Contains(body, "rutracker") {
-		t.Fatalf("body=%q does not mention %q (sentinel text=%q)", body, "rutracker", rutracker.ErrUnauthorized.Error())
 	}
 }
 
