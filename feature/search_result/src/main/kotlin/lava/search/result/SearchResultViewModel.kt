@@ -13,9 +13,11 @@ import lava.domain.model.append
 import lava.domain.model.retry
 import lava.domain.usecase.AddSearchHistoryUseCase
 import lava.domain.usecase.EnrichFilterUseCase
+import lava.domain.usecase.ObserveAuthStateUseCase
 import lava.domain.usecase.ObserveSearchPagingDataUseCase
 import lava.domain.usecase.ToggleFavoriteUseCase
 import lava.logger.api.LoggerFactory
+import lava.models.auth.isAuthorized
 import lava.models.forum.Category
 import lava.models.search.Order
 import lava.models.search.Period
@@ -39,6 +41,10 @@ internal class SearchResultViewModel @Inject constructor(
     private val addSearchHistoryUseCase: AddSearchHistoryUseCase,
     private val enrichFilterUseCase: EnrichFilterUseCase,
     private val toggleFavoriteUseCase: ToggleFavoriteUseCase,
+    // SP-3.2 (2026-04-29): observe auth state to render Unauthorized
+    // empty-state instead of the misleading "Nothing found" when the
+    // user has not signed in to the upstream tracker.
+    private val observeAuthStateUseCase: ObserveAuthStateUseCase,
 ) : ViewModel(), ContainerHost<SearchPageState, SearchResultSideEffect> {
     private val logger = loggerFactory.get("SearchResultViewModel")
     private val mutableFilter = MutableStateFlow(savedStateHandle.filter)
@@ -59,6 +65,7 @@ internal class SearchResultViewModel @Inject constructor(
             is SearchResultAction.ExpandAppBarClick -> onExpandAppBarClick()
             is SearchResultAction.FavoriteClick -> onFavoriteClick(action.topicModel)
             is SearchResultAction.ListBottomReached -> onListBottomReached()
+            is SearchResultAction.LoginClick -> onLoginClick()
             is SearchResultAction.RetryClick -> onRetryClick()
             is SearchResultAction.SearchClick -> onSearchClick()
             is SearchResultAction.SetAuthor -> onSetAuthor(action.author)
@@ -79,27 +86,54 @@ internal class SearchResultViewModel @Inject constructor(
             }
     }
 
+    /**
+     * SP-3.2 (2026-04-29). When auth state is `Unauthorized`, paging
+     * data is suppressed and `SearchResultContent.Unauthorized` is
+     * rendered with a Login button — matching the user-mandate fix
+     * for "search returns Nothing found instead of prompting login."
+     * When the user becomes authorized (returning from login), this
+     * intent re-emits and the paging data flow takes over.
+     *
+     * Sixth-Law clause 1: same surface (auth state) the user touches
+     * via the Login button. Clause 3: primary user-visible state is
+     * the rendered content branch (Unauthorized vs Empty vs Content).
+     */
     private fun observePagingData() = intent {
         logger.d { "Start observing paging data" }
-        observeSearchPagingDataUseCase(
-            filterFlow = mutableFilter,
-            actionsFlow = pagingActions,
-            scope = viewModelScope,
-        ).collectLatest { (data, loadingState) ->
-            reduce {
-                state.copy(
-                    searchContent = when {
-                        data == null -> SearchResultContent.Initial
-                        data.isEmpty() -> SearchResultContent.Empty
-                        else -> SearchResultContent.Content(
-                            torrents = data,
-                            categories = data.mapNotNull { it.topic.category }.distinct(),
-                        )
-                    },
-                    loadStates = loadingState,
-                )
+        observeAuthStateUseCase().collectLatest { authState ->
+            if (!authState.isAuthorized) {
+                reduce {
+                    state.copy(
+                        searchContent = SearchResultContent.Unauthorized,
+                        loadStates = lava.domain.model.LoadStates.Idle,
+                    )
+                }
+                return@collectLatest
+            }
+            observeSearchPagingDataUseCase(
+                filterFlow = mutableFilter,
+                actionsFlow = pagingActions,
+                scope = viewModelScope,
+            ).collectLatest { (data, loadingState) ->
+                reduce {
+                    state.copy(
+                        searchContent = when {
+                            data == null -> SearchResultContent.Initial
+                            data.isEmpty() -> SearchResultContent.Empty
+                            else -> SearchResultContent.Content(
+                                torrents = data,
+                                categories = data.mapNotNull { it.topic.category }.distinct(),
+                            )
+                        },
+                        loadStates = loadingState,
+                    )
+                }
             }
         }
+    }
+
+    private fun onLoginClick() = intent {
+        postSideEffect(SearchResultSideEffect.OpenLogin)
     }
 
     private fun onBackClick() = intent {

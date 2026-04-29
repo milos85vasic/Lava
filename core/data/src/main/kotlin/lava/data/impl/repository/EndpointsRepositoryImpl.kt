@@ -38,9 +38,11 @@ class EndpointsRepositoryImpl @Inject constructor(
     }
 
     private companion object {
+        // SP-3.2 (2026-04-29): default seeded set is just the rutracker
+        // direct connection. The historical `Endpoint.Proxy` was removed
+        // from the model entirely.
         val defaultEndpoints: List<EndpointEntity> by lazy {
             listOf(
-                Endpoint.Proxy,
                 Endpoint.Rutracker,
             ).map(Endpoint::toEntity)
         }

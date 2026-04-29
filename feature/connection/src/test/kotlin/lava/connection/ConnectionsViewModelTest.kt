@@ -302,20 +302,24 @@ class ConnectionsViewModelTest {
     // CHALLENGE — primary assertion on the persisted settings row's
     // post-remove fallback. User-visible because every other screen reads
     // `settings.endpoint` to decide which backend to call.
+    //
+    // SP-3.2 (2026-04-29): post-remove fallback is now Rutracker direct;
+    // Endpoint.Proxy was removed from the model. Reverting
+    // `RemoveEndpointUseCaseImpl` to set `Endpoint.Proxy` would fail to
+    // even compile (the symbol no longer exists), so this test guards
+    // against silent reintroduction of the old fallback.
     @Test
-    fun `remove selected endpoint falls back to Proxy`() = runTest(dispatcherRule.testDispatcher) {
+    fun `remove selected endpoint falls back to Rutracker`() = runTest(dispatcherRule.testDispatcher) {
         val endpoint = Endpoint.Mirror("192.168.1.100")
         endpointsRepository.add(endpoint)
         settingsRepository.setEndpoint(endpoint)
         val viewModel = createViewModel()
-        // Same fix as above: wrap perform in viewModel.test { } so the
-        // container starts and the intent actually runs before assertion.
         viewModel.test(this) {
             expectInitialState()
             viewModel.perform(ConnectionsAction.RemoveEndpoint(endpoint))
         }
 
-        assertEquals(Endpoint.Proxy, settingsRepository.getSettings().endpoint)
+        assertEquals(Endpoint.Rutracker, settingsRepository.getSettings().endpoint)
     }
 
     /**

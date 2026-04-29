@@ -88,7 +88,10 @@ class DiscoverLocalEndpointsUseCaseTest {
         val useCase = createUseCase()
         val mirror = Endpoint.Mirror("192.168.1.100:8080")
         endpointsRepository.add(mirror)
-        settingsRepository.setEndpoint(Endpoint.Proxy)
+        // SP-3.2: was Endpoint.Proxy; that endpoint was removed.
+        // Rutracker is the new "non-mirror" default that the use case
+        // should override when a discovered LAN endpoint shows up.
+        settingsRepository.setEndpoint(Endpoint.Rutracker)
         val discovered = DiscoveredEndpoint(
             host = "192.168.1.100:8080",
             port = 8080,
@@ -158,25 +161,12 @@ class DiscoverLocalEndpointsUseCaseTest {
         )
     }
 
-    @Test
-    fun `allows discovery when current endpoint is Proxy`() = runTest {
-        val useCase = createUseCase()
-        settingsRepository.setEndpoint(Endpoint.Proxy)
-
-        val discovered = DiscoveredEndpoint(
-            host = "192.168.1.100:8080",
-            port = 8080,
-            name = "lava-proxy",
-        )
-        launch {
-            discoveryService.emit(discovered)
-            discoveryService.complete()
-        }
-
-        val result = useCase()
-
-        assertTrue(result is DiscoverLocalEndpointsResult.Discovered)
-    }
+    // SP-3.2 (2026-04-29): the prior `allows discovery when current
+    // endpoint is Proxy` test was redundant with the Rutracker test below
+    // — both exercised the "current is non-mirror, so override on
+    // discovery" branch. With Endpoint.Proxy removed, the Rutracker
+    // case is the load-bearing one. Test deleted; the Rutracker case
+    // covers the remaining branch.
 
     @Test
     fun `allows discovery when current endpoint is Rutracker`() = runTest {
@@ -214,11 +204,20 @@ class DiscoverLocalEndpointsUseCaseTest {
         useCase()
 
         val all = endpointsRepository.observeAll().first()
-        assertTrue("Proxy should be seeded", all.any { it == Endpoint.Proxy })
+        // SP-3.2: Endpoint.Proxy is GONE — assert it does NOT appear
+        // in the seeded set, plus assert what should be there.
         assertTrue("Rutracker should be seeded", all.any { it == Endpoint.Rutracker })
         assertTrue(
             "Discovered mirror should be added",
             all.any { it is Endpoint.Mirror && it.host == "192.168.1.100:8080" },
+        )
+        // Sixth-Law clause 3: primary user-visible state assertion that
+        // Proxy is gone from the seeded list. Reverting the SP-3.2
+        // EndpointsRepositoryImpl.defaultEndpoints to include Proxy
+        // would make this fail with a clear message.
+        assertTrue(
+            "Endpoint.Proxy must NOT be present in the seeded list (SP-3.2)",
+            all.none { it::class.simpleName == "Proxy" },
         )
     }
 

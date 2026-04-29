@@ -58,7 +58,7 @@ internal interface NetworkModule {
          * Default OkHttp client. Uses the JVM/Android system trust store
          * (system CAs only — no user-installed CA acceptance). Used for
          * all public-Internet requests:
-         *   - `Endpoint.Proxy` to `lava-app.tech`
+         *   - `Endpoint.Rutracker` direct to `rutracker.org`
          *   - `Endpoint.Rutracker` and remote `Endpoint.Mirror` instances
          *
          * MUST NOT be used for LAN endpoints; the LAN client below is

@@ -11,7 +11,6 @@ internal object EndpointConverter {
     fun Endpoint.toJson(): String {
         return JSONObject().apply {
             when (this@toJson) {
-                is Endpoint.Proxy -> put(TypeKey, "Proxy")
                 is Endpoint.Rutracker -> put(TypeKey, "Rutracker")
                 is Endpoint.Mirror -> {
                     put(TypeKey, "Mirror")
@@ -26,11 +25,20 @@ internal object EndpointConverter {
         }.toString()
     }
 
+    /**
+     * SP-3.2 back-compat: a legacy persisted record with `type=Proxy`
+     * is migrated to `Endpoint.Rutracker` (the new default), since
+     * `Endpoint.Proxy` no longer exists in the model. Returning `null`
+     * for the legacy record would surface as a missing-default crash
+     * the next time the user opens the app after upgrade — bad UX.
+     * Mapping to Rutracker keeps the user's app usable; they can pick
+     * a different endpoint via the Connections screen.
+     */
     fun fromJson(json: String): Endpoint? {
         return runCatching {
             JSONObject(json).let { jsonObject ->
                 when (jsonObject.getString(TypeKey)) {
-                    "Proxy" -> Endpoint.Proxy
+                    "Proxy" -> Endpoint.Rutracker
                     "Rutracker" -> Endpoint.Rutracker
                     "Mirror" -> Endpoint.Mirror(jsonObject.getString(HostKey))
                     "GoApi" -> Endpoint.GoApi(

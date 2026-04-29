@@ -31,13 +31,6 @@ internal class NetworkApiRepositoryImpl @Inject constructor(
         val endpoint = endpoint()
         return apiMap.getOrPut(endpoint) {
             when (endpoint) {
-                // Public Internet — strict TLS via system trust store.
-                is Endpoint.Proxy -> proxyApi(
-                    host = endpoint.host,
-                    port = null,
-                    scheme = "https",
-                    client = okHttpClient,
-                )
                 // LAN lava-api-go — permissive TLS via lanOkHttpClient.
                 // Trust boundary documented in NetworkModule.lanOkHttpClient KDoc.
                 is Endpoint.GoApi -> proxyApi(
@@ -56,7 +49,7 @@ internal class NetworkApiRepositoryImpl @Inject constructor(
                             client = okHttpClient,
                         )
                     } else {
-                        // Public rutracker mirror — strict TLS.
+                        // Public rutracker (direct or mirror) — strict TLS.
                         rutrackerApi(endpoint.host)
                     }
                 }
@@ -66,7 +59,6 @@ internal class NetworkApiRepositoryImpl @Inject constructor(
 
     override suspend fun getCaptchaUrl(url: String): String {
         return when (val endpoint = endpoint()) {
-            is Endpoint.Proxy -> proxyUrl(endpoint.host, "/captcha/${url.encode()}")
             is Endpoint.GoApi -> goApiUrl(endpoint, "/captcha/${url.encode()}")
             is Endpoint.RutrackerEndpoint -> {
                 if (endpoint.host.isLocalHost()) {
@@ -80,7 +72,6 @@ internal class NetworkApiRepositoryImpl @Inject constructor(
 
     override suspend fun getDownloadUri(id: String): String {
         return when (val endpoint = endpoint()) {
-            is Endpoint.Proxy -> proxyUrl(endpoint.host, "/download/$id")
             is Endpoint.GoApi -> goApiUrl(endpoint, "/download/$id")
             is Endpoint.RutrackerEndpoint -> {
                 if (endpoint.host.isLocalHost()) {
@@ -94,7 +85,6 @@ internal class NetworkApiRepositoryImpl @Inject constructor(
 
     override suspend fun getAuthHeader(token: String): Pair<String, String> {
         return when (val endpoint = endpoint()) {
-            is Endpoint.Proxy -> "Auth-Token" to token
             is Endpoint.GoApi -> "Auth-Token" to token
             is Endpoint.RutrackerEndpoint -> {
                 if (endpoint.host.isLocalHost()) {

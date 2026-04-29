@@ -14,7 +14,9 @@ class RemoveEndpointUseCaseImpl @Inject constructor(
     override suspend operator fun invoke(endpoint: Endpoint) {
         endpointsRepository.remove(endpoint)
         if (settingsRepository.getSettings().endpoint == endpoint) {
-            settingsRepository.setEndpoint(Endpoint.Proxy)
+            // SP-3.2 (2026-04-29): fall back to the rutracker direct
+            // connection since `Endpoint.Proxy` was removed from the model.
+            settingsRepository.setEndpoint(Endpoint.Rutracker)
         }
     }
 }

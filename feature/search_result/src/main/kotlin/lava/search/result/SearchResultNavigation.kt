@@ -33,6 +33,9 @@ fun addSearchResult(
     openSearchInput: (filter: Filter) -> Unit,
     openSearchResult: (filter: Filter) -> Unit,
     openTopic: (id: String) -> Unit,
+    // SP-3.2 (2026-04-29): hook for the Unauthorized empty-state's
+    // Login button — replaces the misleading "Nothing found" UI.
+    openLogin: () -> Unit,
     deepLinkUrls: List<String> = emptyList(),
     animations: NavigationAnimations,
 ) = addDestination(
@@ -82,6 +85,7 @@ fun addSearchResult(
         openSearchInput = openSearchInput,
         openSearchResult = openSearchResult,
         openTopic = openTopic,
+        openLogin = openLogin,
     )
 }
 

@@ -36,7 +36,7 @@ import lava.models.settings.Endpoint
  * 2026-04-29 alongside the `TestDispatchers` scheduler-share fix.
  *
  * Behaviour:
- * - Seeds [Endpoint.Proxy], [Endpoint.Rutracker] on first observation
+ * - Seeds [Endpoint.Rutracker] on first observation (SP-3.2: Endpoint.Proxy was removed)
  *   ONLY if the store is currently empty.
  * - Rejects duplicate additions with [IllegalStateException], matching
  *   Room's primary-key constraint violation.
@@ -48,7 +48,7 @@ class TestEndpointsRepository : EndpointsRepository {
         .asStateFlow()
         .onStart {
             if (mutableEndpoints.value.isEmpty()) {
-                mutableEndpoints.value = listOf(Endpoint.Proxy, Endpoint.Rutracker)
+                mutableEndpoints.value = listOf(Endpoint.Rutracker)
             }
         }
 

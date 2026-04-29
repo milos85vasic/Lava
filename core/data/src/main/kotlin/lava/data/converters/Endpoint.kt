@@ -13,13 +13,11 @@ import lava.models.settings.Endpoint
  */
 internal fun Endpoint.toEntity() = EndpointEntity(
     id = when (this) {
-        is Endpoint.Proxy -> "Proxy"
         is Endpoint.Rutracker -> "Rutracker"
         is Endpoint.Mirror -> "Mirror($host)"
         is Endpoint.GoApi -> "GoApi($host:$port)"
     },
     type = when (this) {
-        is Endpoint.Proxy -> "Proxy"
         is Endpoint.Rutracker -> "Rutracker"
         is Endpoint.Mirror -> "Mirror"
         is Endpoint.GoApi -> "GoApi"
@@ -30,8 +28,15 @@ internal fun Endpoint.toEntity() = EndpointEntity(
     },
 )
 
+/**
+ * SP-3.2 back-compat: a legacy `type=Proxy` row is migrated to
+ * [Endpoint.Rutracker] on read, then dropped from the persisted set
+ * the next time `EndpointsRepositoryImpl.observeAll()` reseeds.
+ * Returning `null` would silently leak a no-longer-renderable entry
+ * in the Connections list.
+ */
 internal fun EndpointEntity.toModel(): Endpoint? = when (type) {
-    "Proxy" -> Endpoint.Proxy
+    "Proxy" -> Endpoint.Rutracker
     "Rutracker" -> Endpoint.Rutracker
     "Mirror" -> Endpoint.Mirror(host)
     "GoApi" -> {
@@ -41,8 +46,6 @@ internal fun EndpointEntity.toModel(): Endpoint? = when (type) {
             val p = host.substring(sep + 1).toIntOrNull() ?: Endpoint.GoApi.DEFAULT_PORT
             Endpoint.GoApi(h, p)
         } else {
-            // Defensive: an entity persisted without a port is still
-            // recoverable via the spec default :8443.
             Endpoint.GoApi(host)
         }
     }

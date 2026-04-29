@@ -12,4 +12,7 @@
     <string name="search_screen_filter_sort_label">Sort by</string>
     <string name="search_screen_result_empty_subtitle">Try to use keywords or change filter parameters</string>
     <string name="search_screen_result_empty_title">Nothing found</string>
+    <!-- SP-3.2 (2026-04-29): Unauthorized empty-state for the results screen. -->
+    <string name="search_screen_result_unauthorized_title">Login required</string>
+    <string name="search_screen_result_unauthorized_subtitle">Sign in to your account to search torrents</string>
 </resources>

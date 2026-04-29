@@ -9,14 +9,6 @@ import org.junit.Test
 class EndpointConverterTest {
 
     @Test
-    fun `convert Proxy to json `() {
-        assertEquals(
-            "{\"type\":\"Proxy\"}",
-            with(EndpointConverter) { Endpoint.Proxy.toJson() },
-        )
-    }
-
-    @Test
     fun `convert Rutracker to json `() {
         assertEquals(
             "{\"type\":\"Rutracker\"}",
@@ -32,10 +24,15 @@ class EndpointConverterTest {
         )
     }
 
+    // SP-3.2 (2026-04-29) — Endpoint.Proxy was removed. Persisted records
+    // with `type=Proxy` are migrated forward to `Endpoint.Rutracker` so an
+    // upgrade from a Proxy-defaulted install does not crash. Forensic
+    // anchor + Sixth-Law-clause-3 user-visible state: post-upgrade the
+    // user lands on a usable endpoint, not on a missing-default error.
     @Test
-    fun `parse Proxy from json`() {
+    fun `legacy Proxy json migrates forward to Rutracker (SP-3_2 back-compat)`() {
         assertEquals(
-            Endpoint.Proxy,
+            Endpoint.Rutracker,
             with(EndpointConverter) { fromJson("{\"type\":\"Proxy\"}") },
         )
     }

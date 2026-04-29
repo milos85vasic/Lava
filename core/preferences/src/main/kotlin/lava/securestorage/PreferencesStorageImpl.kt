@@ -81,9 +81,11 @@ internal class PreferencesStorageImpl @Inject constructor(
 
     override suspend fun getSettings(): Settings {
         return withContext(dispatchers.io) {
+            // SP-3.2 (2026-04-29): default endpoint is rutracker direct;
+            // `Endpoint.Proxy` was removed from the model.
             val endpoint = settingsPreferences.getString(endpointKey, null)?.let {
                 with(EndpointConverter) { fromJson(it) }
-            } ?: Endpoint.Proxy
+            } ?: Endpoint.Rutracker
             val theme = settingsPreferences.getString(themeKey, null)?.let {
                 enumValueOf(it)
             } ?: Theme.SYSTEM

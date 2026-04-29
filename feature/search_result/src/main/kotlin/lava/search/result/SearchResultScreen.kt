@@ -50,12 +50,16 @@ internal fun SearchResultScreen(
     openSearchInput: (filter: Filter) -> Unit,
     openSearchResult: (filter: Filter) -> Unit,
     openTopic: (id: String) -> Unit,
+    // SP-3.2 (2026-04-29): hooked up so the Unauthorized empty-state's
+    // Login button can navigate to the login screen.
+    openLogin: () -> Unit,
 ) {
     val snackbarHost = LocalSnackbarHostState.current
     val favoriteToggleError = stringResource(lava.ui.R.string.error_title)
     viewModel.collectSideEffect { sideEffect ->
         when (sideEffect) {
             is SearchResultSideEffect.Back -> back()
+            is SearchResultSideEffect.OpenLogin -> openLogin()
             is SearchResultSideEffect.OpenSearchInput -> openSearchInput(sideEffect.filter)
             is SearchResultSideEffect.OpenSearchResult -> openSearchResult(sideEffect.filter)
             is SearchResultSideEffect.OpenTopic -> openTopic(sideEffect.id)
@@ -216,6 +220,26 @@ private fun SearchResultList(
                 subtitleRes = R.string.search_screen_result_empty_subtitle,
                 imageRes = lava.ui.R.drawable.ill_empty,
             )
+
+            // SP-3.2 (2026-04-29): "Login required" empty-state with a
+            // Login button — replaces the misleading "Nothing found"
+            // when the user is not signed in. Tap → SearchResultAction.LoginClick
+            // → SearchResultSideEffect.OpenLogin → screen-level openLogin().
+            is SearchResultContent.Unauthorized -> item {
+                lava.designsystem.component.Placeholder(
+                    modifier = Modifier.fillParentMaxSize(),
+                    titleRes = R.string.search_screen_result_unauthorized_title,
+                    subtitleRes = R.string.search_screen_result_unauthorized_subtitle,
+                    imageRes = lava.ui.R.drawable.ill_empty,
+                    action = {
+                        lava.designsystem.component.Button(
+                            onClick = { onAction(SearchResultAction.LoginClick) },
+                            text = stringResource(lava.designsystem.R.string.designsystem_action_login),
+                            color = AppTheme.colors.primary,
+                        )
+                    },
+                )
+            }
 
             is SearchResultContent.Initial -> loadingItem()
         }

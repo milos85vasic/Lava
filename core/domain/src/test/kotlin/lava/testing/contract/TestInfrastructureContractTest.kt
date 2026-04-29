@@ -121,13 +121,23 @@ class TestInfrastructureContractTest {
      * CHALLENGE — when the repo IS empty, observeAll DOES seed with
      * the default endpoints. Both branches of the
      * `if (isEmpty())` guard are exercised.
+     *
+     * SP-3.2 (2026-04-29): the seeded set is now `{Rutracker}` only;
+     * `Endpoint.Proxy` was removed from the model. Sixth-Law clause 3
+     * primary assertion: a fresh-install user lands on Rutracker direct
+     * — no longer on the public Proxy endpoint that no operator wants.
      */
     @Test
-    fun `observe on empty repo seeds Proxy and Rutracker defaults`() = runTest {
+    fun `observe on empty repo seeds Rutracker default`() = runTest {
         val repo = TestEndpointsRepository()
         val all = repo.observeAll().first()
-        assertTrue("Proxy must be seeded", all.any { it == Endpoint.Proxy })
         assertTrue("Rutracker must be seeded", all.any { it == Endpoint.Rutracker })
+        // Falsifiability rehearsal anchor: re-add Endpoint.Proxy to
+        // the seeded list and watch the next assertion fire.
+        assertTrue(
+            "Endpoint.Proxy must NOT be in the seeded set after SP-3.2",
+            all.none { it::class.simpleName == "Proxy" },
+        )
     }
 
     /**

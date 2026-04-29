@@ -93,7 +93,7 @@ class DiscoverLocalEndpointsUseCaseImpl @Inject constructor(
      */
     private fun shouldOverrideExistingSelection(currentEndpoint: Endpoint): Boolean {
         return when (currentEndpoint) {
-            is Endpoint.Proxy, is Endpoint.Rutracker -> true
+            is Endpoint.Rutracker -> true
             is Endpoint.Mirror -> currentEndpoint.host.contains("rutracker")
             is Endpoint.GoApi -> false
         }

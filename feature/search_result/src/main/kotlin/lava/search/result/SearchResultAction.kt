@@ -21,4 +21,6 @@ internal sealed interface SearchResultAction {
     data object ListBottomReached : SearchResultAction
     data object RetryClick : SearchResultAction
     data object SearchClick : SearchResultAction
+    // SP-3.2 (2026-04-29): triggered from the Unauthorized empty-state.
+    data object LoginClick : SearchResultAction
 }

@@ -58,6 +58,7 @@ fun MobileNavigation(navigationController: NavigationController) {
                 openSearchInput = { openSearchInput(it) },
                 openSearchResult = { openSearchResult(it) },
                 openTopic = { openTopic(it) },
+                openLogin = { openLogin() },
                 deepLinkUrls = DeepLinks.searchResultUrls,
                 animations = NavigationAnimations.Default,
             )
@@ -147,6 +148,7 @@ private fun addSearch(
         openSearchInput = { openSearchInput(it) },
         openSearchResult = { openSearchResult(it) },
         openTopic = openTopic,
+        openLogin = openLogin,
         animations = NavigationAnimations.Default,
     )
 }
