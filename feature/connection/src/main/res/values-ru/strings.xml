@@ -3,6 +3,7 @@
     <string name="connection_endpoint_proxy">Прокси</string>
     <string name="connection_endpoint_mirror">Зеркало</string>
     <string name="connection_endpoint_rutracker">Основной</string>
+    <string name="connection_endpoint_goapi">Lava API</string>
     <string name="connection_item_title">Сервер</string>
     <string name="content_description_connection_active">Доступен</string>
     <string name="content_description_connection_blocked">Не доступен</string>

@@ -12,8 +12,12 @@ internal val Endpoint.title: String
         when (this) {
             is Endpoint.Rutracker -> R.string.connection_endpoint_rutracker
             is Endpoint.Mirror -> R.string.connection_endpoint_mirror
-            // SP-3 LAN api-go reuses the mirror string for now;
-            // dedicated string can be added later.
-            is Endpoint.GoApi -> R.string.connection_endpoint_mirror
+            // SP-3.4 (2026-04-29): dedicated "Lava API" label so the
+            // user can tell a discovered lava-api-go entry apart from
+            // a manually-configured rutracker mirror. The bug was that
+            // every GoApi rendered as "Mirror" in the Connections list,
+            // which led users to suspect the routing was wrong even
+            // when it was correct.
+            is Endpoint.GoApi -> R.string.connection_endpoint_goapi
         },
     )

@@ -3,6 +3,11 @@
     <string name="connection_endpoint_proxy">Proxy</string>
     <string name="connection_endpoint_mirror">Mirror</string>
     <string name="connection_endpoint_rutracker">Main</string>
+    <!-- SP-3.4 (2026-04-29): dedicated label for the lava-api-go variant.
+         Was reusing connection_endpoint_mirror, which made every GoApi
+         render as "Mirror" in the Connections list and led the user to
+         mis-identify their LAN api-go as a generic rutracker mirror. -->
+    <string name="connection_endpoint_goapi">Lava API</string>
     <string name="connection_item_title">Server</string>
     <string name="content_description_connection_active">Connected</string>
     <string name="content_description_connection_blocked">Blocked</string>

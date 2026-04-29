@@ -76,12 +76,23 @@ internal class LocalNetworkDiscoveryServiceImpl @Inject constructor(
 
         @Suppress("DEPRECATION")
         override fun onServiceFound(serviceInfo: NsdServiceInfo) {
-            // NsdManager normalises service-type strings (trailing dot,
-            // case) so accept any prefix-match against the type we
-            // actually subscribed to. Cross-matches across types still
-            // can't happen because each listener is registered against
-            // a single SERVICE_TYPE entry.
-            if (!serviceInfo.serviceType.contains(watchedServiceType.trimStart('_').substringBefore('.'))) {
+            // SP-3.4 (2026-04-29) forensic anchor: the previous filter was
+            // `serviceType.contains("lava")` for the `_lava._tcp` watcher,
+            // which ALSO matched `_lava-api._tcp` because "lava" is a
+            // proper substring of "lava-api". Real-device verification on
+            // SM-S918B / Android 16 produced an `Endpoint.Mirror`
+            // (engine=Ktor fallback) for the running lava-api-go service
+            // because the cross-matched listener won the race against
+            // the `_lava-api._tcp` listener and the device's NsdManager
+            // returned no parseable TXT records, so the service-type
+            // fallback fired with the wrong watchedServiceType.
+            //
+            // Fix: match the FULL service+protocol prefix
+            // (`lava._tcp` vs `lava-api._tcp`) so the two listeners are
+            // mutually exclusive AND so we don't accidentally accept
+            // `_lava._udp` for a `_lava._tcp` watcher (different protocol
+            // even if the service name is identical).
+            if (!matchesServiceType(watchedServiceType, serviceInfo.serviceType)) {
                 return
             }
             nsd.resolveService(
@@ -142,4 +153,25 @@ internal class LocalNetworkDiscoveryServiceImpl @Inject constructor(
 
         private val SERVICE_TYPES = listOf(SERVICE_TYPE_KTOR, SERVICE_TYPE_GO)
     }
+}
+
+/**
+ * Whether [foundServiceType] (as reported by Android NsdManager — typically
+ * something like `_lava._tcp.local.` with a trailing dot) belongs to the
+ * listener watching [watchedServiceType] (one of `_lava._tcp` or
+ * `_lava-api._tcp`).
+ *
+ * Match rule: equality OR `startsWith(watched + '.')` after normalising
+ * both inputs (lowercase, leading underscore stripped, trailing dot
+ * stripped). The trailing-dot test is what makes `_lava._tcp` reject
+ * `_lava-api._tcp` (because "lava-api._tcp" doesn't start with "lava._tcp.")
+ * AND reject `_lava._udp` (because "lava._udp..." doesn't start with
+ * "lava._tcp."). Top-level + `internal` so the contract test
+ * `LocalNetworkDiscoveryContractTest` exercises the same function the
+ * production listener uses.
+ */
+internal fun matchesServiceType(watchedServiceType: String, foundServiceType: String): Boolean {
+    val watched = watchedServiceType.trim().trim('.').removePrefix("_").lowercase()
+    val found = foundServiceType.trim().trim('.').removePrefix("_").lowercase()
+    return found == watched || found.startsWith("$watched.")
 }

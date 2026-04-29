@@ -25,8 +25,8 @@ android {
 
     defaultConfig {
         applicationId = "digital.vasic.lava.client"
-        versionCode = 1012
-        versionName = "1.1.2"
+        versionCode = 1013
+        versionName = "1.1.3"
     }
 
     buildFeatures {
