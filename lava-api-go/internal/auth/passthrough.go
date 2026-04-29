@@ -9,6 +9,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -39,16 +40,42 @@ func RealmHash(r *http.Request) string {
 // rutracker schema change is a one-file fix.
 //
 // The legacy Kotlin proxy forwards the Auth-Token header as the entire
-// Cookie value verbatim (see RuTrackerInnerApiImpl.CookieHeader), because
-// the client stores the raw Set-Cookie line captured at login. To keep
-// the Go side prefix-agnostic but spec-aligned (spec §9 names bb_session
-// as the canonical session cookie), we prepend bb_session= only when the
-// token is bare; if the token already contains an "=" we forward as-is.
+// Cookie value verbatim (see RuTrackerInnerApiImpl `header(CookieHeader,
+// token)`), because the client stores the raw Set-Cookie line captured
+// at login (e.g. `bb_session=0-47500467-…; expires=…; Max-Age=…; …`).
+// To keep the Go side prefix-agnostic but spec-aligned (spec §9 names
+// bb_session as the canonical session cookie), we prepend `bb_session=`
+// ONLY when the token is bare; if the token already contains an `=`
+// (i.e. it's already a name=value cookie line) we forward verbatim.
+//
+// SP-3.5 (2026-04-29) forensic anchor: this function previously
+// unconditionally prepended `bb_session=`, producing a double-prefixed
+// `bb_session=bb_session=0-47500467-…; expires=…` Cookie header on the
+// upstream request. Rutracker parsed the first cookie name as
+// "bb_session" with value "bb_session" (everything up to the first `;`
+// AFTER the second `=`) and the session was treated as anonymous —
+// search returned 0 hits, favorites returned 0 entries, every
+// authenticated endpoint behaved as if no Auth-Token had been sent.
+// The KDoc above always claimed the verbatim-forward branch existed;
+// the implementation just never had it. Real-device testing on
+// 2026-04-29 surfaced the symptom: `/search?query=ps4` returned
+// `{"page":1,"pages":1,"torrents":[]}` even though the operator was
+// signed in with valid credentials and the same query in a browser
+// returns thousands of hits.
 func UpstreamCookie(r *http.Request) string {
 	tok := r.Header.Get(HeaderName)
 	if tok == "" {
 		return ""
 	}
+	// Already a name=value cookie line (the only shape Lava clients
+	// ever send — both the Kotlin Ktor proxy and the Android scraper
+	// store the raw upstream Set-Cookie). Forward verbatim.
+	if strings.Contains(tok, "=") {
+		return tok
+	}
+	// Bare token (no `=`): wrap it as the canonical session cookie.
+	// This branch is reached only if a future client decides to send
+	// just the token value without the `name=` prefix.
 	return "bb_session=" + tok
 }
 
