@@ -594,7 +594,7 @@ type AuthResponseDto struct {
 
 // AuthResponseDtoCaptchaRequired defines model for AuthResponseDtoCaptchaRequired.
 type AuthResponseDtoCaptchaRequired struct {
-	Captcha *CaptchaDto                        `json:"captcha,omitempty"`
+	Captcha *CaptchaDto                        `json:"captcha"`
 	Type    AuthResponseDtoCaptchaRequiredType `json:"type"`
 }
 
@@ -612,7 +612,7 @@ type AuthResponseDtoSuccessType string
 
 // AuthResponseDtoWrongCredits defines model for AuthResponseDtoWrongCredits.
 type AuthResponseDtoWrongCredits struct {
-	Captcha *CaptchaDto                     `json:"captcha,omitempty"`
+	Captcha *CaptchaDto                     `json:"captcha"`
 	Type    AuthResponseDtoWrongCreditsType `json:"type"`
 }
 
@@ -621,8 +621,8 @@ type AuthResponseDtoWrongCreditsType string
 
 // AuthorDto defines model for AuthorDto.
 type AuthorDto struct {
-	AvatarUrl *string `json:"avatarUrl,omitempty"`
-	Id        *string `json:"id,omitempty"`
+	AvatarUrl *string `json:"avatarUrl"`
+	Id        *string `json:"id"`
 	Name      string  `json:"name"`
 }
 
@@ -635,19 +635,19 @@ type CaptchaDto struct {
 
 // CategoryDto defines model for CategoryDto.
 type CategoryDto struct {
-	Children *[]CategoryDto `json:"children,omitempty"`
-	Id       *string        `json:"id,omitempty"`
+	Children *[]CategoryDto `json:"children"`
+	Id       *string        `json:"id"`
 	Name     string         `json:"name"`
 }
 
 // CategoryPageDto defines model for CategoryPageDto.
 type CategoryPageDto struct {
 	Category CategoryDto      `json:"category"`
-	Children *[]CategoryDto   `json:"children,omitempty"`
+	Children *[]CategoryDto   `json:"children"`
 	Page     int32            `json:"page"`
 	Pages    int32            `json:"pages"`
-	Sections *[]SectionDto    `json:"sections,omitempty"`
-	Topics   *[]ForumTopicDto `json:"topics,omitempty"`
+	Sections *[]SectionDto    `json:"sections"`
+	Topics   *[]ForumTopicDto `json:"topics"`
 }
 
 // ColorValue defines model for ColorValue.
@@ -679,7 +679,7 @@ type CommentsPageDto = ForumTopicDtoCommentsPage
 
 // Error defines model for Error.
 type Error struct {
-	Details *string `json:"details,omitempty"`
+	Details *string `json:"details"`
 	Error   string  `json:"error"`
 }
 
@@ -700,8 +700,8 @@ type ForumTopicDto struct {
 
 // ForumTopicDtoCommentsPage defines model for ForumTopicDtoCommentsPage.
 type ForumTopicDtoCommentsPage struct {
-	Author   *AuthorDto                    `json:"author,omitempty"`
-	Category *CategoryDto                  `json:"category,omitempty"`
+	Author   *AuthorDto                    `json:"author"`
+	Category *CategoryDto                  `json:"category"`
 	Id       string                        `json:"id"`
 	Page     int32                         `json:"page"`
 	Pages    int32                         `json:"pages"`
@@ -715,8 +715,8 @@ type ForumTopicDtoCommentsPageType string
 
 // ForumTopicDtoTopic defines model for ForumTopicDtoTopic.
 type ForumTopicDtoTopic struct {
-	Author   *AuthorDto             `json:"author,omitempty"`
-	Category *CategoryDto           `json:"category,omitempty"`
+	Author   *AuthorDto             `json:"author"`
+	Category *CategoryDto           `json:"category"`
 	Id       string                 `json:"id"`
 	Title    string                 `json:"title"`
 	Type     ForumTopicDtoTopicType `json:"type"`
@@ -727,17 +727,17 @@ type ForumTopicDtoTopicType string
 
 // ForumTopicDtoTorrent defines model for ForumTopicDtoTorrent.
 type ForumTopicDtoTorrent struct {
-	Author      *AuthorDto               `json:"author,omitempty"`
-	Category    *CategoryDto             `json:"category,omitempty"`
-	Date        *int64                   `json:"date,omitempty"`
-	Description *TorrentDescriptionDto   `json:"description,omitempty"`
+	Author      *AuthorDto               `json:"author"`
+	Category    *CategoryDto             `json:"category"`
+	Date        *int64                   `json:"date"`
+	Description *TorrentDescriptionDto   `json:"description"`
 	Id          string                   `json:"id"`
-	Leeches     *int32                   `json:"leeches,omitempty"`
-	MagnetLink  *string                  `json:"magnetLink,omitempty"`
-	Seeds       *int32                   `json:"seeds,omitempty"`
-	Size        *string                  `json:"size,omitempty"`
-	Status      *TorrentStatusDto        `json:"status,omitempty"`
-	Tags        *string                  `json:"tags,omitempty"`
+	Leeches     *int32                   `json:"leeches"`
+	MagnetLink  *string                  `json:"magnetLink"`
+	Seeds       *int32                   `json:"seeds"`
+	Size        *string                  `json:"size"`
+	Status      *TorrentStatusDto        `json:"status"`
+	Tags        *string                  `json:"tags"`
 	Title       string                   `json:"title"`
 	Type        ForumTopicDtoTorrentType `json:"type"`
 }
@@ -972,24 +972,24 @@ type TopicPageCommentsDto struct {
 
 // TopicPageDto defines model for TopicPageDto.
 type TopicPageDto struct {
-	Author       *AuthorDto           `json:"author,omitempty"`
-	Category     *CategoryDto         `json:"category,omitempty"`
+	Author       *AuthorDto           `json:"author"`
+	Category     *CategoryDto         `json:"category"`
 	CommentsPage TopicPageCommentsDto `json:"commentsPage"`
 	Id           string               `json:"id"`
 	Title        string               `json:"title"`
-	TorrentData  *TorrentDataDto      `json:"torrentData,omitempty"`
+	TorrentData  *TorrentDataDto      `json:"torrentData"`
 }
 
 // TorrentDataDto defines model for TorrentDataDto.
 type TorrentDataDto struct {
-	Date       *string           `json:"date,omitempty"`
-	Leeches    *int32            `json:"leeches,omitempty"`
-	MagnetLink *string           `json:"magnetLink,omitempty"`
-	PosterUrl  *string           `json:"posterUrl,omitempty"`
-	Seeds      *int32            `json:"seeds,omitempty"`
-	Size       *string           `json:"size,omitempty"`
-	Status     *TorrentStatusDto `json:"status,omitempty"`
-	Tags       *string           `json:"tags,omitempty"`
+	Date       *string           `json:"date"`
+	Leeches    *int32            `json:"leeches"`
+	MagnetLink *string           `json:"magnetLink"`
+	PosterUrl  *string           `json:"posterUrl"`
+	Seeds      *int32            `json:"seeds"`
+	Size       *string           `json:"size"`
+	Status     *TorrentStatusDto `json:"status"`
+	Tags       *string           `json:"tags"`
 }
 
 // TorrentDescriptionDto defines model for TorrentDescriptionDto.
@@ -1020,19 +1020,19 @@ type GetRootParams struct {
 	// so an absent or empty value is permitted. Routes that genuinely require
 	// authentication (favorites, post comment) will return an error response
 	// from rutracker upstream when the token is missing.
-	AuthToken *AuthToken `json:"Auth-Token,omitempty"`
+	AuthToken *AuthToken `json:"Auth-Token"`
 }
 
 // GetCommentsPageParams defines parameters for GetCommentsPage.
 type GetCommentsPageParams struct {
-	Page *int32 `form:"page,omitempty" json:"page,omitempty"`
+	Page *int32 `form:"page,omitempty" json:"page"`
 
 	// AuthToken Opaque rutracker session identifier (forwarded as cookie to upstream).
 	// Read in Ktor today via `call.request.headers["Auth-Token"].orEmpty()`,
 	// so an absent or empty value is permitted. Routes that genuinely require
 	// authentication (favorites, post comment) will return an error response
 	// from rutracker upstream when the token is missing.
-	AuthToken *AuthToken `json:"Auth-Token,omitempty"`
+	AuthToken *AuthToken `json:"Auth-Token"`
 }
 
 // PostCommentTextBody defines parameters for PostComment.
@@ -1045,7 +1045,7 @@ type PostCommentParams struct {
 	// so an absent or empty value is permitted. Routes that genuinely require
 	// authentication (favorites, post comment) will return an error response
 	// from rutracker upstream when the token is missing.
-	AuthToken *AuthToken `json:"Auth-Token,omitempty"`
+	AuthToken *AuthToken `json:"Auth-Token"`
 }
 
 // GetDownloadParams defines parameters for GetDownload.
@@ -1055,7 +1055,7 @@ type GetDownloadParams struct {
 	// so an absent or empty value is permitted. Routes that genuinely require
 	// authentication (favorites, post comment) will return an error response
 	// from rutracker upstream when the token is missing.
-	AuthToken *AuthToken `json:"Auth-Token,omitempty"`
+	AuthToken *AuthToken `json:"Auth-Token"`
 }
 
 // GetFavoritesParams defines parameters for GetFavorites.
@@ -1065,7 +1065,7 @@ type GetFavoritesParams struct {
 	// so an absent or empty value is permitted. Routes that genuinely require
 	// authentication (favorites, post comment) will return an error response
 	// from rutracker upstream when the token is missing.
-	AuthToken *AuthToken `json:"Auth-Token,omitempty"`
+	AuthToken *AuthToken `json:"Auth-Token"`
 }
 
 // PostFavoritesAddParams defines parameters for PostFavoritesAdd.
@@ -1075,7 +1075,7 @@ type PostFavoritesAddParams struct {
 	// so an absent or empty value is permitted. Routes that genuinely require
 	// authentication (favorites, post comment) will return an error response
 	// from rutracker upstream when the token is missing.
-	AuthToken *AuthToken `json:"Auth-Token,omitempty"`
+	AuthToken *AuthToken `json:"Auth-Token"`
 }
 
 // PostFavoritesRemoveParams defines parameters for PostFavoritesRemove.
@@ -1085,7 +1085,7 @@ type PostFavoritesRemoveParams struct {
 	// so an absent or empty value is permitted. Routes that genuinely require
 	// authentication (favorites, post comment) will return an error response
 	// from rutracker upstream when the token is missing.
-	AuthToken *AuthToken `json:"Auth-Token,omitempty"`
+	AuthToken *AuthToken `json:"Auth-Token"`
 }
 
 // GetForumParams defines parameters for GetForum.
@@ -1095,20 +1095,20 @@ type GetForumParams struct {
 	// so an absent or empty value is permitted. Routes that genuinely require
 	// authentication (favorites, post comment) will return an error response
 	// from rutracker upstream when the token is missing.
-	AuthToken *AuthToken `json:"Auth-Token,omitempty"`
+	AuthToken *AuthToken `json:"Auth-Token"`
 }
 
 // GetCategoryPageParams defines parameters for GetCategoryPage.
 type GetCategoryPageParams struct {
 	// Page 1-based page index; `null` selects the first page.
-	Page *int32 `form:"page,omitempty" json:"page,omitempty"`
+	Page *int32 `form:"page,omitempty" json:"page"`
 
 	// AuthToken Opaque rutracker session identifier (forwarded as cookie to upstream).
 	// Read in Ktor today via `call.request.headers["Auth-Token"].orEmpty()`,
 	// so an absent or empty value is permitted. Routes that genuinely require
 	// authentication (favorites, post comment) will return an error response
 	// from rutracker upstream when the token is missing.
-	AuthToken *AuthToken `json:"Auth-Token,omitempty"`
+	AuthToken *AuthToken `json:"Auth-Token"`
 }
 
 // GetIndexParams defines parameters for GetIndex.
@@ -1118,19 +1118,19 @@ type GetIndexParams struct {
 	// so an absent or empty value is permitted. Routes that genuinely require
 	// authentication (favorites, post comment) will return an error response
 	// from rutracker upstream when the token is missing.
-	AuthToken *AuthToken `json:"Auth-Token,omitempty"`
+	AuthToken *AuthToken `json:"Auth-Token"`
 }
 
 // PostLoginFormdataBody defines parameters for PostLogin.
 type PostLoginFormdataBody struct {
 	// CapCode Captcha hidden code parameter.
-	CapCode *string `form:"cap_code,omitempty" json:"cap_code,omitempty"`
+	CapCode *string `form:"cap_code,omitempty" json:"cap_code"`
 
 	// CapSid Captcha session id (rutracker `cap_sid_*` field).
-	CapSid *string `form:"cap_sid,omitempty" json:"cap_sid,omitempty"`
+	CapSid *string `form:"cap_sid,omitempty" json:"cap_sid"`
 
 	// CapVal Captcha solution submitted by the user.
-	CapVal   *string `form:"cap_val,omitempty" json:"cap_val,omitempty"`
+	CapVal   *string `form:"cap_val,omitempty" json:"cap_val"`
 	Password string  `form:"password" json:"password"`
 	Username string  `form:"username" json:"username"`
 }
@@ -1138,51 +1138,51 @@ type PostLoginFormdataBody struct {
 // GetSearchParams defines parameters for GetSearch.
 type GetSearchParams struct {
 	// Query Free-text search string.
-	Query *string `form:"query,omitempty" json:"query,omitempty"`
+	Query *string `form:"query,omitempty" json:"query"`
 
 	// Categories Comma-separated rutracker category ids.
-	Categories *string `form:"categories,omitempty" json:"categories,omitempty"`
+	Categories *string `form:"categories,omitempty" json:"categories"`
 
 	// Author Author display name filter.
-	Author *string `form:"author,omitempty" json:"author,omitempty"`
+	Author *string `form:"author,omitempty" json:"author"`
 
 	// AuthorId Numeric author id filter.
-	AuthorId *string             `form:"authorId,omitempty" json:"authorId,omitempty"`
-	Sort     *SearchSortTypeDto  `form:"sort,omitempty" json:"sort,omitempty"`
-	Order    *SearchSortOrderDto `form:"order,omitempty" json:"order,omitempty"`
-	Period   *SearchPeriodDto    `form:"period,omitempty" json:"period,omitempty"`
-	Page     *int32              `form:"page,omitempty" json:"page,omitempty"`
+	AuthorId *string             `form:"authorId,omitempty" json:"authorId"`
+	Sort     *SearchSortTypeDto  `form:"sort,omitempty" json:"sort"`
+	Order    *SearchSortOrderDto `form:"order,omitempty" json:"order"`
+	Period   *SearchPeriodDto    `form:"period,omitempty" json:"period"`
+	Page     *int32              `form:"page,omitempty" json:"page"`
 
 	// AuthToken Opaque rutracker session identifier (forwarded as cookie to upstream).
 	// Read in Ktor today via `call.request.headers["Auth-Token"].orEmpty()`,
 	// so an absent or empty value is permitted. Routes that genuinely require
 	// authentication (favorites, post comment) will return an error response
 	// from rutracker upstream when the token is missing.
-	AuthToken *AuthToken `json:"Auth-Token,omitempty"`
+	AuthToken *AuthToken `json:"Auth-Token"`
 }
 
 // GetTopicParams defines parameters for GetTopic.
 type GetTopicParams struct {
-	Page *int32 `form:"page,omitempty" json:"page,omitempty"`
+	Page *int32 `form:"page,omitempty" json:"page"`
 
 	// AuthToken Opaque rutracker session identifier (forwarded as cookie to upstream).
 	// Read in Ktor today via `call.request.headers["Auth-Token"].orEmpty()`,
 	// so an absent or empty value is permitted. Routes that genuinely require
 	// authentication (favorites, post comment) will return an error response
 	// from rutracker upstream when the token is missing.
-	AuthToken *AuthToken `json:"Auth-Token,omitempty"`
+	AuthToken *AuthToken `json:"Auth-Token"`
 }
 
 // GetTopicPageParams defines parameters for GetTopicPage.
 type GetTopicPageParams struct {
-	Page *int32 `form:"page,omitempty" json:"page,omitempty"`
+	Page *int32 `form:"page,omitempty" json:"page"`
 
 	// AuthToken Opaque rutracker session identifier (forwarded as cookie to upstream).
 	// Read in Ktor today via `call.request.headers["Auth-Token"].orEmpty()`,
 	// so an absent or empty value is permitted. Routes that genuinely require
 	// authentication (favorites, post comment) will return an error response
 	// from rutracker upstream when the token is missing.
-	AuthToken *AuthToken `json:"Auth-Token,omitempty"`
+	AuthToken *AuthToken `json:"Auth-Token"`
 }
 
 // GetTorrentParams defines parameters for GetTorrent.
@@ -1192,7 +1192,7 @@ type GetTorrentParams struct {
 	// so an absent or empty value is permitted. Routes that genuinely require
 	// authentication (favorites, post comment) will return an error response
 	// from rutracker upstream when the token is missing.
-	AuthToken *AuthToken `json:"Auth-Token,omitempty"`
+	AuthToken *AuthToken `json:"Auth-Token"`
 }
 
 // PostCommentTextRequestBody defines body for PostComment for text/plain ContentType.

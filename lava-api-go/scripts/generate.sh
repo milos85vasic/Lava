@@ -22,6 +22,17 @@ go run github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen \
 go run github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen \
   -config api/codegen-client.yaml api/openapi.yaml
 
+# Strip ,omitempty from generated JSON struct tags so nullable pointer fields
+# emit `null` instead of being omitted — matching the legacy Ktor proxy's
+# kotlinx-serialization wire shape (Phase 14 cross-backend parity gate).
+# Caught: GET /forum / /forum/{id} response divergence on CategoryDto.{Id,
+# Children} (Ktor "children":null vs Go missing field). Every nullable field
+# in api/openapi.yaml maps to a *T pointer in generated code, so the global
+# strip is safe; we have no non-nullable optional pointer fields. The 15
+# `,omitempty` strings that remain inside the embedded-spec YAML literal
+# (see `spec` const) are string content, not Go tags.
+sed -i 's|,omitempty"`|"`|g' internal/gen/server/api.gen.go internal/gen/client/api.gen.go
+
 go fmt ./internal/gen/... >/dev/null
 
 echo "[generate] OK"
