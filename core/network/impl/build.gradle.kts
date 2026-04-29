@@ -35,4 +35,6 @@ dependencies {
     implementation(libs.ktor.serialization.kotlinx.json)
 
     debugImplementation(libs.chucker)
+
+    testImplementation(libs.junit4)
 }

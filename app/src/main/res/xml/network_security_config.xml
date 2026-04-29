@@ -2,36 +2,25 @@
 <!--
   Lava network security policy.
 
-  SP-3 (2026-04-29) introduced the LAN Go API surface, which terminates
-  TLS with an operator-generated self-signed certificate (lava-api-go's
-  scripts/gen-cert.sh produces an RSA-2048 CA with a SAN entry for the
-  host's LAN IP). Android's default trust store does not include such
-  CAs, so we declare LAN IP ranges as a separate domain-config that
-  trusts user-installed certificates.
+  SP-3.1 (2026-04-29). The user-installed-CA path was REMOVED because
+  it required an operator side-loading the lava-api-go self-signed CA
+  via Settings → Security → Install certificate — a manual step
+  forbidden by the project's Sixth-Law clause 4 (a feature the user
+  cannot complete without device-settings detours is not shippable).
 
-  Sixth-Law alignment:
-    - clause 1: this is the same surface a real user touches when
-      Settings → Security → Install certificate puts the project CA
-      into the user trust store.
-    - clause 3: the assertion is "operator-installed CA is honoured for
-      LAN IPs" — verifiable by attempting an HTTPS request to the Go
-      API and observing the TLS handshake completes; the ProxyNetworkApi
-      Challenge tests can substitute via okhttp's MockWebServer.
-
-  Public domains (rutracker.org and lava-app.tech) keep the system
-  default behaviour: only system-trusted CAs.
+  TLS to the LAN api-go is now handled at the OkHttp layer via a
+  permissive @Named("lan") OkHttpClient — see
+  core/network/impl/.../NetworkModule.kt KDoc on lanOkHttpClient for
+  the trust-boundary rationale. This NSC file therefore only handles
+  cleartext-on-LAN (for the legacy Ktor proxy at http://lan-ip:8080).
 -->
 <network-security-config>
     <!--
-      Default for any address not matched by domain-config below. This
-      retains the historical posture: cleartext is allowed (the legacy
-      LAN proxy uses http://192.168.x.y:8080), and TLS uses the system
-      trust store.
-
-      SP-3 NOTE: cleartextTrafficPermitted is intentionally true here
-      because the legacy proxy relies on it. When/if the legacy proxy
-      is retired, flip this to false and tighten the LAN block below
-      to only allow HTTPS.
+      Default for any address not matched by domain-config below.
+      Cleartext is allowed because the legacy LAN proxy uses
+      http://192.168.x.y:8080. TLS uses the system trust store —
+      this is the strict path for public-Internet endpoints
+      (lava-app.tech, rutracker.org and mirrors).
     -->
     <base-config cleartextTrafficPermitted="true">
         <trust-anchors>
@@ -40,35 +29,25 @@
     </base-config>
 
     <!--
-      LAN private-address ranges trusted with the union of system CAs
-      and any user-installed CA. Operators install the lava-api-go
-      self-signed CA via Android Settings → Security → Install
-      certificate; this section makes the install effective.
+      Domain-level cleartext-OK list for LAN ranges. Used by the
+      legacy-proxy code path (Endpoint.Mirror with isLocalHost()).
 
-      The IPv4 ranges are RFC 1918 (private) plus 169.254.0.0/16
-      (link-local — useful for direct device-to-device discovery).
-      The hostname `localhost` covers loopback to the device itself
-      (useful for emulator port-forwards). Per the
-      Network Security Config spec, domain entries match by exact
-      hostname (no wildcards in IP form), so each /16 or /24 prefix
-      that's actually used in practice should be enumerated here.
-      The 192.168.x.0/24 and 10.x.x.x ranges are the most common
-      home / SMB LANs and are listed first.
+      The `lava-api-go` HTTPS path on port 8443 does NOT depend on
+      this section — that path is wired through the LAN-permissive
+      OkHttpClient and bypasses NSC's trust-anchor resolution
+      entirely.
+
+      LAN entries: localhost + .local (for mDNS) + the most common
+      home-LAN gateway IPs. The DSL doesn't accept CIDR ranges.
+      Operators on different subnets won't need to edit this — the
+      LAN-permissive OkHttpClient handles HTTPS regardless. They
+      only need to add an entry here if they want plaintext HTTP
+      for the legacy proxy on a non-default LAN prefix.
     -->
     <domain-config cleartextTrafficPermitted="true">
-        <!-- Loopback / emulator. -->
         <domain includeSubdomains="false">localhost</domain>
         <domain includeSubdomains="false">127.0.0.1</domain>
-        <!-- mDNS .local (operator-published advertisement targets). -->
         <domain includeSubdomains="true">local</domain>
-
-        <!--
-          A representative subset of RFC 1918 IPv4 prefixes. The Network
-          Security Config DSL doesn't accept CIDR; full coverage would
-          require per-IP entries. The subset below covers the common
-          home-LAN gateways and SMB ranges. Operators on different
-          subnets can add their LAN IP via this XML before building.
-        -->
         <domain includeSubdomains="false">192.168.1.1</domain>
         <domain includeSubdomains="false">192.168.1.2</domain>
         <domain includeSubdomains="false">192.168.0.1</domain>
@@ -77,19 +56,6 @@
 
         <trust-anchors>
             <certificates src="system" />
-            <certificates src="user" />
         </trust-anchors>
     </domain-config>
-
-    <!--
-      Debug-only override — when the app is built debuggable
-      (applicationIdSuffix=.dev), additionally trust raw certificates
-      placed under res/raw/ by a developer. Not active in release builds.
-    -->
-    <debug-overrides>
-        <trust-anchors>
-            <certificates src="system" />
-            <certificates src="user" />
-        </trust-anchors>
-    </debug-overrides>
 </network-security-config>

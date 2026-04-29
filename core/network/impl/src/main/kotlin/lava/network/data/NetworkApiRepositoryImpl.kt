@@ -16,11 +16,13 @@ import lava.network.impl.ProxyNetworkApi
 import lava.network.serialization.JsonFactory
 import okhttp3.OkHttpClient
 import javax.inject.Inject
+import javax.inject.Named
 import kotlin.io.encoding.Base64
 
 internal class NetworkApiRepositoryImpl @Inject constructor(
     private val settingsRepository: SettingsRepository,
     private val okHttpClient: OkHttpClient,
+    @Named("lan") private val lanOkHttpClient: OkHttpClient,
     private val networkLogger: NetworkLogger,
 ) : NetworkApiRepository {
     private val apiMap = mutableMapOf<Endpoint, NetworkApi>()
@@ -29,12 +31,32 @@ internal class NetworkApiRepositoryImpl @Inject constructor(
         val endpoint = endpoint()
         return apiMap.getOrPut(endpoint) {
             when (endpoint) {
-                is Endpoint.Proxy -> proxyApi(host = endpoint.host, port = null, scheme = "https")
-                is Endpoint.GoApi -> proxyApi(host = endpoint.host, port = endpoint.port, scheme = "https")
+                // Public Internet — strict TLS via system trust store.
+                is Endpoint.Proxy -> proxyApi(
+                    host = endpoint.host,
+                    port = null,
+                    scheme = "https",
+                    client = okHttpClient,
+                )
+                // LAN lava-api-go — permissive TLS via lanOkHttpClient.
+                // Trust boundary documented in NetworkModule.lanOkHttpClient KDoc.
+                is Endpoint.GoApi -> proxyApi(
+                    host = endpoint.host,
+                    port = endpoint.port,
+                    scheme = "https",
+                    client = lanOkHttpClient,
+                )
                 is Endpoint.RutrackerEndpoint -> {
                     if (endpoint.host.isLocalHost()) {
-                        proxyApi(host = endpoint.host, port = null, scheme = "http")
+                        // LAN legacy Ktor proxy on plaintext HTTP — no TLS at all.
+                        proxyApi(
+                            host = endpoint.host,
+                            port = null,
+                            scheme = "http",
+                            client = okHttpClient,
+                        )
                     } else {
+                        // Public rutracker mirror — strict TLS.
                         rutrackerApi(endpoint.host)
                     }
                 }
@@ -92,18 +114,22 @@ internal class NetworkApiRepositoryImpl @Inject constructor(
      *
      * SP-3 (2026-04-29) added the [port] and [scheme] parameters so a
      * caller can target the Go API on its non-default port (8443) via
-     * HTTPS, while preserving the legacy proxy / public Proxy behaviour
-     * (LAN → http, public → https, default ports).
-     *
-     * TLS trust for self-signed LAN certs is configured at the
-     * application level via `app/src/main/res/xml/network_security_config.xml`
-     * — an operator installing the project CA on the device causes the
-     * shared [okHttpClient]'s system trust manager to honour it.
+     * HTTPS. SP-3.1 (same date) added the [client] parameter so the
+     * caller can choose between the strict-TLS [okHttpClient] (public
+     * Internet) and the permissive-TLS LAN client. Routing decisions
+     * are made by the calling `when (endpoint)` block in [getApi];
+     * see [lava.network.di.NetworkModule.lanOkHttpClient] KDoc for the
+     * trust-boundary rationale.
      */
-    private fun proxyApi(host: String, port: Int?, scheme: String): NetworkApi {
+    private fun proxyApi(
+        host: String,
+        port: Int?,
+        scheme: String,
+        client: OkHttpClient,
+    ): NetworkApi {
         return ProxyNetworkApi(
             HttpClient(OkHttp) {
-                engine { preconfigured = okHttpClient }
+                engine { preconfigured = client }
                 defaultRequest {
                     if (port != null) {
                         url(scheme = scheme, host = host, port = port)
