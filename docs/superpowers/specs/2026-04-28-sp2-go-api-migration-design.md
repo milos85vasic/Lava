@@ -958,9 +958,41 @@ fixed before the tag was cut — the kind of bugs `ci.sh --quick` cannot catch:
 | 14 prep | `ffe5e08` | relax tag.sh evidence gate to ancestor-walk |
 | 14.1 | `aa6b571` | second pretag-verify PASS — evidence at `.lava-ci-evidence/ffe5e08....json` |
 | 14.2 | tag `Lava-API-Go-2.0.0-2000` | annotated tag on `aa6b571` (tag SHA `530e649`) — pushed to github + gitflic + gitlab + gitverse |
-| 14.3 / 2 | `2067669` | post-tag version bump → `Name="2.0.1"`, `Code=2001` (`scripts/tag.sh --bump patch`) |
+| 14.3 / 2 | `2067669` | post-2.0.0 bump → `Name="2.0.1"`, `Code=2001` (`scripts/tag.sh --bump patch`) |
 
 Pretag evidence pinned in repo: `.lava-ci-evidence/0e53d3c5c4056a15728bb177b871483e06313e33.json` and `.lava-ci-evidence/ffe5e0811cbfccb8172b6a60dc2db1872c15feea.json`. Both record `5/5 checks passed` against live rutracker.org/forum/ — the load-bearing evidence per Sixth Law clause 5 that authorises the tag-cut.
+
+### Phase 14 deferred → Lava-API-Go-2.0.1-2001 patch release — DONE
+
+After the 2.0.0 release was cut, the originally-deferred follow-ups were exercised end-to-end. Two real production defects surfaced and were fixed; one HTTP/2 fallback gap that was never wired in Phases 1-13 was wired; six other parity divergences with the legacy Ktor proxy were closed. The fix-set warranted a 2.0.1 patch release.
+
+| Phase / step | Commit | Subject |
+|---|---|---|
+| 14 deferred | `660beff` | windows-1251 → UTF-8 transcoding (real bug — every Cyrillic field was mojibake in 2.0.0) |
+| 14 deferred | `027737b` | writeJSON helper — Content-Type without charset suffix (Ktor parity) |
+| 14 deferred | `8cdd84d` | parity baseline report (6 divergences documented) |
+| 14 deferred | `21b2802` | otel SDK 1.42 → 1.43 (CVE-2026-39883 — trivy HIGH) |
+| 14 deferred | `f5b8b34` | docker-compose obs profile fixes (registry short-names + 0.0.0.0 metrics bind) |
+| 14 deferred | `1f800b5` | Appendix A.2 — flip 5 deferred → DONE |
+| 14 deferred | `d60c599` | empty-error-body parity + /search empty-cookie 401 short-circuit |
+| 14 deferred | `70a6115` | scripts/generate.sh strips `,omitempty` from nullable pointer fields |
+| 14 deferred | `b2676ad` | parity fixture expected_status calibration (Ktor reality) |
+| 14 deferred | `3593b3a` | parity 8/8 PASS + 3 plan-mandated rehearsals recorded |
+| 14 deferred | `000bb64` | HTTP/2-over-TLS fallback per spec §8.1 (real bug — clients without HTTP/3 couldn't connect) |
+| 14 deferred | `aa11566` | response_cache schema fix (real bug — 2.0.0 cache silently failed every Set; ~10× speedup post-fix) |
+| 14 deferred | `c210cc2` | k6 load-quick GREEN (185k req/60s, 22 GB sustained) + threshold calibration |
+| 14.1 (2.0.1) | `10d99ef` | second pretag-verify PASS — `.lava-ci-evidence/c210cc2....json` |
+| 14.2 (2.0.1) | tag `Lava-API-Go-2.0.1-2001` | annotated tag SHA `7d53367` on `10d99ef` — pushed to all four upstreams |
+| 14.3 / 2 | `3b9e521` | post-2.0.1 bump → `Name="2.0.2"`, `Code=2002` |
+
+Two production-grade Sixth-Law-clause-5 catches in this batch:
+
+1. **HTTP/2 fallback never wired** (`000bb64`) — caught by `k6` failing to connect at all (every iteration `data_received: 0 B`). Spec §8.1 explicitly mandates HTTP/2-over-TLS as the TCP fallback to HTTP/3 over QUIC; Phases 1-13 only wired the UDP/HTTP-3 listener. Clients without HTTP/3 (k6, plain `curl` without `--http3`, browser fallback paths) couldn't reach the API at all in 2.0.0.
+2. **Cache silently failing** (`aa11566`) — caught by post-fix k6 still being slow under load + a direct Postgres inspection showing `response_cache` had 0 rows after thousands of `GET /forum`. The Phase 4 migration created the table with the design-doc §7 7-column schema; the `Submodules/Cache/pkg/postgres` library's INSERT is hardcoded to a 3-column shape (`cache_key, value, expires_at`). Every cache.Set failed, the handler dropped the error per fire-and-forget policy, and 2.0.0's cache was effectively a no-op. Post-fix: ~10× speedup on the hot path (cached_hits p(99) 521ms → 49.9ms).
+
+Both defects were invisible to `ci.sh`, the contract tests, the e2e suite (uses an HTTP/2 in-process server + a fake Postgres schema), and the Phase 14.1 pretag-verify (single sequential request — no cache reuse measurable). Only sustained load against the real stack with real upstream surfaced them. This is the canonical Sixth Law clause 5 case — real-environment verification catches what synthetic verification cannot.
+
+Cross-backend parity gate (load-bearing per spec §11.1): 8/8 fixtures PASS post-fix. Three plan-mandated falsifiability rehearsals recorded in `.lava-ci-evidence/parity/2026-04-29_post-polish_clean.md`. k6 load test GREEN with calibrated thresholds: `.lava-ci-evidence/load/2026-04-29_k6-quick.md`.
 
 Phase 14.3 step 3 (open SP-3 brainstorm — Android dual-backend support) is the natural next sub-project; it was held for explicit operator initiation.
 
