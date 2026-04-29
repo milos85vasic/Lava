@@ -33,11 +33,13 @@ type Config struct {
 	TLSConfig      *tls.Config // HTTP/3 mandates TLS 1.3
 }
 
-// Server hosts both the HTTP/3 public listener and the plain-HTTP
-// metrics listener. A single Shutdown call drains both.
+// Server hosts both the HTTP/3 public listener (UDP) AND an HTTP/2-over-TLS
+// fallback (TCP) on the same port — per spec §8.1 — plus a plain-HTTP
+// metrics listener. A single Shutdown call drains all three.
 type Server struct {
 	cfg     Config
 	h3srv   *h3.Server
+	h2srv   *http.Server // TCP HTTP/2 fallback on the same port as the HTTP/3 listener
 	metrics *http.Server
 
 	mu       sync.Mutex
@@ -64,9 +66,22 @@ func New(cfg Config) (*Server, error) {
 	if err != nil {
 		return nil, err
 	}
+	// HTTP/2 fallback over TLS on the same port (TCP). Spec §8.1:
+	//   TCP: HTTP/2 fallback (TLS 1.3 only)
+	// Reuses the same TLSConfig so the cert and protocol set match the
+	// HTTP/3 listener. Required for clients that don't speak HTTP/3
+	// (curl without --http3, k6, browser fallback paths).
+	h2cfg := cfg.TLSConfig.Clone()
+	h2cfg.NextProtos = []string{"h2", "http/1.1"}
 	return &Server{
 		cfg:   cfg,
 		h3srv: h3srv,
+		h2srv: &http.Server{
+			Addr:              cfg.Listen,
+			Handler:           cfg.Engine,
+			TLSConfig:         h2cfg,
+			ReadHeaderTimeout: 5 * time.Second,
+		},
 		metrics: &http.Server{
 			Addr:              cfg.MetricsListen,
 			Handler:           cfg.MetricsHandler,
@@ -81,11 +96,20 @@ func New(cfg Config) (*Server, error) {
 // condition. Start blocks; the caller is expected to invoke it from a
 // goroutine and trigger Shutdown from the main thread.
 func (s *Server) Start() error {
-	errCh := make(chan error, 2)
+	errCh := make(chan error, 3)
 
-	// HTTP/3 listener.
+	// HTTP/3 listener (UDP/QUIC).
 	go func() {
 		errCh <- s.h3srv.Start()
+	}()
+
+	// HTTP/2 fallback (TCP/TLS) on the same port. Spec §8.1.
+	go func() {
+		err := s.h2srv.ListenAndServeTLS("", "")
+		if errors.Is(err, http.ErrServerClosed) {
+			err = nil
+		}
+		errCh <- err
 	}()
 
 	// Plain-HTTP metrics listener.
@@ -119,9 +143,11 @@ func (s *Server) Shutdown(ctx context.Context) error {
 	s.stopped = true
 	s.mu.Unlock()
 
-	// Best-effort metrics shutdown — stdlib http.Server.Shutdown
-	// blocks until in-flight requests drain or ctx expires.
+	// Best-effort metrics + HTTP/2 fallback shutdown — stdlib
+	// http.Server.Shutdown blocks until in-flight requests drain or ctx
+	// expires.
 	_ = s.metrics.Shutdown(ctx)
+	_ = s.h2srv.Shutdown(ctx)
 
 	// HTTP/3 shutdown closes the QUIC listener.
 	return s.h3srv.Shutdown(ctx)
