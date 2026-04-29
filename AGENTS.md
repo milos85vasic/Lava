@@ -240,6 +240,24 @@ Every test added to this codebase from this point on MUST satisfy ALL of the fol
 
 6. **Inheritance.** This Sixth Law applies recursively to every submodule, every feature, and every new artifact added to the project (including the Go API service). Submodule constitutions MAY add stricter rules but MUST NOT relax this one.
 
+#### Sixth Law extensions (lessons-learned addenda)
+
+The clauses above are immutable. Below are addenda recorded after a real bug shipped green and we needed to prevent the *class* of bug, not just the specific instance. Authoritative copy lives in `CLAUDE.md`; this AGENTS.md mirrors the headers so an agent reading either file sees the same rule set.
+
+##### 6.A — Real-binary contract tests (added 2026-04-29)
+
+Forensic anchor: `docker-compose.yml` invoked `healthprobe --http3 …` while the binary only registered `-url`/`-insecure`/`-timeout`; the probe exited 1 every 10 seconds for 569 consecutive runs while the API itself served 200. Compose validation was happy, every functional test was green, the orchestrator labelled the container "unhealthy" — and there was no test asserting the probe could even start.
+
+Rule: every script/compose invocation of a binary we own MUST have a contract test that recovers the binary's flag set from its actual `Usage` output and asserts the script's flag set is a strict subset, with a falsifiability rehearsal sub-test that re-introduces a known-buggy flag and confirms the checker rejects it. Canonical implementation: `lava-api-go/tests/contract/healthcheck_contract_test.go`.
+
+##### 6.B — Container "Up" is not application-healthy (added 2026-04-29)
+
+`docker ps` / `podman ps` `Up` only means PID 1 is alive; the application inside may be stuck or crash-looping internally (cf. 6.A). Tests asserting container state alone are bluffs by clauses 1 and 3. Use the same probe the orchestrator uses, or an end-to-end functional request at the user-visible surface.
+
+##### 6.C — Mirror-state mismatch checks before tagging (added 2026-04-29)
+
+"All four mirrors push succeeded" is one assertion; "all four mirrors converge to the same SHA at HEAD" is stronger. `scripts/tag.sh` MUST verify post-push tip-SHA convergence across github/gitflic/gitlab/gitverse before reporting success, and SHOULD record per-mirror SHAs in the evidence file.
+
 ## Local-Only CI/CD (Constitutional Constraint)
 
 This project does NOT use, and MUST NOT add, GitHub Actions, GitLab pipelines, Bitbucket pipelines, CircleCI, Travis, Jenkins-as-a-service, Azure Pipelines, or any other hosted/remote CI/CD service. All build, test, lint, security-scan, mutation-test, load-test, image-build, and release-verification activity MUST run on developer machines or on a self-hosted local runner under the operator's direct control.

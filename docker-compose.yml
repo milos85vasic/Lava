@@ -78,10 +78,19 @@ services:
       LAVA_API_OTLP_ENDPOINT: "http://127.0.0.1:4318" # tempo OTLP HTTP receiver (published from bridge)
     volumes:
       - ./lava-api-go/docker/tls:/etc/lava-api-go/tls:ro
-    healthcheck:
-      test: ["CMD", "/usr/local/bin/healthprobe", "--http3", "https://localhost:8443/health"]
-      interval: 10s
-      retries: 6
+    # NO healthcheck: section here on purpose. The runtime image is
+    # distroless (gcr.io/distroless/static-debian12:nonroot) and has no
+    # /bin/sh. podman-compose translates `test: ["CMD", ...]` into
+    # CMD-SHELL form internally (`sh -c ...`), which fails silently with
+    # rc=1 + empty output on a sh-less image. The Dockerfile's
+    # HEALTHCHECK directive uses exec-form
+    # `HEALTHCHECK ... CMD ["/usr/local/bin/healthprobe"]` and is invoked
+    # directly by the container runtime — no shell wrapper, works on
+    # distroless. We rely on it instead of overriding here.
+    #
+    # Contract enforcement: lava-api-go/tests/contract/healthcheck_contract_test.go
+    # validates the Dockerfile HEALTHCHECK CMD's flag set against the
+    # healthprobe binary's registered flags.
 
   # Profile: legacy ---------------------------------------------------------
   lava-proxy:

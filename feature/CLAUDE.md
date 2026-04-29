@@ -26,6 +26,27 @@ Every feature module MUST obey the root Anti-Bluff Testing Pact. In addition:
 - The Challenge Test must verify that a user-visible outcome is achieved (e.g., endpoint added to list, settings updated).
 - If the Challenge Test passes but the real feature is broken, the test is a bluff and must be rewritten.
 
+### Test classification (per Sixth Law clauses 1, 3, 4)
+
+Every test in a feature module MUST be one of:
+
+- **CHALLENGE** — primary assertion on persisted/observable user-visible state (repository row, settings entry, ViewModel state flag rendered as UI). Satisfies clause 4 acceptance.
+- **VM-CONTRACT** — primary assertion on `SideEffect` emission. Verifies the screen's contract with the ViewModel; does NOT prove the rendered screen reacts. Satisfies clause 1 only at the ViewModel layer; the rendered-UI Challenge is a separate, additional gate.
+
+Tests of either type MUST be marked with a `// CHALLENGE` or `// VM-CONTRACT` comment immediately above the `@Test` line so a reader can audit Sixth-Law compliance at a glance. Conflating the two — calling a side-effect-emission test a "Challenge" — is itself a bluff smell that the audit MUST flag.
+
+### Owed: rendered-UI Challenges (tracked gap)
+
+The project does NOT currently set up `src/androidTest/` with Compose UI test infrastructure. As a consequence, no feature has a rendered-UI Challenge: there is no test that opens a real Composable, drives input through it, and asserts rendered output. Every "VM-CONTRACT" test is therefore the *most* a feature can claim until UI tests land.
+
+Until that infrastructure exists:
+
+1. ViewModel test class KDocs MUST state explicitly that the rendered-UI Challenge is owed (see `feature/menu/src/test/.../MenuViewModelTest.kt` for the canonical phrasing).
+2. Release notes MUST NOT claim "Sixth-Law compliant" for any feature whose only coverage is VM-CONTRACT tests.
+3. Adding `src/androidTest/` + Robolectric + `androidx.compose.ui.test.junit4` is tracked as a constitutional debt item; whoever adds it owns updating every feature's class KDoc to remove the "owed" phrasing.
+
+This is itself an instance of Sixth Law clause 5 ("CI green is necessary, not sufficient"): green ViewModel tests are necessary, not sufficient. Until UI tests run, real-device verification is the only acceptance gate, and `scripts/tag.sh` evidence-recording covers that gap on the lava-api-go side but NOT on the Android client side. SP-3 (Android dual-backend) is the natural place to close this gap.
+
 ## Feature Module Pattern
 
 Each feature follows Orbit MVI:

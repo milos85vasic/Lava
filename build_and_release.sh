@@ -81,6 +81,11 @@ cp "$DEBUG_APK_SRC" "$DEBUG_APK_DST"
 cp "$RELEASE_APK_SRC" "$RELEASE_APK_DST"
 cp "$PROXY_JAR_SRC" "$PROXY_JAR_DST"
 
+# Force docker-format image builds so HEALTHCHECK directives are persisted
+# in the image config. podman defaults to OCI format which silently drops
+# HEALTHCHECK (see start.sh comment + 2026-04-29 incident).
+export BUILDAH_FORMAT=docker
+
 # Save the lava-api-go container image if a runtime is available; otherwise
 # skip with a clear message. start.sh will recreate the image on demand,
 # so this is not load-bearing for the binary release artifact.

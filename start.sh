@@ -106,9 +106,35 @@ if [ "$PROFILE" != "legacy" ]; then
     fi
 fi
 
+# ------------------------------------------------------------------------------
+# Force buildah/podman to produce docker-format images for any container that
+# carries a HEALTHCHECK directive in its Dockerfile.
+#
+# Forensic anchor (2026-04-29): podman defaults to the OCI image format, which
+# does NOT support HEALTHCHECK in image config. The directive is silently
+# dropped at build time with the warning
+#   "HEALTHCHECK is not supported for OCI image format and will be ignored.
+#    Must use `docker` format"
+# emitted to stderr. The lava-api-go runtime image's HEALTHCHECK was being
+# stripped by every `podman compose up` lazy-build, leaving the container
+# with NO probe — so the orchestrator reported "running" indefinitely while
+# the application could in fact be crash-looping. Containers running with
+# `Healthcheck: null` masked a class of bug as serious as the original
+# `--http3` flag drift.
+#
+# Setting BUILDAH_FORMAT=docker globally for this script's invocation makes
+# every podman/buildah build inside the lava-containers pipeline produce
+# docker-format images that persist HEALTHCHECK in their config. This is
+# the structural fix; lava-api-go/tests/contract/healthcheck_contract_test.go
+# enforces the flag-set contract, but only an image-level HEALTHCHECK that
+# survives the build can carry it into the running container.
+# ------------------------------------------------------------------------------
+export BUILDAH_FORMAT=docker
+
 echo "========================================"
 echo "  Lava Container Boot"
 echo "  profile=$PROFILE observability=$WITH_OBSERVABILITY dev-docs=$WITH_DEV_DOCS"
+echo "  BUILDAH_FORMAT=docker (forces image-level HEALTHCHECK persistence)"
 echo "========================================"
 
 # Build the lava-containers args. Use an array so spaces / future flags

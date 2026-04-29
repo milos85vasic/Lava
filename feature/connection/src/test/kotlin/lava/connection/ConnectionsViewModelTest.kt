@@ -25,14 +25,42 @@ import org.junit.Test
 import org.orbitmvi.orbit.test.test
 
 /**
- * Integration Challenge Tests for [ConnectionsViewModel].
+ * Tests for [ConnectionsViewModel] — mixed Integration Challenge + ViewModel Contract suite.
  *
- * These tests wire the REAL ViewModel to REAL UseCase implementations backed
- * by behaviorally equivalent fakes. Only [ObserveEndpointsStatusUseCase] is
- * mocked because it depends on [ConnectionService] (an external network
- * boundary), which is outside the scope of this feature's business logic.
+ * Per the root `CLAUDE.md` Sixth Law (clauses 1, 3, 4) two distinct categories
+ * live in this file and a reader must not conflate them:
  *
- * If a bug exists in any UseCase or repository layer, these tests WILL fail.
+ * 1. **Integration Challenge Tests** — primary assertion on persisted/observable
+ *    user-visible state (repository membership, settings row, ViewModel `state.discovering`
+ *    progress flag). These satisfy Sixth-Law clause 4 for their respective domain
+ *    operations because a real user observes the same persisted state through later
+ *    screens, or sees the `discovering` flag directly via the loading indicator.
+ *    Tagged `// CHALLENGE` below.
+ *
+ * 2. **ViewModel Contract Tests** — primary assertion on `SideEffect` emission only.
+ *    These verify the screen's contract with the ViewModel (which navigation /
+ *    snackbar / dialog event the screen will receive). They do NOT prove the
+ *    rendered screen reacts correctly; that is a separate layer requiring a
+ *    Compose UI test. Tagged `// VM-CONTRACT` below.
+ *
+ * The load-bearing **rendered-UI Challenge** for Connections — open the screen, tap
+ * "Discover", verify the loading indicator actually animates, the snackbar actually
+ * shows the resolved IP — is owed and not yet written. The project does not
+ * currently set up `src/androidTest/` with Compose UI test infrastructure;
+ * tracked in `feature/CLAUDE.md` as a blocking item for any release that claims
+ * feature-level Sixth-Law compliance for this surface.
+ *
+ * Until the UI Challenge exists, a green run of this file MUST be read as
+ * "the ViewModel correctly produces the right state and contract for the screen"
+ * — NOT as "the user can complete discovery and select an endpoint on a real device".
+ *
+ * Wiring uses REAL UseCase implementations end-to-end:
+ *   ViewModel → real UseCase → real Repository (TestEndpointsRepository,
+ *   TestSettingsRepository — both behaviourally equivalent to the production
+ *   `:core:data` impls per the Anti-Bluff Pact's Third Law).
+ * `ObserveEndpointsStatusUseCase` is the only mocked dependency because it
+ * crosses an external network boundary (`ConnectionService`); per the Pact's
+ * Second Law mocking is permitted ONLY at outermost boundaries.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class ConnectionsViewModelTest {
@@ -75,6 +103,8 @@ class ConnectionsViewModelTest {
         )
     }
 
+    // VM-CONTRACT — initial-state contract; no user-visible state mutation
+    // assertion (the empty list IS the initial-state default).
     @Test
     fun `initial state is empty`() = runTest {
         val viewModel = createViewModel()
@@ -83,6 +113,9 @@ class ConnectionsViewModelTest {
         }
     }
 
+    // VM-CONTRACT — verifies the screen receives the open-dialog side-effect.
+    // The rendered-screen Challenge (the dialog actually composes and is
+    // dismissable) is owed (see class KDoc).
     @Test
     fun `clicking connection item emits ShowConnectionDialog`() = runTest {
         val viewModel = createViewModel()
@@ -93,6 +126,9 @@ class ConnectionsViewModelTest {
         }
     }
 
+    // CHALLENGE — primary assertion on `state.edit`, the user-visible
+    // toggle that controls the edit-mode action bar. State transition is
+    // observable in the rendered UI.
     @Test
     fun `edit click toggles edit mode`() = runTest {
         val viewModel = createViewModel()
@@ -107,6 +143,9 @@ class ConnectionsViewModelTest {
         }
     }
 
+    // CHALLENGE — primary assertion on repository membership AND state.edit.
+    // The user observes both: the new endpoint appears in the list, the
+    // edit bar disappears.
     @Test
     fun `submit endpoint adds it and exits edit mode`() = runTest {
         val viewModel = createViewModel()
@@ -126,6 +165,8 @@ class ConnectionsViewModelTest {
         )
     }
 
+    // CHALLENGE — primary assertion on the persisted settings row.
+    // Every other screen reads this same row to decide which backend to call.
     @Test
     fun `select endpoint updates settings`() = runTest {
         val endpoint = Endpoint.Mirror("192.168.1.100")
@@ -137,6 +178,9 @@ class ConnectionsViewModelTest {
         assertEquals(endpoint, settingsRepository.getSettings().endpoint)
     }
 
+    // CHALLENGE — primary assertions on `state.discovering` (rendered as the
+    // progress indicator) AND on the side-effect message text. Both are
+    // user-visible: the spinner and the snackbar.
     @Test
     fun `discover local endpoints shows loading and emits message when found`() = runTest {
         val viewModel = createViewModel()
@@ -163,6 +207,11 @@ class ConnectionsViewModelTest {
         }
     }
 
+    // CHALLENGE — same as above; the loading→done state transition is
+    // user-visible via the progress indicator. The "no local endpoint found"
+    // snackbar is the user-visible confirmation. The audit flagged this
+    // as side-effect-only but the state.discovering assertions ARE
+    // primary-tier user-visible state per Sixth Law clause 3.
     @Test
     fun `discover local endpoints not found shows message`() = runTest {
         val viewModel = createViewModel()
@@ -179,6 +228,8 @@ class ConnectionsViewModelTest {
         }
     }
 
+    // CHALLENGE — same shape as the previous two; user-visible spinner +
+    // snackbar text drive the assertions.
     @Test
     fun `discover local endpoints already configured shows active message`() = runTest {
         val viewModel = createViewModel()
@@ -209,6 +260,8 @@ class ConnectionsViewModelTest {
         }
     }
 
+    // CHALLENGE — primary assertion on repository membership. The user
+    // observes the missing endpoint in any later list-rendering screen.
     @Test
     fun `remove endpoint deletes it from repository`() = runTest {
         val endpoint = Endpoint.Mirror("192.168.1.100")
@@ -223,6 +276,9 @@ class ConnectionsViewModelTest {
         )
     }
 
+    // CHALLENGE — primary assertion on the persisted settings row's
+    // post-remove fallback. User-visible because every other screen reads
+    // `settings.endpoint` to decide which backend to call.
     @Test
     fun `remove selected endpoint falls back to Proxy`() = runTest {
         val endpoint = Endpoint.Mirror("192.168.1.100")

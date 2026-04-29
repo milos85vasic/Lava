@@ -129,6 +129,36 @@ Every test added to this codebase from this point on MUST satisfy ALL of the fol
 
 6. **Inheritance.** This Sixth Law applies recursively to every submodule, every feature, and every new artifact added to the project (including the Go API service). Submodule constitutions MAY add stricter rules but MUST NOT relax this one.
 
+#### Sixth Law extensions (lessons-learned addenda)
+
+The clauses above are immutable. The clauses below are added when a real bug ships green and we need to prevent the *class* of bug, not just the specific instance.
+
+##### 6.A — Real-binary contract tests (added 2026-04-29)
+
+**Forensic anchor:** the lava-api-go container ran 569 consecutive failing healthchecks in production while serving real HTTP/3 + HTTP/2 traffic. `docker-compose.yml` invoked `healthprobe --http3 https://localhost:8443/health`, but the binary at `lava-api-go/cmd/healthprobe/main.go` only registered `-url` / `-insecure` / `-timeout`. `flag.Parse()` rejected the unknown `--http3` and the probe exited 1 every 10 seconds. `docker compose config --quiet` was happy with the YAML; every functional test was green; the orchestrator labelled the container "unhealthy" and there was no test asserting the probe could even start.
+
+**Rule.** Every place where one of our scripts/compose files invokes a binary we own (or build) MUST be covered by a contract test that:
+
+1. Builds (or locates) the target binary.
+2. Recovers the binary's registered flag set from its actual `Usage` output (or by importing the package's flag set, where structurally possible).
+3. Asserts every flag passed by the script/compose is a strict subset of the binary's registered flag set.
+4. Carries a falsifiability rehearsal sub-test that re-introduces the historical buggy flag and confirms the contract checker rejects it. The recorded run must appear in the commit body (Test/Mutation/Observed/Reverted protocol).
+
+The canonical implementation is `lava-api-go/tests/contract/healthcheck_contract_test.go`. New compose healthchecks, new lifecycle scripts, new build glue, new release scripts MUST gain an analogous contract test before the change can be merged.
+
+##### 6.B — Container "Up" is not application-healthy (added 2026-04-29)
+
+`docker ps` / `podman ps` reporting `Up` only means PID 1 is alive — the application inside may be crash-looping, stuck on startup, or (as 6.A shows) green-on-the-outside-broken-on-the-inside. A test that asserts `service.State.Status == "running"` is a bluff test by clauses 1 and 3. Use:
+
+- The same probe the orchestrator uses (or a real-protocol probe at the same surface).
+- An end-to-end functional request that exercises the user-visible code path, not the lifecycle plumbing.
+
+The lava-api-go integration tests already do this (real Gin engine via httptest, real Postgres in podman, real cache). New container-bearing features MUST follow the same pattern.
+
+##### 6.C — Mirror-state mismatch checks before tagging (added 2026-04-29)
+
+When mirroring across N upstreams, "all four mirrors push succeeded" is one assertion; "all four mirrors converge to the same SHA at HEAD" is a stronger one. A push that fences against branch protection on one mirror but goes through on the others produces a green-looking session log and a divergent state at rest. `scripts/tag.sh` MUST verify post-push that all four mirrors report the same tip SHA before reporting success. Future releases of `tag.sh` SHOULD record the per-mirror SHA in the evidence file alongside the pretag-verify probe results.
+
 ## Local-Only CI/CD (Constitutional Constraint)
 
 This project does NOT use, and MUST NOT add, GitHub Actions, GitLab pipelines, Bitbucket pipelines, CircleCI, Travis, Jenkins-as-a-service, Azure Pipelines, or any other hosted/remote CI/CD service. All build, test, lint, security-scan, mutation-test, load-test, image-build, and release-verification activity MUST run on developer machines or on a self-hosted local runner under the operator's direct control.
