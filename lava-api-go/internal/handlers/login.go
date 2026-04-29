@@ -33,6 +33,7 @@
 package handlers
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -111,6 +112,12 @@ func (h *AuthHandler) PostLogin(c *gin.Context) {
 
 	resp, err := h.scraper.Login(c.Request.Context(), params)
 	if err != nil {
+		// SP-3.5 (2026-04-29): log the raw scraper error so a 502
+		// surfaced to the Android client is debuggable from podman
+		// logs alone — credentials are NEVER in err.Error() (the
+		// scraper packs only HTTP status, network errors, and
+		// sentinel names into the error string).
+		log.Printf("login: scraper.Login err=%v", err)
 		writeUpstreamError(c, err)
 		return
 	}

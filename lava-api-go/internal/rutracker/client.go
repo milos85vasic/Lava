@@ -10,10 +10,12 @@
 package rutracker
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"net/url"
 	"strings"
@@ -30,8 +32,9 @@ import (
 // UTF-8 — produces mojibake on Cyrillic content. This was caught by the
 // Phase 14 cross-backend parity test against the Kotlin Ktor proxy
 // (which decodes via its HttpClient's `bodyAsText()` charset path):
-//   ktor: "VPN-сервисы"   (correctly decoded UTF-8 of Russian text)
-//   go:   "VPN-�������"   (windows-1251 bytes interpreted as UTF-8)
+//
+//	ktor: "VPN-сервисы"   (correctly decoded UTF-8 of Russian text)
+//	go:   "VPN-�������"   (windows-1251 bytes interpreted as UTF-8)
 //
 // charset.NewReader sniffs the Content-Type header AND any
 // <meta charset="..."> tag before returning a UTF-8-emitting io.Reader.
@@ -52,7 +55,23 @@ func readBodyDecoded(resp *http.Response) ([]byte, error) {
 		// error to callers like /dl.php (404 path).
 		return io.ReadAll(resp.Body)
 	}
-	r, err := charset.NewReader(resp.Body, ct)
+	// SP-3.5 (2026-04-29) forensic anchor #3: rutracker's POST /forum/login.php
+	// successful response is a 302 with `content-type: text/html; charset=cp1251`
+	// AND a zero-length body. charset.NewReader on an empty stream returns
+	// EOF on the first Read — io.ReadAll then propagates that EOF up,
+	// PostFormWithHeaders surfaces it through the breaker, login.go logs
+	// `err=EOF` and the client gets 502 — even though the auth token IS
+	// already present in the response headers (which the caller had no
+	// chance to inspect because we errored out on body decode first).
+	// Read the raw bytes first so we can short-circuit on empty body.
+	raw, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	if len(raw) == 0 {
+		return raw, nil
+	}
+	r, err := charset.NewReader(bytes.NewReader(raw), ct)
 	if err != nil {
 		return nil, err
 	}
@@ -100,10 +119,77 @@ type Client struct {
 //
 // The breaker name is "rutracker" so observability/metrics can scope by
 // name when multiple breakers exist in the same process.
+//
+// SP-3.5 (2026-04-29) forensic anchor: the underlying Transport is
+// pinned to IPv4 (`tcp4`). Real-device verification on the operator's
+// home LAN showed that Cloudflare's IPv6 edge for rutracker.org happily
+// completes the TLS handshake on POST /forum/login.php but then
+// silently drops the request — bytes-received is zero, the call hangs
+// until the client's 30s timeout fires, and the breaker counts the
+// failure. The IPv4 edge serves the same request in ~150ms (verified
+// 2026-04-29 with the operator's actual credentials → HTTP/2 302 +
+// bb_session cookie). The host's `getent ahosts rutracker.org` returns
+// IPv6 records first (preferred by Go's net.Dialer when both stacks
+// exist), so without this pin the Login endpoint always 502'd on a
+// dual-stack host even when the user supplied valid credentials —
+// exactly the user-visible "Cannot sign in with valid credentials"
+// symptom on real device on 2026-04-29.
+//
+// "tcp4" is forced ONLY for the rutracker upstream client, NOT the
+// metrics/HTTP server side. The Android client and the operator's LAN
+// machines stay free to talk to lava-api-go itself over either stack.
 func NewClient(base string) *Client {
+	dialer := &net.Dialer{
+		Timeout:   10 * time.Second,
+		KeepAlive: 30 * time.Second,
+	}
+	transport := &http.Transport{
+		DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
+			// Force IPv4. See SP-3.5 forensic anchor in NewClient KDoc.
+			if network == "tcp" || network == "tcp6" {
+				network = "tcp4"
+			}
+			return dialer.DialContext(ctx, network, addr)
+		},
+		MaxIdleConns:          100,
+		IdleConnTimeout:       90 * time.Second,
+		TLSHandshakeTimeout:   10 * time.Second,
+		ExpectContinueTimeout: 1 * time.Second,
+		ForceAttemptHTTP2:     true,
+	}
 	return &Client{
 		base: base,
-		http: &http.Client{Timeout: 30 * time.Second},
+		http: &http.Client{
+			Timeout:   30 * time.Second,
+			Transport: transport,
+			// SP-3.5 (2026-04-29) forensic anchor #2: rutracker's
+			// successful POST /forum/login.php returns
+			//   HTTP/2 302
+			//   Location: /forum/index.php
+			//   Set-Cookie: bb_session=<token>
+			// The auth token is on the 302 — NOT on the redirected
+			// /index.php page. Go's default http.Client.CheckRedirect
+			// transparently follows redirects, so the Login flow
+			// observed the redirected page (a login form for an
+			// unauthenticated session because Go does not forward the
+			// just-received Set-Cookie when following the redirect),
+			// fell through ExtractLoginToken's "no token" branch,
+			// then through "no wrong-credits sentinel", and finally
+			// produced ErrUnknown → 502 — even though the credentials
+			// were perfectly valid. Verified on real device 2026-04-29
+			// with `curl -4 -i` showing the 302 + bb_session that the
+			// Go client was throwing away.
+			//
+			// `http.ErrUseLastResponse` tells the client to surface
+			// the 302 to our caller verbatim, which is what the
+			// scraper's Login implementation already expects (see the
+			// `ExtractLoginToken(headers)` call on the response of
+			// PostFormWithHeaders — that headers map IS the original
+			// 302's headers, including the load-bearing Set-Cookie).
+			CheckRedirect: func(req *http.Request, via []*http.Request) error {
+				return http.ErrUseLastResponse
+			},
+		},
 		breaker: breaker.NewCircuitBreaker(breaker.CircuitBreakerConfig{
 			Name:         "rutracker",
 			MaxFailures:  5,
