@@ -16,4 +16,6 @@ dependencies {
     implementation(project(":core:models"))
     implementation(project(":core:network:api"))
     implementation(project(":core:preferences"))
+
+    testImplementation(libs.junit4)
 }

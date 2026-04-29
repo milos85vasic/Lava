@@ -64,7 +64,11 @@ class DiscoverLocalEndpointsUseCaseTest {
     @Test
     fun `returns AlreadyConfigured when same endpoint already exists and is selected`() = runTest {
         val useCase = createUseCase()
-        val mirror = Endpoint.Mirror("192.168.1.100:8080")
+        // SP-3.3 (2026-04-29): Mirror persisted form is the BARE host
+        // — discovery strips the embedded port at conversion time so
+        // routing stays well-formed (forensic anchor in
+        // DiscoverLocalEndpointsUseCaseImpl.toEndpoint KDoc).
+        val mirror = Endpoint.Mirror("192.168.1.100")
         endpointsRepository.add(mirror)
         settingsRepository.setEndpoint(mirror)
         val discovered = DiscoveredEndpoint(
@@ -86,7 +90,8 @@ class DiscoverLocalEndpointsUseCaseTest {
     @Test
     fun `selects existing endpoint when discovered but not currently selected`() = runTest {
         val useCase = createUseCase()
-        val mirror = Endpoint.Mirror("192.168.1.100:8080")
+        // SP-3.3 (2026-04-29): Mirror persisted form is the BARE host.
+        val mirror = Endpoint.Mirror("192.168.1.100")
         endpointsRepository.add(mirror)
         // SP-3.2: was Endpoint.Proxy; that endpoint was removed.
         // Rutracker is the new "non-mirror" default that the use case
@@ -125,7 +130,9 @@ class DiscoverLocalEndpointsUseCaseTest {
 
         assertTrue(result is DiscoverLocalEndpointsResult.Discovered)
         val discoveredResult = result as DiscoverLocalEndpointsResult.Discovered
-        assertEquals("192.168.1.100:8080", discoveredResult.endpoint.host)
+        // SP-3.3: Mirror persisted form is the BARE host so routing
+        // can default the port to 8080 cleanly.
+        assertEquals("192.168.1.100", discoveredResult.endpoint.host)
         assertTrue(
             endpointsRepository.observeAll().first().contains(discoveredResult.endpoint),
         )
@@ -151,8 +158,9 @@ class DiscoverLocalEndpointsUseCaseTest {
 
         assertTrue(result is DiscoverLocalEndpointsResult.Discovered)
         assertTrue(
+            // SP-3.3: bare host (port stripped at conversion).
             endpointsRepository.observeAll().first().any {
-                it is Endpoint.Mirror && it.host == "192.168.1.100:8080"
+                it is Endpoint.Mirror && it.host == "192.168.1.100"
             },
         )
         assertEquals(
@@ -208,8 +216,8 @@ class DiscoverLocalEndpointsUseCaseTest {
         // in the seeded set, plus assert what should be there.
         assertTrue("Rutracker should be seeded", all.any { it == Endpoint.Rutracker })
         assertTrue(
-            "Discovered mirror should be added",
-            all.any { it is Endpoint.Mirror && it.host == "192.168.1.100:8080" },
+            "Discovered mirror should be added (bare host per SP-3.3)",
+            all.any { it is Endpoint.Mirror && it.host == "192.168.1.100" },
         )
         // Sixth-Law clause 3: primary user-visible state assertion that
         // Proxy is gone from the seeded list. Reverting the SP-3.2
@@ -321,7 +329,9 @@ class DiscoverLocalEndpointsUseCaseTest {
         val endpoint = result.endpoint
         assertTrue("expected Endpoint.Mirror, got ${endpoint::class.simpleName}", endpoint is Endpoint.Mirror)
         endpoint as Endpoint.Mirror
-        assertEquals("192.168.1.100:8080", endpoint.host)
+        // SP-3.3: bare host — the legacy proxy port (8080) is filled in
+        // by NetworkApiRepositoryImpl at routing time, not stored.
+        assertEquals("192.168.1.100", endpoint.host)
     }
 
     // CHALLENGE — when the user has already chosen a GoApi endpoint

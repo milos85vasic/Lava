@@ -41,10 +41,18 @@ internal class NetworkApiRepositoryImpl @Inject constructor(
                 )
                 is Endpoint.RutrackerEndpoint -> {
                     if (endpoint.host.isLocalHost()) {
-                        // LAN legacy Ktor proxy on plaintext HTTP — no TLS at all.
+                        // SP-3.3 (2026-04-29). Mirror entries on the LAN
+                        // historically may carry an embedded `:port` in the
+                        // host string (mDNS publishers from before SP-3
+                        // emitted "ip:port" as the host). Pass that port
+                        // through to Ktor's URLBuilder explicitly — calling
+                        // `url(host="ip:port")` does NOT round-trip and will
+                        // route requests at the wrong target. When no port
+                        // is encoded, default to 8080 (the legacy Ktor proxy).
+                        val (h, p) = parseHostPort(endpoint.host)
                         proxyApi(
-                            host = endpoint.host,
-                            port = null,
+                            host = h,
+                            port = p ?: LEGACY_LAN_PROXY_PORT,
                             scheme = "http",
                             client = okHttpClient,
                         )
@@ -55,6 +63,19 @@ internal class NetworkApiRepositoryImpl @Inject constructor(
                 }
             }
         }
+    }
+
+    private fun parseHostPort(s: String): Pair<String, Int?> {
+        val sep = s.lastIndexOf(':')
+        return if (sep > 0) {
+            s.substring(0, sep) to s.substring(sep + 1).toIntOrNull()
+        } else {
+            s to null
+        }
+    }
+
+    private companion object {
+        const val LEGACY_LAN_PROXY_PORT = 8080
     }
 
     override suspend fun getCaptchaUrl(url: String): String {
@@ -151,9 +172,19 @@ internal class NetworkApiRepositoryImpl @Inject constructor(
         )
     }
 
+    /**
+     * SP-3.3 (2026-04-29). For LAN [Endpoint.Mirror], if the host string
+     * doesn't already encode a port, append the default Ktor proxy port
+     * (8080) — otherwise this URL ends up resolving to port 80, where
+     * nothing is listening on the operator's machine.
+     */
     private fun proxyUrl(host: String, path: String): String {
-        val scheme = if (host.isLocalHost()) "http" else "https"
-        return "$scheme://$host$path"
+        return if (host.isLocalHost()) {
+            val (h, p) = parseHostPort(host)
+            "http://$h:${p ?: LEGACY_LAN_PROXY_PORT}$path"
+        } else {
+            "https://$host$path"
+        }
     }
 
     private fun goApiUrl(endpoint: Endpoint.GoApi, path: String): String {

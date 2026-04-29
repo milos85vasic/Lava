@@ -70,10 +70,19 @@ class DiscoverLocalEndpointsUseCaseImpl @Inject constructor(
      * Convert an mDNS hit into the right typed [Endpoint] variant.
      *
      * Engine=Go → [Endpoint.GoApi] with the published port (default 8443).
-     * Engine=Ktor or Unknown → [Endpoint.Mirror] using the host:port form,
-     * which `NetworkApiRepositoryImpl` routes through the legacy LAN proxy
-     * code-path. The DiscoveredEndpoint.host already carries the
-     * `host:port` string from `LocalNetworkDiscoveryServiceImpl`.
+     * Engine=Ktor or Unknown → [Endpoint.Mirror] with the BARE host (no
+     * embedded port). `NetworkApiRepositoryImpl` routes [Endpoint.Mirror]
+     * on a LAN address to `http://host:8080` (the legacy Ktor proxy
+     * default).
+     *
+     * SP-3.3 (2026-04-29) forensic anchor: prior to this commit, the
+     * `host` field of [DiscoveredEndpoint] carried the `ip:port` string
+     * straight through into [Endpoint.Mirror.host]. That broke routing
+     * (Ktor's URL builder treats `ip:port` as a hostname with embedded
+     * colon) and fed the user-visible "Mirror has no green icon" symptom
+     * because [lava.data.api.service.ConnectionService] then probed the
+     * wrong target. Strip the port at conversion time so persisted rows
+     * are well-formed.
      */
     private fun DiscoveredEndpoint.toEndpoint(): Endpoint = when (engine) {
         DiscoveredEndpoint.Engine.Go -> Endpoint.GoApi(
@@ -82,7 +91,7 @@ class DiscoverLocalEndpointsUseCaseImpl @Inject constructor(
         )
         DiscoveredEndpoint.Engine.Ktor,
         DiscoveredEndpoint.Engine.Unknown,
-        -> Endpoint.Mirror(host)
+        -> Endpoint.Mirror(host = host.substringBeforeLast(":").ifEmpty { host })
     }
 
     /**

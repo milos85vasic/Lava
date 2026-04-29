@@ -26,8 +26,8 @@ class ObserveEndpointStatusUseCaseImpl @Inject constructor(
                 emit(state)
                 val status = when {
                     !isOnline -> EndpointStatus.NoInternet
-                    endpoint.isReachable() -> EndpointStatus.Active
-                    isInternetReachable() -> EndpointStatus.Blocked
+                    connectionService.isReachable(endpoint) -> EndpointStatus.Active
+                    connectionService.isInternetReachable() -> EndpointStatus.Blocked
                     else -> EndpointStatus.NoInternet
                 }
                 observeSelectedEndpoint()
@@ -42,10 +42,6 @@ class ObserveEndpointStatusUseCaseImpl @Inject constructor(
             }
             .onStart { emit(initialState(endpoint)) }
     }
-
-    private suspend fun isInternetReachable() = connectionService.isReachable("google.com")
-
-    private suspend fun Endpoint.isReachable() = connectionService.isReachable(host)
 
     private suspend fun initialState(endpoint: Endpoint) = EndpointState(
         endpoint = endpoint,

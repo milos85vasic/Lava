@@ -214,8 +214,11 @@ class ConnectionsViewModelTest {
             viewModel.perform(ConnectionsAction.DiscoverLocalEndpoints)
             val loadingState = awaitState()
             assertTrue("Should show loading", loadingState.discovering)
+            // SP-3.3 (2026-04-29): Mirror persisted form is the BARE
+            // host — discovery strips the embedded port at conversion
+            // (DiscoverLocalEndpointsUseCaseImpl.toEndpoint).
             expectSideEffect(
-                ConnectionsSideEffect.ShowMessage("Discovered local endpoint: 192.168.1.100:8080"),
+                ConnectionsSideEffect.ShowMessage("Discovered local endpoint: 192.168.1.100"),
             )
             val doneState = awaitState()
             assertFalse("Should hide loading", doneState.discovering)
@@ -244,8 +247,10 @@ class ConnectionsViewModelTest {
     @Test
     fun `discover local endpoints already configured shows active message`() = runTest(dispatcherRule.testDispatcher) {
         val viewModel = createViewModel()
-        // Seed the repository and select the endpoint that will be discovered.
-        val mirror = Endpoint.Mirror("192.168.1.100:8080")
+        // SP-3.3 (2026-04-29): seed with the BARE host; discovery
+        // strips the port at conversion so the persisted form an
+        // already-configured user has on disk is bare-host shaped.
+        val mirror = Endpoint.Mirror("192.168.1.100")
         endpointsRepository.add(mirror)
         settingsRepository.setEndpoint(mirror)
         val discovered = lava.data.api.service.DiscoveredEndpoint(
@@ -264,7 +269,7 @@ class ConnectionsViewModelTest {
             val loadingState = awaitState()
             assertTrue("Should show loading", loadingState.discovering)
             expectSideEffect(
-                ConnectionsSideEffect.ShowMessage("Local API active: 192.168.1.100:8080"),
+                ConnectionsSideEffect.ShowMessage("Local API active: 192.168.1.100"),
             )
             val doneState = awaitState()
             assertFalse("Should hide loading", doneState.discovering)
