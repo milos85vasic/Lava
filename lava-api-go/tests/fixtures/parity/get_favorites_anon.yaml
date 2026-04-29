@@ -1,8 +1,8 @@
 # GET /favorites — anonymous bookmarks list.
-# Without an upstream cookie the bookmarks list is necessarily empty, so
-# both backends MUST emit an empty JSON array (not null, not an empty
-# object). This catches a class of bug where one backend silently emits
-# `null` instead of `[]`.
+# Both backends gate /favorites on a non-empty Auth-Token (Ktor via
+# withTokenVerificationUseCase, Go via the matching empty-cookie
+# short-circuit added in d60c599). An anon request returns 401 + {}
+# from both — the parity gate verifies that both backends agree.
 name: get_favorites_anon
 method: GET
 path: /favorites
@@ -10,7 +10,7 @@ query: {}
 headers: {}
 body: ""
 content_type: ""
-expected_status: 200
+expected_status: 401
 compare: json_unordered
 header_allowlist:
   - Content-Type

@@ -1,6 +1,7 @@
-# GET /search?query=... — anonymous search.
-# Exercises the query-string handling path and confirms both backends
-# encode query parameters identically before forwarding upstream.
+# GET /search?query=test — anonymous search.
+# Same story as /favorites: both backends gate /search on a non-empty
+# Auth-Token (Ktor's withTokenVerificationUseCase pattern; Go's matching
+# empty-cookie pre-check). Anon → 401 + {} on both.
 name: get_search_with_query
 method: GET
 path: /search
@@ -9,7 +10,7 @@ query:
 headers: {}
 body: ""
 content_type: ""
-expected_status: 200
+expected_status: 401
 compare: json_unordered
 header_allowlist:
   - Content-Type

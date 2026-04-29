@@ -1,7 +1,6 @@
-# GET /torrent/{id} — anonymous torrent metadata.
-# Path 1 is the lowest-numbered topic on rutracker; pin to 1 to make the
-# fixture stable even if the Phase 14 acceptance run picks a different
-# concrete dataset.
+# GET /torrent/1 — anonymous torrent metadata fetch.
+# Topic id 1 doesn't exist on rutracker.org — the rutracker scraper
+# emits ErrNotFound which both backends map to HTTP 404 + {}.
 name: get_torrent_id_anon
 method: GET
 path: /torrent/1
@@ -9,7 +8,7 @@ query: {}
 headers: {}
 body: ""
 content_type: ""
-expected_status: 200
+expected_status: 404
 compare: json_unordered
 header_allowlist:
   - Content-Type
