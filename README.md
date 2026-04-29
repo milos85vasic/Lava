@@ -53,13 +53,13 @@ didn't behave as you expected. We can't fix what we don't know about, so please
 report liberally. If you're not sure if something is a bug or not, feel free to
 file a bug anyway.
 
-**Issue tracker:** <https://github.com/andrikeev/Lava/issues>
+**Issue tracker:** <https://github.com/milos85vasic/Lava/issues>
 
 **Forum 4PDA:** <https://4pda.to/forum/index.php?showtopic=729411>
 
 ## Sources
 
-All the code and the content is available on github: <https://github.com/andrikeev/Lava>
+All the code and the content is available on github: <https://github.com/milos85vasic/Lava>
 
 ## Privacy Policy
 
@@ -73,7 +73,7 @@ This software is open source, licensed under the [MIT License][6].
 
 [2]: https://play.google.com/store/apps/details?id=digital.vasic.lava.client
 
-[3]: https://github.com/andrikeev/Lava/releases
+[3]: https://github.com/milos85vasic/Lava/releases
 
 [4]: https://apps.rustore.ru/app/digital.vasic.lava.client
 
