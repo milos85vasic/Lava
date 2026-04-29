@@ -9,8 +9,8 @@ package version
 
 const (
 	// Name is the service's semver. Tag prefix: Lava-API-Go-<Name>-<Code>.
-	Name = "2.0.1"
+	Name = "2.0.2"
 
 	// Code is the integer release counter. New tags MUST increment.
-	Code = 2001
+	Code = 2002
 )
