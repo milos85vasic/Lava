@@ -5,6 +5,145 @@ versioning per `lava-api-go/internal/version/version.go`. Tag prefix:
 `Lava-API-Go-<Name>-<Code>`. Both tags are mirrored to github + gitflic +
 gitlab + gitverse with verified identical SHA-1.
 
+## [2.0.2] — 2026-04-29 (`Lava-API-Go-2.0.2-2002`, structural Sixth-Law fixes)
+
+### Fixed (Sixth-Law structural — three bugs in one bug class)
+
+Forensic anchor: `lava-api-go` ran 569 consecutive failing healthchecks
+in production while serving 200 on both HTTP/3 and HTTP/2. Compose
+validated, every functional test was green, every Challenge was green
+— yet the orchestrator labelled the container "unhealthy" and there
+was no test asserting the probe could even start. Three sub-bugs were
+silent in their own way; each is fixed with a structural contract
+test that catches the *class*, not the instance. See root `CLAUDE.md`
+Sixth Law clause 6.A for the mandate.
+
+- **compose↔binary flag drift** (`docker-compose.yml`). The compose
+  healthcheck passed `--http3` to a probe binary that only registers
+  `-url`/`-insecure`/`-timeout`. Removed the compose-level override
+  in favour of the Dockerfile's exec-form HEALTHCHECK. Structural
+  test: `tests/contract/healthcheck_contract_test.go`
+  `TestHealthcheckContract` parses every healthcheck.test array,
+  recovers the binary's flag set from its actual Usage output,
+  asserts subset.
+
+- **podman-compose CMD-SHELL translation on a sh-less image**.
+  podman-compose translates `test: ["CMD", …]` into CMD-SHELL form
+  (`sh -c …`), but the runtime image is distroless and has no
+  /bin/sh, so every probe exited 1 with empty Output. Documented in
+  `docker-compose.yml`. Structural test:
+  `TestDockerfileHealthcheckContract` validates the Dockerfile CMD
+  array against the same flag-set rule.
+
+- **OCI image format silently strips HEALTHCHECK**. podman defaults
+  to OCI image format, which does NOT support HEALTHCHECK in image
+  config. Build-time warning was the only signal:
+  `"HEALTHCHECK is not supported for OCI image format and will be
+  ignored. Must use 'docker' format"`. Resulting images had
+  `Healthcheck: null`; containers booted from them had NO probe.
+  Fix: `start.sh` and `build_and_release.sh` export
+  `BUILDAH_FORMAT=docker`. Structural test:
+  `TestLifecycleScriptsForceDockerFormat` asserts both scripts
+  contain an active export directive (regex anchored, comment-only
+  regression rejected per the rehearsal recorded below).
+
+### Sixth Law extensions (root `CLAUDE.md`, lessons-learned addenda)
+
+- **6.A — Real-binary contract tests.** Every place where a script
+  or compose file invokes a binary we own MUST be covered by a
+  contract test that recovers the binary's registered flag set from
+  its actual Usage output and asserts the script's flag set is a
+  strict subset, with a falsifiability rehearsal sub-test that
+  re-introduces a known-buggy flag and confirms the checker rejects
+  it. Canonical implementation: `tests/contract/healthcheck_contract_test.go`.
+
+- **6.B — Container "Up" is not application-healthy.** `docker
+  ps` / `podman ps` `Up` only means PID 1 is alive. Tests asserting
+  container state alone are bluffs by Sixth Law clauses 1 and 3.
+  Use the same probe the orchestrator uses, or an end-to-end
+  functional request at the user-visible surface.
+
+- **6.C — Mirror-state mismatch checks before tagging.** "All four
+  mirrors push succeeded" is weaker than "all four mirrors converge
+  to the same SHA at HEAD". `scripts/tag.sh` MUST verify post-push
+  tip-SHA convergence across github/gitflic/gitlab/gitverse before
+  reporting success.
+
+### Falsifiability rehearsals (Sixth-Law clause 2)
+
+| Test | Mutation | Observed | Reverted |
+|------|----------|----------|----------|
+| `TestHealthcheckContract` | re-introduce `--http3` to docker-compose.yml | FAIL: "service lava-api-go: healthcheck.test passes flag -http3 but /usr/local/bin/healthprobe does not register it" | PASS after restore |
+| `TestDockerfileHealthcheck_Falsifiability` | inline Dockerfile fixture with `--http3` | FAIL: "flag -http3 not registered" | n/a (always asserts the failure mode) |
+| `TestHealthcheckContract_Falsifiability` | inline YAML fixture with `--http3` | FAIL: "service lava-api-go: healthcheck.test passes flag -http3 but /usr/local/bin/healthprobe does not register it" | n/a (always asserts the failure mode) |
+| `TestLifecycleScriptsForceDockerFormat` | comment out `export BUILDAH_FORMAT=docker` in start.sh | FAIL: "start.sh does not contain an active `export BUILDAH_FORMAT=docker` directive" | PASS after restore |
+
+The rehearsal of `TestLifecycleScriptsForceDockerFormat` initially
+PASSED with the export commented out — because the substring-only
+check fooled itself: `# DELETED: export BUILDAH_FORMAT=docker` still
+matched. Tightened to a regex anchored to start-of-line with no
+leading `#` comment marker. Re-rehearsed: FAIL with the comment,
+PASS with the active export. The bluff rehearsal of a bluff-detection
+test is itself a Sixth-Law-clause-2 datapoint: the rehearsal is the
+only mechanism that distinguishes a real catch from one that hides.
+
+### Real-environment verification (Sixth-Law clause 5)
+
+```
+$ podman ps --format 'table {{.Names}}\t{{.Status}}'
+NAMES          STATUS
+lava-postgres  Up 2 minutes (healthy)
+lava-api-go    Up 2 minutes (healthy)
+
+$ podman inspect lava-api-go --format '{{json .State.Healthcheck.Log}}'
+[{"Start":"2026-04-29T13:27:14...","ExitCode":0,
+  "Output":"…healthprobe: https://localhost:8443/health -> 200"}]
+
+$ curl -sk https://localhost:8443/  → HTTP 200 via 2 (TLS)
+$ curl -sk --http3-only https://localhost:8443/  → HTTP 200 via 3 (QUIC)
+```
+
+### Constitutional propagation
+
+The verbatim user mandate recorded 2026-04-28 was already present in
+several submodule constitutions from a sibling project's lineage
+(ATMOSphere/HelixAgent → CONST-035 / §8.1+§11). This release adds
+an explicit Lava-inheritance addendum to all 15 vasic-digital
+submodule constitutions (CLAUDE.md + AGENTS.md across Auth, Cache,
+Challenges, Concurrency, Config, Containers, Database, Discovery,
+HTTP3, Mdns, Middleware, Observability, RateLimiter, Recovery,
+Security) so the inheritance chain is unambiguous when each
+submodule participates in a Lava feature. Submodule pins advance to
+new SHAs on a `lava-pin/2026-04-29-sixth-law-anchor` branch on each
+submodule's remote — Lava's pin discipline (frozen by default,
+upgrade is a deliberate PR) is preserved.
+
+### Test classification cleanup (`feature/menu`, `feature/connection`)
+
+The 2026-04-29 audit flagged two ViewModel side-effect-only assertions
+as suspected bluff Challenges. Action: clarified each test's KDoc to
+honestly distinguish Integration Challenge Tests (primary assertion
+on persisted/observable user-visible state) from ViewModel Contract
+Tests (primary assertion on `SideEffect` emission only). Per-test
+`// CHALLENGE` / `// VM-CONTRACT` comments added so a reader can
+audit Sixth-Law compliance at a glance. The audit's "high-confidence
+bluff" verdict on `discover_local_endpoints_not_found_shows_message`
+reclassified to CHALLENGE — `state.discovering` IS user-visible UI
+state (the loading indicator). The two genuinely VM-CONTRACT-only
+tests retain their assertions but their KDoc now states explicitly
+that the rendered-UI Challenge is owed (no `src/androidTest/`
+infrastructure in this project yet).
+
+### Sixth Law clause 5 takeaway
+
+Three bugs (compose flag drift, podman-compose CMD-SHELL translation,
+OCI HEALTHCHECK strip) all silently green in CI and `compose config`
+yet broke the orchestrator's view of the container in three different
+ways. Only sustained operation in real-environment verification
+(actual podman recreation, actual `podman inspect .State.Healthcheck`
+read) surfaced any of them. Real-environment verification catches
+what synthetic verification cannot — for the third release in a row.
+
 ## [2.0.1] — 2026-04-29 (`Lava-API-Go-2.0.1-2001`, tag SHA `7d53367`)
 
 ### Fixed (production)
