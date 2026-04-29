@@ -19,8 +19,11 @@ cd "$SCRIPT_DIR"
 APP_VERSION=$(grep -E '^\s+versionName\s*=' app/build.gradle.kts | sed 's/.*"\([^"]*\)".*/\1/')
 APP_VERSION_CODE=$(grep -E '^\s+versionCode\s*=' app/build.gradle.kts | sed 's/.*= \([0-9]*\).*/\1/')
 
-# Extract proxy version from proxy/build.gradle.kts
-PROXY_VERSION=$(grep -E '^\s*version\s*=' proxy/build.gradle.kts | head -1 | sed 's/.*"\([^"]*\)".*/\1/')
+# Extract proxy version from proxy/build.gradle.kts. The script declares
+# `val apiVersionName = "X.Y.Z"` and then `version = apiVersionName`, so
+# matching the literal `version =` line captures the variable reference,
+# not the string. Match the apiVersionName declaration directly.
+PROXY_VERSION=$(grep -E '^[[:space:]]*val[[:space:]]+apiVersionName[[:space:]]*=' proxy/build.gradle.kts | head -1 | sed 's/.*"\([^"]*\)".*/\1/')
 
 # Extract lava-api-go version from internal/version/version.go (same regex
 # tag.sh uses, kept inline so this script remains standalone).
