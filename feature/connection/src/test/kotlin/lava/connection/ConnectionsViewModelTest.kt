@@ -4,6 +4,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import lava.domain.model.endpoint.EndpointState
 import lava.domain.usecase.AddEndpointUseCaseImpl
@@ -12,10 +13,10 @@ import lava.domain.usecase.ObserveEndpointsStatusUseCase
 import lava.domain.usecase.RemoveEndpointUseCaseImpl
 import lava.domain.usecase.SetEndpointUseCaseImpl
 import lava.models.settings.Endpoint
-import lava.testing.TestDispatchers
 import lava.testing.repository.TestEndpointsRepository
 import lava.testing.repository.TestSettingsRepository
 import lava.testing.service.TestLocalNetworkDiscoveryService
+import lava.testing.testDispatchers
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -81,7 +82,13 @@ class ConnectionsViewModelTest {
         observeEndpointsStatusUseCase = MockObserveEndpointsStatusUseCase()
     }
 
-    private fun createViewModel(): ConnectionsViewModel {
+    /**
+     * SP-3 fix (2026-04-29): builder is a `TestScope` extension so the
+     * `DiscoverLocalEndpointsUseCaseImpl` it constructs shares the
+     * surrounding `runTest` scheduler. See `TestDispatchers.kt` KDoc
+     * for the forensic anchor.
+     */
+    private fun TestScope.createViewModel(): ConnectionsViewModel {
         val addEndpointUseCase = AddEndpointUseCaseImpl(endpointsRepository)
         val removeEndpointUseCase = RemoveEndpointUseCaseImpl(
             endpointsRepository = endpointsRepository,
@@ -92,7 +99,7 @@ class ConnectionsViewModelTest {
             discoveryService = discoveryService,
             endpointsRepository = endpointsRepository,
             settingsRepository = settingsRepository,
-            dispatchers = TestDispatchers(),
+            dispatchers = testDispatchers(),
         )
         return ConnectionsViewModel(
             addEndpointUseCase = addEndpointUseCase,
@@ -106,7 +113,7 @@ class ConnectionsViewModelTest {
     // VM-CONTRACT — initial-state contract; no user-visible state mutation
     // assertion (the empty list IS the initial-state default).
     @Test
-    fun `initial state is empty`() = runTest {
+    fun `initial state is empty`() = runTest(dispatcherRule.testDispatcher) {
         val viewModel = createViewModel()
         viewModel.test(this) {
             expectInitialState()
@@ -117,7 +124,7 @@ class ConnectionsViewModelTest {
     // The rendered-screen Challenge (the dialog actually composes and is
     // dismissable) is owed (see class KDoc).
     @Test
-    fun `clicking connection item emits ShowConnectionDialog`() = runTest {
+    fun `clicking connection item emits ShowConnectionDialog`() = runTest(dispatcherRule.testDispatcher) {
         val viewModel = createViewModel()
         viewModel.test(this) {
             expectInitialState()
@@ -130,7 +137,7 @@ class ConnectionsViewModelTest {
     // toggle that controls the edit-mode action bar. State transition is
     // observable in the rendered UI.
     @Test
-    fun `edit click toggles edit mode`() = runTest {
+    fun `edit click toggles edit mode`() = runTest(dispatcherRule.testDispatcher) {
         val viewModel = createViewModel()
         viewModel.test(this) {
             expectInitialState()
@@ -147,7 +154,7 @@ class ConnectionsViewModelTest {
     // The user observes both: the new endpoint appears in the list, the
     // edit bar disappears.
     @Test
-    fun `submit endpoint adds it and exits edit mode`() = runTest {
+    fun `submit endpoint adds it and exits edit mode`() = runTest(dispatcherRule.testDispatcher) {
         val viewModel = createViewModel()
         viewModel.test(this) {
             expectInitialState()
@@ -168,7 +175,7 @@ class ConnectionsViewModelTest {
     // CHALLENGE — primary assertion on the persisted settings row.
     // Every other screen reads this same row to decide which backend to call.
     @Test
-    fun `select endpoint updates settings`() = runTest {
+    fun `select endpoint updates settings`() = runTest(dispatcherRule.testDispatcher) {
         val endpoint = Endpoint.Mirror("192.168.1.100")
         val viewModel = createViewModel()
         viewModel.test(this) {
@@ -178,11 +185,19 @@ class ConnectionsViewModelTest {
         assertEquals(endpoint, settingsRepository.getSettings().endpoint)
     }
 
-    // CHALLENGE — primary assertions on `state.discovering` (rendered as the
-    // progress indicator) AND on the side-effect message text. Both are
-    // user-visible: the spinner and the snackbar.
+    // CHALLENGE — primary assertions on `state.discovering` (rendered as
+    // the progress indicator) AND on the side-effect message text. Both
+    // are user-visible: the spinner and the snackbar.
+    //
+    // Emission order: ConnectionsViewModel.onDiscoverLocalEndpoints does
+    // `reduce(d=true) → useCase → postSideEffect → reduce(d=false)`,
+    // so the test consumes state(d=true) → side-effect → state(d=false).
+    // The older form of this test asserted state → state → side-effect,
+    // which only happened to pass on non-deterministic scheduler timing
+    // — a Sixth-Law-clause-2 bluff. Fixed 2026-04-29 alongside the
+    // TestDispatchers scheduler-share fix that made the order deterministic.
     @Test
-    fun `discover local endpoints shows loading and emits message when found`() = runTest {
+    fun `discover local endpoints shows loading and emits message when found`() = runTest(dispatcherRule.testDispatcher) {
         val viewModel = createViewModel()
         val discovered = lava.data.api.service.DiscoveredEndpoint(
             host = "192.168.1.100:8080",
@@ -199,21 +214,18 @@ class ConnectionsViewModelTest {
             viewModel.perform(ConnectionsAction.DiscoverLocalEndpoints)
             val loadingState = awaitState()
             assertTrue("Should show loading", loadingState.discovering)
-            val doneState = awaitState()
-            assertFalse("Should hide loading", doneState.discovering)
             expectSideEffect(
                 ConnectionsSideEffect.ShowMessage("Discovered local endpoint: 192.168.1.100:8080"),
             )
+            val doneState = awaitState()
+            assertFalse("Should hide loading", doneState.discovering)
         }
     }
 
-    // CHALLENGE — same as above; the loading→done state transition is
-    // user-visible via the progress indicator. The "no local endpoint found"
-    // snackbar is the user-visible confirmation. The audit flagged this
-    // as side-effect-only but the state.discovering assertions ARE
-    // primary-tier user-visible state per Sixth Law clause 3.
+    // CHALLENGE — same emission order as the test above:
+    // state(d=true) → side-effect → state(d=false).
     @Test
-    fun `discover local endpoints not found shows message`() = runTest {
+    fun `discover local endpoints not found shows message`() = runTest(dispatcherRule.testDispatcher) {
         val viewModel = createViewModel()
         launch { discoveryService.complete() }
 
@@ -222,16 +234,15 @@ class ConnectionsViewModelTest {
             viewModel.perform(ConnectionsAction.DiscoverLocalEndpoints)
             val loadingState = awaitState()
             assertTrue("Should show loading", loadingState.discovering)
+            expectSideEffect(ConnectionsSideEffect.ShowMessage("No local endpoint found"))
             val doneState = awaitState()
             assertFalse("Should hide loading", doneState.discovering)
-            expectSideEffect(ConnectionsSideEffect.ShowMessage("No local endpoint found"))
         }
     }
 
-    // CHALLENGE — same shape as the previous two; user-visible spinner +
-    // snackbar text drive the assertions.
+    // CHALLENGE — same emission order as above.
     @Test
-    fun `discover local endpoints already configured shows active message`() = runTest {
+    fun `discover local endpoints already configured shows active message`() = runTest(dispatcherRule.testDispatcher) {
         val viewModel = createViewModel()
         // Seed the repository and select the endpoint that will be discovered.
         val mirror = Endpoint.Mirror("192.168.1.100:8080")
@@ -252,22 +263,34 @@ class ConnectionsViewModelTest {
             viewModel.perform(ConnectionsAction.DiscoverLocalEndpoints)
             val loadingState = awaitState()
             assertTrue("Should show loading", loadingState.discovering)
-            val doneState = awaitState()
-            assertFalse("Should hide loading", doneState.discovering)
             expectSideEffect(
                 ConnectionsSideEffect.ShowMessage("Local API active: 192.168.1.100:8080"),
             )
+            val doneState = awaitState()
+            assertFalse("Should hide loading", doneState.discovering)
         }
     }
 
     // CHALLENGE — primary assertion on repository membership. The user
     // observes the missing endpoint in any later list-rendering screen.
+    //
+    // The 2026-04-29 fix: the original form called `viewModel.perform(...)`
+    // OUTSIDE a `viewModel.test { }` block, which only happened to work
+    // because orbit's container had been started earlier by another test
+    // sharing JVM state, OR because the previous non-deterministic
+    // scheduler dispatched the intent eagerly enough. Container-start
+    // is lazy-on-subscribe; without `viewModel.test { }` the intent
+    // queued forever. Wrapping in `viewModel.test { }` makes the
+    // container-start explicit and the intent-execution deterministic.
     @Test
-    fun `remove endpoint deletes it from repository`() = runTest {
+    fun `remove endpoint deletes it from repository`() = runTest(dispatcherRule.testDispatcher) {
         val endpoint = Endpoint.Mirror("192.168.1.100")
         endpointsRepository.add(endpoint)
         val viewModel = createViewModel()
-        viewModel.perform(ConnectionsAction.RemoveEndpoint(endpoint))
+        viewModel.test(this) {
+            expectInitialState()
+            viewModel.perform(ConnectionsAction.RemoveEndpoint(endpoint))
+        }
 
         val all = endpointsRepository.observeAll().first()
         assertFalse(
@@ -280,12 +303,17 @@ class ConnectionsViewModelTest {
     // post-remove fallback. User-visible because every other screen reads
     // `settings.endpoint` to decide which backend to call.
     @Test
-    fun `remove selected endpoint falls back to Proxy`() = runTest {
+    fun `remove selected endpoint falls back to Proxy`() = runTest(dispatcherRule.testDispatcher) {
         val endpoint = Endpoint.Mirror("192.168.1.100")
         endpointsRepository.add(endpoint)
         settingsRepository.setEndpoint(endpoint)
         val viewModel = createViewModel()
-        viewModel.perform(ConnectionsAction.RemoveEndpoint(endpoint))
+        // Same fix as above: wrap perform in viewModel.test { } so the
+        // container starts and the intent actually runs before assertion.
+        viewModel.test(this) {
+            expectInitialState()
+            viewModel.perform(ConnectionsAction.RemoveEndpoint(endpoint))
+        }
 
         assertEquals(Endpoint.Proxy, settingsRepository.getSettings().endpoint)
     }

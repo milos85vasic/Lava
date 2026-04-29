@@ -4,6 +4,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import lava.data.api.repository.FavoriteSearchRepository
 import lava.domain.usecase.ClearBookmarksUseCase
@@ -18,7 +19,6 @@ import lava.domain.usecase.SetThemeUseCase
 import lava.models.settings.Endpoint
 import lava.models.settings.SyncPeriod
 import lava.models.settings.Theme
-import lava.testing.TestDispatchers
 import lava.testing.logger.TestLoggerFactory
 import lava.testing.repository.TestBookmarksRepository
 import lava.testing.repository.TestFavoritesRepository
@@ -28,6 +28,7 @@ import lava.testing.repository.TestSuggestsRepository
 import lava.testing.repository.TestVisitedRepository
 import lava.testing.service.TestBackgroundService
 import lava.testing.service.TestLocalNetworkDiscoveryService
+import lava.testing.testDispatchers
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
@@ -78,17 +79,27 @@ class MenuViewModelTest {
     private lateinit var settingsRepository: TestSettingsRepository
     private lateinit var backgroundService: TestBackgroundService
     private lateinit var discoveryService: TestLocalNetworkDiscoveryService
-    private lateinit var testDispatchers: TestDispatchers
 
     @Before
     fun setup() {
         settingsRepository = TestSettingsRepository()
         backgroundService = TestBackgroundService()
         discoveryService = TestLocalNetworkDiscoveryService()
-        testDispatchers = TestDispatchers()
     }
 
-    private fun createViewModel(): MenuViewModel {
+    /**
+     * SP-3 fix (2026-04-29): builder is a `TestScope` extension so the
+     * use cases it instantiates (most notably
+     * `DiscoverLocalEndpointsUseCaseImpl`) share the surrounding
+     * `runTest` scheduler. The previous shape allocated a fresh
+     * `TestDispatchers()` in `@Before`, which created a fresh
+     * `TestCoroutineScheduler` per test that `runTest`'s auto-advance
+     * never touched — the same flake-then-deadlock we hit in
+     * `:core:domain:testDebugUnitTest`. See `TestDispatchers.kt` KDoc
+     * forensic anchor.
+     */
+    private fun TestScope.createViewModel(): MenuViewModel {
+        val testDispatchers = testDispatchers()
         val observeSettingsUseCase = ObserveSettingsUseCase(settingsRepository)
         val setThemeUseCase = SetThemeUseCase(settingsRepository)
         val setEndpointUseCase = SetEndpointUseCaseImpl(settingsRepository)
@@ -147,7 +158,7 @@ class MenuViewModelTest {
     // The rendered-screen Challenge that the About screen actually opens on
     // tap is owed (see class KDoc).
     @Test
-    fun `about click emits ShowAbout`() = runTest {
+    fun `about click emits ShowAbout`() = runTest(dispatcherRule.testDispatcher) {
         val viewModel = createViewModel()
         viewModel.test(this) {
             expectInitialState()
@@ -158,7 +169,7 @@ class MenuViewModelTest {
 
     // VM-CONTRACT — see note above; rendered-screen Challenge owed.
     @Test
-    fun `login click emits OpenLogin`() = runTest {
+    fun `login click emits OpenLogin`() = runTest(dispatcherRule.testDispatcher) {
         val viewModel = createViewModel()
         viewModel.test(this) {
             expectInitialState()
@@ -171,7 +182,7 @@ class MenuViewModelTest {
     // which the user observes via every other screen that reads the
     // current endpoint. Sixth-Law clause 3 (user-visible state) satisfied.
     @Test
-    fun `set endpoint updates settings`() = runTest {
+    fun `set endpoint updates settings`() = runTest(dispatcherRule.testDispatcher) {
         val endpoint = Endpoint.Mirror("192.168.1.100")
         val viewModel = createViewModel()
         viewModel.test(this) {
@@ -185,43 +196,61 @@ class MenuViewModelTest {
     // ViewModel correctly suppresses the navigation prompt when discovery
     // returns no result. The user-visible outcome (no dialog appears) is
     // proven only at the screen layer, which is owed.
+    //
+    // orbit-test 7.x: `runOnCreate()` is required to fire the container's
+    // `onCreate` lambda. Earlier versions auto-fired it on `test()` entry.
     @Test
-    fun `auto discovery on init does not emit side effect when not found`() = runTest {
+    fun `auto discovery on init does not emit side effect when not found`() = runTest(dispatcherRule.testDispatcher) {
         // Simulate immediate completion with no results.
-        launch { discoveryService.complete() }
+        discoveryService.complete()
 
         val viewModel = createViewModel()
         viewModel.test(this) {
+            // orbit-test 7.x: explicit runOnCreate() to fire the
+            // container's onCreate (which triggers auto-discovery).
+            // Earlier orbit versions auto-fired this on subscribe.
+            runOnCreate()
             expectInitialState()
-            // No side effect expected because discovery returned NotFound.
+            // observeSettings is an infinite collector intent — without
+            // cancelAndIgnoreRemainingItems(), the test cleanup waits 1s
+            // for it to "complete" and then OrbitTimeoutCancellationException.
+            cancelAndIgnoreRemainingItems()
         }
     }
 
     // VM-CONTRACT — asserts the navigation side-effect is emitted when
     // discovery finds a host. The rendered-screen Challenge that
     // ConnectionSettings actually composes after this side-effect is owed.
+    //
+    // Seed BEFORE createViewModel(): with the UNLIMITED-buffer fake the
+    // emit is non-suspending, so no `launch { … }` wrapper is needed.
+    // The buffered value is waiting when the auto-discovery use case
+    // collects, eliminating the launch-vs-intent ordering race.
     @Test
-    fun `auto discovery on init emits OpenConnectionSettings when endpoint found`() = runTest {
+    fun `auto discovery on init emits OpenConnectionSettings when endpoint found`() = runTest(dispatcherRule.testDispatcher) {
         val discovered = lava.data.api.service.DiscoveredEndpoint(
             host = "192.168.1.100:8080",
             port = 8080,
             name = "lava-proxy",
         )
-        launch {
-            discoveryService.emit(discovered)
-            discoveryService.complete()
-        }
+        discoveryService.emit(discovered)
+        discoveryService.complete()
 
         val viewModel = createViewModel()
         viewModel.test(this) {
+            // orbit-test 7.x: explicit runOnCreate() fires the
+            // container's onCreate (which triggers auto-discovery).
+            runOnCreate()
             expectInitialState()
             expectSideEffect(MenuSideEffect.OpenConnectionSettings)
+            // observeSettings is an infinite intent; cancel before cleanup.
+            cancelAndIgnoreRemainingItems()
         }
     }
 
     // CHALLENGE — primary assertion on the persisted settings row.
     @Test
-    fun `set theme updates settings`() = runTest {
+    fun `set theme updates settings`() = runTest(dispatcherRule.testDispatcher) {
         val viewModel = createViewModel()
         viewModel.test(this) {
             expectInitialState()
@@ -232,7 +261,7 @@ class MenuViewModelTest {
 
     // CHALLENGE — primary assertion on the persisted settings row.
     @Test
-    fun `set favorites sync period updates settings`() = runTest {
+    fun `set favorites sync period updates settings`() = runTest(dispatcherRule.testDispatcher) {
         val viewModel = createViewModel()
         viewModel.test(this) {
             expectInitialState()
@@ -243,7 +272,7 @@ class MenuViewModelTest {
 
     // CHALLENGE — primary assertion on the persisted settings row.
     @Test
-    fun `set bookmarks sync period updates settings`() = runTest {
+    fun `set bookmarks sync period updates settings`() = runTest(dispatcherRule.testDispatcher) {
         val viewModel = createViewModel()
         viewModel.test(this) {
             expectInitialState()

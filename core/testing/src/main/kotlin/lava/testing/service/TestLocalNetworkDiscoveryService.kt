@@ -9,18 +9,36 @@ import lava.data.api.service.LocalNetworkDiscoveryService
 /**
  * Behaviorally equivalent fake of [LocalNetworkDiscoveryServiceImpl].
  *
- * Simulates asynchronous mDNS discovery by emitting [DiscoveredEndpoint] values
- * through a channel. Tests control the discovery timeline explicitly via [emit]
- * and [complete].
+ * Anti-Bluff Pact Third Law alignment: the real impl uses
+ * `callbackFlow` + `trySend(...)` — a non-suspending buffered
+ * emission. The fake MUST mirror that.
  *
- * To simulate a discovery that hangs (triggering the real use case's 5-second
- * [kotlinx.coroutines.withTimeoutOrNull]), simply do not call [complete].
+ * Forensic anchor (2026-04-29). The previous form used a rendezvous
+ * `Channel()` which made `emit` suspend until a receiver parked,
+ * forcing tests to wrap seeds in `launch { emit; … }`. The
+ * `launch + cross-scheduler` interaction with `runTest`'s
+ * auto-advance and `MainDispatcherRule`'s scheduler produced
+ * "TurbineAssertionError: No value produced in 3s" failures (e.g.
+ * `auto discovery on init emits OpenConnectionSettings when endpoint
+ * found`). The rendezvous form was a Third-Law bluff fake — the real
+ * impl's `trySend` never suspends.
+ *
+ * Behaviour:
+ * - [emit] is non-suspending; emissions buffer in a [Channel.UNLIMITED]
+ *   queue and flow to any subsequent collector.
+ * - [complete] closes the channel; collectors see end-of-flow.
+ * - [reset] (kept for back-compat) drains and replaces.
  */
 class TestLocalNetworkDiscoveryService : LocalNetworkDiscoveryService {
-    private var channel: Channel<DiscoveredEndpoint> = Channel()
+    private var channel: Channel<DiscoveredEndpoint> = Channel(Channel.UNLIMITED)
 
     override fun discover(): Flow<DiscoveredEndpoint> = channel.consumeAsFlow()
 
+    /**
+     * Non-suspending — mirrors real impl's `trySend`. `suspend`
+     * keyword is kept for source-compat; the call never actually
+     * suspends with an UNLIMITED channel.
+     */
     suspend fun emit(endpoint: DiscoveredEndpoint) {
         channel.send(endpoint)
     }
@@ -29,11 +47,9 @@ class TestLocalNetworkDiscoveryService : LocalNetworkDiscoveryService {
         channel.close()
     }
 
-    /**
-     * Resets the channel so the service can be reused across tests.
-     */
+    /** Resets the channel so the service can be reused across tests. */
     fun reset() {
         channel.close()
-        channel = Channel()
+        channel = Channel(Channel.UNLIMITED)
     }
 }

@@ -2,13 +2,14 @@ package lava.domain.usecase
 
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import lava.data.api.service.DiscoveredEndpoint
 import lava.models.settings.Endpoint
-import lava.testing.TestDispatchers
 import lava.testing.repository.TestEndpointsRepository
 import lava.testing.repository.TestSettingsRepository
 import lava.testing.service.TestLocalNetworkDiscoveryService
+import lava.testing.testDispatchers
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -34,11 +35,20 @@ class DiscoverLocalEndpointsUseCaseTest {
         settingsRepository = TestSettingsRepository()
     }
 
-    private fun createUseCase(): DiscoverLocalEndpointsUseCase = DiscoverLocalEndpointsUseCaseImpl(
+    /**
+     * SP-3 fix (2026-04-29): make `dispatchers` share the surrounding
+     * `runTest` scheduler. The previous `TestDispatchers()` no-arg form
+     * allocated a fresh `TestCoroutineScheduler` per call, which the
+     * use case's `withContext(dispatchers.io)` switched to — leaving
+     * its work invisible to `runTest`'s auto-advance loop and
+     * intermittently hanging the test. See `TestDispatchers.kt` KDoc
+     * forensic anchor.
+     */
+    private fun TestScope.createUseCase(): DiscoverLocalEndpointsUseCase = DiscoverLocalEndpointsUseCaseImpl(
         discoveryService = discoveryService,
         endpointsRepository = endpointsRepository,
         settingsRepository = settingsRepository,
-        dispatchers = TestDispatchers(),
+        dispatchers = testDispatchers(),
     )
 
     @Test
