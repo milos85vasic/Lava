@@ -1,0 +1,14 @@
+{
+  "commit": "1cd06eae330d371c795ffb3abe825c9d0870f538",
+  "timestamp": "2026-04-29T10:34:29Z",
+  "host": "nezha",
+  "base_url": "https://localhost:8443",
+  "checks": [
+    {"path":"/","status":200,"bytes":5,"ms":202},
+    {"path":"/forum","status":200,"bytes":142380,"ms":239},
+    {"path":"/search?query=test","status":401,"bytes":2,"ms":7},
+    {"path":"/torrent/1","status":404,"bytes":2,"ms":123},
+    {"path":"/favorites","status":401,"bytes":2,"ms":7}
+  ],
+  "exit_code": 0
+}
