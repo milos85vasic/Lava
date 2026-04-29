@@ -135,7 +135,7 @@ private fun Endpoint(
                 label = "EndpointStateIcon_Crossfade",
             ) { edit ->
                 if (edit) {
-                    val removable = endpoint is Endpoint.Mirror
+                    val removable = endpoint is Endpoint.Mirror || endpoint is Endpoint.GoApi
                     IconButton(
                         icon = LavaIcons.Remove,
                         contentDescription = "Remove",

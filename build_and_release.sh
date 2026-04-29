@@ -89,23 +89,34 @@ export BUILDAH_FORMAT=docker
 # Save the lava-api-go container image if a runtime is available; otherwise
 # skip with a clear message. start.sh will recreate the image on demand,
 # so this is not load-bearing for the binary release artifact.
+#
+# 2026-04-29 fix: explicitly build :dev BEFORE saving so the saved image
+# is guaranteed to be a docker-format build of the CURRENT Dockerfile
+# (with HEALTHCHECK), not whatever stale :dev tag happens to be in the
+# local store from an earlier session. The original "if image exists
+# already, just save it" behaviour silently shipped a HEALTHCHECK-less
+# OCI-format tarball when an old :dev tag survived from before the
+# Dockerfile gained its HEALTHCHECK directive.
 APIGO_IMAGE_DST="$RELEASE_DIR/api-go/lava-api-go-${APIGO_VERSION}.image.tar"
+build_apigo_image() {
+    local runtime="$1"
+    echo "[image] building docker-format lava-api-go:dev via $runtime"
+    "$runtime" build --format=docker --target runtime \
+        -f lava-api-go/docker/Dockerfile \
+        -t lava-api-go:dev \
+        .
+}
+
 if command -v podman >/dev/null 2>&1; then
-    if podman image exists lava-api-go:dev 2>/dev/null; then
-        echo "[image] saving lava-api-go:dev via podman → $APIGO_IMAGE_DST"
-        podman save lava-api-go:dev -o "$APIGO_IMAGE_DST"
-    else
-        echo "[image] podman is installed but lava-api-go:dev image is not built locally — skipping image save"
-        echo "        (start.sh builds it on demand; releases/{version}/api-go/ will only contain the binary)"
-    fi
+    build_apigo_image podman
+    echo "[image] saving lava-api-go:dev via podman → $APIGO_IMAGE_DST"
+    rm -f "$APIGO_IMAGE_DST"   # podman save refuses to overwrite an existing tar
+    podman save lava-api-go:dev -o "$APIGO_IMAGE_DST"
 elif command -v docker >/dev/null 2>&1; then
-    if docker image inspect lava-api-go:dev >/dev/null 2>&1; then
-        echo "[image] saving lava-api-go:dev via docker → $APIGO_IMAGE_DST"
-        docker save lava-api-go:dev -o "$APIGO_IMAGE_DST"
-    else
-        echo "[image] docker is installed but lava-api-go:dev image is not built locally — skipping image save"
-        echo "        (start.sh builds it on demand; releases/{version}/api-go/ will only contain the binary)"
-    fi
+    build_apigo_image docker
+    echo "[image] saving lava-api-go:dev via docker → $APIGO_IMAGE_DST"
+    rm -f "$APIGO_IMAGE_DST"
+    docker save lava-api-go:dev -o "$APIGO_IMAGE_DST"
 else
     echo "[image] neither podman nor docker is installed — skipping image save"
     echo "        (releases/{version}/api-go/ will only contain the binary; start.sh builds the image on demand)"

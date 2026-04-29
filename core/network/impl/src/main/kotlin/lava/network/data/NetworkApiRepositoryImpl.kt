@@ -28,12 +28,16 @@ internal class NetworkApiRepositoryImpl @Inject constructor(
     override suspend fun getApi(): NetworkApi {
         val endpoint = endpoint()
         return apiMap.getOrPut(endpoint) {
-            val host = endpoint.host
-            when {
-                endpoint is Endpoint.Proxy -> proxyApi(host)
-                host.isLocalHost() -> proxyApi(host)
-                endpoint is Endpoint.RutrackerEndpoint -> rutrackerApi(host)
-                else -> rutrackerApi(host)
+            when (endpoint) {
+                is Endpoint.Proxy -> proxyApi(host = endpoint.host, port = null, scheme = "https")
+                is Endpoint.GoApi -> proxyApi(host = endpoint.host, port = endpoint.port, scheme = "https")
+                is Endpoint.RutrackerEndpoint -> {
+                    if (endpoint.host.isLocalHost()) {
+                        proxyApi(host = endpoint.host, port = null, scheme = "http")
+                    } else {
+                        rutrackerApi(endpoint.host)
+                    }
+                }
             }
         }
     }
@@ -41,6 +45,7 @@ internal class NetworkApiRepositoryImpl @Inject constructor(
     override suspend fun getCaptchaUrl(url: String): String {
         return when (val endpoint = endpoint()) {
             is Endpoint.Proxy -> proxyUrl(endpoint.host, "/captcha/${url.encode()}")
+            is Endpoint.GoApi -> goApiUrl(endpoint, "/captcha/${url.encode()}")
             is Endpoint.RutrackerEndpoint -> {
                 if (endpoint.host.isLocalHost()) {
                     proxyUrl(endpoint.host, "/captcha/${url.encode()}")
@@ -54,6 +59,7 @@ internal class NetworkApiRepositoryImpl @Inject constructor(
     override suspend fun getDownloadUri(id: String): String {
         return when (val endpoint = endpoint()) {
             is Endpoint.Proxy -> proxyUrl(endpoint.host, "/download/$id")
+            is Endpoint.GoApi -> goApiUrl(endpoint, "/download/$id")
             is Endpoint.RutrackerEndpoint -> {
                 if (endpoint.host.isLocalHost()) {
                     proxyUrl(endpoint.host, "/download/$id")
@@ -67,6 +73,7 @@ internal class NetworkApiRepositoryImpl @Inject constructor(
     override suspend fun getAuthHeader(token: String): Pair<String, String> {
         return when (val endpoint = endpoint()) {
             is Endpoint.Proxy -> "Auth-Token" to token
+            is Endpoint.GoApi -> "Auth-Token" to token
             is Endpoint.RutrackerEndpoint -> {
                 if (endpoint.host.isLocalHost()) {
                     "Auth-Token" to token
@@ -79,12 +86,31 @@ internal class NetworkApiRepositoryImpl @Inject constructor(
 
     private suspend fun endpoint() = settingsRepository.getSettings().endpoint
 
-    private fun proxyApi(host: String): NetworkApi {
-        val scheme = if (host.isLocalHost()) "http" else "https"
+    /**
+     * Build a [ProxyNetworkApi] (Lava-API wire shape, identical for the
+     * legacy Ktor proxy and the lava-api-go service per SP-2 §10 parity).
+     *
+     * SP-3 (2026-04-29) added the [port] and [scheme] parameters so a
+     * caller can target the Go API on its non-default port (8443) via
+     * HTTPS, while preserving the legacy proxy / public Proxy behaviour
+     * (LAN → http, public → https, default ports).
+     *
+     * TLS trust for self-signed LAN certs is configured at the
+     * application level via `app/src/main/res/xml/network_security_config.xml`
+     * — an operator installing the project CA on the device causes the
+     * shared [okHttpClient]'s system trust manager to honour it.
+     */
+    private fun proxyApi(host: String, port: Int?, scheme: String): NetworkApi {
         return ProxyNetworkApi(
             HttpClient(OkHttp) {
                 engine { preconfigured = okHttpClient }
-                defaultRequest { url(scheme = scheme, host = host) }
+                defaultRequest {
+                    if (port != null) {
+                        url(scheme = scheme, host = host, port = port)
+                    } else {
+                        url(scheme = scheme, host = host)
+                    }
+                }
                 install(Logging) {
                     logger = networkLogger
                     level = LogLevel.INFO
@@ -112,6 +138,10 @@ internal class NetworkApiRepositoryImpl @Inject constructor(
     private fun proxyUrl(host: String, path: String): String {
         val scheme = if (host.isLocalHost()) "http" else "https"
         return "$scheme://$host$path"
+    }
+
+    private fun goApiUrl(endpoint: Endpoint.GoApi, path: String): String {
+        return "https://${endpoint.host}:${endpoint.port}$path"
     }
 
     private fun String.encode(): String {
