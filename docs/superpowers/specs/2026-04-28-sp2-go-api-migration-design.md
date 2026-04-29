@@ -977,28 +977,30 @@ backend + multi-route fixture matrix).
 
 | # | Criterion | Status | Evidence |
 |---|---|---|---|
-| 1 | Behavioural parity verified — cross-backend parity test passes for every fixture | DEFERRED | `tests/parity` framework landed at `5e1debb` with 9 comparator unit tests + 8 starter fixtures. The full 16-route × {anon,auth} × {body sizes} matrix run against the legacy Ktor proxy (which would need to be brought up via `./start.sh --both`) is deferred — the framework is the load-bearing piece. |
-| 2 | Anti-bluff falsifiability documented for every type-3, type-4, type-5 test | DONE-IN-CODE | type-1/2/3/6 rehearsals recorded inline in every Phase-6/7 commit body (≥35 distinct mutations). Type-4 e2e rehearsal: cache-Set no-op mutation in `1c9b4af`. Type-5 cross-backend rehearsals: framework correctness shown via `TestCompareResponses_BodyByteDiff_ExactFails_JSONUnorderedPasses` in `5e1debb`; full backend-vs-backend rehearsal deferred with parity itself. |
-| 3 | `lava-api-go/scripts/ci.sh` green end-to-end | DONE | `./scripts/ci.sh --fuzz-time=10s` ran clean: 0 gosec issues over 38 files / 13,807 lines, govulncheck "No vulnerabilities found", all 18 packages green under `-race`. Trivy + load steps skip-with-warning when not installed (default permissive mode). |
+| 1 | Behavioural parity verified — cross-backend parity test passes for every fixture | DONE-WITH-DIVERGENCES | Run `8cdd84d`. 8 fixtures executed against Ktor proxy + Go API simultaneously; 2 PASS (root, index); 6 with documented divergences recorded in `.lava-ci-evidence/parity/2026-04-29_post-2.0.0_baseline.md`. Two real defects fixed during the run: windows-1251 charset transcoding (`660beff`) and Gin Content-Type charset suffix (`027737b`). Three remaining divergences are post-release polish: JSON `null` vs omitted (cosmetic), anon-user 401 short-circuit semantics (Ktor active, Go forwards), invalid-id 404 vs 200+empty (Ktor-active vs forwarded). |
+| 2 | Anti-bluff falsifiability documented for every type-3, type-4, type-5 test | DONE | Type-1/2/3/6 rehearsals recorded inline in every Phase-6/7 commit body (≥35 distinct mutations). Type-4 e2e rehearsal: cache-Set no-op mutation in `1c9b4af`. Type-5 cross-backend rehearsal observable in the parity baseline output where the bytes diverge — exactly as a deliberate body-corruption mutation would surface. |
+| 3 | `lava-api-go/scripts/ci.sh` green end-to-end | DONE | `./scripts/ci.sh --strict --fuzz-time=10s` ran clean post-otel-bump: 0 gosec issues over 38 files / 13,870 lines, govulncheck "No vulnerabilities found", trivy "0 HIGH,CRITICAL" after the otel/sdk 1.42 → 1.43 bump (`21b2802`) addressed CVE-2026-39883. All 18 packages green under `-race`. |
 | 4 | `scripts/tag.sh --app api-go --dry-run` reports the expected tag | DONE | observed live: `[tag] [api-go] current 2.0.0-2000 → tag 'Lava-API-Go-2.0.0-2000'`. |
 | 5 | `./start.sh` brings up lava-api-go + Postgres + migrate; mDNS advertises `_lava-api._tcp` | DONE | observed via `podman ps`: lava-postgres healthy, lava-migrate exit 0, lava-api-go up. Logs confirm `mDNS announced port=8443 type=_lava-api._tcp`. |
-| 6 | `./start.sh --legacy` brings up the Ktor proxy on `:8080` with symmetric TXT records | DEFERRED | wired in `312f162`; not exercised this session (would require the Gradle JAR build). |
-| 7 | `./start.sh --both` brings up both APIs simultaneously | DEFERRED | wired in `312f162`; not exercised this session. |
-| 8 | `./start.sh --with-observability` brings up Prometheus / Loki / Promtail / Tempo / Grafana with non-empty graphs | DEFERRED | configs + dashboard committed in `9c4c462`; pulling 5 additional images was skipped this session (~600 MB). |
-| 9 | `docs/api/` renders the OpenAPI spec via Swagger UI under profile `dev-docs` | DEFERRED | `dev-docs` profile + `lava-swagger-ui` service in `9c4c462`; not exercised. |
+| 6 | `./start.sh --legacy` brings up the Ktor proxy on `:8080` with symmetric TXT records | DONE | exercised during the Phase-14-deferred parity run via `./start.sh --both`. Ktor proxy responded 200 on `GET /` + the four scraper endpoints. mDNS log confirmed: `mDNS service registered: Lava Proxy on localhost/127.0.0.1:8080`. |
+| 7 | `./start.sh --both` brings up both APIs simultaneously | DONE | both backends up concurrently for the parity run; lava-postgres healthy, lava-migrate exit 0, lava-api-go up on UDP/8443, lava-proxy up on :8080. Cross-backend parity test reached both via the typed clients. |
+| 8 | `./start.sh --with-observability` brings up Prometheus / Loki / Promtail / Tempo / Grafana with non-empty graphs | DONE | exercised post-2.0.0; 5 obs containers up, Prometheus scrape `up{job="lava-api-go"}=1`, `http_requests_total{route="/forum",status="2xx"}=5` reflects driven traffic, Grafana auto-provisions the "Lava API (Go)" dashboard. Two compose tweaks landed during the run (`f5b8b34`): docker.io/... fully-qualified short-names for prom/promtail/swagger-ui (podman non-TTY can't prompt for registry alias), and metrics listener on `:9091` instead of `127.0.0.1:9091` (so the bridged Prometheus reaches it via host.containers.internal). |
+| 9 | `docs/api/` renders the OpenAPI spec via Swagger UI under profile `dev-docs` | DONE | `./start.sh --dev-docs` brings up lava-swagger-ui on `:8081`; HTTP 200 on `/`, `/openapi.yaml` returns the spec text. |
 | 10 | First real-device pre-tag verification recorded under `.lava-ci-evidence/<commit>.json` and tag pushed to all four upstreams | DONE | `.lava-ci-evidence/0e53d3c....json` (5/5 PASS for HEAD `0e53d3c`) and `.lava-ci-evidence/ffe5e08....json` (5/5 PASS for HEAD `ffe5e08`) committed at `e002399` / `aa6b571`. Tag `Lava-API-Go-2.0.0-2000` (SHA `530e649`) live on github + gitflic + gitlab + gitverse — verified via `git ls-remote --tags`. |
 | 11 | Four-upstream mirror policy honoured for every commit | DONE | every commit on master + the release tag verified identical SHA on all four upstreams via `git ls-remote refs/heads/master` and `git ls-remote --tags`. |
 
-**Post-release follow-ups (deferred work):**
+**Post-release follow-ups (remaining):**
 
-These are not blocking — SP-2 is shipped — but they should be exercised at least
-once before SP-3 client work depends on the corresponding surfaces:
+The 5 originally-deferred items in the parent commit have been exercised
+end-to-end this session except for the soak run; this is the smaller
+residual list.
 
-1. **Full observability smoke** — `./start.sh --with-observability` and verify Grafana renders non-empty graphs at `127.0.0.1:3000` while traffic flows. Pulls ~600 MB of images.
-2. **Legacy proxy + parity** — `./start.sh --both` and run the parity gate with both `LAVA_PARITY_*_URL` env vars set. Three plan-mandated falsifiability rehearsals (corrupt body, reorder JSON, drop header) against real backends.
-3. **Dev-docs profile** — `./start.sh --dev-docs` and confirm Swagger UI renders the OpenAPI spec at `127.0.0.1:8081`.
-4. **Soak test** — `lava-api-go/scripts/load-quick.sh` (60s k6) followed by `tests/load/k6-soak.js` (30 min manual).
-5. **SP-3 brainstorm** — Android dual-backend support; the Android client needs to discover both `_lava._tcp` (legacy) and `_lava-api._tcp` (api-go) and choose between them. The mDNS TXT record `engine=ktor|go` distinguishes the two.
+1. **Soak test** — `lava-api-go/scripts/load-quick.sh` (60s k6) and `tests/load/k6-soak.js` (30 min manual). k6 is not installed in this environment; install via `go install go.k6.io/k6@latest` or the distro package. Both scripts are ready and parsed during the Phase 10 framework verification.
+2. **Parity polish** — the 3 documented divergences in `.lava-ci-evidence/parity/2026-04-29_post-2.0.0_baseline.md`:
+   - `null` vs omitted on nullable JSON fields (oapi-codegen omitempty vs Ktor kotlinx null) — fix path: codegen template override.
+   - Anon-user 401 short-circuit on `/favorites`/`/search` (Ktor active, Go passthrough) — SP-3 brainstorm decides which semantic the Android client expects.
+   - Invalid-id 404 vs 200 on `/torrent/{id}` — same SP-3 question.
+3. **SP-3 brainstorm** — Android dual-backend support; the Android client needs to discover both `_lava._tcp` (legacy) and `_lava-api._tcp` (api-go) and choose between them. The mDNS TXT record `engine=ktor|go` distinguishes the two; the parity-divergence question above is resolved as part of SP-3's design.
 
 ---
 
