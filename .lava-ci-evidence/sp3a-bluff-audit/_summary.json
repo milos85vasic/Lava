@@ -1,0 +1,66 @@
+{
+  "phase": "SP-3a Phase 0 — Pre-flight Bluff Audit",
+  "completed_at_pre_amend": "<set to commit SHA produced by sp3a-0.7; recoverable via `git log --oneline -1`>",
+  "user_decision": "A — adapt plan to discovered reality (per conversation 2026-04-30)",
+  "audited": [
+    {
+      "task": "0.1",
+      "subject": "TestEndpointsRepository duplicate-rejection equivalence",
+      "outcome": "Equivalence test added + falsifiability rehearsal recorded; preexisting fix verified.",
+      "commit": "e55b021",
+      "evidence": "0.1-test-endpoints-repository.json",
+      "ledger_entry": false
+    },
+    {
+      "task": "0.2",
+      "subject": "TestBookmarksRepository stub-bluff documentation",
+      "outcome": "Inverted stub-bluff test added (passes because fake is a bluff). Ledger entry deferring full implementation. Latent finding flagged: MenuViewModelTest holds the stub but does not exercise any stubbed method today.",
+      "commit": "ed8a2e5",
+      "evidence": "0.2-test-bookmarks-repository.json",
+      "ledger_entry": true
+    },
+    {
+      "task": "0.3",
+      "subject": "TestAuthService — zero consumers",
+      "outcome": "No new test (no consumer to validate against). Ledger entry deferring audit to first consumer.",
+      "commit": "56d0937",
+      "evidence": "0.3-test-auth-service.json",
+      "ledger_entry": true
+    },
+    {
+      "task": "0.4",
+      "subject": "TestLocalNetworkDiscoveryService — equivalence already covered",
+      "outcome": "No new test. Existing TestInfrastructureContractTest (3 @Test methods) + LocalNetworkDiscoveryContractTest (8 @Test methods) cover the equivalence. Ledger entry resolves the audit.",
+      "commit": "56d0937",
+      "evidence": "0.4-test-local-network-discovery.json",
+      "ledger_entry": true
+    },
+    {
+      "task": "0.5",
+      "subject": "EndpointConverterTest re-rehearsal",
+      "outcome": "Existing test catches deliberate-break of dropping an Endpoint variant from EndpointConverter.toJson()'s when block. Falsifiability rehearsal recorded.",
+      "commit": "449d861",
+      "evidence": "0.5-endpoint-converter.json",
+      "ledger_entry": false
+    },
+    {
+      "task": "0.6",
+      "subject": "healthprobe contract test re-rehearsal",
+      "outcome": "Existing test catches deliberate-break of adding an unregistered --http2 flag to docker-compose.yml healthcheck. Falsifiability rehearsal recorded. Latent finding flagged: TestHealthcheckContract is currently a future-facing tripwire because docker-compose.yml has no lava-api-go healthcheck today.",
+      "commit": "449d861",
+      "evidence": "0.6-healthprobe-contract.json",
+      "ledger_entry": false
+    }
+  ],
+  "deferred_to_sp3a_bridge": [
+    "Go-side rutracker test fakes (audit deferred until SP-2 ships)",
+    "Go-side parity test framework (audit deferred until SP-2 ships)"
+  ],
+  "deferred_to_first_consumer": [
+    "TestAuthService equivalence test (Task 0.3)",
+    "TestBookmarksRepository full implementation (Task 0.2)"
+  ],
+  "ledger_clause": "6.A",
+  "next_phase_unblocked": true,
+  "next_phase": "Phase 1 — Foundation: Tracker-SDK + :core:tracker:* modules"
+}
