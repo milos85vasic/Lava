@@ -5,7 +5,7 @@ import lava.tracker.rutracker.api.RuTrackerInnerApi
 import lava.tracker.rutracker.model.Forbidden
 import lava.tracker.rutracker.model.NotFound
 
-internal class GetCommentsPageUseCase(
+class GetCommentsPageUseCase(
     private val api: RuTrackerInnerApi,
     private val parseCommentsPageUseCase: ParseCommentsPageUseCase,
 ) {
