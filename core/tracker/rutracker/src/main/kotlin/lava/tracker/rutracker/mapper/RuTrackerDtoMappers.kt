@@ -1,12 +1,16 @@
 package lava.tracker.rutracker.mapper
 
 import lava.network.dto.auth.AuthResponseDto
+import lava.network.dto.forum.CategoryDto
 import lava.network.dto.forum.CategoryPageDto
 import lava.network.dto.forum.ForumDto
 import lava.network.dto.search.SearchPageDto
+import lava.network.dto.topic.AuthorDto
 import lava.network.dto.topic.CommentsPageDto
 import lava.network.dto.topic.ForumTopicDto
 import lava.network.dto.topic.TopicPageDto
+import lava.network.dto.topic.TorrentDto
+import lava.network.dto.topic.TorrentStatusDto
 import lava.network.dto.user.FavoritesDto
 import lava.tracker.api.model.BrowseResult
 import lava.tracker.api.model.CommentsPage
@@ -51,7 +55,11 @@ import javax.inject.Inject
  */
 class RuTrackerDtoMappers @Inject constructor() {
 
-    fun searchResultToDto(result: SearchResult): SearchPageDto = TODO("Task 2.23")
+    fun searchResultToDto(result: SearchResult): SearchPageDto = SearchPageDto(
+        page = result.currentPage,
+        pages = result.totalPages,
+        torrents = result.items.map { it.toTorrentDto() },
+    )
 
     fun browseResultToDto(result: BrowseResult): CategoryPageDto = TODO("Task 2.24")
 
@@ -66,4 +74,54 @@ class RuTrackerDtoMappers @Inject constructor() {
     fun favoritesToDto(items: List<TorrentItem>): FavoritesDto = TODO("Task 2.27")
 
     fun loginResultToDto(r: LoginResult): AuthResponseDto = TODO("Task 2.27")
+}
+
+/**
+ * Reverse of [SearchPageMapper.toTorrentItem] / [TopicDto.toTorrentItem].
+ *
+ * Reads metadata keys "rutracker.categoryId", "rutracker.categoryName",
+ * "rutracker.authorId", "rutracker.tags", "rutracker.status",
+ * "rutracker.size_text" plus the typed fields the forward mapper carried
+ * directly (seeders -> seeds, magnetUri -> magnetLink, publishDate epoch
+ * seconds -> date).
+ *
+ * Field synthesis:
+ *  - [AuthorDto.name] is required (non-null) by the legacy DTO but
+ *    forward mapping never preserves it. We fall back to the metadata
+ *    "rutracker.authorId" if present, else empty string. The presence
+ *    of an "rutracker.authorId" key is the signal that an author existed
+ *    on the forward DTO; without it we omit the AuthorDto entirely.
+ *  - [TorrentDto.description] is not round-trippable from this mapper
+ *    (descriptions live on TopicDetail, not TorrentItem). Always null.
+ *  - [TorrentStatusDto] is restored by name; an unrecognised string maps
+ *    to null (graceful) rather than throwing.
+ */
+private fun TorrentItem.toTorrentDto(): TorrentDto {
+    val item = this
+    val categoryId = item.metadata["rutracker.categoryId"]
+    val categoryName = item.metadata["rutracker.categoryName"] ?: item.category
+    val category: CategoryDto? = if (categoryId != null || categoryName != null) {
+        CategoryDto(id = categoryId, name = categoryName.orEmpty())
+    } else {
+        null
+    }
+    val authorId = item.metadata["rutracker.authorId"]
+    val author: AuthorDto? = authorId?.let { AuthorDto(id = it, name = it) }
+    val status = item.metadata["rutracker.status"]?.let { name ->
+        runCatching { TorrentStatusDto.valueOf(name) }.getOrNull()
+    }
+    return TorrentDto(
+        id = item.torrentId,
+        title = item.title,
+        author = author,
+        category = category,
+        tags = item.metadata["rutracker.tags"],
+        status = status,
+        date = item.publishDate?.epochSeconds,
+        size = item.metadata["rutracker.size_text"],
+        seeds = item.seeders,
+        leeches = item.leechers,
+        magnetLink = item.magnetUri,
+        description = null,
+    )
 }
