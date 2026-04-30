@@ -1,6 +1,10 @@
 package lava.tracker.client
 
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
 import lava.sdk.api.MapPluginConfig
+import lava.sdk.api.MirrorState
 import lava.tracker.api.TrackerClient
 import lava.tracker.api.TrackerDescriptor
 import lava.tracker.api.feature.AuthenticatableTracker
@@ -19,6 +23,9 @@ import lava.tracker.api.model.SearchRequest
 import lava.tracker.api.model.TopicDetail
 import lava.tracker.api.model.TopicPage
 import lava.tracker.api.model.TorrentItem
+import lava.tracker.client.persistence.LavaMirrorManagerHolder
+import lava.tracker.client.persistence.MirrorConfigLoader
+import lava.tracker.client.persistence.MirrorHealthRepository
 import lava.tracker.registry.TrackerRegistry
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -50,6 +57,15 @@ import javax.inject.Singleton
 @Singleton
 class LavaTrackerSdk @Inject constructor(
     private val registry: TrackerRegistry,
+    /**
+     * Optional collaborators introduced in SP-3a Phase 4 (Tasks 4.4–4.5).
+     * They are nullable so unit tests that construct the SDK with only a
+     * registry (Phase 1–3 surface) keep compiling. Production wiring via
+     * Hilt always supplies them.
+     */
+    private val mirrorManagerHolder: LavaMirrorManagerHolder? = null,
+    private val mirrorHealthRepository: MirrorHealthRepository? = null,
+    private val mirrorConfigLoader: MirrorConfigLoader? = null,
 ) {
     private var activeTrackerId: String = DEFAULT_TRACKER_ID
 
@@ -303,6 +319,77 @@ class LavaTrackerSdk @Inject constructor(
      */
     internal fun getActiveClient(): TrackerClient =
         registry.get(activeTrackerId, MapPluginConfig())
+
+    // -------------------------------------------------------------------
+    // SP-3a Phase 4 (Tasks 4.4 / 4.5): mirror health surface.
+    // -------------------------------------------------------------------
+
+    /**
+     * Probes every known mirror for [trackerId] and persists the result.
+     * No-op when the SDK was constructed without mirror collaborators
+     * (i.e. legacy unit-test path). Called by:
+     *  - [MirrorHealthCheckWorker] on the periodic 15-minute schedule
+     *  - [TrackerSettingsViewModel] when the user taps "Probe now"
+     */
+    suspend fun probeMirrorsFor(trackerId: String) {
+        val holder = mirrorManagerHolder ?: return
+        holder.probeAll(trackerId)
+        val states = holder.observeHealth(trackerId).firstOrEmpty()
+        mirrorHealthRepository?.upsertAll(trackerId, states)
+    }
+
+    /**
+     * Stream of current [MirrorState] entries for [trackerId]. Returns an
+     * empty Flow when the SDK was constructed without a holder. The Flow
+     * is sourced from the in-memory MirrorManager so consumers see live
+     * health transitions as the worker probes mirrors.
+     */
+    fun observeMirrorHealth(trackerId: String): Flow<List<MirrorState>> {
+        val holder = mirrorManagerHolder ?: return flowOf(emptyList())
+        return holder.observeHealthOrEmpty(trackerId)
+    }
+
+    /**
+     * Rehydrates the in-memory MirrorManager state for every registered
+     * tracker from [MirrorHealthRepository] persisted snapshots. Idempotent.
+     * No-op when collaborators are missing (legacy test path).
+     *
+     * Call from the Application onCreate (or first ViewModel init) so
+     * `observeMirrorHealth` returns the previous-session snapshot before
+     * the first periodic probe runs.
+     */
+    suspend fun initialize() {
+        val holder = mirrorManagerHolder ?: return
+        val repo = mirrorHealthRepository ?: return
+        val loader = mirrorConfigLoader
+        for (descriptor in registry.list()) {
+            val trackerId = descriptor.trackerId
+            // Build the manager (warms the cache so observeHealth has an immediate
+            // emission).
+            val manager = holder.managerFor(trackerId)
+            val knownMirrors = loader?.loadFor(trackerId) ?: descriptor.baseUrls
+            val persisted = repo.loadStates(trackerId, knownMirrors)
+            for (state in persisted) {
+                if (state.consecutiveFailures > 0) {
+                    repeat(state.consecutiveFailures) {
+                        manager.reportFailure(state.mirror, RehydratedFailure)
+                    }
+                } else if (state.health == lava.sdk.api.HealthState.HEALTHY) {
+                    manager.reportSuccess(state.mirror)
+                }
+            }
+        }
+    }
+
+    private suspend fun Flow<List<MirrorState>>.firstOrEmpty(): List<MirrorState> {
+        return try {
+            first()
+        } catch (_: NoSuchElementException) {
+            emptyList()
+        }
+    }
+
+    private object RehydratedFailure : Throwable("rehydrated-from-persistence")
 
     companion object {
         const val DEFAULT_TRACKER_ID: String = "rutracker"
