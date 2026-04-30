@@ -1,0 +1,96 @@
+{
+  "task": "sp3a-4.20",
+  "subject": "Phase 4 integration smoke — real-device verification",
+  "ledger_clauses": ["6.5", "7-clause-1"],
+  "operator_attestation_required": true,
+  "status": "PENDING_OPERATOR",
+  "produced_by": "claude-code-subagent",
+  "produced_at": "2026-04-30",
+  "produced_against_commit": "<set when operator signs off>",
+
+  "why_this_is_a_stub": "Sixth Law clause 5 mandates that 'CI green is necessary, not sufficient'. The Phase 4 surface has unit-test (CHALLENGE + VM-CONTRACT) coverage at every layer above the network HealthProbe (52+ tests in :core:tracker:client, 8 in :feature:tracker_settings, 3 in :feature:search_result). The rendered-UI Challenge gate, however, is owed: the project does NOT currently host an androidTest infrastructure (Robolectric + ComposeTestRule) so no test in this codebase opens the actual TrackerSettingsScreen, drives a real tap, and asserts the rendered Composable produces the user-visible outcome. This stub records that the operator MUST perform the smoke manually before the SP-3a Phase 4 surface is considered shippable.",
+
+  "checklist_for_operator": [
+    {
+      "step": 1,
+      "action": "Build the debug APK with the SP-3a Phase 4 commits in scope",
+      "command": "./gradlew :app:assembleDebug --no-daemon",
+      "expected": "BUILD SUCCESSFUL; APK at app/build/outputs/apk/debug/app-debug.apk"
+    },
+    {
+      "step": 2,
+      "action": "Install on a real device or emulator (not a fresh ephemeral CI runner — see Local-Only CI/CD constitutional rule)",
+      "command": "adb install -r app/build/outputs/apk/debug/app-debug.apk",
+      "expected": "Success"
+    },
+    {
+      "step": 3,
+      "action": "Launch the app, open the Menu tab",
+      "expected": "Menu screen renders; the Settings section now shows a 'Trackers' row above Theme."
+    },
+    {
+      "step": 4,
+      "action": "Tap 'Trackers'",
+      "expected": "TrackerSettingsScreen opens; the LazyColumn lists RuTracker (with CheckCircle marker) and RuTor; below each tracker is a MirrorListSection with the bundled mirrors and per-mirror HealthIndicator dots (initial UNKNOWN until first probe completes)."
+    },
+    {
+      "step": 5,
+      "action": "Tap RuTor in the selector",
+      "expected": "Snackbar message 'Switched to rutor' appears; CheckCircle marker now next to RuTor; the active tracker has changed (verified by going Back → Search and observing that the next search routes via RuTor — note: this verification is the stronger end-to-end gate)."
+    },
+    {
+      "step": 6,
+      "action": "Tap 'Probe now' on a tracker section",
+      "expected": "Snackbar 'Probed <tracker>' appears; the per-mirror HealthIndicator dots transition from grey UNKNOWN to green HEALTHY (or red UNHEALTHY when the mirror is genuinely unreachable). The HEALTHY state must persist across an app restart (the MirrorHealthRepository persistence + LavaTrackerSdk.initialize() rehydration path is Task 4.5's contract)."
+    },
+    {
+      "step": 7,
+      "action": "Tap 'Add custom mirror'",
+      "expected": "AddCustomMirrorDialog opens; URL field, priority slider, protocol radios. Type a malformed URL (e.g. 'foo'). The Add button is disabled. Type 'https://test.example/'. The Add button enables. Tap Add."
+    },
+    {
+      "step": 8,
+      "action": "Verify the new custom mirror is persisted",
+      "expected": "MirrorListSection re-renders with a new row 'https://test.example/' carrying the user-supplied priority + protocol; a Delete IconButton appears on this row (not on bundled rows). After force-closing and re-launching the app, the custom row still appears (UserMirrorRepository persistence)."
+    },
+    {
+      "step": 9,
+      "action": "Tap the Delete IconButton on the custom mirror",
+      "expected": "Row disappears; UserMirrorRepository row is deleted (verified by force-close + re-launch)."
+    },
+    {
+      "step": 10,
+      "action": "Cross-tracker fallback rehearsal — REQUIRES network-disabled state for one tracker",
+      "method_a": "Programmatically: in dev tools insert UNHEALTHY rows into tracker_mirror_health for every RuTracker mirror, then launch a search.",
+      "method_b": "Naturally: switch device to airplane mode briefly enough to drive the in-memory MirrorManager to UNHEALTHY (15-min worker cycle).",
+      "expected": "When a search runs after RuTracker exhaustion, the SearchResultScreen renders the CrossTrackerFallbackModal: 'rutracker is unavailable. All known mirrors of rutracker are unreachable. Try the same search on rutor?' Tapping 'Try rutor' invokes resumeWith and the search re-runs against RuTor; tapping Cancel renders a Snackbar 'rutracker is unavailable'."
+    }
+  ],
+
+  "evidence_to_record_on_signoff": {
+    "screenshots": [
+      "trackers_list.png",
+      "rutor_active.png",
+      "probed_healthy.png",
+      "add_mirror_dialog.png",
+      "custom_mirror_row.png",
+      "fallback_modal.png",
+      "fallback_resumed_rutor.png"
+    ],
+    "video_optional": "phase4-end-to-end.mp4",
+    "operator_name": "<fill in>",
+    "operator_attestation_text": "I, <name>, manually executed every step in the checklist on a real Android <device-model> running Android <os-version> against commit <sha>. Every expected outcome was observed. No bluff signals (e.g. 'app didn't crash' interpreted as 'feature works') are included in this attestation. — <date>",
+    "build_commit_sha": "<sha>",
+    "device": "<model + Android version>",
+    "tag_gate_unblocked": "<true/false — per Sixth Law clause 5, only true when EVERY step above passed on the cited device>"
+  },
+
+  "machine_verifiable_part": {
+    "app_assemble_debug": "GREEN at commit <produced_against_commit>",
+    "core_tracker_client_test": "GREEN — 52+ tests including LavaTrackerSdkMirrorHealthTest (5), LavaTrackerSdkCrossTrackerFallbackTest (4), MirrorHealthCheckWorkerTest (5), MirrorHealthRepositoryTest (7), UserMirrorRepositoryTest (8), MirrorConfigLoaderTest (7), CrossTrackerFallbackPolicyTest (6)",
+    "feature_tracker_settings_test": "GREEN — 8 tests in TrackerSettingsViewModelTest exercising real SDK + real Room (in-memory)",
+    "feature_search_result_test": "GREEN — 3 tests in SearchResultViewModelFallbackTest covering the CrossTrackerFallbackModal state machine"
+  },
+
+  "reminder": "This file is a STUB. The Sixth-Law / Seventh-Law tag gate is unblocked ONLY after the operator fills the 'evidence_to_record_on_signoff' block AND flips status to 'OPERATOR_ATTESTED'. Do not run scripts/tag.sh against this commit until that flip happens."
+}
