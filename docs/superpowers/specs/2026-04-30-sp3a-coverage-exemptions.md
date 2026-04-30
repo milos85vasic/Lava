@@ -4,6 +4,14 @@ Per Constitutional clause 6.D (Behavioral Coverage Contract), every uncovered
 line in code authored under SP-3a is listed here with reason, reviewer, and
 date. Blanket waivers are forbidden.
 
+> **See also: Seventh Law clause 5 (Recurring Bluff Hunt).** Every entry in
+> this ledger is eligible to be picked by the recurring 5-file random sample
+> at phase wrap. An exemption that cannot survive the bluff hunt — i.e. the
+> exempted code path is silently exercised by a test the hunt mutates — is
+> a Seventh Law incident in waiting and MUST be audited rather than left
+> as a paper-only exemption. The ledger is necessary, not sufficient: the
+> recurring hunt is the live falsifiability check.
+
 This file was seeded ahead of Task 0.7 by Task 0.2 (TestBookmarksRepository
 stub bluff) because that task needed an entry to land. Task 0.7 will append
 the Phase-0 summary section without re-creating the file.

@@ -71,13 +71,92 @@ mirror health tracking, and an explicit cross-tracker fallback flow.
 - **Added the Seventh Law (Anti-Bluff Enforcement, all 7 clauses)**
   with mechanical pre-push hook enforcement at `.githooks/pre-push`:
   Bluff-Audit commit-message stamp on every test commit, mock-the-
-  SUT pattern rejection, hosted-CI config rejection.
+  SUT pattern rejection, hosted-CI config rejection. The Seventh Law
+  is binding on every test commit and on every release tag —
+  `scripts/tag.sh` refuses to operate without
+  `.lava-ci-evidence/<TAG>/real-device-verification.md` at status
+  `VERIFIED` and per-Challenge-Test attestation files.
 - **Local-Only CI/CD apparatus** materialized as `scripts/ci.sh`
-  (single entry point, three modes), `scripts/check-fixture-
-  freshness.sh`, `scripts/check-constitution.sh`. Pre-push hook
-  runs `scripts/ci.sh --changed-only`. Tag script enforces an
-  Android evidence-pack gate at
-  `.lava-ci-evidence/Lava-Android-<version>/`.
+  (single entry point, three modes — `--changed-only`,
+  `--full`, `--smoke`), `scripts/check-fixture-freshness.sh`,
+  `scripts/check-constitution.sh`, `scripts/bluff-hunt.sh`
+  (Seventh Law clause 5 recurring hunt driver). Pre-push hook runs
+  `scripts/ci.sh --changed-only`. Tag script enforces an Android
+  evidence-pack gate at `.lava-ci-evidence/Lava-Android-<version>/`.
+
+### Phases (commit summary)
+
+The SP-3a development arc spans 6 phases (Phase 0 audit + Phases 1–5
+implementation). Approximate per-phase commit counts:
+
+| Phase | Scope                                                                  | Commits |
+|-------|------------------------------------------------------------------------|---------|
+| 0     | Pre-implementation audit, ledger seeding, equivalence test scaffolding | 5       |
+| 1     | Foundation — `core/tracker/api`, registry, mirror, testing modules     | 12      |
+| 2     | RuTracker decoupling — git-mv, `RuTrackerClient`, parser refit         | 40      |
+| 3     | RuTor implementation — descriptor, parsers, feature impls, fixtures    | 41      |
+| 4     | Mirror health, cross-tracker fallback, `tracker_settings` UI           | 20      |
+| 5     | Constitution updates, 8 Challenge Tests, scripts/ci.sh, tag gate       | 26      |
+| —     | Misc (Seventh Law, JVM-17 hardening, bluff audit, phase wraps)         | 4       |
+| —     | Documentation polish (this release)                                    | 5       |
+| **SP-3a total** |                                                              | **153** |
+
+Phase 5 closes the implementation arc. Real-device verification
+(Task 5.22) is the operator-required gate before tagging — see
+"Known limitations" below.
+
+### Known limitations (operator-required gates)
+
+These are NOT bugs; they are explicit acceptance gates the operator
+MUST satisfy before tagging Lava-Android-1.2.0-1020:
+
+- **Task 5.22 — real-device Challenge Test attestation.** The 8 Compose
+  UI Challenge Tests (`app/src/androidTest/kotlin/lava/app/challenges/`)
+  cannot be run from the agent environment. The operator MUST run each
+  on a real Android device (API 26+, internet-connected), capture the
+  user-visible state per the test's primary assertion, perform the
+  falsifiability mutation listed in the test header, and update each
+  `.lava-ci-evidence/Lava-Android-1.2.0-1020/challenges/C<n>.json`
+  from `PENDING_OPERATOR` to `VERIFIED`. `scripts/tag.sh` refuses
+  to operate without all 8 at `VERIFIED`.
+- **Task 5.25 — connectedAndroidTest runner not yet wired into
+  `:app/build.gradle.kts`.** Until the androidx.test runner deps and
+  the `connectedDebugAndroidTest` task are wired, the operator's
+  C1–C8 verification is performed by manually exercising each
+  scenario on the device rather than by the gradle task. This is
+  constitutional debt tracked in `feature/CLAUDE.md`.
+- **Task 4.20 — Phase 4 integration smoke on real device.** Phase 4
+  shipped the cross-tracker fallback modal end-to-end; Task 4.20 is
+  the integration smoke (mirror probe loop + fallback on real
+  rutracker / rutor mirrors). The smoke commit landed
+  (`80975e0 sp3a-4.20`) but the real-device replay falls under the
+  same Task 5.22 gate above.
+
+### Latent findings (open + resolved)
+
+Tracked in
+[`docs/superpowers/specs/2026-04-30-sp3a-coverage-exemptions.md`](docs/superpowers/specs/2026-04-30-sp3a-coverage-exemptions.md):
+
+- **LF-1** — `MenuViewModelTest` holds `TestBookmarksRepository`
+  without exercising it. **OPEN** — tripwire fires when first
+  `MenuAction.ClearBookmarks` test path is added.
+- **LF-2** — `TestHealthcheckContract` is currently a future-facing
+  tripwire (lava-api-go has no healthcheck block at HEAD). **OPEN** —
+  tripwire fires the moment a healthcheck is re-introduced.
+- **LF-3** — Tracker chain compiles to JVM 21 while Android targets
+  JVM 17. **RESOLVED in Phase 2 Section E wrap-up** (Tracker-SDK pin
+  `b779fda` enforces JVM 17 on every SDK subproject).
+- **LF-5** — `RuTrackerDescriptor` declares `UPLOAD` and
+  `USER_PROFILE` without backing feature interfaces. **OPEN** —
+  letter-of-the-law clause 6.E is satisfied (no caller can ask), but
+  the descriptor makes a forward-looking claim with no impl. Triggers
+  before any phase that depends on those capabilities (cross-tracker
+  fallback ranking, SP-3a-bridge).
+- **LF-6** — `TorrentItem.sizeBytes` is permanently null for
+  rutracker (the legacy scraper discards the byte count and keeps
+  only the formatted display string in `metadata["rutracker.size_text"]`).
+  **OPEN** — triggers before any cross-tracker comparison logic that
+  needs numeric size.
 
 ### Fixed
 - (none — this release is feature-additive)
