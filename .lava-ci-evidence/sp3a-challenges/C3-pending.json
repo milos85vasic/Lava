@@ -1,0 +1,21 @@
+{
+  "challenge_id": "C3",
+  "name": "Anonymous search on RuTor",
+  "test_class": "lava.app.challenges.C3_AnonymousSearchOnRuTorTest",
+  "test_file": "app/src/androidTest/kotlin/lava/app/challenges/C3_AnonymousSearchOnRuTorTest.kt",
+  "spec_reference": "Task 5.11",
+  "operator_attestation_required": true,
+  "status": "PENDING_OPERATOR",
+  "falsifiability_protocol": {
+    "mutation_target": "core/tracker/rutor/src/main/kotlin/lava/tracker/rutor/RuTorDescriptor.kt",
+    "mutation_step": "Remove TrackerCapability.SEARCH from the capabilities set.",
+    "expected_failure": "RuTor.getFeature<Searchable>() returns null; search UI surfaces 'Search not supported on this tracker'; result-row assertion fails.",
+    "expected_assertion_message_substring": "Failed to assertWaitUntil: condition not met within 30000ms",
+    "revert_step": "Re-add TrackerCapability.SEARCH to the capabilities set."
+  },
+  "operator_run_instructions": [
+    "./gradlew :app:connectedDebugAndroidTest --tests \"lava.app.challenges.C3_AnonymousSearchOnRuTorTest\"",
+    "Capture screenshot of search results from rutor.info or rutor.is.",
+    "Perform falsifiability mutation, re-run, capture failure assertion verbatim, revert."
+  ]
+}
