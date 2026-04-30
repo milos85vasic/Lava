@@ -203,41 +203,49 @@ backed. Treated as a latent finding rather than an immediate violation.
 **Audit linkage:** Phase 2 Section C spec + code-quality review (commit landing
 the LF-5 entry); Phase 5 wrap follow-up (commit `lf-5-resolved`).
 
-### LF-6 — `TorrentItem.sizeBytes` permanently null for rutracker (linked: Phase 2 Section D)
+### LF-6 — `TorrentItem.sizeBytes` permanently null for rutracker (linked: Phase 2 Section D) — **RESOLVED 2026-04-30**
+
+**Status:** **RESOLVED** by commit `lf-6-resolved` on 2026-04-30. Resolution
+chose mitigation option 2 (parse the formatted display string in the forward
+mapper). A new internal helper `RuTrackerSizeParser` lives next to the forward
+mappers in `core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker/mapper/`
+and handles GB/MB/KB/B/TB suffixes with optional decimal (period or comma) at
+binary multipliers (1 GB = 2^30) — matching what the legacy rutracker scraper's
+`formatSize` helper renders, so a render-then-parse round-trip is bytewise
+correct (modulo Long truncation of the truncated `Double` value, which is the
+same precision the formatted display string carries).
 
 **Locations:**
 - `core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker/mapper/SearchPageMapper.kt`
 - `core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker/mapper/CategoryPageMapper.kt`
 - `core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker/mapper/TopicMapper.kt`
 
-**Observation:** The new tracker-api model `TorrentItem` exposes
+**Observation (historic):** The new tracker-api model `TorrentItem` exposes
 `sizeBytes: Long?`. The legacy rutracker scraper delivers torrent size as a
 pre-formatted display string (e.g. `"4.7 GB"`), and the raw byte count is
 discarded before the DTO reaches the forward mapper. Consequently every
-`TorrentItem` produced by the rutracker forward mappers has `sizeBytes = null`.
-The display string is preserved in `metadata["rutracker.size_text"]` so UI
-can render it, but any consumer of `Searchable`/`Browsable`/`Topic` features
-that relies on `sizeBytes` for filtering, sorting, or comparison against a
-threshold will silently receive `null` for every rutracker row.
+`TorrentItem` produced by the rutracker forward mappers HAD `sizeBytes = null`.
+The display string was preserved in `metadata["rutracker.size_text"]` so UI
+could render it, but any consumer of `Searchable`/`Browsable`/`Topic` features
+that relied on `sizeBytes` for filtering, sorting, or comparison against a
+threshold silently received `null` for every rutracker row.
 
-**Why this is a latent finding rather than a fix:** Adding raw-byte parsing
-to the rutracker scraper is non-trivial (the scrape would need to parse
-"GB"/"MiB"/"KB"/etc. unit strings into bytes, which is a fertile source of
-locale-rounding bugs). Deferring to a dedicated SP-3 sub-task that owns
-unit parsing keeps Section D's scope clean.
-
-**Mitigation trigger:** before Phase 4 cross-tracker fallback comparison
-logic (which may want to rank by size), one of:
-1. Augment the rutracker scraper to parse the formatted size string into
-   raw bytes server-side and surface a numeric field on `TorrentDto` /
-   `TorrentDataDto`. The forward mappers would then populate
-   `TorrentItem.sizeBytes` from the new field.
-2. Move the unit-parsing into the forward mapper itself with a tested
-   helper (`fun parseRuTrackerSize(s: String): Long?`) and document any
-   locale assumptions.
-3. Document that rutracker `TorrentItem.sizeBytes` is structurally null and
-   that downstream features must consult the metadata key — making this an
-   accepted capability degradation rather than a tripwire.
+**Resolution (2026-04-30):**
+- New `RuTrackerSizeParser` (internal object) in
+  `core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker/mapper/RuTrackerSizeParser.kt`.
+  Tolerates null/blank input by returning null; tolerates U+00A0 between
+  number and unit; supports `B/KB/MB/GB/TB` (case-insensitive); accepts
+  comma-decimal as well as period-decimal.
+- `SearchPageMapper.toTorrentItem` (the `TorrentDto` extension) now calls
+  the parser; `TopicMapper.toTorrentItem` (the `TopicPageDto` extension) does
+  the same. `CategoryPageMapper`'s `TopicDto` branch is intentionally
+  unchanged — `TopicDto` has no `size` field upstream.
+- Tests: `RuTrackerSizeParserTest` (15 cases covering integer GB, decimal
+  GB period+comma, MB, KB, B, integer TB, decimal TB Double-precision
+  truncation, case-insensitive, null, blank, garbage, no-whitespace,
+  non-breaking-space). `SearchPageMapperTest` and `TopicMapperTest` now
+  positively assert non-null `sizeBytes` on the fixtures with a `size`
+  field.
 
 **Audit linkage:** Phase 2 Section D combined review (commit landing the
-LF-6 entry).
+LF-6 entry); Phase 5 wrap follow-up (commit `lf-6-resolved`).

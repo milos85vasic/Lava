@@ -61,8 +61,12 @@ class SearchPageMapperTest {
         assertEquals("magnet:?xt=urn:btih:abcdef", item.magnetUri)
         assertEquals("OS Distros", item.category)
         assertEquals(Instant.fromEpochSeconds(1_700_000_000L), item.publishDate)
-        // sizeBytes intentionally null — legacy DTO already stores formatted "4.7 GB"
-        assertNull(item.sizeBytes)
+        // LF-6 RESOLVED 2026-04-30: sizeBytes is now populated by parsing
+        // the formatted display string ("4.7 GB") via [RuTrackerSizeParser].
+        // Primary assertion on a user-visible numeric value the SDK consumer
+        // reads when ranking or filtering by size.
+        // 4.7 * 2^30 = 5_046_586_572.8 -> Long truncates.
+        assertEquals(java.lang.Long.valueOf(5_046_586_572L), item.sizeBytes)
         assertEquals("4.7 GB", item.metadata["rutracker.size_text"])
         assertEquals("33", item.metadata["rutracker.categoryId"])
         assertEquals("OS Distros", item.metadata["rutracker.categoryName"])

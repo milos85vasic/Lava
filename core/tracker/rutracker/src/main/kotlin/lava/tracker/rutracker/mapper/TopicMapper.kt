@@ -109,7 +109,12 @@ private fun TopicPageDto.toTorrentItem(): TorrentItem {
         trackerId = "rutracker",
         torrentId = id,
         title = title,
-        sizeBytes = null,
+        // LF-6 RESOLVED 2026-04-30: parse the formatted display string
+        // back into a binary byte count via [RuTrackerSizeParser]. Returns
+        // null when the upstream DTO had no size at all OR the string
+        // failed to parse — the metadata key remains as the user-visible
+        // fallback either way.
+        sizeBytes = RuTrackerSizeParser.parse(data?.size),
         seeders = data?.seeds,
         leechers = data?.leeches,
         infoHash = null,

@@ -21,8 +21,12 @@ import javax.inject.Inject
  * Information-loss notes (relevant to Section E reverse mapping):
  *  - The legacy [TorrentDto.size] is already formatted (e.g. "1.2 GB"); the
  *    raw byte count is dropped by the scraper before this mapper sees it.
- *    We preserve the formatted string in metadata under
- *    "rutracker.size_text" but cannot populate [TorrentItem.sizeBytes].
+ *    We preserve the formatted string in metadata under "rutracker.size_text"
+ *    AND, since LF-6 was resolved on 2026-04-30, parse it back into a
+ *    [TorrentItem.sizeBytes] via [RuTrackerSizeParser]. The parser tolerates
+ *    null/blank input and unparseable strings by returning null — i.e. the
+ *    field can still be null when the upstream DTO had no size at all, but
+ *    is never null when the DTO carried a parseable formatted string.
  *  - The legacy [TorrentDto.date] is an epoch-seconds Long when present.
  *    Malformed values are tolerated by yielding null.
  */
@@ -54,7 +58,12 @@ internal fun TorrentDto.toTorrentItem(): TorrentItem {
         trackerId = "rutracker",
         torrentId = id,
         title = title,
-        sizeBytes = null,
+        // LF-6 RESOLVED 2026-04-30: parse the formatted display string
+        // ("4.7 GB") back into a binary byte count. Forward-leaning
+        // consumers (cross-tracker fallback ranking, size-based filters)
+        // can now rely on a non-null value when the upstream DTO carries
+        // a parseable size.
+        sizeBytes = RuTrackerSizeParser.parse(torrent.size),
         seeders = seeds,
         leechers = leeches,
         infoHash = null,

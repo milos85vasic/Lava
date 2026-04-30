@@ -58,6 +58,9 @@ class TopicMapperTest {
         assertEquals(555, detail.torrent.seeders)
         assertEquals(12, detail.torrent.leechers)
         assertEquals("Movies", detail.torrent.category)
+        // LF-6 RESOLVED 2026-04-30: sizeBytes parsed from "8.0 GB" string.
+        // 8 * 2^30 = 8_589_934_592.
+        assertEquals(java.lang.Long.valueOf(8_589_934_592L), detail.torrent.sizeBytes)
         // Description flattens to plain text (rich AST is lossy on round-trip).
         assertNotNull(detail.description)
         assertTrue(
@@ -145,6 +148,9 @@ class TopicMapperTest {
         // ISO-8601 string parses cleanly to Instant.
         assertNotNull(page.topic.torrent.publishDate)
         assertEquals("4.5 GB", page.topic.torrent.metadata["rutracker.size_text"])
+        // LF-6 RESOLVED 2026-04-30: sizeBytes parsed from "4.5 GB".
+        // 4.5 * 2^30 = 4_831_838_208.
+        assertEquals(java.lang.Long.valueOf(4_831_838_208L), page.topic.torrent.sizeBytes)
     }
 
     @Test
