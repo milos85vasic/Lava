@@ -5,10 +5,12 @@ import lava.models.settings.Endpoint
 import lava.models.settings.isLocalHost
 import lava.network.api.NetworkApi
 import lava.network.data.NetworkApiRepository
+import lava.network.dto.FileDto
 import lava.network.dto.auth.AuthResponseDto
 import lava.network.dto.search.SearchPeriodDto
 import lava.network.dto.search.SearchSortOrderDto
 import lava.network.dto.search.SearchSortTypeDto
+import lava.network.dto.topic.TorrentDto
 import lava.tracker.api.model.AuthState
 import lava.tracker.api.model.CaptchaSolution
 import lava.tracker.api.model.LoginRequest
@@ -232,19 +234,42 @@ class SwitchingNetworkApi @Inject constructor(
         token: String,
         id: String,
         page: Int?,
-    ) = api().getTopic(token, id, page)
+    ) = if (shouldUseSdk()) {
+        // Legacy `page` argument is unused on this code path because the
+        // historical `GetTopicUseCase` ignored it as well — fetching the
+        // first page of the topic is the only operation the rutracker
+        // scraper supports under this endpoint name. The SDK facade
+        // matches that behaviour (suspending TopicTracker.getTopic(id)).
+        val detail = sdk.getTopic(id)
+            ?: return api().getTopic(token, id, page)
+        mappers.topicDetailToDto(detail)
+    } else {
+        api().getTopic(token, id, page)
+    }
 
     override suspend fun getTopicPage(
         token: String,
         id: String,
         page: Int?,
-    ) = api().getTopicPage(token, id, page)
+    ) = if (shouldUseSdk()) {
+        val topicPage = sdk.getTopicPage(id, page = page ?: 0)
+            ?: return api().getTopicPage(token, id, page)
+        mappers.topicPageToDto(topicPage)
+    } else {
+        api().getTopicPage(token, id, page)
+    }
 
     override suspend fun getCommentsPage(
         token: String,
         id: String,
         page: Int?,
-    ) = api().getCommentsPage(token, id, page)
+    ) = if (shouldUseSdk()) {
+        val comments = sdk.getCommentsPage(id, page = page ?: 0)
+            ?: return api().getCommentsPage(token, id, page)
+        mappers.commentsPageToDto(comments)
+    } else {
+        api().getCommentsPage(token, id, page)
+    }
 
     override suspend fun addComment(token: String, topicId: String, message: String) =
         if (shouldUseSdk()) {
@@ -253,11 +278,50 @@ class SwitchingNetworkApi @Inject constructor(
             api().addComment(token, topicId, message)
         }
 
-    override suspend fun getTorrent(token: String, id: String) =
-        api().getTorrent(token, id)
+    override suspend fun getTorrent(token: String, id: String): TorrentDto {
+        if (shouldUseSdk()) {
+            val detail = sdk.getTopic(id)
+                ?: return api().getTorrent(token, id)
+            // [topicDetailToDto] returns a sealed [ForumTopicDto] (Torrent /
+            // Topic / CommentsPage). The legacy NetworkApi.getTorrent
+            // signature requires a [TorrentDto]. The rutracker scraper for
+            // topic.php always emits a TorrentDto on the success path —
+            // which the reverse mapper preserves on the default branch.
+            // If the SDK round-trip somehow yields a non-Torrent shape
+            // (e.g. metadata["rutracker.kind"] == "topic" or "comments"),
+            // we fall back to the legacy api() rather than ClassCastException
+            // out, because the legacy contract guarantees TorrentDto.
+            return when (val dto = mappers.topicDetailToDto(detail)) {
+                is TorrentDto -> dto
+                else -> api().getTorrent(token, id)
+            }
+        }
+        return api().getTorrent(token, id)
+    }
 
-    override suspend fun download(token: String, id: String) =
-        api().download(token, id)
+    override suspend fun download(token: String, id: String): FileDto {
+        if (shouldUseSdk()) {
+            val bytes = sdk.downloadTorrent(id)
+                ?: return api().download(token, id)
+            // SP-3a-2.35 parity NOTE: The SDK download facade returns
+            // ByteArray only — the legacy FileDto carries
+            // contentDisposition + contentType too. Those headers are
+            // server-supplied diagnostics and ARE NOT consumed anywhere
+            // in the Android client (only the proxy fat JAR uses them
+            // server-side). We synthesise the standard rutracker
+            // attachment header pair so the FileDto round-trip is shaped
+            // correctly for any future downstream consumer; if a
+            // user-visible regression surfaces from this, expanding the
+            // SDK facade with a proper FileOutcome / FileResult is the
+            // right fix.
+            return FileDto(
+                contentDisposition = "attachment; filename=$id.torrent",
+                contentType = "application/x-bittorrent",
+                bytes = bytes,
+            )
+        }
+        return api().download(token, id)
+    }
 }
 
 /**
