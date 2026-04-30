@@ -11,6 +11,18 @@
 #     the same script developers run by hand and the same that runs
 #     at tag time; it is the single source of truth for "shippable".
 #
+# Layer 2 dedup cache (SP-2 hook patch, 2026-04-30):
+#   - Mirror-policy pushes the same SHA to four upstreams in sequence;
+#     re-running scripts/ci.sh --changed-only against the same SHA on
+#     every push is purely redundant work because the gate's input
+#     (the SHA's tree) is identical on each invocation. The cache at
+#     .lava-ci-evidence/.pre-push-verified-shas (gitignored) records
+#     the SHAs verified in the last LAVA_PRE_PUSH_DEDUP_TTL seconds
+#     (default 3600). When every pushed SHA is in the cache and is
+#     fresh, Layer 2 is skipped with an explicit log message. Layer 1
+#     remains unconditional. Disable the cache with
+#     LAVA_PRE_PUSH_DEDUP_DISABLE=1 or LAVA_PRE_PUSH_DEDUP_TTL=0.
+#
 # The two layers are cumulative: violations in either layer reject the
 # push. Layer 1 is the cheap, surgical check; Layer 2 is the broad
 # script-driven gate.
@@ -27,6 +39,7 @@ url=$2
 # Determine the range of commits being pushed.
 zero=0000000000000000000000000000000000000000
 violations=()
+pushed_shas=()
 
 while read -r local_ref local_sha remote_ref remote_sha; do
   if [[ "$local_sha" == "$zero" ]]; then
@@ -43,6 +56,9 @@ while read -r local_ref local_sha remote_ref remote_sha; do
   fi
 
   for sha in $range; do
+    # Track every pushed SHA so the multi-mirror dedup cache below
+    # knows what to look up / record.
+    pushed_shas+=("$sha")
     # ===== Check 1: Hosted-CI config introduction (Local-Only CI/CD rule) =====
     if git diff-tree --no-commit-id --name-only -r "$sha" | grep -qE '^(\.github/workflows/|\.gitlab-ci\.yml|\.circleci/|azure-pipelines\.yml|bitbucket-pipelines\.yml|Jenkinsfile|appveyor\.yml|travis\.yml)'; then
       violations+=("$sha: introduces hosted-CI config (Local-Only CI/CD rule). Routine bypass forbidden.")
@@ -101,6 +117,75 @@ fi
 # If the operator wishes to push a WIP commit and run the gate
 # manually later, they can bypass with --no-verify and document the
 # emergency per the Local-Only CI/CD rule.
+#
+# ===== Multi-mirror dedup cache (SP-2 hook patch, 2026-04-30) =====
+# Forensic anchor: SP-3a Step 6+7 implementer used --no-verify on 3 of
+# 4 mirror pushes because re-running scripts/ci.sh --changed-only for
+# the same SHA on every mirror is purely redundant. Re-running an
+# identical gate against an identical SHA produces an identical
+# answer; the only thing that differs across pushes is the remote
+# being targeted, which Layer 2 does not look at.
+#
+# Resolution: cache the SHAs that have already passed Layer 2 in this
+# environment, and skip re-running Layer 2 if the SHA appears in the
+# cache and was verified within the configured TTL (default 1h). The
+# cache is local-only, gitignored, and entirely advisory — Layer 1 is
+# unconditional, and a cache miss falls back to running the full
+# gate. This is permitted by the Local-Only CI/CD rule because the
+# gate itself is identical; we are merely deduping invocations.
+#
+# Cache file format: one line per verified SHA, "<sha> <epoch>".
+# TTL: LAVA_PRE_PUSH_DEDUP_TTL seconds (default 3600). Setting it to
+# 0 disables the cache (Layer 2 always runs, like the pre-patch
+# behaviour). Setting LAVA_PRE_PUSH_DEDUP_DISABLE=1 also disables.
+DEDUP_CACHE_DIR=".lava-ci-evidence"
+DEDUP_CACHE_FILE="${DEDUP_CACHE_DIR}/.pre-push-verified-shas"
+DEDUP_TTL="${LAVA_PRE_PUSH_DEDUP_TTL:-3600}"
+DEDUP_DISABLED="${LAVA_PRE_PUSH_DEDUP_DISABLE:-0}"
+
+# Determine whether ALL pushed local SHAs have a fresh cache entry.
+# pushed_shas is populated in the per-SHA loop above. A cache hit on
+# every pushed SHA means Layer 2 was already run successfully against
+# this exact SHA set within the TTL — re-running it would produce the
+# same result on the same input. A cache miss on any SHA falls back
+# to running Layer 2 as normal, after which the cache is refreshed.
+all_shas_cached=true
+if [[ "$DEDUP_DISABLED" != "1" && "$DEDUP_TTL" -gt 0 && ${#pushed_shas[@]} -gt 0 && -f "$DEDUP_CACHE_FILE" ]]; then
+  now=$(date +%s)
+  for sha in "${pushed_shas[@]}"; do
+    cached_line=$(grep -E "^${sha} " "$DEDUP_CACHE_FILE" 2>/dev/null || true)
+    if [[ -z "$cached_line" ]]; then
+      all_shas_cached=false
+      break
+    fi
+    cached_ts="${cached_line##* }"
+    age=$(( now - cached_ts ))
+    if [[ "$age" -ge "$DEDUP_TTL" ]]; then
+      all_shas_cached=false
+      break
+    fi
+  done
+else
+  all_shas_cached=false
+fi
+
+if [[ ${#pushed_shas[@]} -gt 0 && "$all_shas_cached" == "true" ]]; then
+  echo "==============================================================="
+  echo "Pre-push: skipping Layer 2 (scripts/ci.sh --changed-only)"
+  echo "  reason: all ${#pushed_shas[@]} pushed SHA(s) already verified"
+  echo "  cache:  $DEDUP_CACHE_FILE (TTL=${DEDUP_TTL}s)"
+  for sha in "${pushed_shas[@]}"; do
+    cached_line=$(grep -E "^${sha} " "$DEDUP_CACHE_FILE" 2>/dev/null || true)
+    cached_ts="${cached_line##* }"
+    if [[ -n "$cached_ts" ]]; then
+      ts_human=$(date -d "@${cached_ts}" '+%Y-%m-%dT%H:%M:%SZ' -u 2>/dev/null || echo "$cached_ts")
+      echo "    - $sha verified at $ts_human"
+    fi
+  done
+  echo "==============================================================="
+  exit 0
+fi
+
 if [[ -x ./scripts/ci.sh ]]; then
   echo "==============================================================="
   echo "Pre-push: invoking scripts/ci.sh --changed-only (SP-3a Layer 2)"
@@ -112,6 +197,44 @@ if [[ -x ./scripts/ci.sh ]]; then
     echo "Routine bypass (--no-verify) is itself a Seventh Law incident."
     echo "==============================================================="
     exit 1
+  fi
+
+  # Layer 2 passed — refresh the cache for every pushed SHA so that
+  # subsequent pushes of the same SHA(s) to other mirrors skip the
+  # redundant re-run.
+  if [[ "$DEDUP_DISABLED" != "1" && "$DEDUP_TTL" -gt 0 && ${#pushed_shas[@]} -gt 0 ]]; then
+    mkdir -p "$DEDUP_CACHE_DIR"
+    now=$(date +%s)
+    # Strip any pre-existing entries for the SHAs we are about to
+    # re-add; rewrite cache atomically. Old entries beyond the TTL
+    # are also pruned in the same pass.
+    tmp_cache="${DEDUP_CACHE_FILE}.tmp.$$"
+    : > "$tmp_cache"
+    if [[ -f "$DEDUP_CACHE_FILE" ]]; then
+      while IFS=' ' read -r line_sha line_ts; do
+        # Drop empties and stale entries.
+        [[ -z "$line_sha" ]] && continue
+        [[ -z "$line_ts" ]] && continue
+        age=$(( now - line_ts ))
+        [[ "$age" -ge "$DEDUP_TTL" ]] && continue
+        # Drop entries we are about to replace.
+        skip=false
+        for sha in "${pushed_shas[@]}"; do
+          if [[ "$sha" == "$line_sha" ]]; then
+            skip=true; break
+          fi
+        done
+        $skip && continue
+        printf '%s %s\n' "$line_sha" "$line_ts" >>"$tmp_cache"
+      done <"$DEDUP_CACHE_FILE"
+    fi
+    for sha in "${pushed_shas[@]}"; do
+      printf '%s %s\n' "$sha" "$now" >>"$tmp_cache"
+    done
+    mv "$tmp_cache" "$DEDUP_CACHE_FILE"
+    echo "==============================================================="
+    echo "Pre-push: cached ${#pushed_shas[@]} verified SHA(s) in $DEDUP_CACHE_FILE"
+    echo "==============================================================="
   fi
 fi
 

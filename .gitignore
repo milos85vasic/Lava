@@ -14,3 +14,10 @@ keystores/
 .claude/
 releases/
 tools/lava-containers/bin/
+
+# Pre-push hook multi-mirror dedup cache (advisory; recreated on demand).
+# Forensic anchor: SP-3a Step 6+7 used --no-verify on 3-of-4 mirror
+# pushes because re-running scripts/ci.sh --changed-only against an
+# identical SHA was redundant. The hook now caches verified SHAs in
+# this file and skips Layer 2 on cache hit. Local-only by design.
+.lava-ci-evidence/.pre-push-verified-shas
