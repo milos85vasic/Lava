@@ -1,0 +1,23 @@
+{
+  "task": "0.2",
+  "subject": "TestBookmarksRepository — complete stub bluff",
+  "real_counterpart": "BookmarksRepositoryImpl (lava.data.impl.repository, Room BookmarkDao with @PrimaryKey on category id; newTopics encoded as JSONArray)",
+  "stub_status": "Every method body is TODO('Not yet implemented') except clear() which is a no-op. clear() is the only method MenuViewModelTest could currently exercise, and no MenuViewModelTest test invokes MenuAction.ClearBookmarks — so the stub is latent (constructed-but-never-called).",
+  "test": "TestBookmarksRepositoryStubBluffTest (INVERTED: 3 tests pass *because* the fake throws NotImplementedError on getAllBookmarks, isBookmark, and observeBookmarks)",
+  "test_file": "core/testing/src/test/kotlin/lava/testing/repository/TestBookmarksRepositoryStubBluffTest.kt",
+  "test_methods": [
+    "getAllBookmarks_throws_NotImplementedError_proving_fake_is_a_stub_bluff",
+    "isBookmark_throws_NotImplementedError_proving_fake_is_a_stub_bluff",
+    "observeBookmarks_throws_NotImplementedError_proving_fake_is_a_stub_bluff"
+  ],
+  "decision": "Option A — document the stub status as a known bluff in the exemption ledger and defer full behavioral-equivalence implementation to the first SP-3a feature that actually consumes BookmarksRepository (anticipated Phase 4 tracker_settings UI or later).",
+  "menu_viewmodel_test_finding": "feature/menu/src/test/kotlin/lava/menu/MenuViewModelTest.kt:115-118 constructs ClearBookmarksUseCase(bookmarksRepository = TestBookmarksRepository(), ...) but no @Test method invokes MenuAction.ClearBookmarks — confirmed by grep of the file. The stub is wired but never called; MenuViewModelTest passes today only because the bookmark code path is dormant.",
+  "mutation": "Replaced TestBookmarksRepository.isBookmark() body from `TODO(\"Not yet implemented\")` to `return false`",
+  "observed": "java.lang.AssertionError: expected kotlin.NotImplementedError to be thrown, but nothing was thrown — at TestBookmarksRepositoryStubBluffTest.kt:65 (isBookmark_throws_NotImplementedError_proving_fake_is_a_stub_bluff). Test report XML: core/testing/build/test-results/testDebugUnitTest/TEST-lava.testing.repository.TestBookmarksRepositoryStubBluffTest.xml. The other two tests (getAllBookmarks_..., observeBookmarks_...) remained green during the mutation, confirming the failure was scoped exactly to the mutated method.",
+  "reverted": "git checkout -- core/testing/src/main/kotlin/lava/testing/repository/TestBookmarksRepository.kt",
+  "post_revert_run": "BUILD SUCCESSFUL — all 3 inverted tests pass against the restored stub.",
+  "verified_at_pre_amend": "e55b0215a1e92852d581c2d54e266b69a1f894cf (parent of this commit; this entry will be amended in-place by the commit it ships with)",
+  "deferred_to": "First SP-3a consumer of BookmarksRepository (anticipated SP-3a Phase 4 tracker_settings or later)",
+  "ledger_entry": "docs/superpowers/specs/2026-04-30-sp3a-coverage-exemptions.md (entry seeded by this task; Task 0.7 will append Phase-0 summary later)",
+  "ledger_clause": "6.A + Third Law"
+}
