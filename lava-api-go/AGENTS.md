@@ -28,3 +28,28 @@ Local CI: `scripts/ci.sh`. Single source of truth.
 
 ## Host Machine Stability Directive
 Per `/CLAUDE.md` and propagated through `Submodules/*/CLAUDE.md`: never run commands that suspend, hibernate, sign-out, or kill the user session. Cap test parallelism (`GOMAXPROCS=2`, `nice -n 19` are recommended).
+
+## SP-3a-bridge expectations (added 2026-04-30)
+
+The Kotlin-side multi-tracker SDK shipped with SP-3a binds the Go-side
+rutracker bridge work (planned post-SP-2) to root constitutional
+clauses 6.D, 6.E, and 6.F:
+
+- **6.D Behavioral Coverage Contract.** Every Go interface added to
+  mirror the Kotlin tracker SDK shape (e.g. a Go `tracker.Client` or
+  equivalent) MUST have real-stack test coverage at the same surfaces
+  a real client touches. Coverage exemptions go in
+  `docs/superpowers/specs/<bridge-spec>-coverage-exemptions.md`.
+- **6.E Capability Honesty.** When the Go server adds rutor (or any
+  other tracker), every declared capability MUST resolve to a real
+  handler. The cross-backend parity test in `tests/parity/` is the
+  mechanical gate; a 501 / "Not implemented" body for a declared
+  capability is a constitutional violation.
+- **6.F Anti-Bluff Submodule Inheritance.** All vasic-digital
+  submodules pulled in by lava-api-go inherit 6.A-6.E and the Seventh
+  Law recursively. The Bluff-Audit commit-message stamp applies to
+  every Go test commit (`*_test.go`).
+
+The bridge plan is not yet written. The Go-side bridge plan link will
+appear here once SP-2 ships and the bridge spec is drafted. Until then
+the binding is on the contract, not on a specific PR.
