@@ -52,7 +52,8 @@ Lava/
 ├── core/                   # 17 core library module directories
 │   ├── auth/api, auth/impl
 │   ├── common, data, database, designsystem, dispatchers, domain, downloads, logger, models, navigation, notifications, preferences, testing, ui
-│   └── network/api, network/impl, network/rutracker
+│   └── network/api, network/impl
+│   └── tracker/api, tracker/mirror, tracker/registry, tracker/rutracker, tracker/testing
 │   └── work/api, work/impl
 ├── feature/                # 15 feature modules
 │   ├── account, bookmarks, category, connection, favorites, forum, login, main, menu, rating, search, search_input, search_result, topic, visited
@@ -67,7 +68,7 @@ Lava/
 
 - `:app` — Entry point. Contains `Application`, `MainActivity`, `TvActivity`, and the top-level navigation graph. Depends on every core and feature module.
 - `:proxy` — Ktor/Netty server exposing REST endpoints. Built as a fat JAR and containerized with Docker.
-- `core:*` — Shared libraries. Pure Kotlin modules (`models`, `common`, `auth/api`, `network/api`, `network:rutracker`, `work/api`) have **no Android dependency**.
+- `core:*` — Shared libraries. Pure Kotlin modules (`models`, `common`, `auth/api`, `network/api`, `tracker:rutracker`, `tracker:api`, `work/api`) have **no Android dependency**.
 - `feature:*` — Screen-level modules. Each feature typically contains a ViewModel (Orbit MVI), Compose screens, and a navigation contract.
 
 ## Build System & Convention Plugins

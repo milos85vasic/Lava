@@ -91,3 +91,46 @@ the `lava-api-go` service in `docker-compose.yml`, the author MUST:
 
 **Audit linkage:** Task 0.6 evidence at
 `.lava-ci-evidence/sp3a-bluff-audit/0.6-healthprobe-contract.json`.
+
+### LF-3 — Tracker chain compiles to JVM 21 while Android targets JVM 17 (linked: Phase 2 Section A)
+
+**Locations:**
+- `buildSrc/src/main/kotlin/KotlinTrackerModuleConventionPlugin.kt`
+- `core/tracker/api/build.gradle.kts`
+- `core/tracker/testing/build.gradle.kts`
+
+**Observation:** Phase 2 Section A (Task 2.5) required the new `:core:tracker:rutracker`
+module to compile via `lava.kotlin.tracker.module`. At HEAD the Tracker-SDK
+composite-build's `:api`/`:mirror`/`:registry`/`:testing` projects default to the
+JDK 21 toolchain and emit JVM 21 class files. The Lava-side tracker convention
+plugin previously targeted JVM 17, which produced "class file has wrong version 65.0,
+should be 61.0" failures the moment any Lava module on the JVM-17 chain (e.g.
+`:core:tracker:api`, `:core:tracker:testing`) tried to consume an SDK type. To
+unblock Section A's required `BUILD SUCCESSFUL` acceptance gate, the implementer
+bumped JVM target to 21 in three places: the new tracker convention plugin, and the
+two pure-Kotlin Lava-side tracker modules that were previously on JVM_17 via
+`lava.kotlin.library`. The rest of the codebase (Android modules via
+`KotlinAndroid.kt`, regular Kotlin libraries via `KotlinLibraryConventionPlugin.kt`)
+remains JVM_17 — the APK still targets JVM 17 bytecode.
+
+**Why this is a latent finding rather than a fix:** The plan does not authorize a
+JVM-target bump and the cleaner resolution is upstream — set `kotlin { jvmToolchain(17) }`
+on each Tracker-SDK Gradle module. That requires a new Tracker-SDK pin and a fresh
+4-upstream mirror push. Deferred so the rename can land cleanly in Phase 2 Section A.
+
+**Mitigation trigger:** before Section F (Tasks 2.28-2.31, Hilt + LavaTrackerSdk
+wiring) lands the tracker chain into the Android `:app` Hilt module, the author MUST
+verify one of:
+1. The Tracker-SDK pin has been updated upstream to target JVM 17 in its
+   convention/module Gradle scripts, the new pin recorded in `Submodules/Tracker-SDK/`,
+   and the three JVM_21 overrides reverted to JVM_17 in `KotlinTrackerModuleConventionPlugin.kt`,
+   `core/tracker/api/build.gradle.kts`, `core/tracker/testing/build.gradle.kts`.
+2. The Android build (AGP/D8) is configured to accept JVM 21 input bytecode, and the
+   rest of the codebase is bumped to JVM 21 for consistency. (Larger blast radius —
+   only choose this path if upstream Tracker-SDK is sticky on JVM 21.)
+
+If neither condition is met before Section F, `:app:assembleDebug` will fail at D8
+dexing the moment the tracker registry lands on the dependency graph.
+
+**Audit linkage:** Phase 2 Section A spec compliance review (commit landing the
+LF-3 entry).
