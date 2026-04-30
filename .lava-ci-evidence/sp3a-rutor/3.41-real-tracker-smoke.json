@@ -1,0 +1,48 @@
+{
+  "task": "sp3a-3.41",
+  "subject": "RealRuTorIntegrationTest — real-tracker smoke test against rutor.info",
+  "operator_run_at": "2026-04-30T18:32:02",
+  "host": "nezha",
+  "command": "./gradlew :core:tracker:rutor:integrationTest -PrealTrackers=true --no-daemon",
+  "result": "BUILD SUCCESSFUL",
+  "test_count": 4,
+  "skipped": 0,
+  "failures": 0,
+  "errors": 0,
+  "duration_seconds": 2.082,
+  "tests": [
+    {
+      "name": "real search for ubuntu returns at least 3 results with valid infohashes",
+      "duration_seconds": 1.197,
+      "result": "PASS",
+      "exercises": "GET https://rutor.info/search/0/0/000/0/ubuntu — 30+ results parsed, infohashes match SHA-1 regex, all items report trackerId=rutor"
+    },
+    {
+      "name": "real topic fetch returns title and magnet for first search hit",
+      "duration_seconds": 0.879,
+      "result": "PASS",
+      "exercises": "GET https://rutor.info/torrent/<id> + GET https://rutor.info/descriptions/<id>.files — torrent title non-blank, two-fetch dance succeeds"
+    },
+    {
+      "name": "real check-auth returns Unauthenticated when no userid cookie",
+      "duration_seconds": 0.002,
+      "result": "PASS",
+      "exercises": "Anonymous client cookie introspection (no network call) — returns AuthState.Unauthenticated"
+    },
+    {
+      "name": "real login with operator credentials produces userid cookie",
+      "duration_seconds": 0.002,
+      "result": "SKIPPED_NO_CREDENTIALS",
+      "exercises": "POST https://rutor.info/login.php — only runs when LAVA_TEST_USERNAME and LAVA_TEST_PASSWORD env vars are set. Operator-driven verification."
+    }
+  ],
+  "anti_bluff_pact_compliance": {
+    "clause_1_same_surfaces": "Tests exercise RuTorClient.getFeature() exactly as LavaTrackerSdk does in production.",
+    "clause_2_falsifiability": "Each test asserts on user-visible state (item count, infoHash regex, title non-blank). Breaking the parser (e.g. swap RuTorSearchParser to return emptyList()) would cause the search test to fail with 'should return >= 3 items, got 0'.",
+    "clause_3_primary_assertion": "result.items.size, item.infoHash regex, item.title.isNotBlank() — all observable on a real device.",
+    "clause_4_integration_challenge": "Real network, real rutor.info HTML, real RuTorClient + RuTorHttpClient + 5 parsers. No mocks anywhere in the test path.",
+    "clause_5_ci_green_not_sufficient": "This test gates Phase 3 acceptance per the plan. Operator-driven (-PrealTrackers=true), not run on default CI; per Local-Only CI/CD constitutional rule, real-tracker tests are operator-driven verification, not gate-driven CI."
+  },
+  "ledger_clause": "6.4 (Integration Challenge Tests are the load-bearing acceptance gate)",
+  "phase_3_acceptance_gate": "GREEN — search/topic/checkAuth flows all work end-to-end against live rutor.info."
+}
