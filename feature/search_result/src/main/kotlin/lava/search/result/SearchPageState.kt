@@ -11,6 +11,18 @@ internal data class SearchPageState(
     val appBarExpanded: Boolean = false,
     val searchContent: SearchResultContent = SearchResultContent.Initial,
     val loadStates: LoadStates = LoadStates.Idle,
+    /**
+     * SP-3a Phase 4 (Task 4.18). When the SDK emits
+     * SearchOutcome.CrossTrackerFallbackProposed, this slot holds the
+     * pair (failedTrackerId, proposedTrackerId) so [SearchResultScreen]
+     * can render the [CrossTrackerFallbackModal]. Null means no modal.
+     */
+    val crossTrackerFallback: CrossTrackerFallbackProposal? = null,
+)
+
+internal data class CrossTrackerFallbackProposal(
+    val failedTrackerId: String,
+    val proposedTrackerId: String,
 )
 
 internal sealed interface SearchResultContent {

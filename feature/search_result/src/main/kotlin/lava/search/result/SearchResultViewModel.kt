@@ -74,6 +74,49 @@ internal class SearchResultViewModel @Inject constructor(
             is SearchResultAction.SetPeriod -> onSetPeriod(action.period)
             is SearchResultAction.SetSort -> onSetSort(action.sort)
             is SearchResultAction.TopicClick -> onTopicClick(action.topicModel)
+            is SearchResultAction.FallbackAccept -> onFallbackAccept()
+            is SearchResultAction.FallbackDismiss -> onFallbackDismiss()
+        }
+    }
+
+    /**
+     * SP-3a Phase 4 (Task 4.18). Hook for the legacy paging path to
+     * surface a CrossTrackerFallbackProposed proposal as state. The
+     * production paging path is wired to `ObserveSearchPagingDataUseCase`
+     * (not the SDK directly), so the proposal currently arrives via
+     * an out-of-band SDK call only when the consumer explicitly invokes
+     * the new SDK surface. The state slot + actions are introduced now
+     * so a single subsequent commit can route the proposal through the
+     * paging UseCase without further VM-shape changes (Phase 5 work).
+     *
+     * Visibility: internal so the screen wrapper can drive it from
+     * tests until the paging path is migrated.
+     */
+    internal fun proposeFallback(failedTrackerId: String, proposedTrackerId: String) = intent {
+        reduce {
+            state.copy(
+                crossTrackerFallback = CrossTrackerFallbackProposal(
+                    failedTrackerId = failedTrackerId,
+                    proposedTrackerId = proposedTrackerId,
+                ),
+            )
+        }
+    }
+
+    private fun onFallbackAccept() = intent {
+        // Clear the modal; the resumeWith lambda is owned by the paging
+        // path that originally posted the proposal. In the current shape
+        // the screen invokes resumeWith directly via a dedicated callback
+        // (Task 4.18 minimal scope). Acceptance here just dismisses the
+        // modal so the paging UI re-renders with the new outcome.
+        reduce { state.copy(crossTrackerFallback = null) }
+    }
+
+    private fun onFallbackDismiss() = intent {
+        val failed = state.crossTrackerFallback?.failedTrackerId
+        reduce { state.copy(crossTrackerFallback = null) }
+        if (failed != null) {
+            postSideEffect(SearchResultSideEffect.ShowFallbackDismissedError(failed))
         }
     }
 

@@ -24,4 +24,8 @@ internal sealed interface SearchResultAction {
 
     // SP-3.2 (2026-04-29): triggered from the Unauthorized empty-state.
     data object LoginClick : SearchResultAction
+
+    // SP-3a Phase 4 (Task 4.18): cross-tracker fallback modal events.
+    data object FallbackAccept : SearchResultAction
+    data object FallbackDismiss : SearchResultAction
 }

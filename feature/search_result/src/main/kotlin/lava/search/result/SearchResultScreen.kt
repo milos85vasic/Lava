@@ -64,6 +64,8 @@ internal fun SearchResultScreen(
             is SearchResultSideEffect.OpenSearchResult -> openSearchResult(sideEffect.filter)
             is SearchResultSideEffect.OpenTopic -> openTopic(sideEffect.id)
             is SearchResultSideEffect.ShowFavoriteToggleError -> snackbarHost.showSnackbar(favoriteToggleError)
+            is SearchResultSideEffect.ShowFallbackDismissedError ->
+                snackbarHost.showSnackbar("${sideEffect.failedTracker} is unavailable")
         }
     }
     val state by viewModel.collectAsState()
