@@ -13,6 +13,7 @@ dependencies {
     api(project(":core:tracker:registry"))
     api(project(":core:tracker:mirror"))
     api(project(":core:tracker:rutracker"))
+    api(project(":core:tracker:rutor"))
 
     implementation(project(":core:auth:api"))
 

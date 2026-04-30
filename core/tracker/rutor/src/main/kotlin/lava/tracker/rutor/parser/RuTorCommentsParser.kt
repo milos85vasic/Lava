@@ -4,6 +4,7 @@ import lava.tracker.api.model.Comment
 import lava.tracker.api.model.CommentsPage
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Element
+import javax.inject.Inject
 
 /**
  * Parses rutor.info comment listings.
@@ -33,7 +34,7 @@ import org.jsoup.nodes.Element
  * `<div id="comments">` selector path; if not, it returns an empty page rather
  * than fabricating a non-zero comment count.
  */
-class RuTorCommentsParser {
+class RuTorCommentsParser @Inject constructor() {
 
     fun parse(html: String, pageHint: Int = 0): CommentsPage {
         val doc = Jsoup.parse(html)

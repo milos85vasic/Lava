@@ -4,6 +4,7 @@ import lava.tracker.api.model.BrowseResult
 import lava.tracker.api.model.TorrentItem
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
+import javax.inject.Inject
 
 /**
  * Parses the HTML returned by `/browse/<page>/<cat>/<user>/<sort>` on rutor.info.
@@ -26,7 +27,7 @@ import org.jsoup.nodes.Document
  * Sixth Law clause 1: selectors were calibrated against the captured real fixtures
  * before this parser was committed.
  */
-class RuTorBrowseParser {
+class RuTorBrowseParser @Inject constructor() {
 
     private val rowParser = RuTorSearchParser()
 

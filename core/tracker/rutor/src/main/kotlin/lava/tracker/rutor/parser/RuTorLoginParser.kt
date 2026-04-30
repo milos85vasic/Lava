@@ -4,6 +4,7 @@ import lava.tracker.api.model.AuthState
 import lava.tracker.api.model.LoginResult
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
+import javax.inject.Inject
 
 /**
  * Parses rutor.info `/login.php` HTML responses.
@@ -40,7 +41,7 @@ import org.jsoup.nodes.Document
  * Sixth Law clause 1: detection logic was calibrated against actual rutor HTML;
  * the failure fixture is hand-crafted but follows the same DOM idioms.
  */
-class RuTorLoginParser {
+class RuTorLoginParser @Inject constructor() {
 
     enum class Outcome {
         Success,

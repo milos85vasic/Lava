@@ -6,6 +6,7 @@ import lava.tracker.api.model.TorrentItem
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
+import javax.inject.Inject
 
 /**
  * Parses `/torrent/<id>[/<slug>]` topic pages on rutor.info.
@@ -39,7 +40,7 @@ import org.jsoup.nodes.Element
  * Sixth Law clause 1: structure was confirmed against the real fixtures before
  * any selectors were committed.
  */
-class RuTorTopicParser {
+class RuTorTopicParser @Inject constructor() {
 
     fun parse(html: String, topicIdHint: String? = null): TopicDetail {
         val doc = Jsoup.parse(html)

@@ -1,7 +1,5 @@
 package lava.tracker.client
 
-import javax.inject.Inject
-import javax.inject.Singleton
 import lava.sdk.api.MapPluginConfig
 import lava.tracker.api.TrackerClient
 import lava.tracker.api.TrackerDescriptor
@@ -22,6 +20,8 @@ import lava.tracker.api.model.TopicDetail
 import lava.tracker.api.model.TopicPage
 import lava.tracker.api.model.TorrentItem
 import lava.tracker.registry.TrackerRegistry
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * Public SDK facade — the entry point feature ViewModels use to talk to the

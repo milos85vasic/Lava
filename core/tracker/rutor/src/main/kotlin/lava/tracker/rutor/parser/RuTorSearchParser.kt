@@ -5,6 +5,7 @@ import lava.tracker.api.model.TorrentItem
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
+import javax.inject.Inject
 
 /**
  * Parses the HTML returned by `/search/<page>/<cat>/<opts>/<sort>/<query>` on rutor.info.
@@ -34,7 +35,7 @@ import org.jsoup.nodes.Element
  * synthetic shape. Selectors were calibrated against the real fixtures before code
  * was written.
  */
-class RuTorSearchParser {
+class RuTorSearchParser @Inject constructor() {
 
     /** [pageHint] is echoed back as `currentPage` when the page itself does not encode it. */
     fun parse(html: String, pageHint: Int = 0): SearchResult {

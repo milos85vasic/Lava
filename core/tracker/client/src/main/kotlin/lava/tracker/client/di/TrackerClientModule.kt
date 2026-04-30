@@ -10,11 +10,11 @@ import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.request.url
 import io.ktor.serialization.kotlinx.json.json
-import javax.inject.Named
-import javax.inject.Singleton
 import kotlinx.serialization.json.Json
+import lava.auth.api.TokenProvider
 import lava.tracker.registry.DefaultTrackerRegistry
 import lava.tracker.registry.TrackerRegistry
+import lava.tracker.rutor.RuTorClientFactory
 import lava.tracker.rutracker.RuTrackerClientFactory
 import lava.tracker.rutracker.api.RuTrackerInnerApi
 import lava.tracker.rutracker.domain.AddCommentUseCase
@@ -43,7 +43,8 @@ import lava.tracker.rutracker.domain.WithAuthorisedCheckUseCase
 import lava.tracker.rutracker.domain.WithFormTokenUseCase
 import lava.tracker.rutracker.domain.WithTokenVerificationUseCase
 import lava.tracker.rutracker.impl.RuTrackerInnerApiImpl
-import lava.auth.api.TokenProvider
+import javax.inject.Named
+import javax.inject.Singleton
 
 /**
  * Hilt graph for the new SP-3a tracker SDK path.
@@ -212,15 +213,23 @@ object TrackerClientModule {
     fun provideGetMagnetLinkUseCase(): GetMagnetLinkUseCase = GetMagnetLinkUseCase()
 
     // -----------------------------------------------------------------
-    // Registry — populated with the RuTracker factory. Section H may
-    // register additional trackers (RuTor etc.) here.
+    // Registry — populated with both the RuTracker and RuTor factories
+    // (SP-3a Task 3.40, Section J). The RuTor plugin's @Inject-constructor
+    // chain (RuTorClient → RuTorSearch/Browse/Topic/Comments/Auth/Download
+    // → RuTorHttpClient + parsers) is processed transitively by Hilt — no
+    // explicit @Provides for any RuTor class is necessary because every
+    // constructor in that subgraph is @Inject-annotated.
     // -----------------------------------------------------------------
 
     @Provides
     @Singleton
     fun provideTrackerRegistry(
         rutrackerFactory: RuTrackerClientFactory,
-    ): TrackerRegistry = DefaultTrackerRegistry().apply { register(rutrackerFactory) }
+        rutorFactory: RuTorClientFactory,
+    ): TrackerRegistry = DefaultTrackerRegistry().apply {
+        register(rutrackerFactory)
+        register(rutorFactory)
+    }
 
     private const val RUTRACKER_HTTP_CLIENT = "rutracker"
 }
