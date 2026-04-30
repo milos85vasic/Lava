@@ -1,0 +1,73 @@
+{
+  "date": "2026-04-30-go-side",
+  "protocol": "Seventh Law clause 5 — Recurring Bluff Hunt (Go-side)",
+  "phase_boundary": "SP-3a follow-up Task 1 (HEAD de23d17)",
+  "samples_total": 5,
+  "samples_method": "operator-selected from lava-api-go: utils_test.go, comments_test.go, passthrough_test.go (auth), topic_test.go (handlers), search_test.go (rutracker)",
+  "tooling": "cd lava-api-go && go test ./<package>/... -run <TestName> -v",
+  "targets": [
+    {
+      "test_file": "lava-api-go/internal/rutracker/utils_test.go",
+      "production_under_test": "rutracker.getTitle (utils.go) — strips [tag] runs from rutracker forum/search row titles before they reach the user",
+      "mutation_applied": "In utils.go getTitle, replaced the regex-strip + bracket-cleanup body with `return titleWithTags` (skip the strip-tags logic entirely).",
+      "test_run": "go test ./internal/rutracker/... -run TestGetTitle_StripsTags -v",
+      "test_outcome_after_mutation": "fail (CLEAN)",
+      "test_failure_message_if_failed": "TestGetTitle_StripsTags: utils_test.go:35 getTitle(\"[Genre] Title [1080p]\"): got \"[Genre] Title [1080p]\", want \"Title\"; getTitle(\"[Tag] Single\"): got \"[Tag] Single\", want \"Single\"",
+      "bluff_classification_if_bluff": null,
+      "remediation": "N/A — primary assertion is on the user-visible title string the row would render. Falsifiable on the strip-tags branch; the test covers each transformation row of the table.",
+      "reverted": true
+    },
+    {
+      "test_file": "lava-api-go/internal/rutracker/comments_test.go",
+      "production_under_test": "rutracker.ParseCommentsPage (comments.go) — drops the magnet-bearing OP from the comments list so a comments rendering does not double-count the torrent body",
+      "mutation_applied": "In comments.go ParseCommentsPage, commented out the entire firstPost magnet-removal block so the magnet-bearing OP leaks into the post list.",
+      "test_run": "go test ./internal/rutracker/... -run 'TestParseCommentsPage|TestGetCommentsPage' -v",
+      "test_outcome_after_mutation": "fail (CLEAN)",
+      "test_failure_message_if_failed": "TestParseCommentsPage_HappyPath: comments_test.go:66 expected 2 posts (magnet-bearing first post removed), got 3; TestParseCommentsPage_DropsMagnetFirstPost: comments_test.go:102 expected 2 posts (magnet-bearing first post MUST be dropped), got 3",
+      "bluff_classification_if_bluff": null,
+      "remediation": "N/A — the dedicated DropsMagnetFirstPost test pins the magnet-removal contract end-to-end; it failed loudly under the mutation. HappyPath also asserts the count.",
+      "reverted": true
+    },
+    {
+      "test_file": "lava-api-go/internal/auth/passthrough_test.go",
+      "production_under_test": "auth.UpstreamCookie (passthrough.go) — translates the Auth-Token header into the upstream Cookie value; SP-3.5 bug guard against double-prefixing 'bb_session=' on a token that already contains '='",
+      "mutation_applied": "In passthrough.go UpstreamCookie, removed the `if strings.Contains(tok, \"=\") { return tok }` branch so the function unconditionally prepends `bb_session=` (re-introducing the historical SP-3.5 bug).",
+      "test_run": "go test ./internal/auth/... -v",
+      "test_outcome_after_mutation": "fail (CLEAN)",
+      "test_failure_message_if_failed": "TestUpstreamCookieForwardsCookieLineVerbatim: passthrough_test.go:119 got=\"bb_session=bb_session=0-47500467-...\" want=\"bb_session=0-47500467-...\" (cookie line MUST be forwarded verbatim per SP-3.5; double-prefixing breaks search/favorites/etc.); TestUpstreamCookie_TokenWithEqualsForwardsVerbatim: passthrough_test.go:133 got=\"bb_session=session_v2=opaque-token-value\" want \"session_v2=opaque-token-value\"",
+      "bluff_classification_if_bluff": null,
+      "remediation": "N/A — this is the dedicated regression guard for the historical bug; the test commit body in the file already documents the falsifiability rehearsal. Primary assertion is on the bytes the upstream Cookie header would carry.",
+      "reverted": true
+    },
+    {
+      "test_file": "lava-api-go/internal/handlers/topic_test.go",
+      "production_under_test": "handlers.TopicHandler.GetTopic (topic.go) — GET /topic/{id} cache-hit short-circuit and realm-keyed cache slot",
+      "mutation_applied": "In topic.go GetTopic, wrapped the cache-hit short-circuit in `if false { ... }` so the handler always falls through to the scraper (cache lookup never returns the cached body).",
+      "test_run": "go test ./internal/handlers/... -run 'TestTopicHandler_GetTopic_HappyPath|TestTopicHandler_GetTopic_AuthRealmHashAffectsCacheKey' -v",
+      "test_outcome_after_mutation": "fail (CLEAN)",
+      "test_failure_message_if_failed": "TestTopicHandler_GetTopic_HappyPath_HitsScraperOnFirstCall_HitsCacheOnSecond: topic_test.go:98 /topic/{id} scraper calls=2 want 1 (cache should have served the second request); TestTopicHandler_GetTopic_AuthRealmHashAffectsCacheKey: topic_test.go:259 auth-2: scraper calls=3 want 2 (realm-keyed entry should have served the second hit)",
+      "bluff_classification_if_bluff": null,
+      "remediation": "N/A — request dispatched through real Gin engine + real auth.GinMiddleware via httptest. Primary failure signal is on observable scraper-call count which translates to upstream HTTP load — a user-visible-via-cost metric that the cache layer is supposed to suppress. Body bytes are also asserted on the response (Content-Type + JSON match) so it is not a count-only verification.",
+      "reverted": true
+    },
+    {
+      "test_file": "lava-api-go/internal/rutracker/search_test.go",
+      "production_under_test": "rutracker.searchSortTypeValue + GetSearchPage upstream URL builder (search.go) — maps SearchSortTypeDto to rutracker `o=` query value, including Size→7",
+      "mutation_applied": "In search.go searchSortTypeValue, replaced the Size case body `return \"7\"` with `return \"10\"` (collide with the Seeds value).",
+      "test_run": "go test ./internal/rutracker/... -run TestGetSearchPage_BuildsUpstreamURL -v",
+      "test_outcome_after_mutation": "fail (CLEAN)",
+      "test_failure_message_if_failed": "TestGetSearchPage_BuildsUpstreamURL: search_test.go:311 query[\"o\"]: got \"10\", want \"7\"",
+      "bluff_classification_if_bluff": null,
+      "remediation": "N/A — the test asserts on the actual upstream-URL query bytes captured at the httptest server, which is the surface rutracker.org observes. Falsifiable on every parameter mapping (Categories→f, Author→pn, AuthorID→pid, SortType→o, SortOrder→s, Period→tm, Page→start) by the same harness.",
+      "reverted": true
+    }
+  ],
+  "summary": {
+    "bluffs_found": 0,
+    "bluffs_remediated": 0,
+    "samples_clean": 5,
+    "phase_gate_pass": true,
+    "verdict": "All 5 operator-selected Go-side tests survived the mutation-and-revert protocol. Each test failed cleanly with a clear assertion message naming the broken behavior, and passed again after revert. No bluff fakes detected at this phase boundary on the Go-side. The Sixth Law clause-3 'primary assertion on user-visible state' is satisfied by every target: getTitle returns the rendered title; ParseCommentsPage emits the post array a comments view would render; UpstreamCookie produces the upstream Cookie bytes; GetTopic emits HTTP body and Content-Type plus an observable scraper-call cost; GetSearchPage emits the upstream URL bytes.",
+    "post_revert_verification_run": "cd lava-api-go && go test ./internal/rutracker/... ./internal/auth/... ./internal/handlers/... -> ok (cached after first uncached run, all green)"
+  }
+}
