@@ -27,6 +27,12 @@ android {
         applicationId = "digital.vasic.lava.client"
         versionCode = 1020
         versionName = "1.2.0"
+        // SP-3a Step 6 (2026-04-30): wire Hilt + Compose UI test infra so the
+        // 8 Challenge Tests at app/src/androidTest/kotlin/lava/app/challenges/
+        // become runnable on a connected device. The custom runner installs
+        // HiltTestApplication as the test Application; without it
+        // @HiltAndroidTest classes cannot inject.
+        testInstrumentationRunner = "lava.app.LavaHiltTestRunner"
     }
 
     buildFeatures {
@@ -120,4 +126,25 @@ dependencies {
     implementation(libs.firebase.crashlytics)
 
     debugImplementation(libs.leakcanary)
+
+    // ----------------------------------------------------------------
+    // SP-3a Step 6 (2026-04-30): Compose UI + Hilt instrumentation test
+    // dependencies. These wire the 8 Challenge Tests at
+    // app/src/androidTest/kotlin/lava/app/challenges/ so they compile
+    // and (on a connected device) run. The compose BOM is already
+    // applied to androidTestImplementation by the convention plugin
+    // (see buildSrc/.../AndroidCompose.kt) — these libraries are
+    // declared without an explicit version because the BOM resolves
+    // them.
+    // ----------------------------------------------------------------
+    androidTestImplementation(libs.androidx.compose.ui.test)
+    debugImplementation(libs.androidx.compose.ui.testManifest)
+    androidTestImplementation(libs.androidx.test.core)
+    androidTestImplementation(libs.androidx.test.ext)
+    androidTestImplementation(libs.androidx.test.runner)
+    androidTestImplementation(libs.androidx.test.rules)
+    androidTestImplementation(libs.junit4)
+    androidTestImplementation(libs.kotlinx.coroutines.test)
+    androidTestImplementation(libs.hilt.android.testing)
+    kspAndroidTest(libs.hilt.compiler)
 }
