@@ -32,6 +32,18 @@ Every core module MUST obey the root Anti-Bluff Testing Pact. In addition:
 ### Tracker plugin modules (`:core:tracker:*`)
 Per-tracker plugin modules under `core/tracker/` (e.g. `:core:tracker:rutracker`, `:core:tracker:rutor`) all follow the same shape: pure-Kotlin, JVM-only, applying the `lava.kotlin.tracker.module` convention plugin which pre-wires `:core:tracker:api`, `lava.sdk:api`, `lava.sdk:mirror`, Jsoup, OkHttp, kotlinx-coroutines, kotlinx-serialization, JUnit4, mockk, kotlinx-coroutines-test, `:core:tracker:testing`, and `lava.sdk:testing`. Each module exposes one `TrackerDescriptor` object, one `TrackerClient` implementation that wires N feature implementations (Searchable / Browsable / Topic / Comments / Favorites / Authenticatable / Downloadable, only those the descriptor declares as capabilities — clause 6.E Capability Honesty), one `TrackerClientFactory` registered into the SDK registry, and HTML fixtures under `src/test/resources/fixtures/<trackerId>/<scope>/`. New tracker modules MUST follow this layout; do not duplicate Hilt/Android wiring, do not add an `android.namespace` line. Hilt processing for `@Inject constructor` annotations happens transitively via `:core:tracker:client` once the factory is registered there (Section J in the SP-3a plan).
 
+### Scoped clause for new feature interfaces (per root clause 6.E + SP-3a)
+
+Any new feature interface added under `core/tracker/api/` (i.e. a new capability bearer beyond the seven that ship with SP-3a — Searchable, Browsable, Topic, Comments, Favorites, Authenticatable, Downloadable) MUST be accompanied by all three of:
+
+1. **Capability enum entry.** Add a new `TrackerCapability` value in `:core:tracker:api`. The enum is the single source of truth that `TrackerDescriptor.capabilities` and `TrackerClient.getFeature<T>()` are gated on; an interface added without an enum entry is unreachable and constitutes a 6.E violation (capability declared but no path through getFeature).
+
+2. **Behavioral test in at least one tracker module.** Add a real-stack test under `core/tracker/{rutracker,rutor}/src/test/kotlin/.../<Feature>Test.kt` that exercises the interface end-to-end using the production parser and a fixture HTML response (no SUT mocking; only the `OkHttpClient` boundary may be replaced with a `MockWebServer`). Per Sixth Law clause 4, this test is the load-bearing acceptance gate for the new interface.
+
+3. **Mention in `docs/sdk-developer-guide.md`.** Document the new capability in the developer guide's "Adding a new tracker" section so downstream tracker authors understand which capability they MAY (or MUST) implement.
+
+A capability that lacks any of (1), (2), (3) is a Phase-N regression and MUST be addressed before the next release tag. The `scripts/check-constitution.sh` invoked from `scripts/ci.sh` parses the enum + descriptor + capability table and asserts each declared capability resolves to a non-null `getFeature()`; this is the mechanical 6.E gate.
+
 ### Sixth Law — Real User Verification (Anti-Pseudo-Test Rule)
 
 A test that passes while the feature it covers is broken for end users is the most expensive kind of test in this codebase — it converts unknown breakage into believed safety. This has happened in this project before: tests and Integration Challenge Tests executed green while large parts of the product were unusable on a real device. That outcome is a constitutional failure, not a coverage failure, and it MUST NOT recur.
