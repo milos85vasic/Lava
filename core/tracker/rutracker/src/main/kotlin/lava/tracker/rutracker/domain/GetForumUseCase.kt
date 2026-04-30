@@ -1,8 +1,8 @@
 package lava.tracker.rutracker.domain
 
-import lava.tracker.rutracker.api.RuTrackerInnerApi
 import lava.network.dto.forum.CategoryDto
 import lava.network.dto.forum.ForumDto
+import lava.tracker.rutracker.api.RuTrackerInnerApi
 import org.jsoup.Jsoup
 
 internal class GetForumUseCase(private val api: RuTrackerInnerApi) {

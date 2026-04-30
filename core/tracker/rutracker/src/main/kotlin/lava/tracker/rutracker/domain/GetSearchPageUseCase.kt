@@ -1,6 +1,5 @@
 package lava.tracker.rutracker.domain
 
-import lava.tracker.rutracker.api.RuTrackerInnerApi
 import lava.network.dto.forum.CategoryDto
 import lava.network.dto.search.SearchPageDto
 import lava.network.dto.search.SearchPeriodDto
@@ -9,6 +8,7 @@ import lava.network.dto.search.SearchSortTypeDto
 import lava.network.dto.topic.AuthorDto
 import lava.network.dto.topic.TorrentDto
 import lava.network.dto.topic.TorrentStatusDto
+import lava.tracker.rutracker.api.RuTrackerInnerApi
 import org.jsoup.Jsoup
 
 internal class GetSearchPageUseCase(

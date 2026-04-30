@@ -1,7 +1,7 @@
 package lava.tracker.rutracker.domain
 
-import lava.tracker.rutracker.api.RuTrackerInnerApi
 import lava.network.dto.topic.TorrentDto
+import lava.tracker.rutracker.api.RuTrackerInnerApi
 import lava.tracker.rutracker.model.Forbidden
 import lava.tracker.rutracker.model.NotFound
 

@@ -1,6 +1,5 @@
 package lava.tracker.rutracker.domain
 
-import lava.tracker.rutracker.api.RuTrackerInnerApi
 import lava.network.dto.forum.CategoryDto
 import lava.network.dto.forum.CategoryPageDto
 import lava.network.dto.forum.SectionDto
@@ -8,6 +7,7 @@ import lava.network.dto.topic.AuthorDto
 import lava.network.dto.topic.ForumTopicDto
 import lava.network.dto.topic.TopicDto
 import lava.network.dto.topic.TorrentDto
+import lava.tracker.rutracker.api.RuTrackerInnerApi
 import lava.tracker.rutracker.model.Forbidden
 import lava.tracker.rutracker.model.NotFound
 import org.jsoup.Jsoup

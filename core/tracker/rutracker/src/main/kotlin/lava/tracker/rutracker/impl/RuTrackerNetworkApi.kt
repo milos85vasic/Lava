@@ -1,6 +1,9 @@
 package lava.tracker.rutracker.impl
 
-import lava.tracker.rutracker.api.NetworkApi
+import lava.network.api.NetworkApi
+import lava.network.dto.search.SearchPeriodDto
+import lava.network.dto.search.SearchSortOrderDto
+import lava.network.dto.search.SearchSortTypeDto
 import lava.tracker.rutracker.domain.AddCommentUseCase
 import lava.tracker.rutracker.domain.AddFavoriteUseCase
 import lava.tracker.rutracker.domain.CheckAuthorisedUseCase
@@ -15,9 +18,6 @@ import lava.tracker.rutracker.domain.GetTorrentFileUseCase
 import lava.tracker.rutracker.domain.GetTorrentUseCase
 import lava.tracker.rutracker.domain.LoginUseCase
 import lava.tracker.rutracker.domain.RemoveFavoriteUseCase
-import lava.network.dto.search.SearchPeriodDto
-import lava.network.dto.search.SearchSortOrderDto
-import lava.network.dto.search.SearchSortTypeDto
 
 internal class RuTrackerNetworkApi(
     private val addCommentUseCase: AddCommentUseCase,

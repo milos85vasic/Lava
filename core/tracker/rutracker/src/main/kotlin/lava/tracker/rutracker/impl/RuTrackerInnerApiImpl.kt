@@ -19,11 +19,11 @@ import io.ktor.http.Parameters
 import io.ktor.http.content.OutgoingContent
 import io.ktor.http.withCharset
 import io.ktor.utils.io.core.toByteArray
-import lava.tracker.rutracker.api.RuTrackerInnerApi
 import lava.network.dto.FileDto
 import lava.network.dto.search.SearchPeriodDto
 import lava.network.dto.search.SearchSortOrderDto
 import lava.network.dto.search.SearchSortTypeDto
+import lava.tracker.rutracker.api.RuTrackerInnerApi
 import java.net.URLEncoder
 
 internal class RuTrackerInnerApiImpl(private val httpClient: HttpClient) : RuTrackerInnerApi {

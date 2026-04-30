@@ -1,12 +1,12 @@
 package lava.tracker.rutracker.domain
 
-import lava.tracker.rutracker.api.RuTrackerInnerApi
 import lava.network.dto.forum.CategoryDto
 import lava.network.dto.topic.AuthorDto
 import lava.network.dto.topic.ForumTopicDto
 import lava.network.dto.topic.TopicDto
 import lava.network.dto.topic.TorrentDto
 import lava.network.dto.user.FavoritesDto
+import lava.tracker.rutracker.api.RuTrackerInnerApi
 import org.jsoup.Jsoup
 
 internal class GetFavoritesUseCase(

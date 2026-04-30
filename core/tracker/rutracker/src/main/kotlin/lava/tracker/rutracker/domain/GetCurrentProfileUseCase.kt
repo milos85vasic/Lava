@@ -1,7 +1,7 @@
 package lava.tracker.rutracker.domain
 
-import lava.tracker.rutracker.api.RuTrackerInnerApi
 import lava.network.dto.user.ProfileDto
+import lava.tracker.rutracker.api.RuTrackerInnerApi
 import org.jsoup.Jsoup
 
 internal class GetCurrentProfileUseCase(

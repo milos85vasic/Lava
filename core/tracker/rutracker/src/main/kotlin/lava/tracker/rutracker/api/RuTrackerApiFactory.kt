@@ -1,6 +1,7 @@
 package lava.tracker.rutracker.api
 
 import io.ktor.client.HttpClient
+import lava.network.api.NetworkApi
 import lava.tracker.rutracker.domain.AddCommentUseCase
 import lava.tracker.rutracker.domain.AddFavoriteUseCase
 import lava.tracker.rutracker.domain.CheckAuthorisedUseCase

@@ -1,7 +1,7 @@
 package lava.tracker.rutracker.domain
 
-import lava.tracker.rutracker.api.RuTrackerInnerApi
 import lava.network.dto.FileDto
+import lava.tracker.rutracker.api.RuTrackerInnerApi
 
 internal class GetTorrentFileUseCase(
     private val api: RuTrackerInnerApi,

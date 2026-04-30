@@ -1,9 +1,9 @@
 package lava.tracker.rutracker.domain
 
-import lava.tracker.rutracker.api.RuTrackerInnerApi
 import lava.network.dto.auth.AuthResponseDto
 import lava.network.dto.auth.CaptchaDto
 import lava.network.dto.auth.UserDto
+import lava.tracker.rutracker.api.RuTrackerInnerApi
 import lava.tracker.rutracker.model.NoData
 import lava.tracker.rutracker.model.Unknown
 import java.util.regex.Pattern
