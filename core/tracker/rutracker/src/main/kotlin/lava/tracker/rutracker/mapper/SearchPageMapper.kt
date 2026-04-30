@@ -1,21 +1,70 @@
 package lava.tracker.rutracker.mapper
 
+import kotlinx.datetime.Instant
 import lava.network.dto.search.SearchPageDto
 import lava.network.dto.search.SearchPeriodDto
 import lava.network.dto.search.SearchSortOrderDto
 import lava.network.dto.search.SearchSortTypeDto
+import lava.network.dto.topic.TorrentDto
 import lava.tracker.api.model.SearchRequest
 import lava.tracker.api.model.SearchResult
+import lava.tracker.api.model.SortField
+import lava.tracker.api.model.SortOrder
+import lava.tracker.api.model.TimePeriod
+import lava.tracker.api.model.TorrentItem
 import javax.inject.Inject
 
 /**
  * Maps the legacy [SearchPageDto] (rutracker scraper output) to the new
- * tracker-api [SearchResult]. Stub here; populated in Task 2.14.
+ * tracker-api [SearchResult].
+ *
+ * Information-loss notes (relevant to Section E reverse mapping):
+ *  - The legacy [TorrentDto.size] is already formatted (e.g. "1.2 GB"); the
+ *    raw byte count is dropped by the scraper before this mapper sees it.
+ *    We preserve the formatted string in metadata under
+ *    "rutracker.size_text" but cannot populate [TorrentItem.sizeBytes].
+ *  - The legacy [TorrentDto.date] is an epoch-seconds Long when present.
+ *    Malformed values are tolerated by yielding null.
  */
 class SearchPageMapper @Inject constructor() {
     fun toSearchResult(dto: SearchPageDto, currentPage: Int): SearchResult {
-        TODO("populated in Task 2.14")
+        val items = dto.torrents.map { it.toTorrentItem() }
+        return SearchResult(
+            items = items,
+            totalPages = dto.pages,
+            currentPage = currentPage,
+        )
     }
+}
+
+internal fun TorrentDto.toTorrentItem(): TorrentItem {
+    val torrent = this
+    val metadata = buildMap<String, String> {
+        torrent.category?.id?.let { put("rutracker.categoryId", it) }
+        torrent.category?.name?.let { put("rutracker.categoryName", it) }
+        torrent.author?.id?.let { put("rutracker.authorId", it) }
+        torrent.tags?.takeIf { it.isNotBlank() }?.let { put("rutracker.tags", it) }
+        torrent.status?.let { put("rutracker.status", it.name) }
+        torrent.size?.let { put("rutracker.size_text", it) }
+    }
+    val publish = date?.let {
+        runCatching { Instant.fromEpochSeconds(it) }.getOrNull()
+    }
+    return TorrentItem(
+        trackerId = "rutracker",
+        torrentId = id,
+        title = title,
+        sizeBytes = null,
+        seeders = seeds,
+        leechers = leeches,
+        infoHash = null,
+        magnetUri = magnetLink,
+        downloadUrl = null,
+        detailUrl = null,
+        category = category?.name,
+        publishDate = publish,
+        metadata = metadata,
+    )
 }
 
 /**
@@ -31,5 +80,41 @@ data class LegacySearchParams(
     val categories: String?,
 )
 
-/** Reverse mapping (model → legacy DTO enums); populated in Task 2.14. */
-fun SearchRequest.toLegacySearchParams(): LegacySearchParams = TODO("populated in Task 2.14")
+/**
+ * Reverse mapping (model → legacy DTO enums).
+ *
+ * - `SortField.RELEVANCE` has no rutracker equivalent (the site sorts by
+ *   `Date` / `Title` / `Downloaded` / `Seeds` / `Leeches` / `Size`); per
+ *   the plan we collapse RELEVANCE to `Date` to preserve a usable default.
+ * - `categories` becomes a comma-joined string, the form rutracker's `f=`
+ *   query parameter expects. An empty list collapses to `null` (no filter).
+ */
+fun SearchRequest.toLegacySearchParams(): LegacySearchParams {
+    val sortType = when (sort) {
+        SortField.DATE -> SearchSortTypeDto.Date
+        SortField.SEEDERS -> SearchSortTypeDto.Seeds
+        SortField.LEECHERS -> SearchSortTypeDto.Leeches
+        SortField.SIZE -> SearchSortTypeDto.Size
+        SortField.TITLE -> SearchSortTypeDto.Title
+        SortField.RELEVANCE -> SearchSortTypeDto.Date
+    }
+    val orderDto = when (sortOrder) {
+        SortOrder.ASCENDING -> SearchSortOrderDto.Ascending
+        SortOrder.DESCENDING -> SearchSortOrderDto.Descending
+    }
+    val periodDto = period?.let {
+        when (it) {
+            TimePeriod.LAST_DAY -> SearchPeriodDto.Today
+            TimePeriod.LAST_WEEK -> SearchPeriodDto.LastWeek
+            TimePeriod.LAST_MONTH -> SearchPeriodDto.LastMonth
+            TimePeriod.LAST_YEAR -> SearchPeriodDto.AllTime
+            TimePeriod.ALL_TIME -> SearchPeriodDto.AllTime
+        }
+    }
+    return LegacySearchParams(
+        sortType = sortType,
+        sortOrder = orderDto,
+        period = periodDto,
+        categories = categories.takeIf { it.isNotEmpty() }?.joinToString(","),
+    )
+}
