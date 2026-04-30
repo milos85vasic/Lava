@@ -6,6 +6,8 @@ dependencies {
     // @Inject annotation surface for feature classes wired in :core:tracker:client (Section J).
     implementation(libs.javax.inject)
 
-    // OkHttp + kotlinx-coroutines come from the convention plugin transitively;
-    // additional rutor-specific http / mockwebserver wiring is added in Tasks 3.7 / 3.9.
+    // MockWebServer for the http/RuTorHttpClient tests (Tasks 3.9 / 3.10).
+    // OkHttp itself, kotlinx-coroutines, and JUnit4 are provided by the
+    // lava.kotlin.tracker.module convention plugin.
+    testImplementation(libs.okhttp.mockwebserver)
 }
