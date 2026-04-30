@@ -57,3 +57,13 @@ include(":feature:search_input")
 include(":feature:search_result")
 include(":feature:topic")
 include(":feature:visited")
+
+// Tracker-SDK submodule — composite build (pinned via git submodule)
+includeBuild("Submodules/Tracker-SDK") {
+    dependencySubstitution {
+        substitute(module("lava.sdk:api")).using(project(":api"))
+        substitute(module("lava.sdk:mirror")).using(project(":mirror"))
+        substitute(module("lava.sdk:registry")).using(project(":registry"))
+        substitute(module("lava.sdk:testing")).using(project(":testing"))
+    }
+}
