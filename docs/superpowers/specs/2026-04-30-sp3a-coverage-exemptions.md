@@ -167,3 +167,42 @@ both surfaces in `RuTrackerInnerApi`); the second is the safe fallback.
 
 **Audit linkage:** Phase 2 Section C spec + code-quality review (commit landing
 the LF-5 entry).
+
+### LF-6 — `TorrentItem.sizeBytes` permanently null for rutracker (linked: Phase 2 Section D)
+
+**Locations:**
+- `core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker/mapper/SearchPageMapper.kt`
+- `core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker/mapper/CategoryPageMapper.kt`
+- `core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker/mapper/TopicMapper.kt`
+
+**Observation:** The new tracker-api model `TorrentItem` exposes
+`sizeBytes: Long?`. The legacy rutracker scraper delivers torrent size as a
+pre-formatted display string (e.g. `"4.7 GB"`), and the raw byte count is
+discarded before the DTO reaches the forward mapper. Consequently every
+`TorrentItem` produced by the rutracker forward mappers has `sizeBytes = null`.
+The display string is preserved in `metadata["rutracker.size_text"]` so UI
+can render it, but any consumer of `Searchable`/`Browsable`/`Topic` features
+that relies on `sizeBytes` for filtering, sorting, or comparison against a
+threshold will silently receive `null` for every rutracker row.
+
+**Why this is a latent finding rather than a fix:** Adding raw-byte parsing
+to the rutracker scraper is non-trivial (the scrape would need to parse
+"GB"/"MiB"/"KB"/etc. unit strings into bytes, which is a fertile source of
+locale-rounding bugs). Deferring to a dedicated SP-3 sub-task that owns
+unit parsing keeps Section D's scope clean.
+
+**Mitigation trigger:** before Phase 4 cross-tracker fallback comparison
+logic (which may want to rank by size), one of:
+1. Augment the rutracker scraper to parse the formatted size string into
+   raw bytes server-side and surface a numeric field on `TorrentDto` /
+   `TorrentDataDto`. The forward mappers would then populate
+   `TorrentItem.sizeBytes` from the new field.
+2. Move the unit-parsing into the forward mapper itself with a tested
+   helper (`fun parseRuTrackerSize(s: String): Long?`) and document any
+   locale assumptions.
+3. Document that rutracker `TorrentItem.sizeBytes` is structurally null and
+   that downstream features must consult the metadata key — making this an
+   accepted capability degradation rather than a tripwire.
+
+**Audit linkage:** Phase 2 Section D combined review (commit landing the
+LF-6 entry).

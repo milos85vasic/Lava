@@ -61,6 +61,17 @@ class SearchRequestMapperTest {
     }
 
     @Test
+    fun `LAST_YEAR has no rutracker equivalent so collapses to AllTime`() {
+        // SearchPeriodDto offers Today / LastThreeDays / LastWeek / LastTwoWeeks /
+        // LastMonth / AllTime — no LAST_YEAR. The mapper widens LAST_YEAR to
+        // AllTime so callers still get results; this test pins that contract so
+        // it cannot drift silently. Breaking it (e.g. mapping LAST_YEAR to
+        // LastMonth) would surface as `expected: <AllTime> but was: <LastMonth>`.
+        val legacy = SearchRequest("q", period = TimePeriod.LAST_YEAR).toLegacySearchParams()
+        assertEquals(SearchPeriodDto.AllTime, legacy.period)
+    }
+
+    @Test
     fun `sort field maps to SearchSortTypeDto`() {
         assertEquals(
             SearchSortTypeDto.Seeds,

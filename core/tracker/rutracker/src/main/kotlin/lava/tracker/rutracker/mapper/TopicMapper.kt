@@ -39,6 +39,11 @@ import javax.inject.Inject
  *    metadata["rutracker.size_text"], TorrentItem.sizeBytes stays null.
  *  - File listings are not surfaced on rutracker's topic-page scrape
  *    today; TopicDetail.files is always emptyList().
+ *  - Posts embedded in [TopicPageDto.commentsPage.posts] are intentionally
+ *    NOT mapped here — call [CommentsMapper.toCommentsPage] with the same
+ *    DTO for post content. TopicPage carries only torrent metadata +
+ *    pagination; CommentsPage carries the post list. Splitting them keeps
+ *    each feature's payload focused.
  */
 class TopicMapper @Inject constructor() {
     fun toTopicDetail(dto: ForumTopicDto): TopicDetail = when (dto) {

@@ -86,6 +86,12 @@ data class LegacySearchParams(
  * - `SortField.RELEVANCE` has no rutracker equivalent (the site sorts by
  *   `Date` / `Title` / `Downloaded` / `Seeds` / `Leeches` / `Size`); per
  *   the plan we collapse RELEVANCE to `Date` to preserve a usable default.
+ * - `TimePeriod.LAST_YEAR` has no rutracker equivalent (the site offers
+ *   `Today` / `LastThreeDays` / `LastWeek` / `LastTwoWeeks` / `LastMonth`
+ *   / `AllTime`); we collapse LAST_YEAR to `AllTime` so the search still
+ *   returns broadly-relevant results rather than failing. Callers that
+ *   want exact "last year" filtering must downgrade to `LAST_MONTH` or
+ *   accept the wider `AllTime` window.
  * - `categories` becomes a comma-joined string, the form rutracker's `f=`
  *   query parameter expects. An empty list collapses to `null` (no filter).
  */
