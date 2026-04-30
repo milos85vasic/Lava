@@ -62,6 +62,7 @@ include(":feature:search")
 include(":feature:search_input")
 include(":feature:search_result")
 include(":feature:topic")
+include(":feature:tracker_settings")
 include(":feature:visited")
 
 // Tracker-SDK submodule — composite build (pinned via git submodule)
