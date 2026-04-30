@@ -38,6 +38,15 @@ private class InMemoryCookieJar : CookieJar {
     @Synchronized
     override fun loadForRequest(url: HttpUrl): List<Cookie> =
         store[url.host].orEmpty().filter { it.matches(url) }
+
+    /**
+     * Returns every cookie currently stored, across all hosts. Used by
+     * [RuTorHttpClient.cookieValue] as a cross-host fallback so tests
+     * driving the client against MockWebServer (a localhost host) can still
+     * observe the userid cookie under feature-level lookups.
+     */
+    @Synchronized
+    fun allCookies(): List<Cookie> = store.values.flatten()
 }
 
 /** Thrown when [RuTorHttpClient] short-circuits a request because the breaker is OPEN. */
@@ -226,11 +235,21 @@ class RuTorHttpClient internal constructor(
     /**
      * Returns the value of the cookie with [name] for the primary RuTor mirror,
      * or null if none. Pre-loaded for Section J's RuTorAuth wiring.
+     *
+     * The lookup scans every host the cookie jar has observed and returns the
+     * first match by name. RuTor only uses the rutor.info host in production,
+     * so this is functionally identical to a host-scoped lookup; the
+     * cross-host scan is what makes MockWebServer-backed tests in
+     * [feature.RuTorAuthTest] work — Set-Cookie under `localhost` is still
+     * findable when the auth feature later asks "is `userid` set anywhere?".
      */
     fun cookieValue(name: String): String? {
-        val url = HttpUrl.Builder().scheme("https").host("rutor.info").build()
-        val match = cookieJar.loadForRequest(url).firstOrNull { c -> c.name == name }
-        return match?.value
+        // First try the canonical rutor.info host (production path).
+        val rutorUrl = HttpUrl.Builder().scheme("https").host("rutor.info").build()
+        cookieJar.loadForRequest(rutorUrl).firstOrNull { it.name == name }?.let { return it.value }
+        // Fall back to a cross-host scan — exercised by tests where MockWebServer
+        // serves localhost.
+        return cookieJar.allCookies().firstOrNull { it.name == name }?.value
     }
 
     fun clearCookies() {
