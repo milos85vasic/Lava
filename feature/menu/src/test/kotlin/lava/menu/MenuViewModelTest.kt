@@ -52,16 +52,20 @@ import org.orbitmvi.orbit.test.test
  *    renders or navigates; that is a separate layer requiring a Compose UI test.
  *    Tagged `// VM-CONTRACT` below.
  *
- * The load-bearing **rendered-UI Challenge** for menu navigation (open the screen, tap
- * "About", verify the About screen actually composes and is interactable) is owed and
- * not yet written. The project does not currently set up `src/androidTest/` with
- * Compose UI test infrastructure; adding that is tracked in `feature/CLAUDE.md` as
- * a blocking item for any release that claims feature-level Sixth-Law compliance.
+ * The load-bearing **rendered-UI Challenges** for menu navigation now live at
+ * `app/src/androidTest/kotlin/lava/app/challenges/Challenge0{1..8}*.kt` (added in
+ * SP-3a Step 6, 2026-04-30). The project NOW sets up `src/androidTest/` with
+ * Compose UI test infrastructure (Hilt instrumented runner +
+ * `androidx.compose.ui.test.junit4`); see `feature/CLAUDE.md` "Rendered-UI
+ * Challenges" section. Operators run them via
+ * `./gradlew :app:connectedDebugAndroidTest --tests "lava.app.challenges.*"`
+ * on a real device; the falsifiability rehearsal protocol per Sixth-Law
+ * clause 2 is documented in each Challenge Test's KDoc.
  *
- * Until the UI Challenge exists, a green run of this file MUST be read as
- * "the ViewModel correctly produces the right contract for the screen" — NOT as
- * "the user can complete the flow on a real device". That distinction is
- * exactly the bluff-test failure mode the Sixth Law forbids confusing.
+ * A green run of this file alone MUST still be read as "the ViewModel correctly
+ * produces the right contract for the screen" — NOT as "the user can complete the
+ * flow on a real device". The Challenge Tests above are the user-flow gate;
+ * conflating the two is exactly the bluff-test failure mode the Sixth Law forbids.
  *
  * The wiring uses REAL UseCase implementations where the use case has substantive
  * logic (`DiscoverLocalEndpointsUseCaseImpl`); for use cases that are thin
@@ -155,7 +159,8 @@ class MenuViewModelTest {
 
     // VM-CONTRACT — verifies the ViewModel emits the navigation side-effect.
     // The rendered-screen Challenge that the About screen actually opens on
-    // tap is owed (see class KDoc).
+    // tap lives at app/src/androidTest/.../challenges/Challenge0*Test.kt
+    // (operator runs on real device per Task 5.22 — see class KDoc).
     @Test
     fun `about click emits ShowAbout`() = runTest(dispatcherRule.testDispatcher) {
         val viewModel = createViewModel()
@@ -166,7 +171,8 @@ class MenuViewModelTest {
         }
     }
 
-    // VM-CONTRACT — see note above; rendered-screen Challenge owed.
+    // VM-CONTRACT — see note above; rendered-screen Challenge in
+    // app/src/androidTest/.../challenges/.
     @Test
     fun `login click emits OpenLogin`() = runTest(dispatcherRule.testDispatcher) {
         val viewModel = createViewModel()
@@ -194,7 +200,9 @@ class MenuViewModelTest {
     // VM-CONTRACT — asserts the absence of a side-effect; tests that the
     // ViewModel correctly suppresses the navigation prompt when discovery
     // returns no result. The user-visible outcome (no dialog appears) is
-    // proven only at the screen layer, which is owed.
+    // proven only at the screen layer; the corresponding rendered-screen
+    // Challenge is part of the SP-3a Phase 5 Challenge Test suite at
+    // app/src/androidTest/.../challenges/.
     //
     // orbit-test 7.x: `runOnCreate()` is required to fire the container's
     // `onCreate` lambda. Earlier versions auto-fired it on `test()` entry.
@@ -219,7 +227,9 @@ class MenuViewModelTest {
 
     // VM-CONTRACT — asserts the navigation side-effect is emitted when
     // discovery finds a host. The rendered-screen Challenge that
-    // ConnectionSettings actually composes after this side-effect is owed.
+    // ConnectionSettings actually composes after this side-effect is part
+    // of the SP-3a Phase 5 Challenge Test suite at
+    // app/src/androidTest/.../challenges/.
     //
     // Seed BEFORE createViewModel(): with the UNLIMITED-buffer fake the
     // emit is non-suspending, so no `launch { … }` wrapper is needed.

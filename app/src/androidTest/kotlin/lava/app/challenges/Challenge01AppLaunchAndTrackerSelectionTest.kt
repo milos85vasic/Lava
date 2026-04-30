@@ -6,14 +6,22 @@
  * touches when they open the app for the first time after upgrading to
  * Lava 1.2.0 and switch the active tracker.
  *
- * STATUS: Source-only at SP-3a Phase 5 commit. The :app module does NOT
- * yet have a connectedAndroidTest infrastructure (no
- * androidx.test.runner, no Hilt test runner, no Compose-test deps wired
- * in app/build.gradle.kts). This file documents the test shape and is
- * the load-bearing acceptance gate for Operator Real-Device Verification
- * (Task 5.22). Wiring an instrumented runner is tracked as constitutional
- * debt in feature/CLAUDE.md and will be closed in the documentation-polish
- * follow-up plan.
+ * STATUS (updated SP-3a Step 6, 2026-04-30): NOW RUNNABLE. The :app module
+ * has connectedAndroidTest infrastructure wired:
+ *   - lava.app.LavaHiltTestRunner installs HiltTestApplication.
+ *   - androidx.compose.ui.test.junit4 is on the androidTest classpath.
+ *   - hilt-android-testing + kspAndroidTest(hilt-compiler) generate the
+ *     test component graph.
+ *
+ * Operator command:
+ *   ./gradlew :app:connectedDebugAndroidTest --tests \
+ *     "lava.app.challenges.Challenge01AppLaunchAndTrackerSelectionTest"
+ *
+ * Source-only verification (no device required, runs in pre-push gate):
+ *   ./gradlew :app:compileDebugAndroidTestKotlin
+ *
+ * The Sixth Law clause 5 real-device gate is still operator-attested via
+ * .lava-ci-evidence/<TAG>/real-device-verification.md (Task 5.22).
  *
  * FALSIFIABILITY REHEARSAL (operator-executed, see evidence file):
  *

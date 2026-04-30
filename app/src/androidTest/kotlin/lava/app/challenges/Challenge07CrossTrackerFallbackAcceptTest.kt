@@ -8,8 +8,13 @@
  * taps "Try RuTor", and asserts results from RuTor render with the
  * "Results from RuTor" banner.
  *
- * STATUS: Source-only at SP-3a Phase 5 commit. Operator runs on a real
- * device per Task 5.22.
+ * STATUS (updated SP-3a Step 6, 2026-04-30): NOW RUNNABLE on a connected
+ * device via
+ *   ./gradlew :app:connectedDebugAndroidTest --tests \
+ *     "lava.app.challenges.Challenge07CrossTrackerFallbackAcceptTest"
+ * Source-only compile is verified by the pre-push gate.
+ * Operator real-device attestation per Task 5.22 still required for
+ * release tagging (Sixth Law clause 5).
  *
  * The test relies on a debug-only seed in the BuildConfig that lets the
  * instrumented runner pre-populate the in-memory MirrorHealthRepository

@@ -11,8 +11,13 @@
  *     equivalent).
  *   - NO RuTor results render — there must be no silent fallback.
  *
- * STATUS: Source-only at SP-3a Phase 5 commit. Operator runs on a real
- * device per Task 5.22.
+ * STATUS (updated SP-3a Step 6, 2026-04-30): NOW RUNNABLE on a connected
+ * device via
+ *   ./gradlew :app:connectedDebugAndroidTest --tests \
+ *     "lava.app.challenges.Challenge08CrossTrackerFallbackDismissTest"
+ * Source-only compile is verified by the pre-push gate.
+ * Operator real-device attestation per Task 5.22 still required for
+ * release tagging (Sixth Law clause 5).
  *
  * FALSIFIABILITY REHEARSAL:
  *
