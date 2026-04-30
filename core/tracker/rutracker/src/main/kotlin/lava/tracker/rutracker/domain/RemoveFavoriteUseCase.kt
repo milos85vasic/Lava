@@ -2,7 +2,7 @@ package lava.tracker.rutracker.domain
 
 import lava.tracker.rutracker.api.RuTrackerInnerApi
 
-internal class RemoveFavoriteUseCase(
+class RemoveFavoriteUseCase(
     private val api: RuTrackerInnerApi,
     private val withTokenVerificationUseCase: WithTokenVerificationUseCase,
     private val withAuthorisedCheckUseCase: WithAuthorisedCheckUseCase,

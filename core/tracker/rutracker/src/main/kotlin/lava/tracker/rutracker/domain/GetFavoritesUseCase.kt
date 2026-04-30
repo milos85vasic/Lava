@@ -9,7 +9,7 @@ import lava.network.dto.user.FavoritesDto
 import lava.tracker.rutracker.api.RuTrackerInnerApi
 import org.jsoup.Jsoup
 
-internal class GetFavoritesUseCase(
+class GetFavoritesUseCase(
     private val api: RuTrackerInnerApi,
     private val withTokenVerificationUseCase: WithTokenVerificationUseCase,
     private val withAuthorisedCheckUseCase: WithAuthorisedCheckUseCase,

@@ -3,7 +3,7 @@ package lava.tracker.rutracker.domain
 import lava.network.dto.FileDto
 import lava.tracker.rutracker.api.RuTrackerInnerApi
 
-internal class GetTorrentFileUseCase(
+class GetTorrentFileUseCase(
     private val api: RuTrackerInnerApi,
     private val withTokenVerificationUseCase: WithTokenVerificationUseCase,
 ) {

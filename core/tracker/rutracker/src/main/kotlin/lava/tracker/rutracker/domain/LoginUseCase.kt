@@ -8,7 +8,7 @@ import lava.tracker.rutracker.model.NoData
 import lava.tracker.rutracker.model.Unknown
 import java.util.regex.Pattern
 
-internal class LoginUseCase(
+class LoginUseCase(
     private val api: RuTrackerInnerApi,
     private val getCurrentProfileUseCase: GetCurrentProfileUseCase,
 ) {

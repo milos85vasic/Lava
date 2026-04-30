@@ -2,7 +2,7 @@ package lava.tracker.rutracker.domain
 
 import lava.tracker.rutracker.api.RuTrackerInnerApi
 
-internal class CheckAuthorisedUseCase(
+class CheckAuthorisedUseCase(
     private val api: RuTrackerInnerApi,
     private val verifyAuthorisedUseCase: VerifyAuthorisedUseCase,
 ) {
