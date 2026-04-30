@@ -1,0 +1,22 @@
+{
+  "challenge_id": "C7",
+  "name": "Cross-tracker fallback modal accept",
+  "test_class": "lava.app.challenges.C7_CrossTrackerFallbackAcceptTest",
+  "test_file": "app/src/androidTest/kotlin/lava/app/challenges/C7_CrossTrackerFallbackAcceptTest.kt",
+  "spec_reference": "Task 5.15",
+  "operator_attestation_required": true,
+  "status": "PENDING_OPERATOR",
+  "preconditions": "Test runner must pass -PsimulateRuTrackerUnhealthy=true so the in-memory MirrorHealthRepository is seeded with all RuTracker mirrors UNHEALTHY before the @Test starts.",
+  "falsifiability_protocol": {
+    "mutation_target": "core/tracker/client/src/main/kotlin/lava/tracker/client/LavaTrackerSdk.kt",
+    "mutation_step": "Mutate search() outcome dispatch so it never emits CrossTrackerFallbackProposed (always return Failure regardless of the cross-tracker fallback policy).",
+    "expected_failure": "Modal never appears; assertion onNodeWithText('Try RuTor', substring) visible fails on 30s timeout.",
+    "expected_assertion_message_substring": "Failed to assertWaitUntil: condition not met within 30000ms",
+    "revert_step": "Restore the original outcome dispatch in LavaTrackerSdk.search()."
+  },
+  "operator_run_instructions": [
+    "./gradlew :app:connectedDebugAndroidTest --tests \"lava.app.challenges.C7_CrossTrackerFallbackAcceptTest\" -PsimulateRuTrackerUnhealthy=true",
+    "Capture screenshots: (a) modal with 'Try RuTor' button, (b) RuTor results banner after accept.",
+    "Perform falsifiability mutation, re-run, capture verbatim failure assertion, revert."
+  ]
+}
