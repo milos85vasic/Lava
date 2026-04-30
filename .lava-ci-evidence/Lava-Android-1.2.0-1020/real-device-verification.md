@@ -5,13 +5,19 @@ status: PENDING_OPERATOR
 This evidence file is the load-bearing acceptance gate for the
 Lava-Android-1.2.0-1020 release tag per Sixth Law clause 5 + Seventh
 Law clause 3 (operator real-device attestation). It is currently a
-**stub**: the SP-3a Phase 5 implementer landed all 25 commits and the
-mechanical gates in `scripts/tag.sh` (Task 5.21), but cannot run the
-Challenge Tests on a physical device from the agent environment.
+**stub**: the SP-3a Phase 5 implementer landed all 26 commits plus
+the post-implementation documentation polish, and the mechanical
+gates in `scripts/tag.sh` (Task 5.21) are wired, but the agent cannot
+run the Challenge Tests on a physical device.
 
 The operator MUST complete the checklist below and then update the
 `status` line above to `VERIFIED` before invoking
 `./scripts/tag.sh --app android` for this version.
+
+> **See also:** [`docs/SP-3A-RELEASE-NOTES.md`](../../docs/SP-3A-RELEASE-NOTES.md)
+> for the full operator-facing release notes (what shipped, what's
+> deferred, the same checklist below in narrative form, and the
+> literal `scripts/tag.sh` commands to run after sign-off).
 
 ---
 
