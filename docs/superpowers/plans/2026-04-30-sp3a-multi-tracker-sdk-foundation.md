@@ -4996,3 +4996,1617 @@ Expected: `v0.1.0` tag visible on the SDK upstream.
 **Phase 1 done. Phase 2 unblocked.**
 
 ---
+
+## Phase 2: RuTracker Decoupling (Kotlin only)
+
+**Duration:** 2.5 weeks. **Tasks:** 36. **Goal:** Refactor the existing `:core:network:rutracker` module behind the new `TrackerClient` contract with **zero behavioral change**, verified by parity tests against the pre-SP-3a baseline. Rewire `SwitchingNetworkApi` to delegate to `LavaTrackerSdk` underneath. **Out of scope:** any modification to `lava-api-go/internal/rutracker/` (deferred to SP-3a-bridge after SP-2 ships).
+
+**Acceptance gate:** parity test produces byte-for-byte identical output for all 14 `NetworkApi` methods against the pre-SP-3a tag; all existing feature ViewModel tests pass without modification; `:core:network:rutracker` removed from `settings.gradle.kts`; `:core:tracker:rutracker` exists with full feature impl set.
+
+### Section A — Move and rename the existing rutracker module
+
+### Task 2.1: `git mv` the rutracker module to its new location
+
+**Files:**
+- Move: `core/network/rutracker/` → `core/tracker/rutracker/`
+
+- [ ] **Step 1: Verify clean working tree**
+
+Run: `git status`
+Expected: clean. If not, commit or stash first.
+
+- [ ] **Step 2: Perform the move (preserves history)**
+
+```bash
+git mv core/network/rutracker core/tracker/rutracker
+```
+
+- [ ] **Step 3: Verify**
+
+Run: `ls core/tracker/rutracker/src/main/kotlin/lava/network/`
+Expected: `api domain impl model` (the existing package structure, untouched).
+
+Run: `git log --oneline --follow core/tracker/rutracker/build.gradle.kts | head -3`
+Expected: shows commits from the original `core/network/rutracker/build.gradle.kts` history.
+
+- [ ] **Step 4: Commit the rename**
+
+```bash
+git commit -m "sp3a-2.1: git mv core/network/rutracker → core/tracker/rutracker
+
+History preserved via git rename detection. No package or import changes
+yet — those land in subsequent tasks. Build is broken between this
+commit and Task 2.4 (settings.gradle.kts update).
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>"
+```
+
+---
+
+### Task 2.2: Update `settings.gradle.kts` to reflect the rename
+
+**Files:**
+- Modify: `settings.gradle.kts`
+
+- [ ] **Step 1: Remove old include, add new**
+
+Edit `settings.gradle.kts`:
+```kotlin
+// REMOVE this line:
+include(":core:network:rutracker")
+
+// (Already added in Task 1.32; verify present:)
+include(":core:tracker:rutracker")
+```
+
+- [ ] **Step 2: Verify build resolves**
+
+Run: `./gradlew projects | grep rutracker`
+Expected: `:core:tracker:rutracker` only — no `:core:network:rutracker`.
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add settings.gradle.kts
+git commit -m "sp3a-2.2: update settings.gradle.kts for rutracker rename
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>"
+```
+
+---
+
+### Task 2.3: Move package paths from `lava.network.rutracker.*` to `lava.tracker.rutracker.*`
+
+**Files:**
+- Move: every `.kt` file under `core/tracker/rutracker/src/main/kotlin/lava/network/` to `core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker/`
+
+- [ ] **Step 1: Inspect existing structure**
+
+Run: `find core/tracker/rutracker/src/main/kotlin -name "*.kt" | head -20`
+Note the existing top-level packages: `lava.network.api`, `lava.network.domain`, `lava.network.impl`, `lava.network.model`.
+
+- [ ] **Step 2: Move files**
+
+```bash
+cd core/tracker/rutracker/src/main/kotlin
+mkdir -p lava/tracker/rutracker
+git mv lava/network lava/tracker/rutracker/
+cd ../../../../..
+```
+
+(After: files live at `core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker/api/...`, etc.)
+
+- [ ] **Step 3: Update package declarations in every `.kt` file**
+
+Run a sed across the moved files:
+```bash
+find core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker -name "*.kt" \
+  -exec sed -i 's|^package lava\.network\.|package lava.tracker.rutracker.|g' {} \;
+```
+
+- [ ] **Step 4: Update all imports inside the moved files**
+
+```bash
+find core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker -name "*.kt" \
+  -exec sed -i 's|^import lava\.network\.\(api\|domain\|impl\|model\)|import lava.tracker.rutracker.\1|g' {} \;
+```
+
+(The negative match — `lava.network.dto.*` and other non-rutracker packages — must remain `lava.network.*`. Imports of types that belong to `:core:network:api` like `lava.network.dto.search.SearchPageDto` are NOT renamed.)
+
+- [ ] **Step 5: Verify compile**
+
+Run: `./gradlew :core:tracker:rutracker:compileKotlin`
+Expected: BUILD SUCCESSFUL. If errors, they'll point to imports that need finer adjustment.
+
+- [ ] **Step 6: Commit**
+
+```bash
+git add core/tracker/rutracker/
+git commit -m "sp3a-2.3: move package paths to lava.tracker.rutracker.*
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>"
+```
+
+---
+
+### Task 2.4: Update consumer imports across the project
+
+The internal-rutracker types (the `RuTrackerInnerApi` and any other types under the old `lava.network.rutracker.*` package) are now at `lava.tracker.rutracker.*`. Find and update consumers.
+
+**Files:**
+- Modify: any file in `core/`, `feature/`, `app/` that imports from `lava.network.rutracker.*`
+
+- [ ] **Step 1: Find consumers**
+
+```bash
+grep -rln 'import lava\.network\.rutracker\.' core/ feature/ app/ \
+  | sort -u
+```
+
+- [ ] **Step 2: Bulk rename imports**
+
+```bash
+grep -rln 'import lava\.network\.rutracker\.' core/ feature/ app/ \
+  | xargs -I {} sed -i 's|^import lava\.network\.rutracker\.|import lava.tracker.rutracker.|g' {}
+```
+
+- [ ] **Step 3: Verify build**
+
+Run: `./gradlew :app:assembleDebug`
+Expected: BUILD SUCCESSFUL.
+
+If failures, hand-fix the remaining import lines reported by the compiler.
+
+- [ ] **Step 4: Commit**
+
+```bash
+git add -u core/ feature/ app/
+git commit -m "sp3a-2.4: rename consumer imports lava.network.rutracker.* → lava.tracker.rutracker.*
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>"
+```
+
+---
+
+### Task 2.5: Update `core/tracker/rutracker/build.gradle.kts` to use the new convention plugin
+
+**Files:**
+- Modify: `core/tracker/rutracker/build.gradle.kts`
+
+- [ ] **Step 1: Read current build file**
+
+Run: `cat core/tracker/rutracker/build.gradle.kts`
+Expected: `lava.kotlin.library` plugin, `:core:network:api` dependency, Ktor and Jsoup.
+
+- [ ] **Step 2: Replace with the tracker module convention**
+
+```kotlin
+plugins {
+    id("lava.kotlin.tracker.module")  // pre-wires :core:tracker:api + Tracker-SDK + Jsoup/OkHttp
+}
+
+dependencies {
+    // Keep transitional dependency on :core:network:api so the existing
+    // RuTrackerInnerApi (legacy HTTP wire) still compiles. Removed in
+    // Spec 2 when :proxy retires.
+    api(project(":core:network:api"))
+
+    implementation(libs.ktor.client.core)
+    // Jsoup is brought in by the convention plugin; do not re-declare.
+}
+```
+
+- [ ] **Step 3: Verify compile**
+
+Run: `./gradlew :core:tracker:rutracker:compileKotlin`
+Expected: BUILD SUCCESSFUL.
+
+- [ ] **Step 4: Run any existing tests**
+
+Run: `./gradlew :core:tracker:rutracker:test`
+Expected: BUILD SUCCESSFUL (existing tests should still pass; the rename is structural only).
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add core/tracker/rutracker/build.gradle.kts
+git commit -m "sp3a-2.5: rutracker module switches to lava.kotlin.tracker.module plugin
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>"
+```
+
+**Section A complete. Module renamed and re-wired.** Phase 3 (RuTor) may now begin in parallel; Tasks 2.6+ continue building the new RuTracker contract surface.
+
+---
+
+### Section B — `RuTrackerDescriptor`
+
+### Task 2.6: Implement `RuTrackerDescriptor`
+
+**Files:**
+- Create: `core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker/RuTrackerDescriptor.kt`
+- Create: `core/tracker/rutracker/src/test/kotlin/lava/tracker/rutracker/RuTrackerDescriptorTest.kt`
+
+- [ ] **Step 1: Create descriptor**
+
+```kotlin
+package lava.tracker.rutracker
+
+import lava.sdk.api.MirrorUrl
+import lava.sdk.api.Protocol
+import lava.tracker.api.AuthType
+import lava.tracker.api.TrackerCapability
+import lava.tracker.api.TrackerDescriptor
+
+object RuTrackerDescriptor : TrackerDescriptor {
+    override val trackerId = "rutracker"
+    override val displayName = "RuTracker.org"
+    override val baseUrls = listOf(
+        MirrorUrl("https://rutracker.org", isPrimary = true, priority = 0, protocol = Protocol.HTTPS),
+        MirrorUrl("https://rutracker.net", priority = 1, protocol = Protocol.HTTPS),
+        MirrorUrl("https://rutracker.cr", priority = 2, protocol = Protocol.HTTPS),
+    )
+    override val capabilities = setOf(
+        TrackerCapability.SEARCH,
+        TrackerCapability.BROWSE,
+        TrackerCapability.FORUM,
+        TrackerCapability.TOPIC,
+        TrackerCapability.COMMENTS,
+        TrackerCapability.FAVORITES,
+        TrackerCapability.TORRENT_DOWNLOAD,
+        TrackerCapability.MAGNET_LINK,
+        TrackerCapability.AUTH_REQUIRED,
+        TrackerCapability.CAPTCHA_LOGIN,
+        TrackerCapability.UPLOAD,
+        TrackerCapability.USER_PROFILE,
+    )
+    override val authType = AuthType.CAPTCHA_LOGIN
+    override val encoding = "Windows-1251"
+    override val expectedHealthMarker = "rutracker"
+}
+```
+
+- [ ] **Step 2: Test**
+
+```kotlin
+package lava.tracker.rutracker
+
+import lava.tracker.api.TrackerCapability
+import org.junit.Assert.*
+import org.junit.Test
+
+class RuTrackerDescriptorTest {
+    @Test fun `id matches trackerId`() {
+        assertEquals("rutracker", RuTrackerDescriptor.id)
+    }
+    @Test fun `declares all 12 RuTracker capabilities`() {
+        assertEquals(12, RuTrackerDescriptor.capabilities.size)
+    }
+    @Test fun `primary mirror is rutracker_org`() {
+        val primary = RuTrackerDescriptor.baseUrls.first { it.isPrimary }
+        assertEquals("https://rutracker.org", primary.url)
+    }
+    @Test fun `encoding is Windows-1251`() {
+        assertEquals("Windows-1251", RuTrackerDescriptor.encoding)
+    }
+    @Test fun `health marker matches root page substring`() {
+        assertTrue(RuTrackerDescriptor.expectedHealthMarker.isNotBlank())
+    }
+}
+```
+
+- [ ] **Step 3: Run, commit**
+
+```bash
+./gradlew :core:tracker:rutracker:test --tests "*RuTrackerDescriptorTest*"
+git add core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker/RuTrackerDescriptor.kt \
+        core/tracker/rutracker/src/test/kotlin/lava/tracker/rutracker/RuTrackerDescriptorTest.kt
+git commit -m "sp3a-2.6: RuTrackerDescriptor + tests
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>"
+```
+
+---
+
+### Section C — `RuTrackerClient` + 7 feature implementations
+
+The strategy: `RuTrackerClient` wraps the existing `RuTrackerInnerApi` (the current HTTP wire-level client) and exposes the new feature interfaces by delegating each feature method to the existing `UseCase` classes — preserving zero behavioral change.
+
+### Task 2.7: `RuTrackerClient` skeleton
+
+**Files:**
+- Create: `core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker/RuTrackerClient.kt`
+
+- [ ] **Step 1: Locate the existing RuTrackerInnerApi**
+
+Run: `grep -rn "interface RuTrackerInnerApi" core/`
+(If named differently, search for the rutracker HTTP client under `core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker/api/`.)
+
+Note its package and constructor signature.
+
+- [ ] **Step 2: Implement the client**
+
+```kotlin
+// core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker/RuTrackerClient.kt
+package lava.tracker.rutracker
+
+import javax.inject.Inject
+import kotlin.reflect.KClass
+import lava.tracker.api.TrackerCapability
+import lava.tracker.api.TrackerClient
+import lava.tracker.api.TrackerDescriptor
+import lava.tracker.api.TrackerFeature
+import lava.tracker.api.feature.*
+import lava.tracker.rutracker.feature.*  // RuTrackerSearch, RuTrackerBrowse, etc. (Tasks 2.8-2.13)
+
+class RuTrackerClient @Inject constructor(
+    private val search: RuTrackerSearch,
+    private val browse: RuTrackerBrowse,
+    private val topic: RuTrackerTopic,
+    private val comments: RuTrackerComments,
+    private val favorites: RuTrackerFavorites,
+    private val auth: RuTrackerAuth,
+    private val download: RuTrackerDownload,
+) : TrackerClient {
+
+    override val descriptor: TrackerDescriptor = RuTrackerDescriptor
+
+    override suspend fun healthCheck(): Boolean = auth.checkAuthAlive()
+
+    @Suppress("UNCHECKED_CAST")
+    override fun <T : TrackerFeature> getFeature(featureClass: KClass<T>): T? {
+        // Constitutional clause 6.E: declared capability ⇒ non-null feature.
+        return when (featureClass) {
+            SearchableTracker::class -> if (TrackerCapability.SEARCH in descriptor.capabilities) search as T else null
+            BrowsableTracker::class -> if (TrackerCapability.BROWSE in descriptor.capabilities) browse as T else null
+            TopicTracker::class -> if (TrackerCapability.TOPIC in descriptor.capabilities) topic as T else null
+            CommentsTracker::class -> if (TrackerCapability.COMMENTS in descriptor.capabilities) comments as T else null
+            FavoritesTracker::class -> if (TrackerCapability.FAVORITES in descriptor.capabilities) favorites as T else null
+            AuthenticatableTracker::class -> if (TrackerCapability.AUTH_REQUIRED in descriptor.capabilities) auth as T else null
+            DownloadableTracker::class -> if (TrackerCapability.TORRENT_DOWNLOAD in descriptor.capabilities) download as T else null
+            else -> null
+        }
+    }
+
+    override fun close() {
+        // Close any held HTTP clients; for now the inner Ktor client is process-scoped via DI.
+    }
+}
+```
+
+(Compile will fail because the seven `RuTracker*` feature classes don't exist yet — they're created in Tasks 2.8–2.13. That's expected.)
+
+- [ ] **Step 3: Commit (build is intentionally broken until Task 2.13)**
+
+```bash
+git add core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker/RuTrackerClient.kt
+git commit -m "sp3a-2.7: RuTrackerClient skeleton — references feature impls (Tasks 2.8-2.13)
+
+Build will not succeed until the 7 feature impl classes exist.
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>"
+```
+
+---
+
+### Task 2.8: `RuTrackerSearch` feature implementation
+
+**Files:**
+- Create: `core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker/feature/RuTrackerSearch.kt`
+- Create: `core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker/mapper/SearchPageMapper.kt` (stub — fully populated in Task 2.15)
+
+- [ ] **Step 1: Implement the feature**
+
+```kotlin
+// core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker/feature/RuTrackerSearch.kt
+package lava.tracker.rutracker.feature
+
+import javax.inject.Inject
+import lava.tracker.api.feature.SearchableTracker
+import lava.tracker.api.model.SearchRequest
+import lava.tracker.api.model.SearchResult
+import lava.tracker.rutracker.domain.GetSearchPageUseCase
+import lava.tracker.rutracker.mapper.SearchPageMapper
+import lava.tracker.rutracker.mapper.toLegacySearchParams
+
+class RuTrackerSearch @Inject constructor(
+    private val getSearchPage: GetSearchPageUseCase,
+    private val mapper: SearchPageMapper,
+) : SearchableTracker {
+
+    override suspend fun search(request: SearchRequest, page: Int): SearchResult {
+        val (sortType, sortOrder, period, categories) = request.toLegacySearchParams()
+        val dto = getSearchPage(
+            searchQuery = request.query,
+            categories = categories,
+            author = request.author,
+            authorId = null,
+            sortType = sortType,
+            sortOrder = sortOrder,
+            period = period,
+            page = page,
+        )
+        return mapper.toResult(dto, currentPage = page)
+    }
+}
+```
+
+- [ ] **Step 2: Stub the mapper for now (filled in Task 2.15)**
+
+```kotlin
+// core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker/mapper/SearchPageMapper.kt
+package lava.tracker.rutracker.mapper
+
+import javax.inject.Inject
+import lava.network.dto.search.SearchPageDto
+import lava.network.dto.search.SearchPeriodDto
+import lava.network.dto.search.SearchSortOrderDto
+import lava.network.dto.search.SearchSortTypeDto
+import lava.tracker.api.model.SearchRequest
+import lava.tracker.api.model.SearchResult
+
+class SearchPageMapper @Inject constructor() {
+    fun toResult(dto: SearchPageDto, currentPage: Int): SearchResult {
+        TODO("populated in Task 2.15")
+    }
+}
+
+data class LegacySearchParams(
+    val sortType: SearchSortTypeDto?,
+    val sortOrder: SearchSortOrderDto?,
+    val period: SearchPeriodDto?,
+    val categories: String?,
+)
+
+fun SearchRequest.toLegacySearchParams(): LegacySearchParams {
+    TODO("populated in Task 2.15")
+}
+```
+
+- [ ] **Step 3: Commit (still broken until 2.15)**
+
+```bash
+git add core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker/feature/RuTrackerSearch.kt \
+        core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker/mapper/SearchPageMapper.kt
+git commit -m "sp3a-2.8: RuTrackerSearch + SearchPageMapper stub
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>"
+```
+
+---
+
+### Task 2.9: `RuTrackerBrowse` feature implementation
+
+**Files:**
+- Create: `core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker/feature/RuTrackerBrowse.kt`
+- Create: `core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker/mapper/ForumDtoMapper.kt`
+- Create: `core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker/mapper/CategoryPageMapper.kt`
+
+- [ ] **Step 1: Implement**
+
+```kotlin
+package lava.tracker.rutracker.feature
+
+import javax.inject.Inject
+import lava.tracker.api.feature.BrowsableTracker
+import lava.tracker.api.model.BrowseResult
+import lava.tracker.api.model.ForumTree
+import lava.tracker.rutracker.domain.GetCategoryPageUseCase
+import lava.tracker.rutracker.domain.GetForumUseCase
+import lava.tracker.rutracker.mapper.CategoryPageMapper
+import lava.tracker.rutracker.mapper.ForumDtoMapper
+
+class RuTrackerBrowse @Inject constructor(
+    private val getCategoryPage: GetCategoryPageUseCase,
+    private val getForum: GetForumUseCase,
+    private val categoryMapper: CategoryPageMapper,
+    private val forumMapper: ForumDtoMapper,
+) : BrowsableTracker {
+
+    override suspend fun browse(category: String?, page: Int): BrowseResult {
+        require(category != null) { "RuTracker browse requires a category id" }
+        val dto = getCategoryPage(id = category, page = page)
+        return categoryMapper.toBrowseResult(dto, currentPage = page)
+    }
+
+    override suspend fun getForumTree(): ForumTree? {
+        val dto = getForum()
+        return forumMapper.toForumTree(dto)
+    }
+}
+```
+
+- [ ] **Step 2: Stubs**
+
+```kotlin
+// ForumDtoMapper.kt
+package lava.tracker.rutracker.mapper
+
+import javax.inject.Inject
+import lava.network.dto.forum.ForumDto
+import lava.tracker.api.model.ForumTree
+
+class ForumDtoMapper @Inject constructor() {
+    fun toForumTree(dto: ForumDto): ForumTree { TODO("populated in Task 2.16") }
+}
+```
+
+```kotlin
+// CategoryPageMapper.kt
+package lava.tracker.rutracker.mapper
+
+import javax.inject.Inject
+import lava.network.dto.forum.CategoryPageDto
+import lava.tracker.api.model.BrowseResult
+
+class CategoryPageMapper @Inject constructor() {
+    fun toBrowseResult(dto: CategoryPageDto, currentPage: Int): BrowseResult { TODO("populated in Task 2.17") }
+}
+```
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker/feature/RuTrackerBrowse.kt \
+        core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker/mapper/ForumDtoMapper.kt \
+        core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker/mapper/CategoryPageMapper.kt
+git commit -m "sp3a-2.9: RuTrackerBrowse + ForumDtoMapper/CategoryPageMapper stubs
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>"
+```
+
+---
+
+### Task 2.10: `RuTrackerTopic` feature implementation
+
+**Files:**
+- Create: `core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker/feature/RuTrackerTopic.kt`
+- Create: `core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker/mapper/TopicMapper.kt`
+
+```kotlin
+// RuTrackerTopic.kt
+package lava.tracker.rutracker.feature
+
+import javax.inject.Inject
+import lava.tracker.api.feature.TopicTracker
+import lava.tracker.api.model.TopicDetail
+import lava.tracker.api.model.TopicPage
+import lava.tracker.rutracker.domain.GetTopicUseCase
+import lava.tracker.rutracker.domain.GetTopicPageUseCase
+import lava.tracker.rutracker.mapper.TopicMapper
+
+class RuTrackerTopic @Inject constructor(
+    private val getTopic: GetTopicUseCase,
+    private val getTopicPage: GetTopicPageUseCase,
+    private val mapper: TopicMapper,
+) : TopicTracker {
+    override suspend fun getTopic(id: String): TopicDetail =
+        mapper.toTopicDetail(getTopic(id = id, page = 0))
+    override suspend fun getTopicPage(id: String, page: Int): TopicPage =
+        mapper.toTopicPage(getTopicPage(id = id, page = page), currentPage = page)
+}
+```
+
+```kotlin
+// TopicMapper.kt
+package lava.tracker.rutracker.mapper
+import javax.inject.Inject
+import lava.network.dto.topic.ForumTopicDto
+import lava.network.dto.topic.TopicPageDto
+import lava.tracker.api.model.TopicDetail
+import lava.tracker.api.model.TopicPage
+
+class TopicMapper @Inject constructor() {
+    fun toTopicDetail(dto: ForumTopicDto): TopicDetail { TODO("populated in Task 2.18") }
+    fun toTopicPage(dto: TopicPageDto, currentPage: Int): TopicPage { TODO("populated in Task 2.18") }
+}
+```
+
+- [ ] **Commit**
+
+```bash
+git add core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker/feature/RuTrackerTopic.kt \
+        core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker/mapper/TopicMapper.kt
+git commit -m "sp3a-2.10: RuTrackerTopic + TopicMapper stub
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>"
+```
+
+---
+
+### Task 2.11: `RuTrackerComments` feature implementation
+
+```kotlin
+// core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker/feature/RuTrackerComments.kt
+package lava.tracker.rutracker.feature
+
+import javax.inject.Inject
+import lava.tracker.api.feature.CommentsTracker
+import lava.tracker.api.model.CommentsPage
+import lava.tracker.rutracker.domain.AddCommentUseCase
+import lava.tracker.rutracker.domain.GetCommentsPageUseCase
+import lava.tracker.rutracker.mapper.CommentsMapper
+
+class RuTrackerComments @Inject constructor(
+    private val getCommentsPage: GetCommentsPageUseCase,
+    private val addCommentUseCase: AddCommentUseCase,
+    private val mapper: CommentsMapper,
+) : CommentsTracker {
+    override suspend fun getComments(topicId: String, page: Int): CommentsPage =
+        mapper.toCommentsPage(getCommentsPage(id = topicId, page = page), currentPage = page)
+    override suspend fun addComment(topicId: String, message: String): Boolean =
+        addCommentUseCase(topicId = topicId, message = message)
+}
+```
+
+```kotlin
+// core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker/mapper/CommentsMapper.kt
+package lava.tracker.rutracker.mapper
+
+import javax.inject.Inject
+import lava.network.dto.topic.CommentsPageDto
+import lava.tracker.api.model.CommentsPage
+
+class CommentsMapper @Inject constructor() {
+    fun toCommentsPage(dto: CommentsPageDto, currentPage: Int): CommentsPage { TODO("populated in Task 2.19") }
+}
+```
+
+- [ ] **Commit**
+
+```bash
+git add core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker/feature/RuTrackerComments.kt \
+        core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker/mapper/CommentsMapper.kt
+git commit -m "sp3a-2.11: RuTrackerComments + CommentsMapper stub
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>"
+```
+
+---
+
+### Task 2.12: `RuTrackerFavorites` and `RuTrackerAuth` and `RuTrackerDownload`
+
+**Files:**
+- Create: 3 feature files + 3 mapper stubs
+
+```kotlin
+// RuTrackerFavorites.kt
+package lava.tracker.rutracker.feature
+
+import javax.inject.Inject
+import lava.tracker.api.feature.FavoritesTracker
+import lava.tracker.api.model.TorrentItem
+import lava.tracker.rutracker.domain.AddFavoriteUseCase
+import lava.tracker.rutracker.domain.GetFavoritesUseCase
+import lava.tracker.rutracker.domain.RemoveFavoriteUseCase
+import lava.tracker.rutracker.mapper.FavoritesMapper
+
+class RuTrackerFavorites @Inject constructor(
+    private val get: GetFavoritesUseCase,
+    private val add: AddFavoriteUseCase,
+    private val remove: RemoveFavoriteUseCase,
+    private val mapper: FavoritesMapper,
+) : FavoritesTracker {
+    override suspend fun list(): List<TorrentItem> = mapper.toTorrentItems(get())
+    override suspend fun add(id: String): Boolean = add(id)
+    override suspend fun remove(id: String): Boolean = remove(id)
+}
+```
+
+```kotlin
+// RuTrackerAuth.kt
+package lava.tracker.rutracker.feature
+
+import javax.inject.Inject
+import lava.tracker.api.feature.AuthenticatableTracker
+import lava.tracker.api.model.AuthState
+import lava.tracker.api.model.LoginRequest
+import lava.tracker.api.model.LoginResult
+import lava.tracker.rutracker.domain.CheckAuthorisedUseCase
+import lava.tracker.rutracker.domain.LoginUseCase
+import lava.tracker.rutracker.domain.LogoutUseCase
+import lava.tracker.rutracker.mapper.AuthMapper
+
+class RuTrackerAuth @Inject constructor(
+    private val loginUseCase: LoginUseCase,
+    private val logoutUseCase: LogoutUseCase,
+    private val checkUseCase: CheckAuthorisedUseCase,
+    private val mapper: AuthMapper,
+) : AuthenticatableTracker {
+    override suspend fun login(req: LoginRequest): LoginResult =
+        mapper.toLoginResult(loginUseCase(
+            username = req.username, password = req.password,
+            captchaSid = req.captcha?.sid, captchaCode = req.captcha?.code,
+            captchaValue = req.captcha?.value
+        ))
+    override suspend fun logout() { logoutUseCase() }
+    override suspend fun checkAuth(): AuthState = if (checkUseCase()) AuthState.Authenticated else AuthState.Unauthenticated
+    /** Used by RuTrackerClient.healthCheck() — checks if the persisted auth still resolves. */
+    suspend fun checkAuthAlive(): Boolean = checkUseCase()
+}
+```
+
+```kotlin
+// RuTrackerDownload.kt
+package lava.tracker.rutracker.feature
+
+import javax.inject.Inject
+import lava.tracker.api.feature.DownloadableTracker
+import lava.tracker.rutracker.domain.GetMagnetLinkUseCase
+import lava.tracker.rutracker.domain.GetTorrentFileUseCase
+
+class RuTrackerDownload @Inject constructor(
+    private val downloadFile: GetTorrentFileUseCase,
+    private val getMagnet: GetMagnetLinkUseCase,
+) : DownloadableTracker {
+    override suspend fun downloadTorrentFile(id: String): ByteArray = downloadFile(id)
+    override fun getMagnetLink(id: String): String? = getMagnet(id)  // sync if cached, else null
+}
+```
+
+Mapper stubs:
+```kotlin
+// FavoritesMapper.kt
+package lava.tracker.rutracker.mapper
+import javax.inject.Inject
+import lava.network.dto.user.FavoritesDto
+import lava.tracker.api.model.TorrentItem
+class FavoritesMapper @Inject constructor() {
+    fun toTorrentItems(dto: FavoritesDto): List<TorrentItem> { TODO("populated in Task 2.20") }
+}
+```
+
+```kotlin
+// AuthMapper.kt
+package lava.tracker.rutracker.mapper
+import javax.inject.Inject
+import lava.network.dto.auth.AuthResponseDto
+import lava.tracker.api.model.LoginResult
+class AuthMapper @Inject constructor() {
+    fun toLoginResult(dto: AuthResponseDto): LoginResult { TODO("populated in Task 2.21") }
+}
+```
+
+(Note: `GetMagnetLinkUseCase` and `GetTorrentFileUseCase` may need to be created or extracted from existing `GetTorrentUseCase` / `download` flow. If they don't exist, create them as thin wrappers around the existing inner-API methods and commit them in this task.)
+
+- [ ] **Commit**
+
+```bash
+git add core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker/feature/ \
+        core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker/mapper/
+git commit -m "sp3a-2.12: RuTracker Favorites/Auth/Download impls + mapper stubs
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>"
+```
+
+---
+
+### Task 2.13: Resolve compile errors and verify the client compiles
+
+By this point all 7 feature classes exist (with stubbed mappers); `RuTrackerClient` should compile.
+
+- [ ] **Step 1: Build**
+
+Run: `./gradlew :core:tracker:rutracker:compileKotlin`
+Expected: BUILD SUCCESSFUL.
+
+If compile fails because a UseCase referenced in feature classes doesn't exist with the expected signature, hand-fix by adapting to the actual signature. Common adjustments: `LoginUseCase` may take `Username`/`Password` value classes rather than raw strings — adapt by calling its actual API.
+
+- [ ] **Step 2: Commit any compile-fix tweaks**
+
+```bash
+git add -u core/tracker/rutracker/
+git commit -m "sp3a-2.13: compile-fixes — adapt feature classes to actual UseCase signatures
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>"
+```
+
+---
+
+### Section D — Forward DTO → model mappers (full implementations)
+
+The mappers stubbed in Tasks 2.8–2.12 with `TODO()` are now filled in. Each mapper extracts common fields into the new model and stores RuTracker-specific extras under namespaced metadata keys.
+
+### Task 2.14: Common helper — `LegacySearchParams` mapper for `SearchRequest`
+
+**Files:**
+- Modify: `core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker/mapper/SearchPageMapper.kt`
+- Create: `core/tracker/rutracker/src/test/kotlin/lava/tracker/rutracker/mapper/SearchRequestMapperTest.kt`
+
+- [ ] **Step 1: Replace the `toLegacySearchParams` TODO**
+
+```kotlin
+// In SearchPageMapper.kt, replace the TODO-bearing function:
+fun SearchRequest.toLegacySearchParams(): LegacySearchParams {
+    val sortType = when (sort) {
+        SortField.DATE -> SearchSortTypeDto.DATE
+        SortField.SEEDERS -> SearchSortTypeDto.SEEDS
+        SortField.LEECHERS -> SearchSortTypeDto.LEECHES
+        SortField.SIZE -> SearchSortTypeDto.SIZE
+        SortField.RELEVANCE -> SearchSortTypeDto.RELEVANCE
+        SortField.TITLE -> SearchSortTypeDto.TITLE
+    }
+    val sortOrderDto = when (sortOrder) {
+        SortOrder.ASCENDING -> SearchSortOrderDto.ASCENDING
+        SortOrder.DESCENDING -> SearchSortOrderDto.DESCENDING
+    }
+    val periodDto = period?.let {
+        when (it) {
+            TimePeriod.LAST_DAY -> SearchPeriodDto.LAST_DAY
+            TimePeriod.LAST_WEEK -> SearchPeriodDto.LAST_WEEK
+            TimePeriod.LAST_MONTH -> SearchPeriodDto.LAST_MONTH
+            TimePeriod.LAST_YEAR -> SearchPeriodDto.LAST_YEAR
+            TimePeriod.ALL_TIME -> SearchPeriodDto.ALL_TIME
+        }
+    }
+    return LegacySearchParams(
+        sortType = sortType,
+        sortOrder = sortOrderDto,
+        period = periodDto,
+        categories = categories.takeIf { it.isNotEmpty() }?.joinToString(","),
+    )
+}
+```
+
+(Adapt enum value names to match the actual `SearchSortTypeDto` enum members in the existing file — verify with `grep -A 30 'enum class SearchSortTypeDto'`. If a sort field has no DTO equivalent, default to `DATE`.)
+
+- [ ] **Step 2: Test**
+
+```kotlin
+package lava.tracker.rutracker.mapper
+
+import lava.network.dto.search.SearchPeriodDto
+import lava.network.dto.search.SearchSortOrderDto
+import lava.network.dto.search.SearchSortTypeDto
+import lava.tracker.api.model.SearchRequest
+import lava.tracker.api.model.SortField
+import lava.tracker.api.model.SortOrder
+import lava.tracker.api.model.TimePeriod
+import org.junit.Assert.assertEquals
+import org.junit.Test
+
+class SearchRequestMapperTest {
+    @Test
+    fun `default request maps to defaults`() {
+        val r = SearchRequest(query = "ubuntu")
+        val params = r.toLegacySearchParams()
+        assertEquals(SearchSortTypeDto.DATE, params.sortType)
+        assertEquals(SearchSortOrderDto.DESCENDING, params.sortOrder)
+        assertEquals(null, params.period)
+        assertEquals(null, params.categories)
+    }
+    @Test
+    fun `categories list joins with comma`() {
+        val r = SearchRequest(query = "x", categories = listOf("1", "2", "3"))
+        assertEquals("1,2,3", r.toLegacySearchParams().categories)
+    }
+    @Test
+    fun `period maps`() {
+        val r = SearchRequest(query = "x", period = TimePeriod.LAST_WEEK)
+        assertEquals(SearchPeriodDto.LAST_WEEK, r.toLegacySearchParams().period)
+    }
+}
+```
+
+- [ ] **Step 3: Run, commit**
+
+```bash
+git add core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker/mapper/SearchPageMapper.kt \
+        core/tracker/rutracker/src/test/kotlin/lava/tracker/rutracker/mapper/SearchRequestMapperTest.kt
+git commit -m "sp3a-2.14: SearchRequest → LegacySearchParams mapper + tests
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>"
+```
+
+---
+
+### Task 2.15: `SearchPageMapper.toResult` full implementation
+
+**Files:**
+- Modify: `core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker/mapper/SearchPageMapper.kt`
+- Create: `core/tracker/rutracker/src/test/kotlin/lava/tracker/rutracker/mapper/SearchPageMapperTest.kt`
+
+- [ ] **Step 1: Read current `SearchPageDto` shape**
+
+Run: `cat core/network/api/src/main/kotlin/lava/network/dto/search/SearchPageDto.kt`
+Note the field set: items list with id/title/size/seeders/etc., totalPages, etc.
+
+- [ ] **Step 2: Implement**
+
+```kotlin
+// Replace the TODO-bearing toResult function:
+fun toResult(dto: SearchPageDto, currentPage: Int): SearchResult =
+    SearchResult(
+        items = dto.items.map { item ->
+            TorrentItem(
+                trackerId = "rutracker",
+                torrentId = item.id,
+                title = item.title,
+                sizeBytes = item.size,
+                seeders = item.seeds,
+                leechers = item.leeches,
+                infoHash = null,  // RuTracker search results don't include hash; fetched on detail
+                magnetUri = null,
+                downloadUrl = null,
+                detailUrl = null,
+                category = item.categoryId,
+                publishDate = item.date,
+                metadata = buildMetadata(item),
+            )
+        },
+        totalPages = dto.totalPages,
+        currentPage = currentPage,
+    )
+
+private fun buildMetadata(item: lava.network.dto.search.SearchItemDto): Map<String, String> = buildMap {
+    item.author?.let { put("rutracker.author", it) }
+    item.authorId?.let { put("rutracker.authorId", it) }
+    item.commentsCount?.let { put("rutracker.commentsCount", it.toString()) }
+}
+```
+
+(Verify the exact SearchItemDto field names against the existing source. Adapt as needed.)
+
+- [ ] **Step 3: Test**
+
+```kotlin
+package lava.tracker.rutracker.mapper
+
+import lava.network.dto.search.SearchPageDto
+import lava.network.dto.search.SearchItemDto
+import org.junit.Assert.*
+import org.junit.Test
+
+class SearchPageMapperTest {
+    @Test
+    fun `maps DTO items to TorrentItems with rutracker trackerId`() {
+        val dto = SearchPageDto(
+            items = listOf(
+                SearchItemDto(id = "100", title = "Ubuntu", size = 4500000000L,
+                              seeds = 50, leeches = 5, categoryId = "Linux",
+                              author = "ubuntu-team", authorId = "u100",
+                              commentsCount = 10, date = null)
+            ),
+            totalPages = 5,
+        )
+        val result = SearchPageMapper().toResult(dto, currentPage = 0)
+        assertEquals(1, result.items.size)
+        val item = result.items.first()
+        assertEquals("rutracker", item.trackerId)
+        assertEquals("100", item.torrentId)
+        assertEquals("Ubuntu", item.title)
+        assertEquals(4500000000L, item.sizeBytes)
+        assertEquals("ubuntu-team", item.metadata["rutracker.author"])
+        assertEquals("10", item.metadata["rutracker.commentsCount"])
+        assertEquals(5, result.totalPages)
+        assertEquals(0, result.currentPage)
+    }
+}
+```
+
+(Adapt the test data class construction to match actual DTO constructor signatures.)
+
+- [ ] **Step 4: Run, commit**
+
+```bash
+git add core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker/mapper/SearchPageMapper.kt \
+        core/tracker/rutracker/src/test/kotlin/lava/tracker/rutracker/mapper/SearchPageMapperTest.kt
+git commit -m "sp3a-2.15: SearchPageMapper.toResult full impl + test
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>"
+```
+
+---
+
+### Task 2.16: `ForumDtoMapper` full implementation
+
+**Files:**
+- Modify: `core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker/mapper/ForumDtoMapper.kt`
+- Create: `core/tracker/rutracker/src/test/kotlin/lava/tracker/rutracker/mapper/ForumDtoMapperTest.kt`
+
+- [ ] **Step 1: Implement**
+
+```kotlin
+package lava.tracker.rutracker.mapper
+
+import javax.inject.Inject
+import lava.network.dto.forum.ForumDto
+import lava.network.dto.forum.SectionDto
+import lava.network.dto.forum.CategoryDto
+import lava.tracker.api.model.ForumCategory
+import lava.tracker.api.model.ForumTree
+
+class ForumDtoMapper @Inject constructor() {
+    fun toForumTree(dto: ForumDto): ForumTree =
+        ForumTree(
+            rootCategories = dto.sections.map { section -> mapSection(section, parentId = null) }
+        )
+
+    private fun mapSection(s: SectionDto, parentId: String?): ForumCategory =
+        ForumCategory(
+            id = s.id,
+            name = s.name,
+            parentId = parentId,
+            children = s.categories.map { c -> mapCategory(c, parentId = s.id) },
+        )
+
+    private fun mapCategory(c: CategoryDto, parentId: String?): ForumCategory =
+        ForumCategory(id = c.id, name = c.name, parentId = parentId, children = emptyList())
+}
+```
+
+(Verify the `SectionDto`/`CategoryDto` field names against the existing source.)
+
+- [ ] **Step 2: Test**
+
+```kotlin
+package lava.tracker.rutracker.mapper
+
+import lava.network.dto.forum.ForumDto
+import lava.network.dto.forum.SectionDto
+import lava.network.dto.forum.CategoryDto
+import org.junit.Assert.*
+import org.junit.Test
+
+class ForumDtoMapperTest {
+    @Test
+    fun `maps two-level section-category structure with parentId`() {
+        val dto = ForumDto(sections = listOf(
+            SectionDto(id = "s1", name = "Linux", categories = listOf(
+                CategoryDto(id = "c10", name = "Ubuntu"),
+                CategoryDto(id = "c11", name = "Debian"),
+            ))
+        ))
+        val tree = ForumDtoMapper().toForumTree(dto)
+        assertEquals(1, tree.rootCategories.size)
+        val linux = tree.rootCategories.first()
+        assertEquals("Linux", linux.name)
+        assertEquals(null, linux.parentId)
+        assertEquals(2, linux.children.size)
+        assertEquals("s1", linux.children[0].parentId)
+    }
+}
+```
+
+- [ ] **Step 3: Run, commit.**
+
+```bash
+git add core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker/mapper/ForumDtoMapper.kt \
+        core/tracker/rutracker/src/test/kotlin/lava/tracker/rutracker/mapper/ForumDtoMapperTest.kt
+git commit -m "sp3a-2.16: ForumDtoMapper full impl + test
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>"
+```
+
+---
+
+### Task 2.17: `CategoryPageMapper` full implementation
+
+Similar shape to `SearchPageMapper`. Implement `toBrowseResult(dto: CategoryPageDto, currentPage: Int): BrowseResult`. The category metadata becomes the `BrowseResult.category: ForumCategory?`.
+
+```kotlin
+fun toBrowseResult(dto: CategoryPageDto, currentPage: Int): BrowseResult =
+    BrowseResult(
+        items = dto.items.map { /* same TorrentItem shape as SearchPageMapper */ },
+        totalPages = dto.totalPages,
+        currentPage = currentPage,
+        category = dto.category?.let { ForumCategory(id = it.id, name = it.name, parentId = null, children = emptyList()) },
+    )
+```
+
+Test with one normal-shape DTO and one with empty category. Commit with message `sp3a-2.17: CategoryPageMapper full impl + test`.
+
+---
+
+### Task 2.18: `TopicMapper` full implementation
+
+Maps `ForumTopicDto` → `TopicDetail` (extracts torrent metadata + description) and `TopicPageDto` → `TopicPage` (paginated list of posts/comments embedded in the topic).
+
+Implement following the same pattern. Test with a DTO containing files list, magnet URI, and description. Commit `sp3a-2.18: TopicMapper full impl + test`.
+
+---
+
+### Task 2.19: `CommentsMapper` full implementation
+
+Maps `CommentsPageDto` → `CommentsPage`. Each `PostDto` becomes a `Comment` with `author = post.author.name`, `timestamp = post.date`, `body = post.elements.joinToString { it.text }` (flattening the rich post-element structure to plain text for the new model; the original elements survive in `metadata` keyed `"rutracker.post.elements"` as JSON).
+
+Test with one normal post, one with embedded quote, one empty. Commit `sp3a-2.19: CommentsMapper full impl + test`.
+
+---
+
+### Task 2.20: `FavoritesMapper` full implementation
+
+Maps `FavoritesDto` → `List<TorrentItem>`. Same field extraction as search-page mapping. Test. Commit `sp3a-2.20: FavoritesMapper full impl + test`.
+
+---
+
+### Task 2.21: `AuthMapper` full implementation
+
+`AuthResponseDto` is a sealed class with three subtypes (Authorized, Unauthorized, NeedCaptcha). Map:
+
+```kotlin
+fun toLoginResult(dto: AuthResponseDto): LoginResult = when (dto) {
+    is AuthResponseDto.Authorized -> LoginResult(
+        state = AuthState.Authenticated,
+        sessionToken = dto.token,
+    )
+    is AuthResponseDto.Unauthorized -> LoginResult(state = AuthState.Unauthenticated)
+    is AuthResponseDto.NeedCaptcha -> LoginResult(
+        state = AuthState.CaptchaRequired(
+            challenge = CaptchaChallenge(sid = dto.sid, code = dto.code, imageUrl = dto.imageUrl)
+        ),
+        captchaChallenge = CaptchaChallenge(sid = dto.sid, code = dto.code, imageUrl = dto.imageUrl),
+    )
+}
+```
+
+Test all three branches. Commit `sp3a-2.21: AuthMapper full impl + test`.
+
+---
+
+### Section E — Reverse mappers for `SwitchingNetworkApi`
+
+Tasks 2.22–2.27 produce **reverse mappers** that convert new-model types back into legacy DTO types. Used exclusively by the rewired `SwitchingNetworkApi` to preserve the existing `NetworkApi` surface for feature ViewModels.
+
+### Task 2.22: `RuTrackerDtoMappers` aggregator type
+
+**Files:**
+- Create: `core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker/mapper/RuTrackerDtoMappers.kt`
+
+```kotlin
+package lava.tracker.rutracker.mapper
+
+import javax.inject.Inject
+import lava.network.dto.forum.ForumDto
+import lava.network.dto.forum.CategoryPageDto
+import lava.network.dto.search.SearchPageDto
+import lava.network.dto.topic.ForumTopicDto
+import lava.network.dto.topic.TopicPageDto
+import lava.network.dto.topic.CommentsPageDto
+import lava.network.dto.user.FavoritesDto
+import lava.network.dto.auth.AuthResponseDto
+import lava.tracker.api.model.*
+
+/**
+ * Inverse of the forward mappers. Used by SwitchingNetworkApi to translate
+ * new SDK results back into legacy DTOs that feature ViewModels still expect.
+ * Removed in Spec 2 when feature/* are migrated to consume LavaTrackerSdk directly.
+ */
+class RuTrackerDtoMappers @Inject constructor() {
+    fun searchResultToDto(result: SearchResult): SearchPageDto { TODO("Task 2.23") }
+    fun browseResultToDto(result: BrowseResult): CategoryPageDto { TODO("Task 2.24") }
+    fun forumTreeToDto(tree: ForumTree): ForumDto { TODO("Task 2.25") }
+    fun topicDetailToDto(d: TopicDetail): ForumTopicDto { TODO("Task 2.26") }
+    fun topicPageToDto(p: TopicPage): TopicPageDto { TODO("Task 2.26") }
+    fun commentsPageToDto(p: CommentsPage): CommentsPageDto { TODO("Task 2.26") }
+    fun favoritesToDto(items: List<TorrentItem>): FavoritesDto { TODO("Task 2.27") }
+    fun loginResultToDto(r: LoginResult): AuthResponseDto { TODO("Task 2.27") }
+}
+```
+
+Commit `sp3a-2.22: RuTrackerDtoMappers aggregator stub`.
+
+---
+
+### Task 2.23: `searchResultToDto` reverse mapper
+
+Implement the inverse of `SearchPageMapper.toResult`. Each `TorrentItem` becomes a `SearchItemDto` with `metadata["rutracker.author"]` lifted back into `author`, etc. Test with a round-trip: forward-map a fixture DTO, reverse-map the result, assert the reverse equals the forward input. Commit.
+
+---
+
+### Task 2.24: `browseResultToDto` reverse mapper
+
+Same shape as 2.23 but for `BrowseResult` ↔ `CategoryPageDto`. Round-trip test. Commit.
+
+---
+
+### Task 2.25: `forumTreeToDto` reverse mapper
+
+Inverse of `ForumDtoMapper.toForumTree`. Test. Commit.
+
+---
+
+### Task 2.26: `topicDetailToDto`, `topicPageToDto`, `commentsPageToDto` reverse mappers
+
+Three inverse mappers for the topic/comments DTOs. Round-trip tests for each. Commit.
+
+---
+
+### Task 2.27: `favoritesToDto`, `loginResultToDto` reverse mappers
+
+Two final inverse mappers. Round-trip tests. Commit.
+
+---
+
+### Section F — Registry registration + Hilt DI
+
+### Task 2.28: `RuTrackerClientFactory`
+
+**Files:**
+- Create: `core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker/RuTrackerClientFactory.kt`
+
+```kotlin
+package lava.tracker.rutracker
+
+import javax.inject.Inject
+import javax.inject.Provider
+import lava.sdk.api.PluginConfig
+import lava.tracker.api.TrackerClient
+import lava.tracker.api.TrackerDescriptor
+import lava.tracker.registry.TrackerClientFactory
+
+class RuTrackerClientFactory @Inject constructor(
+    private val clientProvider: Provider<RuTrackerClient>,
+) : TrackerClientFactory {
+    override val descriptor: TrackerDescriptor = RuTrackerDescriptor
+    override fun create(config: PluginConfig): TrackerClient = clientProvider.get()
+}
+```
+
+Commit `sp3a-2.28: RuTrackerClientFactory`.
+
+---
+
+### Task 2.29: Hilt DI module for `:core:tracker:client`
+
+**Files:**
+- Create: `core/tracker/client/src/main/kotlin/lava/tracker/client/di/TrackerClientModule.kt`
+- Modify: `core/tracker/client/build.gradle.kts` (add Hilt deps)
+
+```kotlin
+plugins {
+    id("lava.android.library")    // needed because Hilt-on-JVM-only is awkward; we keep client module Android-friendly
+    id("lava.android.hilt")
+    id("lava.kotlin.serialization")
+}
+android.namespace = "lava.tracker.client"
+dependencies {
+    api(project(":core:tracker:api"))
+    api(project(":core:tracker:registry"))
+    api(project(":core:tracker:mirror"))
+    api(project(":core:tracker:rutracker"))  // ensures factory is on classpath
+    implementation(libs.kotlinx.coroutines.core)
+}
+```
+
+```kotlin
+// TrackerClientModule.kt
+package lava.tracker.client.di
+
+import dagger.Module
+import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
+import javax.inject.Singleton
+import lava.tracker.registry.DefaultTrackerRegistry
+import lava.tracker.registry.TrackerRegistry
+import lava.tracker.rutracker.RuTrackerClientFactory
+
+@Module
+@InstallIn(SingletonComponent::class)
+object TrackerClientModule {
+    @Provides @Singleton
+    fun provideTrackerRegistry(rutrackerFactory: RuTrackerClientFactory): TrackerRegistry =
+        DefaultTrackerRegistry().apply { register(rutrackerFactory) }
+}
+```
+
+(After Phase 3 ships, this `provideTrackerRegistry` will also accept `RuTorClientFactory`. Documented as a TODO inline.)
+
+Commit `sp3a-2.29: Hilt module for TrackerRegistry with RuTracker pre-registered`.
+
+---
+
+### Task 2.30: `LavaTrackerSdk` facade skeleton
+
+**Files:**
+- Create: `core/tracker/client/src/main/kotlin/lava/tracker/client/LavaTrackerSdk.kt`
+- Create: `core/tracker/client/src/main/kotlin/lava/tracker/client/SearchOutcome.kt`
+- Create: `core/tracker/client/src/main/kotlin/lava/tracker/client/BrowseOutcome.kt`
+
+```kotlin
+// LavaTrackerSdk.kt
+package lava.tracker.client
+
+import javax.inject.Inject
+import javax.inject.Singleton
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import lava.sdk.api.MapPluginConfig
+import lava.tracker.api.TrackerClient
+import lava.tracker.api.TrackerDescriptor
+import lava.tracker.api.feature.*
+import lava.tracker.api.model.*
+import lava.tracker.registry.TrackerRegistry
+
+@Singleton
+class LavaTrackerSdk @Inject constructor(
+    private val registry: TrackerRegistry,
+) {
+    private val _activeTrackerId = MutableStateFlow("rutracker")
+    val activeTrackerId: StateFlow<String> = _activeTrackerId
+
+    suspend fun switchTracker(trackerId: String) {
+        require(registry.isRegistered(trackerId)) { "Unknown tracker: $trackerId" }
+        _activeTrackerId.value = trackerId
+    }
+
+    fun listAvailableTrackers(): List<TrackerDescriptor> = registry.list()
+
+    fun getActiveDescriptor(): TrackerDescriptor =
+        getActiveClient().descriptor
+
+    private fun getActiveClient(): TrackerClient =
+        registry.get(_activeTrackerId.value, MapPluginConfig())
+
+    suspend fun search(request: SearchRequest, page: Int = 0): SearchOutcome {
+        val client = getActiveClient()
+        val feature = client.getFeature(SearchableTracker::class)
+            ?: return SearchOutcome.Failure(
+                cause = IllegalStateException("Active tracker '${client.descriptor.trackerId}' does not support SEARCH"),
+                triedTrackers = listOf(client.descriptor.trackerId)
+            )
+        return try {
+            val result = feature.search(request, page)
+            SearchOutcome.Success(result, viaTracker = client.descriptor.trackerId)
+        } catch (t: Throwable) {
+            // Cross-tracker fallback policy lives in CrossTrackerFallbackPolicy (Task 4.7).
+            // For Phase 2, propagate as Failure; the cross-tracker logic lights up in Phase 4.
+            SearchOutcome.Failure(t, triedTrackers = listOf(client.descriptor.trackerId))
+        }
+    }
+
+    suspend fun browse(category: String?, page: Int): BrowseOutcome { TODO("Task 2.31") }
+    suspend fun getTopic(id: String): TopicDetail { TODO("Task 2.31") }
+    suspend fun getMagnetLink(id: String): String? { TODO("Task 2.31") }
+    suspend fun downloadTorrent(id: String): ByteArray { TODO("Task 2.31") }
+}
+```
+
+```kotlin
+// SearchOutcome.kt
+package lava.tracker.client
+
+import lava.tracker.api.TrackerCapability
+import lava.tracker.api.model.SearchResult
+
+sealed class SearchOutcome {
+    data class Success(val result: SearchResult, val viaTracker: String) : SearchOutcome()
+    data class CrossTrackerFallbackProposed(
+        val failedTrackerId: String,
+        val proposedTrackerId: String,
+        val capability: TrackerCapability,
+        val resumeWith: suspend () -> SearchOutcome,
+    ) : SearchOutcome()
+    data class Failure(val cause: Throwable, val triedTrackers: List<String>) : SearchOutcome()
+}
+```
+
+```kotlin
+// BrowseOutcome.kt
+package lava.tracker.client
+
+import lava.tracker.api.model.BrowseResult
+
+sealed class BrowseOutcome {
+    data class Success(val result: BrowseResult, val viaTracker: String) : BrowseOutcome()
+    data class Failure(val cause: Throwable, val triedTrackers: List<String>) : BrowseOutcome()
+}
+```
+
+Commit `sp3a-2.30: LavaTrackerSdk facade skeleton + SearchOutcome/BrowseOutcome sealed types`.
+
+---
+
+### Task 2.31: Fill remaining `LavaTrackerSdk` TODO methods
+
+Implement `browse`, `getTopic`, `getMagnetLink`, `downloadTorrent` following the `search` pattern. Each uses `getActiveClient().getFeature(...)`, returns success/failure shapes. Tests using `FakeTrackerClient`. Commit.
+
+---
+
+### Section G — `SwitchingNetworkApi` rewire
+
+### Task 2.32: Read existing `SwitchingNetworkApi` and design the rewire
+
+**Files:**
+- Read: `core/network/impl/src/main/kotlin/lava/network/impl/SwitchingNetworkApi.kt`
+
+- [ ] **Step 1: Identify the current 14-method delegation pattern**
+
+Run: `cat core/network/impl/src/main/kotlin/lava/network/impl/SwitchingNetworkApi.kt`
+Note: each method delegates to one of two backing `NetworkApi` implementations based on configured endpoint.
+
+- [ ] **Step 2: Plan the rewire — every method gets:**
+
+```
+override suspend fun XYZ(...): XyzDto {
+  val request = buildLavaSdkRequest(...)
+  val outcome = sdk.<corresponding-call>(request)
+  return mappers.<corresponding-reverse-mapper>(outcome.successValue())
+}
+```
+
+No changes in this task — design only. Commit a short architectural note as a draft inline doc in the existing file (a single comment line):
+
+```kotlin
+// SP-3a-2.32: SwitchingNetworkApi rewire planned for Task 2.33-2.35;
+// rewires each method to delegate to LavaTrackerSdk + RuTrackerDtoMappers.
+```
+
+Commit `sp3a-2.32: design note for SwitchingNetworkApi rewire`.
+
+---
+
+### Task 2.33: Rewire authentication-related methods (`checkAuthorized`, `login`)
+
+```kotlin
+@Inject constructor(
+    private val sdk: LavaTrackerSdk,
+    private val rutrackerMappers: RuTrackerDtoMappers,
+) : NetworkApi {
+
+    override suspend fun checkAuthorized(token: String): Boolean {
+        val client = sdk.getActiveClient()  // expose getActiveClient() as internal — visible to :core:network:impl
+        val auth = client.getFeature(AuthenticatableTracker::class) ?: return false
+        return auth.checkAuth() is AuthState.Authenticated
+    }
+
+    override suspend fun login(
+        username: String, password: String,
+        captchaSid: String?, captchaCode: String?, captchaValue: String?,
+    ): AuthResponseDto {
+        val client = sdk.getActiveClient()
+        val auth = client.getFeature(AuthenticatableTracker::class)
+            ?: error("Active tracker does not support AUTH")
+        val captcha = if (captchaSid != null && captchaCode != null && captchaValue != null) {
+            CaptchaSolution(captchaSid, captchaCode, captchaValue)
+        } else null
+        val result = auth.login(LoginRequest(username, password, captcha))
+        return rutrackerMappers.loginResultToDto(result)
+    }
+}
+```
+
+(Expose `LavaTrackerSdk.getActiveClient()` as `internal` if not already.)
+
+Test using `FakeTrackerClient`. Commit.
+
+---
+
+### Task 2.34: Rewire forum/category/search/favorites methods
+
+7 more methods: `getFavorites`, `addFavorite`, `removeFavorite`, `getForum`, `getCategory`, `getSearchPage`, `addComment`. Each follows the same pattern. Test each. Commit as `sp3a-2.34`.
+
+---
+
+### Task 2.35: Rewire topic/comments/torrent/download methods
+
+Final 5 methods: `getTopic`, `getTopicPage`, `getCommentsPage`, `getTorrent`, `download`. Test. Commit `sp3a-2.35`.
+
+---
+
+### Section H — Parity gate
+
+### Task 2.36: Cross-version parity test against pre-SP-3a tag
+
+**Files:**
+- Create: `core/network/impl/src/test/kotlin/lava/network/impl/SwitchingNetworkApiParityTest.kt`
+- Create: `.lava-ci-evidence/sp3a-parity/phase2-baseline.json`
+
+The strategy: capture the pre-SP-3a behavior of every NetworkApi method as JSON fixtures (one fixture per method × shape), then assert the rewired SwitchingNetworkApi produces byte-for-byte identical JSON output.
+
+- [ ] **Step 1: Generate baseline fixtures from pre-SP-3a tag**
+
+```bash
+# Check out the last pre-SP-3a release tag (Lava-Android-1.1.4-1014)
+git worktree add /tmp/lava-1.1.4 Lava-Android-1.1.4-1014
+cd /tmp/lava-1.1.4
+# Run a fixture-generating test that exercises every NetworkApi method
+# against a stubbed HTTP server with known HTML fixtures, capturing
+# the JSON-serialized DTO output to test resources.
+./gradlew :core:network:impl:test --tests "*ParityFixtureGenerator*" -PgenerateBaseline=true
+# Copy the generated fixtures back to the SP-3a branch
+cp -r core/network/impl/build/test-results/parity-baseline /run/media/milosvasic/DATA4TB/Projects/Lava/core/network/impl/src/test/resources/parity-baseline-1.1.4/
+git worktree remove /tmp/lava-1.1.4
+```
+
+(If no `ParityFixtureGenerator` exists yet, this task creates one — write a JUnit test that calls each NetworkApi method with stubbed inputs and writes `Json.encodeToString(...)` of the result to a file under `build/test-results/parity-baseline/<method>.json`.)
+
+- [ ] **Step 2: On SP-3a branch, write the parity test**
+
+```kotlin
+package lava.network.impl
+
+import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.test.runTest
+import kotlinx.serialization.json.Json
+import lava.network.dto.search.SearchPageDto
+import org.junit.Test
+import java.io.File
+
+class SwitchingNetworkApiParityTest {
+
+    private val json = Json { prettyPrint = true; encodeDefaults = true }
+    private val baselineDir = File("src/test/resources/parity-baseline-1.1.4")
+
+    @Test
+    fun `getSearchPage produces byte-identical output vs 1.1.4 baseline`() = runTest {
+        val sdk = makeSdkWithStubbedRuTracker()  // helper sets up SwitchingNetworkApi + LavaTrackerSdk + fixture HTML
+        val api = SwitchingNetworkApi(sdk = sdk, rutrackerMappers = RuTrackerDtoMappers())
+        val result = api.getSearchPage(
+            token = "test-token", searchQuery = "ubuntu", categories = null,
+            author = null, authorId = null, sortType = null, sortOrder = null,
+            period = null, page = 0,
+        )
+        val produced = json.encodeToString(SearchPageDto.serializer(), result)
+        val baseline = File(baselineDir, "getSearchPage.json").readText()
+        assertThat(produced).isEqualTo(baseline)
+    }
+
+    // Repeat for all 14 NetworkApi methods — 14 tests total.
+}
+```
+
+- [ ] **Step 3: Run, confirm pass**
+
+Run: `./gradlew :core:network:impl:test --tests "*SwitchingNetworkApiParityTest*"`
+Expected: PASS — all 14 parity assertions green.
+
+If any test fails, the divergence is real — root-cause it (likely a forward+reverse mapper round-trip dropping a field). Fix the mapper, re-run.
+
+- [ ] **Step 4: Record evidence**
+
+```json
+// .lava-ci-evidence/sp3a-parity/phase2-baseline.json
+{
+  "task": "sp3a-2.36",
+  "subject": "SwitchingNetworkApi parity vs Lava-Android-1.1.4-1014",
+  "methods_tested": [
+    "checkAuthorized", "login", "getFavorites", "addFavorite", "removeFavorite",
+    "getForum", "getCategory", "getSearchPage", "getTopic", "getTopicPage",
+    "getCommentsPage", "addComment", "getTorrent", "download"
+  ],
+  "all_methods_byte_identical": true,
+  "baseline_tag": "Lava-Android-1.1.4-1014",
+  "ledger_clause": "6.D"
+}
+```
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add core/network/impl/src/test/kotlin/lava/network/impl/SwitchingNetworkApiParityTest.kt \
+        core/network/impl/src/test/resources/parity-baseline-1.1.4/ \
+        .lava-ci-evidence/sp3a-parity/phase2-baseline.json
+git commit -m "sp3a-2.36: parity gate — SwitchingNetworkApi matches 1.1.4 baseline byte-for-byte
+
+All 14 NetworkApi methods produce identical JSON output via the new
+LavaTrackerSdk underneath compared to the pre-SP-3a baseline. Phase 2
+acceptance gate green.
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>"
+```
+
+**Phase 2 acceptance check.** Run from repo root:
+
+```bash
+./gradlew :app:assembleDebug :core:tracker:rutracker:test :core:network:impl:test
+```
+
+Expected: BUILD SUCCESSFUL — debug APK builds, all tests pass.
+
+```bash
+ls -la core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker/feature/
+```
+
+Expected: 7 feature impl files (Search, Browse, Topic, Comments, Favorites, Auth, Download).
+
+```bash
+grep -r 'core:network:rutracker' settings.gradle.kts || echo "rutracker module no longer at old location — correct"
+```
+
+Expected: prints "rutracker module no longer at old location — correct".
+
+**Phase 2 done. Phase 3 (RuTor) unblocked. Phase 4 may begin in parallel.**
+
+---
