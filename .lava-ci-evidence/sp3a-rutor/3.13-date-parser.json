@@ -1,0 +1,35 @@
+{
+  "task": "sp3a-3.13",
+  "rule": "Anti-Bluff Pact, Sixth Law clause 2 (Falsifiability)",
+  "subject": "core/tracker/rutor/src/main/kotlin/lava/tracker/rutor/parser/RuTorDateParser.kt",
+  "test": "core/tracker/rutor/src/test/kotlin/lava/tracker/rutor/parser/RuTorDateParserTest.kt",
+  "test_methods_targeted": [
+    "Сегодня returns today truncated to UTC midnight",
+    "Сегодня is case-insensitive"
+  ],
+  "contract": "RuTorDateParser.parse(\"Сегодня\", now) MUST return today's UTC midnight; parsing of \"Сегодня\" must NOT fall through to the numeric regex (which can never match the literal Cyrillic word).",
+  "rehearsal": {
+    "mutation": "Removed the `trimmed.equals(\"Сегодня\", ignoreCase = true)` branch from RuTorDateParser.parse, leaving only the Вчера and numeric-pattern branches; \"Сегодня\" therefore reaches the numeric Regex (which contains \\\\d{1,2}) and returns null.",
+    "command": "./gradlew :core:tracker:rutor:test --tests 'lava.tracker.rutor.parser.RuTorDateParserTest' --no-daemon",
+    "observed_failures": [
+      {
+        "test": "Сегодня returns today truncated to UTC midnight",
+        "message": "java.lang.AssertionError: expected:<2026-04-30T00:00:00Z> but was:<null>",
+        "location": "RuTorDateParserTest.kt:35"
+      },
+      {
+        "test": "Сегодня is case-insensitive",
+        "message": "java.lang.AssertionError: expected:<2026-04-30T00:00:00Z> but was:<null>",
+        "location": "RuTorDateParserTest.kt:41"
+      }
+    ],
+    "non_targeted_passing_count": 8,
+    "reverted": true,
+    "reverted_command": "./gradlew :core:tracker:rutor:test --tests 'lava.tracker.rutor.parser.RuTorDateParserTest' --no-daemon",
+    "reverted_result": "BUILD SUCCESSFUL"
+  },
+  "performed_by": "Claude Opus 4.7 (1M context)",
+  "performed_at": "2026-04-30",
+  "host": "nezha (Linux 6.12.61-6.12-alt1)",
+  "notes": "The Сегодня assertion sites are pinned with a fixed clock (2026-04-30T15:42:11Z) so the failure message names the exact expected Instant. The non-Сегодня cases (\"12 Янв 24\", \"5 Дек 2023\", leap day, Вчера, garbage, empty, unknown month, all 12 months) continued to pass under the mutation, confirming the assertion delta is scoped exactly to the deleted branch. Subsequent SP-3a Sections E-H must not collapse the Сегодня branch into the numeric path without re-running this rehearsal and updating this evidence file."
+}
