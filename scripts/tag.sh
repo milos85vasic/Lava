@@ -197,6 +197,78 @@ read_apigo_version_code() {
     "API-Go Code"
 }
 
+# SP-3a Phase 5 Task 5.21 — Android evidence-pack gate.
+#
+# Refuse to tag the Android app at version V unless
+# .lava-ci-evidence/Lava-Android-<V>/ exists with the required
+# subfiles certifying that:
+#   - scripts/ci.sh --full ran green against this commit (ci.sh.json)
+#   - all 8 SP-3a Challenge Tests have an attestation file
+#     (challenges/C{1..8}.json with status: VERIFIED)
+#   - the bluff-audit hunt has been run since the commit
+#     (bluff-audit/<recent>.json)
+#   - the Submodules/Tracker-SDK mirror smoke test passed
+#     (mirror-smoke/<recent>.json)
+#   - operator real-device verification per Task 5.22 is complete
+#     (real-device-verification.md status: VERIFIED)
+#
+# Per Sixth Law clause 5: this is the mechanical gate that prevents
+# a green-CI / broken-on-real-device tag. It implements the Seventh
+# Law clause 3 pre-tag real-device attestation in mechanical form.
+require_evidence_for_android() {
+  local tag_suffix="Android" vname="$1" vcode="$2"
+  if $NO_EVIDENCE_REQUIRED; then
+    warn "[android] --no-evidence-required: bypassing SP-3a evidence-pack gate"
+    return 0
+  fi
+  if $DRY_RUN; then
+    warn "[android] --dry-run: bypassing SP-3a evidence-pack gate"
+    return 0
+  fi
+  local tag_id="Lava-${tag_suffix}-${vname}-${vcode}"
+  local pack_dir="$REPO_ROOT/.lava-ci-evidence/${tag_id}"
+
+  if [[ ! -d "$pack_dir" ]]; then
+    die "Cannot tag $tag_id: missing evidence pack at $pack_dir. Operator MUST run scripts/ci.sh --full and complete real-device verification per SP-3a Task 5.22 before tagging."
+  fi
+
+  # Required subfiles (SP-3a Phase 5 Task 5.21 contract).
+  local missing=()
+  [[ -f "$pack_dir/ci.sh.json" ]] || missing+=("ci.sh.json")
+  [[ -d "$pack_dir/challenges" ]] || missing+=("challenges/")
+  [[ -d "$pack_dir/bluff-audit" ]] || missing+=("bluff-audit/")
+  [[ -d "$pack_dir/mirror-smoke" ]] || missing+=("mirror-smoke/")
+  [[ -f "$pack_dir/real-device-verification.md" ]] || missing+=("real-device-verification.md")
+
+  if (( ${#missing[@]} > 0 )); then
+    die "Cannot tag $tag_id: evidence pack incomplete. Missing: ${missing[*]} under $pack_dir"
+  fi
+
+  # Each Challenge Test C1-C8 MUST have an attestation file with
+  # status: VERIFIED (not PENDING_OPERATOR).
+  local i missing_challenge=()
+  for i in 1 2 3 4 5 6 7 8; do
+    local f="$pack_dir/challenges/C${i}.json"
+    if [[ ! -f "$f" ]]; then
+      missing_challenge+=("C${i}.json")
+      continue
+    fi
+    if ! grep -qE '"status"[[:space:]]*:[[:space:]]*"VERIFIED"' "$f"; then
+      missing_challenge+=("C${i}.json (status not VERIFIED)")
+    fi
+  done
+  if (( ${#missing_challenge[@]} > 0 )); then
+    die "Cannot tag $tag_id: Challenge Test attestations incomplete: ${missing_challenge[*]}"
+  fi
+
+  # real-device-verification.md MUST report status: VERIFIED.
+  if ! grep -qE '^status:[[:space:]]*VERIFIED' "$pack_dir/real-device-verification.md"; then
+    die "Cannot tag $tag_id: real-device-verification.md status is not VERIFIED. Operator must complete Task 5.22 before tagging."
+  fi
+
+  log "[android] SP-3a evidence pack OK: $pack_dir"
+}
+
 # Sixth Law clause 5: refuse to tag api-go without a matching pretag
 # evidence file produced by lava-api-go/scripts/pretag-verify.sh against
 # the current HEAD. Bypass with --no-evidence-required for --dry-run
@@ -356,6 +428,7 @@ for app in "${TARGETS[@]}"; do
       vname=$(read_android_version_name)
       vcode=$(read_android_version_code)
       writer=write_android_versions
+      require_evidence_for_android "$vname" "$vcode"
       ;;
     api)
       tag_suffix="API"
