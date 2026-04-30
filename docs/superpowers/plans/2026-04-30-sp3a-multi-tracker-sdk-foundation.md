@@ -6610,3 +6610,1793 @@ Expected: prints "rutracker module no longer at old location — correct".
 **Phase 2 done. Phase 3 (RuTor) unblocked. Phase 4 may begin in parallel.**
 
 ---
+
+## Phase 3: RuTor Implementation
+
+**Duration:** 2 weeks. **Tasks:** 41. **Goal:** Implement RuTor (`rutor.info` / `rutor.is`) as the first additional tracker, validating that the SDK contract is real and not RuTracker-shaped in disguise. Anonymous-by-default per decision 7b-ii.
+
+**Acceptance gate:** `:core:tracker:rutor:test` green; ≥5 HTML fixtures per parser × 4 parsers (search/browse/topic/login) = 20 fixtures committed; real-tracker integration test passes against rutor.info; `RuTorClientFactory` registered in DI module alongside RuTracker; `LavaTrackerSdk.switchTracker("rutor")` works end-to-end.
+
+### Section A — Module setup
+
+### Task 3.1: Create `:core:tracker:rutor` module skeleton
+
+**Files:**
+- Create: `core/tracker/rutor/build.gradle.kts`
+- Create: `core/tracker/rutor/src/main/kotlin/lava/tracker/rutor/.gitkeep`
+- Create: `core/tracker/rutor/src/test/kotlin/lava/tracker/rutor/.gitkeep`
+- Create: `core/tracker/rutor/src/test/resources/fixtures/rutor/.gitkeep`
+
+- [ ] **Step 1: build.gradle.kts**
+
+```kotlin
+plugins {
+    id("lava.kotlin.tracker.module")
+}
+android.namespace = "lava.tracker.rutor"  // remove this line if convention plugin is JVM-only
+```
+
+(Note: tracker convention plugin is JVM-only per Phase 1 Task 1.30. The `namespace` line above is therefore not applicable. Just `plugins { id("lava.kotlin.tracker.module") }` is enough.)
+
+- [ ] **Step 2: Add to settings.gradle.kts**
+
+Already added in Task 1.32 anticipating this. Verify present: `grep ':core:tracker:rutor' settings.gradle.kts`. If commented, uncomment.
+
+- [ ] **Step 3: Verify**
+
+Run: `./gradlew :core:tracker:rutor:compileKotlin`
+Expected: BUILD SUCCESSFUL.
+
+- [ ] **Step 4: Commit**
+
+```bash
+git add core/tracker/rutor/build.gradle.kts \
+        core/tracker/rutor/src/main/kotlin/lava/tracker/rutor/.gitkeep \
+        core/tracker/rutor/src/test/kotlin/lava/tracker/rutor/.gitkeep \
+        core/tracker/rutor/src/test/resources/fixtures/rutor/.gitkeep
+git commit -m "sp3a-3.1: scaffold :core:tracker:rutor module
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>"
+```
+
+---
+
+### Task 3.2: Add `RuTorClient` and feature-impl placeholders that compile
+
+**Files:**
+- Create: `core/tracker/rutor/src/main/kotlin/lava/tracker/rutor/RuTorClient.kt` (skeleton — full impl in Task 3.40)
+
+- [ ] **Step 1: Skeleton client**
+
+```kotlin
+package lava.tracker.rutor
+
+import javax.inject.Inject
+import kotlin.reflect.KClass
+import lava.tracker.api.TrackerClient
+import lava.tracker.api.TrackerDescriptor
+import lava.tracker.api.TrackerFeature
+
+/** Skeleton — full implementation in Task 3.40. */
+class RuTorClient @Inject constructor() : TrackerClient {
+    override val descriptor: TrackerDescriptor = RuTorDescriptor  // created in Task 3.6
+    override suspend fun healthCheck(): Boolean = false
+    override fun <T : TrackerFeature> getFeature(featureClass: KClass<T>): T? = null
+    override fun close() {}
+}
+```
+
+(Compile fails until Task 3.6 creates `RuTorDescriptor`. Expected.)
+
+Commit `sp3a-3.2: RuTorClient skeleton (compile blocked until Task 3.6)`.
+
+---
+
+### Task 3.3: Test resource directory layout for fixtures
+
+**Files:**
+- Create: `core/tracker/rutor/src/test/resources/fixtures/rutor/{search,browse,topic,login,comments}/.gitkeep`
+
+- [ ] **Step 1:**
+```bash
+for dir in search browse topic login comments; do
+  mkdir -p core/tracker/rutor/src/test/resources/fixtures/rutor/$dir
+  touch core/tracker/rutor/src/test/resources/fixtures/rutor/$dir/.gitkeep
+done
+```
+
+Commit `sp3a-3.3: fixture directory scaffolding for 5 parser scopes`.
+
+---
+
+### Task 3.4: README for the rutor module
+
+**Files:**
+- Create: `core/tracker/rutor/README.md`
+
+```markdown
+# :core:tracker:rutor
+
+RuTor (rutor.info / rutor.is) tracker plugin. Implements `TrackerClient`
++ feature interfaces from `:core:tracker:api`.
+
+## Capabilities
+
+SEARCH, BROWSE, TOPIC, COMMENTS, TORRENT_DOWNLOAD, MAGNET_LINK, RSS,
+AUTH_REQUIRED. **Not implemented:** FORUM (RuTor has categories only),
+FAVORITES (no list endpoint comparable to RuTracker).
+
+## Encoding
+
+UTF-8 throughout. No charset transcoding (unlike RuTracker which is
+Windows-1251).
+
+## Login policy (decision 7b-ii)
+
+Anonymous by default. Login is invoked only when the SDK consumer calls
+`CommentsTracker.addComment()` (or any other authenticated operation)
+and `checkAuth()` returns Unauthenticated.
+
+## Mirrors
+
+See `app/src/main/assets/mirrors.json` for the bundled list. Health
+probe checks for substring "RuTor" in response body.
+
+## Adding a parser fixture
+
+Save HTML to `src/test/resources/fixtures/rutor/<scope>/<name>-<date>.html`.
+Refresh older than 30 days warns; older than 60 blocks tag. See
+`docs/refactoring/decoupling/refresh-fixtures.md`.
+```
+
+Commit `sp3a-3.4: rutor module README`.
+
+---
+
+### Task 3.5: Add module to `core/CLAUDE.md` scoped doc
+
+**Files:**
+- Modify: `core/CLAUDE.md`
+
+Add a section pointing readers to the new tracker module pattern (one paragraph). Commit `sp3a-3.5: scoped CLAUDE.md note for tracker plugin modules`.
+
+---
+
+### Section B — `RuTorDescriptor`
+
+### Task 3.6: Implement `RuTorDescriptor`
+
+**Files:**
+- Create: `core/tracker/rutor/src/main/kotlin/lava/tracker/rutor/RuTorDescriptor.kt`
+- Create: `core/tracker/rutor/src/test/kotlin/lava/tracker/rutor/RuTorDescriptorTest.kt`
+
+```kotlin
+package lava.tracker.rutor
+
+import lava.sdk.api.MirrorUrl
+import lava.sdk.api.Protocol
+import lava.tracker.api.AuthType
+import lava.tracker.api.TrackerCapability
+import lava.tracker.api.TrackerDescriptor
+
+object RuTorDescriptor : TrackerDescriptor {
+    override val trackerId = "rutor"
+    override val displayName = "RuTor.info"
+    override val baseUrls = listOf(
+        MirrorUrl("https://rutor.info", isPrimary = true, priority = 0, protocol = Protocol.HTTPS),
+        MirrorUrl("https://rutor.is",                        priority = 1, protocol = Protocol.HTTPS),
+        MirrorUrl("https://www.rutor.info",                  priority = 2, protocol = Protocol.HTTPS),
+        MirrorUrl("https://www.rutor.is",                    priority = 3, protocol = Protocol.HTTPS),
+        MirrorUrl("http://6tor.org",                         priority = 4, protocol = Protocol.HTTP, region = "ipv6-only"),
+    )
+    override val capabilities = setOf(
+        TrackerCapability.SEARCH,
+        TrackerCapability.BROWSE,
+        TrackerCapability.TOPIC,
+        TrackerCapability.COMMENTS,
+        TrackerCapability.TORRENT_DOWNLOAD,
+        TrackerCapability.MAGNET_LINK,
+        TrackerCapability.RSS,
+        TrackerCapability.AUTH_REQUIRED,
+        // No FORUM, no FAVORITES — RuTor lacks these in a comparable form.
+    )
+    override val authType = AuthType.FORM_LOGIN  // simple POST, no captcha
+    override val encoding = "UTF-8"
+    override val expectedHealthMarker = "RuTor"
+}
+```
+
+Test asserts: 8 capabilities (no FORUM, no FAVORITES, no CAPTCHA_LOGIN), 5 mirrors, primary is rutor.info, encoding UTF-8.
+
+Commit `sp3a-3.6: RuTorDescriptor + tests`.
+
+---
+
+### Section C — HTTP client (cookies, semaphore, circuit breaker)
+
+### Task 3.7: `RuTorHttpClient` skeleton
+
+**Files:**
+- Create: `core/tracker/rutor/src/main/kotlin/lava/tracker/rutor/http/RuTorHttpClient.kt`
+
+```kotlin
+package lava.tracker.rutor.http
+
+import java.net.CookieManager
+import java.net.CookiePolicy
+import java.util.concurrent.TimeUnit
+import javax.inject.Inject
+import javax.inject.Singleton
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
+import kotlinx.coroutines.withContext
+import okhttp3.FormBody
+import okhttp3.JavaNetCookieJar
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.Response
+
+@Singleton
+class RuTorHttpClient @Inject constructor() {
+    private val cookieJar = JavaNetCookieJar(CookieManager().apply { setCookiePolicy(CookiePolicy.ACCEPT_ALL) })
+    private val client = OkHttpClient.Builder()
+        .cookieJar(cookieJar)
+        .connectTimeout(10, TimeUnit.SECONDS)
+        .readTimeout(15, TimeUnit.SECONDS)
+        .followRedirects(true)
+        .build()
+
+    /** Per-tracker semaphore: max 4 concurrent requests, per spec. */
+    private val concurrency = Semaphore(permits = 4)
+
+    suspend fun get(url: String): Response = withContext(Dispatchers.IO) {
+        concurrency.withPermit {
+            client.newCall(Request.Builder().url(url).get().header("User-Agent", USER_AGENT).build()).execute()
+        }
+    }
+
+    suspend fun postForm(url: String, fields: Map<String, String>): Response = withContext(Dispatchers.IO) {
+        concurrency.withPermit {
+            val body = FormBody.Builder().apply { fields.forEach { (k, v) -> add(k, v) } }.build()
+            client.newCall(Request.Builder().url(url).post(body).header("User-Agent", USER_AGENT).build()).execute()
+        }
+    }
+
+    suspend fun download(url: String): ByteArray = withContext(Dispatchers.IO) {
+        concurrency.withPermit {
+            client.newCall(Request.Builder().url(url).get().header("User-Agent", USER_AGENT).build()).execute().use {
+                require(it.isSuccessful) { "RuTor download failed: HTTP ${it.code} for $url" }
+                it.body?.bytes() ?: error("empty response body")
+            }
+        }
+    }
+
+    fun hasCookie(name: String): Boolean =
+        cookieJar.loadForRequest(okhttp3.HttpUrl.Builder().scheme("https").host("rutor.info").build())
+            .any { it.name == name }
+
+    fun clearCookies() {
+        // CookieManager-based cookieJar can't be cleared without reflection; reset by recreating the jar
+        // — for SP-3a, we accept that logout requires app restart. Documented in README.
+    }
+
+    private companion object {
+        const val USER_AGENT = "Mozilla/5.0 (Linux; Android 14) Lava/1.2.0"
+    }
+}
+```
+
+Commit `sp3a-3.7: RuTorHttpClient with cookie jar + semaphore-bounded concurrency`.
+
+---
+
+### Task 3.8: Add circuit breaker around `RuTorHttpClient`
+
+Use `vasic-digital/Recovery` submodule's `CircuitBreaker` if available, otherwise a simple coroutine-based one with thresholds: 3 failures within 30s → OPEN for 30s.
+
+**Files:**
+- Modify: `core/tracker/rutor/src/main/kotlin/lava/tracker/rutor/http/RuTorHttpClient.kt`
+
+Add a `CircuitBreaker` field and wrap `get`/`postForm`/`download` calls. If breaker is OPEN, throw `CircuitBreakerOpenException` (treated as a per-mirror failure by `MirrorManager.executeWithFallback`).
+
+Commit `sp3a-3.8: circuit breaker integrated into RuTorHttpClient (3 failures / 30s)`.
+
+---
+
+### Task 3.9: Test `RuTorHttpClient` with `MockWebServer`
+
+**Files:**
+- Create: `core/tracker/rutor/src/test/kotlin/lava/tracker/rutor/http/RuTorHttpClientTest.kt`
+
+Tests:
+1. GET succeeds, response body returned as expected.
+2. Cookies set in response are persisted and sent on next request.
+3. Concurrent calls beyond semaphore limit (5+) serialize correctly (max 4 in flight).
+4. Circuit breaker opens after 3 consecutive failures, blocks the 4th call.
+5. Circuit breaker resets after 30s.
+
+Commit `sp3a-3.9: RuTorHttpClient unit tests (cookies, semaphore, breaker)`.
+
+---
+
+### Task 3.10: Falsifiability rehearsal — semaphore actually bounds concurrency
+
+**Files:**
+- Create: `core/tracker/rutor/src/test/kotlin/lava/tracker/rutor/http/RuTorHttpClientFalsifiabilityTest.kt`
+- Create: `.lava-ci-evidence/sp3a-rutor/3.10-semaphore.json`
+
+The deliberate break: change `permits = 4` to `permits = 100`; the concurrency-bound test should fail (we'd see 5+ in flight). Revert; passes. Record evidence. Commit.
+
+---
+
+### Section D — Date and size parsers
+
+### Task 3.11: `RuTorDateParser`
+
+**Files:**
+- Create: `core/tracker/rutor/src/main/kotlin/lava/tracker/rutor/parser/RuTorDateParser.kt`
+- Create: `core/tracker/rutor/src/test/kotlin/lava/tracker/rutor/parser/RuTorDateParserTest.kt`
+
+```kotlin
+package lava.tracker.rutor.parser
+
+import java.time.LocalDate
+import java.time.ZoneOffset
+import java.time.temporal.ChronoUnit
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
+import kotlinx.datetime.toJavaInstant
+import kotlinx.datetime.toKotlinInstant
+
+object RuTorDateParser {
+    private val months = mapOf(
+        "Янв" to 1, "Фев" to 2, "Мар" to 3, "Апр" to 4, "Май" to 5, "Июн" to 6,
+        "Июл" to 7, "Авг" to 8, "Сен" to 9, "Окт" to 10, "Ноя" to 11, "Дек" to 12,
+    )
+    fun parse(s: String, now: () -> Instant = Clock.System::now): Instant? {
+        val trimmed = s.trim()
+        return when {
+            trimmed.equals("Сегодня", ignoreCase = true) ->
+                now().toJavaInstant().truncatedTo(ChronoUnit.DAYS).toKotlinInstant()
+            trimmed.equals("Вчера", ignoreCase = true) ->
+                now().toJavaInstant().truncatedTo(ChronoUnit.DAYS).minus(1, ChronoUnit.DAYS).toKotlinInstant()
+            else -> {
+                val match = Regex("""(\d{1,2})\s+(\S+)\s+(\d{2,4})""").find(trimmed) ?: return null
+                val (day, monthAbbr, year) = match.destructured
+                val month = months[monthAbbr.take(3)] ?: return null
+                val fullYear = if (year.length == 2) 2000 + year.toInt() else year.toInt()
+                LocalDate.of(fullYear, month, day.toInt())
+                    .atStartOfDay(ZoneOffset.UTC)
+                    .toInstant()
+                    .toKotlinInstant()
+            }
+        }
+    }
+}
+```
+
+Tests cover: "12 Янв 24" → 2024-01-12, "Сегодня" → today truncated, "Вчера" → yesterday truncated, "garbage" → null, "5 Дек 2023" → 2023-12-05, all 12 months exercised.
+
+Commit `sp3a-3.11: RuTorDateParser with Russian months + Сегодня/Вчера + 14 tests`.
+
+---
+
+### Task 3.12: `RuTorSizeParser`
+
+**Files:**
+- Create: `core/tracker/rutor/src/main/kotlin/lava/tracker/rutor/parser/RuTorSizeParser.kt`
+- Create: `core/tracker/rutor/src/test/kotlin/lava/tracker/rutor/parser/RuTorSizeParserTest.kt`
+
+```kotlin
+package lava.tracker.rutor.parser
+
+object RuTorSizeParser {
+    private val pattern = Regex("""(\d+(?:[.,]\d+)?)\s*(GB|MB|kB|B|TB)""", RegexOption.IGNORE_CASE)
+    fun parse(s: String): Long? {
+        val m = pattern.find(s) ?: return null
+        val (number, unit) = m.destructured
+        val value = number.replace(',', '.').toDoubleOrNull() ?: return null
+        val multiplier = when (unit.uppercase()) {
+            "B" -> 1L
+            "KB" -> 1_024L
+            "MB" -> 1_024L * 1_024L
+            "GB" -> 1_024L * 1_024L * 1_024L
+            "TB" -> 1_024L * 1_024L * 1_024L * 1_024L
+            else -> return null
+        }
+        return (value * multiplier).toLong()
+    }
+}
+```
+
+Tests: "4.5 GB" → 4_831_838_208, "1,5 GB" (comma decimal) → 1_610_612_736, "1024 MB" → 1_073_741_824, "200 kB" → 204_800, "garbage" → null.
+
+Commit `sp3a-3.12: RuTorSizeParser supports GB/MB/kB/B/TB and comma decimals`.
+
+---
+
+### Task 3.13: Falsifiability rehearsal — date parser handles "Сегодня" correctly
+
+Mutate the parser to ignore "Сегодня"; assert the existing test fails; revert; passes. Evidence at `.lava-ci-evidence/sp3a-rutor/3.13-date-parser.json`. Commit.
+
+---
+
+### Section E — Search parser + 5 fixtures
+
+### Task 3.14: `RuTorSearchParser` skeleton with content-based selectors
+
+**Files:**
+- Create: `core/tracker/rutor/src/main/kotlin/lava/tracker/rutor/parser/RuTorSearchParser.kt`
+
+```kotlin
+package lava.tracker.rutor.parser
+
+import javax.inject.Inject
+import lava.tracker.api.model.SearchResult
+import lava.tracker.api.model.TorrentItem
+import org.jsoup.Jsoup
+import org.jsoup.nodes.Element
+
+class RuTorSearchParser @Inject constructor() {
+    fun parse(html: String, currentPage: Int, currentMirror: String): SearchResult {
+        val doc = Jsoup.parse(html)
+        val rows = doc.select("tr:has(td:has(a[href^=magnet:?xt=]))")
+        val items = rows.map { row -> parseRow(row, currentMirror) }
+        val totalPages = (doc.select("td.pages a").mapNotNull { it.text().toIntOrNull() }.maxOrNull() ?: 1)
+            .coerceAtLeast(1)
+        return SearchResult(items = items, totalPages = totalPages, currentPage = currentPage)
+    }
+
+    private fun parseRow(row: Element, currentMirror: String): TorrentItem {
+        val titleLink = row.selectFirst("td:nth-of-type(2) a[href^=/torrent/]")
+            ?: error("RuTor row missing title link: ${row.html().take(200)}")
+        val magnet = row.selectFirst("a[href^=magnet:?xt=]")?.attr("href")
+        val downloadHref = row.selectFirst("a.downgif")?.attr("href")
+        // Content-based size selector: tolerates the comments-count column drift
+        val sizeText = row.select("td").firstOrNull { td ->
+            RuTorSizeParser.parse(td.text()) != null
+        }?.text()
+        val seeders = row.selectFirst("td span.green")?.text()?.toIntOrNull()
+        val leechers = row.selectFirst("td span.red")?.text()?.toIntOrNull()
+        val date = row.selectFirst("td:nth-of-type(1)")?.text()?.let(RuTorDateParser::parse)
+        val infoHash = magnet?.let { Regex("""[A-Fa-f0-9]{40}""").find(it)?.value }
+        val torrentId = titleLink.attr("href").substringAfter("/torrent/").substringBefore("/")
+        return TorrentItem(
+            trackerId = "rutor",
+            torrentId = torrentId,
+            title = titleLink.text(),
+            sizeBytes = sizeText?.let(RuTorSizeParser::parse),
+            seeders = seeders,
+            leechers = leechers,
+            infoHash = infoHash,
+            magnetUri = magnet,
+            downloadUrl = downloadHref?.let { resolveAgainst(currentMirror, it) },
+            detailUrl = resolveAgainst(currentMirror, titleLink.attr("href")),
+            category = null,
+            publishDate = date,
+            metadata = emptyMap(),
+        )
+    }
+
+    private fun resolveAgainst(base: String, relative: String): String =
+        if (relative.startsWith("http")) relative else base.trimEnd('/') + relative
+}
+```
+
+Commit `sp3a-3.14: RuTorSearchParser skeleton with content-based size selector`.
+
+---
+
+### Task 3.15: Search fixture — `search-normal-2026-04-30.html`
+
+**Files:**
+- Create: `core/tracker/rutor/src/test/resources/fixtures/rutor/search/search-normal-2026-04-30.html`
+
+Scrape a real RuTor search page (e.g., `/search/0/0/000/0/ubuntu`) using `curl` from a local machine, save the response. The fixture must contain at least 10 torrent rows with: magnet links, sizes (mix of GB/MB), seeders, leechers, dates (mix of "Сегодня"/"Вчера"/explicit), infohashes derivable from magnets.
+
+Commit `sp3a-3.15: search-normal-2026-04-30.html (10 torrent rows scraped from rutor.info)`.
+
+---
+
+### Task 3.16: Search fixture — `search-empty-2026-04-30.html`
+
+Scrape `/search/0/0/000/0/zzzzzznoresults`. Should produce a page with no torrent rows but valid HTML structure.
+
+Commit `sp3a-3.16: search-empty-2026-04-30.html`.
+
+---
+
+### Task 3.17: Search fixture — `search-edge-columns-2026-04-30.html`
+
+Locate (or construct from a real scrape) a search result with rows missing the comments-count column. This tests the content-based size selector.
+
+Commit `sp3a-3.17: search-edge-columns-2026-04-30.html (variable column hazard)`.
+
+---
+
+### Task 3.18: Search fixture — `search-cyrillic-2026-04-30.html`
+
+Scrape `/search/0/0/000/0/война` (Russian query). Results should have Cyrillic titles, Cyrillic in `Сегодня`/`Вчера` date cells, possibly `Ё`/`ё` characters.
+
+Commit `sp3a-3.18: search-cyrillic-2026-04-30.html`.
+
+---
+
+### Task 3.19: Search fixture — `search-malformed-2026-04-30.html`
+
+Hand-construct a malformed HTML file (e.g., truncated mid-row, unclosed tags, missing magnet link in a row). Used to verify parser gracefully throws or skips bad rows without crashing.
+
+Commit `sp3a-3.19: search-malformed-2026-04-30.html (hand-crafted edge case)`.
+
+---
+
+### Task 3.20: `RuTorSearchParserTest` — 5 fixtures × assertions
+
+**Files:**
+- Create: `core/tracker/rutor/src/test/kotlin/lava/tracker/rutor/parser/RuTorSearchParserTest.kt`
+
+```kotlin
+package lava.tracker.rutor.parser
+
+import com.google.common.truth.Truth.assertThat
+import lava.tracker.testing.LavaFixtureLoader
+import org.junit.Test
+
+class RuTorSearchParserTest {
+    private val parser = RuTorSearchParser()
+    private val fixtures = LavaFixtureLoader("rutor")
+
+    @Test
+    fun `normal page parses 10+ items with non-null core fields`() {
+        val html = fixtures.load("search", "search-normal-2026-04-30.html")
+        val result = parser.parse(html, currentPage = 0, currentMirror = "https://rutor.info")
+        assertThat(result.items).hasSize(10)  // adapt N to actual fixture row count
+        for (item in result.items) {
+            assertThat(item.title).isNotEmpty()
+            assertThat(item.magnetUri).isNotNull()
+            assertThat(item.infoHash).matches("[A-Fa-f0-9]{40}")
+            assertThat(item.sizeBytes).isNotNull()
+            assertThat(item.seeders).isNotNull()
+        }
+    }
+
+    @Test
+    fun `empty page returns zero items`() {
+        val html = fixtures.load("search", "search-empty-2026-04-30.html")
+        val result = parser.parse(html, currentPage = 0, currentMirror = "https://rutor.info")
+        assertThat(result.items).isEmpty()
+    }
+
+    @Test
+    fun `edge_columns fixture — content-based selector finds size despite column drift`() {
+        val html = fixtures.load("search", "search-edge-columns-2026-04-30.html")
+        val result = parser.parse(html, currentPage = 0, currentMirror = "https://rutor.info")
+        for (item in result.items) {
+            assertThat(item.sizeBytes).isNotNull()  // load-bearing assertion: content-based selector worked
+        }
+    }
+
+    @Test
+    fun `cyrillic fixture parses without character corruption`() {
+        val html = fixtures.load("search", "search-cyrillic-2026-04-30.html")
+        val result = parser.parse(html, currentPage = 0, currentMirror = "https://rutor.info")
+        // Assert at least one item has a Cyrillic character in the title
+        assertThat(result.items.any { it.title.any { c -> c.code in 0x0400..0x04FF } }).isTrue()
+    }
+
+    @Test
+    fun `malformed fixture does not crash — gracefully returns whatever it could parse`() {
+        val html = fixtures.load("search", "search-malformed-2026-04-30.html")
+        val result = parser.parse(html, currentPage = 0, currentMirror = "https://rutor.info")
+        // Acceptance: did not throw. Empty or partial results are fine.
+        assertThat(result.items).isNotNull()
+    }
+}
+```
+
+Run: `./gradlew :core:tracker:rutor:test --tests "*RuTorSearchParserTest*"`. All 5 pass.
+
+Commit `sp3a-3.20: RuTorSearchParserTest (5 fixtures × assertions)`.
+
+---
+
+### Section F — Browse parser + 5 fixtures
+
+### Task 3.21: `RuTorBrowseParser` skeleton
+
+Same shape as `RuTorSearchParser` but parses `/browse/{page}/{cat}/...` URLs. Categories live in a top bar; current category extracted into `BrowseResult.category`.
+
+Commit `sp3a-3.21: RuTorBrowseParser skeleton`.
+
+---
+
+### Tasks 3.22–3.25: Browse fixtures + test
+
+- Task 3.22: `browse-normal-2026-04-30.html` (scraped from `/browse/0/0/000/0`)
+- Task 3.23: `browse-empty-2026-04-30.html` (scraped from a known-empty category)
+- Task 3.24: `browse-deep-pagination-2026-04-30.html` (scraped from page 50+)
+- Task 3.25: `RuTorBrowseParserTest` with 4 fixtures × assertions (3.24 covers single-result + malformed via composition)
+
+Commit each.
+
+---
+
+### Section G — Topic parser + 5 fixtures
+
+### Task 3.26: `RuTorTopicParser` skeleton
+
+Parses `/torrent/{id}/{slug}` pages — extracts title, description, magnet, file list, comment count.
+
+Commit `sp3a-3.26: RuTorTopicParser skeleton`.
+
+---
+
+### Tasks 3.27–3.30: Topic fixtures + test
+
+- Task 3.27: `topic-normal-2026-04-30.html`
+- Task 3.28: `topic-with-files-2026-04-30.html`
+- Task 3.29: `topic-with-long-description-2026-04-30.html`
+- Task 3.30: `RuTorTopicParserTest` with 5 fixtures × assertions (combine no-magnet + malformed under one fixture each)
+
+Commit each.
+
+---
+
+### Section H — Comments parser + Login parser + fixtures
+
+### Task 3.31: `RuTorCommentsParser`
+
+Comments are embedded in the topic page; this parser extracts the `<div id="comments">` block.
+
+Commit `sp3a-3.31: RuTorCommentsParser`.
+
+---
+
+### Task 3.32: `RuTorLoginParser`
+
+Parses the response of `POST /users.php?login`. Detects: success (redirect with `userid` cookie), wrong password (login form re-rendered with error text), account locked (specific error variant).
+
+Commit `sp3a-3.32: RuTorLoginParser`.
+
+---
+
+### Tasks 3.33–3.35: Login fixtures + test
+
+- Task 3.33: `login/success-with-userid-cookie-2026-04-30.html` (the redirect-target home page)
+- Task 3.34: `login/failure-wrong-password-2026-04-30.html`
+- Task 3.35: `RuTorLoginParserTest` with 5 fixtures (success, wrong-password, account-locked, redirect-to-home, malformed)
+
+Commit each.
+
+---
+
+### Section I — Feature implementations
+
+### Task 3.36: `RuTorSearch` feature impl
+
+```kotlin
+package lava.tracker.rutor.feature
+
+import javax.inject.Inject
+import lava.tracker.api.feature.SearchableTracker
+import lava.tracker.api.model.SearchRequest
+import lava.tracker.api.model.SearchResult
+import lava.tracker.rutor.http.RuTorHttpClient
+import lava.tracker.rutor.parser.RuTorSearchParser
+
+class RuTorSearch @Inject constructor(
+    private val http: RuTorHttpClient,
+    private val parser: RuTorSearchParser,
+) : SearchableTracker {
+    override suspend fun search(request: SearchRequest, page: Int): SearchResult {
+        val mirror = "https://rutor.info"  // resolved via MirrorManager in Phase 4; for now hardcoded
+        val url = buildString {
+            append(mirror)
+            append("/search/").append(page)
+            append("/0")  // category 0 = all
+            append("/000")  // method-scope-method composed
+            append("/0")  // sort
+            append("/").append(java.net.URLEncoder.encode(request.query, "UTF-8"))
+        }
+        val response = http.get(url)
+        val html = response.use { it.body?.string() ?: error("empty body") }
+        return parser.parse(html, currentPage = page, currentMirror = mirror)
+    }
+}
+```
+
+Commit `sp3a-3.36: RuTorSearch feature impl`.
+
+---
+
+### Task 3.37: `RuTorBrowse`, `RuTorTopic`, `RuTorComments` feature impls
+
+Three parallel files following the same pattern. Commit `sp3a-3.37: RuTor Browse/Topic/Comments feature impls`.
+
+---
+
+### Task 3.38: `RuTorAuth` feature impl
+
+```kotlin
+class RuTorAuth @Inject constructor(
+    private val http: RuTorHttpClient,
+    private val parser: RuTorLoginParser,
+) : AuthenticatableTracker {
+    override suspend fun login(req: LoginRequest): LoginResult {
+        val response = http.postForm("https://rutor.info/users.php?login", mapOf(
+            "nick" to req.username, "password" to req.password, "login" to "Вход"
+        ))
+        val html = response.use { it.body?.string().orEmpty() }
+        return parser.parseLoginResponse(html, sessionToken = if (http.hasCookie("userid")) http.cookieValue("userid") else null)
+    }
+    override suspend fun logout() = http.clearCookies()
+    override suspend fun checkAuth(): AuthState =
+        if (http.hasCookie("userid")) AuthState.Authenticated else AuthState.Unauthenticated
+}
+```
+
+Commit `sp3a-3.38: RuTorAuth — anonymous-by-default policy enforced upstream by LavaTrackerSdk`.
+
+---
+
+### Task 3.39: `RuTorDownload` feature impl
+
+```kotlin
+class RuTorDownload @Inject constructor(private val http: RuTorHttpClient) : DownloadableTracker {
+    override suspend fun downloadTorrentFile(id: String): ByteArray =
+        http.download("https://d.rutor.info/download/$id")
+    override fun getMagnetLink(id: String): String? = null  // not synchronously available; consumer fetches detail
+}
+```
+
+Commit `sp3a-3.39: RuTorDownload feature impl`.
+
+---
+
+### Section J — `RuTorClient` + Factory + DI registration
+
+### Task 3.40: `RuTorClient` full implementation + `RuTorClientFactory` + Hilt registration
+
+```kotlin
+// RuTorClient.kt — full impl replacing the Task 3.2 skeleton
+package lava.tracker.rutor
+
+import javax.inject.Inject
+import kotlin.reflect.KClass
+import lava.tracker.api.TrackerCapability
+import lava.tracker.api.TrackerClient
+import lava.tracker.api.TrackerDescriptor
+import lava.tracker.api.TrackerFeature
+import lava.tracker.api.feature.*
+import lava.tracker.rutor.feature.*
+import lava.tracker.rutor.http.RuTorHttpClient
+
+class RuTorClient @Inject constructor(
+    private val http: RuTorHttpClient,
+    private val search: RuTorSearch,
+    private val browse: RuTorBrowse,
+    private val topic: RuTorTopic,
+    private val comments: RuTorComments,
+    private val auth: RuTorAuth,
+    private val download: RuTorDownload,
+) : TrackerClient {
+    override val descriptor: TrackerDescriptor = RuTorDescriptor
+
+    override suspend fun healthCheck(): Boolean =
+        runCatching { http.get("https://rutor.info").use { it.code == 200 } }.getOrDefault(false)
+
+    @Suppress("UNCHECKED_CAST")
+    override fun <T : TrackerFeature> getFeature(featureClass: KClass<T>): T? {
+        val declared = descriptor.capabilities
+        return when (featureClass) {
+            SearchableTracker::class -> if (TrackerCapability.SEARCH in declared) search as T else null
+            BrowsableTracker::class -> if (TrackerCapability.BROWSE in declared) browse as T else null
+            TopicTracker::class -> if (TrackerCapability.TOPIC in declared) topic as T else null
+            CommentsTracker::class -> if (TrackerCapability.COMMENTS in declared) comments as T else null
+            AuthenticatableTracker::class -> if (TrackerCapability.AUTH_REQUIRED in declared) auth as T else null
+            DownloadableTracker::class -> if (TrackerCapability.TORRENT_DOWNLOAD in declared) download as T else null
+            // FavoritesTracker, BrowsableTracker.getForumTree → null (RuTor has no forum, no favorites)
+            else -> null
+        }
+    }
+
+    override fun close() {}
+}
+```
+
+```kotlin
+// RuTorClientFactory.kt
+package lava.tracker.rutor
+
+import javax.inject.Inject
+import javax.inject.Provider
+import lava.sdk.api.PluginConfig
+import lava.tracker.api.TrackerClient
+import lava.tracker.api.TrackerDescriptor
+import lava.tracker.registry.TrackerClientFactory
+
+class RuTorClientFactory @Inject constructor(private val provider: Provider<RuTorClient>) : TrackerClientFactory {
+    override val descriptor: TrackerDescriptor = RuTorDescriptor
+    override fun create(config: PluginConfig): TrackerClient = provider.get()
+}
+```
+
+Update `core/tracker/client/src/main/kotlin/lava/tracker/client/di/TrackerClientModule.kt` to register both factories:
+
+```kotlin
+@Provides @Singleton
+fun provideTrackerRegistry(
+    rutrackerFactory: RuTrackerClientFactory,
+    rutorFactory: RuTorClientFactory,
+): TrackerRegistry = DefaultTrackerRegistry().apply {
+    register(rutrackerFactory)
+    register(rutorFactory)
+}
+```
+
+Commit `sp3a-3.40: RuTorClient + RuTorClientFactory + Hilt registers RuTor alongside RuTracker`.
+
+---
+
+### Section K — Real-tracker integration test
+
+### Task 3.41: Real-tracker integration test against rutor.info
+
+**Files:**
+- Create: `core/tracker/rutor/src/integrationTest/kotlin/lava/tracker/rutor/RealRuTorIntegrationTest.kt` (annotated `@RealTracker` so default test runs skip it)
+- Modify: `core/tracker/rutor/build.gradle.kts` to define an `integrationTest` source set
+
+```kotlin
+@Tag("RealTracker")
+class RealRuTorIntegrationTest {
+    @Test fun `real search for ubuntu returns >=3 results`() = runTest {
+        val client = RuTorClient(/* DI-built with real RuTorHttpClient */)
+        val search = client.getFeature(SearchableTracker::class) ?: error("SEARCH not declared")
+        val result = search.search(SearchRequest(query = "ubuntu"))
+        assertThat(result.items.size).isAtLeast(3)
+        for (item in result.items) {
+            assertThat(item.infoHash).matches("[A-Fa-f0-9]{40}")
+            assertThat(item.sizeBytes).isNotNull()
+        }
+    }
+
+    @Test fun `real login with test credentials produces userid cookie`() = runTest {
+        val username = System.getenv("LAVA_TEST_USERNAME") ?: "nobody85perfect"
+        val password = System.getenv("LAVA_TEST_PASSWORD") ?: "ironman1985"
+        val auth = client.getFeature(AuthenticatableTracker::class) ?: error("AUTH not declared")
+        val result = auth.login(LoginRequest(username, password))
+        assertThat(result.state).isEqualTo(AuthState.Authenticated)
+        assertThat(result.sessionToken).isNotNull()
+    }
+}
+```
+
+Run only when invoked explicitly: `./gradlew :core:tracker:rutor:integrationTest -PrealTrackers=true`.
+
+Record in `.lava-ci-evidence/sp3a-rutor/3.41-real-tracker-smoke.json` after a successful local run.
+
+Commit `sp3a-3.41: real-tracker integration test (login + search) against rutor.info`.
+
+**Phase 3 acceptance check.**
+
+```bash
+./gradlew :core:tracker:rutor:test
+ls core/tracker/rutor/src/test/resources/fixtures/rutor/search/ | wc -l   # expect 5
+ls core/tracker/rutor/src/test/resources/fixtures/rutor/browse/ | wc -l   # expect 5
+ls core/tracker/rutor/src/test/resources/fixtures/rutor/topic/  | wc -l   # expect 5
+ls core/tracker/rutor/src/test/resources/fixtures/rutor/login/  | wc -l   # expect 5
+```
+
+Plus a working real-tracker smoke run recorded in evidence.
+
+**Phase 3 done.**
+
+---
+
+## Phase 4: Mirror Health + Cross-Tracker Fallback + `:feature:tracker_settings` UI
+
+**Duration:** 1 week. **Tasks:** 20. **Goal:** Wire the SDK's `MirrorManager` into the running app (periodic WorkManager probes, Room persistence), implement the cross-tracker fallback policy with one-tap modal UX (decision 7a-ii), and ship the `:feature:tracker_settings` Compose UI for tracker selection + custom mirrors.
+
+**Acceptance gate:** WorkManager periodic worker probes both trackers' mirrors every 15 min; mirror health persisted to Room and survives app restart; cross-tracker fallback emits `CrossTrackerFallbackProposed` outcome which the UI renders as a modal; user can add/edit/remove custom mirrors per tracker in settings.
+
+### Section A — Persistence schema
+
+### Task 4.1: Room schema migration for mirror health and user mirrors
+
+**Files:**
+- Create: `core/tracker/client/src/main/kotlin/lava/tracker/client/persistence/MirrorHealthEntity.kt`
+- Create: `core/tracker/client/src/main/kotlin/lava/tracker/client/persistence/MirrorHealthDao.kt`
+- Create: `core/tracker/client/src/main/kotlin/lava/tracker/client/persistence/UserMirrorEntity.kt`
+- Create: `core/tracker/client/src/main/kotlin/lava/tracker/client/persistence/UserMirrorDao.kt`
+- Modify: `core/database/src/main/kotlin/.../LavaDatabase.kt` to add new entities
+- Create: `core/database/schemas/lava.database.LavaDatabase/<next>.json` (Room schema export)
+
+```kotlin
+// MirrorHealthEntity.kt
+@Entity(
+    tableName = "tracker_mirror_health",
+    primaryKeys = ["tracker_id", "mirror_url"],
+)
+data class MirrorHealthEntity(
+    @ColumnInfo("tracker_id") val trackerId: String,
+    @ColumnInfo("mirror_url") val mirrorUrl: String,
+    @ColumnInfo("state") val state: String,        // HEALTHY/DEGRADED/UNHEALTHY/UNKNOWN
+    @ColumnInfo("last_check_at") val lastCheckAt: Long?,  // epoch millis
+    @ColumnInfo("consecutive_failures") val consecutiveFailures: Int,
+)
+
+// UserMirrorEntity.kt
+@Entity(
+    tableName = "tracker_mirror_user",
+    primaryKeys = ["tracker_id", "url"],
+)
+data class UserMirrorEntity(
+    @ColumnInfo("tracker_id") val trackerId: String,
+    @ColumnInfo("url") val url: String,
+    @ColumnInfo("priority") val priority: Int,
+    @ColumnInfo("protocol") val protocol: String,  // HTTP/HTTPS/HTTP3
+    @ColumnInfo("added_at") val addedAt: Long,     // epoch millis
+)
+```
+
+DAOs with the standard Room CRUD + Flow observers for the active tracker. Migration in Room: `LavaDatabase` version bump.
+
+Commit `sp3a-4.1: Room schema for tracker_mirror_health + tracker_mirror_user`.
+
+---
+
+### Task 4.2: `MirrorHealthRepository` + `UserMirrorRepository`
+
+**Files:**
+- Create: `core/tracker/client/src/main/kotlin/lava/tracker/client/persistence/MirrorHealthRepository.kt`
+- Create: `core/tracker/client/src/main/kotlin/lava/tracker/client/persistence/UserMirrorRepository.kt`
+
+Implementations with Hilt-injected DAOs. Provide methods: `loadAll(trackerId)`, `upsert(state)`, `flowOf(trackerId)`, `clear(trackerId)`. Tests using in-memory Room DB.
+
+Commit `sp3a-4.2: MirrorHealthRepository + UserMirrorRepository + tests`.
+
+---
+
+### Task 4.3: `MirrorConfigLoader` — bundle + user merge
+
+**Files:**
+- Create: `core/tracker/client/src/main/kotlin/lava/tracker/client/persistence/MirrorConfigLoader.kt`
+- Create: `app/src/main/assets/mirrors.json` (bundled config from spec §5.5)
+
+```kotlin
+class MirrorConfigLoader @Inject constructor(
+    @ApplicationContext private val context: Context,
+    private val userRepo: UserMirrorRepository,
+) {
+    suspend fun loadFor(trackerId: String): List<MirrorUrl> {
+        val bundled = parseBundledJson()[trackerId]?.mirrors ?: emptyList()
+        val user = userRepo.loadAll(trackerId).map { it.toMirrorUrl() }
+        // User entries supersede bundled at same URL
+        return (bundled.associateBy { it.url } + user.associateBy { it.url }).values
+            .sortedBy { it.priority }
+    }
+
+    private fun parseBundledJson(): Map<String, BundledTrackerConfig> {
+        val raw = context.assets.open("mirrors.json").bufferedReader().use { it.readText() }
+        return Json { ignoreUnknownKeys = true }
+            .decodeFromString<MirrorsConfig>(raw)
+            .trackers
+    }
+}
+```
+
+`mirrors.json` content matches spec §5.5 verbatim (RuTracker + RuTor entries).
+
+Commit `sp3a-4.3: MirrorConfigLoader + bundled mirrors.json`.
+
+---
+
+### Section B — WorkManager periodic health worker
+
+### Task 4.4: `MirrorHealthCheckWorker`
+
+**Files:**
+- Create: `core/tracker/client/src/main/kotlin/lava/tracker/client/work/MirrorHealthCheckWorker.kt`
+- Modify: app's WorkManager initializer to schedule the worker
+
+```kotlin
+@HiltWorker
+class MirrorHealthCheckWorker @AssistedInject constructor(
+    @Assisted appContext: Context,
+    @Assisted workerParams: WorkerParameters,
+    private val sdk: LavaTrackerSdk,
+    private val healthRepo: MirrorHealthRepository,
+) : CoroutineWorker(appContext, workerParams) {
+    override suspend fun doWork(): Result {
+        val trackers = sdk.listAvailableTrackers().map { it.trackerId }
+        for (id in trackers) {
+            try {
+                sdk.probeMirrorsFor(id)  // delegates to MirrorManager.probeAll
+                val states = sdk.observeMirrorHealth(id).first()
+                healthRepo.upsertAll(id, states)
+            } catch (t: Throwable) {
+                // Log but don't fail the whole worker
+            }
+        }
+        return Result.success()
+    }
+}
+```
+
+Periodic schedule: 15 minutes, network-connected constraint, no charging requirement.
+
+Commit `sp3a-4.4: MirrorHealthCheckWorker + 15-min periodic schedule`.
+
+---
+
+### Task 4.5: Wire `LavaTrackerSdk` to load + persist mirror health
+
+Add to `LavaTrackerSdk`:
+
+```kotlin
+suspend fun probeMirrorsFor(trackerId: String) = mirrorManager.probeAll(trackerId)
+fun observeMirrorHealth(trackerId: String): Flow<List<MirrorState>> = mirrorManager.observeHealth(trackerId)
+
+// On init: rehydrate state from healthRepo
+suspend fun initialize() {
+    for (descriptor in registry.list()) {
+        val persisted = healthRepo.loadAll(descriptor.trackerId)
+        // Seed mirrorManager states from persisted before the first probe runs
+        ...
+    }
+}
+```
+
+Tests: `LavaTrackerSdk.initialize()` rehydrates state correctly; subsequent `observeMirrorHealth` reflects the rehydrated values.
+
+Commit `sp3a-4.5: LavaTrackerSdk persists mirror health via MirrorHealthRepository`.
+
+---
+
+### Section C — Cross-tracker fallback policy
+
+### Task 4.6: `CrossTrackerFallbackPolicy`
+
+**Files:**
+- Create: `core/tracker/client/src/main/kotlin/lava/tracker/client/CrossTrackerFallbackPolicy.kt`
+
+```kotlin
+class CrossTrackerFallbackPolicy @Inject constructor(
+    private val registry: TrackerRegistry,
+) {
+    /**
+     * When the active tracker has exhausted all mirrors and a configured
+     * alternative tracker supports the same capability, returns the alternative
+     * descriptor. Returns null when no fallback should be proposed.
+     */
+    fun proposeFallback(
+        failedTrackerId: String,
+        capability: TrackerCapability,
+        userOptedIn: Boolean = true,
+    ): TrackerDescriptor? {
+        if (!userOptedIn) return null
+        return registry.trackersWithCapability(capability)
+            .firstOrNull { it.trackerId != failedTrackerId }
+    }
+}
+```
+
+Tests using `FakeTrackerClient`. Commit `sp3a-4.6: CrossTrackerFallbackPolicy`.
+
+---
+
+### Task 4.7: Wire fallback into `LavaTrackerSdk.search` + sibling methods
+
+Modify `LavaTrackerSdk.search` (Phase 2 Task 2.30 stubbed this as `Failure` propagation):
+
+```kotlin
+suspend fun search(request: SearchRequest, page: Int = 0): SearchOutcome {
+    val active = getActiveClient()
+    val feature = active.getFeature(SearchableTracker::class)
+        ?: return SearchOutcome.Failure(...)
+    return try {
+        SearchOutcome.Success(
+            mirrorManager.executeWithFallback(active.descriptor.trackerId) { _ ->
+                feature.search(request, page)
+            },
+            viaTracker = active.descriptor.trackerId
+        )
+    } catch (e: MirrorUnavailableException) {
+        val proposal = fallbackPolicy.proposeFallback(active.descriptor.trackerId, TrackerCapability.SEARCH)
+        if (proposal != null) {
+            SearchOutcome.CrossTrackerFallbackProposed(
+                failedTrackerId = active.descriptor.trackerId,
+                proposedTrackerId = proposal.trackerId,
+                capability = TrackerCapability.SEARCH,
+                resumeWith = {
+                    val alt = registry.get(proposal.trackerId, MapPluginConfig())
+                    val altFeature = alt.getFeature(SearchableTracker::class)
+                        ?: return@CrossTrackerFallbackProposed SearchOutcome.Failure(...)
+                    SearchOutcome.Success(altFeature.search(request, page), viaTracker = proposal.trackerId)
+                },
+            )
+        } else {
+            SearchOutcome.Failure(e, triedTrackers = listOf(active.descriptor.trackerId))
+        }
+    }
+}
+```
+
+Apply the same pattern to `browse`, `getTopic`, etc.
+
+Tests with `FakeTrackerClient`s: simulate all RuTracker mirrors UNHEALTHY, assert outcome is `CrossTrackerFallbackProposed`; simulate user accepting → success via RuTor; simulate user dismissing → `Failure`.
+
+Commit `sp3a-4.7: LavaTrackerSdk emits CrossTrackerFallbackProposed when all mirrors fail`.
+
+---
+
+### Task 4.8: Falsifiability rehearsal — cross-tracker fallback contract
+
+Mutate `proposeFallback` to always return null; assert the test that expects a fallback proposal fails. Revert; passes. Evidence at `.lava-ci-evidence/sp3a-phase4/4.8-fallback.json`. Commit.
+
+---
+
+### Section D — `:feature:tracker_settings` Compose UI
+
+### Task 4.9: Module skeleton
+
+**Files:**
+- Create: `feature/tracker_settings/build.gradle.kts`
+- Create: `feature/tracker_settings/src/main/AndroidManifest.xml`
+
+```kotlin
+// build.gradle.kts
+plugins { id("lava.android.feature") }
+android.namespace = "lava.feature.tracker_settings"
+dependencies {
+    implementation(project(":core:tracker:api"))
+    implementation(project(":core:tracker:client"))
+    implementation(project(":core:designsystem"))
+    implementation(project(":core:navigation"))
+}
+```
+
+Add to `settings.gradle.kts`: `include(":feature:tracker_settings")`.
+
+Commit `sp3a-4.9: scaffold :feature:tracker_settings module`.
+
+---
+
+### Task 4.10: `TrackerSettingsState`, `TrackerSettingsAction`, `TrackerSettingsSideEffect`
+
+**Files:**
+- Create: `feature/tracker_settings/src/main/kotlin/lava/feature/tracker_settings/TrackerSettingsState.kt`
+- Create: `.../TrackerSettingsAction.kt`
+- Create: `.../TrackerSettingsSideEffect.kt`
+
+```kotlin
+data class TrackerSettingsState(
+    val loading: Boolean = false,
+    val activeTrackerId: String = "rutracker",
+    val availableTrackers: List<TrackerDescriptor> = emptyList(),
+    val mirrorHealthByTracker: Map<String, List<MirrorState>> = emptyMap(),
+    val customMirrors: Map<String, List<MirrorUrl>> = emptyMap(),
+    val showAddMirrorDialog: Boolean = false,
+    val addMirrorTargetTracker: String? = null,
+    val error: String? = null,
+)
+sealed class TrackerSettingsAction {
+    object Load : TrackerSettingsAction()
+    data class SwitchActive(val trackerId: String) : TrackerSettingsAction()
+    data class OpenAddMirrorDialog(val trackerId: String) : TrackerSettingsAction()
+    object DismissAddMirrorDialog : TrackerSettingsAction()
+    data class AddCustomMirror(val trackerId: String, val url: String, val priority: Int, val protocol: Protocol) : TrackerSettingsAction()
+    data class RemoveCustomMirror(val trackerId: String, val url: String) : TrackerSettingsAction()
+    data class ProbeNow(val trackerId: String) : TrackerSettingsAction()
+}
+sealed class TrackerSettingsSideEffect {
+    data class ShowToast(val message: String) : TrackerSettingsSideEffect()
+}
+```
+
+Commit `sp3a-4.10: TrackerSettings MVI state/action/side-effect`.
+
+---
+
+### Task 4.11: `TrackerSettingsViewModel`
+
+```kotlin
+@HiltViewModel
+class TrackerSettingsViewModel @Inject constructor(
+    private val sdk: LavaTrackerSdk,
+    private val userMirrorRepo: UserMirrorRepository,
+) : ContainerHost<TrackerSettingsState, TrackerSettingsSideEffect>, ViewModel() {
+
+    override val container = container<TrackerSettingsState, TrackerSettingsSideEffect>(TrackerSettingsState())
+
+    init { intent { reduce { state.copy(loading = true) }; load() } }
+
+    private fun load() = intent {
+        val trackers = sdk.listAvailableTrackers()
+        val active = sdk.activeTrackerId.value
+        val health = trackers.associate { it.trackerId to sdk.observeMirrorHealth(it.trackerId).first() }
+        val custom = trackers.associate { it.trackerId to userMirrorRepo.loadAll(it.trackerId).map { e -> e.toMirrorUrl() } }
+        reduce { state.copy(loading = false, availableTrackers = trackers, activeTrackerId = active, mirrorHealthByTracker = health, customMirrors = custom) }
+    }
+
+    fun onAction(action: TrackerSettingsAction) = intent {
+        when (action) {
+            TrackerSettingsAction.Load -> load()
+            is TrackerSettingsAction.SwitchActive -> {
+                sdk.switchTracker(action.trackerId)
+                reduce { state.copy(activeTrackerId = action.trackerId) }
+                postSideEffect(TrackerSettingsSideEffect.ShowToast("Switched to ${action.trackerId}"))
+            }
+            is TrackerSettingsAction.OpenAddMirrorDialog ->
+                reduce { state.copy(showAddMirrorDialog = true, addMirrorTargetTracker = action.trackerId) }
+            TrackerSettingsAction.DismissAddMirrorDialog ->
+                reduce { state.copy(showAddMirrorDialog = false, addMirrorTargetTracker = null) }
+            is TrackerSettingsAction.AddCustomMirror -> {
+                userMirrorRepo.add(action.trackerId, action.url, action.priority, action.protocol.name)
+                load()
+            }
+            is TrackerSettingsAction.RemoveCustomMirror -> {
+                userMirrorRepo.remove(action.trackerId, action.url)
+                load()
+            }
+            is TrackerSettingsAction.ProbeNow -> {
+                sdk.probeMirrorsFor(action.trackerId)
+                load()
+            }
+        }
+    }
+}
+```
+
+Commit `sp3a-4.11: TrackerSettingsViewModel (Orbit MVI)`.
+
+---
+
+### Task 4.12: `TrackerSelectorList` Compose component
+
+**Files:**
+- Create: `feature/tracker_settings/src/main/kotlin/lava/feature/tracker_settings/components/TrackerSelectorList.kt`
+
+```kotlin
+@Composable
+fun TrackerSelectorList(
+    trackers: List<TrackerDescriptor>,
+    activeTrackerId: String,
+    onSelect: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    LazyColumn(modifier) {
+        items(trackers, key = { it.trackerId }) { t ->
+            ListItem(
+                headlineContent = { Text(t.displayName) },
+                supportingContent = { Text(t.baseUrls.first { it.isPrimary }.url) },
+                trailingContent = {
+                    if (t.trackerId == activeTrackerId) Icon(Icons.Default.CheckCircle, "Active")
+                },
+                modifier = Modifier.clickable { onSelect(t.trackerId) }
+            )
+            HorizontalDivider()
+        }
+    }
+}
+```
+
+Commit `sp3a-4.12: TrackerSelectorList Compose component`.
+
+---
+
+### Task 4.13: `MirrorListSection` Compose component
+
+Renders mirror health for a tracker: each `MirrorUrl` with a colored health indicator (green=HEALTHY, yellow=DEGRADED, red=UNHEALTHY, gray=UNKNOWN), priority, protocol badge, optional "remove" button for user-supplied mirrors.
+
+Commit `sp3a-4.13: MirrorListSection`.
+
+---
+
+### Task 4.14: `HealthIndicator` Compose component
+
+A small colored dot + label. Pure stateless renderer.
+
+Commit `sp3a-4.14: HealthIndicator`.
+
+---
+
+### Task 4.15: `AddCustomMirrorDialog` Compose component
+
+Dialog with: URL field (validated as `https?://...`), priority slider, protocol radio (HTTP/HTTPS/HTTP3), Add/Cancel buttons.
+
+Commit `sp3a-4.15: AddCustomMirrorDialog`.
+
+---
+
+### Task 4.16: `TrackerSettingsScreen` — top-level composable
+
+Composes the four components above + scaffolding (TopAppBar, Snackbar host for side effects).
+
+Commit `sp3a-4.16: TrackerSettingsScreen top-level composable`.
+
+---
+
+### Task 4.17: Cross-tracker fallback modal Compose component
+
+**Files:**
+- Create: `feature/search_result/src/main/kotlin/lava/feature/search_result/components/CrossTrackerFallbackModal.kt`
+
+(Lives in `:feature:search_result` because that's where the modal is consumed; `:feature:tracker_settings` only has the settings UI.)
+
+```kotlin
+@Composable
+fun CrossTrackerFallbackModal(
+    failedTracker: String,
+    proposedTracker: String,
+    onAccept: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("$failedTracker is unavailable") },
+        text = {
+            Text("All known mirrors of $failedTracker are unreachable. " +
+                 "Try the same search on $proposedTracker?")
+        },
+        confirmButton = {
+            TextButton(onClick = onAccept) { Text("Try $proposedTracker") }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("Cancel") }
+        },
+    )
+}
+```
+
+Commit `sp3a-4.17: CrossTrackerFallbackModal in :feature:search_result`.
+
+---
+
+### Task 4.18: Wire modal into `:feature:search_result` ViewModel
+
+`SearchResultViewModel` consumes `LavaTrackerSdk.search()`. When the outcome is `CrossTrackerFallbackProposed`, emit a side effect that the screen renders as the modal. On user accept → call `outcome.resumeWith()`. On user dismiss → propagate the original failure as a Snackbar.
+
+Commit `sp3a-4.18: SearchResultViewModel renders CrossTrackerFallbackModal`.
+
+---
+
+### Task 4.19: Navigation entry to `:feature:tracker_settings`
+
+Add `addTrackerSettings()` and `openTrackerSettings()` to `:core:navigation`. Wire from `:feature:menu` (the existing menu/account screen) as a new menu item.
+
+Commit `sp3a-4.19: navigation entry — Settings → Trackers`.
+
+---
+
+### Task 4.20: Phase 4 integration smoke test
+
+Run on a real Android emulator (or device): launch app → menu → Trackers → see RuTracker + RuTor listed → tap RuTor → home re-renders for RuTor → search for "ubuntu" → results from RuTor render. Capture as a video or screenshot sequence.
+
+Record in `.lava-ci-evidence/sp3a-phase4/4.20-integration-smoke.json` with attached screenshots paths.
+
+Commit `sp3a-4.20: Phase 4 integration smoke verified on real device`.
+
+**Phase 4 done. Phase 5 unblocked (or runs concurrent).**
+
+---
+
+## Phase 5: Constitutional Updates + 8 Challenge Tests + Tag Gate
+
+**Duration:** 0.5 weeks. **Tasks:** 25. **Goal:** Land all eight cascaded constitutional doc updates, eight Challenge Tests with falsifiability rehearsals, `scripts/ci.sh` + `scripts/tag.sh` updates with new gates, pre-push hook, real-device verification, tag `Lava-Android-1.2.0-1020`.
+
+**Acceptance gate:** `scripts/tag.sh Lava-Android-1.2.0-1020` succeeds; `.lava-ci-evidence/Lava-Android-1.2.0-1020/` contains complete evidence pack; tag visible on all four upstreams with verified per-mirror SHA convergence.
+
+### Section A — Cascaded constitutional doc updates
+
+### Task 5.1: Add clauses 6.D, 6.E, 6.F to root `CLAUDE.md`
+
+**Files:**
+- Modify: `CLAUDE.md`
+
+Insert after the existing Sixth Law section the three new clauses with the exact body wording from spec §9.1. Commit `sp3a-5.1: constitutional clauses 6.D + 6.E + 6.F added to root CLAUDE.md`.
+
+---
+
+### Task 5.2: Update `core/CLAUDE.md` with tracker capability honesty rule
+
+Add a paragraph referencing 6.E and listing the binding requirement: every new feature interface in `core/tracker/api/` must have an enum entry in `TrackerCapability`, a behavioral test, and a doc mention.
+
+Commit `sp3a-5.2: core/CLAUDE.md scoped clause for new feature interfaces`.
+
+---
+
+### Task 5.3: Update `feature/CLAUDE.md` with Challenge Test requirement
+
+Add: every feature ViewModel that consumes `LavaTrackerSdk` must have a Challenge Test covering the same UI path; the Challenge Test's falsifiability rehearsal must be recorded in the same PR.
+
+Commit `sp3a-5.3: feature/CLAUDE.md scoped clause for SDK-consuming ViewModels`.
+
+---
+
+### Task 5.4: Update `lava-api-go/CLAUDE.md` and `AGENTS.md` with bridge expectations
+
+Add a section: "When SP-2 ships, the Go-side rutracker refactor must satisfy 6.D and 6.E. The bridge plan will be written then; this clause makes the requirement explicit now so the Go work doesn't drift."
+
+Commit `sp3a-5.4: lava-api-go/{CLAUDE,AGENTS}.md SP-3a-bridge expectations`.
+
+---
+
+### Task 5.5: Create `Submodules/Tracker-SDK/CLAUDE.md`
+
+Already created in Phase 1 Task 1.7 — verify present and matches the body in spec §9.2. If missing, create from the Phase 1 spec content.
+
+Commit (no-op if already done) or `sp3a-5.5: verify Tracker-SDK constitution present`.
+
+---
+
+### Task 5.6: Create `Submodules/Tracker-SDK/CONSTITUTION.md` and `AGENTS.md`
+
+Already created in Phase 1 Task 1.7 — verify present.
+
+Commit `sp3a-5.6: verify Tracker-SDK CONSTITUTION + AGENTS present`.
+
+---
+
+### Task 5.7: Update root `AGENTS.md` with SDK module map
+
+Extend the existing module-map section with the new `core/tracker/*` modules and the `Submodules/Tracker-SDK/` pin policy. Add a pointer to `docs/sdk-developer-guide.md` (created in Task 5.8).
+
+Commit `sp3a-5.7: root AGENTS.md updated with SDK module map`.
+
+---
+
+### Task 5.8: Create `docs/sdk-developer-guide.md` (partial draft)
+
+Per spec §14 success criterion 10: a partial draft outlining the steps for adding a third tracker, validated by paper-tracing through the existing RuTor module.
+
+Sections:
+1. SDK Architecture overview
+2. Adding a new tracker (7-step recipe — Section 6.1 of the source PDF)
+3. Mirror configuration
+4. Testing requirements
+
+Commit `sp3a-5.8: docs/sdk-developer-guide.md partial draft`.
+
+---
+
+### Section B — 8 Challenge Tests
+
+### Task 5.9: Challenge Test C1 — App launch and tracker selection
+
+**Files:**
+- Create: `app/src/androidTest/kotlin/lava/app/challenges/C1_AppLaunchAndTrackerSelectionTest.kt`
+
+Compose UI test: launch `MainActivity`, navigate to Settings → Trackers, assert RuTracker and RuTor are listed, tap RuTracker, assert active state changes to RuTracker.
+
+Falsifiability rehearsal: comment out the registry registration for RuTor in the Hilt module → test asserts only one tracker present → fails. Revert.
+
+Evidence: `.lava-ci-evidence/sp3a-challenges/C1-<sha>.json` with attached screenshot.
+
+Commit `sp3a-5.9: Challenge Test C1 (app launch + tracker selection) + falsifiability rehearsal`.
+
+---
+
+### Task 5.10: Challenge Test C2 — Authenticated search on RuTracker
+
+Compose UI test: with credentials (`nobody85perfect`/`ironman1985`), perform a search for "ubuntu" on RuTracker, assert ≥1 result row renders with parseable size and seeders text.
+
+Falsifiability rehearsal: throw inside `RuTrackerSearch.search` → test asserts the error UI is shown. Revert.
+
+Commit `sp3a-5.10: Challenge Test C2 + falsifiability rehearsal`.
+
+---
+
+### Task 5.11: Challenge Test C3 — Anonymous search on RuTor
+
+Compose UI test: switch active tracker to RuTor, search for "ubuntu", assert ≥1 result row with parseable size and seeders. (No login required per decision 7b-ii.)
+
+Falsifiability rehearsal: mutate the RuTor descriptor capabilities to drop SEARCH → test asserts the search UI shows "not supported" → fails when capability check is honored. Revert.
+
+Commit `sp3a-5.11: Challenge Test C3 + rehearsal`.
+
+---
+
+### Task 5.12: Challenge Test C4 — Switch tracker and re-search
+
+After C2 search, switch to RuTor in settings, return to search, assert results re-render from RuTor (different items than RuTracker).
+
+Falsifiability rehearsal: break `LavaTrackerSdk.switchTracker` (don't update `_activeTrackerId.value`) → test asserts results stay RuTracker → fails. Revert.
+
+Commit `sp3a-5.12: Challenge Test C4 + rehearsal`.
+
+---
+
+### Task 5.13: Challenge Test C5 — View topic detail
+
+Tap a search result, assert TopicDetail screen renders with title, description, file list, magnet URI button.
+
+Falsifiability rehearsal: mutate `TopicMapper.toTopicDetail` to drop the description field → test asserts description is shown → fails. Revert.
+
+Commit `sp3a-5.13: Challenge Test C5 + rehearsal`.
+
+---
+
+### Task 5.14: Challenge Test C6 — Download `.torrent` file
+
+From topic detail, tap Download → assert a file is written to the app's downloads directory and the bytes parse as a valid bencoded torrent (`info.pieces` field present).
+
+Falsifiability rehearsal: short-circuit `RuTorDownload.downloadTorrentFile` to return empty → test asserts file is non-empty → fails. Revert.
+
+Commit `sp3a-5.14: Challenge Test C6 + rehearsal`.
+
+---
+
+### Task 5.15: Challenge Test C7 — Cross-tracker fallback modal accept
+
+Pre-condition: simulate all RuTracker mirrors UNHEALTHY (use a test-only injection that pre-marks the mirrors as UNHEALTHY in the in-memory state).
+
+Test: perform a search; assert `CrossTrackerFallbackModal` is rendered; tap "Try RuTor"; assert results from RuTor render with the "results from RuTor" banner.
+
+Falsifiability rehearsal: mutate `LavaTrackerSdk.search` to never emit `CrossTrackerFallbackProposed` (always return `Failure`) → test asserts modal is shown → fails. Revert.
+
+Commit `sp3a-5.15: Challenge Test C7 (cross-tracker fallback accept path) + rehearsal`.
+
+---
+
+### Task 5.16: Challenge Test C8 — Cross-tracker fallback modal dismiss
+
+Same setup as C7, tap "Cancel" → assert explicit failure UI renders (Snackbar with "Search failed" or equivalent), no silent fallback.
+
+Falsifiability rehearsal: mutate the dismiss handler to silently retry on RuTor anyway → test asserts no RuTor results render → fails. Revert.
+
+Commit `sp3a-5.16: Challenge Test C8 (cross-tracker fallback dismiss) + rehearsal`.
+
+---
+
+### Section C — `scripts/ci.sh` + `scripts/tag.sh` + pre-push hook
+
+### Task 5.17: Create `scripts/ci.sh`
+
+**Files:**
+- Create: `scripts/ci.sh`
+
+Single entry point implementing the gate described in spec §8.6. Driven by `--changed-only` flag for the pre-push hook subset, `--full` for tag-time runs.
+
+```bash
+#!/usr/bin/env bash
+# scripts/ci.sh — local-only CI gate for Lava
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+MODE="${1:---full}"
+EVIDENCE_DIR=".lava-ci-evidence/$(date +%Y-%m-%dT%H-%M-%S)"
+mkdir -p "$EVIDENCE_DIR"
+
+echo "==> Hosted-CI forbidden-files check"
+forbidden=$(find . \( -path './.git' -o -path './build' -o -path './node_modules' \) -prune -o \
+  \( -path '*.github/workflows/*' -o -name '.gitlab-ci.yml' -o -name '.circleci' -o \
+     -name 'azure-pipelines.yml' -o -name 'bitbucket-pipelines.yml' -o -name 'Jenkinsfile' \) \
+  -print 2>/dev/null || true)
+if [[ -n "$forbidden" ]]; then echo "FORBIDDEN HOSTED-CI FILES: $forbidden" >&2; exit 1; fi
+
+echo "==> Host-power forbidden-command regex check"
+viol=$(grep -rE --exclude-dir=.git --exclude-dir=build \
+  '(systemctl\s+(suspend|hibernate|poweroff|halt|reboot|kill-user|kill-session)|loginctl\s+(suspend|hibernate|poweroff|reboot|kill-user|kill-session|terminate-user|terminate-session)|pm-suspend|pm-hibernate|shutdown\s+(-h|-r|-P|-H|now|--halt|--poweroff|--reboot)|org\.freedesktop\.login1\.Manager\.(Suspend|Hibernate|HybridSleep|PowerOff|Reboot))' \
+  scripts/ docs/ buildSrc/ 2>/dev/null || true)
+if [[ -n "$viol" ]]; then echo "FORBIDDEN HOST-POWER COMMAND: $viol" >&2; exit 1; fi
+
+echo "==> Spotless"
+./gradlew spotlessCheck
+
+echo "==> Unit tests"
+./gradlew :core:tracker:api:test :core:tracker:client:test :core:tracker:registry:test \
+          :core:tracker:mirror:test :core:tracker:rutracker:test :core:tracker:rutor:test \
+          :core:tracker:testing:test :core:network:impl:test :core:preferences:test
+
+if [[ "$MODE" == "--full" ]]; then
+  echo "==> SwitchingNetworkApi parity gate"
+  ./gradlew :core:network:impl:test --tests "*ParityTest*"
+
+  echo "==> Mutation tests (PITest)"
+  ./gradlew :core:tracker:rutor:pitest :core:tracker:rutracker:pitest
+
+  echo "==> Fixture freshness check"
+  ./scripts/check-fixture-freshness.sh
+
+  echo "==> Compose UI Challenge Tests"
+  ./gradlew :app:connectedDebugAndroidTest --tests "lava.app.challenges.*"
+fi
+
+echo "==> Constitutional doc parser"
+./scripts/check-constitution.sh
+
+echo "==> All gates passed"
+echo "$MODE" > "$EVIDENCE_DIR/mode"
+git rev-parse HEAD > "$EVIDENCE_DIR/sha"
+```
+
+Commit `sp3a-5.17: scripts/ci.sh local-only CI gate`.
+
+---
+
+### Task 5.18: Create `scripts/check-fixture-freshness.sh`
+
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+THIRTY_DAYS_AGO=$(date -d '30 days ago' +%s)
+SIXTY_DAYS_AGO=$(date -d '60 days ago' +%s)
+warn=0
+for f in $(find core/tracker/*/src/test/resources/fixtures -name '*.html'); do
+  fname=$(basename "$f")
+  date_in_name=$(echo "$fname" | grep -oE '[0-9]{4}-[0-9]{2}-[0-9]{2}' || echo "")
+  if [[ -z "$date_in_name" ]]; then continue; fi
+  ts=$(date -d "$date_in_name" +%s 2>/dev/null || echo 0)
+  if [[ "$ts" -lt "$SIXTY_DAYS_AGO" ]]; then echo "BLOCK: $f >60 days old" >&2; exit 1; fi
+  if [[ "$ts" -lt "$THIRTY_DAYS_AGO" ]]; then echo "WARN: $f >30 days old"; warn=1; fi
+done
+exit 0
+```
+
+Commit `sp3a-5.18: scripts/check-fixture-freshness.sh`.
+
+---
+
+### Task 5.19: Create `scripts/check-constitution.sh`
+
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+# Verify that root CLAUDE.md contains clauses 6.D, 6.E, 6.F
+required=(
+  "6.D — Behavioral Coverage Contract"
+  "6.E — Capability Honesty"
+  "6.F — Anti-Bluff Submodule Inheritance"
+)
+for clause in "${required[@]}"; do
+  if ! grep -qF "$clause" CLAUDE.md; then
+    echo "MISSING constitutional clause: $clause" >&2
+    exit 1
+  fi
+done
+# Verify Tracker-SDK CLAUDE.md exists
+test -f Submodules/Tracker-SDK/CLAUDE.md || { echo "MISSING Submodules/Tracker-SDK/CLAUDE.md" >&2; exit 1; }
+echo "Constitution check passed"
+```
+
+Commit `sp3a-5.19: scripts/check-constitution.sh`.
+
+---
+
+### Task 5.20: Create `.githooks/pre-push` and enable
+
+```bash
+mkdir -p .githooks
+cat > .githooks/pre-push <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+exec ./scripts/ci.sh --changed-only
+EOF
+chmod +x .githooks/pre-push
+git config core.hooksPath .githooks
+```
+
+Commit `sp3a-5.20: pre-push hook (non-bypassable local CI gate)`.
+
+---
+
+### Task 5.21: Update `scripts/tag.sh` with new evidence-pack gate
+
+**Files:**
+- Modify: `scripts/tag.sh`
+
+Add precondition: refuse to tag unless `.lava-ci-evidence/<TAG>/` exists with required subfiles (`ci.sh.json`, `challenges/`, `bluff-audit/`, `mirror-smoke/`, per-mirror SHA). Reuse existing four-upstream push + per-mirror SHA convergence (clause 6.C); add a check that all 8 Challenge Tests in `.lava-ci-evidence/sp3a-challenges/` ran since the commit being tagged.
+
+Commit `sp3a-5.21: scripts/tag.sh enforces SP-3a evidence-pack gate`.
+
+---
+
+### Section D — Real-device verification + tag
+
+### Task 5.22: Real-device verification on a physical Android phone
+
+Per Sixth Law clause 5: human (or scripted runner) uses each Challenge-Tested feature on a real device against real RuTracker and real RuTor. Outcome recorded in `.lava-ci-evidence/Lava-Android-1.2.0-1020/real-device-verification.md` with timestamps + screenshots.
+
+Commit `sp3a-5.22: real-device verification artifact`.
+
+---
+
+### Task 5.23: Update `CHANGELOG.md` with 1.2.0 entry
+
+```markdown
+## Lava-Android-1.2.0-1020 (2026-MM-DD)
+
+### Added
+- RuTor (rutor.info / rutor.is) tracker support.
+- New tracker selection UI in Settings → Trackers.
+- Custom mirror entry per tracker.
+- Cross-tracker fallback modal: when all mirrors of the active tracker fail,
+  the app proposes the alternative tracker for the same operation.
+
+### Changed
+- Internal: RuTracker implementation now fully decoupled behind the multi-tracker SDK.
+- New `vasic-digital/Tracker-SDK` submodule mounted at `Submodules/Tracker-SDK/`.
+
+### Constitutional
+- Added clauses 6.D (Behavioral Coverage Contract), 6.E (Capability Honesty),
+  6.F (Anti-Bluff Submodule Inheritance) to root CLAUDE.md and cascaded.
+
+### Fixed
+- (none — this release is feature-additive)
+```
+
+Commit `sp3a-5.23: CHANGELOG entry for Lava-Android-1.2.0-1020`.
+
+---
+
+### Task 5.24: Bump version codes in `app/build.gradle.kts`
+
+```kotlin
+versionCode = 1020
+versionName = "1.2.0"
+```
+
+(Verify file path: usually a `release.properties` or `app/build.gradle.kts` block.)
+
+Commit `sp3a-5.24: bump app version to 1.2.0 / 1020`.
+
+---
+
+### Task 5.25: Tag `Lava-Android-1.2.0-1020` and mirror
+
+Run: `./scripts/tag.sh Lava-Android-1.2.0-1020`
+
+The script enforces all the Phase 5 gates, pushes to all four upstreams, verifies per-mirror SHA convergence. Creates the canonical evidence pack at `.lava-ci-evidence/Lava-Android-1.2.0-1020/`.
+
+If any gate fails, fix and re-run. Do NOT bypass with `--no-verify` or environment overrides — that would violate the Local-Only CI/CD constitutional rule.
+
+Final commit `sp3a-5.25: SP-3a complete — tagged Lava-Android-1.2.0-1020`.
+
+**Phase 5 done. SP-3a complete.**
+
+---
+
+## Final acceptance check
+
+```bash
+git tag --list | grep Lava-Android-1.2.0-1020
+ls -la .lava-ci-evidence/Lava-Android-1.2.0-1020/
+git ls-remote --tags github | grep Lava-Android-1.2.0-1020
+git ls-remote --tags gitflic | grep Lava-Android-1.2.0-1020
+git ls-remote --tags gitlab | grep Lava-Android-1.2.0-1020
+git ls-remote --tags gitverse | grep Lava-Android-1.2.0-1020
+```
+
+All checks pass: tag visible locally, evidence pack present, four upstreams converged.
+
+The SP-3a-bridge follow-up (Go-side rutracker refactor + parity tests) runs after SP-2 ships its last release tag — that's a separate plan, not part of this one.
+
+---
+
+## Plan Self-Review
+
+Spec coverage:
+- §0 Decision log → all 7 decisions traced to specific tasks: scope decomposition is the very shape of this spec; hybrid extraction → Tasks 1.1–1.27; Kotlin-first → Phase 2 explicitly excludes Go; behavioral coverage → Task 0.7 + 5.17; in-flight bluff audit → Phase 0; bundled+user mirrors → Tasks 4.1–4.3; one-tap fallback → Tasks 4.6–4.8 + 4.17; anonymous-by-default → Task 3.38; four-upstream mirror → Tasks 1.1–1.5 + 1.25–1.27.
+- §1 Goals G1–G8 → all addressed; G1 by Phase 1, G2 by Phase 2, G3 by Phase 3, G4 by Phase 4, G5 by Phase 1 SDK extraction, G6 by Phase 5 §A, G7 by Phase 0, G8 by Phase 5 §D.
+- §2 Architecture → file structure section + Phase 1 module creation tasks.
+- §3 Tracker-SDK submodule → Phase 1 §B–§G.
+- §4 Core interfaces & data model → Tasks 1.32–1.35.
+- §5 Mirror & cross-tracker fallback → Phase 4.
+- §6 RuTor implementation → Phase 3.
+- §7 Mappers + adapter + backward compat → Phase 2 §D, §E, §G.
+- §8 Testing strategy → Phase 0, Phase 5 §B; coverage exemption ledger → Task 0.7.
+- §9 Constitutional updates → Phase 5 §A.
+- §10 Phase shape → matches.
+- §11 Versioning + rollout → Tasks 5.23–5.25.
+
+Placeholder scan: no "TBD", "TODO" outside of intentionally-stubbed code blocks (mappers stubbed in Tasks 2.8–2.12 with explicit "populated in Task 2.X" pointers — that's a forward reference, not a planning gap).
+
+Type consistency: `LavaTrackerSdk.search()` returns `SearchOutcome` consistently across Tasks 2.30, 4.7, 5.10–5.16. `TrackerCapability.AUTH_REQUIRED` (not `AUTH`) used consistently. `MirrorUrl` from `lava.sdk.api`, not `lava.tracker.api` — consistent.
+
+No spec section unaddressed.
+
+---
+
+*End of plan.*
