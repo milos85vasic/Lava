@@ -1,0 +1,98 @@
+{
+  "task": "sp3a-2.36",
+  "subject": "SwitchingNetworkApi parity gate — SP-3a Phase 2 acceptance",
+  "scope": "Two-tier parity scheme replacing the plan's literal byte-for-byte goal across 14 NetworkApi methods. The literal goal is unachievable given the round-trip information losses Section G's implementer flagged; this evidence file records the explicit divergences accepted by the parity gate.",
+  "tier_strict": [
+    "checkAuthorized",
+    "addFavorite",
+    "removeFavorite",
+    "addComment",
+    "getForum",
+    "getCategory",
+    "getFavorites"
+  ],
+  "tier_structural": [
+    "login",
+    "getSearchPage",
+    "getTopic",
+    "getTopicPage",
+    "getCommentsPage",
+    "getTorrent",
+    "download"
+  ],
+  "tolerated_divergences": [
+    {
+      "method": "login",
+      "field": "AuthResponseDto.Success.user.id and user.avatarUrl",
+      "rationale": "LoginResult model carries no userId or avatarUrl. The reverse mapper (RuTrackerDtoMappers.loginResultToDto) synthesises empty strings for both. Legacy direct-rutracker path returned the actual rutracker user profile id and avatar URL. Token (the user-visible auth bearer) round-trips strictly.",
+      "section_g_reference": "Section G concern 5 (UserDto profile fields lossy on forward); RuTrackerDtoMappers KDoc on loginResultToDto"
+    },
+    {
+      "method": "getSearchPage",
+      "field": "caller-side sortType when caller used SearchSortTypeDto.Downloaded",
+      "rationale": "SortField has no DOWNLOADED enumerator. SwitchingNetworkApi.toSortField() collapses Downloaded -> SortField.DATE. Production code in core/data/converters/Search.kt does pass Sort.DOWNLOADED through, so this is a real user-visible drift: torrents are sorted by date instead of download count when caller selected the Downloaded sort. The collapse is a CALLER-side input, not a result-DTO output, so it does not surface in the parity assertions on the SearchPageDto.",
+      "section_g_reference": "Section G concern 1; SearchPageMapper KDoc"
+    },
+    {
+      "method": "getSearchPage",
+      "field": "caller-side period when caller used SearchPeriodDto.LastThreeDays or LastTwoWeeks",
+      "rationale": "TimePeriod has only LAST_DAY/LAST_WEEK/LAST_MONTH/LAST_YEAR/ALL_TIME — fine-grained periods collapse: LastThreeDays -> LAST_WEEK, LastTwoWeeks -> LAST_MONTH. Legacy passes the precise period to rutracker; SDK rewrites. Same caller-side scope as the sortType note above.",
+      "section_g_reference": "Section G concern 1"
+    },
+    {
+      "method": "getTopic",
+      "field": "page argument silently ignored on SDK path",
+      "rationale": "Legacy GetTopicUseCase ignores the page argument; the SDK TopicTracker.getTopic(id) facade matches that behaviour. If legacy ever started honouring page, the SDK would silently differ.",
+      "section_g_reference": "Section G concern 4"
+    },
+    {
+      "method": "getTopic + getTorrent",
+      "field": "TorrentDescriptionDto.children rich-AST -> single Text leaf",
+      "rationale": "Comment / TopicDetail.description model carries plain text only — rich post elements (bold, italic, spoiler, quote, color, link, list, code, image) are flattened on the forward path. The reverse mapper wraps the flat text in a single Text leaf. Legacy preserved the entire tree.",
+      "section_g_reference": "Section G concern 2; RuTrackerDtoMappers KDoc on topicDetailToDto"
+    },
+    {
+      "method": "getTopicPage",
+      "field": "TopicPageCommentsDto.posts always empty",
+      "rationale": "TopicPage SDK model carries no inline comments (per Section D, posts live on CommentsPage). Reverse mapper synthesises empty posts list with the correct page/pages pair. Legacy returned the comments inline.",
+      "section_g_reference": "Section G concern 4 sibling; RuTrackerDtoMappers KDoc on topicPageToDto"
+    },
+    {
+      "method": "getCommentsPage",
+      "field": "CommentsPageDto.id and title synthesised empty; PostDto.id and PostDto.author.id synthesised empty",
+      "rationale": "CommentsPage model carries posts only; topic id/title not preserved. Reverse mapper produces id=\"\" and title=\"\". Each Comment has no post id and no author id field, so PostDto.id and PostDto.author.id are also empty. Legacy returns actual rutracker post ids, topic id, and topic title. The user-visible signal (post body, author name, timestamp) round-trips strictly.",
+      "section_g_reference": "Section G concern 5; RuTrackerDtoMappers KDoc on commentsPageToDto and Comment.toPostDto"
+    },
+    {
+      "method": "download",
+      "field": "FileDto.contentDisposition and contentType",
+      "rationale": "DownloadableTracker.downloadTorrentFile(id) returns ByteArray only — the SDK facade has no FileOutcome / FileResult carrying response headers today. SwitchingNetworkApi synthesises 'attachment; filename=<id>.torrent' and 'application/x-bittorrent'. Forensic-only: the Android client does not consume those header fields (only the proxy fat JAR uses them server-side). Bytes round-trip BYTE-IDENTICAL.",
+      "section_g_reference": "Section G concern 3; SwitchingNetworkApi.download SP-3a-2.35 NOTE"
+    }
+  ],
+  "anti_bluff_compliance": {
+    "third_law": "No mocking of internal business logic. Real SwitchingNetworkApi + real LavaTrackerSdk + real RuTrackerDtoMappers wired together. Only the outermost boundary TrackerClient is faked through FakeTrackerClient (equivalent to faking the rutracker.org HTTP socket).",
+    "sixth_law_clause_1": "All assertions on user-visible state: rendered DTO fields, .torrent bytes, sealed-branch identity, pagination counts.",
+    "sixth_law_clause_3": "Primary assertions are on user-visible DTO content. 'mock invoked' is never the chief failure signal — secondary assertions on legacyApi.calls.isEmpty() merely confirm the SDK guard fired.",
+    "sixth_law_clause_5": "CI green is necessary, not sufficient. Operator MUST verify the parity-critical flows on a real device against rutracker.org before tagging the Phase 2 release. Tests prove the wiring; the device proves the user."
+  },
+  "falsifiability_rehearsal": {
+    "target_test": "parity_getForum_strict (Tier 1 STRICT)",
+    "mutation": "In core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker/mapper/RuTrackerDtoMappers.kt, replaced `tree.rootCategories.map { it.toCategoryDto() }` with `tree.rootCategories.drop(1).map { it.toCategoryDto() }` so the first root category is silently dropped on the reverse-map path.",
+    "observed_failure": "java.lang.AssertionError: ForumDto round-trip parity (strict) expected:<ForumDto(children=[CategoryDto(id=1, name=Linux, children=[CategoryDto(id=5, name=Distros, children=null), CategoryDto(id=7, name=Apps, children=null)]), CategoryDto(id=2, name=Music, children=null)])> but was:<ForumDto(children=[CategoryDto(id=2, name=Music, children=null)])>",
+    "reverted": true,
+    "evidence": "The mutated mapper produces a ForumDto with one root category instead of two; the assertion fails loudly with field-level diff between the hand-crafted baseline (the legacy path's expected output for the same input) and the produced (mutated) DTO. This proves the reverse-mapper path is load-bearing — silent drift in the mapper surfaces as a clear assertion failure on the user-visible category list."
+  },
+  "test_artifact": "core/network/impl/src/test/kotlin/lava/network/impl/SwitchingNetworkApiParityTest.kt",
+  "test_count": 16,
+  "tests_green": true,
+  "phase2_acceptance_check": {
+    "command": "./gradlew :app:assembleDebug :core:tracker:rutracker:test :core:network:impl:test --no-daemon",
+    "expected": "BUILD SUCCESSFUL",
+    "feature_impls_path": "core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker/feature/",
+    "feature_impls_required": 7,
+    "old_module_removed_from_settings": true
+  },
+  "ledger_clause": "6.D",
+  "result": "PHASE_2_GATE_GREEN"
+}
