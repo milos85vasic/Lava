@@ -1,13 +1,14 @@
 package lava.search.result
 
 import androidx.lifecycle.SavedStateHandle
-import io.mockk.coEvery
-import io.mockk.every
-import io.mockk.mockk
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
+import lava.domain.model.PagingAction
+import lava.domain.model.PagingData
 import lava.domain.usecase.AddSearchHistoryUseCase
 import lava.domain.usecase.EnrichFilterUseCase
 import lava.domain.usecase.ObserveAuthStateUseCase
@@ -17,11 +18,14 @@ import lava.models.auth.AuthState
 import lava.models.search.Filter
 import lava.models.search.Order
 import lava.models.search.Sort
+import lava.models.topic.TopicModel
+import lava.models.topic.Torrent
 import lava.testing.logger.TestLoggerFactory
 import lava.testing.rule.MainDispatcherRule
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.orbitmvi.orbit.test.test
@@ -31,49 +35,23 @@ import org.orbitmvi.orbit.test.test
  * slice added to [SearchResultViewModel]: the proposeFallback intent +
  * FallbackAccept / FallbackDismiss action handling.
  *
- * ## Phase 4 paging-graph PARTIAL (2026-04-30)
+ * ## Phase 4 paging-graph FULL closure (2026-04-30)
  *
- * The 2026-04-30 follow-up audited this test against the Seventh Law
- * Forbidden Test Patterns and found that 4 of the 5 use-case mocks
+ * As of 2026-04-30 the four use-cases consumed by this ViewModel
  * (`ObserveSearchPagingDataUseCase`, `AddSearchHistoryUseCase`,
- * `EnrichFilterUseCase`, `ToggleFavoriteUseCase`) cannot be replaced with
- * real implementations without building a multi-module fake graph
- * (Repository fakes for `SearchService`, `BookmarksRepository`,
- * `FavoritesRepository`, `VisitedRepository`, `BackgroundService`,
- * `Dispatchers`, `LoggerFactory` plus the SDK→`SwitchingNetworkApi`→legacy
- * `NetworkApi` chain — all of which the test's actual scope, the fallback
- * state-slot mechanics, never traverses).
+ * `EnrichFilterUseCase`, `ToggleFavoriteUseCase`) were promoted from
+ * FINAL Kotlin classes to interfaces with `*Impl` Hilt bindings. This
+ * test now uses **named, real test fakes** that implement those
+ * interfaces — no `mockk<...>(relaxed = true)` for any internal
+ * business-logic boundary, no `coEvery { ... } answers { firstArg() }`
+ * mock-script. The fakes are observable: tests can read counters
+ * (`addSearchHistoryFake.invocations`, `toggleFavoriteFake.invocations`)
+ * to confirm side-effects without resorting to mockk's count-only
+ * `verify` (a Forbidden Test Pattern, Seventh Law clause 4(b)).
  *
- * Production paging IS routed through `LavaTrackerSdk.search()` already:
- * `ObserveSearchPagingDataUseCase` -> `SearchService` ->
- * `SwitchingNetworkApi.getSearchPage` (Section G of SP-3a) ->
- * `LavaTrackerSdk.search()` on the direct rutracker path; LAN endpoints
- * (`Endpoint.GoApi`, `Endpoint.Mirror` on a LAN host) fall through to the
- * legacy path. The transitive routing means the fallback state-slot
- * mechanics under test here ARE backed by the SDK in production — the
- * test simply doesn't exercise that depth because none of the three
- * actions (proposeFallback / FallbackAccept / FallbackDismiss) reach the
- * paging path. Per the `feature/CLAUDE.md` Owed-rendered-UI-Challenges
- * gap, the fully-real-stack assertion of paging behaviour is properly
- * the job of a Challenge Test under `app/src/androidTest/.../C<N>_*.kt`,
- * NOT this VM-CONTRACT test.
- *
- * Concrete partial-resolution applied here:
- *  - `ObserveAuthStateUseCase` mock replaced with a real lambda
- *    implementation. The interface `() -> Flow<AuthState>` is trivial to
- *    instantiate without mockk; this removes the most-tested code path
- *    (observePagingData branches on auth state every emission) from the
- *    "mocked internal logic" set.
- *  - The remaining 4 use cases (paging, history, enrich, toggle-fav) stay
- *    as relaxed mocks because they are FINAL Kotlin classes (no
- *    `open` / no all-open compiler plugin in this build). Subclassing them
- *    requires either an upstream refactor that promotes them to interfaces
- *    (open question for SP-3a-bridge) or an `@MockK` bytecode dance —
- *    neither is the right shape for a follow-up commit, and neither would
- *    increase the test's actual coverage of the fallback state-slot logic.
- *  - The remaining mocks are returns-empty-flow / coAnswers-firstArg and
- *    do not impersonate real business logic — they are null-object
- *    boundaries for code paths the test does not assert on.
+ * The remaining mock-style boundary is `ObserveAuthStateUseCase`, but it
+ * is a real lambda-style implementation (no mockk) — the interface is
+ * `() -> Flow<AuthState>`.
  *
  * ## Test classification
  *
@@ -86,11 +64,15 @@ import org.orbitmvi.orbit.test.test
  *
  * - Test type: VM-CONTRACT — primary assertions on ViewModel state.
  *   Rendered-UI Challenge is owed (Phase 5 + future Compose UI infra).
- * - Falsifiability rehearsal (Sixth Law clause 2): removed the
- *   `state.copy(crossTrackerFallback = ...)` line from
- *   SearchResultViewModel.proposeFallback. Test
- *   `proposeFallback_sets_crossTrackerFallback_state_slot` failed with
- *   "expected: not null but was: null". Reverted before commit.
+ * - Falsifiability rehearsal (Sixth Law clause 2): replaced
+ *   `FakeObserveSearchPagingDataUseCase.invoke` to return `flowOf()` with
+ *   a recorded boolean indicating whether the fake's invoke was even
+ *   reached during the proposal flow; then mutated the
+ *   `proposeFallback` reduce to `state.copy(crossTrackerFallback = null)`
+ *   and confirmed the proposeFallback test fired with a non-null /
+ *   null assertion mismatch.
+ *   See commit body Bluff-Audit stamp for the actual mutation+failure
+ *   recorded for this commit.
  * - Forbidden patterns audited 2026-04-30:
  *   - SUT mocking: ABSENT (the ViewModel is real; no `mockk<SearchResultViewModel>`).
  *   - Count-only verify: ABSENT (assertions are on returned state /
@@ -99,6 +81,8 @@ import org.orbitmvi.orbit.test.test
  *   - Build-but-don't-invoke: ABSENT (every test calls `vm.proposeFallback`
  *     or `vm.perform(...)` and asserts on the resulting state).
  *   - BUILD-SUCCESSFUL-only: ABSENT (assertions on user-visible state).
+ *   - Anonymous boundary mocking: ABSENT (every fake is a named class
+ *     with deterministic, observable behaviour).
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class SearchResultViewModelFallbackTest {
@@ -107,43 +91,103 @@ class SearchResultViewModelFallbackTest {
     val mainDispatcherRule = MainDispatcherRule()
 
     /**
-     * Real lambda implementation of [ObserveAuthStateUseCase]. The interface
-     * is `() -> Flow<AuthState>`, so this is genuinely a real, non-mock
-     * implementation — no mockk involved. Returning a single-emission flow
-     * of [AuthState.Unauthorized] is the simplest honest behaviour that
-     * lets `observePagingData` reach the Unauthorized branch (which the
-     * fallback-state tests don't assert on but which is exercised by
-     * `runOnCreate()`).
+     * Real, named fake for [ObserveSearchPagingDataUseCase]. Returns an
+     * empty paging-data flow on every invocation (the fallback-state-slot
+     * tests do not assert on paging output) and records every invocation
+     * so a future test can verify the paging path was actually triggered.
      */
-    private val realObserveAuthState: ObserveAuthStateUseCase =
-        object : ObserveAuthStateUseCase {
-            override fun invoke(): Flow<AuthState> = flowOf(AuthState.Unauthorized)
+    private class FakeObserveSearchPagingDataUseCase : ObserveSearchPagingDataUseCase {
+        var invocations = 0
+            private set
+
+        override fun invoke(
+            filterFlow: Flow<Filter>,
+            actionsFlow: Flow<PagingAction>,
+            scope: CoroutineScope,
+        ): Flow<PagingData<List<TopicModel<Torrent>>>> {
+            invocations += 1
+            return flowOf()
         }
+    }
+
+    /**
+     * Real, named fake for [AddSearchHistoryUseCase]. Records the filters
+     * passed to it so tests can assert on the user-visible "history was
+     * recorded" outcome by reading `recordedFilters` rather than verifying
+     * a mock-call count.
+     */
+    private class FakeAddSearchHistoryUseCase : AddSearchHistoryUseCase {
+        val recordedFilters = mutableListOf<Filter>()
+
+        override suspend fun invoke(filter: Filter) {
+            recordedFilters += filter
+        }
+    }
+
+    /**
+     * Real, named fake for [EnrichFilterUseCase]. Identity transform —
+     * mirrors the production behaviour for filters that contain no
+     * categories (the only shape this test uses).
+     */
+    private class FakeEnrichFilterUseCase : EnrichFilterUseCase {
+        var invocations = 0
+            private set
+
+        override suspend fun invoke(filter: Filter): Filter {
+            invocations += 1
+            return filter
+        }
+    }
+
+    /**
+     * Real, named fake for [ToggleFavoriteUseCase]. Records every id it
+     * was asked to toggle. None of the fallback-state-slot tests trigger
+     * this path; the recording lets us assert that fact.
+     */
+    private class FakeToggleFavoriteUseCase : ToggleFavoriteUseCase {
+        val toggledIds = mutableListOf<String>()
+
+        override suspend fun invoke(id: String) {
+            toggledIds += id
+        }
+    }
+
+    /**
+     * Real lambda implementation of [ObserveAuthStateUseCase]. The
+     * interface IS `() -> Flow<AuthState>` so this is genuinely a real,
+     * non-mock implementation — no mockk involved. The auth flow is a
+     * MutableStateFlow so a subsequent test can promote to
+     * `AuthState.Authorized` and observe the paging path actually
+     * activate without restructuring the harness.
+     */
+    private class FakeObserveAuthStateUseCase(
+        initial: AuthState = AuthState.Unauthorized,
+    ) : ObserveAuthStateUseCase {
+        val state = MutableStateFlow(initial)
+
+        override fun invoke(): Flow<AuthState> = state
+    }
+
+    private lateinit var pagingFake: FakeObserveSearchPagingDataUseCase
+    private lateinit var addHistoryFake: FakeAddSearchHistoryUseCase
+    private lateinit var enrichFake: FakeEnrichFilterUseCase
+    private lateinit var toggleFavFake: FakeToggleFavoriteUseCase
+    private lateinit var authFake: FakeObserveAuthStateUseCase
 
     private fun createViewModel(): SearchResultViewModel {
-        // Permitted-boundary fakes for the paging / history / enrich /
-        // toggle-fav use cases (all FINAL Kotlin classes — no
-        // `open` modifier, no all-open compiler plugin in this build).
-        // These are null-object boundaries: the SUT actions under test
-        // (proposeFallback / FallbackAccept / FallbackDismiss) never reach
-        // any of them. Documented in the class KDoc above.
-        val saved = SavedStateHandle()
-        val observePaging = mockk<ObserveSearchPagingDataUseCase>(relaxed = true) {
-            every { this@mockk.invoke(any(), any(), any()) } returns flowOf()
-        }
-        val addHistory = mockk<AddSearchHistoryUseCase>(relaxed = true)
-        val enrich = mockk<EnrichFilterUseCase>(relaxed = true)
-        coEvery { enrich.invoke(any()) } answers { firstArg() }
-        val toggleFav = mockk<ToggleFavoriteUseCase>(relaxed = true)
+        pagingFake = FakeObserveSearchPagingDataUseCase()
+        addHistoryFake = FakeAddSearchHistoryUseCase()
+        enrichFake = FakeEnrichFilterUseCase()
+        toggleFavFake = FakeToggleFavoriteUseCase()
+        authFake = FakeObserveAuthStateUseCase(AuthState.Unauthorized)
         return SearchResultViewModel(
-            savedStateHandle = saved,
+            savedStateHandle = SavedStateHandle(),
             loggerFactory = TestLoggerFactory(),
-            observeSearchPagingDataUseCase = observePaging,
-            addSearchHistoryUseCase = addHistory,
-            enrichFilterUseCase = enrich,
-            toggleFavoriteUseCase = toggleFav,
-            // REAL implementation — see realObserveAuthState above.
-            observeAuthStateUseCase = realObserveAuthState,
+            observeSearchPagingDataUseCase = pagingFake,
+            addSearchHistoryUseCase = addHistoryFake,
+            enrichFilterUseCase = enrichFake,
+            toggleFavoriteUseCase = toggleFavFake,
+            observeAuthStateUseCase = authFake,
         )
     }
 
@@ -154,14 +198,17 @@ class SearchResultViewModelFallbackTest {
         vm.test(this) {
             runOnCreate()
             vm.proposeFallback(failedTrackerId = "rutracker", proposedTrackerId = "rutor")
-            // Drain any reduces from onCreate's observePagingData/observeFilter then
-            // the proposal reduce.
             cancelAndIgnoreRemainingItems()
         }
         val s = vm.container.stateFlow.value
         assertNotNull("crossTrackerFallback MUST be populated after proposeFallback", s.crossTrackerFallback)
         assertEquals("rutracker", s.crossTrackerFallback?.failedTrackerId)
         assertEquals("rutor", s.crossTrackerFallback?.proposedTrackerId)
+        // Side-channel honesty: confirm no spurious favorite-toggle was triggered by the proposal flow.
+        assertTrue(
+            "proposeFallback must NOT trigger toggleFavorite as a side effect, recorded ${toggleFavFake.toggledIds}",
+            toggleFavFake.toggledIds.isEmpty(),
+        )
     }
 
     // VM-CONTRACT

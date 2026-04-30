@@ -6,12 +6,16 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import lava.domain.usecase.AddEndpointUseCase
 import lava.domain.usecase.AddEndpointUseCaseImpl
+import lava.domain.usecase.AddSearchHistoryUseCase
+import lava.domain.usecase.AddSearchHistoryUseCaseImpl
 import lava.domain.usecase.AppLaunchedUseCase
 import lava.domain.usecase.AppLaunchedUseCaseImpl
 import lava.domain.usecase.DisableRatingRequestUseCase
 import lava.domain.usecase.DisableRatingRequestUseCaseImpl
 import lava.domain.usecase.DiscoverLocalEndpointsUseCase
 import lava.domain.usecase.DiscoverLocalEndpointsUseCaseImpl
+import lava.domain.usecase.EnrichFilterUseCase
+import lava.domain.usecase.EnrichFilterUseCaseImpl
 import lava.domain.usecase.GetRatingStoreUseCase
 import lava.domain.usecase.GetRatingStoreUseCaseImpl
 import lava.domain.usecase.LogoutUseCase
@@ -24,12 +28,16 @@ import lava.domain.usecase.ObserveEndpointsStatusUseCase
 import lava.domain.usecase.ObserveEndpointsStatusUseCaseImpl
 import lava.domain.usecase.ObserveRatingRequestUseCase
 import lava.domain.usecase.ObserveRatingRequestUseCaseImpl
+import lava.domain.usecase.ObserveSearchPagingDataUseCase
+import lava.domain.usecase.ObserveSearchPagingDataUseCaseImpl
 import lava.domain.usecase.PostponeRatingRequestUseCase
 import lava.domain.usecase.PostponeRatingRequestUseCaseImpl
 import lava.domain.usecase.RemoveEndpointUseCase
 import lava.domain.usecase.RemoveEndpointUseCaseImpl
 import lava.domain.usecase.SetEndpointUseCase
 import lava.domain.usecase.SetEndpointUseCaseImpl
+import lava.domain.usecase.ToggleFavoriteUseCase
+import lava.domain.usecase.ToggleFavoriteUseCaseImpl
 import javax.inject.Singleton
 
 @Module
@@ -41,7 +49,15 @@ internal interface DomainModule {
 
     @Binds
     @Singleton
+    fun addSearchHistoryUseCase(impl: AddSearchHistoryUseCaseImpl): AddSearchHistoryUseCase
+
+    @Binds
+    @Singleton
     fun discoverLocalEndpointsUseCase(impl: DiscoverLocalEndpointsUseCaseImpl): DiscoverLocalEndpointsUseCase
+
+    @Binds
+    @Singleton
+    fun enrichFilterUseCase(impl: EnrichFilterUseCaseImpl): EnrichFilterUseCase
 
     @Binds
     @Singleton
@@ -77,6 +93,10 @@ internal interface DomainModule {
 
     @Binds
     @Singleton
+    fun observeSearchPagingDataUseCase(impl: ObserveSearchPagingDataUseCaseImpl): ObserveSearchPagingDataUseCase
+
+    @Binds
+    @Singleton
     fun postponeRatingRequestUseCase(impl: PostponeRatingRequestUseCaseImpl): PostponeRatingRequestUseCase
 
     @Binds
@@ -86,4 +106,8 @@ internal interface DomainModule {
     @Binds
     @Singleton
     fun setEndpointUseCase(impl: SetEndpointUseCaseImpl): SetEndpointUseCase
+
+    @Binds
+    @Singleton
+    fun toggleFavoriteUseCase(impl: ToggleFavoriteUseCaseImpl): ToggleFavoriteUseCase
 }
