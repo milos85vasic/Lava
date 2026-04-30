@@ -1,0 +1,9 @@
+{
+  "task": "sp3a-1.27",
+  "tag": "v0.1.0",
+  "tag_sha": "6171ab3fa7f1b16fd1a4747b37310a07c2808c68",
+  "github_tag_sha": "6171ab3fa7f1b16fd1a4747b37310a07c2808c68",
+  "gitlab_tag_sha": "6171ab3fa7f1b16fd1a4747b37310a07c2808c68",
+  "tag_target_commit": "8f3acbf58534b5ba048b7f96a9f72c1fc56cebc6",
+  "ledger_clause": "6.C"
+}

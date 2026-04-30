@@ -1,0 +1,10 @@
+{
+  "task": "sp3a-1.25+1.26",
+  "subject": "Initial push of vasic-digital/Tracker-SDK to all upstreams",
+  "expected_sha": "8f3acbf58534b5ba048b7f96a9f72c1fc56cebc6",
+  "github": "8f3acbf58534b5ba048b7f96a9f72c1fc56cebc6",
+  "gitlab": "8f3acbf58534b5ba048b7f96a9f72c1fc56cebc6",
+  "commit_count_pushed": 12,
+  "spec_deviation": "2-upstream scope (GitHub + GitLab) per operator authorization 2026-04-30",
+  "ledger_clause": "6.C"
+}
