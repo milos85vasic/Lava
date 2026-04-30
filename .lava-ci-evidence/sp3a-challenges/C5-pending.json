@@ -1,0 +1,21 @@
+{
+  "challenge_id": "C5",
+  "name": "View topic detail",
+  "test_class": "lava.app.challenges.C5_ViewTopicDetailTest",
+  "test_file": "app/src/androidTest/kotlin/lava/app/challenges/C5_ViewTopicDetailTest.kt",
+  "spec_reference": "Task 5.13",
+  "operator_attestation_required": true,
+  "status": "PENDING_OPERATOR",
+  "falsifiability_protocol": {
+    "mutation_target": "core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker/mappers/TopicMapper.kt",
+    "mutation_step": "Mutate toTopicDetail() to drop the description field (set description = \"\" unconditionally).",
+    "expected_failure": "TopicDetail renders without the description block; assertion onNodeWithText('Description', substring=true).assertIsDisplayed() fires.",
+    "expected_assertion_message_substring": "Failed to assertIsDisplayed: no nodes match",
+    "revert_step": "Restore the description mapping."
+  },
+  "operator_run_instructions": [
+    "./gradlew :app:connectedDebugAndroidTest --tests \"lava.app.challenges.C5_ViewTopicDetailTest\"",
+    "Capture screenshot of TopicDetail screen showing title, description block, file list, magnet button.",
+    "Perform falsifiability mutation, re-run, capture verbatim failure, revert."
+  ]
+}
