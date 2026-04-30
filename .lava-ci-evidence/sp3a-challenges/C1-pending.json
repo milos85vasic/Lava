@@ -1,0 +1,27 @@
+{
+  "challenge_id": "C1",
+  "name": "App launch and tracker selection",
+  "test_class": "lava.app.challenges.C1_AppLaunchAndTrackerSelectionTest",
+  "test_file": "app/src/androidTest/kotlin/lava/app/challenges/C1_AppLaunchAndTrackerSelectionTest.kt",
+  "spec_reference": "docs/superpowers/plans/2026-04-30-sp3a-multi-tracker-sdk-foundation.md Task 5.9",
+  "operator_attestation_required": true,
+  "status": "PENDING_OPERATOR",
+  "reason": "Source-only at SP-3a Phase 5 commit. Task 5.22 (real-device verification) requires an operator with a physical Android device + connectedAndroidTest infrastructure to run this rehearsal and update this evidence file in place.",
+  "falsifiability_protocol": {
+    "mutation_target": "core/tracker/client/src/main/kotlin/lava/tracker/client/registry/RuTorRegistrationModule.kt",
+    "mutation_step": "Comment out the @IntoSet line that contributes the RuTor TrackerClientFactory to the Hilt multi-binding set.",
+    "expected_failure": "Assertion onNodeWithText(\"RuTor\").assertIsDisplayed() fails because only RuTracker is registered.",
+    "expected_assertion_message_substring": "Failed to assertIsDisplayed: no nodes match (text == \"RuTor\")",
+    "revert_step": "Uncomment the @IntoSet line."
+  },
+  "operator_run_instructions": [
+    "Connect a physical Android device (USB debugging enabled, API 26+).",
+    "Build the debug APK: ./gradlew :app:assembleDebug",
+    "Install: ./gradlew :app:installDebug",
+    "Run: ./gradlew :app:connectedDebugAndroidTest --tests \"lava.app.challenges.C1_AppLaunchAndTrackerSelectionTest\"",
+    "Expected: PASS — record screenshot of Settings → Trackers screen showing both RuTracker and RuTor listed, and RuTracker (active) after tap.",
+    "Then perform the falsifiability mutation, re-run, capture the FAILURE assertion message verbatim, revert, re-run.",
+    "Update this file: status: VERIFIED, observed_failure_message: <verbatim>, attestation_screenshot_sha256: <hash>, attestation_timestamp: <iso8601>, attestation_device: <model + Android version>."
+  ],
+  "evidence_pack_path": ".lava-ci-evidence/Lava-Android-1.2.0-1020/challenges/C1.json"
+}
