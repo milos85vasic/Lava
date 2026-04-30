@@ -1,0 +1,42 @@
+{
+  "task": "sp3a-4.8",
+  "subject": "Falsifiability rehearsal — cross-tracker fallback contract",
+  "ledger_clauses": ["6.6.2", "7-clause-1"],
+  "rehearsals": [
+    {
+      "id": "rehearsal-A",
+      "subject_under_test": "lava.tracker.client.CrossTrackerFallbackPolicy.proposeFallback",
+      "test_class": "lava.tracker.client.CrossTrackerFallbackPolicyTest",
+      "test_method": "proposes_alternative_supporting_capability",
+      "mutation": "Replaced the body of `proposeFallback` with `return null` (deleted the existing if/return logic).",
+      "observed_failure": "junit.framework.AssertionError: expected:<rutor> but was:<null>",
+      "reverted": "git checkout -- core/tracker/client/src/main/kotlin/lava/tracker/client/CrossTrackerFallbackPolicy.kt (verified: git diff returns empty)",
+      "post_revert_run": "BUILD SUCCESSFUL — all 6 CrossTrackerFallbackPolicyTest cases pass on the restored implementation."
+    },
+    {
+      "id": "rehearsal-B",
+      "subject_under_test": "lava.tracker.client.LavaTrackerSdk.search (cross-tracker fallback emission)",
+      "test_class": "lava.tracker.client.LavaTrackerSdkCrossTrackerFallbackTest",
+      "test_method": "search_emits_CrossTrackerFallbackProposed_when_all_rutracker_mirrors_unhealthy",
+      "mutation": "Replaced the body of `proposeFallback` with `return null` (i.e. cross-tracker layer disabled inside the SDK).",
+      "observed_failure": "junit.framework.AssertionError: Expected CrossTrackerFallbackProposed but got: SearchOutcome.Failure(reason='MirrorUnavailable: 0 mirror(s) attempted', triedTrackers=[rutracker], cause=lava.sdk.api.MirrorUnavailableException)",
+      "reverted": "git checkout -- core/tracker/client/src/main/kotlin/lava/tracker/client/CrossTrackerFallbackPolicy.kt (verified: git diff returns empty)",
+      "post_revert_run": "BUILD SUCCESSFUL — all 4 LavaTrackerSdkCrossTrackerFallbackTest cases pass on the restored implementation."
+    },
+    {
+      "id": "rehearsal-C",
+      "subject_under_test": "lava.tracker.client.LavaTrackerSdk.persistMirrorHealthSnapshot",
+      "test_class": "lava.tracker.client.LavaTrackerSdkMirrorHealthTest",
+      "test_method": "probeMirrorsFor_persists_state_to_repository",
+      "mutation": "Removed the `mirrorHealthRepository?.upsertAll(trackerId, states)` call from probeMirrorsFor.",
+      "observed_failure": "java.lang.AssertionError: expected:<2> but was:<0> (no rows persisted to Room)",
+      "reverted": "git checkout -- core/tracker/client/src/main/kotlin/lava/tracker/client/LavaTrackerSdk.kt (verified: git diff returns empty)",
+      "post_revert_run": "BUILD SUCCESSFUL — all 5 LavaTrackerSdkMirrorHealthTest cases pass on the restored implementation."
+    }
+  ],
+  "rule_under_test": "Sixth Law clause 6.6.2 + Seventh Law clause 1 — every test in this codebase MUST be falsifiable by deliberately breaking the production code path it claims to verify. Each rehearsal above demonstrates that the named test fails with a clear assertion message when the corresponding implementation is mutated, and passes again on revert.",
+  "verified_at": "68f79c0",
+  "evidence_taken_at": "2026-04-30",
+  "operator": "claude-code-subagent",
+  "notes": "Rehearsal-B is the load-bearing one for the SP-3a Task 4.8 contract: it confirms that the SearchOutcome.CrossTrackerFallbackProposed emission depends mechanically on CrossTrackerFallbackPolicy.proposeFallback returning a non-null value. Removing that dependency surface causes the outcome to collapse to Failure (the legacy pre-Phase-4 shape), and the test's primary assertion fires on that collapse."
+}
