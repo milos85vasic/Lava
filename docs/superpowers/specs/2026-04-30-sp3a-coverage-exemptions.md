@@ -162,38 +162,46 @@ dexing the moment the tracker registry lands on the dependency graph.
 **Audit linkage:** Phase 2 Section A spec compliance review (commit landing the
 LF-3 entry).
 
-### LF-5 — RuTrackerDescriptor declares UPLOAD + USER_PROFILE without feature interfaces (linked: Phase 2 Section C)
+### LF-5 — RuTrackerDescriptor declares UPLOAD + USER_PROFILE without feature interfaces (linked: Phase 2 Section C) — **RESOLVED 2026-04-30**
+
+**Status:** **RESOLVED** by commit `lf-5-resolved` on 2026-04-30. Resolution
+chose mitigation option 2 (drop the two capabilities) rather than option 1 (add
+the feature interfaces) because the legacy `UploadTorrentUseCase` and
+`GetCurrentProfileUseCase` plumbing is not consumed by any SP-3a feature
+ViewModel — adding the interfaces would be scope creep beyond the SP-3a
+foundation. Re-introducing either capability is appropriately scheduled for a
+future SP (SP-3a-bridge or later) where a feature ViewModel actually needs it.
 
 **Location:** `core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker/RuTrackerDescriptor.kt`
 
-**Observation:** Phase 2 Section B (Task 2.6) populated `RuTrackerDescriptor.capabilities`
-with the full 12-capability set including `TrackerCapability.UPLOAD` and
-`TrackerCapability.USER_PROFILE`. As of Phase 2 Section C end-of-task, the new
-`:core:tracker:api` package does NOT define `UploadableTracker` or `ProfileTracker`
-feature interfaces. Consequently `RuTrackerClient.getFeature<T>()` cannot return a
-non-null impl for those two capabilities — the `KClass<T>` for the missing
-interfaces does not exist as a dispatch key in the `when` switch.
+**Observation (historic):** Phase 2 Section B (Task 2.6) populated
+`RuTrackerDescriptor.capabilities` with the full 12-capability set including
+`TrackerCapability.UPLOAD` and `TrackerCapability.USER_PROFILE`. As of Phase 2
+Section C end-of-task, the new `:core:tracker:api` package did NOT define
+`UploadableTracker` or `ProfileTracker` feature interfaces. Consequently
+`RuTrackerClient.getFeature<T>()` could not return a non-null impl for those two
+capabilities — the `KClass<T>` for the missing interfaces did not exist as a
+dispatch key in the `when` switch.
 
 **Constitutional clause 6.E literal:** "capability declared in descriptor ⇒ this
-returns non-null". The current code SATISFIES this letter-of-the-law because no
-caller can construct `getFeature(UploadableTracker::class)` — the type doesn't
-exist. But the descriptor is making a forward-looking claim that no impl backs.
-Treat as a latent finding rather than an immediate violation.
+returns non-null". The original code SATISFIED this letter-of-the-law because no
+caller could construct `getFeature(UploadableTracker::class)` — the type didn't
+exist. But the descriptor was making a forward-looking claim that no impl
+backed. Treated as a latent finding rather than an immediate violation.
 
-**Mitigation trigger:** before Phase 4 (cross-tracker fallback policy), one of
-the following MUST be true:
-1. `:core:tracker:api` defines `UploadableTracker` and `ProfileTracker`, and
-   `RuTrackerClient.getFeature<T>()` resolves both to working impls (which then
-   wrap appropriate UseCases — `UploadTorrentUseCase` exists already; profile
-   fetching exists via `GetCurrentProfileUseCase` / `GetProfileUseCase`).
-2. The two capabilities are removed from `RuTrackerDescriptor.capabilities` to
-   match the actual feature surface.
-
-The first option is the better outcome (the rutracker scrapers already support
-both surfaces in `RuTrackerInnerApi`); the second is the safe fallback.
+**Resolution (2026-04-30):**
+- `RuTrackerDescriptor.capabilities` reduced from 12 to 10 entries.
+- `UPLOAD` and `USER_PROFILE` removed.
+- `RuTrackerDescriptorTest` assertion updated from `12 capabilities` to `10
+  capabilities` and a new test `LF-5 RESOLVED — UPLOAD and USER_PROFILE are
+  NOT declared (no feature interface)` added.
+- `core/tracker/rutracker/README.md` capability matrix updated.
+- The dormant scrapers (`RuTrackerInnerApi.uploadTorrent`, `getProfile`) and
+  their wrapping UseCases continue to ship as legacy plumbing in this module
+  but are no longer advertised through the SDK.
 
 **Audit linkage:** Phase 2 Section C spec + code-quality review (commit landing
-the LF-5 entry).
+the LF-5 entry); Phase 5 wrap follow-up (commit `lf-5-resolved`).
 
 ### LF-6 — `TorrentItem.sizeBytes` permanently null for rutracker (linked: Phase 2 Section D)
 

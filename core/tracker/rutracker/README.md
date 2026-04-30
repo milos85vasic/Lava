@@ -10,8 +10,9 @@ path now does not exist.
 ## Capability matrix
 
 Per `RuTrackerDescriptor.capabilities` and the corresponding
-`getFeature<T>()` dispatch in `RuTrackerClient`. Twelve declared
-capabilities (the full SP-3a vocabulary minus `RSS`):
+`getFeature<T>()` dispatch in `RuTrackerClient`. Ten declared
+capabilities (the full SP-3a vocabulary minus `RSS`, `UPLOAD`,
+`USER_PROFILE`):
 
 | Capability         | Implemented? | Feature impl                  | Notes                                                            |
 |--------------------|--------------|-------------------------------|------------------------------------------------------------------|
@@ -26,20 +27,23 @@ capabilities (the full SP-3a vocabulary minus `RSS`):
 | `AUTH_REQUIRED`    | yes          | `RuTrackerAuth`               | `bb_session` cookie; verbatim Set-Cookie forwarding (SP-3.5b)    |
 | `CAPTCHA_LOGIN`    | yes          | `RuTrackerAuth`               | Captcha image + form-key extracted from `login.php`              |
 | `RSS`              | **no**       | —                             | RuTracker's RSS endpoint requires per-user secret URL; out of scope |
-| `UPLOAD`           | **declared, not surfaced** | —               | Latent finding LF-5 — descriptor declares it but no feature impl yet  |
-| `USER_PROFILE`     | **declared, not surfaced** | —               | Latent finding LF-5 — descriptor declares it but no feature impl yet  |
+| `UPLOAD`           | **not declared (LF-5 RESOLVED)** | —          | No `UploadableTracker` interface in `:core:tracker:api/feature/`; legacy `UploadTorrentUseCase` is dormant plumbing. |
+| `USER_PROFILE`     | **not declared (LF-5 RESOLVED)** | —          | No `ProfileTracker` interface in `:core:tracker:api/feature/`; legacy `GetCurrentProfileUseCase` is dormant plumbing. |
 
-`UPLOAD` and `USER_PROFILE` are present in the descriptor for
-forward-looking reasons; the underlying scrapers
-(`RuTrackerInnerApi.uploadTorrent`, `getProfile`) exist in this module.
-Because the matching `TrackerFeature` interfaces
-(`UploadableTracker`, `ProfileTracker`) do not yet exist in
-`:core:tracker:api`, no caller can request them via `getFeature<T>()`,
-so the literal letter of clause 6.E is satisfied — but this is logged
-as a **latent finding (LF-5, OPEN)** in
-`docs/superpowers/specs/2026-04-30-sp3a-coverage-exemptions.md` and
-must be resolved before the next phase that depends on those
-capabilities (cross-tracker fallback ranking, SP-3a-bridge).
+`UPLOAD` and `USER_PROFILE` were originally declared on the descriptor
+but had no corresponding feature interface in
+`:core:tracker:api/feature/`, so `RuTrackerClient.getFeature<T>()`
+could not return non-null for them — a clause-6.E (Capability Honesty)
+latent finding (LF-5, OPEN at Phase 5 wrap). LF-5 was RESOLVED on
+2026-04-30 by removing the two capabilities from the descriptor. The
+legacy scrapers (`RuTrackerInnerApi.uploadTorrent`, `getProfile`) and
+their wrapping UseCases (`UploadTorrentUseCase`,
+`GetCurrentProfileUseCase`) are still present in this module as
+dormant plumbing; they are NOT consumed by any SP-3a feature ViewModel
+and are NOT advertised through the SDK. Re-enabling either capability
+requires (a) adding the matching feature interface, (b) wiring it into
+`RuTrackerClient`, (c) updating this table — and is appropriately
+scoped to a future SP (SP-3a-bridge or later).
 
 `RSS` is intentionally absent (RuTracker's RSS feed requires a
 per-user secret URL — exposing it from a generic tracker plugin
