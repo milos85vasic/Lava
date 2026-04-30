@@ -1,0 +1,14 @@
+{
+  "task": "0.3",
+  "subject": "TestAuthService — fake has zero test consumers",
+  "real_counterpart": "AuthServiceImpl",
+  "fake_path": "core/testing/src/main/kotlin/lava/testing/service/TestAuthService.kt",
+  "consumers_searched": "grep -rn 'TestAuthService' --include='*.kt' core/ feature/ app/ (excluding declaration site at core/testing/src/main and build/ output)",
+  "consumers_found": 0,
+  "user_decision": "A — defer equivalence audit until first consumer materialises",
+  "outcome": "Equivalence audit deferred to first consumer; ledger entry added.",
+  "ledger_entry": "docs/superpowers/specs/2026-04-30-sp3a-coverage-exemptions.md (entry added by SP-3a-0.3)",
+  "ledger_clause": "6.A (deferred)",
+  "anticipated_first_consumer": "SP-3a Phase 2 RuTracker decoupling tests using AuthenticatableTracker feature interface",
+  "follow_up_required_when_consumer_added": "Write TestAuthServiceEquivalenceTest following the TestEndpointsRepositoryEquivalenceTest pattern; remove this exemption row."
+}

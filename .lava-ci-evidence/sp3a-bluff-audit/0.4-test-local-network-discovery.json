@@ -1,0 +1,40 @@
+{
+  "task": "0.4",
+  "subject": "TestLocalNetworkDiscoveryService — equivalence already covered",
+  "real_counterpart": "lava.data.impl.service.LocalNetworkDiscoveryServiceImpl",
+  "fake_path": "core/testing/src/main/kotlin/lava/testing/service/TestLocalNetworkDiscoveryService.kt",
+  "covering_tests": [
+    {
+      "path": "core/domain/src/test/kotlin/lava/testing/contract/TestInfrastructureContractTest.kt",
+      "scope": "Fake's own behaviour surface — non-suspending emit, multi-emit ordering, cross-scheduler rendezvous",
+      "test_method_count_touching_TestLocalNetworkDiscoveryService": 3,
+      "test_methods": [
+        "emit does not suspend when no collector is registered (line 181)",
+        "multiple emits before collect all reach the collector (line 199)",
+        "cross-scheduler rendezvous completes within 100ms (line 232)"
+      ],
+      "section_lines": "167-212 (plus the cross-scheduler test at 218-253)"
+    },
+    {
+      "path": "core/domain/src/test/kotlin/lava/domain/contract/LocalNetworkDiscoveryContractTest.kt",
+      "scope": "Real impl's `_lava._tcp.local.` / `_lava-api._tcp.local.` suffix scoping via matchesServiceType (SP-3.4 cross-match regression guard)",
+      "test_method_count": 8,
+      "test_methods": [
+        "lava watcher matches lava service type with local suffix",
+        "lava-api watcher matches lava-api service type with local suffix",
+        "lava watcher MUST NOT cross-match lava-api service type",
+        "lava-api watcher MUST NOT cross-match lava service type",
+        "unrelated service types are rejected by both watchers",
+        "lava tcp watcher MUST NOT match lava udp service type",
+        "normalisation lowercases and strips wrapping characters",
+        "(plus assertEquals normalisation case)"
+      ],
+      "total_file_lines": 115
+    }
+  ],
+  "design_note": "The fake does NOT implement _lava._tcp.local. suffix scoping by design. The fake is a post-resolution injection point — consumers feed pre-resolved DiscoveredEndpoint instances into it. Suffix-scoping happens at the NSD-resolution boundary (in matchesServiceType, called from onServiceFound), which the fake intentionally bypasses. The LocalNetworkDiscoveryService interface contract is 'emit DiscoveredEndpoint', not 'filter by service type'. This is therefore not a behavioural divergence to track in the fake.",
+  "user_decision": "A — verify existing test coverage; if covered, defer with ledger entry",
+  "outcome": "Audit resolved by existing tests; no new test created.",
+  "ledger_entry": "docs/superpowers/specs/2026-04-30-sp3a-coverage-exemptions.md (entry added by SP-3a-0.4)",
+  "ledger_clause": "6.A (covered)"
+}
