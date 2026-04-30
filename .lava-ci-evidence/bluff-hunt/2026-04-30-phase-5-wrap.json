@@ -1,0 +1,67 @@
+{
+  "date": "2026-04-30-phase-5-wrap",
+  "protocol": "Seventh Law clause 5 — Recurring Bluff Hunt",
+  "phase_boundary": "Phase 5 wrap (HEAD 858403f)",
+  "samples_total": 5,
+  "samples_method": "find core feature -name '*Test.kt' -not -path '*/build/*' | shuf -n 5 --random-source=/dev/urandom",
+  "targets": [
+    {
+      "test_file": "core/tracker/rutor/src/test/kotlin/lava/tracker/rutor/feature/RuTorCommentsTest.kt",
+      "production_class_under_test": "lava.tracker.rutor.feature.RuTorComments",
+      "mutation_applied": "Replaced URL path '/comment/' with '/comments/' (wrong path) in RuTorComments.getComments — both pageless and paged branches.",
+      "test_outcome_after_mutation": "fail (CLEAN)",
+      "test_failure_message_if_failed": "RuTorCommentsTest > getComments fetches the canonical comment URL... org.junit.ComparisonFailure at RuTorCommentsTest.kt:47; RuTorCommentsTest > getComments with page greater than zero appends ?page=... ComparisonFailure at RuTorCommentsTest.kt:72",
+      "bluff_classification_if_bluff": null,
+      "remediation": "N/A — test correctly asserts on the URL the user's tap triggers (server.takeRequest().path). Falsifiable, primary assertion is on a network surface.",
+      "reverted": true
+    },
+    {
+      "test_file": "core/network/impl/src/test/kotlin/lava/network/impl/SwitchingNetworkApiAuthTest.kt",
+      "production_class_under_test": "lava.tracker.rutracker.mapper.RuTrackerDtoMappers (the reverse mapper used by SwitchingNetworkApi on the SDK path)",
+      "mutation_applied": "In RuTrackerDtoMappers.loginResultToDto, swapped the AuthState.Authenticated success branch to always return AuthResponseDto.WrongCredits(captcha=null) — even with a valid sessionToken.",
+      "test_outcome_after_mutation": "fail (CLEAN)",
+      "test_failure_message_if_failed": "SwitchingNetworkApiAuthTest > login routes via SDK on direct rutracker and reverse mapper produces user-visible AuthResponseDto FAILED at line 166; SwitchingNetworkApiAuthTest > checkAuthorized routes via SDK and returns true when SDK reports Authenticated FAILED at line 114 (the assertion on AuthResponseDto.Success failed).",
+      "bluff_classification_if_bluff": null,
+      "remediation": "N/A — test asserts on user-visible token and user.id/avatarUrl values produced by the reverse mapper round-trip; the legacy api fall-through is also asserted via .calls.isEmpty(). Real LavaTrackerSdk + DefaultTrackerRegistry + FakeTrackerClient build the full graph.",
+      "reverted": true
+    },
+    {
+      "test_file": "core/tracker/api/src/test/kotlin/lava/tracker/api/TrackerCapabilityTest.kt",
+      "production_class_under_test": "lava.tracker.api.TrackerCapability (enum)",
+      "mutation_applied": "Added a 14th enum value MUTATION_EXTRA_VALUE_FOR_BLUFF_HUNT after USER_PROFILE.",
+      "test_outcome_after_mutation": "fail (CLEAN)",
+      "test_failure_message_if_failed": "TrackerCapabilityTest > enum has 13 values matching spec FAILED at line 9; TrackerCapabilityTest > contains all named capabilities FAILED at line 15.",
+      "bluff_classification_if_bluff": null,
+      "remediation": "N/A — test pins the enum cardinality + every name. Any addition or rename breaks it loudly.",
+      "reverted": true
+    },
+    {
+      "test_file": "core/data/src/test/kotlin/lava/data/impl/service/ConnectionTargetTest.kt",
+      "production_class_under_test": "lava.data.impl.service.connectTarget (extension on Endpoint, used by ConnectionServiceImpl.isReachable)",
+      "mutation_applied": "Changed `is Endpoint.GoApi -> host to port` to `is Endpoint.GoApi -> host to HTTPS_PORT` (drop the user-supplied port, hard-code 443).",
+      "test_outcome_after_mutation": "fail (CLEAN)",
+      "test_failure_message_if_failed": "ConnectionTargetTest > GoApi probes declared port FAILED at line 37 (8443 != 443); ConnectionTargetTest > GoApi probes non-default port FAILED at line 48 (9443 != 443).",
+      "bluff_classification_if_bluff": null,
+      "remediation": "N/A — test exercises the same connectTarget extension production isReachable() calls; primary assertion is on the (host,port) pair the TCP probe opens — exactly what the user observes via the green-icon indicator.",
+      "reverted": true
+    },
+    {
+      "test_file": "core/preferences/src/test/kotlin/lava/securestorage/EndpointConverterTest.kt",
+      "production_class_under_test": "lava.securestorage.model.EndpointConverter",
+      "mutation_applied": "In EndpointConverter.toJson, dropped the put(PortKey, port) call for Endpoint.GoApi.",
+      "test_outcome_after_mutation": "fail (CLEAN)",
+      "test_failure_message_if_failed": "EndpointConverterTest > convert GoApi to json includes host and port FAILED at line 78 (org.json.JSONException — port not present); EndpointConverterTest > convert GoApi with non-default port to json preserves port FAILED at line 87; EndpointConverterTest > roundtrip GoApi survives toJson then fromJson with port preserved FAILED at line 123 (default port 8443 instead of 9443 after round-trip).",
+      "bluff_classification_if_bluff": null,
+      "remediation": "N/A — primary assertion on persisted JSON content + the rehydrated Endpoint.GoApi.port field. Round-trip test specifically guards user-visible 'next launch reaches the right port' behavior.",
+      "reverted": true
+    }
+  ],
+  "summary": {
+    "bluffs_found": 0,
+    "bluffs_remediated": 0,
+    "samples_clean": 5,
+    "phase_gate_pass": true,
+    "verdict": "All 5 randomly-sampled tests survived the mutation-and-revert protocol. Each test failed cleanly when its production class was deliberately broken and passed again after revert. No bluff fakes detected at this phase boundary.",
+    "post_revert_verification_run": "./gradlew :core:tracker:api:test :core:tracker:rutor:test :core:data:testDebugUnitTest :core:preferences:testDebugUnitTest :core:network:impl:testDebugUnitTest --tests <each FQN> --no-daemon -> BUILD SUCCESSFUL"
+  }
+}
