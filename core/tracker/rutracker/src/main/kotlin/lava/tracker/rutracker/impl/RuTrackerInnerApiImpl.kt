@@ -26,7 +26,15 @@ import lava.network.dto.search.SearchSortTypeDto
 import lava.tracker.rutracker.api.RuTrackerInnerApi
 import java.net.URLEncoder
 
-internal class RuTrackerInnerApiImpl(private val httpClient: HttpClient) : RuTrackerInnerApi {
+/**
+ * Visibility bumped from `internal` to public in SP-3a Section F (Task 2.29) so
+ * the Hilt module in `:core:tracker:client` can construct a [RuTrackerInnerApi]
+ * without going through [lava.tracker.rutracker.api.RuTrackerApiFactory]
+ * (which today returns the legacy `NetworkApi` facade). Constitutionally a
+ * widening-only ABI change; legacy callers in `:core:network:impl` are
+ * unaffected because they still go through the factory.
+ */
+class RuTrackerInnerApiImpl(private val httpClient: HttpClient) : RuTrackerInnerApi {
 
     override suspend fun mainPage(token: String) = httpClient.get(Index) {
         header(CookieHeader, token)
