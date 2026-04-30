@@ -47,6 +47,16 @@ Until that infrastructure exists:
 
 This is itself an instance of Sixth Law clause 5 ("CI green is necessary, not sufficient"): green ViewModel tests are necessary, not sufficient. Until UI tests run, real-device verification is the only acceptance gate, and `scripts/tag.sh` evidence-recording covers that gap on the lava-api-go side but NOT on the Android client side. SP-3 (Android dual-backend) is the natural place to close this gap.
 
+### Scoped clause for SDK-consuming ViewModels (per root clauses 6.D + 6.E + SP-3a)
+
+Every feature ViewModel that consumes `LavaTrackerSdk` (directly or via a UseCase that wraps it) MUST have a Challenge Test covering the same UI path the user takes when invoking the SDK operation. The Challenge Test:
+
+1. **Lives at `app/src/androidTest/kotlin/lava/app/challenges/C<N>_<Name>Test.kt`** (one Compose UI test per scenario, instrumented). The pre-SP-3a "owed" gap above is now closed for SDK-consuming ViewModels — those features MUST ship with the rendered-UI Challenge alongside the ViewModel change.
+2. **Falsifiability rehearsal recorded in the same PR.** Per Sixth Law clause 2, the author MUST run the test once with the underlying SDK code path deliberately broken (mutation: throw inside the feature impl, return empty from the parser, drop a capability from the descriptor) and confirm the test fails with a clear assertion message. The mutation, the failure output, and the revert MUST be captured in `.lava-ci-evidence/sp3a-challenges/C<N>-<sha>.json`.
+3. **Operator real-device attestation required for tagging.** Per Sixth Law clause 5 + Seventh Law clause 3, the operator MUST execute the Challenge Test scenario on a real Android device against the real tracker (RuTracker or RuTor) before the next release tag is cut, and record the outcome in `.lava-ci-evidence/<TAG>/real-device-verification.md`. `scripts/tag.sh` will refuse to tag without this evidence (Phase 5 gate).
+
+The eight Challenge Tests written in SP-3a Phase 5 (C1 through C8) are the founding examples — every future SDK-consuming ViewModel MUST follow the same pattern.
+
 ## Feature Module Pattern
 
 Each feature follows Orbit MVI:
