@@ -1,0 +1,21 @@
+{
+  "challenge_id": "C6",
+  "name": "Download .torrent file",
+  "test_class": "lava.app.challenges.C6_DownloadTorrentFileTest",
+  "test_file": "app/src/androidTest/kotlin/lava/app/challenges/C6_DownloadTorrentFileTest.kt",
+  "spec_reference": "Task 5.14",
+  "operator_attestation_required": true,
+  "status": "PENDING_OPERATOR",
+  "falsifiability_protocol": {
+    "mutation_target": "core/tracker/rutor/src/main/kotlin/lava/tracker/rutor/RuTorDownload.kt",
+    "mutation_step": "Short-circuit downloadTorrentFile() to return ByteArray(0).",
+    "expected_failure": "Downloads dir contains a 0-byte file; assertion 'torrentFile.length() > 100' fires; or the 'd' bencoded marker assertion fails.",
+    "expected_assertion_message_substring": "Torrent file too small: 0 bytes",
+    "revert_step": "Restore the original downloadTorrentFile body."
+  },
+  "operator_run_instructions": [
+    "./gradlew :app:connectedDebugAndroidTest --tests \"lava.app.challenges.C6_DownloadTorrentFileTest\"",
+    "Capture screenshot of TopicDetail download success indicator + adb pulled torrent file. Hash it (sha256) and embed in evidence file.",
+    "Perform falsifiability mutation, re-run, capture verbatim failure assertion, revert."
+  ]
+}
