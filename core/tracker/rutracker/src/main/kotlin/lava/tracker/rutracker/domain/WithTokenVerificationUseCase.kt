@@ -2,7 +2,7 @@ package lava.tracker.rutracker.domain
 
 import lava.tracker.rutracker.model.Unauthorized
 
-internal class WithTokenVerificationUseCase(
+class WithTokenVerificationUseCase(
     private val verifyTokenUseCase: VerifyTokenUseCase,
 ) {
     suspend operator fun <T> invoke(

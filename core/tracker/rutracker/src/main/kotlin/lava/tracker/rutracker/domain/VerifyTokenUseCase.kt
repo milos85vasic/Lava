@@ -1,6 +1,6 @@
 package lava.tracker.rutracker.domain
 
-internal object VerifyTokenUseCase {
+object VerifyTokenUseCase {
     operator fun invoke(token: String): Boolean {
         return token.isNotEmpty()
     }

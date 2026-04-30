@@ -3,7 +3,7 @@ package lava.tracker.rutracker.domain
 import lava.tracker.rutracker.model.Unauthorized
 import java.util.regex.Pattern
 
-internal object WithFormTokenUseCase {
+object WithFormTokenUseCase {
 
     suspend operator fun <T> invoke(
         html: String,

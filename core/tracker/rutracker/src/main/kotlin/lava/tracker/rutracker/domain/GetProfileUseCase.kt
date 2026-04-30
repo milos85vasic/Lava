@@ -4,7 +4,7 @@ import lava.network.dto.user.ProfileDto
 import lava.tracker.rutracker.api.RuTrackerInnerApi
 import org.jsoup.Jsoup
 
-internal class GetProfileUseCase(private val api: RuTrackerInnerApi) {
+class GetProfileUseCase(private val api: RuTrackerInnerApi) {
 
     suspend operator fun invoke(id: String): ProfileDto {
         return parseProfile(api.profile(id))

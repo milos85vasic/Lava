@@ -6,7 +6,7 @@ import lava.network.dto.topic.CommentsPageDto
 import lava.network.dto.topic.PostDto
 import org.jsoup.Jsoup
 
-internal object ParseCommentsPageUseCase {
+object ParseCommentsPageUseCase {
     operator fun invoke(html: String): CommentsPageDto {
         val doc = Jsoup.parse(html)
         val id = doc.select("#topic-title").queryParam("t")

@@ -4,7 +4,7 @@ import lava.network.dto.user.ProfileDto
 import lava.tracker.rutracker.api.RuTrackerInnerApi
 import org.jsoup.Jsoup
 
-internal class GetCurrentProfileUseCase(
+class GetCurrentProfileUseCase(
     private val api: RuTrackerInnerApi,
     private val getProfileUseCase: GetProfileUseCase,
 ) {

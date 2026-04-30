@@ -5,7 +5,7 @@ import lava.network.dto.search.SearchPeriodDto
 import lava.network.dto.search.SearchSortOrderDto
 import lava.network.dto.search.SearchSortTypeDto
 
-internal interface RuTrackerInnerApi {
+interface RuTrackerInnerApi {
     suspend fun mainPage(token: String): String
     suspend fun login(
         username: String,

@@ -6,7 +6,7 @@ import lava.network.dto.topic.TorrentDescriptionDto
 import lava.network.dto.topic.TorrentDto
 import org.jsoup.Jsoup
 
-internal object ParseTorrentUseCase {
+object ParseTorrentUseCase {
     operator fun invoke(html: String): TorrentDto {
         val doc = Jsoup.parse(html)
         val id = doc.select("#topic-title").queryParam("t")
