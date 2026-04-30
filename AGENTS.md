@@ -71,6 +71,35 @@ Lava/
 - `core:*` — Shared libraries. Pure Kotlin modules (`models`, `common`, `auth/api`, `network/api`, `tracker:rutracker`, `tracker:api`, `work/api`) have **no Android dependency**.
 - `feature:*` — Screen-level modules. Each feature typically contains a ViewModel (Orbit MVI), Compose screens, and a navigation contract.
 
+### SDK module map (added by SP-3a)
+
+The multi-tracker SDK introduced by SP-3a sits across two locations:
+
+**Local (Lava-domain) Kotlin modules under `core/tracker/`:**
+
+| Module | Purpose |
+|---|---|
+| `:core:tracker:api` | Lava-domain feature interfaces (`Searchable`, `Browsable`, `Topic`, `Comments`, `Favorites`, `Authenticatable`, `Downloadable`), `TrackerCapability` enum, common data model (`TorrentItem`, `SearchRequest`, `SearchResult`, etc.). Pure-Kotlin, JVM-only. |
+| `:core:tracker:registry` | Lava-domain wrapper around the generic `lava.sdk:registry` primitive in the `Tracker-SDK` submodule. Discovers and exposes `TrackerClient` instances. |
+| `:core:tracker:mirror` | Lava-domain wrapper exposing `MirrorConfigStore` typealias and bridging to `lava.sdk:mirror`. |
+| `:core:tracker:client` | `LavaTrackerSdk` orchestrator — switches active tracker, runs cross-tracker fallback, persists user mirrors and mirror health. Hilt-injected entry point for feature ViewModels. |
+| `:core:tracker:rutracker` | RuTracker-specific implementation (decoupled in SP-3a Phase 2 from the legacy `core/network/rutracker` location). |
+| `:core:tracker:rutor` | RuTor-specific implementation (added in SP-3a Phase 3). Anonymous-by-default, capabilities `SEARCH + TOPIC + DOWNLOAD`. |
+| `:core:tracker:testing` | Test fakes (`FakeTrackerClient`, fixtures, builders) shared across tracker modules. |
+
+**Generic (vasic-digital) primitives mounted at `Submodules/Tracker-SDK/`:**
+
+| Submodule path | Purpose |
+|---|---|
+| `Submodules/Tracker-SDK/api` | Generic feature-bearing primitives (`MirrorUrl`, `TrackerDescriptor`-shape, `Mirror` health states). Lava-agnostic. |
+| `Submodules/Tracker-SDK/registry` | Generic in-memory registry of tracker clients. |
+| `Submodules/Tracker-SDK/mirror` | Generic mirror-config store interface (`MirrorConfigStore`). |
+| `Submodules/Tracker-SDK/testing` | Generic test scaffolding (clock, dispatcher, fixture loader). |
+
+The submodule is **frozen by default** per the Decoupled Reusable Architecture rule (root CLAUDE.md). Updating the pin is a deliberate PR — no `git submodule update --remote` in any release script. The submodule is mirrored to GitHub + GitLab (2-upstream scope per 2026-04-30 spec deviation; original 4-upstream policy reduced for SDK velocity).
+
+For a step-by-step recipe to add a third tracker, see [`docs/sdk-developer-guide.md`](docs/sdk-developer-guide.md). For the Challenge Test pack covering the SDK end-to-end on real devices, see `app/src/androidTest/kotlin/lava/app/challenges/`.
+
 ## Build System & Convention Plugins
 
 All modules apply one or more custom convention plugins defined in `buildSrc`. The plugins are registered in `buildSrc/build.gradle.kts` and applied by ID.
