@@ -1,0 +1,7 @@
+{
+  "challenge_id": "C7",
+  "status": "PENDING_OPERATOR",
+  "stub": true,
+  "stub_reason": "SP-3a Phase 5 implementer cannot run Challenge Tests on a physical device. Operator MUST execute Task 5.22 checklist and overwrite this file with status: VERIFIED + attestation fields.",
+  "see": ".lava-ci-evidence/sp3a-challenges/C7-pending.json"
+}

@@ -1,0 +1,13 @@
+{
+  "status": "PENDING_OPERATOR",
+  "stub": true,
+  "note": "Operator MUST run ./scripts/ci.sh --full against the commit being tagged and overwrite this file with the actual evidence (mode: --full, sha: <git rev-parse HEAD at run time>, all_gates: passed, failures: []).",
+  "expected_schema": {
+    "mode": "--full",
+    "sha": "<commit sha>",
+    "all_gates": "passed | failed",
+    "failures": "<list of failed gate names>",
+    "ran_at": "<iso8601>",
+    "host": "<machine fqdn>"
+  }
+}
