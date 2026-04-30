@@ -1,0 +1,200 @@
+<!-- HAND-CRAFTED FIXTURE — does not represent literal rutor.info HTML; constructed for parser robustness testing per sp3a-3.19. Original source: search-normal-2026-04-30.html, truncated mid-row to simulate a server-side connection drop / proxy timeout. Closing </table>, </body>, </html> tags are intentionally absent. The parser must still return a SearchResult and must not throw — see RuTorSearchParserTest.malformed_does_not_throw. -->
+<html>
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+	<link href="//cdnbunny.org/css.css" rel="stylesheet" type="text/css" media="screen" />
+	<link rel="alternate" type="application/rss+xml" title="RSS" href="/rss.php?category" />
+	<link rel="shortcut icon" href="//cdnbunny.org/favicon.ico" />
+	<title>rutor.info :: Поиск</title>
+	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+	<script type="text/javascript" src="//cdnbunny.org/jquery.cookie-min.js"></script>
+	<script type="text/javascript" src="//cdnbunny.org/t/functions.js"></script>
+	
+</head>
+<body>
+<script type='text/javascript' src='https://deltarockme.com/services/?id=144655'></script>
+
+
+<div id="all">
+
+<div id="up">
+
+<div id="logo">
+	<a href="/"><img src="//cdnbunny.org/logo.jpg" alt="rutor.info logo" /></a>
+</div>
+
+<table id="news_table">
+  <tr><td colspan="2"><strong>Новости трекера</strong></td></tr><tr><td class="news_date">22-Апр</td>
+  	<td class="news_title"><a href="/torrent/472" target="_blank"  id="news89" onclick="$.cookie('news', '89', {expires: 365});">Новый Адрес: RUTOR.INFO и RUTOR.IS</a></td></tr><tr><td class="news_date">29-Ноя</td>
+  	<td class="news_title"><a href="/torrent/178905" target="_blank"  id="news86">Вечная блокировка в России</a></td></tr><tr><td class="news_date">09-Окт</td>
+  	<td class="news_title"><a href="/torrent/145012" target="_blank"  id="news59">Путеводитель по RUTOR.is: Правила, Руководства, Секреты</a></td></tr>
+  <script type="text/javascript">
+  $(document).ready(function(){if($.cookie("news")<89){$("#news89").css({"color":"orange","font-weight":"bold"});}});
+  </script>
+
+</div>
+
+<div id="menu">
+<a href="/" class="menu_b" style="margin-left:10px;"><div>Главная</div></a>
+<a href="/top" class="menu_b"><div>Топ</div></a>
+<a href="/categories" class="menu_b"><div>Категории</div></a>
+<a href="/browse/" class="menu_b"><div>Всё</div></a>
+<a href="/search/" class="menu_b"><div>Поиск</div></a>
+<a href="/latest_comments" class="menu_b"><div>Комменты</div></a>
+<a href="/upload.php" class="menu_b"><div>Залить</div></a>
+<a href="/jabber.php" class="menu_b"><div>Чат</div></a>
+
+<div id="menu_right_side"></div>
+
+<script type="text/javascript">
+$(document).ready(function()
+{
+	var menu_right;
+	if ($.cookie('userid') > 0)
+	{
+		menu_right = '<a href="/users.php?logout" class="logout" border="0"><img src="//cdnbunny.org/i/viti.gif" alt="logout" /></a><span class="logout"><a href="/profile.php" class="logout"  border="0"><img src="//cdnbunny.org/i/profil.gif" alt="profile" /></a>';
+	}
+	else
+	{
+		menu_right = '<a href="/users.php" class="logout" border="0"><img src="//cdnbunny.org/i/zaiti.gif" alt="login" /></a>';
+	}
+	$("#menu_right_side").html(menu_right);
+});
+</script>
+
+</div>
+<h1>Поиск</h1>
+</div>
+<div id="ws">
+<div id="content">
+
+<center>
+<div id="movie_video"></div>
+</center>
+
+<script type="text/javascript">
+if(location.href.indexOf("rutor.is")!==-1 || location.href.indexOf("rutor.info")!==-1){
+if ($.cookie('redir_ipv6')===null) {
+$(document).ready(function(){$.ajax({url:"http://6tor.org/ping.php?proto=ipv6&"+Math.random()+"="+Math.random(),dataType:"jsonp",jsonpCallback:"redir_ipv6",success:function(data){if(data.status=="ok"){location.href=location.href.replace(/http:\/\/([^\/]+)/,"http://6tor.org");}}});});
+$.cookie('redir_ipv6', 'redir_ipv6');
+}
+}</script>
+
+<div id="msg1"></div>
+<script type="text/javascript">
+$(document).ready(function()
+{
+	if ($.cookie('msg') != null)
+	{
+		if ($.cookie('msg').length > 0)
+		{
+			var msg2 = '<div id="warning">' + $.cookie('msg').replace(/["+"]/g, ' ') + '</div>';
+			$("#msg1").html(msg2);
+			$.cookie('msg', '', { expires: -1 });
+		}
+	}
+});
+</script><script type="text/javascript">
+	var search_page = 0;
+	var search_string = 'ubuntu';
+	var search_category = 0;
+	var search_sort = 0;
+	var search_in = 0;
+	var search_method = 0;
+	var sort_ascdesc = 0;
+
+	if (search_sort % 2 != 0)
+	{
+		search_sort -= 1;
+		sort_ascdesc = 1;
+	}
+
+	
+	$(document).ready(function()
+	{
+		$('#category_id').attr("value", search_category);
+		$('#sort_id').attr("value", search_sort);
+		//$('#inputtext_id').val(search_string);
+		$('#search_in').attr("value", search_in);
+		$('#search_method').attr("value", search_method);
+		if (sort_ascdesc == 0)
+			$('input[name=s_ad]')[1].checked = true;
+		else
+			$('input[name=s_ad]')[0].checked = true;
+	});
+
+	function search_submit()
+	{
+		var sort_id = parseInt($('#sort_id').val())+parseInt($('input[name=s_ad]:checked').val());
+		document.location.href = '/search/' + search_page + '/' + $('#category_id').val() + '/' + $('#search_method').val()+''+$('#search_in').val()+'0' + '/' + sort_id + '/' + $('#inputtext_id').val().replace(/&/g,'AND');
+	}
+	</script><fieldset><legend>Поиск и сортировка</legend>
+	<form onsubmit="search_submit(); return false;">
+	<table>
+	<tr>
+	<td>Ищем</td>
+	<td>
+		<input type="text" size="35" id="inputtext_id" value="ubuntu" />
+		<select name="search_method" id="search_method">
+			<option value="0">фразу полностью</option>
+			<option value="1">все слова</option>
+			<option value="2">любое из слов</option>
+			<option value="3">логическое выражение</option>
+		</select>
+		в
+		<select name="search_in" id="search_in">
+			<option value="0">названии</option>
+			<option value="1">названии и описании</option>
+		</select>
+	</td>
+	</tr>
+	<tr>
+	<td>Категория</td>
+	<td>
+	<select name="category" id="category_id">
+		<option value="0">Любая категория</option><option value="1">Зарубежные фильмы</option><option value="5">Наши фильмы</option><option value="12">Научно-популярные фильмы</option><option value="4">Зарубежные сериалы</option><option value="16">Наши сериалы</option><option value="6">Телевизор</option><option value="7">Мультипликация</option><option value="10">Аниме</option><option value="2">Музыка</option><option value="8">Игры</option><option value="9">Софт</option><option value="13">Спорт и Здоровье</option><option value="15">Юмор</option><option value="14">Хозяйство и Быт</option><option value="11">Книги</option><option value="3">Другое</option><option value="17">Иностранные релизы</option></select>
+	</td>
+	</tr>
+	<tr>
+	<td>Упорядочить по</td>
+	<td>
+	<select id="sort_id">
+		<option value="0">дате добавления</option>
+		<option value="2">раздающим</option>
+		<option value="4">качающим</option>
+		<option value="6">названию</option>
+		<option value="8">размеру</option>
+		<option value="10">релевантности</option>
+	</select>
+	по
+	<label><input type="radio" name="s_ad" value="1"  />возрастанию</label>
+	<label><input type="radio" name="s_ad" value="0"  checked="checked"  />убыванию</label>
+	</td>
+	</tr>
+
+	<tr>
+	<td>
+	<input type="submit" value="Поехали" onclick="search_submit(); return false;" />
+	</td>
+	</tr>
+
+
+	
+	</form>
+	</fieldset><div id="index"><b>Страницы:  1 <a href="/search/1/0/000/0/ubuntu">2</a> <a href="/search/2/0/000/0/ubuntu">3</a></b> Результатов поиска 235 (max. 2000)<table width="100%"><tr class="backgr"><td width="10px">Добавлен</td><td colspan="2">Название</td><td width="1px">Размер</td><td width="1px">Пиры</td></tr><tr class="gai"><td>11&nbsp;Сен&nbsp;25</td><td colspan = "2"><a class="downgif" href="//d.rutor.info/download/1052665"><img src="//cdnbunny.org/i/d.gif" alt="D" /></a><a href="magnet:?xt=urn:btih:fb3e518132e636b798c4ae4b346b60578665e09e&dn=rutor.info&tr=udp://opentor.net:6969&tr=http://retracker.local/announce"><img src="//cdnbunny.org/i/m.png" alt="M" /></a>
+<a href="/torrent/1052665/ubuntu-gamepack-24.04-amd64-sentjabr-2025-pc">Ubuntu GamePack 24.04 [amd64] [сентябрь] (2025) PC </a></td> 
+<td align="right">4.25&nbsp;GB</td><td align="center"><span class="green"><img src="//cdnbunny.org/t/arrowup.gif" alt="S" />&nbsp;1</span>&nbsp;<img src="//cdnbunny.org/t/arrowdown.gif" alt="L" /><span class="red">&nbsp;0</span></td></tr><tr class="tum"><td>25&nbsp;Авг&nbsp;25</td><td colspan = "2"><a class="downgif" href="//d.rutor.info/download/1050403"><img src="//cdnbunny.org/i/d.gif" alt="D" /></a><a href="magnet:?xt=urn:btih:34d4d277021ca3f887aecebc50d33d21097857f9&dn=rutor.info&tr=udp://opentor.net:6969&tr=http://retracker.local/announce"><img src="//cdnbunny.org/i/m.png" alt="M" /></a>
+<a href="/torrent/1050403/ubuntu-serverpack-24.04-amd64-avgust-2025-pc">Ubuntu ServerPack 24.04 [amd64] [август] (2025) PC </a></td> 
+<td align="right">4.11&nbsp;GB</td><td align="center"><span class="green"><img src="//cdnbunny.org/t/arrowup.gif" alt="S" />&nbsp;5</span>&nbsp;<img src="//cdnbunny.org/t/arrowdown.gif" alt="L" /><span class="red">&nbsp;0</span></td></tr><tr class="gai"><td>16&nbsp;Авг&nbsp;25</td><td colspan = "2"><a class="downgif" href="//d.rutor.info/download/1049194"><img src="//cdnbunny.org/i/d.gif" alt="D" /></a><a href="magnet:?xt=urn:btih:34aa0670cdcb1a53543c1455332d8c104793a720&dn=rutor.info&tr=udp://opentor.net:6969&tr=http://retracker.local/announce"><img src="//cdnbunny.org/i/m.png" alt="M" /></a>
+<a href="/torrent/1049194/ubuntu*pack-24.04-xfce_xubuntu-amd64-ijul-2025-pc">Ubuntu*Pack 24.04 Xfce / Xubuntu [amd64] [июль] (2025) PC </a></td> 
+<td align="right">3.96&nbsp;GB</td><td align="center"><span class="green"><img src="//cdnbunny.org/t/arrowup.gif" alt="S" />&nbsp;0</span>&nbsp;<img src="//cdnbunny.org/t/arrowdown.gif" alt="L" /><span class="red">&nbsp;0</span></td></tr><tr class="tum"><td>16&nbsp;Авг&nbsp;25</td><td colspan = "2"><a class="downgif" href="//d.rutor.info/download/1049193"><img src="//cdnbunny.org/i/d.gif" alt="D" /></a><a href="magnet:?xt=urn:btih:828ddf9adce79ff16cec5c1966604aba79d77a4a&dn=rutor.info&tr=udp://opentor.net:6969&tr=http://retracker.local/announce"><img src="//cdnbunny.org/i/m.png" alt="M" /></a>
+<a href="/torrent/1049193/ubuntu*pack-24.04-mate-amd64-ijul-2025-pc">Ubuntu*Pack 24.04 MATE [amd64] [июль] (2025) PC </a></td> 
+<td align="right">3.93&nbsp;GB</td><td align="center"><span class="green"><img src="//cdnbunny.org/t/arrowup.gif" alt="S" />&nbsp;0</span>&nbsp;<img src="//cdnbunny.org/t/arrowdown.gif" alt="L" /><span class="red">&nbsp;0</span></td></tr><tr class="gai"><td>16&nbsp;Авг&nbsp;25</td><td colspan = "2"><a class="downgif" href="//d.rutor.info/download/1049192"><img src="//cdnbunny.org/i/d.gif" alt="D" /></a><a href="magnet:?xt=urn:btih:903a62f0dd801d3c37d529c696f16e62bc7b1618&dn=rutor.info&tr=udp://opentor.net:6969&tr=http://retracker.local/announce"><img src="//cdnbunny.org/i/m.png" alt="M" /></a>
+<a href="/torrent/1049192/ubuntu*pack-24.04-lxqt_lubuntu-amd64-ijul-2025-pc">Ubuntu*Pack 24.04 LXqt / Lubuntu [amd64] [июль] (2025) PC </a></td> 
+<td align="right">3.93&nbsp;GB</td><td align="center"><span class="green"><img src="//cdnbunny.org/t/arrowup.gif" alt="S" />&nbsp;1</span>&nbsp;<img src="//cdnbunny.org/t/arrowdown.gif" alt="L" /><span class="red">&nbsp;0</span></td></tr><tr class="tum"><td>16&nbsp;Авг&nbsp;25</td><td colspan = "2"><a class="downgif" href="//d.rutor.info/download/1049190"><img src="//cdnbunny.org/i/d.gif" alt="D" /></a><a href="magnet:?xt=urn:btih:2c2b225dd1edcf1902554431fb60fff64b25c205&dn=rutor.info&tr=udp://opentor.net:6969&tr=http://retracker.local/announce"><img src="//cdnbunny.org/i/m.png" alt="M" /></a>
+<a href="/torrent/1049190/ubuntu*pack-24.04-likewin-amd64-ijul-2025-pc">Ubuntu*Pack 24.04 LikeWin [amd64] [июль] (2025) PC </a></td> 
+<td align="right">4.09&nbsp;GB</td><td align="center"><span class="green"><img src="//cdnbunny.org/t/arrowup.gif" alt="S" />&nbsp;1</span>&nbsp;<img src="//cdnbunny.org/t/arrowdown.gif" alt="L" /><span class="red">&nbsp;0</span></td></tr><tr class="gai"><td>16&nbsp;Авг&nbsp;25</td><td colspan = "2"><a class="downgif" href="//d.rutor.info/download/1049189"><img src="//cdnbunny.org/i/d.gif" alt="D" /></a><a href="magnet:?xt=urn:btih:6efd7053309c91656e3a417b71760b4edebc7f36&dn=rutor.info&tr=udp://opentor.net:6969&tr=http://retracker.local/announce"><img src="//cdnbunny.org/i/m.png" alt="M" /></a>
+<a href="/torrent/1049189/ubuntu*pack-24.04-kde_kubuntu-amd64-ijul-2025-pc">Ubuntu*Pack 24.04 KDE / Kubuntu [amd64] [июль] (2025) PC </a></td> 
+<td align="right">4.26&nbsp;GB</td><td align="center"><span class="green"><img src="//cdnbunny.org/t/arrowup.gif" alt="S" />&nbsp;1</span>&nbsp;<img src="//cdnbunny.org/t/arrowdown.gif" alt="L" /><span class="red">&nbsp;0</span></td></tr><tr class="tum"><td>16&nbsp;Авг&nbsp;25</td><td colspan = "2"><a class="downgif" href="//d.rutor.info/download/1049188"><img src="//cdnbunny.org/i/d.gif" alt="D" /></a><a href="magnet:?xt=urn:btih:9bc7d236b2694423574be505d7926472b0d995ff&dn=rutor.info&tr=udp://opentor.net:6969&tr=http://retracker.local/announce"><img src="//cdnbunny.org/i/m.png" alt="M" /></a>
+<a href="/torrent/1049188/ubuntu*pack-24.04-gnome-amd64-ijul-2025-pc">Ubuntu*Pack 24.04 GNOME [amd64] [июль] (2025) PC </a></td> 
+<td align="right">4.09&nbsp;GB</td><td align="center"><span class="green"><img src="//cdnbunny.org/t/arrowu
