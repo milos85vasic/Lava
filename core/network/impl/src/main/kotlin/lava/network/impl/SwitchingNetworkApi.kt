@@ -7,6 +7,37 @@ import lava.network.dto.search.SearchSortOrderDto
 import lava.network.dto.search.SearchSortTypeDto
 import javax.inject.Inject
 
+// SP-3a-2.32: When the active endpoint is public rutracker.org (i.e. an
+// Endpoint.RutrackerEndpoint whose host is NOT a LAN host), every method
+// routes via LavaTrackerSdk + RuTrackerDtoMappers reverse mappers — that's
+// the new SDK-based path. Any other endpoint (LAN proxy, GoApi, LAN Mirror)
+// falls through to the existing NetworkApiRepository wiring untouched.
+//
+// Method routing decided in Task 2.32:
+//   checkAuthorized -> sdk.checkAuth() -> AuthState.Authenticated boolean
+//   login           -> sdk.login(LoginRequest) -> mappers.loginResultToDto
+//   getFavorites    -> sdk.getFavorites() -> mappers.favoritesToDto
+//   addFavorite     -> sdk.addFavorite(id): Boolean
+//   removeFavorite  -> sdk.removeFavorite(id): Boolean
+//   getForum        -> sdk.getForumTree() -> mappers.forumTreeToDto
+//   getCategory     -> sdk.browse(category, page) -> mappers.browseResultToDto
+//   getSearchPage   -> sdk.search(SearchRequest, page) -> mappers.searchResultToDto
+//   getTopic        -> sdk.getTopic(id) -> mappers.topicDetailToDto, cast to TorrentDto
+//   getTopicPage    -> sdk.getTopicPage(id, page) -> mappers.topicPageToDto
+//   getCommentsPage -> sdk.getCommentsPage(id, page) -> mappers.commentsPageToDto
+//   addComment      -> sdk.addComment(topicId, message): Boolean
+//   getTorrent      -> sdk.getTopic(id) -> mappers.topicDetailToDto, cast to TorrentDto
+//   download        -> sdk.downloadTorrent(id): ByteArray? -> wrapped in synthesised FileDto
+//
+// The token parameter on the legacy methods is ignored on the SDK path —
+// the SDK obtains tokens via TokenProvider internally (Pre-authorized
+// adaptation D, Section G). Captcha solution arguments on `login` are
+// remapped into [LoginRequest.captcha] before crossing the SDK seam.
+//
+// `getActiveClient()` was NOT bumped to public — instead [LavaTrackerSdk]
+// gained 11 new method wrappers in Task 2.32 covering every NetworkApi
+// operation (Pre-authorized adaptation B). See LavaTrackerSdk KDoc.
+
 class SwitchingNetworkApi @Inject constructor(
     private val networkApiRepository: NetworkApiRepository,
 ) : NetworkApi {
