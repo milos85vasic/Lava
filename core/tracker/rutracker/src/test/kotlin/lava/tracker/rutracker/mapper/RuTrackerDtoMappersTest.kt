@@ -5,10 +5,18 @@ import lava.network.dto.forum.CategoryPageDto
 import lava.network.dto.forum.ForumDto
 import lava.network.dto.search.SearchPageDto
 import lava.network.dto.topic.AuthorDto
+import lava.network.dto.topic.CommentsPageDto
+import lava.network.dto.topic.PostDto
+import lava.network.dto.topic.Text
 import lava.network.dto.topic.TopicDto
+import lava.network.dto.topic.TopicPageCommentsDto
+import lava.network.dto.topic.TopicPageDto
+import lava.network.dto.topic.TorrentDataDto
+import lava.network.dto.topic.TorrentDescriptionDto
 import lava.network.dto.topic.TorrentDto
 import lava.network.dto.topic.TorrentStatusDto
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Test
 
 /**
@@ -40,6 +48,8 @@ class RuTrackerDtoMappersTest {
     private val forward = SearchPageMapper()
     private val browseForward = CategoryPageMapper()
     private val forumForward = ForumDtoMapper()
+    private val topicForward = TopicMapper()
+    private val commentsForward = CommentsMapper()
 
     @Test
     fun `searchResultToDto round-trips a populated SearchPageDto`() {
@@ -203,5 +213,128 @@ class RuTrackerDtoMappersTest {
         assertEquals("HD Movies", secondForward.rootCategories[0].children[0].name)
         // Parent IDs must propagate down the tree (Section D guarantee).
         assertEquals("10", secondForward.rootCategories[0].children[0].parentId)
+    }
+
+    @Test
+    fun `topicDetailToDto round-trips a Torrent branch with description`() {
+        val originalDto: TorrentDto = TorrentDto(
+            id = "9000",
+            title = "Some.Movie.2024.1080p.BluRay",
+            author = AuthorDto(id = "u1", name = "uploader"),
+            category = CategoryDto(id = "44", name = "Movies"),
+            tags = "[Movies]",
+            status = TorrentStatusDto.Approved,
+            date = 1_700_000_000L,
+            size = "8.0 GB",
+            seeds = 555,
+            leeches = 12,
+            magnetLink = "magnet:?xt=urn:btih:abcd",
+            description = TorrentDescriptionDto(
+                children = listOf(Text("Plot summary")),
+            ),
+        )
+
+        val firstForward = topicForward.toTopicDetail(originalDto)
+        val reversedDto = mappers.topicDetailToDto(firstForward)
+        val secondForward = topicForward.toTopicDetail(reversedDto)
+
+        assertEquals(
+            "forward(reverse(forward(dto))) must equal forward(dto) for TopicDetail",
+            firstForward,
+            secondForward,
+        )
+        // Primary user-visible assertion: magnet survives every leg.
+        assertEquals(
+            "magnet:?xt=urn:btih:abcd",
+            secondForward.torrent.magnetUri,
+        )
+        // Description text round-trips even though the rich AST is lossy.
+        assertNotNull(secondForward.description)
+        assertEquals("Plot summary", secondForward.description)
+    }
+
+    @Test
+    fun `topicPageToDto round-trips a populated topic page`() {
+        val originalDto = TopicPageDto(
+            id = "12",
+            title = "Topic Page",
+            author = AuthorDto(id = "u1", name = "u1"),
+            category = CategoryDto(id = "33", name = "OS"),
+            torrentData = TorrentDataDto(
+                tags = "[ISO]",
+                status = TorrentStatusDto.Approved,
+                date = "2024-04-01T12:00:00Z",
+                size = "4.5 GB",
+                seeds = 100,
+                leeches = 5,
+                magnetLink = "magnet:?xt=urn:btih:beef",
+            ),
+            commentsPage = TopicPageCommentsDto(
+                page = 4,
+                pages = 9,
+                posts = emptyList(),
+            ),
+        )
+
+        val firstForward = topicForward.toTopicPage(originalDto, currentPage = 4)
+        val reversedDto = mappers.topicPageToDto(firstForward)
+        val secondForward = topicForward.toTopicPage(reversedDto, currentPage = 4)
+
+        assertEquals(
+            "forward(reverse(forward(dto))) must equal forward(dto) for TopicPage",
+            firstForward,
+            secondForward,
+        )
+        // Primary user-visible assertions: pagination + magnet + size.
+        assertEquals(9, secondForward.totalPages)
+        assertEquals(4, secondForward.currentPage)
+        assertEquals(
+            "magnet:?xt=urn:btih:beef",
+            secondForward.topic.torrent.magnetUri,
+        )
+        assertEquals(
+            "4.5 GB",
+            secondForward.topic.torrent.metadata["rutracker.size_text"],
+        )
+    }
+
+    @Test
+    fun `commentsPageToDto round-trips a CommentsPage with multiple posts`() {
+        val originalDto = CommentsPageDto(
+            id = "topic-77",
+            title = "Comments thread",
+            page = 2,
+            pages = 5,
+            posts = listOf(
+                PostDto(
+                    id = "p1",
+                    author = AuthorDto(id = "uA", name = "alice"),
+                    date = "2024-04-01T12:00:00Z",
+                    children = listOf(Text("Hello world")),
+                ),
+                PostDto(
+                    id = "p2",
+                    author = AuthorDto(id = "uB", name = "bob"),
+                    date = "2024-04-02T13:00:00Z",
+                    children = listOf(Text("Reply text")),
+                ),
+            ),
+        )
+
+        val firstForward = commentsForward.toCommentsPage(originalDto, currentPage = 2)
+        val reversedDto = mappers.commentsPageToDto(firstForward)
+        val secondForward = commentsForward.toCommentsPage(reversedDto, currentPage = 2)
+
+        assertEquals(
+            "forward(reverse(forward(dto))) must equal forward(dto) for CommentsPage",
+            firstForward,
+            secondForward,
+        )
+        // Primary user-visible assertion: comment bodies survive the trip.
+        assertEquals(2, secondForward.items.size)
+        assertEquals("Hello world", secondForward.items[0].body)
+        assertEquals("alice", secondForward.items[0].author)
+        assertEquals("Reply text", secondForward.items[1].body)
+        assertEquals("bob", secondForward.items[1].author)
     }
 }

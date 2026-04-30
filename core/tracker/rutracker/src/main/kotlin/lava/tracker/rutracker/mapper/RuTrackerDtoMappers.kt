@@ -8,12 +8,18 @@ import lava.network.dto.search.SearchPageDto
 import lava.network.dto.topic.AuthorDto
 import lava.network.dto.topic.CommentsPageDto
 import lava.network.dto.topic.ForumTopicDto
+import lava.network.dto.topic.PostDto
+import lava.network.dto.topic.Text
 import lava.network.dto.topic.TopicDto
+import lava.network.dto.topic.TopicPageCommentsDto
 import lava.network.dto.topic.TopicPageDto
+import lava.network.dto.topic.TorrentDataDto
+import lava.network.dto.topic.TorrentDescriptionDto
 import lava.network.dto.topic.TorrentDto
 import lava.network.dto.topic.TorrentStatusDto
 import lava.network.dto.user.FavoritesDto
 import lava.tracker.api.model.BrowseResult
+import lava.tracker.api.model.Comment
 import lava.tracker.api.model.CommentsPage
 import lava.tracker.api.model.ForumCategory
 import lava.tracker.api.model.ForumTree
@@ -79,11 +85,111 @@ class RuTrackerDtoMappers @Inject constructor() {
     fun forumTreeToDto(tree: ForumTree): ForumDto =
         ForumDto(children = tree.rootCategories.map { it.toCategoryDto() })
 
-    fun topicDetailToDto(d: TopicDetail): ForumTopicDto = TODO("Task 2.26")
+    /**
+     * Inverse of [TopicMapper.toTopicDetail]. Per clause D adaptation, the
+     * default branch is [TorrentDto] (the most common). The metadata key
+     * `"rutracker.kind"` overrides:
+     *   - `"topic"`    -> [TopicDto] (thin)
+     *   - `"comments"` -> [CommentsPageDto] (uncommon, no posts available)
+     *   - default      -> [TorrentDto] with description from [TopicDetail.description]
+     *
+     * Description text becomes a single-element [TorrentDescriptionDto] wrapping
+     * a [Text] node (per clause B: rich AST is not round-trippable, so a
+     * single Text leaf is the canonical lossless inverse for the "no rich
+     * formatting" subset of post content).
+     */
+    fun topicDetailToDto(d: TopicDetail): ForumTopicDto =
+        when (d.torrent.metadata["rutracker.kind"]) {
+            "topic" -> d.torrent.toTopicDto()
+            "comments" -> CommentsPageDto(
+                id = d.torrent.torrentId,
+                title = d.torrent.title,
+                author = d.torrent.metadata["rutracker.authorId"]
+                    ?.let { AuthorDto(id = it, name = it) },
+                category = d.torrent.toCategoryDtoOrNull(),
+                page = 1,
+                pages = 1,
+                posts = emptyList(),
+            )
+            else -> {
+                val base = d.torrent.toTorrentDto()
+                val description = d.description?.takeIf { it.isNotEmpty() }
+                    ?.let { TorrentDescriptionDto(children = listOf(Text(it))) }
+                base.copy(description = description)
+            }
+        }
 
-    fun topicPageToDto(p: TopicPage): TopicPageDto = TODO("Task 2.26")
+    /**
+     * Inverse of [TopicMapper.toTopicPage]. Synthesizes an empty
+     * [TopicPageCommentsDto] because [TopicPage] does not carry comments
+     * inline (per Section D, posts live on [CommentsPage]). Tests that need
+     * a fuller round-trip should compose [topicPageToDto] with
+     * [commentsPageToDto] via the same origin DTO.
+     *
+     * Uses metadata keys (Section D forward contract):
+     *  - "rutracker.size_text", "rutracker.date_text", "rutracker.tags",
+     *    "rutracker.status", "rutracker.posterUrl",
+     *    "rutracker.categoryId", "rutracker.categoryName",
+     *    "rutracker.authorId"
+     */
+    fun topicPageToDto(p: TopicPage): TopicPageDto {
+        val item = p.topic.torrent
+        val torrentData = TorrentDataDto(
+            tags = item.metadata["rutracker.tags"],
+            posterUrl = item.metadata["rutracker.posterUrl"],
+            status = item.metadata["rutracker.status"]?.let { name ->
+                runCatching { TorrentStatusDto.valueOf(name) }.getOrNull()
+            },
+            // Forward mapper preserves the original string in metadata; prefer
+            // it over an Instant.toString() reformat to keep the user-visible
+            // date display identical across round-trip.
+            date = item.metadata["rutracker.date_text"]
+                ?: item.publishDate?.toString(),
+            size = item.metadata["rutracker.size_text"],
+            seeds = item.seeders,
+            leeches = item.leechers,
+            magnetLink = item.magnetUri,
+        )
+        return TopicPageDto(
+            id = item.torrentId,
+            title = item.title,
+            author = item.metadata["rutracker.authorId"]
+                ?.let { AuthorDto(id = it, name = it) },
+            category = item.toCategoryDtoOrNull(),
+            torrentData = torrentData,
+            commentsPage = TopicPageCommentsDto(
+                page = p.currentPage,
+                pages = p.totalPages,
+                posts = emptyList(),
+            ),
+        )
+    }
 
-    fun commentsPageToDto(p: CommentsPage): CommentsPageDto = TODO("Task 2.26")
+    /**
+     * Inverse of [CommentsMapper.toCommentsPage].
+     *
+     * Each [Comment] becomes a [PostDto] with:
+     *  - `id` = "" (placeholder; Comment carries no post id — clause A
+     *    documents that this is unrecoverable on the reverse path)
+     *  - `author` = AuthorDto(id="", name=comment.author) (clause A: id
+     *    is unrecoverable, name is the round-trippable signal)
+     *  - `date` = ISO-8601 string from comment.timestamp, or "" if null
+     *  - `children` = single [Text] element wrapping the body (clause B:
+     *    rich AST is forward-only-lossy, this is the canonical inverse)
+     *
+     * Round-trip from CommentsPageDto to CommentsPage and back is lossy by
+     * construction (rich post AST flattens to text), but
+     * `forward(reverse(forward(dto))) == forward(dto)` IS achievable because
+     * the second forward call also flattens to the same text.
+     */
+    fun commentsPageToDto(p: CommentsPage): CommentsPageDto =
+        CommentsPageDto(
+            id = "",
+            title = "",
+            page = p.currentPage,
+            pages = p.totalPages,
+            posts = p.items.map { it.toPostDto() },
+        )
 
     fun favoritesToDto(items: List<TorrentItem>): FavoritesDto = TODO("Task 2.27")
 
@@ -196,3 +302,32 @@ private fun ForumCategory.toCategoryDto(): CategoryDto {
         children = mappedChildren,
     )
 }
+
+/**
+ * Reconstruct a CategoryDto from a TorrentItem's metadata + category name.
+ * Returns null when neither categoryId nor a category name is present.
+ */
+private fun TorrentItem.toCategoryDtoOrNull(): CategoryDto? {
+    val item = this
+    val categoryId = item.metadata["rutracker.categoryId"]
+    val categoryName = item.metadata["rutracker.categoryName"] ?: item.category
+    return if (categoryId != null || categoryName != null) {
+        CategoryDto(id = categoryId, name = categoryName.orEmpty())
+    } else {
+        null
+    }
+}
+
+/**
+ * Reverse of [PostDto.toComment]. Synthesizes:
+ *  - `id` = "" (clause A: post id is not surfaced on Comment)
+ *  - `AuthorDto.id` = "" (clause A: not surfaced on Comment)
+ *  - `date` = ISO-8601 string of the timestamp, "" if null
+ *  - `children` = single Text node wrapping the entire body
+ */
+private fun Comment.toPostDto(): PostDto = PostDto(
+    id = "",
+    author = AuthorDto(id = "", name = author),
+    date = timestamp?.toString().orEmpty(),
+    children = listOf(Text(body)),
+)
