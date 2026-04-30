@@ -76,7 +76,8 @@ class RuTrackerDtoMappers @Inject constructor() {
         )
     }
 
-    fun forumTreeToDto(tree: ForumTree): ForumDto = TODO("Task 2.25")
+    fun forumTreeToDto(tree: ForumTree): ForumDto =
+        ForumDto(children = tree.rootCategories.map { it.toCategoryDto() })
 
     fun topicDetailToDto(d: TopicDetail): ForumTopicDto = TODO("Task 2.26")
 

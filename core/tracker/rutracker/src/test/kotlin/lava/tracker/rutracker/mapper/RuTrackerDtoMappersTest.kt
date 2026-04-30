@@ -2,6 +2,7 @@ package lava.tracker.rutracker.mapper
 
 import lava.network.dto.forum.CategoryDto
 import lava.network.dto.forum.CategoryPageDto
+import lava.network.dto.forum.ForumDto
 import lava.network.dto.search.SearchPageDto
 import lava.network.dto.topic.AuthorDto
 import lava.network.dto.topic.TopicDto
@@ -38,6 +39,7 @@ class RuTrackerDtoMappersTest {
     private val mappers = RuTrackerDtoMappers()
     private val forward = SearchPageMapper()
     private val browseForward = CategoryPageMapper()
+    private val forumForward = ForumDtoMapper()
 
     @Test
     fun `searchResultToDto round-trips a populated SearchPageDto`() {
@@ -158,5 +160,48 @@ class RuTrackerDtoMappersTest {
         // exactly per Section D's empty-string-as-null contract.
         assertEquals(null, reversedDto.category.id)
         assertEquals("Root", reversedDto.category.name)
+    }
+
+    @Test
+    fun `forumTreeToDto round-trips a recursive forum tree`() {
+        // Real rutracker forum trees are 2-3 levels deep with categories
+        // grouping subforums grouping topics. The reverse mapper must
+        // recurse correctly and preserve the parent-child structure.
+        val originalDto = ForumDto(
+            children = listOf(
+                CategoryDto(
+                    id = "10",
+                    name = "Films",
+                    children = listOf(
+                        CategoryDto(id = "11", name = "HD Movies"),
+                        CategoryDto(id = "12", name = "DVD Movies"),
+                    ),
+                ),
+                CategoryDto(
+                    id = "20",
+                    name = "Music",
+                    children = listOf(
+                        CategoryDto(id = "21", name = "Lossless"),
+                    ),
+                ),
+            ),
+        )
+
+        val firstForward = forumForward.toForumTree(originalDto)
+        val reversedDto = mappers.forumTreeToDto(firstForward)
+        val secondForward = forumForward.toForumTree(reversedDto)
+
+        assertEquals(
+            "forward(reverse(forward(dto))) must equal forward(dto) for forum tree",
+            firstForward,
+            secondForward,
+        )
+        // Primary user-visible assertion: tree shape is preserved.
+        assertEquals(2, secondForward.rootCategories.size)
+        assertEquals("Films", secondForward.rootCategories[0].name)
+        assertEquals(2, secondForward.rootCategories[0].children.size)
+        assertEquals("HD Movies", secondForward.rootCategories[0].children[0].name)
+        // Parent IDs must propagate down the tree (Section D guarantee).
+        assertEquals("10", secondForward.rootCategories[0].children[0].parentId)
     }
 }
