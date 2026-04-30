@@ -5,7 +5,10 @@ import javax.inject.Singleton
 import lava.sdk.api.MapPluginConfig
 import lava.tracker.api.TrackerClient
 import lava.tracker.api.TrackerDescriptor
+import lava.tracker.api.feature.BrowsableTracker
+import lava.tracker.api.feature.DownloadableTracker
 import lava.tracker.api.feature.SearchableTracker
+import lava.tracker.api.feature.TopicTracker
 import lava.tracker.api.model.SearchRequest
 import lava.tracker.api.model.TopicDetail
 import lava.tracker.registry.TrackerRegistry
@@ -76,21 +79,67 @@ class LavaTrackerSdk @Inject constructor(
         }
     }
 
-    /** TODO(Task 2.31): browse, with the same Capability-Honesty pattern as [search]. */
-    suspend fun browse(@Suppress("UNUSED_PARAMETER") category: String?, @Suppress("UNUSED_PARAMETER") page: Int = 0): BrowseOutcome =
-        TODO("Task 2.31")
+    /**
+     * Browses a category on the active tracker. Same Capability-Honesty pattern
+     * as [search]: returns [BrowseOutcome.Failure] when the tracker doesn't
+     * support BROWSE rather than throwing.
+     */
+    suspend fun browse(category: String?, page: Int = 0): BrowseOutcome {
+        val client = getActiveClient()
+        val trackerId = client.descriptor.trackerId
+        val feature = client.getFeature(BrowsableTracker::class)
+            ?: return BrowseOutcome.Failure(
+                reason = "tracker '$trackerId' does not support BROWSE",
+                triedTrackers = listOf(trackerId),
+            )
+        return try {
+            BrowseOutcome.Success(result = feature.browse(category, page), viaTracker = trackerId)
+        } catch (t: Throwable) {
+            BrowseOutcome.Failure(
+                reason = t.message ?: "browse failed",
+                triedTrackers = listOf(trackerId),
+                cause = t,
+            )
+        }
+    }
 
-    /** TODO(Task 2.31): topic detail. */
-    suspend fun getTopic(@Suppress("UNUSED_PARAMETER") topicId: String): TopicDetail? =
-        TODO("Task 2.31")
+    /**
+     * Fetches topic detail for [topicId]. Returns null when the active tracker
+     * doesn't support TOPIC, or when the underlying call throws — callers that
+     * need a failure reason should use the per-feature interface directly.
+     */
+    suspend fun getTopic(topicId: String): TopicDetail? {
+        val feature = getActiveClient().getFeature(TopicTracker::class) ?: return null
+        return try {
+            feature.getTopic(topicId)
+        } catch (_: Throwable) {
+            null
+        }
+    }
 
-    /** TODO(Task 2.31): magnet link (synchronous, may return null). */
-    fun getMagnetLink(@Suppress("UNUSED_PARAMETER") topicId: String): String? =
-        TODO("Task 2.31")
+    /**
+     * Returns the magnet URI for [topicId] if the active tracker supports
+     * synchronous magnet retrieval. RuTracker's current impl is null-only
+     * (a topic-page fetch is required); this is preserved here.
+     */
+    fun getMagnetLink(topicId: String): String? {
+        val feature = getActiveClient().getFeature(DownloadableTracker::class) ?: return null
+        return feature.getMagnetLink(topicId)
+    }
 
-    /** TODO(Task 2.31): torrent file download. */
-    suspend fun downloadTorrent(@Suppress("UNUSED_PARAMETER") topicId: String): ByteArray? =
-        TODO("Task 2.31")
+    /**
+     * Downloads the .torrent file bytes for [topicId]. Returns null when the
+     * active tracker doesn't support TORRENT_DOWNLOAD, or when the underlying
+     * call throws.
+     */
+    suspend fun downloadTorrent(topicId: String): ByteArray? {
+        val feature = getActiveClient().getFeature(DownloadableTracker::class) ?: return null
+        return try {
+            feature.downloadTorrentFile(topicId)
+        } catch (_: Throwable) {
+            null
+        }
+    }
 
     /**
      * Resolves the active [TrackerClient] from the registry. `internal` so

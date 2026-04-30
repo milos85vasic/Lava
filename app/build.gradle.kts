@@ -87,6 +87,7 @@ dependencies {
     implementation(project(":core:network:impl"))
     implementation(project(":core:notifications"))
     implementation(project(":core:preferences"))
+    implementation(project(":core:tracker:client"))
     implementation(project(":core:ui"))
     implementation(project(":core:work:impl"))
 
