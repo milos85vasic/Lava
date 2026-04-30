@@ -11,7 +11,7 @@ import lava.network.dto.topic.TorrentStatusDto
 import lava.tracker.rutracker.api.RuTrackerInnerApi
 import org.jsoup.Jsoup
 
-internal class GetSearchPageUseCase(
+class GetSearchPageUseCase(
     private val api: RuTrackerInnerApi,
     private val withTokenVerificationUseCase: WithTokenVerificationUseCase,
     private val withAuthorisedCheckUseCase: WithAuthorisedCheckUseCase,
