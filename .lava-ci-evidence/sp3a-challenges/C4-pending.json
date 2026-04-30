@@ -1,0 +1,21 @@
+{
+  "challenge_id": "C4",
+  "name": "Switch tracker and re-search",
+  "test_class": "lava.app.challenges.C4_SwitchTrackerAndResearchTest",
+  "test_file": "app/src/androidTest/kotlin/lava/app/challenges/C4_SwitchTrackerAndResearchTest.kt",
+  "spec_reference": "Task 5.12",
+  "operator_attestation_required": true,
+  "status": "PENDING_OPERATOR",
+  "falsifiability_protocol": {
+    "mutation_target": "core/tracker/client/src/main/kotlin/lava/tracker/client/LavaTrackerSdk.kt",
+    "mutation_step": "Mutate switchTracker() so that it does NOT update _activeTrackerId.value (comment out the assignment).",
+    "expected_failure": "Results stay RuTracker even after operator taps RuTor; banner remains 'Results from RuTracker'; waitUntil 'Results from RuTor' visible times out.",
+    "expected_assertion_message_substring": "Failed to assertWaitUntil: condition not met within 30000ms",
+    "revert_step": "Restore the assignment in switchTracker()."
+  },
+  "operator_run_instructions": [
+    "./gradlew :app:connectedDebugAndroidTest --tests \"lava.app.challenges.C4_SwitchTrackerAndResearchTest\"",
+    "Capture screenshots: (a) RuTracker results, (b) RuTor (active) badge, (c) RuTor results banner.",
+    "Perform falsifiability mutation, re-run, capture verbatim failure, revert."
+  ]
+}
