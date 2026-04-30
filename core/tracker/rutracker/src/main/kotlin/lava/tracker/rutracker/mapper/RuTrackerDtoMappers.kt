@@ -1,6 +1,8 @@
 package lava.tracker.rutracker.mapper
 
 import lava.network.dto.auth.AuthResponseDto
+import lava.network.dto.auth.CaptchaDto
+import lava.network.dto.auth.UserDto
 import lava.network.dto.forum.CategoryDto
 import lava.network.dto.forum.CategoryPageDto
 import lava.network.dto.forum.ForumDto
@@ -18,7 +20,9 @@ import lava.network.dto.topic.TorrentDescriptionDto
 import lava.network.dto.topic.TorrentDto
 import lava.network.dto.topic.TorrentStatusDto
 import lava.network.dto.user.FavoritesDto
+import lava.tracker.api.model.AuthState
 import lava.tracker.api.model.BrowseResult
+import lava.tracker.api.model.CaptchaChallenge
 import lava.tracker.api.model.Comment
 import lava.tracker.api.model.CommentsPage
 import lava.tracker.api.model.ForumCategory
@@ -191,9 +195,57 @@ class RuTrackerDtoMappers @Inject constructor() {
             posts = p.items.map { it.toPostDto() },
         )
 
-    fun favoritesToDto(items: List<TorrentItem>): FavoritesDto = TODO("Task 2.27")
+    /**
+     * Inverse of [FavoritesMapper.toTorrentItems]. Each TorrentItem becomes
+     * either a [TorrentDto] or a [TopicDto] based on the
+     * `metadata["rutracker.kind"]` discriminator (clause D adaptation:
+     * default branch is TorrentDto). The forward mapper drops
+     * CommentsPageDto entries via mapNotNull, so the reverse path never
+     * needs to produce them — fav lists are always Topic-or-Torrent.
+     */
+    fun favoritesToDto(items: List<TorrentItem>): FavoritesDto =
+        FavoritesDto(topics = items.map { it.toForumTopicDto() })
 
-    fun loginResultToDto(r: LoginResult): AuthResponseDto = TODO("Task 2.27")
+    /**
+     * Inverse of [AuthMapper.toLoginResult].
+     *
+     * Branch table:
+     *  - state == Authenticated && sessionToken != null -> Success(UserDto)
+     *      with synthesized id="" and avatarUrl="" because UserDto's id
+     *      and avatarUrl are forward-dropped (clause A: unrecoverable).
+     *  - state == Authenticated && sessionToken == null -> degenerate;
+     *      we treat as WrongCredits(captcha=null) rather than fabricating
+     *      a fake token (a fake token would mislead downstream auth-bearer
+     *      injection).
+     *  - state is CaptchaRequired                       -> CaptchaRequired(captcha)
+     *  - state == Unauthenticated && captchaChallenge != null
+     *                                                   -> WrongCredits(captcha)
+     *  - state == Unauthenticated && captchaChallenge == null
+     *                                                   -> WrongCredits(null)
+     */
+    fun loginResultToDto(r: LoginResult): AuthResponseDto {
+        val state = r.state
+        return when (state) {
+            is AuthState.Authenticated -> {
+                val token = r.sessionToken
+                if (token != null) {
+                    AuthResponseDto.Success(
+                        user = UserDto(
+                            id = "",
+                            token = token,
+                            avatarUrl = "",
+                        ),
+                    )
+                } else {
+                    AuthResponseDto.WrongCredits(captcha = null)
+                }
+            }
+            is AuthState.CaptchaRequired ->
+                AuthResponseDto.CaptchaRequired(captcha = state.challenge.toCaptchaDto())
+            is AuthState.Unauthenticated ->
+                AuthResponseDto.WrongCredits(captcha = r.captchaChallenge?.toCaptchaDto())
+        }
+    }
 }
 
 /**
@@ -317,6 +369,17 @@ private fun TorrentItem.toCategoryDtoOrNull(): CategoryDto? {
         null
     }
 }
+
+/**
+ * Reverse of [CaptchaDto.toChallenge].
+ *
+ * Section D's forward mapper assigns:
+ *   `CaptchaChallenge(sid = id, code = code, imageUrl = url)`
+ * so the reverse direction is:
+ *   `CaptchaDto(id = sid, code = code, url = imageUrl)`.
+ */
+private fun CaptchaChallenge.toCaptchaDto(): CaptchaDto =
+    CaptchaDto(id = sid, code = code, url = imageUrl)
 
 /**
  * Reverse of [PostDto.toComment]. Synthesizes:

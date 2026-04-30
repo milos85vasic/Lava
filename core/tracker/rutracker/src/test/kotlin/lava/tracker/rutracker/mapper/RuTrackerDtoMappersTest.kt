@@ -1,5 +1,8 @@
 package lava.tracker.rutracker.mapper
 
+import lava.network.dto.auth.AuthResponseDto
+import lava.network.dto.auth.CaptchaDto
+import lava.network.dto.auth.UserDto
 import lava.network.dto.forum.CategoryDto
 import lava.network.dto.forum.CategoryPageDto
 import lava.network.dto.forum.ForumDto
@@ -15,8 +18,12 @@ import lava.network.dto.topic.TorrentDataDto
 import lava.network.dto.topic.TorrentDescriptionDto
 import lava.network.dto.topic.TorrentDto
 import lava.network.dto.topic.TorrentStatusDto
+import lava.network.dto.user.FavoritesDto
+import lava.tracker.api.model.AuthState
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
@@ -50,6 +57,8 @@ class RuTrackerDtoMappersTest {
     private val forumForward = ForumDtoMapper()
     private val topicForward = TopicMapper()
     private val commentsForward = CommentsMapper()
+    private val favoritesForward = FavoritesMapper()
+    private val authForward = AuthMapper()
 
     @Test
     fun `searchResultToDto round-trips a populated SearchPageDto`() {
@@ -336,5 +345,142 @@ class RuTrackerDtoMappersTest {
         assertEquals("alice", secondForward.items[0].author)
         assertEquals("Reply text", secondForward.items[1].body)
         assertEquals("bob", secondForward.items[1].author)
+    }
+
+    @Test
+    fun `favoritesToDto round-trips a mixed Torrent and Topic favorites list`() {
+        val originalDto = FavoritesDto(
+            topics = listOf(
+                TorrentDto(
+                    id = "fav-1",
+                    title = "Favorited Torrent",
+                    author = AuthorDto(id = "u1", name = "u1"),
+                    category = CategoryDto(id = "33", name = "OS"),
+                    status = TorrentStatusDto.Approved,
+                    seeds = 10,
+                    leeches = 0,
+                    size = "2.0 GB",
+                ),
+                TopicDto(
+                    id = "fav-2",
+                    title = "Favorited Topic",
+                    author = AuthorDto(id = "u2", name = "u2"),
+                    category = CategoryDto(id = "1", name = "Discussion"),
+                ),
+            ),
+        )
+
+        val firstForward = favoritesForward.toTorrentItems(originalDto)
+        val reversedDto = mappers.favoritesToDto(firstForward)
+        val secondForward = favoritesForward.toTorrentItems(reversedDto)
+
+        assertEquals(
+            "forward(reverse(forward(dto))) must equal forward(dto) for favorites",
+            firstForward,
+            secondForward,
+        )
+        assertEquals(2, secondForward.size)
+        assertEquals("fav-1", secondForward[0].torrentId)
+        assertEquals("fav-2", secondForward[1].torrentId)
+        // Topic vs Torrent discriminator must propagate.
+        assertEquals("topic", secondForward[1].metadata["rutracker.kind"])
+        assertNull(
+            "Topic rows do not carry seeders",
+            secondForward[1].seeders,
+        )
+    }
+
+    @Test
+    fun `loginResultToDto round-trips Success with session token`() {
+        val originalDto = AuthResponseDto.Success(
+            user = UserDto(
+                id = "user-1",
+                token = "token-abc-123",
+                avatarUrl = "https://rutracker.org/avatars/1.png",
+            ),
+        )
+
+        val firstForward = authForward.toLoginResult(originalDto)
+        val reversedDto = mappers.loginResultToDto(firstForward)
+        val secondForward = authForward.toLoginResult(reversedDto)
+
+        assertEquals(
+            "forward(reverse(forward(dto))) must equal forward(dto) for Success",
+            firstForward,
+            secondForward,
+        )
+        // Primary user-visible assertion: session token survives the trip.
+        assertEquals(AuthState.Authenticated, secondForward.state)
+        assertEquals("token-abc-123", secondForward.sessionToken)
+    }
+
+    @Test
+    fun `loginResultToDto round-trips WrongCredits with captcha`() {
+        val originalDto = AuthResponseDto.WrongCredits(
+            captcha = CaptchaDto(
+                id = "sid-7",
+                code = "cap_code_xxxxx",
+                url = "https://rutracker.org/captcha/7.png",
+            ),
+        )
+
+        val firstForward = authForward.toLoginResult(originalDto)
+        val reversedDto = mappers.loginResultToDto(firstForward)
+        val secondForward = authForward.toLoginResult(reversedDto)
+
+        assertEquals(firstForward, secondForward)
+        assertEquals(AuthState.Unauthenticated, secondForward.state)
+        assertNotNull(secondForward.captchaChallenge)
+        // CaptchaDto field-name mapping must be preserved across round-trip.
+        assertEquals("sid-7", secondForward.captchaChallenge!!.sid)
+        assertEquals("cap_code_xxxxx", secondForward.captchaChallenge!!.code)
+        assertEquals(
+            "https://rutracker.org/captcha/7.png",
+            secondForward.captchaChallenge!!.imageUrl,
+        )
+        // The reverse mapper must emit a real WrongCredits DTO with the
+        // captcha attached, NOT degrade to captcha=null.
+        assertTrue(reversedDto is AuthResponseDto.WrongCredits)
+        assertNotNull((reversedDto as AuthResponseDto.WrongCredits).captcha)
+    }
+
+    @Test
+    fun `loginResultToDto round-trips CaptchaRequired with challenge`() {
+        val originalDto = AuthResponseDto.CaptchaRequired(
+            captcha = CaptchaDto(
+                id = "sid-9",
+                code = "cap_code_yyyy",
+                url = "https://rutracker.org/captcha/9.png",
+            ),
+        )
+
+        val firstForward = authForward.toLoginResult(originalDto)
+        val reversedDto = mappers.loginResultToDto(firstForward)
+        val secondForward = authForward.toLoginResult(reversedDto)
+
+        assertEquals(firstForward, secondForward)
+        assertTrue(
+            "state should be CaptchaRequired",
+            secondForward.state is AuthState.CaptchaRequired,
+        )
+        // Verify reverse produces CaptchaRequired (not WrongCredits) — this
+        // is the discriminator that drives whether the UI shows the captcha
+        // dialog vs the wrong-password dialog.
+        assertTrue(reversedDto is AuthResponseDto.CaptchaRequired)
+    }
+
+    @Test
+    fun `loginResultToDto round-trips WrongCredits without captcha`() {
+        val originalDto = AuthResponseDto.WrongCredits(captcha = null)
+
+        val firstForward = authForward.toLoginResult(originalDto)
+        val reversedDto = mappers.loginResultToDto(firstForward)
+        val secondForward = authForward.toLoginResult(reversedDto)
+
+        assertEquals(firstForward, secondForward)
+        assertEquals(AuthState.Unauthenticated, secondForward.state)
+        assertNull(secondForward.captchaChallenge)
+        assertTrue(reversedDto is AuthResponseDto.WrongCredits)
+        assertNull((reversedDto as AuthResponseDto.WrongCredits).captcha)
     }
 }
