@@ -43,3 +43,6 @@
 [submodule "Submodules/Concurrency"]
 	path = Submodules/Concurrency
 	url = git@github.com:vasic-digital/Concurrency.git
+[submodule "Submodules/Tracker-SDK"]
+	path = Submodules/Tracker-SDK
+	url = https://github.com/vasic-digital/Tracker-SDK.git
