@@ -1,22 +1,40 @@
 # Lava
 
-Lava is an Android mobile app that is an unofficial client for the popular
-Russian torrent tracker website – rutracker.org. With Lava, users can easily
-search and download torrent files, manage their downloads, and stay up-to-date
-with the latest forum posts and discussions on the site, all from their mobile
-device.
+Lava is an Android mobile app that is an unofficial client for popular
+Russian torrent trackers. As of **1.2.0** Lava is multi-tracker — the app
+ships with built-in support for **RuTracker** (rutracker.org) and
+**RuTor** (rutor.info / rutor.is), with a pluggable SDK that makes adding
+a third tracker an isolated module change. Users can search and download
+torrent files, view topic detail and comments, manage their downloads,
+and switch between trackers from a single Settings screen.
 
 Lava is designed to provide a fast, intuitive, and seamless user experience
-for rutracker.org users on the go. The app is open source and free to use,
-with no ads or tracking, and is constantly being updated and improved by
-a small community of developers and contributors.
+on the go. The app is open source and free to use, with no ads or tracking,
+and is constantly being updated and improved by a small community of
+developers and contributors.
 
-Disclaimer: Lava is not affiliated with or endorsed by rutracker.org in any way.
-The app is provided for personal, non-commercial use only, and users are
-responsible for complying with all applicable laws and regulations regarding
-copyright and file sharing.
+Disclaimer: Lava is not affiliated with or endorsed by rutracker.org,
+rutor.info, or any other tracker site. The app is provided for personal,
+non-commercial use only, and users are responsible for complying with all
+applicable laws and regulations regarding copyright and file sharing.
 
 [**For copyright owners**][1]
+
+## Supported trackers (Lava-Android-1.2.0)
+
+| Tracker   | Module                       | Capabilities                                                              | Auth                                |
+|-----------|------------------------------|---------------------------------------------------------------------------|-------------------------------------|
+| RuTracker | `:core:tracker:rutracker`    | SEARCH + BROWSE + FORUM + TOPIC + COMMENTS + FAVORITES + DOWNLOAD + MAGNET + AUTH (CAPTCHA) + UPLOAD + USER_PROFILE | Required (login + captcha)         |
+| RuTor     | `:core:tracker:rutor`        | SEARCH + BROWSE + TOPIC + COMMENTS + DOWNLOAD + MAGNET + RSS + AUTH        | Anonymous by default (decision 7b-ii) |
+
+The active tracker is user-selectable from **Settings → Trackers**. Each
+tracker carries its own bundled mirror list, supports user-added custom
+mirrors, runs a 15-min mirror health probe, and falls back to the
+alternative tracker via an explicit user-prompted modal when all of its
+own mirrors go UNHEALTHY (no silent fallback).
+
+To add a third tracker (or fork the SDK to add a private one), follow the
+seven-step recipe in [`docs/sdk-developer-guide.md`](docs/sdk-developer-guide.md).
 
 ## Mobile app
 
