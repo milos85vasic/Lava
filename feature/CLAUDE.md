@@ -4,7 +4,7 @@
 
 ## Anti-Bluff Testing Pact (Submodule Law)
 
-> Inherits Laws 1–6 from the root Anti-Bluff Testing Pact in `/CLAUDE.md`. The Sixth Law (Real User Verification) is binding on every feature module — submodule rules below are additive, never relaxing.
+> Inherits Laws 1–7 from the root Anti-Bluff Testing Pact in `/CLAUDE.md`. The Sixth Law (Real User Verification) and the Seventh Law (Anti-Bluff Enforcement, added 2026-04-30) are binding on every feature module — submodule rules below are additive, never relaxing. The Seventh Law's `Bluff-Audit:` commit-message stamp, real-stack verification gate, pre-tag real-device attestation, forbidden test patterns, recurring bluff hunt, bluff discovery protocol, and inheritance clause all apply here verbatim. Pre-push hooks reject feature commits that violate any clause.
 
 Every feature module MUST obey the root Anti-Bluff Testing Pact. In addition:
 

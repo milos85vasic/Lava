@@ -129,6 +129,69 @@ Every test added to this codebase from this point on MUST satisfy ALL of the fol
 
 6. **Inheritance.** This Sixth Law applies recursively to every submodule, every feature, and every new artifact added to the project (including the Go API service). Submodule constitutions MAY add stricter rules but MUST NOT relax this one.
 
+### Seventh Law — Tests MUST Confirm User-Reachable Functionality (Anti-Bluff Enforcement)
+
+The Sixth Law states what tests must satisfy. The Seventh Law states how we enforce it mechanically — because the project has shipped passing-tests with broken-features at least once, and the operator's standing mandate (2026-04-30) is that this MUST NOT recur. The Seventh Law is the teeth.
+
+Every commit that adds, modifies, or removes a test in this codebase, AND every commit that adds or modifies a user-facing feature, is bound by the following clauses. Violation is a release blocker — pre-push hooks reject the push, tag scripts refuse to operate, and reviewers MUST raise the violation as a blocking review comment.
+
+1. **Bluff Audit Stamp on every test commit.** When a commit adds or modifies a `*Test.kt` / `*_test.go` / equivalent file, the commit message body MUST contain a "Bluff-Audit:" block in this exact format:
+
+   ```
+   Bluff-Audit: <test-name-or-file>
+     Mutation: <what was deliberately broken in the production code>
+     Observed-Failure: <copy-paste of the test failure message after mutation>
+     Reverted: yes
+   ```
+
+   At least one mutation per test class added/modified. Pre-push hook rejects test commits without this stamp. The mutation MUST target the production code path the test claims to cover — mutating an unrelated branch is itself a bluff.
+
+2. **Real-Stack Verification Gate per feature.** For every feature whose acceptance criterion mentions user-visible behavior (a screen, an HTTP response, a downloaded file, a persisted row), the feature is not "complete" until a real-stack test exists that:
+   - Hits the real third-party service over the network where the service is third-party (rutracker.org, rutor.info, etc.) — gated by `-PrealTrackers=true` so default test runs don't make outbound calls
+   - Runs against a real Postgres instance where the service is our own (lava-api-go) — gated by `-Pintegration=true` and using podman/docker for the database
+   - Drives the real Compose UI on a real Android emulator/device where the feature is UI — gated by `-PdeviceTests=true` and using `adb shell instrument` against `connectedAndroidTest`
+
+   A feature lacking such a real-stack test is documented as **not user-reachable** until the gap is closed. The matching coverage exemption ledger entry is mandatory.
+
+3. **Pre-Tag Real-Device Attestation.** Before any release tag is cut, the operator MUST execute the user-visible flows (login, search, browse, view topic, download `.torrent`) on a real Android device against the real backend services and record a JSON attestation file at `.lava-ci-evidence/<tag-name>/real-device-attestation.json`. The attestation MUST include: device model, Android version, app version, timestamp, command-by-command checklist of executed user actions, and at least 3 screenshots OR a video recording referenced by hash. `scripts/tag.sh` MUST refuse to operate on a commit lacking the matching attestation. There is no exception. "Operator was busy" is not an exception. "Test environment was unstable" is not an exception. Untested-on-device commits do not get tags.
+
+4. **Forbidden Test Patterns (per-language).** The following patterns are bluffs by construction. Pre-push hooks reject diffs that introduce them:
+
+   - **Mocking the System Under Test.** A `@MockK` / `@Mock` on the class whose name appears in the test class name (e.g. `mockk<RuTrackerSearch>` in `RuTrackerSearchTest`) is the canonical bluff. The SUT must be a real instance. Mocks are permitted ONLY at the boundaries below the SUT (Android system services, real HTTP sockets when not using MockWebServer, real database drivers when not using in-memory variants).
+   - **Verification-only assertions.** A test whose ONLY assertion is `verify { mock.foo() }` or `coVerify { ... }` is a call-counting test, not a behavior test. The Sixth Law clause 3 requires the primary assertion to be on user-visible state.
+   - **`@Ignore`'d tests with no follow-up issue.** An ignored test asserts nothing and adds noise. If a test must be temporarily disabled, the `@Ignore("reason")` argument MUST cite an issue number tracking re-enablement; the issue MUST be triaged in the next phase.
+   - **Tests that build the SUT but never invoke its methods.** A test that constructs a ViewModel, wires its dependencies, and asserts only `assertNotNull(viewModel)` is a compilation test, not a behavior test.
+   - **Acceptance gates whose chief assertion is BUILD SUCCESSFUL.** A Gradle task green-light is necessary but never sufficient — the gate MUST also assert on a meaningful outcome (correct test count, presence of evidence file, field-level data equality, etc.).
+
+5. **Recurring Bluff Hunt.** Once per development phase (every 2-4 weeks of active work), the team performs a bluff hunt. Procedure:
+
+   ```bash
+   # Pick 5 random *Test.kt files from the project
+   bluff_targets=$(find core feature -name '*Test.kt' | shuf -n 5)
+
+   # For each target:
+   for t in $bluff_targets; do
+     # 1. Read the test, identify the production class it claims to cover
+     # 2. Apply a deliberate mutation to that production class
+     # 3. Run the test
+     # 4. If the test still passes, the test is a bluff — file an issue,
+     #    classify the bluff (mock-the-SUT, count-only assertion, etc.),
+     #    and either rewrite or remove the test
+     # 5. Revert the mutation; the test must pass again
+   done
+   ```
+
+   Output recorded in `.lava-ci-evidence/bluff-hunt/<date>.json` with: targets, mutations, observed failures or surviving passes, and any issues opened. The bluff hunt is a phase gate — a phase cannot be marked complete until the bluff hunt has run and any surviving bluffs are addressed.
+
+6. **Bluff Discovery Protocol.** When a real user reports a bug whose corresponding tests are green, a Seventh Law incident is declared. The protocol:
+
+   - The fix commit for the user-visible bug MUST include a regression test that, before the fix, fails with a clear assertion message
+   - The bluff that hid the bug MUST be diagnosed and recorded in `.lava-ci-evidence/sixth-law-incidents/<date>.json` with: which test was the bluff, why it was a bluff (which clause was violated), the mutation that would have caught it
+   - The bluff classification (e.g. "mocked the network call", "asserted only on call count") MUST be added to the Forbidden Test Patterns list above if not already there
+   - The Seventh Law itself MUST be reviewed for a new clause that prevents the same class of bluff in the future
+
+7. **Inheritance and Propagation.** The Seventh Law applies recursively to every submodule, every feature, and every new artifact (including all `vasic-digital/*` submodules and the `lava-api-go` service). Each submodule's `CLAUDE.md` MUST contain either the verbatim Seventh Law or a link to this section in the parent. Submodules MAY add stricter clauses but MUST NOT relax any clause. New submodule adoption is conditional on Seventh Law compliance — non-compliant external submodules MUST be forked under `vasic-digital/` and brought into compliance before adoption.
+
 #### Sixth Law extensions (lessons-learned addenda)
 
 The clauses above are immutable. The clauses below are added when a real bug ships green and we need to prevent the *class* of bug, not just the specific instance.

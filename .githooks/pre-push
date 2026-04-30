@@ -1,0 +1,85 @@
+#!/usr/bin/env bash
+# .githooks/pre-push — Seventh Law mechanical enforcement (added 2026-04-30).
+#
+# Rejects pushes that:
+#   - Introduce hosted-CI configs (Local-Only CI/CD constitutional rule)
+#   - Add/modify *Test.kt without a Bluff-Audit: stamp in the commit message
+#     body (Seventh Law clause 1)
+#   - Match Forbidden Test Patterns (Seventh Law clause 4)
+#
+# Bypass with --no-verify ONLY in operator-documented emergencies (root
+# CLAUDE.md "Local-Only CI/CD" section). Routine bypass is itself a
+# Seventh Law incident.
+
+set -euo pipefail
+
+remote=$1
+url=$2
+
+# Determine the range of commits being pushed.
+zero=0000000000000000000000000000000000000000
+violations=()
+
+while read -r local_ref local_sha remote_ref remote_sha; do
+  if [[ "$local_sha" == "$zero" ]]; then
+    # Branch deletion — nothing to check.
+    continue
+  fi
+
+  if [[ "$remote_sha" == "$zero" ]]; then
+    # New branch — check all commits reachable from local_sha but
+    # not from any other ref the remote already has.
+    range=$(git rev-list "$local_sha" --not --remotes="$remote" | head -200)
+  else
+    range=$(git rev-list "$remote_sha..$local_sha")
+  fi
+
+  for sha in $range; do
+    # ===== Check 1: Hosted-CI config introduction (Local-Only CI/CD rule) =====
+    if git diff-tree --no-commit-id --name-only -r "$sha" | grep -qE '^(\.github/workflows/|\.gitlab-ci\.yml|\.circleci/|azure-pipelines\.yml|bitbucket-pipelines\.yml|Jenkinsfile|appveyor\.yml|travis\.yml)'; then
+      violations+=("$sha: introduces hosted-CI config (Local-Only CI/CD rule). Routine bypass forbidden.")
+    fi
+
+    # ===== Check 2: Test commits MUST carry a Bluff-Audit stamp =====
+    test_files=$(git diff-tree --no-commit-id --name-only -r "$sha" | grep -E '(Test\.kt|_test\.go)$' || true)
+    if [[ -n "$test_files" ]]; then
+      msg=$(git log -1 --pretty=%B "$sha")
+      if ! grep -qE '^Bluff-Audit:' <<<"$msg"; then
+        violations+=("$sha: adds/modifies test files without Bluff-Audit: stamp (Seventh Law clause 1). Files: $(echo "$test_files" | tr '\n' ' ')")
+      fi
+    fi
+
+    # ===== Check 3: Forbidden test patterns =====
+    # 3a — Mocking the SUT (mockk<XxxClass> in XxxClassTest.kt)
+    diff_added=$(git diff-tree -p --no-commit-id "$sha" -- '*Test.kt' 2>/dev/null | grep -E '^\+[^+]' || true)
+    if [[ -n "$diff_added" ]]; then
+      # Find any `mockk<X>(...)` where X matches the test class name root.
+      while IFS= read -r f; do
+        if [[ -z "$f" ]]; then continue; fi
+        class_root=$(basename "$f" .kt | sed 's/Test$//')
+        if [[ -z "$class_root" ]]; then continue; fi
+        if git diff-tree -p --no-commit-id "$sha" -- "$f" 2>/dev/null | \
+           grep -qE "^\+.*mockk<\s*${class_root}\s*>"; then
+          violations+=("$sha: $f mocks the System Under Test (${class_root}). Forbidden test pattern (Seventh Law clause 4).")
+        fi
+      done <<<"$test_files"
+    fi
+  done
+done
+
+if [[ ${#violations[@]} -gt 0 ]]; then
+  echo "==============================================================="
+  echo "PRE-PUSH HOOK REJECTED PUSH — Seventh Law violations detected"
+  echo "==============================================================="
+  for v in "${violations[@]}"; do
+    echo "  - $v"
+  done
+  echo "---------------------------------------------------------------"
+  echo "Each violation MUST be resolved before the push can proceed."
+  echo "Routine bypass (--no-verify) is itself a Seventh Law incident."
+  echo "Documented emergencies: cite the incident ID in the next commit."
+  echo "==============================================================="
+  exit 1
+fi
+
+exit 0

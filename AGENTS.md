@@ -241,6 +241,26 @@ Every test added to this codebase from this point on MUST satisfy ALL of the fol
 
 6. **Inheritance.** This Sixth Law applies recursively to every submodule, every feature, and every new artifact added to the project (including the Go API service). Submodule constitutions MAY add stricter rules but MUST NOT relax this one.
 
+### Seventh Law — Tests MUST Confirm User-Reachable Functionality (Anti-Bluff Enforcement)
+
+The Sixth Law states what tests must satisfy. The Seventh Law states how we enforce it mechanically — because the project has shipped passing-tests with broken-features at least once, and the operator's standing mandate (2026-04-30) is that this MUST NOT recur. The Seventh Law is the teeth.
+
+Every commit that adds, modifies, or removes a test in this codebase, AND every commit that adds or modifies a user-facing feature, is bound by the seven clauses below. Violation is a release blocker — pre-push hooks reject the push, tag scripts refuse to operate, and reviewers MUST raise the violation as a blocking review comment. Authoritative text lives in `CLAUDE.md`; this AGENTS.md mirrors it so an agent reading either file sees the same rule set.
+
+1. **Bluff Audit Stamp on every test commit.** Test-file diffs require a `Bluff-Audit:` block in the commit message body — name of the test, what was deliberately broken in the production code, the actual failure message observed, confirmation the mutation was reverted. Pre-push hook rejects test commits without the stamp.
+
+2. **Real-Stack Verification Gate per feature.** Every user-visible feature requires a real-stack test: real third-party network for third-party services (`-PrealTrackers=true`), real Postgres for our own services (`-Pintegration=true`), real Compose UI on a real Android emulator/device for UI features (`-PdeviceTests=true` / `connectedAndroidTest`). Features without such a test are documented as "not user-reachable" until the gap closes.
+
+3. **Pre-Tag Real-Device Attestation.** Every release tag requires `.lava-ci-evidence/<tag-name>/real-device-attestation.json` with: device model, Android version, app version, command-by-command checklist of executed user actions, ≥3 screenshots OR a video referenced by hash. `scripts/tag.sh` refuses without it. No exceptions.
+
+4. **Forbidden Test Patterns.** Pre-push hooks reject diffs introducing: mocking the SUT, assertions that are only `verify { mock.foo() }`, `@Ignore`'d tests without a tracking issue, tests that build the SUT but never invoke its methods, acceptance gates whose chief assertion is BUILD SUCCESSFUL.
+
+5. **Recurring Bluff Hunt.** Each phase (every 2-4 weeks of active work) ends only after a bluff hunt: 5 random test files, deliberately mutate the production code each one claims to cover, confirm each test fails. Output to `.lava-ci-evidence/bluff-hunt/<date>.json`.
+
+6. **Bluff Discovery Protocol.** When a real user reports a bug whose tests are green, declare a Seventh Law incident. The fix commit MUST include a regression test that fails before the fix; the bluff that hid the bug MUST be diagnosed and recorded in `.lava-ci-evidence/sixth-law-incidents/<date>.json`; the Forbidden Test Patterns list MUST be updated.
+
+7. **Inheritance and Propagation.** Applies recursively to every submodule, every feature, and every new artifact. Each submodule's `CLAUDE.md` MUST contain the verbatim Seventh Law or a link to this section. Non-compliant external submodules MUST be forked under `vasic-digital/` and brought into compliance before adoption.
+
 #### Sixth Law extensions (lessons-learned addenda)
 
 The clauses above are immutable. Below are addenda recorded after a real bug shipped green and we needed to prevent the *class* of bug, not just the specific instance. Authoritative copy lives in `CLAUDE.md`; this AGENTS.md mirrors the headers so an agent reading either file sees the same rule set.
