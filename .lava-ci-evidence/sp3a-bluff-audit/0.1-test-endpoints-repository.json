@@ -1,0 +1,20 @@
+{
+  "task": "0.1",
+  "subject": "TestEndpointsRepository duplicate-rejection equivalence",
+  "real_counterpart": "EndpointsRepositoryImpl (Room DAO with @PrimaryKey)",
+  "test": "TestEndpointsRepositoryEquivalenceTest.fake_rejects_duplicate_endpoint_like_real_impl",
+  "test_file": "core/testing/src/test/kotlin/lava/testing/repository/TestEndpointsRepositoryEquivalenceTest.kt",
+  "mutation": "Commented out the duplicate-rejection if-block in TestEndpointsRepository.add() (lines 56-60 of the committed file).",
+  "observed": "java.lang.AssertionError: Adding the same endpoint twice MUST throw IllegalStateException — TestEndpointsRepository diverged from EndpointsRepositoryImpl's Room PRIMARY KEY behaviour (this is a Third-Law bluff fake; see CLAUDE.md Sixth Law 6.A). (at TestEndpointsRepositoryEquivalenceTest.kt:53)",
+  "observed_run": {
+    "tests_total": 2,
+    "tests_failed": 1,
+    "failed_method": "fake_rejects_duplicate_endpoint_like_real_impl",
+    "passed_method": "fake_seeds_default_only_when_empty_like_real_impl"
+  },
+  "reverted": "git checkout -- core/testing/src/main/kotlin/lava/testing/repository/TestEndpointsRepository.kt (verified: git diff returns empty)",
+  "post_revert_run": "BUILD SUCCESSFUL — both tests passed against the restored fake.",
+  "verified_at": "5d0d4ebceb91cb04f3bba2b09812cfcb744f4e79",
+  "preexisting_fix": "Fake was already fixed on 2026-04-29 (see file doc comment lines 10-43). This task confirms the fix is real via falsifiability rehearsal.",
+  "ledger_clause": "6.A"
+}
