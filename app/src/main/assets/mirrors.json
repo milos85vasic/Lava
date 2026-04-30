@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "trackers": {
+    "rutracker": {
+      "expectedHealthMarker": "rutracker",
+      "mirrors": [
+        { "url": "https://rutracker.org", "isPrimary": true, "priority": 0, "protocol": "HTTPS" },
+        { "url": "https://rutracker.net", "isPrimary": false, "priority": 1, "protocol": "HTTPS" },
+        { "url": "https://rutracker.cr", "isPrimary": false, "priority": 2, "protocol": "HTTPS" }
+      ]
+    },
+    "rutor": {
+      "expectedHealthMarker": "RuTor",
+      "mirrors": [
+        { "url": "https://rutor.info", "isPrimary": true, "priority": 0, "protocol": "HTTPS" },
+        { "url": "https://rutor.is", "isPrimary": false, "priority": 1, "protocol": "HTTPS" },
+        { "url": "https://www.rutor.info", "isPrimary": false, "priority": 2, "protocol": "HTTPS" },
+        { "url": "https://www.rutor.is", "isPrimary": false, "priority": 3, "protocol": "HTTPS" },
+        { "url": "http://6tor.org", "isPrimary": false, "priority": 4, "protocol": "HTTP", "region": "ipv6-only" }
+      ]
+    }
+  }
+}
