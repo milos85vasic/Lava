@@ -19,6 +19,8 @@ dependencies {
     implementation(project(":core:tracker:registry"))
     implementation(project(":core:database"))
 
+    implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.material.iconsExtended)
     implementation(libs.kotlinx.datetime)
 
     testImplementation(libs.bundles.room)
