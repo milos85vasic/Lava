@@ -21,7 +21,7 @@ The seven brainstorming decisions that shape this spec, recorded for traceabilit
 | 6 | Mirror configuration source | Bundled `mirrors.json` ∪ user-supplied custom mirrors stored locally (Room). **No remote update channel.** New mirrors arrive via app updates and via user-supplied entries in `:feature:tracker_settings` UI. |
 | 7a | Cross-tracker fallback default UX | One-tap modal. Silent fallback rejected (violates Sixth Law clause 3); manual-only rejected (defeats SDK purpose). |
 | 7b | RuTor login policy | Anonymous by default. Login is invoked only when the SDK consumer calls a feature that requires it (e.g. `CommentsTracker.addComment()`). |
-| 7c | `vasic-digital/Tracker-SDK` mirroring policy | Mirrored to all four upstreams (GitHub, GitFlic, GitLab, GitVerse) from day 1, per the Decoupled Reusable Architecture rule's recursive default. |
+| 7c | `vasic-digital/Tracker-SDK` mirroring policy | **Originally:** mirrored to all four upstreams (GitHub, GitFlic, GitLab, GitVerse). **Revised 2026-04-30 mid-implementation per operator authorization:** mirrored to GitHub + GitLab only. The Decoupled Reusable Architecture rule's recursive default is therefore relaxed for this submodule; if GitFlic/GitVerse access is later required, the submodule can be added to those upstreams without code changes. |
 
 ---
 
