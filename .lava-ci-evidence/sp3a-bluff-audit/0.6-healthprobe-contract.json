@@ -1,0 +1,9 @@
+{
+  "task": "0.6",
+  "subject": "healthprobe contract test re-rehearsal (forensic anchor 6.A)",
+  "test": "lava-api-go/tests/contract/healthcheck_contract_test.go::TestHealthcheckContract",
+  "mutation": "Added a healthcheck section to the lava-api-go service in docker-compose.yml invoking /usr/local/bin/healthprobe with the unregistered --http2 flag (the binary registers only -url / -insecure / -timeout per cmd/healthprobe/main.go). Pre-mutation the contract test passed vacuously (no service in compose invoked healthprobe); the mutation makes the contract test reachable by introducing a target service whose healthcheck violates the flag-subset contract.",
+  "observed": "=== RUN   TestHealthcheckContract\n    healthcheck_contract_test.go:203: healthprobe registered flags: [insecure timeout url]\n    healthcheck_contract_test.go:213: compose ↔ healthprobe flag-set drift detected:\n          service lava-api-go: healthcheck.test passes flag -http2 but /usr/local/bin/healthprobe does not register it\n--- FAIL: TestHealthcheckContract (0.38s)\nFAIL\nFAIL\tdigital.vasic.lava.apigo/tests/contract\t0.382s\nFAIL",
+  "reverted": "git checkout -- docker-compose.yml — post-revert re-run with -count=1: PASS TestHealthcheckContract (0.38s); `git status --short` clean",
+  "ledger_clause": "6.A (also 6.A.A — Real-binary contract tests)"
+}

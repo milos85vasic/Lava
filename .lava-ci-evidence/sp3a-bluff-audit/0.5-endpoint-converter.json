@@ -1,0 +1,10 @@
+{
+  "task": "0.5",
+  "subject": "EndpointConverterTest re-rehearsal of existing test",
+  "real_counterpart": "core/preferences/src/main/kotlin/lava/securestorage/model/EndpointConverter.kt",
+  "test": "core/preferences/src/test/kotlin/lava/securestorage/EndpointConverterTest.kt (existing — no new test added)",
+  "mutation": "Removed Endpoint.Mirror branch from EndpointConverter.toJson() when block; replaced with `is Endpoint.Mirror -> throw IllegalStateException(\"DELIBERATE BREAK 0.5: Endpoint.Mirror branch removed\")`",
+  "observed": "EndpointConverterTest > convert Mirror to json  FAILED\n    java.lang.IllegalStateException at EndpointConverterTest.kt:23\n\nFull stack from TEST-lava.securestorage.EndpointConverterTest.xml:\njava.lang.IllegalStateException: DELIBERATE BREAK 0.5: Endpoint.Mirror branch removed\n\tat lava.securestorage.model.EndpointConverter.toJson(EndpointConverter.kt:15)\n\tat lava.securestorage.EndpointConverterTest.convert Mirror to json (EndpointConverterTest.kt:23)\n\n10 tests completed, 1 failed",
+  "reverted": "git checkout -- core/preferences/src/main/kotlin/lava/securestorage/model/EndpointConverter.kt — post-revert re-run: BUILD SUCCESSFUL, all 10 tests pass; `git status --short` clean",
+  "ledger_clause": "6.A"
+}
