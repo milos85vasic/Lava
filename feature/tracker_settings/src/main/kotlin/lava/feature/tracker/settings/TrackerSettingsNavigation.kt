@@ -1,4 +1,4 @@
-package lava.feature.tracker_settings
+package lava.feature.tracker.settings
 
 import lava.navigation.NavigationController
 import lava.navigation.model.NavigationGraphBuilder

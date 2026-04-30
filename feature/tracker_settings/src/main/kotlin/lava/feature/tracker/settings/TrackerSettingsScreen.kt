@@ -1,4 +1,4 @@
-package lava.feature.tracker_settings
+package lava.feature.tracker.settings
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -24,10 +24,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import lava.feature.tracker_settings.components.AddCustomMirrorDialog
+import lava.feature.tracker.settings.components.AddCustomMirrorDialog
 import lava.navigation.viewModel
-import lava.feature.tracker_settings.components.MirrorListSection
-import lava.feature.tracker_settings.components.TrackerSelectorList
+import lava.feature.tracker.settings.components.MirrorListSection
+import lava.feature.tracker.settings.components.TrackerSelectorList
 
 /**
  * Top-level Tracker Settings screen. Composes the four pieces:

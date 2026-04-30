@@ -1,4 +1,4 @@
-package lava.feature.tracker_settings.components
+package lava.feature.tracker.settings.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Row

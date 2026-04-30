@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "lava.feature.tracker_settings"
+    namespace = "lava.feature.tracker.settings"
 
     testOptions {
         unitTests {

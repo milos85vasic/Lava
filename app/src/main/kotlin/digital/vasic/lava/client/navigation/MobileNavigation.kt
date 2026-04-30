@@ -9,8 +9,8 @@ import lava.designsystem.component.Page
 import lava.designsystem.component.PagesScreen
 import lava.designsystem.drawables.LavaIcons
 import lava.favorites.FavoritesScreen
-import lava.feature.tracker_settings.addTrackerSettings
-import lava.feature.tracker_settings.openTrackerSettings
+import lava.feature.tracker.settings.addTrackerSettings
+import lava.feature.tracker.settings.openTrackerSettings
 import lava.forum.ForumScreen
 import lava.forum.bookmarks.BookmarksScreen
 import lava.forum.category.addCategory

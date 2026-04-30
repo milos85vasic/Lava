@@ -1,4 +1,4 @@
-package lava.feature.tracker_settings
+package lava.feature.tracker.settings
 
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider

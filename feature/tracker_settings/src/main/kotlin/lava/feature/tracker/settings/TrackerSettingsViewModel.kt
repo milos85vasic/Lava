@@ -1,4 +1,4 @@
-package lava.feature.tracker_settings
+package lava.feature.tracker.settings
 
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel

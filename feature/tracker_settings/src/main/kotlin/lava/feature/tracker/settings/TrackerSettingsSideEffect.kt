@@ -1,4 +1,4 @@
-package lava.feature.tracker_settings
+package lava.feature.tracker.settings
 
 /**
  * MVI side effects for the Tracker Settings screen. Added in SP-3a Phase 4

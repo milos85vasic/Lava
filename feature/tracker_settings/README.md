@@ -91,7 +91,7 @@ onClick = { navController.openTrackerSettings() }
 `TrackerSettingsViewModelTest` exercises every action through real
 `UserMirrorRepository` + in-memory `MirrorHealthRepository` fakes. No
 mocking of `LavaTrackerSdk`, `UserMirrorRepository`, or any class in
-`lava.feature.tracker_settings.*`.
+`lava.feature.tracker.settings.*`.
 
 Per the Anti-Bluff Pact (Sixth + Seventh Laws):
 
