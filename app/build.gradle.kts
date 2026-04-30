@@ -105,6 +105,7 @@ dependencies {
     implementation(project(":feature:search_input"))
     implementation(project(":feature:search_result"))
     implementation(project(":feature:topic"))
+    implementation(project(":feature:tracker_settings"))
     implementation(project(":feature:visited"))
 
     implementation(libs.androidx.activity.compose)
@@ -113,6 +114,7 @@ dependencies {
     implementation(libs.kotlinx.coroutines.core)
 
     implementation(libs.bundles.orbit)
+    implementation(libs.bundles.work)
 
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.crashlytics)

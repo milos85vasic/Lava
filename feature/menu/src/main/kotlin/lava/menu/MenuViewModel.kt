@@ -64,7 +64,13 @@ internal class MenuViewModel @Inject constructor(
             is MenuAction.SetEndpoint -> onSetEndpoint(action.endpoint)
             is MenuAction.SetFavoritesSyncPeriod -> onSetFavoritesSyncPeriod(action.syncPeriod)
             is MenuAction.SetTheme -> onSetTheme(action.theme)
+            is MenuAction.TrackerSettingsClick -> onTrackerSettingsClick()
         }
+    }
+
+    /** SP-3a Phase 4 (Task 4.19). */
+    private fun onTrackerSettingsClick() = intent {
+        postSideEffect(MenuSideEffect.OpenTrackerSettings)
     }
 
     private fun discoverLocalEndpoints() = intent {

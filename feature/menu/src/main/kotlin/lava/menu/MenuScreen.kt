@@ -76,10 +76,14 @@ import java.util.*
 import lava.designsystem.R as DsR
 
 @Composable
-fun MenuScreen(openLogin: () -> Unit) {
+fun MenuScreen(
+    openLogin: () -> Unit,
+    openTrackerSettings: () -> Unit = {},
+) {
     MenuScreen(
         viewModel = viewModel(),
         openLogin = openLogin,
+        openTrackerSettings = openTrackerSettings,
     )
 }
 
@@ -87,6 +91,7 @@ fun MenuScreen(openLogin: () -> Unit) {
 private fun MenuScreen(
     viewModel: MenuViewModel,
     openLogin: () -> Unit,
+    openTrackerSettings: () -> Unit = {},
 ) {
     val openLinkHandler = LocalOpenLinkHandler.current
     val confirmationDialogState = rememberConfirmationDialogState()
@@ -102,6 +107,7 @@ private fun MenuScreen(
             is MenuSideEffect.OpenConnectionSettings -> {
                 openConnectionSettings = true
             }
+            is MenuSideEffect.OpenTrackerSettings -> openTrackerSettings()
             is MenuSideEffect.ShowConfirmation -> {
                 confirmationDialogState.show(
                     title = sideEffect.title,
@@ -158,6 +164,11 @@ private fun MenuScreen(
             onSelect = { theme -> onAction(SetTheme(theme)) },
         )
         endpointSelectionItem(openConnectionSettings, onConnectionSettingsShown)
+        // SP-3a Phase 4 (Task 4.19): entry to the multi-tracker settings screen.
+        menuItem(
+            text = { Text("Trackers") },
+            onClick = { onAction(MenuAction.TrackerSettingsClick) },
+        )
         menuSyncSelectionItem(
             title = { Text(stringResource(R.string.menu_settings_favorites_sync)) },
             items = SyncPeriod.entries,

@@ -9,6 +9,8 @@ import lava.designsystem.component.Page
 import lava.designsystem.component.PagesScreen
 import lava.designsystem.drawables.LavaIcons
 import lava.favorites.FavoritesScreen
+import lava.feature.tracker_settings.addTrackerSettings
+import lava.feature.tracker_settings.openTrackerSettings
 import lava.forum.ForumScreen
 import lava.forum.bookmarks.BookmarksScreen
 import lava.forum.category.addCategory
@@ -42,6 +44,10 @@ fun MobileNavigation(navigationController: NavigationController) {
     MobileNavigation(navigationController) {
         with(navigationController) {
             addLogin(
+                back = ::popBackStack,
+                animations = NavigationAnimations.ScaleInOutAnimation,
+            )
+            addTrackerSettings(
                 back = ::popBackStack,
                 animations = NavigationAnimations.ScaleInOutAnimation,
             )
@@ -83,6 +89,7 @@ fun MobileNavigation(navigationController: NavigationController) {
                 openSearchInput = { openSearchInput(it) },
                 openLogin = { openLogin() },
                 openTopic = { openTopic(it) },
+                openTrackerSettings = { openTrackerSettings() },
             )
         }
     }
@@ -93,6 +100,7 @@ private fun addNestedNavigation(
     openSearchInput: (id: String) -> Unit,
     openLogin: () -> Unit,
     openTopic: (id: String) -> Unit,
+    openTrackerSettings: () -> Unit,
 ) = addDestination {
     val navigationBarItems = remember { BottomRoute.entries.map(BottomRoute::navigationBarItem) }
     val navigationController = rememberNestedNavigationController()
@@ -115,6 +123,7 @@ private fun addNestedNavigation(
             )
             addMenu(
                 openLogin = openLogin,
+                openTrackerSettings = openTrackerSettings,
             )
         }
     }
@@ -217,10 +226,16 @@ private fun addTopics(
 context(NavigationGraphBuilder, NavigationController)
 private fun addMenu(
     openLogin: () -> Unit,
+    openTrackerSettings: () -> Unit,
 ) = addDestination(
     route = BottomRoute.Menu.route,
     animations = BottomRoute.Menu.animations,
-    content = { MenuScreen(openLogin = openLogin) },
+    content = {
+        MenuScreen(
+            openLogin = openLogin,
+            openTrackerSettings = openTrackerSettings,
+        )
+    },
 )
 
 private enum class BottomRoute(val navigationBarItem: NavigationBarItem) {

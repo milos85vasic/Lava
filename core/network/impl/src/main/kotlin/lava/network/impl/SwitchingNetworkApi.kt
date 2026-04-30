@@ -169,6 +169,13 @@ class SwitchingNetworkApi @Inject constructor(
                     outcome.reason,
                     outcome.cause,
                 )
+                // SP-3a Phase 4 (Task 4.7): legacy NetworkApi has no surface
+                // for cross-tracker fallback proposals. Surface the failure
+                // identically to Failure for now; the new SDK callers
+                // (e.g. :feature:tracker_settings) handle the proposal
+                // directly.
+                is BrowseOutcome.CrossTrackerFallbackProposed ->
+                    throw IllegalStateException("All ${outcome.failedTrackerId} mirrors unavailable")
             }
         } else {
             api().getCategory(id, page)
@@ -215,6 +222,8 @@ class SwitchingNetworkApi @Inject constructor(
                 outcome.reason,
                 outcome.cause,
             )
+            is SearchOutcome.CrossTrackerFallbackProposed ->
+                throw IllegalStateException("All ${outcome.failedTrackerId} mirrors unavailable")
         }
     } else {
         api().getSearchPage(

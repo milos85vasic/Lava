@@ -29,8 +29,21 @@ import javax.inject.Singleton
 class LavaMirrorManagerHolder @Inject constructor(
     private val registry: TrackerRegistry,
     private val configLoader: MirrorConfigLoader,
-    private val probeFactory: HealthProbeFactory = DefaultHealthProbeFactory,
 ) {
+    /**
+     * Test-only constructor that swaps the default network-backed
+     * [DefaultHealthProbe] for a stub. Hilt uses the @Inject constructor
+     * above, which always picks up [DefaultHealthProbeFactory].
+     */
+    constructor(
+        registry: TrackerRegistry,
+        configLoader: MirrorConfigLoader,
+        probeFactory: HealthProbeFactory,
+    ) : this(registry, configLoader) {
+        this.probeFactory = probeFactory
+    }
+
+    private var probeFactory: HealthProbeFactory = DefaultHealthProbeFactory
 
     private val managers = HashMap<String, MirrorManager>()
     private val mutex = Mutex()
