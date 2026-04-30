@@ -12,8 +12,10 @@ import lava.database.dao.FavoriteSearchDao
 import lava.database.dao.FavoriteTopicDao
 import lava.database.dao.ForumCategoryDao
 import lava.database.dao.ForumMetadataDao
+import lava.database.dao.MirrorHealthDao
 import lava.database.dao.SearchHistoryDao
 import lava.database.dao.SuggestDao
+import lava.database.dao.UserMirrorDao
 import lava.database.dao.VisitedTopicDao
 import lava.database.entity.BookmarkEntity
 import lava.database.entity.EndpointEntity
@@ -21,8 +23,10 @@ import lava.database.entity.FavoriteSearchEntity
 import lava.database.entity.FavoriteTopicEntity
 import lava.database.entity.ForumCategoryEntity
 import lava.database.entity.ForumMetadata
+import lava.database.entity.MirrorHealthEntity
 import lava.database.entity.SearchHistoryEntity
 import lava.database.entity.SuggestEntity
+import lava.database.entity.UserMirrorEntity
 import lava.database.entity.VisitedTopicEntity
 
 @Database(
@@ -33,11 +37,13 @@ import lava.database.entity.VisitedTopicEntity
         FavoriteTopicEntity::class,
         ForumCategoryEntity::class,
         ForumMetadata::class,
+        MirrorHealthEntity::class,
         SearchHistoryEntity::class,
         SuggestEntity::class,
+        UserMirrorEntity::class,
         VisitedTopicEntity::class,
     ],
-    version = 6,
+    version = 7,
     exportSchema = true,
 )
 @TypeConverters(Converters::class)
@@ -48,8 +54,10 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun favoritesSearchDao(): FavoriteSearchDao
     abstract fun forumCategoryDao(): ForumCategoryDao
     abstract fun forumMetadataDao(): ForumMetadataDao
+    abstract fun mirrorHealthDao(): MirrorHealthDao
     abstract fun searchHistoryDao(): SearchHistoryDao
     abstract fun suggestDao(): SuggestDao
+    abstract fun userMirrorDao(): UserMirrorDao
     abstract fun visitedTopicDao(): VisitedTopicDao
 
     companion object {
@@ -87,6 +95,44 @@ abstract class AppDatabase : RoomDatabase() {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL("DELETE FROM Endpoint WHERE type = 'Proxy'")
                 db.execSQL("DELETE FROM Endpoint WHERE type = 'Mirror' AND host LIKE '%:%'")
+            }
+        }
+
+        /**
+         * SP-3a Phase 4 (Task 4.1, 2026-04-30). Adds the multi-tracker SDK
+         * persistence layer:
+         *  - `tracker_mirror_health` — per-(tracker, mirror) HEALTHY/DEGRADED/
+         *    UNHEALTHY/UNKNOWN snapshot, populated by the periodic
+         *    `MirrorHealthCheckWorker` and rehydrated into the SDK's
+         *    in-memory `MirrorManager` on app start.
+         *  - `tracker_mirror_user` — user-supplied custom mirror URLs that
+         *    layer on top of the bundled `mirrors.json` (user entries
+         *    supersede bundled at the same URL).
+         *
+         * Both tables use composite (tracker_id, mirror_url|url) primary keys
+         * to allow the same URL across trackers without collision while
+         * rejecting duplicates within a single tracker.
+         */
+        val MIGRATION_6_7 = object : Migration(6, 7) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `tracker_mirror_health` (" +
+                        "`tracker_id` TEXT NOT NULL, " +
+                        "`mirror_url` TEXT NOT NULL, " +
+                        "`state` TEXT NOT NULL, " +
+                        "`last_check_at` INTEGER, " +
+                        "`consecutive_failures` INTEGER NOT NULL, " +
+                        "PRIMARY KEY(`tracker_id`, `mirror_url`))",
+                )
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `tracker_mirror_user` (" +
+                        "`tracker_id` TEXT NOT NULL, " +
+                        "`url` TEXT NOT NULL, " +
+                        "`priority` INTEGER NOT NULL, " +
+                        "`protocol` TEXT NOT NULL, " +
+                        "`added_at` INTEGER NOT NULL, " +
+                        "PRIMARY KEY(`tracker_id`, `url`))",
+                )
             }
         }
     }

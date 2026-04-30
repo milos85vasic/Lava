@@ -11,6 +11,7 @@ import lava.database.AppDatabase
 import lava.database.AppDatabase.Companion.MIGRATION_3_4
 import lava.database.AppDatabase.Companion.MIGRATION_4_5
 import lava.database.AppDatabase.Companion.MIGRATION_5_6
+import lava.database.AppDatabase.Companion.MIGRATION_6_7
 import javax.inject.Singleton
 
 @Module
@@ -27,6 +28,7 @@ object DatabaseModule {
             .addMigrations(MIGRATION_3_4)
             .addMigrations(MIGRATION_4_5)
             .addMigrations(MIGRATION_5_6)
+            .addMigrations(MIGRATION_6_7)
             .fallbackToDestructiveMigration(true)
             .build()
 }

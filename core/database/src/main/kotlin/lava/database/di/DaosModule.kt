@@ -27,8 +27,10 @@ import lava.database.dao.FavoriteSearchDao
 import lava.database.dao.FavoriteTopicDao
 import lava.database.dao.ForumCategoryDao
 import lava.database.dao.ForumMetadataDao
+import lava.database.dao.MirrorHealthDao
 import lava.database.dao.SearchHistoryDao
 import lava.database.dao.SuggestDao
+import lava.database.dao.UserMirrorDao
 import lava.database.dao.VisitedTopicDao
 import javax.inject.Singleton
 
@@ -76,4 +78,14 @@ object DaosModule {
     @Singleton
     fun providesVisitedTopicDao(appDatabase: AppDatabase): VisitedTopicDao =
         appDatabase.visitedTopicDao()
+
+    @Provides
+    @Singleton
+    fun providesMirrorHealthDao(appDatabase: AppDatabase): MirrorHealthDao =
+        appDatabase.mirrorHealthDao()
+
+    @Provides
+    @Singleton
+    fun providesUserMirrorDao(appDatabase: AppDatabase): UserMirrorDao =
+        appDatabase.userMirrorDao()
 }
