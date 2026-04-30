@@ -13,6 +13,77 @@ The `<code>` suffix is the integer version code (Android `versionCode`, api-go `
 
 ---
 
+## Lava-Android-1.2.0-1020 — 2026-05-01
+
+First release of the **multi-tracker SDK foundation** (SP-3a). The
+Android client now supports two trackers — RuTracker (existing) and
+RuTor (new) — with user-selectable active tracker, custom mirrors,
+mirror health tracking, and an explicit cross-tracker fallback flow.
+
+### Added
+- **RuTor (rutor.info / rutor.is) tracker support** — anonymous-by-
+  default per decision 7b-ii; capabilities `SEARCH + TOPIC + DOWNLOAD`.
+- **Tracker selection UI in Settings → Trackers** — list of registered
+  trackers, single-tap to switch the active tracker, per-tracker
+  health summary.
+- **Custom mirror entry per tracker** — operators can add mirrors
+  beyond the bundled defaults; persisted in Room
+  (`tracker_mirror_user`).
+- **Mirror health tracking** — periodic `MirrorHealthCheckWorker`
+  (15-min interval) probes each registered mirror; status
+  `HEALTHY` / `DEGRADED` / `UNHEALTHY` persisted in
+  `tracker_mirror_health`.
+- **Cross-tracker fallback modal** — when all mirrors of the active
+  tracker hit `UNHEALTHY`, the SDK emits
+  `CrossTrackerFallbackProposed`; the UI presents a modal offering
+  the alternative tracker. Accept → re-issues the call on the alt
+  tracker; dismiss → explicit failure UI (snackbar). No silent
+  fallback.
+- **`docs/sdk-developer-guide.md` (partial draft)** — 7-step recipe
+  for adding a third tracker, paper-traced through the existing
+  RuTor module.
+- **8 Compose UI Challenge Tests** under
+  `app/src/androidTest/kotlin/lava/app/challenges/` (C1-C8) — each
+  with a documented falsifiability rehearsal protocol.
+
+### Changed
+- **Internal: RuTracker implementation now fully decoupled behind
+  the multi-tracker SDK.** `core/network/rutracker` git-moved to
+  `core/tracker/rutracker`. `RuTrackerClient` implements
+  `TrackerClient` + applicable feature interfaces (Searchable,
+  Browsable, Topic, Comments, Favorites, Authenticatable,
+  Downloadable). `SwitchingNetworkApi` now delegates to
+  `LavaTrackerSdk` rather than to a single hard-wired client.
+- **New `vasic-digital/Tracker-SDK` submodule mounted at
+  `Submodules/Tracker-SDK/`.** Generic primitives (registry,
+  mirror-config store, test scaffolding). Pin is **frozen by
+  default** per the Decoupled Reusable Architecture rule. Mirrored
+  to GitHub + GitLab (2-upstream scope per 2026-04-30 spec
+  deviation).
+
+### Constitutional
+- **Added clauses 6.D (Behavioral Coverage Contract), 6.E (Capability
+  Honesty), 6.F (Anti-Bluff Submodule Inheritance) to root
+  `CLAUDE.md`** and cascaded to `core/CLAUDE.md`,
+  `feature/CLAUDE.md`, `lava-api-go/{CLAUDE,AGENTS}.md`,
+  `Submodules/Tracker-SDK/{CLAUDE,CONSTITUTION,AGENTS}.md`, and
+  root `AGENTS.md`.
+- **Added the Seventh Law (Anti-Bluff Enforcement, all 7 clauses)**
+  with mechanical pre-push hook enforcement at `.githooks/pre-push`:
+  Bluff-Audit commit-message stamp on every test commit, mock-the-
+  SUT pattern rejection, hosted-CI config rejection.
+- **Local-Only CI/CD apparatus** materialized as `scripts/ci.sh`
+  (single entry point, three modes), `scripts/check-fixture-
+  freshness.sh`, `scripts/check-constitution.sh`. Pre-push hook
+  runs `scripts/ci.sh --changed-only`. Tag script enforces an
+  Android evidence-pack gate at
+  `.lava-ci-evidence/Lava-Android-<version>/`.
+
+### Fixed
+- (none — this release is feature-additive)
+
+---
+
 ## Lava-API-Go-2.0.6-2006 — 2026-04-29
 
 Critical bugfix release. **Upgrade strongly recommended** for any 2.0.x deployment — every prior 2.0.x build had at least one of the four root causes below silently breaking authenticated endpoints.
