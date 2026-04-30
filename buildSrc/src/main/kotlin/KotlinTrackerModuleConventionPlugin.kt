@@ -16,14 +16,13 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
  * Pre-wires:
  *   - java-library + kotlin.jvm + serialization
  *   - Static analysis (Spotless / ktlint) via [StaticAnalysisConventionPlugin]
- *   - api dependency on `:core:tracker:api` (the in-repo Lava domain interfaces; created in
- *     Task 1.32 — until then this reference is a forward declaration that Gradle resolves lazily)
+ *   - api dependency on `:core:tracker:api`
  *   - api dependency on `lava.sdk:api` and `lava.sdk:mirror` from the Tracker-SDK submodule.
  *     These module coordinates are substituted to the included build's projects via
- *     `dependencySubstitution` in `settings.gradle.kts` (see Task 1.31).
+ *     `dependencySubstitution` in `settings.gradle.kts`.
  *   - implementation: Jsoup, OkHttp, kotlinx-serialization-json, kotlinx-coroutines-core
  *   - testImplementation: JUnit4, kotlinx-coroutines-test, mockk, `:core:tracker:testing`
- *     and `lava.sdk:testing` (substituted to the SDK's :testing project)
+ *     and `lava.sdk:testing`
  */
 class KotlinTrackerModuleConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
@@ -35,28 +34,17 @@ class KotlinTrackerModuleConventionPlugin : Plugin<Project> {
                 apply(StaticAnalysisConventionPlugin::class.java)
             }
 
-            // Tracker modules consume `lava.sdk:api` / `:mirror` from the
-            // Tracker-SDK composite build. The SDK compiles with the JDK
-            // running Gradle (JDK 21 on the operator's machine) and
-            // advertises a JVM 21 minimum. To keep dependency resolution
-            // happy without modifying the SDK pin, this plugin matches
-            // that level at JVM 21 — Android-side tracker glue
-            // (anything that ends up in the APK) passes through Lava's
-            // android library convention plugin, which still targets
-            // JVM 17. Pure-JVM tracker modules and their tests run on
-            // the JDK 21 launcher, so JVM 21 here is safe.
             tasks.withType<JavaCompile>().configureEach {
-                sourceCompatibility = JavaVersion.VERSION_21.toString()
-                targetCompatibility = JavaVersion.VERSION_21.toString()
+                sourceCompatibility = JavaVersion.VERSION_17.toString()
+                targetCompatibility = JavaVersion.VERSION_17.toString()
             }
             tasks.withType<KotlinJvmCompile>().configureEach {
-                compilerOptions { jvmTarget.set(JvmTarget.JVM_21) }
+                compilerOptions { jvmTarget.set(JvmTarget.JVM_17) }
             }
 
             val libs = extensions.getByType<VersionCatalogsExtension>().named("libs")
 
             dependencies {
-                // In-repo Lava domain interfaces (Task 1.32 will create this module).
                 add("api", project(":core:tracker:api"))
 
                 // Tracker-SDK projects, addressable as external modules. The composite build

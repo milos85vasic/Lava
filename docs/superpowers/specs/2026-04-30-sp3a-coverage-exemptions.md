@@ -92,7 +92,26 @@ the `lava-api-go` service in `docker-compose.yml`, the author MUST:
 **Audit linkage:** Task 0.6 evidence at
 `.lava-ci-evidence/sp3a-bluff-audit/0.6-healthprobe-contract.json`.
 
-### LF-3 — Tracker chain compiles to JVM 21 while Android targets JVM 17 (linked: Phase 2 Section A)
+### LF-3 — Tracker chain compiles to JVM 21 while Android targets JVM 17 (linked: Phase 2 Section A) — **RESOLVED in Phase 2 Section E wrap-up**
+
+**Resolution (2026-04-30):** mitigation trigger #1 applied. Tracker-SDK
+submodule commit `b779fda` adds `subprojects { ... jvmTarget = JVM_17 }`
+to `Submodules/Tracker-SDK/build.gradle.kts`, pinning every SDK subproject
+to JVM 17. Lava's three JVM 17→21 overrides reverted (KotlinTrackerModuleConventionPlugin,
+core/tracker/api/build.gradle.kts, core/tracker/testing/build.gradle.kts).
+Submodule pin updated in Lava to `b779fda`. Build verified GREEN end-to-end:
+`:core:tracker:api`, `:core:tracker:testing`, `:core:tracker:rutracker:test`
+all compile and test against JVM 17 toolchain.
+
+Submodule commit landed locally on branch `sp3a-jvm17-target`; mirror push
+to GitHub + GitLab is a separate operator action (per Decoupled Reusable
+Architecture rule "Submodule fetch/pull is an EXPLICIT operator action").
+
+The original observation below is preserved for forensic context.
+
+---
+
+
 
 **Locations:**
 - `buildSrc/src/main/kotlin/KotlinTrackerModuleConventionPlugin.kt`
