@@ -30,6 +30,6 @@ class RuTrackerTopic @Inject constructor(
     override suspend fun getTopicPage(id: String, page: Int): TopicPage {
         val token = tokenProvider.getToken()
         val dto = getTopicPage(token, id, page)
-        return mapper.toTopicPage(dto)
+        return mapper.toTopicPage(dto, currentPage = page)
     }
 }

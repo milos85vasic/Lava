@@ -13,7 +13,7 @@ import javax.inject.Inject
  * tracker-api [SearchResult]. Stub here; populated in Task 2.14.
  */
 class SearchPageMapper @Inject constructor() {
-    fun toSearchResult(dto: SearchPageDto): SearchResult {
+    fun toSearchResult(dto: SearchPageDto, currentPage: Int): SearchResult {
         TODO("populated in Task 2.14")
     }
 }

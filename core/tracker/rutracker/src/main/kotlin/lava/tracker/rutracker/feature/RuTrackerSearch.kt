@@ -34,6 +34,6 @@ class RuTrackerSearch @Inject constructor(
             period = legacy.period,
             page = page,
         )
-        return mapper.toSearchResult(dto)
+        return mapper.toSearchResult(dto, currentPage = page)
     }
 }

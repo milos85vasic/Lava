@@ -22,7 +22,7 @@ class RuTrackerComments @Inject constructor(
     override suspend fun getComments(topicId: String, page: Int): CommentsPage {
         val token = tokenProvider.getToken()
         val dto = getCommentsPage(token, topicId, page)
-        return mapper.toCommentsPage(dto)
+        return mapper.toCommentsPage(dto, currentPage = page)
     }
 
     override suspend fun addComment(topicId: String, message: String): Boolean {

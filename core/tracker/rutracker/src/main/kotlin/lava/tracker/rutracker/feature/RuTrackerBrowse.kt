@@ -24,13 +24,17 @@ class RuTrackerBrowse @Inject constructor(
     override suspend fun browse(category: String?, page: Int): BrowseResult {
         // The legacy UseCase requires a non-null category id (forum id). Browsing
         // without an id is not a rutracker concept — callers should walk the
-        // forum tree first. Mappers in Task 2.16 will define the failure shape.
-        val id = category ?: error("RuTracker browse requires a forum category id")
-        val dto = getCategoryPage(id, page)
-        return categoryMapper.toBrowseResult(dto)
+        // forum tree first. require() throws IllegalArgumentException, which is
+        // the correct contract-violation idiom (vs. error()'s IllegalStateException).
+        require(category != null) { "RuTracker browse requires a forum category id" }
+        val dto = getCategoryPage(category, page)
+        return categoryMapper.toBrowseResult(dto, currentPage = page)
     }
 
-    override suspend fun getForumTree(): ForumTree {
+    override suspend fun getForumTree(): ForumTree? {
+        // RuTracker always serves a forum tree, so this never returns null in
+        // practice — but the override matches BrowsableTracker's nullable return
+        // so trackers without a forum tree (e.g. RuTor) can satisfy the contract.
         val dto = getForum()
         return forumMapper.toForumTree(dto)
     }

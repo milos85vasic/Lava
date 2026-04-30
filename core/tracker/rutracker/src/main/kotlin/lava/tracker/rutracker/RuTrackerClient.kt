@@ -1,5 +1,6 @@
 package lava.tracker.rutracker
 
+import lava.tracker.api.TrackerCapability
 import lava.tracker.api.TrackerClient
 import lava.tracker.api.TrackerDescriptor
 import lava.tracker.api.TrackerFeature
@@ -41,15 +42,24 @@ class RuTrackerClient @Inject constructor(
     override suspend fun healthCheck(): Boolean = auth.checkAuthAlive()
 
     @Suppress("UNCHECKED_CAST")
-    override fun <T : TrackerFeature> getFeature(featureClass: KClass<T>): T? = when (featureClass) {
-        SearchableTracker::class -> search as T
-        BrowsableTracker::class -> browse as T
-        TopicTracker::class -> topic as T
-        CommentsTracker::class -> comments as T
-        FavoritesTracker::class -> favorites as T
-        AuthenticatableTracker::class -> auth as T
-        DownloadableTracker::class -> download as T
-        else -> null
+    override fun <T : TrackerFeature> getFeature(featureClass: KClass<T>): T? {
+        // Capability Honesty (clause 6.E): a feature impl is exposed only if the
+        // matching capability is in descriptor.capabilities. The gate is no-op
+        // today because RuTrackerDescriptor declares all 7 capabilities, but it
+        // is load-bearing for future descriptor mutations (e.g. disabling
+        // FAVORITES via descriptor change should make getFeature(FavoritesTracker::class)
+        // return null without touching this code).
+        val caps = descriptor.capabilities
+        return when (featureClass) {
+            SearchableTracker::class -> if (TrackerCapability.SEARCH in caps) search as T else null
+            BrowsableTracker::class -> if (TrackerCapability.BROWSE in caps) browse as T else null
+            TopicTracker::class -> if (TrackerCapability.TOPIC in caps) topic as T else null
+            CommentsTracker::class -> if (TrackerCapability.COMMENTS in caps) comments as T else null
+            FavoritesTracker::class -> if (TrackerCapability.FAVORITES in caps) favorites as T else null
+            AuthenticatableTracker::class -> if (TrackerCapability.AUTH_REQUIRED in caps) auth as T else null
+            DownloadableTracker::class -> if (TrackerCapability.TORRENT_DOWNLOAD in caps) download as T else null
+            else -> null
+        }
     }
 
     override fun close() {

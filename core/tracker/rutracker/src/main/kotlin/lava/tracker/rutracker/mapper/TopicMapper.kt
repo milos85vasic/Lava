@@ -19,7 +19,7 @@ class TopicMapper @Inject constructor() {
         TODO("populated in Task 2.17")
     }
 
-    fun toTopicPage(dto: TopicPageDto): TopicPage {
+    fun toTopicPage(dto: TopicPageDto, currentPage: Int): TopicPage {
         TODO("populated in Task 2.17")
     }
 }

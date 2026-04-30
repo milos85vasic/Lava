@@ -134,3 +134,36 @@ dexing the moment the tracker registry lands on the dependency graph.
 
 **Audit linkage:** Phase 2 Section A spec compliance review (commit landing the
 LF-3 entry).
+
+### LF-5 — RuTrackerDescriptor declares UPLOAD + USER_PROFILE without feature interfaces (linked: Phase 2 Section C)
+
+**Location:** `core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker/RuTrackerDescriptor.kt`
+
+**Observation:** Phase 2 Section B (Task 2.6) populated `RuTrackerDescriptor.capabilities`
+with the full 12-capability set including `TrackerCapability.UPLOAD` and
+`TrackerCapability.USER_PROFILE`. As of Phase 2 Section C end-of-task, the new
+`:core:tracker:api` package does NOT define `UploadableTracker` or `ProfileTracker`
+feature interfaces. Consequently `RuTrackerClient.getFeature<T>()` cannot return a
+non-null impl for those two capabilities — the `KClass<T>` for the missing
+interfaces does not exist as a dispatch key in the `when` switch.
+
+**Constitutional clause 6.E literal:** "capability declared in descriptor ⇒ this
+returns non-null". The current code SATISFIES this letter-of-the-law because no
+caller can construct `getFeature(UploadableTracker::class)` — the type doesn't
+exist. But the descriptor is making a forward-looking claim that no impl backs.
+Treat as a latent finding rather than an immediate violation.
+
+**Mitigation trigger:** before Phase 4 (cross-tracker fallback policy), one of
+the following MUST be true:
+1. `:core:tracker:api` defines `UploadableTracker` and `ProfileTracker`, and
+   `RuTrackerClient.getFeature<T>()` resolves both to working impls (which then
+   wrap appropriate UseCases — `UploadTorrentUseCase` exists already; profile
+   fetching exists via `GetCurrentProfileUseCase` / `GetProfileUseCase`).
+2. The two capabilities are removed from `RuTrackerDescriptor.capabilities` to
+   match the actual feature surface.
+
+The first option is the better outcome (the rutracker scrapers already support
+both surfaces in `RuTrackerInnerApi`); the second is the safe fallback.
+
+**Audit linkage:** Phase 2 Section C spec + code-quality review (commit landing
+the LF-5 entry).

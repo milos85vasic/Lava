@@ -9,7 +9,7 @@ import javax.inject.Inject
  * tracker-api [CommentsPage]. Stub here; populated in Task 2.18.
  */
 class CommentsMapper @Inject constructor() {
-    fun toCommentsPage(dto: CommentsPageDto): CommentsPage {
+    fun toCommentsPage(dto: CommentsPageDto, currentPage: Int): CommentsPage {
         TODO("populated in Task 2.18")
     }
 }
