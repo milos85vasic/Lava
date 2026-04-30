@@ -43,7 +43,7 @@ import org.junit.Rule
 import org.junit.Test
 
 @HiltAndroidTest
-class C7_CrossTrackerFallbackAcceptTest {
+class Challenge07CrossTrackerFallbackAcceptTest {
 
     @get:Rule(order = 0)
     val hiltRule = HiltAndroidRule(this)
@@ -73,8 +73,10 @@ class C7_CrossTrackerFallbackAcceptTest {
                 .fetchSemanticsNodes()
                 .isNotEmpty()
         }
-        composeRule.onNodeWithText("All RuTracker mirrors are unhealthy",
-            substring = true)
+        composeRule.onNodeWithText(
+            "All RuTracker mirrors are unhealthy",
+            substring = true,
+        )
             .assertIsDisplayed()
         composeRule.onNodeWithText("Try RuTor", substring = true)
             .assertIsDisplayed()

@@ -1,8 +1,8 @@
 {
   "challenge_id": "C7",
   "name": "Cross-tracker fallback modal accept",
-  "test_class": "lava.app.challenges.C7_CrossTrackerFallbackAcceptTest",
-  "test_file": "app/src/androidTest/kotlin/lava/app/challenges/C7_CrossTrackerFallbackAcceptTest.kt",
+  "test_class": "lava.app.challenges.Challenge07CrossTrackerFallbackAcceptTest",
+  "test_file": "app/src/androidTest/kotlin/lava/app/challenges/Challenge07CrossTrackerFallbackAcceptTest.kt",
   "spec_reference": "Task 5.15",
   "operator_attestation_required": true,
   "status": "PENDING_OPERATOR",
@@ -15,7 +15,7 @@
     "revert_step": "Restore the original outcome dispatch in LavaTrackerSdk.search()."
   },
   "operator_run_instructions": [
-    "./gradlew :app:connectedDebugAndroidTest --tests \"lava.app.challenges.C7_CrossTrackerFallbackAcceptTest\" -PsimulateRuTrackerUnhealthy=true",
+    "./gradlew :app:connectedDebugAndroidTest --tests \"lava.app.challenges.Challenge07CrossTrackerFallbackAcceptTest\" -PsimulateRuTrackerUnhealthy=true",
     "Capture screenshots: (a) modal with 'Try RuTor' button, (b) RuTor results banner after accept.",
     "Perform falsifiability mutation, re-run, capture verbatim failure assertion, revert."
   ]

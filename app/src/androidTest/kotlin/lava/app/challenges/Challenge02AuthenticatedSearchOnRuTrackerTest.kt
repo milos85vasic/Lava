@@ -40,7 +40,7 @@ import org.junit.Rule
 import org.junit.Test
 
 @HiltAndroidTest
-class C2_AuthenticatedSearchOnRuTrackerTest {
+class Challenge02AuthenticatedSearchOnRuTrackerTest {
 
     @get:Rule(order = 0)
     val hiltRule = HiltAndroidRule(this)

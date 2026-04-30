@@ -1,8 +1,8 @@
 {
   "challenge_id": "C4",
   "name": "Switch tracker and re-search",
-  "test_class": "lava.app.challenges.C4_SwitchTrackerAndResearchTest",
-  "test_file": "app/src/androidTest/kotlin/lava/app/challenges/C4_SwitchTrackerAndResearchTest.kt",
+  "test_class": "lava.app.challenges.Challenge04SwitchTrackerAndResearchTest",
+  "test_file": "app/src/androidTest/kotlin/lava/app/challenges/Challenge04SwitchTrackerAndResearchTest.kt",
   "spec_reference": "Task 5.12",
   "operator_attestation_required": true,
   "status": "PENDING_OPERATOR",
@@ -14,7 +14,7 @@
     "revert_step": "Restore the assignment in switchTracker()."
   },
   "operator_run_instructions": [
-    "./gradlew :app:connectedDebugAndroidTest --tests \"lava.app.challenges.C4_SwitchTrackerAndResearchTest\"",
+    "./gradlew :app:connectedDebugAndroidTest --tests \"lava.app.challenges.Challenge04SwitchTrackerAndResearchTest\"",
     "Capture screenshots: (a) RuTracker results, (b) RuTor (active) badge, (c) RuTor results banner.",
     "Perform falsifiability mutation, re-run, capture verbatim failure, revert."
   ]

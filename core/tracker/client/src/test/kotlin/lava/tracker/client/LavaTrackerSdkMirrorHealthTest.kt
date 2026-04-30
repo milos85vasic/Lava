@@ -163,8 +163,10 @@ class LavaTrackerSdkMirrorHealthTest {
 
         val states = sdk.observeMirrorHealth("rutracker").first()
         assertEquals(2, states.size)
-        assertTrue("All mirrors should be HEALTHY after a healthy probe",
-            states.all { it.health == HealthState.HEALTHY })
+        assertTrue(
+            "All mirrors should be HEALTHY after a healthy probe",
+            states.all { it.health == HealthState.HEALTHY },
+        )
     }
 
     // CHALLENGE

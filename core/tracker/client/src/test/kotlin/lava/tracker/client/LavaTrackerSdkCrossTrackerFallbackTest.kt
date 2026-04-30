@@ -15,9 +15,7 @@ import lava.tracker.api.AuthType
 import lava.tracker.api.TrackerCapability
 import lava.tracker.api.TrackerClient
 import lava.tracker.api.TrackerDescriptor
-import lava.tracker.api.model.SearchRequest
 import lava.tracker.api.model.SearchResult
-import lava.tracker.api.model.TorrentItem
 import lava.tracker.client.persistence.LavaMirrorManagerHolder
 import lava.tracker.client.persistence.MirrorConfigLoader
 import lava.tracker.client.persistence.MirrorHealthRepository

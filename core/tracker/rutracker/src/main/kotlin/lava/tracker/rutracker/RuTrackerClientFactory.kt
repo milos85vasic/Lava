@@ -1,11 +1,11 @@
 package lava.tracker.rutracker
 
-import javax.inject.Inject
-import javax.inject.Provider
 import lava.sdk.api.PluginConfig
 import lava.tracker.api.TrackerClient
 import lava.tracker.api.TrackerDescriptor
 import lava.tracker.registry.TrackerClientFactory
+import javax.inject.Inject
+import javax.inject.Provider
 
 /**
  * [TrackerClientFactory] for the RuTracker plugin. Hilt instantiates this and the

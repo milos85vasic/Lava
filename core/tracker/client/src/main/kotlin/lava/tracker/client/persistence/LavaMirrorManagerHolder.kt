@@ -4,7 +4,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlin.time.Duration.Companion.seconds
 import lava.sdk.api.MirrorState
 import lava.sdk.mirror.DefaultHealthProbe
 import lava.sdk.mirror.DefaultMirrorManager
@@ -14,6 +13,7 @@ import lava.sdk.mirror.MirrorManager
 import lava.tracker.registry.TrackerRegistry
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * Holds one [MirrorManager] per registered tracker. Lazy: the manager for

@@ -35,7 +35,7 @@ import org.junit.Rule
 import org.junit.Test
 
 @HiltAndroidTest
-class C5_ViewTopicDetailTest {
+class Challenge05ViewTopicDetailTest {
 
     @get:Rule(order = 0)
     val hiltRule = HiltAndroidRule(this)

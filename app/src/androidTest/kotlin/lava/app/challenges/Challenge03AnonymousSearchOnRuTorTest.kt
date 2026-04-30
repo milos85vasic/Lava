@@ -36,7 +36,7 @@ import org.junit.Rule
 import org.junit.Test
 
 @HiltAndroidTest
-class C3_AnonymousSearchOnRuTorTest {
+class Challenge03AnonymousSearchOnRuTorTest {
 
     @get:Rule(order = 0)
     val hiltRule = HiltAndroidRule(this)

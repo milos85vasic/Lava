@@ -1,8 +1,8 @@
 {
   "challenge_id": "C2",
   "name": "Authenticated search on RuTracker",
-  "test_class": "lava.app.challenges.C2_AuthenticatedSearchOnRuTrackerTest",
-  "test_file": "app/src/androidTest/kotlin/lava/app/challenges/C2_AuthenticatedSearchOnRuTrackerTest.kt",
+  "test_class": "lava.app.challenges.Challenge02AuthenticatedSearchOnRuTrackerTest",
+  "test_file": "app/src/androidTest/kotlin/lava/app/challenges/Challenge02AuthenticatedSearchOnRuTrackerTest.kt",
   "spec_reference": "Task 5.10",
   "operator_attestation_required": true,
   "status": "PENDING_OPERATOR",
@@ -17,7 +17,7 @@
   "operator_run_instructions": [
     "Connect a physical Android device with internet access.",
     "./gradlew :app:installDebug",
-    "./gradlew :app:connectedDebugAndroidTest --tests \"lava.app.challenges.C2_AuthenticatedSearchOnRuTrackerTest\" -PrutrackerLogin=nobody85perfect -PrutrackerPassword=ironman1985",
+    "./gradlew :app:connectedDebugAndroidTest --tests \"lava.app.challenges.Challenge02AuthenticatedSearchOnRuTrackerTest\" -PrutrackerLogin=nobody85perfect -PrutrackerPassword=ironman1985",
     "Capture screenshots: (a) authenticated 'Logged in' badge, (b) search result list with at least one row showing size + seeders.",
     "Perform the falsifiability mutation, re-run, capture failure assertion verbatim, revert."
   ]

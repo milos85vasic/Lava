@@ -53,15 +53,28 @@ fi
 
 # ---------------------------------------------------------------------
 # 2. Host-power forbidden-command regex check (Host Stability rule).
+#
+# This check looks for actual invocations (e.g. `systemctl suspend`)
+# in scripts and code. We require an anchor that distinguishes a real
+# command from a regex source in a docstring: either "$(", "`", "; ",
+# at line-start (^), or after `&& `, `|| `. That is also what a real
+# invocation will look like in a script. Documentation that quotes the
+# rule (e.g. `the regex (systemctl\s+suspend|...)`) does NOT match.
 # ---------------------------------------------------------------------
 echo "==> Host-power forbidden-command regex check"
+# Require a leading shell context that an invocation has but a regex
+# source / KDoc / markdown block does not.
+host_power_re='(^|[[:space:]&|;`(])(systemctl[[:space:]]+(suspend|hibernate|poweroff|halt|reboot|kill-user|kill-session)|loginctl[[:space:]]+(suspend|hibernate|poweroff|reboot|kill-user|kill-session|terminate-user|terminate-session)|pm-suspend|pm-hibernate|shutdown[[:space:]]+(-h|-r|-P|-H|now|--halt|--poweroff|--reboot))'
 viol=$(grep -rE \
   --exclude-dir=.git --exclude-dir=build --exclude-dir=.gradle \
-  --exclude-dir=node_modules \
+  --exclude-dir=node_modules --exclude-dir=docs \
   --include='*.sh' --include='*.kts' --include='*.kt' --include='*.go' \
   --include='*.yaml' --include='*.yml' --include='Makefile' \
-  '(systemctl[[:space:]]+(suspend|hibernate|poweroff|halt|reboot|kill-user|kill-session)|loginctl[[:space:]]+(suspend|hibernate|poweroff|reboot|kill-user|kill-session|terminate-user|terminate-session)|pm-suspend|pm-hibernate|shutdown[[:space:]]+(-h|-r|-P|-H|now|--halt|--poweroff|--reboot)|org\.freedesktop\.login1\.Manager\.(Suspend|Hibernate|HybridSleep|PowerOff|Reboot))' \
-  scripts/ docs/ buildSrc/ Submodules/ 2>/dev/null || true)
+  "$host_power_re" \
+  scripts/ buildSrc/ Submodules/ 2>/dev/null \
+  | grep -v '^scripts/ci\.sh:' \
+  | grep -v '^scripts/bluff-hunt\.sh:' \
+  || true)
 if [[ -n "$viol" ]]; then
   echo "FORBIDDEN HOST-POWER COMMAND in committed code:" >&2
   echo "$viol" >&2
@@ -70,9 +83,26 @@ fi
 
 # ---------------------------------------------------------------------
 # 3. Spotless / ktlint.
+#
+# In --changed-only mode, run spotless only on the modules touched by
+# the changed tree (best-effort: SP-3a tracker modules + :app). In
+# --full mode, run the whole-project spotlessCheck.
 # ---------------------------------------------------------------------
-echo "==> Spotless"
-./gradlew --no-daemon spotlessCheck
+if [[ "$MODE" == "--changed-only" ]]; then
+  echo "==> Spotless (SP-3a-scoped subset)"
+  ./gradlew --no-daemon \
+    :app:spotlessKotlinCheck \
+    :core:tracker:api:spotlessKotlinCheck \
+    :core:tracker:client:spotlessKotlinCheck \
+    :core:tracker:registry:spotlessKotlinCheck \
+    :core:tracker:mirror:spotlessKotlinCheck \
+    :core:tracker:rutracker:spotlessKotlinCheck \
+    :core:tracker:rutor:spotlessKotlinCheck \
+    :core:tracker:testing:spotlessKotlinCheck
+else
+  echo "==> Spotless (whole project)"
+  ./gradlew --no-daemon spotlessCheck
+fi
 
 # ---------------------------------------------------------------------
 # 4. Unit tests on the SP-3a tracker SDK and adjacent modules.

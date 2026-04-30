@@ -1,8 +1,8 @@
 {
   "challenge_id": "C5",
   "name": "View topic detail",
-  "test_class": "lava.app.challenges.C5_ViewTopicDetailTest",
-  "test_file": "app/src/androidTest/kotlin/lava/app/challenges/C5_ViewTopicDetailTest.kt",
+  "test_class": "lava.app.challenges.Challenge05ViewTopicDetailTest",
+  "test_file": "app/src/androidTest/kotlin/lava/app/challenges/Challenge05ViewTopicDetailTest.kt",
   "spec_reference": "Task 5.13",
   "operator_attestation_required": true,
   "status": "PENDING_OPERATOR",
@@ -14,7 +14,7 @@
     "revert_step": "Restore the description mapping."
   },
   "operator_run_instructions": [
-    "./gradlew :app:connectedDebugAndroidTest --tests \"lava.app.challenges.C5_ViewTopicDetailTest\"",
+    "./gradlew :app:connectedDebugAndroidTest --tests \"lava.app.challenges.Challenge05ViewTopicDetailTest\"",
     "Capture screenshot of TopicDetail screen showing title, description block, file list, magnet button.",
     "Perform falsifiability mutation, re-run, capture verbatim failure, revert."
   ]

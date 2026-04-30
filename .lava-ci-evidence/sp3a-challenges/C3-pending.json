@@ -1,8 +1,8 @@
 {
   "challenge_id": "C3",
   "name": "Anonymous search on RuTor",
-  "test_class": "lava.app.challenges.C3_AnonymousSearchOnRuTorTest",
-  "test_file": "app/src/androidTest/kotlin/lava/app/challenges/C3_AnonymousSearchOnRuTorTest.kt",
+  "test_class": "lava.app.challenges.Challenge03AnonymousSearchOnRuTorTest",
+  "test_file": "app/src/androidTest/kotlin/lava/app/challenges/Challenge03AnonymousSearchOnRuTorTest.kt",
   "spec_reference": "Task 5.11",
   "operator_attestation_required": true,
   "status": "PENDING_OPERATOR",
@@ -14,7 +14,7 @@
     "revert_step": "Re-add TrackerCapability.SEARCH to the capabilities set."
   },
   "operator_run_instructions": [
-    "./gradlew :app:connectedDebugAndroidTest --tests \"lava.app.challenges.C3_AnonymousSearchOnRuTorTest\"",
+    "./gradlew :app:connectedDebugAndroidTest --tests \"lava.app.challenges.Challenge03AnonymousSearchOnRuTorTest\"",
     "Capture screenshot of search results from rutor.info or rutor.is.",
     "Perform falsifiability mutation, re-run, capture failure assertion verbatim, revert."
   ]

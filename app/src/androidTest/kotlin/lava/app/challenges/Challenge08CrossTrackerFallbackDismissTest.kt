@@ -43,7 +43,7 @@ import org.junit.Rule
 import org.junit.Test
 
 @HiltAndroidTest
-class C8_CrossTrackerFallbackDismissTest {
+class Challenge08CrossTrackerFallbackDismissTest {
 
     @get:Rule(order = 0)
     val hiltRule = HiltAndroidRule(this)

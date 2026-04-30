@@ -37,7 +37,7 @@ import org.junit.Test
 import java.io.File
 
 @HiltAndroidTest
-class C6_DownloadTorrentFileTest {
+class Challenge06DownloadTorrentFileTest {
 
     @get:Rule(order = 0)
     val hiltRule = HiltAndroidRule(this)
@@ -83,16 +83,22 @@ class C6_DownloadTorrentFileTest {
         val torrentFile = downloadsDir.listFiles()
             ?.firstOrNull { it.length() > 0 }
             ?: error("No non-empty torrent file written to $downloadsDir")
-        assertTrue("Torrent file too small: ${torrentFile.length()} bytes",
-            torrentFile.length() > 100)
+        assertTrue(
+            "Torrent file too small: ${torrentFile.length()} bytes",
+            torrentFile.length() > 100,
+        )
 
         // Bencoded torrent files start with 'd' and contain '4:info'.
         // The 'info' dictionary contains 'pieces' (SHA1 hashes).
         val bytes = torrentFile.readBytes()
-        assertTrue("File does not start with bencoded dict marker 'd'",
-            bytes.isNotEmpty() && bytes[0] == 'd'.code.toByte())
+        assertTrue(
+            "File does not start with bencoded dict marker 'd'",
+            bytes.isNotEmpty() && bytes[0] == 'd'.code.toByte(),
+        )
         val text = String(bytes, Charsets.ISO_8859_1)
-        assertTrue("info.pieces field not present in bencoded torrent",
-            text.contains("6:pieces"))
+        assertTrue(
+            "info.pieces field not present in bencoded torrent",
+            text.contains("6:pieces"),
+        )
     }
 }

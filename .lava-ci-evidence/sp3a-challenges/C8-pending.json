@@ -1,8 +1,8 @@
 {
   "challenge_id": "C8",
   "name": "Cross-tracker fallback modal dismiss",
-  "test_class": "lava.app.challenges.C8_CrossTrackerFallbackDismissTest",
-  "test_file": "app/src/androidTest/kotlin/lava/app/challenges/C8_CrossTrackerFallbackDismissTest.kt",
+  "test_class": "lava.app.challenges.Challenge08CrossTrackerFallbackDismissTest",
+  "test_file": "app/src/androidTest/kotlin/lava/app/challenges/Challenge08CrossTrackerFallbackDismissTest.kt",
   "spec_reference": "Task 5.16",
   "operator_attestation_required": true,
   "status": "PENDING_OPERATOR",
@@ -15,7 +15,7 @@
     "revert_step": "Restore the dismiss handler so it surfaces the failure UI without re-issuing the search."
   },
   "operator_run_instructions": [
-    "./gradlew :app:connectedDebugAndroidTest --tests \"lava.app.challenges.C8_CrossTrackerFallbackDismissTest\" -PsimulateRuTrackerUnhealthy=true",
+    "./gradlew :app:connectedDebugAndroidTest --tests \"lava.app.challenges.Challenge08CrossTrackerFallbackDismissTest\" -PsimulateRuTrackerUnhealthy=true",
     "Capture screenshots: (a) modal with Cancel tap, (b) Snackbar 'Search failed', (c) absence of RuTor results.",
     "Perform falsifiability mutation, re-run, capture verbatim failure assertion, revert."
   ]

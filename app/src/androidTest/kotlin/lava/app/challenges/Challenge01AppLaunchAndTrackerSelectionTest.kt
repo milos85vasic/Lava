@@ -44,7 +44,7 @@ import org.junit.Rule
 import org.junit.Test
 
 @HiltAndroidTest
-class C1_AppLaunchAndTrackerSelectionTest {
+class Challenge01AppLaunchAndTrackerSelectionTest {
 
     @get:Rule(order = 0)
     val hiltRule = HiltAndroidRule(this)

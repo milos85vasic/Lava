@@ -1,5 +1,6 @@
 package lava.tracker.rutor
 
+import kotlinx.coroutines.test.runTest
 import lava.tracker.api.feature.AuthenticatableTracker
 import lava.tracker.api.feature.SearchableTracker
 import lava.tracker.api.feature.TopicTracker
@@ -17,7 +18,6 @@ import lava.tracker.rutor.parser.RuTorCommentsParser
 import lava.tracker.rutor.parser.RuTorLoginParser
 import lava.tracker.rutor.parser.RuTorSearchParser
 import lava.tracker.rutor.parser.RuTorTopicParser
-import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
