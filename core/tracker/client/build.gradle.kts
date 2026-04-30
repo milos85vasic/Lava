@@ -6,6 +6,12 @@ plugins {
 
 android {
     namespace = "lava.tracker.client"
+
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = true
+        }
+    }
 }
 
 dependencies {
@@ -16,9 +22,12 @@ dependencies {
     api(project(":core:tracker:rutor"))
 
     implementation(project(":core:auth:api"))
+    implementation(project(":core:database"))
 
     implementation(libs.javax.inject)
+    implementation(libs.bundles.work)
     implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.kotlinx.datetime)
     implementation(libs.ktor.client.core)
     implementation(libs.ktor.client.okhttp)
     implementation(libs.ktor.client.logging)
@@ -28,5 +37,8 @@ dependencies {
     testImplementation(libs.junit4)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.mockk)
+    testImplementation(libs.bundles.room)
+    testImplementation(libs.androidx.test.core)
+    testImplementation(libs.robolectric)
     testImplementation(project(":core:tracker:testing"))
 }
