@@ -1,10 +1,19 @@
 package lava.network.impl
 
+import lava.data.api.repository.SettingsRepository
+import lava.models.settings.Endpoint
+import lava.models.settings.isLocalHost
 import lava.network.api.NetworkApi
 import lava.network.data.NetworkApiRepository
+import lava.network.dto.auth.AuthResponseDto
 import lava.network.dto.search.SearchPeriodDto
 import lava.network.dto.search.SearchSortOrderDto
 import lava.network.dto.search.SearchSortTypeDto
+import lava.tracker.api.model.AuthState
+import lava.tracker.api.model.CaptchaSolution
+import lava.tracker.api.model.LoginRequest
+import lava.tracker.client.LavaTrackerSdk
+import lava.tracker.rutracker.mapper.RuTrackerDtoMappers
 import javax.inject.Inject
 
 // SP-3a-2.32: When the active endpoint is public rutracker.org (i.e. an
@@ -13,7 +22,7 @@ import javax.inject.Inject
 // the new SDK-based path. Any other endpoint (LAN proxy, GoApi, LAN Mirror)
 // falls through to the existing NetworkApiRepository wiring untouched.
 //
-// Method routing decided in Task 2.32:
+// Method routing decided in Task 2.32 (see commit body):
 //   checkAuthorized -> sdk.checkAuth() -> AuthState.Authenticated boolean
 //   login           -> sdk.login(LoginRequest) -> mappers.loginResultToDto
 //   getFavorites    -> sdk.getFavorites() -> mappers.favoritesToDto
@@ -40,12 +49,41 @@ import javax.inject.Inject
 
 class SwitchingNetworkApi @Inject constructor(
     private val networkApiRepository: NetworkApiRepository,
+    private val sdk: LavaTrackerSdk,
+    private val mappers: RuTrackerDtoMappers,
+    private val settingsRepository: SettingsRepository,
 ) : NetworkApi {
 
     private suspend fun api(): NetworkApi = networkApiRepository.getApi()
 
-    override suspend fun checkAuthorized(token: String) =
-        api().checkAuthorized(token)
+    /**
+     * SDK delegation guard. Returns true iff the active endpoint is a
+     * public rutracker host (direct rutracker.org or a non-LAN mirror host).
+     *
+     * The SDK's HttpClient is pinned to `https://rutracker.org/forum/` (see
+     * TrackerClientModule) and has no per-endpoint switching — therefore we
+     * only delegate to it when the legacy path would have ALSO chosen the
+     * direct rutracker route (NetworkApiRepositoryImpl.rutrackerApi). LAN
+     * endpoints (GoApi or Mirror with localhost host) keep the legacy
+     * NetworkApiRepository path because their wire format is the
+     * Lava-API JSON, not the rutracker HTML scraper.
+     */
+    private suspend fun shouldUseSdk(): Boolean {
+        val endpoint = settingsRepository.getSettings().endpoint
+        return endpoint is Endpoint.RutrackerEndpoint && !endpoint.host.isLocalHost()
+    }
+
+    override suspend fun checkAuthorized(token: String): Boolean {
+        return if (shouldUseSdk()) {
+            // SDK obtains the token via TokenProvider internally; the
+            // explicit `token` parameter is the legacy contract carrier
+            // and is ignored here per Pre-authorized adaptation D.
+            val state = sdk.checkAuth() ?: return api().checkAuthorized(token)
+            state is AuthState.Authenticated
+        } else {
+            api().checkAuthorized(token)
+        }
+    }
 
     override suspend fun login(
         username: String,
@@ -53,7 +91,30 @@ class SwitchingNetworkApi @Inject constructor(
         captchaSid: String?,
         captchaCode: String?,
         captchaValue: String?,
-    ) = api().login(username, password, captchaSid, captchaCode, captchaValue)
+    ): AuthResponseDto {
+        return if (shouldUseSdk()) {
+            val captchaSolution = if (
+                captchaSid != null && captchaCode != null && captchaValue != null
+            ) {
+                CaptchaSolution(sid = captchaSid, code = captchaCode, value = captchaValue)
+            } else {
+                null
+            }
+            val request = LoginRequest(
+                username = username,
+                password = password,
+                captcha = captchaSolution,
+            )
+            // login returns null only when the active tracker has no AUTH
+            // capability — rutracker always does, so this path falls back
+            // to the legacy api() if a future tracker omits AUTH.
+            val result = sdk.login(request)
+                ?: return api().login(username, password, captchaSid, captchaCode, captchaValue)
+            mappers.loginResultToDto(result)
+        } else {
+            api().login(username, password, captchaSid, captchaCode, captchaValue)
+        }
+    }
 
     override suspend fun getFavorites(token: String) =
         api().getFavorites(token)
