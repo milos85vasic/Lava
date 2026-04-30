@@ -5,6 +5,8 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import lava.sdk.api.MapPluginConfig
 import lava.sdk.api.MirrorState
+import lava.sdk.api.MirrorUnavailableException
+import lava.tracker.api.TrackerCapability
 import lava.tracker.api.TrackerClient
 import lava.tracker.api.TrackerDescriptor
 import lava.tracker.api.feature.AuthenticatableTracker
@@ -66,6 +68,7 @@ class LavaTrackerSdk @Inject constructor(
     private val mirrorManagerHolder: LavaMirrorManagerHolder? = null,
     private val mirrorHealthRepository: MirrorHealthRepository? = null,
     private val mirrorConfigLoader: MirrorConfigLoader? = null,
+    private val crossTrackerFallback: CrossTrackerFallbackPolicy? = null,
 ) {
     private var activeTrackerId: String = DEFAULT_TRACKER_ID
 
@@ -97,15 +100,43 @@ class LavaTrackerSdk @Inject constructor(
                 reason = "tracker '$trackerId' does not support SEARCH",
                 triedTrackers = listOf(trackerId),
             )
-        return try {
-            SearchOutcome.Success(result = feature.search(request, page), viaTracker = trackerId)
-        } catch (t: Throwable) {
-            SearchOutcome.Failure(
-                reason = t.message ?: "search failed",
-                triedTrackers = listOf(trackerId),
-                cause = t,
-            )
-        }
+        return runWithMirrorFallback(
+            trackerId = trackerId,
+            capability = TrackerCapability.SEARCH,
+            op = { feature.search(request, page) },
+            wrapSuccess = { SearchOutcome.Success(it, viaTracker = trackerId) },
+            wrapFailure = { reason, cause ->
+                SearchOutcome.Failure(
+                    reason = reason,
+                    triedTrackers = listOf(trackerId),
+                    cause = cause,
+                )
+            },
+            wrapFallback = { proposed ->
+                SearchOutcome.CrossTrackerFallbackProposed(
+                    failedTrackerId = trackerId,
+                    proposedTrackerId = proposed.trackerId,
+                    capability = TrackerCapability.SEARCH,
+                    resumeWith = {
+                        val altClient = registry.get(proposed.trackerId, MapPluginConfig())
+                        val altFeature = altClient.getFeature(SearchableTracker::class)
+                            ?: return@CrossTrackerFallbackProposed SearchOutcome.Failure(
+                                reason = "alternate tracker '${proposed.trackerId}' does not support SEARCH",
+                                triedTrackers = listOf(trackerId, proposed.trackerId),
+                            )
+                        try {
+                            SearchOutcome.Success(altFeature.search(request, page), viaTracker = proposed.trackerId)
+                        } catch (t: Throwable) {
+                            SearchOutcome.Failure(
+                                reason = t.message ?: "alternate search failed",
+                                triedTrackers = listOf(trackerId, proposed.trackerId),
+                                cause = t,
+                            )
+                        }
+                    },
+                )
+            },
+        )
     }
 
     /**
@@ -121,15 +152,43 @@ class LavaTrackerSdk @Inject constructor(
                 reason = "tracker '$trackerId' does not support BROWSE",
                 triedTrackers = listOf(trackerId),
             )
-        return try {
-            BrowseOutcome.Success(result = feature.browse(category, page), viaTracker = trackerId)
-        } catch (t: Throwable) {
-            BrowseOutcome.Failure(
-                reason = t.message ?: "browse failed",
-                triedTrackers = listOf(trackerId),
-                cause = t,
-            )
-        }
+        return runWithMirrorFallback(
+            trackerId = trackerId,
+            capability = TrackerCapability.BROWSE,
+            op = { feature.browse(category, page) },
+            wrapSuccess = { BrowseOutcome.Success(it, viaTracker = trackerId) },
+            wrapFailure = { reason, cause ->
+                BrowseOutcome.Failure(
+                    reason = reason,
+                    triedTrackers = listOf(trackerId),
+                    cause = cause,
+                )
+            },
+            wrapFallback = { proposed ->
+                BrowseOutcome.CrossTrackerFallbackProposed(
+                    failedTrackerId = trackerId,
+                    proposedTrackerId = proposed.trackerId,
+                    capability = TrackerCapability.BROWSE,
+                    resumeWith = {
+                        val altClient = registry.get(proposed.trackerId, MapPluginConfig())
+                        val altFeature = altClient.getFeature(BrowsableTracker::class)
+                            ?: return@CrossTrackerFallbackProposed BrowseOutcome.Failure(
+                                reason = "alternate tracker '${proposed.trackerId}' does not support BROWSE",
+                                triedTrackers = listOf(trackerId, proposed.trackerId),
+                            )
+                        try {
+                            BrowseOutcome.Success(altFeature.browse(category, page), viaTracker = proposed.trackerId)
+                        } catch (t: Throwable) {
+                            BrowseOutcome.Failure(
+                                reason = t.message ?: "alternate browse failed",
+                                triedTrackers = listOf(trackerId, proposed.trackerId),
+                                cause = t,
+                            )
+                        }
+                    },
+                )
+            },
+        )
     }
 
     /**
@@ -321,6 +380,55 @@ class LavaTrackerSdk @Inject constructor(
         registry.get(activeTrackerId, MapPluginConfig())
 
     // -------------------------------------------------------------------
+    // SP-3a Phase 4 (Task 4.7): cross-tracker fallback wrapper.
+    // -------------------------------------------------------------------
+
+    /**
+     * Common wrapper for outcome-returning SDK methods that need:
+     *  1. Mirror-fallback through [LavaMirrorManagerHolder.managerFor]
+     *     (if a holder is wired).
+     *  2. Cross-tracker fallback proposal via [CrossTrackerFallbackPolicy]
+     *     when the active tracker exhausts every mirror.
+     *
+     * When neither collaborator is wired (legacy unit-test path), the op
+     * runs directly and any throw becomes [wrapFailure].
+     */
+    private suspend inline fun <Result, Outcome> runWithMirrorFallback(
+        trackerId: String,
+        capability: TrackerCapability,
+        crossinline op: suspend () -> Result,
+        crossinline wrapSuccess: (Result) -> Outcome,
+        crossinline wrapFailure: (reason: String, cause: Throwable?) -> Outcome,
+        crossinline wrapFallback: (proposed: TrackerDescriptor) -> Outcome,
+    ): Outcome {
+        val holder = mirrorManagerHolder
+        // Path A: legacy — no holder; run op directly.
+        if (holder == null) {
+            return try {
+                wrapSuccess(op())
+            } catch (t: Throwable) {
+                wrapFailure(t.message ?: "operation failed", t)
+            }
+        }
+        // Path B: holder present — execute via the per-tracker MirrorManager.
+        return try {
+            val manager = holder.managerFor(trackerId)
+            val result = manager.executeWithFallback(trackerId) { _ -> op() }
+            wrapSuccess(result)
+        } catch (e: MirrorUnavailableException) {
+            persistMirrorHealthSnapshot(trackerId)
+            val proposal = crossTrackerFallback?.proposeFallback(trackerId, capability)
+            if (proposal != null) {
+                wrapFallback(proposal)
+            } else {
+                wrapFailure(e.message ?: "all mirrors unavailable", e)
+            }
+        } catch (t: Throwable) {
+            wrapFailure(t.message ?: "operation failed", t)
+        }
+    }
+
+    // -------------------------------------------------------------------
     // SP-3a Phase 4 (Tasks 4.4 / 4.5): mirror health surface.
     // -------------------------------------------------------------------
 
@@ -386,6 +494,25 @@ class LavaTrackerSdk @Inject constructor(
             first()
         } catch (_: NoSuchElementException) {
             emptyList()
+        }
+    }
+
+    /**
+     * Persists the current in-memory MirrorState snapshot to
+     * [MirrorHealthRepository]. Public-internal so the inline
+     * [runWithMirrorFallback] helper can invoke it from feature
+     * call-sites without violating private visibility.
+     */
+    @PublishedApi
+    internal suspend fun persistMirrorHealthSnapshot(trackerId: String) {
+        val holder = mirrorManagerHolder ?: return
+        val repo = mirrorHealthRepository ?: return
+        try {
+            val states = holder.observeHealthOrEmpty(trackerId).firstOrEmpty()
+            repo.upsertAll(trackerId, states)
+        } catch (_: Throwable) {
+            // Snapshot persistence failure is not user-visible here —
+            // the periodic worker will pick up the next probe cycle.
         }
     }
 
