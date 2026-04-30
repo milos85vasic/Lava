@@ -24,7 +24,7 @@ dependencies {
     implementation(project(":core:dispatchers"))
     implementation(project(":core:logger"))
     implementation(project(":core:models"))
-    implementation(project(":core:network:rutracker"))
+    implementation(project(":core:tracker:rutracker"))
 
     implementation(libs.coil.kt)
 

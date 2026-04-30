@@ -11,7 +11,7 @@ import lava.data.api.repository.SettingsRepository
 import lava.models.settings.Endpoint
 import lava.models.settings.isLocalHost
 import lava.network.api.NetworkApi
-import lava.network.api.RuTrackerApiFactory
+import lava.tracker.rutracker.api.RuTrackerApiFactory
 import lava.network.impl.ProxyNetworkApi
 import lava.network.serialization.JsonFactory
 import okhttp3.OkHttpClient

@@ -1,7 +1,7 @@
 package digital.vasic.lava.api.di
 
 import digital.vasic.lava.api.api.HttpClientFactory
-import lava.network.api.RuTrackerApiFactory
+import lava.tracker.rutracker.api.RuTrackerApiFactory
 import org.koin.core.context.GlobalContext
 import org.koin.core.parameter.ParametersDefinition
 import org.koin.core.qualifier.Qualifier

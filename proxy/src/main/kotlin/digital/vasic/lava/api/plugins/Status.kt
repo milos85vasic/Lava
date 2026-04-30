@@ -7,14 +7,14 @@ import io.ktor.server.engine.logError
 import io.ktor.server.plugins.MissingRequestParameterException
 import io.ktor.server.plugins.statuspages.StatusPages
 import io.ktor.server.response.respond
-import lava.network.model.BadRequest
-import lava.network.model.Forbidden
-import lava.network.model.LavaProxyError
-import lava.network.model.NoConnection
-import lava.network.model.NoData
-import lava.network.model.NotFound
-import lava.network.model.Unauthorized
-import lava.network.model.Unknown
+import lava.tracker.rutracker.model.BadRequest
+import lava.tracker.rutracker.model.Forbidden
+import lava.tracker.rutracker.model.LavaProxyError
+import lava.tracker.rutracker.model.NoConnection
+import lava.tracker.rutracker.model.NoData
+import lava.tracker.rutracker.model.NotFound
+import lava.tracker.rutracker.model.Unauthorized
+import lava.tracker.rutracker.model.Unknown
 import java.io.IOException
 
 internal fun Application.configureStatusPages() {

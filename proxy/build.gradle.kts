@@ -32,7 +32,7 @@ dependencies {
     implementation(libs.jmdns)
     implementation(libs.jsoup)
     implementation(libs.koin)
-    implementation(project(":core:network:rutracker"))
+    implementation(project(":core:tracker:rutracker"))
 
     testImplementation(libs.junit4)
 }
