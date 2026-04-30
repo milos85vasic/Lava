@@ -1,8 +1,10 @@
 package lava.tracker.rutracker.mapper
 
 import lava.network.dto.forum.CategoryDto
+import lava.network.dto.forum.CategoryPageDto
 import lava.network.dto.search.SearchPageDto
 import lava.network.dto.topic.AuthorDto
+import lava.network.dto.topic.TopicDto
 import lava.network.dto.topic.TorrentDto
 import lava.network.dto.topic.TorrentStatusDto
 import org.junit.Assert.assertEquals
@@ -35,6 +37,7 @@ class RuTrackerDtoMappersTest {
 
     private val mappers = RuTrackerDtoMappers()
     private val forward = SearchPageMapper()
+    private val browseForward = CategoryPageMapper()
 
     @Test
     fun `searchResultToDto round-trips a populated SearchPageDto`() {
@@ -81,5 +84,79 @@ class RuTrackerDtoMappersTest {
         assertEquals(0, reversedDto.torrents.size)
         assertEquals(1, reversedDto.pages)
         assertEquals(1, reversedDto.page)
+    }
+
+    @Test
+    fun `browseResultToDto round-trips mixed Torrent and Topic rows`() {
+        val originalDto = CategoryPageDto(
+            category = CategoryDto(id = "33", name = "OS Distros"),
+            page = 3,
+            pages = 11,
+            sections = null,
+            children = null,
+            topics = listOf(
+                TorrentDto(
+                    id = "111",
+                    title = "TorrentRow",
+                    author = AuthorDto(id = "u1id", name = "u1"),
+                    category = CategoryDto(id = "33", name = "OS Distros"),
+                    status = TorrentStatusDto.Approved,
+                    seeds = 10,
+                    leeches = 2,
+                    size = "1.0 GB",
+                ),
+                TopicDto(
+                    id = "222",
+                    title = "TopicRow (no torrent meta)",
+                    author = AuthorDto(id = "u2id", name = "u2"),
+                    category = CategoryDto(id = "33", name = "OS Distros"),
+                ),
+            ),
+        )
+
+        val firstForward = browseForward.toBrowseResult(originalDto, currentPage = 3)
+        val reversedDto = mappers.browseResultToDto(firstForward)
+        val secondForward = browseForward.toBrowseResult(reversedDto, currentPage = 3)
+
+        assertEquals(
+            "forward(reverse(forward(dto))) must equal forward(dto) for browse pages",
+            firstForward,
+            secondForward,
+        )
+        assertEquals(2, reversedDto.topics?.size)
+        // The TopicDto branch must be preserved across reverse — the forward
+        // mapper relies on `metadata["rutracker.kind"] == "topic"` to choose
+        // the thin TopicDto path; if the reverse mapper produced a TorrentDto
+        // for a Topic row, the second-forward call would fill seeders=0 and
+        // the equality check above would fail.
+        assertEquals(true, reversedDto.topics?.get(1) is TopicDto)
+    }
+
+    @Test
+    fun `browseResultToDto round-trips an empty topics list with null id collapse`() {
+        // Boundary: legacy CategoryDto.id is nullable. Forward collapses to
+        // "" and reverse must restore null. If the reverse step left "",
+        // re-forward would yield ForumCategory.id = "" but the forward step
+        // also collapses null -> "" so equality holds either way at the
+        // ForumCategory level — but the reversed CategoryDto.id should still
+        // be null to match the original DTO contract.
+        val originalDto = CategoryPageDto(
+            category = CategoryDto(id = null, name = "Root"),
+            page = 1,
+            pages = 1,
+            sections = null,
+            children = null,
+            topics = emptyList(),
+        )
+
+        val firstForward = browseForward.toBrowseResult(originalDto, currentPage = 1)
+        val reversedDto = mappers.browseResultToDto(firstForward)
+        val secondForward = browseForward.toBrowseResult(reversedDto, currentPage = 1)
+
+        assertEquals(firstForward, secondForward)
+        // Anti-Bluff Pact (third law): null-id collapse must round-trip
+        // exactly per Section D's empty-string-as-null contract.
+        assertEquals(null, reversedDto.category.id)
+        assertEquals("Root", reversedDto.category.name)
     }
 }

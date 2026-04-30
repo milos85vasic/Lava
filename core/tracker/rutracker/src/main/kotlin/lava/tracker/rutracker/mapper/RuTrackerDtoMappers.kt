@@ -8,12 +8,14 @@ import lava.network.dto.search.SearchPageDto
 import lava.network.dto.topic.AuthorDto
 import lava.network.dto.topic.CommentsPageDto
 import lava.network.dto.topic.ForumTopicDto
+import lava.network.dto.topic.TopicDto
 import lava.network.dto.topic.TopicPageDto
 import lava.network.dto.topic.TorrentDto
 import lava.network.dto.topic.TorrentStatusDto
 import lava.network.dto.user.FavoritesDto
 import lava.tracker.api.model.BrowseResult
 import lava.tracker.api.model.CommentsPage
+import lava.tracker.api.model.ForumCategory
 import lava.tracker.api.model.ForumTree
 import lava.tracker.api.model.LoginResult
 import lava.tracker.api.model.SearchResult
@@ -61,7 +63,18 @@ class RuTrackerDtoMappers @Inject constructor() {
         torrents = result.items.map { it.toTorrentDto() },
     )
 
-    fun browseResultToDto(result: BrowseResult): CategoryPageDto = TODO("Task 2.24")
+    fun browseResultToDto(result: BrowseResult): CategoryPageDto {
+        val topics: List<ForumTopicDto> = result.items.map { it.toForumTopicDto() }
+        val category = result.category?.toCategoryDto() ?: CategoryDto(id = null, name = "")
+        return CategoryPageDto(
+            category = category,
+            page = result.currentPage,
+            pages = result.totalPages,
+            sections = null,
+            children = category.children,
+            topics = topics,
+        )
+    }
 
     fun forumTreeToDto(tree: ForumTree): ForumDto = TODO("Task 2.25")
 
@@ -123,5 +136,62 @@ private fun TorrentItem.toTorrentDto(): TorrentDto {
         leeches = item.leechers,
         magnetLink = item.magnetUri,
         description = null,
+    )
+}
+
+/**
+ * Reverse of [TopicDto.toTorrentItem]. Used when the
+ * forward mapper recorded `metadata["rutracker.kind"] = "topic"` to mark
+ * the row as a thin TopicDto rather than a full TorrentDto. TopicDto
+ * carries no seed/leech/size/magnet/date fields.
+ */
+private fun TorrentItem.toTopicDto(): TopicDto {
+    val item = this
+    val categoryId = item.metadata["rutracker.categoryId"]
+    val categoryName = item.metadata["rutracker.categoryName"] ?: item.category
+    val category: CategoryDto? = if (categoryId != null || categoryName != null) {
+        CategoryDto(id = categoryId, name = categoryName.orEmpty())
+    } else {
+        null
+    }
+    val authorId = item.metadata["rutracker.authorId"]
+    val author: AuthorDto? = authorId?.let { AuthorDto(id = it, name = it) }
+    return TopicDto(
+        id = item.torrentId,
+        title = item.title,
+        author = author,
+        category = category,
+    )
+}
+
+/**
+ * Discriminate between `TorrentDto` and `TopicDto` based on the
+ * `rutracker.kind` metadata key set by the forward mappers
+ * (CategoryPageMapper.toTorrentItemOrNull marks TopicDto rows with
+ * `"rutracker.kind" = "topic"`).
+ *
+ * Note (clause D adaptation): the reverse mapper cannot fully discriminate
+ * `CommentsPageDto` here because the forward path drops it on browse pages.
+ * Per Section D's `CategoryPageMapper.toTorrentItemOrNull`, CommentsPageDto
+ * inputs collapse to null and therefore never reach this reverse path.
+ */
+private fun TorrentItem.toForumTopicDto(): ForumTopicDto =
+    when (metadata["rutracker.kind"]) {
+        "topic" -> toTopicDto()
+        else -> toTorrentDto()
+    }
+
+/**
+ * Reverse of [CategoryDto.toForumCategory]. Restores `id = null` when the
+ * forward mapper collapsed it to "" (Section D ForumDtoMapper documents
+ * this empty-string-as-null contract).
+ */
+private fun ForumCategory.toCategoryDto(): CategoryDto {
+    val mappedChildren = children.takeIf { it.isNotEmpty() }
+        ?.map { it.toCategoryDto() }
+    return CategoryDto(
+        id = id.takeIf { it.isNotEmpty() },
+        name = name,
+        children = mappedChildren,
     )
 }
