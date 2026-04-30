@@ -14,6 +14,7 @@ object RuTrackerDescriptor : TrackerDescriptor {
         MirrorUrl(url = "https://rutracker.net", priority = 1, protocol = Protocol.HTTPS),
         MirrorUrl(url = "https://rutracker.cr", priority = 2, protocol = Protocol.HTTPS),
     )
+
     // SP-3a follow-up (LF-5 RESOLVED, 2026-04-30): UPLOAD and USER_PROFILE
     // were declared on the descriptor but had no matching feature interface
     // in :core:tracker:api/feature/ (no UploadableTracker, no ProfileTracker).
