@@ -5,7 +5,7 @@ import lava.network.dto.forum.ForumDto
 import lava.tracker.rutracker.api.RuTrackerInnerApi
 import org.jsoup.Jsoup
 
-internal class GetForumUseCase(private val api: RuTrackerInnerApi) {
+class GetForumUseCase(private val api: RuTrackerInnerApi) {
 
     suspend operator fun invoke(): ForumDto {
         if (ForumCache.expired()) {

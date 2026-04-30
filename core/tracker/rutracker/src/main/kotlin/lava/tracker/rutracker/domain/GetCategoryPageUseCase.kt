@@ -12,7 +12,7 @@ import lava.tracker.rutracker.model.Forbidden
 import lava.tracker.rutracker.model.NotFound
 import org.jsoup.Jsoup
 
-internal class GetCategoryPageUseCase(private val api: RuTrackerInnerApi) {
+class GetCategoryPageUseCase(private val api: RuTrackerInnerApi) {
 
     suspend operator fun invoke(id: String, page: Int?): CategoryPageDto {
         val html = api.category(id, page)
