@@ -1,0 +1,22 @@
+{
+  "task": "sp3a-3.10",
+  "rule": "Anti-Bluff Pact, Sixth Law clause 2 (Falsifiability)",
+  "subject": "core/tracker/rutor/src/main/kotlin/lava/tracker/rutor/http/RuTorHttpClient.kt",
+  "test": "core/tracker/rutor/src/test/kotlin/lava/tracker/rutor/http/RuTorHttpClientFalsifiabilityTest.kt",
+  "test_method": "semaphore bounds concurrent requests at exactly 4 in flight",
+  "contract": "RuTorHttpClient must serialize all outgoing HTTP calls behind a Semaphore(permits = 4); under load the MockWebServer must observe at most 4 in-flight requests at any one time.",
+  "rehearsal": {
+    "mutation": "Changed Semaphore(permits = 4) to Semaphore(permits = 100) in RuTorHttpClient.kt",
+    "command": "./gradlew :core:tracker:rutor:test --tests 'lava.tracker.rutor.http.RuTorHttpClientFalsifiabilityTest' --no-daemon",
+    "observed_failure": "java.lang.AssertionError: Max in-flight observed must be <= 4 (semaphore bound), was 12",
+    "observed_failure_location": "RuTorHttpClientFalsifiabilityTest.kt:74 (assertTrue line evaluating maxObserved.get() <= 4)",
+    "test_runtime_seconds_under_mutation": 0.379,
+    "reverted": true,
+    "reverted_command": "./gradlew :core:tracker:rutor:test --tests 'lava.tracker.rutor.http.RuTorHttpClientFalsifiabilityTest' --no-daemon",
+    "reverted_result": "BUILD SUCCESSFUL"
+  },
+  "performed_by": "Claude Opus 4.7 (1M context)",
+  "performed_at": "2026-04-30",
+  "host": "nezha (Linux 6.12.61-6.12-alt1)",
+  "notes": "The mutation forced 12 of 12 dispatched requests to overlap at the MockWebServer dispatcher; the assertTrue produced the failure with a clear message naming both the bound and the observed value. After revert, the semaphore re-imposes the 4-permit cap and the test passes. The rehearsal therefore proves the test is wired through the production code path and is genuinely sensitive to a regression that removes the bound. Subsequent SP-3a sections must not relax this test or its bound without re-running the rehearsal and updating this evidence file."
+}
