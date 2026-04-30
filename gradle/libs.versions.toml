@@ -110,6 +110,7 @@ material3 = { group = "com.google.android.material", name = "material", version.
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
 mockk-android = { group = "io.mockk", name = "mockk-android", version.ref = "mockk" }
 okhttp-core = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
+okhttp-mockwebserver = { group = "com.squareup.okhttp3", name = "mockwebserver", version.ref = "okhttp" }
 orbit-compose = { group = "org.orbit-mvi", name = "orbit-compose", version.ref = "orbit" }
 orbit-core = { group = "org.orbit-mvi", name = "orbit-core", version.ref = "orbit" }
 orbit-viewmodel = { group = "org.orbit-mvi", name = "orbit-viewmodel", version.ref = "orbit" }
