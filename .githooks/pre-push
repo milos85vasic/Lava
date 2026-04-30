@@ -1,15 +1,23 @@
 #!/usr/bin/env bash
-# .githooks/pre-push — Seventh Law mechanical enforcement (added 2026-04-30).
+# .githooks/pre-push — layered Anti-Bluff + Local-Only CI gate.
 #
-# Rejects pushes that:
-#   - Introduce hosted-CI configs (Local-Only CI/CD constitutional rule)
-#   - Add/modify *Test.kt without a Bluff-Audit: stamp in the commit message
-#     body (Seventh Law clause 1)
-#   - Match Forbidden Test Patterns (Seventh Law clause 4)
+# Layer 1 (Seventh Law mechanical enforcement, added 2026-04-30):
+#   - Reject hosted-CI configs (Local-Only CI/CD rule).
+#   - Reject test commits without a Bluff-Audit: stamp.
+#   - Reject mock-the-SUT pattern (mockk<XxxClass> in XxxClassTest.kt).
+#
+# Layer 2 (SP-3a Phase 5 Task 5.20, added 2026-04-30):
+#   - Run scripts/ci.sh --changed-only as the local CI gate. This is
+#     the same script developers run by hand and the same that runs
+#     at tag time; it is the single source of truth for "shippable".
+#
+# The two layers are cumulative: violations in either layer reject the
+# push. Layer 1 is the cheap, surgical check; Layer 2 is the broad
+# script-driven gate.
 #
 # Bypass with --no-verify ONLY in operator-documented emergencies (root
 # CLAUDE.md "Local-Only CI/CD" section). Routine bypass is itself a
-# Seventh Law incident.
+# Seventh Law incident and MUST be noted in the next commit message.
 
 set -euo pipefail
 
@@ -80,6 +88,31 @@ if [[ ${#violations[@]} -gt 0 ]]; then
   echo "Documented emergencies: cite the incident ID in the next commit."
   echo "==============================================================="
   exit 1
+fi
+
+# ===== Layer 2: scripts/ci.sh --changed-only =====
+# Per SP-3a Phase 5 Task 5.20: the pre-push hook runs the same local
+# CI gate that runs at tag time, in --changed-only mode (Spotless,
+# unit tests on tracker modules, constitutional doc parser, forbidden-
+# files check, host-power command check). Heavier gates (parity,
+# fixture-freshness, Compose UI Challenge Tests) are deferred to
+# --full mode at tag time.
+#
+# If the operator wishes to push a WIP commit and run the gate
+# manually later, they can bypass with --no-verify and document the
+# emergency per the Local-Only CI/CD rule.
+if [[ -x ./scripts/ci.sh ]]; then
+  echo "==============================================================="
+  echo "Pre-push: invoking scripts/ci.sh --changed-only (SP-3a Layer 2)"
+  echo "==============================================================="
+  if ! ./scripts/ci.sh --changed-only; then
+    echo "==============================================================="
+    echo "PRE-PUSH HOOK REJECTED PUSH — scripts/ci.sh --changed-only failed"
+    echo "==============================================================="
+    echo "Routine bypass (--no-verify) is itself a Seventh Law incident."
+    echo "==============================================================="
+    exit 1
+  fi
 fi
 
 exit 0
