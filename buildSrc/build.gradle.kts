@@ -60,6 +60,10 @@ gradlePlugin {
             id = "lava.kotlin.serialization"
             implementationClass = "KotlinSerializationConventionPlugin"
         }
+        register("kotlinTrackerModuleConvention") {
+            id = "lava.kotlin.tracker.module"
+            implementationClass = "KotlinTrackerModuleConventionPlugin"
+        }
         register("ktorApplication") {
             id = "lava.ktor.application"
             implementationClass = "KtorApplicationConventionPlugin"
