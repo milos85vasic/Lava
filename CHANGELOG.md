@@ -163,6 +163,77 @@ Tracked in
 
 ---
 
+## Lava-API-1.0.2-1002 — 2026-05-01
+
+Maintenance release of the legacy Ktor proxy. Routine patch bump after a clean
+re-build + re-test cycle — no behavioral changes vs `Lava-API-1.0.1-1001`.
+
+### Operational
+- Container image rebuilt against the current Submodules/Containers pin and
+  pushed to `localhost/lava-proxy:dev` via `./build_and_push_docker_image.sh`
+  / `./build_and_release.sh`.
+- Boot verified: `./start.sh --both` brings the proxy up alongside lava-api-go;
+  `lava-containers status` reports `Healthy: true`, LAN IP advertised via
+  mDNS service-type `_lava._tcp.local.` with symmetric TXT records (engine,
+  version, protocols, compression, tls).
+- Real-network smoke: `GET http://localhost:8080/` returns `200 OK` after
+  ~1.7s warmup; `GET /forum` returns 142 KB of legacy Ktor scrape output.
+
+### Constitutional
+- Inherits the new **Seventh Law (Anti-Bluff Enforcement)** added to root
+  `CLAUDE.md` on 2026-04-30. The pre-push hook's Bluff-Audit-stamp gate +
+  forbidden-test-pattern gate apply to all future proxy commits.
+
+### Tests
+- All 18 `lava-api-go` Go test packages green at HEAD; the proxy's
+  Kotlin-side tests inherit the project-wide Spotless / ktlint /
+  unit-test gate run by `scripts/ci.sh --changed-only`.
+
+---
+
+## Lava-API-Go-2.0.7-2007 — 2026-05-01
+
+Maintenance release of the Go API service. Re-anchors the version to the
+post-SP-3a HEAD with all consumer-side constitutional infrastructure
+(submodule mirrors, Seventh Law inheritance, integration-test podman
+runs) verified against real backends.
+
+### Verified — pretag (Sixth Law clause 5 + SP-2 Phase 13.1)
+- `lava-api-go/scripts/pretag-verify.sh` exercised the running api-go
+  on `https://localhost:8443` with all 5 scripted black-box probes:
+  - `GET /` → `200` (5B, 745ms)
+  - `GET /forum` → `200` (142 KB, 920ms)
+  - `GET /search?query=test` → `401` (auth gate honored)
+  - `GET /torrent/1` → `404` (known empty topic)
+  - `GET /favorites` → `401` (auth gate honored)
+- Evidence at `.lava-ci-evidence/1f7f3c0610a353048ef1c3d9daffd41f5aa7f7b1.json`.
+
+### Verified — integration tests against real podman containers
+- **Phase 4.3 cache integration:** 7 tests PASS (1.13s) against
+  `docker.io/postgres:16-alpine` via `scripts/run-test-pg.sh`.
+  Real key generation + Set/Get/Invalidate cycle exercised.
+- **Phase 10.2 e2e:** 6 tests PASS (16.49s). Real Gin engine, real
+  auth middleware, real handlers; no mocks below the SUT.
+- Evidence at `.lava-ci-evidence/sp2-podman-tests-2026-04-30/integration-evidence.json`.
+
+### Constitutional
+- Inherits the new **Seventh Law (Anti-Bluff Enforcement)** with seven
+  mechanically-enforced clauses. `lava-api-go/CLAUDE.md` and
+  `lava-api-go/AGENTS.md` reference the Seventh Law's text in the parent
+  Lava `CLAUDE.md`. Bluff-Audit stamps now mandatory on every Go test
+  commit (`*_test.go`).
+- All 16 vasic-digital submodules consumed by `lava-api-go` (Auth, Cache,
+  Challenges, Concurrency, Config, Containers, Database, Discovery,
+  HTTP3, Mdns, Middleware, Observability, RateLimiter, Recovery, Security,
+  Tracker-SDK) carry the Seventh Law inheritance pointer.
+
+### Mirror status
+- Submodule pin lava-pin/2026-04-30-seventh-law-anchor pushed to GitHub
+  + GitLab for all 13 affected submodules; per-mirror SHA convergence
+  verified via `git ls-remote` per Sixth Law clause 6.C.
+
+---
+
 ## Lava-API-Go-2.0.6-2006 — 2026-04-29
 
 Critical bugfix release. **Upgrade strongly recommended** for any 2.0.x deployment — every prior 2.0.x build had at least one of the four root causes below silently breaking authenticated endpoints.
