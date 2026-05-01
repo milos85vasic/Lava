@@ -21,3 +21,13 @@ tools/lava-containers/bin/
 # identical SHA was redundant. The hook now caches verified SHAs in
 # this file and skips Layer 2 on cache hit. Local-only by design.
 .lava-ci-evidence/.pre-push-verified-shas
+
+# Timestamped scripts/ci.sh run-output dirs are local session telemetry,
+# not committed evidence. The committed evidence files live at the
+# top level of .lava-ci-evidence/ and in named subdirs (sp3a-*/, sp2-*/,
+# bluff-hunt/, sixth-law-incidents/, Lava-Android-*/).
+.lava-ci-evidence/2026-*/
+
+# Build outputs at any depth (already covered for /build but nested
+# modules generate their own build/ dirs)
+**/build/
