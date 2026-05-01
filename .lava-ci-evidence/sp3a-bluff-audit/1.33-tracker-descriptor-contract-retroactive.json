@@ -1,0 +1,19 @@
+{
+  "task": "sp3a-1.33 retro",
+  "subject": "TrackerDescriptorContractTest — retroactive Bluff-Audit per incident 2026-04-30-sp3a-retroactive-stamps",
+  "test_class": "lava.tracker.api.TrackerDescriptorContractTest",
+  "test_methods": [
+    "descriptor exposes id from HasId equal to trackerId",
+    "client returns null for unsupported feature"
+  ],
+  "production_target": "core/tracker/api/src/main/kotlin/lava/tracker/api/TrackerDescriptor.kt (line 9: `override val id: String get() = trackerId`)",
+  "mutation": "Changed the default getter for `id` from `get() = trackerId` to `get() = displayName`. This breaks the contract that `TrackerDescriptor.id` (from HasId) must equal `trackerId`.",
+  "observed_failure": [
+    "descriptor exposes id from HasId equal to trackerId FAILED — org.junit.ComparisonFailure: expected:<[sample]> but was:<[Sample Tracker]> at TrackerDescriptorContractTest.kt:34"
+  ],
+  "reverted": "git checkout -- core/tracker/api/src/main/kotlin/lava/tracker/api/TrackerDescriptor.kt; post-revert ./gradlew :core:tracker:api:test --tests TrackerDescriptorContractTest BUILD SUCCESSFUL (both methods green).",
+  "note_on_second_method": "The second test method (`client returns null for unsupported feature`) was unaffected by the mutation, which correctly demonstrates that the two test methods exercise independent contract surfaces. Test isolation is healthy.",
+  "verified_at_iso": "2026-05-01T08:40:00",
+  "ledger_clause": "6.A + Seventh Law clause 1",
+  "incident_resolved": "2026-04-30-sp3a-retroactive-stamps (sp3a-1.33 substance gap)"
+}

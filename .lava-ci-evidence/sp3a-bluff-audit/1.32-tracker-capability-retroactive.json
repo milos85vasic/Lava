@@ -1,0 +1,19 @@
+{
+  "task": "sp3a-1.32 retro",
+  "subject": "TrackerCapabilityTest — retroactive Bluff-Audit per incident 2026-04-30-sp3a-retroactive-stamps",
+  "test_class": "lava.tracker.api.TrackerCapabilityTest",
+  "test_methods": [
+    "enum has 13 values matching spec",
+    "contains all named capabilities"
+  ],
+  "production_target": "core/tracker/api/src/main/kotlin/lava/tracker/api/TrackerCapability.kt",
+  "mutation": "Commented out the FAVORITES enum value (line 12) so the enum had 12 values instead of 13.",
+  "observed_failure": [
+    "enum has 13 values matching spec FAILED — java.lang.AssertionError: expected:<13> but was:<12>",
+    "contains all named capabilities FAILED — java.lang.AssertionError: expected:<[SEARCH, BROWSE, FORUM, TOPIC, COMMENTS, FAVORITES, TORRENT_DOWNLOAD, MAGNET_LINK, AUTH_REQUIRED, CAPTCHA_LOGIN, RSS, UPLOAD, USER_PROFILE]> but was:<[SEARCH, BROWSE, FORUM, TOPIC, COMMENTS, TORRENT_DOWNLOAD, MAGNET_LINK, AUTH_REQUIRED, CAPTCHA_LOGIN, RSS, UPLOAD, USER_PROFILE]>"
+  ],
+  "reverted": "git checkout -- core/tracker/api/src/main/kotlin/lava/tracker/api/TrackerCapability.kt; post-revert ./gradlew :core:tracker:api:test --tests TrackerCapabilityTest BUILD SUCCESSFUL.",
+  "verified_at_iso": "2026-05-01T08:40:00",
+  "ledger_clause": "6.A + Seventh Law clause 1",
+  "incident_resolved": "2026-04-30-sp3a-retroactive-stamps (sp3a-1.32 substance gap)"
+}
