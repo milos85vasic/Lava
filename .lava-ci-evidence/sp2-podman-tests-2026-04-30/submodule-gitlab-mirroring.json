@@ -1,0 +1,41 @@
+{
+  "task": "submodule-gitlab-mirroring",
+  "subject": "Add GitLab remotes + push 13 missing submodule mirrors per 2-upstream policy",
+  "operator_run_at": "2026-04-30",
+  "context": "Constitutional rule (parent CLAUDE.md): 'Mirror policy applies recursively. Every vasic-digital submodule we own MUST be mirrored to the same set of upstreams Lava itself mirrors to.' SP-3a spec deviation 2026-04-30 reduced submodule scope to 2-upstream (GitHub + GitLab). Tracker-SDK + HTTP3 + Mdns already complied; the other 13 had only GitHub. After Seventh Law propagation (commit e5b213d) the 13 had pushed to GitHub only — this artifact closes the GitLab side.",
+
+  "discovery": {
+    "issue": "glab repo create rejected `Auth/Cache/...` with 'path already taken'",
+    "root_cause": "GitLab normalizes paths to lowercase; repos already exist at gitlab.com/vasic-digital/auth, /cache, etc., even though GitHub uses Capitalized paths.",
+    "resolution": "Add gitlab remote with lowercase URL; existing GitLab repos accept the push."
+  },
+
+  "results": [
+    {"submodule": "Auth", "branch": "lava-pin/2026-04-30-seventh-law-anchor", "sha": "c9dc1b69f2a2", "github": "OK", "gitlab": "OK"},
+    {"submodule": "Cache", "branch": "lava-pin/2026-04-30-seventh-law-anchor", "sha": "3498133d4bb4", "github": "OK", "gitlab": "OK"},
+    {"submodule": "Challenges", "branch": "lava-pin/2026-04-30-seventh-law-anchor", "sha": "ada83bb590fb", "github": "OK", "gitlab": "OK"},
+    {"submodule": "Concurrency", "branch": "lava-pin/2026-04-30-seventh-law-anchor", "sha": "1d583cb859dc", "github": "OK", "gitlab": "OK"},
+    {"submodule": "Config", "branch": "lava-pin/2026-04-30-seventh-law-anchor", "sha": "003cf484a8d7", "github": "OK", "gitlab": "OK"},
+    {"submodule": "Containers", "branch": "lava-pin/2026-04-30-seventh-law-anchor", "sha": "5210376c23b4", "github": "OK", "gitlab": "OK"},
+    {"submodule": "Database", "branch": "lava-pin/2026-04-30-seventh-law-anchor", "sha": "a1f7526a78d9", "github": "OK", "gitlab": "OK"},
+    {"submodule": "Discovery", "branch": "lava-pin/2026-04-30-seventh-law-anchor", "sha": "9c2756234918", "github": "OK", "gitlab": "OK"},
+    {"submodule": "Middleware", "branch": "lava-pin/2026-04-30-seventh-law-anchor", "sha": "6473361f48d6", "github": "OK", "gitlab": "OK"},
+    {"submodule": "Observability", "branch": "lava-pin/2026-04-30-seventh-law-anchor", "sha": "f8eabee30a92", "github": "OK", "gitlab": "OK"},
+    {"submodule": "RateLimiter", "branch": "lava-pin/2026-04-30-seventh-law-anchor", "sha": "6f27d92bf31d", "github": "OK", "gitlab": "OK"},
+    {"submodule": "Recovery", "branch": "lava-pin/2026-04-30-seventh-law-anchor", "sha": "c11eb7e53e25", "github": "OK", "gitlab": "OK"},
+    {"submodule": "Security", "branch": "lava-pin/2026-04-30-seventh-law-anchor", "sha": "83e5ddb53b43", "github": "OK", "gitlab": "OK"}
+  ],
+
+  "convergence_verified": true,
+  "all_13_at_dual_upstream": true,
+  "tracker_sdk_already_compliant": true,
+  "http3_mdns_already_compliant": true,
+  "total_submodules_at_2_upstream": 16,
+
+  "follow_ups": [
+    "Submodule .git/config now records two remotes per repo (origin+gitlab); future submodule pin updates require pushing to both. Lava's scripts/sync-tracker-sdk-mirrors.sh is the canonical pattern; consider generalizing to a sync-all-submodule-mirrors.sh that loops the 16 submodules.",
+    "GitLab path is lowercase by GitLab normalization; GitHub remains capitalized. Documentation should note this asymmetry."
+  ],
+
+  "result": "ALL_16_SUBMODULES_AT_2_UPSTREAM_PARITY"
+}
