@@ -1,0 +1,53 @@
+{
+  "task": "sp2-podman-integration-tests",
+  "subject": "Cache integration tests + e2e tests run against real podman containers",
+  "operator_run_at": "2026-04-30",
+  "host": "podman 5.7.1, postgres:16-alpine, podman-compose",
+  "context": "Phase 4.3 (cache) and Phase 10.2 (e2e) integration tests are gated by podman availability. After Step 1 (submodule init) brought Submodules/Cache + Auth + Concurrency + Config + Database + ... online in this worktree, podman became usable and these tests are now exercisable.",
+
+  "phase_4_3_cache_integration": {
+    "command": "cd lava-api-go && bash scripts/run-test-pg.sh",
+    "runtime": "podman",
+    "image": "docker.io/postgres:16-alpine",
+    "result": "PASS",
+    "test_count": 7,
+    "duration_seconds": 1.134,
+    "tests": [
+      "TestKeyDeterministic",
+      "TestKeyDistinguishesPathVars",
+      "TestKeyDistinguishesAuthRealm",
+      "TestKeyAnonDefault",
+      "TestSetGetReturnsHit",
+      "TestGetMissReturnsMiss",
+      "TestInvalidate"
+    ],
+    "exercises": "Real Postgres key generation + Set/Get/Invalidate cycle. The script transient-launches a Postgres 16 container, runs the integration tests against it, and tears it down."
+  },
+
+  "phase_10_2_e2e": {
+    "command": "cd lava-api-go && go test -v -count=1 ./tests/e2e/...",
+    "runtime": "podman",
+    "result": "PASS",
+    "test_count": 6,
+    "duration_seconds": 16.487,
+    "tests": [
+      {"name": "TestE2E_AllRoutes", "duration_seconds": 5.77, "exercises": "Real lava-api-go binary spun up; all routes exercised via httptest"},
+      {"name": "TestE2E_DownloadEmptyCookie_Returns401", "duration_seconds": 4.97, "exercises": "Auth boundary: empty cookie returns 401"},
+      {"name": "TestE2E_LoginMissingPassword_Returns400_NoUpstream", "duration_seconds": 5.74, "exercises": "Validation: missing password returns 400 without hitting upstream"},
+      {"name": "TestE2E_FakeUpstream_SanityProbe", "duration_seconds": 0.0, "exercises": "Fake upstream test scaffolding"},
+      {"name": "TestE2E_NoSkipMarkerFile", "duration_seconds": 0.0, "exercises": "Asserts no LAVA_E2E_SKIP marker exists"},
+      {"name": "TestE2E_RouterShape", "duration_seconds": 0.0, "exercises": "Router shape introspection"}
+    ]
+  },
+
+  "anti_bluff_pact_compliance": {
+    "clause_1_same_surfaces": "Both test sets exercise the real production binaries / packages: cache/ uses real Postgres; tests/e2e uses the real Gin engine via httptest with real handlers and real auth middleware.",
+    "clause_2_falsifiability": "Falsifiability rehearsals for these tests were performed during their authoring (per Phase 4.3 + Phase 10.2 plan tasks); see commit history for sp2-4.3 and sp2-10.2 commits.",
+    "clause_3_primary_assertion": "All assertions are on user-visible state: HTTP status codes, JSON response bodies, persisted cache rows.",
+    "clause_4_integration_challenge": "These ARE the load-bearing acceptance gates for the cache + auth + handler subsystems. They use real podman containers, not mocks.",
+    "clause_5_ci_green_not_sufficient": "These pass locally; per Local-Only CI/CD they are not gated to a hosted CI, but the operator has now run them and recorded the result here."
+  },
+
+  "ledger_clause": "6.4 (Integration Challenge Tests are the load-bearing acceptance gate)",
+  "result": "BOTH_PHASE_GATES_GREEN"
+}
