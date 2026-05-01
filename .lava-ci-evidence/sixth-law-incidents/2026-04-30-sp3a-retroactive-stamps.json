@@ -25,29 +25,32 @@
       "sha": "202cdc2abfb44a0bec8e755e64d352c13e9aef27",
       "subject": "sp3a-1.32: scaffold :core:tracker:api + AuthType + TrackerCapability",
       "test_file": "core/tracker/api/src/test/kotlin/lava/tracker/api/TrackerCapabilityTest.kt",
-      "rule_satisfied_in_substance": false,
-      "evidence_path": null,
-      "rationale": "TrackerCapabilityTest is a structural enum-shape contract test (asserts 13 values; asserts exact value names). No retroactive falsifiability rehearsal was performed at commit time. Substance gap: a follow-up retroactive Bluff-Audit pass on this test SHOULD be filed in a future commit before the next release tag."
+      "rule_satisfied_in_substance": true,
+      "evidence_path": ".lava-ci-evidence/sp3a-bluff-audit/1.32-tracker-capability-retroactive.json",
+      "rationale": "RESOLVED 2026-05-01 in commit b6c0d65: retroactive Bluff-Audit pass performed. Mutated TrackerCapability enum (commented out FAVORITES); TrackerCapabilityTest failed with both assertions naming the missing value; reverted; tests pass. Stamp recorded in commit message."
     },
     {
       "sha": "fc949b01a06d25a03613023d92542a0bb71979da",
       "subject": "sp3a-1.33: TrackerClient + TrackerDescriptor + TrackerFeature interfaces",
       "test_file": "core/tracker/api/src/test/kotlin/lava/tracker/api/TrackerDescriptorContractTest.kt",
-      "rule_satisfied_in_substance": false,
-      "evidence_path": null,
-      "rationale": "TrackerDescriptorContractTest tests two interface contract invariants (id matches trackerId; getFeature returns null for unsupported feature). Like 1.32, no retroactive rehearsal was performed at commit time."
+      "rule_satisfied_in_substance": true,
+      "evidence_path": ".lava-ci-evidence/sp3a-bluff-audit/1.33-tracker-descriptor-contract-retroactive.json",
+      "rationale": "RESOLVED 2026-05-01 in commit b6c0d65: retroactive Bluff-Audit pass performed. Mutated TrackerDescriptor.id default getter (changed from `get() = trackerId` to `get() = displayName`); TrackerDescriptorContractTest's `descriptor exposes id from HasId equal to trackerId` failed with ComparisonFailure expected:<sample> but was:<Sample Tracker>; reverted; tests pass. Stamp recorded in commit message."
     }
   ],
   "bypass_method": "git push --no-verify to each of the four configured upstreams (github, gitflic, gitlab, gitverse)",
-  "follow_up_required": [
+  "incident_status": "RESOLVED 2026-05-01 in commit b6c0d65 — both substance gaps closed by retroactive falsifiability rehearsals.",
+  "follow_up_required_historical": [
     {
       "kind": "retroactive Bluff-Audit pass for sp3a-1.32 (TrackerCapabilityTest)",
+      "status": "RESOLVED in commit b6c0d65 (2026-05-01)",
       "owner": "next SP-3a session",
       "deadline": "before next release tag",
       "format": "new commit with Bluff-Audit: stamp documenting the retroactive mutation/observed/reverted result; follow same pattern as sp3a-1.13 falsifiability rehearsal in the SDK submodule"
     },
     {
       "kind": "retroactive Bluff-Audit pass for sp3a-1.33 (TrackerDescriptorContractTest)",
+      "status": "RESOLVED in commit b6c0d65 (2026-05-01)",
       "owner": "next SP-3a session",
       "deadline": "before next release tag",
       "format": "new commit with Bluff-Audit: stamp"
