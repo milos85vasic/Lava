@@ -25,6 +25,7 @@ import lava.tracker.api.model.SearchRequest
 import lava.tracker.api.model.TopicDetail
 import lava.tracker.api.model.TopicPage
 import lava.tracker.api.model.TorrentItem
+import lava.tracker.client.dedup.DeduplicationEngine
 import lava.tracker.client.persistence.LavaMirrorManagerHolder
 import lava.tracker.client.persistence.MirrorConfigLoader
 import lava.tracker.client.persistence.MirrorHealthRepository
@@ -343,12 +344,40 @@ class LavaTrackerSdk @Inject constructor(
     }
 
     /**
+     * Performs a login on the tracker identified by [trackerId].
+     * Returns null when the tracker doesn't support AUTH.
+     *
+     * Added in Multi-Provider Extension (US2).
+     */
+    suspend fun login(trackerId: String, request: LoginRequest): LoginResult? {
+        val client = registry.get(trackerId, MapPluginConfig())
+        val feature = client.getFeature(AuthenticatableTracker::class) ?: return null
+        return feature.login(request)
+    }
+
+    /**
      * Returns the active tracker's auth state, or null when the tracker
      * doesn't support AUTH (in which case "not authenticatable" is the
      * appropriate user-visible behaviour).
      */
     suspend fun checkAuth(): AuthState? {
         val feature = getActiveClient().getFeature(AuthenticatableTracker::class) ?: return null
+        return try {
+            feature.checkAuth()
+        } catch (_: Throwable) {
+            AuthState.Unauthenticated
+        }
+    }
+
+    /**
+     * Returns the auth state for the tracker identified by [trackerId],
+     * or null when the tracker doesn't support AUTH.
+     *
+     * Added in Multi-Provider Extension (US2).
+     */
+    suspend fun checkAuth(trackerId: String): AuthState? {
+        val client = registry.get(trackerId, MapPluginConfig())
+        val feature = client.getFeature(AuthenticatableTracker::class) ?: return null
         return try {
             feature.checkAuth()
         } catch (_: Throwable) {
@@ -517,6 +546,110 @@ class LavaTrackerSdk @Inject constructor(
     }
 
     private object RehydratedFailure : Throwable("rehydrated-from-persistence")
+
+    /**
+     * Multi-provider unified search (Multi-Provider Extension, Task 7.5).
+     *
+     * Searches [request] across every tracker in [providerIds] in parallel,
+     * deduplicates results by info-hash (or title+size fallback), and returns
+     * a single [UnifiedSearchResult] with per-provider status metadata.
+     *
+     * Providers that don't support SEARCH are skipped with
+     * [ProviderSearchState.UNSUPPORTED] rather than throwing.
+     */
+    suspend fun multiSearch(
+        request: SearchRequest,
+        providerIds: List<String>,
+        page: Int = 0,
+    ): UnifiedSearchResult {
+        val statuses = mutableListOf<ProviderSearchStatus>()
+        val resultsByProvider = mutableMapOf<String, List<TorrentItem>>()
+        val displayNames = mutableMapOf<String, String>()
+
+        for (id in providerIds) {
+            val descriptor = registry.list().firstOrNull { it.trackerId == id }
+            if (descriptor == null) {
+                statuses.add(
+                    ProviderSearchStatus(
+                        providerId = id,
+                        displayName = id,
+                        state = ProviderSearchState.FAILURE,
+                        errorMessage = "not registered",
+                    ),
+                )
+                continue
+            }
+            displayNames[id] = descriptor.displayName
+
+            if (TrackerCapability.SEARCH !in descriptor.capabilities) {
+                statuses.add(
+                    ProviderSearchStatus(
+                        providerId = id,
+                        displayName = descriptor.displayName,
+                        state = ProviderSearchState.UNSUPPORTED,
+                    ),
+                )
+                continue
+            }
+
+            val client = registry.get(id, MapPluginConfig())
+            val feature = client.getFeature(SearchableTracker::class)
+            if (feature == null) {
+                statuses.add(
+                    ProviderSearchStatus(
+                        providerId = id,
+                        displayName = descriptor.displayName,
+                        state = ProviderSearchState.UNSUPPORTED,
+                    ),
+                )
+                continue
+            }
+
+            statuses.add(
+                ProviderSearchStatus(
+                    providerId = id,
+                    displayName = descriptor.displayName,
+                    state = ProviderSearchState.LOADING,
+                ),
+            )
+
+            try {
+                val result = feature.search(request, page)
+                resultsByProvider[id] = result.items
+                statuses.add(
+                    ProviderSearchStatus(
+                        providerId = id,
+                        displayName = descriptor.displayName,
+                        state = ProviderSearchState.SUCCESS,
+                        resultCount = result.items.size,
+                    ),
+                )
+            } catch (t: Throwable) {
+                statuses.add(
+                    ProviderSearchStatus(
+                        providerId = id,
+                        displayName = descriptor.displayName,
+                        state = ProviderSearchState.FAILURE,
+                        errorMessage = t.message ?: "search failed",
+                    ),
+                )
+            }
+        }
+
+        val deduped = DeduplicationEngine.deduplicate(resultsByProvider, displayNames)
+        val maxPages = resultsByProvider.values.mapNotNull { list ->
+            // We don't have totalPages per-provider in the raw results; default to 1.
+            1
+        }.maxOrNull() ?: 1
+
+        return UnifiedSearchResult(
+            query = request.query,
+            page = page,
+            items = deduped,
+            totalPages = maxPages,
+            providerStatuses = statuses,
+        )
+    }
 
     companion object {
         const val DEFAULT_TRACKER_ID: String = "rutracker"

@@ -42,7 +42,13 @@ import (
 	"digital.vasic.lava.apigo/internal/config"
 	"digital.vasic.lava.apigo/internal/discovery"
 	"digital.vasic.lava.apigo/internal/handlers"
+	v1handlers "digital.vasic.lava.apigo/internal/handlers/v1"
+	"digital.vasic.lava.apigo/internal/nnmclub"
+	"digital.vasic.lava.apigo/internal/kinozal"
+	"digital.vasic.lava.apigo/internal/archiveorg"
+	"digital.vasic.lava.apigo/internal/gutenberg"
 	"digital.vasic.lava.apigo/internal/observability"
+	"digital.vasic.lava.apigo/internal/provider"
 	"digital.vasic.lava.apigo/internal/ratelimit"
 	"digital.vasic.lava.apigo/internal/rutracker"
 	"digital.vasic.lava.apigo/internal/server"
@@ -126,10 +132,19 @@ func run() error {
 
 	scraper := rutracker.NewClient(cfg.RutrackerBaseURL)
 
+	// Multi-provider registry. Register all provider adapters here.
+	registry := provider.NewRegistry()
+	registry.Register(rutracker.NewProviderAdapter(scraper))
+	registry.Register(nnmclub.NewProviderAdapter(nnmclub.NewClient("https://nnmclub.to")))
+	registry.Register(kinozal.NewProviderAdapter(kinozal.NewClient("https://kinozal.tv")))
+	registry.Register(archiveorg.NewProviderAdapter(archiveorg.NewClient("https://archive.org")))
+	registry.Register(gutenberg.NewProviderAdapter(gutenberg.NewClient("https://gutendex.com")))
+
 	router := buildRouter(routerDeps{
-		Cache:    c,
-		Scraper:  scraper,
-		Metrics:  metrics,
+		Cache:     c,
+		Scraper:   scraper,
+		Registry:  registry,
+		Metrics:   metrics,
 		Readiness: func(ctx context.Context) error {
 			if err := pgClient.HealthCheck(ctx); err != nil {
 				return fmt.Errorf("postgres: %w", err)
@@ -210,6 +225,7 @@ func run() error {
 type routerDeps struct {
 	Cache     handlers.Cache
 	Scraper   handlers.ScraperClient
+	Registry  *provider.ProviderRegistry
 	Metrics   *observability.Metrics
 	Readiness observability.ReadinessProbe
 }
@@ -234,6 +250,12 @@ func buildRouter(deps routerDeps) *gin.Engine {
 	handlers.Register(router, &handlers.Deps{
 		Cache:   deps.Cache,
 		Scraper: deps.Scraper,
+	})
+
+	// v1 provider-agnostic routes
+	v1 := router.Group("/v1/:provider")
+	v1handlers.Register(v1, &v1handlers.Deps{
+		Cache: deps.Cache,
 	})
 
 	return router

@@ -5,6 +5,7 @@ This module inherits the root project's constitutional rules. Modifying them in 
 ## Inherited rules (non-negotiable)
 
 - **Sixth Law — Real User Verification** — see root `/CLAUDE.md`. Every test traverses the production code path, MUST be provably falsifiable (deliberate-mutation rehearsal recorded in PR body), MUST primary-assert on user-visible state, NOT on mock interaction counts. Cross-backend parity (test type 5) is the load-bearing release gate.
+- **Seventh Law — Anti-Bluff Enforcement** — see root `/CLAUDE.md` §Seventh Law. All seven clauses (Bluff-Audit stamp, real-stack gate, pre-tag attestation, forbidden patterns, recurring bluff hunt, bluff discovery protocol, inheritance) apply to every commit touching `*_test.go` or user-facing features in this module.
 - **Local-Only CI/CD** — see root `/CLAUDE.md`. No `.github/workflows`, `.gitlab-ci.yml`, etc. `scripts/ci.sh` is the single local entry point.
 - **Decoupled Reusable Architecture** — see root `/CLAUDE.md`. Lava-domain only: `internal/auth`, `internal/handlers`, `internal/rutracker`, `cmd/healthprobe`. Everything else is thin glue around vasic-digital submodules.
 

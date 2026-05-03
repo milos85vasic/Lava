@@ -10,6 +10,9 @@ internal sealed interface MenuSideEffect {
 
     /** SP-3a Phase 4 (Task 4.19). Open the multi-tracker settings screen. */
     data object OpenTrackerSettings : MenuSideEffect
+
+    /** Multi-Provider Extension. Open the provider credentials screen. */
+    data object OpenCredentials : MenuSideEffect
     data class ShowConfirmation(
         @StringRes val title: Int,
         @StringRes val confirmationMessage: Int,

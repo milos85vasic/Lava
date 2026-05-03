@@ -12,6 +12,10 @@ import io.ktor.client.request.url
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import lava.auth.api.TokenProvider
+import lava.tracker.archiveorg.ArchiveOrgClientFactory
+import lava.tracker.gutenberg.GutenbergClientFactory
+import lava.tracker.kinozal.KinozalClientFactory
+import lava.tracker.nnmclub.NnmclubClientFactory
 import lava.tracker.registry.DefaultTrackerRegistry
 import lava.tracker.registry.TrackerRegistry
 import lava.tracker.rutor.RuTorClientFactory
@@ -226,9 +230,17 @@ object TrackerClientModule {
     fun provideTrackerRegistry(
         rutrackerFactory: RuTrackerClientFactory,
         rutorFactory: RuTorClientFactory,
+        nnmclubFactory: NnmclubClientFactory,
+        kinozalFactory: KinozalClientFactory,
+        archiveOrgFactory: ArchiveOrgClientFactory,
+        gutenbergFactory: GutenbergClientFactory,
     ): TrackerRegistry = DefaultTrackerRegistry().apply {
         register(rutrackerFactory)
         register(rutorFactory)
+        register(nnmclubFactory)
+        register(kinozalFactory)
+        register(archiveOrgFactory)
+        register(gutenbergFactory)
     }
 
     private const val RUTRACKER_HTTP_CLIENT = "rutracker"

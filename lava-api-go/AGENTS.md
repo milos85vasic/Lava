@@ -53,3 +53,16 @@ clauses 6.D, 6.E, and 6.F:
 The bridge plan is not yet written. The Go-side bridge plan link will
 appear here once SP-2 ships and the bridge spec is drafted. Until then
 the binding is on the contract, not on a specific PR.
+
+## Seventh Law — Anti-Bluff Enforcement
+
+The full authoritative text lives in root `/CLAUDE.md` and `/AGENTS.md`.
+All clauses apply recursively to `lava-api-go`:
+
+1. **Bluff-Audit Stamp.** Every `*_test.go` diff requires a `Bluff-Audit:` block in the commit message — test name, deliberate production break, observed failure, revert confirmation.
+2. **Real-Stack Verification Gate.** Every user-visible feature requires real-stack verification (real HTTP/3 against real providers, real Postgres with `-Pintegration=true`).
+3. **Pre-Tag Real-Device Attestation.** Required per `scripts/pretag-verify.sh`.
+4. **Forbidden Test Patterns.** No mocking the SUT, no `verify { mock.foo() }` as primary assertion, no `@Ignore` without tracking issue, no tests that build but never invoke the SUT.
+5. **Recurring Bluff Hunt.** Each phase ends with a bluff hunt: 5 random `*_test.go` files, deliberate mutation, confirm failure. Output to `.lava-ci-evidence/bluff-hunt/<date>.json`.
+6. **Bluff Discovery Protocol.** Real-user bug + green tests = Seventh Law incident. Fix commit MUST include regression test; bluff diagnosed in `.lava-ci-evidence/sixth-law-incidents/<date>.json`.
+7. **Inheritance and Propagation.** Applies recursively to every submodule and every new artifact. Submodule constitutions MAY add stricter rules but MUST NOT relax.

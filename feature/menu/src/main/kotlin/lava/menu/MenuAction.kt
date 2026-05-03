@@ -22,6 +22,9 @@ internal sealed interface MenuAction {
 
     /** SP-3a Phase 4 (Task 4.19). Open the multi-tracker settings screen. */
     data object TrackerSettingsClick : MenuAction
+
+    /** Multi-Provider Extension. Open the provider credentials screen. */
+    data object CredentialsClick : MenuAction
     data class SetBookmarksSyncPeriod(val syncPeriod: SyncPeriod) : MenuAction
     data class SetEndpoint(val endpoint: Endpoint) : MenuAction
     data class SetFavoritesSyncPeriod(val syncPeriod: SyncPeriod) : MenuAction

@@ -27,8 +27,12 @@ import lava.database.dao.FavoriteSearchDao
 import lava.database.dao.FavoriteTopicDao
 import lava.database.dao.ForumCategoryDao
 import lava.database.dao.ForumMetadataDao
+import lava.database.dao.ForumProviderSelectionDao
 import lava.database.dao.MirrorHealthDao
+import lava.database.dao.ProviderConfigDao
+import lava.database.dao.ProviderCredentialsDao
 import lava.database.dao.SearchHistoryDao
+import lava.database.dao.SearchProviderSelectionDao
 import lava.database.dao.SuggestDao
 import lava.database.dao.UserMirrorDao
 import lava.database.dao.VisitedTopicDao
@@ -88,4 +92,24 @@ object DaosModule {
     @Singleton
     fun providesUserMirrorDao(appDatabase: AppDatabase): UserMirrorDao =
         appDatabase.userMirrorDao()
+
+    @Provides
+    @Singleton
+    fun providesProviderCredentialsDao(appDatabase: AppDatabase): ProviderCredentialsDao =
+        appDatabase.providerCredentialsDao()
+
+    @Provides
+    @Singleton
+    fun providesProviderConfigDao(appDatabase: AppDatabase): ProviderConfigDao =
+        appDatabase.providerConfigDao()
+
+    @Provides
+    @Singleton
+    fun providesSearchProviderSelectionDao(appDatabase: AppDatabase): SearchProviderSelectionDao =
+        appDatabase.searchProviderSelectionDao()
+
+    @Provides
+    @Singleton
+    fun providesForumProviderSelectionDao(appDatabase: AppDatabase): ForumProviderSelectionDao =
+        appDatabase.forumProviderSelectionDao()
 }

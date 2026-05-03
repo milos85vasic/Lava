@@ -4,19 +4,23 @@
 
 ## Project Overview
 
-**Lava** is an unofficial Android client for [rutracker.org](https://rutracker.org). It consists of two main artifacts:
+**Lava** is an unofficial Android client for rutracker.org (and rutor.info). It consists of three main artifacts:
 
 1. **Android App** (`:app`) — a modular Android application written in Kotlin, using Jetpack Compose for the UI.
-2. **Proxy Server** (`:proxy`) — a headless Ktor server that scrapes rutracker.org and exposes a JSON REST API for the app.
+2. **Go API Service** (`lava-api-go/`) — a headless Go/Gin server (SP-2 onward) that scrapes rutracker.org and exposes a JSON REST API over HTTP/3 and HTTP/2. This is the primary backend.
+3. **Proxy Server** (`:proxy`) — a legacy Ktor/Netty server that also scrapes rutracker.org. It is built as a fat JAR and containerized with Docker. Retained as an opt-in fallback.
 
 The project is a fork of `andrikeev/Flow`, maintained under `milos85vasic/Lava`. All source code, comments, and documentation are in **English**.
 
 - **App ID:** `digital.vasic.lava.client`
-- **App Version:** `1.0.0` (`versionCode = 1000`)
-- **Proxy Version:** `1.0.0`
+- **App Version:** `1.2.0` (`versionCode = 1020`)
+- **Proxy Version:** `1.0.3` (`versionCode = 1003`)
+- **Go API Version:** `2.0.8` (`Code = 2008`)
 - **License:** MIT (see `LICENSE`)
 
 ## Technology Stack
+
+### Android / Kotlin Side
 
 | Layer | Technology |
 |-------|------------|
@@ -40,27 +44,40 @@ The project is a fork of `andrikeev/Flow`, maintained under `milos85vasic/Lava`.
 | Debug Tools | LeakCanary `2.10`, Chucker `4.0.0` |
 | Code Formatting | Spotless `6.22.0` with ktlint |
 
+### Go API Side
+
+| Layer | Technology |
+|-------|------------|
+| Language | Go `1.25.0` |
+| Web Framework | Gin Gonic `v1.12.0` |
+| Transport | HTTP/3 (QUIC via `quic-go` `v0.59.0`) + HTTP/2 TLS fallback |
+| HTML Scraping | goquery `v1.12.0` |
+| Database / Cache | PostgreSQL via `pgx/v5` |
+| Migrations | `golang-migrate/migrate` v4 |
+| Code Generation | `oapi-codegen` `v2.6.0` |
+| Observability | Prometheus metrics, OTLP tracing, structured logging (`slog`) |
+
 ## Repository Layout
 
-The repository is a **multi-module Gradle project**. There is **no root `build.gradle.kts`**; all build logic is centralized in `buildSrc` as custom convention plugins.
+The repository is a **multi-module Gradle project** with an embedded Go service and Git submodules. There is **no root `build.gradle.kts`**; all Kotlin/Android build logic is centralized in `buildSrc` as custom convention plugins.
 
 ```
 Lava/
 ├── app/                    # Android application module
 ├── proxy/                  # Ktor proxy server module (legacy)
-├── lava-api-go/            # Go API service (SP-2 onward)
+├── lava-api-go/            # Go API service (SP-2 onward, primary backend)
 ├── buildSrc/               # Custom Gradle convention plugins
-├── core/                   # ~25 core library modules (post-SP-3a)
+├── core/                   # 25 core library modules
 │   ├── auth/api, auth/impl
 │   ├── common, data, database, designsystem, dispatchers, domain, downloads, logger, models, navigation, notifications, preferences, testing, ui
 │   ├── network/api, network/impl
 │   ├── tracker/api, tracker/client, tracker/mirror, tracker/registry, tracker/rutor, tracker/rutracker, tracker/testing
 │   └── work/api, work/impl
-├── feature/                # 16 feature modules (post-SP-3a)
+├── feature/                # 16 feature modules
 │   ├── account, bookmarks, category, connection, favorites, forum, login, main, menu, rating, search, search_input, search_result, topic, tracker_settings, visited
 ├── Submodules/             # vasic-digital submodules (frozen-by-default pins)
-│   ├── Containers/                # generic container-runtime CLI
-│   └── Tracker-SDK/               # generic tracker-SDK primitives
+│   ├── Auth, Cache, Challenges, Concurrency, Config, Containers, Database, Discovery, HTTP3, Mdns, Middleware, Observability, RateLimiter, Recovery, Security
+│   └── Tracker-SDK/        # generic tracker-SDK primitives (Gradle composite build)
 ├── gradle/
 │   └── libs.versions.toml  # Version catalog
 ├── scripts/                # Local CI/CD apparatus (ci.sh, tag.sh, bluff-hunt.sh, ...)
@@ -69,22 +86,19 @@ Lava/
 ├── .lava-ci-evidence/      # Per-tag evidence packs (Sixth + Seventh Law)
 ├── docs/                   # Architecture, design specs, release notes, dev guide
 ├── build_and_push_docker_image.sh
+├── build_and_release.sh
+├── start.sh / stop.sh
 ├── Upstreams/              # Upstream repository push scripts
 └── settings.gradle.kts
 ```
 
-The exact module count fluctuates as SP-N projects extract or fold
-modules; consult `settings.gradle.kts` for the live list. Pre-SP-3a
-the count was 17 core modules + 15 feature modules; post-SP-3a it is
-roughly 25 core modules (+7 under `core/tracker/`) and 16 feature
-modules (+1 `feature/tracker_settings`). This is approximate by
-design — agents should grep `settings.gradle.kts` rather than rely on
-this count.
+Consult `settings.gradle.kts` for the live module list. The exact count fluctuates as SP-N projects extract or fold modules.
 
 ### Module responsibilities
 
 - `:app` — Entry point. Contains `Application`, `MainActivity`, `TvActivity`, and the top-level navigation graph. Depends on every core and feature module.
-- `:proxy` — Ktor/Netty server exposing REST endpoints. Built as a fat JAR and containerized with Docker.
+- `:proxy` — Ktor/Netty server exposing REST endpoints. Built as a fat JAR and containerized with Docker. Legacy fallback.
+- `lava-api-go/` — Go/Gin server exposing REST endpoints over HTTP/3 + HTTP/2. Primary backend. Built as a static binary and a distroless Docker image.
 - `core:*` — Shared libraries. Pure Kotlin modules (`models`, `common`, `auth/api`, `network/api`, `tracker:api`, `tracker:registry`, `tracker:mirror`, `tracker:rutracker`, `tracker:rutor`, `tracker:testing`, `work/api`) have **no Android dependency**. The Android-bearing tracker module is `:core:tracker:client` (Hilt + WorkManager + Room access).
 - `feature:*` — Screen-level modules. Each feature typically contains a ViewModel (Orbit MVI), Compose screens, and a navigation contract.
 
@@ -100,8 +114,8 @@ The multi-tracker SDK introduced by SP-3a sits across two locations:
 | `:core:tracker:registry` | Lava-domain wrapper around the generic `lava.sdk:registry` primitive in the `Tracker-SDK` submodule. Discovers and exposes `TrackerClient` instances. |
 | `:core:tracker:mirror` | Lava-domain wrapper exposing `MirrorConfigStore` typealias and bridging to `lava.sdk:mirror`. |
 | `:core:tracker:client` | `LavaTrackerSdk` orchestrator — switches active tracker, runs cross-tracker fallback, persists user mirrors and mirror health. Hilt-injected entry point for feature ViewModels. |
-| `:core:tracker:rutracker` | RuTracker-specific implementation (decoupled in SP-3a Phase 2 from the legacy `core/network/rutracker` location). 12 declared capabilities — SEARCH + BROWSE + FORUM + TOPIC + COMMENTS + FAVORITES + DOWNLOAD + MAGNET + AUTH (CAPTCHA_LOGIN) + UPLOAD + USER_PROFILE (the latter two are LF-5 latent — declared but not yet surfaced via feature interfaces). Encoding: Windows-1251. |
-| `:core:tracker:rutor` | RuTor-specific implementation (added in SP-3a Phase 3). 8 declared capabilities — SEARCH + BROWSE + TOPIC + COMMENTS + DOWNLOAD + MAGNET + RSS + AUTH (FORM_LOGIN). Anonymous-by-default per decision 7b-ii. Encoding: UTF-8. |
+| `:core:tracker:rutracker` | RuTracker-specific implementation. 12 declared capabilities — SEARCH + BROWSE + FORUM + TOPIC + COMMENTS + FAVORITES + DOWNLOAD + MAGNET + AUTH (CAPTCHA_LOGIN) + UPLOAD + USER_PROFILE (the latter two are LF-5 latent). Encoding: Windows-1251. |
+| `:core:tracker:rutor` | RuTor-specific implementation. 8 declared capabilities — SEARCH + BROWSE + TOPIC + COMMENTS + DOWNLOAD + MAGNET + RSS + AUTH (FORM_LOGIN). Anonymous-by-default per decision 7b-ii. Encoding: UTF-8. |
 | `:core:tracker:testing` | Test fakes (`FakeTrackerClient`, builders, fixture loaders) shared across tracker modules. |
 
 **Generic (vasic-digital) primitives mounted at `Submodules/Tracker-SDK/`:**
@@ -113,73 +127,33 @@ The multi-tracker SDK introduced by SP-3a sits across two locations:
 | `Submodules/Tracker-SDK/mirror` | Generic mirror-config store interface (`MirrorConfigStore`). |
 | `Submodules/Tracker-SDK/testing` | Generic test scaffolding (clock, dispatcher, fixture loader). |
 
-The submodule is **frozen by default** per the Decoupled Reusable Architecture rule (root CLAUDE.md). Updating the pin is a deliberate PR — no `git submodule update --remote` in any release script. The submodule is mirrored to GitHub + GitLab (2-upstream scope per 2026-04-30 spec deviation; original 4-upstream policy reduced for SDK velocity).
+The submodule is **frozen by default** per the Decoupled Reusable Architecture rule (root `CLAUDE.md`). Updating the pin is a deliberate PR — no `git submodule update --remote` in any release script. The submodule is mirrored to GitHub + GitLab (2-upstream scope per 2026-04-30 spec deviation).
 
 For a step-by-step recipe to add a third tracker, see [`docs/sdk-developer-guide.md`](docs/sdk-developer-guide.md). For the Challenge Test pack covering the SDK end-to-end on real devices, see `app/src/androidTest/kotlin/lava/app/challenges/`.
 
 ### Phase 4–5 deliverables (SP-3a)
 
-Phases 4 and 5 closed the multi-tracker SDK arc. Headline deliverables
-beyond what the SDK module map captures:
+Phases 4 and 5 closed the multi-tracker SDK arc. Headline deliverables beyond what the SDK module map captures:
 
 **Phase 4 — Mirror health, cross-tracker fallback, settings UI**
 
-- `MirrorHealthCheckWorker` — `@HiltWorker` `PeriodicWorkRequest`
-  scheduled every 15 minutes; HEAD-probes every registered mirror and
-  writes the result to `tracker_mirror_health` (Room).
-- `MirrorHealthRepository` — DAO wrapper exposing per-mirror health
-  state observables.
-- `UserMirrorRepository` — DAO wrapper for `tracker_mirror_user`
-  (operator-added custom mirrors).
-- `MirrorConfigLoader` — loads bundled defaults from
-  `core/tracker/client/src/main/assets/mirrors.json`, validates
-  per the schema in [`docs/sdk-developer-guide.md` §7](docs/sdk-developer-guide.md#7-mirror-configuration-spec-mirrorsjson),
-  merges with user customs.
-- `CrossTrackerFallbackPolicy` — pure-function policy that decides
-  whether to propose a cross-tracker fallback when the active
-  tracker's mirrors all hit UNHEALTHY.
-- `LavaTrackerSdk.search()` (and siblings) emit
-  `SearchOutcome.CrossTrackerFallbackProposed(altTrackerId)` when the
-  policy fires; **no silent fallback** — the SDK never re-routes
-  without explicit user consent via the modal.
-- `:feature:tracker_settings` — Compose UI with selector list,
-  per-tracker mirror list section, health indicator, add-custom-mirror
-  dialog. MVI via Orbit.
-- `CrossTrackerFallbackModal` in `:feature:search_result` — the user
-  prompt; accept re-issues the search on the alt tracker, dismiss
-  shows explicit failure.
+- `MirrorHealthCheckWorker` — `@HiltWorker` `PeriodicWorkRequest` scheduled every 15 minutes; HEAD-probes every registered mirror and writes the result to `tracker_mirror_health` (Room).
+- `MirrorHealthRepository` — DAO wrapper exposing per-mirror health state observables.
+- `UserMirrorRepository` — DAO wrapper for `tracker_mirror_user` (operator-added custom mirrors).
+- `MirrorConfigLoader` — loads bundled defaults from `core/tracker/client/src/main/assets/mirrors.json`, validates per the schema in [`docs/sdk-developer-guide.md` §7](docs/sdk-developer-guide.md#7-mirror-configuration-spec-mirrorsjson), merges with user customs.
+- `CrossTrackerFallbackPolicy` — pure-function policy that decides whether to propose a cross-tracker fallback when the active tracker's mirrors all hit UNHEALTHY.
+- `LavaTrackerSdk.search()` (and siblings) emit `SearchOutcome.CrossTrackerFallbackProposed(altTrackerId)` when the policy fires; **no silent fallback** — the SDK never re-routes without explicit user consent via the modal.
+- `:feature:tracker_settings` — Compose UI with selector list, per-tracker mirror list section, health indicator, add-custom-mirror dialog. MVI via Orbit.
+- `CrossTrackerFallbackModal` in `:feature:search_result` — the user prompt; accept re-issues the search on the alt tracker, dismiss shows explicit failure.
 - Navigation entry: Settings → Trackers (wired from `:feature:menu`).
 
 **Phase 5 — Constitution + Challenges + tag gate**
 
-- Constitutional clauses 6.D (Behavioral Coverage Contract), 6.E
-  (Capability Honesty), 6.F (Anti-Bluff Submodule Inheritance)
-  added to root `CLAUDE.md`, cascaded to scoped clauses in
-  `core/CLAUDE.md`, `feature/CLAUDE.md`,
-  `lava-api-go/{CLAUDE,AGENTS}.md`,
-  `Submodules/Tracker-SDK/{CLAUDE,CONSTITUTION,AGENTS}.md`, and root
-  `AGENTS.md`.
-- Seventh Law (Anti-Bluff Enforcement, all 7 clauses) added.
-  Mechanical enforcement via `.githooks/pre-push`: Bluff-Audit
-  commit-message stamp on every test commit, mock-the-SUT pattern
-  rejection, hosted-CI config rejection.
-- 8 Compose UI Challenge Tests (C1–C8) at
-  `app/src/androidTest/kotlin/lava/app/challenges/`. Each carries a
-  documented falsifiability rehearsal protocol in its KDoc. The
-  attestation files live at
-  `.lava-ci-evidence/Lava-Android-1.2.0-1020/challenges/C<n>.json`,
-  status `PENDING_OPERATOR` until the operator runs the real-device
-  check.
-- Local-Only CI/CD apparatus: `scripts/ci.sh` (single entry point;
-  `--changed-only`, `--full`, `--smoke` modes),
-  `scripts/check-fixture-freshness.sh`,
-  `scripts/check-constitution.sh`, `scripts/bluff-hunt.sh` (Seventh
-  Law clause 5 driver).
-- `scripts/tag.sh` Android evidence-pack gate: refuses to tag without
-  `.lava-ci-evidence/Lava-Android-<v>/` containing
-  `ci.sh.json`, `challenges/C{1..8}.json` at status `VERIFIED`,
-  `mirror-smoke/`, `bluff-audit/`, and
-  `real-device-verification.md` at status `VERIFIED`.
+- Constitutional clauses 6.D (Behavioral Coverage Contract), 6.E (Capability Honesty), 6.F (Anti-Bluff Submodule Inheritance) added to root `CLAUDE.md`, cascaded to scoped clauses in `core/CLAUDE.md`, `feature/CLAUDE.md`, `lava-api-go/{CLAUDE,AGENTS}.md`, `Submodules/Tracker-SDK/{CLAUDE,CONSTITUTION,AGENTS}.md`, and root `AGENTS.md`.
+- Seventh Law (Anti-Bluff Enforcement, all 7 clauses) added. Mechanical enforcement via `.githooks/pre-push`: Bluff-Audit commit-message stamp on every test commit, mock-the-SUT pattern rejection, hosted-CI config rejection.
+- 8 Compose UI Challenge Tests (C1–C8) at `app/src/androidTest/kotlin/lava/app/challenges/`. Each carries a documented falsifiability rehearsal protocol in its KDoc.
+- Local-Only CI/CD apparatus: `scripts/ci.sh` (single entry point; `--changed-only`, `--full`, `--smoke` modes), `scripts/check-fixture-freshness.sh`, `scripts/check-constitution.sh`, `scripts/bluff-hunt.sh` (Seventh Law clause 5 driver).
+- `scripts/tag.sh` Android evidence-pack gate: refuses to tag without `.lava-ci-evidence/Lava-Android-<v>/` containing `ci.sh.json`, `challenges/C{1..8}.json` at status `VERIFIED`, `mirror-smoke/`, `bluff-audit/`, and `real-device-verification.md` at status `VERIFIED`.
 
 **Persistence schema (`AppDatabase` v6 → v7 migration)**
 
@@ -187,7 +161,7 @@ beyond what the SDK module map captures:
 // SP-3a Phase 4 added two tables:
 @Entity(tableName = "tracker_mirror_health")
 data class MirrorHealthEntity(
-    @PrimaryKey val mirrorUrl: String,    // composite key in practice
+    @PrimaryKey val mirrorUrl: String,
     val trackerId: String,
     val state: String,                    // HEALTHY | DEGRADED | UNHEALTHY | UNKNOWN
     val lastProbedAt: Long,
@@ -205,9 +179,7 @@ data class UserMirrorEntity(
 )
 ```
 
-The migration `MIGRATION_6_7` lives in `AppDatabase.kt` and creates
-both tables with the appropriate indices. Schema JSONs are checked
-into `core/database/schemas/lava.database.AppDatabase/{6,7}.json`.
+The migration `MIGRATION_6_7` lives in `AppDatabase.kt` and creates both tables with the appropriate indices. Schema JSONs are checked into `core/database/schemas/lava.database.AppDatabase/{6,7}.json`.
 
 ## Build System & Convention Plugins
 
@@ -223,6 +195,7 @@ All modules apply one or more custom convention plugins defined in `buildSrc`. T
 | `lava.kotlin.library` | Pure Kotlin modules | `java-library` + Kotlin JVM + Spotless |
 | `lava.kotlin.serialization` | Modules needing JSON serialization | Kotlin serialization plugin + `kotlinx-serialization-json` |
 | `lava.kotlin.ksp` | Modules using KSP (e.g. Room) | KSP Gradle plugin |
+| `lava.kotlin.tracker.module` | `:core:tracker:rutracker`, `:core:tracker:rutor` | Pure Kotlin module + serialization + Jsoup + OkHttp + coroutines + test deps for tracker plugins |
 | `lava.ktor.application` | `:proxy` | Kotlin library + serialization + `application` plugin + Ktor plugin |
 
 Shared build constants live in `buildSrc/src/main/kotlin/lava/conventions/`:
@@ -233,7 +206,7 @@ Shared build constants live in `buildSrc/src/main/kotlin/lava/conventions/`:
 
 ### Key build files
 
-- `settings.gradle.kts` — Includes `:app`, `:proxy`, all `core:*` and `feature:*` modules.
+- `settings.gradle.kts` — Includes `:app`, `:proxy`, all `core:*` and `feature:*` modules, plus the `Tracker-SDK` composite build.
 - `gradle/libs.versions.toml` — Version catalog with libraries, plugins, and bundles (`coil`, `ktor`, `orbit`, `room`, `work`).
 - `gradle.properties` — Standard Android properties (`android.useAndroidX=true`, `kotlin.code.style=official`, `android.nonFinalResIds=false`, etc.).
 
@@ -255,7 +228,7 @@ Because there is no root build script, you invoke tasks via the Gradle wrapper a
 ./gradlew spotlessApply
 ./gradlew spotlessCheck
 
-# Run all tests (there is very little test coverage today)
+# Run all unit tests
 ./gradlew test
 
 # Build all artifacts and copy to releases/
@@ -270,8 +243,10 @@ releases/
     │   └── digital.vasic.lava.client-{version}-debug.apk
     ├── android-release/
     │   └── digital.vasic.lava.client-{version}-release.apk
-    └── proxy/
-        └── digital.vasic.lava.api-{version}.jar
+    ├── proxy/
+    │   └── digital.vasic.lava.api-{version}.jar
+    └── api-go/
+        └── lava-api-go (static binary) + Docker image tar
 ```
 
 ### App build types
@@ -279,9 +254,31 @@ releases/
 - **Debug** — `isMinifyEnabled = false`, signed with the custom debug keystore (`keystores/debug.keystore`), `applicationIdSuffix = ".dev"`.
 - **Release** — `isRemoveUnusedCode = true`, `isRemoveUnusedResources = true`, `isOptimizeCode = true`, **but `isObfuscate = false`**. Uses ProGuard rules from `app/proguard-rules.pro` and is signed with the custom release keystore (`keystores/release.keystore`).
 
+### Go API service build commands
+
+```bash
+# Build the Go binaries (lava-api-go + healthprobe)
+make build
+
+# Run the Go test suite (unit + race detector)
+make test
+
+# Run the Go CI gate (tidy, codegen, vet, build, test, gosec, govulncheck)
+make ci               # or: ./lava-api-go/scripts/ci.sh
+
+# Regenerate OpenAPI types
+make generate         # or: ./lava-api-go/scripts/generate.sh
+
+# Build the Docker image
+make image
+
+# Run database migrations
+make migrate-up       # requires LAVA_API_PG_URL
+```
+
 ## Code Style & Static Analysis
 
-- **Spotless + ktlint** is the only enforced code-quality tool. It is configured programmatically in `buildSrc/src/main/kotlin/lava/conventions/StaticAnalysisConventionPlugin.kt`.
+- **Spotless + ktlint** is the only enforced code-quality tool for Kotlin. It is configured programmatically in `buildSrc/src/main/kotlin/lava/conventions/StaticAnalysisConventionPlugin.kt`.
 - There is **no Detekt** and **no Checkstyle**.
 - **`.editorconfig`** exists at the project root and configures ktlint rules (e.g. allowing PascalCase for `@Composable` functions).
 - Spotless targets:
@@ -289,6 +286,7 @@ releases/
   - All `*.gradle.kts` files
 - Run `./gradlew spotlessApply` before committing.
 - Kotlin code style is set to `official` in `gradle.properties`.
+- For Go: `go vet ./...`, `gosec`, and `govulncheck` are run as part of `lava-api-go/scripts/ci.sh`.
 
 ## Architecture & Module Organization
 
@@ -308,7 +306,7 @@ app
      └─> core:navigation, core:ui, core:designsystem
 ```
 
-- **Pure Kotlin modules** (`core:models`, `core:common`, `core:auth:api`, `core:network:api`, `core:network:rutracker`, `core:work:api`) do not depend on the Android SDK.
+- **Pure Kotlin modules** (`core:models`, `core:common`, `core:auth:api`, `core:network:api`, `core:tracker:api`, `core:tracker:registry`, `core:tracker:mirror`, `core:tracker:rutracker`, `core:tracker:rutor`, `core:tracker:testing`, `core:work:api`) do not depend on the Android SDK.
 - **API / Impl split** — Several core layers expose an `:api` module (interfaces + models) and an `:impl` module (Hilt-bound implementations). This keeps consumers decoupled from implementation details.
 
 ### MVI with Orbit
@@ -348,7 +346,7 @@ Every test MUST verify an outcome that matters to end users. A test that only as
 ### Third Law — Fakes Must Be Behaviorally Equivalent
 - A fake that is "simpler" than reality in a way that could hide a bug is a bluff fake.
 - `TestEndpointsRepository` MUST reject duplicates (Room primary-key conflict) and seed defaults just like `EndpointsRepositoryImpl`.
-- `TestLocalNetworkDiscoveryService` MUST simulate real NsdManager behaviors (e.g., `_lava._tcp.local.` service-type suffix).
+- `TestLocalNetworkDiscoveryService` MUST simulate real NsdManager behaviors (e.g. `_lava._tcp.local.` service-type suffix).
 - Every fake MUST document any behavioral simplifications that differ from production.
 
 ### Fourth Law — Integration Challenge Tests
@@ -417,6 +415,18 @@ Rule: every script/compose invocation of a binary we own MUST have a contract te
 
 "All four mirrors push succeeded" is one assertion; "all four mirrors converge to the same SHA at HEAD" is stronger. `scripts/tag.sh` MUST verify post-push tip-SHA convergence across github/gitflic/gitlab/gitverse before reporting success, and SHOULD record per-mirror SHAs in the evidence file.
 
+##### 6.D — Behavioral Coverage Contract (added 2026-04-30, SP-3a)
+
+Coverage is measured behaviorally, not lexically. Every public method of every interface added under `core/tracker/api/`, `Submodules/Tracker-SDK/api/`, or any future SDK contract module MUST have at least one real-stack test that traverses the same code path a user's action triggers. Line coverage is reported as a secondary metric. Uncovered lines after the behavioral pass are exempted only via an entry in the per-spec exemption ledger. Blanket coverage waivers are forbidden.
+
+##### 6.E — Capability Honesty (added 2026-04-30, SP-3a)
+
+A `TrackerDescriptor` (or any future descriptor of a feature-bearing component) that declares a capability MUST cause `getFeature()` to return a non-null implementation for the corresponding feature interface. The historical "Not implemented" stub pattern is a constitutional violation. Capability declared ⇒ feature interface returned ⇒ at least one real-stack test exists for the capability.
+
+##### 6.F — Anti-Bluff Submodule Inheritance (added 2026-04-30, SP-3a)
+
+Clauses 6.A through 6.E inherit recursively to every `vasic-digital` submodule mounted in this repository, to every future submodule, and to every code module added to a submodule. A submodule constitution MAY add stricter rules but MUST NOT relax 6.A–6.F. The Go API service (`lava-api-go/`) inherits 6.D and 6.E binding on its rutracker bridge work.
+
 ## Local-Only CI/CD (Constitutional Constraint)
 
 This project does NOT use, and MUST NOT add, GitHub Actions, GitLab pipelines, Bitbucket pipelines, CircleCI, Travis, Jenkins-as-a-service, Azure Pipelines, or any other hosted/remote CI/CD service. All build, test, lint, security-scan, mutation-test, load-test, image-build, and release-verification activity MUST run on developer machines or on a self-hosted local runner under the operator's direct control.
@@ -430,10 +440,10 @@ This project does NOT use, and MUST NOT add, GitHub Actions, GitLab pipelines, B
 ### Mandatory consequences
 
 - The `scripts/` directory (and any `Makefile`, task runner, or build tool introduced later) IS the CI/CD apparatus. Whatever runs in "release CI" MUST be the same script a developer runs locally — no parallel implementation.
-- A single local entry point — `scripts/ci.sh` (to be created in SP-2) — MUST invoke every quality gate appropriate to the changed surface (unit, integration, contract, e2e, fuzz, load, security, mutation, real-device). It MUST be runnable offline once toolchains and base images are present.
+- A single local entry point — `scripts/ci.sh` for Android and `lava-api-go/scripts/ci.sh` for Go — MUST invoke every quality gate appropriate to the changed surface.
 - **Forbidden files.** No `.github/workflows/*`, `.gitlab-ci.yml`, `.circleci/config.yml`, `azure-pipelines.yml`, `bitbucket-pipelines.yml`, `Jenkinsfile` (for hosted Jenkins), or equivalent shall exist on any branch of any of the four upstreams. A pre-push hook MUST reject pushes that introduce such files.
 - **Pre-push gate.** A git pre-push hook installed under `.githooks/` (and enabled via `git config core.hooksPath .githooks`) MUST run the relevant subset of `scripts/ci.sh` before any push to any upstream. The hook MUST NOT be bypassable in routine work; `--no-verify` is reserved for documented emergencies and any such use MUST be noted in the next commit message.
-- **Release tagging gate.** `scripts/tag.sh` MUST refuse to operate against any commit that has not been certified locally — i.e. the local CI gate must have been run successfully against the exact commit being tagged, and the result recorded in a tracked artifact (e.g. `.lava-ci-evidence/`). This implements the Sixth Law clause 5 in mechanical form.
+- **Release tagging gate.** `scripts/tag.sh` MUST refuse to operate against any commit that has not been certified locally — i.e. the local CI gate must have been run successfully against the exact commit being tagged, and the result recorded in a tracked artifact (e.g. `.lava-ci-evidence/`).
 - **No "it passes on CI" handwave.** A failure that reproduces locally on the developer's machine takes precedence over any other signal. Conversely, a developer who claims "it works for me" without having run the local CI gate has not actually verified anything per the Sixth Law.
 
 ### What this rule does NOT forbid
@@ -464,7 +474,7 @@ EVERY component that has a non-Lava-specific use case MUST live in a `vasic-digi
 
 - **Submodule pins are explicit and frozen by default.** A pinned submodule does NOT auto-fetch latest; we are not obligated to track upstream movement. Frozen forever is acceptable. Updating the pin is a deliberate PR.
 - **New non-Lava-specific code added to this repo without a documented "why not a vasic-digital submodule" decision is rejected.** The decision MUST appear either in the relevant design doc or in the PR description.
-- **Generic functionality is contributed UPSTREAM first.** Any component that another `vasic-digital` project would conceivably want goes to the appropriate submodule (or a new `vasic-digital/<name>` repo created via `gh repo create vasic-digital/<name>` and `glab repo create vasic-digital/<name>`). Lava then pins to the new hash. Order matters: upstream first, Lava pin second.
+- **Generic functionality is contributed UPSTREAM first.** Any component that another `vasic-digital` project would conceivably want goes to the appropriate submodule (or a new `vasic-digital/<name>` repo). Lava then pins to the new hash. Order matters: upstream first, Lava pin second.
 - **Every `vasic-digital` submodule we own inherits the Sixth Law and the Local-Only CI/CD rule transitively.** Adopting an externally maintained submodule that violates either is forbidden — fork it under `vasic-digital/` and adopt the fork.
 - **Submodule fetch/pull is an EXPLICIT operator action, never automatic.** No git hooks that silently update pins, no `git submodule update --remote` in any release script. The pin is the contract; changing the contract is a code review event.
 - **Mirror policy applies recursively.** Every `vasic-digital` submodule we own MUST be mirrored to the same set of upstreams Lava itself mirrors to (GitHub + GitLab + GitFlic + GitVerse), unless explicitly waived for that submodule with a documented reason.
@@ -483,35 +493,19 @@ This Decoupled Reusable Architecture rule applies recursively to every `vasic-di
 
 Post-SP-3a (1.2.0) the repository carries:
 
-- **>60 `*Test.kt` files** across `core/*` and `feature/*`, with the
-  `:core:tracker:*` family alone contributing ~43.
-- **8 Compose UI Challenge Tests** at `app/src/androidTest/kotlin/lava/app/challenges/`
-  (C1–C8). Each is the load-bearing acceptance gate for one user-visible
-  scenario per Sixth Law clause 4.
-- **1 real-tracker integration test** at
-  `core/tracker/rutor/src/integrationTest/kotlin/lava/tracker/rutor/RealRuTorIntegrationTest.kt`,
-  gated by `-PrealTrackers=true`.
-- A shared test-utilities module — `:core:testing` — providing
-  `MainDispatcherRule`, fake repositories/services, `TestDispatchers`,
-  and the Compose UI test harness.
-- A separate tracker-test scaffolding module — `:core:tracker:testing` —
-  providing `FakeTrackerClient`, builders, and `LavaFixtureLoader`.
+- **~77 `*Test.kt` files** across `core/*` and `feature/*`, with the `:core:tracker:*` family alone contributing the majority.
+- **8 Compose UI Challenge Tests** at `app/src/androidTest/kotlin/lava/app/challenges/` (C1–C8). Each is the load-bearing acceptance gate for one user-visible scenario per Sixth Law clause 4.
+- **1 real-tracker integration test** at `core/tracker/rutor/src/integrationTest/kotlin/lava/tracker/rutor/RealRuTorIntegrationTest.kt`, gated by `-PrealTrackers=true`.
+- A shared test-utilities module — `:core:testing` — providing `MainDispatcherRule`, fake repositories/services, `TestDispatchers`, and the Compose UI test harness.
+- A separate tracker-test scaffolding module — `:core:tracker:testing` — providing `FakeTrackerClient`, builders, and `LavaFixtureLoader`.
 
 **Test discipline (Anti-Bluff Pact):**
 
 - Use **JUnit 4** for unit tests (to match the existing `MainDispatcherRule`).
-- Place unit tests in `src/test/kotlin/`, instrumented tests in
-  `src/androidTest/kotlin/`, real-tracker integration tests in
-  `src/integrationTest/kotlin/` (only `:core:tracker:rutor` has this
-  source set today; `:core:tracker:rutracker` adds it as needed).
-- Every feature MUST include at least one **Integration Challenge Test**
-  using real UseCase and Repository implementations. Mocking ViewModel
-  dependencies is a Second-Law violation.
-- Every test commit MUST carry a **Bluff-Audit** stamp (Seventh Law
-  clause 1, pre-push hook enforced).
-- Mocking the System Under Test (`mockk<XxxClass>(...)` inside
-  `XxxClassTest.kt`) is **forbidden** and pre-push-rejected (Seventh
-  Law clause 4).
+- Place unit tests in `src/test/kotlin/`, instrumented tests in `src/androidTest/kotlin/`, real-tracker integration tests in `src/integrationTest/kotlin/` (only `:core:tracker:rutor` has this source set today; `:core:tracker:rutracker` adds it as needed).
+- Every feature MUST include at least one **Integration Challenge Test** using real UseCase and Repository implementations. Mocking ViewModel dependencies is a Second-Law violation.
+- Every test commit MUST carry a **Bluff-Audit** stamp (Seventh Law clause 1, pre-push hook enforced).
+- Mocking the System Under Test (`mockk<XxxClass>(...)` inside `XxxClassTest.kt`) is **forbidden** and pre-push-rejected (Seventh Law clause 4).
 
 ### Test runner cheatsheet
 
@@ -523,7 +517,7 @@ All commands assume working directory at the repo root.
 | Unit tests, single tracker module                        | `./gradlew :core:tracker:rutor:test`                                                      |
 | Unit tests, single test class                            | `./gradlew :core:tracker:rutor:test --tests "RuTorSearchParserTest"`                      |
 | Real-tracker integration test (RuTor only)               | `./gradlew :core:tracker:rutor:integrationTest -PrealTrackers=true`                        |
-| Compose UI Challenge Tests (all 8)                       | `./gradlew :app:connectedDebugAndroidTest` *(requires runner wiring — Task 5.25, deferred)* |
+| Compose UI Challenge Tests (all 8)                       | `./gradlew :app:connectedDebugAndroidTest` *(requires connected device)* |
 | Compose UI single Challenge Test                         | `./gradlew :app:connectedDebugAndroidTest --tests "lava.app.challenges.Challenge01*"`     |
 | Local CI gate, changed-only (matches pre-push hook)      | `./scripts/ci.sh --changed-only`                                                          |
 | Local CI gate, full (matches `scripts/tag.sh` gate)      | `./scripts/ci.sh --full`                                                                  |
@@ -534,17 +528,14 @@ All commands assume working directory at the repo root.
 | Tracker-SDK submodule mirror sync (operator-only)        | `./scripts/sync-tracker-sdk-mirrors.sh --check`                                           |
 | Spotless                                                  | `./gradlew spotlessApply` / `./gradlew spotlessCheck`                                     |
 | Single ViewModel test                                    | `./gradlew :feature:tracker_settings:test --tests "TrackerSettingsViewModelTest"`         |
+| Go API unit tests                                        | `cd lava-api-go && go test -race -count=1 ./...`                                          |
+| Go API CI gate                                           | `./lava-api-go/scripts/ci.sh`                                                             |
+| Go API e2e tests                                         | `cd lava-api-go && go test -race -count=1 -v ./tests/e2e/...`                             |
+| Go API contract tests                                    | `cd lava-api-go && go test -race -count=1 -v ./tests/contract/...`                        |
 
-**Gradle `--no-daemon` recommendation.** For long-running builds (the
-Android `:app:assembleDebug` end-to-end takes minutes on a cold cache),
-prefer `--no-daemon` to avoid the Gradle daemon holding locks across a
-host suspend (Host Machine Stability Directive).
+**Gradle `--no-daemon` recommendation.** For long-running builds (the Android `:app:assembleDebug` end-to-end takes minutes on a cold cache), prefer `--no-daemon` to avoid the Gradle daemon holding locks across a host suspend (Host Machine Stability Directive).
 
-**`-Pintegration=true` and `-PdeviceTests=true`.** Reserved for future
-extensions of the real-stack gate (lava-api-go integration suites and
-Android device tests respectively). 1.2.0 ships only `-PrealTrackers=true`
-for the RuTor integration set; the others are placeholders documented
-in the Seventh Law clause 2.
+**`-Pintegration=true` and `-PdeviceTests=true`.** Reserved for future extensions of the real-stack gate (lava-api-go integration suites and Android device tests respectively). 1.2.0 ships only `-PrealTrackers=true` for the RuTor integration set; the others are placeholders documented in the Seventh Law clause 2.
 
 ## Deployment
 
@@ -557,7 +548,31 @@ The app is distributed via Google Play, GitHub Releases, and RuStore (per `READM
 
 There are NO `.github/workflows/`, `.gitlab-ci.yml`, `.circleci/`, or any other hosted-CI configuration files anywhere in the tree. The pre-push hook at `.githooks/pre-push` rejects pushes that introduce them (Local-Only CI/CD rule).
 
-### Proxy Server
+### Go API Service
+
+The Go API is the primary backend. It is built as a static binary and a distroless Docker image.
+
+1. **Build the binaries:**
+   ```bash
+   cd lava-api-go && make build
+   ```
+   Output: `lava-api-go/bin/lava-api-go` and `lava-api-go/bin/healthprobe`
+
+2. **Build the Docker image:**
+   ```bash
+   cd lava-api-go && make image
+   ```
+   Image: `lava-api-go:dev`
+
+3. **Dockerfile** (`lava-api-go/docker/Dockerfile`):
+   - Multi-stage build: `golang:1.25-alpine` → `gcr.io/distroless/static-debian12:nonroot`
+   - Exposes `8443/udp` (HTTP/3) and `8443/tcp` (HTTP/2)
+   - `HEALTHCHECK CMD ["/usr/local/bin/healthprobe"]` (JSON-array form for distroless compat)
+   - Entrypoint: `/usr/local/bin/lava-api-go`
+
+4. **Orchestration:** `docker-compose.yml` at the project root defines services for Postgres, migrations, lava-api-go, legacy proxy, and an observability stack (Prometheus, Loki, Grafana, Tempo). Use `./start.sh` and `./stop.sh` to manage the stack.
+
+### Proxy Server (Legacy)
 
 The proxy is built as a Ktor fat JAR and deployed as a Docker image.
 
@@ -584,27 +599,31 @@ The proxy is built as a Ktor fat JAR and deployed as a Docker image.
    - Exposes port `8080`
    - Entrypoint: `java -jar /app/app.jar`
 
-There are no Docker Compose files, Kubernetes manifests, or other orchestration configs in the repo.
-
 ## Security Considerations
 
-- **Proxy auth** — The proxy expects an `Auth-Token` header (`ApplicationRequest.authToken`) but does not implement OAuth or JWT; it forwards rutracker session state.
+- **Proxy auth** — The proxy expects an `Auth-Token` header but does not implement OAuth or JWT; it forwards rutracker session state.
+- **Go API auth** — The Go API uses passthrough auth middleware that forwards the `Auth-Token` header as a cookie to upstream rutracker.org.
 - **Encrypted preferences** — `core:preferences` uses `androidx.security:security-crypto-ktx` (`1.1.0-alpha03`) to store credentials and settings.
 - **Cleartext traffic** — `android:usesCleartextTraffic="true"` is enabled in the app manifest. Be cautious when changing this.
 - **Signing configuration** — Both debug and release builds use dedicated keystores located under `keystores/`. Keystore paths and passwords are loaded from a `.env` file via `KEYSTORE_ROOT_DIR` and `KEYSTORE_PASSWORD`. See `.env.example` for the required variables. Never commit the `.env` file or the `keystores/` directory.
 - **ProGuard** — `isObfuscate = false` in release. The ProGuard rules in `app/proguard-rules.pro` keep network DTOs (`lava.network.dto.**`) and Tink classes.
 - **Deep links** — The app handles `rutracker.org` deep links. Any Intent processing should validate URLs to avoid injection.
+- **Go API TLS** — The Go API requires TLS 1.3. Self-signed dev certs are generated by `lava-api-go/scripts/gen-cert.sh`. Production requires valid certs.
+- **Go API rate limiting** — Per-IP and per-route rate limiting is enforced via the `digital.vasic.ratelimiter` submodule.
 
 ## Useful Notes for Agents
 
 - **No root `build.gradle.kts`** — Do not create one. Use or extend the convention plugins in `buildSrc` instead.
-- **Adding a new module?** Register it in `settings.gradle.kts` and apply the appropriate convention plugin (`lava.android.feature`, `lava.kotlin.library`, etc.).
+- **Adding a new module?** Register it in `settings.gradle.kts` and apply the appropriate convention plugin (`lava.android.feature`, `lava.kotlin.library`, `lava.kotlin.tracker.module`, etc.).
 - **Adding a dependency?** Prefer adding it to `gradle/libs.versions.toml` first, then referencing it via `libs.findLibrary(...)` or `libs.findBundle(...)` in the convention plugin or module `build.gradle.kts`.
 - **Compose compiler** is managed via the Kotlin Compose compiler plugin (BOM `2025.06.01`). Do not add the old `composeOptions` block.
 - **Context receivers** are enabled in several modules (`-Xcontext-receivers`). If you see `context(NavigationGraphBuilder)` DSL calls, that is why.
 - **Firebase/Google Services** — The app plugin expects `google-services.json` in the `app/` directory. It is gitignored (`app/.gitignore`).
 - **Avoid XML** — The project is fully Compose. Do not add XML layouts or Fragment-based screens.
 - **Orbit MVI** — When modifying a feature, keep the `ViewModel` / `State` / `Action` / `SideEffect` pattern consistent with neighboring features.
+- **Go API spec-first** — `lava-api-go/api/openapi.yaml` is the source of truth. Go types are generated via `oapi-codegen`. The generated code strips `,omitempty` from JSON tags to match Ktor's kotlinx-serialization wire shape.
+- **Go API codegen invariant** — `scripts/generate.sh` regenerates `internal/gen/` from the OpenAPI spec. CI enforces that "regenerate produces empty diff."
+- **`BUILDAH_FORMAT=docker`** — Enforced in `start.sh`, `stop.sh`, and `build_and_release.sh` to preserve `HEALTHCHECK` directives in Podman's default OCI format.
 
 ---
 

@@ -9,3 +9,4 @@ docker/tls/*.key
 *.swp
 .DS_Store
 testdata/fuzz/.cache/
+lava-api-go/lava-api-go

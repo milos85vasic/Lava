@@ -79,11 +79,13 @@ import lava.designsystem.R as DsR
 fun MenuScreen(
     openLogin: () -> Unit,
     openTrackerSettings: () -> Unit = {},
+    openCredentials: () -> Unit = {},
 ) {
     MenuScreen(
         viewModel = viewModel(),
         openLogin = openLogin,
         openTrackerSettings = openTrackerSettings,
+        openCredentials = openCredentials,
     )
 }
 
@@ -92,6 +94,7 @@ private fun MenuScreen(
     viewModel: MenuViewModel,
     openLogin: () -> Unit,
     openTrackerSettings: () -> Unit = {},
+    openCredentials: () -> Unit = {},
 ) {
     val openLinkHandler = LocalOpenLinkHandler.current
     val confirmationDialogState = rememberConfirmationDialogState()
@@ -108,6 +111,7 @@ private fun MenuScreen(
                 openConnectionSettings = true
             }
             is MenuSideEffect.OpenTrackerSettings -> openTrackerSettings()
+            is MenuSideEffect.OpenCredentials -> openCredentials()
             is MenuSideEffect.ShowConfirmation -> {
                 confirmationDialogState.show(
                     title = sideEffect.title,
@@ -168,6 +172,11 @@ private fun MenuScreen(
         menuItem(
             text = { Text("Trackers") },
             onClick = { onAction(MenuAction.TrackerSettingsClick) },
+        )
+        // Multi-Provider Extension: entry to the provider credentials screen.
+        menuItem(
+            text = { Text("Provider Credentials") },
+            onClick = { onAction(MenuAction.CredentialsClick) },
         )
         menuSyncSelectionItem(
             title = { Text(stringResource(R.string.menu_settings_favorites_sync)) },

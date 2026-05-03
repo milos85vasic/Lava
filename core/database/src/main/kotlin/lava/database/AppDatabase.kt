@@ -12,8 +12,12 @@ import lava.database.dao.FavoriteSearchDao
 import lava.database.dao.FavoriteTopicDao
 import lava.database.dao.ForumCategoryDao
 import lava.database.dao.ForumMetadataDao
+import lava.database.dao.ForumProviderSelectionDao
 import lava.database.dao.MirrorHealthDao
+import lava.database.dao.ProviderConfigDao
+import lava.database.dao.ProviderCredentialsDao
 import lava.database.dao.SearchHistoryDao
+import lava.database.dao.SearchProviderSelectionDao
 import lava.database.dao.SuggestDao
 import lava.database.dao.UserMirrorDao
 import lava.database.dao.VisitedTopicDao
@@ -23,8 +27,12 @@ import lava.database.entity.FavoriteSearchEntity
 import lava.database.entity.FavoriteTopicEntity
 import lava.database.entity.ForumCategoryEntity
 import lava.database.entity.ForumMetadata
+import lava.database.entity.ForumProviderSelectionEntity
 import lava.database.entity.MirrorHealthEntity
+import lava.database.entity.ProviderConfigEntity
+import lava.database.entity.ProviderCredentialsEntity
 import lava.database.entity.SearchHistoryEntity
+import lava.database.entity.SearchProviderSelectionEntity
 import lava.database.entity.SuggestEntity
 import lava.database.entity.UserMirrorEntity
 import lava.database.entity.VisitedTopicEntity
@@ -37,13 +45,17 @@ import lava.database.entity.VisitedTopicEntity
         FavoriteTopicEntity::class,
         ForumCategoryEntity::class,
         ForumMetadata::class,
+        ForumProviderSelectionEntity::class,
         MirrorHealthEntity::class,
+        ProviderConfigEntity::class,
+        ProviderCredentialsEntity::class,
         SearchHistoryEntity::class,
+        SearchProviderSelectionEntity::class,
         SuggestEntity::class,
         UserMirrorEntity::class,
         VisitedTopicEntity::class,
     ],
-    version = 7,
+    version = 8,
     exportSchema = true,
 )
 @TypeConverters(Converters::class)
@@ -59,6 +71,10 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun suggestDao(): SuggestDao
     abstract fun userMirrorDao(): UserMirrorDao
     abstract fun visitedTopicDao(): VisitedTopicDao
+    abstract fun providerCredentialsDao(): ProviderCredentialsDao
+    abstract fun providerConfigDao(): ProviderConfigDao
+    abstract fun searchProviderSelectionDao(): SearchProviderSelectionDao
+    abstract fun forumProviderSelectionDao(): ForumProviderSelectionDao
 
     companion object {
         val MIGRATION_3_4 = object : Migration(3, 4) {
@@ -132,6 +148,72 @@ abstract class AppDatabase : RoomDatabase() {
                         "`protocol` TEXT NOT NULL, " +
                         "`added_at` INTEGER NOT NULL, " +
                         "PRIMARY KEY(`tracker_id`, `url`))",
+                )
+            }
+        }
+
+        /**
+         * Multi-Provider Extension (2026-05-02). Adds the credentials
+         * management and provider configuration persistence layer:
+         *  - `provider_credentials` — encrypted auth material per provider.
+         *  - `provider_configs` — per-provider timeout/mirror/capability toggles.
+         *  - `search_provider_selections` — which providers were active per search.
+         *  - `forum_provider_selections` — which provider was used per category.
+         */
+        val MIGRATION_7_8 = object : Migration(7, 8) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `provider_credentials` (" +
+                        "`provider_id` TEXT NOT NULL, " +
+                        "`auth_type` TEXT NOT NULL, " +
+                        "`username` TEXT, " +
+                        "`encrypted_password` TEXT, " +
+                        "`encrypted_token` TEXT, " +
+                        "`encrypted_api_key` TEXT, " +
+                        "`encrypted_api_secret` TEXT, " +
+                        "`cookie_value` TEXT, " +
+                        "`expires_at` INTEGER, " +
+                        "`is_active` INTEGER NOT NULL, " +
+                        "`last_used_at` INTEGER, " +
+                        "`created_at` INTEGER NOT NULL, " +
+                        "`updated_at` INTEGER NOT NULL, " +
+                        "PRIMARY KEY(`provider_id`))",
+                )
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `provider_configs` (" +
+                        "`provider_id` TEXT NOT NULL, " +
+                        "`timeout_ms` INTEGER NOT NULL, " +
+                        "`preferred_mirror_url` TEXT, " +
+                        "`is_enabled` INTEGER NOT NULL, " +
+                        "`search_enabled` INTEGER NOT NULL, " +
+                        "`browse_enabled` INTEGER NOT NULL, " +
+                        "`download_enabled` INTEGER NOT NULL, " +
+                        "`sort_preference` TEXT, " +
+                        "`updated_at` INTEGER NOT NULL, " +
+                        "PRIMARY KEY(`provider_id`))",
+                )
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `search_provider_selections` (" +
+                        "`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                        "`query_hash` TEXT NOT NULL, " +
+                        "`provider_id` TEXT NOT NULL, " +
+                        "`is_selected` INTEGER NOT NULL, " +
+                        "`created_at` INTEGER NOT NULL)",
+                )
+                db.execSQL(
+                    "CREATE INDEX IF NOT EXISTS `index_search_provider_selections_query_hash` " +
+                        "ON `search_provider_selections` (`query_hash`)",
+                )
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `forum_provider_selections` (" +
+                        "`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                        "`category_id` TEXT NOT NULL, " +
+                        "`provider_id` TEXT NOT NULL, " +
+                        "`created_at` INTEGER NOT NULL)",
+                )
+                db.execSQL(
+                    "CREATE INDEX IF NOT EXISTS `index_forum_provider_selections_category_id` " +
+                        "ON `forum_provider_selections` (`category_id`)",
                 )
             }
         }

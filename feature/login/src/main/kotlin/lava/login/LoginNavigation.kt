@@ -17,7 +17,7 @@ fun addLogin(
     arguments = emptyList(),
     animations = animations,
 ) {
-    LoginScreen(
+    ProviderLoginScreen(
         viewModel = viewModel(),
         back = back,
     )
