@@ -15,6 +15,11 @@ keystores/
 releases/
 tools/lava-containers/bin/
 
+# Local tool configuration and state
+.kimi/
+.specify/
+KIMI.md
+
 # Pre-push hook multi-mirror dedup cache (advisory; recreated on demand).
 # Forensic anchor: SP-3a Step 6+7 used --no-verify on 3-of-4 mirror
 # pushes because re-running scripts/ci.sh --changed-only against an

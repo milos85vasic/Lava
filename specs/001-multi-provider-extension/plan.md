@@ -1,0 +1,507 @@
+# Implementation Plan: Multi-Provider Extension
+
+**Branch**: `[001-multi-provider-extension]` | **Date**: 2026-05-02 | **Spec**: [specs/001-multi-provider-extension/spec.md](specs/001-multi-provider-extension/spec.md)
+**Input**: Feature specification from `/specs/001-multi-provider-extension/spec.md`
+
+## Summary
+
+Extend the Lava system (Go API service and Android client) from a single-tracker architecture to a unified multi-provider platform supporting 6 content sources: RuTracker, RuTor (existing), NNMClub, Kinozal (new torrent trackers), Internet Archive, and Project Gutenberg (new HTTP-based digital libraries). This requires:
+
+1. **Go API redesign**: Provider-agnostic routing layer, generalized auth middleware, new database tables for credentials and provider configuration
+2. **4 new Android tracker/provider modules**: Each following the existing `core/tracker/<id>` pattern with Capability Honesty (6.E)
+3. **Credentials management system**: Encrypted at-rest storage with Android Keystore, cloud backup support, sharable across providers
+4. **Unified search & forums**: Concurrent multi-provider dispatch with real-time streaming, deduplication, configurable timeouts, offline cache
+5. **UI/UX redesign**: Material Design 3, dynamic color, skeleton loading, comprehensive error states, accessibility
+6. **Anti-bluff testing**: 12 Challenge Tests (C1–C12) with real-device attestation per constitutional Seventh Law
+
+## Technical Context
+
+**Language/Version**: Kotlin 2.1.0 (Android), Go 1.25.0 (API)  
+**Primary Dependencies**: Jetpack Compose BOM 2025.06.01, Orbit MVI 7.1.0, Dagger Hilt 2.54, Room 2.7.2, Ktor client 2.3.1, Gin Gonic v1.12.0, quic-go v0.59.0, pgx/v5  
+**Storage**: PostgreSQL (Go API), Room with SQLite (Android), EncryptedSharedPreferences (Android credentials)  
+**Testing**: JUnit 4, orbit-test, MockWebServer, Android Instrumentation Tests (Hilt), Go testing + httptest  
+**Target Platform**: Android API 21+ (mobile primary, TV secondary), Linux server (Go API)  
+**Project Type**: Mobile application + headless API service  
+**Performance Goals**: First search result within 3s; concurrent search across 6 providers with individual 10s timeouts; P95 search completion under 15s; crash-free rate >99.5%  
+**Constraints**: No hosted CI/CD (constitutional Local-Only CI/CD); no mocking of internal business logic (constitutional Anti-Bluff); Capability Honesty (6.E) enforced; all provider modules pure Kotlin/JVM-only; 100% Compose UI  
+**Scale/Scope**: 6 providers (2 existing + 4 new), ~25 core modules + ~16 feature modules + 4 new tracker modules + 1 new credentials module + 1 new credentials feature module, 12 Challenge Tests
+
+## Constitution Check
+
+*GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
+
+| Principle | Check | Status |
+|-----------|-------|--------|
+| I. Anti-Bluff Testing (First–Fifth Laws) | Every new provider module requires real-stack parser tests, Integration Challenge Tests, and regression tests for bug fixes. Spec SC-009 and SC-010 mandate this. | ✅ Pass |
+| II. Real User Verification (Sixth Law + 6.A–6.F) | Spec requires 12 Challenge Tests on real device (C1–C12), real-binary contract tests for health probes, and behavioral coverage for every declared capability. Pre-tag real-device attestation required. | ✅ Pass |
+| III. Anti-Bluff Enforcement (Seventh Law) | Spec mandates Bluff-Audit stamps, forbidden test patterns, recurring bluff hunts, and pre-tag evidence gates. All test commits must carry mutation rehearsal documentation. | ✅ Pass |
+| IV. Local-Only CI/CD | No hosted CI configuration introduced. All quality gates run through `scripts/ci.sh` locally. | ✅ Pass |
+| V. Decoupled Reusable Architecture | New providers are Lava-domain logic (HTML parsers, routes, UI). Generic SDK primitives remain in `Submodules/Tracker-SDK/`. No generic code added to Lava repo without upstream justification. | ✅ Pass |
+| Host Machine Stability Directive | No power-management commands in any planned script or implementation. | ✅ Pass |
+
+**Re-check after Phase 1 design**: Verify that no new generic container logic, networking primitives, or reusable UI components are added to Lava repo that belong in `vasic-digital` submodules.
+
+## Project Structure
+
+### Documentation (this feature)
+
+```text
+specs/001-multi-provider-extension/
+├── plan.md              # This file
+├── research.md          # Phase 0 output — consolidated research from docs/refactoring/multi_provieders/
+├── data-model.md        # Phase 1 output — entities, Room schema, PostgreSQL migrations
+├── quickstart.md        # Phase 1 output — developer onboarding for new provider modules
+├── contracts/           # Phase 1 output — API route contracts, auth token format, provider interface
+│   ├── api-routes.md
+│   ├── auth-contract.md
+│   └── provider-interface.md
+└── tasks.md             # Phase 2 output — generated by /speckit-tasks
+```
+
+### Source Code (repository root)
+
+```text
+Lava/
+├── lava-api-go/
+│   ├── internal/
+│   │   ├── provider/          # NEW: Provider interface, registry, dispatch middleware
+│   │   │   ├── provider.go
+│   │   │   ├── registry.go
+│   │   │   └── credentials.go
+│   │   ├── middleware/
+│   │   │   └── provider.go    # NEW: Provider dispatch middleware
+│   │   ├── auth/
+│   │   │   └── generalized.go # REFACTOR: Multi-provider auth middleware
+│   │   ├── handlers/
+│   │   │   └── *.go           # REFACTOR: Use Provider interface instead of ScraperClient
+│   │   ├── nnmclub/           # NEW: NNMClub provider implementation
+│   │   ├── kinozal/           # NEW: Kinozal provider implementation
+│   │   ├── archiveorg/        # NEW: Internet Archive provider implementation
+│   │   ├── gutenberg/         # NEW: Project Gutenberg provider implementation
+│   │   └── rutracker/         # REFACTOR: Provider adapter over existing Client
+│   ├── migrations/
+│   │   ├── 0006_provider_credentials.up.sql
+│   │   ├── 0007_provider_configs.up.sql
+│   │   ├── 0008_search_provider_selections.up.sql
+│   │   └── 0009_forum_provider_selections.up.sql
+│   └── api/
+│       └── openapi.yaml       # UPDATE: /v1/{provider}/... route structure
+│
+├── core/
+│   ├── credentials/           # NEW: Credential storage and encryption
+│   │   ├── api/
+│   │   │   ├── Credential.kt
+│   │   │   ├── CredentialType.kt
+│   │   │   └── CredentialRepository.kt
+│   │   └── impl/
+│   │       ├── CredentialRepositoryImpl.kt
+│   │       ├── CredentialDao.kt
+│   │       ├── CredentialEntity.kt
+│   │       └── CredentialModule.kt
+│   ├── tracker/
+│   │   ├── nnmclub/           # NEW: NNMClub tracker module
+│   │   ├── kinozal/           # NEW: Kinozal tracker module
+│   │   ├── archiveorg/        # NEW: Internet Archive tracker module
+│   │   ├── gutenberg/         # NEW: Project Gutenberg tracker module
+│   │   ├── api/
+│   │   │   └── TrackerCapability.kt  # UPDATE: Add HTTP_DOWNLOAD
+│   │   ├── client/
+│   │   │   └── LavaTrackerSdk.kt     # UPDATE: Multi-provider methods
+│   │   └── registry/
+│   │       └── DefaultTrackerRegistry.kt  # UPDATE: Register 4 new providers
+│   └── database/
+│       └── AppDatabase.kt     # UPDATE: v8 migration (credentials, provider configs, selections, offline cache)
+│
+├── feature/
+│   ├── credentials/           # NEW: Credentials management UI
+│   │   ├── CredentialsScreen.kt
+│   │   ├── CredentialsViewModel.kt
+│   │   ├── CredentialsState.kt
+│   │   ├── CredentialsAction.kt
+│   │   └── CredentialsSideEffect.kt
+│   ├── search/                # UPDATE: Provider filter chips, unified result cards
+│   ├── search_result/         # UPDATE: Deduplication, real-time streaming, provider badges
+│   ├── forum/                 # UPDATE: Unified grouped view, provider sections
+│   ├── login/                 # UPDATE: Credential selector, anonymous toggle, provider cards
+│   ├── tracker_settings/      # UPDATE: Per-provider timeout, anonymous mode, credential association
+│   └── menu/                  # UPDATE: Navigation to Credentials Management
+│
+└── app/
+    └── src/
+        └── androidTest/
+            └── kotlin/lava/app/challenges/
+                ├── C1_AppLaunchAndProviderListTest.kt      # UPDATE: 6 providers
+                ├── C2_UnifiedSearchTest.kt
+                ├── C3_ProviderSpecificSearchFilterTest.kt
+                ├── C4_AnonymousSearchTest.kt
+                ├── C5_AuthenticatedSearchTest.kt
+                ├── C6_LoginAndDownloadTest.kt
+                ├── C7_ArchiveOrgBrowseTest.kt
+                ├── C8_GutenbergSearchAndDownloadTest.kt
+                ├── C9_CreateCredentialAndAssociateTest.kt    # NEW
+                ├── C10_ShareCredentialAcrossProvidersTest.kt # NEW
+                ├── C11_CrossProviderFallbackTest.kt          # NEW
+                └── C12_UnifiedForumsTest.kt                  # NEW
+```
+
+**Structure Decision**: Mobile + API (Option 3). The Android client follows the existing multi-module Gradle structure with new `core/tracker/<id>` modules and new `feature/credentials` module. The Go API service follows the existing `lava-api-go/` layout with new `internal/<provider>/` packages and a new `internal/provider/` abstraction layer.
+
+## Complexity Tracking
+
+> No constitutional violations detected. All complexity is justified by explicit feature requirements.
+
+| Complexity | Why Needed | Simpler Alternative Rejected Because |
+|-----------|------------|-------------------------------------|
+| 4 new provider modules + 1 credentials module | Required by spec to support 6 providers with credential management | Fewer providers would not satisfy the "unified multi-provider platform" requirement |
+| Full deduplication engine | Required by spec (Q4 clarification) | Showing all duplicates would clutter results and degrade UX |
+| Offline cache layer | Required by spec (Q5 clarification) for recent content | No offline support would leave users without access to recently viewed content |
+| Go API provider abstraction + route redesign | Required to support provider-agnostic dispatch with `/v1/{provider}/...` routing | Keeping flat routes would break REST semantics and cache isolation |
+
+## Phases
+
+### Phase 0: Pre-Flight Audit & Foundation (Week 1)
+
+**Goal**: Establish baseline, verify existing code quality, prepare test infrastructure.
+
+**Deliverables**:
+- `research.md` — consolidated technical research from `docs/refactoring/multi_provieders/`
+- Baseline test audit report
+- Test fixture directories created for all 4 new providers
+- MockWebServer test infrastructure configured for Go API and Android
+
+**Sub-tasks**:
+1. Run existing test suite (`./gradlew test`, `make test` in lava-api-go) and document 100% pass rate
+2. Audit existing fakes (`FakeTrackerClient`, `TestEndpointsRepository`) for behavioral equivalence per Third Law
+3. Capture HTML fixtures from NNMClub (search, forum, topic, login pages)
+4. Capture HTML fixtures from Kinozal (search, browse, details, login pages)
+5. Capture JSON fixtures from Internet Archive (search, metadata, collections)
+6. Capture RDF subset and OPDS fixtures from Project Gutenberg
+7. Create test fixture directories: `core/tracker/{nnmclub,kinozal,archiveorg,gutenberg}/src/test/resources/fixtures/`
+8. Configure MockWebServer for Go API integration tests
+9. Run bluff hunt on 5 random existing test files; document results in `.lava-ci-evidence/bluff-hunt/2026-05-02.json`
+10. Document baseline coverage metrics
+
+**Constitution gate**: Bluff hunt must complete with 0 surviving bluffs before proceeding.
+
+---
+
+### Phase 1: Go API Provider Abstraction (Weeks 2–3)
+
+**Goal**: Redesign Go API to support multiple providers through a unified abstraction layer.
+
+**Deliverables**:
+- `internal/provider/provider.go` — Provider interface, Credentials struct, result types
+- `internal/provider/registry.go` — ProviderRegistry with ID-to-implementation mapping
+- `internal/middleware/provider.go` — Dispatch middleware extracting `{provider}` path param
+- `internal/auth/generalized.go` — Multi-provider auth middleware supporting cookie/token/API-key
+- Refactored `internal/handlers/*.go` — All handlers use Provider interface
+- `internal/rutracker/` — Provider adapter wrapping existing Client
+- Database migrations 0006–0009
+- Updated `api/openapi.yaml` with `/v1/{provider}/...` routes
+- Regenerated `internal/gen/` via oapi-codegen
+
+**Sub-tasks**:
+1. Define Provider interface with 18 methods (ID, DisplayName, Capabilities, AuthType, Encoding, Search, Browse, GetForumTree, GetTopic, GetComments, AddComment, GetTorrent, DownloadFile, GetFavorites, AddFavorite, RemoveFavorite, CheckAuth, Login, HealthCheck)
+2. Define Credentials struct with Type, CookieValue, Token, Username, Password fields
+3. Implement ProviderRegistry with thread-safe map and lookup
+4. Refactor auth middleware to parse `provider_id:credential_type:credential_value` from Auth-Token header; maintain backward compatibility for bare tokens (RuTracker cookie)
+5. Create rutracker Provider adapter translating between ScraperClient types and Provider-agnostic types
+6. Update all 13 handler files to retrieve Provider from Gin context
+7. Redesign routes from flat `/forum`, `/search` to `/v1/{provider}/forum`, `/v1/{provider}/search`
+8. Write migrations for provider_credentials, provider_configs, search_provider_selections, forum_provider_selections tables
+9. Update OpenAPI spec and regenerate types
+10. Write contract tests asserting byte-equivalent responses for RuTracker routes before/after refactor
+11. Write real-binary contract test for healthprobe flag compatibility (6.A)
+
+**Constitution gate**: All existing tests must pass with byte-equivalent RuTracker responses. Contract tests must validate the new route structure.
+
+---
+
+### Phase 2: NNMClub Full Implementation (Weeks 4–5)
+
+**Goal**: Complete NNMClub provider on both Go API and Android.
+
+**Deliverables**:
+- `lava-api-go/internal/nnmclub/` — Full provider implementation (8 files)
+- `core/tracker/nnmclub/` — Android tracker module with all feature interfaces
+- HTML fixtures (≥5 per parser scope)
+- Parser tests with Bluff-Audit stamps
+- Integration tests with MockWebServer
+
+**Sub-tasks**:
+1. Go API: `client.go` — HTTP client with circuit breaker (name "nnmclub", MaxFailures 5, ResetTimeout 10s), Windows-1251 decoding, phpBB session management
+2. Go API: `search.go` — POST /forum/tracker.php parser
+3. Go API: `forum.go` — Category hierarchy parser
+4. Go API: `topic.go` — viewtopic.php parser with magnet link extraction
+5. Go API: `login.go` — phpBB authentication flow (ucp.php?mode=login)
+6. Go API: `favorites.go` — phpBB bookmark management
+7. Go API: `comments.go` — phpBB comment parser
+8. Go API: `download.go` — download.php handler
+9. Android: Create `core/tracker/nnmclub/` module with `lava.kotlin.tracker.module` convention plugin
+10. Android: `NNMClubDescriptor` — trackerId "nnmclub", 10 capabilities, authType FORM_LOGIN, encoding Windows-1251
+11. Android: Implement all 7 feature interfaces (Searchable, Browsable, Topic, Comments, Favorites, Authenticatable, Downloadable)
+12. Android: Write parser tests with HTML fixtures; include Bluff-Audit stamp in commit
+13. Android: Register `NNMClubClientFactory` in `TrackerClientModule`
+14. Add NNMClub mirrors to `mirrors.json`
+
+**Constitution gate**: Capability Honesty (6.E) — every declared capability must resolve to non-null `getFeature()`. Parser tests must have Bluff-Audit stamps.
+
+---
+
+### Phase 3: Kinozal Full Implementation (Weeks 6–7)
+
+**Goal**: Complete Kinozal provider on both Go API and Android.
+
+**Deliverables**:
+- `lava-api-go/internal/kinozal/` — Full provider implementation
+- `core/tracker/kinozal/` — Android tracker module
+- HTML fixtures (≥5 per parser scope)
+- Parser tests with Bluff-Audit stamps
+
+**Sub-tasks**:
+1. Go API: `client.go` — Circuit breaker "kinozal", Windows-1251, uid/pass cookie management
+2. Go API: `search.go` — GET /browse.php parser
+3. Go API: `topic.go` — details.php parser with AJAX file list fetch (get_srv_details.php)
+4. Go API: `login.go` — POST /takelogin.php, uid/pass cookie extraction
+5. Go API: `download.go` — dl.kinozal.tv/download.php binary download
+6. Android: `KinozalDescriptor` — trackerId "kinozal", 6 capabilities (no FAVORITES), authType FORM_LOGIN
+7. Android: Implement 6 feature interfaces (no FavoritesTracker)
+8. Android: `KinozalSizeParser` — Russian unit format (ТБ/ГБ/МБ/КБ)
+9. Android: Category mapping for 12 top-level categories
+10. Android: Mirror fallback tests (kinozal.tv → kinozal.me → kinozal.guru)
+11. Register Kinozal in registry and add mirrors to `mirrors.json`
+
+**Constitution gate**: Same as Phase 2 — 6.E compliance, Bluff-Audit stamps, real-stack parser tests.
+
+---
+
+### Phase 4: Internet Archive Implementation (Weeks 8–9)
+
+**Goal**: Complete Internet Archive provider on both Go API and Android.
+
+**Deliverables**:
+- `lava-api-go/internal/archiveorg/` — JSON REST API provider
+- `core/tracker/archiveorg/` — Android module using kotlinx-serialization
+- JSON fixtures for all API endpoints
+- Rate limiting and 429 handling tests
+
+**Sub-tasks**:
+1. Go API: `client.go` — HTTP client with rate limiter (4 concurrent), proper User-Agent, JSON parsing
+2. Go API: `search.go` — Advanced Search API + Scrape API integration
+3. Go API: `browse.go` — Collection-based browsing using Search API with `collection:` prefix
+4. Go API: `item.go` — Item metadata from `/metadata/{IDENTIFIER}`
+5. Go API: `download.go` — HTTP file download from `/download/{IDENTIFIER}/{FILENAME}`
+6. Android: `ArchiveOrgDescriptor` — trackerId "archiveorg", 6 capabilities, authType NONE, encoding UTF-8
+7. Android: `ArchiveOrgSearchApi` — Lucene query builder
+8. Android: `ArchiveOrgScrapeApi` — Cursor-based pagination
+9. Android: `ArchiveOrgMetadataApi` — Item details
+10. Android: `ArchiveOrgCollectionsApi` — Browse hierarchy
+11. Android: Mappers (SearchMapper, ItemMapper, CollectionMapper)
+12. Register Archive.org in registry
+
+**Constitution gate**: JSON contract tests for all API endpoints. Rate limiting behavior verified with MockWebServer.
+
+---
+
+### Phase 5: Project Gutenberg Implementation (Weeks 10–11)
+
+**Goal**: Complete Project Gutenberg provider on both Go API and Android.
+
+**Deliverables**:
+- `lava-api-go/internal/gutenberg/` — RDF catalog + OPDS provider
+- `core/tracker/gutenberg/` — Android module with local Room database and WorkManager sync
+- RDF test fixtures (100–200 representative entries)
+- Catalog sync worker tests
+
+**Sub-tasks**:
+1. Go API: `client.go` — HTTP client with 2-second minimum delay for harvest endpoint
+2. Go API: `catalog.go` — RDF/XML catalog parser for local SQLite database
+3. Go API: `search.go` — Local SQLite search using parsed catalog
+4. Go API: `browse.go` — Bookshelf-based browsing
+5. Go API: `book.go` — Book detail with multiple download format URLs
+6. Go API: `opds.go` — OPDS feed parser for real-time catalog updates
+7. Android: `GutenbergDescriptor` — trackerId "gutenberg", 6 capabilities, authType NONE
+8. Android: `GutenbergCatalogSyncWorker` — WorkManager worker with WiFi + charging constraints, 24h interval
+9. Android: `GutenbergLocalSearch` — Room full-text search on catalog database
+10. Android: `GutenbergBookshelfParser` — OPDS feed parser
+11. Android: Multi-format download URL construction
+12. Register Gutenberg in registry
+
+**Constitution gate**: Catalog sync worker must be tested with real WorkManager constraints. RDF parser must handle 75,000+ entry scale.
+
+---
+
+### Phase 6: Credentials Management System (Weeks 12–13)
+
+**Goal**: Implement Android credentials management with encryption and provider association.
+
+**Deliverables**:
+- `core/credentials/` module — Model, repository, DAO, encryption
+- `feature/credentials/` module — Compose UI, ViewModel, MVI state management
+- Updated `LavaTrackerSdk` with credential management methods
+- Updated LoginScreen with credential selector and anonymous toggle
+
+**Sub-tasks**:
+1. `core/credentials/api/`: `Credential` data class, `CredentialType` enum, `CredentialRepository` interface
+2. `core/credentials/impl/`: `CredentialRepositoryImpl` using Room + EncryptedSharedPreferences
+3. `core/credentials/impl/`: AES-256-GCM encryption via Android Keystore
+4. `core/credentials/impl/`: `CredentialDao` with Room annotations and provider association queries
+5. `core/credentials/impl/`: `CredentialModule` Hilt module
+6. `feature/credentials/`: `CredentialsScreen` with list, type badges, provider chips
+7. `feature/credentials/`: `CredentialsViewModel` with Orbit MVI
+8. `feature/credentials/`: Credential creation/edit bottom sheet with conditional fields
+9. `feature/credentials/`: Credential deletion with confirmation dialog
+10. Update `LavaTrackerSdk`: `setCredentialsForProvider()`, `getCredentialForProvider()`, `setAnonymousMode()`, `getProviderConfig()`, `observeProviderConfigs()`
+11. Update `LoginScreen`: Provider selection cards, credential dropdown, "Create New Credentials" button, anonymous toggle
+12. Update `TrackerSettingsScreen`: Per-provider credential selector, anonymous mode toggle, timeout configuration
+13. Write `CredentialRepository` tests verifying encrypted storage (real implementation, no mocks)
+14. Write UI tests for `CredentialsScreen`
+
+**Constitution gate**: Repository tests must use real encryption and verify behavioral equivalence (Third Law). ViewModel tests must use real UseCase implementations (Second Law).
+
+---
+
+### Phase 7: Unified Search & Forums (Weeks 14–15)
+
+**Goal**: Transform single-tracker search/browse into multi-provider concurrent operations.
+
+**Deliverables**:
+- `LavaTrackerSdk.searchAll()` — Concurrent dispatch with SharedFlow
+- `LavaTrackerSdk.browseAll()` — Concurrent forum/category browsing
+- Updated SearchScreen with provider filter chips, real-time updates, deduplication
+- Updated ForumScreen with unified grouped view
+- Offline cache implementation
+
+**Sub-tasks**:
+1. Implement `searchAll(request, providerIds): Flow<SearchResultBatch>` using Kotlin coroutines `async/awaitAll` with `SharedFlow`
+2. Create `SearchResultBatch` data class
+3. Implement `SearchResultViewModel` with real-time result merging, sorting, and deduplication
+4. Update `SearchScreen` with provider filter chips, search bar, result cards with provider badges
+5. Implement partial error indicators for failed/timed-out providers
+6. Implement `browseAll(categoryId, providerIds): Flow<BrowseResultBatch>`
+7. Update `ForumScreen` with provider-grouped sections, expandable hierarchies
+8. Implement deduplication engine: info-hash matching for torrents, identifier/ISBN for HTTP content
+9. Implement multi-provider badge with expandable per-provider metadata
+10. Implement offline cache: Room entities for cached search results and topic details, 24h TTL, quota-based eviction
+11. Write concurrent search tests with mock providers returning at different speeds
+12. Write deduplication tests with known duplicate and non-duplicate pairs
+
+**Constitution gate**: Challenge Tests C2 (Unified Search) and C12 (Unified Forums) must be written and operator-rehearsed on real device.
+
+---
+
+### Phase 8: UI/UX Redesign (Weeks 16–17)
+
+**Goal**: Implement Material Design 3 visual redesign with dynamic color, error states, and accessibility.
+
+**Deliverables**:
+- Material 3 theme with dynamic color support (Android 12+) and fallback static theme
+- Provider-specific color tokens for badges
+- Redesigned SearchScreen, ForumScreen, LoginScreen, SettingsScreen
+- All error state UIs (network, auth, unavailable, rate limited, partial results, empty)
+- Loading skeletons for all data-fetching screens
+- Dark theme support with proper contrast
+
+**Sub-tasks**:
+1. Define Material 3 theme in `core:designsystem` with `LavaTheme` update
+2. Define provider color tokens: RuTracker blue, RuTor red, NNMClub amber, Kinozal purple, Archive.org green, Gutenberg indigo
+3. Redesign bottom navigation with updated icons and labels
+4. Redesign `SearchScreen`: search bar, provider chips, result cards with badges, skeleton loading
+5. Redesign `ForumScreen`: unified sections, source indicators, expandable groups
+6. Redesign `LoginScreen`: provider selection cards, credential integration, anonymous toggle
+7. Redesign `SettingsScreen`: credentials management section, provider configuration section
+8. Implement error state patterns: Snackbar with retry, full-screen error with illustration, auth error dialog, provider unavailable badge, rate limit message, partial results banner, empty state with suggestions
+9. Implement loading skeletons for Search, Forum, Topic, Login, Settings
+10. Implement smooth transitions with shared element transitions
+11. Accessibility audit: content descriptions, 48dp touch targets, color contrast ratios
+12. Dark theme support with proper provider badge color mapping
+
+**Constitution gate**: Rendered-UI Challenge Tests must verify actual Composable output on real device (Sixth Law clause 1).
+
+---
+
+### Phase 9: Persistence & Preferences (Week 18)
+
+**Goal**: Ensure all user actions persist across sessions with proper migration.
+
+**Deliverables**:
+- `SearchProviderSelectionsRepository` with Room persistence
+- `ForumProviderSelectionsRepository` with Room persistence
+- AppDatabase v8 migration
+- Filter state persistence (sort order, period, categories per provider)
+- Provider display order persistence
+
+**Sub-tasks**:
+1. Create `SearchProviderSelectionsEntity` and `ForumProviderSelectionsEntity` Room entities
+2. Create repositories for provider selections
+3. Migrate existing Settings repository to support per-provider preferences
+4. Implement filter state persistence: sort order, time period, category filters per provider
+5. Implement provider display order persistence
+6. Implement anonymous mode persistence per provider
+7. Implement credential-provider association persistence
+8. Write AppDatabase v8 migration from v7, adding new tables without data loss
+9. Write tests verifying persistence across app restarts
+10. Write tests verifying v7→v8 migration preserves existing data
+
+**Constitution gate**: Migration tests must verify data preservation. Persistence tests must use real database (no in-memory fakes that bypass migration logic).
+
+---
+
+### Phase 10: Testing, Documentation & Tag Gate (Weeks 19–20)
+
+**Goal**: Complete all testing, documentation, and evidence collection for release tagging.
+
+**Deliverables**:
+- 12 Challenge Tests executed on real Android device
+- User manuals for credentials, provider configuration, unified search/forums
+- API documentation for `/v1/{provider}/...` routes
+- Developer guide for adding new providers
+- Real-device attestation evidence pack
+- Bluff hunt on 5 random new test files
+- Performance baseline measurement
+
+**Sub-tasks**:
+1. Execute C1–C12 on real Android device; record outcomes in `.lava-ci-evidence/sp3a-challenges/`
+2. Write user manual: Credentials Management (creating, editing, deleting, sharing)
+3. Write user manual: Provider Selection and Configuration
+4. Write user manual: Unified Search and Forums
+5. Write API documentation: `/v1/{provider}/...` route reference
+6. Write developer guide: Step-by-step recipe for adding a seventh provider
+7. Update `README.md` with multi-provider architecture overview
+8. Update `CHANGELOG.md`
+9. Create real-device attestation: `.lava-ci-evidence/Lava-Android-1.3.0-1030/real-device-verification.md` with device model, Android version, checklist, screenshots
+10. Run `scripts/tag.sh` to verify all evidence gates pass
+11. Run end-of-phase bluff hunt on 5 random new test files; output to `.lava-ci-evidence/bluff-hunt/2026-05-XX.json`
+12. Performance baseline: Measure concurrent search P95 latency across all 6 providers
+
+**Constitution gate**: `scripts/tag.sh` MUST refuse to tag without all evidence files. Bluff hunt MUST find 0 surviving bluffs. All 12 Challenge Tests MUST pass on real device.
+
+---
+
+## Risk Register
+
+| Risk | Impact | Likelihood | Mitigation |
+|------|--------|------------|------------|
+| Provider website changes break HTML parsers | High | Medium | Fixture-based testing, freshness checks (>30 days warning, >60 days block), parser abstraction layer |
+| Windows-1251 decoding issues on new trackers | Medium | Low | Reuse RuTracker charset transcoding pattern, test with Cyrillic content |
+| Internet Archive API changes or deprecation | Medium | Low | Pin API versions, use Scrape API as fallback, cache responses |
+| Gutenberg IP ban from aggressive requests | High | Medium | Strict 2-second rate limiting, local RDF catalog, no direct web scraping |
+| Android Keystore credential encryption fails on some devices | High | Low | Fallback to EncryptedSharedPreferences, hardware keystore detection |
+| Concurrent search causes UI jank or ANR | High | Medium | Result batching, debounce UI updates, SharedFlow with buffer, background dispatcher |
+| Database migration failures on existing users | High | Low | Migration testing on real databases, rollback scripts, phased migration with backup |
+| OpenAPI spec changes break code generation | Medium | Medium | Pin oapi-codegen version, contract tests against golden files |
+| Deduplication false positives degrade UX | Medium | Medium | Info-hash primary matching, confidence thresholds, user-expandable view |
+| Offline cache eviction loses user data | Low | Medium | Quota enforcement with LRU eviction, user-facing notification |
+
+## Post-Design Constitution Re-check
+
+*Re-check after Phase 1 design completion:*
+
+| Principle | Re-check Item | Status |
+|-----------|---------------|--------|
+| V. Decoupled Reusable Architecture | No generic container/networking/encryption code added to Lava repo | ⬜ TBD |
+| 6.A | Contract tests written for healthprobe and new compose healthchecks | ⬜ TBD |
+| 6.B | Container health verified via real-protocol probe, not just `docker ps` | ⬜ TBD |
+| 6.D | Behavioral coverage plan exists for every new interface method | ⬜ TBD |
+| 6.E | Capability enumeration test plan exists for all 6 providers | ⬜ TBD |
+| 6.F | Submodule constitutions reviewed for no relaxation of 6.A–6.F | ⬜ TBD |
