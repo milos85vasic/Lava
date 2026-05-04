@@ -234,6 +234,32 @@ A `TrackerDescriptor` (or any future descriptor of a feature-bearing component) 
 
 Clauses 6.A through 6.E inherit recursively to every `vasic-digital` submodule mounted in this repository, to every future submodule, and to every code module added to a submodule. A submodule constitution MAY add stricter rules (e.g. `Tracker-SDK`'s "no domain shape" rule) but MUST NOT relax 6.A–6.F. Adopting an externally maintained dependency that does not satisfy these clauses requires forking it under `vasic-digital/` first. The Seventh Law (Anti-Bluff Enforcement) inherits under the same rule. The Go API service (`lava-api-go/`) inherits 6.D and 6.E binding on its rutracker bridge work in the SP-3a-bridge follow-up.
 
+##### 6.G — End-to-End Provider Operational Verification (added 2026-05-04)
+
+**Forensic anchor:** The Internet Archive provider (`archiveorg`) shipped with `AuthType.NONE` but the `ProviderLoginScreen` → `ProviderLoginViewModel` → `LavaTrackerSdk.login()` flow hung on `CircularProgressIndicator` because `onSubmitClick()` did not short-circuit for no-auth providers and never reset `isLoading = false` when `sdk.login()` returned `null`. All Challenge Tests C1–C8 passed green while the provider was completely unusable.
+
+Rule: Every provider declared in `TrackerDescriptor` and shown in the provider list MUST have at least one end-to-end test that exercises the real production stack from the user's first tap to a successful outcome on a real device or real service. A provider that appears selectable but cannot complete its primary flow (search, browse, download, or anonymous login) is a constitutional violation, irrespective of unit-test coverage.
+
+1. **Auth-type诚实.** A provider with `AuthType.NONE` must have a test that taps "Continue" and reaches the main app. A provider with `AuthType.FORM_LOGIN` must have a test that enters real credentials (from `.env`) and authenticates successfully against the real service. A provider with `AuthType.API_KEY` must have a test that enters a real key and succeeds.
+2. **No synthetic-only coverage for provider flows.** Unit tests of `ProviderLoginViewModel` in isolation are insufficient. The test must traverse the real screen, the real ViewModel, the real `LavaTrackerSdk`, and the real HTTP client hitting the real base URL declared in the descriptor.
+3. **Falsifiability rehearsal per provider.** Before any new provider is added, the author MUST deliberately break the provider's primary flow (e.g., return `AuthResult.Error` from `login()`, throw in `search()`, return empty results from `browse()`) and confirm the end-to-end test fails with a clear assertion. The PR description MUST state which break was used and what failure the test produced.
+4. **Challenge Test expansion.** Challenge Tests C1–C8 cover rutracker and rutor. For every additional provider, a new Challenge Test MUST be added in `app/src/androidTest/kotlin/lava/app/challenges/` before that provider is declared "supported." Unsupported providers MUST NOT appear in the provider list shipped to end users.
+5. **Real-device or emulator mandate.** Provider end-to-end tests MUST run on a real Android device or on an Android emulator inside a container. Running them on the JVM with Robolectric or on a mocked NavHost is a bluff test by clause 1.
+
+##### 6.H — Credential Security Inviolability (added 2026-05-04)
+
+**Forensic anchor:** Real tracker credentials (`RUTRACKER_USERNAME`, `RUTRACKER_PASSWORD`, etc.) were stored in `../Boba/.env` and had to be copied into this repository for integration testing. Accidental commit of these credentials would be a security incident.
+
+Rule: Files containing real credentials, signing keys, or API secrets MUST never be committed to any upstream. Violation is a release blocker and a security incident.
+
+1. **`.env` and `.env.*` are inviolable.** The root `.gitignore` MUST contain `.env`, `.env.*`, and `.env.local`. No `.env` file shall ever appear in `git ls-files`.
+2. **`keystores/` are inviolable.** The root `.gitignore` MUST contain `keystores/`. Keystore files contain private signing keys.
+3. **`app/google-services.json` is inviolable.** The root `.gitignore` MUST contain this file. It contains Firebase API keys.
+4. **No credential strings in source code.** No hardcoded username, password, API key, or token shall exist in any `.kt`, `.java`, `.go`, `.gradle`, `.md`, or `.xml` file. The only permissible location for real credentials is `.env` (gitignored) or a local secrets manager.
+5. **Pre-push credential scan.** The pre-push hook MUST reject any push that introduces a file matching `.env*` or `*.keystore` or that adds a line matching credential patterns (`password=`, `api_key=`, etc.) to tracked files. `scripts/check-constitution.sh` MUST verify this.
+6. **Leak response protocol.** If credentials are accidentally committed, the commit MUST be purged from all four upstreams immediately, credentials MUST be rotated, and the incident MUST be recorded in `.lava-ci-evidence/sixth-law-incidents/` per the Seventh Law clause 6 protocol.
+7. **Inheritance.** This clause inherits recursively to every submodule. Submodule constitutions MAY add stricter rules but MUST NOT relax this one.
+
 ## Local-Only CI/CD (Constitutional Constraint)
 
 This project does NOT use, and MUST NOT add, GitHub Actions, GitLab pipelines, Bitbucket pipelines, CircleCI, Travis, Jenkins-as-a-service, Azure Pipelines, or any other hosted/remote CI/CD service. All build, test, lint, security-scan, mutation-test, load-test, image-build, and release-verification activity MUST run on developer machines or on a self-hosted local runner under the operator's direct control.
