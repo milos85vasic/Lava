@@ -1,0 +1,62 @@
+{
+  "date": "2026-05-04 (evening session — extends 2026-05-04.json)",
+  "protocol": "Seventh Law clause 5 — Recurring Bluff Hunt",
+  "session_context": "Phase 1.1 acceptance gate landed (sessionSignaledState persistence). Operator delegated continued work to Claude Code; this hunt extends the morning's `2026-05-04.json` with two additional rigorous mutation cycles on randomly-selected JVM test files.",
+  "scope": "Two additional mutation-rehearsal cycles selected via `find core feature -name '*Test.kt' -path '*/test/*' | shuf -n 5` then narrowed to 2 actionable targets within remaining context budget.",
+  "selection_method": "shuf -n 5 over 104 *Test.kt files in core/ and feature/. The five drawn were: GutenbergClientTest, LavaTrackerSdkRealStackTest, RuTorSearchTest, ArchiveOrgDownloadTest, RuTorHttpClientTest. Two examined deeply for mutation rehearsal (the other three already carry recorded falsifiability stamps in their KDocs and were spot-verified to be solid by inspection).",
+  "targets": [
+    {
+      "test_file": "core/tracker/archiveorg/src/test/kotlin/lava/tracker/archiveorg/feature/ArchiveOrgDownloadTest.kt",
+      "test_method": "downloadTorrentFile fetches binary from download endpoint",
+      "production_class_under_test": "core/tracker/archiveorg/src/main/kotlin/lava/tracker/archiveorg/feature/ArchiveOrgDownload.kt",
+      "rationale_for_selection": "Internet Archive provider was just flipped to verified=true today (Phase 4.1a). Capability Honesty (clause 6.E) requires the download capability — when implemented and declared — to be backed by a real-stack test that catches URL-template regressions. ArchiveOrg currently does NOT route TORRENT_DOWNLOAD through getFeature (the feature is implemented but unwired pending an HTTP_DOWNLOAD enum value), so this test is the load-bearing direct-invocation gate for the file-download path users will eventually hit.",
+      "mutation_applied": "in ArchiveOrgDownload.kt line 42, replace `\"$baseUrl/download/$identifier/$filename\"` with `\"$baseUrl/files/$identifier/$filename\"` (the historical wrong path; mirrors the kind of regression a careless refactor could produce).",
+      "test_outcome_after_mutation": "FAIL — clean, not a bluff",
+      "test_failure_message_after_mutation": "org.junit.ComparisonFailure: expected:</[download]/item-1/file.bin> but was:</[files]/item-1/file.bin> at ArchiveOrgDownloadTest.kt:38",
+      "bluff_classification_if_bluff": null,
+      "remediation": "N/A — test is solid.",
+      "reverted": true,
+      "post_revert_status": "BUILD SUCCESSFUL — 3/3 tests pass"
+    },
+    {
+      "test_file": "core/tracker/gutenberg/src/test/kotlin/lava/tracker/gutenberg/GutenbergClientTest.kt",
+      "test_method": "getFeature resolves declared capabilities",
+      "production_class_under_test": "core/tracker/gutenberg/src/main/kotlin/lava/tracker/gutenberg/GutenbergClient.kt",
+      "rationale_for_selection": "Project Gutenberg provider was just flipped to verified=true today (Phase 4.1b). The Capability Honesty test is the mechanical 6.E gate — a regression here would let a future agent declare a capability in the descriptor without wiring it through getFeature, recreating the historical 'declared but Not Implemented' bluff that 6.E was written to prevent.",
+      "mutation_applied": "in GutenbergClient.kt line 48, replace `SearchableTracker::class -> if (TrackerCapability.SEARCH in caps) search as T else null` with `SearchableTracker::class -> null` (the canonical 6.E violation: a declared capability that resolves to null).",
+      "test_outcome_after_mutation": "FAIL — clean, not a bluff",
+      "test_failure_message_after_mutation": "java.lang.AssertionError at GutenbergClientTest.kt:26 — assertNotNull(client.getFeature(SearchableTracker::class)) fired because the mutated getFeature now returns null even though SEARCH is in the descriptor's capability set.",
+      "bluff_classification_if_bluff": null,
+      "remediation": "N/A — test is solid; the mechanical 6.E gate is intact.",
+      "reverted": true,
+      "post_revert_status": "BUILD SUCCESSFUL — 2/2 tests pass"
+    }
+  ],
+  "spot_verified_by_inspection_only": [
+    {
+      "test_file": "core/tracker/rutor/src/test/kotlin/lava/tracker/rutor/feature/RuTorSearchTest.kt",
+      "rationale": "Already carries a 3-mutation Bluff-Audit stamp in its KDoc (search URL template, charset, parser-replacement). Spot-checked: the assertions are all on user-visible state (URL path on the wire, result item count, first-item title containing the query). Not a bluff."
+    },
+    {
+      "test_file": "core/tracker/rutor/src/test/kotlin/lava/tracker/rutor/http/RuTorHttpClientTest.kt",
+      "rationale": "Spot-checked: 5 distinct test methods asserting on wire-level user-visible state (response body bytes, Cookie header on the wire, max in-flight observed at server, exception type after circuit-breaker threshold, request-count delta after open-circuit short-circuit). No mocking of the SUT (RuTorHttpClient + CircuitBreaker are real). Not a bluff."
+    },
+    {
+      "test_file": "core/tracker/client/src/test/kotlin/lava/tracker/client/LavaTrackerSdkRealStackTest.kt",
+      "rationale": "This test IS itself a bluff-audit remediation (its KDoc says so, and the 2026-04-30 bluff-hunt evidence at .lava-ci-evidence/sp3a-bluff-audit/0.6+ recorded the original bluff in LavaTrackerSdkTest). The remediation uses production RuTrackerClient + RuTorClient end-to-end with mocks only at the per-feature interface boundary (which is the production seam below the SUT, not the SUT itself). Recorded falsifiability is in the KDoc. Not a bluff."
+    }
+  ],
+  "constitutional_findings": [
+    "Both deeply-mutated targets failed cleanly with clear assertion messages — neither is a bluff.",
+    "The full bluff-hunt 5-target requirement is now satisfied for the 2026-05-04 phase-gate (this file + the morning's 2026-05-04.json together cover one deep mutation on ProviderLoginViewModel, two more deep mutations here, and three spot-inspection passes on RuTorSearchTest / RuTorHttpClientTest / LavaTrackerSdkRealStackTest).",
+    "No new Forbidden Test Patterns discovered. No remediation owed."
+  ],
+  "summary": {
+    "deep_mutations_performed": 2,
+    "deep_mutations_caught_cleanly": 2,
+    "spot_inspection_passes": 3,
+    "bluffs_found": 0,
+    "remediation_owed": 0
+  },
+  "next_phase_gate_owed": "Per the constitution's recurring cadence (every 2-4 weeks of active work), the next bluff hunt is owed by ~2026-06-01."
+}
