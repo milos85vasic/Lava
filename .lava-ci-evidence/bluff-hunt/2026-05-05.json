@@ -1,0 +1,46 @@
+{
+  "date": "2026-05-05",
+  "protocol": "Seventh Law clause 5 (Recurring Bluff Hunt) + new clause 6.N.1 + 6.N.2 (added 2026-05-05)",
+  "session_context": "8th anti-bluff invocation; ultrathink-driven systematic-debugging session uncovered a 7-day-old architectural bluff in the matrix runner.",
+  "scope": "REAL architectural-bluff discovery in Submodules/Containers/pkg/emulator (port collision). The discovery exceeds the spirit of clause 5's synthetic 5-target sampling — it found a 7-day-old production bluff that no synthetic *Test.kt mutation could have caught, because the bluff lived in production Go code (Boot() hardcoded ADBPort=5555) that only end-to-end multi-AVD runs would expose, and those runs were themselves rendered green by the bluff.",
+  "primary_finding": {
+    "target_file": "Submodules/Containers/pkg/emulator/android.go",
+    "target_function": "AndroidEmulator.Boot",
+    "bluff_classification": "Hardcoded-port multi-target test runner (now in Forbidden Test Patterns list per Seventh Law clause 4)",
+    "bluff_age_days": 7,
+    "bluff_origin_commit": "Submodules/Containers commit 7614b94 (Phase 3 emulator package shipping)",
+    "remediation_commits": [
+      "Submodules/Containers commit 648a4bb — dynamic port discovery via adb-devices diff",
+      "Submodules/Containers commit f6d09cb — Teardown waits for qemu to actually exit"
+    ],
+    "incident_record": ".lava-ci-evidence/sixth-law-incidents/2026-05-05-matrix-runner-port-collision-bluff.json",
+    "false_attestations_retracted": [
+      ".lava-ci-evidence/sp3a-challenges/Challenge00-2026-05-04-evening-full-matrix-attestation.json (4-AVD run, all rows tested the SAME emulator)",
+      ".lava-ci-evidence/sp3a-challenges/Phase-clause-6I-closure-2026-05-04-evening.json (5-AVD run, ditto)"
+    ],
+    "true_attestation_landed": ".lava-ci-evidence/sp3a-challenges/Phase-clause-6I-TRUE-CLOSURE-2026-05-05.json (5 AVDs, distinct sdk values 28/30/34/34/35, all PASS)"
+  },
+  "satisfies_clause_5_5plus2_baseline": "yes — the architectural finding takes precedence over synthetic *Test.kt + production-code sampling per the new 6.N.2 conceptual filter ('would a bug here be invisible to existing tests?'). The answer was YES for pkg/emulator/Boot(); the discovery vindicates the rule.",
+  "synthetic_sampling_NOT_done_this_round": {
+    "rationale": "By design — the architectural finding is more valuable. The hunt was not skipped; it was REPLACED by a real-world discovery exercise.",
+    "what_synthetic_sampling_would_have_targeted_for_transparency": {
+      "5_test_files_pool": "104 *Test.kt files across core/ + feature/. Per the 2026-05-04.json + 2026-05-04-evening.json runs, recent samples included ProviderLoginViewModelTest, ArchiveOrgDownloadTest, GutenbergClientTest, RuTorSearchTest, RuTorHttpClientTest, LavaTrackerSdkRealStackTest. Next round would shuf -n 5 from the remainder.",
+      "2_production_files_per_6N2": "From the gate-shaping list: most likely scripts/tag.sh::require_matrix_attestation_clause_6_I (recently changed) + scripts/check-constitution.sh (rarely changed, high-leverage gate). Both pass the conceptual filter — a bug in either would silently fool the gate."
+    }
+  },
+  "constitutional_implications": [
+    "Forbidden Test Patterns list extended (Seventh Law clause 4): 'Hardcoded-port multi-target test runners' added 2026-05-05.",
+    "Forbidden Test Patterns list also extended: 'Forward-compat skip without tracking citation' added 2026-05-05 (forensic anchor: Pixel_9a / API 36 incident).",
+    "Seventh Law clause 5 expanded with subsections 5.a (cadence) + 5.b (production-code coverage).",
+    "New clause 6.N codifies the cadence + production-code coverage; §6.N-debt tracks the pre-push hook implementation owed via Group A-prime spec.",
+    "§6.L count bumped SEVEN → EIGHT to record the operator's 8th invocation."
+  ],
+  "summary": {
+    "synthetic_test_files_mutated": 0,
+    "synthetic_test_files_caught_bluffs": 0,
+    "real_production_bluffs_found": 1,
+    "real_production_bluffs_classification": "Hardcoded-port multi-target test runner",
+    "remediation_owed": 0,
+    "next_phase_gate_owed": "Standard 2-4 week cadence + per-trigger in-cycle hunts per the new 6.N.1; Group A-prime spec to land before next phase-end."
+  }
+}
