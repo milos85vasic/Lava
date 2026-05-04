@@ -82,6 +82,8 @@ class TrackerSettingsViewModelTest {
         override val authType: AuthType = AuthType.NONE
         override val encoding: String = "UTF-8"
         override val expectedHealthMarker: String = "rutracker"
+        // Verified-by-construction so the UI filter (clause 6.G) does not hide it.
+        override val verified: Boolean = true
     }
 
     private val rutorDescriptor = object : TrackerDescriptor {
@@ -94,6 +96,7 @@ class TrackerSettingsViewModelTest {
         override val authType: AuthType = AuthType.NONE
         override val encoding: String = "UTF-8"
         override val expectedHealthMarker: String = "RuTor"
+        override val verified: Boolean = true
     }
 
     private val bundledJson = """

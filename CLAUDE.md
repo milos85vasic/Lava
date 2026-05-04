@@ -3,10 +3,12 @@
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 > **See also:**
-> - `AGENTS.md` — detailed agent guide (tech stack versions, deployment, security notes).
+> - `AGENTS.md` — longer companion guide (tech stack versions, deployment, security notes). Read this when CLAUDE.md is too brief on a given subject.
 > - `core/CLAUDE.md` and `feature/CLAUDE.md` — scoped Anti-Bluff rules that apply only inside those trees.
+> - `lava-api-go/CLAUDE.md` and `lava-api-go/CONSTITUTION.md` — scoped instructions and constitutional addenda for the Go API service. **Read both before touching `lava-api-go/`.**
+> - `Submodules/<Name>/CLAUDE.md` — each of the 16 `vasic-digital/*` submodules ships its own scoped rules, inherited per 6.F. Honour them before editing any code under `Submodules/`.
 > - `docs/ARCHITECTURE.md`, `docs/LOCAL_NETWORK_DISCOVERY.md` — architecture diagrams and the mDNS discovery flow.
-> - `docs/superpowers/specs/2026-04-28-sp2-go-api-migration-design.md` — full SP-2 design doc (Go API service migration). Read this before touching `lava-api-go/`.
+> - `docs/superpowers/specs/2026-04-28-sp2-go-api-migration-design.md` — full SP-2 design doc (Go API service migration).
 > - `docs/superpowers/plans/2026-04-28-sp2-go-api-migration.md` — SP-2 implementation plan (14 phases, 39 tasks).
 
 ## Project
@@ -44,6 +46,32 @@ The repo is a fork of `andrikeev/Flow`, rebranded to Lava. All code/comments/doc
 # Tests (coverage is minimal; one unit test exists today)
 ./gradlew test
 ./gradlew :core:preferences:test --tests "lava.securestorage.EndpointConverterTest"
+
+# Local CI gate — IS the project's CI/CD apparatus (Local-Only CI/CD rule)
+./scripts/ci.sh --changed-only        # pre-push subset: Spotless, changed-module unit tests,
+                                      #   constitution parser, forbidden-files check
+./scripts/ci.sh --full                # all gates: every module, parity, mutation tests,
+                                      #   fixture freshness, real-device Challenge Tests
+                                      #   (used by scripts/tag.sh at tag time)
+
+# Constitution + bluff enforcement
+./scripts/check-constitution.sh       # parser/validator; greps tracked files for forbidden
+                                      #   commands and credential patterns; run by pre-push
+./scripts/bluff-hunt.sh               # phase-gate bluff hunt (Seventh Law clause 5)
+./scripts/check-fixture-freshness.sh  # detects stale network fixtures
+
+# Real-device Challenge Tests (Sixth Law clause 4 acceptance gate)
+./scripts/run-emulator-tests.sh       # Android emulator container + connectedAndroidTest
+
+# Release tagging — refuses without local CI evidence + real-device attestation
+./scripts/tag.sh <tag>
+
+# Mirror sync (4 upstreams: GitHub, GitLab, GitFlic, GitVerse)
+./Upstreams/GitHub.sh
+./Upstreams/GitLab.sh
+./Upstreams/GitFlic.sh
+./Upstreams/GitVerse.sh
+./scripts/sync-tracker-sdk-mirrors.sh
 ```
 
 `./start.sh` delegates to the Lava-domain CLI at `tools/lava-containers/`, which auto-detects Podman or Docker, builds the proxy fat JAR + image, and runs it via `docker-compose.yml`. Generic container-runtime concerns are owned by the upstream `vasic-digital/Containers` submodule mounted at `Submodules/Containers/` (pinned hash); the local CLI is thin glue per the Decoupled Reusable Architecture constitutional rule. The compose file uses **`network_mode: host`** so JmDNS broadcasts reach the LAN — the Android debug build then auto-discovers the proxy via `NsdManager` (`_lava._tcp.local.`).
@@ -56,13 +84,18 @@ Signing requires a `.env` at the repo root with `KEYSTORE_PASSWORD` and `KEYSTOR
 
 There is **no root `build.gradle.kts`** — all build logic lives in `buildSrc/` as convention plugins (`lava.android.application`, `lava.android.library`, `lava.android.library.compose`, `lava.android.feature`, `lava.android.hilt`, `lava.kotlin.library`, `lava.kotlin.serialization`, `lava.kotlin.ksp`, `lava.ktor.application`). Module `build.gradle.kts` files apply these by ID — **do not duplicate config in module scripts; extend the convention plugin instead.**
 
-Three top-level groupings (all listed in `settings.gradle.kts`):
+Three top-level Gradle groupings (all listed in `settings.gradle.kts`):
 
 - `core/*` — 17 modules. Several use the **api/impl split** (`auth`, `network`, `work`) so consumers depend on `:api` only. Pure-Kotlin modules with no Android dep: `core:models`, `core:common`, `core:auth:api`, `core:network:api`, `core:network:rutracker`, `core:work:api`.
 - `feature/*` — 15 screen-level modules; each applies `lava.android.feature` (which auto-wires Hilt, Orbit, and the standard core deps).
 - `:app` — Compose entry point, depends on every core + feature module. Holds `MainActivity`, `TvActivity`, top-level navigation graph, and rutracker.org deep-link handling.
 
 Dependency direction: `app → feature:* → core:domain → core:data → core:network:impl + core:database`, plus `core:auth:impl`, `core:work:impl`, `core:navigation`, `core:ui`, `core:designsystem`.
+
+Two non-Gradle artifacts also live at the repo root and are NOT built by `./gradlew`:
+
+- `lava-api-go/` — Go service replacing the Ktor `:proxy` in SP-2. Independent build (`Makefile`, `go.mod`), independent constitution (`lava-api-go/CONSTITUTION.md`), real-Postgres integration tests gated by `-Pintegration=true` running under podman/docker. Inherits 6.D and 6.E for its rutracker bridge work.
+- `Submodules/` — 16 pinned `vasic-digital/*` Git submodules (`Auth`, `Cache`, `Challenges`, `Concurrency`, `Config`, `Containers`, `Database`, `Discovery`, `HTTP3`, `Mdns`, `Middleware`, `Observability`, `RateLimiter`, `Recovery`, `Security`, `Tracker-SDK`). Every component with a non-Lava-specific use case lives here per the Decoupled Reusable Architecture rule. Pins are frozen by default — never auto-update.
 
 ### Patterns to follow
 
@@ -273,7 +306,7 @@ This project does NOT use, and MUST NOT add, GitHub Actions, GitLab pipelines, B
 ### Mandatory consequences
 
 - The `scripts/` directory (and any `Makefile`, task runner, or build tool introduced later) IS the CI/CD apparatus. Whatever runs in "release CI" MUST be the same script a developer runs locally — no parallel implementation.
-- A single local entry point — `scripts/ci.sh` (to be created in SP-2) — MUST invoke every quality gate appropriate to the changed surface (unit, integration, contract, e2e, fuzz, load, security, mutation, real-device). It MUST be runnable offline once toolchains and base images are present.
+- A single local entry point — `scripts/ci.sh` — invokes every quality gate appropriate to the changed surface (unit, integration, contract, e2e, fuzz, load, security, mutation, real-device). Two modes: `--changed-only` (pre-push: Spotless, changed-module unit tests, constitution parser, forbidden-files check) and `--full` (every module, parity gate, mutation tests, fixture freshness, Compose UI Challenge Tests on a connected Android device or emulator; used at tag time). Each run writes evidence under `.lava-ci-evidence/<UTC-timestamp>/`. It MUST be runnable offline once toolchains and base images are present.
 - **Forbidden files.** No `.github/workflows/*`, `.gitlab-ci.yml`, `.circleci/config.yml`, `azure-pipelines.yml`, `bitbucket-pipelines.yml`, `Jenkinsfile` (for hosted Jenkins), or equivalent shall exist on any branch of any of the four upstreams. A pre-push hook MUST reject pushes that introduce such files.
 - **Pre-push gate.** A git pre-push hook installed under `.githooks/` (and enabled via `git config core.hooksPath .githooks`) MUST run the relevant subset of `scripts/ci.sh` before any push to any upstream. The hook MUST NOT be bypassable in routine work; `--no-verify` is reserved for documented emergencies and any such use MUST be noted in the next commit message.
 - **Release tagging gate.** `scripts/tag.sh` MUST refuse to operate against any commit that has not been certified locally — i.e. the local CI gate must have been run successfully against the exact commit being tagged, and the result recorded in a tracked artifact (e.g. `.lava-ci-evidence/`). This implements the Sixth Law clause 5 in mechanical form.
@@ -378,6 +411,8 @@ Additional rules (broader than the explicit list):
 - Never trigger a full-screen exclusive mode that might interfere with session keep-alive
 - Never run commands that could exhaust system RAM and trigger an OOM kill of the desktop session
 - Never execute `killall`, `pkill`, or mass-process-termination targeting session processes
+
+**Mechanical enforcement.** `scripts/check-constitution.sh` greps tracked files for the forbidden-command patterns above and for credential patterns (per 6.H clause 5); the pre-push hook runs it. A push that introduces any forbidden command or credential string is rejected at the hook layer — do not work around it; fix the underlying violation.
 
 ### Forensic record: incident 2026-04-28 18:37 (host poweroff)
 

@@ -66,3 +66,11 @@ All clauses apply recursively to `lava-api-go`:
 5. **Recurring Bluff Hunt.** Each phase ends with a bluff hunt: 5 random `*_test.go` files, deliberate mutation, confirm failure. Output to `.lava-ci-evidence/bluff-hunt/<date>.json`.
 6. **Bluff Discovery Protocol.** Real-user bug + green tests = Seventh Law incident. Fix commit MUST include regression test; bluff diagnosed in `.lava-ci-evidence/sixth-law-incidents/<date>.json`.
 7. **Inheritance and Propagation.** Applies recursively to every submodule and every new artifact. Submodule constitutions MAY add stricter rules but MUST NOT relax.
+
+## Clause 6.G — End-to-End Provider Operational Verification (added 2026-05-04)
+
+Inherited per 6.F. This module has no user-facing providers today; the user-facing surface is the HTTP API itself. Every endpoint advertised in `api/openapi.yaml` MUST have a real-stack test (real Gin engine, real Postgres in podman, real upstream tracker over the network) that confirms a real client can complete the flow. An endpoint declared in the spec but unable to complete its flow against the real stack is a constitutional violation. The clause becomes load-bearing on any future multi-tracker bridge work; the bridge spec MUST cite 6.G in its acceptance criteria.
+
+## Clause 6.H — Credential Security Inviolability (added 2026-05-04)
+
+Directly applicable. No tracker username, password, API key, signing key, JWT secret, or database credential shall appear in any tracked file (`.go`, `.sql`, `.yaml`, `.yml`, `.md`, `.sh`, `Makefile`, …). Credentials come from a gitignored `.env` or a local secrets manager at runtime. The Auth-Token redaction rule (CONSTITUTION §Module-specific rules) is necessary but not sufficient. `scripts/check-constitution.sh` rejects pushes that introduce credential patterns; do not work around it — fix the leak.

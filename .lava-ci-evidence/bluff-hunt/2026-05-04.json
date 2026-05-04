@@ -1,0 +1,49 @@
+{
+  "date": "2026-05-04",
+  "protocol": "Seventh Law clause 5 — Recurring Bluff Hunt",
+  "session_context": "Provider operational verification phase (constitutional clause 6.G follow-up). Operator delegated execution to Claude Code as agent.",
+  "scope": "ONE deeply-mutated cycle on the most user-relevant test (ProviderLoginViewModelTest) plus one collateral fix discovered while exercising it. The four-cycle remainder is deferred to the next phase gate.",
+  "targets": [
+    {
+      "test_file": "feature/login/src/test/kotlin/lava/login/ProviderLoginViewModelTest.kt",
+      "test_name": "no-auth provider Continue tap succeeds without anonymous toggle",
+      "production_class_under_test": "feature/login/src/main/kotlin/lava/login/ProviderLoginViewModel.kt",
+      "rationale_for_selection": "User reported the Internet Archive provider was stuck on the login spinner after tapping Continue (forensic anchor of clause 6.G). The pre-existing `anonymous mode login succeeds immediately` test claimed to cover the same code path but its rutracker descriptor declared AUTH_REQUIRED, making authType=FORM_LOGIN — the OR-branch (`state.anonymousMode`) fired, NOT the AuthType.NONE branch the IA bug actually hit. That made the existing test a bluff for the IA bug class.",
+      "remediation_added_in_this_session": [
+        "New test case `no-auth provider Continue tap succeeds without anonymous toggle` exercising the EXACT user-bug code path: AuthType.NONE descriptor, no anonymous toggle, Continue tap → expect Success side effect AND isLoading == false.",
+        "Lifted local val `registry` in setUp() to a `private lateinit var` member field so the new test can register a third (archiveorg) factory after setUp without reflection."
+      ],
+      "mutation_applied": "Reverted both halves of commit 49714c0 (the IA fix) inside ProviderLoginViewModel.onSubmitClick: (a) replaced `if (provider?.authType == \"NONE\" || state.anonymousMode)` with `if (state.anonymousMode)` and dropped the `reduce { state.copy(isLoading = false) }` from that branch; (b) removed the `reduce { state.copy(isLoading = false) }` from the `null -> { ... }` branch at line 222.",
+      "test_outcome_after_mutation": "fail (clean — not a bluff)",
+      "test_failure_message_if_failed": "java.lang.AssertionError: isLoading must be false after Success — IA stuck-on-loading regression",
+      "bluff_classification_if_bluff": null,
+      "remediation": "N/A — the new test catches the regression. Mutation reverted; ProviderLoginViewModel.kt is back to the post-fix state (verified by grep: lines 195/197 + 223 contain the fix-restoring strings).",
+      "reverted": true
+    },
+    {
+      "test_file": "feature/login/src/test/kotlin/lava/login/ProviderLoginViewModelTest.kt",
+      "test_name": "anonymous mode login succeeds immediately (PRE-EXISTING)",
+      "production_class_under_test": "feature/login/src/main/kotlin/lava/login/ProviderLoginViewModel.kt",
+      "rationale_for_selection": "Discovered failing during the bluff hunt baseline run, before any mutation was applied. The test was already broken at HEAD: it called `awaitState() // isLoading = true` between `awaitSideEffect() // HideKeyboard` and `awaitSideEffect() // Success`, expecting an intermediate state emission. StateFlow conflates the loading=true/loading=false reduce pair into a single emission, so the test always saw `Success` where it expected a `State`, and Orbit's awaitState fails on the wrong-type item.",
+      "mutation_applied": null,
+      "test_outcome_after_mutation": "n/a — pre-existing failure, not a mutation result",
+      "test_failure_message_if_failed": "java.lang.AssertionError: Expected State but got SideEffectItem(value=Success)",
+      "bluff_classification_if_bluff": "broken-since-commit (pre-existing — the test fails on every run; CI either was not running this test or was ignoring failures). Classification under Forbidden Test Patterns clause 4: tests that build the SUT but never reliably exercise it. The PR for commit 7a0317d shipped this test in a broken state, and the existence of subsequent green CI runs while THIS test was failing means the gate was unenforced.",
+      "remediation": "Test rewritten to be coalescing-resilient: assert on side-effect sequence (HideKeyboard, Success) and final-state via viewModel.container.stateFlow.value.isLoading instead of intermediate awaitState. Verified passing post-fix.",
+      "reverted": true
+    }
+  ],
+  "constitutional_findings": [
+    "The pre-existing failing test (item 2 above) is a Seventh Law clause 6 incident: a green CI run happened while a test was failing. Either the test wasn't included in the running suite, or the suite's exit code wasn't observed. The pre-push hook MUST run `:feature:login:testDebugUnitTest` and observe a non-zero exit on failure. Action item: confirm scripts/ci.sh --changed-only includes feature module unit tests in its runner set.",
+    "The new no-auth-provider test demonstrates that the IA fix (commit 49714c0) IS now regression-protected at the JVM/Robolectric layer. The matching real-device Compose UI Challenge Test (per 6.G clause 5) is still owed — operator must run app on a real Android device against archive.org and record the attestation in .lava-ci-evidence/<next-tag>/real-device-verification.md before the next release tag is cut."
+  ],
+  "summary": {
+    "tests_evaluated": 2,
+    "bluffs_found": 1,
+    "bluffs_remediated": 1,
+    "regression_tests_added": 1,
+    "deferred_cycles_to_next_phase": 4,
+    "phase_gate_pass": true,
+    "phase_gate_pass_reason": "Both findings (the regression-test gap for the IA bug AND the broken-since-commit test) are remediated in this session's diff. The four remaining mechanical-mutation cycles (per the 5-target template) are deferred — declared explicitly here rather than faked, per the Seventh Law's 'do not fake evidence' principle."
+  }
+}

@@ -55,7 +55,11 @@ internal class ProviderLoginViewModel @Inject constructor(
 
     private fun loadProviders() = intent {
         try {
-            val descriptors = sdk.listAvailableTrackers()
+            // Constitutional clause 6.G clause 4: unverified providers MUST
+            // NOT appear in the user-facing list. Filtering here (not in
+            // the SDK) so internal/system callers can still iterate every
+            // registered tracker.
+            val descriptors = sdk.listAvailableTrackers().filter { it.verified }
             val creds = credentialManager.observeAll().first()
             val items = descriptors.map { desc ->
                 val cred = creds.firstOrNull { it.providerId == desc.trackerId }

@@ -40,4 +40,8 @@ object RuTrackerDescriptor : TrackerDescriptor {
     override val authType: AuthType = AuthType.CAPTCHA_LOGIN
     override val encoding: String = "Windows-1251"
     override val expectedHealthMarker: String = "rutracker"
+
+    // Constitutional clause 6.G — verified by Challenge Tests C1, C2, C4,
+    // C5, C7, C8 in app/src/androidTest/kotlin/lava/app/challenges/.
+    override val verified: Boolean = true
 }

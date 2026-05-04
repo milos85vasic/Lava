@@ -67,3 +67,28 @@ Specifically:
 The bridge plan lives at `docs/superpowers/plans/<TBD-after-SP-2>.md`
 once written. Until then, no Go-side work that touches the bridge
 shape is in scope; SP-3a Phases 0-5 explicitly exclude Go changes.
+
+## Clauses 6.G and 6.H (added 2026-05-04)
+
+- **Clause 6.G (End-to-End Provider Operational Verification).**
+  Today this module exposes only the rutracker handlers. The
+  user-facing surface IS the HTTP API itself, so 6.G binds at the
+  endpoint level: every endpoint advertised by `api/openapi.yaml`
+  MUST have a real-stack test that confirms a real client can
+  complete the flow end-to-end (real Gin engine, real Postgres in
+  podman, real upstream tracker over the network where applicable).
+  An endpoint declared in the spec but unable to complete its flow
+  against the real stack is a constitutional violation, irrespective
+  of unit-test coverage. Becomes load-bearing on any future
+  multi-tracker bridge.
+
+- **Clause 6.H (Credential Security Inviolability).** No tracker
+  username, password, API key, signing key, JWT secret, or database
+  credential shall ever appear in any tracked file (`.go`, `.sql`,
+  `.yaml`, `.yml`, `.md`, `.sh`, `Makefile`, …). Credentials come
+  from a gitignored `.env` or a local secrets manager at runtime.
+  The Auth-Token redaction rule (CONSTITUTION §Module-specific
+  rules) is necessary but not sufficient — the credential must
+  never reach a tracked file in the first place.
+  `scripts/check-constitution.sh` enforces this at pre-push;
+  introducing a credential pattern fails the push.

@@ -70,6 +70,7 @@ class ProviderLoginViewModelTest {
     private lateinit var sdk: LavaTrackerSdk
     private lateinit var rutrackerClient: FakeTrackerClient
     private lateinit var rutorClient: FakeTrackerClient
+    private lateinit var registry: DefaultTrackerRegistry
 
     @Before
     fun setUp() {
@@ -85,7 +86,7 @@ class ProviderLoginViewModelTest {
         )
         manager = ProviderCredentialManager(repository)
 
-        val registry = DefaultTrackerRegistry()
+        registry = DefaultTrackerRegistry()
         val rutrackerDesc = descriptor(
             "rutracker",
             "RuTracker",
@@ -180,11 +181,91 @@ class ProviderLoginViewModelTest {
                 awaitState() // anonymous mode toggled
 
                 viewModel.perform(ProviderLoginAction.SubmitClick)
+                // Two side effects: HideKeyboard then Success. Intermediate
+                // loading=true/false reduces are coalesced by StateFlow, so we
+                // assert on side effects + final state value.
                 val effect1 = awaitSideEffect()
                 assertTrue(effect1 is LoginSideEffect.HideKeyboard)
-                awaitState() // isLoading = true
                 val effect2 = awaitSideEffect()
                 assertTrue(effect2 is LoginSideEffect.Success)
+                assertFalse(viewModel.container.stateFlow.value.isLoading)
+            }
+        }
+
+    /**
+     * Regression test for the Internet Archive stuck-on-loading bug (forensic anchor of clause 6.G).
+     *
+     * Bug: a provider with `AuthType.NONE` (no anonymous-mode toggle in the UI, just a
+     * "Continue" button) would tap Submit, the spinner would appear, `sdk.login()` would
+     * return `null` (the no-auth branch), and the spinner would never be dismissed.
+     *
+     * This test exercises the EXACT user flow that broke: select an `AuthType.NONE`
+     * provider, tap Submit WITHOUT toggling anonymous mode, and verify Success is emitted
+     * AND `isLoading` ends false. The pre-existing `anonymous mode login succeeds immediately`
+     * test does NOT cover this path because it sets `SetAnonymousMode(true)` first, which
+     * triggers the OR-branch (`state.anonymousMode`), not the AuthType.NONE branch.
+     *
+     * Bluff-Audit: ProviderLoginViewModelTest.no-auth provider Continue tap succeeds without anonymous toggle
+     *   Mutation: change `provider?.authType == "NONE"` to `provider?.authType == "NEVER"`
+     *             at ProviderLoginViewModel.onSubmitClick (line 195)
+     *   Observed-Failure: this test fails — final side effect is not Success; the OLD
+     *             "anonymous mode login succeeds immediately" test STILL PASSES, confirming
+     *             it was a bluff for the IA bug class.
+     *   Reverted: yes
+     */
+    @Test
+    fun `no-auth provider Continue tap succeeds without anonymous toggle`() =
+        runTest(mainDispatcherRule.testDispatcher) {
+            // Add an AuthType.NONE provider distinct from the AUTH_REQUIRED ones in setUp().
+            // Caps deliberately exclude AUTH_REQUIRED, so:
+            //   - the descriptor reports AuthType.NONE (helper at line 303),
+            //   - FakeTrackerClient.getFeature(AuthenticatableTracker::class) returns null,
+            //   - sdk.login("archiveorg", _) therefore returns null,
+            //   - which is the EXACT runtime shape of the real Internet Archive flow.
+            val noAuthDesc = descriptor(
+                id = "archiveorg",
+                name = "Internet Archive",
+                caps = setOf(TrackerCapability.SEARCH),
+            )
+            assertEquals(AuthType.NONE, noAuthDesc.authType)
+            val noAuthClient = FakeTrackerClient(noAuthDesc) // loginProvider unused
+            registry.register(
+                object : TrackerClientFactory {
+                    override val descriptor = noAuthDesc
+                    override fun create(config: lava.sdk.api.PluginConfig) = noAuthClient
+                },
+            )
+
+            viewModel.test(this) {
+                runOnCreate()
+                awaitState() // initial loading
+                awaitState() // loaded — now includes archiveorg
+
+                viewModel.perform(ProviderLoginAction.SelectProvider("archiveorg"))
+                awaitState() // selected; no anonymous toggle, no username/password set
+
+                viewModel.perform(ProviderLoginAction.SubmitClick)
+
+                // Two side effects MUST follow: HideKeyboard, then Success.
+                // (StateFlow conflates the loading=true/loading=false reduces, so
+                // we don't assert on the intermediate state shape — what matters
+                // user-visibly is that Success fires AND the final state isn't
+                // stuck on loading.)
+                val effect1 = awaitSideEffect()
+                assertTrue(
+                    "first effect must be HideKeyboard, was $effect1",
+                    effect1 is LoginSideEffect.HideKeyboard,
+                )
+                val effect2 = awaitSideEffect()
+                assertTrue(
+                    "must emit Success for AuthType.NONE Continue tap, was $effect2 — IA stuck-on-loading regression",
+                    effect2 is LoginSideEffect.Success,
+                )
+                // User-visible final state: spinner cleared.
+                assertFalse(
+                    "isLoading must be false after Success — IA stuck-on-loading regression",
+                    viewModel.container.stateFlow.value.isLoading,
+                )
             }
         }
 
@@ -304,5 +385,8 @@ class ProviderLoginViewModelTest {
             if (TrackerCapability.AUTH_REQUIRED in caps) AuthType.FORM_LOGIN else AuthType.NONE
         override val encoding = "UTF-8"
         override val expectedHealthMarker = id
+        // Test descriptors are verified-by-construction so the UI filter (clause 6.G)
+        // does not hide them. Production descriptors gate this on a real Challenge Test.
+        override val verified = true
     }
 }

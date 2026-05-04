@@ -148,7 +148,8 @@ class CredentialsViewModel @Inject constructor(
     private suspend fun org.orbitmvi.orbit.syntax.simple.SimpleSyntax<CredentialsState, CredentialsSideEffect>.load() {
         reduce { state.copy(loading = true, error = null) }
         try {
-            val descriptors = sdk.listAvailableTrackers()
+            // Clause 6.G clause 4: hide unverified providers from user UI.
+            val descriptors = sdk.listAvailableTrackers().filter { it.verified }
             val creds = credentialManager.observeAll().first()
             val uiModels = descriptors.map { desc ->
                 val cred = creds.firstOrNull { it.providerId == desc.trackerId }

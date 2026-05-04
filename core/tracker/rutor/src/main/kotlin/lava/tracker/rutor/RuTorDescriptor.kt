@@ -43,4 +43,8 @@ object RuTorDescriptor : TrackerDescriptor {
     override val authType: AuthType = AuthType.FORM_LOGIN
     override val encoding: String = "UTF-8"
     override val expectedHealthMarker: String = "RuTor"
+
+    // Constitutional clause 6.G — verified by Challenge Tests C1, C3, C4,
+    // C6, C7, C8 in app/src/androidTest/kotlin/lava/app/challenges/.
+    override val verified: Boolean = true
 }

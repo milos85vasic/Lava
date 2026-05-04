@@ -74,7 +74,8 @@ class TrackerSettingsViewModel @Inject constructor(
     private suspend fun org.orbitmvi.orbit.syntax.simple.SimpleSyntax<TrackerSettingsState, TrackerSettingsSideEffect>.load() {
         reduce { state.copy(loading = true, error = null) }
         try {
-            val trackers = sdk.listAvailableTrackers()
+            // Clause 6.G clause 4: hide unverified providers from user UI.
+            val trackers = sdk.listAvailableTrackers().filter { it.verified }
             val active = sdk.activeTrackerId()
             val health = trackers.associate { d ->
                 val states = try {
