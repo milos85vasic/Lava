@@ -109,6 +109,48 @@ if [[ $credential_violations -gt 0 ]]; then
   exit 1
 fi
 
+# ---------------------------------------------------------------------
+# 7. Clause 6.K presence check (Containers extension shipped).
+#
+# Per clause 6.K clause 5: once Submodules/Containers/pkg/emulator/
+# ships, the constitution checker MUST verify (a) the package exists in
+# the pinned submodule, (b) Lava-side scripts/run-emulator-tests.sh
+# references the package's CLI, (c) at least one passing test inside
+# the package. Failure of any is a clause-6.K violation.
+#
+# This check is conditional: if the submodule is not initialised (fresh
+# clone before `git submodule update --init`), it warns rather than
+# fails, since the matrix capability isn't required for every push.
+# Pre-tag invocation (scripts/tag.sh) MUST upgrade the warn to a hard
+# fail.
+# ---------------------------------------------------------------------
+containers_emulator_dir="Submodules/Containers/pkg/emulator"
+if [[ -d "$containers_emulator_dir" ]]; then
+  if [[ ! -f "$containers_emulator_dir/types.go" ]] ||
+     [[ ! -f "$containers_emulator_dir/android.go" ]] ||
+     [[ ! -f "$containers_emulator_dir/matrix.go" ]]; then
+    echo "MISSING clause 6.K files in $containers_emulator_dir" >&2
+    echo "  → expected types.go + android.go + matrix.go." >&2
+    exit 1
+  fi
+  if ! grep -q 'cmd/emulator-matrix' scripts/run-emulator-tests.sh; then
+    echo "MISSING reference to cmd/emulator-matrix in scripts/run-emulator-tests.sh" >&2
+    echo "  → clause 6.K mandates Lava-side glue invokes the Containers CLI." >&2
+    exit 1
+  fi
+  emulator_test_count=$(find "$containers_emulator_dir" -name '*_test.go' | wc -l)
+  if [[ "$emulator_test_count" -eq 0 ]]; then
+    echo "MISSING tests in $containers_emulator_dir (clause 6.K clause 5)" >&2
+    exit 1
+  fi
+  echo "  ✓ clause 6.K: $containers_emulator_dir present + $emulator_test_count test file(s)"
+else
+  echo "  ⚠ clause 6.K: $containers_emulator_dir not present in this checkout."
+  echo "    Submodule may not be initialised; run \`git submodule update --init Submodules/Containers\`."
+  echo "    scripts/tag.sh MUST upgrade this warn to a hard fail at tag time."
+fi
+
 echo "Constitution check passed: 6.D + 6.E + 6.F present in CLAUDE.md;"
 echo "Submodules/Tracker-SDK/CLAUDE.md present; core/ + feature/ scoped"
-echo "clauses present; no clause-6.H credential patterns in tracked files."
+echo "clauses present; no clause-6.H credential patterns in tracked files;"
+echo "clause-6.K Containers extension present."

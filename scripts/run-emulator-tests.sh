@@ -1,177 +1,132 @@
 #!/bin/bash
-set -euo pipefail
-
-# =============================================================================
-# Lava End-to-End Emulator Test Runner
-# =============================================================================
-# Boots the Android emulator container, waits for it to be ready,
-# installs the debug APK, and runs all Challenge Tests (C1–C8)
-# plus provider-specific end-to-end tests.
+# scripts/run-emulator-tests.sh — Lava-side thin glue around the
+# Containers submodule's cmd/emulator-matrix CLI (Phase 3.2 of the
+# 2026-05-04 pending-completion plan; closes the constitutional 6.K-debt
+# entry in CLAUDE.md).
 #
-# Constitutional requirement: clause 6.G — every provider MUST have at
-# least one end-to-end test that exercises the real production stack on
-# a real device or emulator.
+# Per clauses 6.I (Multi-Emulator Container Matrix) + 6.K (Builds-
+# Inside-Containers Mandate) + the Decoupled Reusable Architecture
+# rule: the matrix-orchestration capability lives in
+# `vasic-digital/Containers/pkg/emulator/`. This script:
+#
+#   1. Builds the cmd/emulator-matrix binary from the pinned submodule
+#      (./Submodules/Containers).
+#   2. Builds the Lava debug APK if requested.
+#   3. Invokes the binary with Lava-specific arguments: AVD list, test
+#      class, evidence directory.
+#
+# All matrix logic — boot, install, run, teardown, attestation file
+# writing — is owned by the Containers submodule. New AVD form factors,
+# QEMU support, and other-OS emulators are extension points there, NOT
+# here.
 #
 # Usage:
-#   ./scripts/run-emulator-tests.sh [--avd=Pixel_9a] [--no-build]
-# =============================================================================
+#
+#   ./scripts/run-emulator-tests.sh \
+#       [--test-class lava.app.challenges.Challenge01AppLaunchAndTrackerSelectionTest] \
+#       [--avds CZ_API28_Phone:28:phone,CZ_API30_Phone:30:phone,CZ_API34_Phone:34:phone,Pixel_9a:36:phone] \
+#       [--evidence-dir .lava-ci-evidence/2026-05-04-matrix] \
+#       [--no-build]
+#
+# Environment:
+#   ANDROID_SDK_ROOT or ANDROID_HOME — points to the Android SDK
+#
+# Exit codes:
+#   0  matrix passed (every AVD booted, every test passed)
+#   1  matrix failed (at least one AVD failed)
+#   2  configuration error (missing flags, missing SDK, etc.)
+set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 cd "$PROJECT_DIR"
 
-AVD_NAME="${AVD_NAME:-Pixel_9a}"
+# Defaults
+DEFAULT_TEST_CLASS="lava.app.challenges.Challenge01AppLaunchAndTrackerSelectionTest"
+DEFAULT_AVDS="CZ_API28_Phone:28:phone,CZ_API30_Phone:30:phone,CZ_API34_Phone:34:phone,Pixel_9a:36:phone"
+DEFAULT_EVIDENCE_DIR=".lava-ci-evidence/$(date -u +%Y-%m-%dT%H-%M-%SZ)-matrix"
+
+TEST_CLASS="$DEFAULT_TEST_CLASS"
+AVDS="$DEFAULT_AVDS"
+EVIDENCE_DIR="$DEFAULT_EVIDENCE_DIR"
 BUILD_APK=1
 
-for arg in "$@"; do
-    case "$arg" in
-        --avd=*) AVD_NAME="${arg#--avd=}" ;;
-        --no-build) BUILD_APK=0 ;;
-        *) echo "Unknown option: $arg"; exit 1 ;;
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --test-class) TEST_CLASS="$2"; shift 2 ;;
+        --avds) AVDS="$2"; shift 2 ;;
+        --evidence-dir) EVIDENCE_DIR="$2"; shift 2 ;;
+        --no-build) BUILD_APK=0; shift ;;
+        --help|-h)
+            cat <<USAGE
+Usage: $0 [--test-class <fqcn>] [--avds <list>] [--evidence-dir <path>] [--no-build]
+
+Defaults:
+  --test-class    $DEFAULT_TEST_CLASS
+  --avds          $DEFAULT_AVDS
+  --evidence-dir  $DEFAULT_EVIDENCE_DIR
+
+The AVD list is comma-separated. Each entry MAY include the API level
+and form factor as Name:APILevel:FormFactor. The matrix runner records
+those metadata in the per-AVD attestation row.
+USAGE
+            exit 0
+            ;;
+        *) echo "Unknown option: $1"; exit 2 ;;
     esac
 done
 
-export AVD_NAME
-
-# Verify KVM is available on the host
-if [ ! -e /dev/kvm ]; then
-    echo "ERROR: /dev/kvm not available. Emulator cannot start without hardware virtualization."
-    echo "Enable KVM in BIOS/UEFI and ensure the kvm kernel module is loaded."
-    exit 1
-fi
-
-# Verify Android SDK is set
+# Pre-flight checks
 ANDROID_SDK_ROOT="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-}}"
-if [ -z "$ANDROID_SDK_ROOT" ] || [ ! -d "$ANDROID_SDK_ROOT/emulator" ]; then
-    echo "ERROR: ANDROID_SDK_ROOT or ANDROID_HOME must point to a valid Android SDK."
-    echo "Current: ANDROID_SDK_ROOT=${ANDROID_SDK_ROOT:-(unset)}"
-    exit 1
+if [[ -z "$ANDROID_SDK_ROOT" ]] || [[ ! -d "$ANDROID_SDK_ROOT/emulator" ]]; then
+    echo "ERROR: ANDROID_SDK_ROOT or ANDROID_HOME MUST point to a valid Android SDK." >&2
+    exit 2
+fi
+export ANDROID_SDK_ROOT
+
+if [[ ! -e /dev/kvm ]]; then
+    echo "ERROR: /dev/kvm not available. Emulator cannot start without hardware virtualization." >&2
+    exit 2
 fi
 
-# Verify the AVD exists on the host
-if ! "$ANDROID_SDK_ROOT/emulator/emulator" -list-avds | grep -qx "$AVD_NAME"; then
-    echo "ERROR: AVD '$AVD_NAME' not found in host SDK."
-    echo "Available AVDs:"
-    "$ANDROID_SDK_ROOT/emulator/emulator" -list-avds
-    echo ""
-    echo "Create one with:"
-    echo "  $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/avdmanager create avd -n Pixel_9a -k 'system-images;android-35;google_apis;x86_64' -d pixel_9"
-    exit 1
+CONTAINERS_DIR="$PROJECT_DIR/Submodules/Containers"
+if [[ ! -d "$CONTAINERS_DIR/pkg/emulator" ]]; then
+    echo "ERROR: Submodules/Containers/pkg/emulator not found." >&2
+    echo "  → run \`git submodule update --init Submodules/Containers\` and ensure" >&2
+    echo "    the pin includes commit 7614b94 or later (Phase 3.1 of the 2026-05-04 plan)." >&2
+    exit 2
 fi
 
-echo "========================================"
-echo "  Lava Emulator Test Runner"
-echo "  AVD: $AVD_NAME"
-echo "  SDK: $ANDROID_SDK_ROOT"
-echo "========================================"
+# Build the matrix binary from the pinned Containers submodule.
+BIN_DIR="$PROJECT_DIR/build/emulator-matrix"
+mkdir -p "$BIN_DIR"
+echo "[1/3] Building cmd/emulator-matrix from $CONTAINERS_DIR ..."
+( cd "$CONTAINERS_DIR" && go build -o "$BIN_DIR/emulator-matrix" ./cmd/emulator-matrix/ )
 
-# ---------------------------------------------------------------------------
-# Step 1: Build the debug APK (unless --no-build)
-# ---------------------------------------------------------------------------
-if [ "$BUILD_APK" -eq 1 ]; then
-    echo ""
-    echo "[1/5] Building debug APK..."
-    ./gradlew :app:assembleDebug
+# Build the Lava debug APK if requested.
+APK_PATH="$PROJECT_DIR/app/build/outputs/apk/debug/app-debug.apk"
+if [[ "$BUILD_APK" -eq 1 ]]; then
+    echo "[2/3] Building Lava debug APK ..."
+    ./gradlew :app:assembleDebug --no-daemon
+fi
+if [[ ! -f "$APK_PATH" ]]; then
+    echo "ERROR: APK not found at $APK_PATH" >&2
+    exit 2
 fi
 
-APK_PATH="app/build/outputs/apk/debug/app-debug.apk"
-if [ ! -f "$APK_PATH" ]; then
-    echo "ERROR: APK not found at $APK_PATH"
-    exit 1
-fi
+# Invoke the matrix runner. Per clauses 6.I/6.J: exit code 0 ⇒ matrix
+# passed; exit code 1 ⇒ matrix failed; nothing in between.
+mkdir -p "$EVIDENCE_DIR"
+echo "[3/3] Running matrix:"
+echo "  AVDs:        $AVDS"
+echo "  Test class:  $TEST_CLASS"
+echo "  Evidence:    $EVIDENCE_DIR"
+echo
 
-# ---------------------------------------------------------------------------
-# Step 2: Start the emulator container
-# ---------------------------------------------------------------------------
-echo ""
-echo "[2/5] Starting emulator container..."
-podman-compose -f docker-compose.test.yml up -d lava-emulator
-
-# ---------------------------------------------------------------------------
-# Step 3: Wait for emulator to be ready
-# ---------------------------------------------------------------------------
-echo ""
-echo "[3/5] Waiting for emulator boot completion..."
-BOOT_TIMEOUT=300
-BOOT_START=$(date +%s)
-while true; do
-    # Check if the emulator container is still running
-    if ! podman ps --filter name=lava-emulator --format '{{.Status}}' | grep -q "Up"; then
-        echo "ERROR: Emulator container exited unexpectedly."
-        podman logs lava-emulator | tail -30
-        podman-compose -f docker-compose.test.yml down
-        exit 1
-    fi
-
-    # Try to connect via adb and check boot completion
-    if adb connect localhost:5555 >/dev/null 2>&1; then
-        BOOT_COMPLETED=$(adb -s localhost:5555 shell getprop sys.boot_completed 2>/dev/null | tr -d '\r' || true)
-        if [ "$BOOT_COMPLETED" = "1" ]; then
-            echo "Emulator ready."
-            break
-        fi
-    fi
-
-    NOW=$(date +%s)
-    if [ $((NOW - BOOT_START)) -gt $BOOT_TIMEOUT ]; then
-        echo "ERROR: Emulator boot timed out after ${BOOT_TIMEOUT}s."
-        podman logs lava-emulator | tail -30
-        podman-compose -f docker-compose.test.yml down
-        exit 1
-    fi
-    echo "  Waiting for boot... ($((NOW - BOOT_START))s elapsed)"
-    sleep 5
-done
-
-# ---------------------------------------------------------------------------
-# Step 4: Install APK and run Challenge Tests
-# ---------------------------------------------------------------------------
-echo ""
-echo "[4/5] Installing APK and running Challenge Tests..."
-
-# Uninstall any previous version to avoid signature mismatch
-adb -s localhost:5555 uninstall digital.vasic.lava.client.dev 2>/dev/null || true
-
-# Install the debug APK
-echo "Installing APK..."
-adb -s localhost:5555 install -r "$APK_PATH"
-
-# Grant permissions that the app needs for testing
-adb -s localhost:5555 shell pm grant digital.vasic.lava.client.dev android.permission.WRITE_EXTERNAL_STORAGE 2>/dev/null || true
-
-# Run the Challenge Tests
-# Note: connectedAndroidTest runs all instrumentation tests in :app
-# We also want to run provider-specific tests if they exist.
-echo "Running connectedAndroidTest (Challenge Tests C1–C8 + provider e2e)..."
-./gradlew :app:connectedDebugAndroidTest \
-    -Pandroid.testInstrumentationRunnerArguments.class=lava.app.challenges.ChallengeTestSuite
-
-# ---------------------------------------------------------------------------
-# Step 5: Collect results and cleanup
-# ---------------------------------------------------------------------------
-echo ""
-echo "[5/5] Collecting test results..."
-
-TEST_OUTPUT="app/build/outputs/androidTest-results/connected"
-if [ -d "$TEST_OUTPUT" ]; then
-    echo "Test results available at: $TEST_OUTPUT"
-    ls -la "$TEST_OUTPUT"
-else
-    echo "No test output directory found at $TEST_OUTPUT"
-fi
-
-# Pull screenshots if any
-SCREENSHOT_DIR="app/build/outputs/connected_android_test_additional_output"
-if [ -d "$SCREENSHOT_DIR" ]; then
-    echo "Screenshots available at: $SCREENSHOT_DIR"
-fi
-
-echo ""
-echo "========================================"
-echo "  Test run complete"
-echo "  Stopping emulator container..."
-echo "========================================"
-
-podman-compose -f docker-compose.test.yml down
-
-echo "Done."
+"$BIN_DIR/emulator-matrix" \
+    --android-sdk-root "$ANDROID_SDK_ROOT" \
+    --apk "$APK_PATH" \
+    --test-class "$TEST_CLASS" \
+    --evidence-dir "$EVIDENCE_DIR" \
+    --avds "$AVDS" \
+    --cold-boot

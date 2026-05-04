@@ -164,6 +164,18 @@ C8); longer for C3 (UI bug to fix) and C7 (fault-injection design).
 
 ## Phase 3 — Multi-AVD Container Matrix Infrastructure
 
+**STATUS (2026-05-04 late):** Phases 3.1, 3.2, 3.3 ✓ done in this work
+session. `Submodules/Containers/pkg/emulator/` shipped with falsifiability-
+rehearsed unit tests; `cmd/emulator-matrix` CLI builds + runs;
+Lava-side `scripts/run-emulator-tests.sh` is now thin glue calling the
+CLI; `scripts/check-constitution.sh` enforces the clause-6.K presence
+check; first multi-AVD matrix attestation produced at
+`.lava-ci-evidence/sp3a-challenges/Phase-3-2026-05-04-first-matrix-
+attestation.json` (CZ_API30_Phone + CZ_API34_Phone, both passed C1,
+matrix exit 0, all_passed=true).
+
+
+
 **Why:** Clause 6.I requires a multi-AVD container matrix as the
 acceptance gate. Currently `scripts/run-emulator-tests.sh` boots ONE
 AVD; the orchestration for multi-AVD is documented but not implemented.

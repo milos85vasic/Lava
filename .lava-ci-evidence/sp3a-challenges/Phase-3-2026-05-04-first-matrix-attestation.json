@@ -1,0 +1,25 @@
+{
+  "all_passed": true,
+  "finished_at": "2026-05-04T21:20:21+03:00",
+  "rows": [
+    {
+      "avd": "CZ_API30_Phone",
+      "api_level": 30,
+      "form_factor": "phone",
+      "boot_seconds": 0.000190733,
+      "test_class": "lava.app.challenges.Challenge01AppLaunchAndTrackerSelectionTest",
+      "test_passed": true,
+      "test_seconds": 64.524696631
+    },
+    {
+      "avd": "CZ_API34_Phone",
+      "api_level": 34,
+      "form_factor": "phone",
+      "boot_seconds": 0.000277121,
+      "test_class": "lava.app.challenges.Challenge01AppLaunchAndTrackerSelectionTest",
+      "test_passed": true,
+      "test_seconds": 55.141013193
+    }
+  ],
+  "started_at": "2026-05-04T21:18:21+03:00"
+}
