@@ -36,3 +36,5 @@ KIMI.md
 # Build outputs at any depth (already covered for /build but nested
 # modules generate their own build/ dirs)
 **/build/
+.env.*
+.env.local

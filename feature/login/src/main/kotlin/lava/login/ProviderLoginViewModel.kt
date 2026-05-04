@@ -189,11 +189,12 @@ internal class ProviderLoginViewModel @Inject constructor(
         reduce { state.copy(isLoading = true) }
 
         val providerId = state.selectedProviderId ?: return@intent
+        val provider = state.providers.firstOrNull { it.providerId == providerId }
 
-        // If anonymous mode is enabled and provider supports it, skip auth
-        if (state.anonymousMode) {
-            logger.d { "Anonymous mode selected for $providerId" }
-            kotlinx.coroutines.yield()
+        // If provider requires no auth or anonymous mode is enabled, skip auth
+        if (provider?.authType == "NONE" || state.anonymousMode) {
+            logger.d { "Skipping auth for $providerId (authType=${provider?.authType}, anonymous=${state.anonymousMode})" }
+            reduce { state.copy(isLoading = false) }
             postSideEffect(LoginSideEffect.Success)
             return@intent
         }
@@ -219,6 +220,7 @@ internal class ProviderLoginViewModel @Inject constructor(
             null -> {
                 // Tracker does not support auth — treat as success for UI
                 logger.d { "Tracker $providerId does not support auth" }
+                reduce { state.copy(isLoading = false) }
                 postSideEffect(LoginSideEffect.Success)
             }
             else -> {
