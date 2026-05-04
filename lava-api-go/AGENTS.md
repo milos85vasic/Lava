@@ -89,6 +89,6 @@ Inherited per 6.F. This module has no user-facing providers today; the user-faci
 
 Directly applicable. No tracker username, password, API key, signing key, JWT secret, or database credential shall appear in any tracked file (`.go`, `.sql`, `.yaml`, `.yml`, `.md`, `.sh`, `Makefile`, …). Credentials come from a gitignored `.env` or a local secrets manager at runtime. The Auth-Token redaction rule (CONSTITUTION §Module-specific rules) is necessary but not sufficient. `scripts/check-constitution.sh` rejects pushes that introduce credential patterns; do not work around it — fix the leak.
 
-### Clause 6.N — Bluff-Hunt Cadence Tightening + Production Code Coverage (added 2026-05-05)
+## Clause 6.N — Bluff-Hunt Cadence Tightening + Production Code Coverage (added 2026-05-05)
 
 Inherits root `/CLAUDE.md` §6.N. Beyond the Seventh Law clause 5 baseline (every 2-4 weeks), bluff hunts fire IN-cycle on operator-mandate invocation, matrix-runner/gate change, and new attestation file. Bluff hunts MUST sample production code (2 files mandatory + 0-2 recommended per phase). Pre-push hook enforcement of the in-cycle triggers is owed via §6.N-debt (next brainstorming target after Group A lands). For this service: bluff-hunt the `tests/contract/` real-binary contract gate, `tests/parity/` cross-backend parity gate, and the production handlers behind them. Forensic anchor: 2026-05-05 architectural-bluff discovery in `Submodules/Containers/pkg/emulator`.
