@@ -327,25 +327,47 @@ require_matrix_attestation_clause_6_I() {
     die "Cannot tag $tag_id: clause 6.I clause 7 — matrix attestation has all_passed!=true in: ${failing_files[*]}"
   fi
 
+  # Parse compileSdk from buildSrc — single source of truth. Falls back
+  # to 35 if the file changes shape (with a warning, never silent
+  # passing). This dynamic parse fixes the 2026-05-05 latent helper
+  # bluff: the prior hardcoded `api >= 36` would have silently false-
+  # passed any future compileSdk=37 release with API-36-only evidence.
+  local compile_sdk=35
+  local convention_file="$REPO_ROOT/buildSrc/src/main/kotlin/lava/conventions/AndroidCommon.kt"
+  if [[ -f "$convention_file" ]]; then
+    local parsed
+    parsed=$(grep -oE 'compileSdk[[:space:]]*=[[:space:]]*[0-9]+' "$convention_file" | head -1 | grep -oE '[0-9]+$')
+    if [[ -n "$parsed" ]]; then
+      compile_sdk=$parsed
+    else
+      warn "[android] could not parse compileSdk from $convention_file — defaulting to 35"
+    fi
+  fi
+
   # Coverage check: every minimum API level MUST be represented.
-  local required_apis=(28 30 34) missing_apis=()
+  # Per root §6.I clause 2: API 28, API 30, API 34, AND the project's
+  # current compileSdk. Forward-compat (api > compile_sdk) is permitted
+  # but not required.
+  local required_apis=(28 30 34 "$compile_sdk") missing_apis=()
   local api required
+  # Deduplicate (compile_sdk could equal one of 28/30/34 in odd cases)
+  local seen_apis=()
   for required in "${required_apis[@]}"; do
+    local already_seen=false
+    for s in "${seen_apis[@]}"; do
+      [[ "$s" == "$required" ]] && already_seen=true && break
+    done
+    [[ "$already_seen" == "true" ]] && continue
+    seen_apis+=("$required")
     local found=false
     for api in "${api_levels[@]}"; do
       if [[ "$api" == "$required" ]]; then found=true; break; fi
     done
-    [[ "$found" == "true" ]] || missing_apis+=("$required")
+    [[ "$found" == "true" ]] || missing_apis+=("$required (project's compileSdk requirement)")
   done
-  # "Latest stable" minimum: at least one row at API 36 or higher.
-  local has_latest=false
-  for api in "${api_levels[@]}"; do
-    if (( api >= 36 )); then has_latest=true; break; fi
-  done
-  [[ "$has_latest" == "true" ]] || missing_apis+=("latest-stable-≥36")
 
   if (( ${#missing_apis[@]} > 0 )); then
-    die "Cannot tag $tag_id: clause 6.I clause 2 — matrix coverage incomplete. Missing API levels: ${missing_apis[*]}. Found: ${api_levels[*]} across ${#files[@]} matrix file(s) under $pack_dir."
+    die "Cannot tag $tag_id: clause 6.I clause 2 — matrix coverage incomplete. Missing API levels: ${missing_apis[*]}. Found: ${api_levels[*]} across ${#files[@]} matrix file(s) under $pack_dir. Project compileSdk = $compile_sdk."
   fi
 
   # Form-factor minimum: phone MUST be present.

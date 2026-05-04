@@ -22,6 +22,7 @@ package lava.app.challenges
 
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.test.filters.SdkSuppress
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import digital.vasic.lava.client.MainActivity
@@ -29,6 +30,7 @@ import lava.app.OnboardingBypassRule
 import org.junit.Rule
 import org.junit.Test
 
+@SdkSuppress(maxSdkVersion = 35) // Forward-compat skip on API 36+ until Compose BOM update fixes the AndroidPrefetchScheduler-needs-Looper crash on API 36. See .lava-ci-evidence/sixth-law-incidents/2026-05-05-pixel9a-espresso-api36-incompatibility.json
 @HiltAndroidTest
 class Challenge06DownloadTorrentFileTest {
 

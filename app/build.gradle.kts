@@ -161,6 +161,15 @@ dependencies {
     androidTestImplementation(libs.androidx.test.ext)
     androidTestImplementation(libs.androidx.test.runner)
     androidTestImplementation(libs.androidx.test.rules)
+    // L1 fix (2026-05-05): force-upgrade Espresso core to 3.7.0 so the
+    // matrix runs on Android 16 (API 36) without hitting the
+    // `InputManager.getInstance NoSuchMethodException` from Espresso
+    // 3.5's hidden-API reflection. The Compose BOM resolves Espresso
+    // transitively to 3.5.0; this explicit dependency overrides that
+    // resolution so even Compose `composeRule.waitUntil { … }` calls
+    // (which delegate to Espresso.onIdle()) work on API 36.
+    // See .lava-ci-evidence/sixth-law-incidents/2026-05-05-pixel9a-espresso-api36-incompatibility.json
+    androidTestImplementation(libs.androidx.test.espresso.core)
     androidTestImplementation(libs.junit4)
     androidTestImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(libs.hilt.android.testing)
