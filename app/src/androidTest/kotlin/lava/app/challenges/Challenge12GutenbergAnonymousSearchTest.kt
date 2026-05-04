@@ -34,6 +34,8 @@ import androidx.compose.ui.test.performTextInput
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import digital.vasic.lava.client.MainActivity
+import lava.tracker.gutenberg.GutenbergDescriptor
+import org.junit.Assume.assumeTrue
 import org.junit.Rule
 import org.junit.Test
 
@@ -49,6 +51,11 @@ class Challenge12GutenbergAnonymousSearchTest {
     @Test
     fun pickGutenberg_continue_searchShakespeare_bookRowVisible() {
         hiltRule.inject()
+
+        assumeTrue(
+            "GutenbergDescriptor.verified must be true for this test to apply (clause 6.G)",
+            GutenbergDescriptor.verified,
+        )
 
         composeRule.waitUntil(timeoutMillis = 10_000) {
             composeRule.onAllNodesWithText("Gutenberg", substring = true, ignoreCase = true)

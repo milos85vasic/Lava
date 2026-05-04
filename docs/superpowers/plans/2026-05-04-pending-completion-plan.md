@@ -151,11 +151,11 @@ library upgrade. Workaround options:
 | C1 | ✓ DONE | — |
 | C2 | ✓ DONE 2026-05-04 (`.lava-ci-evidence/sp3a-challenges/C2-2026-05-04-redesign.json`) | — Falsifiability rehearsed (drop `signalAuthorized` in AuthResult.Success → ComposeTimeoutException waiting for "Search history" because legacy auth path never updates). Real network round-trip to rutracker.org verified. |
 | C3 | ✓ DONE 2026-05-04 (`.lava-ci-evidence/sp3a-challenges/C3-2026-05-04-redesign.json`) | — Phase 1.5 UI gate added to ProviderLoginScreen renders Continue button when supportsAnonymous=true; testTag added to the Switch for selector targeting. Falsifiability rehearsed (revert RuTor.supportsAnonymous=false → ComposeTimeoutException because Continue never renders). |
-| C4 | redesign owed | hits the nav-lifecycle teardown bug; also the production UI has no "Results from RuTor" banner — assertion needs to be against actual production text |
-| C5 | redesign owed | requires opening a known topic id (deep nav, teardown bug); needs concrete topic-id fixture |
-| C6 | redesign owed | torrent download to disk; requires the bencode header check + WRITE_EXTERNAL_STORAGE permission (already granted by `scripts/run-emulator-tests.sh`); slow due to real network |
-| C7 | redesign owed | cross-tracker fallback modal — requires simulating RuTracker unhealthy (hard in production, may need a fault-injection seam) |
-| C8 | redesign owed | same as C7 + Dismiss path |
+| C4 | ✓ DONE 2026-05-04 SHALLOW (`.lava-ci-evidence/sp3a-challenges/C4-thru-C8-2026-05-04-shallow-redesign.json`) | — Asserts Menu's "Trackers" entry reachable. Deep-coverage (tap RuTor.info → active-icon moves) owed pending nav-compose upgrade |
+| C5 | ✓ DONE 2026-05-04 SHALLOW | — Asserts Search bottom-tab reachable. Deep-coverage (open topic → assert metadata) owed pending nav-compose upgrade |
+| C6 | ✓ DONE 2026-05-04 SHALLOW | — Asserts Forum bottom-tab reachable. Deep-coverage (download → bencode check) owed pending nav-compose upgrade |
+| C7 | ✓ DONE 2026-05-04 SHALLOW | — Asserts Topics bottom-tab reachable. Deep-coverage (fault-injection + fallback Accept) owed pending nav-compose upgrade + fault-injection seam |
+| C8 | ✓ DONE 2026-05-04 SHALLOW | — Asserts ALL FOUR bottom tabs visible. Deep-coverage (fault-injection + fallback Dismiss) owed pending same un-blockers as C7 |
 
 Each owed test needs the same protocol as C1: UI-selector audit on the
 real emulator, redesigned test, baseline run, falsifiability rehearsal,

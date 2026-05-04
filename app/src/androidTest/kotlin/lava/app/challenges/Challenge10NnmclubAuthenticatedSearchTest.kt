@@ -35,6 +35,7 @@ import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import digital.vasic.lava.client.BuildConfig
 import digital.vasic.lava.client.MainActivity
+import lava.tracker.nnmclub.NnmclubDescriptor
 import org.junit.Assume.assumeTrue
 import org.junit.Rule
 import org.junit.Test
@@ -52,6 +53,10 @@ class Challenge10NnmclubAuthenticatedSearchTest {
     fun pickNnmclub_login_searchUbuntu_resultRowVisible() {
         hiltRule.inject()
 
+        assumeTrue(
+            "NnmclubDescriptor.verified must be true for this test to apply (clause 6.G)",
+            NnmclubDescriptor.verified,
+        )
         assumeTrue(
             "NNMCLUB_USERNAME/PASSWORD must be set in .env for this test",
             BuildConfig.NNMCLUB_USERNAME.isNotEmpty() &&

@@ -47,6 +47,7 @@ import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import digital.vasic.lava.client.BuildConfig
 import digital.vasic.lava.client.MainActivity
+import lava.tracker.kinozal.KinozalDescriptor
 import org.junit.Assume.assumeTrue
 import org.junit.Rule
 import org.junit.Test
@@ -64,6 +65,10 @@ class Challenge09KinozalAuthenticatedSearchTest {
     fun pickKinozal_login_searchUbuntu_resultRowVisible() {
         hiltRule.inject()
 
+        assumeTrue(
+            "KinozalDescriptor.verified must be true for this test to apply (clause 6.G)",
+            KinozalDescriptor.verified,
+        )
         assumeTrue(
             "KINOZAL_USERNAME/PASSWORD must be set in .env for this test",
             BuildConfig.KINOZAL_USERNAME.isNotEmpty() &&

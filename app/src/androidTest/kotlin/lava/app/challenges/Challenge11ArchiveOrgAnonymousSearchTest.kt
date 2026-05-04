@@ -40,6 +40,8 @@ import androidx.compose.ui.test.performTextInput
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import digital.vasic.lava.client.MainActivity
+import lava.tracker.archiveorg.ArchiveOrgDescriptor
+import org.junit.Assume.assumeTrue
 import org.junit.Rule
 import org.junit.Test
 
@@ -55,6 +57,15 @@ class Challenge11ArchiveOrgAnonymousSearchTest {
     @Test
     fun pickArchiveOrg_continue_searchUbuntu_resultRowVisible() {
         hiltRule.inject()
+
+        // Clause 6.G gate: skip when ArchiveOrg is not yet verified.
+        // The verified flag flips only after operator-rehearsed Challenge
+        // Test on the matrix per clause 6.I. Until then this test
+        // skips — visible in the report, NOT counted as PASS.
+        assumeTrue(
+            "ArchiveOrgDescriptor.verified must be true for this test to apply (clause 6.G)",
+            ArchiveOrgDescriptor.verified,
+        )
 
         // Step 1: provider list. Archive.org must appear iff verified=true.
         composeRule.waitUntil(timeoutMillis = 10_000) {
