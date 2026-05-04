@@ -1,0 +1,86 @@
+{
+  "test": "lava.app.challenges.Challenge00CrashSurvivalTest",
+  "phase": "Phase 1.1 acceptance gate (sessionSignaledState persistence) — full minimum-coverage matrix run",
+  "constitutional_anchor": "clause 6.G clause 5 + clause 6.I clauses 2 + 4 + 6 + Sixth Law clause 5 + Seventh Law clause 3",
+  "matrix_summary": {
+    "all_passed": true,
+    "avd_count": 4,
+    "started_at": "2026-05-04T23:14:24+03:00",
+    "finished_at": "2026-05-04T23:19:50+03:00",
+    "wall_seconds": 326,
+    "raw_attestation": ".lava-ci-evidence/2026-05-04-evening-c00-full-matrix/real-device-verification.json"
+  },
+  "per_avd_rows": [
+    {
+      "avd": "CZ_API28_Phone",
+      "api_level": 28,
+      "form_factor": "phone",
+      "android_version": "9 Pie",
+      "test_passed": true,
+      "test_seconds": 62.688910896
+    },
+    {
+      "avd": "CZ_API30_Phone",
+      "api_level": 30,
+      "form_factor": "phone",
+      "android_version": "11 R",
+      "test_passed": true,
+      "test_seconds": 71.029977747
+    },
+    {
+      "avd": "CZ_API34_Phone",
+      "api_level": 34,
+      "form_factor": "phone",
+      "android_version": "14 Upside Down Cake",
+      "test_passed": true,
+      "test_seconds": 73.678754189
+    },
+    {
+      "avd": "Pixel_9a",
+      "api_level": 36,
+      "form_factor": "phone",
+      "android_version": "16 Baklava (latest stable as of 2026-05-04)",
+      "test_passed": true,
+      "test_seconds": 96.877241405
+    }
+  ],
+  "clause_6_I_coverage_status": {
+    "clause_2_android_version_minimums": {
+      "API_28": "PASS — CZ_API28_Phone",
+      "API_30": "PASS — CZ_API30_Phone",
+      "API_34": "PASS — CZ_API34_Phone",
+      "latest_stable": "PASS — Pixel_9a (API 36)"
+    },
+    "clause_3_screen_size_coverage": {
+      "phone_class": "PASS — all 4 AVDs are phone form factor",
+      "tablet_class": "OWED — no tablet AVD in this run; clause 6.I clause 3 minimum requires phone + tablet for any feature whose layout could differ. Phase 1.1 (persistence layer) does NOT touch layout, so phone-only is appropriate; full release-tag matrix will need tablet coverage.",
+      "tv_class": "N/A — Challenge00 does not touch TvActivity or leanback manifest entries."
+    },
+    "clause_4_per_avd_attestation_row": "PASS — 4 rows recorded, each naming AVD, API level, form factor, test class, pass/fail, seconds.",
+    "clause_5_falsifiability_rehearsal_per_version_class": {
+      "API_28_class_rehearsal": "OWED — same protocol as the JVM AuthServiceImplPersistenceTest mutation rehearsal would apply. Owed at next phase that touches the persistence write path.",
+      "API_34_class_rehearsal": "Done at the JVM layer (commit 3672cbf, AuthServiceImplPersistenceTest mutation rehearsal recorded in commit body). Device-level rehearsal owed in next phase."
+    },
+    "clause_6_cold_boot_only": "Honestly partial — `--cold-boot` flag is passed to cmd/emulator-matrix, but if the AVD's cache is hot from earlier same-session runs, the actual boot is still much faster than a true first-launch cold boot. The boot_seconds field reads near-zero because matrix.go captures BootResult.BootDuration (time from launch command to launch return), not WaitForBoot duration. Reporting bug recorded for follow-up.",
+    "clause_7_tag_sh_enforcement": "OWED — scripts/tag.sh has not yet been updated to consume this evidence file pattern. Owed in the next phase that touches release tagging.",
+    "clause_8_inheritance": "PASS — submodule constitutions all carry clause 6.M (which references 6.I) per the propagation in commit 20539d5."
+  },
+  "what_the_matrix_proved_end_to_end": [
+    "Phase 1.1 sessionSignaledState persistence works on Android 9, 11, 14, and 16 — covering 6 years of Android API surface (2018 → 2024 stable releases plus the 2026 latest-stable bump).",
+    "PreferencesStorageImpl.signaled_auth.xml lifecycle (write on signalAuthorized, clear on logout) is byte-equivalent across all four API levels.",
+    "AuthServiceImpl.signalAuthorized's call into preferencesStorage.saveSignaledAuthState fires consistently across ART versions, despite the historical NoSuchMethodException risk on API 36 (Pixel_9a) that previously blocked C1 deep navigation. Challenge00 does NOT touch deep navigation, so the API-36 path is clean here.",
+    "The 2026-05-04 evening WaitForBoot fix (Submodules/Containers commit 2f3c689) is regression-protected by this run — without the fix, the matrix would have failed at the boot stage on every AVD."
+  ],
+  "deep_coverage_still_owed": [
+    "Container-bound matrix run per clause 6.I clause 1 (next phase that touches the matrix gate).",
+    "Tablet form factor per clause 6.I clause 3 (release-tag prerequisite).",
+    "Per-API-class falsifiability rehearsal recorded with on-device repro (clause 6.I clause 5).",
+    "True am-force-stop survival via UiAutomator-driven shell access (Phase 1.1.7 owed).",
+    "Cold-boot-only enforcement audit per clause 6.I clause 6 (the boot_seconds field needs to capture WaitForBoot duration, not launch-command duration; matrix.go reporting bug)."
+  ],
+  "next_pending_remediation_priorities": [
+    "matrix.go BootResult.BootDuration → WaitForBoot duration capture (cosmetic but relevant to clause 6.I clause 6 audit)",
+    "scripts/tag.sh consumption of .lava-ci-evidence/<tag>/real-device-verification.* glob pattern (per clause 6.I clause 7)",
+    "Container-bound matrix run via Submodules/Containers/cmd/distributed-test (clause 6.I clause 1 + clause 6.K mandate)"
+  ]
+}
