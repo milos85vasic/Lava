@@ -347,6 +347,41 @@ This clause exists not to add new mechanics — clauses 6.A through 6.I + the Si
 
 **Inheritance.** Applies recursively to every submodule, every feature, every new artifact. Submodule constitutions MAY emphasize this clause more loudly (e.g. by repeating it verbatim in their `CLAUDE.md`) but MUST NOT relax it.
 
+##### 6.K — Builds-Inside-Containers Mandate (added 2026-05-04)
+
+**Forensic anchor:** the project's emulator-matrix gate (clause 6.I) requires test runs inside containers, but every build that PRODUCES the artifacts those tests exercise (the debug APK, the release APK, the Go API binary, the Ktor proxy fat JAR, the OCI image tarballs) currently runs on the developer's bare host. That is a constitutional inconsistency: the gate run is reproducible, the artifact under test is not. A debug APK built on developer A's machine with their installed Java toolchain + their `~/.gradle/caches/` + their `local.properties` is NOT byte-equivalent to the one built on developer B's machine, and neither is byte-equivalent to the one the CI gate would have produced — any of them might pass on the matrix while the others fail, and we would have no way to tell because there is no shared build surface.
+
+**Rule.** Every build that produces an artifact placed in `releases/`, every build whose output is run inside the emulator-matrix or any clause-6.I gate, and every build whose output is signed for release MUST run inside the project's container path — specifically inside the `vasic-digital/Containers` submodule's build orchestration (existing `cmd/distributed-build` + `pkg/distribution` + `pkg/runtime` primitives), invoked by thin Lava-side glue.
+
+1. **Container-bound builds.** `:app:assembleDebug`, `:app:assembleRelease`, `:proxy:buildFatJar`, `lava-api-go` static-binary build, OCI image builds — all run inside a build container (a JDK-bearing container for Gradle, a Go-bearing container for the Go service) brought up by `Submodules/Containers`. Local incremental dev builds on the host are PERMITTED for iteration; the constitutional gate, the release-artifact build, and the build whose output goes through the emulator matrix MUST go through Containers.
+
+2. **Containers MUST natively support Android emulators.** The existing `cmd/distributed-test` already routes Android-test execution through container orchestration. Per this clause, `Submodules/Containers/pkg/emulator/` is added as a first-class package alongside `pkg/runtime`, `pkg/compose`, `pkg/orchestrator`, `pkg/health`, `pkg/lifecycle`, `pkg/distribution`. Its responsibility: spin up Android emulators in containers (cold-boot per clause 6.I), wire `adb` to the host, install APKs, drive instrumentation tests, collect per-AVD attestation evidence, tear down. Lava's `scripts/run-emulator-tests.sh` becomes thin glue invoking this package.
+
+3. **Containers SHOULD investigate non-Android emulators.** Roadmap items for `pkg/emulator/` (or a sibling `pkg/vm/` if architecturally cleaner), recorded as 6.K-debt and tracked but NOT release-blocking for the next Lava tag:
+   - **QEMU full-system emulation** — boot non-x86 OS images (ARM, RISC-V, MIPS) inside KVM-accelerated containers for cross-architecture testing. Useful for Lava's signing/keystore code that may rely on JCA providers behaving differently across CPU architectures.
+   - **Other OS emulators** — Linux distributions (Alpine, Debian, Fedora, Arch) for testing the Lava proxy's distroless container behavior across base-image families; FreeBSD for verifying `lava-api-go`'s POSIX-only assumptions; minimal Windows for verifying the gradle wrapper's `gradlew.bat` parity.
+   - **iOS / macOS emulation** — out of scope unless and until Lava ships an iOS client; recorded here so the roadmap item exists.
+
+4. **Sixth Law alignment.** Per 6.J ("tests must guarantee the product works"), an artifact built outside the gating container path and tested inside the gating emulator path is constitutionally suspect — green tests against an artifact the gate did not build are a bluff vector by construction. Closing 6.K closes that vector. Until 6.K is closed, every release-evidence note MUST cite which artifact came from which build path; tags with mismatched-path builds are forbidden.
+
+5. **`scripts/check-constitution.sh` enforcement.** Once `Submodules/Containers/pkg/emulator/` ships, the constitution checker MUST verify the existence of: (a) the `pkg/emulator/` package in the pinned Containers submodule, (b) Lava-side thin-glue scripts referencing the package's CLI, (c) at least one passing test inside `Submodules/Containers/pkg/emulator/` exercising a real container-emulator boot via `pkg/runtime`'s auto-detected Docker/Podman. Failure of any of (a)/(b)/(c) is a clause-6.K violation; pre-push rejects.
+
+6. **Falsifiability rehearsal applies to 6.K's own infrastructure.** Per 6.J + clause 6.A, the new Containers `pkg/emulator/` package's tests MUST themselves be falsifiable — deliberate-mutation rehearsal recorded in commit body, observed-failure captured, reverted. The same standard the Lava-side Anti-Bluff Pact applies.
+
+7. **Inheritance.** Applies recursively to every submodule, every feature, every new artifact. Submodule constitutions MAY add stricter rules (e.g. "this submodule's binary MUST also be built inside Containers' multi-arch matrix") but MUST NOT relax this clause.
+
+##### 6.K-debt — Containers extension implementation (constitutional debt, 2026-05-04)
+
+The clauses above are the contract. The implementation is owed: `Submodules/Containers/pkg/emulator/` does not yet exist. Until it does, the Lava-side `docker-compose.test.yml` + `docker/emulator/Dockerfile` + `scripts/run-emulator-tests.sh` are the transitional path — they remain in this repo as Lava-domain glue rather than being extracted. The next phase that touches release tagging or the emulator-matrix gate MUST close this debt before its tag, and the close MUST: (1) add `pkg/emulator/` to Containers, (2) add at least the QEMU baseline to a sibling `pkg/vm/`, (3) extract Lava's emulator-orchestration glue, (4) update the constitution checker per clause 6.K clause 5. No release tag is cut while this debt is open, except for hotfixes whose changeset does not touch the emulator-matrix gate's output.
+
+##### 6.L — Anti-Bluff Functional Reality Mandate (Operator's Standing Order, repeated 2026-05-04)
+
+The user has now invoked this mandate FOUR TIMES in a single working day, which makes the repetition itself a forensic record. This clause is the same as 6.J — every test, every Challenge Test, every CI gate has exactly one job: confirm the feature works for a real user end-to-end on the gating matrix. CI green is necessary, never sufficient. **The reason this clause is restated rather than cross-referenced** is that the operator's standing concern is that future agents and contributors will rationalize their way past 6.J and ship green-tests-with-broken-features again. Every time the operator restates it, this codebase records the restatement here so the next reading agent must look at the same wall of repetition the operator has had to type out.
+
+If you are reading this in a future session and you find yourself thinking *"this test is a small exception"* — STOP. The exception is what produced the Internet Archive stuck-on-loading bug, the broken post-login navigation, the credential leak in C2, the bluffed C1-C8. There are no small exceptions. Tests must guarantee the product works. Anything else is theatre.
+
+**Inheritance.** Applies recursively. Submodule constitutions MAY paste this clause verbatim into their CLAUDE.md to ensure their reading agents see it locally. They MUST NOT abbreviate it; the wall-of-text effect is the point.
+
 ## Local-Only CI/CD (Constitutional Constraint)
 
 This project does NOT use, and MUST NOT add, GitHub Actions, GitLab pipelines, Bitbucket pipelines, CircleCI, Travis, Jenkins-as-a-service, Azure Pipelines, or any other hosted/remote CI/CD service. All build, test, lint, security-scan, mutation-test, load-test, image-build, and release-verification activity MUST run on developer machines or on a self-hosted local runner under the operator's direct control.

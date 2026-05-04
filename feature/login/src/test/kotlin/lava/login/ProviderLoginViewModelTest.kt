@@ -385,6 +385,7 @@ class ProviderLoginViewModelTest {
             if (TrackerCapability.AUTH_REQUIRED in caps) AuthType.FORM_LOGIN else AuthType.NONE
         override val encoding = "UTF-8"
         override val expectedHealthMarker = id
+
         // Test descriptors are verified-by-construction so the UI filter (clause 6.G)
         // does not hide them. Production descriptors gate this on a real Challenge Test.
         override val verified = true
