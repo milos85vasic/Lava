@@ -24,6 +24,17 @@ internal class AuthServiceImpl @Inject constructor(
 ) : AuthService, TokenProvider {
     private val mutableAuthState = SingleItemMutableSharedFlow<AuthState>()
 
+    // 2026-05-04 layer-3 fix: in-memory "session signaled" auth state.
+    // Late-subscribing observers (e.g. SearchViewModel that initializes
+    // AFTER onboarding completes) do NOT see SharedFlow replays because
+    // SingleItemMutableSharedFlow uses replay=0. Without this field, the
+    // bridge from ProviderLoginViewModel.signalAuthorized to the
+    // legacy-auth observers would silently no-op after the screen
+    // transition. onStart emits getAuthState() which now consults this
+    // field, so a new observer sees the right state.
+    @Volatile
+    private var sessionSignaledState: AuthState? = null
+
     override fun observeAuthState(): Flow<AuthState> = mutableAuthState
         .asSharedFlow()
         .onStart { emit(getAuthState()) }
@@ -80,7 +91,33 @@ internal class AuthServiceImpl @Inject constructor(
 
     override suspend fun logout() {
         preferencesStorage.clearAccount()
+        sessionSignaledState = null
         mutableAuthState.emit(AuthState.Unauthorized)
+    }
+
+    /**
+     * 2026-05-04 multi-tracker bridge — see AuthService KDoc. Emits an
+     * Authorized state into the same SharedFlow that observeAuthState()
+     * returns, without touching preferencesStorage (the legacy single-
+     * tracker account store remains the source of truth for legacy login
+     * flows; this bridge is purely an observation-layer signal so the
+     * Search tab unblocks for users who completed a provider flow through
+     * the new ProviderLoginViewModel path).
+     *
+     * Falsifiability rehearsal protocol (Sixth Law clause 2):
+     *   1. Comment out the mutableAuthState.emit(...) line below.
+     *   2. Manual rehearsal on the gating emulator: pick Internet Archive,
+     *      tap Continue, observe Search tab.
+     *   3. Expected failure: Search tab still renders "Authorization
+     *      required to search" because the SharedFlow never updates from
+     *      its onStart-emitted Unauthorized.
+     *   4. Revert the comment; re-rehearse; Search tab renders the
+     *      authorized empty state with a search input.
+     */
+    override suspend fun signalAuthorized(name: String, avatarUrl: String?) {
+        val newState = AuthState.Authorized(name, avatarUrl)
+        sessionSignaledState = newState
+        mutableAuthState.emit(newState)
     }
 
     private suspend fun saveAccount(account: Account) {
@@ -89,6 +126,11 @@ internal class AuthServiceImpl @Inject constructor(
     }
 
     private suspend fun getAuthState(): AuthState {
+        // Prefer the in-memory session-signaled state (set by
+        // signalAuthorized) over the persisted-account state, so a
+        // late-subscribing observer sees the correct authorized state
+        // even though SharedFlow replay=0 dropped the original emission.
+        sessionSignaledState?.let { return it }
         val account = preferencesStorage.getAccount()
         return if (account != null) {
             AuthState.Authorized(account.name, account.avatarUrl)

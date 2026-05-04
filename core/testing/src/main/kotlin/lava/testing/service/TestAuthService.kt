@@ -36,5 +36,21 @@ class TestAuthService : AuthService, TokenProvider {
         captchaValue: String?,
     ): AuthResult = response
 
+    /**
+     * Behaviorally-equivalent fake of [AuthService.signalAuthorized] —
+     * mirrors the production AuthServiceImpl which emits Authorized into
+     * the SharedFlow without touching persistence. Anti-Bluff Pact's
+     * Third Law: a fake that drops this side effect would diverge from
+     * production and produce a bluff fake. The recorded `signaledNames`
+     * lets Challenge tests assert that the multi-tracker login flow
+     * actually bridged through this seam.
+     */
+    val signaledNames = mutableListOf<String>()
+
+    override suspend fun signalAuthorized(name: String, avatarUrl: String?) {
+        signaledNames.add(name)
+        authState.value = AuthState.Authorized(name, avatarUrl)
+    }
+
     override suspend fun refreshToken(): Boolean = false
 }

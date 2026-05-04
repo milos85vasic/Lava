@@ -4,6 +4,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.first
+import lava.auth.api.AuthService
 import lava.credentials.ProviderCredentialManager
 import lava.domain.usecase.ValidateInputUseCase
 import lava.logger.api.LoggerFactory
@@ -29,6 +30,7 @@ internal class ProviderLoginViewModel @Inject constructor(
     private val validateInputUseCase: ValidateInputUseCase,
     private val credentialManager: ProviderCredentialManager,
     private val sdk: LavaTrackerSdk,
+    private val authService: AuthService,
     loggerFactory: LoggerFactory,
 ) : ViewModel(), ContainerHost<ProviderLoginState, LoginSideEffect> {
 
@@ -198,14 +200,17 @@ internal class ProviderLoginViewModel @Inject constructor(
         // If provider requires no auth or anonymous mode is enabled, skip auth
         if (provider?.authType == "NONE" || state.anonymousMode) {
             logger.d { "Skipping auth for $providerId (authType=${provider?.authType}, anonymous=${state.anonymousMode})" }
-            // Clause 6.G follow-up (2026-05-04): switch the SDK's active
-            // tracker to match the user's selection. Without this, the
-            // user lands on the main app's Search tab still pointing at
-            // the default tracker (rutracker), producing "Authorization
-            // required" for what looks to the user like a successful
-            // archive.org / gutenberg / anonymous-rutor flow.
             runCatching { sdk.switchTracker(providerId) }
                 .onFailure { logger.e(it) { "switchTracker($providerId) failed in no-auth path" } }
+            // Clause 6.G/6.J follow-up (2026-05-04 layer-3 fix): bridge
+            // to the legacy AuthService SharedFlow that Search/Forum/
+            // Topic ViewModels observe. Without this signal the Search
+            // tab renders "Authorization required" forever — see
+            // .lava-ci-evidence/sixth-law-incidents/2026-05-04-
+            // onboarding-navigation.json.
+            authService.signalAuthorized(
+                name = "Anonymous (${provider?.displayName ?: providerId})",
+            )
             reduce { state.copy(isLoading = false) }
             postSideEffect(LoginSideEffect.Success)
             return@intent
@@ -234,6 +239,9 @@ internal class ProviderLoginViewModel @Inject constructor(
                 logger.d { "Tracker $providerId does not support auth" }
                 runCatching { sdk.switchTracker(providerId) }
                     .onFailure { logger.e(it) { "switchTracker($providerId) failed in null-auth path" } }
+                authService.signalAuthorized(
+                    name = "Anonymous (${provider?.displayName ?: providerId})",
+                )
                 reduce { state.copy(isLoading = false) }
                 postSideEffect(LoginSideEffect.Success)
             }
@@ -249,6 +257,9 @@ internal class ProviderLoginViewModel @Inject constructor(
                         )
                         runCatching { sdk.switchTracker(providerId) }
                             .onFailure { logger.e(it) { "switchTracker($providerId) failed in auth-success path" } }
+                        authService.signalAuthorized(
+                            name = state.usernameInput.value.text,
+                        )
                         postSideEffect(LoginSideEffect.Success)
                     }
                     is AuthResult.CaptchaRequired -> {

@@ -4,7 +4,11 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.test.runTest
+import lava.auth.api.AuthService
 import lava.credentials.CredentialEncryptor
 import lava.credentials.CredentialsRepository
 import lava.credentials.ProviderCredentialManager
@@ -36,6 +40,41 @@ import org.junit.runner.RunWith
 import org.orbitmvi.orbit.test.test
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
+import lava.models.auth.AuthResult as LegacyAuthResult
+import lava.models.auth.AuthState as LegacyAuthState
+
+/**
+ * Test fake for [AuthService] that obeys the Anti-Bluff Pact's Third Law
+ * (behavioural equivalence): observable SharedFlow + signalAuthorized
+ * emits Authorized; logout emits Unauthorized; the in-memory account is
+ * tracked. login() is unimplemented because ProviderLoginViewModel does
+ * NOT call it (the new flow uses LavaTrackerSdk.login + bridges via
+ * signalAuthorized).
+ */
+private class FakeAuthService : AuthService {
+    val state = MutableSharedFlow<LegacyAuthState>(replay = 1)
+    val signaledNames = mutableListOf<String>()
+
+    init { state.tryEmit(LegacyAuthState.Unauthorized) }
+
+    override fun observeAuthState(): Flow<LegacyAuthState> = state.asSharedFlow()
+    override suspend fun isAuthorized(): Boolean =
+        state.replayCache.lastOrNull() is LegacyAuthState.Authorized
+    override suspend fun login(
+        username: String,
+        password: String,
+        captchaSid: String?,
+        captchaCode: String?,
+        captchaValue: String?,
+    ): LegacyAuthResult = error("legacy login() not exercised by ProviderLoginViewModel")
+    override suspend fun logout() {
+        state.emit(LegacyAuthState.Unauthorized)
+    }
+    override suspend fun signalAuthorized(name: String, avatarUrl: String?) {
+        signaledNames.add(name)
+        state.emit(LegacyAuthState.Authorized(name, avatarUrl))
+    }
+}
 
 /**
  * Anti-bluff test for [ProviderLoginViewModel].
@@ -71,6 +110,7 @@ class ProviderLoginViewModelTest {
     private lateinit var rutrackerClient: FakeTrackerClient
     private lateinit var rutorClient: FakeTrackerClient
     private lateinit var registry: DefaultTrackerRegistry
+    private lateinit var authService: FakeAuthService
 
     @Before
     fun setUp() {
@@ -125,10 +165,12 @@ class ProviderLoginViewModelTest {
         })
 
         sdk = LavaTrackerSdk(registry)
+        authService = FakeAuthService()
         viewModel = ProviderLoginViewModel(
             validateInputUseCase = ValidateInputUseCase(),
             credentialManager = manager,
             sdk = sdk,
+            authService = authService,
             loggerFactory = TestLoggerFactory(),
         )
     }
@@ -265,6 +307,17 @@ class ProviderLoginViewModelTest {
                 assertFalse(
                     "isLoading must be false after Success — IA stuck-on-loading regression",
                     viewModel.container.stateFlow.value.isLoading,
+                )
+
+                // Layer-3 regression: AuthService MUST receive a
+                // signalAuthorized call so the legacy auth-state observer
+                // (Search/Forum/Topic ViewModels via ObserveAuthStateUseCase)
+                // sees Authorized and unblocks the user. Without this, the
+                // 2026-05-04 "Authorization required to search" bug
+                // recurs even after the navigation fix lands.
+                assertTrue(
+                    "signalAuthorized MUST be called for AuthType.NONE provider; recorded names = ${authService.signaledNames}",
+                    authService.signaledNames.any { it.contains("Internet Archive", ignoreCase = true) || it.contains("archiveorg", ignoreCase = true) },
                 )
             }
         }
