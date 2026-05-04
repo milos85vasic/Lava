@@ -28,6 +28,13 @@ internal class PreferencesStorageImpl @Inject constructor(
         sharedPreferencesFactory.getSharedPreferences("rating")
     }
 
+    // Phase 1.1 — separate file so the multi-tracker session signal
+    // doesn't collide with the legacy single-tracker `accountPreferences`
+    // schema.
+    private val signaledAuthPreferences: SharedPreferences by lazy {
+        sharedPreferencesFactory.getSharedPreferences("signaled_auth")
+    }
+
     override suspend fun saveAccount(account: Account) {
         withContext(dispatchers.io) {
             accountPreferences.edit {
@@ -154,6 +161,34 @@ internal class PreferencesStorageImpl @Inject constructor(
         }
     }
 
+    override suspend fun getSignaledAuthState(): SignaledAuthState? {
+        return withContext(dispatchers.io) {
+            val name = signaledAuthPreferences.getString(signaledAuthNameKey, null)
+                ?: return@withContext null
+            val avatar = signaledAuthPreferences.getString(signaledAuthAvatarKey, null)
+            SignaledAuthState(name = name, avatarUrl = avatar)
+        }
+    }
+
+    override suspend fun saveSignaledAuthState(name: String, avatarUrl: String?) {
+        withContext(dispatchers.io) {
+            signaledAuthPreferences.edit {
+                putString(signaledAuthNameKey, name)
+                if (avatarUrl != null) {
+                    putString(signaledAuthAvatarKey, avatarUrl)
+                } else {
+                    remove(signaledAuthAvatarKey)
+                }
+            }
+        }
+    }
+
+    override suspend fun clearSignaledAuthState() {
+        withContext(dispatchers.io) {
+            signaledAuthPreferences.clear()
+        }
+    }
+
     private companion object {
         const val accountIdKey = "account_id"
         const val accountUsernameKey = "account_username"
@@ -171,5 +206,8 @@ internal class PreferencesStorageImpl @Inject constructor(
         const val ratingPostponedKey = "rating_postponed"
 
         const val onboardingCompleteKey = "onboarding_complete"
+
+        const val signaledAuthNameKey = "signaled_auth_name"
+        const val signaledAuthAvatarKey = "signaled_auth_avatar_url"
     }
 }

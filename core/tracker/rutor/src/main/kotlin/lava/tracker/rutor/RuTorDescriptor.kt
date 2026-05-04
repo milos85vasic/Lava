@@ -47,4 +47,10 @@ object RuTorDescriptor : TrackerDescriptor {
     // Constitutional clause 6.G — verified by Challenge Tests C1, C3, C4,
     // C6, C7, C8 in app/src/androidTest/kotlin/lava/app/challenges/.
     override val verified: Boolean = true
+
+    // Phase 1.5 (2026-05-04): RuTor permits anonymous browse/search per
+    // SP-3a decision 7b-ii. AUTH_REQUIRED in the capability set is for
+    // optional features like adding comments; the search/browse path
+    // works without credentials.
+    override val supportsAnonymous: Boolean = true
 }

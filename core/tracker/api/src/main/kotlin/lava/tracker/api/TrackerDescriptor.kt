@@ -51,4 +51,36 @@ interface TrackerDescriptor : HasId {
      *      cutting the next release tag.
      */
     val verified: Boolean get() = false
+
+    /**
+     * Phase 1.5 (2026-05-04) — per-provider anonymous-mode capability.
+     *
+     * Whether this tracker permits browse/search WITHOUT authenticated
+     * credentials. NOT the same as [authType] — a FORM_LOGIN tracker can
+     * still permit anonymous browse if its API exposes public endpoints
+     * (e.g. RuTor per decision 7b-ii in the SP-3a plan). And an
+     * [AuthType.NONE] tracker is implicitly anonymous regardless of this
+     * flag (the field is meaningful for FORM_LOGIN/CAPTCHA_LOGIN providers).
+     *
+     * Truth table (post-Phase-1.5 semantics):
+     *
+     *   | authType        | supportsAnonymous | runtime semantics                                 |
+     *   |-----------------|-------------------|---------------------------------------------------|
+     *   | NONE            | (irrelevant)      | always anonymous; no toggle needed                |
+     *   | FORM_LOGIN      | true              | toggle visible; user chooses anonymous OR creds   |
+     *   | FORM_LOGIN      | false             | toggle hidden; user MUST enter creds              |
+     *   | CAPTCHA_LOGIN   | true              | toggle visible (rare; not used today)             |
+     *   | CAPTCHA_LOGIN   | false             | toggle hidden; user MUST enter creds              |
+     *
+     * Defaults to `false` so the toggle is hidden by default — opt-in is
+     * the safe default. The forensic anchor is the operator's 2026-05-04
+     * observation that the global toggle was misleading: a user could
+     * toggle "Anonymous Access" on, pick RuTracker (which has no
+     * anonymous mode), and the bypass would silently fire — a bluff.
+     *
+     * `ProviderLoginViewModel.onSubmitClick` MUST gate `state.anonymousMode`
+     * on `provider.supportsAnonymous == true`. The provider-list UI MAY
+     * additionally use this flag to decide whether to render the toggle.
+     */
+    val supportsAnonymous: Boolean get() = false
 }

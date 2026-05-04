@@ -92,6 +92,10 @@ internal class AuthServiceImpl @Inject constructor(
     override suspend fun logout() {
         preferencesStorage.clearAccount()
         sessionSignaledState = null
+        // Phase 1.1: clear the persisted signal too, otherwise logout
+        // followed by app restart would silently restore the user as
+        // authorized via the cold-start path in getAuthState().
+        preferencesStorage.clearSignaledAuthState()
         mutableAuthState.emit(AuthState.Unauthorized)
     }
 
@@ -117,6 +121,11 @@ internal class AuthServiceImpl @Inject constructor(
     override suspend fun signalAuthorized(name: String, avatarUrl: String?) {
         val newState = AuthState.Authorized(name, avatarUrl)
         sessionSignaledState = newState
+        // Phase 1.1 (2026-05-04 followup): persist so the user's
+        // authorized state survives process death. Without this, an
+        // archive.org user who force-quits the app sees "Authorization
+        // required to search" again on next launch.
+        preferencesStorage.saveSignaledAuthState(name = name, avatarUrl = avatarUrl)
         mutableAuthState.emit(newState)
     }
 
@@ -131,6 +140,14 @@ internal class AuthServiceImpl @Inject constructor(
         // late-subscribing observer sees the correct authorized state
         // even though SharedFlow replay=0 dropped the original emission.
         sessionSignaledState?.let { return it }
+        // Phase 1.1: cold-start path. If the in-memory field is null
+        // (process just started), consult the persisted signal so the
+        // user's previous authorized state is restored.
+        preferencesStorage.getSignaledAuthState()?.let { signaled ->
+            val restored = AuthState.Authorized(signaled.name, signaled.avatarUrl)
+            sessionSignaledState = restored
+            return restored
+        }
         val account = preferencesStorage.getAccount()
         return if (account != null) {
             AuthState.Authorized(account.name, account.avatarUrl)

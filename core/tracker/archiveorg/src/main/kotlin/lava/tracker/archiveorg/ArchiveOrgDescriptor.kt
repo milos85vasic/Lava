@@ -45,4 +45,9 @@ object ArchiveOrgDescriptor : TrackerDescriptor {
     // (or a future agent with that infrastructure) flips it after the
     // matrix run.
     override val verified: Boolean = false
+
+    // Phase 1.5: archive.org has no auth surface — it is implicitly
+    // anonymous. The flag value is informational here (the AuthType.NONE
+    // path in ProviderLoginViewModel always takes precedence).
+    override val supportsAnonymous: Boolean = true
 }

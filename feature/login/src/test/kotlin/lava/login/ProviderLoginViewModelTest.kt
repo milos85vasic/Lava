@@ -209,28 +209,54 @@ class ProviderLoginViewModelTest {
         }
 
     @Test
-    fun `anonymous mode login succeeds immediately`() =
+    fun `anonymous mode login succeeds on FORM_LOGIN provider with supportsAnonymous true`() =
         runTest(mainDispatcherRule.testDispatcher) {
+            // Phase 1.5 (2026-05-04): the test descriptor explicitly models
+            // a FORM_LOGIN + supportsAnonymous=true tracker (RuTor in
+            // production per decision 7b-ii). This is the legitimate
+            // "anonymous toggle works" path — the bluff that Phase 1.5
+            // closed was the OLD code applying the toggle to providers
+            // without anonymous support.
+            val anonCapableDesc = descriptor(
+                id = "anon-capable",
+                name = "Anon-Capable",
+                caps = setOf(TrackerCapability.SEARCH, TrackerCapability.AUTH_REQUIRED),
+                supportsAnonymousFlag = true,
+            )
+            assertEquals(AuthType.FORM_LOGIN, anonCapableDesc.authType)
+            assertTrue(anonCapableDesc.supportsAnonymous)
+            registry.register(
+                object : TrackerClientFactory {
+                    override val descriptor = anonCapableDesc
+                    override fun create(config: lava.sdk.api.PluginConfig) = FakeTrackerClient(anonCapableDesc)
+                },
+            )
+
             viewModel.test(this) {
                 runOnCreate()
                 awaitState() // loading
-                awaitState() // loaded
+                awaitState() // loaded — now includes anon-capable
 
-                viewModel.perform(ProviderLoginAction.SelectProvider("rutracker"))
+                viewModel.perform(ProviderLoginAction.SelectProvider("anon-capable"))
                 awaitState() // selected
 
                 viewModel.perform(ProviderLoginAction.SetAnonymousMode(true))
                 awaitState() // anonymous mode toggled
 
                 viewModel.perform(ProviderLoginAction.SubmitClick)
-                // Two side effects: HideKeyboard then Success. Intermediate
-                // loading=true/false reduces are coalesced by StateFlow, so we
-                // assert on side effects + final state value.
                 val effect1 = awaitSideEffect()
                 assertTrue(effect1 is LoginSideEffect.HideKeyboard)
                 val effect2 = awaitSideEffect()
                 assertTrue(effect2 is LoginSideEffect.Success)
                 assertFalse(viewModel.container.stateFlow.value.isLoading)
+
+                // The Phase-1.5 anonymous gate fired (provider.supportsAnonymous
+                // == true && state.anonymousMode), so signalAuthorized was
+                // called for the anonymous bypass path.
+                assertTrue(
+                    "signalAuthorized MUST be called when anonymous mode is allowed; recorded names = ${authService.signaledNames}",
+                    authService.signaledNames.any { it.contains("Anon-Capable", ignoreCase = true) },
+                )
             }
         }
 
@@ -424,10 +450,119 @@ class ProviderLoginViewModelTest {
             }
         }
 
+    /**
+     * Phase 1.5 regression test (2026-05-04, operator's 6th anti-bluff
+     * invocation). Forensic anchor: the global "Anonymous Access" toggle
+     * was misleadingly applied to providers that do NOT support
+     * anonymous mode. A user who toggled it on, then picked
+     * RuTracker (CAPTCHA_LOGIN, no anonymous support), would have
+     * silently bypassed the auth path with no warning — a bluff.
+     *
+     * The fix: ProviderLoginViewModel.onSubmitClick now gates
+     * state.anonymousMode on provider.supportsAnonymous.
+     *
+     * This test models a FORM_LOGIN provider with supportsAnonymous=false
+     * (i.e. a Kinozal/NNM-Club/RuTracker-class tracker). The user toggles
+     * Anonymous on. The user submits with empty credentials. The expected
+     * outcome: NOT a Success side effect — the anonymous toggle is
+     * IGNORED for this provider, and the login flow falls through to
+     * sdk.login() which (with empty credentials and the FakeTrackerClient's
+     * default Unauthenticated response) emits WrongCredits → InputState.Invalid
+     * on username/password. The Search tab MUST stay Unauthorized.
+     *
+     * Bluff-Audit: ProviderLoginViewModelTest.anonymous toggle on FORM_LOGIN-without-anonymous provider does NOT bypass auth
+     *   Mutation: revert Phase 1.5 gate — replace `provider?.supportsAnonymous == true && state.anonymousMode`
+     *             with the original `state.anonymousMode`.
+     *   Observed-Failure: this test fails — the bluff path fires Success
+     *             instead of WrongCredits, and signalAuthorized is called
+     *             for a provider that should require credentials.
+     *   Reverted: yes.
+     */
+    @Test
+    fun `anonymous toggle on FORM_LOGIN-without-anonymous provider does NOT bypass auth`() =
+        runTest(mainDispatcherRule.testDispatcher) {
+            // Add a "kinozal-like" provider with FORM_LOGIN + supportsAnonymous=false.
+            val noAnonDesc = descriptor(
+                id = "kinozal-like",
+                name = "Kinozal-like",
+                caps = setOf(TrackerCapability.SEARCH, TrackerCapability.AUTH_REQUIRED),
+                supportsAnonymousFlag = false,
+            )
+            // Sanity: helper produces FORM_LOGIN because AUTH_REQUIRED is
+            // in caps; supportsAnonymous explicit-override = false.
+            assertEquals(AuthType.FORM_LOGIN, noAnonDesc.authType)
+            val noAnonClient = FakeTrackerClient(noAnonDesc).apply {
+                loginProvider = { LoginResult(AuthState.Unauthenticated) }
+            }
+            registry.register(
+                object : TrackerClientFactory {
+                    override val descriptor = noAnonDesc
+                    override fun create(config: lava.sdk.api.PluginConfig) = noAnonClient
+                },
+            )
+
+            viewModel.test(this) {
+                runOnCreate()
+                awaitState() // loading
+                awaitState() // loaded — now includes kinozal-like
+
+                viewModel.perform(ProviderLoginAction.SelectProvider("kinozal-like"))
+                awaitState() // selected
+
+                // User toggles Anonymous Access ON, but this provider doesn't support it.
+                viewModel.perform(ProviderLoginAction.SetAnonymousMode(true))
+                awaitState() // anonymousMode flipped
+
+                // User submits without entering credentials.
+                viewModel.perform(ProviderLoginAction.SubmitClick)
+
+                // Expected: HideKeyboard side effect, then the auth round-trip
+                // proceeds (NOT short-circuited). With empty creds and the
+                // Unauthenticated default, AuthResult.WrongCredits returns →
+                // InputState.Invalid + isLoading=false.
+                val effect1 = awaitSideEffect()
+                assertTrue(
+                    "first effect must be HideKeyboard, was $effect1",
+                    effect1 is LoginSideEffect.HideKeyboard,
+                )
+
+                // Drain the post-submit state emission(s) so Turbine
+                // doesn't fail on unconsumed events at scope close. The
+                // exact emission shape doesn't matter — the assertions
+                // below read the FINAL stateFlow.value directly.
+                awaitState() // post-submit state(s)
+
+                // The OLD bluff path would have emitted Success here.
+                // The Phase-1.5 fix runs the real auth path; the FakeTrackerClient
+                // returns Unauthenticated → WrongCredits → final state has
+                // InputState.Invalid on username/password, NOT Success.
+                // The PRIMARY user-visible signal: signalAuthorized was NOT
+                // called for this provider (would have unblocked the Search
+                // tab — the bluff outcome).
+                assertFalse(
+                    "signalAuthorized MUST NOT be called for FORM_LOGIN provider with supportsAnonymous=false; recorded names = ${authService.signaledNames}",
+                    authService.signaledNames.any { it.contains("kinozal-like", ignoreCase = true) },
+                )
+                // Secondary assertion on the final state — username/password
+                // marked Invalid by the WrongCredits branch.
+                val finalUsername = viewModel.container.stateFlow.value.usernameInput
+                val finalPassword = viewModel.container.stateFlow.value.passwordInput
+                assertTrue(
+                    "username should be Invalid after bypass-blocked submit; was $finalUsername",
+                    finalUsername is InputState.Invalid,
+                )
+                assertTrue(
+                    "password should be Invalid after bypass-blocked submit; was $finalPassword",
+                    finalPassword is InputState.Invalid,
+                )
+            }
+        }
+
     private fun descriptor(
         id: String,
         name: String,
         caps: Set<TrackerCapability>,
+        supportsAnonymousFlag: Boolean = TrackerCapability.AUTH_REQUIRED !in caps,
     ) = object : TrackerDescriptor {
         override val trackerId = id
         override val displayName = name
@@ -442,5 +577,11 @@ class ProviderLoginViewModelTest {
         // Test descriptors are verified-by-construction so the UI filter (clause 6.G)
         // does not hide them. Production descriptors gate this on a real Challenge Test.
         override val verified = true
+
+        // Phase 1.5 (2026-05-04): defaults to "no AUTH_REQUIRED ⇒ anonymous"
+        // so existing tests keep their semantics. Tests that need to model
+        // a FORM_LOGIN-without-anonymous tracker pass `supportsAnonymousFlag = false`
+        // explicitly.
+        override val supportsAnonymous = supportsAnonymousFlag
     }
 }

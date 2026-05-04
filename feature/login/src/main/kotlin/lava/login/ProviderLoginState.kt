@@ -19,6 +19,13 @@ data class ProviderLoginState(
 
 /**
  * UI model for a provider in the login list.
+ *
+ * `supportsAnonymous` (Phase 1.5, 2026-05-04) is per-provider, mapped
+ * from `TrackerDescriptor.supportsAnonymous`. The provider-list UI
+ * SHOULD use it to gate the "Anonymous Access" toggle's visibility (or
+ * disabled state) when this provider is selected. The login submit
+ * path MUST gate `state.anonymousMode` on this flag — see
+ * `ProviderLoginViewModel.onSubmitClick`.
  */
 data class ProviderLoginItem(
     val providerId: String,
@@ -27,6 +34,7 @@ data class ProviderLoginItem(
     val authType: String,
     val isAuthenticated: Boolean,
     val hasCredentials: Boolean,
+    val supportsAnonymous: Boolean = false,
 )
 
 val ProviderLoginState.hasCaptcha: Boolean

@@ -38,4 +38,8 @@ object GutenbergDescriptor : TrackerDescriptor {
     // onboarding screen. See .lava-ci-evidence/sixth-law-incidents/
     // 2026-05-04-onboarding-navigation.json.
     override val verified: Boolean = false
+
+    // Phase 1.5: gutendex.com is a public unauthenticated JSON API.
+    // Implicitly anonymous; flag value is informational.
+    override val supportsAnonymous: Boolean = true
 }

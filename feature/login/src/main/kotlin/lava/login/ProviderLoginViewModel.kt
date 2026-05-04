@@ -72,6 +72,11 @@ internal class ProviderLoginViewModel @Inject constructor(
                     authType = desc.authType.name,
                     isAuthenticated = cred != null && cred.authType != "none",
                     hasCredentials = cred != null && cred.authType != "none",
+                    // Phase 1.5: project the per-provider capability into
+                    // the UI model so the screen can gate the toggle's
+                    // visibility AND the submit handler can gate the
+                    // anonymous bypass on the actual capability.
+                    supportsAnonymous = desc.supportsAnonymous,
                 )
             }
             reduce { state.copy(isLoading = false, providers = items) }
@@ -197,9 +202,20 @@ internal class ProviderLoginViewModel @Inject constructor(
         val providerId = state.selectedProviderId ?: return@intent
         val provider = state.providers.firstOrNull { it.providerId == providerId }
 
-        // If provider requires no auth or anonymous mode is enabled, skip auth
-        if (provider?.authType == "NONE" || state.anonymousMode) {
-            logger.d { "Skipping auth for $providerId (authType=${provider?.authType}, anonymous=${state.anonymousMode})" }
+        // Phase 1.5 (2026-05-04): the global state.anonymousMode toggle
+        // ONLY takes effect for providers that declare
+        // supportsAnonymous = true. For providers without that
+        // capability (RuTracker CAPTCHA_LOGIN, Kinozal/NNM-Club
+        // FORM_LOGIN), an anonymous toggle would have silently
+        // bypassed the credentials check — a bluff. AuthType.NONE
+        // providers are anonymous regardless of the toggle.
+        val anonymousAllowed = provider?.supportsAnonymous == true && state.anonymousMode
+        if (provider?.authType == "NONE" || anonymousAllowed) {
+            logger.d {
+                "Skipping auth for $providerId (authType=${provider?.authType}, " +
+                    "anonymousToggle=${state.anonymousMode}, " +
+                    "supportsAnonymous=${provider?.supportsAnonymous})"
+            }
             runCatching { sdk.switchTracker(providerId) }
                 .onFailure { logger.e(it) { "switchTracker($providerId) failed in no-auth path" } }
             // Clause 6.G/6.J follow-up (2026-05-04 layer-3 fix): bridge
