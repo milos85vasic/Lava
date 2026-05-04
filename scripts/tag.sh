@@ -266,7 +266,98 @@ require_evidence_for_android() {
     die "Cannot tag $tag_id: real-device-verification.md status is not VERIFIED. Operator must complete Task 5.22 before tagging."
   fi
 
+  # Constitutional clause 6.I clause 7 — Multi-Emulator Container Matrix
+  # gate. The evidence pack MUST contain at least one matrix-runner
+  # attestation (real-device-verification.json) covering the minimum
+  # AVD set per 6.I clause 2 (API 28, 30, 34, latest stable ≥ 36).
+  # Phone form factor is the minimum per 6.I clause 3 for features
+  # whose layout is not exercised; features that touch layout MUST
+  # add tablet rows and (where TvActivity / leanback applies) TV rows.
+  # Missing rows = missing evidence. all_passed=false in any matrix
+  # JSON = release blocker.
+  require_matrix_attestation_clause_6_I "$tag_id" "$pack_dir"
+
   log "[android] SP-3a evidence pack OK: $pack_dir"
+}
+
+# Constitutional clause 6.I clause 7 helper. Walks every
+# real-device-verification.json file under the pack directory and
+# asserts: (a) all_passed=true, (b) the UNION of api_level fields
+# across the matrix files covers {28, 30, 34, ≥36}, (c) phone form
+# factor is present.
+#
+# Falsifiability rehearsal recorded in this commit body.
+require_matrix_attestation_clause_6_I() {
+  local tag_id="$1" pack_dir="$2"
+
+  if ! command -v jq >/dev/null 2>&1; then
+    die "Cannot tag $tag_id: jq is required for clause 6.I matrix-attestation gate. Install jq and re-run."
+  fi
+
+  # Find every matrix attestation under the pack dir. Matrix runner
+  # writes EvidenceDir/real-device-verification.json; the pack-dir
+  # convention is to copy / symlink it under
+  # <pack_dir>/matrix/<run-id>/real-device-verification.json. We
+  # accept any depth so operators can organise their pack however.
+  local files
+  mapfile -t files < <(find "$pack_dir" -type f -name 'real-device-verification.json' 2>/dev/null)
+  if (( ${#files[@]} == 0 )); then
+    die "Cannot tag $tag_id: clause 6.I clause 7 — no matrix attestation (real-device-verification.json) under $pack_dir. Run scripts/run-emulator-tests.sh and copy the resulting evidence directory under the pack dir before tagging."
+  fi
+
+  # Per-file gate: all_passed MUST be true. Aggregate api_levels +
+  # form_factors across all matrix files for the coverage check.
+  local api_levels=() form_factors=() failing_files=() f
+  for f in "${files[@]}"; do
+    local all_passed
+    all_passed=$(jq -r '.all_passed' "$f" 2>/dev/null || echo "parse-error")
+    if [[ "$all_passed" != "true" ]]; then
+      failing_files+=("$f (all_passed=$all_passed)")
+      continue
+    fi
+    while IFS= read -r api; do
+      api_levels+=("$api")
+    done < <(jq -r '.rows[]?.api_level // empty' "$f" 2>/dev/null)
+    while IFS= read -r ff; do
+      form_factors+=("$ff")
+    done < <(jq -r '.rows[]?.form_factor // empty' "$f" 2>/dev/null)
+  done
+
+  if (( ${#failing_files[@]} > 0 )); then
+    die "Cannot tag $tag_id: clause 6.I clause 7 — matrix attestation has all_passed!=true in: ${failing_files[*]}"
+  fi
+
+  # Coverage check: every minimum API level MUST be represented.
+  local required_apis=(28 30 34) missing_apis=()
+  local api required
+  for required in "${required_apis[@]}"; do
+    local found=false
+    for api in "${api_levels[@]}"; do
+      if [[ "$api" == "$required" ]]; then found=true; break; fi
+    done
+    [[ "$found" == "true" ]] || missing_apis+=("$required")
+  done
+  # "Latest stable" minimum: at least one row at API 36 or higher.
+  local has_latest=false
+  for api in "${api_levels[@]}"; do
+    if (( api >= 36 )); then has_latest=true; break; fi
+  done
+  [[ "$has_latest" == "true" ]] || missing_apis+=("latest-stable-≥36")
+
+  if (( ${#missing_apis[@]} > 0 )); then
+    die "Cannot tag $tag_id: clause 6.I clause 2 — matrix coverage incomplete. Missing API levels: ${missing_apis[*]}. Found: ${api_levels[*]} across ${#files[@]} matrix file(s) under $pack_dir."
+  fi
+
+  # Form-factor minimum: phone MUST be present.
+  local has_phone=false ff
+  for ff in "${form_factors[@]}"; do
+    if [[ "$ff" == "phone" ]]; then has_phone=true; break; fi
+  done
+  if [[ "$has_phone" != "true" ]]; then
+    die "Cannot tag $tag_id: clause 6.I clause 3 — matrix is missing the phone form factor. Found: ${form_factors[*]}"
+  fi
+
+  log "[android] clause 6.I matrix gate OK: ${#files[@]} matrix file(s), API levels: $(printf '%s ' "${api_levels[@]}"), form factors: $(printf '%s ' "${form_factors[@]}")"
 }
 
 # Sixth Law clause 5: refuse to tag api-go without a matching pretag
