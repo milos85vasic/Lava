@@ -1,0 +1,36 @@
+{
+  "test": "lava.app.challenges.Challenge00CrashSurvivalTest",
+  "phase": "Phase 1.1 acceptance gate (sessionSignaledState persistence)",
+  "constitutional_anchor": "clause 6.G clause 5 + Sixth Law clause 5 + Seventh Law clause 3 + plan/2026-05-04-pending-completion-plan.md Phase 1.1",
+  "attestation": {
+    "avd": "CZ_API34_Phone",
+    "api_level": 34,
+    "form_factor": "phone",
+    "container_bound": false,
+    "host_emulator_run_note": "First single-AVD rehearsal on bare host; clause 6.I container-bound run scheduled for the next phase that touches the matrix gate.",
+    "test_passed": true,
+    "test_seconds": 65.164618461,
+    "matrix_started_at": "2026-05-04T23:08:47+03:00",
+    "matrix_finished_at": "2026-05-04T23:10:15+03:00",
+    "evidence_file": ".lava-ci-evidence/2026-05-04-evening-c00-cz_api34-fix/real-device-verification.json",
+    "all_passed": true
+  },
+  "what_the_test_proved_on_real_device": [
+    "Onboarding flow → Internet Archive → Continue tap reached the post-onboarding main app on a real Android 14 emulator",
+    "AuthServiceImpl.signalAuthorized was invoked during the Continue tap (the recorded SignaledAuthState was non-null after the flow)",
+    "PreferencesStorageImpl.saveSignaledAuthState wrote to disk — the persisted name contained 'Internet Archive' as expected from `Anonymous (${displayName})`",
+    "AuthServiceImpl.logout cleared the persisted state on disk — post-logout getSignaledAuthState() returned null",
+    "Phase 1.1 production-stack guarantee for force-stop survival is verified end-to-end on a real device for the persistence-write path"
+  ],
+  "incident_during_run": {
+    "discovered_bug": "Submodules/Containers/pkg/emulator/android.go::WaitForBoot called `adb connect localhost:<port>` ONCE before the poll loop. On cold boot the ADB socket takes 30-60s to become ready, so the connect failed silently and every subsequent `adb -s localhost:<port>` poll returned 'device not found' — making the matrix runner time out at 5m0s and again at 10m0s while the emulator was actually fully booted.",
+    "fix_commit": "Submodules/Containers commit 2f3c689 — retry adb connect inside the poll loop (idempotent on already-connected; resolves on first iteration after the ADB socket comes up).",
+    "falsifiability_rehearsed": "yes — pre-fix run: 2x boot-timeout failures (5m + 10m). Post-fix run: pass in 65s. Evidence at .lava-ci-evidence/2026-05-04-evening-c00-cz_api34{,-retry,-fix}/.",
+    "constitutional_classification": "clause 6.A real-binary contract bug — script's expectation of the adb binary did not match the binary's reality."
+  },
+  "deep_coverage_owed": [
+    "Container-bound matrix run per clause 6.I clause 1 (next phase that touches the matrix gate)",
+    "Multi-AVD coverage per clause 6.I clauses 2 + 3 (CZ_API28 + CZ_API30 + CZ_API34 + Pixel_9a + tablet form factor)",
+    "True `am force-stop` survival via UiAutomator-driven shell access (Phase 1.1.7 owed pending in-process kill workaround)"
+  ]
+}

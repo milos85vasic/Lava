@@ -50,21 +50,25 @@ TEST_CLASS="$DEFAULT_TEST_CLASS"
 AVDS="$DEFAULT_AVDS"
 EVIDENCE_DIR="$DEFAULT_EVIDENCE_DIR"
 BUILD_APK=1
+BOOT_TIMEOUT=""
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --test-class) TEST_CLASS="$2"; shift 2 ;;
         --avds) AVDS="$2"; shift 2 ;;
         --evidence-dir) EVIDENCE_DIR="$2"; shift 2 ;;
+        --boot-timeout) BOOT_TIMEOUT="$2"; shift 2 ;;
         --no-build) BUILD_APK=0; shift ;;
         --help|-h)
             cat <<USAGE
-Usage: $0 [--test-class <fqcn>] [--avds <list>] [--evidence-dir <path>] [--no-build]
+Usage: $0 [--test-class <fqcn>] [--avds <list>] [--evidence-dir <path>]
+          [--boot-timeout <duration>] [--no-build]
 
 Defaults:
   --test-class    $DEFAULT_TEST_CLASS
   --avds          $DEFAULT_AVDS
   --evidence-dir  $DEFAULT_EVIDENCE_DIR
+  --boot-timeout  5m (forwarded to cmd/emulator-matrix; e.g. 10m, 600s)
 
 The AVD list is comma-separated. Each entry MAY include the API level
 and form factor as Name:APILevel:FormFactor. The matrix runner records
@@ -166,10 +170,16 @@ echo "  Test class:  $TEST_CLASS"
 echo "  Evidence:    $EVIDENCE_DIR"
 echo
 
+extra_args=()
+if [[ -n "$BOOT_TIMEOUT" ]]; then
+    extra_args+=(--boot-timeout "$BOOT_TIMEOUT")
+fi
+
 "$BIN_DIR/emulator-matrix" \
     --android-sdk-root "$ANDROID_SDK_ROOT" \
     --apk "$APK_PATH" \
     --test-class "$TEST_CLASS" \
     --evidence-dir "$EVIDENCE_DIR" \
     --avds "$AVDS" \
-    --cold-boot
+    --cold-boot \
+    "${extra_args[@]}"
