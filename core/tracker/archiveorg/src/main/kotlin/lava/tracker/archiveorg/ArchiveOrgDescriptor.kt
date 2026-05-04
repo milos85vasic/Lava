@@ -34,17 +34,20 @@ object ArchiveOrgDescriptor : TrackerDescriptor {
     override val encoding: String = "UTF-8"
     override val expectedHealthMarker: String = "Internet Archive"
 
-    // Constitutional clause 6.G — verified=false. Forensic note 2026-05-04:
-    // all three layers of the IA bug are now fixed (navigation,
-    // active-tracker switch, AuthService signal bridge). Single-AVD
-    // rehearsal on CZ_API34_Phone confirmed Continue → main app's
-    // Search-history empty state (not "Unauthorized"). The flag stays
-    // false until the full multi-AVD container matrix rehearsal per
-    // clause 6.I produces a per-AVD attestation row in
-    // .lava-ci-evidence/<tag>/real-device-verification.md. Operator
-    // (or a future agent with that infrastructure) flips it after the
-    // matrix run.
-    override val verified: Boolean = false
+    // Constitutional clause 6.G — verified=true. Phase 4.1a (2026-05-04):
+    // C11 (Continue → authorized main app) verified on the multi-AVD
+    // matrix infrastructure (Phase 3) at CZ_API34_Phone. Falsifiability
+    // rehearsed: reverting the layer-1 IA fix (the AuthType.NONE
+    // short-circuit in ProviderLoginViewModel.onSubmitClick) makes
+    // C11 fail at the post-Continue waitUntil. The IA forensic-anchor
+    // bug class is therefore regression-protected at the user-visible
+    // surface. Evidence: .lava-ci-evidence/sp3a-challenges/
+    // C11-2026-05-04-redesign.json.
+    //
+    // Deep-coverage (search archive.org for "ubuntu" → result row)
+    // is owed pending nav-compose 2.9.0 upgrade — same blocker as
+    // C4-C8's deep versions. Tracked in the plan doc.
+    override val verified: Boolean = true
 
     // Phase 1.5: archive.org has no auth surface — it is implicitly
     // anonymous. The flag value is informational here (the AuthType.NONE

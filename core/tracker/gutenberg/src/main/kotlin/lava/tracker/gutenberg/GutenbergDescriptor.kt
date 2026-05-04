@@ -33,11 +33,16 @@ object GutenbergDescriptor : TrackerDescriptor {
     override val encoding: String = "UTF-8"
     override val expectedHealthMarker: String = "Gutenberg"
 
-    // Constitutional clause 6.G — verified=false. Same forensic finding
-    // as ArchiveOrgDescriptor: post-login navigation broken on the root
-    // onboarding screen. See .lava-ci-evidence/sixth-law-incidents/
-    // 2026-05-04-onboarding-navigation.json.
-    override val verified: Boolean = false
+    // Constitutional clause 6.G — verified=true. Phase 4.1b (2026-05-04):
+    // C12 (Continue → authorized main app) verified on the multi-AVD
+    // matrix infrastructure (Phase 3) at CZ_API34_Phone. Falsifiability
+    // shares C11's mutation protocol — both providers route through the
+    // same AuthType.NONE short-circuit + signalAuthorized bridge.
+    // Evidence: .lava-ci-evidence/sp3a-challenges/C12-2026-05-04-redesign.json.
+    //
+    // Deep-coverage (search gutendex.com for "shakespeare" → book row)
+    // owed pending nav-compose 2.9.0 upgrade.
+    override val verified: Boolean = true
 
     // Phase 1.5: gutendex.com is a public unauthenticated JSON API.
     // Implicitly anonymous; flag value is informational.

@@ -1,0 +1,72 @@
+{
+  "phase": "Phase 4 (2026-05-04)",
+  "scope": "Provider verified-flag flips after operator-rehearsed Challenge Tests passing on the Phase-3 matrix infrastructure",
+  "constitutional_anchor": "Clause 6.G clause 4 + clause 6.I (Multi-Emulator Container Matrix)",
+  "verified_providers_after_phase_4": [
+    {
+      "provider_id": "rutracker",
+      "challenge": "C1 (App Launch + Trackers menu visible) + C2 (RuTracker authenticated Sign in)",
+      "first_verified": "pre-Phase-2 (founding example)",
+      "evidence": [
+        ".lava-ci-evidence/sp3a-challenges/C1-2026-05-04-redesign.json",
+        ".lava-ci-evidence/sp3a-challenges/C2-2026-05-04-redesign.json"
+      ]
+    },
+    {
+      "provider_id": "rutor",
+      "challenge": "C3 (RuTor anonymous Continue flow)",
+      "first_verified": "Phase 2.3 (2026-05-04)",
+      "evidence": ".lava-ci-evidence/sp3a-challenges/C3-2026-05-04-redesign.json"
+    },
+    {
+      "provider_id": "archiveorg",
+      "challenge": "C11 (ArchiveOrg anonymous Continue → authorized main app)",
+      "first_verified": "Phase 4.1a (2026-05-04 late) — flipped from verified=false to verified=true",
+      "evidence": ".lava-ci-evidence/sp3a-challenges/C11-2026-05-04-redesign.json",
+      "matrix_run": {
+        "avd": "CZ_API34_Phone",
+        "api_level": 34,
+        "form_factor": "phone",
+        "test_passed": true,
+        "test_seconds": 52.76,
+        "matrix_exit_code": 0,
+        "all_passed": true
+      },
+      "falsifiability": "Revert layer-1 IA fix (drop AuthType.NONE short-circuit in ProviderLoginViewModel.onSubmitClick) → C11 times out at the post-Continue waitUntil for 'Search history' (the spinner stays + auth state never authorizes). Mutation reverted; baseline restored.",
+      "deep_coverage_owed": "Search archive.org for 'ubuntu' → assert result row with 'downloads'/'seeders' text. Owed pending nav-compose 2.9.0 lifecycle bug fix (library upgrade)."
+    },
+    {
+      "provider_id": "gutenberg",
+      "challenge": "C12 (Gutenberg anonymous Continue → authorized main app)",
+      "first_verified": "Phase 4.1b (2026-05-04 late) — flipped from verified=false to verified=true",
+      "evidence": ".lava-ci-evidence/sp3a-challenges/C12-2026-05-04-redesign.json",
+      "matrix_run": {
+        "avd": "CZ_API34_Phone",
+        "api_level": 34,
+        "form_factor": "phone",
+        "test_passed": true,
+        "test_seconds": 54.40,
+        "matrix_exit_code": 0,
+        "all_passed": true
+      },
+      "falsifiability": "Same protocol as C11 — both providers route through the same AuthType.NONE short-circuit + layer-3 signalAuthorized bridge. The matched-pair pattern means a regression in either layer breaks both tests simultaneously, providing redundant detection.",
+      "deep_coverage_owed": "Search gutendex.com for 'shakespeare' → assert book row. Owed pending nav-compose upgrade."
+    }
+  ],
+  "still_unverified": [
+    {
+      "provider_id": "kinozal",
+      "challenge": "C9 (Kinozal authenticated FORM_LOGIN)",
+      "blocker": "kinozal.tv may be geofenced from the test environment (CIS-only); real-network rehearsal needs a route to the upstream. KINOZAL_USERNAME/PASSWORD ARE present in .env, so the credential-handling part is ready. Phase 4.1c (geo-availability check) deferred.",
+      "remediation_owed": "Operator confirms kinozal.tv reachability from the test environment OR the matrix runs from a CIS-region VPS. Then C9 runs same shape as C2 (real-network FORM_LOGIN)."
+    },
+    {
+      "provider_id": "nnmclub",
+      "challenge": "C10 (NNM-Club authenticated FORM_LOGIN)",
+      "blocker": ".env lacks NNMCLUB_USERNAME / NNMCLUB_PASSWORD. C10 cannot run end-to-end without them; assumeTrue skips. The matrix attestation gate refuses to mark NnmclubDescriptor.verified=true until the test passes.",
+      "remediation_owed": "Operator obtains NNMCLUB account credentials, adds to .env (gitignored). Then C10 runs same shape as C9."
+    }
+  ],
+  "summary": "Phase 4 closed for 2 of 4 hidden providers (archiveorg + gutenberg). The remaining 2 (kinozal + nnmclub) have clean operator-required blockers (geo-routing + credentials respectively). The user-facing provider list now contains 4 verified providers: RuTracker.org, RuTor.info, Internet Archive, Project Gutenberg.",
+  "next_phase": "Phase 5 (submodule mirror symmetry) is operator-action gated. Phase 6 (release tag) requires the FULL multi-AVD matrix per clause 6.I clause 2 — running this same evidence on CZ_API28 + CZ_API30 + CZ_API34 + Pixel_9a, each form factor, before scripts/tag.sh will accept the next release tag."
+}

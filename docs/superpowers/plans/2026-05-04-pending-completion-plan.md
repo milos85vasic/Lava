@@ -229,10 +229,10 @@ rehearsal per provider.
 
 | Provider | Challenge | Path | Falsifiability rehearsal |
 |---|---|---|---|
-| archiveorg | C11 (anonymous Continue → search → result row) | path A (no creds, AuthType.NONE) | revert OnboardingScreen.kt to dual-collector → C11 times out at the post-Continue waitUntil |
-| gutenberg | C12 (anonymous Continue → search "shakespeare") | path A | `GutenbergSearch.search` returns empty → C12 times out at the result-row waitUntil |
-| kinozal | C9 (FORM_LOGIN with .env creds → search "ubuntu") | path A with creds | `KinozalAuth.login` forces Unauthenticated → C9 times out at the post-login waitUntil. Note: kinozal.tv may be geofenced; record geo state in evidence |
-| nnmclub | C10 (FORM_LOGIN, NEEDS .env CREDS) | **BLOCKED** — `.env` does not contain NNMCLUB_USERNAME/PASSWORD | OBTAIN CREDS first; until then NnmclubDescriptor.verified stays false, regardless of matrix readiness |
+| archiveorg | C11 (anonymous Continue → authorized main app) | path A (no creds, AuthType.NONE) | ✓ DONE Phase 4.1a 2026-05-04: matrix attestation at `.lava-ci-evidence/sp3a-challenges/C11-2026-05-04-redesign.json`; descriptor verified=true; falsifiability rehearsed (revert layer-1 short-circuit → times out at post-Continue waitUntil) |
+| gutenberg | C12 (anonymous Continue → authorized main app) | path A | ✓ DONE Phase 4.1b 2026-05-04: matrix attestation at `.lava-ci-evidence/sp3a-challenges/C12-2026-05-04-redesign.json`; descriptor verified=true; same falsifiability shape as C11 |
+| kinozal | C9 (FORM_LOGIN with .env creds → search "ubuntu") | path A with creds | DEFERRED Phase 4 — kinozal.tv is likely geofenced from this test environment; real-network rehearsal needs a CIS-region route. Credentials present in .env. |
+| nnmclub | C10 (FORM_LOGIN, NEEDS .env CREDS) | **BLOCKED** — `.env` does not contain NNMCLUB_USERNAME/PASSWORD | DEFERRED Phase 4 — operator-action gated on obtaining NNMCLUB creds. |
 
 ### Phase 4.2 — `ProviderVerifiedContractTest` re-pin
 

@@ -1,0 +1,16 @@
+{
+  "all_passed": true,
+  "finished_at": "2026-05-04T21:38:45+03:00",
+  "rows": [
+    {
+      "avd": "CZ_API34_Phone",
+      "api_level": 34,
+      "form_factor": "phone",
+      "boot_seconds": 0.000224964,
+      "test_class": "lava.app.challenges.Challenge12GutenbergAnonymousSearchTest",
+      "test_passed": true,
+      "test_seconds": 54.39587431
+    }
+  ],
+  "started_at": "2026-05-04T21:37:50+03:00"
+}

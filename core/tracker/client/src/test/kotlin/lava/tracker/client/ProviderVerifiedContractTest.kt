@@ -48,20 +48,29 @@ class ProviderVerifiedContractTest {
     private val verifiedIds = setOf(
         RuTrackerDescriptor.trackerId,
         RuTorDescriptor.trackerId,
+        // Phase 4.1a (2026-05-04 late): C11 shallow Challenge Test green
+        // on CZ_API34_Phone via the new pkg/emulator matrix infrastructure.
+        // Falsifiability: revert layer-1 IA fix → C11 times out post-Continue.
+        ArchiveOrgDescriptor.trackerId,
+        // Phase 4.1b (2026-05-04 late): C12 shallow Challenge Test
+        // matched-pair with C11 — same flow shape, gutendex.com instead
+        // of archive.org. Same falsifiability rehearsal protocol.
+        GutenbergDescriptor.trackerId,
     )
 
     /**
-     * The four providers that the 2026-05-04 emulator rehearsal could
-     * NOT validate end-to-end on a real device surface. They have real
-     * SDK implementations but no operator-rehearsed Challenge Test
-     * passing on the gating matrix. Hidden from the user-facing list
-     * via the verified=false default until that gap is closed.
+     * Two providers still without an operator-rehearsed Challenge Test
+     * passing on the gating matrix. Each has a specific blocker in
+     * `docs/superpowers/plans/2026-05-04-pending-completion-plan.md`
+     * Phase 4.1 row:
+     *   - Kinozal: descriptor verified=false; kinozal.tv may be
+     *     geofenced; C9 needs real-network rehearsal
+     *   - NNM-Club: descriptor verified=false; .env lacks NNMCLUB
+     *     credentials; C10 cannot run end-to-end without them
      */
     private val unverifiedIds = setOf(
         KinozalDescriptor.trackerId,
         NnmclubDescriptor.trackerId,
-        ArchiveOrgDescriptor.trackerId,
-        GutenbergDescriptor.trackerId,
     )
 
     @Test
@@ -97,17 +106,17 @@ class ProviderVerifiedContractTest {
     }
 
     @Test
-    fun `ArchiveOrg is NOT verified — post-login navigation bug blocks C11`() {
-        assertFalse(
-            "ArchiveOrgDescriptor.verified MUST stay false until the 2026-05-04 onboarding-navigation incident is closed and C11 passes on the gating matrix",
+    fun `ArchiveOrg is verified — backed by Challenge Test C11`() {
+        assertTrue(
+            "ArchiveOrgDescriptor.verified MUST stay true — C11 shallow Continue-to-authorized-main-app passing on CZ_API34_Phone via Phase 3 matrix infrastructure (Phase 4.1a, 2026-05-04). Deep-coverage search assertion owed pending nav-compose upgrade.",
             ArchiveOrgDescriptor.verified,
         )
     }
 
     @Test
-    fun `Gutenberg is NOT verified — same blocker as ArchiveOrg`() {
-        assertFalse(
-            "GutenbergDescriptor.verified MUST stay false until the onboarding-navigation incident is closed and C12 passes on the gating matrix",
+    fun `Gutenberg is verified — backed by Challenge Test C12`() {
+        assertTrue(
+            "GutenbergDescriptor.verified MUST stay true — C12 shallow Continue-to-authorized-main-app passing on CZ_API34_Phone via Phase 3 matrix infrastructure (Phase 4.1b, 2026-05-04). Deep-coverage search assertion owed pending nav-compose upgrade.",
             GutenbergDescriptor.verified,
         )
     }

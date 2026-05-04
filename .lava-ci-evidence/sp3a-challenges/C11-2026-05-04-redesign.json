@@ -1,0 +1,16 @@
+{
+  "all_passed": true,
+  "finished_at": "2026-05-04T21:34:39+03:00",
+  "rows": [
+    {
+      "avd": "CZ_API34_Phone",
+      "api_level": 34,
+      "form_factor": "phone",
+      "boot_seconds": 0.000249323,
+      "test_class": "lava.app.challenges.Challenge11ArchiveOrgAnonymousSearchTest",
+      "test_passed": true,
+      "test_seconds": 52.761900648
+    }
+  ],
+  "started_at": "2026-05-04T21:33:46+03:00"
+}
