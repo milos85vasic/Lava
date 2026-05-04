@@ -149,7 +149,7 @@ library upgrade. Workaround options:
 | Test | Status | Blocker |
 |---|---|---|
 | C1 | ✓ DONE | — |
-| C2 | redesign owed | needs `RUTRACKER_USERNAME`/`PASSWORD` from .env via BuildConfig (already wired in commit `356dd00`); requires real-network call to rutracker.org; `assumeTrue` skip when creds absent |
+| C2 | ✓ DONE 2026-05-04 (`.lava-ci-evidence/sp3a-challenges/C2-2026-05-04-redesign.json`) | — Falsifiability rehearsed (drop `signalAuthorized` in AuthResult.Success → ComposeTimeoutException waiting for "Search history" because legacy auth path never updates). Real network round-trip to rutracker.org verified. |
 | C3 | ✓ DONE 2026-05-04 (`.lava-ci-evidence/sp3a-challenges/C3-2026-05-04-redesign.json`) | — Phase 1.5 UI gate added to ProviderLoginScreen renders Continue button when supportsAnonymous=true; testTag added to the Switch for selector targeting. Falsifiability rehearsed (revert RuTor.supportsAnonymous=false → ComposeTimeoutException because Continue never renders). |
 | C4 | redesign owed | hits the nav-lifecycle teardown bug; also the production UI has no "Results from RuTor" banner — assertion needs to be against actual production text |
 | C5 | redesign owed | requires opening a known topic id (deep nav, teardown bug); needs concrete topic-id fixture |

@@ -1,0 +1,30 @@
+{
+  "challenge_id": "C2",
+  "test_class": "lava.app.challenges.Challenge02AuthenticatedSearchOnRuTrackerTest",
+  "phase": "Phase 2.4 (2026-05-04 redesign)",
+  "before_state": "BLUFF + 6.H VIOLATION — pre-existing test asserted on 'Account' → 'Sign in' → 'Logged in' which don't exist in the current UI, AND shipped real RUTRACKER credentials in a `private object BuildConfigBridge` placeholder (recorded in incident 2026-05-04-bridge-credentials.json). Both bluffs already removed in commits 32706b8 + 356dd00 (BuildConfig wiring); this commit completes the test redesign.",
+  "after_state": "PASSING on CZ_API34_Phone (API 34) with real network round-trip to rutracker.org. Test drives the REAL onboarding flow: Select Provider → tap RuTracker.org → enter creds (BuildConfig.RUTRACKER_USERNAME/PASSWORD from .env) → tap Sign in → wait for nav → Search tab shows 'Search history' empty state.",
+  "rehearsal": {
+    "command": "ANDROID_SERIAL=emulator-5554 ./gradlew :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=lava.app.challenges.Challenge02AuthenticatedSearchOnRuTrackerTest --no-daemon",
+    "baseline_outcome": "BUILD SUCCESSFUL — Finished 1 tests on CZ_API34_Phone(AVD) - 14 (real network round-trip ~1m18s)",
+    "mutation": "in feature/login/src/main/kotlin/lava/login/ProviderLoginViewModel.kt: comment out the `authService.signalAuthorized(name = state.usernameInput.value.text)` call inside the AuthResult.Success branch.",
+    "mutation_outcome": "BUILD FAILED — androidx.compose.ui.test.ComposeTimeoutException: Condition still not satisfied after 30000 ms — the test cannot find 'Search history' because the legacy AuthService SharedFlow never receives the bridge signal; SearchViewModel sees Unauthorized; the Search tab renders 'Authorization required to search' instead.",
+    "reverted": true,
+    "reverted_outcome": "BUILD SUCCESSFUL on retry (first post-revert run hit a flaky SocketTimeoutException to rutracker.org — network noise, not a code regression)"
+  },
+  "credential_handling": {
+    "source": ".env (gitignored) → app/build.gradle.kts buildConfigField → BuildConfig.RUTRACKER_USERNAME / BuildConfig.RUTRACKER_PASSWORD",
+    "skip_when_missing": "Test uses Assume.assumeTrue to skip when BuildConfig values are empty (CI without secrets, fresh clones). Skipped is visible in the test report and does NOT count as PASS.",
+    "incident_anchor": ".lava-ci-evidence/sixth-law-incidents/2026-05-04-bridge-credentials.json"
+  },
+  "scope_limits": {
+    "what_test_does_NOT_assert": "Test stops at the main app's Search-history empty state. It does NOT search rutracker.org or assert on result rows. The original C2 asserted on 'seeders' + 'MB' result row content; that portion is deferred to a separate test that uses the bypass rule (avoiding the deep-nav teardown bug) once the search-result UI is structurally verified.",
+    "anti_bluff_note": "The test exercises the FULL credentialed login flow including the real network round-trip. Falsifiability mutation reveals the layer-3 AuthService bridge as the load-bearing seam — without it the legacy auth observation path doesn't update."
+  },
+  "evidence_paths": {
+    "test_kt": "app/src/androidTest/kotlin/lava/app/challenges/Challenge02AuthenticatedSearchOnRuTrackerTest.kt",
+    "credential_wiring_gradle": "app/build.gradle.kts (buildConfigField declarations for RUTRACKER_USERNAME/PASSWORD)",
+    "mutated_production_kt": "feature/login/src/main/kotlin/lava/login/ProviderLoginViewModel.kt"
+  },
+  "matrix_run_owed": "Single-AVD rehearsal on CZ_API34_Phone (API 34). Per clause 6.I, the gating matrix run requires API 28, 30, 34, latest-stable, and at least one tablet form factor. Network-dependent — flaky AVDs may need retry."
+}
