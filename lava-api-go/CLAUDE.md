@@ -92,3 +92,8 @@ shape is in scope; SP-3a Phases 0-5 explicitly exclude Go changes.
   never reach a tracked file in the first place.
   `scripts/check-constitution.sh` enforces this at pre-push;
   introducing a credential pattern fails the push.
+
+## Clauses 6.I and 6.J (added 2026-05-04, inherited per 6.F)
+
+- **Clause 6.I — Multi-Emulator Container Matrix as Real-Device Equivalent** — see root `/CLAUDE.md` §6.I. Real-stack verification, where this service's work requires it (per 6.G clause 5 / Sixth Law clause 5 / Seventh Law clause 3), is satisfied by: (a) the project's container-bound multi-emulator matrix when the Android client surface is exercised through this service; (b) a real Postgres instance in podman/docker for any persistence-touching path; (c) a real HTTP/3 + HTTP/2 socket via the actual `cmd/lava-api-go` binary for any transport-touching path. Mocks of these boundaries are forbidden as the gating signal. Per-stack attestation rows go in `.lava-ci-evidence/<tag>/real-device-verification.md` (or the Go-side equivalent). A single passing test is NOT the gate.
+- **Clause 6.J — Anti-Bluff Functional Reality Mandate** — see root `/CLAUDE.md` §6.J. Every test, every contract test, and every CI gate touched by this service MUST do exactly one job: confirm the feature it claims to cover actually works for an end user, end-to-end, on the gating matrix. CI green is necessary, never sufficient. Adding a test the author cannot execute against the real Postgres + real HTTP stack (or against the emulator container path where applicable) is itself a bluff. Tests must guarantee the product works — anything else is theatre.

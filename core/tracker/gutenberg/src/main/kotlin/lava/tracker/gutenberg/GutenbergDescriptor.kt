@@ -32,4 +32,10 @@ object GutenbergDescriptor : TrackerDescriptor {
     override val authType: AuthType = AuthType.NONE
     override val encoding: String = "UTF-8"
     override val expectedHealthMarker: String = "Gutenberg"
+
+    // Constitutional clause 6.G — verified=false. Same forensic finding
+    // as ArchiveOrgDescriptor: post-login navigation broken on the root
+    // onboarding screen. See .lava-ci-evidence/sixth-law-incidents/
+    // 2026-05-04-onboarding-navigation.json.
+    override val verified: Boolean = false
 }

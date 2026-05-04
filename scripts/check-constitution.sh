@@ -62,6 +62,53 @@ if ! grep -qE 'Challenge Test|SDK-consuming ViewModel' feature/CLAUDE.md; then
   exit 1
 fi
 
+# ---------------------------------------------------------------------
+# 6. Credential pattern scan (constitutional clause 6.H clause 5).
+#
+# Scan tracked files for credential strings that should never appear
+# in source. Patterns target the KDoc-claims-placeholder bluff variant
+# (see .lava-ci-evidence/sixth-law-incidents/2026-05-04-bridge-credentials.json)
+# plus the obvious literal-credential cases. Excludes: .env.example
+# (intentional template), CHANGELOG.md (may document historical incidents),
+# .lava-ci-evidence/ (forensic records of past leaks), this script
+# itself, and CLAUDE.md/AGENTS.md (which document the patterns themselves).
+# ---------------------------------------------------------------------
+forbidden_credential_patterns=(
+  # The C2 bluff shape: a "private object *Bridge" containing string constants
+  # is the canonical placeholder-claiming-to-be-placeholder anti-pattern.
+  'private[[:space:]]+object[[:space:]]+[A-Za-z_]*Bridge[[:space:]]*\{'
+  # Literal credential string assignments in source
+  '(RUTRACKER|KINOZAL|NNMCLUB|IPTORRENTS)_(USERNAME|PASSWORD)[[:space:]]*[:=][[:space:]]*"[^"$][^"]*"'
+)
+
+mapfile -t tracked_files < <(
+  git ls-files 2>/dev/null |
+  grep -vE '^\.env\.example$|^CHANGELOG\.md$|^\.lava-ci-evidence/|^scripts/check-constitution\.sh$|^docs/INCIDENT_|^CLAUDE\.md$|^AGENTS\.md$|^lava-api-go/AGENTS\.md$|^lava-api-go/CLAUDE\.md$|^lava-api-go/CONSTITUTION\.md$' || true
+)
+
+credential_violations=0
+for pat in "${forbidden_credential_patterns[@]}"; do
+  for f in "${tracked_files[@]}"; do
+    [[ -f "$f" ]] || continue
+    if grep -nIE "$pat" "$f" 2>/dev/null; then
+      echo "CREDENTIAL PATTERN /$pat/ found in $f — clause 6.H violation." >&2
+      credential_violations=$((credential_violations + 1))
+    fi
+  done
+done
+
+if [[ $credential_violations -gt 0 ]]; then
+  echo "" >&2
+  echo "Constitutional clause 6.H violation: $credential_violations credential" >&2
+  echo "pattern hit(s) in tracked files. Move credentials to gitignored .env" >&2
+  echo "and read them at runtime via build-time injection (e.g. buildConfigField)." >&2
+  echo "" >&2
+  echo "If a hit is a false positive (e.g. a regex example in a comment or" >&2
+  echo "this script's own source), refactor the file or extend the exclusion" >&2
+  echo "list in scripts/check-constitution.sh — but never weaken the regex." >&2
+  exit 1
+fi
+
 echo "Constitution check passed: 6.D + 6.E + 6.F present in CLAUDE.md;"
 echo "Submodules/Tracker-SDK/CLAUDE.md present; core/ + feature/ scoped"
-echo "clauses present."
+echo "clauses present; no clause-6.H credential patterns in tracked files."

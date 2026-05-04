@@ -31,4 +31,10 @@ object KinozalDescriptor : TrackerDescriptor {
     override val authType: AuthType = AuthType.FORM_LOGIN
     override val encoding: String = "windows-1251"
     override val expectedHealthMarker: String = "Kinozal"
+
+    // Constitutional clause 6.G — verified=false. Same forensic finding
+    // as ArchiveOrgDescriptor: post-login navigation broken on the root
+    // onboarding screen. See .lava-ci-evidence/sixth-law-incidents/
+    // 2026-05-04-onboarding-navigation.json.
+    override val verified: Boolean = false
 }

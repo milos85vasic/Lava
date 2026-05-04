@@ -33,4 +33,12 @@ object NnmclubDescriptor : TrackerDescriptor {
     override val authType: AuthType = AuthType.FORM_LOGIN
     override val encoding: String = "windows-1251"
     override val expectedHealthMarker: String = "NNM-Club"
+
+    // Constitutional clause 6.G — verified=false. Same forensic finding
+    // as ArchiveOrgDescriptor: post-login navigation broken on the root
+    // onboarding screen. ALSO: NNMCLUB_USERNAME/PASSWORD not in .env at
+    // this time, so even a fixed nav flow could not be Challenge-tested
+    // here. See .lava-ci-evidence/sixth-law-incidents/
+    // 2026-05-04-onboarding-navigation.json.
+    override val verified: Boolean = false
 }

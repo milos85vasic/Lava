@@ -33,6 +33,23 @@ android {
         // HiltTestApplication as the test Application; without it
         // @HiltAndroidTest classes cannot inject.
         testInstrumentationRunner = "lava.app.LavaHiltTestRunner"
+
+        // Constitutional clause 6.H — credentials come from .env at build
+        // time, never from tracked source. Empty default makes the
+        // corresponding Challenge Test fail with a clear "credential not
+        // configured" message in environments without .env (CI, fresh
+        // checkouts) rather than silently embedding placeholder strings.
+        // Bluff-prevented: the original BuildConfigBridge inside C2
+        // hardcoded real credentials matching .env literally — committed
+        // 2026-04-30 in dd387385, classified as a Seventh Law clause 6
+        // incident on 2026-05-04. See .lava-ci-evidence/sixth-law-incidents/
+        // for the forensic record.
+        buildConfigField("String", "RUTRACKER_USERNAME", "\"${env["RUTRACKER_USERNAME"].orEmpty()}\"")
+        buildConfigField("String", "RUTRACKER_PASSWORD", "\"${env["RUTRACKER_PASSWORD"].orEmpty()}\"")
+        buildConfigField("String", "KINOZAL_USERNAME", "\"${env["KINOZAL_USERNAME"].orEmpty()}\"")
+        buildConfigField("String", "KINOZAL_PASSWORD", "\"${env["KINOZAL_PASSWORD"].orEmpty()}\"")
+        buildConfigField("String", "NNMCLUB_USERNAME", "\"${env["NNMCLUB_USERNAME"].orEmpty()}\"")
+        buildConfigField("String", "NNMCLUB_PASSWORD", "\"${env["NNMCLUB_PASSWORD"].orEmpty()}\"")
     }
 
     buildFeatures {

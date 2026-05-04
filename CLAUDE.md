@@ -293,6 +293,60 @@ Rule: Files containing real credentials, signing keys, or API secrets MUST never
 6. **Leak response protocol.** If credentials are accidentally committed, the commit MUST be purged from all four upstreams immediately, credentials MUST be rotated, and the incident MUST be recorded in `.lava-ci-evidence/sixth-law-incidents/` per the Seventh Law clause 6 protocol.
 7. **Inheritance.** This clause inherits recursively to every submodule. Submodule constitutions MAY add stricter rules but MUST NOT relax this one.
 
+##### 6.I — Multi-Emulator Container Matrix as Real-Device Equivalent (added 2026-05-04)
+
+**Forensic anchor:** clauses 6.G and the Sixth Law clause 5 + Seventh Law clause 3 originally required **operator real-device attestation** before a release tag. In practice, "real device" became a single Pixel-class phone, which (a) only exercises one Android version + one screen size at a time, (b) creates an operator-availability bottleneck where releases stall waiting on hardware, and (c) silently encourages "looks fine on my Pixel" to substitute for "works on the matrix of devices users actually run." That is the same class of bluff the Sixth Law was written to prevent — a single physical device is not a "matrix" any more than a single test is a "suite."
+
+**Rule.** Real-device verification, where required by clause 6.G clause 5, the Sixth Law clause 5, or the Seventh Law clause 3, is satisfied by **a multi-emulator container matrix** that meets ALL of:
+
+1. **Container-bound.** The emulators MUST run inside the project's emulator container (`docker-compose.test.yml` + `docker/emulator/Dockerfile`), not on a developer's host directly. Host-emulator runs are permitted for development iteration; the constitutional gate is the container path because it is reproducible across operator workstations and self-hosted runners (Local-Only CI/CD rule).
+
+2. **Android version coverage.** At minimum: API 28 (Android 9), API 30 (Android 11), API 34 (Android 14), and the latest stable API the project's `compileSdk` targets. A subset is permitted ONLY if a clause-6.G evidence entry names exactly which API levels were skipped and why; "fast iteration" is not a permitted reason.
+
+3. **Screen-size coverage.** At minimum: one phone-class device (any Pixel small/medium), one tablet-class device (Pixel Tablet or Nexus 9), and one TV-class device when the feature touches `TvActivity` or the leanback manifest entries. Form factor matters: layouts that pass on a 6" phone routinely break on a 10" tablet, and the project ships a `TvActivity` exactly because of that.
+
+4. **Per-AVD attestation row.** The evidence file at `.lava-ci-evidence/<tag>/real-device-verification.md` (or `real-device-attestation.json`) MUST contain one row per AVD-test pair: AVD name, Android API level, screen size, test class executed, pass/fail, screenshot or test-report path, timestamp. A green matrix is a SET of rows, not a single PASS line. Missing rows are missing evidence; "all green" without per-AVD detail is a bluff in itself.
+
+5. **Falsifiability rehearsal still applies per matrix.** For at least one AVD per Android-version-class, the deliberate-mutation rehearsal (Sixth Law clause 2) MUST be performed and recorded — the matrix exists to detect divergence between API levels, so a mutation that breaks on API 34 but not on API 28 is a finding worth keeping.
+
+6. **Cold-boot only for the gate run.** The matrix run that produces the evidence MUST start from cold-booted emulators (no snapshot reload). Snapshot reuse during dev is fine; for the gate it is forbidden, because snapshot drift is a known source of false-green ("worked yesterday" ≠ "works after upgrade").
+
+7. **`scripts/tag.sh` enforcement.** `scripts/tag.sh` MUST refuse to operate on a commit whose `.lava-ci-evidence/<tag>/real-device-verification.md` lacks AT LEAST one row per minimum-coverage AVD listed in clause 2 + clause 3, with all such rows reporting pass. There is no exception. "Operator was busy" is not an exception. "Emulator was flaky" is not an exception — flakiness must be diagnosed and fixed; intermittent green is constitutionally indistinguishable from intermittent red.
+
+8. **Inheritance.** Clause 6.I applies recursively to every feature, every submodule, and every new artifact. Submodule constitutions MAY add stricter coverage requirements (e.g. "tablet-class is mandatory for this feature even though the matrix minimum is phone-class") but MUST NOT relax this clause.
+
+The matrix is the gate. A single passing emulator is not.
+
+##### 6.I-debt — Containers-submodule extraction (constitutional debt, 2026-05-04)
+
+The current `docker-compose.test.yml` + `docker/emulator/Dockerfile` + `scripts/run-emulator-tests.sh` are Lava-side container-orchestration code. Per the Decoupled Reusable Architecture rule, generic container-orchestration concerns MUST live in `vasic-digital/Containers`. The matrix-runner machinery required by clause 6.I (multi-AVD orchestration, per-AVD attestation collection, cold-boot enforcement, falsifiability-rehearsal hooks) is the same kind of capability another `vasic-digital` project would want — therefore it MUST be extracted to a new `Submodules/Containers/pkg/emulator/` package and a `cmd/emulator-matrix/` CLI. Lava's `scripts/run-emulator-tests.sh` then becomes thin glue invoking the Containers CLI with Lava-specific arguments (the AVD list, the test class, the evidence path).
+
+This is recorded as constitutional debt because the immediate-session work (writing + running Challenge Tests C9-C12 on the four hidden providers) needs the matrix capability NOW, while the proper extraction is multi-hour work that includes Anti-Bluff falsifiability rehearsal of the new Containers package's own tests. Acceptable transitional state: development-iteration runs use Lava-side compose; the constitutional-gate run (the one that produces `.lava-ci-evidence/<tag>/real-device-verification.md` and unblocks `scripts/tag.sh`) MUST go through the Containers package once it ships. No release tag is cut while this debt is open.
+
+Tracking: the next phase that touches release tagging MUST close this debt before its tag.
+
+##### 6.J — Anti-Bluff Functional Reality Mandate (added 2026-05-04)
+
+**Forensic anchor (recurring):** the operator has now twice flagged that "tests pass green while features don't actually work for users" (Internet Archive stuck-on-loading + the broader concern that Sixth Law clauses 1-5 alone are insufficient enforcement). The Anti-Bluff Pact is mature; what is needed is the most direct possible re-statement so that no future agent or contributor can read past it.
+
+**Rule.** Every test, every Challenge Test, and every CI gate added to or maintained in this codebase MUST do exactly one job: **confirm that the feature it claims to cover actually works for an end user, end-to-end, on the user's real surfaces.**
+
+If a test passes while the feature is broken — irrespective of what the test's author intended, irrespective of what the test's name says, irrespective of how green CI looks — the test has failed at its only job. There is no "but the assertion was technically correct" defense. There is no "the test was just for the wiring" defense. There is no "we'll add the real test next sprint" defense.
+
+The execution of tests and Challenge Tests in this project has ONE purpose: **guarantee the quality, the completion, and the full usability of the product by end users.** Anything that does not contribute to that guarantee is removed, refactored, or rewritten.
+
+**Mechanical implications:**
+
+1. CI green is necessary, NEVER sufficient. (Sixth Law clause 5 in even more direct words.)
+2. A green Challenge Test means a real user can complete the flow on the gating matrix (clause 6.I). It does not mean "the wiring compiles" or "the mock returned the expected value."
+3. Any agent or contributor may invoke clause 6.J to remove a test they can demonstrate is bluff (the test passes against a deliberately-broken production code path) — even retroactively, even if the test was sacred for years. The bluff classification + the broken-mutation evidence go to `.lava-ci-evidence/sixth-law-incidents/<date>.json`, and the removal is a NORMAL change, not a controversial one.
+4. Adding `@Ignore` to a failing test without an open issue is a clause-6.J violation by construction — "ignored" is not "covered."
+5. Adding a Challenge Test that the agent CANNOT execute against the gating matrix is itself a bluff, regardless of the assertion's plausibility. Either the test runs on the matrix and passes truthfully, or it does not exist.
+
+This clause exists not to add new mechanics — clauses 6.A through 6.I + the Sixth and Seventh Laws already provide the mechanics — but to be the unambiguous restatement that a future agent or contributor cannot rationalize away. **Tests must guarantee the product works. Anything else is theatre.**
+
+**Inheritance.** Applies recursively to every submodule, every feature, every new artifact. Submodule constitutions MAY emphasize this clause more loudly (e.g. by repeating it verbatim in their `CLAUDE.md`) but MUST NOT relax it.
+
 ## Local-Only CI/CD (Constitutional Constraint)
 
 This project does NOT use, and MUST NOT add, GitHub Actions, GitLab pipelines, Bitbucket pipelines, CircleCI, Travis, Jenkins-as-a-service, Azure Pipelines, or any other hosted/remote CI/CD service. All build, test, lint, security-scan, mutation-test, load-test, image-build, and release-verification activity MUST run on developer machines or on a self-hosted local runner under the operator's direct control.

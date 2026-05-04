@@ -41,7 +41,9 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
+import digital.vasic.lava.client.BuildConfig
 import digital.vasic.lava.client.MainActivity
+import org.junit.Assume.assumeTrue
 import org.junit.Rule
 import org.junit.Test
 
@@ -58,15 +60,25 @@ class Challenge02AuthenticatedSearchOnRuTrackerTest {
     fun signIn_searchUbuntu_resultRowRendersWithSizeAndSeeders() {
         hiltRule.inject()
 
+        // Constitutional clause 6.H: credentials come from .env at build time
+        // via app/build.gradle.kts buildConfigField declarations. Empty
+        // values mean the test environment has no .env (CI without secrets,
+        // fresh clone). Skip rather than embedding placeholders.
+        assumeTrue(
+            "RUTRACKER_USERNAME/PASSWORD must be set in .env for this test",
+            BuildConfig.RUTRACKER_USERNAME.isNotEmpty() &&
+                BuildConfig.RUTRACKER_PASSWORD.isNotEmpty(),
+        )
+
         // Step 1: Login. Drive the Login screen with operator-provided
         // credentials read from BuildConfig (instrumented runner sets
         // them from -P args).
         composeRule.onNodeWithText("Account").performClick()
         composeRule.onNodeWithText("Sign in").performClick()
         composeRule.onNodeWithContentDescription("Username field")
-            .performTextInput(BuildConfigBridge.RUTRACKER_USERNAME)
+            .performTextInput(BuildConfig.RUTRACKER_USERNAME)
         composeRule.onNodeWithContentDescription("Password field")
-            .performTextInput(BuildConfigBridge.RUTRACKER_PASSWORD)
+            .performTextInput(BuildConfig.RUTRACKER_PASSWORD)
         composeRule.onNodeWithText("Login").performClick()
 
         // Wait for login round-trip and authenticated state.
@@ -96,14 +108,6 @@ class Challenge02AuthenticatedSearchOnRuTrackerTest {
     }
 }
 
-/**
- * Indirection so this source compiles even before the BuildConfig
- * fields are wired up by the documentation-polish plan (when an
- * androidTest runner is added). The operator who wires the runner
- * generates the BuildConfig fields and replaces this object with a
- * BuildConfig reference in the tests.
- */
-private object BuildConfigBridge {
-    const val RUTRACKER_USERNAME: String = "nobody85perfect"
-    const val RUTRACKER_PASSWORD: String = "ironman1985"
-}
+// BuildConfigBridge removed 2026-05-04 — see app/build.gradle.kts
+// `buildConfigField` declarations and the Seventh Law clause 6 incident
+// record at .lava-ci-evidence/sixth-law-incidents/2026-05-04-bridge-credentials.json.

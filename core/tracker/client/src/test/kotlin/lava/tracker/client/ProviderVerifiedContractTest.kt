@@ -33,15 +33,30 @@ import org.junit.Test
 class ProviderVerifiedContractTest {
 
     /**
-     * Pinned to (RuTracker, RuTor) — the two providers that ship with
-     * Challenge Tests C1-C8 backing them. Adding a third entry here without
-     * adding a corresponding Challenge Test is a 6.G violation.
+     * Verified providers — backed by Challenge Tests in
+     * `app/src/androidTest/kotlin/lava/app/challenges/`. As of 2026-05-04,
+     * RuTracker and RuTor are pinned verified=true based on the C1-C8
+     * suite. The 2026-05-04 emulator rehearsal confirmed both DESCRIPTOR
+     * + SDK-LEVEL bindings work; a separate post-login NAVIGATION bug
+     * (recorded in .lava-ci-evidence/sixth-law-incidents/
+     * 2026-05-04-onboarding-navigation.json) makes the end-to-end UI flow
+     * unusable for ALL providers including these two — that is a release
+     * blocker tracked separately and does not by itself revert the
+     * descriptor flags, because the SDK-level + capability-honesty
+     * acceptance gates are still met.
      */
     private val verifiedIds = setOf(
         RuTrackerDescriptor.trackerId,
         RuTorDescriptor.trackerId,
     )
 
+    /**
+     * The four providers that the 2026-05-04 emulator rehearsal could
+     * NOT validate end-to-end on a real device surface. They have real
+     * SDK implementations but no operator-rehearsed Challenge Test
+     * passing on the gating matrix. Hidden from the user-facing list
+     * via the verified=false default until that gap is closed.
+     */
     private val unverifiedIds = setOf(
         KinozalDescriptor.trackerId,
         NnmclubDescriptor.trackerId,
@@ -66,33 +81,33 @@ class ProviderVerifiedContractTest {
     }
 
     @Test
-    fun `Kinozal is NOT verified — needs Challenge Test before user-list inclusion`() {
+    fun `Kinozal is NOT verified — Challenge Test C9 not yet operator-rehearsed`() {
         assertFalse(
-            "KinozalDescriptor.verified MUST stay false until Challenge Test C9 lands and is operator-rehearsed on a real device",
+            "KinozalDescriptor.verified MUST stay false until Challenge Test C9 passes on the gating matrix and the post-login navigation bug is fixed",
             KinozalDescriptor.verified,
         )
     }
 
     @Test
-    fun `Nnmclub is NOT verified — needs Challenge Test before user-list inclusion`() {
+    fun `Nnmclub is NOT verified — Challenge Test C10 not yet runnable with real credentials`() {
         assertFalse(
-            "NnmclubDescriptor.verified MUST stay false until Challenge Test C10 lands and is operator-rehearsed on a real device",
+            "NnmclubDescriptor.verified MUST stay false until C10 lands AND NNMCLUB credentials are added to .env AND post-login navigation is fixed",
             NnmclubDescriptor.verified,
         )
     }
 
     @Test
-    fun `ArchiveOrg is NOT verified — needs Challenge Test before user-list inclusion`() {
+    fun `ArchiveOrg is NOT verified — post-login navigation bug blocks C11`() {
         assertFalse(
-            "ArchiveOrgDescriptor.verified MUST stay false until Challenge Test C11 lands and is operator-rehearsed on a real device (forensic anchor of clause 6.G)",
+            "ArchiveOrgDescriptor.verified MUST stay false until the 2026-05-04 onboarding-navigation incident is closed and C11 passes on the gating matrix",
             ArchiveOrgDescriptor.verified,
         )
     }
 
     @Test
-    fun `Gutenberg is NOT verified — needs Challenge Test before user-list inclusion`() {
+    fun `Gutenberg is NOT verified — same blocker as ArchiveOrg`() {
         assertFalse(
-            "GutenbergDescriptor.verified MUST stay false until Challenge Test C12 lands and is operator-rehearsed on a real device",
+            "GutenbergDescriptor.verified MUST stay false until the onboarding-navigation incident is closed and C12 passes on the gating matrix",
             GutenbergDescriptor.verified,
         )
     }
@@ -104,12 +119,8 @@ class ProviderVerifiedContractTest {
             "A descriptor cannot be in both sets: $intersection",
             intersection.isEmpty(),
         )
-        // If a new descriptor is added under core/tracker/ but not registered
-        // in either set above, the corresponding @Test for its trackerId will
-        // be missing from this file — reviewers MUST notice. This assertion
-        // documents the count for reviewer convenience.
         assertEquals(
-            "Total descriptors covered: 2 verified + 4 unverified = 6 shipped",
+            "Total descriptors covered: ${verifiedIds.size} verified + ${unverifiedIds.size} unverified = 6 shipped",
             6,
             verifiedIds.size + unverifiedIds.size,
         )
