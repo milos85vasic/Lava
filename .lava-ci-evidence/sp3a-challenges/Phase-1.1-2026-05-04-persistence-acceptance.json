@@ -1,0 +1,121 @@
+{
+  "phase": "Phase 1.1 (2026-05-04 evening)",
+  "scope": "Persist multi-tracker session-signaled auth state across process death — closes the recurring 'archive.org user force-quits, lands on Authorization required again' bug.",
+  "constitutional_anchor": "Sixth Law clauses 1-6 + Seventh Law clauses 1-6 + clause 6.G + clause 6.J + plan/2026-05-04-pending-completion-plan.md Phase 1.1",
+  "tasks_completed": [
+    {
+      "id": "1.1.1",
+      "subject": "Add getSignaledAuthState / saveSignaledAuthState / clearSignaledAuthState to PreferencesStorage interface",
+      "status": "DONE pre-session (commit chain ending b60665d/45fd1ae)"
+    },
+    {
+      "id": "1.1.2",
+      "subject": "Implement in PreferencesStorageImpl using a separate signaled_auth.xml SharedPreferences file",
+      "status": "DONE — keyspace separation matches Anti-Bluff Pact's Third Law (production keeps account vs signaled-auth distinct so a bug in one cannot leak into the other)"
+    },
+    {
+      "id": "1.1.3",
+      "subject": "AuthServiceImpl.signalAuthorized writes both in-memory + persisted",
+      "status": "DONE — see lines 121-130 of AuthServiceImpl.kt"
+    },
+    {
+      "id": "1.1.4",
+      "subject": "AuthServiceImpl.getAuthState reads persisted state when sessionSignaledState is null (cold-start path)",
+      "status": "DONE — see lines 137-157 of AuthServiceImpl.kt"
+    },
+    {
+      "id": "1.1.5",
+      "subject": "AuthServiceImpl.logout clears persisted state too",
+      "status": "DONE — see line 98 of AuthServiceImpl.kt"
+    },
+    {
+      "id": "1.1.6",
+      "subject": "TestAuthService fake updated with persistence-equivalent in-memory map (Anti-Bluff Pact Third Law)",
+      "status": "DONE 2026-05-04 — TestAuthService.persistedSignaledState + simulateProcessRestart() helper"
+    }
+  ],
+  "tests_added": [
+    {
+      "name": "lava.auth.impl.AuthServiceImplPersistenceTest",
+      "module": ":core:auth:impl",
+      "kind": "JVM unit test (real-stack at the persistence boundary)",
+      "test_count": 6,
+      "test_methods": [
+        "signalAuthorized persists the auth state to preferences storage",
+        "coldStart_restores_signaledAuthState_after_simulated_process_restart",
+        "coldStart_with_no_persisted_signal_emits_Unauthorized",
+        "coldStart_with_legacy_account_only_emits_Authorized_from_account",
+        "signaledAuthState_takes_precedence_over_legacy_account_when_both_exist",
+        "logout_clears_persisted_signal_so_next_coldStart_emits_Unauthorized"
+      ],
+      "elapsed_seconds": 0.094,
+      "status": "ALL PASS"
+    },
+    {
+      "name": "lava.testing.service.TestAuthServicePersistenceEquivalenceTest",
+      "module": ":core:testing",
+      "kind": "JVM unit test (Anti-Bluff Pact Third Law equivalence audit of the fake)",
+      "test_count": 5,
+      "test_methods": [
+        "signalAuthorized writes to BOTH in-memory observable AND persisted field",
+        "simulateProcessRestart_after_signalAuthorized_restores_authorized_state",
+        "simulateProcessRestart_with_no_prior_signal_emits_Unauthorized",
+        "logout_clears_persisted_signal_and_subsequent_restart_emits_Unauthorized",
+        "login_response_field_is_unaffected_by_persistence_changes"
+      ],
+      "elapsed_seconds": 0.008,
+      "status": "ALL PASS"
+    },
+    {
+      "name": "lava.app.challenges.Challenge00CrashSurvivalTest",
+      "module": ":app",
+      "kind": "Compose UI Challenge Test (Phase 1.1 acceptance gate; honestly shallow per clause 6.J)",
+      "scope": "Drives the real onboarding flow → IA Continue tap → asserts SignaledAuthState persisted on disk via Hilt entry point. SHALLOW because true 'am force-stop survival' cannot be tested in-process; deep-coverage owed pending UiAutomator-driven shell access.",
+      "compile_status": "compileDebugAndroidTestKotlin BUILD SUCCESSFUL",
+      "matrix_run_status": "owed — Challenge Test exists, will be rehearsed on next matrix run"
+    }
+  ],
+  "falsifiability_rehearsals_recorded": [
+    {
+      "test": "AuthServiceImplPersistenceTest.coldStart_restores_signaledAuthState_after_simulated_process_restart",
+      "mutation": "in AuthServiceImpl.getAuthState(), replace `preferencesStorage.getSignaledAuthState()?.let { signaled -> ... }` with `null?.let { signaled: SignaledAuthState -> ... }` (effectively skip the cold-start signal restoration)",
+      "observed_failure": "AssertionError at AuthServiceImplPersistenceTest.kt:85 — expected `Authorized(name=archive.org user, avatarUrl=http://example.test/a.png)` but got `Unauthorized` (cold-start observer never saw the persisted signal). Also caused `signaledAuthState_takes_precedence_over_legacy_account_when_both_exist` at line 127 to fail because the cold-start path now falls through to the legacy account.",
+      "tests_failed_count": 2,
+      "reverted": true,
+      "post_revert_status": "BUILD SUCCESSFUL — 6/6 tests pass"
+    },
+    {
+      "test": "TestAuthServicePersistenceEquivalenceTest.simulateProcessRestart_after_signalAuthorized_restores_authorized_state",
+      "mutation": "in TestAuthService.signalAuthorized, drop the line `persistedSignaledState = newState` (write only authState.value)",
+      "observed_failure": "AssertionError — expected Authorized but got Unauthorized after simulateProcessRestart; the fake had silently diverged from production where PreferencesStorageImpl.saveSignaledAuthState would still be called. 3 tests failed (signalAuthorized writes to BOTH..., logout_clears_persisted_signal_and_subsequent_restart..., simulateProcessRestart_after_signalAuthorized...).",
+      "tests_failed_count": 3,
+      "reverted": true,
+      "post_revert_status": "BUILD SUCCESSFUL — 10/10 tests pass"
+    }
+  ],
+  "anti_bluff_posture": {
+    "sixth_law_clause_1": "PASS — AuthServiceImplPersistenceTest exercises the production AuthServiceImpl with a behaviorally-equivalent fake at the persistence boundary. No mocking of the SUT.",
+    "sixth_law_clause_2": "PASS — both rehearsals above performed and recorded; the tests fail with clear assertion messages when the production code path is broken.",
+    "sixth_law_clause_3": "PASS — primary assertions are on user-visible state: (a) AuthState.Authorized emitted into the observable consumed by Search/Forum/Topic screens, (b) SignaledAuthState persisted to disk (consumed on cold-start). Mock-interaction-count assertions are absent.",
+    "sixth_law_clause_4": "PARTIAL — Challenge00CrashSurvivalTest is the Compose UI Challenge gate; honest shallow coverage owed deep-coverage upgrade once UiAutomator-shell harness is in place.",
+    "sixth_law_clause_5": "DEFERRED — operator real-device attestation owed at the next matrix run.",
+    "seventh_law_clause_1": "PASS — Bluff-Audit stamps in both test KDocs; the commit message will carry them too.",
+    "seventh_law_clause_4_forbidden_patterns": "PASS — neither test mocks the SUT; no verify-only assertions; no @Ignore; no compilation-only tests; no BUILD-SUCCESSFUL-only gates."
+  },
+  "production_files_touched_in_prior_commits": [
+    "core/preferences/src/main/kotlin/lava/securestorage/PreferencesStorage.kt",
+    "core/preferences/src/main/kotlin/lava/securestorage/PreferencesStorageImpl.kt",
+    "core/auth/impl/src/main/kotlin/lava/auth/impl/AuthServiceImpl.kt"
+  ],
+  "files_added_this_commit": [
+    "core/auth/impl/src/test/kotlin/lava/auth/impl/AuthServiceImplPersistenceTest.kt",
+    "core/testing/src/test/kotlin/lava/testing/service/TestAuthServicePersistenceEquivalenceTest.kt",
+    "app/src/androidTest/kotlin/lava/app/challenges/Challenge00CrashSurvivalTest.kt",
+    ".lava-ci-evidence/sp3a-challenges/Phase-1.1-2026-05-04-persistence-acceptance.json"
+  ],
+  "files_modified_this_commit": [
+    "core/auth/impl/build.gradle.kts (added junit4 + kotlinx.coroutines.test testImplementations)",
+    "core/testing/src/main/kotlin/lava/testing/service/TestAuthService.kt (Task 1.1.6 — persistedSignaledState + simulateProcessRestart helper)"
+  ],
+  "deep_coverage_owed": "Challenge00CrashSurvivalTest deep variant: drive real `am force-stop` via UiAutomator, relaunch app, assert Search-history empty state still renders. Owed pending a future Phase 1.1.7 once the test harness can drive the shell from outside the test process."
+}

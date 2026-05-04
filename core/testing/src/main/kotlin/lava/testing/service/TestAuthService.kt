@@ -17,8 +17,45 @@ class TestAuthService : AuthService, TokenProvider {
 
     override fun observeAuthState(): Flow<AuthState> = authState
 
+    /**
+     * Phase 1.1 (2026-05-04) — persistence-equivalent in-memory map
+     * mirroring the production [lava.auth.impl.AuthServiceImpl] +
+     * [lava.securestorage.PreferencesStorageImpl] pair. The production
+     * pair writes the signaled-auth state to a separate SharedPreferences
+     * file (`signaled_auth.xml`) so a force-quit + relaunch restores the
+     * authorized state for users who completed a no-auth provider flow
+     * (Internet Archive, Project Gutenberg). Anti-Bluff Pact's Third Law:
+     * dropping this field from the fake would diverge from production —
+     * a test that simulates process restart against this fake would
+     * silently lose the signal while the real production stack would
+     * restore it, producing a bluff fake.
+     *
+     * [logout] clears both [authState] and [persistedSignaledState],
+     * matching the production logout semantics.
+     * [simulateProcessRestart] mirrors the production cold-start path:
+     * resets the in-memory observable (process death) and re-emits from
+     * the persisted state if any (the equivalent of
+     * [lava.auth.impl.AuthServiceImpl.getAuthState] consulting
+     * [lava.securestorage.PreferencesStorage.getSignaledAuthState] on
+     * first observation).
+     */
+    var persistedSignaledState: AuthState.Authorized? = null
+
     override suspend fun logout() {
+        persistedSignaledState = null
         authState.value = AuthState.Unauthorized
+    }
+
+    /**
+     * Test helper: simulate process death + relaunch. Resets the
+     * SharedFlow-equivalent observable to the cold-start path, then
+     * consults the persisted signal exactly the way production does.
+     * Tests that need to assert "force-stop survival" of the authorized
+     * state call this between Act and Assert.
+     */
+    fun simulateProcessRestart() {
+        signaledNames.clear()
+        authState.value = persistedSignaledState ?: AuthState.Unauthorized
     }
 
     companion object {
@@ -49,7 +86,11 @@ class TestAuthService : AuthService, TokenProvider {
 
     override suspend fun signalAuthorized(name: String, avatarUrl: String?) {
         signaledNames.add(name)
-        authState.value = AuthState.Authorized(name, avatarUrl)
+        val newState = AuthState.Authorized(name, avatarUrl)
+        // Match the production AuthServiceImpl.signalAuthorized semantics:
+        // write to BOTH the in-memory observable AND the persisted store.
+        persistedSignaledState = newState
+        authState.value = newState
     }
 
     override suspend fun refreshToken(): Boolean = false
