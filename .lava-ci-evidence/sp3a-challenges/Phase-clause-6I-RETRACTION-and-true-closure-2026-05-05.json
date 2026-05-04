@@ -1,0 +1,101 @@
+{
+  "phase": "Clause 6.I RETRACTION + true closure (2026-05-05)",
+  "supersedes": ".lava-ci-evidence/sp3a-challenges/Phase-clause-6I-closure-2026-05-04-evening.json (commit 8e66c53)",
+  "supersedes_attestations": [
+    ".lava-ci-evidence/sp3a-challenges/Challenge00-2026-05-04-evening-full-matrix-attestation.json (commit e3bcae3)"
+  ],
+  "trigger": "Operator invoked 'ultrathink' + /superpowers:systematic-debugging on 2026-05-05 against the agent's prior claim of 'clause 6.I closure'. Phase 1 root-cause investigation surfaced a multi-AVD port-collision architectural bluff in Submodules/Containers/pkg/emulator/Boot() — every iteration of the multi-AVD matrix had been targeting the SAME emulator on port 5555, while the runner's attestation falsely recorded test_passed=true for each AVD.",
+  "constitutional_anchor": "root /CLAUDE.md §6.I clauses 1-8 + Seventh Law clause 6 (Bluff Discovery Protocol) + clause 6.J (Anti-Bluff Functional Reality Mandate)",
+  "what_was_actually_fixed_correctly_in_prior_commits_and_STILL_STANDS": [
+    {
+      "clause": "6.I clause 6 (cold-boot-only reporting — boot_seconds includes WaitForBoot duration)",
+      "commit": "Submodules/Containers 23b4fa9 + Lava 8e66c53",
+      "status": "STANDS — independent fix to matrix.go's BootDuration accumulation; not affected by the port-collision bug. Post-architectural-fix run confirms boot_seconds now reports real cold-boot time (12-28s across the 5 AVDs)."
+    },
+    {
+      "clause": "6.I clause 7 (scripts/tag.sh enforcement helper)",
+      "commit": "Lava 8e66c53",
+      "status": "STANDS — the helper's logic (require all_passed=true, API coverage of {28, 30, 34, ≥36}, phone form factor) is correct. Falsifiability rehearsed in 5 negative scenarios. Note: the gate now PROPERLY rejects this commit's attestation because Pixel_9a (API 36) failed."
+    },
+    {
+      "clause": "6.I clause 5 (falsifiability rehearsal on API 34 class)",
+      "commit": "Lava 8e66c53",
+      "status": "STANDS — that rehearsal was a single-AVD run on CZ_API34_Phone. Single-AVD matrix runs do NOT trigger the port-collision bug (only one emulator exists, on the only port). The mutation rehearsal correctly broke Challenge00 on the real CZ_API34_Phone."
+    }
+  ],
+  "what_was_BLUFF_and_is_RETRACTED": [
+    {
+      "claim_retracted": "5-AVD matrix passed Challenge00 across {API 28 + 30 + 34 phone + 34 tablet + 36}",
+      "prior_attestation": ".lava-ci-evidence/sp3a-challenges/Challenge00-2026-05-04-evening-full-matrix-attestation.json (commit e3bcae3)",
+      "why_it_was_a_bluff": "Diagnostic instrumentation added in this session captured the per-iteration adb-devices state + ro.product.model. PRE-fix output: every iteration targeted localhost:5555 with identical model string 'Android SDK built for x86_64'. Only the FIRST AVD (CZ_API28_Phone) was actually under test, 5 times. The 4 other rows tested the same emulator while their named AVDs ran in the background, untested, and got killed by the next iteration's Teardown.",
+      "constitutional_status": "RETRACTED per Seventh Law clause 6"
+    },
+    {
+      "claim_retracted": "Clause 6.I clause 3 (tablet form factor) closed",
+      "prior_attestation": ".lava-ci-evidence/sp3a-challenges/Phase-clause-6I-closure-2026-05-04-evening.json (commit 8e66c53)",
+      "why_it_was_a_bluff": "The CZ_API34_Tablet AVD WAS created and DID launch, but the matrix never targeted its port. The 'tablet form factor PASS' row in that attestation actually represents the API-28 phone emulator running Challenge00 a 4th time.",
+      "constitutional_status": "RETRACTED — to be re-closed in this commit"
+    }
+  ],
+  "true_clause_6_I_status_after_architectural_fix": {
+    "clause_1_container_bound": "OPEN — broader 6.K-debt; the post-fix matrix still runs on bare host. Container-bound run is owed at the next phase that touches release tagging.",
+    "clause_2_android_version_minimums": {
+      "API_28": "PASS — CZ_API28_Phone tested correctly post-fix, Challenge00 passed in 43.24s",
+      "API_30": "PASS — CZ_API30_Phone tested correctly post-fix, Challenge00 passed in 54.38s",
+      "API_34": "PASS — CZ_API34_Phone tested correctly post-fix, Challenge00 passed in 69.96s",
+      "latest_stable_API_36": "FAIL — Pixel_9a tested correctly post-fix for the FIRST time, Challenge00 FAILED with exit status 1 after 60.58s. This is a NEWLY-DISCOVERED real failure that the bluff was masking."
+    },
+    "clause_3_screen_size_coverage": {
+      "phone_class": "PASS — 4 phone-class AVDs in the post-fix run, all but Pixel_9a passed",
+      "tablet_class": "PASS — CZ_API34_Tablet tested correctly post-fix, Challenge00 passed in 60.22s. The tablet form factor IS now closed for Challenge00 (which is a layout-agnostic test that asserts on text labels). Features whose layout could differ on tablet would still need their own tablet-specific Challenge Tests.",
+      "tv_class": "N/A — Challenge00 doesn't touch TvActivity"
+    },
+    "clause_4_per_avd_attestation_row": "PASS — 5 rows recorded, each carrying distinct AVD/api_level/form_factor and (post-fix) actually-distinct test outcomes",
+    "clause_5_falsifiability_rehearsal": {
+      "API_28_class": "OWED",
+      "API_30_class": "OWED",
+      "API_34_class": "PASS (commit 8e66c53 — single-AVD run, unaffected by the port-collision bug)",
+      "API_36_class": "OWED — but moot until the actual Pixel_9a failure is diagnosed and fixed",
+      "architectural_falsifiability": "PASS — TestAndroidEmulator_Boot_DiscoversNewSerial_WhenPriorEmulatorPersists in Containers commit 648a4bb. Mutation: revert Boot() to hardcoded ports → test fails 'expected 5557 but got 5555'. Reverted; passes."
+    },
+    "clause_6_cold_boot_only_reporting": "PASS — BootResult.BootDuration now includes WaitForBoot elapsed (Containers 23b4fa9). Post-architectural-fix run shows real cold-boot times: 12.46s, 25.85s, 23.28s, 23.14s, 28.18s.",
+    "clause_7_tag_sh_enforcement": "PASS — helper added in Lava 8e66c53. Falsifiability rehearsed in 5 negative paths. NOTE: the helper now correctly REJECTS the post-fix attestation because Pixel_9a's row has test_passed=false → all_passed=false. The gate is doing its job.",
+    "clause_8_inheritance": "PASS — clause 6.M propagated to all 16 submodules (commit 20539d5)"
+  },
+  "post_fix_5_avd_attestation": {
+    "evidence_file": ".lava-ci-evidence/2026-05-05-c00-architectural-fix/real-device-verification.json",
+    "all_passed": false,
+    "rows": [
+      { "avd": "CZ_API28_Phone",  "api_level": 28, "form_factor": "phone",  "boot_seconds": 12.46, "test_seconds": 43.24, "test_passed": true,  "diag_target": "localhost:5555", "diag_sdk": "28", "diag_device": "generic_x86_64" },
+      { "avd": "CZ_API30_Phone",  "api_level": 30, "form_factor": "phone",  "boot_seconds": 25.85, "test_seconds": 54.38, "test_passed": true,  "diag_target": "localhost:5557", "diag_sdk": "30", "diag_device": "generic_x86_64_arm64" },
+      { "avd": "CZ_API34_Phone",  "api_level": 34, "form_factor": "phone",  "boot_seconds": 23.28, "test_seconds": 69.96, "test_passed": true,  "diag_target": "localhost:5559", "diag_sdk": "34", "diag_device": "emu64xa" },
+      { "avd": "CZ_API34_Tablet", "api_level": 34, "form_factor": "tablet", "boot_seconds": 23.14, "test_seconds": 60.22, "test_passed": true,  "diag_target": "localhost:5561", "diag_sdk": "34", "diag_device": "emu64xa" },
+      { "avd": "Pixel_9a",        "api_level": 36, "form_factor": "phone",  "boot_seconds": 28.18, "test_seconds": 60.58, "test_passed": false, "diag_target": "localhost:5563", "diag_sdk": "36", "diag_device": "emu64xa", "test_error": "exit status 1" }
+    ],
+    "wall_seconds": 422,
+    "started_at": "2026-05-05T00:08:52+03:00",
+    "finished_at": "2026-05-05T00:15:54+03:00"
+  },
+  "newly_open_gaps_after_this_session": [
+    {
+      "gap": "Pixel_9a (API 36) Challenge00 failure",
+      "discovered_by": "the architectural fix surfacing the real per-AVD test outcome",
+      "severity": "BLOCKER for clause 6.I clause 2 latest-stable coverage",
+      "reproduction": "single-AVD matrix on Pixel_9a alone (untainted by port collision)",
+      "diagnosis_owed": "matrix runner does not persist gradle stdout; re-run on Pixel_9a alone with --info to capture the actual JUnit failure. Likely candidates: InputManager.getInstance NoSuchMethodException (previously seen on Pixel_9a in this codebase), Compose semantics-tree differences at API 36, or a Hilt entry-point compatibility issue.",
+      "owed_at": "Before the next release tag — clause 6.I clause 7 (tag.sh helper) will refuse to operate on this commit."
+    },
+    {
+      "gap": "Teardown unreliability — `adb -s localhost:<port> emu kill` not actually killing the emulator process",
+      "discovered_by": "orphan emulator accumulation observed during diagnostic runs (5 qemu-system PIDs surviving after matrix completion)",
+      "severity": "Medium — does not compromise per-AVD test results post-discovery-fix, but accumulates state pressure",
+      "remediation": "Investigate `adb emu kill` on this host's SDK version. Consider falling back to `kill -TERM <qemu-system pid>` after a timeout. The clause-6.M zombie-cleanup hook in scripts/run-emulator-tests.sh handles cleanup at the START of the next run as a stopgap.",
+      "owed_at": "Next phase that touches the matrix runner."
+    },
+    {
+      "gap": "Per-AVD falsifiability rehearsal for API 28, 30, 36 (clause 6.I clause 5)",
+      "owed_at": "Next phase that touches the persistence path."
+    }
+  ],
+  "summary": "Operator's 'ultrathink' invocation surfaced a 7-day-old architectural bluff in the matrix runner. The fix is in (Containers commit 648a4bb), unit-test-pinned with falsifiability, and verified by the post-fix diagnostic run. The fix exposed a REAL Pixel_9a Challenge00 failure that was hidden by the bluff for ~2 hours. The prior 'clause 6.I closure' attestations (commits e3bcae3 + 8e66c53) are partially RETRACTED per Seventh Law clause 6; the parts that stand are noted explicitly. Phase 1.1 (sessionSignaledState persistence) remains valid for API 28, 30, 34 phone + tablet — but Pixel_9a (API 36 = latest stable) is now an OPEN gap that blocks the next release tag."
+}

@@ -1,0 +1,88 @@
+{
+  "incident_id": "2026-05-05-matrix-runner-port-collision-bluff",
+  "discovery_date": "2026-05-05",
+  "classification": "Seventh Law clause 6 (Bluff Discovery Protocol) — green CI on broken-for-end-user feature, AND clause 6.I clause 7 architectural bluff",
+  "discovered_by": "ultrathink-driven systematic-debugging investigation triggered by /superpowers:systematic-debugging slash command on 2026-05-05, after operator invoked the keyword 'ultrathink' against the agent's claim of 'clause 6.I closure'",
+  "summary": "The Submodules/Containers/pkg/emulator matrix runner contained an architectural bluff: Boot() hardcoded ADBPort=5555 unconditionally, ignoring the actual port the new emulator binds to. When a multi-AVD matrix ran, every iteration AFTER the first targeted localhost:5555 (the FIRST emulator's port). All subsequent AVDs' emulators ran in the background but were NOT under test; the matrix attestation falsely recorded test_passed=true for each row.",
+  "forensic_evidence_smoking_gun": {
+    "diagnostic_run_pre_fix": {
+      "evidence_file": ".lava-ci-evidence/2026-05-04-evening-c00-diag/real-device-verification.json",
+      "diagnostic_output_per_iteration": [
+        "[matrix-diag] target=localhost:5555 ro.product.model=\"Android SDK built for x86_64\"  -- iteration 1 (CZ_API28_Phone)",
+        "[matrix-diag] target=localhost:5555 ro.product.model=\"Android SDK built for x86_64\"  -- iteration 2 (CZ_API30_Phone)",
+        "[matrix-diag] target=localhost:5555 ro.product.model=\"Android SDK built for x86_64\"  -- iteration 3 (CZ_API34_Phone)",
+        "[matrix-diag] target=localhost:5555 ro.product.model=\"Android SDK built for x86_64\"  -- iteration 4 (CZ_API34_Tablet)",
+        "[matrix-diag] target=localhost:5555 ro.product.model=\"Android SDK built for x86_64\"  -- iteration 5 (Pixel_9a)"
+      ],
+      "interpretation": "EVERY iteration targeted the SAME port (5555) and the SAME emulator (model string identical across all 5). The orphan-emulator accumulation in adb-devices output (5554 → 5554+5556 offline → 5554+5556+5558 offline → ... → 5554+5556+5558+5560+5562) confirms the new emulators DID launch on different ports — but the runner never targeted them."
+    },
+    "diagnostic_run_post_fix": {
+      "evidence_file": ".lava-ci-evidence/2026-05-05-c00-architectural-fix/real-device-verification.json",
+      "diagnostic_output_per_iteration": [
+        "[matrix-diag] target=localhost:5555 sdk=\"28\" device=\"generic_x86_64\"        -- iteration 1 (CZ_API28_Phone)",
+        "[matrix-diag] target=localhost:5557 sdk=\"30\" device=\"generic_x86_64_arm64\"  -- iteration 2 (CZ_API30_Phone)",
+        "[matrix-diag] target=localhost:5559 sdk=\"34\" device=\"emu64xa\"               -- iteration 3 (CZ_API34_Phone)",
+        "[matrix-diag] target=localhost:5561 sdk=\"34\" device=\"emu64xa\"               -- iteration 4 (CZ_API34_Tablet)",
+        "[matrix-diag] target=localhost:5563 sdk=\"36\" device=\"emu64xa\"               -- iteration 5 (Pixel_9a)"
+      ],
+      "interpretation": "Each iteration NOW targets a distinct port. ro.build.version.sdk values match the AVDs' API levels (28, 30, 34, 34, 36). ro.product.device varies. The architectural fix correctly drives each AVD's own emulator."
+    }
+  },
+  "bluff_classification": [
+    {
+      "type": "Architecture-level bluff (NOT in the Forbidden Test Patterns list yet — adding now)",
+      "name": "Hardcoded-port multi-target",
+      "description": "A multi-AVD/multi-target test runner that hardcodes a single port/serial and relies on per-iteration cleanup to free that port for the next iteration. When cleanup is unreliable, the runner targets the LAST surviving emulator instead of the new one, silently testing the wrong target.",
+      "remediation_pattern": "Dynamic discovery — pre/post snapshot of `adb devices` (or equivalent) to detect the NEW serial after each launch."
+    }
+  ],
+  "retroactive_bluff_classification_of_prior_attestations": [
+    {
+      "attestation_file": ".lava-ci-evidence/sp3a-challenges/Challenge00-2026-05-04-evening-full-matrix-attestation.json",
+      "claim": "5-AVD matrix passed including CZ_API34_Tablet and Pixel_9a",
+      "reality": "Only CZ_API28_Phone was actually tested. The 4 other rows tested the SAME emulator 4 more times. The all_passed=true result was structurally a bluff.",
+      "constitutional_status": "RETRACTED — superseded by 2026-05-05-c00-architectural-fix diagnostic + post-fix verification"
+    },
+    {
+      "attestation_file": ".lava-ci-evidence/sp3a-challenges/Challenge00-2026-05-04-evening-cz_api34-attestation.json",
+      "claim": "Single-AVD matrix attestation on CZ_API34_Phone",
+      "reality": "Single-AVD runs do NOT trigger the port-collision bug — the first (and only) emulator binds 5555 and the runner correctly targets it. This attestation IS valid.",
+      "constitutional_status": "STANDS"
+    },
+    {
+      "attestation_file": ".lava-ci-evidence/sp3a-challenges/Phase-clause-6I-closure-2026-05-04-evening.json (commit 8e66c53)",
+      "claim": "Clause 6.I gaps 3 + 5 (API 34) + 6 + 7 closed; 5-AVD matrix including tablet form factor passed",
+      "reality": "Clauses 6 (BootDuration reporting fix) + 7 (tag.sh helper) closures are valid — they were standalone fixes. But clauses 3 (tablet) and 5 (falsifiability) were CONDITIONAL on the matrix actually testing each AVD distinctly, which it wasn't. Clause 5's API-34 falsifiability rehearsal is REAL because that mutation rehearsal was a single-AVD run on CZ_API34_Phone — single-AVD runs are unaffected by the bug.",
+      "constitutional_status": "PARTIAL RETRACTION — clauses 3 (tablet) un-closed; clauses 6 + 7 stand; clause 5 (API 34) stands."
+    }
+  ],
+  "regression_test_added": {
+    "test_file": "Submodules/Containers/pkg/emulator/android_test.go",
+    "test_name": "TestAndroidEmulator_Boot_DiscoversNewSerial_WhenPriorEmulatorPersists",
+    "scope": "Simulates the exact bug scenario — pre-snapshot has emulator-5554 (a leaked previous emulator), post-launch has 5554 + new 5556. Asserts Boot() returns ConsolePort=5556 (NOT 5554 from the pre-snapshot, NOT 5555 from the pre-fix hardcode).",
+    "falsifiability_rehearsed": "Mutation: revert Boot() to pre-fix hardcoded form (ConsolePort=5554, ADBPort=5555). Observed-Failure: TestAndroidEmulator_Boot_DiscoversNewSerial_WhenPriorEmulatorPersists fails with 'expected 5557 but got 5555'. Reverted; post-revert all tests pass."
+  },
+  "additional_bug_partially_addressed": {
+    "bug": "Teardown unreliable — orphan emulators accumulate",
+    "evidence": "Even with the discovery fix, all 5 emulators in the post-fix run REMAINED running after the matrix completed. `adb -s localhost:<port> emu kill` returned successfully but the emulator process did not actually exit. 5 orphans observed in adb devices + 5 qemu-system PIDs in /proc.",
+    "current_status": "OPEN — clause-6.I sibling issue. The discovery fix means each iteration tests its OWN emulator (so attestation accuracy is preserved), but orphans accumulate during the run. The orphan-cleanup hook in scripts/run-emulator-tests.sh (clause 6.M action item) handles them at the START of the next run.",
+    "owed_at": "Next phase that touches the matrix gate. Investigate `adb emu kill` semantics on this host's Android SDK build; consider falling back to `kill -TERM <qemu pid>` after a timeout."
+  },
+  "newly_surfaced_real_failure": {
+    "avd": "Pixel_9a",
+    "api_level": 36,
+    "test": "Challenge00CrashSurvivalTest",
+    "exposed_by": "this architectural fix (post-fix run on real Pixel_9a emulator vs the prior pseudo-runs that all hit the API-28 emulator)",
+    "boot_seconds": 28.18,
+    "test_seconds": 60.58,
+    "test_error": "exit status 1",
+    "diagnosis_owed": "OWED — the matrix runner does not persist gradle stdout, so the actual JUnit failure message was lost. Re-run on Pixel_9a alone to capture the Compose UI test failure detail. Likely candidates: (a) the same `InputManager.getInstance NoSuchMethodException` that previously blocked C1 deep navigation on Pixel_9a, (b) a Compose semantics-tree difference at API 36, (c) a Hilt entry-point compatibility issue at API 36.",
+    "constitutional_status": "Recorded as a known-issue. Phase-1.1 acceptance gate stands valid for API 28/30/34 + tablet form factor. Pixel_9a (API 36 = latest stable) is now an OPEN gap that MUST be closed before the next release tag (clause 6.I clause 2 latest-stable requirement)."
+  },
+  "constitutional_implications_recorded": [
+    "Add Hardcoded-port multi-target pattern to Forbidden Test Patterns (Seventh Law clause 4) — the canonical bluff for any multi-target test runner.",
+    "Update root §6.I clause 7 (tag.sh enforcement) to additionally require: matrix attestations MUST include diagnostic instrumentation that captures per-iteration ro.build.version.sdk, ro.product.device, and adb-devices state. Without this, future agents can't independently verify the runner targeted distinct emulators. The diagnostic added in this session is permanent.",
+    "Update Phase-1.1 acceptance: Pixel_9a (API 36 latest-stable) is OPEN, not CLOSED. Phase 1.1 is conditionally complete for API 28/30/34/tablet only.",
+    "The earlier `Phase-clause-6I-closure-2026-05-04-evening.json` (commit 8e66c53) attestation is partially RETRACTED — clauses 3 + 5 (Pixel_9a) re-opened; clauses 6 + 7 + 5 (API 34 single-AVD) stand."
+  ]
+}
