@@ -198,6 +198,14 @@ internal class ProviderLoginViewModel @Inject constructor(
         // If provider requires no auth or anonymous mode is enabled, skip auth
         if (provider?.authType == "NONE" || state.anonymousMode) {
             logger.d { "Skipping auth for $providerId (authType=${provider?.authType}, anonymous=${state.anonymousMode})" }
+            // Clause 6.G follow-up (2026-05-04): switch the SDK's active
+            // tracker to match the user's selection. Without this, the
+            // user lands on the main app's Search tab still pointing at
+            // the default tracker (rutracker), producing "Authorization
+            // required" for what looks to the user like a successful
+            // archive.org / gutenberg / anonymous-rutor flow.
+            runCatching { sdk.switchTracker(providerId) }
+                .onFailure { logger.e(it) { "switchTracker($providerId) failed in no-auth path" } }
             reduce { state.copy(isLoading = false) }
             postSideEffect(LoginSideEffect.Success)
             return@intent
@@ -224,6 +232,8 @@ internal class ProviderLoginViewModel @Inject constructor(
             null -> {
                 // Tracker does not support auth — treat as success for UI
                 logger.d { "Tracker $providerId does not support auth" }
+                runCatching { sdk.switchTracker(providerId) }
+                    .onFailure { logger.e(it) { "switchTracker($providerId) failed in null-auth path" } }
                 reduce { state.copy(isLoading = false) }
                 postSideEffect(LoginSideEffect.Success)
             }
@@ -237,6 +247,8 @@ internal class ProviderLoginViewModel @Inject constructor(
                             username = state.usernameInput.value.text,
                             password = state.passwordInput.value.text,
                         )
+                        runCatching { sdk.switchTracker(providerId) }
+                            .onFailure { logger.e(it) { "switchTracker($providerId) failed in auth-success path" } }
                         postSideEffect(LoginSideEffect.Success)
                     }
                     is AuthResult.CaptchaRequired -> {
