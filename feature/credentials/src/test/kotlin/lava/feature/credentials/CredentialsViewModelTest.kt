@@ -10,6 +10,7 @@ import lava.credentials.ProviderCredentialManager
 import lava.database.AppDatabase
 import lava.sdk.api.MirrorUrl
 import lava.sdk.api.Protocol
+import lava.testing.rule.MainDispatcherRule
 import lava.tracker.api.AuthType
 import lava.tracker.api.TrackerCapability
 import lava.tracker.api.TrackerDescriptor
@@ -17,7 +18,6 @@ import lava.tracker.client.LavaTrackerSdk
 import lava.tracker.registry.DefaultTrackerRegistry
 import lava.tracker.registry.TrackerClientFactory
 import lava.tracker.testing.FakeTrackerClient
-import lava.testing.rule.MainDispatcherRule
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull

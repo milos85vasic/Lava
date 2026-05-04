@@ -6,28 +6,22 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import lava.designsystem.component.AppBar
+import lava.designsystem.component.BackButton
+import lava.designsystem.component.CircularProgressIndicator
+import lava.designsystem.component.LocalSnackbarHostState
+import lava.designsystem.component.Scaffold
+import lava.designsystem.component.Text
 import lava.feature.tracker.settings.components.AddCustomMirrorDialog
-import lava.navigation.viewModel
 import lava.feature.tracker.settings.components.MirrorListSection
 import lava.feature.tracker.settings.components.TrackerSelectorList
+import lava.navigation.viewModel
 
 /**
  * Top-level Tracker Settings screen. Composes the four pieces:
@@ -39,14 +33,13 @@ import lava.feature.tracker.settings.components.TrackerSelectorList
  *
  * Added in SP-3a Phase 4 (Task 4.16).
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TrackerSettingsScreen(
     onBack: () -> Unit,
     viewModel: TrackerSettingsViewModel = viewModel(),
 ) {
     val state by viewModel.container.stateFlow.collectAsStateWithLifecycle()
-    val snackbarHostState = remember { SnackbarHostState() }
+    val snackbarHostState = LocalSnackbarHostState.current
 
     LaunchedEffect(viewModel) {
         viewModel.container.sideEffectFlow.collect { effect ->
@@ -59,16 +52,11 @@ fun TrackerSettingsScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
+            AppBar(
                 title = { Text("Trackers") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
-                    }
-                },
+                navigationIcon = { BackButton(onClick = onBack) },
             )
         },
-        snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { padding ->
         TrackerSettingsContent(
             state = state,

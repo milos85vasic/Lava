@@ -1,7 +1,6 @@
 package lava.credentials
 
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 import javax.inject.Singleton
 

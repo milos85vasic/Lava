@@ -27,11 +27,12 @@ import digital.vasic.lava.client.navigation.MobileNavigation
 import digital.vasic.lava.client.platform.OpenFileHandlerImpl
 import digital.vasic.lava.client.platform.OpenLinkHandlerImpl
 import digital.vasic.lava.client.platform.ShareLinkHandlerImpl
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import lava.designsystem.platform.LocalPlatformType
 import lava.designsystem.platform.PlatformType
 import lava.logger.api.LoggerFactory
+import lava.login.OnboardingScreen
 import lava.main.MainScreen
 import lava.main.MainViewModel
 import lava.models.settings.Theme
@@ -39,6 +40,7 @@ import lava.navigation.DeepLinks
 import lava.navigation.LocalDeepLinks
 import lava.navigation.rememberNavigationController
 import lava.rating.RatingDialog
+import lava.securestorage.PreferencesStorage
 import lava.ui.platform.LocalLoggerFactory
 import lava.ui.platform.LocalOpenFileHandler
 import lava.ui.platform.LocalOpenLinkHandler
@@ -53,6 +55,9 @@ open class MainActivity : ComponentActivity() {
 
     @Inject
     lateinit var loggerFactory: LoggerFactory
+
+    @Inject
+    lateinit var preferencesStorage: PreferencesStorage
 
     private val viewModel: MainViewModel by viewModels()
 
@@ -81,9 +86,13 @@ open class MainActivity : ComponentActivity() {
         }
 
         var theme: Theme? by mutableStateOf(null)
+        var showOnboarding by mutableStateOf(false)
         lifecycleScope.launch {
             lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.theme.collectLatest { theme = it }
+                val t = viewModel.theme.first()
+                theme = t
+                val onboardingComplete = preferencesStorage.isOnboardingComplete()
+                showOnboarding = !onboardingComplete
             }
         }
         splashScreen.setKeepOnScreenCondition { theme == null }
@@ -101,13 +110,29 @@ open class MainActivity : ComponentActivity() {
                     LocalLoggerFactory provides loggerFactory,
                     LocalDeepLinks provides deepLinks,
                 ) {
-                    val navigationController = rememberNavigationController()
-                    RatingDialog()
-                    MainScreen(
-                        theme = theme,
-                        platformType = deviceType,
-                        content = { MobileNavigation(navigationController) },
-                    )
+                    if (showOnboarding) {
+                        MainScreen(
+                            theme = theme,
+                            platformType = deviceType,
+                        ) {
+                            OnboardingScreen(
+                                onComplete = {
+                                    lifecycleScope.launch {
+                                        preferencesStorage.setOnboardingComplete(true)
+                                        showOnboarding = false
+                                    }
+                                },
+                            )
+                        }
+                    } else {
+                        val navigationController = rememberNavigationController()
+                        RatingDialog()
+                        MainScreen(
+                            theme = theme,
+                            platformType = deviceType,
+                            content = { MobileNavigation(navigationController) },
+                        )
+                    }
                 }
             }
         }

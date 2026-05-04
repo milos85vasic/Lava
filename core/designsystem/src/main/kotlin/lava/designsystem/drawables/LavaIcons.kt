@@ -98,6 +98,7 @@ object LavaIcons {
     val Comment: Icon = Icon.ImageVectorIcon(MaterialIcons.Edit)
     val Connected: Icon = Icon.ImageVectorIcon(MaterialIcons.Link)
     val Delete: Icon = Icon.ImageVectorIcon(Icons.Filled.Delete)
+    val Edit: Icon = Icon.ImageVectorIcon(MaterialIcons.Edit)
     val DropDownExpand: Icon = Icon.ImageVectorIcon(MaterialIcons.ArrowDropDown)
     val Expand: Icon = Icon.ImageVectorIcon(MaterialIcons.ExpandMore)
     val Favorite: Icon = Icon.ImageVectorIcon(MaterialIcons.Favorite)

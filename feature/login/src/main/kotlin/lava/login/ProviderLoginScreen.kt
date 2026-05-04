@@ -16,30 +16,27 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
+import lava.designsystem.component.AppBar
+import lava.designsystem.component.BackButton
+import lava.designsystem.component.Button
+import lava.designsystem.component.CircularProgressIndicator
+import lava.designsystem.component.Icon
+import lava.designsystem.component.Scaffold
+import lava.designsystem.component.Text
+import lava.designsystem.drawables.LavaIcons
+import lava.designsystem.theme.AppTheme
 import org.orbitmvi.orbit.compose.collectAsState
 import org.orbitmvi.orbit.compose.collectSideEffect
-import androidx.compose.material3.Button as MaterialButton
 
 /**
  * Multi-provider login screen.
@@ -49,7 +46,6 @@ import androidx.compose.material3.Button as MaterialButton
  * Shows a list of providers with credential status. Tapping a provider
  * reveals the login form for that provider.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun ProviderLoginScreen(
     viewModel: ProviderLoginViewModel,
@@ -65,7 +61,6 @@ internal fun ProviderLoginScreen(
     ProviderLoginScreen(state = state, onAction = viewModel::perform, back = back)
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun ProviderLoginScreen(
     state: ProviderLoginState,
@@ -74,21 +69,24 @@ internal fun ProviderLoginScreen(
 ) {
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text(if (state.selectedProviderId != null) "Login" else "Select Provider") },
+            AppBar(
+                title = {
+                    Text(
+                        if (state.selectedProviderId != null) {
+                            stringResource(R.string.provider_login_title)
+                        } else {
+                            stringResource(R.string.provider_login_select_provider)
+                        },
+                    )
+                },
                 navigationIcon = {
-                    IconButton(onClick = {
+                    BackButton(onClick = {
                         if (state.selectedProviderId != null) {
                             onAction(ProviderLoginAction.BackToProviders)
                         } else {
                             back()
                         }
-                    }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
-                        )
-                    }
+                    })
                 },
             )
         },
@@ -102,12 +100,14 @@ internal fun ProviderLoginScreen(
                 state.isLoading -> {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 }
+
                 state.selectedProviderId != null -> {
                     ProviderCredentialForm(
                         state = state,
                         onAction = onAction,
                     )
                 }
+
                 else -> {
                     ProviderList(
                         state = state,
@@ -127,7 +127,7 @@ private fun ProviderList(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
+            .padding(AppTheme.spaces.large),
     ) {
         // Anonymous access toggle
         Row(
@@ -137,13 +137,13 @@ private fun ProviderList(
         ) {
             Column {
                 Text(
-                    text = "Anonymous Access",
-                    style = MaterialTheme.typography.titleMedium,
+                    text = stringResource(R.string.provider_login_anonymous_access),
+                    style = AppTheme.typography.titleMedium,
                 )
                 Text(
-                    text = "Some providers support browsing without login",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.outline,
+                    text = stringResource(R.string.provider_login_anonymous_description),
+                    style = AppTheme.typography.bodySmall,
+                    color = AppTheme.colors.outline,
                 )
             }
             Switch(
@@ -152,10 +152,10 @@ private fun ProviderList(
             )
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(AppTheme.spaces.large))
 
         LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(AppTheme.spaces.medium),
         ) {
             items(state.providers) { provider ->
                 ProviderCard(
@@ -175,19 +175,23 @@ private fun ProviderCard(
     Card(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = AppTheme.elevations.small),
+        colors = CardDefaults.cardColors(
+            containerColor = AppTheme.colors.surface,
+            contentColor = AppTheme.colors.onSurface,
+        ),
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(AppTheme.spaces.large),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            horizontalArrangement = Arrangement.spacedBy(AppTheme.spaces.medium),
         ) {
             // Provider color circle with initials
             Box(
                 modifier = Modifier
-                    .size(40.dp)
+                    .size(AppTheme.sizes.large)
                     .clip(CircleShape)
                     .background(providerColor(provider.providerId)),
                 contentAlignment = Alignment.Center,
@@ -195,27 +199,27 @@ private fun ProviderCard(
                 Text(
                     text = provider.displayName.take(2).uppercase(),
                     color = Color.White,
-                    style = MaterialTheme.typography.labelLarge,
+                    style = AppTheme.typography.labelLarge,
                 )
             }
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = provider.displayName,
-                    style = MaterialTheme.typography.titleMedium,
+                    style = AppTheme.typography.titleMedium,
                 )
                 Text(
                     text = provider.providerType,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.primary,
+                    style = AppTheme.typography.bodySmall,
+                    color = AppTheme.colors.primary,
                 )
             }
 
             if (provider.isAuthenticated) {
                 Icon(
-                    imageVector = Icons.Filled.Check,
-                    contentDescription = "Authenticated",
-                    tint = MaterialTheme.colorScheme.primary,
+                    icon = LavaIcons.Selected,
+                    contentDescription = stringResource(R.string.provider_login_authenticated),
+                    tint = AppTheme.colors.primary,
                 )
             }
         }
@@ -232,29 +236,28 @@ private fun ProviderCredentialForm(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .padding(AppTheme.spaces.large)
             .verticalScroll(androidx.compose.foundation.rememberScrollState()),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+        verticalArrangement = Arrangement.spacedBy(AppTheme.spaces.medium),
     ) {
         if (provider != null) {
             Text(
-                text = "Sign in to ${provider.displayName}",
-                style = MaterialTheme.typography.headlineSmall,
+                text = stringResource(R.string.provider_login_sign_in_to, provider.displayName),
+                style = AppTheme.typography.headlineSmall,
             )
 
             if (provider.authType == "NONE" || state.anonymousMode) {
                 Text(
-                    text = "This provider does not require authentication.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.outline,
+                    text = stringResource(R.string.provider_login_no_auth_required),
+                    style = AppTheme.typography.bodyMedium,
+                    color = AppTheme.colors.outline,
                 )
-                Spacer(modifier = Modifier.height(16.dp))
-                MaterialButton(
+                Spacer(modifier = Modifier.height(AppTheme.spaces.large))
+                Button(
+                    text = stringResource(R.string.provider_login_continue),
                     onClick = { onAction(ProviderLoginAction.SubmitClick) },
                     modifier = Modifier.fillMaxWidth(),
-                ) {
-                    androidx.compose.material3.Text("Continue")
-                }
+                )
             } else {
                 // Show the existing credential form
                 UsernameInputField(
@@ -315,12 +318,12 @@ private fun ProviderCredentialForm(
 @Composable
 private fun providerColor(providerId: String): Color {
     return when (providerId) {
-        "rutracker" -> Color(0xFF1E88E5)
-        "rutor" -> Color(0xFFE53935)
-        "nnmclub" -> Color(0xFF43A047)
-        "kinozal" -> Color(0xFFFDD835)
-        "archiveorg" -> Color(0xFF8E24AA)
-        "gutenberg" -> Color(0xFFFDD835)
-        else -> MaterialTheme.colorScheme.primary
+        "rutracker" -> AppTheme.colors.accentBlue
+        "rutor" -> AppTheme.colors.accentRed
+        "nnmclub" -> AppTheme.colors.accentGreen
+        "kinozal" -> AppTheme.colors.accentOrange
+        "archiveorg" -> AppTheme.colors.primary
+        "gutenberg" -> AppTheme.colors.accentOrange
+        else -> AppTheme.colors.primary
     }
 }

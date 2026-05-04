@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tracker_settings_title">Трекеры</string>
+    <string name="tracker_settings_back">Назад</string>
+    <string name="tracker_settings_active">Активный трекер</string>
+    <string name="tracker_settings_mirrors_for">Зеркала для %s</string>
+    <string name="tracker_settings_no_mirrors">Нет известных зеркал. Нажмите "Добавить" чтобы зарегистрировать.</string>
+    <string name="tracker_settings_add_custom">Добавить зеркало</string>
+    <string name="tracker_settings_probe_now">Проверить</string>
+    <string name="tracker_settings_remove_mirror">Удалить зеркало</string>
+    <string name="tracker_settings_add_mirror_title">Добавить зеркало для %s</string>
+    <string name="tracker_settings_url_label">URL</string>
+    <string name="tracker_settings_url_placeholder">https://my-mirror.example/</string>
+    <string name="tracker_settings_priority">Приоритет: %d</string>
+    <string name="tracker_settings_protocol">Протокол</string>
+    <string name="tracker_settings_protocol_https">HTTPS</string>
+    <string name="tracker_settings_protocol_http">HTTP</string>
+    <string name="tracker_settings_protocol_http3">HTTP3</string>
+    <string name="tracker_settings_add">Добавить</string>
+    <string name="tracker_settings_cancel">Отмена</string>
+    <string name="tracker_settings_healthy">Работает</string>
+    <string name="tracker_settings_degraded">Деградирован</string>
+    <string name="tracker_settings_unhealthy">Не работает</string>
+    <string name="tracker_settings_unknown">Неизвестно</string>
+</resources>

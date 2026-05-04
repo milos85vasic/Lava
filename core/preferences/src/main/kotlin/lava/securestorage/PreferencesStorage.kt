@@ -43,4 +43,8 @@ interface PreferencesStorage {
     suspend fun getRatingPostponed(): Boolean
 
     suspend fun setRatingPostponed(value: Boolean)
+
+    suspend fun isOnboardingComplete(): Boolean
+
+    suspend fun setOnboardingComplete(value: Boolean)
 }

@@ -13,4 +13,15 @@
     <string name="login_screen_username_hint">Имя пользователя</string>
     <string name="login_screen_username_empty_label">Не может быть пустым</string>
     <string name="login_screen_wrong_credits_label">Неверный логин или пароль</string>
+
+    <!-- Provider Login -->
+    <string name="provider_login_select_provider">Выберите провайдер</string>
+    <string name="provider_login_title">Вход</string>
+    <string name="provider_login_anonymous_access">Анонимный доступ</string>
+    <string name="provider_login_anonymous_description">Некоторые провайдеры поддерживают просмотр без входа</string>
+    <string name="provider_login_sign_in_to">Вход в %s</string>
+    <string name="provider_login_no_auth_required">Этот провайдер не требует аутентификации.</string>
+    <string name="provider_login_continue">Продолжить</string>
+    <string name="provider_login_back">Назад</string>
+    <string name="provider_login_authenticated">Авторизован</string>
 </resources>

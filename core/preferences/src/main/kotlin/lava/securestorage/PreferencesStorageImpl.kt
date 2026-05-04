@@ -142,6 +142,18 @@ internal class PreferencesStorageImpl @Inject constructor(
         }
     }
 
+    override suspend fun isOnboardingComplete(): Boolean {
+        return withContext(dispatchers.io) {
+            settingsPreferences.getBoolean(onboardingCompleteKey, false)
+        }
+    }
+
+    override suspend fun setOnboardingComplete(value: Boolean) {
+        withContext(dispatchers.io) {
+            settingsPreferences.edit { putBoolean(onboardingCompleteKey, value) }
+        }
+    }
+
     private companion object {
         const val accountIdKey = "account_id"
         const val accountUsernameKey = "account_username"
@@ -157,5 +169,7 @@ internal class PreferencesStorageImpl @Inject constructor(
         const val ratingLaunchCountKey = "rating_launch_count"
         const val ratingDisabledKey = "rating_disabled"
         const val ratingPostponedKey = "rating_postponed"
+
+        const val onboardingCompleteKey = "onboarding_complete"
     }
 }

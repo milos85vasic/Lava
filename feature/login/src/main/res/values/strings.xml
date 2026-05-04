@@ -12,4 +12,15 @@
     <string name="login_screen_username_hint">Username</string>
     <string name="login_screen_username_empty_label">User name required</string>
     <string name="login_screen_wrong_credits_label">Wrong name or password</string>
+
+    <!-- Provider Login -->
+    <string name="provider_login_select_provider">Select Provider</string>
+    <string name="provider_login_title">Login</string>
+    <string name="provider_login_anonymous_access">Anonymous Access</string>
+    <string name="provider_login_anonymous_description">Some providers support browsing without login</string>
+    <string name="provider_login_sign_in_to">Sign in to %s</string>
+    <string name="provider_login_no_auth_required">This provider does not require authentication.</string>
+    <string name="provider_login_continue">Continue</string>
+    <string name="provider_login_back">Back</string>
+    <string name="provider_login_authenticated">Authenticated</string>
 </resources>

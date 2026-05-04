@@ -6,19 +6,17 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import lava.sdk.api.HealthState
+import androidx.compose.ui.res.stringResource
+import lava.designsystem.component.Divider
+import lava.designsystem.component.IconButton
+import lava.designsystem.component.Text
+import lava.designsystem.component.TextButton
+import lava.designsystem.drawables.LavaIcons
+import lava.designsystem.theme.AppTheme
+import lava.feature.tracker.settings.R
 import lava.sdk.api.MirrorState
 import lava.sdk.api.MirrorUrl
 
@@ -41,18 +39,22 @@ fun MirrorListSection(
     onProbeNow: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Column(modifier = modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = AppTheme.spaces.large, vertical = AppTheme.spaces.medium),
+    ) {
         Text(
-            text = "Mirrors for $trackerId",
-            style = MaterialTheme.typography.titleSmall,
-            color = MaterialTheme.colorScheme.primary,
+            text = stringResource(R.string.tracker_settings_mirrors_for, trackerId),
+            style = AppTheme.typography.titleSmall,
+            color = AppTheme.colors.primary,
         )
-        Spacer(modifier = Modifier.padding(vertical = 4.dp))
+        Spacer(modifier = Modifier.padding(vertical = AppTheme.spaces.small))
         if (states.isEmpty()) {
             Text(
-                text = "No mirrors known. Tap \"Add custom\" to register one.",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                text = stringResource(R.string.tracker_settings_no_mirrors),
+                style = AppTheme.typography.bodySmall,
+                color = AppTheme.colors.outline,
             )
         } else {
             states.sortedBy { it.mirror.priority }.forEach { state ->
@@ -61,14 +63,20 @@ fun MirrorListSection(
                     isUser = state.mirror.url in customMirrorUrls,
                     onRemove = { onRemoveMirror(state.mirror.url) },
                 )
-                HorizontalDivider()
+                Divider()
             }
         }
-        Spacer(modifier = Modifier.padding(vertical = 4.dp))
+        Spacer(modifier = Modifier.padding(vertical = AppTheme.spaces.small))
         Row {
-            TextButton(onClick = onAddCustomMirror) { Text("Add custom mirror") }
-            Spacer(modifier = Modifier.width(8.dp))
-            TextButton(onClick = onProbeNow) { Text("Probe now") }
+            TextButton(
+                text = stringResource(R.string.tracker_settings_add_custom),
+                onClick = onAddCustomMirror,
+            )
+            Spacer(modifier = Modifier.width(AppTheme.spaces.medium))
+            TextButton(
+                text = stringResource(R.string.tracker_settings_probe_now),
+                onClick = onProbeNow,
+            )
         }
     }
 }
@@ -82,54 +90,28 @@ private fun MirrorRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp),
+            .padding(vertical = AppTheme.spaces.medium),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         HealthIndicator(health = state.health)
-        Spacer(modifier = Modifier.width(12.dp))
+        Spacer(modifier = Modifier.width(AppTheme.spaces.mediumLarge))
         Column(modifier = Modifier.weight(1f)) {
-            Text(text = state.mirror.url, style = MaterialTheme.typography.bodyMedium)
+            Text(text = state.mirror.url, style = AppTheme.typography.bodyMedium)
             Text(
                 text = badgeText(state.mirror),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = AppTheme.typography.bodySmall,
+                color = AppTheme.colors.outline,
             )
         }
         if (isUser) {
-            IconButton(onClick = onRemove) {
-                Icon(
-                    imageVector = Icons.Default.Delete,
-                    contentDescription = "Remove custom mirror",
-                )
-            }
+            IconButton(
+                icon = LavaIcons.Delete,
+                contentDescription = stringResource(R.string.tracker_settings_remove_mirror),
+                onClick = onRemove,
+            )
         }
     }
 }
 
 private fun badgeText(mirror: MirrorUrl): String =
-    "priority ${mirror.priority} • ${mirror.protocol.name}"
-
-/**
- * Convenience overload for callers that don't have a state map and just
- * want to render an empty section with the buttons enabled. Kept for
- * symmetry with [TrackerSelectorList]'s simpler shape.
- */
-@Composable
-@Suppress("unused") // public API surface
-fun MirrorListSectionEmpty(
-    trackerId: String,
-    onAddCustomMirror: () -> Unit,
-    onProbeNow: () -> Unit,
-) {
-    MirrorListSection(
-        trackerId = trackerId,
-        states = emptyList(),
-        customMirrorUrls = emptySet(),
-        onAddCustomMirror = onAddCustomMirror,
-        onRemoveMirror = {},
-        onProbeNow = onProbeNow,
-    )
-}
-
-@Suppress("unused")
-private fun describeHealth(h: HealthState): String = h.name
+    "priority ${mirror.priority} \u2022 ${mirror.protocol.name}"
