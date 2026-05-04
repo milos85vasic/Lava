@@ -25,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import lava.designsystem.component.AppBar
 import lava.designsystem.component.BackButton
@@ -149,6 +150,7 @@ private fun ProviderList(
             Switch(
                 checked = state.anonymousMode,
                 onCheckedChange = { onAction(ProviderLoginAction.SetAnonymousMode(it)) },
+                modifier = Modifier.testTag(AnonymousAccessSwitchTestTag),
             )
         }
 
@@ -246,7 +248,20 @@ private fun ProviderCredentialForm(
                 style = AppTheme.typography.headlineSmall,
             )
 
-            if (provider.authType == "NONE" || state.anonymousMode) {
+            // Phase 1.5 UI alignment (2026-05-04): the screen renders the
+            // Continue button only when this provider WILL accept the
+            // anonymous bypass. Without the supportsAnonymous gate, a user
+            // could pick a no-anonymous provider (RuTracker CAPTCHA_LOGIN,
+            // Kinozal/NNM-Club FORM_LOGIN), see "Continue" because the
+            // global anonymousMode toggle is on, tap it, and the
+            // ViewModel's onSubmitClick would silently fall through to
+            // sdk.login() with empty credentials → InputState.Invalid +
+            // confusing UI state. The ViewModel gate (Phase 1.5) blocks
+            // the bypass; this UI gate prevents the misleading button
+            // from rendering in the first place.
+            if (provider.authType == "NONE" ||
+                (state.anonymousMode && provider.supportsAnonymous)
+            ) {
                 Text(
                     text = stringResource(R.string.provider_login_no_auth_required),
                     style = AppTheme.typography.bodyMedium,
@@ -327,3 +342,11 @@ private fun providerColor(providerId: String): Color {
         else -> AppTheme.colors.primary
     }
 }
+
+/**
+ * Test tag for the Anonymous Access switch on the provider list. Used by
+ * `app/src/androidTest/.../Challenge03AnonymousSearchOnRuTorTest` and any
+ * future Compose UI tests that need to interact with the toggle without
+ * relying on coordinate-based input.
+ */
+const val AnonymousAccessSwitchTestTag = "anonymous_access_switch"

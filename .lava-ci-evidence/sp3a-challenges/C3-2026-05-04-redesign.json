@@ -1,0 +1,29 @@
+{
+  "challenge_id": "C3",
+  "test_class": "lava.app.challenges.Challenge03AnonymousSearchOnRuTorTest",
+  "phase": "Phase 2.3 (2026-05-04 redesign)",
+  "before_state": "BLUFF — pre-existing test asserted 'Menu' → 'Settings' → 'Trackers' → 'RuTor (active)'. None of those exist in the current UI. Empirical run on CZ_API34_Phone confirmed C1-class failure.",
+  "after_state": "PASSING on CZ_API34_Phone (API 34). Test drives the REAL onboarding flow: Select Provider screen → Anonymous Access toggle → tap RuTor.info → Continue button (rendered because Phase 1.5 UI gate sees supportsAnonymous=true && anonymousMode=true) → tap Continue → main app's Search tab with 'Search history' empty state.",
+  "rehearsal": {
+    "command": "ANDROID_SERIAL=emulator-5554 ./gradlew :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=lava.app.challenges.Challenge03AnonymousSearchOnRuTorTest --no-daemon",
+    "baseline_outcome": "BUILD SUCCESSFUL — Finished 1 tests on CZ_API34_Phone(AVD) - 14",
+    "mutation": "in core/tracker/rutor/src/main/kotlin/lava/tracker/rutor/RuTorDescriptor.kt: revert `override val supportsAnonymous: Boolean = true` to `false`",
+    "mutation_outcome": "BUILD FAILED — androidx.compose.ui.test.ComposeTimeoutException: Condition still not satisfied after 5000 ms (the Continue button never renders because Phase 1.5 UI gate suppresses it when supportsAnonymous=false; the test cannot find 'Continue' within the timeout)",
+    "reverted": true,
+    "reverted_outcome": "BUILD SUCCESSFUL on re-run after the mutation was reverted"
+  },
+  "production_changes_co_shipped": [
+    "feature/login/src/main/kotlin/lava/login/ProviderLoginScreen.kt: added `Modifier.testTag(AnonymousAccessSwitchTestTag)` to the Anonymous Access Switch + `const val AnonymousAccessSwitchTestTag = \"anonymous_access_switch\"` so the test can target it without coordinate-based input.",
+    "feature/login/src/main/kotlin/lava/login/ProviderLoginScreen.kt: Phase 1.5 UI gate — `if (provider.authType == \"NONE\" || (state.anonymousMode && provider.supportsAnonymous))` instead of just `state.anonymousMode`. Without this gate the Continue button would have rendered for non-anonymous-capable providers too (RuTracker CAPTCHA_LOGIN, Kinozal/NNM-Club FORM_LOGIN), and the bypass would have failed silently in the ViewModel."
+  ],
+  "scope_limits": {
+    "what_test_does_NOT_assert": "Test stops at the main app's Search-history empty state. It does NOT search rutor.info or assert on result rows. Reasons: (a) real-network search is slow + flaky for tests, (b) the search-result assertion is C4's job (which has its own redesign owed). The Continue path was the IA-bug forensic anchor; closing it was the priority.",
+    "anti_bluff_note": "C3 is NOT a bluff. It exercises the real onboarding flow + the Phase-1.5 UI gate + the Phase-1 layer-3 AuthService bridge. The deliberate-mutation (supportsAnonymous=false) reveals all three points in a coherent failure mode."
+  },
+  "evidence_paths": {
+    "test_kt": "app/src/androidTest/kotlin/lava/app/challenges/Challenge03AnonymousSearchOnRuTorTest.kt",
+    "production_screen_kt": "feature/login/src/main/kotlin/lava/login/ProviderLoginScreen.kt",
+    "mutated_descriptor_kt": "core/tracker/rutor/src/main/kotlin/lava/tracker/rutor/RuTorDescriptor.kt"
+  },
+  "matrix_run_owed": "Single-AVD rehearsal on CZ_API34_Phone (API 34). Per clause 6.I, the gating matrix run requires API 28, 30, 34, latest-stable, and at least one tablet form factor."
+}
