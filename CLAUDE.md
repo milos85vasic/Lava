@@ -374,6 +374,60 @@ This clause exists not to add new mechanics — clauses 6.A through 6.I + the Si
 
 The clauses above are the contract. The implementation is owed: `Submodules/Containers/pkg/emulator/` does not yet exist. Until it does, the Lava-side `docker-compose.test.yml` + `docker/emulator/Dockerfile` + `scripts/run-emulator-tests.sh` are the transitional path — they remain in this repo as Lava-domain glue rather than being extracted. The next phase that touches release tagging or the emulator-matrix gate MUST close this debt before its tag, and the close MUST: (1) add `pkg/emulator/` to Containers, (2) add at least the QEMU baseline to a sibling `pkg/vm/`, (3) extract Lava's emulator-orchestration glue, (4) update the constitution checker per clause 6.K clause 5. No release tag is cut while this debt is open, except for hotfixes whose changeset does not touch the emulator-matrix gate's output.
 
+##### 6.M — Host-Stability Forensic Discipline (added 2026-05-04 evening, recurrence forensics)
+
+**Forensic anchor:** the operator reported a second possible host-stability incident on 2026-05-04 evening: "computer has stuck or it was suspended / sent to standby / hybernated or signed out (somehow by someone or by something — it is unclear)". A 5-step audit (uptime, who, journalctl logind events, free memory, OOM kernel events) confirmed that **no actual host event occurred** — the host had been continuously up 9h43m, the same user was logged in throughout, no logind transitions appeared in the journal, no OOM kills, no critical kernel events, no forbidden commands invoked anywhere in the session's command stream. The operator's perception was real, but no constitutional violation occurred and no project code path was implicated. Full audit recorded at `.lava-ci-evidence/sixth-law-incidents/2026-05-04-perceived-host-instability.json`.
+
+The audit revealed that **the Forbidden Command List + the existing Host Machine Stability Directive were sufficient** — no command in the session's history matched any forbidden pattern. The clause that this incident motivates is not a new prohibition; it is a forensic discipline so the next perceived-instability event can be classified in 60 seconds rather than rederived from scratch.
+
+**Rule.** Every perceived-instability event — whether a real host suspend, a real sign-out, OR an operator-perceived freeze without forensic evidence — MUST be classified into one of three categories AND recorded with the same audit set:
+
+1. **Class I** — verifiable host event (poweroff, suspend, hibernate, sign-out). `uptime` reset; logged-in users changed; journalctl shows logind transition. Example: `docs/INCIDENT_2026-04-28-HOST-POWEROFF.md`. Triggers the post-poweroff recovery procedure (orphan-container audit, pre-push verification, etc.).
+
+2. **Class II** — measurable resource pressure causing partial freeze (kernel OOM kill of a session process, swap exhaustion, thermal throttling, fs full). `uptime` continuous but `journalctl` shows the kernel intervening. No observed example yet in this project.
+
+3. **Class III** — operator-perceived instability with NO forensic evidence. `uptime` continuous, same user, no journal events, no OOM, no resource pressure. Example: `.lava-ci-evidence/sixth-law-incidents/2026-05-04-perceived-host-instability.json`. The user's perception is real (often a long-running gradle build that paused GUI responsiveness, an emulator GPU lockup, or a remote SSH session disconnect), but no project code path is implicated and no host event is recorded.
+
+**Audit protocol (60-second forensic).** Every perceived-instability response MUST run this set BEFORE concluding anything:
+
+```bash
+# 1. Uptime + logged-in users (Class I detector)
+uptime; who
+
+# 2. Logind events since session start (Class I detector)
+journalctl --user --since '<start-time>' | grep -iE 'suspend|hibernate|poweroff|halt|kill-user|kill-session|terminate-user|terminate-session|sign-out'
+
+# 3. Kernel critical events (Class II detector)
+journalctl --since '10 min ago' | grep -iE 'oom|killed process|emergency|critical'
+
+# 4. Memory + swap (Class II detector)
+free -h
+
+# 5. Disk pressure (Class II detector)
+df -h /run/media/<volume>
+
+# 6. Forbidden-command-in-tracked-files cross-check
+grep -rE 'systemctl[[:space:]]+(suspend|hibernate|...)|loginctl[[:space:]]+(...)|pm-suspend|...' \
+  --include='*.sh' --include='*.kt' --include='*.go' --include='*.kts' . | \
+  grep -v '\.git\|build/\|/INCIDENT_\|forbidden'
+
+# 7. Container state (operator-directive: "destroy + rebuild" mandate)
+podman ps -a | head
+docker ps -a 2>/dev/null  # may be "command not found" on hosts using only podman
+```
+
+**Outputs from each step go into the incident record.** A perceived-instability event without an audit record is itself a Seventh Law violation — clause 6.J's "tests must guarantee the product works" applies to the project's response to incidents too.
+
+**Container-runtime safety analysis (recorded once, referenced forever).**
+
+- **Podman (rootless)** — the runtime in use on the operator's primary host. Rootless Podman has NO host-level power-management privileges by design. It cannot invoke systemctl suspend, cannot trigger logind transitions, cannot sign out the user. The per-user `podman.service` is itself a session service; stopping it stops containers but does NOT affect the user's login session. Read-only operations (`podman ps`, `podman images`) are safe to invoke from any audit. Mutating operations (`podman rm`, `podman stop`) only affect containers, not the host. **Conclusion: Podman cannot cause Class I host events.** Recorded once here so future sessions don't re-derive.
+- **Docker (rootful daemon)** — NOT installed on this host (`command not found`). When present elsewhere, the docker daemon runs as root, so in principle a maliciously-scripted container restart cycle could pressure the host. Lava does not install or invoke Docker; if a future host requires it, the rootless Podman compatibility layer (`docker` symlink to `podman` via podman-docker package) is preferred. **Conclusion for Lava-on-this-host: Docker is not a factor.**
+- **Container builds (`./build_and_release.sh`)** — invokes `podman build` + `podman save` for image export. Both are session-scoped operations. Image-tar exports can be I/O heavy on `/run/media/...` filesystems (the audit's disk-pressure step catches this); archive-rotation hygiene is in `releases/` directory cleanup, not in container management.
+
+**Emulator zombie-cleanup hook (action item from this incident).** `scripts/run-emulator-tests.sh` MUST be extended with a pre-boot hook that kills any `qemu-system` processes left over from interrupted matrix runs before launching new ones. Zombies don't cause host events but they (a) hold ADB ports, (b) consume RAM, (c) confuse the operator's audit. Owed in the next phase that touches the script.
+
+**Inheritance.** Clause 6.M applies recursively to every submodule, every feature, and every new artifact. Submodule constitutions MAY add stricter forensic requirements (e.g., `Submodules/Containers` SHOULD record per-container-runtime audit findings as it's the source of truth for runtime detection) but MUST NOT relax this clause.
+
 ##### 6.L — Anti-Bluff Functional Reality Mandate (Operator's Standing Order, repeated 2026-05-04)
 
 The user has now invoked this mandate **SIX TIMES** in a single working day (initial fix request, after 6.G/6.H landed, after 6.I/6.J landed, after 6.K landed, then again with `ultrathink` after the layer-3 fix, then again after spotting that "Anonymous Access" was modeled as a global toggle when it is actually a per-provider capability). The count is what makes this clause load-bearing: every restatement is an admission by the operator that the prior layers of constitutional plumbing (6.A through 6.K, the Sixth and Seventh Laws) are not yet enough to evict the bluff class on their own. The repetition itself is the forensic record. This clause is the same as 6.J — every test, every Challenge Test, every CI gate has exactly one job: confirm the feature works for a real user end-to-end on the gating matrix. CI green is necessary, never sufficient. **The reason this clause is restated rather than cross-referenced** is that the operator's standing concern is that future agents and contributors will rationalize their way past 6.J and ship green-tests-with-broken-features again. Every time the operator restates it, this codebase records the restatement here so the next reading agent must look at the same wall of repetition the operator has had to type out.

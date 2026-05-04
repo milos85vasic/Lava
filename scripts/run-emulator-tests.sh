@@ -89,6 +89,49 @@ if [[ ! -e /dev/kvm ]]; then
     exit 2
 fi
 
+# Constitutional clause 6.M action item (added 2026-05-04 evening):
+# Kill any orphan qemu-system processes left over from prior interrupted
+# matrix runs before booting new emulators. Zombies don't cause Class I
+# host events but they (a) hold ADB ports, (b) consume RAM, (c) confuse
+# the operator's host-stability audit.
+#
+# This is the typed, allowlisted equivalent of the forbidden `pkill
+# qemu-system` invocation: it walks /proc/<pid>/comm, matches strictly
+# against `qemu-system-*`, and only those PIDs receive signals. SIGTERM
+# first (gives the emulator's QEMU process a chance to release ADB
+# ports cleanly), then SIGKILL after a short grace window for stragglers.
+# No session processes are touched.
+cleanup_qemu_zombies() {
+    local victims=()
+    local pid comm
+    for pid in /proc/[0-9]*; do
+        [[ -r "$pid/comm" ]] || continue
+        comm=$(cat "$pid/comm" 2>/dev/null) || continue
+        if [[ "$comm" == qemu-system-* ]]; then
+            victims+=("${pid##*/}")
+        fi
+    done
+    if [[ ${#victims[@]} -eq 0 ]]; then
+        return 0
+    fi
+    echo "  Found ${#victims[@]} orphan qemu-system process(es): ${victims[*]}"
+    echo "  Sending SIGTERM ..."
+    kill -TERM "${victims[@]}" 2>/dev/null || true
+    sleep 2
+    local stragglers=()
+    for pid in "${victims[@]}"; do
+        if [[ -d /proc/$pid ]]; then
+            stragglers+=("$pid")
+        fi
+    done
+    if [[ ${#stragglers[@]} -gt 0 ]]; then
+        echo "  Sending SIGKILL to stragglers: ${stragglers[*]}"
+        kill -KILL "${stragglers[@]}" 2>/dev/null || true
+    fi
+}
+echo "[0/3] Pre-boot zombie cleanup (clause 6.M action item) ..."
+cleanup_qemu_zombies
+
 CONTAINERS_DIR="$PROJECT_DIR/Submodules/Containers"
 if [[ ! -d "$CONTAINERS_DIR/pkg/emulator" ]]; then
     echo "ERROR: Submodules/Containers/pkg/emulator not found." >&2

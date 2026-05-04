@@ -29,6 +29,20 @@ Local CI: `scripts/ci.sh`. Single source of truth.
 ## Host Machine Stability Directive
 Per `/CLAUDE.md` and propagated through `Submodules/*/CLAUDE.md`: never run commands that suspend, hibernate, sign-out, or kill the user session. Cap test parallelism (`GOMAXPROCS=2`, `nice -n 19` are recommended).
 
+### Clause 6.M — Host-Stability Forensic Discipline (added 2026-05-04 evening)
+
+Inherits root `/CLAUDE.md` §6.M. Every perceived-instability event during a session that touches this service MUST be classified into one of three categories AND audited via the 7-step forensic protocol BEFORE concluding anything:
+
+1. **Class I** — verifiable host event (poweroff, suspend, hibernate, sign-out). `uptime` reset, logged-in users changed, journalctl shows logind transition. Triggers post-poweroff recovery (orphan-container audit, pre-push verification).
+2. **Class II** — measurable resource pressure (kernel OOM kill, swap exhaustion, thermal throttling, fs full). `uptime` continuous but `journalctl` shows kernel intervention.
+3. **Class III** — operator-perceived instability with NO forensic evidence. `uptime` continuous, no journal events. Often a long-running build that paused GUI responsiveness, an emulator GPU lockup, or a remote SSH disconnect.
+
+**7-step audit (60-second forensic):** uptime+who → journalctl logind events → kernel critical events → free -h → df -h → forbidden-command grep across tracked files → container state. Findings recorded under `.lava-ci-evidence/sixth-law-incidents/<date>-<slug>.json` (or, when this service runs standalone, `lava-api-go/.evidence/host-stability/<date>.json`).
+
+**Container-runtime safety analysis (recorded once in root §6.M, referenced forever):** rootless Podman has NO host-level power-management privileges; rootful Docker is not installed on the operator's primary host. The `lava-api-go` container, the integration-test Postgres container, and `make image`'s OCI-tar export are all session-scoped operations that cannot cause Class I host events. This is recorded so a future agent does not re-derive it.
+
+A perceived-instability event without an audit record is itself a Seventh Law violation. Forensic anchors: 2026-04-28 Class I poweroff (`docs/INCIDENT_2026-04-28-HOST-POWEROFF.md` in parent Lava project) and 2026-05-04 Class III perceived-instability (`.lava-ci-evidence/sixth-law-incidents/2026-05-04-perceived-host-instability.json` in parent Lava project).
+
 ## SP-3a-bridge expectations (added 2026-04-30)
 
 The Kotlin-side multi-tracker SDK shipped with SP-3a binds the Go-side
