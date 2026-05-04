@@ -1,0 +1,101 @@
+{
+  "incident_id": "2026-05-05-pixel9a-espresso-api36-incompatibility",
+  "discovery_date": "2026-05-05",
+  "classification": "Class V — newly-discovered real test failure, surfaced by the 2026-05-05 architectural fix to the matrix runner (port-collision bluff). Phase 1 root-cause investigation per /superpowers:systematic-debugging.",
+  "discovery_context": "After the matrix runner's port-collision bug was fixed (Submodules/Containers commit 648a4bb + parent commit 00499e9), Pixel_9a (API 36) was tested for the first time and Challenge00CrashSurvivalTest FAILED. This diagnosis isolates the root cause.",
+  "phase_1_root_cause": {
+    "exact_failure_signature": "java.lang.RuntimeException: java.util.concurrent.ExecutionException: java.lang.RuntimeException: java.lang.NoSuchMethodException: android.hardware.input.InputManager.getInstance []  at androidx.test.espresso.Espresso.onIdle(Espresso.java:18)",
+    "captured_via": "Direct gradle invocation against a single Pixel_9a emulator (bypassing the matrix runner because matrix.go does not persist gradle stdout). Command: `ANDROID_SERIAL=emulator-5554 ./gradlew :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=lava.app.challenges.Challenge00CrashSurvivalTest --no-daemon`",
+    "evidence_file_html": "app/build/reports/androidTests/connected/debug/index.html (gitignored, ephemeral)",
+    "interpretation": "androidx.test.espresso 3.5.0 (transitively pulled from androidx.compose.ui:ui-test through the Compose BOM 2025.06.01) reflects on the hidden Android API android.hardware.input.InputManager.getInstance() to drive UI input events. Android 16 (API 36, Baklava) removed this method (it was always @hide / non-public-API). Espresso's reflection-based call now throws NoSuchMethodException at the entry of every Espresso.onIdle() call. Compose's composeRule.waitUntil { ... } calls Espresso.onIdle internally, so even pure-Compose tests like Challenge00 fail at the first waitUntil even though they never directly use Espresso APIs."
+  },
+  "phase_2_pattern_analysis": {
+    "current_versions_in_use": {
+      "espresso_core_transitive": "3.5.0/3.5.1",
+      "androidx_compose_bom": "2025.06.01 (per CLAUDE.md gradle/libs.versions.toml)",
+      "androidx_test_core": "1.6.1",
+      "androidx_test_ext_junit_ktx": "1.2.1",
+      "androidx_test_runner": "1.6.2",
+      "androidx_test_rules": "1.6.1"
+    },
+    "project_compileSdk": 35,
+    "project_targetSdk": 35,
+    "test_avd_api_level": 36,
+    "constitutional_misalignment": "Per root /CLAUDE.md §6.I clause 2: 'the latest stable API the project's compileSdk targets'. The project's compileSdk is 35 (Android 15, Vanilla Ice Cream). Pixel_9a runs API 36 (Android 16, Baklava) — that is BEYOND the project's compileSdk target, so it is FORWARD-COMPATIBILITY testing, not the constitutional 'latest stable' minimum. The literal clause-6.I-clause-2 minimum is API 35, not 36."
+  },
+  "phase_3_three_distinct_issues_uncovered": [
+    {
+      "issue_id": "L1-espresso-api36",
+      "summary": "Espresso 3.5 incompatible with API 36 (Android 16) due to removed InputManager.getInstance() hidden-API reflection.",
+      "blast_radius": "EVERY UI test (Compose + Espresso + AndroidX-test-based) on API 36 will fail at the first onIdle/waitUntil call. NOT specific to Pixel_9a or to Challenge00.",
+      "fix_options": [
+        {
+          "option": "A",
+          "description": "Upgrade androidx.test.espresso:espresso-core to a version that handles API 36. Latest as of late-2025 is 3.6.x — would need to verify it has the API-36 patch. Add as explicit androidTestImplementation in app/build.gradle.kts to override the BOM-resolved version.",
+          "risk": "Low-medium — Espresso minor-version upgrades are usually backward-compatible; full Compose UI test path may need re-verification."
+        },
+        {
+          "option": "B",
+          "description": "Migrate UI tests off Espresso to UiAutomator or pure Compose semantics-tree assertions where feasible.",
+          "risk": "High — substantial refactor to all Challenge Tests."
+        },
+        {
+          "option": "C",
+          "description": "Skip Espresso-using tests on API 36+ via @SdkSuppress(maxSdkVersion = 35) — pragmatic stopgap, but the suppress MUST cite an issue tracking the upgrade.",
+          "risk": "Low for the test gap; constitutional smell — clause 6.J's 'no @Ignore without an issue' applies to @SdkSuppress without a tracking issue too."
+        }
+      ]
+    },
+    {
+      "issue_id": "L2-constitutional-misalignment",
+      "summary": "The matrix's 'latest stable' AVD (Pixel_9a / API 36) overshoots the project's compileSdk (35). Per the literal constitutional definition, 'latest stable' = compileSdk-targeted API, NOT the latest device the host has installed.",
+      "blast_radius": "The matrix has been requiring API ≥36 coverage when the constitutional minimum is API 35.",
+      "fix_options": [
+        {
+          "option": "A",
+          "description": "Install API 35 system image (`sdkmanager 'system-images;android-35;google_apis;x86_64'`), create CZ_API35_Phone AVD, replace Pixel_9a in the default matrix list with it. This matches the literal clause-6.I-clause-2 minimum.",
+          "risk": "Low — adds a host dependency and AVD; no production code changes."
+        },
+        {
+          "option": "B",
+          "description": "Bump project compileSdk to 36. Then 'latest stable' = 36 = Pixel_9a is correct. But this requires fixing the L1 Espresso issue first (otherwise the upgrade itself breaks the gate).",
+          "risk": "Medium — compileSdk bumps usually surface multiple smaller compatibility issues; CHANGELOG entry required."
+        },
+        {
+          "option": "C",
+          "description": "Keep Pixel_9a as forward-compat testing (recorded as such in the matrix attestation) but treat its failures as informational, not gate-blocking. Drop to a CZ_API35_Phone for the actual gate.",
+          "risk": "Low — most expressive of intent; matches typical industry practice."
+        }
+      ]
+    },
+    {
+      "issue_id": "L3-tag-sh-helper-hardcoded-36",
+      "summary": "scripts/tag.sh::require_matrix_attestation_clause_6_I (added in commit 8e66c53) hardcodes `if (( api >= 36 ))` for the latest-stable check, instead of reading the project's compileSdk dynamically.",
+      "blast_radius": "Future compileSdk bumps (35 → 36 → 37 → ...) silently desync the gate. A compileSdk=37 release with only API 36 evidence would FALSE-PASS the gate.",
+      "fix_options": [
+        {
+          "option": "A",
+          "description": "Parse compileSdk from buildSrc/src/main/kotlin/lava/conventions/AndroidCommon.kt at gate-runtime; require AT LEAST one matrix row at api_level == compileSdk OR api_level == compileSdk + 1 (forward-compat is permitted, not required).",
+          "risk": "Low — bash + grep on a single file."
+        },
+        {
+          "option": "B",
+          "description": "Parse compileSdk from a single source-of-truth file (e.g. gradle.properties or a new constitutional-config file).",
+          "risk": "Low — but introduces a new config file."
+        }
+      ]
+    }
+  ],
+  "phase_4_NOT_yet_implemented": "Per the systematic-debugging Iron Law, Phase 4 (Implementation) follows root-cause investigation and operator decision. This incident document presents the 3 issues + fix options. The operator decides which path; the agent implements after operator confirmation. NO fixes shipped in this commit — diagnosis only.",
+  "constitutional_implications_recorded": [
+    "Phase 1.1 (sessionSignaledState persistence) acceptance gate is REVALIDATED for {API 28 phone, API 30 phone, API 34 phone, API 34 tablet} — those rows in the post-fix matrix attestation 2026-05-05-c00-architectural-fix are real-stack-verified.",
+    "Phase 1.1 acceptance status for API 35 (compileSdk-target latest stable): UNTESTED — no API 35 AVD exists, no API 35 system image installed.",
+    "Phase 1.1 acceptance status for API 36 (forward-compat): FAILS due to L1 Espresso issue. NOT a release blocker if forward-compat is treated as informational; IS a release blocker if 'latest stable' is interpreted as API ≥ compileSdk + 1.",
+    "Earlier 'Pixel_9a passes Challenge00' claims (commits e3bcae3 + 8e66c53, retracted in 00499e9) are now further forensically-grounded: those tests structurally-couldn't have run on Pixel_9a because the matrix runner targeted port 5555 = the API-28 emulator. If they HAD run on Pixel_9a, they would have hit this L1 Espresso failure.",
+    "scripts/tag.sh helper's hardcoded 36-check is itself a clause-6.I-clause-7 latent bluff — owed for fix in the next phase that touches release tagging."
+  ],
+  "operator_decision_owed": [
+    "Choose fix combination across L1+L2+L3. Recommended: L2 option A (install API 35 system image, create CZ_API35_Phone, default matrix uses 35 not 36) + L3 option A (parse compileSdk dynamically) + L1 option C (mark Pixel_9a as forward-compat skip pending Espresso upgrade tracked in an issue). This combination preserves the constitutional baseline AND keeps Pixel_9a in the matrix as advance-warning of API-36 compatibility.",
+    "Alternative: L2 option B (bump compileSdk to 36) + L1 option A (force-upgrade Espresso). Larger scope but resolves both forward-compat and current-stable in one shot."
+  ]
+}
