@@ -1,0 +1,40 @@
+# Lava end-to-end test orchestration (SP-3a Phase 5+).
+#
+# Extends the base docker-compose.yml with an Android emulator service
+# for running Challenge Tests on real device surfaces inside a container.
+#
+# Usage:
+#   podman-compose -f docker-compose.test.yml up -d lava-emulator
+#   ./scripts/run-emulator-tests.sh
+#   podman-compose -f docker-compose.test.yml down
+
+services:
+  lava-emulator:
+    container_name: lava-emulator
+    build:
+      context: .
+      dockerfile: docker/emulator/Dockerfile
+    privileged: true           # Required for /dev/kvm access
+    devices:
+      - /dev/kvm:/dev/kvm
+    volumes:
+      - ${ANDROID_SDK_ROOT:-${ANDROID_HOME:-~/Android/Sdk}}:/opt/android-sdk:ro
+    ports:
+      - "127.0.0.1:5554:5554"   # Emulator console
+      - "127.0.0.1:5555:5555"   # ADB
+    environment:
+      AVD_NAME: ${AVD_NAME:-Pixel_9a}
+      ANDROID_SDK_ROOT: /opt/android-sdk
+    networks:
+      - lava-net
+    healthcheck:
+      test: ["CMD", "adb", "shell", "getprop", "sys.boot_completed"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 60s
+    restart: "no"
+
+networks:
+  lava-net:
+    external: true             # Reuse the network from the base compose file
