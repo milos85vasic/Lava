@@ -1,0 +1,26 @@
+{
+  "challenge_id": "C1",
+  "test_class": "lava.app.challenges.Challenge01AppLaunchAndTrackerSelectionTest",
+  "phase": "Phase 2.2 (2026-05-04 redesign)",
+  "before_state": "BLUFF — pre-existing test asserted on text 'Menu' from a flow that no longer exists post-mandatory-onboarding (commit 7a0317d). Empirical run failed with 'could not find any node that satisfies: (Text contains \"Menu\")'. Source compiled green; instrumentation never ran the assertion.",
+  "after_state": "PASSING on CZ_API34_Phone (API 34) with the OnboardingBypassRule pre-marking onboarding complete + signaling authorized. Test verifies the Menu tab renders the expected Settings entries (Trackers, Provider Credentials, Theme).",
+  "rehearsal": {
+    "command": "ANDROID_SERIAL=emulator-5554 ./gradlew :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=lava.app.challenges.Challenge01AppLaunchAndTrackerSelectionTest --no-daemon",
+    "baseline_outcome": "BUILD SUCCESSFUL — Finished 1 tests on CZ_API34_Phone(AVD) - 14",
+    "mutation": "in feature/menu/src/main/kotlin/lava/menu/MenuScreen.kt at the menuItem rendering for the Trackers entry (line ~173): rename `Text(\"Trackers\")` to `Text(\"BLUFF_RENAMED\")`",
+    "mutation_outcome": "BUILD FAILED — androidx.compose.ui.test.ComposeTimeoutException: Condition still not satisfied after 5000 ms (at Challenge01AppLaunchAndTrackerSelectionTest.kt:92) — the waitUntil for 'Trackers' text fired the timeout because the production renamed the text",
+    "reverted": true,
+    "reverted_outcome": "BUILD SUCCESSFUL on re-run after the mutation was reverted"
+  },
+  "scope_limits": {
+    "what_test_does_NOT_assert": "Test deliberately stops at the Menu tab and does NOT navigate INTO 'Trackers'. Reason: androidx.navigation:navigation-compose has a known lifecycle race when an activity destroys while sitting on a deep route (IllegalStateException 'State must be at least \\'CREATED\\' to be moved to \\'DESTROYED\\''). Empirically observed during C1 redesign — test reached route=tracker_settings successfully but teardown crashed the test result.",
+    "deferred_to_separate_test": "A separate test (TODO: Challenge1bTrackerSettingsContentTest) will verify the Trackers screen lists RuTracker.org + RuTor.info once the navigation library is upgraded OR a workaround is found.",
+    "anti_bluff_note": "The current C1 is not a bluff — it makes assertions on real user-visible state (the Menu's Settings entries) that fail under deliberate production mutation. Stopping at the Menu tab is a real reduction in coverage, but it is HONEST coverage, not bluffed."
+  },
+  "evidence_paths": {
+    "test_kt": "app/src/androidTest/kotlin/lava/app/challenges/Challenge01AppLaunchAndTrackerSelectionTest.kt",
+    "bypass_rule_kt": "app/src/androidTest/kotlin/lava/app/OnboardingBypassRule.kt",
+    "mutated_production_file_kt": "feature/menu/src/main/kotlin/lava/menu/MenuScreen.kt"
+  },
+  "matrix_run_owed": "This rehearsal was on a single AVD (CZ_API34_Phone, API 34). Per clause 6.I, the gating matrix run requires API 28, 30, 34, latest-stable, and at least one tablet form factor. The Challenge Test compiles/passes here; the matrix run produces the per-AVD attestation rows."
+}
