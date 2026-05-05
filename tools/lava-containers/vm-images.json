@@ -1,0 +1,76 @@
+{
+  "version": 1,
+  "_comment": "Placeholder SHA-256 + size values for v0.1. Operator fills in real values via: curl -fsSL <url> -o /tmp/img && sha256sum /tmp/img && stat -c '%s' /tmp/img. The pkg/cache.Store.Get() call rejects on hash mismatch, so attempting to use this manifest in production WILL fail until hashes are populated — this is intentional anti-bluff posture (no silent acceptance of unverified bytes). The manifest's schema conforms to pkg/cache.Manifest (Submodules/Containers/pkg/cache/manifest.go). The 9 qcow2 entries cover (alpine/debian/fedora) × (x86_64/aarch64/riscv64) for the cross-arch signing matrix + cross-OS distro matrix; the 1 'android-system-image-api34-x86_64' entry is referenced by the Phase B pkg/emulator/ refactor for cache-routed system-image fetch. Replace each '0000…' SHA-256 + 0 size with real values before invoking scripts/run-vm-{signing,distro}-matrix.sh.",
+  "images": [
+    {
+      "id": "alpine-3.20-x86_64",
+      "url": "https://dl-cdn.alpinelinux.org/alpine/v3.20/releases/cloud/generic_alpine-3.20.0-x86_64-bios-cloudinit-r0.qcow2",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "size": 0,
+      "format": "qcow2"
+    },
+    {
+      "id": "debian-12-x86_64",
+      "url": "https://cloud.debian.org/images/cloud/bookworm/latest/debian-12-genericcloud-amd64.qcow2",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "size": 0,
+      "format": "qcow2"
+    },
+    {
+      "id": "fedora-40-x86_64",
+      "url": "https://download.fedoraproject.org/pub/fedora/linux/releases/40/Cloud/x86_64/images/Fedora-Cloud-Base-Generic.x86_64-40-1.14.qcow2",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "size": 0,
+      "format": "qcow2"
+    },
+    {
+      "id": "alpine-3.20-aarch64",
+      "url": "https://dl-cdn.alpinelinux.org/alpine/v3.20/releases/cloud/generic_alpine-3.20.0-aarch64-uefi-cloudinit-r0.qcow2",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "size": 0,
+      "format": "qcow2"
+    },
+    {
+      "id": "debian-12-aarch64",
+      "url": "https://cloud.debian.org/images/cloud/bookworm/latest/debian-12-genericcloud-arm64.qcow2",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "size": 0,
+      "format": "qcow2"
+    },
+    {
+      "id": "fedora-40-aarch64",
+      "url": "https://download.fedoraproject.org/pub/fedora/linux/releases/40/Cloud/aarch64/images/Fedora-Cloud-Base-Generic.aarch64-40-1.14.qcow2",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "size": 0,
+      "format": "qcow2"
+    },
+    {
+      "id": "alpine-edge-riscv64",
+      "url": "https://dl-cdn.alpinelinux.org/alpine/edge/releases/cloud/generic_alpine-edge-riscv64-uefi-cloudinit-r0.qcow2",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "size": 0,
+      "format": "qcow2"
+    },
+    {
+      "id": "debian-sid-riscv64",
+      "url": "https://people.debian.org/~gio/dqib/artifacts/debian-sid-riscv64/dqib_riscv64-virt/image.qcow2",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "size": 0,
+      "format": "qcow2"
+    },
+    {
+      "id": "fedora-rawhide-riscv64",
+      "url": "https://dl.fedoraproject.org/pub/alt/risc-v/disk_images/Fedora-Developer-Rawhide-x.y.z-riscv64.raw.xz",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "size": 0,
+      "format": "raw"
+    },
+    {
+      "id": "android-system-image-api34-x86_64",
+      "url": "https://dl.google.com/android/repository/sys-img/google_apis/x86_64-34_r10.zip",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "size": 0,
+      "format": "zip"
+    }
+  ]
+}
