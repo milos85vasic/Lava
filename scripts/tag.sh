@@ -276,6 +276,7 @@ require_evidence_for_android() {
   # Missing rows = missing evidence. all_passed=false in any matrix
   # JSON = release blocker.
   require_matrix_attestation_clause_6_I "$tag_id" "$pack_dir"
+  require_matrix_attestation_group_b_gates "$tag_id" "$pack_dir"
 
   log "[android] SP-3a evidence pack OK: $pack_dir"
 }
@@ -380,6 +381,77 @@ require_matrix_attestation_clause_6_I() {
   fi
 
   log "[android] clause 6.I matrix gate OK: ${#files[@]} matrix file(s), API levels: $(printf '%s ' "${api_levels[@]}"), form factors: $(printf '%s ' "${form_factors[@]}")"
+}
+
+# Group B clause 6.I extension — three additional gates on every
+# matrix attestation. Asserts:
+#
+#   Gate 1: no row carries concurrent != 1
+#           (developer-iteration evidence cannot gate a tag)
+#   Gate 2: run-level gating == true
+#           (run was --concurrent or --dev)
+#   Gate 3: per-row diag.sdk == row.api_level
+#           (the "AVD shadow" bluff — claimed API-N row but the
+#            running emulator reported a different SDK)
+#
+# Each gate is a hard die() — tag.sh refuses the tag and prints the
+# violating rows.
+#
+# Backward-compat carve-outs (limited to fields whose absence is
+# benign on pre-Group-B attestations already shipped under
+# .lava-ci-evidence/):
+#   - Gate 2: absent `gating` field treated as "true".
+#   - Gate 3: rows lacking `diag` or `api_level` are skipped.
+require_matrix_attestation_group_b_gates() {
+  local tag_id="$1" pack_dir="$2"
+
+  local files
+  mapfile -t files < <(find "$pack_dir" -type f -name 'real-device-verification.json' 2>/dev/null)
+  if (( ${#files[@]} == 0 )); then
+    # Already handled by require_matrix_attestation_clause_6_I; do
+    # not double-die. Group B gates only apply when at least one
+    # attestation exists.
+    return 0
+  fi
+
+  local f
+  for f in "${files[@]}"; do
+    # Gate 1 — reject any row whose concurrent != 1.
+    local bad_concurrent
+    bad_concurrent=$(jq -r '.rows[] | select(.concurrent != null and .concurrent != 1) | "\(.avd) (concurrent=\(.concurrent))"' "$f" 2>/dev/null)
+    if [[ -n "$bad_concurrent" ]]; then
+      die "Cannot tag $tag_id: clause 6.I Group B Gate 1 — attestation $f has rows with concurrent != 1 (developer-iteration evidence cannot gate a tag): $bad_concurrent"
+    fi
+
+    # Gate 2 — reject if run-level gating is anything other than true.
+    # Older attestations (pre-Group-B) lack the field; treat absent
+    # (jq null) as true to remain backward-compatible with already-
+    # shipped evidence under .lava-ci-evidence/. This is the ONLY
+    # backward-compat carve-out — once Group B ships, every new
+    # attestation MUST carry the field.
+    #
+    # NOTE: we cannot use jq's `// "true"` shortcut here because `//`
+    # also fires on the boolean `false`, which would coerce
+    # `gating:false` to `"true"` and silently let a non-gating run
+    # past the gate. Use an explicit `if .gating == null` check.
+    local gating
+    gating=$(jq -r 'if (.gating == null) then "true" else (.gating | tostring) end' "$f" 2>/dev/null)
+    if [[ "$gating" != "true" ]]; then
+      die "Cannot tag $tag_id: clause 6.I Group B Gate 2 — attestation $f has gating: $gating (run was --concurrent or --dev)"
+    fi
+
+    # Gate 3 — reject if any row's diag.sdk does not equal its
+    # api_level. Skip rows that lack diag (older attestations) for
+    # the same backward-compat reason as Gate 2.
+    local mismatches
+    mismatches=$(jq -r '.rows[] | select(.diag.sdk != null and .api_level != null and .diag.sdk != .api_level) | "\(.avd): claimed api_level=\(.api_level) but diag.sdk=\(.diag.sdk)"' "$f" 2>/dev/null)
+    if [[ -n "$mismatches" ]]; then
+      die "Cannot tag $tag_id: clause 6.I Group B Gate 3 — attestation $f has rows whose diag.sdk does not match api_level (the AVD-shadow bluff):
+$mismatches"
+    fi
+  done
+
+  log "[android] Group B clause 6.I gates OK across ${#files[@]} attestation file(s)"
 }
 
 # Sixth Law clause 5: refuse to tag api-go without a matching pretag

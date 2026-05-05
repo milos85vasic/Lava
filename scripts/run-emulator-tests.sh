@@ -44,31 +44,72 @@ cd "$PROJECT_DIR"
 # Defaults
 DEFAULT_TEST_CLASS="lava.app.challenges.Challenge01AppLaunchAndTrackerSelectionTest"
 DEFAULT_AVDS="CZ_API28_Phone:28:phone,CZ_API30_Phone:30:phone,CZ_API34_Phone:34:phone,CZ_API34_Tablet:34:tablet,CZ_API35_Phone:35:phone"
-DEFAULT_EVIDENCE_DIR=".lava-ci-evidence/$(date -u +%Y-%m-%dT%H-%M-%SZ)-matrix"
+DEFAULT_TEST_REPORT_GLOB="app/build/outputs/androidTest-results/connected/debug/TEST-*.xml"
 
 TEST_CLASS="$DEFAULT_TEST_CLASS"
 AVDS="$DEFAULT_AVDS"
-EVIDENCE_DIR="$DEFAULT_EVIDENCE_DIR"
+EVIDENCE_DIR=""           # set by detect_evidence_dir below
+TAG_OVERRIDE=""
 BUILD_APK=1
 BOOT_TIMEOUT=""
+CONCURRENT=""
+DEV_MODE=0
+TEST_REPORT_GLOB="$DEFAULT_TEST_REPORT_GLOB"
+
+# detect_version_prefix returns "Lava-Android-<versionName>-<versionCode>"
+# parsed from app/build.gradle.kts. Echoes "Lava-Android-unknown" when
+# the file is missing or unparseable so an iteration run still proceeds
+# (tag.sh's gates will reject the resulting evidence anyway).
+#
+# Lava's app/build.gradle.kts uses `versionName = "X.Y.Z"` /
+# `versionCode = N` (with `=`); the regex matches that shape.
+detect_version_prefix() {
+    local f="$PROJECT_DIR/app/build.gradle.kts"
+    if [[ ! -f "$f" ]]; then
+        echo "Lava-Android-unknown"
+        return 0
+    fi
+    local v vc
+    v=$(grep -oE 'versionName[[:space:]]*=[[:space:]]*"[^"]+"' "$f" | head -n1 | sed -E 's/.*"([^"]+)".*/\1/')
+    vc=$(grep -oE 'versionCode[[:space:]]*=[[:space:]]*[0-9]+' "$f" | head -n1 | grep -oE '[0-9]+$')
+    if [[ -z "$v" || -z "$vc" ]]; then
+        echo "Lava-Android-unknown"
+        return 0
+    fi
+    echo "Lava-Android-${v}-${vc}"
+}
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --test-class) TEST_CLASS="$2"; shift 2 ;;
         --avds) AVDS="$2"; shift 2 ;;
         --evidence-dir) EVIDENCE_DIR="$2"; shift 2 ;;
+        --tag) TAG_OVERRIDE="$2"; shift 2 ;;
         --boot-timeout) BOOT_TIMEOUT="$2"; shift 2 ;;
+        --concurrent) CONCURRENT="$2"; shift 2 ;;
+        --dev) DEV_MODE=1; shift ;;
+        --test-report-glob) TEST_REPORT_GLOB="$2"; shift 2 ;;
         --no-build) BUILD_APK=0; shift ;;
         --help|-h)
             cat <<USAGE
 Usage: $0 [--test-class <fqcn>] [--avds <list>] [--evidence-dir <path>]
-          [--boot-timeout <duration>] [--no-build]
+          [--tag <tag>] [--boot-timeout <duration>] [--concurrent N] [--dev]
+          [--test-report-glob <glob>] [--no-build]
 
 Defaults:
-  --test-class    $DEFAULT_TEST_CLASS
-  --avds          $DEFAULT_AVDS
-  --evidence-dir  $DEFAULT_EVIDENCE_DIR
-  --boot-timeout  5m (forwarded to cmd/emulator-matrix; e.g. 10m, 600s)
+  --test-class        $DEFAULT_TEST_CLASS
+  --avds              $DEFAULT_AVDS
+  --evidence-dir      auto: .lava-ci-evidence/Lava-Android-<v>-<vc>/matrix/<UTC>/
+  --tag               (overrides the auto-detected Lava-Android-<v>-<vc> prefix)
+  --boot-timeout      5m (forwarded to cmd/emulator-matrix; e.g. 10m, 600s)
+  --concurrent        1 (serial; >1 sets gating=false in the attestation)
+  --dev               false (set true to permit snapshot reload; sets gating=false)
+  --test-report-glob  $DEFAULT_TEST_REPORT_GLOB
+
+Evidence-path resolution priority:
+  1. --evidence-dir <path>     (existing flag, wins)
+  2. --tag <tag>               (.lava-ci-evidence/<tag>/matrix/<UTC>/)
+  3. auto-detect               (.lava-ci-evidence/Lava-Android-<v>-<vc>/matrix/<UTC>/)
 
 The AVD list is comma-separated. Each entry MAY include the API level
 and form factor as Name:APILevel:FormFactor. The matrix runner records
@@ -79,6 +120,16 @@ USAGE
         *) echo "Unknown option: $1"; exit 2 ;;
     esac
 done
+
+# Resolve evidence dir if the operator did not pass --evidence-dir.
+if [[ -z "$EVIDENCE_DIR" ]]; then
+    if [[ -n "$TAG_OVERRIDE" ]]; then
+        EVIDENCE_DIR=".lava-ci-evidence/${TAG_OVERRIDE}/matrix/$(date -u +%Y-%m-%dT%H-%M-%SZ)"
+    else
+        prefix=$(detect_version_prefix)
+        EVIDENCE_DIR=".lava-ci-evidence/${prefix}/matrix/$(date -u +%Y-%m-%dT%H-%M-%SZ)"
+    fi
+fi
 
 # Pre-flight checks
 ANDROID_SDK_ROOT="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-}}"
@@ -134,6 +185,15 @@ echo
 extra_args=()
 if [[ -n "$BOOT_TIMEOUT" ]]; then
     extra_args+=(--boot-timeout "$BOOT_TIMEOUT")
+fi
+if [[ -n "$CONCURRENT" ]]; then
+    extra_args+=(--concurrent "$CONCURRENT")
+fi
+if [[ "$DEV_MODE" -eq 1 ]]; then
+    extra_args+=(--dev)
+fi
+if [[ -n "$TEST_REPORT_GLOB" ]]; then
+    extra_args+=(--test-report-glob "$TEST_REPORT_GLOB")
 fi
 
 "$BIN_DIR/emulator-matrix" \
