@@ -1,0 +1,27 @@
+{
+  "date": "2026-05-06",
+  "phase": "group-b-evening-incident-response-hunt",
+  "rule": "§6.N.1.1 subsequent-same-day lighter hunt — 1-2 production-code files from gate-shaping surface",
+  "targets": [
+    {
+      "file": "Submodules/Containers/pkg/emulator/cleanup.go",
+      "function": "KillByPort / killByPortWithDeps",
+      "mutation": "weaken the strict adjacent-token matcher to strings.Contains(token, target)",
+      "covering_test": "Submodules/Containers/pkg/emulator/cleanup_test.go::TestKillByPort_SubstringSafety",
+      "observed_failure": "expected Matched=0 (no adjacent token pair), got 2 (signaled=map[8888:[terminated] 9999:[terminated]])",
+      "reverted": true,
+      "commit_reference": "Containers branch lava-pin/2026-05-06-group-b commit 70fafcd — see commit body Bluff-Audit stamp"
+    },
+    {
+      "file": "Submodules/Containers/pkg/emulator/matrix.go",
+      "function": "parseJUnitFailures",
+      "mutation": "comment out the for _, e := range tc.Errors loop in parseJUnitFailures",
+      "covering_test": "Submodules/Containers/pkg/emulator/matrix_test.go::TestParseJUnitFailures_FailureAndError_BothCaptured",
+      "observed_failure": "expected 2 entries (1 failure + 1 error), got 1: [{Class:lava.app.SomeTest Name:testFail Type:failure Message:expected 1 got 2 Body:stack trace lines here}]",
+      "reverted": true,
+      "commit_reference": "Containers branch lava-pin/2026-05-06-group-b commit 70fafcd — see commit body Bluff-Audit stamp"
+    }
+  ],
+  "outcome": "no surviving bluffs found; both targets fail under deliberate mutation as expected",
+  "next_phase_prep": "Group C scope candidates: network simulation per AVD, hardware-screenshot capture per row, AVD image-cache management"
+}

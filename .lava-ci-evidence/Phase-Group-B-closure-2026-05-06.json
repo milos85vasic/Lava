@@ -1,0 +1,108 @@
+{
+  "date": "2026-05-06",
+  "spec": "docs/superpowers/specs/2026-05-05-anti-bluff-mandate-reinforcement-group-b-design.md",
+  "spec_commit": "e2a3af2",
+  "plan": "docs/superpowers/plans/2026-05-05-anti-bluff-mandate-reinforcement-group-b.md",
+  "plan_commit": "1fcec2e",
+  "branches": {
+    "containers": "lava-pin/2026-05-06-group-b",
+    "lava_parent": "master"
+  },
+  "commits": {
+    "containers_phase_a": "70fafcd024375758d58efc0ab9bac69e4c70f677",
+    "containers_phase_a_fixup": "f5cb3551a8db36414b65036521a60deaf685b441",
+    "lava_phase_b": "67da623b29a1d674ec11b55466fe63fa8e651a1d",
+    "lava_phase_c": "3b3f816a28540dca86f140a6da14f5c1a99ff374"
+  },
+  "components_implemented": {
+    "A_KillByPort": "Submodules/Containers/pkg/emulator/cleanup.go (+ cleanup_test.go) — strict adjacent /proc walk; 4 tests including TestKillByPort_SubstringSafety",
+    "B_Teardown_FastPath": "Submodules/Containers/pkg/emulator/android.go (+ android_test.go) — post-30s-grace KillByPort fast-path; skip-on-mismatch; 2 tests",
+    "C_Types": "Submodules/Containers/pkg/emulator/types.go — DiagnosticInfo, FailureSummary, KillReport, MatrixResult.Gating, MatrixConfig.Concurrent + .Dev + .TestReportGlob, TestResult.Diag + .FailureSummaries + .Concurrent",
+    "D_Matrix": "Submodules/Containers/pkg/emulator/matrix.go — runOne extracted, captureDiagnostic, parseJUnitFailures, worker pool, writeAttestation new fields + 8 tests",
+    "E_CLI": "Submodules/Containers/cmd/emulator-matrix/main.go — --concurrent N + --dev + --test-report-glob flags + Gating-status summary line",
+    "Phase_A_fixup_I_1": "Submodules/Containers — TestReportGlob config field + concurrent-mode safety warning + t.Parallel guidance (5 files, +1 test = 41 total)",
+    "F_RunEmulatorTests": "scripts/run-emulator-tests.sh — auto-detect versionName/versionCode + --tag override + --concurrent + --dev + --test-report-glob passthrough + new evidence-dir convention",
+    "G_TagSh": "scripts/tag.sh — require_matrix_attestation_group_b_gates helper (Gate 1 reject concurrent != 1, Gate 2 reject gating != true, Gate 3 reject diag.sdk != api_level); Gate 2 jq fix avoids `// \"true\"` boolean-false coercion bug",
+    "H_Tests_Evidence": "tests/tag-helper/{run_all.sh + 4 test_tag_*.sh fixtures} + .lava-ci-evidence/bluff-hunt/2026-05-06-group-b.json + this closure file",
+    "CLAUDE_md_doc": "CLAUDE.md §6.I clause 4 paragraph extended with diag/failure_summaries/concurrent/gating row schema documentation"
+  },
+  "mutation_rehearsals": [
+    {
+      "test": "TestKillByPort_SubstringSafety",
+      "mutation": "weaken matcher to strings.Contains(token, target)",
+      "observed": "expected Matched=0 (no adjacent token pair), got 2 (signaled=map[8888:[terminated] 9999:[terminated]])",
+      "reverted": true,
+      "phase": "Containers Phase A"
+    },
+    {
+      "test": "TestTeardown_FastPath_SkipsOnMismatch",
+      "mutation": "replace `if report.Matched == 0 { return Errorf(...) }` with `if report.Matched == 0 { return nil }`",
+      "observed": "expected Teardown to return an error when KillByPort.Matched==0 and emulator persists, got nil",
+      "reverted": true,
+      "phase": "Containers Phase A"
+    },
+    {
+      "test": "TestParseJUnitFailures_FailureAndError_BothCaptured",
+      "mutation": "comment out the for _, e := range tc.Errors loop",
+      "observed": "expected 2 entries (1 failure + 1 error), got 1: [{Class:lava.app.SomeTest Name:testFail Type:failure Message:expected 1 got 2 Body:stack trace lines here}]",
+      "reverted": true,
+      "phase": "Containers Phase A"
+    },
+    {
+      "test": "TestRunMatrix_Gating_TrueOnDefaults",
+      "mutation": "change `Gating: concurrent == 1 && !config.Dev` to `Gating: false`",
+      "observed": "expected Gating=true on defaults (serial, non-dev), got false",
+      "reverted": true,
+      "phase": "Containers Phase A"
+    },
+    {
+      "test": "TestRunMatrix_Gating_FalseOnConcurrent",
+      "mutation": "change `Gating: concurrent == 1 && !config.Dev` to `Gating: true`",
+      "observed": "expected Gating=false when Concurrent=2, got true",
+      "reverted": true,
+      "phase": "Containers Phase A"
+    },
+    {
+      "test": "TestRunMatrix_EmptyTestReportGlob_SkipsJUnitParsing",
+      "mutation": "in pkg/emulator/matrix.go, replaced filepathGlob's body with `return filepath.Glob(\"/tmp/bluff-audit-fixture/TEST-*.xml\")` and pre-populated the fixture with a real JUnit <failure> entry",
+      "observed": "expected empty FailureSummaries when glob empty, got 1 entries: [{Class:bluff.AuditTest Name:bluffMethod Type:failure Message:bluff-audit synthetic failure Body:stacktrace}]",
+      "reverted": true,
+      "phase": "Containers Phase A fix-up (I-1)"
+    },
+    {
+      "test": "test_tag_rejects_diag_sdk_mismatch.sh",
+      "mutation": "comment out the Gate-3 mismatches block in require_matrix_attestation_group_b_gates",
+      "observed": "FAIL: tag.sh exited 0 despite diag.sdk != api_level row",
+      "reverted": true,
+      "phase": "Lava Phase B"
+    }
+  ],
+  "mirror_convergence": {
+    "containers_branch_lava_pin_2026_05_06_group_b": {
+      "github": "f5cb3551a8db36414b65036521a60deaf685b441",
+      "gitlab": "f5cb3551a8db36414b65036521a60deaf685b441",
+      "gitflic": "NOT_CONFIGURED — vasic-digital/containers does not exist on gitflic.ru",
+      "gitverse": "NOT_CONFIGURED — vasic-digital/Containers does not exist on gitverse.ru",
+      "note": "Containers submodule has only 2 of 4 mirrors configured; matches inherited Group A-prime baseline"
+    },
+    "lava_parent_master_after_phase_b": {
+      "github": "67da623b29a1d674ec11b55466fe63fa8e651a1d",
+      "gitlab": "67da623b29a1d674ec11b55466fe63fa8e651a1d",
+      "gitflic": "67da623b29a1d674ec11b55466fe63fa8e651a1d",
+      "gitverse": "67da623b29a1d674ec11b55466fe63fa8e651a1d"
+    },
+    "lava_parent_master_after_phase_c": {
+      "note": "verified after this commit lands; SHAs filled in by post-commit amend per Group A-prime pattern OR left as a separate verification step"
+    },
+    "verification_method": "live git ls-remote (NOT stale .git/refs/remotes/<r>/<branch>)"
+  },
+  "bluff_hunt_reference": ".lava-ci-evidence/bluff-hunt/2026-05-06-group-b.json",
+  "deviations_from_plan_documented": [
+    "Phase A fix-up commit (f5cb355) added MatrixConfig.TestReportGlob to fix Decoupled Reusable Architecture violation + concurrent-mode misattribution (I-1)",
+    "Phase B replaced jq `.gating // \"true\"` shortcut with explicit `if (.gating == null) then \"true\" else (.gating | tostring) end` to avoid coercing boolean false to true (caught by test suite)",
+    "Phase B fixtures use `versionName = \"X.Y.Z\"` regex (with =) matching real app/build.gradle.kts; plan template used the no-= form",
+    "Phase B fixtures add a second commit to track evidence pack, avoiding tag.sh's dirty-tree guard preempting the gate check",
+    "Phase B dropped non-existent `--version` / `--version-code` flags from tag.sh invocations; tag.sh reads from app/build.gradle.kts"
+  ],
+  "next_group_preview": "Group C scope candidates (forward-looking only; not committed): network simulation per AVD, hardware-screenshot capture per row, AVD image-cache management. The next operator anti-bluff-mandate invocation will set the precedence."
+}
