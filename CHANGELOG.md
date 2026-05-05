@@ -17,6 +17,31 @@ Per-version distribution snapshots (the exact text shipped as App Distribution r
 
 ---
 
+## Lava-Android-1.2.6-1026 — 2026-05-05
+
+**Channels:** Firebase App Distribution (debug + release)
+**Previous published:** Lava-Android-1.2.5-1025 (2026-05-05 23:43 UTC)
+
+### Fixed (Crashlytics-driven, §6.O closure-log mandate)
+
+- **fix(tracker-settings): Trackers-from-Settings crash (nested LazyColumn inside Column(verticalScroll))** — operator-reported via Crashlytics. Closure log at `.lava-ci-evidence/crashlytics-resolved/2026-05-05-tracker-settings-nested-scroll.md`. Replaced `LazyColumn` with plain `Column` in `TrackerSelectorList` since the tracker list is bounded (≤ 6 entries). Validation: 2 structural tests in `feature/tracker_settings/src/test/.../TrackerSelectorListLazyColumnRegressionTest.kt`. Challenge: `app/src/androidTest/.../Challenge14TrackerSettingsOpenTest.kt`. Falsifiability rehearsal recorded.
+
+### Added
+
+- **§6.Q Compose Layout Antipattern Guard** — root constitution forbids nesting vertically-scrolling lazy layouts (LazyColumn, etc.) inside parents giving unbounded vertical space (verticalScroll, etc.). Per-feature structural tests + Challenge Tests on the §6.I matrix are the gates. Propagated to AGENTS.md.
+
+### Versions bumped this cycle
+
+| Component | Old | New |
+|---|---|---|
+| Android `:app` | 1.2.5 (1025) | **1.2.6 (1026)** |
+| Ktor proxy | 1.0.5 (1005) | (unchanged) |
+| lava-api-go | 2.0.10 (2010) | (unchanged) |
+
+The 1.2.6 cycle is Android-only — proxy + lava-api-go did not require new fixes.
+
+---
+
 ## Lava-Android-1.2.5-1025 — 2026-05-05
 
 **Channels:** Firebase App Distribution (debug + release)
