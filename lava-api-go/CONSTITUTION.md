@@ -20,3 +20,11 @@ This module inherits the root project's constitutional rules. Modifying them in 
 - The `Auth-Token` header MUST be redacted from every log, span attribute, and audit field (the SHA-256 hash goes to `request_audit.auth_realm_hash` only).
 - The cross-backend parity test (`tests/parity/`) is the load-bearing acceptance gate. A green parity suite means the Go API is byte-equivalent to the Ktor proxy on every supported request shape.
 - Every release tag (`Lava-API-Go-X.Y.Z-NNNN`) requires a recorded entry in `.lava-ci-evidence/` from `scripts/pretag-verify.sh` against the exact commit being tagged.
+
+## Clause 6.L — Anti-Bluff Functional Reality Mandate (Operator's Standing Order)
+
+Inherited verbatim from parent Lava `/CLAUDE.md` §6.L. The operator has invoked this mandate **TEN TIMES** across two working days. The 10th invocation (2026-05-05): "Rebuild Go API and client app(s), put new builds into releases dir (with properly updated version codes) and execute all existing tests and Challenges! Any issue that pops up MUST BE properly addressed by addressing the root causes (fixing them) and covering everything with validation and verification tests and Challenges!"
+
+Every test, every contract test, every parity test, every e2e test, every CI gate added to or maintained in this service MUST do exactly one job: confirm the feature it claims to cover actually works for an end user, end-to-end, on the gating matrix (real Gin engine, real Postgres in podman, real HTTP/3 + HTTP/2 socket). CI green is necessary, NEVER sufficient. Tests must guarantee the product works — anything else is theatre.
+
+Inheritance is recursive. Sub-services MAY paste this clause verbatim; they MUST NOT abbreviate or relax it.
