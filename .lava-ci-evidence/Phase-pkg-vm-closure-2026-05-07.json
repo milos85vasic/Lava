@@ -14,7 +14,7 @@
     "containers_phase_b": "e12598a1e17cc0944af1484f617720ee56fd9812",
     "containers_phase_b_fixup": "3a4d537505e5994190c6481502518ba2e3f29c63",
     "lava_phase_c": "28386f408b03d407f0854178e6373b610e5eb575",
-    "lava_phase_d": "8a52cb0ba8e0f2dec5aeea2784aa14d3567fa600"
+    "lava_phase_d": "8acf8bf06bd5d59cab8c9a89e67c25fe3cbda8c5"
   },
   "components_implemented": {
     "A_pkg_cache": "Manifest schema + FilesystemStore CAS + per-image flock + SHA-256 verify",
@@ -135,10 +135,11 @@
       "gitverse": "28386f408b03d407f0854178e6373b610e5eb575"
     },
     "lava_parent_master_after_phase_d": {
-      "github": "FILL-IN-POST-PUSH",
-      "gitlab": "FILL-IN-POST-PUSH",
-      "gitflic": "FILL-IN-POST-PUSH",
-      "gitverse": "FILL-IN-POST-PUSH"
+      "github": "8acf8bf06bd5d59cab8c9a89e67c25fe3cbda8c5",
+      "gitlab": "8acf8bf06bd5d59cab8c9a89e67c25fe3cbda8c5",
+      "gitflic": "8acf8bf06bd5d59cab8c9a89e67c25fe3cbda8c5",
+      "gitverse": "8acf8bf06bd5d59cab8c9a89e67c25fe3cbda8c5",
+      "note": "all 4 mirrors converged at 8acf8bf after Phase D push; verified via live git ls-remote 2026-05-05T10:01Z"
     },
     "verification_method": "live git ls-remote (NOT stale .git/refs/remotes/<r>/<branch>)"
   },
