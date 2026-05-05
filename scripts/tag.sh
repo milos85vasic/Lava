@@ -278,7 +278,45 @@ require_evidence_for_android() {
   require_matrix_attestation_clause_6_I "$tag_id" "$pack_dir"
   require_matrix_attestation_group_b_gates "$tag_id" "$pack_dir"
 
+  # Constitutional clause 6.P — Distribution Versioning + Changelog
+  # Mandate. Tag MUST refuse if CHANGELOG.md lacks an entry for the
+  # version OR the per-version distribute-changelog snapshot is missing.
+  require_changelog_clause_6_P "$tag_id" "$vname" "$vcode" "Android"
+
   log "[android] SP-3a evidence pack OK: $pack_dir"
+}
+
+# Constitutional clause 6.P helper. Asserts:
+#   1. CHANGELOG.md contains a heading mentioning the version
+#   2. .lava-ci-evidence/distribute-changelog/<channel>/<version>-<code>.md
+#      exists for the firebase-app-distribution channel (Android only;
+#      Go API + proxy use different channels but the rule is the same).
+#
+# Falsifiability rehearsal: rename CHANGELOG.md → CHANGELOG.md.bak;
+# tag.sh must die with "missing CHANGELOG.md entry".
+require_changelog_clause_6_P() {
+  local tag_id="$1" vname="$2" vcode="$3" channel_label="$4"
+  local changelog="$REPO_ROOT/CHANGELOG.md"
+
+  if [[ ! -f "$changelog" ]]; then
+    die "Cannot tag $tag_id: §6.P violation — CHANGELOG.md is missing."
+  fi
+  if ! grep -qE "${tag_id}|${vname} \\(${vcode}\\)|${vname}-${vcode}" "$changelog"; then
+    die "Cannot tag $tag_id: §6.P violation — CHANGELOG.md does not contain an entry for $tag_id (version $vname, code $vcode). Add an entry before tagging."
+  fi
+
+  case "$channel_label" in
+    Android) local channel_dir="firebase-app-distribution" ;;
+    APIGo) local channel_dir="container-registry" ;;
+    Proxy) local channel_dir="releases-proxy" ;;
+    *) local channel_dir="generic" ;;
+  esac
+  local snapshot="$REPO_ROOT/.lava-ci-evidence/distribute-changelog/${channel_dir}/${vname}-${vcode}.md"
+  if [[ ! -f "$snapshot" ]]; then
+    die "Cannot tag $tag_id: §6.P violation — per-version distribute-changelog snapshot missing at $snapshot. Author this file BEFORE running scripts/firebase-distribute.sh; it is the App Distribution release-notes payload."
+  fi
+
+  log "[$channel_label] §6.P CHANGELOG gate passed: entry in CHANGELOG.md + snapshot at $snapshot"
 }
 
 # Constitutional clause 6.I clause 7 helper. Walks every
@@ -492,6 +530,13 @@ require_evidence_for_apigo() {
   else
     log "[api-go] pretag evidence found: .lava-ci-evidence/${head_commit}.json"
   fi
+
+  # §6.P CHANGELOG gate for api-go.
+  local apigo_vname apigo_vcode
+  apigo_vname="$(read_apigo_version_name)"
+  apigo_vcode="$(read_apigo_version_code)"
+  require_changelog_clause_6_P "Lava-API-Go-${apigo_vname}-${apigo_vcode}" \
+    "$apigo_vname" "$apigo_vcode" "APIGo"
 }
 
 bump_semver() {
@@ -620,6 +665,7 @@ for app in "${TARGETS[@]}"; do
       vname=$(read_api_version_name)
       vcode=$(read_api_version_code)
       writer=write_api_versions
+      require_changelog_clause_6_P "Lava-API-${vname}-${vcode}" "$vname" "$vcode" "Proxy"
       ;;
     api-go)
       require_evidence_for_apigo

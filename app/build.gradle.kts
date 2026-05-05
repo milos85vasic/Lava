@@ -25,8 +25,8 @@ android {
 
     defaultConfig {
         applicationId = "digital.vasic.lava.client"
-        versionCode = 1024
-        versionName = "1.2.4"
+        versionCode = 1025
+        versionName = "1.2.5"
         // SP-3a Step 6 (2026-04-30): wire Hilt + Compose UI test infra so the
         // 8 Challenge Tests at app/src/androidTest/kotlin/lava/app/challenges/
         // become runnable on a connected device. The custom runner installs
@@ -54,6 +54,15 @@ android {
 
     buildFeatures {
         buildConfig = true
+    }
+
+    // 2026-05-05 (post-§6.O): JVM unit tests for app-internal helpers
+    // need Android framework calls (Bundle, Log.w) to return default
+    // values instead of throwing "not mocked" — the FirebaseAnalyticsTracker
+    // tests verify nullable-SDK + throwing-SDK paths and don't care
+    // about real Bundle/Log behavior.
+    testOptions {
+        unitTests.isReturnDefaultValues = true
     }
 
     signingConfigs {

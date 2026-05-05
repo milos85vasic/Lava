@@ -1,0 +1,75 @@
+{
+  "date": "2026-05-05",
+  "trigger": "§6.N.1.1 — operator anti-bluff-mandate invocation (ELEVENTH + TWELFTH §6.L invocations)",
+  "scope": "5+2 hunt — 5 *Test.kt-class targets + 2 production-code files per §6.N.2",
+  "session_context": "Firebase integration + Crashlytics fix + §6.O + §6.P constitutional additions, Lava-Android 1.2.3 (1023) → 1.2.4 (1024)",
+  "test_targets": [
+    {
+      "file": "tests/firebase/test_firebase_scripts_no_warn_swallow.sh",
+      "mutation": "appended `firebase apps:list || echo WARN-injected` to scripts/firebase-distribute.sh as real-code line",
+      "observed_failure": "FAIL: scripts/firebase-distribute.sh contains an OR-OR-echo-WARN swallow pattern (§6.J bluff). 80:138:firebase apps:list || echo WARN-injected",
+      "reverted": true,
+      "result": "test caught the mutation correctly"
+    },
+    {
+      "file": "lava-api-go/internal/firebase/firebase_test.go::TestMustConfigured",
+      "mutation": "changed noopClient.Configured() return false → true",
+      "observed_failure": "--- FAIL: TestMustConfigured (0.00s) firebase_test.go:77: MustConfigured(noop) must error",
+      "reverted": true,
+      "result": "test caught the mutation correctly"
+    },
+    {
+      "file": "lava-api-go/internal/middleware/firebase_test.go::TestFirebaseTelemetry_5xx_RecordsNonFatal",
+      "mutation": "changed `case status >= http.StatusInternalServerError:` to `case status >= 9999:`",
+      "observed_failure": "--- FAIL: TestFirebaseTelemetry_5xx_RecordsNonFatal: expected 1 non-fatal record, got 0; --- FAIL: TestFirebaseTelemetry_RecordsHandlerError: expected 1 non-fatal record, got 0",
+      "reverted": true,
+      "result": "test caught the mutation correctly"
+    },
+    {
+      "file": "app/src/test/kotlin/digital/vasic/lava/client/firebase/FirebaseInitializerTest.kt::initialize_survives_crashlytics_throw",
+      "mutation": "removed runCatching{} block around `crashlytics()?.apply { ... }` in FirebaseInitializer.kt",
+      "observed_failure": ":app:testReleaseUnitTest FAILED — There were failing tests; FirebaseInitializerTest.initialize_survives_crashlytics_throw failed",
+      "reverted": true,
+      "result": "test caught the mutation correctly"
+    },
+    {
+      "file": "tests/firebase/test_distribute_enforces_version_monotonicity.sh",
+      "mutation": "removed all CHANGELOG.md references from scripts/firebase-distribute.sh via `sed -i '/CHANGELOG\\.md/d'`",
+      "observed_failure": "FAIL §6.P: scripts/firebase-distribute.sh missing the CHANGELOG.md entry gate.",
+      "reverted": true,
+      "result": "test caught the mutation correctly"
+    }
+  ],
+  "production_code_targets": [
+    {
+      "file": "scripts/firebase-distribute.sh (gate-shaping per §6.N.2)",
+      "mutation": "deletion of the §6.P CHANGELOG.md gate via `sed -i '/CHANGELOG\\.md/d'`",
+      "covered_by": "tests/firebase/test_distribute_enforces_version_monotonicity.sh",
+      "observed": "test_distribute_enforces_version_monotonicity.sh fails with 'FAIL §6.P: missing the CHANGELOG.md entry gate'",
+      "would_have_been_invisible_pre_§6P": true,
+      "reverted": true
+    },
+    {
+      "file": "app/src/main/kotlin/digital/vasic/lava/client/firebase/FirebaseInitializer.kt (gate-shaping for the Crashlytics-fix path)",
+      "mutation": "removed runCatching guard around crashlytics(), analytics(), or performance() block",
+      "covered_by": "FirebaseInitializerTest (5 tests)",
+      "observed": "the corresponding `initialize survives <X> throw` test fails with the throw message that escaped",
+      "would_have_been_invisible_pre_§6O": true,
+      "reverted": true
+    }
+  ],
+  "issues_opened": [],
+  "constitutional_findings": [
+    "§6.J anti-bluff posture is tight — every test added this cycle is falsifiable AND its mutation produces an unambiguous user/operator-visible failure",
+    "§6.O closure-log mandate is in lockstep with the test suite — closure log at .lava-ci-evidence/crashlytics-resolved/2026-05-05-firebase-init-hardening.md cites the validation test + Challenge Test that gate the regression-immunity contract",
+    "§6.P CHANGELOG mandate is mechanically enforced in scripts/firebase-distribute.sh + scripts/tag.sh — a release without changelog cannot ship"
+  ],
+  "session_summary": {
+    "tests_added_this_session": 16,
+    "falsifiability_rehearsals_recorded": 5,
+    "constitutional_clauses_added": ["§6.O", "§6.P"],
+    "constitutional_clauses_propagated": ["§6.O", "§6.P"],
+    "submodule_propagation_count": 16,
+    "anti_bluff_mandate_invocations_this_cycle": ["TENTH (rebuild-everything)", "ELEVENTH (Crashlytics-resolved coverage)", "TWELFTH (distribution versioning + changelog)"]
+  }
+}

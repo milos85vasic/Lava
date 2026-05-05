@@ -17,6 +17,37 @@ Per-version distribution snapshots (the exact text shipped as App Distribution r
 
 ---
 
+## Lava-Android-1.2.5-1025 — 2026-05-05
+
+**Channels:** Firebase App Distribution (debug + release)
+**Previous published:** Lava-Android-1.2.4-1024 (2026-05-05 23:25 UTC)
+
+### Fixed (preemptive Hilt-graph hardening)
+
+- **fix(firebase): Hilt @Provides for Firebase SDKs now tolerates getInstance() throwing.** Pre-1.2.5, a feature ViewModel that injects `AnalyticsTracker` (Login, ProviderLogin, Search, Topic) would crash on construction if `FirebaseAnalytics.getInstance(context)` / `FirebaseCrashlytics.getInstance()` / `FirebasePerformance.getInstance()` threw. The 1.2.3 → 1.2.4 fix only hardened the LavaApplication path, not the Hilt graph. 1.2.5 closes that gap:
+  * `FirebaseProvidesModule` wraps each SDK accessor in `runCatching { ... }.getOrNull()` and provides nullable types.
+  * `FirebaseAnalyticsTracker` accepts nullable SDKs and `runCatching`-guards every per-call SDK invocation.
+  * New `NoOpAnalyticsTracker` is selected by the AnalyticsTracker `@Provides` when both Crashlytics and Analytics are unavailable.
+  * Validation: `app/src/test/.../FirebaseAnalyticsTrackerTest.kt` (4 tests covering null SDKs, throwing SDK, present SDK forwarding).
+
+### Added
+
+- §6.P enforcement extended to `scripts/tag.sh` — refuses tags lacking CHANGELOG.md entry or per-version distribute-changelog snapshot, for android + api + api-go.
+- Bluff-hunt evidence record at `.lava-ci-evidence/bluff-hunt/2026-05-05-firebase-and-distribute-mandates.json` covering 5 falsifiability rehearsals + 2 production-code targets per §6.N.2.
+- Per-version distribute-changelog snapshots for the proxy (1.0.5-1005) and api-go (2.0.10-2010) channels.
+
+### Versions bumped this cycle
+
+| Component | Old | New |
+|---|---|---|
+| Android `:app` | 1.2.4 (1024) | **1.2.5 (1025)** |
+| Ktor proxy | 1.0.5 (1005) | (unchanged) |
+| lava-api-go | 2.0.10 (2010) | (unchanged) |
+
+The 1.2.5 cycle is Android-only — proxy + lava-api-go did not require new fixes; their 1.2.4-cycle versions stay current.
+
+---
+
 ## Lava-Android-1.2.4-1024 — 2026-05-05
 
 **Channels:** Firebase App Distribution (debug + release)
