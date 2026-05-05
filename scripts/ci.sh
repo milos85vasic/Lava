@@ -125,6 +125,34 @@ echo "==> Unit tests"
 echo "==> Constitutional doc parser"
 ./scripts/check-constitution.sh
 
+# ---------------------------------------------------------------------
+# 5b. Hermetic bash test suites (added 2026-05-05 to close the gap that
+# regression tests under tests/ were only run on manual operator trigger).
+# Each suite is independent and self-contained: a `run_all.sh` that runs
+# every `test_*.sh` and exits non-zero if any fails. set -euo pipefail
+# propagates the failure.
+# ---------------------------------------------------------------------
+echo "==> Hermetic bash test suites"
+for suite_dir in tests/firebase tests/ci-sh tests/compose-layout \
+                 tests/tag-helper tests/pre-push tests/check-constitution \
+                 tests/vm-images tests/vm-signing tests/vm-distro; do
+  if [[ -d "$suite_dir" ]]; then
+    runner="$suite_dir/run_all.sh"
+    if [[ -x "$runner" ]]; then
+      echo "    -> $suite_dir"
+      bash "$runner" >/dev/null
+    elif [[ -f "$suite_dir/check_constitution_test.sh" ]]; then
+      # tests/check-constitution has a flat layout (one test_*.sh entry).
+      bash "$suite_dir/check_constitution_test.sh" >/dev/null
+    elif [[ -f "$suite_dir/check4_test.sh" ]]; then
+      # tests/pre-push has a flat layout (multiple check<N>_test.sh entries).
+      for t in "$suite_dir"/check*_test.sh; do
+        bash "$t" >/dev/null
+      done
+    fi
+  fi
+done
+
 if [[ "$MODE" == "--changed-only" ]]; then
   echo "==> --changed-only: skipping parity, mutation, fixture-freshness, Compose UI"
   echo "$MODE" > "$EVIDENCE_DIR/mode"
