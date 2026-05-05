@@ -1,0 +1,37 @@
+{
+  "date": "2026-05-05 evening",
+  "protocol": "Seventh Law clause 5 + §6.N.1.1 (subsequent-same-day lighter incident-response hunt)",
+  "session_context": "Group A-prime spec implementation. The 8th anti-bluff invocation landed earlier today via Group A; this Group A-prime work session is within 24h of the 8th invocation, so per §6.N.1.1 the lighter 1-2 file incident-response hunt suffices.",
+  "scope": "1-2 file rehearsal targeting the gate-shaping production code that Group A-prime modifies — specifically scripts/check-constitution.sh's new §6.N hard-fail check and Submodules/Containers/pkg/emulator/cleanup.go's prefix matcher.",
+  "primary_target": {
+    "file": "scripts/check-constitution.sh",
+    "rationale": "Group A-prime adds §6.N + §6.N-debt presence checks here that hard-fail. The conceptual filter ('would a bug here be invisible to existing tests?') answers YES — without the new tests/check-constitution/check_constitution_test.sh, a regression to the §6.N check would only surface at the next constitution-checker run, potentially after the offending commit had already shipped.",
+    "mutation": "Comment out the `required_6n=( ... )` loop in scripts/check-constitution.sh (Section 6).",
+    "observed_failure": "tests/check-constitution/check_constitution_test.sh::test_missing_6n_heading_fails fails with 'FAIL test_missing_6n_heading_fails: script passed despite missing §6.N' — the stripped-CLAUDE.md fixture is now silently accepted, test correctly catches the bluff.",
+    "reverted": true
+  },
+  "secondary_target": {
+    "file": "Submodules/Containers/pkg/emulator/cleanup.go",
+    "rationale": "STRONGER §6.N variant binds Containers — every pkg/emulator/*.go change requires rehearsal.",
+    "mutation": "Loosen the `strings.HasPrefix(comm, \"qemu-system-\")` matcher to `strings.HasPrefix(comm, \"qemu-\")` (drop trailing dash).",
+    "observed_failure": "TestCleanup_StrictPrefix asserts qemu-img (PID 8888) is NOT in Found; mutation produces 8888 in Found, test fails with 'expected []int{7777}, got []int{7777, 8888}'.",
+    "reverted": true
+  },
+  "tertiary_target": {
+    "file": "Submodules/Containers/pkg/emulator/matrix.go (gradle.log persistence)",
+    "rationale": "Recent change to RunMatrix; falsifiability protocol mandatory per Containers stronger §6.N.",
+    "mutation": "Replace `os.WriteFile(logPath, []byte(out), 0o644)` with `os.WriteFile(logPath, []byte(\"\"), 0o644)` (write empty content).",
+    "observed_failure": "TestAndroidMatrixRunner_AllAVDsPass_ReportsAllPassed fails on the new gradle.log assertion: 'gradle.log for <avd> must contain the captured runOutputs[i]' — content is empty, expected 'BUILD SUCCESSFUL'.",
+    "reverted": true
+  },
+  "summary": {
+    "synthetic_test_files_mutated": 0,
+    "production_files_mutated": 3,
+    "real_bluffs_found": 0,
+    "remediation_owed": 0
+  },
+  "remediation_commits": [
+    "Submodules/Containers 6f4c0a068ca65d84f3933bd900d6df45c346334d (Cleanup API + cmd/emulator-cleanup + matrix.go gradle-log persistence)",
+    "Lava parent 2c7037d93c93932a489b657f6217c47006164455 (pre-push Check 4 + 5 + check-constitution §6.N awareness + run-emulator-tests refactor)"
+  ]
+}

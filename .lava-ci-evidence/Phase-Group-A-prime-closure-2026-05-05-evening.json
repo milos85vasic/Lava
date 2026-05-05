@@ -1,0 +1,35 @@
+{
+  "phase": "Group A-prime — §6.N-debt closure",
+  "spec": "docs/superpowers/specs/2026-05-05-anti-bluff-mandate-reinforcement-group-a-prime-design.md (commit bb2d6a1)",
+  "supersedes": null,
+  "closes": "§6.N-debt entry in CLAUDE.md (added by Group A commit 52db359; resolved by this Group A-prime implementation)",
+  "deliverables_landed": {
+    "lava_parent": [
+      ".githooks/pre-push: Check 4 (§6.N.1.2 enforcement) + Check 5 (§6.N.1.3 enforcement)",
+      "scripts/check-constitution.sh: §6.N + §6.N-debt presence + propagation count + hook-marker checks; warn → hard-fail flip",
+      "scripts/run-emulator-tests.sh: refactored to invoke cmd/emulator-cleanup binary instead of inline cleanup_qemu_zombies",
+      "tests/pre-push/check4_test.sh + check5_test.sh + tests/check-constitution/check_constitution_test.sh",
+      "CLAUDE.md §6.N-debt block updated with RESOLVED 2026-05-05 evening paragraph"
+    ],
+    "containers_submodule": [
+      "pkg/emulator/cleanup.go + cleanup_test.go (Cleanup API with 4 tests, falsifiability-rehearsed prefix matcher)",
+      "cmd/emulator-cleanup/main.go (thin CLI: --verbose flag, exits 0 best-effort)",
+      "pkg/emulator/matrix.go: per-AVD gradle.log + test-report/ persistence",
+      "pkg/emulator/matrix_test.go: assertion that gradle.log is written with captured runOutputs[i]"
+    ]
+  },
+  "remediation_commits": {
+    "containers": "6f4c0a068ca65d84f3933bd900d6df45c346334d (lava-pin/2026-05-05-clause-6n-prime)",
+    "lava_parent_phase_b": "2c7037d93c93932a489b657f6217c47006164455",
+    "lava_parent_phase_c": "b426c69292154ecdadaf874e8f9ddd4b13541049"
+  },
+  "remaining_open_gaps": [
+    "JUnit XML extraction beyond simple cp (fancy reporting — future work, NOT blocking)",
+    "Pre-push hook performance: Check 4 + Check 5 add ~5 grep/jq calls per pushed SHA. Acceptable today (typical push is 1-3 SHAs); revisit if perf bites."
+  ],
+  "verification": {
+    "all_4_upstreams_converged_after_phase_c": "to be confirmed at execution",
+    "containers_pin_bumped_to_lava_pin_2026_05_05_clause_6n_prime": true,
+    "test_suite_green": "tests/pre-push/check{4,5}_test.sh + tests/check-constitution/check_constitution_test.sh all green"
+  }
+}
