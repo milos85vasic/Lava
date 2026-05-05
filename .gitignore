@@ -38,3 +38,31 @@ KIMI.md
 **/build/
 .env.*
 .env.local
+
+# === Firebase artifacts (added 2026-05-05) ===
+# google-services.json contains the project's web API key — technically
+# public per Firebase's threat model, but gitignored by project convention
+# (see root CLAUDE.md §6.H: credentials never in tracked files).
+app/google-services.json
+**/google-services.json
+
+# Firebase Web SDK config for Go API (firebase-web-config.json).
+# Contains apiKey, authDomain, projectId, etc. — public-facing per
+# Firebase's threat model but gitignored by convention.
+lava-api-go/firebase-web-config.json
+
+# Firebase Admin SDK service account key — HIGHLY SENSITIVE.
+# This is a long-lived credential that grants server-side access
+# to ALL Firebase services for the project. NEVER commit.
+lava-api-go/firebase-admin-key.json
+firebase-admin-key.json
+**/firebase-admin-*.json
+
+# Firebase debug log can leak request bodies including project IDs,
+# OAuth tokens, etc. Local-only.
+firebase-debug.log
+**/firebase-debug.log
+
+# Firebase App Distribution upload reports — local telemetry.
+.firebase/
+firebase-distribute-*.log
