@@ -2,6 +2,8 @@
 
 All notable changes to **Lava** (the Android client and the lava-api-go service) are documented in this file.
 
+Per constitutional clause **§6.P (Distribution Versioning + Changelog Mandate)**, every distributed build MUST appear here BEFORE `scripts/firebase-distribute.sh` is run. The script refuses to operate without a matching entry.
+
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) loosely, adapted to a multi-artifact repository. Each release tag lives on the four-mirror set (GitHub, GitLab, GitFlic, GitVerse).
 
 Tag formats:
@@ -10,6 +12,65 @@ Tag formats:
 - `Lava-API-<version>-<code>` — legacy Ktor proxy (`:proxy`).
 
 The `<code>` suffix is the integer version code (Android `versionCode`, api-go `version.Code`).
+
+Per-version distribution snapshots (the exact text shipped as App Distribution release-notes) live under `.lava-ci-evidence/distribute-changelog/<channel>/<version>-<code>.md`.
+
+---
+
+## Lava-Android-1.2.4-1024 — 2026-05-05
+
+**Channels:** Firebase App Distribution (debug + release)
+**Previous published:** Lava-Android-1.2.3-1023 (2026-05-05 22:33 UTC)
+
+### Fixed
+
+- **fix(firebase): harden Firebase init against the 2 Crashlytics crashes recorded against 1.2.3 (1023)** — closure log at `.lava-ci-evidence/crashlytics-resolved/2026-05-05-firebase-init-hardening.md`. Removed redundant `FirebaseApp.initializeApp(this)` (FirebaseInitProvider auto-init covers it; the explicit call raced with StrictMode in some launches). Extracted Firebase init into testable `FirebaseInitializer` with per-SDK `runCatching` guards. Added Firebase keep rules to `app/proguard-rules.pro` since the BOM consumer rules don't fully cover R8 stripping of reflective entry points. Validation test: `app/src/test/.../FirebaseInitializerTest.kt` (5 tests). Challenge Test: `app/src/androidTest/.../Challenge13FirebaseColdStartResilienceTest.kt`. Falsifiability rehearsal recorded in commit body. Commit: `6758b73`.
+
+### Added
+
+- **AnalyticsTracker wired into real user paths** — `LoginViewModel`, `SearchViewModel`, `TopicViewModel`, `ProviderLoginViewModel` emit canonical events (`lava_login_submit`, `lava_login_success`, `lava_login_failure`, `lava_search_submit`, `lava_view_topic`, `lava_download_torrent`, `lava_download_torrent_failure`) via the Hilt-injectable `AnalyticsTracker` interface. Implementation lives in `:app` (`FirebaseAnalyticsTracker`) so feature modules remain reusable per the Decoupled Reusable Architecture rule. Commits: `6758b73`, follow-up.
+- **lava-api-go FirebaseTelemetry middleware** at `internal/middleware/firebase.go` — Gin middleware that records 5xx + recovered panics as Firebase non-fatals; 4xx + 2xx logged as events. Wired into `cmd/lava-api-go/main.go` `buildRouter`. 6 unit tests with falsifiability rehearsal. Honest no-op fallback when no service-account key configured.
+
+### Constitution / Process
+
+- **§6.O Crashlytics-Resolved Issue Coverage Mandate** — every Crashlytics-resolved issue requires (a) validation test, (b) Challenge Test, (c) closure log under `.lava-ci-evidence/crashlytics-resolved/`. Propagated to all 16 vasic-digital submodules + lava-api-go's three doc files. Constitution checker hard-fails on missing §6.O reference in any of the 21+ doc trios. Commits: `6758b73`, `017da23`.
+- **§6.P Distribution Versioning + Changelog Mandate** — every distribute action requires strictly increasing versionCode + matching CHANGELOG.md entry + per-version snapshot. `scripts/firebase-distribute.sh` enforces both gates. **This entry is the inaugural application of §6.P.**
+
+### Versions bumped this cycle
+
+| Component | Old | New |
+|---|---|---|
+| Android `:app` | 1.2.3 (1023) | **1.2.4 (1024)** |
+| Ktor proxy | 1.0.4 (1004) | **1.0.5 (1005)** |
+| Proxy `ServiceAdvertisement.API_VERSION` | 1.0.4 | **1.0.5** |
+| lava-api-go | 2.0.9 (2009) | **2.0.10 (2010)** |
+
+---
+
+## Lava-Android-1.2.3-1023 — 2026-05-05 22:33 UTC
+
+**Channel:** Firebase App Distribution (inaugural)
+**Previous published:** N/A (first Firebase-instrumented build)
+
+### Added (inaugural Firebase integration)
+
+- Crashlytics + Analytics + Performance Monitoring wired in `LavaApplication.kt`.
+- App Distribution replaces local `releases/` flow as canonical operator delivery channel.
+- 5 distribution scripts under `scripts/`: `firebase-env.sh`, `firebase-setup.sh`, `firebase-distribute.sh`, `firebase-stats.sh`, `distribute.sh`.
+- Tester roster loaded from `.env` (`LAVA_FIREBASE_TESTERS_*`).
+- 2 anti-bluff bash regression tests under `tests/firebase/` (no WARN-swallow + gitignore-coverage).
+- `lava-api-go/internal/firebase/` server-side skeleton with no-op fallback when service-account key absent.
+
+Commit: `e9de508`.
+
+### Versions bumped this cycle
+
+| Component | Old | New |
+|---|---|---|
+| Android `:app` | 1.2.2 (1022) | 1.2.3 (1023) |
+| Ktor proxy | 1.0.3 (1003) | 1.0.4 (1004) |
+| Proxy `ServiceAdvertisement.API_VERSION` | 1.0.1 (3 versions stale!) | 1.0.4 |
+| lava-api-go | 2.0.8 (2008) | 2.0.9 (2009) |
 
 ---
 

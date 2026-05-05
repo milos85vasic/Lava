@@ -205,6 +205,21 @@ for f in "${propagation_targets[@]}"; do
 done
 
 # ----------------------------------------------------------------
+# 9d. §6.P propagation count across the same 21+ targets
+# (added 2026-05-05, Distribution Versioning + Changelog Mandate
+# inheritance enforcement, TWELFTH §6.L invocation). Same pattern.
+# ----------------------------------------------------------------
+for f in "${propagation_targets[@]}"; do
+  if [[ ! -f "$f" ]]; then continue; fi
+  count=$(grep -c "6\.P" "$f")
+  if [[ "$count" -lt 1 ]]; then
+    echo "§6.P propagation REGRESSED: $f has 0 references (expected ≥ 1)" >&2
+    echo "  → Re-propagate per the §6.P Distribution Versioning + Changelog Mandate pattern." >&2
+    exit 1
+  fi
+done
+
+# ----------------------------------------------------------------
 # 9c. §6.O closure-log soft warning. When a commit introduces a Crashlytics
 # fix (commit message contains "Crashlytics" + "fix"/"resolve"), the gate
 # WARNS if no matching .lava-ci-evidence/crashlytics-resolved/ entry exists

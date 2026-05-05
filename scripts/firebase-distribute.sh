@@ -60,6 +60,47 @@ fi
 echo "==> Distributing Lava Android $APP_VERSION ($APP_VERSION_CODE)"
 
 # ----------------------------------------------------------------
+# 1a. §6.P (Distribution Versioning + Changelog Mandate) gates.
+# Refuses to operate when:
+#   - current versionCode <= last distributed versionCode for this channel
+#   - CHANGELOG.md lacks entry for this version
+#   - per-version snapshot file is missing
+# ----------------------------------------------------------------
+CHANGELOG_DIR="$LAVA_REPO_ROOT/.lava-ci-evidence/distribute-changelog/firebase-app-distribution"
+LAST_VERSION_FILE="$CHANGELOG_DIR/last-version"
+SNAPSHOT_FILE="$CHANGELOG_DIR/$APP_VERSION-$APP_VERSION_CODE.md"
+
+mkdir -p "$CHANGELOG_DIR"
+
+# Gate 1: monotonic version code
+if [[ -f "$LAST_VERSION_FILE" ]]; then
+    LAST_DISTRIBUTED="$(cat "$LAST_VERSION_FILE" 2>/dev/null || echo 0)"
+    if [[ "$APP_VERSION_CODE" -le "$LAST_DISTRIBUTED" ]]; then
+        echo "FATAL §6.P: current versionCode $APP_VERSION_CODE is not strictly greater than the last distributed code $LAST_DISTRIBUTED." >&2
+        echo "       Bump versionCode in app/build.gradle.kts before re-running this script." >&2
+        echo "       Re-distribution of an already-published versionCode is forbidden." >&2
+        exit 1
+    fi
+fi
+
+# Gate 2: CHANGELOG.md entry
+if ! grep -qE "Lava-Android-?$APP_VERSION-?$APP_VERSION_CODE|Lava-Android $APP_VERSION \\($APP_VERSION_CODE\\)" "$LAVA_REPO_ROOT/CHANGELOG.md"; then
+    echo "FATAL §6.P: CHANGELOG.md does not contain an entry for version $APP_VERSION ($APP_VERSION_CODE)." >&2
+    echo "       Add an entry to CHANGELOG.md before distributing." >&2
+    exit 1
+fi
+
+# Gate 3: per-version snapshot file exists
+if [[ ! -f "$SNAPSHOT_FILE" ]]; then
+    echo "FATAL §6.P: per-version distribute-changelog snapshot missing." >&2
+    echo "       Expected: $SNAPSHOT_FILE" >&2
+    echo "       This file is shipped to App Distribution as release-notes." >&2
+    exit 1
+fi
+
+echo "    §6.P gates passed: versionCode monotonic; CHANGELOG.md entry present; snapshot at $SNAPSHOT_FILE"
+
+# ----------------------------------------------------------------
 # 2. Resolve git SHA + branch for the release notes
 # ----------------------------------------------------------------
 GIT_SHA="$(git rev-parse --short HEAD)"
@@ -69,7 +110,11 @@ TIMESTAMP="$(date -u +%Y-%m-%dT%H-%M-%SZ)"
 if [[ -n "$RELEASE_NOTES_OVERRIDE" ]]; then
     RELEASE_NOTES="$RELEASE_NOTES_OVERRIDE"
 else
-    RELEASE_NOTES="Lava Android $APP_VERSION ($APP_VERSION_CODE)
+    # §6.P: ship the per-version snapshot file as release-notes (truncated
+    # to App Distribution's 16KB limit). The snapshot is the canonical
+    # operator/tester-visible "what's new" payload.
+    RELEASE_NOTES="$(head -c 16000 "$SNAPSHOT_FILE")
+---
 branch=$GIT_BRANCH sha=$GIT_SHA built=$TIMESTAMP"
 fi
 
@@ -134,6 +179,11 @@ LOG="firebase-distribute-${APP_VERSION}-${APP_VERSION_CODE}-${TIMESTAMP}.log"
     echo "project=$LAVA_FIREBASE_PROJECT_ID"
 } > "$LOG"
 echo "==> Distribute log: $LOG (gitignored)"
+
+# §6.P: persist the version code we just published so the next distribute
+# session refuses to ship the same (or older) code.
+echo "$APP_VERSION_CODE" > "$LAST_VERSION_FILE"
+echo "==> §6.P last-version recorded: $APP_VERSION_CODE → $LAST_VERSION_FILE"
 
 echo "==> Firebase distribute complete."
 echo "    Console: https://console.firebase.google.com/project/$LAVA_FIREBASE_PROJECT_ID/appdistribution"

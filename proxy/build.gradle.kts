@@ -3,8 +3,8 @@ plugins {
 }
 
 // Managed by scripts/tag.sh — do not edit manually.
-val apiVersionName = "1.0.4"
-val apiVersionCode = 1004
+val apiVersionName = "1.0.5"
+val apiVersionCode = 1005
 
 group = "digital.vasic.lava.api"
 version = apiVersionName

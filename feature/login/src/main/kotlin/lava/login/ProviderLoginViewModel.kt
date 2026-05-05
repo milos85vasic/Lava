@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.first
 import lava.auth.api.AuthService
+import lava.common.analytics.AnalyticsTracker
 import lava.credentials.ProviderCredentialManager
 import lava.domain.usecase.ValidateInputUseCase
 import lava.logger.api.LoggerFactory
@@ -31,6 +32,7 @@ internal class ProviderLoginViewModel @Inject constructor(
     private val credentialManager: ProviderCredentialManager,
     private val sdk: LavaTrackerSdk,
     private val authService: AuthService,
+    private val analytics: AnalyticsTracker,
     loggerFactory: LoggerFactory,
 ) : ViewModel(), ContainerHost<ProviderLoginState, LoginSideEffect> {
 
@@ -201,6 +203,13 @@ internal class ProviderLoginViewModel @Inject constructor(
 
         val providerId = state.selectedProviderId ?: return@intent
         val provider = state.providers.firstOrNull { it.providerId == providerId }
+        analytics.event(
+            AnalyticsTracker.Events.LOGIN_SUBMIT,
+            mapOf(
+                AnalyticsTracker.Params.PROVIDER to providerId,
+                "auth_type" to (provider?.authType ?: "unknown"),
+            ),
+        )
 
         // Phase 1.5 (2026-05-04): the global state.anonymousMode toggle
         // ONLY takes effect for providers that declare
@@ -226,6 +235,14 @@ internal class ProviderLoginViewModel @Inject constructor(
             // onboarding-navigation.json.
             authService.signalAuthorized(
                 name = "Anonymous (${provider?.displayName ?: providerId})",
+            )
+            analytics.event(
+                AnalyticsTracker.Events.LOGIN_SUCCESS,
+                mapOf(
+                    AnalyticsTracker.Params.PROVIDER to providerId,
+                    "auth_type" to (provider?.authType ?: "NONE"),
+                    "anonymous" to "true",
+                ),
             )
             reduce { state.copy(isLoading = false) }
             postSideEffect(LoginSideEffect.Success)
@@ -275,6 +292,10 @@ internal class ProviderLoginViewModel @Inject constructor(
                             .onFailure { logger.e(it) { "switchTracker($providerId) failed in auth-success path" } }
                         authService.signalAuthorized(
                             name = state.usernameInput.value.text,
+                        )
+                        analytics.event(
+                            AnalyticsTracker.Events.LOGIN_SUCCESS,
+                            mapOf(AnalyticsTracker.Params.PROVIDER to providerId),
                         )
                         postSideEffect(LoginSideEffect.Success)
                     }

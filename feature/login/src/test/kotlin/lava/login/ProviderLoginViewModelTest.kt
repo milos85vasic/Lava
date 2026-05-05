@@ -171,8 +171,20 @@ class ProviderLoginViewModelTest {
             credentialManager = manager,
             sdk = sdk,
             authService = authService,
+            analytics = recordingAnalytics,
             loggerFactory = TestLoggerFactory(),
         )
+    }
+
+    private val recordingAnalytics = object : lava.common.analytics.AnalyticsTracker {
+        val events = mutableListOf<Pair<String, Map<String, String>>>()
+        override fun event(name: String, params: Map<String, String>) {
+            events += name to params
+        }
+        override fun setUserId(userId: String?) {}
+        override fun setProperty(key: String, value: String?) {}
+        override fun recordNonFatal(throwable: Throwable, context: Map<String, String>) {}
+        override fun log(message: String) {}
     }
 
     @Test

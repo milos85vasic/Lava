@@ -18,7 +18,7 @@ object ServiceAdvertisement {
     // truth instead of duplicating the literal string. Eliminates a release-time
     // drift class — the test cannot pass against a stale API_VERSION because
     // there is no second copy of the value to drift from.
-    internal const val API_VERSION = "1.0.4"
+    internal const val API_VERSION = "1.0.5"
 
     private var jmDNS: JmDNS? = null
     private var registeredServiceInfo: ServiceInfo? = null
