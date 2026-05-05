@@ -91,7 +91,48 @@ class ServiceAdvertisementTest {
         assertEquals("identity", info.getPropertyString("compression"))
         assertEquals("optional", info.getPropertyString("tls"))
         assertNotNull(info.getPropertyString("version"))
-        assertEquals("1.0.1", info.getPropertyString("version"))
+        // 2026-05-05 (10th anti-bluff invocation, Phase R6): the version is asserted
+        // against ServiceAdvertisement.API_VERSION (now internal) — single source of
+        // truth. Earlier the test asserted the literal "1.0.1" and silently went
+        // stale through 3 version bumps; the build_and_release.sh release-prep run
+        // for Lava-Android-1.2.3 caught the drift, prompting this de-duplication.
+        assertEquals(ServiceAdvertisement.API_VERSION, info.getPropertyString("version"))
+    }
+
+    /**
+     * Regression test for the 2026-05-05 (10th anti-bluff invocation) drift:
+     * the proxy's `apiVersionName` (build.gradle.kts) and the hardcoded
+     * `ServiceAdvertisement.API_VERSION` constant MUST track each other until
+     * the SP-2 BuildConfig wiring lands. This test asserts the API_VERSION
+     * constant matches the apiVersionName captured at gradle-build time via
+     * the `LAVA_PROXY_API_VERSION_NAME` system property the proxy module
+     * sets when running tests.
+     *
+     * Falsifiability: if the proxy build.gradle.kts bumps `apiVersionName`
+     * without bumping `API_VERSION` (or vice-versa), this test fails with
+     * a clear `expected:<X.Y.Z> but was:<A.B.C>` mismatch — preventing the
+     * silent drift the original literal-string assertion went through 3
+     * versions before catching.
+     *
+     * The system property is plumbed via proxy/build.gradle.kts:
+     *   tasks.test { systemProperty("LAVA_PROXY_API_VERSION_NAME", apiVersionName) }
+     */
+    @Test
+    fun `API_VERSION constant tracks proxy apiVersionName`() {
+        val gradleVersionName = System.getProperty("LAVA_PROXY_API_VERSION_NAME")
+        assertNotNull(
+            "LAVA_PROXY_API_VERSION_NAME system property MUST be plumbed " +
+                "via proxy/build.gradle.kts tasks.test{} block — see the test KDoc",
+            gradleVersionName,
+        )
+        assertEquals(
+            "ServiceAdvertisement.API_VERSION must match proxy/build.gradle.kts " +
+                "apiVersionName until SP-2 BuildConfig wiring (see proxy CLAUDE.md " +
+                "follow-up). Bumping one without the other is a release-time drift " +
+                "that the 1.0.1→1.0.4 silent gap exposed on 2026-05-05.",
+            gradleVersionName,
+            ServiceAdvertisement.API_VERSION,
+        )
     }
 
     @Test

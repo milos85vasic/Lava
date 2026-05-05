@@ -12,7 +12,13 @@ object ServiceAdvertisement {
     //  read it here at runtime instead of hardcoding. Today this string is purely
     //  cosmetic for clients (they read it but do not gate behavior on it). See
     //  docs/superpowers/specs/2026-04-28-sp2-go-api-migration-design.md §8.3.
-    private const val API_VERSION = "1.0.1"
+    //
+    // Made `internal` (was `private`) on 2026-05-05 (10th anti-bluff invocation,
+    // Phase R6) so ServiceAdvertisementTest can reference this single source of
+    // truth instead of duplicating the literal string. Eliminates a release-time
+    // drift class — the test cannot pass against a stale API_VERSION because
+    // there is no second copy of the value to drift from.
+    internal const val API_VERSION = "1.0.4"
 
     private var jmDNS: JmDNS? = null
     private var registeredServiceInfo: ServiceInfo? = null
