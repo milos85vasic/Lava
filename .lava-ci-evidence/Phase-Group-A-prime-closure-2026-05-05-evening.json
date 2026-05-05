@@ -21,7 +21,7 @@
   "remediation_commits": {
     "containers": "6f4c0a068ca65d84f3933bd900d6df45c346334d (lava-pin/2026-05-05-clause-6n-prime)",
     "lava_parent_phase_b": "2c7037d93c93932a489b657f6217c47006164455",
-    "lava_parent_phase_c": "b426c69292154ecdadaf874e8f9ddd4b13541049"
+    "lava_parent_phase_c": "71b4f2afa59681ac325971db0fe3b373af20848f"
   },
   "remaining_open_gaps": [
     "JUnit XML extraction beyond simple cp (fancy reporting — future work, NOT blocking)",
