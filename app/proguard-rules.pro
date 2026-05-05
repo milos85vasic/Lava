@@ -31,5 +31,18 @@
 -keep class com.google.crypto.tink.** { *; }
 -keep class lava.network.dto.** { *; }
 
+# Firebase keep rules — added 2026-05-05 after operator reported 2
+# Crashlytics-recorded crashes within minutes of the first Firebase-
+# instrumented release distribution. The Firebase BOM ships consumer
+# ProGuard rules but the operator-observed crashes implicate R8
+# stripping of Firebase reflective entry points. These rules harden
+# Crashlytics + Analytics + Performance against R8 minification.
+-keep class com.google.firebase.** { *; }
+-keep class com.google.android.gms.measurement.** { *; }
+-keep class com.google.android.gms.internal.measurement.** { *; }
+-keepclassmembers class com.google.firebase.** { *; }
+-dontwarn com.google.firebase.**
+-dontwarn com.google.android.gms.**
+
 -keepattributes SourceFile,LineNumberTable,RuntimeVisibleAnnotations,AnnotationDefault
 -renamesourcefileattribute SourceFile

@@ -7,6 +7,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collectLatest
+import lava.common.analytics.AnalyticsTracker
 import lava.domain.model.PagingAction
 import lava.domain.model.refresh
 import lava.domain.model.retry
@@ -39,6 +40,7 @@ internal class TopicViewModel @Inject constructor(
     private val observeFavoriteStateUseCase: ObserveFavoriteStateUseCase,
     private val observeTopicPagingDataUseCase: ObserveTopicPagingDataUseCase,
     private val toggleFavoriteUseCase: ToggleFavoriteUseCase,
+    private val analytics: AnalyticsTracker,
     loggerFactory: LoggerFactory,
 ) : ViewModel(), ContainerHost<TopicState, TopicSideEffect> {
     private val logger = loggerFactory.get("OpenTopicViewModel")
@@ -74,6 +76,10 @@ internal class TopicViewModel @Inject constructor(
     }
 
     private fun loadTopic() = intent {
+        analytics.event(
+            AnalyticsTracker.Events.VIEW_TOPIC,
+            mapOf(AnalyticsTracker.Params.TOPIC_ID to id.toString()),
+        )
         runCatching { coroutineScope { getTopicUseCase(id) } }
             .onSuccess { topic ->
                 reduce {
@@ -90,7 +96,15 @@ internal class TopicViewModel @Inject constructor(
                     )
                 }
             }
-            .onFailure { }
+            .onFailure { err ->
+                analytics.recordNonFatal(
+                    err,
+                    mapOf(
+                        AnalyticsTracker.Params.TOPIC_ID to id.toString(),
+                        AnalyticsTracker.Params.ERROR to "load_topic_failed",
+                    ),
+                )
+            }
     }
 
     private fun observeFavoritesState() = intent {
@@ -183,12 +197,23 @@ internal class TopicViewModel @Inject constructor(
 
     private fun onTorrentFileClick(title: String) = intent {
         if (isAuthorizedUseCase()) {
+            analytics.event(
+                AnalyticsTracker.Events.DOWNLOAD_TORRENT,
+                mapOf(AnalyticsTracker.Params.TOPIC_ID to id.toString()),
+            )
             postSideEffect(TopicSideEffect.ShowDownloadProgress)
             reduce { state.copy(downloadState = DownloadState.Started) }
             val uri = downloadTorrentUseCase(id, title)
             if (uri != null) {
                 intent { reduce { state.copy(downloadState = DownloadState.Completed(uri)) } }
             } else {
+                analytics.event(
+                    AnalyticsTracker.Events.DOWNLOAD_TORRENT_FAILURE,
+                    mapOf(
+                        AnalyticsTracker.Params.TOPIC_ID to id.toString(),
+                        AnalyticsTracker.Params.ERROR to "download_failed",
+                    ),
+                )
                 intent { reduce { state.copy(downloadState = DownloadState.Error) } }
             }
         } else {

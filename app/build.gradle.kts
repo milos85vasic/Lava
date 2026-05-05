@@ -147,6 +147,10 @@ dependencies {
 
     debugImplementation(libs.leakcanary)
 
+    // JVM unit tests for app-internal helpers (FirebaseInitializer post-§6.O)
+    testImplementation(libs.junit4)
+    testImplementation(libs.mockk)
+
     // ----------------------------------------------------------------
     // SP-3a Step 6 (2026-04-30): Compose UI + Hilt instrumentation test
     // dependencies. These wire the 8 Challenge Tests at

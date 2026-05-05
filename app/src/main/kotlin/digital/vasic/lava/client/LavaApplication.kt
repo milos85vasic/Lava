@@ -2,13 +2,14 @@ package digital.vasic.lava.client
 
 import android.app.Application
 import android.os.StrictMode
+import android.util.Log
 import androidx.work.WorkManager
-import com.google.firebase.FirebaseApp
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.crashlytics.ktx.crashlytics
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.perf.ktx.performance
 import dagger.hilt.android.HiltAndroidApp
+import digital.vasic.lava.client.firebase.FirebaseInitializer
 import lava.network.api.ImageLoader
 import lava.tracker.client.work.MirrorHealthCheckWorker
 import javax.inject.Inject
@@ -37,21 +38,29 @@ class LavaApplication : Application() {
             )
         }
         super.onCreate()
-        FirebaseApp.initializeApp(this)
-        Firebase.crashlytics.apply {
-            isCrashlyticsCollectionEnabled = !BuildConfig.DEBUG
-            setCustomKey("build_type", if (BuildConfig.DEBUG) "debug" else "release")
-            setCustomKey("version_name", BuildConfig.VERSION_NAME)
-            setCustomKey("version_code", BuildConfig.VERSION_CODE)
-            setCustomKey("application_id", BuildConfig.APPLICATION_ID)
-        }
-        Firebase.analytics.apply {
-            setAnalyticsCollectionEnabled(!BuildConfig.DEBUG)
-            setUserProperty("build_type", if (BuildConfig.DEBUG) "debug" else "release")
-            setUserProperty("app_version", BuildConfig.VERSION_NAME)
-        }
-        Firebase.performance.isPerformanceCollectionEnabled = !BuildConfig.DEBUG
+        // FirebaseApp is auto-initialized by `FirebaseInitProvider` (a
+        // ContentProvider declared by the google-services plugin) before
+        // Application.onCreate() is even called. Manual `initializeApp(this)`
+        // was redundant and a 2026-05-05 Crashlytics incident root cause —
+        // see .lava-ci-evidence/crashlytics-resolved/2026-05-05-firebase-init-hardening.md
+        // for the post-mortem. The initializer below is defensively wrapped
+        // so a single SDK failure cannot kill the app.
+        FirebaseInitializer.initialize(
+            crashlytics = { runCatching { Firebase.crashlytics }.getOrNull() },
+            analytics = { runCatching { Firebase.analytics }.getOrNull() },
+            performance = { runCatching { Firebase.performance }.getOrNull() },
+            isDebug = BuildConfig.DEBUG,
+            versionName = BuildConfig.VERSION_NAME,
+            versionCode = BuildConfig.VERSION_CODE,
+            applicationId = BuildConfig.APPLICATION_ID,
+            warn = { msg, t -> Log.w(TAG, msg, t) },
+        )
+
         imageLoader.setup()
         MirrorHealthCheckWorker.schedule(workManager)
+    }
+
+    companion object {
+        private const val TAG = "LavaApplication"
     }
 }

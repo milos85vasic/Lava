@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import lava.common.analytics.AnalyticsTracker
 import lava.domain.model.search.isEmpty
 import lava.domain.usecase.ObserveAuthStateUseCase
 import lava.domain.usecase.ObserveSearchHistoryUseCase
@@ -29,6 +30,7 @@ internal class SearchViewModel @Inject constructor(
     private val removeSearchHistoryUseCase: RemoveSearchHistoryUseCase,
     private val pinSearchHistoryUseCase: PinSearchHistoryUseCase,
     private val unpinSearchHistoryUseCase: UnpinSearchHistoryUseCase,
+    private val analytics: AnalyticsTracker,
     loggerFactory: LoggerFactory,
 ) : ViewModel(), ContainerHost<SearchState, SearchSideEffect> {
     private val logger = loggerFactory.get("SearchViewModel")
@@ -89,6 +91,10 @@ internal class SearchViewModel @Inject constructor(
     }
 
     private fun onSearchItemClick(search: Search) = intent {
+        analytics.event(
+            AnalyticsTracker.Events.SEARCH_SUBMIT,
+            mapOf(AnalyticsTracker.Params.QUERY to search.filter.query.orEmpty()),
+        )
         postSideEffect(SearchSideEffect.OpenSearch(search.filter))
     }
 

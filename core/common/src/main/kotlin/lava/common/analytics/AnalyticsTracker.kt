@@ -19,6 +19,7 @@ interface AnalyticsTracker {
         const val BROWSE_CATEGORY = "lava_browse_category"
         const val VIEW_TOPIC = "lava_view_topic"
         const val DOWNLOAD_TORRENT = "lava_download_torrent"
+        const val DOWNLOAD_TORRENT_FAILURE = "lava_download_torrent_failure"
         const val PROVIDER_SELECTED = "lava_provider_selected"
         const val ENDPOINT_DISCOVERED = "lava_endpoint_discovered"
     }

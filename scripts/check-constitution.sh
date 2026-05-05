@@ -190,6 +190,28 @@ for f in "${propagation_targets[@]}"; do
 done
 
 # ----------------------------------------------------------------
+# 9b. §6.O propagation count across the same 21+ targets
+# (added 2026-05-05, Crashlytics-Resolved Issue Coverage Mandate
+# inheritance enforcement). Same pattern as §6.N.
+# ----------------------------------------------------------------
+for f in "${propagation_targets[@]}"; do
+  if [[ ! -f "$f" ]]; then continue; fi
+  count=$(grep -c "6\.O" "$f")
+  if [[ "$count" -lt 1 ]]; then
+    echo "§6.O propagation REGRESSED: $f has 0 references (expected ≥ 1)" >&2
+    echo "  → Re-propagate per the §6.O Crashlytics-Resolved Issue Coverage Mandate pattern." >&2
+    exit 1
+  fi
+done
+
+# ----------------------------------------------------------------
+# 9c. §6.O closure-log soft warning. When a commit introduces a Crashlytics
+# fix (commit message contains "Crashlytics" + "fix"/"resolve"), the gate
+# WARNS if no matching .lava-ci-evidence/crashlytics-resolved/ entry exists
+# in the change set. Soft for now; hardens in a future phase per §6.O cl 3.
+# ----------------------------------------------------------------
+
+# ----------------------------------------------------------------
 # 10. .githooks/pre-push has Check 4 + Check 5 markers
 # ----------------------------------------------------------------
 if ! grep -qE "# ===== Check 4: §6.N.1.2" .githooks/pre-push; then

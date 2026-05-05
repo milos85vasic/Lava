@@ -41,8 +41,10 @@ import (
 	"digital.vasic.lava.apigo/internal/cache"
 	"digital.vasic.lava.apigo/internal/config"
 	"digital.vasic.lava.apigo/internal/discovery"
+	"digital.vasic.lava.apigo/internal/firebase"
 	"digital.vasic.lava.apigo/internal/handlers"
 	v1handlers "digital.vasic.lava.apigo/internal/handlers/v1"
+	"digital.vasic.lava.apigo/internal/middleware"
 	"digital.vasic.lava.apigo/internal/nnmclub"
 	"digital.vasic.lava.apigo/internal/kinozal"
 	"digital.vasic.lava.apigo/internal/archiveorg"
@@ -140,11 +142,27 @@ func run() error {
 	registry.Register(archiveorg.NewProviderAdapter(archiveorg.NewClient("https://archive.org")))
 	registry.Register(gutenberg.NewProviderAdapter(gutenberg.NewClient("https://gutendex.com")))
 
+	// Firebase telemetry — Admin-SDK-backed when LAVA_FIREBASE_ADMIN_KEY (or
+	// GOOGLE_APPLICATION_CREDENTIALS) points at a service-account JSON;
+	// honest no-op (structured-log forwarder) otherwise. The middleware is
+	// safe to install in either mode (see internal/middleware/firebase.go).
+	fbClient := firebase.New(firebase.Config{
+		CredentialsPath: os.Getenv("LAVA_FIREBASE_ADMIN_KEY"),
+		ProjectID:       os.Getenv("LAVA_FIREBASE_PROJECT_ID"),
+		Logger:          logger,
+	})
+	if fbClient.Configured() {
+		logger.Info("firebase: admin client configured (server-side telemetry active)")
+	} else {
+		logger.Info("firebase: no-op mode (structured-log fallback; set LAVA_FIREBASE_ADMIN_KEY to enable)")
+	}
+
 	router := buildRouter(routerDeps{
 		Cache:     c,
 		Scraper:   scraper,
 		Registry:  registry,
 		Metrics:   metrics,
+		Firebase:  fbClient,
 		Readiness: func(ctx context.Context) error {
 			if err := pgClient.HealthCheck(ctx); err != nil {
 				return fmt.Errorf("postgres: %w", err)
@@ -228,6 +246,7 @@ type routerDeps struct {
 	Registry  *provider.ProviderRegistry
 	Metrics   *observability.Metrics
 	Readiness observability.ReadinessProbe
+	Firebase  firebase.Client
 }
 
 // buildRouter assembles the Gin engine. Factored out of run() so it can
@@ -239,6 +258,7 @@ func buildRouter(deps routerDeps) *gin.Engine {
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.New()
 	router.Use(gin.Recovery())
+	router.Use(middleware.FirebaseTelemetry(deps.Firebase))
 	router.Use(auth.GinMiddleware())
 	if deps.Metrics != nil {
 		router.Use(deps.Metrics.GinMiddleware())

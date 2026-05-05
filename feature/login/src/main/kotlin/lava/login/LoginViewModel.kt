@@ -3,6 +3,7 @@ package lava.login
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import lava.common.analytics.AnalyticsTracker
 import lava.domain.usecase.LoginUseCase
 import lava.domain.usecase.ValidateInputUseCase
 import lava.logger.api.LoggerFactory
@@ -19,6 +20,7 @@ import javax.inject.Inject
 internal class LoginViewModel @Inject constructor(
     private val loginUseCase: LoginUseCase,
     private val validateInputUseCase: ValidateInputUseCase,
+    private val analytics: AnalyticsTracker,
     loggerFactory: LoggerFactory,
 ) : ViewModel(), ContainerHost<LoginState, LoginSideEffect> {
     private val logger = loggerFactory.get("LoginViewModel")
@@ -103,6 +105,7 @@ internal class LoginViewModel @Inject constructor(
     private fun onSubmitClick() = intent {
         postSideEffect(LoginSideEffect.HideKeyboard)
         reduce { state.copy(isLoading = true) }
+        analytics.event(AnalyticsTracker.Events.LOGIN_SUBMIT)
         val response = loginUseCase(
             state.usernameInput.value.text,
             state.passwordInput.value.text,
@@ -113,11 +116,16 @@ internal class LoginViewModel @Inject constructor(
         when (response) {
             is AuthResult.Success -> {
                 logger.d { "Login success" }
+                analytics.event(AnalyticsTracker.Events.LOGIN_SUCCESS)
                 postSideEffect(LoginSideEffect.Success)
             }
 
             is AuthResult.CaptchaRequired -> {
                 logger.d { "Login failed: captcha required" }
+                analytics.event(
+                    AnalyticsTracker.Events.LOGIN_FAILURE,
+                    mapOf(AnalyticsTracker.Params.ERROR to "captcha_required"),
+                )
                 reduce {
                     state.copy(
                         isLoading = false,
@@ -129,6 +137,10 @@ internal class LoginViewModel @Inject constructor(
 
             is AuthResult.WrongCredits -> {
                 logger.d { "Login failed: wrong credits" }
+                analytics.event(
+                    AnalyticsTracker.Events.LOGIN_FAILURE,
+                    mapOf(AnalyticsTracker.Params.ERROR to "wrong_credits"),
+                )
                 reduce {
                     state.copy(
                         isLoading = false,
@@ -142,6 +154,10 @@ internal class LoginViewModel @Inject constructor(
 
             is AuthResult.Error -> {
                 logger.e(response.error) { "Login error" }
+                analytics.recordNonFatal(
+                    response.error,
+                    mapOf(AnalyticsTracker.Params.ERROR to "login_exception"),
+                )
                 postSideEffect(LoginSideEffect.Error(response.error))
                 reduce { state.copy(isLoading = false) }
             }
