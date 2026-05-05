@@ -151,7 +151,7 @@ else
 fi
 
 # ----------------------------------------------------------------
-# 6. §6.N + §6.N-debt presence in root CLAUDE.md
+# 8. §6.N + §6.N-debt presence in root CLAUDE.md
 # (added 2026-05-05, Group A-prime — closes §6.N-debt's transitional
 # "MAY warn but MUST NOT yet hard-fail" clause).
 # ----------------------------------------------------------------
@@ -168,7 +168,7 @@ for clause in "${required_6n[@]}"; do
 done
 
 # ----------------------------------------------------------------
-# 7. §6.N propagation count across 21 target files (Group A propagation)
+# 9. §6.N propagation count across 21 target files (Group A propagation)
 # ----------------------------------------------------------------
 declare -a propagation_targets=(
   "CLAUDE.md" "AGENTS.md"
@@ -190,7 +190,7 @@ for f in "${propagation_targets[@]}"; do
 done
 
 # ----------------------------------------------------------------
-# 8. .githooks/pre-push has Check 4 + Check 5 markers
+# 10. .githooks/pre-push has Check 4 + Check 5 markers
 # ----------------------------------------------------------------
 if ! grep -qE "# ===== Check 4: §6.N.1.2" .githooks/pre-push; then
   echo "MISSING pre-push Check 4 (§6.N.1.2 enforcement marker)" >&2

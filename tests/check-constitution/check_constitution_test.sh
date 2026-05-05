@@ -83,8 +83,25 @@ test_missing_check4_marker_fails() {
   rm -rf "$fixture"
 }
 
+
+# Test 5: missing pre-push Check 5 marker → hard-fails.
+test_missing_check5_marker_fails() {
+  local fixture
+  fixture=$(make_fixture)
+  cd "$fixture"
+  sed -i '/# ===== Check 5: §6.N.1.3/d' .githooks/pre-push
+  if "$fixture/scripts/check-constitution.sh" >/dev/null 2>&1; then
+    echo "FAIL test_missing_check5_marker_fails: script passed despite missing Check 5 marker"
+    exit 1
+  else
+    echo "PASS test_missing_check5_marker_fails"
+  fi
+  rm -rf "$fixture"
+}
+
 test_live_repo_passes
 test_missing_6n_heading_fails
 test_missing_6n_from_submodule_fails
 test_missing_check4_marker_fails
+test_missing_check5_marker_fails
 echo "all check-constitution tests passed"

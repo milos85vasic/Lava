@@ -93,9 +93,6 @@ if [[ ! -e /dev/kvm ]]; then
     exit 2
 fi
 
-echo "[0/3] Pre-boot qemu-zombie cleanup (clause 6.M action item, via Containers cmd/emulator-cleanup) ..."
-"$BIN_DIR/emulator-cleanup" --verbose 2>&1 || true
-
 CONTAINERS_DIR="$PROJECT_DIR/Submodules/Containers"
 if [[ ! -d "$CONTAINERS_DIR/pkg/emulator" ]]; then
     echo "ERROR: Submodules/Containers/pkg/emulator not found." >&2
@@ -104,12 +101,15 @@ if [[ ! -d "$CONTAINERS_DIR/pkg/emulator" ]]; then
     exit 2
 fi
 
-# Build the matrix binary from the pinned Containers submodule.
+# Build the matrix + cleanup binaries from the pinned Containers submodule.
 BIN_DIR="$PROJECT_DIR/build/emulator-matrix"
 mkdir -p "$BIN_DIR"
-echo "[1/3] Building cmd/emulator-matrix from $CONTAINERS_DIR ..."
+echo "[1/3] Building cmd/emulator-matrix + cmd/emulator-cleanup from $CONTAINERS_DIR ..."
 ( cd "$CONTAINERS_DIR" && go build -o "$BIN_DIR/emulator-matrix" ./cmd/emulator-matrix/ )
 ( cd "$CONTAINERS_DIR" && go build -o "$BIN_DIR/emulator-cleanup" ./cmd/emulator-cleanup/ )
+
+echo "[0/3] Pre-boot qemu-zombie cleanup (clause 6.M action item, via Containers cmd/emulator-cleanup) ..."
+"$BIN_DIR/emulator-cleanup" --verbose 2>&1 || true
 
 # Build the Lava debug APK if requested.
 APK_PATH="$PROJECT_DIR/app/build/outputs/apk/debug/app-debug.apk"
