@@ -1,0 +1,9 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<testsuite name="lava.app.challenges.Challenge01AppLaunchAndTrackerSelectionTest" tests="1" failures="0" errors="0" skipped="0" time="4.504" timestamp="2026-05-05T13:37:19" hostname="localhost">
+  <properties>
+    <property name="device" value="sdk_gphone_x86_64 - 11" />
+    <property name="flavor" value="" />
+    <property name="project" value=":app" />
+  </properties>
+  <testcase name="appLaunches_menuTab_showsExpectedSettingsEntries" classname="lava.app.challenges.Challenge01AppLaunchAndTrackerSelectionTest" time="3.418" />
+</testsuite>

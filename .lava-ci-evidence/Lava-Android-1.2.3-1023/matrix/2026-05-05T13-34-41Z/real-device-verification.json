@@ -1,0 +1,80 @@
+{
+  "all_passed": true,
+  "finished_at": "2026-05-05T16:40:59+03:00",
+  "gating": true,
+  "rows": [
+    {
+      "avd": "CZ_API28_Phone",
+      "api_level": 28,
+      "form_factor": "phone",
+      "boot_seconds": 12.792209064,
+      "test_class": "lava.app.challenges.Challenge01AppLaunchAndTrackerSelectionTest",
+      "test_passed": true,
+      "test_seconds": 60.751379981,
+      "gradle_log_path": "CZ_API28_Phone/gradle.log",
+      "diag": {
+        "target": "Android 9.0 (\"Pie\") Tag/ABI: google_apis/x86_64",
+        "sdk": 28,
+        "device": "Android SDK built for x86_64",
+        "adb_devices_state": "localhost:5555         device product:sdk_gphone_x86_64 model:Android_SDK_built_for_x86_64 device:generic_x86_64 transport_id:5"
+      },
+      "failure_summaries": [],
+      "concurrent": 1
+    },
+    {
+      "avd": "CZ_API30_Phone",
+      "api_level": 30,
+      "form_factor": "phone",
+      "boot_seconds": 20.723574539,
+      "test_class": "lava.app.challenges.Challenge01AppLaunchAndTrackerSelectionTest",
+      "test_passed": true,
+      "test_seconds": 47.761298618,
+      "gradle_log_path": "CZ_API30_Phone/gradle.log",
+      "diag": {
+        "target": "Android 11.0 (\"R\") Tag/ABI: google_apis/x86_64",
+        "sdk": 30,
+        "device": "sdk_gphone_x86_64",
+        "adb_devices_state": "localhost:5557         device product:sdk_gphone_x86_64 model:sdk_gphone_x86_64 device:generic_x86_64_arm64 transport_id:9"
+      },
+      "failure_summaries": [],
+      "concurrent": 1
+    },
+    {
+      "avd": "CZ_API34_Phone",
+      "api_level": 34,
+      "form_factor": "phone",
+      "boot_seconds": 23.755290469,
+      "test_class": "lava.app.challenges.Challenge01AppLaunchAndTrackerSelectionTest",
+      "test_passed": true,
+      "test_seconds": 59.150950314,
+      "gradle_log_path": "CZ_API34_Phone/gradle.log",
+      "diag": {
+        "target": "Android 14.0 (\"UpsideDownCake\") Tag/ABI: google_apis/x86_64",
+        "sdk": 34,
+        "device": "sdk_gphone64_x86_64",
+        "adb_devices_state": "localhost:5559         device product:sdk_gphone64_x86_64 model:sdk_gphone64_x86_64 device:emu64xa transport_id:13"
+      },
+      "failure_summaries": [],
+      "concurrent": 1
+    },
+    {
+      "avd": "CZ_API36_Phone",
+      "api_level": 36,
+      "form_factor": "phone",
+      "boot_seconds": 28.822877801,
+      "test_class": "lava.app.challenges.Challenge01AppLaunchAndTrackerSelectionTest",
+      "test_passed": true,
+      "test_seconds": 91.80192856,
+      "gradle_log_path": "CZ_API36_Phone/gradle.log",
+      "diag": {
+        "target": "Android 16.0 (\"Baklava\") Tag/ABI: google_apis_playstore/x86_64",
+        "sdk": 36,
+        "device": "sdk_gphone64_x86_64",
+        "adb_devices_state": "localhost:5561         device product:sdk_gphone64_x86_64 model:sdk_gphone64_x86_64 device:emu64xa transport_id:18"
+      },
+      "failure_summaries": [],
+      "concurrent": 1
+    }
+  ],
+  "started_at": "2026-05-05T16:34:42+03:00"
+}

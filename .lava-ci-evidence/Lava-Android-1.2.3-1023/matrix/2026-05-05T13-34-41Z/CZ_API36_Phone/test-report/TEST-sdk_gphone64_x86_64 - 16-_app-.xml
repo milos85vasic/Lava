@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<testsuite tests="0" failures="0" errors="0" skipped="0" time="1.418" timestamp="2026-05-05T13:40:58" hostname="localhost">
+  <properties>
+    <property name="device" value="sdk_gphone64_x86_64 - 16" />
+    <property name="flavor" value="" />
+    <property name="project" value=":app" />
+  </properties>
+</testsuite>
