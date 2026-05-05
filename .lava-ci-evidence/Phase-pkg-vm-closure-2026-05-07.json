@@ -1,0 +1,157 @@
+{
+  "date": "2026-05-07",
+  "spec": "docs/superpowers/specs/2026-05-05-pkg-vm-image-cache-design.md",
+  "spec_commit": "c8dc198",
+  "plan": "docs/superpowers/plans/2026-05-05-pkg-vm-image-cache.md",
+  "plan_commit": "adf1b1c",
+  "branches": {
+    "containers": "lava-pin/2026-05-07-pkg-vm",
+    "lava_parent": "master"
+  },
+  "commits": {
+    "containers_phase_a": "03f713f709c3609780a9e41a6c7cbd93a515d574",
+    "containers_phase_a_fixup": "78d3a272645ffb983f578b53a214fe338e930dcd",
+    "containers_phase_b": "e12598a1e17cc0944af1484f617720ee56fd9812",
+    "containers_phase_b_fixup": "3a4d537505e5994190c6481502518ba2e3f29c63",
+    "lava_phase_c": "28386f408b03d407f0854178e6373b610e5eb575",
+    "lava_phase_d": "8a52cb0ba8e0f2dec5aeea2784aa14d3567fa600"
+  },
+  "components_implemented": {
+    "A_pkg_cache": "Manifest schema + FilesystemStore CAS + per-image flock + SHA-256 verify",
+    "A_pkg_vm": "VM interface + QEMUVM impl + KVM/TCG arch routing + atomic port allocator + KillByQEMUMonitorPort + Teardown fast-path",
+    "A_pkg_vm_matrix": "QEMUMatrixRunner with same attestation row schema as pkg/emulator (gating, diag, failure_summaries, concurrent), worker pool, captureDiagnostic",
+    "A_cmd_vm_matrix": "11-flag CLI mirror of cmd/emulator-matrix; 0/1/2 exit-code contract",
+    "A_fixup_C1_I1_I4": "KillByQEMUMonitorPort QEMU-strict matcher; HostSubpath path-traversal validation; Teardown error → FailureSummaries; multi-target concurrent test; SSH Dial split into WaitForListener + Authenticate",
+    "B_pkg_emulator_refactor": "MatrixConfig.ImageManifestPath + ensureSystemImageViaCache helper + runOne wiring; honest ErrExtractionNotImplemented sentinel; external API of pkg/emulator UNCHANGED",
+    "B_fixup_C1_I1_I2": "runOne calls ensureSystemImageViaCache (production wiring); test renamed/split for honesty; typed sentinel for v0.1 stub; t.Parallel warning enumerates new seams",
+    "C_lava_consumers": "tools/lava-containers/vm-images.json (placeholder zero-SHAs documented), scripts/run-vm-{signing,distro}-matrix.sh, tests/vm-{signing,distro}/* (5 fixture tests), CLAUDE.md §6.K-debt RESOLVED",
+    "D_closure": "this file + bluff-hunt JSON + pin bump"
+  },
+  "mutation_rehearsals": [
+    {
+      "test": "TestLoadManifest_RejectsMalformedSHA256",
+      "mutation": "disable BOTH length check AND hex-validity check",
+      "observed": "expected malformed-SHA256 error, got nil",
+      "reverted": true,
+      "phase": "Containers Phase A"
+    },
+    {
+      "test": "TestStore_Get_SHA256Mismatch_RejectsAndRemovesBlob",
+      "mutation": "replace `if gotSHA != entry.SHA256` with `if false`",
+      "observed": "expected SHA256 mismatch error, got nil",
+      "reverted": true,
+      "phase": "Containers Phase A"
+    },
+    {
+      "test": "TestQEMUVM_Boot_DistinctPortsAcrossInvocations",
+      "mutation": "hardcode SSH port to 10022",
+      "observed": "two Boots got same SSH port (10022) — port-allocator broken",
+      "reverted": true,
+      "phase": "Containers Phase A"
+    },
+    {
+      "test": "TestTeardown_FastPath_SkipsOnMismatch",
+      "mutation": "replace `if report.Matched == 0 { return Errorf }` with `if report.Matched == 0 { return nil }`",
+      "observed": "expected Teardown to error when QMP fails AND KillByPort.Matched==0, got nil",
+      "reverted": true,
+      "phase": "Containers Phase A"
+    },
+    {
+      "test": "TestQEMUMatrixRunner_AllPass_GatingTrue",
+      "mutation": "change `Gating: concurrent == 1 && !config.Dev` to `Gating: false`",
+      "observed": "expected Gating=true on serial+non-dev, got false",
+      "reverted": true,
+      "phase": "Containers Phase A"
+    },
+    {
+      "test": "TestKillByQEMUMonitorPort_StrictAdjacentMatch",
+      "mutation": "replace `argv[i+1] == target` with `strings.Contains(argv[i+1], portStr)`",
+      "observed": "expected exactly 1 match for monPort=14444 (pid 1111 only), got 2 (sigtermed=[4444 1111])",
+      "reverted": true,
+      "phase": "Containers Phase A fixup"
+    },
+    {
+      "test": "TestRunMatrix_RejectsCaptureHostSubpathTraversal",
+      "mutation": "remove path-traversal validation loop in RunMatrix",
+      "observed": "expected error for HostSubpath \"../../etc/shadow\", got nil",
+      "reverted": true,
+      "phase": "Containers Phase A fixup"
+    },
+    {
+      "test": "TestRunMatrix_TeardownError_FlipsRowToFailed",
+      "mutation": "gut stampTeardownError to no-op",
+      "observed": "expected row.Passed=false after Teardown error, got true",
+      "reverted": true,
+      "phase": "Containers Phase A fixup"
+    },
+    {
+      "test": "TestQEMUMatrixRunner_Concurrent_AllTargetsRunInParallel",
+      "mutation": "break after first queue<-target send",
+      "observed": "expected 4 rows, got 1",
+      "reverted": true,
+      "phase": "Containers Phase A fixup"
+    },
+    {
+      "test": "TestBootResult_AttestationSchemaUnchanged",
+      "mutation": "add CacheUsed bool field to BootResult struct",
+      "observed": "BootResult field count drifted from pre-Phase-B; expected 7, got 8",
+      "reverted": true,
+      "phase": "Containers Phase B"
+    },
+    {
+      "test": "TestRunMatrix_RoutesMissingSystemImageThroughCache_WhenImageManifestPathIsSet",
+      "mutation": "comment out runOne's `if ae, ok := r.emulator.(*AndroidEmulator)` cache-routing block",
+      "observed": "expected at least 1 cache.Store.Get call, got 0",
+      "reverted": true,
+      "phase": "Containers Phase B fixup"
+    },
+    {
+      "test": "test_signing_matrix_rejects_byte_divergence.sh",
+      "mutation": "set divergence=0 unconditionally; remove row-comparison loop",
+      "observed": "FAIL: divergence not detected",
+      "reverted": true,
+      "phase": "Lava Phase C"
+    },
+    {
+      "test": "test_distro_matrix_rejects_proxy_health_failure.sh",
+      "mutation": "drop `if val != true` block",
+      "observed": "FAIL: proxy_health failure not detected",
+      "reverted": true,
+      "phase": "Lava Phase C"
+    }
+  ],
+  "mirror_convergence": {
+    "containers_branch_lava_pin_2026_05_07_pkg_vm": {
+      "github": "3a4d537505e5994190c6481502518ba2e3f29c63",
+      "gitlab": "3a4d537505e5994190c6481502518ba2e3f29c63",
+      "gitflic": "NOT_CONFIGURED — vasic-digital/containers does not exist on gitflic.ru",
+      "gitverse": "NOT_CONFIGURED — vasic-digital/Containers does not exist on gitverse.ru",
+      "note": "Containers submodule has only 2 of 4 mirrors configured; matches inherited Group A-prime + Group B baseline"
+    },
+    "lava_parent_master_after_phase_c": {
+      "github": "28386f408b03d407f0854178e6373b610e5eb575",
+      "gitlab": "28386f408b03d407f0854178e6373b610e5eb575",
+      "gitflic": "28386f408b03d407f0854178e6373b610e5eb575",
+      "gitverse": "28386f408b03d407f0854178e6373b610e5eb575"
+    },
+    "lava_parent_master_after_phase_d": {
+      "github": "FILL-IN-POST-PUSH",
+      "gitlab": "FILL-IN-POST-PUSH",
+      "gitflic": "FILL-IN-POST-PUSH",
+      "gitverse": "FILL-IN-POST-PUSH"
+    },
+    "verification_method": "live git ls-remote (NOT stale .git/refs/remotes/<r>/<branch>)"
+  },
+  "bluff_hunt_reference": ".lava-ci-evidence/bluff-hunt/2026-05-07-pkg-vm.json",
+  "deviations_from_plan_documented": [
+    "Phase A mutation #1 escalated from 'relax SHA-length check from 64 to 1' to 'disable both length AND hex.DecodeString checks' — the original plan-text mutation would not have produced a failure because hex.DecodeString rejects odd-length strings",
+    "Phase A fix-up addressed C1 (KillByPort cannot match QEMU argv) by adding KillByQEMUMonitorPort with QEMU-strict adjacent-token matcher in pkg/vm/teardown.go (NOT extending pkg/emulator/cleanup.go)",
+    "Phase A fix-up addressed I1 (path traversal in HostSubpath), I2 (Teardown error swallowing), I3 (worker pool untested under N>1 targets), I4 (WaitForReady SSH auth requirement → split into WaitForListener + Authenticate)",
+    "Phase B initial commit had a Critical bluff: the new helper was dead production code. Fix-up wired ensureSystemImageViaCache into runOne's pre-Boot path AND renamed the misleading test name (Boot_FetchesMissingSystemImage* → ensureSystemImageViaCache_RoutesMissingImage*) so the test name accurately describes what's tested",
+    "Phase B fix-up added typed sentinel ErrExtractionNotImplemented + extended the t.Parallel warning to enumerate new seams (loadManifestHook, cacheStoreFactory)",
+    "Phase A pkg/vm/clients.go ships fake-driven unit tests + stubs the real SSH/QMP client impls with explicit 'not implemented in v0.1' errors — anti-bluff posture applied to client code itself",
+    "Phase B pkg/emulator/android.go's ensureSystemImageViaCache fetches+verifies from cache.Store but stubs the qcow2 → ANDROID_SDK_ROOT extraction with the typed ErrExtractionNotImplemented sentinel — same v0.1 honesty posture as clients.go",
+    "Phase C tools/lava-containers/vm-images.json ships with placeholder zero-SHAs (operator fills in real hashes against actual upstream downloads in a separate session). Documented in the file's _comment field; pkg/cache.Store.Get rejects mismatch — no silent acceptance"
+  ],
+  "next_group_preview": "Group C remaining candidates: network simulation per AVD, hardware-screenshot capture per row. Followup work to harden: real SSH/QMP client implementations in pkg/vm/clients.go; real qcow2 → ANDROID_SDK_ROOT extraction in pkg/emulator/android.go; real upstream image SHA-256 hashes filled into tools/lava-containers/vm-images.json; AVD image-cache integration in scripts/run-emulator-tests.sh."
+}
