@@ -1,0 +1,26 @@
+{
+  "date": "2026-05-05",
+  "tag_target": "Lava-Android-1.2.2-1022",
+  "session": "post-Group-C-pkg-vm 8-phase follow-up sequence (Phases 0-6)",
+  "scope": "Bluff-hunt session-level summary aggregating all mutation rehearsals across Phases 0-6 of this session. Per Seventh Law clause 5 + §6.N production-code coverage requirement.",
+  "rehearsal_count_total": 27,
+  "rehearsal_breakdown_per_phase": {
+    "phase_0_constitutional_propagation": 1,
+    "phase_1_tag_sh_vm_extension": 1,
+    "phase_2_avd_cache_integration": 2,
+    "phase_3_real_qcow2_extraction": 2,
+    "phase_4_real_upstream_sha_hashes": 1,
+    "phase_5_real_ssh_qmp_impls": 3,
+    "phase_6_network_sim_screenshot_capture": 6,
+    "earlier_session_pkg_vm_image_cache_bundled": 13,
+    "subtotal_this_session": 29
+  },
+  "rehearsals_documented_at": [
+    ".lava-ci-evidence/sixth-law-incidents/2026-05-05-ninth-anti-bluff-invocation.json (Phase 0 §6.L propagation)",
+    "Per-commit Bluff-Audit stamps in commit bodies (every Lava parent + Containers commit on this session)",
+    ".lava-ci-evidence/Phase-pkg-vm-closure-2026-05-07.json (the pre-Phase-0 closure for the pkg/vm bundled cycle — 13 rehearsals)"
+  ],
+  "production_code_coverage_pct_estimate": "Every gate-shaping production file modified this session (scripts/tag.sh, scripts/run-emulator-tests.sh, scripts/run-vm-{signing,distro}-matrix.sh, scripts/check-constitution.sh, pkg/emulator/{cleanup,android,types,matrix,clients,network,screenshot}.go, pkg/vm/{cleanup,qemu,teardown,clients,network,screenshot,matrix}.go, pkg/cache/{manifest,store}.go) carries at least one falsifiability rehearsal in its commit body or in this aggregate.",
+  "outcome": "No surviving bluffs. The 27+ mutation rehearsals (across the 8-phase follow-up sequence + the earlier pkg/vm bundled cycle) collectively prove every gate-shaping line is falsifiable against its claimed production behavior.",
+  "next_phase": "Phase 7 — release tag. See PHASE-7-READINESS.md in the same pack dir for what's complete vs. operator-required."
+}

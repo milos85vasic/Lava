@@ -1,0 +1,23 @@
+{
+  "date": "2026-05-05",
+  "tag_target": "Lava-Android-1.2.2-1022",
+  "verification_method": "live git ls-remote (NOT stale .git/refs/remotes/<r>/<branch>)",
+  "lava_parent_master_at_HEAD": "69de2e5c9da6d0e1f48a976dfbfed3ceb4827417",
+  "lava_parent_mirrors": {
+    "github": "69de2e5c9da6d0e1f48a976dfbfed3ceb4827417",
+    "gitlab": "69de2e5c9da6d0e1f48a976dfbfed3ceb4827417",
+    "gitflic": "69de2e5c9da6d0e1f48a976dfbfed3ceb4827417",
+    "gitverse": "69de2e5c9da6d0e1f48a976dfbfed3ceb4827417"
+  },
+  "lava_parent_4_mirror_convergence": true,
+  "containers_branch": "lava-pin/2026-05-07-pkg-vm",
+  "containers_at_HEAD": "8ec80460706b3b15c7501a4132a3543ab8e087a9",
+  "containers_mirrors": {
+    "github": "8ec80460706b3b15c7501a4132a3543ab8e087a9",
+    "gitlab": "8ec80460706b3b15c7501a4132a3543ab8e087a9",
+    "gitflic": "NOT_CONFIGURED — vasic-digital/containers does not exist on gitflic.ru",
+    "gitverse": "NOT_CONFIGURED — vasic-digital/Containers does not exist on gitverse.ru"
+  },
+  "containers_2_mirror_convergence": true,
+  "outcome": "All configured mirrors converged at HEAD per §6.C (Mirror-State Mismatch Checks Before Tagging)."
+}
