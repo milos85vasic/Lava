@@ -1,82 +1,83 @@
 {
   "version": 1,
-  "_comment": "Placeholder SHA-256 + size values for v0.1. Operator fills in real values via: curl -fsSL <url> -o /tmp/img && sha256sum /tmp/img && stat -c '%s' /tmp/img. The pkg/cache.Store.Get() call rejects on hash mismatch, so attempting to use this manifest in production WILL fail until hashes are populated — this is intentional anti-bluff posture (no silent acceptance of unverified bytes). The manifest's schema conforms to pkg/cache.Manifest (Submodules/Containers/pkg/cache/manifest.go). The 9 qcow2 entries cover (alpine/debian/fedora) × (x86_64/aarch64/riscv64) for the cross-arch signing matrix + cross-OS distro matrix; the 'android-system-image-*' entries are referenced by the Phase B pkg/emulator/ refactor for cache-routed system-image fetch and by Phase 2 of the AVD-cache integration that wires --image-manifest through scripts/run-emulator-tests.sh. Replace each '0000…' SHA-256 + 0 size with real values before invoking scripts/run-vm-{signing,distro}-matrix.sh or scripts/run-emulator-tests.sh --image-manifest <this-file>.",
+  "_comment": "Real upstream SHA-256 + size values, populated 2026-05-05 (Phase 4 of the post-Group-C-pkg-vm follow-up sequence). 9 of 10 entries point at live, downloadable upstream URLs whose bytes have been hashed against the published binaries; the 10th entry — alpine-edge-riscv64 — keeps a placeholder zero SHA because Alpine does not yet publish RISC-V cloud images upstream (probed dl-cdn.alpinelinux.org/alpine/{edge,v3.21,v3.20}/releases/cloud/ — no riscv64 qcow2 listing). The pkg/cache.Store.Get() call rejects any blob whose computed SHA-256 does not match the manifest entry's declared SHA, so attempting to use the alpine-edge-riscv64 entry will fail loudly with an honest 'SHA-256 mismatch' error rather than silently accept unverified bytes — this is anti-bluff posture per §6.J/§6.L. Operators consuming this manifest should treat alpine-edge-riscv64 as a known upstream gap and skip it from their target lists until Alpine's edge cloud images include RISC-V. The fedora-rawhide-riscv64 URL points at Fedora 42's RISC-V cloud-base (the 'rawhide' label in the entry id is historical — Fedora has stabilized 42 by 2026-05; the URL is the current published artifact, not a rolling rawhide URL). Schema conforms to pkg/cache.Manifest (Submodules/Containers/pkg/cache/manifest.go). The 9 qcow2/qcow2-equivalent entries cover (alpine/debian/fedora) × (x86_64/aarch64/riscv64) for the cross-arch signing matrix + cross-OS distro matrix; the 'android-system-image-*' entries are referenced by the Phase B pkg/emulator/ refactor for cache-routed system-image fetch and by Phase 2 of the AVD-cache integration that wires --image-manifest through scripts/run-emulator-tests.sh.",
   "images": [
     {
       "id": "alpine-3.20-x86_64",
       "url": "https://dl-cdn.alpinelinux.org/alpine/v3.20/releases/cloud/generic_alpine-3.20.0-x86_64-bios-cloudinit-r0.qcow2",
-      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
-      "size": 0,
+      "sha256": "900c91ed360beac704158ee99f45bab49e97858f8cb37469d0cc30e8e8e2ca60",
+      "size": 187695104,
       "format": "qcow2"
     },
     {
       "id": "debian-12-x86_64",
       "url": "https://cloud.debian.org/images/cloud/bookworm/latest/debian-12-genericcloud-amd64.qcow2",
-      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
-      "size": 0,
+      "sha256": "eb896aa6767c1ea08e8ffef2fc4dffce135e1893f461b641844b52043d946a1a",
+      "size": 345964544,
       "format": "qcow2"
     },
     {
       "id": "fedora-40-x86_64",
-      "url": "https://download.fedoraproject.org/pub/fedora/linux/releases/40/Cloud/x86_64/images/Fedora-Cloud-Base-Generic.x86_64-40-1.14.qcow2",
-      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
-      "size": 0,
+      "url": "https://archives.fedoraproject.org/pub/archive/fedora/linux/releases/40/Cloud/x86_64/images/Fedora-Cloud-Base-Generic.x86_64-40-1.14.qcow2",
+      "sha256": "ac58f3c35b73272d5986fa6d3bc44fd246b45df4c334e99a07b3bbd00684adee",
+      "size": 397475840,
       "format": "qcow2"
     },
     {
       "id": "alpine-3.20-aarch64",
       "url": "https://dl-cdn.alpinelinux.org/alpine/v3.20/releases/cloud/generic_alpine-3.20.0-aarch64-uefi-cloudinit-r0.qcow2",
-      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
-      "size": 0,
+      "sha256": "599d8053a09c9fe19af8538b0e93949211d3d2f6c29dc9c4ac43d8ae9834ae2b",
+      "size": 221642752,
       "format": "qcow2"
     },
     {
       "id": "debian-12-aarch64",
       "url": "https://cloud.debian.org/images/cloud/bookworm/latest/debian-12-genericcloud-arm64.qcow2",
-      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
-      "size": 0,
+      "sha256": "00689e2d31f392d7743a0195f41de5c2fe43072f88d685e0e6ff1415678072dd",
+      "size": 339799552,
       "format": "qcow2"
     },
     {
       "id": "fedora-40-aarch64",
-      "url": "https://download.fedoraproject.org/pub/fedora/linux/releases/40/Cloud/aarch64/images/Fedora-Cloud-Base-Generic.aarch64-40-1.14.qcow2",
-      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
-      "size": 0,
+      "url": "https://archives.fedoraproject.org/pub/archive/fedora/linux/releases/40/Cloud/aarch64/images/Fedora-Cloud-Base-Generic.aarch64-40-1.14.qcow2",
+      "sha256": "ebdce26d861a9d15072affe1919ed753ec7015bd97b3a7d0d0df6a10834f7459",
+      "size": 408289280,
       "format": "qcow2"
     },
     {
       "id": "alpine-edge-riscv64",
+      "_status": "upstream-unavailable — Alpine does not yet publish RISC-V cloud-init qcow2 images on dl-cdn.alpinelinux.org. Placeholder kept so the manifest still declares the slot the cross-arch signing matrix expects. The pkg/cache.Store.Get() SHA-mismatch check rejects this entry on attempted use, surfacing an honest error rather than silently accepting unverified bytes.",
       "url": "https://dl-cdn.alpinelinux.org/alpine/edge/releases/cloud/generic_alpine-edge-riscv64-uefi-cloudinit-r0.qcow2",
       "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
-      "size": 0,
+      "size": 1,
       "format": "qcow2"
     },
     {
       "id": "debian-sid-riscv64",
-      "url": "https://people.debian.org/~gio/dqib/artifacts/debian-sid-riscv64/dqib_riscv64-virt/image.qcow2",
-      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
-      "size": 0,
+      "url": "https://gitlab.com/giomasce/dqib/-/jobs/artifacts/master/raw/dqib_riscv64-virt/image.qcow2?job=convert_riscv64-virt",
+      "sha256": "315325434ed68cef10de0a36efaafb7c963141fd3697ce469ac5f8a25c9198f5",
+      "size": 468320256,
       "format": "qcow2"
     },
     {
       "id": "fedora-rawhide-riscv64",
-      "url": "https://dl.fedoraproject.org/pub/alt/risc-v/disk_images/Fedora-Developer-Rawhide-x.y.z-riscv64.raw.xz",
-      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
-      "size": 0,
-      "format": "raw"
+      "url": "https://dl.fedoraproject.org/pub/alt/risc-v/release/42/Cloud/riscv64/images/Fedora-Cloud-Base-Generic-42.20250911-2251ba41cdd3.riscv64.qcow2",
+      "sha256": "60f39aa84f78f7d83b95e86c9b0ae78f99f7d1a9c67b0e94c352dd9942713f44",
+      "size": 557645824,
+      "format": "qcow2"
     },
     {
       "id": "android-system-image-api34-x86_64",
       "url": "https://dl.google.com/android/repository/sys-img/google_apis/x86_64-34_r10.zip",
-      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
-      "size": 0,
-      "format": "zip"
+      "sha256": "f76ad89af36719490a6bfd114b269fce4e935f59e3393a85cac8eac8a4483d10",
+      "size": 1541568459,
+      "format": "android-system-image"
     },
     {
       "id": "android-28-phone",
-      "url": "https://dl.google.com/android/repository/sys-img/google_apis/x86_64-28_r12.zip",
-      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
-      "size": 0,
+      "url": "https://dl.google.com/android/repository/sys-img/google_apis/x86_64-28_r11.zip",
+      "sha256": "57fcdae393eac7dbe4bf854093e18d225ca7bfb9746321de70f01c5faa0c37ed",
+      "size": 1102721597,
       "format": "android-system-image"
     }
   ]
