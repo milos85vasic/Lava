@@ -137,8 +137,22 @@ fi
 # 6. SwitchingNetworkApi parity gate (full mode).
 # ---------------------------------------------------------------------
 echo "==> SwitchingNetworkApi parity gate"
-./gradlew --no-daemon :core:network:impl:test --tests "*ParityTest*" || \
-  echo "WARN: parity test class not yet wired in this commit; tracked"
+# 2026-05-05 anti-bluff fix (§6.J/§6.L): the previous form swallowed
+# `gradle test --tests "*ParityTest*"` failures with `|| echo WARN`,
+# making this gate report green regardless of whether the parity test
+# actually passed or even existed. The new form: if the parity test
+# class is wired AND the test passes, the gate passes; if either is
+# false, the gate fails (exit 1) — propagated via set -euo pipefail.
+# When the parity test class is intentionally not yet wired in a
+# given branch, the gate must be EXPLICITLY skipped with a logged
+# reason in this script, not silently swallowed.
+if find core/network/impl/src/test -name '*ParityTest*' -type f 2>/dev/null | grep -q .; then
+  ./gradlew --no-daemon :core:network:impl:test \
+    -Pandroid.testInstrumentationRunnerArguments.class='*ParityTest*'
+else
+  echo "    Parity test class not present in this commit — gate SKIPPED with explicit reason."
+  echo "    To re-enable, add a test under core/network/impl/src/test/.../*ParityTest*.kt."
+fi
 
 # ---------------------------------------------------------------------
 # 7. Mutation tests (PITest). TODO(SP-3a-bridge): not wired yet.
@@ -163,9 +177,18 @@ if [[ -n "${ANDROID_SERIAL:-}" ]] || \
     "$ANDROID_HOME/platform-tools/adb" devices 2>/dev/null | \
     awk 'NR>1 && $2=="device"' | grep -q .); then
   echo "==> Compose UI Challenge Tests (connected device detected)"
+  # 2026-05-05 anti-bluff fix (§6.J/§6.L): the previous form used the
+  # gradle `--tests` flag which AGP 8.9+ rejects with "Unknown command-
+  # line option", AND swallowed the resulting BUILD FAILED with
+  # `|| echo WARN`, then unconditionally printed "All gates passed" —
+  # a textbook §6.J bluff (gate reports green while reality is broken).
+  # Replaced with the AGP-compatible androidTestRunnerArguments.package
+  # filter, AND removed the WARN swallow: a real failure now propagates
+  # via set -euo pipefail. Operator-environment trust-anchor failures
+  # against personal devices are HONEST signals — they document a real
+  # operator-environment gap, not a script-level bluff.
   ./gradlew --no-daemon :app:connectedDebugAndroidTest \
-    --tests "lava.app.challenges.*" || \
-    echo "WARN: connectedDebugAndroidTest failed or runner not yet wired; operator verification per Task 5.22 still required"
+    -Pandroid.testInstrumentationRunnerArguments.package=lava.app.challenges
 else
   echo "==> Compose UI Challenge Tests SKIPPED — no connected Android device"
   echo "    Per Sixth Law clause 5, operator real-device verification"
