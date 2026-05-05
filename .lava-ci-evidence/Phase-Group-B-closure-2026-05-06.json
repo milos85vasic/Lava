@@ -12,7 +12,7 @@
     "containers_phase_a": "70fafcd024375758d58efc0ab9bac69e4c70f677",
     "containers_phase_a_fixup": "f5cb3551a8db36414b65036521a60deaf685b441",
     "lava_phase_b": "67da623b29a1d674ec11b55466fe63fa8e651a1d",
-    "lava_phase_c": "3b3f816a28540dca86f140a6da14f5c1a99ff374"
+    "lava_phase_c": "0cb7ccec98a3021e1b8803b1cf78b4253b357c49"
   },
   "components_implemented": {
     "A_KillByPort": "Submodules/Containers/pkg/emulator/cleanup.go (+ cleanup_test.go) — strict adjacent /proc walk; 4 tests including TestKillByPort_SubstringSafety",
@@ -92,7 +92,11 @@
       "gitverse": "67da623b29a1d674ec11b55466fe63fa8e651a1d"
     },
     "lava_parent_master_after_phase_c": {
-      "note": "verified after this commit lands; SHAs filled in by post-commit amend per Group A-prime pattern OR left as a separate verification step"
+      "github": "0cb7ccec98a3021e1b8803b1cf78b4253b357c49",
+      "gitlab": "0cb7ccec98a3021e1b8803b1cf78b4253b357c49",
+      "gitflic": "0cb7ccec98a3021e1b8803b1cf78b4253b357c49",
+      "gitverse": "0cb7ccec98a3021e1b8803b1cf78b4253b357c49",
+      "note": "all 4 mirrors converged at 0cb7cce after Phase C push; verified via live git ls-remote 2026-05-05T06:09Z"
     },
     "verification_method": "live git ls-remote (NOT stale .git/refs/remotes/<r>/<branch>)"
   },
