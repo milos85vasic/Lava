@@ -150,6 +150,59 @@ else
   echo "    scripts/tag.sh MUST upgrade this warn to a hard fail at tag time."
 fi
 
+# ----------------------------------------------------------------
+# 6. §6.N + §6.N-debt presence in root CLAUDE.md
+# (added 2026-05-05, Group A-prime — closes §6.N-debt's transitional
+# "MAY warn but MUST NOT yet hard-fail" clause).
+# ----------------------------------------------------------------
+required_6n=(
+  "##### 6.N — Bluff-Hunt Cadence"
+  "##### 6.N-debt"
+)
+for clause in "${required_6n[@]}"; do
+  if ! grep -qF "$clause" CLAUDE.md; then
+    echo "MISSING constitutional clause heading: $clause" >&2
+    echo "  → Group A landed §6.N + §6.N-debt; do not delete them." >&2
+    exit 1
+  fi
+done
+
+# ----------------------------------------------------------------
+# 7. §6.N propagation count across 21 target files (Group A propagation)
+# ----------------------------------------------------------------
+declare -a propagation_targets=(
+  "CLAUDE.md" "AGENTS.md"
+  "lava-api-go/CLAUDE.md" "lava-api-go/AGENTS.md" "lava-api-go/CONSTITUTION.md"
+)
+for sm in Auth Cache Challenges Concurrency Config Containers Database \
+          Discovery HTTP3 Mdns Middleware Observability RateLimiter \
+          Recovery Security Tracker-SDK; do
+  propagation_targets+=("Submodules/$sm/CLAUDE.md")
+done
+for f in "${propagation_targets[@]}"; do
+  if [[ ! -f "$f" ]]; then continue; fi
+  count=$(grep -c "6\.N" "$f")
+  if [[ "$count" -lt 1 ]]; then
+    echo "§6.N propagation REGRESSED: $f has 0 references (expected ≥ 1)" >&2
+    echo "  → Re-propagate per Group A's pattern (see commit 130b655)." >&2
+    exit 1
+  fi
+done
+
+# ----------------------------------------------------------------
+# 8. .githooks/pre-push has Check 4 + Check 5 markers
+# ----------------------------------------------------------------
+if ! grep -qE "# ===== Check 4: §6.N.1.2" .githooks/pre-push; then
+  echo "MISSING pre-push Check 4 (§6.N.1.2 enforcement marker)" >&2
+  echo "  → Group A-prime added this; do not remove the marker comment." >&2
+  exit 1
+fi
+if ! grep -qE "# ===== Check 5: §6.N.1.3" .githooks/pre-push; then
+  echo "MISSING pre-push Check 5 (§6.N.1.3 enforcement marker)" >&2
+  echo "  → Group A-prime added this; do not remove the marker comment." >&2
+  exit 1
+fi
+
 echo "Constitution check passed: 6.D + 6.E + 6.F present in CLAUDE.md;"
 echo "Submodules/Tracker-SDK/CLAUDE.md present; core/ + feature/ scoped"
 echo "clauses present; no clause-6.H credential patterns in tracked files;"

@@ -88,6 +88,69 @@ while read -r local_ref local_sha remote_ref remote_sha; do
         fi
       done <<<"$test_files"
     fi
+
+    # ===== Check 4: §6.N.1.2 — gate-shaping file change requires Bluff-Audit
+    # stamp targeting a file in the diff =====
+    gate_files=$(git diff-tree --no-commit-id --name-only -r "$sha" | \
+      grep -E '^(Submodules/Containers/pkg/emulator/.*\.go|scripts/run-emulator-tests\.sh|scripts/tag\.sh|scripts/check-constitution\.sh)$' || true)
+    if [[ -n "$gate_files" ]]; then
+      msg=$(git log -1 --pretty=%B "$sha")
+      if ! grep -qE '^Bluff-Audit:' <<<"$msg"; then
+        violations+=("$sha: §6.N.1.2 violation — touches gate-shaping file(s) without Bluff-Audit stamp. Files: $(echo "$gate_files" | tr '\n' ' ')")
+      else
+        # Stamp present — verify it NAMES at least one file in the diff.
+        diff_files=$(git diff-tree --no-commit-id --name-only -r "$sha")
+        # Extract path tokens from the commit message
+        stamp_paths=$(grep -oE '[a-zA-Z0-9_/.-]+\.(go|kt|sh|json|md)' <<<"$msg" | sort -u)
+        match_found=false
+        while IFS= read -r df; do
+          [[ -z "$df" ]] && continue
+          if grep -qF "$df" <<<"$stamp_paths"; then
+            match_found=true
+            break
+          fi
+        done <<<"$diff_files"
+        if [[ "$match_found" != "true" ]]; then
+          violations+=("$sha: §6.N.1.2 violation — Bluff-Audit stamp present but does NOT name any file in the diff. Diff: $(echo "$diff_files" | tr '\n' ' ') Stamp paths: $(echo "$stamp_paths" | tr '\n' ' ')")
+        fi
+      fi
+    fi
+
+    # ===== Check 5: §6.N.1.3 — new attestation file requires falsifiability
+    # rehearsal evidence (in-JSON, companion file, or commit-body Bluff-Audit) =====
+    new_attestations=$(git diff-tree --no-commit-id --name-only --diff-filter=A -r "$sha" | \
+      grep -E '^(\.lava-ci-evidence/sp3a-challenges/.*\.(json|md)|\.lava-ci-evidence/[^/]+/real-device-verification\.(json|md)|\.lava-ci-evidence/sixth-law-incidents/.*\.json)$' | \
+      grep -v '\.rehearsal\.' || true)
+    if [[ -n "$new_attestations" ]]; then
+      msg=$(git log -1 --pretty=%B "$sha")
+      while IFS= read -r f; do
+        [[ -z "$f" ]] && continue
+        # (1) Embedded in JSON?
+        embedded=false
+        if [[ "$f" =~ \.json$ ]] && command -v jq >/dev/null 2>&1; then
+          if jq -e '.falsifiability_rehearsal // .Bluff_Audit // .bluff_classification // .primary_finding.bluff_classification' "$f" >/dev/null 2>&1; then
+            embedded=true
+          fi
+        fi
+        # (2) Companion file?
+        companion=false
+        stem="${f%.*}"
+        for ext in json md; do
+          if [[ -f "$stem.rehearsal.$ext" ]]; then
+            companion=true
+            break
+          fi
+        done
+        # (3) Commit-body Bluff-Audit referencing the path?
+        commit_ref=false
+        if grep -qE '^Bluff-Audit:' <<<"$msg" && grep -qF "$f" <<<"$msg"; then
+          commit_ref=true
+        fi
+        if [[ "$embedded" != "true" && "$companion" != "true" && "$commit_ref" != "true" ]]; then
+          violations+=("$sha: §6.N.1.3 violation — added attestation $f without falsifiability rehearsal. Accept: (1) embed falsifiability_rehearsal/Bluff_Audit/bluff_classification block in $f; OR (2) ship $stem.rehearsal.{json,md} alongside; OR (3) add Bluff-Audit stamp in commit body referencing $f.")
+        fi
+      done <<<"$new_attestations"
+    fi
   done
 done
 
