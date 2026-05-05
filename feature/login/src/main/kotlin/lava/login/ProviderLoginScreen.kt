@@ -11,8 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
@@ -156,10 +154,18 @@ private fun ProviderList(
 
         Spacer(modifier = Modifier.height(AppTheme.spaces.large))
 
-        LazyColumn(
+        // Replaced LazyColumn with plain Column on 2026-05-05 to satisfy
+        // §6.Q (Compose Layout Antipattern Guard). The provider list is
+        // bounded (≤ 6 entries: rutracker, rutor, nnmclub, kinozal,
+        // archiveorg, gutenberg) so virtualization is unnecessary; a
+        // plain Column also avoids the nested-scroll measurement
+        // hazard that produced the 2026-05-05 Trackers-from-Settings
+        // crash. See .lava-ci-evidence/crashlytics-resolved/
+        // 2026-05-05-tracker-settings-nested-scroll.md.
+        Column(
             verticalArrangement = Arrangement.spacedBy(AppTheme.spaces.medium),
         ) {
-            items(state.providers) { provider ->
+            for (provider in state.providers) {
                 ProviderCard(
                     provider = provider,
                     onClick = { onAction(ProviderLoginAction.SelectProvider(provider.providerId)) },
