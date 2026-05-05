@@ -35,7 +35,53 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 cd "$PROJECT_DIR"
 
-EVIDENCE_DIR=".lava-ci-evidence/vm-signing/$(date -u +%Y-%m-%dT%H-%M-%SZ)"
+# --tag <T> places the run's evidence directory under
+# .lava-ci-evidence/<T>/vm-signing/<UTC>/ so scripts/tag.sh's
+# require_matrix_attestation_clause_6_I (which find-walks all
+# subdirectories of the per-tag pack-dir) discovers it. Without --tag
+# the run lives outside any per-tag pack and is purely diagnostic /
+# developer-iteration.
+TAG_OVERRIDE=""
+EVIDENCE_DIR_OVERRIDE=""
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --tag) TAG_OVERRIDE="${2:-}"; shift 2 ;;
+    --evidence-dir) EVIDENCE_DIR_OVERRIDE="${2:-}"; shift 2 ;;
+    -h|--help)
+      cat <<USAGE
+Usage: $0 [--tag <tag>] [--evidence-dir <path>]
+
+Drive the VM signing matrix (3 distros × 3 architectures = 9 configs)
+and post-process the per-row signing-output.json files to detect
+JCA-provider divergence.
+
+OPTIONS
+  --tag <tag>           Place the run's evidence directory under
+                        .lava-ci-evidence/<tag>/vm-signing/<UTC>/ so
+                        scripts/tag.sh discovers it (Sixth Law
+                        clause 6.I gate).
+  --evidence-dir <path> Explicit evidence-dir override; wins over
+                        --tag if both are provided.
+  -h, --help            Show this help and exit.
+
+Evidence-path resolution priority:
+  1. --evidence-dir <path>     (wins)
+  2. --tag <tag>               (.lava-ci-evidence/<tag>/vm-signing/<UTC>/)
+  3. default                   (.lava-ci-evidence/vm-signing/<UTC>/)
+USAGE
+      exit 0
+      ;;
+    *) echo "ERROR: unknown option: $1 (try --help)" >&2; exit 2 ;;
+  esac
+done
+
+if [[ -n "$EVIDENCE_DIR_OVERRIDE" ]]; then
+  EVIDENCE_DIR="$EVIDENCE_DIR_OVERRIDE"
+elif [[ -n "$TAG_OVERRIDE" ]]; then
+  EVIDENCE_DIR=".lava-ci-evidence/${TAG_OVERRIDE}/vm-signing/$(date -u +%Y-%m-%dT%H-%M-%SZ)"
+else
+  EVIDENCE_DIR=".lava-ci-evidence/vm-signing/$(date -u +%Y-%m-%dT%H-%M-%SZ)"
+fi
 mkdir -p "$EVIDENCE_DIR"
 
 # Build the cmd/vm-matrix binary from the pinned Containers submodule.
