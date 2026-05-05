@@ -57,6 +57,15 @@ CONCURRENT=""
 DEV_MODE=0
 TEST_REPORT_GLOB="$DEFAULT_TEST_REPORT_GLOB"
 IMAGE_MANIFEST=""
+# Phase 6 (Group C remaining) — per-row network simulation +
+# screenshot-on-failure capture. Empty values = use cmd/emulator-matrix
+# defaults (no shaping; capture on failure enabled).
+NETWORK_PROFILE=""
+NETWORK_BANDWIDTH_DOWN=""
+NETWORK_BANDWIDTH_UP=""
+NETWORK_LATENCY=""
+NETWORK_LOSS=""
+CAPTURE_SCREENSHOT_FLAG=""
 
 # detect_version_prefix returns "Lava-Android-<versionName>-<versionCode>"
 # parsed from app/build.gradle.kts. Echoes "Lava-Android-unknown" when
@@ -92,12 +101,22 @@ while [[ $# -gt 0 ]]; do
         --dev) DEV_MODE=1; shift ;;
         --test-report-glob) TEST_REPORT_GLOB="$2"; shift 2 ;;
         --image-manifest) IMAGE_MANIFEST="$2"; shift 2 ;;
+        --network-profile) NETWORK_PROFILE="$2"; shift 2 ;;
+        --network-bandwidth-down) NETWORK_BANDWIDTH_DOWN="$2"; shift 2 ;;
+        --network-bandwidth-up) NETWORK_BANDWIDTH_UP="$2"; shift 2 ;;
+        --network-latency) NETWORK_LATENCY="$2"; shift 2 ;;
+        --network-loss) NETWORK_LOSS="$2"; shift 2 ;;
+        --capture-screenshot-on-failure) CAPTURE_SCREENSHOT_FLAG="$2"; shift 2 ;;
         --no-build) BUILD_APK=0; shift ;;
         --help|-h)
             cat <<USAGE
 Usage: $0 [--test-class <fqcn>] [--avds <list>] [--evidence-dir <path>]
           [--tag <tag>] [--boot-timeout <duration>] [--concurrent N] [--dev]
-          [--test-report-glob <glob>] [--image-manifest <path>] [--no-build]
+          [--test-report-glob <glob>] [--image-manifest <path>]
+          [--network-profile <name>] [--network-bandwidth-down <kbps>]
+          [--network-bandwidth-up <kbps>] [--network-latency <ms>]
+          [--network-loss <pct>] [--capture-screenshot-on-failure true|false]
+          [--no-build]
 
 Defaults:
   --test-class        $DEFAULT_TEST_CLASS
@@ -112,6 +131,19 @@ Defaults:
                       vm-images.json path to opt in to pkg/cache routing
                       for missing Android system-images, e.g.
                       tools/lava-containers/vm-images.json)
+  --network-profile   "" (no shaping). Valid: edge|2g|3g|4g|lte|wifi|ethernet|none.
+                      Phase 6 (Group C remaining) — per-row network simulation
+                      via 'adb emu network speed/delay'.
+  --network-bandwidth-{down,up}  0 = use profile default. Override on top
+                      of --network-profile. Both in kbps.
+  --network-latency   0 = use profile default. Milliseconds.
+  --network-loss      0 = use profile default. Packet loss percentage [0,100].
+                      (Note: Android emulator console does not honour loss;
+                      recorded in the attestation regardless.)
+  --capture-screenshot-on-failure  true (default). Forensic 'adb exec-out
+                      screencap -p' on a failed row, written to
+                      <evidence>/<avd>/screenshot-on-failure.png. Set false
+                      to opt out.
 
 Evidence-path resolution priority:
   1. --evidence-dir <path>     (existing flag, wins)
@@ -204,6 +236,28 @@ if [[ -n "$TEST_REPORT_GLOB" ]]; then
 fi
 if [[ -n "$IMAGE_MANIFEST" ]]; then
     extra_args+=(--image-manifest "$IMAGE_MANIFEST")
+fi
+# Phase 6 (Group C remaining) — per-row network simulation +
+# screenshot-on-failure capture. Forwarding is mechanical; the
+# Containers cmd/emulator-matrix CLI validates ranges and rejects
+# bad values with exit code 2.
+if [[ -n "$NETWORK_PROFILE" ]]; then
+    extra_args+=(--network-profile "$NETWORK_PROFILE")
+fi
+if [[ -n "$NETWORK_BANDWIDTH_DOWN" ]]; then
+    extra_args+=(--network-bandwidth-down "$NETWORK_BANDWIDTH_DOWN")
+fi
+if [[ -n "$NETWORK_BANDWIDTH_UP" ]]; then
+    extra_args+=(--network-bandwidth-up "$NETWORK_BANDWIDTH_UP")
+fi
+if [[ -n "$NETWORK_LATENCY" ]]; then
+    extra_args+=(--network-latency "$NETWORK_LATENCY")
+fi
+if [[ -n "$NETWORK_LOSS" ]]; then
+    extra_args+=(--network-loss "$NETWORK_LOSS")
+fi
+if [[ -n "$CAPTURE_SCREENSHOT_FLAG" ]]; then
+    extra_args+=(--capture-screenshot-on-failure="$CAPTURE_SCREENSHOT_FLAG")
 fi
 
 "$BIN_DIR/emulator-matrix" \

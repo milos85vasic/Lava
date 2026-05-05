@@ -36,13 +36,31 @@ cd "$PROJECT_DIR"
 # developer-iteration.
 TAG_OVERRIDE=""
 EVIDENCE_DIR_OVERRIDE=""
+# Phase 6 (Group C remaining) — per-row network simulation + screenshot
+# on failure (forwarded to cmd/vm-matrix; defaults preserve pre-Phase-6
+# behavior). Empty values = let the Containers CLI use its own defaults.
+NETWORK_PROFILE=""
+NETWORK_BANDWIDTH_DOWN=""
+NETWORK_BANDWIDTH_UP=""
+NETWORK_LATENCY=""
+NETWORK_LOSS=""
+CAPTURE_SCREENSHOT_FLAG=""
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --tag) TAG_OVERRIDE="${2:-}"; shift 2 ;;
     --evidence-dir) EVIDENCE_DIR_OVERRIDE="${2:-}"; shift 2 ;;
+    --network-profile) NETWORK_PROFILE="${2:-}"; shift 2 ;;
+    --network-bandwidth-down) NETWORK_BANDWIDTH_DOWN="${2:-}"; shift 2 ;;
+    --network-bandwidth-up) NETWORK_BANDWIDTH_UP="${2:-}"; shift 2 ;;
+    --network-latency) NETWORK_LATENCY="${2:-}"; shift 2 ;;
+    --network-loss) NETWORK_LOSS="${2:-}"; shift 2 ;;
+    --capture-screenshot-on-failure) CAPTURE_SCREENSHOT_FLAG="${2:-}"; shift 2 ;;
     -h|--help)
       cat <<USAGE
 Usage: $0 [--tag <tag>] [--evidence-dir <path>]
+          [--network-profile <name>] [--network-bandwidth-down <kbps>]
+          [--network-bandwidth-up <kbps>] [--network-latency <ms>]
+          [--network-loss <pct>] [--capture-screenshot-on-failure true|false]
 
 Drive the VM distro matrix (3 distros × x86_64 = 3 configs) and
 post-process per-row probe-output.json (4 booleans × 3 rows = 12).
@@ -54,6 +72,14 @@ OPTIONS
                         clause 6.I gate).
   --evidence-dir <path> Explicit evidence-dir override; wins over
                         --tag if both are provided.
+  --network-profile     Phase 6 — network conditions profile name; valid:
+                        edge|2g|3g|4g|lte|wifi|ethernet|none. Empty disables
+                        shaping. In-guest tc qdisc applies inside the VM.
+  --network-bandwidth-{down,up}  Override (kbps) on top of --network-profile.
+  --network-latency     Override (ms) on top of --network-profile.
+  --network-loss        Override (%) on top of --network-profile. [0,100].
+  --capture-screenshot-on-failure  true|false. QMP screendump of the
+                        guest framebuffer when a row fails. Default true.
   -h, --help            Show this help and exit.
 
 Evidence-path resolution priority:
@@ -91,6 +117,26 @@ if [[ ! -f "$PROXY" || ! -f "$GOAPI" ]]; then
   exit 2
 fi
 
+extra_args=()
+if [[ -n "$NETWORK_PROFILE" ]]; then
+  extra_args+=(--network-profile "$NETWORK_PROFILE")
+fi
+if [[ -n "$NETWORK_BANDWIDTH_DOWN" ]]; then
+  extra_args+=(--network-bandwidth-down "$NETWORK_BANDWIDTH_DOWN")
+fi
+if [[ -n "$NETWORK_BANDWIDTH_UP" ]]; then
+  extra_args+=(--network-bandwidth-up "$NETWORK_BANDWIDTH_UP")
+fi
+if [[ -n "$NETWORK_LATENCY" ]]; then
+  extra_args+=(--network-latency "$NETWORK_LATENCY")
+fi
+if [[ -n "$NETWORK_LOSS" ]]; then
+  extra_args+=(--network-loss "$NETWORK_LOSS")
+fi
+if [[ -n "$CAPTURE_SCREENSHOT_FLAG" ]]; then
+  extra_args+=(--capture-screenshot-on-failure="$CAPTURE_SCREENSHOT_FLAG")
+fi
+
 "$BIN_DIR/vm-matrix" \
   --image-manifest tools/lava-containers/vm-images.json \
   --targets alpine-3.20-x86_64,debian-12-x86_64,fedora-40-x86_64 \
@@ -98,7 +144,8 @@ fi
   --script /tmp/boot-and-probe.sh \
   --captures "/tmp/probe-output.json:probe-output.json" \
   --evidence-dir "$EVIDENCE_DIR" \
-  --concurrent 1 --cold-boot
+  --concurrent 1 --cold-boot \
+  "${extra_args[@]}"
 
 # Post-processing: each row's probe-output.json contains 4 booleans
 # (proxy_health, proxy_search, goapi_health, goapi_metrics). Any false
