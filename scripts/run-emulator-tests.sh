@@ -26,6 +26,7 @@
 #       [--test-class lava.app.challenges.Challenge01AppLaunchAndTrackerSelectionTest] \
 #       [--avds CZ_API28_Phone:28:phone,CZ_API30_Phone:30:phone,CZ_API34_Phone:34:phone,Pixel_9a:36:phone] \
 #       [--evidence-dir .lava-ci-evidence/2026-05-04-matrix] \
+#       [--image-manifest tools/lava-containers/vm-images.json] \
 #       [--no-build]
 #
 # Environment:
@@ -55,6 +56,7 @@ BOOT_TIMEOUT=""
 CONCURRENT=""
 DEV_MODE=0
 TEST_REPORT_GLOB="$DEFAULT_TEST_REPORT_GLOB"
+IMAGE_MANIFEST=""
 
 # detect_version_prefix returns "Lava-Android-<versionName>-<versionCode>"
 # parsed from app/build.gradle.kts. Echoes "Lava-Android-unknown" when
@@ -89,12 +91,13 @@ while [[ $# -gt 0 ]]; do
         --concurrent) CONCURRENT="$2"; shift 2 ;;
         --dev) DEV_MODE=1; shift ;;
         --test-report-glob) TEST_REPORT_GLOB="$2"; shift 2 ;;
+        --image-manifest) IMAGE_MANIFEST="$2"; shift 2 ;;
         --no-build) BUILD_APK=0; shift ;;
         --help|-h)
             cat <<USAGE
 Usage: $0 [--test-class <fqcn>] [--avds <list>] [--evidence-dir <path>]
           [--tag <tag>] [--boot-timeout <duration>] [--concurrent N] [--dev]
-          [--test-report-glob <glob>] [--no-build]
+          [--test-report-glob <glob>] [--image-manifest <path>] [--no-build]
 
 Defaults:
   --test-class        $DEFAULT_TEST_CLASS
@@ -105,6 +108,10 @@ Defaults:
   --concurrent        1 (serial; >1 sets gating=false in the attestation)
   --dev               false (set true to permit snapshot reload; sets gating=false)
   --test-report-glob  $DEFAULT_TEST_REPORT_GLOB
+  --image-manifest    "" (empty preserves pre-Phase-2 behavior; set to a
+                      vm-images.json path to opt in to pkg/cache routing
+                      for missing Android system-images, e.g.
+                      tools/lava-containers/vm-images.json)
 
 Evidence-path resolution priority:
   1. --evidence-dir <path>     (existing flag, wins)
@@ -194,6 +201,9 @@ if [[ "$DEV_MODE" -eq 1 ]]; then
 fi
 if [[ -n "$TEST_REPORT_GLOB" ]]; then
     extra_args+=(--test-report-glob "$TEST_REPORT_GLOB")
+fi
+if [[ -n "$IMAGE_MANIFEST" ]]; then
+    extra_args+=(--image-manifest "$IMAGE_MANIFEST")
 fi
 
 "$BIN_DIR/emulator-matrix" \

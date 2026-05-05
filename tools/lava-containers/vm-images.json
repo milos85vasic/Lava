@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "_comment": "Placeholder SHA-256 + size values for v0.1. Operator fills in real values via: curl -fsSL <url> -o /tmp/img && sha256sum /tmp/img && stat -c '%s' /tmp/img. The pkg/cache.Store.Get() call rejects on hash mismatch, so attempting to use this manifest in production WILL fail until hashes are populated — this is intentional anti-bluff posture (no silent acceptance of unverified bytes). The manifest's schema conforms to pkg/cache.Manifest (Submodules/Containers/pkg/cache/manifest.go). The 9 qcow2 entries cover (alpine/debian/fedora) × (x86_64/aarch64/riscv64) for the cross-arch signing matrix + cross-OS distro matrix; the 1 'android-system-image-api34-x86_64' entry is referenced by the Phase B pkg/emulator/ refactor for cache-routed system-image fetch. Replace each '0000…' SHA-256 + 0 size with real values before invoking scripts/run-vm-{signing,distro}-matrix.sh.",
+  "_comment": "Placeholder SHA-256 + size values for v0.1. Operator fills in real values via: curl -fsSL <url> -o /tmp/img && sha256sum /tmp/img && stat -c '%s' /tmp/img. The pkg/cache.Store.Get() call rejects on hash mismatch, so attempting to use this manifest in production WILL fail until hashes are populated — this is intentional anti-bluff posture (no silent acceptance of unverified bytes). The manifest's schema conforms to pkg/cache.Manifest (Submodules/Containers/pkg/cache/manifest.go). The 9 qcow2 entries cover (alpine/debian/fedora) × (x86_64/aarch64/riscv64) for the cross-arch signing matrix + cross-OS distro matrix; the 'android-system-image-*' entries are referenced by the Phase B pkg/emulator/ refactor for cache-routed system-image fetch and by Phase 2 of the AVD-cache integration that wires --image-manifest through scripts/run-emulator-tests.sh. Replace each '0000…' SHA-256 + 0 size with real values before invoking scripts/run-vm-{signing,distro}-matrix.sh or scripts/run-emulator-tests.sh --image-manifest <this-file>.",
   "images": [
     {
       "id": "alpine-3.20-x86_64",
@@ -71,6 +71,13 @@
       "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
       "size": 0,
       "format": "zip"
+    },
+    {
+      "id": "android-28-phone",
+      "url": "https://dl.google.com/android/repository/sys-img/google_apis/x86_64-28_r12.zip",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "size": 0,
+      "format": "android-system-image"
     }
   ]
 }
