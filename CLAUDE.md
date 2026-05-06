@@ -565,7 +565,7 @@ Pre-push rejects on match. Bluff-Audit stamp required on any commit that adds ne
 **Exemptions** (test fixtures, incident docs, design specs):
 - `.env.example` — by definition carries placeholders
 - `.lava-ci-evidence/sixth-law-incidents/*.json` — forensic anchors quoting historical literals
-- `docs/superpowers/specs/*.md` — design docs may show example values for clarity (placeholders preferred but examples permitted)
+- `docs/superpowers/specs/*.md`, `docs/superpowers/plans/*.md` — design docs and implementation plans may show example values for clarity (placeholders preferred but examples permitted)
 - `*_test.go`, `*Test.kt` — test fixtures may use synthetic literals, MUST NOT use real production values
 
 **Inheritance:** applies recursively to every submodule and every new artifact. Submodule constitutions MAY add stricter rules but MUST NOT relax this clause.
