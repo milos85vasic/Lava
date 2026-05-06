@@ -202,6 +202,52 @@ class ProviderLoginViewModelTest {
             }
         }
 
+    /**
+     * Phase 1 α-hotfix (2026-05-06): a descriptor with apiSupported=false
+     * MUST be filtered out of the user-facing provider list — selecting
+     * such a provider while on a lava-api-go endpoint yields the alice-bug
+     * 404. The filter is `it.verified && it.apiSupported`.
+     *
+     * Bluff-Audit: removing `&& it.apiSupported` from
+     * ProviderLoginViewModel.loadProviders → "expected:<2> but was:<3>"
+     * because the apiSupported=false descriptor reappears.
+     */
+    @Test
+    fun `apiSupported=false provider is hidden from list`() =
+        runTest(mainDispatcherRule.testDispatcher) {
+            // Register a 3rd descriptor with apiSupported=false (simulates
+            // archiveorg / gutenberg today, before Phase 2 ships routes)
+            val unsupportedDesc = object : TrackerDescriptor {
+                override val trackerId = "unsupported-test"
+                override val displayName = "Unsupported (test)"
+                override val baseUrls = listOf(
+                    MirrorUrl("https://unsupported.example", isPrimary = true, protocol = Protocol.HTTPS),
+                )
+                override val capabilities = setOf(TrackerCapability.SEARCH)
+                override val authType = AuthType.NONE
+                override val encoding = "UTF-8"
+                override val expectedHealthMarker = "unsupported"
+                override val verified = true        // verified for §6.G
+                override val apiSupported = false   // but no API routes
+            }
+            registry.register(object : TrackerClientFactory {
+                override val descriptor = unsupportedDesc
+                override fun create(config: lava.sdk.api.PluginConfig) =
+                    FakeTrackerClient(unsupportedDesc)
+            })
+
+            viewModel.test(this) {
+                runOnCreate()
+                awaitState() // loading
+                val state = awaitState()
+                assertEquals(2, state.providers.size)
+                assertFalse(
+                    "apiSupported=false provider must NOT appear in list",
+                    state.providers.any { it.providerId == "unsupported-test" },
+                )
+            }
+        }
+
     @Test
     fun `select provider pre-fills saved credentials`() =
         runTest(mainDispatcherRule.testDispatcher) {
@@ -595,5 +641,12 @@ class ProviderLoginViewModelTest {
         // a FORM_LOGIN-without-anonymous tracker pass `supportsAnonymousFlag = false`
         // explicitly.
         override val supportsAnonymous = supportsAnonymousFlag
+
+        // Phase 1 α-hotfix (2026-05-06): tests model providers that are
+        // API-supported by construction so the UI filter (verified &&
+        // apiSupported) does not hide them. Tests that specifically
+        // verify the apiSupported=false filter use a separate descriptor
+        // factory or override this field inline.
+        override val apiSupported = true
     }
 }

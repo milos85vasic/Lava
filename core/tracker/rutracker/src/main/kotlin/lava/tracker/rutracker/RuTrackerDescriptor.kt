@@ -44,4 +44,10 @@ object RuTrackerDescriptor : TrackerDescriptor {
     // Constitutional clause 6.G — verified by Challenge Tests C1, C2, C4,
     // C5, C7, C8 in app/src/androidTest/kotlin/lava/app/challenges/.
     override val verified: Boolean = true
+
+    // Phase 1 α-hotfix (2026-05-06): rutracker is the only provider with a
+    // working route family in lava-api-go today (legacy /v1/search +
+    // /v1/{provider}/... when provider == "rutracker"). Phase 2 expands
+    // routing to other providers.
+    override val apiSupported: Boolean = true
 }

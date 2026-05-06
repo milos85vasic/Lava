@@ -53,4 +53,9 @@ object RuTorDescriptor : TrackerDescriptor {
     // optional features like adding comments; the search/browse path
     // works without credentials.
     override val supportsAnonymous: Boolean = true
+
+    // Phase 1 α-hotfix (2026-05-06): rutor will gain lava-api-go routes
+    // in Phase 2 of the parent decomposition. Set true now per the
+    // hotfix spec — Phase 2 is the gate that lights up the routes.
+    override val apiSupported: Boolean = true
 }

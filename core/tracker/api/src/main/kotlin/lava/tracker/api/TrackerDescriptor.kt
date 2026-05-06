@@ -83,4 +83,27 @@ interface TrackerDescriptor : HasId {
      * additionally use this flag to decide whether to render the toggle.
      */
     val supportsAnonymous: Boolean get() = false
+
+    /**
+     * Phase 1 α-hotfix (2026-05-06) — does this tracker have a working
+     * route family in `lava-api-go` today?
+     *
+     * `false` means the API service does NOT route `/v1/{trackerId}/...`
+     * for this provider; selecting it while the user's active endpoint
+     * is the lava-api-go service yields a 404 — the alice-bug class.
+     * The user-facing provider list MUST filter on `apiSupported`.
+     *
+     * Phase 2 of the parent decomposition adds per-provider routing
+     * to lava-api-go and flips additional descriptors to `true` as
+     * their routes ship.
+     *
+     * Initial values (2026-05-06):
+     *   - rutracker → true (legacy v1 route exists)
+     *   - rutor     → true (per spec; Phase 2 ships routes)
+     *   - all others → false (no lava-api-go routes yet)
+     *
+     * Defaults to `false` so any new descriptor stays hidden until
+     * its routes land — same fail-closed posture as [verified].
+     */
+    val apiSupported: Boolean get() = false
 }

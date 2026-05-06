@@ -60,10 +60,12 @@ internal class ProviderLoginViewModel @Inject constructor(
     private fun loadProviders() = intent {
         try {
             // Constitutional clause 6.G clause 4: unverified providers MUST
-            // NOT appear in the user-facing list. Filtering here (not in
-            // the SDK) so internal/system callers can still iterate every
-            // registered tracker.
-            val descriptors = sdk.listAvailableTrackers().filter { it.verified }
+            // NOT appear in the user-facing list. Plus Phase 1 α-hotfix:
+            // providers without lava-api-go route family (apiSupported=false)
+            // are hidden too — selecting them while on a lava-api-go endpoint
+            // yields a 404 (the alice-bug class). Phase 2 ships per-provider
+            // routing and flips additional descriptors back to apiSupported=true.
+            val descriptors = sdk.listAvailableTrackers().filter { it.verified && it.apiSupported }
             val creds = credentialManager.observeAll().first()
             val items = descriptors.map { desc ->
                 val cred = creds.firstOrNull { it.providerId == desc.trackerId }

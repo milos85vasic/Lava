@@ -75,7 +75,11 @@ class TrackerSettingsViewModel @Inject constructor(
         reduce { state.copy(loading = true, error = null) }
         try {
             // Clause 6.G clause 4: hide unverified providers from user UI.
-            val trackers = sdk.listAvailableTrackers().filter { it.verified }
+            // Phase 1 α-hotfix (2026-05-06): also hide providers without
+            // a lava-api-go route family (apiSupported=false) — selecting
+            // them while on a lava-api-go endpoint yields a 404.
+            // Phase 2 ships per-provider routing and re-enables them.
+            val trackers = sdk.listAvailableTrackers().filter { it.verified && it.apiSupported }
             val active = sdk.activeTrackerId()
             val health = trackers.associate { d ->
                 val states = try {
