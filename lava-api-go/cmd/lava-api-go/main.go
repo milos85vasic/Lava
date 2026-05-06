@@ -173,6 +173,7 @@ func run() error {
 		Scraper:    scraper,
 		Registry:   registry,
 		Metrics:    metrics,
+		PromReg:    metricsRegistry,
 		Firebase:   fbClient,
 		Readiness: func(ctx context.Context) error {
 			if err := pgClient.HealthCheck(ctx); err != nil {
@@ -258,6 +259,7 @@ type routerDeps struct {
 	Scraper    handlers.ScraperClient
 	Registry   *provider.ProviderRegistry
 	Metrics    *observability.Metrics
+	PromReg    prometheus.Registerer
 	Readiness  observability.ReadinessProbe
 	Firebase   firebase.Client
 }
@@ -276,6 +278,12 @@ func buildRouter(deps routerDeps) *gin.Engine {
 	// with 429 + Retry-After before AuthMiddleware can advance the
 	// counter again. Both middlewares share the same ladder.Ladder
 	// instance constructed in run().
+	// Phase 8 protocol metric MUST be first in the chain so its
+	// post-c.Next() block reads the final c.Writer.Status() — including
+	// 401/426/429 from auth + backoff middlewares that abort early.
+	if deps.Cfg != nil {
+		router.Use(server.NewProtocolMetricMiddleware(deps.Cfg.ProtocolMetricEnabled, deps.PromReg))
+	}
 	if deps.Cfg != nil && deps.AuthLadder != nil {
 		router.Use(auth.NewBackoffMiddleware(deps.AuthLadder, deps.Cfg.AuthTrustedProxies))
 		router.Use(auth.NewMiddleware(deps.Cfg, deps.AuthLadder))
@@ -283,6 +291,11 @@ func buildRouter(deps routerDeps) *gin.Engine {
 	router.Use(auth.GinMiddleware())
 	if deps.Metrics != nil {
 		router.Use(deps.Metrics.GinMiddleware())
+	}
+	// Brotli + Alt-Svc on the success path (after auth gates).
+	if deps.Cfg != nil {
+		router.Use(server.NewBrotliMiddleware(deps.Cfg.BrotliResponseEnabled, deps.Cfg.BrotliQuality))
+		router.Use(server.NewAltSvcMiddleware(deps.Cfg.HTTP3Enabled, deps.Cfg.Listen))
 	}
 
 	router.GET("/health", observability.LivenessHandler())

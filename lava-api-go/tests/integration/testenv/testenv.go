@@ -18,28 +18,41 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/prometheus/client_golang/prometheus"
 
 	"digital.vasic.ratelimiter/pkg/ladder"
 
 	"digital.vasic.lava.apigo/internal/auth"
 	"digital.vasic.lava.apigo/internal/config"
+	"digital.vasic.lava.apigo/internal/server"
 )
 
 // AuthFixture is the test-side description of an authn config.
+//
+// Transport defaults: BrotliResponseEnabled=false, HTTP3Enabled=false,
+// ProtocolMetricEnabled=false — tests opt-in per-fixture so the
+// auth-only tests don't pay middleware setup costs they don't need.
 type AuthFixture struct {
-	FieldName      string
-	ActiveUUIDHex  []string
-	RetiredUUIDHex []string
-	BackoffSteps   []time.Duration
-	TrustedProxies []string
+	FieldName             string
+	ActiveUUIDHex         []string
+	RetiredUUIDHex        []string
+	BackoffSteps          []time.Duration
+	TrustedProxies        []string
+	BrotliResponseEnabled bool
+	BrotliQuality         int
+	HTTP3Enabled          bool
+	ListenAddr            string // e.g. ":8443" — used for Alt-Svc port advertisement
+	ProtocolMetricEnabled bool
+	PromRegistry          prometheus.Registerer
 }
 
 // Env exposes the running test server.
 type Env struct {
-	URL    string
-	Client *http.Client
-	Ladder *ladder.Ladder
-	close  func()
+	URL          string
+	Client       *http.Client
+	Ladder       *ladder.Ladder
+	PromRegistry prometheus.Registerer
+	close        func()
 }
 
 // Close shuts down the test server.
@@ -72,14 +85,32 @@ func NewWithAuth(t *testing.T, fix AuthFixture) *Env {
 		AuthTrustedProxies:          fix.TrustedProxies,
 		AuthMinSupportedVersionName: "1.2.6",
 		AuthMinSupportedVersionCode: 1026,
+		BrotliResponseEnabled:       fix.BrotliResponseEnabled,
+		BrotliQuality:               fix.BrotliQuality,
+		HTTP3Enabled:                fix.HTTP3Enabled,
+		Listen:                      fix.ListenAddr,
+		ProtocolMetricEnabled:       fix.ProtocolMetricEnabled,
+	}
+
+	promReg := fix.PromRegistry
+	if promReg == nil {
+		promReg = prometheus.NewRegistry()
 	}
 
 	gin.SetMode(gin.TestMode)
 	router := gin.New()
 
 	l := ladder.New(cfg.AuthBackoffSteps)
+	// Protocol metric MUST be first: its post-c.Next() block reads
+	// c.Writer.Status() to label the counter, and that only sees the
+	// final value (including 401/426/429 from later middlewares) when
+	// it sits at the outermost layer.
+	router.Use(server.NewProtocolMetricMiddleware(cfg.ProtocolMetricEnabled, promReg))
 	router.Use(auth.NewBackoffMiddleware(l, cfg.AuthTrustedProxies))
 	router.Use(auth.NewMiddleware(cfg, l))
+	// Brotli wraps the writer for response compression on the success path.
+	router.Use(server.NewBrotliMiddleware(cfg.BrotliResponseEnabled, cfg.BrotliQuality))
+	router.Use(server.NewAltSvcMiddleware(cfg.HTTP3Enabled, cfg.Listen))
 
 	// Test-only echo endpoint
 	router.GET("/_test_echo", func(c *gin.Context) {
@@ -90,10 +121,11 @@ func NewWithAuth(t *testing.T, fix AuthFixture) *Env {
 	ts := httptest.NewServer(router)
 
 	return &Env{
-		URL:    ts.URL,
-		Client: ts.Client(),
-		Ladder: l,
-		close:  ts.Close,
+		URL:          ts.URL,
+		Client:       ts.Client(),
+		Ladder:       l,
+		PromRegistry: promReg,
+		close:        ts.Close,
 	}
 }
 
