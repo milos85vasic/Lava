@@ -17,6 +17,82 @@ Per-version distribution snapshots (the exact text shipped as App Distribution r
 
 ---
 
+## Lava-API-Go-2.1.0-2100 — 2026-05-06 (Phase 1)
+
+**Channel:** container registry / remote distribution to thinker.local
+**Previous published:** Lava-API-Go-2.0.16-2016 (2026-05-06)
+
+### Added — API auth + transport (Phase 1 of `docs/todos/Lava_TODOs_001.md`)
+
+- **UUID-based client allowlist** enforced via the `Lava-Auth` header
+  (name itself config-driven via `LAVA_AUTH_FIELD_NAME` per §6.R). Active
+  vs retired separation: retired UUIDs return `426 Upgrade Required` with
+  min-version JSON instead of advancing the backoff counter.
+- **Per-IP fixed-ladder backoff** (`2s,5s,10s,30s,1m,1h` configurable via
+  `LAVA_AUTH_BACKOFF_STEPS`) shipped as the `pkg/ladder` primitive
+  upstream-contributed to `Submodules/RateLimiter`.
+- **HTTP/3 preferred** with HTTP/2 fallback + `Alt-Svc` advertisement.
+- **Brotli response compression** when the client sends `Accept-Encoding: br`.
+- **Prometheus protocol metric** — `lava_api_request_protocol_total{protocol,status}`.
+- **Constitutional clause §6.R** — No-Hardcoding Mandate (added to root +
+  16 submodules + AGENTS.md).
+
+### Tests (§6.G real-stack + §6.A contract + §6.N rehearsals)
+
+- 8 integration tests under `lava-api-go/tests/integration/` (active,
+  retired, unknown, ladder, reset, brotli, alt-svc, metric).
+- 1 contract test asserting `LAVA_AUTH_FIELD_NAME` does NOT appear as
+  a literal in production source.
+- All Bluff-Audit stamps recorded with crisp failure messages from
+  deliberate-mutation rehearsals.
+
+### Submodule pin
+- `Submodules/RateLimiter` pinned at `3faf7a51` (introduces `pkg/ladder/`).
+
+### Versions in this build
+- lava-api-go: 2.1.0 (2100)
+- Android: 1.2.7 (1027) — paired with this API release
+
+---
+
+## Lava-Android-1.2.7-1027 — 2026-05-06 (Phase 1)
+
+**Channel:** Firebase App Distribution
+**Previous published:** Lava-Android-1.2.6-1026 (2026-05-05)
+
+### Added — client-side auth foundation
+
+- **`AuthInterceptor`** — OkHttp interceptor decrypts the per-build
+  encrypted UUID, injects it into the `Lava-Auth` header, zeroizes the
+  plaintext bytes in `finally`. Auth UUID memory hygiene per
+  `core/CLAUDE.md` (added in this release).
+- **Build-time encryption (Phase 11)** — Gradle task
+  `generateLavaAuthClass{Debug,Release}` reads `.env` + the variant
+  keystore and emits `lava.auth.LavaAuthGenerated` containing the
+  AES-GCM-encrypted UUID + nonce + pepper bytes. Generated dir is
+  gitignored.
+- **L2 client-side obfuscation** — AES-256-GCM keyed by
+  `HKDF-SHA256(salt = SHA256(signing-cert)[:16], ikm = pepper)`. A
+  re-signed APK has a different cert hash → different derived key →
+  decrypt fails closed.
+- **α-hotfix: TrackerDescriptor.apiSupported** filter — the user-facing
+  provider list now hides Internet Archive (and other providers without
+  lava-api-go routes) until Phase 2 ships per-provider routing. Closes
+  the alice-bug class.
+- **C15 + C16 Compose UI Challenge Tests** — boot-with-AuthInterceptor +
+  apiSupported-filter rendering assertions.
+
+### Tests
+- HKDFTest (RFC 5869 §A.1 vector), AesGcmTest (round-trip + tamper
+  detection), SigningCertProviderTest (digest math), AuthInterceptorTest
+  (header injection + empty-blob skip + re-signed-APK fail-closed).
+
+### Versions in this build
+- Android: 1.2.7 (1027)
+- lava-api-go: 2.1.0 (2100) — required for full auth flow
+
+---
+
 ## Lava-API-Go-2.0.16-2016 — 2026-05-06
 
 **Channel:** container registry / remote distribution to thinker.local
