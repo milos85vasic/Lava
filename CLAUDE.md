@@ -566,7 +566,9 @@ Pre-push rejects on match. Bluff-Audit stamp required on any commit that adds ne
 - `.env.example` — by definition carries placeholders
 - `.lava-ci-evidence/sixth-law-incidents/*.json` — forensic anchors quoting historical literals
 - `docs/superpowers/specs/*.md`, `docs/superpowers/plans/*.md` — design docs and implementation plans may show example values for clarity (placeholders preferred but examples permitted)
-- `*_test.go`, `*Test.kt` — test fixtures may use synthetic literals, MUST NOT use real production values
+- `*_test.go`, `*Test.kt`, `*Tests.kt`, `*Test.java` — test fixtures may use synthetic literals, MUST NOT use real production values
+
+**Enforcement status (2026-05-06):** UUID literals are enforced today by `scripts/check-constitution.sh` (delegating to `scripts/scan-no-hardcoded-uuid.sh`). IPv4, host:port, schedule, and algorithm-parameter literals are tracked for future phases per the staged-enforcement principle (rule first, mechanical gate as the project ships its scopes). Open a forensic-anchor entry in `.lava-ci-evidence/sixth-law-incidents/` if a literal of any forbidden class ships in production.
 
 **Inheritance:** applies recursively to every submodule and every new artifact. Submodule constitutions MAY add stricter rules but MUST NOT relax this clause.
 
