@@ -10,18 +10,20 @@ package lava.models.settings
  * on the LAN. The only public-Internet endpoint now is
  * [Rutracker] (direct rutracker.org).
  *
- * SP-3 (2026-04-29) introduced [GoApi] as a peer of [Mirror]. Both are LAN
- * endpoints, but [GoApi] points at a `lava-api-go` instance (advertised on
- * mDNS as `_lava-api._tcp` with TXT `engine=go`, default port 8443, HTTPS
- * with the LAN-permissive OkHttp client per SP-3.1). [Mirror] on a private
- * IP is treated as a legacy LAN Ktor proxy (advertised as `_lava._tcp`
- * with TXT `engine=ktor`, default port 8080, HTTP).
+ * 2026-05-06: the entire Ktor `:proxy` module was removed from the
+ * project. Production code paths that constructed LAN [Mirror] endpoints
+ * with HTTP/8080 semantics (the legacy Ktor proxy advertiser) are now
+ * dead. The [Mirror] type is retained for the rutracker public-mirror
+ * use case (a different concept from the LAN proxy).
  *
- * The wire format is identical between the two LAN backends — see SP-2
- * §10 cross-backend parity (8/8 fixtures PASS). The discriminator matters
- * for transport:
+ * SP-3 (2026-04-29) introduced [GoApi] as a peer of [Mirror]. [GoApi]
+ * points at a `lava-api-go` instance (advertised on mDNS as
+ * `_lava-api._tcp` with TXT `engine=go`, default port 8443, HTTPS with
+ * the LAN-permissive OkHttp client per SP-3.1).
  *
- *   - [Mirror] on a LAN IP            → http://host                   (legacy proxy on port 8080)
+ * The discriminator matters for transport:
+ *
+ *   - [Mirror] on a LAN IP            → http://host                   (legacy advertiser, no longer in-tree)
  *   - [Mirror] on a public hostname   → https://host/forum/           (rutracker mirror)
  *   - [GoApi]                         → https://host:port             (LAN api-go, permissive TLS)
  *   - [Rutracker]                     → https://rutracker.org/forum/  (direct, system trust)
