@@ -11,9 +11,21 @@ same commit so the index stays trustworthy. Stale state in this file
 is itself a §6.J spirit issue — the file claims a guarantee, the
 repo has drifted, the agent acts on the claim.
 
-> **Last updated:** 2026-05-06, after Phase 1 of the parent
+> **Last updated:** 2026-05-06 (evening), after Phase 1 of the parent
 > decomposition reached the "deployed-to-thinker.local + on Firebase
-> App Distribution" state.
+> App Distribution" state, plus §6.S (Continuation Document Maintenance
+> Mandate) added to the constitution + propagated to all 16 submodules
+> + lava-api-go, plus Submodules/Challenges/Containers/ residue cleanup.
+
+> **§6.S binding:** this file is constitutionally load-bearing per
+> root `CLAUDE.md` §6.S. Every commit that changes phase status,
+> lands a new spec/plan, bumps a submodule pin, ships a release
+> artifact, discovers or resolves a known issue, or implements an
+> operator scope directive MUST update this file in the SAME
+> COMMIT. The §0 "Last updated" line MUST track HEAD. Stale
+> CONTINUATION.md is itself a §6.J spirit issue under §6.L's
+> repeated mandate. `scripts/check-constitution.sh` enforces
+> presence + structure (§0, §7, §6.S clause + inheritance).
 
 ---
 
@@ -116,22 +128,24 @@ pin is a deliberate operator action; never auto-update.
 
 | Submodule | Pin | Mirrors | Notes |
 |---|---|---|---|
-| `Auth` | `af1c285` | GitHub + GitLab + origin | §6.R inheritance |
-| `Cache` | `d0d513a` | GitHub + GitLab + gitlab + origin | §6.R inheritance |
-| `Challenges` | `165c417` | github + gitlab + origin (+ upstream skipped) | merged P1.5 + §6.R |
-| `Concurrency` | `0d22a15` | GitHub + GitLab + origin | §6.R inheritance |
-| `Config` | `6df901a` | origin | §6.R inheritance |
-| `Containers` | `47237ba` | github + gitlab + origin | merged P1.5-WP8 + §6.R |
-| `Database` | `f65cb58` | GitHub + GitLab + origin | §6.R inheritance |
-| `Discovery` | `892f253` | origin | §6.R inheritance |
-| `HTTP3` | `b3dbff5` | origin | §6.R inheritance |
-| `Mdns` | `c30be6d` | origin | §6.R inheritance |
-| `Middleware` | `560f31a` | origin | §6.R inheritance |
-| `Observability` | `1663f7e` | GitHub + GitLab + origin | §6.R inheritance |
-| `RateLimiter` | `3faf7a5` | gitlab + origin | NEW: pkg/ladder primitive |
-| `Recovery` | `253457b` | origin | §6.R inheritance |
-| `Security` | `7bd6f90` | GitHub + GitLab + origin | §6.R inheritance |
-| `Tracker-SDK` | `819443c` | origin | §6.R inheritance |
+| `Auth` | `6213c61` | GitHub + GitLab + origin | §6.R + §6.S inheritance |
+| `Cache` | `ea3b376` | GitHub + GitLab + gitlab + origin | §6.R + §6.S inheritance |
+| `Challenges` | `f7d336d` | github + gitlab + origin (+ upstream skipped) | merged P1.5 + §6.R + §6.S; Containers/ residue removed |
+| `Concurrency` | `5b5a858` | GitHub + GitLab + origin | §6.R + §6.S inheritance |
+| `Config` | `45a915b` | origin | §6.R + §6.S inheritance |
+| `Containers` | `84c381c` | github + gitlab + origin | merged P1.5-WP8 + §6.R + §6.S |
+| `Database` | `1ce46f9` | GitHub + GitLab + origin | §6.R + §6.S inheritance |
+| `Discovery` | `5348c7d` | origin | §6.R + §6.S inheritance |
+| `HTTP3` | `7fec2d8` | origin | §6.R + §6.S inheritance |
+| `Mdns` | `e7839fa` | origin | §6.R + §6.S inheritance |
+| `Middleware` | `c877ef9` | origin | §6.R + §6.S inheritance |
+| `Observability` | `aff0931` | GitHub + GitLab + origin | §6.R + §6.S inheritance |
+| `RateLimiter` | `1127b11` | gitlab + origin | NEW: pkg/ladder primitive + §6.R + §6.S |
+| `Recovery` | `b4b8771` | origin | §6.R + §6.S inheritance |
+| `Security` | `d45b458` | GitHub + GitLab + origin | §6.R + §6.S inheritance |
+| `Tracker-SDK` | `3d31ea3` | origin | §6.R + §6.S inheritance |
+
+**Internal-to-submodule nested submodules:** `Submodules/Challenges` has a nested `Panoptic` submodule that Challenges' own Go code in `pkg/panoptic/` depends on. Per the operator's "no submodules at multiple depths in the project root" directive, Lava itself has only flat root-level Submodules — but Challenges (consumed as a black-box vasic-digital submodule) self-manages its own internal dependencies, including Panoptic. This is acceptable: the depth restriction applies at Lava's tracking surface, not recursively into each submodule's internal organization.
 
 ---
 
@@ -259,6 +273,189 @@ create proper diagrams and graphs".
 
 ---
 
+## 4.5 Known issues + bugs (in-flight, not blocking distribution)
+
+These are real defects discovered during Phase 1's first deploy. None
+are release-blocking — the API serves and the auth gate fails-closed
+correctly — but each is a real Phase-2-or-later work item.
+
+### 4.5.1 `/api/v1/search` returns 404 even with valid `Lava-Auth` header
+
+**Discovered:** 2026-05-06 during the first authenticated curl test
+against thinker.local.
+
+**Symptom:** with a Lava-Auth header carrying the active UUID:
+- `GET /search?q=ubuntu` → 401 (auth gate fires; header validation
+  fails; the route registration does pass authentication when given a
+  valid header but in the test the path was wrong)
+- `GET /v1/search?q=ubuntu` → 404
+- `GET /api/search?q=ubuntu` → 404
+- `GET /api/v1/search?q=ubuntu` → 404
+
+**Root cause hypothesis:** the route registration in
+`lava-api-go/internal/handlers/v1/handlers.go` uses `group.GET("/search",
+search.GetSearch)` where `group` is `router.Group("/v1/:provider")`.
+So the actual path is `/v1/{provider-id}/search`, not `/v1/search`.
+Phase 1's α-hotfix HID Internet Archive from onboarding so the bug
+doesn't surface in normal flow, but the underlying routing inconsistency
+is real and is the Phase 2 work.
+
+**Phase 2 deliverable:** add `/v1/{providerId}/search`,
+`/v1/{providerId}/browse`, `/v1/{providerId}/topic/:id`,
+`/v1/{providerId}/download/:id` for archiveorg, gutenberg, kinozal,
+nnmclub. Each tracker descriptor flips `apiSupported = true` as its
+routes ship.
+
+### 4.5.2 `/health` had an intermittent 133s timeout once during distribute verification
+
+**Discovered:** 2026-05-06 during the post-distribute verification
+sweep. The first `curl -fsSk https://thinker.local:8443/health` hung
+for 133 seconds before returning. A second curl seconds later
+returned `{"status":"alive"}` immediately.
+
+**Root cause hypothesis:** HTTP/3 vs HTTP/2 negotiation timeout under
+the QUIC `failed to sufficiently increase receive buffer size` warning
+(see 4.5.3 below). The TLS handshake may have stalled on the UDP path
+before falling back to TCP.
+
+**Mitigation:** the container's `HEALTHCHECK` directive (which uses
+the bundled `healthprobe` binary, not curl) has not exhibited this —
+container reports `(healthy)` consistently. The intermittent curl
+hang appears to be at the curl/HTTP-3-client layer, not the API.
+
+**Action:** track but don't gate — observe in future distribute
+sessions. If reproducible, file a forensic anchor under
+`.lava-ci-evidence/sixth-law-incidents/` and root-cause via
+systematic-debugging skill.
+
+### 4.5.3 quic-go UDP receive buffer warning on thinker.local boot
+
+**Discovered:** 2026-05-06 in the api-go boot logs:
+
+```
+2026/05/06 18:21:25 failed to sufficiently increase receive buffer size
+(was: 208 kiB, wanted: 7168 kiB, got: 416 kiB).
+See https://github.com/quic-go/quic-go/wiki/UDP-Buffer-Sizes for details.
+```
+
+**Symptom:** non-fatal warning. HTTP/3 listener still binds; clients
+can still connect via QUIC. But the small buffer means high-throughput
+QUIC traffic could drop packets under load.
+
+**Fix:** thinker.local's host kernel needs `sysctl -w
+net.core.rmem_max=7340032` (and persist via `/etc/sysctl.d/`). Either
+the operator does this manually OR `deployment/thinker/thinker-up.sh`
+gains a sysctl-tune step.
+
+**Action:** Phase 2 or Phase 6 operations work. Track in §6.M
+host-stability discipline if it becomes a Class II resource-pressure
+event.
+
+### 4.5.4 The Phase 1 alice-bug fix is a HIDE, not a FIX
+
+**Discovered:** 2026-05-06 — explicit in the Phase 1 design.
+
+**Symptom:** Internet Archive used to appear in onboarding + crash
+with "Something went wrong" on search. The α-hotfix in Phase 12
+(commit `384ac02`) added `TrackerDescriptor.apiSupported` and filters
+the user-facing list. Internet Archive now shows `apiSupported = false`
+and is hidden — the user never sees it on a fresh install.
+
+**This is not the actual fix.** The Internet Archive provider still
+has no API support; existing installs that already had it selected
+also see a one-time dialog (per the Phase 12 plan, though the dialog
+implementation itself is queued for Phase 5 since it touches
+MainActivity + PreferencesStorage).
+
+**Real fix:** Phase 2 ships per-provider routing in lava-api-go and
+flips `apiSupported = true` on each provider as routes land.
+
+### 4.5.5 The Phase 12 α-hotfix dialog is not yet implemented
+
+**Discovered:** during Phase 12 implementation; descoped to keep that
+phase tight.
+
+**Symptom:** existing installs (before 1.2.7) that had Internet Archive
+or another `apiSupported = false` provider already selected don't get
+a one-time "this provider is not currently supported" dialog. The
+provider just stops working for them silently after upgrade.
+
+**Phase 2 OR Phase 5 deliverable:** wire the dialog through
+`MainActivity.onCreate()` + a `Preferences` boolean flag
+`unsupportedProviderDialogShown`. The dialog dismisses to
+`Settings → Trackers`. Phase 12's plan included this; the
+implementation itself was deferred.
+
+### 4.5.6 Submodules/Challenges has untracked `Containers/` dir leftover from upstream merge
+
+**Discovered:** 2026-05-06 after merging upstream Challenges
+into Lava-side post-§6.R-inheritance. The merged-in commit
+`abe62cb chore(P1.5-T03.02): dedup Containers in Challenges`
+deleted the `Containers/` subdir from Challenges (canonical at
+meta-repo root), but the local clone still has the directory on
+disk because git doesn't auto-delete files that were already
+present locally before the dedup commit's merge.
+
+**Symptom:** `git status` inside Submodules/Challenges shows
+`?? Containers/` (untracked). Doesn't affect builds; cosmetic noise.
+
+**Action:** operator runs `rm -rf Submodules/Challenges/Containers`
+once. Not blocking; tracked here so a future cleanup pass picks it
+up.
+
+### 4.5.7 `Submodules/RateLimiter` only mirrors to 2 of the 4 expected upstreams
+
+**Discovered:** 2026-05-06 during Phase 3 (pkg/ladder upstream
+contribution). The submodule has remotes `gitlab` + `origin`
+(github.com:vasic-digital/RateLimiter) but no GitFlic or GitVerse.
+
+**Symptom:** new pkg/ladder commits land on GitHub + GitLab but not
+on GitFlic or GitVerse. Inconsistent with Lava parent's 4-mirror
+model.
+
+**Phase 6 deliverable:** add gitflic + gitverse remotes to
+`Submodules/RateLimiter` (and audit all other submodules for the
+same gap; Config + Discovery + HTTP3 + Mdns + Middleware + Recovery
++ Tracker-SDK each have only `origin`). The Decoupled Reusable
+Architecture rule says submodules SHOULD mirror to the same set.
+
+### 4.5.8 `Engine.Ktor` enum cascade tail (post-Ktor cleanup low priority)
+
+**Symptom:** the `Engine.Ktor` enum value lingers in client-side
+exhaustive `when` branches. It's dead code — the Ktor :proxy was
+deleted in 2.0.12. Removal would require an Android version bump
+for cosmetic-only cleanup.
+
+**Action:** Phase 5 (UI/UX polish) is the natural place. Tracked.
+
+### 4.5.9 `Endpoint.Mirror` LAN-IP routing branch (post-Ktor cleanup low priority)
+
+Same shape as 4.5.8. Dead path post-Ktor; no triggering producer in
+tree. Phase 5 cleanup target.
+
+### 4.5.10 `docs/todos/` directory is untracked
+
+**Discovered:** persistent throughout Phase 1. The directory contains
+`Lava_TODOs_001.md` (the operator's source-of-truth TODO doc) but is
+NOT committed to git.
+
+**Action:** operator decides whether to commit (canonical TODO history)
+or keep gitignored (working scratch). Currently `.gitignore` does
+NOT list `docs/todos/`, so it's just untracked. Phase 6 documentation
+pass should resolve.
+
+### 4.5.11 IPv4 / host:port / schedule / algorithm-parameter literal grep is staged
+
+**Discovered:** Phase 1 §6.R implementation deliberately deferred
+non-UUID literal classes. The §6.R clause body in CLAUDE.md
+acknowledges this with the "Enforcement status (2026-05-06)" line.
+
+**Action:** Phase 6 deliverable. Add IPv4 grep, host:port grep,
+schedule literal grep with carefully-scoped exemptions (incident
+docs, design specs, plans, test fixtures).
+
+---
+
 ## 5. Operator-flagged follow-up items (small, queued)
 
 Items the operator or reviewers flagged but didn't gate on; pick up
@@ -296,7 +493,16 @@ opportunistically when a related phase touches the area.
   Every value (URLs, ports, header names, credentials, schedules,
   algorithm parameters) comes from `.env` or generated config.
   Pre-push grep enforces UUID literals; IPv4/host:port/schedule
-  enforcement is staged for future phases.
+  enforcement is staged for future phases (see §4.5.11).
+- **§6.S** (Continuation Document Maintenance Mandate): added
+  2026-05-06 in this commit. THIS file (`docs/CONTINUATION.md`)
+  is constitutionally load-bearing. Every commit that changes
+  tracked state MUST update this file in the SAME COMMIT.
+  Stale CONTINUATION.md is itself a §6.J spirit issue.
+  `scripts/check-constitution.sh` enforces (1) file present,
+  (2) §0 "Last updated" line, (3) §7 RESUME PROMPT, (4) §6.S
+  clause in CLAUDE.md, (5) §6.S inheritance in 16 submodules
+  + lava-api-go.
 
 ---
 

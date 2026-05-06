@@ -285,6 +285,57 @@ done
 # this script failed first.
 bash scripts/scan-no-hardcoded-uuid.sh
 
+# ---------------------------------------------------------------------
+# 6.S — Continuation Document Maintenance Mandate enforcement
+# ---------------------------------------------------------------------
+
+# 6.S(1): docs/CONTINUATION.md must exist
+if [[ ! -f docs/CONTINUATION.md ]]; then
+  echo "MISSING continuation document: docs/CONTINUATION.md" >&2
+  echo "  → §6.S requires a maintained CONTINUATION index." >&2
+  exit 1
+fi
+
+# 6.S(2): §0 "Last updated" line must be present (the date that mechanically
+# tracks freshness; CI cannot prove it's the SAME date as HEAD's, but
+# absence of the line is by itself a §6.S violation)
+if ! grep -qE '^> \*\*Last updated:\*\*' docs/CONTINUATION.md; then
+  echo "MISSING §0 'Last updated' line in docs/CONTINUATION.md" >&2
+  echo '  → §6.S requires `> **Last updated:** YYYY-MM-DD, ...` after the §0 heading.' >&2
+  exit 1
+fi
+
+# 6.S(3): §7 RESUME PROMPT must be present (the operator-pasteable text
+# that lets a fresh CLI agent resume work)
+if ! grep -qE '^## 7\. RESUME PROMPT' docs/CONTINUATION.md; then
+  echo "MISSING §7 RESUME PROMPT section in docs/CONTINUATION.md" >&2
+  echo "  → §6.S requires the operator-pasteable resume prompt." >&2
+  exit 1
+fi
+
+# 6.S(4): §6.S clause itself must appear in root CLAUDE.md
+if ! grep -qF '##### 6.S — Continuation Document Maintenance Mandate' CLAUDE.md; then
+  echo "MISSING constitutional clause: 6.S — Continuation Document Maintenance Mandate" >&2
+  echo "  → Add to CLAUDE.md." >&2
+  exit 1
+fi
+
+# 6.S(5): §6.S inheritance reference must appear in every Submodules/*/CLAUDE.md
+for sub in Submodules/*/CLAUDE.md; do
+  if ! grep -qF '## §6.S — Continuation Document Maintenance Mandate' "$sub"; then
+    echo "MISSING 6.S inheritance reference: $sub" >&2
+    echo "  → Append the §6.S heading paragraph (mirror the §6.R pattern)." >&2
+    exit 1
+  fi
+done
+
+# 6.S(6): §6.S inheritance reference must appear in lava-api-go/CLAUDE.md
+if [[ -f lava-api-go/CLAUDE.md ]] && ! grep -qF 'Clause 6.S' lava-api-go/CLAUDE.md; then
+  echo "MISSING 6.S reference in lava-api-go/CLAUDE.md" >&2
+  echo "  → Append a §6.S inheritance reference per §6.F." >&2
+  exit 1
+fi
+
 echo "Constitution check passed: 6.D + 6.E + 6.F present in CLAUDE.md;"
 echo "Submodules/Tracker-SDK/CLAUDE.md present; core/ + feature/ scoped"
 echo "clauses present; no clause-6.H credential patterns in tracked files;"
