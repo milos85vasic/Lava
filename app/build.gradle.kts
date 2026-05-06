@@ -154,8 +154,15 @@ val generateLavaAuthClassRelease = tasks.register("generateLavaAuthClassRelease"
 }
 
 afterEvaluate {
-    tasks.findByName("compileDebugKotlin")?.dependsOn(generateLavaAuthClassDebug)
-    tasks.findByName("compileReleaseKotlin")?.dependsOn(generateLavaAuthClassRelease)
+    // KSP + compileKotlin both consume the same generated source dir so
+    // BOTH need an explicit dependency on the codegen task to avoid
+    // Gradle's implicit-dependency validation.
+    listOf("compileDebugKotlin", "kspDebugKotlin").forEach { name ->
+        tasks.findByName(name)?.dependsOn(generateLavaAuthClassDebug)
+    }
+    listOf("compileReleaseKotlin", "kspReleaseKotlin").forEach { name ->
+        tasks.findByName(name)?.dependsOn(generateLavaAuthClassRelease)
+    }
 }
 
 dependencies {
