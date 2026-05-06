@@ -142,8 +142,13 @@ for suite_dir in tests/firebase tests/ci-sh tests/compose-layout \
       echo "    -> $suite_dir"
       bash "$runner" >/dev/null
     elif [[ -f "$suite_dir/check_constitution_test.sh" ]]; then
-      # tests/check-constitution has a flat layout (one test_*.sh entry).
+      # tests/check-constitution has a flat layout (one test_*.sh entry +
+      # additional test_*.sh files added per phase, e.g. §6.R Phase 1).
       bash "$suite_dir/check_constitution_test.sh" >/dev/null
+      for t in "$suite_dir"/test_*.sh; do
+        [[ -f "$t" ]] || continue
+        bash "$t" >/dev/null
+      done
     elif [[ -f "$suite_dir/check4_test.sh" ]]; then
       # tests/pre-push has a flat layout (multiple check<N>_test.sh entries).
       for t in "$suite_dir"/check*_test.sh; do
