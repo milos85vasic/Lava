@@ -66,3 +66,6 @@ firebase-debug.log
 # Firebase App Distribution upload reports — local telemetry.
 .firebase/
 firebase-distribute-*.log
+
+# Phase 11: build-time generated lava.auth.LavaAuthGenerated source
+app/build/generated/lava-auth/

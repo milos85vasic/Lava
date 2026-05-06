@@ -102,6 +102,60 @@ android {
             applicationIdSuffix = ".dev"
         }
     }
+
+    // Phase 11 (2026-05-06): generated lava.auth.LavaAuthGenerated source
+    sourceSets {
+        getByName("main") {
+            kotlin.srcDir(layout.buildDirectory.dir("generated/lava-auth/main"))
+        }
+    }
+}
+
+// Phase 11 (2026-05-06): build-time encryption of the per-build UUID.
+// Reads .env + signing keystore, generates lava/auth/LavaAuthGenerated.kt
+// into app/build/generated/lava-auth/main/ (gitignored). Wired BEFORE
+// compileKotlin so the generated source is always present at compile time.
+//
+// The generated class implements lava.network.impl.LavaAuthBlobProvider;
+// the runtime AuthInterceptorModule's reflection-based provider lookup
+// (Phase 10) prefers it over StubLavaAuthBlobProvider when present.
+val generateLavaAuthClassDebug = tasks.register("generateLavaAuthClassDebug") {
+    val outputDir = layout.buildDirectory.dir("generated/lava-auth/main")
+    outputs.dir(outputDir)
+    inputs.file(rootProject.file(".env"))
+    inputs.file(rootProject.file("$keystoreRootDir/debug.keystore"))
+    doLast {
+        val outFile = outputDir.get().asFile.resolve("lava/auth/LavaAuthGenerated.kt")
+        LavaAuthCodegen.generate(
+            envFile = rootProject.file(".env"),
+            keystoreFile = rootProject.file("$keystoreRootDir/debug.keystore"),
+            keystorePassword = keystorePassword,
+            keyAlias = "debug",
+            outputFile = outFile,
+        )
+    }
+}
+
+val generateLavaAuthClassRelease = tasks.register("generateLavaAuthClassRelease") {
+    val outputDir = layout.buildDirectory.dir("generated/lava-auth/main")
+    outputs.dir(outputDir)
+    inputs.file(rootProject.file(".env"))
+    inputs.file(rootProject.file("$keystoreRootDir/release.keystore"))
+    doLast {
+        val outFile = outputDir.get().asFile.resolve("lava/auth/LavaAuthGenerated.kt")
+        LavaAuthCodegen.generate(
+            envFile = rootProject.file(".env"),
+            keystoreFile = rootProject.file("$keystoreRootDir/release.keystore"),
+            keystorePassword = keystorePassword,
+            keyAlias = "release",
+            outputFile = outFile,
+        )
+    }
+}
+
+afterEvaluate {
+    tasks.findByName("compileDebugKotlin")?.dependsOn(generateLavaAuthClassDebug)
+    tasks.findByName("compileReleaseKotlin")?.dependsOn(generateLavaAuthClassRelease)
 }
 
 dependencies {
