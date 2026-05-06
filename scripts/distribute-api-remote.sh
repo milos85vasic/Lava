@@ -162,7 +162,26 @@ echo "==> Provisioning $REMOTE:$REMOTE_DIR"
 ssh "$REMOTE" "mkdir -p '$REMOTE_DIR/tls'"
 
 echo "==> scp env + boot script + TLS to $REMOTE"
-scp -q "$LOCAL_ENV" "$REMOTE:$REMOTE_DIR/thinker.local.env"
+
+# Phase 1 (2026-05-06): the new lava-api-go binary requires LAVA_AUTH_*
+# at boot. Combine the committed thinker.local.env (LAVA_THINKER_*)
+# with the operator's local .env's auth + transport block so the
+# remote container has the full set of env vars it needs. Operator
+# .env is gitignored per §6.H — never committed; only the combined
+# temp file is scp'd to the remote.
+COMBINED_ENV="$(mktemp)"
+trap 'rm -f "$COMBINED_ENV"' EXIT
+cat "$LOCAL_ENV" > "$COMBINED_ENV"
+OPERATOR_ENV="$LAVA_REPO_ROOT/.env"
+if [[ -f "$OPERATOR_ENV" ]]; then
+    {
+        echo ""
+        echo "# === Phase 1 auth + transport (merged from operator .env at distribute time) ==="
+        grep -E '^(LAVA_AUTH_|LAVA_API_HTTP3_|LAVA_API_BROTLI_|LAVA_API_PROTOCOL_)' "$OPERATOR_ENV" || true
+    } >> "$COMBINED_ENV"
+fi
+
+scp -q "$COMBINED_ENV" "$REMOTE:$REMOTE_DIR/thinker.local.env"
 scp -q "$LOCAL_BOOT_SH" "$REMOTE:$REMOTE_DIR/thinker-up.sh"
 scp -q "$TLS_DIR_LOCAL/server.crt" "$REMOTE:$REMOTE_DIR/tls/server.crt"
 scp -q "$TLS_DIR_LOCAL/server.key" "$REMOTE:$REMOTE_DIR/tls/server.key"

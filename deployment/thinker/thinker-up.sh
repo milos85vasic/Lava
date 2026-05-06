@@ -133,6 +133,33 @@ echo "==> Starting $LAVA_THINKER_API_NAME"
 # bridge subnet. Postgres is published to 127.0.0.1:${POSTGRES_PORT} on
 # the host, so api-go reaches it via 127.0.0.1 from inside host net.
 PG_URL="postgres://${LAVA_THINKER_POSTGRES_USER}:${LAVA_THINKER_POSTGRES_PASSWORD}@127.0.0.1:${LAVA_THINKER_POSTGRES_PORT}/${LAVA_THINKER_POSTGRES_DB}?sslmode=disable"
+
+# Phase 1 (2026-05-06): the new lava-api-go binary requires LAVA_AUTH_*
+# at boot. Values come from the env-file sourced at the top of this
+# script — distribute-api-remote.sh appends the operator's local .env
+# auth/transport block before scp'ing. Pass each as `-e` if set.
+AUTH_ENV_ARGS=()
+for var in \
+    LAVA_AUTH_FIELD_NAME \
+    LAVA_AUTH_CURRENT_CLIENT_NAME \
+    LAVA_AUTH_ACTIVE_CLIENTS \
+    LAVA_AUTH_RETIRED_CLIENTS \
+    LAVA_AUTH_HMAC_SECRET \
+    LAVA_AUTH_BACKOFF_STEPS \
+    LAVA_AUTH_TRUSTED_PROXIES \
+    LAVA_AUTH_MIN_SUPPORTED_VERSION_NAME \
+    LAVA_AUTH_MIN_SUPPORTED_VERSION_CODE \
+    LAVA_API_HTTP3_ENABLED \
+    LAVA_API_BROTLI_QUALITY \
+    LAVA_API_BROTLI_RESPONSE_ENABLED \
+    LAVA_API_BROTLI_REQUEST_DECODE_ENABLED \
+    LAVA_API_PROTOCOL_METRIC_ENABLED \
+; do
+    if [[ -n "${!var:-}" ]]; then
+        AUTH_ENV_ARGS+=( -e "$var=${!var}" )
+    fi
+done
+
 podman run -d \
     --name "$LAVA_THINKER_API_NAME" \
     --network host \
@@ -143,6 +170,7 @@ podman run -d \
     -e LAVA_API_LISTEN=":${LAVA_THINKER_API_PORT}" \
     -e LAVA_API_TLS_CERT=/etc/lava-api-go/tls/server.crt \
     -e LAVA_API_TLS_KEY=/etc/lava-api-go/tls/server.key \
+    "${AUTH_ENV_ARGS[@]}" \
     "${TLS_VOL_ARGS[@]}" \
     "$API_IMAGE" \
     >/dev/null

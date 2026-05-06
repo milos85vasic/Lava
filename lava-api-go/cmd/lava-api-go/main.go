@@ -274,16 +274,29 @@ func buildRouter(deps routerDeps) *gin.Engine {
 	router := gin.New()
 	router.Use(gin.Recovery())
 	router.Use(middleware.FirebaseTelemetry(deps.Firebase))
-	// Phase 7 (§6.G): backoff fires FIRST so blocked IPs short-circuit
-	// with 429 + Retry-After before AuthMiddleware can advance the
-	// counter again. Both middlewares share the same ladder.Ladder
-	// instance constructed in run().
-	// Phase 8 protocol metric MUST be first in the chain so its
-	// post-c.Next() block reads the final c.Writer.Status() — including
-	// 401/426/429 from auth + backoff middlewares that abort early.
+
+	// Phase 1 (2026-05-06): /health + /ready MUST be registered BEFORE
+	// the auth middleware so the orchestrator's liveness probe (podman
+	// HEALTHCHECK, k8s readiness, scripts/distribute-api-remote.sh's
+	// 60-second health wait) can hit them without a Lava-Auth header.
+	// Without this exemption the auth middleware returns 401, the
+	// orchestrator marks the container unhealthy, and a restart loop
+	// kicks in. Liveness/readiness probes are infrastructure, not
+	// user-facing API surfaces — they predate Phase 1's auth model.
+	router.GET("/health", observability.LivenessHandler())
+	router.GET("/ready", observability.ReadinessHandler(deps.Readiness))
+
+	// Phase 8 protocol metric MUST be first in the auth-gated chain so
+	// its post-c.Next() block reads the final c.Writer.Status() —
+	// including 401/426/429 from auth + backoff middlewares that abort
+	// early.
 	if deps.Cfg != nil {
 		router.Use(server.NewProtocolMetricMiddleware(deps.Cfg.ProtocolMetricEnabled, deps.PromReg))
 	}
+	// Phase 7 (§6.G): backoff fires FIRST among auth middlewares so
+	// blocked IPs short-circuit with 429 + Retry-After before
+	// AuthMiddleware can advance the counter again. Both middlewares
+	// share the same ladder.Ladder instance constructed in run().
 	if deps.Cfg != nil && deps.AuthLadder != nil {
 		router.Use(auth.NewBackoffMiddleware(deps.AuthLadder, deps.Cfg.AuthTrustedProxies))
 		router.Use(auth.NewMiddleware(deps.Cfg, deps.AuthLadder))
@@ -297,9 +310,6 @@ func buildRouter(deps routerDeps) *gin.Engine {
 		router.Use(server.NewBrotliMiddleware(deps.Cfg.BrotliResponseEnabled, deps.Cfg.BrotliQuality))
 		router.Use(server.NewAltSvcMiddleware(deps.Cfg.HTTP3Enabled, deps.Cfg.Listen))
 	}
-
-	router.GET("/health", observability.LivenessHandler())
-	router.GET("/ready", observability.ReadinessHandler(deps.Readiness))
 
 	handlers.Register(router, &handlers.Deps{
 		Cache:   deps.Cache,

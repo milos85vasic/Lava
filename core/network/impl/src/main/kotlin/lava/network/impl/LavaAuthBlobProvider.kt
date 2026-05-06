@@ -14,7 +14,19 @@ package lava.network.impl
  * `AuthInterceptor` to be the ONLY consumer of [getBlob]. Reflective
  * access from elsewhere is a constitutional violation.
  */
-internal interface LavaAuthBlobProvider {
+// `public` (not `internal`) so the build-time-generated
+// lava.auth.LavaAuthGenerated class — which lives in the :app
+// module's generated source set — can implement it. The interface
+// is the contract the build-time codegen output binds against;
+// keeping it `internal` would prevent that cross-module
+// implementation from compiling.
+//
+// The constitutional restriction in core/CLAUDE.md (Auth UUID
+// memory hygiene) constrains callers, not the visibility: the
+// AuthInterceptor is the ONLY production consumer of [getBlob];
+// reflective access from elsewhere is a §6.J violation regardless
+// of Kotlin visibility.
+interface LavaAuthBlobProvider {
     /** AES-256-GCM ciphertext + 16-byte tag. Empty when no real provider is wired. */
     fun getBlob(): ByteArray
 
