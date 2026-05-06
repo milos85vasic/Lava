@@ -33,6 +33,7 @@ require (
 	digital.vasic.ratelimiter v0.0.0-00010101000000-000000000000
 	digital.vasic.recovery v0.0.0-00010101000000-000000000000
 	github.com/PuerkitoBio/goquery v1.12.0
+	github.com/andybalholm/brotli v1.2.1
 	github.com/getkin/kin-openapi v0.133.0
 	github.com/gin-gonic/gin v1.12.0
 	github.com/oapi-codegen/runtime v1.4.0
@@ -69,7 +70,6 @@ require (
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/detectors/gcp v1.31.0 // indirect
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.53.0 // indirect
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.53.0 // indirect
-	github.com/andybalholm/brotli v1.2.1 // indirect
 	github.com/andybalholm/cascadia v1.3.3 // indirect
 	github.com/apache/arrow/go/v10 v10.0.1 // indirect
 	github.com/apache/thrift v0.16.0 // indirect
