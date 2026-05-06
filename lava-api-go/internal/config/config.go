@@ -9,10 +9,15 @@
 package config
 
 import (
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/base64"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -45,6 +50,23 @@ type Config struct {
 
 	// rutracker upstream
 	RutrackerBaseURL string
+
+	// === Phase 1: Auth (read at boot from .env / runtime env vars) ===
+	AuthFieldName               string
+	AuthHMACSecret              []byte            // base64-decoded, ≥16 bytes
+	AuthActiveClients           map[string]string // map[hex(HMAC-SHA256(uuid))] = client_name
+	AuthRetiredClients          map[string]string // forced-upgrade list (same shape)
+	AuthBackoffSteps            []time.Duration   // ladder, monotonic non-decreasing
+	AuthTrustedProxies          []string          // CIDR list, empty = direct
+	AuthMinSupportedVersionName string
+	AuthMinSupportedVersionCode int
+
+	// === Phase 1: Transport ===
+	HTTP3Enabled               bool
+	BrotliQuality              int
+	BrotliResponseEnabled      bool
+	BrotliRequestDecodeEnabled bool
+	ProtocolMetricEnabled      bool
 }
 
 // Load reads environment variables, applies the defaults documented in
@@ -74,6 +96,51 @@ func Load() (*Config, error) {
 		// where path starts with `/`.
 		RutrackerBaseURL: envDefault("LAVA_API_RUTRACKER_URL", "https://rutracker.org/forum"),
 	}
+
+	// === Phase 1: auth field reads ===
+	cfg.AuthFieldName = os.Getenv("LAVA_AUTH_FIELD_NAME")
+	if cfg.AuthFieldName == "" {
+		return nil, errors.New("config: LAVA_AUTH_FIELD_NAME is required")
+	}
+
+	secretB64 := os.Getenv("LAVA_AUTH_HMAC_SECRET")
+	if secretB64 == "" {
+		return nil, errors.New("config: LAVA_AUTH_HMAC_SECRET is required")
+	}
+	secret, err := base64.StdEncoding.DecodeString(secretB64)
+	if err != nil {
+		return nil, fmt.Errorf("config: LAVA_AUTH_HMAC_SECRET base64 decode: %w", err)
+	}
+	if len(secret) < 16 {
+		return nil, fmt.Errorf("config: LAVA_AUTH_HMAC_SECRET must be at least 16 bytes (got %d)", len(secret))
+	}
+	cfg.AuthHMACSecret = secret
+
+	cfg.AuthActiveClients, err = parseClientsList(os.Getenv("LAVA_AUTH_ACTIVE_CLIENTS"), secret)
+	if err != nil {
+		return nil, fmt.Errorf("config: LAVA_AUTH_ACTIVE_CLIENTS: %w", err)
+	}
+	cfg.AuthRetiredClients, err = parseClientsList(os.Getenv("LAVA_AUTH_RETIRED_CLIENTS"), secret)
+	if err != nil {
+		return nil, fmt.Errorf("config: LAVA_AUTH_RETIRED_CLIENTS: %w", err)
+	}
+
+	stepsStr := envDefault("LAVA_AUTH_BACKOFF_STEPS", "2s,5s,10s,30s,1m,1h")
+	cfg.AuthBackoffSteps, err = parseBackoffSteps(stepsStr)
+	if err != nil {
+		return nil, fmt.Errorf("config: LAVA_AUTH_BACKOFF_STEPS: %w", err)
+	}
+
+	cfg.AuthTrustedProxies = parseCSV(os.Getenv("LAVA_AUTH_TRUSTED_PROXIES"))
+	cfg.AuthMinSupportedVersionName = os.Getenv("LAVA_AUTH_MIN_SUPPORTED_VERSION_NAME")
+	cfg.AuthMinSupportedVersionCode = envInt("LAVA_AUTH_MIN_SUPPORTED_VERSION_CODE", 0)
+
+	// === Phase 1: transport ===
+	cfg.HTTP3Enabled = envBool("LAVA_API_HTTP3_ENABLED", true)
+	cfg.BrotliQuality = envInt("LAVA_API_BROTLI_QUALITY", 4)
+	cfg.BrotliResponseEnabled = envBool("LAVA_API_BROTLI_RESPONSE_ENABLED", true)
+	cfg.BrotliRequestDecodeEnabled = envBool("LAVA_API_BROTLI_REQUEST_DECODE_ENABLED", false)
+	cfg.ProtocolMetricEnabled = envBool("LAVA_API_PROTOCOL_METRIC_ENABLED", true)
 
 	if cfg.PGUrl == "" {
 		return nil, errors.New("config: LAVA_API_PG_URL is required (P1 hard-dep)")
@@ -113,4 +180,107 @@ func envDuration(key string, def time.Duration) time.Duration {
 		}
 	}
 	return def
+}
+
+// parseClientsList parses a CSV of "name:uuid" entries and returns a
+// map keyed by hex(HMAC-SHA256(uuid, secret)), valued by name. The
+// plaintext UUID byte slice is zeroized after hashing per §6.H.
+func parseClientsList(csv string, secret []byte) (map[string]string, error) {
+	out := make(map[string]string)
+	if csv == "" {
+		return out, nil
+	}
+	for _, entry := range strings.Split(csv, ",") {
+		entry = strings.TrimSpace(entry)
+		if entry == "" {
+			continue
+		}
+		colon := strings.IndexByte(entry, ':')
+		if colon < 0 {
+			return nil, fmt.Errorf("entry %q missing colon separator", entry)
+		}
+		name := strings.TrimSpace(entry[:colon])
+		uuidStr := strings.TrimSpace(entry[colon+1:])
+		uuidBytes, err := parseUUID(uuidStr)
+		if err != nil {
+			return nil, fmt.Errorf("entry %q: %w", entry, err)
+		}
+		h := hmac.New(sha256.New, secret)
+		h.Write(uuidBytes)
+		// Zeroize plaintext UUID per §6.H — never linger in memory.
+		for i := range uuidBytes {
+			uuidBytes[i] = 0
+		}
+		out[hex.EncodeToString(h.Sum(nil))] = name
+	}
+	return out, nil
+}
+
+// parseUUID hex-decodes a 36-char UUID (with dashes) into 16 bytes.
+func parseUUID(s string) ([]byte, error) {
+	stripped := strings.ReplaceAll(s, "-", "")
+	if len(stripped) != 32 {
+		return nil, fmt.Errorf("UUID %q wrong length (want 36 with dashes)", s)
+	}
+	out := make([]byte, 16)
+	for i := 0; i < 16; i++ {
+		b, err := strconv.ParseUint(stripped[i*2:i*2+2], 16, 8)
+		if err != nil {
+			return nil, fmt.Errorf("UUID %q malformed at byte %d: %w", s, i, err)
+		}
+		out[i] = byte(b)
+	}
+	return out, nil
+}
+
+// parseBackoffSteps parses a CSV of Go time.Duration strings. The
+// resulting list MUST be monotonically non-decreasing — each step is
+// >= the previous step. Returns an error if any step parses badly,
+// the list is empty, or the monotonicity invariant is violated.
+func parseBackoffSteps(csv string) ([]time.Duration, error) {
+	parts := strings.Split(csv, ",")
+	out := make([]time.Duration, 0, len(parts))
+	var prev time.Duration
+	for _, p := range parts {
+		p = strings.TrimSpace(p)
+		d, err := time.ParseDuration(p)
+		if err != nil {
+			return nil, fmt.Errorf("step %q: %w", p, err)
+		}
+		if d < prev {
+			return nil, fmt.Errorf("steps not monotonically non-decreasing at %q (prev %s)", p, prev)
+		}
+		prev = d
+		out = append(out, d)
+	}
+	if len(out) == 0 {
+		return nil, errors.New("at least one step required")
+	}
+	return out, nil
+}
+
+// parseCSV splits on commas and trims whitespace; empty input returns nil.
+func parseCSV(s string) []string {
+	if s == "" {
+		return nil
+	}
+	out := strings.Split(s, ",")
+	for i := range out {
+		out[i] = strings.TrimSpace(out[i])
+	}
+	return out
+}
+
+// envBool reads a boolean env var with a default; falls back to def
+// on parse error (no fatal, since the default is the safer shape).
+func envBool(key string, def bool) bool {
+	v := os.Getenv(key)
+	if v == "" {
+		return def
+	}
+	b, err := strconv.ParseBool(v)
+	if err != nil {
+		return def
+	}
+	return b
 }
