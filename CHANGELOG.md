@@ -17,6 +17,25 @@ Per-version distribution snapshots (the exact text shipped as App Distribution r
 
 ---
 
+## Lava-API-Go-2.0.13-2013 — 2026-05-06
+
+**Channel:** container registry / remote distribution to thinker.local
+**Previous published:** Lava-API-Go-2.0.12-2012 (2026-05-06)
+
+### Fixed (mDNS not reaching the LAN)
+
+- **deployment/thinker/thinker-up.sh: lava-api-go now uses `--network host`** instead of a podman bridge network. The previous bridge-network setup confined JmDNS / mDNS broadcasts to the bridge subnet, so Android testers running Lava could NOT auto-discover thinker.local's API via `_lava-api._tcp`. Matches the local docker-compose.yml pattern where lava-api-go uses `network_mode: host` for the same reason.
+- Postgres still uses a bridge network with `127.0.0.1:${POSTGRES_PORT}` published on the host; api-go connects via `127.0.0.1:5432` (host-namespace local).
+- Verified: `podman logs lava-api-go-thinker` now shows `mDNS announced port=8443 type=_lava-api._tcp`. Cross-host curl succeeds: `curl https://thinker.local:8443/health` returns `{"status":"alive"}` from the workstation.
+
+### Versions bumped
+
+| Component | Old | New |
+|---|---|---|
+| lava-api-go | 2.0.12 (2012) | **2.0.13 (2013)** |
+
+---
+
 ## Lava-API-Go-2.0.12-2012 — 2026-05-06
 
 **Channel:** container registry / remote distribution to thinker.local

@@ -127,17 +127,20 @@ if [[ -f "$LAVA_THINKER_TLS_CERT" && -f "$LAVA_THINKER_TLS_KEY" ]]; then
 fi
 
 echo "==> Starting $LAVA_THINKER_API_NAME"
-PG_URL="postgres://${LAVA_THINKER_POSTGRES_USER}:${LAVA_THINKER_POSTGRES_PASSWORD}@${LAVA_THINKER_POSTGRES_NAME}:5432/${LAVA_THINKER_POSTGRES_DB}?sslmode=disable"
+# network_mode=host so JmDNS / mDNS advertisements reach the LAN — Android
+# clients running Lava discover this API via mDNS (_lava-api._tcp). Without
+# host net, the container is on a bridge and mDNS frames never leave the
+# bridge subnet. Postgres is published to 127.0.0.1:${POSTGRES_PORT} on
+# the host, so api-go reaches it via 127.0.0.1 from inside host net.
+PG_URL="postgres://${LAVA_THINKER_POSTGRES_USER}:${LAVA_THINKER_POSTGRES_PASSWORD}@127.0.0.1:${LAVA_THINKER_POSTGRES_PORT}/${LAVA_THINKER_POSTGRES_DB}?sslmode=disable"
 podman run -d \
     --name "$LAVA_THINKER_API_NAME" \
-    --network "$LAVA_THINKER_NETWORK" \
+    --network host \
     --restart unless-stopped \
     --cpus "$LAVA_THINKER_API_CPUS" \
     --memory "$LAVA_THINKER_API_MEMORY" \
-    -p "${LAVA_THINKER_API_PORT}:8443/udp" \
-    -p "${LAVA_THINKER_API_PORT}:8443/tcp" \
     -e LAVA_API_PG_URL="$PG_URL" \
-    -e LAVA_API_LISTEN=:8443 \
+    -e LAVA_API_LISTEN=":${LAVA_THINKER_API_PORT}" \
     -e LAVA_API_TLS_CERT=/etc/lava-api-go/tls/server.crt \
     -e LAVA_API_TLS_KEY=/etc/lava-api-go/tls/server.key \
     "${TLS_VOL_ARGS[@]}" \
