@@ -266,28 +266,24 @@ if ! grep -qF '##### 6.R — No-Hardcoding Mandate' CLAUDE.md; then
   exit 1
 fi
 
-# 6.R must appear in every Submodules/*/CLAUDE.md (per §6.F inheritance)
+# 6.R must appear in every Submodules/*/CLAUDE.md (per §6.F inheritance).
+# Heading-anchored pattern (`## §6.R — No-Hardcoding Mandate`) — a passing
+# mention in a notes/history paragraph MUST NOT satisfy this gate.
 for sub in Submodules/*/CLAUDE.md; do
-  if ! grep -qF '6.R — No-Hardcoding Mandate' "$sub"; then
+  if ! grep -qF '## §6.R — No-Hardcoding Mandate' "$sub"; then
     echo "MISSING 6.R inheritance reference: $sub" >&2
-    echo "  → Append the §6.R reference paragraph per Phase 1 Task 1.3." >&2
+    echo "  → Append the §6.R heading paragraph per Phase 1 Task 1.3." >&2
     exit 1
   fi
 done
 
-# 6.R: no 36-char UUIDs in tracked source outside the exemption set
-# Exemptions: .env.example, sixth-law incident JSONs, design specs/plans
-# (design docs may carry example values per §6.R clause), test fixtures.
-uuid_violations=$(git ls-files \
-  | grep -vE '^\.env\.example$|^\.lava-ci-evidence/sixth-law-incidents/|^docs/superpowers/(specs|plans)/|_test\.go$|Test\.kt$' \
-  | xargs grep -lE '\b[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\b' 2>/dev/null \
-  || true)
-if [[ -n "$uuid_violations" ]]; then
-  echo "6.R VIOLATION: hardcoded UUIDs in tracked source:" >&2
-  echo "$uuid_violations" >&2
-  echo "  → Move to .env (gitignored); read via config layer." >&2
-  exit 1
-fi
+# 6.R: no 36-char UUIDs in tracked source outside the exemption set.
+# Delegate to the standalone scanner so the hermetic test
+# (tests/check-constitution/test_no_hardcoded_uuid.sh) can invoke the SAME
+# rule in isolation — eliminating the previous silent-PASS bluff where
+# the test green-lit a UUID violation when an unrelated earlier gate in
+# this script failed first.
+bash scripts/scan-no-hardcoded-uuid.sh
 
 echo "Constitution check passed: 6.D + 6.E + 6.F present in CLAUDE.md;"
 echo "Submodules/Tracker-SDK/CLAUDE.md present; core/ + feature/ scoped"
