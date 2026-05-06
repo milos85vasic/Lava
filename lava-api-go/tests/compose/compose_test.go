@@ -51,13 +51,14 @@ func TestComposeFileParses(t *testing.T) {
 	if !ok || len(services) == 0 {
 		t.Fatalf("expected non-empty services map, got %#v", doc["services"])
 	}
-	// Spot-check the five profiles are reachable.
+	// Spot-check that all current-active services are reachable.
+	// Post-Ktor cleanup (lava-api-go 2.0.12, commit a00b28f) removed
+	// lava-proxy and the legacy/both profiles.
 	mustContain := []string{
-		"lava-postgres", "lava-migrate", "lava-api-go", // api-go / both
-		"lava-proxy",                            // legacy / both
-		"lava-prometheus", "lava-loki",          // observability
+		"lava-postgres", "lava-migrate", "lava-api-go", // api-go profile
+		"lava-prometheus", "lava-loki", // observability profile
 		"lava-promtail", "lava-tempo", "lava-grafana",
-		"lava-swagger-ui", // dev-docs
+		"lava-swagger-ui", // dev-docs profile
 	}
 	for _, name := range mustContain {
 		if _, ok := services[name].(map[string]any); !ok {
@@ -78,12 +79,20 @@ func TestComposeProfilesPresent(t *testing.T) {
 	}
 	services := doc["services"].(map[string]any)
 
+	// Post-Ktor cleanup (commit a00b28f) removed lava-proxy + legacy/both
+	// profiles. Remaining services use api-go (default), observability,
+	// dev-docs profiles.
 	expected := map[string][]string{
 		"lava-postgres":   {"api-go", "both"},
 		"lava-api-go":     {"api-go", "both"},
-		"lava-proxy":      {"legacy", "both"},
 		"lava-prometheus": {"observability"},
 		"lava-swagger-ui": {"dev-docs"},
+	}
+	// Anti-regression: lava-proxy MUST NOT be re-introduced unless the
+	// Ktor proxy comes back; if you see this fail because lava-proxy
+	// reappeared, that's a constitutional rollback.
+	if _, ok := services["lava-proxy"]; ok {
+		t.Errorf("lava-proxy service re-introduced (Ktor proxy was removed in lava-api-go 2.0.12)")
 	}
 	for svc, want := range expected {
 		raw := services[svc].(map[string]any)

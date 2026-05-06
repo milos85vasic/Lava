@@ -105,14 +105,22 @@ func TestBuildAndReleaseShParses(t *testing.T) {
 
 func TestStartShContainsProfileFlags(t *testing.T) {
 	body := readScript(t, repoRoot(t), "start.sh")
+	// Post-Ktor cleanup (lava-api-go 2.0.12, commit a00b28f) removed the
+	// legacy --legacy and --both flags. The remaining flags are the
+	// optional add-on profiles for observability and dev-docs.
 	for _, want := range []string{
-		"--legacy",
-		"--both",
 		"--with-observability",
 		"--dev-docs",
 	} {
 		if !strings.Contains(body, want) {
 			t.Errorf("start.sh missing expected flag wiring %q", want)
+		}
+	}
+	// Anti-regression: the legacy flags MUST NOT come back without an
+	// explicit re-introduction of the Ktor proxy.
+	for _, gone := range []string{"--legacy", "--both"} {
+		if strings.Contains(body, gone) {
+			t.Errorf("start.sh still references removed legacy flag %q", gone)
 		}
 	}
 }
