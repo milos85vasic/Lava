@@ -101,6 +101,62 @@ fi
 echo "    §6.P gates passed: versionCode monotonic; CHANGELOG.md entry present; snapshot at $SNAPSHOT_FILE"
 
 # ----------------------------------------------------------------
+# 1b. Phase 1 (Phase-1 §6.R + §6.H) gates — added 2026-05-06.
+#
+#  - Gate 4: pepper rotation. The Phase-11 codegen embeds the
+#    LAVA_AUTH_OBFUSCATION_PEPPER value into the APK as one of the
+#    constants the AuthInterceptor uses to derive the AES key. Per
+#    the Phase-1 spec §9 rotation runbook, every distributed build
+#    MUST carry a fresh pepper. Reusing a pepper across distributions
+#    means a leak in version N is also a compromise of version N+1.
+#    Refuse to operate if the current pepper's SHA-256 already
+#    appears in pepper-history.sha256.
+#
+#  - Gate 5: LAVA_AUTH_CURRENT_CLIENT_NAME consistency.
+#    Refuse to operate if .env's CURRENT_CLIENT_NAME does NOT match
+#    `android-${APP_VERSION}-${APP_VERSION_CODE}`, OR if the named
+#    entry is missing from LAVA_AUTH_ACTIVE_CLIENTS. Either case
+#    means the Phase-11 codegen would generate a UUID for the wrong
+#    client identifier — a silent rotation bug.
+# ----------------------------------------------------------------
+ENV_FILE="$LAVA_REPO_ROOT/.env"
+PEPPER_HISTORY="$CHANGELOG_DIR/pepper-history.sha256"
+touch "$PEPPER_HISTORY"
+
+if [[ -f "$ENV_FILE" ]]; then
+    PEPPER_VALUE="$(grep -E '^LAVA_AUTH_OBFUSCATION_PEPPER=' "$ENV_FILE" | head -1 | cut -d= -f2-)"
+    if [[ -n "$PEPPER_VALUE" ]]; then
+        PEPPER_SHA="$(printf '%s' "$PEPPER_VALUE" | sha256sum | awk '{print $1}')"
+        if grep -qF "$PEPPER_SHA" "$PEPPER_HISTORY"; then
+            echo "FATAL Phase 1 Gate 4: pepper SHA $PEPPER_SHA already used in a previous distribution." >&2
+            echo "       Rotate LAVA_AUTH_OBFUSCATION_PEPPER in .env before re-running this script." >&2
+            echo "       Run: openssl rand -base64 32  → set as LAVA_AUTH_OBFUSCATION_PEPPER" >&2
+            exit 1
+        fi
+    fi
+
+    CURRENT_NAME="$(grep -E '^LAVA_AUTH_CURRENT_CLIENT_NAME=' "$ENV_FILE" | head -1 | cut -d= -f2-)"
+    if [[ -n "$CURRENT_NAME" ]]; then
+        EXPECTED_NAME="android-$APP_VERSION-$APP_VERSION_CODE"
+        if [[ "$CURRENT_NAME" != "$EXPECTED_NAME" ]]; then
+            echo "FATAL Phase 1 Gate 5: LAVA_AUTH_CURRENT_CLIENT_NAME=$CURRENT_NAME does not match expected $EXPECTED_NAME." >&2
+            echo "       The expected name is derived from app/build.gradle.kts versionName/versionCode." >&2
+            echo "       Update LAVA_AUTH_CURRENT_CLIENT_NAME in .env." >&2
+            exit 1
+        fi
+        ACTIVE_CLIENTS="$(grep -E '^LAVA_AUTH_ACTIVE_CLIENTS=' "$ENV_FILE" | head -1 | cut -d= -f2-)"
+        if ! echo "$ACTIVE_CLIENTS" | grep -qF "$CURRENT_NAME:"; then
+            echo "FATAL Phase 1 Gate 5: $CURRENT_NAME not present in LAVA_AUTH_ACTIVE_CLIENTS." >&2
+            echo "       Add the new entry to .env's LAVA_AUTH_ACTIVE_CLIENTS before distributing." >&2
+            exit 1
+        fi
+    fi
+    echo "    Phase 1 Gates 4+5 passed: pepper rotated; current-client-name matches version + appears in active list."
+else
+    echo "    Phase 1 Gates 4+5 skipped: .env not present (auth feature inert at runtime; runtime falls back to StubLavaAuthBlobProvider)."
+fi
+
+# ----------------------------------------------------------------
 # 2. Resolve git SHA + branch for the release notes
 # ----------------------------------------------------------------
 GIT_SHA="$(git rev-parse --short HEAD)"
@@ -184,6 +240,13 @@ echo "==> Distribute log: $LOG (gitignored)"
 # session refuses to ship the same (or older) code.
 echo "$APP_VERSION_CODE" > "$LAST_VERSION_FILE"
 echo "==> §6.P last-version recorded: $APP_VERSION_CODE → $LAST_VERSION_FILE"
+
+# Phase 1 Gate 4: persist the pepper SHA after a successful distribute so
+# the next session refuses to reuse it.
+if [[ -n "${PEPPER_SHA:-}" ]]; then
+    echo "$PEPPER_SHA  # $APP_VERSION-$APP_VERSION_CODE  $TIMESTAMP" >> "$PEPPER_HISTORY"
+    echo "==> Phase 1 Gate 4 pepper SHA recorded: $PEPPER_SHA → $PEPPER_HISTORY"
+fi
 
 echo "==> Firebase distribute complete."
 echo "    Console: https://console.firebase.google.com/project/$LAVA_FIREBASE_PROJECT_ID/appdistribution"
