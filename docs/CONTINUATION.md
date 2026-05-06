@@ -11,11 +11,11 @@ same commit so the index stays trustworthy. Stale state in this file
 is itself a §6.J spirit issue — the file claims a guarantee, the
 repo has drifted, the agent acts on the claim.
 
-> **Last updated:** 2026-05-06 (evening), after Phase 1 of the parent
-> decomposition reached the "deployed-to-thinker.local + on Firebase
-> App Distribution" state, plus §6.S (Continuation Document Maintenance
-> Mandate) added to the constitution + propagated to all 16 submodules
-> + lava-api-go, plus Submodules/Challenges/Containers/ residue cleanup.
+> **Last updated:** 2026-05-06 (late evening), after Phase 1 of the
+> parent decomposition reached the "deployed-to-thinker.local + on
+> Firebase App Distribution" state, plus §6.S (Continuation Document
+> Maintenance Mandate) propagated, plus §6.T (Universal Quality
+> Constraints from HelixCode mining) added.
 
 > **§6.S binding:** this file is constitutionally load-bearing per
 > root `CLAUDE.md` §6.S. Every commit that changes phase status,
@@ -495,14 +495,24 @@ opportunistically when a related phase touches the area.
   Pre-push grep enforces UUID literals; IPv4/host:port/schedule
   enforcement is staged for future phases (see §4.5.11).
 - **§6.S** (Continuation Document Maintenance Mandate): added
-  2026-05-06 in this commit. THIS file (`docs/CONTINUATION.md`)
-  is constitutionally load-bearing. Every commit that changes
+  2026-05-06. THIS file (`docs/CONTINUATION.md`) is
+  constitutionally load-bearing. Every commit that changes
   tracked state MUST update this file in the SAME COMMIT.
   Stale CONTINUATION.md is itself a §6.J spirit issue.
   `scripts/check-constitution.sh` enforces (1) file present,
   (2) §0 "Last updated" line, (3) §7 RESUME PROMPT, (4) §6.S
   clause in CLAUDE.md, (5) §6.S inheritance in 16 submodules
   + lava-api-go.
+- **§6.T** (Universal Quality Constraints): added 2026-05-06
+  from ../HelixCode constitution mining. Four sub-points:
+  - §6.T.1 Reproduction-Before-Fix (HelixCode CONST-014)
+  - §6.T.2 Resource Limits for Tests & Challenges (CONST-011)
+  - §6.T.3 No-Force-Push (CONST-043)
+  - §6.T.4 Bugfix Documentation in `docs/issues/fixed/BUGFIXES.md`
+    (CONST-012). §6.O extends this for Crashlytics issues; §6.T.4
+    covers the rest.
+  All four apply recursively. Submodules MAY tighten but MUST NOT
+  relax.
 
 ---
 

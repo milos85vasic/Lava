@@ -605,6 +605,47 @@ Pre-push rejects on any of (1)-(5) failing.
 
 **Inheritance.** Applies recursively to every submodule, every feature, every new artifact (including `lava-api-go`). Submodule constitutions MAY add stricter rules (e.g., "this submodule maintains its own CONTINUATION.md in addition to the parent") but MUST NOT relax this clause. The pre-push hook in the parent enforces presence of the §6.S clause in submodule CLAUDE.md; per-submodule CONTINUATION files are not yet mandated but recommended for any submodule that develops independently.
 
+##### 6.T — Universal Quality Constraints (added 2026-05-06 from ../HelixCode constitution mining)
+
+**Forensic anchor:** 2026-05-06 operator directive: "Pay attention to rules we may be missing from ../HelixCode Constitution, AGENTS.MD and CLAUDE.MD! We are interested in generic, common sense, universal mandatory constraints which improve stability and quality of the project and all its codebase!"
+
+**Adopted from HelixCode:** four constitutional anchors that are universally-applicable to any vasic-digital / HelixDevelopment-stack project, not just HelixCode-specific. Each is binding here verbatim.
+
+**§6.T.1 — Reproduction-Before-Fix (HelixCode CONST-014).**
+
+Every reported error, defect, or unexpected behavior MUST be reproduced by a Challenge script (or equivalent test that exercises the real production path) BEFORE any fix is attempted. Sequence:
+1. Write the Challenge / regression test first
+2. Run it; confirm it fails (it reproduces the bug)
+3. Fix the production code path
+4. Run again; confirm it passes
+5. Commit the test + fix together with the failure-message-from-step-2 in the Bluff-Audit stamp
+
+A fix without a prior reproducing test is a §6.J spirit violation by construction: there is no falsifiability evidence the fix addresses the root cause vs masking it.
+
+**§6.T.2 — Resource Limits for Tests & Challenges (HelixCode CONST-011).**
+
+ALL test and challenge execution MUST be strictly limited so it does not starve the operator's host or other workloads on shared infrastructure. Concretely:
+- `go test` invocations: `GOMAXPROCS=2 nice -n 19 ionice -c 3 -p 1` prefix recommended for full-suite runs
+- Container test runs: explicit CPU + memory limits via the runtime's `--cpus` + `--memory` flags
+- Gradle test runs: `--max-workers=2` for full-tree invocations on shared hosts
+- Long-running matrix-gate runs: must be backgrounded + monitored, never run in the foreground of an interactive session
+
+The 30-40% host-resource ceiling applies; full-resource runs are reserved for dedicated CI machines and require explicit operator authorization.
+
+**§6.T.3 — No-Force-Push (HelixCode §12.2 / CONST-043).**
+
+No force push, force-with-lease push, history rewrite, branch deletion of `main`/`master`, or upstream-overwriting operation may be performed without explicit, in-conversation user approval given for that specific operation. Authorization for one push does not extend to subsequent pushes. Bypassing hooks (`--no-verify`), signature verification (`--no-gpg-sign`), or protected-branch rules also requires explicit approval. This applies to every repository in the vasic-digital stack and every Lava mirror.
+
+The 4-mirror reconciliation pattern Lava already uses (`-s ours` merge when a sibling mirror has diverged, push the merge to all four) is the prescribed alternative when push-conflicts arise.
+
+**§6.T.4 — Bugfix Documentation (HelixCode CONST-012).**
+
+All bug fixes MUST be documented in `docs/issues/fixed/BUGFIXES.md` (created on first fix; appended thereafter) with: root cause analysis, affected files, fix description, link to the verification test/challenge, and the commit SHA that landed the fix. The §6.O Crashlytics-Resolved Issue Coverage Mandate already requires `.lava-ci-evidence/crashlytics-resolved/<date>-<slug>.md` for each Crashlytics-recorded issue; §6.T.4 extends this to ALL bug fixes (Crashlytics-tracked or not, user-reported or self-discovered).
+
+The closure log is the operator-visible audit trail: a bug "fixed" without an entry in BUGFIXES.md is silently fixed — the next agent that encounters a regression has no record of why the original fix was made or what the failure mode was.
+
+**Inheritance.** All four sub-points apply recursively to every submodule, every feature, every new artifact (including `lava-api-go`). Submodule constitutions MAY add stricter rules but MUST NOT relax any of §6.T.1, §6.T.2, §6.T.3, §6.T.4.
+
 ##### 6.L — Anti-Bluff Functional Reality Mandate (Operator's Standing Order, repeated 2026-05-04)
 
 The user has now invoked this mandate **THIRTEEN TIMES** across two working days (initial fix request, after 6.G/6.H landed, after 6.I/6.J landed, after 6.K landed, then again with `ultrathink` after the layer-3 fix, then again after spotting that "Anonymous Access" was modeled as a global toggle when it is actually a per-provider capability, then on 2026-05-05 after the architectural port-collision bluff in the matrix runner was discovered with the verbatim restatement: "all existing tests and Challenges do work in anti-bluff manner — they MUST confirm that all tested codebase really works as expected", then on 2026-05-05 evening when the operator commissioned a comprehensive plan covering ALL open points and re-emphasized: "execution of tests and Challenges MUST guarantee the quality, the completion and full usability by end users of the product", then on 2026-05-05 late evening immediately after Group C-pkg-vm closed §6.K-debt, when the operator surveyed the next-step menu and re-issued the verbatim mandate, AND now on 2026-05-05 after Phase 7 readiness was reported, when the operator commissioned the full rebuild-and-test-everything cycle for tag Lava-Android-1.2.3 and re-issued the verbatim mandate yet again with the addition: "Rebuild Go API and client app(s), put new builds into releases dir (with properly updated version codes) and execute all existing tests and Challenges! Any issue that pops up MUST BE properly addressed by addressing the root causes (fixing them) and covering everything with validation and verification tests and Challenges!", and now on 2026-05-05 late evening AGAIN immediately after the first Firebase-instrumented APK distribution surfaced 2 Crashlytics-recorded crashes — the verbatim restatement: "We had been in position that all tests do execute with success and all Challenges as well, but in reality the most of the features does not work and can't be used! This MUST NOT be the case and execution of tests and Challenges MUST guarantee the quality, the completition and full usability by end users of the product! ... Each Crashlytics resolved issue MUST BE covered with validation and verification tests and Challenges!", and immediately after that on 2026-05-05 23:11 — "when distributing new build it must have version code bigger by at least one then the last version code available for download (already distribited). Every distributed build MUST CONTAIN changelog with the details what it includes compared to previous one we have published! Make sure all these points are in Constitution, CLAUDE.MD and AGENTS.MD.", and on 2026-05-05 23:51 — the THIRTEENTH invocation, immediately after a real tester reported "Opening Trackers from Settings crashes the app. See Crashlytics for stacktraces. Create proper tests to validate and verify the fix! ... execution of tests and Challenges MUST guarantee the quality, the completition and full usability by end users of the product! This MUST BE part of Constitution of our project, its CLAUDE.MD and AGENTS.MD if it is not there already, and to be applied to all Submodules's Constitutuon, CLAUDE.MD and AGENTS.MD as well (if not there already)!" The crash root cause was a textbook nested-scroll antipattern (`LazyColumn` inside `Column(verticalScroll)`) that no existing test caught — confirming yet again that CI green is necessary, never sufficient. Closure log: `.lava-ci-evidence/crashlytics-resolved/2026-05-05-tracker-settings-nested-scroll.md`.). The count is what makes this clause load-bearing: every restatement is an admission by the operator that the prior layers of constitutional plumbing (6.A through 6.M, the Sixth and Seventh Laws) are not yet enough to evict the bluff class on their own. The repetition itself is the forensic record. This clause is the same as 6.J — every test, every Challenge Test, every CI gate has exactly one job: confirm the feature works for a real user end-to-end on the gating matrix. CI green is necessary, never sufficient. **The reason this clause is restated rather than cross-referenced** is that the operator's standing concern is that future agents and contributors will rationalize their way past 6.J and ship green-tests-with-broken-features again. Every time the operator restates it, this codebase records the restatement here so the next reading agent must look at the same wall of repetition the operator has had to type out.
