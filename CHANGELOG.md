@@ -17,6 +17,25 @@ Per-version distribution snapshots (the exact text shipped as App Distribution r
 
 ---
 
+## Lava-API-Go-2.0.15-2015 — 2026-05-06
+
+**Channel:** container registry / remote distribution to thinker.local
+**Previous published:** Lava-API-Go-2.0.14-2014 (2026-05-06)
+
+### Refactor (post-Ktor naming cleanup)
+
+- **`tools/lava-containers/internal/proxy` → `internal/orchestrator`** — renamed the Go package (the "proxy" name was orchestrator-meaning, confusing post-Ktor-removal). `proxy.go` → `manager.go` (the file holds the `Manager` type for compose lifecycle). Imports + call sites updated in `cmd/lava-containers/main.go`. `git mv` preserves file history.
+- **`Manager.BuildJar()` removed** — it ran `./gradlew :proxy:buildFatJar` which would fail at runtime since the `:proxy` module is gone. `os/exec` import removed (was only used by `BuildJar`). `Manager.BuildImage()` retained for the api-go image build.
+- All `go test ./...` in `tools/lava-containers` PASS post-rename (3 packages).
+
+### Versions bumped
+
+| Component | Old | New |
+|---|---|---|
+| lava-api-go | 2.0.14 (2014) | **2.0.15 (2015)** |
+
+---
+
 ## Lava-API-Go-2.0.14-2014 — 2026-05-06
 
 **Channel:** container registry / remote distribution to thinker.local

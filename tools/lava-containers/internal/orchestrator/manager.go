@@ -7,14 +7,13 @@
 // living under tools/lava-containers/internal/, and will rewire shared concerns
 // (runtime detection, IP scanning, lifecycle) to delegate to the
 // vasic-digital/Containers submodule.
-package proxy
+package orchestrator
 
 import (
 	"fmt"
 	"net"
 	"net/http"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"time"
 
@@ -53,16 +52,6 @@ func DetectLANIP() string {
 		}
 	}
 	return "127.0.0.1"
-}
-
-func (m *Manager) BuildJar() error {
-	fmt.Println("[1/4] Building proxy fat JAR...")
-	gradlew := filepath.Join(m.ProjectDir, "gradlew")
-	cmd := exec.Command(gradlew, ":proxy:buildFatJar")
-	cmd.Dir = m.ProjectDir
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	return cmd.Run()
 }
 
 func (m *Manager) BuildImage() error {

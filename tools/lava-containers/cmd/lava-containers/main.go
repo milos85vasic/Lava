@@ -22,7 +22,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"digital.vasic.lava.tools.containers/internal/proxy"
+	"digital.vasic.lava.tools.containers/internal/orchestrator"
 )
 
 func main() {
@@ -41,13 +41,13 @@ func main() {
 		os.Exit(1)
 	}
 
-	mgr, err := proxy.NewManager(*projectDir)
+	mgr, err := orchestrator.NewManager(*projectDir)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 		os.Exit(1)
 	}
 
-	orch := &proxy.Orchestrator{
+	orch := &orchestrator.Orchestrator{
 		Runtime:           mgr.Runtime,
 		ProjectDir:        mgr.ProjectDir,
 		Profile:           *profile,
@@ -109,7 +109,7 @@ func validateProfile(p string) error {
 // which runs `compose --profile api-go up -d` (plus optional
 // observability + dev-docs profiles). The legacy Ktor JAR-build path
 // was removed in 2026-05-06 with the :proxy module deletion.
-func runStart(_ *proxy.Manager, orch *proxy.Orchestrator) error {
+func runStart(_ *orchestrator.Manager, orch *orchestrator.Orchestrator) error {
 	return orch.ComposeUp()
 }
 

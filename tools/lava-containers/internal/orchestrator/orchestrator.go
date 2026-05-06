@@ -11,7 +11,7 @@
 // change, not a Lava change). Until then, we shell out directly via
 // runtime.Runtime.ComposeRun, which is functionally equivalent.
 
-package proxy
+package orchestrator
 
 import (
 	"fmt"
