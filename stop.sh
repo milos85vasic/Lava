@@ -12,9 +12,9 @@ cd "$SCRIPT_DIR"
 #
 # Why this is broader than `lava-containers -cmd=stop`: the lava-containers
 # CLI scopes its compose-down to the profile flags it was given. A previous
-# `./start.sh --both --with-observability --dev-docs` leaves containers
-# from 4 profiles running, but `./stop.sh` (no args) tearing down only
-# api-go would leave the legacy/observability/dev-docs containers behind.
+# `./start.sh --with-observability --dev-docs` leaves containers from 3
+# profiles running, but `./stop.sh` (no args) tearing down only api-go
+# would leave the observability/dev-docs containers behind.
 # This script enumerates every profile the docker-compose.yml defines and
 # passes them all to `compose down`, so a single ./stop.sh always returns
 # the system to a clean (no-containers) state.
@@ -31,7 +31,7 @@ else
     exit 1
 fi
 
-PROFILES=(--profile api-go --profile legacy --profile both --profile observability --profile dev-docs)
+PROFILES=(--profile api-go --profile observability --profile dev-docs)
 
 echo "[stop.sh] tearing down all profiles via ${RUNTIME[*]} ${PROFILES[*]}"
 

@@ -19,7 +19,6 @@ dependencyResolutionManagement {
 rootProject.name = "Lava"
 
 include(":app")
-include(":proxy")
 include(":core:auth:api")
 include(":core:auth:impl")
 include(":core:common")

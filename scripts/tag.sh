@@ -29,7 +29,7 @@ declare -a EXPLICIT_REMOTES=()
 DEFAULT_REMOTES=(github gitflic gitlab gitverse)
 
 # Apps registry.
-SUPPORTED_APPS=(android api api-go)
+SUPPORTED_APPS=(android api-go)
 
 # ----------------------------------------------------------------------
 # Logging
@@ -57,13 +57,12 @@ Tag format
     Lava-<App>-<versionName>-<versionCode>
   examples
     Lava-Android-1.0.0-1008
-    Lava-API-1.0.1-1001
     Lava-API-Go-2.0.0-2000
 
 OPTIONS
   -h, --help              Show this help and exit.
   -n, --dry-run           Print every action; perform no git or file changes.
-  -a, --app <name>        Restrict to a single app: 'android', 'api', 'api-go',
+  -a, --app <name>        Restrict to a single app: 'android', 'api-go',
                           or 'all' (default: all).
       --bump <part>       Which semver part of versionName to bump after
                           tagging: 'major' | 'minor' | 'patch'   (default: patch).
@@ -171,18 +170,6 @@ read_android_version_code() {
     'versionCode *= *[0-9]+' \
     's/.*versionCode *= *([0-9]+).*/\1/' \
     "Android versionCode"
-}
-read_api_version_name() {
-  read_value "$REPO_ROOT/proxy/build.gradle.kts" \
-    '^val apiVersionName *= *"[^"]+"' \
-    's/^val apiVersionName *= *"([^"]+)".*/\1/' \
-    "API apiVersionName"
-}
-read_api_version_code() {
-  read_value "$REPO_ROOT/proxy/build.gradle.kts" \
-    '^val apiVersionCode *= *[0-9]+' \
-    's/^val apiVersionCode *= *([0-9]+).*/\1/' \
-    "API apiVersionCode"
 }
 read_apigo_version_name() {
   read_value "$REPO_ROOT/lava-api-go/internal/version/version.go" \
@@ -566,19 +553,6 @@ write_android_versions() {
   [[ "$(read_android_version_code)" == "$new_code" ]] || die "Failed to write Android versionCode"
 }
 
-write_api_versions() {
-  local new_name="$1" new_code="$2"
-  local f="$REPO_ROOT/proxy/build.gradle.kts"
-  if $DRY_RUN; then
-    dry "would update $f → apiVersionName=\"$new_name\", apiVersionCode=$new_code"
-    return
-  fi
-  sed -i -E "s|(^val apiVersionName *= *\")[^\"]+(\")|\1$new_name\2|" "$f"
-  sed -i -E "s|(^val apiVersionCode *= *)[0-9]+|\1$new_code|" "$f"
-  [[ "$(read_api_version_name)" == "$new_name" ]] || die "Failed to write API apiVersionName"
-  [[ "$(read_api_version_code)" == "$new_code" ]] || die "Failed to write API apiVersionCode"
-}
-
 write_apigo_versions() {
   local new_name="$1" new_code="$2"
   local f="$REPO_ROOT/lava-api-go/internal/version/version.go"
@@ -659,13 +633,6 @@ for app in "${TARGETS[@]}"; do
       vcode=$(read_android_version_code)
       writer=write_android_versions
       require_evidence_for_android "$vname" "$vcode"
-      ;;
-    api)
-      tag_suffix="API"
-      vname=$(read_api_version_name)
-      vcode=$(read_api_version_code)
-      writer=write_api_versions
-      require_changelog_clause_6_P "Lava-API-${vname}-${vcode}" "$vname" "$vcode" "Proxy"
       ;;
     api-go)
       require_evidence_for_apigo

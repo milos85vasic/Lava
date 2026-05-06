@@ -7,23 +7,19 @@ cd "$SCRIPT_DIR"
 # ------------------------------------------------------------------------------
 # Build & Release Script for Lava
 # ------------------------------------------------------------------------------
-# Builds debug APK, release APK, proxy fat JAR, and the lava-api-go binary,
+# Builds debug APK, release APK, and the lava-api-go binary,
 # then copies them into:
 #   releases/{version}/android-debug/
 #   releases/{version}/android-release/
-#   releases/{version}/proxy/
 #   releases/{version}/api-go/
+#
+# 2026-05-06: the legacy Ktor proxy was removed from the codebase.
+# All API work continues with lava-api-go (Go) only.
 # ------------------------------------------------------------------------------
 
 # Extract Android app version and versionCode from app/build.gradle.kts
 APP_VERSION=$(grep -E '^\s+versionName\s*=' app/build.gradle.kts | sed 's/.*"\([^"]*\)".*/\1/')
 APP_VERSION_CODE=$(grep -E '^\s+versionCode\s*=' app/build.gradle.kts | sed 's/.*= \([0-9]*\).*/\1/')
-
-# Extract proxy version from proxy/build.gradle.kts. The script declares
-# `val apiVersionName = "X.Y.Z"` and then `version = apiVersionName`, so
-# matching the literal `version =` line captures the variable reference,
-# not the string. Match the apiVersionName declaration directly.
-PROXY_VERSION=$(grep -E '^[[:space:]]*val[[:space:]]+apiVersionName[[:space:]]*=' proxy/build.gradle.kts | head -1 | sed 's/.*"\([^"]*\)".*/\1/')
 
 # Extract lava-api-go version from internal/version/version.go (same regex
 # tag.sh uses, kept inline so this script remains standalone).
@@ -34,7 +30,6 @@ echo "========================================"
 echo "  Lava Build & Release"
 echo "========================================"
 echo "  App version:     $APP_VERSION ($APP_VERSION_CODE)"
-echo "  Proxy version:   $PROXY_VERSION"
 echo "  API-Go version:  $APIGO_VERSION ($APIGO_VERSION_CODE)"
 echo "========================================"
 echo ""
@@ -45,23 +40,19 @@ RELEASE_DIR="releases/$APP_VERSION"
 rm -rf "$RELEASE_DIR"
 mkdir -p "$RELEASE_DIR/android-debug"
 mkdir -p "$RELEASE_DIR/android-release"
-mkdir -p "$RELEASE_DIR/proxy"
 mkdir -p "$RELEASE_DIR/api-go"
 
 # Clean and build
-echo "[1/5] Cleaning previous build artifacts..."
+echo "[1/4] Cleaning previous build artifacts..."
 ./gradlew clean --quiet
 
-echo "[2/5] Building Android debug APK..."
+echo "[2/4] Building Android debug APK..."
 ./gradlew :app:assembleDebug
 
-echo "[3/5] Building Android release APK..."
+echo "[3/4] Building Android release APK..."
 ./gradlew :app:assembleRelease
 
-echo "[4/5] Building proxy fat JAR..."
-./gradlew :proxy:buildFatJar
-
-echo "[5/5] Building lava-api-go static binary..."
+echo "[4/4] Building lava-api-go static binary..."
 APIGO_BIN_DST="$SCRIPT_DIR/$RELEASE_DIR/api-go/lava-api-go-${APIGO_VERSION}"
 (
     cd lava-api-go
@@ -71,15 +62,12 @@ APIGO_BIN_DST="$SCRIPT_DIR/$RELEASE_DIR/api-go/lava-api-go-${APIGO_VERSION}"
 # Copy artifacts with descriptive names
 DEBUG_APK_SRC="app/build/outputs/apk/debug/app-debug.apk"
 RELEASE_APK_SRC="app/build/outputs/apk/release/app-release.apk"
-PROXY_JAR_SRC="proxy/build/libs/app.jar"
 
 DEBUG_APK_DST="$RELEASE_DIR/android-debug/digital.vasic.lava.client-${APP_VERSION}-debug.apk"
 RELEASE_APK_DST="$RELEASE_DIR/android-release/digital.vasic.lava.client-${APP_VERSION}-release.apk"
-PROXY_JAR_DST="$RELEASE_DIR/proxy/digital.vasic.lava.api-${PROXY_VERSION}.jar"
 
 cp "$DEBUG_APK_SRC" "$DEBUG_APK_DST"
 cp "$RELEASE_APK_SRC" "$RELEASE_APK_DST"
-cp "$PROXY_JAR_SRC" "$PROXY_JAR_DST"
 
 # Force docker-format image builds so HEALTHCHECK directives are persisted
 # in the image config. podman defaults to OCI format which silently drops

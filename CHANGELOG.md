@@ -17,6 +17,23 @@ Per-version distribution snapshots (the exact text shipped as App Distribution r
 
 ---
 
+## Lava-API-Go-2.0.12-2012 — 2026-05-06
+
+**Channel:** container registry / remote distribution to thinker.local
+**Previous published:** Lava-API-Go-2.0.11-2011 (2026-05-06)
+
+### Removed
+
+- **Legacy Ktor proxy** removed from the codebase. Going forward, lava-api-go (Go) is the only API. Files removed: `proxy/` (entire module), `:proxy` Gradle include, `proxy/build.gradle.kts` parsing in `build_and_release.sh` + `scripts/tag.sh`, `lava-proxy` service in `docker-compose.yml`, `--legacy` / `--both` profiles from `start.sh` + `stop.sh`. The Android client was already using the lava-api-go endpoint by default.
+
+### Versions bumped
+
+| Component | Old | New |
+|---|---|---|
+| lava-api-go | 2.0.11 (2011) | **2.0.12 (2012)** |
+
+---
+
 ## Lava-API-Go-2.0.11-2011 — 2026-05-06
 
 **Channel:** container registry / remote distribution to thinker.local

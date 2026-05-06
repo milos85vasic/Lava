@@ -1,15 +1,13 @@
-# Lava root docker-compose file (SP-2 Phase 11 / Task 11.1).
+# Lava root docker-compose file.
 #
-# Five profiles:
+# 2026-05-06: the legacy Ktor proxy was removed. The api-go (Go) service
+# is the only API. Profiles:
 #   api-go         (default) — lava-postgres + lava-migrate + lava-api-go
-#   legacy                   — legacy Ktor proxy only
-#   both                     — api-go + legacy (Postgres + migrate + Go API + Ktor)
 #   observability            — Prometheus + Loki + Promtail + Tempo + Grafana
 #   dev-docs                 — Swagger UI mounting api/openapi.yaml
 #
-# lava-api-go and lava-proxy use network_mode: host so JmDNS / mDNS
-# advertisements reach the LAN; Postgres + observability containers use the
-# lava-net bridge.
+# lava-api-go uses network_mode: host so JmDNS / mDNS advertisements reach
+# the LAN; Postgres + observability containers use the lava-net bridge.
 #
 # Observability container images are pinned to specific LTS tags rather than
 # :latest so reproduction across machines is deterministic. The pins are an
@@ -91,26 +89,6 @@ services:
     # Contract enforcement: lava-api-go/tests/contract/healthcheck_contract_test.go
     # validates the Dockerfile HEALTHCHECK CMD's flag set against the
     # healthprobe binary's registered flags.
-
-  # Profile: legacy ---------------------------------------------------------
-  lava-proxy:
-    profiles: [legacy, both]
-    container_name: lava-proxy
-    build:
-      context: ./proxy
-      dockerfile: Dockerfile
-    image: digital.vasic.lava.api:latest
-    network_mode: host
-    restart: unless-stopped
-    environment:
-      JAVA_OPTS: "-Xmx512m"
-      ADVERTISE_HOST: "${ADVERTISE_HOST:-}"
-    healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
 
   # Profile: observability --------------------------------------------------
   lava-prometheus:

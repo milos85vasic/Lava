@@ -8,18 +8,17 @@ cd "$SCRIPT_DIR"
 # Lava Container Start Script
 # ------------------------------------------------------------------------------
 # Delegates to the Lava-domain CLI (tools/lava-containers) to bring up the
-# Lava proxy service with full LAN discoverability via mDNS. The Lava CLI is
+# lava-api-go service with full LAN discoverability via mDNS. The Lava CLI is
 # thin glue; generic container-runtime concerns live in the upstream
 # vasic-digital/Containers submodule (Submodules/Containers/, pinned).
 #
-# SP-2 Phase 12 / Task 12.1 added the profile-flag forwarding wiring:
+# 2026-05-06: the legacy Ktor proxy was removed. start.sh now drives the
+# api-go profile only.
 #
 #     ./start.sh                                  # default → --profile=api-go
-#     ./start.sh --legacy                         # legacy Ktor proxy only
-#     ./start.sh --both                           # api-go + legacy side by side
 #     ./start.sh --with-observability             # +observability profile
 #     ./start.sh --dev-docs                       # +dev-docs profile (Swagger UI)
-#     ./start.sh --both --with-observability      # combine
+#     ./start.sh --with-observability --dev-docs  # combine
 #
 # Multiple flags compose. The lava-containers binary is the source of truth
 # for which profiles each switch maps to; this shell script merely parses
@@ -28,21 +27,12 @@ cd "$SCRIPT_DIR"
 
 CONTAINERS_BIN="$SCRIPT_DIR/tools/lava-containers/bin/lava-containers"
 
-# Default profile.
 PROFILE="api-go"
 WITH_OBSERVABILITY=false
 WITH_DEV_DOCS=false
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
-        --legacy)
-            PROFILE="legacy"
-            shift
-            ;;
-        --both)
-            PROFILE="both"
-            shift
-            ;;
         --api-go)
             PROFILE="api-go"
             shift
@@ -57,13 +47,11 @@ while [[ $# -gt 0 ]]; do
             ;;
         -h|--help)
             cat <<EOF
-Usage: $0 [--legacy|--both|--api-go] [--with-observability] [--dev-docs]
+Usage: $0 [--with-observability] [--dev-docs]
 
-Default profile is api-go (the Go service). Combine flags freely:
+Brings up lava-api-go (the Go service). Combine flags freely:
   $0                                  # api-go only
-  $0 --legacy                         # legacy Ktor proxy only
-  $0 --both                           # api-go + legacy
-  $0 --both --with-observability      # +Prometheus/Loki/Promtail/Tempo/Grafana
+  $0 --with-observability             # +Prometheus/Loki/Promtail/Tempo/Grafana
   $0 --dev-docs                       # +Swagger UI
 
 The flags map 1:1 onto lava-containers' --profile / --with-observability /
@@ -88,22 +76,16 @@ if [ ! -f "$CONTAINERS_BIN" ]; then
 fi
 
 # Provision TLS material for lava-api-go's HTTPS/HTTP3 listener if absent.
-# Skipped for the legacy-only profile because the Ktor proxy doesn't need it.
-if [ "$PROFILE" != "legacy" ]; then
-    if [ ! -s "$SCRIPT_DIR/lava-api-go/docker/tls/server.crt" ] || [ ! -s "$SCRIPT_DIR/lava-api-go/docker/tls/server.key" ]; then
-        bash "$SCRIPT_DIR/lava-api-go/scripts/gen-cert.sh"
-    fi
+if [ ! -s "$SCRIPT_DIR/lava-api-go/docker/tls/server.crt" ] || [ ! -s "$SCRIPT_DIR/lava-api-go/docker/tls/server.key" ]; then
+    bash "$SCRIPT_DIR/lava-api-go/scripts/gen-cert.sh"
 fi
 
-# LAVA_PG_PASSWORD is required by the api-go / both profiles' compose stanzas
+# LAVA_PG_PASSWORD is required by the api-go profile's compose stanza
 # (see docker-compose.yml). Provide a deterministic LAN-only default if the
-# operator hasn't set one in .env. Anything more sensitive than a LAN
-# deployment should override via .env.
-if [ "$PROFILE" != "legacy" ]; then
-    if [ -f "$SCRIPT_DIR/.env" ] && ! grep -qE '^LAVA_PG_PASSWORD=' "$SCRIPT_DIR/.env"; then
-        echo "LAVA_PG_PASSWORD=l@vAfl0wZ-pg" >> "$SCRIPT_DIR/.env"
-        echo "[start.sh] appended default LAVA_PG_PASSWORD to .env (LAN-deployment use)"
-    fi
+# operator hasn't set one in .env.
+if [ -f "$SCRIPT_DIR/.env" ] && ! grep -qE '^LAVA_PG_PASSWORD=' "$SCRIPT_DIR/.env"; then
+    echo "LAVA_PG_PASSWORD=l@vAfl0wZ-pg" >> "$SCRIPT_DIR/.env"
+    echo "[start.sh] appended default LAVA_PG_PASSWORD to .env (LAN-deployment use)"
 fi
 
 # ------------------------------------------------------------------------------
