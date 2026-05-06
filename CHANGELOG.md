@@ -17,6 +17,27 @@ Per-version distribution snapshots (the exact text shipped as App Distribution r
 
 ---
 
+## Lava-API-Go-2.0.14-2014 — 2026-05-06
+
+**Channel:** container registry / remote distribution to thinker.local
+**Previous published:** Lava-API-Go-2.0.13-2013 (2026-05-06)
+
+### Removed (post-Ktor cleanup, second pass)
+
+- **`tools/lava-containers/cmd/lava-containers/main.go`** — dropped the `legacy` and `both` profile branches. `validateProfile` now accepts only `api-go`. `runStart` no longer carries the `BuildJar` + `BuildImage` fall-through for the deleted Ktor proxy. `mgr.BuildJar()` removed from the `build` command. `autoDetectProjectDir` no longer probes for the deleted `proxy/` directory.
+- **`main_test.go`** — `TestValidateProfile_Accepts` reduced to `api-go` only; `legacy` + `both` moved to the rejection table.
+- KDoc + comment refresh: header references to "legacy Ktor proxy and/or the new Go API service" reduced to "the lava-api-go service".
+
+### Versions bumped
+
+| Component | Old | New |
+|---|---|---|
+| lava-api-go | 2.0.13 (2013) | **2.0.14 (2014)** |
+
+(api-go version bumped per §6.P even though the changes are workstation-side; the bump keeps the distribute pipeline's gate cleanly happy and the per-version snapshot maintains the chain.)
+
+---
+
 ## Lava-API-Go-2.0.13-2013 — 2026-05-06
 
 **Channel:** container registry / remote distribution to thinker.local

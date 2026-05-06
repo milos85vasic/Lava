@@ -1,21 +1,19 @@
-// Lava-domain CLI: orchestrates the legacy Ktor proxy and/or the new Go API
-// service via docker-compose profiles.
+// Lava-domain CLI: orchestrates the lava-api-go service via docker-compose
+// profiles.
 //
-// This is intentionally Lava-specific (knows about gradlew, the proxy module,
-// the digital.vasic.lava.api image, the api-go|legacy|both|observability|
-// dev-docs profile names from docker-compose.yml). Generic container-runtime
-// concerns are owned by vasic-digital/Containers (mounted at
-// /Submodules/Containers/).
+// 2026-05-06: the legacy Ktor proxy was removed from the codebase.
+// This CLI now drives the api-go profile only (with optional observability
+// + dev-docs profiles).
 //
-// SP-2 Phase 11 / Task 11.3 added the compose-profile flag plumbing
-// (--profile, --with-observability, --dev-docs). Until
-// Submodules/Containers/pkg/compose grows a multi-profile API
-// (today its ComposeProject.Profile is a single string), this CLI shells out
-// directly to `<runtime> compose --profile X --profile Y up -d` rather than
-// going through the upstream orchestrator. Once the upstream exposes a
-// profile-aware primitive, the call sites in
-// internal/proxy.OrchestratorComposeUp / OrchestratorComposeDown should be
-// rewritten to delegate.
+// This is intentionally Lava-specific (knows about gradlew, the
+// digital.vasic.lava.api image, the api-go|observability|dev-docs profile
+// names from docker-compose.yml). Generic container-runtime concerns are
+// owned by vasic-digital/Containers (mounted at /Submodules/Containers/).
+//
+// Until Submodules/Containers/pkg/compose grows a multi-profile API
+// (today its ComposeProject.Profile is a single string), this CLI shells
+// out directly to `<runtime> compose --profile X --profile Y up -d`
+// rather than going through the upstream orchestrator.
 package main
 
 import (
@@ -32,7 +30,7 @@ func main() {
 		cmd               = flag.String("cmd", "status", "Command: start, stop, status, logs, build")
 		projectDir        = flag.String("project-dir", autoDetectProjectDir(), "Path to the Lava project root")
 		followLogs        = flag.Bool("f", false, "Follow logs (for logs command)")
-		profile           = flag.String("profile", "api-go", "Compose profile: api-go (default), legacy, or both")
+		profile           = flag.String("profile", "api-go", "Compose profile: api-go (the only supported profile post-2026-05-06)")
 		withObservability = flag.Bool("with-observability", false, "Include the observability profile (Prometheus/Loki/Promtail/Tempo/Grafana)")
 		devDocs           = flag.Bool("dev-docs", false, "Include the dev-docs profile (Swagger UI)")
 	)
@@ -79,10 +77,6 @@ func main() {
 			os.Exit(1)
 		}
 	case "build":
-		if err := mgr.BuildJar(); err != nil {
-			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
-			os.Exit(1)
-		}
 		if err := mgr.BuildImage(); err != nil {
 			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 			os.Exit(1)
@@ -90,39 +84,32 @@ func main() {
 	default:
 		fmt.Fprintf(os.Stderr, "Unknown command: %s\n", *cmd)
 		fmt.Fprintf(os.Stderr,
-			"Usage: %s [-cmd=start|stop|status|logs|build] [-profile=api-go|legacy|both] "+
+			"Usage: %s [-cmd=start|stop|status|logs|build] [-profile=api-go] "+
 				"[-with-observability] [-dev-docs] [-project-dir=PATH]\n",
 			os.Args[0])
 		os.Exit(1)
 	}
 }
 
-// validateProfile rejects unknown --profile values.
+// validateProfile rejects unknown --profile values. Post-2026-05-06 the
+// only supported profile is api-go (the Ktor proxy was removed); the
+// flag is retained so docker-compose --profile invocations stay
+// explicit and the orchestrator's profile-aware compose-up call site
+// doesn't need a special case.
 func validateProfile(p string) error {
 	switch p {
-	case "api-go", "legacy", "both":
+	case "api-go":
 		return nil
 	default:
-		return fmt.Errorf("invalid --profile=%q (want api-go, legacy, or both)", p)
+		return fmt.Errorf("invalid --profile=%q (want api-go)", p)
 	}
 }
 
-// runStart handles the "start" command. For the legacy profile we keep the
-// existing build-and-up pipeline (Gradle JAR + image + compose up) so
-// behaviour is unchanged. For api-go and both, we delegate to the
-// Orchestrator which runs `compose --profile X up -d`.
-func runStart(mgr *proxy.Manager, orch *proxy.Orchestrator) error {
-	if orch.Profile == "legacy" {
-		jarPath := filepath.Join(mgr.ProjectDir, "proxy", "build", "libs", "app.jar")
-		if _, err := os.Stat(jarPath); os.IsNotExist(err) {
-			if err := mgr.BuildJar(); err != nil {
-				return err
-			}
-		}
-		if err := mgr.BuildImage(); err != nil {
-			return err
-		}
-	}
+// runStart handles the "start" command. Delegates to the Orchestrator
+// which runs `compose --profile api-go up -d` (plus optional
+// observability + dev-docs profiles). The legacy Ktor JAR-build path
+// was removed in 2026-05-06 with the :proxy module deletion.
+func runStart(_ *proxy.Manager, orch *proxy.Orchestrator) error {
 	return orch.ComposeUp()
 }
 
@@ -135,9 +122,6 @@ func autoDetectProjectDir() string {
 	dir := filepath.Dir(exe)
 	for {
 		if _, err := os.Stat(filepath.Join(dir, "gradlew")); err == nil {
-			return dir
-		}
-		if _, err := os.Stat(filepath.Join(dir, "proxy")); err == nil {
 			return dir
 		}
 		parent := filepath.Dir(dir)
