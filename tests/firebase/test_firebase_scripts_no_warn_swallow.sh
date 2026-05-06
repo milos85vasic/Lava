@@ -48,8 +48,11 @@ done
 #    (firebase-env.sh + firebase-setup.sh + firebase-distribute.sh + distribute.sh).
 #    firebase-stats.sh also gets the same treatment.
 for s in "${scripts[@]}"; do
-    if ! head -30 "$s" | grep -qE '^set -euo pipefail|^set -e'; then
-        echo "FAIL: $s does not start with 'set -euo pipefail'."
+    # Allow up to 60 header lines so heavily-documented scripts (e.g.
+    # scripts/distribute.sh's full architecture comment) can keep
+    # comprehensive headers without tripping the gate.
+    if ! head -60 "$s" | grep -qE '^set -euo pipefail|^set -e'; then
+        echo "FAIL: $s does not start with 'set -euo pipefail' (within first 60 lines)."
         exit 1
     fi
 done
