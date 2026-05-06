@@ -17,6 +17,55 @@ Per-version distribution snapshots (the exact text shipped as App Distribution r
 
 ---
 
+## Lava-API-Go-2.0.16-2016 — 2026-05-06
+
+**Channel:** container registry / remote distribution to thinker.local
+**Previous published:** Lava-API-Go-2.0.15-2015 (2026-05-06)
+
+### Fix (post-Ktor cleanup, §6.J bluff in `lava-containers` CLI)
+
+The `lava-containers` workstation CLI had three commands (`build`, `status`, `logs`) that silently targeted dead surfaces post-Ktor-:proxy-removal:
+
+- **`-cmd=build`** — `Manager.BuildImage()` shelled `<runtime> build -t digital.vasic.lava.api:latest ./proxy`. The `./proxy` directory was deleted in 2.0.12 (commit `a00b28f`), so this command would fail at runtime.
+- **`-cmd=status`** — `Manager.isHealthy()` probed `http://localhost:8080/`. The api-go service listens on `https://localhost:8443/health`. Status would always report `Healthy: false` even when api-go was running locally.
+- **`-cmd=logs`** — `Manager.Logs()` called `<runtime> logs lava-proxy`. The `lava-proxy` service was removed from `docker-compose.yml` in 2.0.12; the active service is `lava-api-go`.
+- **`internal/runtime.Runtime.IsHealthy()` + `ContainerIP()`** — both filtered on `name=lava-proxy`. Now `LavaContainerName = "lava-api-go"`.
+
+That's a textbook §6.J bluff: the tool reports outcomes from probing nothing.
+
+### Changes
+
+- `internal/orchestrator/manager.go` — full rewrite of broken paths:
+  - `ServiceName = "lava-api-go"` (was `"lava-proxy"`)
+  - `DefaultPort = "8443"` (was `"8080"`)
+  - `BuildImage()` now invokes `<runtime> compose --profile api-go build` — uses the `build:` directive in `docker-compose.yml`'s `lava-api-go` service entry (context: `.`, dockerfile: `lava-api-go/docker/Dockerfile`, target: `runtime`).
+  - `isHealthy()` probes `https://localhost:8443/health` with `InsecureSkipVerify: true` (LAN cert is self-signed; this is a local-dev liveness probe, not a security gate).
+  - `Status()` prints "Lava API Container Status" instead of "Lava Proxy"; URL line shows the HTTPS health endpoint.
+  - Dead methods deleted: `Start()`, `Stop()`, `printStatus()` — never called from `main.go` post-2.0.13 (the Orchestrator type owns compose-up/down).
+  - Package doc comment rewritten — was still describing the removed Ktor proxy.
+- `internal/runtime/runtime.go` — `IsHealthy()` and `ContainerIP()` now reference `LavaContainerName = "lava-api-go"` constant (was hardcoded `"lava-proxy"`).
+- `internal/orchestrator/orchestrator.go` — doc comment updated; `Profile` field doc narrowed to `"api-go"` (was `"api-go" | "legacy" | "both"`).
+- `internal/orchestrator/orchestrator_test.go` — three tests retargeted from legacy/both profile names to realistic `api-go + observability + dev-docs` compositions (the Orchestrator type passes profile names through opaquely, but tests should reflect the validated set).
+
+### New §6.A real-binary contract test
+
+- `internal/orchestrator/manager_test.go` — `TestManagerConstantsMatchCompose` asserts `ServiceName + DefaultPort` match `docker-compose.yml`'s `container_name:` and `LAVA_API_LISTEN:` entries. `TestManagerConstantsAreNonLegacy` is a regression guard against the legacy `"lava-proxy"`/`"8080"` values.
+- Falsifiability rehearsal recorded in commit body (Bluff-Audit stamp). Both mutations produce crisp failure messages with explicit forensic context.
+
+### Verification
+
+- `go vet ./...` in `tools/lava-containers`: green.
+- `go test ./...` in `tools/lava-containers`: 9 tests across 2 packages PASS (was 7).
+- All 31 hermetic bash test suites: green.
+- thinker.local API (the running 2.0.13 binary, unchanged): `{"status":"alive"}`, `{"status":"ready"}`.
+
+### Versions in this build
+
+- lava-api-go: 2.0.16 (2016) — workstation-CLI cleanup; the api-go binary on thinker.local is unchanged from 2.0.13.
+- Android: 1.2.6 (1026) — unchanged.
+
+---
+
 ## Lava-API-Go-2.0.15-2015 — 2026-05-06
 
 **Channel:** container registry / remote distribution to thinker.local

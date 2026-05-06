@@ -47,8 +47,14 @@ func (r *Runtime) ComposeRun(args ...string) *exec.Cmd {
 
 func (r *Runtime) ComposeFile() string { return "docker-compose.yml" }
 
+// LavaContainerName is the docker-compose container_name for the
+// lava-api-go service that IsHealthy / ContainerIP introspect. Pinned by
+// the §6.A contract test in internal/orchestrator/manager_test.go (which
+// asserts the same name appears in docker-compose.yml).
+const LavaContainerName = "lava-api-go"
+
 func (r *Runtime) IsHealthy() bool {
-	out, err := r.Run("ps", "--filter", "name=lava-proxy", "--format", "{{.Status}}").Output()
+	out, err := r.Run("ps", "--filter", "name="+LavaContainerName, "--format", "{{.Status}}").Output()
 	if err != nil {
 		return false
 	}
@@ -57,7 +63,7 @@ func (r *Runtime) IsHealthy() bool {
 }
 
 func (r *Runtime) ContainerIP() string {
-	out, err := r.Run("inspect", "-f", "{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}", "lava-proxy").Output()
+	out, err := r.Run("inspect", "-f", "{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}", LavaContainerName).Output()
 	if err != nil {
 		return ""
 	}

@@ -1,15 +1,23 @@
-// Package proxy is the Lava-domain orchestrator for the legacy Ktor proxy
-// container. Lava-specific by design: it knows about :proxy:buildFatJar, the
-// digital.vasic.lava.api image tag, the ADVERTISE_HOST env wiring, and the
-// _lava._tcp mDNS expectations.
+// Package orchestrator provides Lava-domain helpers for running the
+// lava-api-go service locally via docker-compose: LAN-IP detection for mDNS
+// advertisement, status reporting, log streaming, image building, and the
+// profile-aware compose driver (Orchestrator type, in orchestrator.go).
 //
-// SP-2 will introduce a sibling orchestrator for the new Go API service, also
-// living under tools/lava-containers/internal/, and will rewire shared concerns
-// (runtime detection, IP scanning, lifecycle) to delegate to the
-// vasic-digital/Containers submodule.
+// Lava-specific by design — it knows about the lava-api-go service name,
+// the digital.vasic.lava.api image tag, the LAVA_API_LISTEN port, and the
+// _lava-api._tcp mDNS service type. Generic container-runtime concerns
+// (Docker/Podman detection, compose invocation) are owned by the
+// vasic-digital/Containers submodule, accessed via internal/runtime.
+//
+// 2026-05-06: post-Ktor-:proxy-removal cleanup. The legacy methods that
+// pointed at the deleted ./proxy directory and the legacy 8080 HTTP port
+// have been rewritten to target the api-go HTTPS:8443 surface. ServiceName
+// + DefaultPort are pinned by a §6.A contract test against
+// docker-compose.yml.
 package orchestrator
 
 import (
+	"crypto/tls"
 	"fmt"
 	"net"
 	"net/http"
@@ -20,8 +28,15 @@ import (
 	"digital.vasic.lava.tools.containers/internal/runtime"
 )
 
-const ServiceName = "lava-proxy"
-const DefaultPort = "8080"
+// ServiceName is the docker-compose service name for the lava-api-go
+// container. MUST match the matching `container_name:` entry in
+// docker-compose.yml; the contract test in manager_test.go enforces this.
+const ServiceName = "lava-api-go"
+
+// DefaultPort is the public listener port for lava-api-go (HTTP/3 + HTTP/2
+// over TLS). MUST match the LAVA_API_LISTEN env var in docker-compose.yml;
+// the contract test in manager_test.go enforces this.
+const DefaultPort = "8443"
 
 type Manager struct {
 	Runtime    *runtime.Runtime
@@ -54,72 +69,40 @@ func DetectLANIP() string {
 	return "127.0.0.1"
 }
 
+// BuildImage rebuilds the lava-api-go image via `compose --profile api-go
+// build`. The image is defined by docker-compose.yml's lava-api-go service
+// (build context: ., dockerfile: lava-api-go/docker/Dockerfile, target:
+// runtime).
 func (m *Manager) BuildImage() error {
-	fmt.Println("[2/4] Building container image...")
-	cmd := m.Runtime.Run("build", "-t", "digital.vasic.lava.api:latest", "./proxy")
+	fmt.Println("[lava-containers] Building lava-api-go image via compose...")
+	composeFile := filepath.Join(m.ProjectDir, m.Runtime.ComposeFile())
+	cmd := m.Runtime.ComposeRun("-f", composeFile, "--profile", "api-go", "build")
 	cmd.Dir = m.ProjectDir
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	return cmd.Run()
 }
 
-func (m *Manager) Start() error {
-	lanIP := DetectLANIP()
-	os.Setenv("ADVERTISE_HOST", lanIP)
-
-	fmt.Println("[3/4] Starting container with LAN discovery...")
-	fmt.Printf("      Runtime: %s\n", m.Runtime)
-	fmt.Printf("      LAN IP:  %s\n", lanIP)
-
-	composeFile := filepath.Join(m.ProjectDir, m.Runtime.ComposeFile())
-	cmd := m.Runtime.ComposeRun("-f", composeFile, "up", "-d", "--build")
-	cmd.Dir = m.ProjectDir
-	cmd.Env = append(os.Environ(), "ADVERTISE_HOST="+lanIP)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("failed to start container: %w", err)
-	}
-
-	fmt.Println("[4/4] Waiting for service to be healthy...")
-	for i := 0; i < 30; i++ {
-		if m.isHealthy() {
-			fmt.Println("      Service is healthy!")
-			m.printStatus(lanIP)
-			return nil
-		}
-		time.Sleep(1 * time.Second)
-	}
-	return fmt.Errorf("service did not become healthy within 30 seconds")
-}
-
-func (m *Manager) Stop() error {
-	fmt.Println("Stopping Lava proxy container...")
-	composeFile := filepath.Join(m.ProjectDir, m.Runtime.ComposeFile())
-	cmd := m.Runtime.ComposeRun("-f", composeFile, "down")
-	cmd.Dir = m.ProjectDir
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("failed to stop container: %w", err)
-	}
-	fmt.Println("Lava proxy stopped.")
-	return nil
-}
-
+// Status prints lifecycle + LAN-discovery state of the local lava-api-go
+// container. The HTTPS health probe is local-host only; remote API health
+// (e.g. thinker.local) should be checked via `curl
+// https://<host>:8443/health` directly.
 func (m *Manager) Status() error {
-	fmt.Println("Lava Proxy Container Status")
-	fmt.Println("===========================")
-	fmt.Printf("Runtime: %s\n", m.Runtime)
-	fmt.Printf("Healthy: %v\n", m.isHealthy())
+	fmt.Println("Lava API Container Status")
+	fmt.Println("=========================")
+	fmt.Printf("Runtime:      %s\n", m.Runtime)
+	fmt.Printf("Service:      %s\n", ServiceName)
+	fmt.Printf("Healthy:      %v\n", m.isHealthy())
 	if ip := m.Runtime.ContainerIP(); ip != "" {
 		fmt.Printf("Container IP: %s\n", ip)
 	}
-	fmt.Printf("LAN IP: %s\n", DetectLANIP())
-	fmt.Printf("URL: http://%s:%s\n", DetectLANIP(), m.Port)
+	lan := DetectLANIP()
+	fmt.Printf("LAN IP:       %s\n", lan)
+	fmt.Printf("Health URL:   https://%s:%s/health\n", lan, m.Port)
 	return nil
 }
 
+// Logs streams the lava-api-go container's stdout/stderr by name.
 func (m *Manager) Logs(follow bool) error {
 	args := []string{"logs"}
 	if follow {
@@ -133,25 +116,20 @@ func (m *Manager) Logs(follow bool) error {
 	return cmd.Run()
 }
 
+// isHealthy probes https://localhost:DefaultPort/health on the local
+// lava-api-go container. The LAN cert is self-signed (loaded from
+// lava-api-go/docker/tls/), so TLS verification is skipped — this is a
+// local-dev liveness probe, not a security gate.
 func (m *Manager) isHealthy() bool {
-	client := &http.Client{Timeout: 2 * time.Second}
-	resp, err := client.Get("http://localhost:" + m.Port + "/")
+	tr := &http.Transport{
+		// #nosec G402 -- local-dev probe against self-signed LAN cert.
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	client := &http.Client{Timeout: 2 * time.Second, Transport: tr}
+	resp, err := client.Get("https://localhost:" + m.Port + "/health")
 	if err != nil {
 		return false
 	}
 	defer resp.Body.Close()
 	return resp.StatusCode == 200
-}
-
-func (m *Manager) printStatus(lanIP string) {
-	fmt.Println("")
-	fmt.Println("========================================")
-	fmt.Println("  Lava Proxy is running")
-	fmt.Println("========================================")
-	fmt.Printf("  Local:   http://localhost:%s\n", m.Port)
-	fmt.Printf("  Network: http://%s:%s\n", lanIP, m.Port)
-	fmt.Printf("  mDNS:    advertising on %s:%s\n", lanIP, m.Port)
-	fmt.Println("========================================")
-	fmt.Println("")
-	fmt.Println("To stop: ./stop.sh")
 }

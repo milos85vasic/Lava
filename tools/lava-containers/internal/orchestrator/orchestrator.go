@@ -1,8 +1,12 @@
 // Orchestrator is the profile-aware compose driver added in SP-2 Phase 11
-// (Task 11.3). It sits next to the legacy Manager (which still owns the
-// Ktor-proxy-specific build pipeline) and translates --profile=X plus optional
+// (Task 11.3). It sits next to the Manager (LAN-IP detection, status,
+// logs, build) and translates --profile=X plus optional
 // --with-observability / --dev-docs into a single
 // `<runtime> compose --profile X --profile Y up -d` invocation.
+//
+// 2026-05-06: post-Ktor-:proxy-removal, the only valid base profile is
+// "api-go". main.go's validateProfile is the validation gate; this type
+// is a pass-through for whatever profile name it's handed.
 //
 // TODO(SP-2 follow-up): delegate to Submodules/Containers/pkg/compose once
 // it exposes profile-aware methods. Today, ComposeProject.Profile is a single
@@ -26,7 +30,7 @@ import (
 type Orchestrator struct {
 	Runtime           *runtime.Runtime
 	ProjectDir        string
-	Profile           string // "api-go" | "legacy" | "both"
+	Profile           string // "api-go" (only supported value post-Ktor-removal)
 	WithObservability bool
 	WithDevDocs       bool
 }
