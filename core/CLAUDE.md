@@ -92,3 +92,9 @@ AI agents may run long-duration tasks (builds, tests, container operations). If 
 - Container builds and long-running containers do NOT normally cause host suspend
 - However, filling the disk with layer caches or consuming all CPU for extended periods can trigger thermal throttling or watchdog timeouts on some systems
 - Always clean up old images/containers after builds to avoid disk pressure
+
+## Auth UUID memory hygiene (added 2026-05-06, Phase 1)
+
+The decrypted UUID inside the Lava client MUST be held only as `ByteArray`, never as `String`. The decrypt-use-zeroize lifetime is bounded by a single OkHttp `Interceptor.intercept()` call; the `ByteArray` is `fill(0)`'d in a `finally` block before the function returns. The Base64-encoded header VALUE is a `String` (immutable) but never logged, never persisted, never assigned to a class field, and leaves Lava code as soon as OkHttp consumes it. Adding logging that includes the header value is a constitutional violation; pre-push grep enforces.
+
+The `core/network/impl/AuthInterceptor` is the ONLY allowed consumer of `LavaAuth.BLOB`; reflective access from elsewhere is also a violation.
