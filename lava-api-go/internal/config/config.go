@@ -237,7 +237,16 @@ func parseUUID(s string) ([]byte, error) {
 // resulting list MUST be monotonically non-decreasing — each step is
 // >= the previous step. Returns an error if any step parses badly,
 // the list is empty, or the monotonicity invariant is violated.
+//
+// Phase 2 follow-up (2026-05-06): short-circuits on empty input
+// rather than letting strings.Split(",", "") return [""] and tripping
+// the "step \"\":" error. The previous behavior was a code-quality
+// reviewer-flagged dead-branch issue: len(out)==0 was unreachable
+// because every iteration appended to out OR returned an error.
 func parseBackoffSteps(csv string) ([]time.Duration, error) {
+	if strings.TrimSpace(csv) == "" {
+		return nil, errors.New("at least one step required")
+	}
 	parts := strings.Split(csv, ",")
 	out := make([]time.Duration, 0, len(parts))
 	var prev time.Duration
@@ -252,9 +261,6 @@ func parseBackoffSteps(csv string) ([]time.Duration, error) {
 		}
 		prev = d
 		out = append(out, d)
-	}
-	if len(out) == 0 {
-		return nil, errors.New("at least one step required")
 	}
 	return out, nil
 }
@@ -271,8 +277,16 @@ func parseCSV(s string) []string {
 	return out
 }
 
-// envBool reads a boolean env var with a default; falls back to def
-// on parse error (no fatal, since the default is the safer shape).
+// envBool reads a boolean env var with a default. Falls back to def
+// on parse error AND emits a stderr warning so an operator typo
+// (e.g. LAVA_API_HTTP3_ENABLED=ture) doesn't silently ship the
+// default value.
+//
+// Phase 2 follow-up (2026-05-06): the original silent-fallback was
+// a code-quality reviewer-flagged §6.J spirit issue (asymmetric to
+// the fail-fast behavior on missing required vars). The warning is
+// the documented behavior — operators wanting strict-fail behavior
+// should validate `.env` ahead of boot via a separate linter.
 func envBool(key string, def bool) bool {
 	v := os.Getenv(key)
 	if v == "" {
@@ -280,6 +294,10 @@ func envBool(key string, def bool) bool {
 	}
 	b, err := strconv.ParseBool(v)
 	if err != nil {
+		fmt.Fprintf(os.Stderr,
+			"config: %s=%q is not a valid boolean (want true|false|1|0); falling back to default %v\n",
+			key, v, def,
+		)
 		return def
 	}
 	return b

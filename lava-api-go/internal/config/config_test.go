@@ -1,6 +1,8 @@
 package config
 
 import (
+	"io"
+	"os"
 	"strings"
 	"testing"
 	"time"
@@ -275,9 +277,28 @@ func TestParseBackoffSteps_NotMonotonic(t *testing.T) {
 }
 
 func TestParseBackoffSteps_Empty(t *testing.T) {
+	// Phase 2 follow-up (2026-05-06): parseBackoffSteps short-circuits
+	// on empty input with the documented "at least one step required"
+	// sentinel — the previous behavior was a §6.J spirit issue (the
+	// dead len(out)==0 branch was unreachable, and the actual path
+	// returned a misleading "step \"\":" error).
 	_, err := parseBackoffSteps("")
 	if err == nil {
-		t.Fatal("expected error for empty input (single empty step parsed)")
+		t.Fatal("expected error for empty input")
+	}
+	if !strings.Contains(err.Error(), "at least one step required") {
+		t.Fatalf("unexpected error message; want 'at least one step required', got %v", err)
+	}
+}
+
+func TestParseBackoffSteps_WhitespaceOnly(t *testing.T) {
+	// Whitespace-only input is structurally empty after TrimSpace.
+	_, err := parseBackoffSteps("   ")
+	if err == nil {
+		t.Fatal("expected error for whitespace-only input")
+	}
+	if !strings.Contains(err.Error(), "at least one step required") {
+		t.Fatalf("unexpected error message: %v", err)
 	}
 }
 
@@ -310,9 +331,153 @@ func TestEnvBool_DefaultOnEmpty(t *testing.T) {
 }
 
 func TestEnvBool_DefaultOnGarbage(t *testing.T) {
+	// Phase 2 follow-up (2026-05-06): envBool emits a stderr warning
+	// on parse failure but still falls back to def. The test captures
+	// stderr to assert the warning fires (so an operator typo doesn't
+	// silently ship the default) AND that the boolean fallback is the
+	// documented def.
+	old := os.Stderr
+	r, w, err := os.Pipe()
+	if err != nil {
+		t.Fatalf("os.Pipe: %v", err)
+	}
+	os.Stderr = w
+	defer func() { os.Stderr = old }()
+
 	t.Setenv("TEST_LAVA_BOOL", "garbage")
-	if !envBool("TEST_LAVA_BOOL", true) {
+	got := envBool("TEST_LAVA_BOOL", true)
+
+	w.Close()
+	captured, _ := io.ReadAll(r)
+
+	if !got {
 		t.Fatal("expected default true on parse error")
+	}
+	stderrStr := string(captured)
+	if !strings.Contains(stderrStr, "TEST_LAVA_BOOL") ||
+		!strings.Contains(stderrStr, "garbage") ||
+		!strings.Contains(stderrStr, "falling back") {
+		t.Fatalf(
+			"expected stderr warning naming the env var + bad value + 'falling back'; "+
+				"got: %q",
+			stderrStr,
+		)
+	}
+}
+
+// TestParseClientsList_HMACDeterminism asserts that the same UUID hashed
+// with the same secret produces the same map key, AND a different secret
+// produces a different key. This is the §6.J primary-on-user-visible-state
+// guarantee for the auth allowlist: the AuthMiddleware compares
+// HMAC(received, secret) against the stored map keys, and that comparison
+// is meaningful only if HMAC is deterministic + secret-binding.
+func TestParseClientsList_HMACDeterminism(t *testing.T) {
+	secret1 := []byte("test-secret-1234567890ABCDEF1234")
+	secret2 := []byte("a-different-secret-WXYZ1234567890")
+	entry := "android-1.2.7-1027:00000000-0000-0000-0000-000000000001"
+
+	m1a, err := parseClientsList(entry, secret1)
+	if err != nil {
+		t.Fatalf("m1a: %v", err)
+	}
+	m1b, err := parseClientsList(entry, secret1)
+	if err != nil {
+		t.Fatalf("m1b: %v", err)
+	}
+	m2, err := parseClientsList(entry, secret2)
+	if err != nil {
+		t.Fatalf("m2: %v", err)
+	}
+
+	// Same secret → same hash → same map key
+	keys1a := mapKeys(m1a)
+	keys1b := mapKeys(m1b)
+	if len(keys1a) != 1 || len(keys1b) != 1 || keys1a[0] != keys1b[0] {
+		t.Fatalf("HMAC not deterministic: %v vs %v", keys1a, keys1b)
+	}
+
+	// Different secret → different hash → different map key
+	keys2 := mapKeys(m2)
+	if len(keys2) != 1 || keys2[0] == keys1a[0] {
+		t.Fatalf("HMAC not secret-bound: secret1 key=%q, secret2 key=%q", keys1a[0], keys2[0])
+	}
+}
+
+func mapKeys(m map[string]string) []string {
+	out := make([]string, 0, len(m))
+	for k := range m {
+		out = append(out, k)
+	}
+	return out
+}
+
+// TestLoad_RejectsMissingAuthFieldName covers the §6.J fail-fast posture
+// for the new required vars Phase 2 introduced.
+func TestLoad_RejectsMissingAuthFieldName(t *testing.T) {
+	clearEnv(t)
+	t.Setenv("LAVA_API_PG_URL", "postgres://test/db?sslmode=disable")
+	t.Setenv("LAVA_API_TLS_CERT", "/tmp/cert.pem")
+	t.Setenv("LAVA_API_TLS_KEY", "/tmp/key.pem")
+	// LAVA_AUTH_FIELD_NAME deliberately missing
+	t.Setenv("LAVA_AUTH_HMAC_SECRET", "dGVzdC1zZWNyZXQtMTIzNDU2Nzg5MDEyMzQ1Ng==")
+	_, err := Load()
+	if err == nil {
+		t.Fatal("expected Load() to fail when LAVA_AUTH_FIELD_NAME is missing")
+	}
+	if !strings.Contains(err.Error(), "LAVA_AUTH_FIELD_NAME") {
+		t.Fatalf("error must name the missing var: %v", err)
+	}
+}
+
+// TestLoad_RejectsMissingHMACSecret covers the symmetric required-var case.
+func TestLoad_RejectsMissingHMACSecret(t *testing.T) {
+	clearEnv(t)
+	t.Setenv("LAVA_API_PG_URL", "postgres://test/db?sslmode=disable")
+	t.Setenv("LAVA_API_TLS_CERT", "/tmp/cert.pem")
+	t.Setenv("LAVA_API_TLS_KEY", "/tmp/key.pem")
+	t.Setenv("LAVA_AUTH_FIELD_NAME", "Lava-Auth")
+	// LAVA_AUTH_HMAC_SECRET deliberately missing
+	_, err := Load()
+	if err == nil {
+		t.Fatal("expected Load() to fail when LAVA_AUTH_HMAC_SECRET is missing")
+	}
+	if !strings.Contains(err.Error(), "LAVA_AUTH_HMAC_SECRET") {
+		t.Fatalf("error must name the missing var: %v", err)
+	}
+}
+
+// TestLoad_RejectsShortHMACSecret covers the < 16-byte minimum check.
+func TestLoad_RejectsShortHMACSecret(t *testing.T) {
+	clearEnv(t)
+	t.Setenv("LAVA_API_PG_URL", "postgres://test/db?sslmode=disable")
+	t.Setenv("LAVA_API_TLS_CERT", "/tmp/cert.pem")
+	t.Setenv("LAVA_API_TLS_KEY", "/tmp/key.pem")
+	t.Setenv("LAVA_AUTH_FIELD_NAME", "Lava-Auth")
+	// 8 bytes base64-encoded → 6 bytes raw → below the 16-byte minimum
+	t.Setenv("LAVA_AUTH_HMAC_SECRET", "QUJDREVGR0g=")
+	_, err := Load()
+	if err == nil {
+		t.Fatal("expected Load() to fail on short LAVA_AUTH_HMAC_SECRET")
+	}
+	if !strings.Contains(err.Error(), "at least 16 bytes") {
+		t.Fatalf("error must explain the 16-byte minimum: %v", err)
+	}
+}
+
+// TestLoad_RejectsMalformedHMACSecretBase64 covers the base64 decode path.
+func TestLoad_RejectsMalformedHMACSecretBase64(t *testing.T) {
+	clearEnv(t)
+	t.Setenv("LAVA_API_PG_URL", "postgres://test/db?sslmode=disable")
+	t.Setenv("LAVA_API_TLS_CERT", "/tmp/cert.pem")
+	t.Setenv("LAVA_API_TLS_KEY", "/tmp/key.pem")
+	t.Setenv("LAVA_AUTH_FIELD_NAME", "Lava-Auth")
+	t.Setenv("LAVA_AUTH_HMAC_SECRET", "!!!not-valid-base64!!!")
+	_, err := Load()
+	if err == nil {
+		t.Fatal("expected Load() to fail on malformed base64 LAVA_AUTH_HMAC_SECRET")
+	}
+	if !strings.Contains(err.Error(), "base64 decode") {
+		t.Fatalf("error must mention base64 decode failure: %v", err)
 	}
 }
 
