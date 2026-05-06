@@ -255,6 +255,40 @@ if ! grep -qE "# ===== Check 5: §6.N.1.3" .githooks/pre-push; then
   exit 1
 fi
 
+# ---------------------------------------------------------------------
+# 6.R — No-Hardcoding Mandate enforcement
+# ---------------------------------------------------------------------
+
+# 6.R clause must appear in root CLAUDE.md
+if ! grep -qF '##### 6.R — No-Hardcoding Mandate' CLAUDE.md; then
+  echo "MISSING constitutional clause: 6.R — No-Hardcoding Mandate" >&2
+  echo "  → Add to CLAUDE.md per Phase 1 Task 1.1." >&2
+  exit 1
+fi
+
+# 6.R must appear in every Submodules/*/CLAUDE.md (per §6.F inheritance)
+for sub in Submodules/*/CLAUDE.md; do
+  if ! grep -qF '6.R — No-Hardcoding Mandate' "$sub"; then
+    echo "MISSING 6.R inheritance reference: $sub" >&2
+    echo "  → Append the §6.R reference paragraph per Phase 1 Task 1.3." >&2
+    exit 1
+  fi
+done
+
+# 6.R: no 36-char UUIDs in tracked source outside the exemption set
+# Exemptions: .env.example, sixth-law incident JSONs, design specs/plans
+# (design docs may carry example values per §6.R clause), test fixtures.
+uuid_violations=$(git ls-files \
+  | grep -vE '^\.env\.example$|^\.lava-ci-evidence/sixth-law-incidents/|^docs/superpowers/(specs|plans)/|_test\.go$|Test\.kt$' \
+  | xargs grep -lE '\b[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\b' 2>/dev/null \
+  || true)
+if [[ -n "$uuid_violations" ]]; then
+  echo "6.R VIOLATION: hardcoded UUIDs in tracked source:" >&2
+  echo "$uuid_violations" >&2
+  echo "  → Move to .env (gitignored); read via config layer." >&2
+  exit 1
+fi
+
 echo "Constitution check passed: 6.D + 6.E + 6.F present in CLAUDE.md;"
 echo "Submodules/Tracker-SDK/CLAUDE.md present; core/ + feature/ scoped"
 echo "clauses present; no clause-6.H credential patterns in tracked files;"
