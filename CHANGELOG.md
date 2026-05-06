@@ -17,6 +17,40 @@ Per-version distribution snapshots (the exact text shipped as App Distribution r
 
 ---
 
+## Lava-API-Go-2.0.11-2011 — 2026-05-06
+
+**Channel:** container registry / remote distribution to thinker.local
+**Previous published:** Lava-API-Go-2.0.10-2010 (2026-05-05)
+
+### Added
+
+- **scripts/distribute-api-remote.sh** — ships the lava-api-go OCI image tarball + boot script + TLS material to a remote host via passwordless SSH and brings the stack up under rootless Podman. Default target: `thinker.local`. Verifies `/health` end-to-end from the local host before reporting success. `--tear-down` mode tears containers + image down on the remote.
+- **deployment/thinker/{thinker.local.env, thinker-up.sh}** — operator-customizable boot config + script that runs on the remote host. Idempotent. Pinned to rootless Podman.
+- **docs/REMOTE-DISTRIBUTION.md** — runbook covering initial SSH setup, distribute, verify, tear-down.
+- **`.env.example`** documents `LAVA_API_GO_REMOTE_HOST` (default `thinker.local`) + `LAVA_REMOTE_HOST_USER` (default `milosvasic`).
+
+### Operational
+
+- Lava-api-go now runs on the LAN host `thinker.local`. The local workstation tears down its containers + image at end-of-distribute and only builds going forward. Android clients reach the API via mDNS discovery (no client-side change needed).
+
+### Versions bumped this cycle
+
+| Component | Old | New |
+|---|---|---|
+| lava-api-go | 2.0.10 (2010) | **2.0.11 (2011)** |
+| Android `:app` | 1.2.6 (1026) | (unchanged) |
+| Ktor proxy | 1.0.5 (1005) | (unchanged) |
+
+### Constitutional bindings
+
+- §6.J — distribute script propagates failures
+- §6.B — `/health` end-to-end probe, not just `podman ps`
+- §6.K — image produced via the container build path
+- §6.M — rootless Podman; no host power-management
+- §6.P — this entry IS the §6.P-mandated changelog; per-version snapshot at `.lava-ci-evidence/distribute-changelog/container-registry/2.0.11-2011.md`
+
+---
+
 ## Lava-Android-1.2.6-1026 — 2026-05-05
 
 **Channels:** Firebase App Distribution (debug + release)
