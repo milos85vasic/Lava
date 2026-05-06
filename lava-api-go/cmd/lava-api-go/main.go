@@ -37,6 +37,8 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 
 	pgcache "digital.vasic.cache/pkg/postgres"
+	"digital.vasic.ratelimiter/pkg/ladder"
+
 	"digital.vasic.lava.apigo/internal/auth"
 	"digital.vasic.lava.apigo/internal/cache"
 	"digital.vasic.lava.apigo/internal/config"
@@ -157,12 +159,21 @@ func run() error {
 		logger.Info("firebase: no-op mode (structured-log fallback; set LAVA_FIREBASE_ADMIN_KEY to enable)")
 	}
 
+	// Phase 7 (§6.G real-stack auth): construct the SHARED ladder.Ladder
+	// from cfg.AuthBackoffSteps. BackoffMiddleware (in front) and
+	// AuthMiddleware (behind) consume the same instance — backoff
+	// short-circuits blocked IPs with 429 BEFORE AuthMiddleware can
+	// advance the counter again.
+	authLadder := ladder.New(cfg.AuthBackoffSteps)
+
 	router := buildRouter(routerDeps{
-		Cache:     c,
-		Scraper:   scraper,
-		Registry:  registry,
-		Metrics:   metrics,
-		Firebase:  fbClient,
+		Cfg:        cfg,
+		AuthLadder: authLadder,
+		Cache:      c,
+		Scraper:    scraper,
+		Registry:   registry,
+		Metrics:    metrics,
+		Firebase:   fbClient,
 		Readiness: func(ctx context.Context) error {
 			if err := pgClient.HealthCheck(ctx); err != nil {
 				return fmt.Errorf("postgres: %w", err)
@@ -241,12 +252,14 @@ func run() error {
 // future addition (rate limiter, audit writer, …) does not change the
 // function signature.
 type routerDeps struct {
-	Cache     handlers.Cache
-	Scraper   handlers.ScraperClient
-	Registry  *provider.ProviderRegistry
-	Metrics   *observability.Metrics
-	Readiness observability.ReadinessProbe
-	Firebase  firebase.Client
+	Cfg        *config.Config
+	AuthLadder *ladder.Ladder
+	Cache      handlers.Cache
+	Scraper    handlers.ScraperClient
+	Registry   *provider.ProviderRegistry
+	Metrics    *observability.Metrics
+	Readiness  observability.ReadinessProbe
+	Firebase   firebase.Client
 }
 
 // buildRouter assembles the Gin engine. Factored out of run() so it can
@@ -259,6 +272,14 @@ func buildRouter(deps routerDeps) *gin.Engine {
 	router := gin.New()
 	router.Use(gin.Recovery())
 	router.Use(middleware.FirebaseTelemetry(deps.Firebase))
+	// Phase 7 (§6.G): backoff fires FIRST so blocked IPs short-circuit
+	// with 429 + Retry-After before AuthMiddleware can advance the
+	// counter again. Both middlewares share the same ladder.Ladder
+	// instance constructed in run().
+	if deps.Cfg != nil && deps.AuthLadder != nil {
+		router.Use(auth.NewBackoffMiddleware(deps.AuthLadder, deps.Cfg.AuthTrustedProxies))
+		router.Use(auth.NewMiddleware(deps.Cfg, deps.AuthLadder))
+	}
 	router.Use(auth.GinMiddleware())
 	if deps.Metrics != nil {
 		router.Use(deps.Metrics.GinMiddleware())
