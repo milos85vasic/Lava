@@ -615,6 +615,30 @@ The proxy is built as a Ktor fat JAR and deployed as a Docker image.
 
 - **Compose Layout Antipattern Guard (Constitutional clause 6.Q, added 2026-05-05)** — Forbids nesting a vertically-scrolling lazy layout (LazyColumn, LazyVerticalGrid, LazyVerticalStaggeredGrid) inside a parent that gives unbounded vertical space (verticalScroll, unbounded wrapContentHeight, LinearLayout-with-weight wrapper). Equivalent rule horizontally. Per-feature structural tests + Compose UI Challenge Tests on the §6.I matrix are the load-bearing acceptance gates. Forensic anchor: the 2026-05-05 Trackers-from-Settings crash (closure log at `.lava-ci-evidence/crashlytics-resolved/2026-05-05-tracker-settings-nested-scroll.md`). Inherits recursively to every submodule. Pattern guard at `feature/tracker_settings/src/test/.../TrackerSelectorListLazyColumnRegressionTest.kt`. Every test, every Challenge Test, every CI gate has exactly one job: confirm the feature works for a real user end-to-end on the gating matrix. CI green is necessary, never sufficient. Tests must guarantee the product works — anything else is theatre. If you find yourself rationalizing a "small exception" — STOP. There are no small exceptions. The Internet Archive stuck-on-loading bug, the broken post-login navigation, the credential leak in C2, the bluffed C1-C8, the 2 first-distribute Crashlytics crashes — these are what "small exceptions" produce. Submodule constitutions MAY paste this clause verbatim; they MUST NOT abbreviate it.
 
+##### 6.R — No-Hardcoding Mandate (added 2026-05-06, FOURTEENTH §6.L invocation)
+
+**Forensic anchor:** 2026-05-06 operator directive during Phase 1 brainstorm: "Pay attention that we MUST NOT hardcode anything ever!" — restating the spirit of §6.J for an entire class of bluffs (literal values that drift silently from their intended source-of-truth).
+
+**Rule.** No connection address, port, header field name, credential, key, salt, secret, schedule, algorithm parameter, or domain literal shall appear as a string/int constant in tracked source code (`.kt`, `.java`, `.go`, `.gradle`, `.kts`, `.xml`, `.yaml`, `.yml`, `.json`, `.sh`). Every such value MUST come from a config source: `.env` (gitignored), generated config class (build-time codegen reading `.env`), runtime env var, or mounted file.
+
+The placeholder file `.env.example` (committed) carries dummy values for every variable so a developer cloning the repo knows what to set.
+
+`scripts/check-constitution.sh` MUST grep tracked files for forbidden literal patterns:
+- Any IPv4 address outside `.env.example` and incident docs
+- The header name from `.env.example`'s `LAVA_AUTH_FIELD_NAME`
+- Any 36-char UUID outside `.env.example`
+- Hardcoded `host:port` pairs in HTTP/HTTPS URLs
+
+Pre-push rejects on match. Bluff-Audit stamp required on any commit that adds new config-driven values, demonstrating the no-hardcoding contract test fails when a literal is reintroduced.
+
+**Exemptions** (test fixtures, incident docs, design specs):
+- `.env.example` — by definition carries placeholders
+- `.lava-ci-evidence/sixth-law-incidents/*.json` — forensic anchors quoting historical literals
+- `docs/superpowers/specs/*.md` — design docs may show example values for clarity (placeholders preferred but examples permitted)
+- `*_test.go`, `*Test.kt` — test fixtures may use synthetic literals, MUST NOT use real production values
+
+**Inheritance:** applies recursively to every submodule and every new artifact. Submodule constitutions MAY add stricter rules but MUST NOT relax this clause.
+
 - **Crashlytics-Resolved Issue Coverage Mandate (Constitutional clause 6.O, added 2026-05-05)** — Every Crashlytics-recorded issue (fatal OR non-fatal) closed/resolved by any commit MUST gain (a) a validation test in the language of the crashing surface that reproduces the conditions, (b) a Challenge Test under `app/src/androidTest/kotlin/lava/app/challenges/` (client) or `tests/e2e/` (server) that drives the same user-facing path, and (c) a closure log at `.lava-ci-evidence/crashlytics-resolved/<date>-<slug>.md` recording the issue ID, root-cause analysis, fix commit SHA, and links to the tests. `scripts/tag.sh` MUST refuse release tags whose CHANGELOG mentions Crashlytics fixes without matching closure logs. Marking a Crashlytics issue "closed" in the Console requires the test coverage to land first — never close-mark before the regression-immunity tests exist. Inherits recursively to every submodule.
 
 - **Distribution Versioning + Changelog Mandate (Constitutional clause 6.P, added 2026-05-05, TWELFTH §6.L invocation)** — Every distribute action (Firebase App Distribution, container registry pushes, releases/ snapshots, scripts/tag.sh) MUST: (1) carry a strictly increasing versionCode (no re-distribution of already-published codes); (2) include a CHANGELOG entry — canonical file `CHANGELOG.md` at repo root + per-version snapshot at `.lava-ci-evidence/distribute-changelog/<channel>/<version>-<code>.md`; (3) inject the changelog into the App Distribution release-notes via `--release-notes`. `scripts/firebase-distribute.sh` REFUSES to operate when current versionCode ≤ last-distributed versionCode for the channel, OR when CHANGELOG.md lacks an entry for the current version, OR when the per-version snapshot file is missing. `scripts/tag.sh` enforces the same gates pre-tag. Re-distributing the same versionCode is forbidden across distribute sessions; idempotent retry within a single session is permitted. ServiceAdvertisement.API_VERSION MUST track proxy apiVersionName (per the §6.A real-binary contract test). Inherits recursively to every submodule + every new artifact.
