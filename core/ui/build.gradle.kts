@@ -23,6 +23,7 @@ dependencies {
     implementation(project(":core:models"))
 
     implementation(libs.accompanist.permissions)
+    implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.lifecycle.runtime)
     implementation(libs.bundles.coil)
     implementation(libs.material3)

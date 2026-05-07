@@ -8,6 +8,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SuggestionChip
+import androidx.compose.material3.SuggestionChipDefaults
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
@@ -32,6 +36,7 @@ import lava.models.topic.Topic
 import lava.models.topic.TopicModel
 import lava.models.topic.Torrent
 import lava.models.topic.TorrentStatus
+import lava.ui.data.ProviderLabel
 
 @Composable
 fun TopicListItem(
@@ -39,6 +44,7 @@ fun TopicListItem(
     modifier: Modifier = Modifier,
     showCategory: Boolean = true,
     dimVisited: Boolean = true,
+    providerLabel: ProviderLabel? = null,
     onClick: () -> Unit,
     onFavoriteClick: () -> Unit,
 ) {
@@ -48,6 +54,7 @@ fun TopicListItem(
         modifier = modifier.alpha(alpha),
         topic = topic,
         showCategory = showCategory,
+        providerLabel = providerLabel,
         action = {
             FavoriteButton(
                 modifier = Modifier.size(AppTheme.sizes.medium),
@@ -66,6 +73,7 @@ fun TopicListItem(
     showCategory: Boolean = true,
     containerColor: Color = AppTheme.colors.surface,
     contentColor: Color = AppTheme.colors.contentColorFor(containerColor),
+    providerLabel: ProviderLabel? = null,
     action: @Composable (() -> Unit)? = null,
     onClick: () -> Unit,
 ) {
@@ -75,6 +83,7 @@ fun TopicListItem(
             torrent = topic,
             showCategory = showCategory,
             contentColor = contentColor,
+            providerLabel = providerLabel,
             action = action,
             onClick = onClick,
         )
@@ -84,6 +93,7 @@ fun TopicListItem(
             topic = topic,
             showCategory = showCategory,
             contentColor = contentColor,
+            providerLabel = providerLabel,
             action = action,
             onClick = onClick,
         )
@@ -96,6 +106,7 @@ private fun Topic(
     topic: Topic,
     showCategory: Boolean = true,
     contentColor: Color,
+    providerLabel: ProviderLabel? = null,
     action: @Composable (() -> Unit)? = null,
     onClick: () -> Unit,
 ) = Surface(
@@ -131,6 +142,23 @@ private fun Topic(
                 )
             }
         }
+        if (providerLabel != null) {
+            SuggestionChip(
+                onClick = {},
+                label = {
+                    Text(
+                        text = providerLabel.displayName,
+                        style = MaterialTheme.typography.labelSmall,
+                    )
+                },
+                colors = SuggestionChipDefaults.suggestionChipColors(
+                    containerColor = providerLabel.color.copy(alpha = 0.12f),
+                    labelColor = providerLabel.color,
+                ),
+                border = null,
+                modifier = Modifier.padding(end = AppTheme.spaces.small),
+            )
+        }
         if (action != null) {
             Box(
                 modifier = Modifier.padding(AppTheme.spaces.medium),
@@ -148,6 +176,7 @@ private fun Torrent(
     torrent: Torrent,
     showCategory: Boolean = true,
     contentColor: Color,
+    providerLabel: ProviderLabel? = null,
     action: @Composable (() -> Unit)? = null,
     onClick: () -> Unit,
 ) {
@@ -179,6 +208,23 @@ private fun Torrent(
                         )
                     }
                     Body(torrent.title)
+                }
+                if (providerLabel != null) {
+                    SuggestionChip(
+                        onClick = {},
+                        label = {
+                            Text(
+                                text = providerLabel.displayName,
+                                style = MaterialTheme.typography.labelSmall,
+                            )
+                        },
+                        colors = SuggestionChipDefaults.suggestionChipColors(
+                            containerColor = providerLabel.color.copy(alpha = 0.12f),
+                            labelColor = providerLabel.color,
+                        ),
+                        border = null,
+                        modifier = Modifier.padding(end = AppTheme.spaces.small),
+                    )
                 }
                 if (action != null) {
                     Box(
