@@ -10,8 +10,10 @@ import lava.domain.usecase.DiscoverLocalEndpointsResult
 import lava.domain.usecase.DiscoverLocalEndpointsUseCase
 import lava.domain.usecase.ObserveSettingsUseCase
 import lava.domain.usecase.SetBookmarksSyncPeriodUseCase
+import lava.domain.usecase.SetCredentialsSyncPeriodUseCase
 import lava.domain.usecase.SetEndpointUseCase
 import lava.domain.usecase.SetFavoritesSyncPeriodUseCase
+import lava.domain.usecase.SetHistorySyncPeriodUseCase
 import lava.domain.usecase.SetThemeUseCase
 import lava.logger.api.LoggerFactory
 import lava.models.settings.Endpoint
@@ -33,8 +35,10 @@ internal class MenuViewModel @Inject constructor(
     private val discoverLocalEndpointsUseCase: DiscoverLocalEndpointsUseCase,
     private val observeSettingsUseCase: ObserveSettingsUseCase,
     private val setBookmarksSyncPeriodUseCase: SetBookmarksSyncPeriodUseCase,
+    private val setCredentialsSyncPeriodUseCase: SetCredentialsSyncPeriodUseCase,
     private val setEndpointUseCase: SetEndpointUseCase,
     private val setFavoritesSyncPeriodUseCase: SetFavoritesSyncPeriodUseCase,
+    private val setHistorySyncPeriodUseCase: SetHistorySyncPeriodUseCase,
     private val setThemeUseCase: SetThemeUseCase,
     loggerFactory: LoggerFactory,
 ) : ViewModel(), ContainerHost<MenuState, MenuSideEffect> {
@@ -61,8 +65,10 @@ internal class MenuViewModel @Inject constructor(
             is MenuAction.RightsClick -> onRightsClick()
             is MenuAction.SendFeedbackClick -> onSendFeedbackClick()
             is MenuAction.SetBookmarksSyncPeriod -> onSetBookmarksSyncPeriod(action.syncPeriod)
+            is MenuAction.SetCredentialsSyncPeriod -> onSetCredentialsSyncPeriod(action.syncPeriod)
             is MenuAction.SetEndpoint -> onSetEndpoint(action.endpoint)
             is MenuAction.SetFavoritesSyncPeriod -> onSetFavoritesSyncPeriod(action.syncPeriod)
+            is MenuAction.SetHistorySyncPeriod -> onSetHistorySyncPeriod(action.syncPeriod)
             is MenuAction.SetTheme -> onSetTheme(action.theme)
             is MenuAction.TrackerSettingsClick -> onTrackerSettingsClick()
             is MenuAction.CredentialsClick -> onCredentialsClick()
@@ -103,6 +109,8 @@ internal class MenuViewModel @Inject constructor(
                     theme = settings.theme,
                     favoritesSyncPeriod = settings.favoritesSyncPeriod,
                     bookmarksSyncPeriod = settings.bookmarksSyncPeriod,
+                    historySyncPeriod = settings.historySyncPeriod,
+                    credentialsSyncPeriod = settings.credentialsSyncPeriod,
                 )
             }
         }
@@ -148,12 +156,20 @@ internal class MenuViewModel @Inject constructor(
         setBookmarksSyncPeriodUseCase(period)
     }
 
+    private fun onSetCredentialsSyncPeriod(period: SyncPeriod) = intent {
+        setCredentialsSyncPeriodUseCase(period)
+    }
+
     private fun onSetEndpoint(endpoint: Endpoint) = intent {
         setEndpointUseCase(endpoint)
     }
 
     private fun onSetFavoritesSyncPeriod(period: SyncPeriod) = intent {
         setFavoritesSyncPeriodUseCase(period)
+    }
+
+    private fun onSetHistorySyncPeriod(period: SyncPeriod) = intent {
+        setHistorySyncPeriodUseCase(period)
     }
 
     private fun onSetTheme(theme: Theme) = intent {

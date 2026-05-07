@@ -26,7 +26,9 @@ internal sealed interface MenuAction {
     /** Multi-Provider Extension. Open the provider credentials screen. */
     data object CredentialsClick : MenuAction
     data class SetBookmarksSyncPeriod(val syncPeriod: SyncPeriod) : MenuAction
+    data class SetCredentialsSyncPeriod(val syncPeriod: SyncPeriod) : MenuAction
     data class SetEndpoint(val endpoint: Endpoint) : MenuAction
     data class SetFavoritesSyncPeriod(val syncPeriod: SyncPeriod) : MenuAction
+    data class SetHistorySyncPeriod(val syncPeriod: SyncPeriod) : MenuAction
     data class SetTheme(val theme: Theme) : MenuAction
 }

@@ -58,7 +58,9 @@ import lava.menu.MenuAction.ConfirmableAction
 import lava.menu.MenuAction.LoginClick
 import lava.menu.MenuAction.SendFeedbackClick
 import lava.menu.MenuAction.SetBookmarksSyncPeriod
+import lava.menu.MenuAction.SetCredentialsSyncPeriod
 import lava.menu.MenuAction.SetFavoritesSyncPeriod
+import lava.menu.MenuAction.SetHistorySyncPeriod
 import lava.menu.MenuAction.SetTheme
 import lava.models.settings.SyncPeriod
 import lava.models.settings.Theme
@@ -142,7 +144,7 @@ private fun MenuScreen(
         )
     },
 ) { padding ->
-    val (theme, favoritesSyncPeriod, bookmarksSyncPeriod) = state
+    val (theme, favoritesSyncPeriod, bookmarksSyncPeriod, historySyncPeriod, credentialsSyncPeriod) = state
     LazyList(
         modifier = Modifier.padding(padding),
         contentPadding = PaddingValues(vertical = AppTheme.spaces.medium),
@@ -191,6 +193,20 @@ private fun MenuScreen(
             selected = bookmarksSyncPeriod,
             labelMapper = { syncPeriod -> stringResource(syncPeriod.resId) },
             onSelect = { syncPeriod -> onAction(SetBookmarksSyncPeriod(syncPeriod)) },
+        )
+        menuSyncSelectionItem(
+            title = { Text(stringResource(R.string.menu_settings_history_sync)) },
+            items = SyncPeriod.entries,
+            selected = historySyncPeriod,
+            labelMapper = { syncPeriod -> stringResource(syncPeriod.resId) },
+            onSelect = { syncPeriod -> onAction(SetHistorySyncPeriod(syncPeriod)) },
+        )
+        menuSyncSelectionItem(
+            title = { Text(stringResource(R.string.menu_settings_credentials_sync)) },
+            items = SyncPeriod.entries,
+            selected = credentialsSyncPeriod,
+            labelMapper = { syncPeriod -> stringResource(syncPeriod.resId) },
+            onSelect = { syncPeriod -> onAction(SetCredentialsSyncPeriod(syncPeriod)) },
         )
         menuSectionLabel { Text(stringResource(R.string.menu_label_data)) }
         menuItem(
