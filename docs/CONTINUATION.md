@@ -11,10 +11,9 @@ same commit so the index stays trustworthy. Stale state in this file
 is itself a §6.J spirit issue — the file claims a guarantee, the
 repo has drifted, the agent acts on the claim.
 
-> **Last updated:** 2026-05-07, after Phase 3 (onboarding wizard)
-> implementation. Multi-step wizard: Welcome → Pick Providers →
-> Configure (per provider) → Summary. New :feature:onboarding
-> module with Orbit MVI ViewModel + AnimatedContent.
+> **Last updated:** 2026-05-07, after Phase 4 (sync expansion)
+> implementation. Device identity UUID, Sync Now buttons, history +
+> credentials sync categories, menu expansion to 4 sync rows.
 
 > **§6.S binding:** this file is constitutionally load-bearing per
 > root `CLAUDE.md` §6.S. Every commit that changes phase status,
@@ -110,6 +109,19 @@ place. Challenge Tests and nncmclub/kinozal (Phase 2b) queued.
   `lava-vasic-digital`. Operator's tester email received the invite.
   Phase 2a additions (provider chips, multi-select) not yet in a
   distributed build.
+
+### Parent-decomposition Phase 4 — Sync subsystem expansion
+
+Status: **implemented, not yet released**. 7 tasks shipped.
+
+| What | Details |
+|------|---------|
+| Device identity | `UUID.randomUUID()` generated on first launch, stored in SharedPreferences |
+| Sync Now buttons | IconButton on Favorites + Bookmarks screens, triggers immediate refresh |
+| History sync | New `historySyncPeriod` in Settings, `SyncHistoryWorker`, `SetHistorySyncPeriodUseCase` |
+| Credential sync | New `credentialsSyncPeriod`, `SyncCredentialsWorker` validates all providers periodically |
+| Menu expanded | 4 sync rows (Favorites, Bookmarks, History, Credentials) with individual dropdowns |
+| Plan | `docs/superpowers/plans/2026-05-07-phase4-sync-expansion.md` |
 
 ### Parent-decomposition Phase 3 — Onboarding wizard
 
