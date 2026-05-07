@@ -25,6 +25,9 @@ internal sealed interface MenuAction {
 
     /** Multi-Provider Extension. Open the provider credentials screen. */
     data object CredentialsClick : MenuAction
+
+    /** Sign out of a specific provider. */
+    data class SignOut(val providerId: String) : MenuAction
     data class SetBookmarksSyncPeriod(val syncPeriod: SyncPeriod) : MenuAction
     data class SetCredentialsSyncPeriod(val syncPeriod: SyncPeriod) : MenuAction
     data class SetEndpoint(val endpoint: Endpoint) : MenuAction

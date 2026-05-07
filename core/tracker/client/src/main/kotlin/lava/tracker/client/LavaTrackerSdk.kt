@@ -403,6 +403,22 @@ class LavaTrackerSdk @Inject constructor(
     }
 
     /**
+     * Logs out of the tracker identified by [trackerId]. No-op when the
+     * tracker doesn't support AUTH.
+     *
+     * Added in Multi-Provider Extension (Menu header).
+     */
+    suspend fun logout(trackerId: String) {
+        val client = registry.get(trackerId, MapPluginConfig())
+        val feature = client.getFeature(AuthenticatableTracker::class) ?: return
+        try {
+            feature.logout()
+        } catch (_: Throwable) {
+            // logout failures are not user-visible.
+        }
+    }
+
+    /**
      * Resolves the active [TrackerClient] from the registry. `internal` so
      * the new SDK seam stays the only public surface — the SDK's wrapper
      * methods (search/browse/getTopic/getTopicPage/getCommentsPage/addComment/

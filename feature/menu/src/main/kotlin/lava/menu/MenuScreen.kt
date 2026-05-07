@@ -4,17 +4,21 @@ import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -30,14 +34,16 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
-import lava.account.AccountItem
+import androidx.compose.ui.unit.dp
 import lava.connection.ConnectionItem
 import lava.designsystem.component.AppBar
 import lava.designsystem.component.Body
 import lava.designsystem.component.BodyLarge
+import lava.designsystem.component.BodySmall
 import lava.designsystem.component.ConfirmationDialog
 import lava.designsystem.component.Dialog
 import lava.designsystem.component.Icon
+import lava.designsystem.component.IconButton
 import lava.designsystem.component.LazyList
 import lava.designsystem.component.ProvideTextStyle
 import lava.designsystem.component.Scaffold
@@ -55,7 +61,6 @@ import lava.menu.MenuAction.ClearBookmarksConfirmation
 import lava.menu.MenuAction.ClearFavoritesConfirmation
 import lava.menu.MenuAction.ClearHistoryConfirmation
 import lava.menu.MenuAction.ConfirmableAction
-import lava.menu.MenuAction.LoginClick
 import lava.menu.MenuAction.SendFeedbackClick
 import lava.menu.MenuAction.SetBookmarksSyncPeriod
 import lava.menu.MenuAction.SetCredentialsSyncPeriod
@@ -149,7 +154,9 @@ private fun MenuScreen(
         modifier = Modifier.padding(padding),
         contentPadding = PaddingValues(vertical = AppTheme.spaces.medium),
     ) {
-        menuAccountItem { onAction(LoginClick) }
+        menuProviderList(state.activeProviders) { providerId ->
+            onAction(MenuAction.SignOut(providerId))
+        }
         menuSectionLabel { Text(stringResource(R.string.menu_label_settings)) }
         menuSelectionItem(
             title = { Text(stringResource(R.string.menu_settings_theme)) },
@@ -265,9 +272,23 @@ private fun MenuScreen(
     }
 }
 
-private fun LazyListScope.menuAccountItem(
-    onLoginClick: () -> Unit,
-) = item { AccountItem(onLoginClick = onLoginClick) }
+private fun LazyListScope.menuProviderList(
+    providers: List<ProviderMenuItem>,
+    onSignOut: (String) -> Unit,
+) = item {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = AppTheme.spaces.large),
+    ) {
+        for (provider in providers) {
+            ProviderRow(
+                provider = provider,
+                onSignOut = { onSignOut(provider.providerId) },
+            )
+        }
+    }
+}
 
 private fun LazyListScope.menuItem(
     text: @Composable () -> Unit,
@@ -336,6 +357,50 @@ private fun MenuItem(
         contentAlignment = Alignment.CenterStart,
     ) {
         ProvideTextStyle(AppTheme.typography.bodyLarge, text)
+    }
+}
+
+@Composable
+private fun ProviderRow(
+    provider: ProviderMenuItem,
+    onSignOut: () -> Unit,
+) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = AppTheme.shapes.medium,
+        color = AppTheme.colors.surface,
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    horizontal = AppTheme.spaces.medium,
+                    vertical = AppTheme.spaces.small,
+                ),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(12.dp)
+                    .background(provider.color, CircleShape),
+            )
+            Spacer(modifier = Modifier.width(AppTheme.spaces.small))
+            Column(modifier = Modifier.weight(1f)) {
+                Body(text = provider.displayName)
+                BodySmall(
+                    text = provider.username ?: "Anonymous",
+                    color = AppTheme.colors.outline,
+                )
+            }
+            if (provider.isAuthenticated) {
+                IconButton(
+                    icon = LavaIcons.Logout,
+                    contentDescription = stringResource(R.string.menu_sign_out),
+                    tint = AppTheme.colors.primary,
+                    onClick = onSignOut,
+                )
+            }
+        }
     }
 }
 

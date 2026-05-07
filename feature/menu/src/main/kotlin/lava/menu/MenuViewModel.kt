@@ -3,6 +3,8 @@ package lava.menu
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.collectLatest
+import lava.credentials.ProviderCredentialManager
+import lava.designsystem.color.ProviderColors
 import lava.domain.usecase.ClearBookmarksUseCase
 import lava.domain.usecase.ClearHistoryUseCase
 import lava.domain.usecase.ClearLocalFavoritesUseCase
@@ -19,6 +21,8 @@ import lava.logger.api.LoggerFactory
 import lava.models.settings.Endpoint
 import lava.models.settings.SyncPeriod
 import lava.models.settings.Theme
+import lava.tracker.api.TrackerCapability
+import lava.tracker.client.LavaTrackerSdk
 import org.orbitmvi.orbit.Container
 import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.syntax.simple.intent
@@ -40,6 +44,8 @@ internal class MenuViewModel @Inject constructor(
     private val setFavoritesSyncPeriodUseCase: SetFavoritesSyncPeriodUseCase,
     private val setHistorySyncPeriodUseCase: SetHistorySyncPeriodUseCase,
     private val setThemeUseCase: SetThemeUseCase,
+    private val sdk: LavaTrackerSdk,
+    private val credentialManager: ProviderCredentialManager,
     loggerFactory: LoggerFactory,
 ) : ViewModel(), ContainerHost<MenuState, MenuSideEffect> {
     private val logger = loggerFactory.get("MenuViewModel")
@@ -49,6 +55,7 @@ internal class MenuViewModel @Inject constructor(
         onCreate = {
             observeSettings()
             discoverLocalEndpoints()
+            loadProviders()
         },
     )
 
@@ -72,6 +79,44 @@ internal class MenuViewModel @Inject constructor(
             is MenuAction.SetTheme -> onSetTheme(action.theme)
             is MenuAction.TrackerSettingsClick -> onTrackerSettingsClick()
             is MenuAction.CredentialsClick -> onCredentialsClick()
+            is MenuAction.SignOut -> onSignOut(action.providerId)
+        }
+    }
+
+    private fun loadProviders() = intent {
+        val descriptors = sdk.listAvailableTrackers()
+        val items = descriptors.map { descriptor ->
+            val isAuthenticatable = TrackerCapability.AUTH_REQUIRED in descriptor.capabilities
+            val authState = if (isAuthenticatable) {
+                try {
+                    sdk.checkAuth(descriptor.trackerId)
+                } catch (_: Throwable) {
+                    null
+                }
+            } else {
+                null
+            }
+            val isAuthenticated = authState is lava.tracker.api.model.AuthState.Authenticated
+            val credentials = try {
+                credentialManager.getCredentials(descriptor.trackerId)
+            } catch (_: Throwable) {
+                null
+            }
+            val username = if (isAuthenticated) {
+                credentials?.username ?: descriptor.displayName
+            } else {
+                null
+            }
+            ProviderMenuItem(
+                providerId = descriptor.trackerId,
+                displayName = descriptor.displayName,
+                username = username,
+                isAuthenticated = isAuthenticated,
+                color = ProviderColors.forProvider(descriptor.trackerId),
+            )
+        }
+        reduce {
+            state.copy(activeProviders = items)
         }
     }
 
@@ -83,6 +128,20 @@ internal class MenuViewModel @Inject constructor(
     /** Multi-Provider Extension. */
     private fun onCredentialsClick() = intent {
         postSideEffect(MenuSideEffect.OpenCredentials)
+    }
+
+    private fun onSignOut(providerId: String) = intent {
+        try {
+            if (sdk.activeTrackerId() == providerId) {
+                sdk.logout()
+            } else {
+                sdk.logout(providerId)
+            }
+        } catch (_: Throwable) { /* best-effort */ }
+        try {
+            credentialManager.clear(providerId)
+        } catch (_: Throwable) { /* best-effort */ }
+        loadProviders()
     }
 
     private fun discoverLocalEndpoints() = intent {
@@ -105,7 +164,7 @@ internal class MenuViewModel @Inject constructor(
         observeSettingsUseCase().collectLatest { settings ->
             reduce {
                 logger.d { "On new settings: $settings" }
-                MenuState(
+                state.copy(
                     theme = settings.theme,
                     favoritesSyncPeriod = settings.favoritesSyncPeriod,
                     bookmarksSyncPeriod = settings.bookmarksSyncPeriod,

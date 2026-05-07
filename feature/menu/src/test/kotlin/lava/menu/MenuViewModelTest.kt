@@ -3,9 +3,15 @@ package lava.menu
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
+import lava.credentials.CredentialEncryptor
+import lava.credentials.CredentialsRepository
+import lava.credentials.ProviderCredentialManager
 import lava.data.api.repository.FavoriteSearchRepository
+import lava.database.dao.ProviderCredentialsDao
+import lava.database.entity.ProviderCredentialsEntity
 import lava.domain.usecase.ClearBookmarksUseCase
 import lava.domain.usecase.ClearHistoryUseCase
 import lava.domain.usecase.ClearLocalFavoritesUseCase
@@ -28,6 +34,8 @@ import lava.testing.repository.TestVisitedRepository
 import lava.testing.service.TestBackgroundService
 import lava.testing.service.TestLocalNetworkDiscoveryService
 import lava.testing.testDispatchers
+import lava.tracker.client.LavaTrackerSdk
+import lava.tracker.registry.DefaultTrackerRegistry
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
@@ -143,6 +151,20 @@ class MenuViewModelTest {
             settingsRepository = settingsRepository,
             dispatchers = testDispatchers,
         )
+
+        val registry = DefaultTrackerRegistry()
+        val sdk = LavaTrackerSdk(registry)
+
+        val fakeDao = object : ProviderCredentialsDao {
+            override suspend fun load(providerId: String) = null
+            override fun observeAll() = emptyFlow<List<ProviderCredentialsEntity>>()
+            override fun observe(providerId: String) = emptyFlow<ProviderCredentialsEntity?>()
+            override suspend fun upsert(entity: ProviderCredentialsEntity) {}
+            override suspend fun delete(providerId: String) {}
+        }
+        val credentialsRepository = CredentialsRepository(fakeDao, CredentialEncryptor())
+        val credentialManager = ProviderCredentialManager(credentialsRepository)
+
         return MenuViewModel(
             clearBookmarksUseCase = clearBookmarksUseCase,
             clearLocalFavoritesUseCase = clearLocalFavoritesUseCase,
@@ -150,9 +172,21 @@ class MenuViewModelTest {
             discoverLocalEndpointsUseCase = discoverUseCase,
             observeSettingsUseCase = observeSettingsUseCase,
             setBookmarksSyncPeriodUseCase = setBookmarksSyncPeriodUseCase,
+            setCredentialsSyncPeriodUseCase = SetCredentialsSyncPeriodUseCase(
+                settingsRepository = settingsRepository,
+                backgroundService = backgroundService,
+                dispatchers = testDispatchers,
+            ),
             setEndpointUseCase = setEndpointUseCase,
             setFavoritesSyncPeriodUseCase = setFavoritesSyncPeriodUseCase,
+            setHistorySyncPeriodUseCase = SetHistorySyncPeriodUseCase(
+                settingsRepository = settingsRepository,
+                backgroundService = backgroundService,
+                dispatchers = testDispatchers,
+            ),
             setThemeUseCase = setThemeUseCase,
+            sdk = sdk,
+            credentialManager = credentialManager,
             loggerFactory = TestLoggerFactory(),
         )
     }
