@@ -53,4 +53,5 @@ object ArchiveOrgDescriptor : TrackerDescriptor {
     // anonymous. The flag value is informational here (the AuthType.NONE
     // path in ProviderLoginViewModel always takes precedence).
     override val supportsAnonymous: Boolean = true
+    override val apiSupported: Boolean = true
 }

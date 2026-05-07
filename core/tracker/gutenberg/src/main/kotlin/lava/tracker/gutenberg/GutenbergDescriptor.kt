@@ -47,4 +47,5 @@ object GutenbergDescriptor : TrackerDescriptor {
     // Phase 1.5: gutendex.com is a public unauthenticated JSON API.
     // Implicitly anonymous; flag value is informational.
     override val supportsAnonymous: Boolean = true
+    override val apiSupported: Boolean = true
 }
