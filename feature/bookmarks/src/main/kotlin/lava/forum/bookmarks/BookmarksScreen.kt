@@ -1,20 +1,25 @@
 package lava.forum.bookmarks
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import lava.designsystem.component.BodyLarge
+import lava.designsystem.component.CircularProgressIndicator
 import lava.designsystem.component.Icon
+import lava.designsystem.component.IconButton
 import lava.designsystem.component.LazyList
 import lava.designsystem.component.Surface
 import lava.designsystem.component.Text
@@ -56,24 +61,43 @@ private fun BookmarksScreen(
 private fun BookmarksScreen(
     state: BookmarksState,
     onAction: (BookmarksAction) -> Unit,
-) = LazyList(
-    modifier = Modifier.fillMaxSize(),
-    contentPadding = PaddingValues(vertical = AppTheme.spaces.large),
-) {
-    when (state) {
-        is BookmarksState.Initial -> loadingItem()
-        is BookmarksState.Empty -> emptyItem(
-            titleRes = R.string.forum_screen_bookmarks_empty_title,
-            subtitleRes = R.string.forum_screen_bookmarks_empty_subtitle,
-            imageRes = R.drawable.ill_bookmarks,
-        )
-
-        is BookmarksState.BookmarksList -> items(items = state.items) { bookmark ->
-            Bookmark(
-                bookmark = bookmark,
-                onClick = { onAction(BookmarksAction.BookmarkClicked(bookmark)) },
+) = Box(modifier = Modifier.fillMaxSize()) {
+    LazyList(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(vertical = AppTheme.spaces.large),
+    ) {
+        when (state) {
+            is BookmarksState.Initial -> loadingItem()
+            is BookmarksState.Empty -> emptyItem(
+                titleRes = R.string.forum_screen_bookmarks_empty_title,
+                subtitleRes = R.string.forum_screen_bookmarks_empty_subtitle,
+                imageRes = R.drawable.ill_bookmarks,
             )
+
+            is BookmarksState.BookmarksList -> items(items = state.items) { bookmark ->
+                Bookmark(
+                    bookmark = bookmark,
+                    onClick = { onAction(BookmarksAction.BookmarkClicked(bookmark)) },
+                )
+            }
         }
+    }
+    if (state.isSyncing) {
+        CircularProgressIndicator(
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(AppTheme.spaces.medium)
+                .size(24.dp),
+        )
+    } else {
+        IconButton(
+            icon = LavaIcons.Reload,
+            contentDescription = "Sync now",
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(AppTheme.spaces.medium),
+            onClick = { onAction(BookmarksAction.SyncNowClick) },
+        )
     }
 }
 

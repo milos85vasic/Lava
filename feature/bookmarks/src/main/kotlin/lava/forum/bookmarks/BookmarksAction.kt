@@ -4,4 +4,5 @@ import lava.models.forum.CategoryModel
 
 internal sealed interface BookmarksAction {
     data class BookmarkClicked(val bookmark: CategoryModel) : BookmarksAction
+    data object SyncNowClick : BookmarksAction
 }

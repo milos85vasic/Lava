@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.collectLatest
 import lava.domain.usecase.ObserveFavoritesUseCase
+import lava.domain.usecase.RefreshFavoritesUseCase
 import lava.logger.api.LoggerFactory
 import lava.models.topic.Topic
 import lava.models.topic.TopicModel
@@ -19,12 +20,13 @@ import javax.inject.Inject
 @HiltViewModel
 class FavoritesViewModel @Inject constructor(
     private val observeFavoritesUseCase: ObserveFavoritesUseCase,
+    private val refreshFavoritesUseCase: RefreshFavoritesUseCase,
     loggerFactory: LoggerFactory,
 ) : ViewModel(), ContainerHost<FavoritesState, FavoritesSideEffect> {
     private val logger = loggerFactory.get("FavoritesViewModel")
 
     override val container: Container<FavoritesState, FavoritesSideEffect> = container(
-        initialState = FavoritesState.Initial,
+        initialState = FavoritesState.Initial(),
         onCreate = { observeFavorites() },
     )
 
@@ -32,6 +34,7 @@ class FavoritesViewModel @Inject constructor(
         logger.d { "Perform $action" }
         when (action) {
             is FavoritesAction.TopicClick -> onTopicClick(action.topicModel)
+            is FavoritesAction.SyncNowClick -> onSyncNow()
         }
     }
 
@@ -39,11 +42,12 @@ class FavoritesViewModel @Inject constructor(
         logger.d { "Start observing favorites" }
         observeFavoritesUseCase(viewModelScope).collectLatest { items ->
             logger.d { "On new favorites list: $items" }
+            val syncing = state.isSyncing
             reduce {
                 if (items.isEmpty()) {
-                    FavoritesState.Empty
+                    FavoritesState.Empty(isSyncing = syncing)
                 } else {
-                    FavoritesState.FavoritesList(items)
+                    FavoritesState.FavoritesList(items, isSyncing = syncing)
                 }
             }
         }
@@ -51,5 +55,29 @@ class FavoritesViewModel @Inject constructor(
 
     private fun onTopicClick(topicModel: TopicModel<out Topic>) = intent {
         postSideEffect(FavoritesSideEffect.OpenTopic(topicModel.topic.id))
+    }
+
+    private fun onSyncNow() = intent {
+        reduce {
+            val s = state
+            when (s) {
+                is FavoritesState.Initial -> s.copy(isSyncing = true)
+                is FavoritesState.Empty -> s.copy(isSyncing = true)
+                is FavoritesState.FavoritesList -> s.copy(isSyncing = true)
+            }
+        }
+        try {
+            refreshFavoritesUseCase()
+        } catch (e: Exception) {
+            logger.e(e) { "Sync now failed" }
+        }
+        reduce {
+            val s = state
+            when (s) {
+                is FavoritesState.Initial -> s.copy(isSyncing = false)
+                is FavoritesState.Empty -> s.copy(isSyncing = false)
+                is FavoritesState.FavoritesList -> s.copy(isSyncing = false)
+            }
+        }
     }
 }

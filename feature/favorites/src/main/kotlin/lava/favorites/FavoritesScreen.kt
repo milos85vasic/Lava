@@ -1,14 +1,20 @@
 package lava.favorites
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import lava.designsystem.component.CircularProgressIndicator
 import lava.designsystem.component.Empty
 import lava.designsystem.component.Icon
+import lava.designsystem.component.IconButton
 import lava.designsystem.component.LazyList
 import lava.designsystem.component.Loading
 import lava.designsystem.drawables.LavaIcons
@@ -46,23 +52,42 @@ private fun FavoritesScreen(
 private fun FavoritesScreen(
     state: FavoritesState,
     onAction: (FavoritesAction) -> Unit,
-) = when (state) {
-    is FavoritesState.Initial -> Loading()
-    is FavoritesState.Empty -> Empty(
-        titleRes = R.string.favorites_empty_title,
-        subtitleRes = R.string.favorites_empty_subtitle,
-        imageRes = R.drawable.ill_favorites,
-    )
-    is FavoritesState.FavoritesList -> LazyList(
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(vertical = AppTheme.spaces.medium),
-    ) {
-        items(items = state.items) { model ->
-            FavoriteTopic(
-                topicModel = model,
-                onClick = { onAction(FavoritesAction.TopicClick(model)) },
-            )
+) = Box(modifier = Modifier.fillMaxSize()) {
+    when (state) {
+        is FavoritesState.Initial -> Loading()
+        is FavoritesState.Empty -> Empty(
+            titleRes = R.string.favorites_empty_title,
+            subtitleRes = R.string.favorites_empty_subtitle,
+            imageRes = R.drawable.ill_favorites,
+        )
+        is FavoritesState.FavoritesList -> LazyList(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(vertical = AppTheme.spaces.medium),
+        ) {
+            items(items = state.items) { model ->
+                FavoriteTopic(
+                    topicModel = model,
+                    onClick = { onAction(FavoritesAction.TopicClick(model)) },
+                )
+            }
         }
+    }
+    if (state.isSyncing) {
+        CircularProgressIndicator(
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(AppTheme.spaces.medium)
+                .size(24.dp),
+        )
+    } else {
+        IconButton(
+            icon = LavaIcons.Reload,
+            contentDescription = "Sync now",
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(AppTheme.spaces.medium),
+            onClick = { onAction(FavoritesAction.SyncNowClick) },
+        )
     }
 }
 
