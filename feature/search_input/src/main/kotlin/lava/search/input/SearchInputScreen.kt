@@ -6,6 +6,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkOut
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -44,6 +45,7 @@ import lava.designsystem.theme.AppTheme
 import lava.designsystem.utils.RunOnFirstComposition
 import lava.models.search.Filter
 import lava.models.search.Suggest
+import lava.search.input.components.ProviderChipBar
 import org.orbitmvi.orbit.compose.collectAsState
 import org.orbitmvi.orbit.compose.collectSideEffect
 import lava.designsystem.R as DsR
@@ -86,16 +88,21 @@ private fun SearchInputScreen(
         )
     },
     content = { padding ->
-        LazyList(
-            modifier = Modifier.padding(padding),
-            contentPadding = PaddingValues(vertical = AppTheme.spaces.medium),
-        ) {
-            items(items = state.suggests) { suggest ->
-                SuggestItem(
-                    suggest = suggest,
-                    onClick = { onAction(SearchInputAction.SuggestClick(suggest)) },
-                    onSubmit = { onAction(SearchInputAction.SuggestEditClick(suggest)) },
-                )
+        Column(modifier = Modifier.padding(padding)) {
+            ProviderChipBar(
+                chips = state.providerChips,
+                onChipToggled = { providerId -> onAction(SearchInputAction.ProviderToggled(providerId)) },
+            )
+            LazyList(
+                contentPadding = PaddingValues(vertical = AppTheme.spaces.medium),
+            ) {
+                items(items = state.suggests) { suggest ->
+                    SuggestItem(
+                        suggest = suggest,
+                        onClick = { onAction(SearchInputAction.SuggestClick(suggest)) },
+                        onSubmit = { onAction(SearchInputAction.SuggestEditClick(suggest)) },
+                    )
+                }
             }
         }
     },

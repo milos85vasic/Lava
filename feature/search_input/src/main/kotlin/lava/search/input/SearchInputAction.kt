@@ -10,4 +10,5 @@ internal sealed interface SearchInputAction {
     data object SubmitClick : SearchInputAction
     data class SuggestEditClick(val suggest: Suggest) : SearchInputAction
     data class SuggestClick(val suggest: Suggest) : SearchInputAction
+    data class ProviderToggled(val providerId: String) : SearchInputAction
 }
