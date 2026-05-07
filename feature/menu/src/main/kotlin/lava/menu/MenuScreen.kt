@@ -501,7 +501,7 @@ private fun AboutAppDialog(state: VisibilityState) {
                     modifier = Modifier.fillMaxWidth(),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    Text(stringResource(R.string.app_version, packageInfo.getAppVersionName()))
+                    Text(stringResource(R.string.app_version, packageInfo.getAppVersionName(), packageInfo.getAppVersionCode()))
                     Text(stringResource(R.string.app_copyright_original))
                     androidx.compose.foundation.text.ClickableText(
                         text = androidx.compose.ui.text.buildAnnotatedString {
@@ -557,6 +557,16 @@ private fun PackageInfo?.getAppName(): String {
 
 @Composable
 private fun PackageInfo?.getAppVersionName(): String = this?.versionName ?: "null"
+
+@Suppress("DEPRECATION")
+private fun PackageInfo?.getAppVersionCode(): Long =
+    this?.let {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            it.longVersionCode
+        } else {
+            it.versionCode.toLong()
+        }
+    } ?: 0L
 
 private val Theme.resId: Int
     get() = when (this) {
