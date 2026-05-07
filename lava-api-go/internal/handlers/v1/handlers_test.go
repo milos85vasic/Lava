@@ -16,18 +16,24 @@ import (
 
 // fakeProvider is a minimal Provider implementation for handler tests.
 type fakeProvider struct {
-	id            string
-	searchResult  *provider.SearchResult
-	searchErr     error
-	browseResult  *provider.BrowseResult
-	forumResult   *provider.ForumTree
-	topicResult   *provider.TopicResult
-	torrentResult *provider.TorrentResult
+	id             string
+	name           string
+	searchResult   *provider.SearchResult
+	searchErr      error
+	browseResult   *provider.BrowseResult
+	forumResult    *provider.ForumTree
+	topicResult    *provider.TopicResult
+	torrentResult  *provider.TorrentResult
 	downloadResult *provider.FileDownload
 }
 
-func (f *fakeProvider) ID() string                         { return f.id }
-func (f *fakeProvider) DisplayName() string                { return f.id }
+func (f *fakeProvider) ID() string { return f.id }
+func (f *fakeProvider) DisplayName() string {
+	if f.name != "" {
+		return f.name
+	}
+	return f.id
+}
 func (f *fakeProvider) Capabilities() []provider.ProviderCapability { return []provider.ProviderCapability{provider.CapSearch, provider.CapBrowse, provider.CapForumTree, provider.CapTopic, provider.CapTorrentDownload} }
 func (f *fakeProvider) AuthType() provider.AuthType        { return provider.AuthNone }
 func (f *fakeProvider) Encoding() string                   { return "UTF-8" }

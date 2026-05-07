@@ -322,6 +322,9 @@ func buildRouter(deps routerDeps) *gin.Engine {
 		Cache: deps.Cache,
 	})
 
+	// v1 multi-provider SSE search
+	router.GET("/v1/search", v1handlers.NewMultiSearchHandler(deps.Registry).GetMultiSearch)
+
 	return router
 }
 
