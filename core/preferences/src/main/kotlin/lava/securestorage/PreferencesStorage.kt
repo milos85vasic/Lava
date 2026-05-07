@@ -1,6 +1,7 @@
 package lava.securestorage
 
 import lava.models.settings.Settings
+import lava.models.settings.SyncPeriod
 import lava.securestorage.model.Account
 
 /**
@@ -67,6 +68,12 @@ interface PreferencesStorage {
     suspend fun saveSignaledAuthState(name: String, avatarUrl: String?)
 
     suspend fun clearSignaledAuthState()
+
+    fun getDeviceId(): String
+    fun getHistorySyncPeriod(): SyncPeriod
+    fun setHistorySyncPeriod(period: SyncPeriod)
+    fun getCredentialsSyncPeriod(): SyncPeriod
+    fun setCredentialsSyncPeriod(period: SyncPeriod)
 }
 
 /**

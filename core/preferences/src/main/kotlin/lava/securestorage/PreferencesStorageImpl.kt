@@ -82,14 +82,14 @@ internal class PreferencesStorageImpl @Inject constructor(
                 putString(themeKey, settings.theme.name)
                 putString(favoritesSyncPeriodKey, settings.favoritesSyncPeriod.name)
                 putString(bookmarksSyncPeriodKey, settings.bookmarksSyncPeriod.name)
+                putString(historySyncPeriodKey, settings.historySyncPeriod.name)
+                putString(credentialsSyncPeriodKey, settings.credentialsSyncPeriod.name)
             }
         }
     }
 
     override suspend fun getSettings(): Settings {
         return withContext(dispatchers.io) {
-            // SP-3.2 (2026-04-29): default endpoint is rutracker direct;
-            // `Endpoint.Proxy` was removed from the model.
             val endpoint = settingsPreferences.getString(endpointKey, null)?.let {
                 with(EndpointConverter) { fromJson(it) }
             } ?: Endpoint.Rutracker
@@ -104,11 +104,22 @@ internal class PreferencesStorageImpl @Inject constructor(
                 settingsPreferences.getString(bookmarksSyncPeriodKey, null)?.let {
                     enumValueOf(it)
                 } ?: SyncPeriod.OFF
+            val historySyncPeriod =
+                settingsPreferences.getString(historySyncPeriodKey, null)?.let {
+                    enumValueOf(it)
+                } ?: SyncPeriod.OFF
+            val credentialsSyncPeriod =
+                settingsPreferences.getString(credentialsSyncPeriodKey, null)?.let {
+                    enumValueOf(it)
+                } ?: SyncPeriod.OFF
             Settings(
                 endpoint = endpoint,
                 theme = theme,
                 favoritesSyncPeriod = favoritesSyncPeriod,
                 bookmarksSyncPeriod = bookmarksSyncPeriod,
+                historySyncPeriod = historySyncPeriod,
+                credentialsSyncPeriod = credentialsSyncPeriod,
+                deviceId = getDeviceId(),
             )
         }
     }
@@ -183,10 +194,36 @@ internal class PreferencesStorageImpl @Inject constructor(
         }
     }
 
+    override fun getHistorySyncPeriod(): SyncPeriod {
+        val stored = settingsPreferences.getString(historySyncPeriodKey, null)
+        return stored?.let { enumValueOf<SyncPeriod>(it) } ?: SyncPeriod.OFF
+    }
+
+    override fun setHistorySyncPeriod(period: SyncPeriod) {
+        settingsPreferences.edit { putString(historySyncPeriodKey, period.name) }
+    }
+
+    override fun getCredentialsSyncPeriod(): SyncPeriod {
+        val stored = settingsPreferences.getString(credentialsSyncPeriodKey, null)
+        return stored?.let { enumValueOf<SyncPeriod>(it) } ?: SyncPeriod.OFF
+    }
+
+    override fun setCredentialsSyncPeriod(period: SyncPeriod) {
+        settingsPreferences.edit { putString(credentialsSyncPeriodKey, period.name) }
+    }
+
     override suspend fun clearSignaledAuthState() {
         withContext(dispatchers.io) {
             signaledAuthPreferences.clear()
         }
+    }
+
+    override fun getDeviceId(): String {
+        val existing = settingsPreferences.getString(KEY_DEVICE_ID, null)
+        if (!existing.isNullOrBlank()) return existing
+        val newId = java.util.UUID.randomUUID().toString()
+        settingsPreferences.edit().putString(KEY_DEVICE_ID, newId).apply()
+        return newId
     }
 
     private companion object {
@@ -200,6 +237,8 @@ internal class PreferencesStorageImpl @Inject constructor(
         const val themeKey = "theme"
         const val favoritesSyncPeriodKey = "favorites_sync_period"
         const val bookmarksSyncPeriodKey = "bookmarks_sync_period"
+        const val historySyncPeriodKey = "history_sync_period"
+        const val credentialsSyncPeriodKey = "credentials_sync_period"
 
         const val ratingLaunchCountKey = "rating_launch_count"
         const val ratingDisabledKey = "rating_disabled"
@@ -209,5 +248,7 @@ internal class PreferencesStorageImpl @Inject constructor(
 
         const val signaledAuthNameKey = "signaled_auth_name"
         const val signaledAuthAvatarKey = "signaled_auth_avatar_url"
+
+        const val KEY_DEVICE_ID = "device_id"
     }
 }

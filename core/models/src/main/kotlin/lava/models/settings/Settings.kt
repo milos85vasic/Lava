@@ -8,4 +8,7 @@ data class Settings(
     val theme: Theme = Theme.SYSTEM,
     val favoritesSyncPeriod: SyncPeriod = SyncPeriod.OFF,
     val bookmarksSyncPeriod: SyncPeriod = SyncPeriod.OFF,
+    val historySyncPeriod: SyncPeriod = SyncPeriod.OFF,
+    val credentialsSyncPeriod: SyncPeriod = SyncPeriod.OFF,
+    val deviceId: String = "",
 )
