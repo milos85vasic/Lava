@@ -13,6 +13,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import lava.common.analytics.AnalyticsTracker
 import lava.domain.model.PagingAction
 import lava.domain.model.append
 import lava.domain.model.retry
@@ -57,6 +58,7 @@ internal class SearchResultViewModel @Inject constructor(
     // user has not signed in to the upstream tracker.
     private val observeAuthStateUseCase: ObserveAuthStateUseCase,
     private val observeSettingsUseCase: ObserveSettingsUseCase,
+    private val analytics: AnalyticsTracker,
 ) : ViewModel(), ContainerHost<SearchPageState, SearchResultSideEffect> {
     private val logger = loggerFactory.get("SearchResultViewModel")
     private val mutableFilter = MutableStateFlow(savedStateHandle.filter)
@@ -235,6 +237,10 @@ internal class SearchResultViewModel @Inject constructor(
                 is SseEvent.Event -> handleSseEvent(event)
                 is SseEvent.StreamEnd -> handleStreamEnd()
                 is SseEvent.Error -> {
+                    analytics.recordNonFatal(
+                        IllegalStateException("SSE error"),
+                        mapOf(AnalyticsTracker.Params.QUERY to filter.query.orEmpty()),
+                    )
                     reduce {
                         state.copy(searchContent = SearchResultContent.Empty)
                     }
@@ -378,7 +384,13 @@ internal class SearchResultViewModel @Inject constructor(
 
     private fun onFavoriteClick(topicModel: TopicModel<out Topic>) = intent {
         runCatching { toggleFavoriteUseCase(topicModel.topic.id) }
-            .onFailure { postSideEffect(SearchResultSideEffect.ShowFavoriteToggleError) }
+            .onFailure {
+                analytics.recordNonFatal(
+                    it,
+                    mapOf(AnalyticsTracker.Params.TOPIC_ID to topicModel.topic.id),
+                )
+                postSideEffect(SearchResultSideEffect.ShowFavoriteToggleError)
+            }
     }
 
     private fun onListBottomReached() = intent {

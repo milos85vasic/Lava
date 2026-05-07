@@ -37,4 +37,14 @@ class TestSettingsRepository : SettingsRepository {
         val settings = mutableSettings.value.copy(bookmarksSyncPeriod = syncPeriod)
         mutableSettings.emit(settings)
     }
+
+    override suspend fun setHistorySyncPeriod(syncPeriod: SyncPeriod) {
+        val settings = mutableSettings.value.copy(historySyncPeriod = syncPeriod)
+        mutableSettings.emit(settings)
+    }
+
+    override suspend fun setCredentialsSyncPeriod(syncPeriod: SyncPeriod) {
+        val settings = mutableSettings.value.copy(credentialsSyncPeriod = syncPeriod)
+        mutableSettings.emit(settings)
+    }
 }

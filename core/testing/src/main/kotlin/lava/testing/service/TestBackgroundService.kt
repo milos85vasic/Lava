@@ -10,5 +10,7 @@ class TestBackgroundService : BackgroundService {
     override suspend fun loadFavorites() = Unit
     override suspend fun syncFavorites(syncPeriod: SyncPeriod) = Unit
     override suspend fun syncBookmarks(syncPeriod: SyncPeriod) = Unit
+    override suspend fun syncHistory(syncPeriod: SyncPeriod) = Unit
+    override suspend fun syncCredentials(syncPeriod: SyncPeriod) = Unit
     override suspend fun stopBackgroundWorks() = Unit
 }

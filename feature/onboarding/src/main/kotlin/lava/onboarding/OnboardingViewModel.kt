@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import lava.auth.api.AuthService
+import lava.common.analytics.AnalyticsTracker
 import lava.credentials.ProviderCredentialManager
 import lava.logger.api.LoggerFactory
 import lava.tracker.api.AuthType
@@ -26,6 +27,7 @@ class OnboardingViewModel @Inject constructor(
     private val credentialManager: ProviderCredentialManager,
     private val authService: AuthService,
     loggerFactory: LoggerFactory,
+    private val analytics: AnalyticsTracker,
 ) : ViewModel(), ContainerHost<OnboardingState, OnboardingSideEffect> {
     private val logger = loggerFactory.get("OnboardingViewModel")
 
@@ -160,6 +162,13 @@ class OnboardingViewModel @Inject constructor(
                 }
                 advanceToNextProvider()
             } catch (e: Exception) {
+                analytics.recordNonFatal(
+                    e,
+                    mapOf(
+                        AnalyticsTracker.Params.PROVIDER to currentId,
+                        AnalyticsTracker.Params.ERROR to "connection_test_failed",
+                    ),
+                )
                 reduce {
                     state.copy(
                         connectionTestRunning = false,

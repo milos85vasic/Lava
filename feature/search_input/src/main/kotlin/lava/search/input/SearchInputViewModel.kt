@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.collectLatest
+import lava.common.analytics.AnalyticsTracker
 import lava.common.newCancelableScope
 import lava.common.relaunch
 import lava.domain.usecase.AddSuggestUseCase
@@ -28,6 +29,7 @@ internal class SearchInputViewModel @Inject constructor(
     private val observeSuggestsUseCase: ObserveSuggestsUseCase,
     private val saveSuggestUseCase: AddSuggestUseCase,
     loggerFactory: LoggerFactory,
+    private val analytics: AnalyticsTracker,
 ) : ViewModel(), ContainerHost<SearchInputState, SearchInputSideEffect> {
     private val logger = loggerFactory.get("SearchInputViewModel")
     private val filter = savedStateHandle.filter
@@ -67,8 +69,12 @@ internal class SearchInputViewModel @Inject constructor(
     private fun onInputChanged(value: TextFieldValue) = intent {
         reduce { state.copy(searchInput = value) }
         observeSuggestsScope.relaunch {
-            observeSuggestsUseCase(value.text).collectLatest { suggests ->
-                reduce { state.copy(suggests = suggests) }
+            try {
+                observeSuggestsUseCase(value.text).collectLatest { suggests ->
+                    reduce { state.copy(suggests = suggests) }
+                }
+            } catch (e: Exception) {
+                analytics.recordNonFatal(e, mapOf(AnalyticsTracker.Params.QUERY to value.text))
             }
         }
     }

@@ -11,9 +11,10 @@ same commit so the index stays trustworthy. Stale state in this file
 is itself a §6.J spirit issue — the file claims a guarantee, the
 repo has drifted, the agent acts on the claim.
 
-> **Last updated:** 2026-05-07, after Phase 4 (sync expansion)
-> implementation. Device identity UUID, Sync Now buttons, history +
-> credentials sync categories, menu expansion to 4 sync rows.
+> **Last updated:** 2026-05-07, after Phases 2-6 of the parent
+> decomposition complete. All 6 phases implemented and pushed to
+> 4 mirrors. Only emulator-requiring work (Challenge Tests C17-C22,
+> real-device verification) remains.
 
 > **§6.S binding:** this file is constitutionally load-bearing per
 > root `CLAUDE.md` §6.S. Every commit that changes phase status,
@@ -110,7 +111,28 @@ place. Challenge Tests and nncmclub/kinozal (Phase 2b) queued.
   Phase 2a additions (provider chips, multi-select) not yet in a
   distributed build.
 
-### Parent-decomposition Phase 4 — Sync subsystem expansion
+### Parent-decomposition Phase 5 — UI/UX polish
+
+Status: **implemented**. 6 sub-tasks shipped.
+
+| What | Details |
+|------|---------|
+| Multi-provider header | Menu shows all signed-in providers with username + sign-out per row |
+| Color themes | Ocean (teal/blue), Forest (green/brown), Sunset (orange/purple) added alongside SYSTEM/LIGHT/DARK |
+| About dialog | Shows "Version: 1.2.7 (1027)" with versionCode |
+| Credentials redesign | Modern cards, ProviderColors dots, nav-bar FAB fix, empty state |
+| Result filtering | Provider filter chips on search results screen |
+| Nav-bar audit | Fixed FAB navigationBarsPadding on all screens (Scaffold-level fix) |
+
+### Parent-decomposition Phase 6 — Crashlytics + distribution prep
+
+Status: **Crashlytics tracking done. Emulator work remains.**
+
+| What | Details |
+|------|---------|
+| Non-fatal tracking | `recordException` added to 8 ViewModels across all error paths |
+| Test infra fixes | `TestBackgroundService`, `TestSettingsRepository` updated for new sync methods |
+| Remaining | Challenge Tests C17-C22 (need emulator), real-device verification, diagrams, release tagging |
 
 Status: **implemented, not yet released**. 7 tasks shipped.
 

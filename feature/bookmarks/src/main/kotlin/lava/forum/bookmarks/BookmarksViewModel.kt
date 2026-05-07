@@ -3,6 +3,7 @@ package lava.forum.bookmarks
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.collectLatest
+import lava.common.analytics.AnalyticsTracker
 import lava.domain.usecase.ObserveBookmarksUseCase
 import lava.domain.usecase.SyncBookmarksUseCase
 import lava.logger.api.LoggerFactory
@@ -19,6 +20,7 @@ internal class BookmarksViewModel @Inject constructor(
     private val observeBookmarksUseCase: ObserveBookmarksUseCase,
     private val syncBookmarksUseCase: SyncBookmarksUseCase,
     loggerFactory: LoggerFactory,
+    private val analytics: AnalyticsTracker,
 ) : ViewModel(), ContainerHost<BookmarksState, BookmarksSideEffect> {
     private val logger = loggerFactory.get("BookmarksViewModel")
 
@@ -64,6 +66,7 @@ internal class BookmarksViewModel @Inject constructor(
         try {
             syncBookmarksUseCase()
         } catch (e: Exception) {
+            analytics.recordNonFatal(e, mapOf(AnalyticsTracker.Params.ERROR to "sync_bookmarks_failed"))
             logger.e(e) { "Sync now failed" }
         }
         reduce {

@@ -13,6 +13,7 @@ import lava.domain.usecase.AddSearchHistoryUseCase
 import lava.domain.usecase.EnrichFilterUseCase
 import lava.domain.usecase.ObserveAuthStateUseCase
 import lava.domain.usecase.ObserveSearchPagingDataUseCase
+import lava.domain.usecase.ObserveSettingsUseCase
 import lava.domain.usecase.ToggleFavoriteUseCase
 import lava.models.auth.AuthState
 import lava.models.search.Filter
@@ -21,6 +22,7 @@ import lava.models.search.Sort
 import lava.models.topic.TopicModel
 import lava.models.topic.Torrent
 import lava.testing.logger.TestLoggerFactory
+import lava.testing.repository.TestSettingsRepository
 import lava.testing.rule.MainDispatcherRule
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -188,6 +190,14 @@ class SearchResultViewModelFallbackTest {
             enrichFilterUseCase = enrichFake,
             toggleFavoriteUseCase = toggleFavFake,
             observeAuthStateUseCase = authFake,
+            observeSettingsUseCase = ObserveSettingsUseCase(TestSettingsRepository()),
+            analytics = object : lava.common.analytics.AnalyticsTracker {
+                override fun event(name: String, params: Map<String, String>) {}
+                override fun setUserId(userId: String?) {}
+                override fun setProperty(key: String, value: String?) {}
+                override fun recordNonFatal(throwable: Throwable, context: Map<String, String>) {}
+                override fun log(message: String) {}
+            },
         )
     }
 

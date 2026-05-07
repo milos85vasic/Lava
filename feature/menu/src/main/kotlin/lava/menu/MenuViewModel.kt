@@ -3,6 +3,7 @@ package lava.menu
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.collectLatest
+import lava.common.analytics.AnalyticsTracker
 import lava.credentials.ProviderCredentialManager
 import lava.designsystem.color.ProviderColors
 import lava.domain.usecase.ClearBookmarksUseCase
@@ -47,6 +48,7 @@ internal class MenuViewModel @Inject constructor(
     private val sdk: LavaTrackerSdk,
     private val credentialManager: ProviderCredentialManager,
     loggerFactory: LoggerFactory,
+    private val analytics: AnalyticsTracker,
 ) : ViewModel(), ContainerHost<MenuState, MenuSideEffect> {
     private val logger = loggerFactory.get("MenuViewModel")
 
@@ -90,7 +92,8 @@ internal class MenuViewModel @Inject constructor(
             val authState = if (isAuthenticatable) {
                 try {
                     sdk.checkAuth(descriptor.trackerId)
-                } catch (_: Throwable) {
+                } catch (e: Throwable) {
+                    analytics.recordNonFatal(e, mapOf(AnalyticsTracker.Params.PROVIDER to descriptor.trackerId))
                     null
                 }
             } else {
@@ -99,7 +102,8 @@ internal class MenuViewModel @Inject constructor(
             val isAuthenticated = authState is lava.tracker.api.model.AuthState.Authenticated
             val credentials = try {
                 credentialManager.getCredentials(descriptor.trackerId)
-            } catch (_: Throwable) {
+            } catch (e: Throwable) {
+                analytics.recordNonFatal(e, mapOf(AnalyticsTracker.Params.PROVIDER to descriptor.trackerId))
                 null
             }
             val username = if (isAuthenticated) {
@@ -137,10 +141,14 @@ internal class MenuViewModel @Inject constructor(
             } else {
                 sdk.logout(providerId)
             }
-        } catch (_: Throwable) { /* best-effort */ }
+        } catch (e: Throwable) {
+            analytics.recordNonFatal(e, mapOf(AnalyticsTracker.Params.PROVIDER to providerId))
+        }
         try {
             credentialManager.clear(providerId)
-        } catch (_: Throwable) { /* best-effort */ }
+        } catch (e: Throwable) {
+            analytics.recordNonFatal(e, mapOf(AnalyticsTracker.Params.PROVIDER to providerId))
+        }
         loadProviders()
     }
 

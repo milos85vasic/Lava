@@ -85,6 +85,7 @@ internal class ProviderLoginViewModel @Inject constructor(
             }
             reduce { state.copy(isLoading = false, providers = items) }
         } catch (t: Throwable) {
+            analytics.recordNonFatal(t, mapOf(AnalyticsTracker.Params.ERROR to "load_providers_failed"))
             logger.e(t) { "Failed to load providers" }
             reduce { state.copy(isLoading = false, error = t.message) }
         }
@@ -228,7 +229,13 @@ internal class ProviderLoginViewModel @Inject constructor(
                     "supportsAnonymous=${provider?.supportsAnonymous})"
             }
             runCatching { sdk.switchTracker(providerId) }
-                .onFailure { logger.e(it) { "switchTracker($providerId) failed in no-auth path" } }
+                .onFailure {
+                    analytics.recordNonFatal(
+                        it,
+                        mapOf(AnalyticsTracker.Params.PROVIDER to providerId),
+                    )
+                    logger.e(it) { "switchTracker($providerId) failed in no-auth path" }
+                }
             // Clause 6.G/6.J follow-up (2026-05-04 layer-3 fix): bridge
             // to the legacy AuthService SharedFlow that Search/Forum/
             // Topic ViewModels observe. Without this signal the Search
@@ -273,7 +280,13 @@ internal class ProviderLoginViewModel @Inject constructor(
                 // Tracker does not support auth — treat as success for UI
                 logger.d { "Tracker $providerId does not support auth" }
                 runCatching { sdk.switchTracker(providerId) }
-                    .onFailure { logger.e(it) { "switchTracker($providerId) failed in null-auth path" } }
+                    .onFailure {
+                        analytics.recordNonFatal(
+                            it,
+                            mapOf(AnalyticsTracker.Params.PROVIDER to providerId),
+                        )
+                        logger.e(it) { "switchTracker($providerId) failed in null-auth path" }
+                    }
                 authService.signalAuthorized(
                     name = "Anonymous (${provider?.displayName ?: providerId})",
                 )
@@ -291,7 +304,13 @@ internal class ProviderLoginViewModel @Inject constructor(
                             password = state.passwordInput.value.text,
                         )
                         runCatching { sdk.switchTracker(providerId) }
-                            .onFailure { logger.e(it) { "switchTracker($providerId) failed in auth-success path" } }
+                            .onFailure {
+                                analytics.recordNonFatal(
+                                    it,
+                                    mapOf(AnalyticsTracker.Params.PROVIDER to providerId),
+                                )
+                                logger.e(it) { "switchTracker($providerId) failed in auth-success path" }
+                            }
                         authService.signalAuthorized(
                             name = state.usernameInput.value.text,
                         )
@@ -324,6 +343,13 @@ internal class ProviderLoginViewModel @Inject constructor(
                         }
                     }
                     is AuthResult.Error -> {
+                        analytics.recordNonFatal(
+                            response.error,
+                            mapOf(
+                                AnalyticsTracker.Params.PROVIDER to providerId,
+                                AnalyticsTracker.Params.ERROR to "login_error",
+                            ),
+                        )
                         logger.e(response.error) { "Login error for $providerId" }
                         postSideEffect(LoginSideEffect.Error(response.error))
                         reduce { state.copy(isLoading = false) }
