@@ -8,7 +8,9 @@ android {
 }
 
 dependencies {
+    implementation(project(":core:network:api"))
     implementation(project(":core:tracker:client"))
     implementation(project(":core:tracker:api"))
+    implementation(libs.okhttp.core)
     implementation(libs.androidx.compose.material3)
 }

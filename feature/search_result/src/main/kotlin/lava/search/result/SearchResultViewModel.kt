@@ -8,6 +8,10 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.onEach
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import lava.domain.model.PagingAction
 import lava.domain.model.append
 import lava.domain.model.retry
@@ -19,12 +23,16 @@ import lava.domain.usecase.ToggleFavoriteUseCase
 import lava.logger.api.LoggerFactory
 import lava.models.auth.isAuthorized
 import lava.models.forum.Category
+import lava.models.search.Filter
 import lava.models.search.Order
 import lava.models.search.Period
 import lava.models.search.Sort
 import lava.models.topic.Author
 import lava.models.topic.Topic
 import lava.models.topic.TopicModel
+import lava.models.topic.Torrent
+import lava.network.sse.SseClient
+import lava.network.sse.SseEvent
 import org.orbitmvi.orbit.Container
 import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.syntax.simple.intent
@@ -54,7 +62,11 @@ internal class SearchResultViewModel @Inject constructor(
         initialState = SearchPageState(mutableFilter.value),
         onCreate = {
             observeFilter()
-            observePagingData()
+            if (mutableFilter.value.providerIds != null) {
+                observeSseSearch(mutableFilter.value)
+            } else {
+                observePagingData()
+            }
         },
     )
 
@@ -169,6 +181,168 @@ internal class SearchResultViewModel @Inject constructor(
                             )
                         },
                         loadStates = loadingState,
+                    )
+                }
+            }
+        }
+    }
+
+    private fun observeSseSearch(filter: Filter) = intent {
+        val providerIds = filter.providerIds
+        if (providerIds.isNullOrEmpty()) return@intent
+
+        reduce {
+            state.copy(
+                searchContent = SearchResultContent.Streaming(
+                    items = emptyList(),
+                    activeProviders = providerIds.map { pid ->
+                        ProviderStreamStatus(
+                            providerId = pid,
+                            displayName = pid,
+                            status = StreamStatus.SEARCHING,
+                        )
+                    },
+                ),
+            )
+        }
+
+        val client = SseClient()
+        val apiBaseUrl = "https://thinker.local:8443"
+        val params = buildString {
+            append("?q=${filter.query.orEmpty()}")
+            append("&providers=${providerIds.joinToString(",")}")
+            append("&sort=${filter.sort}")
+            append("&order=${filter.order}")
+        }
+
+        val headers = mapOf<String, String>()
+
+        client.connect("$apiBaseUrl/v1/search$params", headers).collect { event ->
+            when (event) {
+                is SseEvent.Event -> handleSseEvent(event)
+                is SseEvent.StreamEnd -> handleStreamEnd()
+                is SseEvent.Error -> {
+                    reduce {
+                        state.copy(searchContent = SearchResultContent.Empty)
+                    }
+                    postSideEffect(SearchResultSideEffect.ShowFallbackDismissedError("SSE"))
+                }
+            }
+        }
+    }
+
+    private fun handleSseEvent(event: SseEvent.Event) = intent {
+        val json = Json.parseToJsonElement(event.data).jsonObject
+        when (event.type) {
+            "provider_start" -> {
+                val pid = json["provider_id"]?.jsonPrimitive?.content ?: return@intent
+                val dname = json["display_name"]?.jsonPrimitive?.content ?: pid
+                val current = state.searchContent
+                if (current is SearchResultContent.Streaming) {
+                    reduce {
+                        state.copy(
+                            searchContent = current.copy(
+                                activeProviders = current.activeProviders.map {
+                                    if (it.providerId == pid) {
+                                        it.copy(displayName = dname)
+                                    } else {
+                                        it
+                                    }
+                                },
+                            ),
+                        )
+                    }
+                }
+            }
+            "results" -> {
+                val pid = json["provider_id"]?.jsonPrimitive?.content ?: return@intent
+                val itemsJson = json["items"]?.jsonArray ?: return@intent
+                val newItems = itemsJson.mapNotNull { element ->
+                    val obj = element.jsonObject
+                    val id = obj["id"]?.jsonPrimitive?.content ?: return@mapNotNull null
+                    val title = obj["title"]?.jsonPrimitive?.content ?: ""
+                    TopicModel(
+                        topic = Torrent(id = id, title = title),
+                    )
+                }
+                val current = state.searchContent
+                if (current is SearchResultContent.Streaming) {
+                    reduce {
+                        state.copy(
+                            searchContent = current.copy(
+                                items = current.items + newItems,
+                                activeProviders = current.activeProviders.map {
+                                    if (it.providerId == pid) {
+                                        it.copy(
+                                            status = StreamStatus.RECEIVING,
+                                            resultCount = it.resultCount + newItems.size,
+                                        )
+                                    } else {
+                                        it
+                                    }
+                                },
+                            ),
+                        )
+                    }
+                }
+            }
+            "provider_done" -> {
+                val pid = json["provider_id"]?.jsonPrimitive?.content ?: return@intent
+                val count = json["result_count"]?.jsonPrimitive?.content?.toIntOrNull() ?: 0
+                val current = state.searchContent
+                if (current is SearchResultContent.Streaming) {
+                    reduce {
+                        state.copy(
+                            searchContent = current.copy(
+                                activeProviders = current.activeProviders.map {
+                                    if (it.providerId == pid) {
+                                        it.copy(
+                                            status = StreamStatus.DONE,
+                                            resultCount = count,
+                                        )
+                                    } else {
+                                        it
+                                    }
+                                },
+                            ),
+                        )
+                    }
+                }
+            }
+            "provider_error" -> {
+                val pid = json["provider_id"]?.jsonPrimitive?.content ?: return@intent
+                val current = state.searchContent
+                if (current is SearchResultContent.Streaming) {
+                    reduce {
+                        state.copy(
+                            searchContent = current.copy(
+                                activeProviders = current.activeProviders.map {
+                                    if (it.providerId == pid) {
+                                        it.copy(status = StreamStatus.ERROR)
+                                    } else {
+                                        it
+                                    }
+                                },
+                            ),
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    private fun handleStreamEnd() = intent {
+        val current = state.searchContent
+        if (current is SearchResultContent.Streaming) {
+            if (current.items.isEmpty()) {
+                reduce { state.copy(searchContent = SearchResultContent.Empty) }
+            } else {
+                reduce {
+                    state.copy(
+                        searchContent = SearchResultContent.Content(
+                            torrents = current.items,
+                            categories = emptyList(),
+                        ),
                     )
                 }
             }

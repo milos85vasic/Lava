@@ -243,6 +243,20 @@ private fun SearchResultList(
                 )
             }
 
+            is SearchResultContent.Streaming -> {
+                items(items = state.searchContent.items) { model ->
+                    TopicListItem(
+                        modifier = Modifier.padding(
+                            horizontal = AppTheme.spaces.mediumLarge,
+                            vertical = AppTheme.spaces.mediumSmall,
+                        ),
+                        topicModel = model,
+                        onClick = { onAction(SearchResultAction.TopicClick(model)) },
+                        onFavoriteClick = { onAction(SearchResultAction.FavoriteClick(model)) },
+                    )
+                }
+            }
+
             is SearchResultContent.Initial -> loadingItem()
         }
     }
