@@ -191,6 +191,7 @@ dependencies {
     implementation(project(":feature:favorites"))
     implementation(project(":feature:forum"))
     implementation(project(":feature:login"))
+    implementation(project(":feature:onboarding"))
     implementation(project(":feature:main"))
     implementation(project(":feature:menu"))
     implementation(project(":feature:rating"))
@@ -209,6 +210,7 @@ dependencies {
 
     implementation(libs.bundles.orbit)
     implementation(libs.bundles.work)
+    implementation(libs.androidx.hilt.navigation.compose)
 
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics)

@@ -19,6 +19,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -32,8 +33,8 @@ import kotlinx.coroutines.launch
 import lava.designsystem.platform.LocalPlatformType
 import lava.designsystem.platform.PlatformType
 import lava.logger.api.LoggerFactory
-import lava.login.OnboardingScreen
 import lava.main.MainScreen
+import lava.onboarding.OnboardingScreen
 import lava.main.MainViewModel
 import lava.models.settings.Theme
 import lava.navigation.DeepLinks
@@ -115,7 +116,9 @@ open class MainActivity : ComponentActivity() {
                             theme = theme,
                             platformType = deviceType,
                         ) {
+                            val viewModel: lava.onboarding.OnboardingViewModel = hiltViewModel()
                             OnboardingScreen(
+                                viewModel = viewModel,
                                 onComplete = {
                                     lifecycleScope.launch {
                                         preferencesStorage.setOnboardingComplete(true)
