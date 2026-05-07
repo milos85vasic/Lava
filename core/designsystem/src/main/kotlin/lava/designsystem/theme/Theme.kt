@@ -12,21 +12,24 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
+import lava.models.settings.Theme
 
 @Composable
 fun LavaTheme(
+    theme: Theme = Theme.SYSTEM,
     isDark: Boolean = isSystemInDarkTheme(),
     isDynamic: Boolean = isMaterialYouAvailable(),
     content: @Composable () -> Unit,
 ) {
-    val colors = if (isDynamic && isMaterialYouAvailable()) {
-        val context = LocalContext.current
-        dynamicColors(context, isDark)
-    } else {
-        if (isDark) {
-            darkColors()
+    val colors = when (theme) {
+        Theme.OCEAN -> oceanColors(isDark)
+        Theme.FOREST -> forestColors(isDark)
+        Theme.SUNSET -> sunsetColors(isDark)
+        else -> if (isDynamic && isMaterialYouAvailable()) {
+            val context = LocalContext.current
+            dynamicColors(context, isDark)
         } else {
-            lightColors()
+            if (isDark) darkColors() else lightColors()
         }
     }
     CompositionLocalProvider(LocalColors provides colors, content = content)

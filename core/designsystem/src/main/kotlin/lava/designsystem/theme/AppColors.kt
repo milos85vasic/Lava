@@ -263,6 +263,126 @@ private data class Accents(
     }
 }
 
+internal fun oceanColors(isDark: Boolean) = if (isDark) {
+    AppColors(
+        primary = Color(0xFF80CBC4),
+        onPrimary = Color(0xFF003635),
+        primaryContainer = Color(0xFF00504E),
+        onPrimaryContainer = Color(0xFFA7F0E8),
+        outline = Color(0xFF899393),
+        outlineVariant = Color(0xFF3F4949),
+        surface = Color(0xFF0E1514),
+        onSurface = Color(0xFFDDE4E3),
+        background = Color(0xFF0E1514),
+        onBackground = Color(0xFFDDE4E3),
+        error = Color(0xFFFFB4AB),
+        accentBlue = Color(0xFF64B5F6),
+        accentGreen = Color(0xFF81C784),
+        accentOrange = Color(0xFFFFB74D),
+        accentRed = Color(0xFFE57373),
+        isDark = true,
+    )
+} else {
+    AppColors(
+        primary = Color(0xFF00796B),
+        onPrimary = Color(0xFFFFFFFF),
+        primaryContainer = Color(0xFFB2DFDB),
+        onPrimaryContainer = Color(0xFF00201D),
+        outline = Color(0xFF6F7979),
+        outlineVariant = Color(0xFFBFC9C8),
+        surface = Color(0xFFFBFDFC),
+        onSurface = Color(0xFF191C1C),
+        background = Color(0xFFFBFDFC),
+        onBackground = Color(0xFF191C1C),
+        error = Color(0xFFBA1A1A),
+        accentBlue = Color(0xFF1565C0),
+        accentGreen = Color(0xFF2E7D32),
+        accentOrange = Color(0xFFE65100),
+        accentRed = Color(0xFFC62828),
+        isDark = false,
+    )
+}
+
+internal fun forestColors(isDark: Boolean) = if (isDark) {
+    AppColors(
+        primary = Color(0xFFA5D6A7),
+        onPrimary = Color(0xFF003910),
+        primaryContainer = Color(0xFF005319),
+        onPrimaryContainer = Color(0xFFC1EFC2),
+        outline = Color(0xFF8D9388),
+        outlineVariant = Color(0xFF43483F),
+        surface = Color(0xFF11140E),
+        onSurface = Color(0xFFE1E4DA),
+        background = Color(0xFF11140E),
+        onBackground = Color(0xFFE1E4DA),
+        error = Color(0xFFFFB4AB),
+        accentBlue = Color(0xFF64B5F6),
+        accentGreen = Color(0xFF81C784),
+        accentOrange = Color(0xFFFFB74D),
+        accentRed = Color(0xFFE57373),
+        isDark = true,
+    )
+} else {
+    AppColors(
+        primary = Color(0xFF388E3C),
+        onPrimary = Color(0xFFFFFFFF),
+        primaryContainer = Color(0xFFC8E6C9),
+        onPrimaryContainer = Color(0xFF002106),
+        outline = Color(0xFF73796D),
+        outlineVariant = Color(0xFFC3C8BB),
+        surface = Color(0xFFF9FAF0),
+        onSurface = Color(0xFF1A1C18),
+        background = Color(0xFFF9FAF0),
+        onBackground = Color(0xFF1A1C18),
+        error = Color(0xFFBA1A1A),
+        accentBlue = Color(0xFF1565C0),
+        accentGreen = Color(0xFF2E7D32),
+        accentOrange = Color(0xFF6D4C41),
+        accentRed = Color(0xFFC62828),
+        isDark = false,
+    )
+}
+
+internal fun sunsetColors(isDark: Boolean) = if (isDark) {
+    AppColors(
+        primary = Color(0xFFFFB74D),
+        onPrimary = Color(0xFF462A00),
+        primaryContainer = Color(0xFF633E00),
+        onPrimaryContainer = Color(0xFFFFDDB2),
+        outline = Color(0xFF938A80),
+        outlineVariant = Color(0xFF494137),
+        surface = Color(0xFF15120C),
+        onSurface = Color(0xFFEDE0D2),
+        background = Color(0xFF15120C),
+        onBackground = Color(0xFFEDE0D2),
+        error = Color(0xFFFFB4AB),
+        accentBlue = Color(0xFF64B5F6),
+        accentGreen = Color(0xFF81C784),
+        accentOrange = Color(0xFFFFB74D),
+        accentRed = Color(0xFFE57373),
+        isDark = true,
+    )
+} else {
+    AppColors(
+        primary = Color(0xFFE65100),
+        onPrimary = Color(0xFFFFFFFF),
+        primaryContainer = Color(0xFFFFDCC2),
+        onPrimaryContainer = Color(0xFF331200),
+        outline = Color(0xFF84746A),
+        outlineVariant = Color(0xFFD6C3B7),
+        surface = Color(0xFFFFF8F5),
+        onSurface = Color(0xFF201A14),
+        background = Color(0xFFFFF8F5),
+        onBackground = Color(0xFF201A14),
+        error = Color(0xFFBA1A1A),
+        accentBlue = Color(0xFF1565C0),
+        accentGreen = Color(0xFF2E7D32),
+        accentOrange = Color(0xFFE65100),
+        accentRed = Color(0xFF7B1FA2),
+        isDark = false,
+    )
+}
+
 internal val LocalColors = staticCompositionLocalOf { lightColors() }
 
 @Preview(

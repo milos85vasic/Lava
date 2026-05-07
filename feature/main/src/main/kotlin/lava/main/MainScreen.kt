@@ -18,6 +18,7 @@ fun MainScreen(
     content: @Composable () -> Unit,
 ) {
     LavaTheme(
+        theme = theme,
         isDark = platformType == PlatformType.TV || theme.isDark(),
         isDynamic = theme.isDynamic(),
     ) {
@@ -37,6 +38,9 @@ fun MainScreen(
 private fun Theme.isDark(): Boolean = when (this) {
     Theme.DARK -> true
     Theme.LIGHT -> false
+    Theme.OCEAN -> true
+    Theme.FOREST -> true
+    Theme.SUNSET -> true
     Theme.SYSTEM -> isSystemInDarkTheme()
     Theme.DYNAMIC -> isSystemInDarkTheme()
 }

@@ -47,6 +47,7 @@ import androidx.compose.material.icons.outlined.Filter9
 import androidx.compose.material.icons.outlined.Filter9Plus
 import androidx.compose.material.icons.outlined.FilterVintage
 import androidx.compose.material.icons.outlined.FirstPage
+import androidx.compose.material.icons.outlined.Forest
 import androidx.compose.material.icons.outlined.Forum
 import androidx.compose.material.icons.outlined.Functions
 import androidx.compose.material.icons.outlined.History
@@ -71,6 +72,8 @@ import androidx.compose.material.icons.outlined.Sync
 import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material.icons.outlined.VisibilityOff
+import androidx.compose.material.icons.outlined.WaterDrop
+import androidx.compose.material.icons.outlined.WbTwilight
 import androidx.compose.ui.graphics.vector.ImageVector
 import lava.designsystem.R
 
@@ -138,7 +141,10 @@ object LavaIcons {
     val Storage: Icon = Icon.ImageVectorIcon(MaterialIcons.SdStorage)
     val ThemeDark: Icon = Icon.ImageVectorIcon(MaterialIcons.DarkMode)
     val ThemeDynamic: Icon = Icon.ImageVectorIcon(MaterialIcons.FilterVintage)
+    val ThemeForest: Icon = Icon.ImageVectorIcon(MaterialIcons.Forest)
     val ThemeLight: Icon = Icon.ImageVectorIcon(MaterialIcons.LightMode)
+    val ThemeOcean: Icon = Icon.ImageVectorIcon(MaterialIcons.WaterDrop)
+    val ThemeSunset: Icon = Icon.ImageVectorIcon(MaterialIcons.WbTwilight)
     val ThemeSystem: Icon = Icon.ImageVectorIcon(MaterialIcons.BrightnessAuto)
     val Topics: Icon = Icon.ImageVectorIcon(MaterialIcons.Forum)
     val Unpin: Icon = Icon.ImageVectorIcon(MaterialIcons.PushPin)

@@ -170,6 +170,9 @@ private fun MenuScreen(
                         Theme.DYNAMIC -> LavaIcons.ThemeDynamic
                         Theme.DARK -> LavaIcons.ThemeDark
                         Theme.LIGHT -> LavaIcons.ThemeLight
+                        Theme.OCEAN -> LavaIcons.ThemeOcean
+                        Theme.FOREST -> LavaIcons.ThemeForest
+                        Theme.SUNSET -> LavaIcons.ThemeSunset
                     },
                     contentDescription = null,
                 )
@@ -639,6 +642,9 @@ private val Theme.resId: Int
         Theme.DYNAMIC -> R.string.theme_dynamic
         Theme.DARK -> R.string.theme_dark
         Theme.LIGHT -> R.string.theme_light
+        Theme.OCEAN -> R.string.theme_ocean
+        Theme.FOREST -> R.string.theme_forest
+        Theme.SUNSET -> R.string.theme_sunset
     }
 
 private val SyncPeriod.resId: Int

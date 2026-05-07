@@ -16,6 +16,8 @@ kotlin {
 }
 
 dependencies {
+    implementation(project(":core:models"))
+
     api(libs.androidx.activity.compose)
     api(libs.androidx.compose.foundation)
     api(libs.androidx.compose.foundation.layout)
