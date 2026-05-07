@@ -11,8 +11,10 @@ dependencies {
     api(project(":core:work:api"))
 
     implementation(project(":core:domain"))
+    implementation(project(":core:logger"))
     implementation(project(":core:models"))
     implementation(project(":core:notifications"))
+    implementation(project(":core:tracker:client"))
 
     implementation(libs.bundles.work)
 }

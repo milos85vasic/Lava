@@ -20,7 +20,9 @@ import lava.work.workers.DelegatingWorker
 import lava.work.workers.LoadFavoritesWorker
 import lava.work.workers.RemoveFavoriteWorker
 import lava.work.workers.SyncBookmarksWorker
+import lava.work.workers.SyncCredentialsWorker
 import lava.work.workers.SyncFavoritesWorker
+import lava.work.workers.SyncHistoryWorker
 import lava.work.workers.UpdateBookmarkWorker
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -93,6 +95,34 @@ internal class WorkBackgroundService @Inject constructor(
         }
     }
 
+    override suspend fun syncHistory(syncPeriod: SyncPeriod) {
+        if (syncPeriod == SyncPeriod.OFF) {
+            workManager.cancelUniqueWork(SyncHistoryWork)
+        } else {
+            val data = DelegatingWorker.delegateData(SyncHistoryWorker::class)
+            val workRequest = periodicWorkRequest<DelegatingWorker>(SyncHistoryWork, syncPeriod, data)
+            workManager.enqueueUniquePeriodicWork(
+                SyncHistoryWork,
+                ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE,
+                workRequest,
+            )
+        }
+    }
+
+    override suspend fun syncCredentials(syncPeriod: SyncPeriod) {
+        if (syncPeriod == SyncPeriod.OFF) {
+            workManager.cancelUniqueWork(SyncCredentialsWork)
+        } else {
+            val data = DelegatingWorker.delegateData(SyncCredentialsWorker::class)
+            val workRequest = periodicWorkRequest<DelegatingWorker>(SyncCredentialsWork, syncPeriod, data)
+            workManager.enqueueUniquePeriodicWork(
+                SyncCredentialsWork,
+                ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE,
+                workRequest,
+            )
+        }
+    }
+
     override suspend fun stopBackgroundWorks() {
         workManager.cancelAllWork()
     }
@@ -102,7 +132,9 @@ internal class WorkBackgroundService @Inject constructor(
         const val LoadFavoritesWork = "LoadFavoritesWork"
         const val RemoveFavoriteWork = "RemoveFavoriteWork"
         const val SyncBookmarksWork = "SyncBookmarksWork"
+        const val SyncCredentialsWork = "SyncCredentialsWork"
         const val SyncFavoritesWork = "SyncFavoritesWork"
+        const val SyncHistoryWork = "SyncHistoryWork"
         const val UpdateBookmarkWork = "UpdateBookmarkWork"
 
         inline fun <reified T : ListenableWorker> oneTimeWorkRequest(

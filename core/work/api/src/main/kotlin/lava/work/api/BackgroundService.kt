@@ -9,5 +9,7 @@ interface BackgroundService {
     suspend fun loadFavorites()
     suspend fun syncFavorites(syncPeriod: SyncPeriod)
     suspend fun syncBookmarks(syncPeriod: SyncPeriod)
+    suspend fun syncHistory(syncPeriod: SyncPeriod)
+    suspend fun syncCredentials(syncPeriod: SyncPeriod)
     suspend fun stopBackgroundWorks()
 }
