@@ -1,0 +1,71 @@
+<h2>Phase 2 — Multi-Provider Streaming Search</h2>
+<p class="subtitle">Architecture overview & key design decisions ahead</p>
+
+<div class="section">
+  <h3>What Phase 2 delivers</h3>
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+    <div style="background: var(--bg-secondary); border-radius: 8px; padding: 16px;">
+      <div class="label">Go API Side</div>
+      <p style="margin: 8px 0 0 0; font-size: 14px;">Per-provider streaming routes at <code>/v1/{provider}/search</code> for all 5 providers. SSE-based event stream delivers results in real time as each upstream responds.</p>
+    </div>
+    <div style="background: var(--bg-secondary); border-radius: 8px; padding: 16px;">
+      <div class="label">Android Client Side</div>
+      <p style="margin: 8px 0 0 0; font-size: 14px;">Multi-provider selector in search input screen. Results appear with provider labels. Four dormant providers re-enabled by flipping <code>apiSupported = true</code>.</p>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Current state → Target state</h3>
+  <div style="display: grid; grid-template-columns: 20px 1fr 1fr 1fr 1fr 1fr 1fr; gap: 4px; align-items: center; margin-bottom: 12px;">
+    <div></div>
+    <div class="label" style="text-align: center;">rutracker</div>
+    <div class="label" style="text-align: center;">rutor</div>
+    <div class="label" style="text-align: center;">archiveorg</div>
+    <div class="label" style="text-align: center;">gutenberg</div>
+    <div class="label" style="text-align: center;">kinozal</div>
+    <div class="label" style="text-align: center;">nnmclub</div>
+  </div>
+  <div style="display: grid; grid-template-columns: 20px 1fr 1fr 1fr 1fr 1fr 1fr; gap: 4px; align-items: center;">
+    <div class="label" style="color: var(--accent);">Now</div>
+    <div class="placeholder" style="background: #2e7d32; text-align: center; padding: 6px;">✅</div>
+    <div class="placeholder" style="background: #2e7d32; text-align: center; padding: 6px;">✅</div>
+    <div class="placeholder" style="background: #c62828; text-align: center; padding: 6px;">❌</div>
+    <div class="placeholder" style="background: #c62828; text-align: center; padding: 6px;">❌</div>
+    <div class="placeholder" style="background: #c62828; text-align: center; padding: 6px;">❌</div>
+    <div class="placeholder" style="background: #c62828; text-align: center; padding: 6px;">❌</div>
+  </div>
+  <div style="display: grid; grid-template-columns: 20px 1fr 1fr 1fr 1fr 1fr 1fr; gap: 4px; align-items: center;">
+    <div class="label" style="color: var(--accent);">Target</div>
+    <div class="placeholder" style="background: #2e7d32; text-align: center; padding: 6px;">✅</div>
+    <div class="placeholder" style="background: #2e7d32; text-align: center; padding: 6px;">✅</div>
+    <div class="placeholder" style="background: #2e7d32; text-align: center; padding: 6px;">✅</div>
+    <div class="placeholder" style="background: #2e7d32; text-align: center; padding: 6px;">✅</div>
+    <div class="placeholder" style="background: #2e7d32; text-align: center; padding: 6px;">✅</div>
+    <div class="placeholder" style="background: #2e7d32; text-align: center; padding: 6px;">✅</div>
+  </div>
+  <p style="font-size: 12px; margin-top: 8px; color: var(--text-secondary);">Flipping all 4 dormant <code>apiSupported</code> flags from false → true as routes are validated.</p>
+</div>
+
+<div class="section">
+  <h3>Three key design decisions to make</h3>
+  <div style="display: flex; gap: 12px;">
+    <div class="placeholder" style="flex: 1; padding: 16px; border-radius: 8px; text-align: center;">
+      <div class="label">Decision 1</div>
+      <p style="font-size: 14px; margin: 8px 0;">Streaming transport for real-time results</p>
+      <p style="font-size: 12px; color: var(--text-secondary);">SSE vs WebSocket vs gRPC streaming</p>
+    </div>
+    <div class="placeholder" style="flex: 1; padding: 16px; border-radius: 8px; text-align: center;">
+      <div class="label">Decision 2</div>
+      <p style="font-size: 14px; margin: 8px 0;">Provider label rendering in results</p>
+      <p style="font-size: 12px; color: var(--text-secondary);">Chip badge vs text prefix vs icon</p>
+    </div>
+    <div class="placeholder" style="flex: 1; padding: 16px; border-radius: 8px; text-align: center;">
+      <div class="label">Decision 3</div>
+      <p style="font-size: 14px; margin: 8px 0;">Provider re-enablement order</p>
+      <p style="font-size: 12px; color: var(--text-secondary);">Which tracker gets apiSupported:true first</p>
+    </div>
+  </div>
+</div>
+
+<p style="margin-top: 24px; color: var(--text-secondary);">Let's go through these one at a time. First up: the streaming transport decision.</p>

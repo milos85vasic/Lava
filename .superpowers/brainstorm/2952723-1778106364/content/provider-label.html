@@ -1,0 +1,93 @@
+<h2>Decision 2 — Provider Label Rendering</h2>
+<p class="subtitle">How should each search result show which provider it came from?</p>
+
+<div class="section">
+  <h3>Context</h3>
+  <p style="font-size: 14px;">When searching across multiple providers, each result item needs to show its source. Current results have <strong>no provider indication at all</strong>. We need to add one that's clear but not distracting.</p>
+</div>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Colored Chip / Tag</h3>
+      <p style="font-size: 13px; color: var(--text-secondary);">A small colored badge next to the title with provider name</p>
+      <div style="margin-top: 12px; display: flex; align-items: center; gap: 8px;">
+        <span style="display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; background: #1565c0; color: white;">RuTracker</span>
+        <span style="font-size: 14px; font-weight: 500;">Ubuntu 24.04 LTS Desktop ISO</span>
+      </div>
+      <div style="margin-top: 6px; display: flex; align-items: center; gap: 8px;">
+        <span style="display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; background: #2e7d32; color: white;">RuTor</span>
+        <span style="font-size: 14px; font-weight: 500;">Ubuntu Server 24.04 LTS</span>
+      </div>
+      <div style="margin-top: 6px; display: flex; align-items: center; gap: 8px;">
+        <span style="display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; background: #e65100; color: white;">ArchiveOrg</span>
+        <span style="font-size: 14px; font-weight: 500;">Ubuntu Linux Documentation</span>
+      </div>
+    </div>
+  </div>
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Subtle Icon + Color Bar</h3>
+      <p style="font-size: 13px; color: var(--text-secondary);">A small colored left border with the provider icon</p>
+      <div style="margin-top: 12px;">
+        <div style="display: flex; align-items: center; gap: 8px; padding: 4px 0; border-left: 3px solid #1565c0; padding-left: 10px;">
+          <div style="width: 16px; height: 16px; border-radius: 50%; background: #1565c0; flex-shrink: 0;"></div>
+          <span style="font-size: 14px; font-weight: 500;">Ubuntu 24.04 LTS Desktop ISO</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px; padding: 4px 0; border-left: 3px solid #2e7d32; padding-left: 10px; margin-top: 4px;">
+          <div style="width: 16px; height: 16px; border-radius: 50%; background: #2e7d32; flex-shrink: 0;"></div>
+          <span style="font-size: 14px; font-weight: 500;">Ubuntu Server 24.04 LTS</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px; padding: 4px 0; border-left: 3px solid #e65100; padding-left: 10px; margin-top: 4px;">
+          <div style="width: 16px; height: 16px; border-radius: 50%; background: #e65100; flex-shrink: 0;"></div>
+          <span style="font-size: 14px; font-weight: 500;">Ubuntu Linux Documentation</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Compact Chip + Color (Recommended)</h3>
+      <p style="font-size: 13px; color: var(--text-secondary);">A tiny 2-3 letter chip with provider abbreviation, placed inline before the title — minimal footprint, maximum scanability</p>
+      <div style="margin-top: 12px;">
+        <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 6px;">
+          <span style="display: inline-flex; align-items: center; justify-content: center; min-width: 24px; height: 18px; padding: 0 5px; border-radius: 3px; font-size: 9px; font-weight: 700; letter-spacing: 0.5px; background: #1565c0; color: white;">RT</span>
+          <span style="font-size: 14px; font-weight: 500;">Ubuntu 24.04 LTS Desktop ISO</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 6px;">
+          <span style="display: inline-flex; align-items: center; justify-content: center; min-width: 24px; height: 18px; padding: 0 5px; border-radius: 3px; font-size: 9px; font-weight: 700; letter-spacing: 0.5px; background: #2e7d32; color: white;">RI</span>
+          <span style="font-size: 14px; font-weight: 500;">Ubuntu Server 24.04 LTS</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 6px;">
+          <span style="display: inline-flex; align-items: center; justify-content: center; min-width: 24px; height: 18px; padding: 0 5px; border-radius: 3px; font-size: 9px; font-weight: 700; letter-spacing: 0.5px; background: #e65100; color: white;">IA</span>
+          <span style="font-size: 14px; font-weight: 500;">Ubuntu Linux Documentation</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top: 20px;">
+  <div class="pros-cons">
+    <div class="pros">
+      <h4>Option C rationale (recommended)</h4>
+      <ul>
+        <li>Extremely compact — doesn't steal title space</li>
+        <li>Scannable at a glance — color + abbreviation</li>
+        <li>Works in dense result lists</li>
+        <li>Low visual weight, high information density</li>
+      </ul>
+    </div>
+    <div class="cons">
+      <h4>Trade-offs</h4>
+      <ul>
+        <li>Users need to learn abbreviations</li>
+        <li>New providers need 2-letter codes</li>
+        <li>Less playful than full-name chips</li>
+      </ul>
+    </div>
+  </div>
+</div>
