@@ -1,13 +1,22 @@
 package lava.search.result
 
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -16,6 +25,8 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import lava.designsystem.color.ProviderColors
 import lava.designsystem.component.AppBarState
 import lava.designsystem.component.BackButton
 import lava.designsystem.component.BodyLarge
@@ -33,12 +44,15 @@ import lava.designsystem.theme.AppTheme
 import lava.models.LoadState
 import lava.models.search.Filter
 import lava.models.search.Period
+import lava.models.topic.Topic
+import lava.models.topic.TopicModel
 import lava.search.result.filter.FilterBar
 import lava.ui.component.TopicListItem
 import lava.ui.component.appendItems
 import lava.ui.component.emptyItem
 import lava.ui.component.errorItem
 import lava.ui.component.loadingItem
+import lava.ui.data.ProviderLabel
 import org.orbitmvi.orbit.compose.collectAsState
 import org.orbitmvi.orbit.compose.collectSideEffect
 import lava.designsystem.R as DsR
@@ -195,18 +209,33 @@ private fun SearchResultList(
     ),
     onLastItemVisible = { onAction(SearchResultAction.ListBottomReached) },
 ) {
+    val providerIds = state.filter.providerIds
+    if (!providerIds.isNullOrEmpty()) {
+        item {
+            ProviderFilterChipBar(
+                providerIds = providerIds,
+                providerDisplayNames = state.providerDisplayNames,
+                selectedProviderId = state.selectedFilterProvider,
+                onProviderSelected = { onAction(SearchResultAction.SetFilterProvider(it)) },
+            )
+        }
+    }
     when (state.loadStates.refresh) {
         is LoadState.Error -> errorItem(onRetryClick = { onAction(SearchResultAction.RetryClick) })
         is LoadState.Loading -> loadingItem()
         is LoadState.NotLoading -> when (state.searchContent) {
             is SearchResultContent.Content -> {
-                items(items = state.searchContent.torrents) { model ->
+                val torrents = state.selectedFilterProvider?.let { pid ->
+                    state.searchContent.torrents.filter { it.providerId == pid }
+                } ?: state.searchContent.torrents
+                items(items = torrents) { model ->
                     TopicListItem(
                         modifier = Modifier.padding(
                             horizontal = AppTheme.spaces.mediumLarge,
                             vertical = AppTheme.spaces.mediumSmall,
                         ),
                         topicModel = model,
+                        providerLabel = providerLabelFor(model, state.providerDisplayNames),
                         onClick = { onAction(SearchResultAction.TopicClick(model)) },
                         onFavoriteClick = { onAction(SearchResultAction.FavoriteClick(model)) },
                     )
@@ -244,13 +273,17 @@ private fun SearchResultList(
             }
 
             is SearchResultContent.Streaming -> {
-                items(items = state.searchContent.items) { model ->
+                val filteredItems = state.selectedFilterProvider?.let { pid ->
+                    state.searchContent.items.filter { it.providerId == pid }
+                } ?: state.searchContent.items
+                items(items = filteredItems) { model ->
                     TopicListItem(
                         modifier = Modifier.padding(
                             horizontal = AppTheme.spaces.mediumLarge,
                             vertical = AppTheme.spaces.mediumSmall,
                         ),
                         topicModel = model,
+                        providerLabel = providerLabelFor(model, state.providerDisplayNames),
                         onClick = { onAction(SearchResultAction.TopicClick(model)) },
                         onFavoriteClick = { onAction(SearchResultAction.FavoriteClick(model)) },
                     )
@@ -260,6 +293,66 @@ private fun SearchResultList(
             is SearchResultContent.Initial -> loadingItem()
         }
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ProviderFilterChipBar(
+    providerIds: List<String>,
+    providerDisplayNames: Map<String, String>,
+    selectedProviderId: String?,
+    onProviderSelected: (String?) -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .horizontalScroll(rememberScrollState())
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        FilterChip(
+            selected = selectedProviderId == null,
+            onClick = { onProviderSelected(null) },
+            label = {
+                Text(
+                    text = "All",
+                    style = MaterialTheme.typography.labelMedium,
+                )
+            },
+            colors = FilterChipDefaults.filterChipColors(),
+        )
+        providerIds.forEach { pid ->
+            val color = ProviderColors.forProvider(pid)
+            val displayName = providerDisplayNames[pid] ?: pid
+            FilterChip(
+                selected = selectedProviderId == pid,
+                onClick = { onProviderSelected(pid) },
+                label = {
+                    Text(
+                        text = displayName,
+                        style = MaterialTheme.typography.labelMedium,
+                    )
+                },
+                colors = FilterChipDefaults.filterChipColors(
+                    selectedContainerColor = color.copy(alpha = 0.2f),
+                    selectedLabelColor = color,
+                ),
+            )
+        }
+    }
+}
+
+private fun providerLabelFor(
+    model: TopicModel<out Topic>,
+    displayNames: Map<String, String>,
+): ProviderLabel? {
+    val pid = model.providerId ?: return null
+    val displayName = displayNames[pid] ?: pid
+    return ProviderLabel(
+        providerId = pid,
+        displayName = displayName,
+        color = ProviderColors.forProvider(pid),
+    )
 }
 
 private val Filter.icon: Icon

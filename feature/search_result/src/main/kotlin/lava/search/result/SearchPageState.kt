@@ -18,6 +18,8 @@ internal data class SearchPageState(
      * can render the [CrossTrackerFallbackModal]. Null means no modal.
      */
     val crossTrackerFallback: CrossTrackerFallbackProposal? = null,
+    val selectedFilterProvider: String? = null,
+    val providerDisplayNames: Map<String, String> = emptyMap(),
 )
 
 internal data class CrossTrackerFallbackProposal(

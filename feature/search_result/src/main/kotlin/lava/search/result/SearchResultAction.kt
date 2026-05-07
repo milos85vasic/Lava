@@ -28,4 +28,5 @@ internal sealed interface SearchResultAction {
     // SP-3a Phase 4 (Task 4.18): cross-tracker fallback modal events.
     data object FallbackAccept : SearchResultAction
     data object FallbackDismiss : SearchResultAction
+    data class SetFilterProvider(val providerId: String?) : SearchResultAction
 }

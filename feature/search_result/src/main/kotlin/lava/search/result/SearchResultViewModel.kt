@@ -92,6 +92,7 @@ internal class SearchResultViewModel @Inject constructor(
             is SearchResultAction.TopicClick -> onTopicClick(action.topicModel)
             is SearchResultAction.FallbackAccept -> onFallbackAccept()
             is SearchResultAction.FallbackDismiss -> onFallbackDismiss()
+            is SearchResultAction.SetFilterProvider -> onSetFilterProvider(action.providerId)
         }
     }
 
@@ -134,6 +135,10 @@ internal class SearchResultViewModel @Inject constructor(
         if (failed != null) {
             postSideEffect(SearchResultSideEffect.ShowFallbackDismissedError(failed))
         }
+    }
+
+    private fun onSetFilterProvider(providerId: String?) = intent {
+        reduce { state.copy(selectedFilterProvider = providerId) }
     }
 
     private fun observeFilter() = intent {
@@ -249,6 +254,7 @@ internal class SearchResultViewModel @Inject constructor(
                 if (current is SearchResultContent.Streaming) {
                     reduce {
                         state.copy(
+                            providerDisplayNames = state.providerDisplayNames + (pid to dname),
                             searchContent = current.copy(
                                 activeProviders = current.activeProviders.map {
                                     if (it.providerId == pid) {
@@ -271,6 +277,7 @@ internal class SearchResultViewModel @Inject constructor(
                     val title = obj["title"]?.jsonPrimitive?.content ?: ""
                     TopicModel(
                         topic = Torrent(id = id, title = title),
+                        providerId = pid,
                     )
                 }
                 val current = state.searchContent
