@@ -169,8 +169,8 @@ func (h *MultiSearchHandler) GetMultiSearch(c *gin.Context) {
 			}
 
 			ctx, cancel := context.WithTimeout(c.Request.Context(), 30*time.Second)
-			defer cancel()
-			result, err := p.Search(ctx, opts, provider.Credentials{Type: "none"})
+			result, err := p.Search(ctx, opts, parseCredentials(c))
+			cancel()
 
 			if err != nil {
 				failed++

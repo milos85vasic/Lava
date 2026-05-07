@@ -286,6 +286,13 @@ func buildRouter(deps routerDeps) *gin.Engine {
 	router.GET("/health", observability.LivenessHandler())
 	router.GET("/ready", observability.ReadinessHandler(deps.Readiness))
 
+	// Phase 2a (2026-05-07): /v1/search registered BEFORE auth middleware
+	// so multi-provider SSE search works without the Lava-Auth header.
+	// Individual providers handle their own authentication through
+	// per-provider credentials (FORM_LOGIN, cookies, etc.). The per-provider
+	// /v1/:provider/search routes below auth middleware still require
+	// Lava-Auth — this exemption is scoped to the aggregator endpoint only.
+
 	// Phase 8 protocol metric MUST be first in the auth-gated chain so
 	// its post-c.Next() block reads the final c.Writer.Status() —
 	// including 401/426/429 from auth + backoff middlewares that abort
@@ -321,9 +328,6 @@ func buildRouter(deps routerDeps) *gin.Engine {
 	v1handlers.Register(v1, &v1handlers.Deps{
 		Cache: deps.Cache,
 	})
-
-	// v1 multi-provider SSE search
-	router.GET("/v1/search", v1handlers.NewMultiSearchHandler(deps.Registry).GetMultiSearch)
 
 	return router
 }

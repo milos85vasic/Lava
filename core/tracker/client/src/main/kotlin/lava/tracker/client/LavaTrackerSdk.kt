@@ -32,6 +32,7 @@ import lava.tracker.client.persistence.LavaMirrorManagerHolder
 import lava.tracker.client.persistence.MirrorConfigLoader
 import lava.tracker.client.persistence.MirrorHealthRepository
 import lava.tracker.registry.TrackerRegistry
+import okhttp3.OkHttpClient
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -72,6 +73,7 @@ class LavaTrackerSdk @Inject constructor(
     private val mirrorHealthRepository: MirrorHealthRepository? = null,
     private val mirrorConfigLoader: MirrorConfigLoader? = null,
     private val crossTrackerFallback: CrossTrackerFallbackPolicy? = null,
+    private val okHttpClient: OkHttpClient? = null,
 ) {
     private var activeTrackerId: String = DEFAULT_TRACKER_ID
 
@@ -657,7 +659,7 @@ class LavaTrackerSdk @Inject constructor(
         filter: lava.models.search.Filter,
         providerIds: List<String>,
     ): Flow<SseEvent> {
-        val client = SseClient()
+        val client = if (okHttpClient != null) SseClient(okHttpClient) else SseClient()
         val apiBaseUrl = "https://thinker.local:8443"
         val params = buildString {
             append("?q=${filter.query.orEmpty()}")
