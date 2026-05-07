@@ -1,5 +1,6 @@
 package lava.designsystem.component
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
@@ -47,7 +48,11 @@ fun Scaffold(
                     hostState = snackbarState,
                 )
             },
-            floatingActionButton = floatingActionButton,
+            floatingActionButton = {
+                Box(modifier = Modifier.navigationBarsPadding()) {
+                    floatingActionButton()
+                }
+            },
             containerColor = AppTheme.colors.background,
             contentColor = AppTheme.colors.onBackground,
             contentWindowInsets = DefaultWindowInset,
