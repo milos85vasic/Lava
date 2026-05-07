@@ -63,6 +63,14 @@ class FakeSettingsRepository(initial: Endpoint = Endpoint.Rutracker) : SettingsR
     override suspend fun setBookmarksSyncPeriod(syncPeriod: SyncPeriod) {
         current = current.copy(bookmarksSyncPeriod = syncPeriod)
     }
+
+    override suspend fun setHistorySyncPeriod(syncPeriod: SyncPeriod) {
+        current = current.copy(historySyncPeriod = syncPeriod)
+    }
+
+    override suspend fun setCredentialsSyncPeriod(syncPeriod: SyncPeriod) {
+        current = current.copy(credentialsSyncPeriod = syncPeriod)
+    }
 }
 
 /**
