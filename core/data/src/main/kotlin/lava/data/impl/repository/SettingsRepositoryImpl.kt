@@ -38,6 +38,14 @@ class SettingsRepositoryImpl @Inject constructor(
         updateSettings { copy(bookmarksSyncPeriod = syncPeriod) }
     }
 
+    override suspend fun setHistorySyncPeriod(syncPeriod: SyncPeriod) {
+        updateSettings { copy(historySyncPeriod = syncPeriod) }
+    }
+
+    override suspend fun setCredentialsSyncPeriod(syncPeriod: SyncPeriod) {
+        updateSettings { copy(credentialsSyncPeriod = syncPeriod) }
+    }
+
     private suspend fun updateSettings(update: Settings.() -> Settings) {
         val settings = preferencesStorage
             .getSettings()

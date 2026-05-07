@@ -13,4 +13,6 @@ interface SettingsRepository {
     suspend fun setEndpoint(endpoint: Endpoint)
     suspend fun setFavoritesSyncPeriod(syncPeriod: SyncPeriod)
     suspend fun setBookmarksSyncPeriod(syncPeriod: SyncPeriod)
+    suspend fun setHistorySyncPeriod(syncPeriod: SyncPeriod)
+    suspend fun setCredentialsSyncPeriod(syncPeriod: SyncPeriod)
 }
