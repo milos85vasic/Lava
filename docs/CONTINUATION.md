@@ -11,9 +11,10 @@ same commit so the index stays trustworthy. Stale state in this file
 is itself a §6.J spirit issue — the file claims a guarantee, the
 repo has drifted, the agent acts on the claim.
 
-> **Last updated:** 2026-05-07, after Phase 2b (nnmclub + kinozal
-> apiSupported flags flipped, SSE credentials passthrough, route
-> exemption). Challenge Tests C17-C19 remain.
+> **Last updated:** 2026-05-07, after Phase 3 (onboarding wizard)
+> implementation. Multi-step wizard: Welcome → Pick Providers →
+> Configure (per provider) → Summary. New :feature:onboarding
+> module with Orbit MVI ViewModel + AnimatedContent.
 
 > **§6.S binding:** this file is constitutionally load-bearing per
 > root `CLAUDE.md` §6.S. Every commit that changes phase status,
@@ -109,6 +110,20 @@ place. Challenge Tests and nncmclub/kinozal (Phase 2b) queued.
   `lava-vasic-digital`. Operator's tester email received the invite.
   Phase 2a additions (provider chips, multi-select) not yet in a
   distributed build.
+
+### Parent-decomposition Phase 3 — Onboarding wizard
+
+Status: **implemented, not yet released**. New `:feature:onboarding`
+module. Challenge Tests deferred (need emulator).
+
+| What | Details |
+|------|---------|
+| Module | `:feature:onboarding` with Orbit MVI |
+| Steps | Welcome → Pick Providers → Configure (per provider) → Summary |
+| Credential testing | Auto-test on submit, connection test via sdk.checkAuth()/login() |
+| Back press | Closes app at Welcome, navigates back at other steps |
+| Finish | Signals auth for each configured provider, writes onboardingComplete |
+| Files | 11 new files (ViewModel, 4 steps, Screen, state/action/side effect) |
 
 ---
 

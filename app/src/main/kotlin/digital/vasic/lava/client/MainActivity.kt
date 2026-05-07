@@ -34,12 +34,12 @@ import lava.designsystem.platform.LocalPlatformType
 import lava.designsystem.platform.PlatformType
 import lava.logger.api.LoggerFactory
 import lava.main.MainScreen
-import lava.onboarding.OnboardingScreen
 import lava.main.MainViewModel
 import lava.models.settings.Theme
 import lava.navigation.DeepLinks
 import lava.navigation.LocalDeepLinks
 import lava.navigation.rememberNavigationController
+import lava.onboarding.OnboardingScreen
 import lava.rating.RatingDialog
 import lava.securestorage.PreferencesStorage
 import lava.ui.platform.LocalLoggerFactory
