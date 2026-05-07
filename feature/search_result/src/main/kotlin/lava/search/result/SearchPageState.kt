@@ -44,7 +44,21 @@ internal sealed interface SearchResultContent {
         val torrents: List<TopicModel<Torrent>>,
         val categories: List<Category>,
     ) : SearchResultContent
+
+    data class Streaming(
+        val items: List<TopicModel<Torrent>>,
+        val activeProviders: List<ProviderStreamStatus>,
+    ) : SearchResultContent
 }
+
+data class ProviderStreamStatus(
+    val providerId: String,
+    val displayName: String,
+    val status: StreamStatus,
+    val resultCount: Int = 0,
+)
+
+enum class StreamStatus { SEARCHING, RECEIVING, DONE, ERROR }
 
 internal val SearchPageState.categories
     get() = when (searchContent) {
@@ -52,4 +66,5 @@ internal val SearchPageState.categories
         is SearchResultContent.Empty -> emptyList()
         is SearchResultContent.Initial -> emptyList()
         is SearchResultContent.Unauthorized -> emptyList()
+        is SearchResultContent.Streaming -> emptyList()
     }
