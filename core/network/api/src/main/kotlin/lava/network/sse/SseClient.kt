@@ -1,4 +1,4 @@
-package lava.network.impl
+package lava.network.sse
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow

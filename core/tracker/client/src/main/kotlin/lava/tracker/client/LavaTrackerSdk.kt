@@ -3,6 +3,8 @@ package lava.tracker.client
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
+import lava.network.sse.SseClient
+import lava.network.sse.SseEvent
 import lava.sdk.api.MapPluginConfig
 import lava.sdk.api.MirrorState
 import lava.sdk.api.MirrorUnavailableException
@@ -649,6 +651,21 @@ class LavaTrackerSdk @Inject constructor(
             totalPages = maxPages,
             providerStatuses = statuses,
         )
+    }
+
+    fun streamSearch(
+        filter: lava.models.search.Filter,
+        providerIds: List<String>,
+    ): Flow<SseEvent> {
+        val client = SseClient()
+        val apiBaseUrl = "https://thinker.local:8443"
+        val params = buildString {
+            append("?q=${filter.query.orEmpty()}")
+            append("&providers=${providerIds.joinToString(",")}")
+            append("&sort=${filter.sort}")
+            append("&order=${filter.order}")
+        }
+        return client.connect("$apiBaseUrl/v1/search$params")
     }
 
     companion object {

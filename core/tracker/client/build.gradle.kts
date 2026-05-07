@@ -27,6 +27,8 @@ dependencies {
 
     implementation(project(":core:auth:api"))
     implementation(project(":core:database"))
+    implementation(project(":core:models"))
+    implementation(project(":core:network:api"))
 
     implementation(libs.javax.inject)
     implementation(libs.bundles.work)
