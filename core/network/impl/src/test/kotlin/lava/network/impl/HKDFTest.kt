@@ -49,7 +49,10 @@ class HKDFTest {
             output = out,
         )
         var allZero = true
-        for (b in out) if (b != 0.toByte()) { allZero = false; break }
+        for (b in out) if (b != 0.toByte()) {
+            allZero = false
+            break
+        }
         assertFalse("HKDF produced all-zero output", allZero)
     }
 

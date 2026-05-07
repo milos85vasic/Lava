@@ -39,6 +39,7 @@ internal class SigningCertProvider @Inject constructor(
         } else {
             @Suppress("DEPRECATION")
             val info = pm.getPackageInfo(pkgName, PackageManager.GET_SIGNATURES)
+
             @Suppress("DEPRECATION")
             val sigs = info.signatures
                 ?: error("SigningCertProvider: signatures null on legacy API")

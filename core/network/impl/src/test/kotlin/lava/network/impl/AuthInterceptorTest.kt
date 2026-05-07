@@ -83,8 +83,10 @@ class AuthInterceptorTest {
 
     @Test(expected = javax.crypto.AEADBadTagException::class)
     fun `intercept fails closed when signing cert hash diverges (re-signed APK simulation)`() {
-        val uuid = byteArrayOf(0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
-                               0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10)
+        val uuid = byteArrayOf(
+            0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
+            0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10,
+        )
         val (provider, _) = buildKnownProvider(uuid, "X-Test-Auth")
         // The provider was built with cert-hash filled with 0x42; switch to 0x43.
         val divergedCertHash = AuthInterceptor.SigningCertHash {

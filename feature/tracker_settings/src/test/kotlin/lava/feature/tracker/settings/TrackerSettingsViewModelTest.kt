@@ -85,6 +85,7 @@ class TrackerSettingsViewModelTest {
 
         // Verified-by-construction so the UI filter (clause 6.G) does not hide it.
         override val verified: Boolean = true
+
         // Phase 1 α-hotfix (2026-05-06): apiSupported gates the same UI filter.
         override val apiSupported: Boolean = true
     }

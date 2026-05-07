@@ -227,8 +227,8 @@ class ProviderLoginViewModelTest {
                 override val authType = AuthType.NONE
                 override val encoding = "UTF-8"
                 override val expectedHealthMarker = "unsupported"
-                override val verified = true        // verified for §6.G
-                override val apiSupported = false   // but no API routes
+                override val verified = true // verified for §6.G
+                override val apiSupported = false // but no API routes
             }
             registry.register(object : TrackerClientFactory {
                 override val descriptor = unsupportedDesc

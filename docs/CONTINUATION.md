@@ -11,11 +11,12 @@ same commit so the index stays trustworthy. Stale state in this file
 is itself a §6.J spirit issue — the file claims a guarantee, the
 repo has drifted, the agent acts on the claim.
 
-> **Last updated:** 2026-05-06 (late evening), after Phase 1 of the
-> parent decomposition reached the "deployed-to-thinker.local + on
-> Firebase App Distribution" state, plus §6.S (Continuation Document
-> Maintenance Mandate) propagated, plus §6.T (Universal Quality
-> Constraints from HelixCode mining) added.
+> **Last updated:** 2026-05-07, after Phase 2a (multi-provider
+> streaming search) implementation: Go API SSE handler + tests,
+> Android SseClient + ProviderChipBar + provider labels +
+> search input wiring + apiSupported flags flipped for
+> archiveorg + gutenberg. Challenge Tests C17-C19 + nnmclub +
+> kinozal (Phase 2b) remain.
 
 > **§6.S binding:** this file is constitutionally load-bearing per
 > root `CLAUDE.md` §6.S. Every commit that changes phase status,
@@ -81,13 +82,36 @@ test added.
 | All-submodule push | `6895948` | 16 submodules synced to all their mirrors |
 | Distribute hardening | `e9470812` | /health-before-auth + LavaAuthBlobProvider visibility + thinker.local auth-env plumbing |
 
+### Parent-decomposition Phase 2a — Multi-provider streaming search (core infra)
+
+Status: **implemented, not yet released**. Go API + Android infra in
+place. Challenge Tests and nncmclub/kinozal (Phase 2b) queued.
+
+| Internal step | Head (approx) | What landed |
+|---|---|---|
+| Go SSE handler | `19dbff7`+ | MultiSearchHandler + `GET /v1/search` route |
+| Go handler tests | follow-up | 4 tests with fakeProvider |
+| Android Filter.providerIds | `8ba27c9` | New field on Filter |
+| Android SseClient | `5852e09` | OkHttp-based SSE client in lava.network.sse |
+| Android ProviderColors | `8b29b51` | 6 per-provider Material 3 colors |
+| Android TopicListItem chip | `a220266` | Optional providerLabel chip on result cards |
+| Android ProviderChipBar | follow-up | Multi-select chip bar composable |
+| Android SearchInput wiring | `2583665` | Provider selection in search flow |
+| Android SearchPageState | `53d3231` | Streaming + ProviderStreamStatus variants |
+| Android ViewModel SSE | `18b3636` | SSE observation wired into SearchResultViewModel |
+| apiSupported flags | `c4ec6c4` | archiveorg + gutenberg flipped to true |
+| LavaTrackerSdk.streamSearch | follow-up | streamSearch() method |
+
 ### Operator-visible deliverables
 
 - **API**: `https://thinker.local:8443/{health,ready}` returns
   `{"status":"alive"}` / `{"status":"ready"}`. Auth gate fails-closed
   with `401 {"error":"unauthorized"}` on missing `Lava-Auth` header.
+  New: `GET /v1/search?q=...&providers=...` SSE endpoint.
 - **APK**: 1.2.7 (1027) on Firebase App Distribution under project
   `lava-vasic-digital`. Operator's tester email received the invite.
+  Phase 2a additions (provider chips, multi-select) not yet in a
+  distributed build.
 
 ---
 
@@ -159,37 +183,24 @@ shape as Phase 1 (which produced
 
 ### 4.1 Phase 2 — Multi-provider streaming search
 
+**Status: Phase 2a DONE (core infra). Phase 2b (nnmclub+kinozal) + Challenge Tests remain.**
+
 **Closes:** the alice-bug class (operator's report: "Search 'alice' on
-Internet Archive returns 'Something went wrong'"). Phase 1's α-hotfix
-HID Internet Archive from onboarding; Phase 2 RE-ENABLES it by adding
-working API routes.
+Internet Archive returns 'Something went wrong'").
 
-**Scope:**
-- Per-provider routing in `lava-api-go`: `/v1/{providerId}/search`,
-  `/v1/{providerId}/browse`, `/v1/{providerId}/topic/:id`,
-  `/v1/{providerId}/download/:id` for archiveorg, gutenberg, kinozal,
-  nnmclub (and any future tracker)
-- Streaming results decision: SSE / WebSocket / gRPC streaming — pick
-  one in the brainstorm
-- Per-result provider label in client UI (currently results have no
-  provider attribution)
-- Multi-select provider filter in search input
-- The 4 tracker descriptors flip `apiSupported = false → true` as
-  their routes ship (one descriptor per task; not all in one batch)
-- Challenge Tests for each newly-enabled provider (real-stack,
-  authenticated against the lava-api-go routes)
-- Cross-backend parity test extension (rutracker handler vs new
-  per-provider handlers; existing
-  `lava-api-go/tests/parity/` is the gate)
+**Phase 2a delivered (2026-05-07):**
+- Go API: `GET /v1/search?q=...&providers=...` SSE endpoint fans out to registered providers
+- Android: `SseClient` (lava.network.sse), `ProviderChipBar` composable, provider label chips on result cards, multi-select provider filter in search input, SSE streaming wired into `SearchResultViewModel`
+- `apiSupported = true` flipped on archiveorg + gutenberg descriptors
+- Spec: `docs/superpowers/specs/2026-05-07-phase2-multi-provider-streaming-search-design.md`
+- Plan: `docs/superpowers/plans/2026-05-07-phase2-multi-provider-streaming-search.md`
 
-**TODO sections covered:** "Search request from client(s) app(s)",
-"Receiving results in client(s) app(s)" (real-time event-stream),
-plus the alice-bug fix.
-
-**Operator decisions needed in brainstorm:**
-- Streaming transport (SSE / WS / gRPC streaming)
-- Per-result label rendering (chip vs prefix vs icon)
-- Order of provider re-enablement (which descriptor flips first)
+**Phase 2b remaining:**
+- nnmclub + kinozal Go scrapers (FORM_LOGIN auth)
+- Flip nnmclub + kinozal apiSupported flags
+- Challenge Tests C17 (archiveorg search), C18 (gutenberg search), C19 (multi-provider SSE)
+- Auth header wiring for SSE requests
+- Hardcoded `https://thinker.local:8443` → config-driven per §6.R
 
 ### 4.2 Phase 3 — First-run onboarding wizard
 
