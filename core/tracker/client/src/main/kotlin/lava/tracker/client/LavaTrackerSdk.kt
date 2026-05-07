@@ -658,9 +658,9 @@ class LavaTrackerSdk @Inject constructor(
     fun streamSearch(
         filter: lava.models.search.Filter,
         providerIds: List<String>,
+        apiBaseUrl: String,
     ): Flow<SseEvent> {
         val client = if (okHttpClient != null) SseClient(okHttpClient) else SseClient()
-        val apiBaseUrl = "https://thinker.local:8443"
         val params = buildString {
             append("?q=${filter.query.orEmpty()}")
             append("&providers=${providerIds.joinToString(",")}")

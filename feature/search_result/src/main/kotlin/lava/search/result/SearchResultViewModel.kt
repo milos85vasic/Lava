@@ -7,6 +7,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.onEach
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonArray
@@ -19,6 +20,7 @@ import lava.domain.usecase.AddSearchHistoryUseCase
 import lava.domain.usecase.EnrichFilterUseCase
 import lava.domain.usecase.ObserveAuthStateUseCase
 import lava.domain.usecase.ObserveSearchPagingDataUseCase
+import lava.domain.usecase.ObserveSettingsUseCase
 import lava.domain.usecase.ToggleFavoriteUseCase
 import lava.logger.api.LoggerFactory
 import lava.models.auth.isAuthorized
@@ -27,6 +29,7 @@ import lava.models.search.Filter
 import lava.models.search.Order
 import lava.models.search.Period
 import lava.models.search.Sort
+import lava.models.settings.Endpoint
 import lava.models.topic.Author
 import lava.models.topic.Topic
 import lava.models.topic.TopicModel
@@ -53,6 +56,7 @@ internal class SearchResultViewModel @Inject constructor(
     // empty-state instead of the misleading "Nothing found" when the
     // user has not signed in to the upstream tracker.
     private val observeAuthStateUseCase: ObserveAuthStateUseCase,
+    private val observeSettingsUseCase: ObserveSettingsUseCase,
 ) : ViewModel(), ContainerHost<SearchPageState, SearchResultSideEffect> {
     private val logger = loggerFactory.get("SearchResultViewModel")
     private val mutableFilter = MutableStateFlow(savedStateHandle.filter)
@@ -207,7 +211,11 @@ internal class SearchResultViewModel @Inject constructor(
         }
 
         val client = SseClient()
-        val apiBaseUrl = "https://thinker.local:8443"
+        val currentSettings = observeSettingsUseCase().first()
+        val apiBaseUrl = when (val ep = currentSettings.endpoint) {
+            is Endpoint.GoApi -> "https://${ep.host}:${ep.port}"
+            else -> return@intent
+        }
         val params = buildString {
             append("?q=${filter.query.orEmpty()}")
             append("&providers=${providerIds.joinToString(",")}")
