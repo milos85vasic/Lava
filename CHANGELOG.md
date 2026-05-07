@@ -1,5 +1,49 @@
 # Changelog
 
+## Lava-Android-1.2.8-1028 / Lava-API-Go-2.2.0-2200 — 2026-05-07 (Phases 2-6)
+
+**Previous published:** Lava-Android-1.2.7-1027 / Lava-API-Go-2.1.0-2100
+
+### Added — Multi-provider streaming search (Phase 2)
+
+- `GET /v1/search?q=...&providers=...` SSE endpoint fans out to all registered providers
+- `SseClient` (OkHttp-based SSE parser), `ProviderChipBar` multi-select filter
+- Provider label chips on search result cards
+- `apiSupported=true` on all 6 providers (rutracker, rutor, nnmclub, kinozal, archiveorg, gutenberg)
+- Provider result filtering chips on search results screen
+
+### Added — Onboarding wizard (Phase 3)
+
+- New `:feature:onboarding` module with 4-step wizard: Welcome → Pick Providers → Configure → Summary
+- AnimatedContent sliding transitions
+- Connection auto-test on credential submit, closes app on back press at Welcome
+
+### Added — Sync expansion (Phase 4)
+
+- Device identity UUID generated on first launch
+- Sync Now buttons on Favorites and Bookmarks screens
+- History and Credentials sync categories with WorkManager workers
+- Menu sync settings expanded from 2 to 4 categories
+
+### Changed — UI/UX polish (Phase 5)
+
+- Menu multi-provider header showing all signed-in providers with sign-out
+- Ocean/Forest/Sunset color themes alongside SYSTEM/LIGHT/DARK
+- About dialog shows versionCode: "Version: 1.2.8 (1028)"
+- Credentials screen modern redesign with ProviderColors, nav-bar FAB fix
+- Nav-bar overlap audit: `navigationBarsPadding` added at Scaffold level
+
+### Added — Crashlytics (Phase 6)
+
+- Non-fatal `recordException` tracking in 8 ViewModels across all error paths
+
+### Fixed
+
+- Hardcoded `thinker.local:8443` → config-driven via `ObserveSettingsUseCase`
+- Credentials FAB no longer overlaps 3-button navigation bar
+
+---
+
 All notable changes to **Lava** (the Android client and the lava-api-go service) are documented in this file.
 
 Per constitutional clause **§6.P (Distribution Versioning + Changelog Mandate)**, every distributed build MUST appear here BEFORE `scripts/firebase-distribute.sh` is run. The script refuses to operate without a matching entry.
