@@ -11,12 +11,9 @@ same commit so the index stays trustworthy. Stale state in this file
 is itself a §6.J spirit issue — the file claims a guarantee, the
 repo has drifted, the agent acts on the claim.
 
-> **Last updated:** 2026-05-07, after Phase 2a (multi-provider
-> streaming search) implementation: Go API SSE handler + tests,
-> Android SseClient + ProviderChipBar + provider labels +
-> search input wiring + apiSupported flags flipped for
-> archiveorg + gutenberg. Challenge Tests C17-C19 + nnmclub +
-> kinozal (Phase 2b) remain.
+> **Last updated:** 2026-05-07, after Phase 2b (nnmclub + kinozal
+> apiSupported flags flipped, SSE credentials passthrough, route
+> exemption). Challenge Tests C17-C19 remain.
 
 > **§6.S binding:** this file is constitutionally load-bearing per
 > root `CLAUDE.md` §6.S. Every commit that changes phase status,
@@ -183,24 +180,25 @@ shape as Phase 1 (which produced
 
 ### 4.1 Phase 2 — Multi-provider streaming search
 
-**Status: Phase 2a DONE (core infra). Phase 2b (nnmclub+kinozal) + Challenge Tests remain.**
-
-**Closes:** the alice-bug class (operator's report: "Search 'alice' on
-Internet Archive returns 'Something went wrong'").
+**Status: Phase 2a + 2b DONE. Challenge Tests + hardcoded-URL cleanup remain.**
 
 **Phase 2a delivered (2026-05-07):**
-- Go API: `GET /v1/search?q=...&providers=...` SSE endpoint fans out to registered providers
-- Android: `SseClient` (lava.network.sse), `ProviderChipBar` composable, provider label chips on result cards, multi-select provider filter in search input, SSE streaming wired into `SearchResultViewModel`
-- `apiSupported = true` flipped on archiveorg + gutenberg descriptors
-- Spec: `docs/superpowers/specs/2026-05-07-phase2-multi-provider-streaming-search-design.md`
-- Plan: `docs/superpowers/plans/2026-05-07-phase2-multi-provider-streaming-search.md`
+- Go API: `GET /v1/search?q=...&providers=...` SSE endpoint
+- Android: SseClient, ProviderChipBar, provider label chips, multi-select filter, SSE streaming into ViewModel
+- apiSupported=true on archiveorg + gutenberg
 
-**Phase 2b remaining:**
-- nnmclub + kinozal Go scrapers (FORM_LOGIN auth)
-- Flip nnmclub + kinozal apiSupported flags
-- Challenge Tests C17 (archiveorg search), C18 (gutenberg search), C19 (multi-provider SSE)
-- Auth header wiring for SSE requests
+**Phase 2b delivered (2026-05-07):**
+- apiSupported=true on nnmclub + kinozal (both had working scrapers already)
+- SSE handler passes request credentials via parseCredentials()
+- /v1/search route registered before auth middleware (same pattern as /health)
+- LavaTrackerSdk accepts optional OkHttpClient for future auth header wiring
+- All 6 providers (rutracker, rutor, nnmclub, kinozal, archiveorg, gutenberg) now apiSupported=true
+
+**Remaining:**
+- Challenge Tests C17 (archiveorg search), C18 (gutenberg), C19 (multi-provider)
+- OkHttpClient DI wiring (circular dep blocker: core:network:impl ↔ core:tracker:client)
 - Hardcoded `https://thinker.local:8443` → config-driven per §6.R
+- Android SearchResultViewModel uses direct SseClient → should use LavaTrackerSdk.streamSearch()
 
 ### 4.2 Phase 3 — First-run onboarding wizard
 
