@@ -28,6 +28,9 @@ internal sealed interface MenuAction {
 
     /** Sign out of a specific provider. */
     data class SignOut(val providerId: String) : MenuAction
+
+    /** Confirmed sign-out for a specific provider. */
+    data class ConfirmSignOut(val providerId: String) : MenuAction
     data class SetBookmarksSyncPeriod(val syncPeriod: SyncPeriod) : MenuAction
     data class SetCredentialsSyncPeriod(val syncPeriod: SyncPeriod) : MenuAction
     data class SetEndpoint(val endpoint: Endpoint) : MenuAction

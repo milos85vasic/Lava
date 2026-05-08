@@ -14,6 +14,18 @@
 
 Inherited from root `/CLAUDE.md`. CI green is necessary, NEVER sufficient. Every test must confirm the feature actually works for an end user, end-to-end, on the gating matrix. No LazyColumn inside verticalScroll — per §6.Q Compose Layout Antipattern Guard.
 
+### §6.R — No-Hardcoding Mandate (inherited 2026-05-06, per §6.F)
+
+See root `/CLAUDE.md` §6.R. No connection address, port, header field name, credential, key, salt, secret, schedule, algorithm parameter, or domain literal in tracked source code.
+
+### §6.S — Continuation Document Maintenance Mandate (inherited 2026-05-06, per §6.F)
+
+See root `/CLAUDE.md` §6.S. Every state-changing commit MUST update `docs/CONTINUATION.md` in the same commit.
+
+### §6.T — Universal Quality Constraints (inherited 2026-05-06, per §6.F)
+
+See root `/CLAUDE.md` §6.T. Reproduction-Before-Fix, Resource Limits, No-Force-Push, and Bugfix Documentation apply verbatim.
+
 ## Build & Release
 
 - Debug APK: `./gradlew :app:assembleDebug`

@@ -128,3 +128,11 @@ shape is in scope; SP-3a Phases 0-5 explicitly exclude Go changes.
 
 - **Clause 6.S — Continuation Document Maintenance Mandate** — see root `/CLAUDE.md` §6.S. The file `docs/CONTINUATION.md` (in the parent Lava repo) is the single-file source-of-truth handoff document for resuming work across any CLI session. Every commit affecting this service that changes phase status, lands a new spec/plan, bumps a pin, ships a release artifact (binary, image, container deployment), discovers/resolves a known issue, or implements an operator scope directive MUST update `docs/CONTINUATION.md` in the SAME COMMIT. The §0 "Last updated" line MUST track HEAD. Stale CONTINUATION.md is itself a §6.J spirit issue under §6.L's repeated mandate.
 
+## Clause 6.R (added 2026-05-06, inherited per 6.F)
+
+- **Clause 6.R — No-Hardcoding Mandate** — see root `/CLAUDE.md` §6.R. No connection address, port, header field name, credential, key, salt, secret, schedule, algorithm parameter, or domain literal shall appear as a string/int constant in tracked source code under `lava-api-go/`. Every such value MUST come from `.env` (gitignored), generated config class, runtime env var, or mounted file. Go API service MAY add stricter rules but MUST NOT relax.
+
+## Clause 6.T — Universal Quality Constraints (added 2026-05-06, inherited per 6.F)
+
+- **Clause 6.T — Universal Quality Constraints** — see root `/CLAUDE.md` §6.T. All four sub-points (Reproduction-Before-Fix, Resource Limits for Tests & Challenges, No-Force-Push, Bugfix Documentation) apply verbatim to every commit in `lava-api-go/`. The Go API service MAY add stricter rules but MUST NOT relax any of §6.T.1–§6.T.4.
+

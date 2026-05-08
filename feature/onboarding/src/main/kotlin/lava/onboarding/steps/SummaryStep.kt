@@ -12,14 +12,15 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import lava.designsystem.color.ProviderColors
+import lava.designsystem.component.Button
 import lava.designsystem.component.Icon
+import lava.designsystem.component.Surface
+import lava.designsystem.component.Text
+import lava.designsystem.color.ProviderColors
 import lava.designsystem.drawables.LavaIcons
 import lava.designsystem.theme.AppTheme
 import lava.onboarding.ProviderConfigState
@@ -32,58 +33,60 @@ fun SummaryStep(
     onStartExploring: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(24.dp),
+    Surface(
+        modifier = modifier.fillMaxSize(),
+        color = AppTheme.colors.background,
     ) {
-        Text(
-            text = "All set!",
-            style = AppTheme.typography.headlineMedium,
-        )
-        Spacer(Modifier.height(8.dp))
-        Text(
-            text = "Your providers are ready.",
-            style = AppTheme.typography.bodyMedium,
-            color = AppTheme.colors.onSurfaceVariant,
-        )
-        Spacer(Modifier.height(24.dp))
         Column(
-            modifier = Modifier
-                .weight(1f)
-                .verticalScroll(rememberScrollState()),
+            modifier = Modifier.padding(24.dp),
         ) {
-            providers.filter { it.selected }.forEach { item ->
-                val config = configs[item.descriptor.trackerId]
-                val isConfigured = config?.configured == true
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Canvas(Modifier.size(12.dp)) {
-                        drawCircle(ProviderColors.forProvider(item.descriptor.trackerId))
+            Text(
+                text = "All set!",
+                style = AppTheme.typography.headlineMedium,
+            )
+            Spacer(Modifier.height(8.dp))
+            Text(
+                text = "Your providers are ready.",
+                style = AppTheme.typography.bodyMedium,
+                color = AppTheme.colors.onSurfaceVariant,
+            )
+            Spacer(Modifier.height(24.dp))
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState()),
+            ) {
+                providers.filter { it.selected }.forEach { item ->
+                    val config = configs[item.descriptor.trackerId]
+                    val isConfigured = config?.configured == true
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Canvas(Modifier.size(12.dp)) {
+                            drawCircle(ProviderColors.forProvider(item.descriptor.trackerId))
+                        }
+                        Spacer(Modifier.width(12.dp))
+                        Text(
+                            text = item.descriptor.displayName,
+                            style = AppTheme.typography.bodyLarge,
+                            modifier = Modifier.weight(1f),
+                        )
+                        Icon(
+                            icon = if (isConfigured) LavaIcons.Selected else LavaIcons.Clear,
+                            contentDescription = null,
+                            tint = if (isConfigured) AppTheme.colors.accentGreen else AppTheme.colors.accentRed,
+                        )
                     }
-                    Spacer(Modifier.width(12.dp))
-                    Text(
-                        text = item.descriptor.displayName,
-                        style = AppTheme.typography.bodyLarge,
-                        modifier = Modifier.weight(1f),
-                    )
-                    Icon(
-                        icon = if (isConfigured) LavaIcons.Selected else LavaIcons.Clear,
-                        contentDescription = null,
-                        tint = if (isConfigured) AppTheme.colors.accentGreen else AppTheme.colors.accentRed,
-                    )
                 }
             }
-        }
-        Button(
-            onClick = onStartExploring,
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            Text("Start Exploring")
+            Button(
+                text = "Start Exploring",
+                onClick = onStartExploring,
+                modifier = Modifier.fillMaxWidth(),
+            )
         }
     }
 }

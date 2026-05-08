@@ -27,6 +27,8 @@
     <string name="menu_settings_endpoint">Endpoint</string>
     <string name="menu_settings_theme">Theme</string>
     <string name="menu_sign_out">Sign out</string>
+    <string name="menu_sign_out_title">Sign Out</string>
+    <string name="menu_sign_out_confirmation">Are you sure you want to sign out?</string>
     <string name="menu_title">Menu</string>
 
     <string name="permission_show_notifications_rationale_title">Set up notifications?</string>

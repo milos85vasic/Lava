@@ -3,6 +3,7 @@ package lava.menu
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.collectLatest
+import lava.auth.api.AuthService
 import lava.common.analytics.AnalyticsTracker
 import lava.credentials.ProviderCredentialManager
 import lava.designsystem.color.ProviderColors
@@ -47,6 +48,7 @@ internal class MenuViewModel @Inject constructor(
     private val setThemeUseCase: SetThemeUseCase,
     private val sdk: LavaTrackerSdk,
     private val credentialManager: ProviderCredentialManager,
+    private val authService: AuthService,
     loggerFactory: LoggerFactory,
     private val analytics: AnalyticsTracker,
 ) : ViewModel(), ContainerHost<MenuState, MenuSideEffect> {
@@ -82,6 +84,7 @@ internal class MenuViewModel @Inject constructor(
             is MenuAction.TrackerSettingsClick -> onTrackerSettingsClick()
             is MenuAction.CredentialsClick -> onCredentialsClick()
             is MenuAction.SignOut -> onSignOut(action.providerId)
+            is MenuAction.ConfirmSignOut -> onConfirmSignOut(action.providerId)
         }
     }
 
@@ -135,6 +138,15 @@ internal class MenuViewModel @Inject constructor(
     }
 
     private fun onSignOut(providerId: String) = intent {
+        postSideEffect(MenuSideEffect.ShowSignOutConfirmation(providerId))
+    }
+
+    private fun onConfirmSignOut(providerId: String) = intent {
+        try {
+            authService.logout()
+        } catch (e: Throwable) {
+            analytics.recordNonFatal(e, mapOf(AnalyticsTracker.Params.PROVIDER to providerId))
+        }
         try {
             if (sdk.activeTrackerId() == providerId) {
                 sdk.logout()
@@ -150,6 +162,7 @@ internal class MenuViewModel @Inject constructor(
             analytics.recordNonFatal(e, mapOf(AnalyticsTracker.Params.PROVIDER to providerId))
         }
         loadProviders()
+        postSideEffect(MenuSideEffect.ShowSignOutSuccess)
     }
 
     private fun discoverLocalEndpoints() = intent {

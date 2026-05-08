@@ -18,4 +18,10 @@ internal sealed interface MenuSideEffect {
         @StringRes val confirmationMessage: Int,
         val action: () -> Unit,
     ) : MenuSideEffect
+
+    /** Show a confirmation dialog before signing out of a provider. */
+    data class ShowSignOutConfirmation(val providerId: String) : MenuSideEffect
+
+    /** Sign-out completed successfully. */
+    data object ShowSignOutSuccess : MenuSideEffect
 }

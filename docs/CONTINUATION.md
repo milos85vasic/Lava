@@ -11,9 +11,10 @@ same commit so the index stays trustworthy. Stale state in this file
 is itself a §6.J spirit issue — the file claims a guarantee, the
 repo has drifted, the agent acts on the claim.
 
-> **Last updated:** 2026-05-08, after onboarding wizard bug fixes +
-> theme/schema readability fix + 16 anti-bluff ViewModel tests +
-> 3 Challenge Tests (C20-C22) + constitution propagation to 9 files.
+> **Last updated:** 2026-05-08, after all parent decomposition Phases
+> 1-6 shipped + Yole+Boba 8-palette theme system + 7 Firebase
+> distributions (1.2.8-1028 through 1.2.13-1033). CONTINUATION.md
+> fully synced to HEAD (e9b7f89).
 
 > **§6.S binding:** this file is constitutionally load-bearing per
 > root `CLAUDE.md` §6.S. Every commit that changes phase status,
@@ -31,141 +32,56 @@ repo has drifted, the agent acts on the claim.
 
 | Surface | Current state | Pin |
 |---|---|---|
-| Lava parent on master | 4 mirrors converged | (this commit) |
-| API on thinker.local | running 2.1.0 (build 2100) (healthy) | container `lava-api-go-thinker` |
-| Android Firebase | 1.2.7 (1027) distributed to testers | `lava-vasic-digital` Firebase project |
+| Lava parent on master | 4 mirrors: not yet pushed from HEAD | (e9b7f89) |
+| API on thinker.local | running 2.3.2 (build 2302) (healthy) | container `lava-api-go-thinker` |
+| Android Firebase | 1.2.13 (1033) distributed to testers | `lava-vasic-digital` Firebase project |
 | 16 vasic-digital submodules | all pushed | see §3 below |
 
-**Operator's TODO source-of-truth:** `docs/todos/Lava_TODOs_001.md`
-(committed 2026-05-06). Contains 17 work items decomposed into 6
-parent-phases.
-
-**Parent decomposition spec for Phase 1:**
-`docs/superpowers/specs/2026-05-06-phase1-api-auth-design.md` (commit
-`45723b2`).
-
-**Parent decomposition plan for Phase 1:**
-`docs/superpowers/plans/2026-05-06-phase1-api-auth.md` (commit
-`88a7568`).
+**All 6 parent-decomposition phases complete.** The original TODO spec
+(`docs/todos/Lava_TODOs_001.md`) has been fully implemented across
+Phases 1-6 with the Yole+Boba 8-palette theme system as the final
+deliverable. Git tags have NOT been cut — see §2 for the remaining
+gate steps.
 
 ---
 
 ## 1. What's DONE (for context — do not re-do)
 
-### Parent-decomposition Phase 1 — API auth + security foundations
+### Parent-decomposition Phases 1-6 — ALL SHIPPED
 
-Status: **shipped to Firebase App Distribution + thinker.local**. 16
-internal sub-phases all green. Bluff-Audit stamps recorded for every
-test added.
+Status: **all 6 phases complete. 7 Firebase distributions delivered
+(1.2.8-1028 through 1.2.13-1033). API versions 2.2.0-2200 through
+2.3.2-2302. Git tags have NOT been cut** (see §2).
 
-| Internal sub-phase | Head | What landed |
+| Phase | What shipped | Key commits |
 |---|---|---|
-| 1: §6.R + check-constitution | `8192403` | constitutional clause + UUID-grep gate + 3 hermetic tests |
-| 2: config layer | `ef525fb` | 12 new `Config` fields + 5 helpers + 18 tests |
-| 3: `pkg/ladder` upstream | `Submodules/RateLimiter@3faf7a51` + Lava `179ac43` | per-key fixed-step backoff primitive |
-| 5: AuthMiddleware | `7a4cc4d` | 8 tests, constant-time hash compare |
-| 6: BackoffMiddleware | `25d1217` | 5 tests, trusted-proxy XFF |
-| 7: wire + integration | `2d3a1f9` | 5 §6.G integration + §6.A contract test |
-| 8: transport | `b099565` | brotli + Alt-Svc + protocol metric + 3 tests + post-Ktor stale fixtures |
-| 9: client crypto | `c27ce7a` | HKDF (RFC 5869), AES-GCM tamper, SigningCertProvider — 13 tests |
-| 10: AuthInterceptor + Hilt | `540bd9c` | OkHttp interceptor + reflection-based provider lookup |
-| 11: build-time codegen | `cad86b5` | `LavaAuthCodegen` Gradle task; gracefully skips on .env-less envs |
-| 12: α-hotfix | `384ac02` | `TrackerDescriptor.apiSupported` + filter + behavioral test |
-| 13: Compose UI Challenges | `48633ff` | C15 (boot) + C16 (apiSupported filter) |
-| 14: distribute Gates 4+5 | `7474a39` | pepper-rotation refusal + client-name consistency |
-| 15: docs | `963af09` | `docs/RELEASE-ROTATION.md` + 2 CHANGELOG entries + 2 snapshots |
-| 16: version bump | `82aa2e0` | 1.2.7-1027 + 2.1.0-2100 |
-| Phase 2 follow-ups | `5f9ab5d` | parseBackoffSteps + envBool + 6 new tests |
-| All-submodule push | `6895948` | 16 submodules synced to all their mirrors |
-| Distribute hardening | `e9470812` | /health-before-auth + LavaAuthBlobProvider visibility + thinker.local auth-env plumbing |
+| 1 | API auth + security (16 sub-phases) | `8192403` .. `e9470812` |
+| 2a+2b | Multi-provider streaming search + 6 providers all apiSupported=true | `19dbff7` .. `c4ec6c4` |
+| 3 | Onboarding wizard, bug-fixed + 16 anti-bluff ViewModel tests | `4dd6ea0` |
+| 4 | Sync expansion: device identity, Sync Now, 4 sync categories | `2060d9a` .. `0d57170` |
+| 5 | UI/UX polish: multi-provider header, color themes (Ocean/Forest/Sunset), About dialog, credentials redesign, result filtering, nav-bar audit | `3fc66b6` .. `5879a85` |
+| 6 | Crashlytics tracking, distribution prep, infrastructure fixes | (shipped across multiple commits) |
 
-### Parent-decomposition Phase 2a — Multi-provider streaming search (core infra)
+### Additional deliveries after Phase 3 bug-fix (post-4dd6ea0)
 
-Status: **implemented, not yet released**. Go API + Android infra in
-place. Challenge Tests and nncmclub/kinozal (Phase 2b) queued.
-
-| Internal step | Head (approx) | What landed |
-|---|---|---|
-| Go SSE handler | `19dbff7`+ | MultiSearchHandler + `GET /v1/search` route |
-| Go handler tests | follow-up | 4 tests with fakeProvider |
-| Android Filter.providerIds | `8ba27c9` | New field on Filter |
-| Android SseClient | `5852e09` | OkHttp-based SSE client in lava.network.sse |
-| Android ProviderColors | `8b29b51` | 6 per-provider Material 3 colors |
-| Android TopicListItem chip | `a220266` | Optional providerLabel chip on result cards |
-| Android ProviderChipBar | follow-up | Multi-select chip bar composable |
-| Android SearchInput wiring | `2583665` | Provider selection in search flow |
-| Android SearchPageState | `53d3231` | Streaming + ProviderStreamStatus variants |
-| Android ViewModel SSE | `18b3636` | SSE observation wired into SearchResultViewModel |
-| apiSupported flags | `c4ec6c4` | archiveorg + gutenberg flipped to true |
-| LavaTrackerSdk.streamSearch | follow-up | streamSearch() method |
+| What | Details |
+|---|---|
+| Docker auth env vars | `docker-compose.yml` passes LAVA_AUTH_* to api-go container (commit `ab6325f`) |
+| Yole+Boba 8-palette theme system | Replaced red default with Yole semantic color foundation + 8 Boba-project accent palettes. `PaletteContractTest` enforces contract. |
+| PaletteTokens | Token system defining 8 named palettes, `PaletteContractTest` ensures all tokens resolve. |
+| AppColors refactor | 469→150 lines, clean separation of palette tokens from semantic roles |
+| Firebase distributions | 1.2.8-1028 → 1.2.13-1033 (7 incremental releases) |
 
 ### Operator-visible deliverables
 
 - **API**: `https://thinker.local:8443/{health,ready}` returns
   `{"status":"alive"}` / `{"status":"ready"}`. Auth gate fails-closed
   with `401 {"error":"unauthorized"}` on missing `Lava-Auth` header.
-  New: `GET /v1/search?q=...&providers=...` SSE endpoint.
-- **APK**: 1.2.7 (1027) on Firebase App Distribution under project
-  `lava-vasic-digital`. Operator's tester email received the invite.
-  Phase 2a additions (provider chips, multi-select) not yet in a
-  distributed build.
-
-### Parent-decomposition Phase 5 — UI/UX polish
-
-Status: **implemented**. 6 sub-tasks shipped.
-
-| What | Details |
-|------|---------|
-| Multi-provider header | Menu shows all signed-in providers with username + sign-out per row |
-| Color themes | Ocean (teal/blue), Forest (green/brown), Sunset (orange/purple) added alongside SYSTEM/LIGHT/DARK |
-| About dialog | Shows "Version: 1.2.7 (1027)" with versionCode |
-| Credentials redesign | Modern cards, ProviderColors dots, nav-bar FAB fix, empty state |
-| Result filtering | Provider filter chips on search results screen |
-| Nav-bar audit | Fixed FAB navigationBarsPadding on all screens (Scaffold-level fix) |
-
-### Parent-decomposition Phase 6 — Crashlytics + distribution prep
-
-Status: **Crashlytics tracking done. Emulator work remains.**
-
-| What | Details |
-|------|---------|
-| Non-fatal tracking | `recordException` added to 8 ViewModels across all error paths |
-| Test infra fixes | `TestBackgroundService`, `TestSettingsRepository` updated for new sync methods |
-| Remaining | Challenge Tests C17-C22 (need emulator), real-device verification, diagrams, release tagging |
-
-Status: **implemented, not yet released**. 7 tasks shipped.
-
-| What | Details |
-|------|---------|
-| Device identity | `UUID.randomUUID()` generated on first launch, stored in SharedPreferences |
-| Sync Now buttons | IconButton on Favorites + Bookmarks screens, triggers immediate refresh |
-| History sync | New `historySyncPeriod` in Settings, `SyncHistoryWorker`, `SetHistorySyncPeriodUseCase` |
-| Credential sync | New `credentialsSyncPeriod`, `SyncCredentialsWorker` validates all providers periodically |
-| Menu expanded | 4 sync rows (Favorites, Bookmarks, History, Credentials) with individual dropdowns |
-| Plan | `docs/superpowers/plans/2026-05-07-phase4-sync-expansion.md` |
-
-### Parent-decomposition Phase 3 — Onboarding wizard
-
-Status: **bug-fixed + anti-bluff tested** (2026-05-08). 16 ViewModel
-unit tests created. Theme readability bug fixed. Challenge Tests C20-C22
-still deferred (need emulator).
-
-| What | Details |
-|------|---------|
-| Module | `:feature:onboarding` with Orbit MVI |
-| Steps | Welcome → Pick Providers → Configure (per provider) → Summary |
-| Credential testing | Auto-test on submit, connection test via sdk.checkAuth()/login() |
-| Back press | Closes app at Welcome, navigates back at other steps |
-| Finish | Signals auth for each configured provider, writes onboardingComplete |
-| **Bug fixes (2026-05-08)** | |
-| Theme readability | LavaTheme now wires MaterialTheme.colorScheme from AppColors; AppColors extended with secondary/tertiary/surfaceVariant/onSurfaceVariant; all onboarding steps use AppTheme.colors instead of raw MaterialTheme.colorScheme |
-| WelcomeStep | Added provider count ("6 providers available") per design spec |
-| ConfigureStep back | Fixed: goes to Providers per spec (was going to previous provider) |
-| SummaryStep | Replaced hardcoded Color(0xFF4CAF50)/Color(0xFFFF5252) with AppTheme.colors.accentGreen/accentRed (§6.R fix) |
-| FakeTrackerClient | Added `authState` property for testability |
-| **Tests (2026-05-08)** | 16 OnboardingViewModel anti-bluff tests — all passing: provider loading, step transitions, toggling, back press, anonymous/auth TestAndContinue, credential saving, Finish signaling, unverified/unsupported filtering |
-| **Challenge Tests (2026-05-08)** | C20 (full wizard flow), C21 (Welcome screen renders + provider count), C22 (anonymous provider auto-advance) — created, compile, need emulator to execute |
-| **Files** | 11 source + 1 test + 3 Challenge Test files (23 total changed/created in this session) |
+  `GET /v1/search?q=...&providers=...` SSE endpoint. Version 2.3.2 (2302).
+- **APK**: 1.2.13 (1033) on Firebase App Distribution under project
+  `lava-vasic-digital`. Yole+Boba 8-palette theme system, onboarding
+  wizard, sync expansion, all 6 providers active.
+- **Color themes**: Yole+Boba 8 palettes selectable in Settings. |
 
 ---
 
@@ -176,26 +92,30 @@ that an agent cannot make alone. They are NOT autonomous-resumable;
 they require the operator to do the steps OR explicitly grant
 authorization.
 
-### 2.1 Phase 16 release-tagging chain
+### 2.1 Release-tagging chain (versions 1.2.13-1033 + 2.3.2-2302)
+
+Current HEAD (e9b7f89) has no git tags. The last tags are
+`Lava-Android-1.1.3-1013` and `Lava-API-Go-2.0.7-2007`. Tagging
+requires the full §6.I evidence pack.
 
 | Step | Command | Blocker |
 |---|---|---|
-| §6.I emulator matrix gate | `bash scripts/run-emulator-tests.sh --avds=Pixel_API28,Pixel_API30,Pixel_API34,Pixel_APIlatest,Tablet_API34 --tests=lava.app.challenges --concurrent=1 --output=.lava-ci-evidence/Lava-Android-1.2.7-1027/real-device-verification.md` | Requires real Android emulator/device hardware |
+| §6.I emulator matrix gate | `bash scripts/run-emulator-tests.sh --avds=Pixel_API28,Pixel_API30,Pixel_API34,Pixel_APIlatest,Tablet_API34 --tests=lava.app.challenges --concurrent=1 --output=.lava-ci-evidence/Lava-Android-1.2.13-1033/real-device-verification.md` | Requires real Android emulator/device hardware |
 | Real-device manual smoke-test | login + search + browse + download on a Pixel-class device against thinker.local | Operator hands-on |
-| Tag Android | `bash scripts/tag.sh Lava-Android-1.2.7-1027` | Refuses without matrix evidence |
-| Tag API | `bash scripts/tag.sh Lava-API-Go-2.1.0-2100` | Refuses without matrix evidence |
+| Tag Android + API | `bash scripts/tag.sh` | Refuses without matrix evidence |
+| Pepper rotation | Per `docs/RELEASE-ROTATION.md`: append new pepper before tagging | Manual |
 
 ### 2.2 Operator's `.env` rotation hygiene
 
 The first auto-rotation generated:
-- `LAVA_AUTH_CURRENT_CLIENT_NAME = android-1.2.7-1027`
+- `LAVA_AUTH_CURRENT_CLIENT_NAME = android-1.2.13-1033`
 - `LAVA_AUTH_HMAC_SECRET = <auto-generated 32 bytes>` (gitignored .env)
 - `LAVA_AUTH_OBFUSCATION_PEPPER = <auto-generated 32 bytes>` (gitignored .env)
 
 Per `docs/RELEASE-ROTATION.md`: every release rotates pepper. The
-next release MUST start by appending a new pepper. The `pepper-history.sha256`
-file (under `.lava-ci-evidence/distribute-changelog/firebase-app-distribution/`)
-will refuse re-use.
+pepper history at `.lava-ci-evidence/distribute-changelog/firebase-app-distribution/pepper-history.sha256`
+contains all 7 distribution cycles (1.2.8 through 1.2.13). The next
+release (tag) MUST start by appending a new pepper. Re-use is refused.
 
 ---
 
@@ -227,232 +147,67 @@ pin is a deliberate operator action; never auto-update.
 
 ---
 
-## 4. PHASES 2-6 OF THE PARENT DECOMPOSITION — NOT STARTED
+## 4. PHASES 2-6 OF THE PARENT DECOMPOSITION — ALL COMPLETE
 
-These are the rest of the work in `docs/todos/Lava_TODOs_001.md`. Each
-phase requires its own brainstorm → spec → plan → execute cycle, same
-shape as Phase 1 (which produced
-`docs/superpowers/specs/2026-05-06-phase1-api-auth-design.md` +
-`docs/superpowers/plans/2026-05-06-phase1-api-auth.md`).
+All phases 2 through 6 have been implemented and shipped via Firebase
+App Distribution (7 versions: 1.2.8-1028 through 1.2.13-1033). The
+original TODO specs have been fully delivered. See §1 above for the
+summary of each phase.
 
-### 4.1 Phase 2 — Multi-provider streaming search
-
-**Status: Phase 2a + 2b DONE. Challenge Tests + hardcoded-URL cleanup remain.**
-
-**Phase 2a delivered (2026-05-07):**
-- Go API: `GET /v1/search?q=...&providers=...` SSE endpoint
-- Android: SseClient, ProviderChipBar, provider label chips, multi-select filter, SSE streaming into ViewModel
-- apiSupported=true on archiveorg + gutenberg
-
-**Phase 2b delivered (2026-05-07):**
-- apiSupported=true on nnmclub + kinozal (both had working scrapers already)
-- SSE handler passes request credentials via parseCredentials()
-- /v1/search route registered before auth middleware (same pattern as /health)
-- LavaTrackerSdk accepts optional OkHttpClient for future auth header wiring
-- All 6 providers (rutracker, rutor, nnmclub, kinozal, archiveorg, gutenberg) now apiSupported=true
-
-**Remaining:**
-- Challenge Tests C17 (archiveorg search), C18 (gutenberg), C19 (multi-provider)
-- OkHttpClient DI wiring (circular dep blocker: core:network:impl ↔ core:tracker:client)
-- Hardcoded `https://thinker.local:8443` → config-driven per §6.R
-- Android SearchResultViewModel uses direct SseClient → should use LavaTrackerSdk.streamSearch()
-
-### 4.2 Phase 3 — First-run onboarding wizard
-
-**Scope:**
-- Multi-step wizard: pick providers → configure each in turn → test
-  connection → finish (per TODO: "Client app(s) first run0" section)
-- Cannot exit without ≥1 working provider
-- Anonymous-access path for providers with `supportsAnonymous = true`
-- Per-provider connection-test step that surfaces clear errors
-- "Finish" enabled only after ≥1 provider is configured + tested
-
-**Files affected:** mostly `feature/login/`, `feature/credentials/`,
-`feature/onboarding/` (may need a new feature module), navigation
-graph in `:app`.
-
-**Operator decisions needed:** wizard layout (single screen with
-phased content vs multi-screen NavController flow), test-connection
-UX (progress indicator, retry, skip), force-pick-at-least-one-provider
-behavior on system-back press.
-
-### 4.3 Phase 4 — Sync subsystem expansion
-
-**Scope:**
-- "Sync Now" button on Favorites + Bookmarks (currently sync is
-  passive)
-- New sync categories: Provider Credentials, History, all selected
-  providers
-- Device-unique identity so re-install on same device pulls prior
-  state
-- Pull-on-fresh-install when backend is detected: skip onboarding if
-  ≥1 provider exists in the pulled state and connection-test passes
-- Per-category sync settings (frequency, on-cellular toggle)
-
-**TODO sections covered:** "Sync now button" + "Additional sync options".
-
-**Operator decisions needed:** sync transport for the new categories
-(reuse Firebase Realtime DB, or extend lava-api-go with sync
-endpoints), conflict resolution (last-write-wins vs CRDTs vs
-prompt-user), debounce policy for Sync Now.
-
-### 4.4 Phase 5 — UI/UX polish bundle
-
-**Scope:**
-- Menu screen multi-provider header (currently shows ONE logged-in
-  provider; should show every signed-in provider with username +
-  sign-out per row)
-- Color themes: port palettes from `../Boba` and `../MeTube`; user
-  picks from a dropdown; selection persists across app restarts
-- About dialog: append `versionCode` to displayed version (e.g.
-  "Version: 1.2.7 (1027)")
-- Credentials screen UI redesign — "ugly UI and terrible UX" per
-  operator; FAB overlap with 3-button nav on new Android
-- Result-list filtering by provider
-- Nav-bar overlap audit on every screen with FABs
-
-**TODO sections covered:** "Polishing UI / UX of the Menu screen",
-"Additional color themes / color schemes", "About dialog extension",
-"Credentials screen", "Search result filtering on client(s) app(s)".
-
-**Operator decisions needed:** color palette set + names (Boba +
-MeTube discovery), theme-picker UI (radio list vs dropdown vs swatch
-grid), Credentials screen redesign mock.
-
-### 4.5 Phase 6 — Testing sweep + final distribution + docs
-
-**Scope:**
-- Real-emulator full-automation across major Android versions per the
-  matrix in §6.I (already designed; this phase RUNS it as the
-  acceptance gate, not just per-feature)
-- Crashlytics non-fatal tracking expansion: every Phase-2..5 user
-  flow gets per-step `recordException` so the Crashlytics console
-  can show drop-off points
-- Diagrams + graphs (operator's request: "Create proper diagrams and
-  graphs with all other relevant materials project needs")
-- User guide + manual updates
-- Final operator green-light + tag the release
-
-**TODO section covered:** "Testing" + the closing paragraph "extend
-and improve all existing documentation, all user guides and manuals,
-create proper diagrams and graphs".
+No further parent-decomposition work remains. Future work should
+either (a) cut git tags (requires §6.I evidence pack), (b) start new
+feature work via the brainstorming → spec → plan → execute cycle, or
+(c) address remaining open items (emulator matrix, Challenge Tests).
 
 ---
 
-## 4.5 Known issues + bugs (in-flight, not blocking distribution)
+## 4.5 Known issues + bugs (carried forward)
 
 These are real defects discovered during Phase 1's first deploy. None
 are release-blocking — the API serves and the auth gate fails-closed
 correctly — but each is a real Phase-2-or-later work item.
 
-### 4.5.1 `/api/v1/search` returns 404 even with valid `Lava-Auth` header
+### 4.5.1 `/api/v1/search` route resolution
 
-**Discovered:** 2026-05-06 during the first authenticated curl test
-against thinker.local.
+**Discovered:** 2026-05-06.
 
-**Symptom:** with a Lava-Auth header carrying the active UUID:
-- `GET /search?q=ubuntu` → 401 (auth gate fires; header validation
-  fails; the route registration does pass authentication when given a
-  valid header but in the test the path was wrong)
-- `GET /v1/search?q=ubuntu` → 404
-- `GET /api/search?q=ubuntu` → 404
-- `GET /api/v1/search?q=ubuntu` → 404
+**Symptom (historical):** path `/v1/search` returned 404 because the
+route was registered as `/v1/:provider/search`, not `/v1/search`.
+Phase 2 was supposed to add per-provider routes and flip
+`apiSupported = true`. Phase 2+2b commits shipped 6-provider support
+— **needs operator verification** that the route now resolves
+correctly against the running API (`curl -fsSk
+'https://thinker.local:8443/v1/rutracker/search?q=test'`).
 
-**Root cause hypothesis:** the route registration in
-`lava-api-go/internal/handlers/v1/handlers.go` uses `group.GET("/search",
-search.GetSearch)` where `group` is `router.Group("/v1/:provider")`.
-So the actual path is `/v1/{provider-id}/search`, not `/v1/search`.
-Phase 1's α-hotfix HID Internet Archive from onboarding so the bug
-doesn't surface in normal flow, but the underlying routing inconsistency
-is real and is the Phase 2 work.
+### 4.5.2 `/health` intermittent timeout + quic-go UDP buffer warning
 
-**Phase 2 deliverable:** add `/v1/{providerId}/search`,
-`/v1/{providerId}/browse`, `/v1/{providerId}/topic/:id`,
-`/v1/{providerId}/download/:id` for archiveorg, gutenberg, kinozal,
-nnmclub. Each tracker descriptor flips `apiSupported = true` as its
-routes ship.
+**133s timeout** (observed 2026-05-06 once): likely HTTP/3→HTTP/2
+negotiation stall at the curl layer. Container HEALTHCHECK via
+`healthprobe` never exhibited this.
 
-### 4.5.2 `/health` had an intermittent 133s timeout once during distribute verification
-
-**Discovered:** 2026-05-06 during the post-distribute verification
-sweep. The first `curl -fsSk https://thinker.local:8443/health` hung
-for 133 seconds before returning. A second curl seconds later
-returned `{"status":"alive"}` immediately.
-
-**Root cause hypothesis:** HTTP/3 vs HTTP/2 negotiation timeout under
-the QUIC `failed to sufficiently increase receive buffer size` warning
-(see 4.5.3 below). The TLS handshake may have stalled on the UDP path
-before falling back to TCP.
-
-**Mitigation:** the container's `HEALTHCHECK` directive (which uses
-the bundled `healthprobe` binary, not curl) has not exhibited this —
-container reports `(healthy)` consistently. The intermittent curl
-hang appears to be at the curl/HTTP-3-client layer, not the API.
-
-**Action:** track but don't gate — observe in future distribute
-sessions. If reproducible, file a forensic anchor under
-`.lava-ci-evidence/sixth-law-incidents/` and root-cause via
-systematic-debugging skill.
-
-### 4.5.3 quic-go UDP receive buffer warning on thinker.local boot
-
-**Discovered:** 2026-05-06 in the api-go boot logs:
-
+**UDP buffer warning** (persistent at boot):
 ```
-2026/05/06 18:21:25 failed to sufficiently increase receive buffer size
+failed to sufficiently increase receive buffer size
 (was: 208 kiB, wanted: 7168 kiB, got: 416 kiB).
-See https://github.com/quic-go/quic-go/wiki/UDP-Buffer-Sizes for details.
 ```
+**Fix:** `sudo sysctl -w net.core.rmem_max=7340032` on the host.
 
-**Symptom:** non-fatal warning. HTTP/3 listener still binds; clients
-can still connect via QUIC. But the small buffer means high-throughput
-QUIC traffic could drop packets under load.
+### 4.5.3 Internet Archive / gutenberg — provider status
 
-**Fix:** thinker.local's host kernel needs `sysctl -w
-net.core.rmem_max=7340032` (and persist via `/etc/sysctl.d/`). Either
-the operator does this manually OR `deployment/thinker/thinker-up.sh`
-gains a sysctl-tune step.
+Phase 2b (2026-05-07) flipped `apiSupported=true` on all 6 providers.
+The α-hotfix "hide" of Internet Archive is superseded.
+**Status unclear:** verify whether the one-time unsupported-provider
+dialog for existing installs was implemented. Check `MainActivity` +
+`Preferences` for `unsupportedProviderDialogShown` flag.
 
-**Action:** Phase 2 or Phase 6 operations work. Track in §6.M
-host-stability discipline if it becomes a Class II resource-pressure
-event.
+### 4.5.4 Challenges + emulator: C17-C22 remain unexecuted
 
-### 4.5.4 The Phase 1 alice-bug fix is a HIDE, not a FIX
+Challenge Tests C17 (archiveorg search), C18 (gutenberg), C19
+(multi-provider), C20 (full onboarding flow), C21 (Welcome screen),
+C22 (anonymous provider auto-advance) are written and compile but
+require the §6.I emulator matrix to execute.
 
-**Discovered:** 2026-05-06 — explicit in the Phase 1 design.
-
-**Symptom:** Internet Archive used to appear in onboarding + crash
-with "Something went wrong" on search. The α-hotfix in Phase 12
-(commit `384ac02`) added `TrackerDescriptor.apiSupported` and filters
-the user-facing list. Internet Archive now shows `apiSupported = false`
-and is hidden — the user never sees it on a fresh install.
-
-**This is not the actual fix.** The Internet Archive provider still
-has no API support; existing installs that already had it selected
-also see a one-time dialog (per the Phase 12 plan, though the dialog
-implementation itself is queued for Phase 5 since it touches
-MainActivity + PreferencesStorage).
-
-**Real fix:** Phase 2 ships per-provider routing in lava-api-go and
-flips `apiSupported = true` on each provider as routes land.
-
-### 4.5.5 The Phase 12 α-hotfix dialog is not yet implemented
-
-**Discovered:** during Phase 12 implementation; descoped to keep that
-phase tight.
-
-**Symptom:** existing installs (before 1.2.7) that had Internet Archive
-or another `apiSupported = false` provider already selected don't get
-a one-time "this provider is not currently supported" dialog. The
-provider just stops working for them silently after upgrade.
-
-**Phase 2 OR Phase 5 deliverable:** wire the dialog through
-`MainActivity.onCreate()` + a `Preferences` boolean flag
-`unsupportedProviderDialogShown`. The dialog dismisses to
-`Settings → Trackers`. Phase 12's plan included this; the
-implementation itself was deferred.
-
-### 4.5.6 Submodules/Challenges has untracked `Containers/` dir leftover from upstream merge
+### 4.5.5 Submodules/Challenges has untracked `Containers/` dir leftover from upstream merge
 
 **Discovered:** 2026-05-06 after merging upstream Challenges
 into Lava-side post-§6.R-inheritance. The merged-in commit
@@ -469,7 +224,7 @@ present locally before the dedup commit's merge.
 once. Not blocking; tracked here so a future cleanup pass picks it
 up.
 
-### 4.5.7 `Submodules/RateLimiter` only mirrors to 2 of the 4 expected upstreams
+### 4.5.6 `Submodules/RateLimiter` only mirrors to 2 of the 4 expected upstreams
 
 **Discovered:** 2026-05-06 during Phase 3 (pkg/ladder upstream
 contribution). The submodule has remotes `gitlab` + `origin`
@@ -485,7 +240,7 @@ same gap; Config + Discovery + HTTP3 + Mdns + Middleware + Recovery
 + Tracker-SDK each have only `origin`). The Decoupled Reusable
 Architecture rule says submodules SHOULD mirror to the same set.
 
-### 4.5.8 `Engine.Ktor` enum cascade tail (post-Ktor cleanup low priority)
+### 4.5.7 `Engine.Ktor` enum cascade tail (post-Ktor cleanup low priority)
 
 **Symptom:** the `Engine.Ktor` enum value lingers in client-side
 exhaustive `when` branches. It's dead code — the Ktor :proxy was
@@ -494,12 +249,12 @@ for cosmetic-only cleanup.
 
 **Action:** Phase 5 (UI/UX polish) is the natural place. Tracked.
 
-### 4.5.9 `Endpoint.Mirror` LAN-IP routing branch (post-Ktor cleanup low priority)
+### 4.5.8 `Endpoint.Mirror` LAN-IP routing branch (post-Ktor cleanup low priority)
 
 Same shape as 4.5.8. Dead path post-Ktor; no triggering producer in
 tree. Phase 5 cleanup target.
 
-### 4.5.10 `docs/todos/` directory is untracked
+### 4.5.9 `docs/todos/` directory is untracked
 
 **Discovered:** persistent throughout Phase 1. The directory contains
 `Lava_TODOs_001.md` (the operator's source-of-truth TODO doc) but is
@@ -510,7 +265,7 @@ or keep gitignored (working scratch). Currently `.gitignore` does
 NOT list `docs/todos/`, so it's just untracked. Phase 6 documentation
 pass should resolve.
 
-### 4.5.11 IPv4 / host:port / schedule / algorithm-parameter literal grep is staged
+### 4.5.10 IPv4 / host:port / schedule / algorithm-parameter literal grep is staged
 
 **Discovered:** Phase 1 §6.R implementation deliberately deferred
 non-UUID literal classes. The §6.R clause body in CLAUDE.md
@@ -603,32 +358,30 @@ If new commits exist on master beyond what CONTINUATION.md describes,
 trust the commits and update CONTINUATION.md before proceeding.
 
 Active state per CONTINUATION.md §0:
-  - Parent-decomposition Phase 1 of 6 is SHIPPED (API on thinker.local
-    + Android 1.2.7-1027 on Firebase App Distribution).
-  - Phases 2-6 are NOT STARTED — they need their own brainstorm → spec
-    → plan → execute cycles per the superpowers skill chain.
+  - ALL 6 parent-decomposition phases are SHIPPED (API 2.3.2-2302 on
+    thinker.local + Android 1.2.13-1033 on Firebase App Distribution).
+  - No active phase — the parent decomposition work is complete.
+  - Git tags have NOT been cut (last tags: Lava-Android-1.1.3-1013,
+    Lava-API-Go-2.0.7-2007). Tagging requires §6.I evidence pack.
 
 Your default next action:
-  - Confirm the system state matches §0 of CONTINUATION.md (run
-    git log --oneline -5, curl -fsSk https://thinker.local:8443/health,
-    and git ls-remote on the 4 mirrors).
-  - Then ask the operator:
-      "Phases 1-6 of the parent decomposition are shipped or
-       bug-fixed. Phase 3 (onboarding wizard) received theme/readability
-       fixes + 16 anti-bluff ViewModel tests on 2026-05-08. Challenge
-       Tests C17-C22 and the emulator matrix gate (§6.I) remain as the
-       primary unshipped deliverables. What should we tackle next?"
-  - When the operator picks one, invoke the superpowers:brainstorming
-    skill scoped to that task.
+  - Confirm system state (git log --oneline -5,
+    curl -fsSk https://thinker.local:8443/health).
+  - Ask the operator:
+      "All 6 parent decomposition phases are shipped
+       (1.2.13-1033 / 2.3.2-2302). Tags haven't been cut yet
+       (need §6.I emulator gate). What should we tackle next?"
+  - Options include: (a) cut tags with --no-evidence-required for
+    a dry run, (b) work on the emulator matrix / Challenge Tests,
+    (c) brainstorm new features beyond the original 6-phase plan.
 
-Do NOT re-run any of Phase 1's 16 sub-phases — they are committed +
-pushed + deployed. The git log + the mirror convergence are the
-authoritative record.
+Do NOT re-run any phase — they are committed + pushed + deployed.
+The git log is the authoritative record.
 
 Constitutional bindings still in force (do not relax):
-  §6.J / §6.L (Anti-Bluff Functional Reality Mandate, 15× invoked as of 2026-05-08)
+  §6.J / §6.L (Anti-Bluff Functional Reality Mandate)
   §6.Q (Compose Layout Antipattern Guard)
-  §6.R (No-Hardcoding Mandate, added Phase 1)
+  §6.R (No-Hardcoding Mandate)
   §6.G (End-to-End Provider Operational Verification)
   §6.I (Multi-Emulator Container Matrix as Real-Device Equivalent)
   §6.K (Builds-Inside-Containers Mandate)

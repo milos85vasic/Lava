@@ -1,11 +1,13 @@
 package lava.menu
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
+import lava.auth.api.AuthService
 import lava.credentials.CredentialEncryptor
 import lava.credentials.CredentialsRepository
 import lava.credentials.ProviderCredentialManager
@@ -18,9 +20,13 @@ import lava.domain.usecase.ClearLocalFavoritesUseCase
 import lava.domain.usecase.DiscoverLocalEndpointsUseCaseImpl
 import lava.domain.usecase.ObserveSettingsUseCase
 import lava.domain.usecase.SetBookmarksSyncPeriodUseCase
+import lava.domain.usecase.SetCredentialsSyncPeriodUseCase
 import lava.domain.usecase.SetEndpointUseCaseImpl
 import lava.domain.usecase.SetFavoritesSyncPeriodUseCase
+import lava.domain.usecase.SetHistorySyncPeriodUseCase
 import lava.domain.usecase.SetThemeUseCase
+import lava.models.auth.AuthResult
+import lava.models.auth.AuthState
 import lava.models.settings.Endpoint
 import lava.models.settings.SyncPeriod
 import lava.models.settings.Theme
@@ -91,11 +97,14 @@ class MenuViewModelTest {
     private lateinit var backgroundService: TestBackgroundService
     private lateinit var discoveryService: TestLocalNetworkDiscoveryService
 
+    private lateinit var fakeAuthService: FakeAuthService
+
     @Before
     fun setup() {
         settingsRepository = TestSettingsRepository()
         backgroundService = TestBackgroundService()
         discoveryService = TestLocalNetworkDiscoveryService()
+        fakeAuthService = FakeAuthService()
     }
 
     /**
@@ -187,6 +196,7 @@ class MenuViewModelTest {
             setThemeUseCase = setThemeUseCase,
             sdk = sdk,
             credentialManager = credentialManager,
+            authService = fakeAuthService,
             loggerFactory = TestLoggerFactory(),
             analytics = object : lava.common.analytics.AnalyticsTracker {
                 override fun event(name: String, params: Map<String, String>) {}
@@ -329,5 +339,67 @@ class MenuViewModelTest {
             viewModel.perform(MenuAction.SetBookmarksSyncPeriod(SyncPeriod.OFF))
         }
         assertEquals(SyncPeriod.OFF, settingsRepository.getSettings().bookmarksSyncPeriod)
+    }
+
+    // VM-CONTRACT — SignOut posts ShowSignOutConfirmation side effect instead of signing out directly
+    @Test
+    fun `sign out posts confirmation side effect`() = runTest(dispatcherRule.testDispatcher) {
+        val viewModel = createViewModel()
+        viewModel.test(this) {
+            expectInitialState()
+            viewModel.perform(MenuAction.SignOut("rutracker"))
+            expectSideEffect(MenuSideEffect.ShowSignOutConfirmation("rutracker"))
+            cancelAndIgnoreRemainingItems()
+        }
+    }
+
+    // VM-CONTRACT — ConfirmSignOut calls authService.logout and credentialManager.clear
+    @Test
+    fun `confirm sign out calls auth service logout`() = runTest(dispatcherRule.testDispatcher) {
+        val viewModel = createViewModel()
+        viewModel.test(this) {
+            expectInitialState()
+            viewModel.perform(MenuAction.ConfirmSignOut("rutracker"))
+            expectSideEffect(MenuSideEffect.ShowSignOutSuccess)
+        }
+        assertEquals(true, fakeAuthService.logoutCalled)
+    }
+
+    // VM-CONTRACT — ConfirmSignOut emits ShowSignOutSuccess
+    @Test
+    fun `confirm sign out emits success side effect`() = runTest(dispatcherRule.testDispatcher) {
+        val viewModel = createViewModel()
+        viewModel.test(this) {
+            expectInitialState()
+            viewModel.perform(MenuAction.ConfirmSignOut("rutracker"))
+            expectSideEffect(MenuSideEffect.ShowSignOutSuccess)
+            cancelAndIgnoreRemainingItems()
+        }
+    }
+}
+
+private class FakeAuthService : AuthService {
+    var logoutCalled = false
+    private val _authState = MutableStateFlow<AuthState>(AuthState.Unauthorized)
+
+    override fun observeAuthState(): Flow<AuthState> = _authState.asStateFlow()
+
+    override suspend fun isAuthorized(): Boolean = false
+
+    override suspend fun login(
+        username: String,
+        password: String,
+        captchaSid: String?,
+        captchaCode: String?,
+        captchaValue: String?,
+    ): AuthResult = AuthResult.Error(Exception("fake"))
+
+    override suspend fun logout() {
+        logoutCalled = true
+        _authState.value = AuthState.Unauthorized
+    }
+
+    override suspend fun signalAuthorized(name: String, avatarUrl: String?) {
+        _authState.value = AuthState.Authorized(name, avatarUrl)
     }
 }

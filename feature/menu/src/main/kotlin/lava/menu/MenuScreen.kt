@@ -127,6 +127,17 @@ private fun MenuScreen(
                     onDismiss = confirmationDialogState::hide,
                 )
             }
+            is MenuSideEffect.ShowSignOutConfirmation -> {
+                confirmationDialogState.show(
+                    title = R.string.menu_sign_out_title,
+                    text = R.string.menu_sign_out_confirmation,
+                    onConfirm = { viewModel.perform(MenuAction.ConfirmSignOut(sideEffect.providerId)) },
+                    onDismiss = confirmationDialogState::hide,
+                )
+            }
+            is MenuSideEffect.ShowSignOutSuccess -> {
+                // Provider list is refreshed by loadProviders() in onConfirmSignOut
+            }
         }
     }
     val state by viewModel.collectAsState()

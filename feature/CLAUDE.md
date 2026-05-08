@@ -98,6 +98,18 @@ Every test added to this codebase from this point on MUST satisfy ALL of the fol
 
 6. **Inheritance.** This Sixth Law applies recursively to every submodule, every feature, and every new artifact added to the project (including the Go API service). Submodule constitutions MAY add stricter rules but MUST NOT relax this one.
 
+### §6.R — No-Hardcoding Mandate (inherited 2026-05-06, per §6.F)
+
+See root `/CLAUDE.md` §6.R. No connection address, port, header field name, credential, key, salt, secret, schedule, algorithm parameter, or domain literal shall appear as a string/int constant in tracked source code under `feature/`. Every such value MUST come from `.env` (gitignored), generated config class, runtime env var, or mounted file. Submodule MAY add stricter rules but MUST NOT relax.
+
+### §6.S — Continuation Document Maintenance Mandate (inherited 2026-05-06, per §6.F)
+
+See root `/CLAUDE.md` §6.S. The file `docs/CONTINUATION.md` (in the parent Lava repo) is the single-file source-of-truth handoff document for resuming work across any CLI session. Every commit that changes phase status, lands a new spec/plan, bumps a submodule pin, ships a release artifact, discovers/resolves a known issue, or implements an operator scope directive in `feature/` MUST update `docs/CONTINUATION.md` in the SAME COMMIT. The §0 "Last updated" line MUST track HEAD.
+
+### §6.T — Universal Quality Constraints (inherited 2026-05-06, per §6.F)
+
+See root `/CLAUDE.md` §6.T. All four sub-points (Reproduction-Before-Fix, Resource Limits, No-Force-Push, Bugfix Documentation) apply verbatim to every commit in `feature/`. Submodule MAY add stricter rules but MUST NOT relax.
+
 ---
 
 ## Host Machine Stability Directive (Critical Constraint)
