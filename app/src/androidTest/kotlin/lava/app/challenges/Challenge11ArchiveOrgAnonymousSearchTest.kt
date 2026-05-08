@@ -59,6 +59,7 @@ import androidx.test.filters.SdkSuppress
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import digital.vasic.lava.client.MainActivity
+import lava.app.ResetOnboardingPrefsRule
 import lava.tracker.archiveorg.ArchiveOrgDescriptor
 import org.junit.Assume.assumeTrue
 import org.junit.Rule
@@ -72,6 +73,9 @@ class Challenge11ArchiveOrgAnonymousSearchTest {
     val hiltRule = HiltAndroidRule(this)
 
     @get:Rule(order = 1)
+    val resetPrefs = ResetOnboardingPrefsRule()
+
+    @get:Rule(order = 2)
     val composeRule = createAndroidComposeRule<MainActivity>()
 
     @Test
@@ -88,32 +92,34 @@ class Challenge11ArchiveOrgAnonymousSearchTest {
             ArchiveOrgDescriptor.verified,
         )
 
-        // Step 1: provider list — Internet Archive must appear because
-        // the descriptor is verified=true.
+        // Step 1: Welcome screen.
         composeRule.waitUntil(timeoutMillis = 10_000) {
-            composeRule.onAllNodesWithText("Internet Archive", substring = true, ignoreCase = true)
-                .fetchSemanticsNodes()
-                .isNotEmpty()
+            composeRule.onAllNodesWithText("Welcome to Lava").fetchSemanticsNodes().isNotEmpty()
         }
-        composeRule.onNodeWithText("Internet Archive", substring = true, ignoreCase = true)
-            .performClick()
+        composeRule.onNodeWithText("Get Started").performClick()
 
-        // Step 2: tap Continue. AuthType.NONE — no credentials needed.
-        // This is the EXACT user action that broke before commit 49714c0.
-        composeRule.waitUntil(timeoutMillis = 5_000) {
-            composeRule.onAllNodesWithText("Continue", substring = true, ignoreCase = true)
-                .fetchSemanticsNodes()
-                .isNotEmpty()
+        // Step 2: provider list — pick Internet Archive.
+        composeRule.waitUntil(timeoutMillis = 10_000) {
+            composeRule.onAllNodesWithText("Pick your providers").fetchSemanticsNodes().isNotEmpty()
         }
-        composeRule.onNodeWithText("Continue", substring = true, ignoreCase = true)
-            .performClick()
+        composeRule.onNodeWithText("Internet Archive").performClick()
+        composeRule.onNodeWithText("Next").performClick()
 
-        // Step 3: spinner MUST clear, main app MUST mount, and the
-        // Search tab MUST render the AUTHORIZED empty state — that's
-        // "Search history" (legacy AuthService received the bridge
-        // signal). If it renders "Authorization required to search"
-        // instead, the layer-3 bridge is broken (regression).
-        composeRule.waitUntil(timeoutMillis = 20_000) {
+        // Step 3: configure — tap Continue for AuthType.NONE provider.
+        composeRule.waitUntil(timeoutMillis = 10_000) {
+            composeRule.onAllNodesWithText("Configure Internet Archive").fetchSemanticsNodes().isNotEmpty()
+        }
+        composeRule.onNodeWithText("Continue").performClick()
+
+        // Step 4: Summary screen.
+        composeRule.waitUntil(timeoutMillis = 15_000) {
+            composeRule.onAllNodesWithText("All set!").fetchSemanticsNodes().isNotEmpty()
+        }
+        composeRule.onNodeWithText("Start Exploring").performClick()
+
+        // Step 5: main app MUST mount and the Search tab MUST render
+        // the AUTHORIZED empty state — that's "Search history".
+        composeRule.waitUntil(timeoutMillis = 10_000) {
             composeRule.onAllNodesWithText("Search history").fetchSemanticsNodes().isNotEmpty()
         }
     }

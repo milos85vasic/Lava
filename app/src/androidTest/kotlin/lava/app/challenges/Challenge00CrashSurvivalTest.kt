@@ -80,6 +80,7 @@ import dagger.hilt.android.testing.HiltAndroidTest
 import dagger.hilt.components.SingletonComponent
 import digital.vasic.lava.client.MainActivity
 import kotlinx.coroutines.runBlocking
+import lava.app.ResetOnboardingPrefsRule
 import lava.auth.api.AuthService
 import lava.securestorage.PreferencesStorage
 import lava.securestorage.SignaledAuthState
@@ -106,6 +107,9 @@ class Challenge00CrashSurvivalTest {
     val hiltRule = HiltAndroidRule(this)
 
     @get:Rule(order = 1)
+    val resetPrefs = ResetOnboardingPrefsRule()
+
+    @get:Rule(order = 2)
     val composeRule = createAndroidComposeRule<MainActivity>()
 
     private fun entry(): PersistenceEntryPoint {
@@ -143,20 +147,28 @@ class Challenge00CrashSurvivalTest {
 
         // ===== Act 1: Drive the real onboarding flow on the real device =====
         composeRule.waitUntil(timeoutMillis = 10_000) {
-            composeRule.onAllNodesWithText("Internet Archive", substring = true, ignoreCase = true)
-                .fetchSemanticsNodes()
-                .isNotEmpty()
+            composeRule.onAllNodesWithText("Welcome to Lava").fetchSemanticsNodes().isNotEmpty()
         }
-        composeRule.onNodeWithText("Internet Archive", substring = true, ignoreCase = true)
-            .performClick()
+        composeRule.onNodeWithText("Get Started").performClick()
 
-        composeRule.waitUntil(timeoutMillis = 5_000) {
-            composeRule.onAllNodesWithText("Continue", substring = true, ignoreCase = true)
-                .fetchSemanticsNodes()
-                .isNotEmpty()
+        composeRule.waitUntil(timeoutMillis = 10_000) {
+            composeRule.onAllNodesWithText("Pick your providers").fetchSemanticsNodes().isNotEmpty()
         }
-        composeRule.onNodeWithText("Continue", substring = true, ignoreCase = true)
-            .performClick()
+        arrayOf("RuTracker.org", "RuTor.info", "Kinozal.tv", "NNM-Club", "Project Gutenberg").forEach { name ->
+            try {
+                composeRule.onNodeWithText(name).performClick()
+            } catch (_: AssertionError) { }
+        }
+        composeRule.onNodeWithText("Next").performClick()
+
+        composeRule.waitUntil(timeoutMillis = 10_000) {
+            composeRule.onAllNodesWithText("Configure Internet Archive").fetchSemanticsNodes().isNotEmpty()
+        }
+        composeRule.onNodeWithText("Continue").performClick()
+        composeRule.waitUntil(timeoutMillis = 15_000) {
+            composeRule.onAllNodesWithText("All set!").fetchSemanticsNodes().isNotEmpty()
+        }
+        composeRule.onNodeWithText("Start Exploring").performClick()
 
         composeRule.waitUntil(timeoutMillis = 20_000) {
             composeRule.onAllNodesWithText("Search history").fetchSemanticsNodes().isNotEmpty()

@@ -18,10 +18,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import lava.designsystem.color.ProviderColors
 import lava.designsystem.component.Button
 import lava.designsystem.component.Surface
 import lava.designsystem.component.Text
-import lava.designsystem.color.ProviderColors
 import lava.designsystem.theme.AppTheme
 import lava.onboarding.ProviderOnboardingItem
 

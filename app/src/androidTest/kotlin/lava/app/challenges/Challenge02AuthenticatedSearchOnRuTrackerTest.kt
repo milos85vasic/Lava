@@ -73,6 +73,7 @@ import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import digital.vasic.lava.client.BuildConfig
 import digital.vasic.lava.client.MainActivity
+import lava.app.ResetOnboardingPrefsRule
 import org.junit.Assume.assumeTrue
 import org.junit.Rule
 import org.junit.Test
@@ -85,6 +86,9 @@ class Challenge02AuthenticatedSearchOnRuTrackerTest {
     val hiltRule = HiltAndroidRule(this)
 
     @get:Rule(order = 1)
+    val resetPrefs = ResetOnboardingPrefsRule()
+
+    @get:Rule(order = 2)
     val composeRule = createAndroidComposeRule<MainActivity>()
 
     @Test
@@ -101,38 +105,42 @@ class Challenge02AuthenticatedSearchOnRuTrackerTest {
                 BuildConfig.RUTRACKER_PASSWORD.isNotEmpty(),
         )
 
-        // Step 1: app launches at "Select Provider" screen.
+        // Step 1: Welcome screen
         composeRule.waitUntil(timeoutMillis = 10_000) {
-            composeRule.onAllNodesWithText("Select Provider").fetchSemanticsNodes().isNotEmpty()
+            composeRule.onAllNodesWithText("Welcome to Lava").fetchSemanticsNodes().isNotEmpty()
         }
+        composeRule.onNodeWithText("Get Started").performClick()
 
-        // Step 2: tap "RuTracker.org".
+        // Step 2: provider selection — pick RuTracker.org.
+        composeRule.waitUntil(timeoutMillis = 10_000) {
+            composeRule.onAllNodesWithText("Pick your providers").fetchSemanticsNodes().isNotEmpty()
+        }
         composeRule.onNodeWithText("RuTracker.org").performClick()
+        composeRule.onNodeWithText("Next").performClick()
 
-        // Step 3: wait for the login form (Sign in button visible by
-        // text — disabled until creds are entered, but findable).
-        composeRule.waitUntil(timeoutMillis = 5_000) {
-            composeRule.onAllNodesWithText("Sign in").fetchSemanticsNodes().isNotEmpty()
+        // Step 3: configure — enter credentials and tap Test & Continue.
+        composeRule.waitUntil(timeoutMillis = 10_000) {
+            composeRule.onAllNodesWithText("Configure RuTracker.org").fetchSemanticsNodes().isNotEmpty()
         }
-
-        // Step 4: enter credentials. Username + Password fields are
-        // identified by their content-descriptions (verified empirically
-        // on CZ_API34_Phone).
         composeRule.onNodeWithContentDescription("Username")
             .performTextInput(BuildConfig.RUTRACKER_USERNAME)
         composeRule.onNodeWithContentDescription("Password")
             .performTextInput(BuildConfig.RUTRACKER_PASSWORD)
 
-        // Step 5: tap Sign in. Real-network round-trip to rutracker.org
-        // begins. Login may take several seconds; allow generous timeout.
-        composeRule.onNodeWithText("Sign in").performClick()
+        composeRule.onNodeWithText("Test & Continue").performClick()
 
-        // Step 6: assert main-app bottom-tab nav appears (Sixth Law
+        // Step 4: Summary screen → Start Exploring.
+        composeRule.waitUntil(timeoutMillis = 30_000) {
+            composeRule.onAllNodesWithText("All set!").fetchSemanticsNodes().isNotEmpty()
+        }
+        composeRule.onNodeWithText("Start Exploring").performClick()
+
+        // Step 5: assert main-app bottom-tab nav appears (Sixth Law
         // clause 3 — primary user-visible state). The signalAuthorized
         // bridge (commit 45fd1ae) propagates the auth state to
         // SearchViewModel; the screen renders the "Search history"
         // empty state instead of "Authorization required".
-        composeRule.waitUntil(timeoutMillis = 30_000) {
+        composeRule.waitUntil(timeoutMillis = 10_000) {
             composeRule.onAllNodesWithText("Search history").fetchSemanticsNodes().isNotEmpty()
         }
     }

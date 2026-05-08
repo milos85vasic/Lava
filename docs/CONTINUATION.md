@@ -11,10 +11,10 @@ same commit so the index stays trustworthy. Stale state in this file
 is itself a §6.J spirit issue — the file claims a guarantee, the
 repo has drifted, the agent acts on the claim.
 
-> **Last updated:** 2026-05-08, after all parent decomposition Phases
-> 1-6 shipped + Yole+Boba 8-palette theme system + 7 Firebase
-> distributions (1.2.8-1028 through 1.2.13-1033). CONTINUATION.md
-> fully synced to HEAD (e9b7f89).
+> **Last updated:** 2026-05-08, after constitution propagation (§6.R, §6.S,
+> §6.T) across all submodules + main repo, menu sign-out confirmation flow,
+> onboarding DS refactor, Challenge Tests C23+C24, and full verification
+> pipeline. CONTINUATION.md fully synced to HEAD (852cda8).
 
 > **§6.S binding:** this file is constitutionally load-bearing per
 > root `CLAUDE.md` §6.S. Every commit that changes phase status,
@@ -32,7 +32,7 @@ repo has drifted, the agent acts on the claim.
 
 | Surface | Current state | Pin |
 |---|---|---|
-| Lava parent on master | 4 mirrors: not yet pushed from HEAD | (e9b7f89) |
+| Lava parent on master | 4 mirrors converged at 852cda8 | (852cda8) |
 | API on thinker.local | running 2.3.2 (build 2302) (healthy) | container `lava-api-go-thinker` |
 | Android Firebase | 1.2.13 (1033) distributed to testers | `lava-vasic-digital` Firebase project |
 | 16 vasic-digital submodules | all pushed | see §3 below |

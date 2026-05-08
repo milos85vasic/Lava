@@ -42,6 +42,7 @@ import androidx.test.filters.SdkSuppress
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import digital.vasic.lava.client.MainActivity
+import lava.app.ResetOnboardingPrefsRule
 import org.junit.Rule
 import org.junit.Test
 
@@ -53,6 +54,9 @@ class Challenge20OnboardingWizardFullFlowTest {
     val hiltRule = HiltAndroidRule(this)
 
     @get:Rule(order = 1)
+    val resetPrefs = ResetOnboardingPrefsRule()
+
+    @get:Rule(order = 2)
     val composeRule = createAndroidComposeRule<MainActivity>()
 
     @Test
@@ -64,15 +68,16 @@ class Challenge20OnboardingWizardFullFlowTest {
             composeRule.onAllNodesWithText("Welcome to Lava").fetchSemanticsNodes().isNotEmpty()
         }
         composeRule.onNodeWithText("Welcome to Lava").assertExists()
-        composeRule.onNodeWithText("providers available").assertExists()
+        composeRule.onNodeWithText("providers available", substring = true).assertExists()
         composeRule.onNodeWithText("Get Started").performClick()
 
         // Step 2: Pick Providers — only Internet Archive (anonymous, no creds)
         composeRule.waitUntil(timeoutMillis = 5_000) {
             composeRule.onAllNodesWithText("Pick your providers").fetchSemanticsNodes().isNotEmpty()
         }
-        // Deselect all auth-required providers; keep only Internet Archive
-        arrayOf("RuTracker", "RuTor", "Kinozal", "NNM-Club", "Project Gutenberg").forEach { name ->
+        // Deselect all auth-required providers; keep only Internet Archive.
+        // Use exact displayNames as rendered in ProvidersStep (e.g. "RuTracker.org").
+        arrayOf("RuTracker.org", "RuTor.info", "Kinozal.tv", "NNM-Club", "Project Gutenberg").forEach { name ->
             try {
                 composeRule.onNodeWithText(name).performClick()
             } catch (_: AssertionError) {

@@ -1,6 +1,7 @@
 package lava.onboarding.steps
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -8,15 +9,17 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Switch
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import lava.designsystem.color.ProviderColors
 import lava.designsystem.component.Button
 import lava.designsystem.component.CircularProgressIndicator
 import lava.designsystem.component.OutlinedTextField
 import lava.designsystem.component.Surface
 import lava.designsystem.component.Text
-import lava.designsystem.color.ProviderColors
 import lava.designsystem.theme.AppTheme
 import lava.onboarding.ProviderConfigState
 import lava.tracker.api.AuthType
@@ -29,6 +32,7 @@ fun ConfigureStep(
     isRunning: Boolean,
     onUsernameChanged: (String) -> Unit,
     onPasswordChanged: (String) -> Unit,
+    onToggleAnonymous: (Boolean) -> Unit,
     onTestAndContinue: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -55,9 +59,35 @@ fun ConfigureStep(
                 style = AppTheme.typography.bodyMedium,
                 color = AppTheme.colors.onSurfaceVariant,
             )
-            Spacer(Modifier.height(24.dp))
+            Spacer(Modifier.height(16.dp))
 
-            if (!isAnonymous) {
+            if (!isAnonymous && provider.supportsAnonymous) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Column(Modifier.weight(1f)) {
+                        Text(
+                            text = "Use anonymous access",
+                            style = AppTheme.typography.bodyLarge,
+                        )
+                        Text(
+                            text = "Skip entering credentials",
+                            style = AppTheme.typography.bodySmall,
+                            color = AppTheme.colors.onSurfaceVariant,
+                        )
+                    }
+                    Switch(
+                        checked = config.useAnonymous,
+                        onCheckedChange = onToggleAnonymous,
+                    )
+                }
+                Spacer(Modifier.height(16.dp))
+            }
+
+            Spacer(Modifier.height(if (isAnonymous) 0.dp else 8.dp))
+
+            if (!isAnonymous && !config.useAnonymous) {
                 OutlinedTextField(
                     value = config.username,
                     onValueChange = onUsernameChanged,
@@ -87,7 +117,7 @@ fun ConfigureStep(
 
             Button(
                 onClick = onTestAndContinue,
-                enabled = !isRunning && (isAnonymous || config.username.isNotBlank()),
+                enabled = !isRunning && (isAnonymous || config.useAnonymous || config.username.isNotBlank()),
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 if (isRunning) {
@@ -97,7 +127,7 @@ fun ConfigureStep(
                         color = AppTheme.colors.onPrimary,
                     )
                 } else {
-                    Text(if (isAnonymous) "Continue" else "Test & Continue")
+                    Text(if (isAnonymous || config.useAnonymous) "Continue" else "Test & Continue")
                 }
             }
         }

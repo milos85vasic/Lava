@@ -1,7 +1,6 @@
 package lava.designsystem.theme
 
 import androidx.compose.ui.graphics.luminance
-import kotlin.math.abs
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
@@ -9,6 +8,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
+import kotlin.math.abs
 
 @RunWith(RobolectricTestRunner::class)
 @Config(manifest = Config.NONE, sdk = [33])
@@ -17,9 +17,14 @@ class PaletteContractTest {
     @Test
     fun `all 8 palettes produce valid light colors`() {
         val factories = listOf(
-            { yoleColors(false) }, { draculaColors(false) }, { solarizedColors(false) },
-            { nordColors(false) }, { monokaiColors(false) }, { gruvboxColors(false) },
-            { oneDarkColors(false) }, { tokyoNightColors(false) },
+            { yoleColors(false) },
+            { draculaColors(false) },
+            { solarizedColors(false) },
+            { nordColors(false) },
+            { monokaiColors(false) },
+            { gruvboxColors(false) },
+            { oneDarkColors(false) },
+            { tokyoNightColors(false) },
         )
         for (factory in factories) {
             val colors = factory()
@@ -32,9 +37,14 @@ class PaletteContractTest {
     @Test
     fun `all 8 palettes produce valid dark colors`() {
         val factories = listOf(
-            { yoleColors(true) }, { draculaColors(true) }, { solarizedColors(true) },
-            { nordColors(true) }, { monokaiColors(true) }, { gruvboxColors(true) },
-            { oneDarkColors(true) }, { tokyoNightColors(true) },
+            { yoleColors(true) },
+            { draculaColors(true) },
+            { solarizedColors(true) },
+            { nordColors(true) },
+            { monokaiColors(true) },
+            { gruvboxColors(true) },
+            { oneDarkColors(true) },
+            { tokyoNightColors(true) },
         )
         for (factory in factories) {
             val colors = factory()
@@ -47,10 +57,14 @@ class PaletteContractTest {
     @Test
     fun `each palette has distinct primary color`() {
         val primaries = listOf(
-            PaletteTokens.darculaAccent, PaletteTokens.draculaAccent,
-            PaletteTokens.solarizedAccent, PaletteTokens.nordAccent,
-            PaletteTokens.monokaiAccent, PaletteTokens.gruvboxAccent,
-            PaletteTokens.oneDarkAccent, PaletteTokens.tokyoNightAccent,
+            PaletteTokens.darculaAccent,
+            PaletteTokens.draculaAccent,
+            PaletteTokens.solarizedAccent,
+            PaletteTokens.nordAccent,
+            PaletteTokens.monokaiAccent,
+            PaletteTokens.gruvboxAccent,
+            PaletteTokens.oneDarkAccent,
+            PaletteTokens.tokyoNightAccent,
         )
         assertEquals("all 8 primaries must be unique", 8, primaries.distinct().size)
     }

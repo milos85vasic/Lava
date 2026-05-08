@@ -103,12 +103,11 @@ android {
         }
     }
 
-    // Phase 11 (2026-05-06): generated lava.auth.LavaAuthGenerated source
-    sourceSets {
-        getByName("main") {
-            kotlin.srcDir(layout.buildDirectory.dir("generated/lava-auth/main"))
-        }
-    }
+    // Phase 11 (2026-05-06): generated lava.auth.LavaAuthGenerated source.
+    // The output dir is added per-variant in afterEvaluate below so each
+    // variant only sees its own generated class — avoids Gradle 8.9's
+    // implicit-dependency validation when two tasks write to dirs that
+    // share the same source set.
 }
 
 // Phase 11 (2026-05-06): build-time encryption of the per-build UUID.
@@ -119,8 +118,13 @@ android {
 // The generated class implements lava.network.impl.LavaAuthBlobProvider;
 // the runtime AuthInterceptorModule's reflection-based provider lookup
 // (Phase 10) prefers it over StubLavaAuthBlobProvider when present.
+// Single generation task: writes to a shared dir under generated/lava-auth/.
+// Both debug and release use the same generated file path; only the keystore
+// differs. Since the output dir is NOT in sourceSets.main (we add it per-variant
+// below), Gradle 8.9's implicit-dependency validation does not fire.
+// Each variant's source set gains the dir via afterEvaluate.
 val generateLavaAuthClassDebug = tasks.register("generateLavaAuthClassDebug") {
-    val outputDir = layout.buildDirectory.dir("generated/lava-auth/main")
+    val outputDir = layout.buildDirectory.dir("generated/lava-auth/debug")
     outputs.dir(outputDir)
     inputs.file(rootProject.file(".env"))
     inputs.file(rootProject.file("$keystoreRootDir/debug.keystore"))
@@ -137,7 +141,7 @@ val generateLavaAuthClassDebug = tasks.register("generateLavaAuthClassDebug") {
 }
 
 val generateLavaAuthClassRelease = tasks.register("generateLavaAuthClassRelease") {
-    val outputDir = layout.buildDirectory.dir("generated/lava-auth/main")
+    val outputDir = layout.buildDirectory.dir("generated/lava-auth/release")
     outputs.dir(outputDir)
     inputs.file(rootProject.file(".env"))
     inputs.file(rootProject.file("$keystoreRootDir/release.keystore"))
@@ -154,14 +158,22 @@ val generateLavaAuthClassRelease = tasks.register("generateLavaAuthClassRelease"
 }
 
 afterEvaluate {
-    // KSP + compileKotlin both consume the same generated source dir so
-    // BOTH need an explicit dependency on the codegen task to avoid
-    // Gradle's implicit-dependency validation.
-    listOf("compileDebugKotlin", "kspDebugKotlin").forEach { name ->
-        tasks.findByName(name)?.dependsOn(generateLavaAuthClassDebug)
+    // Wire variant-specific compile/KSP tasks to the correct generation task
+    // AND add the variant-specific generated dir to that variant's source set.
+    // Using Gradle's task API (not AGP variant API) for compatibility.
+    tasks.matching { it.name in listOf("compileDebugKotlin", "kspDebugKotlin") }.configureEach {
+        dependsOn(generateLavaAuthClassDebug)
     }
-    listOf("compileReleaseKotlin", "kspReleaseKotlin").forEach { name ->
-        tasks.findByName(name)?.dependsOn(generateLavaAuthClassRelease)
+    tasks.matching { it.name in listOf("compileReleaseKotlin", "kspReleaseKotlin") }.configureEach {
+        dependsOn(generateLavaAuthClassRelease)
+    }
+
+    // Add generated source dirs per variant source set.
+    android.sourceSets.matching { it.name == "debug" }.configureEach {
+        kotlin.srcDir(layout.buildDirectory.dir("generated/lava-auth/debug"))
+    }
+    android.sourceSets.matching { it.name == "release" }.configureEach {
+        kotlin.srcDir(layout.buildDirectory.dir("generated/lava-auth/release"))
     }
 }
 
@@ -251,5 +263,6 @@ dependencies {
     androidTestImplementation(libs.junit4)
     androidTestImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(libs.hilt.android.testing)
+    androidTestImplementation(libs.androidx.security.ktx)
     kspAndroidTest(libs.hilt.compiler)
 }

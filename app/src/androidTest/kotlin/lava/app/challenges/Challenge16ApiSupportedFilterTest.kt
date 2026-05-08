@@ -40,6 +40,7 @@ import androidx.test.filters.SdkSuppress
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import digital.vasic.lava.client.MainActivity
+import lava.app.ResetOnboardingPrefsRule
 import org.junit.Rule
 import org.junit.Test
 
@@ -51,23 +52,27 @@ class Challenge16ApiSupportedFilterTest {
     val hiltRule = HiltAndroidRule(this)
 
     @get:Rule(order = 1)
+    val resetPrefs = ResetOnboardingPrefsRule()
+
+    @get:Rule(order = 2)
     val composeRule = createAndroidComposeRule<MainActivity>()
 
     @Test
     fun internetArchiveAbsentFromProviderList() {
         hiltRule.inject()
 
-        // Wait for onboarding to render OR for already-onboarded home
-        // tab. Either state is acceptable for this assertion since both
+        // Wait for any rendered screen — home (post-onboarding) or
+        // Welcome screen (fresh install from ResetOnboardingPrefsRule).
+        // Either state is acceptable for this assertion since both
         // surfaces filter on apiSupported.
         composeRule.waitUntil(timeoutMillis = 15_000) {
             composeRule.onAllNodesWithText("Search history")
                 .fetchSemanticsNodes().isNotEmpty() ||
                 composeRule.onAllNodesWithText("Menu")
                     .fetchSemanticsNodes().isNotEmpty() ||
-                composeRule.onAllNodesWithText("RuTracker", ignoreCase = true, substring = true)
+                composeRule.onAllNodesWithText("Welcome to Lava", ignoreCase = true)
                     .fetchSemanticsNodes().isNotEmpty() ||
-                composeRule.onAllNodesWithText("RuTor", ignoreCase = true, substring = true)
+                composeRule.onAllNodesWithText("Get Started", ignoreCase = true)
                     .fetchSemanticsNodes().isNotEmpty()
         }
 

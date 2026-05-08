@@ -121,7 +121,11 @@ class OnboardingViewModel @Inject constructor(
                 if (provider.authType == AuthType.NONE || config.useAnonymous) {
                     sdk.switchTracker(currentId)
                     val result = sdk.checkAuth(currentId)
-                    if (result != AuthState.Authenticated) {
+                    // For AuthType.NONE providers (e.g. Internet Archive), checkAuth may
+                    // return null when the tracker does not implement AuthenticatableTracker.
+                    // null means "auth not applicable" — treat as success. For trackers that
+                    // do implement AuthenticatableTracker and return Unauthenticated, fail.
+                    if (result != null && result != AuthState.Authenticated) {
                         reduce {
                             state.copy(
                                 connectionTestRunning = false,

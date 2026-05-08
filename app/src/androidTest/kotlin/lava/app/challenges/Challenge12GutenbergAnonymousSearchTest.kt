@@ -37,6 +37,7 @@ import androidx.test.filters.SdkSuppress
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import digital.vasic.lava.client.MainActivity
+import lava.app.ResetOnboardingPrefsRule
 import lava.tracker.gutenberg.GutenbergDescriptor
 import org.junit.Assume.assumeTrue
 import org.junit.Rule
@@ -50,6 +51,9 @@ class Challenge12GutenbergAnonymousSearchTest {
     val hiltRule = HiltAndroidRule(this)
 
     @get:Rule(order = 1)
+    val resetPrefs = ResetOnboardingPrefsRule()
+
+    @get:Rule(order = 2)
     val composeRule = createAndroidComposeRule<MainActivity>()
 
     @Test
@@ -62,22 +66,27 @@ class Challenge12GutenbergAnonymousSearchTest {
         )
 
         composeRule.waitUntil(timeoutMillis = 10_000) {
-            composeRule.onAllNodesWithText("Gutenberg", substring = true, ignoreCase = true)
-                .fetchSemanticsNodes()
-                .isNotEmpty()
+            composeRule.onAllNodesWithText("Welcome to Lava").fetchSemanticsNodes().isNotEmpty()
         }
-        composeRule.onNodeWithText("Gutenberg", substring = true, ignoreCase = true)
-            .performClick()
+        composeRule.onNodeWithText("Get Started").performClick()
 
-        composeRule.waitUntil(timeoutMillis = 5_000) {
-            composeRule.onAllNodesWithText("Continue", substring = true, ignoreCase = true)
-                .fetchSemanticsNodes()
-                .isNotEmpty()
+        composeRule.waitUntil(timeoutMillis = 10_000) {
+            composeRule.onAllNodesWithText("Pick your providers").fetchSemanticsNodes().isNotEmpty()
         }
-        composeRule.onNodeWithText("Continue", substring = true, ignoreCase = true)
-            .performClick()
+        composeRule.onNodeWithText("Project Gutenberg").performClick()
+        composeRule.onNodeWithText("Next").performClick()
 
-        composeRule.waitUntil(timeoutMillis = 20_000) {
+        composeRule.waitUntil(timeoutMillis = 10_000) {
+            composeRule.onAllNodesWithText("Configure Project Gutenberg").fetchSemanticsNodes().isNotEmpty()
+        }
+        composeRule.onNodeWithText("Continue").performClick()
+
+        composeRule.waitUntil(timeoutMillis = 15_000) {
+            composeRule.onAllNodesWithText("All set!").fetchSemanticsNodes().isNotEmpty()
+        }
+        composeRule.onNodeWithText("Start Exploring").performClick()
+
+        composeRule.waitUntil(timeoutMillis = 10_000) {
             composeRule.onAllNodesWithText("Search history").fetchSemanticsNodes().isNotEmpty()
         }
     }

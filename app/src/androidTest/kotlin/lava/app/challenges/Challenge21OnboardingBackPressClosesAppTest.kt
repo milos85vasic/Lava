@@ -41,6 +41,7 @@ import androidx.test.filters.SdkSuppress
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import digital.vasic.lava.client.MainActivity
+import lava.app.ResetOnboardingPrefsRule
 import org.junit.Rule
 import org.junit.Test
 
@@ -52,6 +53,9 @@ class Challenge21OnboardingBackPressClosesAppTest {
     val hiltRule = HiltAndroidRule(this)
 
     @get:Rule(order = 1)
+    val resetPrefs = ResetOnboardingPrefsRule()
+
+    @get:Rule(order = 2)
     val composeRule = createAndroidComposeRule<MainActivity>()
 
     @Test
@@ -66,6 +70,6 @@ class Challenge21OnboardingBackPressClosesAppTest {
         }
         composeRule.onNodeWithText("Welcome to Lava").assertIsDisplayed()
         composeRule.onNodeWithText("Get Started").assertIsDisplayed()
-        composeRule.onNodeWithText("providers available").assertIsDisplayed()
+        composeRule.onNodeWithText("providers available", substring = true).assertIsDisplayed()
     }
 }

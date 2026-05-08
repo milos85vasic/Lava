@@ -85,11 +85,12 @@ class Challenge24MenuSignOutFlowTest {
         // Step 3: tap "Theme" to trigger the MenuSelectionDialog
         composeRule.onNodeWithText("Theme").performClick()
 
-        // Step 4: verify the dialog renders with title and options
+        // Step 4: verify the dialog renders with title and options.
+        // "System" appears in both the menu row (current selection) and the
+        // dialog option list, so we check via waitUntil (handles duplicates).
         composeRule.waitUntil(timeoutMillis = 5_000) {
             composeRule.onAllNodesWithText("System").fetchSemanticsNodes().isNotEmpty()
         }
-        composeRule.onNodeWithText("System").assertIsDisplayed()
 
         // Step 5: dismiss by tapping outside or selecting a theme
         composeRule.onNodeWithText("Light").performClick()

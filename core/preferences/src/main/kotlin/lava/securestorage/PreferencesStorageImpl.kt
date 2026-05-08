@@ -15,15 +15,14 @@ import lava.securestorage.utils.edit
 import javax.inject.Inject
 
 internal class PreferencesStorageImpl @Inject constructor(
-    sharedPreferencesFactory: SharedPreferencesFactory,
+    private val sharedPreferencesFactory: SharedPreferencesFactory,
     private val dispatchers: Dispatchers,
 ) : PreferencesStorage {
     private val accountPreferences: SharedPreferences by lazy {
         sharedPreferencesFactory.getSharedPreferences("account")
     }
-    private val settingsPreferences: SharedPreferences by lazy {
-        sharedPreferencesFactory.getSharedPreferences("settings")
-    }
+    private val settingsPreferences: SharedPreferences
+        get() = sharedPreferencesFactory.getSharedPreferences("settings")
     private val ratingPreferences: SharedPreferences by lazy {
         sharedPreferencesFactory.getSharedPreferences("rating")
     }

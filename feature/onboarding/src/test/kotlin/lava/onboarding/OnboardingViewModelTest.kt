@@ -25,7 +25,6 @@ import lava.tracker.api.TrackerDescriptor
 import lava.tracker.client.LavaTrackerSdk
 import lava.tracker.registry.DefaultTrackerRegistry
 import lava.tracker.testing.FakeTrackerClient
-import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before

@@ -65,6 +65,7 @@ fun OnboardingScreen(
                     isRunning = state.connectionTestRunning,
                     onUsernameChanged = { viewModel.perform(OnboardingAction.UsernameChanged(it)) },
                     onPasswordChanged = { viewModel.perform(OnboardingAction.PasswordChanged(it)) },
+                    onToggleAnonymous = { viewModel.perform(OnboardingAction.ToggleAnonymous(it)) },
                     onTestAndContinue = { viewModel.perform(OnboardingAction.TestAndContinue) },
                 )
             }

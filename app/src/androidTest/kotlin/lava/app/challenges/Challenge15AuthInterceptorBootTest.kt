@@ -78,17 +78,18 @@ class Challenge15AuthInterceptorBootTest {
         // AuthInterceptor + LavaAuthBlobProvider bindings. If the
         // reflection-based provider lookup fails OR if the @Multibinds
         // wiring conflicts, the Application crashes during MainActivity
-        // construction and no UI is rendered. Asserting the home-tab
-        // label or the onboarding's "Continue" button proves the boot
-        // chain reached its first frame.
+        // construction and no UI is rendered. Asserting a user-visible
+        // text from either the home screen (post-onboarding) or the
+        // Welcome screen (fresh install) proves the boot chain reached
+        // its first frame.
         composeRule.waitUntil(timeoutMillis = 15_000) {
             val onHome = composeRule.onAllNodesWithText("Search history")
                 .fetchSemanticsNodes().isNotEmpty() ||
                 composeRule.onAllNodesWithText("Menu")
                     .fetchSemanticsNodes().isNotEmpty()
-            val onOnboarding = composeRule.onAllNodesWithText("Continue", ignoreCase = true)
+            val onOnboarding = composeRule.onAllNodesWithText("Welcome to Lava", ignoreCase = true)
                 .fetchSemanticsNodes().isNotEmpty() ||
-                composeRule.onAllNodesWithText("Select", ignoreCase = true, substring = true)
+                composeRule.onAllNodesWithText("Get Started", ignoreCase = true)
                     .fetchSemanticsNodes().isNotEmpty()
             onHome || onOnboarding
         }

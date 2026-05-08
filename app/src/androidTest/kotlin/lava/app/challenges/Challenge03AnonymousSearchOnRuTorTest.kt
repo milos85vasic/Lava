@@ -58,14 +58,13 @@ package lava.app.challenges
 
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
-import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.filters.SdkSuppress
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import digital.vasic.lava.client.MainActivity
-import lava.login.AnonymousAccessSwitchTestTag
+import lava.app.ResetOnboardingPrefsRule
 import org.junit.Rule
 import org.junit.Test
 
@@ -77,35 +76,43 @@ class Challenge03AnonymousSearchOnRuTorTest {
     val hiltRule = HiltAndroidRule(this)
 
     @get:Rule(order = 1)
+    val resetPrefs = ResetOnboardingPrefsRule()
+
+    @get:Rule(order = 2)
     val composeRule = createAndroidComposeRule<MainActivity>()
 
     @Test
     fun toggleAnonymous_pickRuTor_continue_reachesMainApp() {
         hiltRule.inject()
 
-        // Step 1: app starts at "Select Provider" screen.
+        // Step 1: Welcome screen.
         composeRule.waitUntil(timeoutMillis = 10_000) {
-            composeRule.onAllNodesWithText("Select Provider").fetchSemanticsNodes().isNotEmpty()
+            composeRule.onAllNodesWithText("Welcome to Lava").fetchSemanticsNodes().isNotEmpty()
         }
+        composeRule.onNodeWithText("Get Started").performClick()
 
-        // Step 2: toggle the Anonymous Access switch via test tag.
-        composeRule.onNodeWithTag(AnonymousAccessSwitchTestTag).performClick()
-
-        // Step 3: tap RuTor.info. The Phase 1.5 UI gate sees
-        // supportsAnonymous=true && anonymousMode=true → renders the
-        // Continue button on the login screen.
+        // Step 2: provider selection — pick RuTor.info.
+        composeRule.waitUntil(timeoutMillis = 10_000) {
+            composeRule.onAllNodesWithText("Pick your providers").fetchSemanticsNodes().isNotEmpty()
+        }
         composeRule.onNodeWithText("RuTor.info").performClick()
+        composeRule.onNodeWithText("Next").performClick()
 
-        // Step 4: wait for the Continue button on the login screen.
-        composeRule.waitUntil(timeoutMillis = 5_000) {
-            composeRule.onAllNodesWithText("Continue").fetchSemanticsNodes().isNotEmpty()
+        // Step 3: configure — toggle anonymous access, then Continue.
+        composeRule.waitUntil(timeoutMillis = 10_000) {
+            composeRule.onAllNodesWithText("Configure RuTor.info").fetchSemanticsNodes().isNotEmpty()
         }
+        composeRule.onNodeWithText("Use anonymous access").performClick()
         composeRule.onNodeWithText("Continue").performClick()
 
+        // Step 4: Summary screen.
+        composeRule.waitUntil(timeoutMillis = 15_000) {
+            composeRule.onAllNodesWithText("All set!").fetchSemanticsNodes().isNotEmpty()
+        }
+        composeRule.onNodeWithText("Start Exploring").performClick()
+
         // Step 5: assert main-app bottom-tab nav appears (Sixth Law
-        // clause 3 — primary user-visible state). The navigation runs
-        // through OnboardingScreen.onComplete → MainActivity flips
-        // showOnboarding=false → MobileNavigation mounts.
+        // clause 3 — primary user-visible state).
         composeRule.waitUntil(timeoutMillis = 15_000) {
             composeRule.onAllNodesWithText("Search history").fetchSemanticsNodes().isNotEmpty() ||
                 composeRule.onAllNodesWithText("There will be list of recent searches")

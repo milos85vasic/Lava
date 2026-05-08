@@ -35,6 +35,7 @@ import androidx.test.filters.SdkSuppress
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import digital.vasic.lava.client.MainActivity
+import lava.app.ResetOnboardingPrefsRule
 import org.junit.Rule
 import org.junit.Test
 
@@ -46,6 +47,9 @@ class Challenge22OnboardingAnonymousProviderTest {
     val hiltRule = HiltAndroidRule(this)
 
     @get:Rule(order = 1)
+    val resetPrefs = ResetOnboardingPrefsRule()
+
+    @get:Rule(order = 2)
     val composeRule = createAndroidComposeRule<MainActivity>()
 
     @Test
@@ -62,7 +66,7 @@ class Challenge22OnboardingAnonymousProviderTest {
         composeRule.waitUntil(timeoutMillis = 5_000) {
             composeRule.onAllNodesWithText("Pick your providers").fetchSemanticsNodes().isNotEmpty()
         }
-        arrayOf("RuTracker", "RuTor", "Kinozal", "NNM-Club", "Project Gutenberg").forEach { name ->
+        arrayOf("RuTracker.org", "RuTor.info", "Kinozal.tv", "NNM-Club", "Project Gutenberg").forEach { name ->
             try {
                 composeRule.onNodeWithText(name).performClick()
             } catch (_: AssertionError) {
