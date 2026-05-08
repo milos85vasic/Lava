@@ -1,5 +1,14 @@
 # Changelog
 
+## Lava-Android-1.2.12-1032 / Lava-API-Go-2.3.2-2302 — 2026-05-08 (Release build)
+
+**Previous published:** Lava-Android-1.2.11-1031 / Lava-API-Go-2.3.2-2302
+
+First production release build with full signing + ProGuard optimization.
+Includes all fixes from 1.2.9+1.2.10.
+
+---
+
 ## Lava-Android-1.2.11-1031 / Lava-API-Go-2.3.2-2302 — 2026-05-08
 
 **Previous published:** Lava-Android-1.2.10-1030 / Lava-API-Go-2.3.1-2301
