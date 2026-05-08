@@ -11,10 +11,10 @@ same commit so the index stays trustworthy. Stale state in this file
 is itself a §6.J spirit issue — the file claims a guarantee, the
 repo has drifted, the agent acts on the claim.
 
-> **Last updated:** 2026-05-08, after adding §§6.U (No sudo/su), 6.V (Container
-> Emulators), 6.W (GitHub+GitLab only remotes) to root CLAUDE.md/AGENTS.md,
-> propagated to all 16 submodules + lava-api-go, 4-mirror→2-mirror model
-> adopted, and full verification pipeline.
+> **Last updated:** 2026-05-08 19:50 UTC, after Phase 0 of the
+> Full Anti-Bluff Proofing Plan — build stabilized, auth test fixed,
+> all 16 submodules committed + pushed to GitHub+GitLab, GitFlic/GitVerse
+> remotes removed, 2-mirror §6.W enforced.
 
 > **§6.S binding:** this file is constitutionally load-bearing per
 > root `CLAUDE.md` §6.S. Every commit that changes phase status,
@@ -46,6 +46,21 @@ gate steps.
 ---
 
 ## 1. What's DONE (for context — do not re-do)
+
+### Phase 0 — Stabilize Build & Enforce §6.W (2026-05-08)
+
+**Status: COMPLETE. Commits: 9ed7bca (OkHttp fix), 55a702c (Phase 0).**
+
+| Task | Status |
+|------|--------|
+| Fix `:core:auth:impl` FakePreferencesStorage.getDeviceId() | ✓ |
+| Commit 16 submodule constitution propagation (§6.U/V/W) | ✓ |
+| Remove GitFlic, GitVerse, upstream remotes | ✓ |
+| Fix `origin` remote to GitHub+GitLab only | ✓ |
+| Update `scripts/tag.sh` DEFAULT_REMOTES to 2-mirror | ✓ |
+| Delete `Upstreams/GitFlic.sh`, `GitVerse.sh` | ✓ |
+| Add GitLab remotes to 7 submodules lacking them | ✓ |
+| Push parent to both mirrors + verify SHA convergence | ✓ (55a702c on both) |
 
 ### Parent-decomposition Phases 1-6 — ALL SHIPPED
 
@@ -349,22 +364,18 @@ If new commits exist on master beyond what CONTINUATION.md describes,
 trust the commits and update CONTINUATION.md before proceeding.
 
 Active state per CONTINUATION.md §0:
-  - ALL 6 parent-decomposition phases are SHIPPED (API 2.3.2-2302 on
-    thinker.local + Android 1.2.13-1033 on Firebase App Distribution).
-  - No active phase — the parent decomposition work is complete.
-  - Git tags have NOT been cut (last tags: Lava-Android-1.1.3-1013,
-    Lava-API-Go-2.0.7-2007). Tagging requires §6.I evidence pack.
+  - Phase 0 (Stabilize + §6.W) COMPLETE. 55a702c on both mirrors.
+  - Now executing Phase 1: Anti-Bluff Audit of all existing tests.
+  - Full plan at docs/superpowers/specs/2026-05-08-full-anti-bluff-proofing-plan.md
 
 Your default next action:
-  - Confirm system state (git log --oneline -5,
-    curl -fsSk https://thinker.local:8443/health).
-  - Ask the operator:
-      "All 6 parent decomposition phases are shipped
-       (1.2.13-1033 / 2.3.2-2302). Tags haven't been cut yet
-       (need §6.I emulator gate). What should we tackle next?"
-  - Options include: (a) cut tags with --no-evidence-required for
-    a dry run, (b) work on the emulator matrix / Challenge Tests,
-    (c) brainstorm new features beyond the original 6-phase plan.
+  - Execute Phase 1: Anti-Bluff Audit. Tasks:
+    1.1 Inventory all test files
+    1.2 Random sample 5 test files, run falsifiability rehearsal
+    1.3 Check every test for §6.J clause 3 compliance
+    1.4 Refactor identified bluff tests
+    1.5 Check for forbidden test patterns
+    1.6 Verify all Challenge Tests have falsifiability rehearsal protocols in KDoc
 
 Do NOT re-run any phase — they are committed + pushed + deployed.
 The git log is the authoritative record.
