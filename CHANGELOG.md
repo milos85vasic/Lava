@@ -1,5 +1,17 @@
 # Changelog
 
+## Lava-Android-1.2.10-1030 / Lava-API-Go-2.3.1-2301 — 2026-05-08 (Docker auth fix)
+
+**Previous published:** Lava-Android-1.2.9-1029 / Lava-API-Go-2.3.0-2300
+
+### Fixed
+- docker-compose.yml: pass LAVA_AUTH_FIELD_NAME, LAVA_AUTH_HMAC_SECRET, LAVA_AUTH_ACTIVE_CLIENTS, LAVA_AUTH_RETIRED_CLIENTS, LAVA_AUTH_TRUSTED_PROXIES to lava-api-go container (was crashing on startup)
+
+### Changed
+- Go API version → 2.3.1
+
+---
+
 ## Lava-Android-1.2.9-1029 / Lava-API-Go-2.3.0-2300 — 2026-05-08 (Theme fix + anti-bluff onboarding)
 
 **Previous published:** Lava-Android-1.2.8-1028 / Lava-API-Go-2.2.0-2200
