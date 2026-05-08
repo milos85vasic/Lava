@@ -74,6 +74,13 @@ services:
       LAVA_API_TLS_CERT: /etc/lava-api-go/tls/server.crt
       LAVA_API_TLS_KEY:  /etc/lava-api-go/tls/server.key
       LAVA_API_OTLP_ENDPOINT: "http://127.0.0.1:4318" # tempo OTLP HTTP receiver (published from bridge)
+      LAVA_AUTH_FIELD_NAME: "${LAVA_AUTH_FIELD_NAME}"
+      LAVA_AUTH_MIN_SUPPORTED_VERSION_NAME: "${LAVA_AUTH_MIN_SUPPORTED_VERSION_NAME:-1.2.6}"
+      LAVA_AUTH_MIN_SUPPORTED_VERSION_CODE: "${LAVA_AUTH_MIN_SUPPORTED_VERSION_CODE:-1026}"
+      LAVA_AUTH_HMAC_SECRET: "${LAVA_AUTH_HMAC_SECRET}"
+      LAVA_AUTH_ACTIVE_CLIENTS: "${LAVA_AUTH_ACTIVE_CLIENTS}"
+      LAVA_AUTH_RETIRED_CLIENTS: "${LAVA_AUTH_RETIRED_CLIENTS:-}"
+      LAVA_AUTH_TRUSTED_PROXIES: "${LAVA_AUTH_TRUSTED_PROXIES:-}"
     volumes:
       - ./lava-api-go/docker/tls:/etc/lava-api-go/tls:ro
     # NO healthcheck: section here on purpose. The runtime image is
