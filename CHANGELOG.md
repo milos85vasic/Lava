@@ -1,5 +1,13 @@
 # Changelog
 
+## Lava-Android-1.2.11-1031 / Lava-API-Go-2.3.2-2302 — 2026-05-08
+
+**Previous published:** Lava-Android-1.2.10-1030 / Lava-API-Go-2.3.1-2301
+
+(incremental release — see git log for details)
+
+---
+
 ## Lava-Android-1.2.10-1030 / Lava-API-Go-2.3.1-2301 — 2026-05-08 (Docker auth fix)
 
 **Previous published:** Lava-Android-1.2.9-1029 / Lava-API-Go-2.3.0-2300
