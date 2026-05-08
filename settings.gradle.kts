@@ -70,7 +70,6 @@ include(":feature:topic")
 include(":feature:tracker_settings")
 include(":feature:onboarding")
 include(":feature:visited")
-include(":feature:onboarding")
 
 // Tracker-SDK submodule — composite build (pinned via git submodule)
 includeBuild("Submodules/Tracker-SDK") {

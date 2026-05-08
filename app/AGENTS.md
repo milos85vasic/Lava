@@ -10,6 +10,10 @@
 2. **Manifest changes need tests.** Deep links, intent filters, permissions — all must be verified.
 3. **No untested entry points.** `MainActivity`, `TvActivity`, `Application` — initialization logic must be testable or documented with manual verification steps.
 
+### Anti-Bluff Functional Reality Mandate (Constitutional clauses 6.J, 6.L, 6.Q)
+
+Inherited from root `/CLAUDE.md`. CI green is necessary, NEVER sufficient. Every test must confirm the feature actually works for an end user, end-to-end, on the gating matrix. No LazyColumn inside verticalScroll — per §6.Q Compose Layout Antipattern Guard.
+
 ## Build & Release
 
 - Debug APK: `./gradlew :app:assembleDebug`

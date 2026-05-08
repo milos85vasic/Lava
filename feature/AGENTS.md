@@ -11,6 +11,10 @@ All feature modules are bound by the root Anti-Bluff Testing Pact. Key rules for
 3. **Integration Challenge Tests are mandatory.** Every feature must have at least one test wiring real ViewModel → real UseCase → realistic fake repositories.
 4. **No bluff UI tests.** UI tests must verify functional outcomes, not just rendering.
 
+### Anti-Bluff Functional Reality Mandate (Constitutional clauses 6.J, 6.L, 6.Q)
+
+Inherited from root `/CLAUDE.md`. CI green is necessary, NEVER sufficient. Every test must confirm the feature actually works for an end user, end-to-end, on the gating matrix. Tests that pass against deliberately-broken production code are bluffs and must be removed. No LazyColumn inside verticalScroll — per §6.Q Compose Layout Antipattern Guard.
+
 ## Feature-Specific Notes
 
 - `:feature:connection` — Handles endpoint selection and local network discovery. The `ConnectionsViewModel` and `MenuViewModel` both trigger `DiscoverLocalEndpointsUseCase`. Their tests MUST use the real use case to catch discovery logic bugs.

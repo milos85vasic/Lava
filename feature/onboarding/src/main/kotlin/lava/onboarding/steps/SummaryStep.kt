@@ -13,16 +13,15 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import lava.designsystem.color.ProviderColors
 import lava.designsystem.component.Icon
 import lava.designsystem.drawables.LavaIcons
+import lava.designsystem.theme.AppTheme
 import lava.onboarding.ProviderConfigState
 import lava.onboarding.ProviderOnboardingItem
 
@@ -40,13 +39,13 @@ fun SummaryStep(
     ) {
         Text(
             text = "All set!",
-            style = MaterialTheme.typography.headlineMedium,
+            style = AppTheme.typography.headlineMedium,
         )
         Spacer(Modifier.height(8.dp))
         Text(
             text = "Your providers are ready.",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            style = AppTheme.typography.bodyMedium,
+            color = AppTheme.colors.onSurfaceVariant,
         )
         Spacer(Modifier.height(24.dp))
         Column(
@@ -69,13 +68,13 @@ fun SummaryStep(
                     Spacer(Modifier.width(12.dp))
                     Text(
                         text = item.descriptor.displayName,
-                        style = MaterialTheme.typography.bodyLarge,
+                        style = AppTheme.typography.bodyLarge,
                         modifier = Modifier.weight(1f),
                     )
                     Icon(
                         icon = if (isConfigured) LavaIcons.Selected else LavaIcons.Clear,
                         contentDescription = null,
-                        tint = if (isConfigured) Color(0xFF4CAF50) else Color(0xFFFF5252),
+                        tint = if (isConfigured) AppTheme.colors.accentGreen else AppTheme.colors.accentRed,
                     )
                 }
             }

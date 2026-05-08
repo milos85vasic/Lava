@@ -1,5 +1,42 @@
 # Changelog
 
+## Lava-Android-1.2.9-1029 / Lava-API-Go-2.3.0-2300 — 2026-05-08 (Theme fix + anti-bluff onboarding)
+
+**Previous published:** Lava-Android-1.2.8-1028 / Lava-API-Go-2.2.0-2200
+
+### Fixed — Theme readability (critical)
+
+- LavaTheme now wires MaterialTheme.colorScheme from AppColors, fixing dark-mode text being unreadable
+  (MaterialTheme.colorScheme returned light-theme defaults even in dark mode)
+- AppColors extended with secondary, tertiary, surfaceVariant, onSurfaceVariant, error roles
+- All custom themes (Ocean/Forest/Sunset) updated with full Material3 color roles
+
+### Fixed — Onboarding wizard
+
+- WelcomeStep shows provider count ("6 providers available") per design spec
+- ConfigureStep back press now goes to Providers per spec (was going to previous provider)
+- SummaryStep hardcoded colors replaced with AppTheme accents (§6.R No-Hardcoding fix)
+- All onboarding steps use AppTheme.colors/typography/shapes instead of MaterialTheme defaults
+- Anonymous provider TestAndContinue no longer erroneously calls checkAuth for health validation
+
+### Added — Anti-bluff tests
+
+- 16 OnboardingViewModel unit tests (all passing): step transitions, provider toggling, back press, anon/auth TestAndContinue, credential saving, Finish signaling, filtering
+- 3 Challenge Tests (C20-C22) for onboarding wizard — compile, need emulator to execute
+
+### Changed — Constitution
+
+- §6.J/§6.L/§6.Q added to core/, feature/, app/ CLAUDE.md + AGENTS.md (6 files)
+- Lava constitution inheritance added to Panoptic submodule (CLAUDE/AGENTS/CONSTITUTION)
+- FakeTrackerClient now exposes `authState` property for testability
+- Duplicate include(":feature:onboarding") removed from settings.gradle.kts
+
+### Changed — Go API
+
+- version.Name → 2.3.0, Code → 2300
+
+---
+
 ## Lava-Android-1.2.8-1028 / Lava-API-Go-2.2.0-2200 — 2026-05-07 (Phases 2-6)
 
 **Previous published:** Lava-Android-1.2.7-1027 / Lava-API-Go-2.1.0-2100

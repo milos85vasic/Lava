@@ -14,7 +14,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -22,6 +21,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import lava.designsystem.color.ProviderColors
+import lava.designsystem.theme.AppTheme
 import lava.onboarding.ProviderOnboardingItem
 
 @Composable
@@ -39,13 +39,13 @@ fun ProvidersStep(
     ) {
         Text(
             text = "Pick your providers",
-            style = MaterialTheme.typography.headlineSmall,
+            style = AppTheme.typography.headlineSmall,
         )
         Spacer(Modifier.height(8.dp))
         Text(
             text = "Select one or more content providers to configure.",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            style = AppTheme.typography.bodyMedium,
+            color = AppTheme.colors.onSurfaceVariant,
         )
         Spacer(Modifier.height(20.dp))
         Column(
@@ -58,8 +58,8 @@ fun ProvidersStep(
                 Surface(
                     onClick = { onToggle(item.descriptor.trackerId) },
                     modifier = Modifier.fillMaxWidth(),
-                    shape = MaterialTheme.shapes.medium,
-                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                    shape = AppTheme.shapes.medium,
+                    color = AppTheme.colors.surfaceVariant.copy(alpha = 0.5f),
                 ) {
                     Row(
                         modifier = Modifier.padding(16.dp),
@@ -72,12 +72,12 @@ fun ProvidersStep(
                         Column(Modifier.weight(1f)) {
                             Text(
                                 text = item.descriptor.displayName,
-                                style = MaterialTheme.typography.bodyLarge,
+                                style = AppTheme.typography.bodyLarge,
                             )
                             Text(
                                 text = item.descriptor.authType.name,
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                style = AppTheme.typography.labelSmall,
+                                color = AppTheme.colors.onSurfaceVariant,
                             )
                         }
                         Checkbox(

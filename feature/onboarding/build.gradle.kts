@@ -5,6 +5,12 @@ plugins {
 
 android {
     namespace = "lava.onboarding"
+
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = true
+        }
+    }
 }
 
 dependencies {
@@ -21,5 +27,10 @@ dependencies {
     implementation(libs.androidx.compose.material3)
 
     testImplementation(project(":core:testing"))
+    testImplementation(project(":core:tracker:testing"))
+    testImplementation(project(":core:tracker:registry"))
     testImplementation(libs.orbit.test)
+    testImplementation(libs.mockk)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.okhttp.core)
 }

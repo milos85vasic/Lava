@@ -26,6 +26,7 @@ import kotlin.reflect.KClass
 class FakeTrackerClient(override val descriptor: TrackerDescriptor) : TrackerClient {
 
     var healthy: Boolean = true
+    var authState: AuthState = AuthState.Unauthenticated
     var searchResultProvider: (SearchRequest, Int) -> SearchResult =
         { _, _ -> SearchResult(emptyList(), 0, 0) }
     var browseResultProvider: (String?, Int) -> BrowseResult =
@@ -82,13 +83,9 @@ class FakeTrackerClient(override val descriptor: TrackerDescriptor) : TrackerCli
         override suspend fun remove(id: String) = store.remove(id)
     }
     private val auth = object : AuthenticatableTracker {
-        private var state: AuthState = AuthState.Unauthenticated
-        override suspend fun login(req: LoginRequest) = loginProvider(req).also { state = it.state }
-        override suspend fun logout() {
-            state = AuthState.Unauthenticated
-        }
-
-        override suspend fun checkAuth() = state
+        override suspend fun login(req: LoginRequest) = loginProvider(req).also { authState = it.state }
+        override suspend fun checkAuth() = authState
+        override suspend fun logout() { authState = AuthState.Unauthenticated }
     }
     private val download = object : DownloadableTracker {
         override suspend fun downloadTorrentFile(id: String) =

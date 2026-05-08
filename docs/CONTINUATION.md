@@ -11,10 +11,9 @@ same commit so the index stays trustworthy. Stale state in this file
 is itself a §6.J spirit issue — the file claims a guarantee, the
 repo has drifted, the agent acts on the claim.
 
-> **Last updated:** 2026-05-07, after Phases 2-6 of the parent
-> decomposition complete. All 6 phases implemented and pushed to
-> 4 mirrors. Only emulator-requiring work (Challenge Tests C17-C22,
-> real-device verification) remains.
+> **Last updated:** 2026-05-08, after onboarding wizard bug fixes +
+> theme/schema readability fix + 16 anti-bluff ViewModel tests +
+> 3 Challenge Tests (C20-C22) + constitution propagation to 9 files.
 
 > **§6.S binding:** this file is constitutionally load-bearing per
 > root `CLAUDE.md` §6.S. Every commit that changes phase status,
@@ -147,8 +146,9 @@ Status: **implemented, not yet released**. 7 tasks shipped.
 
 ### Parent-decomposition Phase 3 — Onboarding wizard
 
-Status: **implemented, not yet released**. New `:feature:onboarding`
-module. Challenge Tests deferred (need emulator).
+Status: **bug-fixed + anti-bluff tested** (2026-05-08). 16 ViewModel
+unit tests created. Theme readability bug fixed. Challenge Tests C20-C22
+still deferred (need emulator).
 
 | What | Details |
 |------|---------|
@@ -157,7 +157,15 @@ module. Challenge Tests deferred (need emulator).
 | Credential testing | Auto-test on submit, connection test via sdk.checkAuth()/login() |
 | Back press | Closes app at Welcome, navigates back at other steps |
 | Finish | Signals auth for each configured provider, writes onboardingComplete |
-| Files | 11 new files (ViewModel, 4 steps, Screen, state/action/side effect) |
+| **Bug fixes (2026-05-08)** | |
+| Theme readability | LavaTheme now wires MaterialTheme.colorScheme from AppColors; AppColors extended with secondary/tertiary/surfaceVariant/onSurfaceVariant; all onboarding steps use AppTheme.colors instead of raw MaterialTheme.colorScheme |
+| WelcomeStep | Added provider count ("6 providers available") per design spec |
+| ConfigureStep back | Fixed: goes to Providers per spec (was going to previous provider) |
+| SummaryStep | Replaced hardcoded Color(0xFF4CAF50)/Color(0xFFFF5252) with AppTheme.colors.accentGreen/accentRed (§6.R fix) |
+| FakeTrackerClient | Added `authState` property for testability |
+| **Tests (2026-05-08)** | 16 OnboardingViewModel anti-bluff tests — all passing: provider loading, step transitions, toggling, back press, anonymous/auth TestAndContinue, credential saving, Finish signaling, unverified/unsupported filtering |
+| **Challenge Tests (2026-05-08)** | C20 (full wizard flow), C21 (Welcome screen renders + provider count), C22 (anonymous provider auto-advance) — created, compile, need emulator to execute |
+| **Files** | 11 source + 1 test + 3 Challenge Test files (23 total changed/created in this session) |
 
 ---
 
@@ -544,9 +552,12 @@ opportunistically when a related phase touches the area.
   RESOLVED 2026-05-05 evening per `CLAUDE.md` note (Group A-prime
   spec landed).
 - **§6.L** (Anti-Bluff Functional Reality Mandate): the operator has
-  invoked this 14 TIMES. Every test added to Phases 2-6 MUST satisfy
-  the Sixth Law clauses 1-5 + the Seventh Law's Bluff-Audit stamp +
-  the §6.J primary-on-user-visible-state assertion. No exception.
+  invoked this 15 TIMES as of 2026-05-08 (the 15th invocation opened
+  this session: "Onboarding wizard is full of bugs ... Theme colors /
+  color schema is terrible ... Lots bluffing here!"). Every test added
+  MUST satisfy the Sixth Law clauses 1-5 + the Seventh Law's
+  Bluff-Audit stamp + the §6.J primary-on-user-visible-state assertion.
+  No exception.
 - **§6.R** (No-Hardcoding Mandate): added 2026-05-06 in Phase 1.
   Every value (URLs, ports, header names, credentials, schedules,
   algorithm parameters) comes from `.env` or generated config.
@@ -602,19 +613,21 @@ Your default next action:
     git log --oneline -5, curl -fsSk https://thinker.local:8443/health,
     and git ls-remote on the 4 mirrors).
   - Then ask the operator:
-      "Phase 1 of the parent decomposition is shipped. Phases 2-6
-       remain (multi-provider streaming, onboarding wizard, sync
-       expansion, UI/UX polish, testing+distribution sweep). Which
-       phase do you want to brainstorm next?"
+      "Phases 1-6 of the parent decomposition are shipped or
+       bug-fixed. Phase 3 (onboarding wizard) received theme/readability
+       fixes + 16 anti-bluff ViewModel tests on 2026-05-08. Challenge
+       Tests C17-C22 and the emulator matrix gate (§6.I) remain as the
+       primary unshipped deliverables. What should we tackle next?"
   - When the operator picks one, invoke the superpowers:brainstorming
-    skill scoped to that phase.
+    skill scoped to that task.
 
 Do NOT re-run any of Phase 1's 16 sub-phases — they are committed +
 pushed + deployed. The git log + the mirror convergence are the
 authoritative record.
 
 Constitutional bindings still in force (do not relax):
-  §6.J / §6.L (Anti-Bluff Functional Reality Mandate, 14× invoked)
+  §6.J / §6.L (Anti-Bluff Functional Reality Mandate, 15× invoked as of 2026-05-08)
+  §6.Q (Compose Layout Antipattern Guard)
   §6.R (No-Hardcoding Mandate, added Phase 1)
   §6.G (End-to-End Provider Operational Verification)
   §6.I (Multi-Emulator Container Matrix as Real-Device Equivalent)

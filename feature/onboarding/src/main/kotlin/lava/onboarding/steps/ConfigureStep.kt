@@ -10,13 +10,13 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import lava.designsystem.color.ProviderColors
+import lava.designsystem.theme.AppTheme
 import lava.onboarding.ProviderConfigState
 import lava.tracker.api.AuthType
 import lava.tracker.api.TrackerDescriptor
@@ -42,14 +42,14 @@ fun ConfigureStep(
     ) {
         Text(
             text = "Configure ${provider.displayName}",
-            style = MaterialTheme.typography.headlineSmall,
+            style = AppTheme.typography.headlineSmall,
             color = color,
         )
         Spacer(Modifier.height(8.dp))
         Text(
             text = if (isAnonymous) "This provider does not require credentials." else "Enter your credentials for this provider.",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            style = AppTheme.typography.bodyMedium,
+            color = AppTheme.colors.onSurfaceVariant,
         )
         Spacer(Modifier.height(24.dp))
 
@@ -75,8 +75,8 @@ fun ConfigureStep(
         if (config.error != null) {
             Text(
                 text = config.error,
-                color = MaterialTheme.colorScheme.error,
-                style = MaterialTheme.typography.bodySmall,
+                color = AppTheme.colors.error,
+                style = AppTheme.typography.bodySmall,
             )
             Spacer(Modifier.height(12.dp))
         }
@@ -90,7 +90,7 @@ fun ConfigureStep(
                 CircularProgressIndicator(
                     modifier = Modifier.height(20.dp),
                     strokeWidth = 2.dp,
-                    color = MaterialTheme.colorScheme.onPrimary,
+                    color = AppTheme.colors.onPrimary,
                 )
             } else {
                 Text(if (isAnonymous) "Continue" else "Test & Continue")

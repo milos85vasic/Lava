@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -18,9 +17,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import lava.designsystem.component.Icon
 import lava.designsystem.drawables.LavaIcons
+import lava.designsystem.theme.AppTheme
 
 @Composable
 fun WelcomeStep(
+    providerCount: Int,
     onGetStarted: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -39,15 +40,22 @@ fun WelcomeStep(
         Spacer(Modifier.height(24.dp))
         Text(
             text = "Welcome to Lava",
-            style = MaterialTheme.typography.headlineMedium,
+            style = AppTheme.typography.headlineMedium,
             textAlign = TextAlign.Center,
         )
         Spacer(Modifier.height(12.dp))
         Text(
-            text = "Connect to your favorite content providers.\nLet's set everything up.",
-            style = MaterialTheme.typography.bodyLarge,
+            text = "$providerCount providers available",
+            style = AppTheme.typography.bodyLarge,
             textAlign = TextAlign.Center,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            color = AppTheme.colors.onSurfaceVariant,
+        )
+        Spacer(Modifier.height(8.dp))
+        Text(
+            text = "Connect to your favorite content providers.\nLet's set everything up.",
+            style = AppTheme.typography.bodyMedium,
+            textAlign = TextAlign.Center,
+            color = AppTheme.colors.onSurfaceVariant,
         )
         Spacer(Modifier.height(48.dp))
         Button(

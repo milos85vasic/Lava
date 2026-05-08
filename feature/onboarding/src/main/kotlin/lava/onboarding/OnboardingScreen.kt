@@ -47,6 +47,7 @@ fun OnboardingScreen(
     ) { step ->
         when (step) {
             OnboardingStep.Welcome -> WelcomeStep(
+                providerCount = state.providers.size,
                 onGetStarted = { viewModel.perform(OnboardingAction.NextStep) },
             )
             OnboardingStep.Providers -> ProvidersStep(

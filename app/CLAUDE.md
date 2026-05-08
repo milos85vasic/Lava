@@ -6,6 +6,10 @@
 
 > Inherits Laws 1–6 from the root Anti-Bluff Testing Pact in `/CLAUDE.md`. The Sixth Law (Real User Verification) is binding on `:app` — submodule rules below are additive, never relaxing.
 
+### Anti-Bluff Functional Reality Mandate (Constitutional clauses 6.J, 6.L, 6.Q)
+
+Inherited from root `/CLAUDE.md`. CI green is necessary, NEVER sufficient. Every test must confirm the feature actually works for an end user, end-to-end, on the gating matrix (clause 6.I). No LazyColumn inside verticalScroll — per §6.Q. The operator's mandate (invoked 13 times): execution of tests and Challenges MUST guarantee the quality, completion and full usability by end users of the product.
+
 The `:app` module MUST obey the root Anti-Bluff Testing Pact. In addition:
 
 ### Navigation & Integration Tests

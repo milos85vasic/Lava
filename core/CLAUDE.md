@@ -6,6 +6,18 @@
 
 > Inherits Laws 1–7 from the root Anti-Bluff Testing Pact in `/CLAUDE.md`. The Sixth Law (Real User Verification) and the Seventh Law (Anti-Bluff Enforcement, added 2026-04-30) are binding on every core module — submodule rules below are additive, never relaxing. The Seventh Law's `Bluff-Audit:` commit-message stamp, real-stack verification gate, forbidden test patterns, recurring bluff hunt, and inheritance clause all apply here verbatim. Pre-push hooks reject core-module commits that violate any clause.
 
+### Anti-Bluff Functional Reality Mandate (Constitutional clause 6.J)
+
+Every test, every Challenge Test, and every CI gate added to or maintained in core MUST confirm the feature it claims to cover actually works for an end user, end-to-end, on the gating matrix (clause 6.I). CI green is necessary, NEVER sufficient. Any agent or contributor may invoke clause 6.J to remove a test demonstrably bluff (passes against deliberately-broken production code). `@Ignore` without an open issue is a 6.J violation by construction. Tests must guarantee the product works — anything else is theatre.
+
+### Anti-Bluff Functional Reality Mandate, Operator's Standing Order (Constitutional clause 6.L)
+
+Restated verbatim from clause 6.J because the operator has now invoked this mandate **THIRTEEN TIMES** across two working days; the repetition itself is the forensic record. The crash root cause of the 13th invocation was a textbook nested-scroll antipattern (LazyColumn inside Column(verticalScroll)) that no existing test caught — confirming yet again that CI green is necessary, never sufficient. (See §6.Q.) Execution of tests and Challenges MUST guarantee the quality, completion and full usability by end users of the product.
+
+### Compose Layout Antipattern Guard (Constitutional clause 6.Q, added 2026-05-05)
+
+Forbids nesting a vertically-scrolling lazy layout inside a parent that gives unbounded vertical space. Equivalent rule horizontally. Per-feature structural tests + Compose UI Challenge Tests on the §6.I matrix are the load-bearing acceptance gates. Inherits recursively. Tests must guarantee the product works — anything else is theatre.
+
 Every core module MUST obey the root Anti-Bluff Testing Pact. In addition:
 
 ### UseCase Tests

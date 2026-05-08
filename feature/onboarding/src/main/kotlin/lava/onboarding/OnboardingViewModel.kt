@@ -81,11 +81,7 @@ class OnboardingViewModel @Inject constructor(
             OnboardingStep.Welcome -> postSideEffect(OnboardingSideEffect.Finish)
             OnboardingStep.Providers -> reduce { state.copy(step = OnboardingStep.Welcome) }
             OnboardingStep.Configure -> {
-                if (state.currentProviderIndex == 0) {
-                    reduce { state.copy(step = OnboardingStep.Providers) }
-                } else {
-                    reduce { state.copy(currentProviderIndex = state.currentProviderIndex - 1) }
-                }
+                reduce { state.copy(step = OnboardingStep.Providers) }
             }
             OnboardingStep.Summary -> { /* ignore */ }
         }

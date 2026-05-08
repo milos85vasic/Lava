@@ -20,6 +20,10 @@ All core modules are bound by the root Anti-Bluff Testing Pact. Key rules for co
 3. **Service fakes simulate real protocols.** NsdManager returns `_lava._tcp.local.` — the fake must too.
 4. **Every UseCase has an Integration Challenge Test.** Real impl, real fakes, verified side effects.
 
+### Anti-Bluff Functional Reality Mandate (Constitutional clauses 6.J, 6.L, 6.Q)
+
+Inherited from root `/CLAUDE.md`. CI green is necessary, NEVER sufficient. Every test must confirm the feature actually works for an end user, end-to-end, on the gating matrix. Tests that pass against deliberately-broken production code are bluffs and must be removed. No LazyColumn inside verticalScroll — per §6.Q Compose Layout Antipattern Guard.
+
 ## Consequences of Bluff Tests in Core
 
 A bluff test in `core:domain` or `core:data` is especially dangerous because:

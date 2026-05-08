@@ -6,6 +6,10 @@
 
 > Inherits Laws 1–7 from the root Anti-Bluff Testing Pact in `/CLAUDE.md`. The Sixth Law (Real User Verification) and the Seventh Law (Anti-Bluff Enforcement, added 2026-04-30) are binding on every feature module — submodule rules below are additive, never relaxing. The Seventh Law's `Bluff-Audit:` commit-message stamp, real-stack verification gate, pre-tag real-device attestation, forbidden test patterns, recurring bluff hunt, bluff discovery protocol, and inheritance clause all apply here verbatim. Pre-push hooks reject feature commits that violate any clause.
 
+### Anti-Bluff Functional Reality Mandate (Constitutional clauses 6.J, 6.L, 6.Q)
+
+Inherited from root `/CLAUDE.md`. Every test, Challenge Test, and CI gate MUST confirm the feature actually works for an end user, end-to-end, on the gating matrix (clause 6.I). CI green is necessary, NEVER sufficient. Tests that pass against deliberately-broken production code are bluffs and must be removed. No LazyColumn inside verticalScroll — per §6.Q. The operator's mandate (invoked 13 times): execution of tests and Challenges MUST guarantee the quality, completion and full usability by end users of the product.
+
 Every feature module MUST obey the root Anti-Bluff Testing Pact. In addition:
 
 ### ViewModel Tests
