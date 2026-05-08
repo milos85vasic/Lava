@@ -1,4 +1,9 @@
 # Changelog
+## Lava-Android-1.2.13-1033 / Lava-API-Go-2.3.2-2302 — 2026-05-08 (Yole+Boba 8-palette theme system)
+
+Yole semantic color foundation with 8 distinct palettes from Boba project accents.
+
+
 
 ## Lava-Android-1.2.12-1032 / Lava-API-Go-2.3.2-2302 — 2026-05-08 (Release build)
 
