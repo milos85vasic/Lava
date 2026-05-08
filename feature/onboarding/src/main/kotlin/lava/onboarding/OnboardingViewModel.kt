@@ -191,9 +191,15 @@ class OnboardingViewModel @Inject constructor(
 
     private fun onFinish() = intent {
         val configured = state.configs.filter { it.value.configured }
+        val providers = state.providers
         for ((providerId, config) in configured) {
+            val descriptor = providers.find { it.descriptor.trackerId == providerId }?.descriptor
             authService.signalAuthorized(
-                name = if (config.useAnonymous) "Anonymous" else config.username,
+                name = if (config.useAnonymous || descriptor?.authType == AuthType.NONE) {
+                    "Anonymous (${descriptor?.displayName ?: providerId})"
+                } else {
+                    config.username
+                },
                 avatarUrl = null,
             )
         }
