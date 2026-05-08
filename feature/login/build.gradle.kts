@@ -20,4 +20,5 @@ dependencies {
     testImplementation(project(":core:tracker:testing"))
     testImplementation(libs.robolectric)
     testImplementation(libs.bundles.room)
+    testImplementation(libs.ktor.client.okhttp)
 }

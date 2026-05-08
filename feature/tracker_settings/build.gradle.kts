@@ -28,4 +28,5 @@ dependencies {
     testImplementation(libs.robolectric)
     testImplementation(libs.mockk)
     testImplementation(project(":core:tracker:testing"))
+    testImplementation(libs.okhttp.core)
 }

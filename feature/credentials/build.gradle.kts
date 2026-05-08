@@ -26,4 +26,5 @@ dependencies {
     testImplementation(libs.robolectric)
     testImplementation(libs.bundles.room)
     testImplementation(libs.orbit.test)
+    testImplementation(libs.ktor.client.okhttp)
 }
