@@ -3,18 +3,12 @@ package lava.designsystem.theme
 import android.os.Build
 import androidx.annotation.ChecksSdkIntAtLeast
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ProvideTextStyle
-import androidx.compose.material3.Text
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import lava.models.settings.Theme
 
 @Composable
@@ -25,69 +19,51 @@ fun LavaTheme(
     content: @Composable () -> Unit,
 ) {
     val colors = when (theme) {
-        Theme.OCEAN -> oceanColors(isDark)
-        Theme.FOREST -> forestColors(isDark)
-        Theme.SUNSET -> sunsetColors(isDark)
-        else -> if (isDynamic && isMaterialYouAvailable()) {
-            val context = LocalContext.current
-            dynamicColors(context, isDark)
+        Theme.DYNAMIC -> if (isDynamic && isMaterialYouAvailable()) {
+            dynamicColors(LocalContext.current, isDark)
         } else {
-            if (isDark) darkColors() else lightColors()
+            yoleColors(isDark)
         }
+        Theme.DARK -> yoleColors(isDark = true)
+        Theme.LIGHT -> yoleColors(isDark = false)
+        Theme.YOLE, Theme.SYSTEM -> yoleColors(isDark)
+        Theme.DRACULA -> draculaColors(isDark)
+        Theme.SOLARIZED -> solarizedColors(isDark)
+        Theme.NORD -> nordColors(isDark)
+        Theme.MONOKAI -> monokaiColors(isDark)
+        Theme.GRUVBOX -> gruvboxColors(isDark)
+        Theme.ONEDARK -> oneDarkColors(isDark)
+        Theme.TOKYONIGHT -> tokyoNightColors(isDark)
     }
     val materialColorScheme = if (colors.isDark) {
         darkColorScheme(
-            primary = colors.primary,
-            onPrimary = colors.onPrimary,
-            primaryContainer = colors.primaryContainer,
-            onPrimaryContainer = colors.onPrimaryContainer,
-            secondary = colors.secondary,
-            onSecondary = colors.onSecondary,
-            secondaryContainer = colors.secondaryContainer,
-            onSecondaryContainer = colors.onSecondaryContainer,
-            tertiary = colors.tertiary,
-            onTertiary = colors.onTertiary,
-            tertiaryContainer = colors.tertiaryContainer,
-            onTertiaryContainer = colors.onTertiaryContainer,
-            background = colors.background,
-            onBackground = colors.onBackground,
-            surface = colors.surface,
-            onSurface = colors.onSurface,
-            surfaceVariant = colors.surfaceVariant,
-            onSurfaceVariant = colors.onSurfaceVariant,
-            error = colors.error,
-            onError = colors.onError,
-            errorContainer = colors.errorContainer,
-            onErrorContainer = colors.onErrorContainer,
-            outline = colors.outline,
-            outlineVariant = colors.outlineVariant,
+            primary = colors.primary, onPrimary = colors.onPrimary,
+            primaryContainer = colors.primaryContainer, onPrimaryContainer = colors.onPrimaryContainer,
+            secondary = colors.secondary, onSecondary = colors.onSecondary,
+            secondaryContainer = colors.secondaryContainer, onSecondaryContainer = colors.onSecondaryContainer,
+            tertiary = colors.tertiary, onTertiary = colors.onTertiary,
+            tertiaryContainer = colors.tertiaryContainer, onTertiaryContainer = colors.onTertiaryContainer,
+            background = colors.background, onBackground = colors.onBackground,
+            surface = colors.surface, onSurface = colors.onSurface,
+            surfaceVariant = colors.surfaceVariant, onSurfaceVariant = colors.onSurfaceVariant,
+            error = colors.error, onError = colors.onError,
+            errorContainer = colors.errorContainer, onErrorContainer = colors.onErrorContainer,
+            outline = colors.outline, outlineVariant = colors.outlineVariant,
         )
     } else {
         lightColorScheme(
-            primary = colors.primary,
-            onPrimary = colors.onPrimary,
-            primaryContainer = colors.primaryContainer,
-            onPrimaryContainer = colors.onPrimaryContainer,
-            secondary = colors.secondary,
-            onSecondary = colors.onSecondary,
-            secondaryContainer = colors.secondaryContainer,
-            onSecondaryContainer = colors.onSecondaryContainer,
-            tertiary = colors.tertiary,
-            onTertiary = colors.onTertiary,
-            tertiaryContainer = colors.tertiaryContainer,
-            onTertiaryContainer = colors.onTertiaryContainer,
-            background = colors.background,
-            onBackground = colors.onBackground,
-            surface = colors.surface,
-            onSurface = colors.onSurface,
-            surfaceVariant = colors.surfaceVariant,
-            onSurfaceVariant = colors.onSurfaceVariant,
-            error = colors.error,
-            onError = colors.onError,
-            errorContainer = colors.errorContainer,
-            onErrorContainer = colors.onErrorContainer,
-            outline = colors.outline,
-            outlineVariant = colors.outlineVariant,
+            primary = colors.primary, onPrimary = colors.onPrimary,
+            primaryContainer = colors.primaryContainer, onPrimaryContainer = colors.onPrimaryContainer,
+            secondary = colors.secondary, onSecondary = colors.onSecondary,
+            secondaryContainer = colors.secondaryContainer, onSecondaryContainer = colors.onSecondaryContainer,
+            tertiary = colors.tertiary, onTertiary = colors.onTertiary,
+            tertiaryContainer = colors.tertiaryContainer, onTertiaryContainer = colors.onTertiaryContainer,
+            background = colors.background, onBackground = colors.onBackground,
+            surface = colors.surface, onSurface = colors.onSurface,
+            surfaceVariant = colors.surfaceVariant, onSurfaceVariant = colors.onSurfaceVariant,
+            error = colors.error, onError = colors.onError,
+            errorContainer = colors.errorContainer, onErrorContainer = colors.onErrorContainer,
+            outline = colors.outline, outlineVariant = colors.outlineVariant,
         )
     }
     CompositionLocalProvider(LocalColors provides colors) {
@@ -97,43 +73,3 @@ fun LavaTheme(
 
 @ChecksSdkIntAtLeast(api = Build.VERSION_CODES.S)
 fun isMaterialYouAvailable() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
-
-@Preview(
-    group = "Text Styles",
-    showBackground = true,
-)
-@Composable
-private fun TextStylesPreview() {
-    Column(modifier = Modifier.padding(AppTheme.spaces.large)) {
-        ProvideTextStyle(AppTheme.typography.labelSmall) { Text(text = "displayLarge") }
-        ProvideTextStyle(AppTheme.typography.displayLarge) { Text(text = "Hello, World!") }
-        ProvideTextStyle(AppTheme.typography.labelSmall) { Text(text = "displayMedium") }
-        ProvideTextStyle(AppTheme.typography.displayMedium) { Text(text = "Hello, World!") }
-        ProvideTextStyle(AppTheme.typography.labelSmall) { Text(text = "displaySmall") }
-        ProvideTextStyle(AppTheme.typography.displaySmall) { Text(text = "Hello, World!") }
-        ProvideTextStyle(AppTheme.typography.labelSmall) { Text(text = "headlineLarge") }
-        ProvideTextStyle(AppTheme.typography.headlineLarge) { Text(text = "Hello, World!") }
-        ProvideTextStyle(AppTheme.typography.labelSmall) { Text(text = "headlineMedium") }
-        ProvideTextStyle(AppTheme.typography.headlineMedium) { Text(text = "Hello, World!") }
-        ProvideTextStyle(AppTheme.typography.labelSmall) { Text(text = "headlineSmall") }
-        ProvideTextStyle(AppTheme.typography.headlineSmall) { Text(text = "Hello, World!") }
-        ProvideTextStyle(AppTheme.typography.labelSmall) { Text(text = "titleLarge") }
-        ProvideTextStyle(AppTheme.typography.titleLarge) { Text(text = "Hello, World!") }
-        ProvideTextStyle(AppTheme.typography.labelSmall) { Text(text = "titleMedium") }
-        ProvideTextStyle(AppTheme.typography.titleMedium) { Text(text = "Hello, World!") }
-        ProvideTextStyle(AppTheme.typography.labelSmall) { Text(text = "titleSmall") }
-        ProvideTextStyle(AppTheme.typography.titleSmall) { Text(text = "Hello, World!") }
-        ProvideTextStyle(AppTheme.typography.labelSmall) { Text(text = "bodyLarge") }
-        ProvideTextStyle(AppTheme.typography.bodyLarge) { Text(text = "Hello, World!") }
-        ProvideTextStyle(AppTheme.typography.labelSmall) { Text(text = "bodyMedium") }
-        ProvideTextStyle(AppTheme.typography.bodyMedium) { Text(text = "Hello, World!") }
-        ProvideTextStyle(AppTheme.typography.labelSmall) { Text(text = "bodySmall") }
-        ProvideTextStyle(AppTheme.typography.bodySmall) { Text(text = "Hello, World!") }
-        ProvideTextStyle(AppTheme.typography.labelSmall) { Text(text = "labelLarge") }
-        ProvideTextStyle(AppTheme.typography.labelLarge) { Text(text = "Hello, World!") }
-        ProvideTextStyle(AppTheme.typography.labelSmall) { Text(text = "labelMedium") }
-        ProvideTextStyle(AppTheme.typography.labelMedium) { Text(text = "Hello, World!") }
-        ProvideTextStyle(AppTheme.typography.labelSmall) { Text(text = "labelSmall") }
-        ProvideTextStyle(AppTheme.typography.labelSmall) { Text(text = "Hello, World!") }
-    }
-}

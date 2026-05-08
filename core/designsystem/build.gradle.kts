@@ -5,6 +5,12 @@ plugins {
 
 android {
     namespace = "lava.designsystem"
+
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = true
+        }
+    }
 }
 
 kotlin {
@@ -34,4 +40,10 @@ dependencies {
     implementation(libs.material3)
 
     debugApi(libs.androidx.compose.ui.tooling)
+
+    testImplementation(libs.junit4)
+    testImplementation(libs.mockk)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.androidx.test.core)
+    testImplementation(project(":core:testing"))
 }

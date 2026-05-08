@@ -41,9 +41,17 @@
 
     <string name="theme_dark">Dark</string>
     <string name="theme_dynamic">Adaptive</string>
-    <string name="theme_forest">Forest</string>
     <string name="theme_light">Light</string>
+    <string name="theme_forest">Forest</string>
     <string name="theme_ocean">Ocean</string>
     <string name="theme_sunset">Sunset</string>
+    <string name="theme_yole">Yole</string>
+    <string name="theme_dracula">Dracula</string>
+    <string name="theme_solarized">Solarized</string>
+    <string name="theme_nord">Nord</string>
+    <string name="theme_monokai">Monokai</string>
+    <string name="theme_gruvbox">Gruvbox</string>
+    <string name="theme_one_dark">One Dark</string>
+    <string name="theme_tokyo_night">Tokyo Night</string>
     <string name="theme_system">System</string>
 </resources>

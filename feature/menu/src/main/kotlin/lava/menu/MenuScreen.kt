@@ -170,9 +170,14 @@ private fun MenuScreen(
                         Theme.DYNAMIC -> LavaIcons.ThemeDynamic
                         Theme.DARK -> LavaIcons.ThemeDark
                         Theme.LIGHT -> LavaIcons.ThemeLight
-                        Theme.OCEAN -> LavaIcons.ThemeOcean
-                        Theme.FOREST -> LavaIcons.ThemeForest
-                        Theme.SUNSET -> LavaIcons.ThemeSunset
+                        Theme.YOLE -> LavaIcons.ThemeYole
+                        Theme.DRACULA -> LavaIcons.ThemeDracula
+                        Theme.SOLARIZED -> LavaIcons.ThemeSolarized
+                        Theme.NORD -> LavaIcons.ThemeNord
+                        Theme.MONOKAI -> LavaIcons.ThemeMonokai
+                        Theme.GRUVBOX -> LavaIcons.ThemeGruvbox
+                        Theme.ONEDARK -> LavaIcons.ThemeOneDark
+                        Theme.TOKYONIGHT -> LavaIcons.ThemeTokyoNight
                     },
                     contentDescription = null,
                 )
@@ -642,9 +647,14 @@ private val Theme.resId: Int
         Theme.DYNAMIC -> R.string.theme_dynamic
         Theme.DARK -> R.string.theme_dark
         Theme.LIGHT -> R.string.theme_light
-        Theme.OCEAN -> R.string.theme_ocean
-        Theme.FOREST -> R.string.theme_forest
-        Theme.SUNSET -> R.string.theme_sunset
+        Theme.YOLE -> R.string.theme_yole
+        Theme.DRACULA -> R.string.theme_dracula
+        Theme.SOLARIZED -> R.string.theme_solarized
+        Theme.NORD -> R.string.theme_nord
+        Theme.MONOKAI -> R.string.theme_monokai
+        Theme.GRUVBOX -> R.string.theme_gruvbox
+        Theme.ONEDARK -> R.string.theme_one_dark
+        Theme.TOKYONIGHT -> R.string.theme_tokyo_night
     }
 
 private val SyncPeriod.resId: Int

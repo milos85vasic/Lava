@@ -38,11 +38,9 @@ fun MainScreen(
 private fun Theme.isDark(): Boolean = when (this) {
     Theme.DARK -> true
     Theme.LIGHT -> false
-    Theme.OCEAN -> true
-    Theme.FOREST -> true
-    Theme.SUNSET -> true
-    Theme.SYSTEM -> isSystemInDarkTheme()
-    Theme.DYNAMIC -> isSystemInDarkTheme()
+    Theme.SYSTEM, Theme.DYNAMIC, Theme.YOLE, Theme.DRACULA, Theme.SOLARIZED,
+    Theme.NORD, Theme.MONOKAI, Theme.GRUVBOX, Theme.ONEDARK, Theme.TOKYONIGHT,
+    -> isSystemInDarkTheme()
 }
 
 private fun Theme.isDynamic(): Boolean = this == Theme.DYNAMIC
