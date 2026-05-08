@@ -214,6 +214,16 @@ class AuthServiceImplPersistenceTest {
         override suspend fun clearSignaledAuthState() {
             signaled = null
         }
+
+        override fun getDeviceId(): String = "fake-device-id-for-testing"
+
+        private var historySyncPeriod: SyncPeriod = SyncPeriod.OFF
+        private var credentialsSyncPeriod: SyncPeriod = SyncPeriod.OFF
+
+        override fun getHistorySyncPeriod(): SyncPeriod = historySyncPeriod
+        override fun setHistorySyncPeriod(period: SyncPeriod) { historySyncPeriod = period }
+        override fun getCredentialsSyncPeriod(): SyncPeriod = credentialsSyncPeriod
+        override fun setCredentialsSyncPeriod(period: SyncPeriod) { credentialsSyncPeriod = period }
     }
 
     /**

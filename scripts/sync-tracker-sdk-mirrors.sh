@@ -3,10 +3,7 @@
 # Pushes the Submodules/Tracker-SDK/ working tree to its 2 configured upstreams
 # (GitHub + GitLab). Local-only — no hosted CI invoked. Operator-controlled.
 #
-# Spec deviation 2026-04-30: original plan was 4 upstreams (incl. GitFlic +
-# GitVerse); operator authorized 2-upstream scope. To restore 4-upstream
-# mirroring later, append the gitflic/gitverse entries to UPSTREAMS below
-# and re-run.
+# Only GitHub + GitLab per constitutional clause §6.W (added 2026-05-08).
 
 set -euo pipefail
 

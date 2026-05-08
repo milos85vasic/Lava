@@ -26,7 +26,7 @@ NO_EVIDENCE_REQUIRED=false
 declare -a EXPLICIT_REMOTES=()
 
 # Default upstreams (used if --remote is not given).
-DEFAULT_REMOTES=(github gitflic gitlab gitverse)
+DEFAULT_REMOTES=(github gitlab)
 
 # Apps registry.
 SUPPORTED_APPS=(android api-go)
@@ -78,7 +78,7 @@ OPTIONS
       --remote <name>     Push only to this named git remote. Repeat to push to
                           a custom subset (e.g. --remote github --remote gitlab).
                           When omitted, every default upstream that is
-                          configured is used: github, gitflic, gitlab, gitverse.
+                           configured is used: github, gitlab.
 
 EXAMPLES
   # Preview a full tag pass; no git mutations are performed.

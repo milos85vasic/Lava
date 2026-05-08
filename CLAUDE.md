@@ -66,11 +66,9 @@ The repo is a fork of `andrikeev/Flow`, rebranded to Lava. All code/comments/doc
 # Release tagging — refuses without local CI evidence + real-device attestation
 ./scripts/tag.sh <tag>
 
-# Mirror sync (4 upstreams: GitHub, GitLab, GitFlic, GitVerse)
+# Mirror sync (2 upstreams: GitHub, GitLab)
 ./Upstreams/GitHub.sh
 ./Upstreams/GitLab.sh
-./Upstreams/GitFlic.sh
-./Upstreams/GitVerse.sh
 ./scripts/sync-tracker-sdk-mirrors.sh
 ```
 
@@ -267,7 +265,7 @@ The lava-api-go integration tests already do this (real Gin engine via httptest,
 
 ##### 6.C — Mirror-state mismatch checks before tagging (added 2026-04-29)
 
-When mirroring across N upstreams, "all four mirrors push succeeded" is one assertion; "all four mirrors converge to the same SHA at HEAD" is a stronger one. A push that fences against branch protection on one mirror but goes through on the others produces a green-looking session log and a divergent state at rest. `scripts/tag.sh` MUST verify post-push that all four mirrors report the same tip SHA before reporting success. Future releases of `tag.sh` SHOULD record the per-mirror SHA in the evidence file alongside the pretag-verify probe results.
+When mirroring across N upstreams, "all mirrors push succeeded" is one assertion; "all mirrors converge to the same SHA at HEAD" is a stronger one. A push that fences against branch protection on one mirror but goes through on the others produces a green-looking session log and a divergent state at rest. `scripts/tag.sh` MUST verify post-push that both upstreams report the same tip SHA before reporting success. Future releases of `tag.sh` SHOULD record the per-mirror SHA in the evidence file alongside the pretag-verify probe results.
 
 ##### 6.D — Behavioral Coverage Contract (added 2026-04-30, SP-3a)
 
@@ -304,7 +302,7 @@ Rule: Files containing real credentials, signing keys, or API secrets MUST never
 3. **`app/google-services.json` is inviolable.** The root `.gitignore` MUST contain this file. It contains Firebase API keys.
 4. **No credential strings in source code.** No hardcoded username, password, API key, or token shall exist in any `.kt`, `.java`, `.go`, `.gradle`, `.md`, or `.xml` file. The only permissible location for real credentials is `.env` (gitignored) or a local secrets manager.
 5. **Pre-push credential scan.** The pre-push hook MUST reject any push that introduces a file matching `.env*` or `*.keystore` or that adds a line matching credential patterns (`password=`, `api_key=`, etc.) to tracked files. `scripts/check-constitution.sh` MUST verify this.
-6. **Leak response protocol.** If credentials are accidentally committed, the commit MUST be purged from all four upstreams immediately, credentials MUST be rotated, and the incident MUST be recorded in `.lava-ci-evidence/sixth-law-incidents/` per the Seventh Law clause 6 protocol.
+6. **Leak response protocol.** If credentials are accidentally committed, the commit MUST be purged from all upstreams immediately, credentials MUST be rotated, and the incident MUST be recorded in `.lava-ci-evidence/sixth-law-incidents/` per the Seventh Law clause 6 protocol.
 7. **Inheritance.** This clause inherits recursively to every submodule. Submodule constitutions MAY add stricter rules but MUST NOT relax this one.
 
 ##### 6.I — Multi-Emulator Container Matrix as Real-Device Equivalent (added 2026-05-04)
@@ -646,6 +644,89 @@ The closure log is the operator-visible audit trail: a bug "fixed" without an en
 
 **Inheritance.** All four sub-points apply recursively to every submodule, every feature, every new artifact (including `lava-api-go`). Submodule constitutions MAY add stricter rules but MUST NOT relax any of §6.T.1, §6.T.2, §6.T.3, §6.T.4.
 
+##### 6.U — No sudo/su Mandate (added 2026-05-08)
+
+**Forensic anchor:** 2026-05-08 operator directive: "Any use of sudo or su is strictly forbidden! This MUST BE part of all submodules and main project Constitution, CLAUDE.MD and AGENTS.MD! Any action that requires use of su or sudo MUST BE performed within local project or Submodule context with adding local dependencies (as new additional Submodules) which can be fully automatically built and used in local context!"
+
+**Rule.** Every invocation of `sudo` or `su` (including `sudo -u`, `sudo -E`, `su -`, `su -l`, `sudo su`) is strictly forbidden in any committed script, agent tool call, Makefile, Dockerfile, compose file, test, or any other artifact in this codebase. Operations that require elevated privileges MUST be performed via:
+
+1. **Container-based solutions** using the `vasic-digital/Containers` submodule (rootless Podman/Docker). If a build or runtime environment requires system-level dependencies, containerize the dependency rather than escalating privileges on the host.
+2. **Local project or Submodule dependencies** — add new Submodules that provide the required capability in a fully self-contained, automatically buildable manner.
+3. **User-level alternatives** for every privileged operation: user systemd units instead of system-level service files, local port forwarding instead of privileged port binding, user namespaces instead of root-owned resources.
+
+**Why this matters.** Privilege escalation is:
+- **A security risk** — any bug or exploit in code run via sudo gains root access to the host.
+- **A reproducibility hazard** — operations that require sudo depend on the operator having sudo rights and a specific sudoers configuration, which is not portable across developer machines or CI runners.
+- **A Constitutional violation directly** — the Host Machine Stability Directive (below) already forbids commands that lead to host suspend/poweroff; `sudo` on an untrusted script has exactly that blast radius.
+
+**When you encounter a suggestion requiring sudo/su:**
+1. STOP immediately.
+2. Find a user-level alternative (rootless Podman, user namespaces, local-only ports).
+3. If no user-level alternative exists, add a Submodule that provides the capability in a self-contained containerized build.
+4. Never modify the suggestion to "just use sudo" or "add the user to sudoers" — those are constitutional violations.
+
+**Mechanical enforcement.** `scripts/check-constitution.sh` MUST grep tracked files for `sudo `, `sudo\t`, `su `, `su -`, and `su -l` patterns. Pre-push hook rejects on any match. Exemptions: `.env.example` (may show sudo patterns for documentation), incident docs under `.lava-ci-evidence/sixth-law-incidents/` (forensic records may quote historical invocations). `scripts/run-emulator-tests.sh` and every script in the repository MUST NOT contain `sudo` or `su`.
+
+**Inheritance.** Applies recursively to every submodule, every feature, every new artifact (including `lava-api-go`). Submodule constitutions MAY add stricter rules but MUST NOT relax this clause.
+
+##### 6.V — Container Emulators Mandate (added 2026-05-08)
+
+**Forensic anchor:** 2026-05-08 operator directive: "For emulator we MUST use Containers submodule (latest codebase to be fetched and pulled) and emulators ran under the Podman or Docker container(s)! Then, all tests to be executed on them!"
+
+**Rule.** Every Android emulator instance used for Challenge Tests, integration testing, or UI verification MUST run inside a container managed by the `vasic-digital/Containers` submodule (mounted at `Submodules/Containers/`). The following requirements are mandatory:
+
+1. **Containers submodule is the canonical emulator runtime.** The `Submodules/Containers/pkg/emulator/` package (or its successor) MUST be the sole provider of emulator lifecycle management. No host-direct emulator invocation (`emulator -avd ...` or `$ANDROID_HOME/emulator/emulator ...`) is permitted for gate runs. Local dev iteration on the host is permitted; the constitutional gate (Challenge Tests, tag verification, real-device verification) MUST go through Containers.
+
+2. **Rootless Podman/Docker only.** Emulator containers MUST run under rootless Podman or rootless Docker. No privileged containers, no `--privileged` flag, no `sudo` to launch the container runtime.
+
+3. **Latest Containers codebase.** Before any emulator gate run, `Submodules/Containers/` MUST be at the latest available commit from `vasic-digital/Containers` on GitHub and/or GitLab (per §6.W). The pin update MUST be deliberate and committed before the gate run; stale pins are a constitutional violation for gate runs.
+
+4. **All tests execute inside containers.** Every test that depends on an Android emulator (all Compose UI Challenge Tests, all `connectedAndroidTest` runs, all `-PdeviceTests=true` invocations) MUST be executed on an emulator running inside a container. A test that passes on a host-direct emulator but has not been verified inside a container is not gated — the container environment may surface hardware-acceleration, network, or timing differences that produce different outcomes.
+
+5. **Multi-architecture and API-level coverage.** Per §6.I, the emulator matrix inside containers MUST cover minimum API 28, 30, 34, latest stable; minimum phone + tablet + (where TV is touched) TV. Each combination is a distinct container run.
+
+**Transitional allowance.** Until `Submodules/Containers/pkg/emulator/` and `Submodules/Containers/pkg/vm/` fully support all required AVD configurations, the Lava-side `docker-compose.test.yml`, `docker/emulator/Dockerfile`, and `scripts/run-emulator-tests.sh` are the transitional thin glue per the existing §6.K debt note. The transition is complete when every Challenge Test can be executed via `Submodules/Containers` alone.
+
+**Inheritance.** Applies recursively to every submodule, every feature, every new artifact (including `lava-api-go`). Submodule constitutions MAY add stricter rules but MUST NOT relax this clause.
+
+##### 6.W — GitHub + GitLab Only Remote Mandate (added 2026-05-08)
+
+**Forensic anchor:** 2026-05-08 operator directive: "Do not create any new Git remotes besides GitHub and GitLab under vasic-digital and HelixDevelopment organizations since we have full CLI accesses for GitHub and GitLab only. Other Git providers do not have CLI equivalents!"
+
+**Rule.** Only two Git providers are permitted for any remote in this repository or any vasic-digital/HelixDevelopment submodule it depends on:
+
+1. **GitHub** — `github.com/vasic-digital/*` and `github.com/HelixDevelopment/*`
+2. **GitLab** — `gitlab.com/vasic-digital/*` and `gitlab.com/HelixDevelopment/*`
+
+The following are **explicitly forbidden** as remotes:
+- GitFlic (`gitflic.ru`, `gitflic.space`, or any `gitflic.*` domain)
+- GitVerse (`gitverse.ru`, `gitverse.space`, or any `gitverse.*` domain)
+- Bitbucket, Azure Repos, AWS CodeCommit, Gitee, SourceForge, or any other Git hosting provider
+
+**Why this matters.** The operator has full CLI access (`gh`, `glab`) only for GitHub and GitLab. Other providers lack CLI equivalents, which means:
+- Mirror pushes to GitFlic/GitVerse cannot be automated or verified via CLI tooling
+- Repository creation, fork, merge, and issue management are manual-only on unsupported providers
+- Constitutional enforcement (pre-push hooks, bluff audits, continuous verification) cannot reach those mirrors
+- Mirror divergence at unsupported providers becomes undetectable until tag/verify time
+
+**Mandatory consequences.**
+
+1. **All existing GitFlic and GitVerse remotes MUST be removed.** Scripts in `Upstreams/` MUST be updated to target only GitHub and GitLab. `CONTINUATION.md` mirror index (§3) MUST be updated to reflect the 2-mirror model.
+
+2. **The Decoupled Reusable Architecture rule's mirror policy (§Mandatory consequences bullet 7) is amended.** The requirement that every `vasic-digital` submodule mirror to "the same set of upstreams Lava itself mirrors to" is reduced from 4 upstreams (GitHub + GitLab + GitFlic + GitVerse) to 2 upstreams (GitHub + GitLab). Submodules that previously had only `origin` (GitHub) or only `gitlab` must gain the missing GitHub/GitLab remote. Submodules that already have both are compliant.
+
+3. **`scripts/tag.sh` and all verification scripts MUST check only GitHub + GitLab convergence.** The 4-mirror convergence check (§6.C) is reduced to 2-mirror convergence check (GitHub + GitLab). All attestation evidence, verifications, and release procedures reference only the 2 supported mirrors.
+
+4. **No new project on unsupported providers.** Any new `vasic-digital` or `HelixDevelopment` repository MUST be created on GitHub OR GitLab (preferably both), never on any other provider.
+
+**Migration.** This clause takes effect immediately. On the next commit:
+- Remove all GitFlic and GitVerse remote entries from `CONTINUATION.md` (§3 mirror index)
+- Update `Upstreams/` scripts to reflect only GitHub and GitLab
+- Update `scripts/tag.sh` convergence check to verify only 2 mirrors
+- Update all submodule CLAUDE.md/CONSTITUTION.md/AGENTS.md that reference 4 mirrors
+
+**Inheritance.** Applies recursively to every submodule, every feature, every new artifact (including `lava-api-go`). Submodule constitutions MAY add stricter rules (e.g. "this submodule uses GitHub only") but MUST NOT relax this clause.
+
 ##### 6.L — Anti-Bluff Functional Reality Mandate (Operator's Standing Order, repeated 2026-05-04)
 
 The user has now invoked this mandate **THIRTEEN TIMES** across two working days (initial fix request, after 6.G/6.H landed, after 6.I/6.J landed, after 6.K landed, then again with `ultrathink` after the layer-3 fix, then again after spotting that "Anonymous Access" was modeled as a global toggle when it is actually a per-provider capability, then on 2026-05-05 after the architectural port-collision bluff in the matrix runner was discovered with the verbatim restatement: "all existing tests and Challenges do work in anti-bluff manner — they MUST confirm that all tested codebase really works as expected", then on 2026-05-05 evening when the operator commissioned a comprehensive plan covering ALL open points and re-emphasized: "execution of tests and Challenges MUST guarantee the quality, the completion and full usability by end users of the product", then on 2026-05-05 late evening immediately after Group C-pkg-vm closed §6.K-debt, when the operator surveyed the next-step menu and re-issued the verbatim mandate, AND now on 2026-05-05 after Phase 7 readiness was reported, when the operator commissioned the full rebuild-and-test-everything cycle for tag Lava-Android-1.2.3 and re-issued the verbatim mandate yet again with the addition: "Rebuild Go API and client app(s), put new builds into releases dir (with properly updated version codes) and execute all existing tests and Challenges! Any issue that pops up MUST BE properly addressed by addressing the root causes (fixing them) and covering everything with validation and verification tests and Challenges!", and now on 2026-05-05 late evening AGAIN immediately after the first Firebase-instrumented APK distribution surfaced 2 Crashlytics-recorded crashes — the verbatim restatement: "We had been in position that all tests do execute with success and all Challenges as well, but in reality the most of the features does not work and can't be used! This MUST NOT be the case and execution of tests and Challenges MUST guarantee the quality, the completition and full usability by end users of the product! ... Each Crashlytics resolved issue MUST BE covered with validation and verification tests and Challenges!", and immediately after that on 2026-05-05 23:11 — "when distributing new build it must have version code bigger by at least one then the last version code available for download (already distribited). Every distributed build MUST CONTAIN changelog with the details what it includes compared to previous one we have published! Make sure all these points are in Constitution, CLAUDE.MD and AGENTS.MD.", and on 2026-05-05 23:51 — the THIRTEENTH invocation, immediately after a real tester reported "Opening Trackers from Settings crashes the app. See Crashlytics for stacktraces. Create proper tests to validate and verify the fix! ... execution of tests and Challenges MUST guarantee the quality, the completition and full usability by end users of the product! This MUST BE part of Constitution of our project, its CLAUDE.MD and AGENTS.MD if it is not there already, and to be applied to all Submodules's Constitutuon, CLAUDE.MD and AGENTS.MD as well (if not there already)!" The crash root cause was a textbook nested-scroll antipattern (`LazyColumn` inside `Column(verticalScroll)`) that no existing test caught — confirming yet again that CI green is necessary, never sufficient. Closure log: `.lava-ci-evidence/crashlytics-resolved/2026-05-05-tracker-settings-nested-scroll.md`.). The count is what makes this clause load-bearing: every restatement is an admission by the operator that the prior layers of constitutional plumbing (6.A through 6.M, the Sixth and Seventh Laws) are not yet enough to evict the bluff class on their own. The repetition itself is the forensic record. This clause is the same as 6.J — every test, every Challenge Test, every CI gate has exactly one job: confirm the feature works for a real user end-to-end on the gating matrix. CI green is necessary, never sufficient. **The reason this clause is restated rather than cross-referenced** is that the operator's standing concern is that future agents and contributors will rationalize their way past 6.J and ship green-tests-with-broken-features again. Every time the operator restates it, this codebase records the restatement here so the next reading agent must look at the same wall of repetition the operator has had to type out.
@@ -662,13 +743,13 @@ This project does NOT use, and MUST NOT add, GitHub Actions, GitLab pipelines, B
 
 1. **Sixth Law alignment.** Real-device, real-environment verification is load-bearing. Hosted CI runs in synthetic, ephemeral environments — green there proves the synthetic env, not the user's product on a real device.
 2. **Hosted-CI green has historically produced bluff confidence in this project.** A remote dashboard saying "passing" is psychologically indistinguishable from "shipped and works", which is exactly the failure mode the Sixth Law was written to prevent.
-3. **Vendor independence.** This project mirrors to four independent upstreams (GitHub, GitFlic, GitLab, GitVerse) intentionally. Coupling our quality gate to one vendor's pipeline product would re-introduce the single point of failure mirroring is meant to remove.
+3. **Vendor independence.** This project mirrors to two independent upstreams (GitHub and GitLab) intentionally. Coupling our quality gate to one vendor's pipeline product would re-introduce the single point of failure mirroring is meant to remove.
 
 ### Mandatory consequences
 
 - The `scripts/` directory (and any `Makefile`, task runner, or build tool introduced later) IS the CI/CD apparatus. Whatever runs in "release CI" MUST be the same script a developer runs locally — no parallel implementation.
 - A single local entry point — `scripts/ci.sh` — invokes every quality gate appropriate to the changed surface (unit, integration, contract, e2e, fuzz, load, security, mutation, real-device). Two modes: `--changed-only` (pre-push: Spotless, changed-module unit tests, constitution parser, forbidden-files check) and `--full` (every module, parity gate, mutation tests, fixture freshness, Compose UI Challenge Tests on a connected Android device or emulator; used at tag time). Each run writes evidence under `.lava-ci-evidence/<UTC-timestamp>/`. It MUST be runnable offline once toolchains and base images are present.
-- **Forbidden files.** No `.github/workflows/*`, `.gitlab-ci.yml`, `.circleci/config.yml`, `azure-pipelines.yml`, `bitbucket-pipelines.yml`, `Jenkinsfile` (for hosted Jenkins), or equivalent shall exist on any branch of any of the four upstreams. A pre-push hook MUST reject pushes that introduce such files.
+- **Forbidden files.** No `.github/workflows/*`, `.gitlab-ci.yml`, `.circleci/config.yml`, `azure-pipelines.yml`, `bitbucket-pipelines.yml`, `Jenkinsfile` (for hosted Jenkins), or equivalent shall exist on any branch of any of the upstreams. A pre-push hook MUST reject pushes that introduce such files.
 - **Pre-push gate.** A git pre-push hook installed under `.githooks/` (and enabled via `git config core.hooksPath .githooks`) MUST run the relevant subset of `scripts/ci.sh` before any push to any upstream. The hook MUST NOT be bypassable in routine work; `--no-verify` is reserved for documented emergencies and any such use MUST be noted in the next commit message.
 - **Release tagging gate.** `scripts/tag.sh` MUST refuse to operate against any commit that has not been certified locally — i.e. the local CI gate must have been run successfully against the exact commit being tagged, and the result recorded in a tracked artifact (e.g. `.lava-ci-evidence/`). This implements the Sixth Law clause 5 in mechanical form.
 - **No "it passes on CI" handwave.** A failure that reproduces locally on the developer's machine takes precedence over any other signal. Conversely, a developer who claims "it works for me" without having run the local CI gate has not actually verified anything per the Sixth Law.
@@ -704,7 +785,7 @@ EVERY component that has a non-Lava-specific use case MUST live in a `vasic-digi
 - **Generic functionality is contributed UPSTREAM first.** Any component that another `vasic-digital` project would conceivably want goes to the appropriate submodule (or a new `vasic-digital/<name>` repo created via `gh repo create vasic-digital/<name>` and `glab repo create vasic-digital/<name>`). Lava then pins to the new hash. Order matters: upstream first, Lava pin second.
 - **Every `vasic-digital` submodule we own inherits the Sixth Law and the Local-Only CI/CD rule transitively.** Adopting an externally maintained submodule that violates either is forbidden — fork it under `vasic-digital/` and adopt the fork.
 - **Submodule fetch/pull is an EXPLICIT operator action, never automatic.** No git hooks that silently update pins, no `git submodule update --remote` in any release script. The pin is the contract; changing the contract is a code review event.
-- **Mirror policy applies recursively.** Every `vasic-digital` submodule we own MUST be mirrored to the same set of upstreams Lava itself mirrors to (GitHub + GitLab + GitFlic + GitVerse), unless explicitly waived for that submodule with a documented reason.
+- **Mirror policy applies recursively.** Every `vasic-digital` submodule we own MUST be mirrored to the same set of upstreams Lava itself mirrors to (GitHub + GitLab), unless explicitly waived for that submodule with a documented reason.
 
 ### What this rule does NOT forbid
 

@@ -11,10 +11,10 @@ same commit so the index stays trustworthy. Stale state in this file
 is itself a §6.J spirit issue — the file claims a guarantee, the
 repo has drifted, the agent acts on the claim.
 
-> **Last updated:** 2026-05-08, after constitution propagation (§6.R, §6.S,
-> §6.T) across all submodules + main repo, menu sign-out confirmation flow,
-> onboarding DS refactor, Challenge Tests C23+C24, and full verification
-> pipeline. CONTINUATION.md fully synced to HEAD (852cda8).
+> **Last updated:** 2026-05-08, after adding §§6.U (No sudo/su), 6.V (Container
+> Emulators), 6.W (GitHub+GitLab only remotes) to root CLAUDE.md/AGENTS.md,
+> propagated to all 16 submodules + lava-api-go, 4-mirror→2-mirror model
+> adopted, and full verification pipeline.
 
 > **§6.S binding:** this file is constitutionally load-bearing per
 > root `CLAUDE.md` §6.S. Every commit that changes phase status,
@@ -32,7 +32,7 @@ repo has drifted, the agent acts on the claim.
 
 | Surface | Current state | Pin |
 |---|---|---|
-| Lava parent on master | 4 mirrors converged at 852cda8 | (852cda8) |
+| Lava parent on master | 2 mirrors (GitHub + GitLab) at current HEAD | (current SHA) |
 | API on thinker.local | running 2.3.2 (build 2302) (healthy) | container `lava-api-go-thinker` |
 | Android Firebase | 1.2.13 (1033) distributed to testers | `lava-vasic-digital` Firebase project |
 | 16 vasic-digital submodules | all pushed | see §3 below |
@@ -125,23 +125,23 @@ All 16 `vasic-digital` submodules are at HEAD on `main`. Bumping a
 pin is a deliberate operator action; never auto-update.
 
 | Submodule | Pin | Mirrors | Notes |
-|---|---|---|---|
-| `Auth` | `6213c61` | GitHub + GitLab + origin | §6.R + §6.S inheritance |
-| `Cache` | `ea3b376` | GitHub + GitLab + gitlab + origin | §6.R + §6.S inheritance |
-| `Challenges` | `f7d336d` | github + gitlab + origin (+ upstream skipped) | merged P1.5 + §6.R + §6.S; Containers/ residue removed |
-| `Concurrency` | `5b5a858` | GitHub + GitLab + origin | §6.R + §6.S inheritance |
-| `Config` | `45a915b` | origin | §6.R + §6.S inheritance |
-| `Containers` | `84c381c` | github + gitlab + origin | merged P1.5-WP8 + §6.R + §6.S |
-| `Database` | `1ce46f9` | GitHub + GitLab + origin | §6.R + §6.S inheritance |
-| `Discovery` | `5348c7d` | origin | §6.R + §6.S inheritance |
-| `HTTP3` | `7fec2d8` | origin | §6.R + §6.S inheritance |
-| `Mdns` | `e7839fa` | origin | §6.R + §6.S inheritance |
-| `Middleware` | `c877ef9` | origin | §6.R + §6.S inheritance |
-| `Observability` | `aff0931` | GitHub + GitLab + origin | §6.R + §6.S inheritance |
-| `RateLimiter` | `1127b11` | gitlab + origin | NEW: pkg/ladder primitive + §6.R + §6.S |
-| `Recovery` | `b4b8771` | origin | §6.R + §6.S inheritance |
-| `Security` | `d45b458` | GitHub + GitLab + origin | §6.R + §6.S inheritance |
-| `Tracker-SDK` | `3d31ea3` | origin | §6.R + §6.S inheritance |
+|---|---|---|---|---|
+| `Auth` | `6213c61` | GitHub + GitLab | §§6.R, 6.S, 6.U, 6.V, 6.W inheritance |
+| `Cache` | `ea3b376` | GitHub + GitLab | §§6.R, 6.S, 6.U, 6.V, 6.W inheritance |
+| `Challenges` | `f7d336d` | GitHub + GitLab | merged P1.5 + §§6.R-6.W inheritance |
+| `Concurrency` | `5b5a858` | GitHub + GitLab | §§6.R, 6.S, 6.U, 6.V, 6.W inheritance |
+| `Config` | `45a915b` | GitHub + GitLab | §§6.R, 6.S, 6.U, 6.V, 6.W inheritance |
+| `Containers` | `84c381c` | GitHub + GitLab | merged P1.5-WP8 + §§6.R-6.W inheritance |
+| `Database` | `1ce46f9` | GitHub + GitLab | §§6.R, 6.S, 6.U, 6.V, 6.W inheritance |
+| `Discovery` | `5348c7d` | GitHub + GitLab | §§6.R, 6.S, 6.U, 6.V, 6.W inheritance |
+| `HTTP3` | `7fec2d8` | GitHub + GitLab | §§6.R, 6.S, 6.U, 6.V, 6.W inheritance |
+| `Mdns` | `e7839fa` | GitHub + GitLab | §§6.R, 6.S, 6.U, 6.V, 6.W inheritance |
+| `Middleware` | `c877ef9` | GitHub + GitLab | §§6.R, 6.S, 6.U, 6.V, 6.W inheritance |
+| `Observability` | `aff0931` | GitHub + GitLab | §§6.R, 6.S, 6.U, 6.V, 6.W inheritance |
+| `RateLimiter` | `1127b11` | GitHub + GitLab | pkg/ladder primitive + §§6.R-6.W inheritance |
+| `Recovery` | `b4b8771` | GitHub + GitLab | §§6.R, 6.S, 6.U, 6.V, 6.W inheritance |
+| `Security` | `d45b458` | GitHub + GitLab | §§6.R, 6.S, 6.U, 6.V, 6.W inheritance |
+| `Tracker-SDK` | `3d31ea3` | GitHub + GitLab | §§6.R, 6.S, 6.U, 6.V, 6.W inheritance |
 
 **Internal-to-submodule nested submodules:** `Submodules/Challenges` has a nested `Panoptic` submodule that Challenges' own Go code in `pkg/panoptic/` depends on. Per the operator's "no submodules at multiple depths in the project root" directive, Lava itself has only flat root-level Submodules — but Challenges (consumed as a black-box vasic-digital submodule) self-manages its own internal dependencies, including Panoptic. This is acceptable: the depth restriction applies at Lava's tracking surface, not recursively into each submodule's internal organization.
 
@@ -224,21 +224,12 @@ present locally before the dedup commit's merge.
 once. Not blocking; tracked here so a future cleanup pass picks it
 up.
 
-### 4.5.6 `Submodules/RateLimiter` only mirrors to 2 of the 4 expected upstreams
+### 4.5.6 Mirror model reduced to 2-mirror (GitHub + GitLab) per §6.W
 
-**Discovered:** 2026-05-06 during Phase 3 (pkg/ladder upstream
-contribution). The submodule has remotes `gitlab` + `origin`
-(github.com:vasic-digital/RateLimiter) but no GitFlic or GitVerse.
-
-**Symptom:** new pkg/ladder commits land on GitHub + GitLab but not
-on GitFlic or GitVerse. Inconsistent with Lava parent's 4-mirror
-model.
-
-**Phase 6 deliverable:** add gitflic + gitverse remotes to
-`Submodules/RateLimiter` (and audit all other submodules for the
-same gap; Config + Discovery + HTTP3 + Mdns + Middleware + Recovery
-+ Tracker-SDK each have only `origin`). The Decoupled Reusable
-Architecture rule says submodules SHOULD mirror to the same set.
+**Resolved 2026-05-08.** Per constitutional clause §6.W, only GitHub and
+GitLab are permitted as Git remotes. GitFlic and GitVerse are removed from
+all remotes. The 4-mirror model is replaced by 2-mirror. All submodules
+now target GitHub + GitLab.
 
 ### 4.5.7 `Engine.Ktor` enum cascade tail (post-Ktor cleanup low priority)
 
@@ -388,6 +379,9 @@ Constitutional bindings still in force (do not relax):
   §6.O (Crashlytics-Resolved Issue Coverage Mandate)
   §6.P (Distribution Versioning + Changelog Mandate)
   §6.N (Bluff-Hunt Cadence Tightening)
+  §6.U (No sudo/su Mandate)
+  §6.V (Container Emulators Mandate)
+  §6.W (GitHub + GitLab Only Remote Mandate)
 
 The operator's standing order is preserved verbatim in
 CLAUDE.md §6.L. Read it.
@@ -404,9 +398,9 @@ future agents should preserve:
    added or modified.** Pre-push hook rejects commits without them.
 2. **Every commit must have `Co-Authored-By: Claude Opus 4.7
    (1M context) <noreply@anthropic.com>`** as the trailer.
-3. **Push to all 4 Lava parent mirrors** after every commit chain
+3. **Push to both Lava parent mirrors (GitHub + GitLab)** after every commit chain
    that closes a logical unit. After every push, confirm convergence
-   with `for r in github gitlab gitflic gitverse; do echo "$r:
+   with `for r in github gitlab; do echo "$r:
    $(git ls-remote $r master | awk '{print $1}' | head -1)"; done`.
 4. **Submodule pushes are explicit per submodule** to whatever
    remotes that submodule has (varies — see §3 above). Never use

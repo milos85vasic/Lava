@@ -18,7 +18,7 @@ Local CI: `scripts/ci.sh`. Single source of truth.
 4. Implement the change.
 5. `scripts/ci.sh` until green.
 6. For every test added/modified: run the falsifiability rehearsal (see `CLAUDE.md`). Record the result in the commit body.
-7. Commit. Push to `master` of the parent repo on github + gitflic + gitlab + gitverse.
+7. Commit. Push to `master` of the parent repo on github + gitlab.
 
 ## Things to avoid
 - Adding hosted-CI configuration (forbidden; constitutional).
