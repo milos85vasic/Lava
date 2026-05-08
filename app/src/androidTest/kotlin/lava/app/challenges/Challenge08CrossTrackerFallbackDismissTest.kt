@@ -17,6 +17,19 @@
  *   un-blockers as C7.
  *
  * Anti-bluff posture: honest shallow coverage, deep gap documented.
+ *
+ * FALSIFIABILITY REHEARSAL (Sixth Law clause 2):
+ *
+ *   1. In app/src/main/res/values/strings.xml, change
+ *      `<string name="label_menu">Menu</string>` to
+ *      `<string name="label_menu">BLUFF_RENAMED</string>`.
+ *   2. Re-run on the gating emulator.
+ *   3. Expected failure: the `require` assertion for "Menu" fires
+ *      because the bottom-tab label no longer reads "Menu".
+ *   4. Revert; re-run; test passes.
+ *
+ *   Mirror: repeat with "Search", "Forum", or "Topics" — mutating any
+ *   single tab label causes the corresponding require() to fail.
  */
 package lava.app.challenges
 

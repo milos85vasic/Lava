@@ -30,6 +30,15 @@
  *   ComposeTimeoutException at the waitUntil — same as C1's rehearsal.
  *   The deep-coverage gap is documented, not hidden.
  *
+ * FALSIFIABILITY REHEARSAL (Sixth Law clause 2):
+ *
+ *   1. In feature/menu/src/main/kotlin/lava/menu/MenuScreen.kt, change
+ *      `Text("Trackers")` on line ~201 to `Text("BLUFF_RENAMED")`.
+ *   2. Re-run on the gating emulator.
+ *   3. Expected failure: the waitUntil for "Trackers" times out with
+ *      ComposeTimeoutException because the label no longer exists.
+ *   4. Revert; re-run; test passes.
+ *
  * Operator command:
  *   ./gradlew :app:connectedDebugAndroidTest --tests \
  *     "lava.app.challenges.Challenge04SwitchTrackerAndResearchTest"

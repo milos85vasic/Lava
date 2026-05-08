@@ -17,6 +17,16 @@
  * Anti-bluff posture: honest shallow coverage, deep gap documented in
  *   .lava-ci-evidence/sp3a-challenges/C4-2026-05-04-redesign.json
  *   (consolidated entry for C4-C8 shallow-coverage gap).
+ *
+ * FALSIFIABILITY REHEARSAL (Sixth Law clause 2):
+ *
+ *   1. In app/src/main/res/values/strings.xml, change
+ *      `<string name="label_forum">Forum</string>` to
+ *      `<string name="label_forum">BLUFF_RENAMED</string>`.
+ *   2. Re-run on the gating emulator.
+ *   3. Expected failure: the waitUntil for "Forum" times out because
+ *      the bottom-tab label no longer reads "Forum".
+ *   4. Revert; re-run; test passes.
  */
 package lava.app.challenges
 

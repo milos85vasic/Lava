@@ -22,6 +22,16 @@
  *   without teardown failures.
  *
  * Anti-bluff posture: honest shallow coverage, deep gap documented.
+ *
+ * FALSIFIABILITY REHEARSAL (Sixth Law clause 2):
+ *
+ *   1. In app/src/main/res/values/strings.xml, change
+ *      `<string name="label_topics">Topics</string>` to
+ *      `<string name="label_topics">BLUFF_RENAMED</string>`.
+ *   2. Re-run on the gating emulator.
+ *   3. Expected failure: the waitUntil for "Topics" times out because
+ *      the bottom-tab label no longer reads "Topics".
+ *   4. Revert; re-run; test passes.
  */
 package lava.app.challenges
 

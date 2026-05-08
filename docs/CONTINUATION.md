@@ -11,10 +11,12 @@ same commit so the index stays trustworthy. Stale state in this file
 is itself a §6.J spirit issue — the file claims a guarantee, the
 repo has drifted, the agent acts on the claim.
 
-> **Last updated:** 2026-05-08 19:50 UTC, after Phase 0 of the
-> Full Anti-Bluff Proofing Plan — build stabilized, auth test fixed,
-> all 16 submodules committed + pushed to GitHub+GitLab, GitFlic/GitVerse
-> remotes removed, 2-mirror §6.W enforced.
+> **Last updated:** 2026-05-08 20:10 UTC, after Phase 1 of the
+> Full Anti-Bluff Proofing Plan — all 264 test files audited for
+> §6.J compliance (zero violations), 5 bluff-hunt mutations confirmed
+> failing, all 22 Challenge Tests now have falsifiability rehearsal
+> KDoc protocols. Uncommitted RuTrackerDescriptor bluff mutation
+> fixed. Now executing Phase 2 (dead code cleanup, known issue fixes).
 
 > **§6.S binding:** this file is constitutionally load-bearing per
 > root `CLAUDE.md` §6.S. Every commit that changes phase status,
@@ -61,6 +63,19 @@ gate steps.
 | Delete `Upstreams/GitFlic.sh`, `GitVerse.sh` | ✓ |
 | Add GitLab remotes to 7 submodules lacking them | ✓ |
 | Push parent to both mirrors + verify SHA convergence | ✓ (55a702c on both) |
+
+### Phase 1 — Full Anti-Bluff Audit (2026-05-08)
+
+**Status: COMPLETE.** All 264 test files audited for §6.J clause 3 compliance (zero violations). 5 bluff-hunt mutations confirmed to cause test failures. All 22 Challenge Tests now have formal falsifiability rehearsal protocols in KDoc. Uncommitted RuTrackerDescriptor bluff mutation from Phase 1.4 reverted.
+
+| Task | Status | Evidence |
+|------|--------|----------|
+| 1.1 Inventory all test files | ✓ | 264 files identified |
+| 1.2 Random 5 falsifiability rehearsals | ✓ | 5/5 fail when production mutated |
+| 1.3 §6.J clause 3 compliance scan | ✓ | `.lava-ci-evidence/compliance/2026-05-08-phase1-dot3-compliance-report.md` |
+| 1.4 Bluff hunt evidence | ✓ | `.lava-ci-evidence/phase1-dot4-bluff-hunt-report.md` |
+| 1.5 Forbidden pattern check | ✓ | Zero violations documented |
+| 1.6 Challenge KDoc falsifiability protocols | ✓ | All 22 Challenges have formal protocols |
 
 ### Parent-decomposition Phases 1-6 — ALL SHIPPED
 
@@ -363,22 +378,29 @@ Then check the git state vs the CONTINUATION.md "Last updated" line.
 If new commits exist on master beyond what CONTINUATION.md describes,
 trust the commits and update CONTINUATION.md before proceeding.
 
-Active state per CONTINUATION.md §0:
-  - Phase 0 (Stabilize + §6.W) COMPLETE. 55a702c on both mirrors.
-  - Now executing Phase 1: Anti-Bluff Audit of all existing tests.
+Active state per CONTINUATION.md §1:
+  - Phase 0 (Stabilize + §6.W) COMPLETE. Commits: 9ed7bca, 55a702c.
+  - Phase 1 (Full Anti-Bluff Audit) COMPLETE. All 264 tests clean,
+    5 bluff-hunt mutations confirmed, all 22 Challenge KDocs have
+    falsifiability protocols. RuTrackerDescriptor mutation reverted.
+  - Now executing Phase 2: Fix Known Issues.
   - Full plan at docs/superpowers/specs/2026-05-08-full-anti-bluff-proofing-plan.md
 
 Your default next action:
-  - Execute Phase 1: Anti-Bluff Audit. Tasks:
-    1.1 Inventory all test files
-    1.2 Random sample 5 test files, run falsifiability rehearsal
-    1.3 Check every test for §6.J clause 3 compliance
-    1.4 Refactor identified bluff tests
-    1.5 Check for forbidden test patterns
-    1.6 Verify all Challenge Tests have falsifiability rehearsal protocols in KDoc
+  - Execute Phase 2: Fix Known Issues.
+    2.6 Clean up Engine.Ktor dead enum + exhaustive when branches
+    2.7 Clean up Endpoint.Mirror dead LAN-IP routing branch
+    2.8 Resolve docs/todos/ tracking decision (commit or gitignore)
+    2.4 Document UDP buffer fix for operator
 
 Do NOT re-run any phase — they are committed + pushed + deployed.
 The git log is the authoritative record.
+
+Phase 3+ tasks require operator hardware/API access:
+  - 2.2: Execute C17-C22 (requires device/emulator)
+  - 2.3: Verify /api/v1/search (requires running API)
+  - 2.5: Verify Internet Archive/gutenberg (requires API)
+  - Phase 3+: Emulator matrix, real-device verification, tagging
 
 Constitutional bindings still in force (do not relax):
   §6.J / §6.L (Anti-Bluff Functional Reality Mandate)

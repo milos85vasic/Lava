@@ -28,6 +28,16 @@
  *   doc with the specific blocker (nav-compose 2.9.0 bug) and the
  *   un-blocking path (library upgrade).
  *
+ * FALSIFIABILITY REHEARSAL (Sixth Law clause 2):
+ *
+ *   1. In app/src/main/res/values/strings.xml, change
+ *      `<string name="label_search">Search</string>` to
+ *      `<string name="label_search">BLUFF_RENAMED</string>`.
+ *   2. Re-run on the gating emulator.
+ *   3. Expected failure: the waitUntil for "Search" times out because
+ *      the bottom-tab label no longer reads "Search".
+ *   4. Revert; re-run; test passes.
+ *
  * Operator command:
  *   ./gradlew :app:connectedDebugAndroidTest --tests \
  *     "lava.app.challenges.Challenge05ViewTopicDetailTest"
