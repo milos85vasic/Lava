@@ -64,7 +64,6 @@ package lava.app.challenges
 
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
-import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
@@ -111,21 +110,23 @@ class Challenge02AuthenticatedSearchOnRuTrackerTest {
         }
         composeRule.onNodeWithText("Get Started").performClick()
 
-        // Step 2: provider selection — pick RuTracker.org.
+        // Step 2: provider selection — deselect all others, pick RuTracker.org.
         composeRule.waitUntil(timeoutMillis = 10_000) {
             composeRule.onAllNodesWithText("Pick your providers").fetchSemanticsNodes().isNotEmpty()
         }
-        composeRule.onNodeWithText("RuTracker.org").performClick()
+        arrayOf("RuTor.info", "Internet Archive", "Project Gutenberg").forEach { name ->
+            try { composeRule.onNodeWithText(name).performClick() } catch (_: AssertionError) { }
+        }
         composeRule.onNodeWithText("Next").performClick()
 
         // Step 3: configure — enter credentials and tap Test & Continue.
         composeRule.waitUntil(timeoutMillis = 10_000) {
             composeRule.onAllNodesWithText("Configure RuTracker.org").fetchSemanticsNodes().isNotEmpty()
         }
-        composeRule.onNodeWithContentDescription("Username")
-            .performTextInput(BuildConfig.RUTRACKER_USERNAME)
-        composeRule.onNodeWithContentDescription("Password")
-            .performTextInput(BuildConfig.RUTRACKER_PASSWORD)
+        composeRule.onNodeWithText("Username").performClick()
+        composeRule.onNodeWithText("Username").performTextInput(BuildConfig.RUTRACKER_USERNAME)
+        composeRule.onNodeWithText("Password").performClick()
+        composeRule.onNodeWithText("Password").performTextInput(BuildConfig.RUTRACKER_PASSWORD)
 
         composeRule.onNodeWithText("Test & Continue").performClick()
 

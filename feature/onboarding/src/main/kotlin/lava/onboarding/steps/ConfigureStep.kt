@@ -13,6 +13,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import lava.designsystem.color.ProviderColors
 import lava.designsystem.component.Button
@@ -80,6 +81,7 @@ fun ConfigureStep(
                     Switch(
                         checked = config.useAnonymous,
                         onCheckedChange = onToggleAnonymous,
+                        modifier = Modifier.testTag("anonymous_switch"),
                     )
                 }
                 Spacer(Modifier.height(16.dp))

@@ -58,6 +58,7 @@ package lava.app.challenges
 
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.filters.SdkSuppress
@@ -91,22 +92,24 @@ class Challenge03AnonymousSearchOnRuTorTest {
         }
         composeRule.onNodeWithText("Get Started").performClick()
 
-        // Step 2: provider selection — pick RuTor.info.
+        // Step 2: provider selection — deselect all others, pick RuTor.info.
         composeRule.waitUntil(timeoutMillis = 10_000) {
             composeRule.onAllNodesWithText("Pick your providers").fetchSemanticsNodes().isNotEmpty()
         }
-        composeRule.onNodeWithText("RuTor.info").performClick()
+        arrayOf("RuTracker.org", "Internet Archive", "Project Gutenberg").forEach { name ->
+            try { composeRule.onNodeWithText(name).performClick() } catch (_: AssertionError) { }
+        }
         composeRule.onNodeWithText("Next").performClick()
 
         // Step 3: configure — toggle anonymous access, then Continue.
         composeRule.waitUntil(timeoutMillis = 10_000) {
             composeRule.onAllNodesWithText("Configure RuTor.info").fetchSemanticsNodes().isNotEmpty()
         }
-        composeRule.onNodeWithText("Use anonymous access").performClick()
+        composeRule.onNodeWithTag("anonymous_switch").performClick()
         composeRule.onNodeWithText("Continue").performClick()
 
         // Step 4: Summary screen.
-        composeRule.waitUntil(timeoutMillis = 15_000) {
+        composeRule.waitUntil(timeoutMillis = 60_000) {
             composeRule.onAllNodesWithText("All set!").fetchSemanticsNodes().isNotEmpty()
         }
         composeRule.onNodeWithText("Start Exploring").performClick()

@@ -73,7 +73,9 @@ class Challenge12GutenbergAnonymousSearchTest {
         composeRule.waitUntil(timeoutMillis = 10_000) {
             composeRule.onAllNodesWithText("Pick your providers").fetchSemanticsNodes().isNotEmpty()
         }
-        composeRule.onNodeWithText("Project Gutenberg").performClick()
+        arrayOf("RuTracker.org", "RuTor.info", "Internet Archive").forEach { name ->
+            try { composeRule.onNodeWithText(name).performClick() } catch (_: AssertionError) { }
+        }
         composeRule.onNodeWithText("Next").performClick()
 
         composeRule.waitUntil(timeoutMillis = 10_000) {

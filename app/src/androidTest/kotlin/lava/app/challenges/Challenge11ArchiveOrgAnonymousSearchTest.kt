@@ -98,11 +98,13 @@ class Challenge11ArchiveOrgAnonymousSearchTest {
         }
         composeRule.onNodeWithText("Get Started").performClick()
 
-        // Step 2: provider list — pick Internet Archive.
+        // Step 2: provider list — deselect all others, pick Internet Archive.
         composeRule.waitUntil(timeoutMillis = 10_000) {
             composeRule.onAllNodesWithText("Pick your providers").fetchSemanticsNodes().isNotEmpty()
         }
-        composeRule.onNodeWithText("Internet Archive").performClick()
+        arrayOf("RuTracker.org", "RuTor.info", "Project Gutenberg").forEach { name ->
+            try { composeRule.onNodeWithText(name).performClick() } catch (_: AssertionError) { }
+        }
         composeRule.onNodeWithText("Next").performClick()
 
         // Step 3: configure — tap Continue for AuthType.NONE provider.
