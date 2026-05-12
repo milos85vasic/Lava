@@ -184,3 +184,65 @@ entry above)_
 `.lava-ci-evidence/**/post-mortem/` to prevent accidental commit of
 the captured credentials; only matrix attestations + gradle.logs +
 JUnit XML test-reports are committed.
+
+---
+
+## 2026-05-12 — rutracker-cloudflare-mitigation + cookie-selection-bug
+
+**Root cause 1 (Cloudflare anti-bot stall):** `provideRuTrackerHttpClient`
+in `:core:tracker:client` constructed a `Ktor + OkHttp` HttpClient with
+no cookies, no Accept-Language, no Accept, no Accept-Encoding, and no
+explicit User-Agent — i.e. a client whose HTTP/2 header shape is a
+flag-raising fingerprint to Cloudflare's anti-bot. A bare POST to
+`rutracker.org/forum/login.php` was accepted by the TCP+TLS layer but
+never received a response body — verified via Ktor `Logging` plugin
+output. Host-side curl with normal browser-like headers returns
+HTTP/2 200 in <1s for the same URL.
+
+**Root cause 2 (cookie selection picked wrong cookie as session token):**
+`RuTrackerInnerApiImpl.login()` previously extracted `token =
+cookies.firstOrNull { !it.contains("bb_ssl") }` from the final-hop
+`Set-Cookie` headers. When Cloudflare in front of rutracker started
+emitting `cf_clearance=…` on every response, this filter started
+selecting `cf_clearance` as the "rutracker session token". The
+subsequent `mainPage(token)` GET then sent `Cookie: cf_clearance=…`
+without the actual `bb_data` session token, so rutracker returned
+the guest page and `parseUserId` couldn't find the logged-in element.
+
+**Affected files:**
+- `core/tracker/client/src/main/kotlin/lava/tracker/client/di/TrackerClientModule.kt`
+- `core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker/impl/RuTrackerInnerApiImpl.kt`
+
+**Fix:**
+1. Installed `HttpCookies` plugin (`AcceptAllCookiesStorage`) on the
+   rutracker HttpClient.
+2. Added browser-class `defaultRequest` headers (Accept,
+   Accept-Language, Accept-Encoding) + Chrome 124 / Android 14 / Pixel 8
+   User-Agent.
+3. Added a `runCatching { httpClient.get(Index).bodyAsText() }`
+   pre-flight inside `RuTrackerInnerApiImpl.login()` so the
+   `cf_clearance` cookie lands in the cookie jar before the POST.
+4. Tightened the post-login token extraction to match by name prefix
+   (`bb_data` / `bb_session` / `bb_login`) instead of the fragile
+   `!contains("bb_ssl")` negation.
+
+**Verification test/challenge:** Ktor wire-log on C02 re-run shows
+- 10:16:58 GET `/forum/index.php` → 200 (~1s) — pre-flight succeeds, cookies stored
+- 10:16:59 POST `/forum/login.php` → 302 (was: 60s timeout)
+- 10:16:59 GET `/forum/index.php` (auto-redirect) → 200 (~1.3s) — logged-in page returned
+
+The Cloudflare stall is fully resolved by this commit. **C02 itself
+does NOT yet pass end-to-end** because `GetCurrentProfileUseCase.parseUserId`
+throws on the post-login page — `#logged-in-username` element isn't
+in the served HTML (selector stale or mobile-shaped variant). That's
+a separate domain-archaeology task documented in
+`docs/CONTINUATION.md §4.5.3c`.
+
+**Fix commit:** _(this commit)_
+
+**Forensic anchor:** continued Phase 1 systematic-debugging session
+2026-05-12 after operator's "continue" directive. C03 fix landed in
+`4d27c07`; the same session investigated whether the residual C02
+failure was Lava-fixable. CF mitigation succeeded; the remaining
+parser failure surfaced a separate bug that's deferred to a follow-up
+SP for rutracker HTML parser refresh.

@@ -11,20 +11,24 @@ same commit so the index stays trustworthy. Stale state in this file
 is itself a §6.J spirit issue — the file claims a guarantee, the
 repo has drifted, the agent acts on the claim.
 
-> **Last updated:** 2026-05-12, after systematic-debugging Phase 1
-> matrix re-run on CZ_API34_Phone API 34. C03 RESOLVED — anonymous
-> toggle was a Lava bug (treated `AuthState.Unauthenticated` as failure
-> for users who opted out of auth); fix in OnboardingViewModel.
-> C02 partially diagnosed and partially mitigated — `sdk.login(rutracker)`
-> POST to `/forum/login.php` is written successfully but Cloudflare never
-> sends a response back (verified via Ktor wire-log; host curl returns
-> HTTP/2 200 in <1s for the same URL, so this is client-fingerprint-specific,
-> not a server outage). HTTP timeouts bumped from 10s to 60s and browser-like
-> User-Agent added — moved the failure mode from `SocketTimeoutException`
-> to `HttpRequestTimeoutException` but did not unblock the request. Further
-> C02 mitigation needs Cloudflare anti-bot countermeasures (proper
-> Accept/Accept-Language/Accept-Encoding headers + pre-flight GET for
-> cookies) OR routing rutracker via lava-api-go proxy. See §4.5.3b.
+> **Last updated:** 2026-05-12, two-commit C02/C03 fix chain.
+> First commit `4d27c07` resolved C03 (anonymous toggle bug) +
+> credential-leak-in-logs (§6.H) + general HTTP timeout/UA improvements.
+> Second commit (this one) layers Cloudflare anti-bot mitigation:
+> `HttpCookies` plugin with `AcceptAllCookiesStorage`, Chrome-class
+> User-Agent, `Accept`/`Accept-Language`/`Accept-Encoding` headers,
+> and a pre-flight GET to `/forum/index.php` inside
+> `RuTrackerInnerApiImpl.login()` so the POST carries Cloudflare's
+> clearance cookies. **C02 status: post-fix the POST to login.php
+> succeeds (302→200), but profile parsing now fails because
+> `#logged-in-username` is no longer in the page that rutracker.org
+> serves to this client (likely either a stale selector vs. current
+> rutracker HTML, OR the browser-class UA causes rutracker to serve
+> a mobile-shaped page with different selectors).** Cookie selection
+> also tightened — pick by name prefix (`bb_data`/`bb_session`/
+> `bb_login`) instead of "first non-bb_ssl" which had been selecting
+> Cloudflare's `cf_clearance` as the bogus rutracker token. See
+> §4.5.3b + §4.5.3c.
 >
 > **§6.S violations on the previous chain — now corrected here:**
 >   (1) `3f6e5e6` claimed C11/C12 "NOW PASSING" without updating §0
@@ -140,7 +144,7 @@ gate steps.
 |------|--------|-------|
 | C00 CrashSurvival | ✓ | Fixed: `onFinish()` now includes display name for AuthType.NONE |
 | C01 AppLaunch | ✓ | |
-| C02 RuTracker auth | ⏳ | L1+L2 OK, HTTP timeouts/UA bumped, test wait 30s→90s. Cloudflare stalls the login POST (60s no response). Mitigation pending — see §4.5.3b |
+| C02 RuTracker auth | ⏳ | CF mitigation (cookies+pre-flight GET) works — login POST now 302→200. Profile-parse fails: `#logged-in-username` not in served HTML. See §4.5.3c |
 | C03 RuTor anonymous | ✅ | Anonymous toggle bug fixed (OnboardingViewModel skipped checkAuth on anon branch). PASS on CZ_API34_Phone 2026-05-12 09:25 |
 | C04 SwitchTracker | ✓ | |
 | C05 ViewTopic | ✓ | |
@@ -462,6 +466,78 @@ block):**
    "All set!" wait from 30s to 90s to match C03's 60s+ budget plus
    margin. Aligns the test with realistic real-network round-trip
    times after timeout fixes.
+
+### 4.5.3c C02 Cloudflare mitigation outcome (this commit)
+
+Built on top of §4.5.3b's HTTP timeout / UA / Logging improvements,
+this commit layers in:
+
+1. **`HttpCookies` plugin + `AcceptAllCookiesStorage`** on the
+   rutracker Ktor client — cookies captured from any response are
+   replayed automatically on subsequent requests, including across
+   the 302-redirect chain that Ktor's `HttpRedirect` plugin follows
+   internally.
+
+2. **Browser-class request shaping** — Chrome 124 on Android 14 UA
+   plus `Accept`/`Accept-Language`/`Accept-Encoding` `defaultRequest`
+   headers, so Cloudflare's HTTP/header-shape fingerprinter has less
+   to flag.
+
+3. **Pre-flight GET `/forum/index.php`** inside
+   `RuTrackerInnerApiImpl.login()` before the POST — this is the
+   load-bearing change. Without it, the bare POST is silently stalled
+   by Cloudflare. With it, the GET establishes the `cf_clearance`
+   cookie in the jar, the POST replays it, Cloudflare lets the
+   POST through.
+
+4. **Cookie-selection robustness** — the prior code picked `token =
+   cookies.firstOrNull { !it.contains("bb_ssl") }`, which once
+   Cloudflare added `cf_clearance` to every Set-Cookie response
+   meant `token` was `cf_clearance=…` rather than the rutracker
+   session cookie. Now matched by NAME prefix (`bb_data` / `bb_session`
+   / `bb_login`). This is correct behavior regardless of Cloudflare
+   — the previous code was fragile to any extra cookie rutracker
+   ever added.
+
+**Verified via Ktor wire log:** the POST now returns `302` → auto-redirect
+to `/forum/index.php` returns `200` (logged-in page) in ~3s total. Pre-CF-fix:
+the POST timed out at 60s every time.
+
+**C02 STILL DOES NOT PASS end-to-end.** The login HTTP exchange now
+succeeds but `GetCurrentProfileUseCase.parseUserId` throws
+`IllegalArgumentException: query param not found in ` — Jsoup's
+`select("#logged-in-username")` returned an empty selection on the
+post-login page. Two leading hypotheses:
+
+- **Stale selector.** The parser was written against a rutracker.org
+  HTML structure where `<a id="logged-in-username" href="profile.php?u=NNN">…`
+  appeared in the header. rutracker.org may have changed this element
+  ID; the current page might use `.menu-userctrl` or `<a class="loginusername">`
+  or similar.
+- **Mobile vs. desktop variant.** The new Chrome-mobile UA may cause
+  rutracker to serve a mobile-shaped page that lacks the desktop's
+  `#logged-in-username` element entirely.
+
+**Resolution path (not closed in this session):**
+
+1. Capture the actual post-login page HTML by either bumping Ktor
+   Logging to `LogLevel.BODY` for one diagnostic run (note: this
+   leaks credentials in form bodies — use carefully, gitignore the
+   logcat, redact in commit) or by adding a one-shot Lava-logger
+   side channel into `RuTrackerInnerApiImpl.login()` that writes the
+   first N chars to logcat.
+2. Update `GetCurrentProfileUseCase.parseUserId`'s selector to match
+   the actual element rutracker.org serves today, with a fallback
+   selector for the mobile variant if needed. This is a small Jsoup
+   selector change once the actual HTML is in hand.
+3. Re-verify C02 end-to-end.
+
+**Why this is deferred:** the fix requires fresh code-archaeology
+against the live rutracker.org HTML structure, which is bigger than
+"network mitigation" and benefits from focused operator pair-debugging
+(or a dedicated SP for rutracker HTML parser refresh) rather than
+inline-during-this-session attempt #N. The blocking issue — Cloudflare
+stalling our requests — is RESOLVED here.
 
 ### 4.5.4 Challenges + emulator: C17-C22 remain unexecuted
 

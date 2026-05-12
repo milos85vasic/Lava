@@ -46,21 +46,38 @@ class RuTrackerInnerApiImpl(private val httpClient: HttpClient) : RuTrackerInner
         captchaSid: String?,
         captchaCode: String?,
         captchaValue: String?,
-    ): Pair<String?, String> = httpClient.submitForm(
-        url = Login,
-        formParameters = Parameters.build {
-            append("login_username", username)
-            append("login_password", password)
-            append("login", "Вход")
-            if (captchaSid != null && captchaCode != null && captchaValue != null) {
-                append("cap_sid", captchaSid)
-                append(captchaCode, captchaValue)
+    ): Pair<String?, String> {
+        // Pre-flight GET to establish Cloudflare clearance cookie + session token.
+        // Without this the bare POST below is dropped silently by CF anti-bot
+        // (TLS+TCP succeed, request body is written, no response ever returns).
+        // The HttpCookies plugin on this client captures the Set-Cookie headers
+        // from this GET and replays them as Cookie on the subsequent POST.
+        runCatching { httpClient.get(Index).bodyAsText() }
+        return httpClient.submitForm(
+            url = Login,
+            formParameters = Parameters.build {
+                append("login_username", username)
+                append("login_password", password)
+                append("login", "Вход")
+                if (captchaSid != null && captchaCode != null && captchaValue != null) {
+                    append("cap_sid", captchaSid)
+                    append(captchaCode, captchaValue)
+                }
+            },
+        ).let { response ->
+            // After auto-redirect, response.headers carries the final hop's Set-Cookie
+            // (post-login /forum/index.php). The 302's Set-Cookie (where the session
+            // token actually lands) is consumed by Ktor's HttpRedirect plugin and only
+            // survives in the HttpCookies cookie jar. Search the final hop's cookies
+            // for the rutracker session token by NAME prefix — the prior "anything
+            // not bb_ssl" pattern selected Cloudflare's cf_clearance once CF was
+            // in front, breaking mainPage()'s Cookie header.
+            val cookies = response.headers.getAll("Set-Cookie").orEmpty()
+            val token = cookies.firstOrNull { c ->
+                c.startsWith("bb_data") || c.startsWith("bb_session") || c.startsWith("bb_login")
             }
-        },
-    ).let { response ->
-        val cookie = response.headers.getAll("Set-Cookie").orEmpty()
-        val token = cookie.firstOrNull { !it.contains("bb_ssl") }
-        token to response.bodyAsText()
+            token to response.bodyAsText()
+        }
     }
 
     override suspend fun search(

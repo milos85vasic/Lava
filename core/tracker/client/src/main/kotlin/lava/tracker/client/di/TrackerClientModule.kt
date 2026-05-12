@@ -9,10 +9,13 @@ import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.UserAgent
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.plugins.cookies.AcceptAllCookiesStorage
+import io.ktor.client.plugins.cookies.HttpCookies
 import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logger
 import io.ktor.client.plugins.logging.Logging
+import io.ktor.client.request.header
 import io.ktor.client.request.url
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
@@ -85,7 +88,12 @@ object TrackerClientModule {
     @Singleton
     @Named(RUTRACKER_HTTP_CLIENT)
     fun provideRuTrackerHttpClient(): HttpClient = HttpClient(OkHttp) {
-        defaultRequest { url("https://rutracker.org/forum/") }
+        defaultRequest {
+            url("https://rutracker.org/forum/")
+            header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
+            header("Accept-Language", "en-US,en;q=0.5")
+            header("Accept-Encoding", "gzip, deflate, br")
+        }
         install(ContentNegotiation) {
             json(Json { ignoreUnknownKeys = true })
         }
@@ -95,7 +103,10 @@ object TrackerClientModule {
             socketTimeoutMillis = 60_000
         }
         install(UserAgent) {
-            agent = "Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Mobile"
+            agent = "Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36"
+        }
+        install(HttpCookies) {
+            storage = AcceptAllCookiesStorage()
         }
         install(Logging) {
             level = LogLevel.INFO
