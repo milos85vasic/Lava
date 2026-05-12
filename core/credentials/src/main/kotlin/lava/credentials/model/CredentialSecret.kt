@@ -9,7 +9,7 @@ sealed interface CredentialSecret {
 
 enum class CredentialType { USERNAME_PASSWORD, API_KEY, BEARER_TOKEN, COOKIE_SESSION }
 
-internal fun CredentialSecret.type(): CredentialType = when (this) {
+fun CredentialSecret.type(): CredentialType = when (this) {
     is CredentialSecret.UsernamePassword -> CredentialType.USERNAME_PASSWORD
     is CredentialSecret.ApiKey -> CredentialType.API_KEY
     is CredentialSecret.BearerToken -> CredentialType.BEARER_TOKEN
