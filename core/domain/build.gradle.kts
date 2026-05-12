@@ -1,6 +1,7 @@
 plugins {
     id("lava.android.library")
     id("lava.android.hilt")
+    id("lava.kotlin.serialization")
 }
 
 android {
@@ -17,12 +18,15 @@ dependencies {
     implementation(project(":core:models"))
     implementation(project(":core:network:api"))
     implementation(project(":core:notifications"))
+    implementation(project(":core:sync"))
     implementation(project(":core:work:api"))
 
     implementation(libs.javax.inject)
     implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.okhttp.core)
 
     testImplementation(project(":core:testing"))
+    testImplementation(libs.okhttp.mockwebserver)
 }
 
 kotlin {
