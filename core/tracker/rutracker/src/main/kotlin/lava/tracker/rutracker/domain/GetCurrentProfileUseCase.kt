@@ -13,10 +13,21 @@ class GetCurrentProfileUseCase(
     }
 
     companion object {
+        private val LOGGED_IN_SELECTORS = listOf(
+            "#logged-in-username",
+            "a.logged-in-as-uname",
+            ".menu-userctrl a[href*='profile.php?u=']",
+            "a[href*='profile.php?u=']",
+        )
+
         private fun parseUserId(html: String): String {
-            return Jsoup.parse(html)
-                .select("#logged-in-username")
-                .queryParam("u")
+            val doc = Jsoup.parse(html)
+            for (sel in LOGGED_IN_SELECTORS) {
+                val els = doc.select(sel)
+                val u = els.queryParamOrNull("u")
+                if (u != null) return u
+            }
+            error("rutracker logged-in user-id not found — page may be guest, or selectors stale")
         }
     }
 }

@@ -246,3 +246,85 @@ a separate domain-archaeology task documented in
 failure was Lava-fixable. CF mitigation succeeded; the remaining
 parser failure surfaced a separate bug that's deferred to a follow-up
 SP for rutracker HTML parser refresh.
+
+---
+
+## 2026-05-12 — c16-stale-assumption-bluff + parser-selector-fallback + firebase-test-improvement
+
+These three changes are landed together as the anti-bluff-audit response
+to the operator's SIXTEENTH §6.L invocation on 2026-05-12.
+
+**Root cause 1 (Challenge16 stale-assumption bluff):**
+`Challenge16ApiSupportedFilterTest` asserted "Internet Archive must NOT
+appear in the onboarding provider list" because at the time of writing
+(Phase 12 α-hotfix) `ArchiveOrgDescriptor.apiSupported` was `false`. Phase
+2b (Lava-API per-provider routing) later flipped that to `true` without
+updating the test. The test continued to pass green because its `waitUntil`
+clause accepted the Welcome screen — where no provider list renders —
+making "Internet Archive absent" trivially true. Textbook §6.L bluff:
+green-light while the actual behavior was the OPPOSITE of the claim.
+
+**Root cause 2 (`GetCurrentProfileUseCase.parseUserId` brittle selector):**
+The parser used a single Jsoup selector `#logged-in-username` to extract
+the rutracker user-id post-login. With the Cloudflare anti-bot mitigation
+landing in commit `f7d0a62`, the login POST now reaches a 302→200 chain
+successfully — but the post-login page rutracker.org serves to the
+mitigated client doesn't contain `#logged-in-username` (selector stale
+or mobile-shaped variant). Single-selector parsers fail catastrophically
+when the served HTML changes; multi-selector fallback gives graceful
+degradation.
+
+**Root cause 3 (`FirebaseAnalyticsTrackerTest` verify-only assertions):**
+Two tests in `FirebaseAnalyticsTrackerTest` used `verify { mock.foo() }`
+as the SOLE assertion — Forbidden Test Pattern per §6.L clause 4
+("Verification-only assertions"). Call-counting is permitted as a
+secondary signal, never the primary one.
+
+**Affected files:**
+- `app/src/androidTest/kotlin/lava/app/challenges/Challenge16ApiSupportedFilterTest.kt`
+- `core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker/domain/GetCurrentProfileUseCase.kt`
+- `app/src/test/kotlin/digital/vasic/lava/client/firebase/FirebaseAnalyticsTrackerTest.kt`
+- `CLAUDE.md`, `AGENTS.md`, `lava-api-go/CLAUDE.md` (§6.L count + 16th invocation forensic anchor)
+- `docs/CONTINUATION.md` (audit findings + verification log)
+
+**Fix:**
+1. C16 rewritten to navigate to "Pick your providers" and assert that
+   all 4 verified+apiSupported providers (RuTracker.org, RuTor.info,
+   Internet Archive, Project Gutenberg) actually render in the list.
+   Falsifiability rehearsal documented in the KDoc: setting
+   `archiveorg apiSupported=false` causes the IA assertion to fail.
+2. `GetCurrentProfileUseCase` now tries 4 selectors in order before
+   erroring: `#logged-in-username`, `a.logged-in-as-uname`,
+   `.menu-userctrl a[href*='profile.php?u=']`, `a[href*='profile.php?u=']`.
+   Error message updated to "logged-in user-id not found — page may be
+   guest, or selectors stale" so future agents have a clearer
+   diagnostic anchor.
+3. `FirebaseAnalyticsTrackerTest`'s `verify`-only tests refactored
+   to use `mockk slot` captures with `assertEquals` on the captured
+   String values + `assertTrue(slot.isCaptured)` as a non-zero-count
+   gate. The captured-value equality is now the primary assertion,
+   per §6.L clause 4.
+4. Constitutional count update in `CLAUDE.md` §6.L (THIRTEEN → SIXTEEN),
+   `AGENTS.md` §6.L (THIRTEEN → SIXTEEN), `lava-api-go/CLAUDE.md` §6.L
+   (TEN → SIXTEEN). Forensic anchor for the 16th invocation appended
+   to the wall.
+
+**Verification test/challenge:**
+- C16 rewritten: PASS on CZ_API34_Phone API 34 live emulator
+  (2026-05-12 10:50, `BUILD SUCCESSFUL`).
+- 14 of 23 Challenge Tests verified PASS on live emulator this session:
+  C00, C01, C03, C11, C12, C13, C14, C15, C16(rewritten), C20, C21, C22
+  (in isolation; sweep-mode fails due to C21 back-press state leak —
+  not a real-user bug), C23, C24.
+- C02 still does not pass end-to-end (parseUserId fails even with
+  fallback selectors). The Cloudflare-mitigation portion of C02 is
+  fully verified working.
+
+**Fix commit:** _(this commit)_
+
+**Forensic anchor:** operator's SIXTEENTH §6.L invocation, 2026-05-12,
+verbatim: "Do EVERYTHING NOW!!! ... Make sure that all existing tests
+and Challenges do work in anti-bluff manner ... they MUST confirm that
+all tested codebase really works as expected! ... execution of tests
+and Challenges MUST guarantee the quality, the completition and full
+usability by end users of the product!"

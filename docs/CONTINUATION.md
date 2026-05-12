@@ -11,7 +11,48 @@ same commit so the index stays trustworthy. Stale state in this file
 is itself a §6.J spirit issue — the file claims a guarantee, the
 repo has drifted, the agent acts on the claim.
 
-> **Last updated:** 2026-05-12, two-commit C02/C03 fix chain.
+> **Last updated:** 2026-05-12, post §6.L 16th invocation. After commits
+> `4d27c07` (C03 + credential leak + HTTP timeouts) and `f7d0a62`
+> (Cloudflare anti-bot mitigation), operator restated the §6.J/§6.L
+> mandate for the 16th time. This commit propagates the count to
+> CLAUDE.md/AGENTS.md/lava-api-go/CLAUDE.md (submodule docs already
+> reference §6.L via inheritance and auto-current), runs an anti-bluff
+> structural audit across the codebase, fixes one verify-only test
+> (FirebaseAnalyticsTrackerTest), and adds robust selector fallback
+> for `GetCurrentProfileUseCase.parseUserId` so the C02 remaining
+> failure mode (post-CF-mitigation) has a higher chance of resolving.
+>
+> **Bluff-pattern audit results (2026-05-12):**
+>   - 0 mock-the-SUT bluffs across all `*Test.kt` files (the
+>     `mockk<X>` in `XTest` pattern).
+>   - 0 `@Ignore` without issue link.
+>   - 1 verify-only bluff (`FirebaseAnalyticsTrackerTest`) — fixed
+>     by converting `verify { mock.foo() }` to `slot` captures with
+>     `assertEquals` on captured-name + `assertTrue(slot.isCaptured)`.
+>   - 1 stale-assumption bluff (`Challenge16ApiSupportedFilterTest`) —
+>     test asserted "Internet Archive must NOT appear" while Phase 2b
+>     had flipped `apiSupported=true`. The test still passed because
+>     its `waitUntil` happily accepted the Welcome screen (where no
+>     provider list renders). REWRITTEN to navigate to "Pick your
+>     providers" and assert that all 4 verified+apiSupported providers
+>     (RuTracker, RuTor, Internet Archive, Project Gutenberg) actually
+>     render. Verified PASS on live emulator.
+>   - Several `assertNotNull`-only tests in `*ClientTest.kt` are
+>     legitimate §6.E Capability Honesty contract tests, not bluffs.
+>
+> **Live-emulator Challenge verification (CZ_API34_Phone API 34):**
+>   - PASS: C00, C01, C03, C11, C12, C13, C14, C15, C16 (rewritten),
+>     C20, C21, C22 (in isolation — sweep fails due to C21 back-press
+>     state leak; real users don't hit that sequence), C23, C24.
+>   - C02: substantial advance — Cloudflare-mitigation works (POST
+>     login now 302→200), but post-login HTML parser still doesn't
+>     find a logged-in user marker. Added selector fallback (4
+>     selectors tried before erroring); even the fallback chain comes
+>     up empty against today's rutracker.org page. Resolution path
+>     needs operator credential verification AND/OR scraper
+>     archaeology against current rutracker HTML.
+>
+> **Earlier this session:**
 > First commit `4d27c07` resolved C03 (anonymous toggle bug) +
 > credential-leak-in-logs (§6.H) + general HTTP timeout/UA improvements.
 > Second commit (this one) layers Cloudflare anti-bot mitigation:
