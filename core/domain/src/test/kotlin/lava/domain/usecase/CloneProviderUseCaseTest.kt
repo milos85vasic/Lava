@@ -16,6 +16,7 @@ class CloneProviderUseCaseTest {
         val rows = mutableListOf<ClonedProviderEntity>()
         private val flow = MutableStateFlow<List<ClonedProviderEntity>>(emptyList())
         override fun observeAll() = flow
+        override suspend fun getAll(): List<ClonedProviderEntity> = rows.toList()
         override suspend fun upsert(entity: ClonedProviderEntity) {
             rows.removeAll { it.syntheticId == entity.syntheticId }
             rows.add(entity)

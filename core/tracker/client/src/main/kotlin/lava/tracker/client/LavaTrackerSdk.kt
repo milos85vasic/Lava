@@ -3,6 +3,8 @@ package lava.tracker.client
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.runBlocking
+import lava.database.dao.ClonedProviderDao
 import lava.network.sse.SseClient
 import lava.network.sse.SseEvent
 import lava.sdk.api.MapPluginConfig
@@ -74,11 +76,46 @@ class LavaTrackerSdk @Inject constructor(
     private val mirrorConfigLoader: MirrorConfigLoader? = null,
     private val crossTrackerFallback: CrossTrackerFallbackPolicy? = null,
     private val okHttpClient: OkHttpClient? = null,
+    /**
+     * SP-4 Phase A+B (Task 15) — user-cloned providers persisted by
+     * [lava.domain.usecase.CloneProviderUseCase]. Nullable so legacy unit
+     * tests that construct the SDK with only a registry keep compiling.
+     * Production wiring via Hilt supplies it.
+     */
+    private val clonedProviderDao: ClonedProviderDao? = null,
 ) {
     private var activeTrackerId: String = DEFAULT_TRACKER_ID
 
-    /** Returns descriptors of all registered trackers. Order is unspecified. */
-    fun listAvailableTrackers(): List<TrackerDescriptor> = registry.list()
+    /**
+     * Returns descriptors of all registered trackers plus any user-cloned
+     * providers persisted in [ClonedProviderDao] (SP-4 Phase A+B, Task 15).
+     *
+     * Each cloned row produces a [ClonedTrackerDescriptor] that overrides
+     * `trackerId`, `displayName`, and `baseUrls`, but delegates every other
+     * field to the source descriptor identified by
+     * [lava.database.entity.ClonedProviderEntity.sourceTrackerId]. Cloned
+     * rows whose source is no longer registered are skipped — the clone has
+     * no carrier behaviour without it.
+     *
+     * Order is unspecified.
+     */
+    fun listAvailableTrackers(): List<TrackerDescriptor> {
+        val base = registry.list()
+        val dao = clonedProviderDao ?: return base
+        // Room runs `suspend fun getAll()` on its internal query executor;
+        // `runBlocking` here yields to that executor and resumes synchronously
+        // — safe because the SDK method itself is non-suspending and is called
+        // from feature ViewModels on Dispatchers.Main (where Room's executor
+        // is a distinct pool).
+        val cloned = runBlocking { dao.getAll() }
+        if (cloned.isEmpty()) return base
+        val bySource = base.associateBy { it.trackerId }
+        val synthetic = cloned.mapNotNull { entity ->
+            val source = bySource[entity.sourceTrackerId] ?: return@mapNotNull null
+            ClonedTrackerDescriptor(source = source, override = entity)
+        }
+        return base + synthetic
+    }
 
     /** Switches the active tracker. Throws [IllegalArgumentException] if [trackerId] is unknown. */
     fun switchTracker(trackerId: String) {
