@@ -69,11 +69,13 @@ class DiscoverLocalEndpointsUseCaseImpl @Inject constructor(
     /**
      * Convert an mDNS hit into the right typed [Endpoint] variant.
      *
-     * Engine=Go → [Endpoint.GoApi] with the published port (default 8443).
+     * Engine=Go → [Endpoint.GoApi] with the published port from the
+     * service advertisement.
      * Engine=Ktor or Unknown → [Endpoint.Mirror] with the BARE host (no
      * embedded port). `NetworkApiRepositoryImpl` routes [Endpoint.Mirror]
-     * on a LAN address to `http://host:8080` (the legacy Ktor proxy
-     * default).
+     * on a LAN address through `proxyUrl(host, path)`, which appends the
+     * legacy Ktor proxy port held in `LEGACY_LAN_PROXY_PORT` (see
+     * `core/network/impl/.../NetworkApiRepositoryImpl.kt`).
      *
      * SP-3.3 (2026-04-29) forensic anchor: prior to this commit, the
      * `host` field of [DiscoveredEndpoint] carried the `ip:port` string

@@ -87,12 +87,14 @@ fun MenuScreen(
     openLogin: () -> Unit,
     openTrackerSettings: () -> Unit = {},
     openCredentials: () -> Unit = {},
+    openProviderConfig: (String) -> Unit = {},
 ) {
     MenuScreen(
         viewModel = viewModel(),
         openLogin = openLogin,
         openTrackerSettings = openTrackerSettings,
         openCredentials = openCredentials,
+        openProviderConfig = openProviderConfig,
     )
 }
 
@@ -102,6 +104,7 @@ private fun MenuScreen(
     openLogin: () -> Unit,
     openTrackerSettings: () -> Unit = {},
     openCredentials: () -> Unit = {},
+    openProviderConfig: (String) -> Unit = {},
 ) {
     val openLinkHandler = LocalOpenLinkHandler.current
     val confirmationDialogState = rememberConfirmationDialogState()
@@ -119,6 +122,7 @@ private fun MenuScreen(
             }
             is MenuSideEffect.OpenTrackerSettings -> openTrackerSettings()
             is MenuSideEffect.OpenCredentials -> openCredentials()
+            is MenuSideEffect.OpenProviderConfig -> openProviderConfig(sideEffect.providerId)
             is MenuSideEffect.ShowConfirmation -> {
                 confirmationDialogState.show(
                     title = sideEffect.title,
@@ -165,9 +169,11 @@ private fun MenuScreen(
         modifier = Modifier.padding(padding),
         contentPadding = PaddingValues(vertical = AppTheme.spaces.medium),
     ) {
-        menuProviderList(state.activeProviders) { providerId ->
-            onAction(MenuAction.SignOut(providerId))
-        }
+        menuProviderList(
+            providers = state.activeProviders,
+            onOpenConfig = { providerId -> onAction(MenuAction.OpenProviderConfig(providerId)) },
+            onSignOut = { providerId -> onAction(MenuAction.SignOut(providerId)) },
+        )
         menuSectionLabel { Text(stringResource(R.string.menu_label_settings)) }
         menuSelectionItem(
             title = { Text(stringResource(R.string.menu_settings_theme)) },
@@ -293,6 +299,7 @@ private fun MenuScreen(
 
 private fun LazyListScope.menuProviderList(
     providers: List<ProviderMenuItem>,
+    onOpenConfig: (String) -> Unit,
     onSignOut: (String) -> Unit,
 ) = item {
     Column(
@@ -303,6 +310,7 @@ private fun LazyListScope.menuProviderList(
         for (provider in providers) {
             ProviderRow(
                 provider = provider,
+                onClick = { onOpenConfig(provider.providerId) },
                 onSignOut = { onSignOut(provider.providerId) },
             )
         }
@@ -382,10 +390,12 @@ private fun MenuItem(
 @Composable
 private fun ProviderRow(
     provider: ProviderMenuItem,
+    onClick: () -> Unit,
     onSignOut: () -> Unit,
 ) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
+        onClick = onClick,
         shape = AppTheme.shapes.medium,
         color = AppTheme.colors.surface,
     ) {

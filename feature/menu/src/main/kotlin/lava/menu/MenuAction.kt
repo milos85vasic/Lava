@@ -26,6 +26,9 @@ internal sealed interface MenuAction {
     /** Multi-Provider Extension. Open the provider credentials screen. */
     data object CredentialsClick : MenuAction
 
+    /** SP-4 Phase B (Task 18). Open the per-provider config screen. */
+    data class OpenProviderConfig(val providerId: String) : MenuAction
+
     /** Sign out of a specific provider. */
     data class SignOut(val providerId: String) : MenuAction
 

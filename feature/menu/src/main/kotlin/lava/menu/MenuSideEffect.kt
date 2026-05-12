@@ -13,6 +13,9 @@ internal sealed interface MenuSideEffect {
 
     /** Multi-Provider Extension. Open the provider credentials screen. */
     data object OpenCredentials : MenuSideEffect
+
+    /** SP-4 Phase B (Task 18). Open the per-provider config screen. */
+    data class OpenProviderConfig(val providerId: String) : MenuSideEffect
     data class ShowConfirmation(
         @StringRes val title: Int,
         @StringRes val confirmationMessage: Int,

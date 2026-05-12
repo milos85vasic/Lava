@@ -376,6 +376,24 @@ class MenuViewModelTest {
             cancelAndIgnoreRemainingItems()
         }
     }
+
+    // VM-CONTRACT — OpenProviderConfig posts OpenProviderConfig side effect carrying the providerId
+    //
+    // Falsifiability rehearsal (§6.J / §6.N): mutate
+    // MenuViewModel.onOpenProviderConfig() to post a different side effect
+    // (e.g. MenuSideEffect.OpenCredentials) and confirm this test fails with
+    // "expected OpenProviderConfig(rutracker) but got OpenCredentials" — the
+    // assertion is on the SideEffect's data, not just on emission count.
+    @Test
+    fun `open provider config posts side effect with provider id`() = runTest(dispatcherRule.testDispatcher) {
+        val viewModel = createViewModel()
+        viewModel.test(this) {
+            expectInitialState()
+            viewModel.perform(MenuAction.OpenProviderConfig("rutracker"))
+            expectSideEffect(MenuSideEffect.OpenProviderConfig("rutracker"))
+            cancelAndIgnoreRemainingItems()
+        }
+    }
 }
 
 private class FakeAuthService : AuthService {

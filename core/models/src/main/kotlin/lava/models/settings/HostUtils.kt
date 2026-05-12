@@ -24,7 +24,7 @@ fun String.isLocalHost(): Boolean {
         if (hex != null && hex in 0xfc00..0xfdff) return true
     }
 
-    // Strip port if present (e.g., "192.168.0.213:8080")
+    // Strip port if present (e.g., a LAN IP with an embedded port suffix).
     val hostWithoutPort = original.substringBeforeLast(":")
     val lowercase = hostWithoutPort.lowercase()
 

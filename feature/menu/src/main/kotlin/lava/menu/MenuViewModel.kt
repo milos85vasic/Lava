@@ -83,6 +83,7 @@ internal class MenuViewModel @Inject constructor(
             is MenuAction.SetTheme -> onSetTheme(action.theme)
             is MenuAction.TrackerSettingsClick -> onTrackerSettingsClick()
             is MenuAction.CredentialsClick -> onCredentialsClick()
+            is MenuAction.OpenProviderConfig -> onOpenProviderConfig(action.providerId)
             is MenuAction.SignOut -> onSignOut(action.providerId)
             is MenuAction.ConfirmSignOut -> onConfirmSignOut(action.providerId)
         }
@@ -135,6 +136,11 @@ internal class MenuViewModel @Inject constructor(
     /** Multi-Provider Extension. */
     private fun onCredentialsClick() = intent {
         postSideEffect(MenuSideEffect.OpenCredentials)
+    }
+
+    /** SP-4 Phase B (Task 18). */
+    private fun onOpenProviderConfig(providerId: String) = intent {
+        postSideEffect(MenuSideEffect.OpenProviderConfig(providerId))
     }
 
     private fun onSignOut(providerId: String) = intent {

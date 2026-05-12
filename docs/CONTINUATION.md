@@ -11,26 +11,37 @@ same commit so the index stays trustworthy. Stale state in this file
 is itself a §6.J spirit issue — the file claims a guarantee, the
 repo has drifted, the agent acts on the claim.
 
-> **Last updated:** 2026-05-12, SP-4 Phase A foundation + ~half of Phase B
-> infrastructure landed via subagent-driven execution (10 commits on
-> master, all on github + gitlab). Phase A foundation (Tasks 1-10 from
-> `docs/superpowers/plans/2026-05-12-sp4-phase-ab-implementation.md`)
-> is FULLY complete: generic Credentials domain model, AES-256-GCM +
-> PBKDF2 + verifier crypto, Room schema bump v8→v9 with 5 new tables +
-> MIGRATION_8_9, CredentialsEntryRepository with serialized-AES-GCM
-> at-rest, ProviderCredentialBinding, in-memory zeroable
-> CredentialsKeyHolder, PassphraseManager (first-time setup + unlock
-> with verifier-based wrong-pw rejection), Hilt wiring, and the
-> `:feature:credentials_manager` Compose UI module (passphrase unlock
-> dialog + list + create/edit/delete + 4 secret types). Phase B
-> infrastructure tasks landed: `:core:sync` SyncOutbox (Tasks 12),
-> `ProbeMirrorUseCase` (Task 13), `CloneProviderUseCase` (Task 14),
-> `LavaTrackerSdk.listAvailableTrackers()` extended to union cloned
-> providers (Task 15). Compile + unit-test gates all green (24 unit
-> tests across these commits, all with falsifiability rehearsals
-> recorded verbatim per §6.N).
+> **Last updated:** 2026-05-13, SP-4 Phase B Tasks 16+17+18 landed +
+> §4.5.10 §6.R staged-enforcement closure (IPv4 + host:port scanners).
+> Tasks 16+17 ship the `:feature:provider_config` module: Compose UI for
+> the per-provider config screen, Orbit ViewModel wired to all four
+> Phase A+B DAOs (binding / sync toggle / cloned / user mirror) +
+> `CredentialsEntryRepository` + `ProbeMirrorUseCase` +
+> `CloneProviderUseCase` + `SyncOutbox`, six sections (Header /
+> SyncSection / CredentialsSection / MirrorsSection / AnonymousSection /
+> CloneSection), Navigation DSL with providerId required arg. Per
+> §6.Q the screen uses `Column(verticalScroll)` with no nested
+> LazyColumn. Task 18 rewires `MenuScreen` so each provider row's
+> `Surface` is `onClick`-able → `MenuAction.OpenProviderConfig(id)` →
+> `MenuSideEffect.OpenProviderConfig(id)` → `addNestedNavigation`
+> handles the side effect via `openProviderConfig(id)`. New
+> VM-CONTRACT test in `MenuViewModelTest` (`open provider config posts
+> side effect with provider id`) with Bluff-Audit rehearsal recorded.
+> Sign-out trailing affordance was already in place via the existing
+> `ConfirmSignOut` flow; the menu's "Provider Credentials" entry
+> already routes to `:feature:credentials_manager` via
+> `openCredentialsManager()`. §4.5.10 closure: ships
+> `scripts/scan-no-hardcoded-ipv4.sh` + `scripts/scan-no-hardcoded-hostport.sh`
+> as hard-fail gates wired into `scripts/check-constitution.sh`;
+> exemption set matches the UUID scanner pattern + `.md` / `.xml` /
+> `.json` / `.yml` / `.yaml` (external config + docs are legitimate
+> homes for these literals); 2 production-code doc comments updated to
+> use placeholders instead of literal IPs / host:port (`HostUtils.kt`
+> + `DiscoverLocalEndpointsUseCase.kt`). §6.R clause body updated to
+> reflect the closure; algorithm-parameter literal class remains
+> staged (cannot be regex-matched cleanly — needs code-review gate).
 >
-> **Per-task ledger:**
+> **Per-task ledger (SP-4 Phase B continuation):**
 > - 37e2639 — Task 1 (model)
 > - 7740760 — Task 1 fix (drop redundant CredentialsEntry.type field)
 > - 6d548f2 — Task 2 (crypto)
@@ -42,24 +53,26 @@ repo has drifted, the agent acts on the claim.
 > - 97121d7 — Tasks 12+13+14 (SyncOutbox + Probe + Clone)
 > - 59db589 — Task 15 (SDK union cloned providers)
 > - 647d5b5 — Task 15 follow-up (testImplementation :core:database for SwitchingNetworkApi*Test.kt)
+> - 3504d4c — docs(continuation): SP-4 Phase A + half Phase B
+> - 496176e — Auto-commit (submodule pin advance: Challenges + Containers + Security)
+> - [this commit] — Tasks 16+17+18 (provider_config module + Menu rewire)
+> - [this commit] — §4.5.10 closure (§6.R IPv4 + host:port scanners)
 >
 > **Deferred to next session (still planned per SP-4 phase plan A-H + the
 > 21-task Phase A+B implementation plan):**
 > - Task 11: Compose UI Challenges C27 (CredentialsCreateAndAssign) +
 >   C31 (PassphraseUnlockFlow) — require live emulator + connectedDebugAndroidTest cycle.
-> - Tasks 16+17: `:feature:provider_config` module + per-provider
->   config screen sections (header / sync toggle / credentials assign /
->   mirrors list+add+probe / anonymous / clone) — substantial UI work
->   per the plan; each section a distinct Compose composable.
-> - Task 18: Menu provider row → ProviderConfig navigation rewire +
->   sign-out trailing-affordance.
 > - Task 19: Compose UI Challenges C28 (PerProviderSyncToggle) + C29
 >   (AddCustomMirror) + C30 (CloneProvider) — emulator-bound.
 > - Task 20: Version bump 1.2.16-1036 → 1.2.17-1037 / 2.3.5-2305 →
 >   2.3.6-2306, CHANGELOG entry, per-version snapshot, pepper rotation,
->   APK rebuild, Firebase distribute, Go API restart.
-> - Task 21: CONTINUATION.md final-state update reflecting Phase A+B
->   complete + Phase C-H still scoped at the SP-4 design level.
+>   APK rebuild, Firebase distribute, Go API restart. Operator-driven
+>   (Firebase token + pepper-history hygiene).
+> - §4.5.7 + §4.5.8 (Engine.Ktor enum + Endpoint.Mirror LAN-IP branch)
+>   cleanup deferred: persisted-data risk (older app versions may have
+>   `DiscoveredEndpoint.Engine.Ktor` / `Endpoint.Mirror(LAN-IP)` rows
+>   in Room). Proper closure requires a schema migration + version bump,
+>   not a single-session cosmetic edit. Stays in §4.5 as low-priority.
 >
 > Phases C through H of SP-4 (multi-provider parallel search SDK,
 > credentials sync with end-to-end encryption to Lava API, removal-

@@ -285,6 +285,14 @@ done
 # this script failed first.
 bash scripts/scan-no-hardcoded-uuid.sh
 
+# 6.R staged scopes (§4.5.10 closure, 2026-05-13):
+# IPv4 + host:port literal enforcement was deferred at §6.R landing time
+# per "Enforcement status (2026-05-06)". This pair of scanners ships the
+# mechanical gate. Same delegate-to-standalone pattern as the UUID gate
+# so each rule can be invoked in isolation under hermetic test conditions.
+bash scripts/scan-no-hardcoded-ipv4.sh
+bash scripts/scan-no-hardcoded-hostport.sh
+
 # ---------------------------------------------------------------------
 # 6.S — Continuation Document Maintenance Mandate enforcement
 # ---------------------------------------------------------------------

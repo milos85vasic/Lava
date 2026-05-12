@@ -23,6 +23,8 @@ import lava.login.addLogin
 import lava.login.openLogin
 import lava.menu.MenuScreen
 import lava.navigation.NavigationController
+import lava.provider.config.addProviderConfig
+import lava.provider.config.openProviderConfig
 import lava.navigation.model.NavigationBarItem
 import lava.navigation.model.NavigationGraphBuilder
 import lava.navigation.model.buildRoute
@@ -61,6 +63,11 @@ fun MobileNavigation(navigationController: NavigationController) {
             )
             addCredentialsManager(
                 back = ::popBackStack,
+                animations = NavigationAnimations.ScaleInOutAnimation,
+            )
+            addProviderConfig(
+                back = ::popBackStack,
+                openCredentialsManager = ::openCredentialsManager,
                 animations = NavigationAnimations.ScaleInOutAnimation,
             )
             addSearchInput(
@@ -103,6 +110,7 @@ fun MobileNavigation(navigationController: NavigationController) {
                 openTopic = { openTopic(it) },
                 openTrackerSettings = { openTrackerSettings() },
                 openCredentials = { openCredentialsManager() },
+                openProviderConfig = { openProviderConfig(it) },
             )
         }
     }
@@ -115,6 +123,7 @@ private fun addNestedNavigation(
     openTopic: (id: String) -> Unit,
     openTrackerSettings: () -> Unit,
     openCredentials: () -> Unit,
+    openProviderConfig: (String) -> Unit,
 ) = addDestination {
     val navigationBarItems = remember { BottomRoute.entries.map(BottomRoute::navigationBarItem) }
     val navigationController = rememberNestedNavigationController()
@@ -139,6 +148,7 @@ private fun addNestedNavigation(
                 openLogin = openLogin,
                 openTrackerSettings = openTrackerSettings,
                 openCredentials = openCredentials,
+                openProviderConfig = openProviderConfig,
             )
         }
     }
@@ -243,6 +253,7 @@ private fun addMenu(
     openLogin: () -> Unit,
     openTrackerSettings: () -> Unit,
     openCredentials: () -> Unit = {},
+    openProviderConfig: (String) -> Unit = {},
 ) = addDestination(
     route = BottomRoute.Menu.route,
     animations = BottomRoute.Menu.animations,
@@ -251,6 +262,7 @@ private fun addMenu(
             openLogin = openLogin,
             openTrackerSettings = openTrackerSettings,
             openCredentials = openCredentials,
+            openProviderConfig = openProviderConfig,
         )
     },
 )
