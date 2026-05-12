@@ -7,6 +7,8 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import lava.database.converters.Converters
 import lava.database.dao.BookmarkDao
+import lava.database.dao.ClonedProviderDao
+import lava.database.dao.CredentialsEntryDao
 import lava.database.dao.EndpointDao
 import lava.database.dao.FavoriteSearchDao
 import lava.database.dao.FavoriteTopicDao
@@ -15,13 +17,18 @@ import lava.database.dao.ForumMetadataDao
 import lava.database.dao.ForumProviderSelectionDao
 import lava.database.dao.MirrorHealthDao
 import lava.database.dao.ProviderConfigDao
+import lava.database.dao.ProviderCredentialBindingDao
 import lava.database.dao.ProviderCredentialsDao
+import lava.database.dao.ProviderSyncToggleDao
 import lava.database.dao.SearchHistoryDao
 import lava.database.dao.SearchProviderSelectionDao
 import lava.database.dao.SuggestDao
+import lava.database.dao.SyncOutboxDao
 import lava.database.dao.UserMirrorDao
 import lava.database.dao.VisitedTopicDao
 import lava.database.entity.BookmarkEntity
+import lava.database.entity.ClonedProviderEntity
+import lava.database.entity.CredentialsEntryEntity
 import lava.database.entity.EndpointEntity
 import lava.database.entity.FavoriteSearchEntity
 import lava.database.entity.FavoriteTopicEntity
@@ -30,16 +37,21 @@ import lava.database.entity.ForumMetadata
 import lava.database.entity.ForumProviderSelectionEntity
 import lava.database.entity.MirrorHealthEntity
 import lava.database.entity.ProviderConfigEntity
+import lava.database.entity.ProviderCredentialBindingEntity
 import lava.database.entity.ProviderCredentialsEntity
+import lava.database.entity.ProviderSyncToggleEntity
 import lava.database.entity.SearchHistoryEntity
 import lava.database.entity.SearchProviderSelectionEntity
 import lava.database.entity.SuggestEntity
+import lava.database.entity.SyncOutboxEntity
 import lava.database.entity.UserMirrorEntity
 import lava.database.entity.VisitedTopicEntity
 
 @Database(
     entities = [
         BookmarkEntity::class,
+        ClonedProviderEntity::class,
+        CredentialsEntryEntity::class,
         EndpointEntity::class,
         FavoriteSearchEntity::class,
         FavoriteTopicEntity::class,
@@ -48,14 +60,17 @@ import lava.database.entity.VisitedTopicEntity
         ForumProviderSelectionEntity::class,
         MirrorHealthEntity::class,
         ProviderConfigEntity::class,
+        ProviderCredentialBindingEntity::class,
         ProviderCredentialsEntity::class,
+        ProviderSyncToggleEntity::class,
         SearchHistoryEntity::class,
         SearchProviderSelectionEntity::class,
         SuggestEntity::class,
+        SyncOutboxEntity::class,
         UserMirrorEntity::class,
         VisitedTopicEntity::class,
     ],
-    version = 8,
+    version = 9,
     exportSchema = true,
 )
 @TypeConverters(Converters::class)
@@ -75,6 +90,11 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun providerConfigDao(): ProviderConfigDao
     abstract fun searchProviderSelectionDao(): SearchProviderSelectionDao
     abstract fun forumProviderSelectionDao(): ForumProviderSelectionDao
+    abstract fun credentialsEntryDao(): CredentialsEntryDao
+    abstract fun providerCredentialBindingDao(): ProviderCredentialBindingDao
+    abstract fun providerSyncToggleDao(): ProviderSyncToggleDao
+    abstract fun clonedProviderDao(): ClonedProviderDao
+    abstract fun syncOutboxDao(): SyncOutboxDao
 
     companion object {
         val MIGRATION_3_4 = object : Migration(3, 4) {
@@ -214,6 +234,44 @@ abstract class AppDatabase : RoomDatabase() {
                 db.execSQL(
                     "CREATE INDEX IF NOT EXISTS `index_forum_provider_selections_category_id` " +
                         "ON `forum_provider_selections` (`category_id`)",
+                )
+            }
+        }
+
+        /**
+         * SP-4 Phase A+B (Tasks 3+4). Adds five tables backing the multi-credential
+         * persistence layer, per-provider sync toggle, cloned-provider catalogue,
+         * and the outbox feeding the lava-api-go sync worker:
+         *  - `credentials_entry` — Tink-encrypted credential blobs keyed by id.
+         *  - `provider_credential_binding` — providerId -> credentialId mapping.
+         *  - `provider_sync_toggle` — per-provider opt-in flag for cloud sync.
+         *  - `cloned_provider` — synthetic providers cloned from a source tracker.
+         *  - `sync_outbox` — append-only queue of pending sync envelopes.
+         */
+        val MIGRATION_8_9 = object : Migration(8, 9) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS credentials_entry (" +
+                        "id TEXT NOT NULL PRIMARY KEY, displayName TEXT NOT NULL, type TEXT NOT NULL, " +
+                        "ciphertext BLOB NOT NULL, createdAt INTEGER NOT NULL, updatedAt INTEGER NOT NULL)",
+                )
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS provider_credential_binding (" +
+                        "providerId TEXT NOT NULL PRIMARY KEY, credentialId TEXT NOT NULL)",
+                )
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS provider_sync_toggle (" +
+                        "providerId TEXT NOT NULL PRIMARY KEY, enabled INTEGER NOT NULL)",
+                )
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS cloned_provider (" +
+                        "syntheticId TEXT NOT NULL PRIMARY KEY, sourceTrackerId TEXT NOT NULL, " +
+                        "displayName TEXT NOT NULL, primaryUrl TEXT NOT NULL)",
+                )
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS sync_outbox (" +
+                        "id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, kind TEXT NOT NULL, " +
+                        "payload TEXT NOT NULL, createdAt INTEGER NOT NULL)",
                 )
             }
         }
