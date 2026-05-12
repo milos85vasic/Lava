@@ -22,6 +22,8 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import lava.database.AppDatabase
 import lava.database.dao.BookmarkDao
+import lava.database.dao.ClonedProviderDao
+import lava.database.dao.CredentialsEntryDao
 import lava.database.dao.EndpointDao
 import lava.database.dao.FavoriteSearchDao
 import lava.database.dao.FavoriteTopicDao
@@ -30,10 +32,13 @@ import lava.database.dao.ForumMetadataDao
 import lava.database.dao.ForumProviderSelectionDao
 import lava.database.dao.MirrorHealthDao
 import lava.database.dao.ProviderConfigDao
+import lava.database.dao.ProviderCredentialBindingDao
 import lava.database.dao.ProviderCredentialsDao
+import lava.database.dao.ProviderSyncToggleDao
 import lava.database.dao.SearchHistoryDao
 import lava.database.dao.SearchProviderSelectionDao
 import lava.database.dao.SuggestDao
+import lava.database.dao.SyncOutboxDao
 import lava.database.dao.UserMirrorDao
 import lava.database.dao.VisitedTopicDao
 import javax.inject.Singleton
@@ -112,4 +117,32 @@ object DaosModule {
     @Singleton
     fun providesForumProviderSelectionDao(appDatabase: AppDatabase): ForumProviderSelectionDao =
         appDatabase.forumProviderSelectionDao()
+
+    // SP-4 Phase A+B (Task 9). Five DAOs backing the multi-credential
+    // persistence, per-provider sync toggle, cloned-provider catalogue, and
+    // outbox feeding the lava-api-go sync worker.
+    @Provides
+    @Singleton
+    fun providesCredentialsEntryDao(appDatabase: AppDatabase): CredentialsEntryDao =
+        appDatabase.credentialsEntryDao()
+
+    @Provides
+    @Singleton
+    fun providesProviderCredentialBindingDao(appDatabase: AppDatabase): ProviderCredentialBindingDao =
+        appDatabase.providerCredentialBindingDao()
+
+    @Provides
+    @Singleton
+    fun providesProviderSyncToggleDao(appDatabase: AppDatabase): ProviderSyncToggleDao =
+        appDatabase.providerSyncToggleDao()
+
+    @Provides
+    @Singleton
+    fun providesClonedProviderDao(appDatabase: AppDatabase): ClonedProviderDao =
+        appDatabase.clonedProviderDao()
+
+    @Provides
+    @Singleton
+    fun providesSyncOutboxDao(appDatabase: AppDatabase): SyncOutboxDao =
+        appDatabase.syncOutboxDao()
 }

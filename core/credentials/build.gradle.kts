@@ -18,6 +18,7 @@ dependencies {
     implementation(project(":core:models"))
     implementation(project(":core:preferences"))
 
+    implementation(libs.androidx.security.ktx)
     implementation(libs.javax.inject)
     implementation(libs.kotlinx.coroutines.core)
 
