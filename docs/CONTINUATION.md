@@ -11,15 +11,32 @@ same commit so the index stays trustworthy. Stale state in this file
 is itself a §6.J spirit issue — the file claims a guarantee, the
 repo has drifted, the agent acts on the claim.
 
-> **Last updated:** 2026-05-12, post §6.L 18th invocation. The 18th
-> invocation re-asserted the same demand mid-build cycle, validating
-> the operator's standing concern that "all tests green but features
-> don't work" must NEVER recur. Count bumped to EIGHTEEN across all 53
-> constitutional docs (root CLAUDE.md + AGENTS.md, lava-api-go CLAUDE
-> + CONSTITUTION + AGENTS, 16 submodule × 3 = 48 docs). New artifact
-> versions cut: Android 1.2.13-1033 → 1.2.14-1034, Go API 2.3.2-2302 →
-> 2.3.3-2303. Both APKs (debug + release-signed) built successfully.
-> Firebase distribute + Go API local restart proceed in this commit.
+> **Last updated:** 2026-05-12, FULL DISTRIBUTE CYCLE complete for
+> Lava-Android-1.2.14-1034 / Lava-API-Go-2.3.3-2303 in response to
+> operator's §6.L 16th-18th invocations + the "DO EVERYTHING NOW"
+> extended directive.
+>
+> Distribute artifacts:
+> - debug APK release `775nqmmfsquf0` on `digital.vasic.lava.client.dev`
+> - release APK release `3jkm1dohgblfo` on `digital.vasic.lava.client`
+> - both distributed to operator's Firebase tester group
+> - per-version snapshot: `.lava-ci-evidence/distribute-changelog/firebase-app-distribution/1.2.14-1034.md`
+> - last-version recorded: 1034
+> - pepper rotated to `61c7396d...` (recorded to pepper-history)
+> - new client UUID added to LAVA_AUTH_ACTIVE_CLIENTS in .env (gitignored)
+>
+> Go API status:
+> - lava-postgres + lava-api-go containers running locally (healthy)
+> - lava-api-go v2.3.3-2303 at `https://localhost:8443/health`
+>   returning `{"status":"alive"}`
+> - thinker.local remote target offline (DNS resolution times out);
+>   remote distribute deferred. Local API is sufficient for operator
+>   manual testing from the same host or LAN-discovery (mDNS).
+>
+> Constitution propagation: §6.L count bumped to EIGHTEEN across all
+> 53 constitutional docs (root + lava-api-go + 16 × 3 submodule docs).
+> All 16 submodule repos committed + pushed to GitHub + GitLab.
+> Parent pins bumped in lockstep.
 >
 > **Last updated (earlier this session):** post §6.L 17th invocation. The 16th
 > invocation triggered the C03 fix + Cloudflare-mitigation + anti-bluff
