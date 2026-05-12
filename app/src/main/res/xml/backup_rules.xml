@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Android Auto Backup exclusion rules.
+
+  Operator directive 2026-05-12: Endpoint.Rutracker is no longer
+  surfaced; the user's stored endpoint preference MUST NOT survive
+  a backup/restore cycle that would re-seed a stale Main server
+  entry. Excluding the entire "settings" SharedPreferences from
+  backup is heavy-handed (loses theme + sync periods) but ensures
+  the user's reinstall lands on a fresh endpoint pick rather than
+  a zombie rutracker.org default.
+
+  Migration on read in PreferencesStorageImpl.getSettings() handles
+  pre-existing rows (legacy installs that backed up prior to this
+  rule landing); this XML stops new backups from carrying the key
+  forward.
+-->
+<full-backup-content>
+    <exclude domain="sharedpref" path="settings.xml" />
+</full-backup-content>

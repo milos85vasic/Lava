@@ -1,4 +1,56 @@
 # Changelog
+## Lava-Android-1.2.16-1036 / Lava-API-Go-2.3.5-2305 — 2026-05-12 (debug icon + RuTracker-Main full removal + §6.L 19th)
+
+**Previous published:** Lava-Android-1.2.15-1035 / Lava-API-Go-2.3.4-2304
+
+### Fixed
+- **Debug launcher icon background.** The debug variant's `ic_launcher_background`
+  is now solid `#00FF00` (green) instead of the previous gray. Added a
+  debug-specific adaptive-icon at `app/src/debug/res/mipmap-anydpi-v26/ic_launcher.xml`
+  pointing at the debug drawable so both `android:icon` and
+  `android:roundIcon` references in the manifest pick up the green
+  background in the `.dev` variant only.
+- **Debug app name.** `app/src/debug/res/values/strings.xml`'s
+  `app_name` changed from "Lava Dev" → "Lava DEV" per operator.
+- **RuTracker (Main) persisting through reinstall.** v1.2.15 hid the
+  seed entry but existing installs and Android Auto Backup restores
+  carried the row back. Three layers of defense:
+  1. `EndpointsRepositoryImpl.observeAll()` now `purgeRutrackerLegacy()`s
+     the DAO on every observe() start AND filters `Endpoint.Rutracker`
+     out of the emitted list.
+  2. `EndpointsRepositoryImpl.add()` silently rejects
+     `Endpoint.Rutracker` arguments.
+  3. `PreferencesStorageImpl.getSettings()` migrates a persisted
+     `Endpoint.Rutracker` (e.g., from a backup restore) to
+     `Endpoint.GoApi(host = "lava-api.local")` and clears the prefs
+     key.
+- **Auto Backup / cloud-restore exclusion.** Added
+  `app/src/main/res/xml/backup_rules.xml` +
+  `app/src/main/res/xml/data_extraction_rules.xml` excluding
+  `settings.xml` SharedPreferences from full-backup, cloud-backup,
+  and device-transfer paths. Manifest now declares both via
+  `android:fullBackupContent` and `android:dataExtractionRules`.
+  Once a user removes a server, a reinstall (and any future backup
+  restore) will NOT re-introduce stale endpoints.
+
+### New tests
+- `EndpointsRepositoryImplFilterTest` (JVM): asserts the filter +
+  purge + add-rejection contracts.
+- `Challenge26RutrackerMainAbsentFromServerListTest` (Compose UI):
+  asserts the Server section never renders "Main" or
+  "rutracker.org" entries.
+
+### Constitutional
+- §6.L mandate invoked for the 19th time. Count propagated across
+  CLAUDE.md, AGENTS.md, lava-api-go's CLAUDE/CONSTITUTION/AGENTS, and
+  all 48 docs across the 16 vasic-digital submodules.
+
+### Changed
+- Go API version → 2.3.5-2305
+- Android version → 1.2.16-1036
+
+---
+
 ## Lava-Android-1.2.15-1035 / Lava-API-Go-2.3.4-2304 — 2026-05-12 (operator-reported UX issues)
 
 **Previous published:** Lava-Android-1.2.14-1034 / Lava-API-Go-2.3.3-2303

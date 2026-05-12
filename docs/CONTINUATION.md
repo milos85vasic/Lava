@@ -11,8 +11,31 @@ same commit so the index stays trustworthy. Stale state in this file
 is itself a §6.J spirit issue — the file claims a guarantee, the
 repo has drifted, the agent acts on the claim.
 
-> **Last updated:** 2026-05-12, FIVE-issue UX fix cycle complete for
-> Lava-Android-1.2.15-1035 / Lava-API-Go-2.3.4-2304. Operator-reported
+> **Last updated:** 2026-05-12, post v1.2.16 distribute + SP-4 design
+> filed. Operator opened a multi-provider refactor scope during the
+> v1.2.15/1.2.16 release cycle that is multi-phase and cannot be
+> honestly delivered in one session per §6.J anti-bluff. Design doc
+> at `docs/superpowers/specs/2026-05-12-sp4-multi-provider-redesign.md`
+> covers all of: Trackers-screen removal, per-provider config screen
+> reachable from Menu, generic Credentials (one entry usable by N
+> providers, end-to-end encrypted sync), multi-provider parallel
+> search with per-provider event labels, provider clone-with-new-name,
+> per-provider sync ON/OFF toggle, removal-syncs-to-backup. Phased
+> implementation plan (A-H) to follow as separate commits. This
+> session: v1.2.16 distributed (debug icon green + name DEV + RuTracker-
+> Main 3-layer purge + Auto Backup exclusions), SP-4 design filed,
+> submodules fetched + pulled (Security advanced go.sum).
+>
+> Distribute artifacts (v1.2.16-1036):
+> - debug APK release on `digital.vasic.lava.client.dev`
+> - release APK release `36o3uiu0us6cg` on `digital.vasic.lava.client`
+>
+> Go API state:
+> - lava-api-go v2.3.5-2305 running locally at `https://localhost:8443/`
+>   (healthy); kept booted for manual testing.
+>
+> **Last updated (earlier this session):** FIVE-issue UX fix cycle
+> complete for Lava-Android-1.2.15-1035 / Lava-API-Go-2.3.4-2304. Operator-reported
 > issues all addressed, tested, verified on live emulator, distributed
 > via Firebase.
 >

@@ -89,9 +89,22 @@ internal class PreferencesStorageImpl @Inject constructor(
 
     override suspend fun getSettings(): Settings {
         return withContext(dispatchers.io) {
-            val endpoint = settingsPreferences.getString(endpointKey, null)?.let {
+            val storedEndpoint = settingsPreferences.getString(endpointKey, null)?.let {
                 with(EndpointConverter) { fromJson(it) }
-            } ?: Endpoint.Rutracker
+            }
+            // Operator directive 2026-05-12: Endpoint.Rutracker (direct
+            // rutracker.org) is no longer surfaced. Persisted Rutracker
+            // values — including Android Auto Backup restores — are
+            // migrated on read to the LAN lava-api-go mDNS placeholder
+            // and cleared from prefs.
+            val endpoint: Endpoint = if (storedEndpoint == null || storedEndpoint is Endpoint.Rutracker) {
+                if (storedEndpoint is Endpoint.Rutracker) {
+                    settingsPreferences.edit { remove(endpointKey) }
+                }
+                Endpoint.GoApi(host = "lava-api.local")
+            } else {
+                storedEndpoint
+            }
             val theme = settingsPreferences.getString(themeKey, null)?.let {
                 enumValueOf(it)
             } ?: Theme.SYSTEM
