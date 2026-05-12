@@ -11,7 +11,17 @@ same commit so the index stays trustworthy. Stale state in this file
 is itself a §6.J spirit issue — the file claims a guarantee, the
 repo has drifted, the agent acts on the claim.
 
-> **Last updated:** 2026-05-12, post §6.L 17th invocation. The 16th
+> **Last updated:** 2026-05-12, post §6.L 18th invocation. The 18th
+> invocation re-asserted the same demand mid-build cycle, validating
+> the operator's standing concern that "all tests green but features
+> don't work" must NEVER recur. Count bumped to EIGHTEEN across all 53
+> constitutional docs (root CLAUDE.md + AGENTS.md, lava-api-go CLAUDE
+> + CONSTITUTION + AGENTS, 16 submodule × 3 = 48 docs). New artifact
+> versions cut: Android 1.2.13-1033 → 1.2.14-1034, Go API 2.3.2-2302 →
+> 2.3.3-2303. Both APKs (debug + release-signed) built successfully.
+> Firebase distribute + Go API local restart proceed in this commit.
+>
+> **Last updated (earlier this session):** post §6.L 17th invocation. The 16th
 > invocation triggered the C03 fix + Cloudflare-mitigation + anti-bluff
 > audit chain (`4d27c07`, `f7d0a62`, `4b0dd55`). The 17th invocation
 > demanded the count + audit also reach **every submodule's

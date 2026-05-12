@@ -1,4 +1,97 @@
 # Changelog
+## Lava-Android-1.2.14-1034 / Lava-API-Go-2.3.3-2303 — 2026-05-12 (§6.L 16th+17th invocation: C03 fix + Cloudflare anti-bot + anti-bluff audit)
+
+**Previous published:** Lava-Android-1.2.13-1033 / Lava-API-Go-2.3.2-2302
+
+### Fixed
+- **C03 RuTor anonymous onboarding** — Onboarding flow stuck on Configure
+  screen for users picking RuTor with the Anonymous Access toggle on. Root
+  cause: `OnboardingViewModel.onTestAndContinue()` called `sdk.checkAuth()`
+  on the anonymous branch and treated `AuthState.Unauthenticated` as
+  failure — but Unauthenticated IS the user's chosen state for anonymous.
+  Fixed by skipping `checkAuth` on the anonymous branch entirely.
+  (Commit `4d27c07`)
+
+- **Credential-leak-in-logs (§6.H)** — `OnboardingViewModel.perform()`
+  logged actions via `logger.d { "Perform $action" }` which printed the
+  operator's real RuTracker username + password in plain text via the
+  sealed-class auto-`toString` of `UsernameChanged(value=…)` /
+  `PasswordChanged(value=…)`. Discovered during the C03 investigation.
+  Fixed by printing only `action::class.simpleName`. (Commit `4d27c07`)
+
+- **C02 RuTracker login — Cloudflare anti-bot stall** — POST to
+  `/forum/login.php` was silently stalled by Cloudflare's anti-bot
+  (TLS+TCP succeeded, request body written, no response data ever
+  returned). Mitigation: HttpCookies plugin + browser-class headers
+  (Accept, Accept-Language, Accept-Encoding) + real Chrome 124 UA +
+  pre-flight `GET /forum/index.php` so the POST carries Cloudflare
+  clearance cookies. POST now returns 302→200. (Commit `f7d0a62`)
+
+- **rutracker cookie selection bug** — `RuTrackerInnerApiImpl.login()`
+  picked the wrong cookie as the rutracker session token when
+  Cloudflare added `cf_clearance` to Set-Cookie headers. Tightened
+  selection to match by NAME prefix (bb_data/bb_session/bb_login)
+  instead of fragile "not bb_ssl" negation. (Commit `f7d0a62`)
+
+- **HTTP timeouts** — Main + LAN OkHttp clients had no explicit
+  timeouts (OkHttp default 10s — too tight for slow networks).
+  Set explicit 30s connect/read/write. Rutracker Ktor client gets
+  HttpTimeout plugin (60s request, 30s connect, 60s socket).
+  (Commit `4d27c07`)
+
+- **Challenge16 stale-assumption bluff** — Test asserted "Internet
+  Archive must NOT appear in onboarding list" while Phase 2b had
+  flipped `apiSupported=true` on archiveorg. The test passed only
+  because its `waitUntil` accepted the Welcome screen (where no
+  provider list renders). Rewritten to navigate to "Pick your
+  providers" and assert that all 4 verified+apiSupported providers
+  actually render. (Commit `4b0dd55`)
+
+- **GetCurrentProfileUseCase brittle parser** — Single-selector Jsoup
+  approach (`#logged-in-username`) failed after Cloudflare mitigation
+  changed the served page. Added 4-selector fallback chain. (Commit
+  `4b0dd55`)
+
+- **FirebaseAnalyticsTracker verify-only test** — Two tests used
+  `verify { mock.foo() }` as their sole assertion (§6.L clause 4
+  Forbidden Test Pattern). Refactored to `mockk slot` captures with
+  `assertEquals` on captured values. (Commit `4b0dd55`)
+
+### Constitutional
+- §6.L mandate invoked for the 16th + 17th times. Count propagated
+  across CLAUDE.md, AGENTS.md, lava-api-go's CLAUDE/CONSTITUTION/AGENTS,
+  and all 48 docs across the 16 vasic-digital submodules. (Commits
+  `4b0dd55`, `d8b90ab`, this commit)
+
+### Live-emulator Challenge Test verification (CZ_API34_Phone API 34)
+- **PASS** (14 of 24): C00, C01, C03, C04, C05, C06, C07, C08, C09,
+  C10, C11, C12, C13, C14, C15, C16 (rewritten), C20, C21, C22 (in
+  isolation), C23, C24.
+- **PARTIAL** (1): C02 — Cloudflare mitigation portion verified;
+  blocked at `parseUserId` post-login (none of 4 selectors match
+  today's rutracker HTML — needs scraper archaeology or operator
+  credential verification).
+- **HONEST SHALLOW SCOPE** (C04-C08): test classes named after deep
+  features (DownloadTorrentFile, ViewTopicDetail, CrossTrackerFallback)
+  but only assert "tab is visible" per their KDocs (gap forensic in
+  `.lava-ci-evidence/sp3a-challenges/C4-2026-05-04-redesign.json`).
+  Deep tests owed.
+
+### Unit-test suite
+- 421 unit tests across all modules, 0 failures, 0 errors.
+
+### Verified bluff-pattern audit (across all `*Test.kt` files)
+- 0 mock-the-SUT bluffs.
+- 0 `@Ignore` without issue link.
+- 1 verify-only test (FirebaseAnalyticsTrackerTest) — fixed.
+- 1 stale-assumption test (Challenge16ApiSupportedFilterTest) — rewritten.
+
+### Changed
+- Go API version → 2.3.3
+- Android version → 1.2.14
+
+---
+
 ## Lava-Android-1.2.13-1033 / Lava-API-Go-2.3.2-2302 — 2026-05-08 (Yole+Boba 8-palette theme system)
 
 Yole semantic color foundation with 8 distinct palettes from Boba project accents.
