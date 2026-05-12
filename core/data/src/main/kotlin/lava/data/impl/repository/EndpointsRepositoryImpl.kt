@@ -38,13 +38,11 @@ class EndpointsRepositoryImpl @Inject constructor(
     }
 
     private companion object {
-        // SP-3.2 (2026-04-29): default seeded set is just the rutracker
-        // direct connection. The historical `Endpoint.Proxy` was removed
-        // from the model entirely.
-        val defaultEndpoints: List<EndpointEntity> by lazy {
-            listOf(
-                Endpoint.Rutracker,
-            ).map(Endpoint::toEntity)
-        }
+        // Operator directive 2026-05-12: communication is strictly through
+        // Lava API. The historical direct-rutracker.org seed entry was
+        // removed from the seeded set (no longer surfaced to the user).
+        // Discovery populates the list with mDNS-found lava-api-go
+        // instances; users may also add custom endpoints manually.
+        val defaultEndpoints: List<EndpointEntity> = emptyList()
     }
 }

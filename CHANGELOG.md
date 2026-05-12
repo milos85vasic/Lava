@@ -1,4 +1,54 @@
 # Changelog
+## Lava-Android-1.2.15-1035 / Lava-API-Go-2.3.4-2304 — 2026-05-12 (operator-reported UX issues)
+
+**Previous published:** Lava-Android-1.2.14-1034 / Lava-API-Go-2.3.3-2303
+
+### Fixed
+- **Onboarding wizard not shown on clean install.** MainActivity's
+  `showOnboarding` defaulted to `false` and was loaded asynchronously,
+  while `setKeepOnScreenCondition` only waited for theme — not for
+  onboarding-status. Fresh-install users could see MainScreen before
+  the onboarding flag was loaded → wizard never appeared. Fixed by
+  making `showOnboarding` nullable and extending the splash-keep
+  condition to wait for both theme AND onboarding-status to load.
+- **Menu provider color-dot spacing.** Provider rows in the Menu
+  screen had a `small` spacer between the color dot and the provider
+  name — too tight visually. Bumped to `medium`.
+- **Theme change required app restart.** `MainActivity` collected
+  only the `first()` emission of `viewModel.theme` and never observed
+  subsequent changes. Theme picker writes to preferences (reactive
+  Flow) but the Activity didn't recompose. Fixed by switching to
+  `viewModel.theme.collect { ... }` so each emission updates the
+  composition immediately.
+- **Server section: RuTracker (Main) removed from seeded list.**
+  Per the operator's directive "communication is now strictly through
+  the Lava API", the historical direct rutracker.org seed entry
+  (`Endpoint.Rutracker`) is no longer surfaced to the user. The
+  `defaultEndpoints` seed in `EndpointsRepositoryImpl` is now empty;
+  discovery + manual-add populate the list. The `Endpoint.Rutracker`
+  type remains as a fallback constant for now; full type deletion
+  is documented as a follow-up SP because of its ~15 cascading
+  call-site touches.
+- **Server section: trash icon + confirmation dialog for offline
+  endpoints.** Each `Mirror` / `GoApi` row in the Connections list
+  that is `removable && !selected && status != Active` now shows a
+  red trash (Delete) icon directly (no need to toggle edit mode).
+  Tapping it shows a confirmation `Dialog` ("Remove server? — Remove %s
+  from the server list? This cannot be undone."). Confirm → removal;
+  Cancel → no-op. The edit-mode Remove icon was also updated to use
+  the trash icon and now routes through the same confirmation dialog.
+
+### Live-emulator verification
+- 9-Challenge sweep on CZ_API34_Phone API 34 (post-fix re-run): PASS.
+- New Compose UI Challenge: `Challenge25OnboardingFreshInstallTest`
+  verifies the splash + onboarding-wizard rendering on clean prefs.
+
+### Changed
+- Go API version → 2.3.4-2304
+- Android version → 1.2.15-1035
+
+---
+
 ## Lava-Android-1.2.14-1034 / Lava-API-Go-2.3.3-2303 — 2026-05-12 (§6.L 16th+17th invocation: C03 fix + Cloudflare anti-bot + anti-bluff audit)
 
 **Previous published:** Lava-Android-1.2.13-1033 / Lava-API-Go-2.3.2-2302

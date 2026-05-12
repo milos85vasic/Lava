@@ -34,6 +34,7 @@ import lava.connection.ConnectionsAction.SelectEndpoint
 import lava.connection.ConnectionsAction.SubmitEndpoint
 import lava.designsystem.component.BodyLarge
 import lava.designsystem.component.CircularProgressIndicator
+import lava.designsystem.component.Dialog
 import lava.designsystem.component.Icon
 import lava.designsystem.component.IconButton
 import lava.designsystem.component.Surface
@@ -68,50 +69,83 @@ private fun ConnectionsList(
 private fun ConnectionsList(
     state: ConnectionsState,
     onAction: (ConnectionsAction) -> Unit,
-) = Column {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(
-            modifier = Modifier
-                .weight(1.0f)
-                .padding(horizontal = AppTheme.spaces.large),
-            text = stringResource(R.string.connection_item_title),
-            style = AppTheme.typography.headlineSmall,
-        )
-        if (state.discovering) {
-            CircularProgressIndicator(
-                modifier = Modifier.padding(horizontal = AppTheme.spaces.medium),
+) {
+    var pendingRemoval by remember { mutableStateOf<Endpoint?>(null) }
+    Column {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                modifier = Modifier
+                    .weight(1.0f)
+                    .padding(horizontal = AppTheme.spaces.large),
+                text = stringResource(R.string.connection_item_title),
+                style = AppTheme.typography.headlineSmall,
             )
-        } else {
-            IconButton(
-                icon = LavaIcons.Reload,
-                contentDescription = "Discover local endpoints",
-                onClick = { onAction(DiscoverLocalEndpoints) },
+            if (state.discovering) {
+                CircularProgressIndicator(
+                    modifier = Modifier.padding(horizontal = AppTheme.spaces.medium),
+                )
+            } else {
+                IconButton(
+                    icon = LavaIcons.Reload,
+                    contentDescription = "Discover local endpoints",
+                    onClick = { onAction(DiscoverLocalEndpoints) },
+                )
+            }
+            if (state.edit) {
+                TextButton(
+                    text = stringResource(DsR.string.designsystem_action_done),
+                    onClick = { onAction(DoneClick) },
+                )
+            } else {
+                IconButton(
+                    icon = LavaIcons.Comment,
+                    contentDescription = "Edit connections list",
+                    onClick = { onAction(EditClick) },
+                )
+            }
+        }
+        state.connections.forEach { endpointState ->
+            Endpoint(
+                state = state,
+                endpointState = endpointState,
+                onAction = onAction,
+                onRequestRemove = { pendingRemoval = it },
             )
         }
-        if (state.edit) {
-            TextButton(
-                text = stringResource(DsR.string.designsystem_action_done),
-                onClick = { onAction(DoneClick) },
-            )
-        } else {
-            IconButton(
-                icon = LavaIcons.Comment,
-                contentDescription = "Edit connections list",
-                onClick = { onAction(EditClick) },
-            )
-        }
+        AddConnectionItem(state, onAction)
     }
-    state.connections.forEach { endpointState ->
-        Endpoint(
-            state = state,
-            endpointState = endpointState,
-            onAction = onAction,
+    pendingRemoval?.let { endpoint ->
+        Dialog(
+            title = { Text(text = stringResource(R.string.connection_remove_confirm_title)) },
+            text = {
+                Text(
+                    text = stringResource(
+                        R.string.connection_remove_confirm_message,
+                        endpoint.host,
+                    ),
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    text = stringResource(R.string.connection_remove_confirm_yes),
+                    onClick = {
+                        onAction(RemoveEndpoint(endpoint))
+                        pendingRemoval = null
+                    },
+                )
+            },
+            dismissButton = {
+                TextButton(
+                    text = stringResource(R.string.connection_remove_confirm_no),
+                    onClick = { pendingRemoval = null },
+                )
+            },
+            onDismissRequest = { pendingRemoval = null },
         )
     }
-    AddConnectionItem(state, onAction)
 }
 
 @Composable
@@ -119,11 +153,13 @@ private fun Endpoint(
     state: ConnectionsState,
     endpointState: EndpointState,
     onAction: (ConnectionsAction) -> Unit,
+    onRequestRemove: (Endpoint) -> Unit,
 ) {
     val (endpoint, selected, status) = endpointState
     val selectable by remember(state.edit, selected, status) {
         derivedStateOf { !state.edit && status == EndpointStatus.Active && !selected }
     }
+    val removable = (endpoint is Endpoint.Mirror || endpoint is Endpoint.GoApi) && !selected
     Surface(
         modifier = Modifier.defaultMinSize(minHeight = AppTheme.sizes.default),
         onClick = { onAction(SelectEndpoint(endpoint)) },
@@ -135,9 +171,8 @@ private fun Endpoint(
                 label = "EndpointStateIcon_Crossfade",
             ) { edit ->
                 if (edit) {
-                    val removable = endpoint is Endpoint.Mirror || endpoint is Endpoint.GoApi
                     IconButton(
-                        icon = LavaIcons.Remove,
+                        icon = LavaIcons.Delete,
                         contentDescription = "Remove",
                         tint = if (removable) {
                             AppTheme.colors.accentRed
@@ -145,7 +180,7 @@ private fun Endpoint(
                             AppTheme.colors.outline
                         },
                         enabled = removable,
-                        onClick = { onAction(RemoveEndpoint(endpoint)) },
+                        onClick = { onRequestRemove(endpoint) },
                     )
                 } else {
                     IconButton(
@@ -184,6 +219,14 @@ private fun Endpoint(
                 )
             }
             ConnectionStatusIcon(status)
+            if (!state.edit && removable && status != EndpointStatus.Active) {
+                IconButton(
+                    icon = LavaIcons.Delete,
+                    contentDescription = stringResource(R.string.connection_remove_offline),
+                    tint = AppTheme.colors.accentRed,
+                    onClick = { onRequestRemove(endpoint) },
+                )
+            }
         }
     }
 }

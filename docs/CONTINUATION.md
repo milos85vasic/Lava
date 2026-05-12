@@ -11,10 +11,35 @@ same commit so the index stays trustworthy. Stale state in this file
 is itself a §6.J spirit issue — the file claims a guarantee, the
 repo has drifted, the agent acts on the claim.
 
-> **Last updated:** 2026-05-12, FULL DISTRIBUTE CYCLE complete for
-> Lava-Android-1.2.14-1034 / Lava-API-Go-2.3.3-2303 in response to
-> operator's §6.L 16th-18th invocations + the "DO EVERYTHING NOW"
-> extended directive.
+> **Last updated:** 2026-05-12, FIVE-issue UX fix cycle complete for
+> Lava-Android-1.2.15-1035 / Lava-API-Go-2.3.4-2304. Operator-reported
+> issues all addressed, tested, verified on live emulator, distributed
+> via Firebase.
+>
+> Five issues fixed in this cycle:
+>   1. Onboarding wizard not shown on clean install (MainActivity
+>      `showOnboarding` race condition with theme load).
+>   2. Menu provider color-dot spacing too tight (small → medium).
+>   3. RuTracker (Main) removed from seeded Server list (operator:
+>      "communication is strictly through the Lava API").
+>   4. Trash icon + confirmation dialog for offline servers in the
+>      Server section (no edit-mode toggle needed).
+>   5. Theme change required app restart (was `.first()` only;
+>      switched to `.collect`).
+>
+> New Challenge Test C25 (cleanInstall_landsOnOnboardingWelcomeScreen)
+> verifies Issue 1 fix end-to-end: PASS on CZ_API34_Phone API 34.
+>
+> Firebase distribute v1.2.15-1035:
+> - debug APK release `5r56u119feri0` (digital.vasic.lava.client.dev)
+> - release APK release `72jkalgdg9k30` (digital.vasic.lava.client)
+> - pepper rotated; new client UUID; ACTIVE_CLIENTS appended in .env
+>
+> Go API state:
+> - lava-api-go v2.3.4-2304 running locally at https://localhost:8443/
+>   (healthy); kept booted for manual testing.
+>
+> **Last updated (earlier this session):** post §6.L 18th invocation.
 >
 > Distribute artifacts:
 > - debug APK release `775nqmmfsquf0` on `digital.vasic.lava.client.dev`

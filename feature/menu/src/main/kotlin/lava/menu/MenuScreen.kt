@@ -403,7 +403,7 @@ private fun ProviderRow(
                     .size(12.dp)
                     .background(provider.color, CircleShape),
             )
-            Spacer(modifier = Modifier.width(AppTheme.spaces.small))
+            Spacer(modifier = Modifier.width(AppTheme.spaces.medium))
             Column(modifier = Modifier.weight(1f)) {
                 Body(text = provider.displayName)
                 BodySmall(

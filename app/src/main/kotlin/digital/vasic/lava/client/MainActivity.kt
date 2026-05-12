@@ -28,7 +28,6 @@ import digital.vasic.lava.client.navigation.MobileNavigation
 import digital.vasic.lava.client.platform.OpenFileHandlerImpl
 import digital.vasic.lava.client.platform.OpenLinkHandlerImpl
 import digital.vasic.lava.client.platform.ShareLinkHandlerImpl
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import lava.designsystem.platform.LocalPlatformType
 import lava.designsystem.platform.PlatformType
@@ -87,16 +86,15 @@ open class MainActivity : ComponentActivity() {
         }
 
         var theme: Theme? by mutableStateOf(null)
-        var showOnboarding by mutableStateOf(false)
+        var showOnboarding: Boolean? by mutableStateOf(null)
         lifecycleScope.launch {
             lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                val t = viewModel.theme.first()
-                theme = t
                 val onboardingComplete = preferencesStorage.isOnboardingComplete()
                 showOnboarding = !onboardingComplete
+                viewModel.theme.collect { t -> theme = t }
             }
         }
-        splashScreen.setKeepOnScreenCondition { theme == null }
+        splashScreen.setKeepOnScreenCondition { theme == null || showOnboarding == null }
 
         setContent {
             theme?.let { theme ->
@@ -111,7 +109,7 @@ open class MainActivity : ComponentActivity() {
                     LocalLoggerFactory provides loggerFactory,
                     LocalDeepLinks provides deepLinks,
                 ) {
-                    if (showOnboarding) {
+                    if (showOnboarding == true) {
                         MainScreen(
                             theme = theme,
                             platformType = deviceType,
@@ -127,7 +125,7 @@ open class MainActivity : ComponentActivity() {
                                 },
                             )
                         }
-                    } else {
+                    } else if (showOnboarding == false) {
                         val navigationController = rememberNavigationController()
                         RatingDialog()
                         MainScreen(

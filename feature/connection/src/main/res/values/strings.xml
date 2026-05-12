@@ -15,4 +15,9 @@
     <string name="content_description_endpoint_not_selected">Not selected</string>
     <string name="content_description_endpoint_selected">Selected</string>
     <string name="content_description_no_internet">No internet</string>
+    <string name="connection_remove_offline">Remove offline server</string>
+    <string name="connection_remove_confirm_title">Remove server?</string>
+    <string name="connection_remove_confirm_message">Remove %1$s from the server list? This cannot be undone.</string>
+    <string name="connection_remove_confirm_yes">Remove</string>
+    <string name="connection_remove_confirm_no">Cancel</string>
 </resources>
