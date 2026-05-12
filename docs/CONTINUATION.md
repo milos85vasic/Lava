@@ -11,7 +11,67 @@ same commit so the index stays trustworthy. Stale state in this file
 is itself a §6.J spirit issue — the file claims a guarantee, the
 repo has drifted, the agent acts on the claim.
 
-> **Last updated:** 2026-05-12, post v1.2.16 distribute + SP-4 design
+> **Last updated:** 2026-05-12, SP-4 Phase A foundation + ~half of Phase B
+> infrastructure landed via subagent-driven execution (10 commits on
+> master, all on github + gitlab). Phase A foundation (Tasks 1-10 from
+> `docs/superpowers/plans/2026-05-12-sp4-phase-ab-implementation.md`)
+> is FULLY complete: generic Credentials domain model, AES-256-GCM +
+> PBKDF2 + verifier crypto, Room schema bump v8→v9 with 5 new tables +
+> MIGRATION_8_9, CredentialsEntryRepository with serialized-AES-GCM
+> at-rest, ProviderCredentialBinding, in-memory zeroable
+> CredentialsKeyHolder, PassphraseManager (first-time setup + unlock
+> with verifier-based wrong-pw rejection), Hilt wiring, and the
+> `:feature:credentials_manager` Compose UI module (passphrase unlock
+> dialog + list + create/edit/delete + 4 secret types). Phase B
+> infrastructure tasks landed: `:core:sync` SyncOutbox (Tasks 12),
+> `ProbeMirrorUseCase` (Task 13), `CloneProviderUseCase` (Task 14),
+> `LavaTrackerSdk.listAvailableTrackers()` extended to union cloned
+> providers (Task 15). Compile + unit-test gates all green (24 unit
+> tests across these commits, all with falsifiability rehearsals
+> recorded verbatim per §6.N).
+>
+> **Per-task ledger:**
+> - 37e2639 — Task 1 (model)
+> - 7740760 — Task 1 fix (drop redundant CredentialsEntry.type field)
+> - 6d548f2 — Task 2 (crypto)
+> - e6fde48 — Tasks 3+4 (5 entities + DAOs + migration 8→9 + MIGRATION_7_8 registration fix)
+> - c2dd68a — Task 5 (CredentialsEntryRepository)
+> - bddd978 — Tasks 6+7+8 (binding + KeyHolder + PassphraseManager)
+> - 9ff2ad7 — Task 9 (Hilt wiring)
+> - 44960d5 — Task 10 (Credentials Manager Compose UI feature module)
+> - 97121d7 — Tasks 12+13+14 (SyncOutbox + Probe + Clone)
+> - 59db589 — Task 15 (SDK union cloned providers)
+> - 647d5b5 — Task 15 follow-up (testImplementation :core:database for SwitchingNetworkApi*Test.kt)
+>
+> **Deferred to next session (still planned per SP-4 phase plan A-H + the
+> 21-task Phase A+B implementation plan):**
+> - Task 11: Compose UI Challenges C27 (CredentialsCreateAndAssign) +
+>   C31 (PassphraseUnlockFlow) — require live emulator + connectedDebugAndroidTest cycle.
+> - Tasks 16+17: `:feature:provider_config` module + per-provider
+>   config screen sections (header / sync toggle / credentials assign /
+>   mirrors list+add+probe / anonymous / clone) — substantial UI work
+>   per the plan; each section a distinct Compose composable.
+> - Task 18: Menu provider row → ProviderConfig navigation rewire +
+>   sign-out trailing-affordance.
+> - Task 19: Compose UI Challenges C28 (PerProviderSyncToggle) + C29
+>   (AddCustomMirror) + C30 (CloneProvider) — emulator-bound.
+> - Task 20: Version bump 1.2.16-1036 → 1.2.17-1037 / 2.3.5-2305 →
+>   2.3.6-2306, CHANGELOG entry, per-version snapshot, pepper rotation,
+>   APK rebuild, Firebase distribute, Go API restart.
+> - Task 21: CONTINUATION.md final-state update reflecting Phase A+B
+>   complete + Phase C-H still scoped at the SP-4 design level.
+>
+> Phases C through H of SP-4 (multi-provider parallel search SDK,
+> credentials sync with end-to-end encryption to Lava API, removal-
+> syncs-to-backup semantics, Trackers screen removal/repurpose,
+> documentation refresh) remain at high-level scope in the SP-4 design
+> doc. Each gets its own detailed-design + implementation cycle.
+>
+> Go API state: lava-api-go v2.3.5-2305 running locally at
+> `https://localhost:8443/` (healthy). Distribute artifact v1.2.16-1036
+> (debug + release APKs) live on Firebase tester group.
+>
+> **Last updated (earlier this session):** post v1.2.16 distribute + SP-4 design
 > filed. Operator opened a multi-provider refactor scope during the
 > v1.2.15/1.2.16 release cycle that is multi-phase and cannot be
 > honestly delivered in one session per §6.J anti-bluff. Design doc
