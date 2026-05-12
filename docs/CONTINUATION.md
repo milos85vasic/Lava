@@ -11,7 +11,17 @@ same commit so the index stays trustworthy. Stale state in this file
 is itself a §6.J spirit issue — the file claims a guarantee, the
 repo has drifted, the agent acts on the claim.
 
-> **Last updated:** 2026-05-12, post §6.L 16th invocation. After commits
+> **Last updated:** 2026-05-12, post §6.L 17th invocation. The 16th
+> invocation triggered the C03 fix + Cloudflare-mitigation + anti-bluff
+> audit chain (`4d27c07`, `f7d0a62`, `4b0dd55`). The 17th invocation
+> demanded the count + audit also reach **every submodule's
+> CONSTITUTION.md + AGENTS.md** (not just CLAUDE.md). Verified all 16
+> submodules + lava-api-go carry §6.L inheritance in all three doc
+> types; mass-updated the count from TEN/SIXTEEN → SEVENTEEN across
+> 48 submodule docs + 5 root/lava-api-go docs. Per-submodule commits
+> pushed to GitHub + GitLab; parent pins bumped in lockstep.
+>
+> **Last updated (earlier this session):** post §6.L 16th invocation. After commits
 > `4d27c07` (C03 + credential leak + HTTP timeouts) and `f7d0a62`
 > (Cloudflare anti-bot mitigation), operator restated the §6.J/§6.L
 > mandate for the 16th time. This commit propagates the count to
