@@ -148,6 +148,235 @@ stack is not marked complete.
   CONTINUATION.md in the same commit.
 - §6.W mirrors: GitHub + GitLab only, both updated in lockstep.
 
+## Phase A + B detailed design (locked 2026-05-12)
+
+After brainstorming with the operator on 2026-05-12 (post-v1.2.16-distribute),
+the following decisions are locked for the first implementation cycle.
+Phases C-H remain at the high-level scoping in the section above and will
+get their own detailed-design appendices when their cycles begin.
+
+### Operator decisions during brainstorming
+
+1. **Sequencing:** A2 — Phase A complete + Phase B FULL (mirrors + creds
+   assignment + sync toggle + clone + anonymous mode) in this cycle.
+2. **Credential types in scope:** Username+Password, API Key, Bearer
+   Token, Cookie/Session string. All four supported in v1.
+3. **Encryption:** AES-256-GCM with a per-user passphrase. Key derived
+   via PBKDF2-SHA-256 (200_000 iterations). Zero-knowledge: API stores
+   only encrypted blobs.
+4. **Passphrase UX:** Lazy + in-process cache. Prompt only when user
+   opens Credentials for the first time; derived key kept in memory
+   for the lifetime of the process; re-prompt after force-stop.
+
+### Phase A — Generic Credentials data model
+
+**Module:** `:core:credentials` (extends the existing module, which today
+houses `ProviderCredentialManager` + `CredentialEncryptor` +
+`ProviderConfigRepository` + `CredentialsRepository`). The existing
+classes stay in place; new ones are added alongside, and the legacy
+`ProviderCredentials` shape is migrated to the new `CredentialsEntry`
+shape via the Room migration documented below.
+
+**Domain model** (in `:core:credentials:api`):
+
+```kotlin
+sealed interface CredentialSecret {
+    data class UsernamePassword(val username: String, val password: String) : CredentialSecret
+    data class ApiKey(val key: String) : CredentialSecret
+    data class BearerToken(val token: String) : CredentialSecret
+    data class CookieSession(val cookie: String) : CredentialSecret
+}
+
+enum class CredentialType { USERNAME_PASSWORD, API_KEY, BEARER_TOKEN, COOKIE_SESSION }
+
+data class CredentialsEntry(
+    val id: String,                // UUID v4
+    val displayName: String,       // user-given, e.g. "My main creds."
+    val type: CredentialType,      // discriminator for the sealed shape
+    val secret: CredentialSecret,  // decrypted; never persisted unencrypted
+    val createdAtUtc: Long,
+    val updatedAtUtc: Long,
+)
+
+interface CredentialsRepository {
+    suspend fun list(): List<CredentialsEntry>
+    suspend fun observe(): Flow<List<CredentialsEntry>>
+    suspend fun get(id: String): CredentialsEntry?
+    suspend fun upsert(entry: CredentialsEntry)
+    suspend fun delete(id: String)
+}
+
+interface ProviderCredentialBinding {
+    suspend fun bind(providerId: String, credentialId: String)
+    suspend fun unbind(providerId: String)
+    suspend fun observeBinding(providerId: String): Flow<String?>
+}
+```
+
+**Storage** (Room, new schema bump from v8 to v9):
+
+- Table `credentials_entry`: columns `id` (TEXT PK), `display_name`
+  (TEXT NOT NULL), `type` (TEXT NOT NULL), `ciphertext` (BLOB NOT NULL
+  — 12-byte AES-GCM nonce + ciphertext + 16-byte tag concatenated),
+  `created_at` (INTEGER NOT NULL), `updated_at` (INTEGER NOT NULL).
+- Table `provider_credential_binding`: `provider_id` (TEXT PK),
+  `credential_id` (TEXT NOT NULL, FK → credentials_entry.id ON DELETE
+  SET NULL).
+- Migration `8 → 9`: creates both tables. Existing
+  `ProviderCredentialManager` rows migrated to one `CredentialsEntry`
+  per row (display name = `<providerId> default`) + matching binding;
+  legacy table is dropped after migration verifies row count.
+
+**Encryption**:
+
+- File: `core/credentials/impl/src/main/kotlin/lava/credentials/impl/crypto/CredentialsCrypto.kt`.
+- AES-256-GCM via `javax.crypto.Cipher`. Per-entry random 12-byte
+  nonce. 16-byte authentication tag (standard GCM).
+- Key derivation: PBKDF2 with HMAC-SHA-256, 200_000 iterations,
+  32-byte random salt persisted in `settings.xml` under a fixed key
+  `credentials_kdf_salt_v1` (non-secret).
+- Verifier: HMAC-SHA-256(derivedKey, "lava-credentials-v1") persisted
+  alongside the salt under `credentials_verifier_v1`. Wrong passphrase
+  → verifier mismatch → reject without decryption attempt (avoids
+  ciphertext oracle).
+- Passphrase cache: in-memory `AtomicReference<DerivedKey>` on the
+  `:core:credentials:impl` singleton scope; cleared on
+  `Application.onLowMemory()` and on force-stop (Android kills the
+  process → cache gone).
+
+**ViewModel & screen for credentials list / create / edit:**
+
+- New `:feature:credentials_manager` module. Orbit MVI.
+- `CredentialsManagerScreen` reachable from Menu's existing "Provider
+  Credentials" entry (line ~204 of MenuScreen.kt — `"Provider
+  Credentials"`, the entry already exists but routes to the legacy
+  per-provider screen; rewire it to the new screen).
+- Sub-flow: passphrase unlock dialog → list of credentials → tap to
+  edit / "Add new" FAB → create-credentials sheet with type picker +
+  per-type form fields.
+
+**Tests (Phase A):**
+
+- `CredentialsCryptoTest` (JVM): round-trip; wrong passphrase rejected
+  via verifier; tampered ciphertext rejected via GCM tag.
+- `CredentialsRepositoryImplTest` (JVM, real Room in-memory): upsert
+  + observe + delete; provider-binding CRUD; legacy-migration test
+  uses a v17 SQLite snapshot + asserts the migrated rows have the
+  expected display names.
+- `Challenge27CredentialsCreateAndAssignTest` (Compose UI on emulator):
+  full create + assign flow.
+- `Challenge31PassphraseUnlockFlowTest` (Compose UI): wrong-then-right
+  unlock flow asserts on user-visible error + decrypted list.
+
+### Phase B — Per-provider configuration screen
+
+**New module:** `:feature:provider_config` (Compose, Orbit MVI, applies
+`lava.android.feature` plugin).
+
+**Navigation:**
+
+- `Menu` provider `Surface` becomes `clickable` (the existing surface
+  already has an `onClick` for sign-out — change it to route to
+  `openProviderConfig(providerId)`; sign-out moves to a trailing icon
+  with confirmation dialog).
+- New extension function `addProviderConfig` registered in
+  `:core:navigation`.
+
+**Screen structure (single Composable, `Column(verticalScroll(...))` —
+no nested LazyColumn per §6.Q):**
+
+1. **Header**: provider color dot + `displayName` + `descriptor.trackerId`
+   + current connection status icon.
+2. **Sync section**: `SwitchRow("Sync this provider", state.syncEnabled)`.
+   New `provider_sync_toggle(provider_id TEXT PK, enabled INTEGER NOT
+   NULL)` table. Toggling writes to that table + queues a sync-outbox
+   row for Phase E uploader.
+3. **Credentials section**: shows currently-bound
+   `CredentialsEntry.displayName` or "None — anonymous". Two
+   buttons:
+   - "Assign existing…" → opens `CredentialsPickerSheet` (ModalBottomSheet)
+     listing all entries; tap one → bind via
+     `ProviderCredentialBinding.bind(providerId, credentialId)`.
+   - "Create new…" → opens the `CredentialsCreateSheet` from Phase A
+     (reused); on save the new entry is auto-bound to the current
+     provider.
+4. **Mirrors section**: for every entry in `descriptor.baseUrls`
+   (pre-installed) + every `UserMirror(provider_id, url)` from
+   `UserMirrorRepository`, render `MirrorRow(host, status, isPrimary,
+   isUserAdded)`. Per row: probe icon → `ProbeMirrorUseCase` (HTTP HEAD
+   with the existing Ktor client). Add new mirror: text field at the
+   bottom + button.
+5. **Anonymous toggle**: shown only when `descriptor.supportsAnonymous`
+   is true. Switch toggles a new pref `provider_anonymous_${providerId}`.
+6. **Clone provider**: button at bottom. Opens dialog "Clone {name}
+   as…" with two fields: new display name + new primary mirror URL.
+   Confirm creates a row in new `cloned_providers(synthetic_id TEXT
+   PK, source_tracker_id TEXT, display_name TEXT, primary_url TEXT)`
+   table. `LavaTrackerSdk.listAvailableTrackers()` is extended to
+   union the cloned rows as `TrackerDescriptor` overlays.
+
+**Sync wiring (honest-stub for this cycle):**
+
+- A new `:core:sync` module is introduced with a `SyncOutbox`
+  interface + Room-backed impl. Operations on `provider_sync_toggle`,
+  `provider_credential_binding`, `cloned_providers`, and
+  `user_mirror` enqueue an outbox row.
+- The Phase-E uploader (separate cycle) will drain the outbox; this
+  cycle just queues. CHANGELOG documents this as honest-stub.
+
+**Tests (Phase B):**
+
+- `ProviderSyncToggleRepositoryImplTest` (JVM): toggle persists; outbox
+  row created.
+- `CloneProviderUseCaseTest` (JVM): clone produces synthetic
+  descriptor visible through `listAvailableTrackers()`.
+- `ProbeMirrorUseCaseTest` (JVM, MockWebServer): 200, 4xx, timeout,
+  TLS-failure.
+- `Challenge28PerProviderSyncToggleTest` (Compose UI on emulator):
+  toggle sync OFF → reopen screen → still OFF; outbox table contains
+  entry.
+- `Challenge29AddCustomMirrorTest`: add `rutracker.foo` mirror → row
+  appears in list.
+- `Challenge30CloneProviderTest`: clone "RuTracker.org" as "RuTracker
+  EU" with URL `https://rutracker.eu` → returns to Menu → both rows
+  visible.
+
+### Implementation sequencing (subagent-driven per operator approval)
+
+Per the operator's "you can begin using Subagents-Driven approach"
+hint, the work decomposes into independent subagent tasks per phase:
+
+- **Subagent S-A1**: Phase A foundation — `:core:credentials` module
+  scaffold + Room migration + crypto + repository. Pure Kotlin; no UI.
+- **Subagent S-A2**: Phase A UI — `:feature:credentials_manager`
+  module + passphrase unlock + create/edit/delete UI + Menu rewire.
+- **Subagent S-B1**: Phase B screen scaffolding —
+  `:feature:provider_config` module + navigation + screen skeleton
+  with header + sync section.
+- **Subagent S-B2**: Phase B credentials assignment + clone +
+  anonymous + sync outbox wiring.
+- **Subagent S-B3**: Phase B mirrors section + probe + add-mirror
+  flow.
+- **Subagent S-T1**: Test author — write all Challenge Tests + their
+  KDoc-recorded falsifiability rehearsals, run on the live emulator,
+  record evidence under `.lava-ci-evidence/sp4-phase-ab/`.
+
+Each subagent's brief explicitly carries the §6.J + §6.L + §6.S
+mandate. Main agent reviews each subagent's output against this design
+spec before integration.
+
+### CHANGELOG + distribute plan
+
+- Version bump: 1.2.16-1036 → 1.2.17-1037 / 2.3.5-2305 → 2.3.6-2306.
+- CHANGELOG entry covering Phase A + Phase B feature additions, with
+  honest disclosure that:
+  - Sync outbox queues but does not yet upload (Phase E owed).
+  - Mirrors `probe` UI exists; per-mirror auto-failover is Phase D.
+- Per-version snapshot, pepper rotation, last-version update — same
+  §6.P pattern as v1.2.16.
+- Both APKs distributed via Firebase to operator tester group.
+- Go API local restart at v2.3.6-2306; kept booted.
+
 ## Forensic anchor
 
 Operator's directives during the v1.2.15 / v1.2.16 release cycle
