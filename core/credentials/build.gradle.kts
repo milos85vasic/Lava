@@ -1,6 +1,7 @@
 plugins {
     id("lava.android.library")
     id("lava.android.hilt")
+    id("lava.kotlin.serialization")
 }
 
 android {
