@@ -48,5 +48,6 @@ dependencies {
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.okhttp.core)
     testImplementation(libs.okhttp.mockwebserver)
+    testImplementation(project(":core:database"))
     testImplementation(project(":core:tracker:testing"))
 }
