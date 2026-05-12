@@ -11,12 +11,33 @@ same commit so the index stays trustworthy. Stale state in this file
 is itself a §6.J spirit issue — the file claims a guarantee, the
 repo has drifted, the agent acts on the claim.
 
-> **Last updated:** 2026-05-08 21:15 UTC, after container boot + unit test
-> run + emulator Challenge Test execution. Go API (lava-api-go) running
-> healthy. 1840 unit tests all passing (BUILD SUCCESSFUL). C00 CrashSurvivalTest
-> fixed (persisted name for AuthType.NONE providers). 17/24 challenges pass
-> on CZ_API34_Phone emulator. 4 timeout failures (C02, C03, C11, C12)
-> documented. Phase 3 execution started.
+> **Last updated:** 2026-05-12, after systematic-debugging Phase 1
+> investigation of C02 + C03 timeouts. 3-layer root-cause taxonomy
+> recorded; `3f6e5e6` fixes for L1 (UI input mechanism) + L2 (provider
+> deselection) verified present in HEAD; L3 (real-network round-trip)
+> remains unverified and is the residual concern. C11 + C12 claimed
+> PASS by `3f6e5e6` (matrix re-run pending). Phase 12 α-hotfix
+> "hide IA + Gutenberg" superseded by Phase 2b real per-provider
+> routing — both providers now `apiSupported = true`.
+>
+> **§6.S violations on the previous chain — now corrected here:**
+>   (1) `3f6e5e6` claimed C11/C12 "NOW PASSING" without updating §0
+>       or the Phase 3 results table — fixed in this commit.
+>   (2) Phase 2b silently flipped `apiSupported = true` on archiveorg
+>       + gutenberg without recording the supersession of Phase 12
+>       α-hotfix — fixed here.
+>   (3) The §0 line had been stuck at 2026-05-08 21:15 UTC across
+>       multiple state changes (3f6e5e6, Phase 2b flip, post-`b87b414`
+>       investigation) — fixed here.
+>
+> Remaining work pending operator hardware:
+>   - Matrix re-run on emulator to verify L1+L2 fixes in 3f6e5e6
+>     actually close C02 + C03 (or surface L3 as the residual cause)
+>   - Full §6.I matrix (API28 + API30 + API34 + latest + tablet) for
+>     deployed 1.2.13-1033 / 2.3.2-2302 — last matrix evidence is at
+>     Lava-Android-1.2.0-1020 (13 versions behind)
+>   - `tag.sh` invocation for 1.2.13-1033 / 2.3.2-2302 (blocked on
+>     matrix evidence)
 
 > **§6.S binding:** this file is constitutionally load-bearing per
 > root `CLAUDE.md` §6.S. Every commit that changes phase status,
@@ -105,7 +126,7 @@ gate steps.
 | Build debug APK + install on emulator | ✓ | CZ_API34_Phone booted, APK installed |
 | Run Challenge Tests C1-C22 | ✓ | 17/24 pass, 5 fail→4 fail after C00 fix |
 | Fix C00 CrashSurvivalTest | ✓ | AuthType.NONE providers now signal with display name |
-| Investigate C02/C03/C11/C12 timeouts | ⏳ | All ComposeTimeoutExceptions - need deeper UI flow analysis |
+| Investigate C02/C03/C11/C12 timeouts | ⏳ | 3-layer taxonomy below; `3f6e5e6` fixed L1+L2; matrix re-run pending |
 
 **Challenge Test Results (CZ_API34_Phone emulator):**
 
@@ -113,8 +134,8 @@ gate steps.
 |------|--------|-------|
 | C00 CrashSurvival | ✓ | Fixed: `onFinish()` now includes display name for AuthType.NONE |
 | C01 AppLaunch | ✓ | |
-| C02 RuTracker auth | ✗ | ComposeTimeoutException - credential entry flow |
-| C03 RuTor anonymous | ✗ | ComposeTimeoutException - provider selection flow |
+| C02 RuTracker auth | ⏳ | `3f6e5e6` fixed L1 text-input locator + L2 deselection; L3 (rutracker.org round-trip) unverified |
+| C03 RuTor anonymous | ⏳ | `3f6e5e6` fixed L1 Switch testTag + L2 deselection + 60s timeout; L3 (rutor.info checkAuth) unverified |
 | C04 SwitchTracker | ✓ | |
 | C05 ViewTopic | ✓ | |
 | C06 DownloadTorrent | ✓ | |
@@ -122,8 +143,8 @@ gate steps.
 | C08 FallbackDismiss | ✓ | |
 | C09 Kinozal auth | ⏭️ | Skipped (no BuildConfig credentials) |
 | C10 NNMClub auth | ⏭️ | Skipped (no BuildConfig credentials) |
-| C11 ArchiveOrg | ✗ | ComposeTimeoutException - onboarding flow |
-| C12 Gutenberg | ✗ | ComposeTimeoutException - onboarding flow |
+| C11 ArchiveOrg | ✓ | `3f6e5e6` provider-deselection fix — author claims "NOW PASSING" on emulator |
+| C12 Gutenberg | ✓ | `3f6e5e6` same fix as C11 — author claims "NOW PASSING" |
 | C13 FirebaseColdStart | ✓ | |
 | C14 TrackerSettings | ✓ | |
 | C15 AuthInterceptorBoot | ✓ | |
@@ -284,13 +305,82 @@ failed to sufficiently increase receive buffer size
 
 ### 4.5.3 Internet Archive / gutenberg — provider status
 
-Phase 2b (2026-05-07) flipped `apiSupported=true` on all 6 providers.
-The α-hotfix "hide" of Internet Archive is superseded.
-**C11/C12 timeout:** Challenge Tests C11 (ArchiveOrg) and C12 (Gutenberg)
-both time out with ComposeTimeoutException during the onboarding flow.
-Likely causes: (a) `ResetOnboardingPrefsRule` encrypted-prefs clearing
-race, or (b) the navigation flow differs from what the tests expect.
-Investigation deferred — see Phase 3 task list.
+Phase 2b (2026-05-07) flipped `apiSupported=true` on all 6 providers
+(verified at HEAD: ArchiveOrgDescriptor.kt:56, GutenbergDescriptor.kt:50
+both `override val apiSupported: Boolean = true`). The Phase-12 α-hotfix
+"hide IA + others" is superseded. Per Phase 2b, lava-api-go ships
+per-provider routes for these trackers.
+
+**C11/C12 status update (post-`3f6e5e6`, 2026-05-08 22:21):**
+
+`3f6e5e6` provider-deselection fix lands: only the 3 OTHER verified +
+apiSupported providers (not the test's target) are deselected. Commit
+body claims both **NOW PASSING** on emulator after the fix. Awaiting
+matrix re-run for §6.I attestation; no matrix-attestation file exists
+post-`3f6e5e6`. Pre-`3f6e5e6` cause was provider-deselection count
+mismatch, NOT a navigation flow or encrypted-prefs race as previously
+hypothesized.
+
+### 4.5.3a C02 + C03 3-layer root-cause taxonomy (Phase 1 systematic-debugging)
+
+Both C02 (RuTracker authenticated) and C03 (RuTor anonymous) Challenge
+Tests time out at `composeRule.waitUntil { "All set!" visible }` after
+the user taps "Test & Continue". Phase 1 investigation traced 3 layers
+in the SUT chain:
+
+**Layer 1 — UI input mechanism (deterministic, verifiable statically):**
+- C02: text-input fields use `label = { Text("Username") }` and
+  `label = { Text("Password") }` in `ConfigureStep.kt:96+104`. The
+  pre-`3f6e5e6` test used `onNodeWithContentDescription` which didn't
+  match the Compose label semantics → text input failed silently.
+  `3f6e5e6` switched to `onNodeWithText("Username").performTextInput(...)`.
+- C03: anonymous Switch is at `ConfigureStep.kt:81-86`. Pre-`3f6e5e6`
+  test used `performClick()` on the Switch — touch injection on
+  headless emulator is unreliable. `3f6e5e6` added
+  `Modifier.testTag("anonymous_switch")` + the test now uses
+  `onNodeWithTag("anonymous_switch").performClick()` which invokes
+  the semantics action rather than synthesizing touch coordinates.
+- **Status:** fix verified present in HEAD by static grep.
+
+**Layer 2 — Provider deselection (deterministic, verifiable statically):**
+- All 4 verified+apiSupported providers (RuTracker, RuTor, ArchiveOrg,
+  Gutenberg) appear on "Pick your providers" pre-selected. The test
+  must deselect 3 of them before tapping "Next" to land in Configure
+  for the right target. Pre-`3f6e5e6` count was wrong (operated on 5
+  providers including pre-Phase-12 ghosts).
+- **Status:** fix verified present in HEAD by reading the test diff.
+
+**Layer 3 — Real-network round-trip (NOT addressed by `3f6e5e6`,
+unverifiable from this session):**
+- `OnboardingViewModel.onTestAndContinue()` at `feature/onboarding/
+  src/main/kotlin/lava/onboarding/OnboardingViewModel.kt:112`
+  calls either `sdk.checkAuth(currentId)` (C03 anonymous) OR
+  `sdk.login(currentId, LoginRequest(user, pw))` (C02 credentialed).
+  Both are real HTTPS round-trips: rutor.info for C03,
+  rutracker.org for C02.
+- There is NO explicit timeout wrapper around either call; they
+  rely on the Ktor/OkHttp client's default network timeouts (10s
+  connect + 10s read in OkHttp, plus DNS).
+- C02's test waits 30s for "All set!". C03's test waits 60s. If the
+  network round-trip exceeds the budget (slow rutracker.org under
+  Cloudflare, captcha required, geo-block from emulator NAT under
+  VPN), the test times out at L3 — and the failure looks identical
+  to the L1/L2 timeouts.
+- **Status:** cannot verify from this session. Matrix re-run on
+  emulator with the L1+L2 fixes already in HEAD is the only way to
+  distinguish:
+  - If C02/C03 PASS on re-run → L3 is not a residual cause; the
+    investigation closes.
+  - If C02/C03 STILL TIME OUT on re-run → L3 is real; investigate
+    via emulator network logs, captcha detection in the test, OR
+    operator-supplied known-good credentials.
+
+**§6.J consideration:** `3f6e5e6`'s Bluff-Audit proved the L1 + L2
+FIXES are real (mutate fix → test fails). It did NOT prove the full
+Challenge Test passes end-to-end after the fix. That's the matrix
+re-run's job. Pre-matrix-re-run, the believed-state ("C02/C03 fixes
+applied") is HONEST per the commit body's claim — it does NOT claim
+end-to-end PASS for C02/C03 (only for C11/C12).
 
 ### 4.5.4 Challenges + emulator: C17-C22 remain unexecuted
 
@@ -447,15 +537,22 @@ Active state per CONTINUATION.md §1:
   - Phase 2 (Fix Known Issues) COMPLETE. commits: 6009c6b.
   - Phase 3 (Container Boot + Challenges) IN PROGRESS. Go API healthy.
     1840 unit tests pass. C00 fixed (AuthType.NONE signal name).
-    17/24 Challenge Tests pass. 4 timeout failures (C02, C03, C11, C12).
+    Post-`3f6e5e6` believed-state: 19/24 Challenge Tests PASS
+    (C00-C01, C04-C08, C11-C16 + previously-passing C13-C16; C11/C12
+    moved from FAIL to PASS per 3f6e5e6's claim). C02 + C03 fixes
+    applied at L1+L2 but matrix re-run pending to verify L3 is not
+    a residual cause — see §4.5.3a 3-layer taxonomy in CONTINUATION.md.
   - Full plan at docs/superpowers/specs/2026-05-08-full-anti-bluff-proofing-plan.md
 
-Your default next action:
-  - Investigate and fix the 4 remaining Challenge Test timeouts:
-    - C02 (RuTracker auth): credential entry field not found
-    - C03 (RuTor anonymous): provider selection flow times out
-    - C11 (ArchiveOrg): onboarding flow times out
-    - C12 (Gutenberg): onboarding flow times out
+Your default next action (in priority order):
+  - **Operator-hardware-blocked:** re-run the §6.I matrix to verify
+    C02/C03 + close the matrix-attestation gap for 1.2.13-1033.
+    The last attestation is at Lava-Android-1.2.0-1020 (13 versions
+    behind) — see §2.1 release-tagging chain.
+  - **If C02/C03 still time out post-matrix-re-run:** L3 (real-network)
+    investigation: emulator network logs, captcha-page detection in
+    the SUT, known-good credential verification, possibly Mullvad VPN
+    routing for the rutracker.org / rutor.info flows.
   - Or proceed to operator-dependent tasks:
     1. Verify /api/v1/search on the running API (requires auth UUID)
     2. Verify Internet Archive/gutenberg API provider
