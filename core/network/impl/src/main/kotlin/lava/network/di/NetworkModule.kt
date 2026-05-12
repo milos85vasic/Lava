@@ -20,6 +20,7 @@ import okhttp3.OkHttpClient
 import java.net.ProxySelector
 import java.security.SecureRandom
 import java.security.cert.X509Certificate
+import java.util.concurrent.TimeUnit
 import javax.inject.Named
 import javax.inject.Singleton
 import javax.net.ssl.SSLContext
@@ -72,6 +73,9 @@ internal interface NetworkModule {
         ): OkHttpClient {
             return OkHttpClient.Builder()
                 .proxySelector(proxySelector)
+                .connectTimeout(30, TimeUnit.SECONDS)
+                .readTimeout(30, TimeUnit.SECONDS)
+                .writeTimeout(30, TimeUnit.SECONDS)
                 .apply { interceptors.forEach(::addInterceptor) }
                 .build()
         }
@@ -133,6 +137,9 @@ internal interface NetworkModule {
             }
             return OkHttpClient.Builder()
                 .proxySelector(proxySelector)
+                .connectTimeout(30, TimeUnit.SECONDS)
+                .readTimeout(30, TimeUnit.SECONDS)
+                .writeTimeout(30, TimeUnit.SECONDS)
                 .apply { interceptors.forEach(::addInterceptor) }
                 .sslSocketFactory(sslContext.socketFactory, permissiveTrustManager)
                 .hostnameVerifier { _, _ -> true }

@@ -74,3 +74,113 @@ showed `lava-api-go: config: config: LAVA_AUTH_FIELD_NAME is required`
 in a tight loop, with the orchestrator marking the container
 `(unhealthy)` and triggering the restart loop. Operator ran the
 distribute, got the lock-up output, immediately surfaced the issue.
+
+---
+
+## 2026-05-12 — c03-anonymous-toggle-checkauth-bluff
+
+**Root cause:** `OnboardingViewModel.onTestAndContinue()` (the
+"Test & Continue" button handler on the Configure step) called
+`sdk.checkAuth(currentId)` for BOTH `AuthType.NONE` providers AND
+`config.useAnonymous=true` paths, then asserted that the result equals
+`AuthState.Authenticated`. For users opting INTO anonymous mode on a
+FORM_LOGIN tracker (RuTor with the toggle on), `checkAuth` correctly
+returns `Unauthenticated` — that IS the user's chosen state. The code
+treated it as a failure (`error = "Connection failed"`) and never
+advanced to the Summary step. The wait-for-"All set!" timeout fired
+and the user was stuck.
+
+The C03 Challenge Test detected this only as a 60s timeout — no
+indication of WHY. The bug was invisible to the Sixth Law clauses 1-5
+because:
+- The test's primary assertion was on "All set!" appearing (✓ correct
+  per clause 3).
+- The production stack was traversed end-to-end (✓ correct per clauses
+  1 + 4).
+- But there was no logged stack trace; the catch block called
+  `analytics.recordNonFatal` (Crashlytics-only) and silently set the
+  error state. The diagnostic gap was the source of the bluff: green
+  test infrastructure + green code review + green Bluff-Audit on prior
+  commits all missed it because nobody had run C03 end-to-end on a
+  device with logcat tailing to see the error.
+
+**Affected files:**
+- `feature/onboarding/src/main/kotlin/lava/onboarding/OnboardingViewModel.kt`
+
+**Fix:**
+1. Skip `sdk.checkAuth(currentId)` entirely on the anonymous branch.
+   Anonymous = user opted out of auth = no auth state to check =
+   not a failure when there's no session.
+2. Added diagnostic `logger.d`/`logger.e` breadcrumbs on the entire
+   onTestAndContinue flow (auth path taken, result, exception). This
+   closes the §6.T.4-spirit gap that made the C03 bug invisible —
+   future failures will print stack traces to logcat.
+3. Added `HttpTimeout`, `UserAgent`, and `Logging` plugins to the
+   rutracker Ktor HttpClient + 30s timeouts on the main OkHttpClient.
+   The HTTP improvements did NOT close the C02 issue (Cloudflare-side
+   stall — see §4.5.3b in CONTINUATION.md), but they raise the
+   time-budget for slow networks and move the failure mode from
+   `SocketTimeoutException` to a more diagnosable signal.
+4. Bumped Challenge02 test's wait for "All set!" from 30s to 90s to
+   align with realistic real-network round-trip times after the
+   timeout fixes.
+
+**Verification test/challenge:**
+- C03 (`Challenge03AnonymousSearchOnRuTorTest`) — PASS on
+  CZ_API34_Phone API 34 (live emulator at localhost:5555),
+  2026-05-12 09:25:14 to 09:25:23, total ~9.7s. Evidence at
+  `.lava-ci-evidence/Lava-Android-1.2.13-1033/post-mortem/logcat-c03-fix.txt`
+  shows `anon path: switchTracker(rutor) → test ok: advance to next/Summary → Perform Finish`.
+- Falsifiability rehearsal: re-introducing the broken
+  `if (result != null && result != AuthState.Authenticated)` check
+  in the anonymous branch causes C03 to time out at 60s with the
+  Configure screen still visible (the pre-fix failure mode). Verified
+  through the diagnostic logcat: `checkAuth(rutor) result=Unauthenticated`
+  → error path triggered → no advance.
+
+**Fix commit:** _(this commit)_
+
+**Forensic anchor:** Phase 1 systematic-debugging session 2026-05-12.
+Operator picked option C ("investigate C02/C03 properly") + invoked
+the anti-bluff mandate. Matrix runs on CZ_API34_Phone surfaced the
+60s timeout; live-emulator instrumentation captured the
+`anon path: checkAuth(rutor) result=Unauthenticated` line that
+identified the bug.
+
+---
+
+## 2026-05-12 — onboarding-action-logger-leaks-credentials
+
+**Root cause:** Discovered during the C03 investigation above —
+`OnboardingViewModel.perform()` logged the action via
+`logger.d { "Perform $action" }`. For sealed-class subtypes
+`OnboardingAction.UsernameChanged(value: String)` and
+`OnboardingAction.PasswordChanged(value: String)`, Kotlin's
+auto-generated `toString` includes the value, so logcat (and any
+analytics breadcrumb that picks it up) prints the operator's real
+RuTracker username + password in plain text. Severity: §6.H credential
+inviolability concern — although `.env` is gitignored and the values
+never reach disk via a log file in the normal user flow, on a device
+with `adb logcat` running (or with `logcat` being collected by a 3rd
+party app, or shared in a bug report) this is a leak surface.
+
+**Affected files:**
+- `feature/onboarding/src/main/kotlin/lava/onboarding/OnboardingViewModel.kt`
+
+**Fix:** changed the log expression from
+`logger.d { "Perform $action" }` to
+`logger.d { "Perform ${action::class.simpleName}" }` — prints only
+the action type name, never any of its values.
+
+**Verification test/challenge:** logcat tail during a re-run of C02
+shows `Perform UsernameChanged` (no value) and
+`Perform PasswordChanged` (no value).
+
+**Fix commit:** _(same commit as the c03-anonymous-toggle-checkauth-bluff
+entry above)_
+
+**Forensic anchor:** logcat captures during the C02/C03 diag run on
+2026-05-12 surfaced the bug. Pre-fix logcats are gitignored under
+`.lava-ci-evidence/**/post-mortem/` to prevent accidental commit of
+the captured credentials; only matrix attestations + gradle.logs +
+JUnit XML test-reports are committed.

@@ -1,0 +1,15 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<testsuite name="lava.app.challenges.Challenge02AuthenticatedSearchOnRuTrackerTest" tests="1" failures="1" errors="0" skipped="0" time="44.445" timestamp="2026-05-12T06:08:26" hostname="localhost">
+  <properties>
+    <property name="device" value="sdk_gphone64_x86_64 - 14" />
+    <property name="flavor" value="" />
+    <property name="project" value=":app" />
+  </properties>
+  <testcase name="pickRuTracker_enterCreds_signIn_reachesMainApp" classname="lava.app.challenges.Challenge02AuthenticatedSearchOnRuTrackerTest" time="41.685">
+    <failure>androidx.compose.ui.test.ComposeTimeoutException: Condition still not satisfied after 30000 ms
+at androidx.compose.ui.test.AndroidComposeUiTestEnvironment$AndroidComposeUiTestImpl.waitUntil(ComposeUiTest.android.kt:504)
+at androidx.compose.ui.test.junit4.AndroidComposeTestRule.waitUntil(AndroidComposeTestRule.android.kt:339)
+at lava.app.challenges.Challenge02AuthenticatedSearchOnRuTrackerTest.pickRuTracker_enterCreds_signIn_reachesMainApp(Challenge02AuthenticatedSearchOnRuTrackerTest.kt:134)
+</failure>
+  </testcase>
+</testsuite>

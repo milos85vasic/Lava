@@ -12,13 +12,19 @@ is itself a §6.J spirit issue — the file claims a guarantee, the
 repo has drifted, the agent acts on the claim.
 
 > **Last updated:** 2026-05-12, after systematic-debugging Phase 1
-> investigation of C02 + C03 timeouts. 3-layer root-cause taxonomy
-> recorded; `3f6e5e6` fixes for L1 (UI input mechanism) + L2 (provider
-> deselection) verified present in HEAD; L3 (real-network round-trip)
-> remains unverified and is the residual concern. C11 + C12 claimed
-> PASS by `3f6e5e6` (matrix re-run pending). Phase 12 α-hotfix
-> "hide IA + Gutenberg" superseded by Phase 2b real per-provider
-> routing — both providers now `apiSupported = true`.
+> matrix re-run on CZ_API34_Phone API 34. C03 RESOLVED — anonymous
+> toggle was a Lava bug (treated `AuthState.Unauthenticated` as failure
+> for users who opted out of auth); fix in OnboardingViewModel.
+> C02 partially diagnosed and partially mitigated — `sdk.login(rutracker)`
+> POST to `/forum/login.php` is written successfully but Cloudflare never
+> sends a response back (verified via Ktor wire-log; host curl returns
+> HTTP/2 200 in <1s for the same URL, so this is client-fingerprint-specific,
+> not a server outage). HTTP timeouts bumped from 10s to 60s and browser-like
+> User-Agent added — moved the failure mode from `SocketTimeoutException`
+> to `HttpRequestTimeoutException` but did not unblock the request. Further
+> C02 mitigation needs Cloudflare anti-bot countermeasures (proper
+> Accept/Accept-Language/Accept-Encoding headers + pre-flight GET for
+> cookies) OR routing rutracker via lava-api-go proxy. See §4.5.3b.
 >
 > **§6.S violations on the previous chain — now corrected here:**
 >   (1) `3f6e5e6` claimed C11/C12 "NOW PASSING" without updating §0
@@ -126,7 +132,7 @@ gate steps.
 | Build debug APK + install on emulator | ✓ | CZ_API34_Phone booted, APK installed |
 | Run Challenge Tests C1-C22 | ✓ | 17/24 pass, 5 fail→4 fail after C00 fix |
 | Fix C00 CrashSurvivalTest | ✓ | AuthType.NONE providers now signal with display name |
-| Investigate C02/C03/C11/C12 timeouts | ⏳ | 3-layer taxonomy below; `3f6e5e6` fixed L1+L2; matrix re-run pending |
+| Investigate C02/C03/C11/C12 timeouts | ✅/⏳ | C03 RESOLVED (anonymous toggle bug fixed); C02 PARTIAL (Cloudflare anti-bot stall, see §4.5.3b); C11/C12 not re-run this session |
 
 **Challenge Test Results (CZ_API34_Phone emulator):**
 
@@ -134,8 +140,8 @@ gate steps.
 |------|--------|-------|
 | C00 CrashSurvival | ✓ | Fixed: `onFinish()` now includes display name for AuthType.NONE |
 | C01 AppLaunch | ✓ | |
-| C02 RuTracker auth | ⏳ | `3f6e5e6` fixed L1 text-input locator + L2 deselection; L3 (rutracker.org round-trip) unverified |
-| C03 RuTor anonymous | ⏳ | `3f6e5e6` fixed L1 Switch testTag + L2 deselection + 60s timeout; L3 (rutor.info checkAuth) unverified |
+| C02 RuTracker auth | ⏳ | L1+L2 OK, HTTP timeouts/UA bumped, test wait 30s→90s. Cloudflare stalls the login POST (60s no response). Mitigation pending — see §4.5.3b |
+| C03 RuTor anonymous | ✅ | Anonymous toggle bug fixed (OnboardingViewModel skipped checkAuth on anon branch). PASS on CZ_API34_Phone 2026-05-12 09:25 |
 | C04 SwitchTracker | ✓ | |
 | C05 ViewTopic | ✓ | |
 | C06 DownloadTorrent | ✓ | |
@@ -381,6 +387,81 @@ Challenge Test passes end-to-end after the fix. That's the matrix
 re-run's job. Pre-matrix-re-run, the believed-state ("C02/C03 fixes
 applied") is HONEST per the commit body's claim — it does NOT claim
 end-to-end PASS for C02/C03 (only for C11/C12).
+
+### 4.5.3b Matrix re-run outcome 2026-05-12 (Phase 1 findings completed)
+
+The §4.5.3a investigation was completed by running C02 + C03 on
+CZ_API34_Phone API 34 via `scripts/run-emulator-tests.sh`, then directly
+via `./gradlew :app:connectedDebugAndroidTest` against the same live
+emulator with diagnostic logging instrumented in
+`OnboardingViewModel.onTestAndContinue()` and Ktor wire logging in
+`TrackerClientModule.provideRuTrackerHttpClient`. Evidence under
+`.lava-ci-evidence/Lava-Android-1.2.13-1033/{matrix-c02,matrix-c03,post-mortem}`.
+
+**C03 RESOLVED.** The anonymous toggle was a real Lava bug, not L3:
+- `OnboardingViewModel` called `sdk.checkAuth(currentId)` for both
+  `AuthType.NONE` providers AND `config.useAnonymous=true` paths.
+- For `AuthType.NONE` (ArchiveOrg, Gutenberg): no Authenticatable
+  feature, so `checkAuth` returns `null` → null branch passes through.
+- For `useAnonymous=true` on FORM_LOGIN (RuTor): `checkAuth` correctly
+  returns `Unauthenticated` because the user IS unauthenticated by
+  choice. The old code treated `Unauthenticated` as a failure
+  (`error = "Connection failed"`) → never advances to Summary.
+- Fix: skip `checkAuth` entirely on the anonymous branch — anonymous
+  is the user's chosen unauth state, not a failure.
+- Verified: C03 now passes end-to-end on the live emulator (PASS at
+  09:25:23, full diag trace shows `switchTracker → test ok →
+  advance to Summary → Finish`).
+
+**C02 PARTIALLY DIAGNOSED — environmental block remains.** The
+credentialed path correctly calls `sdk.login(rutracker, LoginRequest)`,
+which issues `POST https://rutracker.org/forum/login.php`. Ktor wire log
+captured:
+- 09:38:01.717 — `REQUEST: POST .../login.php` (request line written)
+- 09:39:01.719 — `failed with exception: Request timeout (60_000 ms)`
+- The 60-second gap is exact — Ktor `HttpTimeout.requestTimeoutMillis`
+  fired because the server sent no response data within 60s.
+
+Pre-fix timeline (10s OkHttp default) was a `SocketTimeoutException`
+on HTTP/2 stream `takeHeaders`. After bumping timeouts to 60s and
+installing a browser-like `UserAgent`, the failure mode shifts from
+"timeout reading headers" to "timeout waiting for any response at all"
+— but the request still doesn't complete. From the host directly,
+the SAME URL returns HTTP/2 200 in <1s. This rules out network outage
+and points to client-fingerprint anti-bot: Cloudflare lets the TCP+TLS
+handshake complete, accepts the POST, then deliberately stalls.
+
+**Remaining options for C02:**
+- Add proper browser-like headers (Accept-Language, Accept,
+  Accept-Encoding, Origin, Referer) to evade fingerprint detection.
+- Add a pre-flight GET `/forum/index.php` to establish Cloudflare
+  cookies before the POST.
+- Route rutracker via lava-api-go proxy (`apiSupported=true` is already
+  set on the descriptor — when the Go API runs on thinker.local or
+  locally, the client routes through it instead of direct).
+- Investigate whether the operator's network has Mullvad VPN active and
+  test from a non-VPN exit.
+
+**Fixes landed in this commit (independent of the C02 environmental
+block):**
+1. `OnboardingViewModel`: removed broken `checkAuth` for anonymous
+   mode → C03 PASSES end-to-end on CZ_API34_Phone.
+2. `OnboardingViewModel`: added diagnostic `logger.d`/`logger.e`
+   breadcrumbs that print the auth path taken, the result/exception,
+   and the success advance. Visible in logcat for future triage.
+3. `NetworkModule.okHttpClient` + `lanOkHttpClient`: explicit 30s
+   connect/read/write timeouts (was OkHttp default 10s — too tight
+   for slow networks; user-visible "timeout" became "30s timeout").
+4. `TrackerClientModule.provideRuTrackerHttpClient`: installed
+   `HttpTimeout` (60s request/socket, 30s connect), `UserAgent`, and
+   `Logging` (INFO level via android.util.Log) for the rutracker
+   Ktor client. Did NOT unblock C02 (Cloudflare-side stall) but
+   moved the failure mode to a more diagnosable signal AND gives
+   real users on slow networks the time-budget they need.
+5. `Challenge02AuthenticatedSearchOnRuTrackerTest`: bumped the
+   "All set!" wait from 30s to 90s to match C03's 60s+ budget plus
+   margin. Aligns the test with realistic real-network round-trip
+   times after timeout fixes.
 
 ### 4.5.4 Challenges + emulator: C17-C22 remain unexecuted
 

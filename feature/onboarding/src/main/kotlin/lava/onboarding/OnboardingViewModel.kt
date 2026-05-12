@@ -37,7 +37,9 @@ class OnboardingViewModel @Inject constructor(
     )
 
     fun perform(action: OnboardingAction) {
-        logger.d { "Perform $action" }
+        // Per §6.H: do not toString UsernameChanged/PasswordChanged — sealed-class
+        // auto-toString includes the value, which would leak credentials to logcat.
+        logger.d { "Perform ${action::class.simpleName}" }
         when (action) {
             is OnboardingAction.NextStep -> onNextStep()
             is OnboardingAction.BackStep -> onBackStep()
@@ -119,22 +121,12 @@ class OnboardingViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 if (provider.authType == AuthType.NONE || config.useAnonymous) {
+                    logger.d { "anon path: switchTracker($currentId)" }
                     sdk.switchTracker(currentId)
-                    val result = sdk.checkAuth(currentId)
-                    // For AuthType.NONE providers (e.g. Internet Archive), checkAuth may
-                    // return null when the tracker does not implement AuthenticatableTracker.
-                    // null means "auth not applicable" — treat as success. For trackers that
-                    // do implement AuthenticatableTracker and return Unauthenticated, fail.
-                    if (result != null && result != AuthState.Authenticated) {
-                        reduce {
-                            state.copy(
-                                connectionTestRunning = false,
-                                configs = state.configs + (currentId to config.copy(error = "Connection failed")),
-                            )
-                        }
-                        return@launch
-                    }
+                    // Anonymous mode opts out of auth; an Unauthenticated result is the user's
+                    // chosen state, not a failure — do not call checkAuth here.
                 } else {
+                    logger.d { "cred path: login($currentId) starting" }
                     val loginResult = sdk.login(
                         currentId,
                         LoginRequest(
@@ -142,6 +134,7 @@ class OnboardingViewModel @Inject constructor(
                             password = config.password,
                         ),
                     )
+                    logger.d { "cred path: login($currentId) result=$loginResult" }
                     if (loginResult == null || loginResult.state != AuthState.Authenticated) {
                         reduce {
                             state.copy(
@@ -154,6 +147,7 @@ class OnboardingViewModel @Inject constructor(
                     credentialManager.setPassword(currentId, config.username, config.password)
                 }
 
+                logger.d { "test ok: advance to next/Summary for $currentId" }
                 reduce {
                     state.copy(
                         connectionTestRunning = false,
@@ -162,6 +156,7 @@ class OnboardingViewModel @Inject constructor(
                 }
                 advanceToNextProvider()
             } catch (e: Exception) {
+                logger.e(t = e) { "Connection test failed for $currentId" }
                 analytics.recordNonFatal(
                     e,
                     mapOf(

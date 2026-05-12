@@ -1,0 +1,15 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<testsuite name="lava.app.challenges.Challenge03AnonymousSearchOnRuTorTest" tests="1" failures="1" errors="0" skipped="0" time="72.134" timestamp="2026-05-12T06:15:59" hostname="localhost">
+  <properties>
+    <property name="device" value="sdk_gphone64_x86_64 - 14" />
+    <property name="flavor" value="" />
+    <property name="project" value=":app" />
+  </properties>
+  <testcase name="toggleAnonymous_pickRuTor_continue_reachesMainApp" classname="lava.app.challenges.Challenge03AnonymousSearchOnRuTorTest" time="70.769">
+    <failure>androidx.compose.ui.test.ComposeTimeoutException: Condition still not satisfied after 60000 ms
+at androidx.compose.ui.test.AndroidComposeUiTestEnvironment$AndroidComposeUiTestImpl.waitUntil(ComposeUiTest.android.kt:504)
+at androidx.compose.ui.test.junit4.AndroidComposeTestRule.waitUntil(AndroidComposeTestRule.android.kt:339)
+at lava.app.challenges.Challenge03AnonymousSearchOnRuTorTest.toggleAnonymous_pickRuTor_continue_reachesMainApp(Challenge03AnonymousSearchOnRuTorTest.kt:112)
+</failure>
+  </testcase>
+</testsuite>

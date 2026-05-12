@@ -69,3 +69,9 @@ firebase-distribute-*.log
 
 # Phase 11: build-time generated lava.auth.LavaAuthGenerated source
 app/build/generated/lava-auth/
+
+# Diagnostic logcat captures may contain credentials (UsernameChanged /
+# PasswordChanged actions logged via OnboardingViewModel.logger.d).
+# Per §6.H these MUST NOT be committed.
+.lava-ci-evidence/**/post-mortem/
+.lava-ci-evidence/**/logcat-*.txt

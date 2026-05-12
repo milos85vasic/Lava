@@ -130,8 +130,9 @@ class Challenge02AuthenticatedSearchOnRuTrackerTest {
 
         composeRule.onNodeWithText("Test & Continue").performClick()
 
-        // Step 4: Summary screen → Start Exploring.
-        composeRule.waitUntil(timeoutMillis = 30_000) {
+        // Step 4: Summary screen → Start Exploring. 90s window for real
+        // rutracker.org HTTP/2 + Cloudflare round-trip from the emulator.
+        composeRule.waitUntil(timeoutMillis = 90_000) {
             composeRule.onAllNodesWithText("All set!").fetchSemanticsNodes().isNotEmpty()
         }
         composeRule.onNodeWithText("Start Exploring").performClick()
