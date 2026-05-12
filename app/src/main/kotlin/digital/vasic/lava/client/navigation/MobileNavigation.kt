@@ -5,6 +5,8 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import digital.vasic.lava.client.R
+import lava.credentials.manager.addCredentialsManager
+import lava.credentials.manager.openCredentialsManager
 import lava.designsystem.component.Page
 import lava.designsystem.component.PagesScreen
 import lava.designsystem.drawables.LavaIcons
@@ -57,6 +59,10 @@ fun MobileNavigation(navigationController: NavigationController) {
                 back = ::popBackStack,
                 animations = NavigationAnimations.ScaleInOutAnimation,
             )
+            addCredentialsManager(
+                back = ::popBackStack,
+                animations = NavigationAnimations.ScaleInOutAnimation,
+            )
             addSearchInput(
                 back = ::popBackStack,
                 openSearchResult = {
@@ -96,7 +102,7 @@ fun MobileNavigation(navigationController: NavigationController) {
                 openLogin = { openLogin() },
                 openTopic = { openTopic(it) },
                 openTrackerSettings = { openTrackerSettings() },
-                openCredentials = { openCredentials() },
+                openCredentials = { openCredentialsManager() },
             )
         }
     }

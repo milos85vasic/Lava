@@ -212,6 +212,7 @@ dependencies {
     implementation(project(":feature:search_result"))
     implementation(project(":feature:topic"))
     implementation(project(":feature:credentials"))
+    implementation(project(":feature:credentials_manager"))
     implementation(project(":feature:tracker_settings"))
     implementation(project(":feature:visited"))
 
