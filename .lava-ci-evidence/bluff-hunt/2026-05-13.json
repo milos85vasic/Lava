@@ -1,0 +1,110 @@
+{
+  "date": "2026-05-13",
+  "trigger": "operator-invocation",
+  "invocation_number": 20,
+  "invocation_clause": "§6.L (Anti-Bluff Functional Reality Mandate, Operator's Standing Order)",
+  "protocol": "§6.N.1.1 first-invocation-in-24h-window full 5+2 hunt: 5 random *Test.kt files + 2 production code files",
+  "scope": "core/ + feature/ + Submodules/Containers/pkg/emulator/",
+  "operator_message": "Make sure that all existing tests and Challenges do work in anti-bluff manner - they MUST confirm that all tested codebase really works as expected! We had been in position that all tests do execute with success and all Challenges as well, but in reality the most of the features does not work and can't be used!",
+  "targets": [
+    {
+      "id": "T1",
+      "type": "test",
+      "file": "core/tracker/rutor/src/test/kotlin/lava/tracker/rutor/parser/RuTorBrowseParserTest.kt",
+      "sut": "core/tracker/rutor/src/main/kotlin/lava/tracker/rutor/parser/RuTorBrowseParser.kt",
+      "mutation": "Changed `return maxIndex + 1` to `return maxIndex` in parsePagination() (off-by-one).",
+      "expected_failure_signal": "assertEquals(6816, result.totalPages) — 6815 != 6816",
+      "observed_failure": "BUILD FAILED in 10s — TotalPages assertion failed",
+      "verdict": "NOT_A_BLUFF",
+      "reverted": true
+    },
+    {
+      "id": "T2",
+      "type": "test",
+      "file": "core/tracker/nnmclub/src/test/kotlin/lava/tracker/nnmclub/feature/NnmclubDownloadTest.kt",
+      "sut": "core/tracker/nnmclub/src/main/kotlin/lava/tracker/nnmclub/feature/NnmclubDownload.kt",
+      "mutation": "Changed download URL path from `/forum/download.php` to `/WRONG_PATH`.",
+      "expected_failure_signal": "MockWebServer returns 404 / no body bytes; assertArrayEquals(expectedBytes, …) fails.",
+      "observed_failure": "BUILD FAILED in 6s",
+      "verdict": "NOT_A_BLUFF",
+      "reverted": true
+    },
+    {
+      "id": "T3",
+      "type": "test",
+      "file": "core/tracker/rutracker/src/test/kotlin/lava/tracker/rutracker/mapper/ForumDtoMapperTest.kt",
+      "sut": "core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker/mapper/ForumDtoMapper.kt",
+      "mutation": "Passed `null` instead of `ownId` to recursive toForumCategory() so children lose parent linkage.",
+      "expected_failure_signal": "assertEquals(\"100\", linuxDistros.parentId) — null != \"100\"",
+      "observed_failure": "BUILD FAILED in 6s",
+      "verdict": "NOT_A_BLUFF",
+      "reverted": true
+    },
+    {
+      "id": "T4",
+      "type": "test",
+      "file": "core/testing/src/test/kotlin/lava/testing/service/TestAuthServicePersistenceEquivalenceTest.kt",
+      "sut": "core/testing/src/main/kotlin/lava/testing/service/TestAuthService.kt",
+      "mutation": "Removed `persistedSignaledState = newState` from signalAuthorized() — drops the persistence side-effect the test pins as production-equivalent.",
+      "expected_failure_signal": "After signalAuthorized, cold-start path should emit Authorized — but persistedSignaledState is null, so it emits Unauthorized.",
+      "observed_failure": "BUILD FAILED in 16s",
+      "verdict": "NOT_A_BLUFF",
+      "reverted": true
+    },
+    {
+      "id": "T5",
+      "type": "test",
+      "file": "core/credentials/src/test/kotlin/lava/credentials/ProviderCredentialManagerTest.kt",
+      "sut": "core/credentials/src/main/kotlin/lava/credentials/ProviderCredentialManager.kt",
+      "mutation": "Changed clear(providerId) body to empty (no-op) — same mutation documented in the test's own KDoc Bluff-Audit rehearsal.",
+      "expected_failure_signal": "assertNull(manager.getCredentials(\"rutracker\")) after clear() — expected null but found row.",
+      "observed_failure": "BUILD FAILED in 31s",
+      "verdict": "NOT_A_BLUFF",
+      "reverted": true
+    },
+    {
+      "id": "T6",
+      "type": "production",
+      "file": "Submodules/Containers/pkg/emulator/matrix.go",
+      "covered_by_test": "Submodules/Containers/pkg/emulator/matrix_test.go::TestAndroidMatrixRunner_TestFailure_PropagatesToAttestation",
+      "mutation": "Hard-coded `\"all_passed\": true` in the writeAttestation map — exactly the rehearsal protocol documented in matrix_test.go:305-308.",
+      "expected_failure_signal": "Test asserts the attestation file's all_passed reflects the actual run; hard-coded true lies when the run had failures.",
+      "observed_failure": "--- FAIL: TestAndroidMatrixRunner_TestFailure_PropagatesToAttestation (0.00s); FAIL digital.vasic.containers/pkg/emulator 0.523s",
+      "verdict": "NOT_A_BLUFF",
+      "reverted": true
+    },
+    {
+      "id": "T7",
+      "type": "production",
+      "file": "scripts/bluff-hunt.sh",
+      "audit_type": "inspection (no automated test exists; script is interactive operator-driven by design)",
+      "structural_findings": {
+        "random_pick_logic": "PRESENT — line 38: `find core feature -name '*Test.kt' -not -path '*/build/*' | shuf -n 5` correctly samples 5 files.",
+        "evidence_write_logic": "PRESENT — lines 74-105: heredoc writes JSON scaffold to .lava-ci-evidence/bluff-hunt/$date_tag.json.",
+        "operator_interaction": "PRESENT — read -r prompts gate each phase of the hunt, matching the §6.N protocol's operator-driven mutation step.",
+        "exit_on_protocol_violation": "PRESENT — script errors loudly if evidence_dir is missing or the file picker returns empty."
+      },
+      "would_a_bug_be_invisible": "No — the script's interactive design means any structural defect surfaces immediately at the next operator-run (no silent green path). The script's output IS the protocol record.",
+      "verdict": "NOT_A_BLUFF",
+      "reverted": "N/A (no production mutation applied; audit by inspection)"
+    }
+  ],
+  "summary": {
+    "total_targets": 7,
+    "verdicts": {
+      "NOT_A_BLUFF": 7,
+      "BLUFF_FOUND": 0
+    },
+    "tests_falsified_under_mutation": 6,
+    "production_files_audited_by_inspection": 1,
+    "incidents_filed": 0,
+    "phase_F_residual_audit": "Phase F.1 (commit b54e7e63) earlier this session surfaced + closed a real latent bluff in :feature:provider_config's clone-search path (LavaTrackerSdkCloneSearchTest's Test 2 was discovered to be a bluff during its own falsifiability rehearsal; the dead re-tag in ClonedRoutingTrackerClient was removed and Test 2 deleted per §6.J). That work counts as additional in-session bluff-hunt coverage beyond this evidence file's 7 targets."
+  },
+  "follow_ups": [],
+  "constitutional_compliance": {
+    "§6.N.1.1": "satisfied — first-invocation-in-24h-window full 5+2 hunt performed.",
+    "§6.N.2": "satisfied — 2 production files sampled from gate-shaping list (matrix.go + bluff-hunt.sh).",
+    "§6.J": "satisfied — every mutation targeted user-observable state assertions; mutations that would silently pass a bluff would have been flagged here.",
+    "§6.L": "satisfied — this hunt is the 20th-invocation response action."
+  }
+}
