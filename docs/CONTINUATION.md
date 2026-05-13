@@ -11,8 +11,24 @@ same commit so the index stays trustworthy. Stale state in this file
 is itself a §6.J spirit issue — the file claims a guarantee, the
 repo has drifted, the agent acts on the claim.
 
-> **Last updated:** 2026-05-13, SP-4 Phase B Tasks 16+17+18 landed +
+> **Last updated:** 2026-05-13, **SP-4 Phase F.2 Tasks 1+2+3 landed**
+> (URL injection seam + falsifiability-rehearsed clientFor stamping).
+> Earlier this session: SP-4 Phase B Tasks 16+17+18 +
 > §4.5.10 §6.R staged-enforcement closure (IPv4 + host:port scanners).
+>
+> **Phase F.2 progress (this commit):** New `MirrorUrlProvider` fun
+> interface in `:core:tracker:api`. New `cloneBaseUrlOverride`
+> extension property + `CLONE_BASE_URL_CONFIG_KEY` constant in
+> `:core:tracker:registry`. `LavaTrackerSdk.clientFor` now stamps the
+> clone's `primaryUrl` into the `MapPluginConfig` it passes to
+> `registry.get(sourceTrackerId, …)` so each per-plugin factory can
+> read it. New test `LavaTrackerSdkCloneUrlInjectionTest` (2 cases:
+> clone-id stamps, original-id leaves null) with Bluff-Audit
+> rehearsal recorded — mutation `MapPluginConfig(mapOf(…))` →
+> `MapPluginConfig()` produced `expected:<https://rutracker.eu> but
+> was:<null>` on the cloneBaseUrlOverride assertion; reverted, green.
+> All 15 `:core:tracker:client` test classes pass. **Phase F.2 Task 4
+> (per-plugin refactor across the 6 trackers) is OWED.**
 > Tasks 16+17 ship the `:feature:provider_config` module: Compose UI for
 > the per-provider config screen, Orbit ViewModel wired to all four
 > Phase A+B DAOs (binding / sync toggle / cloned / user mirror) +

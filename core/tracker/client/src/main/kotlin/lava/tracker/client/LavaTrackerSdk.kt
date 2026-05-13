@@ -24,6 +24,7 @@ import lava.tracker.api.TrackerClient
 import lava.tracker.api.TrackerDescriptor
 import lava.tracker.api.feature.AuthenticatableTracker
 import lava.tracker.api.feature.BrowsableTracker
+import lava.tracker.registry.CLONE_BASE_URL_CONFIG_KEY
 import lava.tracker.api.feature.CommentsTracker
 import lava.tracker.api.feature.DownloadableTracker
 import lava.tracker.api.feature.FavoritesTracker
@@ -517,9 +518,14 @@ class LavaTrackerSdk @Inject constructor(
      * clone's synthetic id so the multi-provider UI's per-provider
      * grouping shows "from RuTracker EU" rather than "from RuTracker".
      *
-     * F.2 owe: the URL routing override (so HTTP traffic hits the
-     * clone's primaryUrl) is not yet wired. The ProviderConfig
-     * clone-success Toast discloses this gap to the user.
+     * F.2 (2026-05-13): the URL routing override is now wired at this
+     * seam — the clone's `primaryUrl` is stamped into the [PluginConfig]
+     * under key [CLONE_BASE_URL_CONFIG_KEY]. Per-tracker factories that
+     * have been migrated to F.2 read it via
+     * [lava.tracker.registry.cloneBaseUrlOverride] and route HTTP
+     * traffic through the override URL. Factories that have NOT been
+     * migrated still ignore the key and route through the source's
+     * baseUrls — see the per-plugin Task 4 work in the F.2 plan.
      *
      * Uses `runBlocking` for the DAO read because callers include
      * non-suspending paths ([getActiveClient]). Same pattern as
@@ -535,7 +541,8 @@ class LavaTrackerSdk @Inject constructor(
                         "Clone $id references unknown source ${cloned.sourceTrackerId}",
                     )
                 val cloneDescriptor = ClonedTrackerDescriptor(source = sourceDescriptor, override = cloned)
-                val sourceClient = registry.get(cloned.sourceTrackerId, MapPluginConfig())
+                val cloneConfig = MapPluginConfig(mapOf(CLONE_BASE_URL_CONFIG_KEY to cloned.primaryUrl))
+                val sourceClient = registry.get(cloned.sourceTrackerId, cloneConfig)
                 return ClonedRoutingTrackerClient(sourceClient, cloneDescriptor)
             }
         }
