@@ -220,7 +220,40 @@ repo has drifted, the agent acts on the claim.
 >     but the backup-restore semantic is already correct (the
 >     soft-delete marker is included in Android Auto Backup).
 >
-> **Phase F.1 executed 2026-05-13** (this commit chain):
+> **Phase H tail + Phase E design + Phase F.2 design landed 2026-05-13:**
+>   - `docs/SP-4-RELEASE-NOTES.md` NEW. User-visible + developer-visible
+>     changes across SP-4 Phases A through G.1. Explicit OWED list for
+>     Phase E + Phase F.2 + 10 Compose UI Challenges (C04, C01, C27-C34)
+>     for operator emulator runs before next release tag.
+>   - `docs/ARCHITECTURE.md` updated: `feature/tracker_settings` row
+>     removed (deleted Phase C); `feature/provider_config` +
+>     `feature/credentials_manager` rows added.
+>   - `docs/superpowers/specs/2026-05-13-sp4-phase-e-design.md` —
+>     PUT/DELETE/GET /v1/credentials Go endpoints, two-salt key
+>     derivation (at-rest saltA + transport saltB, both PBKDF2-SHA-256
+>     200k from the same passphrase, zero-knowledge), `CredentialsSyncWorker`
+>     drains the outbox, delta sync `GET /v1/credentials?since=`,
+>     last-write-wins by updatedAt. Execution OWED — multi-domain
+>     (Go API + Android) needs operator-supplied API instance +
+>     cross-device emulator integration testing.
+>   - `docs/superpowers/specs/2026-05-13-sp4-phase-f2-design.md` —
+>     Option B (per-clone MirrorManager + SDK-side URL injection)
+>     locked over Option A (PluginConfig.baseUrlOverride). Composes
+>     with `LavaMirrorManagerHolder` + `runWithMirrorFallback` + per-
+>     clone `UserMirrorEntity` rows. Cross-module refactor across
+>     all 6 tracker plugins. Acceptance criterion: Toast copy drops
+>     "URL routing pending" once `https://rutracker.eu` clone produces
+>     a MockWebServer capture containing rutracker.eu. Execution
+>     scheduled for a dedicated cycle.
+>
+> **§6.S clarification (added 2026-05-13):** commit `<this-commit>` is
+> the follow-up for the prior commit (`docs(sp-4): Phase H tail +
+> Phase E design + Phase F.2 design`) which landed the three new docs
+> WITHOUT updating CONTINUATION.md (§6.S violation). The CONTINUATION
+> update lives in this follow-up commit per the no-amend rule. Recorded
+> as forensic detail so a future agent doesn't repeat the omission.
+>
+> **Phase F.1 executed 2026-05-13** (earlier this session):
 >   - Design + plan: `docs/superpowers/specs/2026-05-13-sp4-phase-f-design.md`
 >     + `docs/superpowers/plans/2026-05-13-sp4-phase-f-implementation.md`.
 >   - **The bug Phase F.1 closes:** Phase B's clone dialog enqueued a
