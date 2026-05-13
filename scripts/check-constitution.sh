@@ -344,7 +344,43 @@ if [[ -f lava-api-go/CLAUDE.md ]] && ! grep -qF 'Clause 6.S' lava-api-go/CLAUDE.
   exit 1
 fi
 
+# -----------------------------------------------------------------------------
+# 6.X — Container-Submodule Emulator Wiring Mandate enforcement
+# (added 2026-05-13, TWENTY-FIRST §6.L invocation). Same pattern as §6.S.
+# Per §6.X clause "Mechanical enforcement" (d) + (e), every submodule's
+# CLAUDE.md / AGENTS.md / CONSTITUTION.md and lava-api-go's three docs MUST
+# contain a §6.X inheritance reference. Clauses (a)–(c) [runtime/wiring
+# checks] are pending §6.X-debt closure and are NOT enforced here yet.
+# -----------------------------------------------------------------------------
+
+# 6.X(1): §6.X clause itself must appear in root CLAUDE.md
+if ! grep -qF '##### 6.X — Container-Submodule Emulator Wiring Mandate' CLAUDE.md; then
+  echo "MISSING 6.X clause in CLAUDE.md" >&2
+  echo "  → Add the §6.X Container-Submodule Emulator Wiring Mandate clause." >&2
+  exit 1
+fi
+
+# 6.X(2): §6.X inheritance reference must appear in every Submodules/*/CLAUDE.md,
+# */AGENTS.md, and */CONSTITUTION.md (per §6.F inheritance).
+for sub in Submodules/*/CLAUDE.md Submodules/*/AGENTS.md Submodules/*/CONSTITUTION.md; do
+  if ! grep -qF '## §6.X — Container-Submodule Emulator Wiring Mandate' "$sub"; then
+    echo "MISSING 6.X inheritance reference: $sub" >&2
+    echo "  → Append the §6.X heading paragraph (mirror the §6.S pattern)." >&2
+    exit 1
+  fi
+done
+
+# 6.X(3): §6.X inheritance reference must appear in lava-api-go's three docs
+for doc in lava-api-go/CLAUDE.md lava-api-go/AGENTS.md lava-api-go/CONSTITUTION.md; do
+  if [[ -f "$doc" ]] && ! grep -qF '§6.X — Container-Submodule Emulator Wiring Mandate' "$doc"; then
+    echo "MISSING 6.X reference in $doc" >&2
+    echo "  → Append a §6.X inheritance reference per §6.F." >&2
+    exit 1
+  fi
+done
+
 echo "Constitution check passed: 6.D + 6.E + 6.F present in CLAUDE.md;"
 echo "Submodules/Tracker-SDK/CLAUDE.md present; core/ + feature/ scoped"
 echo "clauses present; no clause-6.H credential patterns in tracked files;"
-echo "clause-6.K Containers extension present."
+echo "clause-6.K Containers extension present; §6.X Container-Submodule"
+echo "Emulator Wiring inherited in all submodule + lava-api-go docs."

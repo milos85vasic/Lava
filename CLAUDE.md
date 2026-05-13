@@ -669,6 +669,41 @@ The closure log is the operator-visible audit trail: a bug "fixed" without an en
 
 **Inheritance.** Applies recursively to every submodule, every feature, every new artifact (including `lava-api-go`). Submodule constitutions MAY add stricter rules but MUST NOT relax this clause.
 
+##### 6.X — Container-Submodule Emulator Wiring Mandate (added 2026-05-13)
+
+**Forensic anchor:** 2026-05-13 operator directive (TWENTY-FIRST §6.L invocation, immediately after F.2 + F.2.6 + §5 follow-ups landed): "when we rely / depend on emulator(s) needed for the testing of the System, make sure we boot up Container running Android emulator in it using ours Containers Submodule. It is supported and it works, it just need proper connecting into the flows. Do this now and continue!"
+
+§6.V (added 2026-05-08) requires emulators to run inside containers managed by the Containers submodule. The 2026-05-13 operator directive is stricter: the emulator process itself MUST execute INSIDE a podman/docker container managed by `Submodules/Containers/`, not be host-direct-launched by Containers-submodule code that merely runs on the host. The Containers submodule supports this — `pkg/runtime/` provides the rootless podman/docker abstraction; `pkg/emulator/` provides the AVD lifecycle; the wiring that combines them into "Android emulator process inside a Linux container with ADB port forwarded to the host" is the explicit deliverable.
+
+**Rule.** Every Android emulator instance the project depends on for testing — Challenge Tests, integration testing, `-PdeviceTests=true` runs, real-device verification per §6.G/6.I, release-tagging matrix attestation, ANY emulator-bearing gate — MUST satisfy ALL of:
+
+1. **The emulator process runs INSIDE a container.** `qemu-system-x86_64` / `qemu-system-aarch64` / `emulator` executes as PID inside a podman or docker container, not as a process on the host. The container's image bundles the Android SDK + AVD images + KVM/HVF passthrough config. `adb` connects from the host (or from a sibling test container) over the forwarded ADB console port.
+
+2. **The container is launched via the Containers submodule.** `Submodules/Containers/pkg/runtime/` (rootless podman/docker auto-detection) brings the container up. `Submodules/Containers/pkg/emulator/` orchestrates the AVD lifecycle inside it via the runtime's exec interface. No host-side `emulator -avd …` invocation is permitted for gate runs. The Containers submodule is the SOLE provider of the boot path.
+
+3. **Lava-side glue invokes the Containers CLI.** `scripts/run-emulator-tests.sh` becomes (or remains) thin Lava-domain glue that forwards Lava-specific arguments (AVD list, test class, APK path, evidence directory) to the Containers CLI. The CLI's exit code (0 = matrix passed, 1 = at least one AVD failed, 2 = config error per §6.J anti-bluff posture) is the gate's source of truth.
+
+4. **The container path is the gate.** A test that passes via host-direct emulator launch is NOT gated and MUST NOT appear in `.lava-ci-evidence/<tag>/real-device-verification.md` as a passing row. Workstation iteration during development MAY use host-direct emulators for speed, but the constitutional gate run (tag time, release verification) MUST go through the container path. `scripts/tag.sh` enforces this by refusing matrix attestations whose `runner` field is not `containers-submodule`.
+
+5. **Pinned Containers commit at the latest.** Per §6.V clause 3 + §6.W, before any emulator gate run, `Submodules/Containers/` MUST be at the latest commit pushed to `vasic-digital/Containers` on GitHub and GitLab. Stale pins for gate runs are constitutional violations.
+
+6. **Multi-architecture + multi-API coverage inside containers.** Per §6.I + §6.V clause 5: minimum API 28, 30, 34, latest stable, multiplied by phone / tablet / (where applicable) TV form factors. Each (API × form-factor) is a distinct container instance; the matrix runner spins them up sequentially (or concurrently per §6.I clause 4 Group B `concurrent==1` gate). Each AVD's attestation row identifies the container image + runtime (`runner: containers-submodule`, `runtime: podman` or `docker`, `image: <sha256>`).
+
+**Why this clause exists despite §6.V.** §6.V said "the Containers submodule MUST be the canonical emulator runtime" — true at the orchestration level, but it left the door open to a Containers-submodule implementation that host-direct-launched the emulator. The operator's 2026-05-13 directive closes that door: the emulator itself executes inside the container. This eliminates the "tested-against-different-graphics-stack-than-prod" class of bluffs and the "/dev/kvm-on-host vs. /dev/kvm-not-in-container" divergence class.
+
+**Mechanical enforcement.** `scripts/check-constitution.sh` (after §6.X wiring lands) MUST verify:
+- (a) `Submodules/Containers/pkg/emulator/` has a `Containerized*` or `RuntimeBacked*` lifecycle implementation distinct from the host-direct path.
+- (b) `scripts/run-emulator-tests.sh` invokes a Containers-submodule CLI that, when traced, ends in a `podman run` or `docker run` of an emulator-bearing image.
+- (c) `.lava-ci-evidence/<tag>/real-device-verification.{md,json}` attestation rows declare `runner: containers-submodule` for every gating row; rows lacking this declaration are rejected by `scripts/tag.sh`.
+- (d) Every submodule's `CLAUDE.md`, `AGENTS.md`, and `CONSTITUTION.md` contains a §6.X inheritance reference.
+- (e) `lava-api-go/CLAUDE.md`, `lava-api-go/AGENTS.md`, `lava-api-go/CONSTITUTION.md` contain a §6.X inheritance reference.
+
+Failures of (a)–(c) are pre-push rejections once §6.X-debt closes. Failures of (d)/(e) are pre-push rejections immediately.
+
+**§6.X-debt — wiring implementation (constitutional debt, 2026-05-13).** Per §6.V's transitional allowance, `scripts/run-emulator-tests.sh` currently delegates to `Submodules/Containers/cmd/emulator-matrix/` which runs the emulator process on the host via `exec.Command`. The container-bound wiring (the emulator PID lives inside a podman/docker container managed by `pkg/runtime/`) is OWED to the Containers submodule. Acceptable transitional state until this debt closes: workstation iteration uses host-direct (the matrix runner today); release-tagging is blocked until the container-bound path ships. The next phase that touches release tagging or the emulator-matrix gate MUST close this debt before its tag, and the close MUST: (1) add a `Containerized` (or equivalent) `Emulator` implementation in `Submodules/Containers/pkg/emulator/` that boots the emulator inside a `pkg/runtime/`-managed container, (2) update `cmd/emulator-matrix/main.go` to accept a `--runner=containerized|host-direct` flag defaulting to containerized for `--gating=true` invocations, (3) bake or fetch an Android-SDK-bearing container image documented in `tools/lava-containers/vm-images.json`, (4) update Lava-side `scripts/run-emulator-tests.sh` to forward `--runner=containerized` for gate runs, (5) update `scripts/check-constitution.sh` enforcement clauses (a)–(c) above. The §6.V-debt entry on darwin/arm64 (recorded at `.lava-ci-evidence/sixth-law-incidents/2026-05-13-emulator-container-darwin-arm64-gap.json`) is a sub-debt under §6.X-debt and closes when the Containers image supports HVF passthrough OR when a Linux x86_64 self-hosted runner is provisioned per the recorded remediation Option C.
+
+**Inheritance.** Applies recursively to every submodule (including the Containers submodule itself, whose internal emulator code MUST converge on this rule), every feature, every new artifact (including `lava-api-go` test-bench infrastructure). Submodule constitutions MAY add stricter rules (e.g., "this submodule's emulator matrix MUST additionally cover Android Automotive emulators inside containers") but MUST NOT relax this clause.
+
 ##### 6.V — Container Emulators Mandate (added 2026-05-08)
 
 **Forensic anchor:** 2026-05-08 operator directive: "For emulator we MUST use Containers submodule (latest codebase to be fetched and pulled) and emulators ran under the Podman or Docker container(s)! Then, all tests to be executed on them!"

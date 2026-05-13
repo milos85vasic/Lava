@@ -55,6 +55,15 @@ BUILD_APK=1
 BOOT_TIMEOUT=""
 CONCURRENT=""
 DEV_MODE=0
+# §6.X Container-Submodule Emulator Wiring Mandate (added 2026-05-13):
+# the gate run MUST execute the emulator process INSIDE a podman/docker
+# container managed by Submodules/Containers/. Until §6.X-debt closes
+# (Containers-side `Containerized` Emulator implementation), `host-direct`
+# remains the default and is permitted ONLY for workstation iteration.
+# `--runner=containerized` is the forward-looking gate target — when
+# Containers ships the wiring, `scripts/tag.sh` will reject attestation
+# rows without it. Defaults to `host-direct` per the transitional clause.
+RUNNER="host-direct"
 TEST_REPORT_GLOB="$DEFAULT_TEST_REPORT_GLOB"
 IMAGE_MANIFEST=""
 # Phase 6 (Group C remaining) — per-row network simulation +
@@ -99,6 +108,14 @@ while [[ $# -gt 0 ]]; do
         --boot-timeout) BOOT_TIMEOUT="$2"; shift 2 ;;
         --concurrent) CONCURRENT="$2"; shift 2 ;;
         --dev) DEV_MODE=1; shift ;;
+        --runner)
+            RUNNER="$2"
+            case "$RUNNER" in
+                host-direct|containerized) ;;
+                *) echo "ERROR: --runner must be host-direct|containerized (got: $RUNNER)" >&2; exit 2 ;;
+            esac
+            shift 2
+            ;;
         --test-report-glob) TEST_REPORT_GLOB="$2"; shift 2 ;;
         --image-manifest) IMAGE_MANIFEST="$2"; shift 2 ;;
         --network-profile) NETWORK_PROFILE="$2"; shift 2 ;;
@@ -126,6 +143,14 @@ Defaults:
   --boot-timeout      5m (forwarded to cmd/emulator-matrix; e.g. 10m, 600s)
   --concurrent        1 (serial; >1 sets gating=false in the attestation)
   --dev               false (set true to permit snapshot reload; sets gating=false)
+  --runner            host-direct|containerized (default: host-direct).
+                      §6.X Container-Submodule Emulator Wiring Mandate: the
+                      gate target is `containerized` (emulator runs INSIDE
+                      a podman/docker container managed by Submodules/Containers/).
+                      `host-direct` is permitted ONLY for workstation
+                      iteration during §6.X-debt; `scripts/tag.sh` will
+                      reject attestation rows without `runner: containerized`
+                      once the Containers-side wiring lands.
   --test-report-glob  $DEFAULT_TEST_REPORT_GLOB
   --image-manifest    "" (empty preserves pre-Phase-2 behavior; set to a
                       vm-images.json path to opt in to pkg/cache routing
@@ -258,6 +283,22 @@ if [[ -n "$NETWORK_LOSS" ]]; then
 fi
 if [[ -n "$CAPTURE_SCREENSHOT_FLAG" ]]; then
     extra_args+=(--capture-screenshot-on-failure="$CAPTURE_SCREENSHOT_FLAG")
+fi
+
+# §6.X Container-Submodule Emulator Wiring Mandate: forward the runner
+# choice to the matrix CLI. The CLI accepts unknown flags gracefully
+# during the §6.X-debt transition (the flag is informational until the
+# Containers-side `Containerized` Emulator implementation lands).
+# Recording the runner in attestation rows is the path forward for
+# `scripts/tag.sh`'s `runner: containers-submodule` gate.
+echo "[§6.X] runner=$RUNNER (host-direct permitted during §6.X-debt; containerized is the gate target)"
+# Probe whether the binary accepts --runner: if `--help` mentions it, forward;
+# otherwise the flag is informational-only (recorded in this script's stdout
+# and in the §6.X-debt note) until Containers-side adds parser support.
+if "$BIN_DIR/emulator-matrix" --help 2>&1 | grep -q -- "--runner"; then
+    extra_args+=(--runner "$RUNNER")
+else
+    echo "[§6.X] note: cmd/emulator-matrix does not yet accept --runner; recorded informationally."
 fi
 
 "$BIN_DIR/emulator-matrix" \

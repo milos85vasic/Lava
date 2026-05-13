@@ -11,10 +11,22 @@ same commit so the index stays trustworthy. Stale state in this file
 is itself a §6.J spirit issue — the file claims a guarantee, the
 repo has drifted, the agent acts on the claim.
 
-> **Last updated:** 2026-05-13, **SP-4 Phase F.2 COMPLETE** — all
-> 6 plugins (gutenberg / archiveorg / kinozal / nnmclub / rutor /
-> rutracker) now route clone HTTP through the clone's `primaryUrl`.
-> Phase B clone-success Toast disclosure dropped (acceptance gate).
+> **Last updated:** 2026-05-13, **§6.X Container-Submodule Emulator
+> Wiring Mandate added** (twenty-first §6.L invocation) — every emulator
+> the project depends on MUST run its emulator process INSIDE a
+> podman/docker container managed by `Submodules/Containers/`. Clause
+> propagated to all 16 submodules' CLAUDE.md + AGENTS.md + CONSTITUTION.md
+> (48 docs) + lava-api-go's 3 docs + root AGENTS.md (52 files total).
+> `scripts/check-constitution.sh` enforces the inheritance presence.
+> `scripts/run-emulator-tests.sh` gains a `--runner=host-direct|containerized`
+> flag (default `host-direct` during §6.X-debt). §6.X-debt records the
+> Containers-side wiring implementation owed (a `Containerized` Emulator
+> impl in `pkg/emulator/` + an `--runner` flag in `cmd/emulator-matrix/`
+> + an Android-SDK-bearing container image). Earlier this session:
+> **SP-4 Phase F.2 COMPLETE** — all 6 plugins (gutenberg / archiveorg /
+> kinozal / nnmclub / rutor / rutracker) now route clone HTTP through
+> the clone's `primaryUrl`. Phase B clone-success Toast disclosure
+> dropped (acceptance gate).
 >
 > **Phase F.2 cumulative state (this session):**
 >  - Seam landed in `c1d6ade6`: `MirrorUrlProvider`, `CLONE_BASE_URL_CONFIG_KEY`,

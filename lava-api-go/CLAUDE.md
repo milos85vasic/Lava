@@ -136,3 +136,7 @@ shape is in scope; SP-3a Phases 0-5 explicitly exclude Go changes.
 
 - **Clause 6.T — Universal Quality Constraints** — see root `/CLAUDE.md` §6.T. All four sub-points (Reproduction-Before-Fix, Resource Limits for Tests & Challenges, No-Force-Push, Bugfix Documentation) apply verbatim to every commit in `lava-api-go/`. The Go API service MAY add stricter rules but MUST NOT relax any of §6.T.1–§6.T.4.
 
+## §6.X — Container-Submodule Emulator Wiring Mandate (inherited 2026-05-13, per §6.F)
+
+See root `/CLAUDE.md` §6.X. Every Android emulator instance the project depends on for testing MUST execute its emulator process INSIDE a podman/docker container managed by `Submodules/Containers/`, NOT be host-direct-launched by Containers-submodule code that runs on the host. The Containers submodule's `pkg/runtime/` (rootless podman/docker auto-detection) brings the container up; `pkg/emulator/` orchestrates the AVD lifecycle inside it. Lava-side `scripts/run-emulator-tests.sh` is thin glue forwarding to the Containers CLI. The container-bound path is the gate — host-direct emulators are permitted for workstation iteration only. §6.X-debt tracks the wiring implementation owed to `Submodules/Containers/`. This submodule MAY add stricter rules but MUST NOT relax.
+
