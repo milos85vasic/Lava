@@ -23,8 +23,9 @@ the source — every feature mirrors `XxxState` + `XxxAction` +
 
 ```
 ┌──────────────────────────────────────────────────────────────────────┐
-│ feature:* ViewModels (search_result, topic, login, tracker_settings) │
-│   ─ no per-tracker imports; talk to LavaTrackerSdk only              │
+│ feature:* ViewModels (search_result, topic, login, provider_config,  │
+│   credentials_manager, menu) — no per-tracker imports; talk to       │
+│   LavaTrackerSdk only                                                │
 └────────────────────────────────┬─────────────────────────────────────┘
                                  │ inject @Singleton LavaTrackerSdk
                                  ▼
@@ -153,7 +154,8 @@ app start by `MirrorConfigLoader`.
 | `core/tracker/rutracker`               | `lava.kotlin.tracker.module`      | RuTracker plugin                                          |
 | `core/tracker/rutor`                   | `lava.kotlin.tracker.module`      | RuTor plugin                                              |
 | `core/tracker/testing`                 | `lava.kotlin.library`             | `FakeTrackerClient` + builders + fixture loaders          |
-| `feature/tracker_settings`             | `lava.android.feature` + Compose  | Settings UI (selector, mirror list, custom-mirror dialog) |
+| `feature/provider_config`              | `lava.android.feature` + Compose  | Per-provider configuration (mirrors, credentials binding, sync toggle, anonymous mode, clone). Reachable from Menu by tapping a provider row. Replaces the SP-3a Trackers screen (deleted in SP-4 Phase C). |
+| `feature/credentials_manager`          | `lava.android.feature` + Compose  | Passphrase-gated credentials CRUD UI (Phase A). Add / edit / delete `CredentialsEntry` rows. |
 
 Generic primitives mounted via composite build at `Submodules/Tracker-SDK/`
 (submodule pin frozen by default per the Decoupled Reusable Architecture
