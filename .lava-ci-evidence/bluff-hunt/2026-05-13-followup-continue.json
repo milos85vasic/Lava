@@ -1,0 +1,49 @@
+{
+  "date": "2026-05-13",
+  "trigger": "operator 'continue' in same 24h window — subsequent invocation",
+  "follows": "2026-05-13.json (full 5+2 hunt, 20th-invocation response)",
+  "protocol": "§6.N.1.1 subsequent-invocation-in-24h lighter incident-response hunt: 1-2 files most relevant to invocation context",
+  "context": "Operator's 'continue' followed the F.2 Tasks 1+2+3 commit (c1d6ade6). Hunt scoped to the area of code just touched + the gate-shaping production scanner that backs §6.R IPv4 enforcement.",
+  "targets": [
+    {
+      "id": "T1",
+      "type": "test",
+      "file": "core/tracker/client/src/test/kotlin/lava/tracker/client/LavaTrackerSdkCloneSearchTest.kt",
+      "sut": "core/tracker/client/src/main/kotlin/lava/tracker/client/LavaTrackerSdk.kt — clientFor()",
+      "mutation": "Replaced the entire clone-resolution branch in clientFor() with bare `return registry.get(id, MapPluginConfig())` — pre-F.1 behavior that would throw on synthetic clone ids.",
+      "expected_failure_signal": "java.lang.IllegalArgumentException: Unknown plugin id: rutracker.clone.eu propagates out of the multiSearch coroutineScope.",
+      "observed_failure": "java.lang.IllegalArgumentException: Unknown plugin id: rutracker.clone.eu — testsuite tests=1 failures=1 errors=0.",
+      "verdict": "NOT_A_BLUFF",
+      "reverted": true,
+      "post_revert_status": "tests=1 failures=0 errors=0 (green)",
+      "rationale": "The test claims to guard the pre-F.1 crash regression. The mutation re-introduces that exact crash. The test fires as designed."
+    },
+    {
+      "id": "T2",
+      "type": "production-gate",
+      "file": "scripts/scan-no-hardcoded-ipv4.sh",
+      "purpose": "§6.R IPv4-literal enforcement scanner (gate-shaping production code per §6.N.2 canonical list)",
+      "mutation": "Created tracked .kt file with deliberate `1.2.3.4` literal in non-exempt path (repo-root BluffHuntSample.kt); also included `203.0.113.99` (RFC 5737 doc IP) to verify the doc-IP filter.",
+      "expected_failure_signal": "scanner exits 1 with `6.R VIOLATION` + path + line number for 1.2.3.4; does NOT flag 203.0.113.99 (filtered out).",
+      "observed_failure": "exit=1; output: `BluffHuntSample.kt:4:const val REAL_OFFENDER: String = \"1.2.3.4\"` — exactly the expected behavior. 203.0.113.99 was correctly filtered out.",
+      "verdict": "NOT_A_BLUFF",
+      "reverted": true,
+      "post_revert_status": "scanner exit=0 on the clean tree",
+      "rationale": "Scanner correctly distinguishes real connection literals from RFC 5737 documentation IPs and from exempt paths."
+    }
+  ],
+  "summary": {
+    "total_targets": 2,
+    "verdicts": {
+      "NOT_A_BLUFF": 2,
+      "BLUFF_FOUND": 0
+    },
+    "incidents_filed": 0
+  },
+  "follow_ups": [],
+  "constitutional_compliance": {
+    "§6.N.1.1": "satisfied — subsequent-invocation-in-24h lighter hunt (1-2 files) performed.",
+    "§6.J": "satisfied — both mutations targeted user-observable signals (exception propagation, scanner exit code).",
+    "§6.L": "satisfied — this hunt is the 20th-invocation continuation response."
+  }
+}
