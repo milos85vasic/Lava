@@ -1,0 +1,48 @@
+{
+  "date": "2026-05-13",
+  "trigger": "operator 'continue further' — third anti-bluff invocation in same 24h window",
+  "follows": "2026-05-13.json (full 5+2 hunt) → 2026-05-13-followup-continue.json (first lighter hunt)",
+  "protocol": "§6.N.1.1 subsequent-invocation lighter hunt; 1-2 files most relevant to recent invocation context (Phase F.2.6 rutracker per-clone HttpClient just landed at 7ce19967)",
+  "targets": [
+    {
+      "id": "T1",
+      "type": "production",
+      "file": "core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker/RuTrackerSubgraphBuilder.kt",
+      "purpose": "Hand-rolled object that constructs the full RuTracker subgraph from a caller-supplied HttpClient — the load-bearing seam that F.2.6's clone-URL routing depends on. Distinct from the factory-level override-strip mutation rehearsed in the original Bluff-Audit stamp.",
+      "mutation": "Replace `RuTrackerInnerApiImpl(httpClient)` with `RuTrackerInnerApiImpl(RuTrackerHttpClientFactory.create(\"https://rutracker.org/forum/\"))` — i.e., the bluff 'ignored the passed httpClient and used a hardcoded production URL'.",
+      "expected_failure_signal": "RuTrackerClientFactoryCloneUrlTest's MockWebServer receives 0 requests because the request went to rutracker.org instead; `assertNotNull(\"no request reached the MockWebServer at the override URL\")` fires.",
+      "observed_failure": "java.lang.AssertionError: no request reached the MockWebServer at the override URL — testsuite tests=2 failures=1 errors=0.",
+      "verdict": "NOT_A_BLUFF (deeper layer also protected)",
+      "reverted": true,
+      "post_revert_status": "tests=2 failures=0 errors=0 (green)",
+      "rationale": "The F.2.6 falsifiability anchor catches TWO distinct bluff vectors: (a) factory-level override-strip (singleton-error Provider fires), AND (b) subgraph-level httpClient-ignore (MockWebServer 0 captures). Both layers of the override propagation are independently provable."
+    },
+    {
+      "id": "T2",
+      "type": "production",
+      "file": "core/network/impl/src/main/kotlin/lava/network/data/NetworkLogger.kt",
+      "purpose": "§5-follow-up redaction implementation just landed at 0df8c6cc. Verifies the redactAuthHeader function actually does the redaction rather than passing the raw value through.",
+      "mutation": "Replaced redactAuthHeader body with `return message` (identity).",
+      "expected_failure_signal": "NetworkLoggerRedactionTest's `assertFalse(captured.contains(rawHeaderValue))` and `assertFalse(captured.contains(rawValue))` fire across 2 of 3 test cases.",
+      "observed_failure": "java.lang.AssertionError: captured log line must NOT contain the raw auth value; was: REQUEST: ... Lava-Auth: kQHRzU7M2YwYjQwM2VmNTRkLW5vbi1zZWNyZXQtdGVzdC1maXh0dXJl ... — AND case-insensitive match must still redact.",
+      "verdict": "NOT_A_BLUFF",
+      "reverted": true,
+      "post_revert_status": "tests=3 failures=0 errors=0 (green)",
+      "rationale": "The redaction's only job is to strip the raw value from the log line; the negative assertion on the raw value's presence is the user-visible (operator-visible) signal that the leak is closed. Both case-sensitive and case-insensitive variants are independently falsifiable."
+    }
+  ],
+  "summary": {
+    "total_targets": 2,
+    "verdicts": {
+      "NOT_A_BLUFF": 2,
+      "BLUFF_FOUND": 0
+    },
+    "incidents_filed": 0
+  },
+  "follow_ups": [],
+  "constitutional_compliance": {
+    "§6.N.1.1": "satisfied — third lighter hunt in same-24h window per cadence.",
+    "§6.J": "satisfied — both mutations target user-observable signals (MockWebServer wire capture, log-sink line content).",
+    "§6.L": "satisfied — addresses operator's 'continue further... enforce fully no-bluff policy' directive by performing independent layer-by-layer falsifiability rehearsals of just-landed F.2.6 + NetworkLogger code."
+  }
+}
