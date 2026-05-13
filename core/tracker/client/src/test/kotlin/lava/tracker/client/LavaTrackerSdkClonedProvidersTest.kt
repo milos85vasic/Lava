@@ -57,6 +57,13 @@ class LavaTrackerSdkClonedProvidersTest {
             flow.value = rows.toList()
         }
 
+        override suspend fun softDelete(id: String, deletedAt: Long) {
+            rows.indices.toList().forEach { i ->
+                if (rows[i].syntheticId == id) rows[i] = rows[i].copy(deletedAt = deletedAt)
+            }
+            flow.value = rows.filter { it.deletedAt == null }.toList()
+        }
+
         override suspend fun delete(id: String) {
             rows.removeAll { it.syntheticId == id }
             flow.value = rows.toList()

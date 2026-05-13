@@ -17,6 +17,7 @@ dependencies {
     implementation(project(":core:logger"))
     implementation(project(":core:models"))
     implementation(project(":core:preferences"))
+    implementation(project(":core:sync"))
 
     implementation(libs.androidx.security.ktx)
     implementation(libs.javax.inject)

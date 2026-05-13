@@ -16,9 +16,14 @@ class CredentialsEntryRepositoryImplTest {
     private class FakeDao : CredentialsEntryDao {
         val flow = MutableStateFlow<List<CredentialsEntryEntity>>(emptyList())
         override fun observeAll() = flow
-        override suspend fun get(id: String) = flow.value.firstOrNull { it.id == id }
+        override suspend fun get(id: String) = flow.value.firstOrNull { it.id == id && it.deletedAt == null }
         override suspend fun upsert(entity: CredentialsEntryEntity) {
             flow.value = (flow.value.filterNot { it.id == entity.id } + entity)
+        }
+
+        // SP-4 Phase G — soft-delete + hard-delete both supported.
+        override suspend fun softDelete(id: String, deletedAt: Long) {
+            flow.value = flow.value.map { if (it.id == id) it.copy(deletedAt = deletedAt) else it }
         }
         override suspend fun delete(id: String) { flow.value = flow.value.filterNot { it.id == id } }
     }
@@ -29,7 +34,7 @@ class CredentialsEntryRepositoryImplTest {
     @Test
     fun `upsert encrypts and decrypts on read`() = runBlocking {
         val dao = FakeDao()
-        val repo = CredentialsEntryRepositoryImpl(dao) { key }
+        val repo = CredentialsEntryRepositoryImpl(dao, { key })
         val entry = CredentialsEntry(
             id = "id-1",
             displayName = "My creds",
@@ -47,14 +52,14 @@ class CredentialsEntryRepositoryImplTest {
     @Test
     fun `get returns null for unknown id`() = runBlocking {
         val dao = FakeDao()
-        val repo = CredentialsEntryRepositoryImpl(dao) { key }
+        val repo = CredentialsEntryRepositoryImpl(dao, { key })
         assertNull(repo.get("nope"))
     }
 
     @Test
     fun `delete removes the row`() = runBlocking {
         val dao = FakeDao()
-        val repo = CredentialsEntryRepositoryImpl(dao) { key }
+        val repo = CredentialsEntryRepositoryImpl(dao, { key })
         val entry = CredentialsEntry(
             id = "id-2",
             displayName = "X",
@@ -71,7 +76,7 @@ class CredentialsEntryRepositoryImplTest {
     @Test
     fun `round-trips all four secret types`() = runBlocking {
         val dao = FakeDao()
-        val repo = CredentialsEntryRepositoryImpl(dao) { key }
+        val repo = CredentialsEntryRepositoryImpl(dao, { key })
         val secrets = listOf(
             CredentialSecret.UsernamePassword("u", "p"),
             CredentialSecret.ApiKey("ak"),

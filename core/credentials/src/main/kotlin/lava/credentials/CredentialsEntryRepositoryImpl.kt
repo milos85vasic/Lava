@@ -11,6 +11,8 @@ import lava.credentials.model.CredentialSecret
 import lava.credentials.model.CredentialsEntry
 import lava.database.dao.CredentialsEntryDao
 import lava.database.entity.CredentialsEntryEntity
+import lava.sync.SyncOutbox
+import lava.sync.SyncOutboxKind
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -18,6 +20,13 @@ import javax.inject.Singleton
 class CredentialsEntryRepositoryImpl @Inject constructor(
     private val dao: CredentialsEntryDao,
     private val keyProvider: () -> ByteArray,
+    /**
+     * SP-4 Phase G (2026-05-13). Sync outbox the repository enqueues
+     * soft-delete events into. Nullable so unit tests that construct
+     * the repo without a sync layer keep compiling; production Hilt
+     * wiring always supplies it.
+     */
+    private val outbox: SyncOutbox? = null,
 ) : CredentialsEntryRepository {
 
     override fun observe(): Flow<List<CredentialsEntry>> =
@@ -42,7 +51,28 @@ class CredentialsEntryRepositoryImpl @Inject constructor(
         )
     }
 
-    override suspend fun delete(id: String) = dao.delete(id)
+    /**
+     * SP-4 Phase G (2026-05-13). Soft-delete: stamps `deletedAt` so the
+     * row is invisible to read paths but the marker is preserved for
+     * Phase E's sync upload + backup-restore semantics. Also enqueues
+     * a `CREDENTIALS` outbox event with `deleted = true` so Phase E's
+     * uploader can propagate the removal to other devices.
+     */
+    override suspend fun delete(id: String) {
+        val now = System.currentTimeMillis()
+        dao.softDelete(id, now)
+        outbox?.enqueue(
+            SyncOutboxKind.CREDENTIALS,
+            json.encodeToString(WireRemoval(id = id, deletedAt = now)),
+        )
+    }
+
+    @Serializable
+    private data class WireRemoval(
+        val id: String,
+        val deletedAt: Long,
+        val deleted: Boolean = true,
+    )
 
     private fun decode(entity: CredentialsEntryEntity): CredentialsEntry {
         val pt = CredentialsCrypto.decrypt(keyProvider(), entity.ciphertext).toString(Charsets.UTF_8)
@@ -79,6 +109,13 @@ class CredentialsEntryRepositoryImpl @Inject constructor(
     }
 
     companion object {
-        private val json = Json { ignoreUnknownKeys = true }
+        private val json = Json {
+            ignoreUnknownKeys = true
+            // SP-4 Phase G: emit fields with default values so the
+            // `deleted: true` flag on WireRemoval reaches the outbox
+            // payload. Phase E's API handler reads this flag to route
+            // upsert vs removal.
+            encodeDefaults = true
+        }
     }
 }

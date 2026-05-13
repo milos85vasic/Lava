@@ -86,6 +86,9 @@ class LavaTrackerSdkCloneSearchTest {
         override suspend fun upsert(entity: ClonedProviderEntity) {
             rows.value = rows.value.filterNot { it.syntheticId == entity.syntheticId } + entity
         }
+        override suspend fun softDelete(id: String, deletedAt: Long) {
+            rows.value = rows.value.map { if (it.syntheticId == id) it.copy(deletedAt = deletedAt) else it }
+        }
         override suspend fun delete(id: String) {
             rows.value = rows.value.filterNot { it.syntheticId == id }
         }

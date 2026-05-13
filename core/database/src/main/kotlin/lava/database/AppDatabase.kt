@@ -70,7 +70,7 @@ import lava.database.entity.VisitedTopicEntity
         UserMirrorEntity::class,
         VisitedTopicEntity::class,
     ],
-    version = 9,
+    version = 10,
     exportSchema = true,
 )
 @TypeConverters(Converters::class)
@@ -273,6 +273,22 @@ abstract class AppDatabase : RoomDatabase() {
                         "id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, kind TEXT NOT NULL, " +
                         "payload TEXT NOT NULL, createdAt INTEGER NOT NULL)",
                 )
+            }
+        }
+
+        /**
+         * SP-4 Phase G (2026-05-13). Soft-delete columns on
+         * [CredentialsEntryEntity] and [ClonedProviderEntity]. Existing
+         * rows default to `deletedAt = NULL` (not deleted). Read paths
+         * filter on `deletedAt IS NULL`; the column lets Phase E
+         * propagate removals to other devices via the sync outbox AND
+         * lets backup-restore survive a removal (the soft-delete marker
+         * is included in the cloud backup).
+         */
+        val MIGRATION_9_10 = object : Migration(9, 10) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE credentials_entry ADD COLUMN deletedAt INTEGER DEFAULT NULL")
+                db.execSQL("ALTER TABLE cloned_provider ADD COLUMN deletedAt INTEGER DEFAULT NULL")
             }
         }
     }

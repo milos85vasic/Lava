@@ -12,6 +12,7 @@ class CredentialsKeyHolderTest {
         assertNull(h.getOrNull())
         assertFalse(h.isUnlocked())
     }
+
     @Test fun `unlock then getOrNull returns same key`() {
         val h = CredentialsKeyHolder()
         val k = ByteArray(32) { 1 }
@@ -19,6 +20,7 @@ class CredentialsKeyHolderTest {
         assertArrayEquals(k, h.getOrNull())
         assertTrue(h.isUnlocked())
     }
+
     @Test fun `lock zeroes the key`() {
         val h = CredentialsKeyHolder()
         val k = ByteArray(32) { 7 }

@@ -181,6 +181,45 @@ repo has drifted, the agent acts on the claim.
 >       :feature:provider_config — all green.
 >     - §6.S CONTINUATION + §6.W mirror convergence in this same commit.
 >
+> **Phase G executed 2026-05-13** (local half — soft-delete + outbox enqueue):
+>   - Design: `docs/superpowers/specs/2026-05-13-sp4-phase-g-design.md`
+>   - Plan: `docs/superpowers/plans/2026-05-13-sp4-phase-g-implementation.md`
+>   - Schema bump v9 → v10 via `MIGRATION_9_10`: adds `deletedAt: Long?`
+>     column to `credentials_entry` and `cloned_provider`. DAOs gain
+>     `softDelete(id, deletedAt)`; all read queries filter
+>     `WHERE deletedAt IS NULL`.
+>   - `CredentialsEntryRepositoryImpl.delete()` rewritten:
+>     soft-deletes (sets `deletedAt = NOW`) + enqueues
+>     `SyncOutboxKind.CREDENTIALS` with `WireRemoval(id, deletedAt,
+>     deleted = true)`. `Json.encodeDefaults = true` so the
+>     `deleted: true` flag survives JSON round-trip into the outbox
+>     payload (default-value fields would otherwise be omitted —
+>     a real Third-Law-fake-divergence bug surfaced during this
+>     phase's test rehearsal and fixed in the same commit).
+>   - All 3 in-repo fake `ClonedProviderDao` impls + the
+>     `CredentialsEntryRepositoryImplTest.FakeDao` updated to
+>     implement `softDelete`. The new
+>     `CredentialsEntryRepositorySoftDeleteTest.FakeDao` mirrors
+>     Room's `WHERE deletedAt IS NULL` filter behaviorally so the
+>     fake doesn't diverge from production (Third Law).
+>   - 1 new unit test: `CredentialsEntryRepositorySoftDeleteTest`
+>     asserting (1) read-paths hide the soft-deleted row,
+>     (2) the raw table preserves the row + `deletedAt` timestamp
+>     (for backup-restore + Phase E sync upload),
+>     (3) outbox carries a `CREDENTIALS` entry whose payload
+>     contains the id AND `"deleted":true`.
+>   - Falsifiability rehearsal verified: mutating `delete()` back
+>     to `dao.delete(id)` (hard delete + no outbox) makes the
+>     test fail with "soft-deleted row must still be present in
+>     the raw table" — clear user-observable signal.
+>   - **Phase E (remote propagation) is OWED.** Phase G ships the
+>     local soft-delete + outbox enqueue. Phase E's uploader
+>     reads the outbox + propagates the removal to other devices;
+>     Phase E's downloader merges remote soft-deletes into the
+>     local DAO. Without Phase E, the soft-delete is local-only
+>     but the backup-restore semantic is already correct (the
+>     soft-delete marker is included in Android Auto Backup).
+>
 > **Phase F.1 executed 2026-05-13** (this commit chain):
 >   - Design + plan: `docs/superpowers/specs/2026-05-13-sp4-phase-f-design.md`
 >     + `docs/superpowers/plans/2026-05-13-sp4-phase-f-implementation.md`.
