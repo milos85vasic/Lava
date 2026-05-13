@@ -11,22 +11,41 @@ same commit so the index stays trustworthy. Stale state in this file
 is itself a §6.J spirit issue — the file claims a guarantee, the
 repo has drifted, the agent acts on the claim.
 
-> **Last updated:** 2026-05-13, **§6.X-debt PARTIALLY CLOSED** (operator
-> twenty-second §6.L invocation: "Do all debt points now!"). Containers
-> submodule pin bumped to `562069e7` — ships Containerized Emulator
-> impl + `--runner` CLI flag + Containerfile recipe for the Android
-> emulator image. Lava's `scripts/check-constitution.sh` activates
-> §6.X runtime checks (a) [Containerized impl present + asserts
-> Emulator interface] and (b) [cmd/emulator-matrix accepts --runner].
-> Both checks falsifiability-rehearsed: rename-out / sed-disable
-> mutations produce the expected "MISSING 6.X runtime check ..."
-> output; reverted. Runtime check (c) [tag.sh attestation row gate
-> on `runner: containerized`] activates with the next tag.sh touch.
-> Real-stack `t.Skip` test gated on Linux x86_64 with /dev/kvm is
-> the final §6.X close criterion — operator-blocked on darwin/arm64
-> per §6.V-debt incident JSON. Earlier this session: §6.X clause
-> added, 16 submodules + lava-api-go × 3 + root × 2 = 52 docs
-> propagated. Earlier this session:
+> **Last updated:** 2026-05-13 evening, **versionCode bumped 1036 → 1037 +
+> 2305 → 2306** in prep for next distribute (per §6.P + operator's
+> 23rd §6.L invocation: "increase version code propeyl to all apps
+> and services"). NOT distributed — see §2 below for the explicit
+> operator-input checklist that blocks distribute.
+>
+> **§6.X-debt PARTIALLY CLOSED** (twenty-second §6.L invocation: "Do
+> all debt points now!"). Containers submodule pin bumped to
+> `562069e7` — ships Containerized Emulator impl + `--runner` CLI
+> flag + Containerfile recipe for the Android emulator image.
+> `scripts/check-constitution.sh` activates §6.X runtime checks (a)
+> [Containerized impl present + asserts Emulator interface] and (b)
+> [cmd/emulator-matrix accepts --runner]. Both checks falsifiability-
+> rehearsed (rename-out / sed-disable mutations produce the expected
+> "MISSING 6.X runtime check ..." output; reverted). Runtime check
+> (c) [tag.sh attestation row gate on `runner: containerized`]
+> activates with the next tag.sh touch. Real-stack `t.Skip` test
+> gated on Linux x86_64 with /dev/kvm is the final §6.X close
+> criterion — operator-blocked on darwin/arm64 per §6.V-debt
+> incident JSON.
+>
+> **§6.L invocation count: TWENTY → TWENTY-THREE.** Propagated across
+> all 52 constitutional docs (root × 2 + 16 submodules × 3 + lava-api-go
+> × 3). The 23rd invocation is structurally distinct from prior
+> invocations: it asked for rebuild + redistribute, but per §6.J the
+> correct response is REFUSE — distributing with stub
+> `app/google-services.json` would brick the APK on
+> `LavaApplication.onCreate`. CHANGELOG.md + per-version snapshot at
+> `.lava-ci-evidence/distribute-changelog/firebase-app-distribution/Lava-Android-1.2.17-1037.md`
+> document this honestly.
+>
+> **JVM test sweep:** tests=877 failures=0 errors=0 across every
+> module (no regression from §6.X-debt close).
+>
+> **Constitution checker:** GREEN; §6.X runtime checks (a) + (b) active. Earlier this session:
 > **SP-4 Phase F.2 COMPLETE** — all 6 plugins (gutenberg / archiveorg /
 > kinozal / nnmclub / rutor / rutracker) now route clone HTTP through
 > the clone's `primaryUrl`. Phase B clone-success Toast disclosure
