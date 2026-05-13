@@ -220,6 +220,79 @@ repo has drifted, the agent acts on the claim.
 >     but the backup-restore semantic is already correct (the
 >     soft-delete marker is included in Android Auto Backup).
 >
+> **Phase G.2 + Phase D consumer-VM coverage landed 2026-05-13** (audit-driven
+> post the §6.L 20th-invocation directive — operator's "make sure
+> EVERYTHING is fully tackled and no-bluff policy heavily enforced"
+> demanded a sweep for residual gaps in the already-shipped session
+> work; two real gaps surfaced):
+>   - **Phase G.2 — RemoveClonedProviderUseCase + UI**. Phase G.1
+>     shipped soft-delete infrastructure on `cloned_provider` (DAO
+>     `softDelete` + migration) but NO caller existed; users could
+>     never remove a clone they created. This commit closes the gap:
+>     - `core/domain/.../RemoveClonedProviderUseCase`: soft-deletes
+>       the row + enqueues `CLONED_PROVIDER` outbox with
+>       `WireRemoval { syntheticId, deletedAt, deleted = true }`
+>       (same `encodeDefaults = true` pattern as Phase G.1's
+>       credentials path).
+>     - `ProviderConfigState` gains `isClone` + `showRemoveCloneDialog`.
+>       `ProviderConfigAction.OpenRemoveCloneDialog` /
+>       `DismissRemoveCloneDialog` / `ConfirmRemoveClone`. New
+>       `ProviderConfigSideEffect.NavigateBack` pops the screen after
+>       removal.
+>     - `ProviderConfigViewModel` injects `ClonedProviderDao` +
+>       `RemoveClonedProviderUseCase`. `onCreate` queries the DAO
+>       to set `isClone`; `ConfirmRemoveClone` invokes the use case
+>       and emits `NavigateBack`.
+>     - New `RemoveCloneSection.kt`: destructive Remove button (only
+>       when `state.isClone`) + Dialog confirmation. AppTheme.error
+>       color for both button and confirm.
+>     - `ProviderConfigScreen` wires the section + the new side effect
+>       to `onBack()`.
+>     - New test `RemoveClonedProviderUseCaseTest` — 2 tests asserting
+>       on user-observable state (clone disappears from getAll, raw
+>       table preserves deletedAt timestamp, outbox carries CLONED_PROVIDER
+>       with `"deleted":true` payload). Falsifiability rehearsal
+>       verified: dropping the `outbox.enqueue` makes the
+>       "expected exactly one outbox entry" assertion fail.
+>   - **Phase D consumer-VM coverage**. Phase D shipped the SDK
+>     (`LavaTrackerSdkParallelSearchTest`, 4 tests) but the
+>     `SearchResultViewModel.handleMultiSearchEvent` state-reduction
+>     branch had zero coverage. A bug in the VM's per-provider state
+>     transitions would have been invisible to all automated tests.
+>     This commit closes the gap:
+>     - Extracted the pure state transformation to file-scope helper
+>       `applyMultiSearchEvent(state, event): SearchPageState` —
+>       same logic, testable without the orbit VM machinery.
+>     - The VM's `handleMultiSearchEvent` now calls
+>       `reduce { applyMultiSearchEvent(state, event) }`. Exhaustive
+>       `when` retained inside as a sanity guard so a new
+>       `MultiSearchEvent` variant fails fast at compile time.
+>     - New test `ApplyMultiSearchEventTest` — 6 tests covering
+>       ProviderStart (displayName stamp), ProviderResults (items
+>       append + DONE), ProviderFailure (ERROR), ProviderUnsupported
+>       (DONE/zero), AllProvidersDone (no-op), and the defensive
+>       non-Streaming-content no-op (late-event safety). Each test's
+>       KDoc names a specific deliberate mutation that the test
+>       catches.
+>     - Falsifiability rehearsal verified: dropping the
+>       `items = current.items + newItems` line makes the
+>       ProviderResults items-size assertion fail with
+>       `expected:<2> but was:<0>`.
+>     - `:feature:search_result` build.gradle.kts: added
+>       `testImplementation(project(":core:database"))` to make
+>       `ClonedProviderDao?` reachable in the test classpath via
+>       the SDK constructor signature (Phase F.1's nullable injection).
+>     - `SearchResultViewModelFallbackTest` updated to pass an
+>       `sdk = LavaTrackerSdk(registry = DefaultTrackerRegistry())`
+>       parameter (the new Phase D constructor arg).
+>   - **The anti-bluff mandate keeps working.** Two real bluffs
+>     surfaced in already-committed code without an operator-emulator
+>     run — exactly the §6.J "tests must guarantee the product works"
+>     pattern the operator's repeated invocations evict. Recorded
+>     here so a future agent treats "phase committed cleanly" as
+>     necessary, never sufficient — end-of-phase audits remain a
+>     standing operating procedure.
+>
 > **Phase H tail + Phase E design + Phase F.2 design landed 2026-05-13:**
 >   - `docs/SP-4-RELEASE-NOTES.md` NEW. User-visible + developer-visible
 >     changes across SP-4 Phases A through G.1. Explicit OWED list for

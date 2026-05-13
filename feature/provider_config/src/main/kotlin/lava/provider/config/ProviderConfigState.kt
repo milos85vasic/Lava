@@ -19,4 +19,13 @@ data class ProviderConfigState(
     val probeResults: Map<String, ProbeResult> = emptyMap(),
     val showAssignSheet: Boolean = false,
     val showCloneDialog: Boolean = false,
+    /**
+     * SP-4 Phase G.2 (2026-05-13). True when [providerId] is a synthetic
+     * cloned-provider id (i.e. has a row in `cloned_provider` with
+     * `deletedAt IS NULL`). Surfaces the "Remove this clone" destructive
+     * affordance in [sections.RemoveCloneSection]. Original (registered)
+     * trackers cannot be removed — only user-created clones.
+     */
+    val isClone: Boolean = false,
+    val showRemoveCloneDialog: Boolean = false,
 )

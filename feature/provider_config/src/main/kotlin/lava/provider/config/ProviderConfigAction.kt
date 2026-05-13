@@ -13,4 +13,11 @@ sealed interface ProviderConfigAction {
     data object OpenCloneDialog : ProviderConfigAction
     data object DismissCloneDialog : ProviderConfigAction
     data class ConfirmClone(val displayName: String, val primaryUrl: String) : ProviderConfigAction
+
+    /** SP-4 Phase G.2 — surface the destructive Remove confirmation dialog. */
+    data object OpenRemoveCloneDialog : ProviderConfigAction
+    data object DismissRemoveCloneDialog : ProviderConfigAction
+
+    /** SP-4 Phase G.2 — soft-delete the clone + pop back to Menu. */
+    data object ConfirmRemoveClone : ProviderConfigAction
 }

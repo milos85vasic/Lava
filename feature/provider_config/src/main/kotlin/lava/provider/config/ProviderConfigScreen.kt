@@ -21,6 +21,7 @@ import lava.provider.config.sections.CloneSection
 import lava.provider.config.sections.CredentialsSection
 import lava.provider.config.sections.Header
 import lava.provider.config.sections.MirrorsSection
+import lava.provider.config.sections.RemoveCloneSection
 import lava.provider.config.sections.SyncSection
 import org.orbitmvi.orbit.compose.collectAsState
 import org.orbitmvi.orbit.compose.collectSideEffect
@@ -36,6 +37,8 @@ fun ProviderConfigScreen(
         when (effect) {
             is ProviderConfigSideEffect.ShowToast ->
                 Toast.makeText(context, effect.msg, Toast.LENGTH_SHORT).show()
+            // SP-4 Phase G.2 — after Remove clone, pop the screen.
+            ProviderConfigSideEffect.NavigateBack -> onBack()
         }
     }
     val state by viewModel.collectAsState()
@@ -81,5 +84,10 @@ private fun ProviderConfigScreen(
             Divider()
         }
         CloneSection(state = state, onAction = onAction)
+        // SP-4 Phase G.2 — Remove affordance, visible only for cloned providers.
+        if (state.isClone) {
+            Divider()
+            RemoveCloneSection(state = state, onAction = onAction)
+        }
     }
 }

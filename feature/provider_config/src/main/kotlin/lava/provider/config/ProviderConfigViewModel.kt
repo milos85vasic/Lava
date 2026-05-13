@@ -10,6 +10,7 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import lava.credentials.CredentialsEntryRepository
+import lava.database.dao.ClonedProviderDao
 import lava.database.dao.ProviderCredentialBindingDao
 import lava.database.dao.ProviderSyncToggleDao
 import lava.database.dao.UserMirrorDao
@@ -19,6 +20,7 @@ import lava.database.entity.UserMirrorEntity
 import lava.designsystem.color.ProviderColors
 import lava.domain.usecase.CloneProviderUseCase
 import lava.domain.usecase.ProbeMirrorUseCase
+import lava.domain.usecase.RemoveClonedProviderUseCase
 import lava.sync.SyncOutbox
 import lava.sync.SyncOutboxKind
 import lava.tracker.client.LavaTrackerSdk
@@ -37,8 +39,10 @@ class ProviderConfigViewModel @Inject constructor(
     private val bindingDao: ProviderCredentialBindingDao,
     private val toggleDao: ProviderSyncToggleDao,
     private val userMirrorDao: UserMirrorDao,
+    private val clonedProviderDao: ClonedProviderDao,
     private val probe: ProbeMirrorUseCase,
     private val cloneProvider: CloneProviderUseCase,
+    private val removeClonedProvider: RemoveClonedProviderUseCase,
     private val outbox: SyncOutbox,
 ) : ContainerHost<ProviderConfigState, ProviderConfigSideEffect>, ViewModel() {
 
@@ -49,12 +53,17 @@ class ProviderConfigViewModel @Inject constructor(
         onCreate = {
             val descriptor = sdk.listAvailableTrackers()
                 .firstOrNull { it.trackerId == providerId }
+            // SP-4 Phase G.2: check whether this providerId is a user-cloned
+            // synthetic id. The clone surfaces a destructive Remove action;
+            // original (registered) providers do not.
+            val isClone = clonedProviderDao.getAll().any { it.syntheticId == providerId }
             reduce {
                 state.copy(
                     descriptor = descriptor,
                     displayName = descriptor?.displayName.orEmpty(),
                     color = ProviderColors.forProvider(providerId),
                     descriptorMirrors = descriptor?.baseUrls?.map { it.url }.orEmpty(),
+                    isClone = isClone,
                 )
             }
             observeAll()
@@ -132,6 +141,18 @@ class ProviderConfigViewModel @Inject constructor(
                         "Cloned (URL routing pending — searches use source URLs)",
                     ),
                 )
+            }
+            // SP-4 Phase G.2 — destructive clone removal.
+            ProviderConfigAction.OpenRemoveCloneDialog ->
+                reduce { state.copy(showRemoveCloneDialog = true) }
+            ProviderConfigAction.DismissRemoveCloneDialog ->
+                reduce { state.copy(showRemoveCloneDialog = false) }
+            ProviderConfigAction.ConfirmRemoveClone -> {
+                if (!state.isClone) return@intent
+                removeClonedProvider(providerId)
+                reduce { state.copy(showRemoveCloneDialog = false) }
+                postSideEffect(ProviderConfigSideEffect.ShowToast("Clone removed"))
+                postSideEffect(ProviderConfigSideEffect.NavigateBack)
             }
         }
     }

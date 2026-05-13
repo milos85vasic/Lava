@@ -138,90 +138,18 @@ internal class SearchResultViewModel @Inject constructor(
     }
 
     private fun handleMultiSearchEvent(event: MultiSearchEvent) = intent {
+        reduce { applyMultiSearchEvent(state, event) }
+        // §6.J anti-bluff: the pure transformation is extracted to
+        // `applyMultiSearchEvent` at file-scope so the Phase D VM-consumer
+        // test can drive it directly without the orbit intent/reduce
+        // wrapper. Keep the local `when` as a sanity guard so a future
+        // refactor that adds a new event variant fails fast here
+        // (exhaustive `when`).
         when (event) {
-            is MultiSearchEvent.ProviderStart -> {
-                val current = state.searchContent
-                if (current is SearchResultContent.Streaming) {
-                    reduce {
-                        state.copy(
-                            providerDisplayNames = state.providerDisplayNames + (event.providerId to event.displayName),
-                            searchContent = current.copy(
-                                activeProviders = current.activeProviders.map {
-                                    if (it.providerId == event.providerId) {
-                                        it.copy(displayName = event.displayName)
-                                    } else {
-                                        it
-                                    }
-                                },
-                            ),
-                        )
-                    }
-                }
-            }
-            is MultiSearchEvent.ProviderResults -> {
-                val newItems = event.items.map { item ->
-                    TopicModel(
-                        topic = Torrent(id = item.torrentId, title = item.title),
-                        providerId = event.providerId,
-                    )
-                }
-                val current = state.searchContent
-                if (current is SearchResultContent.Streaming) {
-                    reduce {
-                        state.copy(
-                            searchContent = current.copy(
-                                items = current.items + newItems,
-                                activeProviders = current.activeProviders.map {
-                                    if (it.providerId == event.providerId) {
-                                        it.copy(
-                                            status = StreamStatus.DONE,
-                                            resultCount = it.resultCount + newItems.size,
-                                        )
-                                    } else {
-                                        it
-                                    }
-                                },
-                            ),
-                        )
-                    }
-                }
-            }
-            is MultiSearchEvent.ProviderFailure -> {
-                val current = state.searchContent
-                if (current is SearchResultContent.Streaming) {
-                    reduce {
-                        state.copy(
-                            searchContent = current.copy(
-                                activeProviders = current.activeProviders.map {
-                                    if (it.providerId == event.providerId) {
-                                        it.copy(status = StreamStatus.ERROR)
-                                    } else {
-                                        it
-                                    }
-                                },
-                            ),
-                        )
-                    }
-                }
-            }
-            is MultiSearchEvent.ProviderUnsupported -> {
-                val current = state.searchContent
-                if (current is SearchResultContent.Streaming) {
-                    reduce {
-                        state.copy(
-                            searchContent = current.copy(
-                                activeProviders = current.activeProviders.map {
-                                    if (it.providerId == event.providerId) {
-                                        it.copy(status = StreamStatus.DONE, resultCount = 0)
-                                    } else {
-                                        it
-                                    }
-                                },
-                            ),
-                        )
-                    }
-                }
-            }
+            is MultiSearchEvent.ProviderStart -> Unit
+            is MultiSearchEvent.ProviderResults -> Unit
+            is MultiSearchEvent.ProviderFailure -> Unit
+            is MultiSearchEvent.ProviderUnsupported -> Unit
             is MultiSearchEvent.AllProvidersDone -> {
                 // Final snapshot — UI already reflects per-provider
                 // results via the incremental events; no additional
@@ -586,5 +514,90 @@ internal class SearchResultViewModel @Inject constructor(
 
     private fun onTopicClick(topicModel: TopicModel<out Topic>) = intent {
         postSideEffect(SearchResultSideEffect.OpenTopic(topicModel.topic.id))
+    }
+}
+
+/**
+ * SP-4 Phase D consumer — pure-state transformation that reduces a
+ * single `MultiSearchEvent` into a new `SearchPageState`. Extracted
+ * to file-scope so unit tests can drive it directly without the
+ * orbit VM machinery.
+ *
+ * Contract: if the current `searchContent` is not `Streaming`, the
+ * event is ignored and the state is returned unchanged (the events
+ * only make sense while a streaming search is in flight). Per-event
+ * semantics:
+ *
+ *  - `ProviderStart`: stamps the provider's displayName into
+ *    `providerDisplayNames` + into the matching `ProviderStreamStatus`
+ *    row (the row pre-exists with `SEARCHING` from
+ *    `observeStreamMultiSearch` init).
+ *  - `ProviderResults`: appends mapped items + flips the provider's
+ *    row to `DONE` with the new `resultCount`.
+ *  - `ProviderFailure`: flips the provider's row to `ERROR`.
+ *  - `ProviderUnsupported`: flips the provider's row to `DONE` with
+ *    `resultCount = 0` (the user-visible "this provider was skipped"
+ *    signal — same shape as DONE with zero results).
+ *  - `AllProvidersDone`: no state change at this level; the caller's
+ *    `handleStreamEnd()` downgrades Streaming → Content/Empty.
+ */
+internal fun applyMultiSearchEvent(
+    state: SearchPageState,
+    event: MultiSearchEvent,
+): SearchPageState {
+    val current = state.searchContent
+    if (current !is SearchResultContent.Streaming) return state
+
+    return when (event) {
+        is MultiSearchEvent.ProviderStart -> state.copy(
+            providerDisplayNames = state.providerDisplayNames + (event.providerId to event.displayName),
+            searchContent = current.copy(
+                activeProviders = current.activeProviders.map {
+                    if (it.providerId == event.providerId) it.copy(displayName = event.displayName) else it
+                },
+            ),
+        )
+        is MultiSearchEvent.ProviderResults -> {
+            val newItems = event.items.map { item ->
+                TopicModel(
+                    topic = Torrent(id = item.torrentId, title = item.title),
+                    providerId = event.providerId,
+                )
+            }
+            state.copy(
+                searchContent = current.copy(
+                    items = current.items + newItems,
+                    activeProviders = current.activeProviders.map {
+                        if (it.providerId == event.providerId) {
+                            it.copy(
+                                status = StreamStatus.DONE,
+                                resultCount = it.resultCount + newItems.size,
+                            )
+                        } else {
+                            it
+                        }
+                    },
+                ),
+            )
+        }
+        is MultiSearchEvent.ProviderFailure -> state.copy(
+            searchContent = current.copy(
+                activeProviders = current.activeProviders.map {
+                    if (it.providerId == event.providerId) it.copy(status = StreamStatus.ERROR) else it
+                },
+            ),
+        )
+        is MultiSearchEvent.ProviderUnsupported -> state.copy(
+            searchContent = current.copy(
+                activeProviders = current.activeProviders.map {
+                    if (it.providerId == event.providerId) {
+                        it.copy(status = StreamStatus.DONE, resultCount = 0)
+                    } else {
+                        it
+                    }
+                },
+            ),
+        )
+        is MultiSearchEvent.AllProvidersDone -> state
     }
 }

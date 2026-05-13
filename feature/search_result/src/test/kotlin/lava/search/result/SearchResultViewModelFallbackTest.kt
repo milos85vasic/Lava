@@ -198,6 +198,13 @@ class SearchResultViewModelFallbackTest {
                 override fun recordNonFatal(throwable: Throwable, context: Map<String, String>) {}
                 override fun log(message: String) {}
             },
+            // SP-4 Phase D added an `sdk: LavaTrackerSdk` constructor param
+            // for the new streamMultiSearch consumer branch. This test only
+            // exercises the legacy paging path, so a registry-only SDK
+            // suffices.
+            sdk = lava.tracker.client.LavaTrackerSdk(
+                registry = lava.tracker.registry.DefaultTrackerRegistry(),
+            ),
         )
     }
 
