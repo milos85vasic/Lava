@@ -126,20 +126,60 @@ repo has drifted, the agent acts on the claim.
 >   - Build verification: spotless + compileDebugKotlin + compileDebugUnitTestKotlin
 >     across :feature:menu + :feature:provider_config — all green.
 >     :app:compileDebugKotlin requires .env + keystore (operator env).
->   - Phase D detailed-design landed (this commit chain):
->     `docs/superpowers/specs/2026-05-13-sp4-phase-d-design.md` +
->     `docs/superpowers/plans/2026-05-13-sp4-phase-d-implementation.md`.
->     Locked scope: parallel `multiSearch` via `coroutineScope` +
->     `awaitAll`; new `streamMultiSearch(...)`: `Flow<MultiSearchEvent>`
->     via `channelFlow`; `SearchResultViewModel` consumes the new flow
->     when the Go API endpoint isn't configured (SSE path remains the
->     API-on default); `ActiveTrackerSection` (the Phase-C transitional
->     affordance) deleted as Phase D pre-work; `LavaTrackerSdk
->     .activeTrackerId()` + `switchTracker()` marked `@Deprecated`
->     (retained API for legacy paging caller).
->     6 tasks, ~20 steps, single-session executable. C32 + C33 (parallel-
->     search + cancellation Compose UI Challenges) owed for operator
->     execution on the gating emulator before next tag.
+>   - Phase D executed 2026-05-13 (this commit chain):
+>     - Design + plan: `docs/superpowers/specs/2026-05-13-sp4-phase-d-design.md`
+>       + `docs/superpowers/plans/2026-05-13-sp4-phase-d-implementation.md`.
+>     - `LavaTrackerSdk.multiSearch` rewritten from sequential `for`-loop
+>       to PARALLEL `coroutineScope { providerIds.map { async { ... } }
+>       .awaitAll() }`. Latency drops from `sum(per-provider)` to
+>       `max(per-provider)`. Per-provider failure isolated via try/catch
+>       inside `runOneProvider`.
+>     - New `LavaTrackerSdk.streamMultiSearch(...): Flow<MultiSearchEvent>`
+>       via `flow { ... channelFlow { ... } ... }`. Emits
+>       ProviderStart → ProviderResults | ProviderFailure |
+>       ProviderUnsupported per provider, then AllProvidersDone
+>       (suppressed on collector cancellation). Mutex-guarded mutable
+>       maps shared between the channelFlow producer and the post-
+>       emitAll AllProvidersDone snapshot.
+>     - New `MultiSearchEvent` sealed hierarchy in
+>       `core/tracker/client/.../MultiSearchEvent.kt`.
+>     - `SearchResultViewModel`: branch into `observeStreamMultiSearch`
+>       when `providerIds != null && endpoint !is Endpoint.GoApi`.
+>       Maps `MultiSearchEvent` → existing `SearchResultContent.Streaming`
+>       state reductions; SSE path remains the Go-API-configured default.
+>     - `ActiveTrackerSection.kt` deleted (Phase C transitional affordance,
+>       Phase D pre-work per design doc).
+>     - `LavaTrackerSdk.activeTrackerId()` + both `switchTracker(...)`
+>       overloads marked `@Deprecated` (legacy paging path keeps
+>       compiling — full removal post-paging-migration).
+>     - 4 unit tests in `LavaTrackerSdkParallelSearchTest.kt` — all PASS
+>       on real-stack (DefaultTrackerRegistry + SuspendingFakeClient):
+>         1. `multiSearch fans out to N providers concurrently` — uses a
+>            CompletableDeferred barrier + concurrency counter; asserts
+>            `maxConcurrent == 3`. Falsifiability rehearsed: removing
+>            `async { }` so the loop runs sequentially drops
+>            `maxConcurrent` to 1, test fails at line 111 with
+>            AssertionError. Important subtlety: `async` is eager by
+>            default, so `map { it.await() }` does NOT preserve
+>            sequential semantics — the true sequential mutation
+>            removes `async` entirely.
+>         2. `streamMultiSearch cancellation propagates to in-flight
+>            provider calls` — cancellation reaches the suspending
+>            search via structured concurrency.
+>         3. `streamMultiSearch emits ProviderStart before the terminal
+>            event for every provider` — per-provider event ordering +
+>            AllProvidersDone terminal.
+>         4. `multiSearch isolates per-provider failure from siblings` —
+>            one provider's throw doesn't cancel siblings; surviving
+>            providers report SUCCESS.
+>     - C32 + C33 Compose UI Challenges (multi-provider parallel +
+>       cancellation) remain owed for operator execution on the
+>       gating emulator before next tag.
+>     - Build verification: ./gradlew :core:tracker:client:
+>       testDebugUnitTest --tests "...ParallelSearchTest" + spotless
+>       + compileDebugKotlin across :feature:search_result +
+>       :feature:provider_config — all green.
+>     - §6.S CONTINUATION + §6.W mirror convergence in this same commit.
 >
 > Go API state: lava-api-go v2.3.5-2305 running locally at
 > `https://localhost:8443/` (healthy). Distribute artifact v1.2.16-1036

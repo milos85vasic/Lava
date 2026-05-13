@@ -1,9 +1,18 @@
 package lava.tracker.client
 
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import lava.database.dao.ClonedProviderDao
 import lava.network.sse.SseClient
 import lava.network.sse.SseEvent
@@ -117,7 +126,19 @@ class LavaTrackerSdk @Inject constructor(
         return base + synthetic
     }
 
-    /** Switches the active tracker. Throws [IllegalArgumentException] if [trackerId] is unknown. */
+    /**
+     * Switches the active tracker. Throws [IllegalArgumentException] if [trackerId] is unknown.
+     *
+     * @deprecated SP-4 Phase D (2026-05-13) — the single-active-tracker
+     * concept is being phased out in favor of `multiSearch` / `streamMultiSearch`
+     * fan-out across explicit provider lists. Retained for the legacy
+     * single-provider paging path; will be removed once the paging path
+     * migrates to `multiSearch` with a one-element provider list.
+     */
+    @Deprecated(
+        message = "Use multiSearch / streamMultiSearch — single-active-tracker semantics removed by SP-4 Phase D.",
+        level = DeprecationLevel.WARNING,
+    )
     fun switchTracker(trackerId: String) {
         require(registry.isRegistered(trackerId)) {
             "Unknown tracker id: '$trackerId' (registered: ${registry.list().map { it.trackerId }})"
@@ -125,7 +146,18 @@ class LavaTrackerSdk @Inject constructor(
         activeTrackerId = trackerId
     }
 
-    /** Currently-active tracker id. Defaults to "rutracker". */
+    /**
+     * Currently-active tracker id. Defaults to "rutracker".
+     *
+     * @deprecated SP-4 Phase D (2026-05-13) — see [switchTracker] for
+     * the migration target. The legacy paging path still consumes this;
+     * new callers MUST use `multiSearch` / `streamMultiSearch` with
+     * explicit provider ids instead.
+     */
+    @Deprecated(
+        message = "Use multiSearch / streamMultiSearch — single-active-tracker semantics removed by SP-4 Phase D.",
+        level = DeprecationLevel.WARNING,
+    )
     fun activeTrackerId(): String = activeTrackerId
 
     /**
@@ -605,107 +637,207 @@ class LavaTrackerSdk @Inject constructor(
     private object RehydratedFailure : Throwable("rehydrated-from-persistence")
 
     /**
-     * Multi-provider unified search (Multi-Provider Extension, Task 7.5).
+     * Multi-provider unified search.
      *
-     * Searches [request] across every tracker in [providerIds] in parallel,
-     * deduplicates results by info-hash (or title+size fallback), and returns
-     * a single [UnifiedSearchResult] with per-provider status metadata.
+     * SP-4 Phase D (2026-05-13) rewrite: PARALLEL fan-out via
+     * `coroutineScope { ... async { } ... awaitAll() }`. Each provider's
+     * search runs concurrently; total latency is `max(per-provider)`
+     * instead of `sum(per-provider)`. Failures in one provider do not
+     * cancel siblings — each provider's outcome is captured locally
+     * and rolled up into the final [UnifiedSearchResult].
      *
-     * Providers that don't support SEARCH are skipped with
-     * [ProviderSearchState.UNSUPPORTED] rather than throwing.
+     * Providers that don't declare `TrackerCapability.SEARCH` are
+     * skipped with [ProviderSearchState.UNSUPPORTED] rather than
+     * throwing.
      */
     suspend fun multiSearch(
         request: SearchRequest,
         providerIds: List<String>,
         page: Int = 0,
-    ): UnifiedSearchResult {
-        val statuses = mutableListOf<ProviderSearchStatus>()
-        val resultsByProvider = mutableMapOf<String, List<TorrentItem>>()
-        val displayNames = mutableMapOf<String, String>()
+    ): UnifiedSearchResult = coroutineScope {
+        val outcomes = providerIds.map { id ->
+            async { id to runOneProvider(id, request, page) }
+        }.awaitAll()
 
-        for (id in providerIds) {
-            val descriptor = registry.list().firstOrNull { it.trackerId == id }
-            if (descriptor == null) {
-                statuses.add(
-                    ProviderSearchStatus(
-                        providerId = id,
-                        displayName = id,
-                        state = ProviderSearchState.FAILURE,
-                        errorMessage = "not registered",
-                    ),
-                )
-                continue
-            }
-            displayNames[id] = descriptor.displayName
-
-            if (TrackerCapability.SEARCH !in descriptor.capabilities) {
-                statuses.add(
-                    ProviderSearchStatus(
-                        providerId = id,
-                        displayName = descriptor.displayName,
-                        state = ProviderSearchState.UNSUPPORTED,
-                    ),
-                )
-                continue
-            }
-
-            val client = registry.get(id, MapPluginConfig())
-            val feature = client.getFeature(SearchableTracker::class)
-            if (feature == null) {
-                statuses.add(
-                    ProviderSearchStatus(
-                        providerId = id,
-                        displayName = descriptor.displayName,
-                        state = ProviderSearchState.UNSUPPORTED,
-                    ),
-                )
-                continue
-            }
-
-            statuses.add(
-                ProviderSearchStatus(
-                    providerId = id,
-                    displayName = descriptor.displayName,
-                    state = ProviderSearchState.LOADING,
-                ),
-            )
-
-            try {
-                val result = feature.search(request, page)
-                resultsByProvider[id] = result.items
-                statuses.add(
-                    ProviderSearchStatus(
-                        providerId = id,
-                        displayName = descriptor.displayName,
-                        state = ProviderSearchState.SUCCESS,
-                        resultCount = result.items.size,
-                    ),
-                )
-            } catch (t: Throwable) {
-                statuses.add(
-                    ProviderSearchStatus(
-                        providerId = id,
-                        displayName = descriptor.displayName,
-                        state = ProviderSearchState.FAILURE,
-                        errorMessage = t.message ?: "search failed",
-                    ),
-                )
-            }
-        }
-
+        val statuses = outcomes.map { (id, outcome) -> outcome.toStatus(id) }
+        val resultsByProvider = outcomes.mapNotNull { (id, outcome) ->
+            (outcome as? ProviderOutcome.Success)?.let { id to it.items }
+        }.toMap()
+        val displayNames = outcomes.associate { (id, outcome) -> id to outcome.displayName(id) }
         val deduped = DeduplicationEngine.deduplicate(resultsByProvider, displayNames)
-        val maxPages = resultsByProvider.values.mapNotNull { list ->
-            // We don't have totalPages per-provider in the raw results; default to 1.
-            1
-        }.maxOrNull() ?: 1
 
-        return UnifiedSearchResult(
+        UnifiedSearchResult(
             query = request.query,
             page = page,
             items = deduped,
-            totalPages = maxPages,
+            totalPages = 1,
             providerStatuses = statuses,
         )
+    }
+
+    /**
+     * Streaming multi-provider search.
+     *
+     * SP-4 Phase D (2026-05-13) addition. Returns a cold
+     * `Flow<MultiSearchEvent>` that emits each provider's state
+     * transitions (`ProviderStart` → `ProviderResults` | `ProviderFailure`
+     * | `ProviderUnsupported`) as they happen, terminated by exactly one
+     * `AllProvidersDone` on successful completion. Cancellation of the
+     * collector propagates to every in-flight provider call via
+     * `channelFlow`'s structured concurrency.
+     *
+     * Use this when callers want incremental UI updates instead of a
+     * single-shot `UnifiedSearchResult` snapshot. The
+     * `AllProvidersDone.unified` payload is the same shape
+     * [multiSearch] returns, so consumers can `.last()` the flow if
+     * they want both the incremental updates AND the final snapshot.
+     */
+    fun streamMultiSearch(
+        request: SearchRequest,
+        providerIds: List<String>,
+        page: Int = 0,
+    ): Flow<MultiSearchEvent> = flow {
+        // State captured here so both the inner channelFlow's launches AND
+        // the final AllProvidersDone emission see the same maps. Mutex
+        // guards mutation because the channelFlow's children launch in
+        // parallel.
+        val mutex = Mutex()
+        val statuses = mutableMapOf<String, ProviderSearchStatus>()
+        val resultsByProvider = mutableMapOf<String, List<TorrentItem>>()
+        val displayNames = mutableMapOf<String, String>()
+
+        val inner: Flow<MultiSearchEvent> = channelFlow {
+            for (id in providerIds) {
+                launch {
+                    val descriptor = registry.list().firstOrNull { it.trackerId == id }
+                    if (descriptor == null) {
+                        mutex.withLock {
+                            statuses[id] = ProviderSearchStatus(
+                                providerId = id,
+                                displayName = id,
+                                state = ProviderSearchState.FAILURE,
+                                errorMessage = "not registered",
+                            )
+                        }
+                        send(MultiSearchEvent.ProviderFailure(id, "not registered"))
+                        return@launch
+                    }
+                    mutex.withLock { displayNames[id] = descriptor.displayName }
+                    send(MultiSearchEvent.ProviderStart(id, descriptor.displayName))
+
+                    if (TrackerCapability.SEARCH !in descriptor.capabilities) {
+                        mutex.withLock {
+                            statuses[id] = ProviderSearchStatus(
+                                providerId = id,
+                                displayName = descriptor.displayName,
+                                state = ProviderSearchState.UNSUPPORTED,
+                            )
+                        }
+                        send(MultiSearchEvent.ProviderUnsupported(id))
+                        return@launch
+                    }
+
+                    val client = registry.get(id, MapPluginConfig())
+                    val feature = client.getFeature(SearchableTracker::class)
+                    if (feature == null) {
+                        mutex.withLock {
+                            statuses[id] = ProviderSearchStatus(
+                                providerId = id,
+                                displayName = descriptor.displayName,
+                                state = ProviderSearchState.UNSUPPORTED,
+                            )
+                        }
+                        send(MultiSearchEvent.ProviderUnsupported(id))
+                        return@launch
+                    }
+
+                    try {
+                        val result = feature.search(request, page)
+                        mutex.withLock {
+                            resultsByProvider[id] = result.items
+                            statuses[id] = ProviderSearchStatus(
+                                providerId = id,
+                                displayName = descriptor.displayName,
+                                state = ProviderSearchState.SUCCESS,
+                                resultCount = result.items.size,
+                            )
+                        }
+                        send(MultiSearchEvent.ProviderResults(id, result.items))
+                    } catch (t: Throwable) {
+                        mutex.withLock {
+                            statuses[id] = ProviderSearchStatus(
+                                providerId = id,
+                                displayName = descriptor.displayName,
+                                state = ProviderSearchState.FAILURE,
+                                errorMessage = t.message ?: "search failed",
+                            )
+                        }
+                        send(MultiSearchEvent.ProviderFailure(id, t.message ?: "search failed", t))
+                    }
+                }
+            }
+            // channelFlow joins its launch children before the block returns.
+        }
+        emitAll(inner)
+
+        // After every provider reached a terminal state, emit the
+        // deduplicated snapshot. Cancellation of the collector propagates
+        // through emitAll(inner), so this final emit is skipped — which
+        // matches the design (AllProvidersDone signals "all OK").
+        val deduped = DeduplicationEngine.deduplicate(resultsByProvider, displayNames)
+        emit(
+            MultiSearchEvent.AllProvidersDone(
+                unified = UnifiedSearchResult(
+                    query = request.query,
+                    page = page,
+                    items = deduped,
+                    totalPages = 1,
+                    providerStatuses = statuses.values.toList(),
+                ),
+            ),
+        )
+    }
+
+    private sealed interface ProviderOutcome {
+        data class Success(val items: List<TorrentItem>, val displayName: String) : ProviderOutcome
+        data class Failure(val reason: String, val displayName: String, val cause: Throwable?) : ProviderOutcome
+        data class Unsupported(val displayName: String) : ProviderOutcome
+        data class NotRegistered(val id: String) : ProviderOutcome
+
+        fun displayName(fallback: String): String = when (this) {
+            is Success -> displayName
+            is Failure -> displayName
+            is Unsupported -> displayName
+            is NotRegistered -> fallback
+        }
+
+        fun toStatus(id: String): ProviderSearchStatus = when (this) {
+            is Success -> ProviderSearchStatus(id, displayName, ProviderSearchState.SUCCESS, resultCount = items.size)
+            is Failure -> ProviderSearchStatus(id, displayName, ProviderSearchState.FAILURE, errorMessage = reason)
+            is Unsupported -> ProviderSearchStatus(id, displayName, ProviderSearchState.UNSUPPORTED)
+            is NotRegistered -> ProviderSearchStatus(id, id, ProviderSearchState.FAILURE, errorMessage = "not registered")
+        }
+    }
+
+    private suspend fun runOneProvider(
+        id: String,
+        request: SearchRequest,
+        page: Int,
+    ): ProviderOutcome {
+        val descriptor = registry.list().firstOrNull { it.trackerId == id }
+            ?: return ProviderOutcome.NotRegistered(id)
+        if (TrackerCapability.SEARCH !in descriptor.capabilities) {
+            return ProviderOutcome.Unsupported(descriptor.displayName)
+        }
+        val client = registry.get(id, MapPluginConfig())
+        val feature = client.getFeature(SearchableTracker::class)
+            ?: return ProviderOutcome.Unsupported(descriptor.displayName)
+        return try {
+            val result = feature.search(request, page)
+            ProviderOutcome.Success(result.items, descriptor.displayName)
+        } catch (t: Throwable) {
+            ProviderOutcome.Failure(t.message ?: "search failed", descriptor.displayName, t)
+        }
     }
 
     fun streamSearch(

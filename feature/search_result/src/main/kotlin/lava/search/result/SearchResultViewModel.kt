@@ -37,6 +37,11 @@ import lava.models.topic.TopicModel
 import lava.models.topic.Torrent
 import lava.network.sse.SseClient
 import lava.network.sse.SseEvent
+import lava.tracker.api.model.SearchRequest
+import lava.tracker.api.model.SortField
+import lava.tracker.api.model.SortOrder
+import lava.tracker.client.LavaTrackerSdk
+import lava.tracker.client.MultiSearchEvent
 import org.orbitmvi.orbit.Container
 import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.syntax.simple.intent
@@ -59,6 +64,7 @@ internal class SearchResultViewModel @Inject constructor(
     private val observeAuthStateUseCase: ObserveAuthStateUseCase,
     private val observeSettingsUseCase: ObserveSettingsUseCase,
     private val analytics: AnalyticsTracker,
+    private val sdk: LavaTrackerSdk,
 ) : ViewModel(), ContainerHost<SearchPageState, SearchResultSideEffect> {
     private val logger = loggerFactory.get("SearchResultViewModel")
     private val mutableFilter = MutableStateFlow(savedStateHandle.filter)
@@ -68,13 +74,162 @@ internal class SearchResultViewModel @Inject constructor(
         initialState = SearchPageState(mutableFilter.value),
         onCreate = {
             observeFilter()
-            if (mutableFilter.value.providerIds != null) {
-                observeSseSearch(mutableFilter.value)
-            } else {
-                observePagingData()
+            val filter = mutableFilter.value
+            when {
+                filter.providerIds == null -> observePagingData()
+                currentEndpointIsGoApi() -> observeSseSearch(filter)
+                else -> observeStreamMultiSearch(filter)
             }
         },
     )
+
+    /**
+     * SP-4 Phase D (2026-05-13). Read the persisted endpoint once at
+     * onCreate to choose between SSE (Go API path) and client-direct
+     * `streamMultiSearch`.
+     */
+    private suspend fun currentEndpointIsGoApi(): Boolean {
+        return try {
+            observeSettingsUseCase().first().endpoint is Endpoint.GoApi
+        } catch (t: Throwable) {
+            false
+        }
+    }
+
+    /**
+     * SP-4 Phase D (2026-05-13). Client-direct multi-provider parallel
+     * search via `LavaTrackerSdk.streamMultiSearch`. Used when no Go
+     * API endpoint is configured (the SSE path's prerequisite). The
+     * UI state shape is the same `SearchResultContent.Streaming` the
+     * SSE handler drives; only the event source differs.
+     */
+    private fun observeStreamMultiSearch(filter: Filter) = intent {
+        val providerIds = filter.providerIds
+        if (providerIds.isNullOrEmpty()) return@intent
+
+        reduce {
+            state.copy(
+                searchContent = SearchResultContent.Streaming(
+                    items = emptyList(),
+                    activeProviders = providerIds.map { pid ->
+                        ProviderStreamStatus(
+                            providerId = pid,
+                            displayName = pid,
+                            status = StreamStatus.SEARCHING,
+                        )
+                    },
+                ),
+            )
+        }
+
+        val request = SearchRequest(
+            query = filter.query.orEmpty(),
+            sort = SortField.DATE,
+            sortOrder = SortOrder.DESCENDING,
+        )
+
+        sdk.streamMultiSearch(request, providerIds).collect { event ->
+            handleMultiSearchEvent(event)
+        }
+        // After the flow completes naturally, downgrade the Streaming
+        // state to Content (or Empty if no items arrived) mirroring the
+        // SSE handler's handleStreamEnd().
+        handleStreamEnd()
+    }
+
+    private fun handleMultiSearchEvent(event: MultiSearchEvent) = intent {
+        when (event) {
+            is MultiSearchEvent.ProviderStart -> {
+                val current = state.searchContent
+                if (current is SearchResultContent.Streaming) {
+                    reduce {
+                        state.copy(
+                            providerDisplayNames = state.providerDisplayNames + (event.providerId to event.displayName),
+                            searchContent = current.copy(
+                                activeProviders = current.activeProviders.map {
+                                    if (it.providerId == event.providerId) {
+                                        it.copy(displayName = event.displayName)
+                                    } else {
+                                        it
+                                    }
+                                },
+                            ),
+                        )
+                    }
+                }
+            }
+            is MultiSearchEvent.ProviderResults -> {
+                val newItems = event.items.map { item ->
+                    TopicModel(
+                        topic = Torrent(id = item.torrentId, title = item.title),
+                        providerId = event.providerId,
+                    )
+                }
+                val current = state.searchContent
+                if (current is SearchResultContent.Streaming) {
+                    reduce {
+                        state.copy(
+                            searchContent = current.copy(
+                                items = current.items + newItems,
+                                activeProviders = current.activeProviders.map {
+                                    if (it.providerId == event.providerId) {
+                                        it.copy(
+                                            status = StreamStatus.DONE,
+                                            resultCount = it.resultCount + newItems.size,
+                                        )
+                                    } else {
+                                        it
+                                    }
+                                },
+                            ),
+                        )
+                    }
+                }
+            }
+            is MultiSearchEvent.ProviderFailure -> {
+                val current = state.searchContent
+                if (current is SearchResultContent.Streaming) {
+                    reduce {
+                        state.copy(
+                            searchContent = current.copy(
+                                activeProviders = current.activeProviders.map {
+                                    if (it.providerId == event.providerId) {
+                                        it.copy(status = StreamStatus.ERROR)
+                                    } else {
+                                        it
+                                    }
+                                },
+                            ),
+                        )
+                    }
+                }
+            }
+            is MultiSearchEvent.ProviderUnsupported -> {
+                val current = state.searchContent
+                if (current is SearchResultContent.Streaming) {
+                    reduce {
+                        state.copy(
+                            searchContent = current.copy(
+                                activeProviders = current.activeProviders.map {
+                                    if (it.providerId == event.providerId) {
+                                        it.copy(status = StreamStatus.DONE, resultCount = 0)
+                                    } else {
+                                        it
+                                    }
+                                },
+                            ),
+                        )
+                    }
+                }
+            }
+            is MultiSearchEvent.AllProvidersDone -> {
+                // Final snapshot — UI already reflects per-provider
+                // results via the incremental events; no additional
+                // reduce needed here. handleStreamEnd() in the caller
+                // downgrades to Content/Empty.
+            }
+        }
+    }
 
     fun perform(action: SearchResultAction) {
         logger.d { "Perform $action" }

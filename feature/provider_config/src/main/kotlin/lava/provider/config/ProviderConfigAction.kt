@@ -1,8 +1,6 @@
 package lava.provider.config
 
 sealed interface ProviderConfigAction {
-    /** SP-4 Phase C — make this provider the SDK's active target. Removed when Phase D's multi-provider parallel search lands. */
-    data object MakeActive : ProviderConfigAction
     data object ToggleSync : ProviderConfigAction
     data object ToggleAnonymous : ProviderConfigAction
     data object OpenAssignSheet : ProviderConfigAction

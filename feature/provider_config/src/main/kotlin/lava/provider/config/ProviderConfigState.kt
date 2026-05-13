@@ -10,7 +10,6 @@ data class ProviderConfigState(
     val descriptor: TrackerDescriptor? = null,
     val displayName: String = "",
     val color: Color = Color.Gray,
-    val activeTrackerId: String? = null,
     val syncEnabled: Boolean = false,
     val anonymous: Boolean = false,
     val boundCredential: CredentialsEntry? = null,
