@@ -55,8 +55,20 @@ repo has drifted, the agent acts on the claim.
 > - 647d5b5 — Task 15 follow-up (testImplementation :core:database for SwitchingNetworkApi*Test.kt)
 > - 3504d4c — docs(continuation): SP-4 Phase A + half Phase B
 > - 496176e — Auto-commit (submodule pin advance: Challenges + Containers + Security)
-> - [this commit] — Tasks 16+17+18 (provider_config module + Menu rewire)
-> - [this commit] — §4.5.10 closure (§6.R IPv4 + host:port scanners)
+> - 85af95b — Tasks 16+17+18 + §4.5.10 closure (provider_config module + Menu rewire + §6.R IPv4/host:port scanners)
+>
+> **Mirror convergence (§6.W + §6.C, 2026-05-13 follow-up):**
+> Operator added SSH key to GitLab + provided `gh`/`glab` CLI access.
+> Parent pushed to gitlab; 2 submodules (Containers, Security) had GitLab
+> behind GitHub and were pushed forward (Containers: 7813c98 → af51968;
+> Security: a5a0144 → d1f59d5). 3 submodules (HTTP3, Mdns, Tracker-SDK)
+> were on legacy single-`origin` remote — `origin` renamed to `github`,
+> `gitlab` remote added (repos already exist under `vasic-digital`).
+> Full audit verified: parent + all 16 submodules converged on both
+> mirrors at matching SHAs. The 3 newly-multi-remote submodules need
+> their local-only remote-config changes propagated to other developer
+> workstations the next time they `git submodule update --init`, but
+> the pin commits themselves are reachable from both upstreams today.
 >
 > **Deferred to next session (still planned per SP-4 phase plan A-H + the
 > 21-task Phase A+B implementation plan):**
