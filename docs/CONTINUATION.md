@@ -11,24 +11,40 @@ same commit so the index stays trustworthy. Stale state in this file
 is itself a §6.J spirit issue — the file claims a guarantee, the
 repo has drifted, the agent acts on the claim.
 
-> **Last updated:** 2026-05-13, **SP-4 Phase F.2 Tasks 1+2+3 landed**
-> (URL injection seam + falsifiability-rehearsed clientFor stamping).
-> Earlier this session: SP-4 Phase B Tasks 16+17+18 +
-> §4.5.10 §6.R staged-enforcement closure (IPv4 + host:port scanners).
+> **Last updated:** 2026-05-13, **SP-4 Phase F.2 Tasks 1+2+3 + Task 4
+> (5 of 6 plugins) landed**. Clones of gutenberg / archiveorg /
+> kinozal / nnmclub / rutor now route HTTP through the clone's
+> `primaryUrl`; rutracker is documented as F.2.6 debt (different
+> architecture — feature impls delegate to use cases driven by a
+> Ktor `HttpClient` configured upstream in `:core:network:impl`).
 >
-> **Phase F.2 progress (this commit):** New `MirrorUrlProvider` fun
-> interface in `:core:tracker:api`. New `cloneBaseUrlOverride`
-> extension property + `CLONE_BASE_URL_CONFIG_KEY` constant in
-> `:core:tracker:registry`. `LavaTrackerSdk.clientFor` now stamps the
-> clone's `primaryUrl` into the `MapPluginConfig` it passes to
-> `registry.get(sourceTrackerId, …)` so each per-plugin factory can
-> read it. New test `LavaTrackerSdkCloneUrlInjectionTest` (2 cases:
-> clone-id stamps, original-id leaves null) with Bluff-Audit
-> rehearsal recorded — mutation `MapPluginConfig(mapOf(…))` →
-> `MapPluginConfig()` produced `expected:<https://rutracker.eu> but
-> was:<null>` on the cloneBaseUrlOverride assertion; reverted, green.
-> All 15 `:core:tracker:client` test classes pass. **Phase F.2 Task 4
-> (per-plugin refactor across the 6 trackers) is OWED.**
+> **Phase F.2 cumulative state (this session):**
+>  - Seam landed in `c1d6ade6`: `MirrorUrlProvider`, `CLONE_BASE_URL_CONFIG_KEY`,
+>    `cloneBaseUrlOverride` ext, `LavaTrackerSdk.clientFor` stamps,
+>    `LavaTrackerSdkCloneUrlInjectionTest` (Bluff-Audit recorded).
+>  - 5 plugins refactored: each `*ClientFactory.create()` reads
+>    `config.cloneBaseUrlOverride` and, when non-null, constructs a
+>    per-call `*Client` whose feature impls use the override URL.
+>    Each plugin gets a `*ClientFactoryCloneUrlTest` (MockWebServer
+>    capture + singleton-fallback case) with Bluff-Audit rehearsal:
+>    every override-strip mutation triggers
+>    `IllegalStateException: singleton path must NOT be taken when
+>    override is present`. Per-plugin totals:
+>    `:core:tracker:gutenberg` tests=16 (14 existing + 2 new),
+>    `:core:tracker:archiveorg` tests=29 (27 + 2),
+>    `:core:tracker:kinozal` tests=14 (12 + 2),
+>    `:core:tracker:nnmclub` tests=24 (22 + 2),
+>    `:core:tracker:rutor` tests=73 (71 + 2).
+>    No regressions across any of the 5.
+>  - **F.2.6 OWED (rutracker):** rutracker's `RuTrackerSearch` etc.
+>    delegate to legacy use cases (`GetSearchPageUseCase`, …) that
+>    are driven by a Ktor `HttpClient` configured upstream in
+>    `:core:network:impl`. Threading a per-clone URL through that
+>    layer needs either (a) per-clone `HttpClient` construction with
+>    a new `@Provides` Hilt scope, or (b) a request-time URL plugin
+>    on the existing HttpClient. F.2 acceptance gate (Toast drops
+>    on rutracker clone routing) cannot fire until F.2.6 lands.
+>    Toast stays.
 > Tasks 16+17 ship the `:feature:provider_config` module: Compose UI for
 > the per-provider config screen, Orbit ViewModel wired to all four
 > Phase A+B DAOs (binding / sync toggle / cloned / user mirror) +
