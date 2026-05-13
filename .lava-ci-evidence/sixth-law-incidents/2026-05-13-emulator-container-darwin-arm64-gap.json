@@ -1,0 +1,56 @@
+{
+  "date": "2026-05-13",
+  "category": "constitutional-gap (§6.V Container Emulators Mandate vs darwin/arm64 reality)",
+  "severity": "blocking for operator-emulator-runs-on-darwin-arm64",
+  "discovered_during": "operator's directive 'Boot up Container(s) with proper Emulators using our Containers Submodule and continue all work now!' (post-session-12-commits anti-bluff sweep, HEAD b2828fb4)",
+  "summary": "The §6.V mandate (added 2026-05-08) requires every Android emulator instance for Challenge Tests / UI verification to run inside a container managed by the vasic-digital/Containers submodule, rootless Podman/Docker only. The Lava-side implementation lives in docker/emulator/Dockerfile + docker-compose.test.yml. Confirmed structurally non-functional on darwin/arm64:",
+  "findings": {
+    "host_platform": {
+      "uname_s": "Darwin",
+      "uname_m": "arm64",
+      "podman_os": "darwin",
+      "podman_os_arch": "darwin/arm64",
+      "dev_kvm_present": false,
+      "linux_kvm_available": false
+    },
+    "podman_vm": {
+      "name": "podman-machine-default",
+      "vm_type": "applehv",
+      "guest_arch": "linux/arm64",
+      "nested_kvm_available": false
+    },
+    "dockerfile_assumptions_that_fail": [
+      "FROM eclipse-temurin:17-jdk → pulls arm64 image OK (Ubuntu 25.10 'resolute').",
+      "apt-get install qemu-kvm → arm64 Ubuntu marks qemu-kvm as a 'virtual package' with no installable provider (qemu-system-arm-hwe exists but is not a drop-in replacement for kvm acceleration).",
+      "apt-get install libgl1-mesa-glx → not available on Ubuntu 25.10 at all (obsoleted / removed in newer Ubuntu versions).",
+      "devices: /dev/kvm:/dev/kvm → /dev/kvm does not exist on the macOS host; the podman VM does not expose nested virt via HVF either."
+    ],
+    "evidence_commands": [
+      "ls /dev/kvm → No such file or directory",
+      "podman info → Os: darwin, OsArch: darwin/arm64, os: linux (guest)",
+      "podman compose -f docker-compose.test.yml up -d lava-emulator → E: Package 'qemu-kvm' has no installation candidate; E: Package 'libgl1-mesa-glx' is not available; exit status 100"
+    ]
+  },
+  "constitutional_classification": "§6.V-debt — the Container Emulators Mandate was authored without a darwin/arm64 accommodation. The Decoupled Reusable Architecture rule says generic capability lives in Containers; the actual container runtime for that capability assumes Linux x86_64 (where KVM is available). On a darwin/arm64 workstation, the constitutional gate (§6.V) is unreachable today.",
+  "remediation_options": {
+    "A_amend_§6.V": "Add an explicit darwin/arm64 carve-out: 'on macOS-host development workstations, the host-direct emulator path via Containers/cmd/emulator-matrix is acceptable for Challenge Test iteration, but the gate (release-tag) MUST run on a Linux-x86_64 self-hosted runner where the container path works.' This is the lightest-touch remediation; preserves the gate's container-bound posture while unblocking workstation iteration.",
+    "B_harden_Dockerfile_for_arm64": "Rewrite docker/emulator/Dockerfile to (a) use qemu-system-arm + Android arm64 system images instead of qemu-kvm, (b) drop libgl1-mesa-glx (Ubuntu 25.10 dropped it), (c) figure out HVF-or-something inside the podman VM on Apple Silicon. Apple Silicon nested virt is experimental at best; this path may not be solvable today. Estimated effort: 4-8 hours with uncertain payoff.",
+    "C_provision_linux_runner": "Add a Linux-x86_64 self-hosted runner (operator's home server, cloud VM, or similar) where /dev/kvm is real and the existing Dockerfile works. The release-tag gate (per §6.I matrix) lives there; workstation iteration remains darwin/arm64-host-direct via Option A's carve-out."
+  },
+  "recommended_action": "A + C. Amend §6.V to carve out darwin/arm64-workstation host-direct; provision a Linux-x86_64 runner for the gate. Option B (Dockerfile-arm64) is a long-tail nice-to-have but not on the critical path.",
+  "actions_taken_in_this_session": [
+    "Documented the gap (this file) — forensic record for the next agent to read.",
+    "Confirmed host-direct path works: ./Submodules/Containers/cmd/emulator-matrix builds clean from the pinned submodule, the binary has the documented Boot/Install/RunInstrumentation surface area.",
+    "Confirmed APK-build blocker is SEPARATE from the emulator-container gap: ./gradlew :app:assembleDebug fails on missing .env + keystores/debug.keystore + app/google-services.json regardless of which emulator path is used."
+  ],
+  "what_remains_unblocked_post_this_record": [
+    "Emulator boot via Containers/cmd/emulator-matrix (host-direct on darwin/arm64) — feasible.",
+    "Multi-AVD matrix run for an already-built APK — feasible once an APK exists.",
+    "The §6.I matrix-attestation gate is reachable in spirit (Containers/cmd/emulator-matrix produces real-device-verification.json rows per AVD); the §6.V container-wrapper requirement is debt."
+  ],
+  "what_remains_blocked": [
+    "APK build: requires operator-supplied .env, keystores/debug.keystore, app/google-services.json. None are present in the working tree (all gitignored).",
+    "Challenge Tests C04/C01/C27-C34 cannot run without an APK to install.",
+    "The §6.V CONTAINER-WRAPPER requirement on darwin/arm64 remains debt until Option A (amend) or B (harden) or C (Linux runner) ships."
+  ]
+}
