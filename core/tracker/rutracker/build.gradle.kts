@@ -18,5 +18,16 @@ dependencies {
     implementation(libs.javax.inject)
 
     implementation(libs.ktor.client.core)
+    // SP-4 Phase F.2.6 (2026-05-13): RuTrackerHttpClientFactory + RuTrackerSubgraphBuilder
+    // construct per-clone HttpClient instances pinned to the clone's primaryUrl.
+    // The plugins used are the same set the Hilt-singleton path uses in
+    // :core:tracker:client:di:TrackerClientModule.provideRuTrackerHttpClient.
+    implementation(libs.ktor.client.okhttp)
+    implementation(libs.ktor.client.logging)
+    implementation(libs.ktor.client.content.negotiation)
+    implementation(libs.ktor.serialization.kotlinx.json)
+
+    // MockWebServer for the F.2.6 falsifiability-rehearsal Challenge Test.
+    testImplementation(libs.okhttp.mockwebserver)
     // Jsoup is brought in by the convention plugin; do not re-declare.
 }

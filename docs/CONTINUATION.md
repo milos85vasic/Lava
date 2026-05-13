@@ -11,12 +11,10 @@ same commit so the index stays trustworthy. Stale state in this file
 is itself a §6.J spirit issue — the file claims a guarantee, the
 repo has drifted, the agent acts on the claim.
 
-> **Last updated:** 2026-05-13, **SP-4 Phase F.2 Tasks 1+2+3 + Task 4
-> (5 of 6 plugins) landed**. Clones of gutenberg / archiveorg /
-> kinozal / nnmclub / rutor now route HTTP through the clone's
-> `primaryUrl`; rutracker is documented as F.2.6 debt (different
-> architecture — feature impls delegate to use cases driven by a
-> Ktor `HttpClient` configured upstream in `:core:network:impl`).
+> **Last updated:** 2026-05-13, **SP-4 Phase F.2 COMPLETE** — all
+> 6 plugins (gutenberg / archiveorg / kinozal / nnmclub / rutor /
+> rutracker) now route clone HTTP through the clone's `primaryUrl`.
+> Phase B clone-success Toast disclosure dropped (acceptance gate).
 >
 > **Phase F.2 cumulative state (this session):**
 >  - Seam landed in `c1d6ade6`: `MirrorUrlProvider`, `CLONE_BASE_URL_CONFIG_KEY`,
@@ -36,15 +34,27 @@ repo has drifted, the agent acts on the claim.
 >    `:core:tracker:nnmclub` tests=24 (22 + 2),
 >    `:core:tracker:rutor` tests=73 (71 + 2).
 >    No regressions across any of the 5.
->  - **F.2.6 OWED (rutracker):** rutracker's `RuTrackerSearch` etc.
->    delegate to legacy use cases (`GetSearchPageUseCase`, …) that
->    are driven by a Ktor `HttpClient` configured upstream in
->    `:core:network:impl`. Threading a per-clone URL through that
->    layer needs either (a) per-clone `HttpClient` construction with
->    a new `@Provides` Hilt scope, or (b) a request-time URL plugin
->    on the existing HttpClient. F.2 acceptance gate (Toast drops
->    on rutracker clone routing) cannot fire until F.2.6 lands.
->    Toast stays.
+>  - **F.2.6 LANDED (rutracker):** New `RuTrackerHttpClientFactory`
+>    builds per-clone Ktor `HttpClient`s pinned to the override URL;
+>    new `RuTrackerSubgraphBuilder` constructs the full RuTracker
+>    chain (InnerApi → 14 use cases → 8 mappers → 7 features →
+>    RuTrackerClient) from any `HttpClient`. `RuTrackerClientFactory`
+>    gains a `TokenProvider` injection and routes clone calls
+>    through the builder. New `RuTrackerClientFactoryCloneUrlTest`
+>    (MockWebServer-driven) records the §6.J primary on
+>    `recorded.requestUrl.startsWith(overrideBaseUrl)` AND
+>    `path.endsWith("/tracker.php")`. Bluff-Audit rehearsal:
+>    override-strip mutation produces
+>    `IllegalStateException: singleton path must NOT be taken`;
+>    reverted, green. Existing 67 rutracker tests + 2 new = 69 green.
+>    LavaTrackerSdkRealStackTest's `RuTrackerClientFactory(...)`
+>    callsites updated for the new ctor sig + `RuTorClientFactory`
+>    six-arg form. :core:tracker:client suite 156 tests, no
+>    regressions.
+>  - **Phase B Toast disclosure dropped:** `ProviderConfigViewModel`'s
+>    clone-success Toast went from "Cloned (URL routing pending —
+>    searches use source URLs)" to plain "Cloned". F.2 acceptance
+>    gate satisfied.
 > Tasks 16+17 ship the `:feature:provider_config` module: Compose UI for
 > the per-provider config screen, Orbit ViewModel wired to all four
 > Phase A+B DAOs (binding / sync toggle / cloned / user mirror) +
