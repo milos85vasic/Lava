@@ -74,7 +74,7 @@ class RuTrackerClientFactoryCloneUrlTest {
         val singletonProvider = Provider<RuTrackerClient> {
             error("singleton path must NOT be taken when override is present")
         }
-        val factory = RuTrackerClientFactory(singletonProvider, stubTokenProvider)
+        val factory = RuTrackerClientFactory(singletonProvider, Provider { stubTokenProvider })
 
         val config = MapPluginConfig(mapOf(CLONE_BASE_URL_CONFIG_KEY to overrideBaseUrl))
         val client = factory.create(config)
@@ -112,7 +112,7 @@ class RuTrackerClientFactoryCloneUrlTest {
             providerCalled = true
             error("provider was called as expected; halt before constructing real client")
         }
-        val factory = RuTrackerClientFactory(provider, stubTokenProvider)
+        val factory = RuTrackerClientFactory(provider, Provider { stubTokenProvider })
 
         runCatching { factory.create(MapPluginConfig()) }
 

@@ -159,7 +159,7 @@ class LavaTrackerSdkRealStackTest {
         // we wire a direct lambda Provider that returns our real
         // RuTrackerClient. Hilt would have wired the same shape.
         val rutrackerClient = realRuTrackerClient()
-        val rutrackerFactory = RuTrackerClientFactory(Provider { rutrackerClient }, mockk(relaxed = true))
+        val rutrackerFactory = RuTrackerClientFactory(Provider { rutrackerClient }, Provider { mockk<lava.auth.api.TokenProvider>(relaxed = true) })
 
         val rutorClient = realRuTorClient()
         val rutorFactory = RuTorClientFactory(
@@ -208,8 +208,8 @@ class LavaTrackerSdkRealStackTest {
         // that the SDK's getActiveClient() returns the LAST-registered client.
         val firstClient = realRuTrackerClient()
         val secondClient = realRuTrackerClient()
-        val factoryA = RuTrackerClientFactory(Provider { firstClient }, mockk(relaxed = true))
-        val factoryB = RuTrackerClientFactory(Provider { secondClient }, mockk(relaxed = true))
+        val factoryA = RuTrackerClientFactory(Provider { firstClient }, Provider { mockk<lava.auth.api.TokenProvider>(relaxed = true) })
+        val factoryB = RuTrackerClientFactory(Provider { secondClient }, Provider { mockk<lava.auth.api.TokenProvider>(relaxed = true) })
         val registry = DefaultTrackerRegistry().apply {
             register(factoryA)
             register(factoryB) // last-write-wins per DefaultPluginRegistry KDoc

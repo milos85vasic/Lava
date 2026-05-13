@@ -34,7 +34,26 @@ import javax.inject.Provider
  */
 class RuTrackerClientFactory @Inject constructor(
     private val clientProvider: Provider<RuTrackerClient>,
-    private val tokenProvider: TokenProvider,
+    // Provider<TokenProvider> instead of TokenProvider directly to break
+    // a Hilt construction-time cycle introduced by F.2.6: the per-clone
+    // subgraph needs TokenProvider, but the singleton-graph chain is
+    //   RuTrackerClientFactory → TokenProvider → AuthServiceImpl →
+    //   NetworkApi → SwitchingNetworkApi → LavaTrackerSdk →
+    //   TrackerRegistry → RuTrackerClientFactory  ← CYCLE
+    // Provider<T> defers resolution to the call site (only `create()`
+    // with override branch ever calls .get()), which Hilt resolves
+    // because original-tracker construction does NOT touch
+    // TokenProvider. This is the canonical Hilt cycle-breaker pattern
+    // and aligns with how `clientProvider` already works for the
+    // singleton path.
+    //
+    // Discovered 2026-05-13 by APK build under operator's 24th §6.L
+    // invocation: JVM unit tests (tests=877 failures=0 errors=0)
+    // PASSED while `./gradlew :app:hiltJavaCompileDebug` FAILED with
+    // [Dagger/DependencyCycle]. This is the canonical "tests green,
+    // feature broken" failure mode §6.L exists to prevent. Forensic
+    // anchor: see commit body's Bluff-Audit stamp.
+    private val tokenProvider: Provider<TokenProvider>,
 ) : TrackerClientFactory {
     override val descriptor: TrackerDescriptor = RuTrackerDescriptor
 
@@ -43,7 +62,7 @@ class RuTrackerClientFactory @Inject constructor(
         if (override != null) {
             val baseUrl = override.trimEnd('/') + "/forum/"
             val cloneHttp = RuTrackerHttpClientFactory.create(baseUrl)
-            return RuTrackerSubgraphBuilder.build(cloneHttp, tokenProvider)
+            return RuTrackerSubgraphBuilder.build(cloneHttp, tokenProvider.get())
         }
         return clientProvider.get()
     }
