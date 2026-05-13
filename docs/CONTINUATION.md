@@ -126,10 +126,20 @@ repo has drifted, the agent acts on the claim.
 >   - Build verification: spotless + compileDebugKotlin + compileDebugUnitTestKotlin
 >     across :feature:menu + :feature:provider_config — all green.
 >     :app:compileDebugKotlin requires .env + keystore (operator env).
->   - Phase D (multi-provider parallel search SDK) is the next phase
->     in the SP-4 sequence. Phase D pre-work: delete the `ActiveTrackerSection`
->     when `LavaTrackerSdk.activeTrackerId()` becomes semantically
->     meaningless (parallel fan-out has no single active target).
+>   - Phase D detailed-design landed (this commit chain):
+>     `docs/superpowers/specs/2026-05-13-sp4-phase-d-design.md` +
+>     `docs/superpowers/plans/2026-05-13-sp4-phase-d-implementation.md`.
+>     Locked scope: parallel `multiSearch` via `coroutineScope` +
+>     `awaitAll`; new `streamMultiSearch(...)`: `Flow<MultiSearchEvent>`
+>     via `channelFlow`; `SearchResultViewModel` consumes the new flow
+>     when the Go API endpoint isn't configured (SSE path remains the
+>     API-on default); `ActiveTrackerSection` (the Phase-C transitional
+>     affordance) deleted as Phase D pre-work; `LavaTrackerSdk
+>     .activeTrackerId()` + `switchTracker()` marked `@Deprecated`
+>     (retained API for legacy paging caller).
+>     6 tasks, ~20 steps, single-session executable. C32 + C33 (parallel-
+>     search + cancellation Compose UI Challenges) owed for operator
+>     execution on the gating emulator before next tag.
 >
 > Go API state: lava-api-go v2.3.5-2305 running locally at
 > `https://localhost:8443/` (healthy). Distribute artifact v1.2.16-1036
