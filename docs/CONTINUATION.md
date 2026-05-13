@@ -181,6 +181,65 @@ repo has drifted, the agent acts on the claim.
 >       :feature:provider_config — all green.
 >     - §6.S CONTINUATION + §6.W mirror convergence in this same commit.
 >
+> **Phase F.1 executed 2026-05-13** (this commit chain):
+>   - Design + plan: `docs/superpowers/specs/2026-05-13-sp4-phase-f-design.md`
+>     + `docs/superpowers/plans/2026-05-13-sp4-phase-f-implementation.md`.
+>   - **The bug Phase F.1 closes:** Phase B's clone dialog enqueued a
+>     `ClonedProviderEntity` row + the SDK's `listAvailableTrackers()`
+>     unioned cloned descriptors, but every SDK call against a clone
+>     synthetic id (search / multiSearch / streamMultiSearch / login /
+>     checkAuth / logout / getActiveClient) called
+>     `registry.get(syntheticId, …)` which threw
+>     `IllegalArgumentException: Unknown plugin id`. Phase B looked
+>     complete but the clone-search path was a crash. This was a
+>     latent §6.J bluff that the audit at the start of this session
+>     surfaced.
+>   - New `LavaTrackerSdk.clientFor(id)` private helper: resolves
+>     a clone synthetic id via `clonedProviderDao.getAll()` →
+>     `ClonedRoutingTrackerClient(sourceClient, cloneDescriptor)`.
+>     For non-clone ids: identical to `registry.get(...)`.
+>   - All 8 `registry.get(id, MapPluginConfig())` call sites in
+>     `LavaTrackerSdk.kt` rewritten to use `clientFor(id)`.
+>     `registry.list().firstOrNull { ... }` lookups in
+>     `runOneProvider` and the streamMultiSearch loop also rewritten
+>     to use `listAvailableTrackers()` so clone descriptors are
+>     resolved.
+>   - New `ClonedRoutingTrackerClient` wrapper: surfaces the clone's
+>     descriptor to callers reading `client.descriptor.trackerId`
+>     (which is how `LavaTrackerSdk.search` builds
+>     `SearchOutcome.Success.viaTracker`). Delegates feature lookups
+>     to the source client unchanged. Initial implementation also
+>     re-tagged `TorrentItem.trackerId` with the clone id —
+>     **the falsifiability rehearsal proved this was dead code**
+>     (no downstream consumer reads item.trackerId; everything keys
+>     on the explicit per-provider id passed through the SDK seam)
+>     and the re-tag was removed. The bluff test that asserted on it
+>     was deleted rather than papered over.
+>   - `ProviderConfigSideEffect.ShowToast` copy at clone success
+>     updated from "Cloned" to "Cloned (URL routing pending — searches
+>     use source URLs)" — the user is honestly told that the clone's
+>     `primaryUrl` is recorded in the DAO but not yet routed by the
+>     HTTP traffic. **Phase F.2 (URL routing override) is OWED.**
+>   - 1 unit test in `LavaTrackerSdkCloneSearchTest.kt`:
+>     `multiSearch on a clone id does not crash and reports SUCCESS`.
+>     Asserts on user-observable state (the per-provider status the UI
+>     renders). Pre-Phase-F.1 this test crashed with
+>     `IllegalArgumentException`; post-Phase-F.1 it reports SUCCESS
+>     with `displayName == "RuTracker EU"`.
+>   - Falsifiability rehearsal verified: mutating `runOneProvider` to
+>     use `registry.get(id, ...)` + `registry.list()` (the pre-F.1
+>     code path) made the test fail with "expected SUCCESS but was
+>     FAILURE (not registered)" — clear assertion message on
+>     user-observable state.
+>   - Phase F.2 OWED: per-clone `MirrorManager` wiring so the clone's
+>     `primaryUrl` becomes the actual HTTP target. Requires
+>     factory-side `PluginConfig.baseUrlOverride` support across
+>     `:core:tracker:rutracker`, `:core:tracker:rutor`, etc. Multi-
+>     file refactor; not single-session feasible. The Toast copy
+>     discloses this gap to users so no false promise ships.
+>   - Build verification: ./gradlew tests + spotless + constitution
+>     check all green.
+>
 > Go API state: lava-api-go v2.3.5-2305 running locally at
 > `https://localhost:8443/` (healthy). Distribute artifact v1.2.16-1036
 > (debug + release APKs) live on Firebase tester group.

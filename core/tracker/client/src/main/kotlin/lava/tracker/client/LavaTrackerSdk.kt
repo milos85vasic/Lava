@@ -192,7 +192,7 @@ class LavaTrackerSdk @Inject constructor(
                     proposedTrackerId = proposed.trackerId,
                     capability = TrackerCapability.SEARCH,
                     resumeWith = {
-                        val altClient = registry.get(proposed.trackerId, MapPluginConfig())
+                        val altClient = clientFor(proposed.trackerId)
                         val altFeature = altClient.getFeature(SearchableTracker::class)
                             ?: return@CrossTrackerFallbackProposed SearchOutcome.Failure(
                                 reason = "alternate tracker '${proposed.trackerId}' does not support SEARCH",
@@ -244,7 +244,7 @@ class LavaTrackerSdk @Inject constructor(
                     proposedTrackerId = proposed.trackerId,
                     capability = TrackerCapability.BROWSE,
                     resumeWith = {
-                        val altClient = registry.get(proposed.trackerId, MapPluginConfig())
+                        val altClient = clientFor(proposed.trackerId)
                         val altFeature = altClient.getFeature(BrowsableTracker::class)
                             ?: return@CrossTrackerFallbackProposed BrowseOutcome.Failure(
                                 reason = "alternate tracker '${proposed.trackerId}' does not support BROWSE",
@@ -423,7 +423,7 @@ class LavaTrackerSdk @Inject constructor(
      * Added in Multi-Provider Extension (US2).
      */
     suspend fun login(trackerId: String, request: LoginRequest): LoginResult? {
-        val client = registry.get(trackerId, MapPluginConfig())
+        val client = clientFor(trackerId)
         val feature = client.getFeature(AuthenticatableTracker::class) ?: return null
         return feature.login(request)
     }
@@ -449,7 +449,7 @@ class LavaTrackerSdk @Inject constructor(
      * Added in Multi-Provider Extension (US2).
      */
     suspend fun checkAuth(trackerId: String): AuthState? {
-        val client = registry.get(trackerId, MapPluginConfig())
+        val client = clientFor(trackerId)
         val feature = client.getFeature(AuthenticatableTracker::class) ?: return null
         return try {
             feature.checkAuth()
@@ -478,7 +478,7 @@ class LavaTrackerSdk @Inject constructor(
      * Added in Multi-Provider Extension (Menu header).
      */
     suspend fun logout(trackerId: String) {
-        val client = registry.get(trackerId, MapPluginConfig())
+        val client = clientFor(trackerId)
         val feature = client.getFeature(AuthenticatableTracker::class) ?: return
         try {
             feature.logout()
@@ -488,14 +488,59 @@ class LavaTrackerSdk @Inject constructor(
     }
 
     /**
-     * Resolves the active [TrackerClient] from the registry. `internal` so
-     * the new SDK seam stays the only public surface — the SDK's wrapper
-     * methods (search/browse/getTopic/getTopicPage/getCommentsPage/addComment/
-     * getForumTree/getFavorites/addFavorite/removeFavorite/login/checkAuth/
-     * logout/getMagnetLink/downloadTorrent) cover every Section G need.
+     * Resolves the active [TrackerClient]. `internal` so the new SDK
+     * seam stays the only public surface — the SDK's wrapper methods
+     * (search/browse/getTopic/getTopicPage/getCommentsPage/addComment/
+     * getForumTree/getFavorites/addFavorite/removeFavorite/login/
+     * checkAuth/logout/getMagnetLink/downloadTorrent) cover every
+     * Section G need.
+     *
+     * SP-4 Phase F.1 (2026-05-13): routes through [clientFor] so a
+     * synthetic clone id resolves to a [ClonedRoutingTrackerClient]
+     * wrapping the source factory's client. Pre-Phase-F this method
+     * called `registry.get(activeTrackerId, …)` directly, which
+     * threw `IllegalArgumentException` whenever the active tracker
+     * was a clone — that's the bug Phase F.1 closes.
      */
-    internal fun getActiveClient(): TrackerClient =
-        registry.get(activeTrackerId, MapPluginConfig())
+    internal fun getActiveClient(): TrackerClient = clientFor(activeTrackerId)
+
+    /**
+     * SP-4 Phase F.1 (2026-05-13). Resolves a tracker id (real or
+     * synthetic-clone) to a [TrackerClient].
+     *
+     * For a non-clone id: identical to `registry.get(id, MapPluginConfig())`.
+     *
+     * For a synthetic-clone id (matches a row in [clonedProviderDao]):
+     * builds a [ClonedRoutingTrackerClient] that wraps the source
+     * tracker's client. The wrapper surfaces the clone's descriptor
+     * (id, displayName, baseUrls) and re-tags result items with the
+     * clone's synthetic id so the multi-provider UI's per-provider
+     * grouping shows "from RuTracker EU" rather than "from RuTracker".
+     *
+     * F.2 owe: the URL routing override (so HTTP traffic hits the
+     * clone's primaryUrl) is not yet wired. The ProviderConfig
+     * clone-success Toast discloses this gap to the user.
+     *
+     * Uses `runBlocking` for the DAO read because callers include
+     * non-suspending paths ([getActiveClient]). Same pattern as
+     * [listAvailableTrackers] which already wraps the DAO call.
+     */
+    private fun clientFor(id: String): TrackerClient {
+        val dao = clonedProviderDao
+        if (dao != null) {
+            val cloned = runBlocking { dao.getAll() }.firstOrNull { it.syntheticId == id }
+            if (cloned != null) {
+                val sourceDescriptor = registry.list().firstOrNull { it.trackerId == cloned.sourceTrackerId }
+                    ?: throw IllegalStateException(
+                        "Clone $id references unknown source ${cloned.sourceTrackerId}",
+                    )
+                val cloneDescriptor = ClonedTrackerDescriptor(source = sourceDescriptor, override = cloned)
+                val sourceClient = registry.get(cloned.sourceTrackerId, MapPluginConfig())
+                return ClonedRoutingTrackerClient(sourceClient, cloneDescriptor)
+            }
+        }
+        return registry.get(id, MapPluginConfig())
+    }
 
     // -------------------------------------------------------------------
     // SP-3a Phase 4 (Task 4.7): cross-tracker fallback wrapper.
@@ -709,7 +754,10 @@ class LavaTrackerSdk @Inject constructor(
         val inner: Flow<MultiSearchEvent> = channelFlow {
             for (id in providerIds) {
                 launch {
-                    val descriptor = registry.list().firstOrNull { it.trackerId == id }
+                    // SP-4 Phase F.1: descriptor lookup goes through
+                    // listAvailableTrackers() so clone synthetic ids
+                    // resolve to their ClonedTrackerDescriptor.
+                    val descriptor = listAvailableTrackers().firstOrNull { it.trackerId == id }
                     if (descriptor == null) {
                         mutex.withLock {
                             statuses[id] = ProviderSearchStatus(
@@ -737,7 +785,10 @@ class LavaTrackerSdk @Inject constructor(
                         return@launch
                     }
 
-                    val client = registry.get(id, MapPluginConfig())
+                    // SP-4 Phase F.1: clientFor resolves clone synthetic
+                    // ids to a ClonedRoutingTrackerClient (re-tagging
+                    // result items with the clone's id).
+                    val client = clientFor(id)
                     val feature = client.getFeature(SearchableTracker::class)
                     if (feature == null) {
                         mutex.withLock {
@@ -824,12 +875,18 @@ class LavaTrackerSdk @Inject constructor(
         request: SearchRequest,
         page: Int,
     ): ProviderOutcome {
-        val descriptor = registry.list().firstOrNull { it.trackerId == id }
+        // SP-4 Phase F.1: descriptor lookup and client resolution go
+        // through the clone-aware seams so a synthetic clone id is a
+        // first-class provider.
+        // SP-4 Phase F.1: descriptor lookup and client resolution go
+        // through the clone-aware seams so a synthetic clone id is a
+        // first-class provider.
+        val descriptor = listAvailableTrackers().firstOrNull { it.trackerId == id }
             ?: return ProviderOutcome.NotRegistered(id)
         if (TrackerCapability.SEARCH !in descriptor.capabilities) {
             return ProviderOutcome.Unsupported(descriptor.displayName)
         }
-        val client = registry.get(id, MapPluginConfig())
+        val client = clientFor(id)
         val feature = client.getFeature(SearchableTracker::class)
             ?: return ProviderOutcome.Unsupported(descriptor.displayName)
         return try {

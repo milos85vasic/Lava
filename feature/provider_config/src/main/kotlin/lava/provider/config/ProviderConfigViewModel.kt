@@ -124,7 +124,14 @@ class ProviderConfigViewModel @Inject constructor(
                     primaryUrl = action.primaryUrl,
                 )
                 reduce { state.copy(showCloneDialog = false) }
-                postSideEffect(ProviderConfigSideEffect.ShowToast("Cloned"))
+                // SP-4 Phase F.1: the clone is reachable + results are tagged
+                // with the clone's id, but the URL routing override is owed
+                // (Phase F.2). Disclosed in the Toast copy.
+                postSideEffect(
+                    ProviderConfigSideEffect.ShowToast(
+                        "Cloned (URL routing pending — searches use source URLs)",
+                    ),
+                )
             }
         }
     }
