@@ -92,6 +92,22 @@ repo has drifted, the agent acts on the claim.
 > documentation refresh) remain at high-level scope in the SP-4 design
 > doc. Each gets its own detailed-design + implementation cycle.
 >
+> **Phase C detailed-design landed 2026-05-13:**
+>   - Design doc: `docs/superpowers/specs/2026-05-13-sp4-phase-c-design.md`
+>   - Implementation plan: `docs/superpowers/plans/2026-05-13-sp4-phase-c-implementation.md`
+>   - Locked decision: **delete** the Trackers screen (not replace with
+>     summary). Per-provider mirror table + add-mirror + probe + remove
+>     are already provided by `:feature:provider_config` (Phase B).
+>     The only unique surface — active-tracker selector — becomes a
+>     `Make active` affordance inside ProviderConfig, removed when
+>     Phase D's multi-provider parallel search lands.
+>   - Scope: 7 tasks, ~25 steps, single-session executable. Falsifiability
+>     rehearsal owed for the C04 rewrite (currently asserts shallow Menu
+>     reachability; will assert provider-row click → ProviderConfig render).
+>     C14 deleted (per §6.J — deletion not @Ignore — the screen it tested
+>     is gone).
+>   - Phase C implementation is the NEXT autonomous execution cycle.
+>
 > Go API state: lava-api-go v2.3.5-2305 running locally at
 > `https://localhost:8443/` (healthy). Distribute artifact v1.2.16-1036
 > (debug + release APKs) live on Firebase tester group.
