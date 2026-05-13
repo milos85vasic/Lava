@@ -54,6 +54,7 @@ class ProviderConfigViewModel @Inject constructor(
                     descriptor = descriptor,
                     displayName = descriptor?.displayName.orEmpty(),
                     color = ProviderColors.forProvider(providerId),
+                    activeTrackerId = sdk.activeTrackerId(),
                     descriptorMirrors = descriptor?.baseUrls?.map { it.url }.orEmpty(),
                 )
             }
@@ -63,6 +64,19 @@ class ProviderConfigViewModel @Inject constructor(
 
     fun perform(action: ProviderConfigAction) = intent {
         when (action) {
+            ProviderConfigAction.MakeActive -> {
+                try {
+                    sdk.switchTracker(providerId)
+                    reduce { state.copy(activeTrackerId = providerId) }
+                    postSideEffect(
+                        ProviderConfigSideEffect.ShowToast(
+                            "Active provider: ${state.displayName.ifEmpty { providerId }}",
+                        ),
+                    )
+                } catch (e: IllegalArgumentException) {
+                    postSideEffect(ProviderConfigSideEffect.ShowToast("Cannot activate — provider not registered"))
+                }
+            }
             ProviderConfigAction.ToggleSync -> {
                 val next = !state.syncEnabled
                 toggleDao.upsert(ProviderSyncToggleEntity(providerId, next))

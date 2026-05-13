@@ -214,7 +214,6 @@ dependencies {
     implementation(project(":feature:credentials"))
     implementation(project(":feature:credentials_manager"))
     implementation(project(":feature:provider_config"))
-    implementation(project(":feature:tracker_settings"))
     implementation(project(":feature:visited"))
 
     implementation(libs.androidx.activity.compose)

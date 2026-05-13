@@ -13,8 +13,6 @@ import lava.designsystem.drawables.LavaIcons
 import lava.favorites.FavoritesScreen
 import lava.feature.credentials.addCredentials
 import lava.feature.credentials.openCredentials
-import lava.feature.tracker.settings.addTrackerSettings
-import lava.feature.tracker.settings.openTrackerSettings
 import lava.forum.ForumScreen
 import lava.forum.bookmarks.BookmarksScreen
 import lava.forum.category.addCategory
@@ -50,10 +48,6 @@ fun MobileNavigation(navigationController: NavigationController) {
     MobileNavigation(navigationController) {
         with(navigationController) {
             addLogin(
-                back = ::popBackStack,
-                animations = NavigationAnimations.ScaleInOutAnimation,
-            )
-            addTrackerSettings(
                 back = ::popBackStack,
                 animations = NavigationAnimations.ScaleInOutAnimation,
             )
@@ -108,7 +102,6 @@ fun MobileNavigation(navigationController: NavigationController) {
                 openSearchInput = { openSearchInput(it) },
                 openLogin = { openLogin() },
                 openTopic = { openTopic(it) },
-                openTrackerSettings = { openTrackerSettings() },
                 openCredentials = { openCredentialsManager() },
                 openProviderConfig = { openProviderConfig(it) },
             )
@@ -121,7 +114,6 @@ private fun addNestedNavigation(
     openSearchInput: (id: String) -> Unit,
     openLogin: () -> Unit,
     openTopic: (id: String) -> Unit,
-    openTrackerSettings: () -> Unit,
     openCredentials: () -> Unit,
     openProviderConfig: (String) -> Unit,
 ) = addDestination {
@@ -146,7 +138,6 @@ private fun addNestedNavigation(
             )
             addMenu(
                 openLogin = openLogin,
-                openTrackerSettings = openTrackerSettings,
                 openCredentials = openCredentials,
                 openProviderConfig = openProviderConfig,
             )
@@ -251,7 +242,6 @@ private fun addTopics(
 context(NavigationGraphBuilder, NavigationController)
 private fun addMenu(
     openLogin: () -> Unit,
-    openTrackerSettings: () -> Unit,
     openCredentials: () -> Unit = {},
     openProviderConfig: (String) -> Unit = {},
 ) = addDestination(
@@ -260,7 +250,6 @@ private fun addMenu(
     content = {
         MenuScreen(
             openLogin = openLogin,
-            openTrackerSettings = openTrackerSettings,
             openCredentials = openCredentials,
             openProviderConfig = openProviderConfig,
         )

@@ -92,21 +92,44 @@ repo has drifted, the agent acts on the claim.
 > documentation refresh) remain at high-level scope in the SP-4 design
 > doc. Each gets its own detailed-design + implementation cycle.
 >
-> **Phase C detailed-design landed 2026-05-13:**
+> **Phase C executed 2026-05-13:**
 >   - Design doc: `docs/superpowers/specs/2026-05-13-sp4-phase-c-design.md`
 >   - Implementation plan: `docs/superpowers/plans/2026-05-13-sp4-phase-c-implementation.md`
->   - Locked decision: **delete** the Trackers screen (not replace with
->     summary). Per-provider mirror table + add-mirror + probe + remove
->     are already provided by `:feature:provider_config` (Phase B).
->     The only unique surface — active-tracker selector — becomes a
->     `Make active` affordance inside ProviderConfig, removed when
->     Phase D's multi-provider parallel search lands.
->   - Scope: 7 tasks, ~25 steps, single-session executable. Falsifiability
->     rehearsal owed for the C04 rewrite (currently asserts shallow Menu
->     reachability; will assert provider-row click → ProviderConfig render).
->     C14 deleted (per §6.J — deletion not @Ignore — the screen it tested
->     is gone).
->   - Phase C implementation is the NEXT autonomous execution cycle.
+>   - Locked decision: **delete** the Trackers screen (not replace).
+>   - Landed:
+>     - `:feature:tracker_settings` module deleted entirely (build.gradle.kts,
+>       manifest, all sources, tests). 12+ source files + 2 test files removed.
+>     - `:feature:provider_config` gained the `ActiveTrackerSection` —
+>       the only Trackers-screen surface that wasn't already absorbed by
+>       Phase B. Section is marked for removal in Phase D pre-work.
+>     - `MenuAction.TrackerSettingsClick` + `MenuSideEffect.OpenTrackerSettings`
+>       + `onTrackerSettingsClick()` + the "Trackers" menuItem removed.
+>     - `MobileNavigation.kt` cleaned up: no more `addTrackerSettings`
+>       route, no more `openTrackerSettings` callback threaded through
+>       `addNestedNavigation` + `addMenu` + `MenuScreen`.
+>     - `Challenge14TrackerSettingsOpenTest.kt` deleted (per §6.J —
+>       deletion, not @Ignore — the screen it tested is gone).
+>     - `Challenge04SwitchTrackerAndResearchTest.kt` rewritten to
+>       `Challenge04ProviderRowOpensConfigTest.kt`: asserts the new
+>       Menu → tap provider row → ProviderConfig path renders the
+>       "Sync this provider" section (a label only ProviderConfig
+>       produces). Falsifiability rehearsal protocol embedded in
+>       KDoc; operator runs the actual mutation rehearsal on the
+>       gating emulator before next tag.
+>     - `Challenge01AppLaunchAndTrackerSelectionTest.kt` updated: now
+>       asserts "Provider Credentials" + "Theme" menu entries (post
+>       "Trackers" removal); the deep-nav avoidance comment removed
+>       since ProviderConfig is reachable from the same Menu surface.
+>     - 2 stale comment refs in non-deleted files (CrossTrackerFallbackModal.kt,
+>       SwitchingNetworkApi.kt) updated to remove `:feature:tracker_settings`
+>       mentions.
+>   - Build verification: spotless + compileDebugKotlin + compileDebugUnitTestKotlin
+>     across :feature:menu + :feature:provider_config — all green.
+>     :app:compileDebugKotlin requires .env + keystore (operator env).
+>   - Phase D (multi-provider parallel search SDK) is the next phase
+>     in the SP-4 sequence. Phase D pre-work: delete the `ActiveTrackerSection`
+>     when `LavaTrackerSdk.activeTrackerId()` becomes semantically
+>     meaningless (parallel fan-out has no single active target).
 >
 > Go API state: lava-api-go v2.3.5-2305 running locally at
 > `https://localhost:8443/` (healthy). Distribute artifact v1.2.16-1036

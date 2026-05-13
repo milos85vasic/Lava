@@ -8,9 +8,6 @@ internal sealed interface MenuSideEffect {
     data object ShowAbout : MenuSideEffect
     data object OpenConnectionSettings : MenuSideEffect
 
-    /** SP-3a Phase 4 (Task 4.19). Open the multi-tracker settings screen. */
-    data object OpenTrackerSettings : MenuSideEffect
-
     /** Multi-Provider Extension. Open the provider credentials screen. */
     data object OpenCredentials : MenuSideEffect
 

@@ -21,12 +21,17 @@
  *   selectors discovered by `uiautomator dump` against a running
  *   emulator.
  *
- * Real selectors (verified 2026-05-04 on CZ_API34_Phone API 34):
+ * Real selectors (verified 2026-05-04 on CZ_API34_Phone API 34;
+ * post-SP-4-Phase-C the "Trackers" entry was removed, asserting on
+ * "Provider Credentials" instead — the post-Phase-C Menu structure):
  *   - "Menu" — bottom-tab label (string resource, exact match)
- *   - "Trackers" — direct menu item (NOT under a "Settings" sub-menu;
- *     "Settings" is a section header above Theme/Server/Trackers)
- *   - "RuTracker.org" / "RuTor.info" — provider rows in the trackers
- *     list, with the trailing TLD (NOT just "RuTracker" / "RuTor")
+ *   - "Provider Credentials" — direct menu item routing to
+ *     :feature:credentials_manager (post-Phase-C the legacy
+ *     "Trackers" entry is gone; per-provider config is reachable
+ *     by tapping a provider row — covered by C04's rewritten form)
+ *   - "RuTracker.org" / "RuTor.info" — provider rows in the
+ *     provider list, with the trailing TLD (NOT just "RuTracker" /
+ *     "RuTor")
  *
  * Operator command:
  *   ./gradlew :app:connectedDebugAndroidTest --tests \
@@ -89,23 +94,14 @@ class Challenge01AppLaunchAndTrackerSelectionTest {
         // Step 2: assert the expected menu structure is visible. The
         // entries are populated from a real production composition — if
         // any of them go missing, this assertion catches it (mutation:
-        // remove the @Composable that renders TrackerSettingsItem from
-        // MenuScreen.kt → this assertion fires).
+        // remove the "Provider Credentials" menuItem block from
+        // MenuScreen.kt → this assertion fires). Post-SP-4-Phase-C the
+        // "Trackers" entry was deleted; per-provider config is reachable
+        // by tapping a provider row (covered by C04).
         composeRule.waitUntil(timeoutMillis = 5_000) {
-            composeRule.onAllNodesWithText("Trackers").fetchSemanticsNodes().isNotEmpty()
+            composeRule.onAllNodesWithText("Provider Credentials").fetchSemanticsNodes().isNotEmpty()
         }
-        composeRule.onNodeWithText("Trackers").assertIsDisplayed()
         composeRule.onNodeWithText("Provider Credentials").assertIsDisplayed()
         composeRule.onNodeWithText("Theme").assertIsDisplayed()
-
-        // NOTE: Test deliberately stops at the Menu tab and does NOT
-        // navigate INTO "Trackers". Reason: the
-        // androidx.navigation:navigation-compose library has a known
-        // lifecycle race when an activity is destroyed while sitting
-        // on a deep route (IllegalStateException "State must be at
-        // least 'CREATED' to be moved to 'DESTROYED'"). The assertions
-        // on the Trackers screen content moved to a separate test
-        // (TODO: Challenge1bTrackerSettingsContentTest after the
-        // navigation library is upgraded).
     }
 }

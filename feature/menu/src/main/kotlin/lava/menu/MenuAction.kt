@@ -20,9 +20,6 @@ internal sealed interface MenuAction {
     data object RightsClick : MenuAction
     data object SendFeedbackClick : MenuAction
 
-    /** SP-3a Phase 4 (Task 4.19). Open the multi-tracker settings screen. */
-    data object TrackerSettingsClick : MenuAction
-
     /** Multi-Provider Extension. Open the provider credentials screen. */
     data object CredentialsClick : MenuAction
 

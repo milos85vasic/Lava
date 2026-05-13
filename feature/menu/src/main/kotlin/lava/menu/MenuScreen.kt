@@ -85,14 +85,12 @@ import lava.designsystem.R as DsR
 @Composable
 fun MenuScreen(
     openLogin: () -> Unit,
-    openTrackerSettings: () -> Unit = {},
     openCredentials: () -> Unit = {},
     openProviderConfig: (String) -> Unit = {},
 ) {
     MenuScreen(
         viewModel = viewModel(),
         openLogin = openLogin,
-        openTrackerSettings = openTrackerSettings,
         openCredentials = openCredentials,
         openProviderConfig = openProviderConfig,
     )
@@ -102,7 +100,6 @@ fun MenuScreen(
 private fun MenuScreen(
     viewModel: MenuViewModel,
     openLogin: () -> Unit,
-    openTrackerSettings: () -> Unit = {},
     openCredentials: () -> Unit = {},
     openProviderConfig: (String) -> Unit = {},
 ) {
@@ -120,7 +117,6 @@ private fun MenuScreen(
             is MenuSideEffect.OpenConnectionSettings -> {
                 openConnectionSettings = true
             }
-            is MenuSideEffect.OpenTrackerSettings -> openTrackerSettings()
             is MenuSideEffect.OpenCredentials -> openCredentials()
             is MenuSideEffect.OpenProviderConfig -> openProviderConfig(sideEffect.providerId)
             is MenuSideEffect.ShowConfirmation -> {
@@ -202,12 +198,10 @@ private fun MenuScreen(
             onSelect = { theme -> onAction(SetTheme(theme)) },
         )
         endpointSelectionItem(openConnectionSettings, onConnectionSettingsShown)
-        // SP-3a Phase 4 (Task 4.19): entry to the multi-tracker settings screen.
-        menuItem(
-            text = { Text("Trackers") },
-            onClick = { onAction(MenuAction.TrackerSettingsClick) },
-        )
         // Multi-Provider Extension: entry to the provider credentials screen.
+        // SP-4 Phase C (2026-05-13): the legacy "Trackers" menu entry was
+        // removed; per-provider configuration is reachable by tapping a
+        // provider row (Phase B Task 18 wiring).
         menuItem(
             text = { Text("Provider Credentials") },
             onClick = { onAction(MenuAction.CredentialsClick) },

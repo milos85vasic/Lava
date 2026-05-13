@@ -16,6 +16,7 @@ import lava.designsystem.component.Divider
 import lava.designsystem.component.Scaffold
 import lava.designsystem.component.Text
 import lava.navigation.viewModel
+import lava.provider.config.sections.ActiveTrackerSection
 import lava.provider.config.sections.AnonymousSection
 import lava.provider.config.sections.CloneSection
 import lava.provider.config.sections.CredentialsSection
@@ -65,6 +66,8 @@ private fun ProviderConfigScreen(
             .verticalScroll(rememberScrollState()),
     ) {
         Header(state)
+        Divider()
+        ActiveTrackerSection(state = state, onAction = onAction)
         Divider()
         SyncSection(enabled = state.syncEnabled, onAction = onAction)
         Divider()

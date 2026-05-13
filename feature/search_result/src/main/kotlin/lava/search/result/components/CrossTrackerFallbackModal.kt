@@ -12,8 +12,8 @@ import androidx.compose.runtime.Composable
  * cancel (surface the original Failure as a Snackbar).
  *
  * Added in SP-3a Phase 4 (Task 4.17). Lives in :feature:search_result
- * because that's where the modal is consumed; :feature:tracker_settings
- * only owns the settings screen.
+ * because that's where the modal is consumed by the user flow that
+ * triggered the fallback proposal.
  */
 @Composable
 fun CrossTrackerFallbackModal(

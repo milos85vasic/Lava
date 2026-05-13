@@ -70,7 +70,6 @@ include(":feature:search")
 include(":feature:search_input")
 include(":feature:search_result")
 include(":feature:topic")
-include(":feature:tracker_settings")
 include(":feature:onboarding")
 include(":feature:visited")
 

@@ -81,7 +81,6 @@ internal class MenuViewModel @Inject constructor(
             is MenuAction.SetFavoritesSyncPeriod -> onSetFavoritesSyncPeriod(action.syncPeriod)
             is MenuAction.SetHistorySyncPeriod -> onSetHistorySyncPeriod(action.syncPeriod)
             is MenuAction.SetTheme -> onSetTheme(action.theme)
-            is MenuAction.TrackerSettingsClick -> onTrackerSettingsClick()
             is MenuAction.CredentialsClick -> onCredentialsClick()
             is MenuAction.OpenProviderConfig -> onOpenProviderConfig(action.providerId)
             is MenuAction.SignOut -> onSignOut(action.providerId)
@@ -126,11 +125,6 @@ internal class MenuViewModel @Inject constructor(
         reduce {
             state.copy(activeProviders = items)
         }
-    }
-
-    /** SP-3a Phase 4 (Task 4.19). */
-    private fun onTrackerSettingsClick() = intent {
-        postSideEffect(MenuSideEffect.OpenTrackerSettings)
     }
 
     /** Multi-Provider Extension. */
