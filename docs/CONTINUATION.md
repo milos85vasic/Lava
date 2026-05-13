@@ -1157,14 +1157,24 @@ docs, design specs, plans, test fixtures).
 Items the operator or reviewers flagged but didn't gate on; pick up
 opportunistically when a related phase touches the area.
 
-- **OkHttp logging audit:** ensure `NetworkLogger` does NOT include
-  the `Lava-Auth` header value. The constitutional clause in
-  `core/CLAUDE.md` exists but isn't grep-enforced yet.
-- **Submodules/RateLimiter mirror count:** only 2 mirrors today
-  (gitlab + origin/github). Lava parent has 4 mirrors. Decoupled
-  Reusable Architecture rule: every vasic-digital submodule SHOULD
-  mirror to GitFlic + GitVerse too. Phase 6 documentation pass is a
-  natural place to add the remaining 2 mirrors.
+- ~~**OkHttp logging audit:** ensure `NetworkLogger` does NOT include
+  the `Lava-Auth` header value.~~ **RESOLVED 2026-05-13.**
+  `NetworkLogger.redactAuthHeader` now case-insensitive-redacts any
+  `${LAVA_AUTH_FIELD_NAME}: <value>` substring against
+  `LavaAuthBlobProvider.getFieldName()`. New test
+  `NetworkLoggerRedactionTest` (3 cases: raw match, empty-stub no-op,
+  case-insensitive match) with Bluff-Audit recorded — `replace`-as-
+  identity mutation produced 2 expected failures including
+  `captured log line must NOT contain the raw auth value`. Reverted,
+  green. Field name source-of-truth remains parametric per §6.R
+  (`.env` → `LavaAuthGenerated.getFieldName()`).
+- ~~**Submodules/RateLimiter mirror count:** only 2 mirrors today.~~
+  **OBSOLETE per §6.W (2026-05-08).** §6.W reduced the canonical
+  mirror policy from 4 (GitHub + GitLab + GitFlic + GitVerse) to 2
+  (GitHub + GitLab only) because the operator has CLI access (`gh`,
+  `glab`) only on the latter two. RateLimiter's 2-mirror state is
+  now compliant. The Decoupled Reusable Architecture mirror rule
+  was amended accordingly. No further action.
 - **`Endpoint.Ktor` enum cascade** (post-Ktor cleanup tail): low
   priority, would require Android version bump for cosmetic-only
   cleanup. Tracked but not blocking.
