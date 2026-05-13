@@ -61,7 +61,7 @@ fun MobileNavigation(navigationController: NavigationController) {
             )
             addProviderConfig(
                 back = ::popBackStack,
-                openCredentialsManager = ::openCredentialsManager,
+                openCredentialsManager = { openCredentialsManager() },
                 animations = NavigationAnimations.ScaleInOutAnimation,
             )
             addSearchInput(
