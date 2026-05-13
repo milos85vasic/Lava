@@ -11,18 +11,22 @@ same commit so the index stays trustworthy. Stale state in this file
 is itself a §6.J spirit issue — the file claims a guarantee, the
 repo has drifted, the agent acts on the claim.
 
-> **Last updated:** 2026-05-13, **§6.X Container-Submodule Emulator
-> Wiring Mandate added** (twenty-first §6.L invocation) — every emulator
-> the project depends on MUST run its emulator process INSIDE a
-> podman/docker container managed by `Submodules/Containers/`. Clause
-> propagated to all 16 submodules' CLAUDE.md + AGENTS.md + CONSTITUTION.md
-> (48 docs) + lava-api-go's 3 docs + root AGENTS.md (52 files total).
-> `scripts/check-constitution.sh` enforces the inheritance presence.
-> `scripts/run-emulator-tests.sh` gains a `--runner=host-direct|containerized`
-> flag (default `host-direct` during §6.X-debt). §6.X-debt records the
-> Containers-side wiring implementation owed (a `Containerized` Emulator
-> impl in `pkg/emulator/` + an `--runner` flag in `cmd/emulator-matrix/`
-> + an Android-SDK-bearing container image). Earlier this session:
+> **Last updated:** 2026-05-13, **§6.X-debt PARTIALLY CLOSED** (operator
+> twenty-second §6.L invocation: "Do all debt points now!"). Containers
+> submodule pin bumped to `562069e7` — ships Containerized Emulator
+> impl + `--runner` CLI flag + Containerfile recipe for the Android
+> emulator image. Lava's `scripts/check-constitution.sh` activates
+> §6.X runtime checks (a) [Containerized impl present + asserts
+> Emulator interface] and (b) [cmd/emulator-matrix accepts --runner].
+> Both checks falsifiability-rehearsed: rename-out / sed-disable
+> mutations produce the expected "MISSING 6.X runtime check ..."
+> output; reverted. Runtime check (c) [tag.sh attestation row gate
+> on `runner: containerized`] activates with the next tag.sh touch.
+> Real-stack `t.Skip` test gated on Linux x86_64 with /dev/kvm is
+> the final §6.X close criterion — operator-blocked on darwin/arm64
+> per §6.V-debt incident JSON. Earlier this session: §6.X clause
+> added, 16 submodules + lava-api-go × 3 + root × 2 = 52 docs
+> propagated. Earlier this session:
 > **SP-4 Phase F.2 COMPLETE** — all 6 plugins (gutenberg / archiveorg /
 > kinozal / nnmclub / rutor / rutracker) now route clone HTTP through
 > the clone's `primaryUrl`. Phase B clone-success Toast disclosure

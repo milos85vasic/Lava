@@ -350,7 +350,10 @@ fi
 # Per §6.X clause "Mechanical enforcement" (d) + (e), every submodule's
 # CLAUDE.md / AGENTS.md / CONSTITUTION.md and lava-api-go's three docs MUST
 # contain a §6.X inheritance reference. Clauses (a)–(c) [runtime/wiring
-# checks] are pending §6.X-debt closure and are NOT enforced here yet.
+# checks] activate progressively: as of 2026-05-13 evening, (a) and (b)
+# are active — Containers submodule shipped Containerized impl + CLI
+# --runner flag at submodule HEAD 562069e7. Clause (c) [tag.sh
+# attestation row check] activates with the next scripts/tag.sh touch.
 # -----------------------------------------------------------------------------
 
 # 6.X(1): §6.X clause itself must appear in root CLAUDE.md
@@ -379,8 +382,41 @@ for doc in lava-api-go/CLAUDE.md lava-api-go/AGENTS.md lava-api-go/CONSTITUTION.
   fi
 done
 
+# 6.X(4) — runtime check (a): Containers submodule MUST provide a
+# Containerized Emulator implementation distinct from the host-direct
+# AndroidEmulator path. This is the §6.X-debt close criterion (1).
+# Activated 2026-05-13 evening after Containers commit 562069e7 shipped.
+if [[ -d Submodules/Containers/pkg/emulator ]]; then
+  if [[ ! -f Submodules/Containers/pkg/emulator/containerized.go ]]; then
+    echo "MISSING 6.X runtime check (a): Submodules/Containers/pkg/emulator/containerized.go" >&2
+    echo "  → Containers-side §6.X-debt close requires a Containerized Emulator impl." >&2
+    exit 1
+  fi
+  if ! grep -qF 'type Containerized struct' Submodules/Containers/pkg/emulator/containerized.go 2>/dev/null; then
+    echo "MISSING 6.X runtime check (a): containerized.go lacks the Containerized type declaration" >&2
+    exit 1
+  fi
+  # And the Emulator interface compile-time check.
+  if ! grep -qF 'var _ Emulator = (*Containerized)(nil)' Submodules/Containers/pkg/emulator/containerized.go 2>/dev/null; then
+    echo "MISSING 6.X runtime check (a): Containerized does not assert Emulator-interface satisfaction" >&2
+    exit 1
+  fi
+fi
+
+# 6.X(5) — runtime check (b): cmd/emulator-matrix MUST accept the
+# --runner flag (host-direct|containerized). This is the §6.X-debt
+# close criterion (2). Activated 2026-05-13 evening.
+if [[ -f Submodules/Containers/cmd/emulator-matrix/main.go ]]; then
+  if ! grep -qF 'flag.String("runner"' Submodules/Containers/cmd/emulator-matrix/main.go 2>/dev/null; then
+    echo "MISSING 6.X runtime check (b): cmd/emulator-matrix/main.go lacks --runner flag" >&2
+    echo "  → §6.X-debt close requires the runner-choice flag on the matrix CLI." >&2
+    exit 1
+  fi
+fi
+
 echo "Constitution check passed: 6.D + 6.E + 6.F present in CLAUDE.md;"
 echo "Submodules/Tracker-SDK/CLAUDE.md present; core/ + feature/ scoped"
 echo "clauses present; no clause-6.H credential patterns in tracked files;"
 echo "clause-6.K Containers extension present; §6.X Container-Submodule"
-echo "Emulator Wiring inherited in all submodule + lava-api-go docs."
+echo "Emulator Wiring inherited in all submodule + lava-api-go docs;"
+echo "§6.X runtime checks (a) Containerized impl + (b) --runner flag active."
