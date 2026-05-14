@@ -11,19 +11,59 @@ same commit so the index stays trustworthy. Stale state in this file
 is itself a §6.J spirit issue — the file claims a guarantee, the
 repo has drifted, the agent acts on the claim.
 
-> **Last updated:** 2026-05-14, **1.2.23-1043 / 2.3.12-2312 in progress**
-> — HelixConstitution submodule incorporated as `./constitution` at pin
-> `cb27ed8c`; §6.AD HelixConstitution Inheritance Mandate added (29th
-> §6.L cycle); §6.AD-debt opened (per-submodule pointer propagation,
-> `CM-*` gate wiring, no-guessing grep gate, build-resource sampler,
-> commit_all.sh external user guide, lightweight doc-only commit path,
-> §6.W applicability boundary check, `docs/helix-constitution-gates.md`
-> index). `scripts/commit_all.sh` thin wrapper added (§6.W-scoped to
-> GitHub + GitLab). Hardlinked `.git` backup at
-> `.git-backup-pre-helixconstitution-20260514-211450/` per HelixConstitution
-> §9 absolute-data-safety. Versions bumped per §6.Y as FIRST hunk
-> (1042→1043, 2311→2312). Constitutional-plumbing-only — no
-> user-visible feature change.
+> **Last updated:** 2026-05-14, **1.2.23-1043 / 2.3.12-2312 closure-cycle**
+> (constitutional-plumbing-only; no user-visible feature change; no Firebase
+> distribute since 1.2.22-1042 still serves the user-visible surface). Cycle
+> spans commits `66de343b` → `062de2cc`: HelixConstitution submodule
+> incorporation + §6.AD Mandate + 8-track §6.AD-debt opened, then
+> systematically closed across 14 commits. Final closure state:
+>
+>   ✅ §6.AD-debt items 1, 3, 4, 5 (PARTIAL — HTML+PDF deferred), 6, 7, 8 — CLOSED
+>   ⚠ §6.AD-debt item 2 (CM-* gate wiring) — 5 of 11 ✅ wired
+>     (CM-COMMIT-DOCS-EXISTS, CM-UNIVERSAL-VS-PROJECT-CLASSIFICATION,
+>     CM-NONFATAL-COVERAGE, CM-SCRIPT-DOCS-SYNC, CM-BUILD-RESOURCE-STATS-TRACKER);
+>     remaining 6 are ⚠ paper-only by design (depend on Issues/Fixed-tracker
+>     infrastructure Lava doesn't use; equivalence in §6.AD.3)
+>   ✅ §6.AA-debt CLOSED (firebase-distribute.sh default flipped to MODE=debug; --release-only requires companion debug-stage advance)
+>   ✅ §6.Y-debt CLOSED (.githooks/pre-push Check 6: bump-first ordering)
+>   ✅ §6.Z-debt CLOSED (.githooks/pre-push Check 7: evidence-file presence on real pointer advance, vcode→vname via per-version snapshot)
+>   ⚠ §6.AC-debt PARTIAL (scripts/check-non-fatal-coverage.sh wired in WARN-only mode; strict-flip pending queue drain — 5 Kotlin + 444 Go violations)
+>   ❌ §6.AB-debt deferred (Detekt setup needed across 30+ modules first)
+>
+> **Cross-cutting findings discovered during the cycle:**
+>   - `core.hooksPath` was UNSET on this clone — every push earlier this cycle silently bypassed `.githooks/pre-push`. Wired in-session via `git config core.hooksPath .githooks`. New `scripts/setup-clone.sh` + `docs/scripts/setup-clone.sh.md` make this run-once-per-clone discoverable.
+>   - 4 forensic-anchor lines used guessing vocabulary — fixed with `UNCONFIRMED:` / `PENDING_FORENSICS:` markers (§11.4.6 gate caught them on first run).
+>   - Spotless drift in 3 files (Challenge27/Challenge29/FirebaseAnalyticsTracker) had been silently shipped before the hook wiring; fixed in commit `7474f45c`.
+>   - §6.Z value-aware logic required two refactors: (1) compare OLD vs NEW pointer values, not just file-touch; (2) look up vname from per-version snapshot file (since pointer-write commit's build.gradle.kts may have already bumped to the next version).
+>   - `grep -oE` under `set -euo pipefail` killed Check 4 silently on zero-match — fixed with `|| true` per-grep.
+>
+> Final commit chain on master (this closure cycle, 14 commits):
+>   `062de2cc` build-resource stats tracker (HelixConstitution §11.4.24, §6.AD-debt item 5)
+>   `5bb1451d` CM-SCRIPT-DOCS-SYNC pre-push Check 9
+>   `63692ab4` ci.sh wires §6.AC scanner + gate-status update
+>   `2620b2bd` §6.AC-debt PARTIAL CLOSE: non-fatal-coverage scanner
+>   `ee60d7a0` setup-clone.sh + user guide (hooksPath wiring discovery)
+>   `1b50995c` 3 user guides + helix-constitution-gates.md operator-readable index
+>   `964b19d7` §6.AA-debt CLOSE: default-debug-only + Stage 2 gate
+>   `bed323ff` fix(.githooks/pre-push) grep -oE pipefail-safe
+>   `7474f45c` chore: spotless drift in 3 files
+>   `4f27e307` §6.Y-debt + §6.Z-debt + §6.AD-debt item 6: pre-push extensions
+>   `0bc230e7` §6.AD-debt items 1.b + 4 + 7: check-constitution.sh extensions
+>   `643562c4` 16 submodule pin bumps (§6.AD propagation parent commit)
+>   `3508dd93` Lava-side §6.AD pointer-block injection (6 docs)
+>   `66de343b` HelixConstitution submodule incorporation + §6.AD Mandate
+>
+> Per-submodule §6.AD inheritance pointer-blocks landed in 16 separate
+> per-submodule commits (Auth fd82cf38 / Cache b578a496 / Challenges f5fa08d3 /
+> Concurrency 1f8215c9 / Config 3d6fb8b4 / Containers c4f30bdf / Database
+> de84e17a / Discovery 58904e7e / HTTP3 2b1e86b1 / Mdns 0fafd78a / Middleware
+> a96132eb / Observability 9513ad37 / RateLimiter b0a9b235 / Recovery 48818b37
+> / Security 3a394b60 / Tracker-SDK 80d4779a) — total propagation: 54 docs.
+>
+> All commits §6.C-converged on GitHub + GitLab. Hardlinked .git backup at
+> `.git-backup-pre-helixconstitution-20260514-211450/` (per HelixConstitution §9)
+> retained for forensic reference; safe to delete once operator confirms
+> closure-cycle is good.
 >
 > **Prior:** 2026-05-14, **1.2.22-1042 / 2.3.11-2311 DISTRIBUTED to
 > Firebase** (debug stage 1 + release stage 2, operator pre-authorized
