@@ -126,6 +126,14 @@ echo "==> Constitutional doc parser"
 ./scripts/check-constitution.sh
 
 # ---------------------------------------------------------------------
+# 5a1. §6.AC non-fatal-coverage scanner (advisory, default WARN-only).
+# Closes §6.AC-debt to PARTIAL. Set LAVA_NONFATAL_STRICT=1 to fail on
+# violations once the existing-violations queue is drained.
+# ---------------------------------------------------------------------
+echo "==> §6.AC non-fatal-coverage scan (advisory)"
+./scripts/check-non-fatal-coverage.sh | tail -3
+
+# ---------------------------------------------------------------------
 # 5b. Hermetic bash test suites (added 2026-05-05 to close the gap that
 # regression tests under tests/ were only run on manual operator trigger).
 # Each suite is independent and self-contained: a `run_all.sh` that runs
