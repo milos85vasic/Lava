@@ -27,8 +27,15 @@ repo has drifted, the agent acts on the claim.
 >   ✅ §6.AA-debt CLOSED (firebase-distribute.sh default flipped to MODE=debug; --release-only requires companion debug-stage advance)
 >   ✅ §6.Y-debt CLOSED (.githooks/pre-push Check 6: bump-first ordering)
 >   ✅ §6.Z-debt CLOSED (.githooks/pre-push Check 7: evidence-file presence on real pointer advance, vcode→vname via per-version snapshot)
->   ⚠ §6.AC-debt PARTIAL (scripts/check-non-fatal-coverage.sh wired in WARN-only mode; strict-flip pending queue drain — 5 Kotlin + 444 Go violations)
+>   ✅ §6.AC-debt CLOSED (queue drained 7+444 → 0+0; scanner in strict-mode default; ci.sh hard-fail wired in commit `215e14d5`)
 >   ❌ §6.AB-debt deferred (Detekt setup needed across 30+ modules first)
+>
+> **Extended cycle (post-1.2.23-closure follow-up batch, commits `5bb1451d` → `215e14d5`):**
+>   - `5bb1451d` CM-SCRIPT-DOCS-SYNC pre-push Check 9 (closes the §11.4.18 gate)
+>   - `062de2cc` CM-BUILD-RESOURCE-STATS-TRACKER (sampler + report + 2 user guides — closes §6.AD-debt item 5 + §11.4.24)
+>   - `14916722` CONTINUATION.md catch-up
+>   - `b9f4edde` §6.AC drain — scanner heuristic improvements + 7 Kotlin opt-outs (444 → 71)
+>   - `215e14d5` §6.AC FULL CLOSE — 23 Go bulk opt-outs + strict-mode flip + ci.sh hard-fail wiring
 >
 > **Cross-cutting findings discovered during the cycle:**
 >   - `core.hooksPath` was UNSET on this clone — every push earlier this cycle silently bypassed `.githooks/pre-push`. Wired in-session via `git config core.hooksPath .githooks`. New `scripts/setup-clone.sh` + `docs/scripts/setup-clone.sh.md` make this run-once-per-clone discoverable.
