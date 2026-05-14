@@ -13,11 +13,11 @@ type fakeProvider struct {
 	searchCalled bool
 }
 
-func (f *fakeProvider) ID() string                               { return f.id }
-func (f *fakeProvider) DisplayName() string                      { return f.id }
-func (f *fakeProvider) Capabilities() []ProviderCapability       { return f.caps }
-func (f *fakeProvider) AuthType() AuthType                      { return f.auth }
-func (f *fakeProvider) Encoding() string                        { return "UTF-8" }
+func (f *fakeProvider) ID() string                         { return f.id }
+func (f *fakeProvider) DisplayName() string                { return f.id }
+func (f *fakeProvider) Capabilities() []ProviderCapability { return f.caps }
+func (f *fakeProvider) AuthType() AuthType                 { return f.auth }
+func (f *fakeProvider) Encoding() string                   { return "UTF-8" }
 func (f *fakeProvider) Search(ctx context.Context, opts SearchOpts, cred Credentials) (*SearchResult, error) {
 	f.searchCalled = true
 	return &SearchResult{Provider: f.id}, nil

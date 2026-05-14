@@ -162,13 +162,13 @@ func profileBody(uid, avatar string) string {
 
 // TestLogin_Success_FetchesProfile — the full happy path:
 //
-//   1. POST /login.php returns two Set-Cookie headers; only the
-//      non-bb_ssl one becomes the token.
-//   2. The token is forwarded as a Cookie to GET /index.php; the
-//      response carries `#logged-in-username[?u=42]`, so userID=42.
-//   3. GET /profile.php?mode=viewprofile&u=42 returns the avatar URL
-//      and data-uid; UserDto is populated and wrapped in a Success
-//      AuthResponseDto.
+//  1. POST /login.php returns two Set-Cookie headers; only the
+//     non-bb_ssl one becomes the token.
+//  2. The token is forwarded as a Cookie to GET /index.php; the
+//     response carries `#logged-in-username[?u=42]`, so userID=42.
+//  3. GET /profile.php?mode=viewprofile&u=42 returns the avatar URL
+//     and data-uid; UserDto is populated and wrapped in a Success
+//     AuthResponseDto.
 //
 // Sixth Law clause 3 — primary assertions are on the user-visible
 // UserDto fields (Id, Token, AvatarUrl) AND on the form bytes that

@@ -81,9 +81,9 @@ func TestRecordNonFatal_RedactsSensitiveAttributes(t *testing.T) {
 	buf, restore := withTestLogger(t)
 	defer restore()
 	RecordNonFatal(context.Background(), errors.New("auth flow failed"), NonFatalAttributes{
-		AttrFeature: "auth",
-		"password":  "supersecret",
-		"api_key":   "abc123",
+		AttrFeature:    "auth",
+		"password":     "supersecret",
+		"api_key":      "abc123",
 		"X-Auth-Token": "Bearer ey...",
 	})
 	out := buf.String()

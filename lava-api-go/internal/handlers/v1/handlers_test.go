@@ -34,9 +34,11 @@ func (f *fakeProvider) DisplayName() string {
 	}
 	return f.id
 }
-func (f *fakeProvider) Capabilities() []provider.ProviderCapability { return []provider.ProviderCapability{provider.CapSearch, provider.CapBrowse, provider.CapForumTree, provider.CapTopic, provider.CapTorrentDownload} }
-func (f *fakeProvider) AuthType() provider.AuthType        { return provider.AuthNone }
-func (f *fakeProvider) Encoding() string                   { return "UTF-8" }
+func (f *fakeProvider) Capabilities() []provider.ProviderCapability {
+	return []provider.ProviderCapability{provider.CapSearch, provider.CapBrowse, provider.CapForumTree, provider.CapTopic, provider.CapTorrentDownload}
+}
+func (f *fakeProvider) AuthType() provider.AuthType { return provider.AuthNone }
+func (f *fakeProvider) Encoding() string            { return "UTF-8" }
 func (f *fakeProvider) Search(ctx context.Context, opts provider.SearchOpts, cred provider.Credentials) (*provider.SearchResult, error) {
 	return f.searchResult, f.searchErr
 }

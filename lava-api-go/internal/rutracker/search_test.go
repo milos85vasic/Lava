@@ -348,8 +348,8 @@ func TestGetSearchPage_NilParamsOmitted(t *testing.T) {
 
 // --- helpers ----------------------------------------------------------
 
-func strPtr(s string) *string                                  { return &s }
-func intPtr(i int) *int                                        { return &i }
+func strPtr(s string) *string                                    { return &s }
+func intPtr(i int) *int                                          { return &i }
 func sortTypePtr(t gen.SearchSortTypeDto) *gen.SearchSortTypeDto { return &t }
 func sortOrderPtr(o gen.SearchSortOrderDto) *gen.SearchSortOrderDto {
 	return &o

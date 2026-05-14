@@ -8,11 +8,11 @@
 //
 // The collector is registered against an injected Registerer rather
 // than the Prometheus default registry so:
-//   1. tests can pass a fresh registry per test (clean slate, no
-//      cross-test counter contamination);
-//   2. production wires it against the same registry as the existing
-//      Metrics struct so /metrics returns the unified set on the
-//      single private listener.
+//  1. tests can pass a fresh registry per test (clean slate, no
+//     cross-test counter contamination);
+//  2. production wires it against the same registry as the existing
+//     Metrics struct so /metrics returns the unified set on the
+//     single private listener.
 //
 // Cardinality: 3 protocols × 6 status classes (1xx,2xx,3xx,4xx,5xx,
 // unknown) = 18 series — well within Prometheus' comfort range.

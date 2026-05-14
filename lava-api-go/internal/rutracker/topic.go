@@ -5,9 +5,9 @@
 // Three routes share this code:
 //
 //   - GET /topic/{id}     → discriminated union {Topic|Torrent|CommentsPage};
-//                           "magnet:?" substring on the page → torrent path.
+//     "magnet:?" substring on the page → torrent path.
 //   - GET /topic2/{id}    → non-polymorphic TopicPageDto (always, with
-//                           optional torrentData and a commentsPage block).
+//     optional torrentData and a commentsPage block).
 //   - GET /comments/{id}  → CommentsPageDto only. Implemented in comments.go.
 //
 // Pagination: rutracker topic pages carry 30 posts each (NOT 50 like the

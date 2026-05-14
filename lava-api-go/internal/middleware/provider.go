@@ -47,10 +47,10 @@ func ProviderMiddleware(reg *provider.ProviderRegistry, cap provider.ProviderCap
 
 		if !reg.Supports(id, cap) {
 			c.AbortWithStatusJSON(http.StatusNotImplemented, gin.H{
-				"error":        "unsupported_capability",
-				"provider":     id,
-				"capability":   cap,
-				"message":      "This provider does not implement the requested capability.",
+				"error":      "unsupported_capability",
+				"provider":   id,
+				"capability": cap,
+				"message":    "This provider does not implement the requested capability.",
 			})
 			return
 		}

@@ -2,21 +2,21 @@
 // Kotlin:
 //
 //   - LoginUseCase.kt              → Login orchestrator (token / form /
-//                                    captcha resolution tree).
+//     captcha resolution tree).
 //   - LoginUseCase.ParseCaptchaUseCase → ParseCaptcha (three-regex
-//                                    extraction of CaptchaDto from the
-//                                    login-form HTML).
+//     extraction of CaptchaDto from the
+//     login-form HTML).
 //   - GetCurrentProfileUseCase.kt  → fetchUserProfile step 1: extract
-//                                    userId from /index.php's
-//                                    `#logged-in-username[?u=]` href.
+//     userId from /index.php's
+//     `#logged-in-username[?u=]` href.
 //   - GetProfileUseCase.kt         → fetchUserProfile step 2: parse
-//                                    /profile.php?mode=viewprofile&u=<id>
-//                                    into UserDto fields.
+//     /profile.php?mode=viewprofile&u=<id>
+//     into UserDto fields.
 //   - RuTrackerInnerApiImpl.kt:35-56 → POST /login.php with the form
-//                                    shape; the conditional "all three
-//                                    captcha fields or none" guard;
-//                                    the bb_ssl-cookie filter that
-//                                    extracts the auth token.
+//     shape; the conditional "all three
+//     captcha fields or none" guard;
+//     the bb_ssl-cookie filter that
+//     extracts the auth token.
 //
 // The byte-equal Russian literals — "Вход" (the login submit value) and
 // "неверный пароль" (the wrong-credits sentence) — come straight from
@@ -274,11 +274,11 @@ func (c *Client) CheckAuthorised(ctx context.Context, cookie string) (bool, erro
 //  1. GET /index.php with the cookie, parse `#logged-in-username` and
 //     extract the `u` query parameter from its href — that's the userId.
 //  2. GET /profile.php?mode=viewprofile&u=<userId>, parse:
-//       #profile-uname[data-uid]   → UserDto.Id (parity with Kotlin —
-//                                    even though we already have userId
-//                                    from step 1, the upstream's
-//                                    canonical id is data-uid)
-//       #avatar-img > img[src]     → UserDto.AvatarUrl
+//     #profile-uname[data-uid]   → UserDto.Id (parity with Kotlin —
+//     even though we already have userId
+//     from step 1, the upstream's
+//     canonical id is data-uid)
+//     #avatar-img > img[src]     → UserDto.AvatarUrl
 func (c *Client) fetchUserProfile(ctx context.Context, token string) (*gen.UserDto, error) {
 	indexBody, status, err := c.Fetch(ctx, "/index.php", token)
 	if err != nil {

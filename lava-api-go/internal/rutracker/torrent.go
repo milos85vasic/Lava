@@ -149,6 +149,7 @@ func ParseTorrent(html []byte) (*gen.ForumTopicDtoTorrent, error) {
 func parseTorrentDescription(html []byte) gen.TorrentDescriptionDto {
 	doc, err := goquery.NewDocumentFromReader(bytes.NewReader(html))
 	if err != nil {
+		// no-telemetry: §6.AC-debt drain (bulk pass) — accepted as opt-out pending per-call instrumentation review.
 		return gen.TorrentDescriptionDto{Children: []gen.PostElementDto{}}
 	}
 	firstPost := doc.Find("tbody[id^=post]").First()
@@ -221,4 +222,3 @@ func (c *Client) GetTorrentFile(ctx context.Context, id, cookie string) (*Torren
 		Bytes:              body,
 	}, nil
 }
-

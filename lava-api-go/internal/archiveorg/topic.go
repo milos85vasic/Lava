@@ -9,21 +9,21 @@ import (
 // metadataResponse is the JSON envelope returned by /metadata/{identifier}.
 type metadataResponse struct {
 	Metadata struct {
-		Title       string   `json:"title"`
-		Creator     *string  `json:"creator"`
-		Description *string  `json:"description"`
-		Date        *string  `json:"date"`
-		Mediatype   *string  `json:"mediatype"`
+		Title       string  `json:"title"`
+		Creator     *string `json:"creator"`
+		Description *string `json:"description"`
+		Date        *string `json:"date"`
+		Mediatype   *string `json:"mediatype"`
 	} `json:"metadata"`
 	Files []metadataFile `json:"files"`
 }
 
 // metadataFile is a file entry inside a metadata response.
 type metadataFile struct {
-	Name     string  `json:"name"`
-	Size     *string `json:"size"`
-	Format   *string `json:"format"`
-	Source   *string `json:"source"`
+	Name   string  `json:"name"`
+	Size   *string `json:"size"`
+	Format *string `json:"format"`
+	Source *string `json:"source"`
 }
 
 // TopicResult is the domain type returned by Client.Topic.

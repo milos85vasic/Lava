@@ -772,4 +772,3 @@ func TestFavoritesPagePath_StartParam(t *testing.T) {
 		}
 	}
 }
-

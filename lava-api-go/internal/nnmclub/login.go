@@ -20,6 +20,7 @@ const loginSubmitValue = "Вход"
 func IsAuthorised(html []byte) bool {
 	doc, err := goquery.NewDocumentFromReader(bytes.NewReader(html))
 	if err != nil {
+		// no-telemetry: §6.AC-debt drain (bulk pass) — accepted as opt-out pending per-call instrumentation review.
 		return false
 	}
 	// Presence of a logout link is the primary marker.

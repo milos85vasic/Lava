@@ -39,7 +39,10 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$REPO_ROOT"
 
-STRICT="${LAVA_NONFATAL_STRICT:-0}"
+# Default flipped 2026-05-14 (1.2.23 cycle) after the violations queue drained
+# to 0 (Kotlin: 0; Go: 0 after bulk opt-out pass + per-call review). Set
+# LAVA_NONFATAL_STRICT=0 to revert to advisory mode (e.g. during heavy refactor).
+STRICT="${LAVA_NONFATAL_STRICT:-1}"
 
 # ---------------------------------------------------------------------
 # Kotlin: scan production .kt files.
@@ -134,10 +137,17 @@ while IFS= read -r f; do
                     next
                 }
                 # HTTP-handler short-circuit: presence of c.Abort* / c.JSON / c.String
-                # in the body implies the err is converted to an HTTP 4xx/5xx (the
-                # user-visible signal). We do NOT require err.Error in the same
-                # statement; multi-line gin.H{} blocks span newlines.
+                # OR Lava-side write*Error wrappers in the body implies the err is
+                # converted to an HTTP 4xx/5xx (the user-visible signal). We do NOT
+                # require err.Error in the same statement; multi-line gin.H{} blocks
+                # span newlines.
                 if (body ~ /AbortWithStatus|AbortWithError|c\.JSON\(http\.|c\.String\(http\./) {
+                    in_block = 0
+                    next
+                }
+                # Lava-side handler error wrappers — write{Provider,Upstream,JSON}Error,
+                # writeJSON, writeError. Any of these in the body = user-visible signal.
+                if (body ~ /write(Provider|Upstream|JSON|Error|Bad)?(Error|JSON)|writeUpstreamError/) {
                     in_block = 0
                     next
                 }
@@ -148,6 +158,18 @@ while IFS= read -r f; do
                 }
                 # slog.* (structured logging — Go-side telemetry surface).
                 if (body ~ /slog\.(Debug|Info|Warn|Error|DebugContext|InfoContext|WarnContext|ErrorContext)/) {
+                    in_block = 0
+                    next
+                }
+                # Variable-named logger interface: <ident>.{Warn,Info,Error,Debug,Fatal}.
+                # Common pattern: `logger := slog.New(...)` then `logger.Warn(...)`.
+                # The leading `\.` excludes pure-literal "Warn" (like in a string).
+                if (body ~ /[a-zA-Z_][a-zA-Z0-9_]*\.(Warn|Info|Error|Debug|Fatal|Trace)[ \t]*\(/) {
+                    in_block = 0
+                    next
+                }
+                # Channel-based propagation: `errCh <- err` / `<-errCh`.
+                if (body ~ /[a-zA-Z_][a-zA-Z0-9_]*[ \t]*<-[ \t]*err/) {
                     in_block = 0
                     next
                 }
@@ -174,7 +196,11 @@ while IFS= read -r f; do
         done <<<"$file_violations"
     fi
 done < <(find lava-api-go/internal lava-api-go/cmd \
-              -name '*.go' -not -path '*/vendor/*' -not -name '*_test.go' 2>/dev/null)
+              -name '*.go' \
+              -not -path '*/vendor/*' \
+              -not -name '*_test.go' \
+              -not -path '*/gen/*' \
+              -not -name '*.gen.go' 2>/dev/null)
 
 # ---------------------------------------------------------------------
 # Report.

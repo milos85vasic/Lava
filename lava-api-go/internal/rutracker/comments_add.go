@@ -6,8 +6,8 @@
 //   - WithFormTokenUseCase.kt      → ParseFormToken (regex).
 //   - AddCommentUseCase.kt         → AddComment orchestrator.
 //   - RuTrackerInnerApiImpl.kt     → mainPage (GET /index.php with
-//                                    cookie) + postMessage (POST
-//                                    /posting.php form data).
+//     cookie) + postMessage (POST
+//     /posting.php form data).
 //
 // The Russian success sentence "Сообщение было успешно отправлено" is
 // the byte-equal literal from AddCommentUseCase.kt:18 — it is the only

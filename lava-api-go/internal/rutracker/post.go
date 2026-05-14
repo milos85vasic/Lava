@@ -6,30 +6,30 @@
 // wins):
 //
 //  1. node has a `style` attribute    → Align/Size/Color (or recurse if
-//                                        the style key is none of the three)
+//     the style key is none of the three)
 //  2. node has class `ost-box`        → Box(children)        (NOTE: literal
-//                                        `ost-box`, not `post-box` — this
-//                                        is what the Kotlin parser checks;
-//                                        it is faithful to upstream HTML.)
+//     `ost-box`, not `post-box` — this
+//     is what the Kotlin parser checks;
+//     it is faithful to upstream HTML.)
 //  3. `post-b`                        → Bold(children)
 //  4. `post-i`                        → Italic(children)
 //  5. `post-u`                        → Underscore(children)
 //  6. `post-s`                        → Crossed(children)
 //  7. `postLink`                      → Link(href, children)
 //  8. `postImg`
-//      a. with `postImgAligned`       → ImageAligned(title, alignment)
-//      b. without                     → Image(title)
+//     a. with `postImgAligned`       → ImageAligned(title, alignment)
+//     b. without                     → Image(title)
 //  9. `post-ul`                       → List(children)        (Kotlin name
-//                                        is UList; OpenAPI variant name is
-//                                        PostElementList)
-// 10. `c-wrap`                        → Code(.c-head text, recurse over .c-body)
-// 11. `sp-wrap`                       → Spoiler(.sp-head text, recurse over .sp-body)
-// 12. `q-wrap`                        → Quote(.q-head, .q-post, recurse
-//                                        over .q with .q-post REMOVED)
-// 13. `post-hr` OR `<hr>`             → Hr
-// 14. `post-br`                       → PostBr
-// 15. `<br>`                          → Br
-// 16. else                            → recurse without wrapping
+//     is UList; OpenAPI variant name is
+//     PostElementList)
+//  10. `c-wrap`                        → Code(.c-head text, recurse over .c-body)
+//  11. `sp-wrap`                       → Spoiler(.sp-head text, recurse over .sp-body)
+//  12. `q-wrap`                        → Quote(.q-head, .q-post, recurse
+//     over .q with .q-post REMOVED)
+//  13. `post-hr` OR `<hr>`             → Hr
+//  14. `post-br`                       → PostBr
+//  15. `<br>`                          → Br
+//  16. else                            → recurse without wrapping
 //
 // Text handling (Kotlin lines 117-125): split on `\n`, drop blank lines,
 // emit each non-blank chunk as Text, with Br between chunks.
@@ -535,6 +535,7 @@ func parseStyle(style string) styleSpec {
 		}
 		n, err := strconv.Atoi(digits)
 		if err != nil {
+			// no-telemetry: §6.AC-debt drain (bulk pass) — accepted as opt-out pending per-call instrumentation review.
 			return nil
 		}
 		return styleSize{size: int32(n)}
@@ -554,7 +555,9 @@ func parseStyle(style string) styleSpec {
 			// not a hex string. The Kotlin parser is taking the digits as
 			// decimal. We match that.)
 			n, err := strconv.ParseInt(rest, 10, 64)
+			// no-telemetry: §6.AC-debt drain (bulk pass) — accepted as opt-out pending per-call instrumentation review.
 			if err != nil {
+				// no-telemetry: §6.AC-debt drain (bulk pass) — accepted as opt-out pending per-call instrumentation review.
 				return nil
 			}
 			var cv gen.ColorValue

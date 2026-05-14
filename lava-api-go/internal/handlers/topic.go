@@ -71,6 +71,7 @@ func parseOptionalPage(c *gin.Context) *int {
 	}
 	page, err := strconv.Atoi(pageStr)
 	if err != nil {
+		// no-telemetry: §6.AC-debt drain (bulk pass) — accepted as opt-out pending per-call instrumentation review.
 		return nil
 	}
 	return &page

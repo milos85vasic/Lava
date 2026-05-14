@@ -110,10 +110,10 @@ func (f *fakeCache) size() int {
 type fakeScraper struct {
 	mu sync.Mutex
 
-	forumCalls       int
-	lastForumCookie  string
-	forumReturn      *gen.ForumDto
-	forumErr         error
+	forumCalls      int
+	lastForumCookie string
+	forumReturn     *gen.ForumDto
+	forumErr        error
 
 	categoryCalls    int
 	lastCategoryID   string
@@ -156,11 +156,11 @@ type fakeScraper struct {
 	addCommentResult      bool
 	addCommentErr         error
 
-	torrentCalls    int
-	lastTorrentID   string
-	lastTorrentCk   string
-	torrentReturn   *gen.ForumTopicDtoTorrent
-	torrentErr      error
+	torrentCalls  int
+	lastTorrentID string
+	lastTorrentCk string
+	torrentReturn *gen.ForumTopicDtoTorrent
+	torrentErr    error
 
 	torrentFileCalls  int
 	lastTorrentFileID string
@@ -168,34 +168,34 @@ type fakeScraper struct {
 	torrentFileReturn *rutracker.TorrentFile
 	torrentFileErr    error
 
-	favoritesCalls       int
-	lastFavoritesCookie  string
-	favoritesReturn      *gen.FavoritesDto
-	favoritesErr         error
+	favoritesCalls      int
+	lastFavoritesCookie string
+	favoritesReturn     *gen.FavoritesDto
+	favoritesErr        error
 
-	addFavoriteCalls   int
-	lastAddFavoriteID  string
-	lastAddFavoriteCk  string
-	addFavoriteResult  bool
-	addFavoriteErr     error
+	addFavoriteCalls  int
+	lastAddFavoriteID string
+	lastAddFavoriteCk string
+	addFavoriteResult bool
+	addFavoriteErr    error
 
-	removeFavoriteCalls   int
-	lastRemoveFavoriteID  string
-	lastRemoveFavoriteCk  string
-	removeFavoriteResult  bool
-	removeFavoriteErr     error
+	removeFavoriteCalls  int
+	lastRemoveFavoriteID string
+	lastRemoveFavoriteCk string
+	removeFavoriteResult bool
+	removeFavoriteErr    error
 
 	// Phase 7 task 7.7 — index/login/captcha recording fields.
 
-	checkAuthCalls    int
-	lastCheckAuthCk   string
-	checkAuthResult   bool
-	checkAuthErr      error
+	checkAuthCalls  int
+	lastCheckAuthCk string
+	checkAuthResult bool
+	checkAuthErr    error
 
-	loginCalls    int
+	loginCalls      int
 	lastLoginParams rutracker.LoginParams
-	loginReturn   *gen.AuthResponseDto
-	loginErr      error
+	loginReturn     *gen.AuthResponseDto
+	loginErr        error
 
 	captchaCalls    int
 	lastCaptchaPath string

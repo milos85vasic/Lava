@@ -126,11 +126,12 @@ echo "==> Constitutional doc parser"
 ./scripts/check-constitution.sh
 
 # ---------------------------------------------------------------------
-# 5a1. §6.AC non-fatal-coverage scanner (advisory, default WARN-only).
-# Closes §6.AC-debt to PARTIAL. Set LAVA_NONFATAL_STRICT=1 to fail on
-# violations once the existing-violations queue is drained.
+# 5a1. §6.AC non-fatal-coverage scanner (default STRICT-mode after the
+# queue drained 2026-05-14). Set LAVA_NONFATAL_STRICT=0 to revert to
+# advisory mode (e.g. during a heavy refactor that introduces new error
+# paths in bulk).
 # ---------------------------------------------------------------------
-echo "==> §6.AC non-fatal-coverage scan (advisory)"
+echo "==> §6.AC non-fatal-coverage scan (STRICT)"
 ./scripts/check-non-fatal-coverage.sh | tail -3
 
 # ---------------------------------------------------------------------

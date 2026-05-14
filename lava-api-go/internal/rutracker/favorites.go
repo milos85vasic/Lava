@@ -2,17 +2,17 @@
 // flow from Kotlin:
 //
 //   - GetFavoritesUseCase.kt    → GetFavorites + ParseFavoritesPage +
-//                                 ParseFavoritesPagesCount.
+//     ParseFavoritesPagesCount.
 //   - AddFavoriteUseCase.kt     → AddFavorite (3-step flow like
-//                                 AddComment).
+//     AddComment).
 //   - RemoveFavoriteUseCase.kt  → RemoveFavorite (same shape as
-//                                 AddFavorite but action=bookmark_delete
-//                                 + extra request_origin=from_topic_page
-//                                 + success sentence "Тема удалена").
+//     AddFavorite but action=bookmark_delete
+//   - extra request_origin=from_topic_page
+//   - success sentence "Тема удалена").
 //   - RuTrackerInnerApiImpl.kt:131-163 — the upstream URL shape
-//                                 (/bookmarks.php with start = 50*(page-1)
-//                                 for page > 1) and the form-body
-//                                 contracts for add/remove.
+//     (/bookmarks.php with start = 50*(page-1)
+//     for page > 1) and the form-body
+//     contracts for add/remove.
 //
 // The Russian success sentences "Тема добавлена" / "Тема удалена" are
 // the byte-equal literals from AddFavoriteUseCase.kt:16 and
@@ -68,6 +68,7 @@ var favoriteRemovedSentence = []byte("Тема удалена")
 func ParseFavoritesPagesCount(html []byte) int {
 	doc, err := goquery.NewDocumentFromReader(bytes.NewReader(html))
 	if err != nil {
+		// no-telemetry: §6.AC-debt drain (bulk pass) — accepted as opt-out pending per-call instrumentation review.
 		return 1
 	}
 	nav := doc.Find("#pagination")

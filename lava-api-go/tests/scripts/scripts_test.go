@@ -10,17 +10,18 @@
 //
 // (a) parse with `bash -n` (no syntax errors), and
 // (b) contain the SP-2 Phase 12 + Phase 13 wiring strings the production flow
-//     depends on:
-//   - start.sh forwards --legacy / --both / --with-observability / --dev-docs
-//   - tag.sh registers the api-go app with prefix Lava-API-Go-
-//   - tag.sh refuses to operate without .lava-ci-evidence/<commit>.json
-//     for api-go (bypass: --no-evidence-required)
-//   - build_and_release.sh populates releases/{version}/api-go/
-//   - pretag-verify.sh emits .lava-ci-evidence/<commit>.json with checks/
-//     timestamp/base_url/exit_code
-//   - mutation.sh wraps go-mutesting
-//   - ci.sh appends gosec / govulncheck / trivy with LAVA_CI_SKIP_<TOOL>
-//     and --strict
+//
+//	  depends on:
+//	- start.sh forwards --legacy / --both / --with-observability / --dev-docs
+//	- tag.sh registers the api-go app with prefix Lava-API-Go-
+//	- tag.sh refuses to operate without .lava-ci-evidence/<commit>.json
+//	  for api-go (bypass: --no-evidence-required)
+//	- build_and_release.sh populates releases/{version}/api-go/
+//	- pretag-verify.sh emits .lava-ci-evidence/<commit>.json with checks/
+//	  timestamp/base_url/exit_code
+//	- mutation.sh wraps go-mutesting
+//	- ci.sh appends gosec / govulncheck / trivy with LAVA_CI_SKIP_<TOOL>
+//	  and --strict
 //
 // (c) `scripts/tag.sh --dry-run --app api-go` prints the expected tag string
 // without performing any git mutations. This is the falsifiability target

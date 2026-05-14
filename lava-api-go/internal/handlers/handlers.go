@@ -43,8 +43,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	gen "digital.vasic.lava.apigo/internal/gen/server"
 	"digital.vasic.lava.apigo/internal/cache"
+	gen "digital.vasic.lava.apigo/internal/gen/server"
 	"digital.vasic.lava.apigo/internal/rutracker"
 )
 

@@ -40,18 +40,18 @@ var ErrUnsupported = errors.New("capability not supported by this provider")
 type ProviderCapability string
 
 const (
-	CapSearch         ProviderCapability = "SEARCH"
-	CapBrowse         ProviderCapability = "BROWSE"
-	CapForumTree      ProviderCapability = "FORUM_TREE"
-	CapTopic          ProviderCapability = "TOPIC"
-	CapComments       ProviderCapability = "COMMENTS"
-	CapFavorites      ProviderCapability = "FAVORITES"
+	CapSearch          ProviderCapability = "SEARCH"
+	CapBrowse          ProviderCapability = "BROWSE"
+	CapForumTree       ProviderCapability = "FORUM_TREE"
+	CapTopic           ProviderCapability = "TOPIC"
+	CapComments        ProviderCapability = "COMMENTS"
+	CapFavorites       ProviderCapability = "FAVORITES"
 	CapTorrentDownload ProviderCapability = "TORRENT_DOWNLOAD"
-	CapMagnetLink     ProviderCapability = "MAGNET_LINK"
-	CapHTTPDownload   ProviderCapability = "HTTP_DOWNLOAD"
-	CapRSS            ProviderCapability = "RSS"
-	CapUpload         ProviderCapability = "UPLOAD"
-	CapUserProfile    ProviderCapability = "USER_PROFILE"
+	CapMagnetLink      ProviderCapability = "MAGNET_LINK"
+	CapHTTPDownload    ProviderCapability = "HTTP_DOWNLOAD"
+	CapRSS             ProviderCapability = "RSS"
+	CapUpload          ProviderCapability = "UPLOAD"
+	CapUserProfile     ProviderCapability = "USER_PROFILE"
 )
 
 // AuthType describes how a provider authenticates users.
@@ -123,31 +123,31 @@ type BrowseResult struct {
 
 // ForumTree is the hierarchical category structure from Provider.GetForumTree.
 type ForumTree struct {
-	Provider   string         `json:"provider"`
+	Provider   string          `json:"provider"`
 	Categories []ForumCategory `json:"categories"`
 }
 
 // ForumCategory is a node in the forum tree.
 type ForumCategory struct {
-	ID             string          `json:"id"`
-	Name           string          `json:"name"`
-	Subcategories  []ForumCategory `json:"subcategories,omitempty"`
+	ID            string          `json:"id"`
+	Name          string          `json:"name"`
+	Subcategories []ForumCategory `json:"subcategories,omitempty"`
 }
 
 // TopicResult is the detail view of a single content item.
 type TopicResult struct {
-	Provider      string       `json:"provider"`
-	ID            string       `json:"id"`
-	Title         string       `json:"title"`
-	OriginalTitle string       `json:"originalTitle,omitempty"`
-	Year          int          `json:"year,omitempty"`
-	PosterURL     string       `json:"posterUrl,omitempty"`
-	Description   string       `json:"description,omitempty"`
-	IMDbURL       string       `json:"imdbUrl,omitempty"`
-	Files         []TopicFile  `json:"files,omitempty"`
-	Comments      int          `json:"comments,omitempty"`
-	MagnetLink    string       `json:"magnetLink,omitempty"`
-	DownloadURL   string       `json:"downloadUrl,omitempty"`
+	Provider      string      `json:"provider"`
+	ID            string      `json:"id"`
+	Title         string      `json:"title"`
+	OriginalTitle string      `json:"originalTitle,omitempty"`
+	Year          int         `json:"year,omitempty"`
+	PosterURL     string      `json:"posterUrl,omitempty"`
+	Description   string      `json:"description,omitempty"`
+	IMDbURL       string      `json:"imdbUrl,omitempty"`
+	Files         []TopicFile `json:"files,omitempty"`
+	Comments      int         `json:"comments,omitempty"`
+	MagnetLink    string      `json:"magnetLink,omitempty"`
+	DownloadURL   string      `json:"downloadUrl,omitempty"`
 }
 
 // TopicFile is a file listed inside a topic.
@@ -166,11 +166,11 @@ type CommentsResult struct {
 
 // Comment is a single comment or review.
 type Comment struct {
-	ID      string `json:"id"`
-	Author  string `json:"author"`
-	Date    string `json:"date"`
-	Body    string `json:"body"`
-	Rating  int    `json:"rating,omitempty"`
+	ID     string `json:"id"`
+	Author string `json:"author"`
+	Date   string `json:"date"`
+	Body   string `json:"body"`
+	Rating int    `json:"rating,omitempty"`
 }
 
 // FavoritesResult is the user's bookmarked/favorited items.
@@ -199,10 +199,10 @@ type FileDownload struct {
 
 // LoginOpts carries the credentials a user supplies during login.
 type LoginOpts struct {
-	Username     string
-	Password     string
-	CaptchaCode  string
-	CaptchaSID   string
+	Username    string
+	Password    string
+	CaptchaCode string
+	CaptchaSID  string
 }
 
 // LoginResult is the outcome of a login attempt.

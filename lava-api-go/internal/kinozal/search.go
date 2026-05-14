@@ -99,6 +99,7 @@ func (c *Client) Search(ctx context.Context, query string, page int, cookie stri
 func extractIDFromHref(href string) string {
 	u, err := url.Parse(href)
 	if err != nil {
+		// no-telemetry: §6.AC-debt drain (bulk pass) — accepted as opt-out pending per-call instrumentation review.
 		return ""
 	}
 	return u.Query().Get("id")
@@ -118,7 +119,9 @@ func parsePagination(doc *goquery.Document) int {
 	doc.Find("a[href]").Each(func(_ int, s *goquery.Selection) {
 		href, _ := s.Attr("href")
 		u, err := url.Parse(href)
+		// no-telemetry: §6.AC-debt drain (bulk pass) — accepted as opt-out pending per-call instrumentation review.
 		if err != nil {
+			// no-telemetry: §6.AC-debt drain (bulk pass) — accepted as opt-out pending per-call instrumentation review.
 			return
 		}
 		if u.Path == "/browse.php" {

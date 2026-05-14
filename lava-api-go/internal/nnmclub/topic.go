@@ -15,9 +15,10 @@ import (
 // ParseTopicPage parses /forum/viewtopic.php?t=<id> response HTML into a provider TopicResult.
 //
 // Selector walk:
-//   doc.Find("#pagecontent .postbody").First().text() → description
-//   doc.Find("a[href^=magnet:]").First().attr("href") → magnetLink
-//   doc.Find("a[href*=download.php?id=]").First().attr("href") → downloadUrl
+//
+//	doc.Find("#pagecontent .postbody").First().text() → description
+//	doc.Find("a[href^=magnet:]").First().attr("href") → magnetLink
+//	doc.Find("a[href*=download.php?id=]").First().attr("href") → downloadUrl
 func ParseTopicPage(html []byte, id string) (*provider.TopicResult, error) {
 	doc, err := goquery.NewDocumentFromReader(bytes.NewReader(html))
 	if err != nil {

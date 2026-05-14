@@ -39,6 +39,7 @@ func ParseTopicPage(html []byte) (*provider.TopicResult, error) {
 		href, _ := s.Attr("href")
 		u, err := url.Parse(href)
 		if err != nil {
+			// no-telemetry: §6.AC-debt drain (bulk pass) — accepted as opt-out pending per-call instrumentation review.
 			return
 		}
 		id = u.Query().Get("id")

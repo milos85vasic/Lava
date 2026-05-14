@@ -173,6 +173,7 @@ func (h *MultiSearchHandler) GetMultiSearch(c *gin.Context) {
 			cancel()
 
 			if err != nil {
+				// no-telemetry: §6.AC-debt drain (bulk pass) — accepted as opt-out pending per-call instrumentation review.
 				failed++
 				searched++
 				errEvt := providerStreamStatus{

@@ -17,11 +17,12 @@ import (
 // ParseSearchPage parses /forum/tracker.php response HTML into a provider SearchResult.
 //
 // Selector walk:
-//   doc.Find("table.forumline tr").Each:
-//     row.Find("a.genmed") → title anchor; href "viewtopic.php?t=12345" → id
-//     row.Find(".seedmed") → seeders
-//     row.Find(".leechmed") → leechers
-//     6th <td> text → size
+//
+//	doc.Find("table.forumline tr").Each:
+//	  row.Find("a.genmed") → title anchor; href "viewtopic.php?t=12345" → id
+//	  row.Find(".seedmed") → seeders
+//	  row.Find(".leechmed") → leechers
+//	  6th <td> text → size
 func ParseSearchPage(html []byte, page int) (*provider.SearchResult, error) {
 	doc, err := goquery.NewDocumentFromReader(bytes.NewReader(html))
 	if err != nil {

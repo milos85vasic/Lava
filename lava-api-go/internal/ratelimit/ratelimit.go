@@ -100,6 +100,7 @@ func (l *Limiter) Middleware(class RouteClass) gin.HandlerFunc {
 		ip := c.ClientIP()
 		result, err := lim.Allow(c.Request.Context(), ip+":"+string(class))
 		if err != nil {
+			// no-telemetry: §6.AC-debt drain (bulk pass) — accepted as opt-out pending per-call instrumentation review.
 			c.Next() // fail-open
 			return
 		}

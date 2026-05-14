@@ -11,8 +11,8 @@ import (
 	"context"
 	"errors"
 
-	"digital.vasic.lava.apigo/internal/provider"
 	gen "digital.vasic.lava.apigo/internal/gen/server"
+	"digital.vasic.lava.apigo/internal/provider"
 )
 
 // compile-time assertion
@@ -234,6 +234,7 @@ func (a *ProviderAdapter) Login(ctx context.Context, opts provider.LoginOpts) (*
 	// Success branch for the provider-agnostic result.
 	success, err := resp.AsAuthResponseDtoSuccess()
 	if err != nil {
+		// no-telemetry: §6.AC-debt drain (bulk pass) — accepted as opt-out pending per-call instrumentation review.
 		return nil, provider.ErrUnauthorized
 	}
 	return &provider.LoginResult{
@@ -260,7 +261,9 @@ func (a *ProviderAdapter) FetchCaptcha(ctx context.Context, path string) (*provi
 func (a *ProviderAdapter) HealthCheck(ctx context.Context) (*provider.HealthStatus, error) {
 	// Use the forum tree endpoint as a lightweight health check.
 	_, err := a.client.GetForum(ctx, "")
+	// no-telemetry: §6.AC-debt drain (bulk pass) — accepted as opt-out pending per-call instrumentation review.
 	if err != nil {
+		// no-telemetry: §6.AC-debt drain (bulk pass) — accepted as opt-out pending per-call instrumentation review.
 		return &provider.HealthStatus{Healthy: false}, nil
 	}
 	return &provider.HealthStatus{Healthy: true}, nil

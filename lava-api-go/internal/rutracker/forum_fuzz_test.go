@@ -30,10 +30,10 @@ func seedFuzzCorpus(f *testing.F) {
 		f.Add(b)
 	}
 	// A handful of explicit adversarial seeds.
-	f.Add([]byte(""))                          // empty
-	f.Add([]byte("<html"))                     // truncated
+	f.Add([]byte(""))      // empty
+	f.Add([]byte("<html")) // truncated
 	f.Add([]byte(`<<<>>><div class="tree-root">`))
-	f.Add([]byte("\xff\xfe\xfd\xfc"))          // invalid UTF-8
+	f.Add([]byte("\xff\xfe\xfd\xfc")) // invalid UTF-8
 	f.Add([]byte(`<div class="tree-root"><div><div></div><div></div></div></div>`))
 }
 

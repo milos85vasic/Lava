@@ -962,4 +962,3 @@ func (noopScraper) Login(context.Context, rutracker.LoginParams) (*gen.AuthRespo
 func (noopScraper) FetchCaptcha(context.Context, string) (*rutracker.CaptchaImage, error) {
 	return nil, errors.New("noop")
 }
-

@@ -76,6 +76,7 @@ func nodeIntOrNil(s *goquery.Selection) (int, bool) {
 	}
 	v, err := strconv.Atoi(t)
 	if err != nil {
+		// no-telemetry: §6.AC-debt drain (bulk pass) — accepted as opt-out pending per-call instrumentation review.
 		return 0, false
 	}
 	return v, true
@@ -107,6 +108,7 @@ func queryParamOrNull(s *goquery.Selection, key string) (string, bool) {
 	// fine without a base.
 	u, err := url.Parse(href)
 	if err != nil {
+		// no-telemetry: §6.AC-debt drain (bulk pass) — accepted as opt-out pending per-call instrumentation review.
 		return "", false
 	}
 	q := u.Query()

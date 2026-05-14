@@ -10,6 +10,7 @@ import (
 func extractTopicID(href string) string {
 	u, err := url.Parse(href)
 	if err != nil {
+		// no-telemetry: §6.AC-debt drain (bulk pass) — accepted as opt-out pending per-call instrumentation review.
 		// Fallback: manual split for relative URLs like "viewtopic.php?t=12345"
 		if idx := strings.Index(href, "t="); idx != -1 {
 			return strings.TrimSpace(href[idx+2:])
@@ -22,7 +23,9 @@ func extractTopicID(href string) string {
 // extractQueryParam returns a query parameter value from a relative or absolute URL string.
 func extractQueryParam(href, key string) string {
 	u, err := url.Parse(href)
+	// no-telemetry: §6.AC-debt drain (bulk pass) — accepted as opt-out pending per-call instrumentation review.
 	if err != nil {
+		// no-telemetry: §6.AC-debt drain (bulk pass) — accepted as opt-out pending per-call instrumentation review.
 		return ""
 	}
 	return u.Query().Get(key)

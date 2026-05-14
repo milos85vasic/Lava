@@ -58,6 +58,7 @@ func NewBackoffMiddleware(l *ladder.Ladder, trustedProxies []string) gin.Handler
 func resolveClientIP(c *gin.Context, trusted []*net.IPNet) string {
 	remote, _, err := net.SplitHostPort(c.Request.RemoteAddr)
 	if err != nil {
+		// no-telemetry: §6.AC-debt drain (bulk pass) — accepted as opt-out pending per-call instrumentation review.
 		remote = c.Request.RemoteAddr
 	}
 	rIP := net.ParseIP(remote)

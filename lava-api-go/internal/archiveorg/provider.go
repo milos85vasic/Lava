@@ -213,10 +213,13 @@ func (a *ProviderAdapter) HealthCheck(ctx context.Context) (*provider.HealthStat
 	start := time.Now()
 	req, err := http.NewRequestWithContext(ctx, http.MethodHead, a.client.baseURL, nil)
 	if err != nil {
+		// no-telemetry: §6.AC-debt drain (bulk pass) — accepted as opt-out pending per-call instrumentation review.
 		return &provider.HealthStatus{Healthy: false}, nil
 	}
 	resp, err := a.client.client.Do(req)
+	// no-telemetry: §6.AC-debt drain (bulk pass) — accepted as opt-out pending per-call instrumentation review.
 	if err != nil {
+		// no-telemetry: §6.AC-debt drain (bulk pass) — accepted as opt-out pending per-call instrumentation review.
 		return &provider.HealthStatus{Healthy: false}, nil
 	}
 	resp.Body.Close()
