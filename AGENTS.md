@@ -2,6 +2,10 @@
 
 > This file is intended for AI coding agents. It describes the project structure, build system, conventions, and things you need to know before modifying code.
 
+## INHERITED FROM constitution/AGENTS.md
+
+All rules in `constitution/AGENTS.md` (and the `constitution/Constitution.md` it references) apply unconditionally. Lava-specific rules below extend them — they MUST NOT weaken any inherited rule. The HelixConstitution submodule was incorporated 2026-05-14 (29th §6.L cycle); see root `CLAUDE.md` §6.AD + §6.AD-debt for the implementation-gap inventory.
+
 ## Project Overview
 
 **Lava** is an unofficial Android client for rutracker.org (and rutor.info). It consists of three main artifacts:

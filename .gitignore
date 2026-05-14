@@ -15,6 +15,11 @@ keystores/
 releases/
 tools/lava-containers/bin/
 
+# Hardlinked .git mirrors created before destructive operations
+# (HelixConstitution §9 absolute-data-safety). Per §6.AD: never tracked,
+# always recreated on demand, retention is operator's choice.
+.git-backup-*/
+
 # Local tool configuration and state
 .kimi/
 .specify/

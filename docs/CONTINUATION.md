@@ -11,7 +11,61 @@ same commit so the index stays trustworthy. Stale state in this file
 is itself a §6.J spirit issue — the file claims a guarantee, the
 repo has drifted, the agent acts on the claim.
 
-> **Last updated:** 2026-05-14, **1.2.19-1039 DISTRIBUTED to Firebase**
+> **Last updated:** 2026-05-14, **1.2.23-1043 / 2.3.12-2312 in progress**
+> — HelixConstitution submodule incorporated as `./constitution` at pin
+> `cb27ed8c`; §6.AD HelixConstitution Inheritance Mandate added (29th
+> §6.L cycle); §6.AD-debt opened (per-submodule pointer propagation,
+> `CM-*` gate wiring, no-guessing grep gate, build-resource sampler,
+> commit_all.sh external user guide, lightweight doc-only commit path,
+> §6.W applicability boundary check, `docs/helix-constitution-gates.md`
+> index). `scripts/commit_all.sh` thin wrapper added (§6.W-scoped to
+> GitHub + GitLab). Hardlinked `.git` backup at
+> `.git-backup-pre-helixconstitution-20260514-211450/` per HelixConstitution
+> §9 absolute-data-safety. Versions bumped per §6.Y as FIRST hunk
+> (1042→1043, 2311→2312). Constitutional-plumbing-only — no
+> user-visible feature change.
+>
+> **Prior:** 2026-05-14, **1.2.22-1042 / 2.3.11-2311 DISTRIBUTED to
+> Firebase** (debug stage 1 + release stage 2, operator pre-authorized
+> combined). About dialog author re-order (Milos Vasic first; vertical
+> spacing increased). Crashlytics 6-issue sweep: 3 fixed (#1
+> JobCancellationException filter, #5 okhttp scheme validation +
+> ProbeMirrorUseCase IllegalArgumentException catch, #6 RuTrackerNetworkApi
+> login Unknown wrap returning WrongCredits) + 3 closed-historical (#2
+> painterResource fixed in 1.2.20, #3 + #4 §6.Q nested-scroll forensic
+> anchor with structural guards). §6.AC Comprehensive Non-Fatal Telemetry
+> Mandate added (28th §6.L invocation): every catch/error/fallback path
+> records non-fatal with mandatory attributes (feature/operation/error_class/
+> error_message + per-platform extras); Android filter for CancellationException
+> + 1024-char truncation + Crashlytics non-fatal feed; Go-side
+> `internal/observability/RecordNonFatal` + `RecordWarning` with auto-redact
+> for password/token/secret/api_key/cookie/authorization/hmac/pepper.
+> Sample instrumentation in ForumViewModel + ProviderConfigViewModel. §6.AC
+> propagated to root + lava-api-go × 3 + 16 submodules × 3 = 53 docs.
+> §6.AC-debt opened. §6.AA-debt PARTIAL CLOSE: per-channel
+> last-version-{debug,release} pointers now written by firebase-distribute.sh.
+> Both APIs running 2.3.11 (prod compose + dev compose with separate
+> project namespace lava-dev). `last-version-debug` 1041→1042;
+> `last-version-release` 1041→1042. Console URLs: debug app
+> .../releases/0kbhn28t2dos0; release app .../releases/6rhlsoi7r7uko.
+>
+> **Prior:** 2026-05-14, **1.2.21-1041 DISTRIBUTED**, both stages.
+> Onboarding back-press from Welcome no longer marks onboarding-complete
+> (now posts ExitApp side effect; gate validation requires ≥1 provider
+> configured + tested). White-placeholder fix: WelcomeStep changed `Icon`
+> (which tints to LocalContentColor) to `Image` (preserves color). Birthed
+> §6.AB Anti-Bluff Test-Suite Reinforcement (27th §6.L) — non-crashing
+> failure-mode discrimination + per-feature anti-bluff completeness checklist.
+>
+> **Prior:** 2026-05-14, **1.2.20-1040 DISTRIBUTED**. Galaxy S23 Ultra
+> cold-launch crash fixed: `R.drawable.ic_lava_logo` was a `<layer-list>`
+> XML which `painterResource()` does NOT support; replaced with single
+> composited PNG per density (mdpi/hdpi/xhdpi/xxhdpi/xxxhdpi). Birthed
+> §6.Z Anti-Bluff Distribute Guard (26th §6.L) — pre-distribute test
+> execution mandatory; cold-start verification load-bearing canary;
+> source-compile is necessary, NEVER sufficient.
+>
+> **Prior:** 2026-05-14, **1.2.19-1039 DISTRIBUTED to Firebase**
 > per the operator's 25th §6.L invocation. Both APKs uploaded + invited
 > to the 3 testers configured in `.env`:
 >

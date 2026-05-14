@@ -46,3 +46,6 @@
 [submodule "Submodules/Tracker-SDK"]
 	path = Submodules/Tracker-SDK
 	url = https://github.com/vasic-digital/Tracker-SDK.git
+[submodule "constitution"]
+	path = constitution
+	url = git@github.com:HelixDevelopment/HelixConstitution.git

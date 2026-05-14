@@ -1,4 +1,27 @@
 # Changelog
+## Lava-Android-1.2.23-1043 / Lava-API-Go-2.3.12-2312 — 2026-05-14 (HelixConstitution submodule incorporated + §6.AD HelixConstitution Inheritance + 29th §6.L cycle)
+
+**Previous published:** Lava-Android-1.2.22-1042 (debug + release distributed earlier today).
+
+### HelixConstitution submodule (operator's prior 10-step directive, now executed)
+- `git@github.com:HelixDevelopment/HelixConstitution.git` cloned to `./constitution` at pin `cb27ed8c` (frozen).
+- Hardlinked `.git` backup at `.git-backup-pre-helixconstitution-20260514-211450/` per HelixConstitution §9 absolute-data-safety.
+- Inheritance pointer-blocks added to root `CLAUDE.md` + root `AGENTS.md`.
+- `scripts/commit_all.sh` thin wrapper added (§6.W-scoped: GitHub + GitLab).
+
+### Constitutional — §6.AD added (29th §6.L cycle)
+8 sub-clauses + §6.AD-debt with 8 implementation tracks. Operator + reviewer manually verify until mechanical wiring lands.
+
+### §6.L counter 28 → 29
+"continue" directive after 1.2.22 stage-2 release distribute = HelixConstitution incorporation work.
+
+### What's NOT in this version
+- No user-visible feature change (constitutional-plumbing only).
+- HelixConstitution `CM-*` gate set wiring deferred to rolling §6.AD-debt closure.
+- Per-submodule + per-scoped CLAUDE.md inheritance propagation deferred to §6.AD-debt phase 1.
+
+`Classification:` mixed — pattern universal, gaps project-specific.
+
 ## Lava-Android-1.2.22-1042 / Lava-API-Go-2.3.11-2311 — 2026-05-14 (About swap + Crashlytics 6-issue sweep + §6.AC Comprehensive Non-Fatal Telemetry Mandate)
 
 **Previous published:** Lava-Android-1.2.21-1041 (debug + release distributed)
