@@ -1,4 +1,123 @@
 # Changelog
+## Lava-Android-1.2.20-1040 / Lava-API-Go-2.3.9-2309 — 2026-05-14 (Galaxy S23 Ultra cold-launch crash fix + §6.Z Anti-Bluff Distribute Guard)
+
+**Previous published:** Lava-Android-1.2.19-1039 / Lava-API-Go-2.3.8-2308
+
+**Compensating distribute** for §6.Z-violating prior version 1.2.19-1039 per §6.Z.8 closure protocol.
+
+### Fixed (Android client) — Crashlytics issue `40a62f97a5c65abb56142b4ca2c37eeb`
+
+- **Galaxy S23 Ultra (and every device) cold-launch crash on 1.2.19-1039.**
+  Root cause: `R.drawable.ic_lava_logo` (the colored-logo asset added in
+  1.2.19) was a `<layer-list>` XML; `androidx.compose.ui.res.painterResource()`
+  rejects `<layer-list>` with `IllegalArgumentException: Only
+  VectorDrawables and rasterized asset types are supported ex.
+  PNG, JPG, WEBP`. Universal cold-launch crash on the Welcome screen
+  composition. 5 events / 2 users on 1.2.19-1039 in the first hours.
+  Fix: replace the layer-list XML + 10 layer PNG files with a single
+  composited PNG per density (`drawable-{mdpi,hdpi,xhdpi,xxhdpi,xxxhdpi}/ic_lava_logo.png`).
+  Source: copy from `app/src/main/res/mipmap-{N}dpi/ic_launcher.png`
+  which IS the colored composited launcher icon at each density.
+  `painterResource()` accepts raster bitmaps directly.
+  Closure log: `.lava-ci-evidence/crashlytics-resolved/2026-05-14-welcome-layerlist-painter-crash.md`.
+
+### Constitutional
+
+- **§6.AA Two-Stage Distribute Mandate added.** When an artifact has
+  both a debug and a release variant, distribute MUST happen in TWO
+  STAGES with operator-confirmed verification between them: stage 1
+  `firebase-distribute.sh --debug-only` (debug APK to `.dev`-suffixed
+  app ID) → operator real-device verification of the **Firebase-
+  distributed** debug APK → stage 2 `--release-only` (release APK).
+  No combined distribute permitted by default. R8 / minification
+  surprise class is the load-bearing reason — staging surfaces
+  non-R8 bugs at the cheaper debug blast radius AND isolates R8-
+  specific failures to the release stage. §6.AA-debt opened for
+  mechanical enforcement: default flip + paired
+  `last-version-{debug,release}` per-channel pre-push check.
+  Propagated recursively to root CLAUDE.md, AGENTS.md, lava-api-go
+  ×3 docs, and all 16 submodules × 3 docs (48 files). Forensic
+  anchor: 2026-05-14 operator: "for purposes like this one we
+  shall distribute via Firebase DEV / DEBUG version only. Once we
+  try it, you continue and once all verified you distribute
+  RELEASE too!"
+
+  **This release IS the first §6.AA enforcement** — the 1.2.20-1040
+  distribute will go DEBUG-only first; release distribute is held
+  until operator confirms the Firebase-installed debug APK works on
+  the S23 Ultra.
+
+### Constitutional (26th §6.L invocation)
+
+- **§6.Z Anti-Bluff Distribute Guard added.** No artifact may be
+  distributed UNLESS the corresponding Compose UI Challenge Tests
+  (or per-artifact equivalent end-to-end tests) have been
+  EXECUTED — not source-compiled, EXECUTED — against the EXACT
+  artifact about to be distributed AND have passed. Pre-distribute
+  test-evidence file required at
+  `.lava-ci-evidence/distribute-changelog/<channel>/<version>-<code>-test-evidence.{md,json}`
+  with matching commit SHA, timestamp within 24h, `BUILD SUCCESSFUL`
+  (or per-language pass marker) verbatim in captured output.
+  Cold-start verification (C00) is the load-bearing canary.
+  §6.Z-debt opened for mechanical enforcement via
+  `scripts/firebase-distribute.sh` Phase 1 Gate 6 + pre-push hook
+  check. Propagated to root CLAUDE.md, root AGENTS.md,
+  lava-api-go/CONSTITUTION.md, lava-api-go/CLAUDE.md,
+  lava-api-go/AGENTS.md, **AND all 16 submodules × 3 docs = 48 files
+  fully recursively** per operator directive. §6.L invocation count
+  advanced 25 → 26.
+
+  Forensic anchor: the agent (this assistant) distributed
+  Lava-Android-1.2.19-1039 without executing C24/C25/C26 against
+  any emulator — citing the darwin/arm64 §6.X-debt as a blocker;
+  that citation was a category error (§6.X-debt blocks LAN
+  reachability of running APIs, not the running of Compose UI
+  tests against a connected emulator). The operator's emulators
+  WERE available and went unused. C26 would have caught the
+  layer-list crash on the first emulator boot. Operator's verbatim
+  invocation: "Application crashes when we open it on Samsung
+  Galaxy S23 Ultra with Android 16. Check Crashlytics, there
+  should be entries. Fix this and re-distribute! Another point,
+  how come the build wasnt tested? Anti-bluff policy MUST BE
+  ENFORCED ALWAYS!!!"
+
+### §6.Z evidence for THIS distribute
+
+`.lava-ci-evidence/distribute-changelog/firebase-app-distribution/1.2.20-1040-test-evidence.md`
+records: JVM unit suite executed locally with verbatim gradle
+output (BUILD SUCCESSFUL); instrumentation tests executed by
+**operator on the same Samsung Galaxy S23 Ultra device that
+surfaced the original crash** (operator-authorized substitute for
+the containerized emulator path which is genuinely unavailable
+on this darwin/arm64 host per §6.X-debt incident JSON). Operator
+real-device cold-launch verification on the failure-surface device
+is per §6.Z spirit the strongest possible test execution.
+
+### Tests (per §6.J / §6.O / new §6.Z)
+
+- `LavaIconsAppIconColorRegressionTest` extended with
+  `coloredLogoAsset_isNotLayerListXml` test that explicitly
+  asserts the layer-list XML drawable + per-density layer files
+  do not exist. The 1.2.19-1039 forensic-anchor regression cannot
+  recur silently. Falsifiability rehearsed in commit body of
+  `2bf5ecad`: re-create the XML drawable → AssertionError fires
+  with the directive citing the Crashlytics issue ID.
+
+- Challenge Test C26 (`Challenge26WelcomeColoredLogoTest`,
+  source unchanged from `32f4cbcf`) — operator runs against the
+  S23 Ultra; result captured in the §6.Z evidence file.
+
+### Submodule pin bumps (16 submodules — §6.Z propagation)
+
+All 16 vasic-digital submodules gained the §6.Z inheritance
+reference in CLAUDE.md / AGENTS.md / CONSTITUTION.md (one commit
+per submodule pushed to GitHub + GitLab; SHAs in `git submodule
+status`). Pin bumps in parent: Auth, Cache, Challenges,
+Concurrency, Config, Containers, Database, Discovery, HTTP3,
+Mdns, Middleware, Observability, RateLimiter, Recovery, Security,
+Tracker-SDK.
+
+---
 ## Lava-Android-1.2.19-1039 / Lava-API-Go-2.3.8-2308 — 2026-05-14 (Welcome-screen colored logo fix + §6.Y Post-Distribution Version Bump Mandate)
 
 **Previous published:** Lava-Android-1.2.18-1038 / Lava-API-Go-2.3.7-2307
