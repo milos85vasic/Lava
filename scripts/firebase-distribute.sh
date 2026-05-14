@@ -34,12 +34,22 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/firebase-env.sh"
 cd "$LAVA_REPO_ROOT"
 
-MODE="${1:-both}"
+# §6.AA Two-Stage Distribute Mandate — closes §6.AA-debt:
+# Default mode is now `debug` (stage 1). The legacy `both` is reserved for
+# explicit operator-pre-authorized combined invocation (--debug-and-release).
+# A bare `--release-only` invocation REQUIRES a matching debug-stage evidence
+# section in the §6.Z evidence file for the same SHA, recorded by the prior
+# stage-1 run. The default flip prevents the single-sweep failure mode that
+# birthed §6.AA (1.2.19-1039 forensic anchor: combined distribute pushed both
+# debug + release before any device verification; release crashed every cold
+# launch via R8 + painterResource layer-list rejection).
+MODE="debug"
 RELEASE_NOTES_OVERRIDE=""
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --debug-only) MODE="debug"; shift ;;
         --release-only) MODE="release"; shift ;;
+        --debug-and-release|--both) MODE="both"; shift ;;
         --release-notes) RELEASE_NOTES_OVERRIDE="$2"; shift 2 ;;
         *) shift ;;
     esac
@@ -120,6 +130,24 @@ if [[ -f "$GATE_FILE" ]]; then
         echo "FATAL §6.P: current versionCode $APP_VERSION_CODE is not strictly greater than the last distributed code $LAST_DISTRIBUTED on the $GATE_LABEL channel." >&2
         echo "       Bump versionCode in app/build.gradle.kts before re-running this script." >&2
         echo "       Re-distribution of an already-published versionCode on this channel is forbidden." >&2
+        exit 1
+    fi
+fi
+
+# §6.AA Gate (added 2026-05-14): release stage MUST follow debug stage.
+# Closes §6.AA-debt's release-without-companion-debug check. When MODE=release,
+# require last-version-debug to be at LEAST equal to current versionCode (i.e.
+# stage 1 has already advanced the debug pointer for THIS versionCode). This
+# blocks the historical failure mode where release pushed before debug, surfacing
+# R8-only crashes only at release impact.
+if [[ "$MODE" == "release" && -f "$LAST_VERSION_DEBUG_FILE" ]]; then
+    LAST_DEBUG="$(cat "$LAST_VERSION_DEBUG_FILE" 2>/dev/null || echo 0)"
+    if [[ "$APP_VERSION_CODE" -gt "$LAST_DEBUG" ]]; then
+        echo "FATAL §6.AA: --release-only invoked for versionCode $APP_VERSION_CODE but last-version-debug is $LAST_DEBUG (debug stage 1 has not yet distributed this versionCode)." >&2
+        echo "       The §6.AA Two-Stage Distribute Mandate requires Stage 1 (debug) to complete BEFORE Stage 2 (release)." >&2
+        echo "       Either:" >&2
+        echo "         (a) run --debug-only first to distribute the debug variant + obtain operator verification on the failure-surface device" >&2
+        echo "         (b) operator-pre-authorize combined distribute via --debug-and-release (NOT recommended; bypasses staging)" >&2
         exit 1
     fi
 fi
