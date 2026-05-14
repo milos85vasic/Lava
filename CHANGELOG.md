@@ -1,4 +1,104 @@
 # Changelog
+## Lava-Android-1.2.18-1038 / Lava-API-Go-2.3.7-2307 — 2026-05-14 (3 user-reported issues closed: onboarding back-nav + S23 Ultra insets + DEV API discovery)
+
+**Previous published:** Lava-Android-1.2.17-1037 / Lava-API-Go-2.3.6-2306
+
+### Fixed (Android client)
+
+- **Onboarding back navigation works on every step.** The pre-fix
+  `BackHandler` predicate in `OnboardingScreen.kt` was inverted
+  (intercepted on Welcome where it should fall through; ignored on
+  Providers / Configure / Summary where the user actively needs to
+  walk back). The VM's `onBackStep()` was correctly designed but
+  never reached. Two production changes: (a) `BackHandler(enabled =
+  true)` so the VM decides per-step what back means; (b)
+  `onBackStep()` extended so Configure with `currentProviderIndex >
+  0` decrements through the per-provider Configure pages before
+  returning to the Providers list, and Summary now re-enters
+  Configure on the last selected provider so the user can amend a
+  config they've already reviewed. Commit `6a315a28`. 5 new VM
+  unit tests in `OnboardingViewModelTest` cover all four
+  transitions; Challenge Test C24
+  (`Challenge24OnboardingBackNavigationTest`) is the load-bearing
+  instrumentation gate per §6.J — drives
+  `composeRule.activity.onBackPressedDispatcher.onBackPressed()`
+  and asserts the rendered screen transitioned. Operator-rehearsed
+  falsifiability stamp in commit body.
+
+- **Onboarding no longer overlaps the system bars on tall-aspect
+  devices (Samsung Galaxy S23 Ultra reproduction).** MainActivity
+  calls `enableEdgeToEdge`, but `OnboardingScreen.kt`'s
+  `AnimatedContent` container did not apply
+  `Modifier.windowInsetsPadding(WindowInsets.safeDrawing)`. Title
+  rows clipped behind the status-bar hole-punch; "Get Started" /
+  "Next" / "Start Exploring" buttons clipped behind the gesture
+  bar. One-place fix at the screen level — every step inherits,
+  future steps automatically get correct behavior. `safeDrawing`
+  also handles IME so Configure's text fields stay above the
+  keyboard. Commit `09ce7466`.
+  `OnboardingInsetRegressionTest` (JVM, runs in pre-push gate)
+  asserts the modifier + imports are present in source — anyone
+  removing them in a future commit fails the test. Falsifiability
+  rehearsal recorded in commit body. Challenge Test C25
+  (`Challenge25OnboardingInsetSafeDrawingTest`) drives the wizard
+  on a tall-aspect AVD and asserts both top + bottom anchored
+  nodes are reported displayed.
+
+### Added (DEV API instance)
+
+- **Side-by-side DEV lava-api-go on `_lava-api-dev._tcp` port
+  8543.** Developers can now iterate on the Go API without
+  disturbing the production instance. New `docker-compose.dev.yml`
+  brings up `lava-postgres-dev` (host port 5433, schema
+  `lava_api_dev`) + `lava-migrate-dev` + `lava-api-go-dev`
+  reusing the same binary with dev-flavored env values. Only the
+  **debug** Android build (applicationIdSuffix `.dev`) subscribes
+  to the dev service type via the new
+  `DiscoveryServiceTypesModule` Hilt provider; release builds
+  ignore it entirely so a stray dev advertiser on a real user's
+  LAN cannot redirect their traffic. Commit `69b389a2`. New
+  `Engine.GoDev` enum value, new `DiscoveryServiceTypeCatalog`
+  exposing `SERVICE_TYPES_RELEASE` + `SERVICE_TYPES_DEBUG`,
+  domain `toEndpoint()` maps GoDev to `Endpoint.GoApi`. New
+  §6.A real-binary contract test
+  (`lava-api-go/tests/contract/dev_compose_env_contract_test.go`)
+  asserts every `LAVA_API_*` env var the dev compose passes binds
+  to a field `config.Load()` actually reads — drift between the
+  compose file and `internal/config/config.go` is now a CI-time
+  failure. Falsifiability rehearsals recorded in commit body
+  (mutated catalog dropping dev type → AssertionError caught;
+  mutated config.go renaming `LAVA_API_MDNS_TYPE` → contract test
+  fired with the precise error message).
+  `.env.example` documents `LAVA_API_DEV_*` overrides.
+
+### Documentation
+
+- **CLAUDE.md targeted improvements** (commit `225f8351`, no
+  constitutional clause text touched): `docs/CONTINUATION.md`
+  promoted to first entry in "See also" header per §6.S;
+  `CHANGELOG.md` listed per §6.P; multi-tracker reality reflected
+  in Project section; commands gain the single Compose UI
+  Challenge Test invocation example +
+  `scripts/firebase-distribute.sh` (§6.P enforcer) +
+  `scripts/scan-no-hardcoded-{uuid,ipv4,hostport}.sh` siblings
+  (§6.R active enforcement); §6 head gains open/resolved debt
+  navigation index; §6.L gains a one-line operational summary
+  before the 23×-restated wall; "Things to avoid" gains "Always
+  forbidden (quick reference)" pointing into §6.R/U/V/W + Host
+  Stability.
+
+### Open work
+
+- §6.X-debt remains open (Linux x86_64 gate-host provisioning for
+  the container-bound emulator matrix; darwin/arm64 blocked per
+  `.lava-ci-evidence/sixth-law-incidents/2026-05-13-emulator-
+  container-darwin-arm64-gap.json`).
+- Distribute remains operator-blocked on placeholder
+  `app/google-services.json` + placeholder `LAVA_FIREBASE_TOKEN`
+  + placeholder tracker credentials per the §6.L 23rd invocation
+  forensic note (carried over from 1.2.17-1037).
+
+---
 ## Lava-Android-1.2.17-1037 / Lava-API-Go-2.3.6-2306 — 2026-05-13 (§6.X-debt PARTIAL CLOSE + §6.L 21st-23rd invocations)
 
 **Previous published:** Lava-Android-1.2.16-1036 / Lava-API-Go-2.3.5-2305

@@ -11,7 +11,21 @@ same commit so the index stays trustworthy. Stale state in this file
 is itself a §6.J spirit issue — the file claims a guarantee, the
 repo has drifted, the agent acts on the claim.
 
-> **Last updated:** 2026-05-14, **issue 3/3 closed** — DEV API instance
+> **Last updated:** 2026-05-14, **release-prep for 1.2.18-1038 / 2.3.7-2307**
+> per §6.P. All three operator-reported 2026-05-14 issues now bundled
+> into one distribute candidate. `app/build.gradle.kts`: versionCode
+> 1037→1038, versionName 1.2.17→1.2.18. `lava-api-go/internal/version/
+> version.go`: Code 2306→2307, Name 2.3.6→2.3.7. CHANGELOG.md gains
+> the canonical entry; per-version snapshot at `.lava-ci-evidence/
+> distribute-changelog/firebase-app-distribution/Lava-Android-1.2.18-
+> 1038.md` records test + falsifiability evidence per release-block
+> conventions. **`last-version` pointer stays at 1037** — it advances
+> only on actual successful distribute, not on code commit. NOT
+> distributed: same operator-input checklist from 1.2.17-1037 still
+> blocks (real `app/google-services.json`, real `LAVA_FIREBASE_TOKEN`,
+> real tracker credentials, Linux x86_64 §6.X gate host).
+>
+> **Prior:** 2026-05-14, **issue 3/3 closed** — DEV API instance
 > recognition. New `_lava-api-dev._tcp` mDNS service type ships in
 > `core/data/api/service/DiscoveryServiceTypeCatalog.kt` (canonical
 > public catalog: `SERVICE_TYPES_RELEASE` + `SERVICE_TYPES_DEBUG` add
