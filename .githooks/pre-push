@@ -192,6 +192,25 @@ while read -r local_ref local_sha remote_ref remote_sha; do
       fi
     done
 
+    # ===== Check 9: §11.4.18 / CM-SCRIPT-DOCS-SYNC — script doc sync =====
+    # Closes CM-SCRIPT-DOCS-SYNC. When a commit modifies scripts/X.sh, the
+    # companion docs/scripts/X.sh.md MUST be modified in the SAME commit
+    # (per HelixConstitution §11.4.18). Exemption: if no companion doc
+    # exists yet (first commit of a new script), the next commit MUST add
+    # the companion — but this gate doesn't enforce that follow-up.
+    diff_files=$(git diff-tree --no-commit-id --name-only -r "$sha")
+    while IFS= read -r f; do
+      [[ "$f" =~ ^scripts/.*\.sh$ ]] || continue
+      script_basename=$(basename "$f")
+      doc_path="docs/scripts/${script_basename}.md"
+      # If the doc exists AT THIS COMMIT, it must have been touched in this commit.
+      if git cat-file -e "$sha:$doc_path" 2>/dev/null; then
+        if ! grep -qF "$doc_path" <<<"$diff_files"; then
+          violations+=("$sha: §11.4.18/CM-SCRIPT-DOCS-SYNC violation — modifies $f without modifying companion $doc_path in the same commit. Add the doc update to this commit, OR use commit_all.sh --no-push first to amend.")
+        fi
+      fi
+    done <<<"$diff_files"
+
     # ===== Check 8: §11.4.17 Classification: line on new-rule commits =====
     # Closes §6.AD-debt item 6. When a commit adds a new constitutional clause
     # (line matching ^##### 6\.[A-Z]+ — added) to CLAUDE.md, the commit body
