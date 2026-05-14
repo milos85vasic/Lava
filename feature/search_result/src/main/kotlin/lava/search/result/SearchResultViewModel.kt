@@ -92,6 +92,12 @@ internal class SearchResultViewModel @Inject constructor(
         return try {
             observeSettingsUseCase().first().endpoint is Endpoint.GoApi
         } catch (t: Throwable) {
+            // no-telemetry: feature-flag-style endpoint probe — the
+            // boolean false return causes the ViewModel to fall through
+            // to the client-direct SDK path (SP-4 Phase D), which IS the
+            // safe fallback behavior. Throwable here generally means
+            // settings repository not yet hot; firing telemetry on every
+            // hot-restart would be noise.
             false
         }
     }

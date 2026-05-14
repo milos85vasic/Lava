@@ -117,6 +117,11 @@ internal class ConnectionServiceImpl @Inject constructor(
                 connection.connect()
                 connection.responseCode in 200..399
             } catch (e: IOException) {
+                // no-telemetry: connectivity probe — IOException is the
+                // EXPECTED outcome when the network is offline OR the
+                // probed host is unreachable. The boolean return IS the
+                // user-visible signal (UI shows offline badge); telemetry
+                // here would fire on every airplane-mode toggle.
                 false
             } finally {
                 connection.disconnect()

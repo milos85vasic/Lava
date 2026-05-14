@@ -37,8 +37,18 @@ class ProbeMirrorUseCase @Inject constructor(
             }
         }
     } catch (e: IllegalArgumentException) {
+        // no-telemetry: user-typed mirror URL with bad scheme — the result
+        // (ProbeResult.Unreachable with the parser's message) IS the
+        // user-visible signal (toast in ProviderConfigViewModel.AddMirror).
+        // Telemetry here would noise on every typo. Crashlytics #5 (1.2.21)
+        // forensic anchor: this catch was added because okhttp threw
+        // IllegalArgumentException up to the user; the catch converts to a
+        // graceful fallback. No background-tracking value.
         ProbeResult.Unreachable("invalid URL: ${e.message ?: e::class.simpleName ?: "malformed"}")
     } catch (e: IOException) {
+        // no-telemetry: connectivity-probe path — IOException is the
+        // EXPECTED outcome when the probed mirror is offline. The result
+        // value IS the user-visible signal.
         ProbeResult.Unreachable(e.message ?: e::class.simpleName ?: "io")
     }
 }

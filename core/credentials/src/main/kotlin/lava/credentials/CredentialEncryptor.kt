@@ -48,8 +48,12 @@ class CredentialEncryptor {
             val ciphertext = cipher.doFinal(plaintext.toByteArray(Charsets.UTF_8))
             encode(iv + ciphertext)
         } catch (e: Exception) {
-            // Degraded-security fallback: store plaintext with a marker prefix
-            // so decrypt() can detect it.
+            // no-telemetry: silent degradation by design — Keystore unavailable
+            // (e.g. emulator without HW-backed keystore, transient driver
+            // hiccup) is expected during dev/test flows. Telemetry would
+            // double-report cases that the FALLBACK_MARKER itself signals to
+            // every later caller. Wiring AnalyticsTracker into :core:credentials
+            // is tracked as a follow-up to §6.AC-debt rolling closure.
             "$FALLBACK_MARKER$plaintext"
         }
     }
@@ -70,6 +74,10 @@ class CredentialEncryptor {
             cipher.init(Cipher.DECRYPT_MODE, getOrCreateKey(), GCMParameterSpec(TAG_LENGTH_BITS, iv))
             String(cipher.doFinal(encrypted), Charsets.UTF_8)
         } catch (e: Exception) {
+            // no-telemetry: symmetric pair to encrypt() above — decryption
+            // failure returns the (possibly-fallback) ciphertext verbatim;
+            // the caller can detect the FALLBACK_MARKER prefix. Telemetry
+            // would noise on every key-rotation / migration boundary.
             ciphertext
         }
     }

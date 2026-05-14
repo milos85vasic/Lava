@@ -36,6 +36,9 @@ internal class StoreServiceImpl @Inject constructor(
     private fun isRuStoreInstalled() = try {
         context.packageManager.getApplicationInfo("ru.vk.store", 0).enabled
     } catch (e: PackageManager.NameNotFoundException) {
+        // no-telemetry: NameNotFoundException is the EXPECTED path when
+        // the user does not have RuStore installed. This is the canonical
+        // Android idiom for capability detection — there is no error here.
         false
     }
 }

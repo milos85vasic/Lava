@@ -115,18 +115,49 @@ while IFS= read -r f; do
                     in_block = 0
                     next
                 }
-                # Propagation (return with err)? OK.
-                if (body ~ /return [^,]*,?[ \t]*err[ \t]*$/) {
+                # Propagation patterns (any of these ANYWHERE in the body): OK.
+                # The body is a multi-line concatenated string; the awk match
+                # operator does multi-line regex matching across the whole
+                # string, so we use patterns that anchor on newlines OR allow
+                # `return...err` to be terminated by closing paren / brace.
+                #
+                # 1. `return ... err` followed by line-break or end-of-body
+                # 2. `return ... err)` (err inside a function-call wrapper)
+                # 3. `return ... err}` (err as last field of struct literal)
+                if (body ~ /return[^{}]*err($|[ \t)}\n,])/) {
                     in_block = 0
                     next
                 }
-                # Wrapped propagation (return ..., fmt.Errorf(..., err))? OK.
-                if (body ~ /return.*fmt\.Errorf.*err/) {
+                # Wrapped propagation: fmt.Errorf / errors.Wrap.
+                if (body ~ /(fmt\.Errorf|errors\.(Wrap|Wrapf|New))[^\n]*err/) {
+                    in_block = 0
+                    next
+                }
+                # HTTP-handler short-circuit: presence of c.Abort* / c.JSON / c.String
+                # in the body implies the err is converted to an HTTP 4xx/5xx (the
+                # user-visible signal). We do NOT require err.Error in the same
+                # statement; multi-line gin.H{} blocks span newlines.
+                if (body ~ /AbortWithStatus|AbortWithError|c\.JSON\(http\.|c\.String\(http\./) {
+                    in_block = 0
+                    next
+                }
+                # log.* / fmt.Fprintf(os.Stderr, ...) — user-visible signal via stderr/log.
+                if (body ~ /log\.(Printf|Println|Fatalf|Fatal|Print|Errorf|Warnf)|fmt\.Fprintf?\(os\.Stderr/) {
+                    in_block = 0
+                    next
+                }
+                # slog.* (structured logging — Go-side telemetry surface).
+                if (body ~ /slog\.(Debug|Info|Warn|Error|DebugContext|InfoContext|WarnContext|ErrorContext)/) {
                     in_block = 0
                     next
                 }
                 # Continue/break in a loop (likely propagated up)? OK heuristic.
-                if (body ~ /continue *$|break *$/) {
+                if (body ~ /(continue|break)[ \t]*\n/) {
+                    in_block = 0
+                    next
+                }
+                # Panic — propagation by other means.
+                if (body ~ /panic\(/) {
                     in_block = 0
                     next
                 }

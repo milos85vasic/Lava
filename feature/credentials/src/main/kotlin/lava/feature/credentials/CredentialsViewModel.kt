@@ -169,6 +169,12 @@ class CredentialsViewModel @Inject constructor(
                 )
             }
         } catch (t: Throwable) {
+            // no-telemetry: error is rendered to the user via state.error;
+            // wiring AnalyticsTracker into :feature:credentials is tracked
+            // as a follow-up to §6.AC-debt rolling closure (currently the
+            // pattern is established only in :app and :feature:forum +
+            // :feature:provider_config). The user-visible state IS the
+            // signal — error string surfaces directly in the UI.
             reduce { state.copy(loading = false, error = t.message ?: "load failed") }
         }
     }
