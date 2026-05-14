@@ -88,7 +88,18 @@ object LavaIcons {
 
     val Account: Icon = Icon.ImageVectorIcon(MaterialIcons.SwitchAccount)
     val Add: Icon = Icon.ImageVectorIcon(MaterialIcons.Add)
-    val AppIcon: Icon = Icon.DrawableResourceIcon(R.drawable.ic_notification)
+
+    // Full-color Lava brand mark. Used by the onboarding Welcome screen
+    // and any future surface that needs the colored logo. The previous
+    // value (R.drawable.ic_notification) was the monochrome notification
+    // glyph required by Android's notification system — surfacing as the
+    // black-and-white Welcome icon reported on 2026-05-14. The colored
+    // composite drawable lives at R.drawable.ic_lava_logo (layer-list of
+    // ic_lava_logo_background + ic_lava_logo_foreground at 5 densities).
+    val AppIcon: Icon = Icon.DrawableResourceIcon(R.drawable.ic_lava_logo)
+
+    /** Monochrome glyph kept for use by AndroidManifest's notification icon. */
+    val NotificationIcon: Icon = Icon.DrawableResourceIcon(R.drawable.ic_notification)
     val Author: Icon = Icon.ImageVectorIcon(MaterialIcons.PersonSearch)
     val BackArrow: Icon = Icon.ImageVectorIcon(MaterialIconsAutoMirrored.ArrowBack)
     val Blocked: Icon = Icon.ImageVectorIcon(MaterialIcons.LinkOff)

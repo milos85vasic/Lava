@@ -11,7 +11,21 @@ same commit so the index stays trustworthy. Stale state in this file
 is itself a §6.J spirit issue — the file claims a guarantee, the
 repo has drifted, the agent acts on the claim.
 
-> **Last updated:** 2026-05-14, **1.2.18-1038 DISTRIBUTED to Firebase**
+> **Last updated:** 2026-05-14, **release-prep for 1.2.19-1039 / 2.3.8-2308**
+> per §6.P + §6.Y. New version bump landed FIRST per the new §6.Y
+> Post-Distribution Version Bump Mandate (25th §6.L invocation):
+> versionCode 1038→1039, versionName 1.2.18→1.2.19 (patch — user-visible
+> bug fix), Go 2306→2308 + 2.3.7→2.3.8 (lockstep). Single fix in this
+> cycle: WelcomeStep monochrome logo → colored Lava logo
+> (`R.drawable.ic_lava_logo` layer-list of background+foreground PNGs
+> at 5 densities; `LavaIcons.AppIcon` rewired). 2 new tests (JVM unit
+> structural + Compose UI Challenge Test C26 with bitmap RGB-variance
+> assertion). Falsifiability rehearsed (revert AppIcon to
+> ic_notification → AssertionError fires with full guidance). §6.Y
+> rule + §6.Y-debt block added to root CLAUDE.md, root AGENTS.md,
+> lava-api-go/CONSTITUTION.md.
+>
+> **Prior:** 2026-05-14, **1.2.18-1038 DISTRIBUTED to Firebase**
 > per the operator's 24th §6.L invocation. Both APKs uploaded + invited
 > to the 3 testers configured in `.env`:
 >

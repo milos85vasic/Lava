@@ -1,4 +1,67 @@
 # Changelog
+## Lava-Android-1.2.19-1039 / Lava-API-Go-2.3.8-2308 — 2026-05-14 (Welcome-screen colored logo fix + §6.Y Post-Distribution Version Bump Mandate)
+
+**Previous published:** Lava-Android-1.2.18-1038 / Lava-API-Go-2.3.7-2307
+
+### Fixed (Android client)
+
+- **Welcome screen now renders the colored Lava logo** instead of
+  the monochrome notification glyph. Pre-fix:
+  `LavaIcons.AppIcon = Icon.DrawableResourceIcon(R.drawable.ic_notification)`
+  surfaced the Android-required monochrome notification icon as
+  the brand mark on first-launch users' Welcome screen. Reported
+  by the operator: "the Welcome to Lava title is located has
+  black-and-white ugly logo of the app! It MUST BE our nicely
+  colored red log in full color!". Fix: introduced
+  `R.drawable.ic_lava_logo` (layer-list compositing the colored
+  launcher background + foreground PNGs at 5 densities — mdpi
+  through xxxhdpi) in `core:designsystem`, rewired
+  `LavaIcons.AppIcon` to it, preserved the monochrome icon as
+  `LavaIcons.NotificationIcon` for the AndroidManifest. Commit:
+  this release's icon-fix commit.
+
+### Constitutional (25th §6.L invocation)
+
+- **§6.Y Post-Distribution Version Bump Mandate added.** After every
+  successful distribution of any artifact (Android APK via Firebase
+  App Distribution, Google Play Store release, container image push,
+  lava-api-go binary release, any future distributable artifact), the
+  FIRST commit in the new development cycle that touches code MUST
+  bump the artifact's `versionCode` integer (and the per-artifact
+  equivalent for non-Android targets). The `versionName` semver MUST
+  be bumped too when the changes warrant a user-visible version
+  change (patch for bug fix, minor for feature, major for breaking
+  change). §6.Y-debt opened for pre-push hook + check-constitution.sh
+  mechanical enforcement. Propagated to root CLAUDE.md, root
+  AGENTS.md, lava-api-go/CONSTITUTION.md. Submodule (16 × 3 docs)
+  propagation deferred per §6.F default inheritance.
+
+### Tests + falsifiability evidence (per §6.J / §6.N.1.1)
+
+- **JVM unit:** `core/designsystem/.../LavaIconsAppIconColorRegressionTest.kt` —
+  reads `LavaIcons.kt` and asserts `AppIcon` references
+  `R.drawable.ic_lava_logo`; verifies the colored PNG layer assets
+  exist at every density (10 files: 5 densities × 2 layers); verifies
+  the composite XML drawable exists. Falsifiability rehearsed:
+  reverted `AppIcon` to `R.drawable.ic_notification`; observed test
+  failure with full directive message; restored; pass.
+
+- **Compose UI Challenge Test C26:**
+  `app/src/androidTest/.../Challenge26WelcomeColoredLogoTest.kt`
+  drives the real Welcome screen on the gating matrix and asserts
+  the rendered bitmap has measurable RGB variance per channel
+  (rangeR/G/B > 32 each, rgbDelta > 32) — i.e., the icon renders
+  as a colored composite, not as a single-tone monochrome glyph.
+  Source compiles via `:app:compileDebugAndroidTestKotlin`.
+  Instrumentation gating run owed at next §6.X-mounted gate host.
+
+### Operator-input checklist (carried forward, all satisfied)
+
+Same as 1.2.18-1038 — all real, all distribute-eligible. Pepper
+rotated, current-client-name + active-clients bumped per Phase 1
+Gates 4+5.
+
+---
 ## Lava-Android-1.2.18-1038 / Lava-API-Go-2.3.7-2307 — 2026-05-14 (3 user-reported issues closed: onboarding back-nav + S23 Ultra insets + DEV API discovery)
 
 **Previous published:** Lava-Android-1.2.17-1037 / Lava-API-Go-2.3.6-2306
