@@ -20,6 +20,10 @@ tools/lava-containers/bin/
 # always recreated on demand, retention is operator's choice.
 .git-backup-*/
 
+# §11.4.24 build-stats per-sample tempfiles (registry.tsv IS tracked).
+.lava-ci-evidence/build-stats/.sample-*
+.lava-ci-evidence/build-stats/.meta-*
+
 # Local tool configuration and state
 .kimi/
 .specify/
