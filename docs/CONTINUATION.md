@@ -12,18 +12,23 @@ is itself a §6.J spirit issue — the file claims a guarantee, the
 repo has drifted, the agent acts on the claim.
 
 > **Last updated:** 2026-05-14, **release-prep for 1.2.18-1038 / 2.3.7-2307**
-> per §6.P. All three operator-reported 2026-05-14 issues now bundled
-> into one distribute candidate. `app/build.gradle.kts`: versionCode
+> per §6.P. All three operator-reported 2026-05-14 issues bundled into
+> one distribute candidate. `app/build.gradle.kts`: versionCode
 > 1037→1038, versionName 1.2.17→1.2.18. `lava-api-go/internal/version/
-> version.go`: Code 2306→2307, Name 2.3.6→2.3.7. CHANGELOG.md gains
-> the canonical entry; per-version snapshot at `.lava-ci-evidence/
-> distribute-changelog/firebase-app-distribution/Lava-Android-1.2.18-
-> 1038.md` records test + falsifiability evidence per release-block
-> conventions. **`last-version` pointer stays at 1037** — it advances
-> only on actual successful distribute, not on code commit. NOT
-> distributed: same operator-input checklist from 1.2.17-1037 still
-> blocks (real `app/google-services.json`, real `LAVA_FIREBASE_TOKEN`,
-> real tracker credentials, Linux x86_64 §6.X gate host).
+> version.go`: Code 2306→2307, Name 2.3.6→2.3.7. CHANGELOG.md +
+> per-version snapshot at `.lava-ci-evidence/distribute-changelog/
+> firebase-app-distribution/Lava-Android-1.2.18-1038.md` document the
+> release. **STATUS UPDATE 2026-05-14 post-release-prep:** the prior
+> note's "operator-blocked on placeholder" claim is STALE. Operator
+> has since provided real `app/google-services.json` (Firebase project
+> `lava-vasic-digital` / 815513478335), real `LAVA_FIREBASE_TOKEN`
+> (firebase login:list confirms authenticated), real tracker
+> credentials, both keystores. Distribute IS now eligible. Active
+> distribute + API-bring-up + comprehensive test cycle is in flight
+> per the operator's 24th §6.L invocation. The §6.X-debt remains open
+> (container-bound emulator matrix needs Linux x86_64 gate host) but
+> workstation-iteration emulator runs on the operator's host are
+> permitted per §6.K-debt PARTIAL CLOSE.
 >
 > **Prior:** 2026-05-14, **issue 3/3 closed** — DEV API instance
 > recognition. New `_lava-api-dev._tcp` mDNS service type ships in

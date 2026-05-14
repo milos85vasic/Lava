@@ -92,11 +92,27 @@
 - §6.X-debt remains open (Linux x86_64 gate-host provisioning for
   the container-bound emulator matrix; darwin/arm64 blocked per
   `.lava-ci-evidence/sixth-law-incidents/2026-05-13-emulator-
-  container-darwin-arm64-gap.json`).
-- Distribute remains operator-blocked on placeholder
-  `app/google-services.json` + placeholder `LAVA_FIREBASE_TOKEN`
-  + placeholder tracker credentials per the §6.L 23rd invocation
-  forensic note (carried over from 1.2.17-1037).
+  container-darwin-arm64-gap.json`). Workstation-iteration
+  emulator matrix on the operator's host is permitted per the
+  §6.K-debt PARTIAL CLOSE; release tagging awaits the gate host.
+
+### Operator-input checklist update (2026-05-14, post-distribute prep)
+
+The placeholders cited in 1.2.17-1037's release-prep note have
+since been resolved by the operator:
+
+- `app/google-services.json` — REAL (Firebase project
+  `lava-vasic-digital`, project number `815513478335`).
+- `LAVA_FIREBASE_TOKEN` — REAL; `firebase login:list` reports
+  authenticated as `milos85vasic@gmail.com`; `firebase
+  projects:list` returns the lava project.
+- App Distribution testers configured in the Firebase Console
+  (3 emails wired via `.env`).
+- `RUTRACKER_USERNAME` / `RUTRACKER_PASSWORD` — REAL.
+- Both `keystores/{debug,release}.keystore` present.
+
+This release is consequently distribute-eligible. The 1.2.17-1037
+"NOT distributed" note is no longer load-bearing.
 
 ---
 ## Lava-Android-1.2.17-1037 / Lava-API-Go-2.3.6-2306 — 2026-05-13 (§6.X-debt PARTIAL CLOSE + §6.L 21st-23rd invocations)

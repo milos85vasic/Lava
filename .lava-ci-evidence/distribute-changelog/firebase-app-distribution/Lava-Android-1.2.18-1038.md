@@ -92,21 +92,35 @@
   Welcome / Providers / Summary. Source compiled; instrumentation
   run PENDING per §6.X-debt.
 
+### Distribute readiness
+
+Operator inputs cited as blocking in the 1.2.17-1037 release-prep
+note (placeholder `app/google-services.json`, placeholder
+`LAVA_FIREBASE_TOKEN`, placeholder tracker credentials) have ALL
+been provided since that snapshot. As of this snapshot:
+
+- `app/google-services.json` resolves Firebase project
+  `lava-vasic-digital` (project number `815513478335`); real
+  Android app IDs wired in `.env` for prod + dev variants.
+- `LAVA_FIREBASE_TOKEN` is authenticated; `firebase
+  projects:list` returns Lava successfully.
+- 3 testers configured in Firebase App Distribution
+  (visible via `firebase appdistribution:testers:list
+  --project lava-vasic-digital`).
+- Tracker credentials in `.env` are real (Challenge Tests C2-C8
+  + C9-C12 can authenticate against real services when run on
+  the §6.I emulator matrix or operator's host).
+- Both `keystores/{debug,release}.keystore` present.
+
+This release is consequently distribute-eligible.
+
 ### What's NOT in this version
 
-- No actual Firebase distribution — distribute remains
-  operator-blocked on placeholder `app/google-services.json` +
-  placeholder `LAVA_FIREBASE_TOKEN` + placeholder tracker
-  credentials (carried over from the 1.2.17-1037 release-prep
-  note; same operator-input checklist applies).
-- No §6.X-debt closure — Linux x86_64 gate-host provisioning is
-  still owed; the container-bound emulator matrix path is shipped
-  in the Containers submodule but darwin/arm64 cannot exercise it
-  per the recorded incident JSON.
-
-### Operator inputs needed for the next distribute
-
-Same as Lava-Android-1.2.17-1037; see
-`Lava-Android-1.2.17-1037.md` "Operator inputs needed" block. The
-new code in this release is functionally complete and unit-test
-verified; the distribute gate is environmental, not code.
+- §6.X-debt is not closed in this release. The container-bound
+  emulator matrix attestation needed for release tagging requires
+  a Linux x86_64 gate host that is not yet provisioned; the
+  recorded incident JSON
+  (`.lava-ci-evidence/sixth-law-incidents/2026-05-13-emulator-
+  container-darwin-arm64-gap.json`) explains why darwin/arm64
+  cannot run it. Workstation iteration on the operator's host
+  is permitted via the §6.K-debt PARTIAL CLOSE.
