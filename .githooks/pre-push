@@ -90,9 +90,12 @@ while read -r local_ref local_sha remote_ref remote_sha; do
     fi
 
     # ===== Check 4: §6.N.1.2 — gate-shaping file change requires Bluff-Audit
-    # stamp targeting a file in the diff =====
+    # stamp targeting a file in the diff. List extended 2026-05-14 (1.2.23
+    # cycle) to include .githooks/pre-push (the hook itself is gate-shaping)
+    # + scripts/firebase-distribute.sh (release-gate script) per §6.AD-debt
+    # closure-cycle audit. =====
     gate_files=$(git diff-tree --no-commit-id --name-only -r "$sha" | \
-      grep -E '^(Submodules/Containers/pkg/emulator/.*\.go|scripts/run-emulator-tests\.sh|scripts/tag\.sh|scripts/check-constitution\.sh)$' || true)
+      grep -E '^(Submodules/Containers/pkg/emulator/.*\.go|scripts/run-emulator-tests\.sh|scripts/tag\.sh|scripts/check-constitution\.sh|scripts/firebase-distribute\.sh|\.githooks/pre-push)$' || true)
     if [[ -n "$gate_files" ]]; then
       msg=$(git log -1 --pretty=%B "$sha")
       if ! grep -qE '^Bluff-Audit:' <<<"$msg"; then
@@ -100,8 +103,14 @@ while read -r local_ref local_sha remote_ref remote_sha; do
       else
         # Stamp present — verify it NAMES at least one file in the diff.
         diff_files=$(git diff-tree --no-commit-id --name-only -r "$sha")
-        # Extract path tokens from the commit message
-        stamp_paths=$(grep -oE '[a-zA-Z0-9_/.-]+\.(go|kt|sh|json|md)' <<<"$msg" | sort -u)
+        # Extract path tokens from the commit message. Two patterns:
+        # (1) Anything with one of the canonical extensions
+        # (2) Extensionless paths in well-known script dirs (.githooks/*) —
+        #     added 2026-05-14 so a stamp can target .githooks/pre-push itself.
+        stamp_paths=$( { \
+          grep -oE '[a-zA-Z0-9_/.-]+\.(go|kt|kts|sh|json|md|xml|yaml|yml)' <<<"$msg"; \
+          grep -oE '\.githooks/[a-zA-Z0-9_-]+' <<<"$msg"; \
+        } | sort -u)
         match_found=false
         while IFS= read -r df; do
           [[ -z "$df" ]] && continue
@@ -113,6 +122,85 @@ while read -r local_ref local_sha remote_ref remote_sha; do
         if [[ "$match_found" != "true" ]]; then
           violations+=("$sha: §6.N.1.2 violation — Bluff-Audit stamp present but does NOT name any file in the diff. Diff: $(echo "$diff_files" | tr '\n' ' ') Stamp paths: $(echo "$stamp_paths" | tr '\n' ' ')")
         fi
+      fi
+    fi
+
+    # ===== Check 6: §6.Y bump-first ordering =====
+    # Closes §6.Y-debt. After a successful distribute (last-version-{debug,release}
+    # advanced), the FIRST commit in the new development cycle that touches code
+    # MUST bump versionCode. Detection: the commit's tree diff contains non-doc
+    # source files AND working-tree app/build.gradle.kts versionCode equals
+    # last-published-versionCode. The check fires only when versionCode in the
+    # diff is unchanged AND the diff contains code surfaces.
+    if git diff-tree --no-commit-id --name-only -r "$sha" | grep -qE '^(app/.*\.(kt|kts|xml|json)|core/.*\.(kt|kts|xml)|feature/.*\.(kt|kts|xml)|lava-api-go/.*\.go)$'; then
+      # Did THIS commit bump the versionCode in app/build.gradle.kts?
+      if git diff-tree --no-commit-id --name-only -r "$sha" | grep -qF 'app/build.gradle.kts'; then
+        # versionCode line changed in this commit — OK
+        :
+      else
+        # No version bump in this commit; check working-tree versionCode against
+        # the last-published last-version-debug pointer.
+        ver_pointer_debug=".lava-ci-evidence/distribute-changelog/firebase-app-distribution/last-version-debug"
+        if [[ -f "$ver_pointer_debug" ]]; then
+          last_published=$(cat "$ver_pointer_debug" 2>/dev/null | tr -d ' \n' || echo "")
+          # Read the versionCode at this commit's tree
+          commit_vc=$(git show "$sha:app/build.gradle.kts" 2>/dev/null | grep -oE 'versionCode[[:space:]]*=[[:space:]]*[0-9]+' | head -1 | grep -oE '[0-9]+' || echo "")
+          if [[ -n "$last_published" && -n "$commit_vc" && "$commit_vc" -le "$last_published" ]]; then
+            # Allow if commit message body mentions "constitutional-plumbing-only" OR is doc-only label
+            msg=$(git log -1 --pretty=%B "$sha")
+            if ! grep -qE 'constitutional-plumbing-only|docs?-only|version-bump-only|bump-first' <<<"$msg"; then
+              violations+=("$sha: §6.Y violation — touches code (.kt/.kts/.xml/.json/.go) without bumping versionCode (commit's vc=$commit_vc <= last-published-debug=$last_published). Either bump versionCode in this commit OR add a 'constitutional-plumbing-only' rationale line to the commit body.")
+            fi
+          fi
+        fi
+      fi
+    fi
+
+    # ===== Check 7: §6.Z evidence-file presence on distribute-advancing commits =====
+    # Closes §6.Z-debt (companion to firebase-distribute.sh's runtime gate). When
+    # a commit ACTUALLY advances last-version-debug or last-version-release (NEW
+    # value > OLD value), a companion evidence file at
+    # .lava-ci-evidence/distribute-changelog/firebase-app-distribution/<vname>-<NEW>-test-evidence.{md,json}
+    # MUST exist. Touch-without-value-change is NOT an advance.
+    for ptr in last-version-debug last-version-release; do
+      ptr_path=".lava-ci-evidence/distribute-changelog/firebase-app-distribution/${ptr}"
+      if git diff-tree --no-commit-id --name-only -r "$sha" 2>/dev/null | grep -qF "$ptr_path"; then
+        old_val=$(git show "$sha^:$ptr_path" 2>/dev/null | tr -d ' \n' || echo "0")
+        new_val=$(git show "$sha:$ptr_path" 2>/dev/null | tr -d ' \n' || echo "0")
+        # Coerce to integer; if either is non-numeric, treat as no-advance.
+        if [[ "$new_val" =~ ^[0-9]+$ && "$old_val" =~ ^[0-9]+$ && "$new_val" -gt "$old_val" ]]; then
+          # Real advance — find the version-name that distributed this code.
+          # Canonical lookup: per-version snapshot file `<vname>-<new_val>.md`
+          # in same directory (firebase-distribute.sh writes both pointer +
+          # snapshot atomically). If the snapshot is absent, fall back to
+          # build.gradle.kts versionName at this commit.
+          vname=""
+          snapshot=$(ls .lava-ci-evidence/distribute-changelog/firebase-app-distribution/*-${new_val}.md 2>/dev/null | grep -v '\-test-evidence\.md$' | head -1 || true)
+          if [[ -n "$snapshot" ]]; then
+            vname=$(basename "$snapshot" -${new_val}.md)
+          else
+            vname=$(git show "$sha:app/build.gradle.kts" 2>/dev/null | grep -oE 'versionName[[:space:]]*=[[:space:]]*"[^"]+"' | head -1 | sed 's/.*"\([^"]*\)".*/\1/' || echo "")
+          fi
+          if [[ -n "$vname" ]]; then
+            evidence_md=".lava-ci-evidence/distribute-changelog/firebase-app-distribution/${vname}-${new_val}-test-evidence.md"
+            evidence_json=".lava-ci-evidence/distribute-changelog/firebase-app-distribution/${vname}-${new_val}-test-evidence.json"
+            if [[ ! -f "$evidence_md" && ! -f "$evidence_json" ]]; then
+              violations+=("$sha: §6.Z violation — advances $ptr ${old_val}→${new_val} for ${vname} but no test-evidence file at $evidence_md (or .json). The §6.Z mandate requires pre-distribute test execution evidence with matching commit SHA.")
+            fi
+          fi
+        fi
+      fi
+    done
+
+    # ===== Check 8: §11.4.17 Classification: line on new-rule commits =====
+    # Closes §6.AD-debt item 6. When a commit adds a new constitutional clause
+    # (line matching ^##### 6\.[A-Z]+ — added) to CLAUDE.md, the commit body
+    # MUST carry a `Classification:` line per HelixConstitution §11.4.17.
+    new_clauses=$(git diff-tree -p --no-commit-id "$sha" -- CLAUDE.md 2>/dev/null | grep -E '^\+##### 6\.[A-Z]+' | head -3 || true)
+    if [[ -n "$new_clauses" ]]; then
+      msg=$(git log -1 --pretty=%B "$sha")
+      if ! grep -qE '^Classification:' <<<"$msg"; then
+        violations+=("$sha: §11.4.17 violation — adds a new ##### 6.X clause to CLAUDE.md without a 'Classification:' line in the commit body. Add 'Classification: universal' or 'Classification: project-specific' (or 'Classification: mixed') with a one-sentence rationale.")
       fi
     fi
 
