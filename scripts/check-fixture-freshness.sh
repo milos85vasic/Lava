@@ -16,8 +16,20 @@ set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
-THIRTY_DAYS_AGO=$(date -d '30 days ago' +%s)
-SIXTY_DAYS_AGO=$(date -d '60 days ago' +%s)
+# Cross-platform date arithmetic. GNU date (Linux) takes `-d '30 days ago'`;
+# BSD date (macOS) takes `-v-30d`. Python is universally available on
+# both and gives identical results. The pre-fix `date -d ...` form
+# silently errored on darwin (`date: illegal option -- d`), the
+# resulting empty THIRTY_DAYS_AGO + SIXTY_DAYS_AGO compared as 0,
+# and EVERY fixture's `ts -lt 0` evaluated false → script reported
+# "passed" while actually skipping every check. §6.J spirit issue.
+THIRTY_DAYS_AGO=$(python3 -c "import time; print(int(time.time()) - 30*86400)")
+SIXTY_DAYS_AGO=$(python3 -c "import time; print(int(time.time()) - 60*86400)")
+
+# Cross-platform date-string → epoch helper.
+date_to_epoch() {
+  python3 -c "import datetime,sys; print(int(datetime.datetime.strptime(sys.argv[1], '%Y-%m-%d').timestamp()))" "$1" 2>/dev/null || echo 0
+}
 
 warn=0
 blocked=0
@@ -35,7 +47,7 @@ for fixture_dir in $fixture_glob; do
       # Fixture without a date in the name is allowed (e.g. constants).
       continue
     fi
-    ts=$(date -d "$date_in_name" +%s 2>/dev/null || echo 0)
+    ts=$(date_to_epoch "$date_in_name")
     if [[ "$ts" -eq 0 ]]; then continue; fi
 
     if [[ "$ts" -lt "$SIXTY_DAYS_AGO" ]]; then
