@@ -11,7 +11,37 @@ same commit so the index stays trustworthy. Stale state in this file
 is itself a §6.J spirit issue — the file claims a guarantee, the
 repo has drifted, the agent acts on the claim.
 
-> **Last updated:** 2026-05-14, **release-prep for 1.2.18-1038 / 2.3.7-2307**
+> **Last updated:** 2026-05-14, **1.2.18-1038 DISTRIBUTED to Firebase**
+> per the operator's 24th §6.L invocation. Both APKs uploaded + invited
+> to the 3 testers configured in `.env`:
+>
+>   - debug: console.firebase.google.com/project/lava-vasic-digital/
+>     appdistribution/app/android:digital.vasic.lava.client.dev/releases/2d9odckm9unpo
+>   - release: console.firebase.google.com/project/lava-vasic-digital/
+>     appdistribution/app/android:digital.vasic.lava.client/releases/55pp8vgdt67u8
+>
+> `last-version` advanced 1037→1038. Pepper-history advanced (rotated
+> pre-distribute per Phase 1 Gate 4). Both Lava APIs running in containers:
+> `lava-api-go` (prod, port 8443) + `lava-api-go-dev` (dev, port 8543) +
+> their respective Postgres on 5432 / 5433. Both serve HTTP 200 on
+> /health (verified via `podman exec ... healthprobe` and `podman machine
+> ssh curl`). Operator stopped `helix-mistborn-postgres` (their other
+> project's pg on 5432) for this session — needs `podman start
+> helix-mistborn-postgres` when done.
+>
+> **darwin/arm64 LAN-reachability caveat:** `network_mode: host` in
+> podman-on-darwin binds to the podman-machine VM's host, not macOS
+> host. mDNS broadcasts from inside the VM don't reach the LAN
+> (`zeroconf: failed to join enp0s1`), so the distributed APKs CANNOT
+> auto-discover the dev API on phone testers' real LAN. Same root
+> cause as §6.X-debt. For genuine LAN reachability the operator
+> needs either: (a) Linux x86_64 host; (b) run lava-api-go binary
+> directly on darwin (the binary at releases/1.2.18/api-go/lava-
+> api-go-2.3.7 is darwin/arm64 native). For the current session,
+> phone testers must manually configure the endpoint after install
+> (Settings → Endpoint).
+>
+> **Prior:** 2026-05-14, release-prep for 1.2.18-1038 / 2.3.7-2307
 > per §6.P. All three operator-reported 2026-05-14 issues bundled into
 > one distribute candidate. `app/build.gradle.kts`: versionCode
 > 1037→1038, versionName 1.2.17→1.2.18. `lava-api-go/internal/version/
