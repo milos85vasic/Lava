@@ -80,7 +80,14 @@ class OnboardingViewModel @Inject constructor(
 
     private fun onBackStep() = intent {
         when (state.step) {
-            OnboardingStep.Welcome -> postSideEffect(OnboardingSideEffect.Finish)
+            // §6.AB onboarding-gate enforcement: back-from-Welcome MUST NOT
+            // mark onboarding complete (the prior `Finish` post would cause
+            // MainActivity to call `setOnboardingComplete(true)` and route
+            // to the half-functional home screen with zero providers). Post
+            // ExitApp instead — the host Activity calls `finishAffinity()`,
+            // app closes, next launch re-enters onboarding because
+            // `onboardingComplete` was never set.
+            OnboardingStep.Welcome -> postSideEffect(OnboardingSideEffect.ExitApp)
             OnboardingStep.Providers -> reduce { state.copy(step = OnboardingStep.Welcome) }
             OnboardingStep.Configure -> {
                 // Walk back through the per-provider Configure pages before
@@ -200,9 +207,45 @@ class OnboardingViewModel @Inject constructor(
     }
 
     private fun onFinish() = intent {
-        val configured = state.configs.filter { it.value.configured }
+        // §6.AB onboarding-gate enforcement: Finish (which causes
+        // MainActivity to write `setOnboardingComplete(true)` and route to
+        // the main app) MUST only fire when at least one provider has been
+        // both `configured` AND `tested` — i.e. probed with success. The
+        // pre-fix `onFinish()` posted Finish unconditionally; the operator-
+        // reported gate-bypass on Lava-Android-1.2.20-1040 (back-from-Welcome
+        // marked onboarding "complete") was made worse by this branch
+        // accepting Summary→Finish from a wizard where every provider was
+        // skipped. Now the wizard only completes when there's something
+        // real to keep.
+        val verifiedProviders = state.configs.filter { it.value.configured && it.value.tested }
+        if (verifiedProviders.isEmpty()) {
+            // No probed-OK provider — re-enter Configure on the last
+            // selected provider so the user can finish the gate. Surface a
+            // user-visible error on that provider's config so the reason is
+            // discoverable. This is symmetric with the Summary→back path:
+            // the wizard refuses to "complete" until the gate criterion
+            // (≥1 probed provider) is met.
+            val selectedCount = state.providers.count { it.selected }
+            val lastIndex = (selectedCount - 1).coerceAtLeast(0)
+            val lastProvider = state.providers.filter { it.selected }.getOrNull(lastIndex)
+            val errorMessage = "At least one provider must be configured and probed successfully before completing onboarding."
+            reduce {
+                state.copy(
+                    step = OnboardingStep.Configure,
+                    currentProviderIndex = lastIndex,
+                    configs = if (lastProvider != null) {
+                        state.configs + (lastProvider.descriptor.trackerId to (state.configs[lastProvider.descriptor.trackerId]
+                            ?: ProviderConfigState(lastProvider.descriptor.trackerId)).copy(error = errorMessage))
+                    } else {
+                        state.configs
+                    },
+                )
+            }
+            return@intent
+        }
+
         val providers = state.providers
-        for ((providerId, config) in configured) {
+        for ((providerId, config) in verifiedProviders) {
             val descriptor = providers.find { it.descriptor.trackerId == providerId }?.descriptor
             authService.signalAuthorized(
                 name = if (config.useAnonymous || descriptor?.authType == AuthType.NONE) {

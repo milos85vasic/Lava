@@ -87,6 +87,36 @@ class LavaIconsAppIconColorRegressionTest {
      * XML drawable file NOR the per-density `ic_lava_logo_foreground.png` /
      * `_background.png` layer files exist — only the single composited PNGs.
      */
+    /**
+     * §6.AB regression guard for the 1.2.20-1040 white-placeholder bug:
+     * `designsystem.Icon` wraps Material3.Icon which applies
+     * `LocalContentColor` as a tint by default — designed for monochrome
+     * glyphs only and strips colored PNGs to a single tone. The brand
+     * mark on Welcome MUST be rendered with `Image(painter = ...)`, NOT
+     * `Icon(icon = LavaIcons.AppIcon, ...)`.
+     */
+    @Test
+    fun welcomeStep_usesImage_notIcon_forBrandMark() {
+        val source = File("../../feature/onboarding/src/main/kotlin/lava/onboarding/steps/WelcomeStep.kt").readText()
+
+        assertTrue(
+            "WelcomeStep.kt must import androidx.compose.foundation.Image (preserves " +
+                "the colored bitmap). Forensic anchor: §6.AB 2026-05-14 white-placeholder " +
+                "bug on 1.2.20-1040 where Compose Icon's LocalContentColor tint stripped " +
+                "the colored ic_lava_logo PNG to solid white.",
+            source.contains("import androidx.compose.foundation.Image"),
+        )
+        assertTrue(
+            "WelcomeStep.kt must call Image(painter = painterResource(id = R.drawable.ic_lava_logo), ...).",
+            source.contains("Image(") && source.contains("painterResource(id = R.drawable.ic_lava_logo)"),
+        )
+        assertFalse(
+            "WelcomeStep.kt MUST NOT call Icon(icon = LavaIcons.AppIcon, ...) — that's the pre-fix shape that " +
+                "produced the white-placeholder bug. Use Image() to preserve color.",
+            Regex("""Icon\(\s*icon\s*=\s*LavaIcons\.AppIcon""").containsMatchIn(source),
+        )
+    }
+
     @Test
     fun coloredLogoAsset_isNotLayerListXml() {
         val resDir = File("src/main/res")

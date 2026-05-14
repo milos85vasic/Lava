@@ -1,5 +1,6 @@
 package lava.onboarding.steps
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -11,13 +12,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import lava.designsystem.R
 import lava.designsystem.component.Button
-import lava.designsystem.component.Icon
 import lava.designsystem.component.Surface
 import lava.designsystem.component.Text
-import lava.designsystem.drawables.LavaIcons
 import lava.designsystem.theme.AppTheme
 
 @Composable
@@ -35,8 +36,14 @@ fun WelcomeStep(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Icon(
-                icon = LavaIcons.AppIcon,
+            // The brand mark is a colored composited PNG (per density). Use
+            // androidx.compose.foundation.Image — NOT designsystem.Icon which
+            // wraps Material3.Icon + applies LocalContentColor as tint, designed
+            // for monochrome glyphs only and would re-tint our colored bitmap
+            // to a single solid color (the §6.AB white-placeholder forensic
+            // anchor reported on Lava-Android-1.2.20-1040 by the operator).
+            Image(
+                painter = painterResource(id = R.drawable.ic_lava_logo),
                 contentDescription = null,
                 modifier = Modifier.size(80.dp),
             )

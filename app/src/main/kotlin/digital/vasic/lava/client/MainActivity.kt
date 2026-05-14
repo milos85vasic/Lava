@@ -123,6 +123,15 @@ open class MainActivity : ComponentActivity() {
                                         showOnboarding = false
                                     }
                                 },
+                                // §6.AB onboarding-gate enforcement: back-from-Welcome
+                                // closes the app entirely. Next launch re-enters
+                                // onboarding because `onboardingComplete` was never
+                                // written. Per the operator's 27th §6.L invocation:
+                                // "until user does not complete onboarding flow with
+                                // success with at least one Provider configured and
+                                // working (probed with success)" the app keeps
+                                // re-prompting.
+                                onExitApp = { finishAffinity() },
                             )
                         }
                     } else if (showOnboarding == false) {

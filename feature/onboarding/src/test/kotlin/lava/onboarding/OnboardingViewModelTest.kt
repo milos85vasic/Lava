@@ -136,34 +136,100 @@ class OnboardingViewModelTest {
     }
 
     @Test
-    fun `finish emits Finish side effect`() = runTest(dispatcherRule.testDispatcher) {
-        val viewModel = createViewModel()
-        viewModel.test(this) {
-            runOnCreate()
-            expectInitialState()
-            awaitState()
+    fun `finish emits Finish side effect when at least one provider is configured AND tested`() =
+        runTest(dispatcherRule.testDispatcher) {
+            val viewModel = createViewModel()
+            viewModel.test(this) {
+                runOnCreate()
+                expectInitialState()
+                awaitState()
 
-            viewModel.perform(OnboardingAction.Finish)
-            expectSideEffect(OnboardingSideEffect.Finish)
+                // Drive the wizard to Configure for the only registered tracker
+                // (anonymous AuthType.NONE; Continue triggers configured+tested+true via TestAndContinue).
+                viewModel.perform(OnboardingAction.NextStep) // Welcome → Providers
+                expectState { copy(step = OnboardingStep.Providers) }
+                viewModel.perform(OnboardingAction.NextStep) // Providers → Configure (idx 0)
+                expectState { copy(step = OnboardingStep.Configure, currentProviderIndex = 0) }
+                viewModel.perform(OnboardingAction.TestAndContinue)
+                // After connection-test path, three states emit:
+                //   1. connectionTestRunning = true
+                //   2. configs[id] = configured=true, tested=true, running=false
+                //   3. advanceToNextProvider() → step = Summary (single-provider wizard)
+                awaitState()
+                awaitState()
+                awaitState()
+
+                viewModel.perform(OnboardingAction.Finish)
+                expectSideEffect(OnboardingSideEffect.Finish)
+            }
         }
-    }
+
+    @Test
+    fun `finish does NOT emit Finish when no provider has been probed (gate enforced)`() =
+        runTest(dispatcherRule.testDispatcher) {
+            val viewModel = createViewModel()
+            viewModel.test(this) {
+                runOnCreate()
+                expectInitialState()
+                awaitState()
+
+                // Reach Summary by jumping forward without TestAndContinue —
+                // configs are populated by loadProviders() but tested=false +
+                // configured=false. Per §6.AB onboarding-gate enforcement,
+                // Finish here MUST NOT fire.
+                viewModel.perform(OnboardingAction.NextStep) // Welcome → Providers
+                expectState { copy(step = OnboardingStep.Providers) }
+                viewModel.perform(OnboardingAction.NextStep) // Providers → Configure
+                expectState { copy(step = OnboardingStep.Configure, currentProviderIndex = 0) }
+                viewModel.perform(OnboardingAction.NextStep) // Configure → Summary (skip without test)
+                expectState { copy(step = OnboardingStep.Summary, currentProviderIndex = 0) }
+
+                viewModel.perform(OnboardingAction.Finish)
+                // The wizard MUST refuse to finish — re-enter Configure with
+                // an error message on the last provider's config. NOT a
+                // Finish side effect.
+                val errored = awaitState()
+                assertTrue(
+                    "wizard must re-enter Configure when no provider was probed",
+                    errored.step == OnboardingStep.Configure,
+                )
+                val cfg = errored.configs["test-tracker"]
+                assertTrue(
+                    "the gate-failure error message must surface on the active provider config",
+                    cfg?.error?.contains("probed", ignoreCase = true) == true,
+                )
+
+                // No Finish side effect should be emitted; orbit-test will
+                // fail this case if any unconsumed side effect remains when
+                // we cancel — assertion encoded by the absence of any
+                // expectSideEffect() call after the gate failure.
+                cancelAndIgnoreRemainingItems()
+            }
+        }
 
     // Back-step coverage — closes the Sixth-Law gap that allowed the inverted
     // `BackHandler` predicate in OnboardingScreen.kt to ship to users. Each
     // transition in the onboarding wizard MUST round-trip via BackStep.
 
     @Test
-    fun `back step from Welcome emits Finish side effect`() = runTest(dispatcherRule.testDispatcher) {
-        val viewModel = createViewModel()
-        viewModel.test(this) {
-            runOnCreate()
-            expectInitialState()
-            awaitState()
+    fun `back step from Welcome emits ExitApp side effect (gate enforcement, NOT Finish)`() =
+        runTest(dispatcherRule.testDispatcher) {
+            val viewModel = createViewModel()
+            viewModel.test(this) {
+                runOnCreate()
+                expectInitialState()
+                awaitState()
 
-            viewModel.perform(OnboardingAction.BackStep)
-            expectSideEffect(OnboardingSideEffect.Finish)
+                viewModel.perform(OnboardingAction.BackStep)
+                // §6.AB onboarding-gate enforcement: back-from-Welcome MUST
+                // post ExitApp, NOT Finish. The pre-fix shape posted Finish
+                // which made MainActivity write setOnboardingComplete(true)
+                // and route to the half-functional home with zero providers.
+                // Forensic anchor: 2026-05-14 1.2.20-1040 gate-bypass
+                // reported by operator on Galaxy S23 Ultra.
+                expectSideEffect(OnboardingSideEffect.ExitApp)
+            }
         }
-    }
 
     @Test
     fun `back step from Providers returns to Welcome`() = runTest(dispatcherRule.testDispatcher) {

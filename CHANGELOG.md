@@ -1,4 +1,109 @@
 # Changelog
+## Lava-Android-1.2.21-1041 / Lava-API-Go-2.3.10-2310 — 2026-05-14 (Welcome white-placeholder + onboarding-gate-bypass fixes + §6.AB Anti-Bluff Test-Suite Reinforcement)
+
+**Previous published:** Lava-Android-1.2.20-1040 / Lava-API-Go-2.3.9-2309 (debug-only stage 1; release stage 2 never proceeded — 1.2.20 surfaced two non-crashing defects on the operator's Galaxy S23 Ultra)
+
+### Fixed (Android client) — both passed all existing tests on 1.2.20-1040 (§6.AB forensic anchor)
+
+- **Welcome screen brand mark renders in full color (was white placeholder).**
+  Pre-fix: `WelcomeStep` called `Icon(icon = LavaIcons.AppIcon, ...)` which
+  wraps `androidx.compose.material3.Icon` and applies `LocalContentColor`
+  as a tint by default — designed for monochrome glyphs only. The colored
+  `R.drawable.ic_lava_logo` PNG was tinted to a single solid color
+  (white in the dark theme). Fix: switch to
+  `androidx.compose.foundation.Image(painter = painterResource(id =
+  R.drawable.ic_lava_logo), ...)` which preserves the original colors.
+
+- **Onboarding gate enforced — back-from-Welcome closes the app + cannot
+  reach home without a probed provider.** Pre-fix: `OnboardingViewModel
+  .onBackStep()` Welcome branch posted `OnboardingSideEffect.Finish`,
+  which `MainActivity` interpreted as "user completed onboarding" and
+  wrote `setOnboardingComplete(true)`. Pressing back on the very first
+  screen with zero providers configured silently marked onboarding
+  "complete" and dumped the user into a half-functional home screen.
+  Fix: introduced `OnboardingSideEffect.ExitApp`. Welcome back-step now
+  posts `ExitApp` (NOT Finish); `MainActivity` handles it via
+  `finishAffinity()` — app closes, next launch re-enters onboarding
+  because `onboardingComplete` was never written. Additionally,
+  `onFinish()` now validates that ≥1 provider has both
+  `configured = true` AND `tested = true` before posting Finish; if not,
+  the wizard re-enters Configure with an error message on the active
+  provider's config. Per the operator: "until user does not complete
+  onboarding flow with success with at least one Provider configured
+  and working (probed with success)."
+
+### Constitutional (27th §6.L invocation)
+
+- **§6.AB Anti-Bluff Test-Suite Reinforcement added.** The 1.2.20-1040
+  defects are a NEW class of §6.J failure not caught by §6.Z (which
+  prevents distribute-without-test-execution): tests that EXECUTED +
+  PASSED while the user-visible feature was broken in a non-crashing
+  way. §6.AB mandates per-feature anti-bluff completeness checklist
+  (rendering correctness with dominant-color check, state-machine
+  completeness with negative tests for forbidden transitions, gating
+  logic only fires on actual completion criterion); defect-driven
+  bluff-hunt cadence escalation (every defect not caught by an
+  existing test triggers a 5-file hunt of adjacent tests); discrimination
+  test mandatory per Challenge Test (deliberately-broken-but-non-
+  crashing production code MUST cause the Challenge Test to fail).
+  §6.AB-debt deferred to next phase that touches `scripts/check-
+  constitution.sh`. Propagated to root CLAUDE.md, AGENTS.md, lava-api-go
+  ×3 docs, and all 16 submodules ×3 docs (48 files). §6.L counter
+  advanced 26 → 27.
+
+### Tests + falsifiability evidence (per §6.J / §6.AB)
+
+- 2 new `OnboardingViewModelTest` cases:
+  - `back step from Welcome emits ExitApp side effect (gate enforcement,
+    NOT Finish)` — replaces the prior `... emits Finish ...` test.
+    Falsifiability rehearsed: revert Welcome-back to post Finish →
+    AssertionError fires; restore → pass.
+  - `finish does NOT emit Finish when no provider has been probed
+    (gate enforced)` — drives wizard to Summary via NextStep without
+    TestAndContinue, then perform(Finish), asserts state transitions
+    to Configure with error message, asserts NO Finish side effect.
+
+- `LavaIconsAppIconColorRegressionTest` extended with
+  `welcomeStep_usesImage_notIcon_forBrandMark` — reads WelcomeStep.kt
+  source, asserts `import androidx.compose.foundation.Image` present,
+  asserts the `Image(painter = painterResource(id = R.drawable.ic_lava_logo),
+  ...)` call present, asserts the pre-fix `Icon(icon = LavaIcons.AppIcon,
+  ...)` call NOT present.
+
+- 3 new Compose UI Challenge Tests (instrumentation, run on emulator/device):
+  - **C27** `Challenge27WelcomeColoredLogoNotWhitePlaceholderTest` —
+    samples upper-30% horizontal band of the rendered Welcome screen,
+    asserts per-channel RGB variance > 24 AND red dominance over green/
+    blue > 16 (catches the white-placeholder failure mode that C26's
+    whole-screen-variance check missed; per §6.AB.3 discrimination test
+    mandate).
+  - **C28** `Challenge28OnboardingWelcomeBackClosesAppTest` — drives
+    `Activity.onBackPressedDispatcher.onBackPressed()` from Welcome,
+    asserts `Activity.isFinishing == true` (catches the gate-bypass
+    failure mode where `onboardingComplete` was incorrectly set).
+  - **C29** `Challenge29OnboardingFinishRequiresProvedProviderTest` —
+    drives the wizard forward without TestAndContinue, asserts the
+    wizard refuses to escape to home (still on Welcome / Configure /
+    Summary screen markers).
+
+  All 3 source-compile via `:app:compileDebugAndroidTestKotlin`.
+  Per §6.Z: instrumentation execution required pre-distribute. Per
+  §6.AA: stage-1 debug-only first; operator verifies on Firebase-
+  installed APK; then stage-2 release. Per §6.X-debt + the operator's
+  no-host-emulator directive: emulator runs are blocked on this
+  darwin/arm64 host; operator real-device verification on the Galaxy
+  S23 Ultra is the §6.Z evidence path.
+
+### Submodule pin bumps (16 — §6.AB propagation cycle)
+
+All 16 vasic-digital submodules gained the §6.AB inheritance reference
+in CLAUDE.md / AGENTS.md / CONSTITUTION.md. 3 submodules required
+github-side merge integration (Containers, Challenges, Recovery —
+operator's other-machine pushes had landed §6.AB independently;
+union-merged with our local additions). All 16 §6.C-converged at
+the bumped pins.
+
+---
 ## Lava-Android-1.2.20-1040 / Lava-API-Go-2.3.9-2309 — 2026-05-14 (Galaxy S23 Ultra cold-launch crash fix + §6.Z Anti-Bluff Distribute Guard)
 
 **Previous published:** Lava-Android-1.2.19-1039 / Lava-API-Go-2.3.8-2308

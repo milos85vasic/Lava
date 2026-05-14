@@ -25,6 +25,7 @@ import org.orbitmvi.orbit.compose.collectSideEffect
 fun OnboardingScreen(
     viewModel: OnboardingViewModel,
     onComplete: () -> Unit,
+    onExitApp: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val state by viewModel.collectAsState()
@@ -32,6 +33,12 @@ fun OnboardingScreen(
     viewModel.collectSideEffect { sideEffect ->
         when (sideEffect) {
             is OnboardingSideEffect.Finish -> onComplete()
+            // §6.AB onboarding-gate enforcement: ExitApp from Welcome
+            // back-press MUST close the app entirely (host calls
+            // finishAffinity()) — NOT mark onboarding complete. Next
+            // launch will re-enter onboarding because
+            // `onboardingComplete` was never written.
+            is OnboardingSideEffect.ExitApp -> onExitApp()
         }
     }
 
