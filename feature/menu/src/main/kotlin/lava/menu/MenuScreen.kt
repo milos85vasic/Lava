@@ -590,7 +590,12 @@ private fun AboutAppDialog(state: VisibilityState) {
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Text(stringResource(R.string.app_version, packageInfo.getAppVersionName(), packageInfo.getAppVersionCode()))
-                    Text(stringResource(R.string.app_copyright_original))
+                    androidx.compose.foundation.layout.Spacer(modifier = Modifier.height(8.dp))
+                    // Operator directive 2026-05-14: Milos Vasic (current
+                    // maintainer + author) listed FIRST; Valeriy Andrikeev
+                    // (original Flow author this project is forked from)
+                    // listed second. Vertical spacing between author rows
+                    // increased per same directive.
                     androidx.compose.foundation.text.ClickableText(
                         text = androidx.compose.ui.text.buildAnnotatedString {
                             append("© ")
@@ -609,6 +614,8 @@ private fun AboutAppDialog(state: VisibilityState) {
                             color = AppTheme.colors.onSurface,
                         ),
                     )
+                    androidx.compose.foundation.layout.Spacer(modifier = Modifier.height(6.dp))
+                    Text(stringResource(R.string.app_copyright_original))
                 }
             },
             confirmButton = {

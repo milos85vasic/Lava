@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import lava.common.analytics.AnalyticsTracker
 import lava.credentials.CredentialsEntryRepository
 import lava.database.dao.ClonedProviderDao
 import lava.database.dao.ProviderCredentialBindingDao
@@ -44,6 +45,7 @@ class ProviderConfigViewModel @Inject constructor(
     private val cloneProvider: CloneProviderUseCase,
     private val removeClonedProvider: RemoveClonedProviderUseCase,
     private val outbox: SyncOutbox,
+    private val analytics: AnalyticsTracker,
 ) : ContainerHost<ProviderConfigState, ProviderConfigSideEffect>, ViewModel() {
 
     private val providerId: String = savedStateHandle.get<String>(PROVIDER_ID_KEY).orEmpty()
@@ -95,6 +97,34 @@ class ProviderConfigViewModel @Inject constructor(
             is ProviderConfigAction.AddMirror -> {
                 val trimmed = action.url.trim()
                 if (trimmed.isEmpty()) return@intent
+                // §6.O closure for Crashlytics 39469d3bc00aabf76a86d5d15f2e7f2b:
+                // user can type any string in the AddMirror field; pre-fix,
+                // "djdnjd" reached ProbeMirrorUseCase + crashed inside
+                // okhttp's URL builder. Reject at the input boundary
+                // before storing in the DB. The defense-in-depth catch
+                // in ProbeMirrorUseCase covers any remaining bad URL that
+                // sneaks past validation (e.g. via sync-from-other-device).
+                if (!trimmed.startsWith("http://") && !trimmed.startsWith("https://")) {
+                    postSideEffect(
+                        ProviderConfigSideEffect.ShowToast(
+                            "Mirror URL must start with http:// or https://",
+                        ),
+                    )
+                    analytics.recordWarning(
+                        "AddMirror rejected — missing scheme",
+                        mapOf(
+                            AnalyticsTracker.Params.FEATURE to "provider_config",
+                            AnalyticsTracker.Params.OPERATION to "add_mirror",
+                            AnalyticsTracker.Params.PROVIDER to providerId,
+                            // NEVER include the raw URL — could contain
+                            // sensitive segments per §6.H. Just the length
+                            // + first 3 chars hash signature for triage.
+                            "url_length" to trimmed.length.toString(),
+                            "url_prefix" to trimmed.take(3),
+                        ),
+                    )
+                    return@intent
+                }
                 val entity = UserMirrorEntity(
                     trackerId = providerId,
                     url = trimmed,

@@ -1,4 +1,55 @@
 # Changelog
+## Lava-Android-1.2.22-1042 / Lava-API-Go-2.3.11-2311 — 2026-05-14 (About swap + Crashlytics 6-issue sweep + §6.AC Comprehensive Non-Fatal Telemetry Mandate)
+
+**Previous published:** Lava-Android-1.2.21-1041 (debug + release distributed)
+
+### About dialog (operator directive)
+
+- Authors re-ordered: **Milos Vasic (current maintainer)** listed FIRST; **Valeriy Andrikeev (original Flow author)** listed second. Vertical spacing increased between author rows (8.dp + 6.dp Spacers).
+
+### Crashlytics 6-issue sweep (operator's 28th §6.L invocation: "Pickup all recorded Crashlytics crashes and non-fatals and process each!")
+
+| # | Issue | Status | Closure log |
+|---|---|---|---|
+| 1 | `7df61fdba64f9928b067624d6db395ca` JobCancellationException NON_FATAL (8 events) | **FIXED** — cancellation filter at `FirebaseAnalyticsTracker.recordNonFatal` entry; cancellations are structured-concurrency teardown noise | `2026-05-14-jobcancellation-nonfatal-noise-filter.md` |
+| 2 | `40a62f97a5c65abb56142b4ca2c37eeb` painterResource layer-list FATAL (1.2.19) | **CLOSED** historically (fixed 1.2.20 commit `2bf5ecad`) | `2026-05-14-welcome-layerlist-painter-crash.md` |
+| 3 | `c7c8cccad09f72bd7bb95455226109b8` LazyColumn nested verticalScroll FATAL (1.2.3-1.2.5) | **CLOSED** historically (§6.Q forensic anchor + structural guards in place) | `2026-05-14-lazycolumn-verticalscroll-historical.md` |
+| 4 | `033d7e17ea12bdeda10bef8b3251131d` same root cause as #3 | **CLOSED** alongside #3 | (same as #3) |
+| 5 | `39469d3bc00aabf76a86d5d15f2e7f2b` okhttp URL "djdnjd" FATAL (1.2.21) | **FIXED** — defense-in-depth: `ProviderConfigViewModel.AddMirror` rejects strings without `http://`/`https://` prefix + records warning + shows toast; `ProbeMirrorUseCase` now catches `IllegalArgumentException` alongside the existing `IOException` catch | `2026-05-14-okhttp-url-scheme-djdnjd.md` |
+| 6 | `a29412cf6566d0a71b06df416610be57` rutracker LoginUseCase Unknown FATAL (1.2.8) | **FIXED** — `RuTrackerNetworkApi.login` traps any non-cancellation throwable and returns `AuthResponseDto.WrongCredits` as safe fallback | `2026-05-14-rutracker-loginusecase-unknown.md` |
+
+5 closure logs in `.lava-ci-evidence/crashlytics-resolved/`. Operator marks each closed in Firebase Console after 1.2.22 ships.
+
+### Constitutional — §6.AC added (28th §6.L invocation)
+
+**Comprehensive Non-Fatal Telemetry Mandate:** every catch / error / fallback path on every distributable artifact MUST record a non-fatal telemetry event with §6.AC.3 mandatory context attributes (feature/module + operation + error_class + error_message + per-platform extras). Android: `analytics.recordNonFatal(throwable, ctx)` / `recordWarning(message, ctx)` (Crashlytics non-fatal feed). Go API: `observability.RecordNonFatal(ctx, err, attrs)` / `RecordWarning(ctx, msg, attrs)` (structured WARNING/ERROR log with §6.H redaction of `password`/`token`/`secret`/`api_key`/`cookie`/`authorization`/`hmac`/`pepper` attribute names; optional Firebase REST bridge gated by `LAVA_API_FIREBASE_CRASHLYTICS_ENABLED`). Cancellation throwables (CancellationException on Android, context.Canceled / context.DeadlineExceeded on Go) filtered automatically. §6.AC-debt opened for mechanical Detekt + Go-vet enforcement.
+
+Propagated to root CLAUDE.md / AGENTS.md / lava-api-go × 3 docs / 16 submodules × 3 docs = 53 docs total.
+
+### Tests + falsifiability evidence
+
+- `FirebaseAnalyticsTrackerTest` extended with 3 new cases (cancellation filter, wrapped cancellation filter, real-exception passthrough — discrimination test). All PASS.
+- `RuTrackerNetworkApiLoginUnknownRegressionTest` (NEW) — mocks LoginUseCase to throw Unknown, asserts wrap returns WrongCredits. PASS.
+- `internal/observability/nonfatal_test.go` (NEW Go) — 6 cases covering nil-error no-op, context.Canceled filter, context.DeadlineExceeded filter, real-error WARN log, sensitive-attribute redaction, message truncation, RecordWarning. All PASS.
+
+### Recordable instrumentation extended
+
+- `AnalyticsTracker` interface gains `recordWarning(message: String, context: Map<String,String>)` — for non-throwable warnings (degraded paths, fallbacks, missing resources).
+- `AnalyticsTracker.Params` gains §6.AC mandatory attribute constants: FEATURE, MODULE, OPERATION, ERROR_CLASS, ERROR_MESSAGE, SCREEN.
+- `FirebaseAnalyticsTracker` impl: `recordWarning` synthesizes a `LavaNonFatalWarning` exception so warnings surface in Crashlytics's non-fatal feed alongside real exceptions; both record + log channels are used; all values truncated to 1024 chars.
+- `NoOpAnalyticsTracker` impl + 4 anonymous test impls (Onboarding, Menu, Login, SearchResult VMs) updated.
+- `ForumViewModel.onFailure` instrumented with `analytics.recordNonFatal` + §6.AC mandatory attrs.
+- `ProviderConfigViewModel` gains `analytics: AnalyticsTracker` constructor param + `recordWarning` on AddMirror rejection.
+
+### Submodule pin bumps (16 — §6.AC propagation cycle)
+
+All 16 vasic-digital submodules gained §6.AC inheritance reference in CLAUDE.md / AGENTS.md / CONSTITUTION.md.
+
+### What's NOT in this version
+
+- HelixConstitution submodule incorporation deferred to **1.2.23** (separate cycle — multi-step per the directive's STEPs 1-10; bundling adds risk to this cycle).
+
+---
 ## Lava-Android-1.2.21-1041 / Lava-API-Go-2.3.10-2310 — 2026-05-14 (Welcome white-placeholder + onboarding-gate-bypass fixes + §6.AB Anti-Bluff Test-Suite Reinforcement)
 
 **Previous published:** Lava-Android-1.2.20-1040 / Lava-API-Go-2.3.9-2309 (debug-only stage 1; release stage 2 never proceeded — 1.2.20 surfaced two non-crashing defects on the operator's Galaxy S23 Ultra)

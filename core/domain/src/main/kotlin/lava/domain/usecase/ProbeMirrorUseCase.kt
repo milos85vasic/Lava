@@ -15,6 +15,19 @@ class ProbeMirrorUseCase @Inject constructor(
     private val client: OkHttpClient,
 ) {
     suspend operator fun invoke(url: String): ProbeResult = try {
+        // §6.O closure for Crashlytics 39469d3bc00aabf76a86d5d15f2e7f2b
+        // ("Expected URL scheme 'http' or 'https' but no scheme was found
+        // for djdnjd…", FATAL on 1.2.21 release / Galaxy S23 Ultra).
+        // okhttp3.HttpUrl$Builder.parse throws IllegalArgumentException
+        // for malformed URLs — was not caught by the prior IOException-only
+        // catch block. The crash happened on user input "djdnjd" reaching
+        // ProbeMirrorUseCase via ProviderConfigViewModel.AddMirror without
+        // scheme validation. Fix: catch the broader Throwable bucket
+        // (IllegalArgumentException + IOException + anything else OkHttp
+        // might throw at request-build / dispatch time) and surface as
+        // Unreachable with the reason. The defense-in-depth UI-side
+        // validation in ProviderConfigViewModel.AddMirror prevents the
+        // bad URL from being stored in the first place.
         val req = Request.Builder().url(url).head().build()
         client.newCall(req).execute().use { resp ->
             if (resp.code in 200..399) {
@@ -23,6 +36,8 @@ class ProbeMirrorUseCase @Inject constructor(
                 ProbeResult.Unhealthy(resp.code)
             }
         }
+    } catch (e: IllegalArgumentException) {
+        ProbeResult.Unreachable("invalid URL: ${e.message ?: e::class.simpleName ?: "malformed"}")
     } catch (e: IOException) {
         ProbeResult.Unreachable(e.message ?: e::class.simpleName ?: "io")
     }

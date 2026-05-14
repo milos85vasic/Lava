@@ -144,6 +144,10 @@ See root `/CLAUDE.md` §6.X. Every Android emulator instance the project depends
 
 See root `/CLAUDE.md` §6.Y. After every successful distribution of any artifact (Android APK via Firebase App Distribution, Google Play Store release, container image push, **lava-api-go binary release**, any future distributable artifact), the FIRST commit in the new development cycle that touches code MUST bump the artifact's `versionCode` integer. For lava-api-go specifically: bump `Code` + `Name` constants in `internal/version/version.go`. The `versionName` semver MUST be bumped when the changes warrant a user-visible version change. §6.Y-debt is open: pre-push hook + check-constitution.sh enforcement of bump-first ordering documented but not yet mechanically enforced.
 
+## §6.AC — Comprehensive Non-Fatal Telemetry Mandate (inherited 2026-05-14, per §6.F)
+
+See root `/CLAUDE.md` §6.AC. For lava-api-go: every error path MUST call `internal/observability.RecordNonFatal(ctx, err, attrs)`. JVM/host-only assertions are not enough. Mandatory attributes: feature/module, operation, error_class, error_message (no credentials per §6.H), endpoint, request_id, tracker_id where applicable. §6.AC-debt is open. This submodule MAY add stricter rules but MUST NOT relax.
+
 ## §6.AB — Anti-Bluff Test-Suite Reinforcement (inherited 2026-05-14, per §6.F)
 
 See root `/CLAUDE.md` §6.AB. Every test + Challenge MUST be auditable: would this test fail if the user-visible behavior broke in a non-crashing way? Per-feature anti-bluff completeness for lava-api-go: assert response body content + schema (not just status code); assert persisted row content (not just insert call); assert service-on-wire behavior via real client (not just process-up). Defect-driven bluff-hunt + discrimination test per Challenge Test mandatory. This submodule MAY add stricter rules but MUST NOT relax.

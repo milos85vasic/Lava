@@ -6,6 +6,8 @@ import com.google.firebase.crashlytics.FirebaseCrashlytics
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
+import io.mockk.verify
+import kotlinx.coroutines.CancellationException
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -56,5 +58,42 @@ class FirebaseAnalyticsTrackerTest {
         assertEquals("k", keySlot.captured)
         assertEquals("v", valSlot.captured)
         assertEquals(err, errSlot.captured)
+    }
+
+    /**
+     * §6.O closure validation for Crashlytics issue
+     * `7df61fdba64f9928b067624d6db395ca` (8 events / 1 user / 1.2.21
+     * "kotlinx.coroutines.JobCancellationException — StandaloneCoroutine
+     * was cancelled"). Cancellation throwables are structured-concurrency
+     * teardown noise; they MUST NOT reach Crashlytics's non-fatal feed
+     * because they're not real failure modes. The fix: filter them at
+     * the FirebaseAnalyticsTracker.recordNonFatal entry point.
+     */
+    @Test
+    fun `recordNonFatal filters CancellationException (Crashlytics 7df61fdb)`() {
+        val crashlytics = mockk<FirebaseCrashlytics>(relaxed = true)
+        val tracker = FirebaseAnalyticsTracker(analytics = null, crashlytics = crashlytics)
+        val cancellation = CancellationException("StandaloneCoroutine was cancelled")
+        tracker.recordNonFatal(cancellation, mapOf("k" to "v"))
+        verify(exactly = 0) { crashlytics.setCustomKey(any<String>(), any<String>()) }
+        verify(exactly = 0) { crashlytics.recordException(any<Throwable>()) }
+    }
+
+    @Test
+    fun `recordNonFatal filters when CancellationException is wrapped`() {
+        val crashlytics = mockk<FirebaseCrashlytics>(relaxed = true)
+        val tracker = FirebaseAnalyticsTracker(analytics = null, crashlytics = crashlytics)
+        val wrapped = RuntimeException("outer", CancellationException("inner cancellation"))
+        tracker.recordNonFatal(wrapped, emptyMap())
+        verify(exactly = 0) { crashlytics.recordException(any<Throwable>()) }
+    }
+
+    @Test
+    fun `recordNonFatal still reports real exceptions (cancellation filter does not over-filter)`() {
+        val crashlytics = mockk<FirebaseCrashlytics>(relaxed = true)
+        val tracker = FirebaseAnalyticsTracker(analytics = null, crashlytics = crashlytics)
+        val real = IllegalArgumentException("a real failure")
+        tracker.recordNonFatal(real, emptyMap())
+        verify(exactly = 1) { crashlytics.recordException(real) }
     }
 }

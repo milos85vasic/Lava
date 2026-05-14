@@ -196,6 +196,7 @@ class SearchResultViewModelFallbackTest {
                 override fun setUserId(userId: String?) {}
                 override fun setProperty(key: String, value: String?) {}
                 override fun recordNonFatal(throwable: Throwable, context: Map<String, String>) {}
+                override fun recordWarning(message: String, context: Map<String, String>) {}
                 override fun log(message: String) {}
             },
             // SP-4 Phase D added an `sdk: LavaTrackerSdk` constructor param

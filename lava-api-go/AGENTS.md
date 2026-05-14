@@ -121,6 +121,10 @@ Inherited verbatim from parent Lava `/CLAUDE.md` §6.X (added 2026-05-13 in resp
 
 See root `/CLAUDE.md` §6.Y. After every successful distribution of any artifact, the FIRST commit in the new development cycle that touches code MUST bump the artifact's `versionCode`. For lava-api-go: bump `Code` + `Name` in `internal/version/version.go`. The `versionName` semver bumps when warranted (patch/minor/major). §6.Y-debt is open: pre-push hook + check-constitution.sh enforcement documented but not yet mechanically enforced.
 
+## §6.AC — Comprehensive Non-Fatal Telemetry Mandate (inherited 2026-05-14, per §6.F)
+
+See root `/CLAUDE.md` §6.AC. For lava-api-go: every error path MUST call `internal/observability.RecordNonFatal(ctx, err, attrs)`. Mandatory attributes per §6.AC.3 + Go-specific extras (endpoint, request_id, tracker_id). §6.AC-debt is open. This submodule MAY add stricter rules but MUST NOT relax.
+
 ## §6.AB — Anti-Bluff Test-Suite Reinforcement (inherited 2026-05-14, per §6.F)
 
 See root `/CLAUDE.md` §6.AB. Every test + Challenge MUST be auditable: would this test fail if the user-visible behavior broke in a non-crashing way? Per-feature anti-bluff completeness, defect-driven bluff-hunt, discrimination test mandatory. For lava-api-go: assert response body + schema, persisted row content, service-on-wire behavior — not just call counts or status codes. This submodule MAY add stricter rules but MUST NOT relax.

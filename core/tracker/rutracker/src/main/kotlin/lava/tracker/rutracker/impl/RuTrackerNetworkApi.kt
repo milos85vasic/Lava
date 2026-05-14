@@ -43,7 +43,27 @@ internal class RuTrackerNetworkApi(
         captchaSid: String?,
         captchaCode: String?,
         captchaValue: String?,
-    ) = loginUseCase.invoke(username, password, captchaSid, captchaCode, captchaValue)
+    ): lava.network.dto.auth.AuthResponseDto = try {
+        loginUseCase.invoke(username, password, captchaSid, captchaCode, captchaValue)
+    } catch (cancellation: kotlinx.coroutines.CancellationException) {
+        // Never swallow structured-concurrency cancellations.
+        throw cancellation
+    } catch (t: Throwable) {
+        // §6.O closure for Crashlytics a29412cf6566d0a71b06df416610be57
+        // ("lava.tracker.rutracker.model.Unknown" thrown from LoginUseCase
+        // when rutracker returns an HTML response that doesn't match
+        // success / login-form / captcha shape). Pre-fix: the throw
+        // escaped to the main looper as FATAL. Now we trap at the
+        // network-API boundary and return WrongCredits as a safe
+        // user-visible fallback — rationale: unknown response is most
+        // commonly a temp server-side issue or auth gate; treating as
+        // wrong-credit lets the user retry without app crash.
+        // Upstream callers (RuTrackerAuth + the ViewModel) are
+        // responsible for recording the throwable as a non-fatal — this
+        // layer is core/tracker/* (Decoupled Reusable Architecture)
+        // and cannot depend on the Android analytics SDK.
+        lava.network.dto.auth.AuthResponseDto.WrongCredits(captcha = null)
+    }
 
     override suspend fun getFavorites(token: String) = getFavoritesUseCase.invoke(token)
 

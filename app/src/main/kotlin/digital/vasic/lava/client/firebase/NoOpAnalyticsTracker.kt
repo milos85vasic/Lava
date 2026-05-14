@@ -32,6 +32,10 @@ internal object NoOpAnalyticsTracker : AnalyticsTracker {
         Log.w(TAG, "recordNonFatal context=$context", throwable)
     }
 
+    override fun recordWarning(message: String, context: Map<String, String>) {
+        Log.w(TAG, "recordWarning $message context=$context")
+    }
+
     override fun log(message: String) {
         Log.d(TAG, message)
     }

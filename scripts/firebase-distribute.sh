@@ -67,18 +67,59 @@ echo "==> Distributing Lava Android $APP_VERSION ($APP_VERSION_CODE)"
 #   - per-version snapshot file is missing
 # ----------------------------------------------------------------
 CHANGELOG_DIR="$LAVA_REPO_ROOT/.lava-ci-evidence/distribute-changelog/firebase-app-distribution"
+# Legacy single-channel pointer (kept for backward compat + scripts/tag.sh).
 LAST_VERSION_FILE="$CHANGELOG_DIR/last-version"
+# §6.AA-debt PARTIAL CLOSE 2026-05-14: per-channel last-version pointers.
+# Stage 1 (debug-only) advances last-version-debug; Stage 2 (release-only)
+# advances last-version-release. Combined-mode (legacy default `both`) writes
+# all three. The §6.P monotonic-version-code gate consults the pointer that
+# matches the current MODE so debug stage 1 + release stage 2 of the SAME
+# versionCode are both permitted (the canonical §6.AA two-stage flow that
+# was blocked by the prior single-pointer design).
+LAST_VERSION_DEBUG_FILE="$CHANGELOG_DIR/last-version-debug"
+LAST_VERSION_RELEASE_FILE="$CHANGELOG_DIR/last-version-release"
 SNAPSHOT_FILE="$CHANGELOG_DIR/$APP_VERSION-$APP_VERSION_CODE.md"
 
 mkdir -p "$CHANGELOG_DIR"
 
-# Gate 1: monotonic version code
-if [[ -f "$LAST_VERSION_FILE" ]]; then
-    LAST_DISTRIBUTED="$(cat "$LAST_VERSION_FILE" 2>/dev/null || echo 0)"
+# Initialize per-channel pointers from the legacy single pointer if absent.
+# Treats "the last published versionCode" as the prior boundary for both
+# channels — first invocation after this PARTIAL CLOSE seeds equally; from
+# then on the channels diverge per actual distribute history.
+if [[ -f "$LAST_VERSION_FILE" && ! -f "$LAST_VERSION_DEBUG_FILE" ]]; then
+    cp "$LAST_VERSION_FILE" "$LAST_VERSION_DEBUG_FILE"
+fi
+if [[ -f "$LAST_VERSION_FILE" && ! -f "$LAST_VERSION_RELEASE_FILE" ]]; then
+    cp "$LAST_VERSION_FILE" "$LAST_VERSION_RELEASE_FILE"
+fi
+
+# Gate 1: monotonic version code (per-channel under the new model).
+case "$MODE" in
+    debug)
+        GATE_FILE="$LAST_VERSION_DEBUG_FILE"
+        GATE_LABEL="last-version-debug"
+        ;;
+    release)
+        GATE_FILE="$LAST_VERSION_RELEASE_FILE"
+        GATE_LABEL="last-version-release"
+        ;;
+    both)
+        # Legacy combined mode — stricter check against the legacy pointer
+        # (the most-restrictive of the three).
+        GATE_FILE="$LAST_VERSION_FILE"
+        GATE_LABEL="last-version (combined channel)"
+        ;;
+    *)
+        echo "FATAL: unknown MODE '$MODE' (expected debug|release|both)" >&2
+        exit 1
+        ;;
+esac
+if [[ -f "$GATE_FILE" ]]; then
+    LAST_DISTRIBUTED="$(cat "$GATE_FILE" 2>/dev/null || echo 0)"
     if [[ "$APP_VERSION_CODE" -le "$LAST_DISTRIBUTED" ]]; then
-        echo "FATAL §6.P: current versionCode $APP_VERSION_CODE is not strictly greater than the last distributed code $LAST_DISTRIBUTED." >&2
+        echo "FATAL §6.P: current versionCode $APP_VERSION_CODE is not strictly greater than the last distributed code $LAST_DISTRIBUTED on the $GATE_LABEL channel." >&2
         echo "       Bump versionCode in app/build.gradle.kts before re-running this script." >&2
-        echo "       Re-distribution of an already-published versionCode is forbidden." >&2
+        echo "       Re-distribution of an already-published versionCode on this channel is forbidden." >&2
         exit 1
     fi
 fi
@@ -236,10 +277,35 @@ LOG="firebase-distribute-${APP_VERSION}-${APP_VERSION_CODE}-${TIMESTAMP}.log"
 } > "$LOG"
 echo "==> Distribute log: $LOG (gitignored)"
 
-# §6.P: persist the version code we just published so the next distribute
-# session refuses to ship the same (or older) code.
-echo "$APP_VERSION_CODE" > "$LAST_VERSION_FILE"
-echo "==> §6.P last-version recorded: $APP_VERSION_CODE → $LAST_VERSION_FILE"
+# §6.P + §6.AA-debt PARTIAL CLOSE: persist per-channel last-version so
+# stage 1 (debug) + stage 2 (release) of the same SHA are both permitted.
+case "$MODE" in
+    debug)
+        echo "$APP_VERSION_CODE" > "$LAST_VERSION_DEBUG_FILE"
+        echo "==> §6.P last-version-debug recorded: $APP_VERSION_CODE → $LAST_VERSION_DEBUG_FILE"
+        # Also write legacy single pointer at the higher of the two channels
+        # so scripts/tag.sh + downstream scripts continue to see "latest
+        # distributed at all" when they consult the legacy file.
+        debug_v=$(cat "$LAST_VERSION_DEBUG_FILE" 2>/dev/null || echo 0)
+        release_v=$(cat "$LAST_VERSION_RELEASE_FILE" 2>/dev/null || echo 0)
+        max_v=$(( debug_v > release_v ? debug_v : release_v ))
+        echo "$max_v" > "$LAST_VERSION_FILE"
+        ;;
+    release)
+        echo "$APP_VERSION_CODE" > "$LAST_VERSION_RELEASE_FILE"
+        echo "==> §6.P last-version-release recorded: $APP_VERSION_CODE → $LAST_VERSION_RELEASE_FILE"
+        debug_v=$(cat "$LAST_VERSION_DEBUG_FILE" 2>/dev/null || echo 0)
+        release_v=$(cat "$LAST_VERSION_RELEASE_FILE" 2>/dev/null || echo 0)
+        max_v=$(( debug_v > release_v ? debug_v : release_v ))
+        echo "$max_v" > "$LAST_VERSION_FILE"
+        ;;
+    both)
+        echo "$APP_VERSION_CODE" > "$LAST_VERSION_DEBUG_FILE"
+        echo "$APP_VERSION_CODE" > "$LAST_VERSION_RELEASE_FILE"
+        echo "$APP_VERSION_CODE" > "$LAST_VERSION_FILE"
+        echo "==> §6.P last-version (combined) recorded: $APP_VERSION_CODE → all three pointers"
+        ;;
+esac
 
 # Phase 1 Gate 4: persist the pepper SHA after a successful distribute so
 # the next session refuses to reuse it.
