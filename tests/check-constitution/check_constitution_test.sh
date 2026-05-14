@@ -8,6 +8,20 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 SCRIPT="$REPO_ROOT/scripts/check-constitution.sh"
 
+# Cross-platform sed -i: BSD sed (macOS) requires an explicit backup
+# extension argument; GNU sed (Linux) accepts the same form. Using
+# `sed -i.bak` and deleting the .bak afterwards works on both. Without
+# this helper, the pre-fix invocations of `sed -i 's|...|...|' FILE`
+# treated `s|...|...|` as the backup extension and `FILE` as the
+# script on darwin, exiting with `sed: 1: "FILE": invalid command code`
+# and silently aborting the test before any assertion ran.
+sed_inplace() {
+  local expr="$1"
+  local file="$2"
+  sed -i.sedbak "$expr" "$file"
+  rm -f "$file.sedbak"
+}
+
 # Test 1: live repo passes (assumes Group A is in place).
 test_live_repo_passes() {
   cd "$REPO_ROOT"
@@ -38,7 +52,7 @@ test_missing_6n_heading_fails() {
   fixture=$(make_fixture)
   cd "$fixture"
   # Remove the §6.N heading (replace with placeholder).
-  sed -i 's|^##### 6\.N — Bluff-Hunt Cadence|##### 6.X — placeholder|' CLAUDE.md
+  sed_inplace 's|^##### 6\.N — Bluff-Hunt Cadence|##### 6.X — placeholder|' CLAUDE.md
   if "$fixture/scripts/check-constitution.sh" >/dev/null 2>&1; then
     echo "FAIL test_missing_6n_heading_fails: script passed despite missing §6.N"
     exit 1
@@ -55,7 +69,7 @@ test_missing_6n_from_submodule_fails() {
   cd "$fixture"
   if [[ -f Submodules/Auth/CLAUDE.md ]]; then
     # Strip all 6.N references from Auth's CLAUDE.md
-    sed -i '/6\.N/d' Submodules/Auth/CLAUDE.md
+    sed_inplace '/6\.N/d' Submodules/Auth/CLAUDE.md
     if "$fixture/scripts/check-constitution.sh" >/dev/null 2>&1; then
       echo "FAIL test_missing_6n_from_submodule_fails: script passed despite Auth missing §6.N"
       exit 1
@@ -73,7 +87,7 @@ test_missing_check4_marker_fails() {
   local fixture
   fixture=$(make_fixture)
   cd "$fixture"
-  sed -i '/# ===== Check 4: §6.N.1.2/d' .githooks/pre-push
+  sed_inplace '/# ===== Check 4: §6.N.1.2/d' .githooks/pre-push
   if "$fixture/scripts/check-constitution.sh" >/dev/null 2>&1; then
     echo "FAIL test_missing_check4_marker_fails: script passed despite missing Check 4 marker"
     exit 1
@@ -89,7 +103,7 @@ test_missing_check5_marker_fails() {
   local fixture
   fixture=$(make_fixture)
   cd "$fixture"
-  sed -i '/# ===== Check 5: §6.N.1.3/d' .githooks/pre-push
+  sed_inplace '/# ===== Check 5: §6.N.1.3/d' .githooks/pre-push
   if "$fixture/scripts/check-constitution.sh" >/dev/null 2>&1; then
     echo "FAIL test_missing_check5_marker_fails: script passed despite missing Check 5 marker"
     exit 1
