@@ -7,7 +7,10 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -39,9 +42,16 @@ fun OnboardingScreen(
         viewModel.perform(OnboardingAction.BackStep)
     }
 
+    // §6.Q-spirit fix: MainActivity calls enableEdgeToEdge, so onboarding draws
+    // under the status bar + gesture/navigation bar on tall-aspect devices
+    // (Samsung Galaxy S23 Ultra, Pixel 9 Pro XL). safeDrawing covers status
+    // bars + nav bars + display cutout + IME so each step's title row stays
+    // visible and Configure's text fields stay above the keyboard.
     AnimatedContent(
         targetState = state.step,
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier
+            .fillMaxSize()
+            .windowInsetsPadding(WindowInsets.safeDrawing),
         transitionSpec = {
             val dir = if (targetState.ordinal > initialState.ordinal) 1 else -1
             (slideInHorizontally { it * dir } + fadeIn()) togetherWith

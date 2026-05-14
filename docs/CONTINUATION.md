@@ -11,7 +11,22 @@ same commit so the index stays trustworthy. Stale state in this file
 is itself a §6.J spirit issue — the file claims a guarantee, the
 repo has drifted, the agent acts on the claim.
 
-> **Last updated:** 2026-05-14, **issue 1/3 closed** — onboarding back
+> **Last updated:** 2026-05-14, **issue 2/3 closed** — Samsung Galaxy S23
+> Ultra (and any tall-aspect / edge-to-edge device) onboarding overlap
+> with status bar + gesture/nav bar fixed. MainActivity calls
+> `enableEdgeToEdge`, but `OnboardingScreen.kt`'s `AnimatedContent`
+> container did not apply `Modifier.windowInsetsPadding(WindowInsets.
+> safeDrawing)`. One-place fix at the screen level (every step inherits;
+> any future step automatically gets correct behavior). Structural
+> regression test (`OnboardingInsetRegressionTest`) reads the source
+> file and asserts the modifier + imports are present — falsifiability
+> rehearsed (mutation: removed the modifier; observed AssertionError at
+> line 38; reverted; passes). Challenge Test C25
+> (`Challenge25OnboardingInsetSafeDrawingTest`) asserts top + bottom
+> nodes are reported displayed on Welcome / Providers / Summary; runs
+> on tall-aspect AVD (Pixel 9 Pro XL or 1440x3088 custom @ 500dpi).
+>
+> **Prior:** 2026-05-14, **issue 1/3 closed** — onboarding back
 > navigation now functions on every step. Inverted `BackHandler`
 > predicate in `OnboardingScreen.kt` (was enabled only on Welcome,
 > ignored on Providers/Configure/Summary; now enabled everywhere with
