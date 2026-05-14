@@ -1,5 +1,9 @@
 # lava-api-go — Constitution
 
+## INHERITED FROM constitution/Constitution.md
+
+All rules in `constitution/Constitution.md` (and the `constitution/Constitution.md` it references) apply unconditionally. This file's rules below extend them — they MUST NOT weaken any inherited rule. See parent root `CLAUDE.md` §6.AD for the Lava-specific incorporation context (29th §6.L cycle, 2026-05-14) and §6.AD-debt for the implementation-gap inventory. Use `constitution/find_constitution.sh` from the parent project root to resolve the absolute path of the submodule from any nested location.
+
 This module inherits the root project's constitutional rules. Modifying them in this module is forbidden; submodule constitutions may add stricter rules but MUST NOT relax these.
 
 ## Inherited rules (non-negotiable)
