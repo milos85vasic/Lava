@@ -24,7 +24,6 @@ import lava.tracker.api.TrackerClient
 import lava.tracker.api.TrackerDescriptor
 import lava.tracker.api.feature.AuthenticatableTracker
 import lava.tracker.api.feature.BrowsableTracker
-import lava.tracker.registry.CLONE_BASE_URL_CONFIG_KEY
 import lava.tracker.api.feature.CommentsTracker
 import lava.tracker.api.feature.DownloadableTracker
 import lava.tracker.api.feature.FavoritesTracker
@@ -43,6 +42,7 @@ import lava.tracker.client.dedup.DeduplicationEngine
 import lava.tracker.client.persistence.LavaMirrorManagerHolder
 import lava.tracker.client.persistence.MirrorConfigLoader
 import lava.tracker.client.persistence.MirrorHealthRepository
+import lava.tracker.registry.CLONE_BASE_URL_CONFIG_KEY
 import lava.tracker.registry.TrackerRegistry
 import okhttp3.OkHttpClient
 import javax.inject.Inject

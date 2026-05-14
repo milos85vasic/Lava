@@ -21,8 +21,6 @@ import lava.login.addLogin
 import lava.login.openLogin
 import lava.menu.MenuScreen
 import lava.navigation.NavigationController
-import lava.provider.config.addProviderConfig
-import lava.provider.config.openProviderConfig
 import lava.navigation.model.NavigationBarItem
 import lava.navigation.model.NavigationGraphBuilder
 import lava.navigation.model.buildRoute
@@ -34,6 +32,8 @@ import lava.navigation.ui.NavigationAnimations.Companion.slideInRight
 import lava.navigation.ui.NavigationAnimations.Companion.slideOutLeft
 import lava.navigation.ui.NavigationAnimations.Companion.slideOutRight
 import lava.navigation.ui.NestedMobileNavigation
+import lava.provider.config.addProviderConfig
+import lava.provider.config.openProviderConfig
 import lava.search.addSearchHistory
 import lava.search.input.addSearchInput
 import lava.search.input.openSearchInput

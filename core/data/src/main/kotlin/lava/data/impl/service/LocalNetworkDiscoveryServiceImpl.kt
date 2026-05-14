@@ -165,7 +165,6 @@ internal class LocalNetworkDiscoveryServiceImpl @Inject constructor(
     }
 }
 
-
 /**
  * Whether [foundServiceType] (as reported by Android NsdManager — typically
  * something like `_lava._tcp.local.` with a trailing dot) belongs to the
