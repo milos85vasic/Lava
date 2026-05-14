@@ -11,7 +11,24 @@ same commit so the index stays trustworthy. Stale state in this file
 is itself a §6.J spirit issue — the file claims a guarantee, the
 repo has drifted, the agent acts on the claim.
 
-> **Last updated:** 2026-05-14, **release-prep for 1.2.19-1039 / 2.3.8-2308**
+> **Last updated:** 2026-05-14, **1.2.19-1039 DISTRIBUTED to Firebase**
+> per the operator's 25th §6.L invocation. Both APKs uploaded + invited
+> to the 3 testers configured in `.env`:
+>
+>   - debug: console.firebase.google.com/project/lava-vasic-digital/
+>     appdistribution/app/android:digital.vasic.lava.client.dev/releases/7pjdfot2or4i0
+>   - release: console.firebase.google.com/project/lava-vasic-digital/
+>     appdistribution/app/android:digital.vasic.lava.client/releases/1tk4vuvqa9vc0
+>
+> `last-version` advanced 1038→1039. Pepper-history advanced (rotated
+> pre-distribute per Phase 1 Gate 4). §6.Y self-applied: this cycle's
+> first commit (`32f4cbcf`) bumped the version BEFORE the icon fix
+> code change, demonstrating the new mandate's intent. Both APIs need
+> reboot with the new 2.3.8 build (lava-api-go binary + image rebuilt
+> in releases/1.2.19/api-go/) — currently-running containers are still
+> on the 2.3.7 build from the prior cycle.
+>
+> **Prior:** 2026-05-14, release-prep for 1.2.19-1039 / 2.3.8-2308
 > per §6.P + §6.Y. New version bump landed FIRST per the new §6.Y
 > Post-Distribution Version Bump Mandate (25th §6.L invocation):
 > versionCode 1038→1039, versionName 1.2.18→1.2.19 (patch — user-visible
