@@ -46,27 +46,7 @@ class OnboardingViewModelTest {
     @Before
     fun setup() {
         registry = DefaultTrackerRegistry()
-
-        val trackerDescriptor = object : TrackerDescriptor {
-            override val trackerId: String = "test-tracker"
-            override val displayName: String = "Test Tracker"
-            override val baseUrls: List<MirrorUrl> = listOf(
-                MirrorUrl(url = "https://test.example.com", isPrimary = true),
-            )
-            override val capabilities: Set<TrackerCapability> = setOf(TrackerCapability.SEARCH)
-            override val authType: AuthType = AuthType.NONE
-            override val encoding: String = "UTF-8"
-            override val expectedHealthMarker: String = "test"
-            override val verified: Boolean = true
-            override val apiSupported: Boolean = true
-        }
-
-        val factory = object : PluginFactory<TrackerDescriptor, TrackerClient> {
-            override val descriptor: TrackerDescriptor = trackerDescriptor
-            override fun create(config: PluginConfig): TrackerClient = FakeTrackerClient(trackerDescriptor)
-        }
-
-        registry.register(factory)
+        registerTracker("test-tracker", "Test Tracker", "https://test.example.com")
         sdk = LavaTrackerSdk(registry)
 
         val fakeDao = object : ProviderCredentialsDao {
@@ -80,6 +60,25 @@ class OnboardingViewModelTest {
         credentialManager = ProviderCredentialManager(credentialsRepository)
 
         authService = FakeAuthService()
+    }
+
+    private fun registerTracker(id: String, displayName: String, baseUrl: String) {
+        val descriptor = object : TrackerDescriptor {
+            override val trackerId: String = id
+            override val displayName: String = displayName
+            override val baseUrls: List<MirrorUrl> = listOf(MirrorUrl(url = baseUrl, isPrimary = true))
+            override val capabilities: Set<TrackerCapability> = setOf(TrackerCapability.SEARCH)
+            override val authType: AuthType = AuthType.NONE
+            override val encoding: String = "UTF-8"
+            override val expectedHealthMarker: String = "test"
+            override val verified: Boolean = true
+            override val apiSupported: Boolean = true
+        }
+        val factory = object : PluginFactory<TrackerDescriptor, TrackerClient> {
+            override val descriptor: TrackerDescriptor = descriptor
+            override fun create(config: PluginConfig): TrackerClient = FakeTrackerClient(descriptor)
+        }
+        registry.register(factory)
     }
 
     private fun TestScope.createViewModel(): OnboardingViewModel {
@@ -148,6 +147,111 @@ class OnboardingViewModelTest {
             expectSideEffect(OnboardingSideEffect.Finish)
         }
     }
+
+    // Back-step coverage — closes the Sixth-Law gap that allowed the inverted
+    // `BackHandler` predicate in OnboardingScreen.kt to ship to users. Each
+    // transition in the onboarding wizard MUST round-trip via BackStep.
+
+    @Test
+    fun `back step from Welcome emits Finish side effect`() = runTest(dispatcherRule.testDispatcher) {
+        val viewModel = createViewModel()
+        viewModel.test(this) {
+            runOnCreate()
+            expectInitialState()
+            awaitState()
+
+            viewModel.perform(OnboardingAction.BackStep)
+            expectSideEffect(OnboardingSideEffect.Finish)
+        }
+    }
+
+    @Test
+    fun `back step from Providers returns to Welcome`() = runTest(dispatcherRule.testDispatcher) {
+        val viewModel = createViewModel()
+        viewModel.test(this) {
+            runOnCreate()
+            expectInitialState()
+            awaitState()
+
+            viewModel.perform(OnboardingAction.NextStep)
+            expectState { copy(step = OnboardingStep.Providers) }
+
+            viewModel.perform(OnboardingAction.BackStep)
+            expectState { copy(step = OnboardingStep.Welcome) }
+        }
+    }
+
+    @Test
+    fun `back step from Configure returns to Providers when only one provider selected`() =
+        runTest(dispatcherRule.testDispatcher) {
+            val viewModel = createViewModel()
+            viewModel.test(this) {
+                runOnCreate()
+                expectInitialState()
+                awaitState()
+
+                viewModel.perform(OnboardingAction.NextStep) // → Providers
+                expectState { copy(step = OnboardingStep.Providers) }
+                viewModel.perform(OnboardingAction.NextStep) // → Configure (one provider, index 0)
+                expectState { copy(step = OnboardingStep.Configure, currentProviderIndex = 0) }
+
+                viewModel.perform(OnboardingAction.BackStep)
+                expectState { copy(step = OnboardingStep.Providers, currentProviderIndex = 0) }
+            }
+        }
+
+    @Test
+    fun `back step from Configure walks back through provider index when multiple selected`() =
+        runTest(dispatcherRule.testDispatcher) {
+            registerTracker("test-tracker-2", "Test Tracker 2", "https://test2.example.com")
+            sdk = LavaTrackerSdk(registry)
+
+            val viewModel = createViewModel()
+            viewModel.test(this) {
+                runOnCreate()
+                expectInitialState()
+                awaitState() // providers + configs reduced
+
+                viewModel.perform(OnboardingAction.NextStep) // → Providers
+                expectState { copy(step = OnboardingStep.Providers) }
+                viewModel.perform(OnboardingAction.NextStep) // → Configure (index 0)
+                expectState { copy(step = OnboardingStep.Configure, currentProviderIndex = 0) }
+                viewModel.perform(OnboardingAction.NextStep) // advance → Configure (index 1)
+                expectState { copy(step = OnboardingStep.Configure, currentProviderIndex = 1) }
+
+                // Back from Configure(index=1) decrements to Configure(index=0),
+                // does NOT jump straight to Providers — that was the pre-fix bug
+                // where in-progress credentials for provider 0 were inaccessible.
+                viewModel.perform(OnboardingAction.BackStep)
+                expectState { copy(step = OnboardingStep.Configure, currentProviderIndex = 0) }
+
+                // Another back from index 0 returns to Providers list.
+                viewModel.perform(OnboardingAction.BackStep)
+                expectState { copy(step = OnboardingStep.Providers, currentProviderIndex = 0) }
+            }
+        }
+
+    @Test
+    fun `back step from Summary returns to Configure of last provider`() =
+        runTest(dispatcherRule.testDispatcher) {
+            val viewModel = createViewModel()
+            viewModel.test(this) {
+                runOnCreate()
+                expectInitialState()
+                awaitState()
+
+                // Single provider: Welcome → Providers → Configure → (advance) → Summary
+                viewModel.perform(OnboardingAction.NextStep)
+                expectState { copy(step = OnboardingStep.Providers) }
+                viewModel.perform(OnboardingAction.NextStep)
+                expectState { copy(step = OnboardingStep.Configure, currentProviderIndex = 0) }
+                viewModel.perform(OnboardingAction.NextStep) // single provider → Summary
+                expectState { copy(step = OnboardingStep.Summary, currentProviderIndex = 0) }
+
+                viewModel.perform(OnboardingAction.BackStep)
+                expectState { copy(step = OnboardingStep.Configure, currentProviderIndex = 0) }
+            }
+        }
 }
 
 class FakeAuthService : AuthService {

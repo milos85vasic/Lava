@@ -32,7 +32,10 @@ fun OnboardingScreen(
         }
     }
 
-    BackHandler(enabled = state.step == OnboardingStep.Welcome) {
+    // Intercept system back on every step; the ViewModel's onBackStep() decides
+    // whether to walk back through provider config, return to a prior step, or
+    // (only on Welcome) emit Finish so the host can leave the wizard.
+    BackHandler(enabled = true) {
         viewModel.perform(OnboardingAction.BackStep)
     }
 

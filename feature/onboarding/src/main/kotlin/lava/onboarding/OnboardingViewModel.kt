@@ -83,9 +83,24 @@ class OnboardingViewModel @Inject constructor(
             OnboardingStep.Welcome -> postSideEffect(OnboardingSideEffect.Finish)
             OnboardingStep.Providers -> reduce { state.copy(step = OnboardingStep.Welcome) }
             OnboardingStep.Configure -> {
-                reduce { state.copy(step = OnboardingStep.Providers) }
+                // Walk back through the per-provider Configure pages before
+                // returning to the Providers list, so a user configuring N
+                // providers can revisit prior credentials without losing them.
+                if (state.currentProviderIndex > 0) {
+                    reduce { state.copy(currentProviderIndex = state.currentProviderIndex - 1) }
+                } else {
+                    reduce { state.copy(step = OnboardingStep.Providers) }
+                }
             }
-            OnboardingStep.Summary -> { /* ignore */ }
+            OnboardingStep.Summary -> {
+                // Re-enter Configure on the last selected provider so the user
+                // can amend a config they've already reviewed on the summary.
+                val selectedCount = state.providers.count { it.selected }
+                val lastIndex = (selectedCount - 1).coerceAtLeast(0)
+                reduce {
+                    state.copy(step = OnboardingStep.Configure, currentProviderIndex = lastIndex)
+                }
+            }
         }
     }
 

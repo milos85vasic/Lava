@@ -11,7 +11,22 @@ same commit so the index stays trustworthy. Stale state in this file
 is itself a §6.J spirit issue — the file claims a guarantee, the
 repo has drifted, the agent acts on the claim.
 
-> **Last updated:** 2026-05-14, root `CLAUDE.md` audit + 6 targeted edits
+> **Last updated:** 2026-05-14, **issue 1/3 closed** — onboarding back
+> navigation now functions on every step. Inverted `BackHandler`
+> predicate in `OnboardingScreen.kt` (was enabled only on Welcome,
+> ignored on Providers/Configure/Summary; now enabled everywhere with
+> the VM deciding the transition). `OnboardingViewModel.onBackStep()`
+> extended: Configure with `currentProviderIndex > 0` decrements
+> (walks back through provider configs); Summary returns to Configure
+> on last selected provider. 5 new VM tests + Challenge Test C24
+> (`Challenge24OnboardingBackNavigationTest`) cover all four
+> transitions. Reproduction-before-fix gate satisfied (Summary back
+> test failed against pre-fix VM; all 8 pass after fix). C24 source
+> compiles; instrumentation gating run owed at next §6.X-mounted gate
+> host. Issues 2/3 + 3/3 still pending: S23 Ultra insets + DEV API
+> `_lava-api-dev._tcp`.
+>
+> **Prior:** 2026-05-14, root `CLAUDE.md` audit + 6 targeted edits
 > (no constitutional clause text touched): `docs/CONTINUATION.md`
 > promoted to first entry in "See also"; `CHANGELOG.md` listed; multi-
 > tracker reality reflected in Project section; commands gain single
@@ -19,8 +34,7 @@ repo has drifted, the agent acts on the claim.
 > hardcoded-*.sh` siblings; §6 head gains open/resolved debt index;
 > §6.L gains operational summary before the wall; "Things to avoid"
 > gains "Always forbidden (quick reference)" pointing into §6.R/U/V/W +
-> Host Stability. Pending operator work: onboarding back-nav, S23 Ultra
-> insets fix, DEV API service `_lava-api-dev._tcp` (in this order).
+> Host Stability.
 >
 > **Prior:** 2026-05-13 evening, **versionCode bumped 1036 → 1037 +
 > 2305 → 2306** in prep for next distribute (per §6.P + operator's
