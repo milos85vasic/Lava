@@ -86,10 +86,15 @@ class Challenge27WelcomeColoredLogoNotWhitePlaceholderTest {
      */
     private fun assertColoredIconRegion(bitmap: Bitmap) {
         val iconBandHeight = bitmap.height / 3
-        var minR = 255; var maxR = 0
-        var minG = 255; var maxG = 0
-        var minB = 255; var maxB = 0
-        var totalR = 0L; var totalG = 0L; var totalB = 0L
+        var minR = 255
+        var maxR = 0
+        var minG = 255
+        var maxG = 0
+        var minB = 255
+        var maxB = 0
+        var totalR = 0L
+        var totalG = 0L
+        var totalB = 0L
         var samples = 0
         for (y in 0 until iconBandHeight step 8) {
             for (x in 0 until bitmap.width step 8) {
@@ -99,10 +104,16 @@ class Challenge27WelcomeColoredLogoNotWhitePlaceholderTest {
                 val r = (argb shr 16) and 0xFF
                 val g = (argb shr 8) and 0xFF
                 val b = argb and 0xFF
-                if (r < minR) minR = r; if (r > maxR) maxR = r
-                if (g < minG) minG = g; if (g > maxG) maxG = g
-                if (b < minB) minB = b; if (b > maxB) maxB = b
-                totalR += r; totalG += g; totalB += b; samples++
+                if (r < minR) minR = r
+                if (r > maxR) maxR = r
+                if (g < minG) minG = g
+                if (g > maxG) maxG = g
+                if (b < minB) minB = b
+                if (b > maxB) maxB = b
+                totalR += r
+                totalG += g
+                totalB += b
+                samples++
             }
         }
         val rangeR = maxR - minR

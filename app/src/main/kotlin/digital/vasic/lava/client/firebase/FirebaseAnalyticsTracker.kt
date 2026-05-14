@@ -111,6 +111,7 @@ internal class FirebaseAnalyticsTracker(
 
     companion object {
         private const val TAG = "AnalyticsTracker"
+
         // Crashlytics custom-key values are capped at 1024 bytes per the
         // Firebase docs; we also cap warning messages to keep breadcrumbs
         // manageable. Truncation here means the call site MUST front-load
