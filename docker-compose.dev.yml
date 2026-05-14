@@ -1,0 +1,94 @@
+# Lava DEV API instance — runs side-by-side with the production lava-api-go.
+#
+# Use case: a developer iterating on the Go API can advertise a dev mDNS
+# service type (`_lava-api-dev._tcp`) on a different port (default 8543)
+# without disturbing the production instance on the same LAN.
+#
+# Only the **debug** Android build (applicationIdSuffix `.dev`) subscribes
+# to `_lava-api-dev._tcp` — see `app/.../DiscoveryServiceTypesModule.kt`
+# and `core/data/.../DiscoveryServiceTypeCatalog.kt`. Release builds
+# ignore this advertisement entirely, so a stray dev instance on a real
+# user's LAN cannot redirect their traffic.
+#
+# Bring up:
+#   docker compose -f docker-compose.dev.yml up
+#   # or alongside the prod compose:
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+#
+# Tear down:
+#   docker compose -f docker-compose.dev.yml down
+#
+# Verified parse: `docker compose -f docker-compose.dev.yml config --quiet`.
+
+services:
+
+  # Reuses the same Postgres + migrate flow from docker-compose.yml when
+  # this file is layered. When run standalone, brings up its own postgres
+  # via the same image so the dev API has a database. The dev-only schema
+  # name (`lava_api_dev`) keeps prod data isolated from dev experiments.
+  lava-postgres-dev:
+    profiles: [api-go-dev, dev]
+    image: postgres:16-alpine
+    container_name: lava-postgres-dev
+    environment:
+      POSTGRES_DB: lava_api_dev
+      POSTGRES_USER: lava
+      POSTGRES_PASSWORD: ${LAVA_PG_PASSWORD:?required}
+    networks: [lava-net-dev]
+    ports: ["127.0.0.1:5433:5432"]    # host port 5433 to avoid prod-postgres collision
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "lava", "-d", "lava_api_dev"]
+      interval: 5s
+      retries: 12
+
+  lava-migrate-dev:
+    profiles: [api-go-dev, dev]
+    container_name: lava-migrate-dev
+    build:
+      context: .
+      dockerfile: lava-api-go/docker/Dockerfile
+      target: migrate
+    networks: [lava-net-dev]
+    depends_on:
+      lava-postgres-dev: { condition: service_healthy }
+    environment:
+      LAVA_API_PG_URL: "postgres://lava:${LAVA_PG_PASSWORD}@lava-postgres-dev:5432/lava_api_dev?sslmode=disable"
+    restart: "no"
+
+  lava-api-go-dev:
+    profiles: [api-go-dev, dev]
+    container_name: lava-api-go-dev
+    build:
+      context: .
+      dockerfile: lava-api-go/docker/Dockerfile
+      target: runtime
+    network_mode: host                # mDNS requires host net (same as prod)
+    depends_on:
+      lava-migrate-dev: { condition: service_completed_successfully }
+    environment:
+      # Same binary, dev-flavored configuration:
+      #   - listens on a non-prod port so both can run on one host
+      #   - advertises _lava-api-dev._tcp instead of _lava-api._tcp
+      #   - uses the dev schema/database
+      LAVA_API_PG_URL: "postgres://lava:${LAVA_PG_PASSWORD}@127.0.0.1:5433/lava_api_dev?sslmode=disable"
+      LAVA_API_LISTEN: "${LAVA_API_DEV_LISTEN:-:8543}"
+      LAVA_API_METRICS_LISTEN: "${LAVA_API_DEV_METRICS_LISTEN:-:9092}"
+      LAVA_API_MDNS_TYPE: "_lava-api-dev._tcp"
+      LAVA_API_MDNS_PORT: "${LAVA_API_DEV_MDNS_PORT:-8543}"
+      LAVA_API_MDNS_INSTANCE: "${LAVA_API_DEV_MDNS_INSTANCE:-Lava API (dev)}"
+      LAVA_API_TLS_CERT: /etc/lava-api-go/tls/server.crt
+      LAVA_API_TLS_KEY:  /etc/lava-api-go/tls/server.key
+      LAVA_API_OTLP_ENDPOINT: "http://127.0.0.1:4318"
+      LAVA_AUTH_FIELD_NAME: "${LAVA_AUTH_FIELD_NAME}"
+      LAVA_AUTH_MIN_SUPPORTED_VERSION_NAME: "${LAVA_AUTH_MIN_SUPPORTED_VERSION_NAME:-1.2.6}"
+      LAVA_AUTH_MIN_SUPPORTED_VERSION_CODE: "${LAVA_AUTH_MIN_SUPPORTED_VERSION_CODE:-1026}"
+      LAVA_AUTH_HMAC_SECRET: "${LAVA_AUTH_HMAC_SECRET}"
+      LAVA_AUTH_ACTIVE_CLIENTS: "${LAVA_AUTH_ACTIVE_CLIENTS}"
+      LAVA_AUTH_RETIRED_CLIENTS: "${LAVA_AUTH_RETIRED_CLIENTS:-}"
+      LAVA_AUTH_TRUSTED_PROXIES: "${LAVA_AUTH_TRUSTED_PROXIES:-}"
+    volumes:
+      - ./lava-api-go/docker/tls:/etc/lava-api-go/tls:ro
+
+networks:
+  lava-net-dev:
+    driver: bridge

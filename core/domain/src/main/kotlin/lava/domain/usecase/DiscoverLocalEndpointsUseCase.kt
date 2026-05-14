@@ -87,7 +87,13 @@ class DiscoverLocalEndpointsUseCaseImpl @Inject constructor(
      * are well-formed.
      */
     private fun DiscoveredEndpoint.toEndpoint(): Endpoint = when (engine) {
-        DiscoveredEndpoint.Engine.Go -> Endpoint.GoApi(
+        // GoDev shares the GoApi endpoint shape — same protocol (HTTPS),
+        // same TLS expectation, just a different host:port. Only debug
+        // builds reach this branch (release builds never subscribe to
+        // _lava-api-dev._tcp; see DiscoveryServiceTypesModule in :app).
+        DiscoveredEndpoint.Engine.Go,
+        DiscoveredEndpoint.Engine.GoDev,
+        -> Endpoint.GoApi(
             host = host.substringBeforeLast(":").ifEmpty { host },
             port = port,
         )

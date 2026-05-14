@@ -11,7 +11,35 @@ same commit so the index stays trustworthy. Stale state in this file
 is itself a §6.J spirit issue — the file claims a guarantee, the
 repo has drifted, the agent acts on the claim.
 
-> **Last updated:** 2026-05-14, **issue 2/3 closed** — Samsung Galaxy S23
+> **Last updated:** 2026-05-14, **issue 3/3 closed** — DEV API instance
+> recognition. New `_lava-api-dev._tcp` mDNS service type ships in
+> `core/data/api/service/DiscoveryServiceTypeCatalog.kt` (canonical
+> public catalog: `SERVICE_TYPES_RELEASE` + `SERVICE_TYPES_DEBUG` add
+> the dev type). New Hilt qualifier `@DiscoveryServiceTypes` lives in
+> the api package; the impl reads the injected list rather than a
+> hardcoded companion-object constant. App-layer
+> `DiscoveryServiceTypesModule` selects DEBUG vs RELEASE set via
+> `BuildConfig.DEBUG`, so a stray dev advertiser on a production
+> user's LAN cannot redirect their traffic. New `DiscoveredEndpoint
+> .Engine.GoDev` value; `engineFor()` orders the GoDev check before
+> Go to honour the more-specific match. Domain
+> `DiscoverLocalEndpointsUseCase.toEndpoint()` maps GoDev to
+> `Endpoint.GoApi` (same shape, different host:port). New
+> `docker-compose.dev.yml` brings up the side-by-side dev API on port
+> 8543 with its own `lava_api_dev` schema; `.env.example` documents
+> `LAVA_API_DEV_*` overrides. 5 contract assertions in
+> `LocalNetworkDiscoveryServiceTypeTest` (catalog + matchesServiceType
+> discrimination) — falsifiability rehearsed (mutation: drop dev type
+> from DEBUG list; observed AssertionError at line 49; reverted; pass).
+> Go-side §6.A contract test
+> `lava-api-go/tests/contract/dev_compose_env_contract_test.go`
+> asserts every `LAVA_API_*` env var the dev compose passes binds to a
+> field config.Load() actually reads — falsifiability rehearsed
+> (mutation: rename `LAVA_API_MDNS_TYPE` → `LAVA_API_MDNS_SERVICE_TYPE`
+> in config.go; observed exact "env-var ... drifted" assertion;
+> reverted; pass).
+>
+> **Prior:** 2026-05-14, **issue 2/3 closed** — Samsung Galaxy S23
 > Ultra (and any tall-aspect / edge-to-edge device) onboarding overlap
 > with status bar + gesture/nav bar fixed. MainActivity calls
 > `enableEdgeToEdge`, but `OnboardingScreen.kt`'s `AnimatedContent`

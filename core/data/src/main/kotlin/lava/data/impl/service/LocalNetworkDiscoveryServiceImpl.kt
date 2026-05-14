@@ -34,6 +34,7 @@ import javax.inject.Inject
 internal class LocalNetworkDiscoveryServiceImpl @Inject constructor(
     @ApplicationContext context: Context,
     private val dispatchers: Dispatchers,
+    @lava.data.api.service.DiscoveryServiceTypes private val serviceTypes: List<String>,
 ) : LocalNetworkDiscoveryService {
 
     private val nsdManager = context.getSystemService(Context.NSD_SERVICE) as? NsdManager
@@ -49,7 +50,7 @@ internal class LocalNetworkDiscoveryServiceImpl @Inject constructor(
         // can stopServiceDiscovery for each.
         val listeners = mutableListOf<NsdManager.DiscoveryListener>()
 
-        for (serviceType in SERVICE_TYPES) {
+        for (serviceType in serviceTypes) {
             val listener = buildDiscoveryListener(nsd, serviceType, ::trySend)
             listeners += listener
             withContext(dispatchers.main) {
@@ -136,9 +137,16 @@ internal class LocalNetworkDiscoveryServiceImpl @Inject constructor(
         }.getOrNull()
 
         return when (txtEngine) {
+            "go-dev" -> DiscoveredEndpoint.Engine.GoDev
             "go" -> DiscoveredEndpoint.Engine.Go
             "ktor" -> DiscoveredEndpoint.Engine.Ktor
             null, "" -> when {
+                // Order matters: GoDev's service-type literal CONTAINS the Go
+                // literal as a substring after stripping the leading underscore
+                // ("lava-api-dev._tcp" contains "lava-api._tcp"? No — but the
+                // raw `contains` check would match "_lava-api" as a prefix of
+                // "_lava-api-dev". Test the more specific name first.
+                watchedServiceType.contains(SERVICE_TYPE_GO_DEV) -> DiscoveredEndpoint.Engine.GoDev
                 watchedServiceType.contains(SERVICE_TYPE_GO) -> DiscoveredEndpoint.Engine.Go
                 watchedServiceType.contains(SERVICE_TYPE_KTOR) -> DiscoveredEndpoint.Engine.Ktor
                 else -> DiscoveredEndpoint.Engine.Unknown
@@ -148,12 +156,15 @@ internal class LocalNetworkDiscoveryServiceImpl @Inject constructor(
     }
 
     companion object {
-        private const val SERVICE_TYPE_KTOR = "_lava._tcp"
-        private const val SERVICE_TYPE_GO = "_lava-api._tcp"
-
-        private val SERVICE_TYPES = listOf(SERVICE_TYPE_KTOR, SERVICE_TYPE_GO)
+        // Re-export from the api-layer catalog so the existing in-file
+        // engineFor() switch reads the same values the app-layer Hilt
+        // module subscribes against (single source of truth).
+        private const val SERVICE_TYPE_KTOR = lava.data.api.service.DiscoveryServiceTypeCatalog.SERVICE_TYPE_KTOR
+        private const val SERVICE_TYPE_GO = lava.data.api.service.DiscoveryServiceTypeCatalog.SERVICE_TYPE_GO
+        private const val SERVICE_TYPE_GO_DEV = lava.data.api.service.DiscoveryServiceTypeCatalog.SERVICE_TYPE_GO_DEV
     }
 }
+
 
 /**
  * Whether [foundServiceType] (as reported by Android NsdManager — typically

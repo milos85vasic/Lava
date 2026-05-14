@@ -42,6 +42,17 @@ data class DiscoveredEndpoint(
         /** Go API service — `_lava-api._tcp`, HTTPS, port usually 8443. */
         Go,
 
+        /**
+         * Developer Go API instance — `_lava-api-dev._tcp`, advertised by
+         * a side-by-side lava-api-go process running on a different port
+         * (e.g. 8543) so the developer can iterate on the API without
+         * disturbing the production instance. Only the debug build of
+         * the Android client subscribes to this service type; release
+         * builds ignore it entirely so a stray DEV advertiser on a
+         * production user's LAN cannot redirect their traffic.
+         */
+        GoDev,
+
         /** TXT record present but engine value unrecognised; treat conservatively. */
         Unknown,
     }
