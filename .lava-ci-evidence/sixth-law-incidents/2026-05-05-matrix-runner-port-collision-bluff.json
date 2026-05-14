@@ -76,7 +76,7 @@
     "boot_seconds": 28.18,
     "test_seconds": 60.58,
     "test_error": "exit status 1",
-    "diagnosis_owed": "OWED — the matrix runner does not persist gradle stdout, so the actual JUnit failure message was lost. Re-run on Pixel_9a alone to capture the Compose UI test failure detail. Likely candidates: (a) the same `InputManager.getInstance NoSuchMethodException` that previously blocked C1 deep navigation on Pixel_9a, (b) a Compose semantics-tree difference at API 36, (c) a Hilt entry-point compatibility issue at API 36.",
+    "diagnosis_owed": "OWED — the matrix runner does not persist gradle stdout, so the actual JUnit failure message was lost. Re-run on Pixel_9a alone to capture the Compose UI test failure detail. PENDING_FORENSICS: candidate root causes (no captured stdout evidence to pinpoint which) — (a) the same `InputManager.getInstance NoSuchMethodException` that previously blocked C1 deep navigation on Pixel_9a, (b) a Compose semantics-tree difference at API 36, (c) a Hilt entry-point compatibility issue at API 36.",
     "constitutional_status": "Recorded as a known-issue. Phase-1.1 acceptance gate stands valid for API 28/30/34 + tablet form factor. Pixel_9a (API 36 = latest stable) is now an OPEN gap that MUST be closed before the next release tag (clause 6.I clause 2 latest-stable requirement)."
   },
   "constitutional_implications_recorded": [

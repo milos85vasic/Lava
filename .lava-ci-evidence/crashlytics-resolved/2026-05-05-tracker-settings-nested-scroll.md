@@ -2,7 +2,7 @@
 
 **Operator report:** "Opening Trackers from Settings crashes the app. See Crashlytics for stacktraces." (2026-05-05, ~23:51 UTC, after 1.2.5 (1025) distribution.)
 
-**Build affected:** Lava-Android-1.2.5 (1025), commit `69a180e`. Likely also affected: every prior version of the app since `TrackerSelectorList` was introduced in SP-3a Phase 4 (Task 4.12). The earlier Crashlytics-fix cycles (1.2.4, 1.2.5) hardened Firebase init paths but did not exercise this particular screen, so the crash signature was not surfaced until a tester actually navigated Settings → Trackers.
+**Build affected:** Lava-Android-1.2.5 (1025), commit `69a180e`. PENDING_FORENSICS: regression-window for prior versions — the structural defect (LazyColumn nested in Column(verticalScroll)) has been present since `TrackerSelectorList` was introduced in SP-3a Phase 4 (Task 4.12), so all prior versions back to that introduction have the same code path; per-version device-evidence not captured. The earlier Crashlytics-fix cycles (1.2.4, 1.2.5) hardened Firebase init paths but did not exercise this particular screen, so the crash signature was not surfaced until a tester actually navigated Settings → Trackers.
 
 **Crashlytics issue ID (Console):** captured by the operator at incident time; this log retains the reasoned root-cause + fix because the Crashlytics REST API is not publicly available (Console + BigQuery export only — see `docs/CRASHLYTICS-OPERATIONS.md`).
 

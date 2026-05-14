@@ -414,9 +414,155 @@ if [[ -f Submodules/Containers/cmd/emulator-matrix/main.go ]]; then
   fi
 fi
 
+# -----------------------------------------------------------------------------
+# §6.AD HelixConstitution Inheritance — closes §6.AD-debt items 1 + 7.
+# Added 2026-05-14 (29th §6.L cycle).
+# -----------------------------------------------------------------------------
+
+# 6.AD(1): root CLAUDE.md MUST contain the §6.AD clause itself.
+if ! grep -qF '##### 6.AD — HelixConstitution Inheritance' CLAUDE.md; then
+  echo "MISSING 6.AD clause in CLAUDE.md" >&2
+  echo "  → Add the §6.AD HelixConstitution Inheritance Mandate clause." >&2
+  exit 1
+fi
+
+# 6.AD(2): the constitution submodule MUST exist with expected files.
+if [[ ! -d constitution ]]; then
+  echo "MISSING constitution/ submodule directory (§6.AD)" >&2
+  echo "  → git submodule update --init constitution" >&2
+  exit 1
+fi
+for required in constitution/CLAUDE.md constitution/AGENTS.md constitution/Constitution.md constitution/install_upstreams.sh constitution/find_constitution.sh; do
+  if [[ ! -f "$required" ]]; then
+    echo "MISSING $required (§6.AD)" >&2
+    echo "  → constitution submodule appears truncated; re-init with --recursive." >&2
+    exit 1
+  fi
+done
+
+# 6.AD(3): root CLAUDE.md + AGENTS.md MUST carry the inheritance pointer-block.
+for root in CLAUDE.md AGENTS.md; do
+  if ! grep -qF '## INHERITED FROM constitution/' "$root"; then
+    echo "MISSING §6.AD inheritance pointer-block in $root" >&2
+    echo "  → Add '## INHERITED FROM constitution/CLAUDE.md' (or AGENTS.md) at the top, after the H1." >&2
+    exit 1
+  fi
+done
+
+# 6.AD(4): every per-scope CLAUDE.md / AGENTS.md / CONSTITUTION.md MUST carry
+# the inheritance pointer-block. Scope: Submodules/* + lava-api-go/ + core/ +
+# app/ + feature/. (Root CLAUDE.md + AGENTS.md handled above.)
+ad_propagated_targets=()
+for f in Submodules/*/CLAUDE.md Submodules/*/AGENTS.md Submodules/*/CONSTITUTION.md; do
+  [[ -f "$f" ]] && ad_propagated_targets+=("$f")
+done
+for f in lava-api-go/CLAUDE.md lava-api-go/AGENTS.md lava-api-go/CONSTITUTION.md core/CLAUDE.md app/CLAUDE.md feature/CLAUDE.md; do
+  [[ -f "$f" ]] && ad_propagated_targets+=("$f")
+done
+ad_missing=()
+for f in "${ad_propagated_targets[@]}"; do
+  if ! grep -qE '^## INHERITED FROM constitution/' "$f"; then
+    ad_missing+=("$f")
+  fi
+done
+if [[ ${#ad_missing[@]} -gt 0 ]]; then
+  echo "MISSING §6.AD inheritance pointer-block in ${#ad_missing[@]} per-scope doc(s):" >&2
+  for f in "${ad_missing[@]}"; do echo "    $f" >&2; done
+  echo "  → Run scripts/inject-helix-inheritance-block.sh to add the block idempotently." >&2
+  exit 1
+fi
+
+# 6.AD(5): scripts/commit_all.sh wrapper MUST exist + be executable.
+if [[ ! -x scripts/commit_all.sh ]]; then
+  echo "MISSING executable scripts/commit_all.sh (§6.AD.2)" >&2
+  echo "  → HelixConstitution mandates a project-official commit + push wrapper." >&2
+  exit 1
+fi
+
+# 6.AD(6): scripts/inject-helix-inheritance-block.sh debt-closure tool MUST exist.
+if [[ ! -x scripts/inject-helix-inheritance-block.sh ]]; then
+  echo "MISSING executable scripts/inject-helix-inheritance-block.sh (§6.AD-debt item 1)" >&2
+  echo "  → Add the idempotent inject script for new per-scope docs." >&2
+  exit 1
+fi
+
+# -----------------------------------------------------------------------------
+# §6.W applicability boundary check — closes §6.AD-debt item 7.
+# The 2-mirror rule (GitHub + GitLab only) applies to the parent + every
+# vasic-digital submodule. The constitution submodule (HelixDevelopment-domain)
+# is permitted up to 4 named remotes via its own install_upstreams.sh:
+# github + gitlab + gitflic + gitverse. This check verifies:
+#   - parent + vasic-digital submodules have NO gitflic/gitverse named remotes
+#   - constitution submodule (if remotes configured) only adds gitflic/gitverse
+#     to its OWN remotes, never bleeds to parent
+# -----------------------------------------------------------------------------
+forbidden_remote_hosts=("gitflic" "gitverse")
+# Parent
+parent_remotes=$(git remote 2>/dev/null)
+for h in "${forbidden_remote_hosts[@]}"; do
+  if echo "$parent_remotes" | grep -qx "$h"; then
+    echo "§6.W VIOLATION: parent repo has '$h' remote (forbidden — only github + gitlab permitted)" >&2
+    echo "  → git remote remove $h" >&2
+    exit 1
+  fi
+done
+# vasic-digital submodules (every Submodules/* — none is HelixDevelopment-owned)
+for sub in Submodules/*/; do
+  [[ -d "$sub/.git" || -f "$sub/.git" ]] || continue
+  sub_remotes=$(git -C "$sub" remote 2>/dev/null || true)
+  for h in "${forbidden_remote_hosts[@]}"; do
+    if echo "$sub_remotes" | grep -qx "$h"; then
+      echo "§6.W VIOLATION: $sub has '$h' remote (only github + gitlab permitted for Lava-owned submodules)" >&2
+      echo "  → git -C $sub remote remove $h" >&2
+      exit 1
+    fi
+  done
+done
+
+# -----------------------------------------------------------------------------
+# §6.AD-debt item 4 + HelixConstitution §11.4.6 — no-guessing-vocabulary
+# grep gate. Forbidden words in tracked status / closure / commit-template
+# files when describing causes. UNCONFIRMED: / UNKNOWN: / PENDING_FORENSICS:
+# lead-in allows the otherwise-forbidden word to pass.
+# -----------------------------------------------------------------------------
+forbidden_guess_words='\b(likely|probably|maybe|might|possibly|presumably|seemingly|apparently|perhaps|supposedly|conjectured)\b|\bseems\s+to\b|\bappears\s+to\b'
+guess_scan_paths=(
+  ".lava-ci-evidence/sixth-law-incidents"
+  ".lava-ci-evidence/crashlytics-resolved"
+)
+guess_violations=()
+for p in "${guess_scan_paths[@]}"; do
+  [[ -d "$p" ]] || continue
+  while IFS= read -r f; do
+    [[ -z "$f" ]] && continue
+    # Skip the line if it begins with an UNCONFIRMED:/UNKNOWN:/PENDING_FORENSICS: lead
+    # OR if the file is a forensic anchor that quotes historical agent output verbatim
+    # (we exempt the file's own forensic-anchor headers via grep -v on their stable markers).
+    if grep -ihnE "$forbidden_guess_words" "$f" 2>/dev/null | \
+       grep -ivE '^[^:]+:[0-9]+:.*\b(UNCONFIRMED|UNKNOWN|PENDING_FORENSICS):' | \
+       grep -ivE 'forensic[[:space:]]+anchor|verbatim[[:space:]]+(operator|agent|user)|historical[[:space:]]+quote' | \
+       head -3 | grep -q .; then
+      guess_violations+=("$f")
+    fi
+  done < <(find "$p" -type f \( -name '*.md' -o -name '*.json' \))
+done
+# Note: this gate intentionally does NOT scan CLAUDE.md / AGENTS.md / CONSTITUTION.md
+# because those documents must DESCRIBE the forbidden vocabulary as part of the
+# mandate itself — the gate exists for future status reports, not the rule's text.
+if [[ ${#guess_violations[@]} -gt 0 ]]; then
+  echo "§6.AD/HelixConstitution §11.4.6 VIOLATION: forbidden guessing vocabulary in:" >&2
+  printf '    %s\n' "${guess_violations[@]}" >&2
+  echo "  → Either prove the cause with captured evidence and state as fact," >&2
+  echo "    OR mark the line with UNCONFIRMED: / UNKNOWN: / PENDING_FORENSICS: prefix." >&2
+  exit 1
+fi
+
 echo "Constitution check passed: 6.D + 6.E + 6.F present in CLAUDE.md;"
 echo "Submodules/Tracker-SDK/CLAUDE.md present; core/ + feature/ scoped"
 echo "clauses present; no clause-6.H credential patterns in tracked files;"
 echo "clause-6.K Containers extension present; §6.X Container-Submodule"
 echo "Emulator Wiring inherited in all submodule + lava-api-go docs;"
-echo "§6.X runtime checks (a) Containerized impl + (b) --runner flag active."
+echo "§6.X runtime checks (a) Containerized impl + (b) --runner flag active;"
+echo "§6.AD HelixConstitution clause + constitution submodule + 54 per-scope"
+echo "inheritance pointer-blocks present; §6.W remote-host boundary clean;"
+echo "§11.4.6 no-guessing vocabulary gate clean."

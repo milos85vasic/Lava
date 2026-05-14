@@ -44,7 +44,7 @@
       "podman save (image export to OCI tar, called by build_and_release.sh's image-archival step)",
       "podman-compose -f docker-compose.test.yml (NOT invoked this session — Phase 3 used the new pkg/emulator path which talks to host emulator directly, not via compose)"
     ],
-    "verdict": "Podman cannot have caused the perceived instability. The user's perception was likely a long-running gradle build (gradle daemon kotlin-compiler can pause GUI responsiveness during heavy I/O) OR an emulator GPU lockup OR a remote SSH session disconnect — none of which are project-attributable host events.",
+    "verdict": "Podman cannot have caused the perceived instability. UNCONFIRMED: candidate causes for the user's perception (no captured evidence pinpoints which) — a long-running gradle build (gradle daemon kotlin-compiler can pause GUI responsiveness during heavy I/O) OR an emulator GPU lockup OR a remote SSH session disconnect — none of which are project-attributable host events.",
     "docker_specific": "Docker is not installed on this host so cannot be a factor. Recording for completeness."
   },
   "forensic_conclusion": "No actual host-stability event occurred in this session. The host has been continuously up since 12:17 with the same logged-in user. The user's perception of instability is real and worth respecting (Class III incident category exists for exactly this), but no constitutional violation occurred and no project code path is implicated. The forensic anchor of incident 2026-04-28-HOST-POWEROFF (manual GNOME power-button click) does NOT recur here.",
