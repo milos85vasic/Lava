@@ -108,8 +108,8 @@ while read -r local_ref local_sha remote_ref remote_sha; do
         # (2) Extensionless paths in well-known script dirs (.githooks/*) —
         #     added 2026-05-14 so a stamp can target .githooks/pre-push itself.
         stamp_paths=$( { \
-          grep -oE '[a-zA-Z0-9_/.-]+\.(go|kt|kts|sh|json|md|xml|yaml|yml)' <<<"$msg"; \
-          grep -oE '\.githooks/[a-zA-Z0-9_-]+' <<<"$msg"; \
+          grep -oE '[a-zA-Z0-9_/.-]+\.(go|kt|kts|sh|json|md|xml|yaml|yml)' <<<"$msg" || true; \
+          grep -oE '\.githooks/[a-zA-Z0-9_-]+' <<<"$msg" || true; \
         } | sort -u)
         match_found=false
         while IFS= read -r df; do
