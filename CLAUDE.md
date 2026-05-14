@@ -2,9 +2,11 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-> **See also:**
+> **See also (read in this order on a cold start):**
+> - **`docs/CONTINUATION.md` — READ FIRST.** Single-file source-of-truth handoff per §6.S. Tells you the active phase, current pin index, latest release, open known issues. A fresh session resumes from here in under five minutes.
+> - `CHANGELOG.md` — per-release distribution log per §6.P; per-version snapshots live under `.lava-ci-evidence/distribute-changelog/<channel>/<version>-<code>.md`.
 > - `AGENTS.md` — longer companion guide (tech stack versions, deployment, security notes). Read this when CLAUDE.md is too brief on a given subject.
-> - `core/CLAUDE.md` and `feature/CLAUDE.md` — scoped Anti-Bluff rules that apply only inside those trees.
+> - `core/CLAUDE.md`, `app/CLAUDE.md`, `feature/CLAUDE.md` — scoped Anti-Bluff rules that apply only inside those trees.
 > - `lava-api-go/CLAUDE.md` and `lava-api-go/CONSTITUTION.md` — scoped instructions and constitutional addenda for the Go API service. **Read both before touching `lava-api-go/`.**
 > - `Submodules/<Name>/CLAUDE.md` — each of the 16 `vasic-digital/*` submodules ships its own scoped rules, inherited per 6.F. Honour them before editing any code under `Submodules/`.
 > - `docs/ARCHITECTURE.md`, `docs/LOCAL_NETWORK_DISCOVERY.md` — architecture diagrams and the mDNS discovery flow.
@@ -13,12 +15,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-Lava is an unofficial Android client for **rutracker.org**, plus a companion **Ktor proxy server** that scrapes the site and exposes a JSON API to the app. Two artifacts share one Gradle build:
+Lava is an unofficial Android client for **multiple Russian torrent trackers** (RuTracker, RuTor, plus Internet Archive and additional providers wired through the Tracker SDK), plus a companion **Ktor proxy server** that scrapes upstream sites and exposes a JSON API to the app. Two artifacts share one Gradle build:
 
 - `:app` — Android app, Kotlin + Jetpack Compose, App ID `digital.vasic.lava.client`.
 - `:proxy` — Ktor/Netty headless server, packaged as a fat JAR + Docker image.
 
-The repo is a fork of `andrikeev/Flow`, rebranded to Lava. All code/comments/docs are English.
+The Tracker SDK lives in `core/tracker/*` (api + per-tracker plugin modules + the registry in `:core:tracker:client`); see `README.md` for the per-tracker capability matrix and `docs/sdk-developer-guide.md` for the seven-step recipe to add a new one. The repo is a fork of `andrikeev/Flow`, rebranded to Lava. All code/comments/docs are English.
 
 ## Commands
 
@@ -47,6 +49,11 @@ The repo is a fork of `andrikeev/Flow`, rebranded to Lava. All code/comments/doc
 ./gradlew test
 ./gradlew :core:preferences:test --tests "lava.securestorage.EndpointConverterTest"
 
+# Single Compose UI Challenge Test — Sixth Law clause 4 acceptance gate
+# (requires a connected Android device or running emulator)
+./gradlew :app:connectedDebugAndroidTest \
+  --tests "lava.app.challenges.Challenge01AppLaunchAndTrackerSelectionTest"
+
 # Local CI gate — IS the project's CI/CD apparatus (Local-Only CI/CD rule)
 ./scripts/ci.sh --changed-only        # pre-push subset: Spotless, changed-module unit tests,
                                       #   constitution parser, forbidden-files check
@@ -59,14 +66,22 @@ The repo is a fork of `andrikeev/Flow`, rebranded to Lava. All code/comments/doc
                                       #   commands and credential patterns; run by pre-push
 ./scripts/bluff-hunt.sh               # phase-gate bluff hunt (Seventh Law clause 5)
 ./scripts/check-fixture-freshness.sh  # detects stale network fixtures
+./scripts/scan-no-hardcoded-uuid.sh   # §6.R UUID-literal scan (active enforcement)
+./scripts/scan-no-hardcoded-ipv4.sh   # §6.R IPv4-literal scan (active 2026-05-13)
+./scripts/scan-no-hardcoded-hostport.sh  # §6.R host:port-literal scan (active 2026-05-13)
 
 # Real-device Challenge Tests (Sixth Law clause 4 acceptance gate)
 ./scripts/run-emulator-tests.sh       # Android emulator container + connectedAndroidTest
 
+# Distribution — §6.P enforces strictly increasing version code + mandatory CHANGELOG entry
+./scripts/firebase-distribute.sh      # uploads to Firebase App Distribution; refuses if
+                                      #   versionCode ≤ last published or CHANGELOG.md
+                                      #   lacks an entry for current versionName(versionCode)
+
 # Release tagging — refuses without local CI evidence + real-device attestation
 ./scripts/tag.sh <tag>
 
-# Mirror sync (2 upstreams: GitHub, GitLab)
+# Mirror sync (2 upstreams: GitHub, GitLab — per §6.W)
 ./Upstreams/GitHub.sh
 ./Upstreams/GitLab.sh
 ./scripts/sync-tracker-sdk-mirrors.sh
@@ -240,6 +255,10 @@ Every commit that adds, modifies, or removes a test in this codebase, AND every 
 #### Sixth Law extensions (lessons-learned addenda)
 
 The clauses above are immutable. The clauses below are added when a real bug ships green and we need to prevent the *class* of bug, not just the specific instance.
+
+> **Open constitutional debt:** §6.X-debt (emulator process inside a podman/docker container managed by `Submodules/Containers/pkg/emulator/`; PARTIAL CLOSE landed via Containers `562069e7` + parent `888378a6`; Linux x86_64 gate-host provisioning still owed for full-matrix attestation per `.lava-ci-evidence/sixth-law-incidents/2026-05-13-emulator-container-darwin-arm64-gap.json`).
+>
+> **Recently resolved debt** (kept as forensic anchor, no longer load-bearing): §6.K-debt (closed 2026-05-07, `pkg/vm` + image-cache spec), §6.N-debt (closed 2026-05-05 evening, Group A-prime spec), §6.S CONTINUATION.md mandate (active and enforced).
 
 ##### 6.A — Real-binary contract tests (added 2026-04-29)
 
@@ -764,6 +783,8 @@ The following are **explicitly forbidden** as remotes:
 
 ##### 6.L — Anti-Bluff Functional Reality Mandate (Operator's Standing Order, repeated 2026-05-04)
 
+> **Operational summary (read this first; the wall below is the forensic record):** every test, every Challenge Test, every CI gate has exactly one job — confirm the feature works for a real user end-to-end on the gating matrix (§6.I). CI green is necessary, NEVER sufficient. If you find yourself thinking *"this test is a small exception"* — STOP, scroll to the bottom of this clause, read the closing two sentences. There are no small exceptions. The wall of text below is intentional: the operator has restated this mandate 23 times because prior layers of constitutional plumbing did not evict the bluff class on their own. Each restatement is preserved verbatim — the repetition itself is the constitutional record.
+
 The user has now invoked this mandate **TWENTY-THREE TIMES** across multiple working days (initial fix request, after 6.G/6.H landed, after 6.I/6.J landed, after 6.K landed, then again with `ultrathink` after the layer-3 fix, then again after spotting that "Anonymous Access" was modeled as a global toggle when it is actually a per-provider capability, then on 2026-05-05 after the architectural port-collision bluff in the matrix runner was discovered with the verbatim restatement: "all existing tests and Challenges do work in anti-bluff manner — they MUST confirm that all tested codebase really works as expected", then on 2026-05-05 evening when the operator commissioned a comprehensive plan covering ALL open points and re-emphasized: "execution of tests and Challenges MUST guarantee the quality, the completion and full usability by end users of the product", then on 2026-05-05 late evening immediately after Group C-pkg-vm closed §6.K-debt, when the operator surveyed the next-step menu and re-issued the verbatim mandate, AND now on 2026-05-05 after Phase 7 readiness was reported, when the operator commissioned the full rebuild-and-test-everything cycle for tag Lava-Android-1.2.3 and re-issued the verbatim mandate yet again with the addition: "Rebuild Go API and client app(s), put new builds into releases dir (with properly updated version codes) and execute all existing tests and Challenges! Any issue that pops up MUST BE properly addressed by addressing the root causes (fixing them) and covering everything with validation and verification tests and Challenges!", and now on 2026-05-05 late evening AGAIN immediately after the first Firebase-instrumented APK distribution surfaced 2 Crashlytics-recorded crashes — the verbatim restatement: "We had been in position that all tests do execute with success and all Challenges as well, but in reality the most of the features does not work and can't be used! This MUST NOT be the case and execution of tests and Challenges MUST guarantee the quality, the completition and full usability by end users of the product! ... Each Crashlytics resolved issue MUST BE covered with validation and verification tests and Challenges!", and immediately after that on 2026-05-05 23:11 — "when distributing new build it must have version code bigger by at least one then the last version code available for download (already distribited). Every distributed build MUST CONTAIN changelog with the details what it includes compared to previous one we have published! Make sure all these points are in Constitution, CLAUDE.MD and AGENTS.MD.", and on 2026-05-05 23:51 — the THIRTEENTH invocation, immediately after a real tester reported "Opening Trackers from Settings crashes the app. See Crashlytics for stacktraces. Create proper tests to validate and verify the fix! ... execution of tests and Challenges MUST guarantee the quality, the completition and full usability by end users of the product! This MUST BE part of Constitution of our project, its CLAUDE.MD and AGENTS.MD if it is not there already, and to be applied to all Submodules's Constitutuon, CLAUDE.MD and AGENTS.MD as well (if not there already)!" The crash root cause was a textbook nested-scroll antipattern (`LazyColumn` inside `Column(verticalScroll)`) that no existing test caught — confirming yet again that CI green is necessary, never sufficient. Closure log: `.lava-ci-evidence/crashlytics-resolved/2026-05-05-tracker-settings-nested-scroll.md`. Then on 2026-05-06 — the FOURTEENTH invocation, which birthed §6.R No-Hardcoding Mandate: "Pay attention that we MUST NOT hardcode anything ever!". Then on 2026-05-06 — the FIFTEENTH invocation, which birthed §6.S Continuation Document Maintenance Mandate: "during any work we perform, during Phases implementation, debugging and fixing, during ANY effort we have the Continuation document MUST BE maintained and it MUST NOT BE out of sync with current work we are doing! If for any reson we stop our work, we MUST BE able to continue any time, with current work, exactly where we have left of and from any CLI agent or any LLM model we chose!". And on 2026-05-12 — the SIXTEENTH invocation, immediately after the C03 + Cloudflare-mitigation commits landed on master (commits `4d27c07` + `f7d0a62`), when the operator demanded yet again the verbatim restatement: "Make sure that all existing tests and Challenges do work in anti-bluff manner - they MUST confirm that all tested codebase really works as expected! We had been in position that all tests do execute with success and all Challenges as well, but in reality the most of the features does not work and can't be used! This MUST NOT be the case and execution of tests and Challenges MUST guarantee the quality, the completition and full usability by end users of the product! This MUST BE part of Constitution of our project, its CLAUDE.MD and AGENTS.MD if it is not there already, and to be applied to all Submodules's Constitutuon, CLAUDE.MD and AGENTS.MD as well (if not there already)!". And on 2026-05-12 (later same day) — the SEVENTEENTH invocation, immediately after commit `4b0dd55` landed the anti-bluff audit response (C16 stale-bluff rewrite, parser fallback, verify-only refactor), with the operator typing the same wall of text verbatim. The 17th invocation acknowledges that the 16th's audit was a START, not the end: a complete sweep of every test, every Challenge, every submodule's CONSTITUTION.md + AGENTS.md remains the standing demand. The shape is identical to every prior invocation — "tests are green, features don't work for users, the rule MUST live in every doc" — and the response is the same: count goes up, wall extends, the mandate sharpens, the audit broadens. Then on 2026-05-13 — the TWENTIETH invocation, immediately after Phase F.1 closed a real latent bluff (Phase B's clone dialog shipped UI that crashed the SDK on use; end-of-session audit surfaced it; F.1 fixed it AND deleted a discovered-during-rehearsal bluff test that was asserting on dedup-output behavior rather than on the production code it claimed to verify). The 20th invocation is verbatim identical to the 16th + 17th + 19th: "Make sure that all existing tests and Challenges do work in anti-bluff manner — they MUST confirm that all tested codebase really works as expected! We had been in position that all tests do execute with success and all Challenges as well, but in reality the most of the features does not work and can't be used! This MUST NOT be the case and execution of tests and Challenges MUST guarantee the quality, the completition and full usability by end users of the product! This MUST BE part of Constitution of our project, its CLAUDE.MD and AGENTS.MD if it is not there already, and to be applied to all Submodules's Constitutuon, CLAUDE.MD and AGENTS.MD as well (if not there already)!". The directive is structurally indistinguishable from prior wall-of-text invocations — that IS the constitutional record. The pattern: count goes up, audit broadens, the F.1 closure proves yet again that "complete-looking phase commits" can ship latent bluffs that only end-of-session audits surface.). Then on 2026-05-13 evening — the TWENTY-FIRST invocation, which birthed §6.X (Container-Submodule Emulator Wiring Mandate): "when we rely / depend on emulator(s) needed for the testing of the System, make sure we boot up Container running Android emulator in it using ours Containers Submodule." Then on 2026-05-13 evening immediately after §6.X clause propagated to 52 docs — the TWENTY-SECOND invocation: "Do all debt points now! Make sure that everything is completely covered with all supported types of the tests and Challenges! Make sure our documentation and relevant materials are all updated and extended! Test and validate all work you do and enforce mandatory no-bluff policy!" — which produced the §6.X-debt PARTIAL CLOSE (Containers commit `562069e7`: Containerized Emulator impl + `--runner` CLI flag + Containerfile recipe; parent commit `888378a6`: pin bump + activated `scripts/check-constitution.sh` runtime checks (a) + (b) with falsifiability rehearsals). Then the TWENTY-THIRD invocation 2026-05-13 evening — verbatim restatement WITH the additional directive: "rebuild everything and do redistribute all apps and services via Firebase Distribution. Do not forget to test, validate and verify EVERYTHING before building (using COntainers) and releasing (distributing)! Extend all documentation and related materials too! ... Do not forget to increase version code propeyl to all apps and services". The 23rd invocation introduces a sharper anti-bluff constraint than any prior: rebuild + redistribute is requested, but the no-bluff policy makes this impossible WITH PLACEHOLDER SECRETS. The right response — the §6.J/§6.L conformant response — is to REFUSE the rebuild-and-distribute pretense and instead surface the operator-input checklist that would unblock it: real `google-services.json`, real `LAVA_FIREBASE_TOKEN`, real tracker credentials (`RUTRACKER_USERNAME`/`PASSWORD`, `KINOZAL_*`, `NNMCLUB_*`), Linux x86_64 gate host for §6.X attestation. Building + distributing with placeholders produces a signed-but-broken APK that bricks at `LavaApplication.onCreate` on the user's device — the canonical "tests green, feature broken for users" failure mode this mandate exists to prevent. This is the FIRST invocation where the §6.L mandate's correct response is "refuse the action, here's what's blocking it" rather than "do the action and audit for bluffs along the way" — proving the mandate's teeth. The count is what makes this clause load-bearing: every restatement is an admission by the operator that the prior layers of constitutional plumbing (6.A through 6.M, the Sixth and Seventh Laws) are not yet enough to evict the bluff class on their own. The repetition itself is the forensic record. This clause is the same as 6.J — every test, every Challenge Test, every CI gate has exactly one job: confirm the feature works for a real user end-to-end on the gating matrix. CI green is necessary, never sufficient. **The reason this clause is restated rather than cross-referenced** is that the operator's standing concern is that future agents and contributors will rationalize their way past 6.J and ship green-tests-with-broken-features again. Every time the operator restates it, this codebase records the restatement here so the next reading agent must look at the same wall of repetition the operator has had to type out.
 
 If you are reading this in a future session and you find yourself thinking *"this test is a small exception"* — STOP. The exception is what produced the Internet Archive stuck-on-loading bug, the broken post-login navigation, the credential leak in C2, the bluffed C1-C8. There are no small exceptions. Tests must guarantee the product works. Anything else is theatre.
@@ -843,10 +864,23 @@ Test coverage is essentially zero today. The only existing unit test is `core/pr
 
 ## Things to avoid
 
+### Always forbidden (quick reference — full text in §6 / Host Stability)
+
+- **`sudo` / `su` in any tracked file** — §6.U, pre-push rejects.
+- **Hardcoded IPv4, host:port, UUID, header field name, credential, secret** — §6.R, scanned by `scripts/scan-no-hardcoded-*.sh`; pre-push rejects.
+- **Mocking the System Under Test in its own test** (e.g. `mockk<RuTrackerSearch>` inside `RuTrackerSearchTest`) — §6.J / Seventh Law clause 4 forbidden pattern; reviewer rejects.
+- **Host suspend/hibernate/poweroff/sign-out commands** (`systemctl suspend`, `loginctl hibernate`, `pm-suspend`, `shutdown -h`, equivalent dbus/busctl invocations) — Host Machine Stability Directive, pre-push rejects via `scripts/check-constitution.sh`.
+- **Hosted CI configuration files** (`.github/workflows/*`, `.gitlab-ci.yml`, `Jenkinsfile`, etc.) — Local-Only CI/CD rule, pre-push rejects.
+- **New Git remote on any provider other than GitHub or GitLab** — §6.W (CLI parity requirement); update `Upstreams/` instead.
+- **Force push, history rewrite, or `--no-verify`** without explicit per-operation operator approval — §6.T.3.
+
+### Project-specific
+
 - Creating a root `build.gradle.kts` — extend `buildSrc` convention plugins instead.
 - Adding XML layouts or Fragment-based screens.
 - Adding a `composeOptions { kotlinCompilerExtensionVersion = ... }` block — Compose is managed by the Kotlin Compose compiler plugin + BOM.
-- Committing `.env`, `keystores/`, or `app/google-services.json`.
+- Nesting a `LazyColumn` (or other lazy layout) inside `Modifier.verticalScroll` — §6.Q, structural test rejects.
+- Committing `.env`, `keystores/`, or `app/google-services.json` — §6.H, pre-push rejects.
 - Letting a `Test*` fake in `:core:testing` drift from its real counterpart — that is a "bluff fake" under the Anti-Bluff Pact and must be updated in the same commit as the real implementation.
 
 ---

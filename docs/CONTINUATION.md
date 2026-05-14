@@ -11,7 +11,18 @@ same commit so the index stays trustworthy. Stale state in this file
 is itself a §6.J spirit issue — the file claims a guarantee, the
 repo has drifted, the agent acts on the claim.
 
-> **Last updated:** 2026-05-13 evening, **versionCode bumped 1036 → 1037 +
+> **Last updated:** 2026-05-14, root `CLAUDE.md` audit + 6 targeted edits
+> (no constitutional clause text touched): `docs/CONTINUATION.md`
+> promoted to first entry in "See also"; `CHANGELOG.md` listed; multi-
+> tracker reality reflected in Project section; commands gain single
+> Challenge Test invocation + `firebase-distribute.sh` + `scan-no-
+> hardcoded-*.sh` siblings; §6 head gains open/resolved debt index;
+> §6.L gains operational summary before the wall; "Things to avoid"
+> gains "Always forbidden (quick reference)" pointing into §6.R/U/V/W +
+> Host Stability. Pending operator work: onboarding back-nav, S23 Ultra
+> insets fix, DEV API service `_lava-api-dev._tcp` (in this order).
+>
+> **Prior:** 2026-05-13 evening, **versionCode bumped 1036 → 1037 +
 > 2305 → 2306** in prep for next distribute (per §6.P + operator's
 > 23rd §6.L invocation: "increase version code propeyl to all apps
 > and services"). NOT distributed — see §2 below for the explicit
