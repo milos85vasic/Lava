@@ -119,32 +119,25 @@ run_gate "gitignore-coverage" "HelixConstitution §11.4.30" \
     "bash scripts/check-gitignore-coverage.sh"
 
 # §11.4.28 Submodules-As-Equal-Codebase / no nested own-org chains (Phase 5)
-# NOTE: ADVISORY mode in sweep until the Challenges/Panoptic refactor lands;
-# the scanner itself is STRICT, but here the sweep reports the violation
-# without exiting non-zero so other gates continue to run + report.
-# Per docs/plans/2026-05-15-constitution-compliance.md Phase 5: gate is
-# wired in advisory mode; STRICT-flip is a follow-up after refactor.
-run_gate "no-nested-own-org-submodules" "HelixConstitution §11.4.28 (advisory)" \
-    "bash scripts/check-no-nested-own-org-submodules.sh --advisory"
+# STRICT-flipped 2026-05-15: Phase 5-debt closed via github cascade merge
+# (CONST-051(C) flat-layout enforcement removed Challenges/.gitmodules).
+# Scanner now reports 0 violations on real tree.
+run_gate "no-nested-own-org-submodules" "HelixConstitution §11.4.28" \
+    "bash scripts/check-no-nested-own-org-submodules.sh --strict"
 
 # §11.4.35 Canonical-Root Inheritance Clarity + §11.4.36 install_upstreams (Phase 8)
-# NOTE: ADVISORY mode in sweep until the 10 missing install_upstreams scripts
-# land in their respective submodules. §11.4.35 sub-checks all currently pass.
-# Per docs/plans/2026-05-15-constitution-compliance.md Phase 8: gate is wired
-# in advisory mode; STRICT-flip is a follow-up after the 10 submodules each
-# gain their own install_upstreams.
-run_gate "canonical-root-and-upstreams" "HelixConstitution §11.4.35 + §11.4.36 (advisory)" \
-    "bash scripts/check-canonical-root-and-upstreams.sh --advisory"
+# STRICT-flipped 2026-05-15: Phase 8-debt closed (10 install_upstreams
+# scripts landed via Phase 8-debt batch). Scanner now reports 16/16
+# install_upstreams present + all §11.4.35 sub-checks passing.
+run_gate "canonical-root-and-upstreams" "HelixConstitution §11.4.35 + §11.4.36" \
+    "bash scripts/check-canonical-root-and-upstreams.sh --strict"
 
 # §11.4.31 Submodule-Dependency-Manifest (Phase 3)
-# NOTE: ADVISORY mode in sweep until the 16 missing per-submodule
-# helix-deps.yaml files land in their respective submodules.
-# Parent helix-deps.yaml is in place + well-formed. Per
-# docs/plans/2026-05-15-constitution-compliance.md Phase 3: gate is
-# wired in advisory mode; STRICT-flip is a follow-up after the 16
-# submodules each gain their own helix-deps.yaml manifest.
-run_gate "helix-deps-manifest" "HelixConstitution §11.4.31 (advisory)" \
-    "bash scripts/check-helix-deps-manifest.sh --advisory"
+# STRICT-flipped 2026-05-15: Phase 3-debt closed (16/16 per-submodule
+# helix-deps.yaml manifests landed via Phase 3-debt batch). Scanner now
+# reports 16/16 manifests present + parent helix-deps.yaml well-formed.
+run_gate "helix-deps-manifest" "HelixConstitution §11.4.31" \
+    "bash scripts/check-helix-deps-manifest.sh --strict"
 
 # §6.AB Challenge discrimination (Layer 1 marker + Layer 2 body)
 run_gate "challenge-discrimination" "§6.AB Anti-Bluff Test-Suite Reinforcement" \
