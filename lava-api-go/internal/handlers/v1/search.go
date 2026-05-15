@@ -173,7 +173,12 @@ func (h *MultiSearchHandler) GetMultiSearch(c *gin.Context) {
 			cancel()
 
 			if err != nil {
-				// no-telemetry: §6.AC-debt drain (bulk pass) — accepted as opt-out pending per-call instrumentation review.
+				// no-telemetry: SSE multi-provider streaming — each err is
+				// wrapped into a `provider_error` SSE event sent to the
+				// client (the user-visible signal). The error becomes
+				// part of the stream, not background noise. Recording a
+				// non-fatal here would double-report; the SSE consumer
+				// IS the telemetry surface.
 				failed++
 				searched++
 				errEvt := providerStreamStatus{

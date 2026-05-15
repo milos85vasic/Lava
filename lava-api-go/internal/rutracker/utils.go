@@ -76,7 +76,10 @@ func nodeIntOrNil(s *goquery.Selection) (int, bool) {
 	}
 	v, err := strconv.Atoi(t)
 	if err != nil {
-		// no-telemetry: §6.AC-debt drain (bulk pass) — accepted as opt-out pending per-call instrumentation review.
+		// no-telemetry: parser-helper with explicit ok-flag return;
+		// caller branches on the boolean (Kotlin pattern: `int?` = `int + bool`).
+		// false means "not parseable" — same as the empty-string case
+		// the function handles above.
 		return 0, false
 	}
 	return v, true
@@ -108,7 +111,9 @@ func queryParamOrNull(s *goquery.Selection, key string) (string, bool) {
 	// fine without a base.
 	u, err := url.Parse(href)
 	if err != nil {
-		// no-telemetry: §6.AC-debt drain (bulk pass) — accepted as opt-out pending per-call instrumentation review.
+		// no-telemetry: parser-helper with ok-flag return (false = absent).
+		// Caller treats "url unparseable" identically to "param absent" — both
+		// branch into the same default-value path.
 		return "", false
 	}
 	q := u.Query()

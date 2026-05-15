@@ -58,7 +58,10 @@ func NewBackoffMiddleware(l *ladder.Ladder, trustedProxies []string) gin.Handler
 func resolveClientIP(c *gin.Context, trusted []*net.IPNet) string {
 	remote, _, err := net.SplitHostPort(c.Request.RemoteAddr)
 	if err != nil {
-		// no-telemetry: §6.AC-debt drain (bulk pass) — accepted as opt-out pending per-call instrumentation review.
+		// no-telemetry: SplitHostPort fails on bare addresses (no port
+		// suffix) which is normal for some proxies and unix sockets. The
+		// fallback uses RemoteAddr verbatim — downstream net.ParseIP
+		// either accepts it or rejects it (handled at the next branch).
 		remote = c.Request.RemoteAddr
 	}
 	rIP := net.ParseIP(remote)

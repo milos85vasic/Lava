@@ -20,7 +20,11 @@ const loginSubmitValue = "Вход"
 func IsAuthorised(html []byte) bool {
 	doc, err := goquery.NewDocumentFromReader(bytes.NewReader(html))
 	if err != nil {
-		// no-telemetry: §6.AC-debt drain (bulk pass) — accepted as opt-out pending per-call instrumentation review.
+		// no-telemetry: predicate function returning bool — false means
+		// "not authorized" which is the safe default. Caller treats
+		// "parse failed" identically to "no logout link found"; the only
+		// behavioral difference would be a re-login attempt, which is
+		// the desired flow if HTML can't be parsed at all.
 		return false
 	}
 	// Presence of a logout link is the primary marker.

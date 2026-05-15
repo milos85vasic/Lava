@@ -149,7 +149,10 @@ func ParseTorrent(html []byte) (*gen.ForumTopicDtoTorrent, error) {
 func parseTorrentDescription(html []byte) gen.TorrentDescriptionDto {
 	doc, err := goquery.NewDocumentFromReader(bytes.NewReader(html))
 	if err != nil {
-		// no-telemetry: §6.AC-debt drain (bulk pass) — accepted as opt-out pending per-call instrumentation review.
+		// no-telemetry: HTML-parse failure → empty description (function
+		// header explicitly documents the "lenient parser, never errors
+		// out" contract). User sees "no description" instead of an error
+		// page; identical to the Kotlin parser's behavior.
 		return gen.TorrentDescriptionDto{Children: []gen.PostElementDto{}}
 	}
 	firstPost := doc.Find("tbody[id^=post]").First()

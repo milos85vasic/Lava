@@ -71,7 +71,9 @@ func parseOptionalPage(c *gin.Context) *int {
 	}
 	page, err := strconv.Atoi(pageStr)
 	if err != nil {
-		// no-telemetry: §6.AC-debt drain (bulk pass) — accepted as opt-out pending per-call instrumentation review.
+		// no-telemetry: ?page= is an optional query parameter; missing
+		// or malformed = no page filter (default behavior, first page).
+		// User-visible behavior is identical to omitting the parameter.
 		return nil
 	}
 	return &page

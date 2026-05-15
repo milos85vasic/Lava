@@ -68,7 +68,9 @@ var favoriteRemovedSentence = []byte("Тема удалена")
 func ParseFavoritesPagesCount(html []byte) int {
 	doc, err := goquery.NewDocumentFromReader(bytes.NewReader(html))
 	if err != nil {
-		// no-telemetry: §6.AC-debt drain (bulk pass) — accepted as opt-out pending per-call instrumentation review.
+		// no-telemetry: page-count helper returns the "default 1 page"
+		// fallback per the function-header KDoc contract. Pagination UI
+		// renders correctly with 1 page; no user-visible error.
 		return 1
 	}
 	nav := doc.Find("#pagination")

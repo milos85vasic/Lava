@@ -213,13 +213,16 @@ func (a *ProviderAdapter) HealthCheck(ctx context.Context) (*provider.HealthStat
 	start := time.Now()
 	req, err := http.NewRequestWithContext(ctx, http.MethodHead, a.client.baseURL, nil)
 	if err != nil {
-		// no-telemetry: §6.AC-debt drain (bulk pass) — accepted as opt-out pending per-call instrumentation review.
+		// no-telemetry: HealthCheck path — Healthy=false IS the
+		// telemetry surface (HEAD request construction failure means
+		// our own URL is malformed; surface via /health endpoint).
 		return &provider.HealthStatus{Healthy: false}, nil
 	}
 	resp, err := a.client.client.Do(req)
-	// no-telemetry: §6.AC-debt drain (bulk pass) — accepted as opt-out pending per-call instrumentation review.
 	if err != nil {
-		// no-telemetry: §6.AC-debt drain (bulk pass) — accepted as opt-out pending per-call instrumentation review.
+		// no-telemetry: HealthCheck path — Healthy=false IS the
+		// telemetry surface (network error reaching archive.org propagates
+		// to the operator dashboard via /health).
 		return &provider.HealthStatus{Healthy: false}, nil
 	}
 	resp.Body.Close()

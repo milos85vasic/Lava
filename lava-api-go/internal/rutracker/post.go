@@ -535,7 +535,10 @@ func parseStyle(style string) styleSpec {
 		}
 		n, err := strconv.Atoi(digits)
 		if err != nil {
-			// no-telemetry: §6.AC-debt drain (bulk pass) — accepted as opt-out pending per-call instrumentation review.
+			// no-telemetry: BBCode-style attribute parser; nil return =
+			// "no styled element produced" which renders as plain text.
+			// Identical to the Kotlin runCatching{}.getOrNull() behavior
+			// the parser is faithfully porting.
 			return nil
 		}
 		return styleSize{size: int32(n)}
@@ -555,9 +558,12 @@ func parseStyle(style string) styleSpec {
 			// not a hex string. The Kotlin parser is taking the digits as
 			// decimal. We match that.)
 			n, err := strconv.ParseInt(rest, 10, 64)
-			// no-telemetry: §6.AC-debt drain (bulk pass) — accepted as opt-out pending per-call instrumentation review.
 			if err != nil {
-				// no-telemetry: §6.AC-debt drain (bulk pass) — accepted as opt-out pending per-call instrumentation review.
+				// no-telemetry: faithful port of Kotlin's runCatching{}
+				// .toLong() — non-digit color values fall through to nil
+				// (unstyled). The header KDoc above explains the wire-shape
+				// rationale. Telemetry would noise on every BBCode
+				// `[color=red]` (a common but unparseable form).
 				return nil
 			}
 			var cv gen.ColorValue

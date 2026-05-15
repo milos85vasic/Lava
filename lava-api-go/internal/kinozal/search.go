@@ -99,7 +99,8 @@ func (c *Client) Search(ctx context.Context, query string, page int, cookie stri
 func extractIDFromHref(href string) string {
 	u, err := url.Parse(href)
 	if err != nil {
-		// no-telemetry: §6.AC-debt drain (bulk pass) — accepted as opt-out pending per-call instrumentation review.
+		// no-telemetry: scraper helper — empty return signals "id absent"
+		// to caller, which is the same shape as a happy-path absent id.
 		return ""
 	}
 	return u.Query().Get("id")
@@ -119,9 +120,10 @@ func parsePagination(doc *goquery.Document) int {
 	doc.Find("a[href]").Each(func(_ int, s *goquery.Selection) {
 		href, _ := s.Attr("href")
 		u, err := url.Parse(href)
-		// no-telemetry: §6.AC-debt drain (bulk pass) — accepted as opt-out pending per-call instrumentation review.
 		if err != nil {
-			// no-telemetry: §6.AC-debt drain (bulk pass) — accepted as opt-out pending per-call instrumentation review.
+			// no-telemetry: pagination probe — malformed href means this
+			// link is not part of the pagination set; skip it and continue
+			// scanning. The maxPage value reflects whatever links DID parse.
 			return
 		}
 		if u.Path == "/browse.php" {

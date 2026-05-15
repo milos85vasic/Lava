@@ -39,7 +39,10 @@ func ParseTopicPage(html []byte) (*provider.TopicResult, error) {
 		href, _ := s.Attr("href")
 		u, err := url.Parse(href)
 		if err != nil {
-			// no-telemetry: §6.AC-debt drain (bulk pass) — accepted as opt-out pending per-call instrumentation review.
+			// no-telemetry: scraper extracts topic IDs from <a href>
+			// values; malformed href = skip this row. The downstream
+			// id-list either has the row or it doesn't; an empty id-list
+			// surfaces as "no results" to the user.
 			return
 		}
 		id = u.Query().Get("id")

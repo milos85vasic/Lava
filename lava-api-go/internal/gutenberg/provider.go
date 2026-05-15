@@ -124,7 +124,11 @@ func (a *ProviderAdapter) FetchCaptcha(ctx context.Context, path string) (*provi
 func (a *ProviderAdapter) HealthCheck(ctx context.Context) (*provider.HealthStatus, error) {
 	_, err := a.client.Browse(ctx, "", 0)
 	if err != nil {
-		// no-telemetry: §6.AC-debt drain (bulk pass) — accepted as opt-out pending per-call instrumentation review.
+		// no-telemetry: HealthCheck path — the healthcheck IS the
+		// telemetry surface (Healthy=false propagates to the /health
+		// endpoint and the operator dashboard / readiness probe).
+		// Recording a non-fatal here would double-report every probe
+		// failure.
 		return &provider.HealthStatus{Healthy: false}, nil
 	}
 	return &provider.HealthStatus{Healthy: true}, nil

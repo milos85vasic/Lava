@@ -234,7 +234,11 @@ func (a *ProviderAdapter) Login(ctx context.Context, opts provider.LoginOpts) (*
 	// Success branch for the provider-agnostic result.
 	success, err := resp.AsAuthResponseDtoSuccess()
 	if err != nil {
-		// no-telemetry: §6.AC-debt drain (bulk pass) — accepted as opt-out pending per-call instrumentation review.
+		// no-telemetry: discriminated-union narrowing — when the response
+		// is NOT the Success variant, the error here means the response
+		// matched a different variant (WrongCredits, Captcha, etc).
+		// ErrUnauthorized is the correct semantic propagation; the variant
+		// detection happens at the upstream caller via mapError.
 		return nil, provider.ErrUnauthorized
 	}
 	return &provider.LoginResult{
@@ -261,9 +265,9 @@ func (a *ProviderAdapter) FetchCaptcha(ctx context.Context, path string) (*provi
 func (a *ProviderAdapter) HealthCheck(ctx context.Context) (*provider.HealthStatus, error) {
 	// Use the forum tree endpoint as a lightweight health check.
 	_, err := a.client.GetForum(ctx, "")
-	// no-telemetry: §6.AC-debt drain (bulk pass) — accepted as opt-out pending per-call instrumentation review.
 	if err != nil {
-		// no-telemetry: §6.AC-debt drain (bulk pass) — accepted as opt-out pending per-call instrumentation review.
+		// no-telemetry: HealthCheck path — Healthy=false IS the
+		// telemetry surface (propagates to /health endpoint).
 		return &provider.HealthStatus{Healthy: false}, nil
 	}
 	return &provider.HealthStatus{Healthy: true}, nil

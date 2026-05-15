@@ -10,7 +10,9 @@ import (
 func extractTopicID(href string) string {
 	u, err := url.Parse(href)
 	if err != nil {
-		// no-telemetry: §6.AC-debt drain (bulk pass) — accepted as opt-out pending per-call instrumentation review.
+		// no-telemetry: explicit fallback path follows (manual t= split
+		// for relative URLs that url.Parse doesn't handle). The fallback
+		// returns the same shape as the happy path; no signal is lost.
 		// Fallback: manual split for relative URLs like "viewtopic.php?t=12345"
 		if idx := strings.Index(href, "t="); idx != -1 {
 			return strings.TrimSpace(href[idx+2:])
@@ -23,9 +25,11 @@ func extractTopicID(href string) string {
 // extractQueryParam returns a query parameter value from a relative or absolute URL string.
 func extractQueryParam(href, key string) string {
 	u, err := url.Parse(href)
-	// no-telemetry: §6.AC-debt drain (bulk pass) — accepted as opt-out pending per-call instrumentation review.
 	if err != nil {
-		// no-telemetry: §6.AC-debt drain (bulk pass) — accepted as opt-out pending per-call instrumentation review.
+		// no-telemetry: scraper helper — empty string return signals
+		// "param absent" to the caller, which is identical to the
+		// happy-path "param missing" branch (u.Query().Get returns "" too).
+		// Caller treats both cases identically.
 		return ""
 	}
 	return u.Query().Get(key)

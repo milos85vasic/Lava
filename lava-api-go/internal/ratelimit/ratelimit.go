@@ -100,7 +100,12 @@ func (l *Limiter) Middleware(class RouteClass) gin.HandlerFunc {
 		ip := c.ClientIP()
 		result, err := lim.Allow(c.Request.Context(), ip+":"+string(class))
 		if err != nil {
-			// no-telemetry: §6.AC-debt drain (bulk pass) — accepted as opt-out pending per-call instrumentation review.
+			// no-telemetry: fail-open by design — when the rate-limit
+			// backend (Redis / in-memory store) is unreachable, allow
+			// the request rather than degrade availability. The backend's
+			// own liveness telemetry (separate channel) catches sustained
+			// outages; per-request telemetry would amplify any backend
+			// blip into thousands of non-fatal events.
 			c.Next() // fail-open
 			return
 		}
