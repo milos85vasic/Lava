@@ -127,6 +127,15 @@ run_gate "gitignore-coverage" "HelixConstitution §11.4.30" \
 run_gate "no-nested-own-org-submodules" "HelixConstitution §11.4.28 (advisory)" \
     "bash scripts/check-no-nested-own-org-submodules.sh --advisory"
 
+# §11.4.35 Canonical-Root Inheritance Clarity + §11.4.36 install_upstreams (Phase 8)
+# NOTE: ADVISORY mode in sweep until the 10 missing install_upstreams scripts
+# land in their respective submodules. §11.4.35 sub-checks all currently pass.
+# Per docs/plans/2026-05-15-constitution-compliance.md Phase 8: gate is wired
+# in advisory mode; STRICT-flip is a follow-up after the 10 submodules each
+# gain their own install_upstreams.
+run_gate "canonical-root-and-upstreams" "HelixConstitution §11.4.35 + §11.4.36 (advisory)" \
+    "bash scripts/check-canonical-root-and-upstreams.sh --advisory"
+
 # §6.AB Challenge discrimination (Layer 1 marker + Layer 2 body)
 run_gate "challenge-discrimination" "§6.AB Anti-Bluff Test-Suite Reinforcement" \
     "bash scripts/check-challenge-discrimination.sh"
