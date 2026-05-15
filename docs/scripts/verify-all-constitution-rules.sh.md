@@ -53,12 +53,12 @@ Attestation JSON schema:
 
 ## Gates registry (current)
 
-The sweep currently invokes 28 gates across 4 categories:
+The sweep currently invokes 30 gates across 4 categories (count last revised in Phase 2 — §11.4.30 .gitignore audit added):
 
 1. **Constitution doc parser** (1 gate) — `scripts/check-constitution.sh` covering §6.A-§6.AE inheritance + §6.W boundary + §11.4.6 no-guessing
-2. **Anti-bluff scanners** (4 gates) — non-fatal coverage / Challenge discrimination Layer 1+2 / Challenge coverage / fixture freshness
+2. **Anti-bluff scanners** (5 gates) — non-fatal coverage / **gitignore coverage (Phase 2 — §11.4.30)** / Challenge discrimination Layer 1+2 / Challenge coverage / fixture freshness
 3. **No-hardcoding scanners** (3 gates) — UUID / IPv4 / host:port literal scans
-4. **Hermetic test suites** (~20 gates) — tests/firebase + tests/ci-sh + tests/compose-layout + tests/tag-helper + tests/vm-* + tests/pre-push/check{4,5,6,7,8,9} + tests/check-constitution/*
+4. **Hermetic test suites** (~20 gates) — tests/firebase + tests/ci-sh + tests/compose-layout + tests/tag-helper + tests/vm-* + tests/pre-push/check{4,5,6,7,8,9} + tests/check-constitution/* (now includes `test_gitignore_coverage.sh`)
 
 The list grows as new constitution gates land. Adding a new gate to the registry requires updating both the sweep + the hermetic meta-test (`tests/check-constitution/test_verify_all_rules.sh`).
 

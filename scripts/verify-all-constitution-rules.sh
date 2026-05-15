@@ -114,6 +114,10 @@ run_gate "constitution-doc-parser" "§6.D/§6.E/§6.F/§6.AD/§6.W/§11.4.6/§6.
 run_gate "non-fatal-coverage" "§6.AC + HelixConstitution telemetry discipline" \
     "bash scripts/check-non-fatal-coverage.sh"
 
+# §11.4.30 .gitignore + No-Versioned-Build-Artifacts (Phase 2)
+run_gate "gitignore-coverage" "HelixConstitution §11.4.30" \
+    "bash scripts/check-gitignore-coverage.sh"
+
 # §6.AB Challenge discrimination (Layer 1 marker + Layer 2 body)
 run_gate "challenge-discrimination" "§6.AB Anti-Bluff Test-Suite Reinforcement" \
     "bash scripts/check-challenge-discrimination.sh"
