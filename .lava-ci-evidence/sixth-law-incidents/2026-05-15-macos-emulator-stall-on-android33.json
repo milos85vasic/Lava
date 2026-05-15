@@ -13,8 +13,8 @@
   "candidate_root_causes_PENDING_FORENSICS": [
     "ELIMINATED 2026-05-15-second-attempt: AVD config artifact theory. Created fresh CZ_API35_Phone_Fresh AVD via 'avdmanager create avd -n CZ_API35_Phone_Fresh --package system-images;android-35;google_apis_playstore;arm64-v8a --device pixel_7'. Booted with '-no-snapshot-load -no-window -no-audio -no-boot-anim -gpu swiftshader_indirect'. SAME stall pattern: qemu-system-aarch64-headless at ~382% CPU for 10+ minutes, adb shows 'emulator-5554 offline' indefinitely, last log 'Activated packet streamer for bluetooth emulation'. Fresh AVD eliminates AVD-config artifact theory.",
     "VERIFIED PRESENT: HVF acceleration. 'emulator -accel-check' returns 'accel: 0 Hypervisor.Framework OS X Version 15.5'. 'sysctl kern.hv_support' returns 1. Acceleration is working as intended.",
-    "PENDING_FORENSICS (surviving candidate 1): T7 external drive (where ANDROID_SDK_ROOT lives at /Volumes/T7/Android/SDK) I/O latency triggering boot-init timeout. Most likely surviving cause given AVD-recreate did not help.",
-    "PENDING_FORENSICS (surviving candidate 2): emulator 36.1.9 regression on arm64-v8a system images + macOS HVF — would require checking AndroidStudio bug tracker for matching symptom. Last log line consistently 'Activated packet streamer for bluetooth emulation' suggests bluetooth-streamer init phase is the stall point."
+    "PENDING_FORENSICS: surviving candidate 1 — T7 external drive (where ANDROID_SDK_ROOT lives at /Volumes/T7/Android/SDK) I/O latency triggering boot-init timeout. Highest-priority surviving candidate given that AVD-recreate did not change behavior.",
+    "PENDING_FORENSICS: surviving candidate 2 — emulator 36.1.9 regression on arm64-v8a system images + macOS HVF. Would require checking AndroidStudio bug tracker for matching symptom. Last log line consistently 'Activated packet streamer for bluetooth emulation' identifies bluetooth-streamer init phase as the stall point."
   ],
   "remediation_attempted": [
     "ATTEMPT 1 (yole-test:34, original AVD): matrix runner via Containers CLI — produced honest FAIL attestation as designed. yole-test was misconfigured (missing system image). Not a real boot test.",
@@ -22,7 +22,7 @@
     "ATTEMPT 3 (CZ_API35_Phone_Fresh:35 fresh AVD with swiftshader GPU, manual emulator boot): stalled 10+ min identically — eliminates AVD-config artifact theory."
   ],
   "remediation_owed": [
-    "TRY NEXT: move ANDROID_SDK_ROOT off /Volumes/T7 (external drive) to internal SSD + recreate AVD + retest. T7 I/O latency is the most likely surviving cause.",
+    "TRY NEXT: move ANDROID_SDK_ROOT off /Volumes/T7 (external drive) to internal SSD + recreate AVD + retest. UNCONFIRMED: T7 I/O latency causation but it is the highest-priority remaining candidate.",
     "TRY NEXT: downgrade emulator package to 35.x.x (one major before 36.1.9) via 'sdkmanager emulator;35.5.10' OR similar known-good version.",
     "ALTERNATIVE: provision Linux x86_64 + KVM gate-host (per standing §6.X-debt remediation Option C). This is the gate-mode unblocker per §6.X clause 3 — bypasses BOTH the macOS-emulator-stall AND the §6.X-debt KVM-absent gap.",
     "Once a working AVD exists on this host, re-run scripts/run-emulator-tests.sh + scripts/run-challenge-matrix.sh to validate end-to-end execution"
