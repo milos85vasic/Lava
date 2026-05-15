@@ -38,6 +38,18 @@ codebase is shippable, not that the user-visible feature is shipped.
 
 See the script's in-source comment block (above) for canonical usage examples.
 
+## Pipeline steps (current order)
+
+1. Hosted-CI forbidden-files check (Local-Only CI/CD rule)
+2. Host-power forbidden-command regex check (Host Stability rule)
+3. Spotless (`./gradlew spotlessCheck`)
+4. Unit tests across changed modules
+5. Constitutional doc parser (`scripts/check-constitution.sh`)
+6. **5a1 (added 2026-05-14):** §6.AC non-fatal-coverage scan (STRICT default; closes §6.AC-debt + `CM-NONFATAL-COVERAGE` gate)
+7. **5a2 (added 2026-05-15):** §6.AB Challenge-discrimination scan (STRICT default; closes §6.AB-debt + `CM-CHALLENGE-DISCRIMINATION` gate)
+8. 5b. Hermetic bash test suites (under `tests/`)
+9. (Full-mode only) Parity, mutation, fixture-freshness, Compose UI Challenge Tests on connected device
+
 ## Maintenance
 
 When this script is modified, update this document in the same commit (CM-SCRIPT-DOCS-SYNC requires it). Per §11.4.18, the documentation MUST stay in sync with the codebase — no doc may be out of sync with its script.

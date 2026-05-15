@@ -135,6 +135,14 @@ echo "==> §6.AC non-fatal-coverage scan (STRICT)"
 ./scripts/check-non-fatal-coverage.sh | tail -3
 
 # ---------------------------------------------------------------------
+# 5a2. §6.AB Challenge-Test discrimination scanner (default STRICT after
+# all 29 existing Challenge tests carry FALSIFIABILITY REHEARSAL blocks
+# in their KDocs). Set LAVA_CHALLENGE_DISCRIMINATION_STRICT=0 to revert.
+# ---------------------------------------------------------------------
+echo "==> §6.AB Challenge-discrimination scan (STRICT)"
+./scripts/check-challenge-discrimination.sh | tail -3
+
+# ---------------------------------------------------------------------
 # 5b. Hermetic bash test suites (added 2026-05-05 to close the gap that
 # regression tests under tests/ were only run on manual operator trigger).
 # Each suite is independent and self-contained: a `run_all.sh` that runs

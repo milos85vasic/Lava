@@ -23,6 +23,7 @@ HelixConstitution defines a set of `CM-*` mechanical gates (see `constitution/Co
 | `CM-UNIVERSAL-VS-PROJECT-CLASSIFICATION` | §11.4.17 (universal-vs-project classification) | `.githooks/pre-push` Check 8 — fires when `##### 6.X` clause added to CLAUDE.md without `Classification:` line in commit body | ✅ wired |
 | `CM-SUBAGENT-DELEGATION-AUDIT` | §11.4.20 (subagent-driven-by-default mandate) | n/a (no automated audit of subagent vs. foreground delegation in Lava; would require either Claude Code telemetry integration or manual operator review) | ⚠️ paper-only |
 | `CM-NONFATAL-COVERAGE` | §6.AC + HelixConstitution telemetry discipline | `scripts/check-non-fatal-coverage.sh` (bash scanner; default STRICT-mode after queue drained 2026-05-14; `LAVA_NONFATAL_STRICT=0` to revert to advisory mode) | ✅ wired |
+| `CM-CHALLENGE-DISCRIMINATION` | §6.AB Anti-Bluff Test-Suite Reinforcement | `scripts/check-challenge-discrimination.sh` (bash scanner; STRICT-default; verifies every Challenge*Test.kt carries a FALSIFIABILITY REHEARSAL marker in KDoc OR a companion .lava-ci-evidence/sp3a-challenges/<name>.json; `LAVA_CHALLENGE_DISCRIMINATION_STRICT=0` to revert to advisory) | ✅ wired |
 
 ## Lava-side anti-bluff gates (NOT HelixConstitution `CM-*` but related)
 
