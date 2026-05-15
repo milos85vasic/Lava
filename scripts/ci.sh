@@ -143,11 +143,11 @@ echo "==> §6.AB Challenge-discrimination scan (STRICT)"
 ./scripts/check-challenge-discrimination.sh | tail -3
 
 # ---------------------------------------------------------------------
-# 5a3. §6.AE per-feature Challenge coverage scanner (advisory until the
-# per-feature backfill pass closes §6.AE-debt). Set
-# LAVA_CHALLENGE_COVERAGE_STRICT=1 to fail on uncovered features.
+# 5a3. §6.AE per-feature Challenge coverage scanner (default STRICT
+# after the queue drained 2026-05-15 — 18 covered + 1 exempted (account)
+# + 0 uncovered). Set LAVA_CHALLENGE_COVERAGE_STRICT=0 to revert.
 # ---------------------------------------------------------------------
-echo "==> §6.AE Challenge-coverage scan (advisory)"
+echo "==> §6.AE Challenge-coverage scan (STRICT)"
 ./scripts/check-challenge-coverage.sh | tail -4
 
 # ---------------------------------------------------------------------

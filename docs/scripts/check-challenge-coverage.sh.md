@@ -15,9 +15,17 @@ Targeting is detected by ANY of:
 
 ## Default mode
 
-ADVISORY (`LAVA_CHALLENGE_COVERAGE_STRICT=0`) until §6.AE-debt closes (per-feature backfill of dedicated Challenges for any module currently relying only on broad-flow detection).
+STRICT (`LAVA_CHALLENGE_COVERAGE_STRICT=1`) — flipped 2026-05-15 after the per-feature backfill drained the queue (18 covered + 1 exempted + 0 uncovered).
 
-Set `LAVA_CHALLENGE_COVERAGE_STRICT=1` to fail on uncovered features.
+Set `LAVA_CHALLENGE_COVERAGE_STRICT=0` to revert to advisory mode (e.g. during a heavy refactor that adds new features in bulk).
+
+## Exemption mechanism
+
+Pre-wired-but-not-yet-user-reachable features can be exempted via the ledger at `.lava-ci-evidence/challenge-coverage-exemptions.md` using `// AE-exempt: <feature-name>` markers. Each exemption MUST cite WHAT/WHY/WHEN/UNBLOCK per §6.AE.1.
+
+## Hermetic test
+
+`tests/check-constitution/test_challenge_coverage.sh` exercises 4 falsifiability fixtures: uncovered-rejected, covered-via-import-accepted, exempted-via-marker-accepted, advisory-mode-does-not-fail. All PASS. The scanner respects `LAVA_REPO_ROOT` env so the test can use synthetic `feature/*` fixtures without touching the real repo.
 
 ## Usage
 

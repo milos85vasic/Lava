@@ -47,7 +47,7 @@ See the script's in-source comment block (above) for canonical usage examples.
 5. Constitutional doc parser (`scripts/check-constitution.sh`)
 6. **5a1 (added 2026-05-14):** §6.AC non-fatal-coverage scan (STRICT default; closes §6.AC-debt + `CM-NONFATAL-COVERAGE` gate)
 7. **5a2 (added 2026-05-15):** §6.AB Challenge-discrimination scan (STRICT default; closes §6.AB-debt + `CM-CHALLENGE-DISCRIMINATION` gate)
-8. **5a3 (added 2026-05-15, 31st §6.L):** §6.AE per-feature Challenge coverage scan (ADVISORY default per §6.AE-debt; `CM-CHALLENGE-COVERAGE` gate; flips to STRICT after the per-feature backfill closes)
+8. **5a3 (added 2026-05-15, 31st §6.L):** §6.AE per-feature Challenge coverage scan (STRICT default after per-feature backfill drained the queue 2026-05-15; `CM-CHALLENGE-COVERAGE` gate; `LAVA_CHALLENGE_COVERAGE_STRICT=0` to revert to advisory)
 9. 5b. Hermetic bash test suites (under `tests/`)
 10. (Full-mode only) Parity, mutation, fixture-freshness, Compose UI Challenge Tests on connected device
 

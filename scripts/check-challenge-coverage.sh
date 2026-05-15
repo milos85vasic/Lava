@@ -26,10 +26,17 @@
 
 set -euo pipefail
 
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# Default repo-root resolution: parent of the script. Overridable via
+# LAVA_REPO_ROOT env (used by hermetic tests under tests/) so the scanner
+# can be tested against synthetic feature/* fixtures without touching the
+# real repo.
+REPO_ROOT="${LAVA_REPO_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
 cd "$REPO_ROOT"
 
-STRICT="${LAVA_CHALLENGE_COVERAGE_STRICT:-0}"
+# Default flipped 2026-05-15 (1.2.23 closure-cycle, 31st §6.L) after the
+# queue drained: 18 covered + 1 exempted (account) + 0 uncovered. Set
+# LAVA_CHALLENGE_COVERAGE_STRICT=0 to revert to advisory.
+STRICT="${LAVA_CHALLENGE_COVERAGE_STRICT:-1}"
 
 challenge_dir="app/src/androidTest/kotlin/lava/app/challenges"
 if [[ ! -d "$challenge_dir" ]]; then
@@ -52,11 +59,21 @@ fi
 
 # Concatenate every Challenge file content for grep scans.
 all_challenges=$(cat "$challenge_dir"/Challenge*Test.kt 2>/dev/null || true)
+# Read explicit exemptions from .lava-ci-evidence/ — features documented
+# as pre-wired-but-not-yet-user-reachable. Per §6.AE.1 + §6.J, exemption
+# is LAST RESORT; the ledger requires WHAT/WHY/WHEN/UNBLOCK per entry.
+exemptions=$(grep -rh "^// AE-exempt:" .lava-ci-evidence/ 2>/dev/null || true)
 
 uncovered=()
 covered=()
+exempted=()
 for f in "${features[@]}"; do
     found=false
+    # 0. Explicit exemption (LAST RESORT — see ledger)
+    if grep -qE "^// AE-exempt:[ \t]+${f}\\b" <<<"$exemptions"; then
+        exempted+=("$f")
+        continue
+    fi
     # 1. Import-based detection: any `import lava.${feature}` line
     if grep -qE "^import[ \t]+lava\\.${f}([._a-zA-Z]|$)" <<<"$all_challenges"; then
         found=true
@@ -96,7 +113,12 @@ done
 echo "==> §6.AE per-feature Challenge coverage scan"
 echo "    Feature modules: ${#features[@]}"
 echo "    Covered (by direct import / marker / heuristic): ${#covered[@]}"
+echo "    Exempted (pre-wired-but-unreachable per ledger): ${#exempted[@]}"
 echo "    Uncovered: ${#uncovered[@]}"
+if [[ ${#exempted[@]} -gt 0 ]]; then
+    echo "    Exemptions ledger: .lava-ci-evidence/challenge-coverage-exemptions.md"
+    printf '      AE-exempt: %s\n' "${exempted[@]}"
+fi
 
 if [[ ${#uncovered[@]} -eq 0 ]]; then
     echo "    ✓ every feature module has at least one Challenge"
