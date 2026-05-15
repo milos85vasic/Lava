@@ -136,6 +136,16 @@ run_gate "no-nested-own-org-submodules" "HelixConstitution §11.4.28 (advisory)"
 run_gate "canonical-root-and-upstreams" "HelixConstitution §11.4.35 + §11.4.36 (advisory)" \
     "bash scripts/check-canonical-root-and-upstreams.sh --advisory"
 
+# §11.4.31 Submodule-Dependency-Manifest (Phase 3)
+# NOTE: ADVISORY mode in sweep until the 16 missing per-submodule
+# helix-deps.yaml files land in their respective submodules.
+# Parent helix-deps.yaml is in place + well-formed. Per
+# docs/plans/2026-05-15-constitution-compliance.md Phase 3: gate is
+# wired in advisory mode; STRICT-flip is a follow-up after the 16
+# submodules each gain their own helix-deps.yaml manifest.
+run_gate "helix-deps-manifest" "HelixConstitution §11.4.31 (advisory)" \
+    "bash scripts/check-helix-deps-manifest.sh --advisory"
+
 # §6.AB Challenge discrimination (Layer 1 marker + Layer 2 body)
 run_gate "challenge-discrimination" "§6.AB Anti-Bluff Test-Suite Reinforcement" \
     "bash scripts/check-challenge-discrimination.sh"

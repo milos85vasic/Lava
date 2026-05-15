@@ -1,0 +1,112 @@
+# helix-deps.yaml — Lava parent project Submodule-Dependency Manifest
+# Per HelixConstitution §11.4.31 (Submodule-Dependency-Manifest Mandate).
+#
+# Lava is a consumer project, not itself a HelixDevelopment-owned dep
+# (it's a vasic-digital project). This manifest declares Lava's top-level
+# vasic-digital + HelixDevelopment submodule deps so any future
+# incorporator script can bootstrap a fresh Lava clone's submodule
+# graph from scratch.
+#
+# Schema reference: constitution/Constitution.md §11.4.31.
+# Verifier: scripts/check-helix-deps-manifest.sh.
+# Last updated: 2026-05-15 (Phase 3 of constitution-compliance plan).
+
+schema_version: 1
+
+deps:
+  # HelixDevelopment-owned canonical-root constitution
+  - name: constitution
+    ssh_url: git@github.com:HelixDevelopment/HelixConstitution.git
+    ref: main
+    why: "Canonical-root Constitution + CLAUDE.md + AGENTS.md (per §6.AD inheritance pointer-block)"
+    layout: flat
+
+  # vasic-digital owned-by-us submodules (16 total — alphabetical)
+  - name: Auth
+    ssh_url: git@github.com:vasic-digital/Auth.git
+    ref: main
+    why: "Authentication + identity primitives (used by app-side login/credential flows)"
+    layout: grouped
+  - name: Cache
+    ssh_url: git@github.com:vasic-digital/Cache.git
+    ref: main
+    why: "Generic caching primitives (used by network + tracker layers)"
+    layout: grouped
+  - name: Challenges
+    ssh_url: git@github.com:vasic-digital/Challenges.git
+    ref: main
+    why: "Anti-bluff Compose UI Challenge Test infrastructure (§6.J / §6.AB)"
+    layout: grouped
+  - name: Concurrency
+    ssh_url: git@github.com:vasic-digital/Concurrency.git
+    ref: main
+    why: "Coroutine + structured-concurrency primitives"
+    layout: grouped
+  - name: Config
+    ssh_url: git@github.com:vasic-digital/Config.git
+    ref: main
+    why: "Build-time + runtime configuration (.env-driven, no hardcoding per §6.R)"
+    layout: grouped
+  - name: Containers
+    ssh_url: git@github.com:vasic-digital/Containers.git
+    ref: main
+    why: "Rootless podman/docker orchestration + emulator matrix (§6.X / §6.AE)"
+    layout: grouped
+  - name: Database
+    ssh_url: git@github.com:vasic-digital/Database.git
+    ref: main
+    why: "Room/JDBC abstraction + per-tracker schema migrations"
+    layout: grouped
+  - name: Discovery
+    ssh_url: git@github.com:vasic-digital/Discovery.git
+    ref: main
+    why: "LAN service-discovery primitives (consumed by Mdns + lava-api-go)"
+    layout: grouped
+  - name: HTTP3
+    ssh_url: git@github.com:vasic-digital/HTTP3.git
+    ref: main
+    why: "HTTP/3 client + server primitives (consumed by lava-api-go)"
+    layout: grouped
+  - name: Mdns
+    ssh_url: git@github.com:vasic-digital/Mdns.git
+    ref: main
+    why: "JmDNS-based local service advertisement (_lava._tcp.local.)"
+    layout: grouped
+  - name: Middleware
+    ssh_url: git@github.com:vasic-digital/Middleware.git
+    ref: main
+    why: "HTTP middleware chain primitives (auth, logging, rate-limit composition)"
+    layout: grouped
+  - name: Observability
+    ssh_url: git@github.com:vasic-digital/Observability.git
+    ref: main
+    why: "OTLP + structured-logging primitives + Crashlytics non-fatal channel (§6.AC)"
+    layout: grouped
+  - name: RateLimiter
+    ssh_url: git@github.com:vasic-digital/RateLimiter.git
+    ref: main
+    why: "Per-endpoint + per-IP rate limiting (consumed by lava-api-go)"
+    layout: grouped
+  - name: Recovery
+    ssh_url: git@github.com:vasic-digital/Recovery.git
+    ref: main
+    why: "Crash-recovery + restart primitives (lava-api-go restart loop, supervised processes)"
+    layout: grouped
+  - name: Security
+    ssh_url: git@github.com:vasic-digital/Security.git
+    ref: main
+    why: "Crypto + signing + secret-management primitives (used by Tracker SDK auth flows)"
+    layout: grouped
+  - name: Tracker-SDK
+    ssh_url: git@github.com:vasic-digital/Tracker-SDK.git
+    ref: main
+    why: "Per-tracker plugin SDK + capability/feature contracts (SP-3a ground truth)"
+    layout: grouped
+
+transitive_handling:
+  recursive: true
+  conflict_resolution: operator-required
+
+# Lava is an Android/Kotlin + Go-bilingual project root with
+# language-specific subtree exception per §11.4.29.
+language_specific_subtree: true

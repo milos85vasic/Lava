@@ -53,14 +53,14 @@ Attestation JSON schema:
 
 ## Gates registry (current)
 
-The sweep currently invokes 34 gates across 4 categories (count last revised in Phase 8 — §11.4.35 + §11.4.36 canonical-root + install_upstreams added in advisory mode):
+The sweep currently invokes 36 gates across 4 categories (count last revised in Phase 3 — §11.4.31 helix-deps-manifest added in advisory mode):
 
 1. **Constitution doc parser** (1 gate) — `scripts/check-constitution.sh` covering §6.A-§6.AE inheritance + §6.W boundary + §11.4.6 no-guessing
-2. **Anti-bluff scanners** (7 gates) — non-fatal coverage / **gitignore coverage (Phase 2 — §11.4.30)** / **nested-own-org-submodules (Phase 5 — §11.4.28, advisory)** / **canonical-root-and-upstreams (Phase 8 — §11.4.35 + §11.4.36, advisory)** / Challenge discrimination Layer 1+2 / Challenge coverage / fixture freshness
+2. **Anti-bluff scanners** (8 gates) — non-fatal coverage / **gitignore coverage (Phase 2 — §11.4.30)** / **nested-own-org-submodules (Phase 5 — §11.4.28, advisory)** / **canonical-root-and-upstreams (Phase 8 — §11.4.35 + §11.4.36, advisory)** / **helix-deps-manifest (Phase 3 — §11.4.31, advisory)** / Challenge discrimination Layer 1+2 / Challenge coverage / fixture freshness
 3. **No-hardcoding scanners** (3 gates) — UUID / IPv4 / host:port literal scans
-4. **Hermetic test suites** (~21 gates) — tests/firebase + tests/ci-sh + tests/compose-layout + tests/tag-helper + tests/vm-* + tests/pre-push/check{4,5,6,7,8,9} + tests/check-constitution/* (now includes `test_gitignore_coverage.sh` + `test_nested_own_org_submodules.sh` + `test_canonical_root_and_upstreams.sh`)
+4. **Hermetic test suites** (~22 gates) — tests/firebase + tests/ci-sh + tests/compose-layout + tests/tag-helper + tests/vm-* + tests/pre-push/check{4,5,6,7,8,9} + tests/check-constitution/* (now includes `test_gitignore_coverage.sh` + `test_nested_own_org_submodules.sh` + `test_canonical_root_and_upstreams.sh` + `test_helix_deps_manifest.sh`)
 
-Per-gate STRICT/ADVISORY note: `nested-own-org-submodules` and `canonical-root-and-upstreams` both run in advisory mode inside the sweep until their respective open violations are closed (Submodules/Challenges/Panoptic refactor; 10 install_upstreams scripts). The scanners THEMSELVES are STRICT by default when invoked directly; the sweep wrapper passes `--advisory` so the sweep continues running other gates + reports the violations without short-circuiting. Once each open violation is closed, the corresponding sweep wrapper flips to STRICT.
+Per-gate STRICT/ADVISORY note: `nested-own-org-submodules`, `canonical-root-and-upstreams`, and `helix-deps-manifest` all run in advisory mode inside the sweep until their respective open violations are closed (Submodules/Challenges/Panoptic refactor; 10 install_upstreams scripts; 16 per-submodule helix-deps.yaml files). The scanners THEMSELVES are STRICT by default when invoked directly; the sweep wrapper passes `--advisory` so the sweep continues running other gates + reports the violations without short-circuiting. Once each open violation is closed, the corresponding sweep wrapper flips to STRICT.
 
 The list grows as new constitution gates land. Adding a new gate to the registry requires updating both the sweep + the hermetic meta-test (`tests/check-constitution/test_verify_all_rules.sh`).
 
