@@ -11,14 +11,20 @@
   "expected": "boot completion within 90-180s on Apple Silicon HVF",
   "anti_bluff_observation": "the issue is NOT in the §6.AE matrix runner glue. The matrix runner correctly: (a) invoked emulator binary; (b) snapshotted adb devices pre-launch; (c) waited the configured 60s for new emulator serial; (d) on timeout, produced honest FAIL attestation row with structured error message + attestation JSON file. The same matrix runner WOULD work end-to-end if the emulator boot itself completed — the runner is correct, the boot environment is the blocker.",
   "candidate_root_causes_PENDING_FORENSICS": [
-    "PENDING_FORENSICS: known issue with emulator 36.1.9 + macOS Sonoma+ HVF interaction — would require checking AndroidStudio bug tracker for matching symptom",
-    "PENDING_FORENSICS: AVD config artifact (Pixel_7_Pro was created with an older emulator version; cold-boot may need a snapshot reset or AVD recreate)",
-    "PENDING_FORENSICS: T7 external drive (where ANDROID_SDK_ROOT lives) may have I/O latency that triggers boot timeout in the emulator's userspace-init phase"
+    "ELIMINATED 2026-05-15-second-attempt: AVD config artifact theory. Created fresh CZ_API35_Phone_Fresh AVD via 'avdmanager create avd -n CZ_API35_Phone_Fresh --package system-images;android-35;google_apis_playstore;arm64-v8a --device pixel_7'. Booted with '-no-snapshot-load -no-window -no-audio -no-boot-anim -gpu swiftshader_indirect'. SAME stall pattern: qemu-system-aarch64-headless at ~382% CPU for 10+ minutes, adb shows 'emulator-5554 offline' indefinitely, last log 'Activated packet streamer for bluetooth emulation'. Fresh AVD eliminates AVD-config artifact theory.",
+    "VERIFIED PRESENT: HVF acceleration. 'emulator -accel-check' returns 'accel: 0 Hypervisor.Framework OS X Version 15.5'. 'sysctl kern.hv_support' returns 1. Acceleration is working as intended.",
+    "PENDING_FORENSICS (surviving candidate 1): T7 external drive (where ANDROID_SDK_ROOT lives at /Volumes/T7/Android/SDK) I/O latency triggering boot-init timeout. Most likely surviving cause given AVD-recreate did not help.",
+    "PENDING_FORENSICS (surviving candidate 2): emulator 36.1.9 regression on arm64-v8a system images + macOS HVF — would require checking AndroidStudio bug tracker for matching symptom. Last log line consistently 'Activated packet streamer for bluetooth emulation' suggests bluetooth-streamer init phase is the stall point."
   ],
-  "remediation_attempted_before_committing": "killed stuck qemu-system + netsimd + crashpad_handler processes; emulator-5554 cleared from adb",
+  "remediation_attempted": [
+    "ATTEMPT 1 (yole-test:34, original AVD): matrix runner via Containers CLI — produced honest FAIL attestation as designed. yole-test was misconfigured (missing system image). Not a real boot test.",
+    "ATTEMPT 2 (Pixel_7_Pro:33, manual emulator boot): stalled 15+ min, killed.",
+    "ATTEMPT 3 (CZ_API35_Phone_Fresh:35 fresh AVD with swiftshader GPU, manual emulator boot): stalled 10+ min identically — eliminates AVD-config artifact theory."
+  ],
   "remediation_owed": [
-    "Recreate Pixel_7_Pro AVD with current emulator version (avdmanager create avd -n Pixel_7_Pro_Fresh -k 'system-images;android-33;google_apis_playstore;arm64-v8a' -d pixel_7_pro)",
-    "Test boot of fresh AVD; if still stalls, downgrade emulator package OR move ANDROID_SDK_ROOT off T7 external drive to internal SSD",
+    "TRY NEXT: move ANDROID_SDK_ROOT off /Volumes/T7 (external drive) to internal SSD + recreate AVD + retest. T7 I/O latency is the most likely surviving cause.",
+    "TRY NEXT: downgrade emulator package to 35.x.x (one major before 36.1.9) via 'sdkmanager emulator;35.5.10' OR similar known-good version.",
+    "ALTERNATIVE: provision Linux x86_64 + KVM gate-host (per standing §6.X-debt remediation Option C). This is the gate-mode unblocker per §6.X clause 3 — bypasses BOTH the macOS-emulator-stall AND the §6.X-debt KVM-absent gap.",
     "Once a working AVD exists on this host, re-run scripts/run-emulator-tests.sh + scripts/run-challenge-matrix.sh to validate end-to-end execution"
   ],
   "constitutional_implications": "This incident is NOT a §6.X-debt incident (the darwin/arm64 KVM-absent gap is separate). This is a runtime-environment bug in the emulator-on-macOS path. The §6.AE matrix runner glue + §6.X-debt darwin/arm64 gap remain orthogonal: the runner-glue path WORKS (proven by the FAIL attestation), the macOS-emulator path STALLS (unrelated environmental issue), the §6.X gate-mode path REQUIRES Linux x86_64 + KVM (per the standing remediation Option C). Only the gate-mode path is constitutional — the macOS-emulator-stall is a workstation-environment debugging issue.",
