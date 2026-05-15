@@ -103,6 +103,17 @@ deps:
     why: "Per-tracker plugin SDK + capability/feature contracts (SP-3a ground truth)"
     layout: grouped
 
+  # HelixDevelopment-owned QA orchestration framework adopted 2026-05-15
+  # (Phase 4 of constitution-compliance plan). Depends on Challenges +
+  # Containers as siblings (per HelixQA README); both already in Lava's
+  # submodule set above so the incorporator's recursive resolution
+  # produces zero conflict.
+  - name: HelixQA
+    ssh_url: git@github.com:HelixDevelopment/HelixQA.git
+    ref: main
+    why: "Anti-bluff QA orchestration framework with cross-platform testing + real-time crash detection + step validation + evidence collection + ticket generation (Phase 4 — 14 anti-bluff test type harnesses)"
+    layout: grouped
+
 transitive_handling:
   recursive: true
   conflict_resolution: operator-required

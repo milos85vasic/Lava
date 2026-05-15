@@ -11,6 +11,25 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 # ---------------------------------------------------------------------
+# HelixDevelopment-owned submodules — exempt from Lava-specific heading
+# checks (§6.R / §6.S / §6.X / §6.AD). Lava pins these submodules at
+# upstream HEAD AS-IS; their CLAUDE.md / AGENTS.md are HelixDevelopment-
+# authored and follow the canonical-root inheritance pattern (covered by
+# their own §INHERITED FROM Helix Constitution pointer block) rather
+# than Lava-specific clause headings.
+# ---------------------------------------------------------------------
+HELIX_DEV_OWNED=("HelixQA")
+
+is_helix_dev_owned() {
+  local path=$1
+  for owned in "${HELIX_DEV_OWNED[@]}"; do
+    [[ "$path" == *"/$owned/"* ]] && return 0
+    [[ "$path" == *"/$owned"* ]] && return 0
+  done
+  return 1
+}
+
+# ---------------------------------------------------------------------
 # 1. Root CLAUDE.md MUST contain clauses 6.D, 6.E, 6.F.
 # ---------------------------------------------------------------------
 required_clauses=(
@@ -269,7 +288,9 @@ fi
 # 6.R must appear in every Submodules/*/CLAUDE.md (per §6.F inheritance).
 # Heading-anchored pattern (`## §6.R — No-Hardcoding Mandate`) — a passing
 # mention in a notes/history paragraph MUST NOT satisfy this gate.
+# HelixDevelopment-owned submodules are exempt (see HELIX_DEV_OWNED).
 for sub in Submodules/*/CLAUDE.md; do
+  is_helix_dev_owned "$sub" && continue
   if ! grep -qF '## §6.R — No-Hardcoding Mandate' "$sub"; then
     echo "MISSING 6.R inheritance reference: $sub" >&2
     echo "  → Append the §6.R heading paragraph per Phase 1 Task 1.3." >&2
@@ -329,7 +350,9 @@ if ! grep -qF '##### 6.S — Continuation Document Maintenance Mandate' CLAUDE.m
 fi
 
 # 6.S(5): §6.S inheritance reference must appear in every Submodules/*/CLAUDE.md
+# HelixDevelopment-owned submodules are exempt (see HELIX_DEV_OWNED).
 for sub in Submodules/*/CLAUDE.md; do
+  is_helix_dev_owned "$sub" && continue
   if ! grep -qF '## §6.S — Continuation Document Maintenance Mandate' "$sub"; then
     echo "MISSING 6.S inheritance reference: $sub" >&2
     echo "  → Append the §6.S heading paragraph (mirror the §6.R pattern)." >&2
@@ -365,7 +388,9 @@ fi
 
 # 6.X(2): §6.X inheritance reference must appear in every Submodules/*/CLAUDE.md,
 # */AGENTS.md, and */CONSTITUTION.md (per §6.F inheritance).
+# HelixDevelopment-owned submodules are exempt (see HELIX_DEV_OWNED).
 for sub in Submodules/*/CLAUDE.md Submodules/*/AGENTS.md Submodules/*/CONSTITUTION.md; do
+  is_helix_dev_owned "$sub" && continue
   if ! grep -qF '## §6.X — Container-Submodule Emulator Wiring Mandate' "$sub"; then
     echo "MISSING 6.X inheritance reference: $sub" >&2
     echo "  → Append the §6.X heading paragraph (mirror the §6.S pattern)." >&2
@@ -454,7 +479,9 @@ done
 # app/ + feature/. (Root CLAUDE.md + AGENTS.md handled above.)
 ad_propagated_targets=()
 for f in Submodules/*/CLAUDE.md Submodules/*/AGENTS.md Submodules/*/CONSTITUTION.md; do
-  [[ -f "$f" ]] && ad_propagated_targets+=("$f")
+  [[ -f "$f" ]] || continue
+  is_helix_dev_owned "$f" && continue
+  ad_propagated_targets+=("$f")
 done
 for f in lava-api-go/CLAUDE.md lava-api-go/AGENTS.md lava-api-go/CONSTITUTION.md core/CLAUDE.md app/CLAUDE.md feature/CLAUDE.md; do
   [[ -f "$f" ]] && ad_propagated_targets+=("$f")

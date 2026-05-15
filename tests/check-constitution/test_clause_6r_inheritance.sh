@@ -8,8 +8,24 @@
 # and clause body in lockstep.
 set -euo pipefail
 cd "$(dirname "$0")/../.."
+
+# HelixDevelopment-owned submodules are exempt from Lava-specific clause
+# heading inheritance — they ship the canonical-root §INHERITED FROM
+# Helix Constitution pointer block instead. Mirrors the HELIX_DEV_OWNED
+# list in scripts/check-constitution.sh.
+HELIX_DEV_OWNED=("HelixQA")
+is_helix_dev_owned() {
+  local path=$1
+  for owned in "${HELIX_DEV_OWNED[@]}"; do
+    [[ "$path" == *"/$owned/"* ]] && return 0
+    [[ "$path" == *"/$owned"* ]] && return 0
+  done
+  return 1
+}
+
 missing=()
 for sub in Submodules/*/CLAUDE.md; do
+  is_helix_dev_owned "$sub" && continue
   if ! grep -qF '## §6.R — No-Hardcoding Mandate' "$sub"; then
     missing+=("$sub")
   fi

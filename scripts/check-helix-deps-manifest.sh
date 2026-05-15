@@ -49,10 +49,13 @@ done
 # cite WHY (legacy state, structural exemption, etc.) + tracking
 # issue + planned-resolution date.
 HELIX_DEPS_WAIVERS=(
-    # NO ACTIVE WAIVERS — the 16 submodules without helix-deps.yaml
-    # found in the 2026-05-15 audit are documented as Phase 3-debt
-    # to be closed in follow-up cycles (each submodule gains its
-    # own manifest in its own commit per §6.W discipline).
+    # HelixQA — HelixDevelopment-owned submodule adopted at upstream HEAD
+    # 403603db on 2026-05-15. Lava pins the version; the upstream repo's
+    # missing helix-deps.yaml is owed via PR to HelixDevelopment/HelixQA
+    # (Phase 4-debt of constitution-compliance plan, NOT a Lava-side
+    # responsibility to add the file directly without operator authorization
+    # to push to a HelixDevelopment repo).
+    "HelixQA"
 )
 
 is_helix_deps_waived() {

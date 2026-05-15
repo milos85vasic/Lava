@@ -83,3 +83,9 @@ Resolution path: per-submodule cycle (write helix-deps.yaml → commit to submod
 - `docs/helix-constitution-gates.md` `CM-HELIX-DEPS-MANIFEST` row
 - `scripts/verify-all-constitution-rules.sh` (wraps this scanner per §11.4.32)
 - Lava parent's reference manifest: `helix-deps.yaml` (declares all 16 submodule deps + constitution)
+
+## 2026-05-15 update — HelixQA waiver
+
+Phase 4 of the constitution-compliance plan adopted `Submodules/HelixQA` (HelixDevelopment-owned QA orchestration framework) at upstream HEAD `403603db`. HelixQA's CLAUDE.md / AGENTS.md / CONSTITUTION.md follow the canonical-root `## INHERITED FROM Helix Constitution` pointer pattern (HelixDevelopment-authored) rather than Lava's heading-anchored §6.R / §6.S / §6.X / §6.AD pointer-block format. HelixQA also lacks `helix-deps.yaml` + `install_upstreams.sh` wrapper script.
+
+Resolution: `HELIX_DEV_OWNED=("HelixQA")` waiver list + `is_helix_dev_owned()` helper skip HelixQA in every per-Submodule loop in this scanner. Waiver entries cite Phase 4-debt: PR to `HelixDevelopment/HelixQA` upstream owed to add the missing files. Once upstream merges + Lava's pin advances to include them, HelixQA can be removed from the waiver list.

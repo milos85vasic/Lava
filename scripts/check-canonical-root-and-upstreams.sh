@@ -48,10 +48,13 @@ done
 # Each waiver MUST cite WHY the submodule lacks install_upstreams +
 # tracking-issue or planned-resolution date (or "permanent" if structurally not needed).
 INSTALL_UPSTREAMS_WAIVERS=(
-    # NO ACTIVE WAIVERS — the 10 submodules without install_upstreams
-    # found in the 2026-05-15 audit are documented as constitutional debt
-    # to be closed in follow-up cycles (each submodule gains its own
-    # install_upstreams script in its own commit per §6.W discipline).
+    # HelixQA — HelixDevelopment-owned submodule adopted at upstream HEAD
+    # 403603db on 2026-05-15. Lava pins the version; the upstream repo's
+    # missing install_upstreams.sh wrapper script is owed via PR to
+    # HelixDevelopment/HelixQA (Phase 4-debt of constitution-compliance
+    # plan). HelixQA already ships Upstreams/{GitHub,GitLab}.sh recipes;
+    # only the wrapper script is missing.
+    "HelixQA"
 )
 
 is_install_upstreams_waived() {
