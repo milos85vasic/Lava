@@ -48,6 +48,7 @@ See the script's in-source comment block (above) for canonical usage examples.
 6. **5a1 (added 2026-05-14):** §6.AC non-fatal-coverage scan (STRICT default; closes §6.AC-debt + `CM-NONFATAL-COVERAGE` gate)
 7. **5a2 (added 2026-05-15):** §6.AB Challenge-discrimination scan (STRICT default; closes §6.AB-debt + `CM-CHALLENGE-DISCRIMINATION` gate)
 8. **5a3 (added 2026-05-15, 31st §6.L):** §6.AE per-feature Challenge coverage scan (STRICT default after per-feature backfill drained the queue 2026-05-15; `CM-CHALLENGE-COVERAGE` gate; `LAVA_CHALLENGE_COVERAGE_STRICT=0` to revert to advisory)
+9. **5a4 (added 2026-05-15, constitution-compliance plan Phase 1):** §11.4.32 verify-all-constitution-rules sweep (STRICT default; the §11.4.32 mandated enforcement engine for every other constitution rule; wraps every individual gate above + every hermetic test suite into one invocation; produces per-run attestation JSON at `.lava-ci-evidence/verify-all/<UTC-timestamp>.json`; `CM-VERIFY-ALL-CONSTITUTION-RULES` gate)
 9. 5b. Hermetic bash test suites (under `tests/`)
 10. (Full-mode only) Parity, mutation, fixture-freshness, Compose UI Challenge Tests on connected device
 

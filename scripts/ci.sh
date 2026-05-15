@@ -151,6 +151,18 @@ echo "==> §6.AE Challenge-coverage scan (STRICT)"
 ./scripts/check-challenge-coverage.sh | tail -4
 
 # ---------------------------------------------------------------------
+# 5a4. §11.4.32 verify-all-constitution-rules sweep — the enforcement
+# engine for every other §11.4.x and CONST-NNN rule. Wraps every
+# individual gate above + every hermetic test suite. Per §11.4.32
+# itself, this sweep is mandatory after every constitution submodule
+# pull. Pre-push gating is INTENTIONAL — sweep failure rejects the push.
+# Added 2026-05-15 (Phase 1 of constitution-compliance plan).
+# ---------------------------------------------------------------------
+echo "==> §11.4.32 verify-all-constitution-rules sweep (STRICT)"
+./scripts/verify-all-constitution-rules.sh --json-only > /dev/null
+echo "    ✓ §11.4.32 enforcement-engine sweep PASS"
+
+# ---------------------------------------------------------------------
 # 5b. Hermetic bash test suites (added 2026-05-05 to close the gap that
 # regression tests under tests/ were only run on manual operator trigger).
 # Each suite is independent and self-contained: a `run_all.sh` that runs
