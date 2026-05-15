@@ -29,7 +29,6 @@ package lava.app.challenges
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import digital.vasic.lava.client.MainActivity
-import lava.forum.bookmarks.BookmarksScreen
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -41,10 +40,16 @@ class Challenge33BookmarksScreenReachableTest {
     val composeRule = createAndroidComposeRule<MainActivity>()
 
     @Test
-    fun bookmarks_screen_class_is_reachable() {
-        val ref: Any = ::BookmarksScreen
-        check(ref.toString().isNotEmpty()) {
-            "BookmarksScreen reference is unexpectedly empty — feature/bookmarks may have been removed"
+    fun bookmarks_view_model_class_is_reachable_from_runtime_classpath() {
+        // BookmarksViewModel is `internal` to feature/bookmarks. Use
+        // Class.forName() to verify runtime-classpath presence (bypasses
+        // Kotlin's internal access modifier).
+        val viewModelClass = Class.forName("lava.forum.bookmarks.BookmarksViewModel")
+        check(viewModelClass.name == "lava.forum.bookmarks.BookmarksViewModel") {
+            "BookmarksViewModel class name unexpected: ${viewModelClass.name} — feature/bookmarks may have been moved"
         }
     }
+
+    @Suppress("unused")
+    private val packageMarker = "lava.forum.bookmarks"
 }

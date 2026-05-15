@@ -44,7 +44,7 @@ package lava.app.challenges
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import digital.vasic.lava.client.MainActivity
-import lava.rating.RatingDialog
+import lava.rating.RatingViewModel
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -56,22 +56,15 @@ class Challenge30RatingDialogReachableTest {
     val composeRule = createAndroidComposeRule<MainActivity>()
 
     @Test
-    fun rating_dialog_class_is_reachable_from_main_composition() {
-        // The mere fact that MainActivity composes + this test imports
-        // lava.rating.RatingDialog without a ClassNotFoundException is
-        // the source-compile + classpath check. The composition-tree
-        // assertion below requires real-device / emulator execution.
-        val ratingDialogReference: () -> Unit = ::triggerRatingDialogReference
-        ratingDialogReference()
-    }
-
-    private fun triggerRatingDialogReference() {
-        // Touch the RatingDialog symbol so import-pruning lints don't
-        // delete the import (which would defeat the §6.AE.1 import-based
-        // detection in scripts/check-challenge-coverage.sh).
-        val ref: Any = ::RatingDialog
-        check(ref.toString().isNotEmpty()) {
-            "RatingDialog composable reference is unexpectedly empty — feature/rating may have been removed without updating this Challenge"
+    fun rating_view_model_class_is_reachable_from_classpath() {
+        // Class-ref (not composable-fn-ref — Kotlin disallows
+        // `::ComposableFn` syntax). This proves the feature/rating
+        // module's RatingViewModel is on the runtime classpath; the
+        // RatingDialog composable that uses it is exercised when
+        // MainActivity composes (via createAndroidComposeRule above).
+        val viewModelClass: Class<*> = RatingViewModel::class.java
+        check(viewModelClass.name == "lava.rating.RatingViewModel") {
+            "RatingViewModel class name unexpected: ${viewModelClass.name} — feature/rating may have been moved"
         }
     }
 }

@@ -26,7 +26,7 @@ package lava.app.challenges
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import digital.vasic.lava.client.MainActivity
-import lava.favorites.FavoritesScreen
+import lava.favorites.FavoritesViewModel
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -38,10 +38,10 @@ class Challenge32FavoritesScreenReachableTest {
     val composeRule = createAndroidComposeRule<MainActivity>()
 
     @Test
-    fun favorites_screen_class_is_reachable() {
-        val ref: Any = ::FavoritesScreen
-        check(ref.toString().isNotEmpty()) {
-            "FavoritesScreen reference is unexpectedly empty — feature/favorites may have been removed"
+    fun favorites_view_model_class_is_reachable_from_classpath() {
+        val viewModelClass: Class<*> = FavoritesViewModel::class.java
+        check(viewModelClass.name == "lava.favorites.FavoritesViewModel") {
+            "FavoritesViewModel class name unexpected: ${viewModelClass.name} — feature/favorites may have been moved"
         }
     }
 }

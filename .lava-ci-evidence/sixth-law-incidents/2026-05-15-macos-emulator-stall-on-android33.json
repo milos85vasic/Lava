@@ -1,0 +1,28 @@
+{
+  "incident_date": "2026-05-15",
+  "host": "darwin/arm64 (Apple Silicon)",
+  "android_emulator_version": "36.1.9.0 build 13823996",
+  "android_sdk_root": "/Volumes/T7/Android/SDK",
+  "qemu_backend": "qemu-system-aarch64-headless (HVF acceleration)",
+  "system_image": "system-images/android-33/google_apis_playstore/arm64-v8a",
+  "avd": "Pixel_7_Pro",
+  "command": "emulator -avd Pixel_7_Pro -no-snapshot-load -no-window -no-audio -no-boot-anim",
+  "observed": "qemu-system-aarch64-headless process spawned + sustained ~390% CPU for 15+ minutes; adb shows 'emulator-5554 offline' indefinitely; sys.boot_completed never reaches '1'; final log line before stall: 'Activated packet streamer for bluetooth emulation'",
+  "expected": "boot completion within 90-180s on Apple Silicon HVF",
+  "anti_bluff_observation": "the issue is NOT in the §6.AE matrix runner glue. The matrix runner correctly: (a) invoked emulator binary; (b) snapshotted adb devices pre-launch; (c) waited the configured 60s for new emulator serial; (d) on timeout, produced honest FAIL attestation row with structured error message + attestation JSON file. The same matrix runner WOULD work end-to-end if the emulator boot itself completed — the runner is correct, the boot environment is the blocker.",
+  "candidate_root_causes_PENDING_FORENSICS": [
+    "PENDING_FORENSICS: known issue with emulator 36.1.9 + macOS Sonoma+ HVF interaction — would require checking AndroidStudio bug tracker for matching symptom",
+    "PENDING_FORENSICS: AVD config artifact (Pixel_7_Pro was created with an older emulator version; cold-boot may need a snapshot reset or AVD recreate)",
+    "PENDING_FORENSICS: T7 external drive (where ANDROID_SDK_ROOT lives) may have I/O latency that triggers boot timeout in the emulator's userspace-init phase"
+  ],
+  "remediation_attempted_before_committing": "killed stuck qemu-system + netsimd + crashpad_handler processes; emulator-5554 cleared from adb",
+  "remediation_owed": [
+    "Recreate Pixel_7_Pro AVD with current emulator version (avdmanager create avd -n Pixel_7_Pro_Fresh -k 'system-images;android-33;google_apis_playstore;arm64-v8a' -d pixel_7_pro)",
+    "Test boot of fresh AVD; if still stalls, downgrade emulator package OR move ANDROID_SDK_ROOT off T7 external drive to internal SSD",
+    "Once a working AVD exists on this host, re-run scripts/run-emulator-tests.sh + scripts/run-challenge-matrix.sh to validate end-to-end execution"
+  ],
+  "constitutional_implications": "This incident is NOT a §6.X-debt incident (the darwin/arm64 KVM-absent gap is separate). This is a runtime-environment bug in the emulator-on-macOS path. The §6.AE matrix runner glue + §6.X-debt darwin/arm64 gap remain orthogonal: the runner-glue path WORKS (proven by the FAIL attestation), the macOS-emulator path STALLS (unrelated environmental issue), the §6.X gate-mode path REQUIRES Linux x86_64 + KVM (per the standing remediation Option C). Only the gate-mode path is constitutional — the macOS-emulator-stall is a workstation-environment debugging issue.",
+  "evidence_artifacts": [
+    ".lava-ci-evidence/2026-05-15-host-direct-c00/real-device-verification.json (the FAIL attestation produced by the matrix runner against yole-test before this incident)"
+  ]
+}

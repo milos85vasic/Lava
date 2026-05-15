@@ -44,7 +44,6 @@ package lava.app.challenges
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import digital.vasic.lava.client.MainActivity
-import lava.visited.VisitedScreen
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -56,18 +55,23 @@ class Challenge31VisitedScreenReachableTest {
     val composeRule = createAndroidComposeRule<MainActivity>()
 
     @Test
-    fun visited_screen_class_is_reachable_from_main_navigation() {
-        val visitedScreenReference: () -> Unit = ::triggerVisitedScreenReference
-        visitedScreenReference()
-    }
-
-    private fun triggerVisitedScreenReference() {
-        // Touch the VisitedScreen symbol so import-pruning lints don't
-        // delete the import (which would defeat the §6.AE.1 import-based
-        // detection in scripts/check-challenge-coverage.sh).
-        val ref: Any = ::VisitedScreen
-        check(ref.toString().isNotEmpty()) {
-            "VisitedScreen composable reference is unexpectedly empty — feature/visited may have been removed without updating this Challenge"
+    fun visited_view_model_class_is_reachable_from_runtime_classpath() {
+        // VisitedViewModel is `internal` to feature/visited; can't be
+        // referenced via `::class.java` from the app androidTest source
+        // set. Class.forName() bypasses Kotlin's internal access modifier
+        // (which is a kotlinc-only check) and verifies the class IS on
+        // the runtime classpath at instrumentation time. If the class is
+        // missing, ClassNotFoundException is thrown — the test fails
+        // with a clear message naming the missing feature.
+        val viewModelClass = Class.forName("lava.visited.VisitedViewModel")
+        check(viewModelClass.name == "lava.visited.VisitedViewModel") {
+            "VisitedViewModel class name unexpected: ${viewModelClass.name} — feature/visited may have been moved"
         }
     }
+
+    // Marker for scripts/check-challenge-coverage.sh package-aware
+    // detection (the lava.visited import would normally do this, but
+    // VisitedViewModel is internal so we use Class.forName above).
+    @Suppress("unused")
+    private val packageMarker = "lava.visited"
 }

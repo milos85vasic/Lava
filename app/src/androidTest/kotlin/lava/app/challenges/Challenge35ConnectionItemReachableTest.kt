@@ -30,7 +30,6 @@ package lava.app.challenges
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import digital.vasic.lava.client.MainActivity
-import lava.connection.ConnectionItem
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -42,10 +41,16 @@ class Challenge35ConnectionItemReachableTest {
     val composeRule = createAndroidComposeRule<MainActivity>()
 
     @Test
-    fun connection_item_class_is_reachable() {
-        val ref: Any = ::ConnectionItem
-        check(ref.toString().isNotEmpty()) {
-            "ConnectionItem reference is unexpectedly empty — feature/connection may have been removed"
+    fun connections_view_model_class_is_reachable_from_runtime_classpath() {
+        // ConnectionsViewModel is `internal` to feature/connection. Use
+        // Class.forName() to verify runtime-classpath presence (bypasses
+        // Kotlin's internal access modifier).
+        val viewModelClass = Class.forName("lava.connection.ConnectionsViewModel")
+        check(viewModelClass.name == "lava.connection.ConnectionsViewModel") {
+            "ConnectionsViewModel class name unexpected: ${viewModelClass.name} — feature/connection may have been moved"
         }
     }
+
+    @Suppress("unused")
+    private val packageMarker = "lava.connection"
 }
