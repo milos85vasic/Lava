@@ -118,6 +118,15 @@ run_gate "non-fatal-coverage" "§6.AC + HelixConstitution telemetry discipline" 
 run_gate "gitignore-coverage" "HelixConstitution §11.4.30" \
     "bash scripts/check-gitignore-coverage.sh"
 
+# §11.4.28 Submodules-As-Equal-Codebase / no nested own-org chains (Phase 5)
+# NOTE: ADVISORY mode in sweep until the Challenges/Panoptic refactor lands;
+# the scanner itself is STRICT, but here the sweep reports the violation
+# without exiting non-zero so other gates continue to run + report.
+# Per docs/plans/2026-05-15-constitution-compliance.md Phase 5: gate is
+# wired in advisory mode; STRICT-flip is a follow-up after refactor.
+run_gate "no-nested-own-org-submodules" "HelixConstitution §11.4.28 (advisory)" \
+    "bash scripts/check-no-nested-own-org-submodules.sh --advisory"
+
 # §6.AB Challenge discrimination (Layer 1 marker + Layer 2 body)
 run_gate "challenge-discrimination" "§6.AB Anti-Bluff Test-Suite Reinforcement" \
     "bash scripts/check-challenge-discrimination.sh"

@@ -53,12 +53,14 @@ Attestation JSON schema:
 
 ## Gates registry (current)
 
-The sweep currently invokes 30 gates across 4 categories (count last revised in Phase 2 — §11.4.30 .gitignore audit added):
+The sweep currently invokes 32 gates across 4 categories (count last revised in Phase 5 — §11.4.28 nested-own-org-submodule audit added in advisory mode):
 
 1. **Constitution doc parser** (1 gate) — `scripts/check-constitution.sh` covering §6.A-§6.AE inheritance + §6.W boundary + §11.4.6 no-guessing
-2. **Anti-bluff scanners** (5 gates) — non-fatal coverage / **gitignore coverage (Phase 2 — §11.4.30)** / Challenge discrimination Layer 1+2 / Challenge coverage / fixture freshness
+2. **Anti-bluff scanners** (6 gates) — non-fatal coverage / **gitignore coverage (Phase 2 — §11.4.30)** / **nested-own-org-submodules (Phase 5 — §11.4.28, advisory)** / Challenge discrimination Layer 1+2 / Challenge coverage / fixture freshness
 3. **No-hardcoding scanners** (3 gates) — UUID / IPv4 / host:port literal scans
-4. **Hermetic test suites** (~20 gates) — tests/firebase + tests/ci-sh + tests/compose-layout + tests/tag-helper + tests/vm-* + tests/pre-push/check{4,5,6,7,8,9} + tests/check-constitution/* (now includes `test_gitignore_coverage.sh`)
+4. **Hermetic test suites** (~20 gates) — tests/firebase + tests/ci-sh + tests/compose-layout + tests/tag-helper + tests/vm-* + tests/pre-push/check{4,5,6,7,8,9} + tests/check-constitution/* (now includes `test_gitignore_coverage.sh` + `test_nested_own_org_submodules.sh`)
+
+Per-gate STRICT/ADVISORY note: `nested-own-org-submodules` runs in advisory mode inside the sweep until the open `Submodules/Challenges/Panoptic` violation is refactored. The scanner ITSELF is STRICT by default when invoked directly; the sweep wrapper passes `--advisory` so the sweep continues running other gates + reports the violation without short-circuiting. Once the refactor lands, the sweep wrapper flips to STRICT.
 
 The list grows as new constitution gates land. Adding a new gate to the registry requires updating both the sweep + the hermetic meta-test (`tests/check-constitution/test_verify_all_rules.sh`).
 
