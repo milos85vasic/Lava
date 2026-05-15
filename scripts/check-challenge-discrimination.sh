@@ -39,36 +39,86 @@ if [[ ! -d "$challenge_dir" ]]; then
 fi
 
 violations=()
+body_violations=()
 total=0
 while IFS= read -r f; do
     [[ -z "$f" ]] && continue
     total=$((total + 1))
     bn=$(basename "$f" .kt)
+
+    # ===== Layer 1: KDoc marker check (existing) =====
+    has_marker=false
     if grep -qE 'FALSIFIABILITY[ \t]+REHEARSAL|§6\.AB-discrimination:' "$f"; then
-        continue
-    fi
-    if ls .lava-ci-evidence/sp3a-challenges/${bn}-*.json 2>/dev/null | head -1 | grep -q .; then
+        has_marker=true
+    elif ls .lava-ci-evidence/sp3a-challenges/${bn}-*.json 2>/dev/null | head -1 | grep -q .; then
         if grep -lE 'falsifiability_rehearsal|discrimination|bluff_classification' .lava-ci-evidence/sp3a-challenges/${bn}-*.json 2>/dev/null | head -1 | grep -q .; then
-            continue
+            has_marker=true
         fi
     fi
-    violations+=("$f")
+    if [[ "$has_marker" != "true" ]]; then
+        violations+=("$f")
+        continue
+    fi
+
+    # ===== Layer 2: BODY structural check (added 2026-05-15 from
+    # bluff-hunt audit at .lava-ci-evidence/bluff-hunt/
+    # 2026-05-15-challenge-body-structural-audit.json) =====
+    # A test that has the FALSIFIABILITY REHEARSAL marker but NO real
+    # assertion in its body is a §6.J spirit bluff: the doc claims
+    # discrimination, the body proves nothing.
+    #
+    # Acceptable real-assertion patterns (any one is sufficient):
+    #   - composeRule UI assertions: onNode|onAllNodes|assertIs|assertText|
+    #     assertExists|fetchSemanticsNodes|composeRule\.waitUntil
+    #   - JUnit assertions with semantic content: assertEquals|assertTrue|
+    #     assertFalse|assertNotNull|assertSame|assertContains|assertThat
+    #   - `check()` / `require()` with non-trivial condition (more than a
+    #     toString().isNotEmpty() check)
+    #   - `Class.forName()` / `::class.java` for classpath verification
+    #     (the documented minimal-by-design pattern for C30-C35 — these
+    #     are not bluffs because Class.forName throws ClassNotFoundException
+    #     on missing class)
+    # The acceptable-pattern alternation is broad by design — false-negatives
+    # (a real bluff slipping through) are worse than false-positives (a real
+    # test rejected). The §11.4.6 spirit is "either prove the thing or mark
+    # it explicitly". Tests that have NONE of these patterns + still claim
+    # discrimination via the KDoc marker ARE bluffs by construction.
+    if ! grep -qE 'onNode|onAllNodes|assertIs|assertText|assertExists|fetchSemanticsNodes|composeRule\.waitUntil|assertEquals|assertTrue|assertFalse|assertNotNull|assertSame|assertContains|assertThat|Class\.forName|::class\.java|::[a-zA-Z_][a-zA-Z0-9_]*|\bcheck\(|\brequire\(' "$f"; then
+        body_violations+=("$f")
+        continue
+    fi
 done < <(find "$challenge_dir" -name 'Challenge*Test.kt')
 
 echo "==> §6.AB Challenge-Test discrimination scan"
 echo "    Challenge tests: $total"
 echo "    Lacking discrimination marker / companion evidence: ${#violations[@]}"
+echo "    Marker present but body has NO real assertion: ${#body_violations[@]}"
 
-if [[ ${#violations[@]} -eq 0 ]]; then
+if [[ ${#violations[@]} -eq 0 && ${#body_violations[@]} -eq 0 ]]; then
     echo "    ✓ all Challenge tests carry §6.AB.3 falsifiability rehearsal documentation"
+    echo "    ✓ all Challenge test bodies contain real assertions (UI / JUnit / classpath)"
     exit 0
 fi
 
 echo ""
-echo "    First 10 violations (file):"
-printf '      %s\n' "${violations[@]:0:10}"
-if [[ ${#violations[@]} -gt 10 ]]; then
-    echo "      ... and $((${#violations[@]} - 10)) more"
+if [[ ${#violations[@]} -gt 0 ]]; then
+    echo "    Layer 1 violations (missing FALSIFIABILITY REHEARSAL marker):"
+    printf '      %s\n' "${violations[@]:0:10}"
+    if [[ ${#violations[@]} -gt 10 ]]; then
+        echo "      ... and $((${#violations[@]} - 10)) more"
+    fi
+fi
+if [[ ${#body_violations[@]} -gt 0 ]]; then
+    echo "    Layer 2 violations (marker present but body has no real assertion):"
+    printf '      %s\n' "${body_violations[@]:0:10}"
+    if [[ ${#body_violations[@]} -gt 10 ]]; then
+        echo "      ... and $((${#body_violations[@]} - 10)) more"
+    fi
+    echo ""
+    echo "    Layer 2 remediation: add at least one of the following to the test body:"
+    echo "      - Compose UI: composeRule.onAllNodesWithText(\"X\").fetchSemanticsNodes().isNotEmpty()"
+    echo "      - JUnit: assertEquals(...) / assertTrue(...) / assertNotNull(...) / etc."
+    echo "      - Classpath verification: Class.forName(\"...\") OR ::class.java + property check"
 fi
 echo ""
 echo "    Remediation per violation: add a KDoc block of the form"
@@ -81,8 +131,9 @@ echo "    OR ship a companion .lava-ci-evidence/sp3a-challenges/<TestName>-<sha>
 echo "    with a 'falsifiability_rehearsal' / 'discrimination' field."
 
 if [[ "$STRICT" == "1" ]]; then
+    total_violations=$((${#violations[@]} + ${#body_violations[@]}))
     echo ""
-    echo "    LAVA_CHALLENGE_DISCRIMINATION_STRICT=1 — failing on ${#violations[@]} violation(s)."
+    echo "    LAVA_CHALLENGE_DISCRIMINATION_STRICT=1 — failing on $total_violations violation(s) (Layer 1: ${#violations[@]}, Layer 2: ${#body_violations[@]})."
     exit 1
 else
     echo ""

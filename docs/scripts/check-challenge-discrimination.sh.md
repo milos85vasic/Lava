@@ -9,13 +9,33 @@ Mechanical enforcement of §6.AB.3 — every `Challenge*Test.kt` file MUST carry
 
 Closes §6.AB-debt from ❌ deferred to ✅ wired (no Detekt setup required — bash scanner consistent with §6.AC pattern).
 
-## Acceptable markers
+## Two-layer enforcement (Layer 2 added 2026-05-15 from bluff-hunt audit)
 
-Any one of these in the test file's KDoc satisfies the gate:
+### Layer 1: KDoc marker check
+
+Any one of these in the test file's KDoc satisfies Layer 1:
 
 1. `FALSIFIABILITY REHEARSAL` (canonical, used by C00–C29; optionally prefixed with `§6.AB.3`)
 2. `§6.AB-discrimination:` block (alternate canonical form)
 3. Companion file at `.lava-ci-evidence/sp3a-challenges/<TestName>-<sha>.json` with a `falsifiability_rehearsal` / `discrimination` / `bluff_classification` field
+
+### Layer 2: BODY structural check
+
+Files passing Layer 1 are also scanned for real-assertion patterns in the test body. A test that has the FALSIFIABILITY REHEARSAL marker but NO real assertion in its body is a §6.J spirit bluff: the doc claims discrimination, the body proves nothing.
+
+Acceptable real-assertion patterns (any one is sufficient):
+- Compose UI: `onNode|onAllNodes|assertIs|assertText|assertExists|fetchSemanticsNodes|composeRule\.waitUntil`
+- JUnit assertions: `assertEquals|assertTrue|assertFalse|assertNotNull|assertSame|assertContains|assertThat`
+- Classpath verification: `Class\.forName(...)` OR `::class\.java`
+- Symbol references: `::<identifier>` (function-ref or class-ref proves the symbol exists at runtime)
+- `check()` / `require()` calls
+
+Falsifiability rehearsal (Layer 2):
+- Mutation: synthetic `ChallengeBLUFF_REHEARSAL_DELETEMETest.kt` with the FALSIFIABILITY REHEARSAL block but no body assertions
+- Observed: scanner reports "Layer 2 violations (marker present but body has no real assertion)" + names the file + lists remediation patterns
+- Reverted: yes (synthetic file deleted; scanner returns to ✓ green)
+
+Forensic anchor: `.lava-ci-evidence/bluff-hunt/2026-05-15-challenge-body-structural-audit.json` documented the manual audit that motivated this Layer 2 mechanical enforcement.
 
 ## Usage
 
