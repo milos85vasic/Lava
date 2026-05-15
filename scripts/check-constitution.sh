@@ -487,6 +487,32 @@ if [[ ! -x scripts/inject-helix-inheritance-block.sh ]]; then
 fi
 
 # -----------------------------------------------------------------------------
+# §6.AE Comprehensive Challenge Coverage + Container/QEMU Matrix Mandate.
+# Added 2026-05-15 (31st §6.L invocation).
+# -----------------------------------------------------------------------------
+
+# 6.AE(1): root CLAUDE.md MUST contain the §6.AE clause itself.
+if ! grep -qF '##### 6.AE — Comprehensive Challenge Coverage' CLAUDE.md; then
+  echo "MISSING 6.AE clause in CLAUDE.md" >&2
+  echo "  → Add the §6.AE Comprehensive Challenge Coverage + Container/QEMU Matrix Mandate clause." >&2
+  exit 1
+fi
+
+# 6.AE(2): scripts/check-challenge-coverage.sh MUST exist + be executable.
+if [[ ! -x scripts/check-challenge-coverage.sh ]]; then
+  echo "MISSING executable scripts/check-challenge-coverage.sh (§6.AE.6)" >&2
+  echo "  → Add the per-feature Challenge coverage scanner." >&2
+  exit 1
+fi
+
+# 6.AE(3): scripts/run-challenge-matrix.sh MUST exist + be executable.
+if [[ ! -x scripts/run-challenge-matrix.sh ]]; then
+  echo "MISSING executable scripts/run-challenge-matrix.sh (§6.AE.6)" >&2
+  echo "  → Add the §6.AE matrix-runner glue (delegates to Containers submodule)." >&2
+  exit 1
+fi
+
+# -----------------------------------------------------------------------------
 # §6.W applicability boundary check — closes §6.AD-debt item 7.
 # The 2-mirror rule (GitHub + GitLab only) applies to the parent + every
 # vasic-digital submodule. The constitution submodule (HelixDevelopment-domain)

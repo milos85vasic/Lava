@@ -143,6 +143,14 @@ echo "==> §6.AB Challenge-discrimination scan (STRICT)"
 ./scripts/check-challenge-discrimination.sh | tail -3
 
 # ---------------------------------------------------------------------
+# 5a3. §6.AE per-feature Challenge coverage scanner (advisory until the
+# per-feature backfill pass closes §6.AE-debt). Set
+# LAVA_CHALLENGE_COVERAGE_STRICT=1 to fail on uncovered features.
+# ---------------------------------------------------------------------
+echo "==> §6.AE Challenge-coverage scan (advisory)"
+./scripts/check-challenge-coverage.sh | tail -4
+
+# ---------------------------------------------------------------------
 # 5b. Hermetic bash test suites (added 2026-05-05 to close the gap that
 # regression tests under tests/ were only run on manual operator trigger).
 # Each suite is independent and self-contained: a `run_all.sh` that runs

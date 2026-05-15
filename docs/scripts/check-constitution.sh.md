@@ -22,6 +22,22 @@ every mode.
 
 See the script's in-source comment block (above) for canonical usage examples.
 
+## Clauses verified (current set, growing list)
+
+The script asserts presence of the following constitutional clauses + supporting infrastructure:
+
+- §6.D + §6.E + §6.F (root CLAUDE.md)
+- `Submodules/Tracker-SDK/CLAUDE.md` exists
+- `core/CLAUDE.md` references §6.E
+- `feature/CLAUDE.md` references Challenge Test requirement
+- §6.H credential pattern absence (no plaintext credentials in tracked files)
+- §6.K Containers extension presence
+- §6.X Container-Submodule Emulator Wiring inheritance + runtime checks (a) + (b)
+- **§6.AD HelixConstitution Inheritance** — clause + constitution submodule + 54 per-scope inheritance pointer-blocks present
+- **§6.W remote-host boundary** — only github + gitlab named remotes on parent + Lava-owned submodules
+- **§11.4.6 no-guessing vocabulary** — forbidden words in tracked status/closure files unless prefixed by UNCONFIRMED:/UNKNOWN:/PENDING_FORENSICS:
+- **§6.AE Comprehensive Challenge Coverage + Container/QEMU Matrix Mandate** (added 2026-05-15) — clause + `scripts/check-challenge-coverage.sh` + `scripts/run-challenge-matrix.sh` exist + executable
+
 ## Maintenance
 
 When this script is modified, update this document in the same commit (CM-SCRIPT-DOCS-SYNC requires it). Per §11.4.18, the documentation MUST stay in sync with the codebase — no doc may be out of sync with its script.
