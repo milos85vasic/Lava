@@ -46,7 +46,15 @@ repo has drifted, the agent acts on the claim.
 >
 > **CM-* gates wired:** CM-COMMIT-DOCS-EXISTS, CM-UNIVERSAL-VS-PROJECT-CLASSIFICATION, CM-NONFATAL-COVERAGE, CM-SCRIPT-DOCS-SYNC, CM-BUILD-RESOURCE-STATS-TRACKER, CM-CHALLENGE-DISCRIMINATION.
 >
-> **Ongoing future work (not blocking):** per-call refinement of the 23 generic Go `// no-telemetry:` opt-out comments (cosmetic — each currently cites a generic placeholder reason; could be enriched per site).
+> **Even-more-extended cycle (post-final-state polish, commits `5fd7c1fd` → `d5c3c195`):**
+>   - `5fd7c1fd` enrich 28 generic Go `// no-telemetry:` opt-outs with per-site rationales (HealthCheck / scraper / fail-open / parser-helper / SSE-streaming / etc.) — task #63 closed; placeholder count 28→0
+>   - `d5c3c195` build-stats-report.sh extended to derive Stats.html (via pandoc) + Stats.pdf (via wkhtmltopdf-or-weasyprint) — closes the "PARTIAL: HTML+PDF exports pending" caveat on CM-BUILD-RESOURCE-STATS-TRACKER (PARTIAL → ✅ wired); task #64 closed
+>
+> **No remaining open tasks in scope.** All Lava-side debt items in scope of the 1.2.23 closure-cycle are CLOSED. The 6 paper-only `CM-*` gates remain ⚠ by design (depend on Issues/Fixed-tracker infrastructure Lava doesn't use; equivalence mapped in §6.AD.3).
+>
+> **Possible future work** (not in any open task):
+>   - Detekt setup across 30+ Gradle modules (would let `CM-NONFATAL-COVERAGE` + `CM-CHALLENGE-DISCRIMINATION` graduate from bash scanners to first-class Detekt rules; substantial multi-hour work; bash sufficient for now)
+>   - Real-build sampler run (current `registry.tsv` only carries the smoke-test row from sampler bring-up; real Android `:app:assembleDebug` + Go `make build` runs would populate the registry with operator-relevant data)
 >
 > **Cross-cutting findings discovered during the cycle:**
 >   - `core.hooksPath` was UNSET on this clone — every push earlier this cycle silently bypassed `.githooks/pre-push`. Wired in-session via `git config core.hooksPath .githooks`. New `scripts/setup-clone.sh` + `docs/scripts/setup-clone.sh.md` make this run-once-per-clone discoverable.
