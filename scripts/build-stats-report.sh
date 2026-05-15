@@ -105,3 +105,45 @@ IFS='|' read -r ev_mem_min ev_mem_max ev_mem_mean ev_cpu_min ev_cpu_max ev_cpu_m
 } > "$REPORT"
 
 echo "==> wrote $REPORT ($total_builds build(s) tracked)"
+
+# -----------------------------------------------------------------------------
+# §11.4.12 + §11.4.24 derived-format exports.
+# Per HelixConstitution §11.4.12: every auto-generated document MUST be
+# regenerated in the same commit as any edit to its source. The Markdown
+# IS the canonical source; HTML + PDF are derived. Both exports are
+# best-effort: the script does not fail if the toolchain is missing.
+# Wired 2026-05-15 (1.2.23 closure-cycle, task #64).
+# -----------------------------------------------------------------------------
+HTML_REPORT="${REPORT%.md}.html"
+PDF_REPORT="${REPORT%.md}.pdf"
+
+if command -v pandoc >/dev/null 2>&1; then
+    if pandoc -f gfm -t html5 \
+        --metadata title="Lava Build Resource Stats" \
+        --standalone \
+        -o "$HTML_REPORT" "$REPORT" 2>/dev/null; then
+        echo "==> wrote $HTML_REPORT (via pandoc)"
+    else
+        echo "==> WARN: pandoc HTML export failed; HTML report not regenerated"
+    fi
+else
+    echo "==> SKIP HTML export (pandoc not in PATH)"
+fi
+
+if [[ -f "$HTML_REPORT" ]]; then
+    if command -v wkhtmltopdf >/dev/null 2>&1; then
+        if wkhtmltopdf --quiet "$HTML_REPORT" "$PDF_REPORT" 2>/dev/null; then
+            echo "==> wrote $PDF_REPORT (via wkhtmltopdf)"
+        else
+            echo "==> WARN: wkhtmltopdf PDF export failed; PDF report not regenerated"
+        fi
+    elif command -v weasyprint >/dev/null 2>&1; then
+        if weasyprint "$HTML_REPORT" "$PDF_REPORT" 2>/dev/null; then
+            echo "==> wrote $PDF_REPORT (via weasyprint)"
+        else
+            echo "==> WARN: weasyprint PDF export failed; PDF report not regenerated"
+        fi
+    else
+        echo "==> SKIP PDF export (wkhtmltopdf + weasyprint both absent)"
+    fi
+fi

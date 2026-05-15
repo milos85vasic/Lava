@@ -1,7 +1,7 @@
 # Build Resource Stats
 
 **Inheritance:** HelixConstitution §11.4.24 (build-resource stats tracking).
-**Last regenerated:** 2026-05-14T18:27:50Z
+**Last regenerated:** 2026-05-15T02:49:29Z
 **Total builds tracked:** 1
 
 ## Ever-values (across all tracked builds)

@@ -23,7 +23,11 @@ None (reads `.lava-ci-evidence/build-stats/registry.tsv` from the repo root).
 
 ## Outputs
 
-- `docs/build-stats/Stats.md` — overwritten each run
+- `docs/build-stats/Stats.md` — overwritten each run (canonical Markdown)
+- `docs/build-stats/Stats.html` — derived via `pandoc -f gfm -t html5 --standalone` if `pandoc` is in PATH; skipped silently otherwise
+- `docs/build-stats/Stats.pdf` — derived via `wkhtmltopdf` (preferred) OR `weasyprint` (fallback), whichever is in PATH; both absent → skipped silently
+
+The HTML and PDF derivations were added 2026-05-15 (1.2.23 closure-cycle, task #64) per HelixConstitution §11.4.12 (auto-generated docs sync — every regeneration of the source MUST regenerate every derived format).
 
 ## Side-effects
 
