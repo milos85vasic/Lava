@@ -4,7 +4,7 @@
 
 **Goal:** Close `§6.N-debt` from Group A by shipping pre-push hook enforcement of §6.N.1.2 + §6.N.1.3, plus three parallel debt items (Cleanup API, gradle-stdout persistence, check-constitution.sh §6.N awareness).
 
-**Architecture:** Code spans Lava parent (bash hooks + scripts) and Submodules/Containers (Go pkg/emulator + cmd/emulator-cleanup). One Containers commit + one Lava code commit + one Lava pin-bump-and-evidence commit. Branch in Containers: `lava-pin/2026-05-05-clause-6n-prime`. Subagent-driven execution per Group A's pattern.
+**Architecture:** Code spans Lava parent (bash hooks + scripts) and submodules/containers (Go pkg/emulator + cmd/emulator-cleanup). One Containers commit + one Lava code commit + one Lava pin-bump-and-evidence commit. Branch in Containers: `lava-pin/2026-05-05-clause-6n-prime`. Subagent-driven execution per Group A's pattern.
 
 **Tech Stack:** Go 1.24 (testify), Bash 5, jq, git. No Android/Gradle changes.
 
@@ -40,27 +40,27 @@ Expected: each = 1. Group A landed §6.N + §6.N-debt; Group A-prime extends the
 
 ```bash
 cd /run/media/milosvasic/DATA4TB/Projects/Lava
-git ls-tree HEAD Submodules/Containers
-ls Submodules/Containers/pkg/emulator/matrix.go
+git ls-tree HEAD submodules/containers
+ls submodules/containers/pkg/emulator/matrix.go
 ```
 
-Expected: a gitlink line + the matrix.go file exists. The current pin should be `f6d09cb` (Group A-era Teardown wait-for-exit fix). If matrix.go is missing, run `git submodule update --init Submodules/Containers` first.
+Expected: a gitlink line + the matrix.go file exists. The current pin should be `f6d09cb` (Group A-era Teardown wait-for-exit fix). If matrix.go is missing, run `git submodule update --init submodules/containers` first.
 
 ---
 
 ## Phase A: Containers code (own repo)
 
-All steps in Phase A operate inside `Submodules/Containers/` (own git repo). The Lava parent will see `M Submodules/Containers` in `git status` after Phase A completes; the parent pin-bump happens in Phase C.
+All steps in Phase A operate inside `submodules/containers/` (own git repo). The Lava parent will see `M submodules/containers` in `git status` after Phase A completes; the parent pin-bump happens in Phase C.
 
 ### Task A.0: Switch to the Group A-prime branch in Containers
 
 **Files:**
-- Modify (branch state): `Submodules/Containers/.git/HEAD`
+- Modify (branch state): `submodules/containers/.git/HEAD`
 
 - [ ] **Step A.0.1: Create or switch to lava-pin/2026-05-05-clause-6n-prime in Containers**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/Lava/Submodules/Containers
+cd /run/media/milosvasic/DATA4TB/Projects/Lava/submodules/containers
 BRANCH="lava-pin/2026-05-05-clause-6n-prime"
 if git rev-parse --verify "$BRANCH" >/dev/null 2>&1; then
   git checkout "$BRANCH"
@@ -75,12 +75,12 @@ Expected: `branch --show-current` outputs `lava-pin/2026-05-05-clause-6n-prime`.
 ### Task A.1: pkg/emulator/cleanup.go + tests (TDD with 4 tests)
 
 **Files:**
-- Create: `Submodules/Containers/pkg/emulator/cleanup.go`
-- Create: `Submodules/Containers/pkg/emulator/cleanup_test.go`
+- Create: `submodules/containers/pkg/emulator/cleanup.go`
+- Create: `submodules/containers/pkg/emulator/cleanup_test.go`
 
 - [ ] **Step A.1.1: Write the first failing test (TestCleanup_NoMatches)**
 
-Create `Submodules/Containers/pkg/emulator/cleanup_test.go` with:
+Create `submodules/containers/pkg/emulator/cleanup_test.go` with:
 
 ```go
 package emulator
@@ -167,7 +167,7 @@ func TestCleanup_NoMatches(t *testing.T) {
 - [ ] **Step A.1.2: Run the test to confirm it fails (function does not exist yet)**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/Lava/Submodules/Containers
+cd /run/media/milosvasic/DATA4TB/Projects/Lava/submodules/containers
 go test ./pkg/emulator/... -run TestCleanup_NoMatches 2>&1 | tail -10
 ```
 
@@ -175,7 +175,7 @@ Expected: build failure or test failure with "undefined: cleanupWithDeps" or sim
 
 - [ ] **Step A.1.3: Implement the minimum to pass — create cleanup.go shell**
 
-Create `Submodules/Containers/pkg/emulator/cleanup.go`:
+Create `submodules/containers/pkg/emulator/cleanup.go`:
 
 ```go
 package emulator
@@ -451,12 +451,12 @@ Expected: all 4 tests `PASS`. Mutation reverted; cleanup.go is back to STRICT pr
 ### Task A.2: cmd/emulator-cleanup/main.go
 
 **Files:**
-- Create: `Submodules/Containers/cmd/emulator-cleanup/main.go`
+- Create: `submodules/containers/cmd/emulator-cleanup/main.go`
 
 - [ ] **Step A.2.1: Create the cmd dir + main.go**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/Lava/Submodules/Containers
+cd /run/media/milosvasic/DATA4TB/Projects/Lava/submodules/containers
 mkdir -p cmd/emulator-cleanup
 ```
 
@@ -514,7 +514,7 @@ func main() {
 - [ ] **Step A.2.2: Build the binary to verify it compiles**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/Lava/Submodules/Containers
+cd /run/media/milosvasic/DATA4TB/Projects/Lava/submodules/containers
 go build -o /tmp/emulator-cleanup ./cmd/emulator-cleanup/
 ls -la /tmp/emulator-cleanup
 ```
@@ -534,13 +534,13 @@ If qemu-system processes ARE running on the host (rare), the report will show no
 ### Task A.3: pkg/emulator/matrix.go gradle.log + test-report persistence
 
 **Files:**
-- Modify: `Submodules/Containers/pkg/emulator/matrix.go`
-- Modify: `Submodules/Containers/pkg/emulator/matrix_test.go`
+- Modify: `submodules/containers/pkg/emulator/matrix.go`
+- Modify: `submodules/containers/pkg/emulator/matrix_test.go`
 
 - [ ] **Step A.3.1: Read the current matrix.go RunMatrix loop to find the insertion point**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/Lava/Submodules/Containers
+cd /run/media/milosvasic/DATA4TB/Projects/Lava/submodules/containers
 grep -n "RunInstrumentation\|Teardown" pkg/emulator/matrix.go | head -10
 ```
 
@@ -643,7 +643,7 @@ Then in the `for i, t := range r.Tests` loop, locate the `rowJSON{...}` literal 
 - [ ] **Step A.3.4: Build to verify the matrix.go changes compile**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/Lava/Submodules/Containers
+cd /run/media/milosvasic/DATA4TB/Projects/Lava/submodules/containers
 go build ./pkg/emulator/...
 ```
 
@@ -672,7 +672,7 @@ Locate `TestAndroidMatrixRunner_AllAVDsPass_ReportsAllPassed` in `pkg/emulator/m
 - [ ] **Step A.3.6: Run the matrix tests to verify gradle.log assertion passes**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/Lava/Submodules/Containers
+cd /run/media/milosvasic/DATA4TB/Projects/Lava/submodules/containers
 go test ./pkg/emulator/... -run TestAndroidMatrixRunner_AllAVDsPass_ReportsAllPassed -v 2>&1 | tail -10
 ```
 
@@ -702,7 +702,7 @@ Expected: `ok  digital.vasic.containers/pkg/emulator  <duration>` (full test sui
 - [ ] **Step A.4.1: Verify the staged file set in Containers**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/Lava/Submodules/Containers
+cd /run/media/milosvasic/DATA4TB/Projects/Lava/submodules/containers
 git status --short
 ```
 
@@ -847,7 +847,7 @@ git branch --show-current
 git status --short
 ```
 
-Expected: branch = `master`. `git status` will show ` M Submodules/Containers` (the gitlink is dirty because the submodule is on a new branch). That's expected — Phase C handles the pin bump.
+Expected: branch = `master`. `git status` will show ` M submodules/containers` (the gitlink is dirty because the submodule is on a new branch). That's expected — Phase C handles the pin bump.
 
 ### Task B.1: scripts/check-constitution.sh §6.N awareness + warn→hard-fail flip
 
@@ -895,7 +895,7 @@ declare -a propagation_targets=(
 for sm in Auth Cache Challenges Concurrency Config Containers Database \
           Discovery HTTP3 Mdns Middleware Observability RateLimiter \
           Recovery Security Tracker-SDK; do
-  propagation_targets+=("Submodules/$sm/CLAUDE.md")
+  propagation_targets+=("submodules/$sm/CLAUDE.md")
 done
 for f in "${propagation_targets[@]}"; do
   if [[ ! -f "$f" ]]; then continue; fi
@@ -953,7 +953,7 @@ Use Edit. Find the comment marking the end of Check 3 (typically a blank line fo
     # ===== Check 4: §6.N.1.2 — gate-shaping file change requires Bluff-Audit
     # stamp targeting a file in the diff =====
     gate_files=$(git diff-tree --no-commit-id --name-only -r "$sha" | \
-      grep -E '^(Submodules/Containers/pkg/emulator/.*\.go|scripts/run-emulator-tests\.sh|scripts/tag\.sh|scripts/check-constitution\.sh)$' || true)
+      grep -E '^(submodules/containers/pkg/emulator/.*\.go|scripts/run-emulator-tests\.sh|scripts/tag\.sh|scripts/check-constitution\.sh)$' || true)
     if [[ -n "$gate_files" ]]; then
       msg=$(git log -1 --pretty=%B "$sha")
       if ! grep -qE '^Bluff-Audit:' <<<"$msg"; then
@@ -1374,7 +1374,7 @@ Create `tests/check-constitution/check_constitution_test.sh`:
 #!/usr/bin/env bash
 # Tests for scripts/check-constitution.sh §6.N awareness (Group A-prime).
 # The script is sensitive to file structure (CLAUDE.md headings,
-# Submodules/* paths). Easiest way to test: run it against the live
+# submodules/* paths). Easiest way to test: run it against the live
 # repo + against a temporary fixture that DELETES specific structures.
 set -euo pipefail
 
@@ -1416,9 +1416,9 @@ test_missing_6n_from_submodule_fails() {
   fixture=$(mktemp -d)
   cp -r "$REPO_ROOT/." "$fixture/" 2>/dev/null || true
   cd "$fixture"
-  if [[ -f Submodules/Auth/CLAUDE.md ]]; then
+  if [[ -f submodules/auth/CLAUDE.md ]]; then
     # Strip all 6.N references from Auth's CLAUDE.md
-    sed -i '/6\.N/d' Submodules/Auth/CLAUDE.md
+    sed -i '/6\.N/d' submodules/auth/CLAUDE.md
     if "$SCRIPT" >/dev/null 2>&1; then
       echo "FAIL test_missing_6n_from_submodule_fails: script passed despite Auth missing §6.N"
       exit 1
@@ -1426,7 +1426,7 @@ test_missing_6n_from_submodule_fails() {
       echo "PASS test_missing_6n_from_submodule_fails"
     fi
   else
-    echo "SKIP test_missing_6n_from_submodule_fails: Submodules/Auth/CLAUDE.md not present"
+    echo "SKIP test_missing_6n_from_submodule_fails: submodules/auth/CLAUDE.md not present"
   fi
   rm -rf "$fixture"
 }
@@ -1529,7 +1529,7 @@ Replace with (note the trailing blank line + RESOLVED paragraph):
 ```
 The next phase that touches `scripts/check-constitution.sh` MUST close 6.N-debt before its commit lands, and the close MUST: (1) parse commit messages for `Bluff-Audit:` stamps when 6.N.1.2-listed files appear in the diff, (2) check for falsifiability rehearsal evidence (in-attestation or companion file) when 6.N.1.3-listed paths gain new files, (3) update the constitution checker's gate set accordingly.
 
-**RESOLVED 2026-05-05 evening** via Group A-prime spec at `docs/superpowers/specs/2026-05-05-anti-bluff-mandate-reinforcement-group-a-prime-design.md` (commit `bb2d6a1`). Implementation chain: `Submodules/Containers` commit (Cleanup API + matrix.go gradle-log persistence) + Lava parent commit (pre-push Check 4 + Check 5 + check-constitution.sh §6.N awareness + scripts/run-emulator-tests.sh refactor). Pre-push hook Checks 4 + 5 active; constitution checker hard-fails on missing §6.N propagation OR missing rehearsal stamps. The §6.N-debt entry stays in this CLAUDE.md as a forensic record but is no longer load-bearing.
+**RESOLVED 2026-05-05 evening** via Group A-prime spec at `docs/superpowers/specs/2026-05-05-anti-bluff-mandate-reinforcement-group-a-prime-design.md` (commit `bb2d6a1`). Implementation chain: `submodules/containers` commit (Cleanup API + matrix.go gradle-log persistence) + Lava parent commit (pre-push Check 4 + Check 5 + check-constitution.sh §6.N awareness + scripts/run-emulator-tests.sh refactor). Pre-push hook Checks 4 + 5 active; constitution checker hard-fails on missing §6.N propagation OR missing rehearsal stamps. The §6.N-debt entry stays in this CLAUDE.md as a forensic record but is no longer load-bearing.
 ```
 
 - [ ] **Step B.6.3: Verify the RESOLVED marker is present**
@@ -1551,7 +1551,7 @@ git status --short
 
 Expected:
 - ` M CLAUDE.md` (the §6.N-debt RESOLVED update)
-- ` M Submodules/Containers` (gitlink dirty — the actual pin bump happens in Phase C)
+- ` M submodules/containers` (gitlink dirty — the actual pin bump happens in Phase C)
 - ` M scripts/check-constitution.sh`
 - ` M .githooks/pre-push`
 - ` M scripts/run-emulator-tests.sh`
@@ -1572,7 +1572,7 @@ git add CLAUDE.md \
 git status --short
 ```
 
-Expected: 7 paths staged. `Submodules/Containers` should still be UNSTAGED (showing in the unstaged column).
+Expected: 7 paths staged. `submodules/containers` should still be UNSTAGED (showing in the unstaged column).
 
 - [ ] **Step B.7.3: Commit with Bluff-Audit stamp targeting the diff**
 
@@ -1590,7 +1590,7 @@ Changes:
 - .githooks/pre-push:
     + Check 4 (§6.N.1.2) — gate-shaping file change requires
       Bluff-Audit stamp targeting a file in the diff. Triggers on
-      Submodules/Containers/pkg/emulator/*.go, scripts/run-emulator-
+      submodules/containers/pkg/emulator/*.go, scripts/run-emulator-
       tests.sh, scripts/tag.sh, scripts/check-constitution.sh.
     + Check 5 (§6.N.1.3) — new attestation file under
       .lava-ci-evidence/sp3a-challenges/, .lava-ci-evidence/<tag>/
@@ -1614,7 +1614,7 @@ Changes:
     + Replace inline cleanup_qemu_zombies() shell function with
       invocation of the typed Containers Cleanup() API via the new
       binary. The deleted bash function (~40 lines) is superseded
-      by Submodules/Containers/pkg/emulator/cleanup.go.
+      by submodules/containers/pkg/emulator/cleanup.go.
 
 - tests/pre-push/check4_test.sh: 4 fixture-based tests for Check 4
   (no stamp → reject, unrelated stamp → reject, matching stamp →
@@ -1631,7 +1631,7 @@ Changes:
   §6.N-debt entry stays as a forensic record but is no longer
   load-bearing.
 
-Out-of-scope: Submodules/Containers gitlink pin bump (Phase C of the
+Out-of-scope: submodules/containers gitlink pin bump (Phase C of the
 implementation plan handles that, in a separate commit so the diff
 shape stays auditable). Bluff-hunt evidence file (also Phase C).
 
@@ -1728,16 +1728,16 @@ cd /run/media/milosvasic/DATA4TB/Projects/Lava
 git status --short
 ```
 
-Expected: only ` M Submodules/Containers` (the gitlink dirty from Phase A's submodule commit). If anything else is dirty, investigate.
+Expected: only ` M submodules/containers` (the gitlink dirty from Phase A's submodule commit). If anything else is dirty, investigate.
 
 - [ ] **Step C.1.2: Stage the gitlink change**
 
 ```bash
-git add Submodules/Containers
+git add submodules/containers
 git status --short
 ```
 
-Expected: `M  Submodules/Containers` (now staged).
+Expected: `M  submodules/containers` (now staged).
 
 ### Task C.2: Write the bluff-hunt evidence file
 
@@ -1747,7 +1747,7 @@ Expected: `M  Submodules/Containers` (now staged).
 - [ ] **Step C.2.1: Capture the Containers commit SHA + parent commit SHA for cross-references**
 
 ```bash
-containers_sha=$(git -C Submodules/Containers rev-parse HEAD)
+containers_sha=$(git -C submodules/containers rev-parse HEAD)
 parent_b_sha=$(git rev-parse HEAD)  # the Phase B commit, not the upcoming Phase C
 echo "Containers HEAD (lava-pin/2026-05-05-clause-6n-prime): $containers_sha"
 echo "Parent HEAD (Phase B commit): $parent_b_sha"
@@ -1764,7 +1764,7 @@ Create `.lava-ci-evidence/bluff-hunt/2026-05-05-evening-group-a-prime.json`. Sub
   "date": "2026-05-05 evening",
   "protocol": "Seventh Law clause 5 + §6.N.1.1 (subsequent-same-day lighter incident-response hunt)",
   "session_context": "Group A-prime spec implementation. The 8th anti-bluff invocation landed earlier today via Group A; this Group A-prime work session is within 24h of the 8th invocation, so per §6.N.1.1 the lighter 1-2 file incident-response hunt suffices.",
-  "scope": "1-2 file rehearsal targeting the gate-shaping production code that Group A-prime modifies — specifically scripts/check-constitution.sh's new §6.N hard-fail check and Submodules/Containers/pkg/emulator/cleanup.go's prefix matcher.",
+  "scope": "1-2 file rehearsal targeting the gate-shaping production code that Group A-prime modifies — specifically scripts/check-constitution.sh's new §6.N hard-fail check and submodules/containers/pkg/emulator/cleanup.go's prefix matcher.",
   "primary_target": {
     "file": "scripts/check-constitution.sh",
     "rationale": "Group A-prime adds §6.N + §6.N-debt presence checks here that hard-fail. The conceptual filter ('would a bug here be invisible to existing tests?') answers YES — without the new tests/check-constitution/check_constitution_test.sh, a regression to the §6.N check would only surface at the next constitution-checker run, potentially after the offending commit had already shipped.",
@@ -1773,14 +1773,14 @@ Create `.lava-ci-evidence/bluff-hunt/2026-05-05-evening-group-a-prime.json`. Sub
     "reverted": true
   },
   "secondary_target": {
-    "file": "Submodules/Containers/pkg/emulator/cleanup.go",
+    "file": "submodules/containers/pkg/emulator/cleanup.go",
     "rationale": "STRONGER §6.N variant binds Containers — every pkg/emulator/*.go change requires rehearsal.",
     "mutation": "Loosen the `strings.HasPrefix(comm, \"qemu-system-\")` matcher to `strings.HasPrefix(comm, \"qemu-\")` (drop trailing dash).",
     "observed_failure": "TestCleanup_StrictPrefix asserts qemu-img (PID 8888) is NOT in Found; mutation produces 8888 in Found, test fails with 'expected []int{7777}, got []int{7777, 8888}'.",
     "reverted": true
   },
   "tertiary_target": {
-    "file": "Submodules/Containers/pkg/emulator/matrix.go (gradle.log persistence)",
+    "file": "submodules/containers/pkg/emulator/matrix.go (gradle.log persistence)",
     "rationale": "Recent change to RunMatrix; falsifiability protocol mandatory per Containers stronger §6.N.",
     "mutation": "Replace `os.WriteFile(logPath, []byte(out), 0o644)` with `os.WriteFile(logPath, []byte(\"\"), 0o644)` (write empty content).",
     "observed_failure": "TestAndroidMatrixRunner_AllAVDsPass_ReportsAllPassed fails on the new gradle.log assertion: 'gradle.log for <avd> must contain the captured runOutputs[i]' — content is empty, expected 'BUILD SUCCESSFUL'.",
@@ -1793,7 +1793,7 @@ Create `.lava-ci-evidence/bluff-hunt/2026-05-05-evening-group-a-prime.json`. Sub
     "remediation_owed": 0
   },
   "remediation_commits": [
-    "Submodules/Containers <containers-sha> (Cleanup API + cmd/emulator-cleanup + matrix.go gradle-log persistence)",
+    "submodules/containers <containers-sha> (Cleanup API + cmd/emulator-cleanup + matrix.go gradle-log persistence)",
     "Lava parent <parent-b-sha> (pre-push Check 4 + 5 + check-constitution §6.N awareness + run-emulator-tests refactor)"
   ]
 }
@@ -1866,7 +1866,7 @@ git add .lava-ci-evidence/bluff-hunt/2026-05-05-evening-group-a-prime.json \
 git status --short
 ```
 
-Expected: 3 staged paths total (the Submodules/Containers gitlink from Step C.1.2 + the 2 new evidence files).
+Expected: 3 staged paths total (the submodules/containers gitlink from Step C.1.2 + the 2 new evidence files).
 
 - [ ] **Step C.4.2: Commit with full Bluff-Audit stamp covering the evidence files**
 
@@ -1875,12 +1875,12 @@ git commit -m "$(cat <<'EOF'
 chore(submodules+evidence): bump Containers pin + Group A-prime closure evidence
 
 Final commit of Group A-prime implementation. Bumps
-Submodules/Containers to lava-pin/2026-05-05-clause-6n-prime
+submodules/containers to lava-pin/2026-05-05-clause-6n-prime
 (Cleanup API + cmd/emulator-cleanup + matrix.go gradle.log + test-report
 persistence) and lands the bluff-hunt evidence + closure attestation.
 
 Files:
-- Submodules/Containers gitlink: bumped to lava-pin/2026-05-05-clause-6n-prime
+- submodules/containers gitlink: bumped to lava-pin/2026-05-05-clause-6n-prime
 - .lava-ci-evidence/bluff-hunt/2026-05-05-evening-group-a-prime.json: 1-2
   file incident-response hunt per §6.N.1.1 (subsequent-same-day rule).
   Three production-code targets mutated + caught by the new pre-push +
@@ -1903,7 +1903,7 @@ Bluff-Audit: .lava-ci-evidence/Phase-Group-A-prime-closure-2026-05-05-evening.js
   stamp here.
 
 This commit pairs with the prior Lava parent commit (Phase B) +
-Submodules/Containers commit (Phase A) to fully close §6.N-debt.
+submodules/containers commit (Phase A) to fully close §6.N-debt.
 EOF
 )"
 git log --oneline -1
@@ -1918,7 +1918,7 @@ git push origin master 2>&1 | tail -25
 Expected: 4 successful pushes converging at the new SHA. The pre-push hook now includes Check 4 + Check 5 (because Phase B committed them); this Phase C commit must satisfy them.
 
 **Self-check:** Phase C's commit:
-- Touches `Submodules/Containers` gitlink (NOT a `pkg/emulator/*.go` file directly, so Check 4 should NOT trigger). Verify post-push.
+- Touches `submodules/containers` gitlink (NOT a `pkg/emulator/*.go` file directly, so Check 4 should NOT trigger). Verify post-push.
 - Adds 2 attestation files under `.lava-ci-evidence/` paths that DO trigger Check 5. The Bluff-Audit stamp in the commit body (above) names both file paths, satisfying acceptance form (3).
 
 If the push is REJECTED by Check 4 or Check 5, the commit message above is wrong — fix the stamp before re-pushing.
@@ -1958,12 +1958,12 @@ echo "=== run-emulator-tests.sh uses emulator-cleanup ==="
 grep -c "emulator-cleanup" scripts/run-emulator-tests.sh
 echo
 echo "=== Containers files present ==="
-ls Submodules/Containers/pkg/emulator/cleanup.go
-ls Submodules/Containers/pkg/emulator/cleanup_test.go
-ls Submodules/Containers/cmd/emulator-cleanup/main.go
+ls submodules/containers/pkg/emulator/cleanup.go
+ls submodules/containers/pkg/emulator/cleanup_test.go
+ls submodules/containers/cmd/emulator-cleanup/main.go
 echo
 echo "=== Containers tests pass ==="
-( cd Submodules/Containers && go test ./pkg/emulator/... -count=1 2>&1 | tail -3 )
+( cd submodules/containers && go test ./pkg/emulator/... -count=1 2>&1 | tail -3 )
 echo
 echo "=== Lava-side test scripts pass ==="
 ./tests/pre-push/check4_test.sh | tail -2
@@ -2003,9 +2003,9 @@ grep -rE "TBD|TODO|<filled-from|<containers-sha>|<parent-b-sha>|<this-commit-SHA
   tests/ \
   .lava-ci-evidence/bluff-hunt/2026-05-05-evening-group-a-prime.json \
   .lava-ci-evidence/Phase-Group-A-prime-closure-2026-05-05-evening.json \
-  Submodules/Containers/pkg/emulator/cleanup.go \
-  Submodules/Containers/pkg/emulator/cleanup_test.go \
-  Submodules/Containers/cmd/emulator-cleanup/main.go \
+  submodules/containers/pkg/emulator/cleanup.go \
+  submodules/containers/pkg/emulator/cleanup_test.go \
+  submodules/containers/cmd/emulator-cleanup/main.go \
   2>/dev/null
 ```
 

@@ -1,11 +1,11 @@
-// Package server hosts a Gin engine over HTTP/3 (via Submodules/HTTP3) on
+// Package server hosts a Gin engine over HTTP/3 (via submodules/http3) on
 // the public listener and a separate plain-HTTP /metrics listener on
 // localhost. The split is mandated by spec §10: the metrics surface
 // MUST be reachable only by the local Prometheus scraper, never by
 // public clients.
 //
 // Decoupled Reusable rationale: this package contains no Lava-domain
-// logic. It composes Submodules/HTTP3/pkg/server with a stdlib
+// logic. It composes submodules/http3/pkg/server with a stdlib
 // http.Server for the metrics port and exposes a Start / Shutdown
 // lifecycle for cmd/lava-api-go to consume.
 package server

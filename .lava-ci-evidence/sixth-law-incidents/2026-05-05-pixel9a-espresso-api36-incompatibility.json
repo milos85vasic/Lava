@@ -2,7 +2,7 @@
   "incident_id": "2026-05-05-pixel9a-espresso-api36-incompatibility",
   "discovery_date": "2026-05-05",
   "classification": "Class V — newly-discovered real test failure, surfaced by the 2026-05-05 architectural fix to the matrix runner (port-collision bluff). Phase 1 root-cause investigation per /superpowers:systematic-debugging.",
-  "discovery_context": "After the matrix runner's port-collision bug was fixed (Submodules/Containers commit 648a4bb + parent commit 00499e9), Pixel_9a (API 36) was tested for the first time and Challenge00CrashSurvivalTest FAILED. This diagnosis isolates the root cause.",
+  "discovery_context": "After the matrix runner's port-collision bug was fixed (submodules/containers commit 648a4bb + parent commit 00499e9), Pixel_9a (API 36) was tested for the first time and Challenge00CrashSurvivalTest FAILED. This diagnosis isolates the root cause.",
   "phase_1_root_cause": {
     "exact_failure_signature": "java.lang.RuntimeException: java.util.concurrent.ExecutionException: java.lang.RuntimeException: java.lang.NoSuchMethodException: android.hardware.input.InputManager.getInstance []  at androidx.test.espresso.Espresso.onIdle(Espresso.java:18)",
     "captured_via": "Direct gradle invocation against a single Pixel_9a emulator (bypassing the matrix runner because matrix.go does not persist gradle stdout). Command: `ANDROID_SERIAL=emulator-5554 ./gradlew :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=lava.app.challenges.Challenge00CrashSurvivalTest --no-daemon`",

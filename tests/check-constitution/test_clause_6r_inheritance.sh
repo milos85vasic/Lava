@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Asserts §6.R inheritance reference appears in every Submodules/*/CLAUDE.md.
+# Asserts §6.R inheritance reference appears in every submodules/*/CLAUDE.md.
 #
 # Heading-anchored pattern (`## §6.R — No-Hardcoding Mandate`) — a
 # passing mention of the bare phrase in a notes/history paragraph MUST
@@ -24,7 +24,7 @@ is_helix_dev_owned() {
 }
 
 missing=()
-for sub in Submodules/*/CLAUDE.md; do
+for sub in submodules/*/CLAUDE.md; do
   is_helix_dev_owned "$sub" && continue
   if ! grep -qF '## §6.R — No-Hardcoding Mandate' "$sub"; then
     missing+=("$sub")

@@ -484,7 +484,7 @@ This release is consequently distribute-eligible. The 1.2.17-1037
 - **§6.X added (TWENTY-FIRST §6.L invocation).** Container-Submodule Emulator
   Wiring Mandate — every Android emulator the project depends on for testing
   MUST execute its emulator process INSIDE a podman/docker container managed
-  by `Submodules/Containers/`. Propagated to 52 docs (root × 2 + 16 submodules
+  by `submodules/containers/`. Propagated to 52 docs (root × 2 + 16 submodules
   × 3 + lava-api-go × 3). Mechanical enforcement via
   `scripts/check-constitution.sh` (inheritance presence checks).
 - **§6.X-debt PARTIAL CLOSE (TWENTY-SECOND §6.L invocation).** Containers
@@ -507,7 +507,7 @@ This release is consequently distribute-eligible. The 1.2.17-1037
   constitutional docs.
 
 ### Build infrastructure (not user-visible)
-- Submodule pin: `Submodules/Containers` 8197c222 → 562069e7+ (full
+- Submodule pin: `submodules/containers` 8197c222 → 562069e7+ (full
   §6.X-debt close set).
 - `scripts/check-constitution.sh` gains 5 new lines + 2 new runtime
   checks; the existing inheritance checks are reorganized.
@@ -875,7 +875,7 @@ Per-version distribution snapshots (the exact text shipped as App Distribution r
   min-version JSON instead of advancing the backoff counter.
 - **Per-IP fixed-ladder backoff** (`2s,5s,10s,30s,1m,1h` configurable via
   `LAVA_AUTH_BACKOFF_STEPS`) shipped as the `pkg/ladder` primitive
-  upstream-contributed to `Submodules/RateLimiter`.
+  upstream-contributed to `submodules/ratelimiter`.
 - **HTTP/3 preferred** with HTTP/2 fallback + `Alt-Svc` advertisement.
 - **Brotli response compression** when the client sends `Accept-Encoding: br`.
 - **Prometheus protocol metric** — `lava_api_request_protocol_total{protocol,status}`.
@@ -892,7 +892,7 @@ Per-version distribution snapshots (the exact text shipped as App Distribution r
   deliberate-mutation rehearsals.
 
 ### Submodule pin
-- `Submodules/RateLimiter` pinned at `3faf7a51` (introduces `pkg/ladder/`).
+- `submodules/ratelimiter` pinned at `3faf7a51` (introduces `pkg/ladder/`).
 
 ### Versions in this build
 - lava-api-go: 2.1.0 (2100)
@@ -1252,7 +1252,7 @@ mirror health tracking, and an explicit cross-tracker fallback flow.
   Downloadable). `SwitchingNetworkApi` now delegates to
   `LavaTrackerSdk` rather than to a single hard-wired client.
 - **New `vasic-digital/Tracker-SDK` submodule mounted at
-  `Submodules/Tracker-SDK/`.** Generic primitives (registry,
+  `submodules/tracker_sdk/`.** Generic primitives (registry,
   mirror-config store, test scaffolding). Pin is **frozen by
   default** per the Decoupled Reusable Architecture rule. Mirrored
   to GitHub + GitLab (2-upstream scope per 2026-04-30 spec
@@ -1263,7 +1263,7 @@ mirror health tracking, and an explicit cross-tracker fallback flow.
   Honesty), 6.F (Anti-Bluff Submodule Inheritance) to root
   `CLAUDE.md`** and cascaded to `core/CLAUDE.md`,
   `feature/CLAUDE.md`, `lava-api-go/{CLAUDE,AGENTS}.md`,
-  `Submodules/Tracker-SDK/{CLAUDE,CONSTITUTION,AGENTS}.md`, and
+  `submodules/tracker_sdk/{CLAUDE,CONSTITUTION,AGENTS}.md`, and
   root `AGENTS.md`.
 - **Added the Seventh Law (Anti-Bluff Enforcement, all 7 clauses)**
   with mechanical pre-push hook enforcement at `.githooks/pre-push`:
@@ -1366,7 +1366,7 @@ Maintenance release of the legacy Ktor proxy. Routine patch bump after a clean
 re-build + re-test cycle — no behavioral changes vs `Lava-API-1.0.1-1001`.
 
 ### Operational
-- Container image rebuilt against the current Submodules/Containers pin and
+- Container image rebuilt against the current submodules/containers pin and
   pushed to `localhost/lava-proxy:dev` via `./build_and_push_docker_image.sh`
   / `./build_and_release.sh`.
 - Boot verified: `./start.sh --both` brings the proxy up alongside lava-api-go;

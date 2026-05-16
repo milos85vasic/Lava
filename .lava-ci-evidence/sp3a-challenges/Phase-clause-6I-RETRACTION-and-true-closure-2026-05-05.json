@@ -4,12 +4,12 @@
   "supersedes_attestations": [
     ".lava-ci-evidence/sp3a-challenges/Challenge00-2026-05-04-evening-full-matrix-attestation.json (commit e3bcae3)"
   ],
-  "trigger": "Operator invoked 'ultrathink' + /superpowers:systematic-debugging on 2026-05-05 against the agent's prior claim of 'clause 6.I closure'. Phase 1 root-cause investigation surfaced a multi-AVD port-collision architectural bluff in Submodules/Containers/pkg/emulator/Boot() — every iteration of the multi-AVD matrix had been targeting the SAME emulator on port 5555, while the runner's attestation falsely recorded test_passed=true for each AVD.",
+  "trigger": "Operator invoked 'ultrathink' + /superpowers:systematic-debugging on 2026-05-05 against the agent's prior claim of 'clause 6.I closure'. Phase 1 root-cause investigation surfaced a multi-AVD port-collision architectural bluff in submodules/containers/pkg/emulator/Boot() — every iteration of the multi-AVD matrix had been targeting the SAME emulator on port 5555, while the runner's attestation falsely recorded test_passed=true for each AVD.",
   "constitutional_anchor": "root /CLAUDE.md §6.I clauses 1-8 + Seventh Law clause 6 (Bluff Discovery Protocol) + clause 6.J (Anti-Bluff Functional Reality Mandate)",
   "what_was_actually_fixed_correctly_in_prior_commits_and_STILL_STANDS": [
     {
       "clause": "6.I clause 6 (cold-boot-only reporting — boot_seconds includes WaitForBoot duration)",
-      "commit": "Submodules/Containers 23b4fa9 + Lava 8e66c53",
+      "commit": "submodules/containers 23b4fa9 + Lava 8e66c53",
       "status": "STANDS — independent fix to matrix.go's BootDuration accumulation; not affected by the port-collision bug. Post-architectural-fix run confirms boot_seconds now reports real cold-boot time (12-28s across the 5 AVDs)."
     },
     {

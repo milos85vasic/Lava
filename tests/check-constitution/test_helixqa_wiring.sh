@@ -33,23 +33,23 @@ fi
 #   echo 'bluff_scanner_challenge.sh 1 BOOM' | build_fake_repo "$dir"
 build_fake_repo() {
     local root="$1"
-    mkdir -p "$root/Submodules/HelixQA/challenges/scripts"
+    mkdir -p "$root/submodules/helixqa/challenges/scripts"
     mkdir -p "$root/scripts"
     # Copy the wrapper into the fake repo so it resolves REPO_ROOT correctly
     cp "$WRAPPER" "$root/scripts/run-helixqa-challenges.sh"
     chmod +x "$root/scripts/run-helixqa-challenges.sh"
     # Make a minimal .git dir so `git rev-parse HEAD` inside the wrapper
     # doesn't error out catastrophically; the wrapper tolerates "unknown".
-    ( cd "$root/Submodules/HelixQA" && git init -q && git config user.email t@t && git config user.name t )
+    ( cd "$root/submodules/helixqa" && git init -q && git config user.email t@t && git config user.name t )
     # Read per-script spec lines: "scriptname exitcode stdoutmsg"
     while IFS=' ' read -r script_name script_exit script_msg; do
         [[ -z "$script_name" ]] && continue
-        cat > "$root/Submodules/HelixQA/challenges/scripts/$script_name" <<SH
+        cat > "$root/submodules/helixqa/challenges/scripts/$script_name" <<SH
 #!/usr/bin/env bash
 echo "$script_msg"
 exit $script_exit
 SH
-        chmod +x "$root/Submodules/HelixQA/challenges/scripts/$script_name"
+        chmod +x "$root/submodules/helixqa/challenges/scripts/$script_name"
     done
 }
 
@@ -135,7 +135,7 @@ test_fails_when_script_missing() {
     local f
     f=$(mktemp -d)
     build_fake_repo_full "$f" 0 "ok"
-    rm "$f/Submodules/HelixQA/challenges/scripts/bluff_scanner_challenge.sh"
+    rm "$f/submodules/helixqa/challenges/scripts/bluff_scanner_challenge.sh"
     local ev="$f/evidence"
     set +e
     LAVA_REPO_ROOT="$f" bash "$f/scripts/run-helixqa-challenges.sh" --evidence-dir "$ev" >"$f/wrapper.log" 2>&1
@@ -175,7 +175,7 @@ test_skip_mode_when_helixqa_absent() {
     mkdir -p "$f/scripts"
     cp "$WRAPPER" "$f/scripts/run-helixqa-challenges.sh"
     chmod +x "$f/scripts/run-helixqa-challenges.sh"
-    # Deliberately do NOT create Submodules/HelixQA/
+    # Deliberately do NOT create submodules/helixqa/
     local ev="$f/evidence"
     set +e
     LAVA_REPO_ROOT="$f" bash "$f/scripts/run-helixqa-challenges.sh" --evidence-dir "$ev" >"$f/wrapper.log" 2>&1
@@ -188,7 +188,7 @@ test_skip_mode_when_helixqa_absent() {
         rm -rf "$f"
         exit 1
     fi
-    if ! grep -q "git submodule update --init Submodules/HelixQA" "$f/wrapper.log"; then
+    if ! grep -q "git submodule update --init submodules/helixqa" "$f/wrapper.log"; then
         echo "FAIL test_skip_mode_when_helixqa_absent: wrapper log lacks the actionable remediation command"
         sed 's/^/        /' "$f/wrapper.log"
         rm -rf "$f"
@@ -215,12 +215,12 @@ test_fail_classified_correctly() {
     f=$(mktemp -d)
     build_fake_repo_full "$f" 0 "ok"
     # Override one script to exit 1 (real defect)
-    cat > "$f/Submodules/HelixQA/challenges/scripts/chaos_failure_injection_challenge.sh" <<'SH'
+    cat > "$f/submodules/helixqa/challenges/scripts/chaos_failure_injection_challenge.sh" <<'SH'
 #!/usr/bin/env bash
 echo "deliberate-fail-fixture"
 exit 1
 SH
-    chmod +x "$f/Submodules/HelixQA/challenges/scripts/chaos_failure_injection_challenge.sh"
+    chmod +x "$f/submodules/helixqa/challenges/scripts/chaos_failure_injection_challenge.sh"
     local ev="$f/evidence"
     set +e
     LAVA_REPO_ROOT="$f" bash "$f/scripts/run-helixqa-challenges.sh" --evidence-dir "$ev" >"$f/wrapper.log" 2>&1
@@ -250,20 +250,20 @@ SH
 
 # ---------------------------------------------------------------------
 # Test 5 (Q1 §6.X — --runner=containerized honest-fail-fast when
-# Submodules/Containers is absent)
+# submodules/containers is absent)
 # → wrapper exits 4 (missing-runtime), explicit §6.X message
 # Falsifiability rehearsal: if the wrapper silently degraded
 # containerized → host on missing Containers submodule (the canonical
 # §6.X bluff), this test would PASS-with-wrapper-exit-0 because the
 # fake repo's 11 scripts all return 0. The test asserts exit 4 + the
-# specific "git submodule update --init Submodules/Containers" guidance,
+# specific "git submodule update --init submodules/containers" guidance,
 # so silent degradation is mechanically detectable.
 # ---------------------------------------------------------------------
 test_containerized_runner_fails_fast_when_containers_absent() {
     local f
     f=$(mktemp -d)
     build_fake_repo_full "$f" 0 "ok"
-    # Deliberately do NOT create Submodules/Containers
+    # Deliberately do NOT create submodules/containers
     local ev="$f/evidence"
     set +e
     LAVA_REPO_ROOT="$f" bash "$f/scripts/run-helixqa-challenges.sh" \
@@ -278,7 +278,7 @@ test_containerized_runner_fails_fast_when_containers_absent() {
         rm -rf "$f"
         exit 1
     fi
-    if ! grep -q "git submodule update --init Submodules/Containers" "$f/wrapper.log"; then
+    if ! grep -q "git submodule update --init submodules/containers" "$f/wrapper.log"; then
         echo "FAIL test_containerized_runner_fails_fast_when_containers_absent: wrapper log lacks the actionable remediation command"
         sed 's/^/        /' "$f/wrapper.log"
         rm -rf "$f"

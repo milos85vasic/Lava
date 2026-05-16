@@ -91,7 +91,7 @@ The procedure that worked for this incident:
 The incident was NOT caused by container runtimes. However, the investigation surfaced operational rules worth recording:
 
 - **Rootless podman containers do not, by themselves, hold a logind session open.** The current `start.sh`/`tools/lava-containers/` workflow uses host-network containers under the user's session — when the user session ends (poweroff/logout/etc.), the containers receive SIGTERM via their parent's session-scope teardown. This is the desired behavior; do not change it without re-evaluating the failure mode.
-- **`podman run --rm`** is the right discipline for transient test containers. Combined with shell `trap '<cleanup>' EXIT INT TERM HUP` patterns (already in `lava-api-go/scripts/run-test-pg.sh` and `Submodules/Cache/scripts/run-postgres-test.sh`), leaked containers from interrupted test runs are minimised.
+- **`podman run --rm`** is the right discipline for transient test containers. Combined with shell `trap '<cleanup>' EXIT INT TERM HUP` patterns (already in `lava-api-go/scripts/run-test-pg.sh` and `submodules/cache/scripts/run-postgres-test.sh`), leaked containers from interrupted test runs are minimised.
 - **Long-running containers from previous sessions** can leak if the user issues a hard kill of the controlling shell (kill -9 on the parent) instead of a graceful exit. The recovery discipline above includes the standard `podman ps -a` cleanup step for exactly this case.
 - **Gradle daemon** is JVM-resident and survives session restart. This is a feature (faster subsequent builds) but it does mean memory accumulated by long-running gradle work persists; bound it with `--no-daemon` for unattended / long-running jobs.
 

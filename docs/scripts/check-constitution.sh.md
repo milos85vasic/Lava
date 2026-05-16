@@ -14,7 +14,7 @@ scripts/check-constitution.sh — verify constitutional clauses present.
 
 Per the SP-3a plan Task 5.19. Asserts that the three SP-3a clauses
 (6.D, 6.E, 6.F) are present in root CLAUDE.md and that the
-Submodules/Tracker-SDK/CLAUDE.md exists. Run from scripts/ci.sh in
+submodules/tracker_sdk/CLAUDE.md exists. Run from scripts/ci.sh in
 every mode.
 ```
 
@@ -27,7 +27,7 @@ See the script's in-source comment block (above) for canonical usage examples.
 The script asserts presence of the following constitutional clauses + supporting infrastructure:
 
 - §6.D + §6.E + §6.F (root CLAUDE.md)
-- `Submodules/Tracker-SDK/CLAUDE.md` exists
+- `submodules/tracker_sdk/CLAUDE.md` exists
 - `core/CLAUDE.md` references §6.E
 - `feature/CLAUDE.md` references Challenge Test requirement
 - §6.H credential pattern absence (no plaintext credentials in tracked files)
@@ -51,7 +51,7 @@ When this script is modified, update this document in the same commit (CM-SCRIPT
 
 ## 2026-05-15 update — HelixQA waiver
 
-Phase 4 of the constitution-compliance plan adopted `Submodules/HelixQA` (HelixDevelopment-owned QA orchestration framework) at upstream HEAD `403603db`. HelixQA's CLAUDE.md / AGENTS.md / CONSTITUTION.md follow the canonical-root `## INHERITED FROM Helix Constitution` pointer pattern (HelixDevelopment-authored) rather than Lava's heading-anchored §6.R / §6.S / §6.X / §6.AD pointer-block format. HelixQA also lacks `helix-deps.yaml` + `install_upstreams.sh` wrapper script.
+Phase 4 of the constitution-compliance plan adopted `submodules/helixqa` (HelixDevelopment-owned QA orchestration framework) at upstream HEAD `403603db`. HelixQA's CLAUDE.md / AGENTS.md / CONSTITUTION.md follow the canonical-root `## INHERITED FROM Helix Constitution` pointer pattern (HelixDevelopment-authored) rather than Lava's heading-anchored §6.R / §6.S / §6.X / §6.AD pointer-block format. HelixQA also lacks `helix-deps.yaml` + `install_upstreams.sh` wrapper script.
 
 Resolution: `HELIX_DEV_OWNED=("HelixQA")` waiver list + `is_helix_dev_owned()` helper skip HelixQA in every per-Submodule loop in this scanner. Waiver entries cite Phase 4-debt: PR to `HelixDevelopment/HelixQA` upstream owed to add the missing files. Once upstream merges + Lava's pin advances to include them, HelixQA can be removed from the waiver list.
 

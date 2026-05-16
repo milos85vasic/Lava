@@ -112,26 +112,30 @@ NAMES=(
 )
 
 # Count references using git grep against tracked files only.
-# Pattern matches "Submodules/<name>" — the canonical pre-rename path
-# prefix. We count `Submodules/<name>` not bare `<name>` to avoid false
-# positives (e.g., "Auth" appears in many Kotlin/Go contexts that have
-# nothing to do with the submodule).
+# Pattern matches BOTH "submodules/<name>" (pre-Phase-6a) AND
+# "submodules/<name>" (post-Phase-6a). The CamelCase child name is
+# what Phase 6b targets — so any submodules/<CamelCase> ref after
+# Phase 6a is still a §11.4.29 violation until Phase 6b renames it.
+# We count case-insensitively on the parent dir but case-sensitively
+# on the child name (we WANT to surface "submodules/cache" exactly
+# because Phase 6b will rename Cache → cache).
 count_refs_for_name() {
     local name=$1
-    local pattern="Submodules/${name}"
+    # Match both submodules/<name> AND submodules/<name>
+    local pattern="[Ss]ubmodules/${name}"
     local refs files
     # git grep -c reports "<file>:<count>" lines; sum the counts.
-    refs=$(git grep -c "$pattern" 2>/dev/null \
+    refs=$(git grep -c -E "$pattern" 2>/dev/null \
         | awk -F: '{s += $NF} END {print s+0}')
-    files=$(git grep -l "$pattern" 2>/dev/null | wc -l | awk '{print $1+0}')
+    files=$(git grep -l -E "$pattern" 2>/dev/null | wc -l | awk '{print $1+0}')
     echo "${refs}\t${files}"
 }
 
-# Aggregate "Submodules/" references (the bare-prefix without a specific
-# submodule name). This captures references like "Submodules/" used in
-# documentation that refer to the directory as a whole.
+# Aggregate "submodules/" references (the bare-prefix without a specific
+# submodule name) — case-sensitive on capital-S because that's what
+# Phase 6a is migrating away from. After Phase 6a this should be 0.
 count_refs_for_bare_submodules() {
-    local pattern="Submodules/"
+    local pattern="submodules/"
     local refs files
     refs=$(git grep -c "$pattern" 2>/dev/null \
         | awk -F: '{s += $NF} END {print s+0}')
@@ -139,12 +143,12 @@ count_refs_for_bare_submodules() {
     echo "${refs}\t${files}"
 }
 
-# Top-N files for a given name
+# Top-N files for a given name (case-insensitive on parent)
 list_top_files_for_name() {
     local name=$1
     local n=$2
-    local pattern="Submodules/${name}"
-    git grep -c "$pattern" 2>/dev/null \
+    local pattern="[Ss]ubmodules/${name}"
+    git grep -c -E "$pattern" 2>/dev/null \
         | sort -t: -k2 -rn \
         | head -n "$n"
 }
@@ -187,7 +191,7 @@ main() {
         fi
     done
 
-    # Bare-prefix Submodules/ aggregate
+    # Bare-prefix submodules/ aggregate
     IFS=$'\t' read -r refs files <<<"$(echo -e "$(count_refs_for_bare_submodules)")"
     emit_row "TOTAL_Submodules" "$refs" "$files"
 }

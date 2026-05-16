@@ -36,7 +36,7 @@ Extend the Lava system (Go API service and Android client) from a single-tracker
 | II. Real User Verification (Sixth Law + 6.A–6.F) | Spec requires 12 Challenge Tests on real device (C1–C12), real-binary contract tests for health probes, and behavioral coverage for every declared capability. Pre-tag real-device attestation required. | ✅ Pass |
 | III. Anti-Bluff Enforcement (Seventh Law) | Spec mandates Bluff-Audit stamps, forbidden test patterns, recurring bluff hunts, and pre-tag evidence gates. All test commits must carry mutation rehearsal documentation. | ✅ Pass |
 | IV. Local-Only CI/CD | No hosted CI configuration introduced. All quality gates run through `scripts/ci.sh` locally. | ✅ Pass |
-| V. Decoupled Reusable Architecture | New providers are Lava-domain logic (HTML parsers, routes, UI). Generic SDK primitives remain in `Submodules/Tracker-SDK/`. No generic code added to Lava repo without upstream justification. | ✅ Pass |
+| V. Decoupled Reusable Architecture | New providers are Lava-domain logic (HTML parsers, routes, UI). Generic SDK primitives remain in `submodules/tracker_sdk/`. No generic code added to Lava repo without upstream justification. | ✅ Pass |
 | Host Machine Stability Directive | No power-management commands in any planned script or implementation. | ✅ Pass |
 
 **Re-check after Phase 1 design**: Verify that no new generic container logic, networking primitives, or reusable UI components are added to Lava repo that belong in `vasic-digital` submodules.

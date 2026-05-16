@@ -20,7 +20,7 @@ Enforces §11.4.30: every project module / owned-by-us submodule / service / app
 - `app`, `buildSrc`, `lava-api-go` are required if present
 - `core/<X>/` and `feature/<X>/` are required if they have `build.gradle.kts` (i.e., are actual Gradle modules — pure parent dirs like `core/network/` are skipped)
 - `core/<X>/<Y>/` sub-leaf modules same rule
-- All `Submodules/<X>/` are required (every owned-by-us submodule)
+- All `submodules/<X>/` are required (every owned-by-us submodule)
 
 ## Forbidden-pattern detection
 

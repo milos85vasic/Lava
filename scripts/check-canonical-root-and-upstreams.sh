@@ -117,7 +117,7 @@ done
 install_upstreams_violations=()
 install_upstreams_present=()
 install_upstreams_waived=()
-for s in Submodules/*/; do
+for s in submodules/*/; do
     [[ -d "$s" ]] || continue
     name=$(basename "$s")
     # Common script names + locations

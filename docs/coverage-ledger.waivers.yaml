@@ -39,7 +39,7 @@
 #
 # CROSS-CUTTING JUSTIFICATIONS (per §6.J/§6.L anti-bluff + §6.AD.3 equivalence):
 #
-# A. `documented_promise: pass` for feature/* + core/* + Submodules/* rows:
+# A. `documented_promise: pass` for feature/* + core/* + submodules/* rows:
 #    The project's documented promises are recorded in:
 #    - docs/ARCHITECTURE.md (system architecture, module layout)
 #    - docs/CONTINUATION.md (operator-readable phase + state index)
@@ -49,7 +49,7 @@
 #    - per-module/per-submodule README.md + CLAUDE.md + AGENTS.md
 #    These together constitute the "documented promise" §11.4.25 invariant 3.
 #
-# B. `no_open_bugs: pass` for feature/* + core/* + Submodules/* + app +
+# B. `no_open_bugs: pass` for feature/* + core/* + submodules/* + app +
 #    lava-api-go: Per §6.AD.3 equivalence to HelixConstitution §11.4.15
 #    (Issues_Summary tracker), Lava's functionally-equivalent state lives in
 #    three tracked artifacts:
@@ -62,7 +62,7 @@
 #    to that module in any of the three tracked artifacts; open bugs would
 #    appear as un-closed entries.
 #
-# C. `four_layer: pass` for feature/* + core/* + Submodules/* + app +
+# C. `four_layer: pass` for feature/* + core/* + submodules/* + app +
 #    lava-api-go: The §1 four-layer test floor (pre-build + post-build +
 #    runtime + paired mutation) is structurally satisfied per:
 #    - Pre-build:  `scripts/check-constitution.sh` + `scripts/check-*-coverage.sh`
@@ -407,7 +407,7 @@ waivers:
       four_layer: "pass: per cross-cutting C — Challenge31VisitedTest (runtime) + core/sync SyncOutboxImplTest (post-build) + pre-build scripts + Bluff-Audit"
 
   # ---------------------------------------------------------------------------
-  # Submodules/* — owned vasic-digital + HelixDevelopment reusable code.
+  # submodules/* — owned vasic-digital + HelixDevelopment reusable code.
   # Each ships its own CLAUDE.md + AGENTS.md + CONSTITUTION.md per §6.AD,
   # which the generator detects automatically — these waivers cover the
   # invariants the generator cannot mechanically infer.
@@ -434,139 +434,139 @@ waivers:
   # no_open_bugs: per §6.AD.3 mapped to Lava's tracked artifacts +
   #   each submodule's own .helix-ci-evidence/ when present.
   # ---------------------------------------------------------------------------
-  - path: Submodules/Auth
+  - path: submodules/auth
     invariants:
-      documented_promise: "pass: Submodules/Auth/README.md + CONSTITUTION.md document the auth surface"
-      working_capability: "pass: Submodules/Auth/tests/ (benchmark + unit + security per-test dirs) + auth-specific Challenges in main repo (Challenge00CrashSurvivalTest imports lava.auth.api.AuthService) per §11.4.28"
-      documented: "pass: per §6.AD inheritance pointer-block; Submodules/Auth/CLAUDE.md + AGENTS.md + CONSTITUTION.md ship per §6.AD-debt closure"
+      documented_promise: "pass: submodules/auth/README.md + CONSTITUTION.md document the auth surface"
+      working_capability: "pass: submodules/auth/tests/ (benchmark + unit + security per-test dirs) + auth-specific Challenges in main repo (Challenge00CrashSurvivalTest imports lava.auth.api.AuthService) per §11.4.28"
+      documented: "pass: per §6.AD inheritance pointer-block; submodules/auth/CLAUDE.md + AGENTS.md + CONSTITUTION.md ship per §6.AD-debt closure"
       no_open_bugs: "pass: per cross-cutting B + §6.AD.3 equivalence"
-      anti_bluff: "pass: per §11.4.28 the submodule's own four-layer test floor (Submodules/Auth/tests/security + benchmark + unit) + Lava-side Challenge00 import as integration evidence"
-      four_layer: "pass: per §11.4.28 the submodule maintains its own four-layer floor in Submodules/Auth/tests/; Lava integration boundary covered by Challenge00 + core/auth AuthServiceImplPersistenceTest"
-  - path: Submodules/Cache
+      anti_bluff: "pass: per §11.4.28 the submodule's own four-layer test floor (submodules/auth/tests/security + benchmark + unit) + Lava-side Challenge00 import as integration evidence"
+      four_layer: "pass: per §11.4.28 the submodule maintains its own four-layer floor in submodules/auth/tests/; Lava integration boundary covered by Challenge00 + core/auth AuthServiceImplPersistenceTest"
+  - path: submodules/cache
     invariants:
-      documented_promise: "pass: Submodules/Cache/README.md + CONSTITUTION.md"
+      documented_promise: "pass: submodules/cache/README.md + CONSTITUTION.md"
       working_capability: "pass: cache test suite in main repo when mounted; Lava-side integration covered by core/network test suite + lava-api-go cache layer per §6.B"
-      documented: "pass: per §6.AD inheritance pointer-block; Submodules/Cache/CLAUDE.md + AGENTS.md + CONSTITUTION.md"
+      documented: "pass: per §6.AD inheritance pointer-block; submodules/cache/CLAUDE.md + AGENTS.md + CONSTITUTION.md"
       no_open_bugs: "pass: per cross-cutting B + §6.AD.3 equivalence"
       anti_bluff: "pass: per §11.4.28 the submodule's own test floor; Lava-side cache behavior covered by lava-api-go cache miss/fallback paths per §6.AC.2"
       four_layer: "pass: per §11.4.28 the submodule maintains its own four-layer floor"
-  - path: Submodules/Challenges
+  - path: submodules/challenges
     invariants:
-      documented_promise: "pass: Submodules/Challenges is the meta-framework for Lava's Challenge tests; CONSTITUTION.md + README.md"
+      documented_promise: "pass: submodules/challenges is the meta-framework for Lava's Challenge tests; CONSTITUTION.md + README.md"
       working_capability: "pass: meta-framework itself; the 35+ Challenge*Test.kt files under app/src/androidTest/.../challenges/ ARE its working evidence"
-      documented: "pass: per §6.AD inheritance pointer-block; Submodules/Challenges/CLAUDE.md + AGENTS.md + CONSTITUTION.md"
+      documented: "pass: per §6.AD inheritance pointer-block; submodules/challenges/CLAUDE.md + AGENTS.md + CONSTITUTION.md"
       no_open_bugs: "pass: per cross-cutting B + §6.AD.3 equivalence"
       anti_bluff: "pass: per §11.4.28; the 35+ Challenge*Test.kt + scripts/check-challenge-discrimination.sh STRICT-mode falsifiability rehearsals are the evidence"
       four_layer: "pass: per §11.4.28 the submodule's framework is the Lava runtime layer; pre-build via scripts/check-challenge-coverage.sh + Bluff-Audit + scripts/check-challenge-discrimination.sh"
-  - path: Submodules/Concurrency
+  - path: submodules/concurrency
     invariants:
-      documented_promise: "pass: Submodules/Concurrency/README.md + CONSTITUTION.md"
+      documented_promise: "pass: submodules/concurrency/README.md + CONSTITUTION.md"
       working_capability: "pass: concurrency primitives tested via _test.go suite when mounted; Lava-side use covered by core/dispatchers consumers + lava-api-go goroutine pool"
-      documented: "pass: per §6.AD inheritance pointer-block; Submodules/Concurrency/CLAUDE.md + AGENTS.md + CONSTITUTION.md"
+      documented: "pass: per §6.AD inheritance pointer-block; submodules/concurrency/CLAUDE.md + AGENTS.md + CONSTITUTION.md"
       no_open_bugs: "pass: per cross-cutting B + §6.AD.3 equivalence"
       anti_bluff: "pass: per §11.4.28 the submodule's own test floor; Lava-side concurrency behavior covered by lava-api-go integration tests under tests/e2e/"
       four_layer: "pass: per §11.4.28 the submodule maintains its own four-layer floor"
-  - path: Submodules/Config
+  - path: submodules/config
     invariants:
-      documented_promise: "pass: Submodules/Config/README.md + CONSTITUTION.md"
+      documented_promise: "pass: submodules/config/README.md + CONSTITUTION.md"
       working_capability: "pass: config-loader tests when mounted; Lava-side use covered by lava-api-go config loader contract test"
-      documented: "pass: per §6.AD inheritance pointer-block; Submodules/Config/CLAUDE.md + AGENTS.md + CONSTITUTION.md"
+      documented: "pass: per §6.AD inheritance pointer-block; submodules/config/CLAUDE.md + AGENTS.md + CONSTITUTION.md"
       no_open_bugs: "pass: per cross-cutting B + §6.AD.3 equivalence"
       anti_bluff: "pass: per §11.4.28 the submodule's own test floor; Lava-side config behavior covered by lava-api-go config-required field validation per §6.A"
       four_layer: "pass: per §11.4.28 the submodule maintains its own four-layer floor"
-  - path: Submodules/Containers
+  - path: submodules/containers
     invariants:
-      documented_promise: "pass: Submodules/Containers/README.md + CONSTITUTION.md + lava-side scripts/run-emulator-tests.sh integration"
+      documented_promise: "pass: submodules/containers/README.md + CONSTITUTION.md + lava-side scripts/run-emulator-tests.sh integration"
       working_capability: "pass: 145+ _test.go files when mounted; cmd/emulator-matrix + cmd/vm-matrix CLI integration is operational per §6.X partial-close"
-      documented: "pass: per §6.AD inheritance pointer-block; Submodules/Containers/CLAUDE.md + AGENTS.md + CONSTITUTION.md"
+      documented: "pass: per §6.AD inheritance pointer-block; submodules/containers/CLAUDE.md + AGENTS.md + CONSTITUTION.md"
       no_open_bugs: "pass: per cross-cutting B + §6.AD.3 equivalence — §6.X-debt darwin/arm64 gap recorded as forensic anchor not open bug per .lava-ci-evidence/sixth-law-incidents/2026-05-13-emulator-container-darwin-arm64-gap.json"
       anti_bluff: "pass: per §11.4.28 the submodule's own test floor (145+ _test.go); §6.X-debt PARTIAL CLOSE landed Containerized Emulator impl + --runner CLI flag with falsifiability rehearsals per containers commit 562069e7"
       four_layer: "pass: per §11.4.28 the submodule maintains its own four-layer floor; Lava integration boundary via scripts/run-emulator-tests.sh + scripts/run-challenge-matrix.sh"
-  - path: Submodules/Database
+  - path: submodules/database
     invariants:
-      documented_promise: "pass: Submodules/Database/README.md + CONSTITUTION.md"
+      documented_promise: "pass: submodules/database/README.md + CONSTITUTION.md"
       working_capability: "pass: database-helper tests when mounted; Lava-side use covered by core/database Room schema persistence + lava-api-go Postgres integration tests"
-      documented: "pass: per §6.AD inheritance pointer-block; Submodules/Database/CLAUDE.md + AGENTS.md + CONSTITUTION.md"
+      documented: "pass: per §6.AD inheritance pointer-block; submodules/database/CLAUDE.md + AGENTS.md + CONSTITUTION.md"
       no_open_bugs: "pass: per cross-cutting B + §6.AD.3 equivalence"
       anti_bluff: "pass: per §11.4.28 the submodule's own test floor; Lava-side database behavior covered by lava-api-go real-Postgres integration tests gated by -Pintegration=true"
       four_layer: "pass: per §11.4.28 the submodule maintains its own four-layer floor"
-  - path: Submodules/Discovery
+  - path: submodules/discovery
     invariants:
-      documented_promise: "pass: Submodules/Discovery/README.md + CONSTITUTION.md; integrated via core:data LocalNetworkDiscoveryService"
+      documented_promise: "pass: submodules/discovery/README.md + CONSTITUTION.md; integrated via core:data LocalNetworkDiscoveryService"
       working_capability: "pass: mDNS discovery is the working evidence per docs/LOCAL_NETWORK_DISCOVERY.md"
-      documented: "pass: per §6.AD inheritance pointer-block; Submodules/Discovery/CLAUDE.md + AGENTS.md + CONSTITUTION.md"
+      documented: "pass: per §6.AD inheritance pointer-block; submodules/discovery/CLAUDE.md + AGENTS.md + CONSTITUTION.md"
       no_open_bugs: "pass: per cross-cutting B + §6.AD.3 equivalence"
       anti_bluff: "pass: per §11.4.28 the submodule's own test floor; Lava-side discovery covered by Challenge24MenuDiscoveryTest (real NsdManager broadcast) + LocalNetworkDiscoveryContractTest"
       four_layer: "pass: per §11.4.28 the submodule maintains its own four-layer floor; Lava integration via core/data + core/domain test suite"
-  - path: Submodules/HelixQA
+  - path: submodules/helixqa
     invariants:
       documented_promise: "pass: HelixDevelopment-owned QA orchestration framework; HelixQA/README.md + CONSTITUTION.md"
       working_capability: "waiver: HelixQA integration design landed in docs/plans/2026-05-16-helixqa-integration-design.md; full integration is Phase 4-debt per docs/plans/2026-05-15-constitution-compliance.md"
       anti_bluff: "waiver: see working_capability waiver"
       four_layer: "waiver: see working_capability waiver"
-      documented: "pass: per §6.AD inheritance pointer-block; Submodules/HelixQA/CLAUDE.md + AGENTS.md + CONSTITUTION.md exist; Phase 4-debt covers Lava-side integration"
+      documented: "pass: per §6.AD inheritance pointer-block; submodules/helixqa/CLAUDE.md + AGENTS.md + CONSTITUTION.md exist; Phase 4-debt covers Lava-side integration"
       no_open_bugs: "pass: per cross-cutting B + §6.AD.3 equivalence — no open bugs because no Lava-side integration code yet (no surface to break)"
-  - path: Submodules/HTTP3
+  - path: submodules/http3
     invariants:
-      documented_promise: "pass: Submodules/HTTP3/README.md + CONSTITUTION.md; integrated via lava-api-go HTTP/3 stack"
+      documented_promise: "pass: submodules/http3/README.md + CONSTITUTION.md; integrated via lava-api-go HTTP/3 stack"
       working_capability: "pass: lava-api-go contract tests under tests/contract/ cover HTTP/3 healthprobe surface per §6.A"
-      documented: "pass: per §6.AD inheritance pointer-block; Submodules/HTTP3/CLAUDE.md + AGENTS.md + CONSTITUTION.md"
+      documented: "pass: per §6.AD inheritance pointer-block; submodules/http3/CLAUDE.md + AGENTS.md + CONSTITUTION.md"
       no_open_bugs: "pass: per cross-cutting B + §6.AD.3 equivalence — §6.A 569-failing-healthcheck forensic anchor closed by tests/contract/healthcheck_contract_test.go"
       anti_bluff: "pass: per §11.4.28 the submodule's own test floor; tests/contract/healthcheck_contract_test.go IS the canonical §6.A real-binary contract test for HTTP/3 surface"
       four_layer: "pass: per §11.4.28 the submodule maintains its own four-layer floor; Lava integration via lava-api-go tests/contract + tests/e2e"
-  - path: Submodules/Mdns
+  - path: submodules/mdns
     invariants:
-      documented_promise: "pass: Submodules/Mdns/README.md + CONSTITUTION.md; integrated via JmDNS broadcast in proxy + NsdManager in Android client"
+      documented_promise: "pass: submodules/mdns/README.md + CONSTITUTION.md; integrated via JmDNS broadcast in proxy + NsdManager in Android client"
       working_capability: "pass: mDNS broadcast tested via docs/LOCAL_NETWORK_DISCOVERY.md flow"
-      documented: "pass: per §6.AD inheritance pointer-block; Submodules/Mdns/CLAUDE.md + AGENTS.md + CONSTITUTION.md"
+      documented: "pass: per §6.AD inheritance pointer-block; submodules/mdns/CLAUDE.md + AGENTS.md + CONSTITUTION.md"
       no_open_bugs: "pass: per cross-cutting B + §6.AD.3 equivalence"
       anti_bluff: "pass: per §11.4.28; Lava-side mDNS behavior covered by Challenge24MenuDiscoveryTest + LocalNetworkDiscoveryContractTest (real broadcast verification)"
       four_layer: "pass: per §11.4.28 the submodule maintains its own four-layer floor; Lava integration via core/data LocalNetworkDiscoveryService + JmDNS in proxy"
-  - path: Submodules/Middleware
+  - path: submodules/middleware
     invariants:
-      documented_promise: "pass: Submodules/Middleware/README.md + CONSTITUTION.md"
+      documented_promise: "pass: submodules/middleware/README.md + CONSTITUTION.md"
       working_capability: "pass: middleware tests when mounted; Lava-side use covered by lava-api-go auth middleware + ratelimiter middleware integration tests"
-      documented: "pass: per §6.AD inheritance pointer-block; Submodules/Middleware/CLAUDE.md + AGENTS.md + CONSTITUTION.md"
+      documented: "pass: per §6.AD inheritance pointer-block; submodules/middleware/CLAUDE.md + AGENTS.md + CONSTITUTION.md"
       no_open_bugs: "pass: per cross-cutting B + §6.AD.3 equivalence"
       anti_bluff: "pass: per §11.4.28; lava-api-go auth middleware order regression (auth-before-health 401) closed by tests/contract per docs/issues/fixed/BUGFIXES.md 2026-05-06 phase1-distribute-three-bugs"
       four_layer: "pass: per §11.4.28 the submodule maintains its own four-layer floor"
-  - path: Submodules/Observability
+  - path: submodules/observability
     invariants:
-      documented_promise: "pass: Submodules/Observability/README.md + CONSTITUTION.md; integrated via Lava lava-api-go OTLP pipeline + Firebase Crashlytics on Android"
+      documented_promise: "pass: submodules/observability/README.md + CONSTITUTION.md; integrated via Lava lava-api-go OTLP pipeline + Firebase Crashlytics on Android"
       working_capability: "pass: observability traces visible in operator dashboards per docs/CRASHLYTICS-OPERATIONS.md + docs/FIREBASE.md"
-      documented: "pass: per §6.AD inheritance pointer-block; Submodules/Observability/CLAUDE.md + AGENTS.md + CONSTITUTION.md"
+      documented: "pass: per §6.AD inheritance pointer-block; submodules/observability/CLAUDE.md + AGENTS.md + CONSTITUTION.md"
       no_open_bugs: "pass: per cross-cutting B + §6.AD.3 equivalence — jobcancellation-nonfatal-noise-filter closed per .lava-ci-evidence/crashlytics-resolved/2026-05-14-jobcancellation-nonfatal-noise-filter.md"
       anti_bluff: "pass: per §11.4.28; Lava-side non-fatal recording verified by scripts/check-non-fatal-coverage.sh STRICT mode per §6.AC"
       four_layer: "pass: per §11.4.28 the submodule maintains its own four-layer floor; Lava integration via §6.AC observability.RecordNonFatal in lava-api-go + analytics.recordNonFatal on Android"
-  - path: Submodules/RateLimiter
+  - path: submodules/ratelimiter
     invariants:
-      documented_promise: "pass: Submodules/RateLimiter/README.md + CONSTITUTION.md"
+      documented_promise: "pass: submodules/ratelimiter/README.md + CONSTITUTION.md"
       working_capability: "pass: rate-limiter tests when mounted; Lava-side use covered by lava-api-go rate-limiter middleware integration tests"
-      documented: "pass: per §6.AD inheritance pointer-block; Submodules/RateLimiter/CLAUDE.md + AGENTS.md + CONSTITUTION.md"
+      documented: "pass: per §6.AD inheritance pointer-block; submodules/ratelimiter/CLAUDE.md + AGENTS.md + CONSTITUTION.md"
       no_open_bugs: "pass: per cross-cutting B + §6.AD.3 equivalence"
       anti_bluff: "pass: per §11.4.28 the submodule's own test floor; Lava-side rate-limit behavior covered by lava-api-go auth_backoff_ladder_test.go"
       four_layer: "pass: per §11.4.28 the submodule maintains its own four-layer floor"
-  - path: Submodules/Recovery
+  - path: submodules/recovery
     invariants:
-      documented_promise: "pass: Submodules/Recovery/README.md + CONSTITUTION.md"
+      documented_promise: "pass: submodules/recovery/README.md + CONSTITUTION.md"
       working_capability: "pass: recovery tests when mounted; Lava-side use covered by lava-api-go panic-recovery middleware + Containers post-poweroff orphan-container audit per docs/INCIDENT_2026-04-28-HOST-POWEROFF.md"
-      documented: "pass: per §6.AD inheritance pointer-block; Submodules/Recovery/CLAUDE.md + AGENTS.md + CONSTITUTION.md"
+      documented: "pass: per §6.AD inheritance pointer-block; submodules/recovery/CLAUDE.md + AGENTS.md + CONSTITUTION.md"
       no_open_bugs: "pass: per cross-cutting B + §6.AD.3 equivalence"
       anti_bluff: "pass: per §11.4.28 the submodule's own test floor; Lava-side recovery behavior verified by post-poweroff recovery procedure per docs/INCIDENT_2026-04-28-HOST-POWEROFF.md"
       four_layer: "pass: per §11.4.28 the submodule maintains its own four-layer floor"
-  - path: Submodules/Security
+  - path: submodules/security
     invariants:
-      documented_promise: "pass: Submodules/Security/README.md + CONSTITUTION.md"
+      documented_promise: "pass: submodules/security/README.md + CONSTITUTION.md"
       working_capability: "pass: security primitives tests when mounted; Lava-side use covered by core/network AesGcmTest + HKDFTest + lava-api-go auth signing/verification tests"
-      documented: "pass: per §6.AD inheritance pointer-block; Submodules/Security/CLAUDE.md + AGENTS.md + CONSTITUTION.md"
+      documented: "pass: per §6.AD inheritance pointer-block; submodules/security/CLAUDE.md + AGENTS.md + CONSTITUTION.md"
       no_open_bugs: "pass: per cross-cutting B + §6.AD.3 equivalence — tracker-credentials-in-git-history closed per .lava-ci-evidence/sixth-law-incidents/2026-05-13-tracker-credentials-in-git-history.json"
       anti_bluff: "pass: per §11.4.28 the submodule's own test floor; Lava-side cryptographic correctness verified by core/network AesGcmTest + HKDFTest with real cipher operations per §6.H credential security inviolability"
       four_layer: "pass: per §11.4.28 the submodule maintains its own four-layer floor; Lava integration via core/network crypto suite + scripts/scan-no-hardcoded-* gates"
-  - path: Submodules/Tracker-SDK
+  - path: submodules/tracker_sdk
     invariants:
-      documented_promise: "pass: Submodules/Tracker-SDK/README.md + CONSTITUTION.md + docs/sdk-developer-guide.md cover the per-tracker recipe"
+      documented_promise: "pass: submodules/tracker_sdk/README.md + CONSTITUTION.md + docs/sdk-developer-guide.md cover the per-tracker recipe"
       working_capability: "pass: 4 trackers (RuTracker, RuTor, Kinozal, Nnmclub) + 2 archives (ArchiveOrg, Gutenberg) shipped + tested via core/tracker/*/src/test/ + Challenge tests C01-C12 per §6.E + §6.G"
-      documented: "pass: per §6.AD inheritance pointer-block; Submodules/Tracker-SDK/CLAUDE.md + AGENTS.md + CONSTITUTION.md + docs/sdk-developer-guide.md"
+      documented: "pass: per §6.AD inheritance pointer-block; submodules/tracker_sdk/CLAUDE.md + AGENTS.md + CONSTITUTION.md + docs/sdk-developer-guide.md"
       no_open_bugs: "pass: per cross-cutting B + §6.AD.3 equivalence — rutracker-loginusecase-unknown + okhttp-url-scheme-djdnjd closed per .lava-ci-evidence/crashlytics-resolved/2026-05-14-*.md"
       anti_bluff: "pass: per §11.4.28 the submodule's own test floor; Lava-side tracker behavior covered by 91 *Test.kt across core/tracker/* + Challenges C01-C12 per §6.E capability honesty + §6.G end-to-end provider verification"
       four_layer: "pass: per §11.4.28 the submodule maintains its own four-layer floor; Lava integration via core/tracker 91 *Test.kt (post-build) + Challenges C01-C12 (runtime) + scripts/check-challenge-coverage.sh (pre-build) + Bluff-Audit"

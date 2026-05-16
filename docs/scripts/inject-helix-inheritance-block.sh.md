@@ -20,7 +20,7 @@ Idempotent debt-closure tool that injects the standard `## INHERITED FROM consti
 scripts/inject-helix-inheritance-block.sh
 ```
 
-Walks the canonical scope (16 × `Submodules/*/{CLAUDE,AGENTS,CONSTITUTION}.md` + 3 × `lava-api-go/{CLAUDE.md,AGENTS.md,CONSTITUTION.md}` + `core/CLAUDE.md` + `app/CLAUDE.md` + `feature/CLAUDE.md` = 54 files), and for each:
+Walks the canonical scope (16 × `submodules/*/{CLAUDE,AGENTS,CONSTITUTION}.md` + 3 × `lava-api-go/{CLAUDE.md,AGENTS.md,CONSTITUTION.md}` + `core/CLAUDE.md` + `app/CLAUDE.md` + `feature/CLAUDE.md` = 54 files), and for each:
 
 1. If the file already carries a `## INHERITED FROM constitution/` heading → skip with `✓ already present`
 2. Else find the first H1 heading (`# Title`), inject the pointer-block immediately after it, report `+ injected after line N`

@@ -96,7 +96,7 @@ fi
 submodule_violations=()
 submodule_present=()
 submodule_waived=()
-for s in Submodules/*/; do
+for s in submodules/*/; do
     [[ -d "$s" ]] || continue
     name=$(basename "$s")
     found=""

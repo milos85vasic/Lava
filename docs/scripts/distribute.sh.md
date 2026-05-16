@@ -33,7 +33,7 @@ Usage:
 Architecture (per Decoupled Reusable Architecture rule):
 
   * Generic remote-host SSH + container-orchestration primitives live in
-    `Submodules/Containers/pkg/remote/` (the vasic-digital/Containers
+    `submodules/containers/pkg/remote/` (the vasic-digital/Containers
     submodule). Lava's distribute scripts are thin glue that:
       1. Build artifacts via build_and_release.sh (which itself routes
          through the Containers build path).

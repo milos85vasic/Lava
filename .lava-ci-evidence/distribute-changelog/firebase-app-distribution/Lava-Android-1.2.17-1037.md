@@ -6,7 +6,7 @@
 - **§6.X added (TWENTY-FIRST §6.L invocation).** Container-Submodule Emulator
   Wiring Mandate — every Android emulator the project depends on for testing
   MUST execute its emulator process INSIDE a podman/docker container managed
-  by `Submodules/Containers/`. Propagated to 52 docs (root × 2 + 16 submodules
+  by `submodules/containers/`. Propagated to 52 docs (root × 2 + 16 submodules
   × 3 + lava-api-go × 3). Mechanical enforcement via
   `scripts/check-constitution.sh` (inheritance presence checks).
 - **§6.X-debt PARTIAL CLOSE (TWENTY-SECOND §6.L invocation).** Containers
@@ -29,7 +29,7 @@
   constitutional docs.
 
 ### Build infrastructure (not user-visible)
-- Submodule pin: `Submodules/Containers` 8197c222 → 562069e7+ (full
+- Submodule pin: `submodules/containers` 8197c222 → 562069e7+ (full
   §6.X-debt close set).
 - `scripts/check-constitution.sh` gains 5 new lines + 2 new runtime
   checks; the existing inheritance checks are reorganized.

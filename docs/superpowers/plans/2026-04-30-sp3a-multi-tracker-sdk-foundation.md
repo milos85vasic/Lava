@@ -4,7 +4,7 @@
 
 **Goal:** Decouple Lava's RuTracker implementation behind a tracker-agnostic SDK contract, ship RuTor as the first additional tracker, extract reusable mirror/registry/testing primitives to a new `vasic-digital/Tracker-SDK` submodule, and enforce three new constitutional anti-bluff clauses (6.D/6.E/6.F).
 
-**Architecture:** Capability-based SDK (`TrackerClient` + per-feature interfaces) replaces the monolithic 14-method `NetworkApi`. Generic primitives (mirror manager, plugin registry, testing harness) live in `vasic-digital/Tracker-SDK` mounted at `Submodules/Tracker-SDK/`. Tracker-domain contract and impls (`:core:tracker:api`, `:core:tracker:rutracker`, `:core:tracker:rutor`) stay in this repo. `SwitchingNetworkApi` is rewired to delegate to `LavaTrackerSdk` underneath, preserving feature-module backward compatibility throughout SP-3a.
+**Architecture:** Capability-based SDK (`TrackerClient` + per-feature interfaces) replaces the monolithic 14-method `NetworkApi`. Generic primitives (mirror manager, plugin registry, testing harness) live in `vasic-digital/Tracker-SDK` mounted at `submodules/tracker_sdk/`. Tracker-domain contract and impls (`:core:tracker:api`, `:core:tracker:rutracker`, `:core:tracker:rutor`) stay in this repo. `SwitchingNetworkApi` is rewired to delegate to `LavaTrackerSdk` underneath, preserving feature-module backward compatibility throughout SP-3a.
 
 **Tech Stack:** Kotlin 2.1.0, Jetpack Compose, Dagger Hilt, Orbit MVI 7.1.0, Room 2.7.2, Ktor 2.3.1, OkHttp, Jsoup 1.15.3, kotlinx-serialization, JUnit 4, kotlinx-coroutines-test, PITest (mutation), WorkManager (periodic health probes).
 
@@ -33,10 +33,10 @@ Phases are sequential except where explicitly noted (Phase 3 may begin after Pha
 
 ## File Structure (after SP-3a)
 
-### New repository: `vasic-digital/Tracker-SDK` (mounted at `Submodules/Tracker-SDK/`)
+### New repository: `vasic-digital/Tracker-SDK` (mounted at `submodules/tracker_sdk/`)
 
 ```
-Submodules/Tracker-SDK/
+submodules/tracker_sdk/
 ├── README.md
 ├── LICENSE                                      MIT (matching vasic-digital convention)
 ├── CLAUDE.md                                    inherits Lava root + adds "no domain shape"
@@ -995,12 +995,12 @@ Create `scripts/sync-tracker-sdk-mirrors.sh`:
 ```bash
 #!/usr/bin/env bash
 # scripts/sync-tracker-sdk-mirrors.sh
-# Pushes the Submodules/Tracker-SDK/ working tree to all four upstreams.
+# Pushes the submodules/tracker_sdk/ working tree to all four upstreams.
 # Local-only — no hosted CI invoked. Operator-controlled.
 
 set -euo pipefail
 
-cd "$(dirname "$0")/../Submodules/Tracker-SDK"
+cd "$(dirname "$0")/../submodules/tracker_sdk"
 
 UPSTREAMS=(
   "github  git@github.com:vasic-digital/Tracker-SDK.git"
@@ -1052,7 +1052,7 @@ Run: `chmod +x scripts/sync-tracker-sdk-mirrors.sh`
 git add scripts/sync-tracker-sdk-mirrors.sh
 git commit -m "sp3a-1.5: add Tracker-SDK four-upstream sync script
 
-Mirrors Submodules/Tracker-SDK/ to GitHub + GitFlic + GitLab + GitVerse,
+Mirrors submodules/tracker_sdk/ to GitHub + GitFlic + GitLab + GitVerse,
 verifies per-mirror SHA convergence per clause 6.C, exits non-zero on
 divergence. Used after every commit to the SDK submodule.
 
@@ -3498,44 +3498,44 @@ Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>"
 
 ### Section H — Pin submodule in Lava
 
-### Task 1.28: Add `Submodules/Tracker-SDK/` as a git submodule
+### Task 1.28: Add `submodules/tracker_sdk/` as a git submodule
 
 **Files (Lava repo):**
-- Create: `Submodules/Tracker-SDK/` (via `git submodule add`)
+- Create: `submodules/tracker_sdk/` (via `git submodule add`)
 - Modify: `.gitmodules`
 
 - [ ] **Step 1: Pre-flight check**
 
 ```bash
 cd /run/media/milosvasic/DATA4TB/Projects/Lava
-ls Submodules/
+ls submodules/
 ```
 Expected: existing 15 submodules (Auth, Cache, Challenges, etc.) listed; no `Tracker-SDK` yet.
 
 - [ ] **Step 2: Add the submodule pinned at v0.1.0**
 
 ```bash
-git submodule add git@github.com:vasic-digital/Tracker-SDK.git Submodules/Tracker-SDK
-cd Submodules/Tracker-SDK
+git submodule add git@github.com:vasic-digital/Tracker-SDK.git submodules/tracker_sdk
+cd submodules/tracker_sdk
 git checkout v0.1.0
 cd ../..
 ```
 
 - [ ] **Step 3: Verify pin**
 
-Run: `cd Submodules/Tracker-SDK && git describe --tags`
+Run: `cd submodules/tracker_sdk && git describe --tags`
 Expected: `v0.1.0`.
 
 Run: `cat .gitmodules | tail -5`
-Expected: contains a stanza for `Submodules/Tracker-SDK`.
+Expected: contains a stanza for `submodules/tracker_sdk`.
 
 - [ ] **Step 4: Commit the submodule pin**
 
 ```bash
-git add .gitmodules Submodules/Tracker-SDK
+git add .gitmodules submodules/tracker_sdk
 git commit -m "sp3a-1.28: pin vasic-digital/Tracker-SDK at v0.1.0
 
-Submodule mounted at Submodules/Tracker-SDK/, frozen by default.
+Submodule mounted at submodules/tracker_sdk/, frozen by default.
 Updating the pin is a deliberate PR per the Decoupled Reusable
 Architecture rule.
 
@@ -3552,7 +3552,7 @@ Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>"
 cd /tmp
 git clone --recurse-submodules <Lava-upstream-url> lava-fresh
 cd lava-fresh
-ls Submodules/Tracker-SDK/api/src/main/kotlin/lava/sdk/api/MirrorUrl.kt
+ls submodules/tracker_sdk/api/src/main/kotlin/lava/sdk/api/MirrorUrl.kt
 ```
 
 Expected: file exists.
@@ -3560,7 +3560,7 @@ Expected: file exists.
 - [ ] **Step 2: Verify the submodule's CI script runs from inside the Lava clone**
 
 ```bash
-cd Submodules/Tracker-SDK
+cd submodules/tracker_sdk
 ./scripts/ci.sh
 ```
 
@@ -3609,7 +3609,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
  * Pre-wires:
  *   - java-library + kotlin.jvm + serialization
  *   - dependency on :core:tracker:api
- *   - dependency on Submodules/Tracker-SDK/api + mirror
+ *   - dependency on submodules/tracker_sdk/api + mirror
  *   - Jsoup, OkHttp, kotlinx-serialization, kotlinx-coroutines
  *   - testImplementation: junit, kotlinx-coroutines-test, mockk, testing harness
  */
@@ -3718,7 +3718,7 @@ After the `include(...)` calls, before any closing brace, add:
 
 ```kotlin
 // Tracker-SDK submodule — composite build (pinned via git submodule)
-includeBuild("Submodules/Tracker-SDK") {
+includeBuild("submodules/tracker_sdk") {
     dependencySubstitution {
         substitute(module("lava.sdk:api")).using(project(":api"))
         substitute(module("lava.sdk:mirror")).using(project(":mirror"))
@@ -3775,7 +3775,7 @@ Expected: no error; the wiring resolves at the build-script level even if no mod
 git add settings.gradle.kts buildSrc/src/main/kotlin/KotlinTrackerModuleConventionPlugin.kt
 git commit -m "sp3a-1.31: composite-build wire Tracker-SDK into Lava
 
-Submodules/Tracker-SDK is now an includeBuild; its projects are
+submodules/tracker_sdk is now an includeBuild; its projects are
 addressable as 'lava.sdk:<module>' from any Lava module via the
 dependencySubstitution map.
 
@@ -4982,7 +4982,7 @@ Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>"
 Expected: BUILD SUCCESSFUL — all five module test suites green.
 
 ```bash
-ls Submodules/Tracker-SDK/api/src/main/kotlin/lava/sdk/api/
+ls submodules/tracker_sdk/api/src/main/kotlin/lava/sdk/api/
 ```
 
 Expected: `MirrorUrl.kt`, `Protocol.kt`, `HealthState.kt`, `MirrorState.kt`, `FallbackPolicy.kt`, `MirrorUnavailableException.kt`, `PluginConfig.kt`, `HasId.kt` all present.
@@ -8023,7 +8023,7 @@ Commit `sp3a-5.4: lava-api-go/{CLAUDE,AGENTS}.md SP-3a-bridge expectations`.
 
 ---
 
-### Task 5.5: Create `Submodules/Tracker-SDK/CLAUDE.md`
+### Task 5.5: Create `submodules/tracker_sdk/CLAUDE.md`
 
 Already created in Phase 1 Task 1.7 — verify present and matches the body in spec §9.2. If missing, create from the Phase 1 spec content.
 
@@ -8031,7 +8031,7 @@ Commit (no-op if already done) or `sp3a-5.5: verify Tracker-SDK constitution pre
 
 ---
 
-### Task 5.6: Create `Submodules/Tracker-SDK/CONSTITUTION.md` and `AGENTS.md`
+### Task 5.6: Create `submodules/tracker_sdk/CONSTITUTION.md` and `AGENTS.md`
 
 Already created in Phase 1 Task 1.7 — verify present.
 
@@ -8041,7 +8041,7 @@ Commit `sp3a-5.6: verify Tracker-SDK CONSTITUTION + AGENTS present`.
 
 ### Task 5.7: Update root `AGENTS.md` with SDK module map
 
-Extend the existing module-map section with the new `core/tracker/*` modules and the `Submodules/Tracker-SDK/` pin policy. Add a pointer to `docs/sdk-developer-guide.md` (created in Task 5.8).
+Extend the existing module-map section with the new `core/tracker/*` modules and the `submodules/tracker_sdk/` pin policy. Add a pointer to `docs/sdk-developer-guide.md` (created in Task 5.8).
 
 Commit `sp3a-5.7: root AGENTS.md updated with SDK module map`.
 
@@ -8257,7 +8257,7 @@ for clause in "${required[@]}"; do
   fi
 done
 # Verify Tracker-SDK CLAUDE.md exists
-test -f Submodules/Tracker-SDK/CLAUDE.md || { echo "MISSING Submodules/Tracker-SDK/CLAUDE.md" >&2; exit 1; }
+test -f submodules/tracker_sdk/CLAUDE.md || { echo "MISSING submodules/tracker_sdk/CLAUDE.md" >&2; exit 1; }
 echo "Constitution check passed"
 ```
 
@@ -8317,7 +8317,7 @@ Commit `sp3a-5.22: real-device verification artifact`.
 
 ### Changed
 - Internal: RuTracker implementation now fully decoupled behind the multi-tracker SDK.
-- New `vasic-digital/Tracker-SDK` submodule mounted at `Submodules/Tracker-SDK/`.
+- New `vasic-digital/Tracker-SDK` submodule mounted at `submodules/tracker_sdk/`.
 
 ### Constitutional
 - Added clauses 6.D (Behavioral Coverage Contract), 6.E (Capability Honesty),

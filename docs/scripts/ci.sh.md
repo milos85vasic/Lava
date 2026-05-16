@@ -1,6 +1,6 @@
 # `scripts/ci.sh` — User Guide
 
-**Last verified:** 2026-05-15 (1.2.23 closure-cycle, §6.AD-debt task #61 backfill)
+**Last verified:** 2026-05-16 (Phase 6a + 6b §11.4.29 snake_case migration: scripts/ci.sh path-references updated from `Submodules/` to `submodules/`)
 **Inheritance:** HelixConstitution §11.4.18 (script documentation mandate)
 
 ## Overview

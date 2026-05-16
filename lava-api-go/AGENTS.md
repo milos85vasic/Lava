@@ -31,7 +31,7 @@ Local CI: `scripts/ci.sh`. Single source of truth.
 - Mocking internal Lava code in non-unit tests (Sixth Law clause 2).
 
 ## Host Machine Stability Directive
-Per `/CLAUDE.md` and propagated through `Submodules/*/CLAUDE.md`: never run commands that suspend, hibernate, sign-out, or kill the user session. Cap test parallelism (`GOMAXPROCS=2`, `nice -n 19` are recommended).
+Per `/CLAUDE.md` and propagated through `submodules/*/CLAUDE.md`: never run commands that suspend, hibernate, sign-out, or kill the user session. Cap test parallelism (`GOMAXPROCS=2`, `nice -n 19` are recommended).
 
 ### Clause 6.M — Host-Stability Forensic Discipline (added 2026-05-04 evening)
 
@@ -95,7 +95,7 @@ Directly applicable. No tracker username, password, API key, signing key, JWT se
 
 ## Clause 6.N — Bluff-Hunt Cadence Tightening + Production Code Coverage (added 2026-05-05)
 
-Inherits root `/CLAUDE.md` §6.N. Beyond the Seventh Law clause 5 baseline (every 2-4 weeks), bluff hunts fire IN-cycle on operator-mandate invocation, matrix-runner/gate change, and new attestation file. Bluff hunts MUST sample production code (2 files mandatory + 0-2 recommended per phase). Pre-push hook enforcement of the in-cycle triggers is owed via §6.N-debt (next brainstorming target after Group A lands). For this service: bluff-hunt the `tests/contract/` real-binary contract gate, `tests/parity/` cross-backend parity gate, and the production handlers behind them. Forensic anchor: 2026-05-05 architectural-bluff discovery in `Submodules/Containers/pkg/emulator`.
+Inherits root `/CLAUDE.md` §6.N. Beyond the Seventh Law clause 5 baseline (every 2-4 weeks), bluff hunts fire IN-cycle on operator-mandate invocation, matrix-runner/gate change, and new attestation file. Bluff hunts MUST sample production code (2 files mandatory + 0-2 recommended per phase). Pre-push hook enforcement of the in-cycle triggers is owed via §6.N-debt (next brainstorming target after Group A lands). For this service: bluff-hunt the `tests/contract/` real-binary contract gate, `tests/parity/` cross-backend parity gate, and the production handlers behind them. Forensic anchor: 2026-05-05 architectural-bluff discovery in `submodules/containers/pkg/emulator`.
 
 ## Clause 6.L — Anti-Bluff Functional Reality Mandate (Operator's Standing Order)
 
@@ -119,7 +119,7 @@ Inheritance is recursive: this clause applies to every dependency, every test, e
 
 ## §6.X — Container-Submodule Emulator Wiring Mandate (inherited 2026-05-13, per §6.F)
 
-Inherited verbatim from parent Lava `/CLAUDE.md` §6.X (added 2026-05-13 in response to the operator's twenty-first §6.L invocation: "when we rely / depend on emulator(s) needed for the testing of the System, make sure we boot up Container running Android emulator in it using ours Containers Submodule. It is supported and it works, it just need proper connecting into the flows."). Every Android emulator instance MUST execute INSIDE a podman/docker container managed by `Submodules/Containers/`. Host-direct emulator launches are permitted for workstation iteration only; the constitutional gate run (release tagging, real-device verification) MUST go through the container-bound path. `pkg/runtime/` brings the container up; `pkg/emulator/` orchestrates the AVD lifecycle inside it. §6.X-debt tracks the wiring implementation owed to the Containers submodule. This submodule MAY add stricter rules but MUST NOT relax.
+Inherited verbatim from parent Lava `/CLAUDE.md` §6.X (added 2026-05-13 in response to the operator's twenty-first §6.L invocation: "when we rely / depend on emulator(s) needed for the testing of the System, make sure we boot up Container running Android emulator in it using ours Containers Submodule. It is supported and it works, it just need proper connecting into the flows."). Every Android emulator instance MUST execute INSIDE a podman/docker container managed by `submodules/containers/`. Host-direct emulator launches are permitted for workstation iteration only; the constitutional gate run (release tagging, real-device verification) MUST go through the container-bound path. `pkg/runtime/` brings the container up; `pkg/emulator/` orchestrates the AVD lifecycle inside it. §6.X-debt tracks the wiring implementation owed to the Containers submodule. This submodule MAY add stricter rules but MUST NOT relax.
 
 ## §6.Y — Post-Distribution Version Bump Mandate (inherited 2026-05-14, per §6.F)
 

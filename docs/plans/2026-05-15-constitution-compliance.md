@@ -19,8 +19,8 @@ The 12 new constitution clauses introduce these binding rules. For each: status 
 | §11.4.25 | Full-Automation-Coverage Mandate (6 invariants per feature) | PARTIAL — 35 Challenges + unit tests + scanners exist; coverage ledger missing | Phase 7 |
 | §11.4.26 | Constitution-Submodule Update Workflow | COMPLIANT for THIS pull (followed steps 1+2; steps 3+6+7 owed) | Phase 1 (validation) + Phase 0 (this cycle's pin bump) |
 | §11.4.27 | No-Fakes-Beyond-Unit-Tests + 100%-Test-Type Coverage | NON-COMPLIANT — Challenges submodule present (✓), HelixQA NOT incorporated (✗); 14-test-type matrix gaps | Phase 4 |
-| §11.4.28 | Submodules-As-Equal-Codebase + Decoupling + Dependency-Layout | PARTIAL — 16 vasic-digital subs are §6.W mirrored, but `Submodules/` capital-S layout violates §11.4.29; nested-own-org-chains audit owed | Phase 5 + Phase 6 |
-| §11.4.29 | Lowercase-Snake_Case-Naming | NON-COMPLIANT — `Submodules/` (capital S) + 16 CamelCase submodule dirs; references throughout | Phase 6 |
+| §11.4.28 | Submodules-As-Equal-Codebase + Decoupling + Dependency-Layout | PARTIAL — 16 vasic-digital subs are §6.W mirrored, but `submodules/` capital-S layout violates §11.4.29; nested-own-org-chains audit owed | Phase 5 + Phase 6 |
+| §11.4.29 | Lowercase-Snake_Case-Naming | NON-COMPLIANT — `submodules/` (capital S) + 16 CamelCase submodule dirs; references throughout | Phase 6 |
 | §11.4.30 | .gitignore + No-Versioned-Build-Artifacts | PARTIAL — root + most modules have .gitignore; `CM-GITIGNORE-PRECOMMIT-AUDIT` gate missing | Phase 2 |
 | §11.4.31 | Submodule-Dependency-Manifest (helix-deps.yaml) | NON-COMPLIANT — none of the 16 vasic-digital submodules ship helix-deps.yaml | Phase 3 |
 | §11.4.32 | Post-Constitution-Pull Validation (`scripts/verify-all-constitution-rules.sh`) | NON-COMPLIANT — CRITICAL: this is the enforcement engine; without it, every other §11.4.x rule cascades as anchor-only | Phase 1 (highest priority) |
@@ -106,7 +106,7 @@ Each phase: deliverables, falsifiability rehearsal contract, owner, dependency o
 **Two sub-phases:**
 
 **4a — HelixQA submodule incorporation:**
-- Add HelixQA via `git submodule add git@github.com:HelixDevelopment/HelixQA.git Submodules/HelixQA` (or `submodules/helix_qa` per §11.4.29)
+- Add HelixQA via `git submodule add git@github.com:HelixDevelopment/HelixQA.git submodules/helixqa` (or `submodules/helix_qa` per §11.4.29)
 - Pin frozen by default (per §6.AD)
 - Update §6.AD inheritance + add §6.AF clause documenting HelixQA inheritance
 - Per-scope inheritance pointer-blocks updated via `scripts/inject-helix-inheritance-block.sh`
@@ -163,7 +163,7 @@ The design enumerates 10 operator-blocking open questions (Go version conflict, 
 **Phase 6 has its own dedicated sub-plan** at [`docs/plans/2026-05-16-snake_case-migration.md`](2026-05-16-snake_case-migration.md), prepared in the Phase 6.0 research+plan cycle (2026-05-16). Read that plan before executing any rename. Highlights:
 
 - **Per-submodule target mapping table** — 17 owned-by-us submodules with their snake_case targets (`Auth` → `auth`, `RateLimiter` → `rate_limiter`, `Tracker-SDK` → `tracker_sdk`, `HelixQA` → `helix_qa`, etc.).
-- **Audit tool** `scripts/audit-snake_case-references.sh` (read-only) + hermetic test `tests/check-constitution/test_audit_snake_case_references.sh` + companion doc `docs/scripts/audit-snake_case-references.sh.md` shipped in this commit. Run `bash scripts/audit-snake_case-references.sh` for the baseline reference count (currently 806 `Submodules/` refs across 124 files; highest-blast-radius: `Containers` 370 refs / 63 files).
+- **Audit tool** `scripts/audit-snake_case-references.sh` (read-only) + hermetic test `tests/check-constitution/test_audit_snake_case_references.sh` + companion doc `docs/scripts/audit-snake_case-references.sh.md` shipped in this commit. Run `bash scripts/audit-snake_case-references.sh` for the baseline reference count (currently 806 `submodules/` refs across 124 files; highest-blast-radius: `Containers` 370 refs / 63 files).
 - **LANG-spec exemption** explicitly documented: Kotlin/Android `app/`, `core/`, `feature/` subtrees, Gradle wrapper, dotfiles, `Dockerfile*` are EXEMPT from snake_case enforcement on their inner subtree.
 - **HelixDevelopment-owned (HelixQA)** treated the same as vasic-digital — `helix_qa` snake_case is binding (HelixDevelopment is on the owned-org list).
 
@@ -171,7 +171,7 @@ The design enumerates 10 operator-blocking open questions (Go version conflict, 
 
 **6.0 — Plan + audit tool** (THIS commit, 2026-05-16, research+plan only — ZERO renames executed).
 
-**6a — `Submodules/` → `submodules/` rename + every reference updated** (top-level directory).
+**6a — `submodules/` → `submodules/` rename + every reference updated** (top-level directory).
 
 **6b — Per-submodule snake_case renames** (17 sub-cycles, risk-ascending; HIGH-RISK Containers + Tracker-SDK + RateLimiter last).
 

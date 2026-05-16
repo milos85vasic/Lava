@@ -68,11 +68,11 @@ The current Seventh Law clause 5 starts at `CLAUDE.md:201` with `5. **Recurring 
 ```markdown
    **5.a — Cadence tightening (added 2026-05-05, formalized in §6.N.1).** The 2-4 week phase-end cycle remains the baseline, but three additional triggers fire IN-cycle:
    1. **Per operator anti-bluff-mandate invocation.** First invocation in any 24h window: full 5+2 hunt (5 `*Test.kt` files per the baseline rule + 2 production-code files per §6.N.2). Subsequent invocations within the same 24h: lighter "incident-response hunt" — 1-2 files most relevant to the invocation context (e.g., the area of code the latest discovery flagged).
-   2. **Per matrix-runner / gate change** (pre-push enforced — owed via §6.N-debt). Any commit that touches `Submodules/Containers/pkg/emulator/`, `scripts/run-emulator-tests.sh`, `scripts/tag.sh`, or `scripts/check-constitution.sh` MUST be accompanied by a 1-target falsifiability rehearsal in the area of change.
+   2. **Per matrix-runner / gate change** (pre-push enforced — owed via §6.N-debt). Any commit that touches `submodules/containers/pkg/emulator/`, `scripts/run-emulator-tests.sh`, `scripts/tag.sh`, or `scripts/check-constitution.sh` MUST be accompanied by a 1-target falsifiability rehearsal in the area of change.
    3. **Per phase-gating attestation file added** (pre-push enforced — owed via §6.N-debt). Any new file under `.lava-ci-evidence/sp3a-challenges/`, `.lava-ci-evidence/<tag>/real-device-verification.{md,json}`, or `.lava-ci-evidence/sixth-law-incidents/` MUST be accompanied by a falsifiability rehearsal of the production code path the attestation claims to cover.
 
    **5.b — Production-code coverage (added 2026-05-05, formalized in §6.N.2).** Bluff hunts MUST sample production code, not just test files. Layered:
-   - **Mandatory minimum (per phase):** 2 files from gate-shaping production code. Canonical list: `scripts/tag.sh` helpers, `scripts/check-constitution.sh`, `scripts/bluff-hunt.sh`, `Submodules/Containers/pkg/emulator/`, `Submodules/Containers/cmd/emulator-matrix/`, the matrix runner's `writeAttestation` function. The list grows as new gate-shaping code lands.
+   - **Mandatory minimum (per phase):** 2 files from gate-shaping production code. Canonical list: `scripts/tag.sh` helpers, `scripts/check-constitution.sh`, `scripts/bluff-hunt.sh`, `submodules/containers/pkg/emulator/`, `submodules/containers/cmd/emulator-matrix/`, the matrix runner's `writeAttestation` function. The list grows as new gate-shaping code lands.
    - **Recommended additional (per phase):** 0-2 files from broader CI-touched code — anything invoked by `scripts/ci.sh` or `scripts/run-emulator-tests.sh`.
    - **Conceptual filter:** for each candidate file, ask "would a bug here be invisible to existing tests?" Prefer files where the answer is yes.
 
@@ -95,17 +95,17 @@ Locate `##### 6.M — Host-Stability Forensic Discipline` at `CLAUDE.md:379` and
 ```markdown
 ##### 6.N — Bluff-Hunt Cadence Tightening + Production Code Coverage (added 2026-05-05)
 
-**Forensic anchor:** the 7-day-old architectural bluff in `Submodules/Containers/pkg/emulator/Boot()` (hardcoded `ADBPort=5555`) exposed by ultrathink-driven systematic-debugging on 2026-05-05; recorded at `.lava-ci-evidence/sixth-law-incidents/2026-05-05-matrix-runner-port-collision-bluff.json`. The bluff was invisible to all existing `*Test.kt`-targeted bluff hunts because the buggy code was production Go code that no test could mutate-rehearse — only end-to-end multi-AVD matrix runs would have caught it, and those runs were themselves rendered green by the bluff (textbook clause-6.J failure mode). The operator's 8th invocation of the anti-bluff mandate landed concurrently with this discovery, demanding tightened cadence and broader scope for bluff hunts.
+**Forensic anchor:** the 7-day-old architectural bluff in `submodules/containers/pkg/emulator/Boot()` (hardcoded `ADBPort=5555`) exposed by ultrathink-driven systematic-debugging on 2026-05-05; recorded at `.lava-ci-evidence/sixth-law-incidents/2026-05-05-matrix-runner-port-collision-bluff.json`. The bluff was invisible to all existing `*Test.kt`-targeted bluff hunts because the buggy code was production Go code that no test could mutate-rehearse — only end-to-end multi-AVD matrix runs would have caught it, and those runs were themselves rendered green by the bluff (textbook clause-6.J failure mode). The operator's 8th invocation of the anti-bluff mandate landed concurrently with this discovery, demanding tightened cadence and broader scope for bluff hunts.
 
 **6.N.1 — Tightened cadence.** The 2-4 week phase-end cycle (Seventh Law clause 5 baseline) remains. Three additional triggers fire IN-cycle:
 
 1. **Per operator anti-bluff-mandate invocation.** First invocation in any 24h window: full 5+2 hunt (5 `*Test.kt` per Seventh Law clause 5 baseline + 2 production-code files per §6.N.2). Subsequent invocations within the same 24h: lighter "incident-response hunt" — 1-2 files most relevant to the invocation context.
-2. **Per matrix-runner / gate change** (pre-push enforced — see §6.N-debt below). Any commit that touches `Submodules/Containers/pkg/emulator/`, `scripts/run-emulator-tests.sh`, `scripts/tag.sh`, or `scripts/check-constitution.sh` MUST carry a Bluff-Audit stamp recording a 1-target falsifiability rehearsal in the area of change. The hook checks for the `Bluff-Audit:` block AND verifies the mutation reasoning targets a file in the diff.
+2. **Per matrix-runner / gate change** (pre-push enforced — see §6.N-debt below). Any commit that touches `submodules/containers/pkg/emulator/`, `scripts/run-emulator-tests.sh`, `scripts/tag.sh`, or `scripts/check-constitution.sh` MUST carry a Bluff-Audit stamp recording a 1-target falsifiability rehearsal in the area of change. The hook checks for the `Bluff-Audit:` block AND verifies the mutation reasoning targets a file in the diff.
 3. **Per phase-gating attestation file added** (pre-push enforced — see §6.N-debt below). Any new file under `.lava-ci-evidence/sp3a-challenges/`, `.lava-ci-evidence/<tag>/real-device-verification.{md,json}`, or `.lava-ci-evidence/sixth-law-incidents/` MUST be accompanied by a falsifiability rehearsal of the production code path the attestation claims to cover. The rehearsal evidence MAY be embedded in the attestation OR live as a companion file in the same directory.
 
 **6.N.2 — Production-code coverage in bluff hunts.** Bluff hunts MUST sample production code beyond `*Test.kt` / `*_test.go`. Layered scope:
 
-- **Mandatory minimum (per phase):** 2 files from gate-shaping production code. Gate-shaping = files whose output determines pass/fail of a constitutional gate. Canonical list: `scripts/tag.sh` helpers, `scripts/check-constitution.sh`, `scripts/bluff-hunt.sh`, `Submodules/Containers/pkg/emulator/`, `Submodules/Containers/cmd/emulator-matrix/`, the matrix runner's `writeAttestation` function. The list grows as new gate-shaping code lands.
+- **Mandatory minimum (per phase):** 2 files from gate-shaping production code. Gate-shaping = files whose output determines pass/fail of a constitutional gate. Canonical list: `scripts/tag.sh` helpers, `scripts/check-constitution.sh`, `scripts/bluff-hunt.sh`, `submodules/containers/pkg/emulator/`, `submodules/containers/cmd/emulator-matrix/`, the matrix runner's `writeAttestation` function. The list grows as new gate-shaping code lands.
 - **Recommended additional (per phase):** 0-2 files from broader CI-touched code — anything invoked by `scripts/ci.sh` or `scripts/run-emulator-tests.sh`, including Lava-domain Kotlin/Go production paths.
 - **Conceptual filter:** for each candidate file, ask "would a bug here be invisible to existing tests?" Prefer files where the answer is yes — those are the bluff-rich targets.
 
@@ -116,7 +116,7 @@ The mutation-rehearsal protocol from Seventh Law clause 5 applies unchanged: pic
 - 6.N.1.2 + 6.N.1.3 are documented requirements only — no mechanical enforcement
 - The §6.N-debt entry stays open in this `CLAUDE.md` until Group A-prime closes it. The constitution checker (`scripts/check-constitution.sh`) MAY warn but MUST NOT yet hard-fail on missing rehearsals.
 
-**Inheritance.** Clause 6.N applies recursively to every submodule, every feature, and every new artifact. Submodule constitutions MAY add stricter cadence requirements (e.g., `Submodules/Containers` SHOULD bluff-hunt every change to `pkg/emulator/` since it is the source of truth for the matrix gate) but MUST NOT relax this clause.
+**Inheritance.** Clause 6.N applies recursively to every submodule, every feature, and every new artifact. Submodule constitutions MAY add stricter cadence requirements (e.g., `submodules/containers` SHOULD bluff-hunt every change to `pkg/emulator/` since it is the source of truth for the matrix gate) but MUST NOT relax this clause.
 
 ##### 6.N-debt — Pre-push hook enforcement of 6.N.1 clauses 2 + 3 (constitutional debt, 2026-05-05)
 
@@ -178,7 +178,7 @@ Note the line number returned. The next constitutional bullet is the start of th
 Use Edit. The 6.M bullet line ends with text discussing the forensic anchors (`docs/INCIDENT_2026-04-28-HOST-POWEROFF.md` ... `2026-05-04-perceived-host-instability.json`). Add a new line immediately after:
 
 ```markdown
-- **Bluff-Hunt Cadence Tightening + Production Code Coverage (Constitutional clause 6.N)** — Beyond the Seventh Law clause 5 baseline (5 random `*Test.kt` files every 2-4 weeks), three additional triggers fire in-cycle: per operator anti-bluff-mandate invocation (lighter scope after first/day), per matrix-runner / gate change (pre-push enforced — owed via §6.N-debt), per phase-gating attestation file added (pre-push enforced — owed via §6.N-debt). Bluff hunts MUST also sample production code: 2 files per phase from gate-shaping code (`scripts/tag.sh` helpers, `scripts/check-constitution.sh`, `Submodules/Containers/pkg/emulator/`, etc.) plus 0-2 from broader CI-touched code. Forensic anchor: 2026-05-05 ultrathink-driven discovery of the 7-day-old `pkg/emulator/Boot()` port-collision bluff — invisible to all existing test-only bluff hunts. Pre-push hook implementation owed via the Group A-prime spec (next brainstorming target after Group A lands).
+- **Bluff-Hunt Cadence Tightening + Production Code Coverage (Constitutional clause 6.N)** — Beyond the Seventh Law clause 5 baseline (5 random `*Test.kt` files every 2-4 weeks), three additional triggers fire in-cycle: per operator anti-bluff-mandate invocation (lighter scope after first/day), per matrix-runner / gate change (pre-push enforced — owed via §6.N-debt), per phase-gating attestation file added (pre-push enforced — owed via §6.N-debt). Bluff hunts MUST also sample production code: 2 files per phase from gate-shaping code (`scripts/tag.sh` helpers, `scripts/check-constitution.sh`, `submodules/containers/pkg/emulator/`, etc.) plus 0-2 from broader CI-touched code. Forensic anchor: 2026-05-05 ultrathink-driven discovery of the 7-day-old `pkg/emulator/Boot()` port-collision bluff — invisible to all existing test-only bluff hunts. Pre-push hook implementation owed via the Group A-prime spec (next brainstorming target after Group A lands).
 ```
 
 - [ ] **Step 2.3: Verify AGENTS.md update**
@@ -217,7 +217,7 @@ Find the end of the existing §6.M block in the Host Machine Stability section. 
 
 ### Clause 6.N — Bluff-Hunt Cadence Tightening + Production Code Coverage (added 2026-05-05)
 
-Inherits root `/CLAUDE.md` §6.N. Beyond the Seventh Law clause 5 baseline (every 2-4 weeks), bluff hunts fire IN-cycle on operator-mandate invocation, matrix-runner/gate change, and new attestation file. Bluff hunts MUST sample production code (2 files mandatory + 0-2 recommended per phase). Pre-push hook enforcement of the in-cycle triggers is owed via §6.N-debt (next brainstorming target after Group A lands). For this service: bluff-hunt the `tests/contract/` real-binary contract gate, `tests/parity/` cross-backend parity gate, and the production handlers behind them. Forensic anchor: 2026-05-05 architectural-bluff discovery in `Submodules/Containers/pkg/emulator`.
+Inherits root `/CLAUDE.md` §6.N. Beyond the Seventh Law clause 5 baseline (every 2-4 weeks), bluff hunts fire IN-cycle on operator-mandate invocation, matrix-runner/gate change, and new attestation file. Bluff hunts MUST sample production code (2 files mandatory + 0-2 recommended per phase). Pre-push hook enforcement of the in-cycle triggers is owed via §6.N-debt (next brainstorming target after Group A lands). For this service: bluff-hunt the `tests/contract/` real-binary contract gate, `tests/parity/` cross-backend parity gate, and the production handlers behind them. Forensic anchor: 2026-05-05 architectural-bluff discovery in `submodules/containers/pkg/emulator`.
 ```
 
 - [ ] **Step 3.3: Append §6.N reference block to `lava-api-go/CONSTITUTION.md`**
@@ -255,16 +255,16 @@ Create the file with this content:
   "date": "2026-05-05",
   "protocol": "Seventh Law clause 5 (Recurring Bluff Hunt) + new clause 6.N.1 + 6.N.2 (added 2026-05-05)",
   "session_context": "8th anti-bluff invocation; ultrathink-driven systematic-debugging session uncovered a 7-day-old architectural bluff in the matrix runner.",
-  "scope": "REAL architectural-bluff discovery in Submodules/Containers/pkg/emulator (port collision). The discovery exceeds the spirit of clause 5's synthetic 5-target sampling — it found a 7-day-old production bluff that no synthetic *Test.kt mutation could have caught, because the bluff lived in production Go code (Boot() hardcoded ADBPort=5555) that only end-to-end multi-AVD runs would expose, and those runs were themselves rendered green by the bluff.",
+  "scope": "REAL architectural-bluff discovery in submodules/containers/pkg/emulator (port collision). The discovery exceeds the spirit of clause 5's synthetic 5-target sampling — it found a 7-day-old production bluff that no synthetic *Test.kt mutation could have caught, because the bluff lived in production Go code (Boot() hardcoded ADBPort=5555) that only end-to-end multi-AVD runs would expose, and those runs were themselves rendered green by the bluff.",
   "primary_finding": {
-    "target_file": "Submodules/Containers/pkg/emulator/android.go",
+    "target_file": "submodules/containers/pkg/emulator/android.go",
     "target_function": "AndroidEmulator.Boot",
     "bluff_classification": "Hardcoded-port multi-target test runner (now in Forbidden Test Patterns list per Seventh Law clause 4)",
     "bluff_age_days": 7,
-    "bluff_origin_commit": "Submodules/Containers commit 7614b94 (Phase 3 emulator package shipping)",
+    "bluff_origin_commit": "submodules/containers commit 7614b94 (Phase 3 emulator package shipping)",
     "remediation_commits": [
-      "Submodules/Containers commit 648a4bb — dynamic port discovery via adb-devices diff",
-      "Submodules/Containers commit f6d09cb — Teardown waits for qemu to actually exit"
+      "submodules/containers commit 648a4bb — dynamic port discovery via adb-devices diff",
+      "submodules/containers commit f6d09cb — Teardown waits for qemu to actually exit"
     ],
     "incident_record": ".lava-ci-evidence/sixth-law-incidents/2026-05-05-matrix-runner-port-collision-bluff.json",
     "false-attestations_retracted": [
@@ -323,7 +323,7 @@ for f in CLAUDE.md AGENTS.md lava-api-go/CLAUDE.md lava-api-go/AGENTS.md lava-ap
   echo -n "$f: "
   grep -c "6\.N" "$f"
 done
-for f in Submodules/*/CLAUDE.md; do
+for f in submodules/*/CLAUDE.md; do
   echo -n "$(basename $(dirname "$f")): "
   grep -c "6\.N" "$f"
 done
@@ -432,7 +432,7 @@ submodule branches lava-pin/2026-05-05-clause-6n).
 Forensic anchor: 2026-05-05 ultrathink-driven discovery of the 7-day-
 old matrix-runner port-collision bluff. The bluff was invisible to
 existing test-only bluff hunts because it lived in production Go
-code in Submodules/Containers/pkg/emulator/Boot(). New §6.N + 5.b
+code in submodules/containers/pkg/emulator/Boot(). New §6.N + 5.b
 require production-code coverage in bluff hunts going forward.
 
 Out-of-scope: pre-push hook code (Group A-prime spec, next).
@@ -459,7 +459,7 @@ Expected: 4 successful pushes (gitflic, gitlab, gitverse, github), all convergin
 ## Task 7: Submodule §6.N propagation
 
 **Files:**
-- Modify: 16 × `Submodules/<name>/CLAUDE.md` (15 standard + 1 Containers stronger variant)
+- Modify: 16 × `submodules/<name>/CLAUDE.md` (15 standard + 1 Containers stronger variant)
 
 This task batches 16 submodule edits + 16 per-submodule commits + 16 per-submodule pushes. Operates inside each submodule's own git repo.
 
@@ -472,7 +472,7 @@ cat > /tmp/lava-clause-6n-standard.md <<'EOF'
 
 ## Clause 6.N (added 2026-05-05, inherited per 6.F)
 
-- **Clause 6.N — Bluff-Hunt Cadence Tightening + Production Code Coverage** — see root `/CLAUDE.md` §6.N. Beyond the Seventh Law clause 5 baseline (5 random `*Test.kt` files every 2-4 weeks), bluff hunts now fire IN-cycle on three triggers: (1) per operator anti-bluff-mandate invocation — first/day full 5+2, subsequent same-day lighter 1-2 file incident-response; (2) per matrix-runner/gate change (pre-push enforced via §6.N-debt — owed); (3) per phase-gating attestation file added (pre-push enforced via §6.N-debt — owed). Bluff hunts MUST also sample production code: 2 files per phase from gate-shaping code (canonical list in root §6.N.2: `scripts/tag.sh` helpers, `scripts/check-constitution.sh`, `Submodules/Containers/pkg/emulator/`, `Submodules/Containers/cmd/emulator-matrix/`, the matrix runner's `writeAttestation` function) plus 0-2 from broader CI-touched code. Conceptual filter: "would a bug here be invisible to existing tests?". Forensic anchor: 2026-05-05 ultrathink-driven discovery of the 7-day-old `pkg/emulator/Boot()` port-collision bluff that was invisible to all existing test-only bluff hunts. §6.N-debt tracks the pre-push hook implementation owed via the Group A-prime spec (next brainstorming target).
+- **Clause 6.N — Bluff-Hunt Cadence Tightening + Production Code Coverage** — see root `/CLAUDE.md` §6.N. Beyond the Seventh Law clause 5 baseline (5 random `*Test.kt` files every 2-4 weeks), bluff hunts now fire IN-cycle on three triggers: (1) per operator anti-bluff-mandate invocation — first/day full 5+2, subsequent same-day lighter 1-2 file incident-response; (2) per matrix-runner/gate change (pre-push enforced via §6.N-debt — owed); (3) per phase-gating attestation file added (pre-push enforced via §6.N-debt — owed). Bluff hunts MUST also sample production code: 2 files per phase from gate-shaping code (canonical list in root §6.N.2: `scripts/tag.sh` helpers, `scripts/check-constitution.sh`, `submodules/containers/pkg/emulator/`, `submodules/containers/cmd/emulator-matrix/`, the matrix runner's `writeAttestation` function) plus 0-2 from broader CI-touched code. Conceptual filter: "would a bug here be invisible to existing tests?". Forensic anchor: 2026-05-05 ultrathink-driven discovery of the 7-day-old `pkg/emulator/Boot()` port-collision bluff that was invisible to all existing test-only bluff hunts. §6.N-debt tracks the pre-push hook implementation owed via the Group A-prime spec (next brainstorming target).
 EOF
 echo "standard block saved to /tmp/lava-clause-6n-standard.md"
 ```
@@ -498,7 +498,7 @@ echo "Containers stronger variant saved to /tmp/lava-clause-6n-containers.md"
 ```bash
 cd /run/media/milosvasic/DATA4TB/Projects/Lava
 for sm in Auth Cache Challenges Concurrency Config Database Discovery HTTP3 Mdns Middleware Observability RateLimiter Recovery Security Tracker-SDK; do
-  cat /tmp/lava-clause-6n-standard.md >> "Submodules/$sm/CLAUDE.md"
+  cat /tmp/lava-clause-6n-standard.md >> "submodules/$sm/CLAUDE.md"
   echo "appended to $sm"
 done
 ```
@@ -509,7 +509,7 @@ Expected: 15 "appended to <name>" lines.
 
 ```bash
 cd /run/media/milosvasic/DATA4TB/Projects/Lava
-cat /tmp/lava-clause-6n-containers.md >> Submodules/Containers/CLAUDE.md
+cat /tmp/lava-clause-6n-containers.md >> submodules/containers/CLAUDE.md
 echo "appended to Containers"
 ```
 
@@ -518,7 +518,7 @@ echo "appended to Containers"
 ```bash
 cd /run/media/milosvasic/DATA4TB/Projects/Lava
 for sm in Auth Cache Challenges Concurrency Config Containers Database Discovery HTTP3 Mdns Middleware Observability RateLimiter Recovery Security Tracker-SDK; do
-  count=$(grep -c "## Clause 6\.N" "Submodules/$sm/CLAUDE.md")
+  count=$(grep -c "## Clause 6\.N" "submodules/$sm/CLAUDE.md")
   echo "$sm: $count"
 done
 ```
@@ -545,7 +545,7 @@ and mandates production-code coverage in bluff hunts (was previously
 implicit; now explicit).
 
 Forensic anchor: 2026-05-05 ultrathink-driven discovery of a 7-day-old
-architectural bluff in Submodules/Containers/pkg/emulator/Boot() that
+architectural bluff in submodules/containers/pkg/emulator/Boot() that
 hardcoded ADBPort=5555. The bluff was invisible to all existing
 test-only bluff hunts; only multi-AVD matrix runs would have caught
 it, and those runs were themselves rendered green by the bluff.
@@ -559,7 +559,7 @@ EOF
 
 declare -a results
 for sm in Auth Cache Challenges Concurrency Config Containers Database Discovery HTTP3 Mdns Middleware Observability RateLimiter Recovery Security Tracker-SDK; do
-  cd "Submodules/$sm" || { results+=("$sm: cd-failed"); continue; }
+  cd "submodules/$sm" || { results+=("$sm: cd-failed"); continue; }
 
   # Create or switch to the pin branch
   if git rev-parse --verify "$BRANCH" >/dev/null 2>&1; then
@@ -598,7 +598,7 @@ Expected: 16 submodules each report at least one "pushed to <remote> OK" line. S
 ```bash
 cd /run/media/milosvasic/DATA4TB/Projects/Lava
 for sm in Auth Cache Challenges Concurrency Config Containers Database Discovery HTTP3 Mdns Middleware Observability RateLimiter Recovery Security Tracker-SDK; do
-  cd "Submodules/$sm"
+  cd "submodules/$sm"
   echo "$sm: $(git log --oneline -1)"
   cd /run/media/milosvasic/DATA4TB/Projects/Lava
 done
@@ -611,22 +611,22 @@ Expected: 16 lines, each showing the most recent commit message starting with "d
 ## Task 8: Parent submodule pointer bump
 
 **Files:**
-- Modify (gitlink): 16 × `Submodules/<name>` pointer bumps
+- Modify (gitlink): 16 × `submodules/<name>` pointer bumps
 
 - [ ] **Step 8.1: Stage the submodule pointer changes**
 
 ```bash
 cd /run/media/milosvasic/DATA4TB/Projects/Lava
-git add Submodules/Auth Submodules/Cache Submodules/Challenges \
-  Submodules/Concurrency Submodules/Config Submodules/Containers \
-  Submodules/Database Submodules/Discovery Submodules/HTTP3 \
-  Submodules/Mdns Submodules/Middleware Submodules/Observability \
-  Submodules/RateLimiter Submodules/Recovery Submodules/Security \
-  Submodules/Tracker-SDK
+git add submodules/auth submodules/cache submodules/challenges \
+  submodules/concurrency submodules/config submodules/containers \
+  submodules/database submodules/discovery submodules/http3 \
+  submodules/mdns submodules/middleware submodules/observability \
+  submodules/ratelimiter submodules/recovery submodules/security \
+  submodules/tracker_sdk
 git status --short
 ```
 
-Expected: 16 modified-submodule lines (`M Submodules/<name>`).
+Expected: 16 modified-submodule lines (`M submodules/<name>`).
 
 - [ ] **Step 8.2: Commit the pointer bump**
 
@@ -675,7 +675,7 @@ for f in CLAUDE.md AGENTS.md lava-api-go/CLAUDE.md lava-api-go/AGENTS.md lava-ap
   echo -n "$f: "
   grep -c "6\.N" "$f"
 done
-for f in Submodules/*/CLAUDE.md; do
+for f in submodules/*/CLAUDE.md; do
   echo -n "$(basename $(dirname "$f")): "
   grep -c "6\.N" "$f"
 done
@@ -748,7 +748,7 @@ echo "=== Seventh Law clause 5 expansion ==="
 grep -E "5\.a — Cadence|5\.b — Production-code" CLAUDE.md
 echo
 echo "=== Propagation count (should be 21 ≥ 1 each) ==="
-for f in CLAUDE.md AGENTS.md lava-api-go/CLAUDE.md lava-api-go/AGENTS.md lava-api-go/CONSTITUTION.md Submodules/*/CLAUDE.md; do
+for f in CLAUDE.md AGENTS.md lava-api-go/CLAUDE.md lava-api-go/AGENTS.md lava-api-go/CONSTITUTION.md submodules/*/CLAUDE.md; do
   count=$(grep -c "6\.N" "$f")
   [ "$count" -lt 1 ] && echo "GAP: $f has $count refs" || true
 done
@@ -778,7 +778,7 @@ grep -E "TBD|TODO|<filled-from|<HH:MM:SS>" \
   lava-api-go/CLAUDE.md lava-api-go/AGENTS.md lava-api-go/CONSTITUTION.md \
   .lava-ci-evidence/anti-bluff-audit-2026-05-05.json \
   .lava-ci-evidence/bluff-hunt/2026-05-05.json \
-  Submodules/*/CLAUDE.md
+  submodules/*/CLAUDE.md
 ```
 
 Expected: empty output (no unresolved placeholders). Note: the `<TBD-Group-A-prime>` token in §6.N.3 is INTENTIONAL — it stays as a placeholder until Group A-prime spec lands and we know its filename. That single token is the only allowed `<TBD-` reference.

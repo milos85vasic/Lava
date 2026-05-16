@@ -29,9 +29,9 @@ test_compliant_fixture_passes() {
     local f
     f=$(mktemp -d)
     cd "$f"
-    mkdir -p Submodules/foo
+    mkdir -p submodules/foo
     write_well_formed_manifest helix-deps.yaml
-    write_well_formed_manifest Submodules/foo/helix-deps.yaml
+    write_well_formed_manifest submodules/foo/helix-deps.yaml
     local out
     out=$(LAVA_REPO_ROOT="$f" LAVA_HELIX_DEPS_STRICT=1 bash "$SCANNER" 2>&1)
     local rc=$?
@@ -49,8 +49,8 @@ test_missing_parent_manifest_rejected() {
     local f
     f=$(mktemp -d)
     cd "$f"
-    mkdir -p Submodules/foo
-    write_well_formed_manifest Submodules/foo/helix-deps.yaml
+    mkdir -p submodules/foo
+    write_well_formed_manifest submodules/foo/helix-deps.yaml
     # NO parent helix-deps.yaml
     local out
     out=$(LAVA_REPO_ROOT="$f" LAVA_HELIX_DEPS_STRICT=1 bash "$SCANNER" 2>&1)
@@ -69,10 +69,10 @@ test_missing_submodule_manifest_rejected() {
     local f
     f=$(mktemp -d)
     cd "$f"
-    mkdir -p Submodules/withscript Submodules/withoutscript
+    mkdir -p submodules/withscript submodules/withoutscript
     write_well_formed_manifest helix-deps.yaml
-    write_well_formed_manifest Submodules/withscript/helix-deps.yaml
-    # Submodules/withoutscript has NO helix-deps.yaml
+    write_well_formed_manifest submodules/withscript/helix-deps.yaml
+    # submodules/withoutscript has NO helix-deps.yaml
     local out
     out=$(LAVA_REPO_ROOT="$f" LAVA_HELIX_DEPS_STRICT=1 bash "$SCANNER" 2>&1)
     local rc=$?
@@ -90,7 +90,7 @@ test_wrong_schema_version_rejected() {
     local f
     f=$(mktemp -d)
     cd "$f"
-    mkdir -p Submodules/foo
+    mkdir -p submodules/foo
     cat > helix-deps.yaml <<'EOF'
 schema_version: 999
 
@@ -105,7 +105,7 @@ transitive_handling:
   recursive: true
   conflict_resolution: operator-required
 EOF
-    write_well_formed_manifest Submodules/foo/helix-deps.yaml
+    write_well_formed_manifest submodules/foo/helix-deps.yaml
     local out
     out=$(LAVA_REPO_ROOT="$f" LAVA_HELIX_DEPS_STRICT=1 bash "$SCANNER" 2>&1)
     local rc=$?
@@ -141,7 +141,7 @@ test_json_variant_accepted() {
     local f
     f=$(mktemp -d)
     cd "$f"
-    mkdir -p Submodules/foo
+    mkdir -p submodules/foo
     # JSON-ish content satisfying the structural grep checks (the grep
     # patterns use yaml-style; this test verifies file-presence check
     # for variant extensions doesn't crash, even though structural
@@ -161,7 +161,7 @@ transitive_handling:
   recursive: true
   conflict_resolution: operator-required
 EOF
-    cat > Submodules/foo/helix-deps.json <<'EOF'
+    cat > submodules/foo/helix-deps.json <<'EOF'
 {"schema_version": 1, "deps": []}
 EOF
     local out

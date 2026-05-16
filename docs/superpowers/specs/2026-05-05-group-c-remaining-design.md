@@ -165,7 +165,7 @@ scripts/tag.sh (unchanged) — gates on existing schema; the 2 new fields are
 | Phase | Branch | Files | Commits |
 |---|---|---|---|
 | **A.** Containers code | `lava-pin/2026-05-07-pkg-vm` (extends) | `pkg/emulator/{types,network,screenshot,matrix,network_test,screenshot_test,matrix_test}.go`, `pkg/vm/{types,network,screenshot,matrix,network_test,screenshot_test,matrix_test}.go`, `cmd/{emulator,vm}-matrix/main.go` | 1 commit |
-| **B.** Lava parent | `master` | `scripts/run-emulator-tests.sh`, `scripts/run-vm-{signing,distro}-matrix.sh`, `Submodules/Containers` gitlink bump | 1 commit |
+| **B.** Lava parent | `master` | `scripts/run-emulator-tests.sh`, `scripts/run-vm-{signing,distro}-matrix.sh`, `submodules/containers` gitlink bump | 1 commit |
 
 Total: **1 Containers commit + 1 Lava parent commit**. Subagent-driven; 4-mirror push verified live.
 

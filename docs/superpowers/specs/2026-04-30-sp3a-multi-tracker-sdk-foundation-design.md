@@ -79,7 +79,7 @@ Lava (this repo)
 │   ├── data/                                       (consumer change in feature integrations)
 │   ├── domain/                                     (UseCases retained but delegate to LavaTrackerSdk)
 │   └── (other core/* unchanged)
-└── Submodules/
+└── submodules/
     └── Tracker-SDK/                                NEW — vasic-digital/Tracker-SDK pinned hash
         ├── api/                                    Generic types: MirrorUrl, Protocol, HealthState, RetryPolicy
         ├── mirror/                                 MirrorManager engine + health checker
@@ -99,10 +99,10 @@ Lava (this repo)
             ├─→ :core:tracker:api          (interfaces + models)
             ├─→ :core:tracker:rutracker    (impl)
             ├─→ :core:tracker:rutor        (impl)
-            └─→ Submodules/Tracker-SDK/    (mirror, registry, testing, generic API)
+            └─→ submodules/tracker_sdk/    (mirror, registry, testing, generic API)
 ```
 
-`:core:tracker:rutracker` and `:core:tracker:rutor` both depend on `:core:tracker:api` and on `Submodules/Tracker-SDK/api/` (for `MirrorUrl`, `Protocol`, `HealthState`).
+`:core:tracker:rutracker` and `:core:tracker:rutor` both depend on `:core:tracker:api` and on `submodules/tracker_sdk/api/` (for `MirrorUrl`, `Protocol`, `HealthState`).
 
 `:core:network:api` and `:core:network:impl` are **retained** during SP-3a as a transitional layer. After Phase 2 Task 2.6, `SwitchingNetworkApi` is rewired to be a thin adapter over `LavaTrackerSdk` — the existing `NetworkApi` interface keeps its 15-method shape so feature ViewModels keep compiling, but every call goes through the new SDK underneath. `:core:network:rutracker` is removed (its content moves to `:core:tracker:rutracker` via `git mv`, preserving history).
 
@@ -110,9 +110,9 @@ Lava (this repo)
 
 A new convention plugin `lava.kotlin.tracker.module` extends `lava.kotlin.library` and pre-wires:
 - `:core:tracker:api` dependency
-- `Submodules/Tracker-SDK/api/`, `Submodules/Tracker-SDK/mirror/` dependencies
+- `submodules/tracker_sdk/api/`, `submodules/tracker_sdk/mirror/` dependencies
 - Jsoup 1.15.3, OkHttp (matching root version), kotlinx-serialization
-- Standard testing harness (`Submodules/Tracker-SDK/testing/`)
+- Standard testing harness (`submodules/tracker_sdk/testing/`)
 
 Tracker plugin modules (`:core:tracker:rutracker`, `:core:tracker:rutor`, plus any future tracker) apply this plugin instead of duplicating dependency declarations.
 
@@ -135,7 +135,7 @@ What is **explicitly out** of `Tracker-SDK`:
 
 ### 3.2 Submodule constitution
 
-`Submodules/Tracker-SDK/CLAUDE.md` and `CONSTITUTION.md` inherit from Lava's constitution and **add** a stricter rule: "no domain shape." Concretely, the submodule MUST NOT contain any class, function, file, or test resource that names a specific tracker, torrent site, or other Lava-domain entity. CI gate: `grep -rE '(?i)(rutracker|rutor|magnet|torrent|tracker\.org)' Submodules/Tracker-SDK/` returns empty (with named exemption file for the word "tracker" appearing in generic contexts like "tracker-style client").
+`submodules/tracker_sdk/CLAUDE.md` and `CONSTITUTION.md` inherit from Lava's constitution and **add** a stricter rule: "no domain shape." Concretely, the submodule MUST NOT contain any class, function, file, or test resource that names a specific tracker, torrent site, or other Lava-domain entity. CI gate: `grep -rE '(?i)(rutracker|rutor|magnet|torrent|tracker\.org)' submodules/tracker_sdk/` returns empty (with named exemption file for the word "tracker" appearing in generic contexts like "tracker-style client").
 
 The submodule **inherits** Sixth Law clauses 6.A–6.F recursively; its own `CLAUDE.md` references the root and re-states the "no relaxation" clause.
 
@@ -747,11 +747,11 @@ Per project memory, the Android client must connect to LAN api-go over HTTPS wit
 
 **Line coverage targets (secondary, gated):**
 - `:core:tracker:api`, `:core:tracker:client`, `:core:tracker:rutracker`, `:core:tracker:rutor`: ≥95%
-- `Submodules/Tracker-SDK/**`: ≥95%
+- `submodules/tracker_sdk/**`: ≥95%
 - `feature/tracker_settings`, other modified `feature/*`: ≥90%
 - `:app`: ≥85% (lower because Compose Activity glue is hard to unit-test)
 
-**Mutation kill rate (gated):** ≥85% minimum, ≥95% target, on `:core:tracker:*` and `Submodules/Tracker-SDK/**`. PITest on Kotlin; existing `scripts/mutation.sh` for Go (deferred to SP-3a-bridge).
+**Mutation kill rate (gated):** ≥85% minimum, ≥95% target, on `:core:tracker:*` and `submodules/tracker_sdk/**`. PITest on Kotlin; existing `scripts/mutation.sh` for Go (deferred to SP-3a-bridge).
 
 **Exemption ledger:** `docs/superpowers/specs/2026-04-30-sp3a-coverage-exemptions.md` — every uncovered line gets an entry: `path:line — reason — reviewer — date`. Exemptions are reviewed in PR. Blanket waivers are forbidden.
 
@@ -836,7 +836,7 @@ Pre-push hook is **not bypassable** in routine work. `--no-verify` is reserved f
 
 **6.D — Behavioral Coverage Contract.** Adopted body:
 
-> Coverage is measured behaviorally, not lexically. Every public method of every interface added under `core/tracker/api/`, `Submodules/Tracker-SDK/api/`, or any future SDK contract module MUST have at least one real-stack test that traverses the same code path a user's action triggers. Line coverage is reported as a secondary metric. Uncovered lines after the behavioral pass are exempted only via an entry in the per-spec exemption ledger (`docs/superpowers/specs/<spec>-coverage-exemptions.md`) naming the line, the reason, the reviewer, and the date. Blanket coverage waivers are forbidden.
+> Coverage is measured behaviorally, not lexically. Every public method of every interface added under `core/tracker/api/`, `submodules/tracker_sdk/api/`, or any future SDK contract module MUST have at least one real-stack test that traverses the same code path a user's action triggers. Line coverage is reported as a secondary metric. Uncovered lines after the behavioral pass are exempted only via an entry in the per-spec exemption ledger (`docs/superpowers/specs/<spec>-coverage-exemptions.md`) naming the line, the reason, the reviewer, and the date. Blanket coverage waivers are forbidden.
 
 **6.E — Capability Honesty.** Adopted body:
 
@@ -854,9 +854,9 @@ Pre-push hook is **not bypassable** in routine work. `--no-verify` is reserved f
 | `feature/CLAUDE.md` | Add: every feature ViewModel that consumes `LavaTrackerSdk` MUST have a Challenge Test covering the same UI path. The Challenge Test's falsifiability rehearsal MUST be recorded in the same PR that introduces the ViewModel change. |
 | `lava-api-go/CLAUDE.md` | Add SP-3a-bridge expectations: when SP-2 ships, the Go-side rutracker refactor MUST satisfy 6.D and 6.E. |
 | `lava-api-go/AGENTS.md` | Mirror the above plus pointer to the Go-side bridge plan once written. |
-| `Submodules/Tracker-SDK/CLAUDE.md` (new) | Inherit Lava root + add "no domain shape" rule with named CI gate. |
-| `Submodules/Tracker-SDK/CONSTITUTION.md` (new) | Same content as CLAUDE.md, formatted as a constitution doc per project convention. |
-| `Submodules/Tracker-SDK/AGENTS.md` (new) | Submodule-specific agent guide: how to add a new generic primitive, how to run the falsifiability rehearsal, where the four-upstream mirror policy lives. |
+| `submodules/tracker_sdk/CLAUDE.md` (new) | Inherit Lava root + add "no domain shape" rule with named CI gate. |
+| `submodules/tracker_sdk/CONSTITUTION.md` (new) | Same content as CLAUDE.md, formatted as a constitution doc per project convention. |
+| `submodules/tracker_sdk/AGENTS.md` (new) | Submodule-specific agent guide: how to add a new generic primitive, how to run the falsifiability rehearsal, where the four-upstream mirror policy lives. |
 | Root `AGENTS.md` | Extend the agent guide with the new SDK module map, the `Tracker-SDK` pin policy, and pointers to the new Challenge Test pack location. |
 
 ### 9.3 Local-Only CI/CD constraint reaffirmation
@@ -872,7 +872,7 @@ Detailed task/sub-task breakdown is the writing-plans skill's output. This secti
 | Phase | Name | Duration | Key deliverables |
 |---|---|---|---|
 | **0** | **Pre-flight** (Task 1.0) | 0.5w | Bluff audit of all fakes touched by SP-3a. Evidence pack. Exemption ledger seeded. |
-| **1** | **Foundation** | 2w | `vasic-digital/Tracker-SDK` repo created on all four upstreams + mirrored. Submodule pinned at `Submodules/Tracker-SDK/`. `:core:tracker:api`, `:core:tracker:registry` (thin wrapper over Tracker-SDK), `:core:tracker:mirror` (thin wrapper), `:core:tracker:testing`. New convention plugin `lava.kotlin.tracker.module` in `buildSrc/`. Constitutional clauses 6.D/6.E/6.F drafted. |
+| **1** | **Foundation** | 2w | `vasic-digital/Tracker-SDK` repo created on all four upstreams + mirrored. Submodule pinned at `submodules/tracker_sdk/`. `:core:tracker:api`, `:core:tracker:registry` (thin wrapper over Tracker-SDK), `:core:tracker:mirror` (thin wrapper), `:core:tracker:testing`. New convention plugin `lava.kotlin.tracker.module` in `buildSrc/`. Constitutional clauses 6.D/6.E/6.F drafted. |
 | **2** | **RuTracker decoupling (Kotlin only)** | 2.5w | `git mv core/network/rutracker → core/tracker/rutracker`. `RuTrackerClient` implements `TrackerClient` + applicable feature interfaces. DTO ↔ model mappers. Registry registration. `SwitchingNetworkApi` rewired to delegate to `LavaTrackerSdk`. **Parity gate**: byte-for-byte identical output for all 15 NetworkApi methods against pre-SP-3a baseline. **No Go-side changes.** |
 | **3** | **RuTor implementation** | 2w | `:core:tracker:rutor` module. All parsers with ≥5 fixtures each. `RuTorClient`. `RuTorAuthenticator`. Registry registration. Real-tracker integration test. |
 | **4** | **Mirror health + cross-tracker fallback + tracker_settings UI** | 1w | `WorkManager` periodic worker for health probes. Health state persisted to Room. Fallback chain executor with falsifiability rehearsal. Cross-tracker fallback policy + `CrossTrackerFallbackProposed` outcome + UI side effect. `:feature:tracker_settings` Compose screen (tracker selection + custom mirrors UI). |
@@ -945,7 +945,7 @@ The implementation plan that follows this spec must produce per-task and per-sub
 
 SP-3a is "done" when **all** of the following are true:
 
-1. `Submodules/Tracker-SDK/` exists, is mirrored to all four upstreams, has its own constitution + CI evidence, and is pinned at a frozen hash in this repo.
+1. `submodules/tracker_sdk/` exists, is mirrored to all four upstreams, has its own constitution + CI evidence, and is pinned at a frozen hash in this repo.
 2. `:core:tracker:api`, `:core:tracker:client`, `:core:tracker:rutracker`, `:core:tracker:rutor`, `:core:tracker:testing`, `:feature:tracker_settings` are all present and applied.
 3. `:core:network:rutracker` is removed from `settings.gradle.kts`; its history is preserved at `:core:tracker:rutracker` via `git mv`.
 4. `SwitchingNetworkApi` delegates to `LavaTrackerSdk`. Parity gate passes byte-for-byte.

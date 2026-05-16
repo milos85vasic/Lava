@@ -4,19 +4,19 @@
   "rule": "§6.N.1.1 subsequent-same-day lighter hunt — 1-2 production-code files from gate-shaping surface",
   "targets": [
     {
-      "file": "Submodules/Containers/pkg/cache/store.go",
+      "file": "submodules/containers/pkg/cache/store.go",
       "function": "FilesystemStore.Get",
       "mutation": "replace `if gotSHA != entry.SHA256 { ... }` with `if false`",
-      "covering_test": "Submodules/Containers/pkg/cache/store_test.go::TestStore_Get_SHA256Mismatch_RejectsAndRemovesBlob",
+      "covering_test": "submodules/containers/pkg/cache/store_test.go::TestStore_Get_SHA256Mismatch_RejectsAndRemovesBlob",
       "observed_failure": "expected SHA256 mismatch error, got nil",
       "reverted": true,
       "commit_reference": "Containers branch lava-pin/2026-05-07-pkg-vm Phase A commit 03f713f709c3609780a9e41a6c7cbd93a515d574 — see commit body Bluff-Audit stamp"
     },
     {
-      "file": "Submodules/Containers/pkg/vm/qemu.go",
+      "file": "submodules/containers/pkg/vm/qemu.go",
       "function": "QEMUVM.Boot port allocator",
       "mutation": "hardcode SSH port to 10022 instead of allocating via atomic counter",
-      "covering_test": "Submodules/Containers/pkg/vm/qemu_test.go::TestQEMUVM_Boot_DistinctPortsAcrossInvocations",
+      "covering_test": "submodules/containers/pkg/vm/qemu_test.go::TestQEMUVM_Boot_DistinctPortsAcrossInvocations",
       "observed_failure": "two Boots got same SSH port (10022) — port-allocator broken",
       "reverted": true,
       "commit_reference": "Containers branch lava-pin/2026-05-07-pkg-vm Phase A commit 03f713f709c3609780a9e41a6c7cbd93a515d574 — see commit body Bluff-Audit stamp"

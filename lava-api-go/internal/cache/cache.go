@@ -1,4 +1,4 @@
-// Package cache adapts Submodules/Cache/pkg/postgres for lava-api-go's
+// Package cache adapts submodules/cache/pkg/postgres for lava-api-go's
 // concrete needs: cache key construction (per spec §6) and outcome
 // classification (hit | miss | bypass | invalidate) for metrics.
 package cache
@@ -67,7 +67,7 @@ const (
 	OutcomeInvalidate Outcome = "invalidate"
 )
 
-// Client is the lava-api-go cache facade. It owns a Submodules/Cache pgcache.Client
+// Client is the lava-api-go cache facade. It owns a submodules/cache pgcache.Client
 // and exposes only the operations handlers need.
 type Client struct {
 	inner *pgcache.Client

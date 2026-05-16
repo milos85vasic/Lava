@@ -25,7 +25,7 @@ Exemptions (kept in lockstep with the §6.R clause body):
   .env.example                                — placeholder file
   .lava-ci-evidence/                          — forensic anchors + matrix evidence
   docs/**/*.md                                — design docs, plans, incident notes
-  Submodules/                                 — submodules vendored at pinned hash
+  submodules/                                 — submodules vendored at pinned hash
   *_test.go, *Test.kt, *Tests.kt, *Test.java  — synthetic test fixtures
   src/test/, src/androidTest/                 — test source roots
   fixtures/                                   — test HTML/JSON fixtures

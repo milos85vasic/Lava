@@ -41,7 +41,7 @@ The verifier currently runs in `--advisory` mode in `scripts/verify-all-constitu
 ## What it checks
 
 1. **Schema presence**: ledger file exists with a `metadata:` block, `schema_version: 1`, and a `rows:` block.
-2. **Row coverage**: every on-disk path under `feature/*/`, `core/*/`, `app/`, `lava-api-go/`, `Submodules/*/` has a matching `  - path: "<p>"` row in the ledger.
+2. **Row coverage**: every on-disk path under `feature/*/`, `core/*/`, `app/`, `lava-api-go/`, `submodules/*/` has a matching `  - path: "<p>"` row in the ledger.
 3. **Freshness**: regenerates the ledger into a tmp file (stripping the metadata block + `generated_at:` line) and diffs against the committed ledger; any non-trivial row-content difference is a STALE violation.
 
 ## Why staleness checks matter (anti-bluff per §6.J)

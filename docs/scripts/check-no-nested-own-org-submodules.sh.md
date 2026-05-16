@@ -35,7 +35,7 @@ Both `github.com:` and `gitlab.com:` URL forms are matched.
 
 When a violation is reported, two resolution paths exist:
 
-1. **Refactor (preferred):** Extract the nested submodule to be a peer of the container. Example: move `Submodules/Challenges/Panoptic` to `Submodules/Panoptic` (parent-level peer of `Submodules/Challenges`). Both submodules then load independently from the parent project's `.gitmodules`.
+1. **Refactor (preferred):** Extract the nested submodule to be a peer of the container. Example: move `submodules/challenges/Panoptic` to `submodules/Panoptic` (parent-level peer of `submodules/challenges`). Both submodules then load independently from the parent project's `.gitmodules`.
 
 2. **Waiver:** Add an entry to the `WAIVERS=()` array at the top of the scanner. Each waiver MUST cite:
    - WHY the nesting exists (legacy coupling, hard infrastructure dependency, etc.)
@@ -54,7 +54,7 @@ LAVA_NESTED_OWN_ORG_STRICT=0 bash scripts/check-no-nested-own-org-submodules.sh 
 
 `tests/check-constitution/test_nested_own_org_submodules.sh` — 4 fixtures:
 
-- `test_clean_fixture_passes` — synthetic Submodules/foo/ pointing to nlohmann/json (third-party org) → exits 0
+- `test_clean_fixture_passes` — synthetic submodules/foo/ pointing to nlohmann/json (third-party org) → exits 0
 - `test_vasic_digital_chain_rejected` — synthetic vasic-digital chain → exits 1 with violation
 - `test_helix_dev_gitlab_chain_rejected` — HelixDevelopment via gitlab → exits 1 with violation
 - `test_advisory_mode_returns_zero` — advisory mode swallows exit code
@@ -63,9 +63,9 @@ LAVA_NESTED_OWN_ORG_STRICT=0 bash scripts/check-no-nested-own-org-submodules.sh 
 
 | Container | Nested path | Forbidden URL | Status |
 |---|---|---|---|
-| `Submodules/Challenges` | `Panoptic` | `git@github.com:vasic-digital/Panoptic.git` | OPEN — refactor owed |
+| `submodules/challenges` | `Panoptic` | `git@github.com:vasic-digital/Panoptic.git` | OPEN — refactor owed |
 
-The Challenges/Panoptic chain pre-dates §11.4.28 (the clause was added 2026-05-15). Resolution is owed in a follow-up cycle: extract Panoptic to be `Submodules/Panoptic` (parent-level peer of Challenges), update both projects' `.gitmodules`, propagate the rename through any references in the Challenges submodule's code.
+The Challenges/Panoptic chain pre-dates §11.4.28 (the clause was added 2026-05-15). Resolution is owed in a follow-up cycle: extract Panoptic to be `submodules/Panoptic` (parent-level peer of Challenges), update both projects' `.gitmodules`, propagate the rename through any references in the Challenges submodule's code.
 
 ## Cross-references
 

@@ -1,6 +1,6 @@
 -- 0005_response_cache_realign.up.sql
 --
--- Realign the response_cache table to the schema Submodules/Cache/pkg/postgres
+-- Realign the response_cache table to the schema submodules/cache/pkg/postgres
 -- expects (cache_key, value, expires_at). Migration 0001 was rewritten in
 -- aa11566 but golang-migrate considers 0001 already applied on existing
 -- deployments — the change only takes effect on a fresh database. Add a

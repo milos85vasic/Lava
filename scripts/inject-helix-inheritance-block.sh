@@ -11,7 +11,7 @@
 #   scripts/inject-helix-inheritance-block.sh [files...]
 #
 # Default file set (when no args): every CLAUDE.md / AGENTS.md /
-# CONSTITUTION.md under Submodules/ + lava-api-go/ + core/ + app/ +
+# CONSTITUTION.md under submodules/ + lava-api-go/ + core/ + app/ +
 # feature/. The root CLAUDE.md + AGENTS.md are excluded — they were
 # updated in the 1.2.23 cycle's parent commit and have richer §6.AD
 # context.
@@ -39,7 +39,7 @@ cd "${REPO_ROOT}"
 declare -a FILES=()
 if [[ $# -eq 0 ]]; then
     while IFS= read -r f; do FILES+=("${f}"); done < <(
-        ls Submodules/*/CLAUDE.md Submodules/*/AGENTS.md Submodules/*/CONSTITUTION.md 2>/dev/null
+        ls submodules/*/CLAUDE.md submodules/*/AGENTS.md submodules/*/CONSTITUTION.md 2>/dev/null
         ls lava-api-go/CLAUDE.md lava-api-go/AGENTS.md lava-api-go/CONSTITUTION.md 2>/dev/null
         find core feature app -name CLAUDE.md -not -path "*/build/*" -not -path "*/.gradle/*" 2>/dev/null
     )

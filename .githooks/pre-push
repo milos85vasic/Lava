@@ -95,7 +95,7 @@ while read -r local_ref local_sha remote_ref remote_sha; do
     # + scripts/firebase-distribute.sh (release-gate script) per §6.AD-debt
     # closure-cycle audit. =====
     gate_files=$(git diff-tree --no-commit-id --name-only -r "$sha" | \
-      grep -E '^(Submodules/Containers/pkg/emulator/.*\.go|scripts/run-emulator-tests\.sh|scripts/tag\.sh|scripts/check-constitution\.sh|scripts/firebase-distribute\.sh|\.githooks/pre-push)$' || true)
+      grep -E '^(submodules/containers/pkg/emulator/.*\.go|scripts/run-emulator-tests\.sh|scripts/tag\.sh|scripts/check-constitution\.sh|scripts/firebase-distribute\.sh|\.githooks/pre-push)$' || true)
     if [[ -n "$gate_files" ]]; then
       msg=$(git log -1 --pretty=%B "$sha")
       if ! grep -qE '^Bluff-Audit:' <<<"$msg"; then

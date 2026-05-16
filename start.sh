@@ -10,7 +10,7 @@ cd "$SCRIPT_DIR"
 # Delegates to the Lava-domain CLI (tools/lava-containers) to bring up the
 # lava-api-go service with full LAN discoverability via mDNS. The Lava CLI is
 # thin glue; generic container-runtime concerns live in the upstream
-# vasic-digital/Containers submodule (Submodules/Containers/, pinned).
+# vasic-digital/Containers submodule (submodules/containers/, pinned).
 #
 # 2026-05-06: the legacy Ktor proxy was removed. start.sh now drives the
 # api-go profile only.

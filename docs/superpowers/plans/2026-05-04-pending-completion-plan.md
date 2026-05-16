@@ -165,7 +165,7 @@ C8); longer for C3 (UI bug to fix) and C7 (fault-injection design).
 ## Phase 3 — Multi-AVD Container Matrix Infrastructure
 
 **STATUS (2026-05-04 late):** Phases 3.1, 3.2, 3.3 ✓ done in this work
-session. `Submodules/Containers/pkg/emulator/` shipped with falsifiability-
+session. `submodules/containers/pkg/emulator/` shipped with falsifiability-
 rehearsed unit tests; `cmd/emulator-matrix` CLI builds + runs;
 Lava-side `scripts/run-emulator-tests.sh` is now thin glue calling the
 CLI; `scripts/check-constitution.sh` enforces the clause-6.K presence
@@ -180,14 +180,14 @@ matrix exit 0, all_passed=true).
 acceptance gate. Currently `scripts/run-emulator-tests.sh` boots ONE
 AVD; the orchestration for multi-AVD is documented but not implemented.
 Per clause 6.K-debt, this work belongs in
-`Submodules/Containers/pkg/emulator/` + `cmd/emulator-matrix`. Lava-side
+`submodules/containers/pkg/emulator/` + `cmd/emulator-matrix`. Lava-side
 glue calls it.
 
 ### Phase 3.1 — Containers extension
 
 | ID | Task | Falsifiability rehearsal |
 |---|---|---|
-| 3.1.1 | Create `Submodules/Containers/pkg/emulator/` package skeleton — `EmulatorMatrix` type + `RunOptions` + `MatrixResult` | N/A — types only |
+| 3.1.1 | Create `submodules/containers/pkg/emulator/` package skeleton — `EmulatorMatrix` type + `RunOptions` + `MatrixResult` | N/A — types only |
 | 3.1.2 | Implement `Boot(ctx, avd, runtime)` using existing `pkg/runtime` for Docker/Podman auto-detect | Pass invalid AVD → expect deterministic failure with matching error type |
 | 3.1.3 | Implement `WaitForBoot(ctx, port)` — polls `getprop sys.boot_completed` via `adb` until 1 or timeout | Mutate to skip the polling loop → boot-incomplete state slips through |
 | 3.1.4 | Implement `Install(apkPath)`, `RunInstrumentation(testClass)`, `Teardown()` | Each step has its own bluff-audit |

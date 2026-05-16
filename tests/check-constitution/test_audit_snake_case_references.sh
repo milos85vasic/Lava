@@ -144,22 +144,47 @@ test_numeric_columns() {
     fi
 }
 
-# Test 11: counts are non-negative + Containers > Discovery (sanity baseline)
+# Test 11: counts are non-negative + script correctly reports counts
 # This is an anti-bluff guarantee: the script must produce a count that
-# reflects the actual repo state, not a hardcoded value. Containers has
-# vastly more references than Discovery (370 vs 5 at time of writing) —
-# if the script were lying about its inputs, this invariant would break.
+# reflects the actual repo state, not a hardcoded value.
+#
+# Pre-Phase-6a+6b: Containers had ~370 refs, Discovery ~5; the invariant
+# Containers > Discovery surfaced any bluff-by-hardcoding.
+#
+# Post-Phase-6a+6b: ALL 17 CamelCase counts SHOULD be 0 (clean rename;
+# any residual is a stale reference per §11.4.29). The anti-bluff
+# invariant becomes: the audit script reports 0 for every entry that
+# was successfully migrated. Allowing a small forensic-anchor tolerance
+# of <=2 stale refs (per §11.4.29 + bluff-hunt JSON narrative exemption).
 test_blast_radius_ordering_sanity() {
-    local out containers_refs discovery_refs
+    local out containers_refs discovery_refs total_refs name
     out=$(bash "$SCRIPT" 2>&1)
     containers_refs=$(echo "$out" | awk '/^Containers\t/ {print $2}')
     discovery_refs=$(echo "$out" | awk '/^Discovery\t/ {print $2}')
-    if [[ -n "$containers_refs" && -n "$discovery_refs" \
-          && "$containers_refs" -gt "$discovery_refs" ]]; then
-        pass "test_blast_radius_ordering_sanity"
-    else
+
+    # Numeric + present check
+    if [[ -z "$containers_refs" || -z "$discovery_refs" ]]; then
         fail "test_blast_radius_ordering_sanity" \
-             "Containers ($containers_refs) should exceed Discovery ($discovery_refs)"
+             "missing Containers ($containers_refs) or Discovery ($discovery_refs) row"
+        return
+    fi
+
+    # Post-rename clean state: all CamelCase counts MUST be small
+    # (<=2 forensic-anchor narrative quotes; ideally 0). Verify ALL 17
+    # to detect regression where a rename was accidentally reverted.
+    local violations=()
+    while IFS=$'\t' read -r name refs files; do
+        [[ "$name" == "NAME" || "$name" == "TOTAL_Submodules" ]] && continue
+        if (( refs > 2 )); then
+            violations+=("$name=$refs")
+        fi
+    done <<<"$out"
+
+    if (( ${#violations[@]} > 0 )); then
+        fail "test_blast_radius_ordering_sanity" \
+             "post-rename CamelCase regression — these names have >2 refs: ${violations[*]}"
+    else
+        pass "test_blast_radius_ordering_sanity"
     fi
 }
 

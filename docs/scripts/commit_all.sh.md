@@ -112,7 +112,7 @@ The wrapper pushes to every remote named exactly `github` or `gitlab`. If you ha
 
 ### Submodules with nested-dirty state
 
-If `Submodules/X` shows `m` (lowercase, sub-submodule modified) in `git status`, the parent commit does NOT include the submodule unless explicitly listed in `--files`. This is intentional — pre-existing nested-dirty state should not silently advance the parent's pin.
+If `submodules/X` shows `m` (lowercase, sub-submodule modified) in `git status`, the parent commit does NOT include the submodule unless explicitly listed in `--files`. This is intentional — pre-existing nested-dirty state should not silently advance the parent's pin.
 
 ### Commit body includes `--` token
 
@@ -124,7 +124,7 @@ The wrapper is intentionally thin (~180 lines). It does not:
 
 - Run tests directly (Layer 2 of pre-push hook does that via `scripts/ci.sh --changed-only`)
 - Regenerate auto-generated docs (HelixConstitution §11.4.12 — TODO §6.AD-debt for the export-regeneration pipeline integration)
-- Handle submodule pin bumps (use direct `git submodule add` / `git add Submodules/<name>` for those)
+- Handle submodule pin bumps (use direct `git submodule add` / `git add submodules/<name>` for those)
 
 ## Related scripts
 

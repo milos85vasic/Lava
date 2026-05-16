@@ -16,7 +16,7 @@
 # `key:value` JSON snippets in comments.
 #
 # Exemptions (lockstep with §6.R clause body):
-#   .env.example, .lava-ci-evidence/, Submodules/, tests, fixtures/,
+#   .env.example, .lava-ci-evidence/, submodules/, tests, fixtures/,
 #   CHANGELOG.md, *.md, *.json, *.xml, *.yml, *.yaml — external config
 #   and docs are legitimate homes for these literals.
 #
@@ -30,7 +30,7 @@ cd "$(dirname "$0")/.."
 
 candidates=$(
   git ls-files -z \
-    | grep -zvE '^\.env\.example$|^\.lava-ci-evidence/|^Submodules/|_test\.go$|(Test\.kt|Tests\.kt|Test\.java)$|/test/|/androidTest/|fixtures/|^CHANGELOG\.md$|\.md$|\.json$|\.xml$|\.yml$|\.yaml$' \
+    | grep -zvE '^\.env\.example$|^\.lava-ci-evidence/|^submodules/|_test\.go$|(Test\.kt|Tests\.kt|Test\.java)$|/test/|/androidTest/|fixtures/|^CHANGELOG\.md$|\.md$|\.json$|\.xml$|\.yml$|\.yaml$' \
     | while IFS= read -r -d '' p; do
         [[ -f "$p" ]] && printf '%s\0' "$p"
       done \

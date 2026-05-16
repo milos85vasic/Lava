@@ -1,7 +1,7 @@
 # :core:tracker:mirror
 
 Lava-domain bridge to the generic `lava.sdk:mirror` primitive in the
-`Submodules/Tracker-SDK/` composite-build pin. Hosts the
+`submodules/tracker_sdk/` composite-build pin. Hosts the
 Lava-domain `MirrorConfigStore` typealias and any Lava-specific
 serialization glue.
 

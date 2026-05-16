@@ -1,4 +1,4 @@
-// Package ratelimit configures Submodules/RateLimiter for the four route
+// Package ratelimit configures submodules/ratelimiter for the four route
 // classes lava-api-go uses (read | write | login | download), keyed by
 // (client_ip, route_class). Per spec §9, defaults are placeholders until
 // load testing pins them; tunable via env vars.

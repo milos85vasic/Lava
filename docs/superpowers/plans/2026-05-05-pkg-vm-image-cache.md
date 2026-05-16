@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use `superpowers:subagent-driven-development` (recommended, per Group B pattern) or `superpowers:executing-plans` to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Close §6.K-debt criterion (2) by adding `Submodules/Containers/pkg/vm/` (QEMU full-system VM orchestration mirroring `pkg/emulator/AndroidMatrixRunner`'s shape) + a generic `pkg/cache/` (CAS image cache used by both `pkg/vm/` and the refactored `pkg/emulator/`); bundle Group C's image-cache-management item; ship 2 Lava-side consumers (cross-arch signing × 9 configs and cross-OS distro × 3) that produce attestations matching Group B's row schema so `scripts/tag.sh`'s 3 Group B gates work unchanged.
+**Goal:** Close §6.K-debt criterion (2) by adding `submodules/containers/pkg/vm/` (QEMU full-system VM orchestration mirroring `pkg/emulator/AndroidMatrixRunner`'s shape) + a generic `pkg/cache/` (CAS image cache used by both `pkg/vm/` and the refactored `pkg/emulator/`); bundle Group C's image-cache-management item; ship 2 Lava-side consumers (cross-arch signing × 9 configs and cross-OS distro × 3) that produce attestations matching Group B's row schema so `scripts/tag.sh`'s 3 Group B gates work unchanged.
 
 **Architecture:** 3 new Containers packages (`pkg/cache/`, `pkg/vm/`, `cmd/vm-matrix/`) + an internal refactor of `pkg/emulator/` to route image fetch through `pkg/cache/`. Lava-domain pieces stay Lava-side per Decoupled Reusable Architecture: `tools/lava-containers/vm-images.json` (project-side manifest with the 9 qcow2 SHA-256 entries) + 2 thin-glue scripts wrapping `cmd/vm-matrix` for the consumer matrices. Every commit's body carries a Bluff-Audit stamp; pre-push Check 4 (gate-shaping file ⇒ stamp required) enforces.
 
@@ -14,21 +14,21 @@
 
 | File | Responsibility | Phase |
 |---|---|---|
-| `Submodules/Containers/pkg/cache/manifest.go` | `Manifest`, `ImageEntry`, `LoadManifest()` — JSON parse + validation; rejects duplicate IDs, malformed SHA-256, unknown schema versions | A |
-| `Submodules/Containers/pkg/cache/store.go` | `Store` interface; `FilesystemStore` impl with CAS layout (`$XDG_CACHE_HOME/vasic-digital/containers-images/blobs/sha256/<hash>`); per-image flock; SHA-256 verify-on-fetch with rejection-on-mismatch | A |
-| `Submodules/Containers/pkg/cache/manifest_test.go` | Schema validation tests + falsifiability rehearsal (loosen SHA validator → reject test fails) | A |
-| `Submodules/Containers/pkg/cache/store_test.go` | Get/Verify/Refresh tests against counting-fake HTTP server; concurrent-Get serialization test; SHA-mismatch rejection test (falsifiability rehearsal) | A |
-| `Submodules/Containers/pkg/vm/types.go` | `VMTarget`, `BootResult`, `VMConfig`, `DiagnosticInfo`, `FailureSummary`, `VMMatrixConfig`, `VMMatrixResult` (Gating + per-row Diag/FailureSummaries/Concurrent — schema-identical to `pkg/emulator`) | A |
-| `Submodules/Containers/pkg/vm/qemu.go` | `QEMUVM` impl of `VM` interface; KVM-where-available + TCG-fallback per arch; SSH client over `golang.org/x/crypto/ssh`; SCP via the SSH session; QMP control socket for graceful shutdown | A |
-| `Submodules/Containers/pkg/vm/teardown.go` | QEMUVM.Teardown (30s SSH-poweroff + QMP grace) + KillByPort fast-path reusing `pkg/emulator/cleanup.KillByPort` on the QMP monitor port | A |
-| `Submodules/Containers/pkg/vm/matrix.go` | `QEMUMatrixRunner` mirroring `AndroidMatrixRunner`'s shape exactly; `runOne` + `captureDiagnostic` + `parseScriptFailures` + worker pool + `writeAttestation` (same JSON schema) | A |
-| `Submodules/Containers/pkg/vm/qemu_test.go` | Fake SSH server + fake QEMU exec; Boot/WaitForReady/Upload/Run/Download/Teardown tests; falsifiability rehearsal | A |
-| `Submodules/Containers/pkg/vm/teardown_test.go` | Fast-path skip-on-mismatch test using `killByPortHook` seam (mirrors `TestTeardown_FastPath_SkipsOnMismatch` from Group B) | A |
-| `Submodules/Containers/pkg/vm/matrix_test.go` | `stubVM` driving QEMUMatrixRunner; Gating field tests; concurrent-mode tests; FailureSummaries-from-script-stderr tests | A |
-| `Submodules/Containers/cmd/vm-matrix/main.go` | Thin CLI: flag parser; constructs `QEMUVM` + `QEMUMatrixRunner`; same exit-code contract as `cmd/emulator-matrix` | A |
-| `Submodules/Containers/pkg/emulator/types.go` | (modify) extend `MatrixConfig` with optional `ImageManifestPath` field for cache-routed fetches | B |
-| `Submodules/Containers/pkg/emulator/android.go` | (modify) route system-image fetch through `cache.FilesystemStore` when image is absent under `ANDROID_SDK_ROOT` AND `MatrixConfig.ImageManifestPath != ""`; **external API unchanged** | B |
-| `Submodules/Containers/pkg/emulator/android_test.go` | (modify) add `TestAndroidEmulator_Boot_FetchesMissingSystemImageViaCache_AndDoesNotChangeAttestationSchema` — falsifiability rehearsal | B |
+| `submodules/containers/pkg/cache/manifest.go` | `Manifest`, `ImageEntry`, `LoadManifest()` — JSON parse + validation; rejects duplicate IDs, malformed SHA-256, unknown schema versions | A |
+| `submodules/containers/pkg/cache/store.go` | `Store` interface; `FilesystemStore` impl with CAS layout (`$XDG_CACHE_HOME/vasic-digital/containers-images/blobs/sha256/<hash>`); per-image flock; SHA-256 verify-on-fetch with rejection-on-mismatch | A |
+| `submodules/containers/pkg/cache/manifest_test.go` | Schema validation tests + falsifiability rehearsal (loosen SHA validator → reject test fails) | A |
+| `submodules/containers/pkg/cache/store_test.go` | Get/Verify/Refresh tests against counting-fake HTTP server; concurrent-Get serialization test; SHA-mismatch rejection test (falsifiability rehearsal) | A |
+| `submodules/containers/pkg/vm/types.go` | `VMTarget`, `BootResult`, `VMConfig`, `DiagnosticInfo`, `FailureSummary`, `VMMatrixConfig`, `VMMatrixResult` (Gating + per-row Diag/FailureSummaries/Concurrent — schema-identical to `pkg/emulator`) | A |
+| `submodules/containers/pkg/vm/qemu.go` | `QEMUVM` impl of `VM` interface; KVM-where-available + TCG-fallback per arch; SSH client over `golang.org/x/crypto/ssh`; SCP via the SSH session; QMP control socket for graceful shutdown | A |
+| `submodules/containers/pkg/vm/teardown.go` | QEMUVM.Teardown (30s SSH-poweroff + QMP grace) + KillByPort fast-path reusing `pkg/emulator/cleanup.KillByPort` on the QMP monitor port | A |
+| `submodules/containers/pkg/vm/matrix.go` | `QEMUMatrixRunner` mirroring `AndroidMatrixRunner`'s shape exactly; `runOne` + `captureDiagnostic` + `parseScriptFailures` + worker pool + `writeAttestation` (same JSON schema) | A |
+| `submodules/containers/pkg/vm/qemu_test.go` | Fake SSH server + fake QEMU exec; Boot/WaitForReady/Upload/Run/Download/Teardown tests; falsifiability rehearsal | A |
+| `submodules/containers/pkg/vm/teardown_test.go` | Fast-path skip-on-mismatch test using `killByPortHook` seam (mirrors `TestTeardown_FastPath_SkipsOnMismatch` from Group B) | A |
+| `submodules/containers/pkg/vm/matrix_test.go` | `stubVM` driving QEMUMatrixRunner; Gating field tests; concurrent-mode tests; FailureSummaries-from-script-stderr tests | A |
+| `submodules/containers/cmd/vm-matrix/main.go` | Thin CLI: flag parser; constructs `QEMUVM` + `QEMUMatrixRunner`; same exit-code contract as `cmd/emulator-matrix` | A |
+| `submodules/containers/pkg/emulator/types.go` | (modify) extend `MatrixConfig` with optional `ImageManifestPath` field for cache-routed fetches | B |
+| `submodules/containers/pkg/emulator/android.go` | (modify) route system-image fetch through `cache.FilesystemStore` when image is absent under `ANDROID_SDK_ROOT` AND `MatrixConfig.ImageManifestPath != ""`; **external API unchanged** | B |
+| `submodules/containers/pkg/emulator/android_test.go` | (modify) add `TestAndroidEmulator_Boot_FetchesMissingSystemImageViaCache_AndDoesNotChangeAttestationSchema` — falsifiability rehearsal | B |
 | `Lava/tools/lava-containers/vm-images.json` | Project-side manifest with 9 qcow2 entries (alpine/debian/fedora × x86_64/aarch64/riscv64) + 1 Android system-image entry referenced by Phase B | C |
 | `Lava/scripts/run-vm-signing-matrix.sh` | Thin glue invoking `cmd/vm-matrix` for the 9-config signing matrix; post-processing computes per-row `signing_match` from byte equivalence to x86_64 KVM reference | C |
 | `Lava/scripts/run-vm-distro-matrix.sh` | Thin glue invoking `cmd/vm-matrix` for the 3-distro health/functional matrix | C |
@@ -41,7 +41,7 @@
 | `Lava/tests/vm-distro/test_distro_matrix_accepts_clean_run.sh` | Golden path: 3×4 booleans = true → wrapper exits 0 | C |
 | `Lava/tests/vm-{signing,distro}/run_all.sh` | Test runners (one per consumer) executing every `test_*.sh` in the directory | C |
 | `Lava/CLAUDE.md` | (modify) append "RESOLVED" paragraph to §6.K-debt block (mirrors §6.N-debt RESOLVED pattern from Group A-prime; non-load-bearing) | C |
-| `Lava/Submodules/Containers` (gitlink) | Pin bump to Phase B HEAD on `lava-pin/2026-05-07-pkg-vm` | D |
+| `Lava/submodules/containers` (gitlink) | Pin bump to Phase B HEAD on `lava-pin/2026-05-07-pkg-vm` | D |
 | `Lava/.lava-ci-evidence/bluff-hunt/2026-05-07-pkg-vm.json` | §6.N.1.1 same-day hunt: 1-2 production-code files | D |
 | `Lava/.lava-ci-evidence/Phase-pkg-vm-closure-2026-05-07.json` | Closure attestation: per-component SHAs, all rehearsals, mirror convergence | D |
 
@@ -56,7 +56,7 @@
 
 ## Phase A — Containers code (1 commit on `lava-pin/2026-05-07-pkg-vm`)
 
-> Working tree: `Submodules/Containers/`. Tests: `go test ./pkg/cache/... ./pkg/vm/... -count=1 -race` + `go test ./pkg/emulator/... -count=1 -race` (existing 41 tests must stay green).
+> Working tree: `submodules/containers/`. Tests: `go test ./pkg/cache/... ./pkg/vm/... -count=1 -race` + `go test ./pkg/emulator/... -count=1 -race` (existing 41 tests must stay green).
 
 ### Task A0: Branch setup
 
@@ -66,7 +66,7 @@
 - [ ] **Step 1: Verify clean working tree + Group B end state**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/Lava/Submodules/Containers
+cd /run/media/milosvasic/DATA4TB/Projects/Lava/submodules/containers
 git status
 git rev-parse HEAD
 git rev-parse --abbrev-ref HEAD
@@ -2335,9 +2335,9 @@ Expected: both pushes succeed; identical 40-char SHA from both remotes.
 ### Task B1: Add `ImageManifestPath` to `MatrixConfig` + cache-routed Boot
 
 **Files:**
-- Modify: `Submodules/Containers/pkg/emulator/types.go`
-- Modify: `Submodules/Containers/pkg/emulator/android.go`
-- Modify: `Submodules/Containers/pkg/emulator/android_test.go`
+- Modify: `submodules/containers/pkg/emulator/types.go`
+- Modify: `submodules/containers/pkg/emulator/android.go`
+- Modify: `submodules/containers/pkg/emulator/android_test.go`
 
 - [ ] **Step 1: Add the field to MatrixConfig**
 
@@ -2488,7 +2488,7 @@ Expected: both at the same Phase B SHA.
 
 > Working tree: `/run/media/milosvasic/DATA4TB/Projects/Lava` (Lava parent). Tests: `bash tests/vm-signing/run_all.sh` + `bash tests/vm-distro/run_all.sh` + existing pre-push + tag-helper suites.
 
-> Important: Phase C does NOT bump the Submodules/Containers gitlink. Phase D does that. The parent's gitlink stays at `f5cb355` (Group B end state) during Phase C; the new Containers commits live on the branch but aren't yet referenced by the parent.
+> Important: Phase C does NOT bump the submodules/containers gitlink. Phase D does that. The parent's gitlink stays at `f5cb355` (Group B end state) during Phase C; the new Containers commits live on the branch but aren't yet referenced by the parent.
 
 ### Task C1: Lava-side manifest
 
@@ -2626,7 +2626,7 @@ mkdir -p "$EVIDENCE_DIR"
 # Build the cmd/vm-matrix binary from the pinned Containers submodule.
 BIN_DIR="$PROJECT_DIR/build/vm-matrix"
 mkdir -p "$BIN_DIR"
-( cd "$PROJECT_DIR/Submodules/Containers" && go build -o "$BIN_DIR/vm-matrix" ./cmd/vm-matrix/ )
+( cd "$PROJECT_DIR/submodules/containers" && go build -o "$BIN_DIR/vm-matrix" ./cmd/vm-matrix/ )
 
 # Inputs uploaded to each VM:
 #   - proxy/build/libs/app.jar       — the Lava-built JAR to sign
@@ -2912,7 +2912,7 @@ mkdir -p "$EVIDENCE_DIR"
 
 BIN_DIR="$PROJECT_DIR/build/vm-matrix"
 mkdir -p "$BIN_DIR"
-( cd "$PROJECT_DIR/Submodules/Containers" && go build -o "$BIN_DIR/vm-matrix" ./cmd/vm-matrix/ )
+( cd "$PROJECT_DIR/submodules/containers" && go build -o "$BIN_DIR/vm-matrix" ./cmd/vm-matrix/ )
 
 PROXY="proxy/build/libs/app.jar"
 GOAPI="lava-api-go/build/lava-api-go"
@@ -3060,7 +3060,7 @@ git add tools/lava-containers/vm-images.json \
         scripts/run-vm-signing-matrix.sh scripts/run-vm-distro-matrix.sh \
         tests/vm-signing/ tests/vm-distro/ \
         CLAUDE.md
-git status   # Submodules/Containers should still be modified, NOT staged
+git status   # submodules/containers should still be modified, NOT staged
 ```
 
 - [ ] **Step 2: Run all Lava-side tests**
@@ -3175,7 +3175,7 @@ Expected: 4 pushes succeed; identical SHAs across all 4.
 - [ ] **Step 1: Update gitlink to Phase B HEAD**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/Lava/Submodules/Containers
+cd /run/media/milosvasic/DATA4TB/Projects/Lava/submodules/containers
 git fetch github lava-pin/2026-05-07-pkg-vm
 git checkout lava-pin/2026-05-07-pkg-vm
 git pull github lava-pin/2026-05-07-pkg-vm
@@ -3183,8 +3183,8 @@ CONTAINERS_HEAD=$(git rev-parse HEAD)
 echo "Containers HEAD: $CONTAINERS_HEAD"
 
 cd /run/media/milosvasic/DATA4TB/Projects/Lava
-git status   # should show: modified: Submodules/Containers
-git diff --submodule=log Submodules/Containers
+git status   # should show: modified: submodules/containers
+git diff --submodule=log submodules/containers
 ```
 
 ---
@@ -3205,19 +3205,19 @@ Create `.lava-ci-evidence/bluff-hunt/2026-05-07-pkg-vm.json`:
   "rule": "§6.N.1.1 subsequent-same-day lighter hunt — 1-2 production-code files from gate-shaping surface",
   "targets": [
     {
-      "file": "Submodules/Containers/pkg/cache/store.go",
+      "file": "submodules/containers/pkg/cache/store.go",
       "function": "FilesystemStore.Get",
       "mutation": "replace `if gotSHA != entry.SHA256 { ... }` with `if false`",
-      "covering_test": "Submodules/Containers/pkg/cache/store_test.go::TestStore_Get_SHA256Mismatch_RejectsAndRemovesBlob",
+      "covering_test": "submodules/containers/pkg/cache/store_test.go::TestStore_Get_SHA256Mismatch_RejectsAndRemovesBlob",
       "observed_failure": "expected SHA256 mismatch error, got nil",
       "reverted": true,
       "commit_reference": "Containers branch lava-pin/2026-05-07-pkg-vm Phase A — see commit body Bluff-Audit stamp"
     },
     {
-      "file": "Submodules/Containers/pkg/vm/qemu.go",
+      "file": "submodules/containers/pkg/vm/qemu.go",
       "function": "QEMUVM.Boot port allocator",
       "mutation": "hardcode SSH port to 10022 instead of allocating via atomic counter",
-      "covering_test": "Submodules/Containers/pkg/vm/qemu_test.go::TestQEMUVM_Boot_DistinctPortsAcrossInvocations",
+      "covering_test": "submodules/containers/pkg/vm/qemu_test.go::TestQEMUVM_Boot_DistinctPortsAcrossInvocations",
       "observed_failure": "two Boots got same SSH port (10022) — port-allocator broken",
       "reverted": true,
       "commit_reference": "Containers branch lava-pin/2026-05-07-pkg-vm Phase A — see commit body Bluff-Audit stamp"
@@ -3241,7 +3241,7 @@ Create `.lava-ci-evidence/bluff-hunt/2026-05-07-pkg-vm.json`:
 cd /run/media/milosvasic/DATA4TB/Projects/Lava
 LAVA_PHASE_C_SHA=$(git log -1 --format=%H -- scripts/run-vm-signing-matrix.sh)
 
-cd Submodules/Containers
+cd submodules/containers
 CONTAINERS_PHASE_B_SHA=$(git rev-parse HEAD)
 CONTAINERS_PHASE_A_SHA=$(git rev-parse HEAD~1)
 
@@ -3249,7 +3249,7 @@ cd /run/media/milosvasic/DATA4TB/Projects/Lava
 for r in github gitlab gitflic gitverse; do
   echo -n "lava parent $r: "; git ls-remote "$r" refs/heads/master | awk '{print $1}'
 done
-cd Submodules/Containers
+cd submodules/containers
 for r in github gitlab; do
   echo -n "containers $r: "; git ls-remote "$r" refs/heads/lava-pin/2026-05-07-pkg-vm | awk '{print $1}'
 done
@@ -3267,7 +3267,7 @@ Create `.lava-ci-evidence/Phase-pkg-vm-closure-2026-05-07.json` substituting the
 
 ```bash
 cd /run/media/milosvasic/DATA4TB/Projects/Lava
-git add Submodules/Containers \
+git add submodules/containers \
         .lava-ci-evidence/bluff-hunt/2026-05-07-pkg-vm.json \
         .lava-ci-evidence/Phase-pkg-vm-closure-2026-05-07.json
 git status
@@ -3279,7 +3279,7 @@ git status
 git commit -m "$(cat <<'EOF'
 chore(submodules+evidence): bump Containers pin + pkg/vm closure evidence
 
-Bumps Submodules/Containers to lava-pin/2026-05-07-pkg-vm HEAD —
+Bumps submodules/containers to lava-pin/2026-05-07-pkg-vm HEAD —
 Phase A (pkg/cache + pkg/vm + cmd/vm-matrix) + Phase B
 (pkg/emulator refactor to route through pkg/cache).
 
@@ -3333,7 +3333,7 @@ Expected: 4 pushes succeed; identical SHAs across all 4.
    - All verified via live `git ls-remote`.
 
 - [ ] **All test suites green**
-   - `cd Submodules/Containers && go test ./pkg/cache/... ./pkg/vm/... ./pkg/emulator/... -count=1 -race` → 21 + 12 + 42 = 75 tests, race-clean
+   - `cd submodules/containers && go test ./pkg/cache/... ./pkg/vm/... ./pkg/emulator/... -count=1 -race` → 21 + 12 + 42 = 75 tests, race-clean
    - `bash tests/vm-signing/run_all.sh` → 2/2 passed
    - `bash tests/vm-distro/run_all.sh` → 3/3 passed
    - All Group A-prime + Group B suites still green (pre-push Check 4 + 5 + tag-helper + check-constitution)

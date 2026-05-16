@@ -96,7 +96,7 @@ Checklist:
 
 ### Mirror smoke
 
-- [ ] `Submodules/Tracker-SDK` is at the pinned hash; the smoke
+- [ ] `submodules/tracker_sdk` is at the pinned hash; the smoke
       test in `scripts/sync-tracker-sdk-mirrors.sh --check` passes
       (or the equivalent manual verification is logged in
       `mirror-smoke/`).

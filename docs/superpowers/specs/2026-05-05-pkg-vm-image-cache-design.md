@@ -2,7 +2,7 @@
 
 > **Status:** Design approved (operator, 2026-05-05 evening) after Group B closure (`0ac633e`). Implementation pending — subagent-driven execution per Group A-prime / Group B pattern. Branch: Containers `lava-pin/2026-05-07-pkg-vm`. Lava parent commits on `master` once the pin lands.
 
-> **Forensic anchor.** Group A-prime mechanically closed §6.N-debt; Group B added matrix-runner reliability + observability tightenings. What both left open is the §6.K constitutional debt — the requirement that `Submodules/Containers/pkg/vm/` exist for QEMU full-system emulation, alongside the existing `pkg/emulator/` (Android), so cross-architecture and cross-OS testing isn't blocked by the absence of a generic VM-orchestration package.
+> **Forensic anchor.** Group A-prime mechanically closed §6.N-debt; Group B added matrix-runner reliability + observability tightenings. What both left open is the §6.K constitutional debt — the requirement that `submodules/containers/pkg/vm/` exist for QEMU full-system emulation, alongside the existing `pkg/emulator/` (Android), so cross-architecture and cross-OS testing isn't blocked by the absence of a generic VM-orchestration package.
 >
 > The §6.K-debt clause names four close criteria. Three are already met by Group A-prime + Group B:
 > - (1) `pkg/emulator/` exists ✓ (Group A-prime + Group B)
@@ -15,13 +15,13 @@
 
 ### 1.1 In scope (3 Containers packages + 2 Lava consumers + 1 closure)
 
-1. **`Submodules/Containers/pkg/cache/`** (new) — content-addressable store for image artifacts (qcow2 for VMs, Android system-images for emulators). Project-agnostic: no specific images committed inside Containers. Caller supplies a manifest JSON declaring `(id, url, sha256, size, format)` tuples; `pkg/cache/` fetches on cache miss, verifies SHA-256, refuses on mismatch.
+1. **`submodules/containers/pkg/cache/`** (new) — content-addressable store for image artifacts (qcow2 for VMs, Android system-images for emulators). Project-agnostic: no specific images committed inside Containers. Caller supplies a manifest JSON declaring `(id, url, sha256, size, format)` tuples; `pkg/cache/` fetches on cache miss, verifies SHA-256, refuses on mismatch.
 
-2. **`Submodules/Containers/pkg/vm/`** (new) — QEMU full-system VM orchestration. `VM` interface `{ Boot, WaitForReady, Upload, Run, Download, Teardown }`. `VMMatrixRunner` analog of `AndroidMatrixRunner` — emits the SAME attestation row schema (`gating`, `diag`, `failure_summaries`, `concurrent`) so `scripts/tag.sh`'s 3 Group B gates work unchanged. KVM-where-available, TCG fallback. `--concurrent N` + `--dev` semantics identical to `pkg/emulator/` (either flag flips `gating: false`).
+2. **`submodules/containers/pkg/vm/`** (new) — QEMU full-system VM orchestration. `VM` interface `{ Boot, WaitForReady, Upload, Run, Download, Teardown }`. `VMMatrixRunner` analog of `AndroidMatrixRunner` — emits the SAME attestation row schema (`gating`, `diag`, `failure_summaries`, `concurrent`) so `scripts/tag.sh`'s 3 Group B gates work unchanged. KVM-where-available, TCG fallback. `--concurrent N` + `--dev` semantics identical to `pkg/emulator/` (either flag flips `gating: false`).
 
-3. **`Submodules/Containers/cmd/vm-matrix`** (new) — thin CLI wrapper mirroring `cmd/emulator-matrix`. Flags: `--targets`, `--image-manifest`, `--uploads`, `--script`, `--captures`, `--evidence-dir`, `--concurrent`, `--dev`, `--boot-timeout`, `--script-timeout`.
+3. **`submodules/containers/cmd/vm-matrix`** (new) — thin CLI wrapper mirroring `cmd/emulator-matrix`. Flags: `--targets`, `--image-manifest`, `--uploads`, `--script`, `--captures`, `--evidence-dir`, `--concurrent`, `--dev`, `--boot-timeout`, `--script-timeout`.
 
-4. **`Submodules/Containers/pkg/emulator/` refactor** — route Android system-image fetch through `pkg/cache/` instead of the package-local download logic. External API of `pkg/emulator/` UNCHANGED — the refactor is internal. Anti-bluff: ≥1 falsifiability rehearsal proving that the cache backend swap doesn't break the attestation row schema or break existing Group B gates.
+4. **`submodules/containers/pkg/emulator/` refactor** — route Android system-image fetch through `pkg/cache/` instead of the package-local download logic. External API of `pkg/emulator/` UNCHANGED — the refactor is internal. Anti-bluff: ≥1 falsifiability rehearsal proving that the cache backend swap doesn't break the attestation row schema or break existing Group B gates.
 
 5. **Lava cross-arch signing consumer** — Lava-side glue (`scripts/run-vm-signing-matrix.sh` + `tests/vm-signing/`) that drives `cmd/vm-matrix` against (Alpine/Debian/Fedora) × (x86_64/aarch64/riscv64) sub-matrix to verify Lava's signing/keystore code produces byte-equivalent signed APKs across all 9 configs. Bluff vector: JCA provider divergence (different signing bytes from different JREs on different arches). Test scope **A1 (sign-and-compare bytes)** per Q4. Each row records `signing_match: bool` derived from byte equivalence to the x86_64 KVM reference run.
 
@@ -402,7 +402,7 @@ The fast-path reuses `pkg/emulator/cleanup.go::KillByPort` directly — same str
 | **A.** Containers code | `lava-pin/2026-05-07-pkg-vm` | `pkg/cache/*` (new), `pkg/vm/*` (new), `cmd/vm-matrix/main.go` (new) | 1 commit; subagent dispatched per Group A-prime / B pattern |
 | **B.** Emulator refactor | same Containers branch | `pkg/emulator/android.go` (cache-routed image fetch), `pkg/emulator/types.go` (if MatrixConfig gains an ImageManifest path field) | 1 commit |
 | **C.** Lava consumers | Lava `master` | `tools/lava-containers/vm-images.json`, `scripts/run-vm-{signing,distro}-matrix.sh`, `tests/vm-{signing,distro}/*.sh`, `CLAUDE.md` (§6.K-debt RESOLVED) | 1 commit |
-| **D.** Pin bump + closure | Lava `master` | `Submodules/Containers` SHA bump, `.lava-ci-evidence/bluff-hunt/2026-05-07-pkg-vm.json`, `.lava-ci-evidence/Phase-pkg-vm-closure-2026-05-07.json` | 1 commit |
+| **D.** Pin bump + closure | Lava `master` | `submodules/containers` SHA bump, `.lava-ci-evidence/bluff-hunt/2026-05-07-pkg-vm.json`, `.lava-ci-evidence/Phase-pkg-vm-closure-2026-05-07.json` | 1 commit |
 
 Total: **2 Containers commits + 2 Lava parent commits**. Mirror push to all 4 Lava upstreams + 2 Containers upstreams (github + gitlab — gitflic + gitverse aren't configured for the Containers submodule, matching inherited baseline) after each commit; convergence verified via live `git ls-remote`.
 

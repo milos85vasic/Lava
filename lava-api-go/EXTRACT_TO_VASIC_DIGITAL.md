@@ -32,7 +32,7 @@ re-pins onto the generic implementation.
   is `observability.NewLogger(LogConfig)`,
   `observability.DefaultRedactKeys`, and `observability.LogConfig`.
 - **Target submodule and package.**
-  `Submodules/Observability/pkg/logging`. Proposed addition:
+  `submodules/observability/pkg/logging`. Proposed addition:
   ```go
   // NewSlogJSON returns a *slog.Logger that writes JSON-formatted
   // records to out, gates at level, and replaces the value of any
@@ -44,10 +44,10 @@ re-pins onto the generic implementation.
   `NewLogrusAdapter`); the slog surface is additive and does not
   conflict with the existing API.
 - **Why deferred.** Upstream
-  `Submodules/Observability/pkg/logging` does not currently expose a
+  `submodules/observability/pkg/logging` does not currently expose a
   slog handler or attribute-key redaction primitive. Extracting
   requires (a) an upstream PR adding `NewSlogJSON`, (b) a
-  Submodules/Observability tag, (c) a `lava-api-go` re-pin onto the
+  submodules/observability tag, (c) a `lava-api-go` re-pin onto the
   new tag, and (d) deletion of `internal/observability/log.go` in
   favour of a thin wrapper. None of those steps are scoped into the
   current Phase-3 change; doing them in-band would have grown a

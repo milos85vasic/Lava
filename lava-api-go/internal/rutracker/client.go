@@ -1,11 +1,11 @@
 // Package rutracker is the Lava-domain rutracker.org scraper. It wraps an
-// HTTP client with a circuit breaker (Submodules/Recovery), forwards the
+// HTTP client with a circuit breaker (submodules/recovery), forwards the
 // auth cookie produced by internal/auth.UpstreamCookie, and exposes typed
 // helpers each route handler invokes.
 //
 // This package is Lava-domain by spec §5: it knows the rutracker URL shape
 // and the cookie-forwarding semantics used by the 13 routes. Generic
-// circuit-breaker plumbing lives in Submodules/Recovery and is consumed
+// circuit-breaker plumbing lives in submodules/recovery and is consumed
 // here as thin glue (Decoupled Reusable Architecture rule).
 package rutracker
 

@@ -15,12 +15,12 @@
     "lava_phase_c": "0cb7ccec98a3021e1b8803b1cf78b4253b357c49"
   },
   "components_implemented": {
-    "A_KillByPort": "Submodules/Containers/pkg/emulator/cleanup.go (+ cleanup_test.go) — strict adjacent /proc walk; 4 tests including TestKillByPort_SubstringSafety",
-    "B_Teardown_FastPath": "Submodules/Containers/pkg/emulator/android.go (+ android_test.go) — post-30s-grace KillByPort fast-path; skip-on-mismatch; 2 tests",
-    "C_Types": "Submodules/Containers/pkg/emulator/types.go — DiagnosticInfo, FailureSummary, KillReport, MatrixResult.Gating, MatrixConfig.Concurrent + .Dev + .TestReportGlob, TestResult.Diag + .FailureSummaries + .Concurrent",
-    "D_Matrix": "Submodules/Containers/pkg/emulator/matrix.go — runOne extracted, captureDiagnostic, parseJUnitFailures, worker pool, writeAttestation new fields + 8 tests",
-    "E_CLI": "Submodules/Containers/cmd/emulator-matrix/main.go — --concurrent N + --dev + --test-report-glob flags + Gating-status summary line",
-    "Phase_A_fixup_I_1": "Submodules/Containers — TestReportGlob config field + concurrent-mode safety warning + t.Parallel guidance (5 files, +1 test = 41 total)",
+    "A_KillByPort": "submodules/containers/pkg/emulator/cleanup.go (+ cleanup_test.go) — strict adjacent /proc walk; 4 tests including TestKillByPort_SubstringSafety",
+    "B_Teardown_FastPath": "submodules/containers/pkg/emulator/android.go (+ android_test.go) — post-30s-grace KillByPort fast-path; skip-on-mismatch; 2 tests",
+    "C_Types": "submodules/containers/pkg/emulator/types.go — DiagnosticInfo, FailureSummary, KillReport, MatrixResult.Gating, MatrixConfig.Concurrent + .Dev + .TestReportGlob, TestResult.Diag + .FailureSummaries + .Concurrent",
+    "D_Matrix": "submodules/containers/pkg/emulator/matrix.go — runOne extracted, captureDiagnostic, parseJUnitFailures, worker pool, writeAttestation new fields + 8 tests",
+    "E_CLI": "submodules/containers/cmd/emulator-matrix/main.go — --concurrent N + --dev + --test-report-glob flags + Gating-status summary line",
+    "Phase_A_fixup_I_1": "submodules/containers — TestReportGlob config field + concurrent-mode safety warning + t.Parallel guidance (5 files, +1 test = 41 total)",
     "F_RunEmulatorTests": "scripts/run-emulator-tests.sh — auto-detect versionName/versionCode + --tag override + --concurrent + --dev + --test-report-glob passthrough + new evidence-dir convention",
     "G_TagSh": "scripts/tag.sh — require_matrix_attestation_group_b_gates helper (Gate 1 reject concurrent != 1, Gate 2 reject gating != true, Gate 3 reject diag.sdk != api_level); Gate 2 jq fix avoids `// \"true\"` boolean-false coercion bug",
     "H_Tests_Evidence": "tests/tag-helper/{run_all.sh + 4 test_tag_*.sh fixtures} + .lava-ci-evidence/bluff-hunt/2026-05-06-group-b.json + this closure file",

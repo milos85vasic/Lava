@@ -6,27 +6,29 @@ module digital.vasic.lava.apigo
 go 1.26.0
 
 replace (
-	digital.vasic.auth => ../Submodules/Auth
-	digital.vasic.cache => ../Submodules/Cache
-	digital.vasic.challenges => ../Submodules/Challenges
-	digital.vasic.concurrency => ../Submodules/Concurrency
-	digital.vasic.config => ../Submodules/Config
-	digital.vasic.containers => ../Submodules/Containers
-	digital.vasic.database => ../Submodules/Database
-	digital.vasic.discovery => ../Submodules/Discovery
+	digital.vasic.auth => ../submodules/auth
+	digital.vasic.cache => ../submodules/cache
+	digital.vasic.challenges => ../submodules/challenges
+	digital.vasic.concurrency => ../submodules/concurrency
+	digital.vasic.config => ../submodules/config
+	digital.vasic.containers => ../submodules/containers
+	digital.vasic.database => ../submodules/database
+	digital.vasic.discovery => ../submodules/discovery
 	// digital.vasic.helixqa is sibling-replaced for local development +
 	// release builds. Per Phase 4-C-1 operator decision Q3 (Path A —
 	// tag-pin), the upstream resolution will move to a pinned tag once
 	// HelixQA reaches release stability; transitional Path B per design
 	// §C.3 keeps the replace directive active in the meantime.
-	digital.vasic.helixqa => ../Submodules/HelixQA
-	digital.vasic.http3 => ../Submodules/HTTP3
-	digital.vasic.mdns => ../Submodules/Mdns
-	digital.vasic.middleware => ../Submodules/Middleware
-	digital.vasic.observability => ../Submodules/Observability
-	digital.vasic.ratelimiter => ../Submodules/RateLimiter
-	digital.vasic.recovery => ../Submodules/Recovery
-	digital.vasic.security => ../Submodules/Security
+	// Per Phase 6a Q2: HelixQA's local path is submodules/helixqa
+	// (single-token), NOT submodules/helix_qa.
+	digital.vasic.helixqa => ../submodules/helixqa
+	digital.vasic.http3 => ../submodules/http3
+	digital.vasic.mdns => ../submodules/mdns
+	digital.vasic.middleware => ../submodules/middleware
+	digital.vasic.observability => ../submodules/observability
+	digital.vasic.ratelimiter => ../submodules/ratelimiter
+	digital.vasic.recovery => ../submodules/recovery
+	digital.vasic.security => ../submodules/security
 )
 
 tool (

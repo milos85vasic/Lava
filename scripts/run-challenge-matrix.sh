@@ -3,7 +3,7 @@
 #
 # Per §6.AE.2 + §6.AE.3: gate-mode Challenge runs MUST execute on the
 # §6.AE.2 minimum AVD matrix INSIDE containers managed by the
-# Submodules/Containers/cmd/emulator-matrix CLI.
+# submodules/containers/cmd/emulator-matrix CLI.
 #
 # This script is THIN GLUE — it pre-bakes the §6.AE.2 minimum matrix
 # (API 28 / 30 / 34 / latest stable × phone + tablet) and forwards
@@ -183,10 +183,10 @@ if [[ ! -f "$APK" ]]; then
     exit 1
 fi
 
-CONTAINERS_CLI="Submodules/Containers/cmd/emulator-matrix/emulator-matrix"
+CONTAINERS_CLI="submodules/containers/cmd/emulator-matrix/emulator-matrix"
 if [[ ! -x "$CONTAINERS_CLI" ]]; then
     echo "==> Building Containers cmd/emulator-matrix"
-    (cd Submodules/Containers && go build -o cmd/emulator-matrix/emulator-matrix ./cmd/emulator-matrix/)
+    (cd submodules/containers && go build -o cmd/emulator-matrix/emulator-matrix ./cmd/emulator-matrix/)
 fi
 
 # Per §6.AE.3: gate runs MUST use --runner=containerized

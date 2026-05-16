@@ -3,7 +3,7 @@
 // Source of truth: environment variables. Per the Decoupled Reusable rule
 // the variable inventory and validation rules are owned by lava-api-go,
 // while richer features (file-based config, hot-reload, schema-validated
-// merging) can be layered on top via Submodules/Config in later phases.
+// merging) can be layered on top via submodules/config in later phases.
 // The API surface here exposes ONLY the fields lava-api-go actually
 // consumes — no leaking of upstream configuration types.
 package config

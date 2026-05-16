@@ -187,7 +187,7 @@ this window short.
 - **Active vs retired distinction.** A retired UUID returns 426 (no
   backoff increment — the user is honest, just outdated). An unknown
   UUID returns 401 + per-IP backoff (the per-key fixed-step ladder
-  primitive in `Submodules/RateLimiter/pkg/ladder`).
+  primitive in `submodules/ratelimiter/pkg/ladder`).
 
 ---
 

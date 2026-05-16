@@ -22,7 +22,7 @@
 # Architecture (per Decoupled Reusable Architecture rule):
 #
 #   * Generic remote-host SSH + container-orchestration primitives live in
-#     `Submodules/Containers/pkg/remote/` (the vasic-digital/Containers
+#     `submodules/containers/pkg/remote/` (the vasic-digital/Containers
 #     submodule). Lava's distribute scripts are thin glue that:
 #       1. Build artifacts via build_and_release.sh (which itself routes
 #          through the Containers build path).
@@ -72,14 +72,14 @@ done
 #    surfaces BEFORE we ship anything to the remote host.
 # ----------------------------------------------------------------
 if [[ "$ANDROID_ONLY" != "true" ]]; then
-    CONTAINERS_BIN_BOOT="$LAVA_REPO_ROOT/Submodules/Containers/bin/boot"
+    CONTAINERS_BIN_BOOT="$LAVA_REPO_ROOT/submodules/containers/bin/boot"
     if [[ ! -x "$CONTAINERS_BIN_BOOT" ]]; then
-        echo "==> Submodules/Containers/bin/boot missing — building."
-        if [[ -f "$LAVA_REPO_ROOT/Submodules/Containers/Makefile" ]]; then
-            (cd "$LAVA_REPO_ROOT/Submodules/Containers" && make build-boot 2>/dev/null) || \
-                (cd "$LAVA_REPO_ROOT/Submodules/Containers" && go build -o bin/boot ./cmd/boot)
+        echo "==> submodules/containers/bin/boot missing — building."
+        if [[ -f "$LAVA_REPO_ROOT/submodules/containers/Makefile" ]]; then
+            (cd "$LAVA_REPO_ROOT/submodules/containers" && make build-boot 2>/dev/null) || \
+                (cd "$LAVA_REPO_ROOT/submodules/containers" && go build -o bin/boot ./cmd/boot)
         else
-            (cd "$LAVA_REPO_ROOT/Submodules/Containers" && go build -o bin/boot ./cmd/boot)
+            (cd "$LAVA_REPO_ROOT/submodules/containers" && go build -o bin/boot ./cmd/boot)
         fi
     fi
     if [[ -x "$CONTAINERS_BIN_BOOT" ]]; then

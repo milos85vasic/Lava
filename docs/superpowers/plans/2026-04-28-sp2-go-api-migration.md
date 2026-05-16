@@ -4,7 +4,7 @@
 
 **Goal:** Build the new `lava-api-go/` Go service that ports all 13 rutracker proxy routes from the existing Kotlin/Ktor `:proxy` module to Gin Gonic, serving HTTP/3 with Brotli compression, backed by PostgreSQL (cache + audit + rate limit only), composing 14 vasic-digital submodules per the Decoupled Reusable Architecture rule.
 
-**Architecture:** Single-binary Go service in one container. `Submodules/HTTP3` provides quic-go bridging; `Submodules/Cache/pkg/postgres` is the cache backend; `Submodules/Mdns` advertises `_lava-api._tcp` on port 8443; `Submodules/Observability` provides slog + Prometheus + OTel Tempo; `Submodules/RateLimiter` and `Submodules/Recovery` provide sliding-window throttling and a rutracker.org circuit breaker; `Submodules/Security` provides PII redaction and HTTP security headers; `Submodules/Containers` orchestrates lifecycle; `Submodules/Auth` and `Submodules/Middleware` provide Gin glue. The 13 routes' wire shape is preserved byte-for-byte (Option A — behavioural parity); a hand-written OpenAPI 3.1 spec at `lava-api-go/api/openapi.yaml` is the source of truth, with `oapi-codegen` producing committed server interfaces and a typed client used by the cross-backend parity test.
+**Architecture:** Single-binary Go service in one container. `submodules/http3` provides quic-go bridging; `submodules/cache/pkg/postgres` is the cache backend; `submodules/mdns` advertises `_lava-api._tcp` on port 8443; `submodules/observability` provides slog + Prometheus + OTel Tempo; `submodules/ratelimiter` and `submodules/recovery` provide sliding-window throttling and a rutracker.org circuit breaker; `submodules/security` provides PII redaction and HTTP security headers; `submodules/containers` orchestrates lifecycle; `submodules/auth` and `submodules/middleware` provide Gin glue. The 13 routes' wire shape is preserved byte-for-byte (Option A — behavioural parity); a hand-written OpenAPI 3.1 spec at `lava-api-go/api/openapi.yaml` is the source of truth, with `oapi-codegen` producing committed server interfaces and a typed client used by the cross-backend parity test.
 
 **Tech Stack:** Go 1.24+; Gin Gonic; quic-go v0.59 (via `digital.vasic.http3`); PostgreSQL 16 + pgx/v5; golang-migrate; brotli; OpenTelemetry; Prometheus; Loki; Grafana; Tempo; oapi-codegen v2; podman/docker (rootless); k6 for load tests; gosec, govulncheck, trivy for security; go-mutesting for mutation testing.
 
@@ -225,20 +225,20 @@ require (
 )
 
 replace (
-	digital.vasic.auth          => ../Submodules/Auth
-	digital.vasic.cache         => ../Submodules/Cache
-	digital.vasic.challenges    => ../Submodules/Challenges
-	digital.vasic.config        => ../Submodules/Config
-	digital.vasic.containers    => ../Submodules/Containers
-	digital.vasic.database      => ../Submodules/Database
-	digital.vasic.discovery     => ../Submodules/Discovery
-	digital.vasic.http3         => ../Submodules/HTTP3
-	digital.vasic.mdns          => ../Submodules/Mdns
-	digital.vasic.middleware    => ../Submodules/Middleware
-	digital.vasic.observability => ../Submodules/Observability
-	digital.vasic.ratelimiter   => ../Submodules/RateLimiter
-	digital.vasic.recovery      => ../Submodules/Recovery
-	digital.vasic.security      => ../Submodules/Security
+	digital.vasic.auth          => ../submodules/auth
+	digital.vasic.cache         => ../submodules/cache
+	digital.vasic.challenges    => ../submodules/challenges
+	digital.vasic.config        => ../submodules/config
+	digital.vasic.containers    => ../submodules/containers
+	digital.vasic.database      => ../submodules/database
+	digital.vasic.discovery     => ../submodules/discovery
+	digital.vasic.http3         => ../submodules/http3
+	digital.vasic.mdns          => ../submodules/mdns
+	digital.vasic.middleware    => ../submodules/middleware
+	digital.vasic.observability => ../submodules/observability
+	digital.vasic.ratelimiter   => ../submodules/ratelimiter
+	digital.vasic.recovery      => ../submodules/recovery
+	digital.vasic.security      => ../submodules/security
 )
 ```
 
@@ -427,7 +427,7 @@ Local CI: `scripts/ci.sh`. Single source of truth.
 - Mocking internal Lava code in non-unit tests (Sixth Law clause 2).
 
 ## Host Machine Stability Directive
-Per `/CLAUDE.md` and propagated through `Submodules/*/CLAUDE.md`: never run commands that suspend, hibernate, sign-out, or kill the user session. Cap test parallelism (`GOMAXPROCS=2`, `nice -n 19` are recommended).
+Per `/CLAUDE.md` and propagated through `submodules/*/CLAUDE.md`: never run commands that suspend, hibernate, sign-out, or kill the user session. Cap test parallelism (`GOMAXPROCS=2`, `nice -n 19` are recommended).
 ```
 
 - [ ] **Step 5: LICENSE — same MIT as the rest of the project**
@@ -1032,7 +1032,7 @@ func TestLoadRejectsMissingTLS(t *testing.T) {
 // Package config loads and validates the lava-api-go service configuration.
 //
 // Source of truth: environment variables (per Decoupled Reusable rule, this
-// uses Submodules/Config under the hood — but the API surface here exposes
+// uses submodules/config under the hood — but the API surface here exposes
 // only the fields lava-api-go actually consumes).
 package config
 
@@ -1162,7 +1162,7 @@ for r in github gitflic gitlab gitverse; do git push "$r" master; done
 - Create: `lava-api-go/internal/observability/health.go`
 - Create: `lava-api-go/internal/observability/observability_test.go`
 
-This task is content-heavy because it wires four submodules. Use the upstream READMEs (`Submodules/Observability/README.md`, `Submodules/Security/pkg/pii/`) as the API reference.
+This task is content-heavy because it wires four submodules. Use the upstream READMEs (`submodules/observability/README.md`, `submodules/security/pkg/pii/`) as the API reference.
 
 - [ ] **Step 1: log.go — slog-style logger with PII redaction**
 
@@ -1213,7 +1213,7 @@ func NewLogger(cfg LogConfig) *slog.Logger {
 }
 ```
 
-> **Note for the implementer:** the exact API of `digital.vasic.observability/pkg/logging` and `digital.vasic.security/pkg/pii` may differ from what's shown above. Read the actual upstream sources at `Submodules/Observability/pkg/logging/` and `Submodules/Security/pkg/pii/` and adapt accordingly. The contract this file MUST satisfy is "returns a slog.Logger that writes JSON-formatted records and redacts the keys in DefaultRedactKeys".
+> **Note for the implementer:** the exact API of `digital.vasic.observability/pkg/logging` and `digital.vasic.security/pkg/pii` may differ from what's shown above. Read the actual upstream sources at `submodules/observability/pkg/logging/` and `submodules/security/pkg/pii/` and adapt accordingly. The contract this file MUST satisfy is "returns a slog.Logger that writes JSON-formatted records and redacts the keys in DefaultRedactKeys".
 
 - [ ] **Step 2: metrics.go — Prometheus collectors**
 
@@ -1275,7 +1275,7 @@ func (m *Metrics) GinMiddleware() gin.HandlerFunc {
 }
 ```
 
-> **Note:** as with `log.go`, adapt to the actual upstream API at `Submodules/Observability/pkg/{metrics,gin}/`.
+> **Note:** as with `log.go`, adapt to the actual upstream API at `submodules/observability/pkg/{metrics,gin}/`.
 
 - [ ] **Step 3: tracing.go — OTel exporter**
 
@@ -1469,9 +1469,9 @@ func TestServerStartAndServeHTTP3(t *testing.T) {
 	}
 }
 
-// helpers selfSignedTLS / clientTLS adapted from Submodules/HTTP3/internal/testcert/.
+// helpers selfSignedTLS / clientTLS adapted from submodules/http3/internal/testcert/.
 func selfSignedTLS(t *testing.T) (*tls.Config, []byte) {
-	// ... (use the same approach as Submodules/HTTP3/internal/testcert/testcert.go;
+	// ... (use the same approach as submodules/http3/internal/testcert/testcert.go;
 	//      paste-in copy is acceptable in test code per the existing test convention)
 }
 func clientTLS(certBytes []byte) *tls.Config {
@@ -1487,12 +1487,12 @@ func clientTLS(certBytes []byte) *tls.Config {
 ( cd lava-api-go && go test ./internal/server/... )
 ```
 
-- [ ] **Step 3: Implement server.go using Submodules/HTTP3**
+- [ ] **Step 3: Implement server.go using submodules/http3**
 
 `lava-api-go/internal/server/server.go`:
 
 ```go
-// Package server hosts a Gin engine over HTTP/3 (via Submodules/HTTP3) on the
+// Package server hosts a Gin engine over HTTP/3 (via submodules/http3) on the
 // public listener and a separate plain-HTTP /metrics listener on localhost.
 package server
 
@@ -1599,7 +1599,7 @@ go test -race -count=1 ./...
 
 ```bash
 git add lava-api-go/internal/server/ lava-api-go/scripts/ci.sh
-git commit -m "lava-api-go: internal/server — Gin engine fronted by Submodules/HTTP3 on public listener (:8443 default) plus dedicated localhost-only metrics listener (:9091 default). Round-trip test exercises real HTTP/3 client → server. Falsifiability: route-pattern mutation produces 404 vs expected response. ci.sh now runs the full test suite (test step appended)."
+git commit -m "lava-api-go: internal/server — Gin engine fronted by submodules/http3 on public listener (:8443 default) plus dedicated localhost-only metrics listener (:9091 default). Round-trip test exercises real HTTP/3 client → server. Falsifiability: route-pattern mutation produces 404 vs expected response. ci.sh now runs the full test suite (test step appended)."
 for r in github gitflic gitlab gitverse; do git push "$r" master; done
 ```
 
@@ -1756,9 +1756,9 @@ go run -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate \
 chmod +x lava-api-go/scripts/migrate.sh
 ```
 
-- [ ] **Step 2: run-test-pg.sh — adapt the same script as Submodules/Cache/scripts/run-postgres-test.sh**
+- [ ] **Step 2: run-test-pg.sh — adapt the same script as submodules/cache/scripts/run-postgres-test.sh**
 
-Read `Submodules/Cache/scripts/run-postgres-test.sh` (committed in Step 5b of this session). Copy verbatim with two changes:
+Read `submodules/cache/scripts/run-postgres-test.sh` (committed in Step 5b of this session). Copy verbatim with two changes:
 
 1. Replace test-runner command with `go test -race -count=1 -v ./internal/cache/... ./tests/integration/...`.
 2. Bump container name prefix to `lava-api-go-pg-test-$$`.
@@ -1803,11 +1803,11 @@ Expected: migrations apply cleanly, then roll back cleanly.
 ```bash
 git add lava-api-go/scripts/migrate.sh lava-api-go/scripts/run-test-pg.sh \
         lava-api-go/go.mod lava-api-go/go.sum
-git commit -m "lava-api-go: scripts/migrate.sh (golang-migrate wrapper) and scripts/run-test-pg.sh (transient podman Postgres for integration tests, modeled on Submodules/Cache/scripts/run-postgres-test.sh). Migrations verified up + down 4 cleanly against a live Postgres 16 container."
+git commit -m "lava-api-go: scripts/migrate.sh (golang-migrate wrapper) and scripts/run-test-pg.sh (transient podman Postgres for integration tests, modeled on submodules/cache/scripts/run-postgres-test.sh). Migrations verified up + down 4 cleanly against a live Postgres 16 container."
 for r in github gitflic gitlab gitverse; do git push "$r" master; done
 ```
 
-### Task 4.3: internal/cache — wrapper around Submodules/Cache/pkg/postgres
+### Task 4.3: internal/cache — wrapper around submodules/cache/pkg/postgres
 
 **Files:**
 - Create: `lava-api-go/internal/cache/cache.go`
@@ -1819,7 +1819,7 @@ for r in github gitflic gitlab gitverse; do git push "$r" master; done
 `lava-api-go/internal/cache/cache.go`:
 
 ```go
-// Package cache adapts Submodules/Cache/pkg/postgres for lava-api-go's
+// Package cache adapts submodules/cache/pkg/postgres for lava-api-go's
 // concrete needs: cache key construction (per spec §6) and outcome
 // classification (hit | miss | bypass | invalidate) for metrics.
 package cache
@@ -1888,7 +1888,7 @@ const (
 	OutcomeInvalidate Outcome = "invalidate"
 )
 
-// Client is the lava-api-go cache facade. It owns a Submodules/Cache pgcache.Client
+// Client is the lava-api-go cache facade. It owns a submodules/cache pgcache.Client
 // and exposes only the operations handlers need.
 type Client struct {
 	inner *pgcache.Client
@@ -1960,7 +1960,7 @@ func TestKeyAnonDefault(t *testing.T) {
 }
 ```
 
-- [ ] **Step 3: integration_test.go — same Postgres in podman pattern as Submodules/Cache**
+- [ ] **Step 3: integration_test.go — same Postgres in podman pattern as submodules/cache**
 
 ```go
 package cache_test
@@ -2046,7 +2046,7 @@ Mutate `OutcomeHit` to `OutcomeMiss` in cache.go's Get when v != nil. Re-run int
 
 ```bash
 git add lava-api-go/internal/cache/
-git commit -m "lava-api-go: internal/cache — facade over Submodules/Cache/pkg/postgres exposing Key (deterministic SHA-256 of route + path-vars + sorted-query + auth-realm per spec §6) and Outcome (hit/miss/bypass/invalidate) for metrics. Unit tests pin Key determinism + collision properties; integration tests against podman Postgres exercise full Set/Get/Invalidate cycle. Falsifiability: swapping OutcomeHit↔OutcomeMiss in Get fails TestSetGetReturnsHit."
+git commit -m "lava-api-go: internal/cache — facade over submodules/cache/pkg/postgres exposing Key (deterministic SHA-256 of route + path-vars + sorted-query + auth-realm per spec §6) and Outcome (hit/miss/bypass/invalidate) for metrics. Unit tests pin Key determinism + collision properties; integration tests against podman Postgres exercise full Set/Get/Invalidate cycle. Falsifiability: swapping OutcomeHit↔OutcomeMiss in Get fails TestSetGetReturnsHit."
 for r in github gitflic gitlab gitverse; do git push "$r" master; done
 ```
 
@@ -2205,7 +2205,7 @@ for r in github gitflic gitlab gitverse; do git push "$r" master; done
 - [ ] **Step 1: Implement the package**
 
 ```go
-// Package ratelimit configures Submodules/RateLimiter for the four route
+// Package ratelimit configures submodules/ratelimiter for the four route
 // classes lava-api-go uses (read | write | login | download), keyed by
 // (client_ip, route_class). Per spec §9, defaults are placeholders until
 // load testing pins them; tunable via env vars.
@@ -2333,7 +2333,7 @@ Change `if !ok.Allowed { c.AbortWithStatusJSON(http.StatusTooManyRequests, ...) 
 
 ```bash
 git add lava-api-go/internal/ratelimit/
-git commit -m "lava-api-go: internal/ratelimit — Submodules/RateLimiter sliding-window glue per route class. Defaults from spec §9 (60/10/5/10 RPM read/write/login/download), env-tunable. Test pins 429 behavior beyond limit. Falsifiability: nil'ing the abort branch lets the 3rd request through and fails TestMiddlewareBlocksAfterLimit."
+git commit -m "lava-api-go: internal/ratelimit — submodules/ratelimiter sliding-window glue per route class. Defaults from spec §9 (60/10/5/10 RPM read/write/login/download), env-tunable. Test pins 429 behavior beyond limit. Falsifiability: nil'ing the abort branch lets the 3rd request through and fails TestMiddlewareBlocksAfterLimit."
 for r in github gitflic gitlab gitverse; do git push "$r" master; done
 ```
 
@@ -2343,7 +2343,7 @@ for r in github gitflic gitlab gitverse; do git push "$r" master; done
 
 This phase ports the Kotlin Jsoup-based scrapers in `core/network/rutracker/...` to Go. It's the largest single chunk of Lava-domain code. The strategy: **golden-fixture tests against captured rutracker HTML** so the Go scraper can be developed offline and the parity test (Phase 10) is the live double-check.
 
-### Task 6.1: HTTP client wrapped with Submodules/Recovery circuit breaker
+### Task 6.1: HTTP client wrapped with submodules/recovery circuit breaker
 
 **Files:**
 - Create: `lava-api-go/internal/rutracker/client.go`
@@ -2353,7 +2353,7 @@ This phase ports the Kotlin Jsoup-based scrapers in `core/network/rutracker/...`
 
 ```go
 // Package rutracker is the Lava-domain rutracker.org scraper. It wraps an
-// HTTP client with a circuit breaker (Submodules/Recovery), forwards the
+// HTTP client with a circuit breaker (submodules/recovery), forwards the
 // auth cookie produced by internal/auth.UpstreamCookie, and exposes typed
 // helpers each route handler invokes.
 package rutracker
@@ -2563,7 +2563,7 @@ The seven handler-group commits: forum, search, topic, comments, torrent, favori
 - Create: `lava-api-go/internal/discovery/mdns.go`
 - Create: `lava-api-go/internal/discovery/mdns_test.go`
 
-- [ ] **Step 1: Implement using Submodules/Mdns**
+- [ ] **Step 1: Implement using submodules/mdns**
 
 ```go
 package discovery
@@ -2593,7 +2593,7 @@ func Announce(ctx context.Context, instance, serviceType string, port int) (*ser
 }
 ```
 
-- [ ] **Step 2: Integration test** (skip if multicast unavailable, similar to Submodules/Mdns's pattern).
+- [ ] **Step 2: Integration test** (skip if multicast unavailable, similar to submodules/mdns's pattern).
 
 - [ ] **Step 3:** Falsifiability rehearsal — drop the `engine=go` TXT key in the production code, observe test failure. Revert.
 
@@ -2760,11 +2760,11 @@ For every OpenAPI route, create a `<routeName>.golden.json` fixture. Tests use t
 **Files:**
 - Modify: `tools/lava-containers/cmd/lava-containers/main.go` (add `--profile` and `--observability` flags)
 - Modify: `tools/lava-containers/internal/proxy/proxy.go` (refactor to a profile orchestrator)
-- Add: `tools/lava-containers/internal/orchestrator/orchestrator.go` (new — knows about profiles, delegates runtime to Submodules/Containers)
-- Modify: `tools/lava-containers/go.mod` (add `replace digital.vasic.containers => ../../Submodules/Containers`)
+- Add: `tools/lava-containers/internal/orchestrator/orchestrator.go` (new — knows about profiles, delegates runtime to submodules/containers)
+- Modify: `tools/lava-containers/go.mod` (add `replace digital.vasic.containers => ../../submodules/containers`)
 
 - [ ] **Step 1:** Rewrite the CLI flag parser to accept `--profile=api-go|legacy|both` and `--with-observability`, `--dev-docs`.
-- [ ] **Step 2:** Replace the direct `compose -f docker-compose.yml up` call with invocations of `Submodules/Containers/pkg/compose` passing the right `--profile` flags.
+- [ ] **Step 2:** Replace the direct `compose -f docker-compose.yml up` call with invocations of `submodules/containers/pkg/compose` passing the right `--profile` flags.
 - [ ] **Step 3:** Smoke test each combination via `./bin/lava-containers -cmd=start --profile=api-go`.
 - [ ] **Step 4: Commit + push.**
 
@@ -2828,7 +2828,7 @@ For every OpenAPI route, create a `<routeName>.golden.json` fixture. Tests use t
 
 ### Task 13.3: Add gosec, govulncheck, trivy to ci.sh
 
-- [ ] **Step 1:** Append the security steps to `lava-api-go/scripts/ci.sh` (mirror the structure used in `Submodules/HTTP3/scripts/ci.sh`).
+- [ ] **Step 1:** Append the security steps to `lava-api-go/scripts/ci.sh` (mirror the structure used in `submodules/http3/scripts/ci.sh`).
 - [ ] **Step 2:** Resolve any HIGH/CRITICAL findings before proceeding. Document accepted-low items in `SECURITY.md`.
 - [ ] **Step 3: Commit + push.**
 

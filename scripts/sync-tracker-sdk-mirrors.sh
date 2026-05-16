@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # scripts/sync-tracker-sdk-mirrors.sh
-# Pushes the Submodules/Tracker-SDK/ working tree to its 2 configured upstreams
+# Pushes the submodules/tracker_sdk/ working tree to its 2 configured upstreams
 # (GitHub + GitLab). Local-only — no hosted CI invoked. Operator-controlled.
 #
 # Only GitHub + GitLab per constitutional clause §6.W (added 2026-05-08).
 
 set -euo pipefail
 
-cd "$(dirname "$0")/../Submodules/Tracker-SDK"
+cd "$(dirname "$0")/../submodules/tracker_sdk"
 
 UPSTREAMS=(
   "github  git@github.com:vasic-digital/Tracker-SDK.git"

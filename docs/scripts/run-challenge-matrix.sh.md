@@ -5,7 +5,7 @@
 
 ## Overview
 
-Operator entry point for §6.AE gate-mode Challenge Test runs. Pre-bakes the §6.AE.2 minimum AVD matrix (API 28 / 30 / 34 / latest stable × phone + tablet) and delegates to `Submodules/Containers/cmd/emulator-matrix --runner=containerized` per §6.X.
+Operator entry point for §6.AE gate-mode Challenge Test runs. Pre-bakes the §6.AE.2 minimum AVD matrix (API 28 / 30 / 34 / latest stable × phone + tablet) and delegates to `submodules/containers/cmd/emulator-matrix --runner=containerized` per §6.X.
 
 ## Honest pre-flight
 
@@ -85,7 +85,7 @@ Sub-minimums are permitted for development iteration; the gate row's `gating: tr
 
 ## Cross-references
 
-- `Submodules/Containers/cmd/emulator-matrix` (the underlying runner)
+- `submodules/containers/cmd/emulator-matrix` (the underlying runner)
 - `tools/lava-containers/vm-images.json` (matrix manifest)
 - `scripts/run-emulator-tests.sh` (older sister-glue; same delegation, different default arguments)
 - `scripts/run-helixqa-challenges.sh` + `docs/scripts/run-helixqa-challenges.sh.md` (the HelixQA wrapper invoked by `--include-helixqa`)

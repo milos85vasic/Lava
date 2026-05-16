@@ -10,8 +10,8 @@ test_clean_fixture_passes() {
     local f
     f=$(mktemp -d)
     cd "$f"
-    mkdir -p Submodules/foo
-    cat > Submodules/foo/.gitmodules <<'EOF'
+    mkdir -p submodules/foo
+    cat > submodules/foo/.gitmodules <<'EOF'
 [submodule "third-party"]
     path = third-party
     url = git@github.com:nlohmann/json.git
@@ -33,8 +33,8 @@ test_vasic_digital_chain_rejected() {
     local f
     f=$(mktemp -d)
     cd "$f"
-    mkdir -p Submodules/foo
-    cat > Submodules/foo/.gitmodules <<'EOF'
+    mkdir -p submodules/foo
+    cat > submodules/foo/.gitmodules <<'EOF'
 [submodule "BarLib"]
     path = BarLib
     url = git@github.com:vasic-digital/BarLib.git
@@ -56,8 +56,8 @@ test_helix_dev_gitlab_chain_rejected() {
     local f
     f=$(mktemp -d)
     cd "$f"
-    mkdir -p Submodules/qux
-    cat > Submodules/qux/.gitmodules <<'EOF'
+    mkdir -p submodules/qux
+    cat > submodules/qux/.gitmodules <<'EOF'
 [submodule "HelixCore"]
     path = HelixCore
     url = git@gitlab.com:HelixDevelopment/HelixCore.git
@@ -79,8 +79,8 @@ test_advisory_mode_returns_zero() {
     local f
     f=$(mktemp -d)
     cd "$f"
-    mkdir -p Submodules/baz
-    cat > Submodules/baz/.gitmodules <<'EOF'
+    mkdir -p submodules/baz
+    cat > submodules/baz/.gitmodules <<'EOF'
 [submodule "RedThing"]
     path = RedThing
     url = git@github.com:red-elf/RedThing.git

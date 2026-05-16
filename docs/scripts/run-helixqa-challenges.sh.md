@@ -6,7 +6,7 @@
 
 ## Overview
 
-Thin Lava-side wrapper around HelixQA's 11 Challenge scripts shipped at `Submodules/HelixQA/challenges/scripts/`. Invokes them in sequence, captures per-script stdout/stderr to log files, writes a roll-up attestation JSON, and reports per-script PASS / FAIL / SKIP outcomes.
+Thin Lava-side wrapper around HelixQA's 11 Challenge scripts shipped at `submodules/helixqa/challenges/scripts/`. Invokes them in sequence, captures per-script stdout/stderr to log files, writes a roll-up attestation JSON, and reports per-script PASS / FAIL / SKIP outcomes.
 
 Implements **Option 1** from `docs/plans/2026-05-16-helixqa-integration-design.md` — shell-level wiring with NO modification to HelixQA. Future cycles MAY:
 
@@ -71,7 +71,7 @@ bash scripts/run-helixqa-challenges.sh --require-toolchain none
 | `--continue-on-fail` | Keep running scripts after a FAIL (default behavior) |
 | `--stop-on-fail` | Halt the loop on first FAIL (useful for triage of cascading failures) |
 | `--json-only` | Suppress the human-readable stdout summary; only write the attestation JSON |
-| `--runner host\|containerized` | §6.X delegation: `host` (default — workstation iteration) or `containerized` (required for §6.AE gate runs). `containerized` honest-fail-fasts (exit 4) when `Submodules/Containers` is absent. |
+| `--runner host\|containerized` | §6.X delegation: `host` (default — workstation iteration) or `containerized` (required for §6.AE gate runs). `containerized` honest-fail-fasts (exit 4) when `submodules/containers` is absent. |
 | `--container-image <image>` | Container image for `--runner=containerized`. Default: `docker.io/library/golang:1.22` (provides Go toolchain for HelixQA's Go-requiring scripts). |
 | `--container-runtime podman\|docker` | Container runtime for `--runner=containerized`. Default: auto-detect (podman preferred per §6.U). |
 | `--require-toolchain go\|none` | §6.J toolchain precondition. `go` (default): wrapper exits 4 if `go` is absent from PATH (host mode) or always available (container mode). `none`: Go-requiring scripts (bluff_scanner, mutation_ratchet) SKIP with a clear precondition message when `go` is absent. |
@@ -129,8 +129,8 @@ When `--runner=containerized` is selected the `helixqa_runner` field reads `"con
 | 0 | All invoked scripts returned 0 (or `SKIP` exit 2). Zero `FAIL` outcomes. |
 | 1 | One or more invoked scripts returned non-zero exit other than the SKIP-canonical 2. Real defect surfaced by HelixQA OR `--stop-on-fail` halted the loop. |
 | 2 | Invalid arguments (`--only` matched no scripts; unknown flag; invalid `--runner` or `--require-toolchain` value). |
-| 3 | Missing dependency — `Submodules/HelixQA` directory absent, OR the canonical 11-script wired list drifted from what the pin actually ships. |
-| 4 | Missing runtime — `--runner=containerized` without `Submodules/Containers` bootstrapped, OR `--runner=containerized` without a container runtime on PATH, OR `--require-toolchain=go` without `go` on PATH. |
+| 3 | Missing dependency — `submodules/helixqa` directory absent, OR the canonical 11-script wired list drifted from what the pin actually ships. |
+| 4 | Missing runtime — `--runner=containerized` without `submodules/containers` bootstrapped, OR `--runner=containerized` without a container runtime on PATH, OR `--require-toolchain=go` without `go` on PATH. |
 
 The 0/1/2/3/4 split is **anti-bluff load-bearing**: exit 0 means scripts genuinely ran with no failures; exit 3 means we honestly cannot claim to have run them (precondition gap); exit 4 means a runtime / toolchain dependency is missing (silent degradation forbidden per §6.J). Per §6.J we never silently mask a precondition gap as "success".
 
@@ -153,7 +153,7 @@ Additionally the wrapper itself may classify a script as SKIP BEFORE invoking it
 
 When invoked with `--runner=containerized`, the wrapper:
 
-1. Verifies `Submodules/Containers` is bootstrapped (else exit 4)
+1. Verifies `submodules/containers` is bootstrapped (else exit 4)
 2. Auto-detects the container runtime (`podman` preferred; falls back to `docker`)
 3. Selects the container image (default: `docker.io/library/golang:1.22` to provide the Go toolchain HelixQA's Go-requiring scripts need)
 4. For each script, invokes `<runtime> run --rm --user $(id -u):$(id -g) -v $REPO_ROOT:$REPO_ROOT:rw -w $HELIXQA_SCRIPTS_DIR -e HOME=/tmp $CONTAINER_IMAGE bash ./<script>`
@@ -168,7 +168,7 @@ Limitations of the containerized runner (honestly disclosed):
 
 ## §6.W per-script mirror-policy audit
 
-`docs/helixqa-script-audit.md` is the source-of-truth audit. As of the last audit (2026-05-16), 0 of 11 scripts violate §6.W on default config — the `HELIXQA_W_EXCLUSIONS` array is therefore empty. The audit MUST be re-run when the `Submodules/HelixQA` pin bumps; the wrapper's wiring-drift check (exit 3 on added/removed scripts) prompts re-audit but does NOT mechanize the per-script grep — that remains a human-driven audit per §6.J ("real grep results only — no manufactured findings").
+`docs/helixqa-script-audit.md` is the source-of-truth audit. As of the last audit (2026-05-16), 0 of 11 scripts violate §6.W on default config — the `HELIXQA_W_EXCLUSIONS` array is therefore empty. The audit MUST be re-run when the `submodules/helixqa` pin bumps; the wrapper's wiring-drift check (exit 3 on added/removed scripts) prompts re-audit but does NOT mechanize the per-script grep — that remains a human-driven audit per §6.J ("real grep results only — no manufactured findings").
 
 ## Wiring into `scripts/run-challenge-matrix.sh`
 
@@ -202,7 +202,7 @@ Per `docs/plans/2026-05-16-helixqa-integration-design.md` §"6.J anti-bluff post
 2. **Each result MUST be from a real execution.** Per-script log files are written from the actual subprocess output — captured stdout+stderr go to `<evidence-dir>/<script>.log`. The hermetic test `tests/check-constitution/test_helixqa_wiring.sh` asserts the fixture's stdout string appears in the produced log.
 3. **Per §6.AC non-fatal telemetry:** SKIP exits do NOT cause the wrapper itself to FAIL but ARE recorded distinctly from PASS. The attestation JSON's `skip_count` is operator-visible so a regression that flips many PASSes to SKIPs is detectable.
 4. **Per §6.J/§6.L:** the wrapper exists; HelixQA-emitted FAILs are real defects to triage; HelixQA-emitted SKIPs are honest acknowledgments of precondition gaps — NOT false-pass coverage.
-5. **Per §6.X:** `--runner=containerized` honest-fail-fasts (exit 4) when `Submodules/Containers` is absent. The wrapper NEVER silently degrades containerized → host because that would be the exact bluff §6.X exists to prevent.
+5. **Per §6.X:** `--runner=containerized` honest-fail-fasts (exit 4) when `submodules/containers` is absent. The wrapper NEVER silently degrades containerized → host because that would be the exact bluff §6.X exists to prevent.
 6. **Per §6.J:** `--require-toolchain=go` (default) exits 4 when `go` is absent rather than silently SKIPping Go-requiring scripts. Silent-skip-with-default would produce false-green coverage; operators who knowingly work without Go MUST opt in via `--require-toolchain=none`.
 7. **Per §6.W:** the per-script audit at `docs/helixqa-script-audit.md` is the binding source-of-truth for the `HELIXQA_W_EXCLUSIONS` array. Manufactured findings are forbidden; only real `grep` results may populate the audit.
 
@@ -214,9 +214,9 @@ Per `docs/plans/2026-05-16-helixqa-integration-design.md` §"6.J anti-bluff post
 |---|---|
 | `test_passes_when_helixqa_present_and_all_green` | Wrapper exit 0; attestation reports 11/0/0; per-script log files exist + contain the fixture stdout (proving subprocess actually ran) |
 | `test_fails_when_script_missing` | Wrapper exit 3 (wiring drift); error message names the missing script |
-| `test_skip_mode_when_helixqa_absent` | Wrapper exit 3 (missing submodule); error message includes the `git submodule update --init Submodules/HelixQA` remediation command; no attestation written |
+| `test_skip_mode_when_helixqa_absent` | Wrapper exit 3 (missing submodule); error message includes the `git submodule update --init submodules/helixqa` remediation command; no attestation written |
 | `test_fail_classified_correctly` | Wrapper exit 1 when one script returns 1; attestation marks that script as FAIL (not SKIP — anti-bluff classification) |
-| `test_containerized_runner_fails_fast_when_containers_absent` | Q1: Wrapper exit 4; error message names §6.X + `git submodule update --init Submodules/Containers` remediation |
+| `test_containerized_runner_fails_fast_when_containers_absent` | Q1: Wrapper exit 4; error message names §6.X + `git submodule update --init submodules/containers` remediation |
 | `test_host_runner_default_attestation_shape` | Q1: default-runner attestation has `helixqa_runner: host` + caveat field + `require_toolchain: go` + `w_exclusion_audit` pointer |
 | `test_require_toolchain_go_fails_fast_when_go_absent` | Q2: Wrapper exit 4 when `go` absent + default `--require-toolchain=go`; error names the `--require-toolchain=none` escape hatch |
 | `test_require_toolchain_none_skips_go_scripts_when_go_absent` | Q2: Wrapper exit 0; Go-requiring scripts (bluff_scanner, mutation_ratchet) marked SKIP; non-Go scripts still PASS |
@@ -230,10 +230,10 @@ Run: `bash tests/check-constitution/test_helixqa_wiring.sh`
 
 The four open questions from the initial Option 1 commit were resolved in this commit:
 
-1. **Q1 — Container vs host runner** (§6.X integration): RESOLVED. New `--runner=host|containerized` flag (default: `host` for workstation iteration; `containerized` required for §6.AE gate runs). Containerized mode honest-fail-fasts (exit 4) when `Submodules/Containers` is absent — no silent degradation per §6.J.
+1. **Q1 — Container vs host runner** (§6.X integration): RESOLVED. New `--runner=host|containerized` flag (default: `host` for workstation iteration; `containerized` required for §6.AE gate runs). Containerized mode honest-fail-fasts (exit 4) when `submodules/containers` is absent — no silent degradation per §6.J.
 2. **Q2 — Real-deps vs stub gating**: RESOLVED. New `--require-toolchain=go|none` flag (default: `go`). Per-script toolchain requirement declared in `HELIXQA_TOOLCHAIN_MAP` constant (bluff_scanner + mutation_ratchet need Go; the other 9 do not). `--require-toolchain=go` exits 4 when `go` absent; `--require-toolchain=none` SKIPs Go-requiring scripts with a clear precondition message.
 3. **Q3 — Evidence-directory boundary**: RESOLVED. `--evidence-dir` flag is preferred; `LAVA_HELIXQA_EVIDENCE_DIR` env-var override added for parent-runner wrapping use cases. Default location remains `.lava-ci-evidence/helixqa-challenges/<UTC-timestamp>/` per Lava convention.
-4. **Q4 — §6.W mirror policy**: RESOLVED. Per-script audit landed at `docs/helixqa-script-audit.md`; `HELIXQA_W_EXCLUSIONS` array constant in the wrapper consumes the audit's findings. 0/11 scripts currently violate §6.W on default config (the array is empty); re-audit owed on every `Submodules/HelixQA` pin bump.
+4. **Q4 — §6.W mirror policy**: RESOLVED. Per-script audit landed at `docs/helixqa-script-audit.md`; `HELIXQA_W_EXCLUSIONS` array constant in the wrapper consumes the audit's findings. 0/11 scripts currently violate §6.W on default config (the array is empty); re-audit owed on every `submodules/helixqa` pin bump.
 
 See this commit's body for the per-question implementation details + falsifiability rehearsals.
 
@@ -243,6 +243,6 @@ See this commit's body for the per-question implementation details + falsifiabil
 - `docs/scripts/run-challenge-matrix.sh.md` — the `--include-helixqa` flag
 - `docs/helix-constitution-gates.md` — `CM-HELIXQA-WIRING` + `CM-HELIXQA-§6.W-AUDIT` gate rows
 - `docs/helixqa-script-audit.md` — §6.W per-script audit (Phase 4 follow-up B Q4 resolution)
-- `Submodules/HelixQA/CLAUDE.md` — HelixQA's own anti-bluff covenant
-- `Submodules/HelixQA/README.md` — HelixQA framework overview
+- `submodules/helixqa/CLAUDE.md` — HelixQA's own anti-bluff covenant
+- `submodules/helixqa/README.md` — HelixQA framework overview
 - Lava `CLAUDE.md` §6.AE + §6.J + §6.X + §6.W + §6.AD (HelixConstitution inheritance)

@@ -4,7 +4,7 @@
 
 **Goal:** Tighten the matrix-runner gate with five reliability + observability fixes (per-row diagnostics, Teardown force-kill fast-path, pack-dir convention, JUnit XML failure parsing, concurrent-mode opt-in with gating-flip) — none relax existing clauses; all close the next class of bluffs the gate cannot yet detect.
 
-**Architecture:** Components A-E live in `Submodules/Containers/pkg/emulator/` + `cmd/emulator-matrix/` (matrix-runner reliability + evidence — generic, reusable across `vasic-digital/*` consumers). Components F-H live in Lava parent (`scripts/run-emulator-tests.sh`, `scripts/tag.sh`, `tests/tag-helper/`, evidence files — Lava-domain version-string detection + tag-time gates). Three commits: 1 on Containers branch `lava-pin/2026-05-06-group-b`, then 2 on Lava `master` (parent code + pin bump/closure).
+**Architecture:** Components A-E live in `submodules/containers/pkg/emulator/` + `cmd/emulator-matrix/` (matrix-runner reliability + evidence — generic, reusable across `vasic-digital/*` consumers). Components F-H live in Lava parent (`scripts/run-emulator-tests.sh`, `scripts/tag.sh`, `tests/tag-helper/`, evidence files — Lava-domain version-string detection + tag-time gates). Three commits: 1 on Containers branch `lava-pin/2026-05-06-group-b`, then 2 on Lava `master` (parent code + pin bump/closure).
 
 **Tech Stack:** Go 1.24+ (`encoding/xml`, `os/exec`, `syscall`, `sync`, stdlib `testing`); bash 5+ (`jq`); existing pre-push hook from Group A-prime; existing `pkg/emulator` package as the integration baseline.
 
@@ -14,14 +14,14 @@
 
 | File | Responsibility | Phase |
 |---|---|---|
-| `Submodules/Containers/pkg/emulator/cleanup.go` | **+** `KillByPort(ctx, port)` strict-adjacent /proc walk; reuses `procWalker` + `killer` seams | A |
-| `Submodules/Containers/pkg/emulator/cleanup_test.go` | **+** 4 KillByPort tests (no-match, strict-adjacent, substring-safety, SIGKILL-after-grace) | A |
-| `Submodules/Containers/pkg/emulator/types.go` | **+** `DiagnosticInfo`, `KillReport`, extend `BootResult.ConsolePort` already exists; **~** `TestResult` gains `Diag` + `FailureSummaries` + `Concurrent` fields; **+** `MatrixResult.Gating` field | A |
-| `Submodules/Containers/pkg/emulator/android.go` | **~** `Teardown` post-30s-grace fast-path: invoke `KillByPort(port)`; skip-on-mismatch returns original timeout error | A |
-| `Submodules/Containers/pkg/emulator/android_test.go` | **+** 2 Teardown fast-path tests (success-after-grace, skip-on-mismatch) | A |
-| `Submodules/Containers/pkg/emulator/matrix.go` | **~** `RunMatrix`: capture diag pre-test, parse JUnit XML post-test → `FailureSummaries`; **+** worker pool when `Concurrent > 1`; **+** `parseJUnitFailures` helper; **~** `writeAttestation` writes new fields including `gating` | A |
-| `Submodules/Containers/pkg/emulator/matrix_test.go` | **+** 7 tests (parseJUnitFailures: pass/single-failure/single-error/multi-suite/malformed; gating defaults true; gating false on concurrent>1; gating false on dev) | A |
-| `Submodules/Containers/cmd/emulator-matrix/main.go` | **+** `--concurrent N` (default 1) and `--dev` (bool) flags; pipe through to `MatrixConfig` | A |
+| `submodules/containers/pkg/emulator/cleanup.go` | **+** `KillByPort(ctx, port)` strict-adjacent /proc walk; reuses `procWalker` + `killer` seams | A |
+| `submodules/containers/pkg/emulator/cleanup_test.go` | **+** 4 KillByPort tests (no-match, strict-adjacent, substring-safety, SIGKILL-after-grace) | A |
+| `submodules/containers/pkg/emulator/types.go` | **+** `DiagnosticInfo`, `KillReport`, extend `BootResult.ConsolePort` already exists; **~** `TestResult` gains `Diag` + `FailureSummaries` + `Concurrent` fields; **+** `MatrixResult.Gating` field | A |
+| `submodules/containers/pkg/emulator/android.go` | **~** `Teardown` post-30s-grace fast-path: invoke `KillByPort(port)`; skip-on-mismatch returns original timeout error | A |
+| `submodules/containers/pkg/emulator/android_test.go` | **+** 2 Teardown fast-path tests (success-after-grace, skip-on-mismatch) | A |
+| `submodules/containers/pkg/emulator/matrix.go` | **~** `RunMatrix`: capture diag pre-test, parse JUnit XML post-test → `FailureSummaries`; **+** worker pool when `Concurrent > 1`; **+** `parseJUnitFailures` helper; **~** `writeAttestation` writes new fields including `gating` | A |
+| `submodules/containers/pkg/emulator/matrix_test.go` | **+** 7 tests (parseJUnitFailures: pass/single-failure/single-error/multi-suite/malformed; gating defaults true; gating false on concurrent>1; gating false on dev) | A |
+| `submodules/containers/cmd/emulator-matrix/main.go` | **+** `--concurrent N` (default 1) and `--dev` (bool) flags; pipe through to `MatrixConfig` | A |
 | `scripts/run-emulator-tests.sh` (Lava) | **~** auto-detect `versionName`/`versionCode` from `app/build.gradle.kts`; **+** `--tag <tag>` flag; **+** `--concurrent N` and `--dev` passthrough; new evidence-dir convention | B |
 | `scripts/tag.sh` (Lava) | **~** `require_matrix_attestation_clause_6_I` — add 3 new gates: reject `concurrent != 1` on any row, reject run-level `gating: false`, assert `diag.sdk == api_level` per row | B |
 | `tests/tag-helper/test_tag_rejects_concurrent_attestation.sh` | **+** Bash fixture test exercising tag.sh against synthetic attestation with `concurrent: 4` row | B |
@@ -30,7 +30,7 @@
 | `tests/tag-helper/test_tag_accepts_gating_serial_attestation.sh` | **+** Bash fixture test exercising tag.sh against clean serial attestation (all 3 gates green) | B |
 | `tests/tag-helper/run_all.sh` | **+** Test runner that executes all 4 tag-helper tests and exits non-zero if any fail | B |
 | `CLAUDE.md` (Lava root) | **~** §6.I clause 4 documentation extension: row schema gains `diag` + `failure_summaries` + `concurrent`; run-level `gating` field documented | B |
-| `Submodules/Containers` (gitlink) | **~** Pin bump to lava-pin/2026-05-06-group-b HEAD | C |
+| `submodules/containers` (gitlink) | **~** Pin bump to lava-pin/2026-05-06-group-b HEAD | C |
 | `.lava-ci-evidence/bluff-hunt/2026-05-06-group-b.json` | **+** §6.N.1.1-style hunt (1-2 production files from gate-shaping surface) | C |
 | `.lava-ci-evidence/Phase-Group-B-closure-2026-05-06.json` | **+** Closure attestation: per-component SHAs, 5 mutation rehearsals, mirror convergence | C |
 
@@ -44,7 +44,7 @@
 
 ## Phase A — Containers code (1 commit on `lava-pin/2026-05-06-group-b`)
 
-> Working tree: `Submodules/Containers/`. All `git` commands in this phase are run from inside that directory. Tests run via `go test ./pkg/emulator/... -count=1 -race`.
+> Working tree: `submodules/containers/`. All `git` commands in this phase are run from inside that directory. Tests run via `go test ./pkg/emulator/... -count=1 -race`.
 
 ### Task A0: Branch setup
 
@@ -54,7 +54,7 @@
 - [ ] **Step 1: Verify clean working tree in the submodule**
 
 ```bash
-cd Submodules/Containers
+cd submodules/containers
 git status
 ```
 
@@ -63,7 +63,7 @@ Expected: `On branch lava-pin/2026-05-05-clause-6n-prime` (or whatever the curre
 - [ ] **Step 2: Cut the new Group B branch from the current HEAD**
 
 ```bash
-cd Submodules/Containers
+cd submodules/containers
 current_head=$(git rev-parse HEAD)
 echo "Cutting lava-pin/2026-05-06-group-b from $current_head"
 git checkout -b lava-pin/2026-05-06-group-b
@@ -74,7 +74,7 @@ Expected: `Switched to a new branch 'lava-pin/2026-05-06-group-b'`.
 - [ ] **Step 3: Sanity-check the package compiles + tests pass on the new branch BEFORE any change**
 
 ```bash
-cd Submodules/Containers
+cd submodules/containers
 go build ./pkg/emulator/... ./cmd/emulator-matrix/...
 go test ./pkg/emulator/... -count=1 -race
 ```
@@ -88,11 +88,11 @@ If anything fails here, STOP — Group A-prime end state is corrupt and must be 
 ### Task A1: KillByPort — failing tests first (TDD)
 
 **Files:**
-- Modify: `Submodules/Containers/pkg/emulator/cleanup_test.go`
+- Modify: `submodules/containers/pkg/emulator/cleanup_test.go`
 
 - [ ] **Step 1: Add 4 KillByPort tests (all expected to fail because the function does not exist yet)**
 
-Append to `Submodules/Containers/pkg/emulator/cleanup_test.go`:
+Append to `submodules/containers/pkg/emulator/cleanup_test.go`:
 
 ```go
 // ---------------------------------------------------------------------
@@ -245,7 +245,7 @@ func TestKillByPort_RequiresSIGKILL_AfterGrace(t *testing.T) {
 - [ ] **Step 2: Run tests, confirm all 4 fail with "killByPortWithDeps undefined" or "PidCmdlines undefined"**
 
 ```bash
-cd Submodules/Containers
+cd submodules/containers
 go test ./pkg/emulator/... -run 'TestKillByPort' -count=1
 ```
 
@@ -258,11 +258,11 @@ If tests fail to compile for a different reason, fix the test file before procee
 ### Task A2: KillByPort — minimal implementation
 
 **Files:**
-- Modify: `Submodules/Containers/pkg/emulator/cleanup.go`
+- Modify: `submodules/containers/pkg/emulator/cleanup.go`
 
 - [ ] **Step 1: Extend the procWalker interface to expose argv (NUL-separated cmdline)**
 
-In `Submodules/Containers/pkg/emulator/cleanup.go`, replace the `procWalker` interface and `osProcWalker` impl with the extended versions. Find this block (around lines 23-52):
+In `submodules/containers/pkg/emulator/cleanup.go`, replace the `procWalker` interface and `osProcWalker` impl with the extended versions. Find this block (around lines 23-52):
 
 ```go
 // procWalker abstracts /proc enumeration so cleanup_test.go can inject
@@ -370,7 +370,7 @@ func (osProcWalker) PidCmdlines() (map[int][]string, error) {
 
 - [ ] **Step 2: Add `KillReport` struct and `KillByPort` + `killByPortWithDeps` functions**
 
-Append to `Submodules/Containers/pkg/emulator/cleanup.go` (after the existing `cleanupWithDeps` function, before EOF):
+Append to `submodules/containers/pkg/emulator/cleanup.go` (after the existing `cleanupWithDeps` function, before EOF):
 
 ```go
 // KillReport summarises the outcome of a KillByPort invocation.
@@ -506,7 +506,7 @@ func killByPortWithDeps(
 - [ ] **Step 3: Run KillByPort tests, confirm all 4 pass**
 
 ```bash
-cd Submodules/Containers
+cd submodules/containers
 go test ./pkg/emulator/... -run 'TestKillByPort' -count=1 -v
 ```
 
@@ -515,7 +515,7 @@ Expected: `--- PASS: TestKillByPort_NoMatch_NoOp`, `--- PASS: TestKillByPort_Str
 - [ ] **Step 4: Run the entire emulator package test suite — confirm Cleanup tests still pass after the procWalker interface extension**
 
 ```bash
-cd Submodules/Containers
+cd submodules/containers
 go test ./pkg/emulator/... -count=1 -race
 ```
 
@@ -539,7 +539,7 @@ for _, tok := range argv {
 Run the test:
 
 ```bash
-cd Submodules/Containers
+cd submodules/containers
 go test ./pkg/emulator/... -run TestKillByPort_SubstringSafety -count=1 -v
 ```
 
@@ -552,7 +552,7 @@ Expected: `FAIL: TestKillByPort_SubstringSafety` — assertion message says `exp
 Restore the original adjacent-token loop. Run:
 
 ```bash
-cd Submodules/Containers
+cd submodules/containers
 go test ./pkg/emulator/... -run TestKillByPort -count=1 -v
 ```
 
@@ -563,11 +563,11 @@ Expected: PASS for all 4 KillByPort tests.
 ### Task A3: Teardown fast-path — failing tests first
 
 **Files:**
-- Modify: `Submodules/Containers/pkg/emulator/android_test.go`
+- Modify: `submodules/containers/pkg/emulator/android_test.go`
 
 - [ ] **Step 1: Add 2 Teardown fast-path tests**
 
-Append to `Submodules/Containers/pkg/emulator/android_test.go`:
+Append to `submodules/containers/pkg/emulator/android_test.go`:
 
 ```go
 // ---------------------------------------------------------------------
@@ -682,7 +682,7 @@ func TestTeardown_FastPath_SucceedsAfterKillByPort(t *testing.T) {
 - [ ] **Step 2: Run tests, confirm both fail with "killByPortHook undefined" or "teardownGracePeriod undefined"**
 
 ```bash
-cd Submodules/Containers
+cd submodules/containers
 go test ./pkg/emulator/... -run 'TestTeardown_FastPath' -count=1
 ```
 
@@ -693,11 +693,11 @@ Expected: compile error citing the two undefined identifiers.
 ### Task A4: Teardown fast-path — implementation
 
 **Files:**
-- Modify: `Submodules/Containers/pkg/emulator/android.go`
+- Modify: `submodules/containers/pkg/emulator/android.go`
 
 - [ ] **Step 1: Add the two test seams (`killByPortHook`, `teardownGracePeriod`) at file scope**
 
-In `Submodules/Containers/pkg/emulator/android.go`, immediately after the `import` block (around line 11), add:
+In `submodules/containers/pkg/emulator/android.go`, immediately after the `import` block (around line 11), add:
 
 ```go
 // killByPortHook is the package-level seam tests use to substitute a
@@ -822,7 +822,7 @@ func (a *AndroidEmulator) Teardown(ctx context.Context, port int) error {
 - [ ] **Step 3: Run Teardown fast-path tests, confirm both pass**
 
 ```bash
-cd Submodules/Containers
+cd submodules/containers
 go test ./pkg/emulator/... -run 'TestTeardown_FastPath' -count=1 -v
 ```
 
@@ -831,7 +831,7 @@ Expected: `--- PASS: TestTeardown_FastPath_SkipsOnMismatch`, `--- PASS: TestTear
 - [ ] **Step 4: Run the full emulator package test suite — confirm no regressions**
 
 ```bash
-cd Submodules/Containers
+cd submodules/containers
 go test ./pkg/emulator/... -count=1 -race
 ```
 
@@ -844,7 +844,7 @@ Temporarily change `if report.Matched == 0 { return fmt.Errorf(...) }` to `if fa
 Run:
 
 ```bash
-cd Submodules/Containers
+cd submodules/containers
 go test ./pkg/emulator/... -run TestTeardown_FastPath_SkipsOnMismatch -count=1 -v
 ```
 
@@ -857,7 +857,7 @@ Expected: `FAIL: TestTeardown_FastPath_SkipsOnMismatch` — the test asserts a n
 Restore `if report.Matched == 0 { return fmt.Errorf(...) }`. Run:
 
 ```bash
-cd Submodules/Containers
+cd submodules/containers
 go test ./pkg/emulator/... -run TestTeardown_FastPath -count=1 -v
 ```
 
@@ -868,11 +868,11 @@ Expected: PASS for both fast-path tests.
 ### Task A5: types.go — DiagnosticInfo, FailureSummary, AVDRow ext, MatrixResult.Gating
 
 **Files:**
-- Modify: `Submodules/Containers/pkg/emulator/types.go`
+- Modify: `submodules/containers/pkg/emulator/types.go`
 
 - [ ] **Step 1: Add `DiagnosticInfo` and `FailureSummary` structs**
 
-Append to `Submodules/Containers/pkg/emulator/types.go`:
+Append to `submodules/containers/pkg/emulator/types.go`:
 
 ```go
 // DiagnosticInfo is the per-AVD forensic snapshot captured immediately
@@ -916,7 +916,7 @@ type FailureSummary struct {
 
 - [ ] **Step 2: Extend `TestResult` with `Diag`, `FailureSummaries`, `Concurrent`**
 
-In `Submodules/Containers/pkg/emulator/types.go`, find the `TestResult` struct (around lines 62-73) and replace with:
+In `submodules/containers/pkg/emulator/types.go`, find the `TestResult` struct (around lines 62-73) and replace with:
 
 ```go
 // TestResult captures the outcome of a single instrumentation-test
@@ -991,14 +991,14 @@ Find the `MatrixConfig` struct (around lines 78-110) and append two fields just 
 - [ ] **Step 5: Confirm the package still compiles**
 
 ```bash
-cd Submodules/Containers
+cd submodules/containers
 go build ./pkg/emulator/...
 ```
 
 Expected: build succeeds (no test changes needed yet — the new fields default to zero values, existing tests don't read them).
 
 ```bash
-cd Submodules/Containers
+cd submodules/containers
 go test ./pkg/emulator/... -count=1 -race
 ```
 
@@ -1009,11 +1009,11 @@ Expected: every test passes; no race detected.
 ### Task A6: matrix.go — diag capture + JUnit XML parse + worker pool
 
 **Files:**
-- Modify: `Submodules/Containers/pkg/emulator/matrix.go`
+- Modify: `submodules/containers/pkg/emulator/matrix.go`
 
 - [ ] **Step 1: Add JUnit XML parser at the bottom of matrix.go**
 
-Append to `Submodules/Containers/pkg/emulator/matrix.go`:
+Append to `submodules/containers/pkg/emulator/matrix.go`:
 
 ```go
 // parseJUnitFailures reads a single JUnit XML report file and returns
@@ -1101,7 +1101,7 @@ func parseJUnitFailures(xmlPath string) []FailureSummary {
 
 - [ ] **Step 2: Add `encoding/xml` to the import block**
 
-In `Submodules/Containers/pkg/emulator/matrix.go`, change the import block (lines 3-10) from:
+In `submodules/containers/pkg/emulator/matrix.go`, change the import block (lines 3-10) from:
 
 ```go
 import (
@@ -1133,7 +1133,7 @@ import (
 
 - [ ] **Step 3: Wire diag capture + JUnit parsing into `RunMatrix` (single-AVD inner block)**
 
-Extract the per-AVD work from `RunMatrix` into a helper `runOne` that captures diag + parses JUnit XML. In `Submodules/Containers/pkg/emulator/matrix.go`, after the `defaultIfZero` helper (around line 34), add:
+Extract the per-AVD work from `RunMatrix` into a helper `runOne` that captures diag + parses JUnit XML. In `submodules/containers/pkg/emulator/matrix.go`, after the `defaultIfZero` helper (around line 34), add:
 
 ```go
 // runOne executes one (boot → install → test → teardown) cycle for a
@@ -1508,7 +1508,7 @@ func writeAttestation(path string, r MatrixResult) error {
 - [ ] **Step 7: Confirm package compiles + existing tests pass**
 
 ```bash
-cd Submodules/Containers
+cd submodules/containers
 go build ./pkg/emulator/...
 go test ./pkg/emulator/... -count=1 -race
 ```
@@ -1522,11 +1522,11 @@ If `TestAndroidMatrixRunner_AllAVDsPass_ReportsAllPassed` or `TestAndroidMatrixR
 ### Task A7: matrix.go tests — JUnit parser + Gating field
 
 **Files:**
-- Modify: `Submodules/Containers/pkg/emulator/matrix_test.go`
+- Modify: `submodules/containers/pkg/emulator/matrix_test.go`
 
 - [ ] **Step 1: Add JUnit parser tests**
 
-Append to `Submodules/Containers/pkg/emulator/matrix_test.go`:
+Append to `submodules/containers/pkg/emulator/matrix_test.go`:
 
 ```go
 // ---------------------------------------------------------------------
@@ -1644,7 +1644,7 @@ func TestParseJUnitFailures_MissingFile_SyntheticEntry(t *testing.T) {
 
 - [ ] **Step 2: Add Gating-field tests using a fake Emulator**
 
-Append to `Submodules/Containers/pkg/emulator/matrix_test.go`:
+Append to `submodules/containers/pkg/emulator/matrix_test.go`:
 
 ```go
 // ---------------------------------------------------------------------
@@ -1726,7 +1726,7 @@ func TestRunMatrix_Gating_FalseOnDev(t *testing.T) {
 - [ ] **Step 3: Run the new tests, confirm all 8 pass**
 
 ```bash
-cd Submodules/Containers
+cd submodules/containers
 go test ./pkg/emulator/... -run 'TestParseJUnitFailures|TestRunMatrix_Gating' -count=1 -v
 ```
 
@@ -1735,7 +1735,7 @@ Expected: PASS for all 5 parser tests + 3 gating tests.
 - [ ] **Step 4: Run the full emulator package test suite**
 
 ```bash
-cd Submodules/Containers
+cd submodules/containers
 go test ./pkg/emulator/... -count=1 -race
 ```
 
@@ -1748,7 +1748,7 @@ In `parseJUnitFailures` (matrix.go), comment out the entire `for _, e := range t
 Run:
 
 ```bash
-cd Submodules/Containers
+cd submodules/containers
 go test ./pkg/emulator/... -run TestParseJUnitFailures_FailureAndError_BothCaptured -count=1 -v
 ```
 
@@ -1765,7 +1765,7 @@ In `RunMatrix`, change `Gating: concurrent == 1 && !config.Dev` to `Gating: fals
 Run:
 
 ```bash
-cd Submodules/Containers
+cd submodules/containers
 go test ./pkg/emulator/... -run TestRunMatrix_Gating_TrueOnDefaults -count=1 -v
 ```
 
@@ -1778,11 +1778,11 @@ Expected: `FAIL: TestRunMatrix_Gating_TrueOnDefaults` — assertion message says
 ### Task A8: cmd/emulator-matrix — --concurrent + --dev flags
 
 **Files:**
-- Modify: `Submodules/Containers/cmd/emulator-matrix/main.go`
+- Modify: `submodules/containers/cmd/emulator-matrix/main.go`
 
 - [ ] **Step 1: Add the two new flag definitions inside `main()`**
 
-In `Submodules/Containers/cmd/emulator-matrix/main.go`, insert after the existing `flagTestTimeout` (around line 91):
+In `submodules/containers/cmd/emulator-matrix/main.go`, insert after the existing `flagTestTimeout` (around line 91):
 
 ```go
 	flagConcurrent := flag.Int("concurrent", 1,
@@ -1825,7 +1825,7 @@ Find the loop printing per-row results (around lines 134-145). After the `if !re
 - [ ] **Step 4: Confirm the binary builds**
 
 ```bash
-cd Submodules/Containers
+cd submodules/containers
 go build ./cmd/emulator-matrix/...
 ```
 
@@ -1834,7 +1834,7 @@ Expected: build succeeds.
 - [ ] **Step 5: Confirm the help output advertises the new flags**
 
 ```bash
-cd Submodules/Containers
+cd submodules/containers
 go run ./cmd/emulator-matrix/ --help 2>&1 | head -40
 ```
 
@@ -1850,7 +1850,7 @@ Expected: output contains `--concurrent int` and `--dev` lines with the descript
 - [ ] **Step 1: Stage every Phase A change**
 
 ```bash
-cd Submodules/Containers
+cd submodules/containers
 git status
 git add pkg/emulator/cleanup.go pkg/emulator/cleanup_test.go \
         pkg/emulator/types.go \
@@ -1865,7 +1865,7 @@ Expected: all 8 files staged for commit; nothing else unstaged.
 - [ ] **Step 2: Run the full test suite one final time**
 
 ```bash
-cd Submodules/Containers
+cd submodules/containers
 go test ./pkg/emulator/... -count=1 -race
 go build ./pkg/emulator/... ./cmd/emulator-matrix/...
 ```
@@ -1877,7 +1877,7 @@ Expected: every test passes; both builds succeed.
 The commit body MUST contain 5 mutation rehearsals (KillByPort substring-safety + Teardown skip-on-mismatch + JUnit-parser drop-error-elements + Gating-default-true + one for the worker pool). Use the captured failure messages from earlier steps verbatim. Use a HEREDOC for formatting:
 
 ```bash
-cd Submodules/Containers
+cd submodules/containers
 git commit -m "$(cat <<'EOF'
 feat(emulator): Group B — KillByPort fast-path + per-row diag + JUnit parsing + concurrent mode
 
@@ -1953,7 +1953,7 @@ EOF
 - [ ] **Step 4: Push the new branch to all 4 Containers upstreams**
 
 ```bash
-cd Submodules/Containers
+cd submodules/containers
 for r in github gitlab gitflic gitverse; do
   echo "=== $r ==="
   git push -u "$r" lava-pin/2026-05-06-group-b
@@ -1967,7 +1967,7 @@ If any push errors, STOP — diagnose the upstream issue and re-push only the fa
 - [ ] **Step 5: Verify 4-mirror SHA convergence via live ls-remote**
 
 ```bash
-cd Submodules/Containers
+cd submodules/containers
 for r in github gitlab gitflic gitverse; do
   sha=$(git ls-remote "$r" refs/heads/lava-pin/2026-05-06-group-b 2>/dev/null | awk '{print $1}')
   echo "$r: $sha"
@@ -2754,12 +2754,12 @@ Expected: 4 pushes succeed; identical SHA from all 4 remotes.
 ### Task C1: Bump the Containers pin
 
 **Files:**
-- Modify: `Submodules/Containers` (gitlink)
+- Modify: `submodules/containers` (gitlink)
 
 - [ ] **Step 1: Update the submodule's working tree to the new branch HEAD**
 
 ```bash
-cd /run/media/milosvasic/DATA4TB/Projects/Lava/Submodules/Containers
+cd /run/media/milosvasic/DATA4TB/Projects/Lava/submodules/containers
 git fetch github lava-pin/2026-05-06-group-b
 git checkout lava-pin/2026-05-06-group-b
 git pull github lava-pin/2026-05-06-group-b
@@ -2772,8 +2772,8 @@ Save the printed SHA (call it `$CONTAINERS_HEAD`).
 
 ```bash
 cd /run/media/milosvasic/DATA4TB/Projects/Lava
-git status   # should show: modified: Submodules/Containers (new commits)
-git diff --submodule=log Submodules/Containers
+git status   # should show: modified: submodules/containers (new commits)
+git diff --submodule=log submodules/containers
 ```
 
 Expected: the diff shows the new commits the pin bump will pick up.
@@ -2802,19 +2802,19 @@ Create `.lava-ci-evidence/bluff-hunt/2026-05-06-group-b.json`:
   "rule": "§6.N.1.1 subsequent-same-day lighter hunt — 1-2 production-code files from gate-shaping surface",
   "targets": [
     {
-      "file": "Submodules/Containers/pkg/emulator/cleanup.go",
+      "file": "submodules/containers/pkg/emulator/cleanup.go",
       "function": "KillByPort / killByPortWithDeps",
       "mutation": "weaken the strict adjacent-token matcher to strings.Contains(token, target)",
-      "covering_test": "Submodules/Containers/pkg/emulator/cleanup_test.go::TestKillByPort_SubstringSafety",
+      "covering_test": "submodules/containers/pkg/emulator/cleanup_test.go::TestKillByPort_SubstringSafety",
       "observed_failure": "expected Matched=0 (no adjacent token pair), got 2 (signaled=...)",
       "reverted": true,
       "commit_reference": "Containers branch lava-pin/2026-05-06-group-b — see commit body Bluff-Audit stamp"
     },
     {
-      "file": "Submodules/Containers/pkg/emulator/matrix.go",
+      "file": "submodules/containers/pkg/emulator/matrix.go",
       "function": "parseJUnitFailures",
       "mutation": "comment out the for _, e := range tc.Errors loop in parseJUnitFailures",
-      "covering_test": "Submodules/Containers/pkg/emulator/matrix_test.go::TestParseJUnitFailures_FailureAndError_BothCaptured",
+      "covering_test": "submodules/containers/pkg/emulator/matrix_test.go::TestParseJUnitFailures_FailureAndError_BothCaptured",
       "observed_failure": "expected 2 entries (1 failure + 1 error), got 1",
       "reverted": true,
       "commit_reference": "Containers branch lava-pin/2026-05-06-group-b — see commit body Bluff-Audit stamp"
@@ -2839,7 +2839,7 @@ cd /run/media/milosvasic/DATA4TB/Projects/Lava
 LAVA_PHASE_B_SHA=$(git log -1 --format=%H -- scripts/tag.sh)
 echo "Lava parent Phase B SHA: $LAVA_PHASE_B_SHA"
 
-cd Submodules/Containers
+cd submodules/containers
 CONTAINERS_PHASE_A_SHA=$(git rev-parse HEAD)
 echo "Containers Phase A SHA: $CONTAINERS_PHASE_A_SHA"
 
@@ -2849,7 +2849,7 @@ for r in github gitlab gitflic gitverse; do
   git ls-remote "$r" refs/heads/master 2>/dev/null | awk '{print $1}'
 done
 echo
-cd Submodules/Containers
+cd submodules/containers
 for r in github gitlab gitflic gitverse; do
   echo -n "containers branch on $r: "
   git ls-remote "$r" refs/heads/lava-pin/2026-05-06-group-b 2>/dev/null | awk '{print $1}'
@@ -2878,11 +2878,11 @@ Create `.lava-ci-evidence/Phase-Group-B-closure-2026-05-06.json`. Substitute the
     "lava_phase_c": "<filled in by the commit-and-amend below>"
   },
   "components_implemented": {
-    "A_KillByPort": "Submodules/Containers/pkg/emulator/cleanup.go (+ cleanup_test.go) — strict adjacent /proc walk; 4 tests including TestKillByPort_SubstringSafety",
-    "B_Teardown_FastPath": "Submodules/Containers/pkg/emulator/android.go (+ android_test.go) — post-30s-grace KillByPort fast-path; skip-on-mismatch; 2 tests",
-    "C_Types": "Submodules/Containers/pkg/emulator/types.go — DiagnosticInfo, FailureSummary, KillReport, MatrixResult.Gating, MatrixConfig.Concurrent + .Dev, TestResult.Diag + .FailureSummaries + .Concurrent",
-    "D_Matrix": "Submodules/Containers/pkg/emulator/matrix.go — runOne extracted, captureDiagnostic, parseJUnitFailures, worker pool, writeAttestation new fields + 8 tests",
-    "E_CLI": "Submodules/Containers/cmd/emulator-matrix/main.go — --concurrent N + --dev flags + Gating-status summary line",
+    "A_KillByPort": "submodules/containers/pkg/emulator/cleanup.go (+ cleanup_test.go) — strict adjacent /proc walk; 4 tests including TestKillByPort_SubstringSafety",
+    "B_Teardown_FastPath": "submodules/containers/pkg/emulator/android.go (+ android_test.go) — post-30s-grace KillByPort fast-path; skip-on-mismatch; 2 tests",
+    "C_Types": "submodules/containers/pkg/emulator/types.go — DiagnosticInfo, FailureSummary, KillReport, MatrixResult.Gating, MatrixConfig.Concurrent + .Dev, TestResult.Diag + .FailureSummaries + .Concurrent",
+    "D_Matrix": "submodules/containers/pkg/emulator/matrix.go — runOne extracted, captureDiagnostic, parseJUnitFailures, worker pool, writeAttestation new fields + 8 tests",
+    "E_CLI": "submodules/containers/cmd/emulator-matrix/main.go — --concurrent N + --dev flags + Gating-status summary line",
     "F_RunEmulatorTests": "scripts/run-emulator-tests.sh — auto-detect versionName/versionCode + --tag override + --concurrent + --dev passthrough + new evidence-dir convention",
     "G_TagSh": "scripts/tag.sh — require_matrix_attestation_group_b_gates helper (Gate 1 reject concurrent != 1, Gate 2 reject gating != true, Gate 3 reject diag.sdk != api_level)",
     "H_Tests_Evidence": "tests/tag-helper/{run_all.sh + 4 test_tag_*.sh fixtures} + .lava-ci-evidence/bluff-hunt/2026-05-06-group-b.json + this closure file"
@@ -2943,7 +2943,7 @@ Create `.lava-ci-evidence/Phase-Group-B-closure-2026-05-06.json`. Substitute the
 
 ```bash
 cd /run/media/milosvasic/DATA4TB/Projects/Lava
-git add Submodules/Containers \
+git add submodules/containers \
         .lava-ci-evidence/bluff-hunt/2026-05-06-group-b.json \
         .lava-ci-evidence/Phase-Group-B-closure-2026-05-06.json
 git status
@@ -2957,7 +2957,7 @@ Expected: 3 changes staged (the gitlink update + 2 evidence files).
 git commit -m "$(cat <<'EOF'
 chore(submodules+evidence): bump Containers pin + Group B closure evidence
 
-Bumps Submodules/Containers to lava-pin/2026-05-06-group-b HEAD,
+Bumps submodules/containers to lava-pin/2026-05-06-group-b HEAD,
 which contains the Group B Phase A code (KillByPort fast-path,
 DiagnosticInfo + FailureSummary types, matrix.go runOne + JUnit
 parser + worker pool, cmd/emulator-matrix --concurrent + --dev
@@ -3028,7 +3028,7 @@ Expected: 4 pushes succeed; identical SHA from all 4 remotes.
 - [ ] **All 4 mirrors converge after each push** (via live `git ls-remote`)
 
 - [ ] **All test suites green**
-   - `cd Submodules/Containers && go test ./pkg/emulator/... -count=1 -race` → PASS
+   - `cd submodules/containers && go test ./pkg/emulator/... -count=1 -race` → PASS
    - `bash tests/tag-helper/run_all.sh` → 4/4 passed
    - `bash tests/pre-push/check4_test.sh` → ok
    - `bash tests/pre-push/check5_test.sh` → ok

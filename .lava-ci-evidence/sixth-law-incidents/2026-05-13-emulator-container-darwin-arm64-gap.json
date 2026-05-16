@@ -40,7 +40,7 @@
   "recommended_action": "A + C. Amend §6.V to carve out darwin/arm64-workstation host-direct; provision a Linux-x86_64 runner for the gate. Option B (Dockerfile-arm64) is a long-tail nice-to-have but not on the critical path.",
   "actions_taken_in_this_session": [
     "Documented the gap (this file) — forensic record for the next agent to read.",
-    "Confirmed host-direct path works: ./Submodules/Containers/cmd/emulator-matrix builds clean from the pinned submodule, the binary has the documented Boot/Install/RunInstrumentation surface area.",
+    "Confirmed host-direct path works: ./submodules/containers/cmd/emulator-matrix builds clean from the pinned submodule, the binary has the documented Boot/Install/RunInstrumentation surface area.",
     "Confirmed APK-build blocker is SEPARATE from the emulator-container gap: ./gradlew :app:assembleDebug fails on missing .env + keystores/debug.keystore + app/google-services.json regardless of which emulator path is used."
   ],
   "what_remains_unblocked_post_this_record": [

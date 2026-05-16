@@ -88,7 +88,7 @@ the source — every feature mirrors `XxxState` + `XxxAction` +
                                  │ composite-build pin (frozen by default)
                                  ▼
 ┌──────────────────────────────────────────────────────────────────────┐
-│ Submodules/Tracker-SDK/    (vasic-digital/Tracker-SDK)               │
+│ submodules/tracker_sdk/    (vasic-digital/Tracker-SDK)               │
 │   • api       — MirrorUrl, Protocol, Mirror state machine            │
 │   • mirror    — MirrorConfigStore interface                          │
 │   • registry  — generic in-memory tracker registry primitive         │
@@ -157,7 +157,7 @@ app start by `MirrorConfigLoader`.
 | `feature/provider_config`              | `lava.android.feature` + Compose  | Per-provider configuration (mirrors, credentials binding, sync toggle, anonymous mode, clone). Reachable from Menu by tapping a provider row. Replaces the SP-3a Trackers screen (deleted in SP-4 Phase C). |
 | `feature/credentials_manager`          | `lava.android.feature` + Compose  | Passphrase-gated credentials CRUD UI (Phase A). Add / edit / delete `CredentialsEntry` rows. |
 
-Generic primitives mounted via composite build at `Submodules/Tracker-SDK/`
+Generic primitives mounted via composite build at `submodules/tracker_sdk/`
 (submodule pin frozen by default per the Decoupled Reusable Architecture
 constitutional rule).
 

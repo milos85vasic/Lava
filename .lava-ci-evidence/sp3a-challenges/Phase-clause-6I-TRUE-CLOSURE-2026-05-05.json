@@ -37,7 +37,7 @@
     },
     {
       "fix_id": "L4 (Teardown wait-for-exit, surfaced during execution)",
-      "description": "Submodules/Containers commit (TBD) — `adb emu kill` returns 'OK' immediately but qemu-system takes 10-30s to actually exit. The pre-fix Teardown returned immediately, causing 5 emulators to accumulate during a 5-AVD matrix run, producing CPU/RAM contention that flaked late iterations. The new Teardown polls `adb devices` for up to 30s after the kill, returning only when the localhost:<port> entry leaves the 'device' state. Regression test TestAndroidEmulator_Teardown_WaitsForEmulatorToActuallyExit pinned with falsifiability rehearsal in commit body. The matrix wall-time grew slightly (5m37s vs 5m26s baseline) but the gate is now reliable instead of flaky."
+      "description": "submodules/containers commit (TBD) — `adb emu kill` returns 'OK' immediately but qemu-system takes 10-30s to actually exit. The pre-fix Teardown returned immediately, causing 5 emulators to accumulate during a 5-AVD matrix run, producing CPU/RAM contention that flaked late iterations. The new Teardown polls `adb devices` for up to 30s after the kill, returning only when the localhost:<port> entry leaves the 'device' state. Regression test TestAndroidEmulator_Teardown_WaitsForEmulatorToActuallyExit pinned with falsifiability rehearsal in commit body. The matrix wall-time grew slightly (5m37s vs 5m26s baseline) but the gate is now reliable instead of flaky."
     }
   ],
   "clause_6_I_status": {
@@ -59,14 +59,14 @@
       "API_30_class": "OWED",
       "API_34_class": "PASS (commit 8e66c53 — single-AVD CZ_API34_Phone mutation rehearsal)",
       "API_35_class": "OWED",
-      "architectural_falsifiability": "PASS — TestAndroidEmulator_Boot_DiscoversNewSerial_WhenPriorEmulatorPersists in Submodules/Containers"
+      "architectural_falsifiability": "PASS — TestAndroidEmulator_Boot_DiscoversNewSerial_WhenPriorEmulatorPersists in submodules/containers"
     },
     "clause_6_cold_boot_only_reporting": "PASS — boot_seconds now correctly reports cold-boot time across the 5-AVD matrix (12-27s range, all real cold boots post snapshot-purge)",
     "clause_7_tag_sh_enforcement": "PASS — helper now parses compileSdk dynamically and gates correctly. Will accept this commit's evidence (all 4 required APIs present + tablet form factor + all_passed=true).",
     "clause_8_inheritance": "PASS — anti-bluff mandate verified present in all 16 submodule CLAUDE.md files + lava-api-go {CLAUDE,AGENTS,CONSTITUTION}.md + root {CLAUDE,AGENTS}.md + app/core/feature scoped CLAUDE.md."
   },
   "newly_documented_forbidden_test_patterns": [
-    "Hardcoded-port multi-target test runner (added to Seventh Law clause 4 in root CLAUDE.md). Forensic anchor: the 7-day-old Submodules/Containers/pkg/emulator port-collision bluff exposed by ultrathink-driven systematic-debugging on 2026-05-05.",
+    "Hardcoded-port multi-target test runner (added to Seventh Law clause 4 in root CLAUDE.md). Forensic anchor: the 7-day-old submodules/containers/pkg/emulator port-collision bluff exposed by ultrathink-driven systematic-debugging on 2026-05-05.",
     "Forward-compat skip without tracking citation (added to Seventh Law clause 4). Forensic anchor: Pixel_9a Compose-LazyLayout-Looper crash recorded at .lava-ci-evidence/sixth-law-incidents/2026-05-05-pixel9a-espresso-api36-incompatibility.json."
   ],
   "anti_bluff_mandate_audit": {
@@ -78,9 +78,9 @@
     "lava-api-go/CLAUDE.md": "8 references — clauses 6.I/J/K/L/M",
     "lava-api-go/AGENTS.md": "2 references — Anti-Bluff Submodule Inheritance + Seventh Law",
     "lava-api-go/CONSTITUTION.md": "2 references — Inherited rules",
-    "Submodules/{Auth,Cache,Concurrency,Config,Database,Discovery,Middleware,Observability,RateLimiter,Recovery,Security}/CLAUDE.md": "9 references each — full clause stack",
-    "Submodules/{Challenges,Containers,HTTP3,Mdns}/CLAUDE.md": "8 references each — full clause stack with module-specific weight",
-    "Submodules/Tracker-SDK/CLAUDE.md": "6 references — adopts via §1, propagates clauses 6.I-6.M"
+    "submodules/{Auth,Cache,Concurrency,Config,Database,Discovery,Middleware,Observability,RateLimiter,Recovery,Security}/CLAUDE.md": "9 references each — full clause stack",
+    "submodules/{Challenges,Containers,HTTP3,Mdns}/CLAUDE.md": "8 references each — full clause stack with module-specific weight",
+    "submodules/tracker_sdk/CLAUDE.md": "6 references — adopts via §1, propagates clauses 6.I-6.M"
   },
   "remaining_open_gaps_for_future_sessions": [
     "Container-bound matrix run per §6.I clause 1 — broader 6.K-debt",

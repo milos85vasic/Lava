@@ -6,13 +6,13 @@
 
 ## Purpose
 
-`scripts/run-helixqa-challenges.sh` invokes 11 HelixQA Challenge scripts at `Submodules/HelixQA/challenges/scripts/`. HelixQA is owned by the HelixDevelopment organization and may evolve independently — any future addition that pushes artifacts to a non-GitHub / non-GitLab mirror would silently violate Lava's §6.W mirror-host boundary if invoked through the wrapper without re-audit.
+`scripts/run-helixqa-challenges.sh` invokes 11 HelixQA Challenge scripts at `submodules/helixqa/challenges/scripts/`. HelixQA is owned by the HelixDevelopment organization and may evolve independently — any future addition that pushes artifacts to a non-GitHub / non-GitLab mirror would silently violate Lava's §6.W mirror-host boundary if invoked through the wrapper without re-audit.
 
 This document is the per-script audit + the EXCLUSIONS source-of-truth referenced by the `HELIXQA_W_EXCLUSIONS` constant in `scripts/run-helixqa-challenges.sh`. Per §6.J: real `grep` results only — no manufactured findings.
 
 ## Audit methodology
 
-For each script under `Submodules/HelixQA/challenges/scripts/`:
+For each script under `submodules/helixqa/challenges/scripts/`:
 
 1. **Push targets** — `grep -nE 'git[[:space:]]+push' <script>`
 2. **External HTTP services** — `grep -nE 'curl|wget' <script>` + inspection of the URL host(s)
@@ -60,7 +60,7 @@ The Lava wrapper does NOT validate these env vars — they are HelixQA-internal.
 
 This audit MUST be re-run when ANY of the following changes:
 
-1. The `Submodules/HelixQA` pin bumps (because the script set may have changed — new scripts added, existing scripts changed). The `scripts/run-helixqa-challenges.sh` wiring-drift check catches added/removed scripts at runtime, but the §6.W audit of the script BODIES is a separate concern.
+1. The `submodules/helixqa` pin bumps (because the script set may have changed — new scripts added, existing scripts changed). The `scripts/run-helixqa-challenges.sh` wiring-drift check catches added/removed scripts at runtime, but the §6.W audit of the script BODIES is a separate concern.
 2. A new HELIXQA_* env var ships with a remote default (currently none do).
 3. Any script grows a `git push` invocation (currently none have it).
 4. Any script grows a `curl` / `wget` to a non-localhost default (currently none have it).
@@ -72,5 +72,5 @@ The re-audit is mechanical: re-run the methodology section's 4 `grep` queries ag
 - `scripts/run-helixqa-challenges.sh` — the wrapper that consumes `HELIXQA_W_EXCLUSIONS`
 - `docs/scripts/run-helixqa-challenges.sh.md` — wrapper user guide (references this audit)
 - `docs/helix-constitution-gates.md` — `CM-HELIXQA-§6.W-AUDIT` gate row references this audit as the source-of-truth
-- `Submodules/HelixQA/challenges/scripts/` — the 11 scripts audited
+- `submodules/helixqa/challenges/scripts/` — the 11 scripts audited
 - Lava `CLAUDE.md` §6.W (GitHub + GitLab Only Remote Mandate) + §6.J (Anti-Bluff Functional Reality)

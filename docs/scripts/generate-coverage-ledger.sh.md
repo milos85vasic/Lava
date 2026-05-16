@@ -9,7 +9,7 @@ Generates the canonical `docs/coverage-ledger.yaml` — Lava's machine-readable 
 
 For every feature module, core module, app, lava-api-go service, and owned-by-us Submodule, the generator emits one row recording:
 
-- The path (e.g. `feature/onboarding`, `core/auth`, `lava-api-go`, `Submodules/Containers`)
+- The path (e.g. `feature/onboarding`, `core/auth`, `lava-api-go`, `submodules/containers`)
 - The kind (`feature` | `core` | `app` | `api` | `submodule`)
 - Test counts (unit, integration) discovered on disk
 - Challenges that target the row (matched by import / `// covers-feature:` marker / filename keyword / heuristic broad-flow mapping — same matching rules as `scripts/check-challenge-coverage.sh`)
@@ -25,7 +25,7 @@ For every feature module, core module, app, lava-api-go service, and owned-by-us
 | `working_capability` | `pass` if challenge_count > 0; else `gap` | Challenge tests are the E2E gate per §6.AE |
 | `documented_promise` | Always defaults to `gap` | Requires operator-or-reviewer override via waiver — typically points at a CONSTITUTION.md / README.md / spec |
 | `no_open_bugs` | Always defaults to `gap` | Requires operator-or-reviewer override via waiver — typically references closure logs under `.lava-ci-evidence/crashlytics-resolved/` per §6.AD.3 equivalence |
-| `documented` | `pass` if any of `{README.md, CLAUDE.md, AGENTS.md, CONSTITUTION.md}` present in the path; else `gap` | Per-scope §6.AD pointer-block makes this `pass` for any path under feature/, core/, app/, lava-api-go/, Submodules/ (after waivers) |
+| `documented` | `pass` if any of `{README.md, CLAUDE.md, AGENTS.md, CONSTITUTION.md}` present in the path; else `gap` | Per-scope §6.AD pointer-block makes this `pass` for any path under feature/, core/, app/, lava-api-go/, submodules/ (after waivers) |
 | `four_layer` | `pass` if unit_test_count > 0 AND challenge_count > 0; else `gap` | §1 four-layer floor: pre-build + post-build + runtime + paired mutation |
 
 ## Status computation

@@ -156,7 +156,7 @@ what synthetic verification cannot — for the third release in a row.
   same Gin engine; clients negotiate via Alt-Svc / SVCB.
 - **response_cache schema fix** (`aa11566`). The Phase 4 migration created
   the table with the design-doc §7 7-column schema, but the
-  `Submodules/Cache/pkg/postgres` library's INSERT is hardcoded to the
+  `submodules/cache/pkg/postgres` library's INSERT is hardcoded to the
   3-column shape `(cache_key, value, expires_at)`. Every `cache.Set` call
   failed silently in 2.0.0; the cache layer was effectively a no-op. Net
   effect on the hot path: `GET /forum` cached_hits p(99) was **521ms**
@@ -258,7 +258,7 @@ legacy Kotlin/Ktor proxy.
   produces empty diff".
 - **Postgres response cache** (5-minute to 1-hour TTLs per route),
   realm-scoped invalidation on writes. Backed by
-  `Submodules/Cache/pkg/postgres`.
+  `submodules/cache/pkg/postgres`.
 - **mDNS service advertisement** on `_lava-api._tcp` port 8443 with
   TXT records `engine=go, version, protocols=h3,h2,
   compression=br,gzip, tls=required, path=/`.
@@ -267,7 +267,7 @@ legacy Kotlin/Ktor proxy.
   into `auth_realm_hash` for audit / cache-key isolation. Plaintext
   token never persisted, never logged.
 - **Sliding-window rate limit** per (client_ip, route_class) backed by
-  `Submodules/RateLimiter`. Default thresholds: read 60 rpm, write 10 rpm,
+  `submodules/ratelimiter`. Default thresholds: read 60 rpm, write 10 rpm,
   login 5 rpm, download 10 rpm.
 - **Observability stack** (`./start.sh --with-observability`): Prometheus
   scrapes `/metrics`, Loki + Promtail aggregate logs, Tempo collects

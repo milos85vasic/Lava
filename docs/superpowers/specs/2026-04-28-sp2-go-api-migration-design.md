@@ -60,7 +60,7 @@ This document is the SP-2 design satisfying those requirements. It was reached t
 - A Postgres schema for response cache, request audit, rate limiting, and login throttling, applied via `golang-migrate`.
 - mDNS service advertisement on `_lava-api._tcp` (port 8443), distinct from the legacy `_lava._tcp` (port 8080).
 - A symmetrical TXT-record update on the legacy proxy's existing `_lava._tcp` advertisement.
-- A small Lava-local CLI at `tools/lava-containers/` that delegates orchestration to `Submodules/Containers`.
+- A small Lava-local CLI at `tools/lava-containers/` that delegates orchestration to `submodules/containers`.
 - Updates to `docker-compose.yml`, `start.sh`, `stop.sh`, `scripts/tag.sh`, `build_and_release.sh`.
 - An OpenAPI 3.1 spec authored by hand at `lava-api-go/api/openapi.yaml`, used to generate Go server interfaces and a typed Go client (committed).
 - A full local CI gate at `lava-api-go/scripts/ci.sh` covering all eight test types plus mutation testing and pre-tag real-device verification.
@@ -103,22 +103,22 @@ The new service is a single-binary, single-container Go application. It owns its
                                       │            lava-api-go (1 process, 1 container)     │
                                       │                                                     │
    Android client / browser           │  ┌──────────────────────────────────────────────┐   │
-   ──────────────────────────────────▶│  │  digital.vasic.http3 (Submodules/HTTP3)      │   │
+   ──────────────────────────────────▶│  │  digital.vasic.http3 (submodules/http3)      │   │
    HTTP/3 over QUIC, port 8443        │  │  ListenAndServe → http3.Server                │   │
                                       │  └────────────────────┬─────────────────────────┘   │
                                       │                       │                              │
                                       │                       ▼                              │
                                       │  ┌──────────────────────────────────────────────┐   │
                                       │  │  Gin engine + middleware chain                │   │
-                                      │  │   • requestid (Submodules/Middleware)         │   │
-                                      │  │   • recovery   (Submodules/Middleware)        │   │
-                                      │  │   • logging    (Submodules/Observability)     │   │
-                                      │  │   • metrics    (Submodules/Observability)     │   │
-                                      │  │   • tracing    (Submodules/Observability)     │   │
-                                      │  │   • brotli     (Submodules/Middleware)        │   │
-                                      │  │   • altsvc     (Submodules/Middleware)        │   │
-                                      │  │   • headers    (Submodules/Security)          │   │
-                                      │  │   • ratelimit  (Submodules/RateLimiter)       │   │
+                                      │  │   • requestid (submodules/middleware)         │   │
+                                      │  │   • recovery   (submodules/middleware)        │   │
+                                      │  │   • logging    (submodules/observability)     │   │
+                                      │  │   • metrics    (submodules/observability)     │   │
+                                      │  │   • tracing    (submodules/observability)     │   │
+                                      │  │   • brotli     (submodules/middleware)        │   │
+                                      │  │   • altsvc     (submodules/middleware)        │   │
+                                      │  │   • headers    (submodules/security)          │   │
+                                      │  │   • ratelimit  (submodules/ratelimiter)       │   │
                                       │  │   • auth pass-through + audit hash (Lava)     │   │
                                       │  └────────────────────┬─────────────────────────┘   │
                                       │                       │                              │
@@ -140,7 +140,7 @@ The new service is a single-binary, single-container Go application. It owns its
                                       │       ▼                                   ▼          │
                                       │  ┌─────────────────────┐         ┌──────────────────┐│
                                       │  │ Postgres cache       │         │ rutracker scraper ││
-                                      │  │ (Submodules/Cache/   │         │ (Lava-domain     ││
+                                      │  │ (submodules/cache/   │         │ (Lava-domain     ││
                                       │  │  pkg/postgres)       │         │  internal/       ││
                                       │  │  GET → on miss →     │◀────────┤  rutracker)      ││
                                       │  │  upstream → SET      │         │                  ││
@@ -154,7 +154,7 @@ The new service is a single-binary, single-container Go application. It owns its
                                       │  └─────────────────────┘         └──────────────────┘│
                                       │                                                     │
                                       │  In-process mDNS advertisement                       │
-                                      │  (Submodules/Mdns/pkg/service)                       │
+                                      │  (submodules/mdns/pkg/service)                       │
                                       │  _lava-api._tcp on 8443 with TXT records             │
                                       └─────────────────────────────────────────────────────┘
 ```
@@ -168,25 +168,25 @@ The Decoupled Reusable Architecture rule (§3.3) demands an explicit boundary en
 | Component | Source | Lava-local work |
 |---|---|---|
 | Gin HTTP framework | `github.com/gin-gonic/gin` (external) | direct dependency |
-| HTTP/3 server | `Submodules/HTTP3/pkg/server` | thin glue at `lava-api-go/internal/server/server.go` (config wiring only) |
-| Brotli middleware | `Submodules/Middleware/pkg/brotli` | direct use |
-| Alt-Svc HTTP/3 advert | `Submodules/Middleware/pkg/altsvc` | direct use |
-| Gin middleware glue | `Submodules/Middleware/pkg/{gin,chain,cors,recovery,requestid,logging}` | direct use |
-| Postgres driver | `github.com/jackc/pgx/v5` (transitively via `Submodules/Database` and `Submodules/Cache`) | direct |
-| Postgres-backed cache | `Submodules/Cache/pkg/postgres` (we contributed this) | direct use |
-| Schema migrations | `Submodules/Database/pkg/migration` (preferred) or direct `golang-migrate/migrate/v4` if it lacks a feature | thin runner in `lava-api-go/scripts/migrate.sh` |
-| Sliding-window rate limit | `Submodules/RateLimiter/pkg/{sliding,gin}` | direct use |
-| Circuit breaker (rutracker.org) | `Submodules/Recovery/pkg/breaker` | wrap rutracker outbound calls |
-| HTTP security headers | `Submodules/Security/pkg/headers` | direct use |
-| PII / Auth-Token redaction | `Submodules/Security/pkg/pii` | wired into `Submodules/Observability/pkg/logging` |
-| Structured logging | `Submodules/Observability/pkg/logging` | direct use |
-| Prometheus metrics | `Submodules/Observability/pkg/{metrics,gin}` | direct use |
-| OpenTelemetry tracing | `Submodules/Observability/pkg/{trace,gin}` | direct use |
-| Health endpoints | `Submodules/Observability/pkg/health` + `Submodules/Recovery/pkg/health` | direct use |
-| Config (env + JSON) | `Submodules/Config/pkg/{config,env}` | direct use |
-| Container orchestration | `Submodules/Containers/pkg/{runtime,compose,lifecycle,…}` | `tools/lava-containers/` delegates |
-| mDNS announcement | `Submodules/Mdns/pkg/service` (we contributed this) | direct use |
-| Anti-Bluff Challenge framework | `Submodules/Challenges/pkg/{challenge,httpclient,userflow,runner,assertion}` | exercised in `lava-api-go/tests/parity` and `lava-api-go/tests/e2e` |
+| HTTP/3 server | `submodules/http3/pkg/server` | thin glue at `lava-api-go/internal/server/server.go` (config wiring only) |
+| Brotli middleware | `submodules/middleware/pkg/brotli` | direct use |
+| Alt-Svc HTTP/3 advert | `submodules/middleware/pkg/altsvc` | direct use |
+| Gin middleware glue | `submodules/middleware/pkg/{gin,chain,cors,recovery,requestid,logging}` | direct use |
+| Postgres driver | `github.com/jackc/pgx/v5` (transitively via `submodules/database` and `submodules/cache`) | direct |
+| Postgres-backed cache | `submodules/cache/pkg/postgres` (we contributed this) | direct use |
+| Schema migrations | `submodules/database/pkg/migration` (preferred) or direct `golang-migrate/migrate/v4` if it lacks a feature | thin runner in `lava-api-go/scripts/migrate.sh` |
+| Sliding-window rate limit | `submodules/ratelimiter/pkg/{sliding,gin}` | direct use |
+| Circuit breaker (rutracker.org) | `submodules/recovery/pkg/breaker` | wrap rutracker outbound calls |
+| HTTP security headers | `submodules/security/pkg/headers` | direct use |
+| PII / Auth-Token redaction | `submodules/security/pkg/pii` | wired into `submodules/observability/pkg/logging` |
+| Structured logging | `submodules/observability/pkg/logging` | direct use |
+| Prometheus metrics | `submodules/observability/pkg/{metrics,gin}` | direct use |
+| OpenTelemetry tracing | `submodules/observability/pkg/{trace,gin}` | direct use |
+| Health endpoints | `submodules/observability/pkg/health` + `submodules/recovery/pkg/health` | direct use |
+| Config (env + JSON) | `submodules/config/pkg/{config,env}` | direct use |
+| Container orchestration | `submodules/containers/pkg/{runtime,compose,lifecycle,…}` | `tools/lava-containers/` delegates |
+| mDNS announcement | `submodules/mdns/pkg/service` (we contributed this) | direct use |
+| Anti-Bluff Challenge framework | `submodules/challenges/pkg/{challenge,httpclient,userflow,runner,assertion}` | exercised in `lava-api-go/tests/parity` and `lava-api-go/tests/e2e` |
 | Auth pass-through + audit hash | **NONE** | Lava-local at `lava-api-go/internal/auth` (small, somewhat product-specific in the audit semantics) |
 | Rutracker HTML scrapers | **NONE** | Lava-domain at `lava-api-go/internal/rutracker` |
 | Route handlers (13 routes) | **NONE** | Lava-domain at `lava-api-go/internal/handlers` |
@@ -289,7 +289,7 @@ CREATE INDEX login_attempt_lookup_idx ON login_attempt (client_ip, attempted_at 
 ```
 
 **Retention** (background goroutines started by `lava-api-go` on boot):
-- `response_cache`: TTL-driven, `Submodules/Cache/pkg/postgres` GC sweep every 10 minutes (default).
+- `response_cache`: TTL-driven, `submodules/cache/pkg/postgres` GC sweep every 10 minutes (default).
 - `request_audit`: 30-day rolling, custom Lava-local goroutine deleting where `received_at < now() - interval '30 days'`. Tunable via `LAVA_API_AUDIT_RETENTION_DAYS`.
 - `rate_limit_bucket`: orphan rows older than 1 hour with no recent activity, nightly.
 - `login_attempt`: 7-day rolling.
@@ -338,17 +338,17 @@ Per option **A2 + H1** locked during brainstorm:
 - **Wire shape:** identical to the Ktor proxy. Android sends `Auth-Token: <rutracker-session>` header on every authenticated request. The Go API forwards that value as a `Cookie: bb_session=<value>` (or whatever rutracker expects today; faithfully copied from the Ktor implementation) on the upstream call to `rutracker.org`.
 - **Audit hashing:** for every request, compute `auth_realm_hash = hex(sha256(Auth-Token))` and write to `request_audit`. Plain SHA-256, no HMAC, no per-deployment salt. Operators can correlate audit history across deployments and across DB restores. Acceptable given this is a personal/LAN tool whose audit log is for the operator's own forensics.
 - **Login throttle:** every `POST /login` writes to `login_attempt` with `username_hash = sha256(form.username)`. A query checks `(client_ip, username_hash, last 7 days, succeeded=false)` and applies an exponential backoff schedule (TBD: starting at 1 s after the third failure, doubling every failure thereafter, capped at 60 s).
-- **Generic rate limit:** `Submodules/RateLimiter/pkg/sliding` middleware, keyed by `(client_ip, route_class)`. Limits TBD per route class; design value placeholder: `read=60 rpm, write=10 rpm, login=5 rpm, download=10 rpm` per IP. Thresholds tuned during load testing.
-- **Header redaction in logs:** `Submodules/Security/pkg/pii` configured with a denylist of `Auth-Token`, `Cookie`, `Set-Cookie`, anything matching `(?i)^(auth|cookie|x-auth|x-token|bearer)`. Redaction applies to: stdout JSON logs, Loki shipments, OTel span attributes. Verified by a unit test that asserts the rendered log line for a request containing `Auth-Token: secret` does not contain `secret`.
+- **Generic rate limit:** `submodules/ratelimiter/pkg/sliding` middleware, keyed by `(client_ip, route_class)`. Limits TBD per route class; design value placeholder: `read=60 rpm, write=10 rpm, login=5 rpm, download=10 rpm` per IP. Thresholds tuned during load testing.
+- **Header redaction in logs:** `submodules/security/pkg/pii` configured with a denylist of `Auth-Token`, `Cookie`, `Set-Cookie`, anything matching `(?i)^(auth|cookie|x-auth|x-token|bearer)`. Redaction applies to: stdout JSON logs, Loki shipments, OTel span attributes. Verified by a unit test that asserts the rendered log line for a request containing `Auth-Token: secret` does not contain `secret`.
 
 ## 10. Observability
 
-Per option **O3** locked during brainstorm — full stack, all in containers, all managed by `Submodules/Containers`.
+Per option **O3** locked during brainstorm — full stack, all in containers, all managed by `submodules/containers`.
 
 ### 10.1 Application-side
 
-- **Logger:** `Submodules/Observability/pkg/logging` (slog-style structured JSON to stdout). Header redaction wired in via `Submodules/Security/pkg/pii`.
-- **Metrics:** `Submodules/Observability/pkg/metrics` + `pkg/gin`. Required counters / histograms:
+- **Logger:** `submodules/observability/pkg/logging` (slog-style structured JSON to stdout). Header redaction wired in via `submodules/security/pkg/pii`.
+- **Metrics:** `submodules/observability/pkg/metrics` + `pkg/gin`. Required counters / histograms:
   - `http_requests_total{method,route,status}`
   - `http_request_duration_seconds{method,route}` (histogram)
   - `cache_outcome_total{outcome}` (`outcome` ∈ `hit|miss|bypass|invalidate`)
@@ -358,7 +358,7 @@ Per option **O3** locked during brainstorm — full stack, all in containers, al
   - `db_pool_acquire_duration_seconds` (histogram)
   - `mdns_advertisement_active` (gauge, `0`/`1`)
 - **Metrics endpoint:** `/metrics` is served on a **separate dedicated listener** at `127.0.0.1:9091` (HTTP/1.1, no TLS, no auth). NOT served on the public 8443 listener — that listener is LAN-reachable, and exposing `/metrics` there would leak service internals. Prometheus (on the `lava-net` bridge) scrapes via `host.containers.internal:9091`. The dedicated listener is brought up by the same `Server.Start()` call but bound to a different `net.Listener`.
-- **Tracing:** `Submodules/Observability/pkg/trace` exporting OTLP to the local Tempo container. Sampling: 100% for non-`/health`, 0% for `/health`/`/metrics`/`/ready`.
+- **Tracing:** `submodules/observability/pkg/trace` exporting OTLP to the local Tempo container. Sampling: 100% for non-`/health`, 0% for `/health`/`/metrics`/`/ready`.
 - **Health endpoints:**
   - `/health` — liveness only, no DB ping. 200 always while the process is up.
   - `/ready` — readiness, performs `pgxpool.Ping()` plus checks the rutracker.org circuit breaker is not OPEN. 200 only when the service can serve traffic.
@@ -398,7 +398,7 @@ The brainstorm produced an **eight-type taxonomy plus two cross-cutting gates**.
 | 1 | Unit | Go stdlib `testing`, table-driven | `lava-api-go/internal/**/*_test.go` | every public function / handler with non-trivial logic; fails when broken |
 | 2 | Integration | real Postgres via podman (transient) | `lava-api-go/internal/**/integration_test.go`, `lava-api-go/tests/integration/` | every package touching Postgres; assertion on row state |
 | 3 | Contract | OpenAPI 3.1 + golden JSON fixtures + oapi-codegen typed client | `lava-api-go/tests/fixtures/`, `lava-api-go/tests/contract/` | every route's request and response shape; fails if the wire diverges from the spec |
-| 4 | E2E / acceptance | real Gin container, real `Submodules/HTTP3` client | `lava-api-go/tests/e2e/` | the load-bearing Sixth Law gate — real container, real wire |
+| 4 | E2E / acceptance | real Gin container, real `submodules/http3` client | `lava-api-go/tests/e2e/` | the load-bearing Sixth Law gate — real container, real wire |
 | 5 | Cross-backend parity | same E2E suite + a Ktor target | `lava-api-go/tests/parity/` | uniquely valuable — bytes-equivalent across both backends |
 | 6 | Fuzz | Go `testing.F` | `lava-api-go/internal/**/fuzz_test.go` | every parser, encoder, header decoder, brotli ratio |
 | 7 | Load / perf | k6 (preferred; vegeta as fallback) | `lava-api-go/tests/load/` | numeric thresholds in `Makefile`: p99 < 200 ms on cached hits, brotli ratio ≥ 0.4 on JSON, cache hit rate ≥ baseline |
@@ -605,7 +605,7 @@ networks:
 ./stop.sh                                 # tears down all running profiles
 ```
 
-Implemented by `tools/lava-containers/cmd/lava-containers/main.go` — flag parsing translates each combination into a `compose --profile X --profile Y up -d` invocation routed through `Submodules/Containers/pkg/compose` (replacing the current direct `exec.Command`-based runtime calls).
+Implemented by `tools/lava-containers/cmd/lava-containers/main.go` — flag parsing translates each combination into a `compose --profile X --profile Y up -d` invocation routed through `submodules/containers/pkg/compose` (replacing the current direct `exec.Command`-based runtime calls).
 
 ### 12.3 Healthprobe binary (sub-decision (b))
 
@@ -622,7 +622,7 @@ Lava/                                    # repo root, unchanged
 ├── core/                                 # existing Gradle core libs (unchanged)
 ├── feature/                              # existing Gradle features (unchanged)
 ├── tools/lava-containers/                # extended in SP-2 to know about both services
-├── Submodules/                           # vasic-digital submodules (14 mounts, frozen pins)
+├── submodules/                           # vasic-digital submodules (14 mounts, frozen pins)
 │   ├── Containers/  Middleware/  Database/  Cache/  Observability/
 │   ├── RateLimiter/  Recovery/  Security/  Auth/  Challenges/
 │   ├── Config/  Discovery/  HTTP3/  Mdns/
@@ -639,12 +639,12 @@ Lava/                                    # repo root, unchanged
 │   │   └── healthprobe/main.go           # HTTP/3-capable healthcheck
 │   ├── internal/
 │   │   ├── auth/                         # A2 pass-through + H1 audit hash (Lava-local)
-│   │   ├── cache/                        # thin wrap of Submodules/Cache/pkg/postgres
-│   │   ├── config/                       # uses Submodules/Config
-│   │   ├── discovery/                    # thin wrap of Submodules/Mdns
+│   │   ├── cache/                        # thin wrap of submodules/cache/pkg/postgres
+│   │   ├── config/                       # uses submodules/config
+│   │   ├── discovery/                    # thin wrap of submodules/mdns
 │   │   ├── handlers/                     # one file per route group (forum.go, search.go, …)
-│   │   ├── observability/                # uses Submodules/Observability
-│   │   ├── ratelimit/                    # uses Submodules/RateLimiter
+│   │   ├── observability/                # uses submodules/observability
+│   │   ├── ratelimit/                    # uses submodules/ratelimiter
 │   │   ├── rutracker/                    # rutracker.org HTML scrapers (Lava-domain)
 │   │   ├── server/                       # Gin + HTTP/3 wiring
 │   │   ├── version/                      # version constants for tag.sh
@@ -723,9 +723,9 @@ Per option **D1**:
 | `docker-compose.yml` | rewritten as the profiles-based topology in §12 |
 | `start.sh` | flag parsing for `--legacy`, `--both`, `--with-observability`, `--dev-docs`; default profile becomes `api-go` |
 | `stop.sh` | tears down all running profiles (no flag changes) |
-| `tools/lava-containers/cmd/lava-containers/main.go` | extended to translate `start.sh` flags to compose profile invocations; delegates runtime to `Submodules/Containers/pkg/runtime`/`pkg/compose` |
+| `tools/lava-containers/cmd/lava-containers/main.go` | extended to translate `start.sh` flags to compose profile invocations; delegates runtime to `submodules/containers/pkg/runtime`/`pkg/compose` |
 | `tools/lava-containers/internal/proxy/proxy.go` | refactored: rename `Manager` → `LegacyKtorManager`; add a sibling `ApiGoManager` for the new service; both managed by a top-level `Orchestrator` that knows about profiles |
-| `tools/lava-containers/go.mod` | adds `replace digital.vasic.containers => ../../Submodules/Containers` |
+| `tools/lava-containers/go.mod` | adds `replace digital.vasic.containers => ../../submodules/containers` |
 | `proxy/src/main/kotlin/digital/vasic/lava/api/discovery/ServiceAdvertisement.kt` | adds the symmetric TXT records (`engine=ktor`, `version=…`, `protocols=h11`, `compression=identity`, `tls=optional`) |
 | `proxy/build.gradle.kts` | unchanged structurally; the `apiVersionName`/`apiVersionCode` already added in `tag.sh` work |
 | `scripts/tag.sh` | registry gains `api-go` entry with new reader/writer functions for `lava-api-go/internal/version/version.go` |
@@ -738,7 +738,7 @@ Per option **D1**:
 - `app/` (Android — SP-3 territory)
 - `core/`, `feature/` (Gradle modules — Android-side, not server)
 - `containers/` (already deleted in SP-0/Step-2 cleanup)
-- `Submodules/*` except as new pins land via separate "Bump pin" commits when we actually consume new versions
+- `submodules/*` except as new pins land via separate "Bump pin" commits when we actually consume new versions
 
 ## 17. Falsifiability rehearsal protocol
 
@@ -786,7 +786,7 @@ These are not blocking the design — they're judgement calls best made when the
 - **Login-throttle backoff schedule.** Placeholder: 1 s after 3rd failure, doubling, capped at 60 s. May be adjusted after observing real-world failure patterns.
 - **Captcha cookie threading.** The captcha → login state pair is implementation detail; the parity test enforces correctness, but the exact cookie-jar plumbing inside `internal/auth` may differ from the Ktor implementation.
 - **TLS cert rotation strategy.** Self-signed cert by default, mounted from `lava-api-go/docker/tls/`. Auto-rotation via `cert-manager` or ACME is out of scope; operator handles rotation manually.
-- **Whether `Submodules/Database/pkg/migration`** is sufficient or we use `golang-migrate` directly. Decided when the first migration is written.
+- **Whether `submodules/database/pkg/migration`** is sufficient or we use `golang-migrate` directly. Decided when the first migration is written.
 - **Whether `tools/lava-containers/`** should be split into a per-service file structure or stay monolithic. Decided after the second service manager is added (when the duplication risk becomes visible).
 - **Pre-tag verification scripted-user-flow concrete commands.** Sketched in §11.3; finalized during scripts/pretag-verify.sh authoring.
 - **`SECURITY.md` initial population.** Created empty during SP-2; populated as `gosec`/`govulncheck` findings appear.
@@ -856,14 +856,14 @@ gitverse). Review-feedback fix commits are listed inline with their primary task
 |---|---|---|
 | 4.1 migrations | `057d76b` | golang-migrate SQL for the 4 runtime tables |
 | 4.2 migrate.sh + test-pg.sh | `d3c9dab` | scripts wrappers; up/down 4 cleanly verified |
-| 4.3 cache | `3ae9568` | internal/cache facade over Submodules/Cache/pkg/postgres |
+| 4.3 cache | `3ae9568` | internal/cache facade over submodules/cache/pkg/postgres |
 
 ### Phase 5 — Auth + rate limit
 
 | Task | Commit | Subject |
 |---|---|---|
 | 5.1 auth | `3ce69ab` | internal/auth — A2 pass-through + H1 audit hashing |
-| 5.2 ratelimit | `4df0e82` | internal/ratelimit — Submodules/RateLimiter sliding-window glue |
+| 5.2 ratelimit | `4df0e82` | internal/ratelimit — submodules/ratelimiter sliding-window glue |
 
 ### Incident hardening (interleaved before Phase 6)
 
@@ -876,7 +876,7 @@ gitverse). Review-feedback fix commits are listed inline with their primary task
 | Task | Section | Commit | Subject |
 |---|---|---|---|
 | 6.1 | client + breaker | `6faf59a` | internal/rutracker/client — circuit-breaker-wrapped HTTP client |
-| 6.1.b | submodule pin | `08d906c` | bump Submodules/Concurrency to aaca1c2 |
+| 6.1.b | submodule pin | `08d906c` | bump submodules/concurrency to aaca1c2 |
 | 6.2 | forum | `03a3853` | internal/rutracker/forum + utils — forum-tree + category-page parsers |
 | 6.2.fix | review fix | `4fca329` | nodeText multi-match space-join + int32 clamp on Seeds/Leeches |
 | 6.3 | search | `1711e00` | internal/rutracker/search — search-results parser + formatSize |
@@ -988,7 +988,7 @@ After the 2.0.0 release was cut, the originally-deferred follow-ups were exercis
 Two production-grade Sixth-Law-clause-5 catches in this batch:
 
 1. **HTTP/2 fallback never wired** (`000bb64`) — caught by `k6` failing to connect at all (every iteration `data_received: 0 B`). Spec §8.1 explicitly mandates HTTP/2-over-TLS as the TCP fallback to HTTP/3 over QUIC; Phases 1-13 only wired the UDP/HTTP-3 listener. Clients without HTTP/3 (k6, plain `curl` without `--http3`, browser fallback paths) couldn't reach the API at all in 2.0.0.
-2. **Cache silently failing** (`aa11566`) — caught by post-fix k6 still being slow under load + a direct Postgres inspection showing `response_cache` had 0 rows after thousands of `GET /forum`. The Phase 4 migration created the table with the design-doc §7 7-column schema; the `Submodules/Cache/pkg/postgres` library's INSERT is hardcoded to a 3-column shape (`cache_key, value, expires_at`). Every cache.Set failed, the handler dropped the error per fire-and-forget policy, and 2.0.0's cache was effectively a no-op. Post-fix: ~10× speedup on the hot path (cached_hits p(99) 521ms → 49.9ms).
+2. **Cache silently failing** (`aa11566`) — caught by post-fix k6 still being slow under load + a direct Postgres inspection showing `response_cache` had 0 rows after thousands of `GET /forum`. The Phase 4 migration created the table with the design-doc §7 7-column schema; the `submodules/cache/pkg/postgres` library's INSERT is hardcoded to a 3-column shape (`cache_key, value, expires_at`). Every cache.Set failed, the handler dropped the error per fire-and-forget policy, and 2.0.0's cache was effectively a no-op. Post-fix: ~10× speedup on the hot path (cached_hits p(99) 521ms → 49.9ms).
 
 Both defects were invisible to `ci.sh`, the contract tests, the e2e suite (uses an HTTP/2 in-process server + a fake Postgres schema), and the Phase 14.1 pretag-verify (single sequential request — no cache reuse measurable). Only sustained load against the real stack with real upstream surfaced them. This is the canonical Sixth Law clause 5 case — real-environment verification catches what synthetic verification cannot.
 
@@ -1060,19 +1060,19 @@ lava-api-go/
   internal/auth/passthrough.go         # A2 + H1
   internal/auth/passthrough_test.go
   internal/auth/integration_test.go
-  internal/cache/cache.go              # wraps Submodules/Cache/pkg/postgres
+  internal/cache/cache.go              # wraps submodules/cache/pkg/postgres
   internal/cache/cache_test.go
   internal/cache/integration_test.go
-  internal/config/config.go            # uses Submodules/Config
+  internal/config/config.go            # uses submodules/config
   internal/config/config_test.go
-  internal/discovery/mdns.go           # wraps Submodules/Mdns
+  internal/discovery/mdns.go           # wraps submodules/mdns
   internal/discovery/mdns_test.go
-  internal/observability/log.go        # uses Submodules/Observability
+  internal/observability/log.go        # uses submodules/observability
   internal/observability/metrics.go
   internal/observability/tracing.go
   internal/observability/health.go
   internal/observability/observability_test.go
-  internal/ratelimit/ratelimit.go      # uses Submodules/RateLimiter
+  internal/ratelimit/ratelimit.go      # uses submodules/ratelimiter
   internal/ratelimit/ratelimit_test.go
   internal/rutracker/client.go         # circuit-breaker-wrapped HTTP client to rutracker.org
   internal/rutracker/scraper.go        # Jsoup-equivalent: golang.org/x/net/html + cascadia? or goquery
@@ -1128,7 +1128,7 @@ start.sh                               # extended flags
 stop.sh                                # extended teardown
 tools/lava-containers/cmd/lava-containers/main.go  # profile orchestrator
 tools/lava-containers/internal/proxy/proxy.go      # refactored
-tools/lava-containers/internal/runtime/runtime.go  # uses Submodules/Containers
+tools/lava-containers/internal/runtime/runtime.go  # uses submodules/containers
 tools/lava-containers/go.mod                       # replace directive added
 proxy/src/main/kotlin/digital/vasic/lava/api/discovery/ServiceAdvertisement.kt  # symmetric TXT
 scripts/tag.sh                         # api-go entry

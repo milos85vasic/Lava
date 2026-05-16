@@ -55,7 +55,7 @@ Internal SDK shape:
 - Generic primitives (`MirrorUrl`, `Protocol`, `Mirror` state machine,
   in-memory registry, mirror-config store, test scaffolding) extracted
   to a `vasic-digital/Tracker-SDK` submodule mounted at
-  `Submodules/Tracker-SDK/` per the Decoupled Reusable Architecture
+  `submodules/tracker_sdk/` per the Decoupled Reusable Architecture
   rule.
 
 For the architectural overview see
@@ -127,7 +127,7 @@ tripwire with a documented mitigation trigger.
       `adb devices` shows it as `device`.
 - [ ] Host machine plugged in (not battery-only).
 - [ ] `KEYSTORE_PASSWORD` and `KEYSTORE_ROOT_DIR` set in `.env`.
-- [ ] `Submodules/Tracker-SDK/` is at the pinned hash; `git submodule
+- [ ] `submodules/tracker_sdk/` is at the pinned hash; `git submodule
       status` shows no `-` or `+` prefix.
 
 ### Build + install
@@ -199,7 +199,7 @@ Checklist:
 
 ### Mirror smoke
 
-- [ ] `Submodules/Tracker-SDK` at pinned hash; `scripts/sync-tracker-sdk-mirrors.sh
+- [ ] `submodules/tracker_sdk` at pinned hash; `scripts/sync-tracker-sdk-mirrors.sh
       --check` reports OK.
 - [ ] Mirror smoke output saved to
       `.lava-ci-evidence/Lava-Android-1.2.0-1020/mirror-smoke/`.

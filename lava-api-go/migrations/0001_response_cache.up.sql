@@ -1,13 +1,13 @@
 -- 0001_response_cache.up.sql
 --
--- Schema for the lava-api-go response cache. The Submodules/Cache/pkg/postgres
+-- Schema for the lava-api-go response cache. The submodules/cache/pkg/postgres
 -- library expects (cache_key, value, expires_at) at minimum — its INSERT/SELECT
 -- queries are hardcoded to those column names. We keep the schema minimal
 -- here; richer audit fields (status, content-type, fetched_at, hit_count)
 -- belong in request_audit (migration 0002) which is queried separately.
 --
 -- Caught by the Phase 14 k6 load run: the previous 7-column schema diverged
--- from Submodules/Cache's INSERT shape, every cache.Set() failed silently
+-- from submodules/cache's INSERT shape, every cache.Set() failed silently
 -- (the handler dropped the error per fire-and-forget policy), and not a
 -- single byte was ever cached in 2.0.0. The fix is mechanical and doesn't
 -- change wire shape — only storage layout.

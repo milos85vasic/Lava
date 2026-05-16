@@ -746,7 +746,7 @@ cmd/emulator-matrix → Teardown(avd):
 |---|---|---|---|
 | **A.** Containers code | Containers `lava-pin/2026-05-06-group-b` | `pkg/emulator/cleanup.go`, `pkg/emulator/cleanup_test.go`, `pkg/emulator/android.go`, `pkg/emulator/android_test.go`, `pkg/emulator/types.go`, `pkg/emulator/matrix.go`, `pkg/emulator/matrix_test.go`, `cmd/emulator-matrix/main.go` | 1 commit (subagent dispatched per Component A→E with two-stage review per Group A-prime pattern) |
 | **B.** Lava parent code | Lava `master` | `scripts/run-emulator-tests.sh`, `scripts/tag.sh`, `tests/tag-helper/test_tag_rejects_concurrent_attestation.sh`, `tests/tag-helper/test_tag_rejects_non_gating_attestation.sh`, `tests/tag-helper/test_tag_rejects_diag_sdk_mismatch.sh`, `tests/tag-helper/test_tag_accepts_gating_serial_attestation.sh`, `CLAUDE.md` (§6.I clause 4 doc extension) | 1 commit |
-| **C.** Pin bump + closure evidence | Lava `master` | `Submodules/Containers` SHA bump, `.lava-ci-evidence/bluff-hunt/2026-05-06-group-b-evening.json`, `.lava-ci-evidence/Phase-Group-B-closure-2026-05-06-evening.json` | 1 commit |
+| **C.** Pin bump + closure evidence | Lava `master` | `submodules/containers` SHA bump, `.lava-ci-evidence/bluff-hunt/2026-05-06-group-b-evening.json`, `.lava-ci-evidence/Phase-Group-B-closure-2026-05-06-evening.json` | 1 commit |
 
 Total: **3 Lava parent commits + 1 Containers commit** (with the
 intra-phase fix-up commits the subagent-driven workflow may emit per the

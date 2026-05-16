@@ -19,7 +19,7 @@ import (
 //
 // Adaptation note: the plan template imagined typed Counter / Histogram
 // / Gauge wrappers from upstream. The actual upstream
-// (Submodules/Observability/pkg/metrics) exposes a single Collector
+// (submodules/observability/pkg/metrics) exposes a single Collector
 // interface with method-name-by-string. To preserve the named-collector
 // surface promised in the plan we hold the underlying *prometheus.*Vec
 // directly and pass them through the upstream by registering against
@@ -35,7 +35,7 @@ type Metrics struct {
 	MDNSAdvertisementActive    *prometheus.GaugeVec
 
 	// upstream is exposed for callers that prefer the
-	// Submodules/Observability Collector interface (e.g. for ad-hoc
+	// submodules/observability Collector interface (e.g. for ad-hoc
 	// metrics from generic helpers). It writes to the same registry
 	// as the named collectors above.
 	upstream obsmetrics.Collector
@@ -127,7 +127,7 @@ func NewMetrics(registry *prometheus.Registry) *Metrics {
 	)
 
 	// Wire the upstream Collector interface against the same registry
-	// so generic helpers (Submodules/Middleware, etc.) write into the
+	// so generic helpers (submodules/middleware, etc.) write into the
 	// same scrape surface.
 	m.upstream = obsmetrics.NewPrometheusCollector(&obsmetrics.PrometheusConfig{
 		DefaultBuckets: prometheus.DefBuckets,
@@ -137,7 +137,7 @@ func NewMetrics(registry *prometheus.Registry) *Metrics {
 	return m
 }
 
-// Upstream returns the Submodules/Observability Collector that writes
+// Upstream returns the submodules/observability Collector that writes
 // to the same Prometheus registry as the named collectors.
 func (m *Metrics) Upstream() obsmetrics.Collector { return m.upstream }
 

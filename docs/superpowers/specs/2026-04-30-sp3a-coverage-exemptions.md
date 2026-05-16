@@ -104,7 +104,7 @@ the `lava-api-go` service in `docker-compose.yml`, the author MUST:
 
 **Resolution (2026-04-30):** mitigation trigger #1 applied. Tracker-SDK
 submodule commit `b779fda` adds `subprojects { ... jvmTarget = JVM_17 }`
-to `Submodules/Tracker-SDK/build.gradle.kts`, pinning every SDK subproject
+to `submodules/tracker_sdk/build.gradle.kts`, pinning every SDK subproject
 to JVM 17. Lava's three JVM 17→21 overrides reverted (KotlinTrackerModuleConventionPlugin,
 core/tracker/api/build.gradle.kts, core/tracker/testing/build.gradle.kts).
 Submodule pin updated in Lava to `b779fda`. Build verified GREEN end-to-end:
@@ -149,7 +149,7 @@ on each Tracker-SDK Gradle module. That requires a new Tracker-SDK pin and a fre
 wiring) lands the tracker chain into the Android `:app` Hilt module, the author MUST
 verify one of:
 1. The Tracker-SDK pin has been updated upstream to target JVM 17 in its
-   convention/module Gradle scripts, the new pin recorded in `Submodules/Tracker-SDK/`,
+   convention/module Gradle scripts, the new pin recorded in `submodules/tracker_sdk/`,
    and the three JVM_21 overrides reverted to JVM_17 in `KotlinTrackerModuleConventionPlugin.kt`,
    `core/tracker/api/build.gradle.kts`, `core/tracker/testing/build.gradle.kts`.
 2. The Android build (AGP/D8) is configured to accept JVM 21 input bytecode, and the

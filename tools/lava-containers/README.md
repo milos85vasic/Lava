@@ -10,7 +10,7 @@ It is the local "thin glue" called for in the Decoupled Reusable Architecture
 constitutional rule (`/CLAUDE.md`). Generic container-runtime concerns
 (autodetect Docker/Podman, compose lifecycle, network/IP scanning, service
 registry) live in the **upstream Containers submodule** mounted at
-`/Submodules/Containers/`; this CLI will be rewired to delegate to that
+`/submodules/containers/`; this CLI will be rewired to delegate to that
 upstream as part of **SP-2** (Go API migration).
 
 ## Build
@@ -38,5 +38,5 @@ invoke it.
 - `cmd/lava-containers/main.go` — CLI entry point, command dispatch
 - `internal/proxy/proxy.go` — Lava-Ktor-proxy lifecycle manager (Lava-domain)
 - `internal/runtime/runtime.go` — Docker/Podman autodetect (will be replaced
-  by `digital.vasic.containers/pkg/runtime` from `/Submodules/Containers/` in
+  by `digital.vasic.containers/pkg/runtime` from `/submodules/containers/` in
   SP-2)

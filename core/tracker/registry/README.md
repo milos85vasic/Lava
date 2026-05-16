@@ -1,7 +1,7 @@
 # :core:tracker:registry
 
 Lava-domain wrapper around the generic `lava.sdk:registry` primitive
-in the `Submodules/Tracker-SDK/` composite-build pin. Discovers and
+in the `submodules/tracker_sdk/` composite-build pin. Discovers and
 exposes `TrackerClient` instances by `descriptor.trackerId`.
 
 ## Public API

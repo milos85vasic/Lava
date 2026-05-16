@@ -23,8 +23,8 @@
     "Phase 1.1 production-stack guarantee for force-stop survival is verified end-to-end on a real device for the persistence-write path"
   ],
   "incident_during_run": {
-    "discovered_bug": "Submodules/Containers/pkg/emulator/android.go::WaitForBoot called `adb connect localhost:<port>` ONCE before the poll loop. On cold boot the ADB socket takes 30-60s to become ready, so the connect failed silently and every subsequent `adb -s localhost:<port>` poll returned 'device not found' — making the matrix runner time out at 5m0s and again at 10m0s while the emulator was actually fully booted.",
-    "fix_commit": "Submodules/Containers commit 2f3c689 — retry adb connect inside the poll loop (idempotent on already-connected; resolves on first iteration after the ADB socket comes up).",
+    "discovered_bug": "submodules/containers/pkg/emulator/android.go::WaitForBoot called `adb connect localhost:<port>` ONCE before the poll loop. On cold boot the ADB socket takes 30-60s to become ready, so the connect failed silently and every subsequent `adb -s localhost:<port>` poll returned 'device not found' — making the matrix runner time out at 5m0s and again at 10m0s while the emulator was actually fully booted.",
+    "fix_commit": "submodules/containers commit 2f3c689 — retry adb connect inside the poll loop (idempotent on already-connected; resolves on first iteration after the ADB socket comes up).",
     "falsifiability_rehearsed": "yes — pre-fix run: 2x boot-timeout failures (5m + 10m). Post-fix run: pass in 65s. Evidence at .lava-ci-evidence/2026-05-04-evening-c00-cz_api34{,-retry,-fix}/.",
     "constitutional_classification": "clause 6.A real-binary contract bug — script's expectation of the adb binary did not match the binary's reality."
   },
