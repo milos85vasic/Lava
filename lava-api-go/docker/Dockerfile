@@ -21,7 +21,7 @@
 #              directly.
 
 # --- build stage ------------------------------------------------------
-FROM golang:1.25-alpine AS build
+FROM golang:1.26-alpine AS build
 ENV CGO_ENABLED=0 \
     GOOS=linux \
     GOARCH=amd64
@@ -32,7 +32,7 @@ RUN cd /src/lava-api-go && \
     go build -trimpath -ldflags='-s -w' -o /out/healthprobe ./cmd/healthprobe
 
 # --- migrate stage (one-shot lava-migrate compose service) ------------
-FROM golang:1.25-alpine AS migrate
+FROM golang:1.26-alpine AS migrate
 ENV CGO_ENABLED=0 \
     GOOS=linux \
     GOARCH=amd64

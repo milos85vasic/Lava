@@ -24,21 +24,26 @@
 package lava.app.challenges
 
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
-import androidx.test.ext.junit.runners.AndroidJUnit4
+import dagger.hilt.android.testing.HiltAndroidRule
+import dagger.hilt.android.testing.HiltAndroidTest
 import digital.vasic.lava.client.MainActivity
 import lava.favorites.FavoritesViewModel
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
 
-@RunWith(AndroidJUnit4::class)
+
+@HiltAndroidTest
 class Challenge32FavoritesScreenReachableTest {
 
-    @get:Rule
+    @get:Rule(order = 0)
+    val hiltRule = HiltAndroidRule(this)
+
+    @get:Rule(order = 1)
     val composeRule = createAndroidComposeRule<MainActivity>()
 
     @Test
     fun favorites_view_model_class_is_reachable_from_classpath() {
+        hiltRule.inject()
         val viewModelClass: Class<*> = FavoritesViewModel::class.java
         check(viewModelClass.name == "lava.favorites.FavoritesViewModel") {
             "FavoritesViewModel class name unexpected: ${viewModelClass.name} — feature/favorites may have been moved"

@@ -42,21 +42,30 @@
 package lava.app.challenges
 
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
-import androidx.test.ext.junit.runners.AndroidJUnit4
+import dagger.hilt.android.testing.HiltAndroidRule
+import dagger.hilt.android.testing.HiltAndroidTest
 import digital.vasic.lava.client.MainActivity
 import lava.rating.RatingViewModel
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
 
-@RunWith(AndroidJUnit4::class)
+// Forensic anchor 2026-05-17: prior version lacked @HiltAndroidTest +
+// HiltAndroidRule but used createAndroidComposeRule<MainActivity>(),
+// which fails with "The component was not created. Check that you
+// have added the HiltAndroidRule." because MainActivity is
+// @AndroidEntryPoint and requires Hilt's test component setup.
+@HiltAndroidTest
 class Challenge30RatingDialogReachableTest {
 
-    @get:Rule
+    @get:Rule(order = 0)
+    val hiltRule = HiltAndroidRule(this)
+
+    @get:Rule(order = 1)
     val composeRule = createAndroidComposeRule<MainActivity>()
 
     @Test
     fun rating_view_model_class_is_reachable_from_classpath() {
+        hiltRule.inject()
         // Class-ref (not composable-fn-ref — Kotlin disallows
         // `::ComposableFn` syntax). This proves the feature/rating
         // module's RatingViewModel is on the runtime classpath; the

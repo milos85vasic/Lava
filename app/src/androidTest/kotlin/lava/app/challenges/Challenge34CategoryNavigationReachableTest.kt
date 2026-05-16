@@ -27,21 +27,26 @@
 package lava.app.challenges
 
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
-import androidx.test.ext.junit.runners.AndroidJUnit4
+import dagger.hilt.android.testing.HiltAndroidRule
+import dagger.hilt.android.testing.HiltAndroidTest
 import digital.vasic.lava.client.MainActivity
 import lava.forum.category.openCategory
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
 
-@RunWith(AndroidJUnit4::class)
+
+@HiltAndroidTest
 class Challenge34CategoryNavigationReachableTest {
 
-    @get:Rule
+    @get:Rule(order = 0)
+    val hiltRule = HiltAndroidRule(this)
+
+    @get:Rule(order = 1)
     val composeRule = createAndroidComposeRule<MainActivity>()
 
     @Test
     fun category_navigation_is_reachable() {
+        hiltRule.inject()
         val ref: Any = ::openCategory
         check(ref.toString().isNotEmpty()) {
             "openCategory reference is unexpectedly empty — feature/category may have been removed"

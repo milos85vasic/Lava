@@ -28,20 +28,25 @@
 package lava.app.challenges
 
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
-import androidx.test.ext.junit.runners.AndroidJUnit4
+import dagger.hilt.android.testing.HiltAndroidRule
+import dagger.hilt.android.testing.HiltAndroidTest
 import digital.vasic.lava.client.MainActivity
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
 
-@RunWith(AndroidJUnit4::class)
+
+@HiltAndroidTest
 class Challenge35ConnectionItemReachableTest {
 
-    @get:Rule
+    @get:Rule(order = 0)
+    val hiltRule = HiltAndroidRule(this)
+
+    @get:Rule(order = 1)
     val composeRule = createAndroidComposeRule<MainActivity>()
 
     @Test
     fun connections_view_model_class_is_reachable_from_runtime_classpath() {
+        hiltRule.inject()
         // ConnectionsViewModel is `internal` to feature/connection. Use
         // Class.forName() to verify runtime-classpath presence (bypasses
         // Kotlin's internal access modifier).

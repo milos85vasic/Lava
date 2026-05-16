@@ -1,26 +1,71 @@
 # Changelog
-## Lava-Android-1.2.23-1043 / Lava-API-Go-2.3.12-2312 — 2026-05-14 (HelixConstitution submodule incorporated + §6.AD HelixConstitution Inheritance + 29th §6.L cycle)
+## Lava-Android-1.2.23-1043 / Lava-API-Go-2.3.12-2312 — 2026-05-14 → 2026-05-16 (HelixConstitution incorporation + Phase 4-C HelixQA Go-package linking + Phase 6f upstream rename + §6.L 30th → 56th invocations)
 
-**Previous published:** Lava-Android-1.2.22-1042 (debug + release distributed earlier today).
+**Previous published:** Lava-Android-1.2.22-1042 (debug + release distributed 2026-05-14).
 
-### HelixConstitution submodule (operator's prior 10-step directive, now executed)
-- `git@github.com:HelixDevelopment/HelixConstitution.git` cloned to `./constitution` at pin `cb27ed8c` (frozen).
-- Hardlinked `.git` backup at `.git-backup-pre-helixconstitution-20260514-211450/` per HelixConstitution §9 absolute-data-safety.
+Constitutional-plumbing release accumulating cycle work between 2026-05-14 and 2026-05-16. No user-visible feature change — same product surface as 1.2.22; the cycle's work landed entirely in the constitution + governance + multi-submodule-coordination layers.
+
+### HelixConstitution incorporation (2026-05-14)
+- `git@github.com:HelixDevelopment/HelixConstitution.git` cloned to `./constitution` at pin `cb27ed8c` (now advanced to `464ada14`).
+- Hardlinked `.git` backup at `.git-backup-pre-helixconstitution-20260514-211450/` per HelixConstitution §9.
 - Inheritance pointer-blocks added to root `CLAUDE.md` + root `AGENTS.md`.
 - `scripts/commit_all.sh` thin wrapper added (§6.W-scoped: GitHub + GitLab).
 
-### Constitutional — §6.AD added (29th §6.L cycle)
-8 sub-clauses + §6.AD-debt with 8 implementation tracks. Operator + reviewer manually verify until mechanical wiring lands.
+### §6.AD HelixConstitution Inheritance Mandate (29th §6.L cycle)
+8 sub-clauses + §6.AD-debt with 8 implementation tracks.
 
-### §6.L counter 28 → 29
-"continue" directive after 1.2.22 stage-2 release distribute = HelixConstitution incorporation work.
+### §6.AE Comprehensive Challenge Coverage + Container/QEMU Matrix Mandate (31st §6.L cycle, 2026-05-15)
+Per-feature Challenge mandate + container-bound matrix + per-AVD attestation. `scripts/check-challenge-coverage.sh` + `scripts/run-challenge-matrix.sh` shipped.
+
+### Phase 4-C HelixQA Go-package linking (2026-05-16)
+4 internal/qa/ packages added to lava-api-go via WRAP adapter pattern:
+- `internal/qa/evidence/collector.go` (297 LOC, 87.9% coverage) — wraps HelixQA `pkg/evidence` adding §6.O closure-log generation.
+- `internal/qa/detector/detector.go` (255 LOC, 82.9% coverage) — wraps HelixQA `pkg/detector` for real-time crash detection.
+- `internal/qa/ticket/generator.go` (398 LOC, 93.2% coverage) — wraps HelixQA `pkg/ticket.Generator`; authorized programmatic path for §6.O closure logs per §6.O.7.
+- `internal/qa/validator/validator.go + io.go` (424 LOC, 92.5% coverage) — wraps HelixQA `pkg/validator` step validation.
+
+HelixQA upstream PR #1 (`b13ba7c`) added `helix-deps.yaml` + `install_upstreams.sh` — closed Phase 4-debt + brought 17/17 own-org submodules to ZERO `HELIX_DEV_OWNED` waivers.
+
+### Phase 6f upstream rename (2026-05-16)
+All 17 owned-by-us upstream repos lowercased on both mirrors:
+- Batch 1: HelixDevelopment/HelixQA → helixqa (github-only)
+- Batch 2: 7 vasic-digital low-blast (Auth/Cache/Concurrency/Database/Discovery/Mdns/Recovery)
+- Batch 3: 6 vasic-digital medium-blast (Config/Middleware/Observability/RateLimiter/Security/HTTP3)
+- Batch 4: 3 high-blast (Challenges/Containers/Tracker-SDK; Tracker-SDK = hyphen→underscore)
+Lava-side `.gitmodules` + `helix-deps.yaml` updated to lowercase URLs per batch.
+
+### Multi-mirror reconciliation (2026-05-16)
+- gitlab → github fast-forward catch-up on submodules/security (2 commits) + submodules/challenges (1 commit).
+- HelixQA submodule §6.AD pointer-blocks added (commit `12dd33d` on upstream main); Lava re-pinned (Q9 always-track-upstream).
+- `.gitmodules` ignore=untracked for challenges + containers (suppresses parent-side `?` noise from benign nested artifacts).
+
+### Constitution gates expanded
+- §11.4.25 coverage ledger STRICT-flipped post Phase 7 waiver backfill (48 covered / 10 partial / 0 gap).
+- §11.4.28 nested-own-org submodule scanner (`scripts/check-no-nested-own-org-submodules.sh`).
+- §11.4.31 helix-deps.yaml manifest scanner (`scripts/check-helix-deps-manifest.sh`).
+- §11.4.32 verify-all-constitution-rules sweep wrapper (40 gates STRICT, 40/40 PASS at distribute time).
+- §11.4.35 + §11.4.36 canonical-root + install_upstreams scanner.
+- §11.4.33 closure-status-vocab + §11.4.34 reopened-source-attribution equivalence-mapped per §6.AD.3 to existing Lava `.lava-ci-evidence/sixth-law-incidents/` + `.lava-ci-evidence/crashlytics-resolved/` artifacts.
+
+### §6.L counter 28 → 56 (across the cycle)
+27 invocations total spanning 2026-05-14 → 2026-05-16. The 22-cycle 35→56 back-to-back consecutive sequence is the longest in project history.
+
+### Distribute-readiness state
+- ✅ §6.P versionCode 1043 > last-version-debug 1042 + last-version-release 1042.
+- ✅ §6.Y bump-first ordering satisfied at 1.2.22→1.2.23.
+- ✅ §6.W mirrors converged (parent + 14 vasic-digital + helixqa + constitution).
+- ✅ §6.AC framework + per-module instrumentation.
+- ✅ §11.4.32 verify-all sweep 40/40 PASS in STRICT mode.
+- ⚠️ §6.AD-debt OPEN (rolling closure across cycles).
+- ⚠️ §6.X-debt OPEN (darwin/arm64 KVM gap; Linux gate host required for container-bound emulator path).
+- ⚠️ §6.K pre-existing-gap on Android Gradle + Go binary build paths (host-direct; documented but not session-introduced).
 
 ### What's NOT in this version
-- No user-visible feature change (constitutional-plumbing only).
-- HelixConstitution `CM-*` gate set wiring deferred to rolling §6.AD-debt closure.
-- Per-submodule + per-scoped CLAUDE.md inheritance propagation deferred to §6.AD-debt phase 1.
+- No user-visible feature change (constitutional + governance work only).
+- HelixConstitution `CM-*` gate set wiring partially deferred to rolling §6.AD-debt closure.
+- Container-bound emulator gate run deferred per §6.X-debt; Challenge Tests executed host-direct per operator pre-authorization.
 
-`Classification:` mixed — pattern universal, gaps project-specific.
+`Classification:` mixed — patterns universal, gaps project-specific.
 
 ## Lava-Android-1.2.22-1042 / Lava-API-Go-2.3.11-2311 — 2026-05-14 (About swap + Crashlytics 6-issue sweep + §6.AC Comprehensive Non-Fatal Telemetry Mandate)
 

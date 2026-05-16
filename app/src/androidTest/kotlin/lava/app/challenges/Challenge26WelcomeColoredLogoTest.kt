@@ -45,14 +45,11 @@
 package lava.app.challenges
 
 import android.graphics.Bitmap
-import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.onRoot
-import androidx.test.filters.SdkSuppress
+import androidx.test.platform.app.InstrumentationRegistry
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import digital.vasic.lava.client.MainActivity
@@ -60,7 +57,6 @@ import lava.app.ResetOnboardingPrefsRule
 import org.junit.Rule
 import org.junit.Test
 
-@SdkSuppress(maxSdkVersion = 35)
 @HiltAndroidTest
 class Challenge26WelcomeColoredLogoTest {
 
@@ -83,63 +79,62 @@ class Challenge26WelcomeColoredLogoTest {
         composeRule.onNodeWithText("Welcome to Lava").assertIsDisplayed()
         composeRule.onNodeWithText("Get Started").assertIsDisplayed()
 
-        // Capture the entire Welcome screen and verify the icon is colored.
-        // The screen has a single `Icon(icon = LavaIcons.AppIcon)` near the top
-        // — assert the captured bitmap has measurable RGB variance across its
-        // pixels (a monochrome glyph would have variance = 0 because all
-        // foreground pixels are the same tint and the rest is background).
-        val bitmap = composeRule.onRoot().captureToImage().asAndroidBitmap()
+        // Capture via UiAutomation.takeScreenshot() rather than the Compose
+        // captureToImage() API. Forensic anchor: 1.2.23-1043 Challenge run on
+        // Pixel_8 (API 35) — captureToImage() returned an all-zero bitmap
+        // (every pixel R==G==B==0) on this AVD/AGP combo, causing the
+        // assertColorVariance check to fire false-positive on a Welcome
+        // screen that visually renders the correct colored Lava logo.
+        // UiAutomation captures the actual hardware-accelerated rendered
+        // frame the user sees — the same surface adb screencap reads.
+        val bitmap = InstrumentationRegistry.getInstrumentation().uiAutomation.takeScreenshot()
+            ?: error("UiAutomation.takeScreenshot() returned null — emulator must support screenshot")
         assertColorVariance(bitmap)
     }
 
     /**
-     * Asserts the bitmap contains pixels with measurable color variance —
-     * i.e., is not a single-tone monochrome rendering. The Welcome screen
-     * with the colored Lava logo will have RED-dominant pixels in the
-     * logo region; the pre-fix monochrome glyph would be uniformly tinted.
+     * Asserts the bitmap contains pixels where R != G != B — i.e., colored
+     * pixels exist somewhere on screen. Counts per-pixel R-vs-G + R-vs-B
+     * deltas; a colored pixel has at least one delta > 32. The pre-fix
+     * monochrome glyph on white background would produce R==G==B at every
+     * pixel (white = 255,255,255 + gray = 102,102,102 — both have R==G==B).
+     * The colored Lava logo produces pixels like srgba(152,11,21) at the
+     * logo region — R-G delta = 141, R-B delta = 131 → clearly colored.
      *
-     * Method: sample every 16th pixel (cheap), compute max R, max G, max B
-     * separately, and assert at least 2 channels show meaningful range
-     * (max - min > 32) AND that the channels differ from each other
-     * (variance across RGB > 32). Pure monochrome scaled by alpha would
-     * fail because R == G == B at every pixel.
+     * Forensic anchor 2026-05-17: the prior assertion compared `maxR - maxG`
+     * across the WHOLE bitmap. White pixels at the screen edges push
+     * maxR == maxG == maxB == 255, so the delta = 0 even on a screen with
+     * a clearly colored logo. The corrected check counts pixels where the
+     * per-pixel delta is high — that signature can only come from
+     * non-grayscale rendering.
      */
     private fun assertColorVariance(bitmap: Bitmap) {
-        var minR = 255
-        var maxR = 0
-        var minG = 255
-        var maxG = 0
-        var minB = 255
-        var maxB = 0
-        for (y in 0 until bitmap.height step 16) {
-            for (x in 0 until bitmap.width step 16) {
+        var coloredPixelCount = 0
+        var totalSampled = 0
+        var maxPerPixelDelta = 0
+        for (y in 0 until bitmap.height step 4) {
+            for (x in 0 until bitmap.width step 4) {
                 val argb = bitmap.getPixel(x, y)
                 val r = (argb shr 16) and 0xFF
                 val g = (argb shr 8) and 0xFF
                 val b = argb and 0xFF
-                if (r < minR) minR = r
-                if (r > maxR) maxR = r
-                if (g < minG) minG = g
-                if (g > maxG) maxG = g
-                if (b < minB) minB = b
-                if (b > maxB) maxB = b
+                val rgDelta = kotlin.math.abs(r - g)
+                val rbDelta = kotlin.math.abs(r - b)
+                val gbDelta = kotlin.math.abs(g - b)
+                val pixelDelta = maxOf(rgDelta, rbDelta, gbDelta)
+                if (pixelDelta > maxPerPixelDelta) maxPerPixelDelta = pixelDelta
+                if (pixelDelta > 32) coloredPixelCount++
+                totalSampled++
             }
         }
-        val rangeR = maxR - minR
-        val rangeG = maxG - minG
-        val rangeB = maxB - minB
-        val rgbDelta = maxOf(maxR - maxG, maxR - maxB, maxG - maxB).coerceAtLeast(0)
-
-        assert(rangeR > 32 && rangeG > 32 && rangeB > 32) {
-            "Welcome logo appears monochrome — RGB ranges (R=$rangeR, G=$rangeG, " +
-                "B=$rangeB) below 32 threshold. The colored Lava logo MUST " +
-                "render with measurable per-channel variance. Did " +
-                "LavaIcons.AppIcon get reverted to ic_notification?"
-        }
-        assert(rgbDelta > 32) {
-            "Welcome logo channels are too similar (max delta=$rgbDelta < 32) — " +
-                "this is a grayscale rendering, not the colored Lava logo. " +
-                "Check that R.drawable.ic_lava_logo is wired in LavaIcons.AppIcon."
+        val coloredPct = (100.0 * coloredPixelCount / totalSampled).toInt()
+        assert(coloredPixelCount > 100 && maxPerPixelDelta > 64) {
+            "Welcome screen appears monochrome — only $coloredPixelCount/$totalSampled " +
+                "sampled pixels ($coloredPct%) have measurable per-channel delta; " +
+                "max single-pixel delta = $maxPerPixelDelta (< 64 threshold). " +
+                "The colored Lava logo + red Get Started button MUST produce " +
+                "pixels where R != G != B. Did LavaIcons.AppIcon revert to " +
+                "ic_notification, or did a theme/ColorFilter strip colors?"
         }
     }
 }
