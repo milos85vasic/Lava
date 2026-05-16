@@ -109,9 +109,9 @@ deps:
   # submodule set above so the incorporator's recursive resolution
   # produces zero conflict.
   - name: HelixQA
-    ssh_url: git@github.com:HelixDevelopment/HelixQA.git
+    ssh_url: git@github.com:HelixDevelopment/helixqa.git
     ref: main
-    why: "Anti-bluff QA orchestration framework with cross-platform testing + real-time crash detection + step validation + evidence collection + ticket generation (Phase 4 — 14 anti-bluff test type harnesses)"
+    why: "Anti-bluff QA orchestration framework with cross-platform testing + real-time crash detection + step validation + evidence collection + ticket generation (Phase 4 — 14 anti-bluff test type harnesses). Upstream repo renamed to lowercase 2026-05-16 per Phase 6f Batch 1."
     layout: grouped
 
 transitive_handling:

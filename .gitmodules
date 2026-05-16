@@ -51,4 +51,4 @@
 	url = git@github.com:HelixDevelopment/HelixConstitution.git
 [submodule "submodules/helixqa"]
 	path = submodules/helixqa
-	url = git@github.com:HelixDevelopment/HelixQA.git
+	url = git@github.com:HelixDevelopment/helixqa.git
