@@ -11,7 +11,7 @@ same commit so the index stays trustworthy. Stale state in this file
 is itself a §6.J spirit issue — the file claims a guarantee, the
 repo has drifted, the agent acts on the claim.
 
-> **Last updated:** 2026-05-16, **constitution-compliance plan delivery + HelixQA adoption + Phase 7 STRICT-flip cycle**
+> **Last updated:** 2026-05-16, **Phase 4-C-1 — Lava-side `pkg/evidence` adapter under lava-api-go**
 > (constitutional-plumbing-only; no user-visible feature change; no Firebase
 > distribute since 1.2.22-1042 still serves the user-visible surface). Cycle
 > spans commits `4def2da7` → `0c87b6ae` (33 commits since plan landing
@@ -125,6 +125,7 @@ This cycle delivered the entire 12-clause constitution-compliance plan plus Heli
 | 4 follow-up A | Option 1 design + shell wiring | ✅ DONE | `a61bd3d8` + `1b66d192` + merge `d94ade0d` |
 | 4 follow-up B | 4 open-question resolutions | ✅ DONE | `281780d7` + merge `84d871a5` |
 | 4 follow-up C | HelixQA Go-package linking design | 📐 DESIGN-ONLY | `41b81359` + merge `be1ca3d8` |
+| 4-C-1 | Lava-side `pkg/evidence` adapter (WRAP) | ✅ DONE 2026-05-16 | HelixQA `a1e2020d` + Lava `<this-commit>` |
 | 4-debt | HelixQA upstream install_upstreams.sh + helix-deps.yaml | ✅ CLOSED 2026-05-16 | `858ffb3e` |
 | 5 | §11.4.28 nested-own-org submodule audit | ✅ DONE | `bbca3a78` |
 | 5-debt | STRICT flip after Challenges/.gitmodules removal | ✅ CLOSED | `410af7ec` |
@@ -157,22 +158,21 @@ The §6.L Anti-Bluff Functional Reality Mandate counter advanced from 36 to 52 a
 These items need the operator's environment / hardware / decisions
 that an agent cannot make alone.
 
-### 2.1 Phase 4 follow-up C (HelixQA Go-package linking) — 10 open questions
+### 2.1 Phase 4 follow-up C (HelixQA Go-package linking) — STATUS UPDATE 2026-05-16
 
-Design at `docs/plans/2026-05-16-helixqa-go-package-linking-design.md` §G:
+**Phase 4-C-1 (pkg/evidence adapter): COMPLETED 2026-05-16.** All 10 open questions answered by operator + implementation landed in this cycle's commit. Operator decisions: Q1 Go 1.26 bump, Q2 WRAP, Q3 Path A tag-pin (transitional Path B replace+sibling-mount until HelixQA stabilizes), Q4 preserve HelixQA terminology (Collector / Detector / Generator), Q5 upstream-contribute CaptureGeneric first (HelixDevelopment/HelixQA PR #1, branch `feat/evidence-capture-generic`, commit `a1e2020dd759d025b67ef8e024061b103940470d`), Q6 SKIP 4-C-4 navigator entirely, Q7 NO recover() wrapping, Q8 accept 2x CI build-time delta, Q9 always-track-upstream for HelixQA (§6.AD waiver documented in CLAUDE.md), Q10 coverage-ledger bumped in same commit.
 
-1. Go-version conflict (HelixQA needs 1.26; lava-api-go on 1.25) — toolchain bump vs HelixQA patch.
-2. Adapter strategy: WRAP vs RE-EXPORT.
-3. Release-mode dependency resolution (tag-pin vs replace+sibling-mount).
-4. Per-adapter naming: keep HelixQA terminology vs Lava-domain renames.
-5. HelixQA upstream contribution for `pkg/evidence.CaptureGeneric`.
-6. Phase 4-C-4 navigator: SKIP or proceed.
-7. §6.AC waiver scope for HelixQA-internal panics.
-8. CI build-time budget delta (HelixQA's Playwright Go + OpenCV bridges + GStreamer transitive deps).
-9. Constitution submodule pin freshness for `pkg/evidence` API contract.
-10. Coverage-ledger row for the adapter set.
+Deliverables this cycle:
+- HelixQA `pkg/evidence.CaptureGeneric` public method (commit `a1e2020d`, PR HelixDevelopment/HelixQA#1)
+- `lava-api-go/internal/qa/evidence/{collector,collector_test}.go` (adapter + 9 unit tests, 87.9% coverage)
+- `lava-api-go/tests/qa/evidence_test.go` (real-stack integration test, `//go:build helixqa_realstack`)
+- `lava-api-go/go.mod` bumped to Go 1.26 + adds `digital.vasic.helixqa` require + replace
+- `Submodules/HelixQA/` pin bumped to `a1e2020d`
+- `docs/coverage-ledger.yaml` regenerated (58 rows; lava-api-go row: 89 unit tests + 1 integration)
+- `CLAUDE.md` §6.AD-debt: HelixQA always-track-upstream waiver documented
+- This `CONTINUATION.md` updated
 
-**Action:** operator reviews + decides; agent does NOT proceed to Phase 4-C-1 implementation without operator approval on these.
+Phase 4-C-2 (detector adapter), 4-C-3 (ticket adapter), 4-C-4 (validator + SKIP navigator per Q6) remain owed — each is 1-session scope per design doc §E.
 
 ### 2.2 Phase 6 snake_case migration — 8 open questions
 
@@ -210,7 +210,7 @@ Bumping a pin is a deliberate operator action; never auto-update.
 | `Containers` | `c7fc343b` | GitHub + GitLab | helix-deps.yaml + install_upstreams.sh added |
 | `Database` | `13f63819` | GitHub + GitLab | helix-deps.yaml present |
 | `Discovery` | `218cb3a1` | GitHub + GitLab | helix-deps.yaml + install_upstreams.sh added |
-| `HelixQA` | `b13ba7c0` | GitHub | NEW 2026-05-15; HelixDevelopment org; install_upstreams.sh + helix-deps.yaml landed 2026-05-16 |
+| `HelixQA` | `a1e2020d` | GitHub | NEW 2026-05-15; HelixDevelopment org; **always-track-upstream per §6.AD-debt Q9 waiver 2026-05-16**; bumped to `feat/evidence-capture-generic` HEAD (PR #1, CaptureGeneric addition) for Phase 4-C-1 |
 | `HTTP3` | `1fbdcbab` | GitHub + GitLab | helix-deps.yaml + install_upstreams.sh added |
 | `Mdns` | `d93139d5` | GitHub + GitLab | helix-deps.yaml + install_upstreams.sh added |
 | `Middleware` | `ab3d5c62` | GitHub + GitLab | helix-deps.yaml + install_upstreams.sh added |

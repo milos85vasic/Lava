@@ -1,6 +1,9 @@
 module digital.vasic.lava.apigo
 
-go 1.25.0
+// Phase 4-C-1 (Lava 2026-05-16) bumps Go toolchain to 1.26 per operator
+// decision Q1 — HelixQA's go.mod (incorporated via digital.vasic.helixqa
+// below) requires Go 1.26 minimum; lava-api-go aligns to the same floor.
+go 1.26.0
 
 replace (
 	digital.vasic.auth => ../Submodules/Auth
@@ -11,6 +14,12 @@ replace (
 	digital.vasic.containers => ../Submodules/Containers
 	digital.vasic.database => ../Submodules/Database
 	digital.vasic.discovery => ../Submodules/Discovery
+	// digital.vasic.helixqa is sibling-replaced for local development +
+	// release builds. Per Phase 4-C-1 operator decision Q3 (Path A —
+	// tag-pin), the upstream resolution will move to a pinned tag once
+	// HelixQA reaches release stability; transitional Path B per design
+	// §C.3 keeps the replace directive active in the meantime.
+	digital.vasic.helixqa => ../Submodules/HelixQA
 	digital.vasic.http3 => ../Submodules/HTTP3
 	digital.vasic.mdns => ../Submodules/Mdns
 	digital.vasic.middleware => ../Submodules/Middleware
@@ -27,6 +36,7 @@ tool (
 
 require (
 	digital.vasic.cache v0.0.0-00010101000000-000000000000
+	digital.vasic.helixqa v0.0.0-00010101000000-000000000000
 	digital.vasic.http3 v0.0.0-00010101000000-000000000000
 	digital.vasic.mdns v0.0.0-00010101000000-000000000000
 	digital.vasic.observability v0.0.0-00010101000000-000000000000
@@ -38,6 +48,7 @@ require (
 	github.com/gin-gonic/gin v1.12.0
 	github.com/oapi-codegen/runtime v1.4.0
 	github.com/prometheus/client_golang v1.23.2
+	github.com/prometheus/client_model v0.6.2
 	github.com/quic-go/quic-go v0.59.0
 	golang.org/x/net v0.52.0
 	gopkg.in/yaml.v3 v3.0.1
@@ -93,7 +104,7 @@ require (
 	github.com/bytedance/sonic v1.15.0 // indirect
 	github.com/bytedance/sonic/loader v0.5.0 // indirect
 	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
-	github.com/cenkalti/backoff/v4 v4.1.2 // indirect
+	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
 	github.com/cenkalti/backoff/v5 v5.0.3 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/cloudflare/golz4 v0.0.0-20150217214814-ef862a3cdc58 // indirect
@@ -111,7 +122,7 @@ require (
 	github.com/form3tech-oss/jwt-go v3.2.5+incompatible // indirect
 	github.com/gabriel-vasile/mimetype v1.4.12 // indirect
 	github.com/gin-contrib/sse v1.1.0 // indirect
-	github.com/go-jose/go-jose/v4 v4.1.3 // indirect
+	github.com/go-jose/go-jose/v4 v4.1.4 // indirect
 	github.com/go-logr/logr v1.4.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-openapi/jsonpointer v0.21.0 // indirect
@@ -169,7 +180,7 @@ require (
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
-	github.com/mattn/go-sqlite3 v1.14.22 // indirect
+	github.com/mattn/go-sqlite3 v1.14.37 // indirect
 	github.com/microsoft/go-mssqldb v1.0.0 // indirect
 	github.com/miekg/dns v1.1.27 // indirect
 	github.com/minio/asm2plan9s v0.0.0-20200509001527-cdd76441f9d8 // indirect
@@ -192,7 +203,6 @@ require (
 	github.com/pkg/browser v0.0.0-20210911075715-681adbf594b8 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/planetscale/vtprotobuf v0.6.1-0.20240319094008-0393e58bdf10 // indirect
-	github.com/prometheus/client_model v0.6.2 // indirect
 	github.com/prometheus/common v0.66.1 // indirect
 	github.com/prometheus/procfs v0.16.1 // indirect
 	github.com/quic-go/qpack v0.6.0 // indirect
@@ -235,7 +245,7 @@ require (
 	golang.org/x/arch v0.22.0 // indirect
 	golang.org/x/crypto v0.49.0 // indirect
 	golang.org/x/mod v0.34.0 // indirect
-	golang.org/x/oauth2 v0.35.0 // indirect
+	golang.org/x/oauth2 v0.36.0 // indirect
 	golang.org/x/sync v0.20.0 // indirect
 	golang.org/x/sys v0.43.0 // indirect
 	golang.org/x/telemetry v0.0.0-20260311193753-579e4da9a98c // indirect

@@ -765,6 +765,47 @@ The following decisions MUST be made before Phase 4-C-1 implementation begins. E
 
 ## I. Status
 
-**DESIGN-ONLY.** No code changes in this commit. Operator approval owed on all 10 §G open questions before Phase 4-C-1 implementation begins. Phase 4-C-1 cycle deliverables enumerated in §E.1 are blocked on those decisions.
+**Phase 4-C-1: COMPLETED 2026-05-16.** Operator approved all 10 §G open questions and Lava-side `internal/qa/evidence` adapter landed. All §E.1 acceptance criteria met.
+
+| Q | Operator decision |
+|---|---|
+| Q1 | Bump lava-api-go to Go 1.26 (was 1.25) |
+| Q2 | WRAP strategy (adapter exposes Lava-shaped methods translating HelixQA types) |
+| Q3 | Path A — tag-pin in go.mod; transitional Path B (`replace` + sibling-mount) active until HelixQA stabilizes |
+| Q4 | Preserve HelixQA terminology — adapter type is `Collector`, NOT renamed |
+| Q5 | Contribute `CaptureGeneric` upstream first → HelixDevelopment/HelixQA PR #1, branch `feat/evidence-capture-generic`, commit `a1e2020dd759d025b67ef8e024061b103940470d` |
+| Q6 | SKIP 4-C-4 navigator entirely (no plumbing, no skeleton) |
+| Q7 | NO `recover()` wrapping — trust HelixQA + file upstream improvements if panics surface |
+| Q8 | Accept 2x CI build-time increase |
+| Q9 | Always-track-upstream for HelixQA pin (§6.AD waiver in root `CLAUDE.md`) |
+| Q10 | Bump coverage ledger in the SAME Phase 4-C-1 commit |
+
+**Deliverables landed:**
+- HelixQA `pkg/evidence.CaptureGeneric` public method + 4 unit tests (HelixQA PR #1, commit `a1e2020d`)
+- `lava-api-go/internal/qa/evidence/collector.go` (281 LOC) — WRAP-strategy adapter with `NewCollector`, `CaptureText`, `CaptureFile`, `Finalize`, `Items`, `Count`, `RunID`, `OutputDir`
+- `lava-api-go/internal/qa/evidence/collector_test.go` (9 tests, 87.9% statement coverage)
+- `lava-api-go/tests/qa/evidence_test.go` (2 real-stack tests, `//go:build helixqa_realstack`)
+- `lava-api-go/go.mod`: Go 1.26.0 + `digital.vasic.helixqa` require/replace block addition
+- `Submodules/HelixQA/` pin advanced `b13ba7c0` → `a1e2020d`
+- `docs/coverage-ledger.yaml` regenerated (58 rows; lava-api-go: 89 unit tests + 1 integration)
+- `CLAUDE.md` Sixth-Law-extensions block: HelixQA always-track-upstream waiver paragraph
+- `docs/CONTINUATION.md`: Phase 4-C-1 row in §1 + HelixQA pin update in §3
+
+**§6.J anti-bluff posture (4 falsifiability rehearsals, all reverted):**
+1. `TypeConsoleLog → TypeScreenshot` mutation in `CaptureText` → `Item.Type = "screenshot"; want "console_log"`
+2. all `return err → return nil` in `CaptureFile` → `expected error for missing source; got nil`
+3. `c.finalized = true → false` in `Finalize` → 3 assertions fired (post-finalize captures got nil instead of ErrFinalized; Count grew)
+4. HelixQA-side: `if item.Platform == "" → != ""` in `CaptureGeneric` → standalone exerciser fails `FAIL: platform default not applied:`
+
+**Real anti-bluff finding surfaced during implementation:** the initial `TestCollector_ConcurrentCaptures` test caught a production filename-collision bug (millisecond-resolution timestamps + same label letter `a` at i=0 and i=26 produced identical paths under burst). Production fix: added `atomic.Uint64 seq` counter to filename template (`<runID>-<label>-<ms>-<seq>.txt`). The test surfacing a real defect — rather than passing while the bug shipped — is exactly the §6.J posture this clause exists to prove.
+
+**Acceptance criteria all met:**
+- ✅ `go test ./...` PASS for every lava-api-go package including new `internal/qa/evidence`
+- ✅ `go test -tags=helixqa_realstack ./tests/qa/...` PASS (2/2 real-stack tests)
+- ✅ §6.AC telemetry coverage: every error path records via `observability.RecordNonFatal` with mandatory attribute set
+- ✅ §6.J falsifiability rehearsals: 4 mutations, 4 reverted, 4 PASS-after-revert
+- ✅ `scripts/verify-all-constitution-rules.sh --strict`: 40/40 PASS preserved
+
+**Next phases owed:** 4-C-2 (detector adapter), 4-C-3 (ticket adapter), 4-C-4 (validator only; navigator SKIPPED per Q6). Each is 1-session scope per §E.
 
 `Classification:` project-specific (per-package adapter wraps + lava-api-go-specific paths are project-specific; the adapter-layer-as-version-isolation pattern is universal per HelixConstitution §11.4.31).
