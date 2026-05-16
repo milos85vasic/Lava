@@ -21,9 +21,9 @@
 # Invariant values: pass | gap | n/a | "waiver: <rationale>" | "pass: <rationale>"
 metadata:
   schema_version: 1
-  generated_at: "2026-05-16T06:26:45Z"
+  generated_at: "2026-05-16T07:07:53Z"
   generator: "scripts/generate-coverage-ledger.sh"
-  commit_sha: "dcec9eb81888a144e6e258dd2a758946e7be8dfe"
+  commit_sha: "2882304b4b12b3784ec41dabcb27a1c3916d3464"
   mandate: "HelixConstitution §11.4.25 Full-Automation-Coverage Mandate"
 
 rows:
@@ -720,7 +720,7 @@ rows:
   - path: "Submodules/Auth"
     kind: "submodule"
     status: "covered"
-    unit_test_count: 0
+    unit_test_count: 14
     integration_test_count: 0
     challenge_count: 0
     challenges: []
@@ -735,7 +735,7 @@ rows:
   - path: "Submodules/Cache"
     kind: "submodule"
     status: "covered"
-    unit_test_count: 0
+    unit_test_count: 16
     integration_test_count: 0
     challenge_count: 0
     challenges: []
@@ -750,7 +750,7 @@ rows:
   - path: "Submodules/Challenges"
     kind: "submodule"
     status: "covered"
-    unit_test_count: 0
+    unit_test_count: 168
     integration_test_count: 0
     challenge_count: 0
     challenges: []
@@ -765,7 +765,7 @@ rows:
   - path: "Submodules/Concurrency"
     kind: "submodule"
     status: "covered"
-    unit_test_count: 0
+    unit_test_count: 22
     integration_test_count: 0
     challenge_count: 0
     challenges: []
@@ -780,7 +780,7 @@ rows:
   - path: "Submodules/Config"
     kind: "submodule"
     status: "covered"
-    unit_test_count: 0
+    unit_test_count: 5
     integration_test_count: 0
     challenge_count: 0
     challenges: []
@@ -795,7 +795,7 @@ rows:
   - path: "Submodules/Containers"
     kind: "submodule"
     status: "covered"
-    unit_test_count: 0
+    unit_test_count: 145
     integration_test_count: 0
     challenge_count: 0
     challenges: []
@@ -810,7 +810,7 @@ rows:
   - path: "Submodules/Database"
     kind: "submodule"
     status: "covered"
-    unit_test_count: 0
+    unit_test_count: 24
     integration_test_count: 0
     challenge_count: 0
     challenges: []
@@ -825,7 +825,7 @@ rows:
   - path: "Submodules/Discovery"
     kind: "submodule"
     status: "covered"
-    unit_test_count: 0
+    unit_test_count: 13
     integration_test_count: 0
     challenge_count: 0
     challenges: []
@@ -840,7 +840,7 @@ rows:
   - path: "Submodules/HelixQA"
     kind: "submodule"
     status: "covered"
-    unit_test_count: 0
+    unit_test_count: 355
     integration_test_count: 0
     challenge_count: 0
     challenges: []
@@ -855,7 +855,7 @@ rows:
   - path: "Submodules/HTTP3"
     kind: "submodule"
     status: "covered"
-    unit_test_count: 0
+    unit_test_count: 4
     integration_test_count: 0
     challenge_count: 0
     challenges: []
@@ -870,7 +870,7 @@ rows:
   - path: "Submodules/Mdns"
     kind: "submodule"
     status: "covered"
-    unit_test_count: 0
+    unit_test_count: 2
     integration_test_count: 0
     challenge_count: 0
     challenges: []
@@ -885,7 +885,7 @@ rows:
   - path: "Submodules/Middleware"
     kind: "submodule"
     status: "covered"
-    unit_test_count: 0
+    unit_test_count: 20
     integration_test_count: 0
     challenge_count: 0
     challenges: []
@@ -900,7 +900,7 @@ rows:
   - path: "Submodules/Observability"
     kind: "submodule"
     status: "covered"
-    unit_test_count: 0
+    unit_test_count: 16
     integration_test_count: 0
     challenge_count: 0
     challenges: []
@@ -915,7 +915,7 @@ rows:
   - path: "Submodules/RateLimiter"
     kind: "submodule"
     status: "covered"
-    unit_test_count: 0
+    unit_test_count: 18
     integration_test_count: 0
     challenge_count: 0
     challenges: []
@@ -930,7 +930,7 @@ rows:
   - path: "Submodules/Recovery"
     kind: "submodule"
     status: "covered"
-    unit_test_count: 0
+    unit_test_count: 10
     integration_test_count: 0
     challenge_count: 0
     challenges: []
@@ -945,7 +945,7 @@ rows:
   - path: "Submodules/Security"
     kind: "submodule"
     status: "covered"
-    unit_test_count: 0
+    unit_test_count: 17
     integration_test_count: 0
     challenge_count: 0
     challenges: []
@@ -960,7 +960,7 @@ rows:
   - path: "Submodules/Tracker-SDK"
     kind: "submodule"
     status: "covered"
-    unit_test_count: 0
+    unit_test_count: 14
     integration_test_count: 0
     challenge_count: 0
     challenges: []

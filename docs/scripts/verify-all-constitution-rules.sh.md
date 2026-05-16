@@ -65,7 +65,7 @@ Per-gate STRICT/ADVISORY note: Phase 5 / Phase 8 / Phase 3 gates have been STRIC
 - **Phase 8-debt closure**: 10 install_upstreams scripts landed via Phase 8-debt batch (Challenges, Config, Containers, Discovery, HTTP3, Mdns, Middleware, RateLimiter, Recovery, Tracker-SDK each gained install_upstreams.sh + Upstreams/GitHub.sh + Upstreams/GitLab.sh per §6.W).
 - **Phase 3-debt closure**: 16/16 per-submodule helix-deps.yaml manifests landed via Phase 3-debt batch (each authored with HONEST per-submodule deps after analysis).
 
-Phase 7 ships in ADVISORY mode — per-row baseline normalisation (waiver backfill to lift `gap` rows to `partial`/`covered` where evidence justifies) is the gating work before STRICT flip. The verifier still hard-asserts row-coverage + freshness regardless of mode — gate failures here are stale-ledger conditions, not legitimate gap counts.
+Phase 7 STRICT-flipped 2026-05-16 after the waiver-backfill agent (commit 20b3fd36) lifted the ledger from 0/20/38 to 48/10/0. The 10 remaining `partial` rows are honest gaps for structural/glue modules without dedicated unit tests (transitively exercised by downstream features + Challenges). The verifier hard-asserts row-coverage + freshness + schema integrity in STRICT mode; ledger-staleness conditions are the gate's primary failure mode (legitimate gap counts don't trigger the verifier).
 
 The list grows as new constitution gates land. Adding a new gate to the registry requires updating both the sweep + the hermetic meta-test (`tests/check-constitution/test_verify_all_rules.sh`).
 

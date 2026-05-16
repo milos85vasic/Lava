@@ -140,13 +140,14 @@ run_gate "helix-deps-manifest" "HelixConstitution §11.4.31" \
     "bash scripts/check-helix-deps-manifest.sh --strict"
 
 # §11.4.25 Full-Automation-Coverage Ledger (Phase 7)
-# Ships in --advisory mode (default) until per-row backfill normalises the
-# baseline ledger across the full repo; verifier still hard-asserts freshness
-# + row-coverage. STRICT flip is OWED via Phase 7-debt entry in
-# docs/plans/2026-05-15-constitution-compliance.md once the gap-row count
-# stabilises + the operator authorises the flip.
+# STRICT-flipped 2026-05-16 after Phase 7 waiver backfill landed
+# (commit 20b3fd36 → 48 covered / 10 partial / 0 gap; the 10 partial
+# rows are honest gaps for structural/glue modules without dedicated
+# unit tests). Verifier hard-asserts freshness + row-coverage + schema
+# integrity; the 10 partial rows do NOT trigger the verifier (it
+# checks ledger health, not row-coverage thresholds).
 run_gate "coverage-ledger" "HelixConstitution §11.4.25" \
-    "bash scripts/check-coverage-ledger.sh --advisory"
+    "bash scripts/check-coverage-ledger.sh --strict"
 
 # §6.AB Challenge discrimination (Layer 1 marker + Layer 2 body)
 run_gate "challenge-discrimination" "§6.AB Anti-Bluff Test-Suite Reinforcement" \
