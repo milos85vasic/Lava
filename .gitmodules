@@ -3,7 +3,7 @@
 	url = git@github.com:vasic-digital/Containers.git
 [submodule "submodules/middleware"]
 	path = submodules/middleware
-	url = git@github.com:vasic-digital/Middleware.git
+	url = git@github.com:vasic-digital/middleware.git
 [submodule "submodules/database"]
 	path = submodules/database
 	url = git@github.com:vasic-digital/database.git
@@ -12,16 +12,16 @@
 	url = git@github.com:vasic-digital/cache.git
 [submodule "submodules/observability"]
 	path = submodules/observability
-	url = git@github.com:vasic-digital/Observability.git
+	url = git@github.com:vasic-digital/observability.git
 [submodule "submodules/ratelimiter"]
 	path = submodules/ratelimiter
-	url = git@github.com:vasic-digital/RateLimiter.git
+	url = git@github.com:vasic-digital/ratelimiter.git
 [submodule "submodules/recovery"]
 	path = submodules/recovery
 	url = git@github.com:vasic-digital/recovery.git
 [submodule "submodules/security"]
 	path = submodules/security
-	url = git@github.com:vasic-digital/Security.git
+	url = git@github.com:vasic-digital/security.git
 [submodule "submodules/auth"]
 	path = submodules/auth
 	url = git@github.com:vasic-digital/auth.git
@@ -30,13 +30,13 @@
 	url = git@github.com:vasic-digital/Challenges.git
 [submodule "submodules/config"]
 	path = submodules/config
-	url = git@github.com:vasic-digital/Config.git
+	url = git@github.com:vasic-digital/config.git
 [submodule "submodules/discovery"]
 	path = submodules/discovery
 	url = git@github.com:vasic-digital/discovery.git
 [submodule "submodules/http3"]
 	path = submodules/http3
-	url = git@github.com:vasic-digital/HTTP3.git
+	url = git@github.com:vasic-digital/http3.git
 [submodule "submodules/mdns"]
 	path = submodules/mdns
 	url = git@github.com:vasic-digital/mdns.git

@@ -43,7 +43,7 @@ deps:
     why: "Coroutine + structured-concurrency primitives"
     layout: grouped
   - name: Config
-    ssh_url: git@github.com:vasic-digital/Config.git
+    ssh_url: git@github.com:vasic-digital/config.git
     ref: main
     why: "Build-time + runtime configuration (.env-driven, no hardcoding per §6.R)"
     layout: grouped
@@ -63,7 +63,7 @@ deps:
     why: "LAN service-discovery primitives (consumed by Mdns + lava-api-go)"
     layout: grouped
   - name: HTTP3
-    ssh_url: git@github.com:vasic-digital/HTTP3.git
+    ssh_url: git@github.com:vasic-digital/http3.git
     ref: main
     why: "HTTP/3 client + server primitives (consumed by lava-api-go)"
     layout: grouped
@@ -73,17 +73,17 @@ deps:
     why: "JmDNS-based local service advertisement (_lava._tcp.local.)"
     layout: grouped
   - name: Middleware
-    ssh_url: git@github.com:vasic-digital/Middleware.git
+    ssh_url: git@github.com:vasic-digital/middleware.git
     ref: main
     why: "HTTP middleware chain primitives (auth, logging, rate-limit composition)"
     layout: grouped
   - name: Observability
-    ssh_url: git@github.com:vasic-digital/Observability.git
+    ssh_url: git@github.com:vasic-digital/observability.git
     ref: main
     why: "OTLP + structured-logging primitives + Crashlytics non-fatal channel (§6.AC)"
     layout: grouped
   - name: RateLimiter
-    ssh_url: git@github.com:vasic-digital/RateLimiter.git
+    ssh_url: git@github.com:vasic-digital/ratelimiter.git
     ref: main
     why: "Per-endpoint + per-IP rate limiting (consumed by lava-api-go)"
     layout: grouped
@@ -93,7 +93,7 @@ deps:
     why: "Crash-recovery + restart primitives (lava-api-go restart loop, supervised processes)"
     layout: grouped
   - name: Security
-    ssh_url: git@github.com:vasic-digital/Security.git
+    ssh_url: git@github.com:vasic-digital/security.git
     ref: main
     why: "Crypto + signing + secret-management primitives (used by Tracker SDK auth flows)"
     layout: grouped
