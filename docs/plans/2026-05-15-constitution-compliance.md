@@ -143,36 +143,36 @@ Each phase: deliverables, falsifiability rehearsal contract, owner, dependency o
 
 **HUGE phase. Multi-step migration. The constitution itself (§11.4.29) mandates phased execution.**
 
-**Sub-phases:**
+**Phase 6 has its own dedicated sub-plan** at [`docs/plans/2026-05-16-snake_case-migration.md`](2026-05-16-snake_case-migration.md), prepared in the Phase 6.0 research+plan cycle (2026-05-16). Read that plan before executing any rename. Highlights:
 
-**6a — `Submodules/` → `submodules/` rename + every reference updated**
-- `git mv Submodules submodules` (or staged: rename + update all references in same commit)
-- Update `.gitmodules` paths
-- Update `scripts/*.sh` (currently many scripts reference `Submodules/...`)
-- Update `CLAUDE.md` + `AGENTS.md` + every per-scope doc that cites `Submodules/...`
-- Update `.lava-ci-evidence/*` references
+- **Per-submodule target mapping table** — 17 owned-by-us submodules with their snake_case targets (`Auth` → `auth`, `RateLimiter` → `rate_limiter`, `Tracker-SDK` → `tracker_sdk`, `HelixQA` → `helix_qa`, etc.).
+- **Audit tool** `scripts/audit-snake_case-references.sh` (read-only) + hermetic test `tests/check-constitution/test_audit_snake_case_references.sh` + companion doc `docs/scripts/audit-snake_case-references.sh.md` shipped in this commit. Run `bash scripts/audit-snake_case-references.sh` for the baseline reference count (currently 806 `Submodules/` refs across 124 files; highest-blast-radius: `Containers` 370 refs / 63 files).
+- **LANG-spec exemption** explicitly documented: Kotlin/Android `app/`, `core/`, `feature/` subtrees, Gradle wrapper, dotfiles, `Dockerfile*` are EXEMPT from snake_case enforcement on their inner subtree.
+- **HelixDevelopment-owned (HelixQA)** treated the same as vasic-digital — `helix_qa` snake_case is binding (HelixDevelopment is on the owned-org list).
 
-**6b — Each `submodules/<CamelCase>/` → `submodules/<snake_case>/` rename**
-- 16 individual renames: Auth → auth, Cache → cache, Challenges → challenges, Concurrency → concurrency, Config → config, Containers → containers, Database → database, Discovery → discovery, HTTP3 → http3, Mdns → mdns, Middleware → middleware, Observability → observability, RateLimiter → rate_limiter, Recovery → recovery, Security → security, Tracker-SDK → tracker_sdk
-- Per-rename: update parent .gitmodules + all references
-- Per-submodule: each submodule's internal directory structure may also need rename (recursive)
+**Sub-phases (summary; full detail in the sub-plan):**
 
-**6c — File-level renames** (per §11.4.29 the rule applies to project files too)
-- Audit Lava's tracked files for non-snake_case names
-- Common offenders: Kotlin source files (PascalCase by language convention — per §11.4.29 "language-mandated case is preserved inside the language-root" → exempt)
-- Markdown docs: many CamelCase / Title Case names — `CLAUDE.md` is the canonical; per §11.4.29 `must-not-break-technology` exemption likely applies
+**6.0 — Plan + audit tool** (THIS commit, 2026-05-16, research+plan only — ZERO renames executed).
 
-**6d — Mechanical enforcement gate**
-- `scripts/check-snake-case-naming.sh` per §11.4.29 + paired mutation
-- Recognize the language/technology exemptions
+**6a — `Submodules/` → `submodules/` rename + every reference updated** (top-level directory).
 
-**Falsifiability rehearsal:** rename a directory back to CamelCase; assert gate fires + names the offender.
+**6b — Per-submodule snake_case renames** (17 sub-cycles, risk-ascending; HIGH-RISK Containers + Tracker-SDK + RateLimiter last).
 
-**Estimated scope:** EXTENSIVELY LARGE — touches dozens of files + the .gitmodules + every submodule path. Should be its own dedicated session(s). Per §11.4.29 itself: "Phased execution. Comprehensive brainstorming → phase-divided plan → fine-grained tasks/subtasks". This deserves its own sub-plan.
+**6c — File-level renames** (Lava-side tracked files; most exempt under LANG-spec).
+
+**6d — `Upstreams/` → `upstreams/` rename** (constitution submodule's `install_upstreams.sh` already supports dual-mode).
+
+**6e — Mechanical enforcement gate** (`scripts/check-snake-case-naming.sh` + paired mutation).
+
+**6f — Optional upstream Git repo renames** (defer — out of §11.4.29's local-path-only mandatory scope; operator decision).
+
+**Falsifiability rehearsal (per cycle):** rename a directory back to CamelCase OR leave a single reference unrenamed; assert audit script / gate fires + names the offender.
+
+**Estimated scope:** Phase 6.0 = 1 commit. Phases 6a + 6b/1-17 + 6c + 6d + 6e = at least 21 additional commits over multiple sessions. HIGH-RISK renames (Containers, Tracker-SDK) are full-session each.
 
 **Dependency on:** All other phases that create new files MUST follow snake_case from inception.
 
-**Risk:** large rename can break refs in submodule pin tracking + scripts + IDE configs. Hardlinked .git backup required PER PHASE per §9.
+**Risk:** Detailed in `docs/plans/2026-05-16-snake_case-migration.md` §6. Hardlinked `.git` backup required PER PHASE per §9.
 
 ---
 
