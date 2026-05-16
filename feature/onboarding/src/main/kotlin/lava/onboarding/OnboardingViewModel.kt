@@ -234,8 +234,12 @@ class OnboardingViewModel @Inject constructor(
                     step = OnboardingStep.Configure,
                     currentProviderIndex = lastIndex,
                     configs = if (lastProvider != null) {
-                        state.configs + (lastProvider.descriptor.trackerId to (state.configs[lastProvider.descriptor.trackerId]
-                            ?: ProviderConfigState(lastProvider.descriptor.trackerId)).copy(error = errorMessage))
+                        state.configs + (
+                            lastProvider.descriptor.trackerId to (
+                                state.configs[lastProvider.descriptor.trackerId]
+                                    ?: ProviderConfigState(lastProvider.descriptor.trackerId)
+                                ).copy(error = errorMessage)
+                            )
                     } else {
                         state.configs
                     },
