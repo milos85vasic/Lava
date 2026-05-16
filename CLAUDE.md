@@ -15,7 +15,7 @@ Claude Code's `@path/to/file` import syntax also resolves: `@constitution/CLAUDE
 > - `AGENTS.md` — longer companion guide (tech stack versions, deployment, security notes). Read this when CLAUDE.md is too brief on a given subject.
 > - `core/CLAUDE.md`, `app/CLAUDE.md`, `feature/CLAUDE.md` — scoped Anti-Bluff rules that apply only inside those trees.
 > - `lava-api-go/CLAUDE.md` and `lava-api-go/CONSTITUTION.md` — scoped instructions and constitutional addenda for the Go API service. **Read both before touching `lava-api-go/`.**
-> - `Submodules/<Name>/CLAUDE.md` — each of the 16 `vasic-digital/*` submodules + 1 HelixDevelopment-owned (`HelixQA`, adopted Phase 4) ships its own scoped rules, inherited per 6.F. Honour them before editing any code under `Submodules/`.
+> - `Submodules/<Name>/CLAUDE.md` — each of the 16 `vasic-digital/*` submodules + 1 HelixDevelopment-owned (`HelixQA`, adopted Phase 4; Phase 4-debt closed 2026-05-16 — HelixQA upstream commit `b13ba7c` ships `helix-deps.yaml` + `install_upstreams.sh` at parity with the 16 vasic-digital submodules) ships its own scoped rules, inherited per 6.F. All 17 own-org submodules now satisfy `CM-HELIX-DEPS-MANIFEST` + `CM-CANONICAL-ROOT-CLARITY` + `CM-INSTALL-UPSTREAMS-RAN` in fully STRICT mode (0 waived). Honour them before editing any code under `Submodules/`.
 > - `docs/ARCHITECTURE.md`, `docs/LOCAL_NETWORK_DISCOVERY.md` — architecture diagrams and the mDNS discovery flow.
 > - `docs/superpowers/specs/2026-04-28-sp2-go-api-migration-design.md` — full SP-2 design doc (Go API service migration).
 > - `docs/superpowers/plans/2026-04-28-sp2-go-api-migration.md` — SP-2 implementation plan (14 phases, 39 tasks).

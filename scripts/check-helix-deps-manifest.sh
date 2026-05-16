@@ -49,13 +49,12 @@ done
 # cite WHY (legacy state, structural exemption, etc.) + tracking
 # issue + planned-resolution date.
 HELIX_DEPS_WAIVERS=(
-    # HelixQA — HelixDevelopment-owned submodule adopted at upstream HEAD
-    # 403603db on 2026-05-15. Lava pins the version; the upstream repo's
-    # missing helix-deps.yaml is owed via PR to HelixDevelopment/HelixQA
-    # (Phase 4-debt of constitution-compliance plan, NOT a Lava-side
-    # responsibility to add the file directly without operator authorization
-    # to push to a HelixDevelopment repo).
-    "HelixQA"
+    # RESOLVED 2026-05-16 — HelixQA upstream commit b13ba7c landed
+    # helix-deps.yaml at HelixDevelopment/HelixQA's root, closing the
+    # Phase 4-debt PR-to-upstream item. Lava's pin advanced to b13ba7c
+    # in the same parent commit that removed this waiver. The waiver
+    # list is intentionally retained (empty) as a forensic anchor —
+    # past waivers + their resolution dates document the trail.
 )
 
 is_helix_deps_waived() {
