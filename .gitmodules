@@ -1,6 +1,6 @@
 [submodule "submodules/containers"]
 	path = submodules/containers
-	url = git@github.com:vasic-digital/Containers.git
+	url = git@github.com:vasic-digital/containers.git
 [submodule "submodules/middleware"]
 	path = submodules/middleware
 	url = git@github.com:vasic-digital/middleware.git
@@ -27,7 +27,7 @@
 	url = git@github.com:vasic-digital/auth.git
 [submodule "submodules/challenges"]
 	path = submodules/challenges
-	url = git@github.com:vasic-digital/Challenges.git
+	url = git@github.com:vasic-digital/challenges.git
 [submodule "submodules/config"]
 	path = submodules/config
 	url = git@github.com:vasic-digital/config.git
@@ -45,7 +45,7 @@
 	url = git@github.com:vasic-digital/concurrency.git
 [submodule "submodules/tracker_sdk"]
 	path = submodules/tracker_sdk
-	url = https://github.com/vasic-digital/Tracker-SDK.git
+	url = https://github.com/vasic-digital/tracker_sdk.git
 [submodule "constitution"]
 	path = constitution
 	url = git@github.com:HelixDevelopment/HelixConstitution.git

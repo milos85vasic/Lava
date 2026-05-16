@@ -33,7 +33,7 @@ deps:
     why: "Generic caching primitives (used by network + tracker layers)"
     layout: grouped
   - name: Challenges
-    ssh_url: git@github.com:vasic-digital/Challenges.git
+    ssh_url: git@github.com:vasic-digital/challenges.git
     ref: main
     why: "Anti-bluff Compose UI Challenge Test infrastructure (§6.J / §6.AB)"
     layout: grouped
@@ -48,7 +48,7 @@ deps:
     why: "Build-time + runtime configuration (.env-driven, no hardcoding per §6.R)"
     layout: grouped
   - name: Containers
-    ssh_url: git@github.com:vasic-digital/Containers.git
+    ssh_url: git@github.com:vasic-digital/containers.git
     ref: main
     why: "Rootless podman/docker orchestration + emulator matrix (§6.X / §6.AE)"
     layout: grouped
@@ -98,7 +98,7 @@ deps:
     why: "Crypto + signing + secret-management primitives (used by Tracker SDK auth flows)"
     layout: grouped
   - name: Tracker-SDK
-    ssh_url: git@github.com:vasic-digital/Tracker-SDK.git
+    ssh_url: git@github.com:vasic-digital/tracker_sdk.git
     ref: main
     why: "Per-tracker plugin SDK + capability/feature contracts (SP-3a ground truth)"
     layout: grouped
