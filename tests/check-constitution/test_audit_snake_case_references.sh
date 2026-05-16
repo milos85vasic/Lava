@@ -172,10 +172,21 @@ test_blast_radius_ordering_sanity() {
     # Post-rename clean state: all CamelCase counts MUST be small
     # (<=2 forensic-anchor narrative quotes; ideally 0). Verify ALL 17
     # to detect regression where a rename was accidentally reverted.
+    # Exception per Phase 6a Q1 (defer upstream rename): HelixQA's
+    # canonical project name remains "HelixQA" (HelixDevelopment org
+    # repo name); local path is "helixqa" per Q2 single-token decision.
+    # Prose mentions of "HelixQA" in CLAUDE.md / CONTINUATION.md / docs
+    # are valid (project name), not stale renames — allow up to 10.
     local violations=()
+    local threshold
     while IFS=$'\t' read -r name refs files; do
         [[ "$name" == "NAME" || "$name" == "TOTAL_Submodules" ]] && continue
-        if (( refs > 2 )); then
+        if [[ "$name" == "HelixQA" ]]; then
+            threshold=10  # prose-mention tolerance per Q1 defer
+        else
+            threshold=2
+        fi
+        if (( refs > threshold )); then
             violations+=("$name=$refs")
         fi
     done <<<"$out"
