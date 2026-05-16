@@ -122,6 +122,23 @@ Each phase: deliverables, falsifiability rehearsal contract, owner, dependency o
 
 **Dependency on:** Phase 1 (enforcement engine), Phase 6 (naming — affects HelixQA placement path).
 
+#### Phase 4 follow-ups (post-adoption integration)
+
+**Phase 4 follow-up A (2026-05-16, commit `a61bd3d8`)** — Integration design doc covering 3 options. Lives at [`docs/plans/2026-05-16-helixqa-integration-design.md`](2026-05-16-helixqa-integration-design.md). Recommends Option 1 (shell-level wiring) first; Options 2 + 3 deferred.
+
+**Phase 4 follow-up B (2026-05-16, commit `d94ade0d`)** — IMPLEMENTED Option 1: 11 HelixQA Challenge scripts wired into `scripts/run-challenge-matrix.sh` via shell glue + HELIX_DEV_OWNED waiver pattern for 4 existing scanners.
+
+**Phase 4 follow-up C (2026-05-16)** — DESIGN-ONLY: Option 2 Go-package linking design. Lives at [`docs/plans/2026-05-16-helixqa-go-package-linking-design.md`](2026-05-16-helixqa-go-package-linking-design.md). Covers per-package public-API analysis, Lava-side adapter design under `lava-api-go/internal/qa/`, `go.mod` strategy (replace+pin vs tag), 4-phase rollout:
+
+- **Phase 4-C-1:** `pkg/evidence` — smallest API surface; proves `go.mod` pattern + adapter wrapping
+- **Phase 4-C-2:** `pkg/detector` — Android-adjacent (high Lava strategic value)
+- **Phase 4-C-3:** `pkg/ticket` — REPLACES Lava's §6.O closure-log manual authoring with generated markdown
+- **Phase 4-C-4:** `pkg/navigator` + `pkg/validator` — deepest integration; navigator MAY be SKIPPED if no Go-side consumer materializes
+
+The design enumerates 10 operator-blocking open questions (Go version conflict, adapter naming, release-mode dep resolution, navigator skip-or-proceed, etc.) — operator approval required before Phase 4-C-1 implementation starts.
+
+**Estimated scope for Phase 4-C:** 4 sessions (1 per sub-phase), assuming operator decisions land promptly + Go-version conflict resolved upfront.
+
 ---
 
 ### Phase 5 — §11.4.28 nested own-org submodule audit
@@ -271,7 +288,11 @@ This plan does NOT regress the 32-cycle prior work. All 41+ mechanical anti-bluf
 
 **Next session(s)** (operator-driven):
 - Phase 3 — helix-deps.yaml on 16 submodules (per-submodule commits + pin bumps)
-- Phase 4a — HelixQA submodule incorporation
+- Phase 4a — HelixQA submodule incorporation ✅ DONE (commit `aa0db6bd`)
+- Phase 4 follow-up A — integration design ✅ DONE (commit `a61bd3d8`)
+- Phase 4 follow-up B — Option 1 shell-level wiring ✅ DONE (commit `d94ade0d`)
+- Phase 4 follow-up C — Option 2 Go-package linking design ✅ DONE (this commit)
+- Phase 4-C-1..4 — Option 2 Go-package linking IMPLEMENTATION (4 sessions; operator-blocking on 10 open questions per design doc §G)
 - Phase 4b — 14-test-type matrix gap-fill (long tail; multi-session)
 
 **Major rename cycle** (operator-coordinated, dedicated session):
