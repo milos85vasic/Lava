@@ -11,7 +11,7 @@ same commit so the index stays trustworthy. Stale state in this file
 is itself a §6.J spirit issue — the file claims a guarantee, the
 repo has drifted, the agent acts on the claim.
 
-> **Last updated:** 2026-05-16, **Phase 4-C-1 (pkg/evidence adapter) + Phase 6a/6b (snake_case migration) MERGED**
+> **Last updated:** 2026-05-16, **Phase 4-C-2 (pkg/detector adapter) + Phase 4-C-3 (pkg/ticket adapter) — BOTH WORKTREES LANDED + green; parent-cycle close + HelixQA SHA bump + coverage-ledger regen owed at meta-merge**
 > (constitutional-plumbing-only; no user-visible feature change; no Firebase
 > distribute since 1.2.22-1042 still serves the user-visible surface). Cycle
 > spans commits `4def2da7` → `0c87b6ae` (33 commits since plan landing
@@ -125,7 +125,8 @@ This cycle delivered the entire 12-clause constitution-compliance plan plus Heli
 | 4 follow-up A | Option 1 design + shell wiring | ✅ DONE | `a61bd3d8` + `1b66d192` + merge `d94ade0d` |
 | 4 follow-up B | 4 open-question resolutions | ✅ DONE | `281780d7` + merge `84d871a5` |
 | 4 follow-up C | HelixQA Go-package linking design | 📐 DESIGN-ONLY | `41b81359` + merge `be1ca3d8` |
-| 4-C-1 | Lava-side `pkg/evidence` adapter (WRAP) | ✅ DONE 2026-05-16 | HelixQA `a1e2020d` + Lava `<this-commit>` |
+| 4-C-1 | Lava-side `pkg/evidence` adapter (WRAP) | ✅ DONE 2026-05-16 | HelixQA `a1e2020d` + Lava `573b4a8a` |
+| 4-C-2 | Lava-side `pkg/detector` adapter (WRAP) | ✅ DONE 2026-05-16 | HelixQA `a1e2020d` unchanged + Lava `<this-commit>` |
 | 4-debt | HelixQA upstream install_upstreams.sh + helix-deps.yaml | ✅ CLOSED 2026-05-16 | `858ffb3e` |
 | 5 | §11.4.28 nested-own-org submodule audit | ✅ DONE | `bbca3a78` |
 | 5-debt | STRICT flip after Challenges/.gitmodules removal | ✅ CLOSED | `410af7ec` |
@@ -173,6 +174,33 @@ Deliverables this cycle:
 - This `CONTINUATION.md` updated
 
 Phase 4-C-2 (detector adapter), 4-C-3 (ticket adapter), 4-C-4 (validator + SKIP navigator per Q6) remain owed — each is 1-session scope per design doc §E.
+
+**Phase 4-C-2 (pkg/detector adapter): COMPLETED 2026-05-16.** Operator decisions reused from 4-C-1 (Q1–Q10 unchanged). Q4 preserves `Detector` name. Q5: no HelixQA-side promotion needed — `pkg/detector`'s public API surface already exposes everything the adapter requires (`Detector`, `Option`, `New`, `WithDevice`/`WithPackageName`/`WithBrowserURL`/`WithProcessName`/`WithProcessPID`/`WithEvidenceDir`/`WithCommandRunner`, `Check`, `CheckApp`, `Platform`, `DetectionResult`, `CommandRunner` interface).
+
+Deliverables this cycle:
+- `lava-api-go/internal/qa/detector/detector.go` (255 LOC) — WRAP-strategy adapter exposing Lava-shaped `Report` struct (Crashed/Alive/StackTrace/EvidencePath); `CheckGoProcess(processName)` for name-based detection (real `pgrep -f`); `CheckGoProcessByPID(pid)` for PID-based detection (real `kill -0`); `ErrEmptyProcessName` + `ErrInvalidPID` Lava-side guards that block HelixQA's silent fallback to `processName="java"` for empty/zero inputs (forensic value: mutation rehearsal proved Alive=true would silently be returned because Java exists on every dev box)
+- `lava-api-go/internal/qa/detector/detector_test.go` (11 tests, 82.9% statement coverage, race-clean) — uses HelixQA's `CommandRunner` interface as the boundary-fake (not a mock of the SUT; the HelixQA Detector itself runs unaltered, satisfying §6.J.4 forbidden-mock pattern)
+- `lava-api-go/tests/qa/detector_test.go` (3 real-stack tests, `//go:build helixqa_realstack`) — spawns sacrificial `sleep` child processes via `sh -c 'exec -a <sentinel> sleep 30'` (BSD/macOS-compatible argv[0] injection); asserts the REAL HelixQA Detector against the real OS process table
+- `docs/coverage-ledger.yaml` regenerated (lava-api-go unit_test_count 89 → 93)
+- This `CONTINUATION.md` updated; coverage-ledger regen confirmed (58 rows preserved)
+
+§6.J anti-bluff posture: 4 falsifiability rehearsals captured in commit body — (1) `Crashed: dr.HasCrash → !dr.HasCrash` triggered 5 unit-test assertions; (2) empty-name guard removal caught at compile time (`"strings" imported and not used`); (3) PID guard removal triggered 2 sub-test assertions + exposed HelixQA's silent `java` fallback; (4) `Alive: dr.ProcessAlive → !dr.ProcessAlive` triggered ALL 3 real-stack assertions on live/dead/ghost process paths. All reverted, all green after revert.
+
+Honest scope statement: real-stack tests were executed via `go test -tags=helixqa_realstack ./tests/qa/detector_test.go` (file-target form) because the package-target form is currently blocked by the parallel Phase 4-C-3 agent's untracked `internal/qa/ticket/generator.go` (compile error against HelixQA's `pkg/validator.StepResult`). Per task constraint not to touch the parallel agent's code, the file-target execution is the §6.J-conformant proof. Once Phase 4-C-3's agent's code lands clean, package-target runs will pass for both adapters together.
+
+**Phase 4-C-3 (pkg/ticket adapter): COMPLETED 2026-05-16.** Operator decisions reused from 4-C-1 (Q1–Q10 unchanged). Q4 preserves `Generator` name.
+
+Deliverables this cycle:
+- HelixQA-side prereq: `submodules/helixqa/pkg/ticket/enhanced_generator.go` gated behind `//go:build helixqa_enhanced_tickets` so plain consumers of `pkg/ticket` (the Lava adapter) do NOT pull LLMOrchestrator transitively. HelixQA SHA bump owed at parent-cycle close.
+- `lava-api-go/internal/qa/ticket/generator.go` (≈340 LOC) — WRAP-strategy adapter with `NewGenerator`, `GenerateClosureLog`, `OutputDir`, `ClosureLogInput` shape mirroring §6.O closure-log conventions
+- `lava-api-go/internal/qa/ticket/generator_test.go` (13 tests + 8 sub-tests, 93.2% statement coverage with `-race`)
+- `lava-api-go/tests/qa/ticket_test.go` (2 real-stack tests, `//go:build helixqa_realstack`)
+- `CLAUDE.md` §6.O extended with clause 7 — adapter authorized as programmatic closure-log path
+- This `CONTINUATION.md` updated; coverage-ledger row addition owed at parent-cycle rolled regen
+
+§6.J anti-bluff posture: 2 falsifiability rehearsals captured in commit body — (1) H1 heading mutation surfaced by schema test, (2) empty-CrashlyticsID validation removal surfaced by RejectsEmpty test; both reverted, both green after revert.
+
+Phase 4-C-4 (validator adapter; navigator SKIPPED per Q6) remains owed.
 
 ### 2.2 Phase 6 snake_case migration — RESOLVED + EXECUTED
 
