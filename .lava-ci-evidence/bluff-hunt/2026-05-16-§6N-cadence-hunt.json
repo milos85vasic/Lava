@@ -1,0 +1,134 @@
+{
+  "_schema": "lava-bluff-hunt/2026-05-05",
+  "date": "2026-05-16",
+  "trigger": "§6.N.1.1 (per operator anti-bluff-mandate invocation, in-cycle hunt) + §6.N debt (multiple phases closed this session without a hunt)",
+  "session_context": {
+    "branch": "worktree-agent-a7f97348ead5eb908",
+    "head_at_hunt_start": "fd14c889ba00a97b3d5f0b53a7f7d13735010095",
+    "operator_invocation_count_at_hunt": 53,
+    "cycle_basis": "53rd §6.L invocation cycle + new scanner additions (check-helix-deps-manifest.sh, check-coverage-ledger.sh)"
+  },
+  "scope": {
+    "test_file_count": 5,
+    "production_file_count": 2,
+    "total_targets": 7,
+    "selection_method": {
+      "test_files": "find core feature -name '*Test.kt' | shuf -n 5 (138 total test files; macOS bash awk-seeded shuffle fallback)",
+      "production_files": "1 canonical-list (newly-shipped this session) + 1 newly-shipped this session per §6.N.2"
+    }
+  },
+  "targets": [
+    {
+      "index": 1,
+      "kind": "test",
+      "test_path": "core/tracker/testing/src/test/kotlin/lava/tracker/testing/FakeTrackerClientTest.kt",
+      "production_path": "core/tracker/testing/src/main/kotlin/lava/tracker/testing/FakeTrackerClient.kt",
+      "claimed_behavior": "getFeature returns non-null when capability declared, null when not (§6.E Capability Honesty)",
+      "mutation": "Replaced `SearchableTracker::class -> if (TrackerCapability.SEARCH in declared) (search as T) else null` with `SearchableTracker::class -> null` (always-null for declared capability)",
+      "command": "./gradlew :core:tracker:testing:test --tests 'lava.tracker.testing.FakeTrackerClientTest' --console=plain --no-daemon",
+      "result": "FAIL",
+      "observed_failure": "FakeTrackerClientTest > getFeature returns non-null when capability is declared FAILED — java.lang.AssertionError at FakeTrackerClientTest.kt:27",
+      "verdict": "WORKING",
+      "reverted": true
+    },
+    {
+      "index": 2,
+      "kind": "test",
+      "test_path": "core/tracker/rutracker/src/test/kotlin/lava/tracker/rutracker/mapper/FavoritesMapperTest.kt",
+      "production_path": "core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker/mapper/FavoritesMapper.kt",
+      "claimed_behavior": "toTorrentItems maps FavoritesDto.topics to TorrentItem list with trackerId='rutracker' (load-bearing for bookmarks UI grouping)",
+      "mutation": "Replaced `dto.topics.mapNotNull { it.toTorrentItemOrNull() }` with `emptyList()` (drop all bookmarks)",
+      "command": "./gradlew :core:tracker:rutracker:test --tests 'lava.tracker.rutracker.mapper.FavoritesMapperTest' --console=plain --no-daemon",
+      "result": "FAIL",
+      "observed_failure": "3/4 tests failed: bookmarked torrent maps with rutracker trackerId (AssertionError L47), CommentsPageDto entry is silently skipped (AssertionError L94), bookmarked discussion topic produces thin TorrentItem (NoSuchElementException L69). 4th test 'empty favorites list returns empty list' correctly stays green (degenerate case both branches agree on)",
+      "verdict": "WORKING",
+      "reverted": true
+    },
+    {
+      "index": 3,
+      "kind": "test",
+      "test_path": "feature/search_result/src/test/kotlin/lava/search/result/ApplyMultiSearchEventTest.kt",
+      "production_path": "feature/search_result/src/main/kotlin/lava/search/result/SearchResultViewModel.kt (function applyMultiSearchEvent at L550)",
+      "claimed_behavior": "ProviderStart event stamps event.displayName into the matching provider row (user-visible per-provider badge label)",
+      "mutation": "Replaced `activeProviders.map { if (it.providerId == event.providerId) it.copy(displayName = event.displayName) else it }` with `activeProviders.map { it }` (no-op)",
+      "command": "./gradlew :feature:search_result:testDebugUnitTest --tests 'lava.search.result.ApplyMultiSearchEventTest' --console=plain --no-daemon",
+      "result": "FAIL",
+      "observed_failure": "ApplyMultiSearchEventTest > ProviderStart stamps displayName into the matching provider row + providerDisplayNames map FAILED — org.junit.ComparisonFailure at ApplyMultiSearchEventTest.kt:67 (exactly the failure the test's KDoc Falsifiability block predicted)",
+      "verdict": "WORKING",
+      "reverted": true
+    },
+    {
+      "index": 4,
+      "kind": "test",
+      "test_path": "core/tracker/nnmclub/src/test/kotlin/lava/tracker/nnmclub/feature/NnmclubBrowseTest.kt",
+      "production_path": "core/tracker/nnmclub/src/main/kotlin/lava/tracker/nnmclub/feature/NnmclubBrowse.kt",
+      "claimed_behavior": "buildBrowseUrl omits &start= when page=0 (user-visible: HTTP URL the scraper hits on the wire)",
+      "mutation": "Replaced conditional `if (start > 0) ...&start=$start... else ...` with always-emit `&start=$start` even when 0",
+      "command": "./gradlew :core:tracker:nnmclub:test --tests 'lava.tracker.nnmclub.feature.NnmclubBrowseTest' --console=plain --no-daemon",
+      "result": "FAIL",
+      "observed_failure": "NnmclubBrowseTest > browse with null category hits the all-categories slot FAILED — org.junit.ComparisonFailure at NnmclubBrowseTest.kt:33 (path /forum/viewforum.php?f=0 expected, got /forum/viewforum.php?f=0&start=0)",
+      "verdict": "WORKING",
+      "reverted": true
+    },
+    {
+      "index": 5,
+      "kind": "test",
+      "test_path": "core/tracker/mirror/src/test/kotlin/lava/tracker/mirror/MirrorConfigStoreTest.kt",
+      "production_path": "core/tracker/mirror/src/main/kotlin/lava/tracker/mirror/MirrorConfigStore.kt",
+      "claimed_behavior": "load() parses bundledJson into MirrorsConfig with version + per-tracker mirror lists (load-bearing for tracker mirror selection)",
+      "mutation": "Replaced `json.decodeFromString(MirrorsConfig.serializer(), bundledJson)` with hardcoded `MirrorsConfig(version = 999, trackers = emptyMap())`",
+      "command": "./gradlew :core:tracker:mirror:test --tests 'lava.tracker.mirror.MirrorConfigStoreTest' --console=plain --no-daemon",
+      "result": "FAIL",
+      "observed_failure": "MirrorConfigStoreTest > parses bundled JSON shape from spec FAILED — java.lang.AssertionError at MirrorConfigStoreTest.kt:24 (expected version=1, got version=999)",
+      "verdict": "WORKING",
+      "reverted": true
+    },
+    {
+      "index": 6,
+      "kind": "production-scanner",
+      "scanner_path": "scripts/check-coverage-ledger.sh",
+      "hermetic_test_path": "tests/check-constitution/test_coverage_ledger.sh",
+      "classification": "gate-shaping production code (canonical §6.N.2 list — Phase 7 STRICT-flip landed earlier this session)",
+      "claimed_behavior": "Check 2 detects when ledger is missing rows for on-disk paths (separate from Check 3 staleness — defense in depth)",
+      "mutation": "Deleted the entire `missing_rows` loop body (lines 95-106 of check-coverage-ledger.sh); scanner now always reports 'every on-disk path has a row' regardless of ledger contents",
+      "command": "bash tests/check-constitution/test_coverage_ledger.sh",
+      "result": "FAIL",
+      "observed_failure": "FAIL test_missing_row_rejected — fixture adds feature/newfeat AFTER ledger generation; test expects scanner output to contain 'missing rows for 1 on-disk paths' AND 'feature/newfeat'. With mutation, scanner output shows 'Row coverage: ✓ every on-disk path has a row' (false-positive at Check 2 level). Scanner still rc=1 because Check 3 (staleness) independently catches the same drift via a different signal — defense-in-depth working as designed",
+      "verdict": "WORKING (with defense-in-depth note: the missing-row assertion's discrimination IS uniquely exercised — the test catches the false-positive in Check 2 even though Check 3 also catches it)",
+      "reverted": true
+    },
+    {
+      "index": 7,
+      "kind": "production-scanner",
+      "scanner_path": "scripts/check-helix-deps-manifest.sh",
+      "hermetic_test_path": "tests/check-constitution/test_helix_deps_manifest.sh",
+      "classification": "newly-shipped this session per task brief (HelixQA Phase 4-debt closure cycle landed in 50th-invocation cycle)",
+      "claimed_behavior": "Per-submodule loop detects which Submodules/* dirs are missing a helix-deps.{yaml,json,toml} manifest (§11.4.31)",
+      "mutation": "Replaced the if/elif/else branch that classifies a submodule as present/waived/missing with unconditional `submodule_present+=(\"$name (assumed-present)\")` — scanner always reports every submodule as present",
+      "command": "bash tests/check-constitution/test_helix_deps_manifest.sh",
+      "result": "FAIL",
+      "observed_failure": "FAIL test_missing_submodule_manifest_rejected — fixture creates Submodules/foo without a manifest; test expects rc=1 + scanner detects missing manifest. With mutation, scanner reports 'present: 2, missing: 0' and 'all manifests present + well-formed' (false-positive); rc=0; test correctly classifies as FAIL",
+      "verdict": "WORKING",
+      "reverted": true
+    }
+  ],
+  "aggregate": {
+    "total_targets": 7,
+    "bluffs_found": 0,
+    "working_as_designed": 7,
+    "all_baselines_restored": true,
+    "post_revert_verification": {
+      "git_diff_stat": "empty — all production-source mutations reverted",
+      "test_coverage_ledger_baseline": "6/6 PASS",
+      "test_helix_deps_manifest_baseline": "6/6 PASS"
+    }
+  },
+  "sixth_law_incidents_filed": [],
+  "new_forbidden_test_patterns": [],
+  "notes": {
+    "submodule_init_action": "Tracker-SDK submodule was checked out under this worktree (stale empty dir replaced via `git submodule update --init Submodules/Tracker-SDK`) to enable Gradle compilation of :core:tracker:* test modules. No production code modified; pin was already recorded as ae761d5c5d35be379f5a6aa889b24890e5a456f5 in parent.",
+    "test_file_selection_was_deterministic": "macOS does not ship GNU shuf; used `awk 'BEGIN{srand(1716800000)}'` shuffle fallback for reproducibility. The 5 picks: FakeTrackerClientTest, FavoritesMapperTest, ApplyMultiSearchEventTest, NnmclubBrowseTest, MirrorConfigStoreTest",
+    "production_file_selection_rationale": "Picked the 2 newest gate-shaping scanners (added this session) because §6.N.2 conceptual filter says 'prefer files where a bug would be invisible to existing tests' — newly-shipped code is the highest-bluff-risk surface",
+    "defense_in_depth_observation": "Target 6 (check-coverage-ledger.sh) demonstrates a healthy property: when one check's logic is silently broken, a DIFFERENT check (Check 3 staleness) catches the same class of drift. The hermetic test STILL correctly classifies this as FAIL because its missing-row assertion is dedicated discrimination — the staleness check's existence does not let the missing-row check become a bluff."
+  }
+}
