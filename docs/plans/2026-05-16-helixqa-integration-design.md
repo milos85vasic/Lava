@@ -84,6 +84,8 @@ Lava-side Go code (lava-api-go) imports HelixQA's `pkg/detector` + `pkg/evidence
 
 **Mitigation:** wrap every HelixQA API call in Lava-side adapter interfaces so version-bumps of HelixQA only touch the adapter layer.
 
+**FOLLOW-UP DESIGN:** A detailed Phase 4-C design doc for Option 2 exists at [`docs/plans/2026-05-16-helixqa-go-package-linking-design.md`](2026-05-16-helixqa-go-package-linking-design.md) (Phase 4 follow-up C, 2026-05-16). It covers: per-package public-API analysis + Lava-side adapter design + lava-api-go `go.mod` strategy + 4-phase rollout (4-C-1 `pkg/evidence`, 4-C-2 `pkg/detector`, 4-C-3 `pkg/ticket`, 4-C-4 `pkg/navigator`+`pkg/validator`) + §6.J anti-bluff posture + 10 operator-blocking open questions. DESIGN-ONLY; no code changes yet; operator approval owed before Phase 4-C-1 starts.
+
 ### Option 3 — Compose UI Challenge Test backend (HIGHEST effort)
 
 Lava's existing Compose UI Challenge Tests under `app/src/androidTest/kotlin/lava/app/challenges/` migrate to use HelixQA's `pkg/navigator` + `pkg/evidence` + `pkg/ticket` as backend services (via HelixQA CLI invocation OR via Go-package bridging from Kotlin via JNI / gRPC).
