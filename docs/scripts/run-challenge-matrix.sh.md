@@ -1,6 +1,6 @@
 # `scripts/run-challenge-matrix.sh` — User Guide
 
-**Last verified:** 2026-05-15 (1.2.23 closure-cycle, 31st §6.L invocation)
+**Last verified:** 2026-05-16 (HelixQA Option 1 wiring landed — `--include-helixqa` flag added)
 **Inheritance:** HelixConstitution §11.4.18 + Lava §6.AE.6 + §6.X (Container-Submodule Emulator Wiring) + §6.I (Multi-Emulator Container Matrix)
 
 ## Overview
@@ -38,6 +38,9 @@ bash scripts/run-challenge-matrix.sh --latest-api 36
 
 # Skip APK rebuild
 bash scripts/run-challenge-matrix.sh --no-build
+
+# ALSO invoke the 11 HelixQA Challenge scripts (Option 1 wiring)
+bash scripts/run-challenge-matrix.sh --include-helixqa
 ```
 
 ## Inputs
@@ -50,6 +53,7 @@ bash scripts/run-challenge-matrix.sh --no-build
 | `--latest-api <N>` | Override the "latest stable" API level (default: 36) |
 | `--add-tv` | Add a TV-class AVD to the matrix |
 | `--add-foldable` | Add a foldable AVD |
+| `--include-helixqa` | ALSO invoke `scripts/run-helixqa-challenges.sh` (the 11 HelixQA Challenge scripts per Option 1 wiring). OFF by default so existing matrix runs are unaffected. HelixQA runs on the HOST BEFORE the AVD matrix → independent of §6.X-debt darwin/arm64 gate-host gap. HelixQA wrapper evidence lands at `<evidence-dir>/helixqa/`. Non-zero HelixQA exit promotes the final aggregate exit code (matrix exit dominates if both fail). See `docs/scripts/run-helixqa-challenges.sh.md` for full details. |
 
 ## §6.AE.2 mandatory minimum matrix
 
@@ -69,6 +73,7 @@ Sub-minimums are permitted for development iteration; the gate row's `gating: tr
 
 - `<evidence-dir>/host-preflight.json` — host-gap classification (always written)
 - `<evidence-dir>/real-device-verification.{md,json}` — per-AVD attestation rows (only on Linux x86_64 + KVM gate-host)
+- `<evidence-dir>/helixqa/helixqa-attestation.json` + per-script logs — only when `--include-helixqa` is set
 
 ## Exit codes
 
@@ -83,5 +88,7 @@ Sub-minimums are permitted for development iteration; the gate row's `gating: tr
 - `Submodules/Containers/cmd/emulator-matrix` (the underlying runner)
 - `tools/lava-containers/vm-images.json` (matrix manifest)
 - `scripts/run-emulator-tests.sh` (older sister-glue; same delegation, different default arguments)
+- `scripts/run-helixqa-challenges.sh` + `docs/scripts/run-helixqa-challenges.sh.md` (the HelixQA wrapper invoked by `--include-helixqa`)
+- `docs/plans/2026-05-16-helixqa-integration-design.md` (Option 1 wiring design)
 - `.lava-ci-evidence/sixth-law-incidents/2026-05-13-emulator-container-darwin-arm64-gap.json` (the standing §6.X-debt incident)
 - Lava `CLAUDE.md` §6.AE + §6.X + §6.I
