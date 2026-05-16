@@ -6,7 +6,7 @@
 
 **Architecture:** API enforces auth via two new Gin middlewares (backoff → auth) reading config-driven `.env` values; client embeds AES-GCM-encrypted UUID at build time keyed by `HKDF(SHA256(signing-cert) ‖ pepper)`; `Lava-Auth` header (name itself config-driven) carries base64(blob) per request; `ByteArray` zeroize on OkHttp interceptor thread; per-release rotation with active/retired allowlist sets and `426 Upgrade Required` for retired.
 
-**Tech Stack:** Go 1.24 + Gin + quic-go + `golang.org/x/crypto/hkdf` (API); Kotlin + Hilt + OkHttp + javax.crypto + Compose UI (client); Gradle Kotlin DSL build-time codegen; Submodules/RateLimiter (with new `pkg/ladder/` primitive contributed upstream).
+**Tech Stack:** Go 1.24 + Gin + quic-go + `golang.org/x/crypto/hkdf` (API); Kotlin + Hilt + OkHttp + javax.crypto + Compose UI (client); Gradle Kotlin DSL build-time codegen; submodules/ratelimiter (with new `pkg/ladder/` primitive contributed upstream).
 
 **Spec:** `docs/superpowers/specs/2026-05-06-phase1-api-auth-design.md` (commit `45723b2`)
 
@@ -22,7 +22,7 @@
 | `lava-api-go/internal/auth/parse_test.go` | Unit tests for parse + hash |
 | `lava-api-go/internal/auth/middleware.go` | `AuthMiddleware` Gin handler — header → base64 decode → HMAC → active/retired/unknown branch |
 | `lava-api-go/internal/auth/middleware_test.go` | Unit tests for the three branches |
-| `lava-api-go/internal/auth/backoff.go` | Thin Lava-side glue over `Submodules/RateLimiter/pkg/ladder` |
+| `lava-api-go/internal/auth/backoff.go` | Thin Lava-side glue over `submodules/ratelimiter/pkg/ladder` |
 | `lava-api-go/internal/auth/backoff_test.go` | Unit tests for ladder advancement + reset |
 | `lava-api-go/internal/server/brotli.go` | Brotli response middleware |
 | `lava-api-go/internal/server/brotli_test.go` | Unit tests |
@@ -40,12 +40,12 @@
 | `lava-api-go/tests/integration/auth_protocol_metric_test.go` | §6.G real-stack test |
 | `lava-api-go/tests/contract/auth_field_name_contract_test.go` | §6.A contract — `.env.example` matches code |
 
-### New files (Submodules/RateLimiter — upstream contribution)
+### New files (submodules/ratelimiter — upstream contribution)
 
 | Path | Responsibility |
 |---|---|
-| `Submodules/RateLimiter/pkg/ladder/ladder.go` | Per-key fixed-ladder backoff state machine |
-| `Submodules/RateLimiter/pkg/ladder/ladder_test.go` | Unit tests + §6.A contract test against ladder schema |
+| `submodules/ratelimiter/pkg/ladder/ladder.go` | Per-key fixed-ladder backoff state machine |
+| `submodules/ratelimiter/pkg/ladder/ladder_test.go` | Unit tests + §6.A contract test against ladder schema |
 
 ### New files (Android client)
 
@@ -74,7 +74,7 @@
 |---|---|
 | `docs/RELEASE-ROTATION.md` | Operator runbook for UUID + pepper rotation |
 | `tests/check-constitution/test_clause_6r_present.sh` | Hermetic test: §6.R appears in CLAUDE.md |
-| `tests/check-constitution/test_clause_6r_inheritance.sh` | Hermetic test: §6.R reference in every Submodules/*/CLAUDE.md |
+| `tests/check-constitution/test_clause_6r_inheritance.sh` | Hermetic test: §6.R reference in every submodules/*/CLAUDE.md |
 | `tests/check-constitution/test_no_hardcoded_uuid.sh` | Hermetic test: no 36-char UUID outside .env.example |
 | `tests/check-constitution/test_no_hardcoded_field_name.sh` | Hermetic test: header name not literal in source |
 | `tests/firebase/test_firebase_distribute_pepper_rotation.sh` | Hermetic test: pepper-rotation gate |
@@ -88,7 +88,7 @@
 | `CLAUDE.md` | Add §6.R clause (full text per spec §11) |
 | `AGENTS.md` | Add §6.R clause (mirror) |
 | `core/CLAUDE.md` | Add memory-hygiene clause for AuthInterceptor |
-| `Submodules/{Auth,Cache,Challenges,Concurrency,Config,Containers,Database,Discovery,HTTP3,Mdns,Middleware,Observability,RateLimiter,Recovery,Security,Tracker-SDK}/CLAUDE.md` | Add §6.R reference per §6.F inheritance |
+| `submodules/{Auth,Cache,Challenges,Concurrency,Config,Containers,Database,Discovery,HTTP3,Mdns,Middleware,Observability,RateLimiter,Recovery,Security,Tracker-SDK}/CLAUDE.md` | Add §6.R reference per §6.F inheritance |
 | `scripts/check-constitution.sh` | Add §6.R enforcement section |
 | `scripts/firebase-distribute.sh` | Add Gate 4 (pepper rotation) + Gate 5 (current-client-name validation) |
 | `scripts/ci.sh` | Add the new hermetic test suites to invocation |
@@ -98,7 +98,7 @@
 | `lava-api-go/cmd/lava-api-go/main.go` | Wire backoff + auth + brotli + Alt-Svc middlewares |
 | `lava-api-go/internal/server/server.go` | Pass middleware chain to Gin engine setup |
 | `lava-api-go/internal/version/version.go` | Bump to 2.1.0 |
-| `lava-api-go/go.mod` | Pin Submodules/RateLimiter at the new hash (after Phase 3) |
+| `lava-api-go/go.mod` | Pin submodules/ratelimiter at the new hash (after Phase 3) |
 | `core/tracker/api/.../TrackerDescriptor.kt` | Add `apiSupported: Boolean = false` field |
 | `core/tracker/impl/...rutracker descriptor` | Set `apiSupported = true` |
 | `core/tracker/impl/...rutor descriptor` | Set `apiSupported = true` |
@@ -221,12 +221,12 @@ Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>"
 
 ### Task 1.3: Propagate §6.R to all 16 submodules' CLAUDE.md per §6.F inheritance
 
-**Files:** Modify each `Submodules/<Name>/CLAUDE.md`.
+**Files:** Modify each `submodules/<Name>/CLAUDE.md`.
 
 - [ ] **Step 1.3.1: Identify the 16 submodules**
 
 ```bash
-ls -d Submodules/*/CLAUDE.md
+ls -d submodules/*/CLAUDE.md
 ```
 Expected: 16 paths (Auth, Cache, Challenges, Concurrency, Config, Containers, Database, Discovery, HTTP3, Mdns, Middleware, Observability, RateLimiter, Recovery, Security, Tracker-SDK).
 
@@ -243,7 +243,7 @@ See root `/CLAUDE.md` §6.R. No connection address, port, header field name, cre
 - [ ] **Step 1.3.3: Commit (one commit covering all 16)**
 
 ```bash
-git add Submodules/*/CLAUDE.md
+git add submodules/*/CLAUDE.md
 git commit -m "constitution(6.R): propagate to 16 vasic-digital submodules per §6.F
 
 Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>"
@@ -288,7 +288,7 @@ sed -n '1,50p' scripts/check-constitution.sh
 
 - [ ] **Step 1.5.2: Append §6.R enforcement block**
 
-Append the following before the script's final `echo` summary (the section starting with the existing summary line; identify by `grep -n 'Submodules/Tracker-SDK/CLAUDE.md present' scripts/check-constitution.sh`):
+Append the following before the script's final `echo` summary (the section starting with the existing summary line; identify by `grep -n 'submodules/tracker_sdk/CLAUDE.md present' scripts/check-constitution.sh`):
 
 ```bash
 
@@ -303,8 +303,8 @@ if ! grep -qF '##### 6.R — No-Hardcoding Mandate' CLAUDE.md; then
   exit 1
 fi
 
-# 6.R must appear in every Submodules/*/CLAUDE.md (per §6.F inheritance)
-for sub in Submodules/*/CLAUDE.md; do
+# 6.R must appear in every submodules/*/CLAUDE.md (per §6.F inheritance)
+for sub in submodules/*/CLAUDE.md; do
   if ! grep -qF '6.R — No-Hardcoding Mandate' "$sub"; then
     echo "MISSING 6.R inheritance reference: $sub" >&2
     echo "  → Append the §6.R reference paragraph per Phase 1 Task 1.3." >&2
@@ -377,7 +377,7 @@ ci(check-constitution): enforce §6.R No-Hardcoding (UUID + IPv4 patterns)
 
 Extends scripts/check-constitution.sh with three §6.R checks:
 - §6.R clause present in CLAUDE.md
-- §6.R inheritance reference in every Submodules/*/CLAUDE.md
+- §6.R inheritance reference in every submodules/*/CLAUDE.md
 - No 36-char UUIDs in tracked source (excluding .env.example,
   sixth-law incidents, design specs, *_test.go, *Test.kt)
 - No IPv4 literals in tracked source (same exclusions)
@@ -424,11 +424,11 @@ chmod +x tests/check-constitution/test_clause_6r_present.sh
 ```bash
 cat > tests/check-constitution/test_clause_6r_inheritance.sh <<'EOF'
 #!/usr/bin/env bash
-# Asserts §6.R inheritance reference appears in every Submodules/*/CLAUDE.md.
+# Asserts §6.R inheritance reference appears in every submodules/*/CLAUDE.md.
 set -euo pipefail
 cd "$(dirname "$0")/../.."
 missing=()
-for sub in Submodules/*/CLAUDE.md; do
+for sub in submodules/*/CLAUDE.md; do
   if ! grep -qF '6.R — No-Hardcoding Mandate' "$sub"; then
     missing+=("$sub")
   fi
@@ -490,7 +490,7 @@ bash tests/check-constitution/test_no_hardcoded_uuid.sh
 
 For each test:
 1. `test_clause_6r_present.sh`: temporarily delete the `##### 6.R` heading from CLAUDE.md → run test → confirm fail → restore via `git checkout CLAUDE.md`
-2. `test_clause_6r_inheritance.sh`: temporarily delete the §6.R paragraph from one Submodules/*/CLAUDE.md → run test → confirm fail → restore
+2. `test_clause_6r_inheritance.sh`: temporarily delete the §6.R paragraph from one submodules/*/CLAUDE.md → run test → confirm fail → restore
 3. `test_no_hardcoded_uuid.sh`: temporarily add a UUID literal to a `.kt` file → run test → confirm fail → revert
 
 Record the failure messages for the Bluff-Audit stamp.
@@ -507,7 +507,7 @@ test(check-constitution): hermetic suite for §6.R enforcement
 Adds three pre-push-hooked hermetic bash tests for §6.R:
 - test_clause_6r_present.sh: asserts §6.R header in CLAUDE.md
 - test_clause_6r_inheritance.sh: asserts §6.R reference in every
-  Submodules/*/CLAUDE.md (16 submodules)
+  submodules/*/CLAUDE.md (16 submodules)
 - test_no_hardcoded_uuid.sh: asserts no 36-char UUIDs in tracked
   source outside the documented exemption set
 
@@ -517,9 +517,9 @@ Bluff-Audit: test_clause_6r_present.sh
   Reverted: yes
 
 Bluff-Audit: test_clause_6r_inheritance.sh
-  Mutation: removed §6.R paragraph from Submodules/Auth/CLAUDE.md
+  Mutation: removed §6.R paragraph from submodules/auth/CLAUDE.md
   Observed-Failure: "FAIL test_clause_6r_inheritance: missing in:
-                    Submodules/Auth/CLAUDE.md"
+                    submodules/auth/CLAUDE.md"
   Reverted: yes
 
 Bluff-Audit: test_no_hardcoded_uuid.sh
@@ -861,7 +861,7 @@ EOF
 
 ---
 
-## Phase 3: Submodules/RateLimiter `pkg/ladder` upstream contribution
+## Phase 3: submodules/ratelimiter `pkg/ladder` upstream contribution
 
 ### Task 3.1: Investigate RateLimiter test conventions
 
@@ -870,9 +870,9 @@ EOF
 - [ ] **Step 3.1.1: Read existing pattern**
 
 ```bash
-ls Submodules/RateLimiter/pkg/tokenbucket/
-sed -n '1,30p' Submodules/RateLimiter/pkg/tokenbucket/tokenbucket.go
-sed -n '1,30p' Submodules/RateLimiter/pkg/tokenbucket/tokenbucket_test.go
+ls submodules/ratelimiter/pkg/tokenbucket/
+sed -n '1,30p' submodules/ratelimiter/pkg/tokenbucket/tokenbucket.go
+sed -n '1,30p' submodules/ratelimiter/pkg/tokenbucket/tokenbucket_test.go
 ```
 
 Note the exported types, godoc comment style, test naming convention.
@@ -880,7 +880,7 @@ Note the exported types, godoc comment style, test naming convention.
 ### Task 3.2: Write `pkg/ladder` failing test (TDD)
 
 **Files:**
-- Create: `Submodules/RateLimiter/pkg/ladder/ladder_test.go`
+- Create: `submodules/ratelimiter/pkg/ladder/ladder_test.go`
 
 - [ ] **Step 3.2.1: Write the test file**
 
@@ -985,14 +985,14 @@ func TestLadder_PerKeyIndependence(t *testing.T) {
 - [ ] **Step 3.2.2: Run; verify all fail because package doesn't exist**
 
 ```bash
-cd Submodules/RateLimiter && go test ./pkg/ladder/...
+cd submodules/ratelimiter && go test ./pkg/ladder/...
 ```
 Expected: package not found.
 
 ### Task 3.3: Implement `pkg/ladder`
 
 **Files:**
-- Create: `Submodules/RateLimiter/pkg/ladder/ladder.go`
+- Create: `submodules/ratelimiter/pkg/ladder/ladder.go`
 
 - [ ] **Step 3.3.1: Write the implementation**
 
@@ -1104,7 +1104,7 @@ func (l *Ladder) lookup(key string) *entry {
 - [ ] **Step 3.3.2: Run tests; verify all pass**
 
 ```bash
-cd Submodules/RateLimiter && go test ./pkg/ladder/...
+cd submodules/ratelimiter && go test ./pkg/ladder/...
 ```
 
 - [ ] **Step 3.3.3: Falsifiability rehearsal — break Reset**
@@ -1123,7 +1123,7 @@ go test ./pkg/ladder/...
 - [ ] **Step 3.3.4: Commit in the submodule**
 
 ```bash
-cd Submodules/RateLimiter
+cd submodules/ratelimiter
 git add pkg/ladder/
 git commit -m "$(cat <<'EOF'
 feat(ladder): per-key fixed-step backoff state machine
@@ -1156,12 +1156,12 @@ EOF
 ### Task 3.4: Push the submodule + pin in Lava
 
 **Files:**
-- Modify: `Submodules/RateLimiter` pin in Lava parent
+- Modify: `submodules/ratelimiter` pin in Lava parent
 
 - [ ] **Step 3.4.1: Push to RateLimiter mirrors**
 
 ```bash
-cd Submodules/RateLimiter
+cd submodules/ratelimiter
 for r in github gitlab gitflic gitverse; do
   git push $r master 2>&1 | tail -3
 done
@@ -1171,27 +1171,27 @@ done
 
 ```bash
 cd /run/media/milosvasic/DATA4TB/Projects/Lava
-git submodule update --remote Submodules/RateLimiter
+git submodule update --remote submodules/ratelimiter
 # OR explicitly:
-# (cd Submodules/RateLimiter && git rev-parse HEAD) gives the new pin
+# (cd submodules/ratelimiter && git rev-parse HEAD) gives the new pin
 ```
 
 - [ ] **Step 3.4.3: Verify Lava parent sees new pin**
 
 ```bash
-cd Submodules/RateLimiter && git rev-parse HEAD
+cd submodules/ratelimiter && git rev-parse HEAD
 cd ../..
 git status
-# Expected: Submodules/RateLimiter shows as modified (new commit pin)
+# Expected: submodules/ratelimiter shows as modified (new commit pin)
 ```
 
 - [ ] **Step 3.4.4: Commit Lava parent pin update**
 
 ```bash
-git add Submodules/RateLimiter
+git add submodules/ratelimiter
 git commit -m "deps(RateLimiter): pin pkg/ladder upstream contribution
 
-Pins Submodules/RateLimiter at the commit that introduces
+Pins submodules/ratelimiter at the commit that introduces
 pkg/ladder/ — the per-key fixed-step backoff primitive consumed by
 lava-api-go's auth backoff middleware (Phase 1).
 
@@ -1812,7 +1812,7 @@ git add lava-api-go/internal/auth/backoff.go lava-api-go/internal/auth/backoff_t
 git commit -m "$(cat <<'EOF'
 feat(auth): NewBackoffMiddleware (429 + Retry-After) wrapping pkg/ladder
 
-Lava-side glue over Submodules/RateLimiter/pkg/ladder. Resolves client
+Lava-side glue over submodules/ratelimiter/pkg/ladder. Resolves client
 IP honoring trusted-proxy CIDRs (X-Forwarded-For unwrap). On block:
 returns 429 with Retry-After integer-seconds header + JSON body
 {error: "rate_limited", retry_after_seconds: N}.
@@ -2717,7 +2717,7 @@ chmod +x tests/firebase/test_firebase_distribute_pepper_rotation.sh
 - Constitutional clause §6.R No-Hardcoding Mandate
 
 ### Submodule pin
-- Submodules/RateLimiter pinned at the commit that adds pkg/ladder
+- submodules/ratelimiter pinned at the commit that adds pkg/ladder
 
 ### Versions in this build
 - lava-api-go: 2.1.0 (2100)
@@ -2749,7 +2749,7 @@ cp <draft-text> .lava-ci-evidence/distribute-changelog/container-registry/2.1.0-
 
 - [ ] **Step 16.1.1: Bump both**
 
-- [ ] **Step 16.1.2: Build via `Submodules/Containers` per §6.K**
+- [ ] **Step 16.1.2: Build via `submodules/containers` per §6.K**
 
 ```bash
 bash scripts/build-api-via-containers.sh    # creates if it doesn't exist; adapter over existing build_and_release

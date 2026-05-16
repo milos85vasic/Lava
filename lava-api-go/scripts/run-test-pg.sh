@@ -2,7 +2,7 @@
 #
 # scripts/run-test-pg.sh — boot a transient Postgres container, run the
 # lava-api-go integration tests against it, then tear it down. Modeled on
-# Submodules/Cache/scripts/run-postgres-test.sh.
+# submodules/cache/scripts/run-postgres-test.sh.
 #
 # Usage:
 #   scripts/run-test-pg.sh                        # default (random port, image: postgres:16-alpine)

@@ -11,7 +11,7 @@ The script's own header documentation (verbatim):
 
 ```
 scripts/sync-tracker-sdk-mirrors.sh
-Pushes the Submodules/Tracker-SDK/ working tree to its 2 configured upstreams
+Pushes the submodules/tracker_sdk/ working tree to its 2 configured upstreams
 (GitHub + GitLab). Local-only — no hosted CI invoked. Operator-controlled.
 
 Only GitHub + GitLab per constitutional clause §6.W (added 2026-05-08).

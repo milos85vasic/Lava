@@ -14,19 +14,19 @@ GENERATOR="$REPO_ROOT/scripts/generate-coverage-ledger.sh"
 VERIFIER="$REPO_ROOT/scripts/check-coverage-ledger.sh"
 
 # Build a minimal compliant fixture: 1 feature module + 1 core module +
-# app/ + lava-api-go + Submodules/, with a generated docs/coverage-ledger.yaml
+# app/ + lava-api-go + submodules/, with a generated docs/coverage-ledger.yaml
 # under that root.
 make_fixture() {
     local root="$1"
     mkdir -p "$root/feature/foo" "$root/core/bar" "$root/app" \
-             "$root/lava-api-go" "$root/Submodules/Auth" "$root/docs"
+             "$root/lava-api-go" "$root/submodules/auth" "$root/docs"
     # Add a token file so directories aren't empty (find -type d ignores
     # empty dir contents but git would).
     touch "$root/feature/foo/build.gradle.kts"
     touch "$root/core/bar/build.gradle.kts"
     touch "$root/app/build.gradle.kts"
     touch "$root/lava-api-go/go.mod"
-    touch "$root/Submodules/Auth/README.md"
+    touch "$root/submodules/auth/README.md"
 }
 
 # Generate a ledger inside the fixture root.

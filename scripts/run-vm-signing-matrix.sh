@@ -113,7 +113,7 @@ mkdir -p "$EVIDENCE_DIR"
 # Build the cmd/vm-matrix binary from the pinned Containers submodule.
 BIN_DIR="$PROJECT_DIR/build/vm-matrix"
 mkdir -p "$BIN_DIR"
-( cd "$PROJECT_DIR/Submodules/Containers" && go build -o "$BIN_DIR/vm-matrix" ./cmd/vm-matrix/ )
+( cd "$PROJECT_DIR/submodules/containers" && go build -o "$BIN_DIR/vm-matrix" ./cmd/vm-matrix/ )
 
 # Inputs uploaded to each VM:
 #   - tests/vm-signing/sample.apk      — input APK (operator-supplied)

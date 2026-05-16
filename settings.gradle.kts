@@ -74,7 +74,7 @@ include(":feature:onboarding")
 include(":feature:visited")
 
 // Tracker-SDK submodule — composite build (pinned via git submodule)
-includeBuild("Submodules/Tracker-SDK") {
+includeBuild("submodules/tracker_sdk") {
     dependencySubstitution {
         substitute(module("lava.sdk:api")).using(project(":api"))
         substitute(module("lava.sdk:mirror")).using(project(":mirror"))

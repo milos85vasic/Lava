@@ -32,7 +32,7 @@
 # Per §6.W: HelixQA scripts are audited in docs/helixqa-script-audit.md.
 # As of the audit timestamp, 0 of 11 scripts violate §6.W on default
 # config; the HELIXQA_W_EXCLUSIONS array is therefore empty. The audit
-# MUST be re-run when the Submodules/HelixQA pin bumps (the wiring
+# MUST be re-run when the submodules/helixqa pin bumps (the wiring
 # drift check at runtime is necessary but NOT sufficient — the per-
 # script grep audit is a separate concern per §6.J).
 #
@@ -124,7 +124,7 @@ if [[ -z "$EVIDENCE_DIR" ]]; then
 fi
 mkdir -p "$EVIDENCE_DIR"
 
-HELIXQA_DIR="$REPO_ROOT/Submodules/HelixQA"
+HELIXQA_DIR="$REPO_ROOT/submodules/helixqa"
 HELIXQA_SCRIPTS_DIR="$HELIXQA_DIR/challenges/scripts"
 
 # --- §6.J honest pre-flight: the submodule MUST be initialized ---
@@ -134,11 +134,11 @@ if [[ ! -d "$HELIXQA_SCRIPTS_DIR" ]]; then
     Expected directory: $HELIXQA_SCRIPTS_DIR
     Not found in this checkout.
 
-    Cause: the Submodules/HelixQA pin is checked into .gitmodules but
+    Cause: the submodules/helixqa pin is checked into .gitmodules but
     the submodule has NOT been initialized in this working tree.
 
     Fix (operator action):
-      git submodule update --init Submodules/HelixQA
+      git submodule update --init submodules/helixqa
 
     This wrapper REFUSES to claim success on an absent submodule
     (anti-bluff posture per §6.J / §6.L). Exit code 3 = missing
@@ -191,7 +191,7 @@ declare -a HELIXQA_TOOLCHAIN_MAP=(
 # Currently EMPTY (0 of 11 scripts violate §6.W on default config). Future
 # audit cycles MAY populate this array if HelixQA grows a script that
 # pushes to a non-GitHub / non-GitLab remote. The audit re-run is owed
-# whenever the Submodules/HelixQA pin bumps — see audit doc's
+# whenever the submodules/helixqa pin bumps — see audit doc's
 # "Re-audit triggers" section.
 declare -a HELIXQA_W_EXCLUSIONS=(
     # (intentionally empty — see docs/helixqa-script-audit.md)
@@ -281,7 +281,7 @@ fi
 # Honest-fail-fast (exit 4) per §6.J — we never silently degrade
 # containerized → host because that would be the exact bluff §6.X
 # was written to prevent.
-CONTAINERS_DIR="$REPO_ROOT/Submodules/Containers"
+CONTAINERS_DIR="$REPO_ROOT/submodules/containers"
 TOOLCHAIN_AVAILABLE=0
 HELIXQA_W_EXCLUDED_COUNT=0
 
@@ -289,12 +289,12 @@ if [[ "$RUNNER" == "containerized" ]]; then
     if [[ ! -d "$CONTAINERS_DIR" ]]; then
         cat <<EOF >&2
 ==> §6.X containerized runner unavailable
-    --runner=containerized requires the Submodules/Containers submodule.
+    --runner=containerized requires the submodules/containers submodule.
     Expected directory: $CONTAINERS_DIR
     Not found in this checkout.
 
     Fix (operator action):
-      git submodule update --init Submodules/Containers
+      git submodule update --init submodules/containers
 
     Per §6.J anti-bluff: we exit 4 (missing-runtime) rather than silently
     falling back to --runner=host. Falling back would silently violate §6.X
@@ -341,7 +341,7 @@ fi
 
 # --- Q2: §6.J toolchain preflight ---
 # When --require-toolchain=go: verify `go version` succeeds AND `go mod
-# download` works inside Submodules/HelixQA before invoking Go-requiring
+# download` works inside submodules/helixqa before invoking Go-requiring
 # scripts. When --require-toolchain=none: skip Go-requiring scripts if
 # toolchain absent (honest SKIP, not false-PASS).
 if [[ "$RUNNER" == "host" ]]; then

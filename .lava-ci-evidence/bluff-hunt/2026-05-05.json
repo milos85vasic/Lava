@@ -2,16 +2,16 @@
   "date": "2026-05-05",
   "protocol": "Seventh Law clause 5 (Recurring Bluff Hunt) + new clause 6.N.1 + 6.N.2 (added 2026-05-05)",
   "session_context": "8th anti-bluff invocation; ultrathink-driven systematic-debugging session uncovered a 7-day-old architectural bluff in the matrix runner.",
-  "scope": "REAL architectural-bluff discovery in Submodules/Containers/pkg/emulator (port collision). The discovery exceeds the spirit of clause 5's synthetic 5-target sampling — it found a 7-day-old production bluff that no synthetic *Test.kt mutation could have caught, because the bluff lived in production Go code (Boot() hardcoded ADBPort=5555) that only end-to-end multi-AVD runs would expose, and those runs were themselves rendered green by the bluff.",
+  "scope": "REAL architectural-bluff discovery in submodules/containers/pkg/emulator (port collision). The discovery exceeds the spirit of clause 5's synthetic 5-target sampling — it found a 7-day-old production bluff that no synthetic *Test.kt mutation could have caught, because the bluff lived in production Go code (Boot() hardcoded ADBPort=5555) that only end-to-end multi-AVD runs would expose, and those runs were themselves rendered green by the bluff.",
   "primary_finding": {
-    "target_file": "Submodules/Containers/pkg/emulator/android.go",
+    "target_file": "submodules/containers/pkg/emulator/android.go",
     "target_function": "AndroidEmulator.Boot",
     "bluff_classification": "Hardcoded-port multi-target test runner (now in Forbidden Test Patterns list per Seventh Law clause 4)",
     "bluff_age_days": 7,
-    "bluff_origin_commit": "Submodules/Containers commit 7614b94 (Phase 3 emulator package shipping)",
+    "bluff_origin_commit": "submodules/containers commit 7614b94 (Phase 3 emulator package shipping)",
     "remediation_commits": [
-      "Submodules/Containers commit 648a4bb — dynamic port discovery via adb-devices diff",
-      "Submodules/Containers commit f6d09cb — Teardown waits for qemu to actually exit"
+      "submodules/containers commit 648a4bb — dynamic port discovery via adb-devices diff",
+      "submodules/containers commit f6d09cb — Teardown waits for qemu to actually exit"
     ],
     "incident_record": ".lava-ci-evidence/sixth-law-incidents/2026-05-05-matrix-runner-port-collision-bluff.json",
     "false_attestations_retracted": [

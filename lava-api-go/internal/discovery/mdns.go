@@ -1,4 +1,4 @@
-// Package discovery is a thin glue around Submodules/Mdns/pkg/service
+// Package discovery is a thin glue around submodules/mdns/pkg/service
 // that publishes lava-api-go's _lava-api._tcp service advertisement on
 // the LAN. The TXT records are spec'd in §8.2 of the SP-2 design doc;
 // they are byte-equal to what the Android client's discovery layer

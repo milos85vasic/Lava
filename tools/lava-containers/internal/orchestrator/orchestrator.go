@@ -8,7 +8,7 @@
 // "api-go". main.go's validateProfile is the validation gate; this type
 // is a pass-through for whatever profile name it's handed.
 //
-// TODO(SP-2 follow-up): delegate to Submodules/Containers/pkg/compose once
+// TODO(SP-2 follow-up): delegate to submodules/containers/pkg/compose once
 // it exposes profile-aware methods. Today, ComposeProject.Profile is a single
 // string, so a multi-profile invocation cannot be expressed through the
 // upstream API without modifying it (and that is a vasic-digital submodule

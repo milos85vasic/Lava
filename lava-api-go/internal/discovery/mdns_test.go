@@ -13,7 +13,7 @@ import (
 )
 
 // skipIfNoMulticast mirrors the pattern from
-// Submodules/Mdns/pkg/service/integration_test.go: integration tests
+// submodules/mdns/pkg/service/integration_test.go: integration tests
 // that need a real multicast round-trip skip cleanly when the host
 // can't multicast (isolated CI containers, some Wi-Fi NICs). They MUST
 // NOT fail just because multicast is unavailable.

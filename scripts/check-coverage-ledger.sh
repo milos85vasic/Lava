@@ -4,13 +4,13 @@
 # Per HelixConstitution §11.4.25 (Full-Automation-Coverage Mandate): the
 # coverage ledger MUST exist, MUST be fresh (regenerated state matches
 # committed state), AND MUST contain a row for every feature/* + core/* +
-# app + lava-api-go + Submodules/* unit. Stale OR incomplete ledgers are
+# app + lava-api-go + submodules/* unit. Stale OR incomplete ledgers are
 # §11.4.25 violations.
 #
 # This script:
 #   1. Asserts `docs/coverage-ledger.yaml` exists with the expected
 #      schema_version + metadata block.
-#   2. Asserts every feature/* + core/* + Submodules/* + app + lava-api-go
+#   2. Asserts every feature/* + core/* + submodules/* + app + lava-api-go
 #      path on disk has a row in the ledger.
 #   3. Asserts the ledger is FRESH: regenerates it into a tmp file via
 #      `scripts/generate-coverage-ledger.sh` and diffs the row content
@@ -86,10 +86,10 @@ if [[ -d core ]]; then
 fi
 [[ -d app ]] && expected_paths+=("app")
 [[ -d lava-api-go ]] && expected_paths+=("lava-api-go")
-if [[ -d Submodules ]]; then
+if [[ -d submodules ]]; then
     while IFS= read -r p; do
         expected_paths+=("$p")
-    done < <(find Submodules -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sort)
+    done < <(find submodules -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sort)
 fi
 
 missing_rows=()

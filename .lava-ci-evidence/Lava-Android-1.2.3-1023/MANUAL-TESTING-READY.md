@@ -31,7 +31,7 @@ The 8-phase rebuild-and-test-everything cycle (Phases R0-R8) is mechanically com
 
 | Suite | Tests | Result |
 |---|---|---|
-| `cd Submodules/Containers && go test ./pkg/cache/... ./pkg/vm/... ./pkg/emulator/... -count=1 -race` | 9 + 43 + 67 = 119 | PASS |
+| `cd submodules/containers && go test ./pkg/cache/... ./pkg/vm/... ./pkg/emulator/... -count=1 -race` | 9 + 43 + 67 = 119 | PASS |
 | `cd lava-api-go && go test ./...` | 26 packages incl. contract, e2e, parity, load | PASS |
 | 15 vasic-digital Go submodules: `go test ./...` | ~50 packages combined | PASS (all 15) |
 | `./gradlew test --no-daemon` (Lava root) | 1728 tasks, all module unit tests + new ServiceAdvertisement regression test | PASS in 2m 14s |

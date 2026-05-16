@@ -406,7 +406,7 @@ func startFakeRutracker(t *testing.T) (*fakeRutracker, func()) {
 }
 
 // applyMigrations runs the response_cache schema setup against the
-// e2e Postgres. We use the Submodules/Cache CreateSchema entrypoint
+// e2e Postgres. We use the submodules/cache CreateSchema entrypoint
 // rather than shelling out to golang-migrate for two reasons:
 //
 //  1. cache.New() and the Phase 7 handlers ONLY consume the

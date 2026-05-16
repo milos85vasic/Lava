@@ -3,7 +3,7 @@
 //
 // Decoupled Reusable rationale: this package does not contain any
 // Lava-domain business logic. It composes the upstream submodules
-// (Submodules/Observability, Submodules/Security/pkg/pii) into the
+// (submodules/observability, submodules/security/pkg/pii) into the
 // concrete logger / metrics / tracer / health surfaces that
 // cmd/lava-api-go consumes.
 package observability
@@ -28,7 +28,7 @@ type LogConfig struct {
 // DefaultRedactKeys is the redaction denylist applied to slog
 // attribute names for lava-api-go. Per spec §9 the list MUST cover
 // every credential-bearing header that the auth pass-through and
-// Submodules/Auth code paths might log. Keys are matched
+// submodules/auth code paths might log. Keys are matched
 // case-insensitively, and the canonical form (Auth-Token vs auth_token)
 // is irrelevant — both are redacted.
 //
@@ -57,7 +57,7 @@ const redactedSentinel = "[REDACTED]"
 // stated in the plan ("returns a slog.Logger that writes
 // JSON-formatted records and redacts the keys in DefaultRedactKeys")
 // we implement a minimal redacting slog.Handler ourselves, on top of
-// stdlib log/slog. Submodules/Security/pkg/pii is reserved for
+// stdlib log/slog. submodules/security/pkg/pii is reserved for
 // VALUE-based PII redaction (emails, phones, etc.) at the outermost
 // boundaries — it does not provide attribute-key denylisting.
 func NewLogger(cfg LogConfig) *slog.Logger {

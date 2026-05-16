@@ -3,7 +3,7 @@
   "subject": "Cache integration tests + e2e tests run against real podman containers",
   "operator_run_at": "2026-04-30",
   "host": "podman 5.7.1, postgres:16-alpine, podman-compose",
-  "context": "Phase 4.3 (cache) and Phase 10.2 (e2e) integration tests are gated by podman availability. After Step 1 (submodule init) brought Submodules/Cache + Auth + Concurrency + Config + Database + ... online in this worktree, podman became usable and these tests are now exercisable.",
+  "context": "Phase 4.3 (cache) and Phase 10.2 (e2e) integration tests are gated by podman availability. After Step 1 (submodule init) brought submodules/cache + Auth + Concurrency + Config + Database + ... online in this worktree, podman became usable and these tests are now exercisable.",
 
   "phase_4_3_cache_integration": {
     "command": "cd lava-api-go && bash scripts/run-test-pg.sh",

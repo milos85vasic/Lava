@@ -15,7 +15,7 @@ This file documents what was mechanically verifiable in this session without a c
 
 ### ✅ Tracker-SDK submodule test suites
 
-`cd Submodules/Tracker-SDK && ./gradlew test --rerun-tasks` → **BUILD SUCCESSFUL** (4 module test suites: `:api`, `:mirror`, `:registry`, `:testing`).
+`cd submodules/tracker_sdk && ./gradlew test --rerun-tasks` → **BUILD SUCCESSFUL** (4 module test suites: `:api`, `:mirror`, `:registry`, `:testing`).
 
 ### ✅ Phase 0 + Phase 5 retroactive Bluff-Audit completeness
 
@@ -45,7 +45,7 @@ All 8 expected `.lava-ci-evidence/sp3a-bluff-audit/` evidence files present:
 
 ### ✅ Submodule pin verification
 
-All 16 submodule pinned SHAs verified present on their respective remotes (run earlier in this session). `Submodules/Tracker-SDK` pinned at `b2754ea` (= **v0.2.0**, present on github + gitlab).
+All 16 submodule pinned SHAs verified present on their respective remotes (run earlier in this session). `submodules/tracker_sdk` pinned at `b2754ea` (= **v0.2.0**, present on github + gitlab).
 
 ## What is BLOCKED by host environment / hardware
 

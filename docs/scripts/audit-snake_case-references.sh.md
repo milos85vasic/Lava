@@ -6,7 +6,7 @@
 
 ## Overview
 
-Read-only audit that counts, for each of the 17 owned-by-us submodules (16 `vasic-digital/*` + 1 `HelixDevelopment/HelixQA`), how many references in tracked files point at the current pre-rename name (e.g. `Submodules/Containers`). The output is a tab-separated table that the operator and reviewers consult BEFORE approving any rename batch under HelixConstitution §11.4.29.
+Read-only audit that counts, for each of the 17 owned-by-us submodules (16 `vasic-digital/*` + 1 `HelixDevelopment/HelixQA`), how many references in tracked files point at the current pre-rename name (e.g. `submodules/containers`). The output is a tab-separated table that the operator and reviewers consult BEFORE approving any rename batch under HelixConstitution §11.4.29.
 
 The script's value comes from making the rename blast radius **operator-visible and reproducible**: a single command produces a deterministic snapshot that can be diffed before/after each rename batch to detect stale references — which §11.4.29 declares severity-equivalent to the rename itself ("reference drift after a rename is a §11.4.29 violation of equal severity to the rename itself").
 
@@ -52,11 +52,11 @@ TOTAL_Submodules        806     124
 ```
 
 - `NAME` — the current submodule directory name (CamelCase / hyphenated).
-- `REFS` — total occurrences of `Submodules/<NAME>` across all tracked files.
+- `REFS` — total occurrences of `submodules/<NAME>` across all tracked files.
 - `FILES` — distinct file count containing at least one reference.
-- `TOTAL_Submodules` — aggregate for any `Submodules/` prefix reference (this is broader than the per-submodule sum because it captures bare `Submodules/` paths without a specific submodule name).
+- `TOTAL_Submodules` — aggregate for any `submodules/` prefix reference (this is broader than the per-submodule sum because it captures bare `submodules/` paths without a specific submodule name).
 
-The `TOTAL_Submodules` aggregate captures the work of Phase 6a (the top-level `Submodules/` → `submodules/` rename). Per-submodule rows capture the work of Phase 6b sub-cycles.
+The `TOTAL_Submodules` aggregate captures the work of Phase 6a (the top-level `submodules/` → `submodules/` rename). Per-submodule rows capture the work of Phase 6b sub-cycles.
 
 ## Modes
 
@@ -80,25 +80,25 @@ The script does NOT exit nonzero on "too many references found" — it is a read
 
 ## Edge cases
 
-- **Files with `Submodules/` in comments only.** Counted — the rename will touch them too.
+- **Files with `submodules/` in comments only.** Counted — the rename will touch them too.
 - **Binary files.** `git grep` does not match against binary files unless `-a` is passed; this script does NOT pass `-a`, so binary files are skipped. Acceptable because binary files don't contain renameable path strings worth tracking.
 - **`.gitmodules`.** Counted as a tracked file. Renaming requires updating it explicitly.
 - **`.lava-ci-evidence/` historical attestations.** Counted. These are historical records; updates are optional for correctness but recommended for consistency.
-- **Submodule internals (inside `Submodules/<X>/`).** NOT counted by this script because they are tracked by the submodule's own repo, not the parent. Per-submodule renames update the parent's `.gitmodules` + the parent's reference graph; the submodule's internal contents are out of scope.
-- **`Submodules/Tracker-SDK`.** Hyphenated name — `git grep "Submodules/Tracker-SDK"` works fine because `-` is a literal character in extended regex.
-- **`Submodules/HelixQA`.** HelixDevelopment-owned; same audit treatment as vasic-digital submodules per §11.4.28 (HelixDevelopment is on the owned-org list).
+- **Submodule internals (inside `submodules/<X>/`).** NOT counted by this script because they are tracked by the submodule's own repo, not the parent. Per-submodule renames update the parent's `.gitmodules` + the parent's reference graph; the submodule's internal contents are out of scope.
+- **`submodules/tracker_sdk`.** Hyphenated name — `git grep "submodules/tracker_sdk"` works fine because `-` is a literal character in extended regex.
+- **`submodules/helixqa`.** HelixDevelopment-owned; same audit treatment as vasic-digital submodules per §11.4.28 (HelixDevelopment is on the owned-org list).
 
 ## Internal behaviour
 
 For each of the 17 hard-coded `NAMES` entries:
 
-1. Build the pattern `Submodules/<NAME>`.
+1. Build the pattern `submodules/<NAME>`.
 2. `git grep -c "$pattern"` — emits `<file>:<count>` for every file with ≥1 match.
 3. `awk -F: '{s += $NF} END {print s+0}'` sums the per-file counts.
 4. `git grep -l "$pattern" | wc -l` counts distinct files.
 5. Emit `<NAME>\t<refs>\t<files>` to stdout.
 
-For the `TOTAL_Submodules` aggregate row: same pattern but `Submodules/` (no trailing name).
+For the `TOTAL_Submodules` aggregate row: same pattern but `submodules/` (no trailing name).
 
 The hard-coded NAMES list is the §11.4.29 migration scope. New owned-by-us submodules added between this script's creation and §11.4.29 closure MUST be added to the NAMES array (a single-line edit) and the companion plan + hermetic test updated accordingly.
 

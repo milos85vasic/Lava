@@ -8,11 +8,11 @@
 
 ## Context
 
-Phase 4 (commit `aa0db6bd`) adopted HelixQA as `Submodules/HelixQA` at upstream HEAD with the HELIX_DEV_OWNED waiver pattern in 4 scanners. HelixQA is now PRESENT in the Lava tree but NOT INTEGRATED — no Lava code links against it; no Lava test invokes it; no Lava CI gate consumes it.
+Phase 4 (commit `aa0db6bd`) adopted HelixQA as `submodules/helixqa` at upstream HEAD with the HELIX_DEV_OWNED waiver pattern in 4 scanners. HelixQA is now PRESENT in the Lava tree but NOT INTEGRATED — no Lava code links against it; no Lava test invokes it; no Lava CI gate consumes it.
 
 This document identifies WHICH parts of HelixQA add value to Lava + WHERE the integration boundary belongs.
 
-## HelixQA inventory (per `Submodules/HelixQA/pkg/` survey)
+## HelixQA inventory (per `submodules/helixqa/pkg/` survey)
 
 HelixQA ships **30+ Go packages** organized into these capability groups:
 
@@ -116,7 +116,7 @@ Any HelixQA integration MUST satisfy §6.J / §6.AE / §6.L:
 
 ## Open questions for operator
 
-1. **Container vs host runner**: HelixQA's Challenge scripts assume host execution. Lava's §6.X requires container-bound execution. Should the HelixQA challenges be wrapped to run inside `Submodules/Containers/cmd/emulator-matrix --runner=containerized`?
+1. **Container vs host runner**: HelixQA's Challenge scripts assume host execution. Lava's §6.X requires container-bound execution. Should the HelixQA challenges be wrapped to run inside `submodules/containers/cmd/emulator-matrix --runner=containerized`?
 2. **Real-deps vs stub gating**: HelixQA's `bluff_scanner_challenge.sh` runs `go-mutesting` which requires Go toolchain + the project's Go modules. Should Lava's gate execute against `lava-api-go` (real) or stub the toolchain (mock)?
 3. **Evidence directory boundary**: HelixQA emits evidence to its own `<helixqa>/evidence/<run-id>/`. Should Lava redirect to `.lava-ci-evidence/helixqa-challenges/<run-id>/`?
 4. **§6.W mirror policy for HelixQA Challenge invocations**: HelixQA Challenge scripts may push artifacts or invoke external services. Lava's §6.W bounds remotes to GitHub + GitLab. Need audit of each script before wiring.
@@ -127,11 +127,11 @@ DESIGN-ONLY. No code changes in this cycle. Operator approval owed before Option
 
 ## Cross-references
 
-- `Submodules/HelixQA/README.md` — HelixQA framework overview
-- `Submodules/HelixQA/docs/ANTI_BLUFF.md` — HelixQA's anti-bluff discipline (CONST-035 runbook)
-- `Submodules/HelixQA/docs/architecture.md` — HelixQA package overview
-- `Submodules/HelixQA/docs/IMMEDIATE_EXECUTION_PLAN.md` — HelixQA's 2026-04-08 Real-Time Video Pipeline roadmap
-- `Submodules/HelixQA/docs/COMPREHENSIVE_VISION_INTEGRATION_PLAN.md` — HelixQA's 2026-04-09 CV integration plan
+- `submodules/helixqa/README.md` — HelixQA framework overview
+- `submodules/helixqa/docs/ANTI_BLUFF.md` — HelixQA's anti-bluff discipline (CONST-035 runbook)
+- `submodules/helixqa/docs/architecture.md` — HelixQA package overview
+- `submodules/helixqa/docs/IMMEDIATE_EXECUTION_PLAN.md` — HelixQA's 2026-04-08 Real-Time Video Pipeline roadmap
+- `submodules/helixqa/docs/COMPREHENSIVE_VISION_INTEGRATION_PLAN.md` — HelixQA's 2026-04-09 CV integration plan
 - `CLAUDE.md` §6.AE — Comprehensive Challenge Coverage + Container/QEMU Matrix Mandate
 - `CLAUDE.md` §6.J — Anti-Bluff Functional Reality Mandate
 - `CLAUDE.md` §6.AC — Comprehensive Non-Fatal Telemetry Mandate

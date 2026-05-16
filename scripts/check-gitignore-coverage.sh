@@ -61,7 +61,7 @@ for d in core/*/*/; do
     fi
 done
 # Submodule roots — each owned-by-us submodule MUST have .gitignore.
-for d in Submodules/*/; do
+for d in submodules/*/; do
     [[ -d "$d" ]] && MODULE_ROOTS+=("${d%/}")
 done
 

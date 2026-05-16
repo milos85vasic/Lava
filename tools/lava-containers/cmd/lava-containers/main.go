@@ -8,9 +8,9 @@
 // This is intentionally Lava-specific (knows about gradlew, the
 // digital.vasic.lava.api image, the api-go|observability|dev-docs profile
 // names from docker-compose.yml). Generic container-runtime concerns are
-// owned by vasic-digital/Containers (mounted at /Submodules/Containers/).
+// owned by vasic-digital/Containers (mounted at /submodules/containers/).
 //
-// Until Submodules/Containers/pkg/compose grows a multi-profile API
+// Until submodules/containers/pkg/compose grows a multi-profile API
 // (today its ComposeProject.Profile is a single string), this CLI shells
 // out directly to `<runtime> compose --profile X --profile Y up -d`
 // rather than going through the upstream orchestrator.

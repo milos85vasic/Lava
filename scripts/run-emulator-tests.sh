@@ -10,7 +10,7 @@
 # `vasic-digital/Containers/pkg/emulator/`. This script:
 #
 #   1. Builds the cmd/emulator-matrix binary from the pinned submodule
-#      (./Submodules/Containers).
+#      (./submodules/containers).
 #   2. Builds the Lava debug APK if requested.
 #   3. Invokes the binary with Lava-specific arguments: AVD list, test
 #      class, evidence directory.
@@ -57,7 +57,7 @@ CONCURRENT=""
 DEV_MODE=0
 # §6.X Container-Submodule Emulator Wiring Mandate (added 2026-05-13):
 # the gate run MUST execute the emulator process INSIDE a podman/docker
-# container managed by Submodules/Containers/. Until §6.X-debt closes
+# container managed by submodules/containers/. Until §6.X-debt closes
 # (Containers-side `Containerized` Emulator implementation), `host-direct`
 # remains the default and is permitted ONLY for workstation iteration.
 # `--runner=containerized` is the forward-looking gate target — when
@@ -146,7 +146,7 @@ Defaults:
   --runner            host-direct|containerized (default: host-direct).
                       §6.X Container-Submodule Emulator Wiring Mandate: the
                       gate target is `containerized` (emulator runs INSIDE
-                      a podman/docker container managed by Submodules/Containers/).
+                      a podman/docker container managed by submodules/containers/).
                       `host-direct` is permitted ONLY for workstation
                       iteration during §6.X-debt; `scripts/tag.sh` will
                       reject attestation rows without `runner: containerized`
@@ -208,10 +208,10 @@ if [[ ! -e /dev/kvm ]]; then
     exit 2
 fi
 
-CONTAINERS_DIR="$PROJECT_DIR/Submodules/Containers"
+CONTAINERS_DIR="$PROJECT_DIR/submodules/containers"
 if [[ ! -d "$CONTAINERS_DIR/pkg/emulator" ]]; then
-    echo "ERROR: Submodules/Containers/pkg/emulator not found." >&2
-    echo "  → run \`git submodule update --init Submodules/Containers\` and ensure" >&2
+    echo "ERROR: submodules/containers/pkg/emulator not found." >&2
+    echo "  → run \`git submodule update --init submodules/containers\` and ensure" >&2
     echo "    the pin includes commit 7614b94 or later (Phase 3.1 of the 2026-05-04 plan)." >&2
     exit 2
 fi

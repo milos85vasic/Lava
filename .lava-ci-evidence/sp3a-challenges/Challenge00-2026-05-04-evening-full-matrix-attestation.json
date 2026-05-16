@@ -69,7 +69,7 @@
     "Phase 1.1 sessionSignaledState persistence works on Android 9, 11, 14, and 16 — covering 6 years of Android API surface (2018 → 2024 stable releases plus the 2026 latest-stable bump).",
     "PreferencesStorageImpl.signaled_auth.xml lifecycle (write on signalAuthorized, clear on logout) is byte-equivalent across all four API levels.",
     "AuthServiceImpl.signalAuthorized's call into preferencesStorage.saveSignaledAuthState fires consistently across ART versions, despite the historical NoSuchMethodException risk on API 36 (Pixel_9a) that previously blocked C1 deep navigation. Challenge00 does NOT touch deep navigation, so the API-36 path is clean here.",
-    "The 2026-05-04 evening WaitForBoot fix (Submodules/Containers commit 2f3c689) is regression-protected by this run — without the fix, the matrix would have failed at the boot stage on every AVD."
+    "The 2026-05-04 evening WaitForBoot fix (submodules/containers commit 2f3c689) is regression-protected by this run — without the fix, the matrix would have failed at the boot stage on every AVD."
   ],
   "deep_coverage_still_owed": [
     "Container-bound matrix run per clause 6.I clause 1 (next phase that touches the matrix gate).",
@@ -81,6 +81,6 @@
   "next_pending_remediation_priorities": [
     "matrix.go BootResult.BootDuration → WaitForBoot duration capture (cosmetic but relevant to clause 6.I clause 6 audit)",
     "scripts/tag.sh consumption of .lava-ci-evidence/<tag>/real-device-verification.* glob pattern (per clause 6.I clause 7)",
-    "Container-bound matrix run via Submodules/Containers/cmd/distributed-test (clause 6.I clause 1 + clause 6.K mandate)"
+    "Container-bound matrix run via submodules/containers/cmd/distributed-test (clause 6.I clause 1 + clause 6.K mandate)"
   ]
 }

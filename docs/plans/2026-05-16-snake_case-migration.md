@@ -35,8 +35,8 @@ Captured by running the audit script (`scripts/audit-snake_case-references.sh`) 
 
 | Metric | Count |
 |---|---|
-| Files containing `Submodules/` references | 124 |
-| Total `Submodules/` references | 806 |
+| Files containing `submodules/` references | 124 |
+| Total `submodules/` references | 806 |
 | Total bare-word `Submodules` references (incl in paths) | 829 |
 | Submodules currently registered in `.gitmodules` (vasic-digital + HelixDevelopment) | 17 |
 | Constitution submodule (separate, see §3) | 1 |
@@ -63,9 +63,9 @@ Captured by running the audit script (`scripts/audit-snake_case-references.sh`) 
 | `Security` | `security` | vasic-digital | 15 | 6 | LOW |
 | `Tracker-SDK` | `tracker_sdk` | vasic-digital | **83** | **25** | **HIGH** (hyphen→underscore + composite-build Gradle includeBuild + lava-api-go go.mod replace directives) |
 
-**Total per-submodule references:** 714 (close to but not equal to the 806 `Submodules/` total because some references count `Submodules/` paths that don't include a specific submodule name — e.g. `Submodules/<name>/...` regex matches some bare-prefix lines).
+**Total per-submodule references:** 714 (close to but not equal to the 806 `submodules/` total because some references count `submodules/` paths that don't include a specific submodule name — e.g. `submodules/<name>/...` regex matches some bare-prefix lines).
 
-### 1.3 Top files by `Submodules/` reference count
+### 1.3 Top files by `submodules/` reference count
 
 The rename will rewrite content in these files most heavily:
 
@@ -137,7 +137,7 @@ Each submodule's internal source-language layout is exempt inside its root direc
 | Directory | Reason for exemption |
 |---|---|
 | `Upstreams/` | §11.4.29 specifies this directory: `install_upstreams` supports both `Upstreams/` AND `upstreams/` during migration window. Rename is OWED but the dual-support installer makes it safe to defer. |
-| `Submodules/` | THE rename target of Phase 6a — listed here for completeness; the rule applies. |
+| `submodules/` | THE rename target of Phase 6a — listed here for completeness; the rule applies. |
 | `CLAUDE.md`, `AGENTS.md`, `CHANGELOG.md`, `README.md`, `LICENSE` | Convention-mandated file names (Markdown convention + LICENSE convention) — fall under "build-tooling artefacts" / common-sense exemption. |
 | `Constitution.md` (if it ever exists at Lava root — currently lives in `constitution/` submodule) | Same as above. |
 
@@ -151,10 +151,10 @@ Authoritative mapping for Phase 6b. Each rename is a separate sub-cycle.
 |---|---|---|---|---|---|
 | 1 | `Auth` | `auth` | vasic-digital | Single-word PascalCase → lowercase | None |
 | 2 | `Cache` | `cache` | vasic-digital | Same | None |
-| 3 | `Challenges` | `challenges` | vasic-digital | Same | Cascading rename: also forwards through `Submodules/Challenges/Panoptic` nested-own-org-chain (§11.4.28 follow-up debt) |
+| 3 | `Challenges` | `challenges` | vasic-digital | Same | Cascading rename: also forwards through `submodules/challenges/Panoptic` nested-own-org-chain (§11.4.28 follow-up debt) |
 | 4 | `Concurrency` | `concurrency` | vasic-digital | Same | None |
 | 5 | `Config` | `config` | vasic-digital | Same | None |
-| 6 | `Containers` | `containers` | vasic-digital | Same | **HIGH-RISK** — 370 refs across 63 files. The matrix runner, emulator orchestration, every `Submodules/Containers/pkg/...` reference, gate-shaping code in `scripts/check-constitution.sh` and `scripts/run-emulator-tests.sh`. |
+| 6 | `Containers` | `containers` | vasic-digital | Same | **HIGH-RISK** — 370 refs across 63 files. The matrix runner, emulator orchestration, every `submodules/containers/pkg/...` reference, gate-shaping code in `scripts/check-constitution.sh` and `scripts/run-emulator-tests.sh`. |
 | 7 | `Database` | `database` | vasic-digital | Same | None |
 | 8 | `Discovery` | `discovery` | vasic-digital | Same | None |
 | 9 | `HelixQA` | `helix_qa` | HelixDevelopment | CamelCase compound word → snake_case with underscore. **See §3.1 for HelixDevelopment-org considerations.** | Cross-org coordination. |
@@ -165,7 +165,7 @@ Authoritative mapping for Phase 6b. Each rename is a separate sub-cycle.
 | 14 | `RateLimiter` | `rate_limiter` | vasic-digital | CamelCase compound → snake_case | Word boundary split is unambiguous |
 | 15 | `Recovery` | `recovery` | vasic-digital | Same | None |
 | 16 | `Security` | `security` | vasic-digital | Same | None |
-| 17 | `Tracker-SDK` | `tracker_sdk` | vasic-digital | Hyphen + acronym → underscore + lowercase. **HIGH-RISK** — 83 refs across 25 files including `settings.gradle.kts` `includeBuild("Submodules/Tracker-SDK")` AND `lava-api-go/go.mod` replace directives. | Gradle composite-build path + Go module path must update together |
+| 17 | `Tracker-SDK` | `tracker_sdk` | vasic-digital | Hyphen + acronym → underscore + lowercase. **HIGH-RISK** — 83 refs across 25 files including `settings.gradle.kts` `includeBuild("submodules/tracker_sdk")` AND `lava-api-go/go.mod` replace directives. | Gradle composite-build path + Go module path must update together |
 
 ### 3.1 HelixQA / HelixDevelopment-org consideration
 
@@ -213,7 +213,7 @@ Per §11.4.29 + §11.4.20 (subagent delegation): each phase below is a separate 
 
 ---
 
-### Phase 6a — `Submodules/` → `submodules/` (the directory itself)
+### Phase 6a — `submodules/` → `submodules/` (the directory itself)
 
 **Scope:** Single rename — the top-level `Submodules` directory. Cascading updates to every reference path.
 
@@ -223,18 +223,18 @@ Per §11.4.29 + §11.4.20 (subagent delegation): each phase below is a separate 
 
 **Rename steps:**
 1. `git mv Submodules submodules` (or equivalent: `git mv` each child entry — Git's `git mv` handles renamed-directory tracking automatically).
-2. Update `.gitmodules`: every `path = Submodules/<X>` → `path = submodules/<X>` (17 entries).
+2. Update `.gitmodules`: every `path = submodules/<X>` → `path = submodules/<X>` (17 entries).
 3. Update `.git/config` `submodule.*.path` mirrored from `.gitmodules`. (Usually done by `git submodule sync`.)
 4. Run `git submodule sync` + `git submodule update --init` to refresh `.git/modules` pointers.
 5. Update every script/code reference:
-   - `scripts/*.sh` — `Submodules/` → `submodules/` (16 files).
-   - `lava-api-go/go.mod` — `../Submodules/` → `../submodules/` (replace directives).
-   - `settings.gradle.kts` — `includeBuild("Submodules/Tracker-SDK")` → `includeBuild("submodules/Tracker-SDK")`.
+   - `scripts/*.sh` — `submodules/` → `submodules/` (16 files).
+   - `lava-api-go/go.mod` — `../submodules/` → `../submodules/` (replace directives).
+   - `settings.gradle.kts` — `includeBuild("submodules/tracker_sdk")` → `includeBuild("ssubmodules/tracker_sdk")`.
    - `start.sh`, `tools/lava-containers/...`, `tests/...`.
    - `CLAUDE.md` (35 refs), `AGENTS.md`, `CHANGELOG.md`, `.githooks/pre-push`.
    - `docs/**/*.md` (41 files — including superpowers specs/plans).
    - `.lava-ci-evidence/**/*` (27 files — these are historical attestations; the rename in evidence files is for consistency, not for correctness).
-6. Verify no remaining `Submodules/` references via audit: `bash scripts/audit-snake_case-references.sh > after.tsv && diff before.tsv after.tsv`.
+6. Verify no remaining `submodules/` references via audit: `bash scripts/audit-snake_case-references.sh > after.tsv && diff before.tsv after.tsv`.
 
 **Post-rename validation:**
 1. `./gradlew :app:assembleDebug` — verifies Gradle composite-build picks up the renamed path.
@@ -244,7 +244,7 @@ Per §11.4.29 + §11.4.20 (subagent delegation): each phase below is a separate 
 5. `bash tests/check-constitution/test_audit_snake_case_references.sh` — hermetic.
 
 **Falsifiability rehearsal:**
-- Deliberately omit ONE rename (e.g. leave `scripts/check-constitution.sh` referencing `Submodules/`). Run audit — confirm it surfaces the residual reference. Restore + verify clean.
+- Deliberately omit ONE rename (e.g. leave `scripts/check-constitution.sh` referencing `submodules/`). Run audit — confirm it surfaces the residual reference. Restore + verify clean.
 
 **Rollback:**
 - `git checkout HEAD -- .` (working tree).
@@ -433,7 +433,7 @@ Use case: Phase 6a + 6b/1-3 succeed; 6b/4 breaks something. Revert ONLY 6b/4:
 
 1. `git revert <SHA-of-6b/4>`.
 2. Push the revert commit.
-3. Submodule 4's local path returns to the partially-renamed state (still capital `Submodules/<OldName>` if 6b/4 was the FIRST per-submodule rename after 6a — meaning the directory is `submodules/<OldName>` after 6a but `<OldName>` was not lowered yet).
+3. Submodule 4's local path returns to the partially-renamed state (still capital `submodules/<OldName>` if 6b/4 was the FIRST per-submodule rename after 6a — meaning the directory is `submodules/<OldName>` after 6a but `<OldName>` was not lowered yet).
 
 ### 5.4 What MUST NOT be done during rollback
 
@@ -447,9 +447,9 @@ Use case: Phase 6a + 6b/1-3 succeed; 6b/4 breaks something. Revert ONLY 6b/4:
 
 ### 6.1 Risk: Gradle composite-build path break
 
-**Trigger:** Phase 6a OR Phase 6b/Tracker-SDK rename without updating `settings.gradle.kts` `includeBuild("Submodules/Tracker-SDK")`.
+**Trigger:** Phase 6a OR Phase 6b/Tracker-SDK rename without updating `settings.gradle.kts` `includeBuild("submodules/tracker_sdk")`.
 
-**Symptom:** `./gradlew :app:assembleDebug` fails with "Project 'Submodules/Tracker-SDK' not found" or analogous error.
+**Symptom:** `./gradlew :app:assembleDebug` fails with "Project 'submodules/tracker_sdk' not found" or analogous error.
 
 **Mitigation:** `settings.gradle.kts` IS in the audit script's reference count (1 ref). The per-cycle validation step (`./gradlew :app:assembleDebug`) catches this immediately.
 
@@ -457,7 +457,7 @@ Use case: Phase 6a + 6b/1-3 succeed; 6b/4 breaks something. Revert ONLY 6b/4:
 
 **Trigger:** Phase 6a OR Phase 6b/<any> without updating `lava-api-go/go.mod` `replace` directives.
 
-**Symptom:** `cd lava-api-go && go build` fails with "directory ../Submodules/X does not exist".
+**Symptom:** `cd lava-api-go && go build` fails with "directory ../submodules/X does not exist".
 
 **Mitigation:** `lava-api-go/go.mod` IS in the audit script's reference count (15 refs in go.mod alone). The per-cycle validation step (`cd lava-api-go && make build`) catches this immediately.
 
@@ -473,7 +473,7 @@ Use case: Phase 6a + 6b/1-3 succeed; 6b/4 breaks something. Revert ONLY 6b/4:
 
 **Trigger:** Renaming `submodules/<X>` without `git submodule sync`.
 
-**Symptom:** `.git/modules/Submodules/X/` (cached metadata) vs. `.git/modules/submodules/x/` (post-rename expectation) divergence; `git submodule update --init` fails with "fatal: repository '..../X' does not exist".
+**Symptom:** `.git/modules/submodules/X/` (cached metadata) vs. `.git/modules/submodules/x/` (post-rename expectation) divergence; `git submodule update --init` fails with "fatal: repository '..../X' does not exist".
 
 **Mitigation:** Per-cycle step 4 explicitly runs `git submodule sync` + `git submodule update --init`. If still confused: `rm -rf .git/modules/<stale-path>` (safe — re-fetched on next `update --init`).
 
@@ -493,7 +493,7 @@ Use case: Phase 6a + 6b/1-3 succeed; 6b/4 breaks something. Revert ONLY 6b/4:
 
 **Mitigation:**
 - Run the audit script BOTH before AND after; the `diff` MUST show every old-name reference removed (the audit's tab-separated output makes this easy).
-- For Containers: separate the rename of `Submodules/Containers/` itself from updates to scripts that reference it. Could be split into two sub-commits within the cycle (rename + path-update).
+- For Containers: separate the rename of `submodules/containers/` itself from updates to scripts that reference it. Could be split into two sub-commits within the cycle (rename + path-update).
 - For Tracker-SDK: explicitly test the Gradle composite-build path with `./gradlew :app:assembleDebug` AND Go module path with `cd lava-api-go && go build` BEFORE pushing.
 
 ### 6.7 Risk: Reference drift between rename batches
@@ -508,7 +508,7 @@ Use case: Phase 6a + 6b/1-3 succeed; 6b/4 breaks something. Revert ONLY 6b/4:
 
 **Trigger:** Operator's local working tree gets out of sync because of a half-completed pull (Phase 6a landed remotely; operator's checkout is pre-rename).
 
-**Symptom:** `git status` shows `Submodules/` and `submodules/` simultaneously (case-insensitive filesystems on macOS could confuse this further).
+**Symptom:** `git status` shows `submodules/` and `submodules/` simultaneously (case-insensitive filesystems on macOS could confuse this further).
 
 **Mitigation:** Operator MUST run `git status` + `git submodule status` after every pull during the migration window. Document the rename batches in `CHANGELOG.md` so each rename has a discoverable record. macOS case-insensitive filesystems may need `git rm --cached Submodules` + `git submodule add` cycles in extreme cases.
 
@@ -631,7 +631,7 @@ TOTAL_Submodules        806     124
 
 5. **Container CLI subcommand paths: `pkg/emulator` etc. — already snake_case.** No action needed for inside-Containers paths; Go-native.
 
-6. **`Submodules/Containers/cmd/distributed-build/`** (and siblings with hyphens) — Go convention permits hyphens in `cmd/<name>/` directory names. §11.4.29 LANG-spec exemption applies. Verify with the operator that Go-tooling-convention hyphens are EXEMPT from the rule. Current recommendation: EXEMPT.
+6. **`submodules/containers/cmd/distributed-build/`** (and siblings with hyphens) — Go convention permits hyphens in `cmd/<name>/` directory names. §11.4.29 LANG-spec exemption applies. Verify with the operator that Go-tooling-convention hyphens are EXEMPT from the rule. Current recommendation: EXEMPT.
 
 7. **Order-of-operations dependency:** Phase 6a MUST land before Phase 6b. Phase 6b/17 (Containers — 370 refs) is the highest-risk rename and SHOULD land LAST in Phase 6b. Phase 6c-f follow. Confirm operator agrees with the ordering.
 

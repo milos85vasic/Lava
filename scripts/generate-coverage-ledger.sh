@@ -18,7 +18,7 @@
 #    - core/* modules (shared infrastructure)
 #    - app/ (the Android client entry point)
 #    - lava-api-go/ (the Go API service)
-#    - Submodules/* (owned-by-us reusable code that ships with the project)
+#    - submodules/* (owned-by-us reusable code that ships with the project)
 #    Mixing kinds in one file lets the verifier do one walk + one assertion
 #    pass rather than 5 separate files; the `kind` column distinguishes them.
 #
@@ -430,10 +430,10 @@ EOF
         emit_row "lava-api-go" "api" "lava-api-go" "*_test.go" "*integration_test.go" ""
     fi
 
-    # Submodules/* rows
+    # submodules/* rows
     local sm unit_count has_docs invariants status
     local i1 i2 i3 i4 i5 i6
-    for d in $(find Submodules -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sort); do
+    for d in $(find submodules -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sort); do
         sm=$(basename "$d")
         unit_count=0
         local p c

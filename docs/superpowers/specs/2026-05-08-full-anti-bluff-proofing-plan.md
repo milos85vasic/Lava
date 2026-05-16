@@ -13,7 +13,7 @@
 | # | Issue | Severity | Evidence |
 |---|-------|----------|----------|
 | 1 | `:core:auth:impl` test compilation failure | BLOCKER | `FakePreferencesStorage` does not implement `getDeviceId()`. `./gradlew test` fails. |
-| 2 | All 16 submodules have uncommitted constitution propagation | BLOCKER | `git status` shows all 16 Submodules/ as `-dirty` (modified CLAUDE.md/AGENTS.md/CONSTITUTION.md from §6.U/6.V/6.W propagation) |
+| 2 | All 16 submodules have uncommitted constitution propagation | BLOCKER | `git status` shows all 16 submodules/ as `-dirty` (modified CLAUDE.md/AGENTS.md/CONSTITUTION.md from §6.U/6.V/6.W propagation) |
 | 3 | Parent repo CLAUDE.md, AGENTS.md, CONTINUATION.md have uncommitted §6.U/V/W changes | BLOCKER | Uncommitted edits sitting in working tree |
 | 4 | GitFlic + GitVerse remotes still configured | §6.W VIOLATION | `git remote -v` shows `gitflic`, `gitverse`, `upstream` (gitflic) remotes |
 | 5 | `origin` remote has multi-target push URLs mixing all 4 providers | §6.W VIOLATION | `origin` pushes to GitHub + GitLab + GitFlic + GitVerse simultaneously |
@@ -55,7 +55,7 @@
 |---|------|---------|-------------|
 | 0.1 | Fix `:core:auth:impl` `FakePreferencesStorage.getDeviceId()` | Add the missing method override to the test fake | `./gradlew :core:auth:impl:test` passes |
 | 0.2 | Commit all 16 submodule constitution propagation | In each submodule: `git add CLAUDE.md AGENTS.md CONSTITUTION.md` (as present), commit, push to GitHub + GitLab | `git submodule status` shows clean, all 16 pushed to both mirrors |
-| 0.3 | Update parent submodule pins to match committed submodule HEADs | `git add Submodules/*` after submodule commits | `git diff --cached Submodules/` shows new hashes |
+| 0.3 | Update parent submodule pins to match committed submodule HEADs | `git add submodules/*` after submodule commits | `git diff --cached submodules/` shows new hashes |
 | 0.4 | Commit parent CLAUDE.md + AGENTS.md + CONTINUATION.md §6.U/V/W changes | Pending uncommitted edits in parent working tree | `git status` clean |
 | 0.5 | Remove GitFlic remote | `git remote remove gitflic` | `git remote -v` shows no gitflic |
 | 0.6 | Remove GitVerse remote | `git remote remove gitverse` | `git remote -v` shows no gitverse |
@@ -117,7 +117,7 @@
 
 | # | Task | Details | Verification |
 |---|------|---------|-------------|
-| 3.0 | Fetch latest `vasic-digital/Containers` submodule | Update pin to latest commit for emulator support | `git submodule update --init Submodules/Containers` |
+| 3.0 | Fetch latest `vasic-digital/Containers` submodule | Update pin to latest commit for emulator support | `git submodule update --init submodules/containers` |
 | 3.1 | Build emulator containers for API 28, 30, 34, latest | Per Containers submodule tooling | Each container boots and shows `adb devices` |
 | 3.2 | Build emulator containers for phone, tablet, TV form factors | Per §6.I matrix requirements | Each form factor boots |
 | 3.3 | Execute Challenge Tests C1-C22 on each matrix combination | `scripts/run-emulator-tests.sh --avds=...` | JSON evidence per combination |
@@ -136,7 +136,7 @@
 
 | # | Task | Details | Verification |
 |---|------|---------|-------------|
-| 4.1 | Select 5 random test files + 2 production code files from gate-shaping code | Per §6.N: sample includes `scripts/tag.sh` helpers, `scripts/check-constitution.sh`, `Submodules/Containers/pkg/emulator/` | Selection documented |
+| 4.1 | Select 5 random test files + 2 production code files from gate-shaping code | Per §6.N: sample includes `scripts/tag.sh` helpers, `scripts/check-constitution.sh`, `submodules/containers/pkg/emulator/` | Selection documented |
 | 4.2 | For each file: mutate production code, confirm test fails | Follow Seventh Law clause 5 protocol | Each mutation documented in `.lava-ci-evidence/bluff-hunt/2026-05-08.json` |
 | 4.3 | For any test that PASSES when production code is broken: classify as bluff, record incident | Per Seventh Law clause 6 (Bluff Discovery Protocol) | Incident recorded in `.lava-ci-evidence/sixth-law-incidents/` |
 | 4.4 | Fix all discovered bluffs | Rewrite test to catch the real defect | Bluff-Audit stamp on fix commit |

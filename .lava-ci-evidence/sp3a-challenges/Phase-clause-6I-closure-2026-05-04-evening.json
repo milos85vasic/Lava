@@ -22,7 +22,7 @@
     {
       "clause": "6.I clause 6 (cold-boot-only reporting)",
       "previous_status": "PARTIAL — boot_seconds under-reported because matrix.go captured only launch-command duration, not WaitForBoot elapsed",
-      "action_taken": "Submodules/Containers commit 23b4fa9 — pkg/emulator/matrix.go now adds WaitForBoot's returned duration to BootResult.BootDuration before recording the row. New regression test TestAndroidMatrixRunner_BootDuration_IncludesWaitForBootElapsed pins the behavior. Falsifiability rehearsed: removing the `+= waitDuration` line causes Go compiler to refuse to build the package (declared-but-not-used) — strong negative confirmation.",
+      "action_taken": "submodules/containers commit 23b4fa9 — pkg/emulator/matrix.go now adds WaitForBoot's returned duration to BootResult.BootDuration before recording the row. New regression test TestAndroidMatrixRunner_BootDuration_IncludesWaitForBootElapsed pins the behavior. Falsifiability rehearsed: removing the `+= waitDuration` line causes Go compiler to refuse to build the package (declared-but-not-used) — strong negative confirmation.",
       "current_status": "CLOSED — boot_seconds now reflects total launch + wait wall-clock. Observed in post-fix run: CZ_API28_Phone reported boot_seconds=15.07 (true cold boot post snapshot-purge). Other AVDs in the 5-AVD run reported lower values because their snapshots survived prior session runs; that is a snapshot-state issue, not a measurement issue. The `--cold-boot` flag enforces `-no-snapshot` at the emulator level which is the constitutional gate."
     },
     {

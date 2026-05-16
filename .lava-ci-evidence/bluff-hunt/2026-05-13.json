@@ -4,7 +4,7 @@
   "invocation_number": 20,
   "invocation_clause": "§6.L (Anti-Bluff Functional Reality Mandate, Operator's Standing Order)",
   "protocol": "§6.N.1.1 first-invocation-in-24h-window full 5+2 hunt: 5 random *Test.kt files + 2 production code files",
-  "scope": "core/ + feature/ + Submodules/Containers/pkg/emulator/",
+  "scope": "core/ + feature/ + submodules/containers/pkg/emulator/",
   "operator_message": "Make sure that all existing tests and Challenges do work in anti-bluff manner - they MUST confirm that all tested codebase really works as expected! We had been in position that all tests do execute with success and all Challenges as well, but in reality the most of the features does not work and can't be used!",
   "targets": [
     {
@@ -65,8 +65,8 @@
     {
       "id": "T6",
       "type": "production",
-      "file": "Submodules/Containers/pkg/emulator/matrix.go",
-      "covered_by_test": "Submodules/Containers/pkg/emulator/matrix_test.go::TestAndroidMatrixRunner_TestFailure_PropagatesToAttestation",
+      "file": "submodules/containers/pkg/emulator/matrix.go",
+      "covered_by_test": "submodules/containers/pkg/emulator/matrix_test.go::TestAndroidMatrixRunner_TestFailure_PropagatesToAttestation",
       "mutation": "Hard-coded `\"all_passed\": true` in the writeAttestation map — exactly the rehearsal protocol documented in matrix_test.go:305-308.",
       "expected_failure_signal": "Test asserts the attestation file's all_passed reflects the actual run; hard-coded true lies when the run had failures.",
       "observed_failure": "--- FAIL: TestAndroidMatrixRunner_TestFailure_PropagatesToAttestation (0.00s); FAIL digital.vasic.containers/pkg/emulator 0.523s",

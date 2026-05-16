@@ -220,7 +220,7 @@ story.append(body(
 ))
 
 story.append(body(
-    'The project maintains 15 vasic-digital submodules under the Submodules/ directory, covering cross-'
+    'The project maintains 15 vasic-digital submodules under the submodules/ directory, covering cross-'
     'cutting concerns such as HTTP3, Mdns, Middleware (Brotli, CORS, recovery, request ID), Observability, '
     'RateLimiter, Recovery (circuit breaker), Security, Challenges, Config, Discovery, Concurrency, and '
     'Containers. These submodules are frozen by default and require explicit operator action to update.'

@@ -10,7 +10,7 @@ test_compliant_fixture_passes() {
     local f
     f=$(mktemp -d)
     cd "$f"
-    mkdir -p constitution Submodules/foo
+    mkdir -p constitution submodules/foo
     cat > CLAUDE.md <<'EOF'
 # CLAUDE.md
 
@@ -34,7 +34,7 @@ EOF
     cat > constitution/Constitution.md <<'EOF'
 # Canonical Constitution.md
 EOF
-    touch Submodules/foo/install_upstreams.sh
+    touch submodules/foo/install_upstreams.sh
     local out
     out=$(LAVA_REPO_ROOT="$f" LAVA_CANONICAL_ROOT_STRICT=1 bash "$SCANNER" 2>&1)
     local rc=$?
@@ -52,7 +52,7 @@ test_missing_root_pointer_rejected() {
     local f
     f=$(mktemp -d)
     cd "$f"
-    mkdir -p constitution Submodules/foo
+    mkdir -p constitution submodules/foo
     cat > CLAUDE.md <<'EOF'
 # CLAUDE.md without inheritance block
 This file forgets the pointer entirely.
@@ -71,7 +71,7 @@ EOF
     cat > constitution/Constitution.md <<'EOF'
 canonical
 EOF
-    touch Submodules/foo/install_upstreams.sh
+    touch submodules/foo/install_upstreams.sh
     local out
     out=$(LAVA_REPO_ROOT="$f" LAVA_CANONICAL_ROOT_STRICT=1 bash "$SCANNER" 2>&1)
     local rc=$?
@@ -127,7 +127,7 @@ test_missing_install_upstreams_rejected() {
     local f
     f=$(mktemp -d)
     cd "$f"
-    mkdir -p constitution Submodules/withscript Submodules/withoutscript
+    mkdir -p constitution submodules/withscript submodules/withoutscript
     cat > CLAUDE.md <<'EOF'
 # CLAUDE.md
 ## INHERITED FROM constitution/CLAUDE.md
@@ -145,8 +145,8 @@ EOF
     cat > constitution/Constitution.md <<'EOF'
 canonical
 EOF
-    touch Submodules/withscript/install_upstreams.sh
-    # Submodules/withoutscript has NO install_upstreams
+    touch submodules/withscript/install_upstreams.sh
+    # submodules/withoutscript has NO install_upstreams
     local out
     out=$(LAVA_REPO_ROOT="$f" LAVA_CANONICAL_ROOT_STRICT=1 bash "$SCANNER" 2>&1)
     local rc=$?
@@ -184,7 +184,7 @@ test_canonical_fenced_code_block_pointer_passes() {
     local f
     f=$(mktemp -d)
     cd "$f"
-    mkdir -p constitution Submodules/foo
+    mkdir -p constitution submodules/foo
     cat > CLAUDE.md <<'EOF'
 # CLAUDE.md
 ## INHERITED FROM constitution/CLAUDE.md
@@ -214,7 +214,7 @@ EOF
     cat > constitution/Constitution.md <<'EOF'
 canonical
 EOF
-    touch Submodules/foo/install_upstreams.sh
+    touch submodules/foo/install_upstreams.sh
     local out
     out=$(LAVA_REPO_ROOT="$f" LAVA_CANONICAL_ROOT_STRICT=1 bash "$SCANNER" 2>&1)
     local rc=$?

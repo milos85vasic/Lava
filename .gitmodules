@@ -1,54 +1,54 @@
-[submodule "Submodules/Containers"]
-	path = Submodules/Containers
+[submodule "submodules/containers"]
+	path = submodules/containers
 	url = git@github.com:vasic-digital/Containers.git
-[submodule "Submodules/Middleware"]
-	path = Submodules/Middleware
+[submodule "submodules/middleware"]
+	path = submodules/middleware
 	url = git@github.com:vasic-digital/Middleware.git
-[submodule "Submodules/Database"]
-	path = Submodules/Database
+[submodule "submodules/database"]
+	path = submodules/database
 	url = git@github.com:vasic-digital/Database.git
-[submodule "Submodules/Cache"]
-	path = Submodules/Cache
+[submodule "submodules/cache"]
+	path = submodules/cache
 	url = git@github.com:vasic-digital/Cache.git
-[submodule "Submodules/Observability"]
-	path = Submodules/Observability
+[submodule "submodules/observability"]
+	path = submodules/observability
 	url = git@github.com:vasic-digital/Observability.git
-[submodule "Submodules/RateLimiter"]
-	path = Submodules/RateLimiter
+[submodule "submodules/ratelimiter"]
+	path = submodules/ratelimiter
 	url = git@github.com:vasic-digital/RateLimiter.git
-[submodule "Submodules/Recovery"]
-	path = Submodules/Recovery
+[submodule "submodules/recovery"]
+	path = submodules/recovery
 	url = git@github.com:vasic-digital/Recovery.git
-[submodule "Submodules/Security"]
-	path = Submodules/Security
+[submodule "submodules/security"]
+	path = submodules/security
 	url = git@github.com:vasic-digital/Security.git
-[submodule "Submodules/Auth"]
-	path = Submodules/Auth
+[submodule "submodules/auth"]
+	path = submodules/auth
 	url = git@github.com:vasic-digital/Auth.git
-[submodule "Submodules/Challenges"]
-	path = Submodules/Challenges
+[submodule "submodules/challenges"]
+	path = submodules/challenges
 	url = git@github.com:vasic-digital/Challenges.git
-[submodule "Submodules/Config"]
-	path = Submodules/Config
+[submodule "submodules/config"]
+	path = submodules/config
 	url = git@github.com:vasic-digital/Config.git
-[submodule "Submodules/Discovery"]
-	path = Submodules/Discovery
+[submodule "submodules/discovery"]
+	path = submodules/discovery
 	url = git@github.com:vasic-digital/Discovery.git
-[submodule "Submodules/HTTP3"]
-	path = Submodules/HTTP3
+[submodule "submodules/http3"]
+	path = submodules/http3
 	url = git@github.com:vasic-digital/HTTP3.git
-[submodule "Submodules/Mdns"]
-	path = Submodules/Mdns
+[submodule "submodules/mdns"]
+	path = submodules/mdns
 	url = git@github.com:vasic-digital/Mdns.git
-[submodule "Submodules/Concurrency"]
-	path = Submodules/Concurrency
+[submodule "submodules/concurrency"]
+	path = submodules/concurrency
 	url = git@github.com:vasic-digital/Concurrency.git
-[submodule "Submodules/Tracker-SDK"]
-	path = Submodules/Tracker-SDK
+[submodule "submodules/tracker_sdk"]
+	path = submodules/tracker_sdk
 	url = https://github.com/vasic-digital/Tracker-SDK.git
 [submodule "constitution"]
 	path = constitution
 	url = git@github.com:HelixDevelopment/HelixConstitution.git
-[submodule "Submodules/HelixQA"]
-	path = Submodules/HelixQA
+[submodule "submodules/helixqa"]
+	path = submodules/helixqa
 	url = git@github.com:HelixDevelopment/HelixQA.git

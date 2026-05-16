@@ -1,7 +1,7 @@
 // Package runtime is a thin Lava-local wrapper around container-runtime detection.
 //
 // SP-2 will rewire this to delegate to the vasic-digital/Containers submodule
-// mounted at /Submodules/Containers/. Until SP-2 lands, this file preserves the
+// mounted at /submodules/containers/. Until SP-2 lands, this file preserves the
 // existing autodetection so start.sh / stop.sh keep working unchanged.
 package runtime
 

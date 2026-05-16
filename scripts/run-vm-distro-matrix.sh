@@ -104,7 +104,7 @@ mkdir -p "$EVIDENCE_DIR"
 
 BIN_DIR="$PROJECT_DIR/build/vm-matrix"
 mkdir -p "$BIN_DIR"
-( cd "$PROJECT_DIR/Submodules/Containers" && go build -o "$BIN_DIR/vm-matrix" ./cmd/vm-matrix/ )
+( cd "$PROJECT_DIR/submodules/containers" && go build -o "$BIN_DIR/vm-matrix" ./cmd/vm-matrix/ )
 
 PROXY="proxy/build/libs/app.jar"
 GOAPI="lava-api-go/build/lava-api-go"

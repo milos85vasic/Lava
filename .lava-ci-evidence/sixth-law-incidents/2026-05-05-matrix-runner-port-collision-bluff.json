@@ -3,7 +3,7 @@
   "discovery_date": "2026-05-05",
   "classification": "Seventh Law clause 6 (Bluff Discovery Protocol) — green CI on broken-for-end-user feature, AND clause 6.I clause 7 architectural bluff",
   "discovered_by": "ultrathink-driven systematic-debugging investigation triggered by /superpowers:systematic-debugging slash command on 2026-05-05, after operator invoked the keyword 'ultrathink' against the agent's claim of 'clause 6.I closure'",
-  "summary": "The Submodules/Containers/pkg/emulator matrix runner contained an architectural bluff: Boot() hardcoded ADBPort=5555 unconditionally, ignoring the actual port the new emulator binds to. When a multi-AVD matrix ran, every iteration AFTER the first targeted localhost:5555 (the FIRST emulator's port). All subsequent AVDs' emulators ran in the background but were NOT under test; the matrix attestation falsely recorded test_passed=true for each row.",
+  "summary": "The submodules/containers/pkg/emulator matrix runner contained an architectural bluff: Boot() hardcoded ADBPort=5555 unconditionally, ignoring the actual port the new emulator binds to. When a multi-AVD matrix ran, every iteration AFTER the first targeted localhost:5555 (the FIRST emulator's port). All subsequent AVDs' emulators ran in the background but were NOT under test; the matrix attestation falsely recorded test_passed=true for each row.",
   "forensic_evidence_smoking_gun": {
     "diagnostic_run_pre_fix": {
       "evidence_file": ".lava-ci-evidence/2026-05-04-evening-c00-diag/real-device-verification.json",
@@ -57,7 +57,7 @@
     }
   ],
   "regression_test_added": {
-    "test_file": "Submodules/Containers/pkg/emulator/android_test.go",
+    "test_file": "submodules/containers/pkg/emulator/android_test.go",
     "test_name": "TestAndroidEmulator_Boot_DiscoversNewSerial_WhenPriorEmulatorPersists",
     "scope": "Simulates the exact bug scenario — pre-snapshot has emulator-5554 (a leaked previous emulator), post-launch has 5554 + new 5556. Asserts Boot() returns ConsolePort=5556 (NOT 5554 from the pre-snapshot, NOT 5555 from the pre-fix hardcode).",
     "falsifiability_rehearsed": "Mutation: revert Boot() to pre-fix hardcoded form (ConsolePort=5554, ADBPort=5555). Observed-Failure: TestAndroidEmulator_Boot_DiscoversNewSerial_WhenPriorEmulatorPersists fails with 'expected 5557 but got 5555'. Reverted; post-revert all tests pass."

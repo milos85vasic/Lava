@@ -71,7 +71,7 @@ viol=$(grep -rE \
   --include='*.sh' --include='*.kts' --include='*.kt' --include='*.go' \
   --include='*.yaml' --include='*.yml' --include='Makefile' \
   "$host_power_re" \
-  scripts/ buildSrc/ Submodules/ 2>/dev/null \
+  scripts/ buildSrc/ submodules/ 2>/dev/null \
   | grep -v '^scripts/ci\.sh:' \
   | grep -v '^scripts/bluff-hunt\.sh:' \
   || true)

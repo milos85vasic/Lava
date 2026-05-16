@@ -3,21 +3,21 @@ module digital.vasic.lava.apigo
 go 1.25.0
 
 replace (
-	digital.vasic.auth => ../Submodules/Auth
-	digital.vasic.cache => ../Submodules/Cache
-	digital.vasic.challenges => ../Submodules/Challenges
-	digital.vasic.concurrency => ../Submodules/Concurrency
-	digital.vasic.config => ../Submodules/Config
-	digital.vasic.containers => ../Submodules/Containers
-	digital.vasic.database => ../Submodules/Database
-	digital.vasic.discovery => ../Submodules/Discovery
-	digital.vasic.http3 => ../Submodules/HTTP3
-	digital.vasic.mdns => ../Submodules/Mdns
-	digital.vasic.middleware => ../Submodules/Middleware
-	digital.vasic.observability => ../Submodules/Observability
-	digital.vasic.ratelimiter => ../Submodules/RateLimiter
-	digital.vasic.recovery => ../Submodules/Recovery
-	digital.vasic.security => ../Submodules/Security
+	digital.vasic.auth => ../submodules/auth
+	digital.vasic.cache => ../submodules/cache
+	digital.vasic.challenges => ../submodules/challenges
+	digital.vasic.concurrency => ../submodules/concurrency
+	digital.vasic.config => ../submodules/config
+	digital.vasic.containers => ../submodules/containers
+	digital.vasic.database => ../submodules/database
+	digital.vasic.discovery => ../submodules/discovery
+	digital.vasic.http3 => ../submodules/http3
+	digital.vasic.mdns => ../submodules/mdns
+	digital.vasic.middleware => ../submodules/middleware
+	digital.vasic.observability => ../submodules/observability
+	digital.vasic.ratelimiter => ../submodules/ratelimiter
+	digital.vasic.recovery => ../submodules/recovery
+	digital.vasic.security => ../submodules/security
 )
 
 tool (

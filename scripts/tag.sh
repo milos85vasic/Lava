@@ -194,7 +194,7 @@ read_apigo_version_code() {
 #     (challenges/C{1..8}.json with status: VERIFIED)
 #   - the bluff-audit hunt has been run since the commit
 #     (bluff-audit/<recent>.json)
-#   - the Submodules/Tracker-SDK mirror smoke test passed
+#   - the submodules/tracker_sdk mirror smoke test passed
 #     (mirror-smoke/<recent>.json)
 #   - operator real-device verification per Task 5.22 is complete
 #     (real-device-verification.md status: VERIFIED)

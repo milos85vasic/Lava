@@ -20,7 +20,7 @@
 
 The Lava Tracker SDK lives in two layers:
 
-1. **Generic primitives** — mounted at `Submodules/Tracker-SDK/` (the
+1. **Generic primitives** — mounted at `submodules/tracker_sdk/` (the
    `vasic-digital/Tracker-SDK` submodule). These are Lava-agnostic
    building blocks: `MirrorUrl`, `TrackerDescriptor`-shape, `Mirror`
    health-state machine, in-memory registry, mirror-config store, and

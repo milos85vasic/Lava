@@ -104,7 +104,7 @@
           }
         },
         "4.3": {
-          "name": "internal/cache — wrapper around Submodules/Cache/pkg/postgres",
+          "name": "internal/cache — wrapper around submodules/cache/pkg/postgres",
           "status": "DONE",
           "deferral_note": "Adaptation C: integration tests gated by POSTGRES_TEST_URL env var; require live podman Postgres but test code is correctly written",
           "evidence": {

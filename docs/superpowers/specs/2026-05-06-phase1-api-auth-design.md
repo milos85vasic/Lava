@@ -179,7 +179,7 @@ Pre-push hook rejects on match.
 
 `internal/auth/multiprovider.go` (existing) is untouched by Phase 1; per-provider concerns live in Phase 2.
 
-`Submodules/RateLimiter` already exists. Investigation task: does its API expose fixed-ladder per-key state, or only token-bucket? If fixed-ladder is missing, Phase 1 contributes the ladder pattern UPSTREAM first per the Decoupled Reusable Architecture rule, then pins the new submodule hash in Lava. Lava-side `internal/auth/backoff.go` becomes thin glue. (If the submodule already supports the pattern, the Lava-side file is even thinner.)
+`submodules/ratelimiter` already exists. Investigation task: does its API expose fixed-ladder per-key state, or only token-bucket? If fixed-ladder is missing, Phase 1 contributes the ladder pattern UPSTREAM first per the Decoupled Reusable Architecture rule, then pins the new submodule hash in Lava. Lava-side `internal/auth/backoff.go` becomes thin glue. (If the submodule already supports the pattern, the Lava-side file is even thinner.)
 
 ## 7. Client-side architecture
 
@@ -373,7 +373,7 @@ Phase 1 is complete when ALL of:
 
 ### 12.6 Constitutional
 
-- [ ] §6.R added to root `CLAUDE.md`, `AGENTS.md`, every `Submodules/*/CLAUDE.md`.
+- [ ] §6.R added to root `CLAUDE.md`, `AGENTS.md`, every `submodules/*/CLAUDE.md`.
 - [ ] `scripts/check-constitution.sh` extended for forbidden-literal greps; pre-push hook updated to call it.
 - [ ] Falsifiability rehearsal in commit body: deliberate literal reintroduction fails the checker.
 
@@ -398,7 +398,7 @@ For each test class added or modified, a Bluff-Audit stamp goes in the commit bo
 
 ### 12.8 Distribution gate (§6.I + §6.K + §6.P)
 
-- [ ] API binary built via `Submodules/Containers` per §6.K; binary digest recorded in `.lava-ci-evidence/<tag>/api-build-digest.txt`.
+- [ ] API binary built via `submodules/containers` per §6.K; binary digest recorded in `.lava-ci-evidence/<tag>/api-build-digest.txt`.
 - [ ] Distributed to thinker.local via `scripts/distribute-api-remote.sh`.
 - [ ] APK built, signed, distributed via Firebase (`Lava-Android-1.2.7-1027`); §6.P CHANGELOG entry + per-version snapshot at `.lava-ci-evidence/distribute-changelog/firebase/1.2.7-1027.md`.
 - [ ] §6.I emulator matrix gate green: phone + tablet on API 28/30/34/latest, all rows pass (`gating: true`, `concurrent: 1`, no AVD-shadow).
@@ -408,7 +408,7 @@ For each test class added or modified, a Bluff-Audit stamp goes in the commit bo
 
 | Risk | Mitigation |
 |---|---|
-| Submodules/RateLimiter doesn't expose fixed-ladder per-key state | Plan-phase investigation; if missing, contribute upstream first per Decoupled Reusable Architecture rule (a multi-day extension before Phase 1's Lava-side work begins) |
+| submodules/ratelimiter doesn't expose fixed-ladder per-key state | Plan-phase investigation; if missing, contribute upstream first per Decoupled Reusable Architecture rule (a multi-day extension before Phase 1's Lava-side work begins) |
 | Re-signed-APK auth bypass through derived-key change | Killed by design: signing cert SHA enters HKDF salt; re-sign breaks decrypt |
 | Per-release pepper rotation forgotten by operator | `scripts/firebase-distribute.sh` extension: refuse to distribute if `LAVA_AUTH_OBFUSCATION_PEPPER` matches the previous distribute's value (compares against `.lava-ci-evidence/distribute-changelog/firebase/last-pepper.sha256`) |
 | Generated `LavaAuth.kt` accidentally committed | Add to `.gitignore`; pre-push hook scans for the file path |
@@ -420,8 +420,8 @@ For each test class added or modified, a Bluff-Audit stamp goes in the commit bo
 
 Items the implementation plan (writing-plans) must resolve before phase work begins:
 
-1. **`Submodules/RateLimiter` capabilities audit.** Does it already expose fixed-ladder per-key backoff? Is the API stable? If yes, Phase 1's `internal/auth/backoff.go` is thin glue. If no, plan a small upstream contribution to `Submodules/RateLimiter` that adds the ladder primitive (with its own §6.A contract test + §6.N falsifiability rehearsal), pin a new submodule hash in Lava, then proceed with Phase 1's Lava-side work. Per Decoupled Reusable Architecture rule: upstream first, Lava pin second.
-2. **`TrackerDescriptor.apiSupported` location.** The descriptor sealed-interface lives somewhere under `Submodules/Tracker-SDK` or `core/tracker`. Plan must locate the canonical site and decide whether `apiSupported` is a constructor parameter or a derived property.
+1. **`submodules/ratelimiter` capabilities audit.** Does it already expose fixed-ladder per-key backoff? Is the API stable? If yes, Phase 1's `internal/auth/backoff.go` is thin glue. If no, plan a small upstream contribution to `submodules/ratelimiter` that adds the ladder primitive (with its own §6.A contract test + §6.N falsifiability rehearsal), pin a new submodule hash in Lava, then proceed with Phase 1's Lava-side work. Per Decoupled Reusable Architecture rule: upstream first, Lava pin second.
+2. **`TrackerDescriptor.apiSupported` location.** The descriptor sealed-interface lives somewhere under `submodules/tracker_sdk` or `core/tracker`. Plan must locate the canonical site and decide whether `apiSupported` is a constructor parameter or a derived property.
 3. **OkHttp `Interceptor` registration site.** Trace the existing `NetworkModule` Hilt graph to confirm where `AuthInterceptor` is added; ensure it runs after the existing `NetworkLogger` (so logger never sees an unredacted header) and before TLS.
 4. **Build variant + keystore wiring.** Confirm `keystoreLoader` pattern resolves debug/release keystores correctly; confirm Gradle task can invoke it before `compileKotlin`.
 5. **`scripts/check-constitution.sh` regex set.** Plan must enumerate the exact forbidden-literal regexes for §6.R enforcement; ensure pre-push performance is acceptable on the full `git ls-files` scan.
@@ -434,5 +434,5 @@ Items the implementation plan (writing-plans) must resolve before phase work beg
 - Existing API auth surfaces: `lava-api-go/internal/auth/passthrough.go`, `multiprovider.go`
 - Existing client network: `core/network/impl/src/main/kotlin/lava/network/impl/`
 - Memory anchor: `feedback_lan_tls_no_manual_install.md` (LAN TLS without manual cert install — must be preserved)
-- §6.R inheritance target: every `Submodules/*/CLAUDE.md`
+- §6.R inheritance target: every `submodules/*/CLAUDE.md`
 - §6.L invocation count: this spec corresponds to the FOURTEENTH operator restatement of the Anti-Bluff Functional Reality Mandate (the no-hardcoding directive piggy-backs on §6.L's spirit and motivates §6.R's mechanics)

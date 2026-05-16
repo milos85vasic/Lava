@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Tests for scripts/check-constitution.sh §6.N awareness (Group A-prime).
 # The script is sensitive to file structure (CLAUDE.md headings,
-# Submodules/* paths). Easiest way to test: run it against the live
+# submodules/* paths). Easiest way to test: run it against the live
 # repo + against a temporary fixture that DELETES specific structures.
 set -euo pipefail
 
@@ -67,9 +67,9 @@ test_missing_6n_from_submodule_fails() {
   local fixture
   fixture=$(make_fixture)
   cd "$fixture"
-  if [[ -f Submodules/Auth/CLAUDE.md ]]; then
+  if [[ -f submodules/auth/CLAUDE.md ]]; then
     # Strip all 6.N references from Auth's CLAUDE.md
-    sed_inplace '/6\.N/d' Submodules/Auth/CLAUDE.md
+    sed_inplace '/6\.N/d' submodules/auth/CLAUDE.md
     if "$fixture/scripts/check-constitution.sh" >/dev/null 2>&1; then
       echo "FAIL test_missing_6n_from_submodule_fails: script passed despite Auth missing §6.N"
       exit 1
@@ -77,7 +77,7 @@ test_missing_6n_from_submodule_fails() {
       echo "PASS test_missing_6n_from_submodule_fails"
     fi
   else
-    echo "SKIP test_missing_6n_from_submodule_fails: Submodules/Auth/CLAUDE.md not present"
+    echo "SKIP test_missing_6n_from_submodule_fails: submodules/auth/CLAUDE.md not present"
   fi
   rm -rf "$fixture"
 }

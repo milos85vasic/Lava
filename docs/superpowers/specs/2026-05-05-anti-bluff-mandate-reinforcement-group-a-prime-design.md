@@ -14,7 +14,7 @@ Group A landed §6.N (Bluff-Hunt Cadence Tightening + Production Code Coverage) 
 Group A-prime is that spec. It closes §6.N-debt by implementing pre-push hook enforcement of §6.N.1.2 (per matrix-runner/gate change → Bluff-Audit stamp targeting a file in diff) and §6.N.1.3 (per phase-gating attestation file → falsifiability rehearsal evidence).
 
 Group A-prime ALSO bundles three parallel debt items the operator-mandate cycle has accumulated:
-1. `Submodules/Containers/pkg/emulator/Cleanup()` API — the typed in-package qemu-zombie killer per §6.M Containers stronger variant action item
+1. `submodules/containers/pkg/emulator/Cleanup()` API — the typed in-package qemu-zombie killer per §6.M Containers stronger variant action item
 2. Matrix-runner gradle-stdout persistence — recorded in the "remaining open gaps" inventory (failure diagnosis currently requires re-running gradle directly)
 3. `scripts/check-constitution.sh` §6.N awareness — flips the §6.N-debt warn-only transitional flag to hard-fail
 
@@ -24,7 +24,7 @@ These parallel items share the theme of "close the debt the operator-mandate cyc
 
 - Close §6.N-debt mechanically: pre-push hook rejects commits violating §6.N.1.2 + §6.N.1.3
 - `scripts/check-constitution.sh` hard-fails on §6.N propagation regressions
-- Replace inline `cleanup_qemu_zombies` bash in `scripts/run-emulator-tests.sh` with a typed Go API in `Submodules/Containers/pkg/emulator/Cleanup()` invoked via a thin `cmd/emulator-cleanup` binary
+- Replace inline `cleanup_qemu_zombies` bash in `scripts/run-emulator-tests.sh` with a typed Go API in `submodules/containers/pkg/emulator/Cleanup()` invoked via a thin `cmd/emulator-cleanup` binary
 - Matrix-runner persists gradle stdout per AVD so failure diagnosis stops requiring direct gradle re-runs
 - Update root CLAUDE.md §6.N-debt block to RESOLVED status
 
@@ -39,7 +39,7 @@ These parallel items share the theme of "close the debt the operator-mandate cyc
 ## Architecture
 
 ```
-Lava parent repo                           Submodules/Containers (own repo)
+Lava parent repo                           submodules/containers (own repo)
 ─────────────────────────                  ──────────────────────────────────
 
 .githooks/pre-push                         pkg/emulator/cleanup.go            (NEW)
@@ -60,7 +60,7 @@ tests/pre-push/check4_test.sh                + writeAttestation: gradle_log_path
 tests/pre-push/check5_test.sh
 tests/check-constitution_test.sh           pkg/emulator/matrix_test.go        (MODIFY)
                                              + assert gradle.log written w/ correct content
-Submodules/Containers (gitlink bumped)       + assert test-report dir created
+submodules/containers (gitlink bumped)       + assert test-report dir created
 
 CLAUDE.md (root)
   + §6.N-debt block updated to "RESOLVED 2026-05-05"
@@ -82,7 +82,7 @@ The existing §6.N-debt section (added by Group A in commit `52db359`) currently
 Group A-prime adds a final paragraph to the §6.N-debt block:
 
 ```markdown
-**RESOLVED 2026-05-05 evening** via Group A-prime spec at `docs/superpowers/specs/2026-05-05-anti-bluff-mandate-reinforcement-group-a-prime-design.md` (commit `<spec-SHA>`). Implementation chain: `Submodules/Containers` commit `<containers-SHA>` (Cleanup API + matrix.go gradle-log persistence) + Lava parent commit `<lava-SHA>` (pre-push Check 4 + Check 5 + check-constitution.sh §6.N awareness + scripts/run-emulator-tests.sh refactor). Pre-push hook Checks 4 + 5 active; constitution checker hard-fails on missing §6.N propagation OR missing rehearsal stamps. The §6.N-debt entry stays in CLAUDE.md as a forensic record but is no longer load-bearing.
+**RESOLVED 2026-05-05 evening** via Group A-prime spec at `docs/superpowers/specs/2026-05-05-anti-bluff-mandate-reinforcement-group-a-prime-design.md` (commit `<spec-SHA>`). Implementation chain: `submodules/containers` commit `<containers-SHA>` (Cleanup API + matrix.go gradle-log persistence) + Lava parent commit `<lava-SHA>` (pre-push Check 4 + Check 5 + check-constitution.sh §6.N awareness + scripts/run-emulator-tests.sh refactor). Pre-push hook Checks 4 + 5 active; constitution checker hard-fails on missing §6.N propagation OR missing rehearsal stamps. The §6.N-debt entry stays in CLAUDE.md as a forensic record but is no longer load-bearing.
 ```
 
 The `<spec-SHA>`, `<containers-SHA>`, `<lava-SHA>` placeholders are filled at commit time during implementation.
@@ -96,7 +96,7 @@ No other constitutional clauses change. No `§6.L` count bump (no anti-bluff man
 Add to the existing per-SHA loop after Check 3.
 
 **Trigger:** commit's `git diff-tree --no-commit-id --name-only -r "$sha"` returns at least one path matching:
-- `^Submodules/Containers/pkg/emulator/.*\.go$`
+- `^submodules/containers/pkg/emulator/.*\.go$`
 - `^scripts/run-emulator-tests\.sh$`
 - `^scripts/tag\.sh$`
 - `^scripts/check-constitution\.sh$`
@@ -164,7 +164,7 @@ declare -a propagation_targets=(
 for sm in Auth Cache Challenges Concurrency Config Containers Database \
           Discovery HTTP3 Mdns Middleware Observability RateLimiter \
           Recovery Security Tracker-SDK; do
-  propagation_targets+=("Submodules/$sm/CLAUDE.md")
+  propagation_targets+=("submodules/$sm/CLAUDE.md")
 done
 for f in "${propagation_targets[@]}"; do
   if [[ ! -f "$f" ]]; then continue; fi  # skip absent (e.g. submodule not initialized)
@@ -202,7 +202,7 @@ echo "[0/3] Pre-boot qemu-zombie cleanup (clause 6.M action item, via Containers
 
 Remove the `cleanup_qemu_zombies()` function definition entirely (~40 lines). The existing pre-flight checks (`/dev/kvm`, `ANDROID_SDK_ROOT`) stay.
 
-### E. `Submodules/Containers/pkg/emulator/cleanup.go` (NEW)
+### E. `submodules/containers/pkg/emulator/cleanup.go` (NEW)
 
 ```go
 package emulator
@@ -365,7 +365,7 @@ func cleanupWithDeps(ctx context.Context, w procWalker, k killer) (CleanupReport
 }
 ```
 
-### F. `Submodules/Containers/pkg/emulator/cleanup_test.go` (NEW)
+### F. `submodules/containers/pkg/emulator/cleanup_test.go` (NEW)
 
 ```go
 package emulator
@@ -509,7 +509,7 @@ func TestCleanup_PropagatesProcReadErr(t *testing.T) {
 }
 ```
 
-### G. `Submodules/Containers/cmd/emulator-cleanup/main.go` (NEW)
+### G. `submodules/containers/cmd/emulator-cleanup/main.go` (NEW)
 
 ```go
 // Package main is the thin CLI wrapping pkg/emulator.Cleanup.
@@ -562,7 +562,7 @@ func main() {
 }
 ```
 
-### H. `Submodules/Containers/pkg/emulator/matrix.go` (MODIFY)
+### H. `submodules/containers/pkg/emulator/matrix.go` (MODIFY)
 
 In `RunMatrix`, after the `RunInstrumentation` call (current line ~129), add:
 
@@ -601,7 +601,7 @@ if err := os.MkdirAll(avdDir, 0o755); err == nil {
 
 In `writeAttestation`, extend the `rowJSON` struct with `GradleLogPath string \`json:"gradle_log_path,omitempty"\``. Populate per row with `filepath.Join(t.AVD.Name, "gradle.log")`.
 
-### I. `Submodules/Containers/pkg/emulator/matrix_test.go` (MODIFY)
+### I. `submodules/containers/pkg/emulator/matrix_test.go` (MODIFY)
 
 Extend `TestAndroidMatrixRunner_AllAVDsPass_ReportsAllPassed` (or add a new test):
 
@@ -625,7 +625,7 @@ Add a new test `TestAndroidMatrixRunner_GradleLogWriteFailure_DoesNotFailRun`: i
 
 Three bash test scripts in `tests/pre-push/` and `tests/check-constitution/`:
 
-**`tests/pre-push/check4_test.sh`** — sets up a temporary git repo, stages a fixture commit touching `Submodules/Containers/pkg/emulator/cleanup.go`, invokes `.githooks/pre-push` against the fixture, and asserts:
+**`tests/pre-push/check4_test.sh`** — sets up a temporary git repo, stages a fixture commit touching `submodules/containers/pkg/emulator/cleanup.go`, invokes `.githooks/pre-push` against the fixture, and asserts:
 - Commit with no Bluff-Audit stamp → exit non-zero with §6.N.1.2 violation message
 - Commit with stamp present but naming an unrelated file → exit non-zero
 - Commit with stamp naming the touched file → exit zero
@@ -655,7 +655,7 @@ Three bash test scripts in `tests/pre-push/` and `tests/check-constitution/`:
     "reverted": true
   },
   "secondary_target": {
-    "file": "Submodules/Containers/pkg/emulator/cleanup.go",
+    "file": "submodules/containers/pkg/emulator/cleanup.go",
     "rationale": "STRONGER §6.N variant binds Containers — every pkg/emulator/*.go change requires rehearsal.",
     "mutation": "Loosen the `strings.HasPrefix(comm, \"qemu-system-\")` matcher to `strings.HasPrefix(comm, \"qemu-\")`",
     "observed_failure": "TestCleanup_StrictPrefix asserts qemu-img is NOT collected; mutation produces 8888 in Found, test fails with `expected []int{7777}, got []int{7777, 8888}`. Reverted.",
@@ -741,7 +741,7 @@ scripts/run-emulator-tests.sh execution:
 
 ## Error handling
 
-- **Chicken-and-egg with hooks:** Group A-prime's own commit modifies `.githooks/pre-push` + `scripts/check-constitution.sh` + `Submodules/Containers/pkg/emulator/matrix.go`. The OLD hook (without Check 4 + 5) runs at this commit's push time, so the commit is naturally exempt from its own new checks. The commit MUST still carry a Bluff-Audit stamp targeting these files (manual discipline for THIS commit; subsequent commits get hook-enforced).
+- **Chicken-and-egg with hooks:** Group A-prime's own commit modifies `.githooks/pre-push` + `scripts/check-constitution.sh` + `submodules/containers/pkg/emulator/matrix.go`. The OLD hook (without Check 4 + 5) runs at this commit's push time, so the commit is naturally exempt from its own new checks. The commit MUST still carry a Bluff-Audit stamp targeting these files (manual discipline for THIS commit; subsequent commits get hook-enforced).
 - **Comment-only changes** to `pkg/emulator/*.go`: Containers' STRONGER §6.N.3 binds these. The hook treats any diff line in a §6.N.1.2 file as a trigger.
 - **Renames:** `git diff-tree --name-only` shows the new path; stamp must reference it.
 - **/proc permission errors in Cleanup():** best-effort — `osProcWalker.PidComms()` records unreadable PIDs in `report.SkippedReadErr`. The CLI continues and exits 0.
@@ -780,7 +780,7 @@ All 5 mutation rehearsals MUST be performed during implementation and recorded i
 | | B.5 Falsifiability rehearsals (Check 4 + 5 + check-constitution) | Recorded |
 | | B.6 Root CLAUDE.md §6.N-debt block updated to "RESOLVED" | parent WIP |
 | | B.7 Lava parent commit (Bluff-Audit stamp targeting modified files) | parent commit |
-| **C. Pin bump + evidence** | C.1 Bump Submodules/Containers gitlink | parent WIP |
+| **C. Pin bump + evidence** | C.1 Bump submodules/containers gitlink | parent WIP |
 | | C.2 Write `.lava-ci-evidence/bluff-hunt/2026-05-05-evening-group-a-prime.json` | parent WIP |
 | | C.3 Write `.lava-ci-evidence/Phase-Group-A-prime-closure-2026-05-05-evening.json` | parent WIP |
 | | C.4 Pin-bump + evidence commit | parent commit |

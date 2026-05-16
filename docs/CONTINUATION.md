@@ -11,7 +11,7 @@ same commit so the index stays trustworthy. Stale state in this file
 is itself a §6.J spirit issue — the file claims a guarantee, the
 repo has drifted, the agent acts on the claim.
 
-> **Last updated:** 2026-05-16, **constitution-compliance plan delivery + HelixQA adoption + Phase 7 STRICT-flip cycle**
+> **Last updated:** 2026-05-16, **Phase 6a + 6b snake_case migration cycle (parallel with Phase 4-C-1)**
 > (constitutional-plumbing-only; no user-visible feature change; no Firebase
 > distribute since 1.2.22-1042 still serves the user-visible surface). Cycle
 > spans commits `4def2da7` → `0c87b6ae` (33 commits since plan landing
@@ -19,7 +19,7 @@ repo has drifted, the agent acts on the claim.
 >
 > **Major deliverables this cycle:**
 >   - The 12-clause constitution-compliance plan (`docs/plans/2026-05-15-constitution-compliance.md`) executed end-to-end across 10 phases. Plan + every phase's deliverable: see commit log between `832f739e..0c87b6ae`.
->   - HelixQA submodule incorporated (`Submodules/HelixQA` at upstream `b13ba7c0`) — see Phase 4 below.
+>   - HelixQA submodule incorporated (`submodules/helixqa` at upstream `b13ba7c0`) — see Phase 4 below.
 >   - 40-gate verify-all sweep wrapper at full STRICT mode after Phase 7's coverage-ledger STRICT-flip.
 >   - 17 own-org submodules now have helix-deps.yaml + install_upstreams.sh (16 vasic-digital + 1 HelixDevelopment HelixQA); 0 waivers in STRICT mode.
 >   - §6.L counter advanced 36 → 52 across 17 back-to-back restatements (longest sequence in project history); 53rd in-flight per the dispatch that triggered this CONTINUATION.md refresh task.
@@ -29,7 +29,7 @@ repo has drifted, the agent acts on the claim.
 >   - ✅ **Phase 2** (§11.4.30 .gitignore audit gate) — `037389f5`. `scripts/check-gitignore-coverage.sh` + 16 new .gitignore files + sweep wiring + hermetic test.
 >   - ✅ **Phase 3** (§11.4.31 helix-deps.yaml manifest gate) — `43345c3e` (gate) + `410af7ec` + `bcba3a19` (16/16 per-submodule manifests landed + Auth pin bump).
 >   - ✅ **Phase 3-debt** CLOSED — all 16 vasic-digital submodules at pin advance with helix-deps.yaml present.
->   - ✅ **Phase 4** (§11.4.27 HelixQA + 100% test-type coverage) — `aa0db6bd`. HelixQA adopted as `Submodules/HelixQA` at upstream HEAD; `HELIX_DEV_OWNED` exemption pattern added to mirror-mandate scanners.
+>   - ✅ **Phase 4** (§11.4.27 HelixQA + 100% test-type coverage) — `aa0db6bd`. HelixQA adopted as `submodules/helixqa` at upstream HEAD; `HELIX_DEV_OWNED` exemption pattern added to mirror-mandate scanners.
 >   - ✅ **Phase 4 follow-up A** (Option 1 design) — `a61bd3d8`. Integration design at `docs/plans/2026-05-16-helixqa-integration-design.md` (Option 1 shell-wiring recommended; Options 2/3 deferred).
 >   - ✅ **Phase 4 follow-up A executed** (shell-level wiring) — `1b66d192` + merge `d94ade0d`. 11 HelixQA Challenge scripts wrapped via `scripts/run-helixqa-challenges.sh` + `scripts/run-challenge-matrix.sh --include-helixqa` opt-in flag.
 >   - ✅ **Phase 4 follow-up B** (4 open-question resolutions for Option 1) — `281780d7` + merge `84d871a5`. Runner-mode flag (`--runner=host|containerized`), toolchain-precondition gate (`HELIXQA_TOOLCHAIN_MAP`), evidence-dir env-var override, `HELIXQA_W_EXCLUSIONS` array consuming the §6.W audit doc. 11 hermetic fixtures in `tests/check-constitution/test_helixqa_wiring.sh`.
@@ -37,7 +37,7 @@ repo has drifted, the agent acts on the claim.
 >   - ✅ **Phase 4-debt** CLOSED — `858ffb3e` (2026-05-16). HelixQA upstream PR `b13ba7c` landed `helix-deps.yaml` + `install_upstreams.sh` at the HelixQA repo root → Lava parent removed HelixQA from `HELIX_DEPS_WAIVERS` + `INSTALL_UPSTREAMS_WAIVERS`. 17/17 own-org submodules satisfy §11.4.31 + §11.4.35 + §11.4.36 in fully STRICT mode with **zero waivers**.
 >   - ✅ **Phase 5** (§11.4.28 nested own-org submodule audit) — `bbca3a78` (gate) + `410af7ec` (STRICT flip after Challenges/.gitmodules removal via the github cascade merge).
 >   - ✅ **Phase 5-debt** CLOSED — `410af7ec`. Scanner reports 0 violations in STRICT mode; Panoptic is no longer nested via Challenges.
->   - 📐 **Phase 6** (§11.4.29 lowercase snake_case naming) — `322f2081` + merge `c8d42434`. RESEARCH+PLAN ONLY landed at `docs/plans/2026-05-16-snake_case-migration.md`. **Operator-blocked on 8 open questions** (§11 of the plan: phase 6f upstream rename, helix_qa vs helixqa, etc.). Phase 6a implementation cycle NOT started.
+>   - ✅ **Phase 6** (§11.4.29 lowercase snake_case naming) — `322f2081` (plan landing) + Phase 6a + 6b execution this cycle. Operator's 8 Q answers: defer Phase 6f upstream rename (Lava-side only); `helixqa` (single-token); `http3` (single-token); `ratelimiter` (single-token); Go `cmd/` hyphens exempt; ordering Mdns(low) → Containers(high) last; same defer for Tracker-SDK upstream; Phase 6a authorized to run in parallel with Phase 4-C-1. Execution: `Submodules/` → `submodules/` parent rename + 17 child renames (Auth→auth, Cache→cache, Challenges→challenges, Concurrency→concurrency, Config→config, Containers→containers, Database→database, Discovery→discovery, HelixQA→helixqa, HTTP3→http3, Mdns→mdns, Middleware→middleware, Observability→observability, RateLimiter→ratelimiter, Recovery→recovery, Security→security, Tracker-SDK→tracker_sdk) + 139 referencing files updated + `.gitmodules` rewritten + Phase 6f upstream-rename execution plan at `docs/plans/2026-05-16-phase6f-upstream-rename-execution.md` (DEFERRED per Q1). Audit confirms 0 stale `Submodules/X` references in 16/17 names (Tracker-SDK has 1 ref in a historical bluff-hunt JSON narrative quote — exempt forensic anchor).
 >   - ✅ **Phase 7** (§11.4.25 coverage ledger) — `21dee741` + merge `c35af27c` (generator + verifier + 58-row baseline + 6 hermetic fixtures + sweep wiring, advisory at first) → `76507ca0` + merge `20b3fd36` (waiver backfill: 0 covered / 20 partial / 38 gap → 48 covered / 10 partial / 0 gap) → `0c87b6ae` (STRICT-flip in sweep wrapper).
 >   - ✅ **Phase 7-debt** CLOSED — `0c87b6ae`. Sweep wrapper now invokes `check-coverage-ledger.sh --strict` (was `--advisory`); gate hard-fails on stale/missing rows.
 >   - ✅ **Phase 8** (§11.4.35 canonical-root + §11.4.36 install_upstreams) — `d95be689` (gate) + `410af7ec` (STRICT-flip after 10 install_upstreams scripts landed across owned submodules).
@@ -137,7 +137,7 @@ This cycle delivered the entire 12-clause constitution-compliance plan plus Heli
 
 ### HelixQA submodule (NEW this cycle)
 
-- Adopted at `Submodules/HelixQA` from `git@github.com:HelixDevelopment/HelixQA.git`.
+- Adopted at `submodules/helixqa` from `git@github.com:HelixDevelopment/HelixQA.git`.
 - Initial pin: `403603db` (2026-05-15 in Phase 4).
 - Upstream PR `b13ba7c` added `helix-deps.yaml` + `install_upstreams.sh` (2026-05-16 in Phase 4-debt closure).
 - Current pin: `b13ba7c0`.
@@ -174,20 +174,9 @@ Design at `docs/plans/2026-05-16-helixqa-go-package-linking-design.md` §G:
 
 **Action:** operator reviews + decides; agent does NOT proceed to Phase 4-C-1 implementation without operator approval on these.
 
-### 2.2 Phase 6 snake_case migration — 8 open questions
+### 2.2 Phase 6 snake_case migration — RESOLVED + EXECUTED
 
-Plan at `docs/plans/2026-05-16-snake_case-migration.md` §11:
-
-1. Phase 6f (upstream repo rename) — proceed or defer? (current recommendation: defer)
-2. HelixQA local-path target: `helix_qa` or `helixqa`?
-3. Submodule directory rename strategy: bulk vs per-submodule cycles.
-4. Lava-side reference updates: blind sed vs guided per-area.
-5. `core/` and `feature/` (already lowercase) — keep as-is or add to migration?
-6. Per-submodule LANG-spec subtree exemption applicability per submodule.
-7. Audit script (already shipped) coverage extension.
-8. `Submodules/` capital-S → `submodules/` directory rename — timing within sequence.
-
-**Action:** operator reviews + decides; agent does NOT proceed to Phase 6a implementation without operator approval.
+All 8 operator questions answered (2026-05-16). Phase 6a + 6b executed in this cycle. See `docs/plans/2026-05-16-phase6f-upstream-rename-execution.md` for the deferred upstream-rename plan (Q1: defer; document execution steps for operator).
 
 ### 2.3 Release-tagging chain (versions inherit from prior cycle)
 
@@ -221,7 +210,7 @@ Bumping a pin is a deliberate operator action; never auto-update.
 | `Tracker-SDK` | `ae761d5c` | GitHub + GitLab | helix-deps.yaml + install_upstreams.sh added |
 | `constitution` | `464ada14` | universal (HelixConstitution upstream) | 12 new §11.4.25-§11.4.36 clauses |
 
-**Internal-to-submodule nested submodules:** `Submodules/Challenges` had a nested `Panoptic` submodule that was removed via the github cascade merge in Phase 5-debt closure (CONST-051(C) flat-layout enforcement); Challenges now declares Panoptic as a `layout: flat` dependency in its `helix-deps.yaml`.
+**Internal-to-submodule nested submodules:** `submodules/challenges` had a nested `Panoptic` submodule that was removed via the github cascade merge in Phase 5-debt closure (CONST-051(C) flat-layout enforcement); Challenges now declares Panoptic as a `layout: flat` dependency in its `helix-deps.yaml`.
 
 ---
 
@@ -258,7 +247,7 @@ work.
   time + pre-push.
 - **§11.4.27 HelixQA non-incorporation** — Phase 4 closure (`aa0db6bd`)
   + Phase 4-debt closure (`858ffb3e`) bring HelixQA in as
-  `Submodules/HelixQA` with full mirror compliance.
+  `submodules/helixqa` with full mirror compliance.
 - **§11.4.31 / .35 / .36 zero-waiver state** — Phase 4-debt closure +
   Phase 8-debt closure achieve 17/17 own-org submodules satisfying all
   three mandates with **zero waivers** in STRICT mode.
@@ -342,7 +331,7 @@ Your default next action (priority order):
   3. **Crashlytics monitoring**: the last Firebase distribute was 1.2.22-1042
      (2026-05-14); check Crashlytics for any new issues per §6.O closure
      mandate.
-  4. **HelixQA pin freshness**: re-baseline `Submodules/HelixQA` from
+  4. **HelixQA pin freshness**: re-baseline `submodules/helixqa` from
      upstream if operator approves; re-run the §6.W audit.
   5. **Tag-script gate**: still blocked on §6.X-debt (Linux x86_64 + KVM
      gate-host) for §6.I matrix attestation. No release tag this cycle.

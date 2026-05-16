@@ -14,7 +14,7 @@
 #   .env.example                                — placeholder file
 #   .lava-ci-evidence/                          — forensic anchors + matrix evidence
 #   docs/**/*.md                                — design docs, plans, incident notes
-#   Submodules/                                 — submodules vendored at pinned hash
+#   submodules/                                 — submodules vendored at pinned hash
 #   *_test.go, *Test.kt, *Tests.kt, *Test.java  — synthetic test fixtures
 #   src/test/, src/androidTest/                 — test source roots
 #   fixtures/                                   — test HTML/JSON fixtures
@@ -38,7 +38,7 @@ cd "$(dirname "$0")/.."
 
 candidates=$(
   git ls-files -z \
-    | grep -zvE '^\.env\.example$|^\.lava-ci-evidence/|^Submodules/|_test\.go$|(Test\.kt|Tests\.kt|Test\.java)$|/test/|/androidTest/|fixtures/|^CHANGELOG\.md$|\.md$|\.json$|\.xml$|\.yml$|\.yaml$' \
+    | grep -zvE '^\.env\.example$|^\.lava-ci-evidence/|^submodules/|_test\.go$|(Test\.kt|Tests\.kt|Test\.java)$|/test/|/androidTest/|fixtures/|^CHANGELOG\.md$|\.md$|\.json$|\.xml$|\.yml$|\.yaml$' \
     | while IFS= read -r -d '' p; do
         [[ -f "$p" ]] && printf '%s\0' "$p"
       done \

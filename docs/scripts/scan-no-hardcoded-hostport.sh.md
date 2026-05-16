@@ -27,7 +27,7 @@ literals avoids false positives on `Map<String, Int>` declarations or
 `key:value` JSON snippets in comments.
 
 Exemptions (lockstep with §6.R clause body):
-  .env.example, .lava-ci-evidence/, Submodules/, tests, fixtures/,
+  .env.example, .lava-ci-evidence/, submodules/, tests, fixtures/,
   CHANGELOG.md, *.md, *.json, *.xml, *.yml, *.yaml — external config
   and docs are legitimate homes for these literals.
 

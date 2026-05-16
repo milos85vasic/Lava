@@ -3,7 +3,7 @@
 #
 # Per the SP-3a plan Task 5.19. Asserts that the three SP-3a clauses
 # (6.D, 6.E, 6.F) are present in root CLAUDE.md and that the
-# Submodules/Tracker-SDK/CLAUDE.md exists. Run from scripts/ci.sh in
+# submodules/tracker_sdk/CLAUDE.md exists. Run from scripts/ci.sh in
 # every mode.
 
 set -euo pipefail
@@ -46,11 +46,11 @@ for clause in "${required_clauses[@]}"; do
 done
 
 # ---------------------------------------------------------------------
-# 2. Submodules/Tracker-SDK/CLAUDE.md MUST exist.
+# 2. submodules/tracker_sdk/CLAUDE.md MUST exist.
 # ---------------------------------------------------------------------
-if [[ ! -f Submodules/Tracker-SDK/CLAUDE.md ]]; then
-  echo "MISSING Submodules/Tracker-SDK/CLAUDE.md" >&2
-  echo "  → Restore via 'git submodule update --init Submodules/Tracker-SDK'" >&2
+if [[ ! -f submodules/tracker_sdk/CLAUDE.md ]]; then
+  echo "MISSING submodules/tracker_sdk/CLAUDE.md" >&2
+  echo "  → Restore via 'git submodule update --init submodules/tracker_sdk'" >&2
   echo "    or per SP-3a Phase 1 Task 1.7." >&2
   exit 1
 fi
@@ -59,8 +59,8 @@ fi
 # 3. Tracker-SDK constitution MUST reference clauses 6.A-6.F (or the
 #    individual clauses) via the Sixth Law inheritance.
 # ---------------------------------------------------------------------
-if ! grep -qE '6\.A.{0,4}6\.F|6\.A through 6\.E|clauses 6\.A' Submodules/Tracker-SDK/CLAUDE.md; then
-  echo "WARN: Submodules/Tracker-SDK/CLAUDE.md does not explicitly cite 6.A-6.F. Verify the Sixth Law inheritance is present and re-run." >&2
+if ! grep -qE '6\.A.{0,4}6\.F|6\.A through 6\.E|clauses 6\.A' submodules/tracker_sdk/CLAUDE.md; then
+  echo "WARN: submodules/tracker_sdk/CLAUDE.md does not explicitly cite 6.A-6.F. Verify the Sixth Law inheritance is present and re-run." >&2
 fi
 
 # ---------------------------------------------------------------------
@@ -131,7 +131,7 @@ fi
 # ---------------------------------------------------------------------
 # 7. Clause 6.K presence check (Containers extension shipped).
 #
-# Per clause 6.K clause 5: once Submodules/Containers/pkg/emulator/
+# Per clause 6.K clause 5: once submodules/containers/pkg/emulator/
 # ships, the constitution checker MUST verify (a) the package exists in
 # the pinned submodule, (b) Lava-side scripts/run-emulator-tests.sh
 # references the package's CLI, (c) at least one passing test inside
@@ -143,7 +143,7 @@ fi
 # Pre-tag invocation (scripts/tag.sh) MUST upgrade the warn to a hard
 # fail.
 # ---------------------------------------------------------------------
-containers_emulator_dir="Submodules/Containers/pkg/emulator"
+containers_emulator_dir="submodules/containers/pkg/emulator"
 if [[ -d "$containers_emulator_dir" ]]; then
   if [[ ! -f "$containers_emulator_dir/types.go" ]] ||
      [[ ! -f "$containers_emulator_dir/android.go" ]] ||
@@ -165,7 +165,7 @@ if [[ -d "$containers_emulator_dir" ]]; then
   echo "  ✓ clause 6.K: $containers_emulator_dir present + $emulator_test_count test file(s)"
 else
   echo "  ⚠ clause 6.K: $containers_emulator_dir not present in this checkout."
-  echo "    Submodule may not be initialised; run \`git submodule update --init Submodules/Containers\`."
+  echo "    Submodule may not be initialised; run \`git submodule update --init submodules/containers\`."
   echo "    scripts/tag.sh MUST upgrade this warn to a hard fail at tag time."
 fi
 
@@ -196,7 +196,7 @@ declare -a propagation_targets=(
 for sm in Auth Cache Challenges Concurrency Config Containers Database \
           Discovery HTTP3 Mdns Middleware Observability RateLimiter \
           Recovery Security Tracker-SDK; do
-  propagation_targets+=("Submodules/$sm/CLAUDE.md")
+  propagation_targets+=("submodules/$sm/CLAUDE.md")
 done
 for f in "${propagation_targets[@]}"; do
   if [[ ! -f "$f" ]]; then continue; fi
@@ -285,11 +285,11 @@ if ! grep -qF '##### 6.R — No-Hardcoding Mandate' CLAUDE.md; then
   exit 1
 fi
 
-# 6.R must appear in every Submodules/*/CLAUDE.md (per §6.F inheritance).
+# 6.R must appear in every submodules/*/CLAUDE.md (per §6.F inheritance).
 # Heading-anchored pattern (`## §6.R — No-Hardcoding Mandate`) — a passing
 # mention in a notes/history paragraph MUST NOT satisfy this gate.
 # HelixDevelopment-owned submodules are exempt (see HELIX_DEV_OWNED).
-for sub in Submodules/*/CLAUDE.md; do
+for sub in submodules/*/CLAUDE.md; do
   is_helix_dev_owned "$sub" && continue
   if ! grep -qF '## §6.R — No-Hardcoding Mandate' "$sub"; then
     echo "MISSING 6.R inheritance reference: $sub" >&2
@@ -349,9 +349,9 @@ if ! grep -qF '##### 6.S — Continuation Document Maintenance Mandate' CLAUDE.m
   exit 1
 fi
 
-# 6.S(5): §6.S inheritance reference must appear in every Submodules/*/CLAUDE.md
+# 6.S(5): §6.S inheritance reference must appear in every submodules/*/CLAUDE.md
 # HelixDevelopment-owned submodules are exempt (see HELIX_DEV_OWNED).
-for sub in Submodules/*/CLAUDE.md; do
+for sub in submodules/*/CLAUDE.md; do
   is_helix_dev_owned "$sub" && continue
   if ! grep -qF '## §6.S — Continuation Document Maintenance Mandate' "$sub"; then
     echo "MISSING 6.S inheritance reference: $sub" >&2
@@ -386,10 +386,10 @@ if ! grep -qF '##### 6.X — Container-Submodule Emulator Wiring Mandate' CLAUDE
   exit 1
 fi
 
-# 6.X(2): §6.X inheritance reference must appear in every Submodules/*/CLAUDE.md,
+# 6.X(2): §6.X inheritance reference must appear in every submodules/*/CLAUDE.md,
 # */AGENTS.md, and */CONSTITUTION.md (per §6.F inheritance).
 # HelixDevelopment-owned submodules are exempt (see HELIX_DEV_OWNED).
-for sub in Submodules/*/CLAUDE.md Submodules/*/AGENTS.md Submodules/*/CONSTITUTION.md; do
+for sub in submodules/*/CLAUDE.md submodules/*/AGENTS.md submodules/*/CONSTITUTION.md; do
   is_helix_dev_owned "$sub" && continue
   if ! grep -qF '## §6.X — Container-Submodule Emulator Wiring Mandate' "$sub"; then
     echo "MISSING 6.X inheritance reference: $sub" >&2
@@ -411,18 +411,18 @@ done
 # Containerized Emulator implementation distinct from the host-direct
 # AndroidEmulator path. This is the §6.X-debt close criterion (1).
 # Activated 2026-05-13 evening after Containers commit 562069e7 shipped.
-if [[ -d Submodules/Containers/pkg/emulator ]]; then
-  if [[ ! -f Submodules/Containers/pkg/emulator/containerized.go ]]; then
-    echo "MISSING 6.X runtime check (a): Submodules/Containers/pkg/emulator/containerized.go" >&2
+if [[ -d submodules/containers/pkg/emulator ]]; then
+  if [[ ! -f submodules/containers/pkg/emulator/containerized.go ]]; then
+    echo "MISSING 6.X runtime check (a): submodules/containers/pkg/emulator/containerized.go" >&2
     echo "  → Containers-side §6.X-debt close requires a Containerized Emulator impl." >&2
     exit 1
   fi
-  if ! grep -qF 'type Containerized struct' Submodules/Containers/pkg/emulator/containerized.go 2>/dev/null; then
+  if ! grep -qF 'type Containerized struct' submodules/containers/pkg/emulator/containerized.go 2>/dev/null; then
     echo "MISSING 6.X runtime check (a): containerized.go lacks the Containerized type declaration" >&2
     exit 1
   fi
   # And the Emulator interface compile-time check.
-  if ! grep -qF 'var _ Emulator = (*Containerized)(nil)' Submodules/Containers/pkg/emulator/containerized.go 2>/dev/null; then
+  if ! grep -qF 'var _ Emulator = (*Containerized)(nil)' submodules/containers/pkg/emulator/containerized.go 2>/dev/null; then
     echo "MISSING 6.X runtime check (a): Containerized does not assert Emulator-interface satisfaction" >&2
     exit 1
   fi
@@ -431,8 +431,8 @@ fi
 # 6.X(5) — runtime check (b): cmd/emulator-matrix MUST accept the
 # --runner flag (host-direct|containerized). This is the §6.X-debt
 # close criterion (2). Activated 2026-05-13 evening.
-if [[ -f Submodules/Containers/cmd/emulator-matrix/main.go ]]; then
-  if ! grep -qF 'flag.String("runner"' Submodules/Containers/cmd/emulator-matrix/main.go 2>/dev/null; then
+if [[ -f submodules/containers/cmd/emulator-matrix/main.go ]]; then
+  if ! grep -qF 'flag.String("runner"' submodules/containers/cmd/emulator-matrix/main.go 2>/dev/null; then
     echo "MISSING 6.X runtime check (b): cmd/emulator-matrix/main.go lacks --runner flag" >&2
     echo "  → §6.X-debt close requires the runner-choice flag on the matrix CLI." >&2
     exit 1
@@ -475,10 +475,10 @@ for root in CLAUDE.md AGENTS.md; do
 done
 
 # 6.AD(4): every per-scope CLAUDE.md / AGENTS.md / CONSTITUTION.md MUST carry
-# the inheritance pointer-block. Scope: Submodules/* + lava-api-go/ + core/ +
+# the inheritance pointer-block. Scope: submodules/* + lava-api-go/ + core/ +
 # app/ + feature/. (Root CLAUDE.md + AGENTS.md handled above.)
 ad_propagated_targets=()
-for f in Submodules/*/CLAUDE.md Submodules/*/AGENTS.md Submodules/*/CONSTITUTION.md; do
+for f in submodules/*/CLAUDE.md submodules/*/AGENTS.md submodules/*/CONSTITUTION.md; do
   [[ -f "$f" ]] || continue
   is_helix_dev_owned "$f" && continue
   ad_propagated_targets+=("$f")
@@ -559,8 +559,8 @@ for h in "${forbidden_remote_hosts[@]}"; do
     exit 1
   fi
 done
-# vasic-digital submodules (every Submodules/* — none is HelixDevelopment-owned)
-for sub in Submodules/*/; do
+# vasic-digital submodules (every submodules/* — none is HelixDevelopment-owned)
+for sub in submodules/*/; do
   [[ -d "$sub/.git" || -f "$sub/.git" ]] || continue
   sub_remotes=$(git -C "$sub" remote 2>/dev/null || true)
   for h in "${forbidden_remote_hosts[@]}"; do
@@ -611,7 +611,7 @@ if [[ ${#guess_violations[@]} -gt 0 ]]; then
 fi
 
 echo "Constitution check passed: 6.D + 6.E + 6.F present in CLAUDE.md;"
-echo "Submodules/Tracker-SDK/CLAUDE.md present; core/ + feature/ scoped"
+echo "submodules/tracker_sdk/CLAUDE.md present; core/ + feature/ scoped"
 echo "clauses present; no clause-6.H credential patterns in tracked files;"
 echo "clause-6.K Containers extension present; §6.X Container-Submodule"
 echo "Emulator Wiring inherited in all submodule + lava-api-go docs;"

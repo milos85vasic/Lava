@@ -28,7 +28,7 @@ import (
 // TestServerStartAndServeHTTP3 is the load-bearing integration test for
 // internal/server. It exercises the full path:
 //
-//	HTTP/3 client → quic-go transport → Submodules/HTTP3 → gin.Engine.
+//	HTTP/3 client → quic-go transport → submodules/http3 → gin.Engine.
 //
 // Sixth Law primary assertion: the response body and the negotiated
 // protocol must both match, so a regression in route registration OR
@@ -67,7 +67,7 @@ func TestServerStartAndServeHTTP3(t *testing.T) {
 	})
 
 	// Wait for the UDP listener to bind. Same pattern as
-	// Submodules/HTTP3/pkg/server/integration_test.go::startServer.
+	// submodules/http3/pkg/server/integration_test.go::startServer.
 	deadline := time.Now().Add(2 * time.Second)
 	for time.Now().Before(deadline) {
 		c, err := net.Dial("udp", publicAddr)
@@ -277,7 +277,7 @@ func freeTCPPort(t *testing.T) int {
 // selfSignedTLS mints a fresh ECDSA P-256 cert valid for localhost,
 // 127.0.0.1, ::1 and returns a *tls.Config plus the PEM-encoded cert
 // bytes for the client root pool. Adapted from
-// Submodules/HTTP3/internal/testcert/testcert.go (which is `internal`
+// submodules/http3/internal/testcert/testcert.go (which is `internal`
 // to that submodule and thus not importable from here per Go's
 // internal-package rules).
 func selfSignedTLS(t *testing.T) (*tls.Config, []byte) {

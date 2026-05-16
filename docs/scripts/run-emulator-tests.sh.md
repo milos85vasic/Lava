@@ -21,7 +21,7 @@ rule: the matrix-orchestration capability lives in
 `vasic-digital/Containers/pkg/emulator/`. This script:
 
   1. Builds the cmd/emulator-matrix binary from the pinned submodule
-     (./Submodules/Containers).
+     (./submodules/containers).
   2. Builds the Lava debug APK if requested.
   3. Invokes the binary with Lava-specific arguments: AVD list, test
      class, evidence directory.

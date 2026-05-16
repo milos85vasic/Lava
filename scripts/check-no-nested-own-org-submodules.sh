@@ -51,7 +51,7 @@ FORBIDDEN_ORGS_REGEX='vasic-digital|HelixDevelopment|red-elf|ATMOSphere1234321|B
 #   - tracking issue or commit referencing the planned refactor
 #   - target removal date or "permanent" if structurally required
 WAIVERS=(
-    # NO ACTIVE WAIVERS — the Submodules/Challenges/Panoptic finding from
+    # NO ACTIVE WAIVERS — the submodules/challenges/Panoptic finding from
     # the 2026-05-15 audit is documented as constitutional-debt below
     # (Phase 5 commit body), NOT waived. Refactor is owed in a follow-up.
 )
@@ -77,8 +77,8 @@ while IFS= read -r gm; do
     [[ -z "$gm" ]] && continue
     scanned_count=$((scanned_count + 1))
 
-    # Container submodule name = first dir under Submodules/
-    container=$(echo "$gm" | sed -E 's|^Submodules/([^/]+)/.*|\1|')
+    # Container submodule name = first dir under submodules/
+    container=$(echo "$gm" | sed -E 's|^submodules/([^/]+)/.*|\1|')
 
     # Parse .gitmodules for path + url pairs of own-org URLs
     # awk pass over the file to extract submodule sections
@@ -99,7 +99,7 @@ while IFS= read -r gm; do
             if (p != "" && u != "") { printf "%s\t%s\n", p, u }
         }
     ' "$gm")
-done < <(find Submodules -name ".gitmodules" -type f 2>/dev/null)
+done < <(find submodules -name ".gitmodules" -type f 2>/dev/null)
 
 echo "==> §11.4.28 nested-own-org-submodule scan"
 echo "    .gitmodules files scanned: $scanned_count"
@@ -117,7 +117,7 @@ printf '      %s\n' "${violations[@]}"
 echo ""
 echo "    To resolve a violation:"
 echo "      (a) Refactor: extract the nested submodule to be a peer of the container"
-echo "          (e.g., move Submodules/Challenges/Panoptic to Submodules/Panoptic)"
+echo "          (e.g., move submodules/challenges/Panoptic to submodules/Panoptic)"
 echo "      (b) Waiver: add WAIVERS entry with rationale + tracking issue + target date"
 
 if [[ "$STRICT" == "1" ]]; then

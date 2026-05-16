@@ -18,7 +18,7 @@
   "session_command_categories_used": [
     "git (status, diff, log, add, commit, push, ls-remote, ls-files, blame)",
     "gradle (assembleDebug, connectedDebugAndroidTest, spotlessApply, testDebugUnitTest, --no-daemon)",
-    "go (build, test) — inside Submodules/Containers",
+    "go (build, test) — inside submodules/containers",
     "adb (install, uninstall, shell input tap, shell uiautomator dump, shell am, exec-out screencap, devices, emu kill)",
     "emulator (-no-window -no-audio -no-snapshot -gpu swiftshader_indirect)",
     "podman (ps, save) — invoked indirectly via build_and_release.sh's image export step",
