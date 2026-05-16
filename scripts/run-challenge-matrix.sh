@@ -18,6 +18,10 @@
 #       [--latest-api 36]                                    # override "latest stable"
 #       [--add-tv]                                           # add TV-class AVD when feature touches TvActivity
 #       [--add-foldable]                                     # add foldable AVD
+#       [--include-helixqa]                                  # ALSO invoke the 11 HelixQA Challenge scripts
+#                                                            # (per docs/plans/2026-05-16-helixqa-integration-design.md
+#                                                            # Option 1 — shell-level wiring). OFF by default so
+#                                                            # existing matrix runs are unaffected.
 #
 # Honest pre-flight: this script DETECTS the §6.X-debt darwin/arm64
 # host gap (no /dev/kvm available to podman) and, when detected, REFUSES
@@ -41,6 +45,7 @@ NO_BUILD=0
 LATEST_API="36"                 # current "latest stable" as of 2026-05
 ADD_TV=0
 ADD_FOLDABLE=0
+INCLUDE_HELIXQA=0               # per HelixQA integration-design Option 1
 
 # §6.AE.2 minimum AVD matrix. Format: name:apiLevel:formFactor.
 # This is the constitutional minimum for gate runs. Sub-minimums are
@@ -63,7 +68,8 @@ while [[ $# -gt 0 ]]; do
         --latest-api)    LATEST_API="$2"; shift 2 ;;
         --add-tv)        ADD_TV=1; shift ;;
         --add-foldable)  ADD_FOLDABLE=1; shift ;;
-        -h|--help)       sed -n '3,33p' "$0"; exit 0 ;;
+        --include-helixqa) INCLUDE_HELIXQA=1; shift ;;
+        -h|--help)       sed -n '3,37p' "$0"; exit 0 ;;
         *)               echo "ERROR: unknown argument: $1" >&2; exit 2 ;;
     esac
 done
@@ -86,6 +92,30 @@ echo "==> §6.AE Challenge matrix runner"
 echo "    test class: ${TEST_CLASS:-<all under lava.app.challenges>}"
 echo "    evidence dir: $EVIDENCE_DIR"
 echo "    AVDs: $AVDS_JOINED"
+echo "    include-helixqa: $INCLUDE_HELIXQA"
+
+# --- optional: HelixQA Challenge shell-wiring (Option 1 per integration design) ---
+# HelixQA challenges run on the HOST; they are independent of the AVD
+# matrix and therefore execute BEFORE the §6.X host-gap check. This lets
+# the broader-than-Compose-UI test types still run on darwin/arm64 hosts
+# even when the emulator matrix is blocked.
+HELIXQA_OVERALL_RC=0
+if [[ "$INCLUDE_HELIXQA" == "1" ]]; then
+    echo ""
+    echo "==> Invoking HelixQA Challenge shell-wiring (scripts/run-helixqa-challenges.sh)"
+    HELIXQA_EVIDENCE_DIR="$EVIDENCE_DIR/helixqa"
+    mkdir -p "$HELIXQA_EVIDENCE_DIR"
+    if bash "$REPO_ROOT/scripts/run-helixqa-challenges.sh" \
+            --evidence-dir "$HELIXQA_EVIDENCE_DIR"; then
+        echo "    ✓ HelixQA wrapper exited 0 (zero FAIL)"
+    else
+        HELIXQA_OVERALL_RC=$?
+        echo "    ✗ HelixQA wrapper exited $HELIXQA_OVERALL_RC (one or more FAIL)" >&2
+        # Do NOT short-circuit the matrix run on HelixQA failure — both surfaces
+        # are independently load-bearing. The final aggregate exit code combines
+        # both at the bottom of this script.
+    fi
+fi
 
 # --- pre-flight: §6.X host gap detection ---
 PLATFORM="$(uname -s)"
@@ -132,6 +162,12 @@ if [[ "$PLATFORM" != "Linux" || "$HOST_ARCH" != "x86_64" || "$KVM_AVAILABLE" != 
     a §6.AE gate run requires the full matrix to actually run. Per §6.J/§6.L:
     no false-pass; honest unblock report.
 EOF
+    # If --include-helixqa surfaced real failures, still propagate that
+    # signal; otherwise the gate-host-ineligible exit-2 stands. The dominant
+    # signal is the most-severe outcome.
+    if [[ "$HELIXQA_OVERALL_RC" -ne 0 ]]; then
+        echo "ADDITIONAL: HelixQA wrapper reported FAIL (exit=$HELIXQA_OVERALL_RC). See $EVIDENCE_DIR/helixqa/" >&2
+    fi
     exit 2
 fi
 
@@ -173,4 +209,16 @@ RC=$?
 echo ""
 echo "==> §6.AE matrix run complete (exit=$RC)"
 echo "    Evidence: $EVIDENCE_DIR/real-device-verification.{md,json}"
+
+# Aggregate: if HelixQA was opted in AND reported failures, surface that
+# even when the AVD matrix passed. Both surfaces are independently
+# load-bearing per the integration-design Option-1 anti-bluff posture.
+if [[ "$HELIXQA_OVERALL_RC" -ne 0 ]]; then
+    echo "==> HelixQA wrapper also reported FAIL (exit=$HELIXQA_OVERALL_RC). See $EVIDENCE_DIR/helixqa/" >&2
+    # Promote to non-zero if matrix itself was 0; if matrix already failed,
+    # keep matrix's exit code as the dominant signal.
+    if [[ "$RC" -eq 0 ]]; then
+        RC=1
+    fi
+fi
 exit "$RC"

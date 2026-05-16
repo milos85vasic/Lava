@@ -41,6 +41,10 @@ KIMI.md
 # top level of .lava-ci-evidence/ and in named subdirs (sp3a-*/, sp2-*/,
 # bluff-hunt/, sixth-law-incidents/, Lava-Android-*/).
 .lava-ci-evidence/2026-*/
+# verify-all sweep attestations + helixqa wrapper runs are also operator
+# session telemetry — recreated every invocation; never tracked.
+.lava-ci-evidence/verify-all/
+.lava-ci-evidence/helixqa-challenges/
 
 # Build outputs at any depth (already covered for /build but nested
 # modules generate their own build/ dirs)
