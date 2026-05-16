@@ -23,12 +23,12 @@ deps:
 
   # vasic-digital owned-by-us submodules (16 total — alphabetical)
   - name: Auth
-    ssh_url: git@github.com:vasic-digital/Auth.git
+    ssh_url: git@github.com:vasic-digital/auth.git
     ref: main
     why: "Authentication + identity primitives (used by app-side login/credential flows)"
     layout: grouped
   - name: Cache
-    ssh_url: git@github.com:vasic-digital/Cache.git
+    ssh_url: git@github.com:vasic-digital/cache.git
     ref: main
     why: "Generic caching primitives (used by network + tracker layers)"
     layout: grouped
@@ -38,7 +38,7 @@ deps:
     why: "Anti-bluff Compose UI Challenge Test infrastructure (§6.J / §6.AB)"
     layout: grouped
   - name: Concurrency
-    ssh_url: git@github.com:vasic-digital/Concurrency.git
+    ssh_url: git@github.com:vasic-digital/concurrency.git
     ref: main
     why: "Coroutine + structured-concurrency primitives"
     layout: grouped
@@ -53,12 +53,12 @@ deps:
     why: "Rootless podman/docker orchestration + emulator matrix (§6.X / §6.AE)"
     layout: grouped
   - name: Database
-    ssh_url: git@github.com:vasic-digital/Database.git
+    ssh_url: git@github.com:vasic-digital/database.git
     ref: main
     why: "Room/JDBC abstraction + per-tracker schema migrations"
     layout: grouped
   - name: Discovery
-    ssh_url: git@github.com:vasic-digital/Discovery.git
+    ssh_url: git@github.com:vasic-digital/discovery.git
     ref: main
     why: "LAN service-discovery primitives (consumed by Mdns + lava-api-go)"
     layout: grouped
@@ -68,7 +68,7 @@ deps:
     why: "HTTP/3 client + server primitives (consumed by lava-api-go)"
     layout: grouped
   - name: Mdns
-    ssh_url: git@github.com:vasic-digital/Mdns.git
+    ssh_url: git@github.com:vasic-digital/mdns.git
     ref: main
     why: "JmDNS-based local service advertisement (_lava._tcp.local.)"
     layout: grouped
@@ -88,7 +88,7 @@ deps:
     why: "Per-endpoint + per-IP rate limiting (consumed by lava-api-go)"
     layout: grouped
   - name: Recovery
-    ssh_url: git@github.com:vasic-digital/Recovery.git
+    ssh_url: git@github.com:vasic-digital/recovery.git
     ref: main
     why: "Crash-recovery + restart primitives (lava-api-go restart loop, supervised processes)"
     layout: grouped
