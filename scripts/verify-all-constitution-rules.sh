@@ -139,6 +139,15 @@ run_gate "canonical-root-and-upstreams" "HelixConstitution §11.4.35 + §11.4.36
 run_gate "helix-deps-manifest" "HelixConstitution §11.4.31" \
     "bash scripts/check-helix-deps-manifest.sh --strict"
 
+# §11.4.25 Full-Automation-Coverage Ledger (Phase 7)
+# Ships in --advisory mode (default) until per-row backfill normalises the
+# baseline ledger across the full repo; verifier still hard-asserts freshness
+# + row-coverage. STRICT flip is OWED via Phase 7-debt entry in
+# docs/plans/2026-05-15-constitution-compliance.md once the gap-row count
+# stabilises + the operator authorises the flip.
+run_gate "coverage-ledger" "HelixConstitution §11.4.25" \
+    "bash scripts/check-coverage-ledger.sh --advisory"
+
 # §6.AB Challenge discrimination (Layer 1 marker + Layer 2 body)
 run_gate "challenge-discrimination" "§6.AB Anti-Bluff Test-Suite Reinforcement" \
     "bash scripts/check-challenge-discrimination.sh"
