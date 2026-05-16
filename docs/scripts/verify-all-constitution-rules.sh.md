@@ -53,19 +53,19 @@ Attestation JSON schema:
 
 ## Gates registry (current)
 
-The sweep currently invokes 36 gates across 4 categories (count last revised in Phase 3 — §11.4.31 helix-deps-manifest added):
+The sweep currently invokes 37 gates across 4 categories (count last revised in Phase 7 — §11.4.25 coverage-ledger added):
 
 1. **Constitution doc parser** (1 gate) — `scripts/check-constitution.sh` covering §6.A-§6.AE inheritance + §6.W boundary + §11.4.6 no-guessing
-2. **Anti-bluff scanners** (8 gates) — non-fatal coverage / **gitignore coverage (Phase 2 — §11.4.30)** / **nested-own-org-submodules (Phase 5 — §11.4.28, STRICT)** / **canonical-root-and-upstreams (Phase 8 — §11.4.35 + §11.4.36, STRICT)** / **helix-deps-manifest (Phase 3 — §11.4.31, STRICT)** / Challenge discrimination Layer 1+2 / Challenge coverage / fixture freshness
+2. **Anti-bluff scanners** (9 gates) — non-fatal coverage / **gitignore coverage (Phase 2 — §11.4.30)** / **nested-own-org-submodules (Phase 5 — §11.4.28, STRICT)** / **canonical-root-and-upstreams (Phase 8 — §11.4.35 + §11.4.36, STRICT)** / **helix-deps-manifest (Phase 3 — §11.4.31, STRICT)** / **coverage-ledger (Phase 7 — §11.4.25, ADVISORY)** / Challenge discrimination Layer 1+2 / Challenge coverage / fixture freshness
 3. **No-hardcoding scanners** (3 gates) — UUID / IPv4 / host:port literal scans
-4. **Hermetic test suites** (~22 gates) — tests/firebase + tests/ci-sh + tests/compose-layout + tests/tag-helper + tests/vm-* + tests/pre-push/check{4,5,6,7,8,9} + tests/check-constitution/* (now includes `test_gitignore_coverage.sh` + `test_nested_own_org_submodules.sh` + `test_canonical_root_and_upstreams.sh` + `test_helix_deps_manifest.sh`)
+4. **Hermetic test suites** (~23 gates) — tests/firebase + tests/ci-sh + tests/compose-layout + tests/tag-helper + tests/vm-* + tests/pre-push/check{4,5,6,7,8,9} + tests/check-constitution/* (now includes `test_gitignore_coverage.sh` + `test_nested_own_org_submodules.sh` + `test_canonical_root_and_upstreams.sh` + `test_helix_deps_manifest.sh` + `test_coverage_ledger.sh`)
 
-Per-gate STRICT/ADVISORY note: All Phase 5 / Phase 8 / Phase 3 gates have been STRICT-flipped 2026-05-15 after their respective debt closures landed:
+Per-gate STRICT/ADVISORY note: Phase 5 / Phase 8 / Phase 3 gates have been STRICT-flipped 2026-05-15 after their respective debt closures landed:
 - **Phase 5-debt closure**: github cascade merge removed Challenges/.gitmodules (CONST-051(C) flat-layout enforcement); Panoptic no longer nested.
 - **Phase 8-debt closure**: 10 install_upstreams scripts landed via Phase 8-debt batch (Challenges, Config, Containers, Discovery, HTTP3, Mdns, Middleware, RateLimiter, Recovery, Tracker-SDK each gained install_upstreams.sh + Upstreams/GitHub.sh + Upstreams/GitLab.sh per §6.W).
 - **Phase 3-debt closure**: 16/16 per-submodule helix-deps.yaml manifests landed via Phase 3-debt batch (each authored with HONEST per-submodule deps after analysis).
 
-All scanners now run in STRICT mode in the sweep — gate failures hard-stop the sweep instead of advisory-warning.
+Phase 7 ships in ADVISORY mode — per-row baseline normalisation (waiver backfill to lift `gap` rows to `partial`/`covered` where evidence justifies) is the gating work before STRICT flip. The verifier still hard-asserts row-coverage + freshness regardless of mode — gate failures here are stale-ledger conditions, not legitimate gap counts.
 
 The list grows as new constitution gates land. Adding a new gate to the registry requires updating both the sweep + the hermetic meta-test (`tests/check-constitution/test_verify_all_rules.sh`).
 
