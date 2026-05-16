@@ -1,6 +1,7 @@
 [submodule "submodules/containers"]
 	path = submodules/containers
 	url = git@github.com:vasic-digital/containers.git
+	ignore = untracked
 [submodule "submodules/middleware"]
 	path = submodules/middleware
 	url = git@github.com:vasic-digital/middleware.git
@@ -28,6 +29,7 @@
 [submodule "submodules/challenges"]
 	path = submodules/challenges
 	url = git@github.com:vasic-digital/challenges.git
+	ignore = untracked
 [submodule "submodules/config"]
 	path = submodules/config
 	url = git@github.com:vasic-digital/config.git
