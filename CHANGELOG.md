@@ -1,4 +1,55 @@
 # Changelog
+## Lava-Android-1.2.25-1045 / Lava-API-Go-2.3.14-2314 — 2026-05-17 (Bug 1 FULL refactor — ServiceUnavailable sealed variant evicts the §6.J "wrong credentials" bluff + §6.L 58th invocation)
+
+**Previous published:** Lava-Android-1.2.24-1044 (debug + release both distributed 2026-05-17).
+
+User-visible release: when RuTracker login encounters an infrastructure problem (Cloudflare block, parser failure, network timeout, unexpected HTML), the user now sees an accurate **"Service unavailable. Please try again later."** banner with the underlying reason — NOT the misleading "wrong credentials" message that 1.2.23 + 1.2.24 (partial) showed for valid inputs.
+
+### Bug 1 FULL FIX — `AuthResponseDto.ServiceUnavailable` sealed variant
+
+The 1.2.24 partial fix (stderr marker only) is now superseded by a full structural fix that propagates a new error state through 6+ layers:
+- `AuthResponseDto.ServiceUnavailable(reason, captcha?)` — new sealed variant in `core/network/api`
+- `AuthState.ServiceUnavailable(reason)` — new entry in `core/tracker/api`
+- `AuthResult.ServiceUnavailable(reason)` — new entry in `core/models`
+- `AuthMapper` + `RuTrackerDtoMappers` + `AuthServiceImpl` + `LoginUseCase` + `LoginResultMapper` — extended with new branches
+- `ProviderLoginViewModel` — handles the new state + records `analytics.recordWarning(...)` per §6.AC
+- `ProviderLoginState.serviceUnavailable: String?` + `ProviderLoginScreen` render an error-colored banner
+- `RuTrackerNetworkApi.login()` catch now returns `ServiceUnavailable(reason = "$class: $msg")` instead of bluffed `WrongCredits(null)`. Stderr marker preserved as defense-in-depth.
+
+OpenAPI updated + Go bindings regenerated for forward wire-shape compatibility (lava-api-go's server still emits Success/WrongCredits/CaptchaRequired; consumers can decode the new variant when it eventually emits).
+
+### Tests added
+- **Challenge36 LoginServiceUnavailableShowsAccurateMessageTest** (`app/src/androidTest/kotlin/lava/app/challenges/`) — Compose UI test with falsifiability rehearsal per §6.AB.3 + §6.J discrimination check
+- LoginResultMapperTest (new, 6 anti-bluff tests)
+- AuthMapperTest + RuTrackerDtoMappersTest extended with ServiceUnavailable round-trip
+- ProviderLoginViewModelTest extended with new state branch
+- RuTrackerNetworkApiLoginUnknownRegressionTest rewritten to assert on ServiceUnavailable + reason
+
+### Falsifiability rehearsals (§6.J anti-bluff)
+
+6 `Bluff-Audit:` stamps recorded in merge commit `ee643e7f` covering each layer in the chain. Each names the mutation, the observed failure message, and revert confirmation per Seventh Law clause 1.
+
+### Bug 2 still PENDING — operator action required
+
+Anonymous-only multi-search error remains unresolved. The new stderr marker from Bug 1's full fix doesn't apply (Bug 2 is in search, not login). To pinpoint the root cause, please install 1.2.25-1045, attempt search with only anonymous providers, then `adb logcat | grep -iE "error|exception|search"` and share the output.
+
+### §6.AA stage-2 release distribute pending
+
+Per §6.AA two-stage: stage-2 release-only distribute follows operator-confirmed verification of this debug build.
+
+### §6.L counter 57 → 58
+
+Operator's 58th invocation ("all good, start all work now!") authorized the deferred backlog drain that produced this release.
+
+### Distribute-readiness state
+
+- ✅ §6.P versionCode 1045 > last-version-debug 1044 + last-version-release 1044
+- ✅ §6.Y bump-first
+- ✅ §6.W mirrors converged
+- ⚠️ §6.X-debt OPEN (Challenge36 execution on real emulator owed to Linux x86_64 gate-host)
+
+`Classification:` project-specific.
+
 ## Lava-Android-1.2.24-1044 / Lava-API-Go-2.3.13-2313 — 2026-05-17 (operator-reported 3-bug response + §6.H credentials redaction + §6.L 57th invocation)
 
 **Previous published:** Lava-Android-1.2.23-1043 (debug distributed 2026-05-17 02:57Z).
