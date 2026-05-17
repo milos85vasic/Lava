@@ -70,6 +70,17 @@ class Challenge27WelcomeColoredLogoNotWhitePlaceholderTest {
         // captureToImage(). Same forensic anchor as C26: captureToImage
         // returns all-zero bitmap on Pixel_8/API35; UiAutomation reads
         // the actual rendered hardware-accelerated frame.
+        //
+        // Flakiness mitigation (2026-05-17 third run): UiAutomation
+        // occasionally captures the activity mid-recreation when this
+        // test runs in a multi-class suite (the prior C26 tear-down can
+        // leave the surface in a transient state). waitForIdle + a small
+        // explicit sleep give the GPU pipeline a stable post-render
+        // window. Tested on Pixel_8/API35 — without the wait the test
+        // intermittently captures an all-zero bitmap (max delta = 0)
+        // even though the screen visually renders correctly.
+        composeRule.waitForIdle()
+        Thread.sleep(1500)
         val bitmap = InstrumentationRegistry.getInstrumentation().uiAutomation.takeScreenshot()
             ?: error("UiAutomation.takeScreenshot() returned null")
         // The icon sits in the upper portion of the screen above the
