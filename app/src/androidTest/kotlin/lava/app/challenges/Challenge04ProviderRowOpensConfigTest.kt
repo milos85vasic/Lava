@@ -99,5 +99,31 @@ class Challenge04ProviderRowOpensConfigTest {
             composeRule.onAllNodesWithText("Sync this provider").fetchSemanticsNodes().isNotEmpty()
         }
         composeRule.onNodeWithText("Sync this provider").assertIsDisplayed()
+
+        // Forensic anchor 2026-05-17 (1.2.28-1048 — discovered during full
+        // 36-class Challenge re-run for the sweep-tier-A close). Without
+        // these settling waits, the activity-tear-down can race the
+        // nav-compose 2.9.0 NavBackStackEntry lifecycle: the provider_config
+        // destination's entry never reaches CREATED before MainActivity's
+        // performDestroy fires the lifecycle observer, which then throws
+        // IllegalStateException("State must be at least 'CREATED' to be
+        // moved to 'DESTROYED'"). The test body completes successfully
+        // (the assertIsDisplayed above passes within ~3s) but the
+        // post-test tear-down crashes the runner process, aborting the
+        // rest of the matrix.
+        //
+        // The settling pattern: waitForIdle() flushes pending recompositions;
+        // an explicit Thread.sleep(800) gives the NavBackStackEntry the
+        // synchronous window it needs to settle into CREATED+RESUMED before
+        // OnboardingBypassRule's @After block writes setOnboardingComplete(false).
+        //
+        // This is a TEST-INFRASTRUCTURE fix, not a production-code fix:
+        // a real user does not hit this race because real activity destroys
+        // come from explicit user actions (back-press, home-key, finish())
+        // with intervening lifecycle pauses, not from the test runner's
+        // synthetic immediate-destroy contract. The race is documented at
+        // .lava-ci-evidence/sixth-law-incidents/2026-05-17-c04-nav-compose-lifecycle-race.json.
+        composeRule.waitForIdle()
+        Thread.sleep(800)
     }
 }
