@@ -574,39 +574,11 @@ done
 
 # -----------------------------------------------------------------------------
 # §6.AD-debt item 4 + HelixConstitution §11.4.6 — no-guessing-vocabulary
-# grep gate. Forbidden words in tracked status / closure / commit-template
-# files when describing causes. UNCONFIRMED: / UNKNOWN: / PENDING_FORENSICS:
-# lead-in allows the otherwise-forbidden word to pass.
+# grep gate. Delegated to scripts/check-no-guessing-vocabulary.sh (extracted
+# 2026-05-17, 1.2.30-1050 cycle) so the gate is independently testable via
+# tests/check-constitution/test_no_guessing_vocabulary.sh.
 # -----------------------------------------------------------------------------
-forbidden_guess_words='\b(likely|probably|maybe|might|possibly|presumably|seemingly|apparently|perhaps|supposedly|conjectured)\b|\bseems\s+to\b|\bappears\s+to\b'
-guess_scan_paths=(
-  ".lava-ci-evidence/sixth-law-incidents"
-  ".lava-ci-evidence/crashlytics-resolved"
-)
-guess_violations=()
-for p in "${guess_scan_paths[@]}"; do
-  [[ -d "$p" ]] || continue
-  while IFS= read -r f; do
-    [[ -z "$f" ]] && continue
-    # Skip the line if it begins with an UNCONFIRMED:/UNKNOWN:/PENDING_FORENSICS: lead
-    # OR if the file is a forensic anchor that quotes historical agent output verbatim
-    # (we exempt the file's own forensic-anchor headers via grep -v on their stable markers).
-    if grep -ihnE "$forbidden_guess_words" "$f" 2>/dev/null | \
-       grep -ivE '^[^:]+:[0-9]+:.*\b(UNCONFIRMED|UNKNOWN|PENDING_FORENSICS):' | \
-       grep -ivE 'forensic[[:space:]]+anchor|verbatim[[:space:]]+(operator|agent|user)|historical[[:space:]]+quote' | \
-       head -3 | grep -q .; then
-      guess_violations+=("$f")
-    fi
-  done < <(find "$p" -type f \( -name '*.md' -o -name '*.json' \))
-done
-# Note: this gate intentionally does NOT scan CLAUDE.md / AGENTS.md / CONSTITUTION.md
-# because those documents must DESCRIBE the forbidden vocabulary as part of the
-# mandate itself — the gate exists for future status reports, not the rule's text.
-if [[ ${#guess_violations[@]} -gt 0 ]]; then
-  echo "§6.AD/HelixConstitution §11.4.6 VIOLATION: forbidden guessing vocabulary in:" >&2
-  printf '    %s\n' "${guess_violations[@]}" >&2
-  echo "  → Either prove the cause with captured evidence and state as fact," >&2
-  echo "    OR mark the line with UNCONFIRMED: / UNKNOWN: / PENDING_FORENSICS: prefix." >&2
+if ! bash "$(dirname "${BASH_SOURCE[0]}")/check-no-guessing-vocabulary.sh"; then
   exit 1
 fi
 
