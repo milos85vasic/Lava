@@ -86,7 +86,41 @@ class Challenge26RutrackerMainAbsentFromServerListTest {
         }
 
         composeRule.onAllNodesWithText("Main", substring = false).assertCountEquals(0)
-        composeRule.onAllNodesWithText("rutracker.org", ignoreCase = true, substring = true)
-            .assertCountEquals(0)
+
+        // Forensic anchor 2026-05-17 (1.2.28-1048): the original assertion
+        // `onAllNodesWithText("rutracker.org", ignoreCase=true, substring=true)
+        //  .assertCountEquals(0)` was overly broad. SP-4's Menu surface now
+        // renders per-provider rows with button text like
+        // "[RuTracker.org, Anonymous]" — those rows are the LEGITIMATE
+        // provider-config entry point introduced by SP-4 Phase C (which
+        // also removed the legacy "Trackers" menu entry). The substring
+        // scan hits those buttons, producing a false positive.
+        //
+        // The original defect this test was guarding against (clean-install
+        // showing a "Main" server entry with hostname "rutracker.org" via
+        // pre-v1.2.15 DB rows OR Android Auto Backup restoring
+        // Endpoint.Rutracker) is about the SERVER LIST, not the provider
+        // list. The "Main" assertion above already covers the display-name
+        // half. For the hostname half, filter out provider-row buttons
+        // (recognized by the `[<TrackerName>, <AuthState>]` bracket pattern
+        // which is unique to SP-4's provider rows) before asserting.
+        val rutrackerNodes = composeRule
+            .onAllNodesWithText("rutracker.org", ignoreCase = true, substring = true)
+            .fetchSemanticsNodes()
+        val nonProviderRowMatches = rutrackerNodes.filterNot { node ->
+            val text = node.config.find { it.key.name == "Text" }?.value?.toString() ?: ""
+            // Provider-row buttons render as "[TrackerName, AuthState]" — leading
+            // bracket + comma + trailing bracket is the unique signature.
+            text.contains("[") && text.contains(",") && text.endsWith("]")
+        }
+        org.junit.Assert.assertEquals(
+            "Server section MUST NOT contain any node referencing rutracker.org. " +
+                "Provider-row buttons (text='[RuTracker.org, <AuthState>]') are " +
+                "explicitly excluded — they belong to the SP-4 per-provider config " +
+                "list, not the Server selector this test guards. Found these " +
+                "non-provider-row matches: $nonProviderRowMatches",
+            0,
+            nonProviderRowMatches.size,
+        )
     }
 }
