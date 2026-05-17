@@ -1,4 +1,39 @@
 # Changelog
+## Lava-Android-1.2.28-1048 / Lava-API-Go-2.3.17-2317 — 2026-05-17 (comprehensive sweep tier-A — 8 of 10 findings closed + Room v10→v11 migration + §6.L 59th invocation)
+
+**Previous published:** Lava-Android-1.2.27-1047 (debug + release both distributed 2026-05-17).
+
+User-visible release: addresses 8 UI/UX/core defects identified by the comprehensive sweep at `.lava-ci-evidence/sweep-reports/2026-05-17-comprehensive-sweep.md` (commit `a5fa8033`). The sweep catalogued 10 findings (4×P0, 5×P1, 1×P2). This release ships 8 fixes — the remaining 2 require deeper refactoring that lands in a follow-up cycle.
+
+### Sweep findings CLOSED in this release
+
+- **#1 P0 — ToggleAnonymous persistence regression.** Provider-config ToggleAnonymous was rendering correctly but not surviving rotation OR app restart. Root cause: in-memory state never reached the Room `provider_configs` table. Fix: Room v10→v11 migration adds `use_anonymous` column; `ProviderConfigRepository.setUseAnonymous(...)` + `observeUseAnonymous(...)` wire through; `ProviderConfigViewModel.ToggleAnonymous` persists via repository (no longer ViewModel-state-only).
+- **#4 P1 — Login serviceUnavailable banner staleness.** When user re-typed credentials after a service-unavailable error, the stale red banner stayed visible. Fix: `LoginViewModel` now clears `serviceUnavailable` on every `UsernameChanged` / `PasswordChanged` / `onSubmit` intent.
+- **#5 P1 — Stale captcha after retry.** Submitting a fresh attempt didn't clear the previous captcha challenge. Fix: `LoginViewModel.onSubmit` resets captcha state before re-attempting.
+- **#6 P1 — ProviderLogin parallel banner staleness.** Same defect class as #4 but in `ProviderLoginViewModel`. Fix: clears `serviceUnavailable` across `selectProvider` + `backToProviders` intents.
+- **#7 P1 — Onboarding null-login showed misleading "Invalid credentials".** When `LavaTrackerSdk.login()` returned `null` (= "auth completed without a server account" — a legitimate success state for some providers), onboarding incorrectly routed to the failure path. Fix: `OnboardingViewModel.onTestAndContinue` treats null-login as success and proceeds to the next provider/completion.
+- **#8 P1 — Clones appearing in onboarding picker.** `ClonedTrackerDescriptor` entries (used for the per-tenant clone feature) were rendering as selectable providers in onboarding. Fix: onboarding `providersToPick` flow filters out clones.
+- **#9 P2 — MainActivity onboarding-complete re-read.** After completing onboarding, navigation didn't refresh until a full app restart because `MainActivity` only read `getOnboardingComplete()` once at startup. Fix: split into two parallel `launch { repeatOnLifecycle(STARTED) { … } }` blocks; added `PreferencesStorage.observeOnboardingComplete(): Flow<Boolean>` backed by a `SharedPreferences.OnSharedPreferenceChangeListener`.
+- **#10 P2 — ToggleSync race condition.** Two near-simultaneous toggles could leave the database in an inconsistent state. Fix: atomic DAO transaction via new `ProviderSyncToggleDao` (single-statement update).
+
+### Falsifiability rehearsals (§6.J anti-bluff)
+
+7 `Bluff-Audit:` stamps recorded in subagent commit `5e02cdda` covering each defect class. 12 new tests (5 new files + 2 extended). All 14 Compose UI Challenge Tests PASS on Pixel_8/API35.
+
+### Sweep findings DEFERRED
+
+- **#2 P0 — search retry-after-network-fail** — partial mitigation landed earlier (search now surfaces a "try again" affordance); full sealed-Error-variant refactor is deferred to 1.2.29.
+- **#3 P0 — provider-config screen scroll-jank with > 8 providers** — root cause traced to LazyColumn nested in Column (§6.Q antipattern); structural fix requires reshaping the screen and lands in 1.2.29.
+
+### Distribute-readiness
+- ✅ §6.P versionCode 1048 > last-version 1047
+- ✅ §6.Y bump-first applied
+- ✅ §6.W mirrors converged
+- ✅ §6.AA two-stage debug+release back-to-back per operator preauth
+- ✅ §6.Z evidence file pre-distribute
+
+`Classification:` project-specific.
+
 ## Lava-Android-1.2.27-1047 / Lava-API-Go-2.3.16-2316 — 2026-05-17 (full-cycle rebuild + redistribute per operator mandate)
 
 **Previous published:** Lava-Android-1.2.26-1046.

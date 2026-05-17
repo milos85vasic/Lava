@@ -11,7 +11,7 @@ same commit so the index stays trustworthy. Stale state in this file
 is itself a §6.J spirit issue — the file claims a guarantee, the
 repo has drifted, the agent acts on the claim.
 
-> **Last updated:** 2026-05-17 (evening), **Sweep findings tier-A (Findings #1, #4-#10) CLOSED on branch `sweep-findings-tier-A-2026-05-17` + Bug 1 FULL REFACTOR + 1.2.25-1045 DISTRIBUTED + §11.4.10.A constitution clause + §6.L 58th invocation**
+> **Last updated:** 2026-05-17 (late evening), **Sweep findings tier-A MERGED into master at `99098dc0` (8 of 10 closed: #1 Room v10→v11 + #4-#10 P1/P2 cluster); 1.2.28-1048 / 2.3.17-2317 version bump per §6.Y; CHANGELOG + per-version snapshot landed; §6.L 59th invocation; pending: §6.Z evidence + §6.AA two-stage distribute**
 >
 > **Sweep tier-A closure (2026-05-17 evening, branch `sweep-findings-tier-A-2026-05-17`):** 8 of the 10 comprehensive-sweep findings closed in a single coordinated commit (Findings #2 + #3 already closed by Bug 2 cascade + Bug 3 fix in prior cycles). All fixes falsifiability-rehearsed per §6.J / Seventh Law clause 1 (mutation applied → test fails with clear message → mutation reverted → test passes). Bluff-Audit stamps recorded in commit body.
 >   - **Finding #1 (P0) — ToggleAnonymous persistence**: `feature/provider_config/.../ProviderConfigViewModel.kt` now persists via new `ProviderConfigRepository.setUseAnonymous(...)` → Room column `use_anonymous` (Migration 10→11 + schema 11.json). Switch state survives process restart.
