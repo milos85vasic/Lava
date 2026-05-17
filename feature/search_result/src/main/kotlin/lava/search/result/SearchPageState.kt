@@ -42,6 +42,19 @@ internal sealed interface SearchResultContent {
      */
     data object Unauthorized : SearchResultContent
 
+    /**
+     * Sweep finding #2 closure (2026-05-17, 1.2.29-1049). Top-level
+     * search error state with a clear reason + retry affordance. Pre-fix
+     * SSE errors silently routed to [Empty] which rendered "Nothing
+     * found" — the same misleading shape that motivated [Unauthorized].
+     * Now SSE errors set [Error(reason)] and the screen renders an
+     * error-colored message + Retry button that routes to
+     * [SearchResultAction.RetryClick]. Distinct from Paging3's per-page
+     * LoadState.Error (which surfaces in the result-list footer); this
+     * is the "no results because the stream itself failed" outcome.
+     */
+    data class Error(val reason: String) : SearchResultContent
+
     data class Content(
         val torrents: List<TopicModel<Torrent>>,
         val categories: List<Category>,
@@ -66,6 +79,7 @@ internal val SearchPageState.categories
     get() = when (searchContent) {
         is SearchResultContent.Content -> searchContent.categories
         is SearchResultContent.Empty -> emptyList()
+        is SearchResultContent.Error -> emptyList()
         is SearchResultContent.Initial -> emptyList()
         is SearchResultContent.Unauthorized -> emptyList()
         is SearchResultContent.Streaming -> emptyList()

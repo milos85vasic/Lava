@@ -326,12 +326,19 @@ internal class SearchResultViewModel @Inject constructor(
                 is SseEvent.Event -> handleSseEvent(event)
                 is SseEvent.StreamEnd -> handleStreamEnd()
                 is SseEvent.Error -> {
+                    // Sweep finding #2 closure (2026-05-17, 1.2.29-1049).
+                    // Pre-fix this set searchContent = Empty which rendered
+                    // "Nothing found" — the same misleading-shape failure
+                    // mode SP-3.2 fixed for Unauthorized. Now route to the
+                    // new SearchResultContent.Error(reason) which the
+                    // Screen renders with an actionable Retry button.
+                    val reason = event.message.ifEmpty { "Search stream failed" }
                     analytics.recordNonFatal(
-                        IllegalStateException("SSE error"),
+                        IllegalStateException("SSE error: $reason"),
                         mapOf(AnalyticsTracker.Params.QUERY to filter.query.orEmpty()),
                     )
                     reduce {
-                        state.copy(searchContent = SearchResultContent.Empty)
+                        state.copy(searchContent = SearchResultContent.Error(reason))
                     }
                     postSideEffect(SearchResultSideEffect.ShowFallbackDismissedError("SSE"))
                 }
@@ -487,6 +494,23 @@ internal class SearchResultViewModel @Inject constructor(
     }
 
     private fun onRetryClick() = intent {
+        // Sweep finding #2 closure (2026-05-17, 1.2.29-1049). Retry now
+        // also covers the SearchResultContent.Error state introduced this
+        // cycle for SSE/streaming failures. Behavior is dispatch-by-state:
+        //   - If we're in Error from a stream failure → re-subscribe the
+        //     same stream by calling the appropriate observe* path
+        //     (mirrors the onCreate dispatch table at line 78-82).
+        //   - Otherwise → fall through to Paging3's retry as before
+        //     (idempotent — retry on a non-error LoadState is a no-op).
+        if (state.searchContent is SearchResultContent.Error) {
+            val filter = mutableFilter.value
+            when {
+                filter.providerIds == null -> observePagingData()
+                currentEndpointIsGoApi() -> observeSseSearch(filter)
+                else -> observeStreamMultiSearch(filter)
+            }
+            return@intent
+        }
         pagingActions.retry()
     }
 

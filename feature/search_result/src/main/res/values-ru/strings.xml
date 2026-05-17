@@ -13,4 +13,8 @@
     <string name="search_screen_filter_sort_label">Сортировать по</string>
     <string name="search_screen_result_empty_subtitle">Попробуйте использовать ключевые слова или изменить настройки фильтрации</string>
     <string name="search_screen_result_empty_title">Ничего не найдено</string>
+    <!-- Sweep finding #2 (2026-05-17): top-level search error with retry action. -->
+    <string name="search_screen_result_error_title">Поиск не выполнен</string>
+    <string name="search_screen_result_error_subtitle">Возникла проблема с подключением к трекерам. Проверьте соединение и повторите попытку.</string>
+    <string name="search_screen_result_error_retry">Повторить</string>
 </resources>

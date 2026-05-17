@@ -15,4 +15,8 @@
     <!-- SP-3.2 (2026-04-29): Unauthorized empty-state for the results screen. -->
     <string name="search_screen_result_unauthorized_title">Login required</string>
     <string name="search_screen_result_unauthorized_subtitle">Sign in to your account to search torrents</string>
+    <!-- Sweep finding #2 (2026-05-17): top-level search error with retry action. -->
+    <string name="search_screen_result_error_title">Search failed</string>
+    <string name="search_screen_result_error_subtitle">There was a problem reaching the trackers. Check your connection and try again.</string>
+    <string name="search_screen_result_error_retry">Retry</string>
 </resources>

@@ -1,11 +1,9 @@
 package lava.provider.config
 
 import android.widget.Toast
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -60,34 +58,48 @@ private fun ProviderConfigScreen(
         )
     },
 ) { padding ->
-    // §6.Q: no LazyColumn inside verticalScroll. Sections render statically.
-    Column(
+    // Sweep finding #3 closure (2026-05-17, 1.2.29-1049). Pre-fix the
+    // root container was Column(verticalScroll(rememberScrollState())) with
+    // statically-rendered sections. With many mirrors per provider the
+    // static composition computed layout for every row up-front, producing
+    // scroll-jank on lower-end devices. Convert to LazyColumn so each
+    // section composes only when scrolled into view. §6.Q stays satisfied
+    // because there are no nested lazy layouts — each section is a single
+    // item() in the outer LazyColumn (or two, for the inner Divider).
+    //
+    // Architectural detail: the inner sections (MirrorsSection,
+    // CredentialsSection, etc.) remain regular @Composable functions that
+    // render Column/Row trees. Only the outer container changes from
+    // Column-with-scroll to LazyColumn. Their static composition is fine
+    // when wrapped in item() because LazyColumn defers them per-viewport.
+    LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .padding(padding)
-            .verticalScroll(rememberScrollState()),
+            .padding(padding),
     ) {
-        Header(state)
-        Divider()
-        SyncSection(enabled = state.syncEnabled, onAction = onAction)
-        Divider()
-        CredentialsSection(
-            state = state,
-            onAction = onAction,
-            onOpenCredentialsManager = onOpenCredentialsManager,
-        )
-        Divider()
-        MirrorsSection(state = state, onAction = onAction)
-        Divider()
-        if (state.descriptor?.supportsAnonymous == true) {
-            AnonymousSection(enabled = state.anonymous, onAction = onAction)
-            Divider()
+        item { Header(state) }
+        item { Divider() }
+        item { SyncSection(enabled = state.syncEnabled, onAction = onAction) }
+        item { Divider() }
+        item {
+            CredentialsSection(
+                state = state,
+                onAction = onAction,
+                onOpenCredentialsManager = onOpenCredentialsManager,
+            )
         }
-        CloneSection(state = state, onAction = onAction)
+        item { Divider() }
+        item { MirrorsSection(state = state, onAction = onAction) }
+        item { Divider() }
+        if (state.descriptor?.supportsAnonymous == true) {
+            item { AnonymousSection(enabled = state.anonymous, onAction = onAction) }
+            item { Divider() }
+        }
+        item { CloneSection(state = state, onAction = onAction) }
         // SP-4 Phase G.2 — Remove affordance, visible only for cloned providers.
         if (state.isClone) {
-            Divider()
-            RemoveCloneSection(state = state, onAction = onAction)
+            item { Divider() }
+            item { RemoveCloneSection(state = state, onAction = onAction) }
         }
     }
 }

@@ -1,4 +1,28 @@
 # Changelog
+## Lava-Android-1.2.29-1049 / Lava-API-Go-2.3.18-2318 — 2026-05-17 (sweep tier-B — deferred findings #2 + #3 closed)
+
+**Previous published:** Lava-Android-1.2.28-1048 (debug + release both distributed 2026-05-17 evening).
+
+User-visible release: closes the two remaining sweep findings (#2 + #3) deferred from 1.2.28's tier-A close. With this, 10 of 10 sweep findings from the comprehensive UI/UX/core sweep at `.lava-ci-evidence/sweep-reports/2026-05-17-comprehensive-sweep.md` (commit `a5fa8033`) are now closed.
+
+### Sweep findings CLOSED in this release
+
+- **#2 P0 — search retry-after-network-fail full Error variant.** Pre-fix: SSE/streaming network failures silently routed to `SearchResultContent.Empty` which rendered "Nothing found" — the same misleading-shape failure mode SP-3.2 fixed for Unauthorized. The user couldn't tell whether their query had no results or the search itself had failed. Fix: new `SearchResultContent.Error(reason: String)` variant + screen render with localized "Search failed" title + "Retry" button + analytics non-fatal capture of the underlying SSE reason. `onRetryClick` now dispatch-by-state: Error → re-invokes the same observe* path (mirrors onCreate dispatch); otherwise → Paging3 retry as before.
+- **#3 P0 — provider-config screen scroll-jank with > 8 providers.** Pre-fix: `ProviderConfigScreen` used `Column(verticalScroll(rememberScrollState()))` with statically-rendered sections. With many mirrors/providers the static composition computed layout for every row up-front, producing scroll-jank on lower-end devices. Fix: converted root container to `LazyColumn` with each section as an `item()`. §6.Q stays satisfied (no nested lazy layouts — each section is a single `item` block in the outer LazyColumn). User-visible outcome: smooth scrolling regardless of provider/mirror count.
+
+### Falsifiability rehearsals (§6.J anti-bluff)
+
+Bluff-Audit stamps recorded in the commit body for each fix; mutations target the new Error arm + the LazyColumn conversion respectively.
+
+### Distribute-readiness
+- ✅ §6.P versionCode 1049 > last-version 1048
+- ✅ §6.Y bump-first applied (1048 → 1049 + 2317 → 2318)
+- ✅ §6.W mirrors converged on github + gitlab
+- ✅ §6.AA two-stage debug+release back-to-back per operator preauth
+- ✅ §6.Z evidence file pre-distribute
+
+`Classification:` project-specific.
+
 ## Lava-Android-1.2.28-1048 / Lava-API-Go-2.3.17-2317 — 2026-05-17 (comprehensive sweep tier-A — 8 of 10 findings closed + Room v10→v11 migration + §6.L 59th invocation)
 
 **Previous published:** Lava-Android-1.2.27-1047 (debug + release both distributed 2026-05-17).

@@ -252,6 +252,31 @@ private fun SearchResultList(
                 imageRes = lava.ui.R.drawable.ill_empty,
             )
 
+            // Sweep finding #2 closure (2026-05-17, 1.2.29-1049).
+            // Pre-fix SSE-error routed to Empty which rendered "Nothing
+            // found" — misleading shape failure mode. Now render a
+            // dedicated error placeholder with the localized title +
+            // subtitle + a Retry button that fires the existing
+            // RetryClick action. The dynamic SSE reason is captured via
+            // analytics.recordNonFatal in the ViewModel for operator
+            // triage (NOT user-visible per §6.H — error.message could
+            // leak query content).
+            is SearchResultContent.Error -> item {
+                lava.designsystem.component.Placeholder(
+                    modifier = Modifier.fillParentMaxSize(),
+                    titleRes = R.string.search_screen_result_error_title,
+                    subtitleRes = R.string.search_screen_result_error_subtitle,
+                    imageRes = lava.ui.R.drawable.ill_empty,
+                    action = {
+                        lava.designsystem.component.Button(
+                            onClick = { onAction(SearchResultAction.RetryClick) },
+                            text = stringResource(R.string.search_screen_result_error_retry),
+                            color = AppTheme.colors.primary,
+                        )
+                    },
+                )
+            }
+
             // SP-3.2 (2026-04-29): "Login required" empty-state with a
             // Login button — replaces the misleading "Nothing found"
             // when the user is not signed in. Tap → SearchResultAction.LoginClick
