@@ -1,4 +1,14 @@
 # Changelog
+## Lava-Android-1.2.26-1046 / Lava-API-Go-2.3.15-2315 — 2026-05-17 (Bug 2 3-layer cascade fix — anonymous-only search now works)
+
+**Previous published:** Lava-Android-1.2.25-1045.
+
+### Bug 2 FIXED — anonymous-only multi-provider search
+
+3-layer cascade in production code (OnboardingViewModel persistence gap + SearchInputViewModel race + SearchResultNavigation drop) verified + fixed on Pixel_8/API35 emulator with same-emulator before/after falsifiability evidence per §6.J. See commit 1c30c2a4 + .lava-ci-evidence/distribute-changelog/firebase-app-distribution/1.2.26-1046.md for full details.
+
+`Classification:` project-specific.
+
 ## Lava-Android-1.2.25-1045 / Lava-API-Go-2.3.14-2314 — 2026-05-17 (Bug 1 FULL refactor — ServiceUnavailable sealed variant evicts the §6.J "wrong credentials" bluff + §6.L 58th invocation)
 
 **Previous published:** Lava-Android-1.2.24-1044 (debug + release both distributed 2026-05-17).
