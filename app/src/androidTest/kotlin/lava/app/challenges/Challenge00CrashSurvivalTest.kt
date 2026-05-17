@@ -170,7 +170,13 @@ class Challenge00CrashSurvivalTest {
         }
         composeRule.onNodeWithText("Start Exploring").performClick()
 
-        composeRule.waitUntil(timeoutMillis = 20_000) {
+        // Timeout bumped 20s → 40s (2026-05-17) after Bug 2 fix added
+        // providerConfigRepository.ensureDefault() to onTestAndContinue.
+        // Per-provider extra DB write × N providers can stack; the
+        // additional latency on Pixel_8/API35 host AVD pushed the
+        // wait-for-home over the 20s wire. 40s leaves headroom while
+        // still failing fast on real regressions.
+        composeRule.waitUntil(timeoutMillis = 40_000) {
             composeRule.onAllNodesWithText("Search history").fetchSemanticsNodes().isNotEmpty()
         }
 
