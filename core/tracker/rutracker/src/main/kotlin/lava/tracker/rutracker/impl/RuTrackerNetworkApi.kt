@@ -49,19 +49,40 @@ internal class RuTrackerNetworkApi(
         // Never swallow structured-concurrency cancellations.
         throw cancellation
     } catch (t: Throwable) {
-        // §6.O closure for Crashlytics a29412cf6566d0a71b06df416610be57
-        // ("lava.tracker.rutracker.model.Unknown" thrown from LoginUseCase
-        // when rutracker returns an HTML response that doesn't match
-        // success / login-form / captcha shape). Pre-fix: the throw
-        // escaped to the main looper as FATAL. Now we trap at the
-        // network-API boundary and return WrongCredits as a safe
-        // user-visible fallback — rationale: unknown response is most
-        // commonly a temp server-side issue or auth gate; treating as
-        // wrong-credit lets the user retry without app crash.
-        // Upstream callers (RuTrackerAuth + the ViewModel) are
-        // responsible for recording the throwable as a non-fatal — this
-        // layer is core/tracker/* (Decoupled Reusable Architecture)
-        // and cannot depend on the Android analytics SDK.
+        // Bug 1 (2026-05-17, operator §6.L 57th invocation): "Cant login
+        // to RuTracker with valid credentials". The prior catch silently
+        // mapped EVERY throwable (Cloudflare NoData, parser Unknown,
+        // network errors, captcha-parse failures) to
+        // WrongCredits(captcha = null) — and the UI showed the user
+        // "wrong credentials" for inputs that were in fact valid. The
+        // §6.J / §6.AB anti-bluff principle was violated: the system
+        // claimed credentials were wrong when in reality it had no idea.
+        //
+        // This commit preserves the no-crash behaviour (returning
+        // WrongCredits still gives the user a clickable retry surface)
+        // BUT stops the silent conflation by printing a clearly-marked
+        // line to stderr — which on Android lands in `adb logcat` under
+        // the System.err tag, and on the lava-api-go-proxied path lands
+        // in the service log. Operator + reviewer can grep this marker
+        // string to distinguish "user typed wrong password" from
+        // "infrastructure problem masquerading as wrong password".
+        //
+        // Why not return a new sealed variant (e.g. ServiceUnavailable)?
+        // That would require coordinated edits to AuthResponseDto (in
+        // :core:network:api) + AuthMapper + LoginResultMapper +
+        // AuthResult + ProviderLoginViewModel + the login UI string
+        // resources + Challenge tests for each — a 6+ file refactor
+        // that exceeds the 1.2.24 distribute scope. The discriminator
+        // for now IS the printed marker line. The proper sealed-variant
+        // refactor is owed in a follow-up + recorded as such in
+        // docs/CONTINUATION.md.
+        System.err.println(
+            "RuTrackerNetworkApi.login: NOT-actually-wrong-credentials — " +
+                "upstream produced ${t.javaClass.simpleName}: ${t.message ?: "<no message>"} " +
+                "(returning WrongCredits as no-crash fallback per §6.J / §6.AC; " +
+                "see Bug 1 fix in this commit for context)",
+        )
+        t.printStackTrace()
         lava.network.dto.auth.AuthResponseDto.WrongCredits(captcha = null)
     }
 

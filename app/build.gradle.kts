@@ -25,8 +25,8 @@ android {
 
     defaultConfig {
         applicationId = "digital.vasic.lava.client"
-        versionCode = 1043
-        versionName = "1.2.23"
+        versionCode = 1044
+        versionName = "1.2.24"
         // SP-3a Step 6 (2026-04-30): wire Hilt + Compose UI test infra so the
         // 8 Challenge Tests at app/src/androidTest/kotlin/lava/app/challenges/
         // become runnable on a connected device. The custom runner installs

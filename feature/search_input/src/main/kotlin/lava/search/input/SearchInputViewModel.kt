@@ -7,9 +7,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import lava.common.analytics.AnalyticsTracker
 import lava.common.newCancelableScope
 import lava.common.relaunch
+import lava.credentials.ProviderConfigRepository
 import lava.domain.usecase.AddSuggestUseCase
 import lava.domain.usecase.ObserveSuggestsUseCase
 import lava.logger.api.LoggerFactory
@@ -30,23 +33,61 @@ internal class SearchInputViewModel @Inject constructor(
     private val saveSuggestUseCase: AddSuggestUseCase,
     loggerFactory: LoggerFactory,
     private val analytics: AnalyticsTracker,
+    private val providerConfigRepository: ProviderConfigRepository,
 ) : ViewModel(), ContainerHost<SearchInputState, SearchInputSideEffect> {
     private val logger = loggerFactory.get("SearchInputViewModel")
     private val filter = savedStateHandle.filter
     private val observeSuggestsScope = viewModelScope.newCancelableScope()
 
+    /**
+     * The full set of providers Lava knows about. ProviderChip(providerId,
+     * displayName, selected) — selected is recomputed in onCreate based on
+     * which providers the user actually onboarded; never trust this default
+     * for the rendered UI.
+     */
     private val availableProviders = listOf(
-        ProviderChip("rutracker", "RuTracker", true),
-        ProviderChip("rutor", "RuTor", true),
-        ProviderChip("archiveorg", "Internet Archive", true),
-        ProviderChip("gutenberg", "Gutenberg", true),
+        ProviderChip("rutracker", "RuTracker", false),
+        ProviderChip("rutor", "RuTor", false),
+        ProviderChip("archiveorg", "Internet Archive", false),
+        ProviderChip("gutenberg", "Gutenberg", false),
     )
 
-    private var selectedProviders = availableProviders.map { it.providerId }.toSet()
+    /**
+     * Bug 3 (2026-05-17, user report on 1.2.23-1043): the prior version
+     * initialized this to `availableProviders.map { it.providerId }.toSet()`
+     * — ALL providers selected by default. The user saw the search filter
+     * pre-selecting providers they had never onboarded, which then either
+     * (a) failed with "not registered" in streamMultiSearch, or
+     * (b) silently sent traffic for unconfigured providers.
+     *
+     * Fix: initialize empty + populate in onCreate from the persisted
+     * ProviderConfigRepository (the same source onboarding writes to).
+     * Only providers with a config row AND searchEnabled = true are
+     * pre-selected. The user can still toggle any chip; this only
+     * controls the DEFAULT for the search-input chip bar.
+     */
+    private var selectedProviders: Set<String> = emptySet()
 
     override val container: Container<SearchInputState, SearchInputSideEffect> = container(
         initialState = SearchInputState(providerChips = availableProviders),
-        onCreate = { onInputChanged(filter.query.toTextFieldValue()) },
+        onCreate = {
+            viewModelScope.launch {
+                val configured = providerConfigRepository.observeAll().first()
+                val onboardedAndSearchEnabled = configured
+                    .filter { it.searchEnabled && it.isEnabled }
+                    .map { it.providerId }
+                    .toSet()
+                selectedProviders = onboardedAndSearchEnabled
+                reduce {
+                    state.copy(
+                        providerChips = availableProviders.map {
+                            it.copy(selected = it.providerId in onboardedAndSearchEnabled)
+                        },
+                    )
+                }
+            }
+            onInputChanged(filter.query.toTextFieldValue())
+        },
     )
 
     fun perform(action: SearchInputAction) {

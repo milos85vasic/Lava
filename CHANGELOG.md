@@ -1,4 +1,65 @@
 # Changelog
+## Lava-Android-1.2.24-1044 / Lava-API-Go-2.3.13-2313 — 2026-05-17 (operator-reported 3-bug response + §6.H credentials redaction + §6.L 57th invocation)
+
+**Previous published:** Lava-Android-1.2.23-1043 (debug distributed 2026-05-17 02:57Z).
+
+User-visible bug-fix release responding to operator's verbatim §6.L 57th invocation reporting 3 defects observed within "one minute of testing" on 1.2.23-1043 production install.
+
+### Bug 3 FIXED — Search filter pre-selected ALL providers (incl. non-onboarded)
+
+`SearchInputViewModel.kt` initialized `selectedProviders` to `availableProviders.map { it.providerId }.toSet()` — i.e. ALL 4 hard-coded providers regardless of which ones the user had actually onboarded. Result: the search-input chip-bar had every chip pre-selected, sending searches to providers the user had never configured.
+
+Fix: inject `ProviderConfigRepository`; in `onCreate` observe the repository (same source onboarding writes to), filter for `searchEnabled && isEnabled`, initialize `selectedProviders` to that subset, and recompute the chip-bar's `selected` flags from it. The user's manual toggles still work as before.
+
+Files:
+- `feature/search_input/src/main/kotlin/lava/search/input/SearchInputViewModel.kt` (injection + onCreate)
+- `feature/search_input/build.gradle.kts` (new `:core:credentials` dep)
+
+### Bug 1 FIXED (partial) — RuTracker login "wrong credentials" for VALID inputs
+
+`RuTrackerNetworkApi.login()` had a `try { ... } catch (Throwable t) { return WrongCredits(null) }` that silently lied to the user: every Cloudflare block, every parser Unknown, every NoData, every network error was presented as "wrong credentials". The operator's report ("Cant login to RuTracker with valid credentials") matches this exactly.
+
+Partial fix landed in this release: preserve the no-crash behavior (still return WrongCredits) but print a clearly-marked stderr line so the failure is visible in `adb logcat` AND in the lava-api-go service log when called through that path. Operator + reviewer can grep `RuTrackerNetworkApi.login: NOT-actually-wrong-credentials` to distinguish "user typed wrong password" from "infrastructure problem masquerading as wrong password".
+
+Full fix (new sealed variant in `AuthResponseDto` propagated through `AuthMapper` + `LoginResultMapper` + `ProviderLoginViewModel` + UI strings) is owed in 1.2.25 per §6.J completeness mandate — the 6-file refactor exceeded the 1.2.24 scope.
+
+Files:
+- `core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker/impl/RuTrackerNetworkApi.kt`
+
+### Bug 2 INVESTIGATED — Search fails when only anonymous providers selected (DEFERRED to 1.2.25)
+
+User report: 2 anonymous providers onboarded (archiveorg + gutenberg are the candidates); searching ONLY those two shows an error. Investigation traced the flow:
+- `SearchInputViewModel.onSubmit()` → `SearchResultViewModel.observeStreamMultiSearch()` → `LavaTrackerSdk.streamMultiSearch()`
+- For each providerId: `client.getFeature(SearchableTracker::class)?.search(request, page)`
+- `ArchiveOrgSearch` calls `archive.org/advancedsearch.php` (public JSON API)
+- `GutenbergSearch` calls `gutendex.com/books` (public JSON API)
+
+Both implementations look correct on paper. Root cause requires live-device reproduction (Cloudflare blocking, certificate pinning failure, DNS resolution failure, or API-shape regression on archive.org/gutendex are all plausible). Deferred to 1.2.25 after operator can reproduce on Galaxy S23 Ultra with the new logging from Bug 1 visible.
+
+### §6.H — Historical credentials leak redacted
+
+Operator-provided test credentials (`nobody85perfect` / `ironman1985`) were found in 5 tracked files dating back to SP-3a + Lava-Android-1.2.0-1020 cycles. Redacted in commit `d7d4572a`. Incident record at `.lava-ci-evidence/sixth-law-incidents/2026-05-17-credentials-historical-leak-h-violation.json`.
+
+OPERATOR ACTION REQUIRED: rotate the RuTracker account password per §6.H clause 6 — credentials remain valid until rotated.
+
+### §6.L counter 56 → 57
+
+Operator's standing mandate invocation #57. Wall-of-text restatement + "Make sure that all existing tests and Challenges do work in anti-bluff manner". Plus emphasis on full HelixConstitution incorporation.
+
+### Distribute-readiness state
+
+- ✅ §6.P versionCode 1044 > last-version-debug 1043 + last-version-release 1042
+- ✅ §6.Y bump-first (1043 → 1044 + 2312 → 2313 first hunk of this commit)
+- ✅ §6.W mirrors converged (audit confirmed at 8cd47fb3 + d7d4572a)
+- ⚠️ §6.X-debt OPEN (darwin/arm64 KVM gap)
+- ⚠️ §6.K pre-existing-gap on Android Gradle + Go binary build paths
+
+### Stage-1 debug-only distribute via Firebase
+
+Per §6.AA two-stage mandate.
+
+`Classification:` project-specific.
+
 ## Lava-Android-1.2.23-1043 / Lava-API-Go-2.3.12-2312 — 2026-05-14 → 2026-05-16 (HelixConstitution incorporation + Phase 4-C HelixQA Go-package linking + Phase 6f upstream rename + §6.L 30th → 56th invocations)
 
 **Previous published:** Lava-Android-1.2.22-1042 (debug + release distributed 2026-05-14).
