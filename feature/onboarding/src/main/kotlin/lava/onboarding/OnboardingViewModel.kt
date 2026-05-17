@@ -7,6 +7,7 @@ import kotlinx.coroutines.launch
 import lava.auth.api.AuthService
 import lava.common.analytics.AnalyticsTracker
 import lava.credentials.ProviderCredentialManager
+import lava.database.dao.ClonedProviderDao
 import lava.logger.api.LoggerFactory
 import lava.tracker.api.AuthType
 import lava.tracker.api.TrackerDescriptor
@@ -40,6 +41,12 @@ class OnboardingViewModel @Inject constructor(
     // observePagingData (single-tracker rutracker path) → LoadState.Error
     // "Something went wrong" for users who only onboarded anonymous.
     private val providerConfigRepository: lava.credentials.ProviderConfigRepository,
+    // Sweep Finding #8 (2026-05-17, §6.L 59th): onboarding hides
+    // synthetic clones because clones are an advanced post-onboarding
+    // feature configured via Provider Config — not part of first-run.
+    // Pre-fix: `sdk.listAvailableTrackers()` returned base + clones; the
+    // wizard rendered the clones as if they were independent trackers.
+    private val clonedProviderDao: ClonedProviderDao,
 ) : ViewModel(), ContainerHost<OnboardingState, OnboardingSideEffect> {
     private val logger = loggerFactory.get("OnboardingViewModel")
 
@@ -65,8 +72,16 @@ class OnboardingViewModel @Inject constructor(
     }
 
     private fun loadProviders() = intent {
+        // Sweep Finding #8 closure (2026-05-17): exclude synthetic
+        // clones from onboarding. The clone-detection mechanism is by
+        // syntheticId membership in cloned_provider (where deletedAt IS
+        // NULL); ClonedTrackerDescriptor is `internal class` in
+        // :core:tracker:client so we cannot use `is ClonedTrackerDescriptor`
+        // from this module. The syntheticId check is the production-
+        // canonical predicate the SDK itself uses to construct the clone.
+        val syntheticIds = clonedProviderDao.getAll().map { it.syntheticId }.toSet()
         val descriptors = sdk.listAvailableTrackers().filter {
-            it.verified && it.apiSupported
+            it.verified && it.apiSupported && it.trackerId !in syntheticIds
         }
         val items = descriptors.map { ProviderOnboardingItem(it) }
         val configs = items.associate {
@@ -169,7 +184,32 @@ class OnboardingViewModel @Inject constructor(
                         ),
                     )
                     logger.d { "cred path: login($currentId) result=$loginResult" }
-                    if (loginResult == null || loginResult.state != AuthState.Authenticated) {
+                    // Sweep Finding #7 closure (2026-05-17, §6.L 59th):
+                    // distinguish loginResult == null (tracker does not
+                    // support auth — see ProviderLoginViewModel.kt:279)
+                    // from loginResult.state != Authenticated (real auth
+                    // failure). The pre-fix branch lumped both into
+                    // "Invalid credentials", showing a misleading
+                    // credentials-wrong message when the tracker has no
+                    // auth path at all (e.g. a misconfigured descriptor
+                    // whose declared authType is FORM_LOGIN but whose
+                    // implementation returns null from `login()`).
+                    //
+                    // For the null case: fall through to the anonymous
+                    // path — switchTracker(currentId) + skip persisting
+                    // credentials. The user's tested-OK state still
+                    // advances the wizard normally.
+                    if (loginResult == null) {
+                        logger.d {
+                            "cred path: $currentId returned null from login() — " +
+                                "treating as no-auth provider (Finding #7)"
+                        }
+                        sdk.switchTracker(currentId)
+                        // Do not persist credentials — the tracker did not
+                        // accept them; persisting would mislead future code
+                        // (e.g. credential rotation) into believing they're
+                        // valid for an auth path that doesn't exist.
+                    } else if (loginResult.state != AuthState.Authenticated) {
                         reduce {
                             state.copy(
                                 connectionTestRunning = false,
@@ -177,8 +217,9 @@ class OnboardingViewModel @Inject constructor(
                             )
                         }
                         return@launch
+                    } else {
+                        credentialManager.setPassword(currentId, config.username, config.password)
                     }
-                    credentialManager.setPassword(currentId, config.username, config.password)
                 }
 
                 // Bug 2 fix (2026-05-17): persist a default provider_configs

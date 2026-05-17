@@ -46,6 +46,12 @@ internal class LoginViewModel @Inject constructor(
                 } else {
                     InputState.Empty
                 },
+                // Sweep Finding #4 closure (2026-05-17, §6.L 59th):
+                // a fresh keystroke means the user is acknowledging the
+                // banner + retrying. Clearing it here prevents the
+                // confusing "Service unavailable + red-bordered fields"
+                // mixed state on a subsequent WrongCredits.
+                serviceUnavailable = null,
             )
         }
     }
@@ -58,6 +64,8 @@ internal class LoginViewModel @Inject constructor(
                 } else {
                     InputState.Empty
                 },
+                // Sweep Finding #4 closure (2026-05-17).
+                serviceUnavailable = null,
             )
         }
     }
@@ -70,11 +78,18 @@ internal class LoginViewModel @Inject constructor(
                 } else {
                     InputState.Empty
                 },
+                // Sweep Finding #4 closure (2026-05-17).
+                serviceUnavailable = null,
             )
         }
     }
 
     private fun onReloadCaptchaClick() = intent {
+        // Sweep Finding #4 closure (2026-05-17): tapping reload-captcha is
+        // a fresh retry by the user; clear the stale ServiceUnavailable
+        // banner so they aren't shown a stale infra-error on top of the
+        // fresh attempt.
+        reduce { state.copy(serviceUnavailable = null) }
         val response = loginUseCase(
             username = state.usernameInput.value.text,
             password = state.passwordInput.value.text,
@@ -104,13 +119,23 @@ internal class LoginViewModel @Inject constructor(
             // path has no captcha-display side effect to perform — just
             // clear loading so the user can retry. The user-visible message
             // surfaces on the main submit path below.
-            is AuthResult.ServiceUnavailable -> reduce { state.copy(isLoading = false) }
+            is AuthResult.ServiceUnavailable -> reduce {
+                // Sweep Finding #4: surface the new banner even on the
+                // reload-captcha path; we just cleared the prior banner
+                // above so this is the fresh reason.
+                state.copy(isLoading = false, serviceUnavailable = response.reason)
+            }
         }
     }
 
     private fun onSubmitClick() = intent {
         postSideEffect(LoginSideEffect.HideKeyboard)
-        reduce { state.copy(isLoading = true) }
+        // Sweep Finding #4 closure (2026-05-17): tapping submit is a
+        // fresh attempt; clear any stale ServiceUnavailable banner so
+        // the user sees only the freshest outcome of the new round-trip.
+        // If the new attempt also returns ServiceUnavailable, that
+        // branch re-populates the field with the fresh reason.
+        reduce { state.copy(isLoading = true, serviceUnavailable = null) }
         analytics.event(AnalyticsTracker.Events.LOGIN_SUBMIT)
         val response = loginUseCase(
             state.usernameInput.value.text,
@@ -184,6 +209,15 @@ internal class LoginViewModel @Inject constructor(
                     state.copy(
                         isLoading = false,
                         serviceUnavailable = response.reason,
+                        // Sweep Finding #5 closure (2026-05-17, §6.L 59th):
+                        // a CaptchaRequired may have populated `captcha` on a
+                        // prior turn. The next attempt landing as
+                        // ServiceUnavailable means the captcha's sid is stale
+                        // — keeping it on screen would render an invalid
+                        // challenge image. Clear it; the next CaptchaRequired
+                        // re-issues a fresh challenge.
+                        captcha = null,
+                        captchaInput = InputState.Initial,
                     )
                 }
             }

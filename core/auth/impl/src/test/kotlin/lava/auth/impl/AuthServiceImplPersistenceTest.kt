@@ -205,6 +205,12 @@ class AuthServiceImplPersistenceTest {
         override suspend fun isOnboardingComplete(): Boolean = false
         override suspend fun setOnboardingComplete(value: Boolean) = Unit
 
+        // Sweep Finding #9 closure (2026-05-17): the persistence test
+        // suite does not exercise the observe path; emit an empty flow
+        // so the contract is satisfied without affecting test semantics.
+        override fun observeOnboardingComplete(): kotlinx.coroutines.flow.Flow<Boolean> =
+            kotlinx.coroutines.flow.flowOf(false)
+
         override suspend fun getSignaledAuthState(): SignaledAuthState? = signaled
 
         override suspend fun saveSignaledAuthState(name: String, avatarUrl: String?) {

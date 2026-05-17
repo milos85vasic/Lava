@@ -16,6 +16,11 @@ android {
 dependencies {
     implementation(project(":core:auth:api"))
     implementation(project(":core:credentials"))
+    // Sweep Finding #8 (2026-05-17, §6.L 59th): onboarding needs the
+    // ClonedProviderDao to identify which trackerIds are synthetic clones
+    // so the onboarding wizard does not show them (clones are advanced
+    // post-onboarding via Provider Config, not first-run).
+    implementation(project(":core:database"))
     implementation(project(":core:tracker:api"))
     implementation(project(":core:tracker:client"))
     implementation(project(":core:designsystem"))

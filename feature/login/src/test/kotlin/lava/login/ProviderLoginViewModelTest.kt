@@ -707,6 +707,97 @@ class ProviderLoginViewModelTest {
             }
         }
 
+    /**
+     * Sweep Finding #6 closure (2026-05-17, §6.L 59th invocation).
+     *
+     * Verifies the multi-provider login banner clears on navigation
+     * between providers + on retype + on backToProviders. The pre-fix
+     * shape kept `serviceUnavailable` populated across selectProvider /
+     * backToProviders / validate* — so a user who tried RuTracker (got
+     * Cloudflare 503), tapped Back, and selected RuTor would see the
+     * RuTracker banner persist on RuTor's screen.
+     *
+     * Falsifiability rehearsal:
+     *   Mutation: remove `serviceUnavailable = null` from selectProvider's
+     *             reduce in ProviderLoginViewModel.
+     *   Observed: this test fails with
+     *             "serviceUnavailable MUST be null after selectProvider
+     *             (different provider) — was Cloudflare 503".
+     *   Reverted: yes.
+     */
+    @Test
+    fun `Finding 6 - serviceUnavailable clears on selectProvider and backToProviders`() =
+        runTest(mainDispatcherRule.testDispatcher) {
+            // Stub rutracker to surface ServiceUnavailable so the banner
+            // is populated on the first attempt.
+            rutrackerClient.loginProvider = { _ ->
+                LoginResult(
+                    state = AuthState.ServiceUnavailable(reason = "Cloudflare 503"),
+                )
+            }
+            viewModel.test(this) {
+                runOnCreate()
+                awaitState() // loading
+                awaitState() // loaded
+
+                viewModel.perform(ProviderLoginAction.SelectProvider("rutracker"))
+                awaitState()
+
+                viewModel.perform(ProviderLoginAction.UsernameChanged(TextFieldValue("vasya")))
+                awaitState()
+                viewModel.perform(ProviderLoginAction.PasswordChanged(TextFieldValue("anything")))
+                awaitState()
+
+                viewModel.perform(ProviderLoginAction.SubmitClick)
+                awaitSideEffect() // HideKeyboard
+                awaitState() // post-submit (banner set)
+                assertEquals(
+                    "precondition: banner populated after ServiceUnavailable",
+                    "Cloudflare 503",
+                    viewModel.container.stateFlow.value.serviceUnavailable,
+                )
+
+                // Sweep Finding #6 #1: BackToProviders clears the banner.
+                viewModel.perform(ProviderLoginAction.BackToProviders)
+                awaitState()
+                assertNull(
+                    "serviceUnavailable MUST be null after BackToProviders — " +
+                        "was ${viewModel.container.stateFlow.value.serviceUnavailable}",
+                    viewModel.container.stateFlow.value.serviceUnavailable,
+                )
+
+                // Re-arrange: surface the banner again, then select a
+                // DIFFERENT provider and assert the banner clears.
+                viewModel.perform(ProviderLoginAction.SelectProvider("rutracker"))
+                awaitState()
+                viewModel.perform(ProviderLoginAction.UsernameChanged(TextFieldValue("vasya2")))
+                awaitState()
+                viewModel.perform(ProviderLoginAction.PasswordChanged(TextFieldValue("anything2")))
+                awaitState()
+                viewModel.perform(ProviderLoginAction.SubmitClick)
+                awaitSideEffect()
+                awaitState() // banner populated again
+                assertEquals(
+                    "precondition: banner re-populated after second submit",
+                    "Cloudflare 503",
+                    viewModel.container.stateFlow.value.serviceUnavailable,
+                )
+
+                // Sweep Finding #6 #2: SelectProvider clears the banner
+                // when moving to a different provider.
+                viewModel.perform(ProviderLoginAction.SelectProvider("rutor"))
+                awaitState()
+                assertNull(
+                    "serviceUnavailable MUST be null after SelectProvider " +
+                        "(different provider) — " +
+                        "was ${viewModel.container.stateFlow.value.serviceUnavailable}",
+                    viewModel.container.stateFlow.value.serviceUnavailable,
+                )
+
+                cancelAndIgnoreRemainingItems()
+            }
+        }
+
     private fun descriptor(
         id: String,
         name: String,

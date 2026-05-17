@@ -44,6 +44,23 @@ class ProviderConfigRepository @Inject constructor(
         return default
     }
 
+    /**
+     * Sweep Finding #1 closure (2026-05-17, §6.L 59th invocation):
+     * single-field mutator so [lava.provider.config.ProviderConfigViewModel]
+     * can flip the per-provider anonymous flag without round-tripping the
+     * full config. The repository creates a default row if none exists so
+     * the toggle works on first-tap even for providers the user never
+     * opened a Provider Config page for. The §6.J anti-bluff requirement
+     * is met because the persisted row drives [observe] which the VM
+     * re-binds to `state.anonymous` — pre-fix the toggle was in-memory only.
+     */
+    suspend fun setUseAnonymous(providerId: String, useAnonymous: Boolean) {
+        val existing = dao.load(providerId)
+        val updated = (existing?.toModel() ?: ProviderConfig(providerId = providerId))
+            .copy(useAnonymous = useAnonymous, updatedAt = System.currentTimeMillis())
+        dao.upsert(updated.toEntity())
+    }
+
     private fun ProviderConfigEntity.toModel(): ProviderConfig {
         return ProviderConfig(
             providerId = providerId,
@@ -53,6 +70,7 @@ class ProviderConfigRepository @Inject constructor(
             searchEnabled = searchEnabled,
             browseEnabled = browseEnabled,
             downloadEnabled = downloadEnabled,
+            useAnonymous = useAnonymous,
             sortPreference = sortPreference,
             updatedAt = updatedAt,
         )
@@ -67,6 +85,7 @@ class ProviderConfigRepository @Inject constructor(
             searchEnabled = searchEnabled,
             browseEnabled = browseEnabled,
             downloadEnabled = downloadEnabled,
+            useAnonymous = useAnonymous,
             sortPreference = sortPreference,
             updatedAt = System.currentTimeMillis(),
         )
@@ -75,6 +94,9 @@ class ProviderConfigRepository @Inject constructor(
 
 /**
  * Domain model for provider configuration.
+ *
+ * Sweep Finding #1 (2026-05-17): adds [useAnonymous] so per-provider
+ * anonymous-mode opt-in survives across process restarts.
  */
 data class ProviderConfig(
     val providerId: String,
@@ -84,6 +106,7 @@ data class ProviderConfig(
     val searchEnabled: Boolean = true,
     val browseEnabled: Boolean = true,
     val downloadEnabled: Boolean = true,
+    val useAnonymous: Boolean = false,
     val sortPreference: String? = null,
     val updatedAt: Long = System.currentTimeMillis(),
 )
