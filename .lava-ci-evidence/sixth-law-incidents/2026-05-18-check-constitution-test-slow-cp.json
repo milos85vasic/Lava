@@ -1,0 +1,51 @@
+{
+  "incident_date": "2026-05-18",
+  "incident_short_slug": "check-constitution-test-slow-cp",
+  "discovery_context": "Running scripts/verify-all-constitution-rules.sh in background during §6.AD-debt closure cycle (commits 11820734 + 977630c3 + 7dc20171). Sweep hung for 5+ minutes inside hermetic-check-constitution-check_constitution_test gate at 0% CPU per ps. Investigation found a running `cp -r /Users/milosvasic/Projects/Lava/. /var/folders/.../tmp.XXX/` child process — copying the entire monorepo (including 16 submodules + all build outputs + .git histories + .claude/worktrees) for each test fixture.",
+  "discoverer": "Claude Opus 4.7 (1M context) — Lava 1.2.30-1050 tooling cycle, agent-driven",
+  "constitutional_classification": "performance discovery, not a behavior bluff — the tests produce CORRECT results; they just take 5+ minutes each. Multiple per-test cp_-r calls cumulatively make the gate impractical to run routinely.",
+  "constitutional_clauses_implicated": [
+    "§6.J spirit (resource discipline + practical gate-ability)",
+    "§6.T.2 (Resource Limits for Tests & Challenges) — the cp -r pattern uses unbounded disk + I/O for repo-size baseline)"
+  ],
+  "evidence": {
+    "process_snapshot": {
+      "parent_test_pid": 98955,
+      "parent_test_command": "bash tests/check-constitution/check_constitution_test.sh",
+      "child_cp_pid": 22679,
+      "child_cp_command": "cp -r /Users/milosvasic/Projects/Lava/. /var/folders/t3/dmp1fb1d61xbl27trnjtr0_c0000gn/T/tmp.WuNA8gMpY5/",
+      "elapsed_at_observation": "35s",
+      "cpu_at_observation": "0.0%"
+    },
+    "source_line": "tests/check-constitution/check_constitution_test.sh:43 — `cp -r \"$REPO_ROOT/.\" \"$fixture/\" 2>/dev/null || true`",
+    "fixture_calls": "make_fixture() invoked once per test (test_missing_6n_heading_fails, test_missing_6n_from_submodule_fails, test_missing_check4_marker_fails, etc. — each does a full repo cp)",
+    "main_disk_pressure_amplifier": "/var/folders/.../tmp/ is on macOS main disk; main disk at this moment had only 5G-65G headroom because of separate USB-T7 migration in progress; cp into the same disk amplifies the disk-pressure scenario"
+  },
+  "remediation_options": [
+    {
+      "label": "Option A — Exclude heavy dirs",
+      "description": "Change line 43 to `rsync -a --exclude=.git --exclude=build --exclude=.claude --exclude=releases --exclude=node_modules --exclude='submodules/*/build' \"$REPO_ROOT/\" \"$fixture/\"`. Drops cp time from ~5min to ~30s based on relative sizes (build outputs + .git + .claude/worktrees are the bulk).",
+      "estimated_effort_minutes": 15,
+      "risk": "Low. The tests are grep-based on CLAUDE.md + AGENTS.md + CONSTITUTION.md content — none of the excluded dirs affect parse outcomes."
+    },
+    {
+      "label": "Option B — Add LAVA_REPO_ROOT support to scripts/check-constitution.sh",
+      "description": "Refactor check-constitution.sh to honor LAVA_REPO_ROOT env (current implementation hardcodes REPO_ROOT from script dir). Then the test can point at a SMALL synthetic fixture without copying the real repo. Same pattern as scripts/check-script-docs-sync.sh + scripts/check-commit-docs-exists.sh.",
+      "estimated_effort_minutes": 60,
+      "risk": "Medium. check-constitution.sh is 700+ lines with many path resolutions; need to ensure every internal path becomes relative to REPO_ROOT consistently."
+    },
+    {
+      "label": "Option C — Cached fixture per test session",
+      "description": "Build the fixture ONCE at suite start, snapshot to a baseline, then for each test do a cheap rsync-based revert from baseline. Reduces N cp calls to 1.",
+      "estimated_effort_minutes": 30,
+      "risk": "Medium. Requires test isolation discipline — if a test pollutes the baseline, subsequent tests would inherit the pollution."
+    }
+  ],
+  "recommended_remediation": "Option A first (15-min win that returns sweep wall-time to acceptable). Then Option B as a deeper refactor when the next phase touches check-constitution.sh. Option C only if Option B proves intractable.",
+  "operator_actions_required": [
+    "Confirm preferred remediation (A vs B vs hybrid).",
+    "Per §6.M Class III: this is performance not stability; no host-stability response needed."
+  ],
+  "session_outcome": "Discovery recorded as forensic anchor. Sweep was killed mid-run to unblock the commit pipeline (PID 61549 terminated; cp PID 22679 explicitly killed). Fresh sweep launched at PID 23416 (will hit the same issue when it reaches the same test). Both new gates (CM-SCRIPT-DOCS-SYNC + CM-COMMIT-DOCS-EXISTS) PASS in the fresh sweep before the slow gate.",
+  "tracking_task_id": "lava-1.2.31-cycle (or later) — apply Option A remediation"
+}
