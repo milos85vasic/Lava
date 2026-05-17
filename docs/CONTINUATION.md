@@ -11,7 +11,26 @@ same commit so the index stays trustworthy. Stale state in this file
 is itself a §6.J spirit issue — the file claims a guarantee, the
 repo has drifted, the agent acts on the claim.
 
-> **Last updated:** 2026-05-17, **Bug 1 FULL REFACTOR LANDED — `AuthResponseDto.ServiceUnavailable` sealed variant propagates through 8-layer chain; Challenge C36 + 3 unit-layer falsifiability-rehearsed tests; OpenAPI spec + Go bindings regenerated; debug APK builds clean; feature/login + core/tracker/rutracker tests green**
+> **Last updated:** 2026-05-17 (afternoon), **1.2.25-1045 DISTRIBUTED (debug + release back-to-back) + Bug 1 FULL REFACTOR + §11.4.10.A constitution clause + comprehensive 10-finding UI/UX sweep + §6.L 58th invocation**
+>
+> **1.2.25-1045 distribute cycle (2026-05-17 afternoon):**
+>   - Stage-1 debug Firebase release ID `1lfjqc1nnhuio` on `digital.vasic.lava.client.dev`
+>   - Stage-2 release Firebase release ID `7p0h5j70eckqg` on `digital.vasic.lava.client` (production)
+>   - 15/15 Compose UI Challenge test cases PASS on Pixel_8/API35 host-direct AVD (14 classes including new C36)
+>   - HelixConstitution submodule advanced to `ca7c7d7` (§11.4.10.A Pre-store credential leak audit + upstream §11.4.37/38/39) — 5-mirror converged
+>   - §6.L counter 57 → 58
+>
+> **Comprehensive UI/UX/core sweep findings (2026-05-17 evening, branch `comprehensive-sweep-2026-05-17` merged at `c3b8bf5c`):** 10 findings @ `docs/sweeps/2026-05-17-comprehensive-uiux-core-sweep.md`. Top P0s for 1.2.26:
+>   1. `ProviderConfigViewModel.ToggleAnonymous` never persists — anonymous switch reverts on restart (`feature/provider_config/.../ProviderConfigViewModel.kt:82-84`)
+>   2. `SearchResultContent` has no `Error` variant — Bug 2 root cause CONFIRMED ("all providers failed" looks like "0 results") (`feature/search_result/.../SearchPageState.kt:30-54`)
+>   3. `SearchInputViewModel.availableProviders` is hardcoded 4-element list — SDK clones + new trackers invisible to search (`feature/search_input/.../SearchInputViewModel.kt:48-53`)
+> P1 cluster (4 findings on login banner/captcha staleness + onboarding misleading cred message + clones-in-onboarding) + P2 cluster (MainActivity onboarding re-read + ToggleSync race). See sweep doc for full details + per-finding anti-bluff classification.
+>
+> **OPERATOR ACTION still REQUIRED:**
+>   - §6.H historical credential leak: rotate the RuTracker password (credentials remain valid until rotated; in-tree redaction does NOT purge git history per §6.T.3)
+>   - Bug 2 live-device log capture: install 1.2.25, attempt anonymous-only search, `adb logcat | grep -iE "error|exception|search"` to confirm sweep finding #2 root cause
+>
+> **Bug 1 FULL REFACTOR LANDED — `AuthResponseDto.ServiceUnavailable` sealed variant propagates through 8-layer chain; Challenge C36 + 3 unit-layer falsifiability-rehearsed tests; OpenAPI spec + Go bindings regenerated; debug APK builds clean; feature/login + core/tracker/rutracker tests green**
 >
 > **Bug 1 cycle (2026-05-17):**
 >   - Operator's §6.L 57th invocation forensic anchor "Cant login to RuTracker with valid credentials" closed. Partial fix in commit `17ceabcb` (stderr marker line) is now superseded by the full-fix variant: the SDK catch path returns `AuthResponseDto.ServiceUnavailable(reason)` instead of bluffing `WrongCredits(null)`.

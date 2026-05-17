@@ -21,9 +21,9 @@
 # Invariant values: pass | gap | n/a | "waiver: <rationale>" | "pass: <rationale>"
 metadata:
   schema_version: 1
-  generated_at: "2026-05-16T17:42:42Z"
+  generated_at: "2026-05-17T09:47:56Z"
   generator: "scripts/generate-coverage-ledger.sh"
-  commit_sha: "101c233727bf6166272452d8e324334ed39fe67b"
+  commit_sha: "c3b8bf5c05cb2885c4c7a93febc12298cd128931"
   mandate: "HelixConstitution §11.4.25 Full-Automation-Coverage Mandate"
 
 rows:
@@ -161,12 +161,14 @@ rows:
   - path: "feature/login"
     kind: "feature"
     status: "covered"
-    unit_test_count: 1
+    unit_test_count: 2
     integration_test_count: 0
-    challenge_count: 1
+    challenge_count: 2
     challenges:
+      - "C36"
       - "HEURISTIC"
     sample_tests:
+      - "LoginResultMapperTest.kt"
       - "ProviderLoginViewModelTest.kt"
     invariants:
       anti_bluff: "pass"
@@ -684,7 +686,7 @@ rows:
   - path: "app"
     kind: "app"
     status: "covered"
-    unit_test_count: 37
+    unit_test_count: 38
     integration_test_count: 0
     challenge_count: 0
     challenges: []
