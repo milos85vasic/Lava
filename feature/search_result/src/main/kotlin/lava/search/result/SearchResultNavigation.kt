@@ -25,6 +25,14 @@ private const val AuthorNameKey = "pn"
 private const val SortKey = "o"
 private const val OrderKey = "s"
 private const val PeriodKey = "tm"
+// Bug 2 fix (2026-05-17): prior to this commit `providerIds` was missing
+// from the nav serializer + deserializer; the SearchInputViewModel posted
+// OpenSearch(filter.providerIds=[archiveorg, gutenberg]) but the receiving
+// SearchResultViewModel read SavedStateHandle.filter with providerIds=null
+// — which routed the user into observePagingData() (the single-tracker
+// rutracker-direct path), failed at auth, and rendered "Something went
+// wrong" via LoadState.Error. Anonymous-only search was unreachable.
+private const val ProviderIdsKey = "pids"
 private const val SearchResultRoute = "search_result"
 
 context(NavigationGraphBuilder)
@@ -50,6 +58,7 @@ fun addSearchResult(
                 SortKey,
                 OrderKey,
                 PeriodKey,
+                ProviderIdsKey,
             )
         },
     ),
@@ -61,6 +70,7 @@ fun addSearchResult(
         NavigationArgument(SortKey, true),
         NavigationArgument(OrderKey, true),
         NavigationArgument(PeriodKey, true),
+        NavigationArgument(ProviderIdsKey, true),
     ),
     deepLinks = deepLinkUrls.map { url ->
         NavigationDeepLink(
@@ -73,6 +83,7 @@ fun addSearchResult(
                     SortKey,
                     OrderKey,
                     PeriodKey,
+                    ProviderIdsKey,
                 )
             },
         )
@@ -103,6 +114,7 @@ fun openSearchResult(filter: Filter) {
                     SortKey to filter.sort.queryParam,
                     OrderKey to filter.order.queryParam,
                     PeriodKey to filter.period.queryParam,
+                    ProviderIdsKey to filter.providerIds?.takeIf(List<String>::isNotEmpty)?.joinToString(","),
                 )
             },
         ),
@@ -117,6 +129,10 @@ internal val SavedStateHandle.filter: Filter
         sort = Sort.fromQueryParam(get(SortKey)),
         order = Order.fromQueryParam(get(OrderKey)),
         period = Period.fromQueryParam(get(PeriodKey)),
+        providerIds = get<String>(ProviderIdsKey)
+            ?.split(",")
+            ?.filter { it.isNotBlank() }
+            ?.takeIf(List<String>::isNotEmpty),
     )
 
 private val SavedStateHandle.categories: List<Category>?

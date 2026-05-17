@@ -28,6 +28,18 @@ class OnboardingViewModel @Inject constructor(
     private val authService: AuthService,
     loggerFactory: LoggerFactory,
     private val analytics: AnalyticsTracker,
+    // Bug 2 deepest-root-cause fix (2026-05-17): onboarding MUST write a
+    // config row for every configured provider so downstream consumers
+    // (SearchInputViewModel chip-bar, SearchResultNavigation, future
+    // surfaces) see the user's onboarded set. The prior version called
+    // sdk.switchTracker (anon) / sdk.login + credentialManager.setPassword
+    // (creds) but NEVER wrote to provider_configs — table stayed empty
+    // after onboarding, cascading into Bug 2: SearchInputViewModel
+    // selectedProviders defaulted to empty → SearchResultNavigation
+    // serialized empty as null → SearchResultViewModel routed to
+    // observePagingData (single-tracker rutracker path) → LoadState.Error
+    // "Something went wrong" for users who only onboarded anonymous.
+    private val providerConfigRepository: lava.credentials.ProviderConfigRepository,
 ) : ViewModel(), ContainerHost<OnboardingState, OnboardingSideEffect> {
     private val logger = loggerFactory.get("OnboardingViewModel")
 
@@ -168,6 +180,12 @@ class OnboardingViewModel @Inject constructor(
                     }
                     credentialManager.setPassword(currentId, config.username, config.password)
                 }
+
+                // Bug 2 fix (2026-05-17): persist a default provider_configs
+                // row so downstream consumers (search input chip-bar, search
+                // multi-provider filter) see this as a configured provider.
+                // ensureDefault is idempotent — safe to call on re-onboarding.
+                providerConfigRepository.ensureDefault(currentId)
 
                 logger.d { "test ok: advance to next/Summary for $currentId" }
                 reduce {

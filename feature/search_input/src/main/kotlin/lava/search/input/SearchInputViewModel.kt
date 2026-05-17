@@ -120,11 +120,39 @@ internal class SearchInputViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Bug 2 second-cascade fix (2026-05-17): if the user taps Submit
+     * BEFORE the Bug 3 onCreate async coroutine has populated
+     * selectedProviders from the repository, selectedProviders is
+     * still emptySet() and the prior code produced providerIds = [].
+     * The empty list was then dropped by SearchResultNavigation's
+     * serializer, routing the user into observePagingData() (the
+     * single-tracker rutracker path) which fails with LoadState.Error
+     * for users who only onboarded anonymous providers.
+     *
+     * Fix: if selectedProviders is empty at submit time, BLOCK on
+     * loading from ProviderConfigRepository (same source the chip-bar
+     * onCreate reads). The user's perceived latency on first tap is
+     * the existing repo-read time, which is < 100 ms in practice.
+     * Subsequent taps reuse the cached selectedProviders.
+     */
+    private suspend fun resolveProviderIdsForSubmit(): List<String>? {
+        if (selectedProviders.isEmpty()) {
+            val configured = providerConfigRepository.observeAll().first()
+            val onboarded = configured
+                .filter { it.searchEnabled && it.isEnabled }
+                .map { it.providerId }
+                .toSet()
+            selectedProviders = onboarded
+        }
+        val selected = selectedProviders.toList()
+        return if (selected.size == availableProviders.size) null else selected
+    }
+
     private fun onSubmit() = intent {
         val query = state.searchInput.text.trim()
         saveSuggestUseCase(query)
-        val selected = selectedProviders.toList()
-        val providerIds = if (selected.size == availableProviders.size) null else selected
+        val providerIds = resolveProviderIdsForSubmit()
         postSideEffect(SearchInputSideEffect.HideKeyboard)
         postSideEffect(SearchInputSideEffect.OpenSearch(filter.copy(query = query, providerIds = providerIds)))
     }
@@ -132,8 +160,7 @@ internal class SearchInputViewModel @Inject constructor(
     private fun onSubmit(value: String) = intent {
         val query = value.trim()
         saveSuggestUseCase(query)
-        val selected = selectedProviders.toList()
-        val providerIds = if (selected.size == availableProviders.size) null else selected
+        val providerIds = resolveProviderIdsForSubmit()
         postSideEffect(SearchInputSideEffect.HideKeyboard)
         postSideEffect(SearchInputSideEffect.OpenSearch(filter.copy(query = query, providerIds = providerIds)))
     }
