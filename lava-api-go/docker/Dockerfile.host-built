@@ -1,0 +1,31 @@
+# Dockerfile.host-built — wraps host-cross-compiled lava-api-go binaries
+# into a runtime image without re-running `go build` inside the container.
+#
+# Why this exists: the macOS development host stores submodule paths as
+# CamelCase (e.g. submodules/Auth) due to case-insensitive APFS, while
+# the lava-api-go go.mod replace directives reference lowercase paths
+# (../submodules/auth) per the Phase 6a snake_case migration. Inside a
+# Linux container (case-sensitive), `go build` fails to resolve the
+# replace directives. The proper fix is on-disk lowercase rename across
+# the whole submodule tree — substantial work tracked separately.
+#
+# This Dockerfile sidesteps the issue: cross-compile on the host (where
+# macOS resolves the case-insensitive lookups), then COPY the resulting
+# Linux binary into a distroless image.
+#
+# Usage:
+#   # Cross-compile first (from repo root):
+#   cd lava-api-go && \
+#     GOOS=linux GOARCH=amd64 CGO_ENABLED=0 \
+#       go build -trimpath -ldflags='-s -w' -o bin/lava-api-go-linux ./cmd/lava-api-go && \
+#     GOOS=linux GOARCH=amd64 CGO_ENABLED=0 \
+#       go build -trimpath -ldflags='-s -w' -o bin/healthprobe-linux ./cmd/healthprobe
+#   # Then build the image:
+#   podman build -f lava-api-go/docker/Dockerfile.host-built -t lava-api-go:dev .
+
+FROM gcr.io/distroless/static-debian12:nonroot AS runtime
+COPY lava-api-go/bin/lava-api-go-linux /usr/local/bin/lava-api-go
+COPY lava-api-go/bin/healthprobe-linux /usr/local/bin/healthprobe
+EXPOSE 8443/udp 8443/tcp
+HEALTHCHECK --interval=10s --retries=6 CMD ["/usr/local/bin/healthprobe"]
+ENTRYPOINT ["/usr/local/bin/lava-api-go"]
