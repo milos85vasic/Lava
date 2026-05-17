@@ -74,11 +74,17 @@ class Challenge24MenuSignOutFlowTest {
         }
         composeRule.onNodeWithText("Menu").performClick()
 
-        // Step 2: verify expected menu structure entries are visible
+        // Step 2: verify expected menu structure entries are visible.
+        // Forensic anchor 2026-05-17 (1.2.28-1048): the "Trackers" Menu
+        // entry was REMOVED in SP-4 Phase C (commit 6db79c50) because the
+        // per-provider config screen (reachable by tapping a provider row)
+        // absorbs the same capability. This test was stale until 1.2.28's
+        // full-matrix re-run surfaced the regression. Updated to assert on
+        // the canonical-remaining anchor entries: "Provider Credentials"
+        // (the credentials manager link) + "Theme" (the theme picker).
         composeRule.waitUntil(timeoutMillis = 5_000) {
-            composeRule.onAllNodesWithText("Trackers").fetchSemanticsNodes().isNotEmpty()
+            composeRule.onAllNodesWithText("Provider Credentials").fetchSemanticsNodes().isNotEmpty()
         }
-        composeRule.onNodeWithText("Trackers").assertIsDisplayed()
         composeRule.onNodeWithText("Provider Credentials").assertIsDisplayed()
         composeRule.onNodeWithText("Theme").assertIsDisplayed()
 
@@ -95,10 +101,11 @@ class Challenge24MenuSignOutFlowTest {
         // Step 5: dismiss by tapping outside or selecting a theme
         composeRule.onNodeWithText("Light").performClick()
 
-        // Step 6: verify menu is responsive after dialog dismiss
+        // Step 6: verify menu is responsive after dialog dismiss — assert
+        // on "Provider Credentials" (same canonical-remaining anchor).
         composeRule.waitUntil(timeoutMillis = 5_000) {
-            composeRule.onAllNodesWithText("Trackers").fetchSemanticsNodes().isNotEmpty()
+            composeRule.onAllNodesWithText("Provider Credentials").fetchSemanticsNodes().isNotEmpty()
         }
-        composeRule.onNodeWithText("Trackers").assertIsDisplayed()
+        composeRule.onNodeWithText("Provider Credentials").assertIsDisplayed()
     }
 }

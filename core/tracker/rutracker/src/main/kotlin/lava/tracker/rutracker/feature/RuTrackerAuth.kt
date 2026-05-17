@@ -33,13 +33,41 @@ class RuTrackerAuth @Inject constructor(
 
     override suspend fun login(req: LoginRequest): LoginResult {
         val captcha = req.captcha
-        val dto = loginUseCase(
-            username = req.username,
-            password = req.password,
-            captchaSid = captcha?.sid,
-            captchaCode = captcha?.code,
-            captchaValue = captcha?.value,
-        )
+        // Bug 1 v2 (2026-05-17, §6.L 59th invocation, post-sweep retest).
+        //
+        // Bug 1's structural fix (commit ee643e7f) added the catch in
+        // `RuTrackerNetworkApi.login()` that maps Throwable → ServiceUnavailable.
+        // But the multi-tracker SDK code path uses `RuTrackerAuth.login()`
+        // (this method) → `LoginUseCase.invoke()` directly, bypassing
+        // RuTrackerNetworkApi entirely. When LoginUseCase throws NoData
+        // (HTML lacks both login-form key AND token), the exception
+        // escapes this method and crashes ProviderLoginViewModel's
+        // coroutine, killing the app process.
+        //
+        // Wrap the same defensive catch here so the SDK path also
+        // surfaces structured ServiceUnavailable instead of crashing.
+        // Mirror the marker + telemetry shape from RuTrackerNetworkApi.
+        val dto = try {
+            loginUseCase(
+                username = req.username,
+                password = req.password,
+                captchaSid = captcha?.sid,
+                captchaCode = captcha?.code,
+                captchaValue = captcha?.value,
+            )
+        } catch (cancellation: kotlinx.coroutines.CancellationException) {
+            throw cancellation
+        } catch (t: Throwable) {
+            System.err.println(
+                "RuTrackerAuth.login: NOT-actually-wrong-credentials — " +
+                    "upstream produced ${t.javaClass.simpleName}: ${t.message ?: "<no message>"} " +
+                    "(returning ServiceUnavailable per §6.J anti-bluff; reason will reach UI)",
+            )
+            t.printStackTrace()
+            lava.network.dto.auth.AuthResponseDto.ServiceUnavailable(
+                reason = "${t.javaClass.simpleName}: ${t.message ?: "<no message>"}",
+            )
+        }
         return mapper.toLoginResult(dto)
     }
 
