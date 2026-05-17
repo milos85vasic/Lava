@@ -1,4 +1,12 @@
 # Changelog
+## Lava-Android-1.2.27-1047 / Lava-API-Go-2.3.16-2316 — 2026-05-17 (full-cycle rebuild + redistribute per operator mandate)
+
+**Previous published:** Lava-Android-1.2.26-1046.
+
+Full-cycle rebuild + redistribute. Same code as 1.2.26 (Bug 2 cascade fix). §6.Y bump applied. APIs booted, Challenge tests re-run on fresh APK. See .lava-ci-evidence/distribute-changelog/firebase-app-distribution/1.2.27-1047.md for details.
+
+`Classification:` project-specific.
+
 ## Lava-Android-1.2.26-1046 / Lava-API-Go-2.3.15-2315 — 2026-05-17 (Bug 2 3-layer cascade fix — anonymous-only search now works)
 
 **Previous published:** Lava-Android-1.2.25-1045.
