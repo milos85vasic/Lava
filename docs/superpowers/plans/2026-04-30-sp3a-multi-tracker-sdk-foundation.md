@@ -505,7 +505,7 @@ class TestAuthServiceEquivalenceTest {
     fun fake_persists_login_state_like_real_impl() = runTest {
         val store = mutableMapOf<String, String>()  // simulated shared backing store
         val a = TestAuthService(store)
-        a.login("nobody85perfect", "ironman1985")
+        a.login("<redacted-per-§6.H>", "<redacted-per-§6.H>")
         val b = TestAuthService(store)
         assertEquals(
             "fake: a fresh instance backed by the same store should report Authenticated " +
@@ -7462,8 +7462,8 @@ class RealRuTorIntegrationTest {
     }
 
     @Test fun `real login with test credentials produces userid cookie`() = runTest {
-        val username = System.getenv("LAVA_TEST_USERNAME") ?: "nobody85perfect"
-        val password = System.getenv("LAVA_TEST_PASSWORD") ?: "ironman1985"
+        val username = System.getenv("LAVA_TEST_USERNAME") ?: "<redacted-per-§6.H>"
+        val password = System.getenv("LAVA_TEST_PASSWORD") ?: "<redacted-per-§6.H>"
         val auth = client.getFeature(AuthenticatableTracker::class) ?: error("AUTH not declared")
         val result = auth.login(LoginRequest(username, password))
         assertThat(result.state).isEqualTo(AuthState.Authenticated)
@@ -8080,7 +8080,7 @@ Commit `sp3a-5.9: Challenge Test C1 (app launch + tracker selection) + falsifiab
 
 ### Task 5.10: Challenge Test C2 — Authenticated search on RuTracker
 
-Compose UI test: with credentials (`nobody85perfect`/`ironman1985`), perform a search for "ubuntu" on RuTracker, assert ≥1 result row renders with parseable size and seeders text.
+Compose UI test: with credentials (`<redacted-per-§6.H>`/`<redacted-per-§6.H>`), perform a search for "ubuntu" on RuTracker, assert ≥1 result row renders with parseable size and seeders text.
 
 Falsifiability rehearsal: throw inside `RuTrackerSearch.search` → test asserts the error UI is shown. Revert.
 

@@ -794,7 +794,7 @@ Each Challenge Test PR records its falsifiability rehearsal: deliberate break (e
 
 Tagged with `@RealTracker` annotation, excluded from default test runs, executed only by `scripts/ci.sh --real-trackers`:
 
-- Login to RuTracker with real credentials (`nobody85perfect` / `ironman1985`); assert non-null session cookie.
+- Login to RuTracker with real credentials (`<redacted-per-§6.H>` / `<redacted-per-§6.H>`); assert non-null session cookie.
 - Login to RuTor with same credentials; assert authenticated state via `userid` cookie.
 - Real search on each tracker: `query="ubuntu"`, expect ≥3 results, assert all results have non-empty `title` and parseable `infoHash` or `magnetUri`.
 - Real download of a `.torrent` from each tracker; assert file is a valid bencoded torrent (parseable `info.pieces` field).

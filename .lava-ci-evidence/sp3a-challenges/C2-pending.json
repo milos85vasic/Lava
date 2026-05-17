@@ -6,7 +6,7 @@
   "spec_reference": "Task 5.10",
   "operator_attestation_required": true,
   "status": "PENDING_OPERATOR",
-  "credentials_required": "RuTracker login (nobody85perfect / ironman1985), passed via -PrutrackerLogin -PrutrackerPassword.",
+  "credentials_required": "RuTracker login (<redacted-per-§6.H> / <redacted-per-§6.H>), passed via -PrutrackerLogin -PrutrackerPassword.",
   "falsifiability_protocol": {
     "mutation_target": "core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker/RuTrackerSearch.kt",
     "mutation_step": "Throw IllegalStateException(\"rehearsal\") at the top of search().",
@@ -17,7 +17,7 @@
   "operator_run_instructions": [
     "Connect a physical Android device with internet access.",
     "./gradlew :app:installDebug",
-    "./gradlew :app:connectedDebugAndroidTest --tests \"lava.app.challenges.Challenge02AuthenticatedSearchOnRuTrackerTest\" -PrutrackerLogin=nobody85perfect -PrutrackerPassword=ironman1985",
+    "./gradlew :app:connectedDebugAndroidTest --tests \"lava.app.challenges.Challenge02AuthenticatedSearchOnRuTrackerTest\" -PrutrackerLogin=<redacted-per-§6.H> -PrutrackerPassword=<redacted-per-§6.H>",
     "Capture screenshots: (a) authenticated 'Logged in' badge, (b) search result list with at least one row showing size + seeders.",
     "Perform the falsifiability mutation, re-run, capture failure assertion verbatim, revert."
   ]

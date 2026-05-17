@@ -461,7 +461,7 @@ story.append(body(
     'optional and only required for uploading torrents and commenting. Authentication state is maintained '
     'via a userid cookie. When logged in, the menu shows additional options. Unlike RuTracker, there is '
     'no CAPTCHA on login, no form token extraction, and no multi-step authentication process. The credentials '
-    'for testing are: username "nobody85perfect", password "ironman1985" (same as RuTracker).'
+    'for testing are: username "<redacted-per-§6.H>", password "<redacted-per-§6.H>" (same as RuTracker).'
 ))
 
 story.append(h3('RuTor vs RuTracker Feature Comparison'))
@@ -1150,7 +1150,7 @@ story.append(body(
     'the client. The client must handle: (1) UTF-8 responses directly, (2) Cookie management for '
     'authenticated sessions, (3) User-Agent header to avoid blocks, (4) Request rate limiting via semaphore, '
     '(5) Connection to download server d.rutor.info for .torrent files. Test credentials: username '
-    '"nobody85perfect", password "ironman1985".'
+    '"<redacted-per-§6.H>", password "<redacted-per-§6.H>".'
 ))
 story.append(bullet('Sub-task 3.3.1: Create RuTorHttpClient with OkHttp'))
 story.append(bullet('Sub-task 3.3.2: Implement get(url) with UTF-8 handling'))
@@ -1691,7 +1691,7 @@ story.append(body(
 story.append(h3('Layer 3: Integration Tests'))
 story.append(body(
     'Integration tests verify full-stack functionality with real network calls. They use the provided '
-    'test credentials (nobody85perfect / ironman1985) to authenticate against live tracker instances. '
+    'test credentials (<redacted-per-§6.H> / <redacted-per-§6.H>) to authenticate against live tracker instances. '
     'These tests are slow and require network access, so they run in a separate CI profile. Each '
     'integration test verifies: (1) authentication succeeds, (2) search returns results, (3) results '
     'contain valid data (non-empty title, parseable size, valid info hash), (4) topic detail loads, '
@@ -1743,7 +1743,7 @@ story.append(body(
 story.append(Spacer(1, 24))
 story.append(body(
     '<b>Credentials for testing:</b> RuTracker and RuTor both use the same credentials for this POC: '
-    'username "nobody85perfect", password "ironman1985". These credentials should be stored in the '
+    'username "<redacted-per-§6.H>", password "<redacted-per-§6.H>". These credentials should be stored in the '
     '.env file (reference: .env.example in the project root) and must never be committed to version control.'
 ))
 

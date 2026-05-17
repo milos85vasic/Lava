@@ -76,7 +76,7 @@ Checklist:
       RuTor visible in Settings → Trackers; selecting either
       updates the active state.
 - [ ] **C2** Authenticated search on RuTracker — login with
-      `nobody85perfect` / `ironman1985`, search "ubuntu",
+      `<redacted-per-§6.H>` / `<redacted-per-§6.H>`, search "ubuntu",
       ≥1 result row with size + seeders.
 - [ ] **C3** Anonymous search on RuTor — switch to RuTor, search
       "ubuntu", ≥1 result row with size + seeders. No login.
