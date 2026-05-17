@@ -177,6 +177,9 @@ run_gate "fixture-freshness" "§6.D Behavioral Coverage / fixture-staleness" \
 run_gate "inject-helix-inheritance-block-idempotent" "§6.AD-debt item 1 — inheritance propagation" \
     "bash scripts/inject-helix-inheritance-block.sh | tail -1 | grep -q 'added=0'"
 
+run_gate "script-docs-sync" "CM-SCRIPT-DOCS-SYNC / HelixConstitution §11.4.18" \
+    "bash scripts/check-script-docs-sync.sh"
+
 # Hermetic test suites (each suite's own paired-mutation contracts)
 for suite in tests/firebase tests/ci-sh tests/compose-layout tests/tag-helper \
              tests/vm-images tests/vm-signing tests/vm-distro; do
