@@ -49,41 +49,45 @@ internal class RuTrackerNetworkApi(
         // Never swallow structured-concurrency cancellations.
         throw cancellation
     } catch (t: Throwable) {
-        // Bug 1 (2026-05-17, operator §6.L 57th invocation): "Cant login
-        // to RuTracker with valid credentials". The prior catch silently
-        // mapped EVERY throwable (Cloudflare NoData, parser Unknown,
-        // network errors, captcha-parse failures) to
-        // WrongCredits(captcha = null) — and the UI showed the user
-        // "wrong credentials" for inputs that were in fact valid. The
-        // §6.J / §6.AB anti-bluff principle was violated: the system
-        // claimed credentials were wrong when in reality it had no idea.
+        // Bug 1 FULL FIX (2026-05-17, operator §6.L 57th invocation
+        // follow-up): "Cant login to RuTracker with valid credentials".
         //
-        // This commit preserves the no-crash behaviour (returning
-        // WrongCredits still gives the user a clickable retry surface)
-        // BUT stops the silent conflation by printing a clearly-marked
-        // line to stderr — which on Android lands in `adb logcat` under
-        // the System.err tag, and on the lava-api-go-proxied path lands
-        // in the service log. Operator + reviewer can grep this marker
-        // string to distinguish "user typed wrong password" from
-        // "infrastructure problem masquerading as wrong password".
+        // The partial fix in commit 17ceabcb mapped every catch to
+        // WrongCredits(null) + printed a stderr marker — the marker
+        // helped operator triage but the UI still rendered "Wrong
+        // credentials" to the user, which is the §6.J bluff the
+        // operator's restated mandate forbids ("tests pass while the
+        // feature is broken for end users").
         //
-        // Why not return a new sealed variant (e.g. ServiceUnavailable)?
-        // That would require coordinated edits to AuthResponseDto (in
-        // :core:network:api) + AuthMapper + LoginResultMapper +
-        // AuthResult + ProviderLoginViewModel + the login UI string
-        // resources + Challenge tests for each — a 6+ file refactor
-        // that exceeds the 1.2.24 distribute scope. The discriminator
-        // for now IS the printed marker line. The proper sealed-variant
-        // refactor is owed in a follow-up + recorded as such in
-        // docs/CONTINUATION.md.
+        // This full fix introduces a NEW sealed variant
+        // `AuthResponseDto.ServiceUnavailable(reason, captcha)` that
+        // propagates through:
+        //   AuthMapper          → AuthState.ServiceUnavailable(reason)
+        //   RuTrackerDtoMappers → reverse mapper for the same
+        //   AuthServiceImpl     → AuthResult.ServiceUnavailable(reason)
+        //   LoginUseCase        → passes through unchanged
+        //   LoginResultMapper   → maps to AuthResult.ServiceUnavailable
+        //   ProviderLoginVM     → ProviderLoginState.serviceUnavailable
+        //                          + recordWarning telemetry (§6.AC)
+        //   ProviderLoginScreen → renders the user-visible "Service
+        //                          unavailable. Please try again later."
+        //                          string with the reason appended
+        //
+        // We KEEP the stderr marker (defense-in-depth — the operator's
+        // adb logcat trail still surfaces every fired catch even on
+        // builds where the UI might not yet have caught up to the new
+        // state field), but the load-bearing user-visible behavior is
+        // now the structured ServiceUnavailable state rather than the
+        // bluffed WrongCredits.
         System.err.println(
             "RuTrackerNetworkApi.login: NOT-actually-wrong-credentials — " +
                 "upstream produced ${t.javaClass.simpleName}: ${t.message ?: "<no message>"} " +
-                "(returning WrongCredits as no-crash fallback per §6.J / §6.AC; " +
-                "see Bug 1 fix in this commit for context)",
+                "(returning ServiceUnavailable per §6.J anti-bluff; reason will reach UI)",
         )
         t.printStackTrace()
-        lava.network.dto.auth.AuthResponseDto.WrongCredits(captcha = null)
+        lava.network.dto.auth.AuthResponseDto.ServiceUnavailable(
+            reason = "${t.javaClass.simpleName}: ${t.message ?: "<no message>"}",
+        )
     }
 
     override suspend fun getFavorites(token: String) = getFavoritesUseCase.invoke(token)

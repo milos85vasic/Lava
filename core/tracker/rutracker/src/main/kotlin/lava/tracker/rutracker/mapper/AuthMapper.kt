@@ -9,7 +9,8 @@ import javax.inject.Inject
 
 /**
  * Maps the legacy [AuthResponseDto] (sealed: Success / WrongCredits /
- * CaptchaRequired) to the new tracker-api [LoginResult].
+ * CaptchaRequired / ServiceUnavailable) to the new tracker-api
+ * [LoginResult].
  *
  * Branches:
  *  - Success(user)        → state=Authenticated, sessionToken=user.token
@@ -23,6 +24,11 @@ import javax.inject.Inject
  *      Unauthenticated rather than constructing a CaptchaRequired with
  *      a synthetic challenge (which would mislead the UI into showing a
  *      blank challenge image).
+ *  - ServiceUnavailable(reason) → state=ServiceUnavailable(reason). Bug 1
+ *      (2026-05-17, §6.L 57th invocation). Distinct from Unauthenticated:
+ *      the upstream produced an infrastructure error before the auth
+ *      could complete. The UI MUST render `reason` and MUST NOT show
+ *      "wrong credentials" — §6.J anti-bluff requirement.
  *
  * Information-loss notes (Section E):
  *  - The legacy CaptchaDto carries the actual rutracker form-field name
@@ -62,6 +68,11 @@ class AuthMapper @Inject constructor() {
                 )
             }
         }
+        is AuthResponseDto.ServiceUnavailable -> LoginResult(
+            state = AuthState.ServiceUnavailable(dto.reason),
+            sessionToken = null,
+            captchaChallenge = dto.captcha?.toChallenge(),
+        )
     }
 }
 

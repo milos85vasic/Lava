@@ -73,6 +73,18 @@ internal class AuthServiceImpl @Inject constructor(
             is AuthResponseDto.WrongCredits -> {
                 AuthResult.WrongCredits(dto.captcha.toCaptcha())
             }
+
+            // Bug 1 (2026-05-17, §6.L 57th invocation): a downstream
+            // NetworkApi may now emit ServiceUnavailable (the SDK
+            // catch-all in RuTrackerNetworkApi.login surfaces upstream
+            // throwables as ServiceUnavailable instead of the prior
+            // silent WrongCredits bluff). Propagate to the legacy
+            // AuthResult.ServiceUnavailable so the UI can render the
+            // user-visible "Service unavailable" message rather than
+            // the misleading "Wrong credentials" string.
+            is AuthResponseDto.ServiceUnavailable -> {
+                AuthResult.ServiceUnavailable(dto.reason)
+            }
         }
     }
 

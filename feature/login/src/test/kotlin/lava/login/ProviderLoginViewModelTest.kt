@@ -617,6 +617,96 @@ class ProviderLoginViewModelTest {
             }
         }
 
+    /**
+     * Bug 1 (2026-05-17, §6.L 57th invocation) — ServiceUnavailable
+     * propagates to a user-visible state field that the screen renders
+     * as "Service unavailable. Please try again later. (reason)". The
+     * §6.J load-bearing anti-bluff assertion:
+     *   1. `signalAuthorized` is NOT called (so the Search tab is not
+     *      bluff-unblocked).
+     *   2. `usernameInput` + `passwordInput` are NOT marked Invalid
+     *      (so the user is not lied to about their credentials).
+     *   3. `serviceUnavailable` field carries the reason verbatim.
+     *
+     * Falsifiability rehearsal:
+     *   Mutation: in ProviderLoginViewModel.onSubmitClick, change the
+     *             ServiceUnavailable branch's reduce to set
+     *             `usernameInput = InputState.Invalid(...)` and
+     *             `passwordInput = InputState.Invalid(...)` (i.e. the
+     *             §6.J bluff path).
+     *   Observed: this test fails with
+     *             "username MUST NOT be Invalid when ServiceUnavailable
+     *             fires — that is the §6.J bluff. was Invalid(...)".
+     *   Reverted: yes.
+     */
+    @Test
+    fun `service unavailable shows banner does NOT mark creds Invalid does NOT signal authorized`() =
+        runTest(mainDispatcherRule.testDispatcher) {
+            // Stub the rutracker fake to return AuthState.ServiceUnavailable
+            // when login is invoked — simulating the new
+            // RuTrackerNetworkApi catch path.
+            rutrackerClient.loginProvider = { _ ->
+                LoginResult(
+                    state = AuthState.ServiceUnavailable(
+                        reason = "Unknown: parser found no expected markers",
+                    ),
+                )
+            }
+
+            viewModel.test(this) {
+                runOnCreate()
+                awaitState() // loading
+                awaitState() // loaded
+
+                viewModel.perform(ProviderLoginAction.SelectProvider("rutracker"))
+                awaitState() // selected
+
+                viewModel.perform(ProviderLoginAction.UsernameChanged(TextFieldValue("vasya")))
+                awaitState()
+                viewModel.perform(ProviderLoginAction.PasswordChanged(TextFieldValue("definitely-valid")))
+                awaitState()
+
+                viewModel.perform(ProviderLoginAction.SubmitClick)
+                val effect = awaitSideEffect()
+                assertTrue("first effect must be HideKeyboard, was $effect", effect is LoginSideEffect.HideKeyboard)
+
+                // Drain post-submit state(s) so Turbine doesn't fail on
+                // unconsumed events at scope close; final state is read
+                // directly from container.stateFlow below.
+                awaitState() // post-submit state
+
+                val finalState = viewModel.container.stateFlow.value
+
+                // PRIMARY user-visible assertion (§6.J): banner reason is set.
+                assertEquals(
+                    "serviceUnavailable MUST carry the reason verbatim — was ${finalState.serviceUnavailable}",
+                    "Unknown: parser found no expected markers",
+                    finalState.serviceUnavailable,
+                )
+
+                // ANTI-BLUFF assertion 1: creds are NOT marked Invalid.
+                assertFalse(
+                    "username MUST NOT be Invalid when ServiceUnavailable fires — that is the §6.J bluff. " +
+                        "was ${finalState.usernameInput}",
+                    finalState.usernameInput is InputState.Invalid,
+                )
+                assertFalse(
+                    "password MUST NOT be Invalid when ServiceUnavailable fires — that is the §6.J bluff. " +
+                        "was ${finalState.passwordInput}",
+                    finalState.passwordInput is InputState.Invalid,
+                )
+
+                // ANTI-BLUFF assertion 2: NOT signalAuthorized.
+                assertFalse(
+                    "signalAuthorized MUST NOT be called when ServiceUnavailable fires; recorded names = ${authService.signaledNames}",
+                    authService.signaledNames.isNotEmpty(),
+                )
+
+                // Loading cleared.
+                assertFalse("isLoading MUST be false after ServiceUnavailable", finalState.isLoading)
+            }
+        }
+
     private fun descriptor(
         id: String,
         name: String,

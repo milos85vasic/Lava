@@ -23,4 +23,15 @@
     <string name="provider_login_continue">Continue</string>
     <string name="provider_login_back">Back</string>
     <string name="provider_login_authenticated">Authenticated</string>
+
+    <!--
+        Bug 1 (2026-05-17, §6.L 57th invocation): user-visible message when
+        the upstream produced an infrastructure error (Cloudflare block,
+        parser Unknown, network failure, captcha-parse failure) before
+        the auth attempt could complete. The §6.J anti-bluff requirement:
+        this MUST replace the prior silent "Wrong name or password"
+        rendering for these failure modes — the system does NOT know
+        whether the credentials are correct.
+    -->
+    <string name="provider_login_service_unavailable">Service unavailable. Please try again later. (%s)</string>
 </resources>
