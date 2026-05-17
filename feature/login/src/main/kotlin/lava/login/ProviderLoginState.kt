@@ -15,6 +15,16 @@ data class ProviderLoginState(
     val captchaInput: InputState = InputState.Initial,
     val captcha: lava.models.auth.Captcha? = null,
     val error: String? = null,
+    /**
+     * Bug 1 (2026-05-17, §6.L 57th invocation): when the SDK's
+     * `RuTrackerNetworkApi.login` (or any other upstream) reports
+     * [lava.models.auth.AuthResult.ServiceUnavailable], this field
+     * carries the reason string for the UI to render. The §6.J anti-
+     * bluff requirement: the UI MUST NOT mark username/password as
+     * Invalid when this fires — that would tell the user the
+     * credentials are wrong when in fact the system has no idea.
+     */
+    val serviceUnavailable: String? = null,
 )
 
 /**

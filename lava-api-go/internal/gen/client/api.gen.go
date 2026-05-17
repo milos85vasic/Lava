@@ -31,6 +31,21 @@ func (e AuthResponseDtoCaptchaRequiredType) Valid() bool {
 	}
 }
 
+// Defines values for AuthResponseDtoServiceUnavailableType.
+const (
+	ServiceUnavailable AuthResponseDtoServiceUnavailableType = "ServiceUnavailable"
+)
+
+// Valid indicates whether the value is a known member of the AuthResponseDtoServiceUnavailableType enum.
+func (e AuthResponseDtoServiceUnavailableType) Valid() bool {
+	switch e {
+	case ServiceUnavailable:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for AuthResponseDtoSuccessType.
 const (
 	Success AuthResponseDtoSuccessType = "Success"
@@ -596,6 +611,29 @@ type AuthResponseDtoCaptchaRequired struct {
 
 // AuthResponseDtoCaptchaRequiredType defines model for AuthResponseDtoCaptchaRequired.Type.
 type AuthResponseDtoCaptchaRequiredType string
+
+// AuthResponseDtoServiceUnavailable Bug 1 (2026-05-17, §6.L 57th invocation) Android-client variant.
+// Fired when the upstream produced an infrastructure error
+// (Cloudflare 5xx, parser Unknown, network failure, captcha-parse
+// failure) BEFORE the auth attempt could complete. The reason
+// string is rendered verbatim in the user-visible UI. Structurally
+// distinct from WrongCredits — the system does not know whether
+// the credentials were correct. The §6.J anti-bluff requirement:
+// consumers MUST NOT render this as "wrong credentials".
+//
+// Wire-compatibility note: the lava-api-go Go server does NOT
+// currently emit this variant — its rutracker scraper returns
+// structured (Success | WrongCredits | CaptchaRequired) only.
+// The variant exists in the spec so the Android Kotlin SDK
+// wire-shape stays compatible with future Go-side adoption.
+type AuthResponseDtoServiceUnavailable struct {
+	Captcha *CaptchaDto                           `json:"captcha"`
+	Reason  string                                `json:"reason"`
+	Type    AuthResponseDtoServiceUnavailableType `json:"type"`
+}
+
+// AuthResponseDtoServiceUnavailableType defines model for AuthResponseDtoServiceUnavailable.Type.
+type AuthResponseDtoServiceUnavailableType string
 
 // AuthResponseDtoSuccess defines model for AuthResponseDtoSuccess.
 type AuthResponseDtoSuccess struct {
@@ -1281,6 +1319,34 @@ func (t *AuthResponseDto) MergeAuthResponseDtoCaptchaRequired(v AuthResponseDtoC
 	return err
 }
 
+// AsAuthResponseDtoServiceUnavailable returns the union data inside the AuthResponseDto as a AuthResponseDtoServiceUnavailable
+func (t AuthResponseDto) AsAuthResponseDtoServiceUnavailable() (AuthResponseDtoServiceUnavailable, error) {
+	var body AuthResponseDtoServiceUnavailable
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromAuthResponseDtoServiceUnavailable overwrites any union data inside the AuthResponseDto as the provided AuthResponseDtoServiceUnavailable
+func (t *AuthResponseDto) FromAuthResponseDtoServiceUnavailable(v AuthResponseDtoServiceUnavailable) error {
+	v.Type = "ServiceUnavailable"
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeAuthResponseDtoServiceUnavailable performs a merge with any union data inside the AuthResponseDto, using the provided AuthResponseDtoServiceUnavailable
+func (t *AuthResponseDto) MergeAuthResponseDtoServiceUnavailable(v AuthResponseDtoServiceUnavailable) error {
+	v.Type = "ServiceUnavailable"
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
 func (t AuthResponseDto) Discriminator() (string, error) {
 	var discriminator struct {
 		Discriminator string `json:"type"`
@@ -1297,6 +1363,8 @@ func (t AuthResponseDto) ValueByDiscriminator() (interface{}, error) {
 	switch discriminator {
 	case "CaptchaRequired":
 		return t.AsAuthResponseDtoCaptchaRequired()
+	case "ServiceUnavailable":
+		return t.AsAuthResponseDtoServiceUnavailable()
 	case "Success":
 		return t.AsAuthResponseDtoSuccess()
 	case "WrongCredits":

@@ -11,6 +11,26 @@ same commit so the index stays trustworthy. Stale state in this file
 is itself a §6.J spirit issue — the file claims a guarantee, the
 repo has drifted, the agent acts on the claim.
 
+> **Last updated:** 2026-05-17, **Bug 1 FULL REFACTOR LANDED — `AuthResponseDto.ServiceUnavailable` sealed variant propagates through 8-layer chain; Challenge C36 + 3 unit-layer falsifiability-rehearsed tests; OpenAPI spec + Go bindings regenerated; debug APK builds clean; feature/login + core/tracker/rutracker tests green**
+>
+> **Bug 1 cycle (2026-05-17):**
+>   - Operator's §6.L 57th invocation forensic anchor "Cant login to RuTracker with valid credentials" closed. Partial fix in commit `17ceabcb` (stderr marker line) is now superseded by the full-fix variant: the SDK catch path returns `AuthResponseDto.ServiceUnavailable(reason)` instead of bluffing `WrongCredits(null)`.
+>   - **8-layer propagation chain**: `AuthResponseDto` (+ variant) → `AuthMapper` → `AuthState.ServiceUnavailable(reason)` → `RuTrackerDtoMappers` (reverse) → `AuthServiceImpl` → `AuthResult.ServiceUnavailable` → `LoginUseCase` → `LoginResultMapper` → `ProviderLoginViewModel` (recordWarning telemetry per §6.AC + state field) → `ProviderLoginState.serviceUnavailable` → `ProviderLoginScreen` (renders "Service unavailable. Please try again later. (reason)" banner with `R.string.provider_login_service_unavailable` + `ServiceUnavailableTextTestTag`).
+>   - Same wiring landed in legacy `LoginViewModel` + `LoginState.serviceUnavailable` for the single-tracker path.
+>   - **OpenAPI spec**: `lava-api-go/api/openapi.yaml` gains `AuthResponseDtoServiceUnavailable` under `oneOf` + discriminator mapping. Go bindings regenerated via `scripts/generate.sh`; both `internal/gen/server/api.gen.go` + `internal/gen/client/api.gen.go` updated. Note: the Go-side rutracker scraper does NOT emit the new variant today — its login handler still returns Success / WrongCredits / CaptchaRequired only; the parity test holds. The variant exists in the spec so the Android Kotlin SDK wire-shape stays compatible with future Go-side adoption.
+>   - **Tests added** (3 new + 1 rewritten):
+>       - `core/tracker/rutracker/src/test/kotlin/lava/tracker/rutracker/mapper/AuthMapperTest.kt` — added 2 tests for ServiceUnavailable forward mapping (with + without captcha).
+>       - `core/tracker/rutracker/src/test/kotlin/lava/tracker/rutracker/mapper/RuTrackerDtoMappersTest.kt` — added round-trip test asserting reverse-mapper preserves reason.
+>       - `core/tracker/rutracker/src/test/kotlin/lava/tracker/rutracker/impl/RuTrackerNetworkApiLoginUnknownRegressionTest.kt` — REWRITTEN: pre-fix asserted WrongCredits fallback (the §6.J bluff); now asserts ServiceUnavailable with reason carrying throwable class name. Same Crashlytics `a29412cf6566d0a71b06df416610be57` regression-immunity coverage, stronger discrimination.
+>       - `feature/login/src/test/kotlin/lava/login/LoginResultMapperTest.kt` — NEW file. 6 tests; load-bearing assertion: `service unavailable propagates as ServiceUnavailable with reason` + explicit anti-bluff `service unavailable does NOT silently collapse to WrongCredits`.
+>       - `feature/login/src/test/kotlin/lava/login/ProviderLoginViewModelTest.kt` — added VM test: `service unavailable shows banner does NOT mark creds Invalid does NOT signal authorized` exercises the §6.J anti-bluff contract end-to-end at the VM layer (real ViewModel + real ProviderCredentialManager + real Room + real LavaTrackerSdk wired with FakeTrackerClient whose `loginProvider` returns `AuthState.ServiceUnavailable(reason)`).
+>       - `app/src/androidTest/kotlin/lava/app/challenges/Challenge36LoginServiceUnavailableShowsAccurateMessageTest.kt` — NEW Challenge Test under `// covers-feature: login`. Source-written + compiles green on darwin/arm64 (verified via `./gradlew :app:compileDebugAndroidTestKotlin`); EXECUTION against the §6.X-mounted gate-host is OWED.
+>   - **Build verification**: `./gradlew :core:tracker:rutracker:test` PASS, `./gradlew :feature:login:test` PASS, `./gradlew :app:assembleDebug` PASS, `./gradlew :app:compileDebugAndroidTestKotlin` PASS. Spotless applied to all edited files.
+>   - **§6.Y note**: this is a follow-up commit to 1.2.24-1044 — versionCode is NOT bumped here; the next distribute (1.2.25-1045) will pick up Bug 1 full fix + Bug 2 deferred investigation closure once that lands.
+>   - **§6.X-debt**: C36 + the per-AVD matrix attestation row is OWED to a Linux x86_64 + KVM gate-host; the JVM-layer falsifiability rehearsals (4 tests) carry the gate until then.
+>
+> **Previous cycle context (preserved verbatim):**
+>
 > **Last updated:** 2026-05-16, **Phase 4-C-2 (pkg/detector adapter) + Phase 4-C-3 (pkg/ticket adapter) — BOTH WORKTREES LANDED + green; parent-cycle close + HelixQA SHA bump + coverage-ledger regen owed at meta-merge**
 > (constitutional-plumbing-only; no user-visible feature change; no Firebase
 > distribute since 1.2.22-1042 still serves the user-visible surface). Cycle

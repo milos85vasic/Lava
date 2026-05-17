@@ -107,4 +107,59 @@ class AuthMapperTest {
         assertEquals(AuthState.Unauthenticated, result.state)
         assertNull(result.captchaChallenge)
     }
+
+    /**
+     * Bug 1 (2026-05-17, §6.L 57th invocation): the new ServiceUnavailable
+     * variant carries the upstream error reason. The mapper MUST produce
+     * `AuthState.ServiceUnavailable(reason)` — NOT silently degrade to
+     * Unauthenticated, which would re-introduce the bluff.
+     *
+     * Falsifiability rehearsal: replace the new branch's
+     * `AuthState.ServiceUnavailable(dto.reason)` with
+     * `AuthState.Unauthenticated`. This test fails with:
+     *   "expected:<ServiceUnavailable(reason=...)> but was:<Unauthenticated>".
+     */
+    @Test
+    fun `ServiceUnavailable maps to AuthState ServiceUnavailable carrying reason`() {
+        val dto = AuthResponseDto.ServiceUnavailable(
+            reason = "Unknown: parser found no expected markers",
+        )
+
+        val result = mapper.toLoginResult(dto)
+
+        assertTrue(
+            "state should be ServiceUnavailable carrying the reason; was ${result.state}",
+            result.state is AuthState.ServiceUnavailable,
+        )
+        val state = result.state as AuthState.ServiceUnavailable
+        assertEquals("Unknown: parser found no expected markers", state.reason)
+        assertNull(result.sessionToken)
+        assertNull(result.captchaChallenge)
+    }
+
+    @Test
+    fun `ServiceUnavailable with captcha forwards the challenge`() {
+        // Pathological-future: an anti-DDoS layer might emit a captcha
+        // alongside the service-unavailable error. The mapper preserves it.
+        val dto = AuthResponseDto.ServiceUnavailable(
+            reason = "HttpException: 503 Service Unavailable",
+            captcha = CaptchaDto(
+                id = "sid-13",
+                code = "cap_code_zzzz",
+                url = "https://rutracker.org/captcha/13.png",
+            ),
+        )
+
+        val result = mapper.toLoginResult(dto)
+
+        assertTrue(
+            "state should be ServiceUnavailable; was ${result.state}",
+            result.state is AuthState.ServiceUnavailable,
+        )
+        assertEquals(
+            "HttpException: 503 Service Unavailable",
+            (result.state as AuthState.ServiceUnavailable).reason,
+        )
+        assertEquals("sid-13", result.captchaChallenge?.sid)
+    }
 }

@@ -254,6 +254,27 @@ private fun ProviderCredentialForm(
                 style = AppTheme.typography.headlineSmall,
             )
 
+            // Bug 1 (2026-05-17, §6.L 57th invocation): render the
+            // §6.J anti-bluff "Service unavailable" message when the
+            // ViewModel reports an infrastructure error. This MUST
+            // appear in place of any "Wrong name or password" hint;
+            // marking the cred fields Invalid would be the bluff.
+            // The error color + the explicit "Please try again later"
+            // copy gives the user actionable guidance distinct from
+            // "your password is wrong".
+            val serviceUnavailable = state.serviceUnavailable
+            if (serviceUnavailable != null) {
+                Text(
+                    text = stringResource(
+                        R.string.provider_login_service_unavailable,
+                        serviceUnavailable,
+                    ),
+                    style = AppTheme.typography.bodyMedium,
+                    color = AppTheme.colors.error,
+                    modifier = Modifier.testTag(ServiceUnavailableTextTestTag),
+                )
+            }
+
             // Phase 1.5 UI alignment (2026-05-04): the screen renders the
             // Continue button only when this provider WILL accept the
             // anonymous bypass. Without the supportsAnonymous gate, a user
@@ -356,3 +377,13 @@ private fun providerColor(providerId: String): Color {
  * relying on coordinate-based input.
  */
 const val AnonymousAccessSwitchTestTag = "anonymous_access_switch"
+
+/**
+ * Test tag for the Bug 1 (§6.L 57th invocation) "Service unavailable"
+ * banner that appears on the provider login form when the SDK reports
+ * an upstream infrastructure error. Used by
+ * `Challenge36LoginServiceUnavailableShowsAccurateMessageTest` to
+ * locate the banner without relying on text matching (which would be
+ * fragile under translation).
+ */
+const val ServiceUnavailableTextTestTag = "service_unavailable_banner"

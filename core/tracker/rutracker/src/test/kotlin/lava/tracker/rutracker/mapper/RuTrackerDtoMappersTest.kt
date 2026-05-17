@@ -483,4 +483,46 @@ class RuTrackerDtoMappersTest {
         assertTrue(reversedDto is AuthResponseDto.WrongCredits)
         assertNull((reversedDto as AuthResponseDto.WrongCredits).captcha)
     }
+
+    /**
+     * Bug 1 (2026-05-17, §6.L 57th invocation): the round-trip for
+     * ServiceUnavailable MUST preserve the reason string exactly — both
+     * the forward AuthMapper and the reverse RuTrackerDtoMappers
+     * propagate the reason verbatim so the UI banner says the same thing
+     * the catch path captured.
+     *
+     * Falsifiability rehearsal: change the reverse mapper's
+     * ServiceUnavailable branch to drop the reason and emit
+     * AuthResponseDto.WrongCredits(captcha = null). This test fails
+     * with "reversedDto MUST be ServiceUnavailable; was WrongCredits".
+     */
+    @Test
+    fun `loginResultToDto round-trips ServiceUnavailable preserving reason`() {
+        val originalDto = AuthResponseDto.ServiceUnavailable(
+            reason = "Unknown: parser found no expected markers",
+        )
+
+        val firstForward = authForward.toLoginResult(originalDto)
+        val reversedDto = mappers.loginResultToDto(firstForward)
+        val secondForward = authForward.toLoginResult(reversedDto)
+
+        assertEquals(firstForward, secondForward)
+        assertTrue(
+            "state MUST be ServiceUnavailable round-trip; was ${secondForward.state}",
+            secondForward.state is AuthState.ServiceUnavailable,
+        )
+        assertEquals(
+            "Unknown: parser found no expected markers",
+            (secondForward.state as AuthState.ServiceUnavailable).reason,
+        )
+        assertTrue(
+            "reversedDto MUST be ServiceUnavailable (NOT WrongCredits — that " +
+                "would re-introduce the §6.J bluff); was $reversedDto",
+            reversedDto is AuthResponseDto.ServiceUnavailable,
+        )
+        assertEquals(
+            "Unknown: parser found no expected markers",
+            (reversedDto as AuthResponseDto.ServiceUnavailable).reason,
+        )
+    }
 }

@@ -117,12 +117,14 @@ components:
       - $ref: '#/components/schemas/AuthResponseDtoSuccess'
       - $ref: '#/components/schemas/AuthResponseDtoWrongCredits'
       - $ref: '#/components/schemas/AuthResponseDtoCaptchaRequired'
+      - $ref: '#/components/schemas/AuthResponseDtoServiceUnavailable'
       discriminator:
         propertyName: type
         mapping:
           Success: '#/components/schemas/AuthResponseDtoSuccess'
           WrongCredits: '#/components/schemas/AuthResponseDtoWrongCredits'
           CaptchaRequired: '#/components/schemas/AuthResponseDtoCaptchaRequired'
+          ServiceUnavailable: '#/components/schemas/AuthResponseDtoServiceUnavailable'
     AuthResponseDtoSuccess:
       type: object
       required:
@@ -157,6 +159,37 @@ components:
           type: string
           enum:
           - CaptchaRequired
+        captcha:
+          nullable: true
+          allOf:
+          - $ref: '#/components/schemas/CaptchaDto'
+    AuthResponseDtoServiceUnavailable:
+      description: |
+        Bug 1 (2026-05-17, §6.L 57th invocation) Android-client variant.
+        Fired when the upstream produced an infrastructure error
+        (Cloudflare 5xx, parser Unknown, network failure, captcha-parse
+        failure) BEFORE the auth attempt could complete. The reason
+        string is rendered verbatim in the user-visible UI. Structurally
+        distinct from WrongCredits — the system does not know whether
+        the credentials were correct. The §6.J anti-bluff requirement:
+        consumers MUST NOT render this as "wrong credentials".
+
+        Wire-compatibility note: the lava-api-go Go server does NOT
+        currently emit this variant — its rutracker scraper returns
+        structured (Success | WrongCredits | CaptchaRequired) only.
+        The variant exists in the spec so the Android Kotlin SDK
+        wire-shape stays compatible with future Go-side adoption.
+      type: object
+      required:
+      - type
+      - reason
+      properties:
+        type:
+          type: string
+          enum:
+          - ServiceUnavailable
+        reason:
+          type: string
         captcha:
           nullable: true
           allOf:

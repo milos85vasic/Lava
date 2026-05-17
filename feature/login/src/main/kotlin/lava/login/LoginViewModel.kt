@@ -99,6 +99,12 @@ internal class LoginViewModel @Inject constructor(
             }
             is AuthResult.Error -> Unit
             is AuthResult.Success -> Unit
+            // Bug 1 (2026-05-17, §6.L 57th): ServiceUnavailable means the
+            // upstream produced an infrastructure error; the reload-captcha
+            // path has no captcha-display side effect to perform — just
+            // clear loading so the user can retry. The user-visible message
+            // surfaces on the main submit path below.
+            is AuthResult.ServiceUnavailable -> reduce { state.copy(isLoading = false) }
         }
     }
 
@@ -160,6 +166,26 @@ internal class LoginViewModel @Inject constructor(
                 )
                 postSideEffect(LoginSideEffect.Error(response.error))
                 reduce { state.copy(isLoading = false) }
+            }
+
+            // Bug 1 (2026-05-17, §6.L 57th invocation): the upstream
+            // produced an infrastructure error. Render the reason
+            // verbatim and DO NOT mark credentials as Invalid — that
+            // would be the §6.J bluff this branch exists to evict.
+            is AuthResult.ServiceUnavailable -> {
+                logger.e { "Login service unavailable: ${response.reason}" }
+                analytics.recordWarning(
+                    "login_service_unavailable",
+                    mapOf(
+                        AnalyticsTracker.Params.ERROR to response.reason,
+                    ),
+                )
+                reduce {
+                    state.copy(
+                        isLoading = false,
+                        serviceUnavailable = response.reason,
+                    )
+                }
             }
         }
     }

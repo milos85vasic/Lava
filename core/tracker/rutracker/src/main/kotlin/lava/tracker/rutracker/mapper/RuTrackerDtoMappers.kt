@@ -244,6 +244,15 @@ class RuTrackerDtoMappers @Inject constructor() {
                 AuthResponseDto.CaptchaRequired(captcha = state.challenge.toCaptchaDto())
             is AuthState.Unauthenticated ->
                 AuthResponseDto.WrongCredits(captcha = r.captchaChallenge?.toCaptchaDto())
+            // Bug 1 (2026-05-17, §6.L 57th invocation): reverse path for the
+            // new ServiceUnavailable state. Preserves the reason string so
+            // downstream consumers (UI ViewModel, lava-api-go bridge if /
+            // when it adopts the wire-shape) can render it verbatim.
+            is AuthState.ServiceUnavailable ->
+                AuthResponseDto.ServiceUnavailable(
+                    reason = state.reason,
+                    captcha = r.captchaChallenge?.toCaptchaDto(),
+                )
         }
     }
 }

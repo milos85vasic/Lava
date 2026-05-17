@@ -354,6 +354,33 @@ internal class ProviderLoginViewModel @Inject constructor(
                         postSideEffect(LoginSideEffect.Error(response.error))
                         reduce { state.copy(isLoading = false) }
                     }
+
+                    // Bug 1 (2026-05-17, §6.L 57th invocation): upstream
+                    // produced an infrastructure error (Cloudflare 5xx,
+                    // parser Unknown, network failure, captcha-parse
+                    // failure). The §6.J anti-bluff requirement: render
+                    // the reason verbatim and DO NOT mark username /
+                    // password as Invalid — that would tell the user the
+                    // credentials are wrong when in fact the system has
+                    // no idea. Telemetry per §6.AC.
+                    is AuthResult.ServiceUnavailable -> {
+                        analytics.recordWarning(
+                            "login_service_unavailable",
+                            mapOf(
+                                AnalyticsTracker.Params.PROVIDER to providerId,
+                                AnalyticsTracker.Params.ERROR to response.reason,
+                            ),
+                        )
+                        logger.e {
+                            "Login service unavailable for $providerId: ${response.reason}"
+                        }
+                        reduce {
+                            state.copy(
+                                isLoading = false,
+                                serviceUnavailable = response.reason,
+                            )
+                        }
+                    }
                 }
             }
         }

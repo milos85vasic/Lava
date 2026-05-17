@@ -42,6 +42,10 @@ class LoginUseCase @Inject constructor(
                         is AuthResult.WrongCredits -> result.copy(
                             captcha = result.captcha?.enrich(),
                         )
+                        // Bug 1 (2026-05-17, §6.L 57th invocation): pass
+                        // ServiceUnavailable through unchanged — no captcha to
+                        // enrich, just propagate the reason string to the UI.
+                        is AuthResult.ServiceUnavailable -> result
                     }
                 }
                 .onSuccess { result ->
