@@ -50,6 +50,22 @@ interface PreferencesStorage {
     suspend fun setOnboardingComplete(value: Boolean)
 
     /**
+     * Sweep Finding #9 closure (2026-05-17, §6.L 59th invocation).
+     *
+     * Observable variant of [isOnboardingComplete] so the host Activity
+     * can re-render onboarding when the value flips at runtime — e.g.
+     * if a future Settings action calls `setOnboardingComplete(false)`
+     * the home screen must transition back to the welcome flow without
+     * requiring a process restart. Pre-fix `MainActivity.onCreate`
+     * read the value exactly once inside `repeatOnLifecycle(STARTED)`
+     * and was held there by an infinite `viewModel.theme.collect`.
+     *
+     * Default: emits the current persisted value (or false when unset),
+     * then re-emits on every change via SharedPreferences listener.
+     */
+    fun observeOnboardingComplete(): kotlinx.coroutines.flow.Flow<Boolean>
+
+    /**
      * Phase 1.1 — persist the multi-tracker session-signaled auth state
      * across process death. Without this, a user who completed an
      * AuthType.NONE provider's onboarding (archive.org Continue tap)

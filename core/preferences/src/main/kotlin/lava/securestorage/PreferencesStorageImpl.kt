@@ -1,6 +1,11 @@
 package lava.securestorage
 
 import android.content.SharedPreferences
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.withContext
 import lava.dispatchers.api.Dispatchers
 import lava.models.settings.Endpoint
@@ -183,6 +188,38 @@ internal class PreferencesStorageImpl @Inject constructor(
             settingsPreferences.edit { putBoolean(onboardingCompleteKey, value) }
         }
     }
+
+    /**
+     * Sweep Finding #9 closure (2026-05-17, §6.L 59th invocation).
+     *
+     * SharedPreferences-listener-backed Flow so the host Activity can
+     * react to in-process `onboarding_complete` flips without a process
+     * restart. The flow:
+     *   1. Emits the current persisted value (or false) on subscription
+     *      via `onStart` so the first collect terminates the splash
+     *      screen exactly like `isOnboardingComplete()` did pre-fix.
+     *   2. Re-emits every time the value changes — covered by the
+     *      OnSharedPreferenceChangeListener registered on the same
+     *      [settingsPreferences] instance.
+     *   3. Unregisters the listener on cancellation per the awaitClose
+     *      contract.
+     *
+     * Hot subscribers may transform/distinct as appropriate. The current
+     * MainActivity consumer calls `.distinctUntilChanged()` so a redundant
+     * emission (same value re-written) does not re-render.
+     */
+    override fun observeOnboardingComplete(): Flow<Boolean> = callbackFlow {
+        val prefs = settingsPreferences
+        val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, changedKey ->
+            if (changedKey == onboardingCompleteKey) {
+                trySend(prefs.getBoolean(onboardingCompleteKey, false))
+            }
+        }
+        prefs.registerOnSharedPreferenceChangeListener(listener)
+        awaitClose { prefs.unregisterOnSharedPreferenceChangeListener(listener) }
+    }
+        .onStart { emit(settingsPreferences.getBoolean(onboardingCompleteKey, false)) }
+        .flowOn(dispatchers.io)
 
     override suspend fun getSignaledAuthState(): SignaledAuthState? {
         return withContext(dispatchers.io) {

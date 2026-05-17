@@ -28,6 +28,7 @@ import digital.vasic.lava.client.navigation.MobileNavigation
 import digital.vasic.lava.client.platform.OpenFileHandlerImpl
 import digital.vasic.lava.client.platform.OpenLinkHandlerImpl
 import digital.vasic.lava.client.platform.ShareLinkHandlerImpl
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import lava.designsystem.platform.LocalPlatformType
 import lava.designsystem.platform.PlatformType
@@ -87,11 +88,32 @@ open class MainActivity : ComponentActivity() {
 
         var theme: Theme? by mutableStateOf(null)
         var showOnboarding: Boolean? by mutableStateOf(null)
+        // Sweep Finding #9 closure (2026-05-17, §6.L 59th invocation).
+        //
+        // Pre-fix the single launch{} block called `isOnboardingComplete()`
+        // once, then ran an infinite `viewModel.theme.collect` that
+        // serialized any further re-read. Two parallel `launch{}` blocks
+        // now collect their flows independently:
+        //   - theme is observed live;
+        //   - onboardingComplete is observed via the new
+        //     [PreferencesStorage.observeOnboardingComplete] flow, which
+        //     emits the current value on subscription AND re-emits when
+        //     the SharedPreferences key changes (e.g. a Settings "Reset
+        //     onboarding" action). `distinctUntilChanged` suppresses
+        //     redundant re-renders.
+        // The §6.J anti-bluff requirement: the user-visible welcome
+        // screen MUST re-appear if onboardingComplete flips back to false
+        // at runtime — pre-fix this required a process restart.
         lifecycleScope.launch {
             lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                val onboardingComplete = preferencesStorage.isOnboardingComplete()
-                showOnboarding = !onboardingComplete
                 viewModel.theme.collect { t -> theme = t }
+            }
+        }
+        lifecycleScope.launch {
+            lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                preferencesStorage.observeOnboardingComplete()
+                    .distinctUntilChanged()
+                    .collect { complete -> showOnboarding = !complete }
             }
         }
         splashScreen.setKeepOnScreenCondition { theme == null || showOnboarding == null }

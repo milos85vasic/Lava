@@ -70,7 +70,7 @@ import lava.database.entity.VisitedTopicEntity
         UserMirrorEntity::class,
         VisitedTopicEntity::class,
     ],
-    version = 10,
+    version = 11,
     exportSchema = true,
 )
 @TypeConverters(Converters::class)
@@ -289,6 +289,27 @@ abstract class AppDatabase : RoomDatabase() {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL("ALTER TABLE credentials_entry ADD COLUMN deletedAt INTEGER DEFAULT NULL")
                 db.execSQL("ALTER TABLE cloned_provider ADD COLUMN deletedAt INTEGER DEFAULT NULL")
+            }
+        }
+
+        /**
+         * Sweep Finding #1 closure (2026-05-17, §6.L 59th invocation).
+         *
+         * Adds the `use_anonymous` column to `provider_configs` so the
+         * ProviderConfigViewModel's `ToggleAnonymous` handler can persist
+         * the user's choice. Pre-fix: handler did `state.copy(...)` in
+         * memory only — the switch's checked state was lost on next launch.
+         *
+         * Default value 0 (false) preserves existing-user behavior — the
+         * credentials path stays active until they explicitly toggle
+         * anonymous on. NOT NULL so the entity's Boolean field maps
+         * unambiguously.
+         */
+        val MIGRATION_10_11 = object : Migration(10, 11) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "ALTER TABLE provider_configs ADD COLUMN use_anonymous INTEGER NOT NULL DEFAULT 0",
+                )
             }
         }
     }

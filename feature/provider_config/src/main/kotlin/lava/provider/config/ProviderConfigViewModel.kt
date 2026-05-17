@@ -11,6 +11,7 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import lava.common.analytics.AnalyticsTracker
 import lava.credentials.CredentialsEntryRepository
+import lava.credentials.ProviderConfigRepository
 import lava.database.dao.ClonedProviderDao
 import lava.database.dao.ProviderCredentialBindingDao
 import lava.database.dao.ProviderSyncToggleDao
@@ -37,6 +38,7 @@ class ProviderConfigViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val sdk: LavaTrackerSdk,
     private val credentialsRepo: CredentialsEntryRepository,
+    private val providerConfigRepository: ProviderConfigRepository,
     private val bindingDao: ProviderCredentialBindingDao,
     private val toggleDao: ProviderSyncToggleDao,
     private val userMirrorDao: UserMirrorDao,
@@ -75,12 +77,38 @@ class ProviderConfigViewModel @Inject constructor(
     fun perform(action: ProviderConfigAction) = intent {
         when (action) {
             ProviderConfigAction.ToggleSync -> {
-                val next = !state.syncEnabled
+                // Sweep Finding #10 closure (2026-05-17, §6.L 59th).
+                //
+                // Pre-fix: `val next = !state.syncEnabled` could read a
+                // STALE `false` default if the user tapped the Switch
+                // BEFORE `observeAll()` emitted the persisted `true`. The
+                // upsert then wrote `false` on top of the persisted `true`
+                // (silent flip). Read the persisted value from the DAO
+                // synchronously so the toggle is deterministic regardless
+                // of observe-flow timing.
+                val current = toggleDao.get(providerId)?.enabled ?: false
+                val next = !current
                 toggleDao.upsert(ProviderSyncToggleEntity(providerId, next))
                 outbox.enqueue(SyncOutboxKind.SYNC_TOGGLE, json.encodeToString(WireToggle(providerId, next)))
             }
             ProviderConfigAction.ToggleAnonymous -> {
-                reduce { state.copy(anonymous = !state.anonymous) }
+                // Sweep Finding #1 closure (2026-05-17, §6.L 59th).
+                //
+                // Pre-fix: handler did `reduce { state.copy(anonymous = !state.anonymous) }`
+                // — in-memory only. The Switch flipped, the user closed the
+                // app, and on next launch the default `anonymous = false`
+                // won (§6.J bluff: tested state-after-mutation; never
+                // tested state-after-recreate).
+                //
+                // Fix: persist via [ProviderConfigRepository.setUseAnonymous].
+                // The mutation goes to provider_configs.use_anonymous; the
+                // observeAll() flow re-emits → `state.anonymous` re-binds.
+                // The user-visible Switch + Header reflect the persisted
+                // value across process restarts. Read the persisted value
+                // (not state.anonymous) before computing the toggle so the
+                // first-tap race (analogous to Finding #10) cannot leak.
+                val current = providerConfigRepository.load(providerId)?.useAnonymous ?: false
+                providerConfigRepository.setUseAnonymous(providerId, !current)
             }
             ProviderConfigAction.OpenAssignSheet -> reduce { state.copy(showAssignSheet = true) }
             ProviderConfigAction.DismissAssignSheet -> reduce { state.copy(showAssignSheet = false) }
@@ -191,8 +219,15 @@ class ProviderConfigViewModel @Inject constructor(
                 toggleDao.observe(providerId),
                 userMirrorDao.observe(providerId),
                 credentialsRepo.observe(),
-            ) { binding, toggle, mirrors, allCreds ->
-                Snapshot(binding, toggle, mirrors, allCreds)
+                // Sweep Finding #1 (2026-05-17): include the persisted
+                // ProviderConfig so `use_anonymous` round-trips into
+                // `state.anonymous`. The single-emission default (null)
+                // maps to `anonymous = false`, identical to the entity's
+                // column default, so brand-new providers render the
+                // Switch as off before the user has ever opened the row.
+                providerConfigRepository.observe(providerId),
+            ) { binding, toggle, mirrors, allCreds, config ->
+                Snapshot(binding, toggle, mirrors, allCreds, config)
             }
                 .distinctUntilChanged()
                 .collect { snap ->
@@ -200,6 +235,7 @@ class ProviderConfigViewModel @Inject constructor(
                     reduce {
                         state.copy(
                             syncEnabled = snap.toggle?.enabled ?: false,
+                            anonymous = snap.config?.useAnonymous ?: false,
                             boundCredential = bound,
                             availableCredentials = snap.creds,
                             userMirrors = snap.mirrors.map { it.url },
@@ -229,6 +265,9 @@ class ProviderConfigViewModel @Inject constructor(
         val toggle: ProviderSyncToggleEntity?,
         val mirrors: List<UserMirrorEntity>,
         val creds: List<lava.credentials.model.CredentialsEntry>,
+        // Sweep Finding #1 (2026-05-17): carries the persisted
+        // ProviderConfig so `use_anonymous` round-trips into the UI.
+        val config: lava.credentials.ProviderConfig?,
     )
 
     companion object {

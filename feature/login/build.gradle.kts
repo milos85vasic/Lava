@@ -18,6 +18,9 @@ dependencies {
     implementation(libs.androidx.hilt.navigation.compose)
 
     testImplementation(project(":core:tracker:testing"))
+    testImplementation(project(":core:testing"))
+    testImplementation(project(":core:domain"))
+    testImplementation(libs.orbit.test)
     testImplementation(libs.robolectric)
     testImplementation(libs.bundles.room)
     testImplementation(libs.ktor.client.okhttp)

@@ -11,7 +11,20 @@ same commit so the index stays trustworthy. Stale state in this file
 is itself a §6.J spirit issue — the file claims a guarantee, the
 repo has drifted, the agent acts on the claim.
 
-> **Last updated:** 2026-05-17 (afternoon), **1.2.25-1045 DISTRIBUTED (debug + release back-to-back) + Bug 1 FULL REFACTOR + §11.4.10.A constitution clause + comprehensive 10-finding UI/UX sweep + §6.L 58th invocation**
+> **Last updated:** 2026-05-17 (evening), **Sweep findings tier-A (Findings #1, #4-#10) CLOSED on branch `sweep-findings-tier-A-2026-05-17` + Bug 1 FULL REFACTOR + 1.2.25-1045 DISTRIBUTED + §11.4.10.A constitution clause + §6.L 58th invocation**
+>
+> **Sweep tier-A closure (2026-05-17 evening, branch `sweep-findings-tier-A-2026-05-17`):** 8 of the 10 comprehensive-sweep findings closed in a single coordinated commit (Findings #2 + #3 already closed by Bug 2 cascade + Bug 3 fix in prior cycles). All fixes falsifiability-rehearsed per §6.J / Seventh Law clause 1 (mutation applied → test fails with clear message → mutation reverted → test passes). Bluff-Audit stamps recorded in commit body.
+>   - **Finding #1 (P0) — ToggleAnonymous persistence**: `feature/provider_config/.../ProviderConfigViewModel.kt` now persists via new `ProviderConfigRepository.setUseAnonymous(...)` → Room column `use_anonymous` (Migration 10→11 + schema 11.json). Switch state survives process restart.
+>   - **Finding #4 (P1) — `LoginViewModel.serviceUnavailable` retype clear**: cleared in `validateUsername`/`validatePassword`/`validateCaptcha`/`onReloadCaptchaClick`/`onSubmitClick` reduces.
+>   - **Finding #5 (P1) — `LoginViewModel.ServiceUnavailable` stale-captcha clear**: branch now sets `captcha = null, captchaInput = Initial` so the rendered challenge image doesn't lie when the sid expires.
+>   - **Finding #6 (P1) — `ProviderLoginViewModel.serviceUnavailable` clear across selectProvider/backToProviders + retype**: symmetric fix to Findings #4/#5 on the multi-provider login surface.
+>   - **Finding #7 (P1) — `OnboardingViewModel.onTestAndContinue` no more misleading "Invalid credentials"**: distinguishes `loginResult == null` (tracker has no auth path) from `loginResult.state != Authenticated` (real auth failure). Null path now treated as anonymous → switchTracker + advance.
+>   - **Finding #8 (P1) — `OnboardingViewModel.loadProviders` excludes cloned synthetic trackers**: filters by syntheticId membership in `cloned_provider`. Clones remain configurable via Provider Config.
+>   - **Finding #9 (P2) — `MainActivity` onboardingComplete re-read**: `PreferencesStorage.observeOnboardingComplete()` new Flow API (SharedPreferences-listener-backed). Two parallel `lifecycleScope.launch { repeatOnLifecycle { collect } }` blocks (one for theme, one for onboarding). Welcome screen re-appears if settings flip onboardingComplete back to false at runtime.
+>   - **Finding #10 (P2) — `ToggleSync` first-tap race**: reads `toggleDao.get(providerId)?.enabled` synchronously instead of `state.syncEnabled`. First tap before observeAll() emit no longer silently flips the wrong direction.
+>   - **Tests added** (5 new): `LoginViewModelTest` (3 cases: Findings #4 username, #4 password, #5 captcha), `ProviderConfigViewModelTest` (2 cases: Findings #1 + #10), Finding #7 + #8 cases added to existing `OnboardingViewModelTest`, Finding #6 case added to existing `ProviderLoginViewModelTest`.
+>   - **Schema migration**: Room version bumped 10 → 11 (`MIGRATION_10_11` adds `use_anonymous INTEGER NOT NULL DEFAULT 0` to `provider_configs`). `core/database/schemas/lava.database.AppDatabase/11.json` exported by KSP.
+>   - **All builds + tests green**: `:core:database` / `:core:credentials` / `:feature:provider_config` / `:feature:login` / `:feature:onboarding` / `:app:assembleDebug` / `:app:compileDebugAndroidTestKotlin`.
 >
 > **1.2.25-1045 distribute cycle (2026-05-17 afternoon):**
 >   - Stage-1 debug Firebase release ID `1lfjqc1nnhuio` on `digital.vasic.lava.client.dev`

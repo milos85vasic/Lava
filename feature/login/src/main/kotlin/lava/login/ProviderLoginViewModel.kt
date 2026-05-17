@@ -110,6 +110,12 @@ internal class ProviderLoginViewModel @Inject constructor(
                 },
                 captchaInput = InputState.Initial,
                 captcha = null,
+                // Sweep Finding #6 closure (2026-05-17, §6.L 59th):
+                // moving between providers MUST clear the stale infra-
+                // error banner so the user does not see an unrelated
+                // provider's ServiceUnavailable on the newly selected
+                // provider's screen.
+                serviceUnavailable = null,
             )
         }
     }
@@ -126,6 +132,8 @@ internal class ProviderLoginViewModel @Inject constructor(
                 passwordInput = InputState.Initial,
                 captchaInput = InputState.Initial,
                 captcha = null,
+                // Sweep Finding #6 closure (2026-05-17, §6.L 59th).
+                serviceUnavailable = null,
             )
         }
     }
@@ -138,6 +146,9 @@ internal class ProviderLoginViewModel @Inject constructor(
                 } else {
                     InputState.Empty
                 },
+                // Sweep Finding #6 closure (2026-05-17): fresh keystroke
+                // implies user retry; clear stale infra-error banner.
+                serviceUnavailable = null,
             )
         }
     }
@@ -150,6 +161,8 @@ internal class ProviderLoginViewModel @Inject constructor(
                 } else {
                     InputState.Empty
                 },
+                // Sweep Finding #6 closure (2026-05-17).
+                serviceUnavailable = null,
             )
         }
     }
@@ -162,6 +175,8 @@ internal class ProviderLoginViewModel @Inject constructor(
                 } else {
                     InputState.Empty
                 },
+                // Sweep Finding #6 closure (2026-05-17).
+                serviceUnavailable = null,
             )
         }
     }
@@ -202,7 +217,10 @@ internal class ProviderLoginViewModel @Inject constructor(
 
     private fun onSubmitClick() = intent {
         postSideEffect(LoginSideEffect.HideKeyboard)
-        reduce { state.copy(isLoading = true) }
+        // Sweep Finding #6 closure (2026-05-17): a fresh submit clears
+        // the stale infra-error banner; if the new attempt also returns
+        // ServiceUnavailable the branch re-populates with the fresh reason.
+        reduce { state.copy(isLoading = true, serviceUnavailable = null) }
 
         val providerId = state.selectedProviderId ?: return@intent
         val provider = state.providers.firstOrNull { it.providerId == providerId }
@@ -378,6 +396,14 @@ internal class ProviderLoginViewModel @Inject constructor(
                             state.copy(
                                 isLoading = false,
                                 serviceUnavailable = response.reason,
+                                // Sweep Finding #6 + #5 closure (2026-05-17):
+                                // a CaptchaRequired may have populated `captcha`
+                                // on a prior turn. If ServiceUnavailable lands
+                                // next the captcha's sid is stale; clear it so
+                                // the UI does not render an invalid challenge
+                                // image. The next CaptchaRequired re-issues.
+                                captcha = null,
+                                captchaInput = InputState.Initial,
                             )
                         }
                     }
