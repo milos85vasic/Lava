@@ -11,7 +11,7 @@ same commit so the index stays trustworthy. Stale state in this file
 is itself a §6.J spirit issue — the file claims a guarantee, the
 repo has drifted, the agent acts on the claim.
 
-> **Last updated:** 2026-05-17 (late evening), **1.2.28 + 1.2.29 BOTH SHIPPED (1.2.29: debug `7j62q5sd375q8` + release `0aihodtl3s888`); 10/10 sweep findings closed; §6.AD.6 no-guessing-vocabulary gate extracted to standalone `scripts/check-no-guessing-vocabulary.sh` + 7-fixture hermetic test (1.2.30-1050 tooling-cycle, no distribute planned).**
+> **Last updated:** 2026-05-18 (early), **§6.AD-debt 2 more items CLOSED in 1.2.30-1050 tooling cycle: `CM-SCRIPT-DOCS-SYNC` (commit `11820734`) + `CM-COMMIT-DOCS-EXISTS` (commit `977630c3`). Only `CM-SUBAGENT-DELEGATION-AUDIT` remains OWED of the original §6.AD `CM-*` set. Both gates ship with their scanner + 7/8-fixture hermetic test + companion `docs/scripts/*.sh.md` guide + wrapper integration. Plus: T7 USB disk migration today (5G → 65G free on main; 6 dirs symlinked to T7 incl. ~/.gradle, ~/.cache, Xcode; `~/.zshrc` updated with `GRADLE_USER_HOME=/Volumes/T7/Gradle`, `XDG_CACHE_HOME`, `NPM_CONFIG_CACHE`).**
 >
 > **Sweep tier-A closure (2026-05-17 evening, branch `sweep-findings-tier-A-2026-05-17`):** 8 of the 10 comprehensive-sweep findings closed in a single coordinated commit (Findings #2 + #3 already closed by Bug 2 cascade + Bug 3 fix in prior cycles). All fixes falsifiability-rehearsed per §6.J / Seventh Law clause 1 (mutation applied → test fails with clear message → mutation reverted → test passes). Bluff-Audit stamps recorded in commit body.
 >   - **Finding #1 (P0) — ToggleAnonymous persistence**: `feature/provider_config/.../ProviderConfigViewModel.kt` now persists via new `ProviderConfigRepository.setUseAnonymous(...)` → Room column `use_anonymous` (Migration 10→11 + schema 11.json). Switch state survives process restart.
@@ -360,7 +360,7 @@ docs/todos/Lava_TODOs_001.md committed as historical; etc.)
 
 - **§6.K-debt** (Containers extension): RESOLVED 2026-05-07.
 - **§6.N-debt** (pre-push hook enforcement): RESOLVED 2026-05-05.
-- **§6.AD-debt** (HelixConstitution-Inheritance per-scope + CM-* wiring): RESOLVED across the 1.2.23 closure-cycle (`4a7d0402` + earlier); 6 paper-only CM-* gates remain ⚠️ by design (equivalence-mapped per §6.AD.3).
+- **§6.AD-debt** (HelixConstitution-Inheritance per-scope + CM-* wiring): RESOLVED across the 1.2.23 closure-cycle (`4a7d0402` + earlier). Of the original `CM-*` set: 5 mapped Path-B-equivalent (CLOSED-BY-EQUIVALENCE per §6.AD.3), `CM-UNIVERSAL-VS-PROJECT-CLASSIFICATION` CLOSED by pre-push Check 8, `CM-SCRIPT-DOCS-SYNC` CLOSED 2026-05-17 (`11820734`), `CM-COMMIT-DOCS-EXISTS` CLOSED 2026-05-18 (`977630c3`). Only `CM-SUBAGENT-DELEGATION-AUDIT` remains OWED (requires design decision on schema + audit-trail location before implementation).
 - **§6.X-debt** (Linux x86_64 + KVM gate-host for container-bound emulator matrix): STANDING. See §4.5 above.
 - **§6.L** (Anti-Bluff Functional Reality Mandate): 52 invocations across multiple working days; 17-cycle back-to-back the longest sequence in project history this cycle. Per §6.L the repetition IS the constitutional record.
 - **§6.R** (No-Hardcoding Mandate): UUID + IPv4 + host:port scanners active; algorithm-parameter literal grep staged (code-review gate per §6.R clause body).
