@@ -1,4 +1,36 @@
 # Changelog
+## Lava-Android-1.2.32-1052 / Lava-API-Go-2.3.21-2321 — 2026-05-18 (Wave 3 — Challenge26 anti-bluff coverage for ApiSelection + §6.L 61st)
+
+**Previous published:** Lava-Android-1.2.31-1051 (Stage 1 debug + Stage 2 release both shipped earlier 2026-05-18).
+
+**User-visible release:** identical APK behavior to 1.2.31. The change in this release is the addition of `Challenge26ApiDiscoveryAndConnectivityTest` — 6 rendered-UI contract tests covering the new ApiSelection step at every state (searching, empty + retry, found-one, found-multiple + pluralization, selection callback, probe-failure + retry). Closes the Wave-3 anti-bluff item the 1.2.31-1051 release explicitly flagged as OWED.
+
+### What's new for testers
+
+Behavior unchanged from 1.2.31-1051. Same smoke checklist:
+
+1. Install debug APK → cold launch → Welcome screen.
+2. Tap "Get Started" → **NEW "Choose your API" screen**.
+3. If a `lava-api-go` is running on the LAN with `_lava-api._tcp` or `_lava-api-dev._tcp`, the API appears in the list within ~5s.
+4. Tap an API → spinner → on probe success → "Pick your providers" screen.
+5. Confirm subtitles under provider names read "Form Login" / "Api Key" / etc. (no underscores).
+
+If you've already installed 1.2.31, this is the same APK with more test coverage backing it. Re-install or skip — no functional difference.
+
+### Falsifiability rehearsal (§6.J anti-bluff)
+
+Per Challenge26's KDoc: mutating the "Searching for APIs on your network…" string in `ApiSelectionStep.kt` to "Loading…" causes `discoveryRunning_showsSearchingText` to fail with `onNodeWithText` returning empty node-set → `assertIsDisplayed` throws `ComposeNotFoundException`. The mutation rehearsal is the §6.J primary acceptance gate; recorded as the canonical break-revert pattern.
+
+### Distribute-readiness
+
+- ✅ §6.P versionCode 1052 > last-version-debug 1051 + > last-version-release 1051
+- ✅ §6.Y bump-first applied (first hunk of this commit)
+- ✅ §6.W mirrors converged on github + gitlab (1.2.31 cycle pushed)
+- ✅ §6.AA two-stage: this cycle ships Stage 1 debug first; Stage 2 release pending operator confirmation
+- ✅ §6.Z evidence at `.lava-ci-evidence/distribute-changelog/firebase-app-distribution/1.2.32-1052-test-evidence.md` — C00 + C01 + Challenge26 8/8 PASS + debug/release cold-launch verified
+
+`Classification:` project-specific.
+
 ## Lava-Android-1.2.31-1051 / Lava-API-Go-2.3.20-2320 — 2026-05-18 (Onboarding ApiSelection step + subtitle fix + §6.L 60th)
 
 **Previous published:** Lava-Android-1.2.30-1050 (debug + release both distributed earlier 2026-05-18).
