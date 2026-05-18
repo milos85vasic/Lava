@@ -1,4 +1,38 @@
 # Changelog
+## Lava-Android-1.2.30-1050 / Lava-API-Go-2.3.19-2319 — 2026-05-18 (§6.AD-debt FULLY DRAINED + T7 disk migration)
+
+**Previous published:** Lava-Android-1.2.29-1049 (debug + release both distributed 2026-05-17 evening).
+
+**User-visible release:** TOOLING + INFRASTRUCTURE cycle. No app code changes from 1.2.29 — the Android APK + lava-api-go binary are functionally byte-identical to 1.2.29 (modulo build timestamp + Spotless re-formatting). Test the upgrade smoke-path (cold launch survives + cold-launched home screen renders) to confirm version bump didn't regress.
+
+### What landed
+
+- **§6.AD-debt FULLY DRAINED.** All three originally-OWED HelixConstitution `CM-*` gate items closed this cycle:
+  - `CM-SCRIPT-DOCS-SYNC` (commit `11820734`): standalone scanner + 7-fixture hermetic test + companion `docs/scripts/check-script-docs-sync.sh.md` + wrapper integration. Enforces bidirectional drift between `scripts/*.sh` and `docs/scripts/*.sh.md`.
+  - `CM-COMMIT-DOCS-EXISTS` (commit `977630c3`): scanner + 8-fixture hermetic test + companion guide + wrapper. Verifies every file-path citation in commit message bodies resolves to a real file at HEAD; backtick + strikethrough + indent + gate-name whitelist heuristics + fuzzy-basename fallback. Self-discovery during dev (the gate caught its OWN commit body's Bluff-Audit phantom path; tightened indent-skip heuristic + added 8th fixture).
+  - `CM-SUBAGENT-DELEGATION-AUDIT` (commit `2a0e11f4`): scanner + 8-fixture hermetic test + companion guide + audit-dir README + wrapper. Verifies subagent-dispatch commit messages have matching audit entries under `.lava-ci-evidence/subagent-dispatches/`. Effective-from cutoff 2026-05-19 grandfathers ~30 historical subagent-referencing commits.
+- **§6.J forensic anchor** (`6b6cc358`): `check_constitution_test.sh` slow-cp discovery. The hermetic test does `cp -r $REPO_ROOT/. $fixture/` per fixture, copying the entire 8GB monorepo + 16 submodules + .git for each test run. Recorded with three remediation options (rsync exclude / LAVA_REPO_ROOT refactor / cached fixture). Sweep wall-time impact: ~5 minutes per test invocation.
+- **CONTINUATION.md updates** (commits `7dc20171` + `2af3829a`): §6.S compliance for the cycle's milestones (2-of-3 → drained).
+- **T7 USB disk migration:** 5G → 108G free on main disk (+103G across migration + Pixel_8 zombie cleanup + partial-cp scrub). 7 home-dir caches symlinked to T7 (`~/.cache`, `~/.npm-new-cache`, `~/.lmstudio`, `~/.ollama`, `~/.local/share/opencode`, `~/.android`, `~/Library/Developer/Xcode`). `~/.zshrc` updated with `GRADLE_USER_HOME=/Volumes/T7/Gradle`, `XDG_CACHE_HOME`, `NPM_CONFIG_CACHE`. Operator action pending for 62M root-owned npm-cache residual.
+
+### Falsifiability rehearsals (§6.J anti-bluff)
+
+Bluff-Audit stamps recorded in each commit body. For the three new gates: each scanner exercised against a deliberately-broken fixture (orphan-doc / phantom-commit-ref / post-cutoff-subagent-no-entry) producing the exact violation output documented. Reverted via per-test self-cleanup.
+
+### Anti-bluff posture
+
+This cycle ships NO app code changes. The `versionCode = 1050` bump per §6.Y is the only `app/build.gradle.kts` delta from 1.2.29. The §6.Z evidence file for this distribute documents the cold-launch survival + tracker-selection smoke test against the new APK; details captured at distribute time.
+
+### Distribute-readiness
+
+- ✅ §6.P versionCode 1050 > last-version-debug 1049
+- ✅ §6.Y bump-first applied (was applied at start of cycle: 1049 → 1050 + 2318 → 2319)
+- ✅ §6.W mirrors converged on github + gitlab (8 commits this session, all pushed)
+- 🟡 §6.AA two-stage: debug stage 1 first, release stage 2 only after operator confirmation
+- 🟡 §6.Z evidence: pre-distribute generation pending; cold-launch (C00) + tracker selection (C01) Challenge Tests gated by emulator availability
+
+`Classification:` project-specific.
+
 ## Lava-Android-1.2.29-1049 / Lava-API-Go-2.3.18-2318 — 2026-05-17 (sweep tier-B — deferred findings #2 + #3 closed)
 
 **Previous published:** Lava-Android-1.2.28-1048 (debug + release both distributed 2026-05-17 evening).
