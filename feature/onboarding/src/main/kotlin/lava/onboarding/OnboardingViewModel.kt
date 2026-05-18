@@ -59,11 +59,13 @@ class OnboardingViewModel @Inject constructor(
     private val discoveryService: LocalNetworkDiscoveryService,
     private val connectionService: ConnectionService,
     private val endpointsRepository: EndpointsRepository,
-    // Feature flag (defaults true; tests override to false to preserve
-    // pre-existing Welcome → Providers assertions). Production DI passes
-    // the default. When false, NextStep from Welcome bypasses ApiSelection
-    // and goes straight to Providers — same as the pre-60th flow.
-    private val apiSelectionEnabled: Boolean = true,
+    // Feature flag (defaults true; tests bypass Hilt and override to
+    // false to preserve pre-existing Welcome → Providers assertions).
+    // Production DI binds via [OnboardingHiltModule]. When false,
+    // NextStep from Welcome bypasses ApiSelection and goes straight to
+    // Providers — same as the pre-60th flow.
+    @javax.inject.Named("apiSelectionEnabled")
+    private val apiSelectionEnabled: Boolean,
 ) : ViewModel(), ContainerHost<OnboardingState, OnboardingSideEffect> {
     private val logger = loggerFactory.get("OnboardingViewModel")
 

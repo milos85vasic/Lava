@@ -1,4 +1,34 @@
 # Changelog
+## Lava-Android-1.2.31-1051 / Lava-API-Go-2.3.20-2320 — 2026-05-18 (Onboarding ApiSelection step + subtitle fix + §6.L 60th)
+
+**Previous published:** Lava-Android-1.2.30-1050 (debug + release both distributed earlier 2026-05-18).
+
+**User-visible release:** new onboarding step + cosmetic subtitle fix.
+
+### What's new for testers
+
+- **New "Choose your API" screen as the first step after Welcome.** The app now scans your local network via mDNS (NSD) for `_lava-api._tcp` (production) and `_lava-api-dev._tcp` (development) services. Discovered APIs appear as a tappable list. Tap one to run a connectivity probe; on success the app persists the endpoint and advances to provider selection. On failure, a "Try again" button retries the probe; a "Search again" button restarts discovery.
+- **Provider subtitles read "Form Login" / "Api Key" / "Captcha Login" / "None" / "Oauth"** instead of the raw enum names `FORM_LOGIN` / `API_KEY` / etc. with underscores. Operator-flagged in the 60th §6.L invocation; fixed via a `AuthType.displayLabel()` extension covered by 6 unit tests including a forward-compat no-underscore guard.
+
+### Implementation notes
+
+- The new ApiSelection step is gated on `apiSelectionEnabled` Hilt-injected flag (`true` in production, `false` in instrumented tests via `TestOnboardingHiltModule`) so the pre-60th Challenge Tests (C00, C01, C20, C21, C24, C25) continue to assert on the legacy Welcome → Providers flow they were designed for. Wave 3 (next cycle) lands `Challenge26ApiDiscoveryAndConnectivity` for the new step + updates the legacy Challenges to traverse it + removes the flag.
+- Uses EXISTING infrastructure — no new HTTP probe code: `LocalNetworkDiscoveryService` for mDNS, `ConnectionService.isReachable(Endpoint)` for the probe (same probe driving green-icons in Connections), `EndpointsRepository.add()` for persistence.
+
+### Falsifiability rehearsals (§6.J anti-bluff)
+
+Bluff-Audit stamps in commits `19cc0b95` (Wave 1) and the Wave 2 commit body. For `AuthTypeDisplayTest`: mutation = return raw `name`; observed 4 of 6 failures with clear assertions; reverted.
+
+### Distribute-readiness
+
+- ✅ §6.P versionCode 1051 > last-version-debug 1050 + > last-version-release 1050
+- ✅ §6.Y bump-first applied at start of cycle (commit `19cc0b95` first hunk)
+- ✅ §6.W mirrors converged on github + gitlab
+- ✅ §6.AA two-stage: this cycle ships Stage 1 debug first; Stage 2 release pending operator confirmation
+- ✅ §6.Z evidence file at `.lava-ci-evidence/distribute-changelog/firebase-app-distribution/1.2.31-1051-test-evidence.md` records C00 + C01 PASS + debug/release cold-launch + unit-test suites
+
+`Classification:` project-specific.
+
 ## Lava-Android-1.2.30-1050 / Lava-API-Go-2.3.19-2319 — 2026-05-18 (§6.AD-debt FULLY DRAINED + T7 disk migration)
 
 **Previous published:** Lava-Android-1.2.29-1049 (debug + release both distributed 2026-05-17 evening).
