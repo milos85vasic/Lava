@@ -24,6 +24,7 @@ import lava.designsystem.component.Surface
 import lava.designsystem.component.Text
 import lava.designsystem.theme.AppTheme
 import lava.onboarding.ProviderOnboardingItem
+import lava.onboarding.util.displayLabel
 
 @Composable
 fun ProvidersStep(
@@ -77,7 +78,7 @@ fun ProvidersStep(
                                     style = AppTheme.typography.bodyLarge,
                                 )
                                 Text(
-                                    text = item.descriptor.authType.name,
+                                    text = item.descriptor.authType.displayLabel(),
                                     style = AppTheme.typography.labelSmall,
                                     color = AppTheme.colors.onSurfaceVariant,
                                 )
