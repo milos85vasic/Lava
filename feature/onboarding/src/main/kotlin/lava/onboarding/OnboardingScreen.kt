@@ -2,6 +2,9 @@ package lava.onboarding
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
@@ -61,9 +64,23 @@ fun OnboardingScreen(
             .fillMaxSize()
             .windowInsetsPadding(WindowInsets.safeDrawing),
         transitionSpec = {
+            // 62nd §6.L invocation (2026-05-18): smoother non-annoying
+            // animations per operator directive. FastOutSlowInEasing on
+            // the slide track + LinearOutSlowIn on the fade overlap
+            // produces a Material-spec polished feel without the
+            // distraction of a long animation. 320ms slide + 220ms fade
+            // is fast enough to feel snappy + slow enough to read.
             val dir = if (targetState.ordinal > initialState.ordinal) 1 else -1
-            (slideInHorizontally { it * dir } + fadeIn()) togetherWith
-                (slideOutHorizontally { -it * dir } + fadeOut())
+            val slideSpec = tween<androidx.compose.ui.unit.IntOffset>(
+                durationMillis = 320,
+                easing = FastOutSlowInEasing,
+            )
+            val fadeSpec = tween<Float>(
+                durationMillis = 220,
+                easing = LinearOutSlowInEasing,
+            )
+            (slideInHorizontally(animationSpec = slideSpec) { it * dir } + fadeIn(animationSpec = fadeSpec)) togetherWith
+                (slideOutHorizontally(animationSpec = slideSpec) { -it * dir } + fadeOut(animationSpec = fadeSpec))
         },
     ) { step ->
         when (step) {

@@ -1,4 +1,18 @@
 # Changelog
+## Lava-Android-1.2.33-1053 / Lava-API-Go-2.3.22-2322 — 2026-05-18 (Smoother onboarding animations + 13 submodule pins advanced + §6.L 62nd)
+
+**Previous published:** Lava-Android-1.2.32-1052 (debug + release shipped earlier 2026-05-18).
+
+**What's new for testers:**
+- **Smoother transitions between onboarding screens** — Welcome → ApiSelection → Providers → Configure → Summary now uses Material-spec easing (`FastOutSlowInEasing` 320ms slide + `LinearOutSlowInEasing` 220ms fade). Same back-direction-aware slide behaviour, just polished feel.
+- **Submodule infrastructure refresh** — 13 of 18 `vasic-digital/*` submodule pins advanced to upstream HEADs incorporating their latest CLAUDE.md / CONSTITUTION.md / minor API hardening commits. Compile-clean + 8/8 Compose UI Challenges PASS confirm no API-surface breakage from the pulls.
+
+**Test execution:** 8/8 PASS on Pixel_8/API35 (C00 + C01 + Challenge26 6 sub-tests). Debug cold-launch 3199ms / Release cold-launch 1219ms — both no FATAL.
+
+**Distribute-readiness:** §6.P versionCode 1053 > 1052; §6.Y bump-first applied; §6.W converged; §6.Z evidence file present; §6.AA stage 1 debug → stage 2 release.
+
+`Classification:` project-specific.
+
 ## Lava-Android-1.2.32-1052 / Lava-API-Go-2.3.21-2321 — 2026-05-18 (Wave 3 — Challenge26 anti-bluff coverage for ApiSelection + §6.L 61st)
 
 **Previous published:** Lava-Android-1.2.31-1051 (Stage 1 debug + Stage 2 release both shipped earlier 2026-05-18).
