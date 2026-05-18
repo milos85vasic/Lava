@@ -31,7 +31,7 @@ services:
       POSTGRES_USER: lava
       POSTGRES_PASSWORD: ${LAVA_PG_PASSWORD:?required}
     networks: [lava-net]
-    ports: ["127.0.0.1:5432:5432"]
+    ports: ["127.0.0.1:8432:5432"]
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "lava", "-d", "lava_api"]
       interval: 5s
@@ -62,7 +62,7 @@ services:
     depends_on:
       lava-migrate: { condition: service_completed_successfully }
     environment:
-      LAVA_API_PG_URL: "postgres://lava:${LAVA_PG_PASSWORD}@127.0.0.1:5432/lava_api?sslmode=disable"
+      LAVA_API_PG_URL: "postgres://lava:${LAVA_PG_PASSWORD}@127.0.0.1:8432/lava_api?sslmode=disable"
       LAVA_API_LISTEN: ":8443"                        # public LAN listener (HTTP/3 + HTTP/2)
       # Bind metrics to all interfaces so the bridged Prometheus container
       # (`docker.io/prom/prometheus`) can scrape via `host.containers.internal:9091`.
