@@ -183,6 +183,9 @@ run_gate "script-docs-sync" "CM-SCRIPT-DOCS-SYNC / HelixConstitution §11.4.18" 
 run_gate "commit-docs-exists" "CM-COMMIT-DOCS-EXISTS / HelixConstitution §11.4.x (last 5 commits)" \
     "LAVA_COMMIT_RANGE='HEAD~5..HEAD' bash scripts/check-commit-docs-exists.sh"
 
+run_gate "subagent-delegation-audit" "CM-SUBAGENT-DELEGATION-AUDIT / HelixConstitution §11.4.x (last 5 commits)" \
+    "LAVA_COMMIT_RANGE='HEAD~5..HEAD' bash scripts/check-subagent-delegation-audit.sh"
+
 # Hermetic test suites (each suite's own paired-mutation contracts)
 for suite in tests/firebase tests/ci-sh tests/compose-layout tests/tag-helper \
              tests/vm-images tests/vm-signing tests/vm-distro; do
