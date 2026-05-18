@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import lava.onboarding.steps.ApiSelectionStep
 import lava.onboarding.steps.ConfigureStep
 import lava.onboarding.steps.ProvidersStep
 import lava.onboarding.steps.SummaryStep
@@ -69,6 +70,16 @@ fun OnboardingScreen(
             OnboardingStep.Welcome -> WelcomeStep(
                 providerCount = state.providers.size,
                 onGetStarted = { viewModel.perform(OnboardingAction.NextStep) },
+            )
+            // 60th §6.L invocation (2026-05-18): new API selection step
+            OnboardingStep.ApiSelection -> ApiSelectionStep(
+                discoveryRunning = state.apiDiscoveryRunning,
+                discovered = state.discoveredApis,
+                selected = state.selectedApi,
+                connectivity = state.apiConnectivity,
+                onSelect = { viewModel.perform(OnboardingAction.SelectApi(it)) },
+                onRetryDiscovery = { viewModel.perform(OnboardingAction.NextStep) }, // re-enters discovery via step refresh
+                onRetryProbe = { viewModel.perform(OnboardingAction.RetryApiProbe) },
             )
             OnboardingStep.Providers -> ProvidersStep(
                 providers = state.providers,

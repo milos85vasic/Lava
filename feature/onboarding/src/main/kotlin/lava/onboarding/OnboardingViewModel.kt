@@ -3,12 +3,20 @@ package lava.onboarding
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 import lava.auth.api.AuthService
 import lava.common.analytics.AnalyticsTracker
 import lava.credentials.ProviderCredentialManager
+import lava.data.api.repository.EndpointsRepository
+import lava.data.api.service.ConnectionService
+import lava.data.api.service.LocalNetworkDiscoveryService
 import lava.database.dao.ClonedProviderDao
 import lava.logger.api.LoggerFactory
+import lava.models.settings.Endpoint
 import lava.tracker.api.AuthType
 import lava.tracker.api.TrackerDescriptor
 import lava.tracker.api.model.AuthState
@@ -47,8 +55,20 @@ class OnboardingViewModel @Inject constructor(
     // Pre-fix: `sdk.listAvailableTrackers()` returned base + clones; the
     // wizard rendered the clones as if they were independent trackers.
     private val clonedProviderDao: ClonedProviderDao,
+    // 60th §6.L invocation (2026-05-18) — API discovery + connectivity probe
+    private val discoveryService: LocalNetworkDiscoveryService,
+    private val connectionService: ConnectionService,
+    private val endpointsRepository: EndpointsRepository,
+    // Feature flag (defaults true; tests override to false to preserve
+    // pre-existing Welcome → Providers assertions). Production DI passes
+    // the default. When false, NextStep from Welcome bypasses ApiSelection
+    // and goes straight to Providers — same as the pre-60th flow.
+    private val apiSelectionEnabled: Boolean = true,
 ) : ViewModel(), ContainerHost<OnboardingState, OnboardingSideEffect> {
     private val logger = loggerFactory.get("OnboardingViewModel")
+
+    /** Tracks the in-flight discovery flow collection so we can cancel + restart. */
+    private var discoveryJob: Job? = null
 
     override val container: Container<OnboardingState, OnboardingSideEffect> = container(
         initialState = OnboardingState(),
@@ -68,6 +88,105 @@ class OnboardingViewModel @Inject constructor(
             is OnboardingAction.ToggleAnonymous -> onToggleAnonymous(action.enabled)
             is OnboardingAction.TestAndContinue -> onTestAndContinue()
             is OnboardingAction.Finish -> onFinish()
+            is OnboardingAction.SelectApi -> onSelectApi(action.endpoint)
+            is OnboardingAction.RetryApiProbe -> {
+                val current = container.stateFlow.value.selectedApi
+                if (current != null) onSelectApi(current)
+            }
+        }
+    }
+
+    /**
+     * Start collecting the mDNS discovery flow and emitting each
+     * `DiscoveredEndpoint` into state. Cancels any prior collection job
+     * (re-entry from a back-then-forward navigation re-starts fresh).
+     *
+     * §6.J anti-bluff: this collector mutates user-visible state. The
+     * Challenge for ApiSelection asserts on the rendered list count.
+     */
+    private fun startApiDiscovery() = intent {
+        discoveryJob?.cancel()
+        reduce {
+            state.copy(
+                apiDiscoveryRunning = true,
+                discoveredApis = emptyList(),
+                selectedApi = null,
+                apiConnectivity = ApiConnectivityState.Idle,
+            )
+        }
+        // Collect each DiscoveredEndpoint into the running list.
+        discoveryJob = discoveryService.discover()
+            .onEach { hit ->
+                val endpoint = Endpoint.GoApi(host = hit.host, port = hit.port)
+                intent {
+                    val existing = state.discoveredApis
+                    if (existing.none { it is Endpoint.GoApi && it.host == hit.host && it.port == hit.port }) {
+                        reduce { state.copy(discoveredApis = existing + endpoint) }
+                    }
+                }
+            }
+            .launchIn(viewModelScope)
+        // After 5s wall-clock, stop showing the spinner regardless —
+        // user can hit "Search again" if they want more time.
+        viewModelScope.launch {
+            withTimeoutOrNull(5_000) { /* no-op timer */ }
+            intent { reduce { state.copy(apiDiscoveryRunning = false) } }
+        }
+    }
+
+    private fun onSelectApi(endpoint: Endpoint) = intent {
+        reduce {
+            state.copy(
+                selectedApi = endpoint,
+                apiConnectivity = ApiConnectivityState.Testing,
+            )
+        }
+        viewModelScope.launch {
+            try {
+                val reachable = connectionService.isReachable(endpoint)
+                if (reachable) {
+                    // Persist the selected endpoint so the rest of the app
+                    // (search, network, etc.) routes through it.
+                    endpointsRepository.add(endpoint)
+                    logger.d { "ApiSelection: probe OK for $endpoint — advance to Providers" }
+                    intent {
+                        reduce {
+                            state.copy(
+                                apiConnectivity = ApiConnectivityState.Idle,
+                                step = OnboardingStep.Providers,
+                            )
+                        }
+                    }
+                    discoveryJob?.cancel()
+                } else {
+                    intent {
+                        reduce {
+                            state.copy(
+                                apiConnectivity = ApiConnectivityState.Failure(
+                                    reason = "API did not respond",
+                                ),
+                            )
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                logger.e(t = e) { "ApiSelection probe failed for $endpoint" }
+                analytics.recordNonFatal(
+                    e,
+                    mapOf(
+                        AnalyticsTracker.Params.ERROR to "api_probe_failed",
+                    ),
+                )
+                intent {
+                    reduce {
+                        state.copy(
+                            apiConnectivity = ApiConnectivityState.Failure(
+                                reason = e.message ?: "Unknown error",
+                            ),
+                        )
+                    }
+                }
+            }
         }
     }
 
@@ -92,7 +211,18 @@ class OnboardingViewModel @Inject constructor(
 
     private fun onNextStep() = intent {
         when (state.step) {
-            OnboardingStep.Welcome -> reduce { state.copy(step = OnboardingStep.Providers) }
+            OnboardingStep.Welcome -> {
+                if (apiSelectionEnabled) {
+                    reduce { state.copy(step = OnboardingStep.ApiSelection) }
+                    startApiDiscovery()
+                } else {
+                    reduce { state.copy(step = OnboardingStep.Providers) }
+                }
+            }
+            // ApiSelection has no plain "Next" — advance is gated on
+            // SelectApi → probe success. NextStep on this step re-starts
+            // discovery (operator's "Search again" affordance).
+            OnboardingStep.ApiSelection -> startApiDiscovery()
             OnboardingStep.Providers -> {
                 val selected = state.providers.filter { it.selected }
                 if (selected.isEmpty()) return@intent
@@ -115,7 +245,21 @@ class OnboardingViewModel @Inject constructor(
             // app closes, next launch re-enters onboarding because
             // `onboardingComplete` was never set.
             OnboardingStep.Welcome -> postSideEffect(OnboardingSideEffect.ExitApp)
-            OnboardingStep.Providers -> reduce { state.copy(step = OnboardingStep.Welcome) }
+            OnboardingStep.ApiSelection -> {
+                discoveryJob?.cancel()
+                reduce {
+                    state.copy(
+                        step = OnboardingStep.Welcome,
+                        apiDiscoveryRunning = false,
+                        discoveredApis = emptyList(),
+                        selectedApi = null,
+                        apiConnectivity = ApiConnectivityState.Idle,
+                    )
+                }
+            }
+            OnboardingStep.Providers -> reduce {
+                state.copy(step = if (apiSelectionEnabled) OnboardingStep.ApiSelection else OnboardingStep.Welcome)
+            }
             OnboardingStep.Configure -> {
                 // Walk back through the per-provider Configure pages before
                 // returning to the Providers list, so a user configuring N

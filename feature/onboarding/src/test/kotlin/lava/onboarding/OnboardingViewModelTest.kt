@@ -115,6 +115,19 @@ class OnboardingViewModelTest {
             },
             providerConfigRepository = providerConfigRepository,
             clonedProviderDao = clonedProviderDao,
+            // 60th §6.L invocation (2026-05-18): 3 new injections for the
+            // ApiSelection step. Inline fakes here keep the existing test
+            // surface unchanged — these are no-op defaults that don't
+            // influence Welcome → Providers → Configure → Summary tests.
+            discoveryService = lava.testing.service.TestLocalNetworkDiscoveryService(),
+            connectionService = object : lava.data.api.service.ConnectionService {
+                override val networkUpdates: kotlinx.coroutines.flow.Flow<Boolean> =
+                    kotlinx.coroutines.flow.emptyFlow()
+                override suspend fun isReachable(endpoint: lava.models.settings.Endpoint): Boolean = true
+                override suspend fun isInternetReachable(): Boolean = true
+            },
+            endpointsRepository = lava.testing.repository.TestEndpointsRepository(),
+            apiSelectionEnabled = false, // pre-60th flow preserved for these tests
         )
     }
 

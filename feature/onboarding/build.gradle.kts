@@ -21,6 +21,11 @@ dependencies {
     // so the onboarding wizard does not show them (clones are advanced
     // post-onboarding via Provider Config, not first-run).
     implementation(project(":core:database"))
+    // 60th §6.L invocation (2026-05-18): ApiSelection step consumes
+    // LocalNetworkDiscoveryService + ConnectionService + EndpointsRepository
+    // for mDNS discovery + connectivity probe + persist on success.
+    implementation(project(":core:data"))
+    implementation(project(":core:models"))
     implementation(project(":core:tracker:api"))
     implementation(project(":core:tracker:client"))
     implementation(project(":core:designsystem"))
