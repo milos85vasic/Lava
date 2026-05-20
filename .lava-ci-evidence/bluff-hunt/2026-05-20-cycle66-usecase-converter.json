@@ -1,0 +1,35 @@
+{
+  "date": "2026-05-20",
+  "cycle": "§6.L 66th invocation — fourth consecutive operator anti-bluff invocation this session (63 → 64 → 65 → 66)",
+  "hunt_type": "§6.N.1.1 lighter incident-response hunt (2 files — the upper bound for a same-day subsequent operator anti-bluff invocation)",
+  "scope_note": "Continues the §6.N cadence the 65th began (which hunted feature/login/LoginViewModelTest, a ViewModel test). This cycle broadens to 2 more EXISTING Lava tests in different modules AND different architectural layers — a UseCase test and a converter test.",
+  "targets": [
+    {
+      "test_file": "core/domain/src/test/kotlin/lava/domain/usecase/ProbeMirrorUseCaseTest.kt",
+      "test_class": "lava.domain.usecase.ProbeMirrorUseCaseTest",
+      "production_class": "core/domain/src/main/kotlin/lava/domain/usecase/ProbeMirrorUseCase.kt",
+      "layer": "UseCase",
+      "production_wiring": "Real ProbeMirrorUseCase + real OkHttpClient against a real MockWebServer — real HTTP at the boundary, no mocked SUT.",
+      "mutation": "Changed the reachable-status range `resp.code in 200..399` to `200..599`, so a 503 response maps to ProbeResult.Reachable instead of ProbeResult.Unhealthy.",
+      "observed_with_mutation": "BUILD FAILED — `ProbeMirrorUseCaseTest > 5xx is unhealthy` FAILED (java.lang.AssertionError, ProbeMirrorUseCaseTest.kt:38). 3 tests completed, 1 failed; `200 is reachable` and `unreachable returns Unreachable` passed (untouched paths). Failure localized to exactly the mutated path.",
+      "reverted": "yes — git checkout core/domain/src/main/kotlin/lava/domain/usecase/ProbeMirrorUseCase.kt",
+      "observed_after_revert": "BUILD SUCCESSFUL — 3/3 pass.",
+      "verdict": "GENUINE — not a bluff."
+    },
+    {
+      "test_file": "core/preferences/src/test/kotlin/lava/securestorage/EndpointConverterTest.kt",
+      "test_class": "lava.securestorage.EndpointConverterTest",
+      "production_class": "core/preferences/src/main/kotlin/lava/securestorage/model/EndpointConverter.kt",
+      "layer": "serialization / converter",
+      "production_wiring": "Real EndpointConverter; toJson/fromJson round-trip on real Endpoint models.",
+      "mutation": "In fromJson's GoApi branch, replaced `port = jsonObject.optInt(PortKey, Endpoint.GoApi.DEFAULT_PORT)` with `port = Endpoint.GoApi.DEFAULT_PORT`, so an explicitly-persisted port is ignored.",
+      "observed_with_mutation": "BUILD FAILED — `parse GoApi from json with explicit port` FAILED (EndpointConverterTest.kt:93) + `roundtrip GoApi survives toJson then fromJson with port preserved` FAILED (EndpointConverterTest.kt:123). 10 tests completed, 2 failed; the 8 others — including `parse GoApi from json without port falls back to default` — passed. Failure localized to exactly the mutated path.",
+      "reverted": "yes — git checkout core/preferences/src/main/kotlin/lava/securestorage/model/EndpointConverter.kt",
+      "observed_after_revert": "BUILD SUCCESSFUL — 10/10 pass.",
+      "verdict": "GENUINE — not a bluff."
+    }
+  ],
+  "bluffs_found": 0,
+  "issues_opened": [],
+  "summary": "2 files hunted (§6.N.1.1 upper bound for a same-day lighter hunt). Both ProbeMirrorUseCaseTest (UseCase layer) and EndpointConverterTest (converter layer) confirmed genuine anti-bluff tests — each fails localized to exactly the mutated production path and passes when reverted. Combined with the 65th cycle's LoginViewModelTest, 3 existing Lava tests across 3 modules and 3 architectural layers (ViewModel / UseCase / converter) are now §6.N-verified genuine; 0 bluffs found, 0 issues opened."
+}
