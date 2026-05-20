@@ -21,9 +21,12 @@
  *     `@xml/backup_rules` and `@xml/data_extraction_rules`.
  *
  * This test verifies the user-visible outcome: after completing
- * onboarding and reaching the main app, navigating to the Menu's
- * Server section MUST NOT show any entry titled "Main" or any entry
- * whose host is "rutracker.org".
+ * onboarding and reaching the main app, opening the Menu MUST NOT
+ * show any entry titled "Main" or any entry whose host is
+ * "rutracker.org". (SP-4 removed the legacy "Server" menu section;
+ * the endpoint selector is now the ConnectionItem chip in the
+ * "Settings" section — see the 2026-05-20 forensic anchor at the
+ * navigation step below.)
  *
  * FALSIFIABILITY REHEARSAL (Sixth Law clause 2):
  *
@@ -81,8 +84,18 @@ class Challenge26RutrackerMainAbsentFromServerListTest {
             .firstOrNull()
         runCatching { composeRule.onNodeWithText("Menu").performClick() }
 
+        // Forensic anchor 2026-05-20 (§6.L 67th cycle, discovered by the
+        // first full 37-class Challenge run on the per-OS HVF emulator
+        // path): SP-4 removed the legacy "Server" menu section. The
+        // endpoint selector is now the `ConnectionItem` chip inside the
+        // "Settings" section (MenuScreen.kt `endpointSelectionItem` →
+        // `ConnectionItem`). The previous `waitUntil("Server")` timed out
+        // with ComposeTimeoutException because no "Server" node exists
+        // post-SP-4. Wait for the real "Settings" section label instead.
+        // The "Main" + "rutracker.org" assertions below are UNCHANGED —
+        // only the stale navigation marker is repaired, not the guard.
         composeRule.waitUntil(timeoutMillis = 10_000) {
-            composeRule.onAllNodesWithText("Server").fetchSemanticsNodes().isNotEmpty()
+            composeRule.onAllNodesWithText("Settings").fetchSemanticsNodes().isNotEmpty()
         }
 
         composeRule.onAllNodesWithText("Main", substring = false).assertCountEquals(0)

@@ -23,11 +23,31 @@
 #                                                            # Option 1 — shell-level wiring). OFF by default so
 #                                                            # existing matrix runs are unaffected.
 #
-# Honest pre-flight: this script DETECTS the §6.X-debt darwin/arm64
-# host gap (no /dev/kvm available to podman) and, when detected, REFUSES
-# to claim it produced a §6.AE-conformant gate run. Instead it documents
-# what was attempted and what the operator must do on a Linux x86_64
-# gate-host to complete the matrix.
+# OS-aware pre-flight: each host OS has a different correct
+# hardware-acceleration backend, and the correct emulator runner
+# follows from it (see submodules/containers/pkg/emulator/accel.go):
+#
+#   - Linux  → accel KVM  → containerized runner (emulator inside a
+#              podman/docker container with --device /dev/kvm).
+#   - macOS  → accel HVF  → host-direct runner. Apple HVF
+#              (Hypervisor.framework) is a macOS-host-only API a Linux
+#              container cannot reach; the Android emulator uses HVF
+#              automatically when run as a native macOS process, so
+#              host-direct is the only accelerated AND gate-eligible
+#              runner on macOS.
+#   - Windows → accel WHPX → host-direct runner (same reasoning: WHPX
+#              is host-only, unreachable from a Linux container).
+#
+# This script forwards --runner=auto to the Containers emulator-matrix
+# CLI, which resolves the OS-correct runner via emulator.ResolveRunner.
+#
+# It still REFUSES to claim a §6.AE-conformant gate run when the host
+# genuinely has no acceleration available:
+#   - Linux without /dev/kvm → exit 2 (genuinely no accelerator).
+#   - macOS without HVF (kern.hv_support != 1) → exit 2.
+# On macOS WITH HVF the OS-correct runner is host-direct+HVF, so the
+# script proceeds rather than exiting 2 — that is not a host gap, it is
+# the OS-correct accelerated path.
 #
 # Inheritance: HelixConstitution + Lava §6.AE + §6.X + §6.I.
 # Classification: project-specific (Lava AVD list + APK paths; runtime
@@ -69,7 +89,7 @@ while [[ $# -gt 0 ]]; do
         --add-tv)        ADD_TV=1; shift ;;
         --add-foldable)  ADD_FOLDABLE=1; shift ;;
         --include-helixqa) INCLUDE_HELIXQA=1; shift ;;
-        -h|--help)       sed -n '3,37p' "$0"; exit 0 ;;
+        -h|--help)       sed -n '3,54p' "$0"; exit 0 ;;
         *)               echo "ERROR: unknown argument: $1" >&2; exit 2 ;;
     esac
 done
@@ -117,12 +137,59 @@ if [[ "$INCLUDE_HELIXQA" == "1" ]]; then
     fi
 fi
 
-# --- pre-flight: §6.X host gap detection ---
+# --- pre-flight: OS-aware §6.X acceleration detection ---
+#
+# Resolve, per host OS, the acceleration backend and OS-correct
+# runner. This mirrors submodules/containers/pkg/emulator/accel.go's
+# AccelProfileForOS — the Go function is the source of truth; this is
+# the shell-side detection that decides whether the host can run the
+# matrix at all.
 PLATFORM="$(uname -s)"
 HOST_ARCH="$(uname -m)"
 KVM_AVAILABLE=0
 if [[ -e /dev/kvm ]]; then
     KVM_AVAILABLE=1
+fi
+# macOS HVF support: `sysctl -n kern.hv_support` returns 1 when the
+# Hypervisor.framework is available on this Mac.
+HVF_AVAILABLE=0
+if [[ "$PLATFORM" == "Darwin" ]]; then
+    if [[ "$(sysctl -n kern.hv_support 2>/dev/null || echo 0)" == "1" ]]; then
+        HVF_AVAILABLE=1
+    fi
+fi
+
+# Decide accel backend, OS-correct runner, and gate eligibility.
+#   Linux + /dev/kvm  → accel kvm,  runner containerized, eligible
+#   macOS + HVF       → accel hvf,  runner host-direct,   eligible
+#   Linux no /dev/kvm → accel none, ineligible (genuinely no accel)
+#   macOS no HVF      → accel none, ineligible (genuinely no accel)
+#   other / unknown   → accel none, ineligible
+ACCEL_BACKEND="none"
+RESOLVED_RUNNER="host-direct"
+GATE_ELIGIBLE=0
+INELIGIBLE_REASON=""
+if [[ "$PLATFORM" == "Linux" ]]; then
+    if [[ "$KVM_AVAILABLE" == "1" ]]; then
+        ACCEL_BACKEND="kvm"
+        RESOLVED_RUNNER="containerized"
+        GATE_ELIGIBLE=1
+    else
+        INELIGIBLE_REASON="Linux host without /dev/kvm — genuinely no hardware accelerator available"
+    fi
+elif [[ "$PLATFORM" == "Darwin" ]]; then
+    if [[ "$HVF_AVAILABLE" == "1" ]]; then
+        # macOS with HVF: the OS-correct accelerated runner is
+        # host-direct (a native macOS emulator process uses HVF).
+        # This is NOT a host gap — it is the OS-correct path.
+        ACCEL_BACKEND="hvf"
+        RESOLVED_RUNNER="host-direct"
+        GATE_ELIGIBLE=1
+    else
+        INELIGIBLE_REASON="macOS host without HVF (kern.hv_support != 1) — genuinely no hardware accelerator available"
+    fi
+else
+    INELIGIBLE_REASON="Unknown host OS '$PLATFORM' — no known accelerated emulator path"
 fi
 
 cat > "$EVIDENCE_DIR/host-preflight.json" <<JSON
@@ -130,21 +197,27 @@ cat > "$EVIDENCE_DIR/host-preflight.json" <<JSON
   "platform": "$PLATFORM",
   "host_arch": "$HOST_ARCH",
   "kvm_available_on_host": $KVM_AVAILABLE,
-  "podman_machine_kvm_passthrough": "UNCONFIRMED — only verifiable inside the podman VM via 'podman machine ssh ls /dev/kvm'",
-  "constitutional_status": "$(if [[ "$PLATFORM" == "Linux" && "$HOST_ARCH" == "x86_64" && "$KVM_AVAILABLE" == "1" ]]; then echo 'Gate-host eligible: §6.AE matrix CAN be executed'; else echo 'Gate-host INELIGIBLE: §6.AE.2/.5 BLOCKED — see §6.X-debt darwin-arm64-gap incident'; fi)"
+  "hvf_available_on_host": $HVF_AVAILABLE,
+  "resolved_accel_backend": "$ACCEL_BACKEND",
+  "resolved_runner": "$RESOLVED_RUNNER",
+  "gate_eligible": $([[ "$GATE_ELIGIBLE" == "1" ]] && echo true || echo false),
+  "constitutional_status": "$(if [[ "$GATE_ELIGIBLE" == "1" ]]; then echo "Gate-host eligible: §6.AE matrix CAN be executed via runner=$RESOLVED_RUNNER (accel=$ACCEL_BACKEND)"; else echo "Gate-host INELIGIBLE: §6.AE.2/.5 BLOCKED — $INELIGIBLE_REASON"; fi)"
 }
 JSON
 
-if [[ "$PLATFORM" != "Linux" || "$HOST_ARCH" != "x86_64" || "$KVM_AVAILABLE" != "1" ]]; then
+if [[ "$GATE_ELIGIBLE" != "1" ]]; then
     cat <<EOF >&2
 ==> §6.AE.7 host-gap detected
-    Platform: $PLATFORM / arch: $HOST_ARCH / KVM: $([[ "$KVM_AVAILABLE" == "1" ]] && echo "available" || echo "absent")
+    Platform: $PLATFORM / arch: $HOST_ARCH
+    Accelerator: none ($INELIGIBLE_REASON)
 
-    This host CANNOT execute the §6.AE Challenge matrix because Android
-    emulators inside containers require KVM (Linux x86_64) or HVF passthrough
-    (macOS native, NOT exposed to podman containers).
+    This host CANNOT execute the §6.AE Challenge matrix because no
+    hardware-acceleration backend is available. The Android emulator
+    needs KVM (Linux), HVF (macOS), or WHPX (Windows) to run at usable
+    speed; none was detected here.
 
-    The standing §6.X-debt entry documents this gap:
+    The standing §6.X-debt entry documents the darwin/arm64 container
+    case:
       .lava-ci-evidence/sixth-law-incidents/2026-05-13-emulator-container-darwin-arm64-gap.json
 
     What this script DID:
@@ -152,11 +225,13 @@ if [[ "$PLATFORM" != "Linux" || "$HOST_ARCH" != "x86_64" || "$KVM_AVAILABLE" != 
       - Wrote $EVIDENCE_DIR/host-preflight.json with the host-gap classification
       - PROVABLY did NOT produce per-AVD attestation rows (no real run executed)
 
-    What the operator MUST do on a Linux x86_64 + KVM gate-host:
-      1. Provision the host with: podman + Android SDK + adb in PATH + a non-root user
-      2. Clone Lava + run 'git submodule update --init --recursive'
-      3. Run this script with the same arguments
-      4. Inspect $EVIDENCE_DIR/real-device-verification.{md,json} for per-AVD rows
+    What the operator MUST do on an accelerated gate-host:
+      1. Linux x86_64 + /dev/kvm  → runner resolves to containerized
+         macOS + HVF              → runner resolves to host-direct
+      2. Provision: podman (Linux) OR Android SDK + adb (macOS) in PATH, non-root user
+      3. Clone Lava + run 'git submodule update --init --recursive'
+      4. Run this script with the same arguments
+      5. Inspect $EVIDENCE_DIR/real-device-verification.{md,json} for per-AVD rows
 
     This script EXITS 2 (gate-host ineligible) — NOT 0 (success) — because
     a §6.AE gate run requires the full matrix to actually run. Per §6.J/§6.L:
@@ -170,6 +245,8 @@ EOF
     fi
     exit 2
 fi
+
+echo "==> §6.X acceleration resolved: accel=$ACCEL_BACKEND runner=$RESOLVED_RUNNER (platform=$PLATFORM)"
 
 # --- on-gate-host: build (if not --no-build) + delegate to Containers CLI ---
 if [[ "$NO_BUILD" == "0" ]]; then
@@ -189,15 +266,17 @@ if [[ ! -x "$CONTAINERS_CLI" ]]; then
     (cd submodules/containers && go build -o cmd/emulator-matrix/emulator-matrix ./cmd/emulator-matrix/)
 fi
 
-# Per §6.AE.3: gate runs MUST use --runner=containerized
+# Per §6.X: forward --runner=auto so the Containers CLI resolves the
+# OS-correct runner (Linux→containerized via /dev/kvm, macOS→host-direct
+# via HVF). This pre-flight already proved the host is gate-eligible.
 declare -a TEST_CLASS_ARGS=()
 if [[ -n "$TEST_CLASS" ]]; then
     TEST_CLASS_ARGS=(--test-class "$TEST_CLASS")
 fi
 
-echo "==> Delegating to Containers/cmd/emulator-matrix --runner=containerized"
+echo "==> Delegating to Containers/cmd/emulator-matrix --runner=auto (resolves to $RESOLVED_RUNNER on $PLATFORM)"
 "$CONTAINERS_CLI" \
-    --runner=containerized \
+    --runner=auto \
     --apk "$APK" \
     --avds "$AVDS_JOINED" \
     --evidence-dir "$EVIDENCE_DIR" \
