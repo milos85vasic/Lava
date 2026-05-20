@@ -134,6 +134,7 @@ A `FAIL` means an agent ran but did not use codegraph — a real defect.
 | `codegraph status` shows 0 files | run `codegraph index`; check `config.json` include/exclude globs. |
 | Stale results after edits | `codegraph sync` (or `codegraph index -f` for a full rebuild). |
 | `unlock` needed | `codegraph unlock` removes a stale lock file blocking indexing. |
+| `codegraph status` fails — "unable to open database file" / "Using WASM SQLite backend" | The native `better-sqlite3` binding got disabled (a `brew` operation can disturb a global install placed under the Homebrew Node Cellar). Rebuild the index: `codegraph index`. If it persists, reinstall: `npm install -g @colbymchenry/codegraph`. `scripts/verify-codegraph.sh` pre-flight now detects this and aborts cleanly. |
 | A secret path appeared in the index | a §6.H violation — add the path to `config.json` `exclude` and `codegraph index -f`; file an incident. |
 
 ---

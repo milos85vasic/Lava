@@ -60,6 +60,15 @@ if [ ! -f "$REPO_ROOT/.codegraph/codegraph.db" ]; then
   printf '%s✗ pre-flight%s .codegraph/codegraph.db missing — run `codegraph index` first\n' "$R" "$N"
   preflight_ok=0
 fi
+# Backend health — codegraph must be able to actually OPEN the index. Catches
+# the native-better-sqlite3-disabled / WASM-fallback-cannot-open-DB regression
+# class (a brew-disturbed or stale global install) that would otherwise surface
+# mid-suite as confusing "CodeGraph not initialized" errors instead of a clean
+# pre-flight abort. (Encountered 2026-05-20 — see docs/CODEGRAPH.md §6.)
+if [ "$preflight_ok" -eq 1 ] && ! codegraph status >/dev/null 2>&1; then
+  printf '%s✗ pre-flight%s `codegraph status` fails — codegraph cannot open the index DB. The native better-sqlite3 binding may be disabled (WASM fallback). Fix: `codegraph index` to rebuild; if it persists, reinstall — `npm install -g @colbymchenry/codegraph`.\n' "$R" "$N"
+  preflight_ok=0
+fi
 if [ "$preflight_ok" -ne 1 ]; then
   printf '%spre-flight failed — aborting%s\n' "$R" "$N"
   exit 2
