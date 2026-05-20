@@ -88,3 +88,18 @@ app/build/generated/lava-auth/
 # Per §6.H these MUST NOT be committed.
 .lava-ci-evidence/**/post-mortem/
 .lava-ci-evidence/**/logcat-*.txt
+
+# === CodeGraph (added 2026-05-20) ===
+# codegraph builds a local SQLite semantic knowledge graph at
+# .codegraph/codegraph.db — a regenerable build artifact (`codegraph index`).
+# Per CONST-053 (no versioned build artifacts) it MUST NOT be tracked.
+# .codegraph/config.json IS tracked (committed project configuration).
+.codegraph/codegraph.db
+.codegraph/codegraph.db-shm
+.codegraph/codegraph.db-wal
+.codegraph/*.log
+.codegraph/cache/
+# Per-run codegraph verification-suite output is local session telemetry,
+# regenerable by re-running scripts/verify-codegraph.sh. The suite scripts
+# under tests/codegraph/ ARE the committed artifact.
+.lava-ci-evidence/codegraph/

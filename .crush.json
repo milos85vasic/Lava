@@ -1,0 +1,10 @@
+{
+  "$schema": "https://charm.land/crush.json",
+  "mcp": {
+    "codegraph": {
+      "type": "stdio",
+      "command": "codegraph",
+      "args": ["serve", "--mcp"]
+    }
+  }
+}

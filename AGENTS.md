@@ -6,6 +6,17 @@
 
 All rules in `constitution/AGENTS.md` (and the `constitution/Constitution.md` it references) apply unconditionally. Lava-specific rules below extend them — they MUST NOT weaken any inherited rule. The HelixConstitution submodule was incorporated 2026-05-14 (29th §6.L cycle); see root `CLAUDE.md` §6.AD + §6.AD-debt for the implementation-gap inventory.
 
+## Code intelligence — codegraph
+
+This repository is indexed by **codegraph** — a local SQLite semantic
+code-knowledge-graph tool exposed to AI agents over MCP, wired into all five
+supported CLI agents (Claude Code, OpenCode, Qwen Code, Kimi CLI, Crush).
+Prefer its `codegraph_search` / `codegraph_context` MCP tools over blind file
+scanning. Full details — install, per-agent wiring, and the anti-bluff
+verification suite `scripts/verify-codegraph.sh` — are in `docs/CODEGRAPH.md`.
+The agent instruction file for Qwen Code is `QWEN.md` (a plain-text pointer to
+`CLAUDE.md`), present at the repo root and in every submodule.
+
 ## Project Overview
 
 **Lava** is an unofficial Android client for rutracker.org (and rutor.info). It consists of three main artifacts:
