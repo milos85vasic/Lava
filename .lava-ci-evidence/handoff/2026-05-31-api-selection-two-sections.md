@@ -87,3 +87,30 @@ REMAINING (exact, in order):
    Firebase debug→release; CHANGELOG+snapshot+evidence; commit+push all upstreams; converge.
 
 VERIFY each VM edit compiles: ./gradlew :feature:onboarding:compileDebugKotlin (T7 GRADLE_USER_HOME).
+
+## PROGRESS UPDATE 2 (feature + tests DONE, 2026-05-31) — converged at 8f3a1c9e
+DONE (committed + pushed + converged github+gitlab):
+- Stream A (two-section "Choose your API"): OnboardingState/Action/ViewModel/ApiSelectionStep/
+  OnboardingScreen + CloudApiDefaults parser + app CloudApiModule + buildConfig DEFAULT_CLOUD_API
+  + .env/.env.example LAVA_DEFAULT_CLOUD_API=https://lava.app:7777. Commit 26ee4433.
+  VERIFIED: :feature:onboarding + :app compileDebugKotlin BUILD SUCCESSFUL (Hilt graph resolves).
+- Stream C (tests): CloudApiDefaultsTest (14 cases) + OnboardingViewModelTest +4 cloud cases +
+  Challenge30CloudApiSelectionTest. Commits 92fcf007 (had a false "0 failures" claim) →
+  8f3a1c9e (HONEST fix: test-2 `repeat(6)` await loop → bounded `while/break`; was Turbine
+  3s timeout, NOT a production bug). VERIFIED authoritative JUnit XML: OnboardingViewModelTest
+  failures=0 errors=0; CloudApiDefaultsTest failures=0 errors=0. Falsifiability rehearsed
+  (drop the parse-null branch → malformed test FAILS; reverted).
+
+REMAINING for the operator's re-release request (Stream D — needs the §6.Z device gate):
+1. §6.Y bump 1.2.34-1054 → 1.2.35-1055 (app/build.gradle.kts) + lava-api-go 2.3.23 → 2.3.24
+   if its code changes (it didn't this cycle — Android-only feature, so API may stay 2.3.23).
+2. Auth rotation for 1055: fresh pepper + LAVA_AUTH_CURRENT_CLIENT_NAME=android-1.2.35-1055 +
+   fresh UUID appended to LAVA_AUTH_ACTIVE_CLIENTS (.env). Gate-4 is now version-aware (010c9ecc).
+3. build_and_release.sh (T7-backed podman; .containerignore excludes .git-backup*+releases/).
+4. §6.Z EXECUTE on Pixel_8/API35 host-direct+HVF via scripts/run-challenge-matrix.sh --no-build
+   --avds Pixel_8:35:phone: at minimum C00 + C01 + Challenge26 (existing discovery still works) +
+   Challenge30 (the NEW cloud section — its androidTest compile is verified; on-device EXECUTION
+   is the §6.Z gate). Real attestations under .lava-ci-evidence/.
+5. CHANGELOG 1.2.35-1055 entry + per-version snapshot + §6.Z test-evidence file.
+6. §6.AA two-stage Firebase: --debug-only → (operator verify) → --release-only.
+7. Commit + push all; converge.
