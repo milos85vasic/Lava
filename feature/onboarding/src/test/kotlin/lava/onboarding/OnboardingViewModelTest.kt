@@ -34,6 +34,7 @@ import lava.tracker.registry.DefaultTrackerRegistry
 import lava.tracker.testing.FakeTrackerClient
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -518,6 +519,163 @@ class OnboardingViewModelTest {
                     "test-tracker",
                     loaded.providers.first().descriptor.trackerId,
                 )
+            }
+        }
+
+    // ── ApiSelection Cloud / remote-server section (2026-05-31) ───────────
+    //
+    // FALSIFIABILITY REHEARSAL (per §6.J / Sixth Law clause 2). Deliberate
+    // break tried while authoring these tests: make `onAddCloudApi()` ignore
+    // the parse result and unconditionally call `onSelectApi(parsed!!)` (i.e.
+    // remove the `if (parsed == null)` branch). Expected failure:
+    //   - `add cloud api with malformed address sets error and does not advance`
+    //     fails because `state.cloudAddressError` is null (the error branch
+    //     never ran) AND/OR the test crashes / advances past ApiSelection
+    //     instead of staying put — proving the error-on-parse-failure path is
+    //     load-bearing. The break was reverted; production code is unchanged.
+    //
+    // `createViewModelForCloud(reachable)` mirrors `createViewModel()` but lets
+    // the ConnectionService.isReachable result be parameterised so the success
+    // path (probe OK → persist → advance) can be exercised. apiSelectionEnabled
+    // is left false (the default) — AddCloudApi works regardless of the flag
+    // because the cloud-add handler funnels straight into onSelectApi.
+    private fun TestScope.createViewModelForCloud(reachable: Boolean): OnboardingViewModel {
+        return OnboardingViewModel(
+            sdk = sdk,
+            credentialManager = credentialManager,
+            authService = authService,
+            loggerFactory = TestLoggerFactory(),
+            analytics = object : AnalyticsTracker {
+                override fun event(name: String, params: Map<String, String>) {}
+                override fun setUserId(userId: String?) {}
+                override fun setProperty(key: String, value: String?) {}
+                override fun recordNonFatal(throwable: Throwable, context: Map<String, String>) {}
+                override fun recordWarning(message: String, context: Map<String, String>) {}
+                override fun log(message: String) {}
+            },
+            providerConfigRepository = providerConfigRepository,
+            clonedProviderDao = clonedProviderDao,
+            discoveryService = lava.testing.service.TestLocalNetworkDiscoveryService(),
+            connectionService = object : lava.data.api.service.ConnectionService {
+                override val networkUpdates: kotlinx.coroutines.flow.Flow<Boolean> =
+                    kotlinx.coroutines.flow.emptyFlow()
+                override suspend fun isReachable(endpoint: lava.models.settings.Endpoint): Boolean = reachable
+                override suspend fun isInternetReachable(): Boolean = true
+            },
+            endpointsRepository = lava.testing.repository.TestEndpointsRepository(),
+            apiSelectionEnabled = false,
+            defaultCloudApi = "",
+        )
+    }
+
+    // CHALLENGE — primary assertion on the user-visible cloud-address field +
+    // the cleared error state the user sees while typing.
+    @Test
+    fun `cloud address changed updates input and clears error`() =
+        runTest(dispatcherRule.testDispatcher) {
+            val viewModel = createViewModelForCloud(reachable = true)
+            viewModel.test(this) {
+                runOnCreate()
+                expectInitialState()
+                awaitState() // providers + configs reduced
+
+                viewModel.perform(OnboardingAction.CloudAddressChanged("https://lava.app:7777"))
+                val typed = awaitState()
+                assertEquals(
+                    "the typed address must be reflected in the field the user sees",
+                    "https://lava.app:7777",
+                    typed.cloudAddressInput,
+                )
+                assertNull(
+                    "editing the field must clear any prior parse error; was ${typed.cloudAddressError}",
+                    typed.cloudAddressError,
+                )
+
+                cancelAndIgnoreRemainingItems()
+            }
+        }
+
+    // CHALLENGE — primary assertion on state.step advancing to Providers. The
+    // step advance happens in onSelectApi ONLY after the probe succeeds AND
+    // endpointsRepository.add(Endpoint.GoApi("lava.app", 7777)) is called — so
+    // reaching Providers is proof the parse → probe → persist path ran for the
+    // user. TestEndpointsRepository exposes no synchronous read accessor, so
+    // the step advance is the load-bearing assertion (persist is a precondition
+    // of advance per the production code in OnboardingViewModel.onSelectApi).
+    @Test
+    fun `add cloud api with valid address probes persists and advances to Providers`() =
+        runTest(dispatcherRule.testDispatcher) {
+            val viewModel = createViewModelForCloud(reachable = true)
+            viewModel.test(this) {
+                runOnCreate()
+                expectInitialState()
+                awaitState() // providers + configs reduced
+
+                viewModel.perform(OnboardingAction.CloudAddressChanged("https://lava.app:7777"))
+                expectState { copy(cloudAddressInput = "https://lava.app:7777", cloudAddressError = null) }
+
+                viewModel.perform(OnboardingAction.AddCloudApi)
+                // onAddCloudApi() clears the error then funnels into onSelectApi:
+                //   1. selectedApi set + apiConnectivity = Testing
+                //   2. (async probe OK + endpointsRepository.add) → apiConnectivity
+                //      = Idle, step = Providers
+                // Walk states until the step lands on Providers — matching the
+                // async-probe await style used elsewhere in this file.
+                var advanced = false
+                repeat(6) {
+                    val s = awaitState()
+                    if (s.step == OnboardingStep.Providers) {
+                        advanced = true
+                        return@repeat
+                    }
+                }
+                assertTrue(
+                    "AddCloudApi with a valid address MUST advance to Providers after the " +
+                        "probe succeeds and the endpoint is persisted (Endpoint.GoApi(\"lava.app\", 7777)). " +
+                        "step never reached Providers.",
+                    advanced,
+                )
+
+                cancelAndIgnoreRemainingItems()
+            }
+        }
+
+    // CHALLENGE — primary assertion on the user-visible cloudAddressError +
+    // the absence of a step advance (the wizard must NOT leave ApiSelection
+    // when the typed address cannot be parsed).
+    @Test
+    fun `add cloud api with malformed address sets error and does not advance`() =
+        runTest(dispatcherRule.testDispatcher) {
+            val viewModel = createViewModelForCloud(reachable = true)
+            viewModel.test(this) {
+                runOnCreate()
+                expectInitialState()
+                awaitState() // providers + configs reduced
+
+                viewModel.perform(OnboardingAction.CloudAddressChanged("not a url /x"))
+                expectState { copy(cloudAddressInput = "not a url /x", cloudAddressError = null) }
+
+                viewModel.perform(OnboardingAction.AddCloudApi)
+                val errored = awaitState()
+                // PRIMARY: a user-visible parse error is surfaced.
+                assertNotNull(
+                    "a malformed cloud address MUST surface a user-visible cloudAddressError",
+                    errored.cloudAddressError,
+                )
+                assertTrue(
+                    "the error message must mention a valid address so the user knows the fix; " +
+                        "was '${errored.cloudAddressError}'",
+                    errored.cloudAddressError?.contains("valid address", ignoreCase = true) == true,
+                )
+                // PRIMARY: the wizard must NOT advance to Providers — it stays
+                // where it was (initial step is Welcome with the test's
+                // apiSelectionEnabled=false default; the gate is "not Providers").
+                assertFalse(
+                    "a malformed address MUST NOT advance the wizard to Providers; was ${errored.step}",
+                    errored.step == OnboardingStep.Providers,
+                )
+
+                cancelAndIgnoreRemainingItems()
             }
         }
 }
