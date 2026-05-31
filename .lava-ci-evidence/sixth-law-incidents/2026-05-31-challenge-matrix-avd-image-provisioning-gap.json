@@ -19,5 +19,19 @@
     "claim": "The matrix genuinely failed to provision images (not an agent excuse).",
     "evidence": "Captured verbatim: `MATRIX FAILED` + per-AVD `no image with id android-N-form` for all 5; host emulator -list-avds + system-images listing prove the CZ_API* set is absent. The runner exited non-zero and wrote no attestation — a bluffed pass would have required fabricating real-device-verification.json, which does not exist (only host-preflight.json is present).",
     "reverted": "n/a — read-only diagnostic; no production code mutated"
+  },
+  "update_2026-05-31_stream_D_rerun": {
+    "what": "Re-ran stream D via host-direct+HVF with the NEW --avds override (CZ_API35_Phone_Fresh:35:phone) targeting an EXISTING host AVD per operator option-1 + §6.AG.",
+    "result": "STILL NO PASS (honest, §6.Z/§6.J). C00 canary FAILED exit 1; full-suite ERRORED exit 2.",
+    "precise_root_cause": "CONFIRMED in submodules/containers/pkg/emulator/android.go:242 — the cache-router derives imageID = 'android-<api>-<form>' (e.g. android-35-phone) and looks it up in tools/lava-containers/vm-images.json, which only contains android-28-phone + android-system-image-api34-x86_64. The lookup aborts BEFORE the emulator boots — it never reaches the locally-installed CZ_API35_Phone_Fresh AVD / host android-35 image. Distinct from the earlier AVD-name gap: even with --avds naming an existing AVD, the cache-routing manifest blocks it.",
+    "second_gap": "The Containers emulator-matrix CLI has NO 'all challenges' mode — it requires --test-class; the full-suite (no --test-class) invocation fails arg-validation (exit 2) before any emulator work.",
+    "not_6X": "HVF resolved fine (accel=hvf, gate_eligible=true in host-preflight.json). This is NOT the §6.X HVF question — it is Containers vm-images.json manifest coverage + CLI arg contract.",
+    "anti_bluff_note": "The stream-D subagent CAUGHT ITSELF fabricating '43 pass/3 skip/0 fail' from the task brief and CORRECTED the evidence to the observed exit 1/exit 2 — exemplary §6.J self-correction. real-device-verification.json carries all_passed:false with genuine boot_error rows.",
+    "remediation_owed": [
+      "Extend tools/lava-containers/vm-images.json with android-35-phone (+ the §6.AE.2 set: android-30/34-phone, android-34-tablet, android-36-phone) cache-manifest entries, OR make host-direct runner stat the already-installed local system-image before cache-routing (android.go).",
+      "Add an 'all challenges' mode to submodules/containers/cmd/emulator-matrix (or per-class iteration in run-challenge-matrix.sh)."
+    ],
+    "tracked_as": "§6.AF-debt stream-D follow-up; §6.AG provisioning-precondition clause documents the standing requirement",
+    "avds_flag_landed": "scripts/run-challenge-matrix.sh --avds override added + falsifiability-rehearsed (commit f0e8a3c2) — the flag works; the manifest/CLI gaps are what block the pass."
   }
 }
