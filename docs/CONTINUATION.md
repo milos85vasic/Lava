@@ -166,7 +166,7 @@ repo has drifted, the agent acts on the claim.
 | Android Firebase | 1.2.33 (1053) distributed to testers (2026-05-18, last user-visible release; `last-version-{debug,release}` both = 1053) | `lava-vasic-digital` Firebase project |
 | 17 own-org submodules | all pushed (16 vasic-digital + 1 HelixDevelopment HelixQA) | see §3 |
 | constitution submodule | at upstream HEAD `883ccc1` (§11.4.79–§11.4.106 adopted via §6.AF) | HelixDevelopment/HelixConstitution |
-| LVA ticket system | `tools/lava-tickets` + `docs/tickets/tickets.db` (tracked, 8 items LVA-1..8) | §11.4.93/95/106 + operator LVA key |
+| Workable-items tracker | canonical `workable-items` binary + `docs/workable_items.db` (tracked, 8 items LVA-1..8; LVA-3 migrated, LVA-tickets retired) | §11.4.93/95/106 + §11.4.74 |
 | codegraph | incorporated 2026-05-20 (§11.4.78); local SQLite index at `.codegraph/` (1,182 files / 18,567 nodes) | `@colbymchenry/codegraph` MCP |
 | Verify-all sweep | 40/40 PASS, fully STRICT mode (last attested prior cycle; 68th-cycle re-run in progress) | `.lava-ci-evidence/verify-all/` |
 | Coverage ledger | 48 covered / 10 partial / 0 gap (58 rows) | `docs/coverage-ledger.yaml` |
@@ -330,7 +330,7 @@ work.
   `firebase login:ci`) during the §6.L 68th cycle; the transcript-leaked token
   (never committed to git) is now dead. §6.H clause 6 satisfied. Incident:
   `.lava-ci-evidence/sixth-law-incidents/2026-05-20-firebase-token-echo-leak.json`.
-- **LVA-8 — HelixQA desktop crash-detector bluffs on macOS** (§6.L 68th, 2026-05-31):
+- **LVA-8 — HelixQA crash-detector + consumer fixture** — **RESOLVED 2026-05-31** (§6.L 68th):
   `internal/qa/validator` has 6 failing tests because HelixQA's `isPIDAlive`
   (`submodules/helixqa/pkg/detector/desktop.go`) shells `exec kill -0 <pid>` and
   `/bin/kill -0 <absent-pid>` returns EXIT 0 on macOS (bash builtin returns 1), so

@@ -186,11 +186,14 @@ run_gate "commit-docs-exists" "CM-COMMIT-DOCS-EXISTS / HelixConstitution §11.4.
 run_gate "subagent-delegation-audit" "CM-SUBAGENT-DELEGATION-AUDIT / HelixConstitution §11.4.x (last 5 commits)" \
     "LAVA_COMMIT_RANGE='HEAD~5..HEAD' bash scripts/check-subagent-delegation-audit.sh"
 
-# CM-LVA-TICKETS-SYNC §11.4.93/95/106 (advisory until baseline normalizes; the
-# build-advisory-then-strict-flip convention — same path coverage-ledger took).
-# The strict-flip is a follow-up after the gate's baseline is confirmed stable.
-run_gate "lva-tickets-sync" "CM-LVA-TICKETS-SYNC / HelixConstitution §11.4.93/95/106" \
-    "bash scripts/check-lva-tickets.sh --advisory"
+# CM-WORKABLE-ITEMS-SYNC §11.4.93/95 — canonical workable-items binary
+# (constitution/scripts/workable-items/, keyed LVA-N). Validates the SQLite SSoT
+# at docs/workable_items.db, asserts DB↔Markdown (docs/Issues.md/docs/Fixed.md)
+# in-sync, and asserts the DB is git-tracked (§11.4.95). Replaced the retired
+# CM-LVA-TICKETS-SYNC gate (bespoke tools/lava-tickets/, migrated 2026-05-31 —
+# docs/tickets/MIGRATION-TO-CANONICAL.md). Strict: the DB+docs ship in-sync.
+run_gate "workable-items-sync" "CM-WORKABLE-ITEMS-SYNC / HelixConstitution §11.4.93/95" \
+    "bash scripts/check-workable-items.sh"
 
 # Hermetic test suites (each suite's own paired-mutation contracts)
 for suite in tests/firebase tests/ci-sh tests/compose-layout tests/tag-helper \
