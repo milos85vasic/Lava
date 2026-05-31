@@ -1,4 +1,26 @@
 # Changelog
+## Lava-Android-1.2.34-1054 / Lava-API-Go-2.3.23-2323 — 2026-05-31 (Rebuild + redistribute; §6.L 69th)
+
+**Previous published:** Lava-Android-1.2.33-1053 (debug + release shipped 2026-05-18).
+
+**What's new for testers:**
+- Fresh signed **debug + release** build of the client (§6.L 69th "rebuild + redistribute" cycle). No new user-facing app features versus 1.2.33 — this is a clean rebuild against the latest submodule pins + 68th-cycle constitutional tooling, shipped via the §6.AA two-stage flow (debug first, release after verification).
+- lava-api-go bumped to **2.3.23 (2323)** in lockstep; binary + healthprobe rebuilt and booted for live testing.
+
+**Test execution (§6.Z — EXECUTED, not source-compiled):**
+- Compose UI Challenge tests ran on a cold-booted **Pixel_8 / API 35** emulator orchestrated by the Containers submodule (runner=host-direct + HVF per the §6.X per-OS-acceleration model; NOT a live ADB device per §6.AG):
+  - **C00 `Challenge00CrashSurvivalTest`** (cold-start canary) → **PASS** (boot 20.3s, test 53.1s, 0 failures)
+  - **C01 `Challenge01AppLaunchAndTrackerSelectionTest`** → **PASS** (boot 15.7s, test 36.5s, 0 failures)
+- Lava JVM unit-test suite (`./gradlew testDebugUnitTest`) → BUILD SUCCESSFUL, exit 0.
+- Evidence: `.lava-ci-evidence/distribute-changelog/firebase-app-distribution/1.2.34-1054-test-evidence.md` + attestations under `.lava-ci-evidence/2026-05-31-1.2.34-1054-challenge-matrix/`.
+
+**Tooling / governance (no user-visible app impact):**
+- §6.AF-debt PARTIAL CLOSE: `tools/lava-containers/vm-images.json` gained an `android-35-phone` entry so the macOS host-direct+HVF Challenge matrix boots (the prior "no image with id android-35-phone" was a provisioning gap, not an app defect — §6.J forensic distinction recorded).
+
+**Distribute-readiness:** §6.P versionCode 1054 > 1053; §6.Y bump-first applied; §6.Z evidence present + commit-SHA tracked; §6.AA stage 1 debug → stage 2 release.
+
+`Classification:` project-specific.
+
 ## Lava-Android-1.2.33-1053 / Lava-API-Go-2.3.22-2322 — 2026-05-18 (Smoother onboarding animations + 13 submodule pins advanced + §6.L 62nd)
 
 **Previous published:** Lava-Android-1.2.32-1052 (debug + release shipped earlier 2026-05-18).

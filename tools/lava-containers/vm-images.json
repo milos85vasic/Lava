@@ -79,6 +79,14 @@
       "sha256": "57fcdae393eac7dbe4bf854093e18d225ca7bfb9746321de70f01c5faa0c37ed",
       "size": 1102721597,
       "format": "android-system-image"
+    },
+    {
+      "id": "android-35-phone",
+      "_status": "host-direct-preinstalled — the §6.X/§6.AG macOS gate runner is host-direct+HVF, where the AVD (Pixel_8/API35) already has google_apis_playstore/arm64-v8a installed under ANDROID_SDK_ROOT/system-images/android-35/google_apis_playstore/arm64-v8a/. The pkg/emulator ensureSystemImageViaCache Branch 4 (hasExtractedSystemImage) short-circuits to nil BEFORE cache.Store.Get is ever called, so the sha256 below is NOT consulted on a host where the image is pre-installed (the host-direct gate case). The url tag/abi/api parse (parseSystemImageURL → tag=google_apis_playstore, abi=arm64-v8a, api=35) is what derives the correct targetDir for the Branch-4 on-disk check. The sha256 is a documented placeholder pending a real download+hash for the containerized (Linux/KVM) path, mirroring the alpine-edge-riscv64 anti-bluff convention above: if a host WITHOUT the pre-installed image attempts a cache fetch, Store.Get's SHA-mismatch check fails loudly rather than silently accepting unverified bytes. §6.AF-debt: replace with the real upstream SHA when the containerized arm64 path is provisioned.",
+      "url": "https://dl.google.com/android/repository/sys-img/google_apis_playstore/arm64-v8a-35_r09.zip",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "size": 1,
+      "format": "android-system-image"
     }
   ]
 }
