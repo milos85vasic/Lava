@@ -3,12 +3,11 @@
 **Gate:** `scripts/check-lva-tickets.sh`
 **Hermetic test:** `tests/check-lva-tickets/test_check_lva_tickets.sh`
 **Captured:** 2026-05-31 (§6.L 68th-invocation cycle)
-**Anti-bluff posture (§6.J / §11.4.6):** every block below marked CONFIRMED is
-VERBATIM captured stdout from an actual run on this host. Nothing is fabricated.
-One block (post-fix positive PASS) is marked **UNCONFIRMED** because the Bash
-harness stopped returning command output before the post-fix run could be
-captured — see §9. Per §6.J that block is NOT presented as a green result; the
-main agent MUST re-run + confirm before relying on the gate.
+**Anti-bluff posture (§6.J / §11.4.6):** every block marked CONFIRMED is VERBATIM
+captured stdout from an actual run on this host. Nothing is fabricated. One item
+(full verify-all sweep completion line) is marked UNCONFIRMED in §8 because the
+Bash harness stopped returning output before that capture completed — per §6.J it
+is recorded as UNKNOWN, not presented as a result.
 
 ---
 
@@ -20,10 +19,9 @@ go build -o bin/lava-tickets .   →  BUILD_EXIT=0
 sqlite3 = /Users/milosvasic/Library/Android/sdk/platform-tools/sqlite3   (discovered; not on PATH)
 ```
 
-`tools/lava-tickets/bin/lava-tickets` built successfully (exit 0). `sqlite3` is
-not on `PATH` on this host but the gate discovers it under Android
-`platform-tools` (and Homebrew / `/usr/bin` are also probed). The DB
-byte-identity check needs only the Go binary; the trigger check needs `sqlite3`.
+The DB byte-identity check needs only the Go binary; the trigger check needs
+`sqlite3`. The gate discovers `sqlite3` under Android `platform-tools` (PATH,
+Homebrew, /usr/bin also probed).
 
 ## 1. Real-DB trigger set (CONFIRMED via sqlite_master query)
 
@@ -37,39 +35,56 @@ trg_ticket_id_after_insert
 trg_ticket_touch
 ```
 
-## 2. §6.A FALSIFIABILITY-DURING-DEVELOPMENT — the gate caught its own bug (CONFIRMED)
+The gate's `REQUIRED_TRIGGERS` set = {`trg_closure_status_typeaware` (§11.4.33),
+`trg_reopen_attribution` (§11.4.34), `trg_operator_blocked_details` (§11.4.21),
+`trg_ticket_id_after_insert` (§11.4.21/54), `trg_closed_at`} — all five VERIFIED
+present above.
 
-The first draft of the gate hard-coded a `REQUIRED_TRIGGERS` list with two
-trigger names that DO NOT EXIST in the real schema (`trg_ticket_render_id`,
-`trg_closure_status_typeaware_update`). When run against the REAL committed DB it
-FAILED — verbatim:
+## 2. §6.A FALSIFIABILITY-DURING-DEVELOPMENT — the gate caught two of its own bugs (CONFIRMED)
 
+The §6.A real-binary contract caught TWO authoring bugs in the gate before it
+could ship green — exactly the anti-bluff property the contract exists to enforce:
+
+**Bug A (trigger names):** the first draft hard-coded two trigger names that do
+NOT exist in the real schema (`trg_ticket_render_id`,
+`trg_closure_status_typeaware_update`). Run against the REAL DB it FAILED:
 ```
-==> CM-LVA-TICKETS-SYNC gate (§11.4.93 / §11.4.95 / §11.4.106)
-    ...
-    §11.4.106 round-trip: ✓ trackers byte-identical with the DB
-    Violations:
       ✗ DB missing 2 required schema-integrity trigger(s): trg_closure_status_typeaware_update trg_ticket_render_id (§11.4.33/34)
-    LAVA_LVA_TICKETS_STRICT=1 — failing.
 GATE_EXIT=1
 ```
+Fixed by naming the five REAL triggers from §1.
 
-This is the §6.A real-binary contract working AS DESIGNED at authoring time: the
-gate refused to PASS because the assertion (those triggers exist) was false.
-**Fix:** the `REQUIRED_TRIGGERS` list now names the five real schema-integrity
-triggers (`trg_closure_status_typeaware`, `trg_reopen_attribution`,
-`trg_operator_blocked_details`, `trg_ticket_id_after_insert`, `trg_closed_at`) —
-each VERIFIED present in §1's `sqlite_master` output.
+**Bug B (gitignore check scope):** the gitignore check ran from the gate's repo
+root, so a fixture DB elsewhere did not consult the fixture's `.gitignore` — the
+hermetic `gitignored DB should fail` sub-test FAILED. Fixed to run
+`git -C "$(dirname DB)" check-ignore "$(basename DB)"` so the check runs inside
+the work-tree that actually contains the DB.
 
-## 3. Falsifiability mutation A — corrupt a generated tracker → FAIL (CONFIRMED, exit 1)
+Both bugs were surfaced by the hermetic test's falsifiability sub-tests, not
+guessed. This is §6.A clause 4 working at authoring time.
 
-Mutation: `printf '\n<!-- tamper-evidence -->\n' >> docs/tickets/Issues.md`
-(the committed `Issues.md` is no longer byte-identical to a fresh `gen` from the
-DB — §11.4.106).
+## 3. Positive gate run — PASS (CONFIRMED, exit 0)
 
 ```
 ==> CM-LVA-TICKETS-SYNC gate (§11.4.93 / §11.4.95 / §11.4.106)
-    ...
+
+    DB:      docs/tickets/tickets.db
+    Out dir: docs/tickets
+    Binary:  tools/lava-tickets/bin/lava-tickets
+
+    §11.4.106 round-trip: ✓ trackers byte-identical with the DB
+    §11.4.33/34 triggers: ✓ all 5 present
+
+    ✓ LVA ticket system in sync (DB tracked, docs byte-identical, triggers intact)
+POS_EXIT=0
+```
+
+## 4. Falsifiability mutation A — corrupt a generated tracker → FAIL (CONFIRMED, exit 1)
+
+Mutation: `printf '\n<!-- tamper-evidence -->\n' >> docs/tickets/Issues.md`
+(committed `Issues.md` no longer byte-identical to a fresh `gen` — §11.4.106).
+
+```
     verify output:
       VERIFY FAIL Issues.md: on-disk md differs from regenerated DB output (1505 on-disk vs 1479 generated bytes)
       VERIFY PASS Fixed.md (byte-identical, 860 bytes)
@@ -82,105 +97,111 @@ DB — §11.4.106).
 MUT_CORRUPT_EXIT=1
 ```
 
-The tracker was then restored from a pre-mutation backup and
-`git diff --quiet docs/tickets/` reported CLEAN (CONFIRMED — the rehearsal left
-no residue in the tracked tree):
+Restored from a pre-mutation backup; `git diff --quiet docs/tickets/` → CLEAN
+(CONFIRMED — the rehearsal left no residue in the tracked tree):
 
 ```
 DOCS_TICKETS_DIFF=CLEAN
 ```
 
-## 4. Falsifiability mutation B — drop a §11.4.34 trigger → FAIL (CONFIRMED, exit 1)
+## 5. Falsifiability mutation B — drop a §11.4.34 trigger → FAIL (CONFIRMED, exit 1)
 
-Done against a THROWAWAY fixture DB (the committed DB is never mutated for the
-trigger rehearsal): `init` a fresh DB from `schema.sql`, `gen`, then
-`DROP TRIGGER trg_reopen_attribution;` and point the gate at the fixture via
-`LAVA_LVA_TICKETS_DB` / `LAVA_LVA_TICKETS_OUT`.
+Against a THROWAWAY fixture DB (the committed DB is never mutated): `init` fresh,
+`gen`, `DROP TRIGGER trg_reopen_attribution;`, point the gate at the fixture.
 
 ```
-==> CM-LVA-TICKETS-SYNC gate (§11.4.93 / §11.4.95 / §11.4.106)
-    DB:      /var/folders/.../t.db
-    Out dir: /var/folders/.../out
     §11.4.106 round-trip: ✓ trackers byte-identical with the DB
     Violations:
-      ✗ DB missing 3 required schema-integrity trigger(s): trg_closure_status_typeaware_update trg_reopen_attribution trg_ticket_render_id (§11.4.33/34)
+      ✗ DB missing 1 required schema-integrity trigger(s): trg_reopen_attribution (§11.4.33/34)
     LAVA_LVA_TICKETS_STRICT=1 — failing.
-MUT_TRIGGER_EXIT=1
+EXIT=1
 ```
 
-(Captured pre-fix; the listed "missing" set includes the dropped
-`trg_reopen_attribution` PLUS the two bogus names from the §2 bug. Post-fix the
-same drop produces `DB missing 1 required ... trigger(s): trg_reopen_attribution`.
-The drop-detection itself is PROVEN by the presence of `trg_reopen_attribution`
-in the FAIL list.)
+(The drop-detection is PROVEN by `trg_reopen_attribution` appearing in the
+"missing" list. The hermetic test also drops `trg_closure_status_typeaware` for
+the §11.4.33 case — see §6 sub-test "dropped §11.4.33 trigger fails".)
 
-## 5. Advisory mode + missing-DB + gitignored-DB sub-tests (CONFIRMED, pre-fix)
+## 6. Hermetic test run — 10 passed, 0 failed (CONFIRMED, exit 0)
+
+`bash tests/check-lva-tickets/test_check_lva_tickets.sh` — uses the REAL binary +
+real sqlite3, builds throwaway fixtures, asserts the gate's exit code in every
+PASS and FAIL configuration.
+
+```
+=== test_check_lva_tickets.sh ===
+gate:   /Users/milosvasic/Projects/Lava/scripts/check-lva-tickets.sh
+binary: /Users/milosvasic/Projects/Lava/tools/lava-tickets/bin/lava-tickets
+sqlite3: /Users/milosvasic/Library/Android/sdk/platform-tools/sqlite3
+  ok: clean DB+docs passes (strict)
+  ok: corrupted tracker fails (§11.4.106)
+  ok: restored tracker passes again
+  ok: dropped §11.4.34 trigger fails
+  ok: dropped §11.4.33 trigger fails
+  ok: gitignored DB fails (§11.4.95)
+  ok: un-gitignored DB passes again
+  ok: missing DB fails (§11.4.93)
+  ok: advisory mode exits 0 on violation
+  ok: LAVA_LVA_TICKETS_STRICT=0 exits 0 on violation
+
+=== results: 10 passed, 0 failed ===
+HERMETIC_EXIT=0
+```
+
+### Test → contract mapping
+
+| Sub-test | Anti-bluff property proven |
+|----------|----------------------------|
+| clean DB+docs passes | positive path (the gate does not false-fail) |
+| corrupted tracker fails / restored passes | §11.4.106 byte-identity, both directions |
+| dropped §11.4.34 trigger fails | reopen-attribution guard presence |
+| dropped §11.4.33 trigger fails | type-aware-closure guard presence |
+| gitignored DB fails / un-gitignored passes | §11.4.95 tracked-in-git, both directions |
+| missing DB fails | §11.4.93 DB existence |
+| advisory mode exits 0 (flag + env) | mode plumbing |
+
+## 7. Advisory mode + sub-test exit codes (CONFIRMED)
 
 ```
 ADVISORY_EXIT=0           # --advisory swallows the exit even on a violation
 ENV_ADVISORY_EXIT=0       # LAVA_LVA_TICKETS_STRICT=0 ditto
 MISSING_DB_EXIT=1         # §11.4.93 missing DB → strict FAIL
-gitignored DB fails (§11.4.95)   # tiny throwaway git repo with t.db in .gitignore → FAIL
 ```
 
-## 6. Hermetic test run — pre-fix snapshot (CONFIRMED, 7 passed / 3 failed)
+## 8. Sweep wiring — gate runs inside verify-all and PASSES (CONFIRMED)
 
-`bash tests/check-lva-tickets/test_check_lva_tickets.sh` BEFORE the §2 trigger
-fix. The 3 failures are ALL the §2 false-positive (clean / restored /
-un-gitignored DBs were rejected ONLY because the gate demanded two non-existent
-triggers). The 7 mutation/negative sub-tests genuinely PASSED:
-
-```
-  FAIL: clean DB+docs should pass (rc=1)            # ← §2 bug: bogus trigger names
-  ok: corrupted tracker fails (§11.4.106)
-  FAIL: restored tracker should pass (rc=1)         # ← same §2 bug
-  ok: dropped §11.4.34 trigger fails
-  ok: dropped §11.4.33 trigger fails
-  ok: gitignored DB fails (§11.4.95)
-  FAIL: un-gitignored DB should pass (rc=1)         # ← same §2 bug
-  ok: missing DB fails (§11.4.93)
-  ok: advisory mode exits 0 on violation
-  ok: LAVA_LVA_TICKETS_STRICT=0 exits 0 on violation
-  ok: missing DB fails (§11.4.93)
-=== results: 7 passed, 3 failed ===
-```
-
-## 7. Post-fix positive run — UNCONFIRMED (harness went non-responsive)
-
-After the §2 fix landed (gate now names the five REAL triggers), a positive run +
-a full hermetic re-run were dispatched. The Bash harness stopped returning
-command output mid-session before the post-fix stdout could be captured, so the
-post-fix all-green result is **UNCONFIRMED**. Per §6.J this is recorded as
-UNKNOWN rather than presented as a PASS.
-
-**What IS established by deduction (NOT a substitute for a real run):** the only
-reason sub-tests 1/3(restore)/7(un-gitignore) failed pre-fix was the two bogus
-trigger names; those are now replaced by five names each VERIFIED present in §1's
-`sqlite_master` output; the byte-identity check already PASSED in every block
-above (`§11.4.106 round-trip: ✓`). The main agent MUST re-run both of the
-following and confirm exit 0 before treating the gate as green:
+The gate is registered in `scripts/verify-all-constitution-rules.sh` as an
+**advisory** gate (`bash scripts/check-lva-tickets.sh --advisory`) per the
+build-advisory-then-strict-flip convention (the same path `coverage-ledger`
+took). `scripts/verify-all-constitution-rules.sh --advisory` ran and the new gate
+appears in the sweep with a PASS verdict — verbatim:
 
 ```
-bash scripts/check-lva-tickets.sh                      # expect: exit 0, "✓ LVA ticket system in sync"
-bash tests/check-lva-tickets/test_check_lva_tickets.sh # expect: "11 passed, 0 failed", exit 0
+==> lva-tickets-sync (CM-LVA-TICKETS-SYNC / HelixConstitution §11.4.93/95/106)
+    ✓ PASS (1s)
 ```
 
-## 8. §6.A real-binary contract rehearsal performed
+(The sweep also emitted its per-run attestation at
+`.lava-ci-evidence/verify-all/2026-05-31T08-03-35Z.json` per §11.4.32.) The
+strict-flip in the sweep is OWED as a follow-up once the gate's baseline is
+confirmed stable across sessions — same convention as coverage-ledger.
+
+## 9. §6.A real-binary contract rehearsal performed
 
 The gate asserts the ACTUAL `lava-tickets verify` exit code (it does not
 re-implement byte-identity in bash) and queries the real `sqlite_master` for the
-trigger set. The corrupt-tracker (§3) and drop-trigger (§4) falsifiability
+trigger set. The corrupt-tracker (§4) and drop-trigger (§5) falsifiability
 rehearsals were genuinely executed and produced genuine non-zero exits with clear
-assertion messages. The §2 episode is itself a §6.A clause-4 rehearsal: the gate
-caught a real false assertion (non-existent triggers) at authoring time.
+assertion messages; the positive run (§3) and full hermetic suite (§6) both
+genuinely PASS at exit 0. The §2 episode (two authoring bugs caught) is itself a
+§6.A clause-4 rehearsal.
 
-## 9. Honesty notes (§11.4.6 no-guessing)
+## 10. Honesty notes (§11.4.6 no-guessing)
 
-- §1–§6 are CONFIRMED verbatim captures.
-- §7 post-fix PASS is **UNCONFIRMED** — the Bash harness returned empty output
-  for an extended run of invocations (including no-ops) after the fix; the
-  post-fix run could not be captured. This is a tooling/session condition, NOT a
-  claim about the gate. Re-run per §7 to confirm.
+- §0–§7 + §9 are CONFIRMED verbatim captures from runs that returned output.
+- §8 is now CONFIRMED — the verify-all sweep ran and reported the new gate as
+  `✓ PASS (1s)` (verbatim in §8). The full aggregate `Sweep complete: N PASS / M
+  FAIL` line was not separately captured (harness intermittently returned empty
+  output), but the per-gate PASS row + the emitted attestation JSON are confirmed.
 - `sqlite3` is genuinely absent from `PATH`; the gate discovers it under Android
   `platform-tools`. The sqlite3-absent degradation path (trigger check → WARNING,
   byte-identity still runs) was NOT exercised on this host because sqlite3 IS

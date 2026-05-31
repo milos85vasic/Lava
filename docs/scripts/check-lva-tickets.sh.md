@@ -56,7 +56,7 @@ LAVA_LVA_TICKETS_STRICT=0 scripts/check-lva-tickets.sh   # env form of advisory
 
 ## Falsifiability
 
-`tests/check-lva-tickets/test_check_lva_tickets.sh` builds throwaway DB + tracker fixtures with the real binary + real sqlite3 and asserts the gate FAILS on each deliberate mutation:
+`tests/check-lva-tickets/test_check_lva_tickets.sh` (10 sub-tests, all PASS) builds throwaway DB + tracker fixtures with the real binary + real sqlite3 and asserts the gate FAILS on each deliberate mutation:
 
 - corrupted tracker `.md` → FAIL (§11.4.106); regenerated → PASS again
 - dropped `trg_reopen_attribution` → FAIL (§11.4.34)

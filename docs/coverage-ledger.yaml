@@ -21,9 +21,9 @@
 # Invariant values: pass | gap | n/a | "waiver: <rationale>" | "pass: <rationale>"
 metadata:
   schema_version: 1
-  generated_at: "2026-05-31T08:12:51Z"
+  generated_at: "2026-05-31T08:28:34Z"
   generator: "scripts/generate-coverage-ledger.sh"
-  commit_sha: "d8481e18937e510896be3d07936986567f5bb4e5"
+  commit_sha: "a885f9dcf583bff4a85381d33ea015b16c6b8cd8"
   mandate: "HelixConstitution §11.4.25 Full-Automation-Coverage Mandate"
 
 rows:
@@ -708,7 +708,7 @@ rows:
   - path: "lava-api-go"
     kind: "api"
     status: "covered"
-    unit_test_count: 96
+    unit_test_count: 101
     integration_test_count: 1
     challenge_count: 0
     challenges: []
