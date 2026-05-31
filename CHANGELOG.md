@@ -1,4 +1,20 @@
 # Changelog
+## Lava-Android-1.2.35-1055 / Lava-API-Go-2.3.23-2323 — 2026-06-01 ("Choose your API" two sections; §6.L 69th)
+
+- **Onboarding "Choose your API" now has two sections** (commit 26ee4433): the existing
+  "On your network" local mDNS discovery list, plus a NEW "Cloud / remote server" section —
+  type a server address + port and tap **Add server**, or pick a pre-installed default
+  (`https://lava.app:7777`, §6.R-sourced from `.env` → `DEFAULT_CLOUD_API`). One API is chosen
+  to continue; selection runs the same connectivity probe before advancing.
+- `ApiSelectionStep` cloud params gained default values so existing call sites (Challenge26)
+  keep compiling; production `OnboardingScreen` + Challenge30 pass all five explicitly.
+- Tests: CloudApiDefaultsTest 14/14 + OnboardingViewModelTest 14/14 (JUnit XML failures=0,
+  falsifiability-rehearsed) + Challenge30CloudApiSelectionTest (rendered-UI).
+- §6.Z: C00+C01+C26+C30 EXECUTED green on cold-booted Pixel_8/API35 (Containers runner,
+  host-direct+HVF), all_passed:true / 0 failures. Evidence:
+  `.lava-ci-evidence/distribute-changelog/firebase-app-distribution/1.2.35-1055-test-evidence.md`.
+- lava-api-go unchanged this cycle (Android-only feature) → stays 2.3.23-2323.
+
 ## Lava-Android-1.2.34-1054 / Lava-API-Go-2.3.23-2323 — 2026-05-31 (Rebuild + redistribute; §6.L 69th)
 
 **Previous published:** Lava-Android-1.2.33-1053 (debug + release shipped 2026-05-18).

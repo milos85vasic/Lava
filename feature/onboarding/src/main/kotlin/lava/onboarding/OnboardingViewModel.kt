@@ -71,8 +71,11 @@ class OnboardingViewModel @Inject constructor(
     // comes from build-time config (.env → BuildConfig.DEFAULT_CLOUD_API),
     // injected via [OnboardingHiltModule] (§6.R: never a source literal).
     // Tests construct the VM directly and pass any value (or "").
+    // Kotlin default ("") keeps existing direct-construction test call sites
+    // compiling; Hilt ignores Kotlin defaults and always provides the @Named
+    // binding in production (via app-side CloudApiModule).
     @javax.inject.Named("defaultCloudApi")
-    private val defaultCloudApi: String,
+    private val defaultCloudApi: String = "",
 ) : ViewModel(), ContainerHost<OnboardingState, OnboardingSideEffect> {
     private val logger = loggerFactory.get("OnboardingViewModel")
 

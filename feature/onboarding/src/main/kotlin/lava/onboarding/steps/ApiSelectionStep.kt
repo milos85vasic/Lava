@@ -65,11 +65,13 @@ fun ApiSelectionStep(
     onRetryDiscovery: () -> Unit,
     onRetryProbe: () -> Unit,
     // Cloud / remote-server section (2026-05-31 operator request).
-    cloudInput: String,
-    cloudDefaults: List<Endpoint>,
-    cloudError: String?,
-    onCloudInputChange: (String) -> Unit,
-    onAddCloud: () -> Unit,
+    // Defaults keep existing call sites (e.g. Challenge26) compiling; the
+    // production OnboardingScreen + Challenge30 pass all five explicitly.
+    cloudInput: String = "",
+    cloudDefaults: List<Endpoint> = emptyList(),
+    cloudError: String? = null,
+    onCloudInputChange: (String) -> Unit = {},
+    onAddCloud: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     Surface(
