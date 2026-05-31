@@ -1,0 +1,27 @@
+{
+  "incident_date": "2026-05-31",
+  "class": "II",
+  "classification": "measurable resource pressure (disk-full) — §6.M Class-II",
+  "title": "podman VM out of space during build_and_release.sh lava-api-go image build",
+  "cycle": "§6.L 69th (rebuild + redistribute, 1.2.34-1054)",
+  "trigger": "build_and_release.sh, after building the Android debug+release APKs successfully, proceeded to build the lava-api-go OCI image via `podman build`; the build failed at `COPY . .` with 'no space left on device' writing to /var/tmp/container_images_storage.../1 inside the podman machine VM. build_and_release.sh exited 125.",
+  "forensic_evidence": {
+    "host_disk": "/System/Volumes/Data ~5.4Gi avail, 97% capacity (host / is tight but NOT the cause)",
+    "podman_vm_disk": "FULL — the failing path /var/tmp/container_images_storage is INSIDE the podman machine VM, whose virtual disk filled with image-build layers",
+    "podman_system_prune": "reclaimed ~0B from host-visible storage (the full storage is VM-internal)",
+    "build_outcome": "Android APKs SUCCEEDED (releases/1.2.34/android-{debug,release}/*.apk, both versionCode 1054, new pepper); only the Go IMAGE build failed",
+    "exit_code": 125
+  },
+  "impact": {
+    "android_distribute_path": "NOT blocked by this directly — APKs built fine; the lava-api-go IMAGE is not required for Firebase App Distribution (the Go BINARY bin/lava-api-go was already built + version-verified 2.3.23-2323)",
+    "android_test_apk": "app/build/outputs/apk/androidTest/debug/*.apk was NOT produced (build_and_release ran assembleDebug + assembleRelease, not assembleDebugAndroidTest) — so a §6.Z retest of the rebuilt new-pepper APK could not run without first building the androidTest harness, which was deferred per §6.M (do not stack heavy work on a disk-distressed host)",
+    "host_stability": "no Class-I event (uptime continuous, same user, no logind transitions, no OOM); host / remained ~5.4Gi avail throughout — degraded but functional"
+  },
+  "remediation": {
+    "immediate": "did NOT stack more heavy emulator/image builds on the distressed host per §6.M",
+    "recommended_operator_action": "reclaim podman VM space — `podman machine stop && podman machine reset` (or grow the VM disk via `podman machine set --disk-size N`) — before the next lava-api-go image build; the Go binary path is unaffected",
+    "distribute_continuation": "the §6.Z retest of the rebuilt new-pepper 1.2.34-1054 APK + the Firebase two-stage upload remain to be completed once disk is healthy; the prior §6.Z run proved C00+C01 PASS on the 1054 build (pepper is an auth constant inert for cold-start/launch — the rebuild's behavioral surface for C00/C01 is identical)"
+  },
+  "anti_bluff_note": "Recorded per §6.J/§6.L: the distribute is NOT bluffed-as-complete. Honest state = APKs-rebuilt + pepper-rotated + mirrors-converged, with the final Firebase upload gated on (a) podman-VM disk health and (b) the §6.Z retest of the exact new-pepper artifact. Distributing without these would be the exact §6.Z violation the 1.2.19-1039 brick forensically anchors.",
+  "classification_line": "project-specific"
+}
