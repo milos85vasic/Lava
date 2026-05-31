@@ -11,6 +11,8 @@ same commit so the index stays trustworthy. Stale state in this file
 is itself a §6.J spirit issue — the file claims a guarantee, the
 repo has drifted, the agent acts on the claim.
 
+> **Last updated:** 2026-05-31 (§6.L 68th invocation), **flaky-test fix + §6.S table re-sync + subagent-driven constitution/ticket/submodule cycle (IN PROGRESS).** Operator directive: fetch+review constitution submodule, add+incorporate any newly-mandated submodules (submodules-driven), define the tickets SQLite DB key **"LVA"** + Issues/Fixed/Issues_Summary/Fixed_Summary docs with PDF/HTML/DOCX exports, create many new tests of all types with REAL evidence (zero bluffs), keep anti-bluff mandate in all governance docs, commit+push all to all upstreams, endless autonomous loop. **Commit 1 (this commit):** (a) fixed the 67th-cycle flaky `CredentialsViewModelTest > select provider updates selectedProvider` — replaced the fixed-`awaitState()`-count assumption with a bounded await-until-`selectedProvider=="rutracker"` loop (the Room `Flow` `.first()` in `load()` resumes off the StandardTestDispatcher, so emission count is non-deterministic under load); FALSIFIABILITY-REHEARSED (broke `SelectProvider` reduce → `AssertionFailedError: expected:<rutracker> but was:<null>`, localized to that 1 test → reverted → green); (b) `.codegraph/*.pid` gitignore gap closed (`daemon.pid` was untracked-but-not-ignored — §11.4.30); (c) §0 orientation + §3 pin tables re-synced to HEAD `23c508e9` (they had drifted to `0c87b6ae`/CamelCase names/1.2.22 — a §6.S violation now corrected). **In flight (later commits this cycle):** constitution-pin review (CONST-049), missing-submodule incorporation, LVA ticket DB + export pipeline, new-test creation, full sweep. §6.L counter 67 → 68.
+>
 > **Last updated:** 2026-05-20 (§6.L 67th invocation), **rebuild + test cycle — honest §6.Z/§6.X blocker on the Firebase redistribute.** Operator directive: rebuild all apps/services + boot + execute all tests/Challenges + Firebase redistribute. DONE: `lava-api-go` rebuilt (`bin/lava-api-go` + `bin/healthprobe`); Lava debug APK + androidTest APK rebuilt (BUILD SUCCESSFUL); JVM unit-test suite executed (`./gradlew testDebugUnitTest --continue`) — green except ONE flaky test discovered: `CredentialsViewModelTest > select provider updates selectedProvider` failed in-suite, passed 6/6 isolated (a §11.4.50 deterministic-consistency defect — root-cause hypothesis: Room `Flow` `.first()` resuming off the virtual test dispatcher; recorded honestly at `.lava-ci-evidence/sixth-law-incidents/2026-05-20-flaky-credentialsviewmodeltest.json`, fix owed as a focused follow-up, NOT masked). **§6.H credential incident:** a buggy `${LAVA_FIREBASE_TOKEN:-UNSET}` recon command printed the Firebase CI token into the session transcript (NOT committed to git) — incident at `.lava-ci-evidence/sixth-law-incidents/2026-05-20-firebase-token-echo-leak.json`; **operator MUST rotate the token** (`firebase logout` → `firebase login:ci`). **§6.X-debt darwin/arm64 sub-debt RESOLVED** — the operator directed extending the emulator for per-OS acceleration; DONE (Containers `c1871138`+`6aff7ea8`: per-OS-accel model `AccelProfileForOS`/`ResolveRunner`/`GateEligibleForOS` + `emulator-matrix --runner=auto`; `scripts/run-challenge-matrix.sh` OS-aware). macOS's accelerated gate runner is host-direct+HVF (a Linux container cannot reach the host-only HVF API). PROVEN: C00 cold-start canary + the full 37-class Challenge suite ran on Pixel_8/API35 = **43 pass / 3 credential-skip (C02/C09/C10) / 0 fail** — one stale test (`Challenge26RutrackerMainAbsentFromServerListTest`, waited for the SP-4-removed "Server" menu section) repaired + falsifiability-rehearsed. The §6.Z redistribute is now genuinely unblocked on this macOS host; the redistribute itself is pending an operator decision — the app APK is byte-identical to the already-distributed 1.2.33-1053 (no app-user-facing code changed this session). §6.L counter 66 → 67.
 >
 > **Last updated:** 2026-05-20 (§6.L 66th invocation), **§6.N bluff-hunt — 2 more existing Lava tests verified genuine.** Continuing the §6.N cadence beyond the 65th: `core/domain/.../ProbeMirrorUseCaseTest` (UseCase layer) and `core/preferences/.../EndpointConverterTest` (converter layer) were hunted by mutating their production code — `ProbeMirrorUseCase`'s reachable range `200..399`→`200..599`, and `EndpointConverter`'s GoApi `fromJson` port forced to `DEFAULT_PORT`. Both produced localized test failures (1-of-3 and 2-of-10) and passed fully after `git checkout` revert. Verdict: both GENUINE; 0 bluffs. Across the 65th + 66th, 3 existing Lava tests (ViewModel / UseCase / converter layers) are §6.N-verified genuine. Evidence: `.lava-ci-evidence/bluff-hunt/2026-05-20-cycle66-usecase-converter.json`. §6.L counter 65 → 66.
@@ -159,12 +161,13 @@ repo has drifted, the agent acts on the claim.
 
 | Surface | Current state | Pin |
 |---|---|---|
-| Lava parent on master | 2 mirrors (GitHub + GitLab) at HEAD | `0c87b6ae` |
-| API on thinker.local | 2.3.11 running (last cycle's build); not re-built this cycle | container `lava-api-go-thinker` |
-| Android Firebase | 1.2.22 (1042) distributed to testers (2026-05-14, last user-visible release) | `lava-vasic-digital` Firebase project |
+| Lava parent on master | 2 mirrors (GitHub + GitLab) at HEAD | `23c508e9` (pre-68th-cycle) |
+| API (lava-api-go) | 2.3.22 (code 2322) — `internal/version/version.go` | container `lava-api-go-thinker` |
+| Android Firebase | 1.2.33 (1053) distributed to testers (2026-05-18, last user-visible release; `last-version-{debug,release}` both = 1053) | `lava-vasic-digital` Firebase project |
 | 17 own-org submodules | all pushed (16 vasic-digital + 1 HelixDevelopment HelixQA) | see §3 |
-| constitution submodule | at upstream HEAD `464ada14` (12 new §11.4.25-§11.4.36 clauses) | HelixDevelopment/HelixConstitution |
-| Verify-all sweep | 40/40 PASS, fully STRICT mode | `.lava-ci-evidence/verify-all/` |
+| constitution submodule | at upstream HEAD `208e2c8` (adds §11.4.78 CodeGraph mandate) | HelixDevelopment/HelixConstitution |
+| codegraph | incorporated 2026-05-20 (§11.4.78); local SQLite index at `.codegraph/` (1,182 files / 18,567 nodes) | `@colbymchenry/codegraph` MCP |
+| Verify-all sweep | 40/40 PASS, fully STRICT mode (last attested prior cycle; 68th-cycle re-run in progress) | `.lava-ci-evidence/verify-all/` |
 | Coverage ledger | 48 covered / 10 partial / 0 gap (58 rows) | `docs/coverage-ledger.yaml` |
 | CM-* gates wired | ~16 of 24 wired (8 paper-only or equivalence-mapped) | `docs/helix-constitution-gates.md` |
 
@@ -281,24 +284,24 @@ Bumping a pin is a deliberate operator action; never auto-update.
 
 | Submodule | Pin | Mirrors | Notes |
 |---|---|---|---|
-| `Auth` | `32a80e0a` | GitHub + GitLab | helix-deps.yaml + CONST-050(B) anti-bluff cascade |
-| `Cache` | `bb5b7a98` | GitHub + GitLab | helix-deps.yaml present |
-| `Challenges` | `1ef27f1c` | GitHub + GitLab | helix-deps.yaml + flat layout (Panoptic dep declared, .gitmodules removed) |
-| `Concurrency` | `a521b642` | GitHub + GitLab | helix-deps.yaml present |
-| `Config` | `4b0933c6` | GitHub + GitLab | helix-deps.yaml + install_upstreams.sh added |
-| `Containers` | `c7fc343b` | GitHub + GitLab | helix-deps.yaml + install_upstreams.sh added |
-| `Database` | `13f63819` | GitHub + GitLab | helix-deps.yaml present |
-| `Discovery` | `218cb3a1` | GitHub + GitLab | helix-deps.yaml + install_upstreams.sh added |
-| `HelixQA` | `a1e2020d` | GitHub | NEW 2026-05-15; HelixDevelopment org; **always-track-upstream per §6.AD-debt Q9 waiver 2026-05-16**; bumped to `feat/evidence-capture-generic` HEAD (PR #1, CaptureGeneric addition) for Phase 4-C-1 |
-| `HTTP3` | `1fbdcbab` | GitHub + GitLab | helix-deps.yaml + install_upstreams.sh added |
-| `Mdns` | `d93139d5` | GitHub + GitLab | helix-deps.yaml + install_upstreams.sh added |
-| `Middleware` | `ab3d5c62` | GitHub + GitLab | helix-deps.yaml + install_upstreams.sh added |
-| `Observability` | `6cfbf42b` | GitHub + GitLab | helix-deps.yaml present |
-| `RateLimiter` | `a109485f` | GitHub + GitLab | helix-deps.yaml + install_upstreams.sh added |
-| `Recovery` | `5781a89f` | GitHub + GitLab | helix-deps.yaml + install_upstreams.sh added |
-| `Security` | `997ebd39` | GitHub + GitLab | helix-deps.yaml present |
-| `Tracker-SDK` | `ae761d5c` | GitHub + GitLab | helix-deps.yaml + install_upstreams.sh added |
-| `constitution` | `464ada14` | universal (HelixConstitution upstream) | 12 new §11.4.25-§11.4.36 clauses |
+| `auth` | `24ca50db` | GitHub + GitLab | helix-deps.yaml + §11.4.78 CodeGraph cascade |
+| `cache` | `30bb8581` | GitHub + GitLab | helix-deps.yaml present |
+| `challenges` | `09c55f48` | GitHub + GitLab | helix-deps.yaml + flat layout (Panoptic dep declared) |
+| `concurrency` | `7c74625b` | GitHub + GitLab | helix-deps.yaml present |
+| `config` | `9491f8b4` | GitHub + GitLab | helix-deps.yaml + install_upstreams.sh |
+| `containers` | `6aff7ea8` | GitHub + GitLab | helix-deps.yaml + per-OS emulator acceleration (§6.X-debt darwin/arm64 RESOLVED) |
+| `database` | `4ead6233` | GitHub + GitLab | helix-deps.yaml present |
+| `discovery` | `2bddf64c` | GitHub + GitLab | helix-deps.yaml + install_upstreams.sh |
+| `helixqa` | `8b12e922` | GitHub | HelixDevelopment org; always-track-upstream per §6.AD Q9 waiver |
+| `http3` | `1d0df7b7` | GitHub + GitLab | helix-deps.yaml + install_upstreams.sh |
+| `mdns` | `ba1d2385` | GitHub + GitLab | helix-deps.yaml + install_upstreams.sh |
+| `middleware` | `6ee9c0ec` | GitHub + GitLab | helix-deps.yaml + install_upstreams.sh |
+| `observability` | `2b8c1633` | GitHub + GitLab | helix-deps.yaml present |
+| `ratelimiter` | `9da442cb` | GitHub + GitLab | helix-deps.yaml + install_upstreams.sh |
+| `recovery` | `58f9b4f9` | GitHub + GitLab | helix-deps.yaml + install_upstreams.sh |
+| `security` | `a388cc44` | GitHub + GitLab | helix-deps.yaml present |
+| `tracker_sdk` | `7afc37aa` | GitHub + GitLab | helix-deps.yaml + install_upstreams.sh |
+| `constitution` | `208e2c8` | universal (HelixConstitution upstream) | adds §11.4.78 CodeGraph mandate |
 
 **Internal-to-submodule nested submodules:** `submodules/challenges` had a nested `Panoptic` submodule that was removed via the github cascade merge in Phase 5-debt closure (CONST-051(C) flat-layout enforcement); Challenges now declares Panoptic as a `layout: flat` dependency in its `helix-deps.yaml`.
 
@@ -312,12 +315,20 @@ work.
 
 ### 4.5 Active known issues
 
-- **§6.X-debt (Linux x86_64 + KVM gate-host)**: STANDING. On darwin/arm64
-  Apple Silicon + macOS + Podman, the emulator process cannot get HVF/KVM
-  passthrough into the container; matrix attestation runs cannot complete.
+- **§6.X-debt (Linux x86_64 + KVM containerized gate path)**: STANDING for the
+  Linux host path only. The **darwin/arm64 sub-debt is RESOLVED** (2026-05-20,
+  commit `23c508e9`): per-OS emulator acceleration (`AccelProfileForOS` /
+  `ResolveRunner` / `GateEligibleForOS` + `emulator-matrix --runner=auto` in
+  Containers `c1871138`+`6aff7ea8`) makes the macOS gate runner host-direct+HVF
+  (a Linux container cannot reach the host-only HVF API). PROVEN: C00 cold-start
+  canary + full 37-class Challenge suite on Pixel_8/API35 = 43 pass / 3
+  credential-skip / 0 fail. The Linux x86_64 containerized-KVM path remains owed.
   Forensic anchor: `.lava-ci-evidence/sixth-law-incidents/2026-05-13-emulator-container-darwin-arm64-gap.json`.
-  Resolution: provision Linux x86_64 self-hosted runner OR add HVF
-  passthrough to the Containers image.
+- **§6.H Firebase CI token echo-leak** (2026-05-20, §6.L 67th): a buggy
+  `${LAVA_FIREBASE_TOKEN:-UNSET}` recon command printed the token into the
+  session transcript (NOT committed to git). **OPERATOR MUST ROTATE**
+  (`firebase logout` → `firebase login:ci`). Incident:
+  `.lava-ci-evidence/sixth-law-incidents/2026-05-20-firebase-token-echo-leak.json`.
 - **macOS emulator stall** (2026-05-15 incident): Pixel_7_Pro on macOS
   + emulator 36.1.9 stalls indefinitely. Three candidate root-causes
   recorded as `PENDING_FORENSICS:` (T7 external drive contention,
@@ -330,6 +341,21 @@ work.
   on connection-reset. No code change owed.
 
 ### 4.5 Resolved this cycle
+
+- **Flaky `CredentialsViewModelTest > select provider updates selectedProvider`**
+  (§6.L 68th, 2026-05-31): the fixed-`awaitState()`-count assumption was replaced
+  with a bounded await-until-`selectedProvider=="rutracker"` loop, removing the
+  dependence on the non-deterministic interleaving of `load()`'s Room-`Flow`
+  `.first()` resume (delivered off the StandardTestDispatcher) vs. the
+  `SelectProvider` reduce. Falsifiability-rehearsed (broke the reduce →
+  `AssertionFailedError: expected:<rutracker> but was:<null>`, localized to that
+  one test → reverted → 6/6 green). Incident JSON
+  `.lava-ci-evidence/sixth-law-incidents/2026-05-20-flaky-credentialsviewmodeltest.json`
+  remains as the forensic record.
+- **`.codegraph/*.pid` gitignore gap** (§6.L 68th): `daemon.pid` was
+  untracked-but-not-ignored (§11.4.30); `.codegraph/*.pid` added to `.gitignore`.
+
+#### Resolved in prior (constitution-compliance) cycle
 
 - **Ledger-staleness drift class** — Phase 7-debt closure (`0c87b6ae`)
   flipped the coverage-ledger gate from `--advisory` to `--strict` in the

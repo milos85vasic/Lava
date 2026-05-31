@@ -159,7 +159,28 @@ class CredentialsViewModelTest {
             awaitState() // loaded
 
             viewModel.onAction(CredentialsAction.SelectProvider("rutracker"))
-            val state = awaitState()
+
+            // CredentialsViewModel.load() collects credentialManager.observeAll()
+            // via Room's Flow, whose first() emission is delivered on Room's
+            // InvalidationTracker executor (a real background thread), NOT the
+            // StandardTestDispatcher. Under full-suite CPU load the resume of
+            // load()'s final reduce can interleave with this SelectProvider
+            // reduce, so a fixed awaitState() count is non-deterministic and
+            // can land one emission early on the loaded state where
+            // selectedProvider is still null (flake recorded at
+            // .lava-ci-evidence/sixth-law-incidents/2026-05-20-flaky-credentialsviewmodeltest.json).
+            // Await until the user-visible outcome is observed instead of
+            // assuming an emission count. selectedProvider null -> "rutracker"
+            // is a real StateFlow change, so a state carrying it is guaranteed
+            // to be emitted; the bound prevents an unbounded await — a genuine
+            // SelectProvider regression never reaches the outcome and fails
+            // the assertion below with a clear message.
+            var state = awaitState()
+            var guard = 0
+            while (state.selectedProvider != "rutracker" && guard < 4) {
+                state = awaitState()
+                guard++
+            }
             assertEquals("rutracker", state.selectedProvider)
         }
     }
