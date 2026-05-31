@@ -354,6 +354,12 @@ work.
   remains as the forensic record.
 - **`.codegraph/*.pid` gitignore gap** (§6.L 68th): `daemon.pid` was
   untracked-but-not-ignored (§11.4.30); `.codegraph/*.pid` added to `.gitignore`.
+- **Stale coverage ledger (§11.4.25)** (§6.L 68th): the verify-all sweep was
+  46/47 — `docs/coverage-ledger.yaml` had drifted (prior cycles added
+  `feature/login` LoginViewModelTest, `feature/onboarding` AuthTypeDisplayTest +
+  challenge C26, `feature/provider_config` ProviderConfigViewModelTest without
+  regenerating the ledger). Regenerated via `scripts/generate-coverage-ledger.sh`;
+  `check-coverage-ledger.sh --strict` now EXIT=0. Sweep → **47/47 PASS**.
 
 #### Resolved in prior (constitution-compliance) cycle
 

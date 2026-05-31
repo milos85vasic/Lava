@@ -21,9 +21,9 @@
 # Invariant values: pass | gap | n/a | "waiver: <rationale>" | "pass: <rationale>"
 metadata:
   schema_version: 1
-  generated_at: "2026-05-17T09:47:56Z"
+  generated_at: "2026-05-31T07:34:03Z"
   generator: "scripts/generate-coverage-ledger.sh"
-  commit_sha: "c3b8bf5c05cb2885c4c7a93febc12298cd128931"
+  commit_sha: "cb255b9d35f0b48ebbe3b13e77901b51d89eea4a"
   mandate: "HelixConstitution §11.4.25 Full-Automation-Coverage Mandate"
 
 rows:
@@ -161,7 +161,7 @@ rows:
   - path: "feature/login"
     kind: "feature"
     status: "covered"
-    unit_test_count: 2
+    unit_test_count: 3
     integration_test_count: 0
     challenge_count: 2
     challenges:
@@ -169,6 +169,7 @@ rows:
       - "HEURISTIC"
     sample_tests:
       - "LoginResultMapperTest.kt"
+      - "LoginViewModelTest.kt"
       - "ProviderLoginViewModelTest.kt"
     invariants:
       anti_bluff: "pass"
@@ -215,9 +216,9 @@ rows:
   - path: "feature/onboarding"
     kind: "feature"
     status: "covered"
-    unit_test_count: 2
+    unit_test_count: 3
     integration_test_count: 0
-    challenge_count: 9
+    challenge_count: 10
     challenges:
       - "C20"
       - "C21"
@@ -225,10 +226,12 @@ rows:
       - "C23"
       - "C24"
       - "C25"
+      - "C26"
       - "C28"
       - "C29"
       - "HEURISTIC"
     sample_tests:
+      - "AuthTypeDisplayTest.kt"
       - "OnboardingInsetRegressionTest.kt"
       - "OnboardingViewModelTest.kt"
     invariants:
@@ -241,12 +244,13 @@ rows:
   - path: "feature/provider_config"
     kind: "feature"
     status: "covered"
-    unit_test_count: 0
+    unit_test_count: 1
     integration_test_count: 0
     challenge_count: 1
     challenges:
       - "HEURISTIC"
-    sample_tests: []
+    sample_tests:
+      - "ProviderConfigViewModelTest.kt"
     invariants:
       anti_bluff: "pass"
       working_capability: "pass"
@@ -686,7 +690,7 @@ rows:
   - path: "app"
     kind: "app"
     status: "covered"
-    unit_test_count: 38
+    unit_test_count: 39
     integration_test_count: 0
     challenge_count: 0
     challenges: []
@@ -722,7 +726,7 @@ rows:
   - path: "submodules/Auth"
     kind: "submodule"
     status: "gap"
-    unit_test_count: 14
+    unit_test_count: 15
     integration_test_count: 0
     challenge_count: 0
     challenges: []
@@ -752,7 +756,7 @@ rows:
   - path: "submodules/Challenges"
     kind: "submodule"
     status: "gap"
-    unit_test_count: 168
+    unit_test_count: 174
     integration_test_count: 0
     challenge_count: 0
     challenges: []
@@ -797,7 +801,7 @@ rows:
   - path: "submodules/Containers"
     kind: "submodule"
     status: "gap"
-    unit_test_count: 145
+    unit_test_count: 150
     integration_test_count: 0
     challenge_count: 0
     challenges: []
@@ -842,7 +846,7 @@ rows:
   - path: "submodules/HelixQA"
     kind: "submodule"
     status: "gap"
-    unit_test_count: 355
+    unit_test_count: 362
     integration_test_count: 0
     challenge_count: 0
     challenges: []
@@ -887,7 +891,7 @@ rows:
   - path: "submodules/Middleware"
     kind: "submodule"
     status: "gap"
-    unit_test_count: 20
+    unit_test_count: 24
     integration_test_count: 0
     challenge_count: 0
     challenges: []
@@ -902,7 +906,7 @@ rows:
   - path: "submodules/Observability"
     kind: "submodule"
     status: "gap"
-    unit_test_count: 16
+    unit_test_count: 18
     integration_test_count: 0
     challenge_count: 0
     challenges: []
@@ -947,7 +951,7 @@ rows:
   - path: "submodules/Security"
     kind: "submodule"
     status: "gap"
-    unit_test_count: 17
+    unit_test_count: 18
     integration_test_count: 0
     challenge_count: 0
     challenges: []
