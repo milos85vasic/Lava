@@ -114,6 +114,12 @@ run_gate "constitution-doc-parser" "§6.D/§6.E/§6.F/§6.AD/§6.W/§11.4.6/§6.
 run_gate "non-fatal-coverage" "§6.AC + HelixConstitution telemetry discipline" \
     "bash scripts/check-non-fatal-coverage.sh"
 
+# §11.4.65 / CONST-066 Universal Markdown Export Sync (CM-UNIVERSAL-MARKDOWN-EXPORT-SYNC).
+# Backfill: 126 in-scope .md -> 252 siblings, 0 failures (CHANGELOG.md YAML-metadata
+# bug fixed via --from gfm). --check-only reports 0 problems -> strict.
+run_gate "markdown-export-sync" "CM-UNIVERSAL-MARKDOWN-EXPORT-SYNC / HelixConstitution §11.4.65" \
+    "LAVA_MARKDOWN_EXPORT_STRICT=strict bash scripts/check-markdown-export-sync.sh"
+
 # §11.4.30 .gitignore + No-Versioned-Build-Artifacts (Phase 2)
 run_gate "gitignore-coverage" "HelixConstitution §11.4.30" \
     "bash scripts/check-gitignore-coverage.sh"
@@ -200,8 +206,6 @@ run_gate "workable-items-sync" "CM-WORKABLE-ITEMS-SYNC / HelixConstitution §11.
 # (scripts/check-markdown-export-sync.sh) greps in-scope .md and fails on any
 # missing/stale sibling. §6.AF-debt §11.4.65 item closed 2026-05-31; backfill
 # landed 126 in-scope docs, 0 problems at landing.
-run_gate "markdown-export-sync" "CM-UNIVERSAL-MARKDOWN-EXPORT-SYNC / HelixConstitution §11.4.65" \
-    "bash scripts/check-markdown-export-sync.sh"
 
 # Hermetic test suites (each suite's own paired-mutation contracts)
 for suite in tests/firebase tests/ci-sh tests/compose-layout tests/tag-helper \

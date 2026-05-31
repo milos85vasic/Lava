@@ -118,3 +118,9 @@ tools/lava-tickets/digital.vasic.lava.tickets
 # Chaos/stress (§11.4.85) regenerable run evidence — `go test -tags stress` regenerates.
 # The curated proof lives at docs/chaos-stress/EVIDENCE-phase1.md (tracked).
 lava-api-go/tests/stress/evidence/
+
+# weasyprint per-run temp files (markdown-export PDF pipeline)
+toPdfViaTempFile*
+
+# markdown-export hermetic-test completion marker (scratch)
+tests/check-markdown-export-sync/.fin
