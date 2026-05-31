@@ -1,0 +1,90 @@
+<h1
+id="t7-fast-storage--relocation-map-operator-designated-main-fast-storage">T7
+Fast Storage — relocation map (operator-designated main fast
+storage)</h1>
+<p><strong>Operator directive (2026-05-31):</strong> "Use for any
+storage-demanding work T7 drive and update paths references to it since
+this is our main fast storage."</p>
+<p>T7 = Samsung T7 external SSD mounted at <code>/Volumes/T7</code> (1.8
+TiB, ~1.2 TiB free). It is the project's designated <strong>main fast
+storage</strong> for all storage-demanding work (container image builds,
+emulator system-images/AVDs, build caches).</p>
+<h2 id="relocations-in-effect">Relocations in effect</h2>
+<table>
+<thead>
+<tr>
+<th>Concern</th>
+<th>Host path</th>
+<th>Target on T7</th>
+<th>Mechanism</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Podman VM + image storage</td>
+<td><code>~/.local/share/containers</code></td>
+<td><code>/Volumes/T7/containers</code></td>
+<td>symlink</td>
+</tr>
+<tr>
+<td>Gradle home</td>
+<td><code>~/.gradle</code> (via <code>GRADLE_USER_HOME</code>)</td>
+<td><code>/Volumes/T7/Gradle</code></td>
+<td>env var (<code>.zshrc</code>)</td>
+</tr>
+<tr>
+<td>XDG cache</td>
+<td><code>~/.cache</code></td>
+<td><code>/Volumes/T7/cache</code></td>
+<td>symlink</td>
+</tr>
+<tr>
+<td>Android <code>.android</code> (AVDs, 24 GB)</td>
+<td><code>~/.android</code></td>
+<td><code>/Volumes/T7/dot-android</code></td>
+<td>symlink</td>
+</tr>
+</tbody>
+</table>
+<h2 id="podman-vm-the-6m-class-ii-disk-pressure-fix-2026-05-31">Podman
+VM (the §6.M Class-II disk-pressure fix, 2026-05-31)</h2>
+<p>The podman <code>applehv</code> machine stores its whole VM as one
+fixed-size <code>.raw</code> disk image under the graphroot. Originally
+50 GB and living on the host data-volume (which had dropped to 16 GiB
+free / 97%); the lava-api-go OCI image build filled it and
+<code>build_and_release.sh</code> exited 125 "no space left on device"
+(incident
+<code>.lava-ci-evidence/sixth-law-incidents/2026-05-31-disk-pressure-podman-vm-image-build.json</code>).</p>
+<p>Fix:</p>
+<ol type="1">
+<li><code>podman machine stop</code></li>
+<li><code>mv ~/.local/share/containers /Volumes/T7/containers</code></li>
+<li><code>ln -s /Volumes/T7/containers ~/.local/share/containers</code></li>
+<li><code>podman machine start</code></li>
+</ol>
+<p><strong>Verified result:</strong> host data-volume freed ~50 GB (16
+GiB → 66 GiB free). After the move + restart, the live VM reported
+<code>/dev/vda4 50G total / 41G free</code> (the move to a clean
+graphroot on T7 plus a <code>podman system prune</code> is what
+reclaimed the working room) — and <code>build_and_release.sh</code> then
+completed EXIT 0 including the lava-api-go OCI image build that
+previously failed at <code>COPY . .</code>.</p>
+<p><strong>UNCONFIRMED:</strong>
+<code>podman machine set --disk-size 150</code> was issued and returned
+0, but the running VM still reported a 50 GB root afterward — on
+<code>applehv</code> the disk-size change does not appear to apply to
+the already-provisioned <code>.raw</code> without a machine recreate.
+The 50 GB → 41 GB-free headroom on T7 was sufficient for this build; if
+a future build needs more, recreate the machine
+(<code>podman machine rm</code> +
+<code>podman machine init --disk-size N</code>) so the larger raw is
+provisioned fresh on T7.</p>
+<h2 id="caveat-6m">Caveat (§6.M)</h2>
+<p>These relocations make T7 a hard dependency for container + emulator
+work: if T7 is unmounted, podman + the AVD matrix break until it is
+remounted. This is the operator's deliberate choice (T7 is the
+designated main fast storage). The pre-push hook +
+<code>scripts/run-challenge-matrix.sh</code> continue to work host-side;
+only the container/emulator runtime needs T7 present.</p>
+<p><code>Classification:</code> project-specific (Lava's host storage
+layout).</p>

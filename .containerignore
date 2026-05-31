@@ -1,0 +1,49 @@
+# .containerignore — prune the OCI build context for lava-api-go image builds.
+#
+# The lava-api-go Dockerfile uses `COPY . .` with the repo root as build
+# context (docker-compose.yml `context: .`). Without this file, podman/docker
+# copies the ENTIRE repo into the build container before COPY runs — including
+# the multi-GB releases/ tree, .git history, and Gradle/Android build outputs.
+# That filled the podman VM's layer storage and made `build_and_release.sh`
+# exit 125 "no space left on device" at the COPY step (incident
+# .lava-ci-evidence/sixth-law-incidents/2026-05-31-disk-pressure-podman-vm-image-build.json).
+#
+# The Go image build only needs the Go sources + go.mod/go.sum. Everything
+# below is excluded from the build context at source — the proper fix versus
+# growing the VM disk. (§6.M storage discipline; operator T7 fast-storage directive.)
+
+# Release artifacts — gigabytes of prior + current APKs/JARs/images, never needed in the Go build.
+releases/
+
+# Version control + CI evidence
+.git/
+.lava-ci-evidence/
+
+# Android / Gradle build outputs + caches
+**/build/
+.gradle/
+app/build/
+**/.cxx/
+out/
+
+# Android SDK-adjacent + local secrets (NEVER in an image — §6.H)
+.env
+.env.*
+keystores/
+app/google-services.json
+local.properties
+
+# Submodules not needed by the Go build (lava-api-go is self-contained)
+submodules/
+constitution/
+
+# IDE / OS cruft
+.idea/
+.vscode/
+.DS_Store
+**/*.iml
+
+# Node / docs export tooling
+node_modules/
+**/*.pdf
+**/*.html
