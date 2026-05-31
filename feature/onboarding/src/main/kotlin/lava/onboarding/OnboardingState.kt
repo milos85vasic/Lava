@@ -54,4 +54,19 @@ data class OnboardingState(
     val apiDiscoveryRunning: Boolean = false,
     val selectedApi: Endpoint? = null,
     val apiConnectivity: ApiConnectivityState = ApiConnectivityState.Idle,
+
+    // ApiSelection — Cloud / remote server section (2026-05-31 operator request).
+    // Two sections on the "Choose your API" screen: the discovered-on-network
+    // list above, plus a cloud section where the user can type a remote
+    // address+port OR pick a pre-installed default. Both paths funnel into the
+    // SAME SelectApi → probe → persist → advance flow, so no new persistence or
+    // probe plumbing is added — only this UI-input state.
+    //
+    // [cloudDefaults] is populated from the build-time DEFAULT_CLOUD_API config
+    // (§6.R: value lives in .env → buildConfigField, never a source literal).
+    // [cloudAddressInput] is the manual-entry text field; [cloudAddressError]
+    // is set when the typed address cannot be parsed into an Endpoint.GoApi.
+    val cloudDefaults: List<Endpoint> = emptyList(),
+    val cloudAddressInput: String = "",
+    val cloudAddressError: String? = null,
 )

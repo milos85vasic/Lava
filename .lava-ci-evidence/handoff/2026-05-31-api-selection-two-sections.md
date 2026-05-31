@@ -42,3 +42,48 @@ fires the push hook (noise). Work in SMALL single calls; route output to /tmp fi
 Read them; verify git HEAD + last-version pointers with `git ls-remote` before trusting.
 Restore byte-churn before commits: git checkout -- '*.pdf' '*.html' docs/workable_items.db
 constitution ; rm -rf constitution/scripts/workable-items/bin
+
+## PROGRESS UPDATE (Stream A started, 2026-05-31 late)
+Full spec written: docs/specs/2026-05-31-choose-api-two-sections.md (READ IT FIRST).
+
+DONE this session:
+- 69th cycle fully closed: 1.2.34-1054 debug+release distributed; Gate-4 version-aware
+  pepper fix (commit 010c9ecc + hermetic test tests/firebase/test_distribute_gate4_pepper_same_versioncode_allowed.sh);
+  honest retractions of degraded-channel premature claims. Converged at e6848827.
+- Stream A STARTED (2 of 6 files edited, additive + compile-safe because VM when() has `else -> Unit`):
+  - OnboardingState.kt: added cloudDefaults / cloudAddressInput / cloudAddressError fields.
+  - OnboardingAction.kt: added CloudAddressChanged(value) + AddCloudApi.
+
+REMAINING (exact, in order):
+1. Stream B parser: create feature/onboarding/.../steps/CloudApiDefaults.kt (or util/) — pure fun
+   `parse(raw: String): Endpoint.GoApi?` : strip optional `https://`/`http://` scheme, split host:port,
+   port default 8443, return null on malformed. + unit test feature/onboarding/src/test/.../CloudApiDefaultsTest.kt.
+2. .env.example: add `LAVA_DEFAULT_CLOUD_API=https://lava.app:7777`.
+   app/build.gradle.kts: add buildConfigField("String","DEFAULT_CLOUD_API","\"${env["LAVA_DEFAULT_CLOUD_API"].orEmpty()}\"")
+   in defaultConfig (near lines 47-52). Provide to VM via Hilt (a @Provides String qualified, or a tiny
+   CloudDefaultsProvider reading BuildConfig.DEFAULT_CLOUD_API so tests can fake it).
+3. OnboardingViewModel.kt (492 lines): inject cloud-default provider; on ApiSelection entry populate
+   cloudDefaults (parse the configured default; emptyList if blank). Add to perform when():
+   `is OnboardingAction.CloudAddressChanged -> intent { reduce { state.copy(cloudAddressInput=action.value, cloudAddressError=null) } }`
+   `is OnboardingAction.AddCloudApi -> onAddCloudApi()` where onAddCloudApi parses cloudAddressInput;
+   null→reduce cloudAddressError="Enter a valid address like https://host:port"; else onSelectApi(parsed).
+   (perform when() currently ends with `else -> Unit` at line ~63 — replace that, or add cases before it.)
+4. steps/ApiSelectionStep.kt: signature gains cloudInput:String, cloudDefaults:List<Endpoint>,
+   cloudError:String?, onCloudInputChange:(String)->Unit, onAddCloud:()->Unit. Render two titled
+   sections: "On your network" (existing list) + "Cloud / remote server" (TextField bound to cloudInput
+   + "Add" Button→onAddCloud + cloudDefaults rendered as existing ApiRow→onSelect). Update headline/subtitle.
+   contentDescription tags: api-cloud-input, api-cloud-add, api-cloud-default, api-cloud-error.
+   Keep §6.Q (no LazyColumn in verticalScroll — plain forEach, fine).
+5. OnboardingScreen.kt lines 88-96: add the 5 new params to the ApiSelectionStep(...) call:
+   cloudInput=state.cloudAddressInput, cloudDefaults=state.cloudDefaults, cloudError=state.cloudAddressError,
+   onCloudInputChange={viewModel.perform(OnboardingAction.CloudAddressChanged(it))},
+   onAddCloud={viewModel.perform(OnboardingAction.AddCloudApi)}.
+6. OnboardingHiltModule.kt: bind the cloud-default provider (BuildConfig.DEFAULT_CLOUD_API source).
+7. Stream C tests: OnboardingViewModelTest (cloud cases, real VM + fakes, falsifiability),
+   CloudApiDefaultsTest (parser), new Challenge app/src/androidTest/.../Challenge30CloudApiSelectionTest.kt
+   copying Challenge26ApiDiscoveryAndConnectivityTest harness.
+8. Stream D: §6.Y bump 1.2.35-1055; auth rotation (Gate-4 now version-aware); build_and_release (T7);
+   §6.Z execute C00+C01+Challenge26+new Challenge30 on Pixel_8/API35 host-direct+HVF; §6.AA two-stage
+   Firebase debug→release; CHANGELOG+snapshot+evidence; commit+push all upstreams; converge.
+
+VERIFY each VM edit compiles: ./gradlew :feature:onboarding:compileDebugKotlin (T7 GRADLE_USER_HOME).
