@@ -1041,7 +1041,9 @@ The §6.AE.7 darwin/arm64 host gap is a STANDING §6.X-debt sub-item, not a §6.
 
 ##### 6.AF-debt — §11.4.79–106 mechanical wiring (constitutional debt, 2026-05-31)
 
-OWED: (1) §11.4.79 codegraph own-org-submodule inclusion (LVA-6); (2) §11.4.85 chaos/stress scaffold beyond phase-1 lava-api-go (LVA-7); (3) decision + execution on LVA-vs-canonical-`workable-items`-binary reconciliation (LVA-3); (4) per-clause `CM-COVENANT-114-*-PROPAGATION` gate wiring for the new anchors. Until these close, the new clauses are operator-and-reviewer-verified manually; the parent CLAUDE.md §6.AF enumeration is binding by transitive reference per §6.AD.8.
+**CLOSED 2026-05-31 ("do it all" cycle):** ~~(1) §11.4.79 codegraph own-org-submodule inclusion (LVA-6)~~ CLOSED — root cause was uninitialized submodules (not a codegraph gitlink limitation, §11.4.6 correction); after `git submodule init`, 1,842 submodule files indexed, cross-submodule probe PASS, §6.H 0-leak, step-5 mutation confirmed (commit `2c8f1d46`). ~~(3) LVA-3 reconciliation~~ CLOSED — migrated to canonical `workable-items` binary (commit `36ed2ba3`). ~~§11.4.65 universal-markdown-export~~ CLOSED — `CM-UNIVERSAL-MARKDOWN-EXPORT-SYNC` gate + 126-doc backfill (commit `2c8f1d46`). ~~canonical `update`/`reopen`/`block` + PDF/HTML/DOCX export~~ CLOSED upstream (constitution `42ad8a3`, all 4 mirrors).
+
+**Still OWED:** (2) §11.4.85 chaos/stress scaffold beyond phase-1 lava-api-go (LVA-7); (4) per-clause `CM-COVENANT-114-*-PROPAGATION` gate wiring for the new anchors; (5) §11.4.80 codegraph sync-automation MUST `git submodule init` before index (precondition documented, automation owed). Until these close, the affected clauses are operator-and-reviewer-verified manually; the parent CLAUDE.md §6.AF enumeration is binding by transitive reference per §6.AD.8.
 
 ##### 6.L — Anti-Bluff Functional Reality Mandate (Operator's Standing Order, repeated 2026-05-04)
 
