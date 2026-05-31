@@ -20,7 +20,7 @@ change-impact instantly instead of repeatedly scanning files.
 
 | Path | Tracked? | Purpose |
 |------|----------|---------|
-| `.codegraph/config.json` | ✅ tracked | Include/exclude globs (Lava domain code only; secrets excluded per §6.H). |
+| `.codegraph/config.json` | ✅ tracked | Include/exclude globs. Lava domain code + own-org submodule source **in-scope** per §11.4.79 (blanket `submodules/` exclude removed); secrets + third-party + build artifacts excluded per §6.H / §11.4.79. |
 | `.codegraph/codegraph.db` | ❌ gitignored | The SQLite knowledge graph — a regenerable build artifact (CONST-053). |
 | `.codegraph/.gitignore` | ✅ tracked | codegraph's own ignore rules for its data files. |
 | `.mcp.json` | ✅ tracked | Claude Code project-scoped MCP server registration. |
@@ -59,11 +59,39 @@ codegraph index          # builds .codegraph/codegraph.db from config.json
 codegraph status         # shows file/node/edge counts — confirm non-empty
 ```
 
-`config.json` indexes **Lava domain code only** (`app/`, `core/`, `feature/`,
-`buildSrc/`, `proxy/`, `lava-api-go/`) and **excludes**: `submodules/`,
-`constitution/`, `releases/`, `build/`, `.lava-ci-evidence/`, and — per §6.H —
-`.env*`, `keystores/`, `*.keystore`, `*.jks`, `google-services.json`,
-`firebase-admin-*.json`. Never remove the secret excludes.
+`config.json` puts **Lava domain code AND own-org submodule SOURCE in-scope**,
+per constitution **§11.4.79 (LVA-6)** — which mandates that own-org
+(`vasic-digital` + `HelixDevelopment`) submodule source be indexed and forbids a
+blanket `submodules/` exclude. Physically indexed today: `app/`, `core/`,
+`feature/`, `buildSrc/`, `proxy/`, `lava-api-go/` (3,161 files / 52,486 nodes /
+137,780 edges as of the 2026-05-31 re-index). The SOURCE of all 17 own-org
+functional submodules under `submodules/<name>/` (`auth`, `cache`, `challenges`,
+`concurrency`, `config`, `containers`, `database`, `discovery`, `helixqa`,
+`http3`, `mdns`, `middleware`, `observability`, `ratelimiter`, `recovery`,
+`security`, `tracker_sdk`) is **in-scope** (the blanket `submodules/` exclude is
+removed) but is **not yet physically indexed by codegraph v0.9.7**: its
+filesystem walker does not descend across the git-submodule gitlink boundary
+(each submodule carries a nested `.git` gitlink), so submodule source never
+reaches the candidate set regardless of the exclude list. This is a confirmed
+codegraph-version limitation (three-observation diagnosis in
+`docs/codegraph-11479-reconciliation.md` §5), not a config error; full physical
+indexing is OWED pending a codegraph capability that crosses the gitlink
+boundary.
+
+**Excludes** (no blanket `submodules/` entry — §11.4.79 clause 1): the
+`constitution/` governance submodule (docs, not callable code — §11.4.79 clause
+4), `releases/`, `build/`, `.lava-ci-evidence/`; nested third-party/vendored
+deps `**/vendor/`, `**/third_party/` (§11.4.79 clause 3); and — per §6.H /
+§11.4.10, with `**/` prefixes so they apply INSIDE submodules too — `.env*`,
+`keystores/`, `*.keystore`, `*.jks`, `google-services.json`,
+`firebase-admin-*.json`, `secrets/`. **Never remove the secret excludes.** The
+full reconciliation record (before/after policy, re-index + credential-leak
+verification) is in `docs/codegraph-11479-reconciliation.md`.
+
+> After changing the exclude policy you MUST `codegraph index` (single heavy op,
+> §6.T.2), record the new file/node/edge counts, and run the credential-leak
+> check (`codegraph files | grep -iE '\.env|keystore|\.jks|google-services|secrets/' | wc -l`
+> → expect `0`) per §11.4.79 step 5 + §11.4.78.
 
 Keep the index fresh after edits:
 
@@ -109,7 +137,7 @@ scripts/verify-codegraph.sh --quick    # layers 01-04 + 06 (skip slow LLM layer)
 
 | Layer | Proves |
 |-------|--------|
-| 01 index reality | codegraph indexed the **real** Lava codebase (file/node counts, Kotlin+Go, no submodule leak). |
+| 01 index reality | codegraph indexed the **real** Lava codebase (file/node counts, Kotlin+Go) with **no credential/secret-file-path leak** (§6.H — `.env`/keystore/`.jks`/`google-services.json`/`secrets/` *paths* absent; verified 0 on the 2026-05-31 re-index. Note: `java.security.KeyStore` / `android.security.keystore.*` *API identifiers* legitimately appear as imports in Lava source — those are code, not secret files). Own-org submodule source is in-scope per §11.4.79 but not yet physically reachable by v0.9.7's walker — see `docs/codegraph-11479-reconciliation.md` §5. |
 | 02 query correctness | `codegraph query` resolves real symbols to real `file:line`. |
 | 03 MCP protocol | the MCP server returns real data over real stdio JSON-RPC. |
 | 04 agent connectivity | all 5 agents register/connect to codegraph. |
@@ -141,8 +169,13 @@ A `FAIL` means an agent ran but did not use codegraph — a real defect.
 
 ## 7. Constitutional notes
 
-- **§6.H** — `config.json` excludes every secret path; the index must never
-  contain `.env`, keystores, or Firebase keys.
+- **§6.H** — `config.json` excludes every secret path (with `**/` prefixes so
+  the excludes apply inside the now-indexed own-org submodules too); the index
+  must never contain `.env`, keystores, `secrets/`, or Firebase keys.
+- **§11.4.79 (LVA-6)** — own-org submodule SOURCE (`vasic-digital` +
+  `HelixDevelopment`) IS indexed; no blanket `submodules/` exclude. Third-party
+  (`vendor/`, `third_party/`) and the `constitution/` governance submodule stay
+  excluded. See `docs/codegraph-11479-reconciliation.md`.
 - **§6.R** — MCP configs use the bare `codegraph` command (PATH-resolved); no
   hardcoded host paths.
 - **§6.W** — codegraph is an npm tool; no Git remote is added.

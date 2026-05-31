@@ -1,5 +1,6 @@
 {
   "version": 1,
+  "_policy": "Index scope reconciled with constitution §11.4.79 (LVA-6): own-org submodule SOURCE (vasic-digital + HelixDevelopment) IS in-scope; blanket submodules/** exclude REMOVED. Credential/secret paths (§6.H/§11.4.10), build artifacts, and nested third-party vendor trees stay excluded everywhere INCLUDING inside submodules. The constitution/ governance submodule (docs, no callable code) stays excluded per §11.4.79 clause 4. KNOWN LIMITATION (codegraph v0.9.7, confirmed empirically 2026-05-31): the filesystem walker does not descend into git-submodule directories (nested .git gitlink boundary), so submodule SOURCE is not yet physically indexed even with submodules/** removed from this exclude list. Removing the blanket exclude makes this config §11.4.79-compliant in INTENT; full physical indexing of submodule source is OWED pending a codegraph capability that crosses the gitlink boundary (or a vendoring/worktree workaround). See docs/codegraph-11479-reconciliation.md §5.",
   "include": [
     "**/*.ts",
     "**/*.tsx",
@@ -32,8 +33,6 @@
     "**/*.fmx"
   ],
   "exclude": [
-    "submodules/**",
-    "**/submodules/**",
     "constitution/**",
     "releases/**",
     "**/releases/**",
@@ -47,9 +46,11 @@
     "**/.env.*",
     "**/google-services.json",
     "**/firebase-admin-*.json",
+    "**/secrets/**",
     "**/.git/**",
     "**/node_modules/**",
     "**/vendor/**",
+    "**/third_party/**",
     "**/Pods/**",
     "**/dist/**",
     "**/build/**",
