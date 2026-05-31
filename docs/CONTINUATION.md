@@ -385,6 +385,27 @@ the LVA system supersedes or complements the §6.AD.3 Path-B `.lava-ci-evidence/
 ledgers — until ratified, the Path-B mapping remains the binding compliance
 surface and the LVA DB is seeded from it (reconciled, not replacing).
 
+#### Constitution pin BUMPED `208e2c8` → `883ccc1` (§6.L 68th, §6.AF)
+
+Operator directed bump-now+adopt. 53 upstream commits (2026-05-20 → 2026-05-31)
+add **§11.4.79–§11.4.106** (28 universal clauses). 68th-cycle review at
+`.lava-ci-evidence/constitution-review/2026-05-31-68th-cycle-review.md`: **NO
+constitution-mandated submodule is missing** (Challenges, HelixQA, containers,
+codegraph all present). New §6.AF clause in CLAUDE.md enumerates per-clause Lava
+adoption status + §6.AF-debt for the OWED items:
+  - §11.4.93/95/106 (workable-items DB) — **SATISFIED** by the LVA system. The
+    constitution also ships a canonical `workable-items` Go binary at
+    `constitution/scripts/workable-items/` keyed `docs/workable_items.db`;
+    LVA-vs-canonical reconciliation is operator-gated (LVA-3).
+  - §11.4.79/.80 (own-org submodules IN codegraph index) — **OWED** (LVA-6;
+    Lava currently excludes `submodules/`).
+  - §11.4.85 (stress+chaos) — **IN PROGRESS** (LVA-7; phase-1 lava-api-go
+    scaffold + evidence under `docs/chaos-stress/`).
+  - operating-mode clauses — EQUIVALENCE-MAPPED to existing Lava practice.
+    §11.4.100 (video-color) DEMOTED to ATMOSphere-only — not binding on Lava.
+The constitution submodule pin bump is a parent-repo change; per CONST-049 the
+constitution stays pinned + advanced deliberately (NOT auto-tracking).
+
 #### Resolved in prior (constitution-compliance) cycle
 
 - **Ledger-staleness drift class** — Phase 7-debt closure (`0c87b6ae`)
