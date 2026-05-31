@@ -196,10 +196,22 @@ if [[ -f "$ENV_FILE" ]]; then
     PEPPER_VALUE="$(grep -E '^LAVA_AUTH_OBFUSCATION_PEPPER=' "$ENV_FILE" | head -1 | cut -d= -f2-)"
     if [[ -n "$PEPPER_VALUE" ]]; then
         PEPPER_SHA="$(printf '%s' "$PEPPER_VALUE" | sha256sum | awk '{print $1}')"
-        if grep -qF "$PEPPER_SHA" "$PEPPER_HISTORY"; then
-            echo "FATAL Phase 1 Gate 4: pepper SHA $PEPPER_SHA already used in a previous distribution." >&2
+        # §6.AA pepper-reuse semantics: debug + release of the SAME versionCode
+        # legitimately share ONE pepper (one release identity → identical embedded
+        # auth key in both variants). Gate 4's purpose is to prevent reuse ACROSS
+        # releases ("a leak in version N must not also compromise version N+1"), so
+        # it rejects the SHA only when it appears in history for a DIFFERENT
+        # release identity. A prior occurrence for THIS exact "$APP_VERSION-$APP_VERSION_CODE"
+        # (the debug stage of this same build) is allowed — the two-stage §6.AA
+        # release of one versionCode does not require a second rotation.
+        PEPPER_PRIOR_OTHER="$(grep -F "$PEPPER_SHA" "$PEPPER_HISTORY" \
+            | grep -vF "# $APP_VERSION-$APP_VERSION_CODE " || true)"
+        if [[ -n "$PEPPER_PRIOR_OTHER" ]]; then
+            echo "FATAL Phase 1 Gate 4: pepper SHA $PEPPER_SHA already used for a DIFFERENT release:" >&2
+            echo "$PEPPER_PRIOR_OTHER" | sed 's/^/         /' >&2
             echo "       Rotate LAVA_AUTH_OBFUSCATION_PEPPER in .env before re-running this script." >&2
             echo "       Run: openssl rand -base64 32  → set as LAVA_AUTH_OBFUSCATION_PEPPER" >&2
+            echo "       (Reuse WITHIN the same versionCode — debug→release of $APP_VERSION-$APP_VERSION_CODE — is allowed.)" >&2
             exit 1
         fi
     fi
