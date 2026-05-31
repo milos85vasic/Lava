@@ -619,14 +619,19 @@ class OnboardingViewModelTest {
                 //   1. selectedApi set + apiConnectivity = Testing
                 //   2. (async probe OK + endpointsRepository.add) → apiConnectivity
                 //      = Idle, step = Providers
-                // Walk states until the step lands on Providers — matching the
-                // async-probe await style used elsewhere in this file.
+                // Walk states until the step lands on Providers. The loop MUST
+                // stop awaiting as soon as Providers is reached — Orbit dedups
+                // no-op reduces so only a bounded number of distinct states are
+                // emitted; awaiting beyond the last one times out Turbine. `break`
+                // (not `return@repeat`, which only continues the lambda) is the fix.
                 var advanced = false
-                repeat(6) {
+                var guard = 0
+                while (guard < 8) {
+                    guard++
                     val s = awaitState()
                     if (s.step == OnboardingStep.Providers) {
                         advanced = true
-                        return@repeat
+                        break
                     }
                 }
                 assertTrue(
