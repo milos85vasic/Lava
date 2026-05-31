@@ -1,18 +1,26 @@
 {
   "date": "2026-05-20",
-  "class": "§6.H / §11.4.10 credential exposure — credential value printed to terminal output",
+  "class": "\u00a76.H / \u00a711.4.10 credential exposure \u2014 credential value printed to terminal output",
   "severity": "medium",
-  "cycle": "§6.L 67th invocation — prerequisite recon for the operator's rebuild + redistribute directive",
+  "cycle": "\u00a76.L 67th invocation \u2014 prerequisite recon for the operator's rebuild + redistribute directive",
   "what": "A Bash recon command checked whether LAVA_FIREBASE_TOKEN was set using the expansion `${LAVA_FIREBASE_TOKEN:+SET}${LAVA_FIREBASE_TOKEN:-UNSET}`. The `:-` operator (use-default-if-unset-OR-empty) expands to the VARIABLE'S VALUE when the variable is set and non-empty. The Firebase CI token value was therefore printed to that command's stdout and is present in this CLI session's transcript / scrollback.",
   "scope": "The token was NOT written to any tracked file, NOT committed to git, and NOT echoed into any artifact under version control. Exposure is limited to this single CLI session's transcript. No grep of `git ls-files` or `git log -S` is needed because the value never entered the repository.",
-  "root_cause": "Incorrect shell parameter expansion authored by the agent. `${VAR:-DEFAULT}` does NOT mean 'print DEFAULT when VAR exists'; it expands to VAR's value, falling back to DEFAULT only when VAR is unset/empty. The correct existence-only check is `${VAR:+SET}` alone, or `[ -n \"$VAR\" ] && echo SET || echo UNSET` — neither of which ever emits the secret.",
+  "root_cause": "Incorrect shell parameter expansion authored by the agent. `${VAR:-DEFAULT}` does NOT mean 'print DEFAULT when VAR exists'; it expands to VAR's value, falling back to DEFAULT only when VAR is unset/empty. The correct existence-only check is `${VAR:+SET}` alone, or `[ -n \"$VAR\" ] && echo SET || echo UNSET` \u2014 neither of which ever emits the secret.",
   "remediation": [
     "OPERATOR ACTION REQUIRED: rotate the Firebase CI token. `firebase logout`, then `firebase login:ci` to mint a fresh token, then update LAVA_FIREBASE_TOKEN in the gitignored .env. Treat the previously-exported token as compromised until rotated.",
-    "Agent: existence-only credential checks only; never expand a credential variable to its value in any printed command. No credential value is repeated in this incident record (per §6.H clause 4)."
+    "Agent: existence-only credential checks only; never expand a credential variable to its value in any printed command. No credential value is repeated in this incident record (per \u00a76.H clause 4)."
   ],
   "constitutional_refs": [
-    "§6.H clause 4 — no credential strings printed",
-    "§6.H clause 6 — leak response protocol (rotate + record)",
-    "§11.4.10 — test scripts / commands MUST NEVER print or log credentials"
-  ]
+    "\u00a76.H clause 4 \u2014 no credential strings printed",
+    "\u00a76.H clause 6 \u2014 leak response protocol (rotate + record)",
+    "\u00a711.4.10 \u2014 test scripts / commands MUST NEVER print or log credentials"
+  ],
+  "resolution": {
+    "status": "RESOLVED",
+    "resolved_date": "2026-05-31",
+    "resolved_by": "operator",
+    "action": "Operator rotated the Firebase CI token (firebase logout && firebase login:ci) during the \u00a76.L 68th cycle. The leaked token value is now dead. Env reloaded.",
+    "cycle": "\u00a76.L 68th invocation",
+    "ref": "\u00a76.H clause 6 \u2014 leak response protocol satisfied (token rotated; leak was transcript-only, never committed to git)"
+  }
 }
