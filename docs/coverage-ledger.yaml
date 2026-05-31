@@ -21,9 +21,9 @@
 # Invariant values: pass | gap | n/a | "waiver: <rationale>" | "pass: <rationale>"
 metadata:
   schema_version: 1
-  generated_at: "2026-05-31T07:34:03Z"
+  generated_at: "2026-05-31T08:12:51Z"
   generator: "scripts/generate-coverage-ledger.sh"
-  commit_sha: "cb255b9d35f0b48ebbe3b13e77901b51d89eea4a"
+  commit_sha: "d8481e18937e510896be3d07936986567f5bb4e5"
   mandate: "HelixConstitution §11.4.25 Full-Automation-Coverage Mandate"
 
 rows:
@@ -708,14 +708,14 @@ rows:
   - path: "lava-api-go"
     kind: "api"
     status: "covered"
-    unit_test_count: 95
+    unit_test_count: 96
     integration_test_count: 1
     challenge_count: 0
     challenges: []
     sample_tests:
       - "altsvc_test.go"
+      - "api_stress_test.go"
       - "auth_active_uuid_test.go"
-      - "auth_backoff_ladder_test.go"
     invariants:
       anti_bluff: "pass: tests/contract/healthcheck_contract_test.go is the canonical §6.A real-binary contract test; tests/e2e/ + tests/parity/ run against real Postgres in podman per §6.B (container Up is not application-healthy)"
       working_capability: "pass: 87 _test.go + integration tests gated by -Pintegration=true + real Postgres bring-up via docker-compose.test.yml per §6.A/§6.B"
