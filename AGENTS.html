@@ -2077,6 +2077,35 @@ container-bound path. <code>pkg/runtime/</code> brings the container up;
 §6.X-debt tracks the wiring implementation owed to the Containers
 submodule. This submodule MAY add stricter rules but MUST NOT relax.</p>
 <h2
+id="6ag--containers-submodule-driven-emulators-mandate-added-2026-05-31-6l-68th-invocation">§6.AG
+— Containers-Submodule-Driven Emulators Mandate (added 2026-05-31, §6.L
+68th invocation)</h2>
+<p>See parent Lava <code>/CLAUDE.md</code> §6.AG. Every test needing an
+Android device (Compose UI Challenge Tests,
+<code>connectedAndroidTest</code>, <code>-PdeviceTests=true</code>, the
+§6.AE matrix, any emulator-bearing gate) MUST obtain it from an emulator
+instance brought up + managed by the
+<code>vasic-digital/Containers</code> submodule
+(<code>submodules/containers/pkg/emulator/</code> +
+<code>cmd/emulator-matrix</code>), via
+<code>scripts/run-challenge-matrix.sh</code> /
+<code>scripts/run-emulator-tests.sh</code>. The device is a
+<strong>cold-booted emulator AVD, NEVER a live/physical ADB
+device</strong> (physical devices are presumed in use by other projects
+and MUST NOT be targeted). Per-OS implementation (the §6.X acceleration
+model): Linux x86_64 → emulator INSIDE a podman/docker container
+(<code>--device /dev/kvm</code>); macOS/arm64 → host-direct+HVF
+cold-boot (a Linux container cannot reach <code>/dev/kvm</code> — absent
+in the podman VM — nor HVF, a host-only API; this is the §6.X-resolved
+macOS gate path, still Containers-<code>emulator-matrix</code>-driven,
+still an emulator, NOT a live device); Windows → host-direct+WHPX. No
+live-device fallback — a test redirected to a physical <code>adb</code>
+device because an emulator was slow/unavailable is a §6.AG violation;
+the test is OWED, not silently redirected (§6.Z/§6.J). Project-level
+clause per operator instruction + §11.4.35 (consumer-side, NOT the
+shared <code>constitution/</code> submodule).
+<code>Classification:</code> project-specific.</p>
+<h2
 id="6ac--comprehensive-non-fatal-telemetry-mandate-added-2026-05-14">§6.AC
 — Comprehensive Non-Fatal Telemetry Mandate (added 2026-05-14)</h2>
 <p>Every catch / error / fallback / unexpected-state path on every
