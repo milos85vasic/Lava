@@ -91,6 +91,12 @@ func passingDetector(t *testing.T) *hxqadetector.Detector {
 	f.On("pgrep", []byte("12345"), nil)
 	return hxqadetector.New(
 		hxqaconfig.PlatformDesktop,
+		// LVA-8: a process NAME target is REQUIRED for the desktop
+		// detector to consult the (faked) pgrep runner. Without it,
+		// isDesktopProcessAlive hits the close-out⁷⁵ "no target →
+		// alive=true" branch and the fake pgrep wiring is never
+		// reached, so every step spuriously reports StepPassed.
+		hxqadetector.WithProcessName("app-under-test"),
 		hxqadetector.WithCommandRunner(f),
 	)
 }
@@ -104,6 +110,10 @@ func failingDetector(t *testing.T) *hxqadetector.Detector {
 	f.On("pgrep", []byte(""), errors.New("not found"))
 	return hxqadetector.New(
 		hxqaconfig.PlatformDesktop,
+		// LVA-8: see passingDetector — a process-name target is
+		// mandatory for the pgrep path to be exercised; otherwise the
+		// "no target → alive" branch masks the simulated dead process.
+		hxqadetector.WithProcessName("app-under-test"),
 		hxqadetector.WithCommandRunner(f),
 	)
 }
@@ -360,7 +370,10 @@ func TestCounters_AcrossMultipleSteps(t *testing.T) {
 	// pgrep PASS, then we swap the runner to make pgrep FAIL.
 	f := newFakeRunner()
 	f.On("pgrep", []byte("12345"), nil)
+	// LVA-8: process-name target required so the desktop detector
+	// actually invokes the faked pgrep runner (see failingDetector).
 	det := hxqadetector.New(hxqaconfig.PlatformDesktop,
+		hxqadetector.WithProcessName("app-under-test"),
 		hxqadetector.WithCommandRunner(f))
 
 	v := New("run-mix", t.TempDir(), det)

@@ -21,9 +21,9 @@
 # Invariant values: pass | gap | n/a | "waiver: <rationale>" | "pass: <rationale>"
 metadata:
   schema_version: 1
-  generated_at: "2026-05-31T08:28:34Z"
+  generated_at: "2026-05-31T09:07:32Z"
   generator: "scripts/generate-coverage-ledger.sh"
-  commit_sha: "a885f9dcf583bff4a85381d33ea015b16c6b8cd8"
+  commit_sha: "d79d0f82bf45775c55fdc46fbafd7764f43de4ab"
   mandate: "HelixConstitution §11.4.25 Full-Automation-Coverage Mandate"
 
 rows:

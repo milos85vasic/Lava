@@ -99,6 +99,7 @@ app/build/generated/lava-auth/
 .codegraph/codegraph.db-wal
 .codegraph/*.log
 .codegraph/*.pid
+.codegraph/*.lock
 .codegraph/cache/
 # Per-run codegraph verification-suite output is local session telemetry,
 # regenerable by re-running scripts/verify-codegraph.sh. The suite scripts

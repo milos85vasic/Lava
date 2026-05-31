@@ -31,5 +31,15 @@
     "CONST-051 — HelixQA stays decoupled; fix goes upstream, no Lava context injected",
     "CONST-049 — submodule-update pipeline governs the pin bump after the upstream fix",
     "§6.L 68th — surfaced honestly rather than bluff-fixed under context pressure"
-  ]
+  ],
+  "root_cause_correction_2026-05-31": {
+    "status": "ROOT CAUSE CORRECTED — original attribution was UNCONFIRMED and proven WRONG (§11.4.6 self-correction)",
+    "original_claim_was": "That HelixQA's checkProcessByPID shelled `exec kill -0 <pid>` and /bin/kill returned exit 0 for an absent PID on macOS.",
+    "why_original_was_wrong": "The LVA-8 fix subagent could NOT reproduce /bin/kill -0 2147483647 returning exit 0 — both the /bin/kill binary AND the bash builtin returned exit 1 on this host. The by-PID path was NOT the code path the failing tests traverse.",
+    "actual_confirmed_root_cause": "The consumer test fixtures (lava-api-go/internal/qa/validator/validator_test.go: passingDetector, failingDetector, and the inline detector in TestCounters_AcrossMultipleSteps) set WithCommandRunner (a pgrep fake) but NEITHER WithProcessName NOR WithProcessPID. HelixQA's isDesktopProcessAlive therefore hit the close-out⁷⁵ 'no target configured → alive=true' branch and NEVER consulted the fake pgrep runner — so a simulated-dead process read as alive → HasCrash=false → Validator reported StepPassed. The pgrep fake was dead wiring.",
+    "fix_applied": "Added WithProcessName(\"app-under-test\") to all three consumer detectors so the desktop detector actually invokes the (faked) pgrep path. Confirmed: 6 FAIL → package `ok`.",
+    "falsifiability_rehearsal_CONFIRMED": "Stripping WithProcessName from failingDetector reproduced the exact original symptom (Status=\"passed\"; want StepFailed; FailedCount=0; want 1); restoring it returned the package to `ok`. The fix is load-bearing.",
+    "helixqa_upstream_fix_status": "SEPARATELY VALID — the LVA-8 agent ALSO replaced HelixQA's checkProcessByPID exec-`kill` shell-out with syscall.Kill(pid,0) (exec_unix.go/exec_windows.go). This removes a genuine cross-platform fragility in the by-PID path even though that path was not the consumer's bug. Kept as a defensive upstream improvement; pushed to HelixQA per CONST-049/051.",
+    "lesson": "§11.4.6 / §6.J: my original incident root-cause was stated as fact from code-reading without captured reproduction. The subagent's refusal to rubber-stamp it + its captured 6→14 flip is the anti-bluff machinery working on the incident record itself."
+  }
 }
