@@ -161,7 +161,7 @@ repo has drifted, the agent acts on the claim.
 
 | Surface | Current state | Pin |
 |---|---|---|
-| Lava parent on master | 2 mirrors (GitHub + GitLab) at HEAD | `4f3d9a2c` (§6.L 68th cycle) |
+| Lava parent on master | 2 mirrors (GitHub + GitLab) converged at HEAD | §6.L 68th cycle (see `git log` for current SHA) |
 | API (lava-api-go) | 2.3.22 (code 2322) — `internal/version/version.go` | container `lava-api-go-thinker` |
 | Android Firebase | 1.2.33 (1053) distributed to testers (2026-05-18, last user-visible release; `last-version-{debug,release}` both = 1053) | `lava-vasic-digital` Firebase project |
 | 17 own-org submodules | all pushed (16 vasic-digital + 1 HelixDevelopment HelixQA) | see §3 |
@@ -325,10 +325,10 @@ work.
   canary + full 37-class Challenge suite on Pixel_8/API35 = 43 pass / 3
   credential-skip / 0 fail. The Linux x86_64 containerized-KVM path remains owed.
   Forensic anchor: `.lava-ci-evidence/sixth-law-incidents/2026-05-13-emulator-container-darwin-arm64-gap.json`.
-- **§6.H Firebase CI token echo-leak** (2026-05-20, §6.L 67th): a buggy
-  `${LAVA_FIREBASE_TOKEN:-UNSET}` recon command printed the token into the
-  session transcript (NOT committed to git). **OPERATOR MUST ROTATE**
-  (`firebase logout` → `firebase login:ci`). Incident:
+- **§6.H Firebase CI token echo-leak** (2026-05-20, §6.L 67th): **RESOLVED
+  2026-05-31** — operator rotated the token (`firebase logout` →
+  `firebase login:ci`) during the §6.L 68th cycle; the transcript-leaked token
+  (never committed to git) is now dead. §6.H clause 6 satisfied. Incident:
   `.lava-ci-evidence/sixth-law-incidents/2026-05-20-firebase-token-echo-leak.json`.
 - **LVA-8 — HelixQA desktop crash-detector bluffs on macOS** (§6.L 68th, 2026-05-31):
   `internal/qa/validator` has 6 failing tests because HelixQA's `isPIDAlive`
