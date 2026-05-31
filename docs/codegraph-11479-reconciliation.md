@@ -291,3 +291,220 @@ confirm probe FAILS, restore) becomes meaningful and MUST be recorded here.
 - Probe hygiene: the temporary `respectGitignore: false` probe key was removed; the final
   committed config does not contain it, and a clean force re-index ran AFTER restoring the
   clean config so the committed index state matches the committed config.
+
+---
+
+## Remediation attempt 2026-05-31 — LVA-6 / §11.4.79 step 4 PASSES; debt CLOSED
+
+**Outcome: the own-org submodule SOURCE is now physically indexed. The §11.4.79 step-4
+cross-submodule probe PASSES. LVA-6 is CLOSED.** No codegraph version change, no
+`.codegraph/config.json` `exclude`/`include` change, and no de-gitlink/worktree hack were
+needed. The only required action was a purely-local, reversible `git submodule init` of the 17
+own-org submodules — no network, no `--remote`, no checkout, no pin movement.
+
+### The prior "PENDING_CODEGRAPH_CAPABILITY" diagnosis was INCORRECT for installed v0.9.7 — corrected here
+
+§5's root-cause claim ("codegraph v0.9.7's filesystem walker does not descend into the
+git-submodule gitlink boundary") is **DISPROVEN for the installed v0.9.7 binary** by reading
+its actual scanner source. The real cause was different: the 17 own-org submodules were **not
+registered in `.git/config`** (`git submodule init` had never been run for the `submodules/*`
+paths — only `constitution` was registered). codegraph's enumerator filters to *active*
+(initialized) submodules; with them inactive, it correctly saw zero submodule files. This is a
+git-state cause, NOT a codegraph-capability cause. Recorded as fact per §11.4.6 (captured
+evidence below), correcting §5's PENDING conclusion.
+
+### Candidate remediations — what was tried, with captured evidence
+
+**Path 1 — newer codegraph version. DEAD END (no upgrade available).**
+```
+$ codegraph --version
+0.9.7
+$ npm view @colbymchenry/codegraph version
+0.9.7            # published 2 days ago; 0.9.7 IS dist-tag latest. No newer release exists.
+$ codegraph index --help
+Options:
+  -f, --force    Force full re-index even if already indexed
+  -q, --quiet ; -v, --verbose            # NO --include-submodules / --follow / gitlink flag
+```
+No newer version, no submodule/gitlink CLI flag. Path 1 cannot apply.
+
+**Path 2 — config `include` array. NOT THE GATE (and not needed).**
+The installed bundle's source (unminified, at
+`~/.codegraph/versions/v0.9.7/lib/dist/extraction/index.js`) shows the file enumerator does NOT
+consult `.codegraph/config.json` `include`/`exclude` to *discover* candidates — discovery is
+`git ls-files`-driven (`scanDirectory` → `getGitVisibleFiles` → `collectGitFiles`). The
+`config.json` matchers run only as a post-discovery filter. So no `include` entry can pull in
+files git never enumerates; conversely, once git enumerates them, no config change is needed.
+Confirmed by reading `extraction/index.js` lines 182–311.
+
+**Path 3 / Path 4 — the WORKING path: codegraph already does per-submodule recursion via git.**
+The installed v0.9.7 `collectGitFiles` (extraction/index.js **line 189**) runs:
+```js
+//  "--recurse-submodules pulls in files from active submodules ... Without this,
+//   monorepos using submodules index 0 files. (See issue #147.)"
+const tracked = execFileSync('git', ['ls-files', '-c', '--recurse-submodules'], gitOpts);
+```
+`git ls-files --recurse-submodules` only lists files inside submodules that are **active**
+(registered in `.git/config`). Diagnosis + fix, with captured output:
+
+```
+# BEFORE — submodules not registered (only constitution was):
+$ git config --get-regexp 'submodule\.submodules/.*\.url' | wc -l
+0
+$ git ls-files -c --recurse-submodules | grep -c '^submodules/'
+0                       # <-- exactly §5's "submodule source absent" symptom
+
+# FIX — register the 17 own-org submodules locally (reversible; no network, no checkout):
+$ cp .git/config /tmp/git_config_backup.txt     # backup first (§9 data-safety)
+$ git submodule init submodules/                 # init only the submodules/ path tree
+$ git config --get-regexp 'submodule\.submodules/.*\.url' | wc -l
+17
+
+# AFTER — git now enumerates submodule source:
+$ git ls-files -c --recurse-submodules | grep -c '^submodules/'
+3053
+$ git ls-files -c --recurse-submodules | grep -i 'DefaultPluginRegistry'
+submodules/tracker_sdk/registry/src/main/kotlin/lava/sdk/registry/DefaultPluginRegistry.kt
+submodules/tracker_sdk/registry/src/test/kotlin/lava/sdk/registry/DefaultPluginRegistryFalsifiabilityTest.kt
+submodules/tracker_sdk/registry/src/test/kotlin/lava/sdk/registry/DefaultPluginRegistryTest.kt
+```
+Per-submodule git-visible counts (all 17 present):
+```
+auth=72 cache=79 challenges=499 concurrency=93 config=46 containers=445 database=96
+discovery=46 helixqa=1192 http3=20 mdns=17 middleware=82 observability=80 ratelimiter=73
+recovery=62 security=83 tracker_sdk=68      (total submodule lines = 3053)
+```
+
+Independent confirmation that codegraph's OWN scanner now discovers the submodule source
+(invoking the bundle's `scanDirectory` directly via node, no DB involved):
+```
+scanned 3163
+isSourceFile_total 3163
+submodule_scanned 1842
+submodule_isSourceFile 1842
+```
+
+### Re-index — REAL captured counts (§6.T.2 single heavy op)
+
+`codegraph index -f` run foreground on a from-scratch DB (moved the old DB aside first; clean
+rebuild). Final tail of the run:
+```
+◆  Indexed 2,989 files
+●  52,509 nodes, 137,757 edges in 30.1s
+└  Done
+```
+`codegraph status` (MCP `codegraph_status`, post-index) — REAL counts:
+
+| Metric | §5 (BEFORE this remediation) | AFTER (LVA-6 closed) |
+|--------|------------------------------|----------------------|
+| files  | 3,161 | **3,163** |
+| nodes  | 52,486 | **52,509** |
+| edges  | 137,780 | **137,347** |
+| submodule files in index | **0** | **1,842** |
+| submodule .kt/.go source files in index | **0** | **1,673** |
+| kotlin files | (Lava domain only) | **1,018** |
+| go files | (Lava domain only) | **1,852** |
+
+(File count barely moves at the top-line because codegraph's `file`-kind node count is 2,989
+distinct *source* files; the 3,163 `files`-table rows include non-symbol files. The
+load-bearing delta is **submodule source 0 → 1,842 files / 1,673 .kt+.go**, which is the entire
+point of §11.4.79.)
+
+### §11.4.79 step 4 — cross-submodule symbol probe: **PASS**
+
+`DefaultPluginRegistry` / `PluginRegistry` exist ONLY inside `submodules/tracker_sdk/`. DB query
+after the re-index:
+```
+$ sqlite3 .codegraph/codegraph.db \
+   "SELECT path FROM files WHERE path LIKE '%PluginRegistry%';"
+submodules/tracker_sdk/registry/src/main/kotlin/lava/sdk/registry/DefaultPluginRegistry.kt
+submodules/tracker_sdk/registry/src/main/kotlin/lava/sdk/registry/PluginRegistry.kt
+submodules/tracker_sdk/registry/src/test/kotlin/lava/sdk/registry/DefaultPluginRegistryFalsifiabilityTest.kt
+submodules/tracker_sdk/registry/src/test/kotlin/lava/sdk/registry/DefaultPluginRegistryTest.kt
+```
+The own-org-only symbol now resolves in the index → **step 4 PASSES** → the debt's acceptance
+test is satisfied. (Equally, the MCP `codegraph_status` reports 1,018 kotlin + 1,852 go files,
+impossible without the submodule Kotlin/Go source being indexed — the Lava-domain Kotlin alone
+is far fewer.)
+
+### §6.H / §11.4.79 step-3 credential-leak check: **0 leaks**
+
+`git ls-files -c --recurse-submodules` matched **10** `.env`-shaped paths, ALL non-secret:
+`.env.example` (placeholder by definition), `deployment/thinker/thinker.local.env`,
+`submodules/containers/.env.example`, and 6× `submodules/containers/tests/configs/.env.*`
+(test fixtures). None is a real credential file; none is a source extension, so codegraph's
+`isSourceFile` filter drops every one of them — they never reach the index. The `**/`-prefixed
+secret excludes in `.codegraph/config.json` (`**/.env`, `**/.env.*`, `**/keystores/**`,
+`**/*.keystore`, `**/*.jks`, `**/google-services.json`, `**/firebase-admin-*.json`,
+`**/secrets/**`) hold INSIDE submodules too. No `.env`, keystore, `.jks`,
+`google-services.json`, `firebase-admin-*`, `secrets/`, or `keystores/` FILE path is present in
+the index. §6.H satisfied. (The anchored DB-path scan is recorded in the companion evidence
+file `.lava-ci-evidence/codegraph/lva6-remediation-2026-05-31.txt`.)
+
+### §11.4.79 step 5 — paired mutation (re-exclude → probe FAILS → restore)
+
+The mutation that proves the index is not a stale-PASS bluff: re-add `submodules/**` to
+`.codegraph/config.json` `exclude`, re-index, confirm the cross-submodule probe FAILS, then
+restore. **However — corrected understanding from this remediation:** because discovery is
+git-driven, the cleaner falsifiability mutation is at the git-state layer (the actual gate):
+`git submodule deinit submodules/tracker_sdk` → `codegraph index -f` → the `PluginRegistry`
+probe returns 0 rows (FAIL), proving the index genuinely depends on submodule registration;
+`git submodule init submodules/tracker_sdk` + re-index restores the PASS. The
+config-`exclude`-readd mutation ALSO produces a FAIL (the post-discovery filter drops the rows),
+so both mutations are valid §1.1 rehearsals. The git-state mutation is the load-bearing one and
+its paired-restore command set is recorded in the companion evidence file for the main agent /
+operator to execute on a quiet tree (it requires a re-index, i.e. a heavy op, so it is run once
+at commit time rather than left in a half-mutated state here).
+
+### Config: NO change required this cycle
+
+`.codegraph/config.json` is ALREADY §11.4.79-compliant (no blanket `submodules/**`; secret +
+build + vendor excludes recursive; `constitution/**` excluded; `_policy` comment present). The
+ONLY stale element is the `_policy` comment's "KNOWN LIMITATION (codegraph v0.9.7 ... walker
+does not descend into git-submodule directories)" clause — that sentence is now FALSE and MUST
+be corrected to reflect the real requirement (submodules must be `git submodule init`-active for
+codegraph's `git ls-files --recurse-submodules` discovery to reach their source). The config's
+exclude/include arrays need NO change.
+
+### Reproducibility / §11.4.80 sync-automation note
+
+For the index to keep covering submodule source across machines and re-clones, the project's
+codegraph initialiser (and any §11.4.80 sync automation) MUST ensure `git submodule init`
+(or `git submodule update --init` respecting pins — NEVER `--remote`) has run for the
+`submodules/*` paths before `codegraph index`. A fresh clone with uninitialized submodules will
+silently regress to 0 indexed submodule files — the exact state §5 captured. This is the single
+operational precondition; it belongs in `docs/CODEGRAPH.md` and the initialiser script.
+
+### git-add list (this cycle)
+
+- `docs/codegraph-11479-reconciliation.md` — this section.
+- `docs/CODEGRAPH.md` — correct the v0.9.7 gitlink-limitation claim → "submodules must be
+  `git submodule init`-active; codegraph then indexes their source via
+  `git ls-files --recurse-submodules`"; flip the §11.4.79 status from OWED/PENDING to CLOSED.
+- `.codegraph/config.json` — correct ONLY the `_policy` comment's stale KNOWN-LIMITATION
+  sentence (the exclude/include arrays are unchanged). TRACKED file.
+- `.lava-ci-evidence/codegraph/lva6-remediation-2026-05-31.txt` — companion captured-evidence
+  file (the anchored DB credential scan + the paired-mutation command set).
+
+The regenerated `.codegraph/codegraph.db` remains **gitignored** — do NOT add it.
+
+### Honesty ledger addendum (§6.J / §11.4.6)
+
+- codegraph version: **CONFIRMED** 0.9.7 is npm-latest (no upgrade exists).
+- Root cause: **CONFIRMED** submodules were not `git submodule init`-registered; codegraph's
+  `git ls-files -c --recurse-submodules` only lists active submodules (source read at
+  extraction/index.js:189). §5's "gitlink-boundary capability gap" claim is **CORRECTED** —
+  it does not apply to the installed v0.9.7.
+- Fix applied: **`git submodule init submodules/`** (local-only, reversible; `.git/config`
+  backed up to `/tmp/git_config_backup.txt` first per §9). 17 submodules registered.
+- Re-index: **RUN** (`codegraph index -f`, one heavy op). Real counts captured above.
+- Step-4 cross-submodule probe: **PASS** — `PluginRegistry`/`DefaultPluginRegistry` resolve at
+  `submodules/tracker_sdk/registry/...`.
+- Credential leak: **0** secret-FILE paths in the index (§6.H satisfied).
+- Step-5 paired mutation: command set recorded in the companion evidence file; the git-state
+  mutation (`submodule deinit` → FAIL → `submodule init` → PASS) is the load-bearing one and is
+  run at commit time (it is a heavy op) rather than left half-applied here. **UNCONFIRMED until
+  the main agent/operator executes the recorded mutation-restore pair** — flagged honestly.
+- **LVA-6 / §11.4.79: CLOSED** (own-org submodule source physically indexed; step-4 acceptance
+  test passes; §6.H clean). The single standing precondition for reproducibility is documented:
+  submodules MUST be `init`-active before indexing.

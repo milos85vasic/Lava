@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-05-16-phase6f-upstream-rename-execution</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1 id="phase-6f--upstream-repo-rename-execution-plan">Phase 6f —
+Upstream Repo Rename Execution Plan</h1>
+<p><strong>Status:</strong> DEFERRED (operator decision Q1: defer
+upstream renames; perform Lava-side local renames only in Phase 6a +
+6b). <strong>Authority:</strong> HelixConstitution §11.4.29
+(Lowercase-Snake_Case-Naming Mandate, 2026-05-15) — local-path target is
+binding immediately; upstream-repo-name target is binding eventually.
+<strong>Companion artefacts:</strong>
+<code>docs/plans/2026-05-16-snake_case-migration.md</code> (parent
+plan), <code>.gitmodules</code> (post-6a+6b URLs still point at
+CamelCase upstream names — this plan executes the migration that lets us
+rewrite those URLs). <strong>Classification:</strong> project-specific
+(the per-repo rename commands ARE Lava-specific; the cross-org
+coordination discipline is universal per §11.4.29 + §6.W).
+<strong>Inheritance:</strong> §11.4.29 + §6.W (mirror policy — GitHub +
+GitLab only) + §6.AD (HelixConstitution inheritance) + §6.T.3
+(no-force-push).</p>
+<hr />
+<h2 id="0-scope-statement-no-bluff">0. Scope statement (no-bluff)</h2>
+<p>This document enumerates the <strong>34 upstream-rename
+operations</strong> required to bring the upstream-repo NAMES in line
+with the local-path snake_case names produced by Phase 6a + Phase 6b.
+<strong>THIS AGENT DOES NOT EXECUTE these renames.</strong> Phase 6a +
+6b's commits will land with <code>.gitmodules</code> <code>url =</code>
+fields STILL referencing the CamelCase upstream URLs:</p>
+<pre><code>url = git@github.com:vasic-digital/Tracker-SDK.git
+url = git@github.com:HelixDevelopment/HelixQA.git
+url = git@github.com:vasic-digital/RateLimiter.git
+... etc</code></pre>
+<p>This is the §11.4.29-conformant TRANSITIONAL state: the local
+working-tree path is snake_case (the rule's reach); the network
+identifier (URL) is the upstream's choice and is updated in a separate
+cross-org coordination cycle.</p>
+<p>Per §6.AD.3 + §6.T.3 (no force-push without explicit operator
+approval per-operation), executing the renames in this document
+requires:</p>
+<ol type="1">
+<li><strong>Per-operation operator approval</strong> for the inverse
+force-push that mirror-rename triggers.</li>
+<li><strong>Confirmation that no other consumer of any
+submodule</strong> has open work-in-progress that would break by the
+rename. Each of the 17 submodules has at least one downstream consumer
+(Lava itself; potentially other vasic-digital projects).</li>
+<li><strong>Operator-led execution</strong> since these renames cross 2
+orgs (vasic-digital + HelixDevelopment) and 2 mirrors (GitHub + GitLab)
+per the §6.W mirror policy.</li>
+</ol>
+<hr />
+<h2 id="1-enumeration-of-34-upstream-rename-operations">1. Enumeration
+of 34 upstream-rename operations</h2>
+<p>Each rename has TWO sub-operations (one per mirror per §6.W). The
+mapping:</p>
+<h3 id="11-vasic-digital-org-16-repos--2-mirrors--32-operations">1.1
+vasic-digital org (16 repos × 2 mirrors = 32 operations)</h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Current name</th>
+<th>Target name</th>
+<th>Org</th>
+<th>GitHub command</th>
+<th>GitLab command</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>Auth</code></td>
+<td><code>auth</code></td>
+<td>vasic-digital</td>
+<td><code>gh repo rename auth --repo vasic-digital/Auth</code></td>
+<td><code>glab repo rename --new-name auth --repo vasic-digital/Auth</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>Cache</code></td>
+<td><code>cache</code></td>
+<td>vasic-digital</td>
+<td><code>gh repo rename cache --repo vasic-digital/Cache</code></td>
+<td><code>glab repo rename --new-name cache --repo vasic-digital/Cache</code></td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>Challenges</code></td>
+<td><code>challenges</code></td>
+<td>vasic-digital</td>
+<td><code>gh repo rename challenges --repo vasic-digital/Challenges</code></td>
+<td><code>glab repo rename --new-name challenges --repo vasic-digital/Challenges</code></td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>Concurrency</code></td>
+<td><code>concurrency</code></td>
+<td>vasic-digital</td>
+<td><code>gh repo rename concurrency --repo vasic-digital/Concurrency</code></td>
+<td><code>glab repo rename --new-name concurrency --repo vasic-digital/Concurrency</code></td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>Config</code></td>
+<td><code>config</code></td>
+<td>vasic-digital</td>
+<td><code>gh repo rename config --repo vasic-digital/Config</code></td>
+<td><code>glab repo rename --new-name config --repo vasic-digital/Config</code></td>
+</tr>
+<tr>
+<td>6</td>
+<td><code>Containers</code></td>
+<td><code>containers</code></td>
+<td>vasic-digital</td>
+<td><code>gh repo rename containers --repo vasic-digital/Containers</code></td>
+<td><code>glab repo rename --new-name containers --repo vasic-digital/Containers</code></td>
+</tr>
+<tr>
+<td>7</td>
+<td><code>Database</code></td>
+<td><code>database</code></td>
+<td>vasic-digital</td>
+<td><code>gh repo rename database --repo vasic-digital/Database</code></td>
+<td><code>glab repo rename --new-name database --repo vasic-digital/Database</code></td>
+</tr>
+<tr>
+<td>8</td>
+<td><code>Discovery</code></td>
+<td><code>discovery</code></td>
+<td>vasic-digital</td>
+<td><code>gh repo rename discovery --repo vasic-digital/Discovery</code></td>
+<td><code>glab repo rename --new-name discovery --repo vasic-digital/Discovery</code></td>
+</tr>
+<tr>
+<td>9</td>
+<td><code>HTTP3</code></td>
+<td><code>http3</code></td>
+<td>vasic-digital</td>
+<td><code>gh repo rename http3 --repo vasic-digital/HTTP3</code></td>
+<td><code>glab repo rename --new-name http3 --repo vasic-digital/HTTP3</code></td>
+</tr>
+<tr>
+<td>10</td>
+<td><code>Mdns</code></td>
+<td><code>mdns</code></td>
+<td>vasic-digital</td>
+<td><code>gh repo rename mdns --repo vasic-digital/Mdns</code></td>
+<td><code>glab repo rename --new-name mdns --repo vasic-digital/Mdns</code></td>
+</tr>
+<tr>
+<td>11</td>
+<td><code>Middleware</code></td>
+<td><code>middleware</code></td>
+<td>vasic-digital</td>
+<td><code>gh repo rename middleware --repo vasic-digital/Middleware</code></td>
+<td><code>glab repo rename --new-name middleware --repo vasic-digital/Middleware</code></td>
+</tr>
+<tr>
+<td>12</td>
+<td><code>Observability</code></td>
+<td><code>observability</code></td>
+<td>vasic-digital</td>
+<td><code>gh repo rename observability --repo vasic-digital/Observability</code></td>
+<td><code>glab repo rename --new-name observability --repo vasic-digital/Observability</code></td>
+</tr>
+<tr>
+<td>13</td>
+<td><code>RateLimiter</code></td>
+<td><code>ratelimiter</code></td>
+<td>vasic-digital</td>
+<td><code>gh repo rename ratelimiter --repo vasic-digital/RateLimiter</code></td>
+<td><code>glab repo rename --new-name ratelimiter --repo vasic-digital/RateLimiter</code></td>
+</tr>
+<tr>
+<td>14</td>
+<td><code>Recovery</code></td>
+<td><code>recovery</code></td>
+<td>vasic-digital</td>
+<td><code>gh repo rename recovery --repo vasic-digital/Recovery</code></td>
+<td><code>glab repo rename --new-name recovery --repo vasic-digital/Recovery</code></td>
+</tr>
+<tr>
+<td>15</td>
+<td><code>Security</code></td>
+<td><code>security</code></td>
+<td>vasic-digital</td>
+<td><code>gh repo rename security --repo vasic-digital/Security</code></td>
+<td><code>glab repo rename --new-name security --repo vasic-digital/Security</code></td>
+</tr>
+<tr>
+<td>16</td>
+<td><code>Tracker-SDK</code></td>
+<td><code>tracker_sdk</code></td>
+<td>vasic-digital</td>
+<td><code>gh repo rename tracker_sdk --repo vasic-digital/Tracker-SDK</code></td>
+<td><code>glab repo rename --new-name tracker_sdk --repo vasic-digital/Tracker-SDK</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="12-helixdevelopment-org-1-repo--2-mirrors--2-operations">1.2
+HelixDevelopment org (1 repo × 2 mirrors = 2 operations)</h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Current name</th>
+<th>Target name</th>
+<th>Org</th>
+<th>GitHub command</th>
+<th>GitLab command</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>17</td>
+<td><code>HelixQA</code></td>
+<td><code>helixqa</code></td>
+<td>HelixDevelopment</td>
+<td><code>gh repo rename helixqa --repo HelixDevelopment/HelixQA</code></td>
+<td><code>glab repo rename --new-name helixqa --repo HelixDevelopment/HelixQA</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Total: 17 repos × 2 mirrors = 34 upstream-rename
+operations.</strong></p>
+<hr />
+<h2 id="2-pre-execution-checklist-operator">2. Pre-execution checklist
+(operator)</h2>
+<p>Before invoking ANY of the 34 commands above:</p>
+<ul class="task-list">
+<li><label><input type="checkbox" />All Lava local commits referencing
+the OLD upstream names have landed + pushed (Phase 6a + 6b complete,
+<code>.gitmodules</code> updated to new local paths but URLs still point
+at OLD upstream repo names).</label></li>
+<li><label><input type="checkbox" />All downstream consumers of each
+<code>vasic-digital/*</code> repo audited — at minimum, every project
+that lists the repo in their own <code>.gitmodules</code> is identified.
+Lava itself is the primary consumer; check for any other vasic-digital
+projects.</label></li>
+<li><label><input type="checkbox" />All open PRs against the OLD-named
+repos noted — rename will redirect them to the new URL but contributors
+with local clones will need to update their git remotes
+manually.</label></li>
+<li><label><input type="checkbox" />Confirmation that GitHub + GitLab
+BOTH will redirect old URLs to new URLs (both providers do; the redirect
+is server-side, no action required after rename).</label></li>
+<li><label><input
+type="checkbox" /><code>.git-backup-pre-phase6f-&lt;UTC-timestamp&gt;/repo.git.mirror</code>
+hardlinked backup created per §9.1 (HelixConstitution + Lava's §6.T.3
+discipline).</label></li>
+</ul>
+<h2 id="3-execution-sequence-operator-led">3. Execution sequence
+(operator-led)</h2>
+<p>For each of the 17 submodules, in the order listed above:</p>
+<ol type="1">
+<li><strong>Rename on GitHub:</strong> invoke the GitHub command from
+§1.</li>
+<li><strong>Verify the rename succeeded:</strong>
+<code>gh repo view vasic-digital/&lt;new-name&gt;</code> returns the
+expected metadata.</li>
+<li><strong>Rename on GitLab:</strong> invoke the GitLab command from
+§1.</li>
+<li><strong>Verify the rename succeeded:</strong>
+<code>glab repo view vasic-digital/&lt;new-name&gt;</code> returns the
+expected metadata.</li>
+<li><strong>Wait 60 seconds</strong> for any automated mirror-sync
+workflows to converge. (Lava does not use hosted CI per the Local-Only
+CI/CD rule, but external mirror-sync may exist.)</li>
+</ol>
+<p>After all 34 operations are complete, perform §4 (Lava-side URL
+update).</p>
+<h2
+id="4-lava-side-gitmodules-url-update-this-agent-can-execute-after-operator-authorization">4.
+Lava-side <code>.gitmodules</code> URL update (this agent CAN execute
+after operator authorization)</h2>
+<p>Once all 34 upstream renames have completed AND the operator
+authorizes the follow-up commit:</p>
+<ol type="1">
+<li><strong>Update <code>.gitmodules</code></strong> — change every
+<code>url =</code> field to the new repo name. Example transformations:
+<ul>
+<li><code>url = git@github.com:vasic-digital/Tracker-SDK.git</code> →
+<code>url = git@github.com:vasic-digital/tracker_sdk.git</code></li>
+<li><code>url = git@github.com:HelixDevelopment/HelixQA.git</code> →
+<code>url = git@github.com:HelixDevelopment/helixqa.git</code></li>
+</ul></li>
+<li><strong>Update each submodule's <code>Upstreams/GitHub.sh</code> +
+<code>Upstreams/GitLab.sh</code></strong> — these scripts hard-code the
+upstream repo name. Each of the 17 submodules has these scripts in its
+own root; each needs updating.</li>
+<li><strong>Run <code>git submodule sync</code></strong> in every
+consumer project to refresh internal git pointers.</li>
+<li><strong>Operator final-verification:</strong>
+<code>git submodule status</code> on a fresh clone successfully checks
+out every submodule via the new URL.</li>
+<li><strong>Commit + push</strong> with the operator-approved §6.T.3
+force-push if needed (typically not needed — submodule URL updates are
+normal commits).</li>
+</ol>
+<h2 id="5-forensic-anchor-evidence">5. Forensic-anchor evidence</h2>
+<p>Each rename operation MUST be evidenced in:</p>
+<ul>
+<li><code>.lava-ci-evidence/phase6f-upstream-renames/&lt;UTC-timestamp&gt;/per-op.json</code>
+containing: timestamp, command-invoked, mirror, repo-old-name,
+repo-new-name, <code>gh</code>/<code>glab</code> output,
+success/failure.</li>
+</ul>
+<p>If any rename fails partially (e.g. GitHub succeeds but GitLab
+fails), the partial-state MUST be diagnosed + recovered before
+proceeding. Per §6.M-style classification.</p>
+<h2 id="6-rollback-plan">6. Rollback plan</h2>
+<p>GitHub + GitLab both REDIRECT old URLs to new URLs server-side.
+Rolling back a rename:</p>
+<ol type="1">
+<li>Re-rename on each mirror:
+<code>gh repo rename Tracker-SDK --repo vasic-digital/tracker_sdk</code>
+(the reverse).</li>
+<li>Update consumer projects' <code>.gitmodules</code> URLs back to the
+old names.</li>
+<li>Wait for redirect propagation (typically immediate but may take up
+to 60 seconds).</li>
+</ol>
+<p>The rollback is non-destructive — git history is preserved across
+renames; only the network identifier changes.</p>
+<h2 id="7-why-this-is-deferred-q1-decision-rationale">7. Why this is
+deferred (Q1 decision rationale)</h2>
+<p>The operator's Q1 decision for the snake_case migration:</p>
+<blockquote>
+<p>"Phase 6f UPSTREAM rename for ALL 17 owned-by-us — DEFER actual
+upstream renames; document execution steps for operator. Lava-side
+rename ALL paths now."</p>
+</blockquote>
+<p>The rationale:</p>
+<ul>
+<li>Lava-side local-path rename is mechanical + reversible within Lava's
+git history.</li>
+<li>Upstream rename is mechanical but breaks every clone URL anywhere on
+the operator's network. GitHub/GitLab redirects mitigate this BUT (a)
+some operations (e.g., GraphQL API queries) may not follow redirects,
+(b) consumer projects' CI configurations (none for Lava per
+Local-Only-CI/CD; but third parties may exist) need updating.</li>
+<li>Decoupling the two-phase migration lets the local-path change ship +
+soak before the upstream-rename's broader blast radius is
+triggered.</li>
+<li>Per §6.AD.3 + §6.T.3, executing 34 force-push-adjacent operations
+requires per-operation operator approval — a separate session.</li>
+</ul>
+<h2 id="8-sign-off-checklist-for-execution-operator">8. Sign-off
+checklist for execution (operator)</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" />Operator reviews this
+plan.</label></li>
+<li><label><input type="checkbox" />Operator approves the 34-operation
+list.</label></li>
+<li><label><input type="checkbox" />Operator approves the ordering (any
+order is safe; alphabetical is recommended for
+auditability).</label></li>
+<li><label><input
+type="checkbox" /><code>.git-backup-pre-phase6f-&lt;TS&gt;/</code>
+hardlinked backup created.</label></li>
+<li><label><input type="checkbox" />All downstream-consumer projects
+identified + their maintainers notified (if any beyond
+Lava).</label></li>
+<li><label><input type="checkbox" />Operator schedules a single
+contiguous session to execute all 34 operations + the
+<code>.gitmodules</code> URL update commit in lockstep (avoids prolonged
+drift between local-path and upstream-name).</label></li>
+</ul>
+<hr />
+<p><strong>End of plan.</strong> This document is the authoritative
+reference for Phase 6f execution. Until executed, Lava's
+<code>.gitmodules</code> will reference CamelCase upstream URLs while
+local paths are snake_case — a §11.4.29-conformant transitional
+state.</p>
+</body>
+</html>

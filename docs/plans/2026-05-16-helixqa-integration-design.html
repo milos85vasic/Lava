@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-05-16-helixqa-integration-design</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1 id="helixqa-integration-design-phase-4-follow-up--lava-side">HelixQA
+Integration Design (Phase 4 Follow-up — Lava-side)</h1>
+<p><strong>Date:</strong> 2026-05-16 <strong>Phase:</strong> 4 follow-up
+(task #83 of constitution-compliance plan) <strong>Status:</strong>
+Design proposal — operator approval required before implementation
+<strong>HelixQA pin:</strong> <code>403603db</code>
+(v4.0.0-256-g403603d) as of Phase 4 adoption commit
+<code>aa0db6bd</code> <strong>Classification:</strong> project-specific
+(the per-package integration choices are Lava-specific; the
+boundary-identification discipline is universal per HelixConstitution
+§11.4.31)</p>
+<h2 id="context">Context</h2>
+<p>Phase 4 (commit <code>aa0db6bd</code>) adopted HelixQA as
+<code>submodules/helixqa</code> at upstream HEAD with the
+HELIX_DEV_OWNED waiver pattern in 4 scanners. HelixQA is now PRESENT in
+the Lava tree but NOT INTEGRATED — no Lava code links against it; no
+Lava test invokes it; no Lava CI gate consumes it.</p>
+<p>This document identifies WHICH parts of HelixQA add value to Lava +
+WHERE the integration boundary belongs.</p>
+<h2 id="helixqa-inventory-per-submoduleshelixqapkg-survey">HelixQA
+inventory (per <code>submodules/helixqa/pkg/</code> survey)</h2>
+<p>HelixQA ships <strong>30+ Go packages</strong> organized into these
+capability groups:</p>
+<h3 id="group-a--directly-applicable-to-lava">Group A — Directly
+applicable to Lava</h3>
+<table>
+<thead>
+<tr>
+<th>Package</th>
+<th>Purpose</th>
+<th>Lava use case</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>pkg/detector</code></td>
+<td>Crash/ANR detection (ADB-based for Android, JVM/browser process
+monitoring)</td>
+<td>Lava's Android client crash detection during Compose UI Challenge
+Tests + lava-api-go process monitoring</td>
+</tr>
+<tr>
+<td><code>pkg/evidence</code></td>
+<td>Centralized screenshot, video, log, trace collection</td>
+<td>Lava's Challenge Tests need screenshots when assertions fail
+(currently scattered across feature/*/test/)</td>
+</tr>
+<tr>
+<td><code>pkg/navigator</code></td>
+<td>NavigationEngine with ADB / Playwright / X11 executors</td>
+<td>Lava's Compose UI Challenge Tests drive UI via ADB on emulator —
+HelixQA's navigator is a richer abstraction</td>
+</tr>
+<tr>
+<td><code>pkg/validator</code></td>
+<td>Step-by-step validation with per-step evidence</td>
+<td>Lava's §6.J anti-bluff "primary assertion on user-visible state"
+pattern formalized</td>
+</tr>
+<tr>
+<td><code>pkg/ticket</code></td>
+<td>Markdown issue ticket generation for AI fix pipelines</td>
+<td>Lava's §6.O Crashlytics closure logs are conceptually adjacent —
+HelixQA's pattern could replace/extend</td>
+</tr>
+</tbody>
+</table>
+<h3
+id="group-b--conditionally-applicable-need-lava-use-case-to-justify">Group
+B — Conditionally applicable (need Lava use case to justify)</h3>
+<table>
+<thead>
+<tr>
+<th>Package</th>
+<th>Purpose</th>
+<th>When Lava would need it</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>pkg/llm</code></td>
+<td>LLM provider abstraction + adaptive fallback + cost tracking</td>
+<td>If Lava adds LLM-driven test generation OR uses LLM-backed visual
+regression</td>
+</tr>
+<tr>
+<td><code>pkg/issuedetector</code></td>
+<td>LLM-powered visual/UX/accessibility/functional bug detection</td>
+<td>Same as above</td>
+</tr>
+<tr>
+<td><code>pkg/regression</code></td>
+<td>Visual regression (SSIM-based + Lost Pixel / BackstopJS
+integration)</td>
+<td>If Lava adopts pixel-diff Compose UI tests beyond the current
+text-assertion model</td>
+</tr>
+<tr>
+<td><code>pkg/autonomous</code></td>
+<td>SessionCoordinator, PlatformWorker, PhaseManager</td>
+<td>If Lava runs unattended overnight QA cycles</td>
+</tr>
+<tr>
+<td><code>pkg/session</code></td>
+<td>SessionRecorder, Timeline, VideoManager</td>
+<td>If Lava starts recording video evidence per Challenge Test
+(currently screenshot-only via Espresso)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="group-c--not-applicable-to-lava">Group C — Not applicable to
+Lava</h3>
+<table>
+<thead>
+<tr>
+<th>Package</th>
+<th>Purpose</th>
+<th>Why not applicable</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>pkg/discovery</code></td>
+<td>Network host discovery (CPU/RAM/GPU capability scan)</td>
+<td>Lava is single-host — no distributed-test fleet</td>
+</tr>
+<tr>
+<td><code>pkg/distributed</code></td>
+<td>Distributed test orchestration across multiple hosts</td>
+<td>Same — Lava is single-host</td>
+</tr>
+<tr>
+<td><code>pkg/gpu</code></td>
+<td>GPU resource management for ML model inference</td>
+<td>Lava's tests don't need ML model inference</td>
+</tr>
+<tr>
+<td><code>pkg/audio</code></td>
+<td>Audio capture + analysis</td>
+<td>Lava is not an audio app (Boba is; Lava is torrent client)</td>
+</tr>
+<tr>
+<td><code>pkg/capture</code></td>
+<td>Real-time video capture pipeline</td>
+<td>Out of scope per HelixQA's IMMEDIATE_EXECUTION_PLAN.md</td>
+</tr>
+<tr>
+<td><code>pkg/gst</code></td>
+<td>GStreamer integration</td>
+<td>Same</td>
+</tr>
+<tr>
+<td><code>pkg/learning</code>, <code>pkg/memory</code>,
+<code>pkg/planning</code></td>
+<td>LLM-agent learning + memory + planning</td>
+<td>Lava-side LLM agent is Claude Code (separate from HelixQA's
+LLM-agent infra)</td>
+</tr>
+<tr>
+<td><code>pkg/agent</code>, <code>pkg/controller</code>,
+<code>pkg/maestro</code>, <code>pkg/nexus</code></td>
+<td>LLM-driven autonomous test agents</td>
+<td>Same</td>
+</tr>
+<tr>
+<td><code>pkg/opensource</code>, <code>pkg/observe</code>,
+<code>pkg/performance</code></td>
+<td>HelixQA-internal infra</td>
+<td>Lava doesn't need to extend HelixQA</td>
+</tr>
+<tr>
+<td><code>pkg/infra</code>, <code>pkg/bridge</code>,
+<code>pkg/bridges</code></td>
+<td>HelixQA-internal integration shims</td>
+<td>Same</td>
+</tr>
+</tbody>
+</table>
+<h2 id="integration-boundary-options">Integration boundary options</h2>
+<h3
+id="option-1--shell-level-wiring-only-lowest-effort-recommended-for-first-cycle">Option
+1 — Shell-level wiring only (LOWEST effort, RECOMMENDED for first
+cycle)</h3>
+<p>Wire HelixQA's existing 11 Challenge scripts into Lava's
+<code>scripts/run-challenge-matrix.sh</code> per §6.AE Comprehensive
+Challenge Coverage Mandate. HelixQA's scripts run inside Lava's existing
+emulator-matrix infrastructure.</p>
+<p><strong>Scope:</strong> ~150 LOC of bash glue + companion doc updates
++ sweep wrapper update.</p>
+<p><strong>HelixQA Challenge scripts integrated:</strong></p>
+<ul>
+<li><code>anchor_manifest_challenge.sh</code> — validates
+<code>docs/behavior-anchors.md</code> exists with anchors per
+user-visible capability</li>
+<li><code>bluff_scanner_challenge.sh</code> — wraps
+<code>scripts/anti-bluff/bluff-scanner.sh</code> pattern scanner</li>
+<li><code>chaos_failure_injection_challenge.sh</code> — chaos
+engineering harness</li>
+<li><code>ddos_health_flood_challenge.sh</code> — DDoS-resilience
+health-endpoint flooding</li>
+<li><code>host_no_auto_suspend_challenge.sh</code> — host-stability
+check (parallel to Lava's §6.M)</li>
+<li><code>mutation_ratchet_challenge.sh</code> — go-mutesting kill-rate
+ratchet</li>
+<li><code>no_suspend_calls_challenge.sh</code> — host-stability scan for
+suspend-call patterns (parallel to Lava's Host Machine Stability
+Directive)</li>
+<li><code>scaling_horizontal_challenge.sh</code> — horizontal-scaling
+load test</li>
+<li><code>stress_sustained_load_challenge.sh</code> — sustained-load
+stress test</li>
+<li><code>ui_terminal_interaction_challenge.sh</code> — terminal UI
+interaction (limited Lava applicability)</li>
+<li><code>ux_end_to_end_flow_challenge.sh</code> — end-to-end UX flow
+harness</li>
+</ul>
+<p><strong>§6.AE alignment:</strong> these 11 challenges are HelixQA's
+per-test-type harnesses; their integration into Lava's matrix runner
+satisfies §6.AE's "Comprehensive Challenge Coverage" mandate at the
+broader-than-Compose-UI layer.</p>
+<h3
+id="option-2--go-package-linking-for-group-a-packages-medium-effort">Option
+2 — Go-package linking for Group A packages (MEDIUM effort)</h3>
+<p>Lava-side Go code (lava-api-go) imports HelixQA's
+<code>pkg/detector</code> + <code>pkg/evidence</code> +
+<code>pkg/ticket</code> for use in lava-api-go's own test infrastructure
++ crash-reporting pipeline.</p>
+<p><strong>Scope:</strong> lava-api-go's <code>go.mod</code> adds
+<code>digital.vasic.helixqa</code> as a dependency. Per HelixQA's
+README: <code>go install digital.vasic.helixqa/cmd/helixqa@latest</code>
+— the SDK is available. Lava-side Go code calls HelixQA APIs from new
+<code>lava-api-go/internal/qa/</code> package.</p>
+<p><strong>Risk:</strong> HelixQA is in active development (per its
+README + IMMEDIATE_EXECUTION_PLAN.md). API stability is not guaranteed.
+Lava-side imports would couple to HelixQA's release cadence.</p>
+<p><strong>Mitigation:</strong> wrap every HelixQA API call in Lava-side
+adapter interfaces so version-bumps of HelixQA only touch the adapter
+layer.</p>
+<p><strong>FOLLOW-UP DESIGN:</strong> A detailed Phase 4-C design doc
+for Option 2 exists at <a
+href="2026-05-16-helixqa-go-package-linking-design.md"><code>docs/plans/2026-05-16-helixqa-go-package-linking-design.md</code></a>
+(Phase 4 follow-up C, 2026-05-16). It covers: per-package public-API
+analysis + Lava-side adapter design + lava-api-go <code>go.mod</code>
+strategy + 4-phase rollout (4-C-1 <code>pkg/evidence</code>, 4-C-2
+<code>pkg/detector</code>, 4-C-3 <code>pkg/ticket</code>, 4-C-4
+<code>pkg/navigator</code>+<code>pkg/validator</code>) + §6.J anti-bluff
+posture + 10 operator-blocking open questions. DESIGN-ONLY; no code
+changes yet; operator approval owed before Phase 4-C-1 starts.</p>
+<h3
+id="option-3--compose-ui-challenge-test-backend-highest-effort">Option 3
+— Compose UI Challenge Test backend (HIGHEST effort)</h3>
+<p>Lava's existing Compose UI Challenge Tests under
+<code>app/src/androidTest/kotlin/lava/app/challenges/</code> migrate to
+use HelixQA's <code>pkg/navigator</code> + <code>pkg/evidence</code> +
+<code>pkg/ticket</code> as backend services (via HelixQA CLI invocation
+OR via Go-package bridging from Kotlin via JNI / gRPC).</p>
+<p><strong>Scope:</strong> ALL 35+ Compose UI Challenge Tests get
+rewritten to use HelixQA as their backend. This is multi-week work.</p>
+<p><strong>Risk:</strong> HelixQA's navigator/evidence/ticket APIs are
+Go-only; bridging into Kotlin Android tests requires either subprocess
+invocation (slow) or JNI (complex) or gRPC (architecture overhead).</p>
+<p><strong>Recommendation:</strong> DEFER until Lava's existing Compose
+UI Challenge Tests show clear pain points the existing Espresso-based
+infrastructure can't solve.</p>
+<h2 id="recommended-path">Recommended path</h2>
+<p><strong>This-cycle deliverable:</strong> Option 1 — Shell-level
+wiring of HelixQA's 11 Challenge scripts into Lava's
+<code>scripts/run-challenge-matrix.sh</code>. Single commit. No
+Go-package linking. No Compose UI test rewrites.</p>
+<p><strong>Future-cycle deliverable (Phase 4-follow-2):</strong> Option
+2 — Go-package linking for Group A packages. Requires operator decision
+on: (a) lava-api-go vs the Android client as the integration
+entry-point, (b) adapter-interface design for HelixQA API stability
+isolation.</p>
+<p><strong>Out-of-scope (defer indefinitely):</strong> Option 3 —
+Compose UI Challenge Test backend migration. Re-evaluate only if
+Espresso-based tests prove insufficient.</p>
+<h2 id="6j-anti-bluff-posture">§6.J anti-bluff posture</h2>
+<p>Any HelixQA integration MUST satisfy §6.J / §6.AE / §6.L:</p>
+<ol type="1">
+<li>Every HelixQA Challenge script wired into Lava's matrix MUST have a
+paired Lava-side falsifiability rehearsal (per §6.J.2) recorded in the
+wiring-commit's body.</li>
+<li>Every HelixQA-backed assertion MUST be on user-visible state (per
+§6.J.3), not on HelixQA's internal data structures.</li>
+<li>The wiring-commit MUST satisfy §6.AE.5 per-AVD attestation row
+format (no "wired but never executed" entries).</li>
+<li>Any HelixQA API import MUST satisfy §6.AC non-fatal telemetry
+coverage (catch blocks call <code>recordNonFatal</code>).</li>
+<li>Any HelixQA-driven CI gate MUST have a paired hermetic test (per
+Lava's existing <code>tests/check-constitution/test_*.sh</code>
+pattern).</li>
+</ol>
+<h2 id="open-questions-for-operator">Open questions for operator</h2>
+<ol type="1">
+<li><strong>Container vs host runner</strong>: HelixQA's Challenge
+scripts assume host execution. Lava's §6.X requires container-bound
+execution. Should the HelixQA challenges be wrapped to run inside
+<code>submodules/containers/cmd/emulator-matrix --runner=containerized</code>?</li>
+<li><strong>Real-deps vs stub gating</strong>: HelixQA's
+<code>bluff_scanner_challenge.sh</code> runs <code>go-mutesting</code>
+which requires Go toolchain + the project's Go modules. Should Lava's
+gate execute against <code>lava-api-go</code> (real) or stub the
+toolchain (mock)?</li>
+<li><strong>Evidence directory boundary</strong>: HelixQA emits evidence
+to its own <code>&lt;helixqa&gt;/evidence/&lt;run-id&gt;/</code>. Should
+Lava redirect to
+<code>.lava-ci-evidence/helixqa-challenges/&lt;run-id&gt;/</code>?</li>
+<li><strong>§6.W mirror policy for HelixQA Challenge
+invocations</strong>: HelixQA Challenge scripts may push artifacts or
+invoke external services. Lava's §6.W bounds remotes to GitHub + GitLab.
+Need audit of each script before wiring.</li>
+</ol>
+<h2 id="status">Status</h2>
+<p>DESIGN-ONLY. No code changes in this cycle. Operator approval owed
+before Option-1 wiring begins.</p>
+<h2 id="cross-references">Cross-references</h2>
+<ul>
+<li><code>submodules/helixqa/README.md</code> — HelixQA framework
+overview</li>
+<li><code>submodules/helixqa/docs/ANTI_BLUFF.md</code> — HelixQA's
+anti-bluff discipline (CONST-035 runbook)</li>
+<li><code>submodules/helixqa/docs/architecture.md</code> — HelixQA
+package overview</li>
+<li><code>submodules/helixqa/docs/IMMEDIATE_EXECUTION_PLAN.md</code> —
+HelixQA's 2026-04-08 Real-Time Video Pipeline roadmap</li>
+<li><code>submodules/helixqa/docs/COMPREHENSIVE_VISION_INTEGRATION_PLAN.md</code>
+— HelixQA's 2026-04-09 CV integration plan</li>
+<li><code>CLAUDE.md</code> §6.AE — Comprehensive Challenge Coverage +
+Container/QEMU Matrix Mandate</li>
+<li><code>CLAUDE.md</code> §6.J — Anti-Bluff Functional Reality
+Mandate</li>
+<li><code>CLAUDE.md</code> §6.AC — Comprehensive Non-Fatal Telemetry
+Mandate</li>
+<li><code>docs/plans/2026-05-15-constitution-compliance.md</code> —
+parent constitution-compliance plan</li>
+<li><code>docs/helix-constitution-gates.md</code> — gate index (HelixQA
+waivers documented per Phase 4)</li>
+</ul>
+</body>
+</html>

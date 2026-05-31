@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-05-13-sp4-phase-g-design</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1 id="sp-4-phase-g--removal-syncs-to-backup-detailed-design">SP-4
+Phase G — Removal-syncs-to-backup (detailed design)</h1>
+<p><strong>Spec date:</strong> 2026-05-13 <strong>Parent SP:</strong>
+<code>docs/superpowers/specs/2026-05-12-sp4-multi-provider-redesign.md</code>
+<strong>Prerequisite:</strong> Phases A + B + C + D + F.1 complete (HEAD
+<code>2cf53766</code>). <strong>Status:</strong> detailed-design locked.
+Implementation plan in
+<code>docs/superpowers/plans/2026-05-13-sp4-phase-g-implementation.md</code>.</p>
+<h2 id="goal-from-parent-sp-4-design">Goal (from parent SP-4
+design)</h2>
+<blockquote>
+<p><strong>Phase G — Removal-syncs-to-backup.</strong> Soft-delete with
+sync-up semantics so a removal propagates to other devices and survives
+reinstall via backup. Backup-restore test on a second emulator.</p>
+</blockquote>
+<h2 id="why-soft-delete">Why soft-delete</h2>
+<p>Today's <code>delete()</code> is a hard SQL DELETE — the row
+vanishes. Two failure modes:</p>
+<ol type="1">
+<li><strong>Cross-device propagation impossibility.</strong> Phase E's
+sync mechanism (owed) needs to upload a "removal" event to the API. With
+a hard delete, there's nothing left to upload — the local state has lost
+the fact that a removal happened.</li>
+<li><strong>Backup-restore reanimation.</strong> When a device restores
+from cloud backup (a snapshot taken before the removal), the deleted row
+comes back. The user sees deleted credentials reappear after factory
+reset.</li>
+</ol>
+<p>Soft-delete fixes both: the row stays in the database with a
+<code>deletedAt</code> timestamp; read paths filter it out (so the user
+sees it as deleted); the sync layer can upload the removal event; backup
+snapshots include the soft-delete marker.</p>
+<h2 id="scope-of-phase-g">Scope of Phase G</h2>
+<p>This phase ships the <strong>local half</strong> — soft-delete +
+outbox enqueue. The remote propagation (Phase E) reads the outbox events
+and uploads them. Phase G makes Phase E's work possible.</p>
+<p>In-scope:</p>
+<ul>
+<li><code>credentials_entry</code> table gets a
+<code>deletedAt: Long?</code> column.</li>
+<li><code>cloned_provider</code> table gets a
+<code>deletedAt: Long?</code> column.</li>
+<li><code>provider_credential_binding</code> already has
+<code>unbind(providerId)</code> which physically deletes the row — for
+Phase G's semantics this is equivalent (the binding has no "soft-delete
+needed" property; an unbind followed by a re-bind is the natural
+pattern).</li>
+<li>All read paths (<code>observeAll</code>, <code>get</code>,
+<code>getAll</code>) filter <code>WHERE deletedAt IS NULL</code>.</li>
+<li>All write paths (CredentialsManager UI delete, ProviderConfig
+Clone-remove) call <code>softDelete(id, now)</code> AND enqueue an
+outbox event with <code>deleted = true</code>.</li>
+<li>The outbox <code>SyncOutboxKind.CREDENTIALS</code> and
+<code>CLONED_PROVIDER</code> wire payloads gain a
+<code>deleted: Boolean = false</code> field — existing entries default
+to <code>false</code>, new soft-deletes set it to
+<code>true</code>.</li>
+<li>Room schema bumps v9 → v10 with <code>MIGRATION_9_10</code>.</li>
+</ul>
+<p>Out of scope (Phase E):</p>
+<ul>
+<li>The actual upload of the soft-delete outbox event to the API.</li>
+<li>The download of remote soft-deletes and their merge into the local
+DAO.</li>
+<li>Cross-device end-to-end backup-restore Challenge Test on a second
+emulator.</li>
+</ul>
+<h2 id="design-decisions-locked">Design decisions (locked)</h2>
+<h3 id="g-d1--deletedat-column-not-isdeleted-flag">G-D1 —
+<code>deletedAt</code> column, not <code>isDeleted</code> flag</h3>
+<p>Storing the deletion timestamp lets Phase E:</p>
+<ul>
+<li>order multiple deletions by when they happened,</li>
+<li>support a future hard-purge sweep (rows where
+<code>deletedAt &lt; now - 90 days</code> are physically deleted to
+bound DB growth),</li>
+<li>distinguish "deleted N seconds ago" (still in outbox queue waiting
+to upload) from "deleted N hours ago" (already uploaded; the row is kept
+as a tombstone).</li>
+</ul>
+<h3 id="g-d2--two-tables-get-the-column">G-D2 — Two tables get the
+column</h3>
+<p>Only <code>credentials_entry</code> and <code>cloned_provider</code>
+have user-removable rows that need cross-device propagation.
+<code>user_mirror</code> is already removable via its own DAO + the
+existing outbox <code>removed: true</code> wire flag — no schema change
+needed. <code>provider_credential_binding</code> and
+<code>provider_sync_toggle</code> are upsert-only; the user "removes" a
+binding by unbinding (which is a write of "unbound" state, not a removal
+of the row's existence).</p>
+<h3 id="g-d3--wire-payload-extension">G-D3 — Wire payload extension</h3>
+<p><code>CredentialsEntryRepository.upsert(entry)</code> and
+<code>delete(id)</code> already enqueue
+<code>SyncOutboxKind.CREDENTIALS</code> events. The wire JSON gains a
+<code>deleted: Boolean</code> field that defaults to <code>false</code>
+for upserts and is <code>true</code> for soft-deletes. Phase E's API
+handler distinguishes the two and routes accordingly.</p>
+<p><code>CloneProviderUseCase</code> enqueues
+<code>SyncOutboxKind.CLONED_PROVIDER</code> on creation; a new
+<code>RemoveClonedProviderUseCase</code> (added in this phase) enqueues
+the same kind with <code>deleted: true</code>.</p>
+<h3 id="g-d4--backup-exclusion-audit-unchanged">G-D4 — Backup-exclusion
+audit unchanged</h3>
+<p>Per the SP-4 design's "Operator's invariants reasserted" — the
+credentials data is at-rest-encrypted, and the soft-delete marker is
+non-secret metadata. The existing Android Auto Backup configuration
+(which excludes the encrypted prefs files) does NOT need re-auditing for
+Phase G; the soft-delete timestamp is included in the backup just like
+any other Room row.</p>
+<h2 id="affected-surfaces">Affected surfaces</h2>
+<h3 id="files-to-modify">Files to modify</h3>
+<ul>
+<li><code>core/database/src/main/kotlin/lava/database/entity/CredentialsEntryEntity.kt</code>
+— add <code>deletedAt: Long? = null</code>.</li>
+<li><code>core/database/src/main/kotlin/lava/database/entity/ClonedProviderEntity.kt</code>
+— add <code>deletedAt: Long? = null</code>.</li>
+<li><code>core/database/src/main/kotlin/lava/database/dao/CredentialsEntryDao.kt</code>
+— add <code>softDelete(id, deletedAt)</code>; filter all reads on
+<code>WHERE deletedAt IS NULL</code>.</li>
+<li><code>core/database/src/main/kotlin/lava/database/dao/ClonedProviderDao.kt</code>
+— same shape.</li>
+<li><code>core/database/src/main/kotlin/lava/database/AppDatabase.kt</code>
+— bump <code>version = 10</code>; add <code>MIGRATION_9_10</code>.</li>
+<li><code>core/credentials/src/main/kotlin/lava/credentials/CredentialsEntryRepository.kt</code>
++ <code>Impl.kt</code> — <code>delete(id)</code> routes through
+<code>softDelete</code> + outbox enqueue with
+<code>deleted = true</code>.</li>
+<li><code>core/domain/src/main/kotlin/lava/domain/usecase/CloneProviderUseCase.kt</code>
+— wire <code>deleted = false</code> default in the existing payload; add
+sibling <code>RemoveClonedProviderUseCase</code>.</li>
+<li><code>feature/credentials_manager/src/main/kotlin/lava/credentials/manager/CredentialsManagerViewModel.kt</code>
+— <code>Delete</code> action already calls <code>repo.delete(id)</code>
+— no UI change.</li>
+</ul>
+<h3 id="files-to-add">Files to add</h3>
+<ul>
+<li><code>core/domain/src/main/kotlin/lava/domain/usecase/RemoveClonedProviderUseCase.kt</code>.</li>
+<li><code>core/credentials/src/test/kotlin/lava/credentials/CredentialsEntryRepositorySoftDeleteTest.kt</code>
+— verifies soft-deleted row is hidden from <code>observe()</code> AND
+that the outbox carries a <code>deleted: true</code> entry.</li>
+<li><code>core/database/schemas/lava.database.AppDatabase/10.json</code>
+— Room schema export (auto-generated by gradle).</li>
+</ul>
+<h2 id="tests">Tests</h2>
+<ul>
+<li><p><strong>Unit (this phase):</strong>
+<code>CredentialsEntryRepositorySoftDeleteTest</code> —</p>
+<ol type="1">
+<li>Upsert a credential. Observe shows it.</li>
+<li>Delete the credential. Observe excludes it. Outbox has a
+<code>CREDENTIALS</code> row with <code>deleted: true</code>.</li>
+<li>Get-by-id returns null (not the soft-deleted row).</li>
+<li>Mutation rehearsal: revert <code>delete</code> to call
+<code>dao.delete()</code> instead of <code>dao.softDelete()</code>.
+Outbox no longer has the <code>deleted: true</code> entry; observe still
+excludes (because the row is physically gone) — but the upload signal is
+lost. The test catches the outbox-absence assertion.</li>
+</ol></li>
+<li><p><strong>Challenge (Phase E owed):</strong> cross-device
+backup-restore on a second emulator. The Phase E design covers
+this.</p></li>
+</ul>
+<h2 id="anti-bluff-posture-6j">Anti-bluff posture (§6.J)</h2>
+<ol type="1">
+<li>Soft-delete is observable by inspecting the Room row directly: a
+deleted row exists in the table with <code>deletedAt != null</code>. The
+test asserts this directly.</li>
+<li>The outbox-enqueue assertion checks the wire payload's
+<code>deleted</code> flag — not the count of outbox rows. Verify-only
+mutations would be caught.</li>
+<li>The DAO read-path filter is asserted via the <code>observe()</code>
+flow.</li>
+<li>Falsifiability rehearsal protocol embedded in test KDoc.</li>
+</ol>
+<h2 id="implementation-plan">Implementation plan</h2>
+<p>See
+<code>docs/superpowers/plans/2026-05-13-sp4-phase-g-implementation.md</code>
+— 5 tasks, ~15 steps.</p>
+</body>
+</html>

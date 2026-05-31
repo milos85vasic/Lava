@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>audit-snake_case-references.sh</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1
+id="scriptsaudit-snake_case-referencessh--user-guide"><code>scripts/audit-snake_case-references.sh</code>
+— User Guide</h1>
+<p><strong>Last verified:</strong> 2026-05-16 (constitution-compliance
+plan Phase 6.0 — research+plan cycle). <strong>Inheritance:</strong>
+HelixConstitution §11.4.29 (Lowercase-Snake_Case-Naming Mandate) +
+§11.4.18 (script documentation mandate).
+<strong>Classification:</strong> project-specific (the names list IS
+Lava's 17 owned-by-us submodules; the
+audit-for-blast-radius-before-rename discipline is universal per
+§11.4.29).</p>
+<h2 id="overview">Overview</h2>
+<p>Read-only audit that counts, for each of the 17 owned-by-us
+submodules (16 <code>vasic-digital/*</code> + 1
+<code>HelixDevelopment/HelixQA</code>), how many references in tracked
+files point at the current pre-rename name (e.g.
+<code>submodules/containers</code>). The output is a tab-separated table
+that the operator and reviewers consult BEFORE approving any rename
+batch under HelixConstitution §11.4.29.</p>
+<p>The script's value comes from making the rename blast radius
+<strong>operator-visible and reproducible</strong>: a single command
+produces a deterministic snapshot that can be diffed before/after each
+rename batch to detect stale references — which §11.4.29 declares
+severity-equivalent to the rename itself ("reference drift after a
+rename is a §11.4.29 violation of equal severity to the rename
+itself").</p>
+<h2 id="prerequisites">Prerequisites</h2>
+<ul>
+<li><code>git</code> on <code>$PATH</code> and the script invoked from
+inside a git working tree (or via
+<code>LAVA_REPO_ROOT=/path/to/repo</code>).</li>
+<li>POSIX <code>awk</code>, <code>sort</code>, <code>head</code>,
+<code>wc</code> (standard everywhere).</li>
+<li>No network access needed; no privileged operations.</li>
+</ul>
+<h2 id="usage-examples">Usage examples</h2>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Default — TSV output to stdout</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> scripts/audit-snake_case-references.sh</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Markdown table (paste into PRs / plan docs)</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> scripts/audit-snake_case-references.sh <span class="at">--format</span><span class="op">=</span>md</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Names + counts only (no TOTAL_Submodules aggregate)</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> scripts/audit-snake_case-references.sh <span class="at">--names-only</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="co"># TSV + top-5 files per submodule (for digging into reference hotspots)</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> scripts/audit-snake_case-references.sh <span class="at">--top-files</span><span class="op">=</span>5</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Capture before/after baselines around a rename</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> scripts/audit-snake_case-references.sh <span class="op">&gt;</span> /tmp/before.tsv</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="co"># ... perform rename batch ...</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> scripts/audit-snake_case-references.sh <span class="op">&gt;</span> /tmp/after.tsv</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="fu">diff</span> /tmp/before.tsv /tmp/after.tsv</span></code></pre></div>
+<h2 id="output-format">Output format</h2>
+<p>Default TSV:</p>
+<pre><code>NAME            REFS    FILES
+Auth            16      9
+Cache           36      15
+...
+Tracker-SDK     83      25
+TOTAL_Submodules        806     124</code></pre>
+<ul>
+<li><code>NAME</code> — the current submodule directory name (CamelCase
+/ hyphenated).</li>
+<li><code>REFS</code> — total occurrences of
+<code>submodules/&lt;NAME&gt;</code> across all tracked files.</li>
+<li><code>FILES</code> — distinct file count containing at least one
+reference.</li>
+<li><code>TOTAL_Submodules</code> — aggregate for any
+<code>submodules/</code> prefix reference (this is broader than the
+per-submodule sum because it captures bare <code>submodules/</code>
+paths without a specific submodule name).</li>
+</ul>
+<p>The <code>TOTAL_Submodules</code> aggregate captures the work of
+Phase 6a (the top-level <code>submodules/</code> →
+<code>submodules/</code> rename). Per-submodule rows capture the work of
+Phase 6b sub-cycles.</p>
+<h2 id="modes">Modes</h2>
+<table>
+<thead>
+<tr>
+<th>Flag</th>
+<th style="text-align: right;">Behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>(none)</td>
+<td style="text-align: right;">Default: TSV header + 17 per-submodule
+rows + TOTAL_Submodules aggregate</td>
+</tr>
+<tr>
+<td><code>--format=tsv</code></td>
+<td style="text-align: right;">Same as default</td>
+</tr>
+<tr>
+<td><code>--format=md</code></td>
+<td style="text-align: right;">Markdown table (header + rows; no TOTAL
+line in pure-md aesthetic — though TOTAL is included for
+consistency)</td>
+</tr>
+<tr>
+<td><code>--names-only</code></td>
+<td style="text-align: right;">Skip the TOTAL_Submodules aggregate;
+print only the 17 per-name rows + header</td>
+</tr>
+<tr>
+<td><code>--top-files=N</code></td>
+<td style="text-align: right;">Also list the top-N files (by reference
+count) for each name</td>
+</tr>
+<tr>
+<td><code>--help</code>, <code>-h</code></td>
+<td style="text-align: right;">Print embedded documentation, exit 0</td>
+</tr>
+</tbody>
+</table>
+<h2 id="exit-codes">Exit codes</h2>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>Audit completed successfully (regardless of reference counts)</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Argument / environment error (unknown flag, not inside a git repo,
+git missing)</td>
+</tr>
+</tbody>
+</table>
+<p>The script does NOT exit nonzero on "too many references found" — it
+is a read-only measurement, not a gate. The gate role belongs to Phase
+6e's <code>scripts/check-snake-case-naming.sh</code> (planned, not yet
+implemented).</p>
+<h2 id="edge-cases">Edge cases</h2>
+<ul>
+<li><strong>Files with <code>submodules/</code> in comments
+only.</strong> Counted — the rename will touch them too.</li>
+<li><strong>Binary files.</strong> <code>git grep</code> does not match
+against binary files unless <code>-a</code> is passed; this script does
+NOT pass <code>-a</code>, so binary files are skipped. Acceptable
+because binary files don't contain renameable path strings worth
+tracking.</li>
+<li><strong><code>.gitmodules</code>.</strong> Counted as a tracked
+file. Renaming requires updating it explicitly.</li>
+<li><strong><code>.lava-ci-evidence/</code> historical
+attestations.</strong> Counted. These are historical records; updates
+are optional for correctness but recommended for consistency.</li>
+<li><strong>Submodule internals (inside
+<code>submodules/&lt;X&gt;/</code>).</strong> NOT counted by this script
+because they are tracked by the submodule's own repo, not the parent.
+Per-submodule renames update the parent's <code>.gitmodules</code> + the
+parent's reference graph; the submodule's internal contents are out of
+scope.</li>
+<li><strong><code>submodules/tracker_sdk</code>.</strong> Hyphenated
+name — <code>git grep "submodules/tracker_sdk"</code> works fine because
+<code>-</code> is a literal character in extended regex.</li>
+<li><strong><code>submodules/helixqa</code>.</strong>
+HelixDevelopment-owned; same audit treatment as vasic-digital submodules
+per §11.4.28 (HelixDevelopment is on the owned-org list).</li>
+</ul>
+<h2 id="internal-behaviour">Internal behaviour</h2>
+<p>For each of the 17 hard-coded <code>NAMES</code> entries:</p>
+<ol type="1">
+<li>Build the pattern <code>submodules/&lt;NAME&gt;</code>.</li>
+<li><code>git grep -c "$pattern"</code> — emits
+<code>&lt;file&gt;:&lt;count&gt;</code> for every file with ≥1
+match.</li>
+<li><code>awk -F: '{s += $NF} END {print s+0}'</code> sums the per-file
+counts.</li>
+<li><code>git grep -l "$pattern" | wc -l</code> counts distinct
+files.</li>
+<li>Emit <code>&lt;NAME&gt;\t&lt;refs&gt;\t&lt;files&gt;</code> to
+stdout.</li>
+</ol>
+<p>For the <code>TOTAL_Submodules</code> aggregate row: same pattern but
+<code>submodules/</code> (no trailing name).</p>
+<p>The hard-coded NAMES list is the §11.4.29 migration scope. New
+owned-by-us submodules added between this script's creation and §11.4.29
+closure MUST be added to the NAMES array (a single-line edit) and the
+companion plan + hermetic test updated accordingly.</p>
+<h2 id="related-scripts">Related scripts</h2>
+<ul>
+<li><code>scripts/check-no-nested-own-org-submodules.sh</code> —
+§11.4.28 nested-chain audit; runs against the same submodule set.</li>
+<li><code>scripts/check-helix-deps-manifest.sh</code> — §11.4.31
+dependency-manifest gate; consumes the same submodule registry.</li>
+<li><code>scripts/check-constitution.sh</code> — pre-push enforcement
+(the §11.4.29 gate will live here once Phase 6e ships).</li>
+<li><code>scripts/verify-all-constitution-rules.sh</code> — sweep
+wrapper; this audit script is intentionally NOT wired into the sweep
+because it is a read-only measurement (no FAIL condition exists for "too
+many references").</li>
+</ul>
+<h2 id="companion-test">Companion test</h2>
+<p><code>tests/check-constitution/test_audit_snake_case_references.sh</code>
+— 11 hermetic checks:</p>
+<ol type="1">
+<li><code>test_script_executable</code> — script exists + is
+executable</li>
+<li><code>test_runs_cleanly_on_real_tree</code> — exit 0 + TSV header on
+real Lava tree</li>
+<li><code>test_reports_all_17_submodules</code> — every name in the
+NAMES array appears in output</li>
+<li><code>test_reports_total_line</code> — <code>TOTAL_Submodules</code>
+aggregate present + well-formed</li>
+<li><code>test_format_md</code> — <code>--format=md</code> emits a
+Markdown table header</li>
+<li><code>test_names_only_mode</code> — <code>--names-only</code> emits
+exactly 18 lines (header + 17 names)</li>
+<li><code>test_help_exits_zero</code> — <code>--help</code> exits 0 +
+prints docs</li>
+<li><code>test_unknown_arg_exits_2</code> — unknown flags exit 2 + error
+message</li>
+<li><code>test_deterministic_output</code> — two consecutive runs
+produce identical output</li>
+<li><code>test_numeric_columns</code> — REFS and FILES columns are
+integers</li>
+<li><code>test_blast_radius_ordering_sanity</code> — Containers (370
+refs) &gt; Discovery (5 refs); the anti-bluff guarantee that the script
+reflects actual repo state, not hardcoded values</li>
+</ol>
+<h2 id="cross-references">Cross-references</h2>
+<ul>
+<li>HelixConstitution <code>Constitution.md</code> §11.4.29 (the rename
+mandate this script supports).</li>
+<li>HelixConstitution <code>Constitution.md</code> §11.4.18
+(script-doc-sync mandate — companion to this doc).</li>
+<li><code>docs/plans/2026-05-16-snake_case-migration.md</code> — the
+comprehensive migration plan this script enables.</li>
+<li><code>docs/plans/2026-05-15-constitution-compliance.md</code> Phase
+6 — the parent compliance plan referencing this work.</li>
+<li>Lava CLAUDE.md §6.AD-debt (HelixConstitution gate-wiring debt —
+Phase 6 closes a portion).</li>
+<li><code>scripts/check-no-nested-own-org-submodules.sh</code> — sister
+audit for §11.4.28.</li>
+</ul>
+<h2 id="falsifiability-rehearsal-evidence">Falsifiability rehearsal
+evidence</h2>
+<p>Per §6.J clause 2 / §6.N: before declaring this audit script "covers"
+the §11.4.29 baseline-capture role, the following falsifiability
+rehearsals were performed against
+<code>test_blast_radius_ordering_sanity</code>:</p>
+<p><strong>Mutation:</strong> in
+<code>scripts/audit-snake_case-references.sh</code>, replace the real
+<code>count_refs_for_name</code> with a stub returning
+<code>echo "0\t0"</code> for every name.</p>
+<p><strong>Observed failure:</strong>
+<code>test_blast_radius_ordering_sanity</code> fails:
+<code>"Containers (0) should exceed Discovery (0)"</code>. The
+deterministic-output test still passes (a stub IS deterministic — both
+bluffs return zero), but the ordering invariant catches the bluff. The
+<code>test_reports_total_line</code> test ALSO catches it because the
+TOTAL_Submodules aggregate would return 0, which is not the actual
+<code>806</code>.</p>
+<p><strong>Reverted:</strong> yes. Production code restored; all 11
+tests PASS.</p>
+<p>This rehearsal demonstrates the test suite has discrimination — it
+would not silently report PASS if the audit script were lying about its
+inputs.</p>
+</body>
+</html>

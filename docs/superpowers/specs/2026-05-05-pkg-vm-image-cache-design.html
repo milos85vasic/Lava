@@ -1,0 +1,1043 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-05-05-pkg-vm-image-cache-design</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1
+id="pkgvm--image-cache-bundled-design-6k-debt-closure--group-c-image-cache-item">pkg/vm
++ Image-Cache Bundled Design (6.K-debt closure + Group C image-cache
+item)</h1>
+<blockquote>
+<p><strong>Status:</strong> Design approved (operator, 2026-05-05
+evening) after Group B closure (<code>0ac633e</code>). Implementation
+pending — subagent-driven execution per Group A-prime / Group B pattern.
+Branch: Containers <code>lava-pin/2026-05-07-pkg-vm</code>. Lava parent
+commits on <code>master</code> once the pin lands.</p>
+</blockquote>
+<blockquote>
+<p><strong>Forensic anchor.</strong> Group A-prime mechanically closed
+§6.N-debt; Group B added matrix-runner reliability + observability
+tightenings. What both left open is the §6.K constitutional debt — the
+requirement that <code>submodules/containers/pkg/vm/</code> exist for
+QEMU full-system emulation, alongside the existing
+<code>pkg/emulator/</code> (Android), so cross-architecture and cross-OS
+testing isn't blocked by the absence of a generic VM-orchestration
+package.</p>
+<p>The §6.K-debt clause names four close criteria. Three are already met
+by Group A-prime + Group B:</p>
+<ul>
+<li>(1) <code>pkg/emulator/</code> exists ✓ (Group A-prime + Group
+B)</li>
+<li>(3) Lava-side emulator-orchestration glue extracted ✓
+(<code>scripts/run-emulator-tests.sh</code> is now thin glue)</li>
+<li>(4) <code>scripts/check-constitution.sh</code> updated for §6.N
+awareness ✓ (Group A-prime)</li>
+</ul>
+<p>Only criterion (2) — "at least the QEMU baseline" in
+<code>pkg/vm/</code> (or sibling) — remains open. This spec closes it
+AND bundles the only Group C reinforcement candidate that has natural
+overlap (image-cache management is a generic emulator-orchestration
+concern that both <code>pkg/emulator/</code> and <code>pkg/vm/</code>
+need). The other Group C candidates (network simulation,
+hardware-screenshot capture) stay deferred to a true Group C cycle
+later.</p>
+</blockquote>
+<h2 id="1-scope">1. Scope</h2>
+<h3
+id="11-in-scope-3-containers-packages--2-lava-consumers--1-closure">1.1
+In scope (3 Containers packages + 2 Lava consumers + 1 closure)</h3>
+<ol type="1">
+<li><p><strong><code>submodules/containers/pkg/cache/</code></strong>
+(new) — content-addressable store for image artifacts (qcow2 for VMs,
+Android system-images for emulators). Project-agnostic: no specific
+images committed inside Containers. Caller supplies a manifest JSON
+declaring <code>(id, url, sha256, size, format)</code> tuples;
+<code>pkg/cache/</code> fetches on cache miss, verifies SHA-256, refuses
+on mismatch.</p></li>
+<li><p><strong><code>submodules/containers/pkg/vm/</code></strong> (new)
+— QEMU full-system VM orchestration. <code>VM</code> interface
+<code>{ Boot, WaitForReady, Upload, Run, Download, Teardown }</code>.
+<code>VMMatrixRunner</code> analog of <code>AndroidMatrixRunner</code> —
+emits the SAME attestation row schema (<code>gating</code>,
+<code>diag</code>, <code>failure_summaries</code>,
+<code>concurrent</code>) so <code>scripts/tag.sh</code>'s 3 Group B
+gates work unchanged. KVM-where-available, TCG fallback.
+<code>--concurrent N</code> + <code>--dev</code> semantics identical to
+<code>pkg/emulator/</code> (either flag flips
+<code>gating: false</code>).</p></li>
+<li><p><strong><code>submodules/containers/cmd/vm-matrix</code></strong>
+(new) — thin CLI wrapper mirroring <code>cmd/emulator-matrix</code>.
+Flags: <code>--targets</code>, <code>--image-manifest</code>,
+<code>--uploads</code>, <code>--script</code>, <code>--captures</code>,
+<code>--evidence-dir</code>, <code>--concurrent</code>,
+<code>--dev</code>, <code>--boot-timeout</code>,
+<code>--script-timeout</code>.</p></li>
+<li><p><strong><code>submodules/containers/pkg/emulator/</code>
+refactor</strong> — route Android system-image fetch through
+<code>pkg/cache/</code> instead of the package-local download logic.
+External API of <code>pkg/emulator/</code> UNCHANGED — the refactor is
+internal. Anti-bluff: ≥1 falsifiability rehearsal proving that the cache
+backend swap doesn't break the attestation row schema or break existing
+Group B gates.</p></li>
+<li><p><strong>Lava cross-arch signing consumer</strong> — Lava-side
+glue (<code>scripts/run-vm-signing-matrix.sh</code> +
+<code>tests/vm-signing/</code>) that drives <code>cmd/vm-matrix</code>
+against (Alpine/Debian/Fedora) × (x86_64/aarch64/riscv64) sub-matrix to
+verify Lava's signing/keystore code produces byte-equivalent signed APKs
+across all 9 configs. Bluff vector: JCA provider divergence (different
+signing bytes from different JREs on different arches). Test scope
+<strong>A1 (sign-and-compare bytes)</strong> per Q4. Each row records
+<code>signing_match: bool</code> derived from byte equivalence to the
+x86_64 KVM reference run.</p></li>
+<li><p><strong>Lava cross-OS distro consumer</strong> — Lava-side glue
+(<code>scripts/run-vm-distro-matrix.sh</code> +
+<code>tests/vm-distro/</code>) that drives <code>cmd/vm-matrix</code>
+against (Alpine/Debian/Fedora) × x86_64 to verify the Ktor proxy fat JAR
++ the <code>lava-api-go</code> static binary boot AND respond to a real
+functional request on each distro. Bluff vector: distro-specific runtime
+failure (libc differences, JRE provider differences, network stack
+differences). Test scope <strong>B2 (boot-and-functional)</strong> per
+Q4. Each row records <code>proxy_health: bool</code>,
+<code>proxy_search: bool</code>, <code>goapi_health: bool</code>,
+<code>goapi_metrics: bool</code>.</p></li>
+<li><p><strong>Lava manifest + closure</strong> —
+<code>tools/lava-containers/vm-images.json</code> (the project-side
+manifest declaring 9 base qcow2 images), Containers pin bump,
+<code>.lava-ci-evidence/bluff-hunt/2026-05-07-pkg-vm.json</code>,
+<code>.lava-ci-evidence/Phase-pkg-vm-closure-2026-05-07.json</code>.</p></li>
+</ol>
+<h3 id="12-out-of-scope-deferred-to-future-cycles">1.2 Out of scope
+(deferred to future cycles)</h3>
+<ul>
+<li>Group C reinforcement candidates <strong>other than image-cache
+management</strong>: network simulation per AVD, hardware-screenshot
+capture per row.</li>
+<li>Non-baseline OS targets in <code>pkg/vm/</code>: minimal Windows for
+<code>gradlew.bat</code> parity, FreeBSD, macOS / iOS — all roadmap
+items in §6.K's KDoc.</li>
+<li>Image-build orchestration (Packer / cloud-init recipe-driven image
+generation) — <code>pkg/vm/imagebuilder/</code> is a future cycle. v0.1
+ships with operator-supplied URLs that point at upstream cloud
+images.</li>
+<li>Pluggable Cache backend interface — YAGNI for v0.1 (filesystem CAS
+only). Can be retrofitted if a second backend ever appears.</li>
+<li>VM-only <code>tag.sh</code> gates — <code>scripts/tag.sh</code>
+handles VM matrix attestations transparently via the existing
+<code>find &lt;pack&gt; -name 'real-device-verification.json'</code>
+pattern, since <code>pkg/vm/</code>'s <code>writeAttestation</code>
+emits the same schema.</li>
+</ul>
+<h3 id="13-non-goals">1.3 Non-goals</h3>
+<ul>
+<li><strong>Not</strong> a re-design of <code>pkg/emulator/</code>. The
+refactor in this spec is mechanical (route image-fetch through
+<code>pkg/cache/</code>); the matrix-runner gate semantics + Group B
+reliability fixes stay as-is.</li>
+<li><strong>Not</strong> a relaxation of any clause. v0.1 strengthens:
+cross-arch and cross-OS testing become possible from the project's own
+repo, where today they're not.</li>
+<li><strong>Not</strong> a Lava-only change. Components 1-4 live in
+Containers because they're generic capabilities the next vasic-digital
+project to use VM orchestration would want identically. Components 5-7
+live in Lava because the specific consumer matrices + the manifest
+content are Lava-domain (per Decoupled Reusable Architecture).</li>
+</ul>
+<h2 id="2-architecture">2. Architecture</h2>
+<pre><code>┌──────────────────────────────────────────────────────────────────────────┐
+│                  Containers submodule                                    │
+│                  (branch lava-pin/2026-05-07-pkg-vm)                     │
+│                                                                          │
+│  pkg/cache/                                                              │
+│  ├── manifest.go     Manifest{ Version, Images[]{Id,URL,Sha256,Size,Fmt} │
+│  │                   structs + JSON load/validate                        │
+│  ├── store.go        Store{ Get(ImageID), Verify(ImageID),               │
+│  │                   Refresh(ImageID) }; ~/.cache/vasic-digital/         │
+│  │                   containers-images/blobs/sha256/&lt;hash&gt;               │
+│  ├── lock.go         per-image flock to make concurrent Get() safe       │
+│  ├── manifest_test.go                                                    │
+│  ├── store_test.go                                                       │
+│  └── lock_test.go                                                        │
+│                                                                          │
+│  pkg/vm/                                                                 │
+│  ├── types.go        VM, VMTarget, BootResult, VMConfig, VMMatrixConfig, │
+│  │                   VMMatrixResult, with the SAME row-extension fields  │
+│  │                   as pkg/emulator (gating, diag, failure_summaries,   │
+│  │                   concurrent)                                         │
+│  ├── qemu.go         QEMUVM impl of VM iface; KVM/TCG auto-detect by    │
+│  │                   target arch + /dev/kvm presence; ssh client over   │
+│  │                   golang.org/x/crypto/ssh; SCP via ssh; QMP control- │
+│  │                   socket for graceful shutdown                       │
+│  ├── matrix.go       VMMatrixRunner — runOne extracted; captureDiag    │
+│  │                   between Boot and Run; worker pool when             │
+│  │                   Concurrent&gt;1; writeAttestation emits same schema   │
+│  ├── teardown.go     Teardown{30s SSH/QMP grace then KillByPort         │
+│  │                   fast-path reusing pkg/emulator/cleanup.KillByPort  │
+│  │                   on the qemu monitor port}                          │
+│  ├── qemu_test.go    Tests with fake SSH/QMP/exec executors             │
+│  ├── matrix_test.go  Tests with stubVM mirror of stubEmulator           │
+│  └── teardown_test.go Tests using killByPortHook seam                   │
+│                                                                          │
+│  cmd/vm-matrix/                                                          │
+│  └── main.go         CLI wrapper; flag parser; dispatches to             │
+│                      pkg/vm.NewQEMUMatrixRunner; same exit-code          │
+│                      contract as cmd/emulator-matrix (0 green, 1        │
+│                      failed, 2 invalid args)                             │
+│                                                                          │
+│  pkg/emulator/                                                           │
+│  └── (existing files modified) — Boot&#39;s APK fetch (today: download    │
+│      from android-sdk inside the CWD) routed through pkg/cache/Store. │
+│      External API unchanged. ≥1 falsifiability rehearsal recorded.    │
+└──────────────────────────────────────────────────────────────────────────┘
+                               │ pinned by submodule SHA
+                               ▼
+┌──────────────────────────────────────────────────────────────────────────┐
+│                   Lava parent (master)                                   │
+│                                                                          │
+│  tools/lava-containers/                                                  │
+│  └── vm-images.json    9 qcow2 manifest entries + project-domain meta   │
+│                                                                          │
+│  scripts/                                                                │
+│  ├── run-vm-signing-matrix.sh                                            │
+│  │     thin glue → cmd/vm-matrix                                         │
+│  │     uploads: build/libs/proxy.jar + keystore + sample.apk            │
+│  │     script: jarsigner -keystore ks.p12 -signedjar /tmp/signed.apk    │
+│  │             /tmp/sample.apk; cat /tmp/signed.apk | sha256sum         │
+│  │     captures: /tmp/signed.apk → host                                 │
+│  │     post-processing: compare each per-row signed-bytes hash to the   │
+│  │     x86_64 KVM reference; row-level signing_match: bool              │
+│  └── run-vm-distro-matrix.sh                                             │
+│        thin glue → cmd/vm-matrix                                         │
+│        uploads: proxy/build/libs/app.jar + lava-api-go binary           │
+│        script: starts both, probes /health, /metrics, /search           │
+│        captures: probe-output.json → host                               │
+│        post-processing: row-level proxy_*+goapi_* booleans              │
+│                                                                          │
+│  tests/                                                                  │
+│  ├── vm-signing/                                                         │
+│  │     test_signing_matrix_rejects_byte_divergence.sh                   │
+│  │     test_signing_matrix_accepts_concordant_signatures.sh             │
+│  └── vm-distro/                                                          │
+│        test_distro_matrix_rejects_proxy_health_failure.sh               │
+│        test_distro_matrix_rejects_goapi_metrics_failure.sh              │
+│        test_distro_matrix_accepts_clean_run.sh                          │
+│                                                                          │
+│  .lava-ci-evidence/                                                      │
+│  ├── bluff-hunt/2026-05-07-pkg-vm.json                                   │
+│  └── Phase-pkg-vm-closure-2026-05-07.json                                │
+│                                                                          │
+│  CLAUDE.md                                                               │
+│        (~) §6.K-debt RESOLVED paragraph appended (mirrors §6.N-debt     │
+│            RESOLVED pattern from Group A-prime; non-load-bearing)       │
+└──────────────────────────────────────────────────────────────────────────┘</code></pre>
+<h2 id="3-components">3. Components</h2>
+<h3 id="31-pkgcache-containers">3.1 <code>pkg/cache/</code>
+(Containers)</h3>
+<p><strong>Manifest schema</strong>
+(<code>pkg/cache/manifest.go</code>):</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Manifest declares a project&#39;s pinned image artifacts. Lives outside</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co">// Containers (Lava ships its at tools/lava-containers/vm-images.json).</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co">// pkg/cache/ defines the schema; consumers populate it.</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Manifest <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    Version <span class="dt">int</span>              <span class="st">`json:&quot;version&quot;`</span> <span class="co">// currently 1</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    Images  <span class="op">[]</span>ImageEntry     <span class="st">`json:&quot;images&quot;`</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ImageEntry <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    ID     <span class="dt">string</span> <span class="st">`json:&quot;id&quot;`</span>     <span class="co">// canonical id, e.g. &quot;alpine-3.20-x86_64&quot;</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    URL    <span class="dt">string</span> <span class="st">`json:&quot;url&quot;`</span>    <span class="co">// source URL the cache fetches on miss</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    SHA256 <span class="dt">string</span> <span class="st">`json:&quot;sha256&quot;`</span> <span class="co">// hex-encoded, REQUIRED</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    Size   <span class="dt">int64</span>  <span class="st">`json:&quot;size&quot;`</span>   <span class="co">// bytes, REQUIRED — sanity-check the download</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    Format <span class="dt">string</span> <span class="st">`json:&quot;format&quot;`</span> <span class="co">// &quot;qcow2&quot; | &quot;android-system-image&quot; | &quot;raw&quot;</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="co">// LoadManifest parses + validates a manifest file. Returns error on</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="co">// duplicate IDs, malformed SHA256, or schema-version mismatch.</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> LoadManifest<span class="op">(</span>path <span class="dt">string</span><span class="op">)</span> <span class="op">(*</span>Manifest<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span></code></pre></div>
+<p><strong>Store contract</strong>
+(<code>pkg/cache/store.go</code>):</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Store is the content-addressable cache.</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co">// Cache root: $XDG_CACHE_HOME/vasic-digital/containers-images/ (default</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co">// ~/.cache/vasic-digital/containers-images/). Layout:</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co">//</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co">//   blobs/sha256/&lt;full-hash&gt;   → image bytes (read-only)</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="co">//   lockfiles/&lt;sha-prefix&gt;.lock → flock per-image for concurrent download</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="co">//</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="co">// Get returns the local path of the image&#39;s bytes. On cache miss, fetch</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="co">// from URL + verify SHA-256; on mismatch, the partial download is</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="co">// removed and a non-nil error is returned. Concurrent Get() calls for</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="co">// the same image serialize on the per-image lockfile.</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Store <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    Get<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> m <span class="op">*</span>Manifest<span class="op">,</span> imageID <span class="dt">string</span><span class="op">)</span> <span class="op">(</span>path <span class="dt">string</span><span class="op">,</span> err <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>    Verify<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> m <span class="op">*</span>Manifest<span class="op">,</span> imageID <span class="dt">string</span><span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>    Refresh<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> m <span class="op">*</span>Manifest<span class="op">,</span> imageID <span class="dt">string</span><span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>Anti-bluff posture (Sixth Law clause 2)</strong>: every
+public function in <code>pkg/cache/</code> MUST have a
+falsifiability-rehearsal test. Canonical rehearsals:</p>
+<ul>
+<li><code>TestStore_SHA256Mismatch_RejectsAndRemovesBlob</code> —
+replace the blob with one whose SHA differs; assert Get returns an error
+AND the bad blob is removed.</li>
+<li><code>TestStore_ConcurrentGet_SerializesViaFlock</code> — two
+goroutines call Get on the same imageID; both succeed; the URL is
+fetched only once (use a counting fake HTTP server).</li>
+</ul>
+<h3 id="32-pkgvm-containers">3.2 <code>pkg/vm/</code> (Containers)</h3>
+<p><strong><code>VM</code> interface</strong>
+(<code>pkg/vm/types.go</code>):</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> VMTarget <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    ID       <span class="dt">string</span> <span class="st">`json:&quot;id&quot;`</span>        <span class="co">// matches an ImageEntry.ID</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    Arch     <span class="dt">string</span> <span class="st">`json:&quot;arch&quot;`</span>      <span class="co">// &quot;x86_64&quot; | &quot;aarch64&quot; | &quot;riscv64&quot;</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    Distro   <span class="dt">string</span> <span class="st">`json:&quot;distro&quot;`</span>    <span class="co">// &quot;alpine&quot; | &quot;debian&quot; | &quot;fedora&quot;</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    Version  <span class="dt">string</span> <span class="st">`json:&quot;version&quot;`</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> BootResult <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    Target        VMTarget</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    Started       <span class="dt">bool</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    SSHPort       <span class="dt">int</span>           <span class="co">// host port forwarded to guest:22</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    MonitorPort   <span class="dt">int</span>           <span class="co">// host port for QMP control socket</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    BootDuration  time<span class="op">.</span>Duration</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    Error         <span class="dt">error</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> VM <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>    Boot<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> target VMTarget<span class="op">,</span> qcow2Path <span class="dt">string</span><span class="op">)</span> <span class="op">(</span>BootResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>    WaitForReady<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> sshPort <span class="dt">int</span><span class="op">,</span> timeout time<span class="op">.</span>Duration<span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>    Upload<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> sshPort <span class="dt">int</span><span class="op">,</span> hostPath<span class="op">,</span> vmPath <span class="dt">string</span><span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>    Run<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> sshPort <span class="dt">int</span><span class="op">,</span> command <span class="dt">string</span><span class="op">,</span> env <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span><span class="op">,</span> timeout time<span class="op">.</span>Duration<span class="op">)</span> <span class="op">(</span>stdout<span class="op">,</span> stderr <span class="dt">string</span><span class="op">,</span> exitCode <span class="dt">int</span><span class="op">,</span> err <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>    Download<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> sshPort <span class="dt">int</span><span class="op">,</span> vmPath<span class="op">,</span> hostPath <span class="dt">string</span><span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>    Teardown<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> monitorPort<span class="op">,</span> sshPort <span class="dt">int</span><span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong><code>VMMatrixRunner</code></strong>
+(<code>pkg/vm/matrix.go</code>): identical shape to
+<code>pkg/emulator/AndroidMatrixRunner</code> — <code>runOne</code>
+extracted; per-target row populated with <code>Diag</code>
+(target/distro/uname-r/ssh-version), <code>FailureSummaries</code>
+(parsed from script's stderr/exit-code), <code>Concurrent</code> (the
+matrix runner's setting).
+<code>MatrixResult.Gating = concurrent == 1 &amp;&amp; !config.Dev</code>.</p>
+<p><strong><code>Teardown</code> fast-path</strong>
+(<code>pkg/vm/teardown.go</code>): SSH <code>poweroff</code> + 30s
+graceful grace, then port-strict <code>KillByPort(monitorPort)</code>
+reusing <code>pkg/emulator/cleanup.go::KillByPort</code> (already
+strict-adjacent token matcher; no re-implementation). Skip-on-mismatch
+identical to <code>pkg/emulator</code>'s.</p>
+<h3 id="33-cmdvm-matrix-containers">3.3 <code>cmd/vm-matrix/</code>
+(Containers)</h3>
+<p>Thin CLI wrapper. Flags:</p>
+<pre><code>--image-manifest &lt;path&gt;     Path to vm-images.json
+--targets &lt;list&gt;            Comma-separated list of ImageIDs from manifest
+--uploads &lt;list&gt;            Comma-separated host:vm path pairs to upload
+--script &lt;path&gt;             Host-path to shell script run on each target
+--captures &lt;list&gt;           Comma-separated vm:host path pairs to download
+--evidence-dir &lt;path&gt;       Per-target attestation row directory
+--concurrent &lt;N&gt;            Default 1
+--dev                       Permits snapshot reload; sets Gating=false
+--boot-timeout &lt;duration&gt;   Default per-arch (60s/240s/360s — see D6)
+--script-timeout &lt;duration&gt; Default 10m</code></pre>
+<p>Exit codes match <code>cmd/emulator-matrix</code>: 0 = matrix passed,
+1 = at least one target failed, 2 = invalid args / runner error.</p>
+<h3 id="34-pkgemulator-refactor-containers">3.4
+<code>pkg/emulator/</code> refactor (Containers)</h3>
+<p><strong>Goal</strong>: route Android system-image fetch through
+<code>pkg/cache/</code>. <strong>External API unchanged</strong>.</p>
+<p>Today, <code>pkg/emulator/android.go::Boot</code> consumes the
+operator's <code>ANDROID_SDK_ROOT/system-images/</code>. The refactor:
+when an AVD's required system-image is absent,
+<code>pkg/emulator/</code> invokes
+<code>pkg/cache/Store.Get(manifest, "android-&lt;api&gt;-&lt;abi&gt;")</code>
+instead of failing or instructing the operator to run
+<code>sdkmanager</code>. The Lava-side manifest at
+<code>tools/lava-containers/vm-images.json</code> gains
+<code>android-*</code> entries alongside the qcow2 entries.</p>
+<p><strong>Anti-bluff posture</strong>: ≥1 falsifiability rehearsal —
+<code>TestAndroidEmulator_Boot_FetchesMissingSystemImageViaCache_AndDoesNotChangeAttestationSchema</code>.
+Mutation: route to a synthetic cache that returns a different image path
+→ assert (a) Boot still succeeds AND (b) attestation row schema is
+byte-equivalent to the pre-refactor schema.</p>
+<h3 id="35-cross-arch-signing-consumer-lava-parent">3.5 Cross-arch
+signing consumer (Lava parent)</h3>
+<p><strong><code>scripts/run-vm-signing-matrix.sh</code></strong>
+invokes <code>cmd/vm-matrix</code> with:</p>
+<ul>
+<li><code>--targets</code>: 9 IDs, all combinations of
+(alpine,debian,fedora) × (x86_64,aarch64,riscv64)</li>
+<li><code>--uploads</code>: <code>proxy/build/libs/app.jar</code>,
+<code>keystores/upload.keystore.p12</code>,
+<code>tests/vm-signing/sample.apk</code></li>
+<li><code>--script</code>:
+<code>tests/vm-signing/sign-and-hash.sh</code> (runs
+<code>jarsigner</code> + <code>sha256sum signed.apk</code>)</li>
+<li><code>--captures</code>: <code>/tmp/signed.apk</code>,
+<code>/tmp/signing-output.json</code></li>
+</ul>
+<p>Post-processing: read each target's <code>signing-output.json</code>
+for the SHA-256 of the signed bytes. Compare each to the x86_64 KVM
+reference's hash. Row gets <code>signing_match: true</code> iff hashes
+match (byte-equivalent signing).</p>
+<p><strong>Acceptance criterion</strong>: row's
+<code>signing_match</code> is <code>true</code> for all 9 targets. Any
+divergence is the JCA-provider bluff Sixth Law clause 1 was written to
+catch.</p>
+<p><strong>Falsifiability rehearsal</strong> (Lava Phase C):
+<code>test_signing_matrix_rejects_byte_divergence.sh</code> — fixture
+seeds a synthetic attestation with one row's hash differing → assert
+post-processing rejects.</p>
+<h3 id="36-cross-os-distro-consumer-lava-parent">3.6 Cross-OS distro
+consumer (Lava parent)</h3>
+<p><strong><code>scripts/run-vm-distro-matrix.sh</code></strong> invokes
+<code>cmd/vm-matrix</code> with:</p>
+<ul>
+<li><code>--targets</code>: 3 IDs (alpine-x86_64, debian-x86_64,
+fedora-x86_64) — distro coverage not arch</li>
+<li><code>--uploads</code>: <code>proxy/build/libs/app.jar</code>,
+<code>lava-api-go/build/lava-api-go</code></li>
+<li><code>--script</code>:
+<code>tests/vm-distro/boot-and-probe.sh</code> (starts both, polls
+health + functional endpoints)</li>
+<li><code>--captures</code>: <code>/tmp/probe-output.json</code></li>
+</ul>
+<p>Post-processing: read each target's <code>probe-output.json</code>
+for <code>proxy_health: bool</code>, <code>proxy_search: bool</code>,
+<code>goapi_health: bool</code>, <code>goapi_metrics: bool</code>. All
+four must be <code>true</code>.</p>
+<p><strong>Acceptance criterion</strong>: all 4 booleans are
+<code>true</code> for all 3 distros.</p>
+<p><strong>Falsifiability rehearsals</strong> (Lava Phase C):</p>
+<ul>
+<li><code>test_distro_matrix_rejects_proxy_health_failure.sh</code> —
+fixture with one distro reporting <code>proxy_health: false</code> →
+assert rejected.</li>
+<li><code>test_distro_matrix_rejects_goapi_metrics_failure.sh</code> —
+analogous.</li>
+<li><code>test_distro_matrix_accepts_clean_run.sh</code> — golden
+path.</li>
+</ul>
+<h3 id="37-lava-manifest--closure">3.7 Lava manifest + closure</h3>
+<p><strong><code>tools/lava-containers/vm-images.json</code></strong>: 9
+qcow2 entries (alpine/debian/fedora × x86_64/aarch64/riscv64) + at least
+1 Android system-image entry referenced by the
+<code>pkg/emulator/</code> refactor. SHA-256 + size + URL committed;
+bumps require deliberate operator review.</p>
+<p><strong>Closure attestation</strong> at
+<code>.lava-ci-evidence/Phase-pkg-vm-closure-2026-05-07.json</code> —
+same shape as Group B closure (per-component SHAs, mutation-rehearsal
+record, mirror convergence verified via live <code>git ls-remote</code>,
+"next group preview" line).</p>
+<p><strong>Bluff-hunt</strong> at
+<code>.lava-ci-evidence/bluff-hunt/2026-05-07-pkg-vm.json</code> —
+§6.N.1.1 lighter same-day hunt covering 1-2 production-code files
+(<code>pkg/cache/store.go::Get</code> +
+<code>pkg/vm/qemu.go::Boot</code>).</p>
+<h2 id="4-data-flow">4. Data flow</h2>
+<h3 id="41-cross-arch-signing-run-the-canonical-lava-consumer-path">4.1
+Cross-arch signing run (the canonical Lava consumer path)</h3>
+<pre><code>operator: ./scripts/run-vm-signing-matrix.sh
+  ├── parse tools/lava-containers/vm-images.json
+  ├── invoke cmd/vm-matrix with 9 targets, uploads, script, captures
+  │
+cmd/vm-matrix:
+  ├── for each target (sequentially in --concurrent=1):
+  │   ├── pkg/cache/Store.Get(manifest, target.ID) → /home/.../blobs/sha256/&lt;hash&gt;
+  │   ├── pkg/vm/QEMUVM.Boot(target, qcow2_path) → SSH/QMP ports
+  │   ├── pkg/vm/QEMUVM.WaitForReady (SSH listener up)
+  │   ├── captureDiag → DiagnosticInfo{ id, arch, distro, uname-r, ssh-banner }
+  │   ├── for each upload: pkg/vm/QEMUVM.Upload
+  │   ├── pkg/vm/QEMUVM.Run(script) → (stdout, stderr, exitCode)
+  │   ├── for each capture: pkg/vm/QEMUVM.Download
+  │   ├── parse stderr / exitCode for FailureSummaries
+  │   ├── pkg/vm/QEMUVM.Teardown
+  │   └── append AVDRow-equivalent to MatrixResult.Rows
+  ├── writeAttestation → real-device-verification.json with gating: true
+  └── exit 0 if all rows passed
+  │
+post-processing (run-vm-signing-matrix.sh, Lava-side):
+  ├── for each row: read captured signing-output.json → SHA-256
+  ├── compare each to the x86_64 KVM reference
+  └── augment attestation with signing_match bool per row
+
+operator: scripts/tag.sh Lava-Android-X.Y.Z-NN
+  ├── existing clause-6.I-clause-7 helper finds real-device-verification.json
+  ├── existing 3 Group B gates (concurrent=1, gating=true, diag.sdk-or-id consistency)
+  └── tag created (assuming all green)</code></pre>
+<h3 id="42-image-cache-miss-fetch--verify">4.2 Image cache miss (fetch +
+verify)</h3>
+<pre><code>pkg/cache/Store.Get(ctx, manifest, &quot;alpine-3.20-x86_64&quot;):
+  ├── lookup ImageEntry by ID
+  ├── compute target path: $CACHE/blobs/sha256/&lt;entry.sha256&gt;
+  ├── if path exists: stat-then-return (fast path)
+  ├── acquire flock on $CACHE/lockfiles/&lt;sha-prefix&gt;.lock
+  │   (concurrent Get for same ID → second caller waits, then sees the
+  │    blob in the fast path)
+  ├── HTTP GET entry.URL → tempfile
+  ├── stream-hash with sha256.New() while writing
+  ├── if computed_sha != entry.SHA256: rm tempfile, return error
+  ├── if entry.Size != 0 AND tempfile.size != entry.Size: rm, return error
+  ├── atomic rename tempfile → final path
+  ├── release flock
+  └── return final path</code></pre>
+<h3 id="43-vm-matrix-teardown-fast-path">4.3 VM matrix Teardown
+fast-path</h3>
+<pre><code>pkg/vm/QEMUVM.Teardown(ctx, monitorPort, sshPort):
+  ├── SSH &quot;poweroff&quot; via existing sshPort connection
+  ├── poll QMP socket for &quot;SHUTDOWN&quot; event up to teardownGracePeriod (30s)
+  │   (graceful Linux shutdown completes here; QEMU exits)
+  ├── if QEMU still alive after grace:
+  │   ├── pkg/emulator/cleanup.KillByPort(monitorPort) — strict-adjacent /proc walk
+  │   ├── if Matched=0: return &quot;did not exit; KillByPort matched 0 (skip-on-mismatch safety)&quot;
+  │   └── if Matched&gt;0: re-poll for /proc clearing (5s); return nil if gone
+  └── return nil on graceful exit</code></pre>
+<p>The fast-path reuses <code>pkg/emulator/cleanup.go::KillByPort</code>
+directly — same strict-adjacent matcher, same skip-on-mismatch safety,
+no re-implementation. Lava Phase C's falsifiability rehearsal explicitly
+proves this code path:
+<code>TestVMTeardown_FastPath_SkipsOnMismatch</code> is a structural
+copy of <code>TestTeardown_FastPath_SkipsOnMismatch</code> from Group B
+Phase A.</p>
+<h2 id="5-error-handling">5. Error handling</h2>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Behavior</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>pkg/cache.Store.Get</code> SHA mismatch</td>
+<td>Remove partial blob, return error</td>
+<td>Bluff vector — silent corrupt cache hit is exactly what §6.J
+forbids</td>
+</tr>
+<tr>
+<td><code>pkg/cache.Store.Get</code> HTTP error</td>
+<td>Return error, don't poison cache</td>
+<td>Network blips are recoverable on retry</td>
+</tr>
+<tr>
+<td><code>pkg/cache</code> concurrent Get for same image</td>
+<td>Serialize on per-image flock; both succeed; URL fetched once</td>
+<td>Avoid 2× download on parallel matrix runs</td>
+</tr>
+<tr>
+<td><code>pkg/vm.QEMUVM.Boot</code> KVM unavailable on x86_64</td>
+<td>Fall through to TCG; log "[vm] KVM unavailable, using TCG
+(slow)"</td>
+<td>Operator transparency; doesn't fail</td>
+</tr>
+<tr>
+<td><code>pkg/vm.QEMUVM.Boot</code> qemu-system-<arch> not on PATH</td>
+<td>Return error per-target; matrix continues to next target</td>
+<td>Per-target row failure ≠ matrix-runner crash</td>
+</tr>
+<tr>
+<td><code>pkg/vm.QEMUVM.WaitForReady</code> SSH not listening past
+timeout</td>
+<td>Return error; matrix-row Failed</td>
+<td>Honest signal — boot succeeded but guest never came up</td>
+</tr>
+<tr>
+<td><code>pkg/vm.QEMUVM.Run</code> script exits non-zero</td>
+<td>Capture stdout/stderr/exitCode; row Passed=false</td>
+<td>Standard test-failure path</td>
+</tr>
+<tr>
+<td><code>pkg/vm.QEMUVM.Upload</code> SSH copy fails</td>
+<td>Return error; matrix-row Failed</td>
+<td>Same as Run</td>
+</tr>
+<tr>
+<td><code>pkg/vm.QEMUVM.Teardown</code> graceful grace expires</td>
+<td>KillByPort fast-path on monitor port</td>
+<td>Group B Teardown pattern</td>
+</tr>
+<tr>
+<td><code>cmd/vm-matrix</code> --concurrent&gt;1 + script writes to
+shared host dir</td>
+<td>Document as "scripts must be concurrency-aware"; matrix runner does
+not enforce</td>
+<td>Same as <code>pkg/emulator</code>'s <code>TestReportGlob</code>
+warning</td>
+</tr>
+<tr>
+<td>Lava signing consumer: signing_match false on &gt;0 row</td>
+<td>Reject the run; <code>tag.sh</code> refuses (assuming
+row.Passed=false too)</td>
+<td>JCA bluff caught</td>
+</tr>
+<tr>
+<td>Lava distro consumer: any of 4 booleans false</td>
+<td>Reject the run; <code>tag.sh</code> refuses</td>
+<td>Distro bluff caught</td>
+</tr>
+</tbody>
+</table>
+<h2 id="6-testing">6. Testing</h2>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>What</th>
+<th>Real-stack?</th>
+<th>Falsifiability rehearsal?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>pkg/cache/*_test.go</code> (Containers)</td>
+<td>Manifest parse, SHA verify, flock concurrency,
+refresh-after-mutation</td>
+<td>Real <code>os</code> + real <code>flock</code> + counting-fake HTTP
+server</td>
+<td>YES — drop SHA verify → mismatch test fails</td>
+</tr>
+<tr>
+<td><code>pkg/vm/qemu_test.go</code> (Containers)</td>
+<td>Boot/WaitForReady/Upload/Run/Download/Teardown via fake exec/SSH
+executors</td>
+<td>Injected fakes at the boundary</td>
+<td>YES — drop SSH-port-strict match → race-condition test fails</td>
+</tr>
+<tr>
+<td><code>pkg/vm/matrix_test.go</code> (Containers)</td>
+<td>runOne, captureDiag, FailureSummaries parsing, worker pool,
+gating-flag flip</td>
+<td>stubVM (mirror of stubEmulator)</td>
+<td>YES — flip Gating default → defaults test fails</td>
+</tr>
+<tr>
+<td><code>pkg/vm/teardown_test.go</code> (Containers)</td>
+<td>KillByPort fast-path under skip-on-mismatch safety; reuses
+pkg/emulator/cleanup.KillByPort</td>
+<td>Injected killByPortHook seam</td>
+<td>YES — drop skip-on-mismatch return → safety test fails</td>
+</tr>
+<tr>
+<td><code>pkg/emulator/*_test.go</code> (Phase B refactor)</td>
+<td>Existing 41 tests + 1 new (cache-routed Boot doesn't change
+attestation schema)</td>
+<td>Same fakes as Group B</td>
+<td>YES — replace cache backend with one returning a different path →
+schema-equality test fails</td>
+</tr>
+<tr>
+<td><code>tests/vm-signing/test_signing_matrix_*.sh</code> (Lava)</td>
+<td>tag.sh-equivalent rejection of byte-divergent signing rows</td>
+<td>Real bash + jq + fixture attestation JSON</td>
+<td>YES — drop signing_match check → divergence test fails</td>
+</tr>
+<tr>
+<td><code>tests/vm-distro/test_distro_matrix_*.sh</code> (Lava)</td>
+<td>tag.sh-equivalent rejection of proxy_health/goapi_metrics false
+rows</td>
+<td>Same</td>
+<td>YES — drop boolean check → failure-injection test fails</td>
+</tr>
+<tr>
+<td>Real-stack matrix run (operator)</td>
+<td><code>./scripts/run-vm-signing-matrix.sh</code> (real qemu-system-*
++ real SSH + real qcow2 boot) — produces a real attestation with
+<code>signing_match: true</code> × 9; analogous for distro consumer</td>
+<td>YES — real cold-boot QEMU, real artifact upload, real script
+execution</td>
+<td>NOT applicable to a single test — but the matrix run itself
+satisfies clause 6.K + 6.I</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Falsifiability rehearsal floor per phase</strong> (per Q8
+D5):</p>
+<ul>
+<li><strong>Phase A (Containers, all 3 packages + cmd):</strong> ≥5
+rehearsals.</li>
+<li><strong>Phase B (Containers, emulator refactor):</strong> ≥1
+rehearsal.</li>
+<li><strong>Phase C (Lava consumers):</strong> ≥2 rehearsals (1 per
+consumer).</li>
+<li><strong>Phase D (closure):</strong> none (evidence-only, like Group
+B Phase C).</li>
+</ul>
+<h2 id="7-order-of-operations">7. Order of operations</h2>
+<table>
+<thead>
+<tr>
+<th>Phase</th>
+<th>Branch</th>
+<th>Files (high-level)</th>
+<th>Commits</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>A.</strong> Containers code</td>
+<td><code>lava-pin/2026-05-07-pkg-vm</code></td>
+<td><code>pkg/cache/*</code> (new), <code>pkg/vm/*</code> (new),
+<code>cmd/vm-matrix/main.go</code> (new)</td>
+<td>1 commit; subagent dispatched per Group A-prime / B pattern</td>
+</tr>
+<tr>
+<td><strong>B.</strong> Emulator refactor</td>
+<td>same Containers branch</td>
+<td><code>pkg/emulator/android.go</code> (cache-routed image fetch),
+<code>pkg/emulator/types.go</code> (if MatrixConfig gains an
+ImageManifest path field)</td>
+<td>1 commit</td>
+</tr>
+<tr>
+<td><strong>C.</strong> Lava consumers</td>
+<td>Lava <code>master</code></td>
+<td><code>tools/lava-containers/vm-images.json</code>,
+<code>scripts/run-vm-{signing,distro}-matrix.sh</code>,
+<code>tests/vm-{signing,distro}/*.sh</code>, <code>CLAUDE.md</code>
+(§6.K-debt RESOLVED)</td>
+<td>1 commit</td>
+</tr>
+<tr>
+<td><strong>D.</strong> Pin bump + closure</td>
+<td>Lava <code>master</code></td>
+<td><code>submodules/containers</code> SHA bump,
+<code>.lava-ci-evidence/bluff-hunt/2026-05-07-pkg-vm.json</code>,
+<code>.lava-ci-evidence/Phase-pkg-vm-closure-2026-05-07.json</code></td>
+<td>1 commit</td>
+</tr>
+</tbody>
+</table>
+<p>Total: <strong>2 Containers commits + 2 Lava parent commits</strong>.
+Mirror push to all 4 Lava upstreams + 2 Containers upstreams (github +
+gitlab — gitflic + gitverse aren't configured for the Containers
+submodule, matching inherited baseline) after each commit; convergence
+verified via live <code>git ls-remote</code>.</p>
+<p>Estimated wall-clock: 8-12 hours (Phase A is the bulk — pkg/cache +
+pkg/vm + cmd/vm-matrix is roughly 2-3× the surface area of Group B Phase
+A).</p>
+<h2 id="8-constitutional-bindings">8. Constitutional bindings</h2>
+<ul>
+<li><strong>Sixth Law clauses 1-5.</strong> Every test traverses real
+production code paths; falsifiability rehearsal recorded per test class;
+primary assertion on user-visible state (cache file path, VM exit code,
+attestation row schema, <code>signing_match</code> bool,
+<code>proxy_health</code> bool).</li>
+<li><strong>Sixth Law clause 6 (inheritance).</strong> All new files
+inherit the Pact recursively into Containers and Lava both.</li>
+<li><strong>Seventh Law clause 1 (Bluff-Audit stamp).</strong> Every
+commit's body carries the test/mutation/observed/reverted block per
+§6.N.1.2 (pre-push Check 4 enforces).</li>
+<li><strong>Clause 6.I (Multi-Emulator Container Matrix).</strong>
+<code>pkg/vm</code>'s <code>VMMatrixRunner</code> emits the same
+attestation row schema as <code>pkg/emulator</code>'s
+<code>AndroidMatrixRunner</code> — <code>tag.sh</code>'s 3 Group B gates
+apply transparently.</li>
+<li><strong>Clause 6.J / 6.L (Anti-Bluff Functional Reality
+Mandate).</strong> Every gate exists for one reason: refuse evidence
+that doesn't represent a real-user-completes-the-flow run. The
+cross-arch signing consumer specifically catches the JCA bluff; the
+cross-OS distro consumer catches distro-specific runtime
+divergence.</li>
+<li><strong>Clause 6.K (Builds-Inside-Containers Mandate).</strong> This
+spec <strong>closes 6.K-debt</strong>: criterion (2), the QEMU baseline
+in <code>pkg/vm/</code>, lands. Criteria (1) (3) (4) were already met by
+Group A-prime + Group B.</li>
+<li><strong>Clause 6.M (Host-Stability Forensic Discipline).</strong>
+<code>pkg/vm.QEMUVM.Teardown</code>'s KillByPort fast-path reuses
+<code>pkg/emulator/cleanup.KillByPort</code> — strict-adjacent matcher,
+no broad pkill, Matched=0 is no-op-safe. Per-VM port-strict targeting
+means concurrent matrix runs / sibling-project QEMUs are NEVER
+touched.</li>
+<li><strong>Clause 6.N (Bluff-Hunt Cadence).</strong> Phase D's
+bluff-hunt JSON is the §6.N.1.1 same-day record. Pre-push Check 5
+mechanically validates it.</li>
+<li><strong>Decoupled Reusable Architecture.</strong>
+<code>pkg/cache</code>, <code>pkg/vm</code>, <code>cmd/vm-matrix</code>
+are project-agnostic. The Lava-domain manifest
+(<code>tools/lava-containers/vm-images.json</code>) lives in Lava. Same
+separation pattern as <code>--test-report-glob</code> (Containers field)
+vs <code>app/build/outputs/...</code> (Lava-side passthrough).</li>
+<li><strong>Local-Only CI/CD.</strong> No new hosted-CI surface. All
+gates are pre-push hooks + <code>tag.sh</code> + the operator's
+<code>./scripts/run-vm-*-matrix.sh</code> invocation.</li>
+</ul>
+<h2 id="9-mirror-policy">9. Mirror policy</h2>
+<p>Per §6.C (mirror-state mismatch checks) and Decoupled Reusable
+Architecture:</p>
+<ul>
+<li>Containers branch <code>lava-pin/2026-05-07-pkg-vm</code> MUST
+converge at the same SHA on its 2 configured upstreams (github + gitlab)
+before the Lava parent's pin-bump commit references it.</li>
+<li>Lava parent commits (Phases C and D) MUST converge at the same SHA
+on all 4 upstreams before the closure attestation is finalized.</li>
+<li>Convergence verified via live <code>git ls-remote</code> — NOT via
+stale <code>.git/refs/remotes/&lt;r&gt;/master</code> cache. Group
+A-prime + Group B reviewer iterations recorded false-positive
+divergences from misreading that cache.</li>
+</ul>
+<h2 id="10-self-review-checklist">10. Self-review checklist</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" checked="" /><strong>Placeholder
+scan.</strong> No "TBD", no "TODO", no "implement later". Every
+component (3.1-3.7) has interface, file paths, anti-bluff posture
+detail.</label></li>
+<li><label><input type="checkbox" checked="" /><strong>Internal
+consistency.</strong> Architecture diagram, components section, data
+flow, testing table, order-of-operations all reference the same 4
+phases, the same 3 Containers packages + 1 refactor + 2 Lava consumers,
+the same branch name (<code>lava-pin/2026-05-07-pkg-vm</code>), the same
+gating semantics
+(<code>Concurrent==1 &amp;&amp; !Dev</code>).</label></li>
+<li><label><input type="checkbox" checked="" /><strong>Scope
+check.</strong> Single bundled increment closing 6.K-debt + the 1 Group
+C item with overlap. The other 2 Group C candidates (network sim,
+screenshot capture) explicitly out of scope. Phase decomposition into 4
+commits keeps each shippable independently.</label></li>
+<li><label><input type="checkbox" checked="" /><strong>Ambiguity
+check.</strong> Every "MUST" / "MAY" usage intentional. The
+skip-on-mismatch safety is stated three times in three contexts
+(component 3.2 Teardown, error handling table, constitutional binding
+6.M) precisely because Group B operator feedback ("safest approach,
+other processes may be used by other projects") needs zero room for
+misreading. The Decoupled Reusable Architecture separation (manifest in
+Lava, mechanism in Containers) is stated four times (sections 1.3, 3.1,
+3.7, 8) for the same reason.</label></li>
+</ul>
+<hr />
+<p><strong>Spec status:</strong> approved (operator, 2026-05-05
+evening). Awaiting operator review of this written form before
+transitioning to <code>superpowers:writing-plans</code> for the
+implementation plan.</p>
+</body>
+</html>

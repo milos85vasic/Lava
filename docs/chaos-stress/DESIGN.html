@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>DESIGN</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1
+id="stress--chaos-test-design-lava-equivalent-of-helixconstitution-11485">Stress
++ Chaos Test Design (Lava equivalent of HelixConstitution §11.4.85)</h1>
+<p><strong>Status:</strong> Phase 1 scaffold landed (lava-api-go stress,
+host-runnable now). Later phases deferred. <strong>Author:</strong>
+design+investigation subagent, 2026-05-31 (68th-cycle follow-up).
+<strong>Pin note:</strong> This doc is written against constitution pin
+<code>208e2c8</code> AND the fetched upstream <code>origin/main</code> =
+<code>883ccc1</code> (which is where §11.4.85 lives). The pin is NOT
+bumped by this work (CONST-049 / operator-gated). §11.4.85 becomes
+mechanically binding when the pin advances; this scaffold lands the Lava
+equivalent ahead of that so the bump is not blocked on a missing
+suite.</p>
+<hr />
+<h2 id="1-the-mandate--11485-verbatim">1. The mandate — §11.4.85
+verbatim</h2>
+<p>From <code>constitution/Constitution.md</code> at upstream
+<code>origin/main</code> (<code>883ccc1</code>), lines 7382-7396+
+(identical text already present in the pinned tree at the same line
+offsets):</p>
+<blockquote>
+<h3
+id="11485--stress--chaos-test-mandate-user-mandate-2026-05-24">§11.4.85
+— Stress + Chaos Test Mandate (User mandate, 2026-05-24)</h3>
+<p><strong>Short tag:</strong> <code>stress-chaos-mandate</code>.</p>
+<p><strong>Forensic anchor (verbatim user mandate,
+2026-05-24):</strong></p>
+<blockquote>
+<p>"Every fix or improvement you do MUST BE covered with full automation
+stress and chaos tests so we are sure nothing can break the
+functionality and all edge cases are monitored and polished and
+additionally fixed if that is needed! Everything must produce rock solid
+proofs and follow fully no-bluff policy!"</p>
+</blockquote>
+<p><strong>The mandate.</strong> Every fix or improvement landed in a
+consuming project MUST ship with full-automation <strong>stress</strong>
+AND <strong>chaos</strong> test suites that exercise edge cases,
+sustained load, concurrent contention, and failure-injection. A fix that
+PASSes its happy-path test but has never been exercised under stress or
+under fault-injection is a §11.4 / §107 PASS-bluff at the resilience
+layer: it claims to work but carries no evidence that real-world
+adversarial conditions (sustained throughput, parallel contention,
+partial failure, resource exhaustion, malformed input) leave the fix
+intact and the user-visible behaviour correct.</p>
+<p><strong>Definitions (closed-set, mechanically
+auditable):</strong></p>
+<ol type="1">
+<li><strong>Stress test</strong> — exercises the fix-under-test under
+sustained or concurrent load above ordinary usage. At MINIMUM one of:
+<ul>
+<li><strong>Sustained load</strong> — N ≥ 100 sequential iterations OR ≥
+30 seconds wall-clock continuous load. Per-iteration latency MUST be
+recorded; percentile distribution (p50/p95/p99) MUST be reported.</li>
+<li><strong>Concurrent contention</strong> — N ≥ 10 parallel
+invocations. All N MUST complete. No deadlock, no resource leak
+(file-descriptor count, process-table count, RSS), no data race in
+shared state.</li>
+</ul></li>
+</ol>
+</blockquote>
+<p>(The clause continues with the chaos-test definition — fault
+injection, dependency kill, latency injection, malformed input, resource
+exhaustion — and the requirement that recovery after the chaos action be
+asserted on user-visible state. The full body lives in
+<code>constitution/Constitution.md</code> §11.4.85; the normative
+minimums quoted above are what Phase 1 implements.)</p>
+<h3 id="what-the-clause-mandates-extracted-requirements">What the clause
+mandates (extracted requirements)</h3>
+<table>
+<thead>
+<tr>
+<th>Requirement</th>
+<th>§11.4.85 source</th>
+<th>Phase 1 coverage</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Stress: sustained load N≥100 iters OR ≥30s, with p50/p95/p99</td>
+<td>def. 1 (sustained)</td>
+<td>YES — <code>Benchmark/sustained</code> records every latency, emits
+percentiles</td>
+</tr>
+<tr>
+<td>Stress: concurrent contention N≥10 parallel, all complete, no
+leak/race</td>
+<td>def. 1 (concurrent)</td>
+<td>YES — <code>concurrent</code> mode, N=64 goroutines,
+<code>-race</code>-clean, FD-count delta recorded</td>
+</tr>
+<tr>
+<td>Chaos: fault injection (handler error, dependency unavailable)</td>
+<td>def. 2</td>
+<td>PARTIAL — error-injection seam wired; Postgres-kill chaos is
+operator-gated (Phase 1.b)</td>
+</tr>
+<tr>
+<td>Chaos: latency injection</td>
+<td>def. 2</td>
+<td>YES (in-process latency injector middleware)</td>
+</tr>
+<tr>
+<td>Chaos: malformed input</td>
+<td>def. 2</td>
+<td>YES — malformed-body / oversized-path stress variant</td>
+</tr>
+<tr>
+<td>Chaos: resource exhaustion (conn-pool, rate limiter trip)</td>
+<td>def. 2</td>
+<td>PARTIAL — rate-limiter trip recorded; pool-exhaustion is
+operator-gated (needs real PG)</td>
+</tr>
+<tr>
+<td>Recovery assertion on user-visible state after chaos</td>
+<td>clause body</td>
+<td>YES for in-process chaos; real-dependency recovery is Phase 1.b</td>
+</tr>
+<tr>
+<td>Rock-solid proofs / no-bluff (real evidence file, no fabricated
+numbers)</td>
+<td>forensic anchor + §6.J</td>
+<td>YES — JSON + MD evidence written from the actual run only</td>
+</tr>
+<tr>
+<td>Full automation, re-runnable without manual intervention</td>
+<td>§11.4.98 compose</td>
+<td>YES — <code>go test -tags stress</code> +
+<code>scripts/run-chaos-stress.sh</code>, zero manual steps</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Tooling: the clause is outcome-based, not
+tool-prescriptive.</strong> §11.4.85 names no specific load-test tool
+(no k6, no vegeta, no JMeter). It mandates <em>outcomes</em> (recorded
+latency percentiles, all-complete concurrency, recovery-after-fault on
+user-visible state) and a closed-set of <em>dimensions</em>. Phase 1
+therefore uses the Go stdlib <code>testing</code> +
+<code>httptest</code> + goroutines — zero new third-party deps, no sudo,
+runs on this macOS host. This is the same "reuse the stdlib before
+adding tooling" posture §11.4.74 prescribes.</p>
+<hr />
+<h2 id="2-dimensions">2. Dimensions</h2>
+<p><strong>Stress dimensions (load):</strong></p>
+<ul>
+<li>S1 Sustained load — N≥100 sequential requests against the real
+handler; record p50/p95/p99/max.</li>
+<li>S2 Concurrent contention — N≥10 (Phase 1 uses 64) parallel requests;
+all must complete; no FD leak; <code>-race</code>-clean.</li>
+</ul>
+<p><strong>Chaos dimensions (fault):</strong></p>
+<ul>
+<li>C1 Fault injection — handler/dependency returns error mid-load;
+assert error-rate bounded + recovery after fault clears.</li>
+<li>C2 Latency injection — inject artificial per-request latency; assert
+the server stays responsive and percentiles degrade gracefully (no
+hang).</li>
+<li>C3 Dependency kill — kill the Postgres container mid-request stream;
+assert the API returns a clean 5xx (not a panic/hang) during the outage
+and recovers (200) after restart. <strong>Operator-gated</strong> (needs
+podman + real PG; Phase 1.b).</li>
+<li>C4 Resource exhaustion — (a) trip the rate limiter and assert 429 is
+returned deterministically; (b) exhaust the pgx connection pool and
+assert graceful backpressure. (a) is in-process now; (b) is
+operator-gated (Phase 1.b).</li>
+<li>C5 Malformed input — oversized paths, malformed bodies, garbage
+headers under load; assert no panic, bounded error codes.</li>
+</ul>
+<hr />
+<h2 id="3-chosen-first-target--lava-api-go">3. Chosen first target —
+<code>lava-api-go</code></h2>
+<p><strong>Decision: the Go API service is the best first stress+chaos
+target.</strong> Justification:</p>
+<ol type="1">
+<li><strong>It is the only Lava surface that is a real, long-running
+server with real dependencies</strong> (Gin HTTP server + Postgres via
+pgx + cache + rate limiter + rutracker scrape bridge). Stress
+(sustained/concurrent load) and chaos (dependency kill, pool exhaustion,
+rate-limiter trip, latency injection) are <em>native</em> concepts here.
+The Android client, by contrast, has no server-side load surface and its
+chaos analogue (process death, low-memory) needs an emulator — which is
+§6.X-debt-blocked on this darwin/arm64 host (no
+<code>/dev/kvm</code>/HVF in the podman VM).</li>
+<li><strong>It runs on THIS macOS host with no emulator and no
+sudo.</strong> <code>httptest.Server</code> binds a real loopback port
+in-process; <code>go test</code> drives it. The full S1/S2/C1/C2/C4a/C5
+set needs nothing but the Go toolchain.</li>
+<li><strong>It already has a <code>tests/load/</code> directory and a
+test-type taxonomy</strong>
+(<code>tests/{contract,e2e,parity,load,fixtures}</code>) — the
+stress+chaos suite slots in as <code>tests/stress/</code> alongside,
+matching the existing convention.</li>
+<li><strong>Real evidence is cheap and high-signal here:</strong>
+latency percentiles, error rates under injected fault, and
+recovery-time-after-chaos are exactly the "rock-solid proofs" the
+forensic anchor demands, and they are byte-for-byte reproducible.</li>
+</ol>
+<p>The Postgres-kill (C3) and pool-exhaustion (C4b) chaos actions need a
+real Postgres container under podman. They are
+<strong>operator-gated</strong> and run via
+<code>scripts/run-chaos-stress.sh --with-podman</code> (Phase 1.b) — NOT
+faked when the container is absent.</p>
+<hr />
+<h2 id="4-evidence-each-test-produces">4. Evidence each test
+produces</h2>
+<p>Every run writes a single JSON evidence file + a human-readable MD
+companion under
+<code>lava-api-go/tests/stress/evidence/&lt;UTC-timestamp&gt;/</code>.
+Fields:</p>
+<ul>
+<li><strong>per-dimension block</strong> with: dimension id (S1/S2/C1…),
+iterations/concurrency, pass/fail.</li>
+<li><strong>latency</strong>: p50, p95, p99, max, min, mean (nanoseconds
++ human ms), histogram bucket counts.</li>
+<li><strong>error metrics</strong>: total requests, 2xx count, 4xx
+count, 5xx count, error rate.</li>
+<li><strong>chaos block</strong>: fault type, fault window (start/end
+request index), error rate <em>during</em> fault, error rate
+<em>after</em> fault clears, recovery-time (requests-until-first-2xx
+after fault clears).</li>
+<li><strong>leak guards</strong>: open-FD count before/after (delta must
+be ~0), goroutine count before/after.</li>
+<li><strong>provenance</strong>: git SHA
+(<code>git rev-parse HEAD</code>), Go version, GOOS/GOARCH, host,
+wall-clock.</li>
+<li><strong>gating verdict</strong>: <code>PASS</code>/<code>FAIL</code>
+per the §11.4.85 minimums (N≥100 or ≥30s; N≥10 concurrent; recovery
+asserted).</li>
+</ul>
+<p>No number in the evidence file is ever written unless it came from
+the actual run. If a dimension is operator-gated and the dependency is
+absent, the JSON records
+<code>"status": "OPERATOR_GATED", "ran": false</code> — never a
+fabricated metric (§6.J / §11.4.6).</p>
+<hr />
+<h2
+id="5-11498-alignment-full-automation-re-runnable-without-manual-intervention">5.
+§11.4.98 alignment (full automation, re-runnable without manual
+intervention)</h2>
+<p>The Phase 1 suite is a plain
+<code>go test -tags stress ./tests/stress/...</code>. It:</p>
+<ul>
+<li>starts its own <code>httptest.Server</code> in-process (no external
+server to boot by hand),</li>
+<li>needs no human action mid-run (no typing, no clicking, no manual
+webhook),</li>
+<li>runs identically in CI and on the operator's host,</li>
+<li>writes its own evidence file and exits 0/1 on the gating
+verdict.</li>
+</ul>
+<p>The operator-gated Postgres-kill path is <em>also</em>
+full-automation when the flag is supplied — the script brings up the
+container, runs the chaos, tears it down, with no manual step. It is
+gated only on the <em>presence</em> of podman + the operator's opt-in,
+not on a manual action during the run.</p>
+<hr />
+<h2 id="6-phased-plan">6. Phased plan</h2>
+<p><strong>Phase 1 (this commit — host-runnable now):</strong>
+<code>lava-api-go/tests/stress/</code></p>
+<ul>
+<li><code>stress_harness.go</code> (build tag <code>stress</code>) — the
+load driver + latency recorder + evidence writer.</li>
+<li><code>api_stress_test.go</code> (build tag <code>stress</code>) — S1
+sustained, S2 concurrent, C1 in-process fault injection, C2 latency
+injection, C4a rate-limiter trip, C5 malformed input, against a real Gin
+handler via <code>httptest</code>.</li>
+<li><code>scripts/run-chaos-stress.sh</code> — Lava-side glue: runs the
+in-process suite by default; <code>--with-podman</code> adds C3
+(Postgres-kill) + C4b (pool-exhaustion) when the operator opts in.</li>
+</ul>
+<p><strong>Phase 1.b (operator-gated, same code, needs podman + real
+PG):</strong> C3 + C4b via the script's <code>--with-podman</code> path.
+Reuses the existing <code>lava-api-go</code> podman compose for the
+DB.</p>
+<p><strong>Phase 2 (deferred — Android/emulator side):</strong>
+process-death + low-memory + airplane-mode + slow-network chaos for the
+Compose client, driven through the §6.X containerized emulator matrix.
+Blocked on the standing §6.X-debt (darwin/arm64 host has no KVM/HVF in
+the podman VM). Will land on a Linux x86_64 gate-host. Documented
+honestly as deferred, not faked.</p>
+<p><strong>Phase 3 (deferred):</strong> extend the stress+chaos pattern
+to the Ktor <code>:proxy</code> and to the rutracker scrape bridge
+(real-tracker chaos: upstream-slow, upstream-503, Cloudflare-challenge),
+gated by <code>-PrealTrackers=true</code> so default runs make no
+outbound calls.</p>
+<hr />
+<h2 id="7-11474-catalogue-check-reuse-before-build">7. §11.4.74
+catalogue-check (reuse-before-build)</h2>
+<p>Lava already vendors resilience-relevant submodules. Confirmed from
+each submodule's own <code>CLAUDE.md</code> /
+<code>README.md</code>:</p>
+<ul>
+<li><strong><code>submodules/recovery/</code></strong>
+(<code>digital.vasic.recovery</code>) — <code>pkg/breaker</code> (named
+circuit breakers + registry), <code>pkg/health</code> (periodic health
+checker with <code>Status</code> tracking), <code>pkg/facade</code>
+(<code>Resilience</code> API: <code>Execute</code>,
+<code>GetOrCreateBreaker</code>, <code>AddHealthCheck</code>,
+<code>Stats</code>, <code>Stop</code>). This is the
+<strong>production</strong> resilience surface the C3 dependency-kill
+chaos test will drive in Phase 1.b — the circuit-breaker +
+health-checker are exactly what make a Postgres-outage recover
+cleanly.</li>
+<li><strong><code>submodules/ratelimiter/</code></strong> — production
+rate-limiting (the C4a dimension asserts its 429-under-load
+<em>semantics</em>; the in-process Phase-1 version proves the harness
+can detect a deterministic 429, while the real limiter is exercised by
+lava-api-go's existing e2e suite via
+<code>internal/ratelimit/</code>).</li>
+<li><strong><code>submodules/concurrency/</code></strong> —
+<code>pkg/breaker</code> engine (the lower-level breaker
+<code>recovery</code> composes) + <code>pkg/safe</code> concurrent-safe
+containers.</li>
+<li><strong><code>submodules/observability/</code></strong> —
+<code>RecordNonFatal</code> telemetry surface (§6.AC).</li>
+</ul>
+<p><strong>Reuse-vs-build call:</strong> the Phase 1 <strong>stress
+driver itself</strong> (load generation + latency percentile recording +
+evidence writing) is <em>test infrastructure</em>, not a production
+capability — no submodule provides a Go load-generator /
+percentile-recorder, so it is built here in <code>tests/stress/</code>
+(the correct home for test glue, per §11.4.74 "no-match"). The
+<strong>production</strong> capabilities the chaos tests
+<em>exercise</em> (circuit-breaking + health-checking via
+<code>recovery</code>, rate limiting via <code>ratelimiter</code>,
+telemetry via <code>observability</code>) are already provided by the
+submodules and are NOT reimplemented — the stress suite <em>drives</em>
+them, it does not duplicate them. Phase 1.b C3/C4b will import
+<code>digital.vasic.recovery/pkg/facade</code> (via lava-api-go's
+existing <code>internal/</code> glue) rather than re-roll a breaker.</p>
+<p><code>Catalogue-Check:</code> reuse
+<code>vasic-digital/recovery</code> +
+<code>vasic-digital/ratelimiter</code> +
+<code>vasic-digital/observability</code> (chaos <em>targets</em>);
+no-match for the load-driver test glue (built in
+<code>tests/stress/</code>).</p>
+<hr />
+<h2 id="8-honest-status-of-this-investigation">8. Honest status of this
+investigation</h2>
+<ul>
+<li>§11.4.85 text: <strong>CONFIRMED verbatim</strong> (quoted in §1)
+from both the pinned tree and <code>origin/main</code>.</li>
+<li>lava-api-go layout + test taxonomy: <strong>CONFIRMED</strong> —
+<code>tests/{contract,e2e,parity,load,qa, compose,integration,scripts,fixtures}</code>
++ a new <code>tests/stress/</code> added by this work;
+<code>internal/{archiveorg,auth,cache,config,discovery,firebase,gen,gutenberg,handlers,kinozal, middleware,nnmclub,observability,provider,qa,ratelimit,rutracker,server,version}</code>.</li>
+<li>Resilience submodule APIs: <strong>CONFIRMED</strong> from each
+submodule's own <code>CLAUDE.md</code>/<code>README.md</code> (see §7) —
+<code>recovery</code> exposes <code>pkg/{breaker,health,facade}</code>;
+reuse-vs-build call recorded.</li>
+<li>Phase 1 suite: <strong>RAN, verdict PASS, EXIT=0</strong> — see
+<code>EVIDENCE-phase1.md</code> for verbatim numbers.</li>
+<li>Constitution pin: <strong>NOT bumped</strong> (CONST-049 /
+operator-gated). The pin is <code>208e2c8</code>; §11.4.85 is present in
+both the pinned tree and <code>origin/main</code> (<code>883ccc1</code>)
+at the same line offsets.</li>
+</ul>
+</body>
+</html>

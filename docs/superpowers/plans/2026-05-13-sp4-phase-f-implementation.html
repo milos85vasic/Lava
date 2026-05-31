@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-05-13-sp4-phase-f-implementation</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1 id="sp-4-phase-f--clone-searchable-implementation-plan">SP-4 Phase F
+— Clone searchable (implementation plan)</h1>
+<p><strong>Plan date:</strong> 2026-05-13 <strong>Design:</strong>
+<code>docs/superpowers/specs/2026-05-13-sp4-phase-f-design.md</code>
+<strong>Prerequisite:</strong> HEAD <code>657f74c1</code> (Phase D
+landed).</p>
+<p>5 tasks, ~15 steps. Single-session executable.</p>
+<h2 id="task-1--clonedroutingtrackerclient">Task 1 —
+<code>ClonedRoutingTrackerClient</code></h2>
+<p><strong>Files:</strong></p>
+<ul>
+<li>Create:
+<code>core/tracker/client/src/main/kotlin/lava/tracker/client/ClonedRoutingTrackerClient.kt</code></li>
+</ul>
+<p><strong>Steps:</strong></p>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 1: Class
+signature</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">internal</span> <span class="kw">class</span> ClonedRoutingTrackerClient<span class="op">(</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="kw">val</span> <span class="va">sourceClient</span><span class="op">:</span> <span class="dt">TrackerClient</span><span class="op">,</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="kw">val</span> <span class="va">cloneDescriptor</span><span class="op">:</span> <span class="dt">ClonedTrackerDescriptor</span><span class="op">,</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="op">)</span> <span class="op">:</span> <span class="dt">TrackerClient</span> <span class="op">{</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">override</span> <span class="kw">val</span> <span class="va">descriptor</span><span class="op">:</span> TrackerDescriptor <span class="op">=</span> cloneDescriptor</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">override</span> suspend <span class="kw">fun</span> <span class="fu">healthCheck</span><span class="op">():</span> <span class="dt">Boolean</span> <span class="op">=</span> sourceClient<span class="op">.</span>healthCheck<span class="op">()</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">override</span> <span class="kw">fun</span> <span class="fu">close</span><span class="op">()</span> <span class="op">=</span> sourceClient<span class="op">.</span>close<span class="op">()</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">override</span> <span class="kw">fun</span> <span class="op">&lt;</span><span class="dt">T</span> <span class="op">:</span> <span class="dt">TrackerFeature</span><span class="op">&gt;</span> <span class="fu">getFeature</span><span class="op">(</span><span class="va">featureClass</span><span class="op">:</span> <span class="dt">KClass</span>&lt;<span class="va">T</span>&gt;<span class="op">):</span> <span class="dt">T</span><span class="op">?</span> <span class="op">{</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>        <span class="kw">val</span> <span class="va">sourceFeature</span> <span class="op">=</span> sourceClient<span class="op">.</span>getFeature<span class="op">(</span>featureClass<span class="op">)</span> <span class="op">?:</span> <span class="kw">return</span> <span class="kw">null</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>        <span class="at">@Suppress</span><span class="op">(</span><span class="st">&quot;UNCHECKED_CAST&quot;</span><span class="op">)</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>        <span class="kw">return</span> <span class="cf">when</span> <span class="op">(</span>featureClass<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>            SearchableTracker<span class="op">::</span><span class="kw">class</span> -&gt; wrapSearchable<span class="op">(</span><span class="va">sourceFeature</span> <span class="kw">as</span> <span class="va">SearchableTracker</span><span class="op">)</span> <span class="kw">as</span> T</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>            BrowsableTracker<span class="op">:</span>:<span class="kw">class</span>  -&gt; wrapBrowsable<span class="op">(</span><span class="va">sourceFeature</span> <span class="kw">as</span> <span class="va">BrowsableTracker</span><span class="op">)</span> <span class="kw">as</span> T</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>            FavoritesTracker<span class="op">:</span>:<span class="kw">class</span>  -&gt; wrapFavorites<span class="op">(</span><span class="va">sourceFeature</span> <span class="kw">as</span> <span class="va">FavoritesTracker</span><span class="op">)</span> <span class="kw">as</span> T</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>            <span class="co">// Topic / Comments / Authenticatable / Downloadable carry no</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>            <span class="co">// user-visible &quot;tracker id&quot; field — return source&#39;s impl unchanged.</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>            else -&gt; sourceFeature</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="kw">fun</span> wrapSearchable<span class="op">(</span><span class="va">src</span><span class="op">:</span> <span class="dt">SearchableTracker</span><span class="op">):</span> <span class="dt">SearchableTracker</span> = <span class="kw">object</span> <span class="op">:</span> <span class="dt">SearchableTracker</span> <span class="op">{</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>        <span class="kw">override</span> suspend <span class="kw">fun</span> <span class="fu">search</span><span class="op">(</span><span class="va">request</span><span class="op">:</span> <span class="dt">SearchRequest</span><span class="op">,</span> <span class="va">page</span><span class="op">:</span> <span class="dt">Int</span><span class="op">):</span> <span class="dt">SearchResult</span> <span class="op">{</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>            <span class="kw">val</span> <span class="va">raw</span> <span class="op">=</span> src<span class="op">.</span>search<span class="op">(</span>request<span class="op">,</span> page<span class="op">)</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>            <span class="kw">return</span> raw<span class="op">.</span>copy<span class="op">(</span>items <span class="op">=</span> raw<span class="op">.</span>items<span class="op">.</span>map <span class="op">{</span> it<span class="op">.</span>copy<span class="op">(</span>trackerId <span class="op">=</span> cloneDescriptor<span class="op">.</span>trackerId<span class="op">)</span> <span class="op">})</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="kw">fun</span> <span class="fu">wrapBrowsable</span><span class="op">(</span><span class="va">src</span><span class="op">:</span> <span class="dt">BrowsableTracker</span><span class="op">):</span> <span class="dt">BrowsableTracker</span> <span class="op">=</span> <span class="kw">object</span> <span class="op">:</span> <span class="dt">BrowsableTracker</span> <span class="op">{</span></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>        <span class="kw">override</span> suspend <span class="kw">fun</span> <span class="fu">browse</span><span class="op">(</span><span class="va">category</span><span class="op">:</span> <span class="dt">String</span><span class="op">?,</span> <span class="va">page</span><span class="op">:</span> <span class="dt">Int</span><span class="op">):</span> <span class="dt">BrowseResult</span> <span class="op">{</span></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>            <span class="kw">val</span> <span class="va">raw</span> <span class="op">=</span> src<span class="op">.</span>browse<span class="op">(</span>category<span class="op">,</span> page<span class="op">)</span></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>            <span class="kw">return</span> raw<span class="op">.</span>copy<span class="op">(</span>items <span class="op">=</span> raw<span class="op">.</span>items<span class="op">.</span>map <span class="op">{</span> it<span class="op">.</span>copy<span class="op">(</span>trackerId <span class="op">=</span> cloneDescriptor<span class="op">.</span>trackerId<span class="op">)</span> <span class="op">})</span></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>        <span class="kw">override</span> suspend <span class="kw">fun</span> <span class="fu">getForumTree</span><span class="op">():</span> <span class="dt">ForumTree</span><span class="op">?</span> <span class="op">=</span> src<span class="op">.</span>getForumTree<span class="op">()</span></span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="kw">fun</span> <span class="fu">wrapFavorites</span><span class="op">(</span><span class="va">src</span><span class="op">:</span> <span class="dt">FavoritesTracker</span><span class="op">):</span> <span class="dt">FavoritesTracker</span> <span class="op">=</span> <span class="kw">object</span> <span class="op">:</span> <span class="dt">FavoritesTracker</span> <span class="op">{</span></span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>        <span class="kw">override</span> suspend <span class="kw">fun</span> <span class="fu">list</span><span class="op">():</span> <span class="dt">List</span><span class="op">&lt;</span><span class="dt">TorrentItem</span><span class="op">&gt;</span> <span class="op">=</span></span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>            src<span class="op">.</span>list<span class="op">().</span>map <span class="op">{</span> it<span class="op">.</span>copy<span class="op">(</span>trackerId <span class="op">=</span> cloneDescriptor<span class="op">.</span>trackerId<span class="op">)</span> <span class="op">}</span></span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>        <span class="kw">override</span> suspend <span class="kw">fun</span> <span class="fu">add</span><span class="op">(</span><span class="va">id</span><span class="op">:</span> <span class="dt">String</span><span class="op">):</span> <span class="dt">Boolean</span> <span class="op">=</span> src<span class="op">.</span>add<span class="op">(</span>id<span class="op">)</span></span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>        <span class="kw">override</span> suspend <span class="kw">fun</span> <span class="fu">remove</span><span class="op">(</span><span class="va">id</span><span class="op">:</span> <span class="dt">String</span><span class="op">):</span> <span class="dt">Boolean</span> <span class="op">=</span> src<span class="op">.</span>remove<span class="op">(</span>id<span class="op">)</span></span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 2:
+Compile</strong>.</label></li>
+</ul>
+<h2
+id="task-2--lavatrackersdkclientforid--replace-all-registryget-call-sites">Task
+2 — <code>LavaTrackerSdk.clientFor(id)</code> + replace all
+<code>registry.get</code> call sites</h2>
+<p><strong>Files:</strong></p>
+<ul>
+<li>Modify:
+<code>core/tracker/client/src/main/kotlin/lava/tracker/client/LavaTrackerSdk.kt</code></li>
+</ul>
+<p><strong>Steps:</strong></p>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 1: Add
+<code>clientFor</code> helper.</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">private</span> suspend <span class="kw">fun</span> <span class="fu">clientFor</span><span class="op">(</span><span class="va">id</span><span class="op">:</span> <span class="dt">String</span><span class="op">):</span> <span class="dt">TrackerClient</span> <span class="op">{</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">val</span> <span class="va">dao</span> <span class="op">=</span> clonedProviderDao</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">(</span>dao <span class="op">!=</span> <span class="kw">null</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>        <span class="kw">val</span> <span class="va">cloned</span> <span class="op">=</span> dao<span class="op">.</span>getAll<span class="op">().</span>firstOrNull <span class="op">{</span> it<span class="op">.</span>syntheticId <span class="op">==</span> id <span class="op">}</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">(</span>cloned <span class="op">!=</span> <span class="kw">null</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>            <span class="kw">val</span> <span class="va">sourceDescriptor</span> <span class="op">=</span> registry<span class="op">.</span>list<span class="op">().</span>firstOrNull <span class="op">{</span> it<span class="op">.</span>trackerId <span class="op">==</span> cloned<span class="op">.</span>sourceTrackerId <span class="op">}</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>                <span class="op">?:</span> <span class="kw">throw</span> IllegalStateException<span class="op">(</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>                    <span class="st">&quot;Clone </span><span class="ss">$id</span><span class="st"> references unknown source </span><span class="ss">${</span>cloned<span class="op">.</span>sourceTrackerId<span class="ss">}</span><span class="st">&quot;</span><span class="op">,</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>                <span class="op">)</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>            <span class="kw">val</span> <span class="va">cloneDescriptor</span> <span class="op">=</span> ClonedTrackerDescriptor<span class="op">(</span>source <span class="op">=</span> sourceDescriptor<span class="op">,</span> <span class="kw">override</span> <span class="op">=</span> cloned<span class="op">)</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>            <span class="kw">val</span> <span class="va">sourceClient</span> <span class="op">=</span> registry<span class="op">.</span><span class="kw">get</span><span class="op">(</span>cloned<span class="op">.</span>sourceTrackerId<span class="op">,</span> MapPluginConfig<span class="op">())</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>            <span class="kw">return</span> ClonedRoutingTrackerClient<span class="op">(</span>sourceClient<span class="op">,</span> cloneDescriptor<span class="op">)</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    <span class="kw">return</span> registry<span class="op">.</span><span class="kw">get</span><span class="op">(</span>id<span class="op">,</span> MapPluginConfig<span class="op">())</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<ul class="task-list">
+<li><p><label><input type="checkbox" /><strong>Step 2: Replace
+<code>registry.get(id, MapPluginConfig())</code> call sites.</strong>
+Use grep to locate; each call site that's inside a suspend method gets
+replaced with <code>clientFor(id)</code>. The non-suspend
+<code>getActiveClient()</code> is preserved as a compatibility shim that
+does <code>runBlocking { clientForActive() }</code> (mirrors the
+existing <code>listAvailableTrackers</code> runBlocking pattern); a new
+<code>suspend fun getActiveClientSuspend()</code> is added for callers
+that already suspend, and the suspending public methods (search, browse,
+multiSearch, etc.) use the suspend overload.</label></p></li>
+<li><p><label><input type="checkbox" /><strong>Step 3: Compile</strong>
+<code>./gradlew :core:tracker:client:compileDebugKotlin spotlessKotlinCheck</code>.</label></p></li>
+</ul>
+<h2 id="task-3--toast-copy-disclosure">Task 3 — Toast copy
+disclosure</h2>
+<p><strong>Files:</strong></p>
+<ul>
+<li>Modify:
+<code>feature/provider_config/src/main/kotlin/lava/provider/config/ProviderConfigViewModel.kt</code></li>
+</ul>
+<p><strong>Steps:</strong></p>
+<ul class="task-list">
+<li><label><input type="checkbox" />Change
+<code>ProviderConfigSideEffect.ShowToast("Cloned")</code> to
+<code>ProviderConfigSideEffect.ShowToast("Cloned (URL routing pending — searches use source URLs)")</code>.</label></li>
+<li><label><input type="checkbox" />Compile.</label></li>
+</ul>
+<h2 id="task-4--unit-tests">Task 4 — Unit tests</h2>
+<p><strong>Files:</strong></p>
+<ul>
+<li>Create:
+<code>core/tracker/client/src/test/kotlin/lava/tracker/client/LavaTrackerSdkCloneSearchTest.kt</code></li>
+</ul>
+<p><strong>Steps:</strong></p>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 1: Test fake
+<code>ClonedProviderDao</code>.</strong> In-memory list-backed
+implementation with
+<code>getAll() / upsert / delete / observeAll</code>.</label></li>
+<li><label><input type="checkbox" /><strong>Step 2: Test 1 — clone
+search does NOT crash.</strong></label>
+<ul>
+<li>Build a <code>DefaultTrackerRegistry</code> with a fake "rutracker"
+factory.</li>
+<li>Build a fake <code>ClonedProviderDao</code> containing one clone row
+<code>(syntheticId="rutracker.clone.x", sourceTrackerId="rutracker", displayName="RuTracker EU", primaryUrl="https://rutracker.eu")</code>.</li>
+<li>Construct
+<code>LavaTrackerSdk(registry, ..., clonedProviderDao = fakeDao)</code>.</li>
+<li>Call
+<code>sdk.multiSearch(SearchRequest("ubuntu"), providerIds = listOf("rutracker.clone.x"))</code>.</li>
+<li>Assert: result.providerStatuses[0].state == SUCCESS (was
+FAILURE/"not registered" before F.1).</li>
+</ul></li>
+<li><label><input type="checkbox" /><strong>Step 3: Test 2 — clone
+results tagged with clone synthetic id.</strong></label>
+<ul>
+<li>Same setup; the fake source returns items with
+<code>trackerId = "rutracker"</code>.</li>
+<li>Assert: every <code>result.items[*].occurrences[*].providerId</code>
+is <code>"rutracker.clone.x"</code>, NOT <code>"rutracker"</code>.</li>
+<li>This is the user-visible state: the search-result list-cell badge
+reads "RuTracker EU", not "RuTracker.org".</li>
+</ul></li>
+<li><label><input type="checkbox" /><strong>Step 4: Falsifiability
+rehearsals</strong> documented in KDoc + executed pre-commit.</label>
+<ul>
+<li>For Test 1: revert <code>clientFor(id)</code> back to
+<code>registry.get(id, MapPluginConfig())</code>. Test fails with
+<code>IllegalArgumentException</code>.</li>
+<li>For Test 2: in <code>wrapSearchable</code>, return
+<code>src.search(request, page)</code> without the
+<code>.copy(items = items.map { ... })</code> re-tag. Test fails: items
+carry source id, not clone id.</li>
+</ul></li>
+</ul>
+<h2 id="task-5--continuation--commit--push">Task 5 — CONTINUATION +
+commit + push</h2>
+<p><strong>Files:</strong></p>
+<ul>
+<li>Modify: <code>docs/CONTINUATION.md</code></li>
+</ul>
+<p><strong>Steps:</strong></p>
+<ul class="task-list">
+<li><label><input type="checkbox" />§0 update: Phase F.1 landed; F.2
+(per-clone <code>MirrorManager</code>) owed.</label></li>
+<li><label><input type="checkbox" />Commit with both Bluff-Audit
+stamps.</label></li>
+<li><label><input type="checkbox" />Push to github + gitlab. Verify SHA
+convergence.</label></li>
+</ul>
+</body>
+</html>

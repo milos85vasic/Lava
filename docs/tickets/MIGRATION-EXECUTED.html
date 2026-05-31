@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>MIGRATION-EXECUTED</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1
+id="lva-3-migration-to-canonical-workable-items--execution-log-complete--verified">LVA-3
+Migration to canonical workable-items — EXECUTION LOG (COMPLETE +
+VERIFIED)</h1>
+<p><strong>Executed:</strong> 2026-05-31 by execution subagent (LVA-3,
+per <code>docs/tickets/MIGRATION-TO-CANONICAL.md</code> rev 1).
+<strong>Outcome:</strong> COMPLETE. Lava ticket tracking migrated from
+the bespoke <code>tools/lava-tickets/</code> system to the
+<strong>canonical</strong> <code>workable-items</code> Go binary
+(<code>constitution/scripts/workable-items/</code>), keyed
+<code>LVA-N</code>. All 7 LVA keys preserved verbatim. New gate
+<code>CM-WORKABLE-ITEMS-SYNC</code> passes; falsifiability rehearsed.
+<strong>§11.4.6 (no-guessing):</strong> every result below is real
+captured command output. Two early missteps are recorded honestly: (a) a
+first seed pass used placeholder titles/bodies and was DISCARDED +
+rebuilt with verbatim real data; (b) the first <code>body_md</code>
+status-patch used the wrong Status-line literal, which the finisher
+fixed via auto-detection of the generator's exact prefix. <strong>NO git
+commit/push performed</strong> — the main agent stages with
+<code>git add -A</code> (exact list in §9).</p>
+<hr />
+<h2 id="1--build-the-canonical-binary-verified">§1 — Build the canonical
+binary (VERIFIED)</h2>
+<pre><code>( cd constitution/scripts/workable-items &amp;&amp; CGO_ENABLED=1 GOMAXPROCS=2 nice -n 19 go build -o bin/workable-items ./cmd/workable-items )</code></pre>
+<p>→ <strong>EXIT 0</strong>, binary = <strong>7,437,170 bytes</strong>.
+(<code>bin/</code> is gitignored in the submodule — not a tracked
+change.) <code>CGO_ENABLED=1</code> is required; root
+<code>go build</code> fails (no root go.mod).</p>
+<h2 id="2--read-the-old-db-verified--7-rows-not-8">§2 — Read the old DB
+(VERIFIED — 7 rows, NOT 8)</h2>
+<p><code>sqlite3 docs/tickets/tickets.db "SELECT COUNT(*) FROM tickets;"</code>
+→ <strong>7</strong>. No LVA-8 exists in this checkout. Verbatim real
+rows captured (titles/bodies/provenance):</p>
+<table>
+<thead>
+<tr>
+<th>id</th>
+<th>LVA type</th>
+<th>LVA status/closure</th>
+<th>prio</th>
+<th>title (verbatim)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>LVA-1</td>
+<td>Bug</td>
+<td>Closed/Fixed</td>
+<td>P1</td>
+<td>Deflake CredentialsViewModelTest &gt; select provider updates
+selectedProvider</td>
+</tr>
+<tr>
+<td>LVA-2</td>
+<td>Debt</td>
+<td>Closed/Closed</td>
+<td>P1</td>
+<td>§6.X-debt darwin/arm64 emulator-acceleration sub-debt</td>
+</tr>
+<tr>
+<td>LVA-3</td>
+<td>Task</td>
+<td>InProgress</td>
+<td>P1</td>
+<td>Adopt HelixConstitution §11.4.79–106 (pin 53 commits behind)</td>
+</tr>
+<tr>
+<td>LVA-4</td>
+<td>Feature</td>
+<td>InProgress</td>
+<td>P1</td>
+<td>LVA workable-items ticket system (SQLite DB + Go CLI +
+md/HTML/PDF/DOCX export)</td>
+</tr>
+<tr>
+<td>LVA-5</td>
+<td>Incident</td>
+<td>OperatorBlocked</td>
+<td>P0</td>
+<td>Rotate Firebase CI token (printed to session transcript)</td>
+</tr>
+<tr>
+<td>LVA-6</td>
+<td>Task</td>
+<td>Open</td>
+<td>P2</td>
+<td>§11.4.79 reconcile codegraph index policy (own-org submodules IN
+index)</td>
+</tr>
+<tr>
+<td>LVA-7</td>
+<td>Task</td>
+<td>Open</td>
+<td>P2</td>
+<td>§11.4.85 stress + chaos test scaffold</td>
+</tr>
+</tbody>
+</table>
+<p>Real LVA-5 operator_blocked_details (verbatim): "Operator must run
+firebase logout then firebase login:ci and update LAVA_FIREBASE_TOKEN in
+gitignored .env. Agent cannot rotate credentials."</p>
+<h2 id="3--seed-canonical-db--statuses-verified">§3 — Seed canonical DB
++ statuses (VERIFIED)</h2>
+<p><code>rm -f docs/workable_items.db{,-wal,-shm}</code>, 7×
+<code>add --id LVA-N</code> (all rc 0), type-mapping per plan §3
+(<strong>LVA-2 Debt→Task, LVA-5 Incident→Bug</strong>; severity =
+P-level). Closes via <code>close</code>; non-terminal statuses via
+DB-direct UPDATE (no <code>update</code> subcommand). The repeatable
+seed+verify script is committed at
+<code>docs/tickets/finish-migration.sh</code> (idempotent — rebuilds the
+DB from scratch, auto-detects the generator's Status-line literal,
+regenerates, validates, diffs, runs the gate+test).</p>
+<p><strong>FINAL canonical state (matches plan §3 target table
+EXACTLY):</strong></p>
+<pre><code>LVA-1 | Bug     | Fixed (→ Fixed.md)     | P1 | Fixed
+LVA-2 | Task    | Completed (→ Fixed.md) | P1 | Fixed
+LVA-3 | Task    | In progress           | P1 | Issues
+LVA-4 | Feature | In progress           | P1 | Issues
+LVA-5 | Bug     | Operator-blocked      | P0 | Issues
+LVA-6 | Task    | Queued                | P2 | Issues
+LVA-7 | Task    | Queued                | P2 | Issues</code></pre>
+<p><strong>LVA-N keys stored verbatim (no zero-padding) —
+VERIFIED.</strong> Closes recorded real evidence paths:</p>
+<ul>
+<li>LVA-1 →
+<code>feature/credentials/src/test/kotlin/lava/feature/credentials/CredentialsViewModelTest.kt</code></li>
+<li>LVA-2 →
+<code>.lava-ci-evidence/sixth-law-incidents/2026-05-13-emulator-container-darwin-arm64-gap.json</code></li>
+</ul>
+<p>LVA-5 <code>operator_block_details</code> row inserted (what /
+why-exhausted / unblock-condition / who=Operator), reflecting the
+Firebase-token-rotation operator-block.</p>
+<h2 id="4--generate-docs--validate--diff-verified">§4 — Generate docs +
+validate + diff (VERIFIED)</h2>
+<pre><code>sync db-to-md --out-issues docs/Issues.md --out-fixed docs/Fixed.md   → wrote docs/Issues.md + docs/Fixed.md
+validate                                                              → validate: OK — 7 items, all invariants satisfied
+diff --issues docs/Issues.md --fixed docs/Fixed.md                    → diff: DB and Markdown are in sync   [exit 0]
+report --by-status                                                    → In progress 2 | Queued 2 | Completed 1 | Fixed 1 | Operator-blocked 1 | TOTAL 7
+PRAGMA wal_checkpoint(TRUNCATE)                                       → WAL collapsed</code></pre>
+<p><strong>Output paths CONFIRMED from the binary:</strong>
+<code>docs/Issues.md</code> (LVA-3/4/5/6/7) + <code>docs/Fixed.md</code>
+(LVA-1/2) at the docs ROOT. The binary does NOT emit
+<code>_Summary.md</code>/HTML/PDF/DOCX (those were
+<code>tools/lava-tickets/export.go</code>/<code>render.go</code> only —
+see §7 OWED). A stale, INCORRECT <code>docs/Issues_Summary.md</code>
+(+<code>Fixed_Summary.md</code>) leftover from an earlier generation
+(wrong data: LVA-4 Task vs Feature, LVA-5 P1 vs P0) was REMOVED so no
+stale summary ships (plan §3 Step 3).</p>
+<h2
+id="5--gate-replacement-cm-lva-tickets-sync--cm-workable-items-sync-verified">§5
+— Gate replacement (CM-LVA-TICKETS-SYNC → CM-WORKABLE-ITEMS-SYNC)
+(VERIFIED)</h2>
+<p><code>grep -rl</code> located the wiring (the plan's
+<code>UNCONFIRMED</code> location):</p>
+<ul>
+<li>gate: <code>scripts/check-lva-tickets.sh</code></li>
+<li>sweep: <code>scripts/verify-all-constitution-rules.sh</code>
+<strong>lines 189–193</strong>
+(<code>run_gate "lva-tickets-sync" ... "bash scripts/check-lva-tickets.sh --advisory"</code>)</li>
+<li>test: <code>tests/check-lva-tickets/test_check_lva_tickets.sh</code>
+(+ <code>EVIDENCE.md</code>)</li>
+<li>gates-index: <code>docs/helix-constitution-gates.md</code> line
+25</li>
+<li>script docs: <code>docs/scripts/check-lva-tickets.sh.md</code>,
+<code>docs/scripts/lava-tickets.md</code></li>
+<li>(no <code>.githooks/pre-push</code> reference)</li>
+</ul>
+<p>Actions:</p>
+<ul>
+<li><strong>Created</strong>
+<code>scripts/check-workable-items.sh</code> (chmod +x) — canonical
+<code>validate</code> + <code>diff</code> (exit 1 on divergence) +
+<code>git ls-files --error-unmatch docs/workable_items.db</code>
+(§11.4.95). Builds binary if absent.</li>
+<li><strong>Created</strong>
+<code>tests/check-workable-items/test_workable_items_sync.sh</code>
+(chmod +x) — hermetic falsifiability test.</li>
+<li><strong>Created</strong>
+<code>docs/scripts/check-workable-items.sh.md</code> (§11.4.18 script
+doc — keeps CM-SCRIPT-DOCS-SYNC green).</li>
+<li><strong>Edited</strong>
+<code>scripts/verify-all-constitution-rules.sh</code> lines 189–193 →
+<code>run_gate "workable-items-sync" "CM-WORKABLE-ITEMS-SYNC ..." "bash scripts/check-workable-items.sh"</code>
+(strict; DB+docs ship in-sync).</li>
+<li><strong>Edited</strong>
+<code>docs/helix-constitution-gates.md</code> line 25 → new
+CM-WORKABLE-ITEMS-SYNC row.</li>
+<li><strong>Deleted</strong> old gate + test + EVIDENCE + the 2 stale
+script docs.</li>
+</ul>
+<h2 id="6--gate-run--falsifiability-rehearsal-verified-real-evidence">§6
+— Gate run + falsifiability rehearsal (VERIFIED, real evidence)</h2>
+<p>Reversible probe (<code>git add -N docs/workable_items.db</code> …
+run … <code>git reset</code>; NO commit, DB content untouched):</p>
+<pre><code>GATE:  CM-WORKABLE-ITEMS-SYNC: OK — docs/workable_items.db validated, DB ↔ Markdown in sync, DB tracked   [gate_rc=0]
+TEST:  positive case: PASS
+       negative case (corrupted docs/Issues.md): gate correctly FAILED
+       (restore) → PASS
+       PASS: CM-WORKABLE-ITEMS-SYNC gate is falsifiable                                                   [test_rc=0]</code></pre>
+<p>Pre-staging (DB not yet tracked) the gate correctly FAILS with the
+§11.4.95 directive — proving the tracked-check works; it goes green once
+the main agent stages the DB.
+<code>scripts/check-script-docs-sync.sh</code> →
+<code>✓ all 71 scripts documented; no orphan docs</code> (EXIT 0) after
+the doc add + stale-doc removals.</p>
+<h2 id="7--retire-bespoke-system-verified-deleted-via-plain-rm">§7 —
+Retire bespoke system (VERIFIED deleted via plain <code>rm</code>)</h2>
+<ul>
+<li><code>tools/lava-tickets/</code> (whole dir:
+<code>_seed_evidence.sh</code>, <code>commands.go</code>,
+<code>export.go</code>, <code>go.mod</code>, <code>go.sum</code>,
+<code>main.go</code>, <code>render.go</code>,
+<code>tickets_test.go</code>; <code>bin/</code> was gitignored).</li>
+<li><code>docs/tickets/tickets.db</code>;
+<code>docs/tickets/{Issues,Fixed,Issues_Summary,Fixed_Summary}.md</code>;
+<code>docs/tickets/export/</code> (docx + html subtrees).</li>
+<li><code>scripts/check-lva-tickets.sh</code>;
+<code>tests/check-lva-tickets/</code> (test + EVIDENCE.md);
+<code>docs/scripts/check-lva-tickets.sh.md</code>;
+<code>docs/scripts/lava-tickets.md</code>.</li>
+<li>Stray <code>docs/Issues_Summary.md</code> +
+<code>docs/Fixed_Summary.md</code> (non-canonical leftovers).</li>
+</ul>
+<p><strong>KEPT under <code>docs/tickets/</code> as historical
+record</strong> (per dispatch + plan §4 Step 4): <code>DESIGN.md</code>,
+<code>BUILD-EVIDENCE.md</code>, <code>MIGRATION-TO-CANONICAL.md</code>,
+<code>schema.sql</code>, this <code>MIGRATION-EXECUTED.md</code>, and
+<code>finish-migration.sh</code> (the repeatable seeder).</p>
+<blockquote>
+<p>Minor plan discrepancy: plan §4 Step 4 says delete
+<code>docs/tickets/schema.sql</code>; the dispatch said KEEP it. Honored
+the dispatch (KEPT). Main agent may delete if preferred — no longer
+load-bearing.</p>
+</blockquote>
+<p><strong>OWED follow-ups (NOT blocking; file as future LVA
+items):</strong></p>
+<ul>
+<li>Canonical binary has no
+<code>update</code>/<code>reopen</code>/<code>block</code> subcommand —
+non-terminal/operator-blocked transitions used DB-direct UPDATE.
+Upstream-extend per §11.4.74 (constitution-submodule §11.4.26 7-step
+pipeline).</li>
+<li>Summaries (<code>*_Summary.md</code>) + HTML/PDF/DOCX exports are
+NOT emitted by the canonical binary. If still required, regenerate via
+the project export pipeline / §11.4.106 Docs Chain.</li>
+<li>Incident/Debt/Chore→Task coercion caveat +
+<code>source/source_ref</code> folded into description (documented in
+CLAUDE.md §6.AF + CONTINUATION by the main agent).</li>
+<li><code>docs/chaos-stress/EXPORT-AUDIT.md</code> references the old
+lava-tickets export pipeline — main agent should update or mark
+historical.</li>
+</ul>
+<h2 id="8--gitignore-verified">§8 — .gitignore (VERIFIED)</h2>
+<p>Replaced the dead <code># lava-tickets build artifacts</code> block
+with:</p>
+<pre><code># workable-items canonical tracker — DB is TRACKED (§11.4.95); only WAL/SHM sidecars are ignored
+docs/workable_items.db-wal
+docs/workable_items.db-shm</code></pre>
+<p>Verified:
+<code>git check-ignore docs/workable_items.db-{wal,shm}</code> → rc 0
+(both ignored, correct);
+<code>git check-ignore docs/workable_items.db</code> → rc 1 / empty
+(<strong>NOT ignored = correct, §11.4.95</strong>). WAL/SHM sidecars
+checkpoint-collapsed + removed for a clean tree.</p>
+<hr />
+<h2
+id="9--precise-staging-list-for-the-main-agent-git-add--a-captures-all-of-this">§9
+— Precise staging list for the main agent (<code>git add -A</code>
+captures all of this)</h2>
+<p><strong>CREATE (untracked <code>??</code>):</strong></p>
+<ul>
+<li><code>docs/workable_items.db</code> ← <strong>§11.4.95 TRACKED —
+must be staged</strong></li>
+<li><code>docs/Issues.md</code></li>
+<li><code>docs/Fixed.md</code></li>
+<li><code>scripts/check-workable-items.sh</code></li>
+<li><code>tests/check-workable-items/test_workable_items_sync.sh</code></li>
+<li><code>docs/scripts/check-workable-items.sh.md</code></li>
+<li><code>docs/tickets/MIGRATION-EXECUTED.md</code> (this file)</li>
+<li><code>docs/tickets/finish-migration.sh</code> (repeatable
+seeder/verifier)</li>
+</ul>
+<p><strong>MODIFY (<code>M</code>):</strong></p>
+<ul>
+<li><code>.gitignore</code></li>
+<li><code>docs/helix-constitution-gates.md</code></li>
+<li><code>scripts/verify-all-constitution-rules.sh</code></li>
+</ul>
+<p><strong>DELETE (<code>D</code>):</strong></p>
+<ul>
+<li><code>scripts/check-lva-tickets.sh</code></li>
+<li><code>tests/check-lva-tickets/test_check_lva_tickets.sh</code>,
+<code>tests/check-lva-tickets/EVIDENCE.md</code></li>
+<li><code>docs/scripts/check-lva-tickets.sh.md</code>,
+<code>docs/scripts/lava-tickets.md</code></li>
+<li><code>docs/tickets/tickets.db</code></li>
+<li><code>docs/tickets/Issues.md</code>,
+<code>docs/tickets/Fixed.md</code>,
+<code>docs/tickets/Issues_Summary.md</code>,
+<code>docs/tickets/Fixed_Summary.md</code></li>
+<li><code>docs/tickets/export/docx/{Issues,Fixed,Issues_Summary,Fixed_Summary}.docx</code></li>
+<li><code>docs/tickets/export/html/{Issues,Fixed,Issues_Summary,Fixed_Summary}.html</code></li>
+<li><code>tools/lava-tickets/{_seed_evidence.sh,commands.go,export.go,go.mod,go.sum,main.go,render.go,tickets_test.go}</code></li>
+</ul>
+<p><strong>KEPT untouched:</strong>
+<code>docs/tickets/{DESIGN,BUILD-EVIDENCE,MIGRATION-TO-CANONICAL}.md</code>,
+<code>docs/tickets/schema.sql</code>. <strong>WAL/SHM sidecars:</strong>
+removed; gitignored regardless.</p>
+<blockquote>
+<p>Note on <code>git add -A</code> vs the stray summaries:
+<code>docs/Issues_Summary.md</code> + <code>docs/Fixed_Summary.md</code>
+at the docs ROOT were untracked stray files; they were
+<code>rm</code>'d, so they will NOT be staged (they never were
+tracked).</p>
+</blockquote>
+<h2
+id="10--6s--6af-follow-ups-owed-main-agent--no-commit-allowed-in-this-subagent">§10
+— §6.S / §6.AF follow-ups OWED (main agent — no commit allowed in this
+subagent)</h2>
+<ul>
+<li><code>CLAUDE.md §6.AF</code>: rewrite to point at the canonical
+binary (<code>constitution/scripts/workable-items/</code>), DB
+<code>docs/workable_items.db</code>, docs
+<code>docs/Issues.md</code>/<code>docs/Fixed.md</code>, the
+<code>--id LVA-N</code> (preserve) / <code>--prefix LVA</code> (new)
+convention, the Incident→Bug / Debt→Task / Chore→Task mapping, and the
+new <code>CM-WORKABLE-ITEMS-SYNC</code> gate. Add
+<code>Catalogue-Check: reuse HelixDevelopment/HelixConstitution@&lt;pin-sha&gt; scripts/workable-items</code>
++ <code>Classification: project-specific</code>.</li>
+<li><code>docs/CONTINUATION.md</code>: LVA-3 done; LVA-4
+superseded-by-migration; new DB+doc paths; retired
+<code>tools/lava-tickets/</code>; the OWED follow-ups from §7.</li>
+</ul>
+</body>
+</html>

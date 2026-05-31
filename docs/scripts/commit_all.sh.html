@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>commit_all.sh</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1
+id="scriptscommit_allsh--user-guide"><code>scripts/commit_all.sh</code>
+— User Guide</h1>
+<p><strong>Last verified:</strong> 2026-05-14 (1.2.23 cycle)
+<strong>Inheritance:</strong> HelixConstitution §11.4.18 (script
+documentation mandate) + §11.4.22 (lightweight commit path) + Lava §6.AD
+(HelixConstitution Inheritance) + §6.W (GitHub + GitLab only mirror
+policy)</p>
+<h2 id="overview">Overview</h2>
+<p>Project-official commit + multi-mirror-push wrapper for the Lava
+parent repository. HelixConstitution mandates a project commit wrapper
+(CLAUDE.md "MANDATORY COMMIT &amp; PUSH CONSTRAINTS"); Lava's wrapper is
+scoped to the §6.W 2-mirror set (GitHub + GitLab) and refuses
+destructive operations without explicit per-operation operator
+authorization per §9.</p>
+<p>This is the <strong>lightweight path</strong> for routine commits.
+The wrapper:</p>
+<ol type="1">
+<li>Stages files (all-tracked or explicit <code>--files</code>
+list)</li>
+<li>Commits with the supplied message</li>
+<li>Pushes to every configured GitHub + GitLab named remote
+(<code>github</code>, <code>gitlab</code>)</li>
+<li>Verifies <code>§6.C</code> convergence (every mirror's HEAD matches
+local HEAD)</li>
+<li>Reports diagnostics on failure</li>
+</ol>
+<h2 id="prerequisites">Prerequisites</h2>
+<ul>
+<li><code>git</code> ≥ 2.30 in PATH</li>
+<li>Local clone with at least one of: <code>github</code>,
+<code>gitlab</code> named remotes (use
+<code>git remote add github git@github.com:...</code>)</li>
+<li><code>core.hooksPath</code> set to <code>.githooks</code> (one-time
+per clone): <code>git config core.hooksPath .githooks</code></li>
+<li>For commits that touch test files / gate-shaping files: a
+<code>Bluff-Audit:</code> stamp in the commit message body per Seventh
+Law clause 1 + §6.N.1.2</li>
+<li>For commits that add a new constitutional clause
+(<code>##### 6.X</code> in CLAUDE.md): a <code>Classification:</code>
+line per HelixConstitution §11.4.17</li>
+</ul>
+<h2 id="usage">Usage</h2>
+<h3 id="basic-commit--push-all-tracked-changes">Basic commit + push (all
+tracked changes)</h3>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">scripts/commit_all.sh</span> <span class="at">-m</span> <span class="st">&quot;fix(feature): one-line summary&quot;</span></span></code></pre></div>
+<p>Stages every modified + new tracked file, commits, pushes to GitHub +
+GitLab.</p>
+<h3 id="commit-specific-files-only">Commit specific files only</h3>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">scripts/commit_all.sh</span> <span class="at">-m</span> <span class="st">&quot;docs: update CONTINUATION&quot;</span> <span class="at">--files</span> docs/CONTINUATION.md</span></code></pre></div>
+<p>Stages ONLY the listed files (no <code>git add -A</code> global add).
+Useful when:</p>
+<ul>
+<li>Multiple unrelated changes are in the working tree but only one
+belongs in this commit</li>
+<li>Submodules are nested-dirty but the parent change should not bump
+pins</li>
+<li>Large doc edits should not pull in stray test changes</li>
+</ul>
+<h3 id="commit-without-push">Commit without push</h3>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">scripts/commit_all.sh</span> <span class="at">-m</span> <span class="st">&quot;wip: experimenting&quot;</span> <span class="at">--no-push</span></span></code></pre></div>
+<p>Useful for staging WIP commits that are not yet ready to share.</p>
+<h3 id="diagnostic-mode">Diagnostic mode</h3>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">scripts/commit_all.sh</span> <span class="at">--status</span></span></code></pre></div>
+<p>Reports the repo path, branch, HEAD SHA, configured remotes, and a
+list of dirty files (first 20). Does NOT modify state.</p>
+<h3 id="amend-operator-authorized-only">Amend (operator-authorized
+only)</h3>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">scripts/commit_all.sh</span> <span class="at">--amend</span></span></code></pre></div>
+<p>REJECTED with exit code 5. Per HelixConstitution §9
+absolute-data-safety, destructive operations (history rewrite,
+force-push, branch deletion) require explicit per-operation operator
+authorization. The wrapper's standing rule: NO amend. If genuinely
+needed, the operator runs <code>git commit --amend</code> directly after
+backing up <code>.git</code>.</p>
+<h2 id="inputs">Inputs</h2>
+<table>
+<thead>
+<tr>
+<th>Argument</th>
+<th>Required?</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>-m</code>, <code>--message &lt;msg&gt;</code></td>
+<td>yes (unless <code>--status</code>)</td>
+<td>Commit message body</td>
+</tr>
+<tr>
+<td><code>--files &lt;f1&gt; &lt;f2&gt; ...</code></td>
+<td>no</td>
+<td>Stage only the listed paths (default: stage all tracked
+changes)</td>
+</tr>
+<tr>
+<td><code>--no-push</code></td>
+<td>no</td>
+<td>Skip push; commit only</td>
+</tr>
+<tr>
+<td><code>--amend</code></td>
+<td>no</td>
+<td>Rejected with exit 5 (operator must use
+<code>git commit --amend</code> directly)</td>
+</tr>
+<tr>
+<td><code>--status</code></td>
+<td>no</td>
+<td>Diagnostic mode; reports state without modifying</td>
+</tr>
+<tr>
+<td><code>-h</code>, <code>--help</code></td>
+<td>no</td>
+<td>Print usage and exit</td>
+</tr>
+</tbody>
+</table>
+<h2 id="outputs">Outputs</h2>
+<ul>
+<li>Newly-created commit on local <code>HEAD</code></li>
+<li>Push to every configured <code>github</code> + <code>gitlab</code>
+named remote</li>
+<li>§6.C convergence check report (✓ or ✗ per mirror)</li>
+<li>Exit code 0 on success</li>
+</ul>
+<h2 id="exit-codes">Exit codes</h2>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>Committed + pushed (or committed only with
+<code>--no-push</code>)</td>
+</tr>
+<tr>
+<td>1</td>
+<td>Usage error (missing required arg)</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Git operation failed (commit failed)</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Nothing to commit (informational, not error)</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Push failed for one or more mirrors</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Operator confirmation required for destructive flag
+(<code>--amend</code>)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="side-effects">Side-effects</h2>
+<ul>
+<li>Modifies index, HEAD, refs/heads/master (the active branch)</li>
+<li>Pushes to remote refs (this is destructive in the sense that it
+advances remote state; per §6.W only github + gitlab are touched)</li>
+<li>Triggers the pre-push hook (<code>.githooks/pre-push</code>) which
+runs Layer 1 (anti-bluff checks) + Layer 2
+(<code>scripts/ci.sh --changed-only</code>)</li>
+</ul>
+<h2 id="edge-cases">Edge cases</h2>
+<h3
+id="multiple-remotes-named-github-but-pointing-to-different-upstreams">Multiple
+remotes named github but pointing to different upstreams</h3>
+<p>The wrapper pushes to every remote named exactly <code>github</code>
+or <code>gitlab</code>. If you have additional named remotes
+(<code>upstream</code>, <code>origin</code> with mixed push URLs,
+<code>helixdevelopment-fork</code>, etc.), they are NOT pushed by the
+wrapper. Per §6.W, only github + gitlab are mandated mirrors for the
+Lava parent.</p>
+<h3 id="submodules-with-nested-dirty-state">Submodules with nested-dirty
+state</h3>
+<p>If <code>submodules/X</code> shows <code>m</code> (lowercase,
+sub-submodule modified) in <code>git status</code>, the parent commit
+does NOT include the submodule unless explicitly listed in
+<code>--files</code>. This is intentional — pre-existing nested-dirty
+state should not silently advance the parent's pin.</p>
+<h3 id="commit-body-includes----token">Commit body includes
+<code>--</code> token</h3>
+<p>Argument parsing stops <code>--files</code> consumption on the first
+token starting with <code>-</code> (single or double dash). Pass
+<code>-m</code> BEFORE <code>--files</code> to avoid the message being
+parsed as a file path.</p>
+<h2 id="internal-behaviour">Internal behaviour</h2>
+<p>The wrapper is intentionally thin (~180 lines). It does not:</p>
+<ul>
+<li>Run tests directly (Layer 2 of pre-push hook does that via
+<code>scripts/ci.sh --changed-only</code>)</li>
+<li>Regenerate auto-generated docs (HelixConstitution §11.4.12 — TODO
+§6.AD-debt for the export-regeneration pipeline integration)</li>
+<li>Handle submodule pin bumps (use direct
+<code>git submodule add</code> /
+<code>git add submodules/&lt;name&gt;</code> for those)</li>
+</ul>
+<h2 id="related-scripts">Related scripts</h2>
+<ul>
+<li><code>.githooks/pre-push</code> — invoked automatically on push;
+runs anti-bluff checks + ci.sh</li>
+<li><code>scripts/ci.sh --changed-only</code> — Layer 2 pre-push gate
+(Spotless, changed-module unit tests, constitution parser, hermetic bash
+test suites)</li>
+<li><code>scripts/check-constitution.sh</code> — invoked from
+<code>ci.sh</code>; verifies clauses 6.A through 6.AD + §6.W boundary +
+no-guessing vocabulary</li>
+<li><code>scripts/firebase-distribute.sh</code> — release distribute
+(not invoked from commit_all)</li>
+<li><code>scripts/inject-helix-inheritance-block.sh</code> — §6.AD-debt
+closure tool; idempotent inject of inheritance pointer-blocks</li>
+</ul>
+<h2 id="cross-references">Cross-references</h2>
+<ul>
+<li>HelixConstitution <code>CLAUDE.md</code> "MANDATORY COMMIT &amp;
+PUSH CONSTRAINTS"</li>
+<li>HelixConstitution <code>Constitution.md</code> §11.4.22 (lightweight
+commit path)</li>
+<li>HelixConstitution <code>Constitution.md</code> §11.4.18 (script
+documentation mandate — this very document satisfies §11.4.18 for
+<code>commit_all.sh</code>)</li>
+<li>Lava <code>CLAUDE.md</code> §6.AD (HelixConstitution
+Inheritance)</li>
+<li>Lava <code>CLAUDE.md</code> §6.W (GitHub + GitLab only mirror
+mandate)</li>
+<li>Lava <code>CLAUDE.md</code> §6.T.3 (no-force-push)</li>
+</ul>
+</body>
+</html>

@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>DESIGN</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1 id="lva-ticket-system--design">LVA Ticket System — Design</h1>
+<p><strong>Status:</strong> DESIGN (scaffold only; no DB binary, no
+generator scripts built yet) <strong>Key prefix:</strong>
+<code>LVA</code> (operator directive, §6.L 68th invocation, 2026-05-31)
+<strong>Author:</strong> design+scaffold subagent <strong>Constitutional
+basis:</strong> HelixConstitution §11.4.15 / §11.4.16 / §11.4.19 /
+§11.4.21 / §11.4.33 / §11.4.34 / §11.4.54 / §11.4.55 / §11.4.65; Lava
+§6.AD.3, §6.O, §6.T</p>
+<hr />
+<h2 id="0-the-key-decision">0. The key decision</h2>
+<p>The operator (§6.L 68th invocation, 2026-05-31) directed: define the
+ticket key for the main workable-items SQLite database and related
+documents (Issues, Fixed, Issues_Summary, Fixed_Summary) and their
+exports to PDF / HTML / DOCX. <strong>The key prefix is
+<code>LVA</code>.</strong> Tickets are <code>LVA-1</code>,
+<code>LVA-2</code>, … — a stable, monotonic, project-prefixed key. This
+is the Lava-specific instantiation of the HelixConstitution §11.4.54
+ATM-NNN ticket-identifier mandate (ATM → LVA).</p>
+<p>The <code>seq INTEGER PRIMARY KEY AUTOINCREMENT</code> column is the
+monotonic integer; the <code>id</code> column renders
+<code>'LVA-' || seq</code> via an <code>AFTER INSERT</code> trigger.
+AUTOINCREMENT (not plain rowid) guarantees keys are never reused even
+after deletes — satisfying §11.4.54's "monotonic, never renumbered,
+append-only".</p>
+<h2 id="1-what-exists-today-vs-what-is-missing">1. What exists today vs.
+what is missing</h2>
+<table>
+<thead>
+<tr>
+<th>Thing</th>
+<th>State (CONFIRMED via filesystem + sqlite3 + reading)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>tickets.db</code> / <code>Issues.md</code> /
+<code>Fixed.md</code> / <code>Issues_Summary.md</code> /
+<code>Fixed_Summary.md</code></td>
+<td><strong>MISSING</strong> — none exist in the Lava repo
+(<code>find</code> returned no matches outside the HelixQA submodule +
+<code>.claude/worktrees/</code>)</td>
+</tr>
+<tr>
+<td><code>docs/tickets/</code></td>
+<td><strong>CREATED by this scaffold</strong> (<code>schema.sql</code> +
+this <code>DESIGN.md</code>)</td>
+</tr>
+<tr>
+<td><code>lava-api-go/internal/qa/ticket/*.go</code></td>
+<td><strong>IMPLEMENTED + REAL</strong> — <code>generator.go</code> (398
+lines) + <code>generator_test.go</code> (426 lines). Adapter over
+HelixQA <code>pkg/ticket.Generator</code> that emits §6.O Crashlytics
+CLOSURE LOGS (one md per closed Crashlytics issue). It is NOT a tickets
+DB: no SQLite, no Issues/Fixed tracker, no LVA key. Different concern;
+see §6.</td>
+</tr>
+<tr>
+<td>HelixQA submodule <code>pkg/ticket</code> (15 Go files)</td>
+<td><strong>ON DISK + REAL</strong> at
+<code>submodules/helixqa/pkg/ticket/</code> (<code>ticket.go</code> 13.7
+KB, <code>enhanced_generator.go</code>, <code>rich_capture.go</code>,
+OCU mapping/replay + tests). Emits <code>HQA-####</code> generic
+QA-session tickets. NOT keyed <code>LVA</code>, NOT SQLite. The Lava
+adapter wraps this.</td>
+</tr>
+<tr>
+<td><code>constitution/</code> submodule</td>
+<td><strong>FULLY CHECKED OUT</strong> — <code>Constitution.md</code>
+(7302 lines), <code>CLAUDE.md</code> (2485 lines) + pre-rendered
+<code>.html</code>/<code>.pdf</code>/<code>.docx</code> for each. Full
+§11.4.x text read for §2.</td>
+</tr>
+<tr>
+<td>Equivalence-mapped state (§6.AD.3 Path B)</td>
+<td><strong>EXISTS</strong> — <code>docs/CONTINUATION.md</code> (§6.S) +
+<code>.lava-ci-evidence/crashlytics-resolved/&lt;date&gt;-&lt;slug&gt;.md</code>
+(§6.O) +
+<code>.lava-ci-evidence/sixth-law-incidents/&lt;date&gt;-&lt;slug&gt;.json</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Conclusion:</strong> no SQLite ticket DB nor
+Issues/Fixed/Summary tracker docs exist keyed <code>LVA</code>. The two
+existing Go <code>ticket</code> packages are a DIFFERENT artifact —
+Crashlytics/QA closure-log generators, not a workable-items database.
+This is a greenfield build keyed <code>LVA</code> that complements
+them.</p>
+<h2 id="2-helixconstitution-mandates-this-design-satisfies">2.
+HelixConstitution mandates this design satisfies</h2>
+<p>Quoted from the on-disk <code>constitution/Constitution.md</code>
+(7302 lines) and <code>constitution/CLAUDE.md</code> (2485 lines), both
+fully checked out and read:</p>
+<ul>
+<li><strong>§11.4.15 — Item-status tracking</strong> (CLAUDE.md):
+<em>"Every active item in the project Issues file carries a
+<code>**Status:**</code> line… Six-state vocabulary:
+<code>Queued</code>, <code>In progress</code>,
+<code>Ready for testing</code>, <code>In testing</code>,
+<code>Reopened</code>, <code>Fixed (→ Fixed.md)</code>."</em> §11.4.21
+adds a 7th value <code>Operator-blocked</code>. →
+<code>tickets.status</code> FK to <code>item_status</code>. NOTE: the
+constitution's literal vocabulary differs from this design's normalized
+lifecycle states — the generator MUST render constitution-literal Status
+strings in the produced <code>Issues.md</code> (mapping in §4); the DB
+stores normalized states for query sanity.</li>
+<li><strong>§11.4.16 — Item-type tracking</strong> (CLAUDE.md):
+<em>"Three-value CLOSED vocabulary: <code>Bug</code>…
+<code>Feature</code>… <code>Task</code>…"</em> →
+<code>tickets.type</code> FK to <code>item_type</code>. This design adds
+Chore/Incident/Debt as Lava-domain extras; the generator MUST collapse
+them to the constitution 3-value closed set in rendered docs
+(Chore→Task, Incident→Bug, Debt→Task) OR the operator ratifies an
+extension. CONFIRMED constitution closed set = {Bug, Feature,
+Task}.</li>
+<li><strong>§11.4.19 — Fixed-document column-alignment</strong>
+(Constitution.md line 1150+) + <strong>§11.4.53 — Fixed_Summary
+parity</strong>: Fixed.md + Fixed_Summary.md MUST carry Status + Type
+columns aligned with Issues_Summary, and
+<code>mtime(Fixed_Summary) ≥ mtime(Fixed)</code>. → <code>v_fixed</code>
+/ <code>v_fixed_summary</code> VIEWS (in sync by construction); the
+generator emits all four <code>.md</code> + §11.4.65 <code>.html</code>
++ <code>.pdf</code> siblings.</li>
+<li><strong>§11.4.21 / §11.4.54 — stable project-prefixed key.</strong>
+§11.4.54 (ATM-NNN mandate): <em>"Every workable item… MUST carry a
+stable, unique, auto-incremental ATM-NNN ticket identifier. …monotonic,
+never renumbered, append-only."</em> For Lava the prefix is
+<strong>LVA</strong>. → the <code>LVA-&lt;seq&gt;</code> id with
+AUTOINCREMENT. §11.4.54 also requires the LVA-ID as leftmost column in
+both summaries.</li>
+<li><strong>§11.4.33 — Type-aware closure-status vocabulary</strong>
+(CLAUDE.md): closed map <code>Bug → Fixed (→ Fixed.md)</code>,
+<code>Feature → Implemented (→ Fixed.md)</code>,
+<code>Task → Completed (→ Fixed.md)</code>. →
+<code>closure_status</code> column +
+<code>closure_status_for_type</code> mapping +
+<code>trg_closure_status_typeaware</code> trigger (VALIDATED:
+Bug→Implemented rejected; Bug→Fixed accepted). The generator MUST emit
+the literal <code>(→ Fixed.md)</code> suffix.</li>
+<li><strong>§11.4.34 — Reopened-source attribution</strong> (CLAUDE.md):
+every <code>Reopened</code> heading carries
+<code>**Reopened-Details:**</code> with <strong>By</strong> (AI|User),
+<strong>On</strong> (ISO), <strong>Reason</strong> (closed vocab
+<code>{test-failed | manual-testing-detected | captured-evidence-contradicts | end-user-report | cycle-re-discovered | design-reconsidered}</code>),
+<strong>Evidence</strong> (path). → <code>reopened_who</code> (By),
+<code>reopened_when</code> (On), <code>reopened_why</code> (Reason),
+<code>reopened_incident</code> (Evidence) columns +
+<code>trg_reopen_attribution</code> trigger (VALIDATED: reopen missing
+any of the four rejected). §11.4.55 adds per-item
+<code>docs/issues/&lt;LVA-NNN&gt;/Reopens.md</code> when reopens_count
+&gt; 0 — see §7 (a <code>ticket_events</code> history table is the
+recommended follow-up).</li>
+</ul>
+<p>Also honored: <strong>§11.4.21 operator-blocked-details</strong> →
+<code>operator_blocked_details</code></p>
+<ul>
+<li>trigger; <strong>§11.4.65 / §11.4.60</strong> universal Markdown
+export (<code>.md</code> + <code>.html</code> + <code>.pdf</code> always
+in sync) → drives the export pipeline in §5.</li>
+</ul>
+<p><strong>Validation evidence:</strong> the schema was applied to a
+throwaway db with the host <code>sqlite3</code> and every trigger was
+exercised — Bug→Implemented rejected
+(<code>§11.4.33: Closed ticket needs a type-valid closure_status</code>),
+Bug→Fixed accepted, reopen-without-attribution rejected
+(<code>§11.4.34: Reopen needs reopened_why/who/when/incident</code>),
+reopen-with-attribution accepted, <code>LVA-1</code> /
+<code>LVA-2</code> auto-rendered, <code>closed_at</code> auto-stamped,
+summary views populated. (No db committed — it is a generated
+artifact.)</p>
+<h2 id="3-schema">3. Schema</h2>
+<p>Full DDL in <code>docs/tickets/schema.sql</code>. Shape:</p>
+<ul>
+<li><code>item_type</code>, <code>item_status</code>,
+<code>closure_status</code> — closed-set lookup tables (FK-enforced;
+auditable + extensible without code edits).</li>
+<li><code>closure_status_for_type</code> — the §11.4.33 (type → valid
+closure verbs) mapping.</li>
+<li><code>tickets</code> — the core table (seq/id, title, body, type,
+status, closure_status, priority, source/source_ref, reopened_*,
+fix_commit_sha / validation_test / challenge_test / closure_log,
+operator_blocked_details, duplicate_of, timestamps).</li>
+<li>Triggers — id rendering, updated_at touch, type-aware closure guard,
+reopen attribution guard, operator-blocked guard, closed_at stamp.</li>
+<li>Views — <code>v_issues</code>, <code>v_fixed</code>,
+<code>v_issues_summary</code>, <code>v_fixed_summary</code>.</li>
+</ul>
+<p>No sudo, no service, no network — host <code>sqlite3</code> only.</p>
+<h2 id="4-generated-document-set--vocabulary-mapping">4. Generated
+document set + vocabulary mapping</h2>
+<p>Four canonical markdown docs, generated FROM the db (single source of
+truth = the db; the <code>.md</code> files + their
+<code>.html</code>/<code>.pdf</code>/<code>.docx</code> are derived
+artifacts):</p>
+<table>
+<thead>
+<tr>
+<th>Doc</th>
+<th>Source view</th>
+<th>Content</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Issues.md</code></td>
+<td><code>v_issues</code></td>
+<td>Non-closed tickets, leftmost <code>LVA ID</code> column (§11.4.54),
+then Type, Status, Priority, Title, Source</td>
+</tr>
+<tr>
+<td><code>Fixed.md</code></td>
+<td><code>v_fixed</code></td>
+<td>Closed tickets, <code>LVA ID</code>, Type, Closure Status (literal
+<code>(→ Fixed.md)</code> per §11.4.33), Title, Fix SHA, Validation
+Test, Challenge Test, Closure Log</td>
+</tr>
+<tr>
+<td><code>Issues_Summary.md</code></td>
+<td><code>v_issues_summary</code></td>
+<td>Counts by (Type × Status); §11.4.54 LVA-ID column on the detail
+rows</td>
+</tr>
+<tr>
+<td><code>Fixed_Summary.md</code></td>
+<td><code>v_fixed_summary</code></td>
+<td>Counts by (Type × Closure Status); §11.4.19 column-aligned with
+Issues_Summary</td>
+</tr>
+</tbody>
+</table>
+<p><strong>DB-normalized → constitution-literal mapping the generator
+MUST apply:</strong></p>
+<table>
+<thead>
+<tr>
+<th>DB <code>status</code></th>
+<th>Rendered <code>**Status:**</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Open</td>
+<td>Queued</td>
+</tr>
+<tr>
+<td>InProgress</td>
+<td>In progress</td>
+</tr>
+<tr>
+<td>InReview</td>
+<td>Ready for testing / In testing</td>
+</tr>
+<tr>
+<td>Reopened</td>
+<td>Reopened (+ <code>**Reopened-Details:**</code> block per
+§11.4.34)</td>
+</tr>
+<tr>
+<td>OperatorBlocked</td>
+<td>Operator-blocked (+ <code>**Operator-Block-Details:**</code> per
+§11.4.21)</td>
+</tr>
+<tr>
+<td>Closed</td>
+<td>the type-aware closure verb (next table)</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>DB <code>type</code> + <code>closure_status</code></th>
+<th>Rendered closure <code>**Status:**</code> (§11.4.33)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Bug + Fixed</td>
+<td><code>Fixed (→ Fixed.md)</code></td>
+</tr>
+<tr>
+<td>Feature + Implemented</td>
+<td><code>Implemented (→ Fixed.md)</code></td>
+</tr>
+<tr>
+<td>Task + Completed</td>
+<td><code>Completed (→ Fixed.md)</code></td>
+</tr>
+</tbody>
+</table>
+<p>DB-extra types (Chore/Incident/Debt) collapse to {Task,Bug,Task} in
+rendered docs until the operator ratifies extending the constitution's
+3-value set.</p>
+<h2
+id="5-export-pipeline-pdf--html--docx--built-around-what-is-actually-installed">5.
+Export pipeline (PDF / HTML / DOCX) — built around what is ACTUALLY
+installed</h2>
+<p><strong>Tool reality on this host (CONFIRMED — clean per-tool
+<code>which</code> + per-module <code>python3 -c "import X"</code>
+probe; everything needed is present):</strong></p>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Result</th>
+<th>Evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>sqlite3</code></td>
+<td><strong>PRESENT</strong></td>
+<td><code>…/Android/sdk/platform-tools/sqlite3</code> — schema + all
+triggers validated against it</td>
+</tr>
+<tr>
+<td><code>python3</code></td>
+<td><strong>PRESENT</strong></td>
+<td><code>/opt/homebrew/opt/python@3.9/libexec/bin/python3</code></td>
+</tr>
+<tr>
+<td><code>pandoc</code></td>
+<td><strong>PRESENT</strong></td>
+<td><code>/opt/homebrew/bin/pandoc</code> — covers md→HTML AND
+md→DOCX</td>
+</tr>
+<tr>
+<td><code>weasyprint</code></td>
+<td><strong>PRESENT</strong> (binary + py module 66.0)</td>
+<td><code>/opt/homebrew/bin/weasyprint</code> +
+<code>import weasyprint</code> OK — covers HTML→PDF</td>
+</tr>
+<tr>
+<td>python <code>python-docx</code> (<code>docx</code>)</td>
+<td><strong>PRESENT</strong> (1.2.0)</td>
+<td><code>import docx</code> OK — programmatic DOCX fallback</td>
+</tr>
+<tr>
+<td>python <code>jinja2</code></td>
+<td><strong>PRESENT</strong> (3.1.6)</td>
+<td><code>import jinja2</code> OK — optional templating</td>
+</tr>
+<tr>
+<td><code>go</code></td>
+<td><strong>PRESENT</strong></td>
+<td><code>/opt/homebrew/bin/go</code> — the Lava
+<code>internal/qa/ticket</code> adapter builds here</td>
+</tr>
+<tr>
+<td><code>wkhtmltopdf</code></td>
+<td>MISSING</td>
+<td>not needed — weasyprint covers PDF</td>
+</tr>
+<tr>
+<td><code>libreoffice</code> / <code>soffice</code></td>
+<td>MISSING</td>
+<td>not needed — pandoc covers DOCX</td>
+</tr>
+<tr>
+<td>python <code>markdown</code></td>
+<td>MISSING</td>
+<td>not needed — pandoc parses md</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Earlier-probe correction (no-guessing, §11.4.6).</strong> A
+first probe printed a confusing interleaving (a stray
+<code>Traceback</code> aligned next to a later module's
+<code>OK</code>). The clean per-line probe (each <code>import</code> on
+its own invocation) is authoritative: pandoc + weasyprint + python-docx
+are ALL installed. The constitution submodule's pre-rendered
+<code>.html</code>/<code>.pdf</code>/<code>.docx</code> artifacts on
+disk corroborate that this exact pandoc + weasyprint pipeline already
+runs in this repo for §11.4.65 exports.</p>
+</blockquote>
+<p><strong>Implication: the FULL pipeline (md + HTML + PDF + DOCX) is
+buildable TODAY with no installs and no sudo.</strong> §11.4.65 /
+§11.4.60 (every tracked <code>.md</code> has synced <code>.html</code> +
+<code>.pdf</code> siblings; operator also asked for DOCX) is satisfiable
+now.</p>
+<p><strong>Export pipeline (single tier — all tools
+present):</strong></p>
+<ol type="1">
+<li><strong>md generation:</strong> <code>sqlite3</code> query → Python
+(stdlib <code>sqlite3</code>; <code>jinja2</code> optional) →
+<code>Issues.md</code> / <code>Fixed.md</code> /
+<code>Issues_Summary.md</code> / <code>Fixed_Summary.md</code>.</li>
+<li><strong>HTML:</strong>
+<code>pandoc &lt;doc&gt;.md -o &lt;doc&gt;.html --standalone</code>
+(matches the existing repo pattern that produced
+<code>constitution/*.html</code>).</li>
+<li><strong>PDF:</strong>
+<code>pandoc &lt;doc&gt;.md -o &lt;doc&gt;.pdf --pdf-engine=weasyprint</code>
+(the §11.4.65 documented "pandoc HTML + weasyprint PDF" combo).</li>
+<li><strong>DOCX:</strong>
+<code>pandoc &lt;doc&gt;.md -o &lt;doc&gt;.docx</code> (operator's
+explicit ask; pandoc native DOCX writer — no LibreOffice needed).
+<code>python-docx</code> is the fine-grained-styling fallback.</li>
+</ol>
+<p>Mirror the constitution's <code>sync_all_markdown_exports.sh</code>
+<code>timeout 60</code>-per-file guard for consistency (§6.T.2
+host-budget — these are sub-second conversions on a handful of small
+docs).</p>
+<p><strong>Operator-install items (NOT via sudo): NONE required</strong>
+for the core md/HTML/PDF/DOCX pipeline — every tool is already present.
+Optional future hardening: run pandoc+weasyprint inside the Containers
+submodule (§6.K / §6.U / §11.4.76) for cross-workstation reproducibility
+— not a blocker.</p>
+<h2
+id="6-relationship-to-the-existing-go-ticket-packages--the-6ad3-mapping">6.
+Relationship to the existing Go <code>ticket</code> packages + the
+§6.AD.3 mapping</h2>
+<p><strong>The two existing <code>ticket</code> Go packages are a
+DIFFERENT artifact and are NOT superseded by the LVA
+system:</strong></p>
+<ul>
+<li><code>submodules/helixqa/pkg/ticket/</code> (15 real Go files,
+<code>ticket.go</code> 13.7 KB) — HelixQA's <code>Generator</code>
+producing <code>HQA-####</code> QA-session tickets (generic markdown for
+any QA failure: crash, step failure, ANR). Reusable,
+project-agnostic.</li>
+<li><code>lava-api-go/internal/qa/ticket/generator.go</code> (398 real
+lines) — Lava's adapter wrapping the HelixQA Generator to emit §6.O
+Crashlytics <strong>closure logs</strong> at
+<code>.lava-ci-evidence/crashlytics-resolved/&lt;date&gt;-&lt;slug&gt;.md</code>.
+One file per closed Crashlytics issue.</li>
+</ul>
+<p>Neither manages an Issues/Fixed workable-items tracker, neither uses
+SQLite, neither is keyed <code>LVA</code>. They are output generators
+for incident/QA artifacts. The LVA system is the <strong>workable-items
+database</strong> (the operator's directive target). They COMPLEMENT
+each other: a Crashlytics issue closed via the
+<code>internal/qa/ticket</code> adapter SHOULD also become an
+<code>Incident</code>/<code>Bug</code> LVA ticket (status Closed,
+<code>closure_log</code> pointing at the generated md). Per §11.4.74
+(catalogue-first / extend-don't-reimplement): the LVA generator MAY
+reuse HelixQA <code>pkg/ticket</code> rendering helpers where they fit
+rather than re-rolling markdown — flagged in §7. The Go adapter is REAL
+and working — do NOT delete it.</p>
+<h3
+id="relationship-to-the-6ad3-path-b-equivalence-mapping">Relationship to
+the §6.AD.3 Path-B equivalence mapping</h3>
+<p>§6.AD.3 Path B (2026-05-15) formally mapped HelixConstitution
+§11.4.33 / §11.4.34 to Lava's existing artifacts
+(<code>CONTINUATION.md</code> + the two <code>.lava-ci-evidence/</code>
+ledgers) and declared that mapping binding "rather than requiring a
+parallel Issues.md / Fixed.md tracker."</p>
+<p><strong>This LVA system COMPLEMENTS rather than immediately
+supersedes that mapping:</strong></p>
+<ul>
+<li>The operator's 68th-invocation directive now explicitly calls for
+the SQLite DB
+<ul>
+<li>Issues/Fixed/Summary docs + PDF/HTML/DOCX exports — i.e. the very
+parallel tracker Path B previously deemed optional. The LVA system is
+the operator-directed materialization of those trackers.</li>
+</ul></li>
+<li>Until the LVA system is populated and wired into the gates, the
+Path-B equivalence remains the binding compliance surface (do NOT remove
+the <code>.lava-ci-evidence/</code> ledgers or
+<code>CONTINUATION.md</code> state). The LVA db should be SEEDED from
+the existing <code>.lava-ci-evidence/crashlytics-resolved/*</code> +
+<code>sixth-law-incidents/*</code> so the two surfaces stay
+reconciled.</li>
+<li>Once the LVA db is authoritative and the generators run in CI
+(<code>scripts/ci.sh</code>), §6.AD.3 should be amended to note the LVA
+system as primary tracker with the <code>.lava-ci-evidence/</code>
+ledgers as forensic backing (a CLAUDE.md edit for the main agent /
+operator — NOT done in this scaffold).</li>
+</ul>
+<p>This supersede-vs-complement decision is project-specific
+(<code>Classification: project-specific</code>) and must be ratified by
+the operator before the Path-B mapping text is rewritten.</p>
+<h2 id="7-action-list-for-the-main-agent-prioritized">7. Action list for
+the main agent (prioritized)</h2>
+<ol type="1">
+<li><strong>Commit this scaffold</strong>
+(<code>docs/tickets/DESIGN.md</code> +
+<code>docs/tickets/schema.sql</code>). Per §6.S update
+<code>docs/CONTINUATION.md</code> in the same commit (new docs/tickets
+surface + LVA key decision). Add a <code>Classification:</code> line per
+§11.4.17.</li>
+<li><strong>Build the generator</strong> —
+<code>scripts/tickets-gen.py</code> (stdlib <code>sqlite3</code>; jinja2
+optional, present) reads the db and emits Issues.md / Fixed.md /
+Issues_Summary.md / Fixed_Summary.md, then shells to <code>pandoc</code>
+(HTML + DOCX) + <code>pandoc --pdf-engine=weasyprint</code> (PDF) per §5
+— ALL tools confirmed present, no install. Add a
+<code>docs/scripts/tickets-gen.md</code> companion per §11.4.18. Cover
+with a hermetic test per §6.A. Apply the §4
+normalized→constitution-literal vocab mapping so rendered docs satisfy
+§11.4.15/16/33.</li>
+<li><strong>Seed from existing evidence</strong> — import
+<code>.lava-ci-evidence/crashlytics-resolved/*</code> (→ Bug/Incident,
+Closed, closure_log set) and <code>sixth-law-incidents/*</code> (→
+Incident) as LVA tickets, reconciling with the Path-B surface (§6).</li>
+<li><strong>§11.4.74 catalogue-check before re-rolling
+markdown.</strong> Evaluate reusing/extending the HelixQA
+<code>pkg/ticket</code> + Lava <code>internal/qa/ticket</code> rendering
+helpers; record <code>Catalogue-Check: reuse|extend|no-match</code>. Do
+NOT delete the Go adapter (different concern — closure logs, not the
+tracker DB).</li>
+<li><strong>Decide canonical tracker-doc location.</strong> §11.4.48
+carve-out fixes the 5 canonical tracker docs at <code>docs/</code> ROOT
+(<code>docs/Issues.md</code>, …, <code>docs/CONTINUATION.md</code>). If
+Lava adopts that convention, rendered tracker docs go at
+<code>docs/</code> root with the SQLite db + schema + generator under
+<code>docs/tickets/</code>. Operator decision via §11.4.66
+AskUserQuestion.</li>
+<li><strong>Gitignore decision for <code>tickets.db</code>.</strong>
+Recommend gitignore the binary + commit <code>schema.sql</code> + a
+<code>seed.sql</code> of INSERTs (reproducible, reviewable), with a
+§11.4.77 <code>.gitignore-meta/</code> entry declaring
+<code>sqlite3 db &lt; seed.sql</code> as the regeneration mechanism.
+(Existing precedent: <code>.codegraph/codegraph.db</code> is gitignored
+with <code>codegraph index</code> as its regen mechanism.)</li>
+<li><strong>No operator install required</strong> for md/HTML/PDF/DOCX —
+pandoc + weasyprint + python-docx + sqlite3 + python3 + go all present
+(evidence §5).</li>
+<li><strong>Wire gates</strong> — add a
+<code>scripts/check-constitution.sh</code> check that the LVA db's
+triggers exist + generated docs are in sync (regenerate +
+<code>git diff --exit-code</code>) +
+<code>.md</code>/<code>.html</code>/<code>.pdf</code> mtimes aligned
+(§11.4.60/65), closing the §6.AD-debt <code>CM-ITEM-*</code> gates with
+a real implementation instead of equivalence-mapping. Add a
+<code>Classification:</code> line + paired §1.1 mutation test.</li>
+<li><strong>Follow-up: <code>ticket_events</code> history table</strong>
+for full §11.4.55 per-item Reopens.md reasoning chains (the current
+<code>reopened_*</code> columns hold only the latest reopen; full
+history needs an append-only events table).</li>
+</ol>
+<hr />
+<h2 id="8-build-outcome-2026-05-31-6l-68th-invocation">8. Build outcome
+(2026-05-31, §6.L 68th invocation)</h2>
+<p>The system is BUILT and the design's open questions are resolved.
+Verbatim build evidence:
+<code>docs/tickets/BUILD-EVIDENCE.md</code>.</p>
+<ul>
+<li><strong>Implementation language: Go, not Python.</strong> The §7.2
+design sketched a <code>scripts/tickets-gen.py</code>; the actual build
+is a Go module at <code>tools/lava-tickets/</code> (pure
+<code>modernc.org/sqlite</code>, no CGO) per the operator's Go-only
+directive. It implements
+<code>init / add / update / close / reopen / gen / verify / import / export / list</code>.</li>
+<li><strong>DB-in-git decision (§7.6 superseded):</strong>
+<code>docs/tickets/tickets.db</code> IS <strong>TRACKED in git, NOT
+gitignored</strong> — §11.4.95 ("Workable-items SQLite DB TRACKED in
+git, NEVER gitignored", a NEW clause in the 53-commit delta the
+68th-cycle review surfaced) is explicit and overrides §7.6's
+gitignore-the- binary recommendation. The DB is checkpointed to DELETE
+journal mode before commit so it is self-contained; only
+<code>*.db-wal</code>/<code>*.db-shm</code> sidecars + <code>bin/</code>
++ scratch <code>_*.sh</code> are gitignored.</li>
+<li><strong>Round-trip (§11.4.106):</strong> <code>gen</code> then
+<code>verify</code> is byte-identical — PROVEN, and the contract test
+includes a falsifiability rehearsal (corrupting a tracker makes
+<code>verify</code> FAIL).</li>
+<li><strong>Triggers (§11.4.33/34):</strong> exercised by the binary's
+contract test — Bug→Implemented rejected, Bug→Fixed accepted, partial
+reopen rejected.</li>
+<li><strong>Export:</strong> HTML is pure-Go (always works —
+<code>Issues.html</code> committed as proof). PDF/DOCX run pandoc inside
+a podman/docker container; when no runtime is up the tool exits 3 with
+an operator-actionable message and writes NO fake file (§6.J). Host
+<code>pandoc</code> is the documented operator fallback (real DOCX
+produced this session).</li>
+<li><strong>Seeded items:</strong> 7 REAL items (LVA-1…LVA-7) derived
+from <code>docs/CONTINUATION.md</code>
+<ul>
+<li>the 68th-cycle constitution review + the two 2026-05-20 sixth-law
+incidents. No invented commit SHA (recorded as <code>pending</code> per
+§11.4.6 no-guessing).</li>
+</ul></li>
+<li><strong>§6.AD.3 Path-B vs SQLite-DB reconciliation (LVA-3) remains
+operator-gated</strong> — this build materializes the tracker the
+§6.AD.3 carve-out previously deemed optional; whether it SUPERSEDES or
+COMPLEMENTS the <code>.lava-ci-evidence/</code> ledgers is the
+main-agent/operator decision (DESIGN §6), not made in this build.</li>
+</ul>
+<hr />
+<p><code>Classification: project-specific</code> (the LVA key + Lava's
+doc set + the Path-B relationship are Lava-specific; the underlying
+§11.4.x mandates are universal and inherited from
+HelixConstitution).</p>
+</body>
+</html>

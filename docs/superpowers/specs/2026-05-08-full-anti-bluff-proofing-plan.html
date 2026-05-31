@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-05-08-full-anti-bluff-proofing-plan</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1 id="full-anti-bluff-proofing-plan">Full Anti-Bluff Proofing
+Plan</h1>
+<p><strong>Date:</strong> 2026-05-08 <strong>Status:</strong> Draft
+<strong>Author:</strong> Agent assessment after OkHttp build fix
+session</p>
+<hr />
+<h2 id="assessment-not-bluff-proofed-evidence">Assessment: NOT
+Bluff-Proofed (Evidence)</h2>
+<h3 id="blocking-must-fix-before-any-release">Blocking (must fix before
+ANY release)</h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Issue</th>
+<th>Severity</th>
+<th>Evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>:core:auth:impl</code> test compilation failure</td>
+<td>BLOCKER</td>
+<td><code>FakePreferencesStorage</code> does not implement
+<code>getDeviceId()</code>. <code>./gradlew test</code> fails.</td>
+</tr>
+<tr>
+<td>2</td>
+<td>All 16 submodules have uncommitted constitution propagation</td>
+<td>BLOCKER</td>
+<td><code>git status</code> shows all 16 submodules/ as
+<code>-dirty</code> (modified CLAUDE.md/AGENTS.md/CONSTITUTION.md from
+§6.U/6.V/6.W propagation)</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Parent repo CLAUDE.md, AGENTS.md, CONTINUATION.md have uncommitted
+§6.U/V/W changes</td>
+<td>BLOCKER</td>
+<td>Uncommitted edits sitting in working tree</td>
+</tr>
+<tr>
+<td>4</td>
+<td>GitFlic + GitVerse remotes still configured</td>
+<td>§6.W VIOLATION</td>
+<td><code>git remote -v</code> shows <code>gitflic</code>,
+<code>gitverse</code>, <code>upstream</code> (gitflic) remotes</td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>origin</code> remote has multi-target push URLs mixing all 4
+providers</td>
+<td>§6.W VIOLATION</td>
+<td><code>origin</code> pushes to GitHub + GitLab + GitFlic + GitVerse
+simultaneously</td>
+</tr>
+</tbody>
+</table>
+<h3 id="high-features-exist-but-verification-is-weak-or-absent">High
+(features exist but verification is weak or absent)</h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Issue</th>
+<th>Severity</th>
+<th>Evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>6</td>
+<td>Challenge Tests C17-C22 never executed</td>
+<td>HIGH</td>
+<td>CONTINUATION.md §4.5.4 confirms they "require the §6.I emulator
+matrix to execute"</td>
+</tr>
+<tr>
+<td>7</td>
+<td>§6.I emulator matrix never run</td>
+<td>HIGH</td>
+<td>CONTINUATION.md §2.1 — blocked on operator hardware</td>
+</tr>
+<tr>
+<td>8</td>
+<td>No git tags cut for any 1.2.x release</td>
+<td>HIGH</td>
+<td>Last tag is Lava-Android-1.1.3-1013, current is 1.2.13-1033</td>
+</tr>
+<tr>
+<td>9</td>
+<td>No real-device verification evidence for 1.2.x</td>
+<td>HIGH</td>
+<td>CONTINUATION.md §2.1 — requires operator hands-on</td>
+</tr>
+<tr>
+<td>10</td>
+<td>No recent bluff hunt executed</td>
+<td>HIGH</td>
+<td>Last bluff hunt not documented; §6.N requires per-phase hunt</td>
+</tr>
+<tr>
+<td>11</td>
+<td>Many tests may be bluffs (pass while feature broken)</td>
+<td>HIGH</td>
+<td>Historical pattern per §6.L — "all tests green, most features
+broken" has happened repeatedly</td>
+</tr>
+</tbody>
+</table>
+<h3 id="medium-known-but-not-blocking-immediate-safety">Medium (known
+but not blocking immediate safety)</h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Issue</th>
+<th>Severity</th>
+<th>Evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>12</td>
+<td><code>/api/v1/search</code> route resolution needs operator
+verification</td>
+<td>MED</td>
+<td>CONTINUATION.md §4.5.1</td>
+</tr>
+<tr>
+<td>13</td>
+<td><code>/health</code> intermittent timeout + UDP buffer warning</td>
+<td>MED</td>
+<td>CONTINUATION.md §4.5.2</td>
+</tr>
+<tr>
+<td>14</td>
+<td>Internet Archive / gutenberg provider status unclear</td>
+<td>MED</td>
+<td>CONTINUATION.md §4.5.3</td>
+</tr>
+<tr>
+<td>15</td>
+<td><code>Engine.Ktor</code> dead enum cascade</td>
+<td>LOW</td>
+<td>CONTINUATION.md §4.5.7</td>
+</tr>
+<tr>
+<td>16</td>
+<td><code>Endpoint.Mirror</code> dead LAN-IP branch</td>
+<td>LOW</td>
+<td>CONTINUATION.md §4.5.8</td>
+</tr>
+<tr>
+<td>17</td>
+<td><code>docs/todos/</code> untracked</td>
+<td>LOW</td>
+<td>CONTINUATION.md §4.5.9</td>
+</tr>
+<tr>
+<td>18</td>
+<td>IPv4/host:port/schedule literal grep staged</td>
+<td>LOW</td>
+<td>CONTINUATION.md §4.5.10</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="phased-plan">Phased Plan</h2>
+<h3
+id="phase-0-stabilize--fix-compilation--commit-pending-changes">Phase 0:
+Stabilize — Fix Compilation &amp; Commit Pending Changes</h3>
+<p><strong>Goal:</strong> <code>./gradlew test</code> passes clean, all
+pending constitutional changes are committed, all 4 forbidden remotes
+removed.</p>
+<p><strong>Tasks:</strong></p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Task</th>
+<th>Details</th>
+<th>Verification</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0.1</td>
+<td>Fix <code>:core:auth:impl</code>
+<code>FakePreferencesStorage.getDeviceId()</code></td>
+<td>Add the missing method override to the test fake</td>
+<td><code>./gradlew :core:auth:impl:test</code> passes</td>
+</tr>
+<tr>
+<td>0.2</td>
+<td>Commit all 16 submodule constitution propagation</td>
+<td>In each submodule:
+<code>git add CLAUDE.md AGENTS.md CONSTITUTION.md</code> (as present),
+commit, push to GitHub + GitLab</td>
+<td><code>git submodule status</code> shows clean, all 16 pushed to both
+mirrors</td>
+</tr>
+<tr>
+<td>0.3</td>
+<td>Update parent submodule pins to match committed submodule HEADs</td>
+<td><code>git add submodules/*</code> after submodule commits</td>
+<td><code>git diff --cached submodules/</code> shows new hashes</td>
+</tr>
+<tr>
+<td>0.4</td>
+<td>Commit parent CLAUDE.md + AGENTS.md + CONTINUATION.md §6.U/V/W
+changes</td>
+<td>Pending uncommitted edits in parent working tree</td>
+<td><code>git status</code> clean</td>
+</tr>
+<tr>
+<td>0.5</td>
+<td>Remove GitFlic remote</td>
+<td><code>git remote remove gitflic</code></td>
+<td><code>git remote -v</code> shows no gitflic</td>
+</tr>
+<tr>
+<td>0.6</td>
+<td>Remove GitVerse remote</td>
+<td><code>git remote remove gitverse</code></td>
+<td><code>git remote -v</code> shows no gitverse</td>
+</tr>
+<tr>
+<td>0.7</td>
+<td>Remove upstream (GitFlic dup) remote</td>
+<td><code>git remote remove upstream</code></td>
+<td><code>git remote -v</code> shows no upstream</td>
+</tr>
+<tr>
+<td>0.8</td>
+<td>Fix <code>origin</code> remote to push only to GitHub + GitLab</td>
+<td>Reset <code>origin</code> to single URL, or add separate
+<code>github</code>/<code>gitlab</code> push targets</td>
+<td><code>git remote -v</code> shows only 2 providers</td>
+</tr>
+<tr>
+<td>0.9</td>
+<td>Update scripts/tag.sh and Upstreams/ scripts to use only 2
+remotes</td>
+<td>Remove GitFlic/GitVerse references</td>
+<td><code>grep -r 'gitflic|gitverse' scripts/ Upstreams/</code> returns
+empty</td>
+</tr>
+<tr>
+<td>0.10</td>
+<td>Push parent to both remotes</td>
+<td><code>git push github master &amp;&amp; git push gitlab master</code></td>
+<td>Both converge to same SHA</td>
+</tr>
+<tr>
+<td>0.11</td>
+<td>Verify SHA convergence across both remotes</td>
+<td>`for r in github gitlab; do echo "$r: $(git ls-remote $r master</td>
+<td>awk '{print $1}')"; done`</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Exit criteria:</strong> <code>./gradlew test</code> passes.
+<code>git status</code> clean. <code>git remote -v</code> shows only
+GitHub + GitLab. All 16 submodules committed and pushed. No forbidden
+remotes.</p>
+<hr />
+<h3 id="phase-1-anti-bluff-audit-of-all-existing-tests">Phase 1:
+Anti-Bluff Audit of All Existing Tests</h3>
+<p><strong>Goal:</strong> EVERY test file verified to catch real defects
+— not pass while features are broken.</p>
+<p><strong>Tasks:</strong></p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Task</th>
+<th>Details</th>
+<th>Verification</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1.1</td>
+<td>Inventory all test files</td>
+<td>`find . -name '*Test.kt' -o -name '<em>Test.java' -o -name
+'</em>_test.go'</td>
+<td>sort`</td>
+</tr>
+<tr>
+<td>1.2</td>
+<td>Random sample 5 test files, run falsifiability rehearsal (Seventh
+Law clause 5)</td>
+<td>For each: (a) read the test, (b) deliberately break the production
+code it claims to cover, (c) confirm test FAILS with clear assertion
+message, (d) revert mutation, (e) document result</td>
+<td>5 files × fail-confirmed in
+<code>.lava-ci-evidence/bluff-hunt/2026-05-08.json</code></td>
+</tr>
+<tr>
+<td>1.3</td>
+<td>Check every test for §6.J clause 3 compliance (primary assertion on
+user-visible state)</td>
+<td>Grep for <code>verify </code> patterns, <code>assertEquals</code> on
+internal state, mock assertions as primary</td>
+<td>List of tests that need refactoring</td>
+</tr>
+<tr>
+<td>1.4</td>
+<td>Refactor identified bluff tests</td>
+<td>Replace mock-only assertions with real-stack, user-visible state
+assertions</td>
+<td>Bluff-Audit stamp on every refactored test commit</td>
+</tr>
+<tr>
+<td>1.5</td>
+<td>Check for forbidden test patterns (Seventh Law clause 4)</td>
+<td><code>mockk&lt;SUT&gt;</code> inside <code>*Test.kt</code>,
+<code>@Ignore</code> without tracking issue, tests that build SUT but
+never invoke methods</td>
+<td>List of violations, fix or document</td>
+</tr>
+<tr>
+<td>1.6</td>
+<td>Verify all Challenge Tests (C1-C22) have falsifiability rehearsal
+protocols in their KDoc</td>
+<td>Read each Challenge Test file</td>
+<td>Every file has documented break-and-confirm-fail procedure in
+KDoc</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Exit criteria:</strong> All test files audited. Minimum 5
+bluff-hunt mutations confirmed to cause test failures. Zero forbidden
+patterns. All Challenge KDOCs document falsifiability protocol.</p>
+<hr />
+<h3 id="phase-2-fix-all-known-issues">Phase 2: Fix All Known Issues</h3>
+<p><strong>Goal:</strong> Every issue in §4.5 of CONTINUATION.md is
+either fixed (with regression test) or explicitly documented as deferred
+with a tracking issue.</p>
+<p><strong>Tasks:</strong></p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Task</th>
+<th>Details</th>
+<th>Verification</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2.1</td>
+<td>Fix Challenge Tests C1-C16 if they exhibit bluff behavior</td>
+<td>Run each Challenge, deliberately break feature, confirm failure</td>
+<td>Each Challenge has documented falsifiability rehearsal</td>
+</tr>
+<tr>
+<td>2.2</td>
+<td>Execute C17-C22 on available device/emulator</td>
+<td>Run each new provider Challenge Test</td>
+<td>All 6 pass or documented failures</td>
+</tr>
+<tr>
+<td>2.3</td>
+<td>Verify <code>/api/v1/search</code> route resolution</td>
+<td><code>curl -fsSk 'https://thinker.local:8443/v1/rutracker/search?q=test'</code></td>
+<td>Returns 200 with search results</td>
+</tr>
+<tr>
+<td>2.4</td>
+<td>Document UDP buffer fix for operator</td>
+<td><code>sudo sysctl -w net.core.rmem_max=7340032</code> per
+CONTINUATION.md §4.5.2</td>
+<td>Operator note added to docs/</td>
+</tr>
+<tr>
+<td>2.5</td>
+<td>Verify Internet Archive + gutenberg provider status</td>
+<td>Test via API call or Challenge Test</td>
+<td>Provider works or documented limitation</td>
+</tr>
+<tr>
+<td>2.6</td>
+<td>Clean up <code>Engine.Ktor</code> dead enum (if touching relevant
+code)</td>
+<td>Remove enum value + prune exhaustive when branches</td>
+<td>Compiles without <code>Ktor</code> references</td>
+</tr>
+<tr>
+<td>2.7</td>
+<td>Clean up <code>Endpoint.Mirror</code> dead branch (if touching
+relevant code)</td>
+<td>Prune dead routing branch</td>
+<td>Compiles clean</td>
+</tr>
+<tr>
+<td>2.8</td>
+<td>Commit or gitignore <code>docs/todos/</code></td>
+<td>Operator decision</td>
+<td>Tracked properly</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Exit criteria:</strong> All HIGH and MEDIUM issues resolved
+or explicitly deferred with tracking. CONTINUATION.md §4.5 updated.</p>
+<hr />
+<h3 id="phase-3-emulator-matrix-execution-6i">Phase 3: Emulator Matrix
+Execution (§6.I)</h3>
+<p><strong>Goal:</strong> All Challenge Tests pass on the mandated
+emulator matrix inside containers.</p>
+<p><strong>Tasks:</strong></p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Task</th>
+<th>Details</th>
+<th>Verification</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>3.0</td>
+<td>Fetch latest <code>vasic-digital/Containers</code> submodule</td>
+<td>Update pin to latest commit for emulator support</td>
+<td><code>git submodule update --init submodules/containers</code></td>
+</tr>
+<tr>
+<td>3.1</td>
+<td>Build emulator containers for API 28, 30, 34, latest</td>
+<td>Per Containers submodule tooling</td>
+<td>Each container boots and shows <code>adb devices</code></td>
+</tr>
+<tr>
+<td>3.2</td>
+<td>Build emulator containers for phone, tablet, TV form factors</td>
+<td>Per §6.I matrix requirements</td>
+<td>Each form factor boots</td>
+</tr>
+<tr>
+<td>3.3</td>
+<td>Execute Challenge Tests C1-C22 on each matrix combination</td>
+<td><code>scripts/run-emulator-tests.sh --avds=...</code></td>
+<td>JSON evidence per combination</td>
+</tr>
+<tr>
+<td>3.4</td>
+<td>Document per-AVD attestation rows</td>
+<td>Record in
+<code>.lava-ci-evidence/Lava-Android-&lt;version&gt;/real-device-verification.md</code></td>
+<td>Matrix coverage table complete</td>
+</tr>
+<tr>
+<td>3.5</td>
+<td>Falsifiability rehearsal on each AVD class</td>
+<td>Break feature, confirm Challenge fails on each Android version
+class</td>
+<td>Per-version failure evidence</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Exit criteria:</strong> All 22 Challenge Tests pass on all
+matrix combinations. Attestation document written with per-AVD rows.
+Falsifiability rehearsals documented.</p>
+<hr />
+<h3 id="phase-4-full-bluff-hunt-seventh-law-clause-5">Phase 4: Full
+Bluff Hunt (Seventh Law clause 5)</h3>
+<p><strong>Goal:</strong> Systematic verification that every test class
+actually catches real defects.</p>
+<p><strong>Tasks:</strong></p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Task</th>
+<th>Details</th>
+<th>Verification</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>4.1</td>
+<td>Select 5 random test files + 2 production code files from
+gate-shaping code</td>
+<td>Per §6.N: sample includes <code>scripts/tag.sh</code> helpers,
+<code>scripts/check-constitution.sh</code>,
+<code>submodules/containers/pkg/emulator/</code></td>
+<td>Selection documented</td>
+</tr>
+<tr>
+<td>4.2</td>
+<td>For each file: mutate production code, confirm test fails</td>
+<td>Follow Seventh Law clause 5 protocol</td>
+<td>Each mutation documented in
+<code>.lava-ci-evidence/bluff-hunt/2026-05-08.json</code></td>
+</tr>
+<tr>
+<td>4.3</td>
+<td>For any test that PASSES when production code is broken: classify as
+bluff, record incident</td>
+<td>Per Seventh Law clause 6 (Bluff Discovery Protocol)</td>
+<td>Incident recorded in
+<code>.lava-ci-evidence/sixth-law-incidents/</code></td>
+</tr>
+<tr>
+<td>4.4</td>
+<td>Fix all discovered bluffs</td>
+<td>Rewrite test to catch the real defect</td>
+<td>Bluff-Audit stamp on fix commit</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Exit criteria:</strong> 5+ production mutations cause test
+failures. Zero bluffs found, or all bluffs fixed and documented.</p>
+<hr />
+<h3
+id="phase-5-full-ci-gate--real-device-verification-seventh-law-clause-2-3">Phase
+5: Full CI Gate &amp; Real-Device Verification (Seventh Law clause
+2-3)</h3>
+<p><strong>Goal:</strong> Complete the pre-tag evidence pack.</p>
+<p><strong>Tasks:</strong></p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Task</th>
+<th>Details</th>
+<th>Verification</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>5.0</td>
+<td>Operator action: hardware/device access</td>
+<td>Connect Android device or authorize emulator matrix run</td>
+<td>Device visible via <code>adb devices</code></td>
+</tr>
+<tr>
+<td>5.1</td>
+<td>Run full CI gate</td>
+<td><code>./scripts/ci.sh --full</code></td>
+<td>All gates pass, evidence written to
+<code>.lava-ci-evidence/</code></td>
+</tr>
+<tr>
+<td>5.2</td>
+<td>Real-device manual smoke test</td>
+<td>Login + search + browse + download on real device against
+thinker.local</td>
+<td>Recorded in real-device-attestation.json</td>
+</tr>
+<tr>
+<td>5.3</td>
+<td>Take 3+ screenshots or video</td>
+<td>Document user-visible behavior per Seventh Law clause 3</td>
+<td>Screenshots hashed and referenced</td>
+</tr>
+<tr>
+<td>5.4</td>
+<td>Pepper rotation</td>
+<td>Append new pepper per <code>docs/RELEASE-ROTATION.md</code></td>
+<td><code>.lava-ci-evidence/distribute-changelog/firebase-app-distribution/pepper-history.sha256</code>
+updated</td>
+</tr>
+<tr>
+<td>5.5</td>
+<td>Verify pre-tag evidence pack complete</td>
+<td>Check all required files: <code>ci.sh.json</code>,
+<code>challenges/C{1..22}.json</code> at VERIFIED,
+<code>mirror-smoke/</code>, <code>bluff-audit/</code>,
+<code>real-device-verification.md</code></td>
+<td><code>scripts/tag.sh</code> (dry-run) does not refuse</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Exit criteria:</strong> Full evidence pack populated.
+Real-device verification documented.</p>
+<hr />
+<h3 id="phase-6-rebuild-api--client-redistribute-reboot">Phase 6:
+Rebuild API + Client, Redistribute, Reboot</h3>
+<p><strong>Goal:</strong> Shippable artifacts with constitutional
+compliance.</p>
+<p><strong>Tasks:</strong></p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Task</th>
+<th>Details</th>
+<th>Verification</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>6.1</td>
+<td>Rebuild Go API</td>
+<td><code>cd lava-api-go &amp;&amp; make build</code></td>
+<td>Binary at <code>lava-api-go/bin/lava-api-go</code></td>
+</tr>
+<tr>
+<td>6.2</td>
+<td>Rebuild Go API Docker image</td>
+<td><code>cd lava-api-go &amp;&amp; make image</code></td>
+<td>Image <code>lava-api-go:dev</code></td>
+</tr>
+<tr>
+<td>6.3</td>
+<td>Rebuild Android APK (debug + release)</td>
+<td><code>./gradlew :app:assembleDebug :app:assembleRelease</code></td>
+<td>APKs in <code>app/build/outputs/apk/</code></td>
+</tr>
+<tr>
+<td>6.4</td>
+<td>Rebuild proxy fat JAR</td>
+<td><code>./gradlew :proxy:buildFatJar</code></td>
+<td>JAR at <code>proxy/build/libs/app.jar</code></td>
+</tr>
+<tr>
+<td>6.5</td>
+<td>Copy artifacts to <code>releases/</code></td>
+<td><code>./build_and_release.sh</code></td>
+<td><code>releases/&lt;version&gt;/</code> populated</td>
+</tr>
+<tr>
+<td>6.6</td>
+<td>Cut git tag (Android)</td>
+<td><code>scripts/tag.sh --app android</code></td>
+<td>Tag <code>Lava-Android-&lt;vname&gt;-&lt;vcode&gt;</code> pushed to
+both mirrors</td>
+</tr>
+<tr>
+<td>6.7</td>
+<td>Cut git tag (API)</td>
+<td><code>scripts/tag.sh --api go</code></td>
+<td>Tag <code>Lava-API-Go-&lt;vname&gt;-&lt;vcode&gt;</code> pushed to
+both mirrors</td>
+</tr>
+<tr>
+<td>6.8</td>
+<td>Distribute via Firebase App Distribution</td>
+<td><code>scripts/firebase-distribute.sh</code></td>
+<td>New version on Firebase with changelog</td>
+</tr>
+<tr>
+<td>6.9</td>
+<td>Verify post-push SHA convergence</td>
+<td>Check both mirrors report same tag SHA</td>
+<td>Converged</td>
+</tr>
+<tr>
+<td>6.10</td>
+<td>Reboot API container</td>
+<td><code>./stop.sh &amp;&amp; ./start.sh</code></td>
+<td><code>curl https://thinker.local:8443/health</code> returns 200</td>
+</tr>
+<tr>
+<td>6.11</td>
+<td>Verify API functional after reboot</td>
+<td>Smoke test: search, auth, health</td>
+<td>All endpoints respond correctly</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Exit criteria:</strong> Git tags cut on both mirrors. APK on
+Firebase with proper versionCode and changelog. API container restarted
+and healthy.</p>
+<hr />
+<h2
+id="constitutional-reinforcement-if-needed-after-audit">Constitutional
+Reinforcement (if needed after audit)</h2>
+<p>After phases 1-6, if any gaps are found in the existing
+constitutional clauses (§6.J, §6.L, Sixth Law, Seventh Law), this
+section documents the amendments.</p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Clause</th>
+<th>Current state</th>
+<th>Amendment needed?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A</td>
+<td>§6.J (Anti-Bluff Functional Reality)</td>
+<td>Present in CLAUDE.md + AGENTS.md</td>
+<td>Verify during Phase 1</td>
+</tr>
+<tr>
+<td>B</td>
+<td>§6.L (Operator's Standing Order)</td>
+<td>Present in CLAUDE.md + AGENTS.md</td>
+<td>Verify during Phase 1</td>
+</tr>
+<tr>
+<td>C</td>
+<td>Sixth Law (Real User Verification)</td>
+<td>Present in CLAUDE.md + AGENTS.md</td>
+<td>Verify during Phase 1</td>
+</tr>
+<tr>
+<td>D</td>
+<td>Seventh Law (Anti-Bluff Enforcement)</td>
+<td>Present in CLAUDE.md + AGENTS.md</td>
+<td>Verify during Phase 1</td>
+</tr>
+</tbody>
+</table>
+<p>The user's mandate — "execution of tests and Challenges MUST
+guarantee the quality, the completion and full usability by end users of
+the product" — is already codified in §6.J and §6.L. Phase 1 will
+determine if the mechanical enforcement is adequate.</p>
+<hr />
+<h2 id="timeline-estimate">Timeline Estimate</h2>
+<table>
+<thead>
+<tr>
+<th>Phase</th>
+<th>Effort</th>
+<th>Dependencies</th>
+<th>Can be parallelized?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>~2-3 hours</td>
+<td>None</td>
+<td>Submodule commits can run in parallel</td>
+</tr>
+<tr>
+<td>1</td>
+<td>~4-6 hours</td>
+<td>Phase 0 (clean build needed)</td>
+<td>Test audit + bluff hunt in parallel</td>
+</tr>
+<tr>
+<td>2</td>
+<td>~3-4 hours</td>
+<td>Phase 1 (must know which tests are real)</td>
+<td>Task 2.3 (API verify) overlaps</td>
+</tr>
+<tr>
+<td>3</td>
+<td>~4-8 hours</td>
+<td>Phase 2, Containers submodule, operator hardware</td>
+<td>Matrix cells in parallel</td>
+</tr>
+<tr>
+<td>4</td>
+<td>~2-3 hours</td>
+<td>Phase 1 (fresh audit after fixes)</td>
+<td>Bluff hunt independent of phase 3</td>
+</tr>
+<tr>
+<td>5</td>
+<td>~1-2 hours</td>
+<td>Phases 1-4, operator device/hardware</td>
+<td>Manual steps (operator)</td>
+</tr>
+<tr>
+<td>6</td>
+<td>~2-3 hours</td>
+<td>Phase 5</td>
+<td>Builds in parallel (API + Android)</td>
+</tr>
+<tr>
+<td><strong>Total</strong></td>
+<td><strong>~18-29 hours</strong></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Parallelizable groups:</strong></p>
+<ul>
+<li>Phase 0.1 (auth test fix) is independent of 0.2-0.9 (submodule/git
+cleanup)</li>
+<li>Phase 1 tasks can run in parallel across multiple agents</li>
+<li>Phase 3 matrix cells are embarrassingly parallel</li>
+<li>Phase 6.1+6.2 (Go build) and 6.3+6.4 (Android build) can run
+simultaneously</li>
+</ul>
+<hr />
+<h2 id="fallback">Fallback</h2>
+<p>If operator hardware/emulator access is unavailable:</p>
+<ul>
+<li><strong>Phase 3</strong> is replaced by: "Execute C17-C22 on any
+available device, document gaps for emulator matrix"</li>
+<li><strong>Phase 5.2</strong> (real-device smoke test) is replaced by:
+"Document which steps require operator hands-on"</li>
+<li><strong>Phase 6.6-6.7</strong> (tag cutting) uses
+<code>--no-evidence-required</code> as a dry run, with the caveat that
+tagging is NOT complete without the evidence pack</li>
+</ul>
+</body>
+</html>

@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>run-helixqa-challenges.sh</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1
+id="scriptsrun-helixqa-challengessh--user-guide"><code>scripts/run-helixqa-challenges.sh</code>
+— User Guide</h1>
+<p><strong>Last verified:</strong> 2026-05-16 (Phase 4 follow-up B — 4
+open questions resolved) <strong>Inheritance:</strong> HelixConstitution
+§11.4.18 (script documentation mandate) + Lava §6.AE (Comprehensive
+Challenge Coverage) + §6.J (Anti-Bluff Functional Reality) + §6.X
+(Container-Submodule Emulator Wiring — implemented via
+<code>--runner=containerized</code>) + §6.W (mirror-host boundary —
+per-script audit at <code>docs/helixqa-script-audit.md</code>)
+<strong>Classification:</strong> project-specific (the per-script wiring
+choices + the §6.W audit results are Lava-specific; the
+host-vs-container delegation is universal per §6.X)</p>
+<h2 id="overview">Overview</h2>
+<p>Thin Lava-side wrapper around HelixQA's 11 Challenge scripts shipped
+at <code>submodules/helixqa/challenges/scripts/</code>. Invokes them in
+sequence, captures per-script stdout/stderr to log files, writes a
+roll-up attestation JSON, and reports per-script PASS / FAIL / SKIP
+outcomes.</p>
+<p>Implements <strong>Option 1</strong> from
+<code>docs/plans/2026-05-16-helixqa-integration-design.md</code> —
+shell-level wiring with NO modification to HelixQA. Future cycles
+MAY:</p>
+<ul>
+<li>Add Go-package linking for Group A packages (Option 2 in the
+design).</li>
+<li>Migrate Compose UI Challenge Tests to use HelixQA as backend (Option
+3 in the design — deferred indefinitely).</li>
+</ul>
+<h2 id="the-11-wired-scripts">The 11 wired scripts</h2>
+<p>Canonical list (matches <code>HELIXQA_SCRIPTS</code> array in the
+script body):</p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Script</th>
+<th>What it checks (HelixQA's own framing)</th>
+<th>Toolchain</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>anchor_manifest_challenge.sh</code></td>
+<td><code>docs/behavior-anchors.md</code> rows + per-anchor file/symbol
+resolution</td>
+<td>none</td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>bluff_scanner_challenge.sh</code></td>
+<td>scanner self-test + tree-wide bluff scan</td>
+<td><strong>go</strong></td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>chaos_failure_injection_challenge.sh</code></td>
+<td>chaos-engineering harness</td>
+<td>none</td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>ddos_health_flood_challenge.sh</code></td>
+<td>DDoS-resilience health-endpoint flooding</td>
+<td>none</td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>host_no_auto_suspend_challenge.sh</code></td>
+<td>host suspend / hibernate / sleep targets masked + sleep.conf
+override (Linux-only)</td>
+<td>none</td>
+</tr>
+<tr>
+<td>6</td>
+<td><code>mutation_ratchet_challenge.sh</code></td>
+<td>go-mutesting kill-rate ratchet</td>
+<td><strong>go</strong></td>
+</tr>
+<tr>
+<td>7</td>
+<td><code>no_suspend_calls_challenge.sh</code></td>
+<td>source-tree scan for forbidden host-power-management
+invocations</td>
+<td>none</td>
+</tr>
+<tr>
+<td>8</td>
+<td><code>scaling_horizontal_challenge.sh</code></td>
+<td>horizontal-scaling load test</td>
+<td>none</td>
+</tr>
+<tr>
+<td>9</td>
+<td><code>stress_sustained_load_challenge.sh</code></td>
+<td>sustained-load stress test</td>
+<td>none</td>
+</tr>
+<tr>
+<td>10</td>
+<td><code>ui_terminal_interaction_challenge.sh</code></td>
+<td>terminal UI interaction (limited Lava applicability)</td>
+<td>none</td>
+</tr>
+<tr>
+<td>11</td>
+<td><code>ux_end_to_end_flow_challenge.sh</code></td>
+<td>end-to-end UX flow harness</td>
+<td>none</td>
+</tr>
+</tbody>
+</table>
+<p>Toolchain column source: <code>HELIXQA_TOOLCHAIN_MAP</code> constant
+in the wrapper. <code>go</code> means the script invokes a Go binary
+(go-mutesting, the bluff scanner) that requires <code>go</code> on
+PATH.</p>
+<h2 id="usage">Usage</h2>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Run ALL 11 HelixQA Challenge scripts on the HOST (workstation iteration)</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> scripts/run-helixqa-challenges.sh</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Run only specific scripts (comma-separated basenames without .sh)</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> scripts/run-helixqa-challenges.sh <span class="at">--only</span> host_no_auto_suspend_challenge,no_suspend_calls_challenge</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Custom evidence dir</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> scripts/run-helixqa-challenges.sh <span class="at">--evidence-dir</span> .lava-ci-evidence/myrun/helixqa</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Custom evidence dir via env var (useful when wrapping)</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="va">LAVA_HELIXQA_EVIDENCE_DIR</span><span class="op">=</span>/tmp/helixqa <span class="fu">bash</span> scripts/run-helixqa-challenges.sh</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Halt the loop on first non-zero exit (default: continue)</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> scripts/run-helixqa-challenges.sh <span class="at">--stop-on-fail</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Suppress stdout summary (machine consumption only)</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> scripts/run-helixqa-challenges.sh <span class="at">--json-only</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="co"># §6.X containerized runner (gate-mode evidence)</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> scripts/run-helixqa-challenges.sh <span class="at">--runner</span> containerized <span class="at">--container-image</span> docker.io/library/golang:1.22</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="co"># Skip Go-requiring scripts when Go is unavailable</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> scripts/run-helixqa-challenges.sh <span class="at">--require-toolchain</span> none</span></code></pre></div>
+<h2 id="inputs">Inputs</h2>
+<table>
+<thead>
+<tr>
+<th>Arg / Env</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--evidence-dir &lt;dir&gt;</code></td>
+<td>Output directory (default: <code>$LAVA_HELIXQA_EVIDENCE_DIR</code>
+if set; else
+<code>.lava-ci-evidence/helixqa-challenges/&lt;UTC-timestamp&gt;/</code>)</td>
+</tr>
+<tr>
+<td><code>LAVA_HELIXQA_EVIDENCE_DIR</code> env</td>
+<td>Env-var alternative to <code>--evidence-dir</code>. CLI flag wins if
+both are set.</td>
+</tr>
+<tr>
+<td><code>--only NAME1,NAME2,...</code></td>
+<td>Run only the listed scripts (basename without <code>.sh</code>);
+errors if none match</td>
+</tr>
+<tr>
+<td><code>--continue-on-fail</code></td>
+<td>Keep running scripts after a FAIL (default behavior)</td>
+</tr>
+<tr>
+<td><code>--stop-on-fail</code></td>
+<td>Halt the loop on first FAIL (useful for triage of cascading
+failures)</td>
+</tr>
+<tr>
+<td><code>--json-only</code></td>
+<td>Suppress the human-readable stdout summary; only write the
+attestation JSON</td>
+</tr>
+<tr>
+<td><code>--runner host|containerized</code></td>
+<td>§6.X delegation: <code>host</code> (default — workstation iteration)
+or <code>containerized</code> (required for §6.AE gate runs).
+<code>containerized</code> honest-fail-fasts (exit 4) when
+<code>submodules/containers</code> is absent.</td>
+</tr>
+<tr>
+<td><code>--container-image &lt;image&gt;</code></td>
+<td>Container image for <code>--runner=containerized</code>. Default:
+<code>docker.io/library/golang:1.22</code> (provides Go toolchain for
+HelixQA's Go-requiring scripts).</td>
+</tr>
+<tr>
+<td><code>--container-runtime podman|docker</code></td>
+<td>Container runtime for <code>--runner=containerized</code>. Default:
+auto-detect (podman preferred per §6.U).</td>
+</tr>
+<tr>
+<td><code>--require-toolchain go|none</code></td>
+<td>§6.J toolchain precondition. <code>go</code> (default): wrapper
+exits 4 if <code>go</code> is absent from PATH (host mode) or always
+available (container mode). <code>none</code>: Go-requiring scripts
+(bluff_scanner, mutation_ratchet) SKIP with a clear precondition message
+when <code>go</code> is absent.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="outputs">Outputs</h2>
+<pre><code>&lt;evidence-dir&gt;/
+├── helixqa-attestation.json          # roll-up: pin, runner, totals, per-script rows
+├── anchor_manifest_challenge.log     # per-script stdout+stderr
+├── bluff_scanner_challenge.log
+├── chaos_failure_injection_challenge.log
+├── ddos_health_flood_challenge.log
+├── host_no_auto_suspend_challenge.log
+├── mutation_ratchet_challenge.log
+├── no_suspend_calls_challenge.log
+├── scaling_horizontal_challenge.log
+├── stress_sustained_load_challenge.log
+├── ui_terminal_interaction_challenge.log
+└── ux_end_to_end_flow_challenge.log</code></pre>
+<h3 id="attestation-json-shape">Attestation JSON shape</h3>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;timestamp&quot;</span><span class="fu">:</span> <span class="st">&quot;2026-05-16T03:52:15Z&quot;</span><span class="fu">,</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;helixqa_pin&quot;</span><span class="fu">:</span> <span class="st">&quot;403603dbd47b971549709bd9f2efa30dca810097&quot;</span><span class="fu">,</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;helixqa_runner&quot;</span><span class="fu">:</span> <span class="st">&quot;host&quot;</span><span class="fu">,</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;helixqa_runner_caveat&quot;</span><span class="fu">:</span> <span class="st">&quot;§6.X container-wrapping NOT in use this run; rerun with --runner=containerized for §6.AE gate-mode evidence&quot;</span><span class="fu">,</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;require_toolchain&quot;</span><span class="fu">:</span> <span class="st">&quot;go&quot;</span><span class="fu">,</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;toolchain_available&quot;</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;container_runtime&quot;</span><span class="fu">:</span> <span class="st">&quot;n/a&quot;</span><span class="fu">,</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;container_image&quot;</span><span class="fu">:</span> <span class="st">&quot;n/a&quot;</span><span class="fu">,</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;w_excluded_count&quot;</span><span class="fu">:</span> <span class="dv">0</span><span class="fu">,</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;w_exclusion_audit&quot;</span><span class="fu">:</span> <span class="st">&quot;docs/helixqa-script-audit.md&quot;</span><span class="fu">,</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;total_scripts&quot;</span><span class="fu">:</span> <span class="dv">11</span><span class="fu">,</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;pass_count&quot;</span><span class="fu">:</span> <span class="dv">5</span><span class="fu">,</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;fail_count&quot;</span><span class="fu">:</span> <span class="dv">2</span><span class="fu">,</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;skip_count&quot;</span><span class="fu">:</span> <span class="dv">4</span><span class="fu">,</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;halted_early&quot;</span><span class="fu">:</span> <span class="kw">false</span><span class="fu">,</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;all_passed&quot;</span><span class="fu">:</span> <span class="kw">false</span><span class="fu">,</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;scripts&quot;</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">{</span><span class="dt">&quot;name&quot;</span><span class="fu">:</span> <span class="st">&quot;anchor_manifest_challenge.sh&quot;</span><span class="fu">,</span> <span class="dt">&quot;result&quot;</span><span class="fu">:</span> <span class="st">&quot;FAIL&quot;</span><span class="fu">,</span> <span class="dt">&quot;exit_code&quot;</span><span class="fu">:</span> <span class="dv">1</span><span class="fu">,</span> <span class="dt">&quot;duration_seconds&quot;</span><span class="fu">:</span> <span class="dv">0</span><span class="fu">,</span> <span class="dt">&quot;log&quot;</span><span class="fu">:</span> <span class="st">&quot;anchor_manifest_challenge.log&quot;</span><span class="fu">}</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>  <span class="ot">]</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<p>When <code>--runner=containerized</code> is selected the
+<code>helixqa_runner</code> field reads <code>"containerized"</code>,
+the caveat is replaced with
+<code>"(no caveat — §6.X containerized runner active)"</code>, and
+<code>container_runtime</code> / <code>container_image</code> carry the
+actual values used.</p>
+<h2 id="exit-codes">Exit codes</h2>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>All invoked scripts returned 0 (or <code>SKIP</code> exit 2). Zero
+<code>FAIL</code> outcomes.</td>
+</tr>
+<tr>
+<td>1</td>
+<td>One or more invoked scripts returned non-zero exit other than the
+SKIP-canonical 2. Real defect surfaced by HelixQA OR
+<code>--stop-on-fail</code> halted the loop.</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Invalid arguments (<code>--only</code> matched no scripts; unknown
+flag; invalid <code>--runner</code> or <code>--require-toolchain</code>
+value).</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Missing dependency — <code>submodules/helixqa</code> directory
+absent, OR the canonical 11-script wired list drifted from what the pin
+actually ships.</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Missing runtime — <code>--runner=containerized</code> without
+<code>submodules/containers</code> bootstrapped, OR
+<code>--runner=containerized</code> without a container runtime on PATH,
+OR <code>--require-toolchain=go</code> without <code>go</code> on
+PATH.</td>
+</tr>
+</tbody>
+</table>
+<p>The 0/1/2/3/4 split is <strong>anti-bluff load-bearing</strong>: exit
+0 means scripts genuinely ran with no failures; exit 3 means we honestly
+cannot claim to have run them (precondition gap); exit 4 means a runtime
+/ toolchain dependency is missing (silent degradation forbidden per
+§6.J). Per §6.J we never silently mask a precondition gap as
+"success".</p>
+<h2 id="per-script-skip--fail-semantics">Per-script SKIP / FAIL
+semantics</h2>
+<p>The wrapper treats each script's own exit codes as authoritative and
+classifies:</p>
+<ul>
+<li><code>exit 0</code> → <strong>PASS</strong> — script reports
+success</li>
+<li><code>exit 2</code> → <strong>SKIP</strong> — script's documented
+"scanner missing / precondition unmet" exit code (per
+<code>no_suspend_calls_challenge.sh</code> convention)</li>
+<li>any other non-zero → <strong>FAIL</strong> — real defect OR
+Linux-only check failing on macOS/other host</li>
+</ul>
+<p>Additionally the wrapper itself may classify a script as SKIP BEFORE
+invoking it:</p>
+<ul>
+<li>The script is on the <code>HELIXQA_W_EXCLUSIONS</code> array (§6.W
+audit found a violation) → <strong>SKIP</strong> exit-2 with a
+per-script log line citing the audit doc</li>
+<li>The script declares <code>toolchain: go</code> in
+<code>HELIXQA_TOOLCHAIN_MAP</code> AND
+<code>--require-toolchain=none</code> AND <code>go</code> absent from
+PATH → <strong>SKIP</strong> exit-2 with a precondition-unmet
+message</li>
+</ul>
+<p><strong>Many of the 11 HelixQA scripts are LINUX-SPECIFIC</strong>
+(they invoke <code>systemctl</code>, read <code>/etc/systemd/</code>,
+parse <code>journalctl</code>). On macOS or any host without systemd,
+these will FAIL — not because Lava is broken, but because the HelixQA
+author wrote them assuming a Linux host. <strong>This is the honest
+behavior</strong> — per §6.J the wrapper does NOT mis-classify
+"wrong-OS" as PASS or as SKIP without operator intervention. Operators
+on macOS hosts SHOULD use <code>--only</code> to filter to portable
+scripts (<code>anchor_manifest_challenge</code>,
+<code>bluff_scanner_challenge</code>,
+<code>mutation_ratchet_challenge</code> — when the HelixQA-internal
+scanner directory is present), OR use
+<code>--runner=containerized</code> to provide a Linux execution surface
+inside a podman/docker container.</p>
+<h2 id="6x-containerized-runner">§6.X containerized runner</h2>
+<p>When invoked with <code>--runner=containerized</code>, the
+wrapper:</p>
+<ol type="1">
+<li>Verifies <code>submodules/containers</code> is bootstrapped (else
+exit 4)</li>
+<li>Auto-detects the container runtime (<code>podman</code> preferred;
+falls back to <code>docker</code>)</li>
+<li>Selects the container image (default:
+<code>docker.io/library/golang:1.22</code> to provide the Go toolchain
+HelixQA's Go-requiring scripts need)</li>
+<li>For each script, invokes
+<code>&lt;runtime&gt; run --rm --user $(id -u):$(id -g) -v $REPO_ROOT:$REPO_ROOT:rw -w $HELIXQA_SCRIPTS_DIR -e HOME=/tmp $CONTAINER_IMAGE bash ./&lt;script&gt;</code></li>
+<li>Writes the same per-script logs + attestation JSON to the evidence
+dir on the host filesystem (via the bind mount)</li>
+</ol>
+<p>The container runs as the host UID so evidence files retain operator
+ownership — no root-owned outputs.</p>
+<p>Limitations of the containerized runner (honestly disclosed):</p>
+<ul>
+<li>Scripts that probe HOST systemd state
+(<code>host_no_auto_suspend_challenge.sh</code>) will see the
+CONTAINER's systemd state, not the host's. Their results inside a
+container are NOT meaningful for the host the operator runs on; treat
+them as HelixQA's own self-test rather than as a Lava-host audit.</li>
+<li>Scripts that connect to LOCAL services (<code>chaos</code>,
+<code>ddos</code>, <code>scaling</code>, <code>stress</code> against
+<code>localhost:8081</code>) will hit the container's localhost, not the
+host's. The operator MUST either run the local service inside the same
+network namespace OR override <code>HELIXQA_HEALTH_URL</code> to a
+reachable address. The wrapper does NOT pre-validate this — it is
+operator-supplied per §6.W audit.</li>
+</ul>
+<h2 id="6w-per-script-mirror-policy-audit">§6.W per-script mirror-policy
+audit</h2>
+<p><code>docs/helixqa-script-audit.md</code> is the source-of-truth
+audit. As of the last audit (2026-05-16), 0 of 11 scripts violate §6.W
+on default config — the <code>HELIXQA_W_EXCLUSIONS</code> array is
+therefore empty. The audit MUST be re-run when the
+<code>submodules/helixqa</code> pin bumps; the wrapper's wiring-drift
+check (exit 3 on added/removed scripts) prompts re-audit but does NOT
+mechanize the per-script grep — that remains a human-driven audit per
+§6.J ("real grep results only — no manufactured findings").</p>
+<h2 id="wiring-into-scriptsrun-challenge-matrixsh">Wiring into
+<code>scripts/run-challenge-matrix.sh</code></h2>
+<p>The §6.AE Challenge matrix runner accepts an opt-in
+<code>--include-helixqa</code> flag that invokes this wrapper as a
+sibling step BEFORE the AVD matrix runs:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> scripts/run-challenge-matrix.sh <span class="at">--include-helixqa</span></span></code></pre></div>
+<p>The flag is <strong>OFF by default</strong> so existing matrix
+invocations (operator iterations, prior CI flows) are unaffected. When
+enabled:</p>
+<ul>
+<li>HelixQA wrapper runs on the host FIRST (host independent of AVD
+matrix)</li>
+<li>Wrapper evidence lands at
+<code>&lt;matrix-evidence-dir&gt;/helixqa/</code></li>
+<li>A non-zero HelixQA exit is folded into the matrix runner's final
+exit code (matrix exit dominates if both fail; HelixQA exit promotes
+matrix-0 to 1 if HelixQA reports FAIL)</li>
+<li>HelixQA does NOT run inside the §6.X-debt darwin/arm64 gate-host
+skip — it runs regardless because it doesn't need KVM</li>
+</ul>
+<p>To force the matrix-aggregated HelixQA invocation to use the
+containerized runner, the operator currently runs the wrapper
+separately:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> scripts/run-helixqa-challenges.sh <span class="at">--runner</span> containerized</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> scripts/run-challenge-matrix.sh         <span class="co"># without --include-helixqa</span></span></code></pre></div>
+<p>A future cycle MAY teach the matrix runner to pass
+<code>--runner=containerized</code> through; today the matrix runner
+invokes the wrapper with default arguments (host mode) since the matrix
+runner itself only fully runs on Linux x86_64 hosts where the host
+runner is effectively equivalent.</p>
+<h2 id="anti-bluff-posture">Anti-bluff posture</h2>
+<p>Per <code>docs/plans/2026-05-16-helixqa-integration-design.md</code>
+§"6.J anti-bluff posture":</p>
+<ol type="1">
+<li><strong>Each invoked script MUST actually be invokable.</strong> The
+wrapper's pre-flight rejects (exit 3) if the wired list drifts from the
+actual pin contents.</li>
+<li><strong>Each result MUST be from a real execution.</strong>
+Per-script log files are written from the actual subprocess output —
+captured stdout+stderr go to
+<code>&lt;evidence-dir&gt;/&lt;script&gt;.log</code>. The hermetic test
+<code>tests/check-constitution/test_helixqa_wiring.sh</code> asserts the
+fixture's stdout string appears in the produced log.</li>
+<li><strong>Per §6.AC non-fatal telemetry:</strong> SKIP exits do NOT
+cause the wrapper itself to FAIL but ARE recorded distinctly from PASS.
+The attestation JSON's <code>skip_count</code> is operator-visible so a
+regression that flips many PASSes to SKIPs is detectable.</li>
+<li><strong>Per §6.J/§6.L:</strong> the wrapper exists; HelixQA-emitted
+FAILs are real defects to triage; HelixQA-emitted SKIPs are honest
+acknowledgments of precondition gaps — NOT false-pass coverage.</li>
+<li><strong>Per §6.X:</strong> <code>--runner=containerized</code>
+honest-fail-fasts (exit 4) when <code>submodules/containers</code> is
+absent. The wrapper NEVER silently degrades containerized → host because
+that would be the exact bluff §6.X exists to prevent.</li>
+<li><strong>Per §6.J:</strong> <code>--require-toolchain=go</code>
+(default) exits 4 when <code>go</code> is absent rather than silently
+SKIPping Go-requiring scripts. Silent-skip-with-default would produce
+false-green coverage; operators who knowingly work without Go MUST opt
+in via <code>--require-toolchain=none</code>.</li>
+<li><strong>Per §6.W:</strong> the per-script audit at
+<code>docs/helixqa-script-audit.md</code> is the binding source-of-truth
+for the <code>HELIXQA_W_EXCLUSIONS</code> array. Manufactured findings
+are forbidden; only real <code>grep</code> results may populate the
+audit.</li>
+</ol>
+<h2 id="hermetic-test">Hermetic test</h2>
+<p><code>tests/check-constitution/test_helixqa_wiring.sh</code> — 11
+fixtures:</p>
+<table>
+<thead>
+<tr>
+<th>Fixture</th>
+<th>Asserts</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>test_passes_when_helixqa_present_and_all_green</code></td>
+<td>Wrapper exit 0; attestation reports 11/0/0; per-script log files
+exist + contain the fixture stdout (proving subprocess actually
+ran)</td>
+</tr>
+<tr>
+<td><code>test_fails_when_script_missing</code></td>
+<td>Wrapper exit 3 (wiring drift); error message names the missing
+script</td>
+</tr>
+<tr>
+<td><code>test_skip_mode_when_helixqa_absent</code></td>
+<td>Wrapper exit 3 (missing submodule); error message includes the
+<code>git submodule update --init submodules/helixqa</code> remediation
+command; no attestation written</td>
+</tr>
+<tr>
+<td><code>test_fail_classified_correctly</code></td>
+<td>Wrapper exit 1 when one script returns 1; attestation marks that
+script as FAIL (not SKIP — anti-bluff classification)</td>
+</tr>
+<tr>
+<td><code>test_containerized_runner_fails_fast_when_containers_absent</code></td>
+<td>Q1: Wrapper exit 4; error message names §6.X +
+<code>git submodule update --init submodules/containers</code>
+remediation</td>
+</tr>
+<tr>
+<td><code>test_host_runner_default_attestation_shape</code></td>
+<td>Q1: default-runner attestation has <code>helixqa_runner: host</code>
++ caveat field + <code>require_toolchain: go</code> +
+<code>w_exclusion_audit</code> pointer</td>
+</tr>
+<tr>
+<td><code>test_require_toolchain_go_fails_fast_when_go_absent</code></td>
+<td>Q2: Wrapper exit 4 when <code>go</code> absent + default
+<code>--require-toolchain=go</code>; error names the
+<code>--require-toolchain=none</code> escape hatch</td>
+</tr>
+<tr>
+<td><code>test_require_toolchain_none_skips_go_scripts_when_go_absent</code></td>
+<td>Q2: Wrapper exit 0; Go-requiring scripts (bluff_scanner,
+mutation_ratchet) marked SKIP; non-Go scripts still PASS</td>
+</tr>
+<tr>
+<td><code>test_evidence_dir_env_var_override</code></td>
+<td>Q3: <code>LAVA_HELIXQA_EVIDENCE_DIR</code> env var redirects
+attestation; default dated dir is NOT populated</td>
+</tr>
+<tr>
+<td><code>test_invalid_runner_rejected</code></td>
+<td>Q1: Wrapper exit 2 + explicit error on unknown <code>--runner</code>
+value</td>
+</tr>
+<tr>
+<td><code>test_invalid_require_toolchain_rejected</code></td>
+<td>Q2: Wrapper exit 2 + explicit error on unknown
+<code>--require-toolchain</code> value</td>
+</tr>
+</tbody>
+</table>
+<p>Run:
+<code>bash tests/check-constitution/test_helixqa_wiring.sh</code></p>
+<h2 id="open-questions-resolved-2026-05-16--phase-4-follow-up-b">Open
+questions (resolved 2026-05-16 — Phase 4 follow-up B)</h2>
+<p>The four open questions from the initial Option 1 commit were
+resolved in this commit:</p>
+<ol type="1">
+<li><strong>Q1 — Container vs host runner</strong> (§6.X integration):
+RESOLVED. New <code>--runner=host|containerized</code> flag (default:
+<code>host</code> for workstation iteration; <code>containerized</code>
+required for §6.AE gate runs). Containerized mode honest-fail-fasts
+(exit 4) when <code>submodules/containers</code> is absent — no silent
+degradation per §6.J.</li>
+<li><strong>Q2 — Real-deps vs stub gating</strong>: RESOLVED. New
+<code>--require-toolchain=go|none</code> flag (default:
+<code>go</code>). Per-script toolchain requirement declared in
+<code>HELIXQA_TOOLCHAIN_MAP</code> constant (bluff_scanner +
+mutation_ratchet need Go; the other 9 do not).
+<code>--require-toolchain=go</code> exits 4 when <code>go</code> absent;
+<code>--require-toolchain=none</code> SKIPs Go-requiring scripts with a
+clear precondition message.</li>
+<li><strong>Q3 — Evidence-directory boundary</strong>: RESOLVED.
+<code>--evidence-dir</code> flag is preferred;
+<code>LAVA_HELIXQA_EVIDENCE_DIR</code> env-var override added for
+parent-runner wrapping use cases. Default location remains
+<code>.lava-ci-evidence/helixqa-challenges/&lt;UTC-timestamp&gt;/</code>
+per Lava convention.</li>
+<li><strong>Q4 — §6.W mirror policy</strong>: RESOLVED. Per-script audit
+landed at <code>docs/helixqa-script-audit.md</code>;
+<code>HELIXQA_W_EXCLUSIONS</code> array constant in the wrapper consumes
+the audit's findings. 0/11 scripts currently violate §6.W on default
+config (the array is empty); re-audit owed on every
+<code>submodules/helixqa</code> pin bump.</li>
+</ol>
+<p>See this commit's body for the per-question implementation details +
+falsifiability rehearsals.</p>
+<h2 id="cross-references">Cross-references</h2>
+<ul>
+<li><code>docs/plans/2026-05-16-helixqa-integration-design.md</code> —
+design doc (Option 1 chosen this cycle; Option 2 + Option 3
+deferred)</li>
+<li><code>docs/scripts/run-challenge-matrix.sh.md</code> — the
+<code>--include-helixqa</code> flag</li>
+<li><code>docs/helix-constitution-gates.md</code> —
+<code>CM-HELIXQA-WIRING</code> + <code>CM-HELIXQA-§6.W-AUDIT</code> gate
+rows</li>
+<li><code>docs/helixqa-script-audit.md</code> — §6.W per-script audit
+(Phase 4 follow-up B Q4 resolution)</li>
+<li><code>submodules/helixqa/CLAUDE.md</code> — HelixQA's own anti-bluff
+covenant</li>
+<li><code>submodules/helixqa/README.md</code> — HelixQA framework
+overview</li>
+<li>Lava <code>CLAUDE.md</code> §6.AE + §6.J + §6.X + §6.W + §6.AD
+(HelixConstitution inheritance)</li>
+</ul>
+</body>
+</html>

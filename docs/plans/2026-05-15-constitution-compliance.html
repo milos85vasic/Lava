@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-05-15-constitution-compliance</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1
+id="constitution-compliance-comprehensive-plan-2026-05-15">Constitution-Compliance
+Comprehensive Plan (2026-05-15)</h1>
+<p><strong>Trigger:</strong> operator directive 2026-05-15: "fetch and
+pull constitution Submodule and process the whole project — check if we
+are respecting and following all mandatory rules and constraints from
+root (constitution Submodule) Constitution, AGENTS.MD and CLAUDE.MD. If
+we do not create comprehensive plan in phases for achieveing this!"</p>
+<p><strong>Constitution pin advanced this cycle:</strong>
+<code>cb27ed8c</code> → <code>464ada14</code> (12 new clauses: §11.4.25
+through §11.4.36).</p>
+<p><strong>Inheritance:</strong> HelixConstitution Constitution.md /
+CLAUDE.md / AGENTS.md (canonical root per §11.4.35). Lava parent
+CLAUDE.md / AGENTS.md (consumer extensions).</p>
+<p><strong>Anti-bluff posture:</strong> every phase carries a
+falsifiability rehearsal contract per §11.4 + §1.1. Per-phase
+deliverable lists what would be a §11.4 spirit bluff to skip.</p>
+<hr />
+<h2 id="gap-inventory-audit-result">Gap Inventory (audit result)</h2>
+<p>The 12 new constitution clauses introduce these binding rules. For
+each: status COMPLIANT / NON-COMPLIANT / EQUIVALENT (Lava has different
+but functionally-matching infrastructure per §6.AD.3) / PARTIAL.</p>
+<table>
+<thead>
+<tr>
+<th>Clause</th>
+<th>Subject</th>
+<th>Lava status</th>
+<th>Phase that closes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>§11.4.25</td>
+<td>Full-Automation-Coverage Mandate (6 invariants per feature)</td>
+<td>PARTIAL — 35 Challenges + unit tests + scanners exist; coverage
+ledger missing</td>
+<td>Phase 7</td>
+</tr>
+<tr>
+<td>§11.4.26</td>
+<td>Constitution-Submodule Update Workflow</td>
+<td>COMPLIANT for THIS pull (followed steps 1+2; steps 3+6+7 owed)</td>
+<td>Phase 1 (validation) + Phase 0 (this cycle's pin bump)</td>
+</tr>
+<tr>
+<td>§11.4.27</td>
+<td>No-Fakes-Beyond-Unit-Tests + 100%-Test-Type Coverage</td>
+<td>NON-COMPLIANT — Challenges submodule present (✓), HelixQA NOT
+incorporated (✗); 14-test-type matrix gaps</td>
+<td>Phase 4</td>
+</tr>
+<tr>
+<td>§11.4.28</td>
+<td>Submodules-As-Equal-Codebase + Decoupling + Dependency-Layout</td>
+<td>PARTIAL — 16 vasic-digital subs are §6.W mirrored, but
+<code>submodules/</code> capital-S layout violates §11.4.29;
+nested-own-org-chains audit owed</td>
+<td>Phase 5 + Phase 6</td>
+</tr>
+<tr>
+<td>§11.4.29</td>
+<td>Lowercase-Snake_Case-Naming</td>
+<td>NON-COMPLIANT — <code>submodules/</code> (capital S) + 16 CamelCase
+submodule dirs; references throughout</td>
+<td>Phase 6</td>
+</tr>
+<tr>
+<td>§11.4.30</td>
+<td>.gitignore + No-Versioned-Build-Artifacts</td>
+<td>PARTIAL — root + most modules have .gitignore;
+<code>CM-GITIGNORE-PRECOMMIT-AUDIT</code> gate missing</td>
+<td>Phase 2</td>
+</tr>
+<tr>
+<td>§11.4.31</td>
+<td>Submodule-Dependency-Manifest (helix-deps.yaml)</td>
+<td>NON-COMPLIANT — none of the 16 vasic-digital submodules ship
+helix-deps.yaml</td>
+<td>Phase 3</td>
+</tr>
+<tr>
+<td>§11.4.32</td>
+<td>Post-Constitution-Pull Validation
+(<code>scripts/verify-all-constitution-rules.sh</code>)</td>
+<td>NON-COMPLIANT — CRITICAL: this is the enforcement engine; without
+it, every other §11.4.x rule cascades as anchor-only</td>
+<td>Phase 1 (highest priority)</td>
+</tr>
+<tr>
+<td>§11.4.33</td>
+<td>Type-aware closure-status vocabulary</td>
+<td>EQUIVALENT — Lava uses CONTINUATION + closure-logs (§6.AD.3
+mapping); needs explicit amendment to cover the new vocabulary</td>
+<td>Phase 9</td>
+</tr>
+<tr>
+<td>§11.4.34</td>
+<td>Reopened-source attribution</td>
+<td>EQUIVALENT — same as §11.4.33; sixth-law-incidents JSONs already
+capture similar fields</td>
+<td>Phase 9</td>
+</tr>
+<tr>
+<td>§11.4.35</td>
+<td>Canonical-root inheritance clarity</td>
+<td>LIKELY-COMPLIANT — root CLAUDE.md + AGENTS.md carry
+<code>## INHERITED FROM constitution/</code> pointer-block;
+<code>CM-CANONICAL-ROOT-CLARITY</code> gate missing</td>
+<td>Phase 8 (verification)</td>
+</tr>
+<tr>
+<td>§11.4.36</td>
+<td>Mandatory install_upstreams on clone/add</td>
+<td>NON-COMPLIANT — <code>install_upstreams</code> is operator-host-side
+via <code>.bashrc</code>/<code>.zshrc</code>; no Lava-side mechanical
+verification that the operator ran it on each submodule clone</td>
+<td>Phase 8</td>
+</tr>
+</tbody>
+</table>
+<p>Prior gates wired (carried forward, NOT counted as gaps from this
+cycle):</p>
+<ul>
+<li>§6.AB Layer 1 marker + Layer 2 body assertion ✅</li>
+<li>§6.AC non-fatal coverage scanner (STRICT) ✅</li>
+<li>§6.AD HelixConstitution inheritance + per-scope pointer-block
+propagation ✅</li>
+<li>§6.AE per-feature Challenge coverage scanner (STRICT) ✅</li>
+<li>41+ mechanical anti-bluff enforcement points ✅</li>
+</ul>
+<hr />
+<h2 id="phased-plan-in-priority-order">Phased Plan (in priority
+order)</h2>
+<p>Each phase: deliverables, falsifiability rehearsal contract, owner,
+dependency on prior phases, estimated scope.</p>
+<h3 id="phase-0--pin-advance--plan-land-this-cycle">Phase 0 — Pin
+advance + plan land (THIS CYCLE)</h3>
+<p><strong>Status:</strong> ✅ DONE (commit <code>ed16debd</code>
+advanced constitution pin; this commit lands the plan)</p>
+<p><strong>Deliverable:</strong> constitution submodule advanced to
+464ada14 + this plan committed.</p>
+<p><strong>Honest gap acknowledgment:</strong> §11.4.32's pre-pull
+validation could not run because the validation script doesn't exist
+(gap ack'd in commit body of <code>ed16debd</code>).</p>
+<hr />
+<h3 id="phase-1--11432-enforcement-engine-highest-priority">Phase 1 —
+§11.4.32 enforcement engine (HIGHEST PRIORITY)</h3>
+<p><strong>Why first:</strong> §11.4.32 is "the enforcement engine for
+every other §11.4.x and CONST-NNN rule — without it, new rules cascade
+as anchors but never get enforced in the codebase". Every other phase
+depends on this.</p>
+<p><strong>Deliverable:</strong></p>
+<ul>
+<li><code>scripts/verify-all-constitution-rules.sh</code> — walks every
+constitution rule with a programmatic gate; runs each gate against
+current tree; produces structured report</li>
+<li>Hermetic test under
+<code>tests/check-constitution/test_verify_all_rules.sh</code> — paired
+mutation per rule (plant a known violation; assert sweep reports FAIL
+for the planted gate)</li>
+<li>Pre-push integration via <code>.githooks/pre-push</code> Check 10
+(advisory initially)</li>
+<li><code>docs/scripts/verify-all-constitution-rules.sh.md</code> per
+§11.4.18</li>
+</ul>
+<p><strong>Falsifiability rehearsal contract (mandatory per §11.4.32
+itself):</strong></p>
+<ul>
+<li>For each enforced gate, plant a known violation; assert sweep
+reports FAIL; revert; assert sweep reports PASS</li>
+</ul>
+<p><strong>Estimated scope:</strong> ~300-400 lines of bash; 8-10
+hermetic test cases. Single commit.</p>
+<p><strong>Anti-bluff posture:</strong> the script's OWN existence +
+failing-on-mutation behavior IS the proof; a <code>verify-all</code>
+script that exits 0 without running every implementable gate is itself a
+§11.4.32 violation.</p>
+<hr />
+<h3
+id="phase-2--11430-gitignore-audit-gate-cm-gitignore-precommit-audit">Phase
+2 — §11.4.30 .gitignore audit gate
+(<code>CM-GITIGNORE-PRECOMMIT-AUDIT</code>)</h3>
+<p><strong>Deliverable:</strong></p>
+<ul>
+<li><code>scripts/check-gitignore-coverage.sh</code> — walks every
+module/submodule/service; verifies <code>.gitignore</code> is present;
+verifies it covers the 6 forbidden classes (build artefacts, cache
+files, temp files, sensitive-data files, generated reports/logs, OS/IDE
+personal state); verifies no tracked files match forbidden patterns</li>
+<li>Pre-push hook integration (Check 11)</li>
+<li>Hermetic test under
+<code>tests/pre-push/check11_gitignore_test.sh</code></li>
+</ul>
+<p><strong>Falsifiability rehearsal:</strong> plant a <code>.env</code>
+file in tracked content; assert gate fires + commit rejected.</p>
+<p><strong>Estimated scope:</strong> ~200 lines of bash; 4 hermetic test
+cases (no-gitignore-rejected, missing-patterns-rejected,
+tracked-forbidden-file-rejected, clean-tree-accepted).</p>
+<hr />
+<h3 id="phase-3--11431-helix-depsyaml-authorship">Phase 3 — §11.4.31
+helix-deps.yaml authorship</h3>
+<p><strong>Deliverable:</strong></p>
+<ul>
+<li>For each of the 16 vasic-digital submodules + the constitution
+submodule + (later) HelixQA: author <code>helix-deps.yaml</code> in the
+submodule's root listing its own-org dependencies</li>
+<li>Schema per §11.4.31: <code>schema_version</code>,
+<code>deps: [{name, ssh_url, ref, why, layout: flat|grouped}]</code>,
+<code>transitive_handling.recursive: true</code>,
+<code>transitive_handling.conflict_resolution: operator-required</code>,
+<code>language_specific_subtree: bool</code></li>
+<li>Audit in main repo:
+<code>scripts/check-submodule-deps-manifest.sh</code> walks every
+submodule + verifies helix-deps.yaml presence + schema-validity</li>
+<li>Per submodule: separate commit + push to GitHub + GitLab</li>
+<li>Parent pin bumps in single consolidating commit (per §6.AD
+propagation pattern)</li>
+</ul>
+<p><strong>Falsifiability rehearsal:</strong> delete one submodule's
+helix-deps.yaml; assert audit fires + names the missing manifest.</p>
+<p><strong>Estimated scope:</strong> 17 submodule commits + 1 parent
+commit + 1 audit script. Significant scope; should be its own
+session-segment.</p>
+<p><strong>Dependency on:</strong> Phase 1 (enforcement engine) wires
+this audit.</p>
+<hr />
+<h3
+id="phase-4--11427-100-test-type-coverage--helixqa-incorporation">Phase
+4 — §11.4.27 100% test-type coverage + HelixQA incorporation</h3>
+<p><strong>Two sub-phases:</strong></p>
+<p><strong>4a — HelixQA submodule incorporation:</strong></p>
+<ul>
+<li>Add HelixQA via
+<code>git submodule add git@github.com:HelixDevelopment/HelixQA.git submodules/helixqa</code>
+(or <code>submodules/helix_qa</code> per §11.4.29)</li>
+<li>Pin frozen by default (per §6.AD)</li>
+<li>Update §6.AD inheritance + add §6.AF clause documenting HelixQA
+inheritance</li>
+<li>Per-scope inheritance pointer-blocks updated via
+<code>scripts/inject-helix-inheritance-block.sh</code></li>
+</ul>
+<p><strong>4b — 14-test-type matrix audit:</strong></p>
+<ul>
+<li>Inventory current test types in Lava (unit ✓ / integration ✓ /
+Challenges ✓ / hermetic-bash ✓ / parity ✓ / mutation ✗ / fuzz ✗ / load ✗
+/ security ✗ / DDoS ✗ / scaling ✗ / chaos ✗ / stress ✗ / performance ✗ /
+benchmarking ✗ / UI ✓ / UX ✗)</li>
+<li>Per missing type: write a "first instance" test + record in coverage
+ledger (Phase 7)</li>
+<li>HelixQA autonomous-session integration: configure HelixQA test-bank
+registration for Lava; run autonomous session; capture wire
+evidence</li>
+</ul>
+<p><strong>Falsifiability rehearsal per type:</strong> for each new test
+type, write at least one positive test + one negative test
+(deliberate-defect mutation that the test catches).</p>
+<p><strong>Estimated scope:</strong> MAJOR — 10+ new test types; could
+be a multi-session effort. Phase 4a is a single commit; Phase 4b is
+per-test-type incremental.</p>
+<p><strong>Dependency on:</strong> Phase 1 (enforcement engine), Phase 6
+(naming — affects HelixQA placement path).</p>
+<h4 id="phase-4-follow-ups-post-adoption-integration">Phase 4 follow-ups
+(post-adoption integration)</h4>
+<p><strong>Phase 4 follow-up A (2026-05-16, commit
+<code>a61bd3d8</code>)</strong> — Integration design doc covering 3
+options. Lives at <a
+href="2026-05-16-helixqa-integration-design.md"><code>docs/plans/2026-05-16-helixqa-integration-design.md</code></a>.
+Recommends Option 1 (shell-level wiring) first; Options 2 + 3
+deferred.</p>
+<p><strong>Phase 4 follow-up B (2026-05-16, commit
+<code>d94ade0d</code>)</strong> — IMPLEMENTED Option 1: 11 HelixQA
+Challenge scripts wired into
+<code>scripts/run-challenge-matrix.sh</code> via shell glue +
+HELIX_DEV_OWNED waiver pattern for 4 existing scanners.</p>
+<p><strong>Phase 4 follow-up C (2026-05-16)</strong> — DESIGN-ONLY:
+Option 2 Go-package linking design. Lives at <a
+href="2026-05-16-helixqa-go-package-linking-design.md"><code>docs/plans/2026-05-16-helixqa-go-package-linking-design.md</code></a>.
+Covers per-package public-API analysis, Lava-side adapter design under
+<code>lava-api-go/internal/qa/</code>, <code>go.mod</code> strategy
+(replace+pin vs tag), 4-phase rollout:</p>
+<ul>
+<li><strong>Phase 4-C-1:</strong> <code>pkg/evidence</code> — smallest
+API surface; proves <code>go.mod</code> pattern + adapter wrapping</li>
+<li><strong>Phase 4-C-2:</strong> <code>pkg/detector</code> —
+Android-adjacent (high Lava strategic value)</li>
+<li><strong>Phase 4-C-3:</strong> <code>pkg/ticket</code> — REPLACES
+Lava's §6.O closure-log manual authoring with generated markdown</li>
+<li><strong>Phase 4-C-4:</strong> <code>pkg/navigator</code> +
+<code>pkg/validator</code> — deepest integration; navigator MAY be
+SKIPPED if no Go-side consumer materializes</li>
+</ul>
+<p>The design enumerates 10 operator-blocking open questions (Go version
+conflict, adapter naming, release-mode dep resolution, navigator
+skip-or-proceed, etc.) — operator approval required before Phase 4-C-1
+implementation starts.</p>
+<p><strong>Estimated scope for Phase 4-C:</strong> 4 sessions (1 per
+sub-phase), assuming operator decisions land promptly + Go-version
+conflict resolved upfront.</p>
+<hr />
+<h3 id="phase-5--11428-nested-own-org-submodule-audit">Phase 5 —
+§11.4.28 nested own-org submodule audit</h3>
+<p><strong>Deliverable:</strong></p>
+<ul>
+<li><code>scripts/check-no-nested-own-org-submodules.sh</code> — walks
+every owned submodule's <code>.gitmodules</code>; rejects entries
+pointing to vasic-digital / HelixDevelopment / red-elf /
+ATMOSphere1234321 / Bear-Suite / BoatOS123456 / Helix-Flow / Helix-Track
+/ Server-Factory orgs</li>
+<li>Pre-push hook integration (Check 12)</li>
+<li>Hermetic test under
+<code>tests/pre-push/check12_nested_submodules_test.sh</code></li>
+</ul>
+<p><strong>Audit data point owed:</strong> check each of the 16
+vasic-digital submodules' <code>.gitmodules</code> files; list any that
+violate. Operator action then closes via either (a) refactor the
+offending submodule to NOT nest, OR (b) explicit waiver per §11.4.28
+carve-out.</p>
+<p><strong>Falsifiability rehearsal:</strong> add a nested own-org
+submodule entry to a synthetic test fixture; assert gate rejects.</p>
+<p><strong>Estimated scope:</strong> ~150 lines of bash; 3 hermetic test
+cases. Single commit.</p>
+<hr />
+<h3 id="phase-6--11429-lowercase-snake_case-naming-migration">Phase 6 —
+§11.4.29 lowercase snake_case naming migration</h3>
+<p><strong>HUGE phase. Multi-step migration. The constitution itself
+(§11.4.29) mandates phased execution.</strong></p>
+<p><strong>Phase 6 has its own dedicated sub-plan</strong> at <a
+href="2026-05-16-snake_case-migration.md"><code>docs/plans/2026-05-16-snake_case-migration.md</code></a>,
+prepared in the Phase 6.0 research+plan cycle (2026-05-16). Read that
+plan before executing any rename. Highlights:</p>
+<ul>
+<li><strong>Per-submodule target mapping table</strong> — 17 owned-by-us
+submodules with their snake_case targets (<code>Auth</code> →
+<code>auth</code>, <code>RateLimiter</code> → <code>rate_limiter</code>,
+<code>Tracker-SDK</code> → <code>tracker_sdk</code>,
+<code>HelixQA</code> → <code>helix_qa</code>, etc.).</li>
+<li><strong>Audit tool</strong>
+<code>scripts/audit-snake_case-references.sh</code> (read-only) +
+hermetic test
+<code>tests/check-constitution/test_audit_snake_case_references.sh</code>
++ companion doc
+<code>docs/scripts/audit-snake_case-references.sh.md</code> shipped in
+this commit. Run
+<code>bash scripts/audit-snake_case-references.sh</code> for the
+baseline reference count (currently 806 <code>submodules/</code> refs
+across 124 files; highest-blast-radius: <code>Containers</code> 370 refs
+/ 63 files).</li>
+<li><strong>LANG-spec exemption</strong> explicitly documented:
+Kotlin/Android <code>app/</code>, <code>core/</code>,
+<code>feature/</code> subtrees, Gradle wrapper, dotfiles,
+<code>Dockerfile*</code> are EXEMPT from snake_case enforcement on their
+inner subtree.</li>
+<li><strong>HelixDevelopment-owned (HelixQA)</strong> treated the same
+as vasic-digital — <code>helix_qa</code> snake_case is binding
+(HelixDevelopment is on the owned-org list).</li>
+</ul>
+<p><strong>Sub-phases (summary; full detail in the
+sub-plan):</strong></p>
+<p><strong>6.0 — Plan + audit tool</strong> (THIS commit, 2026-05-16,
+research+plan only — ZERO renames executed).</p>
+<p><strong>6a — <code>submodules/</code> → <code>submodules/</code>
+rename + every reference updated</strong> (top-level directory).</p>
+<p><strong>6b — Per-submodule snake_case renames</strong> (17
+sub-cycles, risk-ascending; HIGH-RISK Containers + Tracker-SDK +
+RateLimiter last).</p>
+<p><strong>6c — File-level renames</strong> (Lava-side tracked files;
+most exempt under LANG-spec).</p>
+<p><strong>6d — <code>Upstreams/</code> → <code>upstreams/</code>
+rename</strong> (constitution submodule's
+<code>install_upstreams.sh</code> already supports dual-mode).</p>
+<p><strong>6e — Mechanical enforcement gate</strong>
+(<code>scripts/check-snake-case-naming.sh</code> + paired mutation).</p>
+<p><strong>6f — Optional upstream Git repo renames</strong> (defer — out
+of §11.4.29's local-path-only mandatory scope; operator decision).</p>
+<p><strong>Falsifiability rehearsal (per cycle):</strong> rename a
+directory back to CamelCase OR leave a single reference unrenamed;
+assert audit script / gate fires + names the offender.</p>
+<p><strong>Estimated scope:</strong> Phase 6.0 = 1 commit. Phases 6a +
+6b/1-17 + 6c + 6d + 6e = at least 21 additional commits over multiple
+sessions. HIGH-RISK renames (Containers, Tracker-SDK) are full-session
+each.</p>
+<p><strong>Dependency on:</strong> All other phases that create new
+files MUST follow snake_case from inception.</p>
+<p><strong>Risk:</strong> Detailed in
+<code>docs/plans/2026-05-16-snake_case-migration.md</code> §6.
+Hardlinked <code>.git</code> backup required PER PHASE per §9.</p>
+<hr />
+<h3 id="phase-7--11425-coverage-ledger">Phase 7 — §11.4.25 coverage
+ledger</h3>
+<p><strong>Deliverable:</strong></p>
+<ul>
+<li><code>docs/coverage-ledger.md</code> — feature × platform ×
+invariant-1..6 × status matrix</li>
+<li>Generator script: <code>scripts/build-coverage-ledger.sh</code>
+derives the ledger from existing data (Challenge tests + unit tests +
+scanner outputs)</li>
+<li>Per-cell evidence link (where possible)</li>
+<li>Maintained as part of release-gate sweeps (regenerated)</li>
+<li>Gaps tracked per §11.4.15</li>
+</ul>
+<p><strong>Per §11.4.25, the 6 invariants are:</strong></p>
+<ol type="1">
+<li>Anti-bluff posture (captured runtime evidence per §7.1 + §11.4)</li>
+<li>Proof of working capability end-to-end on the target topology (per
+§11.4.3)</li>
+<li>Working implementation matching the documented promise</li>
+<li>No open issues / bugs surfaced by the suite</li>
+<li>Full documentation kept in sync per §11.4.12</li>
+<li>Four-layer test floor per §1 (pre-build + post-build + runtime +
+paired mutation)</li>
+</ol>
+<p><strong>Falsifiability rehearsal:</strong> plant a feature row with
+all invariants ✓ but no actual underlying tests; assert ledger generator
+detects + flags the row.</p>
+<p><strong>Estimated scope:</strong> ~200 lines of bash + ~150 lines of
+generated markdown. Single session.</p>
+<p><strong>Dependency on:</strong> Phase 4b (test-type matrix) provides
+the data the ledger summarizes.</p>
+<hr />
+<h3 id="phase-8--11435--11436-verification-gates">Phase 8 — §11.4.35 +
+§11.4.36 verification gates</h3>
+<p><strong>§11.4.35 <code>CM-CANONICAL-ROOT-CLARITY</code>:</strong></p>
+<ul>
+<li>Verifies (a) consumer's CLAUDE.md opens with <code>@import</code> or
+<code>## INHERITED FROM constitution/CLAUDE.md</code></li>
+<li>Verifies (b) the constitution submodule's three files are
+present</li>
+<li>Verifies (c) no <code>## INHERITED FROM</code> block in the
+constitution submodule's own files</li>
+</ul>
+<p><strong>§11.4.36 <code>CM-INSTALL-UPSTREAMS-RAN</code>:</strong></p>
+<ul>
+<li>Verifies that for every owned-by-us submodule with
+<code>upstreams/</code> (or <code>Upstreams/</code>) populated,
+<code>install_upstreams</code> was run (evidence: per-submodule
+<code>git remote -v</code> shows multiple named remotes matching the
+recipe declarations)</li>
+<li>Operator-host-side dependency: the <code>install_upstreams</code>
+utility must be on <code>PATH</code>. The audit just verifies the RESULT
+of running it.</li>
+</ul>
+<p><strong>Estimated scope:</strong> ~150 lines bash + 4 hermetic tests.
+Single commit.</p>
+<hr />
+<h3
+id="phase-9--11433--11434--type-aware-closure-status--reopened-source-attribution">Phase
+9 — §11.4.33 + §11.4.34 — Type-aware closure-status + Reopened-source
+attribution</h3>
+<p><strong>Two paths to choose:</strong></p>
+<p><strong>Path A — Migrate Lava to Issues.md / Fixed.md tracker
+structure</strong></p>
+<ul>
+<li>Substantial process change</li>
+<li>Requires building Issues.md / Issues_Summary.md / Fixed.md /
+Fixed_Summary.md generators</li>
+<li>Per-cycle maintenance burden</li>
+<li>Aligns Lava with HelixConstitution's prescribed tracker</li>
+</ul>
+<p><strong>Path B — Formally amend §6.AD.3 to cover the new clauses'
+equivalence</strong></p>
+<ul>
+<li>Lava's existing CONTINUATION + closure-logs convention treated as
+equivalent</li>
+<li>§6.AD.3's mapping extended: Status vocabulary mapping
+(Bug→Fixed-equivalent, Feature→Implemented-equivalent,
+Task→Completed-equivalent); Reopened-source attribution mapped to
+closure-log fields</li>
+<li>§6.AD.3 entry in CLAUDE.md amended to explicitly cite §11.4.33 +
+§11.4.34 + §11.4.35 + §11.4.36</li>
+</ul>
+<p><strong>Recommended:</strong> Path B. Lower friction; preserves
+Lava's existing convention; the "equivalence is documented" pattern was
+operator-accepted in §6.AD.3 for the prior trackers (§11.4.15 + §11.4.16
++ §11.4.19 + §11.4.21).</p>
+<p><strong>Falsifiability rehearsal:</strong> for whichever path, write
+a synthetic closure-record + verify the gate accepts it.</p>
+<p><strong>Estimated scope:</strong> Path B = single docs commit (~50
+lines edit). Path A = multi-commit substantial work.</p>
+<hr />
+<h2 id="cross-cutting-concerns">Cross-cutting concerns</h2>
+<h3 id="pin-bump-cascade-11426-step-7">Pin-bump cascade (§11.4.26 step
+7)</h3>
+<p>Every phase that lands new clauses in this Lava CLAUDE.md MUST also
+propagate via §6.AD's pointer-block +
+scripts/inject-helix-inheritance-block.sh. The 54 per-scope docs already
+carry the pointer-block; new clauses inherit transitively.</p>
+<h3 id="11432-sweep-wiring">§11.4.32 sweep wiring</h3>
+<p>Phase 1 builds the sweep. Every subsequent phase MUST register its
+new gate(s) in the sweep so the master verifier runs them.</p>
+<h3 id="11420-subagent-delegation">§11.4.20 subagent delegation</h3>
+<p>Per §11.4.20: phases with multi-step scope (≥3 phases) should
+consider subagent delegation. Phases 4, 6 are highest priority for
+subagent partitioning.</p>
+<h3 id="prior-cycle-wins-carried-forward">Prior-cycle wins carried
+forward</h3>
+<p>This plan does NOT regress the 32-cycle prior work. All 41+
+mechanical anti-bluff gates remain. The Phase 1 sweep WRAPS them,
+doesn't replace them.</p>
+<hr />
+<h2 id="suggested-execution-order">Suggested execution order</h2>
+<p><strong>Immediate</strong> (this session, after this commit):</p>
+<ul>
+<li>Phase 0 ✅ DONE</li>
+<li>Phase 1 — verify-all sweep (HIGHEST priority)</li>
+<li>Phase 2 — gitignore audit gate</li>
+<li>Phase 5 — nested-own-org audit gate</li>
+<li>Phase 8 — canonical-root + install_upstreams gates</li>
+<li>Phase 9 (Path B) — §6.AD.3 equivalence amendment</li>
+</ul>
+<p><strong>Next session(s)</strong> (operator-driven):</p>
+<ul>
+<li>Phase 3 — helix-deps.yaml on 16 submodules (per-submodule commits +
+pin bumps)</li>
+<li>Phase 4a — HelixQA submodule incorporation ✅ DONE (commit
+<code>aa0db6bd</code>)</li>
+<li>Phase 4 follow-up A — integration design ✅ DONE (commit
+<code>a61bd3d8</code>)</li>
+<li>Phase 4 follow-up B — Option 1 shell-level wiring ✅ DONE (commit
+<code>d94ade0d</code>)</li>
+<li>Phase 4 follow-up C — Option 2 Go-package linking design ✅ DONE
+(this commit)</li>
+<li>Phase 4-C-1..4 — Option 2 Go-package linking IMPLEMENTATION (4
+sessions; operator-blocking on 10 open questions per design doc §G)</li>
+<li>Phase 4b — 14-test-type matrix gap-fill (long tail;
+multi-session)</li>
+</ul>
+<p><strong>Major rename cycle</strong> (operator-coordinated, dedicated
+session):</p>
+<ul>
+<li>Phase 6 — lowercase snake_case migration (HUGE; needs its own
+sub-plan + extensive testing)</li>
+<li>Phase 7 — coverage ledger (depends on Phase 4b for data)</li>
+</ul>
+<hr />
+<h2 id="honest-scope-statements">Honest scope statements</h2>
+<p><strong>What this plan IS:</strong></p>
+<ul>
+<li>Comprehensive gap inventory against the new 12 clauses</li>
+<li>Phased deliverables with anti-bluff falsifiability rehearsal
+contracts per phase</li>
+<li>Suggested execution order</li>
+<li>Cross-cutting-concerns inventory</li>
+</ul>
+<p><strong>What this plan IS NOT:</strong></p>
+<ul>
+<li>An implementation</li>
+<li>A guarantee that any phase will land in any specific time
+window</li>
+<li>A claim that all gaps are equally addressable on this host (Phase
+4b's UI/UX/security/etc tests may need infrastructure not yet on this
+host; per §6.X-debt the macOS-emulator-stall continues to block
+real-emulator UI execution)</li>
+</ul>
+<p><strong>What blocks this plan:</strong></p>
+<ul>
+<li>§6.X-debt darwin/arm64 emulator gap continues to block actual UI
+Challenge execution (orthogonal to the plan; affects Phase 4b's
+test-type runs)</li>
+<li>3 vasic-digital submodules (Challenges, Containers, Security) have
+UPSTREAM AHEAD of local pin — operator's call whether to pull (per §6.AD
+pins-frozen rule, deferred)</li>
+</ul>
+<p><strong>Anti-bluff posture of this plan:</strong> This plan IS the
+deliverable per the operator's directive ("create comprehensive plan in
+phases for achieveing this!"). Per §6.J: every phase carries a
+falsifiability rehearsal contract. Per §11.4.32: Phase 1 is the
+enforcement engine without which subsequent phases would be anchor-only.
+Per §11.4.20: phases are subagent-partitionable.</p>
+<p><strong>Classification:</strong> project-specific (the plan's
+specific phases + Lava-specific paths are project-specific; the
+discipline of "phased plan with falsifiability rehearsal per phase" is
+universal per HelixConstitution §11.4 + the established Lava §6.J/§6.L
+pattern).</p>
+</body>
+</html>

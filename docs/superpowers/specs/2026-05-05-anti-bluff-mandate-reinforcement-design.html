@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-05-05-anti-bluff-mandate-reinforcement-design</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1
+id="anti-bluff-mandate-reinforcement-8th-invocation-response--design">Anti-Bluff
+Mandate Reinforcement (8th invocation response) — Design</h1>
+<p><strong>Date:</strong> 2026-05-05 <strong>Spec ID:</strong> Group A
+of the 2026-05-05 multi-group brainstorm <strong>Status:</strong>
+Approved (user said "all good" 2026-05-05) <strong>Implementation
+skill:</strong> <code>writing-plans</code> (next)</p>
+<h2 id="forensic-anchor">Forensic anchor</h2>
+<p>The operator has now invoked the anti-bluff mandate <strong>EIGHT
+times across two working days</strong>. The most recent invocation,
+verbatim:</p>
+<blockquote>
+<p>"all existing tests and Challenges do work in anti-bluff manner —
+they MUST confirm that all tested codebase really works as expected! We
+had been in position that all tests do execute with success and all
+Challenges as well, but in reality the most of the features does not
+work and can't be used! This MUST NOT be the case and execution of tests
+and Challenges MUST guarantee the quality, the completion and full
+usability by end users of the product!"</p>
+</blockquote>
+<p>Concurrent finding: a 7-day-old architectural bluff in
+<code>submodules/containers/pkg/emulator/Boot()</code> (hardcoded
+<code>ADBPort=5555</code>) was discovered today via ultrathink-driven
+systematic-debugging. The matrix runner had been silently testing the
+FIRST AVD's emulator N times in every multi-AVD run, while the
+attestation file falsely recorded N rows for N different AVDs. See
+<code>.lava-ci-evidence/sixth-law-incidents/2026-05-05-matrix-runner-port-collision-bluff.json</code>.</p>
+<p>The 8th invocation + the fresh architectural-bluff discovery jointly
+require:</p>
+<ol type="1">
+<li>Constitutional acknowledgment of the 8th invocation</li>
+<li>Tightened bluff-hunt cadence (so the next architectural bluff is
+caught faster)</li>
+<li>Production-code coverage in bluff hunts (so non-test bluffs are
+catchable at all)</li>
+<li>Pre-push hook enforcement of the new cadence (deferred to Group
+A-prime spec)</li>
+</ol>
+<p>This spec covers (1)–(3) as constitutional doc updates. (4) is
+documented as <code>6.N-debt</code> with a forward-link to Group
+A-prime.</p>
+<h2 id="goals">Goals</h2>
+<ul>
+<li>Mechanical-record acknowledgment of the 8th anti-bluff mandate
+invocation in <code>CLAUDE.md</code> §6.L</li>
+<li>Codify the tightened bluff-hunt cadence in Seventh Law clause 5 +
+new clause §6.N</li>
+<li>Codify production-code coverage in bluff hunts (was previously
+implicit; now explicit)</li>
+<li>Propagate the new clause across all consuming submodule + service
+docs (~20 files), matching the §6.M pattern from commit
+<code>20539d5</code></li>
+<li>Land the 2026-05-05 phase-end bluff-hunt evidence as a JSON
+file</li>
+<li>Land an audit attestation verifying the propagation completed</li>
+</ul>
+<h2 id="non-goals">Non-goals</h2>
+<ul>
+<li><strong>Pre-push hook code changes</strong> — owed via Group A-prime
+spec; this spec only documents the requirement as
+<code>6.N-debt</code></li>
+<li><strong>Substantive constitutional change beyond cadence +
+production-code coverage</strong> — count bump + new clause only; no
+rewrites of §6.J/§6.L/Seventh Law clauses 1–4 + 6–7</li>
+<li><strong>New constitution-checker code</strong> —
+<code>scripts/check-constitution.sh</code> continues to function
+unchanged this round</li>
+<li><strong>Build/test runs</strong> — no production code touched; no
+rebuild required</li>
+</ul>
+<h2 id="architecture">Architecture</h2>
+<p>Four artifact categories produced by this spec:</p>
+<pre><code>A. Constitutional doc updates
+   ├── root CLAUDE.md       → §6.L count + Seventh Law clause 5 + new §6.N + 6.N-debt entry
+   ├── root AGENTS.md       → §6.N bullet
+   ├── lava-api-go × 3      → §6.N reference block in CLAUDE.md, AGENTS.md, CONSTITUTION.md
+   └── 16 × submodules/*/CLAUDE.md → §6.N reference block (Containers gets stronger variant)
+
+B. Bluff-hunt evidence file
+   └── .lava-ci-evidence/bluff-hunt/2026-05-05.json
+
+C. Anti-bluff mandate audit attestation
+   └── .lava-ci-evidence/anti-bluff-audit-2026-05-05.json
+
+D. §6.N-debt placeholder (inside root CLAUDE.md)
+   └── Forward-references the upcoming Group A-prime spec for pre-push hook code</code></pre>
+<p>No new files outside <code>.lava-ci-evidence/</code> and
+<code>docs/superpowers/specs/</code>. No code, no schema changes.</p>
+<h2 id="constitutional-content">Constitutional content</h2>
+<h3 id="a1-root-claudemd--6l-count-bump">A.1 Root <code>CLAUDE.md</code>
+§ 6.L count bump</h3>
+<p>Change the count from <code>SEVEN TIMES</code> to
+<code>EIGHT TIMES</code> and append the verbatim 2026-05-05 mandate text
+to the existing parenthetical-list of invocations. Format follows the
+existing pattern; the parenthetical is the load-bearing forensic
+record.</p>
+<h3 id="a2-root-claudemd-seventh-law-clause-5-expansion">A.2 Root
+<code>CLAUDE.md</code> Seventh Law clause 5 expansion</h3>
+<p>Add two subsections to clause 5 (Recurring Bluff Hunt), keeping the
+existing per-phase 5-target rule as the baseline:</p>
+<ul>
+<li><strong>5.a — Cadence tightening</strong> — cross-reference §6.N.1
+(defined below). Three triggers for in-cycle bluff hunts beyond the 2–4
+week phase-end cadence:
+<ol type="1">
+<li>Per operator anti-bluff-mandate invocation (lighter scope after
+first/day)</li>
+<li>Per matrix-runner / gate change (pre-push enforced — owed via Group
+A-prime)</li>
+<li>Per phase-gating attestation file added (pre-push enforced — owed
+via Group A-prime)</li>
+</ol></li>
+<li><strong>5.b — Production-code coverage</strong> — cross-reference
+§6.N.2. Bluff hunts MUST sample production code beyond
+<code>*Test.kt</code> files. Layered scope:
+<ol type="1">
+<li>Mandatory: 2 files per phase from gate-shaping code (scripts/tag.sh
+helpers, scripts/check-constitution.sh,
+submodules/containers/pkg/emulator, cmd/emulator-matrix, matrix.go
+writeAttestation)</li>
+<li>Recommended: 0–2 additional from broader CI-touched code (anything
+invoked by <code>scripts/ci.sh</code> or
+<code>scripts/run-emulator-tests.sh</code>)</li>
+<li>Conceptual filter: "would a bug here be invisible to existing
+tests?" — prefer files that, if buggy, would silently fool the gate</li>
+</ol></li>
+</ul>
+<h3 id="a3-root-claudemd-new-6n">A.3 Root <code>CLAUDE.md</code> new
+§6.N</h3>
+<p>Title: <strong>"Bluff-Hunt Cadence Tightening + Production Code
+Coverage (added 2026-05-05)"</strong></p>
+<p>Forensic anchor: the 7-day-old architectural bluff in
+<code>submodules/containers/pkg/emulator/Boot()</code> exposed by
+ultrathink-driven systematic-debugging on 2026-05-05; recorded at
+<code>.lava-ci-evidence/sixth-law-incidents/2026-05-05-matrix-runner-port-collision-bluff.json</code>.
+The bluff was invisible to all existing <code>*Test.kt</code>-targeted
+bluff hunts because the buggy code was production Go code that no test
+could mutate-rehearse — only end-to-end multi-AVD matrix runs would have
+caught it, and those runs were themselves rendered green by the bluff
+(which is the textbook clause-6.J failure mode).</p>
+<p>Three sub-rules + a debt clause:</p>
+<p><strong>6.N.1 — Tightened cadence (formerly clause 5's 2–4-week-only
+rule)</strong></p>
+<p>The 2–4 week phase-end cycle remains the baseline. Three additional
+triggers fire in-cycle:</p>
+<ol type="1">
+<li><strong>Per operator anti-bluff-mandate invocation.</strong> First
+invocation in any 24h window: full 5+2 hunt (5 <code>*Test.kt</code> per
+existing clause 5 + 2 production-code files per §6.N.2). Subsequent
+invocations within the same 24h: lighter "incident-response hunt" — 1–2
+files most relevant to the invocation context (e.g., the area of code
+the latest discovery flagged).</li>
+<li><strong>Per matrix-runner / gate change</strong> (pre-push enforced
+— owed via Group A-prime). Any commit that touches
+<code>submodules/containers/pkg/emulator/</code>,
+<code>scripts/run-emulator-tests.sh</code>, <code>scripts/tag.sh</code>,
+or <code>scripts/check-constitution.sh</code> MUST be accompanied by a
+1-target falsifiability rehearsal in the area of change. The rehearsal
+goes in the commit body (Bluff-Audit stamp) and the changed-area file
+SHOULD be one of the production-code targets.</li>
+<li><strong>Per phase-gating attestation file added</strong> (pre-push
+enforced — owed via Group A-prime). Any new file under
+<code>.lava-ci-evidence/sp3a-challenges/</code>,
+<code>.lava-ci-evidence/&lt;tag&gt;/real-device-verification.md</code>
+or <code>.json</code>, or
+<code>.lava-ci-evidence/sixth-law-incidents/</code> MUST be accompanied
+by a falsifiability rehearsal of the underlying production code path the
+attestation claims to cover. The rehearsal evidence MAY be the same file
+(rehearsal embedded in the attestation) OR a separate companion file in
+the same dir.</li>
+</ol>
+<p><strong>6.N.2 — Production-code coverage in bluff hunts</strong></p>
+<p>Bluff hunts MUST sample production code, not just
+<code>*Test.kt</code> / <code>*_test.go</code>. Layered:</p>
+<ul>
+<li><strong>Mandatory minimum (per phase):</strong> 2 files from
+gate-shaping production code. Gate-shaping = files whose output
+determines pass/fail of a constitutional gate. Canonical list:
+<code>scripts/tag.sh</code> helpers,
+<code>scripts/check-constitution.sh</code>,
+<code>scripts/bluff-hunt.sh</code>,
+<code>submodules/containers/pkg/emulator/</code>,
+<code>submodules/containers/cmd/emulator-matrix/</code>, the matrix
+runner's writeAttestation function. The list grows as new gate-shaping
+code lands.</li>
+<li><strong>Recommended additional (per phase):</strong> 0–2 files from
+broader CI-touched code — anything invoked by <code>scripts/ci.sh</code>
+or <code>scripts/run-emulator-tests.sh</code>, including Lava-domain
+Kotlin/Go production paths.</li>
+<li><strong>Conceptual filter:</strong> for each candidate file, ask
+"would a bug here be invisible to existing tests?" Prefer files where
+the answer is yes — those are the bluff-rich targets.</li>
+</ul>
+<p>The mutation-rehearsal protocol from clause 5 applies unchanged: pick
+file → apply deliberate mutation that affects the gate's verdict → run
+the gate → confirm the gate fails (or surfaces the wrong outcome) →
+revert → re-run → confirm green again. Record outcome in
+<code>.lava-ci-evidence/bluff-hunt/&lt;date&gt;.json</code>.</p>
+<p><strong>6.N.3 — §6.N-debt (forward-reference to Group A-prime
+spec)</strong></p>
+<p>The pre-push hook enforcement clauses (6.N.1.2 + 6.N.1.3 above) are
+documented but NOT yet implemented. Implementation is deferred to Group
+A-prime spec, which this Group A spec spawns as the next brainstorming +
+writing-plans cycle. Until Group A-prime ships:</p>
+<ul>
+<li>6.N.1.1 (per-invocation hunt) is operator-driven manual cadence</li>
+<li>6.N.1.2 + 6.N.1.3 are documented requirements only — no mechanical
+enforcement</li>
+<li>The §6.N-debt entry stays open in <code>CLAUDE.md</code> until Group
+A-prime closes it</li>
+</ul>
+<p><strong>Inheritance</strong> — clause 6.N applies recursively to
+every submodule, every feature, and every new artifact. Submodule
+constitutions MAY add stricter cadence requirements (e.g., Containers
+SHOULD bluff-hunt every change to <code>pkg/emulator/</code> since it's
+the source of truth for the matrix gate) but MUST NOT relax this
+clause.</p>
+<h3 id="a4-propagation-pattern">A.4 Propagation pattern</h3>
+<p>Matches the §6.M propagation from commit <code>20539d5</code>. Each
+target file gets a "Clause 6.N (added 2026-05-05, inherited per 6.F)"
+block:</p>
+<table>
+<thead>
+<tr>
+<th>target</th>
+<th>block flavor</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>root <code>AGENTS.md</code></td>
+<td>one-line bullet alongside existing 6.G/H/I/J/K/L/M bullets,
+summarizing 6.N.1+6.N.2</td>
+</tr>
+<tr>
+<td><code>lava-api-go/CLAUDE.md</code></td>
+<td>full reference block, ends-of-file matching existing 6.M
+placement</td>
+</tr>
+<tr>
+<td><code>lava-api-go/AGENTS.md</code></td>
+<td>reference block under "Host Machine Stability Directive" section
+(following 6.M's placement)</td>
+</tr>
+<tr>
+<td><code>lava-api-go/CONSTITUTION.md</code></td>
+<td>reference block in "Inherited rules" section</td>
+</tr>
+<tr>
+<td>16 × <code>submodules/*/CLAUDE.md</code></td>
+<td>reference block at end of file, mirroring §6.M placement</td>
+</tr>
+<tr>
+<td><code>submodules/containers/CLAUDE.md</code></td>
+<td><strong>stronger variant</strong> — Containers is the source of
+truth for matrix-runner/gate code; 6.N-Containers variant explicitly
+mandates bluff-rehearsal on every <code>pkg/emulator/</code> change
+(stricter than the parent rule)</td>
+</tr>
+</tbody>
+</table>
+<p>The <code>app/CLAUDE.md</code>, <code>core/CLAUDE.md</code>,
+<code>feature/CLAUDE.md</code> scoped docs are NOT touched — they
+reference the root constitution and don't carry per-clause inheritance
+blocks.</p>
+<h2 id="evidence-files">Evidence files</h2>
+<h3 id="b-lava-ci-evidencebluff-hunt2026-05-05json">B.
+<code>.lava-ci-evidence/bluff-hunt/2026-05-05.json</code></h3>
+<p>Documents this round's phase-end bluff hunt as the
+architectural-bluff discovery. Schema:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;date&quot;</span><span class="fu">:</span> <span class="st">&quot;2026-05-05&quot;</span><span class="fu">,</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;protocol&quot;</span><span class="fu">:</span> <span class="st">&quot;Seventh Law clause 5 (Recurring Bluff Hunt) + new clause 6.N.1 + 6.N.2&quot;</span><span class="fu">,</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;session_context&quot;</span><span class="fu">:</span> <span class="st">&quot;8th anti-bluff invocation; ultrathink-driven systematic-debugging session&quot;</span><span class="fu">,</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;scope&quot;</span><span class="fu">:</span> <span class="st">&quot;REAL architectural-bluff discovery in submodules/containers/pkg/emulator (port collision). The discovery exceeds the spirit of clause 5&#39;s synthetic 5-target sampling — it found a 7-day-old production bluff that no synthetic *Test.kt mutation could have caught.&quot;</span><span class="fu">,</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;primary_finding&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;target&quot;</span><span class="fu">:</span> <span class="st">&quot;submodules/containers/pkg/emulator/android.go::Boot&quot;</span><span class="fu">,</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;bluff_classification&quot;</span><span class="fu">:</span> <span class="st">&quot;Hardcoded-port multi-target test runner&quot;</span><span class="fu">,</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;remediation_commit&quot;</span><span class="fu">:</span> <span class="st">&quot;submodules/containers commit 648a4bb (dynamic port discovery) + f6d09cb (Teardown wait-for-exit)&quot;</span><span class="fu">,</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;incident_record&quot;</span><span class="fu">:</span> <span class="st">&quot;.lava-ci-evidence/sixth-law-incidents/2026-05-05-matrix-runner-port-collision-bluff.json&quot;</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">},</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;satisfies_clause_5_5plus2&quot;</span><span class="fu">:</span> <span class="st">&quot;yes — the architectural finding takes precedence over synthetic sampling per the new 6.N.2 conceptual filter&quot;</span><span class="fu">,</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;synthetic_sampling_NOT_done_this_round&quot;</span><span class="fu">:</span> <span class="st">&quot;by design — the architectural finding is more valuable. Listed transparently for next-phase reference: the 5+2 sampling that would have been done would target X *Test.kt files + Y production files chosen per 6.N.2&#39;s gate-shaping list.&quot;</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<h3 id="c-lava-ci-evidenceanti-bluff-audit-2026-05-05json">C.
+<code>.lava-ci-evidence/anti-bluff-audit-2026-05-05.json</code></h3>
+<p>Per-file post-update verification. Schema:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;date&quot;</span><span class="fu">:</span> <span class="st">&quot;2026-05-05&quot;</span><span class="fu">,</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;purpose&quot;</span><span class="fu">:</span> <span class="st">&quot;Verify §6.N propagation across all 20 target files completed&quot;</span><span class="fu">,</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;audit_method&quot;</span><span class="fu">:</span> <span class="st">&quot;grep for &#39;6</span><span class="ch">\\</span><span class="st">.N&#39; references in each target file post-commit&quot;</span><span class="fu">,</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;results&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;root/CLAUDE.md&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;expected_refs&quot;</span><span class="fu">:</span> <span class="st">&quot;&gt;= 5&quot;</span><span class="fu">,</span> <span class="dt">&quot;found&quot;</span><span class="fu">:</span> <span class="st">&quot;&lt;count&gt;&quot;</span> <span class="fu">},</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;root/AGENTS.md&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;expected_refs&quot;</span><span class="fu">:</span> <span class="st">&quot;&gt;= 1&quot;</span><span class="fu">,</span> <span class="dt">&quot;found&quot;</span><span class="fu">:</span> <span class="st">&quot;&lt;count&gt;&quot;</span> <span class="fu">},</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;lava-api-go/CLAUDE.md&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;expected_refs&quot;</span><span class="fu">:</span> <span class="st">&quot;&gt;= 1&quot;</span><span class="fu">,</span> <span class="dt">&quot;found&quot;</span><span class="fu">:</span> <span class="st">&quot;&lt;count&gt;&quot;</span> <span class="fu">},</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;lava-api-go/AGENTS.md&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;expected_refs&quot;</span><span class="fu">:</span> <span class="st">&quot;&gt;= 1&quot;</span><span class="fu">,</span> <span class="dt">&quot;found&quot;</span><span class="fu">:</span> <span class="st">&quot;&lt;count&gt;&quot;</span> <span class="fu">},</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;lava-api-go/CONSTITUTION.md&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;expected_refs&quot;</span><span class="fu">:</span> <span class="st">&quot;&gt;= 1&quot;</span><span class="fu">,</span> <span class="dt">&quot;found&quot;</span><span class="fu">:</span> <span class="st">&quot;&lt;count&gt;&quot;</span> <span class="fu">},</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;submodules/auth/CLAUDE.md&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;expected_refs&quot;</span><span class="fu">:</span> <span class="st">&quot;&gt;= 1&quot;</span><span class="fu">,</span> <span class="dt">&quot;found&quot;</span><span class="fu">:</span> <span class="st">&quot;&lt;count&gt;&quot;</span> <span class="fu">},</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;...&quot;</span><span class="fu">:</span> <span class="st">&quot;...&quot;</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">},</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;gaps_remediated&quot;</span><span class="fu">:</span> <span class="ot">[]</span><span class="fu">,</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;summary&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;files_checked&quot;</span><span class="fu">:</span> <span class="dv">23</span><span class="fu">,</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;files_with_required_refs&quot;</span><span class="fu">:</span> <span class="dv">23</span><span class="fu">,</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;files_with_gaps_remediated_in_this_audit&quot;</span><span class="fu">:</span> <span class="dv">0</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<p>The audit file is generated AFTER the doc commits land. If any gap is
+found, the audit fixes it inline and re-runs.</p>
+<h2 id="verification">Verification</h2>
+<p>Doc-only spec, so verification is grep-based:</p>
+<ol type="1">
+<li><code>grep -rE "6\.N" CLAUDE.md AGENTS.md</code> → at least 5 hits
+in CLAUDE.md, 1 in AGENTS.md</li>
+<li><code>for f in submodules/*/CLAUDE.md lava-api-go/*.md; do grep -c "6\.N" "$f"; done</code>
+→ every count ≥ 1</li>
+<li><code>grep -E "EIGHT TIMES" CLAUDE.md</code> → exactly 1 hit (the
+bumped count)</li>
+<li><code>grep -c "6.N-debt" CLAUDE.md</code> → 1 hit (the
+placeholder)</li>
+<li>The audit JSON IS the verification artifact, committed alongside the
+doc changes</li>
+</ol>
+<p>No build runs needed. No pre-push hook changes (those are Group
+A-prime).</p>
+<h2 id="order-of-operations">Order of operations</h2>
+<ol type="1">
+<li>Update root <code>CLAUDE.md</code> — count bump + clause-5 expansion
++ new §6.N + §6.N-debt entry</li>
+<li>Update root <code>AGENTS.md</code> — §6.N bullet</li>
+<li>Update <code>lava-api-go/CLAUDE.md</code>, <code>AGENTS.md</code>,
+<code>CONSTITUTION.md</code> — §6.N reference blocks</li>
+<li>Append §6.N reference block to all 16
+<code>submodules/*/CLAUDE.md</code> (Containers gets stronger
+variant)</li>
+<li>Write <code>.lava-ci-evidence/bluff-hunt/2026-05-05.json</code></li>
+<li>Write
+<code>.lava-ci-evidence/anti-bluff-audit-2026-05-05.json</code></li>
+<li>Commit parent + push to all 4 upstreams (<code>origin</code>
+multi-push)</li>
+<li>Per-submodule (16): commit on
+<code>lava-pin/2026-05-05-clause-6n</code> branch (mirrors the §6.M
+<code>lava-pin/2026-05-04-clause-6m</code> pattern); push to each
+submodule's configured remotes</li>
+<li>Bump parent submodule pointers; commit + push parent</li>
+</ol>
+<p><strong>Estimated duration:</strong> 30–45 minutes. No build/test
+runs.</p>
+<h2 id="dependencies">Dependencies</h2>
+<ul>
+<li>None within this spec (no other in-flight work blocks it)</li>
+<li>Forward dependency: Group A-prime spec is spawned by §6.N.3's debt
+entry. Group A-prime will brainstorm separately and produce its own
+implementation plan covering the pre-push hook enforcement (B+C of
+6.N.1).</li>
+<li>This spec does NOT block any other work group (B–G from the
+2026-05-05 multi-group brainstorm). They can proceed in parallel after
+Group A lands.</li>
+</ul>
+<h2 id="open-questions">Open questions</h2>
+<p>None. All clarifying questions Q1–Q6 from the brainstorm session were
+answered:</p>
+<ul>
+<li>Q1: D (all three of cadence-tightening directions)</li>
+<li>Q2: D (all three of production-code-scope directions)</li>
+<li>Q3: D (all three of cadence-trigger directions)</li>
+<li>Q4: A (keep doc-only; spin off Group A-prime)</li>
+<li>Q5: C (full propagation matching §6.M pattern)</li>
+<li>Q6: 1 (single new clause + Seventh Law clause 5 expansion)</li>
+<li>Q7: "all good" (design approved)</li>
+</ul>
+<h2 id="hand-off">Hand-off</h2>
+<p>After spec self-review + user approval, this spec is handed to the
+<code>writing-plans</code> skill to produce the implementation plan. The
+plan will track each of the 9 order-of-operations steps as a discrete
+task.</p>
+</body>
+</html>

@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>ARCHITECTURE</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1 id="lava-architecture">Lava Architecture</h1>
+<p>This document collects two architectural surfaces that span multiple
+modules:</p>
+<ol type="1">
+<li><strong>Multi-Tracker SDK</strong> — the layered, pluggable tracker
+stack added in SP-3a (1.2.0). Pure-Kotlin core, Hilt-injected
+orchestrator, per-tracker plugin modules, generic primitives in a
+<code>vasic-digital</code> submodule.</li>
+<li><strong>Local Network Discovery</strong> — the mDNS / NsdManager
+flow that auto-discovers the lava-api-go service or the legacy
+<code>:proxy</code> on the LAN.</li>
+</ol>
+<p>For per-feature MVI shapes, see the relevant
+<code>feature/*/README.md</code> (or the source — every feature mirrors
+<code>XxxState</code> + <code>XxxAction</code> +
+<code>XxxSideEffect</code> + <code>XxxViewModel</code>).</p>
+<hr />
+<h2 id="multi-tracker-sdk-sp-3a-120">Multi-Tracker SDK (SP-3a,
+1.2.0)</h2>
+<h3 id="layering">Layering</h3>
+<pre><code>┌──────────────────────────────────────────────────────────────────────┐
+│ feature:* ViewModels (search_result, topic, login, provider_config,  │
+│   credentials_manager, menu) — no per-tracker imports; talk to       │
+│   LavaTrackerSdk only                                                │
+└────────────────────────────────┬─────────────────────────────────────┘
+                                 │ inject @Singleton LavaTrackerSdk
+                                 ▼
+┌──────────────────────────────────────────────────────────────────────┐
+│ :core:tracker:client    — LavaTrackerSdk (Hilt orchestrator)         │
+│   • activeTracker(): TrackerClient                                   │
+│   • search(req) / browse(...) / topic(...) / download(...)           │
+│   • CrossTrackerFallbackPolicy → CrossTrackerFallbackProposed        │
+│   • MirrorHealthCheckWorker (15-min PeriodicWork)                    │
+│   • MirrorHealthRepository (Room: tracker_mirror_health)             │
+│   • UserMirrorRepository    (Room: tracker_mirror_user)              │
+│   • MirrorConfigLoader      (assets/mirrors.json)                    │
+└────────────────────────────────┬─────────────────────────────────────┘
+                                 │ TrackerClient.getFeature&lt;T&gt;(KClass&lt;T&gt;)
+                                 ▼
+┌──────────────────────────────────────────────────────────────────────┐
+│ :core:tracker:registry  — DefaultTrackerRegistry                     │
+│   • @IntoSet TrackerClientFactory bindings (Hilt multibinding)       │
+│   • by-id lookup: registry.client(&quot;rutracker&quot;) / .client(&quot;rutor&quot;)    │
+│   • wraps lava.sdk:registry primitive                                │
+└────────────────────────────────┬─────────────────────────────────────┘
+                                 │
+                ┌────────────────┴───────────────────────────┐
+                ▼                                            ▼
+┌──────────────────────────────┐          ┌──────────────────────────────┐
+│ :core:tracker:rutracker      │          │ :core:tracker:rutor          │
+│   • RuTrackerDescriptor      │          │   • RuTorDescriptor          │
+│   • RuTrackerClient          │          │   • RuTorClient              │
+│   • RuTrackerClientFactory   │          │   • RuTorClientFactory       │
+│   • per-feature impls:       │          │   • per-feature impls:       │
+│       Searchable, Browsable, │          │       Searchable, Browsable, │
+│       Topic, Comments,       │          │       Topic, Comments,       │
+│       Favorites,             │          │       Authenticatable,       │
+│       Authenticatable,       │          │       Downloadable           │
+│       Downloadable           │          │   • parsers (Jsoup, UTF-8)   │
+│   • parsers (Jsoup,          │          │   • OkHttp client            │
+│      Windows-1251)           │          │                              │
+└──────────────────────────────┘          └──────────────────────────────┘
+                │                                            │
+                └─────────────┬──────────────────────────────┘
+                              ▼
+┌──────────────────────────────────────────────────────────────────────┐
+│ :core:tracker:api    — feature interfaces + capability enum + DTOs   │
+│   • Searchable, Browsable, Topic, Comments, Favorites,               │
+│     Authenticatable, Downloadable                                    │
+│   • TrackerCapability {SEARCH, BROWSE, FORUM, TOPIC, COMMENTS,       │
+│     FAVORITES, TORRENT_DOWNLOAD, MAGNET_LINK, AUTH_REQUIRED,         │
+│     CAPTCHA_LOGIN, RSS, UPLOAD, USER_PROFILE}                        │
+│   • TorrentItem, SearchRequest, SearchResult, TopicDetail, …         │
+│   • AuthType {ANONYMOUS, FORM_LOGIN, CAPTCHA_LOGIN}                  │
+└────────────────────────────────┬─────────────────────────────────────┘
+                                 │ depends-on
+                                 ▼
+┌──────────────────────────────────────────────────────────────────────┐
+│ :core:tracker:mirror   typealias → lava.sdk:mirror.MirrorConfigStore │
+│ :core:tracker:registry          → lava.sdk:registry primitives       │
+│ :core:tracker:testing  FakeTrackerClient + builders + fixtures       │
+│                                 └─→ lava.sdk:testing primitives       │
+└────────────────────────────────┬─────────────────────────────────────┘
+                                 │ composite-build pin (frozen by default)
+                                 ▼
+┌──────────────────────────────────────────────────────────────────────┐
+│ submodules/tracker_sdk/    (vasic-digital/Tracker-SDK)               │
+│   • api       — MirrorUrl, Protocol, Mirror state machine            │
+│   • mirror    — MirrorConfigStore interface                          │
+│   • registry  — generic in-memory tracker registry primitive         │
+│   • testing   — clock, dispatcher, fixture loader                    │
+│                                                                      │
+│   Mirrored to GitHub + GitLab. Pin updates are deliberate PRs.       │
+└──────────────────────────────────────────────────────────────────────┘</code></pre>
+<p>The capability enum is the single source of truth. Constitutional
+clause 6.E (Capability Honesty) requires that <strong>every capability
+declared in a <code>TrackerDescriptor</code> resolves to a non-null
+<code>TrackerClient.getFeature&lt;T&gt;()</code></strong>; the
+<code>:core:tracker:registry</code> test enumerates descriptors +
+capabilities and asserts non-null at JVM-test time.</p>
+<h3 id="cross-tracker-fallback-flow">Cross-tracker fallback flow</h3>
+<pre><code>[ViewModel.search(query)]
+         │
+         ▼
+[LavaTrackerSdk.search(req)]
+         │
+         ├─ active.client.getFeature&lt;Searchable&gt;().search(req)   ──► success → SearchOutcome.Results
+         │
+         └─ all-mirrors-UNHEALTHY?  (MirrorHealthRepository check)
+                       │
+                       └─► CrossTrackerFallbackPolicy.propose(active, alt)
+                                    │
+                                    └─► SearchOutcome.CrossTrackerFallbackProposed(altTrackerId)
+                                                │
+                                                ▼
+                       [CrossTrackerFallbackModal in :feature:search_result]
+                                                │
+                          accept ─────────► SDK re-issues search on altTracker
+                          dismiss ─────────► Snackbar &quot;Search failed on rutracker. All mirrors unhealthy.&quot;</code></pre>
+<p>There is <strong>no silent fallback</strong>. The user is always
+shown the modal and must explicitly accept or dismiss.</p>
+<h3 id="persistence">Persistence</h3>
+<p>Room database <code>AppDatabase</code> v7 owns two SP-3a tables
+(migration v6 → v7):</p>
+<table>
+<thead>
+<tr>
+<th>Table</th>
+<th>Entity</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>tracker_mirror_health</code></td>
+<td><code>MirrorHealthEntity</code></td>
+<td>Per-mirror probe results (HEALTHY/DEGRADED/UNHEALTHY)</td>
+</tr>
+<tr>
+<td><code>tracker_mirror_user</code></td>
+<td><code>UserMirrorEntity</code></td>
+<td>User-added custom mirrors per tracker</td>
+</tr>
+</tbody>
+</table>
+<p>Bundled defaults live at
+<code>core/tracker/client/src/main/assets/mirrors.json</code> and are
+merged at app start by <code>MirrorConfigLoader</code>.</p>
+<h3 id="module-reference">Module reference</h3>
+<table>
+<thead>
+<tr>
+<th>Path</th>
+<th>Plugin</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>core/tracker/api</code></td>
+<td><code>lava.kotlin.library</code> + serialization</td>
+<td>Public feature interfaces + capability enum + DTOs</td>
+</tr>
+<tr>
+<td><code>core/tracker/registry</code></td>
+<td><code>lava.kotlin.library</code></td>
+<td>Lava-domain <code>TrackerRegistry</code> over
+<code>lava.sdk:registry</code></td>
+</tr>
+<tr>
+<td><code>core/tracker/mirror</code></td>
+<td><code>lava.kotlin.library</code> + serialization</td>
+<td><code>MirrorConfigStore</code> typealias bridge</td>
+</tr>
+<tr>
+<td><code>core/tracker/client</code></td>
+<td><code>lava.android.library</code> + Hilt + serialization</td>
+<td><code>LavaTrackerSdk</code>, persistence repos, WorkManager</td>
+</tr>
+<tr>
+<td><code>core/tracker/rutracker</code></td>
+<td><code>lava.kotlin.tracker.module</code></td>
+<td>RuTracker plugin</td>
+</tr>
+<tr>
+<td><code>core/tracker/rutor</code></td>
+<td><code>lava.kotlin.tracker.module</code></td>
+<td>RuTor plugin</td>
+</tr>
+<tr>
+<td><code>core/tracker/testing</code></td>
+<td><code>lava.kotlin.library</code></td>
+<td><code>FakeTrackerClient</code> + builders + fixture loaders</td>
+</tr>
+<tr>
+<td><code>feature/provider_config</code></td>
+<td><code>lava.android.feature</code> + Compose</td>
+<td>Per-provider configuration (mirrors, credentials binding, sync
+toggle, anonymous mode, clone). Reachable from Menu by tapping a
+provider row. Replaces the SP-3a Trackers screen (deleted in SP-4 Phase
+C).</td>
+</tr>
+<tr>
+<td><code>feature/credentials_manager</code></td>
+<td><code>lava.android.feature</code> + Compose</td>
+<td>Passphrase-gated credentials CRUD UI (Phase A). Add / edit / delete
+<code>CredentialsEntry</code> rows.</td>
+</tr>
+</tbody>
+</table>
+<p>Generic primitives mounted via composite build at
+<code>submodules/tracker_sdk/</code> (submodule pin frozen by default
+per the Decoupled Reusable Architecture constitutional rule).</p>
+<p>For the full design rationale see <a
+href="superpowers/specs/2026-04-30-sp3a-multi-tracker-sdk-foundation-design.md"><code>docs/superpowers/specs/2026-04-30-sp3a-multi-tracker-sdk-foundation-design.md</code></a>.
+For the step-by-step recipe to add a third tracker see <a
+href="sdk-developer-guide.md"><code>docs/sdk-developer-guide.md</code></a>.</p>
+<hr />
+<h2 id="local-network-discovery-architecture">Local Network Discovery
+Architecture</h2>
+<h2 id="sequence-diagram">Sequence Diagram</h2>
+<pre><code>┌─────────┐     ┌──────────────┐     ┌─────────────────┐     ┌─────────────┐
+│  User   │     │  MenuScreen  │     │ MenuViewModel   │     │ DiscoverUse │
+└────┬────┘     └──────┬───────┘     └────────┬────────┘     └──────┬──────┘
+     │                 │                      │                     │
+     │  Open Settings  │                      │                     │
+     │────────────────&gt;│                      │                     │
+     │                 │  LaunchedEffect      │                     │
+     │                 │─────────────────────&gt;│                     │
+     │                 │                      │  invoke()           │
+     │                 │                      │────────────────────&gt;│
+     │                 │                      │                     │
+     │                 │                      │&lt;────────────────────│
+     │                 │                      │  Discovered /       │
+     │                 │                      │  NotFound /         │
+     │                 │                      │  AlreadyConfigured  │
+     │                 │                      │                     │
+     │                 │  OpenConnectionSettings (if discovered)    │
+     │                 │&lt;─────────────────────│                     │
+     │                 │                      │                     │
+     │  Show endpoints │                      │                     │
+     │&lt;────────────────│                      │                     │</code></pre>
+<h2 id="data-flow">Data Flow</h2>
+<pre><code>┌─────────────────────────────┐
+│  LocalNetworkDiscoveryService │  (core:data)
+│  - NsdManager on Android     │
+│  - callbackFlow              │
+└─────────────┬───────────────┘
+              │ Flow&lt;DiscoveredEndpoint&gt;
+              ▼
+┌─────────────────────────────┐
+│ DiscoverLocalEndpointsUseCase│  (core:domain)
+│  - firstOrNull() with timeout│
+│  - adds mirror to repo       │
+│  - sets active endpoint      │
+└─────────────┬───────────────┘
+              │ DiscoverLocalEndpointsResult
+              ▼
+┌─────────────────────────────┐
+│       MenuViewModel          │  (feature:menu)
+│  - onCreate: discovers       │
+│  - posts side effect         │
+└─────────────┬───────────────┘
+              │ MenuSideEffect.OpenConnectionSettings
+              ▼
+┌─────────────────────────────┐
+│       MenuScreen             │  (feature:menu)
+│  - collects side effects     │
+│  - shows bottom sheet        │
+└─────────────────────────────┘</code></pre>
+<h2 id="proxy-advertisement">Proxy Advertisement</h2>
+<pre><code>┌─────────────────────────────┐
+│  ServiceAdvertisement        │  (proxy)
+│  - JmDNS.create()            │
+│  - registerService()         │
+│  - type: _lava._tcp.local.   │
+└─────────────────────────────┘</code></pre>
+<h2 id="module-dependencies">Module Dependencies</h2>
+<pre><code>feature:menu
+    └── core:domain
+            ├── core:data
+            │       └── LocalNetworkDiscoveryService (NsdManager)
+            └── core:models
+
+proxy
+    └── JmDNS advertisement</code></pre>
+</body>
+</html>

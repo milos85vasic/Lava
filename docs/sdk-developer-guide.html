@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>sdk-developer-guide</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1 id="lava-tracker-sdk--developer-guide">Lava Tracker SDK — Developer
+Guide</h1>
+<blockquote>
+<p><strong>Status:</strong> SP-3a documentation-polish revision
+(2026-05-01, Lava-Android-1.2.0-1020). The 7-step recipe in §2 remains
+the load-bearing structural acceptance criterion; sections 1, 3, 4 are
+the conceptual frame; sections 5–7 are mechanical compliance gates added
+in the polish pass and bind every PR that adds a tracker.</p>
+<p><strong>Validation:</strong> Each step in §2 has been paper-traced
+through the existing <code>:core:tracker:rutor</code> module (added in
+SP-3a Phase 3). If you can answer "yes" to every step against
+<code>core/tracker/rutor/</code>, your new tracker module is
+structurally compliant. Sections 5–7 are validated against both
+<code>:core:tracker:rutracker</code> and
+<code>:core:tracker:rutor</code> — if a new tracker can satisfy them as
+completely as those two do, the SDK contract is preserved.</p>
+</blockquote>
+<hr />
+<h2 id="1-sdk-architecture-overview">1. SDK Architecture Overview</h2>
+<p>The Lava Tracker SDK lives in two layers:</p>
+<ol type="1">
+<li><p><strong>Generic primitives</strong> — mounted at
+<code>submodules/tracker_sdk/</code> (the
+<code>vasic-digital/Tracker-SDK</code> submodule). These are
+Lava-agnostic building blocks: <code>MirrorUrl</code>,
+<code>TrackerDescriptor</code>-shape, <code>Mirror</code> health-state
+machine, in-memory registry, mirror-config store, and test scaffolding
+(clock, dispatcher, fixture loader). The submodule is <strong>frozen by
+default</strong>: updating the pin is a deliberate PR.</p></li>
+<li><p><strong>Lava-domain wrappers + per-tracker plugins</strong> —
+under <code>core/tracker/</code> in the Lava monorepo.
+<code>core/tracker/api/</code> exposes the seven feature interfaces
+(<code>Searchable</code>, <code>Browsable</code>, <code>Topic</code>,
+<code>Comments</code>, <code>Favorites</code>,
+<code>Authenticatable</code>, <code>Downloadable</code>) and the
+<code>TrackerCapability</code> enum.
+<code>core/tracker/{rutracker,rutor}/</code> are the two shipped
+per-tracker plugins. <code>core/tracker/client/</code> hosts
+<code>LavaTrackerSdk</code>, the Hilt-injected orchestrator that
+ViewModels consume.</p></li>
+</ol>
+<p>A feature ViewModel never imports a per-tracker module directly. It
+talks to <code>LavaTrackerSdk</code>, which routes the call through the
+active tracker's <code>TrackerClient.getFeature&lt;T&gt;()</code>.
+Capability declared in the descriptor ⇒ feature interface returned ⇒
+method works (constitutional clause 6.E, Capability Honesty).</p>
+<pre><code>[ViewModel] → [LavaTrackerSdk] → [Registry] → [TrackerClient (active)]
+                                                    │
+                                                    ├─→ getFeature&lt;Searchable&gt;()
+                                                    ├─→ getFeature&lt;Authenticatable&gt;()
+                                                    └─→ getFeature&lt;Downloadable&gt;()</code></pre>
+<p>When all mirrors of the active tracker fail,
+<code>LavaTrackerSdk</code> emits
+<code>CrossTrackerFallbackProposed</code> (Phase 4); the UI presents a
+modal offering the alternative tracker. There is no silent fallback.</p>
+<hr />
+<h2 id="2-adding-a-new-tracker-7-step-recipe">2. Adding a New Tracker
+(7-step recipe)</h2>
+<p>Follow these steps in order. Each step is testable against the
+existing <code>:core:tracker:rutor</code> module — when in doubt,
+paper-trace there first.</p>
+<h3 id="step-1--create-the-gradle-module">Step 1 — Create the Gradle
+module</h3>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> core/tracker/<span class="op">&lt;</span>trackerId<span class="op">&gt;</span>/src/<span class="dt">{main</span><span class="op">,</span><span class="dt">test}</span>/kotlin</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> core/tracker/<span class="op">&lt;</span>trackerId<span class="op">&gt;</span>/src/test/resources/fixtures/<span class="op">&lt;</span>trackerId<span class="op">&gt;</span></span></code></pre></div>
+<p>Create
+<code>core/tracker/&lt;trackerId&gt;/build.gradle.kts</code>:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>plugins <span class="op">{</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    id<span class="op">(</span><span class="st">&quot;lava.kotlin.tracker.module&quot;</span><span class="op">)</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>That convention plugin pre-wires <code>:core:tracker:api</code>,
+<code>lava.sdk:api</code>, <code>lava.sdk:mirror</code>, Jsoup, OkHttp,
+kotlinx-coroutines, kotlinx-serialization, JUnit4, mockk,
+kotlinx-coroutines-test, <code>:core:tracker:testing</code>, and
+<code>lava.sdk:testing</code>. <strong>Do not duplicate config</strong>;
+if you find yourself adding dependencies module-by-module, extend the
+convention plugin instead.</p>
+<p>Add the module to <code>settings.gradle.kts</code>:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>include<span class="op">(</span><span class="st">&quot;:core:tracker:&lt;trackerId&gt;&quot;</span><span class="op">)</span></span></code></pre></div>
+<h3 id="step-2--define-the-trackerdescriptor">Step 2 — Define the
+<code>TrackerDescriptor</code></h3>
+<p>In
+<code>core/tracker/&lt;trackerId&gt;/src/main/kotlin/lava/tracker/&lt;trackerId&gt;/&lt;TrackerId&gt;Descriptor.kt</code>:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">object</span> <span class="op">&lt;</span><span class="dt">TrackerId</span><span class="op">&gt;</span>Descriptor <span class="op">:</span> <span class="dt">TrackerDescriptor</span> <span class="op">{</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">override</span> <span class="kw">val</span> <span class="va">id</span> <span class="op">=</span> <span class="st">&quot;&lt;trackerId&gt;&quot;</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">override</span> <span class="kw">val</span> <span class="va">displayName</span> <span class="op">=</span> <span class="st">&quot;&lt;Display Name&gt;&quot;</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">override</span> <span class="kw">val</span> <span class="va">capabilities</span><span class="op">:</span> Set<span class="op">&lt;</span>TrackerCapability<span class="op">&gt;</span> <span class="op">=</span> setOf<span class="op">(</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>        TrackerCapability<span class="op">.</span>SEARCH<span class="op">,</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>        TrackerCapability<span class="op">.</span>TOPIC<span class="op">,</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>        TrackerCapability<span class="op">.</span>DOWNLOAD<span class="op">,</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>        <span class="co">// declare ONLY the capabilities you will actually wire up</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>        <span class="co">// (clause 6.E Capability Honesty: declared ⇒ getFeature non-null)</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    <span class="op">)</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    <span class="kw">override</span> <span class="kw">val</span> <span class="va">defaultMirrors</span> <span class="op">=</span> listOf<span class="op">(</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>        MirrorUrl<span class="op">(</span>host <span class="op">=</span> <span class="st">&quot;&lt;primary-host&gt;&quot;</span><span class="op">,</span> priority <span class="op">=</span> <span class="dv">100</span><span class="op">),</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>        MirrorUrl<span class="op">(</span>host <span class="op">=</span> <span class="st">&quot;&lt;secondary-host&gt;&quot;</span><span class="op">,</span> priority <span class="op">=</span> <span class="dv">50</span><span class="op">),</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>    <span class="op">)</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    <span class="kw">override</span> <span class="kw">val</span> <span class="va">authRequired</span> <span class="op">=</span> <span class="kw">false</span>  <span class="co">// or true for RuTracker-style auth</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="step-3--implement-the-per-feature-interfaces">Step 3 — Implement
+the per-feature interfaces</h3>
+<p>For each capability declared in step 2, write a class implementing
+the matching <code>core:tracker:api</code> interface. Classes live in
+<code>core/tracker/&lt;trackerId&gt;/src/main/kotlin/lava/tracker/&lt;trackerId&gt;/</code>:</p>
+<ul>
+<li><code>&lt;TrackerId&gt;Search.kt</code> →
+<code>Searchable</code></li>
+<li><code>&lt;TrackerId&gt;Topic.kt</code> → <code>Topic</code></li>
+<li><code>&lt;TrackerId&gt;Download.kt</code> →
+<code>Downloadable</code></li>
+<li><code>&lt;TrackerId&gt;Authenticator.kt</code> →
+<code>Authenticatable</code> (if applicable)</li>
+<li>(etc.)</li>
+</ul>
+<p>Each implementation MUST use OkHttp + Jsoup against the live tracker
+HTML. <strong>No HTTP-mocking inside the production class</strong> — the
+<code>OkHttpClient</code> is constructor-injected so a test can swap in
+<code>MockWebServer</code> (clause 6.E + Seventh Law clause 4: mock at
+the boundary, not inside the SUT).</p>
+<h3 id="step-4--wire-up-the-trackerclient">Step 4 — Wire up the
+<code>TrackerClient</code></h3>
+<p>In
+<code>core/tracker/&lt;trackerId&gt;/src/main/kotlin/lava/tracker/&lt;trackerId&gt;/&lt;TrackerId&gt;Client.kt</code>:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> <span class="op">&lt;</span><span class="dt">TrackerId</span><span class="op">&gt;</span>Client @Inject <span class="kw">constructor</span><span class="op">(</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="kw">val</span> <span class="va">search</span><span class="op">:</span> &lt;<span class="dt">TrackerId</span>&gt;<span class="va">Search</span><span class="op">,</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="kw">val</span> <span class="va">topic</span><span class="op">:</span> &lt;<span class="dt">TrackerId</span>&gt;<span class="va">Topic</span><span class="op">,</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="kw">val</span> <span class="va">download</span><span class="op">:</span> &lt;<span class="dt">TrackerId</span>&gt;<span class="va">Download</span><span class="op">,</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="op">)</span> <span class="op">:</span> <span class="dt">TrackerClient</span> <span class="op">{</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">override</span> <span class="kw">val</span> <span class="va">descriptor</span> <span class="op">=</span> <span class="op">&lt;</span>TrackerId<span class="op">&gt;</span>Descriptor</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    <span class="kw">override</span> <span class="kw">fun</span> <span class="op">&lt;</span><span class="dt">T</span> <span class="op">:</span> <span class="dt">Any</span><span class="op">&gt;</span> <span class="fu">getFeature</span><span class="op">(</span><span class="va">klass</span><span class="op">:</span> <span class="dt">KClass</span>&lt;<span class="va">T</span>&gt;<span class="op">):</span> <span class="dt">T</span><span class="op">?</span> <span class="op">=</span> <span class="cf">when</span> <span class="op">(</span>klass<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>        Searchable<span class="op">::</span><span class="kw">class</span>    -&gt; if <span class="op">(</span><span class="va">TrackerCapability</span>.<span class="va">SEARCH</span>   <span class="kw">in</span> <span class="va">descriptor</span>.<span class="va">capabilities</span><span class="op">)</span> search   <span class="kw">as</span> T else null</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>        Topic<span class="op">:</span>:<span class="kw">class</span>         -&gt; if <span class="op">(</span><span class="va">TrackerCapability</span>.<span class="va">TOPIC</span>    <span class="kw">in</span> <span class="va">descriptor</span>.<span class="va">capabilities</span><span class="op">)</span> topic    <span class="kw">as</span> T else null</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>        Downloadable<span class="op">:</span>:<span class="kw">class</span>  -&gt; if <span class="op">(</span><span class="va">TrackerCapability</span>.<span class="va">DOWNLOAD</span> <span class="kw">in</span> <span class="va">descriptor</span>.<span class="va">capabilities</span><span class="op">)</span> download <span class="kw">as</span> T else null</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>        else -&gt; null</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>The capability check inside <code>getFeature</code> is the runtime
+enforcement of clause 6.E. Drop a capability from the descriptor →
+<code>getFeature</code> returns null → call site MUST handle null (no
+silent stub).</p>
+<h3 id="step-5--register-the-trackerclientfactory">Step 5 — Register the
+<code>TrackerClientFactory</code></h3>
+<p>In
+<code>core/tracker/client/src/main/kotlin/lava/tracker/client/registry/</code>
+add:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="at">@Module</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="at">@InstallIn</span><span class="op">(</span>SingletonComponent<span class="op">::</span><span class="kw">class</span>)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="kw">object</span> <span class="op">&lt;</span><span class="dt">TrackerId</span><span class="op">&gt;</span>RegistrationModule <span class="op">{</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">@Provides</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">@IntoSet</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">fun</span> <span class="fu">provide</span><span class="op">&lt;</span><span class="dt">TrackerId</span><span class="op">&gt;</span><span class="fu">Factory</span><span class="op">(</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>        <span class="va">impl</span><span class="op">:</span> &lt;<span class="dt">TrackerId</span>&gt;<span class="va">Client</span><span class="op">,</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">):</span> <span class="dt">TrackerClientFactory</span> <span class="op">=</span> TrackerClientFactory<span class="op">(</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>        descriptor <span class="op">=</span> <span class="op">&lt;</span>TrackerId<span class="op">&gt;</span>Descriptor<span class="op">,</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>        instantiate <span class="op">=</span> <span class="op">{</span> impl <span class="op">},</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    <span class="op">)</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The <code>@IntoSet</code> multi-binding picks every factory up at app
+start; the registry exposes them by <code>descriptor.id</code>. No
+reflection, no service loader, no manual bootstrapping in
+<code>Application.onCreate</code>.</p>
+<h3 id="step-6--drop-fixtures--write-parser-tests">Step 6 — Drop
+fixtures + write parser tests</h3>
+<p>Save sample HTML pages from the live tracker (one per parser scope)
+at:</p>
+<pre><code>core/tracker/&lt;trackerId&gt;/src/test/resources/fixtures/&lt;trackerId&gt;/
+  search/&lt;query&gt;-&lt;YYYY-MM-DD&gt;.html
+  topic/&lt;topicId&gt;-&lt;YYYY-MM-DD&gt;.html
+  ...</code></pre>
+<p>Fixture filenames MUST embed the date
+(<code>scripts/check-fixture-freshness.sh</code> warns at &gt;30 days,
+blocks at &gt;60 days). Each parser scope MUST have at least 5 fixtures
+spanning real-world variations.</p>
+<p>Write parser tests under <code>src/test/kotlin/</code>:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> <span class="op">&lt;</span><span class="dt">TrackerId</span><span class="op">&gt;</span>SearchParserTest <span class="op">{</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">@Test</span> <span class="kw">fun</span> `<span class="fu">parses</span> <span class="fu">search</span> <span class="fu">results</span> <span class="fu">from</span> 2026-04 <span class="fu">fixture</span>`<span class="op">()</span> <span class="op">{</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>        <span class="kw">val</span> <span class="va">html</span> <span class="op">=</span> readFixture<span class="op">(</span><span class="st">&quot;search/ubuntu-2026-04-15.html&quot;</span><span class="op">)</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>        <span class="kw">val</span> <span class="va">results</span> <span class="op">=</span> <span class="op">&lt;</span>TrackerId<span class="op">&gt;</span>SearchParser<span class="op">.</span>parse<span class="op">(</span>html<span class="op">)</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>        assertEquals<span class="op">(</span><span class="dv">50</span><span class="op">,</span> results<span class="op">.</span>size<span class="op">)</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>        assertEquals<span class="op">(</span><span class="st">&quot;ubuntu-22.04.4-desktop-amd64.iso&quot;</span><span class="op">,</span> results<span class="op">[</span><span class="dv">0</span><span class="op">].</span>title<span class="op">)</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>        assertTrue<span class="op">(</span>results<span class="op">[</span><span class="dv">0</span><span class="op">].</span>sizeBytes <span class="op">&gt;</span> <span class="dv">0</span><span class="op">)</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>        assertTrue<span class="op">(</span>results<span class="op">[</span><span class="dv">0</span><span class="op">].</span>seeders <span class="op">&gt;=</span> <span class="dv">0</span><span class="op">)</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Every test commit MUST carry a <code>Bluff-Audit:</code> stamp in the
+commit body (Seventh Law clause 1, mechanical pre-push hook
+enforcement).</p>
+<h3 id="step-7--add-a-challenge-test-in-app">Step 7 — Add a Challenge
+Test in <code>:app</code></h3>
+<p>In <code>app/src/androidTest/kotlin/lava/app/challenges/</code>, add
+a Compose UI test that exercises the full stack against your new
+tracker. Mirror the shape of
+<code>C1_AppLaunchAndTrackerSelectionTest.kt</code> (added in SP-3a
+Phase 5). The Challenge Test:</p>
+<ol type="1">
+<li>Drives <code>MainActivity</code> to the search screen.</li>
+<li>Switches the active tracker to your new tracker via Settings →
+Trackers.</li>
+<li>Performs a real search.</li>
+<li>Asserts ≥1 result row renders with parseable size + seeders
+text.</li>
+</ol>
+<p>Falsifiability rehearsal: temporarily mutate the tracker's
+<code>getFeature</code> to return null for <code>Searchable</code> →
+re-run → confirm the UI shows the "not supported" path → revert. Capture
+the rehearsal in
+<code>.lava-ci-evidence/sp3a-challenges/&lt;TestName&gt;-&lt;sha&gt;.json</code>
+per Sixth Law clause 2.</p>
+<hr />
+<h2 id="3-mirror-configuration">3. Mirror Configuration</h2>
+<p>Mirror sources, in priority order:</p>
+<ol type="1">
+<li><strong>Bundled defaults</strong> —
+<code>core/tracker/client/src/main/assets/mirrors.json</code>, merged at
+app start by <code>MirrorConfigLoader</code>.</li>
+<li><strong>User-added custom mirrors</strong> — persisted in Room
+(<code>tracker_mirror_user</code> table), exposed by
+<code>UserMirrorRepository</code>.</li>
+<li><strong>Health-tracked active subset</strong> —
+<code>MirrorHealthRepository</code> writes
+<code>tracker_mirror_health</code> rows on every probe; the
+<code>MirrorHealthCheckWorker</code> runs every 15 minutes and writes
+<code>HEALTHY</code> / <code>DEGRADED</code> / <code>UNHEALTHY</code>
+states.</li>
+</ol>
+<p>When all mirrors of the active tracker hit <code>UNHEALTHY</code>,
+<code>LavaTrackerSdk</code> emits a
+<code>CrossTrackerFallbackProposed</code> outcome. The UI shows
+<code>CrossTrackerFallbackModal</code>; user accept → re-issues the call
+on the alternative tracker; user dismiss → explicit failure UI
+(snackbar). No silent fallback.</p>
+<p>To add a tracker's default mirrors, edit
+<code>mirrors.json</code>:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;&lt;trackerId&gt;&quot;</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">{</span> <span class="dt">&quot;host&quot;</span><span class="fu">:</span> <span class="st">&quot;&lt;primary&gt;&quot;</span><span class="fu">,</span> <span class="dt">&quot;priority&quot;</span><span class="fu">:</span> <span class="dv">100</span> <span class="fu">}</span><span class="ot">,</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">{</span> <span class="dt">&quot;host&quot;</span><span class="fu">:</span> <span class="st">&quot;&lt;secondary&gt;&quot;</span><span class="fu">,</span> <span class="dt">&quot;priority&quot;</span><span class="fu">:</span> <span class="dv">50</span> <span class="fu">}</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>  <span class="ot">]</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<p><code>MirrorConfigLoader</code> validates this on app start; an entry
+without a matching <code>TrackerDescriptor</code> is logged as a config
+error and ignored.</p>
+<hr />
+<h2 id="4-testing-requirements">4. Testing Requirements</h2>
+<p>Every tracker module MUST satisfy:</p>
+<table>
+<thead>
+<tr>
+<th>Requirement</th>
+<th>Mechanism</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Real-stack parser tests</td>
+<td>Fixtures under <code>src/test/resources/fixtures/&lt;id&gt;/</code>,
+one test per parser scope, ≥5 fixtures each. Pre-push hook rejects new
+test commits without a <code>Bluff-Audit:</code> stamp.</td>
+</tr>
+<tr>
+<td>Capability honesty</td>
+<td>Constitutional clause 6.E: every capability declared in the
+descriptor MUST resolve to a non-null
+<code>getFeature&lt;T&gt;()</code>. The
+<code>:core:tracker:registry</code> test enumerates descriptors +
+capabilities and asserts non-null.</td>
+</tr>
+<tr>
+<td>Cross-tracker parity</td>
+<td>Where two trackers expose the same capability (e.g. both have
+<code>SEARCH</code>), at least one shared-shape test asserts the
+result-set DTO is identical (modulo tracker id).</td>
+</tr>
+<tr>
+<td>Real-tracker integration test</td>
+<td>Gated by <code>-PrealTrackers=true</code>. Hits the live tracker.
+Run before tagging; results recorded in
+<code>.lava-ci-evidence/sp3a-rutor/</code> (or equivalent for new
+trackers).</td>
+</tr>
+<tr>
+<td>Real-device Challenge Test</td>
+<td>One Compose UI test per user-visible scenario in
+<code>app/src/androidTest/kotlin/lava/app/challenges/</code>.
+Falsifiability rehearsal captured in
+<code>.lava-ci-evidence/sp3a-challenges/</code>. Operator real-device
+attestation required before the next release tag.</td>
+</tr>
+</tbody>
+</table>
+<p>Coverage exemptions for individual lines go in
+<code>docs/superpowers/specs/&lt;spec&gt;-coverage-exemptions.md</code>
+per clause 6.D. Blanket waivers are forbidden.</p>
+<hr />
+<h2 id="5-reference-existing-trackers">5. Reference: existing
+trackers</h2>
+<table>
+<thead>
+<tr>
+<th>Tracker</th>
+<th>Module</th>
+<th>Capabilities</th>
+<th>Auth</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>RuTracker</td>
+<td><code>:core:tracker:rutracker</code></td>
+<td>SEARCH + BROWSE + TOPIC + COMMENTS + FAVORITES + AUTH +
+DOWNLOAD</td>
+<td>Required (login)</td>
+</tr>
+<tr>
+<td>RuTor</td>
+<td><code>:core:tracker:rutor</code></td>
+<td>SEARCH + TOPIC + DOWNLOAD</td>
+<td>Anonymous (decision 7b-ii)</td>
+</tr>
+</tbody>
+</table>
+<p>When adding the third tracker, follow this guide; if any step doesn't
+match the existing modules, that is the first thing to clarify in the PR
+description.</p>
+<hr />
+<h2 id="5-real-stack-testing-requirements-seventh-law-clauses">5.
+Real-Stack Testing Requirements (Seventh Law clauses)</h2>
+<p>The Sixth Law mandates real-user verification; the Seventh Law (added
+2026-04-30) mandates the <strong>mechanical</strong> way that
+verification is enforced for tracker plugins. A new tracker MUST satisfy
+each of the seven clauses below before the next release tag.</p>
+<h3 id="51--bluff-audit-stamp-on-every-test-commit-clause-1">5.1 —
+Bluff-Audit stamp on every test commit (clause 1)</h3>
+<p>Every commit whose diff touches a <code>*Test.kt</code> file MUST
+carry a <code>Bluff-Audit:</code> block in the commit message body. The
+pre-push hook at <code>.githooks/pre-push</code> rejects pushes without
+it. The required shape:</p>
+<pre><code>Bluff-Audit:
+  Test:      lava.tracker.&lt;id&gt;.feature.&lt;TestClassName&gt;
+  Mutation:  &lt;one sentence describing the deliberate production-code break&gt;
+  Observed:  &lt;verbatim assertion message produced by the mutated test run&gt;
+  Reverted:  &lt;commit SHA or &quot;yes (worktree)&quot; confirming the mutation was undone&gt;</code></pre>
+<p>A stamp that says "Mutation: none / Observed: nothing / Reverted:
+nothing" is an explicit Seventh Law violation and blocks the push.</p>
+<h3 id="52--real-stack-verification-gate-clause-2">5.2 — Real-stack
+verification gate (clause 2)</h3>
+<p>Each user-visible tracker capability MUST have a real-stack test:</p>
+<table>
+<thead>
+<tr>
+<th>Capability surface</th>
+<th>Real-stack gate</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Tracker network parsing</td>
+<td>Live HTTP fixture run via
+<code>./gradlew :core:tracker:&lt;id&gt;:integrationTest -PrealTrackers=true</code></td>
+</tr>
+<tr>
+<td>Mirror health probe</td>
+<td>Live mirror HEAD via the same <code>-PrealTrackers=true</code>
+flag</td>
+</tr>
+<tr>
+<td>Cross-tracker fallback UX</td>
+<td><code>:app:connectedDebugAndroidTest --tests "lava.app.challenges.Challenge0[78]*"</code>
+on a real device</td>
+</tr>
+</tbody>
+</table>
+<p>If a capability cannot be real-stack-tested, it is documented as "not
+user-reachable" in the coverage exemption ledger and flagged as a
+deferred gap in the PR description — never silently shipped.</p>
+<h3 id="53--pre-tag-real-device-attestation-clause-3">5.3 — Pre-tag
+real-device attestation (clause 3)</h3>
+<p>Every release tag carrying tracker code MUST be preceded by:</p>
+<p><code>.lava-ci-evidence/Lava-Android-&lt;vname&gt;-&lt;vcode&gt;/real-device-verification.md</code></p>
+<p>with <code>status: VERIFIED</code> plus, for each Challenge Test
+C1–C8 that exercises the new tracker, a per-test attestation file under
+<code>.lava-ci-evidence/Lava-Android-&lt;vname&gt;-&lt;vcode&gt;/challenges/C&lt;n&gt;.json</code>
+also at <code>status: VERIFIED</code>. <code>scripts/tag.sh</code>
+refuses to tag without all of these in place.</p>
+<h3 id="54--forbidden-test-patterns-clause-4">5.4 — Forbidden test
+patterns (clause 4)</h3>
+<p>The pre-push hook rejects:</p>
+<ul>
+<li><code>mockk&lt;XxxClass&gt;(...)</code> inside
+<code>XxxClassTest.kt</code> (mocking the SUT).</li>
+<li>Tests whose primary assertion is
+<code>verify { mock.foo() }</code>.</li>
+<li><code>@Ignore</code>'d tests without a tracking issue ID in a
+comment.</li>
+<li>Tests that build the SUT but never invoke its public methods.</li>
+<li>Acceptance gates whose assertion is <code>BUILD SUCCESSFUL</code>
+(literal or paraphrased).</li>
+</ul>
+<p>If your test seems to require one of these, refactor the SUT for
+testability — the test is telling you the design is wrong.</p>
+<h3 id="55--recurring-bluff-hunt-clause-5">5.5 — Recurring bluff hunt
+(clause 5)</h3>
+<p>Every 2–4 weeks of active work, an end-of-phase bluff hunt picks 5
+random <code>*Test.kt</code> files, deliberately mutates the production
+code each test claims to cover, and confirms the test fails. Output is
+appended to <code>.lava-ci-evidence/bluff-hunt/&lt;date&gt;.json</code>.
+New tracker modules become eligible for the random sample on first
+commit; expect their parser tests to be hunted by the third or fourth
+phase wrap.</p>
+<h3 id="56--bluff-discovery-protocol-clause-6">5.6 — Bluff discovery
+protocol (clause 6)</h3>
+<p>If a real user files a bug whose tests were green: declare a Seventh
+Law incident, write a regression test that fails before the fix, record
+the bluff diagnosis under
+<code>.lava-ci-evidence/sixth-law-incidents/&lt;date&gt;.json</code>,
+and add the bluff pattern to the forbidden-pattern list at the top of
+this section.</p>
+<h3 id="57--inheritance-clause-7">5.7 — Inheritance (clause 7)</h3>
+<p>This section MUST be linked or copied verbatim into every per-tracker
+module's <code>README.md</code> (and into any future
+<code>vasic-digital</code> extension submodule). Forking a non-compliant
+external tracker plugin is forbidden — re-implement under
+<code>vasic-digital/</code> instead.</p>
+<blockquote>
+<p>See also: root <code>CLAUDE.md</code> Seventh Law (canonical text),
+root <code>AGENTS.md</code> Seventh Law mirror,
+<code>core/CLAUDE.md</code> scoped clause for per-tracker modules.</p>
+</blockquote>
+<hr />
+<h2 id="6-falsifiability-rehearsal-protocol-worked-example">6.
+Falsifiability Rehearsal Protocol (worked example)</h2>
+<p>The mechanical Bluff-Audit stamp (§5.1) requires a
+<code>Mutation</code> line. The mutation MUST be <strong>a real edit to
+the production code that the test claims to cover</strong>, not a tweak
+to the test itself. The pattern:</p>
+<ol type="1">
+<li><strong>Identify the load-bearing assertion.</strong> Read the test,
+identify the one assertion that, if it fails, means a real user is
+broken.</li>
+<li><strong>Locate the production code that must be correct for that
+assertion to pass.</strong> Resist the urge to mutate the test fixture —
+you are auditing the production code, not the test scaffold.</li>
+<li><strong>Apply a minimal mutation.</strong> Single-character,
+single-branch, single-method-rename. Smaller is better; the goal is "did
+this test actually exercise that line?"</li>
+<li><strong>Run the test once with the mutation in place.</strong>
+Capture the verbatim assertion failure message, including the values it
+reported.</li>
+<li><strong>Revert the mutation.</strong> Run again, confirm pass.</li>
+<li><strong>Record the four lines</strong> in the commit body
+Bluff-Audit stamp.</li>
+</ol>
+<h3 id="worked-example--rutorsearchparsertest">Worked example —
+<code>RuTorSearchParserTest</code></h3>
+<p>The test in
+<code>core/tracker/rutor/src/test/kotlin/lava/tracker/rutor/feature/RuTorSearchTest.kt</code>
+asserts that the parser extracts a non-empty result list with at least
+one row whose <code>seeders &gt;= 0</code> from the bundled fixture
+<code>fixtures/rutor/search/ubuntu-2026-04-15.html</code>.</p>
+<p><strong>Mutation candidate (good):</strong> in
+<code>core/tracker/rutor/src/main/kotlin/lava/tracker/rutor/parser/SearchParser.kt</code>,
+change <code>select("td.s")</code> (the seeders column selector) to
+<code>select("td.q")</code> (a non-existent class). Re-run the test —
+the production code now extracts no rows; the test fails with
+<code>expected: &lt;non-empty list&gt; but was: &lt;[]&gt;</code> (or
+whatever shape the production class returns on parser failure). Revert.
+Re-run. Pass.</p>
+<p><strong>Mutation candidate (bad — DO NOT USE):</strong> changing the
+fixture HTML to remove all <code>&lt;tr&gt;</code> rows. The mutation is
+on the <em>test fixture</em>, not the <em>production code</em>; this
+proves only that the parser handles empty input, not that it correctly
+handles real input.</p>
+<p><strong>Mutation candidate (bad — DO NOT USE):</strong> changing the
+test assertion from <code>assertTrue(results.isNotEmpty())</code> to
+<code>assertFalse(results.isNotEmpty())</code>. This is a tautological
+mutation of the test itself; it proves nothing.</p>
+<h3 id="what-the-bluff-audit-stamp-looks-like">What the Bluff-Audit
+stamp looks like</h3>
+<pre><code>sp3a-3.7-rutor-search: real-stack parser test on ubuntu-2026-04-15.html
+
+Adds RuTorSearchParserTest, exercising the production SearchParser
+against a saved live response.
+
+Bluff-Audit:
+  Test:      lava.tracker.rutor.feature.RuTorSearchTest.parses_search_results_from_2026-04_fixture
+  Mutation:  Renamed `select(&quot;td.s&quot;)` to `select(&quot;td.q&quot;)` in SearchParser.kt
+             so the seeders column resolves to an empty NodeSet.
+  Observed:  expected: &lt;non-empty list&gt; but was: &lt;[]&gt; at line 42 of RuTorSearchTest.kt
+  Reverted:  yes (commit 8a32e1b shows the un-mutated source); re-running
+             the test after revert produces 50 rows with seeders &gt;= 0.
+
+Co-Authored-By: ...</code></pre>
+<h3 id="when-the-rehearsal-is-impractical">When the rehearsal is
+impractical</h3>
+<p>If the mutation rehearsal cannot be completed for legitimate reasons
+(e.g. the test runs in an environment the agent cannot access on a real
+device), record <code>Reverted: pending operator</code> and add an
+operator-checklist entry to
+<code>.lava-ci-evidence/Lava-Android-&lt;v&gt;/real-device-verification.md</code>.
+The tag gate then refuses to operate until the operator completes the
+rehearsal and updates the stamp by amendment-on-merge.</p>
+<hr />
+<h2 id="7-mirror-configuration-spec-mirrorsjson">7. Mirror Configuration
+Spec (<code>mirrors.json</code>)</h2>
+<p><code>core/tracker/client/src/main/assets/mirrors.json</code> is the
+bundled default-mirror set merged at app start by
+<code>MirrorConfigLoader</code>. It is the <strong>only</strong> way to
+ship a default mirror with the app — runtime additions live in the
+<code>tracker_mirror_user</code> Room table and never touch this
+file.</p>
+<h3 id="json-schema">JSON schema</h3>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;$schema&quot;</span><span class="fu">:</span> <span class="st">&quot;https://json-schema.org/draft/2020-12/schema&quot;</span><span class="fu">,</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;object&quot;</span><span class="fu">,</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;additionalProperties&quot;</span><span class="fu">:</span> <span class="kw">false</span><span class="fu">,</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;required&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;version&quot;</span><span class="ot">,</span> <span class="st">&quot;trackers&quot;</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;properties&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;version&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;integer&quot;</span><span class="fu">,</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;minimum&quot;</span><span class="fu">:</span> <span class="dv">1</span><span class="fu">,</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;description&quot;</span><span class="fu">:</span> <span class="st">&quot;Bumped when a breaking shape change lands; MirrorConfigLoader rejects unknown versions.&quot;</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">},</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;generatedAt&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;string&quot;</span><span class="fu">,</span></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;format&quot;</span><span class="fu">:</span> <span class="st">&quot;date-time&quot;</span><span class="fu">,</span></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;description&quot;</span><span class="fu">:</span> <span class="st">&quot;ISO-8601 timestamp the file was last regenerated.&quot;</span></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">},</span></span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;trackers&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;object&quot;</span><span class="fu">,</span></span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;patternProperties&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;^[a-z][a-z0-9_]{1,31}$&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>          <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;array&quot;</span><span class="fu">,</span></span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>          <span class="dt">&quot;minItems&quot;</span><span class="fu">:</span> <span class="dv">1</span><span class="fu">,</span></span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>          <span class="dt">&quot;items&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a>            <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;object&quot;</span><span class="fu">,</span></span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a>            <span class="dt">&quot;additionalProperties&quot;</span><span class="fu">:</span> <span class="kw">false</span><span class="fu">,</span></span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a>            <span class="dt">&quot;required&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;url&quot;</span><span class="ot">,</span> <span class="st">&quot;priority&quot;</span><span class="ot">,</span> <span class="st">&quot;protocol&quot;</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a>            <span class="dt">&quot;properties&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a>              <span class="dt">&quot;url&quot;</span><span class="fu">:</span>      <span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;string&quot;</span><span class="fu">,</span> <span class="dt">&quot;format&quot;</span><span class="fu">:</span> <span class="st">&quot;uri&quot;</span> <span class="fu">},</span></span>
+<span id="cb13-29"><a href="#cb13-29" aria-hidden="true" tabindex="-1"></a>              <span class="dt">&quot;priority&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;integer&quot;</span><span class="fu">,</span> <span class="dt">&quot;minimum&quot;</span><span class="fu">:</span> <span class="dv">0</span><span class="fu">,</span> <span class="dt">&quot;maximum&quot;</span><span class="fu">:</span> <span class="dv">1000</span> <span class="fu">},</span></span>
+<span id="cb13-30"><a href="#cb13-30" aria-hidden="true" tabindex="-1"></a>              <span class="dt">&quot;protocol&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;string&quot;</span><span class="fu">,</span> <span class="dt">&quot;enum&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;HTTPS&quot;</span><span class="ot">,</span> <span class="st">&quot;HTTP&quot;</span><span class="ot">]</span> <span class="fu">},</span></span>
+<span id="cb13-31"><a href="#cb13-31" aria-hidden="true" tabindex="-1"></a>              <span class="dt">&quot;isPrimary&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;boolean&quot;</span><span class="fu">,</span> <span class="dt">&quot;default&quot;</span><span class="fu">:</span> <span class="kw">false</span> <span class="fu">},</span></span>
+<span id="cb13-32"><a href="#cb13-32" aria-hidden="true" tabindex="-1"></a>              <span class="dt">&quot;region&quot;</span><span class="fu">:</span>    <span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;string&quot;</span><span class="fu">,</span> <span class="dt">&quot;description&quot;</span><span class="fu">:</span> <span class="st">&quot;Free-form region tag, e.g. &#39;eu&#39;, &#39;ipv6-only&#39;.&quot;</span> <span class="fu">}</span></span>
+<span id="cb13-33"><a href="#cb13-33" aria-hidden="true" tabindex="-1"></a>            <span class="fu">}</span></span>
+<span id="cb13-34"><a href="#cb13-34" aria-hidden="true" tabindex="-1"></a>          <span class="fu">}</span></span>
+<span id="cb13-35"><a href="#cb13-35" aria-hidden="true" tabindex="-1"></a>        <span class="fu">}</span></span>
+<span id="cb13-36"><a href="#cb13-36" aria-hidden="true" tabindex="-1"></a>      <span class="fu">},</span></span>
+<span id="cb13-37"><a href="#cb13-37" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;additionalProperties&quot;</span><span class="fu">:</span> <span class="kw">false</span></span>
+<span id="cb13-38"><a href="#cb13-38" aria-hidden="true" tabindex="-1"></a>    <span class="fu">}</span></span>
+<span id="cb13-39"><a href="#cb13-39" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb13-40"><a href="#cb13-40" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<h3 id="worked-example">Worked example</h3>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;version&quot;</span><span class="fu">:</span> <span class="dv">1</span><span class="fu">,</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;generatedAt&quot;</span><span class="fu">:</span> <span class="st">&quot;2026-04-30T19:20:00Z&quot;</span><span class="fu">,</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;trackers&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;rutracker&quot;</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>      <span class="fu">{</span> <span class="dt">&quot;url&quot;</span><span class="fu">:</span> <span class="st">&quot;https://rutracker.org&quot;</span><span class="fu">,</span> <span class="dt">&quot;isPrimary&quot;</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span> <span class="dt">&quot;priority&quot;</span><span class="fu">:</span> <span class="dv">0</span><span class="fu">,</span>  <span class="dt">&quot;protocol&quot;</span><span class="fu">:</span> <span class="st">&quot;HTTPS&quot;</span> <span class="fu">}</span><span class="ot">,</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>      <span class="fu">{</span> <span class="dt">&quot;url&quot;</span><span class="fu">:</span> <span class="st">&quot;https://rutracker.net&quot;</span><span class="fu">,</span> <span class="dt">&quot;priority&quot;</span><span class="fu">:</span> <span class="dv">1</span><span class="fu">,</span>  <span class="dt">&quot;protocol&quot;</span><span class="fu">:</span> <span class="st">&quot;HTTPS&quot;</span> <span class="fu">}</span><span class="ot">,</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>      <span class="fu">{</span> <span class="dt">&quot;url&quot;</span><span class="fu">:</span> <span class="st">&quot;https://rutracker.cr&quot;</span><span class="fu">,</span>  <span class="dt">&quot;priority&quot;</span><span class="fu">:</span> <span class="dv">2</span><span class="fu">,</span>  <span class="dt">&quot;protocol&quot;</span><span class="fu">:</span> <span class="st">&quot;HTTPS&quot;</span> <span class="fu">}</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>    <span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;rutor&quot;</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>      <span class="fu">{</span> <span class="dt">&quot;url&quot;</span><span class="fu">:</span> <span class="st">&quot;https://rutor.info&quot;</span><span class="fu">,</span> <span class="dt">&quot;isPrimary&quot;</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span> <span class="dt">&quot;priority&quot;</span><span class="fu">:</span> <span class="dv">0</span><span class="fu">,</span> <span class="dt">&quot;protocol&quot;</span><span class="fu">:</span> <span class="st">&quot;HTTPS&quot;</span> <span class="fu">}</span><span class="ot">,</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>      <span class="fu">{</span> <span class="dt">&quot;url&quot;</span><span class="fu">:</span> <span class="st">&quot;https://rutor.is&quot;</span><span class="fu">,</span>   <span class="dt">&quot;priority&quot;</span><span class="fu">:</span> <span class="dv">1</span><span class="fu">,</span> <span class="dt">&quot;protocol&quot;</span><span class="fu">:</span> <span class="st">&quot;HTTPS&quot;</span> <span class="fu">}</span><span class="ot">,</span></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>      <span class="fu">{</span> <span class="dt">&quot;url&quot;</span><span class="fu">:</span> <span class="st">&quot;http://6tor.org&quot;</span><span class="fu">,</span>    <span class="dt">&quot;priority&quot;</span><span class="fu">:</span> <span class="dv">4</span><span class="fu">,</span> <span class="dt">&quot;protocol&quot;</span><span class="fu">:</span> <span class="st">&quot;HTTP&quot;</span><span class="fu">,</span> <span class="dt">&quot;region&quot;</span><span class="fu">:</span> <span class="st">&quot;ipv6-only&quot;</span> <span class="fu">}</span></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>    <span class="ot">]</span></span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<h3
+id="validation-rules-enforced-by-mirrorconfigloader-at-runtime">Validation
+rules (enforced by <code>MirrorConfigLoader</code> at runtime)</h3>
+<ol type="1">
+<li><strong>Tracker key MUST match a registered
+<code>TrackerDescriptor.trackerId</code>.</strong> An entry whose key
+has no descriptor is logged as a config error and ignored — it is never
+silently downgraded to a fallback default.</li>
+<li><strong><code>isPrimary: true</code> MUST appear at most once per
+tracker.</strong> Two primaries triggers a config error and the loader
+keeps the first-encountered one.</li>
+<li><strong><code>priority</code> is unique-by-convention</strong>
+(lower wins). Duplicates are accepted but the order between
+equally-prioritised mirrors is undefined.</li>
+<li><strong><code>protocol</code> MUST match <code>url</code>
+scheme.</strong> A <code>protocol: HTTPS</code> entry with an
+<code>http://</code> URL is rejected.</li>
+<li><strong><code>region</code> is purely informational.</strong> It is
+not used for routing logic in 1.2.0; reserved for future region-aware
+health probes.</li>
+</ol>
+<h3 id="when-you-regenerate-mirrorsjson">When you regenerate
+<code>mirrors.json</code></h3>
+<ul>
+<li>Bump <code>generatedAt</code>. (<code>version</code> is bumped only
+when the schema itself changes.)</li>
+<li>Run <code>./gradlew :core:tracker:client:test</code> — the loader
+has parser tests that catch shape regressions.</li>
+<li>Add a Bluff-Audit stamp to the commit per §5.1 — even a JSON file
+edit that adjusts default mirrors is a behavior change worthy of
+rehearsal (e.g. mutate one URL to a non-resolving host, run the
+health-probe test, observe the UNHEALTHY emit, revert).</li>
+</ul>
+<h3 id="forbidden-in-mirrorsjson">Forbidden in
+<code>mirrors.json</code></h3>
+<ul>
+<li>Credentials, tokens, captcha cookies — these are user-scoped and
+belong in encrypted preferences, never in a bundled asset.</li>
+<li>LAN-only addresses (<code>192.168.*</code>, <code>10.*</code>,
+<code>.local</code>) — those are discovery-time concerns owned by
+<code>LocalNetworkDiscoveryService</code> in
+<code>:core:data</code>.</li>
+<li>Onion / I2P / proxy hostnames — out of scope for 1.2.0.</li>
+</ul>
+<hr />
+<p><em>Last updated: 2026-05-01 (SP-3a Lava-Android-1.2.0-1020 docs
+polish).</em></p>
+</body>
+</html>

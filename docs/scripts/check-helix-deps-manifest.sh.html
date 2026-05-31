@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>check-helix-deps-manifest.sh</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1
+id="scriptscheck-helix-deps-manifestsh--user-guide"><code>scripts/check-helix-deps-manifest.sh</code>
+— User Guide</h1>
+<p><strong>Last verified:</strong> 2026-05-15 (constitution-compliance
+plan Phase 3) <strong>Inheritance:</strong> HelixConstitution §11.4.31
+(Submodule-Dependency-Manifest Mandate) + §11.4.18 (script docs)</p>
+<h2 id="overview">Overview</h2>
+<p>Verifies that the parent project root + every owned-by-us submodule
+ships a <code>helix-deps.yaml</code> (or <code>.json</code> /
+<code>.toml</code> variant — single canonical file per submodule)
+declaring its inter-submodule dependencies per HelixConstitution
+§11.4.31.</p>
+<p>The manifest is what an incorporator script reads to bootstrap a
+fresh project's submodule graph from scratch — eliminating the
+§11.4.28-forbidden nested own-org submodule chains by making each
+dependency declaratively flat-layoutable.</p>
+<h2 id="manifest-schema-per-11431">Manifest schema (per §11.4.31)</h2>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">schema_version</span><span class="kw">:</span><span class="at"> </span><span class="dv">1</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">deps</span><span class="kw">:</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> &lt;CanonicalName&gt;</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">ssh_url</span><span class="kw">:</span><span class="at"> git@github.com:&lt;org&gt;/&lt;name&gt;.git</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">ref</span><span class="kw">:</span><span class="at"> main</span><span class="co">          # branch or pinned tag</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">why</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;&lt;human-readable rationale&gt;&quot;</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">layout</span><span class="kw">:</span><span class="at"> flat</span><span class="co">       # &#39;flat&#39; = &lt;root&gt;/&lt;name&gt;/; &#39;grouped&#39; = &lt;root&gt;/submodules/&lt;name&gt;/</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="fu">transitive_handling</span><span class="kw">:</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">recursive</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">conflict_resolution</span><span class="kw">:</span><span class="at"> operator-required</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="fu">language_specific_subtree</span><span class="kw">:</span><span class="at"> </span><span class="ch">false</span><span class="co">   # true = inner subtree exempt from §11.4.29 snake_case</span></span></code></pre></div>
+<h2 id="validation-passes-per-manifest">Validation passes per
+manifest</h2>
+<ol type="1">
+<li>File exists at canonical path (<code>helix-deps.yaml</code>
+preferred; <code>.json</code> / <code>.toml</code> accepted)</li>
+<li><code>schema_version: 1</code> declared</li>
+<li><code>deps:</code> top-level array present</li>
+<li><code>transitive_handling:</code> block present</li>
+</ol>
+<p>(Deeper schema validation — per-dep
+<code>name</code>/<code>ssh_url</code>/<code>ref</code>/<code>why</code>/<code>layout</code>
+field-level checks — is owed to a follow-up enhancement; current scanner
+uses a structural grep-based fallback that catches the most common drift
+class without requiring <code>yq</code> / <code>python-yaml</code>
+toolchain.)</p>
+<h2 id="modes">Modes</h2>
+<table>
+<thead>
+<tr>
+<th>Flag</th>
+<th>Behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--strict</code> (default)</td>
+<td>Exit 1 on any violation</td>
+</tr>
+<tr>
+<td><code>--advisory</code></td>
+<td>Exit 0 even on violation</td>
+</tr>
+<tr>
+<td><code>LAVA_HELIX_DEPS_STRICT=0</code> env</td>
+<td>Same as --advisory</td>
+</tr>
+</tbody>
+</table>
+<h2 id="usage">Usage</h2>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> scripts/check-helix-deps-manifest.sh                <span class="co"># strict (default)</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> scripts/check-helix-deps-manifest.sh <span class="at">--advisory</span>     <span class="co"># exit 0 even on violation</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="va">LAVA_HELIX_DEPS_STRICT</span><span class="op">=</span>0 <span class="fu">bash</span> scripts/check-helix-deps-manifest.sh   <span class="co"># env-driven</span></span></code></pre></div>
+<h2 id="hermetic-test">Hermetic test</h2>
+<p><code>tests/check-constitution/test_helix_deps_manifest.sh</code> — 6
+fixtures:</p>
+<ol type="1">
+<li><code>test_compliant_fixture_passes</code> — parent + per-submodule
+manifests both present + well-formed</li>
+<li><code>test_missing_parent_manifest_rejected</code> — repo root lacks
+helix-deps.yaml</li>
+<li><code>test_missing_submodule_manifest_rejected</code> — owned
+submodule lacks helix-deps.yaml</li>
+<li><code>test_wrong_schema_version_rejected</code> — schema_version:
+999 (must be 1)</li>
+<li><code>test_advisory_mode_returns_zero</code> — advisory swallows
+exit code</li>
+<li><code>test_json_variant_accepted</code> — discrimination test:
+helix-deps.json is recognized as a valid alternative extension</li>
+</ol>
+<h2 id="known-violations-2026-05-15-audit">Known violations (2026-05-15
+audit)</h2>
+<p>Parent manifest: ✅ <code>helix-deps.yaml</code> (well-formed,
+declares 17 deps: 16 vasic-digital submodules + constitution).</p>
+<p>Per-submodule manifests: 16 of 16 owned submodules MISSING
+helix-deps.yaml.</p>
+<table>
+<thead>
+<tr>
+<th>Submodule</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Auth, Cache, Challenges, Concurrency, Config, Containers, Database,
+Discovery, HTTP3, Mdns, Middleware, Observability, RateLimiter,
+Recovery, Security, Tracker-SDK</td>
+<td>✗ MISSING — owed in per-submodule follow-up commits</td>
+</tr>
+</tbody>
+</table>
+<p>Resolution path: per-submodule cycle (write helix-deps.yaml → commit
+to submodule → push to GitHub + GitLab per §6.W → bump pin in parent
+Lava). The parent commit can batch the 16 pin bumps once each submodule
+has its own manifest. Then sweep wrapper flips from advisory →
+strict.</p>
+<h2 id="cross-references">Cross-references</h2>
+<ul>
+<li>HelixConstitution <code>Constitution.md</code> §11.4.31 (the
+mandate)</li>
+<li><code>docs/plans/2026-05-15-constitution-compliance.md</code> Phase
+3</li>
+<li><code>docs/helix-constitution-gates.md</code>
+<code>CM-HELIX-DEPS-MANIFEST</code> row</li>
+<li><code>scripts/verify-all-constitution-rules.sh</code> (wraps this
+scanner per §11.4.32)</li>
+<li>Lava parent's reference manifest: <code>helix-deps.yaml</code>
+(declares all 16 submodule deps + constitution)</li>
+</ul>
+<h2 id="2026-05-15-update--helixqa-waiver">2026-05-15 update — HelixQA
+waiver</h2>
+<p>Phase 4 of the constitution-compliance plan adopted
+<code>submodules/helixqa</code> (HelixDevelopment-owned QA orchestration
+framework) at upstream HEAD <code>403603db</code>. HelixQA's CLAUDE.md /
+AGENTS.md / CONSTITUTION.md follow the canonical-root
+<code>## INHERITED FROM Helix Constitution</code> pointer pattern
+(HelixDevelopment-authored) rather than Lava's heading-anchored §6.R /
+§6.S / §6.X / §6.AD pointer-block format. HelixQA also lacks
+<code>helix-deps.yaml</code> + <code>install_upstreams.sh</code> wrapper
+script.</p>
+<p>Resolution: <code>HELIX_DEV_OWNED=("HelixQA")</code> waiver list +
+<code>is_helix_dev_owned()</code> helper skip HelixQA in every
+per-Submodule loop in this scanner. Waiver entries cite Phase 4-debt: PR
+to <code>HelixDevelopment/HelixQA</code> upstream owed to add the
+missing files. Once upstream merges + Lava's pin advances to include
+them, HelixQA can be removed from the waiver list.</p>
+<h2 id="2026-05-16-update--helixqa-waiver-resolved">2026-05-16 update —
+HelixQA waiver RESOLVED</h2>
+<p>The Phase 4-debt PR to <code>HelixDevelopment/HelixQA</code> upstream
+landed as commit <code>b13ba7c</code>
+(<code>feat(gov): add helix-deps.yaml + install_upstreams.sh wrapper</code>),
+adding both missing files at HelixQA's repo root. Lava's pin advanced to
+<code>b13ba7c</code> in the same parent commit that removed HelixQA from
+<code>HELIX_DEPS_WAIVERS</code>. The waiver list is now empty — the
+per-Submodule loop in this scanner treats HelixQA on equal terms with
+the other 16 owned submodules; all 17 must ship a parseable
+<code>helix-deps.yaml</code> at the submodule root or the scanner
+reports a violation. The <code>HELIX_DEPS_WAIVERS=()</code> empty array
+is intentionally retained as a forensic anchor.</p>
+</body>
+</html>

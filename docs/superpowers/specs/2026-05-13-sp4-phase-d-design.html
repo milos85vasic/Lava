@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-05-13-sp4-phase-d-design</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1
+id="sp-4-phase-d--multi-provider-parallel-search-sdk-detailed-design">SP-4
+Phase D — Multi-Provider Parallel Search SDK (detailed design)</h1>
+<p><strong>Spec date:</strong> 2026-05-13 <strong>Parent SP:</strong>
+<code>docs/superpowers/specs/2026-05-12-sp4-multi-provider-redesign.md</code>
+<strong>Prerequisite:</strong> Phases A + B + C complete (HEAD
+<code>6db79c50</code>). <strong>Status:</strong> detailed-design locked.
+Implementation plan in
+<code>docs/superpowers/plans/2026-05-13-sp4-phase-d-implementation.md</code>.</p>
+<h2 id="goal-from-parent-sp-4-design">Goal (from parent SP-4
+design)</h2>
+<blockquote>
+<p><strong>Phase D — Multi-provider parallel search SDK.</strong>
+SharedFlow-based fan-out in <code>LavaTrackerSdk</code>. Per-provider
+result labeling. Search results UI updated to render labels.
+Cancellation + backpressure tests.</p>
+</blockquote>
+<h2 id="current-state-audit">Current state audit</h2>
+<h3 id="already-in-place">Already in place</h3>
+<table>
+<thead>
+<tr>
+<th>Surface</th>
+<th>What's there</th>
+<th>What's missing</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>LavaTrackerSdk.multiSearch(request, providerIds, page)</code></td>
+<td>Returns <code>UnifiedSearchResult</code> after all providers
+complete</td>
+<td><strong>SEQUENTIAL</strong> — loops
+<code>for (id in providerIds)</code>. Result for provider N+1 waits for
+provider N.</td>
+</tr>
+<tr>
+<td><code>LavaTrackerSdk.streamSearch(filter, providerIds, apiBaseUrl)</code></td>
+<td>SSE client connects to Lava Go API <code>/v1/search</code></td>
+<td>Requires Lava Go API to be reachable. No client-direct fan-out
+path.</td>
+</tr>
+<tr>
+<td><code>UnifiedSearchResult</code> / <code>UnifiedTorrentItem</code> /
+<code>ProviderOccurrence</code> / <code>ProviderSearchStatus</code></td>
+<td>All four data classes exist;
+<code>DeduplicationEngine.deduplicate(...)</code> collapses duplicates
+across providers</td>
+<td>Already shaped for per-provider labeling.</td>
+</tr>
+<tr>
+<td><code>feature/search_result/SearchResultViewModel.observeSseSearch(Filter)</code></td>
+<td>Reads SSE events from the Go API, drives
+<code>SearchResultContent.Streaming(items, activeProviders)</code>
+state</td>
+<td>Only triggered when <code>filter.providerIds != null</code>. The
+non-streaming path (<code>observePagingData()</code>) still routes
+through legacy single-provider paging.</td>
+</tr>
+<tr>
+<td>Phase C <code>ActiveTrackerSection</code></td>
+<td>Renders inside ProviderConfig; "Make active" mutates
+<code>LavaTrackerSdk.activeTrackerId()</code></td>
+<td>Phase D pre-work: delete when <code>activeTrackerId</code> becomes
+semantically meaningless.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="what-phase-d-adds">What Phase D adds</h3>
+<ol type="1">
+<li><strong>Client-direct parallel fan-out for
+<code>multiSearch</code></strong> — same return shape
+(<code>UnifiedSearchResult</code>), but provider calls run in parallel
+via
+<code>coroutineScope { providerIds.map { async { ... } }.awaitAll() }</code>.
+Latency drops from <code>sum(latencies)</code> to
+<code>max(latencies)</code>. No API dependency.</li>
+<li><strong><code>streamMultiSearch(request, providerIds, page): Flow&lt;MultiSearchEvent&gt;</code></strong>
+— new SDK method that emits events as providers complete:
+<ul>
+<li><code>MultiSearchEvent.ProviderStart(providerId, displayName)</code></li>
+<li><code>MultiSearchEvent.ProviderResults(providerId, items)</code></li>
+<li><code>MultiSearchEvent.ProviderFailure(providerId, reason, cause)</code></li>
+<li><code>MultiSearchEvent.ProviderUnsupported(providerId)</code></li>
+<li><code>MultiSearchEvent.AllProvidersDone(unified: UnifiedSearchResult)</code>
+Mirrors the SSE wire-event shape but is entirely client-side. Replaces
+the API dependency for users who don't want to route every search
+through the Lava Go service.</li>
+</ul></li>
+<li><strong>Search-result UI consumes both paths.</strong>
+<code>SearchResultViewModel</code> gets a second branch: when
+<code>filter.providerIds != null</code> AND no Go API endpoint is
+configured (or the user has opted out of API routing), use
+<code>streamMultiSearch</code> directly. The state shape
+(<code>SearchResultContent.Streaming(items, activeProviders)</code>)
+already supports this — only the source changes.</li>
+<li><strong>Cancellation tests.</strong> When the user navigates away or
+sets a new filter mid-search, every in-flight provider
+<code>async</code> MUST be cancelled. Verify by checking that the
+underlying <code>OkHttpClient.dispatcher.runningCalls()</code> drops to
+zero within 100ms of structured-concurrency cancellation.</li>
+<li><strong>Backpressure tests.</strong> Slow consumer (1s delay per
+event) MUST NOT OOM the SharedFlow buffer. Use
+<code>MutableSharedFlow(replay = 0, extraBufferCapacity = providerIds.size + 4, onBufferOverflow = BufferOverflow.SUSPEND)</code>.
+Verify by emitting 10× more events than the buffer can hold and
+confirming no event is dropped (or dropped per the explicit policy if
+<code>DROP_OLDEST</code> is chosen for ProviderStart-style events).</li>
+<li><strong><code>ActiveTrackerSection</code> deletion.</strong> Once
+<code>streamMultiSearch</code> is the default search path, the
+single-active-tracker concept is dead. Delete
+<code>ActiveTrackerSection.kt</code> + the <code>MakeActive</code>
+action + <code>activeTrackerId</code> state field. Keep
+<code>LavaTrackerSdk.activeTrackerId()</code> /
+<code>switchTracker()</code> API for transitional callers (e.g., the
+legacy single-provider search path) but mark them
+<code>@Deprecated("Use multiSearch/streamMultiSearch")</code> for
+removal in a later cycle.</li>
+</ol>
+<h2 id="design-decisions-locked">Design decisions (locked)</h2>
+<h3 id="d1--sharedflow-vs-coroutinescopeasync">D1 — SharedFlow vs
+coroutineScope+async</h3>
+<p><strong>Decision:</strong> <code>streamMultiSearch</code> returns a
+cold <code>Flow&lt;MultiSearchEvent&gt;</code> backed by
+<code>channelFlow { ... }</code>. The internal fan-out launches one
+coroutine per provider via <code>launch { ... }</code> and uses
+<code>send(event)</code> to emit. <code>channelFlow</code> provides:</p>
+<ul>
+<li>Built-in cancellation (cancelling the collector cancels the producer
+coroutines)</li>
+<li>Built-in backpressure (<code>send</code> suspends when the consumer
+is slow)</li>
+<li>Per-emission concurrency (multiple providers can emit simultaneously
+without manual <code>Mutex</code>)</li>
+</ul>
+<p><code>MutableSharedFlow</code> would also work but is overkill for
+this use case (no multiple subscribers, no replay needs).
+<code>channelFlow</code> is the idiomatic choice.</p>
+<p>For the non-streaming <code>multiSearch</code> (which returns a
+single <code>UnifiedSearchResult</code>), use
+<code>coroutineScope { providerIds.map { async { ... } }.awaitAll() }</code>.
+Each <code>async</code> block is independent; failures inside one don't
+cancel siblings (catch <code>Throwable</code> and convert to
+<code>ProviderSearchStatus.FAILURE</code>).</p>
+<h3 id="d2--buffer-policy">D2 — Buffer policy</h3>
+<p><strong>Decision:</strong> <code>BufferOverflow.SUSPEND</code> for
+the streaming flow. Per-provider event count is bounded (1 start + 1
+result + 1 failure-or-done = max 3 per provider × N providers + 1
+AllDone). Even with 10 providers, the upper bound is 31 events. The
+default channel buffer (64) absorbs this without back-pressure mattering
+in practice. The chosen policy is the safe default; the backpressure
+test exists to prove the policy is honoured under stress (a 1s-delay
+consumer with 100+ emitted events MUST observe all 100 in order).</p>
+<h3 id="d3--cancellation-semantics">D3 — Cancellation semantics</h3>
+<p><strong>Decision:</strong> structured concurrency via
+<code>channelFlow</code>. When the collector cancels (e.g., the user
+navigates away), the <code>channelFlow</code> block is cancelled, which
+cancels every child <code>launch</code> running a provider's
+<code>search</code>. The provider's HTTP client (Ktor/OkHttp) honours
+coroutine cancellation; in-flight requests are aborted at the next
+suspension point.</p>
+<p>Cancellation test verifies that after <code>cancel()</code> on the
+collector, <code>OkHttpClient.dispatcher.runningCalls()</code> returns 0
+within 200ms (allowing for OS-level connection-close latency).</p>
+<h3 id="d4--per-provider-result-labeling">D4 — Per-provider result
+labeling</h3>
+<p><strong>Decision:</strong> The existing
+<code>UnifiedTorrentItem.primaryProvider</code> +
+<code>occurrences[].providerDisplayName</code> already carry the labels.
+The Search Results UI's existing
+<code>SearchResultContent.Streaming.activeProviders</code> field carries
+the status. No new state shape is needed. The Phase D UI work is wiring
+the new <code>streamMultiSearch</code> Flow into the existing
+state-shape — not redesigning the UI.</p>
+<h3 id="d5--default-search-path">D5 — Default search path</h3>
+<p><strong>Decision:</strong> when
+<code>filter.providerIds.isNullOrEmpty()</code> → legacy single-provider
+paging path (unchanged). When
+<code>filter.providerIds != null</code>:</p>
+<ul>
+<li>If <code>endpoint is Endpoint.GoApi</code> AND user opted in to API
+routing (the existing config) → SSE path (<code>observeSseSearch</code>,
+unchanged).</li>
+<li>Else → client-direct <code>streamMultiSearch</code> (NEW path, Phase
+D).</li>
+</ul>
+<p>The two streaming paths consume the same UI state shape; the only
+difference is the event source (SSE wire JSON vs. Kotlin Flow
+events).</p>
+<h3 id="d6--phase-d-pre-work-activetrackersection-removal">D6 — Phase D
+pre-work: <code>ActiveTrackerSection</code> removal</h3>
+<p><strong>Decision:</strong> delete
+<code>ActiveTrackerSection.kt</code> + the <code>MakeActive</code>
+action + the <code>activeTrackerId</code> state field as PART of Phase
+D, not as a separate phase. The Phase C design explicitly marked this
+affordance as Phase D pre-work, and Phase D is the cycle that makes the
+single-active-tracker concept obsolete.</p>
+<p>The Phase C addition was deliberately a small surgical affordance;
+deletion is symmetric.</p>
+<p><code>LavaTrackerSdk.activeTrackerId()</code> +
+<code>switchTracker()</code> API surface is RETAINED but marked
+<code>@Deprecated</code> — the legacy paging path still uses
+<code>activeTrackerId</code> to choose its tracker. Full removal of
+those methods is a future phase (after the legacy paging path is
+migrated to <code>multiSearch</code>-with-single-provider).</p>
+<h2 id="affected-surfaces">Affected surfaces</h2>
+<h3 id="files-to-add">Files to add</h3>
+<ul>
+<li><code>core/tracker/client/src/main/kotlin/lava/tracker/client/MultiSearchEvent.kt</code>
+— sealed event hierarchy + <code>UnifiedSearchResult.from(events)</code>
+builder.</li>
+<li><code>core/tracker/client/src/test/kotlin/lava/tracker/client/LavaTrackerSdkParallelSearchTest.kt</code>
+— unit tests verifying parallel fan-out (latencies overlap, all
+providers complete), cancellation (in-flight calls dropped), and
+backpressure (slow consumer doesn't lose events).</li>
+</ul>
+<h3 id="files-to-modify">Files to modify</h3>
+<ul>
+<li><code>core/tracker/client/src/main/kotlin/lava/tracker/client/LavaTrackerSdk.kt</code>:
+<ul>
+<li>Rewrite <code>multiSearch(...)</code> body:
+<code>coroutineScope { providerIds.map { async { runOneProvider(it) } }.awaitAll() }</code>.</li>
+<li>Add
+<code>streamMultiSearch(request, providerIds, page): Flow&lt;MultiSearchEvent&gt;</code>.</li>
+<li>Mark <code>activeTrackerId()</code> + <code>switchTracker()</code>
+<code>@Deprecated</code>.</li>
+</ul></li>
+<li><code>feature/search_result/src/main/kotlin/lava/search/result/SearchResultViewModel.kt</code>:
+<ul>
+<li>In <code>onCreate</code>, branch on
+<code>endpoint is Endpoint.GoApi</code> for SSE vs new
+<code>streamMultiSearch</code> path.</li>
+<li>New <code>observeStreamMultiSearch(filter)</code> private method
+consuming the Flow; reuses the existing
+<code>handleSseEvent</code>-equivalent state-reduce logic (factor shared
+helpers).</li>
+</ul></li>
+</ul>
+<h3 id="files-to-delete">Files to delete</h3>
+<ul>
+<li><code>feature/provider_config/src/main/kotlin/lava/provider/config/sections/ActiveTrackerSection.kt</code>
+(Phase D pre-work).</li>
+<li>The <code>ProviderConfigAction.MakeActive</code> data object + its
+<code>when</code> branch in <code>ProviderConfigViewModel</code>.</li>
+<li>The <code>activeTrackerId</code> state field in
+<code>ProviderConfigState</code>.</li>
+<li>The <code>ActiveTrackerSection(state, onAction)</code> invocation in
+<code>ProviderConfigScreen</code>.</li>
+</ul>
+<h2 id="challenge-tests-inventory">Challenge Tests inventory</h2>
+<table>
+<thead>
+<tr>
+<th>Challenge</th>
+<th>New / changed</th>
+<th>Scope</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>C32 (new) <code>MultiProviderParallelSearchTest.kt</code></td>
+<td>Drive: launch → Search tab → enter query → toggle on RuTracker +
+RuTor + ArchiveOrg → tap Search → assert all three
+<code>ProviderStreamStatus.SEARCHING</code> rows render → wait for
+results → assert UnifiedTorrentItem badges for at least 2 providers
+visible</td>
+<td>Falsifiability: replace <code>awaitAll()</code> with
+<code>forEach { it.await() }</code> (preserves sequential semantics in
+async wrapper). Test SHOULD still pass eventually (no provider is
+dropped) but the test asserts max-total-time &lt; 2×
+single-provider-latency — sequential exec would fail that bound.</td>
+</tr>
+<tr>
+<td>C33 (new) <code>SearchCancellationTest.kt</code></td>
+<td>Drive: start a multi-provider search → press back before any results
+arrive → assert no in-flight <code>OkHttpClient</code> calls remain
+after 200ms</td>
+<td>Falsifiability: remove the <code>coroutineScope</code> wrapper so
+<code>async</code>'s are unstructured (won't be cancelled by parent
+cancellation). Test fails — calls keep running.</td>
+</tr>
+</tbody>
+</table>
+<p>Both are gating-emulator-bound (operator runs them; KDoc carries the
+rehearsal protocol).</p>
+<p>Existing Challenges affected:</p>
+<ul>
+<li><strong>C04</strong> (just rewritten in Phase C) — no change needed;
+the "Sync this provider" assertion still holds because
+<code>SyncSection</code> survives Phase D.</li>
+<li><strong>C01</strong> — no change needed; the menu structure is
+unchanged.</li>
+</ul>
+<h2 id="anti-bluff-posture">Anti-bluff posture</h2>
+<p>Per §6.J / §6.L:</p>
+<ol type="1">
+<li>The new SDK methods MUST have unit tests against real
+<code>TrackerRegistry</code> + fake providers, not mocked SDK
+behavior.</li>
+<li>Cancellation test MUST observe a real
+<code>OkHttpClient.dispatcher.runningCalls()</code> count, not a
+mock.</li>
+<li>Backpressure test MUST send N+1 events through the Flow with a
+deliberately-slow collector and assert no event is silently
+dropped.</li>
+<li>Bluff-Audit stamps for every new <code>*Test.kt</code>; the C32/C33
+rehearsals are documented in their KDoc and executed by the operator on
+the gating emulator before next tag.</li>
+<li><code>@Deprecated</code> markers on <code>activeTrackerId()</code> +
+<code>switchTracker()</code> MUST cite the migration target
+(<code>multiSearch</code> / <code>streamMultiSearch</code>).</li>
+<li>§6.S CONTINUATION updated in the implementation commit.</li>
+</ol>
+<h2 id="out-of-scope-for-phase-d">Out of scope for Phase D</h2>
+<ul>
+<li><strong>Per-provider rate limiting</strong> — A provider serving
+slow responses (Cloudflare-mitigated rutracker) should not slow the
+rest. Handled implicitly by <code>awaitAll()</code> returning when the
+slowest completes; explicit per-provider timeouts are a Phase D+1 polish
+item if observed.</li>
+<li><strong>Result-ranking weights per provider</strong> —
+<code>DeduplicationEngine</code> currently uses occurrence count;
+weighted scoring is a future SP.</li>
+<li><strong>Removal of the SSE path</strong> — both paths coexist
+post-Phase-D. SSE remains the default when the Go API is configured
+(server-side dedup, server-side cache); client-direct is the fallback
+when API is offline.</li>
+<li><strong>Removing <code>LavaTrackerSdk.activeTrackerId()</code> /
+<code>switchTracker()</code></strong> — only
+<code>@Deprecated</code>-marked here. Full removal awaits the legacy
+paging path migration.</li>
+</ul>
+<h2 id="operators-invariants-reasserted">Operator's invariants
+reasserted</h2>
+<ul>
+<li>§6.J anti-bluff: cancellation + backpressure tests assert on
+observable state (running-calls count, event sequence), not on mock-call
+counts.</li>
+<li>§6.Q Compose layout: no UI changes risk nested-scroll antipatterns
+(the SSE-vs-streamMultiSearch branch is in the ViewModel; the Compose
+tree is unchanged).</li>
+<li>§6.R no hardcoded literals: no new literals (timeouts come from
+existing config; provider IDs come from
+<code>LavaTrackerSdk.listAvailableTrackers()</code>).</li>
+<li>§6.S CONTINUATION updated in the implementation commit.</li>
+<li>§6.W mirrors: pushed to both in lockstep.</li>
+</ul>
+<h2 id="implementation-plan">Implementation plan</h2>
+<p>See
+<code>docs/superpowers/plans/2026-05-13-sp4-phase-d-implementation.md</code>
+— 6 tasks, ~20 steps.</p>
+<h2 id="forensic-anchor">Forensic anchor</h2>
+<p>The sequential <code>multiSearch</code> was acceptable for v1.2.x
+with 2 providers. With Phase A+B making it ergonomic to add custom
+providers (clone-with-new-name + per-provider config), the sequential
+cost compounds. A user with 6 providers and 2-second average latencies
+saw 12-second total search time; parallel fan-out brings that to ~2.5
+seconds. That's the user-visible win. The cancellation + backpressure
+tests are the constitutional load-bearing guarantees that the parallel
+path doesn't regress reliability.</p>
+</body>
+</html>

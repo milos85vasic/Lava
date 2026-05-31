@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-05-12-sp4-multi-provider-redesign</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1
+id="sp-4--multi-provider-redesign-trackers-screen-removal-generic-credentials-parallel-search-sync">SP-4
+— Multi-Provider Redesign (Trackers screen removal, generic Credentials,
+parallel search, sync)</h1>
+<p><strong>Status:</strong> specification only — implementation in
+phases that follow. <strong>Filed:</strong> 2026-05-12 per operator
+directives during the v1.2.16 release cycle.</p>
+<h2 id="problem-statement-operators-words-paraphrased">Problem statement
+(operator's words, paraphrased)</h2>
+<ol type="1">
+<li><p><strong>The Trackers screen exposes a "current tracker" picker,
+which is wrong.</strong> The product MUST work with ALL
+enabled+configured providers simultaneously. The Trackers screen as a
+switch-between-providers surface is deprecated.</p></li>
+<li><p><strong>API performs search + sync across ALL enabled providers
+in parallel, emits results as async events to subscribers.</strong>
+Search results UI shows results from every responding provider with
+per-row labels identifying which provider returned which row.</p></li>
+<li><p><strong>Per-provider configuration screen reached by tapping the
+provider name in the Menu.</strong> That screen MUST support:</p>
+<ul>
+<li>assigning one of the user's stored Credentials</li>
+<li>creating new Credentials inline</li>
+<li>adding mirror URLs</li>
+<li>listing all pre-installed mirrors</li>
+<li>all other per-provider options</li>
+<li>connection probing per mirror</li>
+<li>sync ON / OFF toggle for the provider</li>
+</ul></li>
+<li><p><strong>CLONE existing provider</strong> — duplicate a provider
+with a new display name + new URL set, so users can search multiple
+instances of the same provider type (e.g. two rutracker mirrors on
+different hosts, including LAN-hosted Tracker instances on the local
+network).</p></li>
+<li><p><strong>All provider parameters sync via Lava API.</strong> Sync
+settings of the app gate which sub-sets sync and at what
+cadence.</p></li>
+<li><p><strong>Generic Credentials</strong> as their own entity:</p>
+<ul>
+<li>User creates a Credentials entry by name (e.g. "My main
+creds.")</li>
+<li>Each Credentials has a type: username+password, token, api-key, or
+any of the supported authentication shapes.</li>
+<li>Each Credentials carries the actual secret values for its type.</li>
+<li><strong>One Credentials entry can be assigned to multiple providers
+simultaneously</strong> (e.g. "My main creds." used for both RuTracker
+and RuTor).</li>
+<li>Credentials sync via the Lava API and are end-to-end encrypted on
+both client and API sides. No leak of any kind permitted.</li>
+</ul></li>
+<li><p><strong>Removed entries MUST also be removed from
+backups.</strong> Once a user removes anything, a re-sync is
+mandatory.</p></li>
+<li><p><strong>Full test coverage</strong> — unit + integration +
+Compose UI Challenges. Anti-bluff per §6.J: every test asserts on
+user-visible state, falsifiability rehearsal per test, no
+<code>@Ignore</code> without tracking issue, no verify-only
+assertions.</p></li>
+</ol>
+<h2 id="why-this-is-multi-phase">Why this is multi-phase</h2>
+<p>The scope crosses every layer of the app + the Go API + the data
+model:</p>
+<ul>
+<li><strong>Domain model:</strong> introduce
+<code>CredentialsEntry</code>, <code>ProviderConfig</code>,
+<code>SyncToggle</code> types. Migrate existing
+<code>ProviderCredentialManager</code> (Phase-11 per-provider
+username+password) to the new generic shape.</li>
+<li><strong>Persistence:</strong> Room schema changes (new tables for
+credentials, provider config, sync toggle). Migration from the v17
+schema. Backup-exclusion rules audit (settings.xml is already excluded
+as of v1.2.16; new credentials table needs encrypted-at-rest semantics
+AND sync-back semantics).</li>
+<li><strong>Network:</strong> new Go API endpoints for credentials +
+provider config sync, with end-to-end encryption (operator-supplied key
+material; the existing per-build LAVA_AUTH crypto chain is the starting
+point but credentials need a separate per-user secret derivation).</li>
+<li><strong>SDK:</strong> <code>LavaTrackerSdk</code> learns to fan-out
+search/browse/auth across N providers in parallel and emit per-provider
+events on a SharedFlow. Backpressure + cancellation semantics
+specified.</li>
+<li><strong>UI:</strong>
+<ul>
+<li>Search results screen: render per-provider rows with provider labels
++ provider color dot.</li>
+<li>Menu: tap on provider row → per-provider config screen (new).</li>
+<li>Per-provider config screen: assign / create / pick credentials, list
++ add mirrors, probe, clone-with-new-name, sync toggle.</li>
+<li>Trackers screen: remove the picker entirely. The screen either goes
+away or becomes a per-provider summary (TBD in phase plan).</li>
+</ul></li>
+<li><strong>Tests:</strong> every layer needs unit + integration +
+Compose UI Challenge coverage. §6.J primary-on-user-visible-state.
+Anti-bluff rehearsals recorded per commit.</li>
+<li><strong>Documentation:</strong> user guide, developer guide,
+architecture diagram updates. The Continuation document tracks phase
+status.</li>
+</ul>
+<p>A realistic phased breakdown (see
+<code>docs/superpowers/plans/</code> for the implementation plan that
+follows this design):</p>
+<ul>
+<li><strong>Phase A — Generic Credentials model.</strong> Domain types +
+Room migration + per-build encrypted-at-rest persistence + unit tests +
+Challenge for the create-credentials flow.</li>
+<li><strong>Phase B — Per-provider config screen.</strong> Compose
+screen reachable from Menu tap on provider row. Assign existing
+credentials, add mirror URL, probe. Per-provider sync ON/OFF toggle.
+Challenge for full screen interactions.</li>
+<li><strong>Phase C — Trackers screen removal.</strong> Replace the
+screen with a multi-provider summary OR delete from the navigation
+graph. C04-C08 Challenges remapped or rewritten honestly.</li>
+<li><strong>Phase D — Multi-provider parallel search SDK.</strong>
+SharedFlow-based fan-out in <code>LavaTrackerSdk</code>. Per-provider
+result labeling. Search results UI updated to render labels.
+Cancellation + backpressure tests.</li>
+<li><strong>Phase E — Credentials sync via Lava API.</strong> New Go
+endpoints <code>/v1/credentials</code> (PUT/DELETE/GET) with per-user
+key encryption. Client-side sync mechanism + retry. End-to-end
+encryption tests.</li>
+<li><strong>Phase F — Provider clone-with-new-name.</strong> UI clone
+affordance. Domain support for "multiple instances of the same provider
+type with different mirror sets". Challenge for clone+search the
+clone.</li>
+<li><strong>Phase G — Removal-syncs-to-backup.</strong> Soft-delete with
+sync-up semantics so a removal propagates to other devices and survives
+reinstall via backup. Backup-restore test on a second emulator.</li>
+<li><strong>Phase H — Documentation refresh.</strong> User guide,
+developer guide, diagrams, CONTINUATION.md final state.</li>
+</ul>
+<p>Each phase ships its own commit (or commit chain) and its own
+distribute round. Anti-bluff is enforced phase-by-phase: a phase that
+cannot produce a green Challenge Test against the real production stack
+is not marked complete.</p>
+<h2 id="out-of-scope-for-sp-4">Out of scope for SP-4</h2>
+<ul>
+<li><strong>iOS client</strong> — Lava is Android-only as of
+v1.2.16.</li>
+<li><strong>Cross-tracker deduplication</strong> (treating two mirrors
+of the same rutracker post as one logical search result) — separate SP
+if the operator requests it later.</li>
+<li><strong>Per-credential MFA</strong> — the credential types in scope
+are username+password, token, api-key. Adding TOTP / push-MFA is a
+future SP.</li>
+</ul>
+<h2 id="operators-invariants-reasserted-in-the-design">Operator's
+invariants reasserted in the design</h2>
+<ul>
+<li>§6.J anti-bluff: every Challenge Test asserts on user-visible state.
+No verify-only. No <code>@Ignore</code> without an issue. No
+mock-the-SUT.</li>
+<li>§6.H credential security: credentials never appear in tracked files,
+in logs, or in non-encrypted persistence. All credential paths through
+<code>LavaAuth</code> style codegen-pepper-derived AES-GCM keys for
+at-rest; the per-user-key-derivation for sync is a Phase E design
+item.</li>
+<li>§6.P distribution versioning: each phase that ships an artifact
+bumps versionCode strictly + carries a CHANGELOG entry + per-version
+snapshot.</li>
+<li>§6.S CONTINUATION.md: every phase that lands updates CONTINUATION.md
+in the same commit.</li>
+<li>§6.W mirrors: GitHub + GitLab only, both updated in lockstep.</li>
+</ul>
+<h2 id="phase-a--b-detailed-design-locked-2026-05-12">Phase A + B
+detailed design (locked 2026-05-12)</h2>
+<p>After brainstorming with the operator on 2026-05-12
+(post-v1.2.16-distribute), the following decisions are locked for the
+first implementation cycle. Phases C-H remain at the high-level scoping
+in the section above and will get their own detailed-design appendices
+when their cycles begin.</p>
+<h3 id="operator-decisions-during-brainstorming">Operator decisions
+during brainstorming</h3>
+<ol type="1">
+<li><strong>Sequencing:</strong> A2 — Phase A complete + Phase B FULL
+(mirrors + creds assignment + sync toggle + clone + anonymous mode) in
+this cycle.</li>
+<li><strong>Credential types in scope:</strong> Username+Password, API
+Key, Bearer Token, Cookie/Session string. All four supported in v1.</li>
+<li><strong>Encryption:</strong> AES-256-GCM with a per-user passphrase.
+Key derived via PBKDF2-SHA-256 (200_000 iterations). Zero-knowledge: API
+stores only encrypted blobs.</li>
+<li><strong>Passphrase UX:</strong> Lazy + in-process cache. Prompt only
+when user opens Credentials for the first time; derived key kept in
+memory for the lifetime of the process; re-prompt after force-stop.</li>
+</ol>
+<h3 id="phase-a--generic-credentials-data-model">Phase A — Generic
+Credentials data model</h3>
+<p><strong>Module:</strong> <code>:core:credentials</code> (extends the
+existing module, which today houses
+<code>ProviderCredentialManager</code> +
+<code>CredentialEncryptor</code> + <code>ProviderConfigRepository</code>
++ <code>CredentialsRepository</code>). The existing classes stay in
+place; new ones are added alongside, and the legacy
+<code>ProviderCredentials</code> shape is migrated to the new
+<code>CredentialsEntry</code> shape via the Room migration documented
+below.</p>
+<p><strong>Domain model</strong> (in
+<code>:core:credentials:api</code>):</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">sealed</span> <span class="kw">interface</span> CredentialSecret <span class="op">{</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">data</span> <span class="kw">class</span> UsernamePassword<span class="op">(</span><span class="kw">val</span> <span class="va">username</span><span class="op">:</span> <span class="dt">String</span><span class="op">,</span> <span class="kw">val</span> <span class="va">password</span><span class="op">:</span> <span class="dt">String</span><span class="op">)</span> <span class="op">:</span> <span class="dt">CredentialSecret</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">data</span> <span class="kw">class</span> ApiKey<span class="op">(</span><span class="kw">val</span> <span class="va">key</span><span class="op">:</span> <span class="dt">String</span><span class="op">)</span> <span class="op">:</span> <span class="dt">CredentialSecret</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">data</span> <span class="kw">class</span> BearerToken<span class="op">(</span><span class="kw">val</span> <span class="va">token</span><span class="op">:</span> <span class="dt">String</span><span class="op">)</span> <span class="op">:</span> <span class="dt">CredentialSecret</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">data</span> <span class="kw">class</span> CookieSession<span class="op">(</span><span class="kw">val</span> <span class="va">cookie</span><span class="op">:</span> <span class="dt">String</span><span class="op">)</span> <span class="op">:</span> <span class="dt">CredentialSecret</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="kw">enum</span> <span class="kw">class</span> CredentialType <span class="op">{</span> USERNAME_PASSWORD<span class="op">,</span> API_KEY<span class="op">,</span> BEARER_TOKEN<span class="op">,</span> COOKIE_SESSION <span class="op">}</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> <span class="kw">class</span> CredentialsEntry<span class="op">(</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="kw">val</span> <span class="va">id</span><span class="op">:</span> <span class="dt">String</span><span class="op">,</span>                <span class="co">// UUID v4</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    <span class="kw">val</span> <span class="va">displayName</span><span class="op">:</span> <span class="dt">String</span><span class="op">,</span>       <span class="co">// user-given, e.g. &quot;My main creds.&quot;</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    <span class="kw">val</span> <span class="va">type</span><span class="op">:</span> <span class="dt">CredentialType</span><span class="op">,</span>      <span class="co">// discriminator for the sealed shape</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    <span class="kw">val</span> <span class="va">secret</span><span class="op">:</span> <span class="dt">CredentialSecret</span><span class="op">,</span>  <span class="co">// decrypted; never persisted unencrypted</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    <span class="kw">val</span> <span class="va">createdAtUtc</span><span class="op">:</span> <span class="dt">Long</span><span class="op">,</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    <span class="kw">val</span> <span class="va">updatedAtUtc</span><span class="op">:</span> <span class="dt">Long</span><span class="op">,</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="kw">interface</span> CredentialsRepository <span class="op">{</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>    suspend <span class="kw">fun</span> <span class="fu">list</span><span class="op">():</span> <span class="dt">List</span><span class="op">&lt;</span><span class="dt">CredentialsEntry</span><span class="op">&gt;</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>    <span class="fu">suspend</span> <span class="kw">fun</span> <span class="fu">observe</span><span class="op">():</span> <span class="dt">Flow</span><span class="op">&lt;</span><span class="dt">List</span><span class="op">&lt;</span><span class="dt">CredentialsEntry</span><span class="op">&gt;&gt;</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>    <span class="fu">suspend</span> <span class="kw">fun</span> <span class="kw">get</span><span class="op">(</span><span class="va">id</span><span class="op">:</span> <span class="dt">String</span><span class="op">):</span> <span class="dt">CredentialsEntry</span><span class="op">?</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>    <span class="fu">suspend</span> <span class="kw">fun</span> <span class="fu">upsert</span><span class="op">(</span><span class="va">entry</span><span class="op">:</span> <span class="dt">CredentialsEntry</span><span class="op">)</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>    <span class="fu">suspend</span> <span class="kw">fun</span> <span class="fu">delete</span><span class="op">(</span><span class="va">id</span><span class="op">:</span> <span class="dt">String</span><span class="op">)</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a><span class="kw">interface</span> <span class="fu">ProviderCredentialBinding</span> <span class="op">{</span></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>    suspend <span class="kw">fun</span> <span class="fu">bind</span><span class="op">(</span><span class="va">providerId</span><span class="op">:</span> <span class="dt">String</span><span class="op">,</span> <span class="va">credentialId</span><span class="op">:</span> <span class="dt">String</span><span class="op">)</span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>    <span class="fu">suspend</span> <span class="kw">fun</span> <span class="fu">unbind</span><span class="op">(</span><span class="va">providerId</span><span class="op">:</span> <span class="dt">String</span><span class="op">)</span></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>    <span class="fu">suspend</span> <span class="kw">fun</span> <span class="fu">observeBinding</span><span class="op">(</span><span class="va">providerId</span><span class="op">:</span> <span class="dt">String</span><span class="op">):</span> <span class="dt">Flow</span><span class="op">&lt;</span><span class="dt">String</span><span class="op">?&gt;</span></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p><strong>Storage</strong> (Room, new schema bump from v8 to v9):</p>
+<ul>
+<li>Table <code>credentials_entry</code>: columns <code>id</code> (TEXT
+PK), <code>display_name</code> (TEXT NOT NULL), <code>type</code> (TEXT
+NOT NULL), <code>ciphertext</code> (BLOB NOT NULL — 12-byte AES-GCM
+nonce + ciphertext + 16-byte tag concatenated), <code>created_at</code>
+(INTEGER NOT NULL), <code>updated_at</code> (INTEGER NOT NULL).</li>
+<li>Table <code>provider_credential_binding</code>:
+<code>provider_id</code> (TEXT PK), <code>credential_id</code> (TEXT NOT
+NULL, FK → credentials_entry.id ON DELETE SET NULL).</li>
+<li>Migration <code>8 → 9</code>: creates both tables. Existing
+<code>ProviderCredentialManager</code> rows migrated to one
+<code>CredentialsEntry</code> per row (display name =
+<code>&lt;providerId&gt; default</code>) + matching binding; legacy
+table is dropped after migration verifies row count.</li>
+</ul>
+<p><strong>Encryption</strong>:</p>
+<ul>
+<li>File:
+<code>core/credentials/impl/src/main/kotlin/lava/credentials/impl/crypto/CredentialsCrypto.kt</code>.</li>
+<li>AES-256-GCM via <code>javax.crypto.Cipher</code>. Per-entry random
+12-byte nonce. 16-byte authentication tag (standard GCM).</li>
+<li>Key derivation: PBKDF2 with HMAC-SHA-256, 200_000 iterations,
+32-byte random salt persisted in <code>settings.xml</code> under a fixed
+key <code>credentials_kdf_salt_v1</code> (non-secret).</li>
+<li>Verifier: HMAC-SHA-256(derivedKey, "lava-credentials-v1") persisted
+alongside the salt under <code>credentials_verifier_v1</code>. Wrong
+passphrase → verifier mismatch → reject without decryption attempt
+(avoids ciphertext oracle).</li>
+<li>Passphrase cache: in-memory
+<code>AtomicReference&lt;DerivedKey&gt;</code> on the
+<code>:core:credentials:impl</code> singleton scope; cleared on
+<code>Application.onLowMemory()</code> and on force-stop (Android kills
+the process → cache gone).</li>
+</ul>
+<p><strong>ViewModel &amp; screen for credentials list / create /
+edit:</strong></p>
+<ul>
+<li>New <code>:feature:credentials_manager</code> module. Orbit
+MVI.</li>
+<li><code>CredentialsManagerScreen</code> reachable from Menu's existing
+"Provider Credentials" entry (line ~204 of MenuScreen.kt —
+<code>"Provider Credentials"</code>, the entry already exists but routes
+to the legacy per-provider screen; rewire it to the new screen).</li>
+<li>Sub-flow: passphrase unlock dialog → list of credentials → tap to
+edit / "Add new" FAB → create-credentials sheet with type picker +
+per-type form fields.</li>
+</ul>
+<p><strong>Tests (Phase A):</strong></p>
+<ul>
+<li><code>CredentialsCryptoTest</code> (JVM): round-trip; wrong
+passphrase rejected via verifier; tampered ciphertext rejected via GCM
+tag.</li>
+<li><code>CredentialsRepositoryImplTest</code> (JVM, real Room
+in-memory): upsert
+<ul>
+<li>observe + delete; provider-binding CRUD; legacy-migration test uses
+a v17 SQLite snapshot + asserts the migrated rows have the expected
+display names.</li>
+</ul></li>
+<li><code>Challenge27CredentialsCreateAndAssignTest</code> (Compose UI
+on emulator): full create + assign flow.</li>
+<li><code>Challenge31PassphraseUnlockFlowTest</code> (Compose UI):
+wrong-then-right unlock flow asserts on user-visible error + decrypted
+list.</li>
+</ul>
+<h3 id="phase-b--per-provider-configuration-screen">Phase B —
+Per-provider configuration screen</h3>
+<p><strong>New module:</strong> <code>:feature:provider_config</code>
+(Compose, Orbit MVI, applies <code>lava.android.feature</code>
+plugin).</p>
+<p><strong>Navigation:</strong></p>
+<ul>
+<li><code>Menu</code> provider <code>Surface</code> becomes
+<code>clickable</code> (the existing surface already has an
+<code>onClick</code> for sign-out — change it to route to
+<code>openProviderConfig(providerId)</code>; sign-out moves to a
+trailing icon with confirmation dialog).</li>
+<li>New extension function <code>addProviderConfig</code> registered in
+<code>:core:navigation</code>.</li>
+</ul>
+<p><strong>Screen structure (single Composable,
+<code>Column(verticalScroll(...))</code> — no nested LazyColumn per
+§6.Q):</strong></p>
+<ol type="1">
+<li><strong>Header</strong>: provider color dot +
+<code>displayName</code> + <code>descriptor.trackerId</code>
+<ul>
+<li>current connection status icon.</li>
+</ul></li>
+<li><strong>Sync section</strong>:
+<code>SwitchRow("Sync this provider", state.syncEnabled)</code>. New
+<code>provider_sync_toggle(provider_id TEXT PK, enabled INTEGER NOT NULL)</code>
+table. Toggling writes to that table + queues a sync-outbox row for
+Phase E uploader.</li>
+<li><strong>Credentials section</strong>: shows currently-bound
+<code>CredentialsEntry.displayName</code> or "None — anonymous". Two
+buttons:
+<ul>
+<li>"Assign existing…" → opens <code>CredentialsPickerSheet</code>
+(ModalBottomSheet) listing all entries; tap one → bind via
+<code>ProviderCredentialBinding.bind(providerId, credentialId)</code>.</li>
+<li>"Create new…" → opens the <code>CredentialsCreateSheet</code> from
+Phase A (reused); on save the new entry is auto-bound to the current
+provider.</li>
+</ul></li>
+<li><strong>Mirrors section</strong>: for every entry in
+<code>descriptor.baseUrls</code> (pre-installed) + every
+<code>UserMirror(provider_id, url)</code> from
+<code>UserMirrorRepository</code>, render
+<code>MirrorRow(host, status, isPrimary, isUserAdded)</code>. Per row:
+probe icon → <code>ProbeMirrorUseCase</code> (HTTP HEAD with the
+existing Ktor client). Add new mirror: text field at the bottom +
+button.</li>
+<li><strong>Anonymous toggle</strong>: shown only when
+<code>descriptor.supportsAnonymous</code> is true. Switch toggles a new
+pref <code>provider_anonymous_${providerId}</code>.</li>
+<li><strong>Clone provider</strong>: button at bottom. Opens dialog
+"Clone {name} as…" with two fields: new display name + new primary
+mirror URL. Confirm creates a row in new
+<code>cloned_providers(synthetic_id TEXT PK, source_tracker_id TEXT, display_name TEXT, primary_url TEXT)</code>
+table. <code>LavaTrackerSdk.listAvailableTrackers()</code> is extended
+to union the cloned rows as <code>TrackerDescriptor</code>
+overlays.</li>
+</ol>
+<p><strong>Sync wiring (honest-stub for this cycle):</strong></p>
+<ul>
+<li>A new <code>:core:sync</code> module is introduced with a
+<code>SyncOutbox</code> interface + Room-backed impl. Operations on
+<code>provider_sync_toggle</code>,
+<code>provider_credential_binding</code>, <code>cloned_providers</code>,
+and <code>user_mirror</code> enqueue an outbox row.</li>
+<li>The Phase-E uploader (separate cycle) will drain the outbox; this
+cycle just queues. CHANGELOG documents this as honest-stub.</li>
+</ul>
+<p><strong>Tests (Phase B):</strong></p>
+<ul>
+<li><code>ProviderSyncToggleRepositoryImplTest</code> (JVM): toggle
+persists; outbox row created.</li>
+<li><code>CloneProviderUseCaseTest</code> (JVM): clone produces
+synthetic descriptor visible through
+<code>listAvailableTrackers()</code>.</li>
+<li><code>ProbeMirrorUseCaseTest</code> (JVM, MockWebServer): 200, 4xx,
+timeout, TLS-failure.</li>
+<li><code>Challenge28PerProviderSyncToggleTest</code> (Compose UI on
+emulator): toggle sync OFF → reopen screen → still OFF; outbox table
+contains entry.</li>
+<li><code>Challenge29AddCustomMirrorTest</code>: add
+<code>rutracker.foo</code> mirror → row appears in list.</li>
+<li><code>Challenge30CloneProviderTest</code>: clone "RuTracker.org" as
+"RuTracker EU" with URL <code>https://rutracker.eu</code> → returns to
+Menu → both rows visible.</li>
+</ul>
+<h3
+id="implementation-sequencing-subagent-driven-per-operator-approval">Implementation
+sequencing (subagent-driven per operator approval)</h3>
+<p>Per the operator's "you can begin using Subagents-Driven approach"
+hint, the work decomposes into independent subagent tasks per phase:</p>
+<ul>
+<li><strong>Subagent S-A1</strong>: Phase A foundation —
+<code>:core:credentials</code> module scaffold + Room migration + crypto
++ repository. Pure Kotlin; no UI.</li>
+<li><strong>Subagent S-A2</strong>: Phase A UI —
+<code>:feature:credentials_manager</code> module + passphrase unlock +
+create/edit/delete UI + Menu rewire.</li>
+<li><strong>Subagent S-B1</strong>: Phase B screen scaffolding —
+<code>:feature:provider_config</code> module + navigation + screen
+skeleton with header + sync section.</li>
+<li><strong>Subagent S-B2</strong>: Phase B credentials assignment +
+clone + anonymous + sync outbox wiring.</li>
+<li><strong>Subagent S-B3</strong>: Phase B mirrors section + probe +
+add-mirror flow.</li>
+<li><strong>Subagent S-T1</strong>: Test author — write all Challenge
+Tests + their KDoc-recorded falsifiability rehearsals, run on the live
+emulator, record evidence under
+<code>.lava-ci-evidence/sp4-phase-ab/</code>.</li>
+</ul>
+<p>Each subagent's brief explicitly carries the §6.J + §6.L + §6.S
+mandate. Main agent reviews each subagent's output against this design
+spec before integration.</p>
+<h3 id="changelog--distribute-plan">CHANGELOG + distribute plan</h3>
+<ul>
+<li>Version bump: 1.2.16-1036 → 1.2.17-1037 / 2.3.5-2305 →
+2.3.6-2306.</li>
+<li>CHANGELOG entry covering Phase A + Phase B feature additions, with
+honest disclosure that:
+<ul>
+<li>Sync outbox queues but does not yet upload (Phase E owed).</li>
+<li>Mirrors <code>probe</code> UI exists; per-mirror auto-failover is
+Phase D.</li>
+</ul></li>
+<li>Per-version snapshot, pepper rotation, last-version update — same
+§6.P pattern as v1.2.16.</li>
+<li>Both APKs distributed via Firebase to operator tester group.</li>
+<li>Go API local restart at v2.3.6-2306; kept booted.</li>
+</ul>
+<h2 id="forensic-anchor">Forensic anchor</h2>
+<p>Operator's directives during the v1.2.15 / v1.2.16 release cycle
+(2026-05-12 sequence after the C03 + Cloudflare + anti-bluff cycle):</p>
+<blockquote>
+<p>"When opening the Trackers screen, we can switch between the
+Providers!? This is not how we have requested in last iterations to be!
+WE MUST work with all enabled and configured providers!"</p>
+</blockquote>
+<blockquote>
+<p>"The whole Trackers screen is not needed anymore! We MUST make sure
+we can open Provider configuration screen my tap on it from Menu on its
+name."</p>
+</blockquote>
+<blockquote>
+<p>"Make sure we can CLONE existing provider and assign it a new name
+and new URL so practically users can sync and search multiple instances
+running on various hosting platforms of particular Tracker (Provider)
+type we support!"</p>
+</blockquote>
+<blockquote>
+<p>"Make sure all Providers DO SYNC and can be toggled for sync-ing ON
+and OFF!"</p>
+</blockquote>
+<blockquote>
+<p>"The Credentials we create MUST BE generic! ... heavily protected and
+encryped on both sides ... user can choose for one or more providers the
+Credentials. Like this 'My main creds.' can be used at the same time for
+RuTracker provider and RuTor provider!"</p>
+</blockquote>
+<p>The 19th §6.L invocation (same 2026-05-12 wave) reaffirms the
+anti-bluff mandate: every phase MUST guarantee real-user-visible
+functionality, not green-tests-with-broken-features.</p>
+</body>
+</html>

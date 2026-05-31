@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>EVIDENCE-phase1</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1 id="stress--chaos--phase-1-evidence-11485-lava-equivalent">Stress +
+Chaos — Phase 1 Evidence (§11.4.85 Lava equivalent)</h1>
+<p><strong>Date:</strong> 2026-05-31 (68th-cycle follow-up).
+<strong>Scope:</strong> lava-api-go in-process stress + chaos suite
+(<code>tests/stress/</code>). <strong>Result:</strong> the suite was
+<strong>authored, built, and ACTUALLY RAN</strong>; verdict
+<strong>PASS</strong>, <code>go test</code> <strong>EXIT=0</strong>.</p>
+<hr />
+<h2 id="verbatim-run-output-tmpstress_runlog">Verbatim run output
+(<code>/tmp/stress_run.log</code>)</h2>
+<pre><code>=== RUN   TestStressChaos
+    api_stress_test.go:252: evidence written: evidence/2026-05-31T07-58-03Z/stress-chaos.json (verdict=PASS)
+--- PASS: TestStressChaos (0.81s)
+PASS
+ok      digital.vasic.lava.apigo/tests/stress   1.625s
+EXIT=0</code></pre>
+<p>Command invoked (from repo root, this session):</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">chmod</span> +x scripts/run-chaos-stress.sh</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> lava-api-go</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="va">GOMAXPROCS</span><span class="op">=</span>2 <span class="ex">go</span> test <span class="at">-tags</span> stress <span class="at">-run</span> TestStressChaos <span class="at">-v</span> ./tests/stress/...   <span class="co"># → EXIT=0, PASS</span></span></code></pre></div>
+<p>Provenance from the evidence file: git SHA
+<code>a6c278d076748ead360b46bc360b39c412260dd1</code>,
+<code>go1.26.2 darwin/arm64</code> on host <code>Mistborn.local</code>,
+started <code>2026-05-31T07:58:02Z</code>, wall 0.80s. Leak guards:
+goroutines 3 → 5 (clean — httptest server workers), open FDs 0 → 0
+(<code>/dev/fd</code> read returned 0 on this host, recorded as 0 not
+faked).</p>
+<hr />
+<h2
+id="captured-per-dimension-metrics-verbatim-from-evidence2026-05-31t07-58-03zstress-chaosjson">Captured
+per-dimension metrics (verbatim from
+<code>evidence/2026-05-31T07-58-03Z/stress-chaos.json</code>)</h2>
+<table>
+<thead>
+<tr>
+<th>Dim</th>
+<th>Name</th>
+<th>Ran</th>
+<th>Status</th>
+<th>Reqs</th>
+<th>2xx</th>
+<th>4xx</th>
+<th>5xx</th>
+<th>errRate</th>
+<th>p50ms</th>
+<th>p95ms</th>
+<th>p99ms</th>
+<th>maxms</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>S1</td>
+<td>sustained-load</td>
+<td>true</td>
+<td>PASS</td>
+<td>500</td>
+<td>500</td>
+<td>0</td>
+<td>0</td>
+<td>0.000</td>
+<td>0.16</td>
+<td>0.28</td>
+<td>0.59</td>
+<td>0.82</td>
+</tr>
+<tr>
+<td>S2</td>
+<td>concurrent-contention</td>
+<td>true</td>
+<td>PASS</td>
+<td>64</td>
+<td>64</td>
+<td>0</td>
+<td>0</td>
+<td>0.000</td>
+<td>2.10</td>
+<td>3.30</td>
+<td>3.32</td>
+<td>3.32</td>
+</tr>
+<tr>
+<td>C1</td>
+<td>fault-injection-recovery</td>
+<td>true</td>
+<td>PASS</td>
+<td>300</td>
+<td>200</td>
+<td>0</td>
+<td>100</td>
+<td>0.333</td>
+<td>0.16</td>
+<td>0.19</td>
+<td>0.24</td>
+<td>0.26</td>
+</tr>
+<tr>
+<td>C2</td>
+<td>latency-injection</td>
+<td>true</td>
+<td>PASS</td>
+<td>100</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0.000</td>
+<td>6.04</td>
+<td>6.32</td>
+<td>6.35</td>
+<td>6.37</td>
+</tr>
+<tr>
+<td>C5</td>
+<td>malformed-input</td>
+<td>true</td>
+<td>PASS</td>
+<td>100</td>
+<td>0</td>
+<td>100</td>
+<td>0</td>
+<td>0.000</td>
+<td>0.25</td>
+<td>0.59</td>
+<td>0.60</td>
+<td>0.61</td>
+</tr>
+<tr>
+<td>C4a</td>
+<td>rate-limiter-trip</td>
+<td>true</td>
+<td>PASS</td>
+<td>30</td>
+<td>10</td>
+<td>20</td>
+<td>0</td>
+<td>0.000</td>
+<td>0.16</td>
+<td>0.18</td>
+<td>0.20</td>
+<td>0.20</td>
+</tr>
+<tr>
+<td>C3</td>
+<td>dependency-kill-postgres</td>
+<td><strong>false</strong></td>
+<td><strong>OPERATOR_GATED</strong></td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>C4b</td>
+<td>pool-exhaustion</td>
+<td><strong>false</strong></td>
+<td><strong>OPERATOR_GATED</strong></td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<h3 id="chaos-recovery-observations-verbatim">Chaos recovery
+observations (verbatim)</h3>
+<ul>
+<li><strong>C1</strong> (dependency-unavailable-503): errRate
+<strong>during</strong> fault = <strong>1.000</strong>,
+<strong>after</strong> fault = <strong>0.000</strong>, recovery in
+<strong>1 request</strong>. Fault returns a clean 503 (no panic / no
+hang); recovers to 200 the very first request after the fault clears.
+This is the load-bearing chaos proof — a real dependency outage produces
+a clean error, not a crash, and recovery is immediate.</li>
+<li><strong>C2</strong> (5ms-per-request latency injection): errRate
+0.000; p50 degraded to <strong>6.04ms</strong> under the 5ms injection
+(server stays responsive, percentiles degrade gracefully, no hang).</li>
+<li><strong>C4a</strong> (rate-limit exhaustion): first <strong>10 →
+200</strong>, remaining <strong>20 → 429</strong>, deterministic; 0 ×
+5xx.</li>
+<li><strong>C5</strong> (oversized 1KB path segment under load):
+<strong>100/100 → clean 400</strong>, 0 × 5xx (no panic).</li>
+</ul>
+<hr />
+<h2 id="what-ran-vs-what-is-operator-gated">What ran vs what is
+operator-gated</h2>
+<p>All six in-process dimensions (S1, S2, C1, C2, C4a, C5) <strong>ran
+and passed</strong> on this macOS host with no Postgres, no emulator, no
+sudo, in 0.80s wall-clock.</p>
+<p>C3 (Postgres-kill) and C4b (pgx-pool-exhaustion) are
+<strong>OPERATOR_GATED by design</strong> — they need a real Postgres
+container under podman. The evidence file records them
+<code>"ran": false, "status": "OPERATOR_GATED"</code> with <strong>no
+fabricated metrics</strong> (§6.J / §11.4.6). They run via
+<code>scripts/run-chaos-stress.sh --with-podman</code> once the Phase
+1.b real-Postgres chaos driver lands (see DESIGN.md §6). This gating is
+a deliberate phase boundary, not a relay/tooling failure.</p>
+<hr />
+<h2 id="falsifiability-11485--sixth-law-clause-2">Falsifiability
+(§11.4.85 / Sixth Law clause 2)</h2>
+<p>The gating thresholds are conservative and structural, so the PASS is
+meaningful:</p>
+<ul>
+<li>S1/S2 assert errRate==0 against a trivial <code>/health</code> —
+only a broken Go HTTP stack could flake them.</li>
+<li>C1 asserts ≥0.99 error-rate <em>during</em> the injected fault AND
+0.0 <em>after</em> + a 2xx returns — flip the fault-injection middleware
+off and the "during fault" assertion (<code>durErr &lt; 0.99</code>)
+fires; leave it stuck on and the post-clear
+<code>postErr &gt; 0 || post2 == 0</code> assertion fires. Either break
+is caught.</li>
+<li>C4a/C5 assert exact status-code partitions — change the rate-limit
+cap or the oversize threshold and the counts diverge from the expected
+<code>(10,20)</code> / <code>(100 × 4xx)</code> and the test FAILs.</li>
+</ul>
+<p>Absolute latency magnitude is <strong>recorded, never asserted
+on</strong>, precisely so the evidence is descriptive without being
+host-jitter-flaky.</p>
+</body>
+</html>

@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>RELEASE-ROTATION</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1 id="lava-phase-1-release-rotation-runbook">Lava Phase-1 Release
+Rotation Runbook</h1>
+<p>Operator runbook for rotating the per-build UUID + pepper that
+Phase-1's client-auth foundation embeds in each Android release. The
+auth flow is covered by:</p>
+<ul>
+<li><code>docs/superpowers/specs/2026-05-06-phase1-api-auth-design.md</code>
+— design</li>
+<li><code>docs/superpowers/plans/2026-05-06-phase1-api-auth.md</code> —
+plan</li>
+<li><code>core/CLAUDE.md</code> Auth UUID memory hygiene clause</li>
+<li>§6.R No-Hardcoding Mandate (root <code>CLAUDE.md</code>)</li>
+</ul>
+<p>The TL;DR: every Android release ships with a unique UUID (the
+per-build client identifier) AND a unique obfuscation pepper (rotates
+the build-time AES key derivation). The lava-api-go service maintains an
+allowlist of accepted UUIDs (active) plus a separate retired list that
+returns <code>426 Upgrade Required</code> so old APKs prompt the user to
+update.</p>
+<hr />
+<h2 id="when-to-rotate">When to rotate</h2>
+<p>Rotate every release tag. The mechanism is engineered so reusing a
+previous (UUID, pepper) pair across releases REDUCES security: the
+single attacker decompile attack on version N also pwns version N+1.</p>
+<p>A leaked UUID detected mid-cycle MUST be rotated AS SOON AS the leak
+is confirmed — see "Mid-cycle leak response" below.</p>
+<hr />
+<h2 id="step-by-step-rotation-every-release">Step-by-step rotation
+(every release)</h2>
+<h3 id="1-generate-fresh-uuid--pepper">1. Generate fresh UUID +
+pepper</h3>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="va">NEW_UUID</span><span class="op">=</span><span class="st">&quot;</span><span class="va">$(</span><span class="fu">uuidgen</span><span class="va">)</span><span class="st">&quot;</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="va">NEW_PEPPER</span><span class="op">=</span><span class="st">&quot;</span><span class="va">$(</span><span class="ex">openssl</span> rand <span class="at">-base64</span> 32<span class="va">)</span><span class="st">&quot;</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;UUID:   </span><span class="va">$NEW_UUID</span><span class="st">&quot;</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;Pepper: </span><span class="va">$NEW_PEPPER</span><span class="st">&quot;</span></span></code></pre></div>
+<h3 id="2-decide-the-new-client-name">2. Decide the new client name</h3>
+<p>The naming convention is
+<code>android-${VERSION_NAME}-${VERSION_CODE}</code>, matching
+<code>app/build.gradle.kts</code> versionName + versionCode. Bump both
+in <code>app/build.gradle.kts</code> first if you haven't already (§6.P
+forbids re-distributing the same versionCode).</p>
+<pre><code>android-1.2.7-1027</code></pre>
+<h3 id="3-update-env-gitignored-per-operator">3. Update
+<code>.env</code> (gitignored, per-operator)</h3>
+<p>Append the new entry to the active list, set the current name, and
+rotate the pepper:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode ini"><code class="sourceCode ini"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="dt">LAVA_AUTH_CURRENT_CLIENT_NAME</span><span class="ot">=</span><span class="st">android-1.2.7-1027</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="dt">LAVA_AUTH_ACTIVE_CLIENTS</span><span class="ot">=</span><span class="st">android-1.2.7-1027:${NEW_UUID},android-1.2.6-1026:&lt;previous-uuid&gt;</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="dt">LAVA_AUTH_RETIRED_CLIENTS</span><span class="ot">=</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="dt">LAVA_AUTH_OBFUSCATION_PEPPER</span><span class="ot">=</span><span class="st">${NEW_PEPPER}</span></span></code></pre></div>
+<p>If a previously-active release should now be forced-upgrade (because
+≥95% of users have already moved past it, OR because its UUID leaked),
+move that entry from <code>LAVA_AUTH_ACTIVE_CLIENTS</code> to
+<code>LAVA_AUTH_RETIRED_CLIENTS</code>.</p>
+<p>The same <code>.env</code> is read by:</p>
+<ul>
+<li>the Android Gradle codegen
+(<code>generateLavaAuthClassDebug/Release</code>)</li>
+<li>the lava-api-go service at boot</li>
+</ul>
+<p>So both sides see the same allowlist.</p>
+<h3 id="4-build-the-apk">4. Build the APK</h3>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">./gradlew</span> :app:clean :app:assembleRelease</span></code></pre></div>
+<p>The <code>generateLavaAuthClassRelease</code> task generates
+<code>app/build/generated/lava-auth/main/lava/auth/LavaAuthGenerated.kt</code>
+containing the AES-GCM-encrypted UUID + nonce + pepper bytes + field
+name. The runtime <code>AuthInterceptor</code> decrypts on each
+request.</p>
+<h3 id="5-build-the-api-binary">5. Build the API binary</h3>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">(</span> <span class="bu">cd</span> lava-api-go <span class="kw">&amp;&amp;</span> <span class="fu">make</span> build <span class="kw">&amp;&amp;</span> <span class="fu">make</span> image <span class="kw">)</span></span></code></pre></div>
+<h3 id="6-stage-the-snapshot-files">6. Stage the snapshot files</h3>
+<p>Per §6.P, every distribute action requires:</p>
+<ul>
+<li>A <code>CHANGELOG.md</code> entry referencing the new version</li>
+<li>A per-version snapshot file under
+<code>.lava-ci-evidence/distribute-changelog/firebase-app-distribution/&lt;version&gt;-&lt;code&gt;.md</code></li>
+</ul>
+<p>Both are committed before the distribute script runs.</p>
+<h3 id="7-distribute-the-api-to-thinkerlocal">7. Distribute the API to
+thinker.local</h3>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">./scripts/distribute-api-remote.sh</span></span></code></pre></div>
+<p>The script copies the new image to thinker.local, reloads the systemd
+unit, and verifies <code>/health</code> returns 200. The new
+<code>.env</code> is also synced so the API sees the rotated
+allowlist.</p>
+<h3 id="8-distribute-the-apk-via-firebase">8. Distribute the APK via
+Firebase</h3>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">./scripts/firebase-distribute.sh</span> <span class="at">--release-only</span></span></code></pre></div>
+<p>This runs through:</p>
+<ul>
+<li>§6.P Gates 1+2+3 (versionCode monotonic, CHANGELOG entry, snapshot
+file)</li>
+<li>Phase-1 Gate 4 (pepper rotated — the script refuses if its SHA-256
+is in
+<code>.lava-ci-evidence/distribute-changelog/firebase-app-distribution/pepper-history.sha256</code>)</li>
+<li>Phase-1 Gate 5 (<code>LAVA_AUTH_CURRENT_CLIENT_NAME</code> matches
+<code>android-${APP_VERSION}-${APP_VERSION_CODE}</code> AND appears in
+<code>LAVA_AUTH_ACTIVE_CLIENTS</code>)</li>
+</ul>
+<p>After upload, both <code>last-version</code> and
+<code>pepper-history.sha256</code> are updated so the next session is
+gated by them.</p>
+<h3 id="9-tag-the-release">9. Tag the release</h3>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ex">./scripts/tag.sh</span> Lava-Android-1.2.7-1027</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./scripts/tag.sh</span> Lava-API-Go-2.1.0-2100</span></code></pre></div>
+<p><code>scripts/tag.sh</code> requires §6.I matrix-gate evidence
+(<code>.lava-ci-evidence/Lava-Android-1.2.7-1027/real-device-verification.md</code>)
+to operate. See the §6.I clause in root <code>CLAUDE.md</code>.</p>
+<h3 id="10-post-distribute-audit">10. Post-distribute audit</h3>
+<p>After ≥95% of installs are on the new version (verifiable via
+Firebase Analytics or Crashlytics version distribution), retire the
+previous release:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode ini"><code class="sourceCode ini"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Move from ACTIVE to RETIRED</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="dt">LAVA_AUTH_RETIRED_CLIENTS</span><span class="ot">=</span><span class="st">android-1.2.6-1026:&lt;previous-uuid&gt;</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="dt">LAVA_AUTH_ACTIVE_CLIENTS</span><span class="ot">=</span><span class="st">android-1.2.7-1027:${NEW_UUID}</span></span></code></pre></div>
+<p>Restart lava-api-go so the new allowlist takes effect. Old APKs now
+receive <code>426 Upgrade Required</code> with min-version JSON; the
+client surfaces "please upgrade" dialogs.</p>
+<hr />
+<h2 id="mid-cycle-leak-response">Mid-cycle leak response</h2>
+<p>If an active UUID is leaked between releases (e.g. detected via API
+abuse, brute-force-rate spike, or a tester's APK
+reverse-engineered):</p>
+<ol type="1">
+<li>Generate a NEW UUID + pepper for an emergency release (steps 1-2
+above).</li>
+<li>Skip directly to step 8 (move the leaked entry from ACTIVE to
+RETIRED) BEFORE the new release ships. Old APKs now get
+<code>426</code>.</li>
+<li>Build + distribute the new release ASAP per steps 4-9.</li>
+</ol>
+<p>The window between (a) marking RETIRED and (b) shipping the new APK
+is when honest users on the leaked release see the upgrade dialog. Keep
+this window short.</p>
+<hr />
+<h2 id="rotation-contract-guarantees">Rotation contract guarantees</h2>
+<ul>
+<li><strong>Re-signed-APK fail-closed.</strong> The build-time HKDF salt
+is SHA-256(signing-cert-DER)[:16]. A re-signed APK has a different cert
+→ different hash → different derived key → AES-GCM decrypt fails closed
+at request time (<code>AEADBadTagException</code> propagates as
+<code>IOException</code>).</li>
+<li><strong>Pepper rotation invalidates extraction.</strong> A
+reverse-engineer who extracts the UUID + pepper from version N has N's
+encryption blob, but version N+1 ships a fresh pepper, so version N's
+plaintext doesn't decrypt N+1's blob. The window for an extracted secret
+is one release.</li>
+<li><strong>Active vs retired distinction.</strong> A retired UUID
+returns 426 (no backoff increment — the user is honest, just outdated).
+An unknown UUID returns 401 + per-IP backoff (the per-key fixed-step
+ladder primitive in
+<code>submodules/ratelimiter/pkg/ladder</code>).</li>
+</ul>
+<hr />
+<h2 id="constitutional-bindings">Constitutional bindings</h2>
+<ul>
+<li>§6.R — every value in this runbook (UUIDs, peppers, allowlists)
+comes from <code>.env</code>, never tracked source.</li>
+<li>§6.H — <code>.env</code> is gitignored; never committed.</li>
+<li>§6.G — every Android release MUST pass the §6.I emulator-matrix gate
+before tagging.</li>
+<li>§6.J — the Compose UI Challenge Tests C15+C16 (Phase 13) are the
+load-bearing Sixth Law clause-4 acceptance gate for this auth
+feature.</li>
+<li>§6.P — <code>firebase-distribute.sh</code> enforces monotonic
+versionCode + CHANGELOG entry + snapshot presence.</li>
+<li>Phase-1 Gates 4+5 — pepper rotation + client-name consistency (added
+2026-05-06).</li>
+</ul>
+</body>
+</html>

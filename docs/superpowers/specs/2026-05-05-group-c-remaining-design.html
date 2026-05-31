@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-05-05-group-c-remaining-design</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1
+id="group-c-remaining--network-simulation--screenshot-on-failure-design">Group
+C Remaining — Network Simulation + Screenshot-on-Failure Design</h1>
+<blockquote>
+<p><strong>Status:</strong> Design approved (operator, 2026-05-05 — "all
+good" on the A.3 / B.1 / C.2 recommendations after Phase 5 SSH/QMP impls
+landed). Implementation pending — subagent-driven execution. Branch:
+Containers <code>lava-pin/2026-05-07-pkg-vm</code> (extends the existing
+in-flight branch).</p>
+</blockquote>
+<blockquote>
+<p><strong>Forensic anchor.</strong> The Group B-pkg-vm closure JSON
+listed three Group C candidates: AVD image-cache management (delivered
+via the bundled pkg/vm + image-cache spec, closing §6.K-debt), network
+simulation per AVD/VM, and hardware-screenshot capture per row. The
+first landed in a separate cycle; the other two are bundled here as the
+final piece of Group C.</p>
+</blockquote>
+<h2 id="1-scope">1. Scope</h2>
+<h3 id="11-in-scope">1.1 In scope</h3>
+<ul>
+<li><strong>Network conditions per row</strong> (component A.3 — profile
++ custom override). 8 named profiles map to (downKbps, upKbps,
+latencyMS, lossPercent) tuples; CLI override flags supersede the profile
+when set. Applied AFTER guest boot completes, BEFORE the test/script
+runs.</li>
+<li><strong>Screenshot capture on test failure</strong> (component B.1).
+When <code>row.Passed == false</code>, capture a screenshot of the
+guest's framebuffer and save it under
+<code>&lt;evidence-dir&gt;/&lt;row-id&gt;/screenshot-on-failure.{png,ppm}</code>.</li>
+<li><strong>Both pkg/emulator AND pkg/vm coverage</strong> (component
+C.2 — symmetric). Same field names + flags + behavior across both
+packages.</li>
+<li><strong>CLI surfaces.</strong> Both <code>cmd/emulator-matrix</code>
+and <code>cmd/vm-matrix</code> gain the new flags. Lava-side wrappers
+(<code>scripts/run-emulator-tests.sh</code>,
+<code>scripts/run-vm-{signing,distro}-matrix.sh</code>) forward
+them.</li>
+</ul>
+<h3 id="12-out-of-scope-deferred">1.2 Out of scope (deferred)</h3>
+<ul>
+<li>Real-time network condition changes mid-test (e.g., simulate "wifi
+drop at second 30"). Static-for-the-test conditions only.</li>
+<li>Always-capture screenshots (B.2/B.3) — only on-failure for
+v0.1.</li>
+<li>PCAP packet capture per row.</li>
+<li>Per-row video recording.</li>
+<li>DNS / DHCP / VPN simulation beyond bandwidth/latency/loss.</li>
+</ul>
+<h3 id="13-non-goals">1.3 Non-goals</h3>
+<ul>
+<li><strong>Not</strong> a re-design of any existing matrix-runner
+internals — both new features integrate via small additions to
+<code>runOne</code> (between WaitForBoot/WaitForReady and
+RunInstrumentation/Run for network apply; after Run for
+screenshot).</li>
+<li><strong>Not</strong> a relaxation of any existing clause. Anti-bluff
+posture applied: every test asserts on user-visible / forensic state
+(the actual bandwidth/latency/loss applied; the actual screenshot file
+existing on disk with non-empty bytes).</li>
+</ul>
+<h2 id="2-architecture">2. Architecture</h2>
+<pre><code>Containers (branch lava-pin/2026-05-07-pkg-vm — extends current HEAD)
+
+  pkg/emulator/
+    types.go         + NetworkConditions{ DownKbps, UpKbps, LatencyMS, LossPercent }
+                     + MatrixConfig.NetworkProfile string
+                     + MatrixConfig.NetworkOverride NetworkConditions
+                     + MatrixConfig.CaptureScreenshotOnFailure bool
+                     + AVDRow.NetworkProfile string  (recorded in attestation)
+                     + AVDRow.ScreenshotPath string  (relative to evidence dir; empty if not captured)
+    network.go       (new) — LookupNetworkProfile, mergeNetworkConditions(profile, override),
+                     applyNetworkConditions(ctx, executor, serial, conditions) via adb emu console
+                     `network speed &lt;kbps&gt;` and `network delay &lt;ms&gt;` commands.
+    screenshot.go    (new) — CaptureScreenshot(ctx, executor, serial, dstPath) via
+                     `adb -s &lt;serial&gt; exec-out screencap -p` writing PNG bytes.
+    matrix.go        runOne integration: applyNetworkConditions after WaitForBoot,
+                     CaptureScreenshot when row.Passed == false (gated on
+                     config.CaptureScreenshotOnFailure).
+    network_test.go  (new) + screenshot_test.go (new) — fakes-driven unit tests.
+
+  pkg/vm/
+    types.go         analogous fields on VMMatrixConfig + VMTestResult
+    network.go       (new) — applyNetworkConditionsVM via SSH-in `tc qdisc add dev eth0
+                     root netem delay &lt;ms&gt;ms rate &lt;kbps&gt;kbit loss &lt;%&gt;%` after
+                     WaitForReady. Network interface name resolved via SSH `ip route
+                     | awk &#39;/^default/{print $5}&#39;`.
+    screenshot.go    (new) — CaptureScreenshotVM via QMP `screendump &lt;path&gt;` to a
+                     guest-side temp path; QMP returns; then SCP-download from guest.
+                     QEMU&#39;s screendump produces PPM (no native PNG; operator can
+                     convert via ImageMagick / eog handles PPM).
+    matrix.go        runOne integration: same shape as pkg/emulator.
+    network_test.go (new) + screenshot_test.go (new) — fakes-driven unit tests.
+
+  cmd/emulator-matrix/main.go + cmd/vm-matrix/main.go
+    Both gain:
+      --network-profile &lt;name&gt;             one of: edge, 2g, 3g, 4g, lte, wifi, ethernet, none
+      --network-bandwidth-down &lt;kbps&gt;      override
+      --network-bandwidth-up   &lt;kbps&gt;      override
+      --network-latency        &lt;ms&gt;        override
+      --network-loss           &lt;%&gt;         override (float, 0.0-100.0)
+      --capture-screenshot-on-failure      bool, default true
+
+Lava parent (branch master)
+
+  scripts/run-emulator-tests.sh
+  scripts/run-vm-signing-matrix.sh
+  scripts/run-vm-distro-matrix.sh
+    forward the new flags 1:1 (existing extra_args pattern).
+
+  No new tests required at Lava level — the contract is &quot;flags forwarded&quot;.
+  The Containers tests cover behavior.</code></pre>
+<h3 id="network-profile-values">Network profile values</h3>
+<div class="sourceCode" id="cb2"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">var</span> networkProfiles <span class="op">=</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span>NetworkConditions<span class="op">{</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;edge&quot;</span><span class="op">:</span>     <span class="op">{</span>DownKbps<span class="op">:</span> <span class="dv">240</span><span class="op">,</span>    UpKbps<span class="op">:</span> <span class="dv">200</span><span class="op">,</span>    LatencyMS<span class="op">:</span> <span class="dv">840</span><span class="op">,</span> LossPercent<span class="op">:</span> <span class="fl">1.0</span><span class="op">},</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;2g&quot;</span><span class="op">:</span>       <span class="op">{</span>DownKbps<span class="op">:</span> <span class="dv">50</span><span class="op">,</span>     UpKbps<span class="op">:</span> <span class="dv">50</span><span class="op">,</span>     LatencyMS<span class="op">:</span> <span class="dv">500</span><span class="op">,</span> LossPercent<span class="op">:</span> <span class="fl">2.0</span><span class="op">},</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;3g&quot;</span><span class="op">:</span>       <span class="op">{</span>DownKbps<span class="op">:</span> <span class="dv">1500</span><span class="op">,</span>   UpKbps<span class="op">:</span> <span class="dv">750</span><span class="op">,</span>    LatencyMS<span class="op">:</span> <span class="dv">100</span><span class="op">,</span> LossPercent<span class="op">:</span> <span class="fl">0.5</span><span class="op">},</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;4g&quot;</span><span class="op">:</span>       <span class="op">{</span>DownKbps<span class="op">:</span> <span class="dv">6000</span><span class="op">,</span>   UpKbps<span class="op">:</span> <span class="dv">1500</span><span class="op">,</span>   LatencyMS<span class="op">:</span> <span class="dv">50</span><span class="op">,</span>  LossPercent<span class="op">:</span> <span class="fl">0.1</span><span class="op">},</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;lte&quot;</span><span class="op">:</span>      <span class="op">{</span>DownKbps<span class="op">:</span> <span class="dv">12000</span><span class="op">,</span>  UpKbps<span class="op">:</span> <span class="dv">3000</span><span class="op">,</span>   LatencyMS<span class="op">:</span> <span class="dv">20</span><span class="op">,</span>  LossPercent<span class="op">:</span> <span class="fl">0.05</span><span class="op">},</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;wifi&quot;</span><span class="op">:</span>     <span class="op">{</span>DownKbps<span class="op">:</span> <span class="dv">50000</span><span class="op">,</span>  UpKbps<span class="op">:</span> <span class="dv">10000</span><span class="op">,</span>  LatencyMS<span class="op">:</span> <span class="dv">5</span><span class="op">,</span>   LossPercent<span class="op">:</span> <span class="fl">0.01</span><span class="op">},</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;ethernet&quot;</span><span class="op">:</span> <span class="op">{</span>DownKbps<span class="op">:</span> <span class="dv">100000</span><span class="op">,</span> UpKbps<span class="op">:</span> <span class="dv">100000</span><span class="op">,</span> LatencyMS<span class="op">:</span> <span class="dv">1</span><span class="op">,</span>   LossPercent<span class="op">:</span> <span class="fl">0.0</span><span class="op">},</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;none&quot;</span><span class="op">:</span>     <span class="op">{},</span>  <span class="co">// no shaping; LookupNetworkProfile returns zero-value</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Override merging: any non-zero override field wins over the profile's
+value. <code>none</code> profile + zero overrides = no shaping applied
+(early return).</p>
+<h2 id="3-data-flow">3. Data flow</h2>
+<h3 id="successful-gating-run">Successful gating run</h3>
+<pre><code>operator: ./scripts/run-emulator-tests.sh \
+            --network-profile 4g \
+            --network-loss 0.5 \
+            ...
+
+scripts/run-emulator-tests.sh
+  └── forwards --network-profile 4g --network-loss 0.5 to cmd/emulator-matrix
+
+cmd/emulator-matrix
+  └── for each AVD:
+      ├── Boot → WaitForBoot (Android up)
+      ├── applyNetworkConditions(serial, conditions) — adb emu network speed/delay
+      ├── Install APK
+      ├── RunInstrumentation
+      ├── if !row.Passed &amp;&amp; CaptureScreenshotOnFailure:
+      │     CaptureScreenshot(serial, evidence-dir/&lt;avd&gt;/screenshot-on-failure.png)
+      ├── append AVDRow with NetworkProfile + (if captured) ScreenshotPath
+      └── Teardown
+  └── writeAttestation includes per-row network_profile + screenshot_path fields
+
+scripts/tag.sh (unchanged) — gates on existing schema; the 2 new fields are
+  additive and don&#39;t affect the Group B gates.</code></pre>
+<h2 id="4-error-handling">4. Error handling</h2>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Unknown <code>--network-profile &lt;name&gt;</code></td>
+<td>exit 2 with "unknown network profile: %s" + list of valid names</td>
+</tr>
+<tr>
+<td>applyNetworkConditions fails (adb/SSH error)</td>
+<td>row's BootError records "network conditions apply failed: <err>";
+row Passed=false</td>
+</tr>
+<tr>
+<td>CaptureScreenshot fails (adb error / screendump error)</td>
+<td>log warning to stderr; row.ScreenshotPath stays empty; row.Passed
+signal NOT changed (screenshot is forensic-extra, not gating)</td>
+</tr>
+<tr>
+<td>Screenshot disk-write fails</td>
+<td>same — log + skip; non-fatal</td>
+</tr>
+<tr>
+<td><code>--network-bandwidth-down &lt;kbps&gt;</code> with negative
+value</td>
+<td>exit 2 at flag-parse time</td>
+</tr>
+<tr>
+<td><code>--network-loss &lt;%&gt;</code> outside [0, 100]</td>
+<td>exit 2</td>
+</tr>
+<tr>
+<td><code>--capture-screenshot-on-failure=false</code> with
+row.Passed=false</td>
+<td>no screenshot written (operator opted out)</td>
+</tr>
+<tr>
+<td>Profile + override merge produces zero-everything</td>
+<td>no shaping applied (early return; this is the <code>none</code>
+profile path)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="5-testing">5. Testing</h2>
+<table>
+<thead>
+<tr>
+<th>Test</th>
+<th>Asserts</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>TestLookupNetworkProfile_Known</code></td>
+<td>each of 8 profile names returns expected (DownKbps, UpKbps,
+LatencyMS, LossPercent)</td>
+</tr>
+<tr>
+<td><code>TestLookupNetworkProfile_Unknown_ReturnsError</code></td>
+<td>"unknown network profile" error</td>
+</tr>
+<tr>
+<td><code>TestMergeNetworkConditions_OverrideWinsPerField</code></td>
+<td>profile=4g (down=6000), override.DownKbps=12345 →
+result.DownKbps=12345; other fields inherit from profile</td>
+</tr>
+<tr>
+<td><code>TestApplyNetworkConditions_NoOpOnZeroes</code></td>
+<td>conditions all-zero → adb emu network commands NOT issued</td>
+</tr>
+<tr>
+<td><code>TestApplyNetworkConditions_AdbEmuConsoleCommandsIssued_Android</code></td>
+<td>conditions=4g profile → fakeExecutor records
+<code>adb emu console "network speed 6000:1500"</code> +
+<code>network delay 50</code> (or analogous emulator-console
+invocations)</td>
+</tr>
+<tr>
+<td><code>TestApplyNetworkConditionsVM_TCQdiscIssued</code></td>
+<td>conditions=4g → fake SSH session records
+<code>tc qdisc add dev eth0 root netem delay 50ms rate 6000kbit loss 0.1%</code></td>
+</tr>
+<tr>
+<td><code>TestCaptureScreenshot_Android_WritesPNGBytes</code></td>
+<td>adb screencap fake produces PNG bytes; CaptureScreenshot writes them
+to dst path</td>
+</tr>
+<tr>
+<td><code>TestCaptureScreenshot_AndroidAdbError_LogsWarningReturnsNil</code></td>
+<td>when adb fails, function returns nil (forensic-only) and does NOT
+propagate the error to row.Passed</td>
+</tr>
+<tr>
+<td><code>TestCaptureScreenshotVM_QMPScreendumpIssued</code></td>
+<td>QMP fake records <code>screendump &lt;path&gt;</code> command</td>
+</tr>
+<tr>
+<td><code>TestRunOne_NetworkConditionsAppliedBetweenBootAndTest</code></td>
+<td>runOne with --network-profile 4g → apply happens after WaitForBoot,
+BEFORE Install/RunInstrumentation</td>
+</tr>
+<tr>
+<td><code>TestRunOne_ScreenshotCapturedOnRowFailure</code></td>
+<td>runOne with row.Passed=false + CaptureScreenshotOnFailure=true →
+screenshot file exists at expected path</td>
+</tr>
+<tr>
+<td><code>TestRunOne_ScreenshotSkippedOnRowSuccess</code></td>
+<td>runOne with row.Passed=true → screenshot NOT captured</td>
+</tr>
+<tr>
+<td><code>TestRunOne_ScreenshotSkippedWhenFlagFalse</code></td>
+<td>runOne with row.Passed=false + CaptureScreenshotOnFailure=false →
+screenshot NOT captured</td>
+</tr>
+</tbody>
+</table>
+<p>≥4 falsifiability rehearsals across the test suite.</p>
+<h2 id="6-order-of-operations">6. Order of operations</h2>
+<table>
+<thead>
+<tr>
+<th>Phase</th>
+<th>Branch</th>
+<th>Files</th>
+<th>Commits</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>A.</strong> Containers code</td>
+<td><code>lava-pin/2026-05-07-pkg-vm</code> (extends)</td>
+<td><code>pkg/emulator/{types,network,screenshot,matrix,network_test,screenshot_test,matrix_test}.go</code>,
+<code>pkg/vm/{types,network,screenshot,matrix,network_test,screenshot_test,matrix_test}.go</code>,
+<code>cmd/{emulator,vm}-matrix/main.go</code></td>
+<td>1 commit</td>
+</tr>
+<tr>
+<td><strong>B.</strong> Lava parent</td>
+<td><code>master</code></td>
+<td><code>scripts/run-emulator-tests.sh</code>,
+<code>scripts/run-vm-{signing,distro}-matrix.sh</code>,
+<code>submodules/containers</code> gitlink bump</td>
+<td>1 commit</td>
+</tr>
+</tbody>
+</table>
+<p>Total: <strong>1 Containers commit + 1 Lava parent commit</strong>.
+Subagent-driven; 4-mirror push verified live.</p>
+<h2 id="7-constitutional-bindings">7. Constitutional bindings</h2>
+<ul>
+<li><strong>Sixth Law clauses 1-5.</strong> Tests assert on user-visible
+behavior: the actual adb/tc commands issued, the actual screenshot
+file's existence + non-empty bytes, the actual network_profile field in
+the attestation row.</li>
+<li><strong>Clause 6.I.</strong> Per-row schema gains
+<code>network_profile</code> + <code>screenshot_path</code>; tag.sh's
+existing Group B gates are unchanged (new fields are additive).</li>
+<li><strong>Clause 6.J/6.L.</strong> Anti-bluff posture:
+screenshot-on-failure is forensic gold for diagnosing broken tests; the
+network-conditions apply is observable on the emulator console / via tc
+inside the guest. No silent failures.</li>
+<li><strong>Clause 6.M.</strong> No new host-stability concerns.
+<code>tc qdisc</code> runs INSIDE the guest, not on the host.</li>
+<li><strong>Clause 6.N.</strong> The Containers commit's body carries ≥4
+falsifiability rehearsals per the stricter §6.N variant.</li>
+<li><strong>Decoupled Reusable Architecture.</strong> Network profiles +
+screenshot capture are generic emulator/VM concerns; they live in
+Containers. Lava-side scripts forward the flags.</li>
+</ul>
+<h2 id="8-self-review-checklist">8. Self-review checklist</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" checked="" /><strong>Placeholder
+scan.</strong> No "TBD" / "TODO" / "implement later" in the spec
+body.</label></li>
+<li><label><input type="checkbox" checked="" /><strong>Internal
+consistency.</strong> Architecture diagram, components, data flow,
+testing all reference the same field names (<code>NetworkProfile</code>,
+<code>NetworkOverride</code>, <code>CaptureScreenshotOnFailure</code>,
+<code>ScreenshotPath</code>), the same 8 profile names, the same flag
+names.</label></li>
+<li><label><input type="checkbox" checked="" /><strong>Scope
+check.</strong> Bundled (network sim + screenshot) is appropriate — both
+are runOne-integration concerns. Not too large for one cycle (1
+Containers commit + 1 Lava parent commit).</label></li>
+<li><label><input type="checkbox" checked="" /><strong>Ambiguity
+check.</strong> Network condition apply ordering ("after WaitForBoot,
+before Install/RunInstrumentation") stated in 3 places (component A.3,
+data flow, testing table). Screenshot capture trigger ("when
+row.Passed==false AND CaptureScreenshotOnFailure==true") stated in 3
+places (component B.1, error handling table, testing
+table).</label></li>
+</ul>
+<hr />
+<p><strong>Spec status:</strong> approved. Plan written inline (next
+section). Implementation dispatched to a single subagent (smaller scope
+than Group A-prime / B / pkg-vm so the per-task review pattern collapses
+to a single implementer + spec/quality review).</p>
+</body>
+</html>

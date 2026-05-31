@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>check-no-guessing-vocabulary.sh</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1
+id="scriptscheck-no-guessing-vocabularysh--user-guide"><code>scripts/check-no-guessing-vocabulary.sh</code>
+— User Guide</h1>
+<p><strong>Last verified:</strong> 2026-05-17 (1.2.30-1050 tooling
+cycle) <strong>Inheritance:</strong> HelixConstitution §11.4.6
+(no-guessing-vocabulary mandate) + Lava §6.AD.6 (extracted gate)</p>
+<h2 id="overview">Overview</h2>
+<p>Standalone gate that scans tracked status / closure / forensic-anchor
+files for forbidden guessing vocabulary. Extracted from
+<code>scripts/check-constitution.sh</code>'s embedded block on
+2026-05-17 so the gate is independently testable.</p>
+<p>Forbidden words: <code>likely</code>, <code>probably</code>,
+<code>maybe</code>, <code>might</code>, <code>possibly</code>,
+<code>presumably</code>, <code>seems to</code>, <code>appears to</code>,
+<code>seemingly</code>, <code>apparently</code>, <code>perhaps</code>,
+<code>supposedly</code>, <code>conjectured</code>.</p>
+<p>When a forbidden word appears in a scanned file, the gate fires
+unless one of these whitelist conditions matches the SAME LINE:</p>
+<ol type="1">
+<li>The line is prefixed with <code>UNCONFIRMED:</code> /
+<code>UNKNOWN:</code> / <code>PENDING_FORENSICS:</code> (any case).</li>
+<li>The line contains a verbatim-quote marker:
+<code>forensic anchor</code> / <code>verbatim operator|agent|user</code>
+/ <code>historical quote</code>.</li>
+</ol>
+<p>These exemptions exist so:</p>
+<ul>
+<li>Hypothesis lines explicitly marked as PENDING evidence pass
+(tracked-task discipline).</li>
+<li>Forensic anchors that quote prior operator/agent output verbatim
+aren't flagged for the historical content's vocabulary.</li>
+</ul>
+<h2 id="why-this-gate-exists">Why this gate exists</h2>
+<p>Per HelixConstitution §11.4.6: "Either prove the cause with captured
+evidence and state it as fact, OR explicitly mark
+<code>UNCONFIRMED:</code> / <code>UNKNOWN:</code> /
+<code>PENDING_FORENSICS:</code> with a tracked-task ID." The gate
+enforces this discipline at pre-push time so closure logs and forensic
+anchors don't drift into hedged language that would obscure what's
+actually known vs. assumed.</p>
+<h2 id="usage">Usage</h2>
+<h3 id="default--scan-production-paths">Default — scan production
+paths</h3>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> scripts/check-no-guessing-vocabulary.sh</span></code></pre></div>
+<p>Scans:</p>
+<ul>
+<li><code>.lava-ci-evidence/sixth-law-incidents/</code></li>
+<li><code>.lava-ci-evidence/crashlytics-resolved/</code></li>
+</ul>
+<p>Across <code>*.md</code> + <code>*.json</code> files.</p>
+<h3 id="custom-scan-paths-hermetic-test-mode">Custom scan paths
+(hermetic-test mode)</h3>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="va">LAVA_NO_GUESSING_SCAN_PATHS</span><span class="op">=</span><span class="st">&quot;path1:path2:path3&quot;</span> <span class="fu">bash</span> scripts/check-no-guessing-vocabulary.sh</span></code></pre></div>
+<p>Colon-separated list. Used by
+<code>tests/check-constitution/test_no_guessing_vocabulary.sh</code> to
+scan fixture dirs without touching <code>.lava-ci-evidence/</code>.</p>
+<h3 id="custom-repo-root-hermetic-test-mode">Custom repo root
+(hermetic-test mode)</h3>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="va">LAVA_REPO_ROOT</span><span class="op">=</span><span class="st">&quot;/path/to/synthetic/repo&quot;</span> <span class="fu">bash</span> scripts/check-no-guessing-vocabulary.sh</span></code></pre></div>
+<h2 id="exit-codes">Exit codes</h2>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>Gate clean (no forbidden vocabulary found)</td>
+</tr>
+<tr>
+<td>1</td>
+<td>At least one violation (paths printed to stderr)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="integration">Integration</h2>
+<p><code>scripts/check-constitution.sh</code> (line ~575) delegates to
+this script. The pre-push hook invokes
+<code>check-constitution.sh</code> which transitively runs this
+gate.</p>
+<h2 id="6j-anti-bluff-falsifiability-rehearsal">§6.J anti-bluff
+falsifiability rehearsal</h2>
+<ol type="1">
+<li>Add a tracked file under
+<code>.lava-ci-evidence/sixth-law-incidents/</code> with a line like:
+<code>The root cause likely involves a race condition</code>.</li>
+<li>Run <code>bash scripts/check-no-guessing-vocabulary.sh</code> →
+expect exit 1 + the file listed in stderr.</li>
+<li>Prepend <code>UNCONFIRMED:</code> to the line. Re-run → expect exit
+0.</li>
+<li>Remove the test file.</li>
+</ol>
+<p>The deliberate-break rehearsal proves the gate fires on real
+violations and that the whitelist works.</p>
+<h2 id="hermetic-test">Hermetic test</h2>
+<p><code>tests/check-constitution/test_no_guessing_vocabulary.sh</code>
+— 7 fixtures covering:</p>
+<ol type="1">
+<li>Clean fixture passes</li>
+<li>Forbidden word without whitelist → reject</li>
+<li><code>UNCONFIRMED:</code> whitelist passes</li>
+<li><code>PENDING_FORENSICS:</code> whitelist passes</li>
+<li>Verbatim-quote exemption (line-scoped) passes</li>
+<li>Multiple scan paths via colon separator</li>
+<li>Real-repo sanity check</li>
+</ol>
+<p>Run the test:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> tests/check-constitution/test_no_guessing_vocabulary.sh</span></code></pre></div>
+<h2 id="why-intentionally-not-scanned">Why intentionally NOT
+scanned</h2>
+<p>The gate intentionally does NOT scan <code>CLAUDE.md</code> /
+<code>AGENTS.md</code> / <code>CONSTITUTION.md</code> because those
+documents must DESCRIBE the forbidden vocabulary as part of the mandate
+itself. The gate exists for future status reports / closure logs /
+commit-template files, not the rule's own text.</p>
+<p><code>Classification:</code> project-specific (gate's content list is
+universal per HelixConstitution §11.4.6 but scan-path defaults are
+Lava-specific).</p>
+</body>
+</html>

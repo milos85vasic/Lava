@@ -1,0 +1,1671 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>CONTINUATION</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1 id="lava--work-continuation-index">Lava — Work Continuation
+Index</h1>
+<p><strong>Purpose:</strong> this single file is the source-of-truth for
+resuming the project's work across any CLI session. A fresh agent reads
+this file first, locates the active phase, and continues from there.
+Everything ahead of HEAD is recorded; everything behind HEAD is in
+<code>git log</code>.</p>
+<p><strong>Maintenance:</strong> every release tag, every phase
+completion, every operator directive that changes scope MUST update this
+file in the same commit so the index stays trustworthy. Stale state in
+this file is itself a §6.J spirit issue — the file claims a guarantee,
+the repo has drifted, the agent acts on the claim.</p>
+<blockquote>
+<p><strong>Last updated:</strong> 2026-05-31 (§6.L 68th invocation),
+<strong>flaky-test fix + §6.S table re-sync + subagent-driven
+constitution/ticket/submodule cycle (IN PROGRESS).</strong> Operator
+directive: fetch+review constitution submodule, add+incorporate any
+newly-mandated submodules (submodules-driven), define the tickets SQLite
+DB key <strong>"LVA"</strong> +
+Issues/Fixed/Issues_Summary/Fixed_Summary docs with PDF/HTML/DOCX
+exports, create many new tests of all types with REAL evidence (zero
+bluffs), keep anti-bluff mandate in all governance docs, commit+push all
+to all upstreams, endless autonomous loop. <strong>Commit 1 (this
+commit):</strong> (a) fixed the 67th-cycle flaky
+<code>CredentialsViewModelTest &gt; select provider updates selectedProvider</code>
+— replaced the fixed-<code>awaitState()</code>-count assumption with a
+bounded await-until-<code>selectedProvider=="rutracker"</code> loop (the
+Room <code>Flow</code> <code>.first()</code> in <code>load()</code>
+resumes off the StandardTestDispatcher, so emission count is
+non-deterministic under load); FALSIFIABILITY-REHEARSED (broke
+<code>SelectProvider</code> reduce →
+<code>AssertionFailedError: expected:&lt;rutracker&gt; but was:&lt;null&gt;</code>,
+localized to that 1 test → reverted → green); (b)
+<code>.codegraph/*.pid</code> gitignore gap closed
+(<code>daemon.pid</code> was untracked-but-not-ignored — §11.4.30); (c)
+§0 orientation + §3 pin tables re-synced to HEAD <code>23c508e9</code>
+(they had drifted to <code>0c87b6ae</code>/CamelCase names/1.2.22 — a
+§6.S violation now corrected). <strong>In flight (later commits this
+cycle):</strong> constitution-pin review (CONST-049), missing-submodule
+incorporation, LVA ticket DB + export pipeline, new-test creation, full
+sweep. §6.L counter 67 → 68.</p>
+<p><strong>Last updated:</strong> 2026-05-20 (§6.L 67th invocation),
+<strong>rebuild + test cycle — honest §6.Z/§6.X blocker on the Firebase
+redistribute.</strong> Operator directive: rebuild all apps/services +
+boot + execute all tests/Challenges + Firebase redistribute. DONE:
+<code>lava-api-go</code> rebuilt (<code>bin/lava-api-go</code> +
+<code>bin/healthprobe</code>); Lava debug APK + androidTest APK rebuilt
+(BUILD SUCCESSFUL); JVM unit-test suite executed
+(<code>./gradlew testDebugUnitTest --continue</code>) — green except ONE
+flaky test discovered:
+<code>CredentialsViewModelTest &gt; select provider updates selectedProvider</code>
+failed in-suite, passed 6/6 isolated (a §11.4.50
+deterministic-consistency defect — root-cause hypothesis: Room
+<code>Flow</code> <code>.first()</code> resuming off the virtual test
+dispatcher; recorded honestly at
+<code>.lava-ci-evidence/sixth-law-incidents/2026-05-20-flaky-credentialsviewmodeltest.json</code>,
+fix owed as a focused follow-up, NOT masked). <strong>§6.H credential
+incident:</strong> a buggy <code>${LAVA_FIREBASE_TOKEN:-UNSET}</code>
+recon command printed the Firebase CI token into the session transcript
+(NOT committed to git) — incident at
+<code>.lava-ci-evidence/sixth-law-incidents/2026-05-20-firebase-token-echo-leak.json</code>;
+<strong>operator MUST rotate the token</strong>
+(<code>firebase logout</code> → <code>firebase login:ci</code>).
+<strong>§6.X-debt darwin/arm64 sub-debt RESOLVED</strong> — the operator
+directed extending the emulator for per-OS acceleration; DONE
+(Containers <code>c1871138</code>+<code>6aff7ea8</code>: per-OS-accel
+model
+<code>AccelProfileForOS</code>/<code>ResolveRunner</code>/<code>GateEligibleForOS</code>
++ <code>emulator-matrix --runner=auto</code>;
+<code>scripts/run-challenge-matrix.sh</code> OS-aware). macOS's
+accelerated gate runner is host-direct+HVF (a Linux container cannot
+reach the host-only HVF API). PROVEN: C00 cold-start canary + the full
+37-class Challenge suite ran on Pixel_8/API35 = <strong>43 pass / 3
+credential-skip (C02/C09/C10) / 0 fail</strong> — one stale test
+(<code>Challenge26RutrackerMainAbsentFromServerListTest</code>, waited
+for the SP-4-removed "Server" menu section) repaired +
+falsifiability-rehearsed. The §6.Z redistribute is now genuinely
+unblocked on this macOS host; the redistribute itself is pending an
+operator decision — the app APK is byte-identical to the
+already-distributed 1.2.33-1053 (no app-user-facing code changed this
+session). §6.L counter 66 → 67.</p>
+<p><strong>Last updated:</strong> 2026-05-20 (§6.L 66th invocation),
+<strong>§6.N bluff-hunt — 2 more existing Lava tests verified
+genuine.</strong> Continuing the §6.N cadence beyond the 65th:
+<code>core/domain/.../ProbeMirrorUseCaseTest</code> (UseCase layer) and
+<code>core/preferences/.../EndpointConverterTest</code> (converter
+layer) were hunted by mutating their production code —
+<code>ProbeMirrorUseCase</code>'s reachable range
+<code>200..399</code>→<code>200..599</code>, and
+<code>EndpointConverter</code>'s GoApi <code>fromJson</code> port forced
+to <code>DEFAULT_PORT</code>. Both produced localized test failures
+(1-of-3 and 2-of-10) and passed fully after <code>git checkout</code>
+revert. Verdict: both GENUINE; 0 bluffs. Across the 65th + 66th, 3
+existing Lava tests (ViewModel / UseCase / converter layers) are
+§6.N-verified genuine. Evidence:
+<code>.lava-ci-evidence/bluff-hunt/2026-05-20-cycle66-usecase-converter.json</code>.
+§6.L counter 65 → 66.</p>
+<p><strong>Last updated:</strong> 2026-05-20 (§6.L 65th invocation),
+<strong>§6.N bluff-hunt — an existing Lava test verified
+genuine.</strong> Per the 65th §6.L wall ("all existing tests and
+Challenges MUST work anti-bluff"), a §6.N.1.1 incident-response
+bluff-hunt of an EXISTING Lava test (not the new codegraph suite):
+<code>feature/login/.../LoginViewModelTest.kt</code> was hunted by
+actually performing its documented mutation —
+<code>serviceUnavailable = null</code> removed from
+<code>LoginViewModel.validateUsername</code>. The test FAILED with the
+predicted <code>AssertionError</code>, localized to exactly the mutated
+code path (the other 2 tests, on untouched paths, passed); mutation
+reverted via <code>git checkout</code>; re-run
+<code>BUILD SUCCESSFUL</code> 3/3. Verdict: GENUINE — the test provably
+catches the production break it covers; 0 bluffs found. Evidence:
+<code>.lava-ci-evidence/bluff-hunt/2026-05-20-codegraph-cycle-loginviewmodel.json</code>.
+§6.L counter 64 → 65.</p>
+<p><strong>Last updated:</strong> 2026-05-20 (§6.L 64th invocation),
+<strong>codegraph backend regression caught by the anti-bluff suite +
+fixed.</strong> A fresh <code>scripts/verify-codegraph.sh --quick</code>
+run FAILED — codegraph's native <code>better-sqlite3</code> binding had
+been disabled (<code>better-sqlite3.disabled</code> in the
+Homebrew-Node-Cellar global install), forcing a WASM fallback that could
+not open the index DB; plus a stray <code>codegraph serve --mcp</code>
+process from a prior run. Fixed: re-enabled native better-sqlite3,
+killed the stray process, rebuilt the index via
+<code>codegraph index</code> (1,182 files / 18,567 nodes — its §11.4.77
+regeneration mechanism), re-verified <code>--quick</code> → 44 pass / 0
+fail. Hardened the suite with a <code>codegraph status</code> pre-flight
+check that fails fast-and-clear on this backend-breakage class;
+<code>docs/CODEGRAPH.md</code> troubleshooting extended. Anti-bluff
+mandate propagation re-audited — present in 4/4 governance files across
+all 17 submodules + constitution + root + lava-api-go. This is the §6.L
+mandate working exactly as designed: the suite refused to bluff when
+codegraph was genuinely broken. §6.L counter 63 → 64.</p>
+<p><strong>Last updated:</strong> 2026-05-20, <strong>codegraph
+code-intelligence incorporated (operator directive; §6.L 63rd
+invocation).</strong> codegraph (<code>@colbymchenry/codegraph</code>
+0.6.8) installed globally via npm (no sudo — §6.U). The Lava domain
+codebase is indexed into a local SQLite semantic graph — 1,182 files
+(973 Kotlin + 196 Go), 18,567 nodes, 21,462 edges;
+<code>submodules/</code>, <code>constitution/</code>,
+<code>releases/</code> and all §6.H secret paths excluded from the index
+(verified: 0 submodule-file leak). The codegraph MCP server is wired
+into all 5 supported CLI agents: Claude Code (<code>.mcp.json</code>),
+OpenCode (<code>opencode.json</code>), Qwen Code
+(<code>.qwen/settings.json</code>), Crush (<code>.crush.json</code>),
+Kimi CLI (<code>~/.kimi/mcp.json</code>). Anti-bluff verification suite
+<code>scripts/verify-codegraph.sh</code> + <code>tests/codegraph/</code>
+(6 layers): layers 01-04 + 06 PASS — index reality, query correctness,
+MCP-protocol JSON-RPC, all-5-agent connectivity, and falsifiability
+(layers 01-03 provably FAIL when the DB is removed, PASS when restored).
+Layer 05 (LLM-driven E2E) — Claude Code PASS (reports the unforgeable
+index node count, obtainable only by calling the
+<code>codegraph_status</code> MCP tool); OpenCode / Kimi CLI / Crush
+SKIP (documented credential/quota gaps in this environment — no Google
+API key / Kimi monthly quota exhausted / Venice.ai account has no
+credits — these are NOT codegraph defects; the integration itself is
+proven by layer 04). <code>docs/CODEGRAPH.md</code> written; design spec
+<code>docs/superpowers/specs/2026-05-20-codegraph-incorporation-design.md</code>.
+<code>QWEN.md</code> (Qwen Code instruction file — a plain-text pointer
+to <code>CLAUDE.md</code>, deliberately zero <code>@</code>-tokens so
+Qwen Code's import processor does not choke) created across repo root +
+18 submodules + <code>lava-api-go</code>. constitution submodule
+fetched+pulled <code>9b52046</code> -&gt; <code>2456605</code>
+(CONST-049 step 1). <strong>§11.4.78 CodeGraph mandate — FULL ECOSYSTEM
+CASCADE COMPLETE.</strong> §11.4.78 (CodeGraph code-intelligence
+mandate) authored into the constitution submodule:
+<code>Constitution.md</code> + mirrored into <code>CLAUDE.md</code> /
+<code>AGENTS.md</code> / <code>QWEN.md</code>; all 16 governance
+artefacts (.md + regenerated .html + .pdf + .docx) updated; constitution
+<code>2456605</code> → <code>208e2c8</code> pushed to all 4 upstreams
+(gitflic, github, gitlab, gitverse) per CONST-049. The §11.4.78 anchor
+cascaded into all 17 owned submodules' <code>CONSTITUTION.md</code> /
+<code>CLAUDE.md</code> / <code>AGENTS.md</code>, with
+<code>QWEN.md</code> created for each — every submodule committed +
+pushed to GitHub + GitLab (helixqa to its single GitHub upstream).
+§11.4.78 also appended to <code>lava-api-go</code>'s
+<code>CLAUDE.md</code> / <code>AGENTS.md</code> /
+<code>CONSTITUTION.md</code> / <code>QWEN.md</code>. All 18 submodule
+pins bumped in the parent. QWEN.md anchors are zero-<code>@</code> so
+Qwen Code's import processor does not choke.**</p>
+<p><strong>Last updated:</strong> 2026-05-18, <em><em>§6.AD-debt FULLY
+DRAINED in 1.2.30-1050 tooling cycle. All three originally-OWED CM-</em>
+items CLOSED this session: <code>CM-SCRIPT-DOCS-SYNC</code> (commit
+<code>11820734</code>), <code>CM-COMMIT-DOCS-EXISTS</code> (commit
+<code>977630c3</code>), <code>CM-SUBAGENT-DELEGATION-AUDIT</code>
+(commit <code>2a0e11f4</code>). Each ships with standalone scanner +
+7-or-8-fixture hermetic test + companion
+<code>docs/scripts/*.sh.md</code> user guide + wrapper integration +
+Bluff-Audit falsifiability rehearsal. The 5 Path-B equivalence-mapped
+items remain CLOSED-BY-EQUIVALENCE per §6.AD.3. Plus: T7 USB disk
+migration today (5G → 108G free on main; 7 dirs symlinked to T7 incl.
+~/.gradle, ~/.cache, ~/.android, Xcode; <code>~/.zshrc</code> updated
+with <code>GRADLE_USER_HOME=/Volumes/T7/Gradle</code>,
+<code>XDG_CACHE_HOME</code>, <code>NPM_CONFIG_CACHE</code>).</em>*</p>
+<p><strong>Sweep tier-A closure (2026-05-17 evening, branch
+<code>sweep-findings-tier-A-2026-05-17</code>):</strong> 8 of the 10
+comprehensive-sweep findings closed in a single coordinated commit
+(Findings #2 + #3 already closed by Bug 2 cascade + Bug 3 fix in prior
+cycles). All fixes falsifiability-rehearsed per §6.J / Seventh Law
+clause 1 (mutation applied → test fails with clear message → mutation
+reverted → test passes). Bluff-Audit stamps recorded in commit body.</p>
+<ul>
+<li><strong>Finding #1 (P0) — ToggleAnonymous persistence</strong>:
+<code>feature/provider_config/.../ProviderConfigViewModel.kt</code> now
+persists via new
+<code>ProviderConfigRepository.setUseAnonymous(...)</code> → Room column
+<code>use_anonymous</code> (Migration 10→11 + schema 11.json). Switch
+state survives process restart.</li>
+<li><strong>Finding #4 (P1) —
+<code>LoginViewModel.serviceUnavailable</code> retype clear</strong>:
+cleared in
+<code>validateUsername</code>/<code>validatePassword</code>/<code>validateCaptcha</code>/<code>onReloadCaptchaClick</code>/<code>onSubmitClick</code>
+reduces.</li>
+<li><strong>Finding #5 (P1) —
+<code>LoginViewModel.ServiceUnavailable</code> stale-captcha
+clear</strong>: branch now sets
+<code>captcha = null, captchaInput = Initial</code> so the rendered
+challenge image doesn't lie when the sid expires.</li>
+<li><strong>Finding #6 (P1) —
+<code>ProviderLoginViewModel.serviceUnavailable</code> clear across
+selectProvider/backToProviders + retype</strong>: symmetric fix to
+Findings #4/#5 on the multi-provider login surface.</li>
+<li><strong>Finding #7 (P1) —
+<code>OnboardingViewModel.onTestAndContinue</code> no more misleading
+"Invalid credentials"</strong>: distinguishes
+<code>loginResult == null</code> (tracker has no auth path) from
+<code>loginResult.state != Authenticated</code> (real auth failure).
+Null path now treated as anonymous → switchTracker + advance.</li>
+<li><strong>Finding #8 (P1) —
+<code>OnboardingViewModel.loadProviders</code> excludes cloned synthetic
+trackers</strong>: filters by syntheticId membership in
+<code>cloned_provider</code>. Clones remain configurable via Provider
+Config.</li>
+<li><strong>Finding #9 (P2) — <code>MainActivity</code>
+onboardingComplete re-read</strong>:
+<code>PreferencesStorage.observeOnboardingComplete()</code> new Flow API
+(SharedPreferences-listener-backed). Two parallel
+<code>lifecycleScope.launch { repeatOnLifecycle { collect } }</code>
+blocks (one for theme, one for onboarding). Welcome screen re-appears if
+settings flip onboardingComplete back to false at runtime.</li>
+<li><strong>Finding #10 (P2) — <code>ToggleSync</code> first-tap
+race</strong>: reads <code>toggleDao.get(providerId)?.enabled</code>
+synchronously instead of <code>state.syncEnabled</code>. First tap
+before observeAll() emit no longer silently flips the wrong
+direction.</li>
+<li><strong>Tests added</strong> (5 new):
+<code>LoginViewModelTest</code> (3 cases: Findings #4 username, #4
+password, #5 captcha), <code>ProviderConfigViewModelTest</code> (2
+cases: Findings #1 + #10), Finding #7 + #8 cases added to existing
+<code>OnboardingViewModelTest</code>, Finding #6 case added to existing
+<code>ProviderLoginViewModelTest</code>.</li>
+<li><strong>Schema migration</strong>: Room version bumped 10 → 11
+(<code>MIGRATION_10_11</code> adds
+<code>use_anonymous INTEGER NOT NULL DEFAULT 0</code> to
+<code>provider_configs</code>).
+<code>core/database/schemas/lava.database.AppDatabase/11.json</code>
+exported by KSP.</li>
+<li><strong>All builds + tests green</strong>:
+<code>:core:database</code> / <code>:core:credentials</code> /
+<code>:feature:provider_config</code> / <code>:feature:login</code> /
+<code>:feature:onboarding</code> / <code>:app:assembleDebug</code> /
+<code>:app:compileDebugAndroidTestKotlin</code>.</li>
+</ul>
+<p><strong>1.2.25-1045 distribute cycle (2026-05-17
+afternoon):</strong></p>
+<ul>
+<li>Stage-1 debug Firebase release ID <code>1lfjqc1nnhuio</code> on
+<code>digital.vasic.lava.client.dev</code></li>
+<li>Stage-2 release Firebase release ID <code>7p0h5j70eckqg</code> on
+<code>digital.vasic.lava.client</code> (production)</li>
+<li>15/15 Compose UI Challenge test cases PASS on Pixel_8/API35
+host-direct AVD (14 classes including new C36)</li>
+<li>HelixConstitution submodule advanced to <code>ca7c7d7</code>
+(§11.4.10.A Pre-store credential leak audit + upstream §11.4.37/38/39) —
+5-mirror converged</li>
+<li>§6.L counter 57 → 58</li>
+</ul>
+<p><strong>Comprehensive UI/UX/core sweep findings (2026-05-17 evening,
+branch <code>comprehensive-sweep-2026-05-17</code> merged at
+<code>c3b8bf5c</code>):</strong> 10 findings @
+<code>docs/sweeps/2026-05-17-comprehensive-uiux-core-sweep.md</code>.
+Top P0s for 1.2.26:</p>
+<ol type="1">
+<li><code>ProviderConfigViewModel.ToggleAnonymous</code> never persists
+— anonymous switch reverts on restart
+(<code>feature/provider_config/.../ProviderConfigViewModel.kt:82-84</code>)</li>
+<li><code>SearchResultContent</code> has no <code>Error</code> variant —
+Bug 2 root cause CONFIRMED ("all providers failed" looks like "0
+results")
+(<code>feature/search_result/.../SearchPageState.kt:30-54</code>)</li>
+<li><code>SearchInputViewModel.availableProviders</code> is hardcoded
+4-element list — SDK clones + new trackers invisible to search
+(<code>feature/search_input/.../SearchInputViewModel.kt:48-53</code>) P1
+cluster (4 findings on login banner/captcha staleness + onboarding
+misleading cred message + clones-in-onboarding) + P2 cluster
+(MainActivity onboarding re-read + ToggleSync race). See sweep doc for
+full details + per-finding anti-bluff classification.</li>
+</ol>
+<p><strong>OPERATOR ACTION still REQUIRED:</strong></p>
+<ul>
+<li>§6.H historical credential leak: rotate the RuTracker password
+(credentials remain valid until rotated; in-tree redaction does NOT
+purge git history per §6.T.3)</li>
+<li>Bug 2 live-device log capture: install 1.2.25, attempt
+anonymous-only search,
+<code>adb logcat | grep -iE "error|exception|search"</code> to confirm
+sweep finding #2 root cause</li>
+</ul>
+<p><strong>Bug 1 FULL REFACTOR LANDED —
+<code>AuthResponseDto.ServiceUnavailable</code> sealed variant
+propagates through 8-layer chain; Challenge C36 + 3 unit-layer
+falsifiability-rehearsed tests; OpenAPI spec + Go bindings regenerated;
+debug APK builds clean; feature/login + core/tracker/rutracker tests
+green</strong></p>
+<p><strong>Bug 1 cycle (2026-05-17):</strong></p>
+<ul>
+<li>Operator's §6.L 57th invocation forensic anchor "Cant login to
+RuTracker with valid credentials" closed. Partial fix in commit
+<code>17ceabcb</code> (stderr marker line) is now superseded by the
+full-fix variant: the SDK catch path returns
+<code>AuthResponseDto.ServiceUnavailable(reason)</code> instead of
+bluffing <code>WrongCredits(null)</code>.</li>
+<li><strong>8-layer propagation chain</strong>:
+<code>AuthResponseDto</code> (+ variant) → <code>AuthMapper</code> →
+<code>AuthState.ServiceUnavailable(reason)</code> →
+<code>RuTrackerDtoMappers</code> (reverse) →
+<code>AuthServiceImpl</code> →
+<code>AuthResult.ServiceUnavailable</code> → <code>LoginUseCase</code> →
+<code>LoginResultMapper</code> → <code>ProviderLoginViewModel</code>
+(recordWarning telemetry per §6.AC + state field) →
+<code>ProviderLoginState.serviceUnavailable</code> →
+<code>ProviderLoginScreen</code> (renders "Service unavailable. Please
+try again later. (reason)" banner with
+<code>R.string.provider_login_service_unavailable</code> +
+<code>ServiceUnavailableTextTestTag</code>).</li>
+<li>Same wiring landed in legacy <code>LoginViewModel</code> +
+<code>LoginState.serviceUnavailable</code> for the single-tracker
+path.</li>
+<li><strong>OpenAPI spec</strong>:
+<code>lava-api-go/api/openapi.yaml</code> gains
+<code>AuthResponseDtoServiceUnavailable</code> under <code>oneOf</code>
++ discriminator mapping. Go bindings regenerated via
+<code>scripts/generate.sh</code>; both
+<code>internal/gen/server/api.gen.go</code> +
+<code>internal/gen/client/api.gen.go</code> updated. Note: the Go-side
+rutracker scraper does NOT emit the new variant today — its login
+handler still returns Success / WrongCredits / CaptchaRequired only; the
+parity test holds. The variant exists in the spec so the Android Kotlin
+SDK wire-shape stays compatible with future Go-side adoption.</li>
+<li><strong>Tests added</strong> (3 new + 1 rewritten):
+<ul>
+<li><code>core/tracker/rutracker/src/test/kotlin/lava/tracker/rutracker/mapper/AuthMapperTest.kt</code>
+— added 2 tests for ServiceUnavailable forward mapping (with + without
+captcha).</li>
+<li><code>core/tracker/rutracker/src/test/kotlin/lava/tracker/rutracker/mapper/RuTrackerDtoMappersTest.kt</code>
+— added round-trip test asserting reverse-mapper preserves reason.</li>
+<li><code>core/tracker/rutracker/src/test/kotlin/lava/tracker/rutracker/impl/RuTrackerNetworkApiLoginUnknownRegressionTest.kt</code>
+— REWRITTEN: pre-fix asserted WrongCredits fallback (the §6.J bluff);
+now asserts ServiceUnavailable with reason carrying throwable class
+name. Same Crashlytics <code>a29412cf6566d0a71b06df416610be57</code>
+regression-immunity coverage, stronger discrimination.</li>
+<li><code>feature/login/src/test/kotlin/lava/login/LoginResultMapperTest.kt</code>
+— NEW file. 6 tests; load-bearing assertion:
+<code>service unavailable propagates as ServiceUnavailable with reason</code>
++ explicit anti-bluff
+<code>service unavailable does NOT silently collapse to WrongCredits</code>.</li>
+<li><code>feature/login/src/test/kotlin/lava/login/ProviderLoginViewModelTest.kt</code>
+— added VM test:
+<code>service unavailable shows banner does NOT mark creds Invalid does NOT signal authorized</code>
+exercises the §6.J anti-bluff contract end-to-end at the VM layer (real
+ViewModel + real ProviderCredentialManager + real Room + real
+LavaTrackerSdk wired with FakeTrackerClient whose
+<code>loginProvider</code> returns
+<code>AuthState.ServiceUnavailable(reason)</code>).</li>
+<li><code>app/src/androidTest/kotlin/lava/app/challenges/Challenge36LoginServiceUnavailableShowsAccurateMessageTest.kt</code>
+— NEW Challenge Test under <code>// covers-feature: login</code>.
+Source-written + compiles green on darwin/arm64 (verified via
+<code>./gradlew :app:compileDebugAndroidTestKotlin</code>); EXECUTION
+against the §6.X-mounted gate-host is OWED.</li>
+</ul></li>
+<li><strong>Build verification</strong>:
+<code>./gradlew :core:tracker:rutracker:test</code> PASS,
+<code>./gradlew :feature:login:test</code> PASS,
+<code>./gradlew :app:assembleDebug</code> PASS,
+<code>./gradlew :app:compileDebugAndroidTestKotlin</code> PASS. Spotless
+applied to all edited files.</li>
+<li><strong>§6.Y note</strong>: this is a follow-up commit to
+1.2.24-1044 — versionCode is NOT bumped here; the next distribute
+(1.2.25-1045) will pick up Bug 1 full fix + Bug 2 deferred investigation
+closure once that lands.</li>
+<li><strong>§6.X-debt</strong>: C36 + the per-AVD matrix attestation row
+is OWED to a Linux x86_64 + KVM gate-host; the JVM-layer falsifiability
+rehearsals (4 tests) carry the gate until then.</li>
+</ul>
+<p><strong>Previous cycle context (preserved verbatim):</strong></p>
+<p><strong>Last updated:</strong> 2026-05-16, <strong>Phase 4-C-2
+(pkg/detector adapter) + Phase 4-C-3 (pkg/ticket adapter) — BOTH
+WORKTREES LANDED + green; parent-cycle close + HelixQA SHA bump +
+coverage-ledger regen owed at meta-merge</strong>
+(constitutional-plumbing-only; no user-visible feature change; no
+Firebase distribute since 1.2.22-1042 still serves the user-visible
+surface). Cycle spans commits <code>4def2da7</code> →
+<code>0c87b6ae</code> (33 commits since plan landing
+<code>832f739e</code>). Final state at HEAD <code>0c87b6ae</code>:</p>
+<p><strong>Major deliverables this cycle:</strong></p>
+<ul>
+<li>The 12-clause constitution-compliance plan
+(<code>docs/plans/2026-05-15-constitution-compliance.md</code>) executed
+end-to-end across 10 phases. Plan + every phase's deliverable: see
+commit log between <code>832f739e..0c87b6ae</code>.</li>
+<li>HelixQA submodule incorporated (<code>submodules/helixqa</code> at
+upstream <code>b13ba7c0</code>) — see Phase 4 below.</li>
+<li>40-gate verify-all sweep wrapper at full STRICT mode after Phase 7's
+coverage-ledger STRICT-flip.</li>
+<li>17 own-org submodules now have helix-deps.yaml +
+install_upstreams.sh (16 vasic-digital + 1 HelixDevelopment HelixQA); 0
+waivers in STRICT mode.</li>
+<li>§6.L counter advanced 36 → 52 across 17 back-to-back restatements
+(longest sequence in project history); 53rd in-flight per the dispatch
+that triggered this CONTINUATION.md refresh task.</li>
+</ul>
+<p><strong>Phase-by-phase status (constitution-compliance
+plan):</strong></p>
+<ul>
+<li>✅ <strong>Phase 1</strong> (§11.4.32 enforcement engine) —
+<code>4def2da7</code>.
+<code>scripts/verify-all-constitution-rules.sh</code> + meta-test +
+ci.sh wiring.</li>
+<li>✅ <strong>Phase 2</strong> (§11.4.30 .gitignore audit gate) —
+<code>037389f5</code>. <code>scripts/check-gitignore-coverage.sh</code>
++ 16 new .gitignore files + sweep wiring + hermetic test.</li>
+<li>✅ <strong>Phase 3</strong> (§11.4.31 helix-deps.yaml manifest gate)
+— <code>43345c3e</code> (gate) + <code>410af7ec</code> +
+<code>bcba3a19</code> (16/16 per-submodule manifests landed + Auth pin
+bump).</li>
+<li>✅ <strong>Phase 3-debt</strong> CLOSED — all 16 vasic-digital
+submodules at pin advance with helix-deps.yaml present.</li>
+<li>✅ <strong>Phase 4</strong> (§11.4.27 HelixQA + 100% test-type
+coverage) — <code>aa0db6bd</code>. HelixQA adopted as
+<code>submodules/helixqa</code> at upstream HEAD;
+<code>HELIX_DEV_OWNED</code> exemption pattern added to mirror-mandate
+scanners.</li>
+<li>✅ <strong>Phase 4 follow-up A</strong> (Option 1 design) —
+<code>a61bd3d8</code>. Integration design at
+<code>docs/plans/2026-05-16-helixqa-integration-design.md</code> (Option
+1 shell-wiring recommended; Options 2/3 deferred).</li>
+<li>✅ <strong>Phase 4 follow-up A executed</strong> (shell-level
+wiring) — <code>1b66d192</code> + merge <code>d94ade0d</code>. 11
+HelixQA Challenge scripts wrapped via
+<code>scripts/run-helixqa-challenges.sh</code> +
+<code>scripts/run-challenge-matrix.sh --include-helixqa</code> opt-in
+flag.</li>
+<li>✅ <strong>Phase 4 follow-up B</strong> (4 open-question resolutions
+for Option 1) — <code>281780d7</code> + merge <code>84d871a5</code>.
+Runner-mode flag (<code>--runner=host|containerized</code>),
+toolchain-precondition gate (<code>HELIXQA_TOOLCHAIN_MAP</code>),
+evidence-dir env-var override, <code>HELIXQA_W_EXCLUSIONS</code> array
+consuming the §6.W audit doc. 11 hermetic fixtures in
+<code>tests/check-constitution/test_helixqa_wiring.sh</code>.</li>
+<li>📐 <strong>Phase 4 follow-up C</strong> (DESIGN-ONLY) —
+<code>41b81359</code> + merge <code>be1ca3d8</code>. HelixQA Go-package
+linking design at
+<code>docs/plans/2026-05-16-helixqa-go-package-linking-design.md</code>
+(770-line Option 2 proposal: per-package adapters + 4-cycle rollout
+4-C-1 <code>pkg/evidence</code> → 4-C-4
+<code>pkg/navigator</code>+<code>pkg/validator</code>).
+<strong>Operator-blocked on 10 open questions</strong> (§G of the
+design); implementation cycle NOT started.</li>
+<li>✅ <strong>Phase 4-debt</strong> CLOSED — <code>858ffb3e</code>
+(2026-05-16). HelixQA upstream PR <code>b13ba7c</code> landed
+<code>helix-deps.yaml</code> + <code>install_upstreams.sh</code> at the
+HelixQA repo root → Lava parent removed HelixQA from
+<code>HELIX_DEPS_WAIVERS</code> +
+<code>INSTALL_UPSTREAMS_WAIVERS</code>. 17/17 own-org submodules satisfy
+§11.4.31 + §11.4.35 + §11.4.36 in fully STRICT mode with <strong>zero
+waivers</strong>.</li>
+<li>✅ <strong>Phase 5</strong> (§11.4.28 nested own-org submodule
+audit) — <code>bbca3a78</code> (gate) + <code>410af7ec</code> (STRICT
+flip after Challenges/.gitmodules removal via the github cascade
+merge).</li>
+<li>✅ <strong>Phase 5-debt</strong> CLOSED — <code>410af7ec</code>.
+Scanner reports 0 violations in STRICT mode; Panoptic is no longer
+nested via Challenges.</li>
+<li>✅ <strong>Phase 6</strong> (§11.4.29 lowercase snake_case naming) —
+<code>322f2081</code> (plan landing) + Phase 6a + 6b execution this
+cycle. Operator's 8 Q answers: defer Phase 6f upstream rename (Lava-side
+only); <code>helixqa</code> (single-token); <code>http3</code>
+(single-token); <code>ratelimiter</code> (single-token); Go
+<code>cmd/</code> hyphens exempt; ordering Mdns(low) → Containers(high)
+last; same defer for Tracker-SDK upstream; Phase 6a authorized to run in
+parallel with Phase 4-C-1. Execution: <code>Submodules/</code> →
+<code>submodules/</code> parent rename + 17 child renames (Auth→auth,
+Cache→cache, Challenges→challenges, Concurrency→concurrency,
+Config→config, Containers→containers, Database→database,
+Discovery→discovery, HelixQA→helixqa, HTTP3→http3, Mdns→mdns,
+Middleware→middleware, Observability→observability,
+RateLimiter→ratelimiter, Recovery→recovery, Security→security,
+Tracker-SDK→tracker_sdk) + 139 referencing files updated +
+<code>.gitmodules</code> rewritten + Phase 6f upstream-rename execution
+plan at
+<code>docs/plans/2026-05-16-phase6f-upstream-rename-execution.md</code>
+(DEFERRED per Q1). Audit confirms 0 stale <code>Submodules/X</code>
+references in 16/17 names (Tracker-SDK has 1 ref in a historical
+bluff-hunt JSON narrative quote — exempt forensic anchor).</li>
+<li>✅ <strong>Phase 7</strong> (§11.4.25 coverage ledger) —
+<code>21dee741</code> + merge <code>c35af27c</code> (generator +
+verifier + 58-row baseline + 6 hermetic fixtures + sweep wiring,
+advisory at first) → <code>76507ca0</code> + merge <code>20b3fd36</code>
+(waiver backfill: 0 covered / 20 partial / 38 gap → 48 covered / 10
+partial / 0 gap) → <code>0c87b6ae</code> (STRICT-flip in sweep
+wrapper).</li>
+<li>✅ <strong>Phase 7-debt</strong> CLOSED — <code>0c87b6ae</code>.
+Sweep wrapper now invokes <code>check-coverage-ledger.sh --strict</code>
+(was <code>--advisory</code>); gate hard-fails on stale/missing
+rows.</li>
+<li>✅ <strong>Phase 8</strong> (§11.4.35 canonical-root + §11.4.36
+install_upstreams) — <code>d95be689</code> (gate) +
+<code>410af7ec</code> (STRICT-flip after 10 install_upstreams scripts
+landed across owned submodules).</li>
+<li>✅ <strong>Phase 8-debt</strong> CLOSED — <code>858ffb3e</code>.
+HelixQA's upstream <code>install_upstreams.sh</code> is the final
+hold-out; scanner reports 17/17 install_upstreams present in STRICT
+mode.</li>
+<li>✅ <strong>Phase 9 Path B</strong> (§11.4.33 + §11.4.34
+equivalence-mapping) — <code>055fbcbe</code>. §6.AD.3 amended: Lava's
+CONTINUATION + closure-logs + sixth-law-incidents satisfy the
+type-aware-closure + reopened-source-attribution semantics; no parallel
+Issues/Fixed tracker; equivalence is binding. Gates-index gets 2 new
+EQUIVALENCE-MAPPED rows (CM-CLOSURE-STATUS-VOCAB-COMPLIANCE,
+CM-REOPENED-SOURCE-ATTRIBUTION).</li>
+</ul>
+<p><strong>Verify-all sweep result at HEAD
+<code>0c87b6ae</code>:</strong> <strong>40/40 PASS in fully STRICT
+mode</strong> (post-STRICT-flip; the prior 07:00:56Z attestation showed
+39/40 only because the coverage-ledger sha drifted between commit and
+sweep — the re-run at HEAD is clean). Attestation directory:
+<code>.lava-ci-evidence/verify-all/&lt;UTC-timestamp&gt;.json</code>.</p>
+<p><em><em>CM-</em> gates inventory at HEAD:</em>* 24 HelixConstitution
+<code>CM-*</code> gates tracked at
+<code>docs/helix-constitution-gates.md</code>; ~16 wired + ~8 paper-only
+(mostly Issues/Fixed-tracker-dependent — equivalence-mapped per
+§6.AD.3). 14 Lava-side anti-bluff gates also active.</p>
+<p><strong>All 33 session commits §6.C-converged on GitHub +
+GitLab.</strong> Pre-push Checks 1-9 active throughout.</p>
+<p><strong>Prior:</strong> 2026-05-14, <strong>1.2.23-1043 / 2.3.12-2312
+closure-cycle</strong> (constitutional-plumbing-only; no user-visible
+feature change). HelixConstitution submodule incorporated + §6.AD
+HelixConstitution-Inheritance Mandate landed; 8-track §6.AD-debt opened
+and systematically closed across 14 commits. §6.AC + §6.AB scanners in
+STRICT mode. Build-resource stats tracker (§11.4.24) landed. All
+Lava-side debts in scope CLOSED at commit <code>4a7d0402</code>. See git
+log <code>66de343b..4a7d0402</code> for the full closure-cycle.</p>
+<p><strong>Prior:</strong> 2026-05-14, <strong>1.2.22-1042 / 2.3.11-2311
+DISTRIBUTED to Firebase</strong> (debug stage 1 + release stage 2,
+operator pre-authorized combined). About dialog author re-order;
+Crashlytics 6-issue sweep (3 fixed + 3 closed-historical); §6.AC
+Comprehensive Non-Fatal Telemetry Mandate added (28th §6.L); §6.AA-debt
+PARTIAL CLOSE; per-channel last-version-{debug,release} pointers; both
+APIs running 2.3.11.</p>
+<p><strong>Prior:</strong> 2026-05-14, 1.2.21-1041 DISTRIBUTED
+(onboarding back-press fix + WelcomeStep colored Image fix; §6.AB
+Anti-Bluff Test-Suite Reinforcement, 27th §6.L).</p>
+<p><strong>Prior:</strong> 2026-05-14, 1.2.20-1040 DISTRIBUTED (Galaxy
+S23 Ultra cold-launch crash fix: <code>ic_lava_logo</code> layer-list →
+composited PNG; §6.Z Anti-Bluff Distribute Guard, 26th §6.L).</p>
+<p><strong>Prior:</strong> 2026-05-14, 1.2.19-1039 DISTRIBUTED (§6.Y
+Post-Distribution Version Bump Mandate, 25th §6.L) + 1.2.18-1038
+DISTRIBUTED (24th §6.L).</p>
+<p><strong>Prior:</strong> 2026-05-13, SP-4 Phase G + Phase F.1 + F.2 +
+Phase D (multi- provider parallel search SDK) + Phase C (Trackers screen
+removal + :feature:provider_config landing). See git log
+<code>0c87b6ae..</code> and the CHANGELOG for the full delivery
+chain.</p>
+<p><strong>§6.S binding:</strong> this file is constitutionally
+load-bearing per root <code>CLAUDE.md</code> §6.S. Every commit that
+changes phase status, lands a new spec/plan, bumps a submodule pin,
+ships a release artifact, discovers or resolves a known issue, or
+implements an operator scope directive MUST update this file in the SAME
+COMMIT. The §0 "Last updated" line MUST track HEAD. Stale
+CONTINUATION.md is itself a §6.J spirit issue under §6.L's repeated
+mandate. <code>scripts/check-constitution.sh</code> enforces presence +
+structure (§0, §7, §6.S clause + inheritance).</p>
+</blockquote>
+<hr />
+<h2 id="0-quick-orientation-read-this-first">0. Quick orientation (read
+this first)</h2>
+<table>
+<thead>
+<tr>
+<th>Surface</th>
+<th>Current state</th>
+<th>Pin</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Lava parent on master</td>
+<td>2 mirrors (GitHub + GitLab) converged at HEAD</td>
+<td>§6.L 68th cycle (see <code>git log</code> for current SHA)</td>
+</tr>
+<tr>
+<td>API (lava-api-go)</td>
+<td>2.3.22 (code 2322) — <code>internal/version/version.go</code></td>
+<td>container <code>lava-api-go-thinker</code></td>
+</tr>
+<tr>
+<td>Android Firebase</td>
+<td>1.2.33 (1053) distributed to testers (2026-05-18, last user-visible
+release; <code>last-version-{debug,release}</code> both = 1053)</td>
+<td><code>lava-vasic-digital</code> Firebase project</td>
+</tr>
+<tr>
+<td>17 own-org submodules</td>
+<td>all pushed (16 vasic-digital + 1 HelixDevelopment HelixQA)</td>
+<td>see §3</td>
+</tr>
+<tr>
+<td>constitution submodule</td>
+<td>at upstream HEAD <code>883ccc1</code> (§11.4.79–§11.4.106 adopted
+via §6.AF)</td>
+<td>HelixDevelopment/HelixConstitution</td>
+</tr>
+<tr>
+<td>Workable-items tracker</td>
+<td>canonical <code>workable-items</code> binary +
+<code>docs/workable_items.db</code> (tracked, 8 items LVA-1..8; LVA-3
+migrated, LVA-tickets retired)</td>
+<td>§11.4.93/95/106 + §11.4.74</td>
+</tr>
+<tr>
+<td>codegraph</td>
+<td>incorporated 2026-05-20 (§11.4.78); local SQLite index at
+<code>.codegraph/</code> (1,182 files / 18,567 nodes)</td>
+<td><code>@colbymchenry/codegraph</code> MCP</td>
+</tr>
+<tr>
+<td>Verify-all sweep</td>
+<td>40/40 PASS, fully STRICT mode (last attested prior cycle; 68th-cycle
+re-run in progress)</td>
+<td><code>.lava-ci-evidence/verify-all/</code></td>
+</tr>
+<tr>
+<td>Coverage ledger</td>
+<td>48 covered / 10 partial / 0 gap (58 rows)</td>
+<td><code>docs/coverage-ledger.yaml</code></td>
+</tr>
+<tr>
+<td>CM-* gates wired</td>
+<td>~16 of 24 wired (8 paper-only or equivalence-mapped)</td>
+<td><code>docs/helix-constitution-gates.md</code></td>
+</tr>
+</tbody>
+</table>
+<p>This cycle delivered the entire 12-clause constitution-compliance
+plan plus HelixQA submodule adoption plus the Phase 7 STRICT-flip.
+<strong>No user-visible feature change</strong>;
+constitutional-plumbing-only.</p>
+<hr />
+<h2 id="1-whats-done-this-cycle-since-2026-05-15">1. What's DONE (this
+cycle, since 2026-05-15)</h2>
+<h3
+id="constitution-compliance-plan-docsplans2026-05-15-constitution-compliancemd">Constitution-compliance
+plan
+(<code>docs/plans/2026-05-15-constitution-compliance.md</code>)</h3>
+<table>
+<thead>
+<tr>
+<th>Phase</th>
+<th>Subject</th>
+<th>Status</th>
+<th>Anchor commits</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>Pin advance + plan land</td>
+<td>✅ DONE</td>
+<td><code>ed16debd</code> (pin) + <code>832f739e</code> (plan)</td>
+</tr>
+<tr>
+<td>1</td>
+<td>§11.4.32 enforcement engine</td>
+<td>✅ DONE</td>
+<td><code>4def2da7</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td>§11.4.30 .gitignore audit gate</td>
+<td>✅ DONE</td>
+<td><code>037389f5</code></td>
+</tr>
+<tr>
+<td>3</td>
+<td>§11.4.31 helix-deps.yaml manifests</td>
+<td>✅ DONE</td>
+<td><code>43345c3e</code> + <code>410af7ec</code> +
+<code>bcba3a19</code></td>
+</tr>
+<tr>
+<td>3-debt</td>
+<td>16/16 per-submodule manifests</td>
+<td>✅ CLOSED</td>
+<td><code>410af7ec</code> + per-submodule pin advances</td>
+</tr>
+<tr>
+<td>4</td>
+<td>§11.4.27 HelixQA + 100% test-type coverage</td>
+<td>✅ DONE</td>
+<td><code>aa0db6bd</code></td>
+</tr>
+<tr>
+<td>4 follow-up A</td>
+<td>Option 1 design + shell wiring</td>
+<td>✅ DONE</td>
+<td><code>a61bd3d8</code> + <code>1b66d192</code> + merge
+<code>d94ade0d</code></td>
+</tr>
+<tr>
+<td>4 follow-up B</td>
+<td>4 open-question resolutions</td>
+<td>✅ DONE</td>
+<td><code>281780d7</code> + merge <code>84d871a5</code></td>
+</tr>
+<tr>
+<td>4 follow-up C</td>
+<td>HelixQA Go-package linking design</td>
+<td>📐 DESIGN-ONLY</td>
+<td><code>41b81359</code> + merge <code>be1ca3d8</code></td>
+</tr>
+<tr>
+<td>4-C-1</td>
+<td>Lava-side <code>pkg/evidence</code> adapter (WRAP)</td>
+<td>✅ DONE 2026-05-16</td>
+<td>HelixQA <code>a1e2020d</code> + Lava <code>573b4a8a</code></td>
+</tr>
+<tr>
+<td>4-C-2</td>
+<td>Lava-side <code>pkg/detector</code> adapter (WRAP)</td>
+<td>✅ DONE 2026-05-16</td>
+<td>HelixQA <code>a1e2020d</code> unchanged + Lava
+<code>&lt;this-commit&gt;</code></td>
+</tr>
+<tr>
+<td>4-debt</td>
+<td>HelixQA upstream install_upstreams.sh + helix-deps.yaml</td>
+<td>✅ CLOSED 2026-05-16</td>
+<td><code>858ffb3e</code></td>
+</tr>
+<tr>
+<td>5</td>
+<td>§11.4.28 nested-own-org submodule audit</td>
+<td>✅ DONE</td>
+<td><code>bbca3a78</code></td>
+</tr>
+<tr>
+<td>5-debt</td>
+<td>STRICT flip after Challenges/.gitmodules removal</td>
+<td>✅ CLOSED</td>
+<td><code>410af7ec</code></td>
+</tr>
+<tr>
+<td>6</td>
+<td>§11.4.29 lowercase snake_case naming</td>
+<td>📐 PLAN-ONLY</td>
+<td><code>322f2081</code> + merge <code>c8d42434</code></td>
+</tr>
+<tr>
+<td>7</td>
+<td>§11.4.25 coverage ledger</td>
+<td>✅ DONE</td>
+<td><code>21dee741</code> + merge <code>c35af27c</code></td>
+</tr>
+<tr>
+<td>7-debt</td>
+<td>waiver backfill + STRICT flip</td>
+<td>✅ CLOSED</td>
+<td><code>76507ca0</code> + merge <code>20b3fd36</code> +
+<code>0c87b6ae</code></td>
+</tr>
+<tr>
+<td>8</td>
+<td>§11.4.35 + §11.4.36 canonical-root + install_upstreams</td>
+<td>✅ DONE</td>
+<td><code>d95be689</code> + <code>410af7ec</code></td>
+</tr>
+<tr>
+<td>8-debt</td>
+<td>10 install_upstreams scripts across owned submodules</td>
+<td>✅ CLOSED</td>
+<td><code>410af7ec</code></td>
+</tr>
+<tr>
+<td>9 Path B</td>
+<td>§11.4.33 + §11.4.34 equivalence-mapping</td>
+<td>✅ DONE</td>
+<td><code>055fbcbe</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="helixqa-submodule-new-this-cycle">HelixQA submodule (NEW this
+cycle)</h3>
+<ul>
+<li>Adopted at <code>submodules/helixqa</code> from
+<code>git@github.com:HelixDevelopment/HelixQA.git</code>.</li>
+<li>Initial pin: <code>403603db</code> (2026-05-15 in Phase 4).</li>
+<li>Upstream PR <code>b13ba7c</code> added <code>helix-deps.yaml</code>
++ <code>install_upstreams.sh</code> (2026-05-16 in Phase 4-debt
+closure).</li>
+<li>Current pin: <code>b13ba7c0</code>.</li>
+<li>11 HelixQA Challenge scripts wrapped via
+<code>scripts/run-helixqa-challenges.sh</code> (Option 1 shell-level
+wiring).</li>
+<li>11 hermetic fixtures at
+<code>tests/check-constitution/test_helixqa_wiring.sh</code> validate
+the wrapper.</li>
+<li>§6.W audit doc at <code>docs/helixqa-script-audit.md</code>
+(per-script git-push / curl / outside-worktree analysis; 0/11 violators
+on default config).</li>
+<li><code>HELIX_DEV_OWNED</code> exemption pattern in
+<code>scripts/check-canonical-root-and-upstreams.sh</code> +
+<code>scripts/check-helix-deps-manifest.sh</code> (HelixDevelopment org
+submodules treated like vasic-digital for mirror-presence checks,
+distinct from arbitrary third-party submodules).</li>
+</ul>
+<h3 id="6l-counter-advance">§6.L counter advance</h3>
+<p>The §6.L Anti-Bluff Functional Reality Mandate counter advanced from
+36 to 52 across the cycle (53rd is in-flight per the dispatch that
+triggered this CONTINUATION.md refresh task). 17-cycle back-to-back
+restatement is the longest sequence in project history; per §6.L the
+repetition itself is the constitutional record. Anchor commits:
+<code>8c47cd17</code>, <code>d159d0fc</code> (37-41 batched),
+<code>66803d4d</code> (43+44 batched), <code>aa0db6bd</code> (45),
+<code>a61bd3d8</code> (46), <code>ed7a658d</code> (47),
+<code>dcec9eb8</code> (48), <code>0f1b19f1</code> (49),
+<code>2882304b</code> (50+51), <code>0c87b6ae</code> (52).</p>
+<hr />
+<h2 id="2-whats-blocked-on-operator-action">2. What's BLOCKED ON
+OPERATOR ACTION</h2>
+<p>These items need the operator's environment / hardware / decisions
+that an agent cannot make alone.</p>
+<h3
+id="21-phase-4-follow-up-c-helixqa-go-package-linking--status-update-2026-05-16">2.1
+Phase 4 follow-up C (HelixQA Go-package linking) — STATUS UPDATE
+2026-05-16</h3>
+<p><strong>Phase 4-C-1 (pkg/evidence adapter): COMPLETED
+2026-05-16.</strong> All 10 open questions answered by operator +
+implementation landed in this cycle's commit. Operator decisions: Q1 Go
+1.26 bump, Q2 WRAP, Q3 Path A tag-pin (transitional Path B
+replace+sibling-mount until HelixQA stabilizes), Q4 preserve HelixQA
+terminology (Collector / Detector / Generator), Q5 upstream-contribute
+CaptureGeneric first (HelixDevelopment/HelixQA PR #1, branch
+<code>feat/evidence-capture-generic</code>, commit
+<code>a1e2020dd759d025b67ef8e024061b103940470d</code>), Q6 SKIP 4-C-4
+navigator entirely, Q7 NO recover() wrapping, Q8 accept 2x CI build-time
+delta, Q9 always-track-upstream for HelixQA (§6.AD waiver documented in
+CLAUDE.md), Q10 coverage-ledger bumped in same commit.</p>
+<p>Deliverables this cycle:</p>
+<ul>
+<li>HelixQA <code>pkg/evidence.CaptureGeneric</code> public method
+(commit <code>a1e2020d</code>, PR HelixDevelopment/HelixQA#1)</li>
+<li><code>lava-api-go/internal/qa/evidence/{collector,collector_test}.go</code>
+(adapter + 9 unit tests, 87.9% coverage)</li>
+<li><code>lava-api-go/tests/qa/evidence_test.go</code> (real-stack
+integration test, <code>//go:build helixqa_realstack</code>)</li>
+<li><code>lava-api-go/go.mod</code> bumped to Go 1.26 + adds
+<code>digital.vasic.helixqa</code> require + replace</li>
+<li><code>Submodules/HelixQA/</code> pin bumped to
+<code>a1e2020d</code></li>
+<li><code>docs/coverage-ledger.yaml</code> regenerated (58 rows;
+lava-api-go row: 89 unit tests + 1 integration)</li>
+<li><code>CLAUDE.md</code> §6.AD-debt: HelixQA always-track-upstream
+waiver documented</li>
+<li>This <code>CONTINUATION.md</code> updated</li>
+</ul>
+<p>Phase 4-C-2 (detector adapter), 4-C-3 (ticket adapter), 4-C-4
+(validator + SKIP navigator per Q6) remain owed — each is 1-session
+scope per design doc §E.</p>
+<p><strong>Phase 4-C-2 (pkg/detector adapter): COMPLETED
+2026-05-16.</strong> Operator decisions reused from 4-C-1 (Q1–Q10
+unchanged). Q4 preserves <code>Detector</code> name. Q5: no HelixQA-side
+promotion needed — <code>pkg/detector</code>'s public API surface
+already exposes everything the adapter requires (<code>Detector</code>,
+<code>Option</code>, <code>New</code>,
+<code>WithDevice</code>/<code>WithPackageName</code>/<code>WithBrowserURL</code>/<code>WithProcessName</code>/<code>WithProcessPID</code>/<code>WithEvidenceDir</code>/<code>WithCommandRunner</code>,
+<code>Check</code>, <code>CheckApp</code>, <code>Platform</code>,
+<code>DetectionResult</code>, <code>CommandRunner</code> interface).</p>
+<p>Deliverables this cycle:</p>
+<ul>
+<li><code>lava-api-go/internal/qa/detector/detector.go</code> (255 LOC)
+— WRAP-strategy adapter exposing Lava-shaped <code>Report</code> struct
+(Crashed/Alive/StackTrace/EvidencePath);
+<code>CheckGoProcess(processName)</code> for name-based detection (real
+<code>pgrep -f</code>); <code>CheckGoProcessByPID(pid)</code> for
+PID-based detection (real <code>kill -0</code>);
+<code>ErrEmptyProcessName</code> + <code>ErrInvalidPID</code> Lava-side
+guards that block HelixQA's silent fallback to
+<code>processName="java"</code> for empty/zero inputs (forensic value:
+mutation rehearsal proved Alive=true would silently be returned because
+Java exists on every dev box)</li>
+<li><code>lava-api-go/internal/qa/detector/detector_test.go</code> (11
+tests, 82.9% statement coverage, race-clean) — uses HelixQA's
+<code>CommandRunner</code> interface as the boundary-fake (not a mock of
+the SUT; the HelixQA Detector itself runs unaltered, satisfying §6.J.4
+forbidden-mock pattern)</li>
+<li><code>lava-api-go/tests/qa/detector_test.go</code> (3 real-stack
+tests, <code>//go:build helixqa_realstack</code>) — spawns sacrificial
+<code>sleep</code> child processes via
+<code>sh -c 'exec -a &lt;sentinel&gt; sleep 30'</code>
+(BSD/macOS-compatible argv[0] injection); asserts the REAL HelixQA
+Detector against the real OS process table</li>
+<li><code>docs/coverage-ledger.yaml</code> regenerated (lava-api-go
+unit_test_count 89 → 93)</li>
+<li>This <code>CONTINUATION.md</code> updated; coverage-ledger regen
+confirmed (58 rows preserved)</li>
+</ul>
+<p>§6.J anti-bluff posture: 4 falsifiability rehearsals captured in
+commit body — (1) <code>Crashed: dr.HasCrash → !dr.HasCrash</code>
+triggered 5 unit-test assertions; (2) empty-name guard removal caught at
+compile time (<code>"strings" imported and not used</code>); (3) PID
+guard removal triggered 2 sub-test assertions + exposed HelixQA's silent
+<code>java</code> fallback; (4)
+<code>Alive: dr.ProcessAlive → !dr.ProcessAlive</code> triggered ALL 3
+real-stack assertions on live/dead/ghost process paths. All reverted,
+all green after revert.</p>
+<p>Honest scope statement: real-stack tests were initially executed via
+<code>go test -tags=helixqa_realstack ./tests/qa/detector_test.go</code>
+(file-target form) while Phase 4-C-3's
+<code>internal/qa/ticket/generator.go</code> was untracked +
+uncompiling. After 4-C-3 landed at <code>86402bfa</code> (which also
+bumped HelixQA pin <code>a1e2020d</code> → <code>c57c275</code> to gate
+<code>enhanced_generator.go</code> behind the
+<code>helixqa_enhanced_tickets</code> tag), the full package-target form
+<code>go test -tags=helixqa_realstack ./tests/qa/...</code> PASSes too
+(7/7: 2 evidence + 3 detector + 2 ticket). Re-verified at HEAD
+post-<code>86402bfa</code>.</p>
+<p><strong>Phase 4-C-3 (pkg/ticket adapter): COMPLETED
+2026-05-16.</strong> Operator decisions reused from 4-C-1 (Q1–Q10
+unchanged). Q4 preserves <code>Generator</code> name.</p>
+<p>Deliverables this cycle:</p>
+<ul>
+<li>HelixQA-side prereq:
+<code>submodules/helixqa/pkg/ticket/enhanced_generator.go</code> gated
+behind <code>//go:build helixqa_enhanced_tickets</code> so plain
+consumers of <code>pkg/ticket</code> (the Lava adapter) do NOT pull
+LLMOrchestrator transitively. HelixQA SHA bump owed at parent-cycle
+close.</li>
+<li><code>lava-api-go/internal/qa/ticket/generator.go</code> (≈340 LOC)
+— WRAP-strategy adapter with <code>NewGenerator</code>,
+<code>GenerateClosureLog</code>, <code>OutputDir</code>,
+<code>ClosureLogInput</code> shape mirroring §6.O closure-log
+conventions</li>
+<li><code>lava-api-go/internal/qa/ticket/generator_test.go</code> (13
+tests + 8 sub-tests, 93.2% statement coverage with
+<code>-race</code>)</li>
+<li><code>lava-api-go/tests/qa/ticket_test.go</code> (2 real-stack
+tests, <code>//go:build helixqa_realstack</code>)</li>
+<li><code>CLAUDE.md</code> §6.O extended with clause 7 — adapter
+authorized as programmatic closure-log path</li>
+<li>This <code>CONTINUATION.md</code> updated; coverage-ledger row
+addition owed at parent-cycle rolled regen</li>
+</ul>
+<p>§6.J anti-bluff posture: 2 falsifiability rehearsals captured in
+commit body — (1) H1 heading mutation surfaced by schema test, (2)
+empty-CrashlyticsID validation removal surfaced by RejectsEmpty test;
+both reverted, both green after revert.</p>
+<p>Phase 4-C-4 (validator adapter; navigator SKIPPED per Q6) remains
+owed.</p>
+<h3 id="22-phase-6-snake_case-migration--resolved--executed">2.2 Phase 6
+snake_case migration — RESOLVED + EXECUTED</h3>
+<p>All 8 operator questions answered (2026-05-16). Phase 6a + 6b
+executed in this cycle. See
+<code>docs/plans/2026-05-16-phase6f-upstream-rename-execution.md</code>
+for the deferred upstream-rename plan (Q1: defer; document execution
+steps for operator).</p>
+<h3 id="23-release-tagging-chain-versions-inherit-from-prior-cycle">2.3
+Release-tagging chain (versions inherit from prior cycle)</h3>
+<p>Last Firebase distribute: 1.2.22-1042 / 2.3.11-2311 (2026-05-14).
+This cycle made NO user-visible changes, so no new distribute is owed.
+Tag-script gate per §6.I (multi-emulator container matrix + per-AVD
+attestation) still blocked on Linux x86_64 + KVM gate-host per the
+standing §6.X-debt
+(<code>.lava-ci-evidence/sixth-law-incidents/2026-05-13-emulator-container-darwin-arm64-gap.json</code>).</p>
+<hr />
+<h2 id="3-submodule-pin-index">3. Submodule pin index</h2>
+<p>17 own-org submodules + 1 universal-rules submodule (constitution).
+Bumping a pin is a deliberate operator action; never auto-update.</p>
+<table>
+<thead>
+<tr>
+<th>Submodule</th>
+<th>Pin</th>
+<th>Mirrors</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>auth</code></td>
+<td><code>24ca50db</code></td>
+<td>GitHub + GitLab</td>
+<td>helix-deps.yaml + §11.4.78 CodeGraph cascade</td>
+</tr>
+<tr>
+<td><code>cache</code></td>
+<td><code>30bb8581</code></td>
+<td>GitHub + GitLab</td>
+<td>helix-deps.yaml present</td>
+</tr>
+<tr>
+<td><code>challenges</code></td>
+<td><code>09c55f48</code></td>
+<td>GitHub + GitLab</td>
+<td>helix-deps.yaml + flat layout (Panoptic dep declared)</td>
+</tr>
+<tr>
+<td><code>concurrency</code></td>
+<td><code>7c74625b</code></td>
+<td>GitHub + GitLab</td>
+<td>helix-deps.yaml present</td>
+</tr>
+<tr>
+<td><code>config</code></td>
+<td><code>9491f8b4</code></td>
+<td>GitHub + GitLab</td>
+<td>helix-deps.yaml + install_upstreams.sh</td>
+</tr>
+<tr>
+<td><code>containers</code></td>
+<td><code>6aff7ea8</code></td>
+<td>GitHub + GitLab</td>
+<td>helix-deps.yaml + per-OS emulator acceleration (§6.X-debt
+darwin/arm64 RESOLVED)</td>
+</tr>
+<tr>
+<td><code>database</code></td>
+<td><code>4ead6233</code></td>
+<td>GitHub + GitLab</td>
+<td>helix-deps.yaml present</td>
+</tr>
+<tr>
+<td><code>discovery</code></td>
+<td><code>2bddf64c</code></td>
+<td>GitHub + GitLab</td>
+<td>helix-deps.yaml + install_upstreams.sh</td>
+</tr>
+<tr>
+<td><code>helixqa</code></td>
+<td><code>8b12e922</code></td>
+<td>GitHub</td>
+<td>HelixDevelopment org; always-track-upstream per §6.AD Q9 waiver</td>
+</tr>
+<tr>
+<td><code>http3</code></td>
+<td><code>1d0df7b7</code></td>
+<td>GitHub + GitLab</td>
+<td>helix-deps.yaml + install_upstreams.sh</td>
+</tr>
+<tr>
+<td><code>mdns</code></td>
+<td><code>ba1d2385</code></td>
+<td>GitHub + GitLab</td>
+<td>helix-deps.yaml + install_upstreams.sh</td>
+</tr>
+<tr>
+<td><code>middleware</code></td>
+<td><code>6ee9c0ec</code></td>
+<td>GitHub + GitLab</td>
+<td>helix-deps.yaml + install_upstreams.sh</td>
+</tr>
+<tr>
+<td><code>observability</code></td>
+<td><code>2b8c1633</code></td>
+<td>GitHub + GitLab</td>
+<td>helix-deps.yaml present</td>
+</tr>
+<tr>
+<td><code>ratelimiter</code></td>
+<td><code>9da442cb</code></td>
+<td>GitHub + GitLab</td>
+<td>helix-deps.yaml + install_upstreams.sh</td>
+</tr>
+<tr>
+<td><code>recovery</code></td>
+<td><code>58f9b4f9</code></td>
+<td>GitHub + GitLab</td>
+<td>helix-deps.yaml + install_upstreams.sh</td>
+</tr>
+<tr>
+<td><code>security</code></td>
+<td><code>a388cc44</code></td>
+<td>GitHub + GitLab</td>
+<td>helix-deps.yaml present</td>
+</tr>
+<tr>
+<td><code>tracker_sdk</code></td>
+<td><code>7afc37aa</code></td>
+<td>GitHub + GitLab</td>
+<td>helix-deps.yaml + install_upstreams.sh</td>
+</tr>
+<tr>
+<td><code>constitution</code></td>
+<td><code>208e2c8</code></td>
+<td>universal (HelixConstitution upstream)</td>
+<td>adds §11.4.78 CodeGraph mandate</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Internal-to-submodule nested submodules:</strong>
+<code>submodules/challenges</code> had a nested <code>Panoptic</code>
+submodule that was removed via the github cascade merge in Phase 5-debt
+closure (CONST-051(C) flat-layout enforcement); Challenges now declares
+Panoptic as a <code>layout: flat</code> dependency in its
+<code>helix-deps.yaml</code>.</p>
+<hr />
+<h2 id="4-known-issues--bugs-carried-forward--historical">4. Known
+issues + bugs (carried forward — historical)</h2>
+<p>These are real defects discovered before this cycle. Tracked here for
+forensic continuity; none are blocking this cycle's constitutional
+work.</p>
+<h3 id="45-active-known-issues">4.5 Active known issues</h3>
+<ul>
+<li><strong>§6.X-debt (Linux x86_64 + KVM containerized gate
+path)</strong>: STANDING for the Linux host path only. The
+<strong>darwin/arm64 sub-debt is RESOLVED</strong> (2026-05-20, commit
+<code>23c508e9</code>): per-OS emulator acceleration
+(<code>AccelProfileForOS</code> / <code>ResolveRunner</code> /
+<code>GateEligibleForOS</code> +
+<code>emulator-matrix --runner=auto</code> in Containers
+<code>c1871138</code>+<code>6aff7ea8</code>) makes the macOS gate runner
+host-direct+HVF (a Linux container cannot reach the host-only HVF API).
+PROVEN: C00 cold-start canary + full 37-class Challenge suite on
+Pixel_8/API35 = 43 pass / 3 credential-skip / 0 fail. The Linux x86_64
+containerized-KVM path remains owed. Forensic anchor:
+<code>.lava-ci-evidence/sixth-law-incidents/2026-05-13-emulator-container-darwin-arm64-gap.json</code>.</li>
+<li><strong>§6.H Firebase CI token echo-leak</strong> (2026-05-20, §6.L
+67th): <strong>RESOLVED 2026-05-31</strong> — operator rotated the token
+(<code>firebase logout</code> → <code>firebase login:ci</code>) during
+the §6.L 68th cycle; the transcript-leaked token (never committed to
+git) is now dead. §6.H clause 6 satisfied. Incident:
+<code>.lava-ci-evidence/sixth-law-incidents/2026-05-20-firebase-token-echo-leak.json</code>.</li>
+<li><strong>LVA-8 — HelixQA crash-detector + consumer fixture</strong> —
+<strong>RESOLVED 2026-05-31</strong> (§6.L 68th):
+<code>internal/qa/validator</code> has 6 failing tests because HelixQA's
+<code>isPIDAlive</code>
+(<code>submodules/helixqa/pkg/detector/desktop.go</code>) shells
+<code>exec kill -0 &lt;pid&gt;</code> and
+<code>/bin/kill -0 &lt;absent-pid&gt;</code> returns EXIT 0 on macOS
+(bash builtin returns 1), so a dead PID reads as alive → Validator
+reports StepPassed on a crashed step (the canonical §6.J bluff). ROOT
+CAUSE CONFIRMED (captured evidence). Fix belongs UPSTREAM in HelixQA
+(use <code>syscall.Kill</code> not <code>/bin/kill</code>) per CONST-051
++ CONST-049. Incident:
+<code>.lava-ci-evidence/sixth-law-incidents/2026-05-31-helixqa-validator-killbinary-macos-bluff.json</code>.
+The Lava adapter is a faithful pass-through (0-byte
+<code>internal/</code> diff) — the defect is entirely HelixQA-side.
+<strong>Operator decision owed:</strong> authorize the HelixQA upstream
+fix cycle (fix → push to HelixQA → bump pin).</li>
+<li><strong>LVA-3 — LVA-vs-canonical-workable-items
+reconciliation</strong> (§6.L 68th): the constitution ships a canonical
+<code>workable-items</code> Go binary at
+<code>constitution/scripts/workable-items/</code> keyed
+<code>docs/workable_items.db</code>; Lava built a parallel LVA-keyed
+system at <code>tools/lava-tickets/</code> +
+<code>docs/tickets/tickets.db</code>. Both satisfy §11.4.93/95/106;
+whether LVA supersedes or complements the canonical binary (§11.4.74
+catalogue-first) is an <strong>operator decision</strong>. Until
+ratified both the LVA system AND the §6.AD.3 Path-B
+<code>.lava-ci-evidence/</code> ledgers stay in force.</li>
+<li><strong>macOS emulator stall</strong> (2026-05-15 incident):
+Pixel_7_Pro on macOS
+<ul>
+<li>emulator 36.1.9 stalls indefinitely. Three candidate root-causes
+recorded as <code>PENDING_FORENSICS:</code> (T7 external drive
+contention, emulator-36.1.9 known issues, AVD config theory eliminated
+by fresh-AVD re-test). Forensic anchor:
+<code>.lava-ci-evidence/sixth-law-incidents/2026-05-15-macos-emulator-stall-on-android33.json</code>.
+Orthogonal to §6.X-debt.</li>
+</ul></li>
+<li><strong>github SSH-fail flake pattern</strong> (resolved this
+cycle): the §6.L 37th
+<ul>
+<li>39th invocation forensics document multi-push retry pattern; the
+resolution is the standing operator practice of retrying
+<code>git push github</code> on connection-reset. No code change
+owed.</li>
+</ul></li>
+</ul>
+<h3 id="45-resolved-this-cycle">4.5 Resolved this cycle</h3>
+<ul>
+<li><strong>Flaky
+<code>CredentialsViewModelTest &gt; select provider updates selectedProvider</code></strong>
+(§6.L 68th, 2026-05-31): the fixed-<code>awaitState()</code>-count
+assumption was replaced with a bounded
+await-until-<code>selectedProvider=="rutracker"</code> loop, removing
+the dependence on the non-deterministic interleaving of
+<code>load()</code>'s Room-<code>Flow</code> <code>.first()</code>
+resume (delivered off the StandardTestDispatcher) vs. the
+<code>SelectProvider</code> reduce. Falsifiability-rehearsed (broke the
+reduce →
+<code>AssertionFailedError: expected:&lt;rutracker&gt; but was:&lt;null&gt;</code>,
+localized to that one test → reverted → 6/6 green). Incident JSON
+<code>.lava-ci-evidence/sixth-law-incidents/2026-05-20-flaky-credentialsviewmodeltest.json</code>
+remains as the forensic record.</li>
+<li><strong><code>.codegraph/*.pid</code> gitignore gap</strong> (§6.L
+68th): <code>daemon.pid</code> was untracked-but-not-ignored (§11.4.30);
+<code>.codegraph/*.pid</code> added to <code>.gitignore</code>.</li>
+<li><strong>Stale coverage ledger (§11.4.25)</strong> (§6.L 68th): the
+verify-all sweep was 46/47 — <code>docs/coverage-ledger.yaml</code> had
+drifted (prior cycles added <code>feature/login</code>
+LoginViewModelTest, <code>feature/onboarding</code> AuthTypeDisplayTest
++ challenge C26, <code>feature/provider_config</code>
+ProviderConfigViewModelTest without regenerating the ledger).
+Regenerated via <code>scripts/generate-coverage-ledger.sh</code>;
+<code>check-coverage-ledger.sh --strict</code> now EXIT=0. Sweep →
+<strong>47/47 PASS</strong>.</li>
+</ul>
+<h4 id="lva-ticket-system-new-6l-68th-1149395106">LVA ticket system NEW
+(§6.L 68th, §11.4.93/95/106)</h4>
+<p>The operator's "define ticket key LVA + SQLite workable-items DB +
+Issues/Fixed/ Issues_Summary/Fixed_Summary + PDF/HTML/DOCX exports"
+directive is the same requirement as the new HelixConstitution
+<strong>§11.4.93/95/106</strong> (workable-items SQLite DB
+tracked-in-git + mechanical md↔︎DB byte-identical sync). Built as a
+pure-Go module at <code>tools/lava-tickets/</code>
+(<code>digital.vasic.lava.tickets</code>, Go 1.26,
+<code>modernc.org/sqlite</code> — no CGO, no sudo). Key prefix
+<strong><code>LVA</code></strong> (LVA-1, LVA-2, …; the Lava
+instantiation of §11.4.54 ATM-NNN). The DB
+<code>docs/tickets/tickets.db</code> <strong>IS tracked</strong>
+(§11.4.95 — never gitignored); only <code>*.db-wal/-shm/-journal</code>
+sidecars + <code>bin/</code> + scratch are ignored. Subcommands:
+<code>init/add/update/close/reopen/gen/verify/import/export/list/version</code>.
+<code>go test</code> 7/7 PASS (incl. §11.4.106 round-trip +
+falsifiability, §11.4.33 type-aware closure, §11.4.34
+reopen-attribution); <code>verify</code> byte-identical PASS (exits 1 on
+drift — independently confirmed). Exports: HTML (pure-Go) ✓, DOCX
+(podman <code>pandoc/core</code>) ✓, <strong>PDF honestly
+BLOCKED</strong> (container lacks a LaTeX engine — tool exits 3, writes
+NO fake file; remediation: <code>pandoc/latex</code> image or host
+<code>weasyprint</code>). 7 real LVA tickets seeded from actual project
+state (no invented SHAs). Design + verbatim build evidence:
+<code>docs/tickets/DESIGN.md</code> +
+<code>docs/tickets/BUILD-EVIDENCE.md</code>. <strong>OPEN (operator
+decision, LVA-3):</strong> whether the LVA system supersedes or
+complements the §6.AD.3 Path-B <code>.lava-ci-evidence/</code> ledgers —
+until ratified, the Path-B mapping remains the binding compliance
+surface and the LVA DB is seeded from it (reconciled, not
+replacing).</p>
+<h4
+id="constitution-pin-bumped-208e2c8--883ccc1-6l-68th-6af">Constitution
+pin BUMPED <code>208e2c8</code> → <code>883ccc1</code> (§6.L 68th,
+§6.AF)</h4>
+<p>Operator directed bump-now+adopt. 53 upstream commits (2026-05-20 →
+2026-05-31) add <strong>§11.4.79–§11.4.106</strong> (28 universal
+clauses). 68th-cycle review at
+<code>.lava-ci-evidence/constitution-review/2026-05-31-68th-cycle-review.md</code>:
+<strong>NO constitution-mandated submodule is missing</strong>
+(Challenges, HelixQA, containers, codegraph all present). New §6.AF
+clause in CLAUDE.md enumerates per-clause Lava adoption status +
+§6.AF-debt for the OWED items:</p>
+<ul>
+<li>§11.4.93/95/106 (workable-items DB) — <strong>SATISFIED</strong> by
+the LVA system. The constitution also ships a canonical
+<code>workable-items</code> Go binary at
+<code>constitution/scripts/workable-items/</code> keyed
+<code>docs/workable_items.db</code>; LVA-vs-canonical reconciliation is
+operator-gated (LVA-3).</li>
+<li>§11.4.79/.80 (own-org submodules IN codegraph index) —
+<strong>OWED</strong> (LVA-6; Lava currently excludes
+<code>submodules/</code>).</li>
+<li>§11.4.85 (stress+chaos) — <strong>IN PROGRESS</strong> (LVA-7;
+phase-1 lava-api-go scaffold + evidence under
+<code>docs/chaos-stress/</code>).</li>
+<li>operating-mode clauses — EQUIVALENCE-MAPPED to existing Lava
+practice. §11.4.100 (video-color) DEMOTED to ATMOSphere-only — not
+binding on Lava. The constitution submodule pin bump is a parent-repo
+change; per CONST-049 the constitution stays pinned + advanced
+deliberately (NOT auto-tracking).</li>
+</ul>
+<h4 id="resolved-in-prior-constitution-compliance-cycle">Resolved in
+prior (constitution-compliance) cycle</h4>
+<ul>
+<li><strong>Ledger-staleness drift class</strong> — Phase 7-debt closure
+(<code>0c87b6ae</code>) flipped the coverage-ledger gate from
+<code>--advisory</code> to <code>--strict</code> in the sweep wrapper.
+Subsequent stale-ledger commits will hard-fail at sweep time +
+pre-push.</li>
+<li><strong>§11.4.27 HelixQA non-incorporation</strong> — Phase 4
+closure (<code>aa0db6bd</code>)
+<ul>
+<li>Phase 4-debt closure (<code>858ffb3e</code>) bring HelixQA in as
+<code>submodules/helixqa</code> with full mirror compliance.</li>
+</ul></li>
+<li><strong>§11.4.31 / .35 / .36 zero-waiver state</strong> — Phase
+4-debt closure + Phase 8-debt closure achieve 17/17 own-org submodules
+satisfying all three mandates with <strong>zero waivers</strong> in
+STRICT mode.</li>
+</ul>
+<h3 id="45-historical--pre-this-cycle-carried-forward">4.5 Historical —
+pre-this-cycle, carried forward</h3>
+<p>(See full historical detail in the git log between the prior
+CONTINUATION.md "Last updated" header and <code>4a7d0402</code>.
+Summary: C02 Cloudflare-mitigation stops short of profile-parsing;
+C17-C22 require emulator matrix; UDP buffer warning documented; mirror
+model reduced to 2-mirror per §6.W; docs/todos/Lava_TODOs_001.md
+committed as historical; etc.)</p>
+<hr />
+<h2 id="5-operator-flagged-follow-up-items-small-queued">5.
+Operator-flagged follow-up items (small, queued)</h2>
+<ul>
+<li><strong>Phase 4-C implementation</strong> — blocked on §2.1 open
+questions.</li>
+<li><strong>Phase 6a implementation</strong> — blocked on §2.2 open
+questions.</li>
+<li><strong>HelixQA pin upgrade cadence</strong> — operator decides when
+to re-baseline to track HelixQA <code>main</code> vs. holding at
+<code>b13ba7c0</code>.</li>
+<li><strong>Re-audit HelixQA scripts
+(<code>docs/helixqa-script-audit.md</code>)</strong> on every pin bump
+per the §6.W audit doc's re-audit-trigger clause.</li>
+<li><strong>Coverage-ledger row additions</strong> when new feature
+modules land — the generator is deterministic; re-run via
+<code>scripts/generate-coverage-ledger.sh</code> in the same commit as
+the new module to keep STRICT mode green.</li>
+</ul>
+<hr />
+<h2 id="6-constitutional-debt--memory-anchors">6. Constitutional debt +
+memory anchors</h2>
+<ul>
+<li><strong>§6.K-debt</strong> (Containers extension): RESOLVED
+2026-05-07.</li>
+<li><strong>§6.N-debt</strong> (pre-push hook enforcement): RESOLVED
+2026-05-05.</li>
+<li><strong>§6.AD-debt</strong> (HelixConstitution-Inheritance per-scope
++ CM-* wiring): FULLY DRAINED 2026-05-18. Of the original
+<code>CM-*</code> set: 5 mapped Path-B-equivalent (CLOSED-BY-EQUIVALENCE
+per §6.AD.3), <code>CM-UNIVERSAL-VS-PROJECT-CLASSIFICATION</code> CLOSED
+by pre-push Check 8, <code>CM-SCRIPT-DOCS-SYNC</code> CLOSED 2026-05-17
+(<code>11820734</code>), <code>CM-COMMIT-DOCS-EXISTS</code> CLOSED
+2026-05-18 (<code>977630c3</code>),
+<code>CM-SUBAGENT-DELEGATION-AUDIT</code> CLOSED 2026-05-18
+(<code>2a0e11f4</code>). No items remain OWED.</li>
+<li><strong>§6.X-debt</strong> (Linux x86_64 + KVM gate-host for
+container-bound emulator matrix): STANDING. See §4.5 above.</li>
+<li><strong>§6.L</strong> (Anti-Bluff Functional Reality Mandate): 52
+invocations across multiple working days; 17-cycle back-to-back the
+longest sequence in project history this cycle. Per §6.L the repetition
+IS the constitutional record.</li>
+<li><strong>§6.R</strong> (No-Hardcoding Mandate): UUID + IPv4 +
+host:port scanners active; algorithm-parameter literal grep staged
+(code-review gate per §6.R clause body).</li>
+<li><strong>§6.S</strong> (Continuation Document Maintenance): THIS
+file. Per §6.S the §0 "Last updated" line MUST track HEAD.</li>
+<li><strong>§6.T</strong> (Universal Quality Constraints): four
+sub-points active (Reproduction-Before-Fix, Resource Limits,
+No-Force-Push, Bugfix Documentation).</li>
+<li><strong>§6.AC</strong> (Comprehensive Non-Fatal Telemetry): scanner
+in STRICT mode; ci.sh hard-fail wired.</li>
+<li><strong>§6.AB</strong> (Anti-Bluff Test-Suite Reinforcement):
+scanner in STRICT mode.</li>
+<li><strong>§6.AE</strong> (Comprehensive Challenge Coverage +
+Container/QEMU Matrix): per-feature scanner in STRICT mode; container
+matrix runner BLOCKED on §6.X-debt.</li>
+</ul>
+<hr />
+<h2 id="7-resume-prompt">7. RESUME PROMPT</h2>
+<p>Paste the following into a new CLI agent session to continue this
+work. The agent needs no scrollback — everything it needs is in this
+file plus the spec/plan/CLAUDE.md set referenced from it.</p>
+<pre><code>Continue Lava project work. Read these in order before doing anything:
+
+  1. /Users/milosvasic/Projects/Lava/docs/CONTINUATION.md
+  2. /Users/milosvasic/Projects/Lava/CLAUDE.md
+  3. /Users/milosvasic/Projects/Lava/constitution/Constitution.md
+  4. /Users/milosvasic/Projects/Lava/docs/plans/2026-05-15-constitution-compliance.md
+  5. /Users/milosvasic/Projects/Lava/docs/helix-constitution-gates.md
+  6. /Users/milosvasic/Projects/Lava/docs/coverage-ledger.yaml (skim — generated)
+
+Then check the git state vs the CONTINUATION.md &quot;Last updated&quot; line.
+If new commits exist on master beyond what CONTINUATION.md describes,
+trust the commits and update CONTINUATION.md before proceeding (per §6.S).
+
+Active state per CONTINUATION.md §1 (2026-05-16):
+  - All 10 phases of the constitution-compliance plan DONE (Phases 1-9 closed).
+  - HelixQA submodule incorporated; Phase 4-debt CLOSED 2026-05-16.
+  - Verify-all sweep: 40/40 PASS in fully STRICT mode.
+  - 17/17 own-org submodules with helix-deps.yaml + install_upstreams.sh; zero waivers.
+  - Coverage ledger: 48 covered / 10 partial / 0 gap (58 rows).
+  - §6.L counter at 52; 53rd in-flight at the moment of this CONTINUATION.md refresh.
+  - 33 session commits §6.C-converged on GitHub + GitLab.
+
+Your default next action (priority order):
+  1. **Phase 4-C** (HelixQA Go-package linking): blocked on 10 operator open
+     questions at `docs/plans/2026-05-16-helixqa-go-package-linking-design.md`
+     §G. Surface the questions to the operator; do NOT proceed to 4-C-1.
+  2. **Phase 6a** (snake_case migration): blocked on 8 operator open questions
+     at `docs/plans/2026-05-16-snake_case-migration.md` §11. Surface the
+     questions to the operator; do NOT proceed to Phase 6a implementation.
+  3. **Crashlytics monitoring**: the last Firebase distribute was 1.2.22-1042
+     (2026-05-14); check Crashlytics for any new issues per §6.O closure
+     mandate.
+  4. **HelixQA pin freshness**: re-baseline `submodules/helixqa` from
+     upstream if operator approves; re-run the §6.W audit.
+  5. **Tag-script gate**: still blocked on §6.X-debt (Linux x86_64 + KVM
+     gate-host) for §6.I matrix attestation. No release tag this cycle.
+
+Do NOT re-run completed phases — they are committed + pushed + sweep-verified.
+The git log is the authoritative record.
+
+Verify-all sweep evidence: `.lava-ci-evidence/verify-all/&lt;UTC-timestamp&gt;.json`
+Latest gates index: `docs/helix-constitution-gates.md`
+Coverage ledger: `docs/coverage-ledger.yaml`
+
+Constitutional bindings still in force (do not relax):
+  §6.J / §6.L (Anti-Bluff Functional Reality Mandate)
+  §6.AB / §6.AC / §6.AE (anti-bluff scanners — STRICT)
+  §6.AD (HelixConstitution Inheritance) + §6.AD.3 (equivalence-mapping)
+  §6.R (No-Hardcoding Mandate)
+  §6.S (Continuation Document Maintenance — THIS file)
+  §6.W (GitHub + GitLab Only Remote Mandate; HELIX_DEV_OWNED exemption for HelixDevelopment org)
+  §6.X (Container-Submodule Emulator Wiring; PARTIAL — gate-host owed)
+  §11.4.25-§11.4.36 (12 new HelixConstitution clauses)
+
+The operator&#39;s standing §6.L wall is preserved verbatim in CLAUDE.md.
+Read it.</code></pre>
+<hr />
+<h2 id="8-house-keeping-the-agent-should-keep-doing">8. House-keeping
+the agent should keep doing</h2>
+<p>These are habits established across multiple cycles; future agents
+should preserve them.</p>
+<ol type="1">
+<li><strong>Commit messages carry Bluff-Audit stamps for every test
+class added or modified</strong> (Seventh Law clause 1; pre-push Check 2
+rejects commits without them).</li>
+<li><strong>Every commit must have
+<code>Co-Authored-By: Claude Opus 4.7 (1M context) &lt;noreply@anthropic.com&gt;</code></strong>
+as the trailer.</li>
+<li><strong>Push to both Lava parent mirrors (GitHub + GitLab)</strong>
+after every commit chain that closes a logical unit. After every push,
+confirm convergence with
+<code>for r in github gitlab; do echo "$r: $(git ls-remote $r master | awk '{print $1}' | head -1)"; done</code>.</li>
+<li><strong>Submodule pushes are explicit per submodule</strong> to
+whatever remotes that submodule has (varies — see §3). Never use
+<code>git submodule foreach git push</code> blindly.</li>
+<li><strong>Update this CONTINUATION.md</strong> in the same commit as
+any completion-state change (phase done, new spec/plan written,
+submodule pin bumped, distribute artifact shipped, new operator-blocked
+open question surfaced).</li>
+<li><strong>Run
+<code>scripts/verify-all-constitution-rules.sh</code></strong> before
+any release-tagging or major-state-change attempt. The sweep wrapper is
+in fully STRICT mode; a non-40/40 result is a release blocker.</li>
+<li><strong>Re-generate the coverage ledger</strong>
+(<code>scripts/generate-coverage-ledger.sh</code>) in the same commit as
+any new feature module or any module-deletion; the STRICT-mode gate
+rejects stale-ledger commits.</li>
+<li><strong>The autonomous loop ends</strong> when the next forward step
+requires operator-environment access (real device, real keystore
+secrets, Firebase token, ssh credentials) OR operator decision-making
+(open questions, brainstorming next phase scope, tagging, choosing a UI
+direction). At that point, summarize state + ask the operator the
+specific next-step question.</li>
+</ol>
+<hr />
+<h2 id="9-cross-references">9. Cross-references</h2>
+<ul>
+<li><strong>Plan docs (this cycle):</strong>
+<ul>
+<li><code>docs/plans/2026-05-15-constitution-compliance.md</code> —
+master plan</li>
+<li><code>docs/plans/2026-05-16-helixqa-integration-design.md</code> —
+Option 1 wiring (DONE)</li>
+<li><code>docs/plans/2026-05-16-helixqa-go-package-linking-design.md</code>
+— Option 2 design (DESIGN-ONLY; operator-blocked)</li>
+<li><code>docs/plans/2026-05-16-snake_case-migration.md</code> — Phase 6
+plan (PLAN-ONLY; operator-blocked)</li>
+</ul></li>
+<li><strong>Gates inventory:</strong>
+<code>docs/helix-constitution-gates.md</code></li>
+<li><strong>Coverage ledger:</strong>
+<code>docs/coverage-ledger.yaml</code> +
+<code>docs/coverage-ledger.waivers.yaml</code></li>
+<li><strong>Constitution source-of-truth:</strong>
+<code>constitution/</code> submodule (HelixConstitution at
+<code>464ada14</code>)</li>
+<li><strong>Sweep wrapper:</strong>
+<code>scripts/verify-all-constitution-rules.sh</code></li>
+<li><strong>Sweep attestations:</strong>
+<code>.lava-ci-evidence/verify-all/&lt;UTC-timestamp&gt;.json</code></li>
+<li><strong>HelixQA audit:</strong>
+<code>docs/helixqa-script-audit.md</code></li>
+<li><strong>HelixQA wrapper:</strong>
+<code>scripts/run-helixqa-challenges.sh</code></li>
+<li><strong>HelixQA hermetic test:</strong>
+<code>tests/check-constitution/test_helixqa_wiring.sh</code></li>
+</ul>
+</body>
+</html>

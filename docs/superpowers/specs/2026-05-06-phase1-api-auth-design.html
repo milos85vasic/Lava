@@ -1,0 +1,1077 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-05-06-phase1-api-auth-design</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1 id="phase-1--api-auth--security-foundations-design">Phase 1 — API
+Auth &amp; Security Foundations (design)</h1>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Date</strong></td>
+<td>2026-05-06</td>
+</tr>
+<tr>
+<td><strong>Phase</strong></td>
+<td>1 of 6 (parent: <code>docs/todos/Lava_TODOs_001.md</code>)</td>
+</tr>
+<tr>
+<td><strong>Status</strong></td>
+<td>Approved (brainstorm 2026-05-06) — pending plan</td>
+</tr>
+<tr>
+<td><strong>Owner</strong></td>
+<td>Operator + Claude</td>
+</tr>
+<tr>
+<td><strong>Predecessor</strong></td>
+<td>post-Ktor cleanup chain ending at
+<code>lava-api-go-2.0.16</code></td>
+</tr>
+<tr>
+<td><strong>Successor</strong></td>
+<td>Phase 2 (multi-provider streaming search; absorbs alice-bug routing
+fix)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="1-decomposition-reference">1. Decomposition reference</h2>
+<p>The TODO at <code>docs/todos/Lava_TODOs_001.md</code> covers 17 work
+items. They cannot fit one spec. Decomposition agreed during
+brainstorm:</p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Phase</th>
+<th>TODO sections covered</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>1</strong></td>
+<td><strong>API auth &amp; security foundations</strong> <em>(this
+spec)</em></td>
+<td>"Lava API secure access" + transport mandate (HTTP/3, brotli, HTTPS
+body); + α hotfix to hide unsupported providers</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Multi-provider streaming search</td>
+<td>"Search request" + "Receiving results" + per-provider routing
+(closes alice-404) + events transport</td>
+</tr>
+<tr>
+<td>3</td>
+<td>First-run onboarding wizard</td>
+<td>"Client app first run"</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Sync subsystem expansion</td>
+<td>"Sync now button" + "Additional sync options"</td>
+</tr>
+<tr>
+<td>5</td>
+<td>UI/UX polish bundle</td>
+<td>Menu screen + Color themes + About dialog + Credentials screen +
+result filtering + nav-bar overlap</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Testing sweep + distribution + documentation</td>
+<td>"Testing" + Firebase distribute + thinker.local boot +
+diagrams/manuals + green-light-to-operator</td>
+</tr>
+</tbody>
+</table>
+<h2 id="2-motivation">2. Motivation</h2>
+<p>Today the <code>lava-api-go</code> API has no authentication: any LAN
+host (or, given the appropriate firewall hole, any internet host) can
+call its endpoints. The Android client embeds no proof-of-origin in its
+requests; the API cannot tell a Lava client from <code>curl</code>. The
+TODO mandates: (a) UUID-based client allowlist enforced server-side; (b)
+progressive backoff on invalid credentials; (c) HTTP/3 with brotli
+compression and TLS-encrypted bodies for every request and response; (d)
+build-time UUID injection on the Android client with encrypted-at-rest
+representation in the APK and decrypt-on-use lifetime in memory.</p>
+<p>Phase 1 introduces this auth foundation. Every later phase's
+networked surface (Phase 2's streaming search, Phase 4's sync, Phase 6's
+distribution gate) consumes Phase 1's transport.</p>
+<h2 id="3-goals">3. Goals</h2>
+<ul>
+<li><strong>G1</strong> Every API request from the Android client
+carries a per-build UUID, transported via a config-named HTTP header.
+The API rejects requests without a valid header.</li>
+<li><strong>G2</strong> The API stores the allowlist as
+<code>HMAC-SHA256(UUID, LAVA_AUTH_HMAC_SECRET)</code> at boot. Plaintext
+UUIDs are zeroized after the boot-time hashing pass.</li>
+<li><strong>G3</strong> Invalid headers from a given source IP trigger a
+fixed-ladder progressive backoff
+(<code>2s → 5s → 10s → 30s → 1m → 1h …</code>), configurable via
+<code>.env</code>.</li>
+<li><strong>G4</strong> Per-release UUID rotation: each Android release
+gets a unique UUID. Active and retired releases are separated; retired
+releases receive <code>HTTP 426 Upgrade Required</code> (no
+backoff).</li>
+<li><strong>G5</strong> Transport mandates: HTTP/3 (preferred, with
+HTTP/2 fallback), brotli response compression, TLS 1.3 minimum.</li>
+<li><strong>G6</strong> Client-side encrypted UUID at L2 layering —
+AES-GCM keyed by HKDF over
+<code>SHA256(signing-cert)[:16] ‖ pepper</code>. UUID handled as
+<code>ByteArray</code> end-to-end; never as <code>String</code>.
+Decrypted on the OkHttp interceptor thread; zeroized immediately after
+request emission.</li>
+<li><strong>G7</strong> Constitutional clause <strong>§6.R —
+No-Hardcoding Mandate</strong> added to root <code>CLAUDE.md</code> +
+<code>AGENTS.md</code> + every submodule's <code>CLAUDE.md</code>.
+Pre-push enforcement via
+<code>scripts/check-constitution.sh</code>.</li>
+<li><strong>G8</strong> α-hotfix: Onboarding hides providers whose
+<code>TrackerDescriptor.apiSupported = false</code>; existing installs
+with such a provider selected receive a one-time dialog directing to
+another provider.</li>
+</ul>
+<h2 id="4-non-goals-out-of-scope-for-phase-1">4. Non-goals (out of scope
+for Phase 1)</h2>
+<ul>
+<li>Multi-provider routing / per-provider search endpoints — Phase
+2.</li>
+<li>Streaming results (SSE/WS/gRPC) — Phase 2.</li>
+<li>Onboarding wizard redesign — Phase 3.</li>
+<li>Sync subsystem expansion — Phase 4.</li>
+<li>Color themes / About / Credentials redesign — Phase 5.</li>
+<li><code>.env</code> SIGHUP hot-reload — Phase 6 operations
+concern.</li>
+<li>Per-installation UUIDs (each device its own) — explicitly rejected
+during brainstorm; the operator's TODO describes per-build UUIDs.</li>
+<li>Native (NDK) client-side decryption (L3) — explicitly deferred; L2
+is the chosen layer.</li>
+<li>Reversible-encryption-at-rest of API allowlist (β) or KDF-hardened
+comparison (γ) — explicitly rejected during brainstorm.</li>
+</ul>
+<h2 id="5-configuration-model-6r-compliance">5. Configuration model
+(§6.R compliance)</h2>
+<p>Single <code>.env</code> at repo root (existing pattern;
+<code>.gitignore</code>'d per §6.H). New variables introduced by Phase
+1:</p>
+<pre><code># === Auth field identifier (read by both API + Android build) ===
+LAVA_AUTH_FIELD_NAME=Lava-Auth                         # the HTTP header name
+                                                        # (placeholder; the .env decides)
+
+# === Allowlist + rotation (API reads at boot; Android build picks one entry) ===
+LAVA_AUTH_CURRENT_CLIENT_NAME=android-1.2.7-1027       # which UUID this build embeds
+LAVA_AUTH_ACTIVE_CLIENTS=android-1.2.7-1027:UUID-A,android-1.2.6-1026:UUID-B
+LAVA_AUTH_RETIRED_CLIENTS=android-1.2.5-1025:UUID-C
+
+# === API-only ===
+LAVA_AUTH_HMAC_SECRET=&lt;32-byte base64&gt;                 # boot-time secret for hashing
+LAVA_AUTH_BACKOFF_STEPS=2s,5s,10s,30s,1m,1h            # ladder; configurable
+LAVA_AUTH_TRUSTED_PROXIES=                             # CIDR list, empty for direct
+LAVA_AUTH_MIN_SUPPORTED_VERSION_NAME=1.2.6
+LAVA_AUTH_MIN_SUPPORTED_VERSION_CODE=1026
+
+# === Android-build-only ===
+LAVA_AUTH_OBFUSCATION_PEPPER=&lt;32-byte base64&gt;          # rotated per release
+
+# === Transport (API runtime) ===
+LAVA_API_HTTP3_ENABLED=true
+LAVA_API_BROTLI_QUALITY=4
+LAVA_API_BROTLI_RESPONSE_ENABLED=true
+LAVA_API_BROTLI_REQUEST_DECODE_ENABLED=false
+LAVA_API_PROTOCOL_METRIC_ENABLED=true</code></pre>
+<p>The same <code>.env</code> line <code>LAVA_AUTH_FIELD_NAME=...</code>
+is read by both the API at boot and the Android Gradle codegen at build
+— single source of truth. The header name is config; nothing in source
+code names it literally.</p>
+<p><code>.env.example</code> (committed) carries placeholder values for
+every variable above so a developer cloning the repo knows what to set;
+placeholders match the format but are never valid (e.g.
+<code>&lt;32-byte base64&gt;</code> literal text).</p>
+<p><code>scripts/check-constitution.sh</code> extension: greps tracked
+files for forbidden literal patterns:</p>
+<ul>
+<li>Literal IPv4 addresses outside <code>.env.example</code> and
+incident docs</li>
+<li>The literal header name <code>Lava-Auth</code> (or whatever the
+operator sets — the checker reads from <code>.env.example</code>)</li>
+<li>Any 36-char UUID outside <code>.env.example</code></li>
+<li>Hardcoded host:port pairs</li>
+</ul>
+<p>Pre-push hook rejects on match.</p>
+<h2 id="6-api-side-architecture">6. API-side architecture</h2>
+<pre><code>   ┌────────────────────────────────────────────────────────────────┐
+   │ cmd/lava-api-go/main.go                                        │
+   │   boot:                                                        │
+   │     1. read .env (existing config layer)                       │
+   │     2. parse LAVA_AUTH_ACTIVE_CLIENTS  → []ClientEntry         │
+   │        parse LAVA_AUTH_RETIRED_CLIENTS → []ClientEntry         │
+   │     3. for each entry: hash = HMAC-SHA256(uuid, secret)        │
+   │     4. zeroize plaintext UUID byte slice (runtime.KeepAlive)   │
+   │     5. install middlewares (in order):                         │
+   │          backoffMW → authMW → brotliMW → handlers              │
+   └────────────────────────────────────────────────────────────────┘
+                                   │
+                                   ▼
+   ┌────────────────────────────────────────────────────────────────┐
+   │ internal/auth/middleware.go (NEW)                              │
+   │                                                                │
+   │   func AuthMiddleware(active, retired map[string]string,       │
+   │                       secret []byte,                           │
+   │                       backoff *Backoff) gin.HandlerFunc {      │
+   │     return func(c *gin.Context) {                              │
+   │       hdr := c.GetHeader(LAVA_AUTH_FIELD_NAME)                 │
+   │       if hdr == &quot;&quot; { c.AbortWithStatus(401); ... }             │
+   │       blob, err := base64.StdEncoding.DecodeString(hdr)        │
+   │       if err != nil { c.AbortWithStatus(401); ... }            │
+   │       hash := hmacSHA256(blob, secret)                         │
+   │       if name, ok := active[hash]; ok {                        │
+   │         c.Set(&quot;client_name&quot;, name)                             │
+   │         backoff.Reset(c.ClientIP())                            │
+   │         c.Next()                                               │
+   │         return                                                 │
+   │       }                                                        │
+   │       if name, ok := retired[hash]; ok {                       │
+   │         c.Header(&quot;Lava-Min-Version-Name&quot;,                      │
+   │                  config.MinSupportedVersionName)               │
+   │         c.JSON(426, gin.H{                                     │
+   │           &quot;error&quot;: &quot;client_version_unsupported&quot;,               │
+   │           &quot;min_supported_version_name&quot;:                        │
+   │              config.MinSupportedVersionName,                   │
+   │           &quot;min_supported_version_code&quot;:                        │
+   │              config.MinSupportedVersionCode,                   │
+   │           &quot;client_name&quot;: name,                                 │
+   │         })                                                     │
+   │         c.Abort()                                              │
+   │         return                                                 │
+   │       }                                                        │
+   │       backoff.RecordFailure(c.ClientIP())                      │
+   │       c.AbortWithStatusJSON(401, gin.H{&quot;error&quot;: &quot;unauthorized&quot;})│
+   │     }                                                          │
+   │   }                                                            │
+   └────────────────────────────────────────────────────────────────┘
+                                   │
+                                   ▼
+   ┌────────────────────────────────────────────────────────────────┐
+   │ internal/auth/backoff.go (NEW)                                 │
+   │                                                                │
+   │   type Backoff struct {                                        │
+   │     steps []time.Duration  // from BACKOFF_STEPS env           │
+   │     state sync.Map         // ip → *State                      │
+   │   }                                                            │
+   │                                                                │
+   │   type State struct {                                          │
+   │     mu           sync.Mutex                                    │
+   │     failures    int                                            │
+   │     blockedUntil time.Time                                     │
+   │   }                                                            │
+   │                                                                │
+   │   func (b *Backoff) CheckBlocked(ip string) (bool, int)        │
+   │     // returns (blocked, retryAfterSeconds)                    │
+   │                                                                │
+   │   func (b *Backoff) RecordFailure(ip string)                   │
+   │     // advances ladder; clamps at last step                    │
+   │                                                                │
+   │   func (b *Backoff) Reset(ip string)                           │
+   │                                                                │
+   │   func BackoffMiddleware(b *Backoff) gin.HandlerFunc           │
+   │     // before authMW: returns 429 + Retry-After when blocked   │
+   └────────────────────────────────────────────────────────────────┘</code></pre>
+<p><code>internal/auth/multiprovider.go</code> (existing) is untouched
+by Phase 1; per-provider concerns live in Phase 2.</p>
+<p><code>submodules/ratelimiter</code> already exists. Investigation
+task: does its API expose fixed-ladder per-key state, or only
+token-bucket? If fixed-ladder is missing, Phase 1 contributes the ladder
+pattern UPSTREAM first per the Decoupled Reusable Architecture rule,
+then pins the new submodule hash in Lava. Lava-side
+<code>internal/auth/backoff.go</code> becomes thin glue. (If the
+submodule already supports the pattern, the Lava-side file is even
+thinner.)</p>
+<h2 id="7-client-side-architecture">7. Client-side architecture</h2>
+<h3 id="71-build-time-codegen">7.1 Build-time codegen</h3>
+<p>A new Gradle task <code>:app:generateLavaAuthClass</code> runs before
+<code>compileKotlin</code>:</p>
+<ol type="1">
+<li>Read <code>.env</code> (already loaded by existing build script via
+<code>keystoreLoader</code> pattern).</li>
+<li>Look up <code>LAVA_AUTH_CURRENT_CLIENT_NAME</code>. If not present →
+fail build with explicit error.</li>
+<li>Find the matching entry in <code>LAVA_AUTH_ACTIVE_CLIENTS</code>. If
+not present → fail build.</li>
+<li>Read the UUID bytes (parse the <code>xxxx-xxxx-...</code>
+representation into 16 raw bytes).</li>
+<li>Compute the per-build encryption key. The signing-cert hash is the
+SHA256 of the X.509 DER bytes of the certificate embedded in the
+variant's keystore (<code>keystores/&lt;variant&gt;.jks</code>, path
+resolved by the existing <code>keystoreLoader</code> pattern). Build
+variant selects keystore: debug variant → debug keystore; release
+variant → release keystore. The runtime <code>SigningCertProvider</code>
+reads the SAME certificate from
+<code>PackageManager.getPackageInfo(... GET_SIGNING_CERTIFICATES)</code>
+— DER bytes are identical → hash is identical → derived key matches.
+<pre><code>certBytes       = readKeystore(variant).getCertificate(alias).encoded   // DER bytes
+signingCertHash = SHA256(certBytes)[:16]
+pepper          = base64-decode(LAVA_AUTH_OBFUSCATION_PEPPER)  // 32 bytes
+key             = HKDF-SHA256(salt = signingCertHash, ikm = pepper, info = &quot;lava-auth-v1&quot;, length = 32)</code></pre></li>
+<li>AES-GCM encrypt:
+<code>(blob, nonce, tag) = AES-256-GCM(uuid_bytes, key, random_nonce_12_bytes)</code></li>
+<li>Generate Kotlin source
+<code>app/src/main/generated/kotlin/lava/auth/LavaAuth.kt</code>:
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">internal</span> <span class="kw">object</span> LavaAuth <span class="op">{</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">internal</span> <span class="kw">val</span> <span class="va">BLOB</span><span class="op">:</span>    ByteArray <span class="op">=</span> byteArrayOf<span class="op">(</span><span class="co">/* 16 + tag bytes */</span><span class="op">)</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">internal</span> <span class="kw">val</span> <span class="va">NONCE</span><span class="op">:</span>   ByteArray <span class="op">=</span> byteArrayOf<span class="op">(</span><span class="co">/* 12 bytes */</span><span class="op">)</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">internal</span> <span class="kw">val</span> <span class="va">PEPPER</span><span class="op">:</span>  ByteArray <span class="op">=</span> byteArrayOf<span class="op">(</span><span class="co">/* 32 bytes */</span><span class="op">)</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">internal</span> <span class="kw">val</span> <span class="va">FIELD_NAME</span><span class="op">:</span> <span class="kw">String</span> <span class="op">=</span> <span class="st">&quot;&lt;from LAVA_AUTH_FIELD_NAME&gt;&quot;</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div></li>
+<li>Zero the in-memory plaintext UUID buffer used during codegen.</li>
+</ol>
+<p><code>@Generated</code> annotation (or moduleName-style comment) for
+the generator's identity. Generated file is <code>.gitignore</code>'d
+but committed-to-build-artifacts location is
+<code>app/build/generated/lava-auth/</code>.</p>
+<p>R8 keep-rules retain <code>LavaAuth</code> as <code>internal</code>
+but obfuscate field names (the field names like <code>BLOB</code>,
+<code>NONCE</code> are decoded by the only caller — an inline crypto
+helper — via reflection-free direct reference).</p>
+<h3 id="72-runtime-decryption--injection">7.2 Runtime decryption +
+injection</h3>
+<p>A new <code>core/network/impl/AuthInterceptor.kt</code>:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">internal</span> <span class="kw">class</span> AuthInterceptor @Inject <span class="kw">constructor</span><span class="op">(</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="kw">val</span> <span class="va">signingCertProvider</span><span class="op">:</span> <span class="dt">SigningCertProvider</span><span class="op">,</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="op">)</span> <span class="op">:</span> <span class="dt">Interceptor</span> <span class="op">{</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">override</span> <span class="kw">fun</span> <span class="fu">intercept</span><span class="op">(</span><span class="va">chain</span><span class="op">:</span> <span class="dt">Interceptor</span>.<span class="va">Chain</span><span class="op">):</span> <span class="dt">Response</span> <span class="op">{</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>        <span class="kw">val</span> <span class="va">keyBytes</span> <span class="op">=</span> ByteArray<span class="op">(</span><span class="dv">32</span><span class="op">)</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>        <span class="kw">val</span> <span class="va">uuidBytes</span> <span class="op">=</span> ByteArray<span class="op">(</span><span class="dv">16</span><span class="op">)</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>        <span class="cf">try</span> <span class="op">{</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>            <span class="co">// Compute the same key the build-time codegen used</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>            <span class="kw">val</span> <span class="va">certHash</span> <span class="op">=</span> signingCertProvider<span class="op">.</span>sha256<span class="op">().</span>copyOfRange<span class="op">(</span><span class="dv">0</span><span class="op">,</span> <span class="dv">16</span><span class="op">)</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>            HKDF<span class="op">.</span>deriveKey<span class="op">(</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>                salt <span class="op">=</span> certHash<span class="op">,</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>                ikm <span class="op">=</span> LavaAuth<span class="op">.</span>PEPPER<span class="op">,</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>                info <span class="op">=</span> <span class="st">&quot;lava-auth-v1&quot;</span><span class="op">.</span>toByteArray<span class="op">(</span>Charsets<span class="op">.</span>UTF_8<span class="op">),</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>                output <span class="op">=</span> keyBytes<span class="op">,</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>            <span class="op">)</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>            <span class="co">// AES-GCM decrypt</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>            AesGcm<span class="op">.</span>decrypt<span class="op">(</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>                ciphertextWithTag <span class="op">=</span> LavaAuth<span class="op">.</span>BLOB<span class="op">,</span></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>                key <span class="op">=</span> keyBytes<span class="op">,</span></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>                nonce <span class="op">=</span> LavaAuth<span class="op">.</span>NONCE<span class="op">,</span></span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>                aad <span class="op">=</span> <span class="kw">null</span><span class="op">,</span></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>                output <span class="op">=</span> uuidBytes<span class="op">,</span></span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>            <span class="op">)</span></span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>            <span class="kw">val</span> <span class="va">headerValue</span> <span class="op">=</span> Base64<span class="op">.</span>getEncoder<span class="op">().</span>encodeToString<span class="op">(</span>uuidBytes<span class="op">)</span></span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>            <span class="kw">val</span> <span class="va">req</span> <span class="op">=</span> chain<span class="op">.</span>request<span class="op">().</span>newBuilder<span class="op">()</span></span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>                <span class="op">.</span>header<span class="op">(</span>LavaAuth<span class="op">.</span>FIELD_NAME<span class="op">,</span> headerValue<span class="op">)</span></span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>                <span class="op">.</span>build<span class="op">()</span></span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>            <span class="kw">return</span> chain<span class="op">.</span>proceed<span class="op">(</span>req<span class="op">)</span></span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span> <span class="cf">finally</span> <span class="op">{</span></span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a>            keyBytes<span class="op">.</span>fill<span class="op">(</span><span class="dv">0</span><span class="op">)</span></span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a>            uuidBytes<span class="op">.</span>fill<span class="op">(</span><span class="dv">0</span><span class="op">)</span></span>
+<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a>            <span class="co">// headerValue is a String — JVM-immutable, can&#39;t be zeroed.</span></span>
+<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a>            <span class="co">// Acceptable: it leaves Lava code as soon as OkHttp consumes it.</span></span>
+<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a>            <span class="co">// Mitigation: do NOT log this header anywhere.</span></span>
+<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb5-38"><a href="#cb5-38" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb5-39"><a href="#cb5-39" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><code>SigningCertProvider</code> (also new) returns the
+<code>SHA-256</code> of the running APK's signing certificate via
+<code>PackageManager.getPackageInfo(... PackageManager.GET_SIGNING_CERTIFICATES)</code>.
+Same cert hash that the build-time codegen used → same derived key →
+AES-GCM decrypt succeeds. A re-signed APK has a different cert hash →
+derived key differs → decrypt fails → no header sent → API responds 401.
+This kills the re-sign-and-redistribute attack vector.</p>
+<h3 id="73-memory-hygiene-clause-coreclaudemd">7.3 Memory-hygiene clause
+(<code>core/CLAUDE.md</code>)</h3>
+<p>Append to <code>core/CLAUDE.md</code>:</p>
+<blockquote>
+<p><strong>Auth UUID memory hygiene.</strong> The decrypted UUID inside
+the client MUST be held only as <code>ByteArray</code>, never as
+<code>String</code>. The decrypt-use-zeroize lifetime is bounded by a
+single OkHttp <code>Interceptor.intercept()</code> call; the
+<code>ByteArray</code> is <code>fill(0)</code>'d in a
+<code>finally</code> block before the function returns. The
+Base64-encoded header VALUE is a <code>String</code> (immutable) but
+never logged, never persisted, never assigned to a class field, and
+leaves Lava code as soon as OkHttp consumes it. Adding logging that
+includes the header value is a constitutional violation; pre-push grep
+enforces.</p>
+</blockquote>
+<h2 id="8-transport-policy">8. Transport policy</h2>
+<ul>
+<li>API binds two listeners on the same logical port (8443): UDP via
+<code>quic-go</code> for HTTP/3, TCP via <code>net/http</code> for
+HTTP/2.</li>
+<li>Both listeners share one TLS config
+(<code>MinVersion: tls.VersionTLS13</code>).</li>
+<li>Every HTTP/2 response carries
+<code>Alt-Svc: h3=":&lt;port&gt;"; ma=86400</code> so HTTP-3-capable
+clients upgrade.</li>
+<li>Brotli response middleware applied after <code>authMW</code> (no
+point compressing 401/426 envelopes).</li>
+<li><code>Content-Encoding: br</code> advertised when client
+<code>Accept-Encoding</code> includes <code>br</code>.</li>
+<li>Brotli <strong>request</strong> decoding off by default
+(<code>LAVA_API_BROTLI_REQUEST_DECODE_ENABLED=false</code>); request
+bodies in Phase 1 are JSON <code>{auth: ..., query: ...}</code> shapes
+whose compression overhead exceeds savings. Configurable for forward
+compatibility.</li>
+<li>New Prometheus counter:
+<code>lava_api_request_protocol_total{protocol="h3"|"h2",status="2xx"|"4xx"|"5xx"}</code>.
+Visible in the existing observability profile.</li>
+</ul>
+<h2 id="9-rotation-workflow">9. Rotation workflow</h2>
+<p>The runbook lives at <code>docs/RELEASE-ROTATION.md</code> (created
+in Phase 1):</p>
+<ol type="1">
+<li><code>uuidgen</code> → new UUID for the upcoming release.</li>
+<li><code>openssl rand -base64 32</code> → new pepper.</li>
+<li>Update <code>.env</code>:
+<ul>
+<li>Append <code>android-${NEW_VERSION}-${NEW_CODE}:${NEW_UUID}</code>
+to <code>LAVA_AUTH_ACTIVE_CLIENTS</code>.</li>
+<li>Set
+<code>LAVA_AUTH_CURRENT_CLIENT_NAME=android-${NEW_VERSION}-${NEW_CODE}</code>.</li>
+<li>Replace <code>LAVA_AUTH_OBFUSCATION_PEPPER</code> with the new
+value.</li>
+</ul></li>
+<li>Build APK via <code>./build_and_release.sh</code> (uses the new
+pepper + new UUID).</li>
+<li>Distribute via Firebase:
+<code>scripts/firebase-distribute.sh</code>.</li>
+<li>Restart API: <code>scripts/distribute-api-remote.sh</code> (deploys
+new <code>.env</code> to thinker.local + restarts container).</li>
+<li>Wait until ≥95% of installs (per Crashlytics version distribution)
+are on the new version.</li>
+<li>Move the oldest entry from <code>LAVA_AUTH_ACTIVE_CLIENTS</code> to
+<code>LAVA_AUTH_RETIRED_CLIENTS</code>.</li>
+<li>Restart API. Old APKs now receive <code>426 Upgrade Required</code>
+→ user upgrades.</li>
+</ol>
+<p>If an active UUID leaks before step 7, skip to step 8 immediately for
+the leaked release. Affected users get <code>426</code>, see upgrade
+dialog, install newer release.</p>
+<h2 id="10-α-hotfix-hide-unsupported-providers">10. α-hotfix: hide
+unsupported providers</h2>
+<p>Add <code>apiSupported: Boolean</code> to
+<code>core/tracker/api/.../TrackerDescriptor</code> (or wherever the
+descriptor sealed-interface lives — to be confirmed during plan phase).
+Initial values:</p>
+<ul>
+<li><code>rutracker.org</code> → <code>true</code></li>
+<li><code>rutor.info</code> → <code>true</code></li>
+<li><code>internet-archive</code> → <code>false</code> (flips to
+<code>true</code> in Phase 2)</li>
+<li>Any other registered tracker → audited per descriptor</li>
+</ul>
+<p><code>feature/onboarding</code>'s provider list filters
+<code>descriptors.where { it.apiSupported }</code>. Settings → Trackers
+also marks unsupported descriptors with a "Not yet supported via this
+backend" subtitle.</p>
+<p>Existing installs with an unsupported provider already selected:
+<code>MainActivity.onCreate()</code> checks the persisted selected
+providers; if any has <code>apiSupported = false</code>, surface a
+one-time <code>AlertDialog</code>: <em>"<provider name> is not currently
+supported via this backend. Please configure another provider."</em> On
+dismiss, navigate to <code>Settings → Trackers</code>. The "one-time"
+tracking is via a <code>Preferences</code> boolean flag.</p>
+<p>This is the Phase-1 stopgap. Phase 2 makes IA
+<code>apiSupported = true</code> by adding the routes, and the hotfix
+becomes inert.</p>
+<h2 id="11-constitutional-addition-6r">11. Constitutional addition:
+§6.R</h2>
+<p>Add the following to root <code>CLAUDE.md</code> after §6.Q (so the
+chain reads <code>…§6.O, §6.P, §6.Q, §6.R, §6.L</code>):</p>
+<blockquote>
+<h3
+id="6r--no-hardcoding-mandate-added-2026-05-06-fourteenth-6l-invocation">§6.R
+— No-Hardcoding Mandate (added 2026-05-06, FOURTEENTH §6.L
+invocation)</h3>
+<p>No connection address, port, header field name, credential, key,
+salt, secret, schedule, algorithm parameter, or domain literal shall
+appear as a string/int constant in tracked source code
+(<code>.kt</code>, <code>.java</code>, <code>.go</code>,
+<code>.gradle</code>, <code>.kts</code>, <code>.xml</code>,
+<code>.yaml</code>, <code>.yml</code>, <code>.json</code>,
+<code>.sh</code>). Every such value MUST come from a config source:
+<code>.env</code> (gitignored), generated config class (build-time
+codegen reading <code>.env</code>), runtime env var, or mounted
+file.</p>
+<p>The placeholder file <code>.env.example</code> (committed) carries
+dummy values for every variable so a developer cloning the repo knows
+what to set.</p>
+<p><code>scripts/check-constitution.sh</code> MUST grep tracked files
+for forbidden literal patterns:</p>
+<ul>
+<li>Any IPv4 address outside <code>.env.example</code> and incident
+docs</li>
+<li>The header name from <code>.env.example</code>'s
+<code>LAVA_AUTH_FIELD_NAME</code></li>
+<li>Any 36-char UUID outside <code>.env.example</code></li>
+<li>Hardcoded <code>host:port</code> pairs in HTTP/HTTPS URLs</li>
+</ul>
+<p>Pre-push rejects on match. Bluff-Audit stamp required on any commit
+that adds new config-driven values, demonstrating the no-hardcoding
+contract test fails when a literal is reintroduced.</p>
+<p>Inheritance: applies recursively to every submodule and every new
+artifact. Submodule constitutions MAY add stricter rules (e.g. "this
+submodule MAY NOT read environment variables at all; all config arrives
+via constructor injection") but MUST NOT relax this clause.</p>
+</blockquote>
+<p>Also append to <code>AGENTS.md</code> and every submodule's
+<code>CLAUDE.md</code> per §6.F inheritance.</p>
+<h2 id="12-acceptance-criteria">12. Acceptance criteria</h2>
+<p>Phase 1 is complete when ALL of:</p>
+<h3 id="121-api-side">12.1 API-side</h3>
+<ul class="task-list">
+<li><label><input
+type="checkbox" /><code>internal/auth/middleware.go</code> exists,
+exports <code>AuthMiddleware</code>. Active-UUID path returns 200;
+retired-UUID path returns 426 with min-version JSON; unknown-UUID path
+returns 401.</label></li>
+<li><label><input
+type="checkbox" /><code>internal/auth/backoff.go</code> exists, exports
+<code>Backoff</code> + <code>BackoffMiddleware</code>. Per-IP fixed
+ladder; resets on success.</label></li>
+<li><label><input type="checkbox" /><code>cmd/lava-api-go/main.go</code>
+wires both middlewares before all v1 routes.</label></li>
+<li><label><input type="checkbox" /><code>.env.example</code> carries
+placeholders for every new variable.</label></li>
+<li><label><input
+type="checkbox" /><code>internal/config/config.go</code> reads +
+validates every new variable; failure to parse is a fatal boot error (no
+silent defaults).</label></li>
+</ul>
+<h3 id="122-client-side">12.2 Client-side</h3>
+<ul class="task-list">
+<li><label><input type="checkbox" /><code>app/build.gradle.kts</code>
+registers <code>:app:generateLavaAuthClass</code> task; runs before
+<code>compileKotlin</code>; fails the build if <code>.env</code> lookup
+fails.</label></li>
+<li><label><input
+type="checkbox" /><code>app/src/main/generated/kotlin/lava/auth/LavaAuth.kt</code>
+is generated (gitignored; checked into build artifacts
+only).</label></li>
+<li><label><input
+type="checkbox" /><code>core/network/impl/AuthInterceptor.kt</code>
+exists, registered into the OkHttp client chain via
+<code>NetworkModule</code>.</label></li>
+<li><label><input type="checkbox" /><code>SigningCertProvider</code>
+exists, returns the running APK's signing-cert SHA256.</label></li>
+<li><label><input type="checkbox" />R8 keep-rules retain the
+<code>LavaAuth</code> object's bytes but not its symbol
+names.</label></li>
+</ul>
+<h3 id="123-transport">12.3 Transport</h3>
+<ul class="task-list">
+<li><label><input type="checkbox" />HTTP/3 listener active on the
+configured port; <code>Alt-Svc</code> header set on every HTTP/2
+response.</label></li>
+<li><label><input type="checkbox" />Brotli response middleware
+compresses for clients sending
+<code>Accept-Encoding: br</code>.</label></li>
+<li><label><input
+type="checkbox" /><code>lava_api_request_protocol_total{protocol="h3"|"h2"}</code>
+metric increments correctly under both transports.</label></li>
+</ul>
+<h3 id="124-rotation">12.4 Rotation</h3>
+<ul class="task-list">
+<li><label><input
+type="checkbox" /><code>docs/RELEASE-ROTATION.md</code> exists with the
+operator runbook.</label></li>
+<li><label><input
+type="checkbox" /><code>scripts/check-constitution.sh</code> rejects
+pushes that add a literal UUID outside
+<code>.env.example</code>.</label></li>
+<li><label><input
+type="checkbox" /><code>scripts/firebase-distribute.sh</code> (extended)
+reads <code>LAVA_AUTH_CURRENT_CLIENT_NAME</code> and refuses to
+distribute if the chosen UUID is not in
+<code>LAVA_AUTH_ACTIVE_CLIENTS</code>.</label></li>
+</ul>
+<h3 id="125-α-hotfix">12.5 α-hotfix</h3>
+<ul class="task-list">
+<li><label><input
+type="checkbox" /><code>TrackerDescriptor.apiSupported: Boolean</code>
+added; existing onboarding consumes it.</label></li>
+<li><label><input type="checkbox" />First-time-only dialog surfaced for
+installs that already have an unsupported provider
+selected.</label></li>
+<li><label><input type="checkbox" />Internet Archive descriptor:
+<code>apiSupported = false</code> in Phase 1; flips in Phase
+2.</label></li>
+</ul>
+<h3 id="126-constitutional">12.6 Constitutional</h3>
+<ul class="task-list">
+<li><label><input type="checkbox" />§6.R added to root
+<code>CLAUDE.md</code>, <code>AGENTS.md</code>, every
+<code>submodules/*/CLAUDE.md</code>.</label></li>
+<li><label><input
+type="checkbox" /><code>scripts/check-constitution.sh</code> extended
+for forbidden-literal greps; pre-push hook updated to call
+it.</label></li>
+<li><label><input type="checkbox" />Falsifiability rehearsal in commit
+body: deliberate literal reintroduction fails the checker.</label></li>
+</ul>
+<h3 id="127-tests-6g-real-stack--6a-contract--6n-rehearsals">12.7 Tests
+(§6.G real-stack + §6.A contract + §6.N rehearsals)</h3>
+<table>
+<thead>
+<tr>
+<th>Test class</th>
+<th>Path</th>
+<th>Asserts on</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>AuthActiveUuidReturns200Test</code></td>
+<td><code>lava-api-go/tests/integration/</code></td>
+<td>real Gin engine + real Postgres + real HTTP request → 200 + correct
+response body</td>
+</tr>
+<tr>
+<td><code>AuthRetiredUuidReturns426Test</code></td>
+<td>same</td>
+<td>retired UUID → 426 + JSON body containing
+<code>min_supported_version_name</code> and <code>_code</code></td>
+</tr>
+<tr>
+<td><code>AuthUnknownUuidReturns401Test</code></td>
+<td>same</td>
+<td>unknown UUID → 401 + counter increments</td>
+</tr>
+<tr>
+<td><code>AuthBackoffLadderTest</code></td>
+<td>same</td>
+<td>7 sequential 401s; assert each response carries
+<code>Retry-After: &lt;BACKOFF_STEPS[i]&gt;</code></td>
+</tr>
+<tr>
+<td><code>AuthBackoffResetsOnSuccessTest</code></td>
+<td>same</td>
+<td>5 fails, 1 success, 1 fail → counter is at step 1 not step 6</td>
+</tr>
+<tr>
+<td><code>AuthBrotliResponseTest</code></td>
+<td>same</td>
+<td><code>Accept-Encoding: br</code> → response carries
+<code>Content-Encoding: br</code> + decompressed body matches
+uncompressed control</td>
+</tr>
+<tr>
+<td><code>AuthH3AltSvcAdvertisementTest</code></td>
+<td>same</td>
+<td>HTTP/2 response carries
+<code>Alt-Svc: h3=":&lt;port&gt;"</code></td>
+</tr>
+<tr>
+<td><code>AuthProtocolMetricTest</code></td>
+<td>same</td>
+<td>metric <code>lava_api_request_protocol_total</code> increments
+correctly per protocol used</td>
+</tr>
+<tr>
+<td><code>AuthHeaderInjectionContractTest</code></td>
+<td><code>lava-api-go/tests/contract/</code></td>
+<td>§6.A contract: <code>LAVA_AUTH_FIELD_NAME</code> from
+<code>.env.example</code> matches what
+<code>internal/auth/middleware.go</code> reads (parallels
+<code>healthcheck_contract_test.go</code> pattern)</td>
+</tr>
+<tr>
+<td><code>AuthClientFieldNameMatchesApiTest</code></td>
+<td>Android side, <code>core/network/impl/src/test/.../</code></td>
+<td>the build-time-generated <code>LavaAuth.FIELD_NAME</code> matches
+what the API expects (cross-checks <code>.env.example</code>)</td>
+</tr>
+<tr>
+<td><code>C13_AuthHeaderInjectionTest</code></td>
+<td><code>app/src/androidTest/.../challenges/</code></td>
+<td>Compose UI Challenge per §6.G clause 4: real screen → real ViewModel
+→ real OkHttp + AuthInterceptor → real lava-api-go in podman → asserts
+on user-visible state ("search results loaded successfully")</td>
+</tr>
+<tr>
+<td><code>C14_AuthRotationForceUpgradeDialogTest</code></td>
+<td>same</td>
+<td>Compose UI Challenge: API returns 426 → upgrade dialog renders +
+user-visible text matches expected</td>
+</tr>
+</tbody>
+</table>
+<p>For each test class added or modified, a Bluff-Audit stamp goes in
+the commit body per §6.N. At least one mutation per class must produce a
+crisp failure message.</p>
+<h3 id="128-distribution-gate-6i--6k--6p">12.8 Distribution gate (§6.I +
+§6.K + §6.P)</h3>
+<ul class="task-list">
+<li><label><input type="checkbox" />API binary built via
+<code>submodules/containers</code> per §6.K; binary digest recorded in
+<code>.lava-ci-evidence/&lt;tag&gt;/api-build-digest.txt</code>.</label></li>
+<li><label><input type="checkbox" />Distributed to thinker.local via
+<code>scripts/distribute-api-remote.sh</code>.</label></li>
+<li><label><input type="checkbox" />APK built, signed, distributed via
+Firebase (<code>Lava-Android-1.2.7-1027</code>); §6.P CHANGELOG entry +
+per-version snapshot at
+<code>.lava-ci-evidence/distribute-changelog/firebase/1.2.7-1027.md</code>.</label></li>
+<li><label><input type="checkbox" />§6.I emulator matrix gate green:
+phone + tablet on API 28/30/34/latest, all rows pass
+(<code>gating: true</code>, <code>concurrent: 1</code>, no
+AVD-shadow).</label></li>
+<li><label><input type="checkbox" />Operator notified to install +
+smoke-test the four flows: login, search-against-rutracker, browse,
+download.</label></li>
+</ul>
+<h2 id="13-risks--mitigations">13. Risks + mitigations</h2>
+<table>
+<thead>
+<tr>
+<th>Risk</th>
+<th>Mitigation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>submodules/ratelimiter doesn't expose fixed-ladder per-key
+state</td>
+<td>Plan-phase investigation; if missing, contribute upstream first per
+Decoupled Reusable Architecture rule (a multi-day extension before Phase
+1's Lava-side work begins)</td>
+</tr>
+<tr>
+<td>Re-signed-APK auth bypass through derived-key change</td>
+<td>Killed by design: signing cert SHA enters HKDF salt; re-sign breaks
+decrypt</td>
+</tr>
+<tr>
+<td>Per-release pepper rotation forgotten by operator</td>
+<td><code>scripts/firebase-distribute.sh</code> extension: refuse to
+distribute if <code>LAVA_AUTH_OBFUSCATION_PEPPER</code> matches the
+previous distribute's value (compares against
+<code>.lava-ci-evidence/distribute-changelog/firebase/last-pepper.sha256</code>)</td>
+</tr>
+<tr>
+<td>Generated <code>LavaAuth.kt</code> accidentally committed</td>
+<td>Add to <code>.gitignore</code>; pre-push hook scans for the file
+path</td>
+</tr>
+<tr>
+<td>Header name leaked via logging</td>
+<td>The constitutional <code>core/CLAUDE.md</code> clause +
+<code>scripts/check-constitution.sh</code> grep for the field name in
+non-test logging code</td>
+</tr>
+<tr>
+<td>HTTP/3 disabled by accident on thinker.local</td>
+<td>Boot-time validation: if <code>LAVA_API_HTTP3_ENABLED=true</code>
+but UDP listener fails, abort startup with explicit error (no silent
+fallback to HTTP/2-only)</td>
+</tr>
+<tr>
+<td>Backoff state grows unbounded under brute force</td>
+<td><code>sync.Map</code> entries with
+<code>blockedUntil + 24h &lt; now</code> are pruned by a background
+goroutine</td>
+</tr>
+</tbody>
+</table>
+<h2 id="14-plan-phase-investigations">14. Plan-phase investigations</h2>
+<p>Items the implementation plan (writing-plans) must resolve before
+phase work begins:</p>
+<ol type="1">
+<li><strong><code>submodules/ratelimiter</code> capabilities
+audit.</strong> Does it already expose fixed-ladder per-key backoff? Is
+the API stable? If yes, Phase 1's <code>internal/auth/backoff.go</code>
+is thin glue. If no, plan a small upstream contribution to
+<code>submodules/ratelimiter</code> that adds the ladder primitive (with
+its own §6.A contract test + §6.N falsifiability rehearsal), pin a new
+submodule hash in Lava, then proceed with Phase 1's Lava-side work. Per
+Decoupled Reusable Architecture rule: upstream first, Lava pin
+second.</li>
+<li><strong><code>TrackerDescriptor.apiSupported</code>
+location.</strong> The descriptor sealed-interface lives somewhere under
+<code>submodules/tracker_sdk</code> or <code>core/tracker</code>. Plan
+must locate the canonical site and decide whether
+<code>apiSupported</code> is a constructor parameter or a derived
+property.</li>
+<li><strong>OkHttp <code>Interceptor</code> registration site.</strong>
+Trace the existing <code>NetworkModule</code> Hilt graph to confirm
+where <code>AuthInterceptor</code> is added; ensure it runs after the
+existing <code>NetworkLogger</code> (so logger never sees an unredacted
+header) and before TLS.</li>
+<li><strong>Build variant + keystore wiring.</strong> Confirm
+<code>keystoreLoader</code> pattern resolves debug/release keystores
+correctly; confirm Gradle task can invoke it before
+<code>compileKotlin</code>.</li>
+<li><strong><code>scripts/check-constitution.sh</code> regex
+set.</strong> Plan must enumerate the exact forbidden-literal regexes
+for §6.R enforcement; ensure pre-push performance is acceptable on the
+full <code>git ls-files</code> scan.</li>
+<li><strong><code>scripts/firebase-distribute.sh</code> extension
+scope.</strong> Confirm where the previous-pepper-SHA is read/written;
+ensure the same-pepper-rejection check fires reliably.</li>
+</ol>
+<h2 id="15-references">15. References</h2>
+<ul>
+<li>Operator TODO: <code>docs/todos/Lava_TODOs_001.md</code></li>
+<li>Constitution root: <code>CLAUDE.md</code> §6.A through §6.Q</li>
+<li>Existing API auth surfaces:
+<code>lava-api-go/internal/auth/passthrough.go</code>,
+<code>multiprovider.go</code></li>
+<li>Existing client network:
+<code>core/network/impl/src/main/kotlin/lava/network/impl/</code></li>
+<li>Memory anchor: <code>feedback_lan_tls_no_manual_install.md</code>
+(LAN TLS without manual cert install — must be preserved)</li>
+<li>§6.R inheritance target: every
+<code>submodules/*/CLAUDE.md</code></li>
+<li>§6.L invocation count: this spec corresponds to the FOURTEENTH
+operator restatement of the Anti-Bluff Functional Reality Mandate (the
+no-hardcoding directive piggy-backs on §6.L's spirit and motivates
+§6.R's mechanics)</li>
+</ul>
+</body>
+</html>

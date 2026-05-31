@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-05-13-sp4-phase-f-design</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1
+id="sp-4-phase-f--clone-with-new-name-actually-searchable-detailed-design">SP-4
+Phase F — Clone-with-new-name actually searchable (detailed design)</h1>
+<p><strong>Spec date:</strong> 2026-05-13 <strong>Parent SP:</strong>
+<code>docs/superpowers/specs/2026-05-12-sp4-multi-provider-redesign.md</code>
+<strong>Prerequisite:</strong> Phases A + B + C + D complete (HEAD
+<code>657f74c1</code>). <strong>Status:</strong> detailed-design locked.
+Implementation plan in
+<code>docs/superpowers/plans/2026-05-13-sp4-phase-f-implementation.md</code>.</p>
+<h2 id="goal-from-parent-sp-4-design">Goal (from parent SP-4
+design)</h2>
+<blockquote>
+<p><strong>Phase F — Provider clone-with-new-name.</strong> UI clone
+affordance. Domain support for "multiple instances of the same provider
+type with different mirror sets". Challenge for clone+search the
+clone.</p>
+</blockquote>
+<h2 id="current-state-audit-post-phase-d-head-657f74c1">Current state
+audit (post Phase D, HEAD <code>657f74c1</code>)</h2>
+<table>
+<thead>
+<tr>
+<th>Surface</th>
+<th>What's there</th>
+<th>What's missing</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Phase B <code>CloneSection</code> UI</td>
+<td><code>ProviderConfigAction.ConfirmClone(displayName, primaryUrl)</code>
+→ <code>CloneProviderUseCase</code> → <code>ClonedProviderDao</code> row
++ <code>SyncOutbox</code> enqueue</td>
+<td>OK</td>
+</tr>
+<tr>
+<td>Phase A <code>ClonedProviderDao</code> /
+<code>ClonedProviderEntity</code></td>
+<td>Persists
+<code>(syntheticId, sourceTrackerId, displayName, primaryUrl)</code></td>
+<td>OK</td>
+</tr>
+<tr>
+<td><code>LavaTrackerSdk.listAvailableTrackers()</code></td>
+<td>Returns base + synthetic <code>ClonedTrackerDescriptor</code>s
+(capabilities + AuthType + apiSupported all delegate to source;
+trackerId + displayName + baseUrls are the clone's)</td>
+<td>OK</td>
+</tr>
+<tr>
+<td><code>LavaTrackerSdk.search</code> / <code>multiSearch</code> /
+<code>streamMultiSearch</code></td>
+<td>All call <code>registry.get(id, MapPluginConfig())</code>
+synchronously</td>
+<td><strong>CRASHES on clone IDs</strong> —
+<code>DefaultPluginRegistry.get(id)</code> throws
+<code>IllegalArgumentException: Unknown plugin id: rutracker.clone.&lt;uuid&gt;</code>
+because clones have no registered factory. Phase B looks complete but
+the search path against clones is dead.</td>
+</tr>
+<tr>
+<td>Source tracker clients (e.g. <code>RuTrackerClient</code>)</td>
+<td>Construct their HTTP/Ktor stack with
+<code>descriptor.baseUrls</code> baked in at factory.create-time.</td>
+<td>URL override is per-factory; no
+<code>PluginConfig.baseUrlOverride</code> contract today.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="what-this-is-and-isnt">What this is and isn't</h2>
+<p>This phase is <strong>F.1</strong> — close the SDK crash + tag
+results with clone id so the multi-provider UI correctly displays "from
+RuTracker EU" instead of "from RuTracker". Searches against a clone
+route to the <strong>source</strong> tracker's TrackerClient and use the
+<strong>source's</strong> baseUrls — the clone's <code>primaryUrl</code>
+is recorded in the DAO but NOT yet routed.</p>
+<p><strong>F.2 (owed, separate phase)</strong> wires the URL override
+end-to-end: per-clone <code>MirrorManager</code> OR
+<code>PluginConfig.baseUrlOverride</code> support across factories, so a
+search against the "RuTracker EU" clone hits <code>rutracker.eu</code>
+instead of <code>rutracker.org</code>.</p>
+<p><strong>Honest disclosure:</strong> when the user creates a clone,
+the ConfirmClone Toast text changes from "Cloned" to "Cloned (URL
+routing pending — searches use source URLs until Phase F.2)" so the user
+is not misled about what the clone is doing today. This is the §6.J
+anti-bluff mechanic: ship value, name the gap, no false promise.</p>
+<h2 id="design-decisions-locked">Design decisions (locked)</h2>
+<h3 id="f-d1--resolution-at-the-sdk-seam-not-in-the-registry">F-D1 —
+Resolution at the SDK seam, not in the registry</h3>
+<p>The clone's synthetic id is NOT registered as a separate factory.
+Instead, every SDK call that does
+<code>registry.get(id, MapPluginConfig())</code> goes through a new
+private suspend helper <code>clientFor(id: String): TrackerClient</code>
+that:</p>
+<ul>
+<li>If <code>id</code> is a synthetic clone (looked up in
+<code>ClonedProviderDao</code>): construct a wrapping
+<code>ClonedRoutingTrackerClient</code> that
+<ul>
+<li>Reports the clone's descriptor (via
+<code>ClonedTrackerDescriptor</code>)</li>
+<li>Delegates <code>getFeature(...)</code> to a <strong>clone-aware
+shim</strong> that wraps the source feature: calls the source feature's
+method, then re-tags result items with the clone's synthetic id.</li>
+</ul></li>
+<li>Else: <code>registry.get(id, MapPluginConfig())</code> as
+today.</li>
+</ul>
+<p>Why at the SDK seam, not at the registry: keeping the synthetic-id
+resolution out of the registry preserves the registry's contract ("if
+you call register, you can call get"; clones live outside that contract
+— they're a Lava-domain composition on top).</p>
+<h3 id="f-d2--result-re-tagging">F-D2 — Result re-tagging</h3>
+<p><code>SearchableTracker.search(...)</code> returns
+<code>SearchResult(items, totalPages, currentPage)</code> where each
+<code>TorrentItem</code> carries <code>trackerId</code>. The clone-shim
+wraps the source feature and re-maps <code>items</code> to have
+<code>trackerId = clone.syntheticId</code> so the multi-provider UI's
+per-provider grouping shows the clone's display name correctly.</p>
+<p>Same pattern for
+<code>BrowsableTracker.browse(...) → BrowseResult</code> items, and
+<code>FavoritesTracker.list()</code> items.</p>
+<h3 id="f-d3--getactiveclient-also-resolved">F-D3 — getActiveClient also
+resolved</h3>
+<p><code>LavaTrackerSdk.search / browse / getTopic / login / checkAuth / logout / downloadTorrent / getMagnetLink / addFavorite / removeFavorite / getCommentsPage / addComment / getForumTree / getFavorites</code>
+ALL call <code>getActiveClient()</code> which does
+<code>registry.get(activeTrackerId, ...)</code>. If a user marks a clone
+as active (legacy <code>switchTracker(...)</code> — now
+<code>@Deprecated</code>), every one of those crashes today.</p>
+<p><code>getActiveClient()</code> is refactored to a suspend
+<code>getActiveClientSuspend()</code> that uses
+<code>clientFor(activeTrackerId)</code>. The non-suspend overload is
+kept as a deprecated fallback that calls
+<code>runBlocking { ... }</code> (consistent with the existing
+<code>listAvailableTrackers()</code> pattern that already does this for
+<code>ClonedProviderDao.getAll()</code>).</p>
+<h3 id="f-d4--ui-disclosure-of-the-f2-gap">F-D4 — UI disclosure of the
+F.2 gap</h3>
+<p><code>ProviderConfigSideEffect.ShowToast("Cloned")</code> becomes
+<code>ShowToast("Cloned (URL routing pending — searches use source URLs)")</code>.
+No new UI surfaces; just honest copy.</p>
+<h3 id="f-d5--usermirrordao-keyed-by-clone-id">F-D5 —
+<code>UserMirrorDao</code> keyed by clone id</h3>
+<p>When the user adds a custom mirror for a clone (via Phase B's
+MirrorsSection), the <code>UserMirrorEntity.trackerId</code> field
+carries the clone's synthetic id. The infrastructure already supports
+this — DAO doesn't care if the trackerId is a clone or not. F.2 will
+read this DAO to construct the per-clone MirrorManager.</p>
+<h2 id="affected-surfaces">Affected surfaces</h2>
+<h3 id="files-to-add">Files to add</h3>
+<ul>
+<li><code>core/tracker/client/src/main/kotlin/lava/tracker/client/ClonedRoutingTrackerClient.kt</code>
+— the wrapping client.</li>
+<li><code>core/tracker/client/src/test/kotlin/lava/tracker/client/LavaTrackerSdkCloneSearchTest.kt</code>
+— unit tests: search a clone returns items tagged with clone id; the
+source's parser ran (asserted by the items' contents).</li>
+</ul>
+<h3 id="files-to-modify">Files to modify</h3>
+<ul>
+<li><code>core/tracker/client/src/main/kotlin/lava/tracker/client/LavaTrackerSdk.kt</code>:
+<ul>
+<li>Add
+<code>private suspend fun clientFor(id: String): TrackerClient</code>.</li>
+<li>Replace every <code>registry.get(id, MapPluginConfig())</code> call
+with <code>clientFor(id)</code>. (~12 call sites: search, browse,
+getTopic, getTopicPage, getCommentsPage, addComment, downloadTorrent,
+getMagnetLink, getForumTree, getFavorites, addFavorite, removeFavorite,
+login, checkAuth, logout, multiSearch, streamMultiSearch).</li>
+<li><code>getActiveClient()</code> →
+<code>getActiveClientSuspend()</code> for callers that already suspend;
+the non-suspend version is kept for the <code>internal</code>
+SwitchingNetworkApi compat path.</li>
+</ul></li>
+<li><code>feature/provider_config/src/main/kotlin/lava/provider/config/ProviderConfigViewModel.kt</code>
+— Toast copy updated.</li>
+<li><code>docs/CONTINUATION.md</code> — Phase F.1 landed; F.2 owed.</li>
+</ul>
+<h2 id="challenge-tests">Challenge Tests</h2>
+<p><strong>C34 (new)</strong>
+<code>CloneAndSearchClonedProviderTest.kt</code>:</p>
+<ol type="1">
+<li>Start on Menu → tap RuTracker.org provider row → ProviderConfig →
+tap "Clone provider…" → fill name "RuTracker EU" + URL "<a
+href="https://rutracker.eu">https://rutracker.eu</a>" → Confirm.</li>
+<li>Toast "Cloned (URL routing pending...)" displayed.</li>
+<li>Press back → Menu now shows two RuTracker rows: original +
+"RuTracker EU".</li>
+<li>Tap "RuTracker EU" → ProviderConfig opens correctly.</li>
+</ol>
+<p>Operator-bound (gating emulator).</p>
+<p>Falsifiability rehearsal for the unit test:</p>
+<p><strong>Unit test 1</strong> asserts that
+<code>sdk.multiSearch(clone-id)</code> does NOT throw (today it does
+throw <code>IllegalArgumentException</code>). Mutation: revert
+<code>clientFor(id)</code> back to
+<code>registry.get(id, MapPluginConfig())</code>. Test fails with the
+same IllegalArgumentException.</p>
+<p><strong>Unit test 2</strong> asserts that returned items carry the
+CLONE's synthetic id, not the SOURCE's id. Mutation: in the clone-shim,
+return source items unmodified (skip the re-tag). Test fails — the
+items' trackerId is the source's id.</p>
+<h2 id="anti-bluff-posture">Anti-bluff posture</h2>
+<p>Per §6.J / §6.L:</p>
+<ol type="1">
+<li>The Toast copy "(URL routing pending — searches use source URLs)"
+disclosures the F.2 gap at the moment the user creates the clone — no
+false promise about the URL override.</li>
+<li>Unit tests assert on user-observable outcomes: no crash, items
+tagged with clone id, source parser actually ran.</li>
+<li>CONTINUATION.md explicitly names F.2 as owed; the SP-4 sequence
+record includes the gap.</li>
+<li>F.1 alone IS a complete user-visible improvement: today the search
+path against clones is a crash; after F.1 the clone appears as a
+normal-looking provider that returns results. The URL gap is documented,
+not hidden.</li>
+</ol>
+<h2 id="out-of-scope-for-phase-f-this-is-f2-owed">Out of scope for Phase
+F (this is F.2 owed)</h2>
+<ul>
+<li>Per-clone <code>MirrorManager</code> wiring so search HTTP traffic
+actually hits the clone's <code>primaryUrl</code>.</li>
+<li>Result-content variation when source URLs are degraded (Phase F.2
+lets clones be a failover surface).</li>
+<li>Removing the Toast copy disclosure (it stays until F.2 ships).</li>
+</ul>
+<h2 id="operators-invariants-reasserted">Operator's invariants
+reasserted</h2>
+<ul>
+<li>§6.J: searching a clone now produces a real, user-visible outcome
+(items in the search-result list, correctly tagged with the clone's
+display name).</li>
+<li>§6.Q: no UI layout changes; ProviderConfig screen is unchanged
+structurally.</li>
+<li>§6.R: no new hardcoded literals.</li>
+<li>§6.S: CONTINUATION updated in implementation commit.</li>
+<li>§6.W: pushed to both mirrors in lockstep.</li>
+</ul>
+<h2 id="implementation-plan">Implementation plan</h2>
+<p>See
+<code>docs/superpowers/plans/2026-05-13-sp4-phase-f-implementation.md</code>
+— 5 tasks, ~15 steps.</p>
+</body>
+</html>

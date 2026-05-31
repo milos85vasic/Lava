@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-05-13-sp4-phase-f2-implementation</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1 id="sp-4-phase-f2--per-clone-url-routing-implementation-plan">SP-4
+Phase F.2 — Per-clone URL routing (implementation plan)</h1>
+<p><strong>Plan date:</strong> 2026-05-13 <strong>Design:</strong>
+<code>docs/superpowers/specs/2026-05-13-sp4-phase-f2-design.md</code>
+(Option B locked: per-clone MirrorManager + SDK-side URL injection).
+<strong>Prerequisite:</strong> Phase F.1 complete (HEAD
+<code>b54e7e63</code> and later).</p>
+<p><strong>Scope warning.</strong> This is a cross-module refactor
+across 6 tracker plugins. Every plugin's feature implementation
+(<code>Search.kt</code>, <code>Browse.kt</code>, <code>Topic.kt</code>,
+<code>Auth.kt</code>, <code>Download.kt</code>,
+<code>Comments.kt</code>, <code>Favorites.kt</code>) gains a URL-source
+parameter. Every plugin's existing per-feature unit tests must continue
+to pass. Recommended execution mode: focused dedicated session, NOT
+tail-end of an already-long multi-phase day. Validate each plugin's
+existing tests after touching it; rollback any plugin where the
+injection breaks coverage before proceeding to the next.</p>
+<h2 id="goal-verbatim-from-f2-design">Goal (verbatim from F.2
+design)</h2>
+<p>Make a cloned provider's <code>primaryUrl</code> (stored in
+<code>ClonedProviderEntity.primaryUrl</code>) actually route the clone's
+HTTP traffic, instead of routing through the source provider's URLs.
+Acceptance criterion: the Phase B clone-success Toast drops the "(URL
+routing pending — searches use source URLs)" disclosure once a clone of
+RuTracker at <code>https://rutracker.eu</code> produces a MockWebServer
+capture that contains <code>rutracker.eu</code> in the request URL.</p>
+<h2 id="affected-modules">Affected modules</h2>
+<ul>
+<li><code>core/tracker/rutracker</code> — primary refactor surface (most
+complex feature set).</li>
+<li><code>core/tracker/rutor</code> — second-most complex; mirrors
+RuTracker's HTML-parsing shape.</li>
+<li><code>core/tracker/nnmclub</code> — simpler scrape; fewer feature
+impls.</li>
+<li><code>core/tracker/kinozal</code> — similar to nnmclub.</li>
+<li><code>core/tracker/archiveorg</code> —
+<code>apiSupported = true</code> ; routes through Internet Archive
+JSON.</li>
+<li><code>core/tracker/gutenberg</code> — also JSON-based; smallest
+surface.</li>
+</ul>
+<h2 id="tasks">Tasks</h2>
+<h3 id="task-1--define-the-url-injection-seam">Task 1 — Define the URL
+injection seam</h3>
+<p><strong>Files (new):</strong></p>
+<ul>
+<li><code>core/tracker/api/src/main/kotlin/lava/tracker/api/MirrorUrlProvider.kt</code></li>
+</ul>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span> <span class="im">lava</span><span class="op">.</span><span class="im">tracker</span><span class="op">.</span><span class="im">api</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co">/**</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co"> * SP-4 Phase F.2 — per-call source of the base URL a tracker feature</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co"> * implementation should hit. Injected by [TrackerClientFactory.create]</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co"> * for clones (returning the clone&#39;s `primaryUrl` from</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co"> * `ClonedProviderEntity.primaryUrl`) and by Hilt&#39;s per-source-plugin</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co"> * binding for original providers (returning `descriptor.baseUrls[0].url`).</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co"> *</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="co"> * The provider is a function, not a constant, so future per-call</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="co"> * mirror-fallback can swap it without changing feature-impl signatures.</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="co"> */</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="kw">fun</span> <span class="kw">interface</span> <span class="fu">MirrorUrlProvider</span> <span class="op">{</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    <span class="kw">fun</span> <span class="fu">baseUrl</span><span class="op">():</span> <span class="dt">String</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p><strong>Steps:</strong></p>
+<ul class="task-list">
+<li><label><input type="checkbox" />Create the file with the
+<code>fun interface</code> above.</label></li>
+<li><label><input type="checkbox" />Add a compile-only unit test in
+<code>:core:tracker:api</code>'s test source set asserting the interface
+can be implemented + invoked.</label></li>
+<li><label><input type="checkbox" />Compile.</label></li>
+</ul>
+<h3 id="task-2--pluginconfig-extension-for-clone-url-override">Task 2 —
+<code>PluginConfig</code> extension for clone URL override</h3>
+<p><strong>Files:</strong></p>
+<ul>
+<li>Modify:
+<code>core/tracker/registry/src/main/kotlin/lava/tracker/registry/TrackerPluginConfig.kt</code>
+(or wherever the Lava-domain config wrapper lives — confirm path first
+via
+<code>grep -rn "PluginConfig" core/tracker/registry/src/main</code>)</li>
+</ul>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">/** Convenience accessor: nullable clone URL override stamped by LavaTrackerSdk.clientFor. */</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> <span class="va">PluginConfig</span><span class="op">.</span>cloneBaseUrlOverride<span class="op">:</span> <span class="kw">String</span><span class="op">?</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">get</span><span class="op">()</span> <span class="op">=</span> raw<span class="op">[</span><span class="st">&quot;lava.cloneBaseUrl&quot;</span><span class="op">]</span> <span class="kw">as</span><span class="op">?</span> <span class="kw">String</span></span></code></pre></div>
+<p><strong>Steps:</strong></p>
+<ul class="task-list">
+<li><label><input type="checkbox" />Add the extension
+property.</label></li>
+<li><label><input type="checkbox" />Compile.</label></li>
+</ul>
+<h3 id="task-3--lavatrackersdkclientfor-stamps-the-override">Task 3 —
+<code>LavaTrackerSdk.clientFor</code> stamps the override</h3>
+<p><strong>Files:</strong></p>
+<ul>
+<li>Modify:
+<code>core/tracker/client/src/main/kotlin/lava/tracker/client/LavaTrackerSdk.kt</code></li>
+</ul>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">private</span> <span class="kw">fun</span> <span class="fu">clientFor</span><span class="op">(</span><span class="va">id</span><span class="op">:</span> <span class="dt">String</span><span class="op">):</span> <span class="dt">TrackerClient</span> <span class="op">{</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">val</span> <span class="va">dao</span> <span class="op">=</span> clonedProviderDao</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">(</span>dao <span class="op">!=</span> <span class="kw">null</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>        <span class="kw">val</span> <span class="va">cloned</span> <span class="op">=</span> runBlocking <span class="op">{</span> dao<span class="op">.</span>getAll<span class="op">()</span> <span class="op">}.</span>firstOrNull <span class="op">{</span> it<span class="op">.</span>syntheticId <span class="op">==</span> id <span class="op">}</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">(</span>cloned <span class="op">!=</span> <span class="kw">null</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>            <span class="kw">val</span> <span class="va">sourceDescriptor</span> <span class="op">=</span> registry<span class="op">.</span>list<span class="op">().</span>firstOrNull <span class="op">{</span> it<span class="op">.</span>trackerId <span class="op">==</span> cloned<span class="op">.</span>sourceTrackerId <span class="op">}</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>                <span class="op">?:</span> <span class="kw">throw</span> IllegalStateException<span class="op">(</span><span class="st">&quot;Clone </span><span class="ss">$id</span><span class="st"> references unknown source </span><span class="ss">${</span>cloned<span class="op">.</span>sourceTrackerId<span class="ss">}</span><span class="st">&quot;</span><span class="op">)</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>            <span class="kw">val</span> <span class="va">cloneDescriptor</span> <span class="op">=</span> ClonedTrackerDescriptor<span class="op">(</span>source <span class="op">=</span> sourceDescriptor<span class="op">,</span> <span class="kw">override</span> <span class="op">=</span> cloned<span class="op">)</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>            <span class="co">// NEW: pass the clone&#39;s primaryUrl to the factory via PluginConfig.</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>            <span class="kw">val</span> <span class="va">config</span> <span class="op">=</span> MapPluginConfig<span class="op">(</span>mapOf<span class="op">(</span><span class="st">&quot;lava.cloneBaseUrl&quot;</span> to cloned<span class="op">.</span>primaryUrl<span class="op">))</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>            <span class="kw">val</span> <span class="va">sourceClient</span> <span class="op">=</span> registry<span class="op">.</span><span class="kw">get</span><span class="op">(</span>cloned<span class="op">.</span>sourceTrackerId<span class="op">,</span> config<span class="op">)</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>            <span class="kw">return</span> ClonedRoutingTrackerClient<span class="op">(</span>sourceClient<span class="op">,</span> cloneDescriptor<span class="op">)</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>    <span class="kw">return</span> registry<span class="op">.</span><span class="kw">get</span><span class="op">(</span>id<span class="op">,</span> MapPluginConfig<span class="op">())</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>Steps:</strong></p>
+<ul class="task-list">
+<li><label><input type="checkbox" />Modify <code>clientFor</code> to
+stamp <code>lava.cloneBaseUrl</code> into PluginConfig for
+clones.</label></li>
+<li><label><input type="checkbox" />Compile (the factories don't read it
+yet — they'll keep working with the source URL until each one is
+migrated in Task 4).</label></li>
+</ul>
+<h3 id="task-4--per-tracker-plugin-refactor">Task 4 — Per-tracker-plugin
+refactor</h3>
+<p><strong>For each of the 6 plugins, in order (smallest scope first to
+validate the approach):</strong></p>
+<ol type="1">
+<li><strong>gutenberg</strong> (smallest — JSON-based, fewest
+features)</li>
+<li><strong>archiveorg</strong> (also JSON-based)</li>
+<li><strong>kinozal</strong></li>
+<li><strong>nnmclub</strong></li>
+<li><strong>rutor</strong></li>
+<li><strong>rutracker</strong> (most complex — largest existing test
+surface)</li>
+</ol>
+<p><strong>Per-plugin sub-steps:</strong></p>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>4.X.1</strong> Read
+<code>&lt;Plugin&gt;Client.kt</code> +
+<code>&lt;Plugin&gt;ClientFactory.kt</code>. Identify where the source's
+base URL is captured today (typically
+<code>RuTrackerDescriptor.baseUrls[0].url</code> baked into an HTTP
+client at injection time).</label></li>
+<li><label><input type="checkbox" /><strong>4.X.2</strong> Modify the
+factory: read <code>config.cloneBaseUrlOverride</code>; if non-null,
+construct a
+<code>MirrorUrlProvider { config.cloneBaseUrlOverride!! }</code>. Else
+<code>MirrorUrlProvider { descriptor.baseUrls[0].url }</code>.</label></li>
+<li><label><input type="checkbox" /><strong>4.X.3</strong> Modify the
+client + its feature impls to accept the <code>MirrorUrlProvider</code>
+at construction time. Replace hardcoded
+<code>descriptor.baseUrls[0]</code> references in each feature's HTTP
+call with <code>urlProvider.baseUrl()</code>.</label></li>
+<li><label><input type="checkbox" /><strong>4.X.4</strong> Run the
+plugin's existing unit tests
+(<code>./gradlew :core:tracker:&lt;plugin&gt;:testDebugUnitTest</code>).
+MUST all pass before moving to the next plugin. If any break, ROLLBACK
+this plugin's changes and investigate before proceeding.</label></li>
+<li><label><input type="checkbox" /><strong>4.X.5</strong> Add a
+falsifiability-rehearsal test per plugin: assert that when the factory
+is invoked with
+<code>MapPluginConfig(mapOf("lava.cloneBaseUrl" to "https://override.test"))</code>,
+a search HTTP call uses <code>https://override.test</code>
+(MockWebServer capture). Bluff-Audit stamp.</label></li>
+</ul>
+<h3 id="task-5--end-to-end-challenge-test">Task 5 — End-to-end Challenge
+Test</h3>
+<p><strong>Files (new):</strong></p>
+<ul>
+<li><code>core/tracker/client/src/test/kotlin/lava/tracker/client/LavaTrackerSdkCloneRoutingTest.kt</code></li>
+</ul>
+<p>Drive the full path:</p>
+<ol type="1">
+<li>Seed a clone (<code>rutracker.clone.eu</code> →
+<code>https://rutracker.eu</code>).</li>
+<li>Seed a <code>MockWebServer</code> at the override URL.</li>
+<li>Invoke
+<code>sdk.multiSearch(SearchRequest("x"), listOf(clone.syntheticId))</code>.</li>
+<li>Assert the <code>MockWebServer.takeRequest().requestUrl.host</code>
+is <code>rutracker.eu</code>, NOT <code>rutracker.org</code>.</li>
+</ol>
+<p>Falsifiability rehearsal: revert Task 3's PluginConfig stamping; test
+fails because the source URL is hit instead.</p>
+<h3 id="task-6--toast-disclosure-drop">Task 6 — Toast disclosure
+drop</h3>
+<p><strong>Files:</strong></p>
+<ul>
+<li>Modify:
+<code>feature/provider_config/src/main/kotlin/lava/provider/config/ProviderConfigViewModel.kt</code></li>
+</ul>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">// BEFORE (Phase F.1, current state):</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>ProviderConfigSideEffect<span class="op">.</span>ShowToast<span class="op">(</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;Cloned (URL routing pending — searches use source URLs)&quot;</span><span class="op">,</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="co">// AFTER (Phase F.2 acceptance):</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>ProviderConfigSideEffect<span class="op">.</span>ShowToast<span class="op">(</span><span class="st">&quot;Cloned&quot;</span><span class="op">)</span></span></code></pre></div>
+<p><strong>Steps:</strong></p>
+<ul class="task-list">
+<li><label><input type="checkbox" />Modify the Toast copy.</label></li>
+<li><label><input type="checkbox" />Compile.</label></li>
+</ul>
+<h3 id="task-7--continuation--commit--push">Task 7 — CONTINUATION +
+commit + push</h3>
+<p><strong>Steps:</strong></p>
+<ul class="task-list">
+<li><label><input type="checkbox" />Update
+<code>docs/CONTINUATION.md</code> §0 with the Phase F.2
+delivery.</label></li>
+<li><label><input type="checkbox" />Commit with Bluff-Audit stamps for
+every per-plugin test added in Task 4.</label></li>
+<li><label><input type="checkbox" />Push to github + gitlab; verify SHA
+convergence.</label></li>
+</ul>
+<h2 id="risk-register">Risk register</h2>
+<table>
+<thead>
+<tr>
+<th>Risk</th>
+<th>Mitigation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Plugin refactor breaks existing per-feature unit tests</td>
+<td>Per-plugin validation gate before proceeding to next. ROLLBACK +
+investigate, not push-through.</td>
+</tr>
+<tr>
+<td><code>descriptor.baseUrls[0].url</code> is referenced elsewhere
+(e.g. probe URL, mirror health)</td>
+<td>Grep before refactor:
+<code>grep -rn "descriptor.baseUrls\[0\]" core/tracker/</code>. Each
+callsite needs the same urlProvider injection OR explicit "this stays on
+the descriptor's base, not the clone's" reasoning.</td>
+</tr>
+<tr>
+<td>MockWebServer test setup heavy per plugin</td>
+<td>One shared test helper in <code>:core:tracker:testing</code>
+(already exists for fixture loading) gains a
+<code>mockWebServerFor(client)</code> builder.</td>
+</tr>
+<tr>
+<td>Hilt scoping subtleties — singleton clients vs per-call clones</td>
+<td><code>RuTrackerClient</code> is <code>@Singleton</code> today
+(<code>@Inject constructor</code> + provided by Hilt). For clones, the
+factory must produce a NEW instance per call (or per clone synthetic
+id). Investigate scoping carefully — may need <code>@Provides</code>
+instead of <code>@Singleton</code> for the URL-injected variant.</td>
+</tr>
+<tr>
+<td><code>LavaMirrorManagerHolder</code> already exists for the source's
+mirror-fallback</td>
+<td>Per-clone mirror manager construction needs to compose with this.
+Defer to a Phase F.3 follow-up if the integration is non-trivial; F.2
+ships single-URL routing first.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="acceptance-gates">Acceptance gates</h2>
+<p>Phase F.2 is COMPLETE when ALL of:</p>
+<ol type="1">
+<li>Every per-plugin test gate (Task 4) passes.</li>
+<li>The end-to-end Challenge Test (Task 5) passes.</li>
+<li>The Toast copy (Task 6) is <code>"Cloned"</code> (no parenthetical
+disclosure).</li>
+<li>The CHANGELOG entry documents Phase F.2 as the user-visible "Clones
+now actually use their custom URL" deliverable.</li>
+<li>The mirror SHAs converge on both github + gitlab post-push.</li>
+</ol>
+<h2 id="estimated-session-time">Estimated session time</h2>
+<ul>
+<li>Task 1 + 2 + 3: ~30 minutes (small + low-risk).</li>
+<li>Task 4: <strong>6 × 45-90 minutes per plugin = 4.5–9 hours.</strong>
+This dominates the schedule.</li>
+<li>Task 5 + 6 + 7: ~45 minutes combined.</li>
+</ul>
+<p><strong>Total realistic estimate: 6–11 hours of focused
+work.</strong> A single-session execution is feasible only on a
+dedicated day with no other work in flight; otherwise stage across 2–3
+sessions, one plugin pair per session, with a passing-tests gate between
+sessions.</p>
+</body>
+</html>

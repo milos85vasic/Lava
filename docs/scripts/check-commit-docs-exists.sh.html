@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>check-commit-docs-exists.sh</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1
+id="scriptscheck-commit-docs-existssh--user-guide"><code>scripts/check-commit-docs-exists.sh</code>
+— User Guide</h1>
+<p><strong>Last verified:</strong> 2026-05-18 (1.2.30-1050 tooling
+cycle) <strong>Inheritance:</strong> HelixConstitution §11.4.x
+(commit-references-resolve mandate) + Lava §6.AD-debt closure
+(CM-COMMIT-DOCS-EXISTS)</p>
+<h2 id="overview">Overview</h2>
+<p>Per-commit reference resolver. Scans commit message bodies for file
+path citations and verifies each one resolves to a real file at HEAD. A
+commit message that cites "evidence at
+<code>.lava-ci-evidence/X.json</code>" when X.json was never created (or
+was deleted later) is a §6.J spirit violation — the claim is
+unfalsifiable because the referenced evidence does not exist.</p>
+<h2 id="usage">Usage</h2>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Default — scan HEAD only</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> scripts/check-commit-docs-exists.sh</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Scan a range of commits</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> scripts/check-commit-docs-exists.sh HEAD~5..HEAD</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Scan all unpushed commits (recommended pre-push)</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> scripts/check-commit-docs-exists.sh <span class="st">&#39;@{u}..HEAD&#39;</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Env-var alternative (used by hermetic tests + the sweep wrapper)</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="va">LAVA_COMMIT_RANGE</span><span class="op">=</span><span class="st">&#39;HEAD~3..HEAD&#39;</span> <span class="fu">bash</span> scripts/check-commit-docs-exists.sh</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="va">LAVA_REPO_ROOT</span><span class="op">=</span>/path/to/synthetic <span class="fu">bash</span> scripts/check-commit-docs-exists.sh</span></code></pre></div>
+<h2 id="exit-codes">Exit codes</h2>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>Every referenced path resolves (exact or fuzzy-basename)</td>
+</tr>
+<tr>
+<td>1</td>
+<td>At least one orphan reference; commit SHA + path printed to
+stderr</td>
+</tr>
+</tbody>
+</table>
+<h2 id="what-counts-as-a-path-reference">What counts as a path
+reference</h2>
+<p>A token in a commit message body is considered a path reference when
+ALL of these hold:</p>
+<ol type="1">
+<li>It contains at least one <code>/</code> (directory separator).</li>
+<li>It ends with one of the recognized extensions:
+<code>md json sh kt go kts gradle xml yaml yml toml conf txt tsv</code>.</li>
+<li>It starts with one of the canonical project-root prefixes:
+<code>docs/</code>, <code>scripts/</code>, <code>tests/</code>,
+<code>.lava-ci-evidence/</code>, <code>submodules/</code>,
+<code>constitution/</code>, <code>app/</code>, <code>core/</code>,
+<code>feature/</code>, <code>proxy/</code>, <code>lava-api-go/</code>,
+<code>tools/</code>, <code>buildSrc/</code>, <code>config/</code>,
+<code>keystores/</code>, <code>releases/</code>,
+<code>Upstreams/</code>, <code>.githooks/</code>.</li>
+</ol>
+<p>These three conditions together filter out version IDs
+(<code>1.2.30-1050</code>), package names that happen to contain dots,
+and URLs.</p>
+<h2 id="whitelist-conditions-intentional-skips">Whitelist conditions
+(intentional skips)</h2>
+<ul>
+<li><strong>Backtick spans</strong> (<code>`like-this`</code>) are
+stripped before regex match. Prose markup is not a citation.</li>
+<li><strong><code>~~strikethrough~~</code> spans</strong> are stripped.
+The closure-mark convention intentionally references obsolete
+paths.</li>
+<li><strong>Blockquote lines</strong> (lines starting with
+<code>&gt; </code>) are dropped. §6.L cycle bodies often quote operator
+messages verbatim where the original might reference now-renamed
+paths.</li>
+<li><strong>Glob/wildcard paths</strong> containing <code>*</code> are
+skipped. They are intentional non-existent path patterns.</li>
+</ul>
+<h2 id="fuzzy-basename-fallback">Fuzzy basename fallback</h2>
+<p>A prose reference like
+<code>feature/search_result/SearchPageState.kt</code> resolves the real
+file at
+<code>feature/search_result/src/main/kotlin/lava/search/result/SearchPageState.kt</code>
+via this fallback:</p>
+<ol type="1">
+<li>Exact path check first.</li>
+<li>If miss: extract the leading directory (e.g. <code>feature</code>) +
+the basename (<code>SearchPageState.kt</code>).</li>
+<li><code>find &lt;prefix-dir&gt; -name &lt;basename&gt;</code>
+excluding <code>build/</code>, <code>.git/</code>,
+<code>.claude/</code>.</li>
+<li>If 1+ matches found, treat as resolved.</li>
+</ol>
+<p>The fallback prevents pedantic false-positives on human-written
+short-form paths while still catching genuinely-missing files.</p>
+<h2 id="6j-anti-bluff-falsifiability-rehearsal">§6.J anti-bluff
+falsifiability rehearsal</h2>
+<ol type="1">
+<li>Create an empty git commit referencing a phantom file:
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">--allow-empty</span> <span class="at">-m</span> <span class="st">&quot;claim: see .lava-ci-evidence/sixth-law-incidents/2026-99-99-phantom.json&quot;</span></span></code></pre></div></li>
+<li>Run <code>bash scripts/check-commit-docs-exists.sh</code> → expect
+exit 1 with the phantom path listed.</li>
+<li>Either <code>git commit --amend</code> removing the reference, OR
+create the file, OR drop the commit.</li>
+</ol>
+<p>The deliberate-phantom rehearsal proves the gate fires on real
+evidence gaps.</p>
+<h2 id="integration">Integration</h2>
+<ul>
+<li>Wired into <code>scripts/verify-all-constitution-rules.sh</code> as
+a standard gate (default scope: <code>HEAD~5..HEAD</code> to balance
+signal vs noise).</li>
+<li>Pre-push hooks transitively run via
+<code>scripts/check-constitution.sh</code>.</li>
+<li>Recommended pre-push scope: <code>@{u}..HEAD</code> to verify ALL
+unpushed commits before propagation.</li>
+</ul>
+<h2 id="hermetic-test">Hermetic test</h2>
+<p><code>tests/check-constitution/test_commit_docs_exists.sh</code> — 7
+fixtures:</p>
+<ol type="1">
+<li>Commit with no path refs → pass</li>
+<li>All-existing paths → pass</li>
+<li>Orphan reference → reject (exit 1) + path listed</li>
+<li>Stale ref inside <code>~~strikethrough~~</code> → pass
+(skipped)</li>
+<li>Stale ref inside backticks → pass (skipped)</li>
+<li>Fuzzy basename short-form → pass (resolved via find)</li>
+<li>Real-repo HEAD sanity check → pass</li>
+</ol>
+<p>Run:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> tests/check-constitution/test_commit_docs_exists.sh</span></code></pre></div>
+<p><code>Classification:</code> project-specific (the convention is
+universal per HelixConstitution; the path-prefix whitelist is
+Lava-specific).</p>
+</body>
+</html>

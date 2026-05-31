@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>README</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1 id="lava">Lava</h1>
+<p>Lava is an Android mobile app that is an unofficial client for
+popular Russian torrent trackers. As of <strong>1.2.0</strong> Lava is
+multi-tracker — the app ships with built-in support for
+<strong>RuTracker</strong> (rutracker.org) and <strong>RuTor</strong>
+(rutor.info / rutor.is), with a pluggable SDK that makes adding a third
+tracker an isolated module change. Users can search and download torrent
+files, view topic detail and comments, manage their downloads, and
+switch between trackers from a single Settings screen.</p>
+<p>Lava is designed to provide a fast, intuitive, and seamless user
+experience on the go. The app is open source and free to use, with no
+ads or tracking, and is constantly being updated and improved by a small
+community of developers and contributors.</p>
+<p>Disclaimer: Lava is not affiliated with or endorsed by rutracker.org,
+rutor.info, or any other tracker site. The app is provided for personal,
+non-commercial use only, and users are responsible for complying with
+all applicable laws and regulations regarding copyright and file
+sharing.</p>
+<p><a href="https://lava-app.tech/copyrights.html"><strong>For copyright
+owners</strong></a></p>
+<h2 id="supported-trackers-lava-android-120">Supported trackers
+(Lava-Android-1.2.0)</h2>
+<table>
+<thead>
+<tr>
+<th>Tracker</th>
+<th>Module</th>
+<th>Capabilities</th>
+<th>Auth</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>RuTracker</td>
+<td><code>:core:tracker:rutracker</code></td>
+<td>SEARCH + BROWSE + FORUM + TOPIC + COMMENTS + FAVORITES + DOWNLOAD +
+MAGNET + AUTH (CAPTCHA) + UPLOAD + USER_PROFILE</td>
+<td>Required (login + captcha)</td>
+</tr>
+<tr>
+<td>RuTor</td>
+<td><code>:core:tracker:rutor</code></td>
+<td>SEARCH + BROWSE + TOPIC + COMMENTS + DOWNLOAD + MAGNET + RSS +
+AUTH</td>
+<td>Anonymous by default (decision 7b-ii)</td>
+</tr>
+</tbody>
+</table>
+<p>The active tracker is user-selectable from <strong>Settings →
+Trackers</strong>. Each tracker carries its own bundled mirror list,
+supports user-added custom mirrors, runs a 15-min mirror health probe,
+and falls back to the alternative tracker via an explicit user-prompted
+modal when all of its own mirrors go UNHEALTHY (no silent fallback).</p>
+<p>To add a third tracker (or fork the SDK to add a private one), follow
+the seven-step recipe in <a
+href="docs/sdk-developer-guide.md"><code>docs/sdk-developer-guide.md</code></a>.</p>
+<h2 id="mobile-app">Mobile app</h2>
+<p><a
+href="https://play.google.com/store/apps/details?id=digital.vasic.lava.client"><img src="badges/google-play-badge.png" alt="Get it on Google Play" height="90"></a>
+<a
+href="https://github.com/milos85vasic/Lava/releases"><img src="badges/github-badge.png" alt="Get it on GitHub" height="90"></a>
+<a
+href="https://apps.rustore.ru/app/digital.vasic.lava.client"><img src="badges/rustore-badge.png" alt="Get it on RuStore" height="90"></a></p>
+<h2 id="screenshots">Screenshots</h2>
+<details>
+    <summary>Light</summary>
+
+<img src="screenshots/search_history_light.png" alt="Search" width="250">
+<img src="screenshots/search_result_screen_light.png" alt="Search" width="250">
+<img src="screenshots/forum_light.png" alt="Forum" width="250">
+<img src="screenshots/topic_light.png" alt="Topic" width="250">
+
+</details>
+
+<details>
+    <summary>Dark</summary>
+
+<img src="screenshots/search_history.png" alt="Search" width="250">
+<img src="screenshots/search_result_screen.png" alt="Search" width="250">
+<img src="screenshots/forum.png" alt="Forum" width="250">
+<img src="screenshots/topic.png" alt="Topic" width="250">
+
+</details>
+
+<h2 id="contact">Contact</h2>
+<p>Feel free to contact us if you found this useful or if there was
+something that didn't behave as you expected. We can't fix what we don't
+know about, so please report liberally. If you're not sure if something
+is a bug or not, feel free to file a bug anyway.</p>
+<p><strong>Issue tracker:</strong> <a
+href="https://github.com/milos85vasic/Lava/issues">https://github.com/milos85vasic/Lava/issues</a></p>
+<p><strong>Forum 4PDA:</strong> <a
+href="https://4pda.to/forum/index.php?showtopic=729411">https://4pda.to/forum/index.php?showtopic=729411</a></p>
+<h2 id="sources">Sources</h2>
+<p>All the code and the content is available on github: <a
+href="https://github.com/milos85vasic/Lava">https://github.com/milos85vasic/Lava</a></p>
+<h2 id="privacy-policy">Privacy Policy</h2>
+<p><a href="https://lava-app.tech/privacy-policy.html">Privacy
+Policy</a></p>
+<h2 id="license">License</h2>
+<p>This software is open source, licensed under the <a
+href="https://opensource.org/licenses/MIT">MIT License</a>.</p>
+</body>
+</html>

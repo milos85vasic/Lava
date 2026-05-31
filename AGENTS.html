@@ -1,0 +1,2257 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>AGENTS</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1 id="lava--agent-guide">Lava — Agent Guide</h1>
+<blockquote>
+<p>This file is intended for AI coding agents. It describes the project
+structure, build system, conventions, and things you need to know before
+modifying code.</p>
+</blockquote>
+<h2 id="inherited-from-constitutionagentsmd">INHERITED FROM
+constitution/AGENTS.md</h2>
+<p>All rules in <code>constitution/AGENTS.md</code> (and the
+<code>constitution/Constitution.md</code> it references) apply
+unconditionally. Lava-specific rules below extend them — they MUST NOT
+weaken any inherited rule. The HelixConstitution submodule was
+incorporated 2026-05-14 (29th §6.L cycle); see root
+<code>CLAUDE.md</code> §6.AD + §6.AD-debt for the implementation-gap
+inventory.</p>
+<h2 id="code-intelligence--codegraph">Code intelligence — codegraph</h2>
+<p>This repository is indexed by <strong>codegraph</strong> — a local
+SQLite semantic code-knowledge-graph tool exposed to AI agents over MCP,
+wired into all five supported CLI agents (Claude Code, OpenCode, Qwen
+Code, Kimi CLI, Crush). Prefer its <code>codegraph_search</code> /
+<code>codegraph_context</code> MCP tools over blind file scanning. Full
+details — install, per-agent wiring, and the anti-bluff verification
+suite <code>scripts/verify-codegraph.sh</code> — are in
+<code>docs/CODEGRAPH.md</code>. The agent instruction file for Qwen Code
+is <code>QWEN.md</code> (a plain-text pointer to
+<code>CLAUDE.md</code>), present at the repo root and in every
+submodule.</p>
+<h2 id="project-overview">Project Overview</h2>
+<p><strong>Lava</strong> is an unofficial Android client for
+rutracker.org (and rutor.info). It consists of three main artifacts:</p>
+<ol type="1">
+<li><strong>Android App</strong> (<code>:app</code>) — a modular Android
+application written in Kotlin, using Jetpack Compose for the UI.</li>
+<li><strong>Go API Service</strong> (<code>lava-api-go/</code>) — a
+headless Go/Gin server (SP-2 onward) that scrapes rutracker.org and
+exposes a JSON REST API over HTTP/3 and HTTP/2. This is the primary
+backend.</li>
+<li><strong>Proxy Server</strong> (<code>:proxy</code>) — a legacy
+Ktor/Netty server that also scrapes rutracker.org. It is built as a fat
+JAR and containerized with Docker. Retained as an opt-in fallback.</li>
+</ol>
+<p>The project is a fork of <code>andrikeev/Flow</code>, maintained
+under <code>milos85vasic/Lava</code>. All source code, comments, and
+documentation are in <strong>English</strong>.</p>
+<ul>
+<li><strong>App ID:</strong> <code>digital.vasic.lava.client</code></li>
+<li><strong>App Version:</strong> <code>1.2.0</code>
+(<code>versionCode = 1020</code>)</li>
+<li><strong>Proxy Version:</strong> <code>1.0.3</code>
+(<code>versionCode = 1003</code>)</li>
+<li><strong>Go API Version:</strong> <code>2.0.8</code>
+(<code>Code = 2008</code>)</li>
+<li><strong>License:</strong> MIT (see <code>LICENSE</code>)</li>
+</ul>
+<h2 id="technology-stack">Technology Stack</h2>
+<h3 id="android--kotlin-side">Android / Kotlin Side</h3>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Technology</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Language</td>
+<td>Kotlin <code>2.1.0</code></td>
+</tr>
+<tr>
+<td>Build System</td>
+<td>Gradle <code>8.9</code> (via wrapper)</td>
+</tr>
+<tr>
+<td>Android Gradle Plugin</td>
+<td><code>8.6.1</code></td>
+</tr>
+<tr>
+<td>Android compileSdk</td>
+<td><code>35</code></td>
+</tr>
+<tr>
+<td>Android minSdk</td>
+<td><code>21</code></td>
+</tr>
+<tr>
+<td>Android targetSdk</td>
+<td><code>35</code></td>
+</tr>
+<tr>
+<td>JDK Toolchain</td>
+<td><code>17</code></td>
+</tr>
+<tr>
+<td>UI Framework</td>
+<td>Jetpack Compose (BOM <code>2025.06.01</code>) — 100 % Compose, no
+XML layouts</td>
+</tr>
+<tr>
+<td>State Management</td>
+<td>Orbit MVI <code>7.1.0</code></td>
+</tr>
+<tr>
+<td>Dependency Injection (Android)</td>
+<td>Dagger Hilt <code>2.54</code></td>
+</tr>
+<tr>
+<td>Dependency Injection (Proxy)</td>
+<td>Koin <code>3.4.0</code></td>
+</tr>
+<tr>
+<td>Networking</td>
+<td>Ktor client <code>2.3.1</code>, OkHttp, Coil <code>2.7.0</code></td>
+</tr>
+<tr>
+<td>HTML Parsing</td>
+<td>Jsoup <code>1.15.3</code></td>
+</tr>
+<tr>
+<td>Database</td>
+<td>Room <code>2.7.2</code> with KSP</td>
+</tr>
+<tr>
+<td>Background Work</td>
+<td>WorkManager <code>2.10.2</code></td>
+</tr>
+<tr>
+<td>Serialization</td>
+<td>Kotlinx Serialization <code>1.6.3</code></td>
+</tr>
+<tr>
+<td>Crash Reporting</td>
+<td>Firebase Crashlytics (via Firebase BOM <code>33.15.0</code>)</td>
+</tr>
+<tr>
+<td>Debug Tools</td>
+<td>LeakCanary <code>2.10</code>, Chucker <code>4.0.0</code></td>
+</tr>
+<tr>
+<td>Code Formatting</td>
+<td>Spotless <code>6.22.0</code> with ktlint</td>
+</tr>
+</tbody>
+</table>
+<h3 id="go-api-side">Go API Side</h3>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Technology</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Language</td>
+<td>Go <code>1.25.0</code></td>
+</tr>
+<tr>
+<td>Web Framework</td>
+<td>Gin Gonic <code>v1.12.0</code></td>
+</tr>
+<tr>
+<td>Transport</td>
+<td>HTTP/3 (QUIC via <code>quic-go</code> <code>v0.59.0</code>) + HTTP/2
+TLS fallback</td>
+</tr>
+<tr>
+<td>HTML Scraping</td>
+<td>goquery <code>v1.12.0</code></td>
+</tr>
+<tr>
+<td>Database / Cache</td>
+<td>PostgreSQL via <code>pgx/v5</code></td>
+</tr>
+<tr>
+<td>Migrations</td>
+<td><code>golang-migrate/migrate</code> v4</td>
+</tr>
+<tr>
+<td>Code Generation</td>
+<td><code>oapi-codegen</code> <code>v2.6.0</code></td>
+</tr>
+<tr>
+<td>Observability</td>
+<td>Prometheus metrics, OTLP tracing, structured logging
+(<code>slog</code>)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="repository-layout">Repository Layout</h2>
+<p>The repository is a <strong>multi-module Gradle project</strong> with
+an embedded Go service and Git submodules. There is <strong>no root
+<code>build.gradle.kts</code></strong>; all Kotlin/Android build logic
+is centralized in <code>buildSrc</code> as custom convention
+plugins.</p>
+<pre><code>Lava/
+├── app/                    # Android application module
+├── proxy/                  # Ktor proxy server module (legacy)
+├── lava-api-go/            # Go API service (SP-2 onward, primary backend)
+├── buildSrc/               # Custom Gradle convention plugins
+├── core/                   # 25 core library modules
+│   ├── auth/api, auth/impl
+│   ├── common, data, database, designsystem, dispatchers, domain, downloads, logger, models, navigation, notifications, preferences, testing, ui
+│   ├── network/api, network/impl
+│   ├── tracker/api, tracker/client, tracker/mirror, tracker/registry, tracker/rutor, tracker/rutracker, tracker/testing
+│   └── work/api, work/impl
+├── feature/                # 16 feature modules
+│   ├── account, bookmarks, category, connection, favorites, forum, login, main, menu, rating, search, search_input, search_result, topic, tracker_settings, visited
+├── submodules/             # vasic-digital submodules (frozen-by-default pins)
+│   ├── Auth, Cache, Challenges, Concurrency, Config, Containers, Database, Discovery, HTTP3, Mdns, Middleware, Observability, RateLimiter, Recovery, Security
+│   └── Tracker-SDK/        # generic tracker-SDK primitives (Gradle composite build)
+├── gradle/
+│   └── libs.versions.toml  # Version catalog
+├── scripts/                # Local CI/CD apparatus (ci.sh, tag.sh, bluff-hunt.sh, ...)
+│   └── ...
+├── .githooks/              # pre-push hook (Anti-Bluff + Local-Only CI gate)
+├── .lava-ci-evidence/      # Per-tag evidence packs (Sixth + Seventh Law)
+├── docs/                   # Architecture, design specs, release notes, dev guide
+├── build_and_push_docker_image.sh
+├── build_and_release.sh
+├── start.sh / stop.sh
+├── Upstreams/              # Upstream repository push scripts
+└── settings.gradle.kts</code></pre>
+<p>Consult <code>settings.gradle.kts</code> for the live module list.
+The exact count fluctuates as SP-N projects extract or fold modules.</p>
+<h3 id="module-responsibilities">Module responsibilities</h3>
+<ul>
+<li><code>:app</code> — Entry point. Contains <code>Application</code>,
+<code>MainActivity</code>, <code>TvActivity</code>, and the top-level
+navigation graph. Depends on every core and feature module.</li>
+<li><code>:proxy</code> — Ktor/Netty server exposing REST endpoints.
+Built as a fat JAR and containerized with Docker. Legacy fallback.</li>
+<li><code>lava-api-go/</code> — Go/Gin server exposing REST endpoints
+over HTTP/3 + HTTP/2. Primary backend. Built as a static binary and a
+distroless Docker image.</li>
+<li><code>core:*</code> — Shared libraries. Pure Kotlin modules
+(<code>models</code>, <code>common</code>, <code>auth/api</code>,
+<code>network/api</code>, <code>tracker:api</code>,
+<code>tracker:registry</code>, <code>tracker:mirror</code>,
+<code>tracker:rutracker</code>, <code>tracker:rutor</code>,
+<code>tracker:testing</code>, <code>work/api</code>) have <strong>no
+Android dependency</strong>. The Android-bearing tracker module is
+<code>:core:tracker:client</code> (Hilt + WorkManager + Room
+access).</li>
+<li><code>feature:*</code> — Screen-level modules. Each feature
+typically contains a ViewModel (Orbit MVI), Compose screens, and a
+navigation contract.</li>
+</ul>
+<h3 id="sdk-module-map-added-by-sp-3a">SDK module map (added by
+SP-3a)</h3>
+<p>The multi-tracker SDK introduced by SP-3a sits across two
+locations:</p>
+<p><strong>Local (Lava-domain) Kotlin modules under
+<code>core/tracker/</code>:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Module</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>:core:tracker:api</code></td>
+<td>Lava-domain feature interfaces (<code>Searchable</code>,
+<code>Browsable</code>, <code>Topic</code>, <code>Comments</code>,
+<code>Favorites</code>, <code>Authenticatable</code>,
+<code>Downloadable</code>), <code>TrackerCapability</code> enum, common
+data model (<code>TorrentItem</code>, <code>SearchRequest</code>,
+<code>SearchResult</code>, etc.). Pure-Kotlin, JVM-only.</td>
+</tr>
+<tr>
+<td><code>:core:tracker:registry</code></td>
+<td>Lava-domain wrapper around the generic
+<code>lava.sdk:registry</code> primitive in the <code>Tracker-SDK</code>
+submodule. Discovers and exposes <code>TrackerClient</code>
+instances.</td>
+</tr>
+<tr>
+<td><code>:core:tracker:mirror</code></td>
+<td>Lava-domain wrapper exposing <code>MirrorConfigStore</code>
+typealias and bridging to <code>lava.sdk:mirror</code>.</td>
+</tr>
+<tr>
+<td><code>:core:tracker:client</code></td>
+<td><code>LavaTrackerSdk</code> orchestrator — switches active tracker,
+runs cross-tracker fallback, persists user mirrors and mirror health.
+Hilt-injected entry point for feature ViewModels.</td>
+</tr>
+<tr>
+<td><code>:core:tracker:rutracker</code></td>
+<td>RuTracker-specific implementation. 12 declared capabilities — SEARCH
++ BROWSE + FORUM + TOPIC + COMMENTS + FAVORITES + DOWNLOAD + MAGNET +
+AUTH (CAPTCHA_LOGIN) + UPLOAD + USER_PROFILE (the latter two are LF-5
+latent). Encoding: Windows-1251.</td>
+</tr>
+<tr>
+<td><code>:core:tracker:rutor</code></td>
+<td>RuTor-specific implementation. 8 declared capabilities — SEARCH +
+BROWSE + TOPIC + COMMENTS + DOWNLOAD + MAGNET + RSS + AUTH (FORM_LOGIN).
+Anonymous-by-default per decision 7b-ii. Encoding: UTF-8.</td>
+</tr>
+<tr>
+<td><code>:core:tracker:testing</code></td>
+<td>Test fakes (<code>FakeTrackerClient</code>, builders, fixture
+loaders) shared across tracker modules.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Generic (vasic-digital) primitives mounted at
+<code>submodules/tracker_sdk/</code>:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Submodule path</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>submodules/tracker_sdk/api</code></td>
+<td>Generic feature-bearing primitives (<code>MirrorUrl</code>,
+<code>TrackerDescriptor</code>-shape, <code>Mirror</code> health
+states). Lava-agnostic.</td>
+</tr>
+<tr>
+<td><code>submodules/tracker_sdk/registry</code></td>
+<td>Generic in-memory registry of tracker clients.</td>
+</tr>
+<tr>
+<td><code>submodules/tracker_sdk/mirror</code></td>
+<td>Generic mirror-config store interface
+(<code>MirrorConfigStore</code>).</td>
+</tr>
+<tr>
+<td><code>submodules/tracker_sdk/testing</code></td>
+<td>Generic test scaffolding (clock, dispatcher, fixture loader).</td>
+</tr>
+</tbody>
+</table>
+<p>The submodule is <strong>frozen by default</strong> per the Decoupled
+Reusable Architecture rule (root <code>CLAUDE.md</code>). Updating the
+pin is a deliberate PR — no <code>git submodule update --remote</code>
+in any release script. The submodule is mirrored to GitHub + GitLab
+(2-upstream scope per 2026-04-30 spec deviation).</p>
+<p>For a step-by-step recipe to add a third tracker, see <a
+href="docs/sdk-developer-guide.md"><code>docs/sdk-developer-guide.md</code></a>.
+For the Challenge Test pack covering the SDK end-to-end on real devices,
+see <code>app/src/androidTest/kotlin/lava/app/challenges/</code>.</p>
+<h3 id="phase-45-deliverables-sp-3a">Phase 4–5 deliverables (SP-3a)</h3>
+<p>Phases 4 and 5 closed the multi-tracker SDK arc. Headline
+deliverables beyond what the SDK module map captures:</p>
+<p><strong>Phase 4 — Mirror health, cross-tracker fallback, settings
+UI</strong></p>
+<ul>
+<li><code>MirrorHealthCheckWorker</code> — <code>@HiltWorker</code>
+<code>PeriodicWorkRequest</code> scheduled every 15 minutes; HEAD-probes
+every registered mirror and writes the result to
+<code>tracker_mirror_health</code> (Room).</li>
+<li><code>MirrorHealthRepository</code> — DAO wrapper exposing
+per-mirror health state observables.</li>
+<li><code>UserMirrorRepository</code> — DAO wrapper for
+<code>tracker_mirror_user</code> (operator-added custom mirrors).</li>
+<li><code>MirrorConfigLoader</code> — loads bundled defaults from
+<code>core/tracker/client/src/main/assets/mirrors.json</code>, validates
+per the schema in <a
+href="docs/sdk-developer-guide.md#7-mirror-configuration-spec-mirrorsjson"><code>docs/sdk-developer-guide.md</code>
+§7</a>, merges with user customs.</li>
+<li><code>CrossTrackerFallbackPolicy</code> — pure-function policy that
+decides whether to propose a cross-tracker fallback when the active
+tracker's mirrors all hit UNHEALTHY.</li>
+<li><code>LavaTrackerSdk.search()</code> (and siblings) emit
+<code>SearchOutcome.CrossTrackerFallbackProposed(altTrackerId)</code>
+when the policy fires; <strong>no silent fallback</strong> — the SDK
+never re-routes without explicit user consent via the modal.</li>
+<li><code>:feature:tracker_settings</code> — Compose UI with selector
+list, per-tracker mirror list section, health indicator,
+add-custom-mirror dialog. MVI via Orbit.</li>
+<li><code>CrossTrackerFallbackModal</code> in
+<code>:feature:search_result</code> — the user prompt; accept re-issues
+the search on the alt tracker, dismiss shows explicit failure.</li>
+<li>Navigation entry: Settings → Trackers (wired from
+<code>:feature:menu</code>).</li>
+</ul>
+<p><strong>Phase 5 — Constitution + Challenges + tag gate</strong></p>
+<ul>
+<li>Constitutional clauses 6.D (Behavioral Coverage Contract), 6.E
+(Capability Honesty), 6.F (Anti-Bluff Submodule Inheritance) added to
+root <code>CLAUDE.md</code>, cascaded to scoped clauses in
+<code>core/CLAUDE.md</code>, <code>feature/CLAUDE.md</code>,
+<code>lava-api-go/{CLAUDE,AGENTS}.md</code>,
+<code>submodules/tracker_sdk/{CLAUDE,CONSTITUTION,AGENTS}.md</code>, and
+root <code>AGENTS.md</code>.</li>
+<li>Seventh Law (Anti-Bluff Enforcement, all 7 clauses) added.
+Mechanical enforcement via <code>.githooks/pre-push</code>: Bluff-Audit
+commit-message stamp on every test commit, mock-the-SUT pattern
+rejection, hosted-CI config rejection.</li>
+<li>8 Compose UI Challenge Tests (C1–C8) at
+<code>app/src/androidTest/kotlin/lava/app/challenges/</code>. Each
+carries a documented falsifiability rehearsal protocol in its KDoc.</li>
+<li>Local-Only CI/CD apparatus: <code>scripts/ci.sh</code> (single entry
+point; <code>--changed-only</code>, <code>--full</code>,
+<code>--smoke</code> modes),
+<code>scripts/check-fixture-freshness.sh</code>,
+<code>scripts/check-constitution.sh</code>,
+<code>scripts/bluff-hunt.sh</code> (Seventh Law clause 5 driver).</li>
+<li><code>scripts/tag.sh</code> Android evidence-pack gate: refuses to
+tag without <code>.lava-ci-evidence/Lava-Android-&lt;v&gt;/</code>
+containing <code>ci.sh.json</code>, <code>challenges/C{1..8}.json</code>
+at status <code>VERIFIED</code>, <code>mirror-smoke/</code>,
+<code>bluff-audit/</code>, and <code>real-device-verification.md</code>
+at status <code>VERIFIED</code>.</li>
+</ul>
+<p><strong>Persistence schema (<code>AppDatabase</code> v6 → v7
+migration)</strong></p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">// SP-3a Phase 4 added two tables:</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="at">@Entity</span><span class="op">(</span>tableName <span class="op">=</span> <span class="st">&quot;tracker_mirror_health&quot;</span><span class="op">)</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> <span class="kw">class</span> MirrorHealthEntity<span class="op">(</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    @<span class="va">PrimaryKey</span> <span class="kw">val</span> <span class="va">mirrorUrl</span><span class="op">:</span> <span class="dt">String</span><span class="op">,</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">val</span> <span class="va">trackerId</span><span class="op">:</span> <span class="dt">String</span><span class="op">,</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">val</span> <span class="va">state</span><span class="op">:</span> <span class="dt">String</span><span class="op">,</span>                    <span class="co">// HEALTHY | DEGRADED | UNHEALTHY | UNKNOWN</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">val</span> <span class="va">lastProbedAt</span><span class="op">:</span> <span class="dt">Long</span><span class="op">,</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="kw">val</span> <span class="va">lastHealthyAt</span><span class="op">:</span> <span class="dt">Long</span><span class="op">?,</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">val</span> <span class="va">consecutiveFailures</span><span class="op">:</span> <span class="dt">Int</span><span class="op">,</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>@Entity<span class="op">(</span><span class="va">tableName</span> <span class="op">=</span> <span class="st">&quot;tracker_mirror_user&quot;</span><span class="op">)</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> <span class="kw">class</span> UserMirrorEntity<span class="op">(</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    @<span class="va">PrimaryKey</span>(<span class="va">autoGenerate</span> <span class="op">=</span> true<span class="op">)</span> <span class="kw">val</span> id<span class="op">:</span> <span class="dt">Long</span> = 0<span class="op">,</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    <span class="kw">val</span> <span class="va">trackerId</span><span class="op">:</span> <span class="kw">String</span><span class="op">,</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    <span class="kw">val</span> <span class="va">url</span><span class="op">:</span> <span class="kw">String</span><span class="op">,</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    <span class="kw">val</span> <span class="va">priority</span><span class="op">:</span> <span class="kw">Int</span><span class="op">,</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    <span class="kw">val</span> <span class="va">protocol</span><span class="op">:</span> <span class="kw">String</span><span class="op">,</span>                 <span class="co">// HTTPS | HTTP</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span></code></pre></div>
+<p>The migration <code>MIGRATION_6_7</code> lives in
+<code>AppDatabase.kt</code> and creates both tables with the appropriate
+indices. Schema JSONs are checked into
+<code>core/database/schemas/lava.database.AppDatabase/{6,7}.json</code>.</p>
+<h2 id="build-system--convention-plugins">Build System &amp; Convention
+Plugins</h2>
+<p>All modules apply one or more custom convention plugins defined in
+<code>buildSrc</code>. The plugins are registered in
+<code>buildSrc/build.gradle.kts</code> and applied by ID.</p>
+<table>
+<thead>
+<tr>
+<th>Plugin ID</th>
+<th>Applied To</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>lava.android.application</code></td>
+<td><code>:app</code></td>
+<td>Android app plugin, Firebase/Crashlytics, static analysis, Compose
+compiler</td>
+</tr>
+<tr>
+<td><code>lava.android.library</code></td>
+<td>Most <code>core:*</code> and <code>feature:*</code></td>
+<td>Android library + Kotlin Android + Spotless</td>
+</tr>
+<tr>
+<td><code>lava.android.library.compose</code></td>
+<td>Compose-enabled modules</td>
+<td>Adds Compose BOM dependencies and compiler settings</td>
+</tr>
+<tr>
+<td><code>lava.android.feature</code></td>
+<td>All <code>feature:*</code></td>
+<td>Applies library + Hilt, wires standard core dependencies, Orbit,
+enables <code>-Xcontext-receivers</code></td>
+</tr>
+<tr>
+<td><code>lava.android.hilt</code></td>
+<td>Android modules needing DI</td>
+<td>Dagger Hilt plugin + KSP compilers</td>
+</tr>
+<tr>
+<td><code>lava.kotlin.library</code></td>
+<td>Pure Kotlin modules</td>
+<td><code>java-library</code> + Kotlin JVM + Spotless</td>
+</tr>
+<tr>
+<td><code>lava.kotlin.serialization</code></td>
+<td>Modules needing JSON serialization</td>
+<td>Kotlin serialization plugin +
+<code>kotlinx-serialization-json</code></td>
+</tr>
+<tr>
+<td><code>lava.kotlin.ksp</code></td>
+<td>Modules using KSP (e.g. Room)</td>
+<td>KSP Gradle plugin</td>
+</tr>
+<tr>
+<td><code>lava.kotlin.tracker.module</code></td>
+<td><code>:core:tracker:rutracker</code>,
+<code>:core:tracker:rutor</code></td>
+<td>Pure Kotlin module + serialization + Jsoup + OkHttp + coroutines +
+test deps for tracker plugins</td>
+</tr>
+<tr>
+<td><code>lava.ktor.application</code></td>
+<td><code>:proxy</code></td>
+<td>Kotlin library + serialization + <code>application</code> plugin +
+Ktor plugin</td>
+</tr>
+</tbody>
+</table>
+<p>Shared build constants live in
+<code>buildSrc/src/main/kotlin/lava/conventions/</code>:</p>
+<ul>
+<li><code>AndroidCommon.kt</code> — <code>compileSdk = 35</code>,
+<code>minSdk = 21</code>, <code>targetSdk = 35</code></li>
+<li><code>KotlinAndroid.kt</code> — Java / Kotlin target
+<code>VERSION_17</code></li>
+<li><code>AndroidCompose.kt</code> — Compose compiler plugin +
+experimental opt-ins</li>
+<li><code>StaticAnalysisConventionPlugin.kt</code> — Spotless
+configuration</li>
+</ul>
+<h3 id="key-build-files">Key build files</h3>
+<ul>
+<li><code>settings.gradle.kts</code> — Includes <code>:app</code>,
+<code>:proxy</code>, all <code>core:*</code> and <code>feature:*</code>
+modules, plus the <code>Tracker-SDK</code> composite build.</li>
+<li><code>gradle/libs.versions.toml</code> — Version catalog with
+libraries, plugins, and bundles (<code>coil</code>, <code>ktor</code>,
+<code>orbit</code>, <code>room</code>, <code>work</code>).</li>
+<li><code>gradle.properties</code> — Standard Android properties
+(<code>android.useAndroidX=true</code>,
+<code>kotlin.code.style=official</code>,
+<code>android.nonFinalResIds=false</code>, etc.).</li>
+</ul>
+<h2 id="build-commands">Build Commands</h2>
+<p>Because there is no root build script, you invoke tasks via the
+Gradle wrapper as usual. Common commands:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Build the Android app (debug)</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./gradlew</span> :app:assembleDebug</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Build the Android app (release)</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="ex">./gradlew</span> :app:assembleRelease</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Build the proxy fat JAR</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="ex">./gradlew</span> :proxy:buildFatJar</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Run Spotless formatting/checks</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="ex">./gradlew</span> spotlessApply</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="ex">./gradlew</span> spotlessCheck</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Run all unit tests</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="ex">./gradlew</span> test</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Build all artifacts and copy to releases/</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="ex">./build_and_release.sh</span></span></code></pre></div>
+<p>The <code>build_and_release.sh</code> script produces:</p>
+<pre><code>releases/
+└── {version}/
+    ├── android-debug/
+    │   └── digital.vasic.lava.client-{version}-debug.apk
+    ├── android-release/
+    │   └── digital.vasic.lava.client-{version}-release.apk
+    ├── proxy/
+    │   └── digital.vasic.lava.api-{version}.jar
+    └── api-go/
+        └── lava-api-go (static binary) + Docker image tar</code></pre>
+<h3 id="app-build-types">App build types</h3>
+<ul>
+<li><strong>Debug</strong> — <code>isMinifyEnabled = false</code>,
+signed with the custom debug keystore
+(<code>keystores/debug.keystore</code>),
+<code>applicationIdSuffix = ".dev"</code>.</li>
+<li><strong>Release</strong> — <code>isRemoveUnusedCode = true</code>,
+<code>isRemoveUnusedResources = true</code>,
+<code>isOptimizeCode = true</code>, <strong>but
+<code>isObfuscate = false</code></strong>. Uses ProGuard rules from
+<code>app/proguard-rules.pro</code> and is signed with the custom
+release keystore (<code>keystores/release.keystore</code>).</li>
+</ul>
+<h3 id="go-api-service-build-commands">Go API service build
+commands</h3>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Build the Go binaries (lava-api-go + healthprobe)</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> build</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Run the Go test suite (unit + race detector)</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> test</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Run the Go CI gate (tidy, codegen, vet, build, test, gosec, govulncheck)</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> ci               <span class="co"># or: ./lava-api-go/scripts/ci.sh</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Regenerate OpenAPI types</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> generate         <span class="co"># or: ./lava-api-go/scripts/generate.sh</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Build the Docker image</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> image</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Run database migrations</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> migrate-up       <span class="co"># requires LAVA_API_PG_URL</span></span></code></pre></div>
+<h2 id="code-style--static-analysis">Code Style &amp; Static
+Analysis</h2>
+<ul>
+<li><strong>Spotless + ktlint</strong> is the only enforced code-quality
+tool for Kotlin. It is configured programmatically in
+<code>buildSrc/src/main/kotlin/lava/conventions/StaticAnalysisConventionPlugin.kt</code>.</li>
+<li>There is <strong>no Detekt</strong> and <strong>no
+Checkstyle</strong>.</li>
+<li><strong><code>.editorconfig</code></strong> exists at the project
+root and configures ktlint rules (e.g. allowing PascalCase for
+<code>@Composable</code> functions).</li>
+<li>Spotless targets:
+<ul>
+<li>All <code>**/*.kt</code> files (excluding <code>build/</code>)</li>
+<li>All <code>*.gradle.kts</code> files</li>
+</ul></li>
+<li>Run <code>./gradlew spotlessApply</code> before committing.</li>
+<li>Kotlin code style is set to <code>official</code> in
+<code>gradle.properties</code>.</li>
+<li>For Go: <code>go vet ./...</code>, <code>gosec</code>, and
+<code>govulncheck</code> are run as part of
+<code>lava-api-go/scripts/ci.sh</code>.</li>
+</ul>
+<h2 id="architecture--module-organization">Architecture &amp; Module
+Organization</h2>
+<h3 id="clean-architecture--layered-modules">Clean architecture /
+layered modules</h3>
+<p>The project follows a <strong>modular clean architecture</strong>
+with strict dependency direction:</p>
+<pre><code>app
+ └─&gt; feature:*
+     └─&gt; core:domain
+         └─&gt; core:data
+             └─&gt; core:network:impl
+             └─&gt; core:database
+         └─&gt; core:auth:impl
+         └─&gt; core:work:impl
+     └─&gt; core:navigation, core:ui, core:designsystem</code></pre>
+<ul>
+<li><strong>Pure Kotlin modules</strong> (<code>core:models</code>,
+<code>core:common</code>, <code>core:auth:api</code>,
+<code>core:network:api</code>, <code>core:tracker:api</code>,
+<code>core:tracker:registry</code>, <code>core:tracker:mirror</code>,
+<code>core:tracker:rutracker</code>, <code>core:tracker:rutor</code>,
+<code>core:tracker:testing</code>, <code>core:work:api</code>) do not
+depend on the Android SDK.</li>
+<li><strong>API / Impl split</strong> — Several core layers expose an
+<code>:api</code> module (interfaces + models) and an <code>:impl</code>
+module (Hilt-bound implementations). This keeps consumers decoupled from
+implementation details.</li>
+</ul>
+<h3 id="mvi-with-orbit">MVI with Orbit</h3>
+<p>Every feature module uses <strong>Orbit MVI</strong>:</p>
+<ul>
+<li><code>XxxViewModel</code> — <code>@HiltViewModel</code>, implements
+<code>ContainerHost&lt;State, SideEffect&gt;</code>.</li>
+<li><code>XxxState</code> — <code>sealed interface</code> describing UI
+states (<code>Loading</code>, <code>Loaded</code>, <code>Error</code>,
+<code>Empty</code>).</li>
+<li><code>XxxAction</code> — <code>sealed interface</code> for user
+intents.</li>
+<li><code>XxxSideEffect</code> — <code>sealed interface</code> for
+one-time events (navigation, toasts, etc.).</li>
+</ul>
+<p>Example:
+<code>feature/forum/src/main/kotlin/lava/forum/ForumViewModel.kt</code></p>
+<h3 id="ui--navigation">UI &amp; Navigation</h3>
+<ul>
+<li><strong>100 % Jetpack Compose</strong>. There are no XML layouts or
+Fragments in feature modules.</li>
+<li><strong>Custom design system</strong> lives in
+<code>:core:designsystem</code> (<code>LavaTheme</code>,
+<code>AppBar</code>, custom text fields, etc.).</li>
+<li><strong>Custom navigation wrapper</strong> in
+<code>:core:navigation</code> sits on top of Jetpack Navigation Compose.
+<ul>
+<li>Routes are built with a Kotlin DSL using <strong>context
+receivers</strong> (enabled in several modules).</li>
+<li>Each feature exposes <code>addXxx()</code> and
+<code>openXxx()</code> extension functions.</li>
+<li>Deep links for <code>rutracker.org/forum/viewtopic.php</code>,
+<code>viewforum.php</code>, and <code>tracker.php</code> are handled in
+<code>app/src/main/AndroidManifest.xml</code> and wired into the
+navigation graph.</li>
+</ul></li>
+<li><strong>TV support</strong> — <code>TvActivity</code> extends
+<code>MainActivity</code> and changes <code>PlatformType</code> to
+<code>TV</code>. Leanback launcher intent is declared in the manifest.
+The app also declares <code>android.software.leanback</code> as not
+required and <code>android.hardware.touchscreen</code> as not
+required.</li>
+</ul>
+<h2 id="anti-bluff-testing-pact-constitutional-law">Anti-Bluff Testing
+Pact (Constitutional Law)</h2>
+<p>This project adheres to <strong>Anti-Bluff Testing</strong>. A "bluff
+test" is one that passes while the corresponding real feature is broken
+for end users. Bluff tests create false confidence and are strictly
+forbidden.</p>
+<h3
+id="first-law--tests-must-guarantee-real-user-visible-behavior">First
+Law — Tests Must Guarantee Real User-Visible Behavior</h3>
+<p>Every test MUST verify an outcome that matters to end users. A test
+that only asserts "function did not crash" or "mock was called" is a
+bluff test and must be rewritten.</p>
+<h3 id="second-law--no-mocking-of-internal-business-logic">Second Law —
+No Mocking of Internal Business Logic</h3>
+<ul>
+<li><strong>ViewModel tests MUST use real UseCase
+implementations</strong> wired to realistic fakes, never mocked use
+cases.</li>
+<li><strong>UseCase tests MUST use real Repository
+implementations</strong> (or fakes that enforce identical invariants to
+the real database / network layer).</li>
+<li>Mocking is permitted ONLY at the outermost system boundaries
+(Android <code>NsdManager</code>, actual HTTP sockets, hardware).</li>
+<li>If a UseCase contains a bug, a ViewModel Integration Challenge Test
+wired to the real UseCase MUST fail.</li>
+</ul>
+<h3 id="third-law--fakes-must-be-behaviorally-equivalent">Third Law —
+Fakes Must Be Behaviorally Equivalent</h3>
+<ul>
+<li>A fake that is "simpler" than reality in a way that could hide a bug
+is a bluff fake.</li>
+<li><code>TestEndpointsRepository</code> MUST reject duplicates (Room
+primary-key conflict) and seed defaults just like
+<code>EndpointsRepositoryImpl</code>.</li>
+<li><code>TestLocalNetworkDiscoveryService</code> MUST simulate real
+NsdManager behaviors (e.g. <code>_lava._tcp.local.</code> service-type
+suffix).</li>
+<li>Every fake MUST document any behavioral simplifications that differ
+from production.</li>
+</ul>
+<h3 id="fourth-law--integration-challenge-tests">Fourth Law —
+Integration Challenge Tests</h3>
+<ul>
+<li>Every feature MUST include at least one <strong>Integration
+Challenge Test</strong> that exercises the real implementation stack
+end-to-end: ViewModel → UseCase → Repository → (Fake) Service.</li>
+<li>Challenge Tests use actual production classes at every layer; only
+external boundaries are faked.</li>
+<li>A passing Challenge Test MUST guarantee the feature works for a real
+user under the tested scenario.</li>
+</ul>
+<h3 id="fifth-law--regression-immunity">Fifth Law — Regression
+Immunity</h3>
+<ul>
+<li>Every production bug fix MUST be accompanied by a test that would
+have failed before the fix.</li>
+<li>If such a test cannot be written, the architecture is untestable and
+must be refactored before the fix is accepted.</li>
+<li>Code coverage numbers are meaningless if the tests are bluffs;
+behavioral guarantees are the only valid metric.</li>
+</ul>
+<h3 id="sixth-law--real-user-verification-anti-pseudo-test-rule">Sixth
+Law — Real User Verification (Anti-Pseudo-Test Rule)</h3>
+<p>A test that passes while the feature it covers is broken for end
+users is the most expensive kind of test in this codebase — it converts
+unknown breakage into believed safety. This has happened in this project
+before: tests and Integration Challenge Tests executed green while large
+parts of the product were unusable on a real device. That outcome is a
+constitutional failure, not a coverage failure, and it MUST NOT
+recur.</p>
+<p>Every test added to this codebase from this point on MUST satisfy ALL
+of the following. Violation of any of them is a release blocker,
+irrespective of coverage metrics, CI status, reviewer sign-off, or
+schedule pressure.</p>
+<ol type="1">
+<li><p><strong>Same surfaces the user touches.</strong> The test must
+traverse the production code path the user's action triggers, end to
+end, with no shortcut that bypasses real wiring. If the user's action is
+"open screen → tap button → see result", the test exercises the same
+screen, the same button handler, and the same result-rendering code —
+not a synthetic call into the ViewModel that skips the screen, and not a
+hand-rolled flow that skips the network/database boundary the real
+action crosses.</p></li>
+<li><p><strong>Provably falsifiable on real defects.</strong> Before
+merging, the author MUST run the test once with the underlying feature
+deliberately broken (throw inside the use case, return the wrong row
+from the repository, return the wrong status from the API) and confirm
+the test fails with a clear assertion message. The PR description MUST
+state which deliberate break was used and what failure the test
+produced. A test that cannot be made to fail by breaking the thing it
+claims to verify is a bluff test by definition.</p></li>
+<li><p><strong>Primary assertion on user-visible state.</strong> The
+chief failure signal of the test MUST be on something a real user could
+see or measure: rendered UI text, persisted database row, HTTP response
+body / status / header, file written to disk, packet on the wire. "Mock
+was invoked N times" is a permitted secondary assertion, never the
+primary one.</p></li>
+<li><p><strong>Integration Challenge Tests are the load-bearing
+acceptance gate.</strong> A green Challenge Test means a real user can
+complete the flow on a real device against real services — not "the
+wiring compiles". A feature for which a Challenge Test cannot be written
+is, by definition, not shippable. Refactor for testability or remove the
+feature.</p></li>
+<li><p><strong>CI green is necessary, not sufficient.</strong> "All
+tests pass" is not a release signal. Before any release tag is cut, a
+human (or a scripted black-box runner that drives the real UI / real
+HTTP API) MUST have used the feature on a real device or environment and
+observed the user-visible outcome described in the feature spec. Tag
+scripts (e.g. <code>scripts/tag.sh</code>) MUST NOT be run until that
+verification is documented.</p></li>
+<li><p><strong>Inheritance.</strong> This Sixth Law applies recursively
+to every submodule, every feature, and every new artifact added to the
+project (including the Go API service). Submodule constitutions MAY add
+stricter rules but MUST NOT relax this one.</p></li>
+</ol>
+<h3
+id="seventh-law--tests-must-confirm-user-reachable-functionality-anti-bluff-enforcement">Seventh
+Law — Tests MUST Confirm User-Reachable Functionality (Anti-Bluff
+Enforcement)</h3>
+<p>The Sixth Law states what tests must satisfy. The Seventh Law states
+how we enforce it mechanically — because the project has shipped
+passing-tests with broken-features at least once, and the operator's
+standing mandate (2026-04-30) is that this MUST NOT recur. The Seventh
+Law is the teeth.</p>
+<p>Every commit that adds, modifies, or removes a test in this codebase,
+AND every commit that adds or modifies a user-facing feature, is bound
+by the seven clauses below. Violation is a release blocker — pre-push
+hooks reject the push, tag scripts refuse to operate, and reviewers MUST
+raise the violation as a blocking review comment. Authoritative text
+lives in <code>CLAUDE.md</code>; this AGENTS.md mirrors it so an agent
+reading either file sees the same rule set.</p>
+<ol type="1">
+<li><p><strong>Bluff Audit Stamp on every test commit.</strong>
+Test-file diffs require a <code>Bluff-Audit:</code> block in the commit
+message body — name of the test, what was deliberately broken in the
+production code, the actual failure message observed, confirmation the
+mutation was reverted. Pre-push hook rejects test commits without the
+stamp.</p></li>
+<li><p><strong>Real-Stack Verification Gate per feature.</strong> Every
+user-visible feature requires a real-stack test: real third-party
+network for third-party services (<code>-PrealTrackers=true</code>),
+real Postgres for our own services (<code>-Pintegration=true</code>),
+real Compose UI on a real Android emulator/device for UI features
+(<code>-PdeviceTests=true</code> / <code>connectedAndroidTest</code>).
+Features without such a test are documented as "not user-reachable"
+until the gap closes.</p></li>
+<li><p><strong>Pre-Tag Real-Device Attestation.</strong> Every release
+tag requires
+<code>.lava-ci-evidence/&lt;tag-name&gt;/real-device-attestation.json</code>
+with: device model, Android version, app version, command-by-command
+checklist of executed user actions, ≥3 screenshots OR a video referenced
+by hash. <code>scripts/tag.sh</code> refuses without it. No
+exceptions.</p></li>
+<li><p><strong>Forbidden Test Patterns.</strong> Pre-push hooks reject
+diffs introducing: mocking the SUT, assertions that are only
+<code>verify { mock.foo() }</code>, <code>@Ignore</code>'d tests without
+a tracking issue, tests that build the SUT but never invoke its methods,
+acceptance gates whose chief assertion is BUILD SUCCESSFUL.</p></li>
+<li><p><strong>Recurring Bluff Hunt.</strong> Each phase (every 2-4
+weeks of active work) ends only after a bluff hunt: 5 random test files,
+deliberately mutate the production code each one claims to cover,
+confirm each test fails. Output to
+<code>.lava-ci-evidence/bluff-hunt/&lt;date&gt;.json</code>.</p></li>
+<li><p><strong>Bluff Discovery Protocol.</strong> When a real user
+reports a bug whose tests are green, declare a Seventh Law incident. The
+fix commit MUST include a regression test that fails before the fix; the
+bluff that hid the bug MUST be diagnosed and recorded in
+<code>.lava-ci-evidence/sixth-law-incidents/&lt;date&gt;.json</code>;
+the Forbidden Test Patterns list MUST be updated.</p></li>
+<li><p><strong>Inheritance and Propagation.</strong> Applies recursively
+to every submodule, every feature, and every new artifact. Each
+submodule's <code>CLAUDE.md</code> MUST contain the verbatim Seventh Law
+or a link to this section. Non-compliant external submodules MUST be
+forked under <code>vasic-digital/</code> and brought into compliance
+before adoption.</p></li>
+</ol>
+<h4 id="sixth-law-extensions-lessons-learned-addenda">Sixth Law
+extensions (lessons-learned addenda)</h4>
+<p>The clauses above are immutable. Below are addenda recorded after a
+real bug shipped green and we needed to prevent the <em>class</em> of
+bug, not just the specific instance. Authoritative copy lives in
+<code>CLAUDE.md</code>; this AGENTS.md mirrors the headers so an agent
+reading either file sees the same rule set.</p>
+<h5 id="6a--real-binary-contract-tests-added-2026-04-29">6.A —
+Real-binary contract tests (added 2026-04-29)</h5>
+<p>Forensic anchor: <code>docker-compose.yml</code> invoked
+<code>healthprobe --http3 …</code> while the binary only registered
+<code>-url</code>/<code>-insecure</code>/<code>-timeout</code>; the
+probe exited 1 every 10 seconds for 569 consecutive runs while the API
+itself served 200. Compose validation was happy, every functional test
+was green, the orchestrator labelled the container "unhealthy" — and
+there was no test asserting the probe could even start.</p>
+<p>Rule: every script/compose invocation of a binary we own MUST have a
+contract test that recovers the binary's flag set from its actual
+<code>Usage</code> output and asserts the script's flag set is a strict
+subset, with a falsifiability rehearsal sub-test that re-introduces a
+known-buggy flag and confirms the checker rejects it. Canonical
+implementation:
+<code>lava-api-go/tests/contract/healthcheck_contract_test.go</code>.</p>
+<h5
+id="6b--container-up-is-not-application-healthy-added-2026-04-29">6.B —
+Container "Up" is not application-healthy (added 2026-04-29)</h5>
+<p><code>docker ps</code> / <code>podman ps</code> <code>Up</code> only
+means PID 1 is alive; the application inside may be stuck or
+crash-looping internally (cf. 6.A). Tests asserting container state
+alone are bluffs by clauses 1 and 3. Use the same probe the orchestrator
+uses, or an end-to-end functional request at the user-visible
+surface.</p>
+<h5
+id="6c--mirror-state-mismatch-checks-before-tagging-added-2026-04-29">6.C
+— Mirror-state mismatch checks before tagging (added 2026-04-29)</h5>
+<p>"All mirrors push succeeded" is one assertion; "all mirrors converge
+to the same SHA at HEAD" is stronger. <code>scripts/tag.sh</code> MUST
+verify post-push tip-SHA convergence across github/gitlab before
+reporting success, and SHOULD record per-mirror SHAs in the evidence
+file.</p>
+<h5 id="6d--behavioral-coverage-contract-added-2026-04-30-sp-3a">6.D —
+Behavioral Coverage Contract (added 2026-04-30, SP-3a)</h5>
+<p>Coverage is measured behaviorally, not lexically. Every public method
+of every interface added under <code>core/tracker/api/</code>,
+<code>submodules/tracker_sdk/api/</code>, or any future SDK contract
+module MUST have at least one real-stack test that traverses the same
+code path a user's action triggers. Line coverage is reported as a
+secondary metric. Uncovered lines after the behavioral pass are exempted
+only via an entry in the per-spec exemption ledger. Blanket coverage
+waivers are forbidden.</p>
+<h5 id="6e--capability-honesty-added-2026-04-30-sp-3a">6.E — Capability
+Honesty (added 2026-04-30, SP-3a)</h5>
+<p>A <code>TrackerDescriptor</code> (or any future descriptor of a
+feature-bearing component) that declares a capability MUST cause
+<code>getFeature()</code> to return a non-null implementation for the
+corresponding feature interface. The historical "Not implemented" stub
+pattern is a constitutional violation. Capability declared ⇒ feature
+interface returned ⇒ at least one real-stack test exists for the
+capability.</p>
+<h5 id="6f--anti-bluff-submodule-inheritance-added-2026-04-30-sp-3a">6.F
+— Anti-Bluff Submodule Inheritance (added 2026-04-30, SP-3a)</h5>
+<p>Clauses 6.A through 6.E inherit recursively to every
+<code>vasic-digital</code> submodule mounted in this repository, to
+every future submodule, and to every code module added to a submodule. A
+submodule constitution MAY add stricter rules but MUST NOT relax
+6.A–6.F. The Go API service (<code>lava-api-go/</code>) inherits 6.D and
+6.E binding on its rutracker bridge work.</p>
+<h2 id="local-only-cicd-constitutional-constraint">Local-Only CI/CD
+(Constitutional Constraint)</h2>
+<p>This project does NOT use, and MUST NOT add, GitHub Actions, GitLab
+pipelines, Bitbucket pipelines, CircleCI, Travis, Jenkins-as-a-service,
+Azure Pipelines, or any other hosted/remote CI/CD service. All build,
+test, lint, security-scan, mutation-test, load-test, image-build, and
+release-verification activity MUST run on developer machines or on a
+self-hosted local runner under the operator's direct control.</p>
+<h3 id="why">Why</h3>
+<ol type="1">
+<li><strong>Sixth Law alignment.</strong> Real-device, real-environment
+verification is load-bearing. Hosted CI runs in synthetic, ephemeral
+environments — green there proves the synthetic env, not the user's
+product on a real device.</li>
+<li><strong>Hosted-CI green has historically produced bluff confidence
+in this project.</strong> A remote dashboard saying "passing" is
+psychologically indistinguishable from "shipped and works", which is
+exactly the failure mode the Sixth Law was written to prevent.</li>
+<li><strong>Vendor independence.</strong> This project mirrors to two
+independent upstreams (GitHub and GitLab) intentionally. Coupling our
+quality gate to one vendor's pipeline product would re-introduce the
+single point of failure mirroring is meant to remove.</li>
+</ol>
+<h3 id="mandatory-consequences">Mandatory consequences</h3>
+<ul>
+<li>The <code>scripts/</code> directory (and any <code>Makefile</code>,
+task runner, or build tool introduced later) IS the CI/CD apparatus.
+Whatever runs in "release CI" MUST be the same script a developer runs
+locally — no parallel implementation.</li>
+<li>A single local entry point — <code>scripts/ci.sh</code> for Android
+and <code>lava-api-go/scripts/ci.sh</code> for Go — MUST invoke every
+quality gate appropriate to the changed surface.</li>
+<li><strong>Forbidden files.</strong> No
+<code>.github/workflows/*</code>, <code>.gitlab-ci.yml</code>,
+<code>.circleci/config.yml</code>, <code>azure-pipelines.yml</code>,
+<code>bitbucket-pipelines.yml</code>, <code>Jenkinsfile</code> (for
+hosted Jenkins), or equivalent shall exist on any branch of any of the
+upstreams. A pre-push hook MUST reject pushes that introduce such
+files.</li>
+<li><strong>Pre-push gate.</strong> A git pre-push hook installed under
+<code>.githooks/</code> (and enabled via
+<code>git config core.hooksPath .githooks</code>) MUST run the relevant
+subset of <code>scripts/ci.sh</code> before any push to any upstream.
+The hook MUST NOT be bypassable in routine work;
+<code>--no-verify</code> is reserved for documented emergencies and any
+such use MUST be noted in the next commit message.</li>
+<li><strong>Release tagging gate.</strong> <code>scripts/tag.sh</code>
+MUST refuse to operate against any commit that has not been certified
+locally — i.e. the local CI gate must have been run successfully against
+the exact commit being tagged, and the result recorded in a tracked
+artifact (e.g. <code>.lava-ci-evidence/</code>).</li>
+<li><strong>No "it passes on CI" handwave.</strong> A failure that
+reproduces locally on the developer's machine takes precedence over any
+other signal. Conversely, a developer who claims "it works for me"
+without having run the local CI gate has not actually verified anything
+per the Sixth Law.</li>
+</ul>
+<h3 id="what-this-rule-does-not-forbid">What this rule does NOT
+forbid</h3>
+<ul>
+<li>Running tests, linters, or scanners <em>on the developer's
+machine</em> via any tool (this is the whole point).</li>
+<li>Running tests inside containers locally (this is the whole
+point).</li>
+<li>Running a self-hosted runner (a real machine the operator controls,
+invoking the same <code>scripts/ci.sh</code>) — that is local CI by
+another name.</li>
+<li>Per-upstream branch-protection rules that simply <em>require</em>
+status checks to be green; we just don't satisfy those checks via hosted
+runners.</li>
+</ul>
+<h3 id="inheritance">Inheritance</h3>
+<p>Every submodule and every new artifact added to the project
+(including the Go API service) inherits this rule. Submodule
+constitutions MAY add stricter local-CI requirements but MUST NOT relax
+this one or introduce hosted-CI configuration.</p>
+<h2
+id="decoupled-reusable-architecture-constitutional-constraint">Decoupled
+Reusable Architecture (Constitutional Constraint)</h2>
+<p>EVERY component that has a non-Lava-specific use case MUST live in a
+<code>vasic-digital</code> submodule, not in this repo. The boundary is
+enumerated per-component in the design doc for the sub-project that
+introduces the component (SP-2 onward). Code that ends up in this repo
+MUST be either:</p>
+<ul>
+<li>(a) <strong>Lava domain logic</strong> — the 13 rutracker routes,
+the rutracker HTML parsers, the Compose UI for Lava screens, the
+<code>Endpoint</code> sealed-interface, app/manifest entries, etc.;
+OR</li>
+<li>(b) <strong>Thin glue</strong> tying <code>vasic-digital</code>
+submodules together for Lava's specific needs.</li>
+</ul>
+<h3 id="why-1">Why</h3>
+<ol type="1">
+<li><strong>Sixth Law alignment.</strong> "It works in Lava" must mean
+the same thing as "it works in the next vasic-digital project that uses
+this submodule" — otherwise we are silently coupling generic capability
+to one product, which is the same class of failure as silently disabling
+rate-limiting (Sixth Law clause 5 territory).</li>
+<li><strong>Bluff prevention.</strong> Code copy-pasted between projects
+is the highest-bandwidth bluff vector: behaviour drifts silently, fixes
+don't propagate, "we have an mDNS implementation" turns out to mean four
+divergent implementations with one bug each.</li>
+<li><strong>Operator economics.</strong> The <code>vasic-digital</code>
+org is owned end-to-end. New repos under it cost zero (we own the org,
+we have CLI access on GitHub and GitLab). Reusing existing submodules
+costs zero pinning effort. Re-implementing per-project is the only
+expensive option.</li>
+</ol>
+<h3 id="mandatory-consequences-1">Mandatory consequences</h3>
+<ul>
+<li><strong>Submodule pins are explicit and frozen by default.</strong>
+A pinned submodule does NOT auto-fetch latest; we are not obligated to
+track upstream movement. Frozen forever is acceptable. Updating the pin
+is a deliberate PR.</li>
+<li><strong>New non-Lava-specific code added to this repo without a
+documented "why not a vasic-digital submodule" decision is
+rejected.</strong> The decision MUST appear either in the relevant
+design doc or in the PR description.</li>
+<li><strong>Generic functionality is contributed UPSTREAM
+first.</strong> Any component that another <code>vasic-digital</code>
+project would conceivably want goes to the appropriate submodule (or a
+new <code>vasic-digital/&lt;name&gt;</code> repo). Lava then pins to the
+new hash. Order matters: upstream first, Lava pin second.</li>
+<li><strong>Every <code>vasic-digital</code> submodule we own inherits
+the Sixth Law and the Local-Only CI/CD rule transitively.</strong>
+Adopting an externally maintained submodule that violates either is
+forbidden — fork it under <code>vasic-digital/</code> and adopt the
+fork.</li>
+<li><strong>Submodule fetch/pull is an EXPLICIT operator action, never
+automatic.</strong> No git hooks that silently update pins, no
+<code>git submodule update --remote</code> in any release script. The
+pin is the contract; changing the contract is a code review event.</li>
+<li><strong>Mirror policy applies recursively.</strong> Every
+<code>vasic-digital</code> submodule we own MUST be mirrored to the same
+set of upstreams Lava itself mirrors to (GitHub + GitLab), unless
+explicitly waived for that submodule with a documented reason.</li>
+</ul>
+<h3 id="what-this-rule-does-not-forbid-1">What this rule does NOT
+forbid</h3>
+<ul>
+<li>Lava-domain code in this repo. The 13 rutracker routes, the
+rutracker scrapers, the Compose UI, the <code>Endpoint</code> model, the
+<code>:proxy</code> Ktor server, the <code>app/</code> Android module —
+all stay here.</li>
+<li>Thin Lava-specific glue files in this repo that compose
+<code>vasic-digital</code> primitives.</li>
+<li>Deferring extraction of a borderline piece during a single PR; the
+deferral must be tracked as a TODO with a target sub-project for
+extraction.</li>
+</ul>
+<h3 id="inheritance-1">Inheritance</h3>
+<p>This Decoupled Reusable Architecture rule applies recursively to
+every <code>vasic-digital</code> submodule we own. A submodule
+constitution MAY add stricter rules (e.g. "no external dependencies")
+but MUST NOT relax this one — meaning, <code>vasic-digital</code>
+submodules themselves MUST extract their own reusable parts to deeper
+submodules rather than copy-paste between siblings.</p>
+<h2 id="testing-strategy">Testing Strategy</h2>
+<p>Post-SP-3a (1.2.0) the repository carries:</p>
+<ul>
+<li><strong>~77 <code>*Test.kt</code> files</strong> across
+<code>core/*</code> and <code>feature/*</code>, with the
+<code>:core:tracker:*</code> family alone contributing the
+majority.</li>
+<li><strong>8 Compose UI Challenge Tests</strong> at
+<code>app/src/androidTest/kotlin/lava/app/challenges/</code> (C1–C8).
+Each is the load-bearing acceptance gate for one user-visible scenario
+per Sixth Law clause 4.</li>
+<li><strong>1 real-tracker integration test</strong> at
+<code>core/tracker/rutor/src/integrationTest/kotlin/lava/tracker/rutor/RealRuTorIntegrationTest.kt</code>,
+gated by <code>-PrealTrackers=true</code>.</li>
+<li>A shared test-utilities module — <code>:core:testing</code> —
+providing <code>MainDispatcherRule</code>, fake repositories/services,
+<code>TestDispatchers</code>, and the Compose UI test harness.</li>
+<li>A separate tracker-test scaffolding module —
+<code>:core:tracker:testing</code> — providing
+<code>FakeTrackerClient</code>, builders, and
+<code>LavaFixtureLoader</code>.</li>
+</ul>
+<p><strong>Test discipline (Anti-Bluff Pact):</strong></p>
+<ul>
+<li>Use <strong>JUnit 4</strong> for unit tests (to match the existing
+<code>MainDispatcherRule</code>).</li>
+<li>Place unit tests in <code>src/test/kotlin/</code>, instrumented
+tests in <code>src/androidTest/kotlin/</code>, real-tracker integration
+tests in <code>src/integrationTest/kotlin/</code> (only
+<code>:core:tracker:rutor</code> has this source set today;
+<code>:core:tracker:rutracker</code> adds it as needed).</li>
+<li>Every feature MUST include at least one <strong>Integration
+Challenge Test</strong> using real UseCase and Repository
+implementations. Mocking ViewModel dependencies is a Second-Law
+violation.</li>
+<li>Every test commit MUST carry a <strong>Bluff-Audit</strong> stamp
+(Seventh Law clause 1, pre-push hook enforced).</li>
+<li>Mocking the System Under Test
+(<code>mockk&lt;XxxClass&gt;(...)</code> inside
+<code>XxxClassTest.kt</code>) is <strong>forbidden</strong> and
+pre-push-rejected (Seventh Law clause 4).</li>
+</ul>
+<h3 id="test-runner-cheatsheet">Test runner cheatsheet</h3>
+<p>All commands assume working directory at the repo root.</p>
+<table>
+<thead>
+<tr>
+<th>Goal</th>
+<th>Command</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Default unit tests, all modules</td>
+<td><code>./gradlew test</code></td>
+</tr>
+<tr>
+<td>Unit tests, single tracker module</td>
+<td><code>./gradlew :core:tracker:rutor:test</code></td>
+</tr>
+<tr>
+<td>Unit tests, single test class</td>
+<td><code>./gradlew :core:tracker:rutor:test --tests "RuTorSearchParserTest"</code></td>
+</tr>
+<tr>
+<td>Real-tracker integration test (RuTor only)</td>
+<td><code>./gradlew :core:tracker:rutor:integrationTest -PrealTrackers=true</code></td>
+</tr>
+<tr>
+<td>Compose UI Challenge Tests (all 8)</td>
+<td><code>./gradlew :app:connectedDebugAndroidTest</code> <em>(requires
+connected device)</em></td>
+</tr>
+<tr>
+<td>Compose UI single Challenge Test</td>
+<td><code>./gradlew :app:connectedDebugAndroidTest --tests "lava.app.challenges.Challenge01*"</code></td>
+</tr>
+<tr>
+<td>Local CI gate, changed-only (matches pre-push hook)</td>
+<td><code>./scripts/ci.sh --changed-only</code></td>
+</tr>
+<tr>
+<td>Local CI gate, full (matches <code>scripts/tag.sh</code> gate)</td>
+<td><code>./scripts/ci.sh --full</code></td>
+</tr>
+<tr>
+<td>Local CI gate, smoke (cheapest, sanity check)</td>
+<td><code>./scripts/ci.sh --smoke</code></td>
+</tr>
+<tr>
+<td>Recurring bluff hunt (Seventh Law clause 5, end-of-phase)</td>
+<td><code>./scripts/bluff-hunt.sh</code></td>
+</tr>
+<tr>
+<td>Constitution checker (capability honesty + scoped clauses)</td>
+<td><code>./scripts/check-constitution.sh</code></td>
+</tr>
+<tr>
+<td>Fixture freshness (warn at &gt;30d, block at &gt;60d)</td>
+<td><code>./scripts/check-fixture-freshness.sh</code></td>
+</tr>
+<tr>
+<td>Tracker-SDK submodule mirror sync (operator-only)</td>
+<td><code>./scripts/sync-tracker-sdk-mirrors.sh --check</code></td>
+</tr>
+<tr>
+<td>Spotless</td>
+<td><code>./gradlew spotlessApply</code> /
+<code>./gradlew spotlessCheck</code></td>
+</tr>
+<tr>
+<td>Single ViewModel test</td>
+<td><code>./gradlew :feature:tracker_settings:test --tests "TrackerSettingsViewModelTest"</code></td>
+</tr>
+<tr>
+<td>Go API unit tests</td>
+<td><code>cd lava-api-go &amp;&amp; go test -race -count=1 ./...</code></td>
+</tr>
+<tr>
+<td>Go API CI gate</td>
+<td><code>./lava-api-go/scripts/ci.sh</code></td>
+</tr>
+<tr>
+<td>Go API e2e tests</td>
+<td><code>cd lava-api-go &amp;&amp; go test -race -count=1 -v ./tests/e2e/...</code></td>
+</tr>
+<tr>
+<td>Go API contract tests</td>
+<td><code>cd lava-api-go &amp;&amp; go test -race -count=1 -v ./tests/contract/...</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Gradle <code>--no-daemon</code> recommendation.</strong> For
+long-running builds (the Android <code>:app:assembleDebug</code>
+end-to-end takes minutes on a cold cache), prefer
+<code>--no-daemon</code> to avoid the Gradle daemon holding locks across
+a host suspend (Host Machine Stability Directive).</p>
+<p><strong><code>-Pintegration=true</code> and
+<code>-PdeviceTests=true</code>.</strong> Reserved for future extensions
+of the real-stack gate (lava-api-go integration suites and Android
+device tests respectively). 1.2.0 ships only
+<code>-PrealTrackers=true</code> for the RuTor integration set; the
+others are placeholders documented in the Seventh Law clause 2.</p>
+<h2 id="deployment">Deployment</h2>
+<h3 id="android-app">Android App</h3>
+<p>The app is distributed via Google Play, GitHub Releases, and RuStore
+(per <code>README.md</code>). The release-tagging mechanics are
+local-only per the Local-Only CI/CD constitutional rule:</p>
+<ul>
+<li><code>./scripts/ci.sh --full</code> is the local quality gate. The
+same script runs in pre-push (<code>--changed-only</code> mode) and at
+tag time (<code>--full</code> mode).</li>
+<li><code>./scripts/tag.sh --app android</code> cuts the
+<code>Lava-Android-&lt;vname&gt;-&lt;vcode&gt;</code> tag, pushes to
+both upstreams (github + gitlab), and verifies per-mirror SHA
+convergence per clause 6.C. It refuses to operate without a populated
+<code>.lava-ci-evidence/Lava-Android-&lt;vname&gt;-&lt;vcode&gt;/</code>
+evidence pack (Seventh Law clause 3 mechanical gate).</li>
+</ul>
+<p>There are NO <code>.github/workflows/</code>,
+<code>.gitlab-ci.yml</code>, <code>.circleci/</code>, or any other
+hosted-CI configuration files anywhere in the tree. The pre-push hook at
+<code>.githooks/pre-push</code> rejects pushes that introduce them
+(Local-Only CI/CD rule).</p>
+<h3 id="go-api-service">Go API Service</h3>
+<p>The Go API is the primary backend. It is built as a static binary and
+a distroless Docker image.</p>
+<ol type="1">
+<li><p><strong>Build the binaries:</strong></p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> lava-api-go <span class="kw">&amp;&amp;</span> <span class="fu">make</span> build</span></code></pre></div>
+<p>Output: <code>lava-api-go/bin/lava-api-go</code> and
+<code>lava-api-go/bin/healthprobe</code></p></li>
+<li><p><strong>Build the Docker image:</strong></p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> lava-api-go <span class="kw">&amp;&amp;</span> <span class="fu">make</span> image</span></code></pre></div>
+<p>Image: <code>lava-api-go:dev</code></p></li>
+<li><p><strong>Dockerfile</strong>
+(<code>lava-api-go/docker/Dockerfile</code>):</p>
+<ul>
+<li>Multi-stage build: <code>golang:1.25-alpine</code> →
+<code>gcr.io/distroless/static-debian12:nonroot</code></li>
+<li>Exposes <code>8443/udp</code> (HTTP/3) and <code>8443/tcp</code>
+(HTTP/2)</li>
+<li><code>HEALTHCHECK CMD ["/usr/local/bin/healthprobe"]</code>
+(JSON-array form for distroless compat)</li>
+<li>Entrypoint: <code>/usr/local/bin/lava-api-go</code></li>
+</ul></li>
+<li><p><strong>Orchestration:</strong> <code>docker-compose.yml</code>
+at the project root defines services for Postgres, migrations,
+lava-api-go, legacy proxy, and an observability stack (Prometheus, Loki,
+Grafana, Tempo). Use <code>./start.sh</code> and <code>./stop.sh</code>
+to manage the stack.</p></li>
+</ol>
+<h3 id="proxy-server-legacy">Proxy Server (Legacy)</h3>
+<p>The proxy is built as a Ktor fat JAR and deployed as a Docker
+image.</p>
+<ol type="1">
+<li><p><strong>Build the fat JAR:</strong></p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="ex">./gradlew</span> :proxy:buildFatJar</span></code></pre></div>
+<p>Output: <code>proxy/build/libs/app.jar</code></p></li>
+<li><p><strong>Build &amp; push the Docker image:</strong></p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="ex">./build_and_push_docker_image.sh</span></span></code></pre></div>
+<p>The script does the following:</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> build <span class="at">-t</span> lava-app-proxy ./proxy</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> tag lava-app-proxy registry.digitalocean.com/lava-app/lava-app-proxy</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> push registry.digitalocean.com/lava-app/lava-app-proxy</span></code></pre></div></li>
+<li><p><strong>Dockerfile</strong> (<code>proxy/Dockerfile</code>):</p>
+<ul>
+<li>Base image: <code>openjdk:17.0.1-jdk-slim</code>
+(<code>linux/amd64</code>)</li>
+<li>Exposes port <code>8080</code></li>
+<li>Entrypoint: <code>java -jar /app/app.jar</code></li>
+</ul></li>
+</ol>
+<h2 id="security-considerations">Security Considerations</h2>
+<ul>
+<li><p><strong>Proxy auth</strong> — The proxy expects an
+<code>Auth-Token</code> header but does not implement OAuth or JWT; it
+forwards rutracker session state.</p></li>
+<li><p><strong>Go API auth</strong> — The Go API uses passthrough auth
+middleware that forwards the <code>Auth-Token</code> header as a cookie
+to upstream rutracker.org.</p></li>
+<li><p><strong>Encrypted preferences</strong> —
+<code>core:preferences</code> uses
+<code>androidx.security:security-crypto-ktx</code>
+(<code>1.1.0-alpha03</code>) to store credentials and settings.</p></li>
+<li><p><strong>Cleartext traffic</strong> —
+<code>android:usesCleartextTraffic="true"</code> is enabled in the app
+manifest. Be cautious when changing this.</p></li>
+<li><p><strong>Signing configuration</strong> — Both debug and release
+builds use dedicated keystores located under <code>keystores/</code>.
+Keystore paths and passwords are loaded from a <code>.env</code> file
+via <code>KEYSTORE_ROOT_DIR</code> and <code>KEYSTORE_PASSWORD</code>.
+See <code>.env.example</code> for the required variables. Never commit
+the <code>.env</code> file or the <code>keystores/</code>
+directory.</p></li>
+<li><p><strong>Credential Security (Constitutional clause 6.H)</strong>
+— <code>.env</code>, <code>.env.*</code>, <code>.env.local</code>,
+<code>keystores/</code>, and <code>app/google-services.json</code> are
+inviolable. They MUST be gitignored. No credential string shall ever
+appear in source code. The pre-push hook rejects any diff that
+introduces credential patterns. Accidental commit is a security incident
+requiring upstream purge and credential rotation.</p></li>
+<li><p><strong>Provider Operational Verification (Constitutional clause
+6.G)</strong> — Every <code>TrackerDescriptor</code> shipped to end
+users MUST have at least one passing Challenge Test exercising its
+primary user-visible flow on a real Android device or in the project's
+emulator container. The descriptor's <code>verified: Boolean</code> flag
+is the mechanical gate; the user-facing provider list (login, settings,
+credentials screens) MUST filter on <code>verified == true</code>. A
+provider that appears selectable but cannot complete its primary flow is
+a constitutional violation, irrespective of unit-test coverage. Forensic
+anchor: 2026-05-04 Internet Archive stuck-on-loading bug — Challenge
+Tests C1–C8 were green while archive.org users could not progress past
+the Continue tap because the test descriptors used
+<code>AuthType.FORM_LOGIN</code> and never exercised the
+<code>AuthType.NONE</code> code path. Pinned by
+<code>core/tracker/client/src/test/kotlin/lava/tracker/client/ProviderVerifiedContractTest.kt</code>
+— flipping <code>verified=true</code> without the matching Challenge
+Test fails CI immediately.</p></li>
+<li><p><strong>Multi-Emulator Container Matrix (Constitutional clause
+6.I)</strong> — Real-device verification (per 6.G clause 5 / Sixth Law
+clause 5 / Seventh Law clause 3) is satisfied ONLY by the project's
+container-bound multi-emulator matrix: minimum API 28, 30, 34, latest
+stable; minimum phone + tablet + (where the feature touches
+<code>TvActivity</code> or the leanback manifest entries) TV; per-AVD
+attestation rows in
+<code>.lava-ci-evidence/&lt;tag&gt;/real-device-verification.md</code>;
+cold-boot for the gate run; falsifiability rehearsal per
+Android-version-class. A single passing emulator (or device) is NOT the
+gate — the matrix is. <code>scripts/tag.sh</code> MUST refuse to operate
+on a commit whose evidence file lacks the minimum-coverage rows.
+Snapshot reuse during dev is fine; for the gate it is
+forbidden.</p></li>
+<li><p><strong>Anti-Bluff Functional Reality Mandate (Constitutional
+clause 6.J)</strong> — Every test, every Challenge Test, and every CI
+gate added to or maintained in this codebase MUST do exactly one job:
+confirm the feature it claims to cover actually works for an end user,
+end-to-end, on the gating matrix (clause 6.I). CI green is necessary,
+NEVER sufficient. Any agent or contributor may invoke clause 6.J to
+remove a test demonstrably bluff (passes against deliberately-broken
+production code) — the bluff classification + broken-mutation evidence
+go to
+<code>.lava-ci-evidence/sixth-law-incidents/&lt;date&gt;.json</code>.
+Adding a Challenge Test the author cannot execute against the gating
+matrix is itself a bluff. <code>@Ignore</code> without an open issue is
+a 6.J violation by construction. Tests must guarantee the product works
+— anything else is theatre.</p></li>
+<li><p><strong>Builds-Inside-Containers Mandate (Constitutional clause
+6.K)</strong> — Every release-artifact build
+(<code>:app:assembleDebug</code>, <code>:app:assembleRelease</code>,
+<code>:proxy:buildFatJar</code>, <code>lava-api-go</code> static binary,
+OCI image builds) MUST run inside the project's container-bound build
+path, anchored on <code>vasic-digital/Containers</code>'s build
+orchestration (<code>cmd/distributed-build</code> +
+<code>pkg/distribution</code> + <code>pkg/runtime</code>). Local
+incremental dev builds on the host are permitted for iteration; the
+constitutional gate, the release-artifact build, and the build whose
+output goes through the emulator matrix (clause 6.I) MUST go through
+Containers. The accompanying <code>6.K-debt</code> entry tracks the
+package additions (<code>submodules/containers/pkg/emulator/</code>,
+<code>submodules/containers/pkg/vm/</code>) that are owed; until that
+debt is closed, Lava-side <code>docker-compose.test.yml</code>,
+<code>docker/emulator/Dockerfile</code>, and
+<code>scripts/run-emulator-tests.sh</code> are the transitional thin
+glue. An artifact built outside the container path and tested inside the
+gating emulator path is constitutionally suspect — green tests against
+an artifact the gate did not build are a bluff vector by
+construction.</p></li>
+<li><p><strong>Anti-Bluff Functional Reality Mandate, Operator's
+Standing Order (Constitutional clause 6.L)</strong> — Restated verbatim
+from clause 6.J because the operator has now invoked this mandate
+<strong>TWENTY-FIVE TIMES</strong> across multiple working days; the
+repetition itself is the forensic record. The 13th invocation
+(2026-05-05 23:51, after a real tester reported the
+Trackers-from-Settings crash): "Opening Trackers from Settings crashes
+the app. See Crashlytics for stacktraces. Create proper tests to
+validate and verify the fix! ... execution of tests and Challenges MUST
+guarantee the quality, the completition and full usability by end users
+of the product!" The crash root cause was a textbook nested-scroll
+antipattern (LazyColumn inside Column(verticalScroll)) that no existing
+test caught — confirming yet again that CI green is necessary, never
+sufficient. (See §6.Q.) The 14th invocation (2026-05-06) birthed §6.R
+No-Hardcoding Mandate. The 15th invocation (2026-05-06) birthed §6.S
+Continuation Document Maintenance Mandate. The 16th invocation
+(2026-05-12, after the C03+CF commits
+<code>4d27c07</code>+<code>f7d0a62</code> landed on master): "Make sure
+that all existing tests and Challenges do work in anti-bluff manner -
+they MUST confirm that all tested codebase really works as expected! We
+had been in position that all tests do execute with success and all
+Challenges as well, but in reality the most of the features does not
+work and can't be used! This MUST NOT be the case and execution of tests
+and Challenges MUST guarantee the quality, the completition and full
+usability by end users of the product!" The 17th invocation (2026-05-12
+later, after the anti-bluff audit response <code>4b0dd55</code> landed)
+used the same verbatim wording and demands that the rule live in every
+submodule's CONSTITUTION.md + AGENTS.md too, not just CLAUDE.md — the
+17th audit verified all 16 submodule + lava-api-go CONSTITUTION/AGENTS
+files already carry §6.L inheritance.</p></li>
+<li><p><strong>Compose Layout Antipattern Guard (Constitutional clause
+6.Q, added 2026-05-05)</strong> — Forbids nesting a vertically-scrolling
+lazy layout (LazyColumn, LazyVerticalGrid, LazyVerticalStaggeredGrid)
+inside a parent that gives unbounded vertical space (verticalScroll,
+unbounded wrapContentHeight, LinearLayout-with-weight wrapper).
+Equivalent rule horizontally. Per-feature structural tests + Compose UI
+Challenge Tests on the §6.I matrix are the load-bearing acceptance
+gates. Forensic anchor: the 2026-05-05 Trackers-from-Settings crash
+(closure log at
+<code>.lava-ci-evidence/crashlytics-resolved/2026-05-05-tracker-settings-nested-scroll.md</code>).
+Inherits recursively to every submodule. Pattern guard at
+<code>feature/tracker_settings/src/test/.../TrackerSelectorListLazyColumnRegressionTest.kt</code>.
+Every test, every Challenge Test, every CI gate has exactly one job:
+confirm the feature works for a real user end-to-end on the gating
+matrix. CI green is necessary, never sufficient. Tests must guarantee
+the product works — anything else is theatre. If you find yourself
+rationalizing a "small exception" — STOP. There are no small exceptions.
+The Internet Archive stuck-on-loading bug, the broken post-login
+navigation, the credential leak in C2, the bluffed C1-C8, the 2
+first-distribute Crashlytics crashes — these are what "small exceptions"
+produce. Submodule constitutions MAY paste this clause verbatim; they
+MUST NOT abbreviate it.</p></li>
+</ul>
+<h5
+id="6r--no-hardcoding-mandate-added-2026-05-06-fourteenth-6l-invocation">6.R
+— No-Hardcoding Mandate (added 2026-05-06, FOURTEENTH §6.L
+invocation)</h5>
+<p><strong>Forensic anchor:</strong> 2026-05-06 operator directive
+during Phase 1 brainstorm: "Pay attention that we MUST NOT hardcode
+anything ever!" — restating the spirit of §6.J for an entire class of
+bluffs (literal values that drift silently from their intended
+source-of-truth).</p>
+<p><strong>Rule.</strong> No connection address, port, header field
+name, credential, key, salt, secret, schedule, algorithm parameter, or
+domain literal shall appear as a string/int constant in tracked source
+code (<code>.kt</code>, <code>.java</code>, <code>.go</code>,
+<code>.gradle</code>, <code>.kts</code>, <code>.xml</code>,
+<code>.yaml</code>, <code>.yml</code>, <code>.json</code>,
+<code>.sh</code>). Every such value MUST come from a config source:
+<code>.env</code> (gitignored), generated config class (build-time
+codegen reading <code>.env</code>), runtime env var, or mounted
+file.</p>
+<p>The placeholder file <code>.env.example</code> (committed) carries
+dummy values for every variable so a developer cloning the repo knows
+what to set.</p>
+<p><code>scripts/check-constitution.sh</code> MUST grep tracked files
+for forbidden literal patterns:</p>
+<ul>
+<li>Any IPv4 address outside <code>.env.example</code> and incident
+docs</li>
+<li>The header name from <code>.env.example</code>'s
+<code>LAVA_AUTH_FIELD_NAME</code></li>
+<li>Any 36-char UUID outside <code>.env.example</code></li>
+<li>Hardcoded <code>host:port</code> pairs in HTTP/HTTPS URLs</li>
+</ul>
+<p>Pre-push rejects on match. Bluff-Audit stamp required on any commit
+that adds new config-driven values, demonstrating the no-hardcoding
+contract test fails when a literal is reintroduced.</p>
+<p><strong>Exemptions</strong> (test fixtures, incident docs, design
+specs):</p>
+<ul>
+<li><code>.env.example</code> — by definition carries placeholders</li>
+<li><code>.lava-ci-evidence/sixth-law-incidents/*.json</code> — forensic
+anchors quoting historical literals</li>
+<li><code>docs/superpowers/specs/*.md</code>,
+<code>docs/superpowers/plans/*.md</code> — design docs and
+implementation plans may show example values for clarity (placeholders
+preferred but examples permitted)</li>
+<li><code>*_test.go</code>, <code>*Test.kt</code>,
+<code>*Tests.kt</code>, <code>*Test.java</code> — test fixtures may use
+synthetic literals, MUST NOT use real production values</li>
+</ul>
+<p><strong>Enforcement status (2026-05-06):</strong> UUID literals are
+enforced today by <code>scripts/check-constitution.sh</code> (delegating
+to <code>scripts/scan-no-hardcoded-uuid.sh</code>). IPv4, host:port,
+schedule, and algorithm-parameter literals are tracked for future phases
+per the staged-enforcement principle (rule first, mechanical gate as the
+project ships its scopes). Open a forensic-anchor entry in
+<code>.lava-ci-evidence/sixth-law-incidents/</code> if a literal of any
+forbidden class ships in production.</p>
+<p><strong>Inheritance:</strong> applies recursively to every submodule
+and every new artifact. Submodule constitutions MAY add stricter rules
+but MUST NOT relax this clause.</p>
+<h5
+id="6s--continuation-document-maintenance-mandate-added-2026-05-06-fifteenth-6l-invocation">6.S
+— Continuation Document Maintenance Mandate (added 2026-05-06, FIFTEENTH
+§6.L invocation)</h5>
+<p><strong>Forensic anchor:</strong> 2026-05-06 operator directive:
+"during any work we perform, during Phases implementation, debugging and
+fixing, during ANY effort we have the Continuation document MUST BE
+maintained and it MUST NOT BE out of sync with current work we are
+doing! If for any reson we stop our work, we MUST BE able to continue
+any time, with current work, exactly where we have left of and from any
+CLI agent or any LLM model we chose! Nothing can be broken or faulty in
+maintained Continuation document!"</p>
+<p><strong>Rule.</strong> The file <code>docs/CONTINUATION.md</code> is
+the single-file source-of-truth handoff document for resuming the
+project's work across any CLI session. It MUST be maintained
+continuously and MUST NOT drift out of sync with the actual repository
+state. Every commit that changes any of: (a) phase status, (b) new
+spec/plan, (c) submodule pin, (d) release artifact, (e) known issue
+discovered or resolved, (f) operator scope directive, (g) user-visible
+bug fix — MUST update <code>docs/CONTINUATION.md</code> in the SAME
+COMMIT.</p>
+<p>The §0 "Last updated" line MUST be the date of the most recent
+CONTINUATION-touching commit. A stale value is a §6.S violation.</p>
+<p><code>scripts/check-constitution.sh</code> enforces (1)
+<code>docs/CONTINUATION.md</code> exists, (2) contains §0 "Last
+updated", (3) contains §7 RESUME PROMPT, (4) §6.S present in
+<code>CLAUDE.md</code>, (5) §6.S inheritance reference in every
+<code>submodules/*/CLAUDE.md</code> +
+<code>lava-api-go/CLAUDE.md</code>. Pre-push rejects on any failure.</p>
+<p><strong>Inheritance:</strong> applies recursively. Submodule
+constitutions MAY add stricter rules (e.g., per-submodule CONTINUATION
+files) but MUST NOT relax this clause.</p>
+<h5
+id="6t--universal-quality-constraints-added-2026-05-06-from-helixcode-constitution-mining">6.T
+— Universal Quality Constraints (added 2026-05-06 from ../HelixCode
+constitution mining)</h5>
+<p>Four constitutional anchors imported verbatim from the HelixCode
+project's CONSTITUTION.md:</p>
+<ul>
+<li><strong>§6.T.1 Reproduction-Before-Fix (HelixCode
+CONST-014).</strong> Every defect MUST be reproduced by a Challenge /
+regression test BEFORE the fix lands. Sequence: write test → confirm
+fail → fix → confirm pass → commit both with the failure message in a
+Bluff-Audit stamp.</li>
+<li><strong>§6.T.2 Resource Limits for Tests &amp; Challenges (HelixCode
+CONST-011).</strong> Full-suite test runs MUST cap host-resource usage
+(~30-40%) via <code>GOMAXPROCS=2 nice -n 19 ionice -c 3 -p 1</code> for
+<code>go test</code>, <code>--cpus</code>/<code>--memory</code> for
+container test runs, <code>--max-workers=2</code> for Gradle full-tree
+runs.</li>
+<li><strong>§6.T.3 No-Force-Push (HelixCode §12.2 / CONST-043).</strong>
+No force-push, history rewrite, branch-deletion, or hook-bypass without
+explicit per-operation operator approval. The 4-mirror
+<code>-s ours</code> reconciliation pattern is the prescribed
+alternative.</li>
+<li><strong>§6.T.4 Bugfix Documentation (HelixCode CONST-012).</strong>
+All bug fixes documented in <code>docs/issues/fixed/BUGFIXES.md</code>
+with root cause, files, fix description, verification test link, fix
+commit SHA. §6.O extends this for Crashlytics issues; §6.T.4 covers the
+rest.</li>
+</ul>
+<p><strong>Inheritance:</strong> applies recursively. Submodules MAY add
+stricter rules but MUST NOT relax.</p>
+<ul>
+<li><p><strong>Crashlytics-Resolved Issue Coverage Mandate
+(Constitutional clause 6.O, added 2026-05-05)</strong> — Every
+Crashlytics-recorded issue (fatal OR non-fatal) closed/resolved by any
+commit MUST gain (a) a validation test in the language of the crashing
+surface that reproduces the conditions, (b) a Challenge Test under
+<code>app/src/androidTest/kotlin/lava/app/challenges/</code> (client) or
+<code>tests/e2e/</code> (server) that drives the same user-facing path,
+and (c) a closure log at
+<code>.lava-ci-evidence/crashlytics-resolved/&lt;date&gt;-&lt;slug&gt;.md</code>
+recording the issue ID, root-cause analysis, fix commit SHA, and links
+to the tests. <code>scripts/tag.sh</code> MUST refuse release tags whose
+CHANGELOG mentions Crashlytics fixes without matching closure logs.
+Marking a Crashlytics issue "closed" in the Console requires the test
+coverage to land first — never close-mark before the regression-immunity
+tests exist. Inherits recursively to every submodule.</p></li>
+<li><p><strong>Distribution Versioning + Changelog Mandate
+(Constitutional clause 6.P, added 2026-05-05, TWELFTH §6.L
+invocation)</strong> — Every distribute action (Firebase App
+Distribution, container registry pushes, releases/ snapshots,
+scripts/tag.sh) MUST: (1) carry a strictly increasing versionCode (no
+re-distribution of already-published codes); (2) include a CHANGELOG
+entry — canonical file <code>CHANGELOG.md</code> at repo root +
+per-version snapshot at
+<code>.lava-ci-evidence/distribute-changelog/&lt;channel&gt;/&lt;version&gt;-&lt;code&gt;.md</code>;
+(3) inject the changelog into the App Distribution release-notes via
+<code>--release-notes</code>.
+<code>scripts/firebase-distribute.sh</code> REFUSES to operate when
+current versionCode ≤ last-distributed versionCode for the channel, OR
+when CHANGELOG.md lacks an entry for the current version, OR when the
+per-version snapshot file is missing. <code>scripts/tag.sh</code>
+enforces the same gates pre-tag. Re-distributing the same versionCode is
+forbidden across distribute sessions; idempotent retry within a single
+session is permitted. ServiceAdvertisement.API_VERSION MUST track proxy
+apiVersionName (per the §6.A real-binary contract test). Inherits
+recursively to every submodule + every new artifact.</p></li>
+<li><p><strong>Host-Stability Forensic Discipline (Constitutional clause
+6.M)</strong> — Every perceived-instability event during a session —
+whether a real host suspend, a real sign-out, OR an operator-perceived
+freeze without forensic evidence — MUST be classified into Class I
+(verifiable host event), Class II (resource pressure), or Class III
+(operator-perceived without forensic evidence) AND audited via the
+7-step forensic protocol (uptime+who, journalctl logind events, kernel
+critical events, free -h, df -h, forbidden-command grep, container state
+inventory). Findings recorded under
+<code>.lava-ci-evidence/sixth-law-incidents/&lt;date&gt;-&lt;slug&gt;.json</code>.
+Container-runtime safety analysis (recorded once in root §6.M,
+referenced forever): rootless Podman has NO host-level power-management
+privileges; rootful Docker is not installed on the operator's primary
+host. Container operations cannot cause Class I host events on the
+audited host configuration. The Forbidden Command List remains the
+prohibition; clause 6.M is the discipline for classifying and recording
+perceived events that may or may not have actually occurred. A
+perceived-instability event without an audit record is itself a Seventh
+Law violation. Forensic anchor: 2026-04-28 Class I poweroff
+(<code>docs/INCIDENT_2026-04-28-HOST-POWEROFF.md</code>) + 2026-05-04
+Class III perceived-instability
+(<code>.lava-ci-evidence/sixth-law-incidents/2026-05-04-perceived-host-instability.json</code>).</p></li>
+<li><p><strong>Bluff-Hunt Cadence Tightening + Production Code Coverage
+(Constitutional clause 6.N)</strong> — Beyond the Seventh Law clause 5
+baseline (5 random <code>*Test.kt</code> files every 2-4 weeks), three
+additional triggers fire in-cycle: per operator anti-bluff-mandate
+invocation (lighter scope after first/day), per matrix-runner / gate
+change (pre-push enforced — owed via §6.N-debt), per phase-gating
+attestation file added (pre-push enforced — owed via §6.N-debt). Bluff
+hunts MUST also sample production code: 2 files per phase from
+gate-shaping code (<code>scripts/tag.sh</code> helpers,
+<code>scripts/check-constitution.sh</code>,
+<code>submodules/containers/pkg/emulator/</code>, etc.) plus 0-2 from
+broader CI-touched code. Forensic anchor: 2026-05-05 ultrathink-driven
+discovery of the 7-day-old <code>pkg/emulator/Boot()</code>
+port-collision bluff — invisible to all existing test-only bluff hunts.
+Pre-push hook implementation owed via the Group A-prime spec (next
+brainstorming target after Group A lands).</p></li>
+<li><p><strong>No sudo/su ever (Constitutional clause 6.U)</strong> —
+Every use of <code>sudo</code> or <code>su</code> is strictly forbidden.
+Operations requiring elevated privileges MUST use container-based
+solutions from the <code>vasic-digital/Containers</code> submodule or be
+provided by local project/Submodule dependencies that build
+automatically. Never modify a suggestion to "just use sudo" — find a
+user-level alternative. The pre-push hook rejects files containing
+<code>sudo </code> or <code>su </code> patterns. Propagated recursively
+to all submodules.</p></li>
+<li><p><strong>Container Emulators mandate (Constitutional clause
+6.V)</strong> — Every Android emulator instance for Challenge Tests / UI
+verification MUST run inside a container managed by the
+<code>vasic-digital/Containers</code> submodule. Rootless Podman/Docker
+only. All tests execute inside containers. The §6.I matrix (API
+28/30/34/latest, phone/tablet/TV) runs inside container-bound emulators.
+Propagated recursively.</p></li>
+<li><p><strong>GitHub + GitLab only remotes (Constitutional clause
+6.W)</strong> — Only GitHub (<code>vasic-digital/*</code>,
+<code>HelixDevelopment/*</code>) and GitLab
+(<code>vasic-digital/*</code>, <code>HelixDevelopment/*</code>) are
+permitted as remotes. GitFlic, GitVerse, and all other providers are
+forbidden. The 4-mirror model is replaced by 2-mirror (GitHub + GitLab).
+All scripts, verification, and attestation procedures check only 2
+mirrors. Propagated recursively.</p></li>
+<li><p><strong>ProGuard</strong> — <code>isObfuscate = false</code> in
+release. The ProGuard rules in <code>app/proguard-rules.pro</code> keep
+network DTOs (<code>lava.network.dto.**</code>) and Tink
+classes.</p></li>
+<li><p><strong>Deep links</strong> — The app handles
+<code>rutracker.org</code> deep links. Any Intent processing should
+validate URLs to avoid injection.</p></li>
+<li><p><strong>Go API TLS</strong> — The Go API requires TLS 1.3.
+Self-signed dev certs are generated by
+<code>lava-api-go/scripts/gen-cert.sh</code>. Production requires valid
+certs.</p></li>
+<li><p><strong>Go API rate limiting</strong> — Per-IP and per-route rate
+limiting is enforced via the <code>digital.vasic.ratelimiter</code>
+submodule.</p></li>
+</ul>
+<h2 id="useful-notes-for-agents">Useful Notes for Agents</h2>
+<ul>
+<li><strong>No root <code>build.gradle.kts</code></strong> — Do not
+create one. Use or extend the convention plugins in
+<code>buildSrc</code> instead.</li>
+<li><strong>Adding a new module?</strong> Register it in
+<code>settings.gradle.kts</code> and apply the appropriate convention
+plugin (<code>lava.android.feature</code>,
+<code>lava.kotlin.library</code>,
+<code>lava.kotlin.tracker.module</code>, etc.).</li>
+<li><strong>Adding a dependency?</strong> Prefer adding it to
+<code>gradle/libs.versions.toml</code> first, then referencing it via
+<code>libs.findLibrary(...)</code> or <code>libs.findBundle(...)</code>
+in the convention plugin or module <code>build.gradle.kts</code>.</li>
+<li><strong>Compose compiler</strong> is managed via the Kotlin Compose
+compiler plugin (BOM <code>2025.06.01</code>). Do not add the old
+<code>composeOptions</code> block.</li>
+<li><strong>Context receivers</strong> are enabled in several modules
+(<code>-Xcontext-receivers</code>). If you see
+<code>context(NavigationGraphBuilder)</code> DSL calls, that is
+why.</li>
+<li><strong>Firebase/Google Services</strong> — The app plugin expects
+<code>google-services.json</code> in the <code>app/</code> directory. It
+is gitignored (<code>app/.gitignore</code>).</li>
+<li><strong>Avoid XML</strong> — The project is fully Compose. Do not
+add XML layouts or Fragment-based screens.</li>
+<li><strong>Orbit MVI</strong> — When modifying a feature, keep the
+<code>ViewModel</code> / <code>State</code> / <code>Action</code> /
+<code>SideEffect</code> pattern consistent with neighboring
+features.</li>
+<li><strong>Go API spec-first</strong> —
+<code>lava-api-go/api/openapi.yaml</code> is the source of truth. Go
+types are generated via <code>oapi-codegen</code>. The generated code
+strips <code>,omitempty</code> from JSON tags to match Ktor's
+kotlinx-serialization wire shape.</li>
+<li><strong>Go API codegen invariant</strong> —
+<code>scripts/generate.sh</code> regenerates <code>internal/gen/</code>
+from the OpenAPI spec. CI enforces that "regenerate produces empty
+diff."</li>
+<li><strong><code>BUILDAH_FORMAT=docker</code></strong> — Enforced in
+<code>start.sh</code>, <code>stop.sh</code>, and
+<code>build_and_release.sh</code> to preserve <code>HEALTHCHECK</code>
+directives in Podman's default OCI format.</li>
+</ul>
+<hr />
+<h2 id="host-machine-stability-directive-critical-constraint">Host
+Machine Stability Directive (Critical Constraint)</h2>
+<p><strong>IT IS FORBIDDEN to directly or indirectly cause the host
+machine to:</strong></p>
+<ul>
+<li>Suspend, hibernate, or enter standby mode</li>
+<li>Sign out the currently logged-in user</li>
+<li>Terminate the user session or running processes</li>
+<li>Trigger any power-management event that interrupts active work</li>
+</ul>
+<h3 id="why-this-matters">Why This Matters</h3>
+<p>AI agents may run long-duration tasks (builds, tests, container
+operations). If the host suspends or the user is signed out, all
+progress is lost, builds fail, and the development session is corrupted.
+This has happened before and must never happen again.</p>
+<h3 id="what-agents-must-not-do--explicit-forbidden-command-list">What
+Agents Must NOT Do — Explicit Forbidden Command List</h3>
+<p>The following invocations are <strong>categorically
+forbidden</strong> in any committed script, any subagent's planned
+action, or any agent's tool call:</p>
+<pre><code>systemctl  {suspend, hibernate, hybrid-sleep, suspend-then-hibernate,
+            poweroff, halt, reboot, kexec, kill-user, kill-session}
+loginctl   {suspend, hibernate, hybrid-sleep, suspend-then-hibernate,
+            poweroff, halt, reboot, kill-user, kill-session,
+            terminate-user, terminate-session}
+pm-suspend  pm-hibernate  pm-suspend-hybrid
+shutdown   {-h, -r, -P, -H, now, --halt, --poweroff, --reboot}
+dbus-send / busctl  →  org.freedesktop.login1.Manager.{Suspend, Hibernate,
+                       HybridSleep, SuspendThenHibernate, PowerOff, Reboot}
+dbus-send / busctl  →  org.freedesktop.UPower.{Suspend, Hibernate, HybridSleep}
+gsettings set       →  *.power.sleep-inactive-{ac,battery}-type set to anything
+                       except &#39;nothing&#39; or &#39;blank&#39;
+gsettings set       →  *.power.power-button-action  set to anything except
+                       &#39;nothing&#39; or &#39;interactive&#39;</code></pre>
+<p>Additional rules:</p>
+<ul>
+<li>Never modify power-management settings (sleep timers, lid-close
+behavior, screensaver activation)</li>
+<li>Never trigger a full-screen exclusive mode that might interfere with
+session keep-alive</li>
+<li>Never run commands that could exhaust system RAM and trigger an OOM
+kill of the desktop session</li>
+<li>Never execute <code>killall</code>, <code>pkill</code>, or
+mass-process-termination targeting session processes</li>
+</ul>
+<h3 id="forensic-record-incident-2026-04-28-1837-host-poweroff">Forensic
+record: incident 2026-04-28 18:37 (host poweroff)</h3>
+<p>See <code>docs/INCIDENT_2026-04-28-HOST-POWEROFF.md</code> for the
+full investigation. A user-space-initiated graceful poweroff via GNOME
+Shell occurred at 18:37:14 during SP-2 implementation. <strong>Not a
+suspend, not a hibernate, not an OOM kill, not a kernel panic.</strong>
+Root cause was external to this codebase (operator GNOME power-button
+click, hardware power-button, or out-of-scope scheduled task). The
+commit-and-push-per-phase discipline preserved every completed phase.
+After-incident recovery procedure (state verify → mirror parity → orphan
+container cleanup → resume from last commit) is documented in the
+incident file.</p>
+<h3 id="what-agents-should-do">What Agents SHOULD Do</h3>
+<ul>
+<li>Keep sessions alive: prefer short, bounded operations over
+indefinite waits</li>
+<li>For builds/tests longer than a few minutes, use background tasks
+where possible</li>
+<li>Monitor system load and avoid pushing the host to resource
+exhaustion</li>
+<li>If a container build or gradle build takes a long time, warn the
+user and use <code>--no-daemon</code> to prevent Gradle daemon from
+holding locks across suspends</li>
+</ul>
+<h3 id="docker--podman-specific-notes">Docker / Podman Specific
+Notes</h3>
+<ul>
+<li>Container builds and long-running containers do NOT normally cause
+host suspend</li>
+<li>However, filling the disk with layer caches or consuming all CPU for
+extended periods can trigger thermal throttling or watchdog timeouts on
+some systems</li>
+<li>Always clean up old images/containers after builds to avoid disk
+pressure</li>
+</ul>
+<h2
+id="6x--container-submodule-emulator-wiring-mandate-inherited-2026-05-13-per-6f">§6.X
+— Container-Submodule Emulator Wiring Mandate (inherited 2026-05-13, per
+§6.F)</h2>
+<p>Inherited verbatim from parent Lava <code>/CLAUDE.md</code> §6.X
+(added 2026-05-13 in response to the operator's twenty-first §6.L
+invocation: "when we rely / depend on emulator(s) needed for the testing
+of the System, make sure we boot up Container running Android emulator
+in it using ours Containers Submodule. It is supported and it works, it
+just need proper connecting into the flows."). Every Android emulator
+instance MUST execute INSIDE a podman/docker container managed by
+<code>submodules/containers/</code>. Host-direct emulator launches are
+permitted for workstation iteration only; the constitutional gate run
+(release tagging, real-device verification) MUST go through the
+container-bound path. <code>pkg/runtime/</code> brings the container up;
+<code>pkg/emulator/</code> orchestrates the AVD lifecycle inside it.
+§6.X-debt tracks the wiring implementation owed to the Containers
+submodule. This submodule MAY add stricter rules but MUST NOT relax.</p>
+<h2
+id="6ac--comprehensive-non-fatal-telemetry-mandate-added-2026-05-14">§6.AC
+— Comprehensive Non-Fatal Telemetry Mandate (added 2026-05-14)</h2>
+<p>Every catch / error / fallback / unexpected-state path on every
+distributable artifact MUST record a non-fatal telemetry event with
+sufficient context to triage the failure remotely. <strong>Android
+client:</strong> call
+<code>analytics.recordNonFatal(throwable, context)</code> (for
+throwables) or <code>analytics.recordWarning(message, context)</code>
+(for non-throwable warnings) at every meaningful error site. The
+<code>AnalyticsTracker</code> interface in
+<code>lava.common.analytics</code> is the canonical entry; under the
+hood it routes to Firebase Crashlytics's non-fatal channel. Cancellation
+throwables (CancellationException + wrappers) are filtered automatically
+as benign teardown noise. <strong>lava-api-go:</strong> equivalent
+<code>observability.RecordNonFatal(ctx, err, attrs)</code> helper emits
+structured WARNING/ERROR log + optional Crashlytics REST bridge when
+<code>LAVA_API_FIREBASE_CRASHLYTICS_ENABLED=true</code>.
+<strong>Mandatory context attributes:</strong> <code>feature</code> /
+<code>module</code>, <code>operation</code>, <code>error_class</code>,
+<code>error_message</code> (truncated 1024 chars, never include
+credentials per §6.H), and per-platform extras (<code>screen</code> for
+Android, <code>endpoint</code> + <code>request_id</code> for Go).
+<strong>Forbidden:</strong> silent fallbacks without telemetry (use
+<code>// no-telemetry: &lt;reason&gt;</code> to opt out explicitly),
+recording credentials/tokens/cookies/PII unredacted. §6.AC-debt is open:
+Detekt rule for Kotlin + Go-vet check for Go that flag
+<code>try/catch</code> blocks lacking the telemetry call; pre-push hook
+integration; documented but not yet mechanically enforced.</p>
+<p>Forensic anchor: 2026-05-14 operator directive after 1.2.21-1041
+stage-1 verification: "Add comprehensive Crashlytics non-fatals
+recording all over the apps and API so we can track in the background
+all warnings, issues and unexpected situations!" The §6.AB completeness
+checklist catches discrimination gaps in tests; §6.AC is the runtime
+equivalent — every error path that fires in production MUST surface to
+telemetry so the operator can triage real-user failures remotely.</p>
+<p>Inheritance: applies recursively to every submodule's distributable
+artifacts and every new artifact added to the project.</p>
+<h2
+id="6ab--anti-bluff-test-suite-reinforcement-27th-6l-invocation-added-2026-05-14">§6.AB
+— Anti-Bluff Test-Suite Reinforcement (27th §6.L invocation, added
+2026-05-14)</h2>
+<p>Every existing test + Challenge MUST be auditable for the anti-bluff
+property "would this test fail if the user-visible feature broke in the
+way a real user would notice?" Per-feature anti-bluff completeness
+checklist: rendering correctness (not just rendering presence — assert
+dominant color matches expected hue, not just RGB-variance &gt; N),
+state-machine completeness (negative tests for forbidden transitions:
+back-from-Welcome MUST NOT mark onboarding complete; reaching home MUST
+require ≥1 successfully probed provider), gating logic (gate fires only
+on actual completion criterion, not on side effects of unrelated
+transitions). Bluff-hunt cadence escalation: every
+Crashlytics-or-operator-reported defect not caught by an existing test
+triggers a 5-file defect-driven bluff-hunt of adjacent tests, recorded
+under
+<code>.lava-ci-evidence/bluff-hunt/&lt;date&gt;-defect-driven-&lt;slug&gt;.json</code>.
+The §6.J-spirit discrimination test for every Challenge Test: before
+declared "covers the feature", the author MUST construct a
+deliberately-broken-but-non-crashing version of the production code and
+confirm the Challenge Test FAILS — because the 1.2.19 crash was the easy
+case (§6.Z catches it), the 1.2.20 white-icon + gate-bypass are the hard
+cases that this clause exists to prevent.</p>
+<p>Forensic anchor: 2026-05-14 1.2.20-1040 debug installed on Galaxy S23
+Ultra surfaced (a) Welcome brand mark renders as white placeholder
+(Compose <code>Icon</code> applies <code>LocalContentColor</code> tint,
+designed for monochrome glyphs) and (b) onboarding "complete" gate fires
+on Welcome back-press (<code>OnboardingViewModel.onBackStep()</code>
+Welcome branch posts <code>Finish</code>; <code>MainActivity</code>
+writes <code>setOnboardingComplete(true)</code> on <code>Finish</code>).
+Both passed all existing tests. Operator: "all existing tests and
+Challenges do work in anti-bluff manner — they MUST confirm that all
+tested codebase really works as expected!"</p>
+<p>Inheritance: applies recursively to every submodule, every feature,
+every new artifact added to the project.</p>
+<h2
+id="6aa--two-stage-distribute-mandate-debug-first-release-after-verification-added-2026-05-14">§6.AA
+— Two-Stage Distribute Mandate (Debug First, Release After Verification,
+added 2026-05-14)</h2>
+<p>When an artifact has both a debug and a release variant, distribute
+MUST happen in TWO STAGES with operator-confirmed verification between
+them. Stage 1: <code>firebase-distribute.sh --debug-only</code>
+distributes the debug APK to the <code>.dev</code>-suffixed app ID;
+operator (or designated tester) verifies the
+<strong>Firebase-distributed</strong> debug APK on the failure-surface
+device class. Stage 2: ONLY AFTER written debug verification,
+<code>firebase-distribute.sh --release-only</code> distributes the
+release APK; §6.Z evidence file appended with release-stage section. No
+combined distribute permitted by default — that requires explicit
+per-cycle operator authorization recorded in the evidence file. The R8 /
+minification surprise class (§6.Z forensic anchor was a release-only
+<code>painterResource()</code> rejection) is the load-bearing reason:
+staging surfaces non-R8 bugs at debug's smaller blast radius AND
+isolates R8-specific failures to the release stage. §6.AA-debt is open:
+<code>scripts/firebase-distribute.sh</code> default flip to
+<code>--debug-only</code> + refusal of out-of-order
+<code>--release-only</code> + paired
+<code>last-version-{debug,release}</code> per-channel are documented but
+not yet mechanically enforced. Forensic anchor: 2026-05-14 operator:
+"for purposes like this one we shall distribute via Firebase DEV / DEBUG
+version only. Once we try it, you continue and once all verified you
+distribute RELEASE too!"</p>
+<p>Inheritance: applies recursively to every submodule's distributable
+artifacts and every new artifact added to the project.</p>
+<h2
+id="6z--anti-bluff-distribute-guard-added-2026-05-14-twenty-sixth-6l-invocation">§6.Z
+— Anti-Bluff Distribute Guard (added 2026-05-14, TWENTY-SIXTH §6.L
+invocation)</h2>
+<p>No artifact may be distributed (Firebase App Distribution, Google
+Play Store release, container image push, lava-api-go binary release,
+any future distributable channel) UNLESS the corresponding Compose UI
+Challenge Tests (or per-artifact equivalent end-to-end tests) have been
+<strong>EXECUTED — not source-compiled, EXECUTED</strong> — against a
+real device or emulator running the EXACT artifact about to be
+distributed, AND have <strong>passed</strong>. Pre-distribute
+test-evidence file required at
+<code>.lava-ci-evidence/distribute-changelog/&lt;channel&gt;/&lt;version&gt;-&lt;code&gt;-test-evidence.{md,json}</code>
+with matching commit SHA, timestamp within 24h, and
+<code>BUILD SUCCESSFUL</code> verbatim in the captured gradle output for
+the per-channel mandatory test set (Android: at minimum C00 cold-start +
+C01 launch + every Cn whose target file appears in the cycle's diff).
+Cold-start verification (C00) is the load-bearing canary — skipping it
+for any reason is a §6.Z violation. There is no "this is a small change"
+exception (forensic anchor: 1.2.19-1039 was a one-line drawable swap
+that crashed every device on cold launch). §6.Z-debt is open:
+pre-distribute test-evidence gate (firebase-distribute.sh Phase 1 Gate
+6) + pre-push hook check are documented but not yet mechanically
+enforced.</p>
+<p>Forensic anchor: 2026-05-14 operator's 26th §6.L invocation, in
+response to a Crashlytics report on Lava-Android-1.2.19-1039:
+"Application crashes when we open it on Samsung Galaxy S23 Ultra with
+Android 16. Check Crashlytics, there should be entries. Fix this and
+re-distribute! Another point, how come the build wasnt tested?
+Anti-bluff policy MUST BE ENFORCED ALWAYS!!!" The agent (this assistant)
+had distributed 1.2.19-1039 without executing C24/C25/C26 against an
+emulator — citing the darwin/arm64 §6.X-debt as the blocker, but
+§6.X-debt blocks LAN reachability of running APIs (mDNS broadcasts
+through the podman VM), NOT the running of Compose UI tests against a
+connected emulator. The operator's Pixel_7_Pro / Pixel_8 / Pixel_9_Pro
+AVDs WERE available. Distribute proceeded without test execution.
+Crashlytics issue <code>40a62f97a5c65abb56142b4ca2c37eeb</code> (FATAL,
+<code>painterResource()</code> rejecting a
+<code>&lt;layer-list&gt;</code> drawable in
+<code>LavaIcons.AppIcon</code>) hit every cold launch; C26 would have
+caught it on first emulator boot.</p>
+<p>Inheritance: applies recursively to every submodule's distributable
+artifacts and every new artifact added to the project. Submodule
+constitutions MAY add stricter rules but MUST NOT relax this clause.</p>
+<h2
+id="6y--post-distribution-version-bump-mandate-added-2026-05-14-twenty-fifth-6l-invocation">§6.Y
+— Post-Distribution Version Bump Mandate (added 2026-05-14, TWENTY-FIFTH
+§6.L invocation)</h2>
+<p>After every successful distribution of any artifact (Android APK via
+Firebase App Distribution, Google Play Store release, container image
+push, lava-api-go binary release, any future distributable artifact),
+the FIRST commit in the new development cycle that touches code MUST
+bump the artifact's <code>versionCode</code> integer (and the
+per-artifact equivalent for non-Android targets — see clause 2 of root
+CLAUDE.md §6.Y). The <code>versionName</code> semver MUST be bumped too
+when the changes warrant a user-visible version change (patch for bug
+fix, minor for feature, major for breaking change; held only for
+internal refactor / docs / test-only with a one-line rationale in the
+bump commit body). The bump-first commit MAY be version-bump-only OR
+contain the bump as the first hunk of a feature commit; bump-only is
+preferred for <code>git log</code> discoverability.</p>
+<p>§6.Y-debt is open: pre-push hook +
+<code>scripts/check-constitution.sh</code> enforcement of the bump-first
+ordering is documented but not yet mechanically enforced. Until
+§6.Y-debt closes, reviewers MUST manually verify bump-first ordering on
+every commit that lands after a distribute. The forensic anchor:
+2026-05-14 operator directive immediately after the 1.2.18-1038 Firebase
+distribute success: "after every application's distribution ... before
+any new changes have been applied to the product version code MUST BE
+increased to proper buildable target - API or Application! If it is
+required and it makes sense version MUST BE increased as well!"
+Inheritance: applies recursively to every submodule's distributable
+artifacts and every new artifact added to the project. Submodule
+constitutions MAY add stricter rules but MUST NOT relax this clause.</p>
+</body>
+</html>

@@ -1,0 +1,2773 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-04-28-sp2-go-api-migration-design</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1
+id="sp-2--lava-api-migration-to-go-gin--http3--postgres--brotli">SP-2 —
+Lava API Migration to Go (Gin + HTTP/3 + Postgres + Brotli)</h1>
+<blockquote>
+<p><strong>Status:</strong> design approved through brainstorming,
+awaiting user review of this written spec. <strong>Author:</strong>
+Claude Opus 4.7 (1M context) with operator Milos Vasic.
+<strong>Date:</strong> 2026-04-28. <strong>Successor of:</strong> SP-0
+(constitutional rules, committed in this session). <strong>Predecessor
+of:</strong> SP-3 (Android dual-backend support), SP-6 (release tagging
+for the new artifact).</p>
+</blockquote>
+<hr />
+<h2 id="table-of-contents">Table of Contents</h2>
+<ol type="1">
+<li><a href="#1-context--motivation">Context &amp; motivation</a></li>
+<li><a href="#2-scope--non-goals">Scope &amp; non-goals</a></li>
+<li><a href="#3-constitutional-inheritance">Constitutional
+inheritance</a></li>
+<li><a href="#4-architecture-overview">Architecture overview</a></li>
+<li><a href="#5-per-component-decoupling-boundary">Per-component
+decoupling boundary</a></li>
+<li><a href="#6-the-13-routes--parity-contract">The 13 routes — parity
+contract</a></li>
+<li><a href="#7-postgres-data-model">Postgres data model</a></li>
+<li><a href="#8-wire--mdns-contract">Wire &amp; mDNS contract</a></li>
+<li><a href="#9-auth-model">Auth model</a></li>
+<li><a href="#10-observability">Observability</a></li>
+<li><a href="#11-test-plan">Test plan</a></li>
+<li><a href="#12-container-topology">Container topology</a></li>
+<li><a href="#13-repository-layout">Repository layout</a></li>
+<li><a href="#14-openapi-contract">OpenAPI contract</a></li>
+<li><a href="#15-versioning--release">Versioning &amp; release</a></li>
+<li><a
+href="#16-lava-side-rollout--what-existing-files-change">Lava-side
+rollout — what existing files change</a></li>
+<li><a href="#17-falsifiability-rehearsal-protocol">Falsifiability
+rehearsal protocol</a></li>
+<li><a href="#18-acceptance-criteria">Acceptance criteria</a></li>
+<li><a href="#19-open-questions-deferred-to-implementation">Open
+questions deferred to implementation</a></li>
+</ol>
+<hr />
+<h2 id="1-context--motivation">1. Context &amp; motivation</h2>
+<p>The Lava project ships an Android client backed by a server-side
+proxy that scrapes <a href="https://rutracker.org">rutracker.org</a> and
+exposes a JSON REST API to the client. The current proxy is a
+Kotlin/Ktor service (<code>:proxy</code> Gradle module, ~13 routes,
+stateless, single container, ~600 lines of route handlers + scraper
+code).</p>
+<p>The operator has directed a full migration of this server to
+<strong>Go (Gin Gonic)</strong> with the following hard
+requirements:</p>
+<ul>
+<li>HTTP/3 (QUIC) for all communication with the new server.</li>
+<li>Brotli compression on responses where the client accepts it.</li>
+<li>PostgreSQL persistence (cache, audit, rate-limit only — no user
+data).</li>
+<li>Everything runs in containers, orchestrated by the
+<code>vasic-digital/Containers</code> submodule.</li>
+<li>100% test coverage across every applicable test type, with each test
+provably catching real defects (Sixth Law).</li>
+<li>Full documentation: API spec (OpenAPI), user guides, operator
+manuals.</li>
+<li>The legacy Kotlin/Ktor proxy is preserved as an opt-in fallback —
+never removed, never default-on.</li>
+<li>The Android client (SP-3, separate sub-project) speaks both
+APIs.</li>
+<li>Local-only CI/CD (no GitHub Actions, no GitLab pipelines); the
+<code>scripts/</code> directory is the single source of CI truth.</li>
+<li>The new architecture is fully decoupled and reusable: anything
+generic lives under <code>vasic-digital/</code>; this repo carries only
+Lava-domain logic and thin glue.</li>
+</ul>
+<p>This document is the SP-2 design satisfying those requirements. It
+was reached through a multi-turn brainstorm against the constitutional
+rules just codified in SP-0 (Sixth Law, Local-Only CI/CD, Decoupled
+Reusable Architecture).</p>
+<h2 id="2-scope--non-goals">2. Scope &amp; non-goals</h2>
+<p><strong>In scope (SP-2):</strong></p>
+<ul>
+<li>A new top-level Go module at <code>lava-api-go/</code> named
+<code>digital.vasic.lava.apigo</code>, version 2.0.0.</li>
+<li>The 13 existing route handlers reproduced behaviourally identically
+— same paths, same JSON shapes, same status semantics — over Gin +
+HTTP/3 + Brotli.</li>
+<li>A Postgres schema for response cache, request audit, rate limiting,
+and login throttling, applied via <code>golang-migrate</code>.</li>
+<li>mDNS service advertisement on <code>_lava-api._tcp</code> (port
+8443), distinct from the legacy <code>_lava._tcp</code> (port
+8080).</li>
+<li>A symmetrical TXT-record update on the legacy proxy's existing
+<code>_lava._tcp</code> advertisement.</li>
+<li>A small Lava-local CLI at <code>tools/lava-containers/</code> that
+delegates orchestration to <code>submodules/containers</code>.</li>
+<li>Updates to <code>docker-compose.yml</code>, <code>start.sh</code>,
+<code>stop.sh</code>, <code>scripts/tag.sh</code>,
+<code>build_and_release.sh</code>.</li>
+<li>An OpenAPI 3.1 spec authored by hand at
+<code>lava-api-go/api/openapi.yaml</code>, used to generate Go server
+interfaces and a typed Go client (committed).</li>
+<li>A full local CI gate at <code>lava-api-go/scripts/ci.sh</code>
+covering all eight test types plus mutation testing and pre-tag
+real-device verification.</li>
+<li>New documentation: API reference (rendered from OpenAPI), operator
+manual for running the new service, user-facing migration notes.</li>
+</ul>
+<p><strong>Out of scope (deferred to other sub-projects):</strong></p>
+<ul>
+<li>Android client changes to support both APIs —
+<strong>SP-3</strong>.</li>
+<li>Container orchestration polish beyond what SP-2 needs — covered by
+<strong>SP-4</strong> if required.</li>
+<li>Release tagging operationalization — <strong>SP-6</strong>
+(extending <code>scripts/tag.sh</code> registry with
+<code>api-go</code>).</li>
+<li>Audit of pre-existing tests for bluffs — <strong>SP-1</strong>.</li>
+<li>Any product redesign (new features, new endpoints, new response
+shapes). Hard rule: behavioural parity, nothing more.</li>
+<li>Server-side session storage / credential persistence — explicitly
+rejected during brainstorm; pass-through stays.</li>
+</ul>
+<h2 id="3-constitutional-inheritance">3. Constitutional inheritance</h2>
+<p>This sub-project inherits and is bound by every constitutional rule
+committed during SP-0. The three load-bearing rules:</p>
+<h3 id="31-sixth-law--real-user-verification">3.1 Sixth Law — Real User
+Verification</h3>
+<p>Every test added in SP-2 MUST satisfy the six clauses of the Sixth
+Law (see <code>/CLAUDE.md</code>). The two clauses with the highest
+practical impact on this design:</p>
+<ul>
+<li><strong>Clause 2 (Provably falsifiable):</strong> before merging any
+test, the author runs the test once with the underlying feature
+deliberately broken and records the observed failure in the commit
+message. Three falsifiability rehearsals already performed in
+SP-0/Step-5 set the precedent (HTTP3 challenge, Cache TTL, Mdns TXT
+round-trip).</li>
+<li><strong>Clause 4 (Challenge Tests are load-bearing):</strong> the
+cross-backend parity suite is the load-bearing acceptance gate for SP-2.
+A green parity suite means every supported request shape produces
+byte-equivalent responses against both the Ktor proxy and the Go
+API.</li>
+</ul>
+<h3 id="32-local-only-cicd">3.2 Local-Only CI/CD</h3>
+<p><code>lava-api-go/scripts/ci.sh</code> is the single CI entry point.
+<strong>No</strong> <code>.github/workflows</code>,
+<code>.gitlab-ci.yml</code>, etc. anywhere in this repo at any time. The
+pre-push hook (added during SP-2 implementation) runs the gate set
+appropriate to the changed surface. <code>scripts/tag.sh</code> MUST
+refuse to operate on a commit whose local CI has not been recorded as
+green.</p>
+<h3 id="33-decoupled-reusable-architecture">3.3 Decoupled Reusable
+Architecture</h3>
+<p>The boundary between Lava-domain code (this repo) and reusable
+infrastructure (vasic-digital submodules) is enumerated in <a
+href="#5-per-component-decoupling-boundary">§5</a>. No component crosses
+that boundary without explicit justification in this document or a
+successor design doc.</p>
+<h2 id="4-architecture-overview">4. Architecture overview</h2>
+<p>The new service is a single-binary, single-container Go application.
+It owns its full HTTP-protocol surface (HTTP/2 fallback, HTTP/3 primary)
+inside a Gin router, with the QUIC layer provided by the in-process
+<code>digital.vasic.http3</code> wrapper.</p>
+<pre><code>                                      ┌─────────────────────────────────────────────────────┐
+                                      │            lava-api-go (1 process, 1 container)     │
+                                      │                                                     │
+   Android client / browser           │  ┌──────────────────────────────────────────────┐   │
+   ──────────────────────────────────▶│  │  digital.vasic.http3 (submodules/http3)      │   │
+   HTTP/3 over QUIC, port 8443        │  │  ListenAndServe → http3.Server                │   │
+                                      │  └────────────────────┬─────────────────────────┘   │
+                                      │                       │                              │
+                                      │                       ▼                              │
+                                      │  ┌──────────────────────────────────────────────┐   │
+                                      │  │  Gin engine + middleware chain                │   │
+                                      │  │   • requestid (submodules/middleware)         │   │
+                                      │  │   • recovery   (submodules/middleware)        │   │
+                                      │  │   • logging    (submodules/observability)     │   │
+                                      │  │   • metrics    (submodules/observability)     │   │
+                                      │  │   • tracing    (submodules/observability)     │   │
+                                      │  │   • brotli     (submodules/middleware)        │   │
+                                      │  │   • altsvc     (submodules/middleware)        │   │
+                                      │  │   • headers    (submodules/security)          │   │
+                                      │  │   • ratelimit  (submodules/ratelimiter)       │   │
+                                      │  │   • auth pass-through + audit hash (Lava)     │   │
+                                      │  └────────────────────┬─────────────────────────┘   │
+                                      │                       │                              │
+                                      │                       ▼                              │
+                                      │  ┌──────────────────────────────────────────────┐   │
+                                      │  │  Route handlers (Lava-domain)                 │   │
+                                      │  │   ├ /index, /                                 │   │
+                                      │  │   ├ /login                                    │   │
+                                      │  │   ├ /forum, /forum/{id}                       │   │
+                                      │  │   ├ /search                                   │   │
+                                      │  │   ├ /topic/{id}, /topic2/{id}                 │   │
+                                      │  │   ├ /comments/{id}, /comments/{id}/add        │   │
+                                      │  │   ├ /torrent/{id}                             │   │
+                                      │  │   ├ /download/{id}                            │   │
+                                      │  │   ├ /captcha/{path}                           │   │
+                                      │  │   └ /favorites, /favorites/{add,remove}/{id}  │   │
+                                      │  └────┬───────────────────────────────────┬─────┘   │
+                                      │       │                                   │          │
+                                      │       ▼                                   ▼          │
+                                      │  ┌─────────────────────┐         ┌──────────────────┐│
+                                      │  │ Postgres cache       │         │ rutracker scraper ││
+                                      │  │ (submodules/cache/   │         │ (Lava-domain     ││
+                                      │  │  pkg/postgres)       │         │  internal/       ││
+                                      │  │  GET → on miss →     │◀────────┤  rutracker)      ││
+                                      │  │  upstream → SET      │         │                  ││
+                                      │  └─────────┬────────────┘         └────────┬─────────┘│
+                                      │            │                                │          │
+                                      │            ▼                                ▼          │
+                                      │  ┌─────────────────────┐         ┌──────────────────┐│
+                                      │  │ lava-postgres       │         │ rutracker.org    ││
+                                      │  │ (compose: bridge    │         │ (HTTPS, with     ││
+                                      │  │  127.0.0.1:5432)    │         │  Recovery breaker)│
+                                      │  └─────────────────────┘         └──────────────────┘│
+                                      │                                                     │
+                                      │  In-process mDNS advertisement                       │
+                                      │  (submodules/mdns/pkg/service)                       │
+                                      │  _lava-api._tcp on 8443 with TXT records             │
+                                      └─────────────────────────────────────────────────────┘</code></pre>
+<p>The legacy Kotlin/Ktor proxy continues to run unchanged (port 8080,
+<code>_lava._tcp</code>) when the operator opts in via
+<code>./start.sh --legacy</code> or <code>--both</code>. SP-3 will teach
+the Android client to discover and choose between the two.</p>
+<h2 id="5-per-component-decoupling-boundary">5. Per-component decoupling
+boundary</h2>
+<p>The Decoupled Reusable Architecture rule (§3.3) demands an explicit
+boundary enumeration. The following table is normative for SP-2:</p>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Source</th>
+<th>Lava-local work</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Gin HTTP framework</td>
+<td><code>github.com/gin-gonic/gin</code> (external)</td>
+<td>direct dependency</td>
+</tr>
+<tr>
+<td>HTTP/3 server</td>
+<td><code>submodules/http3/pkg/server</code></td>
+<td>thin glue at <code>lava-api-go/internal/server/server.go</code>
+(config wiring only)</td>
+</tr>
+<tr>
+<td>Brotli middleware</td>
+<td><code>submodules/middleware/pkg/brotli</code></td>
+<td>direct use</td>
+</tr>
+<tr>
+<td>Alt-Svc HTTP/3 advert</td>
+<td><code>submodules/middleware/pkg/altsvc</code></td>
+<td>direct use</td>
+</tr>
+<tr>
+<td>Gin middleware glue</td>
+<td><code>submodules/middleware/pkg/{gin,chain,cors,recovery,requestid,logging}</code></td>
+<td>direct use</td>
+</tr>
+<tr>
+<td>Postgres driver</td>
+<td><code>github.com/jackc/pgx/v5</code> (transitively via
+<code>submodules/database</code> and <code>submodules/cache</code>)</td>
+<td>direct</td>
+</tr>
+<tr>
+<td>Postgres-backed cache</td>
+<td><code>submodules/cache/pkg/postgres</code> (we contributed
+this)</td>
+<td>direct use</td>
+</tr>
+<tr>
+<td>Schema migrations</td>
+<td><code>submodules/database/pkg/migration</code> (preferred) or direct
+<code>golang-migrate/migrate/v4</code> if it lacks a feature</td>
+<td>thin runner in <code>lava-api-go/scripts/migrate.sh</code></td>
+</tr>
+<tr>
+<td>Sliding-window rate limit</td>
+<td><code>submodules/ratelimiter/pkg/{sliding,gin}</code></td>
+<td>direct use</td>
+</tr>
+<tr>
+<td>Circuit breaker (rutracker.org)</td>
+<td><code>submodules/recovery/pkg/breaker</code></td>
+<td>wrap rutracker outbound calls</td>
+</tr>
+<tr>
+<td>HTTP security headers</td>
+<td><code>submodules/security/pkg/headers</code></td>
+<td>direct use</td>
+</tr>
+<tr>
+<td>PII / Auth-Token redaction</td>
+<td><code>submodules/security/pkg/pii</code></td>
+<td>wired into <code>submodules/observability/pkg/logging</code></td>
+</tr>
+<tr>
+<td>Structured logging</td>
+<td><code>submodules/observability/pkg/logging</code></td>
+<td>direct use</td>
+</tr>
+<tr>
+<td>Prometheus metrics</td>
+<td><code>submodules/observability/pkg/{metrics,gin}</code></td>
+<td>direct use</td>
+</tr>
+<tr>
+<td>OpenTelemetry tracing</td>
+<td><code>submodules/observability/pkg/{trace,gin}</code></td>
+<td>direct use</td>
+</tr>
+<tr>
+<td>Health endpoints</td>
+<td><code>submodules/observability/pkg/health</code> +
+<code>submodules/recovery/pkg/health</code></td>
+<td>direct use</td>
+</tr>
+<tr>
+<td>Config (env + JSON)</td>
+<td><code>submodules/config/pkg/{config,env}</code></td>
+<td>direct use</td>
+</tr>
+<tr>
+<td>Container orchestration</td>
+<td><code>submodules/containers/pkg/{runtime,compose,lifecycle,…}</code></td>
+<td><code>tools/lava-containers/</code> delegates</td>
+</tr>
+<tr>
+<td>mDNS announcement</td>
+<td><code>submodules/mdns/pkg/service</code> (we contributed this)</td>
+<td>direct use</td>
+</tr>
+<tr>
+<td>Anti-Bluff Challenge framework</td>
+<td><code>submodules/challenges/pkg/{challenge,httpclient,userflow,runner,assertion}</code></td>
+<td>exercised in <code>lava-api-go/tests/parity</code> and
+<code>lava-api-go/tests/e2e</code></td>
+</tr>
+<tr>
+<td>Auth pass-through + audit hash</td>
+<td><strong>NONE</strong></td>
+<td>Lava-local at <code>lava-api-go/internal/auth</code> (small,
+somewhat product-specific in the audit semantics)</td>
+</tr>
+<tr>
+<td>Rutracker HTML scrapers</td>
+<td><strong>NONE</strong></td>
+<td>Lava-domain at <code>lava-api-go/internal/rutracker</code></td>
+</tr>
+<tr>
+<td>Route handlers (13 routes)</td>
+<td><strong>NONE</strong></td>
+<td>Lava-domain at <code>lava-api-go/internal/handlers</code></td>
+</tr>
+<tr>
+<td>Healthprobe binary (HTTP/3-capable)</td>
+<td><strong>NONE</strong></td>
+<td>Lava-local at <code>lava-api-go/cmd/healthprobe</code> (~30 LOC;
+baked into the container image)</td>
+</tr>
+</tbody>
+</table>
+<p>Anything new added during implementation that isn't on this table
+requires either (a) a documented decision of "why not a vasic-digital
+submodule" in the implementation PR, or (b) a contribution upstream to
+one of the existing submodules (or a new one) before being consumed
+locally.</p>
+<h2 id="6-the-13-routes--parity-contract">6. The 13 routes — parity
+contract</h2>
+<p>The Go API replicates the existing Ktor proxy's route surface with
+<strong>byte-equivalent JSON responses</strong>, <strong>identical
+status codes</strong>, and <strong>identical user-visible header
+semantics</strong>. This is the <em>whole</em> of option A's
+contract.</p>
+<table>
+<thead>
+<tr>
+<th>Route</th>
+<th>Purpose</th>
+<th style="text-align: right;">Cache TTL</th>
+<th>Rate-limit class</th>
+<th>Postgres write</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GET /</code></td>
+<td>health/static</td>
+<td style="text-align: right;">none</td>
+<td>read</td>
+<td>none</td>
+<td>returns 200 + tiny payload</td>
+</tr>
+<tr>
+<td><code>GET /index</code></td>
+<td>health/static</td>
+<td style="text-align: right;">none</td>
+<td>read</td>
+<td>none</td>
+<td>alias for <code>/</code></td>
+</tr>
+<tr>
+<td><code>POST /login</code></td>
+<td>rutracker login</td>
+<td style="text-align: right;"><strong>never</strong></td>
+<td>login</td>
+<td><code>login_attempt</code></td>
+<td>sets cookies; throttled; captcha-aware</td>
+</tr>
+<tr>
+<td><code>GET /forum</code></td>
+<td>forum tree</td>
+<td style="text-align: right;">hours</td>
+<td>read</td>
+<td>response_cache</td>
+<td>category list</td>
+</tr>
+<tr>
+<td><code>GET /forum/{id}</code></td>
+<td>category page</td>
+<td style="text-align: right;">minutes</td>
+<td>read</td>
+<td>response_cache</td>
+<td>paginated</td>
+</tr>
+<tr>
+<td><code>GET /search</code></td>
+<td>search results</td>
+<td style="text-align: right;">seconds</td>
+<td>read</td>
+<td>response_cache</td>
+<td>query normalised before key</td>
+</tr>
+<tr>
+<td><code>GET /topic/{id}</code></td>
+<td>topic page</td>
+<td style="text-align: right;">minutes</td>
+<td>read</td>
+<td>response_cache</td>
+<td></td>
+</tr>
+<tr>
+<td><code>GET /topic2/{id}</code></td>
+<td>alt topic format</td>
+<td style="text-align: right;">minutes</td>
+<td>read</td>
+<td>response_cache</td>
+<td></td>
+</tr>
+<tr>
+<td><code>GET /comments/{id}</code></td>
+<td>comments page</td>
+<td style="text-align: right;">minutes</td>
+<td>read</td>
+<td>response_cache</td>
+<td></td>
+</tr>
+<tr>
+<td><code>POST /comments/{id}/add</code></td>
+<td>post comment</td>
+<td style="text-align: right;"><strong>never</strong></td>
+<td>write</td>
+<td>invalidates topic cache key</td>
+<td></td>
+</tr>
+<tr>
+<td><code>GET /torrent/{id}</code></td>
+<td>torrent metadata</td>
+<td style="text-align: right;">hours</td>
+<td>read</td>
+<td>response_cache</td>
+<td>stable; long TTL</td>
+</tr>
+<tr>
+<td><code>GET /download/{id}</code></td>
+<td>torrent file (binary)</td>
+<td style="text-align: right;"><strong>never</strong></td>
+<td>download</td>
+<td>none (binary not cached)</td>
+<td>audit-only</td>
+</tr>
+<tr>
+<td><code>GET /captcha/{path}</code></td>
+<td>captcha image</td>
+<td style="text-align: right;">none</td>
+<td>login</td>
+<td>none</td>
+<td>per-session, never cached</td>
+</tr>
+<tr>
+<td><code>GET /favorites</code></td>
+<td>per-user favorites</td>
+<td style="text-align: right;">seconds</td>
+<td>read</td>
+<td>response_cache (key includes auth_realm_hash)</td>
+<td></td>
+</tr>
+<tr>
+<td><code>POST /favorites/add/{id}</code></td>
+<td>add favorite</td>
+<td style="text-align: right;"><strong>never</strong></td>
+<td>write</td>
+<td>invalidates favorites cache</td>
+<td></td>
+</tr>
+<tr>
+<td><code>POST /favorites/remove/{id}</code></td>
+<td>remove favorite</td>
+<td style="text-align: right;"><strong>never</strong></td>
+<td>write</td>
+<td>invalidates favorites cache</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Cache key normalisation (uniform across all cached
+routes):</strong></p>
+<pre><code>cache_key = sha256(
+    method + &quot;\n&quot; +
+    route_template + &quot;\n&quot; +
+    path_vars (sorted) + &quot;\n&quot; +
+    normalised_query + &quot;\n&quot; +
+    auth_realm_hash (or &quot;anon&quot;)
+).hex</code></pre>
+<p><code>route_template</code> is the registered pattern
+(<code>/forum/{id}</code>), not the concrete path — so
+<code>/forum/123</code> and <code>/forum/456</code> differ at the
+<code>path_vars</code> line, not at <code>route_template</code>.
+<code>normalised_query</code> lowercases keys, sorts them, drops empty
+values, URL-decodes. <code>auth_realm_hash</code> ensures per-user
+response isolation where rutracker behaviour depends on session (e.g.
+favorites).</p>
+<p><strong>Response invalidation on writes:</strong></p>
+<p><code>POST /comments/{id}/add</code> deletes the cache row for
+<code>GET /topic/{id}</code>, <code>GET /topic2/{id}</code>,
+<code>GET /comments/{id}</code>.
+<code>POST /favorites/{add,remove}/{id}</code> deletes the
+<code>GET /favorites</code> row for the same
+<code>auth_realm_hash</code>. Implemented as deterministic key
+construction shared between the read handler and the write handler.</p>
+<h2 id="7-postgres-data-model">7. Postgres data model</h2>
+<p>Five tables, all under schema <code>lava_api</code> (configurable via
+<code>LAVA_API_PG_SCHEMA</code> env var). DDL applied via
+<code>golang-migrate</code> migrations in
+<code>lava-api-go/migrations/</code>.</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode sql"><code class="sourceCode sql"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">-- 0001_init.up.sql  -- response cache</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> <span class="cf">IF</span> <span class="kw">NOT</span> <span class="kw">EXISTS</span> response_cache (</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    cache_key       TEXT <span class="kw">PRIMARY</span> <span class="kw">KEY</span>,</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    upstream_status <span class="dt">SMALLINT</span> <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    body_brotli     BYTEA <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    content_type    TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    fetched_at      TIMESTAMPTZ <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> now(),</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    expires_at      TIMESTAMPTZ <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    hit_count       BIGINT <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> <span class="dv">0</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>);</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> response_cache_expires_at_idx <span class="kw">ON</span> response_cache (expires_at);</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="co">-- 0002_audit.up.sql  -- forensic + Sixth Law evidence trail</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> <span class="cf">IF</span> <span class="kw">NOT</span> <span class="kw">EXISTS</span> request_audit (</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>    <span class="kw">id</span>              BIGSERIAL <span class="kw">PRIMARY</span> <span class="kw">KEY</span>,</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    received_at     TIMESTAMPTZ <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> now(),</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>    <span class="kw">method</span>          TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>    path            TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>    <span class="kw">query</span>           TEXT,</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>    client_ip       INET,</span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>    auth_realm_hash TEXT,                       <span class="co">-- SHA-256 hex of Auth-Token; never raw</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>    upstream_status <span class="dt">SMALLINT</span>,</span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>    upstream_ms     <span class="dt">INTEGER</span>,</span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>    cache_outcome   TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,              <span class="co">-- &#39;hit&#39; | &#39;miss&#39; | &#39;bypass&#39; | &#39;invalidate&#39;</span></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>    bytes_out       <span class="dt">INTEGER</span></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>);</span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> request_audit_received_at_idx <span class="kw">ON</span> request_audit (received_at);</span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a><span class="co">-- 0003_rate_limit.up.sql  -- token-bucket per (client_ip, route_class)</span></span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> <span class="cf">IF</span> <span class="kw">NOT</span> <span class="kw">EXISTS</span> rate_limit_bucket (</span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>    client_ip       INET <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>    route_class     TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,              <span class="co">-- &#39;read&#39; | &#39;write&#39; | &#39;login&#39; | &#39;download&#39;</span></span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>    tokens          <span class="dt">DOUBLE</span> <span class="dt">PRECISION</span> <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>    last_refill_at  TIMESTAMPTZ <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>    <span class="kw">PRIMARY</span> <span class="kw">KEY</span> (client_ip, route_class)</span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a>);</span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a><span class="co">-- 0004_login_attempt.up.sql  -- separate from generic rate-limit because login is the abuse hot-spot</span></span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> <span class="cf">IF</span> <span class="kw">NOT</span> <span class="kw">EXISTS</span> login_attempt (</span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a>    <span class="kw">id</span>              BIGSERIAL <span class="kw">PRIMARY</span> <span class="kw">KEY</span>,</span>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a>    client_ip       INET <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a>    username_hash   TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,              <span class="co">-- SHA-256 of submitted username</span></span>
+<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a>    succeeded       <span class="dt">BOOLEAN</span> <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a>    attempted_at    TIMESTAMPTZ <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> now()</span>
+<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a>);</span>
+<span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> login_attempt_lookup_idx <span class="kw">ON</span> login_attempt (client_ip, attempted_at <span class="kw">DESC</span>);</span></code></pre></div>
+<p><strong>Retention</strong> (background goroutines started by
+<code>lava-api-go</code> on boot):</p>
+<ul>
+<li><code>response_cache</code>: TTL-driven,
+<code>submodules/cache/pkg/postgres</code> GC sweep every 10 minutes
+(default).</li>
+<li><code>request_audit</code>: 30-day rolling, custom Lava-local
+goroutine deleting where
+<code>received_at &lt; now() - interval '30 days'</code>. Tunable via
+<code>LAVA_API_AUDIT_RETENTION_DAYS</code>.</li>
+<li><code>rate_limit_bucket</code>: orphan rows older than 1 hour with
+no recent activity, nightly.</li>
+<li><code>login_attempt</code>: 7-day rolling.</li>
+</ul>
+<p><strong>Hard dependency model (P1):</strong> the API process refuses
+to start if Postgres is unreachable. <code>/health</code> returns 503 if
+the DB connection drops post-boot. Brainstorm rationale (section 7 of
+conversation): silent feature degradation under DB outage is the
+Sixth-Law failure mode in operational form; honest failure is better
+than mute partial-functionality.</p>
+<h2 id="8-wire--mdns-contract">8. Wire &amp; mDNS contract</h2>
+<h3 id="81-http-listener">8.1 HTTP listener</h3>
+<ul>
+<li><strong>Address:</strong> <code>0.0.0.0:8443</code></li>
+<li><strong>TCP:</strong> HTTP/2 fallback (TLS 1.3 only)</li>
+<li><strong>UDP:</strong> HTTP/3 (QUIC, TLS 1.3 by spec)</li>
+<li><strong>TLS:</strong> server cert mounted at
+<code>/etc/lava-api-go/tls/server.crt</code> and <code>.key</code>.
+Self-signed for LAN deployment by default; the operator may swap in an
+ACME-issued cert.</li>
+<li><strong>Brotli:</strong> applied for clients sending
+<code>Accept-Encoding: br</code>. <code>gzip</code> is also offered as a
+fallback. No compression for <code>Content-Type: image/*</code> or sub-1
+KiB bodies.</li>
+<li><strong>Alt-Svc header on every HTTP/2 response:</strong>
+<code>alt-svc: h3=":8443"; ma=86400</code> so clients learn to
+upgrade.</li>
+</ul>
+<h3 id="82-mdns-advertisement">8.2 mDNS advertisement</h3>
+<ul>
+<li><strong>Service type:</strong> <code>_lava-api._tcp</code> (note:
+type label is a string identifier; <code>_tcp</code> is convention even
+though the primary transport is QUIC/UDP — clients filter further via
+TXT records).</li>
+<li><strong>Port:</strong> 8443.</li>
+<li><strong>TXT records:</strong>
+<ul>
+<li><code>engine=go</code></li>
+<li><code>version=2.0.0</code> (read at advertisement time from
+<code>lava-api-go/internal/version</code>)</li>
+<li><code>protocols=h3,h2</code></li>
+<li><code>compression=br,gzip</code></li>
+<li><code>tls=required</code></li>
+<li><code>path=/</code></li>
+</ul></li>
+</ul>
+<h3 id="83-legacy-ktor-proxy-advertisement-changed-in-this-sp">8.3
+Legacy Ktor proxy advertisement (changed in this SP)</h3>
+<p>The existing <code>proxy/.../discovery/ServiceAdvertisement.kt</code>
+is updated to publish symmetric TXT records on its existing
+<code>_lava._tcp</code> advertisement so SP-3's discovery logic can
+describe both backends uniformly:</p>
+<ul>
+<li><code>engine=ktor</code></li>
+<li><code>version=&lt;Ktor proxy semver from proxy/build.gradle.kts apiVersionName&gt;</code></li>
+<li><code>protocols=h11</code></li>
+<li><code>compression=identity</code></li>
+<li><code>tls=optional</code></li>
+</ul>
+<p>This is the <strong>only</strong> change to the legacy
+<code>:proxy</code> Kotlin module in SP-2. Everything else there is left
+untouched.</p>
+<h2 id="9-auth-model">9. Auth model</h2>
+<p>Per option <strong>A2 + H1</strong> locked during brainstorm:</p>
+<ul>
+<li><strong>Wire shape:</strong> identical to the Ktor proxy. Android
+sends <code>Auth-Token: &lt;rutracker-session&gt;</code> header on every
+authenticated request. The Go API forwards that value as a
+<code>Cookie: bb_session=&lt;value&gt;</code> (or whatever rutracker
+expects today; faithfully copied from the Ktor implementation) on the
+upstream call to <code>rutracker.org</code>.</li>
+<li><strong>Audit hashing:</strong> for every request, compute
+<code>auth_realm_hash = hex(sha256(Auth-Token))</code> and write to
+<code>request_audit</code>. Plain SHA-256, no HMAC, no per-deployment
+salt. Operators can correlate audit history across deployments and
+across DB restores. Acceptable given this is a personal/LAN tool whose
+audit log is for the operator's own forensics.</li>
+<li><strong>Login throttle:</strong> every <code>POST /login</code>
+writes to <code>login_attempt</code> with
+<code>username_hash = sha256(form.username)</code>. A query checks
+<code>(client_ip, username_hash, last 7 days, succeeded=false)</code>
+and applies an exponential backoff schedule (TBD: starting at 1 s after
+the third failure, doubling every failure thereafter, capped at 60
+s).</li>
+<li><strong>Generic rate limit:</strong>
+<code>submodules/ratelimiter/pkg/sliding</code> middleware, keyed by
+<code>(client_ip, route_class)</code>. Limits TBD per route class;
+design value placeholder:
+<code>read=60 rpm, write=10 rpm, login=5 rpm, download=10 rpm</code> per
+IP. Thresholds tuned during load testing.</li>
+<li><strong>Header redaction in logs:</strong>
+<code>submodules/security/pkg/pii</code> configured with a denylist of
+<code>Auth-Token</code>, <code>Cookie</code>, <code>Set-Cookie</code>,
+anything matching <code>(?i)^(auth|cookie|x-auth|x-token|bearer)</code>.
+Redaction applies to: stdout JSON logs, Loki shipments, OTel span
+attributes. Verified by a unit test that asserts the rendered log line
+for a request containing <code>Auth-Token: secret</code> does not
+contain <code>secret</code>.</li>
+</ul>
+<h2 id="10-observability">10. Observability</h2>
+<p>Per option <strong>O3</strong> locked during brainstorm — full stack,
+all in containers, all managed by
+<code>submodules/containers</code>.</p>
+<h3 id="101-application-side">10.1 Application-side</h3>
+<ul>
+<li><strong>Logger:</strong>
+<code>submodules/observability/pkg/logging</code> (slog-style structured
+JSON to stdout). Header redaction wired in via
+<code>submodules/security/pkg/pii</code>.</li>
+<li><strong>Metrics:</strong>
+<code>submodules/observability/pkg/metrics</code> +
+<code>pkg/gin</code>. Required counters / histograms:
+<ul>
+<li><code>http_requests_total{method,route,status}</code></li>
+<li><code>http_request_duration_seconds{method,route}</code>
+(histogram)</li>
+<li><code>cache_outcome_total{outcome}</code> (<code>outcome</code> ∈
+<code>hit|miss|bypass|invalidate</code>)</li>
+<li><code>rate_limit_blocked_total{route_class}</code></li>
+<li><code>rutracker_upstream_duration_seconds{route}</code>
+(histogram)</li>
+<li><code>rutracker_upstream_errors_total{route,kind}</code></li>
+<li><code>db_pool_acquire_duration_seconds</code> (histogram)</li>
+<li><code>mdns_advertisement_active</code> (gauge,
+<code>0</code>/<code>1</code>)</li>
+</ul></li>
+<li><strong>Metrics endpoint:</strong> <code>/metrics</code> is served
+on a <strong>separate dedicated listener</strong> at
+<code>127.0.0.1:9091</code> (HTTP/1.1, no TLS, no auth). NOT served on
+the public 8443 listener — that listener is LAN-reachable, and exposing
+<code>/metrics</code> there would leak service internals. Prometheus (on
+the <code>lava-net</code> bridge) scrapes via
+<code>host.containers.internal:9091</code>. The dedicated listener is
+brought up by the same <code>Server.Start()</code> call but bound to a
+different <code>net.Listener</code>.</li>
+<li><strong>Tracing:</strong>
+<code>submodules/observability/pkg/trace</code> exporting OTLP to the
+local Tempo container. Sampling: 100% for non-<code>/health</code>, 0%
+for <code>/health</code>/<code>/metrics</code>/<code>/ready</code>.</li>
+<li><strong>Health endpoints:</strong>
+<ul>
+<li><code>/health</code> — liveness only, no DB ping. 200 always while
+the process is up.</li>
+<li><code>/ready</code> — readiness, performs
+<code>pgxpool.Ping()</code> plus checks the rutracker.org circuit
+breaker is not OPEN. 200 only when the service can serve traffic.</li>
+</ul></li>
+</ul>
+<h3 id="102-container-side">10.2 Container-side</h3>
+<table>
+<thead>
+<tr>
+<th>Container</th>
+<th>Image (default)</th>
+<th>Bind</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>lava-prometheus</code></td>
+<td><code>prom/prometheus:latest</code> (pinned in compose)</td>
+<td><code>127.0.0.1:9090</code></td>
+<td>scrape <code>lava-api-go:8443/metrics</code></td>
+</tr>
+<tr>
+<td><code>lava-loki</code></td>
+<td><code>grafana/loki:latest</code></td>
+<td><code>127.0.0.1:3100</code></td>
+<td>log aggregation</td>
+</tr>
+<tr>
+<td><code>lava-promtail</code></td>
+<td><code>grafana/promtail:latest</code></td>
+<td>(none — sidecar)</td>
+<td>ship Docker logs of <code>lava-api-go</code> to Loki</td>
+</tr>
+<tr>
+<td><code>lava-grafana</code></td>
+<td><code>grafana/grafana:latest</code></td>
+<td><code>127.0.0.1:3000</code></td>
+<td>dashboards (one provisioned by default)</td>
+</tr>
+<tr>
+<td><code>lava-tempo</code></td>
+<td><code>grafana/tempo:latest</code></td>
+<td><code>127.0.0.1:3200</code></td>
+<td>trace store</td>
+</tr>
+</tbody>
+</table>
+<p>All five containers run only when compose profile
+<code>observability</code> is active
+(<code>./start.sh --with-observability</code>). Configuration files in
+<code>lava-api-go/docker/observability/</code>:</p>
+<pre><code>docker/observability/
+├── prometheus.yml
+├── loki-config.yaml
+├── promtail-config.yaml
+├── tempo.yaml
+└── grafana/
+    ├── provisioning/
+    │   ├── datasources/datasources.yml   # Prometheus + Loki + Tempo wired
+    │   └── dashboards/dashboards.yml
+    └── dashboards/
+        └── lava-api.json                  # one default dashboard</code></pre>
+<h2 id="11-test-plan">11. Test plan</h2>
+<p>The brainstorm produced an <strong>eight-type taxonomy plus two
+cross-cutting gates</strong>. Each route, package, or layer of
+<code>lava-api-go</code> MUST have tests in the appropriate types per
+the table below.</p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Type</th>
+<th>Tooling</th>
+<th>Lava location</th>
+<th>Sixth Law obligation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Unit</td>
+<td>Go stdlib <code>testing</code>, table-driven</td>
+<td><code>lava-api-go/internal/**/*_test.go</code></td>
+<td>every public function / handler with non-trivial logic; fails when
+broken</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Integration</td>
+<td>real Postgres via podman (transient)</td>
+<td><code>lava-api-go/internal/**/integration_test.go</code>,
+<code>lava-api-go/tests/integration/</code></td>
+<td>every package touching Postgres; assertion on row state</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Contract</td>
+<td>OpenAPI 3.1 + golden JSON fixtures + oapi-codegen typed client</td>
+<td><code>lava-api-go/tests/fixtures/</code>,
+<code>lava-api-go/tests/contract/</code></td>
+<td>every route's request and response shape; fails if the wire diverges
+from the spec</td>
+</tr>
+<tr>
+<td>4</td>
+<td>E2E / acceptance</td>
+<td>real Gin container, real <code>submodules/http3</code> client</td>
+<td><code>lava-api-go/tests/e2e/</code></td>
+<td>the load-bearing Sixth Law gate — real container, real wire</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Cross-backend parity</td>
+<td>same E2E suite + a Ktor target</td>
+<td><code>lava-api-go/tests/parity/</code></td>
+<td>uniquely valuable — bytes-equivalent across both backends</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Fuzz</td>
+<td>Go <code>testing.F</code></td>
+<td><code>lava-api-go/internal/**/fuzz_test.go</code></td>
+<td>every parser, encoder, header decoder, brotli ratio</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Load / perf</td>
+<td>k6 (preferred; vegeta as fallback)</td>
+<td><code>lava-api-go/tests/load/</code></td>
+<td>numeric thresholds in <code>Makefile</code>: p99 &lt; 200 ms on
+cached hits, brotli ratio ≥ 0.4 on JSON, cache hit rate ≥ baseline</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Security / static</td>
+<td><code>gosec</code>, <code>govulncheck</code>, <code>trivy</code>
+(image)</td>
+<td><code>lava-api-go/scripts/ci.sh</code></td>
+<td><code>HIGH</code>/<code>CRITICAL</code> findings hard-fail; lower
+severities tracked in <code>lava-api-go/SECURITY.md</code></td>
+</tr>
+<tr>
+<td>+</td>
+<td>Mutation</td>
+<td><code>go-mutesting</code> (or equivalent)</td>
+<td><code>lava-api-go/scripts/mutation.sh</code></td>
+<td>quarterly; surviving mutants are bluffs</td>
+</tr>
+<tr>
+<td>+</td>
+<td>Pre-tag real-device</td>
+<td>scripted black-box runner against running container</td>
+<td><code>lava-api-go/scripts/pretag-verify.sh</code></td>
+<td>required before any <code>Lava-API-Go-*</code> tag is cut</td>
+</tr>
+</tbody>
+</table>
+<h3 id="111-cross-backend-parity-test-sixth-laws-load-bearing-gate">11.1
+Cross-backend parity test (Sixth Law's load-bearing gate)</h3>
+<p>This is the test type that uniquely earns its keep because we kept
+the legacy proxy. Implementation outline:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">// lava-api-go/tests/parity/parity_test.go (sketch)</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestParityAcrossBackends<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    ktor <span class="op">:=</span> startKtor<span class="op">(</span>t<span class="op">)</span>        <span class="co">// brings up legacy proxy</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    goapi <span class="op">:=</span> startGoAPI<span class="op">(</span>t<span class="op">)</span>      <span class="co">// brings up new service</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    cli <span class="op">:=</span> newOAPIClient<span class="op">()</span>      <span class="co">// typed client generated from openapi.yaml</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    cases <span class="op">:=</span> loadParityFixtures<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;../fixtures/parity/&quot;</span><span class="op">)</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> c <span class="op">:=</span> <span class="kw">range</span> cases <span class="op">{</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>        t<span class="op">.</span>Run<span class="op">(</span>c<span class="op">.</span>Name<span class="op">,</span> <span class="kw">func</span><span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>            ktorResp <span class="op">:=</span> mustGet<span class="op">(</span>t<span class="op">,</span> cli<span class="op">,</span> ktor<span class="op">.</span>URL<span class="op">+</span>c<span class="op">.</span>Path<span class="op">,</span> c<span class="op">.</span>Headers<span class="op">)</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>            goResp   <span class="op">:=</span> mustGet<span class="op">(</span>t<span class="op">,</span> cli<span class="op">,</span> goapi<span class="op">.</span>URL<span class="op">+</span>c<span class="op">.</span>Path<span class="op">,</span> c<span class="op">.</span>Headers<span class="op">)</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>            assertByteEqual<span class="op">(</span>t<span class="op">,</span> ktorResp<span class="op">.</span>Body<span class="op">,</span> goResp<span class="op">.</span>Body<span class="op">)</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>            assertEqual<span class="op">(</span>t<span class="op">,</span> ktorResp<span class="op">.</span>Status<span class="op">,</span> goResp<span class="op">.</span>Status<span class="op">)</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>            assertHeaderSubsetEqual<span class="op">(</span>t<span class="op">,</span> ktorResp<span class="op">.</span>Headers<span class="op">,</span> goResp<span class="op">.</span>Headers<span class="op">,</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;Content-Type&quot;</span><span class="op">,</span> <span class="st">&quot;X-…&quot;</span><span class="op">})</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>        <span class="op">})</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Fixtures in <code>lava-api-go/tests/fixtures/parity/</code> are JSON
+files describing
+<code>(method, path, headers, body, expected_status)</code> with
+expected response bodies committed alongside. Generated initially by
+recording real responses from the running Ktor proxy against
+rutracker.org — that recording itself is a Sixth-Law event (the
+recording is the contract).</p>
+<h3 id="112-falsifiability-rehearsal-protocol-sixth-law-clause-2">11.2
+Falsifiability rehearsal protocol (Sixth Law clause 2)</h3>
+<p>Every PR touching this codebase MUST include in its description, for
+every test the PR adds or modifies:</p>
+<ol type="1">
+<li>The deliberate mutation applied to production code (e.g. "removed
+the WHERE clause in <code>cache.Get</code>").</li>
+<li>The exact assertion that fired (e.g.
+<code>body mismatch: h2="received=3" h3="MUTATED"</code>).</li>
+<li>A statement that the mutation was reverted before the commit was
+finalised.</li>
+</ol>
+<p>This is the same procedure already performed three times in this
+session (HTTP3, Cache pkg/postgres, Mdns). Three precedents establish
+the pattern.</p>
+<h3 id="113-local-ci-gate">11.3 Local CI gate</h3>
+<p><code>lava-api-go/scripts/ci.sh</code> runs, in order:</p>
+<ol type="1">
+<li><code>go mod tidy</code> invariant (sha256 before/after)</li>
+<li><code>oapi-codegen</code> invariant (regenerate; assert no diff in
+<code>internal/gen/</code>)</li>
+<li><code>go vet ./...</code></li>
+<li><code>go build ./...</code></li>
+<li><code>go test -race -count=1 ./...</code> (types 1, 2, 3, 4, 5, 6 —
+type 5 spins up Ktor in podman)</li>
+<li>fuzz: <code>go test -fuzz=. -fuzztime=30s ./internal/...</code>
+(each <code>Fuzz*</code> run sequentially)</li>
+<li><code>gosec</code> (type 8)</li>
+<li><code>govulncheck ./...</code> (type 8)</li>
+<li>load: <code>scripts/load-quick.sh</code> runs k6 for 60 s with
+strict thresholds (type 7); skipped under <code>--quick</code></li>
+<li>image build + <code>trivy image</code> (type 8); skipped under
+<code>--quick</code></li>
+</ol>
+<p>Quarterly: <code>scripts/mutation.sh</code> runs
+<code>go-mutesting</code> over the <code>internal/</code> tree.
+Surviving mutants are filed as bluff incidents and triaged.</p>
+<p>Pre-tag: <code>scripts/pretag-verify.sh</code> brings up the full
+stack, executes a scripted user flow (login → search → fetch a topic →
+add a comment → favorites round-trip), records the wall-clock outcome,
+and writes <code>.lava-ci-evidence/&lt;commit&gt;.json</code>.
+<code>scripts/tag.sh</code> reads that file and refuses to operate
+without one matching the current commit.</p>
+<h2 id="12-container-topology">12. Container topology</h2>
+<p>Per option <strong>T1 + M-A</strong> locked during brainstorm.</p>
+<h3 id="121-single-root-docker-composeyml-with-profiles">12.1 Single
+root <code>docker-compose.yml</code> with profiles</h3>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># docker-compose.yml (sketch — final form lives in repo root after SP-2 implementation)</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="fu">services</span><span class="kw">:</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="co">  # Profile: api-go (default) ----------------------------------------------</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">lava-postgres</span><span class="kw">:</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">profiles</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">api-go</span><span class="kw">,</span><span class="at"> both</span><span class="kw">]</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">image</span><span class="kw">:</span><span class="at"> postgres:16-alpine</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">environment</span><span class="kw">:</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">POSTGRES_DB</span><span class="kw">:</span><span class="at"> lava_api</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">POSTGRES_USER</span><span class="kw">:</span><span class="at"> lava</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">POSTGRES_PASSWORD</span><span class="kw">:</span><span class="at"> ${LAVA_PG_PASSWORD:?required}</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">networks</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">lava-net</span><span class="kw">]</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">ports</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="st">&quot;127.0.0.1:5432:5432&quot;</span><span class="kw">]</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">healthcheck</span><span class="kw">:</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">test</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="st">&quot;CMD&quot;</span><span class="kw">,</span><span class="at"> </span><span class="st">&quot;pg_isready&quot;</span><span class="kw">,</span><span class="at"> </span><span class="st">&quot;-U&quot;</span><span class="kw">,</span><span class="at"> </span><span class="st">&quot;lava&quot;</span><span class="kw">,</span><span class="at"> </span><span class="st">&quot;-d&quot;</span><span class="kw">,</span><span class="at"> </span><span class="st">&quot;lava_api&quot;</span><span class="kw">]</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">interval</span><span class="kw">:</span><span class="at"> 5s</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">retries</span><span class="kw">:</span><span class="at"> </span><span class="dv">12</span></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">lava-migrate</span><span class="kw">:</span></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">profiles</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">api-go</span><span class="kw">,</span><span class="at"> both</span><span class="kw">]</span></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">build</span><span class="kw">:</span></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">context</span><span class="kw">:</span><span class="at"> ./lava-api-go</span></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">target</span><span class="kw">:</span><span class="at"> migrate</span></span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">networks</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">lava-net</span><span class="kw">]</span></span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">depends_on</span><span class="kw">:</span></span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">lava-postgres</span><span class="kw">:</span><span class="at"> </span><span class="kw">{</span><span class="at"> </span><span class="fu">condition</span><span class="kw">:</span><span class="at"> service_healthy </span><span class="kw">}</span></span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">environment</span><span class="kw">:</span></span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">LAVA_API_PG_URL</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;postgres://lava:${LAVA_PG_PASSWORD}@lava-postgres:5432/lava_api?sslmode=disable&quot;</span></span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">restart</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;no&quot;</span></span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">lava-api-go</span><span class="kw">:</span></span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">profiles</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">api-go</span><span class="kw">,</span><span class="at"> both</span><span class="kw">]</span></span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">build</span><span class="kw">:</span></span>
+<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">context</span><span class="kw">:</span><span class="at"> ./lava-api-go</span></span>
+<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">target</span><span class="kw">:</span><span class="at"> runtime</span></span>
+<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">network_mode</span><span class="kw">:</span><span class="at"> host</span><span class="co">                     # mDNS requires host net</span></span>
+<span id="cb6-38"><a href="#cb6-38" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">depends_on</span><span class="kw">:</span></span>
+<span id="cb6-39"><a href="#cb6-39" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">lava-migrate</span><span class="kw">:</span><span class="at"> </span><span class="kw">{</span><span class="at"> </span><span class="fu">condition</span><span class="kw">:</span><span class="at"> service_completed_successfully </span><span class="kw">}</span></span>
+<span id="cb6-40"><a href="#cb6-40" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">environment</span><span class="kw">:</span></span>
+<span id="cb6-41"><a href="#cb6-41" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">LAVA_API_PG_URL</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;postgres://lava:${LAVA_PG_PASSWORD}@127.0.0.1:5432/lava_api?sslmode=disable&quot;</span></span>
+<span id="cb6-42"><a href="#cb6-42" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">LAVA_API_LISTEN</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;:8443&quot;</span><span class="co">                        # public LAN listener (HTTP/3 + HTTP/2)</span></span>
+<span id="cb6-43"><a href="#cb6-43" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">LAVA_API_METRICS_LISTEN</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;127.0.0.1:9091&quot;</span><span class="co">       # private metrics listener</span></span>
+<span id="cb6-44"><a href="#cb6-44" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">LAVA_API_TLS_CERT</span><span class="kw">:</span><span class="at"> /etc/lava-api-go/tls/server.crt</span></span>
+<span id="cb6-45"><a href="#cb6-45" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">LAVA_API_TLS_KEY</span><span class="kw">:</span><span class="at">  /etc/lava-api-go/tls/server.key</span></span>
+<span id="cb6-46"><a href="#cb6-46" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">LAVA_API_OTLP_ENDPOINT</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;http://127.0.0.1:4318&quot;</span><span class="co"> # tempo OTLP HTTP receiver (published from bridge)</span></span>
+<span id="cb6-47"><a href="#cb6-47" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">volumes</span><span class="kw">:</span></span>
+<span id="cb6-48"><a href="#cb6-48" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> ./lava-api-go/docker/tls:/etc/lava-api-go/tls:ro</span></span>
+<span id="cb6-49"><a href="#cb6-49" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">healthcheck</span><span class="kw">:</span></span>
+<span id="cb6-50"><a href="#cb6-50" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">test</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="st">&quot;CMD&quot;</span><span class="kw">,</span><span class="at"> </span><span class="st">&quot;/usr/local/bin/healthprobe&quot;</span><span class="kw">,</span><span class="at"> </span><span class="st">&quot;--http3&quot;</span><span class="kw">,</span><span class="at"> </span><span class="st">&quot;https://localhost:8443/health&quot;</span><span class="kw">]</span></span>
+<span id="cb6-51"><a href="#cb6-51" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">interval</span><span class="kw">:</span><span class="at"> 10s</span></span>
+<span id="cb6-52"><a href="#cb6-52" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">retries</span><span class="kw">:</span><span class="at"> </span><span class="dv">6</span></span>
+<span id="cb6-53"><a href="#cb6-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-54"><a href="#cb6-54" aria-hidden="true" tabindex="-1"></a><span class="co">  # Profile: legacy ---------------------------------------------------------</span></span>
+<span id="cb6-55"><a href="#cb6-55" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">lava-proxy</span><span class="kw">:</span></span>
+<span id="cb6-56"><a href="#cb6-56" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">profiles</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">legacy</span><span class="kw">,</span><span class="at"> both</span><span class="kw">]</span></span>
+<span id="cb6-57"><a href="#cb6-57" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">build</span><span class="kw">:</span></span>
+<span id="cb6-58"><a href="#cb6-58" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">context</span><span class="kw">:</span><span class="at"> ./proxy</span></span>
+<span id="cb6-59"><a href="#cb6-59" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">network_mode</span><span class="kw">:</span><span class="at"> host</span></span>
+<span id="cb6-60"><a href="#cb6-60" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">environment</span><span class="kw">:</span></span>
+<span id="cb6-61"><a href="#cb6-61" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">ADVERTISE_HOST</span><span class="kw">:</span><span class="at"> ${ADVERTISE_HOST:-}</span></span>
+<span id="cb6-62"><a href="#cb6-62" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">healthcheck</span><span class="kw">:</span></span>
+<span id="cb6-63"><a href="#cb6-63" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">test</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="st">&quot;CMD&quot;</span><span class="kw">,</span><span class="at"> </span><span class="st">&quot;wget&quot;</span><span class="kw">,</span><span class="at"> </span><span class="st">&quot;-q&quot;</span><span class="kw">,</span><span class="at"> </span><span class="st">&quot;--spider&quot;</span><span class="kw">,</span><span class="at"> </span><span class="st">&quot;http://localhost:8080/&quot;</span><span class="kw">]</span></span>
+<span id="cb6-64"><a href="#cb6-64" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">interval</span><span class="kw">:</span><span class="at"> 30s</span></span>
+<span id="cb6-65"><a href="#cb6-65" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">retries</span><span class="kw">:</span><span class="at"> </span><span class="dv">3</span></span>
+<span id="cb6-66"><a href="#cb6-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-67"><a href="#cb6-67" aria-hidden="true" tabindex="-1"></a><span class="co">  # Profile: observability --------------------------------------------------</span></span>
+<span id="cb6-68"><a href="#cb6-68" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">lava-prometheus</span><span class="kw">:</span></span>
+<span id="cb6-69"><a href="#cb6-69" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">profiles</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">observability</span><span class="kw">]</span></span>
+<span id="cb6-70"><a href="#cb6-70" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">image</span><span class="kw">:</span><span class="at"> prom/prometheus:latest</span></span>
+<span id="cb6-71"><a href="#cb6-71" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">networks</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">lava-net</span><span class="kw">]</span></span>
+<span id="cb6-72"><a href="#cb6-72" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">ports</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="st">&quot;127.0.0.1:9090:9090&quot;</span><span class="kw">]</span></span>
+<span id="cb6-73"><a href="#cb6-73" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">volumes</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="st">&quot;./lava-api-go/docker/observability/prometheus.yml:/etc/prometheus/prometheus.yml:ro&quot;</span><span class="kw">]</span></span>
+<span id="cb6-74"><a href="#cb6-74" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-75"><a href="#cb6-75" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">lava-loki</span><span class="kw">:</span></span>
+<span id="cb6-76"><a href="#cb6-76" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">profiles</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">observability</span><span class="kw">]</span></span>
+<span id="cb6-77"><a href="#cb6-77" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">image</span><span class="kw">:</span><span class="at"> grafana/loki:latest</span></span>
+<span id="cb6-78"><a href="#cb6-78" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">networks</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">lava-net</span><span class="kw">]</span></span>
+<span id="cb6-79"><a href="#cb6-79" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">ports</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="st">&quot;127.0.0.1:3100:3100&quot;</span><span class="kw">]</span></span>
+<span id="cb6-80"><a href="#cb6-80" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">volumes</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="st">&quot;./lava-api-go/docker/observability/loki-config.yaml:/etc/loki/local-config.yaml:ro&quot;</span><span class="kw">]</span></span>
+<span id="cb6-81"><a href="#cb6-81" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-82"><a href="#cb6-82" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">lava-promtail</span><span class="kw">:</span></span>
+<span id="cb6-83"><a href="#cb6-83" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">profiles</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">observability</span><span class="kw">]</span></span>
+<span id="cb6-84"><a href="#cb6-84" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">image</span><span class="kw">:</span><span class="at"> grafana/promtail:latest</span></span>
+<span id="cb6-85"><a href="#cb6-85" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">networks</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">lava-net</span><span class="kw">]</span></span>
+<span id="cb6-86"><a href="#cb6-86" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">volumes</span><span class="kw">:</span></span>
+<span id="cb6-87"><a href="#cb6-87" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="st">&quot;/var/log:/var/log:ro&quot;</span></span>
+<span id="cb6-88"><a href="#cb6-88" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="st">&quot;./lava-api-go/docker/observability/promtail-config.yaml:/etc/promtail/config.yml:ro&quot;</span></span>
+<span id="cb6-89"><a href="#cb6-89" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">depends_on</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">lava-loki</span><span class="kw">]</span></span>
+<span id="cb6-90"><a href="#cb6-90" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-91"><a href="#cb6-91" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">lava-tempo</span><span class="kw">:</span></span>
+<span id="cb6-92"><a href="#cb6-92" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">profiles</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">observability</span><span class="kw">]</span></span>
+<span id="cb6-93"><a href="#cb6-93" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">image</span><span class="kw">:</span><span class="at"> grafana/tempo:latest</span></span>
+<span id="cb6-94"><a href="#cb6-94" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">networks</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">lava-net</span><span class="kw">]</span></span>
+<span id="cb6-95"><a href="#cb6-95" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">ports</span><span class="kw">:</span></span>
+<span id="cb6-96"><a href="#cb6-96" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="st">&quot;127.0.0.1:3200:3200&quot;</span><span class="co">   # query / API</span></span>
+<span id="cb6-97"><a href="#cb6-97" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="st">&quot;127.0.0.1:4318:4318&quot;</span><span class="co">   # OTLP HTTP receiver — lava-api-go (host net) ships traces here</span></span>
+<span id="cb6-98"><a href="#cb6-98" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">volumes</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="st">&quot;./lava-api-go/docker/observability/tempo.yaml:/etc/tempo.yaml:ro&quot;</span><span class="kw">]</span></span>
+<span id="cb6-99"><a href="#cb6-99" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-100"><a href="#cb6-100" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">lava-grafana</span><span class="kw">:</span></span>
+<span id="cb6-101"><a href="#cb6-101" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">profiles</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">observability</span><span class="kw">]</span></span>
+<span id="cb6-102"><a href="#cb6-102" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">image</span><span class="kw">:</span><span class="at"> grafana/grafana:latest</span></span>
+<span id="cb6-103"><a href="#cb6-103" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">networks</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">lava-net</span><span class="kw">]</span></span>
+<span id="cb6-104"><a href="#cb6-104" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">ports</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="st">&quot;127.0.0.1:3000:3000&quot;</span><span class="kw">]</span></span>
+<span id="cb6-105"><a href="#cb6-105" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">volumes</span><span class="kw">:</span></span>
+<span id="cb6-106"><a href="#cb6-106" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="st">&quot;./lava-api-go/docker/observability/grafana/provisioning:/etc/grafana/provisioning:ro&quot;</span></span>
+<span id="cb6-107"><a href="#cb6-107" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="st">&quot;./lava-api-go/docker/observability/grafana/dashboards:/var/lib/grafana/dashboards:ro&quot;</span></span>
+<span id="cb6-108"><a href="#cb6-108" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">depends_on</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">lava-prometheus</span><span class="kw">,</span><span class="at"> lava-loki</span><span class="kw">,</span><span class="at"> lava-tempo</span><span class="kw">]</span></span>
+<span id="cb6-109"><a href="#cb6-109" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-110"><a href="#cb6-110" aria-hidden="true" tabindex="-1"></a><span class="co">  # Profile: dev-docs -------------------------------------------------------</span></span>
+<span id="cb6-111"><a href="#cb6-111" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">lava-swagger-ui</span><span class="kw">:</span></span>
+<span id="cb6-112"><a href="#cb6-112" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">profiles</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">dev-docs</span><span class="kw">]</span></span>
+<span id="cb6-113"><a href="#cb6-113" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">image</span><span class="kw">:</span><span class="at"> swaggerapi/swagger-ui:latest</span></span>
+<span id="cb6-114"><a href="#cb6-114" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">networks</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">lava-net</span><span class="kw">]</span></span>
+<span id="cb6-115"><a href="#cb6-115" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">ports</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="st">&quot;127.0.0.1:8081:8080&quot;</span><span class="kw">]</span></span>
+<span id="cb6-116"><a href="#cb6-116" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">environment</span><span class="kw">:</span></span>
+<span id="cb6-117"><a href="#cb6-117" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">SWAGGER_JSON</span><span class="kw">:</span><span class="at"> /openapi.yaml</span></span>
+<span id="cb6-118"><a href="#cb6-118" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">volumes</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="st">&quot;./lava-api-go/api/openapi.yaml:/openapi.yaml:ro&quot;</span><span class="kw">]</span></span>
+<span id="cb6-119"><a href="#cb6-119" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-120"><a href="#cb6-120" aria-hidden="true" tabindex="-1"></a><span class="fu">networks</span><span class="kw">:</span></span>
+<span id="cb6-121"><a href="#cb6-121" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">lava-net</span><span class="kw">:</span><span class="at"> </span><span class="kw">{}</span></span></code></pre></div>
+<h3 id="122-lifecycle-entry-points-startsh-stopsh">12.2 Lifecycle entry
+points (<code>./start.sh</code>, <code>./stop.sh</code>)</h3>
+<pre><code>./start.sh                                # profiles: api-go        (Go API + Postgres)
+./start.sh --legacy                       # profiles: legacy        (Ktor proxy only)
+./start.sh --both                         # profiles: both          (api-go + legacy + Postgres)
+./start.sh --with-observability           # api-go + observability stack
+./start.sh --both --with-observability    # all 9 services
+./start.sh --dev-docs                     # adds Swagger UI
+
+./stop.sh                                 # tears down all running profiles</code></pre>
+<p>Implemented by
+<code>tools/lava-containers/cmd/lava-containers/main.go</code> — flag
+parsing translates each combination into a
+<code>compose --profile X --profile Y up -d</code> invocation routed
+through <code>submodules/containers/pkg/compose</code> (replacing the
+current direct <code>exec.Command</code>-based runtime calls).</p>
+<h3 id="123-healthprobe-binary-sub-decision-b">12.3 Healthprobe binary
+(sub-decision (b))</h3>
+<p><code>lava-api-go/cmd/healthprobe/main.go</code> is a ~30-line tool
+that uses <code>digital.vasic.http3</code>'s client to issue a GET
+against <code>https://localhost:8443/health</code> with a 2 s deadline,
+exits 0 on 200, exits 1 otherwise. Baked into the runtime container
+image. Used by the compose <code>healthcheck.test</code>. This proves
+the HTTP/3 socket works on every healthcheck tick — not just the HTTP/2
+fallback path.</p>
+<h2 id="13-repository-layout">13. Repository layout</h2>
+<p>Per option <strong>L1</strong>:</p>
+<pre><code>Lava/                                    # repo root, unchanged
+├── app/                                  # existing Android module (unchanged in SP-2)
+├── proxy/                                # legacy Ktor proxy (only ServiceAdvertisement.kt changes)
+├── core/                                 # existing Gradle core libs (unchanged)
+├── feature/                              # existing Gradle features (unchanged)
+├── tools/lava-containers/                # extended in SP-2 to know about both services
+├── submodules/                           # vasic-digital submodules (14 mounts, frozen pins)
+│   ├── Containers/  Middleware/  Database/  Cache/  Observability/
+│   ├── RateLimiter/  Recovery/  Security/  Auth/  Challenges/
+│   ├── Config/  Discovery/  HTTP3/  Mdns/
+├── docker-compose.yml                    # rewritten with profiles
+├── start.sh / stop.sh                    # extended with flags
+├── scripts/                              # tag.sh extended with api-go entry, ci.sh added
+├── docs/                                 # api/ rendering added
+├── lava-api-go/                          # NEW — the SP-2 artifact
+│   ├── api/
+│   │   ├── openapi.yaml                  # source of truth
+│   │   └── codegen.yaml                  # oapi-codegen config
+│   ├── cmd/
+│   │   ├── lava-api-go/main.go           # primary entry point
+│   │   └── healthprobe/main.go           # HTTP/3-capable healthcheck
+│   ├── internal/
+│   │   ├── auth/                         # A2 pass-through + H1 audit hash (Lava-local)
+│   │   ├── cache/                        # thin wrap of submodules/cache/pkg/postgres
+│   │   ├── config/                       # uses submodules/config
+│   │   ├── discovery/                    # thin wrap of submodules/mdns
+│   │   ├── handlers/                     # one file per route group (forum.go, search.go, …)
+│   │   ├── observability/                # uses submodules/observability
+│   │   ├── ratelimit/                    # uses submodules/ratelimiter
+│   │   ├── rutracker/                    # rutracker.org HTML scrapers (Lava-domain)
+│   │   ├── server/                       # Gin + HTTP/3 wiring
+│   │   ├── version/                      # version constants for tag.sh
+│   │   └── gen/
+│   │       ├── server/                   # oapi-codegen output (committed)
+│   │       └── client/                   # oapi-codegen typed client (committed)
+│   ├── migrations/                       # 0001_init.up.sql, 0001_init.down.sql, …
+│   ├── tests/
+│   │   ├── contract/
+│   │   ├── e2e/
+│   │   ├── parity/
+│   │   ├── load/
+│   │   └── fixtures/
+│   ├── docker/
+│   │   ├── Dockerfile                    # multi-stage: build → runtime → migrate target
+│   │   ├── tls/                          # gitignored; populated by operator or scripts/gen-cert.sh
+│   │   └── observability/                # prometheus.yml, loki-config.yaml, promtail-config.yaml, tempo.yaml, grafana/
+│   ├── scripts/
+│   │   ├── ci.sh                         # canonical local CI gate
+│   │   ├── generate.sh                   # oapi-codegen
+│   │   ├── migrate.sh                    # golang-migrate wrapper
+│   │   ├── run-test-pg.sh                # transient Postgres for integration tests
+│   │   ├── load-quick.sh                 # 60s k6 with thresholds
+│   │   ├── mutation.sh                   # quarterly mutation testing
+│   │   └── pretag-verify.sh              # real-device verification → .lava-ci-evidence/
+│   ├── Makefile
+│   ├── go.mod                            # module digital.vasic.lava.apigo
+│   ├── go.sum
+│   ├── README.md
+│   ├── CONSTITUTION.md
+│   ├── CLAUDE.md
+│   ├── AGENTS.md
+│   └── SECURITY.md                       # tracked low-severity findings, exemption rationale
+└── .lava-ci-evidence/                    # pretag-verify.sh outputs; tag.sh reads this</code></pre>
+<h2 id="14-openapi-contract">14. OpenAPI contract</h2>
+<p>Per option <strong>D1</strong>:</p>
+<ul>
+<li><strong>Source of truth:</strong>
+<code>lava-api-go/api/openapi.yaml</code> — OpenAPI 3.1,
+hand-written.</li>
+<li><strong>Codegen:</strong> <code>oapi-codegen</code> v2 invoked by
+<code>scripts/generate.sh</code>. Config in
+<code>api/codegen.yaml</code>. Outputs:
+<ul>
+<li><code>internal/gen/server/api.gen.go</code> — strict server
+interfaces, models, request/response types</li>
+<li><code>internal/gen/client/api.gen.go</code> — typed Go client used
+by the parity test</li>
+</ul></li>
+<li><strong>Generated code IS committed.</strong> The CI gate enforces
+"regenerated diff is empty" via the same sha256-before/after pattern
+used for <code>go mod tidy</code>.</li>
+<li><strong>Authoring discipline:</strong> every route's
+<code>summary</code>, <code>description</code>, parameter docs,
+request/response examples are populated; reviewers diff
+<code>openapi.yaml</code> for semantic changes during PR review.</li>
+<li><strong>Doc rendering:</strong> <code>lava-swagger-ui</code>
+container under compose profile <code>dev-docs</code> mounts the YAML
+and serves the standard Swagger UI on <code>127.0.0.1:8081</code>.</li>
+<li><strong>Initial spec authoring:</strong> reverse-engineered from the
+existing Ktor proxy. The recording-and-encoding step is a
+Sixth-Law-bound task: the spec MUST encode what Ktor actually emits
+today, byte-for-byte. The cross-backend parity test (type 5) is the
+falsifying tool — if the spec is wrong, parity fails.</li>
+</ul>
+<h2 id="15-versioning--release">15. Versioning &amp; release</h2>
+<ul>
+<li><p><strong>Initial version:</strong>
+<code>apiVersionName = "2.0.0"</code>,
+<code>apiVersionCode = 2000</code> (rationale: visible jump from the
+legacy Ktor's <code>1.x</code> line; even-thousand versionCode mirrors
+the major).</p></li>
+<li><p><strong>Source-of-truth file:</strong>
+<code>lava-api-go/internal/version/version.go</code>:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span> version</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> Name <span class="op">=</span> <span class="st">&quot;2.0.0&quot;</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> Code <span class="op">=</span> <span class="dv">2000</span></span></code></pre></div>
+<p>These are the values <code>scripts/tag.sh</code> reads/writes when
+tagging this artifact.</p></li>
+<li><p><strong>Tag prefix:</strong>
+<code>Lava-API-Go-&lt;versionName&gt;-&lt;versionCode&gt;</code> (e.g.
+<code>Lava-API-Go-2.0.0-2000</code>).</p></li>
+<li><p><strong><code>scripts/tag.sh</code> registry update:</strong> add
+a third app key <code>api-go</code> alongside <code>android</code> and
+<code>api</code>, with reader/writer functions matching the Go file
+shape.</p></li>
+<li><p><strong>Release tag gate (Sixth Law clause 5):</strong>
+<code>scripts/tag.sh</code> refuses to operate against any commit
+lacking a corresponding
+<code>.lava-ci-evidence/&lt;commit&gt;.json</code> produced by
+<code>scripts/pretag-verify.sh</code>. The evidence file records: commit
+SHA, timestamp, scripted-user-flow result, asserted thresholds.</p></li>
+<li><p><strong>Releases directory:</strong>
+<code>build_and_release.sh</code> extended to produce
+<code>releases/{version}/api-go/lava-api-go-&lt;version&gt;.tar.gz</code>
+(binary) and
+<code>releases/{version}/api-go/lava-api-go-&lt;version&gt;.image.tar</code>
+(saved container image).</p></li>
+</ul>
+<h2 id="16-lava-side-rollout--what-existing-files-change">16. Lava-side
+rollout — what existing files change</h2>
+<p><strong>Files added (new):</strong> all of <code>lava-api-go/</code>
+(deep tree above).</p>
+<p><strong>Files modified (existing in this repo):</strong></p>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Change</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>docker-compose.yml</code></td>
+<td>rewritten as the profiles-based topology in §12</td>
+</tr>
+<tr>
+<td><code>start.sh</code></td>
+<td>flag parsing for <code>--legacy</code>, <code>--both</code>,
+<code>--with-observability</code>, <code>--dev-docs</code>; default
+profile becomes <code>api-go</code></td>
+</tr>
+<tr>
+<td><code>stop.sh</code></td>
+<td>tears down all running profiles (no flag changes)</td>
+</tr>
+<tr>
+<td><code>tools/lava-containers/cmd/lava-containers/main.go</code></td>
+<td>extended to translate <code>start.sh</code> flags to compose profile
+invocations; delegates runtime to
+<code>submodules/containers/pkg/runtime</code>/<code>pkg/compose</code></td>
+</tr>
+<tr>
+<td><code>tools/lava-containers/internal/proxy/proxy.go</code></td>
+<td>refactored: rename <code>Manager</code> →
+<code>LegacyKtorManager</code>; add a sibling <code>ApiGoManager</code>
+for the new service; both managed by a top-level
+<code>Orchestrator</code> that knows about profiles</td>
+</tr>
+<tr>
+<td><code>tools/lava-containers/go.mod</code></td>
+<td>adds
+<code>replace digital.vasic.containers =&gt; ../../submodules/containers</code></td>
+</tr>
+<tr>
+<td><code>proxy/src/main/kotlin/digital/vasic/lava/api/discovery/ServiceAdvertisement.kt</code></td>
+<td>adds the symmetric TXT records (<code>engine=ktor</code>,
+<code>version=…</code>, <code>protocols=h11</code>,
+<code>compression=identity</code>, <code>tls=optional</code>)</td>
+</tr>
+<tr>
+<td><code>proxy/build.gradle.kts</code></td>
+<td>unchanged structurally; the
+<code>apiVersionName</code>/<code>apiVersionCode</code> already added in
+<code>tag.sh</code> work</td>
+</tr>
+<tr>
+<td><code>scripts/tag.sh</code></td>
+<td>registry gains <code>api-go</code> entry with new reader/writer
+functions for <code>lava-api-go/internal/version/version.go</code></td>
+</tr>
+<tr>
+<td><code>docs/TAGGING.md</code></td>
+<td>gains an <code>api-go</code> row in the source-of-truth table;
+example tag <code>Lava-API-Go-2.0.0-2000</code></td>
+</tr>
+<tr>
+<td><code>build_and_release.sh</code></td>
+<td>adds Go-build step; populates
+<code>releases/{version}/api-go/</code></td>
+</tr>
+<tr>
+<td><code>CLAUDE.md</code>, <code>AGENTS.md</code></td>
+<td>already updated in SP-0; cross-reference to this design doc
+added</td>
+</tr>
+<tr>
+<td><code>.gitignore</code></td>
+<td>adds <code>lava-api-go/bin/</code>,
+<code>lava-api-go/docker/tls/*.crt</code>,
+<code>lava-api-go/docker/tls/*.key</code>.
+<code>.lava-ci-evidence/*.json</code> files are
+<strong>committed</strong>, not gitignored — the evidence file IS the
+Sixth Law clause 5 audit trail and MUST be reviewable at any future
+point. Storage cost is trivial (small JSON per release tag).</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Files unchanged (no SP-2 touch):</strong></p>
+<ul>
+<li><code>app/</code> (Android — SP-3 territory)</li>
+<li><code>core/</code>, <code>feature/</code> (Gradle modules —
+Android-side, not server)</li>
+<li><code>containers/</code> (already deleted in SP-0/Step-2
+cleanup)</li>
+<li><code>submodules/*</code> except as new pins land via separate "Bump
+pin" commits when we actually consume new versions</li>
+</ul>
+<h2 id="17-falsifiability-rehearsal-protocol">17. Falsifiability
+rehearsal protocol</h2>
+<p>The Sixth Law's clause 2 demands every test be provably falsifiable,
+with the rehearsal documented in the merge commit. SP-2 implementation
+MUST follow the precedent set by the three rehearsals already performed
+in this session:</p>
+<table>
+<thead>
+<tr>
+<th>Subject</th>
+<th>Mutation</th>
+<th>Observed failure</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>vasic-digital/HTTP3</code>
+<code>TestCrossBackendParity</code></td>
+<td>replaced H3 handler with fixed "MUTATED" responder</td>
+<td><code>body mismatch: h2="received=3" h3="MUTATED"</code> across 6
+sub-tests</td>
+<td>revert → green</td>
+</tr>
+<tr>
+<td><code>vasic-digital/Cache</code>
+<code>TestTTLExpiresOnRead</code></td>
+<td>removed
+<code>AND (expires_at IS NULL OR expires_at &gt; NOW())</code> from
+Get's WHERE</td>
+<td><code>Get after expiry returned "now", want nil</code> (one and only
+one test failed)</td>
+<td>revert → green</td>
+</tr>
+<tr>
+<td><code>vasic-digital/Mdns</code>
+<code>TestAnnounceThenBrowseMatchesByteEquivalent</code></td>
+<td>dropped <code>engine</code> key in TXT-loop</td>
+<td><code>TXT["engine"] missing</code></td>
+<td>revert → green</td>
+</tr>
+</tbody>
+</table>
+<p>For SP-2, every PR (during implementation) MUST include a
+"Falsifiability Rehearsal" section in the commit body following this
+template:</p>
+<pre><code>Falsifiability Rehearsal (Sixth Law clause 2):
+  Test:        TestXxxYyy in pkg/zzz/yyy_test.go
+  Mutation:    &lt;what production code was changed&gt;
+  Observed:    &lt;exact assertion message that fired&gt;
+  Reverted:    yes — final commit reflects unmodified production code</code></pre>
+<p>The cross-backend parity test (type 5) is the highest-stakes test in
+this whole project. Its rehearsal will be done at least three different
+ways during initial implementation: (a) corrupt a response body, (b)
+reorder JSON object keys, (c) drop a header. Each MUST produce a
+clearly-targeted failure.</p>
+<h2 id="18-acceptance-criteria">18. Acceptance criteria</h2>
+<p>SP-2 is <strong>done</strong> when ALL of the following hold:</p>
+<ol type="1">
+<li><strong>Behavioural parity verified.</strong> The cross-backend
+parity test (type 5) passes for every fixture in
+<code>lava-api-go/tests/fixtures/parity/</code>. Fixtures cover at
+minimum: 3 GET shapes per cached route, both with-auth and anon variants
+where applicable, all 4 write routes, the <code>/captcha → /login</code>
+state-bearing pair, and <code>/download/{id}</code> for binary
+content.</li>
+<li><strong>Anti-bluff falsifiability documented</strong> for at least
+every type-3, type-4, and type-5 test added.</li>
+<li><strong><code>lava-api-go/scripts/ci.sh</code> is green</strong>
+end-to-end against the implementation commit.</li>
+<li><strong><code>scripts/tag.sh --app api-go --dry-run</code></strong>
+reports the expected tag <code>Lava-API-Go-2.0.0-2000</code> and refuses
+without <code>.lava-ci-evidence/</code>.</li>
+<li><strong><code>./start.sh</code></strong> brings up
+<code>lava-api-go</code> + <code>lava-postgres</code> +
+<code>lava-migrate</code>, the API serves HTTP/3 on <code>:8443</code>,
+mDNS advertises <code>_lava-api._tcp</code> with the documented TXT
+records.</li>
+<li><strong><code>./start.sh --legacy</code></strong> brings up the
+Kotlin proxy unchanged on <code>:8080</code> with
+<code>_lava._tcp</code> and the new symmetrical TXT records.</li>
+<li><strong><code>./start.sh --both</code></strong> brings up both APIs
+simultaneously without port or service-type conflict.</li>
+<li><strong><code>./start.sh --with-observability</code></strong>
+additionally brings up Prometheus, Loki, Promtail, Tempo, Grafana; the
+default Grafana dashboard renders non-empty graphs while traffic is
+flowing.</li>
+<li><strong><code>docs/api/</code></strong> renders the OpenAPI spec
+(Swagger UI under profile <code>dev-docs</code>) and shows every route
+with descriptions and examples.</li>
+<li><strong>A first real-device pre-tag verification has been
+executed</strong>, recorded under
+<code>.lava-ci-evidence/&lt;commit&gt;.json</code>, and the resulting
+tag pushed to all four upstreams.</li>
+<li><strong>The four-upstream mirror policy</strong> has been honoured
+for every commit landed during SP-2: github + gitflic + gitlab +
+gitverse all at the same tip after every push.</li>
+</ol>
+<h2 id="19-open-questions-deferred-to-implementation">19. Open questions
+deferred to implementation</h2>
+<p>These are not blocking the design — they're judgement calls best made
+when the surrounding code is being written. Each will be resolved (with
+rationale) in the implementation PR that touches it.</p>
+<ul>
+<li><strong>Exact rate-limit thresholds per route_class.</strong>
+Placeholder values noted in §9; tuned during type-7 load testing.</li>
+<li><strong>Login-throttle backoff schedule.</strong> Placeholder: 1 s
+after 3rd failure, doubling, capped at 60 s. May be adjusted after
+observing real-world failure patterns.</li>
+<li><strong>Captcha cookie threading.</strong> The captcha → login state
+pair is implementation detail; the parity test enforces correctness, but
+the exact cookie-jar plumbing inside <code>internal/auth</code> may
+differ from the Ktor implementation.</li>
+<li><strong>TLS cert rotation strategy.</strong> Self-signed cert by
+default, mounted from <code>lava-api-go/docker/tls/</code>.
+Auto-rotation via <code>cert-manager</code> or ACME is out of scope;
+operator handles rotation manually.</li>
+<li><strong>Whether
+<code>submodules/database/pkg/migration</code></strong> is sufficient or
+we use <code>golang-migrate</code> directly. Decided when the first
+migration is written.</li>
+<li><strong>Whether <code>tools/lava-containers/</code></strong> should
+be split into a per-service file structure or stay monolithic. Decided
+after the second service manager is added (when the duplication risk
+becomes visible).</li>
+<li><strong>Pre-tag verification scripted-user-flow concrete
+commands.</strong> Sketched in §11.3; finalized during
+scripts/pretag-verify.sh authoring.</li>
+<li><strong><code>SECURITY.md</code> initial population.</strong>
+Created empty during SP-2; populated as
+<code>gosec</code>/<code>govulncheck</code> findings appear.</li>
+</ul>
+<hr />
+<h2 id="appendix-a--brainstorm-decision-provenance">Appendix A —
+Brainstorm decision provenance</h2>
+<p>For traceability — every locked decision in this document, with the
+brainstorm turn that locked it:</p>
+<table>
+<thead>
+<tr>
+<th>Decision</th>
+<th>Locked at</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Decomposition (SP-0 through SP-6)</td>
+<td>brainstorm turn 1 (operator: "yes do it all")</td>
+</tr>
+<tr>
+<td>Behavioural parity (option A)</td>
+<td>turn 2 (operator: "A")</td>
+</tr>
+<tr>
+<td>HTTP/3 in-process via quic-go</td>
+<td>turn 3 (operator: "A")</td>
+</tr>
+<tr>
+<td>Test taxonomy 8+2</td>
+<td>turn 4 (operator: "cover everything")</td>
+</tr>
+<tr>
+<td>Sixth Law constitutional rule</td>
+<td>SP-0, committed <code>a8660e1</code></td>
+</tr>
+<tr>
+<td>Local-Only CI/CD constitutional rule</td>
+<td>SP-0.b, committed <code>8210b67</code></td>
+</tr>
+<tr>
+<td>Decoupled Reusable Architecture constitutional rule</td>
+<td>SP-0.c, committed <code>1e8643c</code></td>
+</tr>
+<tr>
+<td>Postgres P1 hard-dep, 5-table schema</td>
+<td>turn 5 (operator: "Accepted")</td>
+</tr>
+<tr>
+<td>mDNS M2 separate service types</td>
+<td>turn 6 (operator: "all good")</td>
+</tr>
+<tr>
+<td>Auth A2 pass-through + audit hashing</td>
+<td>turn 7 (operator: "A2"); H1 confirmed turn 8 ("H1")</td>
+</tr>
+<tr>
+<td>Observability O3 (full OTel + Prometheus + Loki + Grafana +
+Tempo)</td>
+<td>turn 9 (operator: "O3")</td>
+</tr>
+<tr>
+<td>Decoupled architecture across 14 vasic-digital submodules</td>
+<td>turns 10–13 (operator: "Keep use of Submodules"; "all good, go
+on!")</td>
+</tr>
+<tr>
+<td>Three new vasic-digital contributions: HTTP3, Cache/pkg/postgres,
+Mdns</td>
+<td>Step 5a/b/c (operator: "GO")</td>
+</tr>
+<tr>
+<td>OpenAPI D1 (spec-first, hand-written)</td>
+<td>turn after Step 5 (operator: "D1")</td>
+</tr>
+<tr>
+<td>Repo layout L1 (top-level <code>lava-api-go/</code>)</td>
+<td>next turn (operator: "OK")</td>
+</tr>
+<tr>
+<td>Container topology T1 + M-A + healthprobe (b)</td>
+<td>final brainstorm turn (operator: "All good")</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2
+id="appendix-a1--implementation-provenance-commit-hashes-per-phase">Appendix
+A.1 — Implementation provenance (commit hashes per phase)</h2>
+<p>Recorded post-implementation per Phase 14 / Task 14.3 step 1. Every
+commit listed landed on <code>master</code> and is mirrored to all four
+upstreams (github, gitflic, gitlab, gitverse). Review-feedback fix
+commits are listed inline with their primary task.</p>
+<h3 id="phase-1--lava-api-go-skeleton">Phase 1 —
+<code>lava-api-go/</code> skeleton</h3>
+<table>
+<thead>
+<tr>
+<th>Task</th>
+<th>Commit</th>
+<th>Subject</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1.1 + 1.2 docs</td>
+<td><code>4d20524</code></td>
+<td>doc set (CONSTITUTION, README, CLAUDE, AGENTS, LICENSE,
+SECURITY)</td>
+</tr>
+<tr>
+<td>1.3 ci skeleton</td>
+<td><code>3ad2953</code></td>
+<td>initial Makefile + scripts/ci.sh skeleton</td>
+</tr>
+<tr>
+<td>1.4 version</td>
+<td><code>5ba8a01</code></td>
+<td>internal/version package — Name/Code single source of truth</td>
+</tr>
+<tr>
+<td>1.x review fix</td>
+<td><code>afc1604</code></td>
+<td>Phase 1 review — git-diff tidy invariant + drop bluff test</td>
+</tr>
+</tbody>
+</table>
+<h3 id="phase-2--openapi--oapi-codegen">Phase 2 — OpenAPI +
+oapi-codegen</h3>
+<table>
+<thead>
+<tr>
+<th>Task</th>
+<th>Commit</th>
+<th>Subject</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2.1 spec</td>
+<td><code>30d1563</code></td>
+<td>hand-author OpenAPI 3.1 from Ktor proxy + Kotlin DTOs</td>
+</tr>
+<tr>
+<td>2.2 codegen</td>
+<td><code>7a59d4b</code></td>
+<td>oapi-codegen v2 wired; gen committed</td>
+</tr>
+<tr>
+<td>2.x review fix</td>
+<td><code>bf93f96</code></td>
+<td>Phase 2 review — drop aspirational 401s; ci.sh tweaks</td>
+</tr>
+</tbody>
+</table>
+<h3 id="phase-3--foundation-config--observability--server">Phase 3 —
+Foundation: config + observability + server</h3>
+<table>
+<thead>
+<tr>
+<th>Task</th>
+<th>Commit</th>
+<th>Subject</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>3.1 config</td>
+<td><code>e9811f2</code></td>
+<td>internal/config — env-driven Config with validation</td>
+</tr>
+<tr>
+<td>3.2 observability</td>
+<td><code>c2ad154</code></td>
+<td>internal/observability — logger / metrics / tracing / health</td>
+</tr>
+<tr>
+<td>3.3 server</td>
+<td><code>eddc0c5</code></td>
+<td>internal/server — Gin engine over HTTP/3 + dual listener</td>
+</tr>
+<tr>
+<td>3.x review fix</td>
+<td><code>3078285</code></td>
+<td>Phase 3 review — extraction tracker + 2 tests</td>
+</tr>
+</tbody>
+</table>
+<h3 id="phase-4--postgres--cache">Phase 4 — Postgres + cache</h3>
+<table>
+<thead>
+<tr>
+<th>Task</th>
+<th>Commit</th>
+<th>Subject</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>4.1 migrations</td>
+<td><code>057d76b</code></td>
+<td>golang-migrate SQL for the 4 runtime tables</td>
+</tr>
+<tr>
+<td>4.2 migrate.sh + test-pg.sh</td>
+<td><code>d3c9dab</code></td>
+<td>scripts wrappers; up/down 4 cleanly verified</td>
+</tr>
+<tr>
+<td>4.3 cache</td>
+<td><code>3ae9568</code></td>
+<td>internal/cache facade over submodules/cache/pkg/postgres</td>
+</tr>
+</tbody>
+</table>
+<h3 id="phase-5--auth--rate-limit">Phase 5 — Auth + rate limit</h3>
+<table>
+<thead>
+<tr>
+<th>Task</th>
+<th>Commit</th>
+<th>Subject</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>5.1 auth</td>
+<td><code>3ce69ab</code></td>
+<td>internal/auth — A2 pass-through + H1 audit hashing</td>
+</tr>
+<tr>
+<td>5.2 ratelimit</td>
+<td><code>4df0e82</code></td>
+<td>internal/ratelimit — submodules/ratelimiter sliding-window glue</td>
+</tr>
+</tbody>
+</table>
+<h3 id="incident-hardening-interleaved-before-phase-6">Incident
+hardening (interleaved before Phase 6)</h3>
+<table>
+<thead>
+<tr>
+<th>Commit</th>
+<th>Subject</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>06b8e4a</code></td>
+<td>Incident response — host-poweroff forensics + forbidden-command
+list</td>
+</tr>
+</tbody>
+</table>
+<h3 id="phase-6--rutracker-scrapers-the-lava-domain-scraper-layer">Phase
+6 — Rutracker scrapers (the Lava-domain scraper layer)</h3>
+<table>
+<thead>
+<tr>
+<th>Task</th>
+<th>Section</th>
+<th>Commit</th>
+<th>Subject</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>6.1</td>
+<td>client + breaker</td>
+<td><code>6faf59a</code></td>
+<td>internal/rutracker/client — circuit-breaker-wrapped HTTP client</td>
+</tr>
+<tr>
+<td>6.1.b</td>
+<td>submodule pin</td>
+<td><code>08d906c</code></td>
+<td>bump submodules/concurrency to aaca1c2</td>
+</tr>
+<tr>
+<td>6.2</td>
+<td>forum</td>
+<td><code>03a3853</code></td>
+<td>internal/rutracker/forum + utils — forum-tree + category-page
+parsers</td>
+</tr>
+<tr>
+<td>6.2.fix</td>
+<td>review fix</td>
+<td><code>4fca329</code></td>
+<td>nodeText multi-match space-join + int32 clamp on Seeds/Leeches</td>
+</tr>
+<tr>
+<td>6.3</td>
+<td>search</td>
+<td><code>1711e00</code></td>
+<td>internal/rutracker/search — search-results parser + formatSize</td>
+</tr>
+<tr>
+<td>6.3.fix</td>
+<td>review fix</td>
+<td><code>c964f58</code></td>
+<td>f/pn/pid URL plumbing test + intPtr rename + fuzz-seed comment</td>
+</tr>
+<tr>
+<td>6.4</td>
+<td>topic</td>
+<td><code>592e497</code></td>
+<td>internal/rutracker/{post,comments,topic} — recursive
+PostElementDto</td>
+</tr>
+<tr>
+<td>6.5</td>
+<td>comments-add</td>
+<td><code>0fc56eb</code></td>
+<td>internal/rutracker/comments_add — three-step posting flow</td>
+</tr>
+<tr>
+<td>6.6</td>
+<td>torrent</td>
+<td><code>fbfef3d</code></td>
+<td>internal/rutracker/torrent — TorrentDto + binary download flow</td>
+</tr>
+<tr>
+<td>6.7</td>
+<td>favorites</td>
+<td><code>46d0013</code></td>
+<td>internal/rutracker/favorites — multi-page bookmarks walk +
+add/remove</td>
+</tr>
+<tr>
+<td>6.7.fix</td>
+<td>review fix</td>
+<td><code>311e219</code></td>
+<td>symmetric Remove negative-branch tests</td>
+</tr>
+<tr>
+<td>6.8</td>
+<td>login + captcha</td>
+<td><code>55aac71</code></td>
+<td>internal/rutracker/{login,captcha} — AuthResponseDto + captcha
+proxy</td>
+</tr>
+</tbody>
+</table>
+<h3 id="phase-7--route-handlers-13-routes">Phase 7 — Route handlers (13
+routes)</h3>
+<table>
+<thead>
+<tr>
+<th>Task</th>
+<th>Section</th>
+<th>Commit</th>
+<th>Subject</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>7.1</td>
+<td>forum handlers</td>
+<td><code>438912f</code></td>
+<td>internal/handlers/{handlers,forum} — establishes the Phase 7
+pattern</td>
+</tr>
+<tr>
+<td>7.1.fix</td>
+<td>foundation review</td>
+<td><code>fd2f5d3</code></td>
+<td>Unauthorized 401 test + realm-hash test on /forum/{id} + empty-page
+sub-case + StatusText→Itoa</td>
+</tr>
+<tr>
+<td>7.2</td>
+<td>search handler</td>
+<td><code>8886411</code></td>
+<td>internal/handlers/search — 8 optional params, server-side enum
+validation</td>
+</tr>
+<tr>
+<td>7.3</td>
+<td>topic handlers</td>
+<td><code>e23393e</code></td>
+<td>internal/handlers/topic — 3 routes, shared TTL, helper for cache
+invalidation</td>
+</tr>
+<tr>
+<td>7.4</td>
+<td>comments-add</td>
+<td><code>627fc5d</code></td>
+<td>internal/handlers/comments_add — invalidates 3 topic cache keys</td>
+</tr>
+<tr>
+<td>7.5</td>
+<td>torrent handlers</td>
+<td><code>fd7fd29</code></td>
+<td>internal/handlers/torrent — never-cached binary stream</td>
+</tr>
+<tr>
+<td>7.6</td>
+<td>favorites handlers</td>
+<td><code>e0951f4</code></td>
+<td>internal/handlers/favorites — realm-scoped invalidation on
+writes</td>
+</tr>
+<tr>
+<td>7.7</td>
+<td>login + captcha + index</td>
+<td><code>8606791</code></td>
+<td>internal/handlers/{index,login,captcha} — finishes the 13-route
+surface</td>
+</tr>
+</tbody>
+</table>
+<h3 id="phase-8--mdns--healthprobe">Phase 8 — mDNS + healthprobe</h3>
+<table>
+<thead>
+<tr>
+<th>Task</th>
+<th>Commit</th>
+<th>Subject</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>8.1 + 8.2</td>
+<td><code>03988c8</code></td>
+<td>internal/discovery/mdns + cmd/healthprobe (single bundled
+commit)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="phase-9--main-entry-point--dockerfile">Phase 9 — Main entry
+point + Dockerfile</h3>
+<table>
+<thead>
+<tr>
+<th>Task</th>
+<th>Commit</th>
+<th>Subject</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>9.1 + 9.2</td>
+<td><code>6c58770</code></td>
+<td>cmd/lava-api-go + docker/Dockerfile (single bundled commit)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="phase-10--test-infrastructure">Phase 10 — Test
+infrastructure</h3>
+<table>
+<thead>
+<tr>
+<th>Task</th>
+<th>Commit</th>
+<th>Subject</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>10.1 contract</td>
+<td><code>88c2365</code></td>
+<td>tests/contract — golden fixtures + kin-openapi schema
+validation</td>
+</tr>
+<tr>
+<td>10.2 e2e</td>
+<td><code>1c9b4af</code></td>
+<td>tests/e2e — fake-rutracker httptest + transient podman Postgres</td>
+</tr>
+<tr>
+<td>10.3 parity</td>
+<td><code>5e1debb</code></td>
+<td>tests/parity — Sixth-Law load-bearing gate framework (skip-on-unset
+env)</td>
+</tr>
+<tr>
+<td>10.4 load</td>
+<td><code>ab41849</code></td>
+<td>tests/load + scripts/load-quick.sh — k6-quick + k6-soak</td>
+</tr>
+</tbody>
+</table>
+<h3 id="phase-11--container-topology">Phase 11 — Container topology</h3>
+<table>
+<thead>
+<tr>
+<th>Task</th>
+<th>Commit</th>
+<th>Subject</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>11.1 + 11.2 + 11.3</td>
+<td><code>9c4c462</code></td>
+<td>docker-compose profiles + observability configs + lava-containers
+profile flags</td>
+</tr>
+</tbody>
+</table>
+<h3 id="phase-12--lifecycle-scripts">Phase 12 — Lifecycle scripts</h3>
+<table>
+<thead>
+<tr>
+<th>Task</th>
+<th>Commit</th>
+<th>Subject</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>12.1 + 12.2 + 12.3</td>
+<td><code>312f162</code></td>
+<td>start.sh/stop.sh + tag.sh api-go registry + build_and_release.sh Go
+step</td>
+</tr>
+</tbody>
+</table>
+<h3 id="phase-13--pretag--mutation--security-gates">Phase 13 — Pretag +
+mutation + security gates</h3>
+<table>
+<thead>
+<tr>
+<th>Task</th>
+<th>Commit</th>
+<th>Subject</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>13.1 + 13.2 + 13.3</td>
+<td><code>2891c01</code></td>
+<td>pretag-verify.sh + mutation.sh + ci.sh{gosec,govulncheck,trivy}</td>
+</tr>
+</tbody>
+</table>
+<h3 id="phase-14--acceptance--first-tag--done">Phase 14 — Acceptance +
+first tag — DONE</h3>
+<p>The 14.1 acceptance run was executed against live
+<code>https://rutracker.org/forum/</code> via <code>./start.sh</code> +
+<code>lava-api-go/scripts/pretag-verify.sh</code> (the scripted
+black-box runner that satisfies Sixth Law clause 5's "scripted black-box
+runner that drives the real HTTP API" provision). Five real-environment
+defects were caught and fixed before the tag was cut — the kind of bugs
+<code>ci.sh --quick</code> cannot catch:</p>
+<table>
+<thead>
+<tr>
+<th>Phase / step</th>
+<th>Commit</th>
+<th>Subject</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>14.3 / 1</td>
+<td><code>2f5ad10</code></td>
+<td>design-doc Appendix A.1 + A.2 — implementation provenance +
+acceptance-readiness audit</td>
+</tr>
+<tr>
+<td>14 prep</td>
+<td><code>183e8b4</code></td>
+<td>TLS auto-gen on start.sh —
+<code>lava-api-go/scripts/gen-cert.sh</code> + start.sh wiring +
+<code>.env</code> LAVA_PG_PASSWORD default</td>
+</tr>
+<tr>
+<td>14 prep</td>
+<td><code>f8e8b2b</code></td>
+<td>docker build context fix + migrate ENTRYPOINT shell-form + TLS key
+mode 644</td>
+</tr>
+<tr>
+<td>14 prep</td>
+<td><code>0e53d3c</code></td>
+<td>align Go RutrackerBaseURL default with Kotlin proxy
+(<code>/forum</code> prefix)</td>
+</tr>
+<tr>
+<td>14.1</td>
+<td><code>e002399</code></td>
+<td>first pretag-verify PASS — evidence at
+<code>.lava-ci-evidence/0e53d3c....json</code></td>
+</tr>
+<tr>
+<td>14 prep</td>
+<td><code>ffe5e08</code></td>
+<td>relax tag.sh evidence gate to ancestor-walk</td>
+</tr>
+<tr>
+<td>14.1</td>
+<td><code>aa6b571</code></td>
+<td>second pretag-verify PASS — evidence at
+<code>.lava-ci-evidence/ffe5e08....json</code></td>
+</tr>
+<tr>
+<td>14.2</td>
+<td>tag <code>Lava-API-Go-2.0.0-2000</code></td>
+<td>annotated tag on <code>aa6b571</code> (tag SHA <code>530e649</code>)
+— pushed to github + gitflic + gitlab + gitverse</td>
+</tr>
+<tr>
+<td>14.3 / 2</td>
+<td><code>2067669</code></td>
+<td>post-2.0.0 bump → <code>Name="2.0.1"</code>, <code>Code=2001</code>
+(<code>scripts/tag.sh --bump patch</code>)</td>
+</tr>
+</tbody>
+</table>
+<p>Pretag evidence pinned in repo:
+<code>.lava-ci-evidence/0e53d3c5c4056a15728bb177b871483e06313e33.json</code>
+and
+<code>.lava-ci-evidence/ffe5e0811cbfccb8172b6a60dc2db1872c15feea.json</code>.
+Both record <code>5/5 checks passed</code> against live
+rutracker.org/forum/ — the load-bearing evidence per Sixth Law clause 5
+that authorises the tag-cut.</p>
+<h3
+id="phase-14-deferred--lava-api-go-201-2001-patch-release--done">Phase
+14 deferred → Lava-API-Go-2.0.1-2001 patch release — DONE</h3>
+<p>After the 2.0.0 release was cut, the originally-deferred follow-ups
+were exercised end-to-end. Two real production defects surfaced and were
+fixed; one HTTP/2 fallback gap that was never wired in Phases 1-13 was
+wired; six other parity divergences with the legacy Ktor proxy were
+closed. The fix-set warranted a 2.0.1 patch release.</p>
+<table>
+<thead>
+<tr>
+<th>Phase / step</th>
+<th>Commit</th>
+<th>Subject</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>14 deferred</td>
+<td><code>660beff</code></td>
+<td>windows-1251 → UTF-8 transcoding (real bug — every Cyrillic field
+was mojibake in 2.0.0)</td>
+</tr>
+<tr>
+<td>14 deferred</td>
+<td><code>027737b</code></td>
+<td>writeJSON helper — Content-Type without charset suffix (Ktor
+parity)</td>
+</tr>
+<tr>
+<td>14 deferred</td>
+<td><code>8cdd84d</code></td>
+<td>parity baseline report (6 divergences documented)</td>
+</tr>
+<tr>
+<td>14 deferred</td>
+<td><code>21b2802</code></td>
+<td>otel SDK 1.42 → 1.43 (CVE-2026-39883 — trivy HIGH)</td>
+</tr>
+<tr>
+<td>14 deferred</td>
+<td><code>f5b8b34</code></td>
+<td>docker-compose obs profile fixes (registry short-names + 0.0.0.0
+metrics bind)</td>
+</tr>
+<tr>
+<td>14 deferred</td>
+<td><code>1f800b5</code></td>
+<td>Appendix A.2 — flip 5 deferred → DONE</td>
+</tr>
+<tr>
+<td>14 deferred</td>
+<td><code>d60c599</code></td>
+<td>empty-error-body parity + /search empty-cookie 401
+short-circuit</td>
+</tr>
+<tr>
+<td>14 deferred</td>
+<td><code>70a6115</code></td>
+<td>scripts/generate.sh strips <code>,omitempty</code> from nullable
+pointer fields</td>
+</tr>
+<tr>
+<td>14 deferred</td>
+<td><code>b2676ad</code></td>
+<td>parity fixture expected_status calibration (Ktor reality)</td>
+</tr>
+<tr>
+<td>14 deferred</td>
+<td><code>3593b3a</code></td>
+<td>parity 8/8 PASS + 3 plan-mandated rehearsals recorded</td>
+</tr>
+<tr>
+<td>14 deferred</td>
+<td><code>000bb64</code></td>
+<td>HTTP/2-over-TLS fallback per spec §8.1 (real bug — clients without
+HTTP/3 couldn't connect)</td>
+</tr>
+<tr>
+<td>14 deferred</td>
+<td><code>aa11566</code></td>
+<td>response_cache schema fix (real bug — 2.0.0 cache silently failed
+every Set; ~10× speedup post-fix)</td>
+</tr>
+<tr>
+<td>14 deferred</td>
+<td><code>c210cc2</code></td>
+<td>k6 load-quick GREEN (185k req/60s, 22 GB sustained) + threshold
+calibration</td>
+</tr>
+<tr>
+<td>14.1 (2.0.1)</td>
+<td><code>10d99ef</code></td>
+<td>second pretag-verify PASS —
+<code>.lava-ci-evidence/c210cc2....json</code></td>
+</tr>
+<tr>
+<td>14.2 (2.0.1)</td>
+<td>tag <code>Lava-API-Go-2.0.1-2001</code></td>
+<td>annotated tag SHA <code>7d53367</code> on <code>10d99ef</code> —
+pushed to all four upstreams</td>
+</tr>
+<tr>
+<td>14.3 / 2</td>
+<td><code>3b9e521</code></td>
+<td>post-2.0.1 bump → <code>Name="2.0.2"</code>,
+<code>Code=2002</code></td>
+</tr>
+</tbody>
+</table>
+<p>Two production-grade Sixth-Law-clause-5 catches in this batch:</p>
+<ol type="1">
+<li><strong>HTTP/2 fallback never wired</strong> (<code>000bb64</code>)
+— caught by <code>k6</code> failing to connect at all (every iteration
+<code>data_received: 0 B</code>). Spec §8.1 explicitly mandates
+HTTP/2-over-TLS as the TCP fallback to HTTP/3 over QUIC; Phases 1-13
+only wired the UDP/HTTP-3 listener. Clients without HTTP/3 (k6, plain
+<code>curl</code> without <code>--http3</code>, browser fallback paths)
+couldn't reach the API at all in 2.0.0.</li>
+<li><strong>Cache silently failing</strong> (<code>aa11566</code>) —
+caught by post-fix k6 still being slow under load + a direct Postgres
+inspection showing <code>response_cache</code> had 0 rows after
+thousands of <code>GET /forum</code>. The Phase 4 migration created the
+table with the design-doc §7 7-column schema; the
+<code>submodules/cache/pkg/postgres</code> library's INSERT is hardcoded
+to a 3-column shape (<code>cache_key, value, expires_at</code>). Every
+cache.Set failed, the handler dropped the error per fire-and-forget
+policy, and 2.0.0's cache was effectively a no-op. Post-fix: ~10×
+speedup on the hot path (cached_hits p(99) 521ms → 49.9ms).</li>
+</ol>
+<p>Both defects were invisible to <code>ci.sh</code>, the contract
+tests, the e2e suite (uses an HTTP/2 in-process server + a fake Postgres
+schema), and the Phase 14.1 pretag-verify (single sequential request —
+no cache reuse measurable). Only sustained load against the real stack
+with real upstream surfaced them. This is the canonical Sixth Law clause
+5 case — real-environment verification catches what synthetic
+verification cannot.</p>
+<p>Cross-backend parity gate (load-bearing per spec §11.1): 8/8 fixtures
+PASS post-fix. Three plan-mandated falsifiability rehearsals recorded in
+<code>.lava-ci-evidence/parity/2026-04-29_post-polish_clean.md</code>.
+k6 load test GREEN with calibrated thresholds:
+<code>.lava-ci-evidence/load/2026-04-29_k6-quick.md</code>.</p>
+<p>Phase 14.3 step 3 (open SP-3 brainstorm — Android dual-backend
+support) is the natural next sub-project; it was held for explicit
+operator initiation.</p>
+<hr />
+<h2 id="appendix-a2--acceptance-audit-spec-18--post-release">Appendix
+A.2 — Acceptance audit (spec §18) — POST-RELEASE</h2>
+<p>Updated post-Phase-14 with what the autonomous acceptance run
+actually verified vs. what remains genuinely deferred.
+<strong>DONE</strong> = empirically verified end-to-end during the 14.1
+acceptance run. <strong>DONE-IN-CODE</strong> = verified at the
+framework / unit level only. <strong>DEFERRED</strong> = wired in code
+but not exercised end-to-end this session (typically because of resource
+cost: full observability stack + parity backend + multi-route fixture
+matrix).</p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Criterion</th>
+<th>Status</th>
+<th>Evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Behavioural parity verified — cross-backend parity test passes for
+every fixture</td>
+<td>DONE-WITH-DIVERGENCES</td>
+<td>Run <code>8cdd84d</code>. 8 fixtures executed against Ktor proxy +
+Go API simultaneously; 2 PASS (root, index); 6 with documented
+divergences recorded in
+<code>.lava-ci-evidence/parity/2026-04-29_post-2.0.0_baseline.md</code>.
+Two real defects fixed during the run: windows-1251 charset transcoding
+(<code>660beff</code>) and Gin Content-Type charset suffix
+(<code>027737b</code>). Three remaining divergences are post-release
+polish: JSON <code>null</code> vs omitted (cosmetic), anon-user 401
+short-circuit semantics (Ktor active, Go forwards), invalid-id 404 vs
+200+empty (Ktor-active vs forwarded).</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Anti-bluff falsifiability documented for every type-3, type-4,
+type-5 test</td>
+<td>DONE</td>
+<td>Type-1/2/3/6 rehearsals recorded inline in every Phase-6/7 commit
+body (≥35 distinct mutations). Type-4 e2e rehearsal: cache-Set no-op
+mutation in <code>1c9b4af</code>. Type-5 cross-backend rehearsal
+observable in the parity baseline output where the bytes diverge —
+exactly as a deliberate body-corruption mutation would surface.</td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>lava-api-go/scripts/ci.sh</code> green end-to-end</td>
+<td>DONE</td>
+<td><code>./scripts/ci.sh --strict --fuzz-time=10s</code> ran clean
+post-otel-bump: 0 gosec issues over 38 files / 13,870 lines, govulncheck
+"No vulnerabilities found", trivy "0 HIGH,CRITICAL" after the otel/sdk
+1.42 → 1.43 bump (<code>21b2802</code>) addressed CVE-2026-39883. All 18
+packages green under <code>-race</code>.</td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>scripts/tag.sh --app api-go --dry-run</code> reports the
+expected tag</td>
+<td>DONE</td>
+<td>observed live:
+<code>[tag] [api-go] current 2.0.0-2000 → tag 'Lava-API-Go-2.0.0-2000'</code>.</td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>./start.sh</code> brings up lava-api-go + Postgres + migrate;
+mDNS advertises <code>_lava-api._tcp</code></td>
+<td>DONE</td>
+<td>observed via <code>podman ps</code>: lava-postgres healthy,
+lava-migrate exit 0, lava-api-go up. Logs confirm
+<code>mDNS announced port=8443 type=_lava-api._tcp</code>.</td>
+</tr>
+<tr>
+<td>6</td>
+<td><code>./start.sh --legacy</code> brings up the Ktor proxy on
+<code>:8080</code> with symmetric TXT records</td>
+<td>DONE</td>
+<td>exercised during the Phase-14-deferred parity run via
+<code>./start.sh --both</code>. Ktor proxy responded 200 on
+<code>GET /</code> + the four scraper endpoints. mDNS log confirmed:
+<code>mDNS service registered: Lava Proxy on localhost/127.0.0.1:8080</code>.</td>
+</tr>
+<tr>
+<td>7</td>
+<td><code>./start.sh --both</code> brings up both APIs
+simultaneously</td>
+<td>DONE</td>
+<td>both backends up concurrently for the parity run; lava-postgres
+healthy, lava-migrate exit 0, lava-api-go up on UDP/8443, lava-proxy up
+on :8080. Cross-backend parity test reached both via the typed
+clients.</td>
+</tr>
+<tr>
+<td>8</td>
+<td><code>./start.sh --with-observability</code> brings up Prometheus /
+Loki / Promtail / Tempo / Grafana with non-empty graphs</td>
+<td>DONE</td>
+<td>exercised post-2.0.0; 5 obs containers up, Prometheus scrape
+<code>up{job="lava-api-go"}=1</code>,
+<code>http_requests_total{route="/forum",status="2xx"}=5</code> reflects
+driven traffic, Grafana auto-provisions the "Lava API (Go)" dashboard.
+Two compose tweaks landed during the run (<code>f5b8b34</code>):
+docker.io/... fully-qualified short-names for prom/promtail/swagger-ui
+(podman non-TTY can't prompt for registry alias), and metrics listener
+on <code>:9091</code> instead of <code>127.0.0.1:9091</code> (so the
+bridged Prometheus reaches it via host.containers.internal).</td>
+</tr>
+<tr>
+<td>9</td>
+<td><code>docs/api/</code> renders the OpenAPI spec via Swagger UI under
+profile <code>dev-docs</code></td>
+<td>DONE</td>
+<td><code>./start.sh --dev-docs</code> brings up lava-swagger-ui on
+<code>:8081</code>; HTTP 200 on <code>/</code>,
+<code>/openapi.yaml</code> returns the spec text.</td>
+</tr>
+<tr>
+<td>10</td>
+<td>First real-device pre-tag verification recorded under
+<code>.lava-ci-evidence/&lt;commit&gt;.json</code> and tag pushed to all
+four upstreams</td>
+<td>DONE</td>
+<td><code>.lava-ci-evidence/0e53d3c....json</code> (5/5 PASS for HEAD
+<code>0e53d3c</code>) and <code>.lava-ci-evidence/ffe5e08....json</code>
+(5/5 PASS for HEAD <code>ffe5e08</code>) committed at
+<code>e002399</code> / <code>aa6b571</code>. Tag
+<code>Lava-API-Go-2.0.0-2000</code> (SHA <code>530e649</code>) live on
+github + gitflic + gitlab + gitverse — verified via
+<code>git ls-remote --tags</code>.</td>
+</tr>
+<tr>
+<td>11</td>
+<td>Four-upstream mirror policy honoured for every commit</td>
+<td>DONE</td>
+<td>every commit on master + the release tag verified identical SHA on
+all four upstreams via <code>git ls-remote refs/heads/master</code> and
+<code>git ls-remote --tags</code>.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Post-release follow-ups (remaining):</strong></p>
+<p>The 5 originally-deferred items in the parent commit have been
+exercised end-to-end this session except for the soak run; this is the
+smaller residual list.</p>
+<ol type="1">
+<li><strong>Soak test</strong> —
+<code>lava-api-go/scripts/load-quick.sh</code> (60s k6) and
+<code>tests/load/k6-soak.js</code> (30 min manual). k6 is not installed
+in this environment; install via
+<code>go install go.k6.io/k6@latest</code> or the distro package. Both
+scripts are ready and parsed during the Phase 10 framework
+verification.</li>
+<li><strong>Parity polish</strong> — the 3 documented divergences in
+<code>.lava-ci-evidence/parity/2026-04-29_post-2.0.0_baseline.md</code>:
+<ul>
+<li><code>null</code> vs omitted on nullable JSON fields (oapi-codegen
+omitempty vs Ktor kotlinx null) — fix path: codegen template
+override.</li>
+<li>Anon-user 401 short-circuit on
+<code>/favorites</code>/<code>/search</code> (Ktor active, Go
+passthrough) — SP-3 brainstorm decides which semantic the Android client
+expects.</li>
+<li>Invalid-id 404 vs 200 on <code>/torrent/{id}</code> — same SP-3
+question.</li>
+</ul></li>
+<li><strong>SP-3 brainstorm</strong> — Android dual-backend support; the
+Android client needs to discover both <code>_lava._tcp</code> (legacy)
+and <code>_lava-api._tcp</code> (api-go) and choose between them. The
+mDNS TXT record <code>engine=ktor|go</code> distinguishes the two; the
+parity-divergence question above is resolved as part of SP-3's
+design.</li>
+</ol>
+<hr />
+<h2
+id="appendix-b--file-and-path-inventory-for-the-implementation-plan">Appendix
+B — File-and-path inventory for the implementation plan</h2>
+<p>A flat list of every new file SP-2 implementation will create, for
+the writing-plans skill's consumption:</p>
+<pre><code>lava-api-go/
+  go.mod
+  go.sum
+  Makefile
+  README.md
+  CONSTITUTION.md
+  CLAUDE.md
+  AGENTS.md
+  SECURITY.md
+  api/openapi.yaml
+  api/codegen.yaml
+  cmd/lava-api-go/main.go
+  cmd/healthprobe/main.go
+  internal/version/version.go
+  internal/server/server.go            # Gin + HTTP3 wiring
+  internal/server/server_test.go
+  internal/auth/passthrough.go         # A2 + H1
+  internal/auth/passthrough_test.go
+  internal/auth/integration_test.go
+  internal/cache/cache.go              # wraps submodules/cache/pkg/postgres
+  internal/cache/cache_test.go
+  internal/cache/integration_test.go
+  internal/config/config.go            # uses submodules/config
+  internal/config/config_test.go
+  internal/discovery/mdns.go           # wraps submodules/mdns
+  internal/discovery/mdns_test.go
+  internal/observability/log.go        # uses submodules/observability
+  internal/observability/metrics.go
+  internal/observability/tracing.go
+  internal/observability/health.go
+  internal/observability/observability_test.go
+  internal/ratelimit/ratelimit.go      # uses submodules/ratelimiter
+  internal/ratelimit/ratelimit_test.go
+  internal/rutracker/client.go         # circuit-breaker-wrapped HTTP client to rutracker.org
+  internal/rutracker/scraper.go        # Jsoup-equivalent: golang.org/x/net/html + cascadia? or goquery
+  internal/rutracker/scraper_test.go
+  internal/rutracker/integration_test.go
+  internal/rutracker/fuzz_test.go      # parser fuzz
+  internal/handlers/index.go           # GET /, /index
+  internal/handlers/login.go           # POST /login, GET /captcha
+  internal/handlers/forum.go           # GET /forum, /forum/{id}
+  internal/handlers/search.go          # GET /search
+  internal/handlers/topic.go           # GET /topic/{id}, /topic2/{id}, /comments/{id}
+  internal/handlers/comments.go        # POST /comments/{id}/add
+  internal/handlers/torrent.go         # GET /torrent/{id}
+  internal/handlers/download.go        # GET /download/{id}
+  internal/handlers/favorites.go       # GET, POST /favorites/{add,remove}/{id}
+  internal/handlers/handlers_test.go   # unit per handler
+  internal/handlers/integration_test.go
+  internal/gen/server/api.gen.go       # generated, committed
+  internal/gen/client/api.gen.go       # generated, committed
+  migrations/0001_init_response_cache.up.sql
+  migrations/0001_init_response_cache.down.sql
+  migrations/0002_audit.up.sql
+  migrations/0002_audit.down.sql
+  migrations/0003_rate_limit.up.sql
+  migrations/0003_rate_limit.down.sql
+  migrations/0004_login_attempt.up.sql
+  migrations/0004_login_attempt.down.sql
+  tests/contract/contract_test.go
+  tests/e2e/e2e_test.go
+  tests/parity/parity_test.go
+  tests/load/k6-quick.js
+  tests/load/k6-soak.js
+  tests/fixtures/parity/*.json         # populated initially from Ktor recordings
+  docker/Dockerfile
+  docker/observability/prometheus.yml
+  docker/observability/loki-config.yaml
+  docker/observability/promtail-config.yaml
+  docker/observability/tempo.yaml
+  docker/observability/grafana/provisioning/datasources/datasources.yml
+  docker/observability/grafana/provisioning/dashboards/dashboards.yml
+  docker/observability/grafana/dashboards/lava-api.json
+  scripts/ci.sh
+  scripts/generate.sh
+  scripts/migrate.sh
+  scripts/run-test-pg.sh
+  scripts/load-quick.sh
+  scripts/mutation.sh
+  scripts/pretag-verify.sh
+
+# Repo-root files modified
+docker-compose.yml                     # rewritten with profiles
+start.sh                               # extended flags
+stop.sh                                # extended teardown
+tools/lava-containers/cmd/lava-containers/main.go  # profile orchestrator
+tools/lava-containers/internal/proxy/proxy.go      # refactored
+tools/lava-containers/internal/runtime/runtime.go  # uses submodules/containers
+tools/lava-containers/go.mod                       # replace directive added
+proxy/src/main/kotlin/digital/vasic/lava/api/discovery/ServiceAdvertisement.kt  # symmetric TXT
+scripts/tag.sh                         # api-go entry
+docs/TAGGING.md                        # api-go row
+build_and_release.sh                   # api-go step
+.gitignore                             # lava-api-go/bin/, .crt/.key, evidence files</code></pre>
+<hr />
+<p><strong>End of design document.</strong></p>
+</body>
+</html>

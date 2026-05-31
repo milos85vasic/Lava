@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-04-30-sp3a-coverage-exemptions</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1 id="sp-3a-coverage-exemption-ledger">SP-3a Coverage Exemption
+Ledger</h1>
+<p>Per Constitutional clause 6.D (Behavioral Coverage Contract), every
+uncovered line in code authored under SP-3a is listed here with reason,
+reviewer, and date. Blanket waivers are forbidden.</p>
+<blockquote>
+<p><strong>See also: Seventh Law clause 5 (Recurring Bluff
+Hunt).</strong> Every entry in this ledger is eligible to be picked by
+the recurring 5-file random sample at phase wrap. An exemption that
+cannot survive the bluff hunt — i.e. the exempted code path is silently
+exercised by a test the hunt mutates — is a Seventh Law incident in
+waiting and MUST be audited rather than left as a paper-only exemption.
+The ledger is necessary, not sufficient: the recurring hunt is the live
+falsifiability check.</p>
+</blockquote>
+<p>This file was seeded ahead of Task 0.7 by Task 0.2
+(TestBookmarksRepository stub bluff) because that task needed an entry
+to land. Task 0.7 will append the Phase-0 summary section without
+re-creating the file.</p>
+<h2 id="format">Format</h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Lines</th>
+<th>Reason</th>
+<th>Reviewer</th>
+<th>Date</th>
+<th>PR</th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+<h2 id="entries">Entries</h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Lines</th>
+<th>Reason</th>
+<th>Reviewer</th>
+<th>Date</th>
+<th>PR</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>core/testing/src/main/kotlin/lava/testing/repository/TestBookmarksRepository.kt</code></td>
+<td>all (every method body is <code>TODO("Not yet implemented")</code>,
+except <code>clear()</code> which is a no-op)</td>
+<td>Complete stub fake. Full behavioral-equivalence implementation
+against <code>BookmarksRepositoryImpl</code> (Room
+<code>BookmarkDao</code>, <code>@PrimaryKey</code> on category id,
+<code>JSONArray</code>-encoded <code>newTopics</code> column) deferred
+to the first SP-3a consumer of <code>BookmarksRepository</code> —
+anticipated SP-3a Phase 4 (<code>tracker_settings</code> UI) or later.
+Stub status is locked in place by the inverted test
+<code>TestBookmarksRepositoryStubBluffTest</code>: when the stub is
+replaced with a real fake, those three assertions will start failing and
+force the maintainer to (a) remove this row, and (b) replace the
+inverted test with a true equivalence test patterned after
+<code>TestEndpointsRepositoryEquivalenceTest</code>. The current
+<code>MenuViewModelTest</code> constructs
+<code>ClearBookmarksUseCase(TestBookmarksRepository(), ...)</code> but
+never triggers a code path that calls a stubbed method (no
+<code>MenuAction.ClearBookmarks</code> test exists), so the stub is
+latent rather than actively broken. Anti-Bluff Pact Third Law violation
+acknowledged; falsifiability rehearsal recorded in
+<code>.lava-ci-evidence/sp3a-bluff-audit/0.2-test-bookmarks-repository.json</code>.</td>
+<td>implementer (subagent, supervised)</td>
+<td>2026-04-30</td>
+<td>SP-3a-0.2</td>
+</tr>
+<tr>
+<td><code>core/testing/src/main/kotlin/lava/testing/service/TestAuthService.kt</code></td>
+<td>all</td>
+<td>Fake has zero test consumers in the codebase as of 2026-04-30
+(verified via
+<code>grep -rn 'TestAuthService' --include='*.kt' core/ feature/ app/</code>
+excluding the declaration site — empty result). Per user decision A on
+the Phase 0 audit, equivalence audit is deferred to the first consumer
+(anticipated SP-3a Phase 2 RuTracker decoupling tests using the
+<code>AuthenticatableTracker</code> feature interface). When the first
+consumer is added, write a <code>TestAuthServiceEquivalenceTest</code>
+following the <code>TestEndpointsRepositoryEquivalenceTest</code>
+pattern (real <code>AuthServiceImpl</code> token persistence: in-memory
+token storage, login/logout state transitions, token-expiry
+observation). Anti-Bluff Pact Third Law: an unused fake cannot mislead
+any test; the bluff vector is latent until a consumer materialises.
+Evidence recorded in
+<code>.lava-ci-evidence/sp3a-bluff-audit/0.3-test-auth-service.json</code>.</td>
+<td>implementer (subagent, supervised)</td>
+<td>2026-04-30</td>
+<td>SP-3a-0.3</td>
+</tr>
+<tr>
+<td><code>core/testing/src/main/kotlin/lava/testing/service/TestLocalNetworkDiscoveryService.kt</code></td>
+<td>n/a — fake is a post-resolution injection point</td>
+<td>Equivalence already verified by two complementary contract tests in
+<code>core/domain</code>: (a)
+<code>core/domain/src/test/kotlin/lava/testing/contract/TestInfrastructureContractTest.kt</code>
+lines 167-212 (the
+<code>// TestLocalNetworkDiscoveryService — non-suspending emit contract</code>
+section) covers the fake's actual behaviour surface — non-suspending
+<code>emit</code>, multi-emit ordering, cross-scheduler rendezvous —
+i.e. the Third-Law bluff that the fake's previous
+rendezvous-<code>Channel()</code> form was guilty of; and (b)
+<code>core/domain/src/test/kotlin/lava/domain/contract/LocalNetworkDiscoveryContractTest.kt</code>
+(115 lines, 8 <code>@Test</code> methods) covers the real impl's
+<code>_lava._tcp.local.</code> / <code>_lava-api._tcp.local.</code>
+suffix-scoping logic via <code>matchesServiceType</code>, which is the
+SP-3.4 cross-match regression guard. The fake does NOT implement suffix
+scoping by design — it is a post-resolution channel that consumers feed
+pre-resolved <code>DiscoveredEndpoint</code> instances into;
+suffix-scoping happens at the NSD-resolution boundary that the fake
+intentionally bypasses (the <code>LocalNetworkDiscoveryService</code>
+interface contract is "emit <code>DiscoveredEndpoint</code>s", not
+"filter by service type"). No new test required for SP-3a; this entry
+documents the audit's resolution. Evidence recorded in
+<code>.lava-ci-evidence/sp3a-bluff-audit/0.4-test-local-network-discovery.json</code>.</td>
+<td>implementer (subagent, supervised)</td>
+<td>2026-04-30</td>
+<td>SP-3a-0.4</td>
+</tr>
+</tbody>
+</table>
+<h2 id="latent-findings">Latent findings</h2>
+<p>The following are NOT coverage exemptions — they are known-risk
+observations surfaced during the Phase 0 audit. They do NOT block Phase
+1 (Foundation), but each is a future-facing tripwire that MUST be
+revisited before its respective trigger condition materialises.</p>
+<h3
+id="lf-1--menuviewmodeltest-holds-testbookmarksrepository-without-exercising-it-linked-task-02">LF-1
+— <code>MenuViewModelTest</code> holds
+<code>TestBookmarksRepository</code> without exercising it (linked: Task
+0.2)</h3>
+<p><strong>Location:</strong>
+<code>feature/menu/src/test/kotlin/lava/menu/MenuViewModelTest.kt:115-118</code></p>
+<p><strong>Observation:</strong> the test constructs
+<code>TestBookmarksRepository()</code> and wires it into
+<code>ClearBookmarksUseCase</code>, which is then injected into
+<code>MenuViewModel</code>. As of 2026-04-30 no <code>@Test</code>
+method in this file dispatches a <code>MenuAction</code> whose handler
+invokes a stubbed method on the repository — i.e. the bookmarks fake is
+held but never touched. The instant a test is added that drives, for
+example, a <code>MenuAction.ClearBookmarks</code> flow, the stub will
+throw <code>NotImplementedError</code> at the first stubbed call site
+(<code>getBookmarks()</code>, <code>saveBookmark(...)</code>, etc.) and
+the test will fail at runtime, not at compile time.</p>
+<p><strong>Mitigation trigger:</strong> when the first
+<code>MenuViewModel</code> test path that exercises bookmarks is added
+(anticipated during SP-3a Phase 4 tracker settings work or earlier
+feature work), the author MUST either:</p>
+<ol type="1">
+<li>Implement <code>TestBookmarksRepository</code> against the
+<code>TestEndpointsRepositoryEquivalenceTest</code> pattern (full
+behavioural equivalence to <code>BookmarksRepositoryImpl</code>), and
+remove the corresponding ledger entry above; or</li>
+<li>Document why the new test path does not need a real fake (e.g. it
+uses a purpose-built local fake), and leave the ledger entry
+intact.</li>
+</ol>
+<p><strong>Audit linkage:</strong> Task 0.2 evidence at
+<code>.lava-ci-evidence/sp3a-bluff-audit/0.2-test-bookmarks-repository.json</code>.</p>
+<h3
+id="lf-2--testhealthcheckcontract-is-currently-a-future-facing-tripwire-linked-task-06">LF-2
+— <code>TestHealthcheckContract</code> is currently a future-facing
+tripwire (linked: Task 0.6)</h3>
+<p><strong>Location:</strong>
+<code>lava-api-go/tests/contract/healthcheck_contract_test.go::TestHealthcheckContract</code></p>
+<p><strong>Observation:</strong> Constitutional clause 6.A (real-binary
+contract tests) was authored in response to the lava-api-go
+<code>--http3</code> healthcheck regression of 2026-04-29, where
+<code>docker-compose.yml</code> invoked
+<code>healthprobe --http3 https://localhost:8443/health</code> against a
+binary that only registered
+<code>-url</code>/<code>-insecure</code>/<code>-timeout</code>. The
+contract test extracts the healthcheck command from
+<code>docker-compose.yml</code>, recovers the registered flag set from
+the binary's <code>Usage</code> output, and asserts strict subset. As of
+2026-04-30 the <code>lava-api-go</code> service block in
+<code>docker-compose.yml</code> has no <code>healthcheck:</code> block
+at all (the bug was triaged by removing the broken healthcheck rather
+than fixing the flag). Consequently the contract test's "extract
+command" step finds an empty command and the subset check is trivially
+satisfied — the test passes vacuously.</p>
+<p>The test is still load-bearing as a tripwire: the moment a
+healthcheck is re-introduced for <code>lava-api-go</code>, this contract
+test will validate it against the actual flag set of the
+<code>healthprobe</code> binary at the pinned hash. The falsifiability
+rehearsal recorded in Task 0.6 confirmed the test fails when a bogus
+<code>--http2</code> flag is added to the compose healthcheck.</p>
+<p><strong>Mitigation trigger:</strong> before re-introducing any
+<code>healthcheck:</code> block on the <code>lava-api-go</code> service
+in <code>docker-compose.yml</code>, the author MUST:</p>
+<ol type="1">
+<li>Run
+<code>go test ./tests/contract/... -run TestHealthcheckContract</code>
+against the new compose file and confirm the test now exercises the
+subset check non-vacuously (i.e. the extracted command is
+non-empty).</li>
+<li>Add a falsifiability rehearsal sub-test asserting that an
+unregistered flag in the new healthcheck command causes the contract
+checker to fail.</li>
+<li>Record the rehearsal in a new evidence file under
+<code>.lava-ci-evidence/</code> with the same
+Test/Mutation/Observed/Reverted protocol used by Task 0.6.</li>
+</ol>
+<p><strong>Audit linkage:</strong> Task 0.6 evidence at
+<code>.lava-ci-evidence/sp3a-bluff-audit/0.6-healthprobe-contract.json</code>.</p>
+<h3
+id="lf-3--tracker-chain-compiles-to-jvm-21-while-android-targets-jvm-17-linked-phase-2-section-a--resolved-in-phase-2-section-e-wrap-up">LF-3
+— Tracker chain compiles to JVM 21 while Android targets JVM 17 (linked:
+Phase 2 Section A) — <strong>RESOLVED in Phase 2 Section E
+wrap-up</strong></h3>
+<p><strong>Resolution (2026-04-30):</strong> mitigation trigger #1
+applied. Tracker-SDK submodule commit <code>b779fda</code> adds
+<code>subprojects { ... jvmTarget = JVM_17 }</code> to
+<code>submodules/tracker_sdk/build.gradle.kts</code>, pinning every SDK
+subproject to JVM 17. Lava's three JVM 17→21 overrides reverted
+(KotlinTrackerModuleConventionPlugin, core/tracker/api/build.gradle.kts,
+core/tracker/testing/build.gradle.kts). Submodule pin updated in Lava to
+<code>b779fda</code>. Build verified GREEN end-to-end:
+<code>:core:tracker:api</code>, <code>:core:tracker:testing</code>,
+<code>:core:tracker:rutracker:test</code> all compile and test against
+JVM 17 toolchain.</p>
+<p>Submodule commit landed locally on branch
+<code>sp3a-jvm17-target</code>; mirror push to GitHub + GitLab is a
+separate operator action (per Decoupled Reusable Architecture rule
+"Submodule fetch/pull is an EXPLICIT operator action").</p>
+<p>The original observation below is preserved for forensic context.</p>
+<hr />
+<p><strong>Locations:</strong></p>
+<ul>
+<li><code>buildSrc/src/main/kotlin/KotlinTrackerModuleConventionPlugin.kt</code></li>
+<li><code>core/tracker/api/build.gradle.kts</code></li>
+<li><code>core/tracker/testing/build.gradle.kts</code></li>
+</ul>
+<p><strong>Observation:</strong> Phase 2 Section A (Task 2.5) required
+the new <code>:core:tracker:rutracker</code> module to compile via
+<code>lava.kotlin.tracker.module</code>. At HEAD the Tracker-SDK
+composite-build's
+<code>:api</code>/<code>:mirror</code>/<code>:registry</code>/<code>:testing</code>
+projects default to the JDK 21 toolchain and emit JVM 21 class files.
+The Lava-side tracker convention plugin previously targeted JVM 17,
+which produced "class file has wrong version 65.0, should be 61.0"
+failures the moment any Lava module on the JVM-17 chain (e.g.
+<code>:core:tracker:api</code>, <code>:core:tracker:testing</code>)
+tried to consume an SDK type. To unblock Section A's required
+<code>BUILD SUCCESSFUL</code> acceptance gate, the implementer bumped
+JVM target to 21 in three places: the new tracker convention plugin, and
+the two pure-Kotlin Lava-side tracker modules that were previously on
+JVM_17 via <code>lava.kotlin.library</code>. The rest of the codebase
+(Android modules via <code>KotlinAndroid.kt</code>, regular Kotlin
+libraries via <code>KotlinLibraryConventionPlugin.kt</code>) remains
+JVM_17 — the APK still targets JVM 17 bytecode.</p>
+<p><strong>Why this is a latent finding rather than a fix:</strong> The
+plan does not authorize a JVM-target bump and the cleaner resolution is
+upstream — set <code>kotlin { jvmToolchain(17) }</code> on each
+Tracker-SDK Gradle module. That requires a new Tracker-SDK pin and a
+fresh 4-upstream mirror push. Deferred so the rename can land cleanly in
+Phase 2 Section A.</p>
+<p><strong>Mitigation trigger:</strong> before Section F (Tasks
+2.28-2.31, Hilt + LavaTrackerSdk wiring) lands the tracker chain into
+the Android <code>:app</code> Hilt module, the author MUST verify one
+of:</p>
+<ol type="1">
+<li>The Tracker-SDK pin has been updated upstream to target JVM 17 in
+its convention/module Gradle scripts, the new pin recorded in
+<code>submodules/tracker_sdk/</code>, and the three JVM_21 overrides
+reverted to JVM_17 in
+<code>KotlinTrackerModuleConventionPlugin.kt</code>,
+<code>core/tracker/api/build.gradle.kts</code>,
+<code>core/tracker/testing/build.gradle.kts</code>.</li>
+<li>The Android build (AGP/D8) is configured to accept JVM 21 input
+bytecode, and the rest of the codebase is bumped to JVM 21 for
+consistency. (Larger blast radius — only choose this path if upstream
+Tracker-SDK is sticky on JVM 21.)</li>
+</ol>
+<p>If neither condition is met before Section F,
+<code>:app:assembleDebug</code> will fail at D8 dexing the moment the
+tracker registry lands on the dependency graph.</p>
+<p><strong>Audit linkage:</strong> Phase 2 Section A spec compliance
+review (commit landing the LF-3 entry).</p>
+<h3
+id="lf-5--rutrackerdescriptor-declares-upload--user_profile-without-feature-interfaces-linked-phase-2-section-c--resolved-2026-04-30">LF-5
+— RuTrackerDescriptor declares UPLOAD + USER_PROFILE without feature
+interfaces (linked: Phase 2 Section C) — <strong>RESOLVED
+2026-04-30</strong></h3>
+<p><strong>Status:</strong> <strong>RESOLVED</strong> by commit
+<code>lf-5-resolved</code> on 2026-04-30. Resolution chose mitigation
+option 2 (drop the two capabilities) rather than option 1 (add the
+feature interfaces) because the legacy <code>UploadTorrentUseCase</code>
+and <code>GetCurrentProfileUseCase</code> plumbing is not consumed by
+any SP-3a feature ViewModel — adding the interfaces would be scope creep
+beyond the SP-3a foundation. Re-introducing either capability is
+appropriately scheduled for a future SP (SP-3a-bridge or later) where a
+feature ViewModel actually needs it.</p>
+<p><strong>Location:</strong>
+<code>core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker/RuTrackerDescriptor.kt</code></p>
+<p><strong>Observation (historic):</strong> Phase 2 Section B (Task 2.6)
+populated <code>RuTrackerDescriptor.capabilities</code> with the full
+12-capability set including <code>TrackerCapability.UPLOAD</code> and
+<code>TrackerCapability.USER_PROFILE</code>. As of Phase 2 Section C
+end-of-task, the new <code>:core:tracker:api</code> package did NOT
+define <code>UploadableTracker</code> or <code>ProfileTracker</code>
+feature interfaces. Consequently
+<code>RuTrackerClient.getFeature&lt;T&gt;()</code> could not return a
+non-null impl for those two capabilities — the
+<code>KClass&lt;T&gt;</code> for the missing interfaces did not exist as
+a dispatch key in the <code>when</code> switch.</p>
+<p><strong>Constitutional clause 6.E literal:</strong> "capability
+declared in descriptor ⇒ this returns non-null". The original code
+SATISFIED this letter-of-the-law because no caller could construct
+<code>getFeature(UploadableTracker::class)</code> — the type didn't
+exist. But the descriptor was making a forward-looking claim that no
+impl backed. Treated as a latent finding rather than an immediate
+violation.</p>
+<p><strong>Resolution (2026-04-30):</strong></p>
+<ul>
+<li><code>RuTrackerDescriptor.capabilities</code> reduced from 12 to 10
+entries.</li>
+<li><code>UPLOAD</code> and <code>USER_PROFILE</code> removed.</li>
+<li><code>RuTrackerDescriptorTest</code> assertion updated from
+<code>12 capabilities</code> to <code>10 capabilities</code> and a new
+test
+<code>LF-5 RESOLVED — UPLOAD and USER_PROFILE are NOT declared (no feature interface)</code>
+added.</li>
+<li><code>core/tracker/rutracker/README.md</code> capability matrix
+updated.</li>
+<li>The dormant scrapers (<code>RuTrackerInnerApi.uploadTorrent</code>,
+<code>getProfile</code>) and their wrapping UseCases continue to ship as
+legacy plumbing in this module but are no longer advertised through the
+SDK.</li>
+</ul>
+<p><strong>Audit linkage:</strong> Phase 2 Section C spec + code-quality
+review (commit landing the LF-5 entry); Phase 5 wrap follow-up (commit
+<code>lf-5-resolved</code>).</p>
+<h3
+id="lf-6--torrentitemsizebytes-permanently-null-for-rutracker-linked-phase-2-section-d--resolved-2026-04-30">LF-6
+— <code>TorrentItem.sizeBytes</code> permanently null for rutracker
+(linked: Phase 2 Section D) — <strong>RESOLVED 2026-04-30</strong></h3>
+<p><strong>Status:</strong> <strong>RESOLVED</strong> by commit
+<code>lf-6-resolved</code> on 2026-04-30. Resolution chose mitigation
+option 2 (parse the formatted display string in the forward mapper). A
+new internal helper <code>RuTrackerSizeParser</code> lives next to the
+forward mappers in
+<code>core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker/mapper/</code>
+and handles GB/MB/KB/B/TB suffixes with optional decimal (period or
+comma) at binary multipliers (1 GB = 2^30) — matching what the legacy
+rutracker scraper's <code>formatSize</code> helper renders, so a
+render-then-parse round-trip is bytewise correct (modulo Long truncation
+of the truncated <code>Double</code> value, which is the same precision
+the formatted display string carries).</p>
+<p><strong>Locations:</strong></p>
+<ul>
+<li><code>core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker/mapper/SearchPageMapper.kt</code></li>
+<li><code>core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker/mapper/CategoryPageMapper.kt</code></li>
+<li><code>core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker/mapper/TopicMapper.kt</code></li>
+</ul>
+<p><strong>Observation (historic):</strong> The new tracker-api model
+<code>TorrentItem</code> exposes <code>sizeBytes: Long?</code>. The
+legacy rutracker scraper delivers torrent size as a pre-formatted
+display string (e.g. <code>"4.7 GB"</code>), and the raw byte count is
+discarded before the DTO reaches the forward mapper. Consequently every
+<code>TorrentItem</code> produced by the rutracker forward mappers HAD
+<code>sizeBytes = null</code>. The display string was preserved in
+<code>metadata["rutracker.size_text"]</code> so UI could render it, but
+any consumer of
+<code>Searchable</code>/<code>Browsable</code>/<code>Topic</code>
+features that relied on <code>sizeBytes</code> for filtering, sorting,
+or comparison against a threshold silently received <code>null</code>
+for every rutracker row.</p>
+<p><strong>Resolution (2026-04-30):</strong></p>
+<ul>
+<li>New <code>RuTrackerSizeParser</code> (internal object) in
+<code>core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker/mapper/RuTrackerSizeParser.kt</code>.
+Tolerates null/blank input by returning null; tolerates U+00A0 between
+number and unit; supports <code>B/KB/MB/GB/TB</code> (case-insensitive);
+accepts comma-decimal as well as period-decimal.</li>
+<li><code>SearchPageMapper.toTorrentItem</code> (the
+<code>TorrentDto</code> extension) now calls the parser;
+<code>TopicMapper.toTorrentItem</code> (the <code>TopicPageDto</code>
+extension) does the same. <code>CategoryPageMapper</code>'s
+<code>TopicDto</code> branch is intentionally unchanged —
+<code>TopicDto</code> has no <code>size</code> field upstream.</li>
+<li>Tests: <code>RuTrackerSizeParserTest</code> (15 cases covering
+integer GB, decimal GB period+comma, MB, KB, B, integer TB, decimal TB
+Double-precision truncation, case-insensitive, null, blank, garbage,
+no-whitespace, non-breaking-space). <code>SearchPageMapperTest</code>
+and <code>TopicMapperTest</code> now positively assert non-null
+<code>sizeBytes</code> on the fixtures with a <code>size</code>
+field.</li>
+</ul>
+<p><strong>Audit linkage:</strong> Phase 2 Section D combined review
+(commit landing the LF-6 entry); Phase 5 wrap follow-up (commit
+<code>lf-6-resolved</code>).</p>
+</body>
+</html>

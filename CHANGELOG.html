@@ -1,0 +1,3217 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>CHANGELOG</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1 id="changelog">Changelog</h1>
+<h2
+id="lava-android-1233-1053--lava-api-go-2322-2322--2026-05-18-smoother-onboarding-animations--13-submodule-pins-advanced--6l-62nd">Lava-Android-1.2.33-1053
+/ Lava-API-Go-2.3.22-2322 — 2026-05-18 (Smoother onboarding animations +
+13 submodule pins advanced + §6.L 62nd)</h2>
+<p><strong>Previous published:</strong> Lava-Android-1.2.32-1052 (debug
++ release shipped earlier 2026-05-18).</p>
+<p><strong>What's new for testers:</strong></p>
+<ul>
+<li><strong>Smoother transitions between onboarding screens</strong> —
+Welcome → ApiSelection → Providers → Configure → Summary now uses
+Material-spec easing (<code>FastOutSlowInEasing</code> 320ms slide +
+<code>LinearOutSlowInEasing</code> 220ms fade). Same
+back-direction-aware slide behaviour, just polished feel.</li>
+<li><strong>Submodule infrastructure refresh</strong> — 13 of 18
+<code>vasic-digital/*</code> submodule pins advanced to upstream HEADs
+incorporating their latest CLAUDE.md / CONSTITUTION.md / minor API
+hardening commits. Compile-clean + 8/8 Compose UI Challenges PASS
+confirm no API-surface breakage from the pulls.</li>
+</ul>
+<p><strong>Test execution:</strong> 8/8 PASS on Pixel_8/API35 (C00 + C01
++ Challenge26 6 sub-tests). Debug cold-launch 3199ms / Release
+cold-launch 1219ms — both no FATAL.</p>
+<p><strong>Distribute-readiness:</strong> §6.P versionCode 1053 &gt;
+1052; §6.Y bump-first applied; §6.W converged; §6.Z evidence file
+present; §6.AA stage 1 debug → stage 2 release.</p>
+<p><code>Classification:</code> project-specific.</p>
+<h2
+id="lava-android-1232-1052--lava-api-go-2321-2321--2026-05-18-wave-3--challenge26-anti-bluff-coverage-for-apiselection--6l-61st">Lava-Android-1.2.32-1052
+/ Lava-API-Go-2.3.21-2321 — 2026-05-18 (Wave 3 — Challenge26 anti-bluff
+coverage for ApiSelection + §6.L 61st)</h2>
+<p><strong>Previous published:</strong> Lava-Android-1.2.31-1051 (Stage
+1 debug + Stage 2 release both shipped earlier 2026-05-18).</p>
+<p><strong>User-visible release:</strong> identical APK behavior to
+1.2.31. The change in this release is the addition of
+<code>Challenge26ApiDiscoveryAndConnectivityTest</code> — 6 rendered-UI
+contract tests covering the new ApiSelection step at every state
+(searching, empty + retry, found-one, found-multiple + pluralization,
+selection callback, probe-failure + retry). Closes the Wave-3 anti-bluff
+item the 1.2.31-1051 release explicitly flagged as OWED.</p>
+<h3 id="whats-new-for-testers">What's new for testers</h3>
+<p>Behavior unchanged from 1.2.31-1051. Same smoke checklist:</p>
+<ol type="1">
+<li>Install debug APK → cold launch → Welcome screen.</li>
+<li>Tap "Get Started" → <strong>NEW "Choose your API"
+screen</strong>.</li>
+<li>If a <code>lava-api-go</code> is running on the LAN with
+<code>_lava-api._tcp</code> or <code>_lava-api-dev._tcp</code>, the API
+appears in the list within ~5s.</li>
+<li>Tap an API → spinner → on probe success → "Pick your providers"
+screen.</li>
+<li>Confirm subtitles under provider names read "Form Login" / "Api Key"
+/ etc. (no underscores).</li>
+</ol>
+<p>If you've already installed 1.2.31, this is the same APK with more
+test coverage backing it. Re-install or skip — no functional
+difference.</p>
+<h3 id="falsifiability-rehearsal-6j-anti-bluff">Falsifiability rehearsal
+(§6.J anti-bluff)</h3>
+<p>Per Challenge26's KDoc: mutating the "Searching for APIs on your
+network…" string in <code>ApiSelectionStep.kt</code> to "Loading…"
+causes <code>discoveryRunning_showsSearchingText</code> to fail with
+<code>onNodeWithText</code> returning empty node-set →
+<code>assertIsDisplayed</code> throws
+<code>ComposeNotFoundException</code>. The mutation rehearsal is the
+§6.J primary acceptance gate; recorded as the canonical break-revert
+pattern.</p>
+<h3 id="distribute-readiness">Distribute-readiness</h3>
+<ul>
+<li>✅ §6.P versionCode 1052 &gt; last-version-debug 1051 + &gt;
+last-version-release 1051</li>
+<li>✅ §6.Y bump-first applied (first hunk of this commit)</li>
+<li>✅ §6.W mirrors converged on github + gitlab (1.2.31 cycle
+pushed)</li>
+<li>✅ §6.AA two-stage: this cycle ships Stage 1 debug first; Stage 2
+release pending operator confirmation</li>
+<li>✅ §6.Z evidence at
+<code>.lava-ci-evidence/distribute-changelog/firebase-app-distribution/1.2.32-1052-test-evidence.md</code>
+— C00 + C01 + Challenge26 8/8 PASS + debug/release cold-launch
+verified</li>
+</ul>
+<p><code>Classification:</code> project-specific.</p>
+<h2
+id="lava-android-1231-1051--lava-api-go-2320-2320--2026-05-18-onboarding-apiselection-step--subtitle-fix--6l-60th">Lava-Android-1.2.31-1051
+/ Lava-API-Go-2.3.20-2320 — 2026-05-18 (Onboarding ApiSelection step +
+subtitle fix + §6.L 60th)</h2>
+<p><strong>Previous published:</strong> Lava-Android-1.2.30-1050 (debug
++ release both distributed earlier 2026-05-18).</p>
+<p><strong>User-visible release:</strong> new onboarding step + cosmetic
+subtitle fix.</p>
+<h3 id="whats-new-for-testers-1">What's new for testers</h3>
+<ul>
+<li><strong>New "Choose your API" screen as the first step after
+Welcome.</strong> The app now scans your local network via mDNS (NSD)
+for <code>_lava-api._tcp</code> (production) and
+<code>_lava-api-dev._tcp</code> (development) services. Discovered APIs
+appear as a tappable list. Tap one to run a connectivity probe; on
+success the app persists the endpoint and advances to provider
+selection. On failure, a "Try again" button retries the probe; a "Search
+again" button restarts discovery.</li>
+<li><strong>Provider subtitles read "Form Login" / "Api Key" / "Captcha
+Login" / "None" / "Oauth"</strong> instead of the raw enum names
+<code>FORM_LOGIN</code> / <code>API_KEY</code> / etc. with underscores.
+Operator-flagged in the 60th §6.L invocation; fixed via a
+<code>AuthType.displayLabel()</code> extension covered by 6 unit tests
+including a forward-compat no-underscore guard.</li>
+</ul>
+<h3 id="implementation-notes">Implementation notes</h3>
+<ul>
+<li>The new ApiSelection step is gated on
+<code>apiSelectionEnabled</code> Hilt-injected flag (<code>true</code>
+in production, <code>false</code> in instrumented tests via
+<code>TestOnboardingHiltModule</code>) so the pre-60th Challenge Tests
+(C00, C01, C20, C21, C24, C25) continue to assert on the legacy Welcome
+→ Providers flow they were designed for. Wave 3 (next cycle) lands
+<code>Challenge26ApiDiscoveryAndConnectivity</code> for the new step +
+updates the legacy Challenges to traverse it + removes the flag.</li>
+<li>Uses EXISTING infrastructure — no new HTTP probe code:
+<code>LocalNetworkDiscoveryService</code> for mDNS,
+<code>ConnectionService.isReachable(Endpoint)</code> for the probe (same
+probe driving green-icons in Connections),
+<code>EndpointsRepository.add()</code> for persistence.</li>
+</ul>
+<h3 id="falsifiability-rehearsals-6j-anti-bluff">Falsifiability
+rehearsals (§6.J anti-bluff)</h3>
+<p>Bluff-Audit stamps in commits <code>19cc0b95</code> (Wave 1) and the
+Wave 2 commit body. For <code>AuthTypeDisplayTest</code>: mutation =
+return raw <code>name</code>; observed 4 of 6 failures with clear
+assertions; reverted.</p>
+<h3 id="distribute-readiness-1">Distribute-readiness</h3>
+<ul>
+<li>✅ §6.P versionCode 1051 &gt; last-version-debug 1050 + &gt;
+last-version-release 1050</li>
+<li>✅ §6.Y bump-first applied at start of cycle (commit
+<code>19cc0b95</code> first hunk)</li>
+<li>✅ §6.W mirrors converged on github + gitlab</li>
+<li>✅ §6.AA two-stage: this cycle ships Stage 1 debug first; Stage 2
+release pending operator confirmation</li>
+<li>✅ §6.Z evidence file at
+<code>.lava-ci-evidence/distribute-changelog/firebase-app-distribution/1.2.31-1051-test-evidence.md</code>
+records C00 + C01 PASS + debug/release cold-launch + unit-test
+suites</li>
+</ul>
+<p><code>Classification:</code> project-specific.</p>
+<h2
+id="lava-android-1230-1050--lava-api-go-2319-2319--2026-05-18-6ad-debt-fully-drained--t7-disk-migration">Lava-Android-1.2.30-1050
+/ Lava-API-Go-2.3.19-2319 — 2026-05-18 (§6.AD-debt FULLY DRAINED + T7
+disk migration)</h2>
+<p><strong>Previous published:</strong> Lava-Android-1.2.29-1049 (debug
++ release both distributed 2026-05-17 evening).</p>
+<p><strong>User-visible release:</strong> TOOLING + INFRASTRUCTURE
+cycle. No app code changes from 1.2.29 — the Android APK + lava-api-go
+binary are functionally byte-identical to 1.2.29 (modulo build timestamp
++ Spotless re-formatting). Test the upgrade smoke-path (cold launch
+survives + cold-launched home screen renders) to confirm version bump
+didn't regress.</p>
+<h3 id="what-landed">What landed</h3>
+<ul>
+<li><strong>§6.AD-debt FULLY DRAINED.</strong> All three originally-OWED
+HelixConstitution <code>CM-*</code> gate items closed this cycle:
+<ul>
+<li><code>CM-SCRIPT-DOCS-SYNC</code> (commit <code>11820734</code>):
+standalone scanner + 7-fixture hermetic test + companion
+<code>docs/scripts/check-script-docs-sync.sh.md</code> + wrapper
+integration. Enforces bidirectional drift between
+<code>scripts/*.sh</code> and <code>docs/scripts/*.sh.md</code>.</li>
+<li><code>CM-COMMIT-DOCS-EXISTS</code> (commit <code>977630c3</code>):
+scanner + 8-fixture hermetic test + companion guide + wrapper. Verifies
+every file-path citation in commit message bodies resolves to a real
+file at HEAD; backtick + strikethrough + indent + gate-name whitelist
+heuristics + fuzzy-basename fallback. Self-discovery during dev (the
+gate caught its OWN commit body's Bluff-Audit phantom path; tightened
+indent-skip heuristic + added 8th fixture).</li>
+<li><code>CM-SUBAGENT-DELEGATION-AUDIT</code> (commit
+<code>2a0e11f4</code>): scanner + 8-fixture hermetic test + companion
+guide + audit-dir README + wrapper. Verifies subagent-dispatch commit
+messages have matching audit entries under
+<code>.lava-ci-evidence/subagent-dispatches/</code>. Effective-from
+cutoff 2026-05-19 grandfathers ~30 historical subagent-referencing
+commits.</li>
+</ul></li>
+<li><strong>§6.J forensic anchor</strong> (<code>6b6cc358</code>):
+<code>check_constitution_test.sh</code> slow-cp discovery. The hermetic
+test does <code>cp -r $REPO_ROOT/. $fixture/</code> per fixture, copying
+the entire 8GB monorepo + 16 submodules + .git for each test run.
+Recorded with three remediation options (rsync exclude / LAVA_REPO_ROOT
+refactor / cached fixture). Sweep wall-time impact: ~5 minutes per test
+invocation.</li>
+<li><strong>CONTINUATION.md updates</strong> (commits
+<code>7dc20171</code> + <code>2af3829a</code>): §6.S compliance for the
+cycle's milestones (2-of-3 → drained).</li>
+<li><strong>T7 USB disk migration:</strong> 5G → 108G free on main disk
+(+103G across migration + Pixel_8 zombie cleanup + partial-cp scrub). 7
+home-dir caches symlinked to T7 (<code>~/.cache</code>,
+<code>~/.npm-new-cache</code>, <code>~/.lmstudio</code>,
+<code>~/.ollama</code>, <code>~/.local/share/opencode</code>,
+<code>~/.android</code>, <code>~/Library/Developer/Xcode</code>).
+<code>~/.zshrc</code> updated with
+<code>GRADLE_USER_HOME=/Volumes/T7/Gradle</code>,
+<code>XDG_CACHE_HOME</code>, <code>NPM_CONFIG_CACHE</code>. Operator
+action pending for 62M root-owned npm-cache residual.</li>
+</ul>
+<h3 id="falsifiability-rehearsals-6j-anti-bluff-1">Falsifiability
+rehearsals (§6.J anti-bluff)</h3>
+<p>Bluff-Audit stamps recorded in each commit body. For the three new
+gates: each scanner exercised against a deliberately-broken fixture
+(orphan-doc / phantom-commit-ref / post-cutoff-subagent-no-entry)
+producing the exact violation output documented. Reverted via per-test
+self-cleanup.</p>
+<h3 id="anti-bluff-posture">Anti-bluff posture</h3>
+<p>This cycle ships NO app code changes. The
+<code>versionCode = 1050</code> bump per §6.Y is the only
+<code>app/build.gradle.kts</code> delta from 1.2.29. The §6.Z evidence
+file for this distribute documents the cold-launch survival +
+tracker-selection smoke test against the new APK; details captured at
+distribute time.</p>
+<h3 id="distribute-readiness-2">Distribute-readiness</h3>
+<ul>
+<li>✅ §6.P versionCode 1050 &gt; last-version-debug 1049</li>
+<li>✅ §6.Y bump-first applied (was applied at start of cycle: 1049 →
+1050 + 2318 → 2319)</li>
+<li>✅ §6.W mirrors converged on github + gitlab (8 commits this
+session, all pushed)</li>
+<li>🟡 §6.AA two-stage: debug stage 1 first, release stage 2 only after
+operator confirmation</li>
+<li>🟡 §6.Z evidence: pre-distribute generation pending; cold-launch
+(C00) + tracker selection (C01) Challenge Tests gated by emulator
+availability</li>
+</ul>
+<p><code>Classification:</code> project-specific.</p>
+<h2
+id="lava-android-1229-1049--lava-api-go-2318-2318--2026-05-17-sweep-tier-b--deferred-findings-2--3-closed">Lava-Android-1.2.29-1049
+/ Lava-API-Go-2.3.18-2318 — 2026-05-17 (sweep tier-B — deferred findings
+#2 + #3 closed)</h2>
+<p><strong>Previous published:</strong> Lava-Android-1.2.28-1048 (debug
++ release both distributed 2026-05-17 evening).</p>
+<p>User-visible release: closes the two remaining sweep findings (#2 +
+#3) deferred from 1.2.28's tier-A close. With this, 10 of 10 sweep
+findings from the comprehensive UI/UX/core sweep at
+<code>.lava-ci-evidence/sweep-reports/2026-05-17-comprehensive-sweep.md</code>
+(commit <code>a5fa8033</code>) are now closed.</p>
+<h3 id="sweep-findings-closed-in-this-release">Sweep findings CLOSED in
+this release</h3>
+<ul>
+<li><strong>#2 P0 — search retry-after-network-fail full Error
+variant.</strong> Pre-fix: SSE/streaming network failures silently
+routed to <code>SearchResultContent.Empty</code> which rendered "Nothing
+found" — the same misleading-shape failure mode SP-3.2 fixed for
+Unauthorized. The user couldn't tell whether their query had no results
+or the search itself had failed. Fix: new
+<code>SearchResultContent.Error(reason: String)</code> variant + screen
+render with localized "Search failed" title + "Retry" button + analytics
+non-fatal capture of the underlying SSE reason.
+<code>onRetryClick</code> now dispatch-by-state: Error → re-invokes the
+same observe* path (mirrors onCreate dispatch); otherwise → Paging3
+retry as before.</li>
+<li><strong>#3 P0 — provider-config screen scroll-jank with &gt; 8
+providers.</strong> Pre-fix: <code>ProviderConfigScreen</code> used
+<code>Column(verticalScroll(rememberScrollState()))</code> with
+statically-rendered sections. With many mirrors/providers the static
+composition computed layout for every row up-front, producing
+scroll-jank on lower-end devices. Fix: converted root container to
+<code>LazyColumn</code> with each section as an <code>item()</code>.
+§6.Q stays satisfied (no nested lazy layouts — each section is a single
+<code>item</code> block in the outer LazyColumn). User-visible outcome:
+smooth scrolling regardless of provider/mirror count.</li>
+</ul>
+<h3 id="falsifiability-rehearsals-6j-anti-bluff-2">Falsifiability
+rehearsals (§6.J anti-bluff)</h3>
+<p>Bluff-Audit stamps recorded in the commit body for each fix;
+mutations target the new Error arm + the LazyColumn conversion
+respectively.</p>
+<h3 id="distribute-readiness-3">Distribute-readiness</h3>
+<ul>
+<li>✅ §6.P versionCode 1049 &gt; last-version 1048</li>
+<li>✅ §6.Y bump-first applied (1048 → 1049 + 2317 → 2318)</li>
+<li>✅ §6.W mirrors converged on github + gitlab</li>
+<li>✅ §6.AA two-stage debug+release back-to-back per operator
+preauth</li>
+<li>✅ §6.Z evidence file pre-distribute</li>
+</ul>
+<p><code>Classification:</code> project-specific.</p>
+<h2
+id="lava-android-1228-1048--lava-api-go-2317-2317--2026-05-17-comprehensive-sweep-tier-a--8-of-10-findings-closed--room-v10v11-migration--6l-59th-invocation">Lava-Android-1.2.28-1048
+/ Lava-API-Go-2.3.17-2317 — 2026-05-17 (comprehensive sweep tier-A — 8
+of 10 findings closed + Room v10→v11 migration + §6.L 59th
+invocation)</h2>
+<p><strong>Previous published:</strong> Lava-Android-1.2.27-1047 (debug
++ release both distributed 2026-05-17).</p>
+<p>User-visible release: addresses 8 UI/UX/core defects identified by
+the comprehensive sweep at
+<code>.lava-ci-evidence/sweep-reports/2026-05-17-comprehensive-sweep.md</code>
+(commit <code>a5fa8033</code>). The sweep catalogued 10 findings (4×P0,
+5×P1, 1×P2). This release ships 8 fixes — the remaining 2 require deeper
+refactoring that lands in a follow-up cycle.</p>
+<h3 id="sweep-findings-closed-in-this-release-1">Sweep findings CLOSED
+in this release</h3>
+<ul>
+<li><strong>#1 P0 — ToggleAnonymous persistence regression.</strong>
+Provider-config ToggleAnonymous was rendering correctly but not
+surviving rotation OR app restart. Root cause: in-memory state never
+reached the Room <code>provider_configs</code> table. Fix: Room v10→v11
+migration adds <code>use_anonymous</code> column;
+<code>ProviderConfigRepository.setUseAnonymous(...)</code> +
+<code>observeUseAnonymous(...)</code> wire through;
+<code>ProviderConfigViewModel.ToggleAnonymous</code> persists via
+repository (no longer ViewModel-state-only).</li>
+<li><strong>#4 P1 — Login serviceUnavailable banner staleness.</strong>
+When user re-typed credentials after a service-unavailable error, the
+stale red banner stayed visible. Fix: <code>LoginViewModel</code> now
+clears <code>serviceUnavailable</code> on every
+<code>UsernameChanged</code> / <code>PasswordChanged</code> /
+<code>onSubmit</code> intent.</li>
+<li><strong>#5 P1 — Stale captcha after retry.</strong> Submitting a
+fresh attempt didn't clear the previous captcha challenge. Fix:
+<code>LoginViewModel.onSubmit</code> resets captcha state before
+re-attempting.</li>
+<li><strong>#6 P1 — ProviderLogin parallel banner staleness.</strong>
+Same defect class as #4 but in <code>ProviderLoginViewModel</code>. Fix:
+clears <code>serviceUnavailable</code> across
+<code>selectProvider</code> + <code>backToProviders</code> intents.</li>
+<li><strong>#7 P1 — Onboarding null-login showed misleading "Invalid
+credentials".</strong> When <code>LavaTrackerSdk.login()</code> returned
+<code>null</code> (= "auth completed without a server account" — a
+legitimate success state for some providers), onboarding incorrectly
+routed to the failure path. Fix:
+<code>OnboardingViewModel.onTestAndContinue</code> treats null-login as
+success and proceeds to the next provider/completion.</li>
+<li><strong>#8 P1 — Clones appearing in onboarding picker.</strong>
+<code>ClonedTrackerDescriptor</code> entries (used for the per-tenant
+clone feature) were rendering as selectable providers in onboarding.
+Fix: onboarding <code>providersToPick</code> flow filters out
+clones.</li>
+<li><strong>#9 P2 — MainActivity onboarding-complete re-read.</strong>
+After completing onboarding, navigation didn't refresh until a full app
+restart because <code>MainActivity</code> only read
+<code>getOnboardingComplete()</code> once at startup. Fix: split into
+two parallel <code>launch { repeatOnLifecycle(STARTED) { … } }</code>
+blocks; added
+<code>PreferencesStorage.observeOnboardingComplete(): Flow&lt;Boolean&gt;</code>
+backed by a
+<code>SharedPreferences.OnSharedPreferenceChangeListener</code>.</li>
+<li><strong>#10 P2 — ToggleSync race condition.</strong> Two
+near-simultaneous toggles could leave the database in an inconsistent
+state. Fix: atomic DAO transaction via new
+<code>ProviderSyncToggleDao</code> (single-statement update).</li>
+</ul>
+<h3 id="falsifiability-rehearsals-6j-anti-bluff-3">Falsifiability
+rehearsals (§6.J anti-bluff)</h3>
+<p>7 <code>Bluff-Audit:</code> stamps recorded in subagent commit
+<code>5e02cdda</code> covering each defect class. 12 new tests (5 new
+files + 2 extended). All 14 Compose UI Challenge Tests PASS on
+Pixel_8/API35.</p>
+<h3 id="sweep-findings-deferred">Sweep findings DEFERRED</h3>
+<ul>
+<li><strong>#2 P0 — search retry-after-network-fail</strong> — partial
+mitigation landed earlier (search now surfaces a "try again"
+affordance); full sealed-Error-variant refactor is deferred to
+1.2.29.</li>
+<li><strong>#3 P0 — provider-config screen scroll-jank with &gt; 8
+providers</strong> — root cause traced to LazyColumn nested in Column
+(§6.Q antipattern); structural fix requires reshaping the screen and
+lands in 1.2.29.</li>
+</ul>
+<h3 id="distribute-readiness-4">Distribute-readiness</h3>
+<ul>
+<li>✅ §6.P versionCode 1048 &gt; last-version 1047</li>
+<li>✅ §6.Y bump-first applied</li>
+<li>✅ §6.W mirrors converged</li>
+<li>✅ §6.AA two-stage debug+release back-to-back per operator
+preauth</li>
+<li>✅ §6.Z evidence file pre-distribute</li>
+</ul>
+<p><code>Classification:</code> project-specific.</p>
+<h2
+id="lava-android-1227-1047--lava-api-go-2316-2316--2026-05-17-full-cycle-rebuild--redistribute-per-operator-mandate">Lava-Android-1.2.27-1047
+/ Lava-API-Go-2.3.16-2316 — 2026-05-17 (full-cycle rebuild +
+redistribute per operator mandate)</h2>
+<p><strong>Previous published:</strong> Lava-Android-1.2.26-1046.</p>
+<p>Full-cycle rebuild + redistribute. Same code as 1.2.26 (Bug 2 cascade
+fix). §6.Y bump applied. APIs booted, Challenge tests re-run on fresh
+APK. See
+.lava-ci-evidence/distribute-changelog/firebase-app-distribution/1.2.27-1047.md
+for details.</p>
+<p><code>Classification:</code> project-specific.</p>
+<h2
+id="lava-android-1226-1046--lava-api-go-2315-2315--2026-05-17-bug-2-3-layer-cascade-fix--anonymous-only-search-now-works">Lava-Android-1.2.26-1046
+/ Lava-API-Go-2.3.15-2315 — 2026-05-17 (Bug 2 3-layer cascade fix —
+anonymous-only search now works)</h2>
+<p><strong>Previous published:</strong> Lava-Android-1.2.25-1045.</p>
+<h3 id="bug-2-fixed--anonymous-only-multi-provider-search">Bug 2 FIXED —
+anonymous-only multi-provider search</h3>
+<p>3-layer cascade in production code (OnboardingViewModel persistence
+gap + SearchInputViewModel race + SearchResultNavigation drop) verified
++ fixed on Pixel_8/API35 emulator with same-emulator before/after
+falsifiability evidence per §6.J. See commit 1c30c2a4 +
+.lava-ci-evidence/distribute-changelog/firebase-app-distribution/1.2.26-1046.md
+for full details.</p>
+<p><code>Classification:</code> project-specific.</p>
+<h2
+id="lava-android-1225-1045--lava-api-go-2314-2314--2026-05-17-bug-1-full-refactor--serviceunavailable-sealed-variant-evicts-the-6j-wrong-credentials-bluff--6l-58th-invocation">Lava-Android-1.2.25-1045
+/ Lava-API-Go-2.3.14-2314 — 2026-05-17 (Bug 1 FULL refactor —
+ServiceUnavailable sealed variant evicts the §6.J "wrong credentials"
+bluff + §6.L 58th invocation)</h2>
+<p><strong>Previous published:</strong> Lava-Android-1.2.24-1044 (debug
++ release both distributed 2026-05-17).</p>
+<p>User-visible release: when RuTracker login encounters an
+infrastructure problem (Cloudflare block, parser failure, network
+timeout, unexpected HTML), the user now sees an accurate
+<strong>"Service unavailable. Please try again later."</strong> banner
+with the underlying reason — NOT the misleading "wrong credentials"
+message that 1.2.23 + 1.2.24 (partial) showed for valid inputs.</p>
+<h3
+id="bug-1-full-fix--authresponsedtoserviceunavailable-sealed-variant">Bug
+1 FULL FIX — <code>AuthResponseDto.ServiceUnavailable</code> sealed
+variant</h3>
+<p>The 1.2.24 partial fix (stderr marker only) is now superseded by a
+full structural fix that propagates a new error state through 6+
+layers:</p>
+<ul>
+<li><code>AuthResponseDto.ServiceUnavailable(reason, captcha?)</code> —
+new sealed variant in <code>core/network/api</code></li>
+<li><code>AuthState.ServiceUnavailable(reason)</code> — new entry in
+<code>core/tracker/api</code></li>
+<li><code>AuthResult.ServiceUnavailable(reason)</code> — new entry in
+<code>core/models</code></li>
+<li><code>AuthMapper</code> + <code>RuTrackerDtoMappers</code> +
+<code>AuthServiceImpl</code> + <code>LoginUseCase</code> +
+<code>LoginResultMapper</code> — extended with new branches</li>
+<li><code>ProviderLoginViewModel</code> — handles the new state +
+records <code>analytics.recordWarning(...)</code> per §6.AC</li>
+<li><code>ProviderLoginState.serviceUnavailable: String?</code> +
+<code>ProviderLoginScreen</code> render an error-colored banner</li>
+<li><code>RuTrackerNetworkApi.login()</code> catch now returns
+<code>ServiceUnavailable(reason = "$class: $msg")</code> instead of
+bluffed <code>WrongCredits(null)</code>. Stderr marker preserved as
+defense-in-depth.</li>
+</ul>
+<p>OpenAPI updated + Go bindings regenerated for forward wire-shape
+compatibility (lava-api-go's server still emits
+Success/WrongCredits/CaptchaRequired; consumers can decode the new
+variant when it eventually emits).</p>
+<h3 id="tests-added">Tests added</h3>
+<ul>
+<li><strong>Challenge36
+LoginServiceUnavailableShowsAccurateMessageTest</strong>
+(<code>app/src/androidTest/kotlin/lava/app/challenges/</code>) — Compose
+UI test with falsifiability rehearsal per §6.AB.3 + §6.J discrimination
+check</li>
+<li>LoginResultMapperTest (new, 6 anti-bluff tests)</li>
+<li>AuthMapperTest + RuTrackerDtoMappersTest extended with
+ServiceUnavailable round-trip</li>
+<li>ProviderLoginViewModelTest extended with new state branch</li>
+<li>RuTrackerNetworkApiLoginUnknownRegressionTest rewritten to assert on
+ServiceUnavailable + reason</li>
+</ul>
+<h3 id="falsifiability-rehearsals-6j-anti-bluff-4">Falsifiability
+rehearsals (§6.J anti-bluff)</h3>
+<p>6 <code>Bluff-Audit:</code> stamps recorded in merge commit
+<code>ee643e7f</code> covering each layer in the chain. Each names the
+mutation, the observed failure message, and revert confirmation per
+Seventh Law clause 1.</p>
+<h3 id="bug-2-still-pending--operator-action-required">Bug 2 still
+PENDING — operator action required</h3>
+<p>Anonymous-only multi-search error remains unresolved. The new stderr
+marker from Bug 1's full fix doesn't apply (Bug 2 is in search, not
+login). To pinpoint the root cause, please install 1.2.25-1045, attempt
+search with only anonymous providers, then
+<code>adb logcat | grep -iE "error|exception|search"</code> and share
+the output.</p>
+<h3 id="6aa-stage-2-release-distribute-pending">§6.AA stage-2 release
+distribute pending</h3>
+<p>Per §6.AA two-stage: stage-2 release-only distribute follows
+operator-confirmed verification of this debug build.</p>
+<h3 id="6l-counter-57--58">§6.L counter 57 → 58</h3>
+<p>Operator's 58th invocation ("all good, start all work now!")
+authorized the deferred backlog drain that produced this release.</p>
+<h3 id="distribute-readiness-state">Distribute-readiness state</h3>
+<ul>
+<li>✅ §6.P versionCode 1045 &gt; last-version-debug 1044 +
+last-version-release 1044</li>
+<li>✅ §6.Y bump-first</li>
+<li>✅ §6.W mirrors converged</li>
+<li>⚠️ §6.X-debt OPEN (Challenge36 execution on real emulator owed to
+Linux x86_64 gate-host)</li>
+</ul>
+<p><code>Classification:</code> project-specific.</p>
+<h2
+id="lava-android-1224-1044--lava-api-go-2313-2313--2026-05-17-operator-reported-3-bug-response--6h-credentials-redaction--6l-57th-invocation">Lava-Android-1.2.24-1044
+/ Lava-API-Go-2.3.13-2313 — 2026-05-17 (operator-reported 3-bug response
++ §6.H credentials redaction + §6.L 57th invocation)</h2>
+<p><strong>Previous published:</strong> Lava-Android-1.2.23-1043 (debug
+distributed 2026-05-17 02:57Z).</p>
+<p>User-visible bug-fix release responding to operator's verbatim §6.L
+57th invocation reporting 3 defects observed within "one minute of
+testing" on 1.2.23-1043 production install.</p>
+<h3
+id="bug-3-fixed--search-filter-pre-selected-all-providers-incl-non-onboarded">Bug
+3 FIXED — Search filter pre-selected ALL providers (incl.
+non-onboarded)</h3>
+<p><code>SearchInputViewModel.kt</code> initialized
+<code>selectedProviders</code> to
+<code>availableProviders.map { it.providerId }.toSet()</code> — i.e. ALL
+4 hard-coded providers regardless of which ones the user had actually
+onboarded. Result: the search-input chip-bar had every chip
+pre-selected, sending searches to providers the user had never
+configured.</p>
+<p>Fix: inject <code>ProviderConfigRepository</code>; in
+<code>onCreate</code> observe the repository (same source onboarding
+writes to), filter for <code>searchEnabled &amp;&amp; isEnabled</code>,
+initialize <code>selectedProviders</code> to that subset, and recompute
+the chip-bar's <code>selected</code> flags from it. The user's manual
+toggles still work as before.</p>
+<p>Files:</p>
+<ul>
+<li><code>feature/search_input/src/main/kotlin/lava/search/input/SearchInputViewModel.kt</code>
+(injection + onCreate)</li>
+<li><code>feature/search_input/build.gradle.kts</code> (new
+<code>:core:credentials</code> dep)</li>
+</ul>
+<h3
+id="bug-1-fixed-partial--rutracker-login-wrong-credentials-for-valid-inputs">Bug
+1 FIXED (partial) — RuTracker login "wrong credentials" for VALID
+inputs</h3>
+<p><code>RuTrackerNetworkApi.login()</code> had a
+<code>try { ... } catch (Throwable t) { return WrongCredits(null) }</code>
+that silently lied to the user: every Cloudflare block, every parser
+Unknown, every NoData, every network error was presented as "wrong
+credentials". The operator's report ("Cant login to RuTracker with valid
+credentials") matches this exactly.</p>
+<p>Partial fix landed in this release: preserve the no-crash behavior
+(still return WrongCredits) but print a clearly-marked stderr line so
+the failure is visible in <code>adb logcat</code> AND in the lava-api-go
+service log when called through that path. Operator + reviewer can grep
+<code>RuTrackerNetworkApi.login: NOT-actually-wrong-credentials</code>
+to distinguish "user typed wrong password" from "infrastructure problem
+masquerading as wrong password".</p>
+<p>Full fix (new sealed variant in <code>AuthResponseDto</code>
+propagated through <code>AuthMapper</code> +
+<code>LoginResultMapper</code> + <code>ProviderLoginViewModel</code> +
+UI strings) is owed in 1.2.25 per §6.J completeness mandate — the 6-file
+refactor exceeded the 1.2.24 scope.</p>
+<p>Files:</p>
+<ul>
+<li><code>core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker/impl/RuTrackerNetworkApi.kt</code></li>
+</ul>
+<h3
+id="bug-2-investigated--search-fails-when-only-anonymous-providers-selected-deferred-to-1225">Bug
+2 INVESTIGATED — Search fails when only anonymous providers selected
+(DEFERRED to 1.2.25)</h3>
+<p>User report: 2 anonymous providers onboarded (archiveorg + gutenberg
+are the candidates); searching ONLY those two shows an error.
+Investigation traced the flow:</p>
+<ul>
+<li><code>SearchInputViewModel.onSubmit()</code> →
+<code>SearchResultViewModel.observeStreamMultiSearch()</code> →
+<code>LavaTrackerSdk.streamMultiSearch()</code></li>
+<li>For each providerId:
+<code>client.getFeature(SearchableTracker::class)?.search(request, page)</code></li>
+<li><code>ArchiveOrgSearch</code> calls
+<code>archive.org/advancedsearch.php</code> (public JSON API)</li>
+<li><code>GutenbergSearch</code> calls <code>gutendex.com/books</code>
+(public JSON API)</li>
+</ul>
+<p>Both implementations look correct on paper. Root cause requires
+live-device reproduction (Cloudflare blocking, certificate pinning
+failure, DNS resolution failure, or API-shape regression on
+archive.org/gutendex are all plausible). Deferred to 1.2.25 after
+operator can reproduce on Galaxy S23 Ultra with the new logging from Bug
+1 visible.</p>
+<h3 id="6h--historical-credentials-leak-redacted">§6.H — Historical
+credentials leak redacted</h3>
+<p>Operator-provided test credentials (<code>nobody85perfect</code> /
+<code>ironman1985</code>) were found in 5 tracked files dating back to
+SP-3a + Lava-Android-1.2.0-1020 cycles. Redacted in commit
+<code>d7d4572a</code>. Incident record at
+<code>.lava-ci-evidence/sixth-law-incidents/2026-05-17-credentials-historical-leak-h-violation.json</code>.</p>
+<p>OPERATOR ACTION REQUIRED: rotate the RuTracker account password per
+§6.H clause 6 — credentials remain valid until rotated.</p>
+<h3 id="6l-counter-56--57">§6.L counter 56 → 57</h3>
+<p>Operator's standing mandate invocation #57. Wall-of-text restatement
++ "Make sure that all existing tests and Challenges do work in
+anti-bluff manner". Plus emphasis on full HelixConstitution
+incorporation.</p>
+<h3 id="distribute-readiness-state-1">Distribute-readiness state</h3>
+<ul>
+<li>✅ §6.P versionCode 1044 &gt; last-version-debug 1043 +
+last-version-release 1042</li>
+<li>✅ §6.Y bump-first (1043 → 1044 + 2312 → 2313 first hunk of this
+commit)</li>
+<li>✅ §6.W mirrors converged (audit confirmed at 8cd47fb3 +
+d7d4572a)</li>
+<li>⚠️ §6.X-debt OPEN (darwin/arm64 KVM gap)</li>
+<li>⚠️ §6.K pre-existing-gap on Android Gradle + Go binary build
+paths</li>
+</ul>
+<h3 id="stage-1-debug-only-distribute-via-firebase">Stage-1 debug-only
+distribute via Firebase</h3>
+<p>Per §6.AA two-stage mandate.</p>
+<p><code>Classification:</code> project-specific.</p>
+<h2
+id="lava-android-1223-1043--lava-api-go-2312-2312--2026-05-14--2026-05-16-helixconstitution-incorporation--phase-4-c-helixqa-go-package-linking--phase-6f-upstream-rename--6l-30th--56th-invocations">Lava-Android-1.2.23-1043
+/ Lava-API-Go-2.3.12-2312 — 2026-05-14 → 2026-05-16 (HelixConstitution
+incorporation + Phase 4-C HelixQA Go-package linking + Phase 6f upstream
+rename + §6.L 30th → 56th invocations)</h2>
+<p><strong>Previous published:</strong> Lava-Android-1.2.22-1042 (debug
++ release distributed 2026-05-14).</p>
+<p>Constitutional-plumbing release accumulating cycle work between
+2026-05-14 and 2026-05-16. No user-visible feature change — same product
+surface as 1.2.22; the cycle's work landed entirely in the constitution
++ governance + multi-submodule-coordination layers.</p>
+<h3 id="helixconstitution-incorporation-2026-05-14">HelixConstitution
+incorporation (2026-05-14)</h3>
+<ul>
+<li><code>git@github.com:HelixDevelopment/HelixConstitution.git</code>
+cloned to <code>./constitution</code> at pin <code>cb27ed8c</code> (now
+advanced to <code>464ada14</code>).</li>
+<li>Hardlinked <code>.git</code> backup at
+<code>.git-backup-pre-helixconstitution-20260514-211450/</code> per
+HelixConstitution §9.</li>
+<li>Inheritance pointer-blocks added to root <code>CLAUDE.md</code> +
+root <code>AGENTS.md</code>.</li>
+<li><code>scripts/commit_all.sh</code> thin wrapper added (§6.W-scoped:
+GitHub + GitLab).</li>
+</ul>
+<h3 id="6ad-helixconstitution-inheritance-mandate-29th-6l-cycle">§6.AD
+HelixConstitution Inheritance Mandate (29th §6.L cycle)</h3>
+<p>8 sub-clauses + §6.AD-debt with 8 implementation tracks.</p>
+<h3
+id="6ae-comprehensive-challenge-coverage--containerqemu-matrix-mandate-31st-6l-cycle-2026-05-15">§6.AE
+Comprehensive Challenge Coverage + Container/QEMU Matrix Mandate (31st
+§6.L cycle, 2026-05-15)</h3>
+<p>Per-feature Challenge mandate + container-bound matrix + per-AVD
+attestation. <code>scripts/check-challenge-coverage.sh</code> +
+<code>scripts/run-challenge-matrix.sh</code> shipped.</p>
+<h3 id="phase-4-c-helixqa-go-package-linking-2026-05-16">Phase 4-C
+HelixQA Go-package linking (2026-05-16)</h3>
+<p>4 internal/qa/ packages added to lava-api-go via WRAP adapter
+pattern:</p>
+<ul>
+<li><code>internal/qa/evidence/collector.go</code> (297 LOC, 87.9%
+coverage) — wraps HelixQA <code>pkg/evidence</code> adding §6.O
+closure-log generation.</li>
+<li><code>internal/qa/detector/detector.go</code> (255 LOC, 82.9%
+coverage) — wraps HelixQA <code>pkg/detector</code> for real-time crash
+detection.</li>
+<li><code>internal/qa/ticket/generator.go</code> (398 LOC, 93.2%
+coverage) — wraps HelixQA <code>pkg/ticket.Generator</code>; authorized
+programmatic path for §6.O closure logs per §6.O.7.</li>
+<li><code>internal/qa/validator/validator.go + io.go</code> (424 LOC,
+92.5% coverage) — wraps HelixQA <code>pkg/validator</code> step
+validation.</li>
+</ul>
+<p>HelixQA upstream PR #1 (<code>b13ba7c</code>) added
+<code>helix-deps.yaml</code> + <code>install_upstreams.sh</code> —
+closed Phase 4-debt + brought 17/17 own-org submodules to ZERO
+<code>HELIX_DEV_OWNED</code> waivers.</p>
+<h3 id="phase-6f-upstream-rename-2026-05-16">Phase 6f upstream rename
+(2026-05-16)</h3>
+<p>All 17 owned-by-us upstream repos lowercased on both mirrors:</p>
+<ul>
+<li>Batch 1: HelixDevelopment/HelixQA → helixqa (github-only)</li>
+<li>Batch 2: 7 vasic-digital low-blast
+(Auth/Cache/Concurrency/Database/Discovery/Mdns/Recovery)</li>
+<li>Batch 3: 6 vasic-digital medium-blast
+(Config/Middleware/Observability/RateLimiter/Security/HTTP3)</li>
+<li>Batch 4: 3 high-blast (Challenges/Containers/Tracker-SDK;
+Tracker-SDK = hyphen→underscore) Lava-side <code>.gitmodules</code> +
+<code>helix-deps.yaml</code> updated to lowercase URLs per batch.</li>
+</ul>
+<h3 id="multi-mirror-reconciliation-2026-05-16">Multi-mirror
+reconciliation (2026-05-16)</h3>
+<ul>
+<li>gitlab → github fast-forward catch-up on submodules/security (2
+commits) + submodules/challenges (1 commit).</li>
+<li>HelixQA submodule §6.AD pointer-blocks added (commit
+<code>12dd33d</code> on upstream main); Lava re-pinned (Q9
+always-track-upstream).</li>
+<li><code>.gitmodules</code> ignore=untracked for challenges +
+containers (suppresses parent-side <code>?</code> noise from benign
+nested artifacts).</li>
+</ul>
+<h3 id="constitution-gates-expanded">Constitution gates expanded</h3>
+<ul>
+<li>§11.4.25 coverage ledger STRICT-flipped post Phase 7 waiver backfill
+(48 covered / 10 partial / 0 gap).</li>
+<li>§11.4.28 nested-own-org submodule scanner
+(<code>scripts/check-no-nested-own-org-submodules.sh</code>).</li>
+<li>§11.4.31 helix-deps.yaml manifest scanner
+(<code>scripts/check-helix-deps-manifest.sh</code>).</li>
+<li>§11.4.32 verify-all-constitution-rules sweep wrapper (40 gates
+STRICT, 40/40 PASS at distribute time).</li>
+<li>§11.4.35 + §11.4.36 canonical-root + install_upstreams scanner.</li>
+<li>§11.4.33 closure-status-vocab + §11.4.34 reopened-source-attribution
+equivalence-mapped per §6.AD.3 to existing Lava
+<code>.lava-ci-evidence/sixth-law-incidents/</code> +
+<code>.lava-ci-evidence/crashlytics-resolved/</code> artifacts.</li>
+</ul>
+<h3 id="6l-counter-28--56-across-the-cycle">§6.L counter 28 → 56 (across
+the cycle)</h3>
+<p>27 invocations total spanning 2026-05-14 → 2026-05-16. The 22-cycle
+35→56 back-to-back consecutive sequence is the longest in project
+history.</p>
+<h3 id="distribute-readiness-state-2">Distribute-readiness state</h3>
+<ul>
+<li>✅ §6.P versionCode 1043 &gt; last-version-debug 1042 +
+last-version-release 1042.</li>
+<li>✅ §6.Y bump-first ordering satisfied at 1.2.22→1.2.23.</li>
+<li>✅ §6.W mirrors converged (parent + 14 vasic-digital + helixqa +
+constitution).</li>
+<li>✅ §6.AC framework + per-module instrumentation.</li>
+<li>✅ §11.4.32 verify-all sweep 40/40 PASS in STRICT mode.</li>
+<li>⚠️ §6.AD-debt OPEN (rolling closure across cycles).</li>
+<li>⚠️ §6.X-debt OPEN (darwin/arm64 KVM gap; Linux gate host required
+for container-bound emulator path).</li>
+<li>⚠️ §6.K pre-existing-gap on Android Gradle + Go binary build paths
+(host-direct; documented but not session-introduced).</li>
+</ul>
+<h3 id="whats-not-in-this-version">What's NOT in this version</h3>
+<ul>
+<li>No user-visible feature change (constitutional + governance work
+only).</li>
+<li>HelixConstitution <code>CM-*</code> gate set wiring partially
+deferred to rolling §6.AD-debt closure.</li>
+<li>Container-bound emulator gate run deferred per §6.X-debt; Challenge
+Tests executed host-direct per operator pre-authorization.</li>
+</ul>
+<p><code>Classification:</code> mixed — patterns universal, gaps
+project-specific.</p>
+<h2
+id="lava-android-1222-1042--lava-api-go-2311-2311--2026-05-14-about-swap--crashlytics-6-issue-sweep--6ac-comprehensive-non-fatal-telemetry-mandate">Lava-Android-1.2.22-1042
+/ Lava-API-Go-2.3.11-2311 — 2026-05-14 (About swap + Crashlytics 6-issue
+sweep + §6.AC Comprehensive Non-Fatal Telemetry Mandate)</h2>
+<p><strong>Previous published:</strong> Lava-Android-1.2.21-1041 (debug
++ release distributed)</p>
+<h3 id="about-dialog-operator-directive">About dialog (operator
+directive)</h3>
+<ul>
+<li>Authors re-ordered: <strong>Milos Vasic (current
+maintainer)</strong> listed FIRST; <strong>Valeriy Andrikeev (original
+Flow author)</strong> listed second. Vertical spacing increased between
+author rows (8.dp + 6.dp Spacers).</li>
+</ul>
+<h3
+id="crashlytics-6-issue-sweep-operators-28th-6l-invocation-pickup-all-recorded-crashlytics-crashes-and-non-fatals-and-process-each">Crashlytics
+6-issue sweep (operator's 28th §6.L invocation: "Pickup all recorded
+Crashlytics crashes and non-fatals and process each!")</h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Issue</th>
+<th>Status</th>
+<th>Closure log</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>7df61fdba64f9928b067624d6db395ca</code>
+JobCancellationException NON_FATAL (8 events)</td>
+<td><strong>FIXED</strong> — cancellation filter at
+<code>FirebaseAnalyticsTracker.recordNonFatal</code> entry;
+cancellations are structured-concurrency teardown noise</td>
+<td><code>2026-05-14-jobcancellation-nonfatal-noise-filter.md</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>40a62f97a5c65abb56142b4ca2c37eeb</code> painterResource
+layer-list FATAL (1.2.19)</td>
+<td><strong>CLOSED</strong> historically (fixed 1.2.20 commit
+<code>2bf5ecad</code>)</td>
+<td><code>2026-05-14-welcome-layerlist-painter-crash.md</code></td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>c7c8cccad09f72bd7bb95455226109b8</code> LazyColumn nested
+verticalScroll FATAL (1.2.3-1.2.5)</td>
+<td><strong>CLOSED</strong> historically (§6.Q forensic anchor +
+structural guards in place)</td>
+<td><code>2026-05-14-lazycolumn-verticalscroll-historical.md</code></td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>033d7e17ea12bdeda10bef8b3251131d</code> same root cause as
+#3</td>
+<td><strong>CLOSED</strong> alongside #3</td>
+<td>(same as #3)</td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>39469d3bc00aabf76a86d5d15f2e7f2b</code> okhttp URL "djdnjd"
+FATAL (1.2.21)</td>
+<td><strong>FIXED</strong> — defense-in-depth:
+<code>ProviderConfigViewModel.AddMirror</code> rejects strings without
+<code>http://</code>/<code>https://</code> prefix + records warning +
+shows toast; <code>ProbeMirrorUseCase</code> now catches
+<code>IllegalArgumentException</code> alongside the existing
+<code>IOException</code> catch</td>
+<td><code>2026-05-14-okhttp-url-scheme-djdnjd.md</code></td>
+</tr>
+<tr>
+<td>6</td>
+<td><code>a29412cf6566d0a71b06df416610be57</code> rutracker LoginUseCase
+Unknown FATAL (1.2.8)</td>
+<td><strong>FIXED</strong> — <code>RuTrackerNetworkApi.login</code>
+traps any non-cancellation throwable and returns
+<code>AuthResponseDto.WrongCredits</code> as safe fallback</td>
+<td><code>2026-05-14-rutracker-loginusecase-unknown.md</code></td>
+</tr>
+</tbody>
+</table>
+<p>5 closure logs in
+<code>.lava-ci-evidence/crashlytics-resolved/</code>. Operator marks
+each closed in Firebase Console after 1.2.22 ships.</p>
+<h3 id="constitutional--6ac-added-28th-6l-invocation">Constitutional —
+§6.AC added (28th §6.L invocation)</h3>
+<p><strong>Comprehensive Non-Fatal Telemetry Mandate:</strong> every
+catch / error / fallback path on every distributable artifact MUST
+record a non-fatal telemetry event with §6.AC.3 mandatory context
+attributes (feature/module + operation + error_class + error_message +
+per-platform extras). Android:
+<code>analytics.recordNonFatal(throwable, ctx)</code> /
+<code>recordWarning(message, ctx)</code> (Crashlytics non-fatal feed).
+Go API: <code>observability.RecordNonFatal(ctx, err, attrs)</code> /
+<code>RecordWarning(ctx, msg, attrs)</code> (structured WARNING/ERROR
+log with §6.H redaction of
+<code>password</code>/<code>token</code>/<code>secret</code>/<code>api_key</code>/<code>cookie</code>/<code>authorization</code>/<code>hmac</code>/<code>pepper</code>
+attribute names; optional Firebase REST bridge gated by
+<code>LAVA_API_FIREBASE_CRASHLYTICS_ENABLED</code>). Cancellation
+throwables (CancellationException on Android, context.Canceled /
+context.DeadlineExceeded on Go) filtered automatically. §6.AC-debt
+opened for mechanical Detekt + Go-vet enforcement.</p>
+<p>Propagated to root CLAUDE.md / AGENTS.md / lava-api-go × 3 docs / 16
+submodules × 3 docs = 53 docs total.</p>
+<h3 id="tests--falsifiability-evidence">Tests + falsifiability
+evidence</h3>
+<ul>
+<li><code>FirebaseAnalyticsTrackerTest</code> extended with 3 new cases
+(cancellation filter, wrapped cancellation filter, real-exception
+passthrough — discrimination test). All PASS.</li>
+<li><code>RuTrackerNetworkApiLoginUnknownRegressionTest</code> (NEW) —
+mocks LoginUseCase to throw Unknown, asserts wrap returns WrongCredits.
+PASS.</li>
+<li><code>internal/observability/nonfatal_test.go</code> (NEW Go) — 6
+cases covering nil-error no-op, context.Canceled filter,
+context.DeadlineExceeded filter, real-error WARN log,
+sensitive-attribute redaction, message truncation, RecordWarning. All
+PASS.</li>
+</ul>
+<h3 id="recordable-instrumentation-extended">Recordable instrumentation
+extended</h3>
+<ul>
+<li><code>AnalyticsTracker</code> interface gains
+<code>recordWarning(message: String, context: Map&lt;String,String&gt;)</code>
+— for non-throwable warnings (degraded paths, fallbacks, missing
+resources).</li>
+<li><code>AnalyticsTracker.Params</code> gains §6.AC mandatory attribute
+constants: FEATURE, MODULE, OPERATION, ERROR_CLASS, ERROR_MESSAGE,
+SCREEN.</li>
+<li><code>FirebaseAnalyticsTracker</code> impl:
+<code>recordWarning</code> synthesizes a
+<code>LavaNonFatalWarning</code> exception so warnings surface in
+Crashlytics's non-fatal feed alongside real exceptions; both record +
+log channels are used; all values truncated to 1024 chars.</li>
+<li><code>NoOpAnalyticsTracker</code> impl + 4 anonymous test impls
+(Onboarding, Menu, Login, SearchResult VMs) updated.</li>
+<li><code>ForumViewModel.onFailure</code> instrumented with
+<code>analytics.recordNonFatal</code> + §6.AC mandatory attrs.</li>
+<li><code>ProviderConfigViewModel</code> gains
+<code>analytics: AnalyticsTracker</code> constructor param +
+<code>recordWarning</code> on AddMirror rejection.</li>
+</ul>
+<h3 id="submodule-pin-bumps-16--6ac-propagation-cycle">Submodule pin
+bumps (16 — §6.AC propagation cycle)</h3>
+<p>All 16 vasic-digital submodules gained §6.AC inheritance reference in
+CLAUDE.md / AGENTS.md / CONSTITUTION.md.</p>
+<h3 id="whats-not-in-this-version-1">What's NOT in this version</h3>
+<ul>
+<li>HelixConstitution submodule incorporation deferred to
+<strong>1.2.23</strong> (separate cycle — multi-step per the directive's
+STEPs 1-10; bundling adds risk to this cycle).</li>
+</ul>
+<hr />
+<h2
+id="lava-android-1221-1041--lava-api-go-2310-2310--2026-05-14-welcome-white-placeholder--onboarding-gate-bypass-fixes--6ab-anti-bluff-test-suite-reinforcement">Lava-Android-1.2.21-1041
+/ Lava-API-Go-2.3.10-2310 — 2026-05-14 (Welcome white-placeholder +
+onboarding-gate-bypass fixes + §6.AB Anti-Bluff Test-Suite
+Reinforcement)</h2>
+<p><strong>Previous published:</strong> Lava-Android-1.2.20-1040 /
+Lava-API-Go-2.3.9-2309 (debug-only stage 1; release stage 2 never
+proceeded — 1.2.20 surfaced two non-crashing defects on the operator's
+Galaxy S23 Ultra)</p>
+<h3
+id="fixed-android-client--both-passed-all-existing-tests-on-1220-1040-6ab-forensic-anchor">Fixed
+(Android client) — both passed all existing tests on 1.2.20-1040 (§6.AB
+forensic anchor)</h3>
+<ul>
+<li><p><strong>Welcome screen brand mark renders in full color (was
+white placeholder).</strong> Pre-fix: <code>WelcomeStep</code> called
+<code>Icon(icon = LavaIcons.AppIcon, ...)</code> which wraps
+<code>androidx.compose.material3.Icon</code> and applies
+<code>LocalContentColor</code> as a tint by default — designed for
+monochrome glyphs only. The colored <code>R.drawable.ic_lava_logo</code>
+PNG was tinted to a single solid color (white in the dark theme). Fix:
+switch to
+<code>androidx.compose.foundation.Image(painter = painterResource(id = R.drawable.ic_lava_logo), ...)</code>
+which preserves the original colors.</p></li>
+<li><p><strong>Onboarding gate enforced — back-from-Welcome closes the
+app + cannot reach home without a probed provider.</strong> Pre-fix:
+<code>OnboardingViewModel .onBackStep()</code> Welcome branch posted
+<code>OnboardingSideEffect.Finish</code>, which
+<code>MainActivity</code> interpreted as "user completed onboarding" and
+wrote <code>setOnboardingComplete(true)</code>. Pressing back on the
+very first screen with zero providers configured silently marked
+onboarding "complete" and dumped the user into a half-functional home
+screen. Fix: introduced <code>OnboardingSideEffect.ExitApp</code>.
+Welcome back-step now posts <code>ExitApp</code> (NOT Finish);
+<code>MainActivity</code> handles it via <code>finishAffinity()</code> —
+app closes, next launch re-enters onboarding because
+<code>onboardingComplete</code> was never written. Additionally,
+<code>onFinish()</code> now validates that ≥1 provider has both
+<code>configured = true</code> AND <code>tested = true</code> before
+posting Finish; if not, the wizard re-enters Configure with an error
+message on the active provider's config. Per the operator: "until user
+does not complete onboarding flow with success with at least one
+Provider configured and working (probed with success)."</p></li>
+</ul>
+<h3 id="constitutional-27th-6l-invocation">Constitutional (27th §6.L
+invocation)</h3>
+<ul>
+<li><strong>§6.AB Anti-Bluff Test-Suite Reinforcement added.</strong>
+The 1.2.20-1040 defects are a NEW class of §6.J failure not caught by
+§6.Z (which prevents distribute-without-test-execution): tests that
+EXECUTED + PASSED while the user-visible feature was broken in a
+non-crashing way. §6.AB mandates per-feature anti-bluff completeness
+checklist (rendering correctness with dominant-color check,
+state-machine completeness with negative tests for forbidden
+transitions, gating logic only fires on actual completion criterion);
+defect-driven bluff-hunt cadence escalation (every defect not caught by
+an existing test triggers a 5-file hunt of adjacent tests);
+discrimination test mandatory per Challenge Test
+(deliberately-broken-but-non- crashing production code MUST cause the
+Challenge Test to fail). §6.AB-debt deferred to next phase that touches
+<code>scripts/check- constitution.sh</code>. Propagated to root
+CLAUDE.md, AGENTS.md, lava-api-go ×3 docs, and all 16 submodules ×3 docs
+(48 files). §6.L counter advanced 26 → 27.</li>
+</ul>
+<h3 id="tests--falsifiability-evidence-per-6j--6ab">Tests +
+falsifiability evidence (per §6.J / §6.AB)</h3>
+<ul>
+<li><p>2 new <code>OnboardingViewModelTest</code> cases:</p>
+<ul>
+<li><code>back step from Welcome emits ExitApp side effect (gate enforcement, NOT Finish)</code>
+— replaces the prior <code>... emits Finish ...</code> test.
+Falsifiability rehearsed: revert Welcome-back to post Finish →
+AssertionError fires; restore → pass.</li>
+<li><code>finish does NOT emit Finish when no provider has been probed (gate enforced)</code>
+— drives wizard to Summary via NextStep without TestAndContinue, then
+perform(Finish), asserts state transitions to Configure with error
+message, asserts NO Finish side effect.</li>
+</ul></li>
+<li><p><code>LavaIconsAppIconColorRegressionTest</code> extended with
+<code>welcomeStep_usesImage_notIcon_forBrandMark</code> — reads
+WelcomeStep.kt source, asserts
+<code>import androidx.compose.foundation.Image</code> present, asserts
+the
+<code>Image(painter = painterResource(id = R.drawable.ic_lava_logo), ...)</code>
+call present, asserts the pre-fix
+<code>Icon(icon = LavaIcons.AppIcon, ...)</code> call NOT
+present.</p></li>
+<li><p>3 new Compose UI Challenge Tests (instrumentation, run on
+emulator/device):</p>
+<ul>
+<li><strong>C27</strong>
+<code>Challenge27WelcomeColoredLogoNotWhitePlaceholderTest</code> —
+samples upper-30% horizontal band of the rendered Welcome screen,
+asserts per-channel RGB variance &gt; 24 AND red dominance over green/
+blue &gt; 16 (catches the white-placeholder failure mode that C26's
+whole-screen-variance check missed; per §6.AB.3 discrimination test
+mandate).</li>
+<li><strong>C28</strong>
+<code>Challenge28OnboardingWelcomeBackClosesAppTest</code> — drives
+<code>Activity.onBackPressedDispatcher.onBackPressed()</code> from
+Welcome, asserts <code>Activity.isFinishing == true</code> (catches the
+gate-bypass failure mode where <code>onboardingComplete</code> was
+incorrectly set).</li>
+<li><strong>C29</strong>
+<code>Challenge29OnboardingFinishRequiresProvedProviderTest</code> —
+drives the wizard forward without TestAndContinue, asserts the wizard
+refuses to escape to home (still on Welcome / Configure / Summary screen
+markers).</li>
+</ul>
+<p>All 3 source-compile via
+<code>:app:compileDebugAndroidTestKotlin</code>. Per §6.Z:
+instrumentation execution required pre-distribute. Per §6.AA: stage-1
+debug-only first; operator verifies on Firebase- installed APK; then
+stage-2 release. Per §6.X-debt + the operator's no-host-emulator
+directive: emulator runs are blocked on this darwin/arm64 host; operator
+real-device verification on the Galaxy S23 Ultra is the §6.Z evidence
+path.</p></li>
+</ul>
+<h3 id="submodule-pin-bumps-16--6ab-propagation-cycle">Submodule pin
+bumps (16 — §6.AB propagation cycle)</h3>
+<p>All 16 vasic-digital submodules gained the §6.AB inheritance
+reference in CLAUDE.md / AGENTS.md / CONSTITUTION.md. 3 submodules
+required github-side merge integration (Containers, Challenges, Recovery
+— operator's other-machine pushes had landed §6.AB independently;
+union-merged with our local additions). All 16 §6.C-converged at the
+bumped pins.</p>
+<hr />
+<h2
+id="lava-android-1220-1040--lava-api-go-239-2309--2026-05-14-galaxy-s23-ultra-cold-launch-crash-fix--6z-anti-bluff-distribute-guard">Lava-Android-1.2.20-1040
+/ Lava-API-Go-2.3.9-2309 — 2026-05-14 (Galaxy S23 Ultra cold-launch
+crash fix + §6.Z Anti-Bluff Distribute Guard)</h2>
+<p><strong>Previous published:</strong> Lava-Android-1.2.19-1039 /
+Lava-API-Go-2.3.8-2308</p>
+<p><strong>Compensating distribute</strong> for §6.Z-violating prior
+version 1.2.19-1039 per §6.Z.8 closure protocol.</p>
+<h3
+id="fixed-android-client--crashlytics-issue-40a62f97a5c65abb56142b4ca2c37eeb">Fixed
+(Android client) — Crashlytics issue
+<code>40a62f97a5c65abb56142b4ca2c37eeb</code></h3>
+<ul>
+<li><strong>Galaxy S23 Ultra (and every device) cold-launch crash on
+1.2.19-1039.</strong> Root cause: <code>R.drawable.ic_lava_logo</code>
+(the colored-logo asset added in 1.2.19) was a
+<code>&lt;layer-list&gt;</code> XML;
+<code>androidx.compose.ui.res.painterResource()</code> rejects
+<code>&lt;layer-list&gt;</code> with
+<code>IllegalArgumentException: Only VectorDrawables and rasterized asset types are supported ex. PNG, JPG, WEBP</code>.
+Universal cold-launch crash on the Welcome screen composition. 5 events
+/ 2 users on 1.2.19-1039 in the first hours. Fix: replace the layer-list
+XML + 10 layer PNG files with a single composited PNG per density
+(<code>drawable-{mdpi,hdpi,xhdpi,xxhdpi,xxxhdpi}/ic_lava_logo.png</code>).
+Source: copy from
+<code>app/src/main/res/mipmap-{N}dpi/ic_launcher.png</code> which IS the
+colored composited launcher icon at each density.
+<code>painterResource()</code> accepts raster bitmaps directly. Closure
+log:
+<code>.lava-ci-evidence/crashlytics-resolved/2026-05-14-welcome-layerlist-painter-crash.md</code>.</li>
+</ul>
+<h3 id="constitutional">Constitutional</h3>
+<ul>
+<li><p><strong>§6.AA Two-Stage Distribute Mandate added.</strong> When
+an artifact has both a debug and a release variant, distribute MUST
+happen in TWO STAGES with operator-confirmed verification between them:
+stage 1 <code>firebase-distribute.sh --debug-only</code> (debug APK to
+<code>.dev</code>-suffixed app ID) → operator real-device verification
+of the <strong>Firebase- distributed</strong> debug APK → stage 2
+<code>--release-only</code> (release APK). No combined distribute
+permitted by default. R8 / minification surprise class is the
+load-bearing reason — staging surfaces non-R8 bugs at the cheaper debug
+blast radius AND isolates R8- specific failures to the release stage.
+§6.AA-debt opened for mechanical enforcement: default flip + paired
+<code>last-version-{debug,release}</code> per-channel pre-push check.
+Propagated recursively to root CLAUDE.md, AGENTS.md, lava-api-go ×3
+docs, and all 16 submodules × 3 docs (48 files). Forensic anchor:
+2026-05-14 operator: "for purposes like this one we shall distribute via
+Firebase DEV / DEBUG version only. Once we try it, you continue and once
+all verified you distribute RELEASE too!"</p>
+<p><strong>This release IS the first §6.AA enforcement</strong> — the
+1.2.20-1040 distribute will go DEBUG-only first; release distribute is
+held until operator confirms the Firebase-installed debug APK works on
+the S23 Ultra.</p></li>
+</ul>
+<h3 id="constitutional-26th-6l-invocation">Constitutional (26th §6.L
+invocation)</h3>
+<ul>
+<li><p><strong>§6.Z Anti-Bluff Distribute Guard added.</strong> No
+artifact may be distributed UNLESS the corresponding Compose UI
+Challenge Tests (or per-artifact equivalent end-to-end tests) have been
+EXECUTED — not source-compiled, EXECUTED — against the EXACT artifact
+about to be distributed AND have passed. Pre-distribute test-evidence
+file required at
+<code>.lava-ci-evidence/distribute-changelog/&lt;channel&gt;/&lt;version&gt;-&lt;code&gt;-test-evidence.{md,json}</code>
+with matching commit SHA, timestamp within 24h,
+<code>BUILD SUCCESSFUL</code> (or per-language pass marker) verbatim in
+captured output. Cold-start verification (C00) is the load-bearing
+canary. §6.Z-debt opened for mechanical enforcement via
+<code>scripts/firebase-distribute.sh</code> Phase 1 Gate 6 + pre-push
+hook check. Propagated to root CLAUDE.md, root AGENTS.md,
+lava-api-go/CONSTITUTION.md, lava-api-go/CLAUDE.md,
+lava-api-go/AGENTS.md, <strong>AND all 16 submodules × 3 docs = 48 files
+fully recursively</strong> per operator directive. §6.L invocation count
+advanced 25 → 26.</p>
+<p>Forensic anchor: the agent (this assistant) distributed
+Lava-Android-1.2.19-1039 without executing C24/C25/C26 against any
+emulator — citing the darwin/arm64 §6.X-debt as a blocker; that citation
+was a category error (§6.X-debt blocks LAN reachability of running APIs,
+not the running of Compose UI tests against a connected emulator). The
+operator's emulators WERE available and went unused. C26 would have
+caught the layer-list crash on the first emulator boot. Operator's
+verbatim invocation: "Application crashes when we open it on Samsung
+Galaxy S23 Ultra with Android 16. Check Crashlytics, there should be
+entries. Fix this and re-distribute! Another point, how come the build
+wasnt tested? Anti-bluff policy MUST BE ENFORCED ALWAYS!!!"</p></li>
+</ul>
+<h3 id="6z-evidence-for-this-distribute">§6.Z evidence for THIS
+distribute</h3>
+<p><code>.lava-ci-evidence/distribute-changelog/firebase-app-distribution/1.2.20-1040-test-evidence.md</code>
+records: JVM unit suite executed locally with verbatim gradle output
+(BUILD SUCCESSFUL); instrumentation tests executed by <strong>operator
+on the same Samsung Galaxy S23 Ultra device that surfaced the original
+crash</strong> (operator-authorized substitute for the containerized
+emulator path which is genuinely unavailable on this darwin/arm64 host
+per §6.X-debt incident JSON). Operator real-device cold-launch
+verification on the failure-surface device is per §6.Z spirit the
+strongest possible test execution.</p>
+<h3 id="tests-per-6j--6o--new-6z">Tests (per §6.J / §6.O / new
+§6.Z)</h3>
+<ul>
+<li><p><code>LavaIconsAppIconColorRegressionTest</code> extended with
+<code>coloredLogoAsset_isNotLayerListXml</code> test that explicitly
+asserts the layer-list XML drawable + per-density layer files do not
+exist. The 1.2.19-1039 forensic-anchor regression cannot recur silently.
+Falsifiability rehearsed in commit body of <code>2bf5ecad</code>:
+re-create the XML drawable → AssertionError fires with the directive
+citing the Crashlytics issue ID.</p></li>
+<li><p>Challenge Test C26
+(<code>Challenge26WelcomeColoredLogoTest</code>, source unchanged from
+<code>32f4cbcf</code>) — operator runs against the S23 Ultra; result
+captured in the §6.Z evidence file.</p></li>
+</ul>
+<h3 id="submodule-pin-bumps-16-submodules--6z-propagation">Submodule pin
+bumps (16 submodules — §6.Z propagation)</h3>
+<p>All 16 vasic-digital submodules gained the §6.Z inheritance reference
+in CLAUDE.md / AGENTS.md / CONSTITUTION.md (one commit per submodule
+pushed to GitHub + GitLab; SHAs in <code>git submodule status</code>).
+Pin bumps in parent: Auth, Cache, Challenges, Concurrency, Config,
+Containers, Database, Discovery, HTTP3, Mdns, Middleware, Observability,
+RateLimiter, Recovery, Security, Tracker-SDK.</p>
+<hr />
+<h2
+id="lava-android-1219-1039--lava-api-go-238-2308--2026-05-14-welcome-screen-colored-logo-fix--6y-post-distribution-version-bump-mandate">Lava-Android-1.2.19-1039
+/ Lava-API-Go-2.3.8-2308 — 2026-05-14 (Welcome-screen colored logo fix +
+§6.Y Post-Distribution Version Bump Mandate)</h2>
+<p><strong>Previous published:</strong> Lava-Android-1.2.18-1038 /
+Lava-API-Go-2.3.7-2307</p>
+<h3 id="fixed-android-client">Fixed (Android client)</h3>
+<ul>
+<li><strong>Welcome screen now renders the colored Lava logo</strong>
+instead of the monochrome notification glyph. Pre-fix:
+<code>LavaIcons.AppIcon = Icon.DrawableResourceIcon(R.drawable.ic_notification)</code>
+surfaced the Android-required monochrome notification icon as the brand
+mark on first-launch users' Welcome screen. Reported by the operator:
+"the Welcome to Lava title is located has black-and-white ugly logo of
+the app! It MUST BE our nicely colored red log in full color!". Fix:
+introduced <code>R.drawable.ic_lava_logo</code> (layer-list compositing
+the colored launcher background + foreground PNGs at 5 densities — mdpi
+through xxxhdpi) in <code>core:designsystem</code>, rewired
+<code>LavaIcons.AppIcon</code> to it, preserved the monochrome icon as
+<code>LavaIcons.NotificationIcon</code> for the AndroidManifest. Commit:
+this release's icon-fix commit.</li>
+</ul>
+<h3 id="constitutional-25th-6l-invocation">Constitutional (25th §6.L
+invocation)</h3>
+<ul>
+<li><strong>§6.Y Post-Distribution Version Bump Mandate added.</strong>
+After every successful distribution of any artifact (Android APK via
+Firebase App Distribution, Google Play Store release, container image
+push, lava-api-go binary release, any future distributable artifact),
+the FIRST commit in the new development cycle that touches code MUST
+bump the artifact's <code>versionCode</code> integer (and the
+per-artifact equivalent for non-Android targets). The
+<code>versionName</code> semver MUST be bumped too when the changes
+warrant a user-visible version change (patch for bug fix, minor for
+feature, major for breaking change). §6.Y-debt opened for pre-push hook
++ check-constitution.sh mechanical enforcement. Propagated to root
+CLAUDE.md, root AGENTS.md, lava-api-go/CONSTITUTION.md. Submodule (16 ×
+3 docs) propagation deferred per §6.F default inheritance.</li>
+</ul>
+<h3 id="tests--falsifiability-evidence-per-6j--6n11">Tests +
+falsifiability evidence (per §6.J / §6.N.1.1)</h3>
+<ul>
+<li><p><strong>JVM unit:</strong>
+<code>core/designsystem/.../LavaIconsAppIconColorRegressionTest.kt</code>
+— reads <code>LavaIcons.kt</code> and asserts <code>AppIcon</code>
+references <code>R.drawable.ic_lava_logo</code>; verifies the colored
+PNG layer assets exist at every density (10 files: 5 densities × 2
+layers); verifies the composite XML drawable exists. Falsifiability
+rehearsed: reverted <code>AppIcon</code> to
+<code>R.drawable.ic_notification</code>; observed test failure with full
+directive message; restored; pass.</p></li>
+<li><p><strong>Compose UI Challenge Test C26:</strong>
+<code>app/src/androidTest/.../Challenge26WelcomeColoredLogoTest.kt</code>
+drives the real Welcome screen on the gating matrix and asserts the
+rendered bitmap has measurable RGB variance per channel (rangeR/G/B &gt;
+32 each, rgbDelta &gt; 32) — i.e., the icon renders as a colored
+composite, not as a single-tone monochrome glyph. Source compiles via
+<code>:app:compileDebugAndroidTestKotlin</code>. Instrumentation gating
+run owed at next §6.X-mounted gate host.</p></li>
+</ul>
+<h3
+id="operator-input-checklist-carried-forward-all-satisfied">Operator-input
+checklist (carried forward, all satisfied)</h3>
+<p>Same as 1.2.18-1038 — all real, all distribute-eligible. Pepper
+rotated, current-client-name + active-clients bumped per Phase 1 Gates
+4+5.</p>
+<hr />
+<h2
+id="lava-android-1218-1038--lava-api-go-237-2307--2026-05-14-3-user-reported-issues-closed-onboarding-back-nav--s23-ultra-insets--dev-api-discovery">Lava-Android-1.2.18-1038
+/ Lava-API-Go-2.3.7-2307 — 2026-05-14 (3 user-reported issues closed:
+onboarding back-nav + S23 Ultra insets + DEV API discovery)</h2>
+<p><strong>Previous published:</strong> Lava-Android-1.2.17-1037 /
+Lava-API-Go-2.3.6-2306</p>
+<h3 id="fixed-android-client-1">Fixed (Android client)</h3>
+<ul>
+<li><p><strong>Onboarding back navigation works on every step.</strong>
+The pre-fix <code>BackHandler</code> predicate in
+<code>OnboardingScreen.kt</code> was inverted (intercepted on Welcome
+where it should fall through; ignored on Providers / Configure / Summary
+where the user actively needs to walk back). The VM's
+<code>onBackStep()</code> was correctly designed but never reached. Two
+production changes: (a) <code>BackHandler(enabled = true)</code> so the
+VM decides per-step what back means; (b) <code>onBackStep()</code>
+extended so Configure with <code>currentProviderIndex &gt; 0</code>
+decrements through the per-provider Configure pages before returning to
+the Providers list, and Summary now re-enters Configure on the last
+selected provider so the user can amend a config they've already
+reviewed. Commit <code>6a315a28</code>. 5 new VM unit tests in
+<code>OnboardingViewModelTest</code> cover all four transitions;
+Challenge Test C24
+(<code>Challenge24OnboardingBackNavigationTest</code>) is the
+load-bearing instrumentation gate per §6.J — drives
+<code>composeRule.activity.onBackPressedDispatcher.onBackPressed()</code>
+and asserts the rendered screen transitioned. Operator-rehearsed
+falsifiability stamp in commit body.</p></li>
+<li><p><strong>Onboarding no longer overlaps the system bars on
+tall-aspect devices (Samsung Galaxy S23 Ultra reproduction).</strong>
+MainActivity calls <code>enableEdgeToEdge</code>, but
+<code>OnboardingScreen.kt</code>'s <code>AnimatedContent</code>
+container did not apply
+<code>Modifier.windowInsetsPadding(WindowInsets.safeDrawing)</code>.
+Title rows clipped behind the status-bar hole-punch; "Get Started" /
+"Next" / "Start Exploring" buttons clipped behind the gesture bar.
+One-place fix at the screen level — every step inherits, future steps
+automatically get correct behavior. <code>safeDrawing</code> also
+handles IME so Configure's text fields stay above the keyboard. Commit
+<code>09ce7466</code>. <code>OnboardingInsetRegressionTest</code> (JVM,
+runs in pre-push gate) asserts the modifier + imports are present in
+source — anyone removing them in a future commit fails the test.
+Falsifiability rehearsal recorded in commit body. Challenge Test C25
+(<code>Challenge25OnboardingInsetSafeDrawingTest</code>) drives the
+wizard on a tall-aspect AVD and asserts both top + bottom anchored nodes
+are reported displayed.</p></li>
+</ul>
+<h3 id="added-dev-api-instance">Added (DEV API instance)</h3>
+<ul>
+<li><strong>Side-by-side DEV lava-api-go on
+<code>_lava-api-dev._tcp</code> port 8543.</strong> Developers can now
+iterate on the Go API without disturbing the production instance. New
+<code>docker-compose.dev.yml</code> brings up
+<code>lava-postgres-dev</code> (host port 5433, schema
+<code>lava_api_dev</code>) + <code>lava-migrate-dev</code> +
+<code>lava-api-go-dev</code> reusing the same binary with dev-flavored
+env values. Only the <strong>debug</strong> Android build
+(applicationIdSuffix <code>.dev</code>) subscribes to the dev service
+type via the new <code>DiscoveryServiceTypesModule</code> Hilt provider;
+release builds ignore it entirely so a stray dev advertiser on a real
+user's LAN cannot redirect their traffic. Commit <code>69b389a2</code>.
+New <code>Engine.GoDev</code> enum value, new
+<code>DiscoveryServiceTypeCatalog</code> exposing
+<code>SERVICE_TYPES_RELEASE</code> + <code>SERVICE_TYPES_DEBUG</code>,
+domain <code>toEndpoint()</code> maps GoDev to
+<code>Endpoint.GoApi</code>. New §6.A real-binary contract test
+(<code>lava-api-go/tests/contract/dev_compose_env_contract_test.go</code>)
+asserts every <code>LAVA_API_*</code> env var the dev compose passes
+binds to a field <code>config.Load()</code> actually reads — drift
+between the compose file and <code>internal/config/config.go</code> is
+now a CI-time failure. Falsifiability rehearsals recorded in commit body
+(mutated catalog dropping dev type → AssertionError caught; mutated
+config.go renaming <code>LAVA_API_MDNS_TYPE</code> → contract test fired
+with the precise error message). <code>.env.example</code> documents
+<code>LAVA_API_DEV_*</code> overrides.</li>
+</ul>
+<h3 id="documentation">Documentation</h3>
+<ul>
+<li><strong>CLAUDE.md targeted improvements</strong> (commit
+<code>225f8351</code>, no constitutional clause text touched):
+<code>docs/CONTINUATION.md</code> promoted to first entry in "See also"
+header per §6.S; <code>CHANGELOG.md</code> listed per §6.P;
+multi-tracker reality reflected in Project section; commands gain the
+single Compose UI Challenge Test invocation example +
+<code>scripts/firebase-distribute.sh</code> (§6.P enforcer) +
+<code>scripts/scan-no-hardcoded-{uuid,ipv4,hostport}.sh</code> siblings
+(§6.R active enforcement); §6 head gains open/resolved debt navigation
+index; §6.L gains a one-line operational summary before the 23×-restated
+wall; "Things to avoid" gains "Always forbidden (quick reference)"
+pointing into §6.R/U/V/W + Host Stability.</li>
+</ul>
+<h3 id="open-work">Open work</h3>
+<ul>
+<li>§6.X-debt remains open (Linux x86_64 gate-host provisioning for the
+container-bound emulator matrix; darwin/arm64 blocked per
+<code>.lava-ci-evidence/sixth-law-incidents/2026-05-13-emulator- container-darwin-arm64-gap.json</code>).
+Workstation-iteration emulator matrix on the operator's host is
+permitted per the §6.K-debt PARTIAL CLOSE; release tagging awaits the
+gate host.</li>
+</ul>
+<h3
+id="operator-input-checklist-update-2026-05-14-post-distribute-prep">Operator-input
+checklist update (2026-05-14, post-distribute prep)</h3>
+<p>The placeholders cited in 1.2.17-1037's release-prep note have since
+been resolved by the operator:</p>
+<ul>
+<li><code>app/google-services.json</code> — REAL (Firebase project
+<code>lava-vasic-digital</code>, project number
+<code>815513478335</code>).</li>
+<li><code>LAVA_FIREBASE_TOKEN</code> — REAL;
+<code>firebase login:list</code> reports authenticated as
+<code>milos85vasic@gmail.com</code>; <code>firebase projects:list</code>
+returns the lava project.</li>
+<li>App Distribution testers configured in the Firebase Console (3
+emails wired via <code>.env</code>).</li>
+<li><code>RUTRACKER_USERNAME</code> / <code>RUTRACKER_PASSWORD</code> —
+REAL.</li>
+<li>Both <code>keystores/{debug,release}.keystore</code> present.</li>
+</ul>
+<p>This release is consequently distribute-eligible. The 1.2.17-1037
+"NOT distributed" note is no longer load-bearing.</p>
+<hr />
+<h2
+id="lava-android-1217-1037--lava-api-go-236-2306--2026-05-13-6x-debt-partial-close--6l-21st-23rd-invocations">Lava-Android-1.2.17-1037
+/ Lava-API-Go-2.3.6-2306 — 2026-05-13 (§6.X-debt PARTIAL CLOSE + §6.L
+21st-23rd invocations)</h2>
+<p><strong>Previous published:</strong> Lava-Android-1.2.16-1036 /
+Lava-API-Go-2.3.5-2305</p>
+<h3 id="constitutional-1">Constitutional</h3>
+<ul>
+<li><strong>§6.X added (TWENTY-FIRST §6.L invocation).</strong>
+Container-Submodule Emulator Wiring Mandate — every Android emulator the
+project depends on for testing MUST execute its emulator process INSIDE
+a podman/docker container managed by
+<code>submodules/containers/</code>. Propagated to 52 docs (root × 2 +
+16 submodules × 3 + lava-api-go × 3). Mechanical enforcement via
+<code>scripts/check-constitution.sh</code> (inheritance presence
+checks).</li>
+<li><strong>§6.X-debt PARTIAL CLOSE (TWENTY-SECOND §6.L
+invocation).</strong> Containers submodule commit <code>562069e7</code>
+ships:
+<ul>
+<li><code>pkg/emulator/containerized.go</code> — Containerized type
+implementing the Emulator interface via podman/docker
+<code>run -d --device /dev/kvm</code>.</li>
+<li><code>pkg/emulator/containerized_test.go</code> — 9 test functions /
+12 sub-cases with Bluff-Audit rehearsal (mutating
+<code>"--device", "/dev/kvm"</code> out of Boot args produces "captured
+args missing --device /dev/kvm").</li>
+<li><code>pkg/emulator/Containerfile</code> + <code>entrypoint.sh</code>
+— Android emulator image recipe (Linux x86_64 buildable; darwin/arm64
+blocked per §6.V-debt).</li>
+<li><code>cmd/emulator-matrix/main.go</code> —
+<code>--runner=host-direct|containerized</code> flag +
+<code>--container-image</code> + <code>--container-runtime</code>.</li>
+</ul></li>
+<li><strong>§6.X runtime checks (a) + (b) activated</strong> in Lava
+parent <code>scripts/check-constitution.sh</code>. Both
+falsifiability-rehearsed (<code>mv</code> / <code>sed</code> mutations
+produce "MISSING 6.X runtime check (...)").</li>
+<li><strong>§6.L invocation count: TWENTY → TWENTY-THREE.</strong>
+Operator invoked the Anti-Bluff Functional Reality Mandate three times
+in this session window. Verbatim restatement of the no-bluff covenant
+propagated across all 52 constitutional docs.</li>
+</ul>
+<h3 id="build-infrastructure-not-user-visible">Build infrastructure (not
+user-visible)</h3>
+<ul>
+<li>Submodule pin: <code>submodules/containers</code> 8197c222 →
+562069e7+ (full §6.X-debt close set).</li>
+<li><code>scripts/check-constitution.sh</code> gains 5 new lines + 2 new
+runtime checks; the existing inheritance checks are reorganized.</li>
+</ul>
+<h3 id="whats-not-in-this-version-2">What's NOT in this version</h3>
+<ul>
+<li><strong>No Firebase distribute.</strong> Per operator's 23rd §6.L
+invocation: rebuild
+<ul>
+<li>redistribute requires real <code>app/google-services.json</code> +
+real <code>LAVA_FIREBASE_TOKEN</code>. Both are placeholders in this
+commit. Distributing with stub secrets produces signed-but-broken APKs
+(Firebase init crashes on <code>LavaApplication.onCreate</code>) —
+that's the canonical §6.J "tests green, feature broken for users" bluff
+this mandate exists to prevent.</li>
+</ul></li>
+<li><strong>No §6.X gate run.</strong> The
+Containers/cmd/emulator-matrix <code>--runner= containerized</code> path
+requires Linux x86_64 with <code>/dev/kvm</code>; this build is on
+darwin/arm64. Real-stack boot test recorded as honestly outstanding per
+§6.V-debt incident JSON.</li>
+</ul>
+<h3 id="operator-inputs-needed-for-the-next-distribute">Operator inputs
+needed for the next distribute</h3>
+<ol type="1">
+<li>Real <code>app/google-services.json</code> (not the stub).</li>
+<li>Real <code>LAVA_FIREBASE_TOKEN</code> in <code>.env</code>.</li>
+<li>Real <code>RUTRACKER_USERNAME</code> +
+<code>RUTRACKER_PASSWORD</code> (for C02 verification).</li>
+<li>Real <code>KINOZAL_USERNAME</code>/<code>KINOZAL_PASSWORD</code>
+(for C09).</li>
+<li>Real <code>NNMCLUB_USERNAME</code>/<code>NNMCLUB_PASSWORD</code>
+(for C10).</li>
+<li>Linux x86_64 gate host (or remote runner) for the §6.X attestation
+producing <code>runner: containerized</code> rows.</li>
+</ol>
+<h1 id="changelog-1">Changelog</h1>
+<h2
+id="lava-android-1216-1036--lava-api-go-235-2305--2026-05-12-debug-icon--rutracker-main-full-removal--6l-19th">Lava-Android-1.2.16-1036
+/ Lava-API-Go-2.3.5-2305 — 2026-05-12 (debug icon + RuTracker-Main full
+removal + §6.L 19th)</h2>
+<p><strong>Previous published:</strong> Lava-Android-1.2.15-1035 /
+Lava-API-Go-2.3.4-2304</p>
+<h3 id="fixed">Fixed</h3>
+<ul>
+<li><strong>Debug launcher icon background.</strong> The debug variant's
+<code>ic_launcher_background</code> is now solid <code>#00FF00</code>
+(green) instead of the previous gray. Added a debug-specific
+adaptive-icon at
+<code>app/src/debug/res/mipmap-anydpi-v26/ic_launcher.xml</code>
+pointing at the debug drawable so both <code>android:icon</code> and
+<code>android:roundIcon</code> references in the manifest pick up the
+green background in the <code>.dev</code> variant only.</li>
+<li><strong>Debug app name.</strong>
+<code>app/src/debug/res/values/strings.xml</code>'s
+<code>app_name</code> changed from "Lava Dev" → "Lava DEV" per
+operator.</li>
+<li><strong>RuTracker (Main) persisting through reinstall.</strong>
+v1.2.15 hid the seed entry but existing installs and Android Auto Backup
+restores carried the row back. Three layers of defense:
+<ol type="1">
+<li><code>EndpointsRepositoryImpl.observeAll()</code> now
+<code>purgeRutrackerLegacy()</code>s the DAO on every observe() start
+AND filters <code>Endpoint.Rutracker</code> out of the emitted
+list.</li>
+<li><code>EndpointsRepositoryImpl.add()</code> silently rejects
+<code>Endpoint.Rutracker</code> arguments.</li>
+<li><code>PreferencesStorageImpl.getSettings()</code> migrates a
+persisted <code>Endpoint.Rutracker</code> (e.g., from a backup restore)
+to <code>Endpoint.GoApi(host = "lava-api.local")</code> and clears the
+prefs key.</li>
+</ol></li>
+<li><strong>Auto Backup / cloud-restore exclusion.</strong> Added
+<code>app/src/main/res/xml/backup_rules.xml</code> +
+<code>app/src/main/res/xml/data_extraction_rules.xml</code> excluding
+<code>settings.xml</code> SharedPreferences from full-backup,
+cloud-backup, and device-transfer paths. Manifest now declares both via
+<code>android:fullBackupContent</code> and
+<code>android:dataExtractionRules</code>. Once a user removes a server,
+a reinstall (and any future backup restore) will NOT re-introduce stale
+endpoints.</li>
+</ul>
+<h3 id="new-tests">New tests</h3>
+<ul>
+<li><code>EndpointsRepositoryImplFilterTest</code> (JVM): asserts the
+filter + purge + add-rejection contracts.</li>
+<li><code>Challenge26RutrackerMainAbsentFromServerListTest</code>
+(Compose UI): asserts the Server section never renders "Main" or
+"rutracker.org" entries.</li>
+</ul>
+<h3 id="constitutional-2">Constitutional</h3>
+<ul>
+<li>§6.L mandate invoked for the 19th time. Count propagated across
+CLAUDE.md, AGENTS.md, lava-api-go's CLAUDE/CONSTITUTION/AGENTS, and all
+48 docs across the 16 vasic-digital submodules.</li>
+</ul>
+<h3 id="changed">Changed</h3>
+<ul>
+<li>Go API version → 2.3.5-2305</li>
+<li>Android version → 1.2.16-1036</li>
+</ul>
+<hr />
+<h2
+id="lava-android-1215-1035--lava-api-go-234-2304--2026-05-12-operator-reported-ux-issues">Lava-Android-1.2.15-1035
+/ Lava-API-Go-2.3.4-2304 — 2026-05-12 (operator-reported UX issues)</h2>
+<p><strong>Previous published:</strong> Lava-Android-1.2.14-1034 /
+Lava-API-Go-2.3.3-2303</p>
+<h3 id="fixed-1">Fixed</h3>
+<ul>
+<li><strong>Onboarding wizard not shown on clean install.</strong>
+MainActivity's <code>showOnboarding</code> defaulted to
+<code>false</code> and was loaded asynchronously, while
+<code>setKeepOnScreenCondition</code> only waited for theme — not for
+onboarding-status. Fresh-install users could see MainScreen before the
+onboarding flag was loaded → wizard never appeared. Fixed by making
+<code>showOnboarding</code> nullable and extending the splash-keep
+condition to wait for both theme AND onboarding-status to load.</li>
+<li><strong>Menu provider color-dot spacing.</strong> Provider rows in
+the Menu screen had a <code>small</code> spacer between the color dot
+and the provider name — too tight visually. Bumped to
+<code>medium</code>.</li>
+<li><strong>Theme change required app restart.</strong>
+<code>MainActivity</code> collected only the <code>first()</code>
+emission of <code>viewModel.theme</code> and never observed subsequent
+changes. Theme picker writes to preferences (reactive Flow) but the
+Activity didn't recompose. Fixed by switching to
+<code>viewModel.theme.collect { ... }</code> so each emission updates
+the composition immediately.</li>
+<li><strong>Server section: RuTracker (Main) removed from seeded
+list.</strong> Per the operator's directive "communication is now
+strictly through the Lava API", the historical direct rutracker.org seed
+entry (<code>Endpoint.Rutracker</code>) is no longer surfaced to the
+user. The <code>defaultEndpoints</code> seed in
+<code>EndpointsRepositoryImpl</code> is now empty; discovery +
+manual-add populate the list. The <code>Endpoint.Rutracker</code> type
+remains as a fallback constant for now; full type deletion is documented
+as a follow-up SP because of its ~15 cascading call-site touches.</li>
+<li><strong>Server section: trash icon + confirmation dialog for offline
+endpoints.</strong> Each <code>Mirror</code> / <code>GoApi</code> row in
+the Connections list that is
+<code>removable &amp;&amp; !selected &amp;&amp; status != Active</code>
+now shows a red trash (Delete) icon directly (no need to toggle edit
+mode). Tapping it shows a confirmation <code>Dialog</code> ("Remove
+server? — Remove %s from the server list? This cannot be undone.").
+Confirm → removal; Cancel → no-op. The edit-mode Remove icon was also
+updated to use the trash icon and now routes through the same
+confirmation dialog.</li>
+</ul>
+<h3 id="live-emulator-verification">Live-emulator verification</h3>
+<ul>
+<li>9-Challenge sweep on CZ_API34_Phone API 34 (post-fix re-run):
+PASS.</li>
+<li>New Compose UI Challenge:
+<code>Challenge25OnboardingFreshInstallTest</code> verifies the splash +
+onboarding-wizard rendering on clean prefs.</li>
+</ul>
+<h3 id="changed-1">Changed</h3>
+<ul>
+<li>Go API version → 2.3.4-2304</li>
+<li>Android version → 1.2.15-1035</li>
+</ul>
+<hr />
+<h2
+id="lava-android-1214-1034--lava-api-go-233-2303--2026-05-12-6l-16th17th-invocation-c03-fix--cloudflare-anti-bot--anti-bluff-audit">Lava-Android-1.2.14-1034
+/ Lava-API-Go-2.3.3-2303 — 2026-05-12 (§6.L 16th+17th invocation: C03
+fix + Cloudflare anti-bot + anti-bluff audit)</h2>
+<p><strong>Previous published:</strong> Lava-Android-1.2.13-1033 /
+Lava-API-Go-2.3.2-2302</p>
+<h3 id="fixed-2">Fixed</h3>
+<ul>
+<li><p><strong>C03 RuTor anonymous onboarding</strong> — Onboarding flow
+stuck on Configure screen for users picking RuTor with the Anonymous
+Access toggle on. Root cause:
+<code>OnboardingViewModel.onTestAndContinue()</code> called
+<code>sdk.checkAuth()</code> on the anonymous branch and treated
+<code>AuthState.Unauthenticated</code> as failure — but Unauthenticated
+IS the user's chosen state for anonymous. Fixed by skipping
+<code>checkAuth</code> on the anonymous branch entirely. (Commit
+<code>4d27c07</code>)</p></li>
+<li><p><strong>Credential-leak-in-logs (§6.H)</strong> —
+<code>OnboardingViewModel.perform()</code> logged actions via
+<code>logger.d { "Perform $action" }</code> which printed the operator's
+real RuTracker username + password in plain text via the sealed-class
+auto-<code>toString</code> of <code>UsernameChanged(value=…)</code> /
+<code>PasswordChanged(value=…)</code>. Discovered during the C03
+investigation. Fixed by printing only
+<code>action::class.simpleName</code>. (Commit
+<code>4d27c07</code>)</p></li>
+<li><p><strong>C02 RuTracker login — Cloudflare anti-bot stall</strong>
+— POST to <code>/forum/login.php</code> was silently stalled by
+Cloudflare's anti-bot (TLS+TCP succeeded, request body written, no
+response data ever returned). Mitigation: HttpCookies plugin +
+browser-class headers (Accept, Accept-Language, Accept-Encoding) + real
+Chrome 124 UA + pre-flight <code>GET /forum/index.php</code> so the POST
+carries Cloudflare clearance cookies. POST now returns 302→200. (Commit
+<code>f7d0a62</code>)</p></li>
+<li><p><strong>rutracker cookie selection bug</strong> —
+<code>RuTrackerInnerApiImpl.login()</code> picked the wrong cookie as
+the rutracker session token when Cloudflare added
+<code>cf_clearance</code> to Set-Cookie headers. Tightened selection to
+match by NAME prefix (bb_data/bb_session/bb_login) instead of fragile
+"not bb_ssl" negation. (Commit <code>f7d0a62</code>)</p></li>
+<li><p><strong>HTTP timeouts</strong> — Main + LAN OkHttp clients had no
+explicit timeouts (OkHttp default 10s — too tight for slow networks).
+Set explicit 30s connect/read/write. Rutracker Ktor client gets
+HttpTimeout plugin (60s request, 30s connect, 60s socket). (Commit
+<code>4d27c07</code>)</p></li>
+<li><p><strong>Challenge16 stale-assumption bluff</strong> — Test
+asserted "Internet Archive must NOT appear in onboarding list" while
+Phase 2b had flipped <code>apiSupported=true</code> on archiveorg. The
+test passed only because its <code>waitUntil</code> accepted the Welcome
+screen (where no provider list renders). Rewritten to navigate to "Pick
+your providers" and assert that all 4 verified+apiSupported providers
+actually render. (Commit <code>4b0dd55</code>)</p></li>
+<li><p><strong>GetCurrentProfileUseCase brittle parser</strong> —
+Single-selector Jsoup approach (<code>#logged-in-username</code>) failed
+after Cloudflare mitigation changed the served page. Added 4-selector
+fallback chain. (Commit <code>4b0dd55</code>)</p></li>
+<li><p><strong>FirebaseAnalyticsTracker verify-only test</strong> — Two
+tests used <code>verify { mock.foo() }</code> as their sole assertion
+(§6.L clause 4 Forbidden Test Pattern). Refactored to
+<code>mockk slot</code> captures with <code>assertEquals</code> on
+captured values. (Commit <code>4b0dd55</code>)</p></li>
+</ul>
+<h3 id="constitutional-3">Constitutional</h3>
+<ul>
+<li>§6.L mandate invoked for the 16th + 17th times. Count propagated
+across CLAUDE.md, AGENTS.md, lava-api-go's CLAUDE/CONSTITUTION/AGENTS,
+and all 48 docs across the 16 vasic-digital submodules. (Commits
+<code>4b0dd55</code>, <code>d8b90ab</code>, this commit)</li>
+</ul>
+<h3
+id="live-emulator-challenge-test-verification-cz_api34_phone-api-34">Live-emulator
+Challenge Test verification (CZ_API34_Phone API 34)</h3>
+<ul>
+<li><strong>PASS</strong> (14 of 24): C00, C01, C03, C04, C05, C06, C07,
+C08, C09, C10, C11, C12, C13, C14, C15, C16 (rewritten), C20, C21, C22
+(in isolation), C23, C24.</li>
+<li><strong>PARTIAL</strong> (1): C02 — Cloudflare mitigation portion
+verified; blocked at <code>parseUserId</code> post-login (none of 4
+selectors match today's rutracker HTML — needs scraper archaeology or
+operator credential verification).</li>
+<li><strong>HONEST SHALLOW SCOPE</strong> (C04-C08): test classes named
+after deep features (DownloadTorrentFile, ViewTopicDetail,
+CrossTrackerFallback) but only assert "tab is visible" per their KDocs
+(gap forensic in
+<code>.lava-ci-evidence/sp3a-challenges/C4-2026-05-04-redesign.json</code>).
+Deep tests owed.</li>
+</ul>
+<h3 id="unit-test-suite">Unit-test suite</h3>
+<ul>
+<li>421 unit tests across all modules, 0 failures, 0 errors.</li>
+</ul>
+<h3 id="verified-bluff-pattern-audit-across-all-testkt-files">Verified
+bluff-pattern audit (across all <code>*Test.kt</code> files)</h3>
+<ul>
+<li>0 mock-the-SUT bluffs.</li>
+<li>0 <code>@Ignore</code> without issue link.</li>
+<li>1 verify-only test (FirebaseAnalyticsTrackerTest) — fixed.</li>
+<li>1 stale-assumption test (Challenge16ApiSupportedFilterTest) —
+rewritten.</li>
+</ul>
+<h3 id="changed-2">Changed</h3>
+<ul>
+<li>Go API version → 2.3.3</li>
+<li>Android version → 1.2.14</li>
+</ul>
+<hr />
+<h2
+id="lava-android-1213-1033--lava-api-go-232-2302--2026-05-08-yoleboba-8-palette-theme-system">Lava-Android-1.2.13-1033
+/ Lava-API-Go-2.3.2-2302 — 2026-05-08 (Yole+Boba 8-palette theme
+system)</h2>
+<p>Yole semantic color foundation with 8 distinct palettes from Boba
+project accents.</p>
+<h2
+id="lava-android-1212-1032--lava-api-go-232-2302--2026-05-08-release-build">Lava-Android-1.2.12-1032
+/ Lava-API-Go-2.3.2-2302 — 2026-05-08 (Release build)</h2>
+<p><strong>Previous published:</strong> Lava-Android-1.2.11-1031 /
+Lava-API-Go-2.3.2-2302</p>
+<p>First production release build with full signing + ProGuard
+optimization. Includes all fixes from 1.2.9+1.2.10.</p>
+<hr />
+<h2
+id="lava-android-1211-1031--lava-api-go-232-2302--2026-05-08">Lava-Android-1.2.11-1031
+/ Lava-API-Go-2.3.2-2302 — 2026-05-08</h2>
+<p><strong>Previous published:</strong> Lava-Android-1.2.10-1030 /
+Lava-API-Go-2.3.1-2301</p>
+<p>(incremental release — see git log for details)</p>
+<hr />
+<h2
+id="lava-android-1210-1030--lava-api-go-231-2301--2026-05-08-docker-auth-fix">Lava-Android-1.2.10-1030
+/ Lava-API-Go-2.3.1-2301 — 2026-05-08 (Docker auth fix)</h2>
+<p><strong>Previous published:</strong> Lava-Android-1.2.9-1029 /
+Lava-API-Go-2.3.0-2300</p>
+<h3 id="fixed-3">Fixed</h3>
+<ul>
+<li>docker-compose.yml: pass LAVA_AUTH_FIELD_NAME,
+LAVA_AUTH_HMAC_SECRET, LAVA_AUTH_ACTIVE_CLIENTS,
+LAVA_AUTH_RETIRED_CLIENTS, LAVA_AUTH_TRUSTED_PROXIES to lava-api-go
+container (was crashing on startup)</li>
+</ul>
+<h3 id="changed-3">Changed</h3>
+<ul>
+<li>Go API version → 2.3.1</li>
+</ul>
+<hr />
+<h2
+id="lava-android-129-1029--lava-api-go-230-2300--2026-05-08-theme-fix--anti-bluff-onboarding">Lava-Android-1.2.9-1029
+/ Lava-API-Go-2.3.0-2300 — 2026-05-08 (Theme fix + anti-bluff
+onboarding)</h2>
+<p><strong>Previous published:</strong> Lava-Android-1.2.8-1028 /
+Lava-API-Go-2.2.0-2200</p>
+<h3 id="fixed--theme-readability-critical">Fixed — Theme readability
+(critical)</h3>
+<ul>
+<li>LavaTheme now wires MaterialTheme.colorScheme from AppColors, fixing
+dark-mode text being unreadable (MaterialTheme.colorScheme returned
+light-theme defaults even in dark mode)</li>
+<li>AppColors extended with secondary, tertiary, surfaceVariant,
+onSurfaceVariant, error roles</li>
+<li>All custom themes (Ocean/Forest/Sunset) updated with full Material3
+color roles</li>
+</ul>
+<h3 id="fixed--onboarding-wizard">Fixed — Onboarding wizard</h3>
+<ul>
+<li>WelcomeStep shows provider count ("6 providers available") per
+design spec</li>
+<li>ConfigureStep back press now goes to Providers per spec (was going
+to previous provider)</li>
+<li>SummaryStep hardcoded colors replaced with AppTheme accents (§6.R
+No-Hardcoding fix)</li>
+<li>All onboarding steps use AppTheme.colors/typography/shapes instead
+of MaterialTheme defaults</li>
+<li>Anonymous provider TestAndContinue no longer erroneously calls
+checkAuth for health validation</li>
+</ul>
+<h3 id="added--anti-bluff-tests">Added — Anti-bluff tests</h3>
+<ul>
+<li>16 OnboardingViewModel unit tests (all passing): step transitions,
+provider toggling, back press, anon/auth TestAndContinue, credential
+saving, Finish signaling, filtering</li>
+<li>3 Challenge Tests (C20-C22) for onboarding wizard — compile, need
+emulator to execute</li>
+</ul>
+<h3 id="changed--constitution">Changed — Constitution</h3>
+<ul>
+<li>§6.J/§6.L/§6.Q added to core/, feature/, app/ CLAUDE.md + AGENTS.md
+(6 files)</li>
+<li>Lava constitution inheritance added to Panoptic submodule
+(CLAUDE/AGENTS/CONSTITUTION)</li>
+<li>FakeTrackerClient now exposes <code>authState</code> property for
+testability</li>
+<li>Duplicate include(":feature:onboarding") removed from
+settings.gradle.kts</li>
+</ul>
+<h3 id="changed--go-api">Changed — Go API</h3>
+<ul>
+<li>version.Name → 2.3.0, Code → 2300</li>
+</ul>
+<hr />
+<h2
+id="lava-android-128-1028--lava-api-go-220-2200--2026-05-07-phases-2-6">Lava-Android-1.2.8-1028
+/ Lava-API-Go-2.2.0-2200 — 2026-05-07 (Phases 2-6)</h2>
+<p><strong>Previous published:</strong> Lava-Android-1.2.7-1027 /
+Lava-API-Go-2.1.0-2100</p>
+<h3 id="added--multi-provider-streaming-search-phase-2">Added —
+Multi-provider streaming search (Phase 2)</h3>
+<ul>
+<li><code>GET /v1/search?q=...&amp;providers=...</code> SSE endpoint
+fans out to all registered providers</li>
+<li><code>SseClient</code> (OkHttp-based SSE parser),
+<code>ProviderChipBar</code> multi-select filter</li>
+<li>Provider label chips on search result cards</li>
+<li><code>apiSupported=true</code> on all 6 providers (rutracker, rutor,
+nnmclub, kinozal, archiveorg, gutenberg)</li>
+<li>Provider result filtering chips on search results screen</li>
+</ul>
+<h3 id="added--onboarding-wizard-phase-3">Added — Onboarding wizard
+(Phase 3)</h3>
+<ul>
+<li>New <code>:feature:onboarding</code> module with 4-step wizard:
+Welcome → Pick Providers → Configure → Summary</li>
+<li>AnimatedContent sliding transitions</li>
+<li>Connection auto-test on credential submit, closes app on back press
+at Welcome</li>
+</ul>
+<h3 id="added--sync-expansion-phase-4">Added — Sync expansion (Phase
+4)</h3>
+<ul>
+<li>Device identity UUID generated on first launch</li>
+<li>Sync Now buttons on Favorites and Bookmarks screens</li>
+<li>History and Credentials sync categories with WorkManager
+workers</li>
+<li>Menu sync settings expanded from 2 to 4 categories</li>
+</ul>
+<h3 id="changed--uiux-polish-phase-5">Changed — UI/UX polish (Phase
+5)</h3>
+<ul>
+<li>Menu multi-provider header showing all signed-in providers with
+sign-out</li>
+<li>Ocean/Forest/Sunset color themes alongside SYSTEM/LIGHT/DARK</li>
+<li>About dialog shows versionCode: "Version: 1.2.8 (1028)"</li>
+<li>Credentials screen modern redesign with ProviderColors, nav-bar FAB
+fix</li>
+<li>Nav-bar overlap audit: <code>navigationBarsPadding</code> added at
+Scaffold level</li>
+</ul>
+<h3 id="added--crashlytics-phase-6">Added — Crashlytics (Phase 6)</h3>
+<ul>
+<li>Non-fatal <code>recordException</code> tracking in 8 ViewModels
+across all error paths</li>
+</ul>
+<h3 id="fixed-4">Fixed</h3>
+<ul>
+<li>Hardcoded <code>thinker.local:8443</code> → config-driven via
+<code>ObserveSettingsUseCase</code></li>
+<li>Credentials FAB no longer overlaps 3-button navigation bar</li>
+</ul>
+<hr />
+<p>All notable changes to <strong>Lava</strong> (the Android client and
+the lava-api-go service) are documented in this file.</p>
+<p>Per constitutional clause <strong>§6.P (Distribution Versioning +
+Changelog Mandate)</strong>, every distributed build MUST appear here
+BEFORE <code>scripts/firebase-distribute.sh</code> is run. The script
+refuses to operate without a matching entry.</p>
+<p>The format follows <a
+href="https://keepachangelog.com/en/1.1.0/">Keep a Changelog</a>
+loosely, adapted to a multi-artifact repository. Each release tag lives
+on the four-mirror set (GitHub, GitLab, GitFlic, GitVerse).</p>
+<p>Tag formats:</p>
+<ul>
+<li><code>Lava-Android-&lt;version&gt;-&lt;code&gt;</code> — Android
+client.</li>
+<li><code>Lava-API-Go-&lt;version&gt;-&lt;code&gt;</code> — Go API
+service (<code>lava-api-go</code>).</li>
+<li><code>Lava-API-&lt;version&gt;-&lt;code&gt;</code> — legacy Ktor
+proxy (<code>:proxy</code>).</li>
+</ul>
+<p>The <code>&lt;code&gt;</code> suffix is the integer version code
+(Android <code>versionCode</code>, api-go
+<code>version.Code</code>).</p>
+<p>Per-version distribution snapshots (the exact text shipped as App
+Distribution release-notes) live under
+<code>.lava-ci-evidence/distribute-changelog/&lt;channel&gt;/&lt;version&gt;-&lt;code&gt;.md</code>.</p>
+<hr />
+<h2 id="lava-api-go-210-2100--2026-05-06-phase-1">Lava-API-Go-2.1.0-2100
+— 2026-05-06 (Phase 1)</h2>
+<p><strong>Channel:</strong> container registry / remote distribution to
+thinker.local <strong>Previous published:</strong>
+Lava-API-Go-2.0.16-2016 (2026-05-06)</p>
+<h3
+id="added--api-auth--transport-phase-1-of-docstodoslava_todos_001md">Added
+— API auth + transport (Phase 1 of
+<code>docs/todos/Lava_TODOs_001.md</code>)</h3>
+<ul>
+<li><strong>UUID-based client allowlist</strong> enforced via the
+<code>Lava-Auth</code> header (name itself config-driven via
+<code>LAVA_AUTH_FIELD_NAME</code> per §6.R). Active vs retired
+separation: retired UUIDs return <code>426 Upgrade Required</code> with
+min-version JSON instead of advancing the backoff counter.</li>
+<li><strong>Per-IP fixed-ladder backoff</strong>
+(<code>2s,5s,10s,30s,1m,1h</code> configurable via
+<code>LAVA_AUTH_BACKOFF_STEPS</code>) shipped as the
+<code>pkg/ladder</code> primitive upstream-contributed to
+<code>submodules/ratelimiter</code>.</li>
+<li><strong>HTTP/3 preferred</strong> with HTTP/2 fallback +
+<code>Alt-Svc</code> advertisement.</li>
+<li><strong>Brotli response compression</strong> when the client sends
+<code>Accept-Encoding: br</code>.</li>
+<li><strong>Prometheus protocol metric</strong> —
+<code>lava_api_request_protocol_total{protocol,status}</code>.</li>
+<li><strong>Constitutional clause §6.R</strong> — No-Hardcoding Mandate
+(added to root + 16 submodules + AGENTS.md).</li>
+</ul>
+<h3 id="tests-6g-real-stack--6a-contract--6n-rehearsals">Tests (§6.G
+real-stack + §6.A contract + §6.N rehearsals)</h3>
+<ul>
+<li>8 integration tests under
+<code>lava-api-go/tests/integration/</code> (active, retired, unknown,
+ladder, reset, brotli, alt-svc, metric).</li>
+<li>1 contract test asserting <code>LAVA_AUTH_FIELD_NAME</code> does NOT
+appear as a literal in production source.</li>
+<li>All Bluff-Audit stamps recorded with crisp failure messages from
+deliberate-mutation rehearsals.</li>
+</ul>
+<h3 id="submodule-pin">Submodule pin</h3>
+<ul>
+<li><code>submodules/ratelimiter</code> pinned at <code>3faf7a51</code>
+(introduces <code>pkg/ladder/</code>).</li>
+</ul>
+<h3 id="versions-in-this-build">Versions in this build</h3>
+<ul>
+<li>lava-api-go: 2.1.0 (2100)</li>
+<li>Android: 1.2.7 (1027) — paired with this API release</li>
+</ul>
+<hr />
+<h2
+id="lava-android-127-1027--2026-05-06-phase-1">Lava-Android-1.2.7-1027 —
+2026-05-06 (Phase 1)</h2>
+<p><strong>Channel:</strong> Firebase App Distribution <strong>Previous
+published:</strong> Lava-Android-1.2.6-1026 (2026-05-05)</p>
+<h3 id="added--client-side-auth-foundation">Added — client-side auth
+foundation</h3>
+<ul>
+<li><strong><code>AuthInterceptor</code></strong> — OkHttp interceptor
+decrypts the per-build encrypted UUID, injects it into the
+<code>Lava-Auth</code> header, zeroizes the plaintext bytes in
+<code>finally</code>. Auth UUID memory hygiene per
+<code>core/CLAUDE.md</code> (added in this release).</li>
+<li><strong>Build-time encryption (Phase 11)</strong> — Gradle task
+<code>generateLavaAuthClass{Debug,Release}</code> reads
+<code>.env</code> + the variant keystore and emits
+<code>lava.auth.LavaAuthGenerated</code> containing the
+AES-GCM-encrypted UUID + nonce + pepper bytes. Generated dir is
+gitignored.</li>
+<li><strong>L2 client-side obfuscation</strong> — AES-256-GCM keyed by
+<code>HKDF-SHA256(salt = SHA256(signing-cert)[:16], ikm = pepper)</code>.
+A re-signed APK has a different cert hash → different derived key →
+decrypt fails closed.</li>
+<li><strong>α-hotfix: TrackerDescriptor.apiSupported</strong> filter —
+the user-facing provider list now hides Internet Archive (and other
+providers without lava-api-go routes) until Phase 2 ships per-provider
+routing. Closes the alice-bug class.</li>
+<li><strong>C15 + C16 Compose UI Challenge Tests</strong> —
+boot-with-AuthInterceptor + apiSupported-filter rendering
+assertions.</li>
+</ul>
+<h3 id="tests">Tests</h3>
+<ul>
+<li>HKDFTest (RFC 5869 §A.1 vector), AesGcmTest (round-trip + tamper
+detection), SigningCertProviderTest (digest math), AuthInterceptorTest
+(header injection + empty-blob skip + re-signed-APK fail-closed).</li>
+</ul>
+<h3 id="versions-in-this-build-1">Versions in this build</h3>
+<ul>
+<li>Android: 1.2.7 (1027)</li>
+<li>lava-api-go: 2.1.0 (2100) — required for full auth flow</li>
+</ul>
+<hr />
+<h2 id="lava-api-go-2016-2016--2026-05-06">Lava-API-Go-2.0.16-2016 —
+2026-05-06</h2>
+<p><strong>Channel:</strong> container registry / remote distribution to
+thinker.local <strong>Previous published:</strong>
+Lava-API-Go-2.0.15-2015 (2026-05-06)</p>
+<h3 id="fix-post-ktor-cleanup-6j-bluff-in-lava-containers-cli">Fix
+(post-Ktor cleanup, §6.J bluff in <code>lava-containers</code> CLI)</h3>
+<p>The <code>lava-containers</code> workstation CLI had three commands
+(<code>build</code>, <code>status</code>, <code>logs</code>) that
+silently targeted dead surfaces post-Ktor-:proxy-removal:</p>
+<ul>
+<li><strong><code>-cmd=build</code></strong> —
+<code>Manager.BuildImage()</code> shelled
+<code>&lt;runtime&gt; build -t digital.vasic.lava.api:latest ./proxy</code>.
+The <code>./proxy</code> directory was deleted in 2.0.12 (commit
+<code>a00b28f</code>), so this command would fail at runtime.</li>
+<li><strong><code>-cmd=status</code></strong> —
+<code>Manager.isHealthy()</code> probed
+<code>http://localhost:8080/</code>. The api-go service listens on
+<code>https://localhost:8443/health</code>. Status would always report
+<code>Healthy: false</code> even when api-go was running locally.</li>
+<li><strong><code>-cmd=logs</code></strong> —
+<code>Manager.Logs()</code> called
+<code>&lt;runtime&gt; logs lava-proxy</code>. The
+<code>lava-proxy</code> service was removed from
+<code>docker-compose.yml</code> in 2.0.12; the active service is
+<code>lava-api-go</code>.</li>
+<li><strong><code>internal/runtime.Runtime.IsHealthy()</code> +
+<code>ContainerIP()</code></strong> — both filtered on
+<code>name=lava-proxy</code>. Now
+<code>LavaContainerName = "lava-api-go"</code>.</li>
+</ul>
+<p>That's a textbook §6.J bluff: the tool reports outcomes from probing
+nothing.</p>
+<h3 id="changes">Changes</h3>
+<ul>
+<li><code>internal/orchestrator/manager.go</code> — full rewrite of
+broken paths:
+<ul>
+<li><code>ServiceName = "lava-api-go"</code> (was
+<code>"lava-proxy"</code>)</li>
+<li><code>DefaultPort = "8443"</code> (was <code>"8080"</code>)</li>
+<li><code>BuildImage()</code> now invokes
+<code>&lt;runtime&gt; compose --profile api-go build</code> — uses the
+<code>build:</code> directive in <code>docker-compose.yml</code>'s
+<code>lava-api-go</code> service entry (context: <code>.</code>,
+dockerfile: <code>lava-api-go/docker/Dockerfile</code>, target:
+<code>runtime</code>).</li>
+<li><code>isHealthy()</code> probes
+<code>https://localhost:8443/health</code> with
+<code>InsecureSkipVerify: true</code> (LAN cert is self-signed; this is
+a local-dev liveness probe, not a security gate).</li>
+<li><code>Status()</code> prints "Lava API Container Status" instead of
+"Lava Proxy"; URL line shows the HTTPS health endpoint.</li>
+<li>Dead methods deleted: <code>Start()</code>, <code>Stop()</code>,
+<code>printStatus()</code> — never called from <code>main.go</code>
+post-2.0.13 (the Orchestrator type owns compose-up/down).</li>
+<li>Package doc comment rewritten — was still describing the removed
+Ktor proxy.</li>
+</ul></li>
+<li><code>internal/runtime/runtime.go</code> — <code>IsHealthy()</code>
+and <code>ContainerIP()</code> now reference
+<code>LavaContainerName = "lava-api-go"</code> constant (was hardcoded
+<code>"lava-proxy"</code>).</li>
+<li><code>internal/orchestrator/orchestrator.go</code> — doc comment
+updated; <code>Profile</code> field doc narrowed to
+<code>"api-go"</code> (was
+<code>"api-go" | "legacy" | "both"</code>).</li>
+<li><code>internal/orchestrator/orchestrator_test.go</code> — three
+tests retargeted from legacy/both profile names to realistic
+<code>api-go + observability + dev-docs</code> compositions (the
+Orchestrator type passes profile names through opaquely, but tests
+should reflect the validated set).</li>
+</ul>
+<h3 id="new-6a-real-binary-contract-test">New §6.A real-binary contract
+test</h3>
+<ul>
+<li><code>internal/orchestrator/manager_test.go</code> —
+<code>TestManagerConstantsMatchCompose</code> asserts
+<code>ServiceName + DefaultPort</code> match
+<code>docker-compose.yml</code>'s <code>container_name:</code> and
+<code>LAVA_API_LISTEN:</code> entries.
+<code>TestManagerConstantsAreNonLegacy</code> is a regression guard
+against the legacy <code>"lava-proxy"</code>/<code>"8080"</code>
+values.</li>
+<li>Falsifiability rehearsal recorded in commit body (Bluff-Audit
+stamp). Both mutations produce crisp failure messages with explicit
+forensic context.</li>
+</ul>
+<h3 id="verification">Verification</h3>
+<ul>
+<li><code>go vet ./...</code> in <code>tools/lava-containers</code>:
+green.</li>
+<li><code>go test ./...</code> in <code>tools/lava-containers</code>: 9
+tests across 2 packages PASS (was 7).</li>
+<li>All 31 hermetic bash test suites: green.</li>
+<li>thinker.local API (the running 2.0.13 binary, unchanged):
+<code>{"status":"alive"}</code>, <code>{"status":"ready"}</code>.</li>
+</ul>
+<h3 id="versions-in-this-build-2">Versions in this build</h3>
+<ul>
+<li>lava-api-go: 2.0.16 (2016) — workstation-CLI cleanup; the api-go
+binary on thinker.local is unchanged from 2.0.13.</li>
+<li>Android: 1.2.6 (1026) — unchanged.</li>
+</ul>
+<hr />
+<h2 id="lava-api-go-2015-2015--2026-05-06">Lava-API-Go-2.0.15-2015 —
+2026-05-06</h2>
+<p><strong>Channel:</strong> container registry / remote distribution to
+thinker.local <strong>Previous published:</strong>
+Lava-API-Go-2.0.14-2014 (2026-05-06)</p>
+<h3 id="refactor-post-ktor-naming-cleanup">Refactor (post-Ktor naming
+cleanup)</h3>
+<ul>
+<li><strong><code>tools/lava-containers/internal/proxy</code> →
+<code>internal/orchestrator</code></strong> — renamed the Go package
+(the "proxy" name was orchestrator-meaning, confusing
+post-Ktor-removal). <code>proxy.go</code> → <code>manager.go</code> (the
+file holds the <code>Manager</code> type for compose lifecycle). Imports
++ call sites updated in <code>cmd/lava-containers/main.go</code>.
+<code>git mv</code> preserves file history.</li>
+<li><strong><code>Manager.BuildJar()</code> removed</strong> — it ran
+<code>./gradlew :proxy:buildFatJar</code> which would fail at runtime
+since the <code>:proxy</code> module is gone. <code>os/exec</code>
+import removed (was only used by <code>BuildJar</code>).
+<code>Manager.BuildImage()</code> retained for the api-go image
+build.</li>
+<li>All <code>go test ./...</code> in <code>tools/lava-containers</code>
+PASS post-rename (3 packages).</li>
+</ul>
+<h3 id="versions-bumped">Versions bumped</h3>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Old</th>
+<th>New</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>lava-api-go</td>
+<td>2.0.14 (2014)</td>
+<td><strong>2.0.15 (2015)</strong></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="lava-api-go-2014-2014--2026-05-06">Lava-API-Go-2.0.14-2014 —
+2026-05-06</h2>
+<p><strong>Channel:</strong> container registry / remote distribution to
+thinker.local <strong>Previous published:</strong>
+Lava-API-Go-2.0.13-2013 (2026-05-06)</p>
+<h3 id="removed-post-ktor-cleanup-second-pass">Removed (post-Ktor
+cleanup, second pass)</h3>
+<ul>
+<li><strong><code>tools/lava-containers/cmd/lava-containers/main.go</code></strong>
+— dropped the <code>legacy</code> and <code>both</code> profile
+branches. <code>validateProfile</code> now accepts only
+<code>api-go</code>. <code>runStart</code> no longer carries the
+<code>BuildJar</code> + <code>BuildImage</code> fall-through for the
+deleted Ktor proxy. <code>mgr.BuildJar()</code> removed from the
+<code>build</code> command. <code>autoDetectProjectDir</code> no longer
+probes for the deleted <code>proxy/</code> directory.</li>
+<li><strong><code>main_test.go</code></strong> —
+<code>TestValidateProfile_Accepts</code> reduced to <code>api-go</code>
+only; <code>legacy</code> + <code>both</code> moved to the rejection
+table.</li>
+<li>KDoc + comment refresh: header references to "legacy Ktor proxy
+and/or the new Go API service" reduced to "the lava-api-go
+service".</li>
+</ul>
+<h3 id="versions-bumped-1">Versions bumped</h3>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Old</th>
+<th>New</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>lava-api-go</td>
+<td>2.0.13 (2013)</td>
+<td><strong>2.0.14 (2014)</strong></td>
+</tr>
+</tbody>
+</table>
+<p>(api-go version bumped per §6.P even though the changes are
+workstation-side; the bump keeps the distribute pipeline's gate cleanly
+happy and the per-version snapshot maintains the chain.)</p>
+<hr />
+<h2 id="lava-api-go-2013-2013--2026-05-06">Lava-API-Go-2.0.13-2013 —
+2026-05-06</h2>
+<p><strong>Channel:</strong> container registry / remote distribution to
+thinker.local <strong>Previous published:</strong>
+Lava-API-Go-2.0.12-2012 (2026-05-06)</p>
+<h3 id="fixed-mdns-not-reaching-the-lan">Fixed (mDNS not reaching the
+LAN)</h3>
+<ul>
+<li><strong>deployment/thinker/thinker-up.sh: lava-api-go now uses
+<code>--network host</code></strong> instead of a podman bridge network.
+The previous bridge-network setup confined JmDNS / mDNS broadcasts to
+the bridge subnet, so Android testers running Lava could NOT
+auto-discover thinker.local's API via <code>_lava-api._tcp</code>.
+Matches the local docker-compose.yml pattern where lava-api-go uses
+<code>network_mode: host</code> for the same reason.</li>
+<li>Postgres still uses a bridge network with
+<code>127.0.0.1:${POSTGRES_PORT}</code> published on the host; api-go
+connects via <code>127.0.0.1:5432</code> (host-namespace local).</li>
+<li>Verified: <code>podman logs lava-api-go-thinker</code> now shows
+<code>mDNS announced port=8443 type=_lava-api._tcp</code>. Cross-host
+curl succeeds: <code>curl https://thinker.local:8443/health</code>
+returns <code>{"status":"alive"}</code> from the workstation.</li>
+</ul>
+<h3 id="versions-bumped-2">Versions bumped</h3>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Old</th>
+<th>New</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>lava-api-go</td>
+<td>2.0.12 (2012)</td>
+<td><strong>2.0.13 (2013)</strong></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="lava-api-go-2012-2012--2026-05-06">Lava-API-Go-2.0.12-2012 —
+2026-05-06</h2>
+<p><strong>Channel:</strong> container registry / remote distribution to
+thinker.local <strong>Previous published:</strong>
+Lava-API-Go-2.0.11-2011 (2026-05-06)</p>
+<h3 id="removed">Removed</h3>
+<ul>
+<li><strong>Legacy Ktor proxy</strong> removed from the codebase. Going
+forward, lava-api-go (Go) is the only API. Files removed:
+<code>proxy/</code> (entire module), <code>:proxy</code> Gradle include,
+<code>proxy/build.gradle.kts</code> parsing in
+<code>build_and_release.sh</code> + <code>scripts/tag.sh</code>,
+<code>lava-proxy</code> service in <code>docker-compose.yml</code>,
+<code>--legacy</code> / <code>--both</code> profiles from
+<code>start.sh</code> + <code>stop.sh</code>. The Android client was
+already using the lava-api-go endpoint by default.</li>
+</ul>
+<h3 id="versions-bumped-3">Versions bumped</h3>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Old</th>
+<th>New</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>lava-api-go</td>
+<td>2.0.11 (2011)</td>
+<td><strong>2.0.12 (2012)</strong></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="lava-api-go-2011-2011--2026-05-06">Lava-API-Go-2.0.11-2011 —
+2026-05-06</h2>
+<p><strong>Channel:</strong> container registry / remote distribution to
+thinker.local <strong>Previous published:</strong>
+Lava-API-Go-2.0.10-2010 (2026-05-05)</p>
+<h3 id="added">Added</h3>
+<ul>
+<li><strong>scripts/distribute-api-remote.sh</strong> — ships the
+lava-api-go OCI image tarball + boot script + TLS material to a remote
+host via passwordless SSH and brings the stack up under rootless Podman.
+Default target: <code>thinker.local</code>. Verifies
+<code>/health</code> end-to-end from the local host before reporting
+success. <code>--tear-down</code> mode tears containers + image down on
+the remote.</li>
+<li><strong>deployment/thinker/{thinker.local.env,
+thinker-up.sh}</strong> — operator-customizable boot config + script
+that runs on the remote host. Idempotent. Pinned to rootless
+Podman.</li>
+<li><strong>docs/REMOTE-DISTRIBUTION.md</strong> — runbook covering
+initial SSH setup, distribute, verify, tear-down.</li>
+<li><strong><code>.env.example</code></strong> documents
+<code>LAVA_API_GO_REMOTE_HOST</code> (default
+<code>thinker.local</code>) + <code>LAVA_REMOTE_HOST_USER</code>
+(default <code>milosvasic</code>).</li>
+</ul>
+<h3 id="operational">Operational</h3>
+<ul>
+<li>Lava-api-go now runs on the LAN host <code>thinker.local</code>. The
+local workstation tears down its containers + image at end-of-distribute
+and only builds going forward. Android clients reach the API via mDNS
+discovery (no client-side change needed).</li>
+</ul>
+<h3 id="versions-bumped-this-cycle">Versions bumped this cycle</h3>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Old</th>
+<th>New</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>lava-api-go</td>
+<td>2.0.10 (2010)</td>
+<td><strong>2.0.11 (2011)</strong></td>
+</tr>
+<tr>
+<td>Android <code>:app</code></td>
+<td>1.2.6 (1026)</td>
+<td>(unchanged)</td>
+</tr>
+<tr>
+<td>Ktor proxy</td>
+<td>1.0.5 (1005)</td>
+<td>(unchanged)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="constitutional-bindings">Constitutional bindings</h3>
+<ul>
+<li>§6.J — distribute script propagates failures</li>
+<li>§6.B — <code>/health</code> end-to-end probe, not just
+<code>podman ps</code></li>
+<li>§6.K — image produced via the container build path</li>
+<li>§6.M — rootless Podman; no host power-management</li>
+<li>§6.P — this entry IS the §6.P-mandated changelog; per-version
+snapshot at
+<code>.lava-ci-evidence/distribute-changelog/container-registry/2.0.11-2011.md</code></li>
+</ul>
+<hr />
+<h2 id="lava-android-126-1026--2026-05-05">Lava-Android-1.2.6-1026 —
+2026-05-05</h2>
+<p><strong>Channels:</strong> Firebase App Distribution (debug +
+release) <strong>Previous published:</strong> Lava-Android-1.2.5-1025
+(2026-05-05 23:43 UTC)</p>
+<h3 id="fixed-crashlytics-driven-6o-closure-log-mandate">Fixed
+(Crashlytics-driven, §6.O closure-log mandate)</h3>
+<ul>
+<li><strong>fix(tracker-settings): Trackers-from-Settings crash (nested
+LazyColumn inside Column(verticalScroll))</strong> — operator-reported
+via Crashlytics. Closure log at
+<code>.lava-ci-evidence/crashlytics-resolved/2026-05-05-tracker-settings-nested-scroll.md</code>.
+Replaced <code>LazyColumn</code> with plain <code>Column</code> in
+<code>TrackerSelectorList</code> since the tracker list is bounded (≤ 6
+entries). Validation: 2 structural tests in
+<code>feature/tracker_settings/src/test/.../TrackerSelectorListLazyColumnRegressionTest.kt</code>.
+Challenge:
+<code>app/src/androidTest/.../Challenge14TrackerSettingsOpenTest.kt</code>.
+Falsifiability rehearsal recorded.</li>
+</ul>
+<h3 id="added-1">Added</h3>
+<ul>
+<li><strong>§6.Q Compose Layout Antipattern Guard</strong> — root
+constitution forbids nesting vertically-scrolling lazy layouts
+(LazyColumn, etc.) inside parents giving unbounded vertical space
+(verticalScroll, etc.). Per-feature structural tests + Challenge Tests
+on the §6.I matrix are the gates. Propagated to AGENTS.md.</li>
+</ul>
+<h3 id="versions-bumped-this-cycle-1">Versions bumped this cycle</h3>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Old</th>
+<th>New</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Android <code>:app</code></td>
+<td>1.2.5 (1025)</td>
+<td><strong>1.2.6 (1026)</strong></td>
+</tr>
+<tr>
+<td>Ktor proxy</td>
+<td>1.0.5 (1005)</td>
+<td>(unchanged)</td>
+</tr>
+<tr>
+<td>lava-api-go</td>
+<td>2.0.10 (2010)</td>
+<td>(unchanged)</td>
+</tr>
+</tbody>
+</table>
+<p>The 1.2.6 cycle is Android-only — proxy + lava-api-go did not require
+new fixes.</p>
+<hr />
+<h2 id="lava-android-125-1025--2026-05-05">Lava-Android-1.2.5-1025 —
+2026-05-05</h2>
+<p><strong>Channels:</strong> Firebase App Distribution (debug +
+release) <strong>Previous published:</strong> Lava-Android-1.2.4-1024
+(2026-05-05 23:25 UTC)</p>
+<h3 id="fixed-preemptive-hilt-graph-hardening">Fixed (preemptive
+Hilt-graph hardening)</h3>
+<ul>
+<li><strong>fix(firebase): Hilt @Provides for Firebase SDKs now
+tolerates getInstance() throwing.</strong> Pre-1.2.5, a feature
+ViewModel that injects <code>AnalyticsTracker</code> (Login,
+ProviderLogin, Search, Topic) would crash on construction if
+<code>FirebaseAnalytics.getInstance(context)</code> /
+<code>FirebaseCrashlytics.getInstance()</code> /
+<code>FirebasePerformance.getInstance()</code> threw. The 1.2.3 → 1.2.4
+fix only hardened the LavaApplication path, not the Hilt graph. 1.2.5
+closes that gap:
+<ul>
+<li><code>FirebaseProvidesModule</code> wraps each SDK accessor in
+<code>runCatching { ... }.getOrNull()</code> and provides nullable
+types.</li>
+<li><code>FirebaseAnalyticsTracker</code> accepts nullable SDKs and
+<code>runCatching</code>-guards every per-call SDK invocation.</li>
+<li>New <code>NoOpAnalyticsTracker</code> is selected by the
+AnalyticsTracker <code>@Provides</code> when both Crashlytics and
+Analytics are unavailable.</li>
+<li>Validation:
+<code>app/src/test/.../FirebaseAnalyticsTrackerTest.kt</code> (4 tests
+covering null SDKs, throwing SDK, present SDK forwarding).</li>
+</ul></li>
+</ul>
+<h3 id="added-2">Added</h3>
+<ul>
+<li>§6.P enforcement extended to <code>scripts/tag.sh</code> — refuses
+tags lacking CHANGELOG.md entry or per-version distribute-changelog
+snapshot, for android + api + api-go.</li>
+<li>Bluff-hunt evidence record at
+<code>.lava-ci-evidence/bluff-hunt/2026-05-05-firebase-and-distribute-mandates.json</code>
+covering 5 falsifiability rehearsals + 2 production-code targets per
+§6.N.2.</li>
+<li>Per-version distribute-changelog snapshots for the proxy
+(1.0.5-1005) and api-go (2.0.10-2010) channels.</li>
+</ul>
+<h3 id="versions-bumped-this-cycle-2">Versions bumped this cycle</h3>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Old</th>
+<th>New</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Android <code>:app</code></td>
+<td>1.2.4 (1024)</td>
+<td><strong>1.2.5 (1025)</strong></td>
+</tr>
+<tr>
+<td>Ktor proxy</td>
+<td>1.0.5 (1005)</td>
+<td>(unchanged)</td>
+</tr>
+<tr>
+<td>lava-api-go</td>
+<td>2.0.10 (2010)</td>
+<td>(unchanged)</td>
+</tr>
+</tbody>
+</table>
+<p>The 1.2.5 cycle is Android-only — proxy + lava-api-go did not require
+new fixes; their 1.2.4-cycle versions stay current.</p>
+<hr />
+<h2 id="lava-android-124-1024--2026-05-05">Lava-Android-1.2.4-1024 —
+2026-05-05</h2>
+<p><strong>Channels:</strong> Firebase App Distribution (debug +
+release) <strong>Previous published:</strong> Lava-Android-1.2.3-1023
+(2026-05-05 22:33 UTC)</p>
+<h3 id="fixed-5">Fixed</h3>
+<ul>
+<li><strong>fix(firebase): harden Firebase init against the 2
+Crashlytics crashes recorded against 1.2.3 (1023)</strong> — closure log
+at
+<code>.lava-ci-evidence/crashlytics-resolved/2026-05-05-firebase-init-hardening.md</code>.
+Removed redundant <code>FirebaseApp.initializeApp(this)</code>
+(FirebaseInitProvider auto-init covers it; the explicit call raced with
+StrictMode in some launches). Extracted Firebase init into testable
+<code>FirebaseInitializer</code> with per-SDK <code>runCatching</code>
+guards. Added Firebase keep rules to <code>app/proguard-rules.pro</code>
+since the BOM consumer rules don't fully cover R8 stripping of
+reflective entry points. Validation test:
+<code>app/src/test/.../FirebaseInitializerTest.kt</code> (5 tests).
+Challenge Test:
+<code>app/src/androidTest/.../Challenge13FirebaseColdStartResilienceTest.kt</code>.
+Falsifiability rehearsal recorded in commit body. Commit:
+<code>6758b73</code>.</li>
+</ul>
+<h3 id="added-3">Added</h3>
+<ul>
+<li><strong>AnalyticsTracker wired into real user paths</strong> —
+<code>LoginViewModel</code>, <code>SearchViewModel</code>,
+<code>TopicViewModel</code>, <code>ProviderLoginViewModel</code> emit
+canonical events (<code>lava_login_submit</code>,
+<code>lava_login_success</code>, <code>lava_login_failure</code>,
+<code>lava_search_submit</code>, <code>lava_view_topic</code>,
+<code>lava_download_torrent</code>,
+<code>lava_download_torrent_failure</code>) via the Hilt-injectable
+<code>AnalyticsTracker</code> interface. Implementation lives in
+<code>:app</code> (<code>FirebaseAnalyticsTracker</code>) so feature
+modules remain reusable per the Decoupled Reusable Architecture rule.
+Commits: <code>6758b73</code>, follow-up.</li>
+<li><strong>lava-api-go FirebaseTelemetry middleware</strong> at
+<code>internal/middleware/firebase.go</code> — Gin middleware that
+records 5xx + recovered panics as Firebase non-fatals; 4xx + 2xx logged
+as events. Wired into <code>cmd/lava-api-go/main.go</code>
+<code>buildRouter</code>. 6 unit tests with falsifiability rehearsal.
+Honest no-op fallback when no service-account key configured.</li>
+</ul>
+<h3 id="constitution--process">Constitution / Process</h3>
+<ul>
+<li><strong>§6.O Crashlytics-Resolved Issue Coverage Mandate</strong> —
+every Crashlytics-resolved issue requires (a) validation test, (b)
+Challenge Test, (c) closure log under
+<code>.lava-ci-evidence/crashlytics-resolved/</code>. Propagated to all
+16 vasic-digital submodules + lava-api-go's three doc files.
+Constitution checker hard-fails on missing §6.O reference in any of the
+21+ doc trios. Commits: <code>6758b73</code>, <code>017da23</code>.</li>
+<li><strong>§6.P Distribution Versioning + Changelog Mandate</strong> —
+every distribute action requires strictly increasing versionCode +
+matching CHANGELOG.md entry + per-version snapshot.
+<code>scripts/firebase-distribute.sh</code> enforces both gates.
+<strong>This entry is the inaugural application of §6.P.</strong></li>
+</ul>
+<h3 id="versions-bumped-this-cycle-3">Versions bumped this cycle</h3>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Old</th>
+<th>New</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Android <code>:app</code></td>
+<td>1.2.3 (1023)</td>
+<td><strong>1.2.4 (1024)</strong></td>
+</tr>
+<tr>
+<td>Ktor proxy</td>
+<td>1.0.4 (1004)</td>
+<td><strong>1.0.5 (1005)</strong></td>
+</tr>
+<tr>
+<td>Proxy <code>ServiceAdvertisement.API_VERSION</code></td>
+<td>1.0.4</td>
+<td><strong>1.0.5</strong></td>
+</tr>
+<tr>
+<td>lava-api-go</td>
+<td>2.0.9 (2009)</td>
+<td><strong>2.0.10 (2010)</strong></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2
+id="lava-android-123-1023--2026-05-05-2233-utc">Lava-Android-1.2.3-1023
+— 2026-05-05 22:33 UTC</h2>
+<p><strong>Channel:</strong> Firebase App Distribution (inaugural)
+<strong>Previous published:</strong> N/A (first Firebase-instrumented
+build)</p>
+<h3 id="added-inaugural-firebase-integration">Added (inaugural Firebase
+integration)</h3>
+<ul>
+<li>Crashlytics + Analytics + Performance Monitoring wired in
+<code>LavaApplication.kt</code>.</li>
+<li>App Distribution replaces local <code>releases/</code> flow as
+canonical operator delivery channel.</li>
+<li>5 distribution scripts under <code>scripts/</code>:
+<code>firebase-env.sh</code>, <code>firebase-setup.sh</code>,
+<code>firebase-distribute.sh</code>, <code>firebase-stats.sh</code>,
+<code>distribute.sh</code>.</li>
+<li>Tester roster loaded from <code>.env</code>
+(<code>LAVA_FIREBASE_TESTERS_*</code>).</li>
+<li>2 anti-bluff bash regression tests under
+<code>tests/firebase/</code> (no WARN-swallow +
+gitignore-coverage).</li>
+<li><code>lava-api-go/internal/firebase/</code> server-side skeleton
+with no-op fallback when service-account key absent.</li>
+</ul>
+<p>Commit: <code>e9de508</code>.</p>
+<h3 id="versions-bumped-this-cycle-4">Versions bumped this cycle</h3>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Old</th>
+<th>New</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Android <code>:app</code></td>
+<td>1.2.2 (1022)</td>
+<td>1.2.3 (1023)</td>
+</tr>
+<tr>
+<td>Ktor proxy</td>
+<td>1.0.3 (1003)</td>
+<td>1.0.4 (1004)</td>
+</tr>
+<tr>
+<td>Proxy <code>ServiceAdvertisement.API_VERSION</code></td>
+<td>1.0.1 (3 versions stale!)</td>
+<td>1.0.4</td>
+</tr>
+<tr>
+<td>lava-api-go</td>
+<td>2.0.8 (2008)</td>
+<td>2.0.9 (2009)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="lava-android-120-1020--2026-05-01">Lava-Android-1.2.0-1020 —
+2026-05-01</h2>
+<p>First release of the <strong>multi-tracker SDK foundation</strong>
+(SP-3a). The Android client now supports two trackers — RuTracker
+(existing) and RuTor (new) — with user-selectable active tracker, custom
+mirrors, mirror health tracking, and an explicit cross-tracker fallback
+flow.</p>
+<h3 id="added-4">Added</h3>
+<ul>
+<li><strong>RuTor (rutor.info / rutor.is) tracker support</strong> —
+anonymous-by- default per decision 7b-ii; capabilities
+<code>SEARCH + TOPIC + DOWNLOAD</code>.</li>
+<li><strong>Tracker selection UI in Settings → Trackers</strong> — list
+of registered trackers, single-tap to switch the active tracker,
+per-tracker health summary.</li>
+<li><strong>Custom mirror entry per tracker</strong> — operators can add
+mirrors beyond the bundled defaults; persisted in Room
+(<code>tracker_mirror_user</code>).</li>
+<li><strong>Mirror health tracking</strong> — periodic
+<code>MirrorHealthCheckWorker</code> (15-min interval) probes each
+registered mirror; status <code>HEALTHY</code> / <code>DEGRADED</code> /
+<code>UNHEALTHY</code> persisted in
+<code>tracker_mirror_health</code>.</li>
+<li><strong>Cross-tracker fallback modal</strong> — when all mirrors of
+the active tracker hit <code>UNHEALTHY</code>, the SDK emits
+<code>CrossTrackerFallbackProposed</code>; the UI presents a modal
+offering the alternative tracker. Accept → re-issues the call on the alt
+tracker; dismiss → explicit failure UI (snackbar). No silent
+fallback.</li>
+<li><strong><code>docs/sdk-developer-guide.md</code> (partial
+draft)</strong> — 7-step recipe for adding a third tracker, paper-traced
+through the existing RuTor module.</li>
+<li><strong>8 Compose UI Challenge Tests</strong> under
+<code>app/src/androidTest/kotlin/lava/app/challenges/</code> (C1-C8) —
+each with a documented falsifiability rehearsal protocol.</li>
+</ul>
+<h3 id="changed-4">Changed</h3>
+<ul>
+<li><strong>Internal: RuTracker implementation now fully decoupled
+behind the multi-tracker SDK.</strong>
+<code>core/network/rutracker</code> git-moved to
+<code>core/tracker/rutracker</code>. <code>RuTrackerClient</code>
+implements <code>TrackerClient</code> + applicable feature interfaces
+(Searchable, Browsable, Topic, Comments, Favorites, Authenticatable,
+Downloadable). <code>SwitchingNetworkApi</code> now delegates to
+<code>LavaTrackerSdk</code> rather than to a single hard-wired
+client.</li>
+<li><strong>New <code>vasic-digital/Tracker-SDK</code> submodule mounted
+at <code>submodules/tracker_sdk/</code>.</strong> Generic primitives
+(registry, mirror-config store, test scaffolding). Pin is <strong>frozen
+by default</strong> per the Decoupled Reusable Architecture rule.
+Mirrored to GitHub + GitLab (2-upstream scope per 2026-04-30 spec
+deviation).</li>
+</ul>
+<h3 id="constitutional-4">Constitutional</h3>
+<ul>
+<li><strong>Added clauses 6.D (Behavioral Coverage Contract), 6.E
+(Capability Honesty), 6.F (Anti-Bluff Submodule Inheritance) to root
+<code>CLAUDE.md</code></strong> and cascaded to
+<code>core/CLAUDE.md</code>, <code>feature/CLAUDE.md</code>,
+<code>lava-api-go/{CLAUDE,AGENTS}.md</code>,
+<code>submodules/tracker_sdk/{CLAUDE,CONSTITUTION,AGENTS}.md</code>, and
+root <code>AGENTS.md</code>.</li>
+<li><strong>Added the Seventh Law (Anti-Bluff Enforcement, all 7
+clauses)</strong> with mechanical pre-push hook enforcement at
+<code>.githooks/pre-push</code>: Bluff-Audit commit-message stamp on
+every test commit, mock-the- SUT pattern rejection, hosted-CI config
+rejection. The Seventh Law is binding on every test commit and on every
+release tag — <code>scripts/tag.sh</code> refuses to operate without
+<code>.lava-ci-evidence/&lt;TAG&gt;/real-device-verification.md</code>
+at status <code>VERIFIED</code> and per-Challenge-Test attestation
+files.</li>
+<li><strong>Local-Only CI/CD apparatus</strong> materialized as
+<code>scripts/ci.sh</code> (single entry point, three modes —
+<code>--changed-only</code>, <code>--full</code>, <code>--smoke</code>),
+<code>scripts/check-fixture-freshness.sh</code>,
+<code>scripts/check-constitution.sh</code>,
+<code>scripts/bluff-hunt.sh</code> (Seventh Law clause 5 recurring hunt
+driver). Pre-push hook runs <code>scripts/ci.sh --changed-only</code>.
+Tag script enforces an Android evidence-pack gate at
+<code>.lava-ci-evidence/Lava-Android-&lt;version&gt;/</code>.</li>
+</ul>
+<h3 id="phases-commit-summary">Phases (commit summary)</h3>
+<p>The SP-3a development arc spans 6 phases (Phase 0 audit + Phases 1–5
+implementation). Approximate per-phase commit counts:</p>
+<table>
+<thead>
+<tr>
+<th>Phase</th>
+<th>Scope</th>
+<th>Commits</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>Pre-implementation audit, ledger seeding, equivalence test
+scaffolding</td>
+<td>5</td>
+</tr>
+<tr>
+<td>1</td>
+<td>Foundation — <code>core/tracker/api</code>, registry, mirror,
+testing modules</td>
+<td>12</td>
+</tr>
+<tr>
+<td>2</td>
+<td>RuTracker decoupling — git-mv, <code>RuTrackerClient</code>, parser
+refit</td>
+<td>40</td>
+</tr>
+<tr>
+<td>3</td>
+<td>RuTor implementation — descriptor, parsers, feature impls,
+fixtures</td>
+<td>41</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Mirror health, cross-tracker fallback, <code>tracker_settings</code>
+UI</td>
+<td>20</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Constitution updates, 8 Challenge Tests, scripts/ci.sh, tag
+gate</td>
+<td>26</td>
+</tr>
+<tr>
+<td>—</td>
+<td>Misc (Seventh Law, JVM-17 hardening, bluff audit, phase wraps)</td>
+<td>4</td>
+</tr>
+<tr>
+<td>—</td>
+<td>Documentation polish (this release)</td>
+<td>5</td>
+</tr>
+<tr>
+<td><strong>SP-3a total</strong></td>
+<td></td>
+<td><strong>153</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Phase 5 closes the implementation arc. Real-device verification (Task
+5.22) is the operator-required gate before tagging — see "Known
+limitations" below.</p>
+<h3 id="known-limitations-operator-required-gates">Known limitations
+(operator-required gates)</h3>
+<p>These are NOT bugs; they are explicit acceptance gates the operator
+MUST satisfy before tagging Lava-Android-1.2.0-1020:</p>
+<ul>
+<li><strong>Task 5.22 — real-device Challenge Test attestation.</strong>
+The 8 Compose UI Challenge Tests
+(<code>app/src/androidTest/kotlin/lava/app/challenges/</code>) cannot be
+run from the agent environment. The operator MUST run each on a real
+Android device (API 26+, internet-connected), capture the user-visible
+state per the test's primary assertion, perform the falsifiability
+mutation listed in the test header, and update each
+<code>.lava-ci-evidence/Lava-Android-1.2.0-1020/challenges/C&lt;n&gt;.json</code>
+from <code>PENDING_OPERATOR</code> to <code>VERIFIED</code>.
+<code>scripts/tag.sh</code> refuses to operate without all 8 at
+<code>VERIFIED</code>.</li>
+<li><strong>Task 5.25 — connectedAndroidTest runner not yet wired into
+<code>:app/build.gradle.kts</code>.</strong> Until the androidx.test
+runner deps and the <code>connectedDebugAndroidTest</code> task are
+wired, the operator's C1–C8 verification is performed by manually
+exercising each scenario on the device rather than by the gradle task.
+This is constitutional debt tracked in
+<code>feature/CLAUDE.md</code>.</li>
+<li><strong>Task 4.20 — Phase 4 integration smoke on real
+device.</strong> Phase 4 shipped the cross-tracker fallback modal
+end-to-end; Task 4.20 is the integration smoke (mirror probe loop +
+fallback on real rutracker / rutor mirrors). The smoke commit landed
+(<code>80975e0 sp3a-4.20</code>) but the real-device replay falls under
+the same Task 5.22 gate above.</li>
+</ul>
+<h3 id="latent-findings-open--resolved">Latent findings (open +
+resolved)</h3>
+<p>Tracked in <a
+href="docs/superpowers/specs/2026-04-30-sp3a-coverage-exemptions.md"><code>docs/superpowers/specs/2026-04-30-sp3a-coverage-exemptions.md</code></a>:</p>
+<ul>
+<li><strong>LF-1</strong> — <code>MenuViewModelTest</code> holds
+<code>TestBookmarksRepository</code> without exercising it.
+<strong>OPEN</strong> — tripwire fires when first
+<code>MenuAction.ClearBookmarks</code> test path is added.</li>
+<li><strong>LF-2</strong> — <code>TestHealthcheckContract</code> is
+currently a future-facing tripwire (lava-api-go has no healthcheck block
+at HEAD). <strong>OPEN</strong> — tripwire fires the moment a
+healthcheck is re-introduced.</li>
+<li><strong>LF-3</strong> — Tracker chain compiles to JVM 21 while
+Android targets JVM 17. <strong>RESOLVED in Phase 2 Section E
+wrap-up</strong> (Tracker-SDK pin <code>b779fda</code> enforces JVM 17
+on every SDK subproject).</li>
+<li><strong>LF-5</strong> — <code>RuTrackerDescriptor</code> declares
+<code>UPLOAD</code> and <code>USER_PROFILE</code> without backing
+feature interfaces. <strong>OPEN</strong> — letter-of-the-law clause 6.E
+is satisfied (no caller can ask), but the descriptor makes a
+forward-looking claim with no impl. Triggers before any phase that
+depends on those capabilities (cross-tracker fallback ranking,
+SP-3a-bridge).</li>
+<li><strong>LF-6</strong> — <code>TorrentItem.sizeBytes</code> is
+permanently null for rutracker (the legacy scraper discards the byte
+count and keeps only the formatted display string in
+<code>metadata["rutracker.size_text"]</code>). <strong>OPEN</strong> —
+triggers before any cross-tracker comparison logic that needs numeric
+size.</li>
+</ul>
+<h3 id="fixed-6">Fixed</h3>
+<ul>
+<li>(none — this release is feature-additive)</li>
+</ul>
+<hr />
+<h2 id="lava-api-102-1002--2026-05-01">Lava-API-1.0.2-1002 —
+2026-05-01</h2>
+<p>Maintenance release of the legacy Ktor proxy. Routine patch bump
+after a clean re-build + re-test cycle — no behavioral changes vs
+<code>Lava-API-1.0.1-1001</code>.</p>
+<h3 id="operational-1">Operational</h3>
+<ul>
+<li>Container image rebuilt against the current submodules/containers
+pin and pushed to <code>localhost/lava-proxy:dev</code> via
+<code>./build_and_push_docker_image.sh</code> /
+<code>./build_and_release.sh</code>.</li>
+<li>Boot verified: <code>./start.sh --both</code> brings the proxy up
+alongside lava-api-go; <code>lava-containers status</code> reports
+<code>Healthy: true</code>, LAN IP advertised via mDNS service-type
+<code>_lava._tcp.local.</code> with symmetric TXT records (engine,
+version, protocols, compression, tls).</li>
+<li>Real-network smoke: <code>GET http://localhost:8080/</code> returns
+<code>200 OK</code> after ~1.7s warmup; <code>GET /forum</code> returns
+142 KB of legacy Ktor scrape output.</li>
+</ul>
+<h3 id="constitutional-5">Constitutional</h3>
+<ul>
+<li>Inherits the new <strong>Seventh Law (Anti-Bluff
+Enforcement)</strong> added to root <code>CLAUDE.md</code> on
+2026-04-30. The pre-push hook's Bluff-Audit-stamp gate +
+forbidden-test-pattern gate apply to all future proxy commits.</li>
+</ul>
+<h3 id="tests-1">Tests</h3>
+<ul>
+<li>All 18 <code>lava-api-go</code> Go test packages green at HEAD; the
+proxy's Kotlin-side tests inherit the project-wide Spotless / ktlint /
+unit-test gate run by <code>scripts/ci.sh --changed-only</code>.</li>
+</ul>
+<hr />
+<h2 id="lava-api-go-207-2007--2026-05-01">Lava-API-Go-2.0.7-2007 —
+2026-05-01</h2>
+<p>Maintenance release of the Go API service. Re-anchors the version to
+the post-SP-3a HEAD with all consumer-side constitutional infrastructure
+(submodule mirrors, Seventh Law inheritance, integration-test podman
+runs) verified against real backends.</p>
+<h3 id="verified--pretag-sixth-law-clause-5--sp-2-phase-131">Verified —
+pretag (Sixth Law clause 5 + SP-2 Phase 13.1)</h3>
+<ul>
+<li><code>lava-api-go/scripts/pretag-verify.sh</code> exercised the
+running api-go on <code>https://localhost:8443</code> with all 5
+scripted black-box probes:
+<ul>
+<li><code>GET /</code> → <code>200</code> (5B, 745ms)</li>
+<li><code>GET /forum</code> → <code>200</code> (142 KB, 920ms)</li>
+<li><code>GET /search?query=test</code> → <code>401</code> (auth gate
+honored)</li>
+<li><code>GET /torrent/1</code> → <code>404</code> (known empty
+topic)</li>
+<li><code>GET /favorites</code> → <code>401</code> (auth gate
+honored)</li>
+</ul></li>
+<li>Evidence at
+<code>.lava-ci-evidence/1f7f3c0610a353048ef1c3d9daffd41f5aa7f7b1.json</code>.</li>
+</ul>
+<h3
+id="verified--integration-tests-against-real-podman-containers">Verified
+— integration tests against real podman containers</h3>
+<ul>
+<li><strong>Phase 4.3 cache integration:</strong> 7 tests PASS (1.13s)
+against <code>docker.io/postgres:16-alpine</code> via
+<code>scripts/run-test-pg.sh</code>. Real key generation +
+Set/Get/Invalidate cycle exercised.</li>
+<li><strong>Phase 10.2 e2e:</strong> 6 tests PASS (16.49s). Real Gin
+engine, real auth middleware, real handlers; no mocks below the
+SUT.</li>
+<li>Evidence at
+<code>.lava-ci-evidence/sp2-podman-tests-2026-04-30/integration-evidence.json</code>.</li>
+</ul>
+<h3 id="constitutional-6">Constitutional</h3>
+<ul>
+<li>Inherits the new <strong>Seventh Law (Anti-Bluff
+Enforcement)</strong> with seven mechanically-enforced clauses.
+<code>lava-api-go/CLAUDE.md</code> and
+<code>lava-api-go/AGENTS.md</code> reference the Seventh Law's text in
+the parent Lava <code>CLAUDE.md</code>. Bluff-Audit stamps now mandatory
+on every Go test commit (<code>*_test.go</code>).</li>
+<li>All 16 vasic-digital submodules consumed by <code>lava-api-go</code>
+(Auth, Cache, Challenges, Concurrency, Config, Containers, Database,
+Discovery, HTTP3, Mdns, Middleware, Observability, RateLimiter,
+Recovery, Security, Tracker-SDK) carry the Seventh Law inheritance
+pointer.</li>
+</ul>
+<h3 id="mirror-status">Mirror status</h3>
+<ul>
+<li>Submodule pin lava-pin/2026-04-30-seventh-law-anchor pushed to
+GitHub
+<ul>
+<li>GitLab for all 13 affected submodules; per-mirror SHA convergence
+verified via <code>git ls-remote</code> per Sixth Law clause 6.C.</li>
+</ul></li>
+</ul>
+<hr />
+<h2 id="lava-api-go-206-2006--2026-04-29">Lava-API-Go-2.0.6-2006 —
+2026-04-29</h2>
+<p>Critical bugfix release. <strong>Upgrade strongly
+recommended</strong> for any 2.0.x deployment — every prior 2.0.x build
+had at least one of the four root causes below silently breaking
+authenticated endpoints.</p>
+<h3 id="fixed-7">Fixed</h3>
+<ul>
+<li><strong>SP-3.5 — login 502 (three independent root causes in
+<code>internal/rutracker.Client</code>):</strong>
+<ol type="1">
+<li><strong>IPv6 silent drop on Cloudflare's rutracker edge.</strong>
+Go's <code>net.Dialer</code> preferred AAAA records; TLS handshake
+completed; request body uploaded; response was silently dropped. Fixed
+by <code>Transport.DialContext</code> rewriting <code>tcp</code> /
+<code>tcp6</code> → <code>tcp4</code> for the rutracker upstream client
+only.</li>
+<li><strong>Default redirect-following discarded the
+<code>bb_session</code> cookie.</strong> Login response is
+<code>HTTP 302 + Location:/forum/index.php + Set-Cookie:bb_session=…</code>;
+the auth token is on the 302, not on <code>/index.php</code>. Default
+<code>http.Client.CheckRedirect</code> followed the 302 silently and the
+scraper saw the unauthenticated login form. Fixed by
+<code>CheckRedirect = http.ErrUseLastResponse</code>.</li>
+<li><strong><code>charset.NewReader</code> on an empty body returned
+EOF.</strong> The 302 carries
+<code>content-type: text/html; charset=cp1251</code> AND a zero-length
+body; first Read returned EOF; auth headers we needed were never
+inspected. Fixed by reading raw bytes first and short-circuiting on
+<code>len==0</code>.</li>
+</ol></li>
+<li><strong>SP-3.5b — search/favorites/etc. all returning empty for
+valid sessions.</strong> <code>auth.UpstreamCookie</code>
+unconditionally prepended <code>bb_session=</code> to the
+<code>Auth-Token</code> header value; the Android client (and the legacy
+Ktor proxy) store the <strong>raw upstream Set-Cookie line</strong> at
+login, so the upstream request landed with
+<code>Cookie: bb_session=bb_session=…</code> — a doubly-prefixed cookie
+that rutracker parsed as anonymous. Fixed by forwarding tokens that
+already contain <code>=</code> verbatim.</li>
+</ul>
+<h3 id="diagnostics">Diagnostics</h3>
+<ul>
+<li><code>internal/handlers/login.go</code> now logs the raw scraper
+error (err.Error() only — credentials are never in err) so a future 502
+is debuggable from <code>podman logs</code> alone.</li>
+</ul>
+<h3 id="tests-sixth-law">Tests (Sixth Law)</h3>
+<ul>
+<li><code>TestNewClient_TransportForcesIPv4</code> — pins the IPv4
+rewrite.</li>
+<li><code>TestNewClient_DoesNotFollowRedirects</code> — pins
+<code>CheckRedirect = ErrUseLastResponse</code>.</li>
+<li><code>TestUpstreamCookieForwardsCookieLineVerbatim</code> — pins the
+verbatim-forward branch with the real-world Set-Cookie shape.</li>
+<li><code>TestUpstreamCookie_TokenWithEqualsForwardsVerbatim</code> —
+defensive guard that any <code>name=value</code> pair forwards
+as-is.</li>
+</ul>
+<p>Each test is a Sixth-Law Challenge with a documented MUTATION
+rehearsal in the test KDoc.</p>
+<h3 id="verified">Verified</h3>
+<ul>
+<li>Operator's own credentials, real LAN, real device:
+<ul>
+<li><code>POST /login</code> → <code>200 + Success</code>.</li>
+<li><code>GET /search?query=ps4</code> →
+<code>{"page":1,"pages":10,"torrents":[…50 hits…]}</code> (first hit
+"Eternights").</li>
+</ul></li>
+<li>Pretag-verify (Sixth Law clause 5 mechanical gate): all 5 black-box
+probes green.</li>
+</ul>
+<hr />
+<h2 id="lava-android-113-1013--2026-04-29">Lava-Android-1.1.3-1013 —
+2026-04-29</h2>
+<p>Real-device verified on Samsung Galaxy S23 Ultra (SM-S918B / Android
+16). This release fixes every issue surfaced by the operator's
+real-device testing on 2026-04-29 against the lava-api-go LAN
+service.</p>
+<h3 id="fixed-8">Fixed</h3>
+<ul>
+<li><strong>SP-3.4 — mDNS service-type cross-match.</strong> The
+<code>_lava._tcp</code> listener was cross-matching
+<code>_lava-api._tcp</code> services because
+<code>"lava-api".contains("lava")</code> is true. A discovered
+lava-api-go service ended up classified as the legacy Ktor proxy
+(<code>Endpoint.Mirror</code>), routing to the wrong port (8080) instead
+of the Go API's port (8443). Fixed by replacing the substring filter
+with strict prefix-with-dot matching
+(<code>matchesServiceType</code>).</li>
+<li><strong>SP-3.3 — Connections list cleanup, port-aware reachability,
+route-clean LAN Mirror:</strong>
+<ul>
+<li>Database migration v5→v6 deletes legacy <code>type='Proxy'</code>
+rows (collapses the duplicate "Main" entry) and <code>Mirror</code> rows
+whose host contains <code>:</code> (legacy <code>ip:port</code>
+shape).</li>
+<li><code>ConnectionService.isReachable</code> is now Endpoint-aware:
+TCP probes the exact host:port the network layer would actually open per
+variant.</li>
+<li><code>NetworkApiRepositoryImpl.proxyApi</code> parses
+<code>host:port</code> out of <code>Mirror.host</code> instead of
+feeding it through Ktor's URLBuilder as a hostname; LAN Mirror without
+an explicit port defaults to 8080.</li>
+<li>Discovery strips the embedded port at conversion time so persisted
+<code>Mirror</code> rows are bare-host shaped.</li>
+</ul></li>
+<li><strong>SP-3.2 — <code>Endpoint.Proxy</code> removed; Unauthorized
+search UX:</strong>
+<ul>
+<li>Removed <code>Endpoint.Proxy</code> from the model entirely (the
+public lava-app.tech instance was retired). Pre-existing rows are
+migrated forward to <code>Endpoint.Rutracker</code> on read.</li>
+<li>Search shows a "Login required" empty-state with a Login button when
+not signed in (no more misleading "Nothing found").</li>
+</ul></li>
+<li><strong>SP-3.1 — LAN HTTPS without manual cert install.</strong> A
+dedicated permissive-TLS <code>OkHttpClient</code>
+(<code>@Named("lan")</code>) accepts any LAN-side server cert, used
+<strong>only</strong> for <code>Endpoint.GoApi</code> and LAN
+<code>Endpoint.Mirror</code>. The strict default client is unchanged for
+public Internet endpoints. The user mandate — "must work without manual
+installation" — is satisfied.</li>
+</ul>
+<h3 id="changed-5">Changed</h3>
+<ul>
+<li><code>Endpoint.GoApi</code> now renders as <strong>"Lava
+API"</strong> in the Connections list (was "Mirror"), so the operator
+can distinguish a discovered Go service from a manually-configured
+rutracker mirror at a glance.</li>
+</ul>
+<h3 id="tests-sixth-law-1">Tests (Sixth Law)</h3>
+<ul>
+<li>Killed a 2h22m gradle test hang in
+<code>:core:domain:testDebugUnitTest</code> caused by 4 interlocking
+Third-Law bluff fakes (TestDispatchers, TestEndpointsRepository,
+TestLocalNetworkDiscoveryService, MainDispatcherRule).</li>
+<li>Added 25+ Sixth-Law Challenge tests across <code>:core:data</code>,
+<code>:core:domain</code>, <code>feature:connection</code>,
+<code>feature:menu</code>, <code>feature:search_result</code>. Each
+carries a documented MUTATION falsifiability rehearsal.</li>
+</ul>
+<h3 id="compatibility">Compatibility</h3>
+<ul>
+<li>Tested against <code>lava-api-go 2.0.6</code> (current API
+release).</li>
+<li>Also works against the legacy Ktor proxy and rutracker direct.</li>
+</ul>
+<hr />
+<h2 id="lava-api-go-205-2005--2026-04-29">Lava-API-Go-2.0.5-2005 —
+2026-04-29</h2>
+<p>Superseded by 2.0.6. Login fix (SP-3.5 root causes 1+2+3) shipped
+here; the search/favorites empty-results fix (SP-3.5b) landed in
+2.0.6.</p>
+<hr />
+<h2 id="lava-android-112-1012--2026-04-29">Lava-Android-1.1.2-1012 —
+2026-04-29</h2>
+<p>Superseded by 1.1.3. Issue-1/2/3 SP-3.3 fixes shipped here; the
+SP-3.4 mDNS cross-match fix landed in 1.1.3.</p>
+<hr />
+<h2 id="lava-api-go-204-2004--2026-04-29">Lava-API-Go-2.0.4-2004 —
+2026-04-29</h2>
+<p>Container build hardening:</p>
+<ul>
+<li><code>start.sh</code> and <code>build_and_release.sh</code> now
+export <code>BUILDAH_FORMAT=docker</code> so Podman builds Docker-format
+images that persist <code>HEALTHCHECK</code> directives.</li>
+<li><code>build_and_release.sh</code> always rebuilds the
+<code>:dev</code> image with <code>--format=docker</code> before saving,
+so the saved image tarball never carries a stale OCI-format build.</li>
+</ul>
+<hr />
+<h2 id="lava-api-go-202-2002--2026-04-29">Lava-API-Go-2.0.2-2002 —
+2026-04-29</h2>
+<p>Sixth Law inheritance docs added across all
+<code>vasic-digital</code> submodules.</p>
+<hr />
+<h2 id="lava-api-go-200202--2026-04-2829">Lava-API-Go-2.0.0..2.0.2 —
+2026-04-28..29</h2>
+<p>SP-2 — initial Go service migration. Cross-backend parity with the
+Ktor proxy verified (8/8 fixtures), k6 load tests green, real Postgres
+in podman, real HTTP/3 client. See
+<code>docs/superpowers/specs/2026-04-28-sp2-go-api-migration-design.md</code>
+and
+<code>docs/superpowers/plans/2026-04-28-sp2-go-api-migration.md</code>
+for the full design.</p>
+<hr />
+<h2 id="lava-android-110-1010--2026-04-29">Lava-Android-1.1.0-1010 —
+2026-04-29</h2>
+<p>SP-3 — Android dual-backend support: discover and route to
+lava-api-go alongside the legacy proxy.</p>
+<hr />
+<h2 id="earlier-history">Earlier history</h2>
+<p>See <code>git log --oneline --decorate</code> for the full history
+before the SP-2/SP-3 series; the changelog above starts at the point
+where the Sixth Law was instituted (2026-04-28).</p>
+</body>
+</html>

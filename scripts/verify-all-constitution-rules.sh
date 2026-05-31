@@ -195,6 +195,14 @@ run_gate "subagent-delegation-audit" "CM-SUBAGENT-DELEGATION-AUDIT / HelixConsti
 run_gate "workable-items-sync" "CM-WORKABLE-ITEMS-SYNC / HelixConstitution §11.4.93/95" \
     "bash scripts/check-workable-items.sh"
 
+# §11.4.65 Universal Markdown Export Sync (CM-UNIVERSAL-MARKDOWN-EXPORT-SYNC).
+# Every non-source-code .md MUST have synced .html + .pdf siblings. The gate
+# (scripts/check-markdown-export-sync.sh) greps in-scope .md and fails on any
+# missing/stale sibling. §6.AF-debt §11.4.65 item closed 2026-05-31; backfill
+# landed 126 in-scope docs, 0 problems at landing.
+run_gate "markdown-export-sync" "CM-UNIVERSAL-MARKDOWN-EXPORT-SYNC / HelixConstitution §11.4.65" \
+    "bash scripts/check-markdown-export-sync.sh"
+
 # Hermetic test suites (each suite's own paired-mutation contracts)
 for suite in tests/firebase tests/ci-sh tests/compose-layout tests/tag-helper \
              tests/vm-images tests/vm-signing tests/vm-distro; do

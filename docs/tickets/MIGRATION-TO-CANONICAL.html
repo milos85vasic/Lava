@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>MIGRATION-TO-CANONICAL</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1 id="migration-to-the-canonical-workable-items-binary">Migration to
+the canonical workable-items binary</h1>
+<p><strong>Revision:</strong> 1 <strong>Last modified:</strong>
+2026-05-31T00:00:00Z <strong>Description:</strong> Plan to migrate Lava
+ticket tracking from the bespoke <code>tools/lava-tickets/</code> system
+(DB: <code>docs/tickets/tickets.db</code>) to the canonical
+<code>workable-items</code> Go binary shipped in the constitution
+submodule (<code>constitution/scripts/workable-items/</code>), per
+Constitution §11.4.93 + §11.4.74 catalogue-first. Tracked as LVA-4 ("LVA
+workable-items ticket system").</p>
+<hr />
+<h2 id="0-executive-summary-read-first">0. Executive summary (read
+first)</h2>
+<ul>
+<li><strong>The LVA-key question is ANSWERED and requires NO upstream
+change.</strong> The canonical <code>add</code> takes
+<code>--prefix</code> (default <code>WIT</code>; <code>crud.go</code>
+<code>addPrefixDefault = "WIT"</code>). <code>--prefix LVA</code>
+auto-allocates <code>LVA-NNN</code> (format <code>"%s-%03d"</code>,
+<code>crud.go</code> <code>nextID</code>). <code>--id LVA-N</code>
+stores <code>LVA-N</code> <strong>verbatim</strong> (no padding).
+<strong>CONFIRMED at runtime:</strong> <code>add --id LVA-7</code> →
+stored <code>LVA-7</code>; <code>add --prefix LVA</code> (no id) →
+stored <code>LVA-008</code> (continues from max). To preserve the
+existing <code>LVA-1</code>..<code>LVA-7</code> keys, pass
+<code>--id LVA-N</code> on each <code>add</code>. No
+constitution-submodule change is needed for LVA keys.</li>
+<li><strong>Build + run CONFIRMED.</strong> Built from inside the module
+dir:
+<code>( cd constitution/scripts/workable-items &amp;&amp; CGO_ENABLED=1 go build -o /tmp/wi-canon ./cmd/workable-items )</code>
+→ <strong>EXIT 0</strong>, 7.4 MB binary. <code>--help</code> ran EXIT 0
+(full output in §6). <strong><code>go build</code> from the repo ROOT
+FAILS</strong> (<code>go: cannot find main module</code> — no root
+<code>go.mod</code>); you MUST <code>cd</code> into the module dir
+first. Self-contained <code>go.mod</code> (<code>go 1.21</code>, dep
+<code>mattn/go-sqlite3 v1.14.22</code>) + committed <code>go.sum</code>;
+schema is <code>//go:embed schema_embed.sql</code>.
+<strong><code>CGO_ENABLED=1</code> REQUIRED</strong> (cgo sqlite driver;
+<code>CGO_ENABLED=0</code> fails).</li>
+<li><strong>End-to-end CONFIRMED</strong> on a throwaway DB:
+<code>close LVA-7 --status fixed</code> moved it to Fixed with status
+<code>Fixed (→ Fixed.md)</code>; <code>validate</code> → "OK";
+<code>sync db-to-md</code> + <code>diff</code> → "DB and Markdown are in
+sync" EXIT 0.</li>
+<li><strong>The 7 LVA items CAN be represented</strong>, but the schemas
+differ substantially (§3). Hard parts: (a) LVA <code>priority</code>
+P0–P3 vs canonical free-text <code>severity</code>; (b) LVA Types
+<code>Incident</code>/<code>Debt</code>/<code>Chore</code> are NOT in
+the canonical closed set <code>{Bug,Feature,Task}</code> — and
+<code>add</code> does NOT reject them, it <strong>silently coerces
+unknown types to <code>Task</code></strong> (CONFIRMED:
+<code>add Incident</code> and <code>add Debt</code> both stored
+<code>Task</code>; <code>parse.go normalizeType</code>
+<code>default: return "Task"</code>). So to store LVA-5 (Incident) as
+<code>Bug</code>, you MUST pass <code>add Bug …</code>, never
+<code>add Incident …</code>. (c) LVA's provenance columns
+(<code>source</code>, <code>source_ref</code>, <code>reopened_*</code>,
+<code>fix_commit_sha</code>, <code>validation_test</code>,
+<code>challenge_test</code>, <code>closure_log</code>) have no canonical
+column.</li>
+</ul>
+<p><strong>§11.4.74 Catalogue-Check for the migration commit:</strong>
+<code>Catalogue-Check: reuse HelixDevelopment/HelixConstitution@&lt;pin-sha&gt; scripts/workable-items</code>
+— canonical binary covers the core lava-tickets functionality; bespoke
+system retired.</p>
+<hr />
+<h2 id="1-build--invoke-from-the-lava-root">1. Build + invoke from the
+Lava root</h2>
+<pre><code>constitution/scripts/workable-items/
+├── go.mod / go.sum     module github.com/HelixDevelopment/HelixConstitution/scripts/workable-items; go 1.21; mattn/go-sqlite3 v1.14.22
+├── schema.sql          authoritative DDL (items + item_history + obsolete_details + operator_block_details + firebase_metadata + doc_segments + meta)
+└── cmd/workable-items/  main.go crud.go db.go parse.go sync.go report.go schema_embed.sql</code></pre>
+<p><strong>Build (resource-capped per §11.4.82 / §6.T.2) — MUST cd into
+the module dir:</strong></p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">(</span> <span class="bu">cd</span> constitution/scripts/workable-items <span class="kw">&amp;&amp;</span> <span class="dt">\</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="va">CGO_ENABLED</span><span class="op">=</span>1 <span class="va">GOMAXPROCS</span><span class="op">=</span>2 <span class="fu">nice</span> <span class="at">-n</span> 19 go build <span class="at">-o</span> bin/workable-items ./cmd/workable-items <span class="kw">)</span></span></code></pre></div>
+<p>The submodule's <code>.gitignore</code> ignores <code>bin/</code>,
+<code>*.db</code>, so a built binary is not committed into the
+submodule.</p>
+<p><strong>Invoke (every subcommand requires <code>--db</code>;
+positional+flag order is free per
+<code>partitionArgs</code>):</strong></p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="va">WI</span><span class="op">=</span>constitution/scripts/workable-items/bin/workable-items</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="va">DB</span><span class="op">=</span>docs/workable_items.db</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="va">$WI</span> add <span class="op">&lt;</span>Bug<span class="kw">|</span><span class="ex">Feature</span><span class="kw">|</span><span class="ex">Task</span><span class="op">&gt;</span> <span class="op">&lt;</span>severity<span class="op">&gt;</span> --db <span class="va">$DB</span> <span class="at">--id</span> LVA-N <span class="at">--title</span> <span class="st">&quot;T&quot;</span> <span class="at">--description</span> <span class="st">&quot;D…&quot;</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="va">$WI</span> close LVA-N <span class="at">--db</span> <span class="va">$DB</span> <span class="at">--status</span> <span class="op">&lt;</span>fixed<span class="kw">|</span><span class="ex">implemented</span><span class="kw">|</span><span class="ex">completed</span><span class="kw">|</span><span class="ex">obsolete</span><span class="op">&gt;</span> --evidence <span class="op">&lt;</span>path<span class="op">&gt;</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="va">$WI</span> sync db-to-md <span class="at">--db</span> <span class="va">$DB</span> <span class="at">--out-issues</span> docs/Issues.md <span class="at">--out-fixed</span> docs/Fixed.md</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="va">$WI</span> sync md-to-db <span class="at">--db</span> <span class="va">$DB</span> <span class="at">--issues</span> docs/Issues.md <span class="at">--fixed</span> docs/Fixed.md</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="va">$WI</span> diff     <span class="at">--db</span> <span class="va">$DB</span> <span class="at">--issues</span> docs/Issues.md <span class="at">--fixed</span> docs/Fixed.md   <span class="co"># exit 1 on divergence (CI gate)</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="va">$WI</span> validate <span class="at">--db</span> <span class="va">$DB</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="va">$WI</span> report   <span class="at">--db</span> <span class="va">$DB</span> [--by-type<span class="kw">|</span><span class="ex">--by-status</span><span class="kw">|</span><span class="ex">--by-severity</span><span class="kw">|</span><span class="ex">--by-assigned</span><span class="kw">|</span><span class="ex">--by-creator</span><span class="kw">|</span><span class="ex">--obsolete-audit]</span></span></code></pre></div>
+<p>There is <strong>no <code>update</code> and no <code>reopen</code>
+subcommand</strong> — <code>add</code> always creates
+<code>Queued</code>; <code>close</code> is the only status-transition.
+Non-<code>Queued</code> open statuses need a DB-direct UPDATE (§4 Step
+2c).</p>
+<hr />
+<h2 id="2-db-path--doc-path">2. DB path + doc path</h2>
+<ul>
+<li><strong>DB path = <code>docs/workable_items.db</code></strong>
+(§11.4.95 amends §11.4.93's dotfile to this tracked, non-dotfile path).
+Not hardcoded — pass <code>--db</code>; <code>openDB</code>
+<code>os.MkdirAll</code>s the parent dir.</li>
+<li><strong>§11.4.95 — the DB is TRACKED in git, NEVER
+gitignored.</strong> <code>git add docs/workable_items.db</code>. The
+<code>.db-wal</code>/<code>.db-shm</code> sidecars MUST be gitignored;
+run <code>PRAGMA wal_checkpoint(TRUNCATE)</code> before staging (schema
+sets <code>journal_mode = WAL</code>).</li>
+<li><strong>Doc paths</strong> are passed explicitly (no built-in
+default). Recommended: emit <strong><code>docs/Issues.md</code> +
+<code>docs/Fixed.md</code></strong> at the docs root (the §11.4.48
+carve-out treats the canonical trackers as <code>docs/</code>-root
+constants). Lava keeps them under <code>docs/tickets/</code> today;
+migrating to <code>docs/</code> root aligns with the constitution. This
+plan assumes <code>docs/</code> root.</li>
+</ul>
+<hr />
+<h2 id="3-schema-comparison--the-load-bearing-differences">3. Schema
+comparison — the load-bearing differences</h2>
+<h3
+id="real-lava-tickets-schema-docsticketsticketsdb-confirmed-via-schema">Real
+lava-tickets schema (<code>docs/tickets/tickets.db</code>, confirmed via
+<code>.schema</code>)</h3>
+<pre><code>tickets(seq INTEGER PK AUTOINCREMENT, id TEXT UNIQUE (&#39;LVA-&lt;seq&gt;&#39; via trigger),
+  title, body, type→item_type, status→item_status, closure_status→closure_status,
+  priority CHECK(&#39;P0&#39;..&#39;P3&#39;),
+  source CHECK(&#39;operator-report&#39;,&#39;crashlytics&#39;,&#39;self-discovered&#39;,&#39;bluff-hunt&#39;,&#39;code-review&#39;,&#39;user-report&#39;,&#39;automated-gate&#39;),
+  source_ref, reopened_{why,who,when,incident}, fix_commit_sha, validation_test,
+  challenge_test, closure_log, operator_blocked_details, duplicate_of,
+  created_at, updated_at, closed_at)
++ lookup tables item_type/item_status/closure_status/closure_status_for_type + triggers + views</code></pre>
+<p><strong>LVA closed sets (confirmed):</strong></p>
+<ul>
+<li><code>item_status</code>:
+<code>Blocked | Closed | InProgress | InReview | Open | OperatorBlocked | Reopened</code></li>
+<li><code>item_type</code>:
+<code>Bug | Chore | Debt | Feature | Incident | Task</code></li>
+<li><code>closure_status</code>:
+<code>Closed | Completed | Duplicate | Fixed | Implemented | NotReproducible | Resolved | WontFix</code></li>
+</ul>
+<p>LVA <code>id</code> is <code>LVA-&lt;seq&gt;</code> (bare integer,
+NOT zero-padded).</p>
+<h3
+id="canonical-schema-constitutionscriptsworkable-itemsschemasql">Canonical
+schema
+(<code>constitution/scripts/workable-items/schema.sql</code>)</h3>
+<pre><code>items(atm_id, type CHECK(&#39;Bug&#39;,&#39;Feature&#39;,&#39;Task&#39;), status CHECK(10-value closed set),
+  severity, title, description, forensic_anchor, closure_criteria, composes_with,
+  created_by, assigned_to, current_location CHECK(&#39;Issues&#39;,&#39;Fixed&#39;), body_md,
+  created_at, last_modified, PRIMARY KEY(atm_id, current_location))
++ item_history / obsolete_details / operator_block_details / firebase_metadata / doc_segments / meta</code></pre>
+<p>Canonical <code>status</code> closed set:
+<code>Queued | In progress | Ready for testing | In testing | Reopened | Operator-blocked | Fixed (→ Fixed.md) | Implemented (→ Fixed.md) | Completed (→ Fixed.md) | Obsolete (→ Fixed.md)</code>.</p>
+<h3 id="field-mapping">Field mapping</h3>
+<table>
+<thead>
+<tr>
+<th>lava-tickets</th>
+<th>canonical</th>
+<th>maps cleanly?</th>
+<th>note</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>id</code> (<code>LVA-N</code>)</td>
+<td><code>items.atm_id</code></td>
+<td>YES — pass <code>--id LVA-N</code> (verbatim, CONFIRMED). Composite
+PK <code>(atm_id,current_location)</code> allows same id in both
+trackers; each item is in exactly one location, no conflict.</td>
+<td></td>
+</tr>
+<tr>
+<td><code>seq</code></td>
+<td>—</td>
+<td>DROPPED. No <code>seq</code> in canonical. Future auto-ids zero-pad
+(<code>LVA-008</code>) while legacy are bare (<code>LVA-7</code>);
+<code>atoiSafe</code> parses both so monotonicity holds. Cosmetic
+only.</td>
+<td></td>
+</tr>
+<tr>
+<td><code>type</code></td>
+<td><code>items.type</code></td>
+<td><strong>TRANSFORM REQUIRED.</strong> Canonical only stores
+<code>{Bug,Feature,Task}</code> and <code>add</code> silently coerces
+anything else to <code>Task</code> (CONFIRMED). Map at the
+<code>add</code> command: <code>Incident → Bug</code> (pass
+<code>add Bug</code>), <code>Debt → Task</code>,
+<code>Chore → Task</code>. <code>Bug/Feature/Task</code> pass through.
+<strong>LVA-2=Debt→Task, LVA-5=Incident→Bug.</strong></td>
+<td></td>
+</tr>
+<tr>
+<td><code>status</code></td>
+<td><code>items.status</code></td>
+<td><strong>TRANSFORM REQUIRED.</strong> <code>Open→Queued</code>,
+<code>InProgress→In progress</code>,
+<code>OperatorBlocked→Operator-blocked</code>, <code>Closed→</code>
+type-aware terminal (§11.4.33), <code>Reopened→Reopened</code>,
+<code>Blocked/InReview→</code> nearest (<code>In progress</code>).</td>
+<td></td>
+</tr>
+<tr>
+<td><code>closure_status</code></td>
+<td>folded into <code>items.status</code></td>
+<td>YES via §11.4.33 — terminal status word IS the closure status
+(`close --status fixed</td>
+<td>implemented</td>
+</tr>
+<tr>
+<td><code>priority</code> (P0–P3)</td>
+<td><code>items.severity</code></td>
+<td>store the P-level literal as severity (free text). No information
+lost.</td>
+<td></td>
+</tr>
+<tr>
+<td><code>title</code></td>
+<td><code>items.title</code></td>
+<td>YES</td>
+<td></td>
+</tr>
+<tr>
+<td><code>body</code></td>
+<td><code>items.description</code></td>
+<td>YES — §11.4.91 floor (≥6 words OR ≥40 chars) enforced at
+<code>add</code>; real LVA bodies satisfy it.</td>
+<td></td>
+</tr>
+<tr>
+<td>(derived Issues/Fixed)</td>
+<td><code>items.current_location</code></td>
+<td>terminal status → <code>Fixed</code>, else <code>Issues</code>.</td>
+<td></td>
+</tr>
+<tr>
+<td><code>source</code>,<code>source_ref</code></td>
+<td>—</td>
+<td>no column. Fold <code>source_ref</code> into description as a
+<code>**Source:**</code> line so the audit link survives.</td>
+<td></td>
+</tr>
+<tr>
+<td><code>reopened_*</code></td>
+<td><code>item_history</code>
+(<code>Reopened</code>,<code>by</code>,<code>reason</code>,<code>evidence_path</code>)</td>
+<td>none of the 7 is <code>Reopened</code> now → no port.</td>
+<td></td>
+</tr>
+<tr>
+<td><code>fix_commit_sha</code>/<code>validation_test</code>/<code>challenge_test</code>/<code>closure_log</code></td>
+<td><code>close --evidence</code> →
+<code>item_history.evidence_path</code></td>
+<td><code>close</code> records ONE evidence path; use the richest
+(closure_log else validation_test).</td>
+<td></td>
+</tr>
+<tr>
+<td><code>operator_blocked_details</code></td>
+<td><code>operator_block_details</code> table</td>
+<td>structurally yes, but no subcommand populates it — DB-direct INSERT
+(§4 Step 2c). LVA-5 is OperatorBlocked.</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h3 id="the-7-real-lva-items-confirmed-from-ticketsdb">The 7 real LVA
+items (confirmed from <code>tickets.db</code>)</h3>
+<table>
+<thead>
+<tr>
+<th>id</th>
+<th>LVA type</th>
+<th>LVA status / closure</th>
+<th>priority</th>
+<th>→ canonical <code>add</code> type</th>
+<th>→ canonical status</th>
+<th>→ location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>LVA-1</td>
+<td>Bug</td>
+<td>Closed / Fixed</td>
+<td>P1</td>
+<td>Bug</td>
+<td><code>Fixed (→ Fixed.md)</code></td>
+<td>Fixed</td>
+</tr>
+<tr>
+<td>LVA-2</td>
+<td>Debt</td>
+<td>Closed / Closed</td>
+<td>P1</td>
+<td>Task</td>
+<td><code>Completed (→ Fixed.md)</code></td>
+<td>Fixed</td>
+</tr>
+<tr>
+<td>LVA-3</td>
+<td>Task</td>
+<td>InProgress</td>
+<td>P1</td>
+<td>Task</td>
+<td><code>In progress</code></td>
+<td>Issues</td>
+</tr>
+<tr>
+<td>LVA-4</td>
+<td>Feature</td>
+<td>InProgress</td>
+<td>P1</td>
+<td>Feature</td>
+<td><code>In progress</code></td>
+<td>Issues</td>
+</tr>
+<tr>
+<td>LVA-5</td>
+<td>Incident</td>
+<td>OperatorBlocked</td>
+<td>P0</td>
+<td><strong>Bug</strong> (NOT Incident — would coerce to Task)</td>
+<td><code>Operator-blocked</code></td>
+<td>Issues</td>
+</tr>
+<tr>
+<td>LVA-6</td>
+<td>Task</td>
+<td>Open</td>
+<td>P2</td>
+<td>Task</td>
+<td><code>Queued</code></td>
+<td>Issues</td>
+</tr>
+<tr>
+<td>LVA-7</td>
+<td>Task</td>
+<td>Open</td>
+<td>P2</td>
+<td>Task</td>
+<td><code>Queued</code></td>
+<td>Issues</td>
+</tr>
+</tbody>
+</table>
+<p>Titles/bodies: quote verbatim from
+<code>sqlite3 docs/tickets/tickets.db "SELECT id,title,body FROM tickets ORDER BY seq"</code>
+— do NOT paraphrase (§11.4.6).</p>
+<hr />
+<h2 id="4-step-by-step-migration-main-agent-executable">4. Step-by-step
+migration (main-agent-executable)</h2>
+<blockquote>
+<p>CWD = repo root.
+<code>WI=constitution/scripts/workable-items/bin/workable-items</code>,
+<code>DB=docs/workable_items.db</code>.</p>
+</blockquote>
+<h3 id="step-1--build--capture-evidence">Step 1 — build + capture
+evidence</h3>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">(</span> <span class="bu">cd</span> constitution/scripts/workable-items <span class="kw">&amp;&amp;</span> <span class="va">CGO_ENABLED</span><span class="op">=</span>1 <span class="va">GOMAXPROCS</span><span class="op">=</span>2 <span class="fu">nice</span> <span class="at">-n</span> 19 go build <span class="at">-o</span> bin/workable-items ./cmd/workable-items <span class="kw">)</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;</span><span class="va">$WI</span><span class="st">&quot;</span> <span class="at">--help</span>    <span class="co"># capture as §11.4.5 evidence (EXIT 0 confirmed)</span></span></code></pre></div>
+<h3 id="step-2--seed-7-items-preserving-exact-keys">Step 2 — seed 7
+items, preserving exact keys</h3>
+<p>Pull <code>--title</code>/<code>--description</code> from the DB for
+each. Use the canonical <code>add</code> type per the §3 table
+(<code>Incident→Bug</code>, <code>Debt→Task</code>). Severity = the
+P-level.</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span> <span class="at">-f</span> <span class="st">&quot;</span><span class="va">$DB</span><span class="st">&quot;</span> <span class="st">&quot;</span><span class="va">$DB</span><span class="st">-wal&quot;</span> <span class="st">&quot;</span><span class="va">$DB</span><span class="st">-shm&quot;</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;</span><span class="va">$WI</span><span class="st">&quot;</span> add Bug     P1 <span class="at">--db</span> <span class="st">&quot;</span><span class="va">$DB</span><span class="st">&quot;</span> <span class="at">--id</span> LVA-1 <span class="at">--title</span> <span class="st">&quot;&lt;LVA-1 title&gt;&quot;</span> <span class="at">--description</span> <span class="st">&quot;&lt;LVA-1 body&gt;&quot;</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;</span><span class="va">$WI</span><span class="st">&quot;</span> add Task    P1 <span class="at">--db</span> <span class="st">&quot;</span><span class="va">$DB</span><span class="st">&quot;</span> <span class="at">--id</span> LVA-2 <span class="at">--title</span> <span class="st">&quot;&lt;LVA-2 title&gt;&quot;</span> <span class="at">--description</span> <span class="st">&quot;&lt;LVA-2 body&gt;&quot;</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;</span><span class="va">$WI</span><span class="st">&quot;</span> add Task    P1 <span class="at">--db</span> <span class="st">&quot;</span><span class="va">$DB</span><span class="st">&quot;</span> <span class="at">--id</span> LVA-3 <span class="at">--title</span> <span class="st">&quot;&lt;LVA-3 title&gt;&quot;</span> <span class="at">--description</span> <span class="st">&quot;&lt;LVA-3 body&gt;&quot;</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;</span><span class="va">$WI</span><span class="st">&quot;</span> add Feature P1 <span class="at">--db</span> <span class="st">&quot;</span><span class="va">$DB</span><span class="st">&quot;</span> <span class="at">--id</span> LVA-4 <span class="at">--title</span> <span class="st">&quot;&lt;LVA-4 title&gt;&quot;</span> <span class="at">--description</span> <span class="st">&quot;&lt;LVA-4 body&gt;&quot;</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;</span><span class="va">$WI</span><span class="st">&quot;</span> add Bug     P0 <span class="at">--db</span> <span class="st">&quot;</span><span class="va">$DB</span><span class="st">&quot;</span> <span class="at">--id</span> LVA-5 <span class="at">--title</span> <span class="st">&quot;&lt;LVA-5 title&gt;&quot;</span> <span class="at">--description</span> <span class="st">&quot;&lt;LVA-5 body&gt;&quot;</span>   <span class="co"># Incident→Bug</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;</span><span class="va">$WI</span><span class="st">&quot;</span> add Task    P2 <span class="at">--db</span> <span class="st">&quot;</span><span class="va">$DB</span><span class="st">&quot;</span> <span class="at">--id</span> LVA-6 <span class="at">--title</span> <span class="st">&quot;&lt;LVA-6 title&gt;&quot;</span> <span class="at">--description</span> <span class="st">&quot;&lt;LVA-6 body&gt;&quot;</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;</span><span class="va">$WI</span><span class="st">&quot;</span> add Task    P2 <span class="at">--db</span> <span class="st">&quot;</span><span class="va">$DB</span><span class="st">&quot;</span> <span class="at">--id</span> LVA-7 <span class="at">--title</span> <span class="st">&quot;&lt;LVA-7 title&gt;&quot;</span> <span class="at">--description</span> <span class="st">&quot;&lt;LVA-7 body&gt;&quot;</span></span></code></pre></div>
+<h3 id="step-2b--close-the-two-terminal-items-lva-1-lva-2">Step 2b —
+close the two terminal items (LVA-1, LVA-2)</h3>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;</span><span class="va">$WI</span><span class="st">&quot;</span> close LVA-1 <span class="at">--db</span> <span class="st">&quot;</span><span class="va">$DB</span><span class="st">&quot;</span> <span class="at">--status</span> fixed <span class="dt">\</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">--evidence</span> feature/credentials/src/test/kotlin/lava/feature/credentials/CredentialsViewModelTest.kt</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;</span><span class="va">$WI</span><span class="st">&quot;</span> close LVA-2 <span class="at">--db</span> <span class="st">&quot;</span><span class="va">$DB</span><span class="st">&quot;</span> <span class="at">--status</span> completed <span class="dt">\</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">--evidence</span> .lava-ci-evidence/sixth-law-incidents/2026-05-13-emulator-container-darwin-arm64-gap.json</span></code></pre></div>
+<p>Both paths are the genuine evidence already in the LVA rows (honest,
+non-bluff).</p>
+<h3
+id="step-2c--non-queued-open-statuses-lva-3-lva-4-in-progress-lva-5-operator-blocked">Step
+2c — non-<code>Queued</code> open statuses (LVA-3, LVA-4
+<code>In progress</code>; LVA-5 <code>Operator-blocked</code>)</h3>
+<p><code>add</code> only produces <code>Queued</code>; no
+<code>update</code> subcommand. DB-direct (recommended now):</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="ex">sqlite3</span> <span class="st">&quot;</span><span class="va">$DB</span><span class="st">&quot;</span> <span class="st">&quot;UPDATE items SET status=&#39;In progress&#39;,</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="st">  body_md=replace(body_md,&#39;**Status:** Queued&#39;,&#39;**Status:** In progress&#39;)</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="st">  WHERE atm_id IN (&#39;LVA-3&#39;,&#39;LVA-4&#39;);&quot;</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="ex">sqlite3</span> <span class="st">&quot;</span><span class="va">$DB</span><span class="st">&quot;</span> <span class="st">&quot;UPDATE items SET status=&#39;Operator-blocked&#39;,</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="st">  body_md=replace(body_md,&#39;**Status:** Queued&#39;,&#39;**Status:** Operator-blocked&#39;)</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="st">  WHERE atm_id=&#39;LVA-5&#39;;&quot;</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="ex">sqlite3</span> <span class="st">&quot;</span><span class="va">$DB</span><span class="st">&quot;</span> <span class="st">&quot;INSERT INTO operator_block_details(atm_id,what,why_exhausted_alternatives,unblock_condition,who)</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="st">  VALUES(&#39;LVA-5&#39;,&#39;&lt;what from tickets.db operator_blocked_details&gt;&#39;,&#39;&lt;why&gt;&#39;,&#39;&lt;unblock&gt;&#39;,&#39;Operator&#39;);&quot;</span></span></code></pre></div>
+<p>The <code>body_md replace()</code> keeps the §11.4.93 round-trip
+green. (Alternative: extend the canonical binary upstream with
+<code>update</code>/<code>block</code> subcommands per §11.4.74 — OWED,
+not blocking.)</p>
+<h3 id="step-3--generate-doc-set--verify">Step 3 — generate doc set +
+verify</h3>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="ex">sqlite3</span> <span class="st">&quot;</span><span class="va">$DB</span><span class="st">&quot;</span> <span class="st">&quot;PRAGMA wal_checkpoint(TRUNCATE);&quot;</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;</span><span class="va">$WI</span><span class="st">&quot;</span> sync db-to-md <span class="at">--db</span> <span class="st">&quot;</span><span class="va">$DB</span><span class="st">&quot;</span> <span class="at">--out-issues</span> docs/Issues.md <span class="at">--out-fixed</span> docs/Fixed.md</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;</span><span class="va">$WI</span><span class="st">&quot;</span> validate <span class="at">--db</span> <span class="st">&quot;</span><span class="va">$DB</span><span class="st">&quot;</span>     <span class="co"># expect &quot;OK — 7 items&quot;</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;</span><span class="va">$WI</span><span class="st">&quot;</span> diff <span class="at">--db</span> <span class="st">&quot;</span><span class="va">$DB</span><span class="st">&quot;</span> <span class="at">--issues</span> docs/Issues.md <span class="at">--fixed</span> docs/Fixed.md   <span class="co"># expect &quot;in sync&quot;, exit 0</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;</span><span class="va">$WI</span><span class="st">&quot;</span> report <span class="at">--db</span> <span class="st">&quot;</span><span class="va">$DB</span><span class="st">&quot;</span> <span class="at">--by-status</span></span></code></pre></div>
+<p>Binary generates <strong><code>Issues.md</code> +
+<code>Fixed.md</code> only</strong>. Summaries
+(<code>Issues_Summary.md</code>/<code>Fixed_Summary.md</code>) +
+HTML/PDF (§11.4.12/§11.4.53/§11.4.65) are NOT produced by it —
+<code>tools/lava-tickets/export.go</code>/<code>render.go</code>
+produced them today. After retiring that, regenerate via the project
+export pipeline OR the §11.4.106 Docs Chain engine. Do NOT leave stale
+<code>docs/tickets/*_Summary.*</code> /
+<code>docs/tickets/export/*</code> behind.</p>
+<h3 id="step-4--retire-the-bespoke-system-main-agent-does-git-rm">Step 4
+— retire the bespoke system (main agent does <code>git rm</code>)</h3>
+<ul>
+<li><code>tools/lava-tickets/</code> (whole dir).</li>
+<li><code>docs/tickets/tickets.db</code> → replaced by
+<code>docs/workable_items.db</code>.</li>
+<li><code>docs/tickets/schema.sql</code> → replaced by the canonical
+embedded schema.</li>
+<li><code>docs/tickets/{Issues,Fixed,Issues_Summary,Fixed_Summary}.md</code>
++ <code>docs/tickets/export/*</code> → replaced by
+<code>docs/Issues.md</code>/<code>docs/Fixed.md</code> + regenerated
+summaries/exports.</li>
+<li>Keep <code>docs/tickets/DESIGN.md</code> +
+<code>docs/tickets/BUILD-EVIDENCE.md</code> as forensic anchors (or move
+under <code>docs/tickets/retired/</code>). Any path used as
+<code>--evidence</code> MUST remain reachable.</li>
+</ul>
+<p><strong>Replace the <code>CM-LVA-TICKETS-SYNC</code> gate.</strong>
+<code>UNCONFIRMED:</code> its exact wiring location — the grep for
+<code>CM-LVA-TICKETS-SYNC</code>/<code>lava-tickets</code> in
+<code>scripts/check-constitution.sh</code> +
+<code>.githooks/pre-push</code> did not return output this session
+(session I/O degradation), so the main agent MUST grep to locate it
+before editing. Replace its body with:</p>
+<ul>
+<li><code>workable-items validate --db docs/workable_items.db</code></li>
+<li><code>workable-items diff --db docs/workable_items.db --issues docs/Issues.md --fixed docs/Fixed.md</code>
+(exit 1 = §11.4.93 <code>CM-WORKABLE-ITEMS-MD-DB-IN-SYNC</code>)</li>
+<li><code>git ls-files docs/workable_items.db</code> non-empty =
+§11.4.95 <code>CM-WORKABLE-ITEMS-DB-TRACKED</code></li>
+<li>gate builds <code>bin/workable-items</code> if absent, or
+<code>go run ./cmd/workable-items</code> from the module dir.</li>
+</ul>
+<h3
+id="step-5--governance--gitignore--continuation-same-commit-6s1210">Step
+5 — governance + gitignore + CONTINUATION (SAME commit,
+§6.S/§12.10)</h3>
+<ul>
+<li><strong><code>.gitignore</code>:</strong> add
+<code>docs/workable_items.db-wal</code> +
+<code>docs/workable_items.db-shm</code>. Do NOT ignore
+<code>docs/workable_items.db</code> (§11.4.95). Remove dead
+<code>docs/tickets/</code> lines.</li>
+<li><strong><code>CLAUDE.md</code> §6.AF:</strong> rewrite to point at
+the canonical binary
+(<code>constitution/scripts/workable-items/</code>), DB
+<code>docs/workable_items.db</code>, docs
+<code>docs/Issues.md</code>/<code>docs/Fixed.md</code>, the LVA-prefix
+convention (<code>--id LVA-N</code> to preserve,
+<code>--prefix LVA</code> for new), the Incident→Bug / Debt→Task /
+Chore→Task type-mapping decision, and the new gate. Add
+<code>Catalogue-Check: reuse …</code> +
+<code>Classification: project-specific</code>.</li>
+<li><strong><code>docs/CONTINUATION.md</code>:</strong> record LVA-4
+progress, new DB+doc paths, retired <code>tools/lava-tickets/</code>,
+OWED follow-ups (canonical
+<code>update</code>/<code>reopen</code>/<code>block</code> subcommand
+extension; summary+export pipeline standardisation; the
+Incident/Debt/Chore type-coercion-to-Task caveat; source/source_ref
+folded into description).</li>
+</ul>
+<h3 id="step-6--catalogue-check--commit-main-agent">Step 6 —
+Catalogue-Check + commit (main agent)</h3>
+<pre><code>Catalogue-Check: reuse HelixDevelopment/HelixConstitution@&lt;pin-sha&gt; scripts/workable-items
+Classification: project-specific (Lava consumes the canonical binary; LVA-prefix + Incident→Bug/Debt→Task/Chore→Task mapping is Lava-specific)</code></pre>
+<hr />
+<h2 id="5-main-agent-doable-vs-operatorupstream-blocked">5.
+Main-agent-doable vs operator/upstream-blocked</h2>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Build canonical binary</td>
+<td><strong>DONE/feasible</strong> (CONFIRMED EXIT 0 from module dir;
+root build fails — cd in first).</td>
+</tr>
+<tr>
+<td>Seed 7 items with exact keys (<code>--id LVA-N</code>)</td>
+<td><strong>Main-agent-doable</strong> (CONFIRMED <code>--id</code>
+verbatim + <code>--prefix</code> auto-alloc).</td>
+</tr>
+<tr>
+<td>Type transform (Incident→Bug, Debt/Chore→Task)</td>
+<td><strong>Main-agent-doable</strong> (mandatory:
+<code>add Incident</code>/<code>add Debt</code> silently coerce to Task
+— CONFIRMED — so pass the canonical type explicitly).</td>
+</tr>
+<tr>
+<td>Status transform + close LVA-1/LVA-2</td>
+<td><strong>Main-agent-doable</strong> (CONFIRMED close→Fixed + validate
+OK).</td>
+</tr>
+<tr>
+<td>LVA-3/4 <code>In progress</code>, LVA-5
+<code>Operator-blocked</code> + operator_block_details</td>
+<td><strong>Main-agent-doable</strong> via DB-direct UPDATE +
+<code>body_md</code> replace + INSERT (no
+<code>update</code>/<code>block</code> subcommand).</td>
+</tr>
+<tr>
+<td>Generate Issues.md/Fixed.md + validate + diff</td>
+<td><strong>Main-agent-doable</strong> (CONFIRMED round-trip in
+sync).</td>
+</tr>
+<tr>
+<td>Retire <code>tools/lava-tickets/</code> + replace gate + update
+CLAUDE/.gitignore/CONTINUATION</td>
+<td><strong>Main-agent-doable.</strong> Grep
+<code>CM-LVA-TICKETS-SYNC</code> first to locate gate wiring
+(<code>UNCONFIRMED:</code> location this session).</td>
+</tr>
+<tr>
+<td>Summary docs + HTML/PDF exports</td>
+<td><strong>Main-agent-doable</strong> but depends on pandoc/weasyprint
++ project export pipeline (binary does NOT emit them).</td>
+</tr>
+<tr>
+<td><code>update</code>/<code>reopen</code>/<code>block</code> upstream
+extensions</td>
+<td><strong>OWED upstream-extend</strong> (§11.4.74), NOT blocking.
+Requires §11.4.26 7-step constitution-submodule pipeline + push to its 4
+upstreams. File as a future LVA item. <strong><code>--prefix</code>
+default change is NOT needed.</strong></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="6-captured-evidence-this-session-from-this-checkout">6. Captured
+evidence (this session, from this checkout)</h2>
+<p><code>go build</code> from inside
+<code>constitution/scripts/workable-items</code> with
+<code>CGO_ENABLED=1</code> → <strong>EXIT 0</strong>, 7.4 MB binary.
+<code>go build</code> from repo root → FAILS
+<code>go: cannot find main module</code>.</p>
+<p><code>--help</code> (EXIT 0, verbatim):</p>
+<pre><code>workable-items — §11.4.93 SQLite-SSoT for workable items
+
+Usage:
+  workable-items &lt;subcommand&gt; [args...]
+
+Subcommands:
+  sync md-to-db --db &lt;p&gt; [--issues &lt;p&gt;] [--fixed &lt;p&gt;]   Parse trackers, upsert DB.
+  sync db-to-md --db &lt;p&gt; [--out-issues &lt;p&gt;] [--out-fixed &lt;p&gt;]  Regenerate trackers from DB.
+  diff --db &lt;p&gt; [--issues &lt;p&gt;] [--fixed &lt;p&gt;]            Show DB vs Markdown divergence.
+  validate --db &lt;p&gt;                                     Closed-set + §11.4.91 invariants.
+  add &lt;type&gt; &lt;severity&gt; --db &lt;p&gt; --title &lt;T&gt; --description &lt;D&gt; [--id &lt;id&gt;] [--prefix &lt;P&gt;] [--created-by &lt;h&gt;] [--assigned-to &lt;h&gt;]
+                                                        Create a new Queued item in Issues.
+  close &lt;atm-id&gt; --db &lt;p&gt; --status &lt;fixed|implemented|completed|obsolete&gt; --evidence &lt;p&gt;
+                                                        Atomic Issues→Fixed closure (§11.4.19).
+  report --db &lt;p&gt; [--by-type|--by-status|--by-severity|--by-assigned|--by-creator|--obsolete-audit]
+                                                        Read-only grouped tally / §11.4.90 audit.
+
+Canonical authority: Constitution.md §11.4.93.</code></pre>
+<p>Runtime behaviour proofs (throwaway DB):</p>
+<ul>
+<li><code>add Bug P0 --id LVA-7 …</code> →
+<code>add: created LVA-7 (Bug, status=Queued)</code>; stored atm_id =
+<code>LVA-7</code>.</li>
+<li><code>add Task P2 --prefix LVA …</code> (no id) →
+<code>add: created LVA-008 (Task, status=Queued)</code>; stored atm_id =
+<code>LVA-008</code>.</li>
+<li><code>add Incident …</code> → <code>(Task, …)</code> and
+<code>add Debt …</code> → <code>(Task, …)</code> — <strong>unknown types
+silently coerced to Task</strong>.</li>
+<li><code>close LVA-7 --status fixed --evidence &lt;p&gt;</code> →
+<code>close: moved LVA-7 Issues→Fixed (status=Fixed (→ Fixed.md))</code>.</li>
+<li><code>validate</code> →
+<code>validate: OK — 2 items, all invariants satisfied</code>.</li>
+<li><code>sync db-to-md</code> + <code>diff</code> →
+<code>diff: DB and Markdown are in sync</code> (EXIT 0).</li>
+</ul>
+<h2 id="7-the-lva-key-answer-definitive">7. The LVA-key answer
+(definitive)</h2>
+<p><strong>Configurable — NO upstream change required.</strong> Source
+(<code>crud.go</code>): <code>const addPrefixDefault = "WIT"</code>;
+<code>nextID</code> returns
+<code>fmt.Sprintf("%s-%03d", prefix, max+1)</code>; explicit
+<code>--id</code> stored as <code>strings.TrimSpace(*explicitID)</code>
+verbatim. Confirmed at runtime (§6). Preserve
+<code>LVA-1</code>..<code>LVA-7</code> via <code>--id LVA-N</code>; new
+tickets via <code>--prefix LVA</code> (zero-padded
+<code>LVA-NNN</code>). Neither path needs a constitution-submodule
+edit.</p>
+</body>
+</html>

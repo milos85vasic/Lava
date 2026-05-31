@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>BUGFIXES</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1 id="lava--bug-fix-audit-trail">Lava — Bug Fix Audit Trail</h1>
+<p>Per constitutional clause <strong>§6.T.4 (Bugfix
+Documentation)</strong> — every bug fix in this project MUST be
+documented here with root cause analysis, affected files, fix
+description, link to the verification test/ challenge, and the commit
+SHA that landed the fix.</p>
+<p>§6.O (Crashlytics-Resolved Issue Coverage Mandate) extends this for
+Crashlytics-recorded issues; their closure logs live at
+<code>.lava-ci-evidence/crashlytics-resolved/&lt;date&gt;-&lt;slug&gt;.md</code>.
+§6.T.4 covers the rest — operator-reported, self-discovered, or
+reviewer-flagged bugs that don't enter the Crashlytics pipeline.</p>
+<p>Format per entry:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">## YYYY-MM-DD — &lt;short slug&gt;</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>**Root cause:** ...</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>**Affected files:** ...</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>**Fix:** ...</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>**Verification test/challenge:** path or commit ref</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>**Fix commit:** SHA</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>**Forensic anchor:** (optional) what surfaced the bug</span></code></pre></div>
+<hr />
+<h2 id="2026-05-06--phase1-distribute-three-bugs">2026-05-06 —
+phase1-distribute-three-bugs</h2>
+<p>The first real-distribute of Lava-Android-1.2.7-1027 +
+lava-api-go-2.1.0 exposed three bugs that landed in commit
+<code>e947081</code>:</p>
+<p><strong>Root cause 1:</strong> <code>/health</code> and
+<code>/ready</code> endpoints were registered AFTER the auth middleware
+in <code>lava-api-go/cmd/lava-api-go/main.go</code>
+<code>buildRouter</code>, so the orchestrator's liveness probe got 401 →
+restart loop.</p>
+<p><strong>Root cause 2:</strong>
+<code>core/network/impl/.../LavaAuthBlobProvider.kt</code> was declared
+<code>internal</code>, but the Phase 11 build-time-generated
+<code>lava.auth.LavaAuthGenerated</code> class lives in
+<code>:app</code>'s source set — different module → cannot access
+internal interface → compile failure.</p>
+<p><strong>Root cause 3:</strong>
+<code>scripts/distribute-api-remote.sh</code> +
+<code>deployment/thinker/thinker-up.sh</code> did NOT ship the
+operator's local <code>.env</code> <code>LAVA_AUTH_*</code> +
+<code>LAVA_API_HTTP3_*</code>/<code>BROTLI_*</code>/<code>PROTOCOL_*</code>
+values to the thinker.local container. The new 2.1.0 binary required
+<code>LAVA_AUTH_FIELD_NAME</code> + <code>LAVA_AUTH_HMAC_SECRET</code>
+at boot → crash-loop.</p>
+<p><strong>Affected files:</strong></p>
+<ul>
+<li><code>lava-api-go/cmd/lava-api-go/main.go</code></li>
+<li><code>core/network/impl/src/main/kotlin/lava/network/impl/LavaAuthBlobProvider.kt</code></li>
+<li><code>scripts/distribute-api-remote.sh</code></li>
+<li><code>deployment/thinker/thinker-up.sh</code></li>
+</ul>
+<p><strong>Fix:</strong></p>
+<ol type="1">
+<li>Register <code>/health</code> + <code>/ready</code> BEFORE the auth
+chain.</li>
+<li>Drop <code>internal</code> from
+<code>LavaAuthBlobProvider</code>.</li>
+<li>Distribute script merges operator's <code>.env</code> auth/transport
+block into a temp env file before scp; thinker-up iterates the variables
+and passes each as <code>-e VAR=$VAR</code> to
+<code>podman run</code>.</li>
+</ol>
+<p><strong>Verification test/challenge:</strong> post-fix smoke test in
+<code>scripts/distribute-api-remote.sh</code>'s 60-second
+<code>/health</code> wait (passes);
+<code>curl -fsSk https://thinker.local:8443/{health,ready}</code> return
+<code>{"status":"alive"}</code> / <code>{"status":"ready"}</code>
+(passes); auth gate returns 401 with
+<code>{"error":"unauthorized"}</code> for missing header (passes —
+fail-closed posture confirmed).</p>
+<p><strong>Fix commit:</strong> <code>e947081</code></p>
+<p><strong>Forensic anchor:</strong> the very first
+<code>bash scripts/distribute-api-remote.sh</code> after the
+api-go-2.1.0 build showed
+<code>lava-api-go: config: config: LAVA_AUTH_FIELD_NAME is required</code>
+in a tight loop, with the orchestrator marking the container
+<code>(unhealthy)</code> and triggering the restart loop. Operator ran
+the distribute, got the lock-up output, immediately surfaced the
+issue.</p>
+<hr />
+<h2 id="2026-05-12--c03-anonymous-toggle-checkauth-bluff">2026-05-12 —
+c03-anonymous-toggle-checkauth-bluff</h2>
+<p><strong>Root cause:</strong>
+<code>OnboardingViewModel.onTestAndContinue()</code> (the "Test &amp;
+Continue" button handler on the Configure step) called
+<code>sdk.checkAuth(currentId)</code> for BOTH
+<code>AuthType.NONE</code> providers AND
+<code>config.useAnonymous=true</code> paths, then asserted that the
+result equals <code>AuthState.Authenticated</code>. For users opting
+INTO anonymous mode on a FORM_LOGIN tracker (RuTor with the toggle on),
+<code>checkAuth</code> correctly returns <code>Unauthenticated</code> —
+that IS the user's chosen state. The code treated it as a failure
+(<code>error = "Connection failed"</code>) and never advanced to the
+Summary step. The wait-for-"All set!" timeout fired and the user was
+stuck.</p>
+<p>The C03 Challenge Test detected this only as a 60s timeout — no
+indication of WHY. The bug was invisible to the Sixth Law clauses 1-5
+because:</p>
+<ul>
+<li>The test's primary assertion was on "All set!" appearing (✓ correct
+per clause 3).</li>
+<li>The production stack was traversed end-to-end (✓ correct per clauses
+1 + 4).</li>
+<li>But there was no logged stack trace; the catch block called
+<code>analytics.recordNonFatal</code> (Crashlytics-only) and silently
+set the error state. The diagnostic gap was the source of the bluff:
+green test infrastructure + green code review + green Bluff-Audit on
+prior commits all missed it because nobody had run C03 end-to-end on a
+device with logcat tailing to see the error.</li>
+</ul>
+<p><strong>Affected files:</strong></p>
+<ul>
+<li><code>feature/onboarding/src/main/kotlin/lava/onboarding/OnboardingViewModel.kt</code></li>
+</ul>
+<p><strong>Fix:</strong></p>
+<ol type="1">
+<li>Skip <code>sdk.checkAuth(currentId)</code> entirely on the anonymous
+branch. Anonymous = user opted out of auth = no auth state to check =
+not a failure when there's no session.</li>
+<li>Added diagnostic <code>logger.d</code>/<code>logger.e</code>
+breadcrumbs on the entire onTestAndContinue flow (auth path taken,
+result, exception). This closes the §6.T.4-spirit gap that made the C03
+bug invisible — future failures will print stack traces to logcat.</li>
+<li>Added <code>HttpTimeout</code>, <code>UserAgent</code>, and
+<code>Logging</code> plugins to the rutracker Ktor HttpClient + 30s
+timeouts on the main OkHttpClient. The HTTP improvements did NOT close
+the C02 issue (Cloudflare-side stall — see §4.5.3b in CONTINUATION.md),
+but they raise the time-budget for slow networks and move the failure
+mode from <code>SocketTimeoutException</code> to a more diagnosable
+signal.</li>
+<li>Bumped Challenge02 test's wait for "All set!" from 30s to 90s to
+align with realistic real-network round-trip times after the timeout
+fixes.</li>
+</ol>
+<p><strong>Verification test/challenge:</strong></p>
+<ul>
+<li>C03 (<code>Challenge03AnonymousSearchOnRuTorTest</code>) — PASS on
+CZ_API34_Phone API 34 (live emulator at localhost:5555), 2026-05-12
+09:25:14 to 09:25:23, total ~9.7s. Evidence at
+<code>.lava-ci-evidence/Lava-Android-1.2.13-1033/post-mortem/logcat-c03-fix.txt</code>
+shows
+<code>anon path: switchTracker(rutor) → test ok: advance to next/Summary → Perform Finish</code>.</li>
+<li>Falsifiability rehearsal: re-introducing the broken
+<code>if (result != null &amp;&amp; result != AuthState.Authenticated)</code>
+check in the anonymous branch causes C03 to time out at 60s with the
+Configure screen still visible (the pre-fix failure mode). Verified
+through the diagnostic logcat:
+<code>checkAuth(rutor) result=Unauthenticated</code> → error path
+triggered → no advance.</li>
+</ul>
+<p><strong>Fix commit:</strong> <em>(this commit)</em></p>
+<p><strong>Forensic anchor:</strong> Phase 1 systematic-debugging
+session 2026-05-12. Operator picked option C ("investigate C02/C03
+properly") + invoked the anti-bluff mandate. Matrix runs on
+CZ_API34_Phone surfaced the 60s timeout; live-emulator instrumentation
+captured the
+<code>anon path: checkAuth(rutor) result=Unauthenticated</code> line
+that identified the bug.</p>
+<hr />
+<h2
+id="2026-05-12--onboarding-action-logger-leaks-credentials">2026-05-12 —
+onboarding-action-logger-leaks-credentials</h2>
+<p><strong>Root cause:</strong> Discovered during the C03 investigation
+above — <code>OnboardingViewModel.perform()</code> logged the action via
+<code>logger.d { "Perform $action" }</code>. For sealed-class subtypes
+<code>OnboardingAction.UsernameChanged(value: String)</code> and
+<code>OnboardingAction.PasswordChanged(value: String)</code>, Kotlin's
+auto-generated <code>toString</code> includes the value, so logcat (and
+any analytics breadcrumb that picks it up) prints the operator's real
+RuTracker username + password in plain text. Severity: §6.H credential
+inviolability concern — although <code>.env</code> is gitignored and the
+values never reach disk via a log file in the normal user flow, on a
+device with <code>adb logcat</code> running (or with <code>logcat</code>
+being collected by a 3rd party app, or shared in a bug report) this is a
+leak surface.</p>
+<p><strong>Affected files:</strong></p>
+<ul>
+<li><code>feature/onboarding/src/main/kotlin/lava/onboarding/OnboardingViewModel.kt</code></li>
+</ul>
+<p><strong>Fix:</strong> changed the log expression from
+<code>logger.d { "Perform $action" }</code> to
+<code>logger.d { "Perform ${action::class.simpleName}" }</code> — prints
+only the action type name, never any of its values.</p>
+<p><strong>Verification test/challenge:</strong> logcat tail during a
+re-run of C02 shows <code>Perform UsernameChanged</code> (no value) and
+<code>Perform PasswordChanged</code> (no value).</p>
+<p><strong>Fix commit:</strong> <em>(same commit as the
+c03-anonymous-toggle-checkauth-bluff entry above)</em></p>
+<p><strong>Forensic anchor:</strong> logcat captures during the C02/C03
+diag run on 2026-05-12 surfaced the bug. Pre-fix logcats are gitignored
+under <code>.lava-ci-evidence/**/post-mortem/</code> to prevent
+accidental commit of the captured credentials; only matrix attestations
++ gradle.logs + JUnit XML test-reports are committed.</p>
+<hr />
+<h2
+id="2026-05-12--rutracker-cloudflare-mitigation--cookie-selection-bug">2026-05-12
+— rutracker-cloudflare-mitigation + cookie-selection-bug</h2>
+<p><strong>Root cause 1 (Cloudflare anti-bot stall):</strong>
+<code>provideRuTrackerHttpClient</code> in
+<code>:core:tracker:client</code> constructed a
+<code>Ktor + OkHttp</code> HttpClient with no cookies, no
+Accept-Language, no Accept, no Accept-Encoding, and no explicit
+User-Agent — i.e. a client whose HTTP/2 header shape is a flag-raising
+fingerprint to Cloudflare's anti-bot. A bare POST to
+<code>rutracker.org/forum/login.php</code> was accepted by the TCP+TLS
+layer but never received a response body — verified via Ktor
+<code>Logging</code> plugin output. Host-side curl with normal
+browser-like headers returns HTTP/2 200 in &lt;1s for the same URL.</p>
+<p><strong>Root cause 2 (cookie selection picked wrong cookie as session
+token):</strong> <code>RuTrackerInnerApiImpl.login()</code> previously
+extracted
+<code>token = cookies.firstOrNull { !it.contains("bb_ssl") }</code> from
+the final-hop <code>Set-Cookie</code> headers. When Cloudflare in front
+of rutracker started emitting <code>cf_clearance=…</code> on every
+response, this filter started selecting <code>cf_clearance</code> as the
+"rutracker session token". The subsequent <code>mainPage(token)</code>
+GET then sent <code>Cookie: cf_clearance=…</code> without the actual
+<code>bb_data</code> session token, so rutracker returned the guest page
+and <code>parseUserId</code> couldn't find the logged-in element.</p>
+<p><strong>Affected files:</strong></p>
+<ul>
+<li><code>core/tracker/client/src/main/kotlin/lava/tracker/client/di/TrackerClientModule.kt</code></li>
+<li><code>core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker/impl/RuTrackerInnerApiImpl.kt</code></li>
+</ul>
+<p><strong>Fix:</strong></p>
+<ol type="1">
+<li>Installed <code>HttpCookies</code> plugin
+(<code>AcceptAllCookiesStorage</code>) on the rutracker HttpClient.</li>
+<li>Added browser-class <code>defaultRequest</code> headers (Accept,
+Accept-Language, Accept-Encoding) + Chrome 124 / Android 14 / Pixel 8
+User-Agent.</li>
+<li>Added a
+<code>runCatching { httpClient.get(Index).bodyAsText() }</code>
+pre-flight inside <code>RuTrackerInnerApiImpl.login()</code> so the
+<code>cf_clearance</code> cookie lands in the cookie jar before the
+POST.</li>
+<li>Tightened the post-login token extraction to match by name prefix
+(<code>bb_data</code> / <code>bb_session</code> / <code>bb_login</code>)
+instead of the fragile <code>!contains("bb_ssl")</code> negation.</li>
+</ol>
+<p><strong>Verification test/challenge:</strong> Ktor wire-log on C02
+re-run shows</p>
+<ul>
+<li>10:16:58 GET <code>/forum/index.php</code> → 200 (~1s) — pre-flight
+succeeds, cookies stored</li>
+<li>10:16:59 POST <code>/forum/login.php</code> → 302 (was: 60s
+timeout)</li>
+<li>10:16:59 GET <code>/forum/index.php</code> (auto-redirect) → 200
+(~1.3s) — logged-in page returned</li>
+</ul>
+<p>The Cloudflare stall is fully resolved by this commit. <strong>C02
+itself does NOT yet pass end-to-end</strong> because
+<code>GetCurrentProfileUseCase.parseUserId</code> throws on the
+post-login page — <code>#logged-in-username</code> element isn't in the
+served HTML (selector stale or mobile-shaped variant). That's a separate
+domain-archaeology task documented in
+<code>docs/CONTINUATION.md §4.5.3c</code>.</p>
+<p><strong>Fix commit:</strong> <em>(this commit)</em></p>
+<p><strong>Forensic anchor:</strong> continued Phase 1
+systematic-debugging session 2026-05-12 after operator's "continue"
+directive. C03 fix landed in <code>4d27c07</code>; the same session
+investigated whether the residual C02 failure was Lava-fixable. CF
+mitigation succeeded; the remaining parser failure surfaced a separate
+bug that's deferred to a follow-up SP for rutracker HTML parser
+refresh.</p>
+<hr />
+<h2
+id="2026-05-12--c16-stale-assumption-bluff--parser-selector-fallback--firebase-test-improvement">2026-05-12
+— c16-stale-assumption-bluff + parser-selector-fallback +
+firebase-test-improvement</h2>
+<p>These three changes are landed together as the anti-bluff-audit
+response to the operator's SIXTEENTH §6.L invocation on 2026-05-12.</p>
+<p><strong>Root cause 1 (Challenge16 stale-assumption bluff):</strong>
+<code>Challenge16ApiSupportedFilterTest</code> asserted "Internet
+Archive must NOT appear in the onboarding provider list" because at the
+time of writing (Phase 12 α-hotfix)
+<code>ArchiveOrgDescriptor.apiSupported</code> was <code>false</code>.
+Phase 2b (Lava-API per-provider routing) later flipped that to
+<code>true</code> without updating the test. The test continued to pass
+green because its <code>waitUntil</code> clause accepted the Welcome
+screen — where no provider list renders — making "Internet Archive
+absent" trivially true. Textbook §6.L bluff: green-light while the
+actual behavior was the OPPOSITE of the claim.</p>
+<p><strong>Root cause 2
+(<code>GetCurrentProfileUseCase.parseUserId</code> brittle
+selector):</strong> The parser used a single Jsoup selector
+<code>#logged-in-username</code> to extract the rutracker user-id
+post-login. With the Cloudflare anti-bot mitigation landing in commit
+<code>f7d0a62</code>, the login POST now reaches a 302→200 chain
+successfully — but the post-login page rutracker.org serves to the
+mitigated client doesn't contain <code>#logged-in-username</code>
+(selector stale or mobile-shaped variant). Single-selector parsers fail
+catastrophically when the served HTML changes; multi-selector fallback
+gives graceful degradation.</p>
+<p><strong>Root cause 3 (<code>FirebaseAnalyticsTrackerTest</code>
+verify-only assertions):</strong> Two tests in
+<code>FirebaseAnalyticsTrackerTest</code> used
+<code>verify { mock.foo() }</code> as the SOLE assertion — Forbidden
+Test Pattern per §6.L clause 4 ("Verification-only assertions").
+Call-counting is permitted as a secondary signal, never the primary
+one.</p>
+<p><strong>Affected files:</strong></p>
+<ul>
+<li><code>app/src/androidTest/kotlin/lava/app/challenges/Challenge16ApiSupportedFilterTest.kt</code></li>
+<li><code>core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker/domain/GetCurrentProfileUseCase.kt</code></li>
+<li><code>app/src/test/kotlin/digital/vasic/lava/client/firebase/FirebaseAnalyticsTrackerTest.kt</code></li>
+<li><code>CLAUDE.md</code>, <code>AGENTS.md</code>,
+<code>lava-api-go/CLAUDE.md</code> (§6.L count + 16th invocation
+forensic anchor)</li>
+<li><code>docs/CONTINUATION.md</code> (audit findings + verification
+log)</li>
+</ul>
+<p><strong>Fix:</strong></p>
+<ol type="1">
+<li>C16 rewritten to navigate to "Pick your providers" and assert that
+all 4 verified+apiSupported providers (RuTracker.org, RuTor.info,
+Internet Archive, Project Gutenberg) actually render in the list.
+Falsifiability rehearsal documented in the KDoc: setting
+<code>archiveorg apiSupported=false</code> causes the IA assertion to
+fail.</li>
+<li><code>GetCurrentProfileUseCase</code> now tries 4 selectors in order
+before erroring: <code>#logged-in-username</code>,
+<code>a.logged-in-as-uname</code>,
+<code>.menu-userctrl a[href*='profile.php?u=']</code>,
+<code>a[href*='profile.php?u=']</code>. Error message updated to
+"logged-in user-id not found — page may be guest, or selectors stale" so
+future agents have a clearer diagnostic anchor.</li>
+<li><code>FirebaseAnalyticsTrackerTest</code>'s <code>verify</code>-only
+tests refactored to use <code>mockk slot</code> captures with
+<code>assertEquals</code> on the captured String values +
+<code>assertTrue(slot.isCaptured)</code> as a non-zero-count gate. The
+captured-value equality is now the primary assertion, per §6.L clause
+4.</li>
+<li>Constitutional count update in <code>CLAUDE.md</code> §6.L (THIRTEEN
+→ SIXTEEN), <code>AGENTS.md</code> §6.L (THIRTEEN → SIXTEEN),
+<code>lava-api-go/CLAUDE.md</code> §6.L (TEN → SIXTEEN). Forensic anchor
+for the 16th invocation appended to the wall.</li>
+</ol>
+<p><strong>Verification test/challenge:</strong></p>
+<ul>
+<li>C16 rewritten: PASS on CZ_API34_Phone API 34 live emulator
+(2026-05-12 10:50, <code>BUILD SUCCESSFUL</code>).</li>
+<li>14 of 23 Challenge Tests verified PASS on live emulator this
+session: C00, C01, C03, C11, C12, C13, C14, C15, C16(rewritten), C20,
+C21, C22 (in isolation; sweep-mode fails due to C21 back-press state
+leak — not a real-user bug), C23, C24.</li>
+<li>C02 still does not pass end-to-end (parseUserId fails even with
+fallback selectors). The Cloudflare-mitigation portion of C02 is fully
+verified working.</li>
+</ul>
+<p><strong>Fix commit:</strong> <em>(this commit)</em></p>
+<p><strong>Forensic anchor:</strong> operator's SIXTEENTH §6.L
+invocation, 2026-05-12, verbatim: "Do EVERYTHING NOW!!! ... Make sure
+that all existing tests and Challenges do work in anti-bluff manner ...
+they MUST confirm that all tested codebase really works as expected! ...
+execution of tests and Challenges MUST guarantee the quality, the
+completition and full usability by end users of the product!"</p>
+</body>
+</html>

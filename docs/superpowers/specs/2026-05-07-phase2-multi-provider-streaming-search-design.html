@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-05-07-phase2-multi-provider-streaming-search-design</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1 id="phase-2--multi-provider-streaming-search-design">Phase 2 —
+Multi-Provider Streaming Search Design</h1>
+<p><strong>Date:</strong> 2026-05-07 <strong>Status:</strong> Approved
+(post-brainstorm) <strong>Parent decomposition:</strong> Phase 2 of 6
+(see <code>docs/CONTINUATION.md</code> §4.1) <strong>Constitutional
+bindings:</strong> §6.J, §6.L, §6.R, §6.G, §6.E, §6.Q, §6.S, §6.T,
+§7</p>
+<hr />
+<h2 id="1-problem-statement">1. Problem Statement</h2>
+<p>Phase 1 shipped auth + security foundations. Five providers are
+registered in <code>lava-api-go</code> and six on the Android side, but
+only rutracker and rutor have working search end-to-end. The α-hotfix
+(commit <code>384ac02</code>) hid Internet Archive and other unsupported
+providers from the user-facing list via
+<code>apiSupported = false</code>. The operator's "alice-bug" report —
+"Search 'alice' on Internet Archive returns 'Something went wrong'" — is
+a symptom of this gap.</p>
+<p>Phase 2 re-enables hidden providers by implementing their Go API
+scraper backends, wiring multi-provider search into the Android client
+with real-time streaming, and adding provider attribution to search
+results.</p>
+<hr />
+<h2 id="2-design-decisions-from-brainstorm">2. Design Decisions (from
+brainstorm)</h2>
+<table>
+<thead>
+<tr>
+<th>Decision</th>
+<th>Choice</th>
+<th>Rationale</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Streaming transport</td>
+<td><strong>SSE</strong> (Server-Sent Events)</td>
+<td>Standard HTTP, unidirectional, no upgrade handshake, works over
+HTTP/3. Simpler than WebSocket or gRPC for one-way result
+streaming.</td>
+</tr>
+<tr>
+<td>Search endpoint</td>
+<td><strong>Single aggregated</strong> <code>/v1/search</code></td>
+<td>Backend fans out to providers, streams results via single SSE
+connection. Cleaner client code, less connection overhead.</td>
+</tr>
+<tr>
+<td>Provider label on results</td>
+<td><strong>Compact chip/badge</strong> on each card</td>
+<td>Small colored chip in card corner. Subtle, scannable, uses existing
+design system.</td>
+</tr>
+<tr>
+<td>Provider selector</td>
+<td><strong>Expandable chip bar</strong> below search input</td>
+<td>Horizontal scrollable row of toggle chips. "All" chip + one per
+provider. Material 3 filter chip pattern.</td>
+</tr>
+<tr>
+<td>Re-enablement order</td>
+<td><strong>archiveorg + gutenberg first</strong>, then nnmclub +
+kinozal</td>
+<td>Anonymous providers (no auth) are simpler to implement. Fixes
+alice-bug fastest. Auth-requiring providers follow.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="3-end-to-end-data-flow">3. End-to-End Data Flow</h2>
+<pre><code>User types &quot;alice&quot; → picks providers [rutracker, archiveorg] → taps Search
+
+Android Client                           Go API (thinker.local:8443)
+    │                                          │
+    ├─ GET /v1/search?q=alice&amp;providers=... ──►│
+    │   (Accept: text/event-stream)            │
+    │   (Lava-Auth: &lt;encrypted-uuid&gt;)          │
+    │                                          ├─ goroutine → rutracker.Search(&quot;alice&quot;)
+    │                                          ├─ goroutine → archiveorg.Search(&quot;alice&quot;)
+    │                                          │
+    │◄── SSE: event=provider_start             │
+    │         data={&quot;provider_id&quot;:&quot;archiveorg&quot;} │
+    │◄── SSE: event=results                    │
+    │         data={&quot;provider_id&quot;:&quot;archiveorg&quot;,│
+    │               &quot;items&quot;:[...],             │
+    │               &quot;page&quot;:1,&quot;total_pages&quot;:3}  │
+    │◄── SSE: event=provider_done              │
+    │◄── SSE: event=results (rutracker)        │
+    │◄── SSE: event=stream_end                 │
+    │                                          │
+    ▼                                          ▼
+Results render incrementally with provider chip on each card.</code></pre>
+<hr />
+<h2 id="4-go-api-changes">4. Go API Changes</h2>
+<h3 id="41-new-multi-search-endpoint">4.1 New multi-search endpoint</h3>
+<pre><code>GET /v1/search?q=&lt;query&gt;&amp;providers=&lt;id1&gt;,&lt;id2&gt;,...&amp;page=1&amp;sort=date&amp;order=desc</code></pre>
+<p>Parameters:</p>
+<ul>
+<li><code>q</code> (required): search query string</li>
+<li><code>providers</code> (optional): comma-separated provider IDs. If
+empty or absent, defaults to ALL registered providers with SEARCH
+capability</li>
+<li><code>page</code>, <code>sort</code>, <code>order</code>,
+<code>categories</code>, <code>author</code>, <code>period</code>:
+forwarded to each provider's Search method</li>
+</ul>
+<h3 id="42-new-handler">4.2 New handler</h3>
+<p>File: <code>lava-api-go/internal/handlers/v1/search.go</code> — add
+or replace with <code>MultiSearchHandler</code>.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> MultiSearchHandler <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    Registry provider<span class="op">.</span>Registry</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>h <span class="op">*</span>MultiSearchHandler<span class="op">)</span> GetMultiSearch<span class="op">(</span>c <span class="op">*</span>gin<span class="op">.</span>Context<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    query <span class="op">:=</span> c<span class="op">.</span>Query<span class="op">(</span><span class="st">&quot;q&quot;</span><span class="op">)</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    providerIDs <span class="op">:=</span> parseProviderList<span class="op">(</span>c<span class="op">.</span>Query<span class="op">(</span><span class="st">&quot;providers&quot;</span><span class="op">))</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">// defaults to all SEARCH-capable providers if empty</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    c<span class="op">.</span>Header<span class="op">(</span><span class="st">&quot;Content-Type&quot;</span><span class="op">,</span> <span class="st">&quot;text/event-stream&quot;</span><span class="op">)</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    c<span class="op">.</span>Header<span class="op">(</span><span class="st">&quot;Cache-Control&quot;</span><span class="op">,</span> <span class="st">&quot;no-cache&quot;</span><span class="op">)</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    c<span class="op">.</span>Header<span class="op">(</span><span class="st">&quot;Connection&quot;</span><span class="op">,</span> <span class="st">&quot;keep-alive&quot;</span><span class="op">)</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>    c<span class="op">.</span>Stream<span class="op">(</span><span class="kw">func</span><span class="op">(</span>w io<span class="op">.</span>Writer<span class="op">)</span> <span class="dt">bool</span> <span class="op">{</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Fan out to providers in goroutines</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Stream SSE events as each completes</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Return false when all done or client disconnects</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>    <span class="op">})</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="43-sse-event-types">4.3 SSE event types</h3>
+<table>
+<thead>
+<tr>
+<th>Event</th>
+<th>Data shape</th>
+<th>When emitted</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>provider_start</code></td>
+<td><code>{"provider_id":"archiveorg","display_name":"Internet Archive","total_providers":3}</code></td>
+<td>Before searching a provider</td>
+</tr>
+<tr>
+<td><code>results</code></td>
+<td><code>{"provider_id":"archiveorg","items":[...TorrentItemDTO...],"page":1,"total_pages":3}</code></td>
+<td>Provider returns a page of results</td>
+</tr>
+<tr>
+<td><code>provider_error</code></td>
+<td><code>{"provider_id":"kinozal","error":"upstream_timeout","message":"Kinozal did not respond within 30s"}</code></td>
+<td>Provider search fails</td>
+</tr>
+<tr>
+<td><code>provider_done</code></td>
+<td><code>{"provider_id":"archiveorg","total":67,"pages":3}</code></td>
+<td>Provider completes all pages</td>
+</tr>
+<tr>
+<td><code>stream_end</code></td>
+<td><code>{"providers_searched":3,"providers_failed":0,"total_results":301}</code></td>
+<td>All providers complete or error out</td>
+</tr>
+</tbody>
+</table>
+<h3 id="44-provider-scraper-implementations">4.4 Provider scraper
+implementations</h3>
+<p><strong>Phase 2a — anonymous providers:</strong></p>
+<ul>
+<li><p><code>internal/archiveorg/</code> — implement <code>Client</code>
+that:</p>
+<ul>
+<li>Constructs search URL:
+<code>https://archive.org/advancedsearch.php?q=...&amp;output=json</code></li>
+<li>Parses JSON response into <code>provider.SearchResult</code></li>
+<li>Maps archive.org metadata fields to <code>TorrentItemDTO</code>
+(identifier→id, title→title, etc.)</li>
+<li>Handles pagination via archive.org's
+<code>rows</code>/<code>page</code> parameters</li>
+<li>Returns <code>provider.ErrNotFound</code> on empty results</li>
+</ul></li>
+<li><p><code>internal/gutenberg/</code> — implement <code>Client</code>
+that:</p>
+<ul>
+<li>Constructs search URL:
+<code>https://www.gutenberg.org/ebooks/search/?query=...</code></li>
+<li>Scrapes HTML results into <code>provider.SearchResult</code></li>
+<li>Maps Gutenberg fields (title, author, id, formats) to
+<code>TorrentItemDTO</code></li>
+<li>Handles pagination via Gutenberg's <code>start_index</code>
+parameter</li>
+</ul></li>
+</ul>
+<p>Both already have <code>ProviderAdapter</code> stubs that compile
+against <code>provider.Provider</code>. Work is limited to the internal
+<code>Client</code> implementations.</p>
+<p><strong>Phase 2b — auth-requiring providers:</strong></p>
+<ul>
+<li><code>internal/nnmclub/</code> — implement <code>Client</code> with
+FORM_LOGIN auth flow</li>
+<li><code>internal/kinozal/</code> — implement <code>Client</code> with
+FORM_LOGIN auth flow</li>
+</ul>
+<h3 id="45-error-handling">4.5 Error handling</h3>
+<ul>
+<li>Provider timeout (configurable, default 30s) → emit
+<code>provider_error</code>, continue with other providers</li>
+<li>Provider returns empty results → emit <code>provider_done</code>
+with <code>total: 0</code></li>
+<li>All providers fail → emit <code>stream_end</code> with
+<code>total_results: 0</code>, client shows "No results" state</li>
+<li>Client disconnects mid-stream → cancel all in-flight goroutines via
+context</li>
+</ul>
+<hr />
+<h2 id="5-android-client-changes">5. Android Client Changes</h2>
+<h3 id="51-new-models-and-extensions">5.1 New models and extensions</h3>
+<p><code>core/models/src/main/kotlin/lava/models/search/Filter.kt</code>
+— add field:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> <span class="kw">class</span> Filter<span class="op">(</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">// ... existing fields ...</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">val</span> <span class="va">providerIds</span><span class="op">:</span> <span class="dt">List</span>&lt;<span class="va">String</span>&gt;? <span class="op">=</span> null<span class="op">,</span>  <span class="co">// null = all available</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span></code></pre></div>
+<p><code>core/tracker/api/src/main/kotlin/lava/tracker/api/model/TorrentItem.kt</code>
+— ensure <code>trackerId</code> field is present (already exists in SDK
+models).</p>
+<h3 id="52-sse-client">5.2 SSE client</h3>
+<p>New file:
+<code>core/network/impl/src/main/kotlin/lava/network/impl/SseClient.kt</code></p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">interface</span> SseClient <span class="op">{</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">fun</span> <span class="fu">connect</span><span class="op">(</span><span class="va">url</span><span class="op">:</span> <span class="dt">String</span><span class="op">,</span> <span class="va">headers</span><span class="op">:</span> <span class="dt">Map</span>&lt;<span class="va">String</span><span class="op">,</span> <span class="va">String</span>&gt;<span class="op">):</span> <span class="dt">Flow</span><span class="op">&lt;</span><span class="dt">SseEvent</span><span class="op">&gt;</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="kw">sealed</span> <span class="kw">interface</span> <span class="fu">SseEvent</span> <span class="op">{</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">data</span> <span class="kw">class</span> Event<span class="op">(</span><span class="kw">val</span> <span class="va">type</span><span class="op">:</span> <span class="dt">String</span><span class="op">,</span> <span class="kw">val</span> <span class="kw">data</span><span class="op">:</span> <span class="dt">String</span><span class="op">)</span> <span class="op">:</span> <span class="dt">SseEvent</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">data</span> <span class="kw">class</span> Error<span class="op">(</span><span class="kw">val</span> <span class="va">throwable</span><span class="op">:</span> <span class="dt">Throwable</span><span class="op">)</span> <span class="op">:</span> <span class="dt">SseEvent</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    <span class="kw">data</span> <span class="kw">object</span> StreamEnd <span class="op">:</span> <span class="dt">SseEvent</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>Implementation uses OkHttp with a streaming response body reader.
+Parses SSE wire format (event:, data:, empty line delimiters). Emits
+typed events via Kotlin Flow. Handles:</p>
+<ul>
+<li>Connection timeout → <code>SseEvent.Error</code></li>
+<li>Premature stream close → <code>SseEvent.Error</code> + optional
+reconnect</li>
+<li>Cancellation (search re-submit) → closes underlying HTTP
+connection</li>
+</ul>
+<h3 id="53-provider-chip-bar">5.3 Provider chip bar</h3>
+<p>New composable:
+<code>feature/search_input/src/main/kotlin/lava/search/input/components/ProviderChipBar.kt</code></p>
+<pre><code> [All] [RuTracker] [RuTor] [Archive.org] [Gutenberg]  ← horizontally scrollable</code></pre>
+<p>Behavior:</p>
+<ul>
+<li>Reads available providers from
+<code>LavaTrackerSdk.listAvailableTrackers().filter { it.apiSupported }</code></li>
+<li>"All" chip: toggled on by default. Tap selects all providers,
+deselects individual chips.</li>
+<li>Individual chips: tapping any deselects "All". Multiple can be
+selected.</li>
+<li><code>providerIds</code> list passed to
+<code>SearchInputAction.SubmitClick</code> →
+<code>Filter.providerIds</code></li>
+<li>Selection remembered in <code>SearchInputViewModel</code> state for
+the session</li>
+</ul>
+<p>Visual: Material 3 <code>FilterChip</code> with <code>selected</code>
+state. Each chip uses provider's assigned color when selected.</p>
+<h3 id="54-provider-labels-on-result-cards">5.4 Provider labels on
+result cards</h3>
+<p>Modify:
+<code>core/ui/src/main/kotlin/lava/ui/component/TopicListItem.kt</code></p>
+<p>Add optional parameter:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">fun</span> <span class="fu">TopicListItem</span><span class="op">(</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    <span class="va">topicModel</span><span class="op">:</span> <span class="dt">TopicModel</span>&lt;<span class="kw">out</span> <span class="va">Topic</span>&gt;<span class="op">,</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    <span class="va">providerLabel</span><span class="op">:</span> <span class="dt">ProviderLabel</span><span class="op">?</span> <span class="op">=</span> null<span class="op">,</span>  <span class="co">// NEW</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    <span class="co">// ... existing params ...</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span></code></pre></div>
+<p><code>ProviderLabel</code> data class:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> <span class="kw">class</span> ProviderLabel<span class="op">(</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">val</span> <span class="va">providerId</span><span class="op">:</span> <span class="dt">String</span><span class="op">,</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">val</span> <span class="va">displayName</span><span class="op">:</span> <span class="dt">String</span><span class="op">,</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">val</span> <span class="va">color</span><span class="op">:</span> <span class="dt">Color</span><span class="op">,</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span></code></pre></div>
+<p>Rendered as a small <code>SuggestionChip</code> or
+<code>AssistChip</code> in the card's top-right corner, using the
+provider's assigned color (Section 7). When absent (legacy path), no
+chip is rendered — backward compatible.</p>
+<h3 id="55-searchresultviewmodel-streaming-integration">5.5
+SearchResultViewModel streaming integration</h3>
+<p>Extend <code>SearchResultViewModel</code> to support the new SSE
+path:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co">// NEW state variants added to SearchResultContent:</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="kw">sealed</span> <span class="kw">interface</span> SearchResultContent <span class="op">{</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">// ... existing: Initial, Empty, Unauthorized, Content ...</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">data</span> <span class="kw">class</span> Streaming<span class="op">(</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>        <span class="kw">val</span> <span class="va">items</span><span class="op">:</span> <span class="dt">List</span>&lt;<span class="va">TopicModel</span>&lt;<span class="va">Torrent</span>&gt;&gt;<span class="op">,</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>        <span class="kw">val</span> <span class="va">activeProviders</span><span class="op">:</span> <span class="dt">List</span>&lt;<span class="va">ProviderStreamStatus</span>&gt;<span class="op">,</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">)</span> <span class="op">:</span> <span class="dt">SearchResultContent</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> <span class="kw">class</span> ProviderStreamStatus<span class="op">(</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>    <span class="kw">val</span> <span class="va">providerId</span><span class="op">:</span> <span class="dt">String</span><span class="op">,</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>    <span class="kw">val</span> <span class="va">displayName</span><span class="op">:</span> <span class="dt">String</span><span class="op">,</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>    <span class="kw">val</span> <span class="va">status</span><span class="op">:</span> <span class="dt">StreamStatus</span><span class="op">,</span>  <span class="co">// SEARCHING, RECEIVING, DONE, ERROR</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>    <span class="kw">val</span> <span class="va">resultCount</span><span class="op">:</span> <span class="dt">Int</span><span class="op">,</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span></code></pre></div>
+<p>Flow:</p>
+<ol type="1">
+<li><code>onCreate</code> checks if <code>filter.providerIds</code>
+contains any <code>apiSupported</code> providers</li>
+<li>If yes → calls <code>observeSseSearch()</code> instead of
+<code>observePagingData()</code></li>
+<li>If no (legacy, all non-apiSupported) → falls back to existing
+<code>observePagingData()</code></li>
+<li><code>observeSseSearch()</code>:
+<ul>
+<li>Builds SSE URL from <code>Endpoint</code> config</li>
+<li>Connects via <code>SseClient</code></li>
+<li>Maps each SSE event to state updates:
+<ul>
+<li><code>provider_start</code> → adds
+<code>ProviderStreamStatus(SEARCHING)</code> to
+<code>Streaming.activeProviders</code></li>
+<li><code>results</code> → appends items to
+<code>Streaming.items</code>, updates status to
+<code>RECEIVING</code></li>
+<li><code>provider_done</code> → marks status as <code>DONE</code>,
+updates <code>resultCount</code></li>
+<li><code>provider_error</code> → marks status as <code>ERROR</code>,
+shows inline error chip</li>
+<li><code>stream_end</code> → transitions to
+<code>SearchResultContent.Content</code> with final merged list</li>
+</ul></li>
+<li>On connection failure → <code>SearchResultContent.Error</code> with
+retry action</li>
+</ul></li>
+</ol>
+<h3 id="56-lavatrackersdk-extension">5.6 LavaTrackerSdk extension</h3>
+<p>Add method to <code>LavaTrackerSdk</code>:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">fun</span> <span class="fu">streamSearch</span><span class="op">(</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    <span class="va">filter</span><span class="op">:</span> <span class="dt">Filter</span><span class="op">,</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    <span class="va">providerIds</span><span class="op">:</span> <span class="dt">List</span>&lt;<span class="va">String</span>&gt;<span class="op">,</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="op">):</span> <span class="dt">Flow</span><span class="op">&lt;</span><span class="dt">SseEvent</span><span class="op">&gt;</span></span></code></pre></div>
+<p>This is the entry point that:</p>
+<ol type="1">
+<li>Resolves the Go API base URL from config</li>
+<li>Constructs the SSE request URL with query parameters</li>
+<li>Delegates to <code>SseClient.connect()</code></li>
+<li>Returns the event flow for the ViewModel to consume</li>
+</ol>
+<hr />
+<h2 id="6-provider-color-scheme">6. Provider Color Scheme</h2>
+<p>Each provider gets a consistent Material 3 tonal palette color used
+for chips, labels, and status indicators:</p>
+<table>
+<thead>
+<tr>
+<th>Provider</th>
+<th>trackerId</th>
+<th>Color</th>
+<th>Hex</th>
+<th>Rationale</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>RuTracker</td>
+<td><code>rutracker</code></td>
+<td>Blue</td>
+<td><code>#1976D2</code></td>
+<td>Default/primary, existing theme</td>
+</tr>
+<tr>
+<td>RuTor</td>
+<td><code>rutor</code></td>
+<td>Teal</td>
+<td><code>#00897B</code></td>
+<td>Distinct from blue, complementary</td>
+</tr>
+<tr>
+<td>Internet Archive</td>
+<td><code>archiveorg</code></td>
+<td>Amber</td>
+<td><code>#F9A825</code></td>
+<td>"Archive/library" warmth</td>
+</tr>
+<tr>
+<td>Project Gutenberg</td>
+<td><code>gutenberg</code></td>
+<td>Deep Purple</td>
+<td><code>#7B1FA2</code></td>
+<td>Literary, distinct</td>
+</tr>
+<tr>
+<td>NNM-Club</td>
+<td><code>nnmclub</code></td>
+<td>Red</td>
+<td><code>#D32F2F</code></td>
+<td>Russian tracker, bold</td>
+</tr>
+<tr>
+<td>Kinozal</td>
+<td><code>kinozal</code></td>
+<td>Orange</td>
+<td><code>#E64A19</code></td>
+<td>Film-related, warm</td>
+</tr>
+</tbody>
+</table>
+<p>Colors are defined in a centralized <code>ProviderColors</code>
+object in <code>core/designsystem/</code> and consumed by chips and
+labels. Chips use filled tonal variant (background tinted, text
+colored).</p>
+<hr />
+<h2 id="7-provider-re-enablement-plan">7. Provider Re-enablement
+Plan</h2>
+<h3 id="phase-2a--anonymous-providers-this-plan">Phase 2a — Anonymous
+providers (this plan)</h3>
+<table>
+<thead>
+<tr>
+<th>Step</th>
+<th>What</th>
+<th>Deliverable</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Implement <code>archiveorg.Client</code> (scraper)</td>
+<td><code>internal/archiveorg/client.go</code> + tests</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Implement <code>gutenberg.Client</code> (scraper)</td>
+<td><code>internal/gutenberg/client.go</code> + tests</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Implement <code>MultiSearchHandler</code> with SSE</td>
+<td><code>internal/handlers/v1/search.go</code> + tests</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Wire in <code>main.go</code></td>
+<td>Route registration</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Flip <code>apiSupported = true</code> on
+<code>ArchiveOrgDescriptor</code> +
+<code>GutenbergDescriptor</code></td>
+<td>Kotlin descriptor updates</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Implement <code>SseClient</code> on Android</td>
+<td><code>core/network/impl/SseClient.kt</code> + tests</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Implement <code>ProviderChipBar</code> composable</td>
+<td><code>feature/search_input/components/</code></td>
+</tr>
+<tr>
+<td>8</td>
+<td>Implement provider labels on result cards</td>
+<td><code>core/ui/component/TopicListItem.kt</code></td>
+</tr>
+<tr>
+<td>9</td>
+<td>Wire <code>SearchResultViewModel</code> streaming path</td>
+<td><code>feature/search_result/SearchResultViewModel.kt</code></td>
+</tr>
+<tr>
+<td>10</td>
+<td>Challenge Test C17 (archiveorg search)</td>
+<td>Composable test on real emulator</td>
+</tr>
+<tr>
+<td>11</td>
+<td>Challenge Test C18 (gutenberg search)</td>
+<td>Composable test on real emulator</td>
+</tr>
+<tr>
+<td>12</td>
+<td>Challenge Test C19 (multi-provider SSE)</td>
+<td>Composable test: select 2+ providers, verify both label chips
+appear</td>
+</tr>
+</tbody>
+</table>
+<h3 id="phase-2b--auth-requiring-providers-future-plan">Phase 2b —
+Auth-requiring providers (future plan)</h3>
+<table>
+<thead>
+<tr>
+<th>Step</th>
+<th>What</th>
+<th>Deliverable</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Implement <code>nnmclub.Client</code> with FORM_LOGIN</td>
+<td><code>internal/nnmclub/client.go</code> + tests</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Implement <code>kinozal.Client</code> with FORM_LOGIN</td>
+<td><code>internal/kinozal/client.go</code> + tests</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Flip <code>apiSupported = true</code> on their descriptors</td>
+<td>Kotlin descriptor updates</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Challenge Tests C20 (nnmclub) + C21 (kinozal)</td>
+<td>Composable tests with credential pass-through</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="8-what-stays-legacy">8. What Stays Legacy</h2>
+<p>For backward compatibility and gradual migration:</p>
+<ul>
+<li><strong>Legacy <code>/search</code> endpoint</strong>
+(rutracker-only, root-mounted) remains active for existing clients</li>
+<li><strong><code>SearchServiceImpl</code> →
+<code>NetworkApi</code></strong> path stays for providers with
+<code>apiSupported = false</code></li>
+<li><strong><code>ObserveSearchPagingDataUseCase</code></strong> remains
+the code path for single-tracker paginated search</li>
+<li><strong><code>CrossTrackerFallbackModal</code></strong> (Phase 4)
+continues to work independently — it fires on mirror unavailability, not
+on provider routing</li>
+<li><strong><code>LavaTrackerSdk</code></strong> is the routing layer:
+<code>apiSupported</code> providers → SSE path, others → legacy
+path</li>
+</ul>
+<hr />
+<h2 id="9-testing-strategy">9. Testing Strategy</h2>
+<h3 id="go-api">Go API</h3>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>What</th>
+<th>Location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Unit — scraper</td>
+<td>archive.org JSON response → <code>SearchResult</code></td>
+<td><code>internal/archiveorg/client_test.go</code></td>
+</tr>
+<tr>
+<td>Unit — scraper</td>
+<td>Gutenberg HTML fixture → <code>SearchResult</code></td>
+<td><code>internal/gutenberg/client_test.go</code></td>
+</tr>
+<tr>
+<td>Unit — SSE</td>
+<td>Event struct → wire format marshalling</td>
+<td><code>internal/handlers/v1/search_test.go</code></td>
+</tr>
+<tr>
+<td>Integration</td>
+<td><code>GET /v1/search</code> → SSE stream, validate events</td>
+<td><code>tests/e2e/v1_search_test.go</code></td>
+</tr>
+<tr>
+<td>Contract</td>
+<td>Content-Type, event format, error handling</td>
+<td><code>tests/contract/v1_search_contract_test.go</code></td>
+</tr>
+<tr>
+<td>Parity</td>
+<td>Compare archiveorg/gutenberg results against baseline</td>
+<td><code>tests/parity/</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="android">Android</h3>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>What</th>
+<th>Location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Unit — SSE client</td>
+<td>Parse event stream, handle disconnect/reconnect</td>
+<td><code>core/network/impl/src/test/</code></td>
+</tr>
+<tr>
+<td>Unit — ViewModel</td>
+<td>State transitions on each SSE event type</td>
+<td><code>feature/search_result/src/test/</code></td>
+</tr>
+<tr>
+<td>Unit — ProviderChipBar</td>
+<td>Chip selection/deselection logic</td>
+<td><code>feature/search_input/src/test/</code></td>
+</tr>
+<tr>
+<td>Structure</td>
+<td>ProviderChipBar layout regression (no nested scroll violation per
+§6.Q)</td>
+<td><code>feature/search_input/src/test/</code></td>
+</tr>
+<tr>
+<td>Challenge C17</td>
+<td>archiveorg search: enter "alice" → select Archive.org → results
+appear with amber chip</td>
+<td><code>app/src/androidTest/</code></td>
+</tr>
+<tr>
+<td>Challenge C18</td>
+<td>gutenberg search: enter "sherlock" → select Gutenberg → results
+appear with purple chip</td>
+<td><code>app/src/androidTest/</code></td>
+</tr>
+<tr>
+<td>Challenge C19</td>
+<td>multi-provider: select RuTracker + Archive.org → search → both chips
+visible on respective cards</td>
+<td><code>app/src/androidTest/</code></td>
+</tr>
+</tbody>
+</table>
+<p>All tests carry Bluff-Audit stamps per Seventh Law clause 1. All
+Challenge Tests exercise real Compose UI on the §6.I emulator
+matrix.</p>
+<hr />
+<h2 id="10-files-affected-summary">10. Files Affected (summary)</h2>
+<h3 id="go-api-1">Go API</h3>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Change</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>lava-api-go/internal/handlers/v1/search.go</code></td>
+<td>Add <code>MultiSearchHandler</code> with SSE streaming</td>
+</tr>
+<tr>
+<td><code>lava-api-go/internal/archiveorg/client.go</code></td>
+<td>Implement real scraper</td>
+</tr>
+<tr>
+<td><code>lava-api-go/internal/gutenberg/client.go</code></td>
+<td>Implement real scraper</td>
+</tr>
+<tr>
+<td><code>lava-api-go/cmd/lava-api-go/main.go</code></td>
+<td>Wire multi-search route (or extend existing register)</td>
+</tr>
+<tr>
+<td><code>lava-api-go/api/openapi.yaml</code></td>
+<td>Document new <code>/v1/search</code> endpoint + SSE event types</td>
+</tr>
+</tbody>
+</table>
+<h3 id="android-1">Android</h3>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Change</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>core/models/.../search/Filter.kt</code></td>
+<td>Add <code>providerIds</code> field</td>
+</tr>
+<tr>
+<td><code>core/network/impl/.../SseClient.kt</code></td>
+<td>New — SSE client</td>
+</tr>
+<tr>
+<td><code>core/designsystem/.../ProviderColors.kt</code></td>
+<td>New — per-provider color definitions</td>
+</tr>
+<tr>
+<td><code>core/ui/.../TopicListItem.kt</code></td>
+<td>Add <code>providerLabel</code> parameter, render chip</td>
+</tr>
+<tr>
+<td><code>core/tracker/client/.../LavaTrackerSdk.kt</code></td>
+<td>Add <code>streamSearch()</code> method</td>
+</tr>
+<tr>
+<td><code>feature/search_input/.../components/ProviderChipBar.kt</code></td>
+<td>New — multi-select chip bar</td>
+</tr>
+<tr>
+<td><code>feature/search_input/.../SearchInputViewModel.kt</code></td>
+<td>Wire provider selection into Filter</td>
+</tr>
+<tr>
+<td><code>feature/search_result/.../SearchResultScreen.kt</code></td>
+<td>Wire streaming path</td>
+</tr>
+<tr>
+<td><code>feature/search_result/.../SearchResultViewModel.kt</code></td>
+<td>Add SSE observation, new state variants</td>
+</tr>
+<tr>
+<td><code>feature/search_result/.../SearchPageState.kt</code></td>
+<td>Add <code>Streaming</code> and <code>ProviderStreamStatus</code>
+types</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="11-risks-and-mitigations">11. Risks and Mitigations</h2>
+<table>
+<thead>
+<tr>
+<th>Risk</th>
+<th>Mitigation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>archive.org JSON API changes format</td>
+<td>Fixture-based tests catch parse regressions. Contract test against
+live API.</td>
+</tr>
+<tr>
+<td>Gutenberg HTML structure changes</td>
+<td>Fixture freshness check (30d warn, 60d block per scripts).</td>
+</tr>
+<tr>
+<td>SSE connection unreliable on mobile networks</td>
+<td>Reconnect with exponential backoff. Show inline error chip, don't
+fail whole search.</td>
+</tr>
+<tr>
+<td>Streaming state complicates ViewModel</td>
+<td>Separate <code>observeSseSearch()</code> path from
+<code>observePagingData()</code>. Clear branching, not interleaved.</td>
+</tr>
+<tr>
+<td>Provider colors clash with dynamic themes (Phase 5)</td>
+<td>Provider colors are assigned hex values, not theme aliases. Theme
+changes in Phase 5 pick them up via color reference.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="12-constitutional-compliance">12. Constitutional Compliance</h2>
+<ul>
+<li><strong>§6.J / §6.L</strong> (Anti-Bluff): every SSE event → UI
+state transition has a Challenge Test asserting user-visible
+outcome</li>
+<li><strong>§6.E</strong> (Capability Honesty): providers only flip
+<code>apiSupported = true</code> after real scraper implementation
+exists + passes parity test</li>
+<li><strong>§6.G</strong> (Provider Operational Verification):
+descriptor <code>verified</code> remains false until Challenge Test
+passes on emulator matrix</li>
+<li><strong>§6.R</strong> (No-Hardcoding): all provider base URLs,
+timeouts, and colors come from config/generated code, never
+literals</li>
+<li><strong>§6.Q</strong> (Compose Layout Antipattern Guard):
+<code>ProviderChipBar</code> uses <code>LazyRow</code>, never nested in
+verticalScroll parent</li>
+<li><strong>§6.S</strong> (Continuation): this design doc referenced
+from <code>CONTINUATION.md</code>, updated per commit</li>
+<li><strong>§7</strong> (Bluff-Audit): every test commit carries
+<code>Bluff-Audit:</code> stamp demonstrating deliberate break → test
+failure → revert</li>
+</ul>
+</body>
+</html>

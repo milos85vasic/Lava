@@ -1,0 +1,1251 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-05-05-anti-bluff-mandate-reinforcement-group-a-prime-design</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1
+id="anti-bluff-mandate-reinforcement--group-a-prime-closes-6n-debt-design">Anti-Bluff
+Mandate Reinforcement — Group A-prime (closes §6.N-debt) Design</h1>
+<p><strong>Date:</strong> 2026-05-05 (evening brainstorm; execution
+likely lands 2026-05-05 evening or 2026-05-06) <strong>Spec ID:</strong>
+Group A-prime — successor to Group A
+(<code>docs/superpowers/specs/2026-05-05-anti-bluff-mandate-reinforcement-design.md</code>)
+<strong>Status:</strong> Approved (user said "all ok" to architecture,
+components, data flow, error handling, testing, order-of-ops; "all ok"
+again on Q8) <strong>Implementation skill:</strong>
+<code>writing-plans</code> (next)</p>
+<h2 id="forensic-anchor">Forensic anchor</h2>
+<p>Group A landed §6.N (Bluff-Hunt Cadence Tightening + Production Code
+Coverage) as constitutional doc-only updates and explicitly deferred
+mechanical enforcement via a §6.N-debt placeholder. The placeholder text
+(in root <code>CLAUDE.md</code>) reads:</p>
+<blockquote>
+<p>"The pre-push hook enforcement clauses (6.N.1.2 + 6.N.1.3 above) are
+documented but NOT yet implemented. Implementation is deferred to the
+Group A-prime spec, which the parent Group A spec spawns as the next
+brainstorming + writing-plans cycle."</p>
+</blockquote>
+<p>Group A-prime is that spec. It closes §6.N-debt by implementing
+pre-push hook enforcement of §6.N.1.2 (per matrix-runner/gate change →
+Bluff-Audit stamp targeting a file in diff) and §6.N.1.3 (per
+phase-gating attestation file → falsifiability rehearsal evidence).</p>
+<p>Group A-prime ALSO bundles three parallel debt items the
+operator-mandate cycle has accumulated:</p>
+<ol type="1">
+<li><code>submodules/containers/pkg/emulator/Cleanup()</code> API — the
+typed in-package qemu-zombie killer per §6.M Containers stronger variant
+action item</li>
+<li>Matrix-runner gradle-stdout persistence — recorded in the "remaining
+open gaps" inventory (failure diagnosis currently requires re-running
+gradle directly)</li>
+<li><code>scripts/check-constitution.sh</code> §6.N awareness — flips
+the §6.N-debt warn-only transitional flag to hard-fail</li>
+</ol>
+<p>These parallel items share the theme of "close the debt the
+operator-mandate cycle keeps reopening" and form a coherent Group
+A-prime envelope per the user's choice (Q1=D in the brainstorm).</p>
+<h2 id="goals">Goals</h2>
+<ul>
+<li>Close §6.N-debt mechanically: pre-push hook rejects commits
+violating §6.N.1.2 + §6.N.1.3</li>
+<li><code>scripts/check-constitution.sh</code> hard-fails on §6.N
+propagation regressions</li>
+<li>Replace inline <code>cleanup_qemu_zombies</code> bash in
+<code>scripts/run-emulator-tests.sh</code> with a typed Go API in
+<code>submodules/containers/pkg/emulator/Cleanup()</code> invoked via a
+thin <code>cmd/emulator-cleanup</code> binary</li>
+<li>Matrix-runner persists gradle stdout per AVD so failure diagnosis
+stops requiring direct gradle re-runs</li>
+<li>Update root CLAUDE.md §6.N-debt block to RESOLVED status</li>
+</ul>
+<h2 id="non-goals">Non-goals</h2>
+<ul>
+<li><strong><code>§6.L count bump</code></strong> — "Brainstorm Group
+A-prime now" is a request, not a verbal restatement of the anti-bluff
+mandate. Count stays at EIGHT.</li>
+<li><strong>Other Forbidden Test Patterns expansion</strong> — already
+shipped in Group A</li>
+<li><strong>Submodule re-propagation</strong> — Group A's §6.N
+propagation across 16 submodules + lava-api-go × 3 stands; this spec
+does NOT touch those propagated blocks</li>
+<li><strong>Multi-mirror rollout for single-remote submodules</strong> —
+Phase 5 mirror symmetry, separate operator-action gated work</li>
+<li><strong>JUnit XML extraction beyond simple cp</strong> — fancy
+reporting is future work; this spec just preserves the raw XMLs
+alongside gradle.log</li>
+</ul>
+<h2 id="architecture">Architecture</h2>
+<pre><code>Lava parent repo                           submodules/containers (own repo)
+─────────────────────────                  ──────────────────────────────────
+
+.githooks/pre-push                         pkg/emulator/cleanup.go            (NEW)
+  + Check 4 (§6.N.1.2)                       + Cleanup(ctx) → CleanupReport
+  + Check 5 (§6.N.1.3)                       + walks /proc/[0-9]*/comm == qemu-system-*
+
+scripts/check-constitution.sh              pkg/emulator/cleanup_test.go       (NEW)
+  + §6.N + §6.N-debt presence                + procWalker injection seam
+  + propagation count = 21                   + 3 tests incl. prefix-strictness rehearsal
+  + Check 4 + Check 5 markers wired
+  + warn → hard-fail flip                  cmd/emulator-cleanup/main.go       (NEW)
+                                             + thin CLI: parse --verbose, call Cleanup
+scripts/run-emulator-tests.sh
+  + replace inline cleanup_qemu_zombies     pkg/emulator/matrix.go             (MODIFY)
+    with cmd/emulator-cleanup invocation     + per-AVD EvidenceDir/&lt;avd&gt;/gradle.log
+                                             + per-AVD EvidenceDir/&lt;avd&gt;/test-report/
+tests/pre-push/check4_test.sh                + writeAttestation: gradle_log_path field
+tests/pre-push/check5_test.sh
+tests/check-constitution_test.sh           pkg/emulator/matrix_test.go        (MODIFY)
+                                             + assert gradle.log written w/ correct content
+submodules/containers (gitlink bumped)       + assert test-report dir created
+
+CLAUDE.md (root)
+  + §6.N-debt block updated to &quot;RESOLVED 2026-05-05&quot;
+
+.lava-ci-evidence/bluff-hunt/2026-05-05-evening-group-a-prime.json
+.lava-ci-evidence/Phase-Group-A-prime-closure-2026-05-05-evening.json</code></pre>
+<p>Total file scope: 3 modified + 3 new in Lava; 3 new + 2 modified in
+Containers; 3 test scripts in tests/pre-push/ + tests/; 2 evidence JSON;
+1 doc edit.</p>
+<h2 id="constitutional-content">Constitutional content</h2>
+<h3 id="root-claudemd-6n-debt-block-update">Root <code>CLAUDE.md</code>
+§6.N-debt block update</h3>
+<p>The existing §6.N-debt section (added by Group A in commit
+<code>52db359</code>) currently reads (excerpt):</p>
+<blockquote>
+<p>"The clauses above are the contract. Mechanical enforcement (pre-push
+hook code that rejects non-compliant commits) is owed via the Group
+A-prime spec, which is the next brainstorming target after Group A
+lands."</p>
+</blockquote>
+<p>Group A-prime adds a final paragraph to the §6.N-debt block:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>**RESOLVED 2026-05-05 evening** via Group A-prime spec at <span class="in">`docs/superpowers/specs/2026-05-05-anti-bluff-mandate-reinforcement-group-a-prime-design.md`</span> (commit <span class="in">`&lt;spec-SHA&gt;`</span>). Implementation chain: <span class="in">`submodules/containers`</span> commit <span class="in">`&lt;containers-SHA&gt;`</span> (Cleanup API + matrix.go gradle-log persistence) + Lava parent commit <span class="in">`&lt;lava-SHA&gt;`</span> (pre-push Check 4 + Check 5 + check-constitution.sh §6.N awareness + scripts/run-emulator-tests.sh refactor). Pre-push hook Checks 4 + 5 active; constitution checker hard-fails on missing §6.N propagation OR missing rehearsal stamps. The §6.N-debt entry stays in CLAUDE.md as a forensic record but is no longer load-bearing.</span></code></pre></div>
+<p>The <code>&lt;spec-SHA&gt;</code>,
+<code>&lt;containers-SHA&gt;</code>, <code>&lt;lava-SHA&gt;</code>
+placeholders are filled at commit time during implementation.</p>
+<p>No other constitutional clauses change. No <code>§6.L</code> count
+bump (no anti-bluff mandate restatement this round).</p>
+<h2 id="component-design">Component design</h2>
+<h3 id="a-githookspre-push-check-4--6n12-enforcement">A.
+<code>.githooks/pre-push</code> Check 4 — §6.N.1.2 enforcement</h3>
+<p>Add to the existing per-SHA loop after Check 3.</p>
+<p><strong>Trigger:</strong> commit's
+<code>git diff-tree --no-commit-id --name-only -r "$sha"</code> returns
+at least one path matching:</p>
+<ul>
+<li><code>^submodules/containers/pkg/emulator/.*\.go$</code></li>
+<li><code>^scripts/run-emulator-tests\.sh$</code></li>
+<li><code>^scripts/tag\.sh$</code></li>
+<li><code>^scripts/check-constitution\.sh$</code></li>
+</ul>
+<p><strong>Validation:</strong></p>
+<ol type="1">
+<li>Read commit body:
+<code>msg=$(git log -1 --pretty=%B "$sha")</code></li>
+<li>Assert <code>^Bluff-Audit:</code> appears in msg (matches existing
+Check 2 pattern)</li>
+<li>Extract path tokens from msg using regex:
+<code>[a-zA-Z0-9_/.-]+\.(go|kt|sh|json|md)</code></li>
+<li>Compute set intersection with
+<code>git diff-tree --no-commit-id --name-only -r "$sha"</code></li>
+<li>Assert intersection ≥ 1</li>
+</ol>
+<p><strong>Failure message format:</strong></p>
+<pre><code>$sha: §6.N.1.2 violation — touches gate-shaping file(s) without Bluff-Audit stamp targeting a file in the diff.
+  Files in diff: &lt;files&gt;
+  Files named in stamp: &lt;files-or-&quot;none&quot;&gt;
+  Required: at least one path token in the Bluff-Audit body must match a file in the diff.</code></pre>
+<h3 id="b-githookspre-push-check-5--6n13-enforcement">B.
+<code>.githooks/pre-push</code> Check 5 — §6.N.1.3 enforcement</h3>
+<p><strong>Trigger:</strong> commit ADDS files
+(<code>git diff-tree --no-commit-id --name-only --diff-filter=A -r "$sha"</code>)
+under any of:</p>
+<ul>
+<li><code>^\.lava-ci-evidence/sp3a-challenges/.*\.(json|md)$</code></li>
+<li><code>^\.lava-ci-evidence/[^/]+/real-device-verification\.(json|md)$</code></li>
+<li><code>^\.lava-ci-evidence/sixth-law-incidents/.*\.json$</code></li>
+</ul>
+<p><strong>Validation per added attestation file
+<code>$f</code>:</strong></p>
+<p>Accept if ANY of:</p>
+<ol type="1">
+<li><strong>Embedded in JSON:</strong>
+<code>jq -e '.falsifiability_rehearsal // .Bluff_Audit // .bluff_classification // .primary_finding.bluff_classification' "$f"</code>
+returns truthy</li>
+<li><strong>Companion file:</strong>
+<code>$(dirname "$f")/$(basename "$f" .json).rehearsal.json</code> OR
+<code>$(basename "$f" .md).rehearsal.md</code> exists in the same
+commit</li>
+<li><strong>Commit-body Bluff-Audit:</strong> msg contains
+<code>^Bluff-Audit:</code> AND msg contains the literal <code>$f</code>
+path token</li>
+</ol>
+<p><strong>Failure message format:</strong></p>
+<pre><code>$sha: §6.N.1.3 violation — added attestation file &lt;f&gt; without falsifiability rehearsal evidence.
+  Accept ANY of:
+    (1) embed `falsifiability_rehearsal` / `Bluff_Audit` / `bluff_classification` block in &lt;f&gt;
+    (2) ship companion file &lt;basename&gt;.rehearsal.{json,md} alongside
+    (3) include Bluff-Audit stamp in commit body referencing the path &quot;&lt;f&gt;&quot;</code></pre>
+<h3 id="c-scriptscheck-constitutionsh-additions">C.
+<code>scripts/check-constitution.sh</code> additions</h3>
+<p>After the existing 6.K Containers presence check, append:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 6. §6.N + §6.N-debt presence in root CLAUDE.md (added 2026-05-05, Group A-prime)</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="va">required_6n</span><span class="op">=</span><span class="va">(</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;##### 6.N — Bluff-Hunt Cadence&quot;</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;##### 6.N-debt&quot;</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="va">)</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> clause <span class="kw">in</span> <span class="st">&quot;</span><span class="va">${required_6n</span><span class="op">[@]</span><span class="va">}</span><span class="st">&quot;</span><span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="ot">! </span><span class="fu">grep</span> <span class="at">-qF</span> <span class="st">&quot;</span><span class="va">$clause</span><span class="st">&quot;</span> CLAUDE.md<span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    <span class="bu">echo</span> <span class="st">&quot;MISSING constitutional clause: </span><span class="va">$clause</span><span class="st">&quot;</span> <span class="op">&gt;&amp;</span><span class="dv">2</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    <span class="bu">exit</span> 1</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>  <span class="cf">fi</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="co"># 7. §6.N propagation count across 21 target files (Group A propagation)</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="bu">declare</span> <span class="at">-a</span> <span class="va">propagation_targets</span><span class="op">=</span><span class="va">(</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;CLAUDE.md&quot;</span> <span class="st">&quot;AGENTS.md&quot;</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;lava-api-go/CLAUDE.md&quot;</span> <span class="st">&quot;lava-api-go/AGENTS.md&quot;</span> <span class="st">&quot;lava-api-go/CONSTITUTION.md&quot;</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a><span class="va">)</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> sm <span class="kw">in</span> Auth Cache Challenges Concurrency Config Containers Database <span class="dt">\</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>          Discovery HTTP3 Mdns Middleware Observability RateLimiter <span class="dt">\</span></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>          Recovery Security Tracker-SDK<span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>  <span class="va">propagation_targets</span><span class="op">+=</span><span class="va">(</span><span class="st">&quot;submodules/</span><span class="va">$sm</span><span class="st">/CLAUDE.md&quot;</span><span class="va">)</span></span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> f <span class="kw">in</span> <span class="st">&quot;</span><span class="va">${propagation_targets</span><span class="op">[@]</span><span class="va">}</span><span class="st">&quot;</span><span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="kw">[[</span> <span class="ot">!</span> <span class="ot">-f</span> <span class="st">&quot;</span><span class="va">$f</span><span class="st">&quot;</span> <span class="kw">]];</span> <span class="cf">then</span> <span class="cf">continue</span><span class="kw">;</span> <span class="cf">fi</span>  <span class="co"># skip absent (e.g. submodule not initialized)</span></span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>  <span class="va">count</span><span class="op">=</span><span class="va">$(</span><span class="fu">grep</span> <span class="at">-c</span> <span class="st">&quot;6\.N&quot;</span> <span class="st">&quot;</span><span class="va">$f</span><span class="st">&quot;</span><span class="va">)</span></span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="kw">[[</span> <span class="st">&quot;</span><span class="va">$count</span><span class="st">&quot;</span> <span class="ot">-lt</span> 1 <span class="kw">]];</span> <span class="cf">then</span></span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>    <span class="bu">echo</span> <span class="st">&quot;§6.N propagation REGRESSED: </span><span class="va">$f</span><span class="st"> has 0 references (expected ≥ 1)&quot;</span> <span class="op">&gt;&amp;</span><span class="dv">2</span></span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>    <span class="bu">exit</span> 1</span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>  <span class="cf">fi</span></span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span></span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a><span class="co"># 8. .githooks/pre-push has Check 4 + Check 5 markers</span></span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="ot">! </span><span class="fu">grep</span> <span class="at">-qE</span> <span class="st">&quot;# ===== Check 4: §6.N.1.2&quot;</span> .githooks/pre-push<span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a>  <span class="bu">echo</span> <span class="st">&quot;MISSING pre-push Check 4 (§6.N.1.2 enforcement marker)&quot;</span> <span class="op">&gt;&amp;</span><span class="dv">2</span></span>
+<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a>  <span class="bu">exit</span> 1</span>
+<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a><span class="cf">fi</span></span>
+<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="ot">! </span><span class="fu">grep</span> <span class="at">-qE</span> <span class="st">&quot;# ===== Check 5: §6.N.1.3&quot;</span> .githooks/pre-push<span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb5-38"><a href="#cb5-38" aria-hidden="true" tabindex="-1"></a>  <span class="bu">echo</span> <span class="st">&quot;MISSING pre-push Check 5 (§6.N.1.3 enforcement marker)&quot;</span> <span class="op">&gt;&amp;</span><span class="dv">2</span></span>
+<span id="cb5-39"><a href="#cb5-39" aria-hidden="true" tabindex="-1"></a>  <span class="bu">exit</span> 1</span>
+<span id="cb5-40"><a href="#cb5-40" aria-hidden="true" tabindex="-1"></a><span class="cf">fi</span></span></code></pre></div>
+<p>All four new asserts hard-fail (<code>exit 1</code>). The §6.N-debt's
+transitional "MAY warn but MUST NOT yet hard-fail" clause is now
+retired.</p>
+<h3 id="d-scriptsrun-emulator-testssh-refactor">D.
+<code>scripts/run-emulator-tests.sh</code> refactor</h3>
+<p>Locate the existing <code>cleanup_qemu_zombies()</code> function and
+its invocation
+<code>[0/3] Pre-boot zombie cleanup (clause 6.M action item)</code>.
+Replace with:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Build the cleanup binary alongside emulator-matrix</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="kw">(</span> <span class="bu">cd</span> <span class="st">&quot;</span><span class="va">$CONTAINERS_DIR</span><span class="st">&quot;</span> <span class="kw">&amp;&amp;</span> <span class="ex">go</span> build <span class="at">-o</span> <span class="st">&quot;</span><span class="va">$BIN_DIR</span><span class="st">/emulator-cleanup&quot;</span> ./cmd/emulator-cleanup/ <span class="kw">)</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;[0/3] Pre-boot qemu-zombie cleanup (clause 6.M action item, via Containers cmd/emulator-cleanup) ...&quot;</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;</span><span class="va">$BIN_DIR</span><span class="st">/emulator-cleanup&quot;</span> <span class="at">--verbose</span> <span class="kw">||</span> <span class="fu">true</span>   <span class="co"># best-effort; never fails the matrix run</span></span></code></pre></div>
+<p>Remove the <code>cleanup_qemu_zombies()</code> function definition
+entirely (~40 lines). The existing pre-flight checks
+(<code>/dev/kvm</code>, <code>ANDROID_SDK_ROOT</code>) stay.</p>
+<h3 id="e-submodulescontainerspkgemulatorcleanupgo-new">E.
+<code>submodules/containers/pkg/emulator/cleanup.go</code> (NEW)</h3>
+<div class="sourceCode" id="cb7"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span> emulator</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="op">(</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;context&quot;</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;fmt&quot;</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;os&quot;</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;path/filepath&quot;</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;strconv&quot;</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;strings&quot;</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;syscall&quot;</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;time&quot;</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a><span class="co">// CleanupReport summarises the outcome of a Cleanup invocation.</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> CleanupReport <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>    Found          <span class="op">[]</span><span class="dt">int</span>  <span class="co">// PIDs whose /proc/&lt;pid&gt;/comm matched &quot;qemu-system-*&quot;</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>    TerminatedTERM <span class="op">[]</span><span class="dt">int</span>  <span class="co">// PIDs that exited within the SIGTERM grace window</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>    KilledKILL     <span class="op">[]</span><span class="dt">int</span>  <span class="co">// PIDs that required SIGKILL</span></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>    Surviving      <span class="op">[]</span><span class="dt">int</span>  <span class="co">// PIDs still alive after SIGKILL (rare; permission errors)</span></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>    SkippedReadErr <span class="op">[]</span><span class="dt">int</span>  <span class="co">// PIDs whose /proc/&lt;pid&gt;/comm couldn&#39;t be read (permission/race)</span></span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a><span class="co">// procWalker abstracts /proc enumeration so cleanup_test.go can inject</span></span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a><span class="co">// synthetic /proc data. Production walks the real /proc.</span></span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> procWalker <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>    PidComms<span class="op">()</span> <span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">int</span><span class="op">]</span><span class="dt">string</span><span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> osProcWalker <span class="kw">struct</span><span class="op">{}</span></span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>osProcWalker<span class="op">)</span> PidComms<span class="op">()</span> <span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">int</span><span class="op">]</span><span class="dt">string</span><span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a>    entries<span class="op">,</span> err <span class="op">:=</span> os<span class="op">.</span>ReadDir<span class="op">(</span><span class="st">&quot;/proc&quot;</span><span class="op">)</span></span>
+<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;read /proc: %w&quot;</span><span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb7-36"><a href="#cb7-36" aria-hidden="true" tabindex="-1"></a>    out <span class="op">:=</span> <span class="bu">make</span><span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">int</span><span class="op">]</span><span class="dt">string</span><span class="op">)</span></span>
+<span id="cb7-37"><a href="#cb7-37" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> e <span class="op">:=</span> <span class="kw">range</span> entries <span class="op">{</span></span>
+<span id="cb7-38"><a href="#cb7-38" aria-hidden="true" tabindex="-1"></a>        pid<span class="op">,</span> err <span class="op">:=</span> strconv<span class="op">.</span>Atoi<span class="op">(</span>e<span class="op">.</span>Name<span class="op">())</span></span>
+<span id="cb7-39"><a href="#cb7-39" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">||</span> pid <span class="op">&lt;=</span> <span class="dv">0</span> <span class="op">{</span></span>
+<span id="cb7-40"><a href="#cb7-40" aria-hidden="true" tabindex="-1"></a>            <span class="cf">continue</span></span>
+<span id="cb7-41"><a href="#cb7-41" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb7-42"><a href="#cb7-42" aria-hidden="true" tabindex="-1"></a>        commPath <span class="op">:=</span> filepath<span class="op">.</span>Join<span class="op">(</span><span class="st">&quot;/proc&quot;</span><span class="op">,</span> e<span class="op">.</span>Name<span class="op">(),</span> <span class="st">&quot;comm&quot;</span><span class="op">)</span></span>
+<span id="cb7-43"><a href="#cb7-43" aria-hidden="true" tabindex="-1"></a>        b<span class="op">,</span> err <span class="op">:=</span> os<span class="op">.</span>ReadFile<span class="op">(</span>commPath<span class="op">)</span></span>
+<span id="cb7-44"><a href="#cb7-44" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb7-45"><a href="#cb7-45" aria-hidden="true" tabindex="-1"></a>            <span class="co">// Best-effort: process may have exited mid-walk</span></span>
+<span id="cb7-46"><a href="#cb7-46" aria-hidden="true" tabindex="-1"></a>            out<span class="op">[</span>pid<span class="op">]</span> <span class="op">=</span> <span class="st">&quot;&quot;</span></span>
+<span id="cb7-47"><a href="#cb7-47" aria-hidden="true" tabindex="-1"></a>            <span class="cf">continue</span></span>
+<span id="cb7-48"><a href="#cb7-48" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb7-49"><a href="#cb7-49" aria-hidden="true" tabindex="-1"></a>        out<span class="op">[</span>pid<span class="op">]</span> <span class="op">=</span> strings<span class="op">.</span>TrimSpace<span class="op">(</span><span class="dt">string</span><span class="op">(</span>b<span class="op">))</span></span>
+<span id="cb7-50"><a href="#cb7-50" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb7-51"><a href="#cb7-51" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> out<span class="op">,</span> <span class="ot">nil</span></span>
+<span id="cb7-52"><a href="#cb7-52" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-53"><a href="#cb7-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-54"><a href="#cb7-54" aria-hidden="true" tabindex="-1"></a><span class="co">// killer abstracts signalling for testability.</span></span>
+<span id="cb7-55"><a href="#cb7-55" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> killer <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb7-56"><a href="#cb7-56" aria-hidden="true" tabindex="-1"></a>    Signal<span class="op">(</span>pid <span class="dt">int</span><span class="op">,</span> sig syscall<span class="op">.</span>Signal<span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb7-57"><a href="#cb7-57" aria-hidden="true" tabindex="-1"></a>    Exists<span class="op">(</span>pid <span class="dt">int</span><span class="op">)</span> <span class="dt">bool</span></span>
+<span id="cb7-58"><a href="#cb7-58" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-59"><a href="#cb7-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-60"><a href="#cb7-60" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> osKiller <span class="kw">struct</span><span class="op">{}</span></span>
+<span id="cb7-61"><a href="#cb7-61" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-62"><a href="#cb7-62" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>osKiller<span class="op">)</span> Signal<span class="op">(</span>pid <span class="dt">int</span><span class="op">,</span> sig syscall<span class="op">.</span>Signal<span class="op">)</span> <span class="dt">error</span> <span class="op">{</span></span>
+<span id="cb7-63"><a href="#cb7-63" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> syscall<span class="op">.</span>Kill<span class="op">(</span>pid<span class="op">,</span> sig<span class="op">)</span></span>
+<span id="cb7-64"><a href="#cb7-64" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-65"><a href="#cb7-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-66"><a href="#cb7-66" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>osKiller<span class="op">)</span> Exists<span class="op">(</span>pid <span class="dt">int</span><span class="op">)</span> <span class="dt">bool</span> <span class="op">{</span></span>
+<span id="cb7-67"><a href="#cb7-67" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> syscall<span class="op">.</span>Kill<span class="op">(</span>pid<span class="op">,</span> <span class="dv">0</span><span class="op">)</span> <span class="op">==</span> <span class="ot">nil</span></span>
+<span id="cb7-68"><a href="#cb7-68" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-69"><a href="#cb7-69" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-70"><a href="#cb7-70" aria-hidden="true" tabindex="-1"></a><span class="co">// Cleanup walks /proc, finds processes whose comm has the prefix</span></span>
+<span id="cb7-71"><a href="#cb7-71" aria-hidden="true" tabindex="-1"></a><span class="co">// &quot;qemu-system-&quot;, sends SIGTERM, waits up to 5 seconds for graceful</span></span>
+<span id="cb7-72"><a href="#cb7-72" aria-hidden="true" tabindex="-1"></a><span class="co">// exit, then SIGKILLs stragglers. Returns a CleanupReport.</span></span>
+<span id="cb7-73"><a href="#cb7-73" aria-hidden="true" tabindex="-1"></a><span class="co">//</span></span>
+<span id="cb7-74"><a href="#cb7-74" aria-hidden="true" tabindex="-1"></a><span class="co">// This API replaces the per-script ad-hoc `pkill qemu-system`</span></span>
+<span id="cb7-75"><a href="#cb7-75" aria-hidden="true" tabindex="-1"></a><span class="co">// invocations that the Forbidden Command List would otherwise reject —</span></span>
+<span id="cb7-76"><a href="#cb7-76" aria-hidden="true" tabindex="-1"></a><span class="co">// `pkill` against session processes is forbidden, but a typed</span></span>
+<span id="cb7-77"><a href="#cb7-77" aria-hidden="true" tabindex="-1"></a><span class="co">// in-package cleanup that targets a strict process-name allowlist</span></span>
+<span id="cb7-78"><a href="#cb7-78" aria-hidden="true" tabindex="-1"></a><span class="co">// (exact prefix &quot;qemu-system-&quot; with trailing dash) is permitted per</span></span>
+<span id="cb7-79"><a href="#cb7-79" aria-hidden="true" tabindex="-1"></a><span class="co">// Containers&#39; STRONGER §6.M variant.</span></span>
+<span id="cb7-80"><a href="#cb7-80" aria-hidden="true" tabindex="-1"></a><span class="co">//</span></span>
+<span id="cb7-81"><a href="#cb7-81" aria-hidden="true" tabindex="-1"></a><span class="co">// Bluff-Audit (recorded in the implementing commit body):</span></span>
+<span id="cb7-82"><a href="#cb7-82" aria-hidden="true" tabindex="-1"></a><span class="co">//   Mutation: loosen the prefix matcher from &quot;qemu-system-&quot; to &quot;qemu-&quot;</span></span>
+<span id="cb7-83"><a href="#cb7-83" aria-hidden="true" tabindex="-1"></a><span class="co">//   Observed: TestCleanup_StrictPrefix asserts that a synthetic</span></span>
+<span id="cb7-84"><a href="#cb7-84" aria-hidden="true" tabindex="-1"></a><span class="co">//             /proc fixture containing &quot;qemu-foo&quot; is NOT collected;</span></span>
+<span id="cb7-85"><a href="#cb7-85" aria-hidden="true" tabindex="-1"></a><span class="co">//             the loosened matcher would include it, failing the test.</span></span>
+<span id="cb7-86"><a href="#cb7-86" aria-hidden="true" tabindex="-1"></a><span class="co">//   Reverted: yes</span></span>
+<span id="cb7-87"><a href="#cb7-87" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> Cleanup<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="op">(</span>CleanupReport<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-88"><a href="#cb7-88" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> cleanupWithDeps<span class="op">(</span>ctx<span class="op">,</span> osProcWalker<span class="op">{},</span> osKiller<span class="op">{})</span></span>
+<span id="cb7-89"><a href="#cb7-89" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-90"><a href="#cb7-90" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-91"><a href="#cb7-91" aria-hidden="true" tabindex="-1"></a><span class="co">// cleanupWithDeps is the testable core. Production uses Cleanup; tests</span></span>
+<span id="cb7-92"><a href="#cb7-92" aria-hidden="true" tabindex="-1"></a><span class="co">// inject synthetic procWalker + killer.</span></span>
+<span id="cb7-93"><a href="#cb7-93" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> cleanupWithDeps<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> w procWalker<span class="op">,</span> k killer<span class="op">)</span> <span class="op">(</span>CleanupReport<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-94"><a href="#cb7-94" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> report CleanupReport</span>
+<span id="cb7-95"><a href="#cb7-95" aria-hidden="true" tabindex="-1"></a>    pidComms<span class="op">,</span> err <span class="op">:=</span> w<span class="op">.</span>PidComms<span class="op">()</span></span>
+<span id="cb7-96"><a href="#cb7-96" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb7-97"><a href="#cb7-97" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> report<span class="op">,</span> err</span>
+<span id="cb7-98"><a href="#cb7-98" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb7-99"><a href="#cb7-99" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> pid<span class="op">,</span> comm <span class="op">:=</span> <span class="kw">range</span> pidComms <span class="op">{</span></span>
+<span id="cb7-100"><a href="#cb7-100" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> comm <span class="op">==</span> <span class="st">&quot;&quot;</span> <span class="op">{</span></span>
+<span id="cb7-101"><a href="#cb7-101" aria-hidden="true" tabindex="-1"></a>            report<span class="op">.</span>SkippedReadErr <span class="op">=</span> <span class="bu">append</span><span class="op">(</span>report<span class="op">.</span>SkippedReadErr<span class="op">,</span> pid<span class="op">)</span></span>
+<span id="cb7-102"><a href="#cb7-102" aria-hidden="true" tabindex="-1"></a>            <span class="cf">continue</span></span>
+<span id="cb7-103"><a href="#cb7-103" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb7-104"><a href="#cb7-104" aria-hidden="true" tabindex="-1"></a>        <span class="co">// STRICT prefix: &quot;qemu-system-&quot; with trailing dash. NOT &quot;qemu-&quot;.</span></span>
+<span id="cb7-105"><a href="#cb7-105" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Falsifiability mutation target — see TestCleanup_StrictPrefix.</span></span>
+<span id="cb7-106"><a href="#cb7-106" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> strings<span class="op">.</span>HasPrefix<span class="op">(</span>comm<span class="op">,</span> <span class="st">&quot;qemu-system-&quot;</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-107"><a href="#cb7-107" aria-hidden="true" tabindex="-1"></a>            report<span class="op">.</span>Found <span class="op">=</span> <span class="bu">append</span><span class="op">(</span>report<span class="op">.</span>Found<span class="op">,</span> pid<span class="op">)</span></span>
+<span id="cb7-108"><a href="#cb7-108" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb7-109"><a href="#cb7-109" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb7-110"><a href="#cb7-110" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="bu">len</span><span class="op">(</span>report<span class="op">.</span>Found<span class="op">)</span> <span class="op">==</span> <span class="dv">0</span> <span class="op">{</span></span>
+<span id="cb7-111"><a href="#cb7-111" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> report<span class="op">,</span> <span class="ot">nil</span></span>
+<span id="cb7-112"><a href="#cb7-112" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb7-113"><a href="#cb7-113" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Send SIGTERM to all found PIDs</span></span>
+<span id="cb7-114"><a href="#cb7-114" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> pid <span class="op">:=</span> <span class="kw">range</span> report<span class="op">.</span>Found <span class="op">{</span></span>
+<span id="cb7-115"><a href="#cb7-115" aria-hidden="true" tabindex="-1"></a>        _ <span class="op">=</span> k<span class="op">.</span>Signal<span class="op">(</span>pid<span class="op">,</span> syscall<span class="op">.</span>SIGTERM<span class="op">)</span></span>
+<span id="cb7-116"><a href="#cb7-116" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb7-117"><a href="#cb7-117" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Wait up to 5 seconds, polling every 250ms</span></span>
+<span id="cb7-118"><a href="#cb7-118" aria-hidden="true" tabindex="-1"></a>    deadline <span class="op">:=</span> time<span class="op">.</span>Now<span class="op">().</span>Add<span class="op">(</span><span class="dv">5</span> <span class="op">*</span> time<span class="op">.</span>Second<span class="op">)</span></span>
+<span id="cb7-119"><a href="#cb7-119" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> stragglers <span class="op">[]</span><span class="dt">int</span></span>
+<span id="cb7-120"><a href="#cb7-120" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> time<span class="op">.</span>Now<span class="op">().</span>Before<span class="op">(</span>deadline<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-121"><a href="#cb7-121" aria-hidden="true" tabindex="-1"></a>        <span class="cf">select</span> <span class="op">{</span></span>
+<span id="cb7-122"><a href="#cb7-122" aria-hidden="true" tabindex="-1"></a>        <span class="cf">case</span> <span class="op">&lt;-</span>ctx<span class="op">.</span>Done<span class="op">():</span></span>
+<span id="cb7-123"><a href="#cb7-123" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> report<span class="op">,</span> ctx<span class="op">.</span>Err<span class="op">()</span></span>
+<span id="cb7-124"><a href="#cb7-124" aria-hidden="true" tabindex="-1"></a>        <span class="cf">case</span> <span class="op">&lt;-</span>time<span class="op">.</span>After<span class="op">(</span><span class="dv">250</span> <span class="op">*</span> time<span class="op">.</span>Millisecond<span class="op">):</span></span>
+<span id="cb7-125"><a href="#cb7-125" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb7-126"><a href="#cb7-126" aria-hidden="true" tabindex="-1"></a>        stragglers <span class="op">=</span> stragglers<span class="op">[:</span><span class="dv">0</span><span class="op">]</span></span>
+<span id="cb7-127"><a href="#cb7-127" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> _<span class="op">,</span> pid <span class="op">:=</span> <span class="kw">range</span> report<span class="op">.</span>Found <span class="op">{</span></span>
+<span id="cb7-128"><a href="#cb7-128" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> k<span class="op">.</span>Exists<span class="op">(</span>pid<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-129"><a href="#cb7-129" aria-hidden="true" tabindex="-1"></a>                stragglers <span class="op">=</span> <span class="bu">append</span><span class="op">(</span>stragglers<span class="op">,</span> pid<span class="op">)</span></span>
+<span id="cb7-130"><a href="#cb7-130" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb7-131"><a href="#cb7-131" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb7-132"><a href="#cb7-132" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="bu">len</span><span class="op">(</span>stragglers<span class="op">)</span> <span class="op">==</span> <span class="dv">0</span> <span class="op">{</span></span>
+<span id="cb7-133"><a href="#cb7-133" aria-hidden="true" tabindex="-1"></a>            <span class="cf">break</span></span>
+<span id="cb7-134"><a href="#cb7-134" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb7-135"><a href="#cb7-135" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb7-136"><a href="#cb7-136" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Mark PIDs that exited within grace window as TerminatedTERM</span></span>
+<span id="cb7-137"><a href="#cb7-137" aria-hidden="true" tabindex="-1"></a>    terminated <span class="op">:=</span> <span class="bu">make</span><span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">int</span><span class="op">]</span><span class="dt">bool</span><span class="op">)</span></span>
+<span id="cb7-138"><a href="#cb7-138" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> pid <span class="op">:=</span> <span class="kw">range</span> report<span class="op">.</span>Found <span class="op">{</span></span>
+<span id="cb7-139"><a href="#cb7-139" aria-hidden="true" tabindex="-1"></a>        terminated<span class="op">[</span>pid<span class="op">]</span> <span class="op">=</span> <span class="ot">true</span></span>
+<span id="cb7-140"><a href="#cb7-140" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb7-141"><a href="#cb7-141" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> pid <span class="op">:=</span> <span class="kw">range</span> stragglers <span class="op">{</span></span>
+<span id="cb7-142"><a href="#cb7-142" aria-hidden="true" tabindex="-1"></a>        terminated<span class="op">[</span>pid<span class="op">]</span> <span class="op">=</span> <span class="ot">false</span></span>
+<span id="cb7-143"><a href="#cb7-143" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb7-144"><a href="#cb7-144" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> pid <span class="op">:=</span> <span class="kw">range</span> report<span class="op">.</span>Found <span class="op">{</span></span>
+<span id="cb7-145"><a href="#cb7-145" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> terminated<span class="op">[</span>pid<span class="op">]</span> <span class="op">{</span></span>
+<span id="cb7-146"><a href="#cb7-146" aria-hidden="true" tabindex="-1"></a>            report<span class="op">.</span>TerminatedTERM <span class="op">=</span> <span class="bu">append</span><span class="op">(</span>report<span class="op">.</span>TerminatedTERM<span class="op">,</span> pid<span class="op">)</span></span>
+<span id="cb7-147"><a href="#cb7-147" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb7-148"><a href="#cb7-148" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb7-149"><a href="#cb7-149" aria-hidden="true" tabindex="-1"></a>    <span class="co">// SIGKILL stragglers</span></span>
+<span id="cb7-150"><a href="#cb7-150" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> pid <span class="op">:=</span> <span class="kw">range</span> stragglers <span class="op">{</span></span>
+<span id="cb7-151"><a href="#cb7-151" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> err <span class="op">:=</span> k<span class="op">.</span>Signal<span class="op">(</span>pid<span class="op">,</span> syscall<span class="op">.</span>SIGKILL<span class="op">);</span> err <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb7-152"><a href="#cb7-152" aria-hidden="true" tabindex="-1"></a>            report<span class="op">.</span>KilledKILL <span class="op">=</span> <span class="bu">append</span><span class="op">(</span>report<span class="op">.</span>KilledKILL<span class="op">,</span> pid<span class="op">)</span></span>
+<span id="cb7-153"><a href="#cb7-153" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span> <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb7-154"><a href="#cb7-154" aria-hidden="true" tabindex="-1"></a>            report<span class="op">.</span>Surviving <span class="op">=</span> <span class="bu">append</span><span class="op">(</span>report<span class="op">.</span>Surviving<span class="op">,</span> pid<span class="op">)</span></span>
+<span id="cb7-155"><a href="#cb7-155" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb7-156"><a href="#cb7-156" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb7-157"><a href="#cb7-157" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> report<span class="op">,</span> <span class="ot">nil</span></span>
+<span id="cb7-158"><a href="#cb7-158" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="f-submodulescontainerspkgemulatorcleanup_testgo-new">F.
+<code>submodules/containers/pkg/emulator/cleanup_test.go</code>
+(NEW)</h3>
+<div class="sourceCode" id="cb8"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span> emulator</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="op">(</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;context&quot;</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;errors&quot;</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;syscall&quot;</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;testing&quot;</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;github.com/stretchr/testify/assert&quot;</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;github.com/stretchr/testify/require&quot;</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> fakeProcWalker <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>    pids <span class="kw">map</span><span class="op">[</span><span class="dt">int</span><span class="op">]</span><span class="dt">string</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>    err  <span class="dt">error</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>f fakeProcWalker<span class="op">)</span> PidComms<span class="op">()</span> <span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">int</span><span class="op">]</span><span class="dt">string</span><span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> f<span class="op">.</span>err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> f<span class="op">.</span>err</span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> f<span class="op">.</span>pids<span class="op">,</span> <span class="ot">nil</span></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> fakeKiller <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>    sent      <span class="kw">map</span><span class="op">[</span><span class="dt">int</span><span class="op">][]</span>syscall<span class="op">.</span>Signal</span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>    aliveAfter <span class="kw">map</span><span class="op">[</span>syscall<span class="op">.</span>Signal<span class="op">]</span><span class="kw">map</span><span class="op">[</span><span class="dt">int</span><span class="op">]</span><span class="dt">bool</span>  <span class="co">// after which signal a pid stays alive</span></span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> newFakeKiller<span class="op">()</span> <span class="op">*</span>fakeKiller <span class="op">{</span></span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="op">&amp;</span>fakeKiller<span class="op">{</span></span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>        sent<span class="op">:</span> <span class="kw">map</span><span class="op">[</span><span class="dt">int</span><span class="op">][]</span>syscall<span class="op">.</span>Signal<span class="op">{},</span></span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a>        aliveAfter<span class="op">:</span> <span class="kw">map</span><span class="op">[</span>syscall<span class="op">.</span>Signal<span class="op">]</span><span class="kw">map</span><span class="op">[</span><span class="dt">int</span><span class="op">]</span><span class="dt">bool</span><span class="op">{</span></span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a>            syscall<span class="op">.</span>SIGTERM<span class="op">:</span> <span class="op">{},</span></span>
+<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a>            syscall<span class="op">.</span>SIGKILL<span class="op">:</span> <span class="op">{},</span></span>
+<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a>        <span class="op">},</span></span>
+<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-40"><a href="#cb8-40" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>f <span class="op">*</span>fakeKiller<span class="op">)</span> Signal<span class="op">(</span>pid <span class="dt">int</span><span class="op">,</span> sig syscall<span class="op">.</span>Signal<span class="op">)</span> <span class="dt">error</span> <span class="op">{</span></span>
+<span id="cb8-41"><a href="#cb8-41" aria-hidden="true" tabindex="-1"></a>    f<span class="op">.</span>sent<span class="op">[</span>pid<span class="op">]</span> <span class="op">=</span> <span class="bu">append</span><span class="op">(</span>f<span class="op">.</span>sent<span class="op">[</span>pid<span class="op">],</span> sig<span class="op">)</span></span>
+<span id="cb8-42"><a href="#cb8-42" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="ot">nil</span></span>
+<span id="cb8-43"><a href="#cb8-43" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-44"><a href="#cb8-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-45"><a href="#cb8-45" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>f <span class="op">*</span>fakeKiller<span class="op">)</span> Exists<span class="op">(</span>pid <span class="dt">int</span><span class="op">)</span> <span class="dt">bool</span> <span class="op">{</span></span>
+<span id="cb8-46"><a href="#cb8-46" aria-hidden="true" tabindex="-1"></a>    <span class="co">// After SIGKILL the pid is gone unconditionally.</span></span>
+<span id="cb8-47"><a href="#cb8-47" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> _<span class="op">,</span> killed <span class="op">:=</span> f<span class="op">.</span>aliveAfter<span class="op">[</span>syscall<span class="op">.</span>SIGKILL<span class="op">][</span>pid<span class="op">];</span> killed <span class="op">{</span></span>
+<span id="cb8-48"><a href="#cb8-48" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="ot">true</span>  <span class="co">// injected &quot;still alive after SIGKILL&quot; — Surviving</span></span>
+<span id="cb8-49"><a href="#cb8-49" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb8-50"><a href="#cb8-50" aria-hidden="true" tabindex="-1"></a>    sent <span class="op">:=</span> f<span class="op">.</span>sent<span class="op">[</span>pid<span class="op">]</span></span>
+<span id="cb8-51"><a href="#cb8-51" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> s <span class="op">:=</span> <span class="kw">range</span> sent <span class="op">{</span></span>
+<span id="cb8-52"><a href="#cb8-52" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> s <span class="op">==</span> syscall<span class="op">.</span>SIGKILL <span class="op">{</span></span>
+<span id="cb8-53"><a href="#cb8-53" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> <span class="ot">false</span></span>
+<span id="cb8-54"><a href="#cb8-54" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb8-55"><a href="#cb8-55" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> s <span class="op">==</span> syscall<span class="op">.</span>SIGTERM <span class="op">{</span></span>
+<span id="cb8-56"><a href="#cb8-56" aria-hidden="true" tabindex="-1"></a>            <span class="co">// After SIGTERM, exists if explicitly marked alive</span></span>
+<span id="cb8-57"><a href="#cb8-57" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> f<span class="op">.</span>aliveAfter<span class="op">[</span>syscall<span class="op">.</span>SIGTERM<span class="op">][</span>pid<span class="op">]</span></span>
+<span id="cb8-58"><a href="#cb8-58" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb8-59"><a href="#cb8-59" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb8-60"><a href="#cb8-60" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="ot">true</span>  <span class="co">// never signalled — alive</span></span>
+<span id="cb8-61"><a href="#cb8-61" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-62"><a href="#cb8-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-63"><a href="#cb8-63" aria-hidden="true" tabindex="-1"></a><span class="co">// TestCleanup_NoMatches confirms an empty /proc state returns an empty report.</span></span>
+<span id="cb8-64"><a href="#cb8-64" aria-hidden="true" tabindex="-1"></a><span class="co">// Falsifiability: change strings.HasPrefix(comm, &quot;qemu-system-&quot;) to</span></span>
+<span id="cb8-65"><a href="#cb8-65" aria-hidden="true" tabindex="-1"></a><span class="co">// strings.HasPrefix(comm, &quot;&quot;) → all pids would be Found. Test fails.</span></span>
+<span id="cb8-66"><a href="#cb8-66" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestCleanup_NoMatches<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb8-67"><a href="#cb8-67" aria-hidden="true" tabindex="-1"></a>    w <span class="op">:=</span> fakeProcWalker<span class="op">{</span>pids<span class="op">:</span> <span class="kw">map</span><span class="op">[</span><span class="dt">int</span><span class="op">]</span><span class="dt">string</span><span class="op">{</span></span>
+<span id="cb8-68"><a href="#cb8-68" aria-hidden="true" tabindex="-1"></a>        <span class="dv">1234</span><span class="op">:</span> <span class="st">&quot;bash&quot;</span><span class="op">,</span></span>
+<span id="cb8-69"><a href="#cb8-69" aria-hidden="true" tabindex="-1"></a>        <span class="dv">5678</span><span class="op">:</span> <span class="st">&quot;node&quot;</span><span class="op">,</span></span>
+<span id="cb8-70"><a href="#cb8-70" aria-hidden="true" tabindex="-1"></a>        <span class="dv">9999</span><span class="op">:</span> <span class="st">&quot;java&quot;</span><span class="op">,</span></span>
+<span id="cb8-71"><a href="#cb8-71" aria-hidden="true" tabindex="-1"></a>    <span class="op">}}</span></span>
+<span id="cb8-72"><a href="#cb8-72" aria-hidden="true" tabindex="-1"></a>    k <span class="op">:=</span> newFakeKiller<span class="op">()</span></span>
+<span id="cb8-73"><a href="#cb8-73" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-74"><a href="#cb8-74" aria-hidden="true" tabindex="-1"></a>    report<span class="op">,</span> err <span class="op">:=</span> cleanupWithDeps<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> w<span class="op">,</span> k<span class="op">)</span></span>
+<span id="cb8-75"><a href="#cb8-75" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb8-76"><a href="#cb8-76" aria-hidden="true" tabindex="-1"></a>    assert<span class="op">.</span>Empty<span class="op">(</span>t<span class="op">,</span> report<span class="op">.</span>Found<span class="op">)</span></span>
+<span id="cb8-77"><a href="#cb8-77" aria-hidden="true" tabindex="-1"></a>    assert<span class="op">.</span>Empty<span class="op">(</span>t<span class="op">,</span> report<span class="op">.</span>TerminatedTERM<span class="op">)</span></span>
+<span id="cb8-78"><a href="#cb8-78" aria-hidden="true" tabindex="-1"></a>    assert<span class="op">.</span>Empty<span class="op">(</span>t<span class="op">,</span> report<span class="op">.</span>KilledKILL<span class="op">)</span></span>
+<span id="cb8-79"><a href="#cb8-79" aria-hidden="true" tabindex="-1"></a>    assert<span class="op">.</span>Empty<span class="op">(</span>t<span class="op">,</span> report<span class="op">.</span>Surviving<span class="op">)</span></span>
+<span id="cb8-80"><a href="#cb8-80" aria-hidden="true" tabindex="-1"></a>    assert<span class="op">.</span>Empty<span class="op">(</span>t<span class="op">,</span> k<span class="op">.</span>sent<span class="op">,</span> <span class="st">&quot;no signals sent when no qemu-system processes present&quot;</span><span class="op">)</span></span>
+<span id="cb8-81"><a href="#cb8-81" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-82"><a href="#cb8-82" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-83"><a href="#cb8-83" aria-hidden="true" tabindex="-1"></a><span class="co">// TestCleanup_OneMatch_TerminatesOnSIGTERM confirms the happy path:</span></span>
+<span id="cb8-84"><a href="#cb8-84" aria-hidden="true" tabindex="-1"></a><span class="co">// one qemu-system PID is found, SIGTERM is sent, the PID exits within</span></span>
+<span id="cb8-85"><a href="#cb8-85" aria-hidden="true" tabindex="-1"></a><span class="co">// the grace window, no SIGKILL needed. Falsifiability: skip the</span></span>
+<span id="cb8-86"><a href="#cb8-86" aria-hidden="true" tabindex="-1"></a><span class="co">// SIGTERM Signal() call → fakeKiller.sent stays empty; assertion fires.</span></span>
+<span id="cb8-87"><a href="#cb8-87" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestCleanup_OneMatch_TerminatesOnSIGTERM<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb8-88"><a href="#cb8-88" aria-hidden="true" tabindex="-1"></a>    w <span class="op">:=</span> fakeProcWalker<span class="op">{</span>pids<span class="op">:</span> <span class="kw">map</span><span class="op">[</span><span class="dt">int</span><span class="op">]</span><span class="dt">string</span><span class="op">{</span></span>
+<span id="cb8-89"><a href="#cb8-89" aria-hidden="true" tabindex="-1"></a>        <span class="dv">1234</span><span class="op">:</span> <span class="st">&quot;bash&quot;</span><span class="op">,</span></span>
+<span id="cb8-90"><a href="#cb8-90" aria-hidden="true" tabindex="-1"></a>        <span class="dv">7777</span><span class="op">:</span> <span class="st">&quot;qemu-system-x86_64&quot;</span><span class="op">,</span></span>
+<span id="cb8-91"><a href="#cb8-91" aria-hidden="true" tabindex="-1"></a>    <span class="op">}}</span></span>
+<span id="cb8-92"><a href="#cb8-92" aria-hidden="true" tabindex="-1"></a>    k <span class="op">:=</span> newFakeKiller<span class="op">()</span></span>
+<span id="cb8-93"><a href="#cb8-93" aria-hidden="true" tabindex="-1"></a>    <span class="co">// PID 7777 is alive at first, but the killer&#39;s default Exists()</span></span>
+<span id="cb8-94"><a href="#cb8-94" aria-hidden="true" tabindex="-1"></a>    <span class="co">// after SIGTERM (with no aliveAfter[SIGTERM] entry) returns false,</span></span>
+<span id="cb8-95"><a href="#cb8-95" aria-hidden="true" tabindex="-1"></a>    <span class="co">// simulating immediate graceful exit.</span></span>
+<span id="cb8-96"><a href="#cb8-96" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-97"><a href="#cb8-97" aria-hidden="true" tabindex="-1"></a>    report<span class="op">,</span> err <span class="op">:=</span> cleanupWithDeps<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> w<span class="op">,</span> k<span class="op">)</span></span>
+<span id="cb8-98"><a href="#cb8-98" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb8-99"><a href="#cb8-99" aria-hidden="true" tabindex="-1"></a>    assert<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="op">[]</span><span class="dt">int</span><span class="op">{</span><span class="dv">7777</span><span class="op">},</span> report<span class="op">.</span>Found<span class="op">)</span></span>
+<span id="cb8-100"><a href="#cb8-100" aria-hidden="true" tabindex="-1"></a>    assert<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="op">[]</span><span class="dt">int</span><span class="op">{</span><span class="dv">7777</span><span class="op">},</span> report<span class="op">.</span>TerminatedTERM<span class="op">)</span></span>
+<span id="cb8-101"><a href="#cb8-101" aria-hidden="true" tabindex="-1"></a>    assert<span class="op">.</span>Empty<span class="op">(</span>t<span class="op">,</span> report<span class="op">.</span>KilledKILL<span class="op">)</span></span>
+<span id="cb8-102"><a href="#cb8-102" aria-hidden="true" tabindex="-1"></a>    assert<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="op">[]</span>syscall<span class="op">.</span>Signal<span class="op">{</span>syscall<span class="op">.</span>SIGTERM<span class="op">},</span> k<span class="op">.</span>sent<span class="op">[</span><span class="dv">7777</span><span class="op">])</span></span>
+<span id="cb8-103"><a href="#cb8-103" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-104"><a href="#cb8-104" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-105"><a href="#cb8-105" aria-hidden="true" tabindex="-1"></a><span class="co">// TestCleanup_StrictPrefix is the falsifiability-rehearsal test for</span></span>
+<span id="cb8-106"><a href="#cb8-106" aria-hidden="true" tabindex="-1"></a><span class="co">// the prefix-matcher. Synthetic /proc contains &quot;qemu-foo&quot; (NOT a</span></span>
+<span id="cb8-107"><a href="#cb8-107" aria-hidden="true" tabindex="-1"></a><span class="co">// qemu-system process). The strict prefix &quot;qemu-system-&quot; must NOT</span></span>
+<span id="cb8-108"><a href="#cb8-108" aria-hidden="true" tabindex="-1"></a><span class="co">// match it.</span></span>
+<span id="cb8-109"><a href="#cb8-109" aria-hidden="true" tabindex="-1"></a><span class="co">//</span></span>
+<span id="cb8-110"><a href="#cb8-110" aria-hidden="true" tabindex="-1"></a><span class="co">// Mutation: loosen prefix to &quot;qemu-&quot; (drop &quot;system-&quot;) → this test</span></span>
+<span id="cb8-111"><a href="#cb8-111" aria-hidden="true" tabindex="-1"></a><span class="co">//           fails because PID 8888 is now in Found.</span></span>
+<span id="cb8-112"><a href="#cb8-112" aria-hidden="true" tabindex="-1"></a><span class="co">// Reverted: yes.</span></span>
+<span id="cb8-113"><a href="#cb8-113" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestCleanup_StrictPrefix<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb8-114"><a href="#cb8-114" aria-hidden="true" tabindex="-1"></a>    w <span class="op">:=</span> fakeProcWalker<span class="op">{</span>pids<span class="op">:</span> <span class="kw">map</span><span class="op">[</span><span class="dt">int</span><span class="op">]</span><span class="dt">string</span><span class="op">{</span></span>
+<span id="cb8-115"><a href="#cb8-115" aria-hidden="true" tabindex="-1"></a>        <span class="dv">7777</span><span class="op">:</span> <span class="st">&quot;qemu-system-x86_64&quot;</span><span class="op">,</span>  <span class="co">// legitimate match</span></span>
+<span id="cb8-116"><a href="#cb8-116" aria-hidden="true" tabindex="-1"></a>        <span class="dv">8888</span><span class="op">:</span> <span class="st">&quot;qemu-img&quot;</span><span class="op">,</span>             <span class="co">// NOT a qemu-system process</span></span>
+<span id="cb8-117"><a href="#cb8-117" aria-hidden="true" tabindex="-1"></a>        <span class="dv">9999</span><span class="op">:</span> <span class="st">&quot;qemu&quot;</span><span class="op">,</span>                 <span class="co">// NOT a qemu-system process</span></span>
+<span id="cb8-118"><a href="#cb8-118" aria-hidden="true" tabindex="-1"></a>    <span class="op">}}</span></span>
+<span id="cb8-119"><a href="#cb8-119" aria-hidden="true" tabindex="-1"></a>    k <span class="op">:=</span> newFakeKiller<span class="op">()</span></span>
+<span id="cb8-120"><a href="#cb8-120" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-121"><a href="#cb8-121" aria-hidden="true" tabindex="-1"></a>    report<span class="op">,</span> err <span class="op">:=</span> cleanupWithDeps<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> w<span class="op">,</span> k<span class="op">)</span></span>
+<span id="cb8-122"><a href="#cb8-122" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb8-123"><a href="#cb8-123" aria-hidden="true" tabindex="-1"></a>    assert<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="op">[]</span><span class="dt">int</span><span class="op">{</span><span class="dv">7777</span><span class="op">},</span> report<span class="op">.</span>Found<span class="op">,</span></span>
+<span id="cb8-124"><a href="#cb8-124" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;STRICT prefix qemu-system- MUST NOT match qemu-img or qemu&quot;</span><span class="op">)</span></span>
+<span id="cb8-125"><a href="#cb8-125" aria-hidden="true" tabindex="-1"></a>    <span class="co">// 8888 + 9999 must NOT have been signalled</span></span>
+<span id="cb8-126"><a href="#cb8-126" aria-hidden="true" tabindex="-1"></a>    assert<span class="op">.</span>Empty<span class="op">(</span>t<span class="op">,</span> k<span class="op">.</span>sent<span class="op">[</span><span class="dv">8888</span><span class="op">])</span></span>
+<span id="cb8-127"><a href="#cb8-127" aria-hidden="true" tabindex="-1"></a>    assert<span class="op">.</span>Empty<span class="op">(</span>t<span class="op">,</span> k<span class="op">.</span>sent<span class="op">[</span><span class="dv">9999</span><span class="op">])</span></span>
+<span id="cb8-128"><a href="#cb8-128" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-129"><a href="#cb8-129" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-130"><a href="#cb8-130" aria-hidden="true" tabindex="-1"></a><span class="co">// TestCleanup_PropagatesProcReadErr confirms procWalker errors surface</span></span>
+<span id="cb8-131"><a href="#cb8-131" aria-hidden="true" tabindex="-1"></a><span class="co">// to the caller (we don&#39;t silently swallow /proc read failures).</span></span>
+<span id="cb8-132"><a href="#cb8-132" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestCleanup_PropagatesProcReadErr<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb8-133"><a href="#cb8-133" aria-hidden="true" tabindex="-1"></a>    w <span class="op">:=</span> fakeProcWalker<span class="op">{</span>err<span class="op">:</span> errors<span class="op">.</span>New<span class="op">(</span><span class="st">&quot;permission denied&quot;</span><span class="op">)}</span></span>
+<span id="cb8-134"><a href="#cb8-134" aria-hidden="true" tabindex="-1"></a>    k <span class="op">:=</span> newFakeKiller<span class="op">()</span></span>
+<span id="cb8-135"><a href="#cb8-135" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-136"><a href="#cb8-136" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> err <span class="op">:=</span> cleanupWithDeps<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> w<span class="op">,</span> k<span class="op">)</span></span>
+<span id="cb8-137"><a href="#cb8-137" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Error<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb8-138"><a href="#cb8-138" aria-hidden="true" tabindex="-1"></a>    assert<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> err<span class="op">.</span>Error<span class="op">(),</span> <span class="st">&quot;permission denied&quot;</span><span class="op">)</span></span>
+<span id="cb8-139"><a href="#cb8-139" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="g-submodulescontainerscmdemulator-cleanupmaingo-new">G.
+<code>submodules/containers/cmd/emulator-cleanup/main.go</code>
+(NEW)</h3>
+<div class="sourceCode" id="cb9"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Package main is the thin CLI wrapping pkg/emulator.Cleanup.</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="co">//</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="co">// Invoked by Lava&#39;s scripts/run-emulator-tests.sh as a pre-boot</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="co">// zombie-cleanup step. Best-effort: returns 0 even when no matches</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="co">// were found OR some PIDs survived (the matrix runner SHOULD continue</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="co">// regardless — the cleanup is a hygiene improvement, not a gate).</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span> main</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="op">(</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;context&quot;</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;encoding/json&quot;</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;flag&quot;</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;fmt&quot;</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;os&quot;</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;time&quot;</span></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;digital.vasic.containers/pkg/emulator&quot;</span></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> main<span class="op">()</span> <span class="op">{</span></span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>    verbose <span class="op">:=</span> flag<span class="op">.</span>Bool<span class="op">(</span><span class="st">&quot;verbose&quot;</span><span class="op">,</span> <span class="ot">false</span><span class="op">,</span> <span class="st">&quot;print full CleanupReport JSON to stdout&quot;</span><span class="op">)</span></span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>    timeoutSec <span class="op">:=</span> flag<span class="op">.</span>Int<span class="op">(</span><span class="st">&quot;timeout&quot;</span><span class="op">,</span> <span class="dv">30</span><span class="op">,</span> <span class="st">&quot;overall timeout in seconds&quot;</span><span class="op">)</span></span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>    flag<span class="op">.</span>Parse<span class="op">()</span></span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>    ctx<span class="op">,</span> cancel <span class="op">:=</span> context<span class="op">.</span>WithTimeout<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> time<span class="op">.</span>Duration<span class="op">(*</span>timeoutSec<span class="op">)*</span>time<span class="op">.</span>Second<span class="op">)</span></span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>    <span class="cf">defer</span> cancel<span class="op">()</span></span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a>    report<span class="op">,</span> err <span class="op">:=</span> emulator<span class="op">.</span>Cleanup<span class="op">(</span>ctx<span class="op">)</span></span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a>        fmt<span class="op">.</span>Fprintf<span class="op">(</span>os<span class="op">.</span>Stderr<span class="op">,</span> <span class="st">&quot;emulator-cleanup: %v</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Best-effort: even on error we exit 0 so the matrix runner can proceed.</span></span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Operator can spot the error in stderr.</span></span>
+<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a>        os<span class="op">.</span>Exit<span class="op">(</span><span class="dv">0</span><span class="op">)</span></span>
+<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb9-35"><a href="#cb9-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-36"><a href="#cb9-36" aria-hidden="true" tabindex="-1"></a>    fmt<span class="op">.</span>Fprintf<span class="op">(</span>os<span class="op">.</span>Stderr<span class="op">,</span></span>
+<span id="cb9-37"><a href="#cb9-37" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;emulator-cleanup: found=%d terminated=%d killed=%d surviving=%d skipped=%d</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">,</span></span>
+<span id="cb9-38"><a href="#cb9-38" aria-hidden="true" tabindex="-1"></a>        <span class="bu">len</span><span class="op">(</span>report<span class="op">.</span>Found<span class="op">),</span> <span class="bu">len</span><span class="op">(</span>report<span class="op">.</span>TerminatedTERM<span class="op">),</span> <span class="bu">len</span><span class="op">(</span>report<span class="op">.</span>KilledKILL<span class="op">),</span></span>
+<span id="cb9-39"><a href="#cb9-39" aria-hidden="true" tabindex="-1"></a>        <span class="bu">len</span><span class="op">(</span>report<span class="op">.</span>Surviving<span class="op">),</span> <span class="bu">len</span><span class="op">(</span>report<span class="op">.</span>SkippedReadErr<span class="op">),</span></span>
+<span id="cb9-40"><a href="#cb9-40" aria-hidden="true" tabindex="-1"></a>    <span class="op">)</span></span>
+<span id="cb9-41"><a href="#cb9-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-42"><a href="#cb9-42" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">*</span>verbose <span class="op">{</span></span>
+<span id="cb9-43"><a href="#cb9-43" aria-hidden="true" tabindex="-1"></a>        b<span class="op">,</span> _ <span class="op">:=</span> json<span class="op">.</span>MarshalIndent<span class="op">(</span>report<span class="op">,</span> <span class="st">&quot;&quot;</span><span class="op">,</span> <span class="st">&quot;  &quot;</span><span class="op">)</span></span>
+<span id="cb9-44"><a href="#cb9-44" aria-hidden="true" tabindex="-1"></a>        fmt<span class="op">.</span>Fprintln<span class="op">(</span>os<span class="op">.</span>Stdout<span class="op">,</span> <span class="dt">string</span><span class="op">(</span>b<span class="op">))</span></span>
+<span id="cb9-45"><a href="#cb9-45" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb9-46"><a href="#cb9-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-47"><a href="#cb9-47" aria-hidden="true" tabindex="-1"></a>    os<span class="op">.</span>Exit<span class="op">(</span><span class="dv">0</span><span class="op">)</span></span>
+<span id="cb9-48"><a href="#cb9-48" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="h-submodulescontainerspkgemulatormatrixgo-modify">H.
+<code>submodules/containers/pkg/emulator/matrix.go</code> (MODIFY)</h3>
+<p>In <code>RunMatrix</code>, after the <code>RunInstrumentation</code>
+call (current line ~129), add:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Persist gradle stdout per AVD for failure diagnosis. Best-effort —</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="co">// write errors do NOT fail the matrix run; they&#39;re logged to stderr.</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="co">// Per the 2026-05-05 operator-feedback list (&quot;matrix runner doesn&#39;t</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="co">// persist gradle stdout — when a test fails the operator has to re-run</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="co">// gradle directly to see the JUnit assertion&quot;).</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>avdDir <span class="op">:=</span> filepath<span class="op">.</span>Join<span class="op">(</span>config<span class="op">.</span>EvidenceDir<span class="op">,</span> avd<span class="op">.</span>Name<span class="op">)</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> err <span class="op">:=</span> os<span class="op">.</span>MkdirAll<span class="op">(</span>avdDir<span class="op">,</span> <span class="bn">0o755</span><span class="op">);</span> err <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    logPath <span class="op">:=</span> filepath<span class="op">.</span>Join<span class="op">(</span>avdDir<span class="op">,</span> <span class="st">&quot;gradle.log&quot;</span><span class="op">)</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> werr <span class="op">:=</span> os<span class="op">.</span>WriteFile<span class="op">(</span>logPath<span class="op">,</span> <span class="op">[]</span><span class="dt">byte</span><span class="op">(</span>out<span class="op">),</span> <span class="bn">0o644</span><span class="op">);</span> werr <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>        fmt<span class="op">.</span>Fprintf<span class="op">(</span>os<span class="op">.</span>Stderr<span class="op">,</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;[matrix] warning: failed to persist gradle.log for %s: %v</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">,</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>            avd<span class="op">.</span>Name<span class="op">,</span> werr<span class="op">,</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>        <span class="op">)</span></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Copy any per-AVD JUnit XML reports the gradle run produced.</span></span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Path convention: app/build/outputs/androidTest-results/connected/debug/</span><span class="al">TEST</span><span class="co">-*.xml</span></span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>    matches<span class="op">,</span> _ <span class="op">:=</span> filepath<span class="op">.</span>Glob<span class="op">(</span><span class="st">&quot;app/build/outputs/androidTest-results/connected/debug/TEST-*.xml&quot;</span><span class="op">)</span></span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="bu">len</span><span class="op">(</span>matches<span class="op">)</span> <span class="op">&gt;</span> <span class="dv">0</span> <span class="op">{</span></span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>        reportDir <span class="op">:=</span> filepath<span class="op">.</span>Join<span class="op">(</span>avdDir<span class="op">,</span> <span class="st">&quot;test-report&quot;</span><span class="op">)</span></span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>        _ <span class="op">=</span> os<span class="op">.</span>MkdirAll<span class="op">(</span>reportDir<span class="op">,</span> <span class="bn">0o755</span><span class="op">)</span></span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> _<span class="op">,</span> src <span class="op">:=</span> <span class="kw">range</span> matches <span class="op">{</span></span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>            data<span class="op">,</span> rerr <span class="op">:=</span> os<span class="op">.</span>ReadFile<span class="op">(</span>src<span class="op">)</span></span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> rerr <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>                <span class="cf">continue</span></span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a>            dst <span class="op">:=</span> filepath<span class="op">.</span>Join<span class="op">(</span>reportDir<span class="op">,</span> filepath<span class="op">.</span>Base<span class="op">(</span>src<span class="op">))</span></span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a>            _ <span class="op">=</span> os<span class="op">.</span>WriteFile<span class="op">(</span>dst<span class="op">,</span> data<span class="op">,</span> <span class="bn">0o644</span><span class="op">)</span></span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>In <code>writeAttestation</code>, extend the <code>rowJSON</code>
+struct with
+<code>GradleLogPath string \</code>json:"gradle_log_path,omitempty"`<code>. Populate per row with </code>filepath.Join(t.AVD.Name,
+"gradle.log")`.</p>
+<h3 id="i-submodulescontainerspkgemulatormatrix_testgo-modify">I.
+<code>submodules/containers/pkg/emulator/matrix_test.go</code>
+(MODIFY)</h3>
+<p>Extend
+<code>TestAndroidMatrixRunner_AllAVDsPass_ReportsAllPassed</code> (or
+add a new test):</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Verify that the per-AVD gradle.log is written by RunMatrix.</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> _<span class="op">,</span> avd <span class="op">:=</span> <span class="kw">range</span> avds <span class="op">{</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    logPath <span class="op">:=</span> filepath<span class="op">.</span>Join<span class="op">(</span>evidenceDir<span class="op">,</span> avd<span class="op">.</span>Name<span class="op">,</span> <span class="st">&quot;gradle.log&quot;</span><span class="op">)</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>FileExists<span class="op">(</span>t<span class="op">,</span> logPath<span class="op">,</span> <span class="st">&quot;gradle.log must be written for AVD %s&quot;</span><span class="op">,</span> avd<span class="op">.</span>Name<span class="op">)</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    content<span class="op">,</span> err <span class="op">:=</span> os<span class="op">.</span>ReadFile<span class="op">(</span>logPath<span class="op">)</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    assert<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;BUILD SUCCESSFUL&quot;</span><span class="op">,</span> <span class="dt">string</span><span class="op">(</span>content<span class="op">),</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;gradle.log for %s must contain the captured runOutputs[i]&quot;</span><span class="op">,</span> avd<span class="op">.</span>Name<span class="op">)</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The <code>fakeEmulator.RunInstrumentation</code> already returns
+<code>runOutputs[i]</code> as the <code>out</code> string; the test
+fixture sets that to "BUILD SUCCESSFUL". The new assertion confirms
+<code>RunMatrix</code> wrote that string to the per-AVD gradle.log.</p>
+<p>Add a new test
+<code>TestAndroidMatrixRunner_GradleLogWriteFailure_DoesNotFailRun</code>:
+inject a read-only <code>EvidenceDir</code>; assert RunMatrix still
+returns <code>all_passed=true</code> (gradle.log write failure is
+best-effort, not gating). Falsifiability: remove the
+<code>if err == nil { ... }</code> guard around the os.MkdirAll call →
+matrix run fails on write error; this test catches.</p>
+<h3 id="j-pre-push-test-harnesses-new">J. Pre-push test harnesses
+(NEW)</h3>
+<p>Three bash test scripts in <code>tests/pre-push/</code> and
+<code>tests/check-constitution/</code>:</p>
+<p><strong><code>tests/pre-push/check4_test.sh</code></strong> — sets up
+a temporary git repo, stages a fixture commit touching
+<code>submodules/containers/pkg/emulator/cleanup.go</code>, invokes
+<code>.githooks/pre-push</code> against the fixture, and asserts:</p>
+<ul>
+<li>Commit with no Bluff-Audit stamp → exit non-zero with §6.N.1.2
+violation message</li>
+<li>Commit with stamp present but naming an unrelated file → exit
+non-zero</li>
+<li>Commit with stamp naming the touched file → exit zero</li>
+</ul>
+<p><strong><code>tests/pre-push/check5_test.sh</code></strong> —
+analogous; fixture commits add new attestation files; asserts each of
+the three accepted-evidence forms passes and absence fails.</p>
+<p><strong><code>tests/check-constitution/check_constitution_test.sh</code></strong>
+— runs <code>scripts/check-constitution.sh</code> against fixture
+trees:</p>
+<ul>
+<li>Tree missing §6.N heading in CLAUDE.md → exit non-zero</li>
+<li>Tree with §6.N but a submodule CLAUDE.md missing §6.N reference →
+exit non-zero</li>
+<li>Tree with all checks passing → exit zero</li>
+</ul>
+<h3 id="k-bluff-hunt-evidence">K. Bluff-hunt evidence</h3>
+<p><code>.lava-ci-evidence/bluff-hunt/2026-05-05-evening-group-a-prime.json</code>:</p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;date&quot;</span><span class="fu">:</span> <span class="st">&quot;2026-05-05 evening&quot;</span><span class="fu">,</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;protocol&quot;</span><span class="fu">:</span> <span class="st">&quot;Seventh Law clause 5 + §6.N.1.1 (subsequent-same-day lighter incident-response hunt)&quot;</span><span class="fu">,</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;session_context&quot;</span><span class="fu">:</span> <span class="st">&quot;Group A-prime spec implementation. The 8th anti-bluff invocation landed earlier today via Group A; this Group A-prime work session is within 24h of the 8th invocation, so per §6.N.1.1 the lighter 1-2 file incident-response hunt suffices.&quot;</span><span class="fu">,</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;scope&quot;</span><span class="fu">:</span> <span class="st">&quot;1-2 file rehearsal targeting the gate-shaping production code that Group A-prime modifies — specifically scripts/check-constitution.sh&#39;s new §6.N hard-fail check.&quot;</span><span class="fu">,</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;primary_target&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;file&quot;</span><span class="fu">:</span> <span class="st">&quot;scripts/check-constitution.sh&quot;</span><span class="fu">,</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;rationale&quot;</span><span class="fu">:</span> <span class="st">&quot;Group A-prime adds §6.N + §6.N-debt presence checks here that hard-fail. The conceptual filter (&#39;would a bug here be invisible to existing tests?&#39;) answers YES — without the new pre-push check5_test.sh, a regression to the §6.N check would only surface at the next constitution-checker run, potentially after the offending commit had already shipped.&quot;</span><span class="fu">,</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;mutation&quot;</span><span class="fu">:</span> <span class="st">&quot;Comment out the `required_6n=( ... )` loop in check-constitution.sh&quot;</span><span class="fu">,</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;observed_failure&quot;</span><span class="fu">:</span> <span class="st">&quot;tests/check-constitution/check_constitution_test.sh fixture-3 (CLAUDE.md missing §6.N) now passes when it should fail. Verified — bluff caught.&quot;</span><span class="fu">,</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;reverted&quot;</span><span class="fu">:</span> <span class="kw">true</span></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">},</span></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;secondary_target&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;file&quot;</span><span class="fu">:</span> <span class="st">&quot;submodules/containers/pkg/emulator/cleanup.go&quot;</span><span class="fu">,</span></span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;rationale&quot;</span><span class="fu">:</span> <span class="st">&quot;STRONGER §6.N variant binds Containers — every pkg/emulator/*.go change requires rehearsal.&quot;</span><span class="fu">,</span></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;mutation&quot;</span><span class="fu">:</span> <span class="st">&quot;Loosen the `strings.HasPrefix(comm, </span><span class="ch">\&quot;</span><span class="st">qemu-system-</span><span class="ch">\&quot;</span><span class="st">)` matcher to `strings.HasPrefix(comm, </span><span class="ch">\&quot;</span><span class="st">qemu-</span><span class="ch">\&quot;</span><span class="st">)`&quot;</span><span class="fu">,</span></span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;observed_failure&quot;</span><span class="fu">:</span> <span class="st">&quot;TestCleanup_StrictPrefix asserts qemu-img is NOT collected; mutation produces 8888 in Found, test fails with `expected []int{7777}, got []int{7777, 8888}`. Reverted.&quot;</span><span class="fu">,</span></span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;reverted&quot;</span><span class="fu">:</span> <span class="kw">true</span></span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">},</span></span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;summary&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;synthetic_test_files_mutated&quot;</span><span class="fu">:</span> <span class="dv">0</span><span class="fu">,</span></span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;production_files_mutated&quot;</span><span class="fu">:</span> <span class="dv">2</span><span class="fu">,</span></span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;real_bluffs_found&quot;</span><span class="fu">:</span> <span class="dv">0</span><span class="fu">,</span></span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;remediation_owed&quot;</span><span class="fu">:</span> <span class="dv">0</span></span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<h3 id="l-closure-attestation">L. Closure attestation</h3>
+<p><code>.lava-ci-evidence/Phase-Group-A-prime-closure-2026-05-05-evening.json</code>:</p>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;phase&quot;</span><span class="fu">:</span> <span class="st">&quot;Group A-prime — §6.N-debt closure&quot;</span><span class="fu">,</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;spec&quot;</span><span class="fu">:</span> <span class="st">&quot;docs/superpowers/specs/2026-05-05-anti-bluff-mandate-reinforcement-group-a-prime-design.md&quot;</span><span class="fu">,</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;supersedes&quot;</span><span class="fu">:</span> <span class="kw">null</span><span class="fu">,</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;closes&quot;</span><span class="fu">:</span> <span class="st">&quot;§6.N-debt entry in CLAUDE.md (added by Group A commit 52db359; resolved by this Group A-prime implementation)&quot;</span><span class="fu">,</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;deliverables_landed&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;lava_parent&quot;</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;.githooks/pre-push: Check 4 (§6.N.1.2) + Check 5 (§6.N.1.3)&quot;</span><span class="ot">,</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;scripts/check-constitution.sh: §6.N + §6.N-debt presence + propagation count + hook-marker checks; warn → hard-fail flip&quot;</span><span class="ot">,</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;scripts/run-emulator-tests.sh: refactored to invoke cmd/emulator-cleanup binary&quot;</span><span class="ot">,</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;tests/pre-push/check4_test.sh + check5_test.sh + tests/check-constitution/check_constitution_test.sh&quot;</span><span class="ot">,</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;CLAUDE.md §6.N-debt block updated to RESOLVED&quot;</span></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>    <span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;containers_submodule&quot;</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;pkg/emulator/cleanup.go + cleanup_test.go (Cleanup API with 4 tests, falsifiability-rehearsed prefix matcher)&quot;</span><span class="ot">,</span></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;cmd/emulator-cleanup/main.go (thin CLI)&quot;</span><span class="ot">,</span></span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;pkg/emulator/matrix.go: per-AVD gradle.log + test-report/ persistence&quot;</span><span class="ot">,</span></span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;pkg/emulator/matrix_test.go: assertion that gradle.log is written&quot;</span></span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>    <span class="ot">]</span></span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">},</span></span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;remaining_open_gaps&quot;</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;JUnit XML extraction beyond simple cp (fancy reporting — future work, NOT blocking)&quot;</span><span class="ot">,</span></span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;Pre-push hook performance: Check 4 + Check 5 add ~5 grep/jq calls per pushed SHA. Acceptable today (typical push is 1-3 SHAs); revisit if perf bites.&quot;</span></span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a>  <span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;verification&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;all_4_upstreams_converged&quot;</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;containers_pin_bumped&quot;</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;test_suite_green&quot;</span><span class="fu">:</span> <span class="st">&quot;to be confirmed at execution&quot;</span></span>
+<span id="cb13-29"><a href="#cb13-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb13-30"><a href="#cb13-30" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<h2 id="data-flow">Data flow</h2>
+<pre><code>git push origin master
+  ↓
+.githooks/pre-push  (per pushed SHA)
+  → Check 1 (hosted-CI ban)              [existing]
+  → Check 2 (test-file Bluff-Audit)      [existing]
+  → Check 3 (forbidden test patterns)    [existing]
+  → Check 4 (§6.N.1.2 — gate-file change + stamp-targets-file)  [NEW]
+  → Check 5 (§6.N.1.3 — new attestation file + rehearsal)        [NEW]
+  ↓
+Layer 2: scripts/ci.sh --changed-only
+  → scripts/check-constitution.sh
+    → existing 6.D/6.E/6.F/Tracker-SDK/scoped/credentials/6.K checks
+    → §6.N + §6.N-debt presence              [NEW, hard-fail]
+    → §6.N propagation count = 21            [NEW, hard-fail]
+    → Check 4 + Check 5 markers in pre-push  [NEW, hard-fail]
+
+scripts/run-emulator-tests.sh execution:
+  [0/3] cmd/emulator-cleanup invocation     [REFACTORED — was inline bash]
+        → pkg/emulator.Cleanup() walks /proc, SIGTERM, wait 5s, SIGKILL
+        → exits 0 (best-effort)
+  [1/3] build cmd/emulator-matrix
+  [2/3] build APK (if --build)
+  [3/3] cmd/emulator-matrix per-AVD
+        → Boot → WaitForBoot → Install → RunInstrumentation
+        → write EvidenceDir/&lt;avd&gt;/gradle.log     [NEW]
+        → cp test-report XMLs to EvidenceDir/&lt;avd&gt;/test-report/  [NEW]
+        → Teardown (already polls qemu exit per Group A&#39;s f6d09cb)</code></pre>
+<h2 id="error-handling">Error handling</h2>
+<ul>
+<li><strong>Chicken-and-egg with hooks:</strong> Group A-prime's own
+commit modifies <code>.githooks/pre-push</code> +
+<code>scripts/check-constitution.sh</code> +
+<code>submodules/containers/pkg/emulator/matrix.go</code>. The OLD hook
+(without Check 4 + 5) runs at this commit's push time, so the commit is
+naturally exempt from its own new checks. The commit MUST still carry a
+Bluff-Audit stamp targeting these files (manual discipline for THIS
+commit; subsequent commits get hook-enforced).</li>
+<li><strong>Comment-only changes</strong> to
+<code>pkg/emulator/*.go</code>: Containers' STRONGER §6.N.3 binds these.
+The hook treats any diff line in a §6.N.1.2 file as a trigger.</li>
+<li><strong>Renames:</strong> <code>git diff-tree --name-only</code>
+shows the new path; stamp must reference it.</li>
+<li><strong>/proc permission errors in Cleanup():</strong> best-effort —
+<code>osProcWalker.PidComms()</code> records unreadable PIDs in
+<code>report.SkippedReadErr</code>. The CLI continues and exits 0.</li>
+<li><strong>gradle.log write failure:</strong> matrix.go logs to stderr
+but does NOT fail the matrix run (<code>if err == nil</code> guard
+around the entire EvidenceDir/<avd>/ block).</li>
+<li><strong>JUnit XML cp errors:</strong> silent skip; the JUnit reports
+are nice-to-have, not gating.</li>
+<li><strong>False-positive Cleanup() match:</strong> Strict prefix
+<code>"qemu-system-"</code> (with trailing dash).
+<code>TestCleanup_StrictPrefix</code> pins this — mutate to
+<code>"qemu-"</code> → test fails.</li>
+<li><strong>Pre-push hook performance:</strong> Check 4 + Check 5 add ~5
+grep/jq calls per pushed SHA. Acceptable today (typical push is 1-3
+SHAs).</li>
+<li><strong>Counting "9th invocation":</strong> "Brainstorm Group
+A-prime now" is a request, NOT a verbal restatement of the anti-bluff
+mandate text. §6.L count stays at EIGHT. (If the operator restates the
+mandate during execution, the count bumps.)</li>
+</ul>
+<h2 id="testing">Testing</h2>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Test file</th>
+<th>Falsifiability mutation</th>
+<th>Recorded in</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>pkg/emulator/cleanup.go</td>
+<td>cleanup_test.go::TestCleanup_StrictPrefix</td>
+<td>Loosen prefix <code>qemu-system-</code> → <code>qemu-</code></td>
+<td>Containers commit body</td>
+</tr>
+<tr>
+<td>pkg/emulator/matrix.go gradle.log</td>
+<td>matrix_test.go (extended)</td>
+<td>Skip the os.WriteFile call → assertion fails on missing file</td>
+<td>Containers commit body</td>
+</tr>
+<tr>
+<td>.githooks/pre-push Check 4</td>
+<td>tests/pre-push/check4_test.sh</td>
+<td>Stamp present but names file NOT in diff → expect violation</td>
+<td>Lava commit body</td>
+</tr>
+<tr>
+<td>.githooks/pre-push Check 5</td>
+<td>tests/pre-push/check5_test.sh</td>
+<td>New attestation with no rehearsal in any of 3 places → expect
+violation</td>
+<td>Lava commit body</td>
+</tr>
+<tr>
+<td>scripts/check-constitution.sh</td>
+<td>tests/check-constitution/check_constitution_test.sh</td>
+<td>Delete §6.N from a fixture CLAUDE.md → expect hard-fail</td>
+<td>Lava commit body</td>
+</tr>
+</tbody>
+</table>
+<p>All 5 mutation rehearsals MUST be performed during implementation and
+recorded in the relevant commit's <code>Bluff-Audit:</code> block.</p>
+<h2 id="order-of-operations">Order of operations</h2>
+<table>
+<thead>
+<tr>
+<th>Phase</th>
+<th>Step</th>
+<th>Output</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>A. Containers code (own repo)</strong></td>
+<td>A.1 pkg/emulator/cleanup.go + cleanup_test.go (TDD)</td>
+<td>Containers WIP</td>
+</tr>
+<tr>
+<td></td>
+<td>A.2 cmd/emulator-cleanup/main.go</td>
+<td>Containers WIP</td>
+</tr>
+<tr>
+<td></td>
+<td>A.3 pkg/emulator/matrix.go: per-AVD gradle.log + test-report/</td>
+<td>Containers WIP</td>
+</tr>
+<tr>
+<td></td>
+<td>A.4 pkg/emulator/matrix_test.go extension</td>
+<td>Containers WIP</td>
+</tr>
+<tr>
+<td></td>
+<td>A.5 Falsifiability rehearsals (cleanup prefix + matrix.log
+skip)</td>
+<td>Recorded</td>
+</tr>
+<tr>
+<td></td>
+<td>A.6 Containers commit on
+<code>lava-pin/2026-05-05-clause-6n-prime</code></td>
+<td>Containers commit + push</td>
+</tr>
+<tr>
+<td><strong>B. Lava-side parent</strong></td>
+<td>B.1 scripts/check-constitution.sh §6.N awareness + hard-fail
+flip</td>
+<td>parent WIP</td>
+</tr>
+<tr>
+<td></td>
+<td>B.2 .githooks/pre-push: Check 4 + Check 5</td>
+<td>parent WIP</td>
+</tr>
+<tr>
+<td></td>
+<td>B.3 scripts/run-emulator-tests.sh refactor</td>
+<td>parent WIP</td>
+</tr>
+<tr>
+<td></td>
+<td>B.4 tests/pre-push/check{4,5}_test.sh +
+tests/check-constitution_test.sh</td>
+<td>parent WIP</td>
+</tr>
+<tr>
+<td></td>
+<td>B.5 Falsifiability rehearsals (Check 4 + 5 +
+check-constitution)</td>
+<td>Recorded</td>
+</tr>
+<tr>
+<td></td>
+<td>B.6 Root CLAUDE.md §6.N-debt block updated to "RESOLVED"</td>
+<td>parent WIP</td>
+</tr>
+<tr>
+<td></td>
+<td>B.7 Lava parent commit (Bluff-Audit stamp targeting modified
+files)</td>
+<td>parent commit</td>
+</tr>
+<tr>
+<td><strong>C. Pin bump + evidence</strong></td>
+<td>C.1 Bump submodules/containers gitlink</td>
+<td>parent WIP</td>
+</tr>
+<tr>
+<td></td>
+<td>C.2 Write
+<code>.lava-ci-evidence/bluff-hunt/2026-05-05-evening-group-a-prime.json</code></td>
+<td>parent WIP</td>
+</tr>
+<tr>
+<td></td>
+<td>C.3 Write
+<code>.lava-ci-evidence/Phase-Group-A-prime-closure-2026-05-05-evening.json</code></td>
+<td>parent WIP</td>
+</tr>
+<tr>
+<td></td>
+<td>C.4 Pin-bump + evidence commit</td>
+<td>parent commit</td>
+</tr>
+<tr>
+<td></td>
+<td>C.5 Push parent to all 4 upstreams</td>
+<td>mirror convergence</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Estimated duration:</strong> 4-6 hours total. Most expensive:
+Cleanup() falsifiability rehearsal + Check 4/5 bash test harnesses.</p>
+<h2 id="dependencies">Dependencies</h2>
+<ul>
+<li><strong>Group A</strong> (commit chain
+<code>aa3aa1e → ... → 84395d4</code>) — MUST be landed first. Group
+A-prime extends Group A's §6.N + §6.N-debt structure.</li>
+<li><strong>No other in-flight work blocks Group A-prime.</strong></li>
+<li><strong>Group A-prime UNBLOCKS:</strong> the next
+constitution-checker change. The §6.N-debt entry currently warns "the
+next phase that touches <code>scripts/check-constitution.sh</code> MUST
+close 6.N-debt before its commit lands". This spec IS that closing
+change.</li>
+</ul>
+<h2 id="open-questions">Open questions</h2>
+<p>None blocking. Q1–Q8 from the brainstorm session were all
+answered:</p>
+<ul>
+<li>Q1: D (full envelope — pre-push checks + check-constitution.sh +
+Cleanup() + gradle-stdout)</li>
+<li>Q2: B (Check 4 medium strictness — stamp NAMES a file in diff)</li>
+<li>Q3: D (Check 5 accepts JSON-embedded OR companion file OR commit
+Bluff-Audit)</li>
+<li>Q4: A (Cleanup() = standalone package function + new
+cmd/emulator-cleanup/)</li>
+<li>Q5: B (gradle stdout = per-AVD subdirectory with test-report/)</li>
+<li>Q6: D (check-constitution.sh: clause + propagation + hook-markers +
+warn→hard-fail flip)</li>
+<li>Q7: "all ok" (architecture sketch approved)</li>
+<li>Q8: "all ok" (component design + data flow + error handling +
+testing + order-of-ops approved)</li>
+</ul>
+<h2 id="hand-off">Hand-off</h2>
+<p>After spec self-review + user approval, this spec is handed to the
+<code>writing-plans</code> skill to produce the implementation plan. The
+plan will track each Phase A/B/C step as a discrete subagent-driven
+task. Per Group A's pattern, the implementation will use
+<code>superpowers:subagent-driven-development</code> execution.</p>
+</body>
+</html>

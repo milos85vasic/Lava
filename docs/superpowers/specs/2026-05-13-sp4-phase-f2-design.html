@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-05-13-sp4-phase-f2-design</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1 id="sp-4-phase-f2--per-clone-url-routing-detailed-design">SP-4 Phase
+F.2 — Per-clone URL routing (detailed design)</h1>
+<p><strong>Spec date:</strong> 2026-05-13 <strong>Parent SP:</strong>
+<code>docs/superpowers/specs/2026-05-12-sp4-multi-provider-redesign.md</code>
+<strong>Prerequisite:</strong> Phase F.1 complete (HEAD
+<code>b54e7e63</code> and later). <strong>Status:</strong>
+detailed-design locked. Execution is a cross-module refactor across
+every tracker plugin (6 today, more as the SDK grows) — non-trivial and
+scheduled for a dedicated cycle. Honest gap acknowledged via the Phase B
+clone-success Toast.</p>
+<h2 id="goal">Goal</h2>
+<p>Make a cloned provider's <code>primaryUrl</code> (stored in
+<code>ClonedProviderEntity.primaryUrl</code>) actually route the clone's
+HTTP traffic, instead of routing through the source provider's URLs.</p>
+<h2 id="current-state-post-phase-f1">Current state (post Phase F.1)</h2>
+<p><code>ClonedRoutingTrackerClient</code> (commit
+<code>b54e7e63</code>) wraps the source <code>TrackerClient</code> and
+surfaces the clone's <code>descriptor</code> (id + displayName +
+baseUrls). But <code>getFeature(SearchableTracker)</code> delegates to
+the source's feature unchanged — and the source feature's HTTP stack was
+built around the SOURCE's <code>baseUrls</code> at factory.create-time.
+The clone's <code>baseUrls</code> (in the wrapper's
+<code>descriptor</code>) are visible BUT not read by the actual search
+path.</p>
+<p>User-visible consequence: searching a clone produces results, but
+they come from the source's URL. The clone-success Toast discloses this:
+<em>"Cloned (URL routing pending — searches use source URLs)"</em>.</p>
+<h2 id="design-options-locked-option-b">Design options (locked: Option
+B)</h2>
+<h3 id="option-a--pluginconfigbaseurloverride">Option A —
+PluginConfig.baseUrlOverride</h3>
+<p>Add an
+<code>OverridePluginConfig(baseUrls: List&lt;MirrorUrl&gt;): PluginConfig</code>
+and modify every tracker factory's <code>create(config)</code> to read
+this and override its internal HTTP client. Each factory must be
+modified:</p>
+<ul>
+<li><code>:core:tracker:rutracker:RuTrackerClientFactory</code></li>
+<li><code>:core:tracker:rutor:RuTorClientFactory</code></li>
+<li><code>:core:tracker:nnmclub:NnmclubClientFactory</code></li>
+<li><code>:core:tracker:kinozal:KinozalClientFactory</code></li>
+<li><code>:core:tracker:archiveorg:ArchiveOrgClientFactory</code></li>
+<li><code>:core:tracker:gutenberg:GutenbergClientFactory</code></li>
+</ul>
+<p>Each factory wires its OkHttp/Ktor client with hardcoded base URLs
+from <code>descriptor.baseUrls</code>. To accept an override, the
+factory must read the config's override field FIRST, then fall back to
+<code>descriptor.baseUrls</code>.</p>
+<p><strong>Pros:</strong> uniform contract across factories; the SDK
+passes the override; each factory wires identically.
+<strong>Cons:</strong> every factory must be modified; future tracker
+plugins MUST implement the override or the clone for that tracker breaks
+silently.</p>
+<h3
+id="option-b-locked--per-clone-mirrormanager--sdk-side-url-injection">Option
+B (LOCKED) — Per-clone MirrorManager + SDK-side URL injection</h3>
+<p>The SDK already has <code>LavaMirrorManagerHolder</code> +
+<code>MirrorManager</code> per tracker — that's the layer that picks
+"which baseUrl to actually try" at call time. The Phase F.2 design
+is:</p>
+<ol type="1">
+<li>When <code>LavaTrackerSdk.clientFor(id)</code> resolves a clone,
+ALSO build a per-clone <code>MirrorManager</code> whose mirror list is
+the clone's <code>primaryUrl</code> + any clone-specific
+<code>UserMirrorEntity</code> rows (the user can add additional mirrors
+per clone, keyed by <code>tracker_id = synthetic_clone_id</code>).</li>
+<li><code>ClonedRoutingTrackerClient</code> is extended to inject this
+<code>MirrorManager</code> into the source's feature wrappers. Each
+feature method that issues an HTTP call uses
+<code>manager.executeWithFallback { url -&gt; ... }</code> instead of
+the source's bound URL.</li>
+</ol>
+<p>For this to work, the SOURCE's feature implementations must accept a
+per-call <code>baseUrl</code> parameter OR a <code>MirrorManager</code>
+they can consult. Today they don't — they capture the URL at
+construction time.</p>
+<p>So Option B's refactor is structurally similar to Option A: each
+tracker plugin's feature impl must be made URL-injectable. The
+difference is HOW the URL is injected:</p>
+<ul>
+<li>Option A: at factory.create() time via PluginConfig.</li>
+<li>Option B: at feature-call time via MirrorManager parameter.</li>
+</ul>
+<p><strong>Option B is preferred</strong> because it gracefully composes
+with the existing mirror-fallback machinery
+(<code>runWithMirrorFallback</code>) and with the per-clone
+<code>UserMirrorEntity</code> rows (clone gets its own mirror list, the
+SDK rotates through them on failure).</p>
+<p><strong>Cons:</strong> larger refactor — every tracker plugin's
+feature impl gains a <code>MirrorManager</code> parameter; the source's
+existing <code>MirrorManager</code> becomes one of many.</p>
+<h2 id="affected-surfaces-cross-module-multi-file">Affected surfaces
+(cross-module, multi-file)</h2>
+<h3 id="per-tracker-plugin--6-today">Per-tracker plugin (× 6 today)</h3>
+<p>Each
+<code>core/tracker/&lt;name&gt;/src/main/kotlin/lava/tracker/&lt;name&gt;/</code>
+directory has feature implementations (<code>Search.kt</code>,
+<code>Browse.kt</code>, <code>Topic.kt</code>, <code>Auth.kt</code>,
+<code>Download.kt</code>). Each MUST accept a <code>MirrorManager</code>
+(or equivalent URL provider) at construction time and use it
+per-call.</p>
+<h3 id="sdk-side">SDK side</h3>
+<ul>
+<li><code>LavaTrackerSdk.clientFor(id)</code> for clones: build a
+per-clone <code>MirrorManager</code> from
+<code>ClonedProviderEntity.primaryUrl</code> +
+<code>UserMirrorDao.observe(syntheticId)</code>.</li>
+<li><code>ClonedRoutingTrackerClient</code> extended to inject the
+per-clone manager into each wrapped feature.</li>
+</ul>
+<h3 id="phase-b-mirrors-section">Phase B mirrors section</h3>
+<p>The MirrorsSection in ProviderConfig already supports adding
+<code>UserMirrorEntity</code> rows keyed by <code>tracker_id</code>. For
+clones, the <code>tracker_id</code> IS the synthetic clone id. No UI
+change.</p>
+<h2 id="tests">Tests</h2>
+<ul>
+<li>Unit tests in each tracker plugin: feature method receives a
+<code>MirrorManager</code>, calls hit the manager's URL.</li>
+<li>New SDK integration test:
+<code>LavaTrackerSdkCloneRouting Test</code> — wire a clone with
+primaryUrl <code>https://rutracker.eu</code>, fake source's
+<code>SearchableTracker</code> to assert that
+<code>feature.search(...)</code> was called with the clone's URL, not
+the source's URL.</li>
+<li>Falsifiability rehearsal: revert the SDK seam to use the source's
+URL — test fails.</li>
+</ul>
+<h2 id="anti-bluff-posture">Anti-bluff posture</h2>
+<p>Per §6.J:</p>
+<ul>
+<li>The test's primary assertion is on the URL the HTTP client tried to
+hit (MockWebServer captures the request URL). Not on mocks or interface
+calls.</li>
+<li>The clone-success Toast copy is updated to remove the disclosure
+("URL routing pending — searches use source URLs") once Phase F.2 ships
+and end-to-end test passes.</li>
+</ul>
+<h2 id="why-design-only-no-implementation-in-this-session">Why design
+only (no implementation in this session)</h2>
+<p>Phase F.2 is a cross-module refactor across 6 tracker plugins. Each
+plugin's feature impls need URL-injection plumbing. Each plugin has its
+own test suite that must be updated. The cross-cutting scope makes it
+appropriate for a dedicated session where the refactor's safety can be
+focused on (existing tests must continue to pass; the new injection seam
+must not break the source-URL path for non-cloned providers).</p>
+<h2 id="phase-f2-acceptance-criterion">Phase F.2 acceptance
+criterion</h2>
+<p>The clone-success Toast becomes "Cloned" (no longer "Cloned (URL
+routing pending — searches use source URLs)"). A clone of RuTracker at
+<code>https://rutracker.eu</code> produces a search-result MockWebServer
+capture that contains <code>rutracker.eu</code> in the request URL, NOT
+<code>rutracker.org</code>.</p>
+</body>
+</html>

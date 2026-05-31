@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>SP-4-RELEASE-NOTES</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1 id="sp-4-multi-provider-redesign--release-notes">SP-4 Multi-Provider
+Redesign — Release Notes</h1>
+<p><strong>Status (2026-05-13):</strong> Phases A + B + C + D + F.1 +
+G.1 landed on master. Phases E + F.2 + H tail are owed. See
+<code>docs/superpowers/specs/2026-05-12-sp4-multi-provider-redesign.md</code>
+for the original design + every phase's design doc under
+<code>docs/superpowers/specs/2026-05-13-sp4-phase-&lt;X&gt;-design.md</code>.</p>
+<h2 id="user-visible-changes-so-far">User-visible changes (so far)</h2>
+<ol type="1">
+<li><strong>Generic Credentials</strong> — a single
+<code>CredentialsEntry</code> (Username+Password, API Key, Bearer Token,
+or Cookie/Session string) can be assigned to multiple providers.
+Encrypted at rest with AES-256-GCM (PBKDF2-SHA-256, 200k iterations,
+per-user passphrase). Reachable from Menu → "Provider Credentials".</li>
+<li><strong>Per-Provider Configuration</strong> — tap any provider row
+in Menu → opens the provider's configuration screen. Bind a credential,
+toggle sync, list mirrors, add custom mirrors, probe reachability,
+switch anonymous mode (where supported), or clone the provider under a
+new name with a different URL.</li>
+<li><strong>Trackers screen removed</strong> — the legacy SP-3a
+"Trackers" menu entry and screen are gone. Every capability they offered
+is now reachable from per-provider config + Menu provider rows. C04 +
+C14 Challenge Tests rewritten / deleted accordingly.</li>
+<li><strong>Multi-Provider Parallel Search</strong> —
+<code>LavaTrackerSdk.multiSearch</code> fans out across selected
+providers in parallel via <code>coroutineScope</code> +
+<code>async</code> + <code>awaitAll</code>. Latency drops from
+<code>sum(per-provider)</code> to <code>max(per-provider)</code>. New
+<code>streamMultiSearch(...)</code> cold
+<code>Flow&lt;MultiSearchEvent&gt;</code> for callers that want
+incremental UI updates. Both paths feed
+<code>SearchResultContent.Streaming</code>'s per-provider grouping UI.
+The new client-direct path is the default when the Lava Go API is not
+configured.</li>
+<li><strong>Clone-with-new-name searchable</strong> — the Phase B clone
+dialog creates a <code>ClonedProviderEntity</code> with its own
+<code>primaryUrl</code>. The SDK now resolves the synthetic clone id
+without crashing (Phase F.1). The clone's display name surfaces in
+result rows via <code>client.descriptor.trackerId</code>. <strong>Phase
+F.2 still owed</strong>: per-clone <code>MirrorManager</code> so HTTP
+traffic actually hits the clone's <code>primaryUrl</code> (today, source
+URLs are used; the clone-success Toast discloses this honestly).</li>
+<li><strong>Soft-delete with sync-up semantics</strong> (Phase G.1) —
+removing a credential or cloned provider now marks the row with a
+<code>deletedAt</code> timestamp instead of physically deleting it. Read
+paths hide the row; the soft-delete marker is preserved for cross-device
+propagation (Phase E owed) and survives backup-restore (the Android Auto
+Backup snapshot includes the marker).</li>
+</ol>
+<h2 id="developer-visible-changes">Developer-visible changes</h2>
+<h3 id="new-sdk-methods-lavatrackersdk">New SDK methods
+(<code>LavaTrackerSdk</code>)</h3>
+<ul>
+<li><code>multiSearch(request, providerIds, page)</code> — now PARALLEL.
+Same <code>UnifiedSearchResult</code> return shape; per-provider failure
+isolated (one provider throwing does not cancel siblings).</li>
+<li><code>streamMultiSearch(request, providerIds, page): Flow&lt;MultiSearchEvent&gt;</code>
+— NEW. Cold flow emits <code>ProviderStart</code>,
+<code>ProviderResults</code>, <code>ProviderFailure</code>,
+<code>ProviderUnsupported</code>, terminated by
+<code>AllProvidersDone(unified)</code> on normal completion.
+Cancellation of the collector propagates to every in-flight provider
+call via structured concurrency.</li>
+<li><code>clientFor(id)</code> — PRIVATE seam introduced by Phase F.1.
+Resolves a synthetic clone id to a
+<code>ClonedRoutingTrackerClient</code> that wraps the source factory's
+client. Non-clone ids fall through to <code>registry.get(...)</code>
+unchanged.</li>
+<li><code>activeTrackerId()</code> + <code>switchTracker(...)</code> —
+marked <code>@Deprecated</code> in Phase D. Legacy paging path still
+uses them; full removal awaits the paging-path migration to
+<code>multiSearch(singleProvider)</code>.</li>
+</ul>
+<h3 id="new-schema">New schema</h3>
+<ul>
+<li>v8 → v9 (Phase A): <code>credentials_entry</code>,
+<code>provider_credential_binding</code>,
+<code>provider_sync_toggle</code>, <code>cloned_provider</code>,
+<code>sync_outbox</code> (Migration_8_9).</li>
+<li>v9 → v10 (Phase G.1): <code>deletedAt: Long?</code> column added to
+<code>credentials_entry</code> and <code>cloned_provider</code>
+(Migration_9_10). Existing rows default to <code>NULL</code> (not
+deleted).</li>
+</ul>
+<h3 id="new-constitutional-clauses">New constitutional clauses</h3>
+<ul>
+<li>§6.R — No-Hardcoding Mandate. IPv4 + host:port literal scanners
+landed in §4.5.10 closure.</li>
+<li>§6.S — Continuation Document Maintenance Mandate.</li>
+<li>§6.T.1–4 — Universal Quality Constraints (Reproduction-Before-Fix,
+Resource Limits, No-Force-Push, Bugfix Documentation).</li>
+<li>§6.U — No sudo/su Mandate.</li>
+<li>§6.V — Container Emulators Mandate.</li>
+<li>§6.W — GitHub + GitLab Only Remotes (4-mirror model reduced to
+2).</li>
+<li>§6.L count bumped to TWENTY (operator's repeated standing
+order).</li>
+</ul>
+<h2 id="owed-work-carrying-forward-beyond-sp-4-active-execution">Owed
+work (carrying forward beyond SP-4 active execution)</h2>
+<h3 id="phase-e--credentials-sync-via-lava-api">Phase E — Credentials
+sync via Lava API</h3>
+<p>The Go API service (lava-api-go) needs
+<code>PUT /v1/credentials</code>,
+<code>DELETE /v1/credentials/:id</code>,
+<code>GET /v1/credentials</code>. End-to-end encryption with a per-user
+key derivation (separate from the existing per-build LAVA_AUTH chain).
+Client-side sync mechanism reads the sync outbox and uploads pending
+entries; merges remote soft-deletes back into the local DAO.
+Backup-restore Challenge Test on a second emulator. Multi-domain phase
+(Go + Android); execute requires operator-supplied Go API environment +
+integration testing.</p>
+<h3 id="phase-f2--per-clone-url-routing">Phase F.2 — Per-clone URL
+routing</h3>
+<p>The current <code>ClonedRoutingTrackerClient</code> (Phase F.1) wraps
+the source TrackerClient unchanged — <code>getFeature(...)</code>
+delegates to the source, which is bound to the source's
+<code>baseUrls</code> at factory.create-time. For the clone's
+<code>primaryUrl</code> to actually be used by HTTP traffic, either (a)
+the per-tracker factories need to accept a
+<code>PluginConfig.baseUrlOverride</code> and rebuild their HTTP client
+around it, or (b) a per-clone <code>MirrorManager</code> needs to be
+injected at SDK-call time. Cross-module refactor across
+<code>:core:tracker:rutracker</code>, <code>:core:tracker:rutor</code>,
+<code>:core:tracker:nnmclub</code>, <code>:core:tracker:kinozal</code>,
+<code>:core:tracker:archiveorg</code>,
+<code>:core:tracker:gutenberg</code>. The Phase B clone-success Toast
+already discloses this gap to the user.</p>
+<h3 id="phase-h--documentation-refresh-tail">Phase H — Documentation
+refresh (tail)</h3>
+<p>This file is the start. Owed:</p>
+<ul>
+<li><code>sdk-developer-guide.md</code> updates documenting the new
+<code>multiSearch</code> + <code>streamMultiSearch</code> +
+<code>clientFor</code> surfaces.</li>
+<li>User-facing onboarding copy for the new per-provider config
+screen.</li>
+<li>Diagrams in <code>ARCHITECTURE.md</code> redrawn to reflect Phase B
++ C + D + F.1.</li>
+</ul>
+<h3 id="compose-ui-challenges">Compose UI Challenges</h3>
+<p>Operator-bound execution on the §6.I matrix:</p>
+<ul>
+<li>C04 (rewritten in Phase C) — Menu provider row → ProviderConfig
+opens</li>
+<li>C01 (updated in Phase C) — Menu structure now lists "Provider
+Credentials" instead of "Trackers"</li>
+<li>C27 — CredentialsCreateAndAssign (Phase A+B owed)</li>
+<li>C28 — PerProviderSyncToggle (Phase B owed)</li>
+<li>C29 — AddCustomMirror (Phase B owed)</li>
+<li>C30 — CloneProvider (Phase B owed)</li>
+<li>C31 — PassphraseUnlockFlow (Phase A owed)</li>
+<li>C32 — MultiProviderParallelSearch (Phase D owed)</li>
+<li>C33 — SearchCancellation (Phase D owed)</li>
+<li>C34 — CloneAndSearchClonedProvider (Phase F.1 owed)</li>
+</ul>
+<p>All require live emulator runs producing per-AVD attestation rows in
+<code>.lava-ci-evidence/&lt;tag&gt;/real-device-verification.md</code>
+before the next release tag.</p>
+<h2 id="anti-bluff-posture-across-sp-4">Anti-bluff posture across
+SP-4</h2>
+<p>Every phase shipped a Bluff-Audit stamp in its commit body with a
+deliberate-mutation rehearsal:</p>
+<ul>
+<li>Phase B:
+<code>MenuViewModelTest.open provider config posts side effect with provider id</code></li>
+<li>Phase C: rehearsal protocols embedded in C04 + C01 KDoc
+(operator-driven on emulator)</li>
+<li>Phase D: <code>LavaTrackerSdkParallelSearchTest</code> —
+parallel-fanout / cancellation / event-ordering / failure-isolation (4
+tests, 3 rehearsed in commit)</li>
+<li>Phase F.1: <code>LavaTrackerSdkCloneSearchTest</code> — also
+surfaced + closed a real latent bluff (a proposed Test 2 was discovered
+during its own rehearsal to be a bluff against
+<code>DeduplicationEngine</code>'s map-key-driven output; both the bluff
+test AND the dead production re-tag were deleted)</li>
+<li>Phase G.1: <code>CredentialsEntryRepositorySoftDeleteTest</code> —
+also surfaced + closed a Third-Law fake-divergence bug (FakeDao didn't
+mirror Room's <code>WHERE deletedAt IS NULL</code> filter; fixed in the
+same commit before the rehearsal could expose a false-green)</li>
+</ul>
+<p>The §6.N hunt at the 20th §6.L invocation (2026-05-13) found 0 bluffs
+across 5 random <code>*Test.kt</code> files + 2 gate-shaping production
+files. Evidence:
+<code>.lava-ci-evidence/bluff-hunt/2026-05-13.json</code>.</p>
+<p>The Phase F.1 and G.1 discoveries were unrelated to that hunt — they
+were end-of-phase audits the operator's 20th-invocation directive made
+standing operating procedure. Both confirm the §6.J pattern the
+operator's mandate evicts: phases that LOOK complete can ship latent
+bluffs that only end-of-session audits surface.</p>
+<h2 id="mirror-status">Mirror status</h2>
+<p>Parent + 16 vasic-digital submodules + lava-api-go: all on both
+GitHub + GitLab at HEAD <code>68f75e6a</code> as of 2026-05-13.</p>
+</body>
+</html>

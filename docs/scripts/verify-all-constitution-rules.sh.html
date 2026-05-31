@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>verify-all-constitution-rules.sh</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1
+id="scriptsverify-all-constitution-rulessh--user-guide"><code>scripts/verify-all-constitution-rules.sh</code>
+— User Guide</h1>
+<p><strong>Last verified:</strong> 2026-05-15 (constitution-compliance
+plan Phase 1) <strong>Inheritance:</strong> HelixConstitution §11.4.32
+(Post-Constitution-Pull Validation Mandate) + §11.4.18 (script
+documentation)</p>
+<h2 id="overview">Overview</h2>
+<p>Master enforcement-engine sweep that wraps every individual
+constitution-gate + every hermetic test suite into a single invocation.
+Per §11.4.32 itself: "this gate is the enforcement engine for every
+other §11.4.x and CONST-NNN rule — without it, new rules cascade as
+anchors but never get enforced in the codebase".</p>
+<p>Mandatory invocation triggers (per §11.4.32):</p>
+<ul>
+<li>Whenever <code>git submodule update --remote constitution</code>
+produces any content change in the constitution submodule</li>
+<li>Operator-explicit manual invocation</li>
+<li>ci.sh step 5a4 (every CI run)</li>
+</ul>
+<h2 id="usage">Usage</h2>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> scripts/verify-all-constitution-rules.sh                <span class="co"># STRICT (default) — exits 1 on any gate failure</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> scripts/verify-all-constitution-rules.sh <span class="at">--strict</span>       <span class="co"># explicit strict</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> scripts/verify-all-constitution-rules.sh <span class="at">--advisory</span>     <span class="co"># exits 0 even with failures</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> scripts/verify-all-constitution-rules.sh <span class="at">--json-only</span>    <span class="co"># suppresses stdout summary; only emits JSON</span></span></code></pre></div>
+<h2 id="inputs">Inputs</h2>
+<table>
+<thead>
+<tr>
+<th>Arg</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--strict</code></td>
+<td>Default: exit 1 on any gate failure</td>
+</tr>
+<tr>
+<td><code>--advisory</code></td>
+<td>Exit 0 even with failures (for incremental adoption)</td>
+</tr>
+<tr>
+<td><code>--json-only</code></td>
+<td>Suppress stdout per-gate summary; only write attestation JSON</td>
+</tr>
+<tr>
+<td><code>LAVA_REPO_ROOT</code> env</td>
+<td>Override repo root for hermetic testing</td>
+</tr>
+</tbody>
+</table>
+<h2 id="outputs">Outputs</h2>
+<ul>
+<li><strong>stdout:</strong> per-gate pass/fail summary + final verdict
+(suppressed by <code>--json-only</code>)</li>
+<li><strong><code>.lava-ci-evidence/verify-all/&lt;UTC-timestamp&gt;.json</code>:</strong>
+structured attestation with sweep metadata + per-gate result list</li>
+</ul>
+<p>Attestation JSON schema:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;sweep_timestamp&quot;</span><span class="fu">:</span> <span class="st">&quot;&lt;ISO timestamp&gt;&quot;</span><span class="fu">,</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;sweep_mode&quot;</span><span class="fu">:</span> <span class="st">&quot;strict|advisory&quot;</span><span class="fu">,</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;sweep_constitution_pin&quot;</span><span class="fu">:</span> <span class="st">&quot;&lt;git rev-parse HEAD inside constitution/&gt;&quot;</span><span class="fu">,</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;total_gates&quot;</span><span class="fu">:</span> <span class="er">&lt;int&gt;</span><span class="fu">,</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;pass_count&quot;</span><span class="fu">:</span> <span class="er">&lt;int&gt;</span><span class="fu">,</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;fail_count&quot;</span><span class="fu">:</span> <span class="er">&lt;int&gt;</span><span class="fu">,</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;all_passed&quot;</span><span class="fu">:</span> <span class="er">&lt;bool&gt;</span><span class="fu">,</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;gates&quot;</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">{</span><span class="dt">&quot;name&quot;</span><span class="fu">:</span> <span class="st">&quot;&lt;gate-name&gt;&quot;</span><span class="fu">,</span> <span class="dt">&quot;rule_ref&quot;</span><span class="fu">:</span> <span class="st">&quot;&lt;§clause-ref&gt;&quot;</span><span class="fu">,</span> <span class="dt">&quot;result&quot;</span><span class="fu">:</span> <span class="st">&quot;PASS|FAIL&quot;</span><span class="fu">,</span> <span class="dt">&quot;duration_seconds&quot;</span><span class="fu">:</span> <span class="er">&lt;int&gt;</span><span class="fu">}</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>  <span class="ot">]</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<h2 id="gates-registry-current">Gates registry (current)</h2>
+<p>The sweep currently invokes 37 gates across 4 categories (count last
+revised in Phase 7 — §11.4.25 coverage-ledger added):</p>
+<ol type="1">
+<li><strong>Constitution doc parser</strong> (1 gate) —
+<code>scripts/check-constitution.sh</code> covering §6.A-§6.AE
+inheritance + §6.W boundary + §11.4.6 no-guessing</li>
+<li><strong>Anti-bluff scanners</strong> (9 gates) — non-fatal coverage
+/ <strong>gitignore coverage (Phase 2 — §11.4.30)</strong> /
+<strong>nested-own-org-submodules (Phase 5 — §11.4.28, STRICT)</strong>
+/ <strong>canonical-root-and-upstreams (Phase 8 — §11.4.35 + §11.4.36,
+STRICT)</strong> / <strong>helix-deps-manifest (Phase 3 — §11.4.31,
+STRICT)</strong> / <strong>coverage-ledger (Phase 7 — §11.4.25,
+ADVISORY)</strong> / Challenge discrimination Layer 1+2 / Challenge
+coverage / fixture freshness</li>
+<li><strong>No-hardcoding scanners</strong> (3 gates) — UUID / IPv4 /
+host:port literal scans</li>
+<li><strong>Hermetic test suites</strong> (~23 gates) — tests/firebase +
+tests/ci-sh + tests/compose-layout + tests/tag-helper + tests/vm-* +
+tests/pre-push/check{4,5,6,7,8,9} + tests/check-constitution/* (now
+includes <code>test_gitignore_coverage.sh</code> +
+<code>test_nested_own_org_submodules.sh</code> +
+<code>test_canonical_root_and_upstreams.sh</code> +
+<code>test_helix_deps_manifest.sh</code> +
+<code>test_coverage_ledger.sh</code>)</li>
+</ol>
+<p>Per-gate STRICT/ADVISORY note: Phase 5 / Phase 8 / Phase 3 gates have
+been STRICT-flipped 2026-05-15 after their respective debt closures
+landed:</p>
+<ul>
+<li><strong>Phase 5-debt closure</strong>: github cascade merge removed
+Challenges/.gitmodules (CONST-051(C) flat-layout enforcement); Panoptic
+no longer nested.</li>
+<li><strong>Phase 8-debt closure</strong>: 10 install_upstreams scripts
+landed via Phase 8-debt batch (Challenges, Config, Containers,
+Discovery, HTTP3, Mdns, Middleware, RateLimiter, Recovery, Tracker-SDK
+each gained install_upstreams.sh + Upstreams/GitHub.sh +
+Upstreams/GitLab.sh per §6.W).</li>
+<li><strong>Phase 3-debt closure</strong>: 16/16 per-submodule
+helix-deps.yaml manifests landed via Phase 3-debt batch (each authored
+with HONEST per-submodule deps after analysis).</li>
+</ul>
+<p>Phase 7 STRICT-flipped 2026-05-16 after the waiver-backfill agent
+(commit 20b3fd36) lifted the ledger from 0/20/38 to 48/10/0. The 10
+remaining <code>partial</code> rows are honest gaps for structural/glue
+modules without dedicated unit tests (transitively exercised by
+downstream features + Challenges). The verifier hard-asserts
+row-coverage + freshness + schema integrity in STRICT mode;
+ledger-staleness conditions are the gate's primary failure mode
+(legitimate gap counts don't trigger the verifier).</p>
+<p>The list grows as new constitution gates land. Adding a new gate to
+the registry requires updating both the sweep + the hermetic meta-test
+(<code>tests/check-constitution/test_verify_all_rules.sh</code>).</p>
+<h2
+id="falsifiability-rehearsal-mandated-by-11432-itself">Falsifiability
+rehearsal (mandated by §11.4.32 itself)</h2>
+<p>§11.4.32: "sweep's own meta-test (paired mutation §1.1) plants a
+known violation of each enforced gate and asserts sweep reports FAIL for
+the planted gate."</p>
+<p>Implemented in
+<code>tests/check-constitution/test_verify_all_rules.sh</code> with 4
+fixtures:</p>
+<ul>
+<li><code>test_clean_tree_passes</code> — sweep passes against the real
+Lava tree</li>
+<li><code>test_gate_failure_propagates</code> — synthetic minimal repo
+(no constitution clauses) causes sweep to report
+<code>all_passed: false</code> + exit 1</li>
+<li><code>test_advisory_mode_returns_zero</code> —
+<code>--advisory</code> exits 0 even with failures</li>
+<li><code>test_attestation_json_structure</code> — emitted JSON has all
+required fields</li>
+</ul>
+<p>A sweep that exits PASS without running every implementable gate is
+itself a §11.4.32 violation.</p>
+<h2 id="side-effects">Side-effects</h2>
+<ul>
+<li>Creates <code>.lava-ci-evidence/verify-all/</code> directory if
+missing</li>
+<li>Writes one attestation file per invocation (timestamps make file
+names unique)</li>
+<li>Does NOT modify any tracked files</li>
+</ul>
+<h2 id="cross-references">Cross-references</h2>
+<ul>
+<li>HelixConstitution <code>Constitution.md</code> §11.4.32 (the
+mandate)</li>
+<li><code>docs/plans/2026-05-15-constitution-compliance.md</code> (Phase
+1 — this script)</li>
+<li><code>docs/helix-constitution-gates.md</code>
+<code>CM-VERIFY-ALL-CONSTITUTION-RULES</code> row</li>
+<li><code>tests/check-constitution/test_verify_all_rules.sh</code> (the
+hermetic meta-test)</li>
+<li>All individual scanners + hermetic suites the sweep wraps</li>
+</ul>
+</body>
+</html>

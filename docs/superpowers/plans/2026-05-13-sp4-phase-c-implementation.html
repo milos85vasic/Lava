@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-05-13-sp4-phase-c-implementation</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1 id="sp-4-phase-c--trackers-screen-removal-implementation-plan">SP-4
+Phase C — Trackers Screen Removal (implementation plan)</h1>
+<p><strong>Plan date:</strong> 2026-05-13 <strong>Design:</strong>
+<code>docs/superpowers/specs/2026-05-13-sp4-phase-c-design.md</code>
+<strong>Parent SP:</strong>
+<code>docs/superpowers/specs/2026-05-12-sp4-multi-provider-redesign.md</code>
+<strong>Prerequisite:</strong> Phase B complete (commit
+<code>85af95b3</code>).</p>
+<p>This phase is single-session executable, 7 tasks, ~25 steps. No
+emulator needed for the structural deletions; the C04 rewrite +
+falsifiability rehearsal needs a connected emulator only if executed on
+the gating matrix per §6.I. Operator-driven rehearsal can happen at any
+time before the next tag.</p>
+<h2 id="task-1--add-activetrackersection-to-featureprovider_config">Task
+1 — Add <code>ActiveTrackerSection</code> to
+<code>:feature:provider_config</code></h2>
+<p>Preserves the only unique capability of the deleted Trackers screen
+as a small affordance inside ProviderConfig.</p>
+<p><strong>Files:</strong></p>
+<ul>
+<li>Create:
+<code>feature/provider_config/src/main/kotlin/lava/provider/config/sections/ActiveTrackerSection.kt</code></li>
+<li>Modify:
+<code>feature/provider_config/src/main/kotlin/lava/provider/config/ProviderConfigState.kt</code>
+— add <code>activeTrackerId: String? = null</code></li>
+<li>Modify:
+<code>feature/provider_config/src/main/kotlin/lava/provider/config/ProviderConfigAction.kt</code>
+— add <code>data object MakeActive : ProviderConfigAction</code></li>
+<li>Modify:
+<code>feature/provider_config/src/main/kotlin/lava/provider/config/ProviderConfigViewModel.kt</code>
+— observe <code>sdk.activeTrackerId()</code> snapshot at init; handle
+<code>MakeActive</code> by calling
+<code>sdk.switchTracker(providerId)</code> + reducing the new state</li>
+<li>Modify:
+<code>feature/provider_config/src/main/kotlin/lava/provider/config/ProviderConfigScreen.kt</code>
+— insert <code>ActiveTrackerSection(state, onAction)</code> between
+<code>Header</code> and <code>SyncSection</code></li>
+</ul>
+<p><strong>Steps:</strong></p>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 1: Add state field +
+action.</strong></label></li>
+<li><label><input type="checkbox" /><strong>Step 2: ViewModel
+wiring.</strong> Read <code>sdk.activeTrackerId()</code> in
+<code>onCreate</code>; on <code>MakeActive</code> call
+<code>sdk.switchTracker(providerId)</code> then
+<code>reduce { state.copy(activeTrackerId = providerId) }</code>.</label></li>
+<li><label><input type="checkbox" /><strong>Step 3: Section
+composable.</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="at">@Composable</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="kw">internal</span> <span class="kw">fun</span> <span class="fu">ActiveTrackerSection</span><span class="op">(</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="va">state</span><span class="op">:</span> <span class="dt">ProviderConfigState</span><span class="op">,</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="va">onAction</span><span class="op">:</span> <span class="op">(</span><span class="dt">ProviderConfigAction</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="dt">Unit</span><span class="op">,</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">val</span> <span class="va">isActive</span> <span class="op">=</span> state<span class="op">.</span>activeTrackerId <span class="op">!=</span> <span class="kw">null</span> <span class="op">&amp;&amp;</span> state<span class="op">.</span>activeTrackerId <span class="op">==</span> state<span class="op">.</span>providerId</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    Row<span class="op">(</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>        modifier <span class="op">=</span> Modifier<span class="op">.</span>fillMaxWidth<span class="op">().</span>padding<span class="op">(</span>horizontal <span class="op">=</span> AppTheme<span class="op">.</span>spaces<span class="op">.</span>large<span class="op">,</span> vertical <span class="op">=</span> AppTheme<span class="op">.</span>spaces<span class="op">.</span>medium<span class="op">),</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>        verticalAlignment <span class="op">=</span> Alignment<span class="op">.</span>CenterVertically<span class="op">,</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    <span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>        Column<span class="op">(</span>modifier <span class="op">=</span> Modifier<span class="op">.</span>weight<span class="op">(</span><span class="fl">1f</span><span class="op">))</span> <span class="op">{</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>            Body<span class="op">(</span>text <span class="op">=</span> <span class="cf">if</span> <span class="op">(</span>isActive<span class="op">)</span> <span class="st">&quot;Active provider&quot;</span> <span class="cf">else</span> <span class="st">&quot;Inactive&quot;</span><span class="op">)</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>            BodySmall<span class="op">(</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>                text <span class="op">=</span> <span class="cf">if</span> <span class="op">(</span>isActive<span class="op">)</span> <span class="st">&quot;This provider is the SDK&#39;s currently-active target.&quot;</span> <span class="cf">else</span> <span class="st">&quot;Tap Make active to route searches here.&quot;</span><span class="op">,</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>                color <span class="op">=</span> AppTheme<span class="op">.</span>colors<span class="op">.</span>outline<span class="op">,</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>            <span class="op">)</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">(!</span>isActive<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>            TextButton<span class="op">(</span>text <span class="op">=</span> <span class="st">&quot;Make active&quot;</span><span class="op">,</span> onClick <span class="op">=</span> <span class="op">{</span> onAction<span class="op">(</span>ProviderConfigAction<span class="op">.</span>MakeActive<span class="op">)</span> <span class="op">})</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 4: Wire into
+screen.</strong></label></li>
+<li><label><input type="checkbox" /><strong>Step 5: Compile.</strong>
+<code>./gradlew :feature:provider_config:compileDebugKotlin spotlessKotlinCheck</code>.</label></li>
+</ul>
+<h2 id="task-2--delete-challenge14trackersettingsopentestkt">Task 2 —
+Delete <code>Challenge14TrackerSettingsOpenTest.kt</code></h2>
+<p>The Trackers screen this Challenge opens is being deleted. Per §6.J,
+deletion (not <code>@Ignore</code>) is the correct response.</p>
+<p><strong>Files:</strong></p>
+<ul>
+<li>Delete:
+<code>app/src/androidTest/kotlin/lava/app/challenges/Challenge14TrackerSettingsOpenTest.kt</code></li>
+</ul>
+<p><strong>Steps:</strong></p>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 1: <code>git rm</code>
+the file.</strong></label></li>
+<li><label><input type="checkbox" /><strong>Step 2: Verify</strong> no
+other Challenge references it.</label></li>
+</ul>
+<h2
+id="task-3--remove-trackers-menu-entry--actionside-effect-plumbing">Task
+3 — Remove Trackers menu entry + action/side-effect plumbing</h2>
+<p><strong>Files:</strong></p>
+<ul>
+<li>Modify:
+<code>feature/menu/src/main/kotlin/lava/menu/MenuAction.kt</code> —
+remove <code>TrackerSettingsClick</code></li>
+<li>Modify:
+<code>feature/menu/src/main/kotlin/lava/menu/MenuSideEffect.kt</code> —
+remove <code>OpenTrackerSettings</code></li>
+<li>Modify:
+<code>feature/menu/src/main/kotlin/lava/menu/MenuViewModel.kt</code> —
+remove <code>onTrackerSettingsClick()</code> + the action's
+<code>when</code> branch</li>
+<li>Modify:
+<code>feature/menu/src/main/kotlin/lava/menu/MenuScreen.kt</code> —
+remove <code>openTrackerSettings</code> parameter + side-effect handler
++ the <code>menuItem(text = { Text("Trackers") }, ...)</code> LazyList
+entry</li>
+</ul>
+<p><strong>Steps:</strong></p>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 1:
+MenuAction.kt</strong> — delete the <code>TrackerSettingsClick</code>
+line + its comment.</label></li>
+<li><label><input type="checkbox" /><strong>Step 2:
+MenuSideEffect.kt</strong> — delete the <code>OpenTrackerSettings</code>
+line + comment.</label></li>
+<li><label><input type="checkbox" /><strong>Step 3:
+MenuViewModel.kt</strong> — delete
+<code>onTrackerSettingsClick()</code>, the <code>when</code> branch, the
+unused <code>import</code>.</label></li>
+<li><label><input type="checkbox" /><strong>Step 4:
+MenuScreen.kt</strong> — delete the parameter from both
+<code>fun MenuScreen(...)</code> overloads + the
+<code>OpenTrackerSettings</code> branch in
+<code>collectSideEffect { ... }</code> + the
+<code>menuItem(text = { Text("Trackers") }, ...)</code> block. Remove
+the unused string resource reference if any.</label></li>
+<li><label><input type="checkbox" /><strong>Step 5: Compile</strong>
+<code>:feature:menu:compileDebugKotlin :feature:menu:compileDebugUnitTestKotlin</code>.</label></li>
+</ul>
+<h2 id="task-4--remove-featuretracker_settings-from-build-graph">Task 4
+— Remove <code>:feature:tracker_settings</code> from build graph</h2>
+<p><strong>Files:</strong></p>
+<ul>
+<li>Modify: <code>settings.gradle.kts</code> — remove
+<code>include(":feature:tracker_settings")</code></li>
+<li>Modify: <code>app/build.gradle.kts</code> — remove
+<code>implementation(project(":feature:tracker_settings"))</code></li>
+<li>Modify:
+<code>app/src/main/kotlin/.../navigation/MobileNavigation.kt</code> —
+remove the two
+<code>import lava.feature.tracker.settings.{addTrackerSettings,openTrackerSettings}</code>
+lines, the <code>addTrackerSettings(...)</code> block, the
+<code>openTrackerSettings = { openTrackerSettings() }</code>
+pass-through, and the <code>openTrackerSettings: () -&gt; Unit</code>
+parameter from <code>addNestedNavigation</code> +
+<code>addMenu</code></li>
+</ul>
+<p><strong>Steps:</strong></p>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 1:
+settings.gradle.kts.</strong></label></li>
+<li><label><input type="checkbox" /><strong>Step 2:
+app/build.gradle.kts.</strong></label></li>
+<li><label><input type="checkbox" /><strong>Step 3:
+MobileNavigation.kt.</strong> Both the <code>addTrackerSettings</code>
+registration AND the menu-pass-through chain.</label></li>
+<li><label><input type="checkbox" /><strong>Step 4: Compile
+:app</strong> — <code>./gradlew :app:compileDebugKotlin</code> (operator
+env required for .env / keystore; skip on agent sessions).</label></li>
+</ul>
+<h2 id="task-5--delete-featuretracker_settings-directory">Task 5 —
+Delete <code>feature/tracker_settings/</code> directory</h2>
+<p><strong>Files:</strong></p>
+<ul>
+<li>Delete: <code>feature/tracker_settings/</code> (recursive —
+build.gradle.kts, manifest, all sources + tests + resources)</li>
+</ul>
+<p><strong>Steps:</strong></p>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 1:
+<code>git rm -r feature/tracker_settings/</code></strong>.</label></li>
+<li><label><input type="checkbox" /><strong>Step 2: Verify</strong>
+<code>grep -rln "lava.feature.tracker.settings\|:feature:tracker_settings\|TrackerSettingsScreen" .</code>
+returns nothing in tracked sources. Hits in <code>docs/</code>,
+<code>CHANGELOG.md</code>, <code>docs/CONTINUATION.md</code>,
+<code>.lava-ci-evidence/</code> are historical record and
+stay.</label></li>
+</ul>
+<h2
+id="task-6--rewrite-c04-against-the-new-menu--providerconfig-path">Task
+6 — Rewrite C04 against the new Menu → ProviderConfig path</h2>
+<p>Per §6.J + §6.N, the rewrite ships with a falsifiability
+rehearsal.</p>
+<p><strong>Files:</strong></p>
+<ul>
+<li>Modify:
+<code>app/src/androidTest/kotlin/lava/app/challenges/Challenge04SwitchTrackerAndResearchTest.kt</code></li>
+</ul>
+<p><strong>Steps:</strong></p>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 1: Rename
+file.</strong> New name:
+<code>Challenge04ProviderRowOpensConfigTest.kt</code>. Class name
+matches.</label></li>
+<li><label><input type="checkbox" /><strong>Step 2: New scope.</strong>
+Drive: launch → Menu tab → tap first provider row → assert
+<code>ProviderConfig</code> screen renders with the provider's
+displayName visible in the AppBar title + at least one of the new
+sections ("Sync this provider", "Mirrors", "Make active" affordance when
+not-active) is visible.</label></li>
+<li><label><input type="checkbox" /><strong>Step 3: Falsifiability
+rehearsal.</strong> Mutate
+<code>MenuViewModel.onOpenProviderConfig(providerId)</code> to NOT emit
+<code>MenuSideEffect.OpenProviderConfig(providerId)</code> (e.g., emit
+<code>Unit</code> or comment out the postSideEffect line). Run the
+rewritten C04. Confirm it fails with a clear
+<code>expected node containing 'Sync this provider' was not found</code>
+style assertion. Record the mutation + observed failure verbatim in
+commit body. Revert. Re-run → PASS.</label></li>
+<li><label><input type="checkbox" /><strong>Step 4: KDoc update</strong>
+with the new falsifiability rehearsal protocol per the project's
+Challenge Test convention.</label></li>
+</ul>
+<h2 id="task-7--update-continuationmd--commit--push">Task 7 — Update
+CONTINUATION.md + commit + push</h2>
+<p><strong>Files:</strong></p>
+<ul>
+<li>Modify: <code>docs/CONTINUATION.md</code> — §0 "Last updated" +
+per-task ledger + state delta</li>
+</ul>
+<p><strong>Steps:</strong></p>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 1: CONTINUATION
+update.</strong> Update §0 with the Phase C delivery (Trackers screen
+deleted, <code>ActiveTrackerSection</code> added, C04 rewritten, C14
+deleted).</label></li>
+<li><label><input type="checkbox" /><strong>Step 2: Local CI
+gate.</strong> <code>bash scripts/check-constitution.sh</code> (must
+pass) + the spotless+test runs.</label></li>
+<li><label><input type="checkbox" /><strong>Step 3: Commit</strong> with
+body containing:</label>
+<ul>
+<li>One Bluff-Audit stamp per modified <code>*Test.kt</code> file (just
+C04 here).</li>
+<li>Note Phase C closure references the design doc + plan paths.</li>
+<li><code>Co-Authored-By: Claude Opus 4.7 (1M context) &lt;noreply@anthropic.com&gt;</code>
+trailer.</li>
+</ul></li>
+<li><label><input type="checkbox" /><strong>Step 4: Push both
+mirrors.</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> r <span class="kw">in</span> github gitlab<span class="kw">;</span> <span class="cf">do</span> <span class="fu">git</span> push <span class="st">&quot;</span><span class="va">$r</span><span class="st">&quot;</span> master<span class="kw">;</span> <span class="cf">done</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> r <span class="kw">in</span> github gitlab<span class="kw">;</span> <span class="cf">do</span> <span class="bu">echo</span> <span class="st">&quot;</span><span class="va">$r</span><span class="st">: </span><span class="va">$(</span><span class="fu">git</span> ls-remote <span class="va">$r</span> master <span class="kw">|</span> <span class="fu">awk</span> <span class="st">&#39;{print $1}&#39;</span> <span class="kw">|</span> <span class="fu">head</span> <span class="at">-1</span><span class="va">)</span><span class="st">&quot;</span><span class="kw">;</span> <span class="cf">done</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;HEAD: </span><span class="va">$(</span><span class="fu">git</span> rev-parse HEAD<span class="va">)</span><span class="st">&quot;</span></span></code></pre></div>
+<p>Verify SHA convergence.</p>
+<h2 id="risk-register">Risk register</h2>
+<table>
+<thead>
+<tr>
+<th>Risk</th>
+<th>Mitigation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Tests in the deleted <code>feature/tracker_settings/src/test/</code>
+are referenced by external tooling</td>
+<td>Verified by grep: only <code>feature/tracker_settings</code> itself
++ Challenge14 reference these. C14 deleted in Task 2; the rest is
+internal to the deleted module.</td>
+</tr>
+<tr>
+<td>The single test class
+<code>TrackerSelectorListLazyColumnRegressionTest</code> (§6.Q
+regression coverage) goes away with the module</td>
+<td>Acceptable: the §6.Q rule is mechanically enforced via
+<code>scripts/check-constitution.sh</code> checks already in place; the
+per-feature test was an additional structural test for one screen, not
+the constitutional gate.</td>
+</tr>
+<tr>
+<td>ActiveTrackerSection becomes dead code at Phase D</td>
+<td>Documented as Phase D pre-work: delete the section when
+<code>LavaTrackerSdk.activeTrackerId()</code> is removed. Recorded in
+the design doc.</td>
+</tr>
+<tr>
+<td>Persisted-state references to <code>tracker_settings</code>
+route</td>
+<td>None: the route was always in-process navigation only; no deep links
+or Room rows reference it.</td>
+</tr>
+<tr>
+<td><code>:app:compileDebugKotlin</code> fails in agent sessions without
+<code>.env</code> + <code>keystores/debug.keystore</code></td>
+<td>Same operator-env limitation as Phase B Task 16+17+18. The
+:feature:tracker_settings + :feature:menu + :feature:provider_config +
+spotless gates all pass without <code>.env</code>. Operator runs the
+full :app compile in their env before tag.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="deliverable-summary">Deliverable summary</h2>
+<p>A single commit (or 2-3 if grouping by domain) that:</p>
+<ol type="1">
+<li>Removes the entire Trackers screen feature module.</li>
+<li>Adds the <code>ActiveTrackerSection</code> affordance to
+ProviderConfig.</li>
+<li>Removes the Menu's Trackers entry + plumbing.</li>
+<li>Removes the Trackers route from the navigation graph.</li>
+<li>Rewrites C04 against the new path; deletes C14.</li>
+<li>Updates CONTINUATION.md.</li>
+<li>Lands on both mirrors with verified SHA convergence.</li>
+</ol>
+<p>Estimated session time: 30-60 minutes of execution + the
+falsifiability-rehearsal Gradle round for C04 (~3-5 minutes against the
+gating matrix when the operator runs it on the emulator). The structural
+deletions are the bulk; the affordance addition is the only feature
+work.</p>
+</body>
+</html>

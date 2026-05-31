@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-05-13-sp4-phase-c-design</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1 id="sp-4-phase-c--trackers-screen-removal-detailed-design">SP-4
+Phase C — Trackers Screen Removal (detailed design)</h1>
+<p><strong>Spec date:</strong> 2026-05-13 <strong>Parent SP:</strong>
+<code>docs/superpowers/specs/2026-05-12-sp4-multi-provider-redesign.md</code>
+<strong>Phase B (commit 85af95b3) prerequisite:</strong> complete.
+<strong>Status:</strong> detailed-design locked. Implementation plan in
+<code>docs/superpowers/plans/2026-05-13-sp4-phase-c-implementation.md</code>.</p>
+<h2 id="goal-from-parent-sp-4-design">Goal (from parent SP-4
+design)</h2>
+<blockquote>
+<p><strong>Phase C — Trackers screen removal.</strong> Replace the
+screen with a multi-provider summary OR delete from the navigation
+graph. C04-C08 Challenges remapped or rewritten honestly.</p>
+</blockquote>
+<h2 id="current-state-post-phase-b-commit-85af95b3">Current state (post
+Phase B, commit <code>85af95b3</code>)</h2>
+<p>The <code>:feature:tracker_settings</code> module (the Trackers
+screen) was the v1.2.x home for per-provider management:</p>
+<table>
+<thead>
+<tr>
+<th>Trackers screen capability</th>
+<th>Where it lives now</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Active-tracker radio selector</td>
+<td>only on Trackers screen — <code>TrackerSelectorList</code></td>
+</tr>
+<tr>
+<td>Per-tracker mirror health table</td>
+<td>duplicated by <code>:feature:provider_config</code>
+<code>MirrorsSection</code></td>
+</tr>
+<tr>
+<td>"Add custom mirror" dialog</td>
+<td>duplicated by <code>MirrorsSection</code> add-row</td>
+</tr>
+<tr>
+<td>"Probe now"</td>
+<td>duplicated by <code>MirrorsSection</code> per-mirror Probe
+button</td>
+</tr>
+<tr>
+<td>Per-mirror Remove (user-added)</td>
+<td>duplicated by <code>MirrorsSection</code></td>
+</tr>
+</tbody>
+</table>
+<p>Per the SP-4 design, <strong>multi-provider parallel search (Phase
+D)</strong> removes the concept of a single "active tracker" —
+<code>LavaTrackerSdk.multiSearch</code> fans out to every selected
+provider. Once Phase D lands, the active-tracker radio is obsolete by
+construction.</p>
+<p><strong>Net result:</strong> of the five Trackers-screen capabilities
+above, four are already provided by ProviderConfig (Phase B). The fifth
+(active-tracker radio) is a v1.2.x-transitional concept that goes away
+in Phase D.</p>
+<h2 id="design-decision-delete-dont-replace">Design decision: delete,
+don't replace</h2>
+<p>The Phase C scope in the parent SP-4 design offered two paths
+(multi-provider summary OR deletion). The locked decision is
+<strong>deletion</strong> for these reasons:</p>
+<ol type="1">
+<li><strong>No unique surface.</strong> Every Phase B
+<code>:feature:provider_config</code> screen renders the same
+per-provider mirror table the Trackers screen does. A "multi-provider
+summary" screen would duplicate the Menu's existing provider list, which
+already shows every provider with health-dot-equivalent state (color
+dot, auth icon).</li>
+<li><strong>§6.J anti-bluff.</strong> Adding a summary screen that
+duplicates Menu's provider list would be theatre — two screens showing
+the same data via two code paths. Bug fixed in one would silently rot in
+the other.</li>
+<li><strong>Phase D obsolescence.</strong> Even a thin summary screen
+would be obsolete two phases later. Building it just to delete it is
+waste.</li>
+<li><strong>Smaller blast radius.</strong> Deletion is a structural
+simplification; replacement is an additional surface to maintain. Per
+the operator's no-half-implementations rule, simplification is
+preferred.</li>
+</ol>
+<p>The single transitional capability — active-tracker switching — moves
+to a <code>Make active provider</code> button inside
+<code>:feature:provider_config</code>. It's a one-line affordance, not a
+screen. Removed entirely when Phase D ships.</p>
+<h2 id="affected-surfaces">Affected surfaces</h2>
+<h3 id="files-to-delete">Files to delete</h3>
+<ul>
+<li><code>feature/tracker_settings/</code> — entire module
+(build.gradle.kts, manifest, all .kt sources, tests, resources)</li>
+<li><code>app/src/androidTest/kotlin/lava/app/challenges/Challenge14TrackerSettingsOpenTest.kt</code>
+— the screen this Challenge opens is gone; the test becomes vacuous</li>
+</ul>
+<h3 id="settingsgradlekts">settings.gradle.kts</h3>
+<p>Remove <code>include(":feature:tracker_settings")</code>.</p>
+<h3 id="appbuildgradlekts">app/build.gradle.kts</h3>
+<p>Remove
+<code>implementation(project(":feature:tracker_settings"))</code>.</p>
+<h3
+id="appsrcmainkotlinnavigationmobilenavigationkt">app/src/main/kotlin/.../navigation/MobileNavigation.kt</h3>
+<p>Remove:</p>
+<ul>
+<li><code>import lava.feature.tracker.settings.addTrackerSettings</code></li>
+<li><code>import lava.feature.tracker.settings.openTrackerSettings</code></li>
+<li>The <code>addTrackerSettings(...)</code> registration block</li>
+<li>The <code>openTrackerSettings = { openTrackerSettings() }</code>
+parameter pass-through</li>
+<li>The <code>openTrackerSettings: () -&gt; Unit</code> parameter from
+<code>addNestedNavigation</code> + <code>addMenu</code></li>
+</ul>
+<h3
+id="featuremenusrcmainkotlinlavamenumenuactionkt">feature/menu/src/main/kotlin/lava/menu/MenuAction.kt</h3>
+<p>Remove
+<code>data object TrackerSettingsClick : MenuAction</code>.</p>
+<h3
+id="featuremenusrcmainkotlinlavamenumenusideeffectkt">feature/menu/src/main/kotlin/lava/menu/MenuSideEffect.kt</h3>
+<p>Remove
+<code>data object OpenTrackerSettings : MenuSideEffect</code>.</p>
+<h3
+id="featuremenusrcmainkotlinlavamenumenuviewmodelkt">feature/menu/src/main/kotlin/lava/menu/MenuViewModel.kt</h3>
+<p>Remove <code>onTrackerSettingsClick()</code> private method + the
+<code>is MenuAction.TrackerSettingsClick -&gt; onTrackerSettingsClick()</code>
+branch.</p>
+<h3
+id="featuremenusrcmainkotlinlavamenumenuscreenkt">feature/menu/src/main/kotlin/lava/menu/MenuScreen.kt</h3>
+<p>Remove:</p>
+<ul>
+<li><code>openTrackerSettings: () -&gt; Unit = {},</code> parameter (and
+from the inner overload)</li>
+<li>The
+<code>is MenuSideEffect.OpenTrackerSettings -&gt; openTrackerSettings()</code>
+case in <code>collectSideEffect</code></li>
+<li>The
+<code>menuItem(text = { Text("Trackers") }, onClick = { onAction(MenuAction.TrackerSettingsClick) })</code>
+LazyList entry</li>
+</ul>
+<h3
+id="featuremenusrctestkotlinlavamenumenuviewmodeltestkt">feature/menu/src/test/kotlin/lava/menu/MenuViewModelTest.kt</h3>
+<p>No tests directly exercise <code>TrackerSettingsClick</code>
+(verified by grep). No changes needed.</p>
+<h3
+id="add-make-active-provider-affordance-to-featureprovider_config">Add
+"Make active provider" affordance to
+<code>:feature:provider_config</code></h3>
+<p>Inside <code>ProviderConfigScreen</code>, after <code>Header</code>
+section and before <code>SyncSection</code>, add an
+<code>ActiveTrackerSection</code> that:</p>
+<ul>
+<li>Shows <code>Active provider: rutracker.org</code> line indicating
+the SDK's current active tracker</li>
+<li>Shows a <code>Make active</code> button when
+<code>state.providerId != state.activeTrackerId</code></li>
+<li>Button → <code>ProviderConfigAction.MakeActive</code> → ViewModel
+calls <code>sdk.switchTracker(providerId)</code> → re-reads
+<code>state.activeTrackerId</code></li>
+</ul>
+<p>This is the only Trackers-screen capability that needed a home;
+ProviderConfig is the natural home since the user is already looking at
+the provider they want to make active.</p>
+<p><strong>Marker for Phase D:</strong> the
+<code>ActiveTrackerSection</code> is removed when Phase D's
+multi-provider parallel search ships (it makes
+<code>activeTrackerId</code> semantically meaningless). Recorded as
+Phase D pre-work.</p>
+<h2 id="challenge-tests-inventory">Challenge Tests inventory</h2>
+<table>
+<thead>
+<tr>
+<th>Challenge</th>
+<th>Current scope (post Phase 1 audit, commit
+<code>85af95b3</code>)</th>
+<th>Phase C impact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>C04 SwitchTrackerAndResearch</td>
+<td>"Menu tab → 'Trackers' entry reachable" (intentionally shallow;
+nav-compose 2.9.0 lifecycle race)</td>
+<td>Rewrite: assert Menu tab reachable + click a provider row →
+ProviderConfig renders + <code>Make active</code> button visible/hidden
+correctly. Shallow OK — the rewrite removes the deleted-screen
+assertion.</td>
+</tr>
+<tr>
+<td>C05 ViewTopic</td>
+<td>"Search tab reachable" (shallow; nav-compose race)</td>
+<td>No change — never touched TrackerSettings</td>
+</tr>
+<tr>
+<td>C06 DownloadTorrent</td>
+<td>"Forum tab reachable" (shallow)</td>
+<td>No change</td>
+</tr>
+<tr>
+<td>C07 CrossTrackerFallbackAccept</td>
+<td>"Topics tab reachable" (shallow; fault-injection-seam owed)</td>
+<td>No change</td>
+</tr>
+<tr>
+<td>C08 CrossTrackerFallbackDismiss</td>
+<td>"All four bottom-tab labels present" (shallow)</td>
+<td>No change</td>
+</tr>
+<tr>
+<td>C14 TrackerSettingsOpen</td>
+<td>Opens Trackers screen + asserts top-bar title rendered</td>
+<td><strong>Delete entirely</strong> — the screen is gone.</td>
+</tr>
+</tbody>
+</table>
+<p>C04 rewrite preserves the spirit (Menu reachable + provider
+interaction works) without requiring the deleted screen.</p>
+<h2 id="6q-regression-protection">§6.Q regression protection</h2>
+<p>The deleted
+<code>:feature:tracker_settings/src/test/.../TrackerSelectorListLazyColumnRegressionTest.kt</code>
+is a per-feature structural test against the nested-scroll antipattern.
+The §6.Q protection itself is mechanical via the constitution checker.
+We delete the file with the rest of the module. The pattern guard is
+preserved structurally:</p>
+<ul>
+<li><code>:feature:provider_config</code>'s
+<code>ProviderConfigScreen</code> uses
+<code>Column(verticalScroll)</code> with no nested LazyColumn at root
+level (verified at Phase B commit time).</li>
+<li>Should a future Phase C-style screen-level test be needed, the
+credentials_manager already has its own LazyColumn-in-Box-fillMaxSize
+pattern as a reference.</li>
+</ul>
+<p>No follow-up §6.Q test is owed by this phase.</p>
+<h2 id="anti-bluff-posture">Anti-bluff posture</h2>
+<p>Per §6.J / §6.L / §6.Q the phase MUST:</p>
+<ol type="1">
+<li><strong>Falsifiability rehearsal for C04 rewrite.</strong> Mutate
+the production code path C04 hits (e.g., remove the Menu provider row's
+<code>onClick</code> handler so taps go nowhere) and confirm the
+rewritten C04 fails with a clear assertion message. Record in commit
+body. The mutation MUST target the production path the rewrite claims to
+verify (the provider-row click handler that now routes to
+ProviderConfig), not an unrelated branch.</li>
+<li><strong>Bluff-Audit stamps</strong> for every modified
+<code>*Test.kt</code> file in this phase.</li>
+<li><strong>No <code>@Ignore</code> on C14.</strong> Deletion, not
+silencing. A skipped test is the bluff pattern §6.J calls out.</li>
+<li><strong>§6.S CONTINUATION update</strong> in the same commit as the
+deletions.</li>
+<li><strong>Build-verify</strong> before commit:
+<code>./gradlew :feature:menu:compileDebugKotlin :feature:provider_config:compileDebugKotlin spotlessKotlinCheck testDebugUnitTest</code>.</li>
+</ol>
+<h2 id="out-of-scope-for-phase-c">Out of scope for Phase C</h2>
+<ul>
+<li><strong><code>ActiveTrackerSection</code> Compose UI
+Challenge.</strong> Phase D removes this section. A Challenge Test gated
+on its existence would be a §6.J bluff against the upcoming removal —
+write it only if Phase D's start is more than one cycle out.</li>
+<li><strong>Migration prompt.</strong> Users on an older app version who
+had the Trackers screen bookmarked: no in-app migration prompt is needed
+— the Menu provider rows are the discoverable replacement, and the
+CHANGELOG entry documents the move.</li>
+<li><strong><code>feature:tracker_settings</code> git history
+preservation.</strong> The deletion removes the files but the history
+stays in <code>git log</code>; no archive subtree needed.</li>
+</ul>
+<h2 id="operators-invariants-reasserted">Operator's invariants
+reasserted</h2>
+<ul>
+<li>§6.Q: ProviderConfig already complies; no new nested-scroll surfaces
+introduced.</li>
+<li>§6.R: no new hardcoded literals; the deletions only remove existing
+config-free code.</li>
+<li>§6.S: CONTINUATION updated in the implementation commit.</li>
+<li>§6.W: pushed to both mirrors in lockstep.</li>
+<li>§6.P: any artifact-shipping commit (Phase C may bump version) bumps
+versionCode strictly + carries CHANGELOG entry.</li>
+</ul>
+<h2 id="implementation-plan">Implementation plan</h2>
+<p>See
+<code>docs/superpowers/plans/2026-05-13-sp4-phase-c-implementation.md</code>
+— 7 tasks, ~25 steps, single-session executable.</p>
+<h2 id="forensic-anchor">Forensic anchor</h2>
+<p>The Trackers screen shipped in SP-3a Phase 4 (commit cluster around
+Task 4.19) when the multi-tracker SDK first introduced runtime tracker
+switching. It served its purpose for the v1.2.x cycle. With Phase B's
+per-provider config screen and Phase D's upcoming multi-provider
+parallel search, the screen's role is fully absorbed elsewhere. Phase C
+is the structural cleanup that closes the v1.2.x "active tracker" mental
+model in favor of the SP-4 "multiple providers, each independently
+configured, all queried in parallel" model.</p>
+</body>
+</html>

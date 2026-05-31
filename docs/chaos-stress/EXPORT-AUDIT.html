@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>EXPORT-AUDIT</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1
+id="chaos-stress-docs--markdown-export-sibling-audit-11465">Chaos-Stress
+Docs — Markdown Export Sibling Audit (§11.4.65)</h1>
+<p><strong>Status:</strong> Audit complete — recommendation:
+<strong>§6.AF-debt</strong> (do NOT generate a sibling pile this cycle)
+<strong>Constitution:</strong> §11.4.65 (CONST-066
+universal-markdown-export) · §11.4.61/64 (metadata table + ToC) · §6.U
+(no sudo) · §6.T.2 (resource limits) · §11.4.6 (no-guessing)
+<strong>Last updated:</strong> 2026-05-31 <strong>Owner:</strong>
+docs-export audit subagent (read-only git; no commit/push)
+<strong>Scope:</strong> the NEW markdown docs added in the last ~10
+commits OUTSIDE <code>docs/tickets/</code>,
+<code>docs/CODEGRAPH.md</code>, <code>.codegraph/</code>,
+<code>constitution/</code></p>
+<hr />
+<h2 id="1-export-tooling-reality">1. Export-tooling reality</h2>
+<table>
+<thead>
+<tr>
+<th>Probe</th>
+<th>Result (CONFIRMED)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>command -v pandoc</code></td>
+<td><strong>PRESENT</strong> — <code>/opt/homebrew/bin/pandoc</code>
+(pandoc 3.9.0.2)</td>
+</tr>
+<tr>
+<td><code>command -v weasyprint</code></td>
+<td><strong>PRESENT</strong> — <code>/opt/homebrew/bin/weasyprint</code>
+(WeasyPrint 66.0)</td>
+</tr>
+<tr>
+<td><code>scripts/testing/sync_all_markdown_exports.sh</code></td>
+<td><strong>ABSENT</strong> — no canonical Lava export script</td>
+</tr>
+<tr>
+<td>Any <code>scripts/*export*</code> /
+<code>scripts/*markdown*sync*</code></td>
+<td><strong>NONE</strong> (full-tree <code>find</code>)</td>
+</tr>
+<tr>
+<td>Lava tracked files referencing
+<code>weasyprint</code>/<code>pandoc</code></td>
+<td><code>scripts/build-stats-report.sh</code> only — that is the
+§11.4.24 <strong>build-stats report renderer</strong>, NOT a doc-sibling
+export tool</td>
+</tr>
+<tr>
+<td>Constitution submodule (<code>constitution/</code>, pin
+<code>883ccc1</code>)</td>
+<td><strong>HAS §11.4.65</strong> (Constitution.md L100 ToC entry +
+§11.4.65 body) AND ships its own export triples: every governance doc
+(<code>Constitution</code>, <code>CLAUDE</code>, <code>AGENTS</code>,
+<code>QWEN</code>, <code>README</code>,
+<code>submodules-catalogue</code>) exists as <code>.md</code> +
+<code>.html</code> + <code>.pdf</code> + <code>.docx</code> at the
+submodule root</td>
+</tr>
+<tr>
+<td>Constitution committed export <em>script</em></td>
+<td><code>constitution/scripts/</code> contains only
+<code>codegraph_sync.sh</code>, <code>codegraph_update.sh</code>,
+<code>workable-items/</code> — <strong>no committed markdown-export
+script</strong> is visible in the pinned tree; the constitution's
+<code>.html</code>/<code>.pdf</code>/<code>.docx</code> triples appear
+to be produced by an upstream-internal tool not vendored into the
+submodule</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Conclusion:</strong></p>
+<ul>
+<li>The <strong>toolchain to generate siblings exists on this
+host</strong> (pandoc + weasyprint) — generate-now is <em>physically
+feasible</em>, contrary to a no-tooling blocker.</li>
+<li>But <strong>Lava itself has no committed Markdown→HTML/PDF export
+mechanism</strong>: no <code>sync_all_markdown_exports.sh</code>, no
+delegation wrapper to the constitution submodule, and the only
+weasyprint consumer is the build-stats renderer (a different §11.4.24
+concern).</li>
+<li>The constitution submodule <strong>demonstrates the §11.4.65
+convention</strong> (it keeps its own doc triples in sync) but does
+<strong>not export a reusable script</strong> into the pinned tree that
+Lava could invoke.</li>
+</ul>
+<h2 id="2-is-11465-enforced-in-lava-today">2. Is §11.4.65 ENFORCED in
+Lava today?</h2>
+<p><strong>NO.</strong> Evidence:</p>
+<ul>
+<li><code>scripts/verify-all-constitution-rules.sh</code> — no
+<code>CM-UNIVERSAL-MARKDOWN-EXPORT-SYNC</code> gate; no reference to
+<code>markdown</code>, <code>export</code>, <code>sibling</code>,
+<code>.html</code>, <code>.pdf</code>, or <code>11.4.65</code>.</li>
+<li><code>scripts/check-constitution.sh</code> — no markdown-export
+gate.</li>
+<li><code>CLAUDE.md</code> — <code>§6.AF</code> exists but covers
+<strong>HelixConstitution §11.4.79–106 adoption</strong> (constitution
+pin bump + LVA tickets + chaos-stress); it does <strong>not</strong>
+wire §11.4.65 universal-markdown-export. §6.AF-debt enumerates owed
+items but markdown-export-sync is not among them.</li>
+</ul>
+<p>§11.4.65 is inherited (binding by transitive reference per §6.AD.8)
+but <strong>un-wired as a project-side gate</strong> — the same posture
+as the other un-implemented <code>CM-*</code> gates tracked under
+§6.AD-debt.</p>
+<h2 id="3-per-doc-sibling-status-in-scope-new-docs">3. Per-doc sibling
+status (in-scope NEW docs)</h2>
+<table>
+<thead>
+<tr>
+<th>Doc (repo-relative)</th>
+<th><code>.md</code></th>
+<th><code>.html</code></th>
+<th><code>.pdf</code></th>
+<th>§11.4.61 metadata</th>
+<th>ToC</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>docs/chaos-stress/DESIGN.md</code></td>
+<td>Y (14353B)</td>
+<td><strong>N</strong></td>
+<td><strong>N</strong></td>
+<td>bold key:value header block (not pipe-table)</td>
+<td>numbered <code>##</code> sections, no explicit ToC list</td>
+</tr>
+<tr>
+<td><code>docs/chaos-stress/EVIDENCE-phase1.md</code></td>
+<td>Y (4548B)</td>
+<td><strong>N</strong></td>
+<td><strong>N</strong></td>
+<td>partial</td>
+<td>none</td>
+</tr>
+<tr>
+<td><code>docs/scripts/run-chaos-stress.sh.md</code></td>
+<td>Y (2202B)</td>
+<td><strong>N</strong></td>
+<td><strong>N</strong></td>
+<td>script-companion free-form</td>
+<td>n/a (short)</td>
+</tr>
+<tr>
+<td><code>docs/scripts/check-lva-tickets.sh.md</code></td>
+<td>Y (4661B)</td>
+<td><strong>N</strong></td>
+<td><strong>N</strong></td>
+<td>script-companion free-form</td>
+<td>n/a (short)</td>
+</tr>
+<tr>
+<td><code>lava-api-go/tests/NEW-TESTS-EVIDENCE.md</code></td>
+<td>Y (9250B)</td>
+<td><strong>N</strong></td>
+<td><strong>N</strong></td>
+<td>evidence free-form</td>
+<td>none</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Correction to the task's premise:</strong> the task said the
+3 ad-hoc PDFs / commit <code>85a4a7f5</code> exist — <strong>they do
+not</strong>. There are <strong>zero</strong> <code>.html</code> and
+<strong>zero</strong> <code>.pdf</code> siblings for any in-scope doc.
+(<code>git show 85a4a7f5</code> returned no such commit; the only
+<code>*.pdf</code>/<code>*.html</code> doc siblings in the tree are
+under <code>docs/tickets/export/</code> — another stream's domain, out
+of scope — and the constitution submodule root.)
+<code>lava-api-go/tests/NEW-TESTS-EVIDENCE.md</code> DOES exist (9250B),
+contrary to the task's "may not exist" note.</p>
+<p><strong>Other NEW <code>.md</code> in the last 10 commits, outside
+excluded paths (no siblings either, noted for completeness, NOT in this
+task's generate-scope):</strong>
+<code>docs/scripts/lava-tickets.md</code>,
+<code>docs/scripts/verify-codegraph.sh.md</code>,
+<code>docs/superpowers/specs/2026-05-20-codegraph-incorporation-design.md</code>,
+<code>QWEN.md</code>, <code>lava-api-go/QWEN.md</code>,
+<code>lava-api-go/tests/stress/README.md</code>,
+<code>tests/check-lva-tickets/EVIDENCE.md</code>,
+<code>.lava-ci-evidence/constitution-review/2026-05-31-68th-cycle-review.md</code>.</p>
+<h2 id="4-recommendation--6af-debt-not-generate-now">4. Recommendation —
+§6.AF-debt (NOT generate-now)</h2>
+<p><strong>Record §11.4.65 universal-markdown-export enforcement as
+§6.AF-debt; do NOT hand-generate siblings for these docs this
+cycle.</strong> The toolchain exists, so this is a <em>policy</em>
+recommendation, not a <em>capability</em> blocker:</p>
+<ol type="1">
+<li><strong>No convention to be consistent with.</strong> Lava has no
+export script and no §11.4.65 gate. Hand-running <code>pandoc</code> on
+5 docs now creates artifacts with <strong>nothing to keep them in
+sync</strong> — the next <code>.md</code> edit silently desyncs the
+<code>.html</code>/<code>.pdf</code>, which is exactly the
+green-looking-but-stale bluff class the Anti-Bluff Pact (§6.J/§6.L)
+exists to prevent. A maintained sibling needs a re-sync gate; an
+unmaintained one is worse than none.</li>
+<li><strong>Partial coverage is misleading.</strong> If §11.4.65 binds,
+it binds for <strong>all</strong> non-source docs (the §3 list is ~13
+files, plus the broader tree). Generating siblings for just the 5
+chaos-stress docs implies a convention that the other 8+ NEW docs (and
+the entire pre-existing <code>docs/</code> tree) violate — making the
+repo <em>look</em> partially-compliant while being uniformly
+non-enforced.</li>
+<li><strong>Metadata/ToC is non-conformant.</strong> None of the 5 docs
+carry a §11.4.61 pipe-table metadata block or explicit ToC. Generating
+HTML/PDF from non-conformant source bakes the non-conformance into the
+rendered artifacts; the right fix normalizes source first, then renders
+once.</li>
+<li><strong>The constitution shows the right pattern.</strong> The
+submodule keeps
+<code>.md</code>+<code>.html</code>+<code>.pdf</code>+<code>.docx</code>
+in lockstep via a real (upstream-internal) tool. Lava should mirror that
+with a committed
+<code>scripts/testing/sync_all_markdown_exports.sh</code> (pandoc
+<code>--standalone</code> HTML + <code>--pdf-engine=weasyprint</code>
+PDF), wire a gate, then backfill <strong>all</strong> docs in one pass —
+a dedicated phase, not a 5-file side effect of the chaos-stress
+cycle.</li>
+</ol>
+<h3
+id="suggested-6af-debt-addendum-for-claudemd-for-the-main-agent-to-consider">Suggested
+§6.AF-debt addendum for CLAUDE.md (for the main agent to consider)</h3>
+<blockquote>
+<p><strong>§6.AF-debt addendum — §11.4.65 universal Markdown export sync
+(2026-05-31).</strong> §11.4.65 (CONST-066) is inherited but un-wired in
+Lava: no <code>scripts/testing/sync_all_markdown_exports.sh</code>, no
+<code>CM-UNIVERSAL-MARKDOWN-EXPORT-SYNC</code> gate in
+<code>scripts/verify-all-constitution-rules.sh</code>. pandoc 3.9 +
+weasyprint 66 ARE installed on the operator host; the constitution
+submodule keeps its own <code>.md/.html/.pdf/.docx</code> triples in
+sync as the reference pattern. No in-scope <code>docs/</code> doc
+currently has <code>.html</code>/<code>.pdf</code> siblings (the
+<code>docs/tickets/export/</code> triples belong to the tickets stream).
+Closure owes: (1) a canonical Lava export script; (2) verify-all gate
+wiring; (3) one consistent sibling backfill across all non-source docs
+incl. §11.4.61 pipe-table metadata + ToC normalization. Until close,
+markdown-export sync is operator-and-reviewer-verified manually.</p>
+</blockquote>
+<h2 id="5-files-for-git-add-this-cycle">5. Files for git add (this
+cycle)</h2>
+<p><strong>Only this audit file</strong> — no generated siblings
+(recommend §6.AF-debt over hand-generation):</p>
+<ul>
+<li><code>docs/chaos-stress/EXPORT-AUDIT.md</code></li>
+</ul>
+</body>
+</html>

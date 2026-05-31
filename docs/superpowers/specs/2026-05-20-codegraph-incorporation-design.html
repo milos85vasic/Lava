@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-05-20-codegraph-incorporation-design</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1 id="codegraph-incorporation--design-spec">CodeGraph Incorporation —
+Design Spec</h1>
+<ul>
+<li><strong>Date:</strong> 2026-05-20</li>
+<li><strong>Status:</strong> Approved (operator sign-off, brainstorming
+session "Lava")</li>
+<li><strong>Author:</strong> Claude Code (Opus 4.7),
+operator-directed</li>
+<li><strong>Spec type:</strong> project-specific tooling
+incorporation</li>
+<li><strong>Classification:</strong> project-specific (per
+HelixConstitution §11.4.17 — codegraph is a Lava developer-tooling
+choice; the anti-bluff verification <em>pattern</em> it follows is
+universal)</li>
+</ul>
+<h2 id="1-context">1. Context</h2>
+<p>The operator directed incorporation of <strong>codegraph</strong>
+(<code>https://github.com/colbymchenry/codegraph</code>, npm package
+<code>@colbymchenry/codegraph</code>) into the Lava project. CodeGraph
+is a Node.js 18+ tool that builds a <strong>local SQLite semantic
+knowledge graph</strong> of a codebase and exposes it to AI coding
+agents over the <strong>Model Context Protocol (MCP)</strong>. It is
+100% local — no cloud, no external API — which aligns with Lava's
+Local-Only CI/CD constitutional constraint.</p>
+<p>The operator's primary CLI agent is <strong>Claude Code</strong>;
+codegraph must additionally work with <strong>OpenCode, Kimi CLI, Crush,
+and Qwen Code</strong>. All five are installed on the host and were
+probed: all five support non-interactive invocation and MCP server
+registration.</p>
+<p>This incorporation is performed under the standing §6.L Anti-Bluff
+Functional Reality Mandate (this is the <strong>63rd
+invocation</strong>). The verification suite is the load-bearing
+deliverable: a green test must mean codegraph genuinely works for a real
+agent end-to-end, not that "the wiring compiles."</p>
+<h2 id="2-goal">2. Goal</h2>
+<ol type="1">
+<li>Install codegraph globally on the host
+(<code>npm install -g @colbymchenry/codegraph</code>).</li>
+<li>Initialize + index the Lava domain codebase into a real, non-empty
+knowledge graph.</li>
+<li>Wire codegraph's MCP server into all five CLI agents, project-scoped
++ committed where each agent supports it.</li>
+<li>Build an <strong>anti-bluff verification suite</strong> that proves,
+with falsifiability rehearsals, that codegraph works end-to-end for
+every agent.</li>
+<li>Document everything (<code>docs/CODEGRAPH.md</code>).</li>
+<li>Propagate the §6.L mandate (63rd invocation) and create
+<code>QWEN.md</code> across root + all submodules +
+<code>lava-api-go</code>.</li>
+<li>Commit and push parent + every touched submodule to GitHub + GitLab;
+verify §6.C convergence.</li>
+</ol>
+<h2 id="3-non-goals">3. Non-goals</h2>
+<ul>
+<li>codegraph does <strong>not</strong> become a
+<code>vasic-digital</code> submodule. It is third-party developer
+tooling (like <code>gh</code>, <code>glab</code>, Gradle) — the
+Decoupled Reusable Architecture rule does not require submodule
+extraction for external tools.</li>
+<li>No new Git remote on any provider (§6.W preserved).</li>
+<li>Indexing the 18 pinned submodules is out of scope for the initial
+index — they are frozen external code with their own constitutions. The
+index covers Lava domain code only.</li>
+<li>This is not a distributable artifact — §6.P (versionCode/changelog)
+does not apply; §6.S (CONTINUATION.md) does.</li>
+</ul>
+<h2 id="4-constitutional-compliance">4. Constitutional compliance</h2>
+<table>
+<thead>
+<tr>
+<th>Rule</th>
+<th>How satisfied</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>§6.W (GitHub+GitLab only)</td>
+<td>codegraph is an npm tool; no Git remote added.</td>
+</tr>
+<tr>
+<td>§6.U (no sudo/su)</td>
+<td>npm global prefix is user-writable; install needs no elevation.</td>
+</tr>
+<tr>
+<td>§6.R (no hardcoding)</td>
+<td><code>.codegraph/config.json</code> uses project-relative paths; MCP
+configs reference <code>codegraph</code> on <code>PATH</code>; no
+IPv4/host:port/UUID literals.</td>
+</tr>
+<tr>
+<td>§6.H (credential inviolability)</td>
+<td><code>.codegraph/config.json</code> excludes <code>.env*</code>,
+<code>keystores/</code>, <code>app/google-services.json</code>,
+<code>*.keystore</code> from indexing.</td>
+</tr>
+<tr>
+<td>Local-Only CI/CD</td>
+<td>codegraph is 100% local; the verification suite runs via
+<code>scripts/</code>.</td>
+</tr>
+<tr>
+<td>Decoupled Reusable Architecture</td>
+<td>codegraph is external tooling, not Lava domain code, not reusable
+<code>vasic-digital</code> code → no submodule.</td>
+</tr>
+<tr>
+<td>§6.J / §6.L (anti-bluff)</td>
+<td>Verification suite carries falsifiability rehearsals; primary
+assertions on real codegraph-derived <code>file:line</code> data;
+per-agent end-to-end drives.</td>
+</tr>
+<tr>
+<td>§6.AD (HelixConstitution inheritance)</td>
+<td><code>QWEN.md</code> joins the inherited per-scope doc set; no
+inherited rule weakened.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="5-architecture">5. Architecture</h2>
+<pre><code>.codegraph/
+  config.json        # committed — language/exclude/framework config
+  codegraph.db       # gitignored — SQLite knowledge graph (build artifact)
+
+Agent MCP wiring (project-scoped, committed where supported):
+  .mcp.json          # Claude Code  — { mcpServers: { codegraph: ... } }
+  opencode.json      # OpenCode     — { mcp: { codegraph: ... } }
+  .qwen/settings.json# Qwen Code    — { mcpServers: { codegraph: ... } }
+  .crush.json        # Crush        — { mcp: { codegraph: ... } }
+  &lt;kimi project cfg&gt; # Kimi CLI     — MCP server entry
+
+Each agent spawns `codegraph serve --mcp` (stdio transport) and gets the
+codegraph_search / codegraph_context / codegraph_callers / codegraph_callees /
+codegraph_impact / codegraph_node / codegraph_files / codegraph_status tools.
+
+Verification:
+  scripts/verify-codegraph.sh        # runner — all 5 layers
+  tests/codegraph/*.sh               # per-layer test scripts
+  .lava-ci-evidence/codegraph/       # evidence output</code></pre>
+<h2 id="6-phases">6. Phases</h2>
+<h3 id="phase-0--precondition-committed--pushed">Phase 0 — Precondition:
+committed + pushed</h3>
+<p>Main repo verified 0-ahead/0-behind on GitHub and GitLab. Verify each
+of the 18 submodules' pinned commit exists on its own GitHub + GitLab
+remotes (§6.C convergence); push any divergence. Untracked build
+artifacts (<code>submodules/challenges/Panoptic/</code>,
+<code>submodules/containers/cmd/emulator-matrix/emulator-matrix</code>)
+are <strong>not</strong> committed.</p>
+<h3 id="phase-1--install-codegraph">Phase 1 — Install codegraph</h3>
+<p><code>npm install -g @colbymchenry/codegraph</code>. Verify
+<code>codegraph --version</code>. Honest risk: native modules
+(<code>better-sqlite3</code>, <code>tree-sitter</code>) on macOS arm64 +
+node v25 may lack prebuilds; codegraph advertises a WASM fallback. Any
+build failure is reported, not hidden.</p>
+<h3 id="phase-2--initialize--index">Phase 2 — Initialize + index</h3>
+<p><code>codegraph init</code>; tune <code>.codegraph/config.json</code>
+to index Lava domain code (<code>app/</code>, <code>core/</code>,
+<code>feature/</code>, <code>buildSrc/</code>, <code>proxy/</code>,
+<code>lava-api-go/</code>) and exclude <code>submodules/</code>,
+<code>build/</code>, <code>releases/</code>, <code>.git/</code>,
+<code>.gradle/</code>, <code>.lava-ci-evidence/</code>,
+<code>node_modules/</code>, and all §6.H secret paths.
+<code>codegraph index</code> → <code>codegraph status</code> confirms a
+real non-empty graph. <code>.codegraph/codegraph.db</code> added to
+<code>.gitignore</code>.</p>
+<h3 id="phase-3--wire-all-5-agents">Phase 3 — Wire all 5 agents</h3>
+<p><code>codegraph install</code> auto-configures Claude Code +
+OpenCode. Manual project-scoped MCP wiring for Qwen Code, Kimi CLI,
+Crush. Prefer committed project-scoped config so the wiring is
+reproducible per clone.</p>
+<h3 id="phase-4--anti-bluff-verification-suite">Phase 4 — Anti-bluff
+verification suite</h3>
+<p>Five layers, each with a §6.J falsifiability rehearsal (deliberate
+break → observed failure → revert), evidence to
+<code>.lava-ci-evidence/codegraph/</code>:</p>
+<ol type="1">
+<li><strong>Index reality</strong> —
+<code>.codegraph/codegraph.db</code> exists, non-empty, contains real
+Lava symbols (<code>MainActivity</code>, <code>LavaApplication</code>, a
+known <code>lava-api-go</code> symbol).</li>
+<li><strong>Query correctness</strong> —
+<code>codegraph query &lt;symbol&gt;</code> returns the correct
+<code>file:line</code>.</li>
+<li><strong>MCP server</strong> — drive
+<code>codegraph serve --mcp</code> over stdio JSON-RPC:
+<code>initialize</code> → <code>tools/list</code> → real
+<code>codegraph_search</code> call → assert real data.</li>
+<li><strong>Per-agent end-to-end (×5)</strong> — run each agent
+non-interactively with a prompt that forces a codegraph MCP tool call;
+assert the agent's answer carries the correct codegraph-derived
+<code>file:line</code>. Falsifiability: with the MCP server disabled the
+test must fail. <strong>Any agent that genuinely cannot be driven
+end-to-end is recorded as a documented gap — never faked.</strong></li>
+<li><strong>Runner</strong> — <code>scripts/verify-codegraph.sh</code>
+aggregates; exit non-zero on any failure.</li>
+</ol>
+<h3 id="phase-5--documentation">Phase 5 — Documentation</h3>
+<p><code>docs/CODEGRAPH.md</code> (what/why, install, init/scan,
+per-agent wiring, running the suite, troubleshooting). Update
+<code>CLAUDE.md</code>, <code>AGENTS.md</code>,
+<code>docs/CONTINUATION.md</code> (§6.S).</p>
+<h3 id="phase-6--6l-63rd--qwenmd-propagation">Phase 6 — §6.L 63rd +
+QWEN.md propagation</h3>
+<p>Advance §6.L counter 62→63 in <code>CLAUDE.md</code> with this
+invocation's narrative. Create <code>QWEN.md</code> (a thin
+pointer/inheritance file referencing <code>CLAUDE.md</code>) at repo
+root, in each of the 18 submodules, and in <code>lava-api-go</code>.
+Confirm the anti-bluff mandate is inherited in every scope (it already
+is, via the §6.AD pointer-block + <code>./constitution/</code>
+submodule); <code>QWEN.md</code> joins that inherited surface. No
+inherited rule is weakened.</p>
+<h3 id="phase-7--commit-push-converge">Phase 7 — Commit, push,
+converge</h3>
+<p>Commit parent + each touched submodule; push to GitHub + GitLab;
+verify §6.C convergence; run <code>scripts/check-constitution.sh</code>
+and the pre-push gate.</p>
+<h2 id="7-anti-bluff-verification-design-detail">7. Anti-bluff
+verification design detail</h2>
+<p>The verification suite's chief assertion (per Sixth Law clause 3) is
+always on <strong>user-visible / real data</strong>: a real symbol's
+real <code>file:line</code> as resolved from the real indexed Lava
+codebase, surfaced through the real MCP transport, observed in the real
+agent's real output. "The config file exists" and "the process started"
+are permitted secondary assertions only.</p>
+<p>Falsifiability rehearsal per layer (recorded in
+<code>.lava-ci-evidence/codegraph/</code>):</p>
+<ul>
+<li>Layer 1: rename/remove the DB → reality test fails.</li>
+<li>Layer 2: query a symbol that does not exist → empty; query a real
+one → correct line.</li>
+<li>Layer 3: request a non-existent tool / wrong symbol → MCP error /
+empty result.</li>
+<li>Layer 4: point the agent at a config with the codegraph server
+removed → the agent cannot answer from the graph → test fails.</li>
+</ul>
+<h2 id="8-risks--honest-unknowns">8. Risks / honest unknowns</h2>
+<ul>
+<li><strong>Native module build</strong> on node v25 arm64 — may need
+WASM fallback or may fail. Verified in Phase 1; reported
+truthfully.</li>
+<li><strong>Kimi CLI MCP config format</strong> — exact file/location
+confirmed during Phase 3.</li>
+<li><strong>Agent non-determinism</strong> — Phase 4 asserts the
+<em>correct answer appears</em> with bounded retries; the falsifiability
+rehearsal (server disabled → must fail) guards against a false green
+from the agent answering out of training knowledge rather than the
+graph.</li>
+<li><strong>Index scope</strong> — submodules excluded initially;
+revisitable if the operator wants cross-submodule graph queries
+later.</li>
+</ul>
+<h2 id="9-coverage-exemptions">9. Coverage exemptions</h2>
+<p>None anticipated. codegraph is third-party code — Lava does not test
+codegraph's internals; Lava tests that <em>codegraph, as integrated into
+Lava, works for Lava's agents</em>. That is the behavioral contract this
+spec's Phase 4 covers in full.</p>
+</body>
+</html>

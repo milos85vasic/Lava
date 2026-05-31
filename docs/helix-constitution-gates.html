@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>helix-constitution-gates</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1
+id="helixconstitution-gates--lava-implementation-status">HelixConstitution
+Gates — Lava Implementation Status</h1>
+<p><strong>Last updated:</strong> 2026-05-16 (HelixQA Phase 4-debt
+closed — upstream PR <code>b13ba7c</code> landed
+<code>helix-deps.yaml</code> + <code>install_upstreams.sh</code>;
+Lava-side waivers removed; 17/17 own-org submodules satisfy
+<code>CM-HELIX-DEPS-MANIFEST</code> +
+<code>CM-CANONICAL-ROOT-CLARITY</code> +
+<code>CM-INSTALL-UPSTREAMS-RAN</code> in fully STRICT mode)
+<strong>Inheritance:</strong> Per Lava <code>CLAUDE.md</code> §6.AD
+(HelixConstitution Inheritance Mandate); enumerated per §6.AD-debt item
+8.</p>
+<h2 id="purpose">Purpose</h2>
+<p>HelixConstitution defines a set of <code>CM-*</code> mechanical gates
+(see <code>constitution/Constitution.md</code> §11.4 sub-clauses). Each
+gate has a status: ✅ wired, ⚠️ paper-only, or ❌ blocked. This document
+is the operator-readable index — the source of truth for "what's
+actually enforced versus what's documented."</p>
+<h2 id="gate-inventory">Gate Inventory</h2>
+<table>
+<thead>
+<tr>
+<th>Gate ID</th>
+<th>HelixConstitution clause</th>
+<th>Lava implementation</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CM-COVENANT-114-16-PROPAGATION</code></td>
+<td>§11.4.16 (Item-Type tracking)</td>
+<td>n/a (Lava uses <code>.lava-ci-evidence/crashlytics-resolved/</code>
++ <code>.lava-ci-evidence/sixth-law-incidents/</code> rather than
+Issues/Issues_Summary trackers; equivalence documented in §6.AD.3)</td>
+<td>⚠️ paper-only</td>
+</tr>
+<tr>
+<td><code>CM-COMMIT-DOCS-EXISTS</code></td>
+<td>§11.4.22 (lightweight commit path)</td>
+<td><code>scripts/commit_all.sh</code> exists + executable; verified by
+<code>scripts/check-constitution.sh</code> 6.AD(5)</td>
+<td>✅ wired</td>
+</tr>
+<tr>
+<td><code>CM-FIXED-COLUMN-ALIGNMENT</code></td>
+<td>§11.4.19 (Fixed-document column alignment)</td>
+<td>n/a (Lava does not maintain Fixed.md / Fixed_Summary.md tracker
+structure; functional equivalent: per-issue closure logs in
+<code>.lava-ci-evidence/crashlytics-resolved/</code>)</td>
+<td>⚠️ paper-only</td>
+</tr>
+<tr>
+<td><code>CM-SCRIPT-DOCS-SYNC</code></td>
+<td>§11.4.18 (script documentation mandate)</td>
+<td><code>.githooks/pre-push</code> Check 9 — fires when
+<code>scripts/X.sh</code> is modified without companion
+<code>docs/scripts/X.sh.md</code> in the same commit (only when the doc
+already exists at this commit); rehearsed in synthetic fixture</td>
+<td>✅ wired</td>
+</tr>
+<tr>
+<td><code>CM-BUILD-RESOURCE-STATS-TRACKER</code></td>
+<td>§11.4.24 (build-resource stats tracking)</td>
+<td><code>scripts/build-stats-sample.sh</code> (per-sample collector,
+BSD+GNU portable, wraps a build via
+<code>wrap "&lt;name&gt;" -- &lt;cmd&gt;</code>) +
+<code>.lava-ci-evidence/build-stats/registry.tsv</code> (per-build
+summary registry) + <code>scripts/build-stats-report.sh</code> (derives
+<code>docs/build-stats/Stats.md</code> + <code>Stats.html</code> via
+pandoc + <code>Stats.pdf</code> via wkhtmltopdf-or-weasyprint; HTML/PDF
+skip silently if exporters absent)</td>
+<td>✅ wired</td>
+</tr>
+<tr>
+<td><code>CM-ITEM-STATUS-TRACKING</code></td>
+<td>§11.4.15 (item-status tracking)</td>
+<td>n/a (Lava uses CONTINUATION.md + closure logs; mapping documented in
+§6.AD.3)</td>
+<td>⚠️ paper-only</td>
+</tr>
+<tr>
+<td><code>CM-ITEM-TYPE-TRACKING</code></td>
+<td>§11.4.16 (item-type tracking)</td>
+<td>n/a (same as above)</td>
+<td>⚠️ paper-only</td>
+</tr>
+<tr>
+<td><code>CM-ITEM-OPERATOR-BLOCKED-DETAILS</code></td>
+<td>§11.4.21 (operator-blocked status + self-resolution audit)</td>
+<td>n/a (Lava uses
+<code>.lava-ci-evidence/sixth-law-incidents/&lt;date&gt;.json</code> for
+blocker tracking; the <code>Operator-blocked</code> status vocabulary is
+not in use)</td>
+<td>⚠️ paper-only</td>
+</tr>
+<tr>
+<td><code>CM-OPERATOR-BLOCKED-SELF-RESOLUTION-AUDIT</code></td>
+<td>§11.4.21</td>
+<td>n/a (same as above)</td>
+<td>⚠️ paper-only</td>
+</tr>
+<tr>
+<td><code>CM-UNIVERSAL-VS-PROJECT-CLASSIFICATION</code></td>
+<td>§11.4.17 (universal-vs-project classification)</td>
+<td><code>.githooks/pre-push</code> Check 8 — fires when
+<code>##### 6.X</code> clause added to CLAUDE.md without
+<code>Classification:</code> line in commit body</td>
+<td>✅ wired</td>
+</tr>
+<tr>
+<td><code>CM-SUBAGENT-DELEGATION-AUDIT</code></td>
+<td>§11.4.20 (subagent-driven-by-default mandate)</td>
+<td>n/a (no automated audit of subagent vs. foreground delegation in
+Lava; would require either Claude Code telemetry integration or manual
+operator review)</td>
+<td>⚠️ paper-only</td>
+</tr>
+<tr>
+<td><code>CM-LVA-TICKETS-SYNC</code></td>
+<td>§11.4.93 (SQLite single-source-of-truth) + §11.4.95 (DB
+tracked-in-git, never gitignored) + §11.4.106 (byte-identical doc↔︎DB
+round-trip) + §11.4.33/34 (closure + reopen schema guards)</td>
+<td><code>scripts/check-lva-tickets.sh</code> (verifies (a)
+<code>docs/tickets/tickets.db</code> exists + is NOT gitignored, (b) the
+REAL <code>tools/lava-tickets verify</code> binary reports
+byte-identical trackers — §6.A real-binary contract, not a bash re-impl,
+(c) the five §11.4.33/34 schema-integrity triggers are present via a
+<code>sqlite_master</code> query; builds the binary via
+<code>go build</code> if absent; discovers <code>sqlite3</code> on
+PATH/Homebrew/Android platform-tools;
+<code>LAVA_LVA_TICKETS_STRICT=0</code> / <code>--advisory</code> for
+incremental adoption). Hermetic test:
+<code>tests/check-lva-tickets/test_check_lva_tickets.sh</code> (10
+sub-tests: clean PASS + falsifiability — corrupt-tracker FAIL/restore
+PASS, drop-§11.4.33-trigger FAIL, drop-§11.4.34-trigger FAIL,
+gitignored-DB FAIL/un-ignore PASS, missing-DB FAIL, advisory exits 0).
+Evidence: <code>tests/check-lva-tickets/EVIDENCE.md</code>. Wired into
+<code>scripts/verify-all-constitution-rules.sh</code> in
+<code>--advisory</code> mode (build-advisory-then-strict-flip
+convention; strict-flip OWED after baseline stabilizes)</td>
+<td>✅ wired (advisory)</td>
+</tr>
+<tr>
+<td><code>CM-UNIVERSAL-MARKDOWN-EXPORT-SYNC</code></td>
+<td>HelixConstitution §11.4.65 Universal Markdown Export Mandate</td>
+<td><code>scripts/sync-markdown-exports.sh</code>
+(<code>--check-only</code>/<code>--regenerate-all</code>/<code>--regenerate &lt;f&gt;</code>;
+pandoc HTML + <code>pandoc --pdf-engine=weasyprint</code> PDF;
+<code>timeout 60</code>/file; 500-candidate cap with log) +
+<code>scripts/check-markdown-export-sync.sh</code> (gate wrapper;
+<code>LAVA_MARKDOWN_EXPORT_STRICT</code> advisory/strict). Scope:
+project-root + <code>docs/**</code> + <code>scripts/**</code>
+<code>.md</code>; excludes source trees + submodules + constitution
+(they sync their own). Backfill 2026-05-31: 126 in-scope docs, generated
+<code>.html</code>+<code>.pdf</code> siblings (TRACKED per §11.4.65).
+Hermetic test:
+<code>tests/check-markdown-export-sync/test_markdown_export_sync.sh</code>
+(positive + delete-sibling-FAIL + backdate-mtime-FAIL + restore-PASS).
+Closes §6.AF-debt §11.4.65 item.</td>
+<td>✅ wired</td>
+</tr>
+<tr>
+<td><code>CM-NONFATAL-COVERAGE</code></td>
+<td>§6.AC + HelixConstitution telemetry discipline</td>
+<td><code>scripts/check-non-fatal-coverage.sh</code> (bash scanner;
+default STRICT-mode after queue drained 2026-05-14;
+<code>LAVA_NONFATAL_STRICT=0</code> to revert to advisory mode)</td>
+<td>✅ wired</td>
+</tr>
+<tr>
+<td><code>CM-CHALLENGE-DISCRIMINATION</code></td>
+<td>§6.AB Anti-Bluff Test-Suite Reinforcement</td>
+<td><code>scripts/check-challenge-discrimination.sh</code> (bash
+scanner; STRICT-default; verifies every Challenge*Test.kt carries a
+FALSIFIABILITY REHEARSAL marker in KDoc OR a companion
+.lava-ci-evidence/sp3a-challenges/<name>.json;
+<code>LAVA_CHALLENGE_DISCRIMINATION_STRICT=0</code> to revert to
+advisory)</td>
+<td>✅ wired</td>
+</tr>
+<tr>
+<td><code>CM-CHALLENGE-COVERAGE</code></td>
+<td>§6.AE Comprehensive Challenge Coverage + Container/QEMU Matrix
+Mandate</td>
+<td><code>scripts/check-challenge-coverage.sh</code> (bash scanner;
+STRICT-default after queue drained 2026-05-15; verifies every feature/*
+module has at least one Challenge that targets it via import /
+<code>// covers-feature:</code> marker / heuristic /
+<code>// AE-exempt:</code> ledger entry;
+<code>LAVA_CHALLENGE_COVERAGE_STRICT=0</code> to revert to advisory) +
+<code>scripts/run-challenge-matrix.sh</code> (matrix-runner glue;
+delegates to
+<code>submodules/containers/cmd/emulator-matrix --runner=containerized</code>;
+pre-bakes the §6.AE.2 minimum API/form-factor matrix; refuses to claim
+success on hosts lacking KVM with a clear §6.X-debt host-gap
+diagnostic). Hermetic test:
+<code>tests/check-constitution/test_challenge_coverage.sh</code> (4
+falsifiability fixtures, all PASS)</td>
+<td>✅ wired (PARTIAL: scanner STRICT-and-green; runner still BLOCKED on
+darwin/arm64 per standing §6.X-debt)</td>
+</tr>
+<tr>
+<td><code>CM-VERIFY-ALL-CONSTITUTION-RULES</code></td>
+<td>HelixConstitution §11.4.32 Post-Constitution-Pull Validation
+Mandate</td>
+<td><code>scripts/verify-all-constitution-rules.sh</code> (master sweep;
+STRICT default; wraps every individual gate above + every hermetic test
+suite into a single enforcement engine; emits per-run attestation JSON
+at <code>.lava-ci-evidence/verify-all/&lt;UTC-timestamp&gt;.json</code>
+with per-gate pass/fail/duration); wired into <code>scripts/ci.sh</code>
+step 5a4. Hermetic test:
+<code>tests/check-constitution/test_verify_all_rules.sh</code> (4
+falsifiability fixtures including the §11.4.32-mandated paired-mutation
+that plants a known violation + asserts sweep reports FAIL). PER
+§11.4.32 ITSELF: this gate is "the enforcement engine for every other
+§11.4.x and CONST-NNN rule" — without it, new rules cascade as anchors
+but never get enforced in the codebase</td>
+<td>✅ wired (Phase 1 of constitution-compliance plan, commit
+<code>4def2da7</code>)</td>
+</tr>
+<tr>
+<td><code>CM-GITIGNORE-PRECOMMIT-AUDIT</code></td>
+<td>HelixConstitution §11.4.30 .gitignore + No-Versioned-Build-Artifacts
+Mandate</td>
+<td><code>scripts/check-gitignore-coverage.sh</code> (STRICT default;
+verifies every actual Gradle module + every owned-by-us submodule has
+.gitignore; verifies no tracked files match the forbidden-pattern set
+with explicit allowlist for documented-non-sensitive deployment
+configs); wrapped by verify-all sweep. Hermetic test:
+<code>tests/check-constitution/test_gitignore_coverage.sh</code> (3
+fixtures: real-tree-passes, module-without-gitignore-rejected,
+clean-fixture-passes)</td>
+<td>✅ wired (Phase 2 of constitution-compliance plan)</td>
+</tr>
+<tr>
+<td><code>CM-NO-NESTED-OWN-ORG-SUBMODULES</code></td>
+<td>HelixConstitution §11.4.28 Submodules-As-Equal-Codebase Mandate</td>
+<td><code>scripts/check-no-nested-own-org-submodules.sh</code> (STRICT
+default; walks every owned submodule's <code>.gitmodules</code>; rejects
+entries pointing to vasic-digital / HelixDevelopment / red-elf /
+ATMOSphere1234321 / Bear-Suite / BoatOS123456 / Helix-Flow / Helix-Track
+/ Server-Factory orgs on github.com or gitlab.com; per-entry waiver
+mechanism with mandatory rationale + tracking-issue +
+target-removal-date); wrapped by verify-all sweep in STRICT mode.
+Hermetic test:
+<code>tests/check-constitution/test_nested_own_org_submodules.sh</code>
+(4 fixtures: clean-fixture-passes, vasic-digital-chain-rejected,
+HelixDevelopment-gitlab-chain-rejected, advisory-mode-returns-zero).
+Phase 5-debt closed 2026-05-15: github cascade merge removed
+Challenges/.gitmodules (CONST-051(C) flat-layout enforcement); Panoptic
+no longer nested; scanner reports 0 violations in STRICT mode</td>
+<td>✅ wired + STRICT (Phase 5 of constitution-compliance plan)</td>
+</tr>
+<tr>
+<td><code>CM-CANONICAL-ROOT-CLARITY</code> +
+<code>CM-INSTALL-UPSTREAMS-RAN</code></td>
+<td>HelixConstitution §11.4.35 Canonical-Root Inheritance Clarity +
+§11.4.36 Mandatory install_upstreams</td>
+<td><code>scripts/check-canonical-root-and-upstreams.sh</code> (STRICT
+default; verifies (a) root CLAUDE.md + AGENTS.md open with
+<code>## INHERITED FROM constitution/&lt;file&gt;</code> or
+<code>@constitution/&lt;file&gt;</code> pointer in first 40 lines, (b)
+constitution submodule's three canonical files exist, (c) constitution
+submodule's own CLAUDE.md/AGENTS.md do NOT carry
+<code>## INHERITED FROM</code> at top level — fenced
+<code>```markdown</code> code blocks correctly recognized as
+documentation; verifies every owned submodule has install_upstreams
+script at one of 6 supported locations; per-submodule waiver mechanism
+with mandatory rationale); wrapped by verify-all sweep in STRICT mode.
+Hermetic test:
+<code>tests/check-constitution/test_canonical_root_and_upstreams.sh</code>
+(6 fixtures including discrimination test for fenced-code-block
+false-positive prevention). Phase 8-debt closed 2026-05-15: 10
+install_upstreams scripts landed (Challenges, Config, Containers,
+Discovery, HTTP3, Mdns, Middleware, RateLimiter, Recovery, Tracker-SDK
+each gained install_upstreams.sh + Upstreams/GitHub.sh +
+Upstreams/GitLab.sh per §6.W). Phase 4-debt closed 2026-05-16: HelixQA
+upstream PR <code>b13ba7c</code> (<code>HelixDevelopment/HelixQA</code>)
+landed <code>install_upstreams.sh</code> wrapper at HelixQA's repo root
++ Lava parent removed HelixQA from
+<code>INSTALL_UPSTREAMS_WAIVERS</code>; scanner now reports 17/17
+install_upstreams present (0 waived) + all §11.4.35 sub-checks passing
+in STRICT mode</td>
+<td>✅ wired + STRICT (Phase 8 of constitution-compliance plan; Phase
+4-debt closed 2026-05-16)</td>
+</tr>
+<tr>
+<td><code>CM-HELIX-DEPS-MANIFEST</code></td>
+<td>HelixConstitution §11.4.31 Submodule-Dependency-Manifest
+Mandate</td>
+<td><code>scripts/check-helix-deps-manifest.sh</code> (STRICT default;
+verifies (a) parent project root has
+<code>helix-deps.{yaml,json,toml}</code> with
+<code>schema_version: 1</code> + <code>deps:</code> +
+<code>transitive_handling:</code> blocks, (b) every owned-by-us
+submodule has its own <code>helix-deps.{yaml,json,toml}</code>;
+per-submodule waiver mechanism with mandatory rationale); wrapped by
+verify-all sweep in STRICT mode. Hermetic test:
+<code>tests/check-constitution/test_helix_deps_manifest.sh</code> (6
+fixtures: compliant-fixture-passes, missing-parent-rejected,
+missing-submodule-rejected, wrong-schema-version-rejected,
+advisory-mode-returns-zero, json-variant-accepted). Phase 3-debt closed
+2026-05-15: 16/16 per-submodule helix-deps.yaml manifests landed (Auth,
+Cache, Challenges, Concurrency, Config, Containers, Database, Discovery,
+HTTP3, Mdns, Middleware, Observability, RateLimiter, Recovery, Security,
+Tracker-SDK — each authored with honest per-submodule deps after
+analysis: 15 leaf modules with empty deps + Challenges declaring
+Panoptic with layout: flat). Phase 4-debt closed 2026-05-16: HelixQA
+upstream PR <code>b13ba7c</code> (<code>HelixDevelopment/HelixQA</code>)
+landed <code>helix-deps.yaml</code> at HelixQA's repo root (declares
+Challenges + Containers deps per HelixQA's README sibling-directory
+enumeration) + Lava parent removed HelixQA from
+<code>HELIX_DEPS_WAIVERS</code>; parent helix-deps.yaml declares 18 deps
+(16 vasic-digital + HelixDevelopment/HelixQA + constitution); scanner
+now reports 17/17 per-submodule manifests present (0 waived) in STRICT
+mode</td>
+<td>✅ wired + STRICT (Phase 3 of constitution-compliance plan; Phase
+4-debt closed 2026-05-16)</td>
+</tr>
+<tr>
+<td><code>CM-COVERAGE-LEDGER</code></td>
+<td>HelixConstitution §11.4.25 Full-Automation-Coverage Mandate</td>
+<td><code>scripts/generate-coverage-ledger.sh</code> (deterministic
+per-row YAML generator; walks <code>feature/*/</code>,
+<code>core/*/</code>, <code>app/</code>, <code>lava-api-go/</code>,
+<code>submodules/*/</code>; emits 6 invariants per row — anti_bluff,
+working_capability, documented_promise, no_open_bugs, documented,
+four_layer — with status
+<code>pass</code>/<code>gap</code>/<code>n/a</code>/<code>waiver:</code>;
+produces <code>docs/coverage-ledger.yaml</code>) +
+<code>scripts/check-coverage-ledger.sh</code> (verifier; asserts
+schema-presence, every-on-disk-path-has-a-row, AND
+ledger-fresh-vs-regenerated). Companion waiver mechanism:
+<code>docs/coverage-ledger.waivers.yaml</code> (hand-edited per-row
+overrides for invariants 3/4 the generator cannot mechanically infer).
+Hermetic test:
+<code>tests/check-constitution/test_coverage_ledger.sh</code> (6
+fixtures: clean-fixture-passes, missing-ledger-rejected,
+missing-row-rejected, stale-ledger-rejected, advisory-mode-returns-zero,
+generator-deterministic). Default: --advisory in verify-all sweep until
+per-row backfill stabilises baseline; STRICT flip OWED via Phase
+7-debt</td>
+<td>✅ wired (advisory) (Phase 7 of constitution-compliance plan)</td>
+</tr>
+<tr>
+<td><code>CM-CLOSURE-STATUS-VOCAB-COMPLIANCE</code></td>
+<td>HelixConstitution §11.4.33 Type-aware closure-status vocabulary</td>
+<td>EQUIVALENCE-MAPPED per §6.AD.3 (Phase 9 Path B): Lava's
+<code>.lava-ci-evidence/sixth-law-incidents/&lt;date&gt;-&lt;slug&gt;.json</code>
+schema includes candidate-causes, ELIMINATED entries, and
+<code>PENDING_FORENSICS:</code> markers (per §11.4.6) that satisfy the
+type-aware closure-status semantics §11.4.33 prescribes. No standalone
+scanner — the §6.AD.3 mapping IS the binding equivalence per Path
+B.</td>
+<td>✅ equivalence-mapped (Phase 9 Path B of constitution-compliance
+plan)</td>
+</tr>
+<tr>
+<td><code>CM-REOPENED-SOURCE-ATTRIBUTION</code></td>
+<td>HelixConstitution §11.4.34 Reopened-source attribution</td>
+<td>EQUIVALENCE-MAPPED per §6.AD.3 (Phase 9 Path B): Lava's
+<code>.lava-ci-evidence/crashlytics-resolved/&lt;date&gt;-&lt;slug&gt;.md</code>
+closure-log schema includes root-cause + fix-commit-SHA +
+validation-test references — providing WHY + WHO + WHEN + WHICH-INCIDENT
+lineage for each closed item. Re-opens are tracked as new closure-log
+entries citing the prior log. No standalone scanner — the §6.AD.3
+mapping IS the binding equivalence per Path B.</td>
+<td>✅ equivalence-mapped (Phase 9 Path B of constitution-compliance
+plan)</td>
+</tr>
+<tr>
+<td><code>CM-HELIXQA-WIRING</code></td>
+<td>HelixConstitution §11.4.27 (CONST-050) full test-type coverage
+including HelixQA + Lava §6.AE Comprehensive Challenge Coverage</td>
+<td><code>scripts/run-helixqa-challenges.sh</code> (Lava-side wrapper
+invoking the 11 HelixQA Challenge scripts at
+<code>submodules/helixqa/challenges/scripts/</code>; captures per-script
+stdout+stderr to log files; emits roll-up attestation JSON; classifies
+exit codes 0/2/other → PASS/SKIP/FAIL; refuses to silently mask missing
+submodule or wiring drift — exit 3 with actionable remediation per §6.J
+anti-bluff posture). Wired into
+<code>scripts/run-challenge-matrix.sh</code> via
+<code>--include-helixqa</code> opt-in flag (OFF by default so existing
+matrix runs are unaffected). Phase 4 follow-up B (2026-05-16) added:
+<code>--runner=host|containerized</code> flag (§6.X container
+delegation, honest-fail-fast exit 4 on missing Containers submodule),
+<code>--require-toolchain=go|none</code> flag (§6.J toolchain
+precondition gate with <code>HELIXQA_TOOLCHAIN_MAP</code> per-script
+declaration), <code>LAVA_HELIXQA_EVIDENCE_DIR</code> env-var override
+(Q3), <code>HELIXQA_W_EXCLUSIONS</code> array consuming
+<code>docs/helixqa-script-audit.md</code> (Q4). Hermetic test:
+<code>tests/check-constitution/test_helixqa_wiring.sh</code> (11
+fixtures covering all 4 questions' resolutions + the original 4
+fixtures). Docs: <code>docs/scripts/run-helixqa-challenges.sh.md</code>
++ <code>docs/scripts/run-challenge-matrix.sh.md</code> +
+<code>docs/helixqa-script-audit.md</code>. Design:
+<code>docs/plans/2026-05-16-helixqa-integration-design.md</code> Option
+1 — shell-level wiring. Many HelixQA scripts are Linux-only
+(systemctl/journalctl); macOS hosts will see FAIL/SKIP outcomes that are
+HONEST acknowledgments of the wrong-OS gap rather than false-pass.</td>
+<td>✅ wired (Option 1 — shell wiring + 4 open-question resolutions);
+host runner is default; containerized runner ready for §6.AE gate
+runs</td>
+</tr>
+<tr>
+<td><code>CM-HELIXQA-§6.W-AUDIT</code></td>
+<td>Lava §6.W (GitHub + GitLab Only Remote Mandate) + §6.J (Anti-Bluff
+Functional Reality)</td>
+<td><code>docs/helixqa-script-audit.md</code> (per-script audit of all
+11 HelixQA Challenge scripts; 4-query methodology: git push / curl-wget
+/ external HTTP / outside-worktree FS writes; per-script verdict table
+with COMPLIANT / REQUIRES-EXCLUSION / HOST-MUTATION-RISK classification;
+aggregate verdict + operator-supplied env-var risk surface + re-audit
+triggers). Consumed by <code>scripts/run-helixqa-challenges.sh</code>
+via the <code>HELIXQA_W_EXCLUSIONS</code> array constant (currently
+empty since 0/11 scripts violate §6.W on default config). Re-audit OWED
+whenever the submodules/helixqa pin bumps; the wrapper's wiring-drift
+check (exit 3 on added/removed scripts) prompts re-audit but does not
+mechanize the per-script grep — that remains a human-driven audit per
+§6.J ("real grep results only — no manufactured findings").</td>
+<td>✅ wired (advisory; per-script audit is doc-driven; mechanical
+scanner OWED if a future pin bump introduces a violator)</td>
+</tr>
+</tbody>
+</table>
+<h2
+id="lava-side-anti-bluff-gates-not-helixconstitution-cm--but-related">Lava-side
+anti-bluff gates (NOT HelixConstitution <code>CM-*</code> but
+related)</h2>
+<p>For completeness — these gates predate or extend HelixConstitution's
+<code>CM-*</code> set:</p>
+<table>
+<thead>
+<tr>
+<th>Gate name</th>
+<th>Lava clause</th>
+<th>Implementation</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Hosted-CI config rejection</td>
+<td>Local-Only CI/CD rule</td>
+<td><code>.githooks/pre-push</code> Check 1</td>
+<td>✅ wired</td>
+</tr>
+<tr>
+<td>Test-commit Bluff-Audit stamp</td>
+<td>Seventh Law clause 1</td>
+<td><code>.githooks/pre-push</code> Check 2</td>
+<td>✅ wired</td>
+</tr>
+<tr>
+<td>Mock-the-SUT pattern rejection</td>
+<td>Seventh Law clause 4</td>
+<td><code>.githooks/pre-push</code> Check 3</td>
+<td>✅ wired</td>
+</tr>
+<tr>
+<td>Gate-shaping file Bluff-Audit stamp + path-match</td>
+<td>§6.N.1.2</td>
+<td><code>.githooks/pre-push</code> Check 4 (with extended
+<code>.githooks/pre-push</code> regex)</td>
+<td>✅ wired</td>
+</tr>
+<tr>
+<td>Attestation falsifiability rehearsal</td>
+<td>§6.N.1.3</td>
+<td><code>.githooks/pre-push</code> Check 5</td>
+<td>✅ wired</td>
+</tr>
+<tr>
+<td>§6.Y bump-first ordering</td>
+<td>§6.Y</td>
+<td><code>.githooks/pre-push</code> Check 6</td>
+<td>✅ wired</td>
+</tr>
+<tr>
+<td>§6.Z evidence-file presence on pointer advance</td>
+<td>§6.Z</td>
+<td><code>.githooks/pre-push</code> Check 7 +
+<code>firebase-distribute.sh</code> Phase-1 Gates</td>
+<td>✅ wired</td>
+</tr>
+<tr>
+<td>§6.AA Two-Stage default + release-requires-debug-companion</td>
+<td>§6.AA</td>
+<td><code>firebase-distribute.sh</code> (default flipped to
+<code>MODE=debug</code>; <code>--release-only</code> requires
+<code>last-version-debug &gt;= current vc</code>)</td>
+<td>✅ wired</td>
+</tr>
+<tr>
+<td>§6.W mirror-host boundary</td>
+<td>§6.W + §6.AD.1</td>
+<td><code>scripts/check-constitution.sh</code> 6.AD §6.W block</td>
+<td>✅ wired</td>
+</tr>
+<tr>
+<td>§6.AD per-scope inheritance pointer-block presence</td>
+<td>§6.AD.4</td>
+<td><code>scripts/check-constitution.sh</code> 6.AD(4); 54 in-scope
+files enforced</td>
+<td>✅ wired</td>
+</tr>
+<tr>
+<td>§6.AD constitution submodule presence + structure</td>
+<td>§6.AD.2</td>
+<td><code>scripts/check-constitution.sh</code> 6.AD(2)</td>
+<td>✅ wired</td>
+</tr>
+<tr>
+<td>§6.AD <code>commit_all.sh</code> +
+<code>inject-helix-inheritance-block.sh</code> presence</td>
+<td>§6.AD.5 + §6.AD.6</td>
+<td><code>scripts/check-constitution.sh</code> 6.AD(5)+(6)</td>
+<td>✅ wired</td>
+</tr>
+<tr>
+<td>§11.4.6 no-guessing vocabulary</td>
+<td>§6.AD.6 + HelixConstitution §11.4.6</td>
+<td><code>scripts/check-constitution.sh</code> final block</td>
+<td>✅ wired</td>
+</tr>
+<tr>
+<td>§6.X Container-Submodule Emulator wiring</td>
+<td>§6.X</td>
+<td><code>scripts/check-constitution.sh</code> 6.X(4)+(5) (with PARTIAL
+CLOSE — Linux x86_64 gate-host still owed)</td>
+<td>✅ wired (PARTIAL)</td>
+</tr>
+<tr>
+<td>§6.K Containers extension presence</td>
+<td>§6.K</td>
+<td><code>scripts/check-constitution.sh</code> clause 6.K block</td>
+<td>✅ wired</td>
+</tr>
+</tbody>
+</table>
+<h2 id="why-some-gates-are-warning-paper-only">Why some gates are ⚠️
+paper-only</h2>
+<p>The <code>CM-*</code> gates marked ⚠️ paper-only typically depend on
+infrastructure Lava does not have today:</p>
+<ul>
+<li><p><strong>Issues / Issues_Summary / Fixed / Fixed_Summary
+trackers</strong> (§11.4.15 / §11.4.16 / §11.4.19 / §11.4.21):
+HelixConstitution prescribes a project-wide work-tracker file structure.
+Lava's equivalent is <code>docs/CONTINUATION.md</code> (single-file
+source-of-truth handoff per §6.S) plus per-issue closure logs in
+<code>.lava-ci-evidence/crashlytics-resolved/&lt;date&gt;-&lt;slug&gt;.md</code>
+(per §6.O). The substance is equivalent (status + type + history); the
+file structure differs. Lava does not plan to migrate to the
+HelixConstitution file structure unless / until the operator commissions
+that work; the equivalence is documented in §6.AD.3.</p></li>
+<li><p><strong>Build-resource stats tracker</strong> (§11.4.24 /
+<code>CM-BUILD-RESOURCE-STATS-TRACKER</code>): Requires a host-side
+sampler that captures memory / CPU / IO at fixed interval, computes
+per-metric min/max/mean/p95, appends to a TSV registry, derives
+Stats.{md,html,pdf} via the §11.4.22 lightweight commit path.
+Substantial implementation work (~200+ lines plus a viewer). Tracked
+under §6.AD-debt item 5 for a future cycle.</p></li>
+<li><p><strong>Subagent-delegation audit</strong> (§11.4.20 /
+<code>CM-SUBAGENT-DELEGATION-AUDIT</code>): Requires either Claude Code
+telemetry integration (not yet exposed by the platform) or
+operator-driven self-audit. Tracked under §6.AD-debt for a future cycle
+when telemetry surfaces become available.</p></li>
+<li><p><strong>Script documentation sync</strong> (§11.4.18 /
+<code>CM-SCRIPT-DOCS-SYNC</code>): The doc files exist
+(<code>docs/scripts/commit_all.sh.md</code>,
+<code>docs/scripts/inject-helix-inheritance-block.sh.md</code>) but no
+pre-push gate yet enforces "modifying <code>scripts/X.sh</code> requires
+modifying <code>docs/scripts/X.sh.md</code> in the same commit". The
+pre-push gate is straightforward to add when the doc-set is more
+complete. Tracked under §6.AD-debt.</p></li>
+</ul>
+<h2 id="how-to-read-this-document">How to read this document</h2>
+<ul>
+<li>✅ wired: a script enforces the rule; pre-push or similar gate fires
+on violation; can demonstrate by running the falsifiability rehearsal
+cited in the original closure commit</li>
+<li>⚠️ paper-only: the rule is documented in CLAUDE.md / AGENTS.md /
+Constitution.md but no mechanical gate enforces it; operator + reviewer
+manually verify</li>
+<li>❌ blocked: the rule cannot be enforced today due to missing
+infrastructure; closure work is tracked under §6.AD-debt</li>
+</ul>
+<h2 id="how-to-wire-a-new-gate">How to wire a new gate</h2>
+<ol type="1">
+<li>Read the corresponding <code>Constitution.md</code> §11.4.X clause
+for the rule's intent</li>
+<li>Pick the enforcement surface: pre-push hook
+(<code>.githooks/pre-push</code>), constitution check
+(<code>scripts/check-constitution.sh</code>), distribute script
+(<code>scripts/firebase-distribute.sh</code>), tag script
+(<code>scripts/tag.sh</code>)</li>
+<li>Add the gate logic; include <code>|| true</code> on every
+<code>grep -oE</code> pipe to avoid <code>set -e</code> killing the gate
+on zero matches</li>
+<li>Add a falsifiability rehearsal: deliberately break a target file,
+re-run the gate, confirm the violation message includes the target
+path</li>
+<li>Add a hermetic test under <code>tests/&lt;area&gt;/</code>
+exercising both the positive and negative paths</li>
+<li>Update this document — flip ⚠️ to ✅ for the gate's row</li>
+<li>Commit + push via <code>scripts/commit_all.sh</code> with proper
+Bluff-Audit stamp + Classification line</li>
+</ol>
+<h2 id="cross-references">Cross-references</h2>
+<ul>
+<li>Lava <code>CLAUDE.md</code> §6.AD (HelixConstitution Inheritance
+Mandate) + §6.AD-debt</li>
+<li>HelixConstitution <code>Constitution.md</code> §11.4.1 through
+§11.4.24</li>
+<li>HelixConstitution <code>CLAUDE.md</code> (universal CLAUDE.md
+inherited by every consuming project)</li>
+</ul>
+</body>
+</html>

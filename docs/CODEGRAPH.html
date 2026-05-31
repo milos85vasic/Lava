@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>CODEGRAPH</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1 id="codegraph--code-intelligence-for-lava">CodeGraph — Code
+Intelligence for Lava</h1>
+<p><strong>CodeGraph</strong> is a local semantic code-knowledge-graph
+tool. It indexes the Lava codebase into a SQLite graph and exposes it to
+AI coding agents over the <strong>Model Context Protocol (MCP)</strong>,
+so an agent can resolve symbols, callers, callees, and change-impact
+instantly instead of repeatedly scanning files.</p>
+<ul>
+<li>Upstream: <a
+href="https://github.com/colbymchenry/codegraph">https://github.com/colbymchenry/codegraph</a>
+· npm <code>@colbymchenry/codegraph</code></li>
+<li>100 % local — SQLite, no cloud, no external API (compatible with
+Lava's <strong>Local-Only CI/CD</strong> constitutional
+constraint).</li>
+<li><strong>Mandatory</strong> for Lava development per the constitution
+(<code>constitution/</code> — HelixConstitution codegraph mandate). All
+five supported CLI agents are wired.</li>
+</ul>
+<blockquote>
+<p><strong>Status:</strong> incorporated 2026-05-20. Design spec:
+<code>docs/superpowers/specs/2026-05-20-codegraph-incorporation-design.md</code>.</p>
+</blockquote>
+<hr />
+<h2 id="1-what-gets-created-in-the-repo">1. What gets created in the
+repo</h2>
+<table>
+<thead>
+<tr>
+<th>Path</th>
+<th>Tracked?</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>.codegraph/config.json</code></td>
+<td>✅ tracked</td>
+<td>Include/exclude globs. Lava domain code + own-org submodule source
+<strong>in-scope AND physically indexed</strong> per §11.4.79 (blanket
+<code>submodules/</code> exclude removed); secrets + third-party + build
+artifacts excluded per §6.H / §11.4.79.</td>
+</tr>
+<tr>
+<td><code>.codegraph/codegraph.db</code></td>
+<td>❌ gitignored</td>
+<td>The SQLite knowledge graph — a regenerable build artifact
+(CONST-053).</td>
+</tr>
+<tr>
+<td><code>.codegraph/.gitignore</code></td>
+<td>✅ tracked</td>
+<td>codegraph's own ignore rules for its data files.</td>
+</tr>
+<tr>
+<td><code>.mcp.json</code></td>
+<td>✅ tracked</td>
+<td>Claude Code project-scoped MCP server registration.</td>
+</tr>
+<tr>
+<td><code>opencode.json</code></td>
+<td>✅ tracked</td>
+<td>OpenCode MCP server registration.</td>
+</tr>
+<tr>
+<td><code>.crush.json</code></td>
+<td>✅ tracked</td>
+<td>Crush MCP server registration.</td>
+</tr>
+<tr>
+<td><code>.qwen/settings.json</code></td>
+<td>✅ tracked</td>
+<td>Qwen Code MCP server registration.</td>
+</tr>
+<tr>
+<td><code>~/.kimi/mcp.json</code></td>
+<td>host-local</td>
+<td>Kimi CLI MCP registration (Kimi config is host-local;
+<code>.kimi/</code> is gitignored by project convention).</td>
+</tr>
+</tbody>
+</table>
+<p>All MCP configs reference the binary as bare <code>codegraph</code>
+(resolved on <code>PATH</code>) — <strong>never</strong> an absolute
+host path, per the §6.R no-hardcoding mandate.</p>
+<hr />
+<h2 id="2-installation">2. Installation</h2>
+<p>CodeGraph is a Node.js 18+ tool. Install it <strong>globally</strong>
+(no <code>sudo</code> — §6.U; the npm prefix is user-writable):</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">npm</span> install <span class="at">-g</span> @colbymchenry/codegraph</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="ex">codegraph</span> <span class="at">--version</span>          <span class="co"># expect 0.6.x or newer</span></span></code></pre></div>
+<p>Native modules (<code>better-sqlite3</code>,
+<code>tree-sitter</code>) compile on install; codegraph ships a WASM
+fallback if a prebuilt binary is unavailable for your Node version.</p>
+<hr />
+<h2 id="3-initialization--indexing">3. Initialization &amp;
+indexing</h2>
+<p>Already done for this repo — <code>.codegraph/config.json</code> is
+committed. To rebuild the index from scratch on a fresh clone:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">codegraph</span> index          <span class="co"># builds .codegraph/codegraph.db from config.json</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="ex">codegraph</span> status         <span class="co"># shows file/node/edge counts — confirm non-empty</span></span></code></pre></div>
+<p><code>config.json</code> puts <strong>Lava domain code AND own-org
+submodule SOURCE in-scope</strong>, per constitution <strong>§11.4.79
+(LVA-6)</strong> — which mandates that own-org
+(<code>vasic-digital</code> + <code>HelixDevelopment</code>) submodule
+source be indexed and forbids a blanket <code>submodules/</code>
+exclude. Physically indexed today (verified 2026-05-31):
+<code>app/</code>, <code>core/</code>, <code>feature/</code>,
+<code>buildSrc/</code>, <code>lava-api-go/</code>, <strong>plus the
+SOURCE of all 17 own-org functional submodules</strong> under
+<code>submodules/&lt;name&gt;/</code> (<code>auth</code>,
+<code>cache</code>, <code>challenges</code>, <code>concurrency</code>,
+<code>config</code>, <code>containers</code>, <code>database</code>,
+<code>discovery</code>, <code>helixqa</code>, <code>http3</code>,
+<code>mdns</code>, <code>middleware</code>, <code>observability</code>,
+<code>ratelimiter</code>, <code>recovery</code>, <code>security</code>,
+<code>tracker_sdk</code>). Totals: <strong>3,167 files / 52,562 nodes /
+137,980 edges</strong>, of which <strong>1,842 submodule files (1,673
+.kt+.go source)</strong>. The cross-submodule probe
+(<code>DefaultPluginRegistry</code>/<code>PluginRegistry</code>, symbols
+that exist only in <code>submodules/tracker_sdk/</code>) resolves —
+§11.4.79 step 4 PASSES.</p>
+<p>codegraph v0.9.7 discovers submodule source via
+<code>git ls-files -c --recurse-submodules</code> (its
+<code>extraction/index.js → collectGitFiles</code>), which only lists
+submodules that are <strong>git-active</strong>. The <strong>operational
+precondition</strong> is therefore: before <code>codegraph index</code>,
+the <code>submodules/*</code> paths MUST be
+<code>git submodule init</code>-active (run
+<code>git submodule update --init</code>, respecting pins —
+<strong>NEVER <code>--remote</code></strong>). A fresh clone with
+uninitialized submodules silently indexes 0 submodule files. The earlier
+"codegraph walker does not cross the gitlink boundary" claim was
+INCORRECT for v0.9.7 and is retracted — the real gate was submodule
+registration in <code>.git/config</code>, not a codegraph capability
+gap. Full record + falsifiability proof:
+<code>docs/codegraph-11479-reconciliation.md</code> → "Remediation
+attempt 2026-05-31".</p>
+<p><strong>Excludes</strong> (no blanket <code>submodules/</code> entry
+— §11.4.79 clause 1): the <code>constitution/</code> governance
+submodule (docs, not callable code — §11.4.79 clause 4),
+<code>releases/</code>, <code>build/</code>,
+<code>.lava-ci-evidence/</code>; nested third-party/vendored deps
+<code>**/vendor/</code>, <code>**/third_party/</code> (§11.4.79 clause
+3); and — per §6.H / §11.4.10, with <code>**/</code> prefixes so they
+apply INSIDE submodules too — <code>.env*</code>,
+<code>keystores/</code>, <code>*.keystore</code>, <code>*.jks</code>,
+<code>google-services.json</code>, <code>firebase-admin-*.json</code>,
+<code>secrets/</code>. <strong>Never remove the secret
+excludes.</strong> The full reconciliation record (before/after policy,
+re-index + credential-leak verification) is in
+<code>docs/codegraph-11479-reconciliation.md</code>.</p>
+<blockquote>
+<p>After changing the exclude policy you MUST
+<code>codegraph index</code> (single heavy op, §6.T.2), record the new
+file/node/edge counts, and run the credential-leak check
+(<code>codegraph files | grep -iE '\.env|keystore|\.jks|google-services|secrets/' | wc -l</code>
+→ expect <code>0</code>) per §11.4.79 step 5 + §11.4.78.</p>
+</blockquote>
+<p>Keep the index fresh after edits:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">codegraph</span> sync           <span class="co"># incremental update since last index</span></span></code></pre></div>
+<hr />
+<h2 id="4-the-five-supported-cli-agents">4. The five supported CLI
+agents</h2>
+<p>Claude Code is Lava's primary agent; all five are wired and
+verified.</p>
+<table>
+<thead>
+<tr>
+<th>Agent</th>
+<th>Config file</th>
+<th>Re-add command</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Claude Code</strong></td>
+<td><code>.mcp.json</code> (project)</td>
+<td>already present; <code>claude mcp get codegraph</code></td>
+</tr>
+<tr>
+<td><strong>OpenCode</strong></td>
+<td><code>opencode.json</code> (project)</td>
+<td>already present; <code>opencode mcp list</code></td>
+</tr>
+<tr>
+<td><strong>Qwen Code</strong></td>
+<td><code>.qwen/settings.json</code> (project)</td>
+<td><code>qwen mcp add codegraph codegraph serve --mcp --scope project --transport stdio</code></td>
+</tr>
+<tr>
+<td><strong>Kimi CLI</strong></td>
+<td><code>~/.kimi/mcp.json</code> (host)</td>
+<td><code>kimi mcp add --transport stdio codegraph -- codegraph serve --mcp</code></td>
+</tr>
+<tr>
+<td><strong>Crush</strong></td>
+<td><code>.crush.json</code> (project)</td>
+<td>already present</td>
+</tr>
+</tbody>
+</table>
+<p>On a fresh clone the four project-scoped configs are committed and
+work immediately. Only <strong>Kimi CLI</strong> needs the one-off
+<code>kimi mcp add</code> above, because Kimi stores MCP config
+host-locally (<code>.kimi/</code> is gitignored).</p>
+<p>All agents spawn <code>codegraph serve --mcp</code> (stdio transport)
+and gain the MCP tools: <code>codegraph_search</code>,
+<code>codegraph_context</code>, <code>codegraph_callers</code>,
+<code>codegraph_callees</code>, <code>codegraph_impact</code>,
+<code>codegraph_node</code>, <code>codegraph_files</code>,
+<code>codegraph_status</code>.</p>
+<hr />
+<h2 id="5-verification--the-anti-bluff-suite">5. Verification — the
+anti-bluff suite</h2>
+<p>Per the Anti-Bluff Pact (§6.J / §6.L), the integration is covered by
+a falsifiable verification suite. It IS the codegraph quality gate
+(Local-Only CI/CD — no hosted equivalent).</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">scripts/verify-codegraph.sh</span>            <span class="co"># full run — 6 layers, incl. agent E2E</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="ex">scripts/verify-codegraph.sh</span> <span class="at">--quick</span>    <span class="co"># layers 01-04 + 06 (skip slow LLM layer)</span></span></code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Proves</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>01 index reality</td>
+<td>codegraph indexed the <strong>real</strong> Lava codebase (file/node
+counts, Kotlin+Go) with <strong>no credential/secret-file-path
+leak</strong> (§6.H —
+<code>.env</code>/keystore/<code>.jks</code>/<code>google-services.json</code>/<code>secrets/</code>
+<em>paths</em> absent; verified 0 on the 2026-05-31 re-index. Note:
+<code>java.security.KeyStore</code> /
+<code>android.security.keystore.*</code> <em>API identifiers</em>
+legitimately appear as imports in Lava source — those are code, not
+secret files). Own-org submodule source is in-scope per §11.4.79 AND
+physically indexed (1,842 submodule files / 1,673 .kt+.go), provided
+submodules are <code>git submodule init</code>-active before indexing —
+see <code>docs/codegraph-11479-reconciliation.md</code> → "Remediation
+attempt 2026-05-31".</td>
+</tr>
+<tr>
+<td>02 query correctness</td>
+<td><code>codegraph query</code> resolves real symbols to real
+<code>file:line</code>.</td>
+</tr>
+<tr>
+<td>03 MCP protocol</td>
+<td>the MCP server returns real data over real stdio JSON-RPC.</td>
+</tr>
+<tr>
+<td>04 agent connectivity</td>
+<td>all 5 agents register/connect to codegraph.</td>
+</tr>
+<tr>
+<td>05 agent E2E</td>
+<td>each agent provably <strong>uses</strong> codegraph in a real LLM
+turn — it must report the index node count, a fact obtainable only by
+calling the <code>codegraph_status</code> tool.</td>
+</tr>
+<tr>
+<td>06 falsifiability</td>
+<td>layers 01-03 <strong>fail</strong> when the DB is removed and
+<strong>pass</strong> when restored — proving the suite is not a
+bluff.</td>
+</tr>
+</tbody>
+</table>
+<p>Evidence is written to
+<code>.lava-ci-evidence/codegraph/&lt;UTC-timestamp&gt;/</code>.</p>
+<p><strong>Honest classification (§6.L):</strong> layer 05 marks an
+agent <code>SKIP</code> (a <em>documented gap</em>, never a faked pass)
+if it cannot be run here because it is not authenticated / has no model
+configured. Authenticate that agent and re-run. A <code>FAIL</code>
+means an agent ran but did not use codegraph — a real defect.</p>
+<hr />
+<h2 id="6-troubleshooting">6. Troubleshooting</h2>
+<table>
+<thead>
+<tr>
+<th>Symptom</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>codegraph: command not found</code></td>
+<td><code>npm install -g @colbymchenry/codegraph</code>; ensure the npm
+global <code>bin</code> is on <code>PATH</code>.</td>
+</tr>
+<tr>
+<td>Agent does not see codegraph tools</td>
+<td>re-check the agent's config file (§4); run the agent's
+<code>mcp list</code>.</td>
+</tr>
+<tr>
+<td><code>codegraph status</code> shows 0 files</td>
+<td>run <code>codegraph index</code>; check <code>config.json</code>
+include/exclude globs.</td>
+</tr>
+<tr>
+<td>Stale results after edits</td>
+<td><code>codegraph sync</code> (or <code>codegraph index -f</code> for
+a full rebuild).</td>
+</tr>
+<tr>
+<td><code>unlock</code> needed</td>
+<td><code>codegraph unlock</code> removes a stale lock file blocking
+indexing.</td>
+</tr>
+<tr>
+<td><code>codegraph status</code> fails — "unable to open database file"
+/ "Using WASM SQLite backend"</td>
+<td>The native <code>better-sqlite3</code> binding got disabled (a
+<code>brew</code> operation can disturb a global install placed under
+the Homebrew Node Cellar). Rebuild the index:
+<code>codegraph index</code>. If it persists, reinstall:
+<code>npm install -g @colbymchenry/codegraph</code>.
+<code>scripts/verify-codegraph.sh</code> pre-flight now detects this and
+aborts cleanly.</td>
+</tr>
+<tr>
+<td>A secret path appeared in the index</td>
+<td>a §6.H violation — add the path to <code>config.json</code>
+<code>exclude</code> and <code>codegraph index -f</code>; file an
+incident.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="7-constitutional-notes">7. Constitutional notes</h2>
+<ul>
+<li><strong>§6.H</strong> — <code>config.json</code> excludes every
+secret path (with <code>**/</code> prefixes so the excludes apply inside
+the now-indexed own-org submodules too); the index must never contain
+<code>.env</code>, keystores, <code>secrets/</code>, or Firebase
+keys.</li>
+<li><strong>§11.4.79 (LVA-6) — CLOSED 2026-05-31</strong> — own-org
+submodule SOURCE (<code>vasic-digital</code> +
+<code>HelixDevelopment</code>) IS physically indexed (1,842 submodule
+files; cross-submodule probe passes); no blanket
+<code>submodules/</code> exclude. Operational precondition:
+<code>git submodule init</code>-active before
+<code>codegraph index</code>. Third-party (<code>vendor/</code>,
+<code>third_party/</code>) and the <code>constitution/</code> governance
+submodule stay excluded. See
+<code>docs/codegraph-11479-reconciliation.md</code>.</li>
+<li><strong>§6.R</strong> — MCP configs use the bare
+<code>codegraph</code> command (PATH-resolved); no hardcoded host
+paths.</li>
+<li><strong>§6.W</strong> — codegraph is an npm tool; no Git remote is
+added.</li>
+<li><strong>Decoupled Reusable Architecture</strong> — codegraph is
+third-party developer tooling, not Lava domain code and not a
+<code>vasic-digital</code> submodule.</li>
+<li><strong>Local-Only CI/CD</strong> — codegraph and
+<code>scripts/verify-codegraph.sh</code> run entirely locally.</li>
+</ul>
+</body>
+</html>

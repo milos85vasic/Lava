@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-05-13-sp4-phase-d-implementation</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1
+id="sp-4-phase-d--multi-provider-parallel-search-sdk-implementation-plan">SP-4
+Phase D — Multi-Provider Parallel Search SDK (implementation plan)</h1>
+<p><strong>Plan date:</strong> 2026-05-13 <strong>Design:</strong>
+<code>docs/superpowers/specs/2026-05-13-sp4-phase-d-design.md</code>
+<strong>Parent SP:</strong>
+<code>docs/superpowers/specs/2026-05-12-sp4-multi-provider-redesign.md</code>
+<strong>Prerequisite:</strong> Phase C complete (HEAD
+<code>6db79c50</code>).</p>
+<p>6 tasks, ~20 steps. The SDK-side work (Tasks 1-3) +
+ActiveTrackerSection removal (Task 4) are autonomously executable. The
+Search-Result UI branch (Task 5) is also autonomous. Cancellation +
+backpressure unit tests (Task 6) ship in the same commit. Compose UI
+Challenges C32 + C33 are documented as KDoc rehearsal protocols;
+operator runs them on the gating emulator before next tag.</p>
+<h2 id="task-1--multisearchevent-sealed-hierarchy--builder">Task 1 —
+<code>MultiSearchEvent</code> sealed hierarchy + builder</h2>
+<p>The event vocabulary the streaming SDK method emits.</p>
+<p><strong>Files:</strong></p>
+<ul>
+<li>Create:
+<code>core/tracker/client/src/main/kotlin/lava/tracker/client/MultiSearchEvent.kt</code></li>
+</ul>
+<p><strong>Steps:</strong></p>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 1: Sealed
+hierarchy.</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">sealed</span> <span class="kw">interface</span> MultiSearchEvent <span class="op">{</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">val</span> <span class="va">providerId</span><span class="op">:</span> <span class="kw">String</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">data</span> <span class="kw">class</span> ProviderStart<span class="op">(</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>        <span class="kw">override</span> <span class="kw">val</span> <span class="va">providerId</span><span class="op">:</span> <span class="dt">String</span><span class="op">,</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>        <span class="kw">val</span> <span class="va">displayName</span><span class="op">:</span> <span class="dt">String</span><span class="op">,</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">)</span> <span class="op">:</span> <span class="dt">MultiSearchEvent</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">data</span> <span class="kw">class</span> ProviderResults<span class="op">(</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>        <span class="kw">override</span> <span class="kw">val</span> <span class="va">providerId</span><span class="op">:</span> <span class="dt">String</span><span class="op">,</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>        <span class="kw">val</span> <span class="va">items</span><span class="op">:</span> <span class="dt">List</span>&lt;<span class="va">TorrentItem</span>&gt;<span class="op">,</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    <span class="op">)</span> <span class="op">:</span> <span class="dt">MultiSearchEvent</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    <span class="kw">data</span> <span class="kw">class</span> ProviderFailure<span class="op">(</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>        <span class="kw">override</span> <span class="kw">val</span> <span class="va">providerId</span><span class="op">:</span> <span class="dt">String</span><span class="op">,</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>        <span class="kw">val</span> <span class="va">reason</span><span class="op">:</span> <span class="dt">String</span><span class="op">,</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>        <span class="kw">val</span> <span class="va">cause</span><span class="op">:</span> <span class="dt">Throwable</span><span class="op">?</span> <span class="op">=</span> null<span class="op">,</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    <span class="op">)</span> <span class="op">:</span> <span class="dt">MultiSearchEvent</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>    <span class="kw">data</span> <span class="kw">class</span> ProviderUnsupported<span class="op">(</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>        <span class="kw">override</span> <span class="kw">val</span> <span class="va">providerId</span><span class="op">:</span> <span class="dt">String</span><span class="op">,</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>    <span class="op">)</span> <span class="op">:</span> <span class="dt">MultiSearchEvent</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>    <span class="kw">data</span> <span class="kw">class</span> AllProvidersDone<span class="op">(</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>        <span class="kw">override</span> <span class="kw">val</span> <span class="va">providerId</span><span class="op">:</span> <span class="dt">String</span> <span class="op">=</span> <span class="st">&quot;&quot;</span><span class="op">,</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>        <span class="kw">val</span> <span class="va">unified</span><span class="op">:</span> <span class="dt">UnifiedSearchResult</span><span class="op">,</span></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>    <span class="op">)</span> <span class="op">:</span> <span class="dt">MultiSearchEvent</span></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<ul class="task-list">
+<li><p><label><input type="checkbox" /><strong>Step 2: Builder
+helper.</strong> Add a companion
+<code>fun UnifiedSearchResult.Companion.fromEvents(query, page, events): UnifiedSearchResult</code>
+— consume the event sequence, build the <code>providerStatuses</code> +
+<code>resultsByProvider</code> maps, run
+<code>DeduplicationEngine.deduplicate(...)</code>, return the assembled
+<code>UnifiedSearchResult</code>.</label></p></li>
+<li><p><label><input type="checkbox" /><strong>Step 3:
+Compile.</strong></label></p></li>
+</ul>
+<h2
+id="task-2--rewrite-lavatrackersdkmultisearch-to-parallel-fan-out">Task
+2 — Rewrite <code>LavaTrackerSdk.multiSearch</code> to parallel
+fan-out</h2>
+<p><strong>Files:</strong></p>
+<ul>
+<li>Modify:
+<code>core/tracker/client/src/main/kotlin/lava/tracker/client/LavaTrackerSdk.kt</code></li>
+</ul>
+<p><strong>Steps:</strong></p>
+<ul class="task-list">
+<li><p><label><input type="checkbox" /><strong>Step 1: Extract
+per-provider logic</strong> into a private
+<code>suspend fun runOneProvider(id, descriptor, request, page): ProviderOutcome</code>
+returning a sealed result (Success(items), Failure(reason), Unsupported,
+NotRegistered).</label></p></li>
+<li><p><label><input type="checkbox" /><strong>Step 2: Rewrite
+multiSearch body:</strong></label></p></li>
+</ul>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>suspend <span class="kw">fun</span> <span class="fu">multiSearch</span><span class="op">(</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="va">request</span><span class="op">:</span> <span class="dt">SearchRequest</span><span class="op">,</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="va">providerIds</span><span class="op">:</span> <span class="dt">List</span>&lt;<span class="va">String</span>&gt;<span class="op">,</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="va">page</span><span class="op">:</span> <span class="dt">Int</span> <span class="op">=</span> <span class="dv">0</span><span class="op">,</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="op">):</span> <span class="dt">UnifiedSearchResult</span> <span class="op">=</span> coroutineScope <span class="op">{</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">val</span> <span class="va">outcomes</span> <span class="op">=</span> providerIds<span class="op">.</span>map <span class="op">{</span> id <span class="op">-&gt;</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>        async <span class="op">{</span> id to runOneProvider<span class="op">(</span>id<span class="op">,</span> request<span class="op">,</span> page<span class="op">)</span> <span class="op">}</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">}.</span>awaitAll<span class="op">()</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Build UnifiedSearchResult from the parallel outcomes (logic moved here from current sequential impl)</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">val</span> <span class="va">statuses</span> <span class="op">=</span> outcomes<span class="op">.</span>map <span class="op">{</span> <span class="op">(</span>id<span class="op">,</span> outcome<span class="op">)</span> <span class="op">-&gt;</span> outcome<span class="op">.</span>toStatus<span class="op">(</span>id<span class="op">)</span> <span class="op">}</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    <span class="kw">val</span> <span class="va">resultsByProvider</span> <span class="op">=</span> outcomes<span class="op">.</span>mapNotNull <span class="op">{</span> <span class="op">(</span>id<span class="op">,</span> outcome<span class="op">)</span> <span class="op">-&gt;</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>        <span class="op">(</span>outcome <span class="kw">as</span><span class="op">?</span> ProviderOutcome<span class="op">.</span>Success<span class="op">)?.</span>let <span class="op">{</span> id to it<span class="op">.</span>items <span class="op">}</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    <span class="op">}.</span>toMap<span class="op">()</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    <span class="kw">val</span> <span class="va">displayNames</span> <span class="op">=</span> outcomes<span class="op">.</span>associate <span class="op">{</span> <span class="op">(</span>id<span class="op">,</span> outcome<span class="op">)</span> <span class="op">-&gt;</span> id to outcome<span class="op">.</span>displayName<span class="op">(</span>id<span class="op">)</span> <span class="op">}</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    <span class="kw">val</span> <span class="va">deduped</span> <span class="op">=</span> DeduplicationEngine<span class="op">.</span>deduplicate<span class="op">(</span>resultsByProvider<span class="op">,</span> displayNames<span class="op">)</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    UnifiedSearchResult<span class="op">(</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>        query <span class="op">=</span> request<span class="op">.</span>query<span class="op">,</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>        page <span class="op">=</span> page<span class="op">,</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>        items <span class="op">=</span> deduped<span class="op">,</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>        totalPages <span class="op">=</span> <span class="dv">1</span><span class="op">,</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>        providerStatuses <span class="op">=</span> statuses<span class="op">,</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>    <span class="op">)</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 3:
+Compile.</strong></label></li>
+</ul>
+<h2 id="task-3--add-streammultisearch-via-channelflow">Task 3 — Add
+<code>streamMultiSearch(...)</code> via channelFlow</h2>
+<p><strong>Files:</strong></p>
+<ul>
+<li>Modify:
+<code>core/tracker/client/src/main/kotlin/lava/tracker/client/LavaTrackerSdk.kt</code></li>
+</ul>
+<p><strong>Steps:</strong></p>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 1: Signature +
+body.</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">fun</span> <span class="fu">streamMultiSearch</span><span class="op">(</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="va">request</span><span class="op">:</span> <span class="dt">SearchRequest</span><span class="op">,</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="va">providerIds</span><span class="op">:</span> <span class="dt">List</span>&lt;<span class="va">String</span>&gt;<span class="op">,</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="va">page</span><span class="op">:</span> <span class="dt">Int</span> <span class="op">=</span> <span class="dv">0</span><span class="op">,</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="op">):</span> <span class="dt">Flow</span><span class="op">&lt;</span><span class="dt">MultiSearchEvent</span><span class="op">&gt;</span> <span class="op">=</span> channelFlow <span class="op">{</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">val</span> <span class="va">statuses</span> <span class="op">=</span> mutableMapOf<span class="op">&lt;</span><span class="kw">String</span><span class="op">,</span> ProviderSearchStatus<span class="op">&gt;()</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">val</span> <span class="va">resultsByProvider</span> <span class="op">=</span> mutableMapOf<span class="op">&lt;</span><span class="kw">String</span><span class="op">,</span> List<span class="op">&lt;</span>TorrentItem<span class="op">&gt;&gt;()</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    <span class="kw">val</span> <span class="va">displayNames</span> <span class="op">=</span> mutableMapOf<span class="op">&lt;</span><span class="kw">String</span><span class="op">,</span> <span class="kw">String</span><span class="op">&gt;()</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> <span class="op">(</span>id <span class="kw">in</span> providerIds<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>        launch <span class="op">{</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>            <span class="kw">val</span> <span class="va">descriptor</span> <span class="op">=</span> registry<span class="op">.</span>list<span class="op">().</span>firstOrNull <span class="op">{</span> it<span class="op">.</span>trackerId <span class="op">==</span> id <span class="op">}</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="op">(</span>descriptor <span class="op">==</span> <span class="kw">null</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>                send<span class="op">(</span>MultiSearchEvent<span class="op">.</span>ProviderFailure<span class="op">(</span>id<span class="op">,</span> <span class="st">&quot;not registered&quot;</span><span class="op">))</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>                statuses<span class="op">[</span>id<span class="op">]</span> <span class="op">=</span> ProviderSearchStatus<span class="op">(</span>id<span class="op">,</span> id<span class="op">,</span> ProviderSearchState<span class="op">.</span>FAILURE<span class="op">,</span> errorMessage <span class="op">=</span> <span class="st">&quot;not registered&quot;</span><span class="op">)</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>                return<span class="at">@launch</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>            displayNames<span class="op">[</span>id<span class="op">]</span> <span class="op">=</span> descriptor<span class="op">.</span>displayName</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>            send<span class="op">(</span>MultiSearchEvent<span class="op">.</span>ProviderStart<span class="op">(</span>id<span class="op">,</span> descriptor<span class="op">.</span>displayName<span class="op">))</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="op">(</span>TrackerCapability<span class="op">.</span>SEARCH <span class="op">!</span><span class="kw">in</span> descriptor<span class="op">.</span>capabilities<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>                send<span class="op">(</span>MultiSearchEvent<span class="op">.</span>ProviderUnsupported<span class="op">(</span>id<span class="op">))</span></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>                statuses<span class="op">[</span>id<span class="op">]</span> <span class="op">=</span> ProviderSearchStatus<span class="op">(</span>id<span class="op">,</span> descriptor<span class="op">.</span>displayName<span class="op">,</span> ProviderSearchState<span class="op">.</span>UNSUPPORTED<span class="op">)</span></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>                return<span class="at">@launch</span></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>            <span class="kw">val</span> <span class="va">client</span> <span class="op">=</span> registry<span class="op">.</span><span class="kw">get</span><span class="op">(</span>id<span class="op">,</span> MapPluginConfig<span class="op">())</span></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>            <span class="kw">val</span> <span class="va">feature</span> <span class="op">=</span> client<span class="op">.</span>getFeature<span class="op">(</span>SearchableTracker<span class="op">::</span><span class="kw">class</span>)</span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>            if <span class="op">(</span><span class="va">feature</span> <span class="op">=</span>= null<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>                send<span class="op">(</span>MultiSearchEvent<span class="op">.</span>ProviderUnsupported<span class="op">(</span>id<span class="op">))</span></span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>                statuses<span class="op">[</span>id<span class="op">]</span> <span class="op">=</span> ProviderSearchStatus<span class="op">(</span>id<span class="op">,</span> descriptor<span class="op">.</span>displayName<span class="op">,</span> ProviderSearchState<span class="op">.</span>UNSUPPORTED<span class="op">)</span></span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>                return<span class="at">@launch</span></span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>            <span class="cf">try</span> <span class="op">{</span></span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>                <span class="kw">val</span> <span class="va">result</span> <span class="op">=</span> feature<span class="op">.</span>search<span class="op">(</span>request<span class="op">,</span> page<span class="op">)</span></span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a>                resultsByProvider<span class="op">[</span>id<span class="op">]</span> <span class="op">=</span> result<span class="op">.</span>items</span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a>                statuses<span class="op">[</span>id<span class="op">]</span> <span class="op">=</span> ProviderSearchStatus<span class="op">(</span>id<span class="op">,</span> descriptor<span class="op">.</span>displayName<span class="op">,</span> ProviderSearchState<span class="op">.</span>SUCCESS<span class="op">,</span> resultCount <span class="op">=</span> result<span class="op">.</span>items<span class="op">.</span>size<span class="op">)</span></span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a>                send<span class="op">(</span>MultiSearchEvent<span class="op">.</span>ProviderResults<span class="op">(</span>id<span class="op">,</span> result<span class="op">.</span>items<span class="op">))</span></span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span> <span class="cf">catch</span> <span class="op">(</span>t<span class="op">:</span> Throwable<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a>                statuses<span class="op">[</span>id<span class="op">]</span> <span class="op">=</span> ProviderSearchStatus<span class="op">(</span>id<span class="op">,</span> descriptor<span class="op">.</span>displayName<span class="op">,</span> ProviderSearchState<span class="op">.</span>FAILURE<span class="op">,</span> errorMessage <span class="op">=</span> t<span class="op">.</span>message <span class="op">?:</span> <span class="st">&quot;search failed&quot;</span><span class="op">)</span></span>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a>                send<span class="op">(</span>MultiSearchEvent<span class="op">.</span>ProviderFailure<span class="op">(</span>id<span class="op">,</span> t<span class="op">.</span>message <span class="op">?:</span> <span class="st">&quot;search failed&quot;</span><span class="op">,</span> t<span class="op">))</span></span>
+<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Wait for all launches to complete; channelFlow&#39;s `awaitClose` is not needed</span></span>
+<span id="cb3-47"><a href="#cb3-47" aria-hidden="true" tabindex="-1"></a>    <span class="co">// because the `launch`-es are children of this scope and complete before</span></span>
+<span id="cb3-48"><a href="#cb3-48" aria-hidden="true" tabindex="-1"></a>    <span class="co">// channelFlow returns.</span></span>
+<span id="cb3-49"><a href="#cb3-49" aria-hidden="true" tabindex="-1"></a><span class="op">}.</span>onCompletion <span class="op">{</span> cause <span class="op">-&gt;</span></span>
+<span id="cb3-50"><a href="#cb3-50" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">(</span>cause <span class="op">==</span> <span class="kw">null</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-51"><a href="#cb3-51" aria-hidden="true" tabindex="-1"></a>        <span class="kw">val</span> <span class="va">deduped</span> <span class="op">=</span> DeduplicationEngine<span class="op">.</span>deduplicate<span class="op">(</span>resultsByProvider<span class="op">,</span> displayNames<span class="op">)</span></span>
+<span id="cb3-52"><a href="#cb3-52" aria-hidden="true" tabindex="-1"></a>        <span class="kw">val</span> <span class="va">unified</span> <span class="op">=</span> UnifiedSearchResult<span class="op">(</span></span>
+<span id="cb3-53"><a href="#cb3-53" aria-hidden="true" tabindex="-1"></a>            query <span class="op">=</span> request<span class="op">.</span>query<span class="op">,</span></span>
+<span id="cb3-54"><a href="#cb3-54" aria-hidden="true" tabindex="-1"></a>            page <span class="op">=</span> page<span class="op">,</span></span>
+<span id="cb3-55"><a href="#cb3-55" aria-hidden="true" tabindex="-1"></a>            items <span class="op">=</span> deduped<span class="op">,</span></span>
+<span id="cb3-56"><a href="#cb3-56" aria-hidden="true" tabindex="-1"></a>            totalPages <span class="op">=</span> <span class="dv">1</span><span class="op">,</span></span>
+<span id="cb3-57"><a href="#cb3-57" aria-hidden="true" tabindex="-1"></a>            providerStatuses <span class="op">=</span> statuses<span class="op">.</span>values<span class="op">.</span>toList<span class="op">(),</span></span>
+<span id="cb3-58"><a href="#cb3-58" aria-hidden="true" tabindex="-1"></a>        <span class="op">)</span></span>
+<span id="cb3-59"><a href="#cb3-59" aria-hidden="true" tabindex="-1"></a>        emit<span class="op">(</span>MultiSearchEvent<span class="op">.</span>AllProvidersDone<span class="op">(</span>unified <span class="op">=</span> unified<span class="op">))</span></span>
+<span id="cb3-60"><a href="#cb3-60" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-61"><a href="#cb3-61" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Note: the local mutable maps captured by the inner launches are safe
+in coroutine-scope mutation (single-threaded confined to the parent's
+dispatcher) because <code>channelFlow</code> runs the producer on a
+single dispatcher unless the user opts into <code>flowOn</code>. If we
+ever move to
+<code>flowOn(Dispatchers.IO.limitedParallelism(...))</code>, swap the
+maps for <code>ConcurrentHashMap</code>.</p>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 2:
+Compile.</strong></label></li>
+</ul>
+<h2 id="task-4--delete-activetrackersection--related-stateaction">Task 4
+— Delete <code>ActiveTrackerSection</code> + related state/action</h2>
+<p>The Phase C-added affordance is dead post-Phase-D. Delete with
+<code>@Deprecated</code> markers on the SDK API surface it called.</p>
+<p><strong>Files:</strong></p>
+<ul>
+<li>Delete:
+<code>feature/provider_config/src/main/kotlin/lava/provider/config/sections/ActiveTrackerSection.kt</code></li>
+<li>Modify:
+<code>feature/provider_config/src/main/kotlin/lava/provider/config/ProviderConfigState.kt</code>
+— remove <code>activeTrackerId</code> field</li>
+<li>Modify:
+<code>feature/provider_config/src/main/kotlin/lava/provider/config/ProviderConfigAction.kt</code>
+— remove <code>MakeActive</code></li>
+<li>Modify:
+<code>feature/provider_config/src/main/kotlin/lava/provider/config/ProviderConfigViewModel.kt</code>
+— remove the <code>MakeActive</code> branch + the
+<code>activeTrackerId</code> field assignment in
+<code>onCreate</code></li>
+<li>Modify:
+<code>feature/provider_config/src/main/kotlin/lava/provider/config/ProviderConfigScreen.kt</code>
+— remove <code>ActiveTrackerSection</code> import + invocation</li>
+<li>Modify:
+<code>core/tracker/client/src/main/kotlin/lava/tracker/client/LavaTrackerSdk.kt</code>
+— mark <code>activeTrackerId()</code> and both
+<code>switchTracker</code> overloads
+<code>@Deprecated("Use multiSearch/streamMultiSearch — single-active-tracker semantics removed by SP-4 Phase D")</code>.</li>
+</ul>
+<p><strong>Steps:</strong></p>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 1: <code>git rm</code>
+ActiveTrackerSection.kt.</strong></label></li>
+<li><label><input type="checkbox" /><strong>Step 2: Edit each of the 5
+modified files</strong> to drop the corresponding lines.</label></li>
+<li><label><input type="checkbox" /><strong>Step 3: Compile both feature
+modules.</strong></label></li>
+</ul>
+<h2
+id="task-5--searchresultviewmodel-consumes-streammultisearch-when-api-is-not-configured">Task
+5 — <code>SearchResultViewModel</code> consumes
+<code>streamMultiSearch</code> when API is not configured</h2>
+<p><strong>Files:</strong></p>
+<ul>
+<li>Modify:
+<code>feature/search_result/src/main/kotlin/lava/search/result/SearchResultViewModel.kt</code></li>
+</ul>
+<p><strong>Steps:</strong></p>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 1: Branch in
+<code>onCreate</code>.</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>onCreate <span class="op">=</span> <span class="op">{</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    observeFilter<span class="op">()</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">when</span> <span class="op">{</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>        mutableFilter<span class="op">.</span>value<span class="op">.</span>providerIds <span class="op">==</span> <span class="kw">null</span> <span class="op">-&gt;</span> observePagingData<span class="op">()</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>        currentEndpointIsGoApi<span class="op">()</span> <span class="op">-&gt;</span> observeSseSearch<span class="op">(</span>mutableFilter<span class="op">.</span>value<span class="op">)</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span> <span class="op">-&gt;</span> observeStreamMultiSearch<span class="op">(</span>mutableFilter<span class="op">.</span>value<span class="op">)</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<ul class="task-list">
+<li><p><label><input type="checkbox" /><strong>Step 2: Helper
+<code>currentEndpointIsGoApi()</code></strong> reads
+<code>observeSettingsUseCase().first().endpoint is Endpoint.GoApi</code>.</label></p></li>
+<li><p><label><input type="checkbox" /><strong>Step 3: New private
+<code>observeStreamMultiSearch(filter)</code></strong> consumes
+<code>sdk.streamMultiSearch(...)</code>. On each event:</label></p>
+<ul>
+<li><code>ProviderStart(id, name)</code> → reduce
+<code>searchContent.activeProviders</code> adding/updating the provider
+row to <code>SEARCHING</code>.</li>
+<li><code>ProviderResults(id, items)</code> → append to
+<code>searchContent.items</code> + mark provider <code>DONE</code>.</li>
+<li><code>ProviderFailure(id, reason, _)</code> → mark provider
+<code>ERROR(reason)</code>.</li>
+<li><code>ProviderUnsupported(id)</code> → mark provider
+<code>UNSUPPORTED</code>.</li>
+<li><code>AllProvidersDone(unified)</code> → final reduce with the
+deduplicated unified result.</li>
+</ul></li>
+</ul>
+<p>Reuse the existing <code>handleSseEvent</code>-style state-reduce
+logic; refactor the shared parts into a private helper
+<code>applyProviderEvent(state, event): SearchPageState</code>.</p>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 4:
+Compile.</strong></label></li>
+</ul>
+<h2 id="task-6--cancellation--backpressure-unit-tests">Task 6 —
+Cancellation + backpressure unit tests</h2>
+<p><strong>Files:</strong></p>
+<ul>
+<li>Create:
+<code>core/tracker/client/src/test/kotlin/lava/tracker/client/LavaTrackerSdkParallelSearchTest.kt</code></li>
+</ul>
+<p><strong>Steps:</strong></p>
+<ul class="task-list">
+<li><p><label><input type="checkbox" /><strong>Step 1: Parallel fan-out
+timing test.</strong> Fake 3 providers with 500ms latency each. Assert
+<code>multiSearch(...)</code> completes in &lt; 700ms (max latency +
+overhead), not 1500ms (sum of latencies).</label></p></li>
+<li><p><label><input type="checkbox" /><strong>Step 2: Cancellation
+test.</strong> Start <code>streamMultiSearch(...)</code> collection;
+cancel after first <code>ProviderStart</code> event arrives; assert
+remaining provider coroutines are cancelled (verify by injecting a fake
+<code>SearchableTracker</code> whose <code>search</code> is a
+<code>suspendCancellableCoroutine</code> and asserting the cancellation
+handler ran).</label></p></li>
+<li><p><label><input type="checkbox" /><strong>Step 3: Backpressure
+test.</strong> Inject 5 fake providers that each emit instantly; use a
+collector with <code>delay(50)</code> between collects; assert all
+<code>ProviderStart</code> + <code>ProviderResults</code> +
+<code>AllProvidersDone</code> events are received in order (no drops, no
+reorderings).</label></p></li>
+<li><p><label><input type="checkbox" /><strong>Step 4: Bluff-Audit
+rehearsal.</strong></label></p>
+<ul>
+<li>For (1): Mutate <code>multiSearch</code> body to
+<code>for (id in providerIds) { runOneProvider(...) }</code>
+(sequential). Confirm test fails with "took 1500ms, expected &lt;
+700ms".</li>
+<li>For (2): Remove the <code>coroutineScope { }</code> wrapper so
+children are unstructured. Confirm cancellation test fails — child
+coroutines outlive the parent cancellation.</li>
+<li>For (3): Change <code>channelFlow</code> buffer to
+<code>Channel.UNLIMITED</code> (no backpressure). Confirm test still
+passes for this scenario but document that the change weakens the
+contract; the test's purpose is to lock the SUSPEND policy. (For a
+falsifiable test of backpressure ITSELF, mutate the collector to NOT
+delay and assert that the emissions happen before the delay — but this
+is testing the test, not the SUT. Stick with the order-preservation
+assertion as the primary signal.)</li>
+</ul>
+<p>Record all three mutations + observed-failures in commit
+body.</p></li>
+<li><p><label><input type="checkbox" /><strong>Step 5: Compile + run
+tests.</strong>
+<code>./gradlew :core:tracker:client:testDebugUnitTest</code>.</label></p></li>
+</ul>
+<h2 id="task-7--continuation-update--commit--push">Task 7 — CONTINUATION
+update + commit + push</h2>
+<p><strong>Steps:</strong></p>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 1: Update
+CONTINUATION.md</strong> §0 with Phase D delivery.</label></li>
+<li><label><input type="checkbox" /><strong>Step 2: Local CI
+gate.</strong> <code>bash scripts/check-constitution.sh</code> + the
+spotless/test runs.</label></li>
+<li><label><input type="checkbox" /><strong>Step 3: Commit</strong>
+with:</label>
+<ul>
+<li>Bluff-Audit stamps for
+<code>LavaTrackerSdkParallelSearchTest.kt</code> (3 mutations).</li>
+<li>Notes on <code>@Deprecated</code>-marked API surfaces and the
+migration target.</li>
+<li><code>Co-Authored-By</code> trailer.</li>
+</ul></li>
+<li><label><input type="checkbox" /><strong>Step 4: Push to github +
+gitlab.</strong> Verify SHA convergence.</label></li>
+</ul>
+<h2 id="risk-register">Risk register</h2>
+<table>
+<thead>
+<tr>
+<th>Risk</th>
+<th>Mitigation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>channelFlow</code>'s <code>send</code> from inner
+<code>launch</code> can deadlock if the collector is slow + the producer
+holds a mutex</td>
+<td>Avoid mutex inside the producer; rely on coroutine-confinement of
+the local maps (single dispatcher). Tested by Task 6 Step 3.</td>
+</tr>
+<tr>
+<td>The legacy paging path still calls
+<code>LavaTrackerSdk.activeTrackerId()</code></td>
+<td>Deprecation marker is non-breaking; legacy callers continue to
+compile. Full removal is a future phase post-paging-migration.</td>
+</tr>
+<tr>
+<td><code>streamMultiSearch</code> emits <code>AllProvidersDone</code>
+via <code>onCompletion</code> — if the collector cancels mid-stream,
+<code>AllProvidersDone</code> is NOT emitted</td>
+<td>Intentional. The consumer's <code>observeStreamMultiSearch</code>
+ViewModel logic does not depend on <code>AllProvidersDone</code> for
+final state; it incrementally reduces on each
+<code>ProviderResults</code> event. <code>AllProvidersDone</code> is the
+"all OK, here's the deduplicated summary" event for non-streaming
+callers.</td>
+</tr>
+<tr>
+<td>Phase D commit and Phase C commit both reference
+<code>ActiveTrackerSection</code> — risk of merge surprise</td>
+<td>Phase D ships only on master, ahead of Phase C in linear history. No
+branching surprise.</td>
+</tr>
+<tr>
+<td>Cancellation test may flake on slow CI</td>
+<td>Use generous timeouts (1000ms cancellation-propagation window).</td>
+</tr>
+</tbody>
+</table>
+<h2 id="deliverable-summary">Deliverable summary</h2>
+<p>A single commit (or 2-3 if grouping by domain) that:</p>
+<ol type="1">
+<li>Adds <code>MultiSearchEvent</code> + parallel
+<code>multiSearch</code> + <code>streamMultiSearch</code> to
+<code>LavaTrackerSdk</code>.</li>
+<li>Wires <code>SearchResultViewModel</code> to consume the new flow
+when the Go API is not configured.</li>
+<li>Deletes <code>ActiveTrackerSection</code> + related state/action;
+marks <code>LavaTrackerSdk.activeTrackerId()</code> +
+<code>switchTracker()</code> <code>@Deprecated</code>.</li>
+<li>Adds 3 unit tests (parallel-timing, cancellation, backpressure) with
+Bluff-Audit stamps.</li>
+<li>Documents C32 + C33 as Compose UI Challenges with KDoc rehearsal
+protocols (operator-bound execution).</li>
+<li>Updates CONTINUATION.md.</li>
+<li>Lands on both mirrors with verified SHA convergence.</li>
+</ol>
+<p>Estimated session time: 1-2 hours of execution + the three unit-test
+mutation rehearsals (~3 minutes each). The Compose UI Challenges C32 +
+C33 are owed for operator execution before next tag, not for this
+implementation commit.</p>
+</body>
+</html>

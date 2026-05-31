@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-05-17-comprehensive-uiux-core-sweep</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1 id="comprehensive-uiux--core-flow-sweep--2026-05-17">Comprehensive
+UI/UX + Core Flow Sweep — 2026-05-17</h1>
+<p><strong>Branch:</strong> <code>comprehensive-sweep-2026-05-17</code>
+<strong>Operator mandate:</strong> §6.L 58th invocation. Standing
+directive: tests pass green while features don't work for users. The
+operator's 1-minute test of distribute 1.2.23-1043 caught 3 user-facing
+defects the test suite let pass; this sweep is to find similar issues
+PROACTIVELY.</p>
+<p><strong>Constitutional binding:</strong> §6.J anti-bluff functional
+reality, §6.AB per-feature anti-bluff completeness checklist, §6.L
+operator standing order.</p>
+<p><strong>Methodology.</strong> Read every load-bearing ViewModel +
+screen pattern in <code>feature/</code>, every load-bearing tracker
+entry in <code>core/tracker/</code>, plus
+<code>app/src/main/kotlin/.../MainActivity.kt</code>. For each finding,
+classify by user severity, locate file:line, document symptom + root
+cause, and assess whether an existing test would catch it. No assumption
+is made about emulator availability (§6.X-debt host gap on darwin/arm64
+means runtime verification is operator-blocked).</p>
+<hr />
+<h2 id="top-10-findings-summary">Top-10 findings summary</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Severity</th>
+<th>Title</th>
+<th>File</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>P0</td>
+<td><code>ToggleAnonymous</code> in <code>ProviderConfigViewModel</code>
+never persists</td>
+<td><code>feature/provider_config/.../ProviderConfigViewModel.kt:82-84</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td>P0</td>
+<td><code>SearchResultContent</code> has no <code>Error</code> variant —
+"all providers failed" looks identical to "0 results"</td>
+<td><code>feature/search_result/.../SearchPageState.kt:30-54</code></td>
+</tr>
+<tr>
+<td>3</td>
+<td>P0</td>
+<td><code>SearchInputViewModel.availableProviders</code> is hardcoded —
+new SDK providers invisible</td>
+<td><code>feature/search_input/.../SearchInputViewModel.kt:48-53</code></td>
+</tr>
+<tr>
+<td>4</td>
+<td>P1</td>
+<td><code>LoginViewModel.serviceUnavailable</code> banner is never
+cleared on retype / retry</td>
+<td><code>feature/login/.../LoginViewModel.kt:41-75</code></td>
+</tr>
+<tr>
+<td>5</td>
+<td>P1</td>
+<td><code>LoginViewModel.ServiceUnavailable</code> branch doesn't clear
+stale <code>captcha</code> from prior <code>CaptchaRequired</code></td>
+<td><code>feature/login/.../LoginViewModel.kt:175-189</code></td>
+</tr>
+<tr>
+<td>6</td>
+<td>P1</td>
+<td><code>ProviderLoginViewModel.serviceUnavailable</code> banner is
+never cleared (same class as #4)</td>
+<td><code>feature/login/.../ProviderLoginViewModel.kt:133-167</code></td>
+</tr>
+<tr>
+<td>7</td>
+<td>P1</td>
+<td><code>OnboardingViewModel.onTestAndContinue</code> advances even
+when <code>loginResult == null</code> and provider is non-anonymous</td>
+<td><code>feature/onboarding/.../OnboardingViewModel.kt:160-179</code></td>
+</tr>
+<tr>
+<td>8</td>
+<td>P1</td>
+<td><code>loadProviders()</code> filter
+<code>verified &amp;&amp; apiSupported</code> may exclude providers the
+user explicitly cloned</td>
+<td><code>feature/onboarding/.../OnboardingViewModel.kt:55-64</code></td>
+</tr>
+<tr>
+<td>9</td>
+<td>P2</td>
+<td><code>MainActivity</code> reads <code>onboardingComplete</code> once
+in <code>repeatOnLifecycle</code> then never re-reads — survives via
+local mutableState only</td>
+<td><code>app/src/main/kotlin/.../MainActivity.kt:90-96</code></td>
+</tr>
+<tr>
+<td>10</td>
+<td>P2</td>
+<td><code>ToggleSync</code> in <code>ProviderConfigViewModel</code>
+calls <code>state.syncEnabled</code> BEFORE <code>observeAll()</code>
+populates it — first toggle may flip to opposite</td>
+<td><code>feature/provider_config/.../ProviderConfigViewModel.kt:77-81</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="findings--detail">Findings — detail</h2>
+<h3 id="finding-1--toggleanonymous-never-persists-p0">Finding 1 —
+<code>ToggleAnonymous</code> never persists (P0)</h3>
+<p><strong>Severity:</strong> P0 user-blocking when user expects setting
+to survive a restart.</p>
+<p><strong>File:line:</strong>
+<code>feature/provider_config/src/main/kotlin/lava/provider/config/ProviderConfigViewModel.kt:82-84</code></p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>ProviderConfigAction<span class="op">.</span>ToggleAnonymous <span class="op">-&gt;</span> <span class="op">{</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    reduce <span class="op">{</span> state<span class="op">.</span>copy<span class="op">(</span>anonymous <span class="op">=</span> <span class="op">!</span>state<span class="op">.</span>anonymous<span class="op">)</span> <span class="op">}</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>Symptom.</strong> User opens Provider Config screen, toggles
+the "Anonymous" switch ON, closes/backgrounds the app. On next launch
+the toggle is OFF again. The switch is rendered
+(<code>AnonymousSection.kt:29</code>) and reacts to taps, but the change
+is in-memory only — no DAO write, no outbox event, no
+<code>state.copy(anonymous = ...)</code> is read back from any persisted
+source in <code>observeAll()</code>. <code>Snapshot</code> (line 227)
+has 4 fields: binding/toggle/mirrors/creds — <code>anonymous</code> is
+NOT in the snapshot. After process death the initial-state default
+<code>anonymous = false</code> (line 14 in
+<code>ProviderConfigState.kt</code>) wins.</p>
+<p><strong>Root cause.</strong> The handler mutates
+<code>state.copy</code> without calling any of:
+<code>toggleDao.upsert(...)</code> (sync toggle), a hypothetical
+<code>anonymousDao.upsert(...)</code> (doesn't exist),
+<code>outbox.enqueue(...)</code> (no <code>ANONYMOUS_TOGGLE</code>
+SyncOutboxKind exists either). Compare to <code>ToggleSync</code>
+directly above which DOES persist + enqueue.</p>
+<p><strong>Fix sketch.</strong> Either (a) add a
+<code>ProviderAnonymousToggleEntity</code> + DAO + outbox kind + wire
+<code>observeAll()</code> to include it (matches <code>ToggleSync</code>
+pattern, ~50 LOC change touching DB schema migration); OR (b) repurpose
+the existing <code>ProviderConfigEntity</code> if it has an
+<code>anonymous</code> column (audit
+<code>ProviderConfigRepository.observeAll()</code> schema first); OR (c)
+remove the toggle from the screen entirely if anonymous mode is fully
+governed at the per-onboarding-session level. Operator decision required
+on which DB shape to commit to.</p>
+<p><strong>Anti-bluff classification.</strong> No existing test would
+catch this. <code>ProviderConfigViewModelTest</code> (if any) only
+asserts the in-memory <code>state.anonymous</code> flips. The test that
+would catch it: open VM → call <code>perform(ToggleAnonymous)</code> →
+instantiate a SECOND VM with the same <code>savedStateHandle</code> +
+DAOs (or <code>viewModelScope.cancel(); recreate</code>) → assert
+<code>state.anonymous == true</code> after onCreate completes. The bluff
+is "we asserted on state-after-mutation; we never asserted on
+state-after-recreate." Canonical §6.AB clause 1c gating-logic gap.</p>
+<hr />
+<h3 id="finding-2--searchresultcontent-has-no-error-variant-p0">Finding
+2 — <code>SearchResultContent</code> has no <code>Error</code> variant
+(P0)</h3>
+<p><strong>Severity:</strong> P0 user-blocking. The unresolved Bug 2
+from the prior cycle has a UI-layer root cause: even if every provider
+in <code>streamMultiSearch</code> fails (e.g. operator's "search fails
+for anonymous-only providers" report), the user sees "Nothing found" —
+the same screen they'd see for a legitimate 0-result query.</p>
+<p><strong>File:line:</strong>
+<code>feature/search_result/src/main/kotlin/lava/search/result/SearchPageState.kt:30-54</code>
++ <code>SearchResultViewModel.kt:444-460</code>.</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">// SearchPageState.kt</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="kw">internal</span> <span class="kw">sealed</span> <span class="kw">interface</span> SearchResultContent <span class="op">{</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">data</span> <span class="kw">object</span> Initial <span class="op">:</span> <span class="dt">SearchResultContent</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">data</span> <span class="kw">object</span> Empty <span class="op">:</span> <span class="dt">SearchResultContent</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">data</span> <span class="kw">object</span> Unauthorized <span class="op">:</span> <span class="dt">SearchResultContent</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">data</span> <span class="kw">class</span> Content<span class="op">(</span>...<span class="op">)</span> <span class="op">:</span> <span class="dt">SearchResultContent</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">data</span> <span class="kw">class</span> Streaming<span class="op">(</span>...<span class="op">)</span> <span class="op">:</span> <span class="dt">SearchResultContent</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="co">// SearchResultViewModel.kt handleStreamEnd:</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="dt">if</span> <span class="op">(</span><span class="va">current</span>.<span class="va">items</span>.<span class="va">isEmpty</span>(<span class="op">)</span>) <span class="op">{</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    reduce <span class="op">{</span> state<span class="op">.</span>copy<span class="op">(</span>searchContent <span class="op">=</span> SearchResultContent<span class="op">.</span>Empty<span class="op">)</span> <span class="op">}</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>Symptom.</strong> User selects 2 providers (e.g. archiveorg +
+gutenberg), searches "foo". Both providers throw (Cloudflare block,
+network down, SSL handshake failure, JSON shape mismatch — any cause).
+<code>streamMultiSearch</code> emits <code>ProviderFailure</code> for
+each → <code>applyMultiSearchEvent</code> flips both rows to
+<code>StreamStatus.ERROR</code>. <code>handleStreamEnd</code> sees
+<code>current.items.isEmpty()</code> (because every provider failed) and
+reduces to <code>SearchResultContent.Empty</code> — the user-visible
+"Nothing found" screen. The user has no way to distinguish "search
+worked; 0 hits" from "search broken; everything errored."</p>
+<p><strong>Root cause.</strong> <code>handleStreamEnd</code> only checks
+<code>items.isEmpty()</code>, not
+<code>activeProviders.all { it.status == StreamStatus.ERROR }</code>.
+The <code>Streaming</code> state has per-provider status, but the
+terminal <code>Empty</code> state discards it.</p>
+<p><strong>Fix sketch.</strong> Add
+<code>data class Error(val providerErrors: Map&lt;String, String&gt;) : SearchResultContent</code>
+variant. In <code>handleStreamEnd</code>, if
+<code>items.isEmpty()</code> AND
+<code>current.activeProviders.all { it.status == StreamStatus.ERROR }</code>,
+render <code>Error</code> with the per-provider error messages
+(preserved from <code>MultiSearchEvent.ProviderFailure.message</code>).
+If items.isEmpty() AND at least one provider succeeded, render
+<code>Empty</code> (legitimate 0-result). The screen renderer adds a new
+branch displaying the per-provider error list with a Retry button.</p>
+<p><strong>Anti-bluff classification.</strong> No existing test catches
+this. The streaming-VM test <code>ApplyMultiSearchEventTest</code>
+asserts on <code>StreamStatus.ERROR</code> transitions but stops at
+<code>Streaming.activeProviders[i].status</code> — never drives the
+<code>handleStreamEnd</code> finalization branch with all-failed-state.
+The test that would catch it: feed <code>streamMultiSearch</code> a flow
+that emits ProviderStart + ProviderFailure for every provider → assert
+final state is <code>SearchResultContent.Error</code>, not
+<code>Empty</code>. Falsifiability: today this assertion would fail;
+with the fix, it passes; mutating the fix back to <code>Empty</code>
+makes it fail again.</p>
+<hr />
+<h3
+id="finding-3--searchinputviewmodelavailableproviders-is-hardcoded-p0">Finding
+3 — <code>SearchInputViewModel.availableProviders</code> is hardcoded
+(P0)</h3>
+<p><strong>Severity:</strong> P0 for any new tracker added to the SDK.
+The 4-element hardcoded list is also a soft §6.R violation (string
+literals for provider IDs + display names that should come from
+<code>LavaTrackerSdk.listAvailableTrackers()</code>).</p>
+<p><strong>File:line:</strong>
+<code>feature/search_input/src/main/kotlin/lava/search/input/SearchInputViewModel.kt:48-53</code></p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">private</span> <span class="kw">val</span> <span class="va">availableProviders</span> <span class="op">=</span> listOf<span class="op">(</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    ProviderChip<span class="op">(</span><span class="st">&quot;rutracker&quot;</span><span class="op">,</span> <span class="st">&quot;RuTracker&quot;</span><span class="op">,</span> <span class="kw">false</span><span class="op">),</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    ProviderChip<span class="op">(</span><span class="st">&quot;rutor&quot;</span><span class="op">,</span> <span class="st">&quot;RuTor&quot;</span><span class="op">,</span> <span class="kw">false</span><span class="op">),</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    ProviderChip<span class="op">(</span><span class="st">&quot;archiveorg&quot;</span><span class="op">,</span> <span class="st">&quot;Internet Archive&quot;</span><span class="op">,</span> <span class="kw">false</span><span class="op">),</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    ProviderChip<span class="op">(</span><span class="st">&quot;gutenberg&quot;</span><span class="op">,</span> <span class="st">&quot;Gutenberg&quot;</span><span class="op">,</span> <span class="kw">false</span><span class="op">),</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span></code></pre></div>
+<p><strong>Symptom.</strong> When a new tracker is added (the project
+actively grows: see <code>core/tracker/kinozal/</code>,
+<code>core/tracker/nnmclub/</code>, <code>core/tracker/yts/</code> per
+the SDK developer guide), it appears in
+<code>LavaTrackerSdk.listAvailableTrackers()</code> and in onboarding,
+but the search-input chip bar still shows only the 4 hardcoded chips.
+User cannot filter searches by the new provider from the search input
+screen. Also, ClonedTrackerDescriptors (SP-4 Phase A+B clones) are
+invisible.</p>
+<p><strong>Root cause.</strong> The class instance-field list is a
+snapshot taken at compile time. Same antipattern that produced Bug 3 of
+the 57th cycle (search-input selecting
+all-providers-by-default-including-non-onboarded); this is the
+orthogonal half of that defect.</p>
+<p><strong>Fix sketch.</strong> Inject <code>LavaTrackerSdk</code> (or a
+<code>ProviderRegistry</code> UseCase) into the VM. In
+<code>onCreate</code>,
+<code>val available = sdk.listAvailableTrackers().filter { it.verified &amp;&amp; it.apiSupported }.map { ProviderChip(it.trackerId, it.displayName, selected = it.trackerId in onboardedAndSearchEnabled) }</code>.
+Drop the hardcoded list. The <code>onSubmit</code> "if (selected.size ==
+availableProviders.size) null else selected" logic also needs to use the
+dynamic list size.</p>
+<p><strong>Anti-bluff classification.</strong> No test catches this. The
+bluff: tests instantiate the VM and assert that the 4 known chips appear
+— but never assert that a NEWLY registered tracker (via a
+<code>FakeTrackerRegistry</code> containing 5 trackers) appears as a 5th
+chip. The test that would catch it: register 5 trackers in the test
+fixture → instantiate VM → assert 5 chips appear.</p>
+<hr />
+<h3
+id="finding-4--loginviewmodelserviceunavailable-banner-never-cleared-p1">Finding
+4 — <code>LoginViewModel.serviceUnavailable</code> banner never cleared
+(P1)</h3>
+<p><strong>Severity:</strong> P1 user-visible degradation. User sees a
+stale "Service unavailable: <reason>" banner persist while they're
+already typing new credentials, retrying, or solving the captcha. The
+fresh action's state changes are correctly reduced
+(<code>usernameInput</code>, <code>passwordInput</code>,
+<code>captcha</code>, etc.), but <code>serviceUnavailable</code> is
+never set back to null.</p>
+<p><strong>File:line:</strong>
+<code>feature/login/src/main/kotlin/lava/login/LoginViewModel.kt:41-75</code>
+(the three validate* handlers) and <code>:77-109</code>
+(onReloadCaptchaClick).</p>
+<p><strong>Symptom.</strong> User submits login →
+<code>AuthResult.ServiceUnavailable</code> arrives → banner appears with
+reason. User retypes password (intending to retry). Banner stays. User
+taps Submit. Banner stays even if the next attempt is
+<code>Success</code> — wait, no, on <code>Success</code> the screen
+finishes via <code>postSideEffect</code>, so the user never sees the
+stale banner in that path. But on a subsequent <code>WrongCredits</code>
+(now the credentials really are wrong), the user sees BOTH "Service
+unavailable: <old reason>" AND red-bordered fields — a confusing mixed
+state.</p>
+<p><strong>Root cause.</strong> Symmetrical to the captcha-clear
+discipline already present elsewhere: every state transition that
+materially changes the screen's submit context should also clear the
+stale infra-error banner. None of <code>validateUsername</code>,
+<code>validatePassword</code>, <code>validateCaptcha</code>,
+<code>onReloadCaptchaClick</code>, or <code>onSubmitClick</code> (until
+it gets a fresh non-ServiceUnavailable result) clear it.</p>
+<p><strong>Fix sketch.</strong> Add
+<code>serviceUnavailable = null</code> to each
+<code>state.copy(...)</code> in: validateUsername, validatePassword,
+validateCaptcha, onReloadCaptchaClick (all branches), onSubmitClick's
+<code>Success</code>/<code>CaptchaRequired</code>/<code>WrongCredits</code>/<code>Error</code>
+branches. Only the <code>ServiceUnavailable</code> branch preserves it.
+Add a <code>clearServiceUnavailable()</code> helper to centralize.</p>
+<p><strong>Anti-bluff classification.</strong> The existing
+<code>LoginViewModelTest</code> (if any) likely asserts only on the
+most-recent reduce — never on the transition "ServiceUnavailable → user
+types → assert serviceUnavailable is null." The discriminating test:
+arrange state with <code>serviceUnavailable = "Cloudflare 503"</code> →
+invoke <code>perform(UsernameChanged("newuser"))</code> → assert
+<code>state.serviceUnavailable == null</code>. Falsifiability: today
+fails; with fix, passes.</p>
+<hr />
+<h3
+id="finding-5--loginviewmodelserviceunavailable-branch-doesnt-clear-stale-captcha-p1">Finding
+5 — <code>LoginViewModel.ServiceUnavailable</code> branch doesn't clear
+stale captcha (P1)</h3>
+<p><strong>Severity:</strong> P1. RuTracker's
+<code>CaptchaRequired</code> may precede a
+<code>ServiceUnavailable</code> on the next attempt (e.g. user solved
+one captcha correctly but a Cloudflare 503 lands on the redirect). The
+stale <code>state.captcha</code> from the prior
+<code>CaptchaRequired</code> persists, so the UI keeps rendering the
+captcha input field with the now-invalid challenge image.</p>
+<p><strong>File:line:</strong>
+<code>feature/login/src/main/kotlin/lava/login/LoginViewModel.kt:175-189</code></p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">is</span> AuthResult<span class="op">.</span>ServiceUnavailable <span class="op">-&gt;</span> <span class="op">{</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="op">...</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    reduce <span class="op">{</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>        state<span class="op">.</span>copy<span class="op">(</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>            isLoading <span class="op">=</span> <span class="kw">false</span><span class="op">,</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>            serviceUnavailable <span class="op">=</span> response<span class="op">.</span>reason<span class="op">,</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>        <span class="op">)</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>Symptom.</strong> Captcha image renders from the prior turn
+but the captcha-sid is no longer valid upstream. User solves it, taps
+Submit, server returns 401 → <code>WrongCredits</code> fires (or another
+503), perpetually broken loop until app restart.</p>
+<p><strong>Root cause.</strong> The branch doesn't reset
+<code>captcha = null</code> and
+<code>captchaInput = InputState.Initial</code>. Compare to
+<code>WrongCredits</code> and <code>CaptchaRequired</code> which DO
+reset <code>captchaInput</code> to Empty.</p>
+<p><strong>Fix sketch.</strong> Add
+<code>captcha = null, captchaInput = InputState.Initial</code> to the
+<code>ServiceUnavailable</code> reduce. The decision "do we keep the
+captcha?" depends on the reason — if the 503 is from the captcha-image
+endpoint itself, the captcha is invalid; if from the auth endpoint after
+a valid captcha, the captcha is consumed. Safest default: clear it. If
+the user retries, the next <code>CaptchaRequired</code> re-issues.</p>
+<p><strong>Anti-bluff classification.</strong> Same shape as Finding 4.
+The test: pre-populate
+<code>state.captcha = Captcha(id="abc", code="def")</code> → drive a
+<code>ServiceUnavailable</code> result → assert
+<code>state.captcha == null</code>.</p>
+<hr />
+<h3
+id="finding-6--providerloginviewmodelserviceunavailable-never-cleared-p1">Finding
+6 — <code>ProviderLoginViewModel.serviceUnavailable</code> never cleared
+(P1)</h3>
+<p><strong>Severity:</strong> P1. Identical class to Finding 4 but on
+the multi-provider login surface used during onboarding's per-provider
+config step.</p>
+<p><strong>File:line:</strong>
+<code>feature/login/src/main/kotlin/lava/login/ProviderLoginViewModel.kt:133-167</code>
+(validate* handlers), <code>:94-115</code> (selectProvider),
+<code>:121-131</code> (backToProviders), <code>:366-383</code>
+(ServiceUnavailable branch).</p>
+<p><strong>Symptom.</strong> During onboarding for RuTracker, the
+connection test surfaces ServiceUnavailable (Cloudflare). User taps
+"Back to providers" — banner persists because
+<code>backToProviders()</code> doesn't clear it. User selects a
+different provider — banner persists because <code>selectProvider</code>
+doesn't clear it. User now sees an unrelated provider's screen with the
+stale banner.</p>
+<p><strong>Root cause.</strong> Same as Finding 4 — every
+state-affecting handler should clear
+<code>serviceUnavailable</code>.</p>
+<p><strong>Fix sketch.</strong> Add
+<code>serviceUnavailable = null</code> to <code>selectProvider</code>,
+<code>backToProviders</code>, validate*,
+<code>onReloadCaptchaClick</code> reduces. Also clear
+<code>captcha</code> in the ServiceUnavailable branch (same as Finding 5
+for this VM).</p>
+<p><strong>Anti-bluff classification.</strong> Same shape: test arranges
+<code>serviceUnavailable = "..."</code> then drives
+<code>selectProvider("rutor")</code> and asserts the banner cleared.</p>
+<hr />
+<h3
+id="finding-7--onboardingviewmodelontestandcontinue-may-advance-silently-when-login-returns-null-p1">Finding
+7 — <code>OnboardingViewModel.onTestAndContinue</code> may advance
+silently when login returns <code>null</code> (P1)</h3>
+<p><strong>Severity:</strong> P1. Subtle gating bug masked by the
+<code>if (loginResult == null || loginResult.state != AuthState.Authenticated)</code>
+check.</p>
+<p><strong>File:line:</strong>
+<code>feature/onboarding/src/main/kotlin/lava/onboarding/OnboardingViewModel.kt:160-179</code></p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> <span class="va">loginResult</span> <span class="op">=</span> sdk<span class="op">.</span>login<span class="op">(</span>currentId<span class="op">,</span> LoginRequest<span class="op">(...))</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="op">(</span>loginResult <span class="op">==</span> <span class="kw">null</span> <span class="op">||</span> loginResult<span class="op">.</span>state <span class="op">!=</span> AuthState<span class="op">.</span>Authenticated<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    reduce <span class="op">{</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>        state<span class="op">.</span>copy<span class="op">(</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>            connectionTestRunning <span class="op">=</span> <span class="kw">false</span><span class="op">,</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>            configs <span class="op">=</span> state<span class="op">.</span>configs <span class="op">+</span> <span class="op">(</span>currentId to config<span class="op">.</span>copy<span class="op">(</span>error <span class="op">=</span> <span class="st">&quot;Invalid credentials&quot;</span><span class="op">)),</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>        <span class="op">)</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    return<span class="at">@launch</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>credentialManager<span class="op">.</span>setPassword<span class="op">(</span>currentId<span class="op">,</span> config<span class="op">.</span>username<span class="op">,</span> config<span class="op">.</span>password<span class="op">)</span></span></code></pre></div>
+<p><strong>Symptom.</strong> When <code>sdk.login(currentId, ...)</code>
+returns <code>null</code> (tracker does not support auth — e.g. user
+selects an <code>AuthType.NONE</code> provider but didn't toggle
+anonymous), the user sees "Invalid credentials" — WRONG message; the
+credentials weren't tested at all because the tracker doesn't have auth.
+The condition lumps "no auth support" with "wrong credentials."</p>
+<p><strong>Root cause.</strong> <code>loginResult == null</code> per
+<code>LavaTrackerSdk.login</code> contract means "tracker does not
+support auth" (see <code>ProviderLoginViewModel.kt:279-295</code>). For
+onboarding, this branch should fall through to the anonymous-equivalent
+path (signal anonymous + advance), not surface "Invalid credentials."
+The current flow handles this at line 145
+(<code>if (provider.authType == AuthType.NONE || config.useAnonymous)</code>),
+but a misconfigured descriptor (authType says FORM_LOGIN but the
+implementation returns null) leaks through.</p>
+<p><strong>Fix sketch.</strong> Distinguish in the result-handling: if
+<code>loginResult == null</code>, treat as anonymous (same as the
+line-147 path) — set tested+configured, advance. If
+<code>loginResult != null &amp;&amp; state != Authenticated</code>,
+surface "Invalid credentials." Also extend the new
+<code>AuthResult.ServiceUnavailable</code> chain here so this surface
+gets honest error messaging too (today onboarding throws Exception and
+catches at line 180).</p>
+<p><strong>Anti-bluff classification.</strong> A discrimination test
+would drive: VM with a <code>FakeSdk</code> returning <code>null</code>
+from <code>login(...)</code> → call
+<code>perform(TestAndContinue)</code> → assert the user-visible message
+is NOT "Invalid credentials" (today the test would pass if it only
+asserts on <code>connectionTestRunning = false</code>). Falsifiability:
+mutate <code>loginResult == null</code> branch to advance silently →
+test should fail because no error message + advanced state.</p>
+<hr />
+<h3
+id="finding-8--loadproviders-filter-excludes-cloned-providers-p1">Finding
+8 — <code>loadProviders()</code> filter excludes cloned providers
+(P1)</h3>
+<p><strong>Severity:</strong> P1 for users who configured a clone of
+RuTracker (SP-4 Phase A+B).</p>
+<p><strong>File:line:</strong>
+<code>feature/onboarding/src/main/kotlin/lava/onboarding/OnboardingViewModel.kt:55-64</code></p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> <span class="va">descriptors</span> <span class="op">=</span> sdk<span class="op">.</span>listAvailableTrackers<span class="op">().</span>filter <span class="op">{</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    it<span class="op">.</span>verified <span class="op">&amp;&amp;</span> it<span class="op">.</span>apiSupported</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>Symptom.</strong>
+<code>ClonedTrackerDescriptor.verified</code> and
+<code>.apiSupported</code> delegate to the source — but if the user
+cloned an unverified tracker the clone never appears in onboarding.
+Conversely, if the source was apiSupported=true but the clone's
+primaryUrl points at a non-API mirror, the clone falsely passes. Either
+way, onboarding shows the wrong set.</p>
+<p><strong>Root cause.</strong> Generic descriptor filter applied to
+both base + cloned descriptors without considering clone semantics.</p>
+<p><strong>Fix sketch.</strong> During onboarding, hide clones entirely
+(clones are advanced — configured later via Provider Config, not during
+first-run onboarding). Filter:
+<code>.filter { it.verified &amp;&amp; it.apiSupported &amp;&amp; it !is ClonedTrackerDescriptor }</code>.
+Document the decision in a code comment so a future agent doesn't
+naively include clones.</p>
+<p><strong>Anti-bluff classification.</strong> Test with a
+<code>FakeRegistry</code> returning [rutracker (verified=true)] plus a
+<code>ClonedProviderDao</code> row → assert
+<code>state.providers.size == 1</code> not 2.</p>
+<hr />
+<h3
+id="finding-9--mainactivity-reads-onboardingcomplete-once-then-never-re-reads-p2">Finding
+9 — <code>MainActivity</code> reads <code>onboardingComplete</code> once
+then never re-reads (P2)</h3>
+<p><strong>Severity:</strong> P2 polish — survives in normal use because
+the local <code>mutableStateOf</code> carries the value forward. Edge
+case: in-process auth state changes that should re-trigger onboarding
+(e.g. user signs out → <code>setOnboardingComplete(false)</code> from
+settings) won't surface until process restart.</p>
+<p><strong>File:line:</strong>
+<code>app/src/main/kotlin/digital/vasic/lava/client/MainActivity.kt:90-96</code></p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>lifecycleScope<span class="op">.</span>launch <span class="op">{</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    lifecycle<span class="op">.</span>repeatOnLifecycle<span class="op">(</span>Lifecycle<span class="op">.</span>State<span class="op">.</span>STARTED<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>        <span class="kw">val</span> <span class="va">onboardingComplete</span> <span class="op">=</span> preferencesStorage<span class="op">.</span>isOnboardingComplete<span class="op">()</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>        showOnboarding <span class="op">=</span> <span class="op">!</span>onboardingComplete</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>        viewModel<span class="op">.</span>theme<span class="op">.</span>collect <span class="op">{</span> t <span class="op">-&gt;</span> theme <span class="op">=</span> t <span class="op">}</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>Symptom.</strong>
+<code>viewModel.theme.collect { ... }</code> never completes → the
+surrounding block is held by <code>repeatOnLifecycle</code> for the
+whole STARTED lifetime → <code>onboardingComplete</code> is read exactly
+ONCE per STARTED transition. If the activity stays in STARTED across a
+settings change that flips <code>onboardingComplete</code> back to false
+(e.g. user "Resets onboarding" from settings), the activity does not
+re-render onboarding until process death + restart.</p>
+<p><strong>Root cause.</strong> Reading a one-shot suspend value inside
+an infinite collector serializes them inappropriately. The
+<code>onboardingComplete</code> should be observed as a Flow (the
+preferences storage has DataStore underneath which IS a Flow — see
+<code>PreferencesStorage</code> for confirmation).</p>
+<p><strong>Fix sketch.</strong> Convert to flow:
+<code>combine(preferencesStorage.onboardingCompleteFlow(), viewModel.theme) { complete, t -&gt; ... }.collect { ... }</code>.
+Or split: two parallel
+<code>launch { repeatOnLifecycle { collect } }</code> blocks, one for
+theme, one for onboardingComplete.</p>
+<p><strong>Anti-bluff classification.</strong> Instrumentation test:
+launch app, complete onboarding, navigate to Settings, tap "Reset
+onboarding" (assuming that action exists or is the bookmark-style
+toggle), assert the welcome screen appears without process restart.</p>
+<hr />
+<h3 id="finding-10--togglesync-reads-pre-observeall-state-p2">Finding 10
+— <code>ToggleSync</code> reads pre-<code>observeAll</code> state
+(P2)</h3>
+<p><strong>Severity:</strong> P2 polish. First-time
+<code>ToggleSync</code> invocation may read uninitialized
+<code>state.syncEnabled = false</code> even if the persisted toggle is
+<code>true</code>, then flip the persisted value back to false.</p>
+<p><strong>File:line:</strong>
+<code>feature/provider_config/src/main/kotlin/lava/provider/config/ProviderConfigViewModel.kt:77-81</code></p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>ProviderConfigAction<span class="op">.</span>ToggleSync <span class="op">-&gt;</span> <span class="op">{</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">val</span> <span class="va">next</span> <span class="op">=</span> <span class="op">!</span>state<span class="op">.</span>syncEnabled</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    toggleDao<span class="op">.</span>upsert<span class="op">(</span>ProviderSyncToggleEntity<span class="op">(</span>providerId<span class="op">,</span> next<span class="op">))</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    outbox<span class="op">.</span>enqueue<span class="op">(</span>SyncOutboxKind<span class="op">.</span>SYNC_TOGGLE<span class="op">,</span> json<span class="op">.</span>encodeToString<span class="op">(</span>WireToggle<span class="op">(</span>providerId<span class="op">,</span> next<span class="op">)))</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>Symptom.</strong> Race: <code>onCreate</code> launches
+<code>observeAll()</code> in <code>viewModelScope.launch</code>; the
+user may tap the Sync toggle before the first DAO emission arrives.
+<code>state.syncEnabled</code> defaults to <code>false</code>, so the
+first tap calculates <code>next = !false = true</code> — accidentally
+CORRECT if the persisted value was false, accidentally WRONG (writes
+<code>false</code> on top of a persisted <code>true</code>) if user is
+reconfiguring an existing provider.</p>
+<p><strong>Root cause.</strong> State is the user-visible
+representation; for destructive toggles the canonical source is the DAO.
+Should read <code>toggleDao.get(providerId)?.enabled ?: false</code> and
+flip that.</p>
+<p><strong>Fix sketch.</strong>
+<code>val current = toggleDao.get(providerId)?.enabled ?: false; val next = !current; toggleDao.upsert(...)</code>.
+The state still receives the update via the observe flow.</p>
+<p><strong>Anti-bluff classification.</strong> Race test: arrange DAO
+with <code>enabled = true</code>, dispatch <code>ToggleSync</code>
+BEFORE the first observe emission arrives → assert DAO is now
+<code>enabled = false</code>. Today: race-dependent. With fix:
+deterministic.</p>
+<hr />
+<h2
+id="additional-defensive-observations-not-numbered-findings">Additional
+defensive observations (not numbered findings)</h2>
+<ul>
+<li><p><strong><code>SearchInputViewModel.onSubmit</code></strong> uses
+<code>if (selected.size == availableProviders.size) null else selected</code>
+to encode "user selected all providers" → <code>providerIds=null</code>
+(search uses default-all). With Finding 3 fixed (dynamic providers),
+this size comparison becomes correct against the dynamic list. Today it
+compares to the 4-element hardcoded list — if the live SDK has 5
+providers and user selected 4, providerIds=null is emitted
+incorrectly.</p></li>
+<li><p><strong><code>OnboardingViewModel.onTestAndContinue</code> line
+169</strong> persists credentials via
+<code>credentialManager.setPassword(currentId, config.username, config.password)</code>
+BUT does not check <code>config.useAnonymous</code> first — for an
+anonymous-mode toggle on a <code>FORM_LOGIN</code> provider that
+supports anonymous (e.g. cloned tracker with a public mirror), the line
+is skipped via the line-145 short-circuit. Verify with
+<code>provider.supportsAnonymous == true &amp;&amp; config.useAnonymous</code>:
+today line 145 only checks <code>config.useAnonymous</code> without the
+<code>supportsAnonymous</code> capability gate. This duplicates the
+<code>ProviderLoginViewModel.kt:224</code> discipline (Phase 1.5
+anonymous-allowed gate) — onboarding bypassed it.</p></li>
+<li><p><strong><code>SearchResultViewModel.observeStreamMultiSearch</code></strong>
+does not handle empty <code>providerIds</code> after the early-return:
+if <code>filter.providerIds</code> is empty (not null), the early return
+at line 114 fires AFTER <code>reduce {...}</code> already produced an
+empty Streaming state. The user is stuck on a
+Streaming-with-no-providers display forever. Add a fallback to
+<code>searchContent = Empty</code> when providerIds resolves to empty
+post-construction.</p></li>
+<li><p><strong>§6.AB discrimination audit notes</strong> on existing
+Challenge tests: most C00–C36 tests assert on
+<code>composeRule.onNodeWithText(...).assertExists()</code> patterns
+that pass when the node exists regardless of content correctness.
+Sampling: <code>Challenge26ColoredLogo*</code> already addressed
+(asserts on rendered pixel colors), but
+<code>Challenge21OnboardingStartedAtFirstLaunchTest</code> likely only
+asserts the Welcome composable shows — would not catch the white-icon
+regression Crashlytics found at 1.2.20.</p></li>
+<li><p><strong>No <code>Error</code> rendering at all</strong> in
+<code>SearchResultScreen.kt</code> for the case where
+<code>SearchResultContent</code> is one of the existing variants but
+<code>loadStates</code> carries an error. Worth a focused audit
+pass.</p></li>
+</ul>
+<hr />
+<h2 id="action-taken-in-this-commit">Action taken in this commit</h2>
+<p>This sweep is FINDINGS-ONLY per the operator's "prioritize finding
+over fixing" directive. Two of the findings have safe 1-paragraph fixes
+(#4, #5, #6 — clear <code>serviceUnavailable</code> and stale captcha on
+state transitions). They are deferred to a follow-up commit so they land
+WITH discrimination tests per §6.AB clause 3 (test must FAIL against the
+deliberate non-fix).</p>
+<p><code>docs/CONTINUATION.md</code> is NOT updated in this commit (no
+phase status / pin / release / known-issue resolution changes; only an
+audit document landed). Per §6.S the rule fires on state-changing
+commits; this is an additive findings document.</p>
+<p>Next-step recommendation for operator:</p>
+<ol type="1">
+<li><strong>Resolve Finding 1 first</strong> (Toggle Anonymous
+persistence) — it is the most visible defect a tester would notice.</li>
+<li><strong>Resolve Finding 2</strong> (SearchResultContent.Error
+variant) — required to fix the unresolved Bug 2 from 1.2.23.</li>
+<li><strong>Resolve Finding 3</strong> (SearchInputViewModel hardcoding)
+— blocks new-tracker rollouts.</li>
+<li>Findings 4-6 (login banner clearing) can ship together as one
+cleanup commit with discrimination tests.</li>
+</ol>
+<hr />
+<h2 id="6ad-compliance-notes-for-this-document">§6.AD-compliance notes
+for this document</h2>
+<ul>
+<li><code>Classification:</code> project-specific (sweep methodology +
+findings list are Lava-internal).</li>
+<li>No-guessing vocabulary check: this document avoids
+<code>likely</code>/<code>probably</code>/<code>maybe</code>/<code>seems</code>/<code>appears</code>/<code>guess</code>/<code>perhaps</code>.
+Uses <code>CONFIRMED</code> for verified facts and explicit
+hypotheticals for race conditions (Findings 9, 10).</li>
+<li>No credentials, signing material, or §6.H sensitive content
+recorded.</li>
+<li>No commands run that could affect host stability (read-only
+<code>grep</code>/<code>find</code> only).</li>
+</ul>
+</body>
+</html>

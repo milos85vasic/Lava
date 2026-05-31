@@ -1,0 +1,1764 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-05-16-snake_case-migration</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1
+id="lowercase-snake_case-migration-plan--constitution-compliance-phase-6">Lowercase
+snake_case Migration Plan — Constitution-Compliance Phase 6</h1>
+<p><strong>Status:</strong> PLAN — RESEARCH + AUDIT ONLY (no renames
+executed in this commit). <strong>Phase:</strong>
+Constitution-Compliance plan Phase 6 (per
+<code>docs/plans/2026-05-15-constitution-compliance.md</code>).
+<strong>Authority:</strong> HelixConstitution §11.4.29
+(Lowercase-Snake_Case-Naming Mandate, 2026-05-15). <strong>Companion
+artifacts:</strong> <code>scripts/audit-snake_case-references.sh</code>
+(audit tool),
+<code>tests/check-constitution/test_audit_snake_case_references.sh</code>
+(hermetic test),
+<code>docs/scripts/audit-snake_case-references.sh.md</code> (user
+guide). <strong>Classification:</strong> project-specific (rename
+targets + reference inventory are Lava-specific; the
+rename-with-reference-update discipline is universal per §11.4.29).
+<strong>Inheritance:</strong> §11.4.29 + §11.4.17 + §11.4.18 + §11.4.20
++ §11.4.26 + §11.4.27 + §11.4.32 + §6.J/§6.L (anti-bluff) + §6.W (mirror
+policy) + Lava's §6.AD HelixConstitution Inheritance.</p>
+<hr />
+<h2 id="0-scope-statement-no-bluff">0. Scope statement (no-bluff)</h2>
+<p>This document is the <strong>RESEARCH + PLAN</strong> deliverable for
+Phase 6. The actual renames are NOT executed in the commit landing this
+plan; they are scheduled for follow-up cycles after operator review. Per
+§11.4.29 itself:</p>
+<blockquote>
+<p>"Phased execution. Comprehensive brainstorming → phase-divided plan →
+fine-grained tasks/subtasks with enormous detail, every change covered
+by every applicable test type."</p>
+</blockquote>
+<p>The deliverables of THIS cycle are:</p>
+<ol type="1">
+<li>This plan document (per-submodule mapping + risk + phases +
+rollback).</li>
+<li><code>scripts/audit-snake_case-references.sh</code> — read-only
+audit producing a tab-separated baseline reference count.</li>
+<li><code>tests/check-constitution/test_audit_snake_case_references.sh</code>
+— hermetic test of the audit script.</li>
+<li><code>docs/scripts/audit-snake_case-references.sh.md</code> — script
+user guide per §11.4.18.</li>
+<li>Updated Phase 6 section in
+<code>docs/plans/2026-05-15-constitution-compliance.md</code>
+referencing this plan + the audit script.</li>
+</ol>
+<p>The rename execution is intentionally NOT in this cycle's diff. Per
+§6.L (Anti-Bluff Functional Reality Mandate, operator's standing order):
+renaming 17 submodules + 124 referencing files in a single commit
+without per-batch verification would be the textbook bluff this
+constitution forbids. The phased execution below sequences each rename
+batch so each one's anti-bluff evidence can be captured
+independently.</p>
+<hr />
+<h2 id="1-current-state-baseline-captured-2026-05-16">1. Current state
+baseline (captured 2026-05-16)</h2>
+<p>Captured by running the audit script
+(<code>scripts/audit-snake_case-references.sh</code>) at branch
+<code>plan/2026-05-16-snake-case-migration</code> HEAD. The full
+machine-readable output is in §10 of this document and reproducible via
+<code>bash scripts/audit-snake_case-references.sh</code>.</p>
+<h3 id="11-top-line-counts">1.1 Top-line counts</h3>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Count</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Files containing <code>submodules/</code> references</td>
+<td>124</td>
+</tr>
+<tr>
+<td>Total <code>submodules/</code> references</td>
+<td>806</td>
+</tr>
+<tr>
+<td>Total bare-word <code>Submodules</code> references (incl in
+paths)</td>
+<td>829</td>
+</tr>
+<tr>
+<td>Submodules currently registered in <code>.gitmodules</code>
+(vasic-digital + HelixDevelopment)</td>
+<td>17</td>
+</tr>
+<tr>
+<td>Constitution submodule (separate, see §3)</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+<h3 id="12-per-submodule-reference-inventory">1.2 Per-submodule
+reference inventory</h3>
+<table>
+<thead>
+<tr>
+<th>Submodule (current name)</th>
+<th>Target name (snake_case)</th>
+<th>Owner org</th>
+<th>Refs (count)</th>
+<th>Ref-bearing files</th>
+<th>Rename complexity</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Auth</code></td>
+<td><code>auth</code></td>
+<td>vasic-digital</td>
+<td>16</td>
+<td>9</td>
+<td>LOW</td>
+</tr>
+<tr>
+<td><code>Cache</code></td>
+<td><code>cache</code></td>
+<td>vasic-digital</td>
+<td>36</td>
+<td>15</td>
+<td>LOW</td>
+</tr>
+<tr>
+<td><code>Challenges</code></td>
+<td><code>challenges</code></td>
+<td>vasic-digital</td>
+<td>14</td>
+<td>8</td>
+<td>LOW</td>
+</tr>
+<tr>
+<td><code>Concurrency</code></td>
+<td><code>concurrency</code></td>
+<td>vasic-digital</td>
+<td>5</td>
+<td>4</td>
+<td>LOW</td>
+</tr>
+<tr>
+<td><code>Config</code></td>
+<td><code>config</code></td>
+<td>vasic-digital</td>
+<td>10</td>
+<td>6</td>
+<td>LOW</td>
+</tr>
+<tr>
+<td><code>Containers</code></td>
+<td><code>containers</code></td>
+<td>vasic-digital</td>
+<td><strong>370</strong></td>
+<td><strong>63</strong></td>
+<td><strong>HIGH</strong> (matrix runner, emulator orchestration,
+gate-shaping code)</td>
+</tr>
+<tr>
+<td><code>Database</code></td>
+<td><code>database</code></td>
+<td>vasic-digital</td>
+<td>8</td>
+<td>5</td>
+<td>LOW</td>
+</tr>
+<tr>
+<td><code>Discovery</code></td>
+<td><code>discovery</code></td>
+<td>vasic-digital</td>
+<td>5</td>
+<td>4</td>
+<td>LOW</td>
+</tr>
+<tr>
+<td><code>HelixQA</code></td>
+<td><code>helix_qa</code> (see §3.1)</td>
+<td>HelixDevelopment</td>
+<td>13</td>
+<td>6</td>
+<td>MEDIUM (HelixDevelopment-owned; cross-org coordination)</td>
+</tr>
+<tr>
+<td><code>HTTP3</code></td>
+<td><code>http3</code></td>
+<td>vasic-digital</td>
+<td>20</td>
+<td>7</td>
+<td>LOW</td>
+</tr>
+<tr>
+<td><code>Mdns</code></td>
+<td><code>mdns</code></td>
+<td>vasic-digital</td>
+<td>14</td>
+<td>7</td>
+<td>LOW</td>
+</tr>
+<tr>
+<td><code>Middleware</code></td>
+<td><code>middleware</code></td>
+<td>vasic-digital</td>
+<td>14</td>
+<td>6</td>
+<td>LOW</td>
+</tr>
+<tr>
+<td><code>Observability</code></td>
+<td><code>observability</code></td>
+<td>vasic-digital</td>
+<td>29</td>
+<td>8</td>
+<td>LOW</td>
+</tr>
+<tr>
+<td><code>RateLimiter</code></td>
+<td><code>rate_limiter</code></td>
+<td>vasic-digital</td>
+<td>50</td>
+<td>13</td>
+<td>MEDIUM (hyphen-equivalent + casing change)</td>
+</tr>
+<tr>
+<td><code>Recovery</code></td>
+<td><code>recovery</code></td>
+<td>vasic-digital</td>
+<td>12</td>
+<td>6</td>
+<td>LOW</td>
+</tr>
+<tr>
+<td><code>Security</code></td>
+<td><code>security</code></td>
+<td>vasic-digital</td>
+<td>15</td>
+<td>6</td>
+<td>LOW</td>
+</tr>
+<tr>
+<td><code>Tracker-SDK</code></td>
+<td><code>tracker_sdk</code></td>
+<td>vasic-digital</td>
+<td><strong>83</strong></td>
+<td><strong>25</strong></td>
+<td><strong>HIGH</strong> (hyphen→underscore + composite-build Gradle
+includeBuild + lava-api-go go.mod replace directives)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Total per-submodule references:</strong> 714 (close to but
+not equal to the 806 <code>submodules/</code> total because some
+references count <code>submodules/</code> paths that don't include a
+specific submodule name — e.g. <code>submodules/&lt;name&gt;/...</code>
+regex matches some bare-prefix lines).</p>
+<h3 id="13-top-files-by-submodules-reference-count">1.3 Top files by
+<code>submodules/</code> reference count</h3>
+<p>The rename will rewrite content in these files most heavily:</p>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Refs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>docs/superpowers/plans/2026-05-05-anti-bluff-mandate-reinforcement-group-b.md</code></td>
+<td>77</td>
+</tr>
+<tr>
+<td><code>docs/superpowers/specs/2026-04-28-sp2-go-api-migration-design.md</code></td>
+<td>61</td>
+</tr>
+<tr>
+<td><code>docs/superpowers/plans/2026-05-05-anti-bluff-mandate-reinforcement-group-a-prime.md</code></td>
+<td>54</td>
+</tr>
+<tr>
+<td><code>docs/superpowers/plans/2026-04-28-sp2-go-api-migration.md</code></td>
+<td>43</td>
+</tr>
+<tr>
+<td><code>docs/superpowers/plans/2026-05-06-phase1-api-auth.md</code></td>
+<td>41</td>
+</tr>
+<tr>
+<td><code>docs/superpowers/plans/2026-05-05-pkg-vm-image-cache.md</code></td>
+<td>38</td>
+</tr>
+<tr>
+<td><code>CLAUDE.md</code></td>
+<td>35</td>
+</tr>
+<tr>
+<td><code>.gitmodules</code></td>
+<td>34</td>
+</tr>
+<tr>
+<td><code>scripts/check-constitution.sh</code></td>
+<td>29</td>
+</tr>
+</tbody>
+</table>
+<h3 id="14-distribution-by-top-level-directory">1.4 Distribution by
+top-level directory</h3>
+<table>
+<thead>
+<tr>
+<th>Directory</th>
+<th>Files affected</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>docs/</code> (including superpowers specs + plans +
+scripts)</td>
+<td>41</td>
+</tr>
+<tr>
+<td><code>.lava-ci-evidence/</code></td>
+<td>27</td>
+</tr>
+<tr>
+<td><code>lava-api-go/</code> (Go service incl. go.mod replace
+directives)</td>
+<td>20</td>
+</tr>
+<tr>
+<td><code>scripts/</code></td>
+<td>16</td>
+</tr>
+<tr>
+<td><code>tools/</code></td>
+<td>5</td>
+</tr>
+<tr>
+<td><code>tests/</code></td>
+<td>5</td>
+</tr>
+<tr>
+<td><code>core/</code> (Lava-side)</td>
+<td>2</td>
+</tr>
+<tr>
+<td><code>start.sh</code></td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>specs/</code></td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>settings.gradle.kts</code></td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>CLAUDE.md</code></td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>CHANGELOG.md</code></td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>AGENTS.md</code></td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>.gitmodules</code></td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>.githooks/</code></td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="2-lang-spec-subtree-exemption-per-11429">2. LANG-spec subtree
+exemption per §11.4.29</h2>
+<p>§11.4.29 carves out language/technology-mandated case from the
+snake_case rule. The exemption applies INSIDE a language-root subtree;
+the submodule's root directory still follows our convention.</p>
+<h3
+id="21-lava-side-exempt-subtrees-pascalcase-or-camelcase-preserved">2.1
+Lava-side exempt subtrees (<code>PascalCase</code> or camelCase
+preserved)</h3>
+<table>
+<thead>
+<tr>
+<th>Subtree</th>
+<th>Reason</th>
+<th>Exempt content</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>app/src/**/*.kt</code></td>
+<td>Kotlin compiler requires <code>PascalCase</code> class files</td>
+<td>All <code>*.kt</code> source files, all package directories (already
+lowercase)</td>
+</tr>
+<tr>
+<td><code>core/**/*.kt</code></td>
+<td>Kotlin</td>
+<td>Same as above</td>
+</tr>
+<tr>
+<td><code>feature/**/*.kt</code></td>
+<td>Kotlin</td>
+<td>Same as above</td>
+</tr>
+<tr>
+<td><code>app/src/main/res/drawable*/</code>, <code>mipmap*/</code>,
+etc.</td>
+<td>Android resource directories use mandated names</td>
+<td><code>drawable-*dpi</code>, <code>mipmap-anydpi-v26</code>,
+etc.</td>
+</tr>
+<tr>
+<td><code>app/src/main/res/values*/strings.xml</code> (etc.)</td>
+<td>Android resource value naming</td>
+<td>XML resource files</td>
+</tr>
+<tr>
+<td><code>buildSrc/src/main/kotlin/*.kt</code></td>
+<td>Kotlin convention plugin file naming</td>
+<td><code>*.kts</code> convention plugins (e.g.
+<code>lava.android.application.gradle.kts</code>)</td>
+</tr>
+<tr>
+<td><code>lava-api-go/**/*.go</code></td>
+<td>Go source: file names are lowercase but use <code>_</code> in
+standard Go style — already compliant</td>
+<td>Confirmed Go-idiomatic</td>
+</tr>
+<tr>
+<td><code>docker/</code> and <code>Dockerfile*</code></td>
+<td>Docker tooling convention <code>Dockerfile</code> is the canonical
+name</td>
+<td>Already established</td>
+</tr>
+<tr>
+<td><code>Gradle wrapper</code>: <code>gradlew</code>,
+<code>gradlew.bat</code>, <code>gradle/wrapper/</code></td>
+<td>Gradle-mandated naming</td>
+<td>Already standard</td>
+</tr>
+<tr>
+<td><code>.git/</code>, <code>.githooks/</code>,
+<code>.gitmodules</code>, <code>.gitignore</code></td>
+<td>Git-mandated dotfile names</td>
+<td>Already standard</td>
+</tr>
+<tr>
+<td><code>node_modules/</code> (if ever introduced)</td>
+<td>npm-mandated</td>
+<td>N/A currently</td>
+</tr>
+</tbody>
+</table>
+<h3 id="22-per-submodule-lang-spec-roots">2.2 Per-submodule LANG-spec
+roots</h3>
+<p>Each submodule's internal source-language layout is exempt inside its
+root directory. The submodule's <strong>root directory itself</strong>
+MUST be snake_case (the whole point of §11.4.29).</p>
+<table>
+<thead>
+<tr>
+<th>Submodule</th>
+<th>Primary language</th>
+<th>Exempt internal subtrees</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Auth</code>, <code>Cache</code>, <code>Challenges</code>,
+<code>Concurrency</code>, <code>Config</code>, <code>Database</code>,
+<code>Discovery</code>, <code>HelixQA</code>, <code>HTTP3</code>,
+<code>Mdns</code>, <code>Middleware</code>, <code>Observability</code>,
+<code>RateLimiter</code>, <code>Recovery</code>, <code>Security</code>,
+<code>Tracker-SDK</code></td>
+<td>Kotlin (multi-platform / Android / JVM)</td>
+<td><code>**/*.kt</code>, <code>src/main/kotlin/**/</code>,
+<code>src/test/kotlin/**/</code>, Android <code>res/</code>, Gradle
+conventions</td>
+</tr>
+<tr>
+<td><code>Containers</code></td>
+<td>Go</td>
+<td><code>**/*.go</code>, <code>cmd/&lt;name&gt;/</code>,
+<code>pkg/&lt;name&gt;/</code> (already lowercase per Go
+convention)</td>
+</tr>
+</tbody>
+</table>
+<h3
+id="23-lava-root-level-directories-that-look-like-they-need-rename--actually-exempt">2.3
+Lava root-level directories that look like they need rename — actually
+exempt</h3>
+<table>
+<thead>
+<tr>
+<th>Directory</th>
+<th>Reason for exemption</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Upstreams/</code></td>
+<td>§11.4.29 specifies this directory: <code>install_upstreams</code>
+supports both <code>Upstreams/</code> AND <code>upstreams/</code> during
+migration window. Rename is OWED but the dual-support installer makes it
+safe to defer.</td>
+</tr>
+<tr>
+<td><code>submodules/</code></td>
+<td>THE rename target of Phase 6a — listed here for completeness; the
+rule applies.</td>
+</tr>
+<tr>
+<td><code>CLAUDE.md</code>, <code>AGENTS.md</code>,
+<code>CHANGELOG.md</code>, <code>README.md</code>,
+<code>LICENSE</code></td>
+<td>Convention-mandated file names (Markdown convention + LICENSE
+convention) — fall under "build-tooling artefacts" / common-sense
+exemption.</td>
+</tr>
+<tr>
+<td><code>Constitution.md</code> (if it ever exists at Lava root —
+currently lives in <code>constitution/</code> submodule)</td>
+<td>Same as above.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="3-per-submodule-target-name-mapping-full-table">3. Per-submodule
+target name mapping (full table)</h2>
+<p>Authoritative mapping for Phase 6b. Each rename is a separate
+sub-cycle.</p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Current name</th>
+<th>Target snake_case</th>
+<th>Owner org</th>
+<th>Renaming rationale</th>
+<th>Special handling</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>Auth</code></td>
+<td><code>auth</code></td>
+<td>vasic-digital</td>
+<td>Single-word PascalCase → lowercase</td>
+<td>None</td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>Cache</code></td>
+<td><code>cache</code></td>
+<td>vasic-digital</td>
+<td>Same</td>
+<td>None</td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>Challenges</code></td>
+<td><code>challenges</code></td>
+<td>vasic-digital</td>
+<td>Same</td>
+<td>Cascading rename: also forwards through
+<code>submodules/challenges/Panoptic</code> nested-own-org-chain
+(§11.4.28 follow-up debt)</td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>Concurrency</code></td>
+<td><code>concurrency</code></td>
+<td>vasic-digital</td>
+<td>Same</td>
+<td>None</td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>Config</code></td>
+<td><code>config</code></td>
+<td>vasic-digital</td>
+<td>Same</td>
+<td>None</td>
+</tr>
+<tr>
+<td>6</td>
+<td><code>Containers</code></td>
+<td><code>containers</code></td>
+<td>vasic-digital</td>
+<td>Same</td>
+<td><strong>HIGH-RISK</strong> — 370 refs across 63 files. The matrix
+runner, emulator orchestration, every
+<code>submodules/containers/pkg/...</code> reference, gate-shaping code
+in <code>scripts/check-constitution.sh</code> and
+<code>scripts/run-emulator-tests.sh</code>.</td>
+</tr>
+<tr>
+<td>7</td>
+<td><code>Database</code></td>
+<td><code>database</code></td>
+<td>vasic-digital</td>
+<td>Same</td>
+<td>None</td>
+</tr>
+<tr>
+<td>8</td>
+<td><code>Discovery</code></td>
+<td><code>discovery</code></td>
+<td>vasic-digital</td>
+<td>Same</td>
+<td>None</td>
+</tr>
+<tr>
+<td>9</td>
+<td><code>HelixQA</code></td>
+<td><code>helix_qa</code></td>
+<td>HelixDevelopment</td>
+<td>CamelCase compound word → snake_case with underscore. <strong>See
+§3.1 for HelixDevelopment-org considerations.</strong></td>
+<td>Cross-org coordination.</td>
+</tr>
+<tr>
+<td>10</td>
+<td><code>HTTP3</code></td>
+<td><code>http3</code></td>
+<td>vasic-digital</td>
+<td>Acronym + digit: <code>HTTP3</code> → <code>http3</code> (no
+underscore between letters and digits — <code>http_3</code> would
+arguably be more idiomatic snake_case but <code>http3</code> matches the
+canonical protocol name)</td>
+<td>Decision: <code>http3</code> (consistent with
+<code>:core:network:rutracker</code> — single-token in source
+already)</td>
+</tr>
+<tr>
+<td>11</td>
+<td><code>Mdns</code></td>
+<td><code>mdns</code></td>
+<td>vasic-digital</td>
+<td>Single-word lowercased acronym</td>
+<td>None</td>
+</tr>
+<tr>
+<td>12</td>
+<td><code>Middleware</code></td>
+<td><code>middleware</code></td>
+<td>vasic-digital</td>
+<td>Same</td>
+<td>None</td>
+</tr>
+<tr>
+<td>13</td>
+<td><code>Observability</code></td>
+<td><code>observability</code></td>
+<td>vasic-digital</td>
+<td>Same</td>
+<td>None</td>
+</tr>
+<tr>
+<td>14</td>
+<td><code>RateLimiter</code></td>
+<td><code>rate_limiter</code></td>
+<td>vasic-digital</td>
+<td>CamelCase compound → snake_case</td>
+<td>Word boundary split is unambiguous</td>
+</tr>
+<tr>
+<td>15</td>
+<td><code>Recovery</code></td>
+<td><code>recovery</code></td>
+<td>vasic-digital</td>
+<td>Same</td>
+<td>None</td>
+</tr>
+<tr>
+<td>16</td>
+<td><code>Security</code></td>
+<td><code>security</code></td>
+<td>vasic-digital</td>
+<td>Same</td>
+<td>None</td>
+</tr>
+<tr>
+<td>17</td>
+<td><code>Tracker-SDK</code></td>
+<td><code>tracker_sdk</code></td>
+<td>vasic-digital</td>
+<td>Hyphen + acronym → underscore + lowercase.
+<strong>HIGH-RISK</strong> — 83 refs across 25 files including
+<code>settings.gradle.kts</code>
+<code>includeBuild("submodules/tracker_sdk")</code> AND
+<code>lava-api-go/go.mod</code> replace directives.</td>
+<td>Gradle composite-build path + Go module path must update
+together</td>
+</tr>
+</tbody>
+</table>
+<h3 id="31-helixqa--helixdevelopment-org-consideration">3.1 HelixQA /
+HelixDevelopment-org consideration</h3>
+<p><code>HelixQA</code> is owned by <code>HelixDevelopment</code>, not
+<code>vasic-digital</code>. §11.4.29 applies universally — all
+owned-by-us submodules (any org in the operator's list) must follow
+snake_case. HelixDevelopment IS on the owned-org list (per §11.4.28's
+verbatim list: vasic-digital, HelixDevelopment, red-elf,
+ATMOSphere1234321, Bear-Suite, BoatOS123456, Helix-Flow, Helix-Track,
+Server-Factory).</p>
+<p><strong>Decision: rename to <code>helix_qa</code>.</strong> The
+exemption clause "third-party submodules keep upstream names" does NOT
+apply because HelixDevelopment is OUR org. The rename is binding.</p>
+<p><strong>Upstream rename consideration.</strong> The submodule lives
+at <code>git@github.com:HelixDevelopment/HelixQA.git</code> upstream.
+§11.4.29's reach is the local checkout path — the upstream repo name
+itself ALSO follows §11.4.29 universally, but renaming an upstream
+GitHub/GitLab repo is a separate, coordinated operation:</p>
+<ul>
+<li>The <code>.gitmodules</code> <code>path</code> field is what Lava
+controls — we set this to <code>submodules/helix_qa</code>.</li>
+<li>The <code>.gitmodules</code> <code>url</code> field points at the
+upstream (<code>HelixDevelopment/HelixQA</code>). The upstream itself
+remains at its existing URL until a separate cross-org coordination
+renames the upstream repo too.</li>
+<li>After the upstream is renamed (e.g. to
+<code>HelixDevelopment/helix_qa</code> or
+<code>HelixDevelopment/helix-qa</code> per GitHub naming convention), we
+update <code>.gitmodules</code> URLs and migrate. Until then, the local
+path is snake_case while the upstream URL remains CamelCase — this is
+the §11.4.29-conformant transitional state (rule applies to "directories
+under the parent project's working tree"; the <code>url</code> field is
+a network identifier, not a working-tree directory).</li>
+</ul>
+<p><strong>Equivalent for Tracker-SDK.</strong> Same logic: upstream is
+<code>vasic-digital/Tracker-SDK</code>. Local path becomes
+<code>submodules/tracker_sdk</code>. Upstream URL update is a follow-up
+coordination cycle (vasic-digital is OUR org, so we own the timing).</p>
+<p><strong>Equivalent for every other vasic-digital submodule.</strong>
+Same pattern — local path is canonical-snake_case; upstream URL update
+is per-org follow-up.</p>
+<h3
+id="32-constitution-submodule-special-case-already-mounted-at-constitution">3.2
+Constitution submodule special case (already mounted at
+<code>constitution/</code>)</h3>
+<p>The HelixDevelopment constitution submodule is mounted at
+<code>./constitution/</code> (lowercase, no underscore — single word).
+It is ALREADY snake_case-compliant. No rename needed. The §11.4.35
+canonical-root inheritance pointer in Lava's CLAUDE.md + AGENTS.md
+continues to reference <code>constitution/CLAUDE.md</code>.</p>
+<hr />
+<h2 id="4-phased-execution-plan">4. Phased execution plan</h2>
+<p>Per §11.4.29 + §11.4.20 (subagent delegation): each phase below is a
+separate cycle (separate commit, separate falsifiability rehearsal,
+separate sweep run). Phases run sequentially because each builds on the
+previous (e.g. Phase 6b uses the already-renamed
+<code>submodules/</code> path from Phase 6a).</p>
+<h3 id="phase-60--plan--audit-tool-this-commit">Phase 6.0 — Plan + audit
+tool (THIS commit)</h3>
+<p><strong>Status:</strong> SHIPPING IN THIS COMMIT.</p>
+<p><strong>Deliverables:</strong></p>
+<ul>
+<li>This plan document.</li>
+<li><code>scripts/audit-snake_case-references.sh</code> (read-only audit
+tool).</li>
+<li><code>tests/check-constitution/test_audit_snake_case_references.sh</code>
+(hermetic test).</li>
+<li><code>docs/scripts/audit-snake_case-references.sh.md</code>
+(companion doc).</li>
+<li>Updated reference in
+<code>docs/plans/2026-05-15-constitution-compliance.md</code> Phase 6
+section.</li>
+</ul>
+<p><strong>Risk:</strong> ZERO — read-only. No renames. Audit script +
+hermetic test + plan only.</p>
+<p><strong>Exit criteria:</strong></p>
+<ul>
+<li>Audit script runs successfully on real tree.</li>
+<li>Hermetic test passes.</li>
+<li><code>scripts/verify-all-constitution-rules.sh --strict</code>
+reports unchanged baseline (no new gate failures).</li>
+</ul>
+<hr />
+<h3 id="phase-6a--submodules--submodules-the-directory-itself">Phase 6a
+— <code>submodules/</code> → <code>submodules/</code> (the directory
+itself)</h3>
+<p><strong>Scope:</strong> Single rename — the top-level
+<code>Submodules</code> directory. Cascading updates to every reference
+path.</p>
+<p><strong>Pre-rename audit:</strong></p>
+<ol type="1">
+<li>Run
+<code>bash scripts/audit-snake_case-references.sh &gt; before.tsv</code>.</li>
+<li>Hardlinked <code>.git</code> backup per §9.1:
+<code>cp -al .git ../.git-backup-pre-snake-case-6a-$(date -u +%Y%m%dT%H%M%SZ)/repo.git.mirror</code>.</li>
+</ol>
+<p><strong>Rename steps:</strong></p>
+<ol type="1">
+<li><code>git mv Submodules submodules</code> (or equivalent:
+<code>git mv</code> each child entry — Git's <code>git mv</code> handles
+renamed-directory tracking automatically).</li>
+<li>Update <code>.gitmodules</code>: every
+<code>path = submodules/&lt;X&gt;</code> →
+<code>path = submodules/&lt;X&gt;</code> (17 entries).</li>
+<li>Update <code>.git/config</code> <code>submodule.*.path</code>
+mirrored from <code>.gitmodules</code>. (Usually done by
+<code>git submodule sync</code>.)</li>
+<li>Run <code>git submodule sync</code> +
+<code>git submodule update --init</code> to refresh
+<code>.git/modules</code> pointers.</li>
+<li>Update every script/code reference:
+<ul>
+<li><code>scripts/*.sh</code> — <code>submodules/</code> →
+<code>submodules/</code> (16 files).</li>
+<li><code>lava-api-go/go.mod</code> — <code>../submodules/</code> →
+<code>../submodules/</code> (replace directives).</li>
+<li><code>settings.gradle.kts</code> —
+<code>includeBuild("submodules/tracker_sdk")</code> →
+<code>includeBuild("ssubmodules/tracker_sdk")</code>.</li>
+<li><code>start.sh</code>, <code>tools/lava-containers/...</code>,
+<code>tests/...</code>.</li>
+<li><code>CLAUDE.md</code> (35 refs), <code>AGENTS.md</code>,
+<code>CHANGELOG.md</code>, <code>.githooks/pre-push</code>.</li>
+<li><code>docs/**/*.md</code> (41 files — including superpowers
+specs/plans).</li>
+<li><code>.lava-ci-evidence/**/*</code> (27 files — these are historical
+attestations; the rename in evidence files is for consistency, not for
+correctness).</li>
+</ul></li>
+<li>Verify no remaining <code>submodules/</code> references via audit:
+<code>bash scripts/audit-snake_case-references.sh &gt; after.tsv &amp;&amp; diff before.tsv after.tsv</code>.</li>
+</ol>
+<p><strong>Post-rename validation:</strong></p>
+<ol type="1">
+<li><code>./gradlew :app:assembleDebug</code> — verifies Gradle
+composite-build picks up the renamed path.</li>
+<li><code>cd lava-api-go &amp;&amp; make build</code> — verifies Go
+module replace-directives work.</li>
+<li><code>bash scripts/run-emulator-tests.sh --help</code> (smoke) —
+verifies matrix runner glue.</li>
+<li><code>bash scripts/verify-all-constitution-rules.sh --strict</code>
+— full sweep.</li>
+<li><code>bash tests/check-constitution/test_audit_snake_case_references.sh</code>
+— hermetic.</li>
+</ol>
+<p><strong>Falsifiability rehearsal:</strong></p>
+<ul>
+<li>Deliberately omit ONE rename (e.g. leave
+<code>scripts/check-constitution.sh</code> referencing
+<code>submodules/</code>). Run audit — confirm it surfaces the residual
+reference. Restore + verify clean.</li>
+</ul>
+<p><strong>Rollback:</strong></p>
+<ul>
+<li><code>git checkout HEAD -- .</code> (working tree).</li>
+<li><code>git reset --hard HEAD~1</code> (last commit).</li>
+<li>Restore from <code>.git-backup-pre-snake-case-6a-...</code> if
+<code>git</code> itself is somehow corrupted.</li>
+</ul>
+<p><strong>Estimated effort:</strong> 1 focused session. Commit message
+MUST cite the falsifiability rehearsal per §6.N.</p>
+<p><strong>Operator approval required:</strong> YES — high blast radius.
+Operator MUST sign off on the rename batch before push to mirrors.</p>
+<hr />
+<h3 id="phase-6b--per-submodule-snake_case-renames-17-sub-cycles">Phase
+6b — Per-submodule snake_case renames (17 sub-cycles)</h3>
+<p><strong>Strategy:</strong> ONE commit per submodule. Each commit:</p>
+<ol type="1">
+<li>Renames the directory.</li>
+<li>Updates <code>.gitmodules</code> <code>[submodule "..."]</code>
+heading + <code>path</code> field.</li>
+<li>Updates every reference in tracked files.</li>
+<li>Runs the audit + post-rename validation.</li>
+<li>Captures a per-cycle falsifiability rehearsal.</li>
+</ol>
+<p><strong>Ordering</strong> — risk-ascending (small blast radius first
+to build muscle):</p>
+<table>
+<thead>
+<tr>
+<th>Order</th>
+<th>Submodule</th>
+<th>Refs</th>
+<th>Risk</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Discovery</td>
+<td>5</td>
+<td>LOW</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Concurrency</td>
+<td>5</td>
+<td>LOW</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Database</td>
+<td>8</td>
+<td>LOW</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Config</td>
+<td>10</td>
+<td>LOW</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Recovery</td>
+<td>12</td>
+<td>LOW</td>
+</tr>
+<tr>
+<td>6</td>
+<td>HelixQA → helix_qa</td>
+<td>13</td>
+<td>MEDIUM (cross-org)</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Challenges</td>
+<td>14</td>
+<td>LOW</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Mdns</td>
+<td>14</td>
+<td>LOW</td>
+</tr>
+<tr>
+<td>9</td>
+<td>Middleware</td>
+<td>14</td>
+<td>LOW</td>
+</tr>
+<tr>
+<td>10</td>
+<td>Security</td>
+<td>15</td>
+<td>LOW</td>
+</tr>
+<tr>
+<td>11</td>
+<td>Auth</td>
+<td>16</td>
+<td>LOW</td>
+</tr>
+<tr>
+<td>12</td>
+<td>HTTP3 → http3</td>
+<td>20</td>
+<td>LOW</td>
+</tr>
+<tr>
+<td>13</td>
+<td>Observability</td>
+<td>29</td>
+<td>LOW</td>
+</tr>
+<tr>
+<td>14</td>
+<td>Cache</td>
+<td>36</td>
+<td>LOW</td>
+</tr>
+<tr>
+<td>15</td>
+<td>RateLimiter → rate_limiter</td>
+<td>50</td>
+<td>MEDIUM (compound name)</td>
+</tr>
+<tr>
+<td>16</td>
+<td>Tracker-SDK → tracker_sdk</td>
+<td>83</td>
+<td>HIGH (Gradle includeBuild + Go go.mod)</td>
+</tr>
+<tr>
+<td>17</td>
+<td>Containers → containers</td>
+<td>370</td>
+<td>HIGHEST (matrix runner + gate-shaping code)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Per-cycle pre-rename audit:</strong></p>
+<ul>
+<li><code>bash scripts/audit-snake_case-references.sh &gt; before-&lt;name&gt;.tsv</code>.</li>
+<li><code>cp -al .git ../.git-backup-pre-rename-&lt;name&gt;-$(date -u +%Y%m%dT%H%M%SZ)/repo.git.mirror</code>.</li>
+</ul>
+<p><strong>Per-cycle rename steps:</strong></p>
+<ol type="1">
+<li><code>git mv submodules/&lt;OldName&gt; submodules/&lt;new_name&gt;</code>.</li>
+<li>Update <code>.gitmodules</code>:
+<ul>
+<li><code>[submodule "submodules/&lt;OldName&gt;"]</code> →
+<code>[submodule "submodules/&lt;new_name&gt;"]</code>.</li>
+<li><code>path = submodules/&lt;OldName&gt;</code> →
+<code>path = submodules/&lt;new_name&gt;</code>.</li>
+</ul></li>
+<li>Update every reference in:
+<ul>
+<li><code>scripts/*.sh</code> (use
+<code>git grep -l "&lt;OldName&gt;" | xargs sed -i '' 's|submodules/&lt;OldName&gt;|submodules/&lt;new_name&gt;|g'</code>).</li>
+<li><code>docs/**/*.md</code>.</li>
+<li><code>CLAUDE.md</code>, <code>AGENTS.md</code>,
+<code>CHANGELOG.md</code>.</li>
+<li><code>lava-api-go/go.mod</code> (if this submodule has Go replace
+directives).</li>
+<li><code>settings.gradle.kts</code> (if Gradle includeBuild references
+it).</li>
+<li><code>.lava-ci-evidence/**/*</code>.</li>
+</ul></li>
+<li>Run <code>git submodule sync</code> to refresh git's internal
+pointers.</li>
+<li>Verify:
+<code>bash scripts/audit-snake_case-references.sh &gt; after-&lt;name&gt;.tsv &amp;&amp; diff before-&lt;name&gt;.tsv after-&lt;name&gt;.tsv</code>.</li>
+</ol>
+<p><strong>Per-cycle validation:</strong></p>
+<ul>
+<li><code>./gradlew :app:assembleDebug</code> (if this submodule is in
+Gradle build).</li>
+<li><code>cd lava-api-go &amp;&amp; make build</code> (if this submodule
+is in Go module).</li>
+<li><code>bash scripts/verify-all-constitution-rules.sh --strict</code>.</li>
+</ul>
+<p><strong>Per-cycle falsifiability rehearsal:</strong></p>
+<ul>
+<li>Leave ONE reference unrenamed (e.g. in a script). Run audit —
+confirm it flags the residual. Restore + verify clean.</li>
+</ul>
+<p><strong>Per-cycle commit message MUST contain:</strong></p>
+<ul>
+<li><code>Bluff-Audit:</code> block per §6.N + Seventh Law clause
+1.</li>
+<li><code>Classification:</code> line per §11.4.17 (project-specific —
+the rename target IS Lava's).</li>
+<li>Citation of falsifiability rehearsal.</li>
+</ul>
+<p><strong>Per-cycle push:</strong> to both GitHub + GitLab mirrors per
+§6.W.</p>
+<p><strong>Estimated effort:</strong> 17 sessions (one per submodule).
+Some pairs may bundle (small + small) at operator's discretion;
+HIGH-RISK renames (Containers, Tracker-SDK, RateLimiter) MUST be their
+own sessions.</p>
+<hr />
+<h3 id="phase-6c--file-level-renames-lava-side">Phase 6c — File-level
+renames (Lava-side)</h3>
+<p><strong>Scope:</strong> Tracked files at Lava root or under
+non-LANG-spec subtrees that violate snake_case. Per §11.4.29 the rule
+applies to project files too.</p>
+<p><strong>Audit step (NEW script needed in this phase):</strong></p>
+<ul>
+<li><code>scripts/audit-non-snake-case-files.sh</code> — walks tracked
+files, lists every non-snake_case name not in the §2 exemption set.</li>
+</ul>
+<p><strong>Expected findings (preview):</strong></p>
+<ul>
+<li><code>docs/INCIDENT_2026-04-28-HOST-POWEROFF.md</code> — already
+snake_case in content but the <code>INCIDENT_</code> prefix is ALL-CAPS.
+Decision: keep as-is per "tradition" (legacy filename established by
+operator; rename doc-only files only when low-risk; the rule's spirit is
+operator-ergonomics).</li>
+<li><code>docs/superpowers/specs/*-design.md</code> — already
+snake_case.</li>
+<li><code>docs/superpowers/plans/*.md</code> — already snake_case.</li>
+<li><code>tools/lava-containers/</code> — already snake_case.</li>
+</ul>
+<p><strong>Anticipated decisions:</strong></p>
+<ul>
+<li>LANG-spec subtrees: exempted (see §2).</li>
+<li>Markdown docs at root: keep PascalCase / UPPERCASE per Markdown
+ecosystem convention (<code>README.md</code>, <code>CHANGELOG.md</code>,
+<code>LICENSE</code>, <code>CLAUDE.md</code>, <code>AGENTS.md</code>,
+<code>INCIDENT_*.md</code>).</li>
+<li>New docs (Phase 6c onwards) MUST be snake_case from inception.</li>
+</ul>
+<p><strong>Estimated effort:</strong> 1 session for the audit +
+decisions. Actual renames may be ZERO if all current files are either
+snake_case or in an exemption set.</p>
+<hr />
+<h3 id="phase-6d--upstreams--upstreams-lava-side">Phase 6d —
+<code>Upstreams/</code> → <code>upstreams/</code> (Lava side)</h3>
+<p><strong>Scope:</strong> Rename the Lava-side <code>Upstreams/</code>
+directory per §11.4.29's explicit transition clause.</p>
+<p><strong>Pre-requisites:</strong></p>
+<ul>
+<li>Confirm <code>install_upstreams</code> (host-system utility from
+constitution submodule) supports BOTH <code>Upstreams/</code> and
+<code>upstreams/</code> directory layouts. The constitution mandates
+this transitional dual-support — verify before renaming.</li>
+<li>Constitution submodule's <code>install_upstreams.sh</code> is
+already on operator's PATH.</li>
+</ul>
+<p><strong>Rename steps:</strong></p>
+<ol type="1">
+<li><code>git mv Upstreams upstreams</code>.</li>
+<li>Update any script that hard-codes <code>Upstreams/</code> (currently
+0 from grep; the install_upstreams utility scans both).</li>
+<li>Run <code>install_upstreams</code> from repo root — verify it picks
+up the new lowercase directory.</li>
+<li>Update <code>CLAUDE.md</code> reference
+(<code>./Upstreams/GitHub.sh</code> →
+<code>./upstreams/GitHub.sh</code>).</li>
+<li>Update <code>CHANGELOG.md</code> if mentioned.</li>
+</ol>
+<p><strong>Validation:</strong></p>
+<ul>
+<li><code>git remote -v</code> — verify both GitHub + GitLab remotes
+still configured correctly.</li>
+<li>Push to both mirrors — verify multi-upstream push works.</li>
+</ul>
+<p><strong>Estimated effort:</strong> Half a session.</p>
+<hr />
+<h3 id="phase-6e--mechanical-gate">Phase 6e — Mechanical gate</h3>
+<p><strong>Scope:</strong>
+<code>scripts/check-snake-case-naming.sh</code> enforcement gate +
+companion hermetic test, wired into
+<code>scripts/verify-all-constitution-rules.sh</code>.</p>
+<p><strong>Gate logic:</strong></p>
+<ul>
+<li>Walk all tracked files + directories.</li>
+<li>For each name, check it matches
+<code>^[a-z0-9_]+(\.[a-z0-9_]+)*$</code> OR is on the LANG-spec
+exemption list (<code>*.kt</code>, <code>*.kts</code>,
+<code>*.gradle.kts</code>, <code>*.go</code>, <code>*.xml</code>,
+<code>*.json</code>, <code>*.yaml</code>, <code>*.yml</code>,
+<code>*.md</code> for markdown, Android
+<code>drawable-*</code>/<code>mipmap-*</code>/etc., Gradle wrapper,
+dotfiles).</li>
+<li>Reject on violation with "non-snake_case name: <path>".</li>
+</ul>
+<p><strong>Modes:</strong></p>
+<ul>
+<li><code>--strict</code> (default): exit 1 on violation.</li>
+<li><code>--advisory</code>: exit 0; print warnings.</li>
+</ul>
+<p><strong>Companion hermetic test:</strong></p>
+<ul>
+<li>Plant a <code>BadName.txt</code> synthetic file — confirm gate
+FAILs.</li>
+<li>Plant a <code>MainActivity.kt</code> synthetic file — confirm gate
+PASSes (LANG-spec exemption).</li>
+<li>Confirm clean Lava tree PASSes.</li>
+</ul>
+<p><strong>Falsifiability rehearsal:</strong></p>
+<ul>
+<li>Rename a snake_case file back to PascalCase. Run gate — confirm FAIL
+with the offender named.</li>
+</ul>
+<p><strong>Estimated effort:</strong> 1 session.</p>
+<hr />
+<h3
+id="phase-6f--upstream-coordination-cross-org-rename-of-repos-themselves">Phase
+6f — Upstream coordination (cross-org rename of repos themselves)</h3>
+<p><strong>Scope:</strong> Optionally rename the upstream Git repos
+(<code>github.com/vasic-digital/Tracker-SDK</code> →
+<code>github.com/vasic-digital/tracker_sdk</code> or
+<code>tracker-sdk</code>;
+<code>github.com/HelixDevelopment/HelixQA</code> → <code>helix_qa</code>
+/ <code>helix-qa</code>).</p>
+<p><strong>Considerations:</strong></p>
+<ul>
+<li>GitHub convention is kebab-case (hyphens). Renaming to
+<code>tracker-sdk</code> would be GitHub-idiomatic; to
+<code>tracker_sdk</code> would be §11.4.29-idiomatic. §11.4.29 silent on
+the hyphen-vs-underscore for upstream repo names — likely we keep
+upstream URL as-is and only the LOCAL submodule path is renamed.</li>
+<li>Renaming an upstream Git repo breaks every clone URL anywhere.
+GitHub auto-redirects old URLs but only for some operations.
+Recommendation: do NOT rename upstream repos unless operator explicitly
+authorizes; the local-path rename per §11.4.29 is what's mandatory.</li>
+<li>If operator authorizes: coordinate per-org.
+<code>gh repo rename vasic-digital/Tracker-SDK tracker_sdk</code> (or
+use the GitHub UI). Verify GitLab mirror name updates. Update all
+consuming projects' <code>.gitmodules</code> <code>url</code>
+fields.</li>
+</ul>
+<p><strong>Decision (pending operator):</strong> Defer. The §11.4.29
+local-path rename is what the constitution mandates; the upstream repo
+name is a network identifier, not a working-tree directory.</p>
+<p><strong>Estimated effort:</strong> 0-1 session (depends on operator
+decision).</p>
+<hr />
+<h2 id="5-rollback-plan">5. Rollback plan</h2>
+<p>Every rename batch has a hardlinked <code>.git</code> backup per §9.1
+(HelixConstitution + Lava's existing host-stability discipline). The
+backup costs near-zero disk (hardlinks).</p>
+<h3 id="51-rollback-for-single-rename-batch-during-the-session">5.1
+Rollback for single rename batch (during the session)</h3>
+<ol type="1">
+<li><code>git reset --hard HEAD~1</code> if the rename was just
+committed.</li>
+<li><code>git checkout HEAD -- .</code> to discard uncommitted
+working-tree changes.</li>
+<li>If git's internal state is somehow corrupt:
+<code>rm -rf .git &amp;&amp; cp -al ../.git-backup-pre-rename-&lt;name&gt;-&lt;TS&gt;/repo.git.mirror .git</code>.</li>
+</ol>
+<h3 id="52-rollback-after-push-more-involved">5.2 Rollback after push
+(more involved)</h3>
+<ol type="1">
+<li>Operator-approved force-push of the inverse commit (per §6.T.3 —
+force-push requires explicit per-operation approval).</li>
+<li>Re-clone consuming projects if their submodule pin points at the
+abandoned commit.</li>
+<li>Document in
+<code>.lava-ci-evidence/sixth-law-incidents/&lt;date&gt;-snake_case-rename-rollback.json</code>
+per §6.M.</li>
+</ol>
+<h3 id="53-partial-rollback-some-renames-stick-some-revert">5.3 Partial
+rollback (some renames stick, some revert)</h3>
+<p>Use case: Phase 6a + 6b/1-3 succeed; 6b/4 breaks something. Revert
+ONLY 6b/4:</p>
+<ol type="1">
+<li><code>git revert &lt;SHA-of-6b/4&gt;</code>.</li>
+<li>Push the revert commit.</li>
+<li>Submodule 4's local path returns to the partially-renamed state
+(still capital <code>submodules/&lt;OldName&gt;</code> if 6b/4 was the
+FIRST per-submodule rename after 6a — meaning the directory is
+<code>submodules/&lt;OldName&gt;</code> after 6a but
+<code>&lt;OldName&gt;</code> was not lowered yet).</li>
+</ol>
+<h3 id="54-what-must-not-be-done-during-rollback">5.4 What MUST NOT be
+done during rollback</h3>
+<ul>
+<li>Force-push without operator authorization per §6.T.3.</li>
+<li>Skip pre-push hooks with <code>--no-verify</code> per §6.T.3.</li>
+<li>Rewrite history via <code>git filter-branch</code> /
+<code>git filter-repo</code> without §9.1 backup + operator
+approval.</li>
+</ul>
+<hr />
+<h2 id="6-risk-analysis">6. Risk analysis</h2>
+<h3 id="61-risk-gradle-composite-build-path-break">6.1 Risk: Gradle
+composite-build path break</h3>
+<p><strong>Trigger:</strong> Phase 6a OR Phase 6b/Tracker-SDK rename
+without updating <code>settings.gradle.kts</code>
+<code>includeBuild("submodules/tracker_sdk")</code>.</p>
+<p><strong>Symptom:</strong> <code>./gradlew :app:assembleDebug</code>
+fails with "Project 'submodules/tracker_sdk' not found" or analogous
+error.</p>
+<p><strong>Mitigation:</strong> <code>settings.gradle.kts</code> IS in
+the audit script's reference count (1 ref). The per-cycle validation
+step (<code>./gradlew :app:assembleDebug</code>) catches this
+immediately.</p>
+<h3 id="62-risk-go-module-replace-directive-path-break">6.2 Risk: Go
+module replace-directive path break</h3>
+<p><strong>Trigger:</strong> Phase 6a OR Phase 6b/<any> without updating
+<code>lava-api-go/go.mod</code> <code>replace</code> directives.</p>
+<p><strong>Symptom:</strong>
+<code>cd lava-api-go &amp;&amp; go build</code> fails with "directory
+../submodules/X does not exist".</p>
+<p><strong>Mitigation:</strong> <code>lava-api-go/go.mod</code> IS in
+the audit script's reference count (15 refs in go.mod alone). The
+per-cycle validation step
+(<code>cd lava-api-go &amp;&amp; make build</code>) catches this
+immediately.</p>
+<h3 id="63-risk-constitution-checker-reference-break">6.3 Risk:
+Constitution checker reference break</h3>
+<p><strong>Trigger:</strong> Phase 6a OR Phase 6b/<any> without updating
+<code>scripts/check-constitution.sh</code> (29 refs).</p>
+<p><strong>Symptom:</strong> Pre-push hook fails with stale path errors;
+OR pre-push hook silently passes while the rule it claims to enforce is
+no longer checked.</p>
+<p><strong>Mitigation:</strong>
+<code>scripts/check-constitution.sh</code> has THE HIGHEST per-script
+ref count. Per-cycle validation MUST run
+<code>bash scripts/verify-all-constitution-rules.sh --strict</code> —
+any silent pass on a stale path surfaces as a sweep regression.</p>
+<h3 id="64-risk-submodule-initsync-gets-confused">6.4 Risk: Submodule
+init/sync gets confused</h3>
+<p><strong>Trigger:</strong> Renaming <code>submodules/&lt;X&gt;</code>
+without <code>git submodule sync</code>.</p>
+<p><strong>Symptom:</strong> <code>.git/modules/submodules/X/</code>
+(cached metadata) vs. <code>.git/modules/submodules/x/</code>
+(post-rename expectation) divergence;
+<code>git submodule update --init</code> fails with "fatal: repository
+'..../X' does not exist".</p>
+<p><strong>Mitigation:</strong> Per-cycle step 4 explicitly runs
+<code>git submodule sync</code> +
+<code>git submodule update --init</code>. If still confused:
+<code>rm -rf .git/modules/&lt;stale-path&gt;</code> (safe — re-fetched
+on next <code>update --init</code>).</p>
+<h3
+id="65-risk-helixdevelopment-owned-submodule-cross-org-coordination">6.5
+Risk: HelixDevelopment-owned submodule cross-org coordination</h3>
+<p><strong>Trigger:</strong> Phase 6b/HelixQA — local path becomes
+<code>submodules/helix_qa</code> while upstream URL still
+<code>HelixDevelopment/HelixQA</code> (PascalCase).</p>
+<p><strong>Symptom:</strong> None expected. The <code>path</code> and
+<code>url</code> fields in <code>.gitmodules</code> are independent.
+§11.4.29 governs working-tree paths, not network identifiers.</p>
+<p><strong>Mitigation:</strong> Document the transitional state in the
+commit message. If operator later authorizes the upstream rename, run
+Phase 6f in coordination with HelixDevelopment.</p>
+<h3
+id="66-risk-high-blast-radius-rename-batches-containers--tracker-sdk">6.6
+Risk: HIGH-blast-radius rename batches (Containers + Tracker-SDK)</h3>
+<p><strong>Trigger:</strong> Phase 6b/Containers (370 refs) or Phase
+6b/Tracker-SDK (83 refs).</p>
+<p><strong>Symptom:</strong> Higher chance of missing a reference;
+higher diff-volume in the commit; harder for reviewer to verify the
+rename is complete.</p>
+<p><strong>Mitigation:</strong></p>
+<ul>
+<li>Run the audit script BOTH before AND after; the <code>diff</code>
+MUST show every old-name reference removed (the audit's tab-separated
+output makes this easy).</li>
+<li>For Containers: separate the rename of
+<code>submodules/containers/</code> itself from updates to scripts that
+reference it. Could be split into two sub-commits within the cycle
+(rename + path-update).</li>
+<li>For Tracker-SDK: explicitly test the Gradle composite-build path
+with <code>./gradlew :app:assembleDebug</code> AND Go module path with
+<code>cd lava-api-go &amp;&amp; go build</code> BEFORE pushing.</li>
+</ul>
+<h3 id="67-risk-reference-drift-between-rename-batches">6.7 Risk:
+Reference drift between rename batches</h3>
+<p><strong>Trigger:</strong> Phase 6b/N renames
+<code>submodules/X</code>, but Phase 6b/N+1 commit lands with stale
+references to <code>submodules/X</code> (the renamed-old-name)
+somewhere.</p>
+<p><strong>Symptom:</strong> §11.4.29 violation per "reference drift
+after a rename is a §11.4.29 violation of equal severity to the rename
+itself".</p>
+<p><strong>Mitigation:</strong> The audit script (run as pre-push gate
+after each rename) catches this immediately. The mechanical gate from
+Phase 6e (when wired) will reject pushes with stale references
+automatically.</p>
+<h3
+id="68-risk-operator-unrelated-breakage-during-the-migration-window">6.8
+Risk: Operator-unrelated breakage during the migration window</h3>
+<p><strong>Trigger:</strong> Operator's local working tree gets out of
+sync because of a half-completed pull (Phase 6a landed remotely;
+operator's checkout is pre-rename).</p>
+<p><strong>Symptom:</strong> <code>git status</code> shows
+<code>submodules/</code> and <code>submodules/</code> simultaneously
+(case-insensitive filesystems on macOS could confuse this further).</p>
+<p><strong>Mitigation:</strong> Operator MUST run
+<code>git status</code> + <code>git submodule status</code> after every
+pull during the migration window. Document the rename batches in
+<code>CHANGELOG.md</code> so each rename has a discoverable record.
+macOS case-insensitive filesystems may need
+<code>git rm --cached Submodules</code> + <code>git submodule add</code>
+cycles in extreme cases.</p>
+<hr />
+<h2
+id="7-anti-bluff-guarantees-per-11429-test-coverage-clause--6j--6l">7.
+Anti-bluff guarantees (per §11.4.29 test-coverage clause + §6.J /
+§6.L)</h2>
+<p>§11.4.29 explicitly mandates:</p>
+<blockquote>
+<p>"Test coverage of renames. Every batch of renames MUST ship with: (i)
+a regression test that verifies every reference to the renamed entity
+now resolves to the new name (no stale references left); (ii) a full
+CONST-050(B) test-type matrix run against the post-rename tree; (iii)
+anti-bluff (CONST-035) wire-evidence captured during the runtime
+verification."</p>
+</blockquote>
+<p>Per-phase coverage:</p>
+<h3 id="71-regression-test-zero-stale-references">7.1 Regression test:
+zero stale references</h3>
+<p>The audit script
+(<code>scripts/audit-snake_case-references.sh</code>) IS the regression
+detector. Per-phase exit criterion:
+<code>audit_after - audit_before == 0</code> for the renamed-from name.
+The hermetic test verifies the script's correctness on planted
+fixtures.</p>
+<h3 id="72-full-test-type-matrix-on-post-rename-tree">7.2 Full test-type
+matrix on post-rename tree</h3>
+<p>After each Phase 6b sub-cycle:</p>
+<ul>
+<li>Unit tests: <code>./gradlew test --rerun-tasks</code> (Lava) +
+<code>cd lava-api-go &amp;&amp; make test</code> (Go).</li>
+<li>Integration: <code>./gradlew :app:connectedDebugAndroidTest</code>
+(Compose UI Challenge Tests on emulator — gated by Containers submodule
+per §6.X / §6.AE).</li>
+<li>Constitution sweep:
+<code>bash scripts/verify-all-constitution-rules.sh --strict</code>.</li>
+<li>Pre-push hook: implicit on push.</li>
+</ul>
+<h3 id="73-anti-bluff-wire-evidence">7.3 Anti-bluff wire evidence</h3>
+<p>Per-phase JSON evidence file at
+<code>.lava-ci-evidence/snake_case-migration/&lt;phase&gt;-&lt;UTC-timestamp&gt;.json</code>
+capturing:</p>
+<ul>
+<li>Before/after audit TSV output diff.</li>
+<li>Build verification command stdout/stderr.</li>
+<li>Sweep result.</li>
+<li>Falsifiability rehearsal output.</li>
+</ul>
+<h3 id="74-falsifiability-rehearsal-6j-clause-2--6n-clauses-2-3">7.4
+Falsifiability rehearsal (§6.J clause 2 + §6.N clauses 2-3)</h3>
+<p>Per-cycle: leave ONE reference unrenamed (e.g. inside an evidence
+file or a docs/superpowers/plans/ entry); run audit — confirm it flags
+the residual reference; restore. The Bluff-Audit: stamp in the commit
+body records the residual + the observed audit failure message.</p>
+<hr />
+<h2 id="8-composition-with-other-constitutional-rules">8. Composition
+with other constitutional rules</h2>
+<p>§11.4.29 composes with:</p>
+<ul>
+<li><strong>§1 (four-layer floor)</strong> — every rename batch runs
+pre-build + post-build + runtime + meta-test paired mutation.</li>
+<li><strong>§1.1 (paired mutation)</strong> — falsifiability rehearsal
+per cycle (§7.4 above).</li>
+<li><strong>§11.4.12 (auto-generated docs sync)</strong> — if any
+auto-generated doc references the old name, regenerate in the same
+commit.</li>
+<li><strong>§11.4.17 (universal-vs-project classification)</strong> —
+rename batch commits MUST carry <code>Classification:</code> line
+(project-specific — target names are Lava-specific).</li>
+<li><strong>§11.4.18 (script-doc sync)</strong> — every renamed
+<code>scripts/*.sh</code> requires same-commit update to
+<code>docs/scripts/*.md</code>.</li>
+<li><strong>§11.4.20 (subagent delegation)</strong> — Phase 6b can run
+multiple sub-cycles in parallel via subagents for non-overlapping
+submodules.</li>
+<li><strong>§11.4.25 (coverage ledger)</strong> — every renamed path
+appears in the coverage ledger when Phase 7 ships.</li>
+<li><strong>§11.4.26 (constitution-submodule update workflow)</strong> —
+if a rename triggers any constitution update, follow the 7-step
+pipeline.</li>
+<li><strong>§11.4.27 (no-fakes-beyond-unit-tests +
+100%-test-type-coverage)</strong> — every rename batch covered by every
+applicable test type.</li>
+<li><strong>§11.4.28 (Submodules-As-Equal-Codebase)</strong> — rename
+batches treat owned submodules as equal codebase; each gets engineering
+attention.</li>
+<li><strong>§11.4.32 (post-pull validation sweep)</strong> — operator
+MUST run <code>scripts/verify-all-constitution-rules.sh</code> after
+pulling any rename batch.</li>
+</ul>
+<p>Lava-specific composition:</p>
+<ul>
+<li><strong>§6.J / §6.L (anti-bluff)</strong> — every rename batch's
+commit body carries a Bluff-Audit: stamp recording the falsifiability
+rehearsal.</li>
+<li><strong>§6.W (mirror policy)</strong> — push to both GitHub + GitLab
+mirrors per cycle.</li>
+<li><strong>§6.S (CONTINUATION maintenance)</strong> —
+<code>docs/CONTINUATION.md</code> updated in the same commit as any
+rename batch.</li>
+<li><strong>§6.AD-debt (HelixConstitution gate-wiring)</strong> — the
+rename mechanical gate (Phase 6e) closes part of this debt.</li>
+</ul>
+<hr />
+<h2 id="9-subagent-delegation-plan-per-11420">9. Subagent delegation
+plan (per §11.4.20)</h2>
+<p>§11.4.20 (subagent-driven-by-default mandate): when scope is
+multi-step + parallelizable, the primary agent MUST delegate.</p>
+<p>The 17 per-submodule renames in Phase 6b are textbook parallelizable
+IF they touch non-overlapping files. They don't always —
+<code>CLAUDE.md</code> is touched by EVERY rename batch — so parallel
+delegation requires coordination.</p>
+<p><strong>Recommended delegation pattern:</strong></p>
+<ul>
+<li><strong>Phase 6a:</strong> primary agent (high-coordination, touches
+everything).</li>
+<li><strong>Phase 6b/1-5 (LOW-RISK, ≤12 refs each):</strong> primary
+agent or 1 subagent per cycle, sequential.</li>
+<li><strong>Phase 6b/6-13 (LOW-MEDIUM, 13-30 refs each):</strong>
+primary agent OR up to 2 subagents in parallel IF they partition
+disjoint files (one renames <code>submodules/&lt;X&gt;</code> and
+updates <code>docs/superpowers/plans/&lt;P&gt;.md</code>; the other
+renames <code>submodules/&lt;Y&gt;</code> and updates
+<code>docs/superpowers/plans/&lt;Q&gt;.md</code>).</li>
+<li><strong>Phase 6b/14-17 (HIGH-RISK, ≥36 refs each):</strong> primary
+agent, sequential. NO parallel delegation. These are high-coordination
+renames where reviewer attention matters.</li>
+<li><strong>Phase 6c, 6d, 6e:</strong> primary agent.</li>
+<li><strong>Phase 6f:</strong> OPERATOR decision required (cross-org
+upstream rename).</li>
+</ul>
+<hr />
+<h2 id="10-audit-script-baseline-output-captured-2026-05-16">10. Audit
+script baseline output (captured 2026-05-16)</h2>
+<p>Reproducible via
+<code>bash scripts/audit-snake_case-references.sh</code>. The script's
+tab-separated output is the authoritative source for §1.</p>
+<pre><code># Captured at branch plan/2026-05-16-snake-case-migration HEAD
+NAME            REFS    FILES
+Auth            16      9
+Cache           36      15
+Challenges      14      8
+Concurrency     5       4
+Config          10      6
+Containers      370     63
+Database        8       5
+Discovery       5       4
+HelixQA         13      6
+HTTP3           20      7
+Mdns            14      7
+Middleware      14      6
+Observability   29      8
+RateLimiter     50      13
+Recovery        12      6
+Security        15      6
+Tracker-SDK     83      25
+TOTAL_Submodules        806     124</code></pre>
+<hr />
+<h2 id="11-open-questions-for-operator-review">11. Open questions for
+operator review</h2>
+<ol type="1">
+<li><p><strong>Phase 6f (upstream repo rename) — proceed or
+defer?</strong> Current recommendation: defer. §11.4.29 governs local
+working-tree paths; upstream repo names are network
+identifiers.</p></li>
+<li><p><strong>HelixQA local-path target: <code>helix_qa</code> or
+<code>helixqa</code>?</strong> Current recommendation:
+<code>helix_qa</code> (snake_case requires word separator;
+<code>Helix</code> and <code>QA</code> are clearly two words).
+Alternative: <code>helixqa</code> (single token, matches
+<code>mdns</code> / <code>http3</code> precedent for short compound
+names). Decision-axis: word-boundary clarity.</p></li>
+<li><p><strong>HTTP3 local-path target: <code>http3</code> or
+<code>http_3</code>?</strong> Current recommendation: <code>http3</code>
+(matches the protocol's canonical name; digits inside a single token, no
+separator needed). Alternative: <code>http_3</code> (pedantic
+snake_case). Decision-axis: ergonomics vs. pedantry. The
+<code>mdns</code> / <code>nnmclub</code> / <code>gutenberg</code> /
+<code>rutracker</code> neighbors all use single-token names without
+internal separators.</p></li>
+<li><p><strong>RateLimiter local-path target: <code>rate_limiter</code>
+or <code>ratelimiter</code>?</strong> Current recommendation:
+<code>rate_limiter</code> (compound noun with clear word boundary).
+Alternative: <code>ratelimiter</code> (matches Go
+<code>pkg/ratelimiter</code> convention common in Go code).
+Decision-axis: snake_case fidelity vs. Go-idiomatic
+single-token.</p></li>
+<li><p><strong>Container CLI subcommand paths: <code>pkg/emulator</code>
+etc. — already snake_case.</strong> No action needed for
+inside-Containers paths; Go-native.</p></li>
+<li><p><strong><code>submodules/containers/cmd/distributed-build/</code></strong>
+(and siblings with hyphens) — Go convention permits hyphens in
+<code>cmd/&lt;name&gt;/</code> directory names. §11.4.29 LANG-spec
+exemption applies. Verify with the operator that Go-tooling-convention
+hyphens are EXEMPT from the rule. Current recommendation:
+EXEMPT.</p></li>
+<li><p><strong>Order-of-operations dependency:</strong> Phase 6a MUST
+land before Phase 6b. Phase 6b/17 (Containers — 370 refs) is the
+highest-risk rename and SHOULD land LAST in Phase 6b. Phase 6c-f follow.
+Confirm operator agrees with the ordering.</p></li>
+<li><p><strong>Phase 6f-style upstream rename for
+<code>Tracker-SDK</code> (vasic-digital/Tracker-SDK →
+vasic-digital/tracker_sdk)?</strong> Same defer recommendation as
+HelixQA.</p></li>
+</ol>
+<hr />
+<h2 id="12-sign-off-checklist-for-execution">12. Sign-off checklist for
+execution</h2>
+<p>Before Phase 6a executes (separate commit from this plan):</p>
+<ul class="task-list">
+<li><label><input type="checkbox" />Operator reviews this
+plan.</label></li>
+<li><label><input type="checkbox" />Operator approves §11 open questions
+(or sends amendments).</label></li>
+<li><label><input type="checkbox" />Operator approves the per-cycle
+ordering in §4.</label></li>
+<li><label><input type="checkbox" />Operator reads §5 rollback
+plan.</label></li>
+<li><label><input type="checkbox" />Operator reads §6 risk
+analysis.</label></li>
+<li><label><input type="checkbox" />Linux x86_64 gate host available for
+Phase 6a + 6b/17 (Containers rename) so emulator-matrix attestation can
+run if §6.X-debt closes in the interim.</label></li>
+<li><label><input
+type="checkbox" /><code>.git-backup-pre-snake-case-6a-&lt;TS&gt;/</code>
+directory plan confirmed (disk space, location, retention).</label></li>
+<li><label><input type="checkbox" />CONTINUATION.md updated to reflect
+the migration window opening.</label></li>
+</ul>
+<hr />
+<p><strong>End of plan.</strong> This document is the authoritative
+reference for the entire snake_case migration program. Per §6.S, it MUST
+be kept in sync with reality as phases execute; per-phase commits MUST
+update <code>docs/CONTINUATION.md</code> AND any references herein that
+have shifted.</p>
+</body>
+</html>

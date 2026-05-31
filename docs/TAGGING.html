@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>TAGGING</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1 id="lava-release-tagging-guide">Lava Release Tagging Guide</h1>
+<blockquote>
+<p>Operator manual for <code>scripts/tag.sh</code>. Read this before
+cutting your first release.</p>
+</blockquote>
+<h2 id="table-of-contents">Table of Contents</h2>
+<ol type="1">
+<li><a href="#overview">Overview</a></li>
+<li><a href="#tag-format">Tag format</a></li>
+<li><a href="#what-the-script-does">What the script does</a></li>
+<li><a href="#source-of-truth-where-versions-live">Source of truth:
+where versions live</a></li>
+<li><a href="#quick-reference">Quick reference</a></li>
+<li><a href="#flag-by-flag-reference">Flag-by-flag reference</a></li>
+<li><a href="#common-workflows">Common workflows</a></li>
+<li><a href="#adding-a-new-appservice">Adding a new app/service</a></li>
+<li><a href="#troubleshooting">Troubleshooting</a></li>
+<li><a href="#faq">FAQ</a></li>
+</ol>
+<hr />
+<h2 id="overview">Overview</h2>
+<p>Lava ships three independently versioned artifacts:</p>
+<table>
+<thead>
+<tr>
+<th>App key</th>
+<th>Tag prefix</th>
+<th>Source of truth</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>android</code></td>
+<td><code>Lava-Android</code></td>
+<td><code>app/build.gradle.kts</code> (<code>versionName</code> /
+<code>versionCode</code>)</td>
+<td>Android client (<code>digital.vasic.lava.client</code>)</td>
+</tr>
+<tr>
+<td><code>api</code></td>
+<td><code>Lava-API</code></td>
+<td><code>proxy/build.gradle.kts</code> (<code>apiVersionName</code> /
+<code>apiVersionCode</code>)</td>
+<td>Ktor proxy server (<code>digital.vasic.lava.api</code>)</td>
+</tr>
+<tr>
+<td><code>api-go</code></td>
+<td><code>Lava-API-Go</code></td>
+<td><code>lava-api-go/internal/version/version.go</code>
+(<code>Name</code> / <code>Code</code>)</td>
+<td>Go API service (SP-2 successor to the Ktor proxy)</td>
+</tr>
+</tbody>
+</table>
+<p><code>scripts/tag.sh</code> automates the release process for either
+or both of them:</p>
+<ol type="1">
+<li>Reads the <strong>current</strong> versionName/versionCode from each
+app's source of truth.</li>
+<li>Creates an annotated git tag in the canonical Lava format.</li>
+<li>Pushes the tag to <strong>every configured upstream</strong>
+(GitHub, GitFlic, GitLab, GitVerse).</li>
+<li>Bumps the source-of-truth files (versionName via semver rule;
+versionCode by <code>+1</code>).</li>
+<li>Commits the bump and pushes the commit to every upstream.</li>
+</ol>
+<p>The script is <strong>idempotent</strong> for tag creation: running
+it twice on the same release commit will skip already-existing tags (and
+warn) instead of failing.</p>
+<h2 id="tag-format">Tag format</h2>
+<pre><code>Lava-&lt;App&gt;-&lt;versionName&gt;-&lt;versionCode&gt;</code></pre>
+<p>Concrete examples:</p>
+<table>
+<thead>
+<tr>
+<th>Tag</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Lava-Android-1.0.0-1008</code></td>
+<td>Android client, semver <code>1.0.0</code>, code
+<code>1008</code></td>
+</tr>
+<tr>
+<td><code>Lava-Android-1.0.1-1009</code></td>
+<td>Android client, the next patch</td>
+</tr>
+<tr>
+<td><code>Lava-API-1.0.0-1000</code></td>
+<td>Proxy server, first tagged release</td>
+</tr>
+<tr>
+<td><code>Lava-API-1.1.0-1001</code></td>
+<td>Proxy server, minor bump</td>
+</tr>
+<tr>
+<td><code>Lava-API-Go-2.0.0-2000</code></td>
+<td>Go API service, first tagged release</td>
+</tr>
+<tr>
+<td><code>Lava-API-Go-2.0.1-2001</code></td>
+<td>Go API service, the next patch</td>
+</tr>
+</tbody>
+</table>
+<p>Rules:</p>
+<ul>
+<li><code>&lt;App&gt;</code> is one of <code>Android</code>,
+<code>API</code>, <code>API-Go</code> (case sensitive). Add new ones via
+the registry — see <a href="#adding-a-new-appservice">Adding a new
+app/service</a>.</li>
+<li><code>&lt;versionName&gt;</code> is a strict three-component semver
+<code>MAJOR.MINOR.PATCH</code>. Pre-release suffixes (e.g.
+<code>-rc1</code>) are <strong>not</strong> supported by the bump logic;
+if you need one, run with <code>--no-bump</code>.</li>
+<li><code>&lt;versionCode&gt;</code> is a positive integer. The script
+always advances it by <code>+1</code> after a release.</li>
+</ul>
+<h2 id="what-the-script-does">What the script does</h2>
+<h3 id="per-app-in-registry-order">Per app (in registry order):</h3>
+<ol type="1">
+<li><strong>Read current versions</strong> from the build file (failing
+loudly if it can't parse them).</li>
+<li><strong>Compose the tag</strong>
+<code>Lava-&lt;App&gt;-&lt;vname&gt;-&lt;vcode&gt;</code>.</li>
+<li><strong>Create an annotated tag</strong> at <code>HEAD</code> with
+the message
+<code>Release &lt;App&gt; &lt;vname&gt; (versionCode &lt;vcode&gt;)</code>.
+<ul>
+<li>If the tag already exists locally, the step is
+<strong>skipped</strong> (warning printed) and the script
+continues.</li>
+</ul></li>
+<li><strong>Push the tag</strong> to each configured remote (one
+<code>git push &lt;remote&gt; refs/tags/&lt;tag&gt;</code> per
+remote).</li>
+<li><strong>Compute new versions</strong>
+(<code>--bump major|minor|patch</code> controls semver; versionCode is
+always <code>+1</code>).</li>
+<li><strong>Write the bump</strong> back into the build file and verify
+the change took effect (re-reads the value).</li>
+</ol>
+<h3 id="after-all-apps-have-been-processed">After all apps have been
+processed:</h3>
+<ol start="7" type="1">
+<li><strong>Stage and commit</strong> the bump with message
+<code>Bump versions after release: &lt;apps&gt; (--bump &lt;part&gt;)</code>.</li>
+<li><strong>Push the commit</strong> to each configured remote
+(<code>git push &lt;remote&gt; HEAD:&lt;current-branch&gt;</code>).</li>
+</ol>
+<h3 id="pre-flight-safety-checks">Pre-flight safety checks</h3>
+<p>Before any of the above runs:</p>
+<ul>
+<li>The working tree must be <strong>clean</strong>
+(<code>git status --porcelain</code> empty). Otherwise the script
+aborts.</li>
+<li>Every requested remote must exist (<code>git remote get-url</code>)
+— otherwise it aborts before any push.</li>
+<li><code>--bump</code> value must be <code>major</code>,
+<code>minor</code>, or <code>patch</code>.</li>
+<li><code>--app</code> value must be <code>android</code>,
+<code>api</code>, <code>api-go</code>, or <code>all</code>.</li>
+</ul>
+<h3 id="dry-run">Dry run</h3>
+<p><code>--dry-run</code> (or <code>-n</code>) prints every action the
+script <em>would</em> take, including the precise <code>git tag</code>,
+<code>git push</code>, and <code>sed</code> invocations, but performs no
+git mutations or file writes. Useful for rehearsals and code review.</p>
+<h2 id="source-of-truth-where-versions-live">Source of truth: where
+versions live</h2>
+<table>
+<thead>
+<tr>
+<th>App key</th>
+<th>File</th>
+<th>versionName line</th>
+<th>versionCode line</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>android</td>
+<td><code>app/build.gradle.kts</code></td>
+<td><code>versionName = "X.Y.Z"</code> (inside
+<code>defaultConfig</code>)</td>
+<td><code>versionCode = NNNN</code> (inside
+<code>defaultConfig</code>)</td>
+</tr>
+<tr>
+<td>api</td>
+<td><code>proxy/build.gradle.kts</code></td>
+<td><code>val apiVersionName = "X.Y.Z"</code> (top level)</td>
+<td><code>val apiVersionCode = NNNN</code> (top level)</td>
+</tr>
+<tr>
+<td>api-go</td>
+<td><code>lava-api-go/internal/version/version.go</code></td>
+<td><code>Name = "X.Y.Z"</code> (inside the <code>const (...)</code>
+block)</td>
+<td><code>Code = NNNN</code> (inside the <code>const (...)</code>
+block)</td>
+</tr>
+</tbody>
+</table>
+<p>Both sets of identifiers are owned by <code>tag.sh</code>. <strong>Do
+not edit them by hand for routine releases</strong> — let the script
+bump them. Manual edits are appropriate only for cherry-picking a
+release version (e.g. cutting <code>1.1.0</code> deliberately) before
+running the script with <code>--no-bump</code>.</p>
+<h2 id="quick-reference">Quick reference</h2>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Print the help text.</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="ex">scripts/tag.sh</span> <span class="at">--help</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Preview a full tag pass without touching anything.</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="ex">scripts/tag.sh</span> <span class="at">--dry-run</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Cut a release for both apps, push everywhere, bump patch.</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="ex">scripts/tag.sh</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Cut Android only, bump minor.</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="ex">scripts/tag.sh</span> <span class="at">--app</span> android <span class="at">--bump</span> minor</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Cut both apps locally, do not push.</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="ex">scripts/tag.sh</span> <span class="at">--no-push</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Cut both apps and push only to GitHub.</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="ex">scripts/tag.sh</span> <span class="at">--remote</span> github</span></code></pre></div>
+<h2 id="flag-by-flag-reference">Flag-by-flag reference</h2>
+<table>
+<thead>
+<tr>
+<th>Flag</th>
+<th>Argument</th>
+<th>Default</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>-h</code>, <code>--help</code></td>
+<td>—</td>
+<td>—</td>
+<td>Print help and exit.</td>
+</tr>
+<tr>
+<td><code>-n</code>, <code>--dry-run</code></td>
+<td>—</td>
+<td>off</td>
+<td>Show actions; do not change anything.</td>
+</tr>
+<tr>
+<td><code>-a</code>, <code>--app</code></td>
+<td><code>android</code> | <code>api</code> | <code>api-go</code> |
+<code>all</code></td>
+<td><code>all</code></td>
+<td>Restrict the run to a specific app.</td>
+</tr>
+<tr>
+<td><code>--bump</code></td>
+<td><code>major</code> | <code>minor</code> | <code>patch</code></td>
+<td><code>patch</code></td>
+<td>Which semver part to advance after tagging. versionCode is always
+<code>+1</code>.</td>
+</tr>
+<tr>
+<td><code>--no-bump</code></td>
+<td>—</td>
+<td>bump on</td>
+<td>Skip the post-tag bump and bump-commit entirely.</td>
+</tr>
+<tr>
+<td><code>--no-push</code></td>
+<td>—</td>
+<td>push on</td>
+<td>Tag/commit locally only; do not push.</td>
+</tr>
+<tr>
+<td><code>--remote</code></td>
+<td>remote name</td>
+<td>github + gitflic + gitlab + gitverse (those that exist)</td>
+<td>Push to a specific remote. Repeatable.</td>
+</tr>
+</tbody>
+</table>
+<p>Unknown options cause the script to exit <code>1</code> with a hint
+to run <code>--help</code>.</p>
+<h2 id="common-workflows">Common workflows</h2>
+<h3 id="1-routine-patch-release-of-both-apps">1. Routine patch release
+of both apps</h3>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> switch master</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> pull <span class="at">--ff-only</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="ex">scripts/tag.sh</span> <span class="at">--dry-run</span>     <span class="co"># rehearse</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="ex">scripts/tag.sh</span>               <span class="co"># commit</span></span></code></pre></div>
+<p>After completion the repo will have:</p>
+<ul>
+<li>Two new tags pushed everywhere (e.g.
+<code>Lava-Android-1.0.0-1008</code>,
+<code>Lava-API-1.0.0-1000</code>).</li>
+<li>One new commit on <code>master</code> bumping both apps to the next
+patch.</li>
+</ul>
+<h3 id="2-hot-fix-the-android-app-only">2. Hot-fix the Android app
+only</h3>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">scripts/tag.sh</span> <span class="at">--app</span> android <span class="at">--bump</span> patch</span></code></pre></div>
+<p>The <code>:proxy</code> versions are untouched.</p>
+<h3 id="3-cut-a-minor-release-for-the-api-only">3. Cut a minor release
+for the API only</h3>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">scripts/tag.sh</span> <span class="at">--app</span> api <span class="at">--bump</span> minor</span></code></pre></div>
+<p>Result: <code>Lava-API-1.0.0-1000</code> is created (current state),
+then <code>apiVersionName</code> becomes <code>1.1.0</code> and
+<code>apiVersionCode</code> becomes <code>1001</code>.</p>
+<h3
+id="4-re-tag-the-same-commit-after-you-noticed-a-bad-metadata-change">4.
+Re-tag the same commit after you noticed a bad metadata change</h3>
+<p>If the previous run already pushed the tag, just bump manually or use
+<code>--no-push --no-bump</code> to rebuild the local tag, delete the
+stale one, and re-push. (The script does <strong>not</strong> force-push
+or move existing tags — that has to be a deliberate operator
+action.)</p>
+<h3 id="5-tag-locally-push-later">5. Tag locally, push later</h3>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">scripts/tag.sh</span> <span class="at">--no-push</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="co"># inspect tags / commits, then:</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> push github <span class="at">--follow-tags</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> push gitflic <span class="at">--follow-tags</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> push gitlab <span class="at">--follow-tags</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> push gitverse <span class="at">--follow-tags</span></span></code></pre></div>
+<h3 id="6-promote-a-manually-edited-versionname">6. Promote a manually
+edited versionName</h3>
+<p>If you want this release to be <code>2.0.0</code> exactly, edit
+<code>versionName</code> (and/or <code>apiVersionName</code>) by hand,
+commit, then run:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">scripts/tag.sh</span> <span class="at">--no-bump</span></span></code></pre></div>
+<p>The script will create <code>Lava-Android-2.0.0-&lt;code&gt;</code>
+(and <code>Lava-API-2.0.0-&lt;code&gt;</code>) at HEAD without bumping
+back down or up.</p>
+<h2 id="adding-a-new-appservice">Adding a new app/service</h2>
+<p>When a new artifact joins the build, do all four steps:</p>
+<ol type="1">
+<li><strong>Add a source of truth</strong> — pick a stable place for
+<code>versionName</code> and <code>versionCode</code> (e.g.
+<code>tools/build.gradle.kts</code> containing
+<code>val toolsVersionName = "X.Y.Z"</code>).</li>
+<li><strong>Add reader/writer functions</strong> in
+<code>scripts/tag.sh</code> modeled after
+<code>read_api_version_name</code> /
+<code>write_api_versions</code>.</li>
+<li><strong>Add the app key</strong> to <code>SUPPORTED_APPS</code> and
+extend the <code>case "$app" in</code> block to wire the reader, writer,
+and tag prefix.</li>
+<li><strong>Update this guide</strong> — add a row to the <em>Source of
+truth</em> table and to the <em>Tag format</em> examples.</li>
+</ol>
+<p>Keep tag prefixes unique and human-readable (<code>Lava-Tools</code>,
+<code>Lava-Web</code>, <code>Lava-CLI</code>, …). Avoid prefixes that
+collide with existing semver-only tags.</p>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<h3 id="working-tree-is-dirty">"Working tree is dirty"</h3>
+<p>The script refuses to run with uncommitted changes — that would
+entangle the bump commit with unrelated work. Fix with:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> status</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> stash         <span class="co"># or git commit -m &quot;wip&quot;</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="ex">scripts/tag.sh</span></span></code></pre></div>
+<h3 id="failed-to-read--versionnameversioncode">"Failed to read …
+versionName/versionCode"</h3>
+<p>The regex couldn't find the expected line. Most common causes:</p>
+<ul>
+<li>Someone reformatted <code>app/build.gradle.kts</code> and the
+<code>versionName = "…"</code> line no longer matches
+<code>versionName *= *"…"</code>.</li>
+<li>The <code>apiVersionName</code>/<code>apiVersionCode</code>
+declarations were removed from <code>proxy/build.gradle.kts</code>.</li>
+</ul>
+<p>Fix the source file or update the corresponding <code>read_*</code>
+regex in <code>scripts/tag.sh</code>. Always pair a regex change with a
+verifying dry-run.</p>
+<h3 id="tag--already-exists-locally--skipping-creation">"Tag … already
+exists locally — skipping creation"</h3>
+<p>The script already created the tag in a previous run. If the previous
+run failed before the push completed, just re-run with the same
+arguments — the existing tag will be re-pushed.</p>
+<p>To <strong>delete</strong> a stale tag (e.g. one that points to the
+wrong commit):</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> tag <span class="at">-d</span> Lava-Android-1.0.0-1008</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> push github :refs/tags/Lava-Android-1.0.0-1008</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> push gitflic :refs/tags/Lava-Android-1.0.0-1008</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> push gitlab :refs/tags/Lava-Android-1.0.0-1008</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> push gitverse :refs/tags/Lava-Android-1.0.0-1008</span></code></pre></div>
+<p>Then re-run <code>tag.sh</code>.</p>
+<h3 id="configured-remote--does-not-exist">"Configured remote '…' does
+not exist"</h3>
+<p>You passed <code>--remote &lt;name&gt;</code> but no such git remote
+is set up. Check with <code>git remote -v</code> and either add the
+remote or pick a different name.</p>
+<h3 id="bump-commit-didnt-happen">Bump commit didn't happen</h3>
+<p>If <code>--no-bump</code> was passed, this is expected. Otherwise
+check that the writer functions actually changed the build files — the
+script verifies the write by re-reading the value, so a silent failure
+is unlikely; an outright <code>Failed to write …</code> error is the
+usual signal.</p>
+<h3 id="one-remote-rejected-the-push">One remote rejected the push</h3>
+<p>The script uses <code>set -e</code>, so it stops at the first failed
+push. The earlier remotes have already received the tag/commit; the
+failing one must be retried manually:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> push <span class="op">&lt;</span>bad-remote<span class="op">&gt;</span> --follow-tags</span></code></pre></div>
+<p>…or rerun with <code>--remote &lt;bad-remote&gt;</code> once the
+underlying issue (auth, network, branch protection) is fixed.</p>
+<h2 id="faq">FAQ</h2>
+<p><strong>Q: Why is the API versionCode separate from the Android
+versionCode?</strong> A: They are independent products with independent
+release cycles. Coupling them would force one to bump every time the
+other ships.</p>
+<p><strong>Q: Does the script ever force-push?</strong> A: No. It does
+<code>git push &lt;remote&gt; refs/tags/&lt;tag&gt;</code> and
+<code>git push &lt;remote&gt; HEAD:&lt;branch&gt;</code> — no
+<code>+</code> prefix, no <code>--force</code>. Tag movements and
+history rewrites are deliberately operator-only.</p>
+<p><strong>Q: Does the script touch other branches?</strong> A: No. It
+tags <code>HEAD</code> and pushes to the <strong>current
+branch's</strong> name on each remote. If you're not on
+<code>master</code>, you'll push to that branch on every remote, which
+is rarely what you want — usually you should release from
+<code>master</code>.</p>
+<p><strong>Q: Can I run it from CI?</strong> A: Yes;
+<code>--dry-run</code> makes for a safe preview job, and the real run
+can be gated behind a manual approval. Configure the CI runner with SSH
+keys for every upstream you want to push to.</p>
+<p><strong>Q: What about pre-release versions like
+<code>1.0.0-rc1</code>?</strong> A: Not supported by the bump logic —
+the semver regex requires three numeric parts. Set such versions by hand
+and run with <code>--no-bump</code>.</p>
+</body>
+</html>

@@ -1,0 +1,1338 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-05-05-anti-bluff-mandate-reinforcement-group-b-design</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1 id="anti-bluff-mandate-reinforcement--group-b-design">Anti-Bluff
+Mandate Reinforcement — Group B Design</h1>
+<blockquote>
+<p><strong>Status:</strong> Design approved (operator, 2026-05-05
+evening) after Group A-prime closure. Implementation pending —
+subagent-driven execution per Group A-prime pattern. Branch: Containers
+<code>lava-pin/2026-05-06-group-b</code>; Lava parent commits on
+<code>master</code> once the pin lands.</p>
+</blockquote>
+<blockquote>
+<p><strong>Forensic anchor.</strong> Group A-prime mechanically closed
+§6.N-debt (pre-push Check 4 + 5, <code>check-constitution.sh</code> §6.N
+awareness, <code>cmd/emulator-cleanup</code>, per-AVD gradle stdout
+persistence). What it left open is <em>the next class of bluffs the
+matrix gate cannot yet detect</em>: matrix-runner reliability gaps
+(zombie cleanup is best-effort but Teardown still relies on the upstream
+<code>adb emu kill</code> that has been observed to hang), evidence
+opacity (<code>real-device-verification.md</code> rows lack the
+<code>target/sdk/device</code> triple a reviewer needs to verify "the
+AVD that ran is the AVD the matrix claims it ran"), JUnit-XML evidence
+ambiguity (a failed test row only carries <code>passed: false</code> and
+a JUnit path — the reviewer must open the file to learn <em>which</em>
+test failed and <em>why</em>), and dev/CI conflation
+(<code>--concurrent N</code> does not exist; iteration runs and gating
+runs share the same evidence shape).</p>
+<p>Group B is the next reinforcement increment. Five tightenings, each
+independently shippable, all bound to the same anti-bluff mechanic the
+rest of §6.A-§6.N enforce: the gate must distinguish "feature works for
+a real user on the gating matrix" from any weaker signal, and the
+evidence row must carry enough detail that a future reviewer cannot
+rationalize past a divergence.</p>
+</blockquote>
+<h2 id="1-scope">1. Scope</h2>
+<h3 id="11-in-scope-5-components-locked">1.1 In scope (5 components,
+locked)</h3>
+<ol type="1">
+<li><p><strong>Per-row diagnostic data in attestation JSON.</strong>
+Every row in <code>real-device-verification.{json,md}</code> (clause 6.I
+clause 4) gains a <code>diag</code> object: <code>target</code> (full
+AVD <code>system-images</code> package id), <code>sdk</code> (the AVD's
+reported <code>ro.build.version.sdk</code>), <code>device</code> (the
+AVD's reported <code>ro.product.model</code> /
+<code>ro.product.device</code>), <code>adb_devices_state</code> (the
+line for this emulator from <code>adb devices -l</code> captured
+immediately before instrumentation invocation). This is the minimum
+forensic surface a reviewer needs to verify the AVD the matrix
+<em>claims</em> to have run is the AVD that <em>actually</em>
+ran.</p></li>
+<li><p><strong>Teardown force-kill fast-path.</strong>
+<code>pkg/emulator.AndroidRunner.Teardown</code> today calls
+<code>adb -s &lt;serial&gt; emu kill</code> then waits up to 30s for the
+emulator to exit (observed to hang on stuck QEMU instances; the stuck
+instance becomes a zombie that <code>cmd/emulator-cleanup</code> then
+has to deal with on the <em>next</em> matrix run). Group B adds a
+port-targeted fast-path: after the 30s grace expires,
+<code>Teardown</code> invokes <code>cleanup.KillByPort(port)</code>
+which walks <code>/proc</code>, finds the QEMU process whose cmdline
+contains <code>-port &lt;port&gt;</code> <em>as adjacent argv
+tokens</em> (strict — substring match is forbidden because port
+<code>5554</code> substring- matches <code>25554</code>), SIGTERMs it,
+waits 5s, SIGKILLs if still alive. <strong>Safety: if no
+<code>/proc</code> entry has <code>-port &lt;port&gt;</code> adjacent,
+the fast-path is a no-op and Teardown returns the original
+<code>adb emu kill</code> outcome.</strong> The kill is <em>only</em>
+applied to a process whose cmdline is provably this matrix's emulator;
+no PID file scraping, no name-prefix match alone, no broader pkill.
+Other concurrent emulators on other ports — whether started by another
+matrix run, by a developer's manual <code>emulator -avd</code>, or by a
+sibling vasic-digital project — are untouched. This is the "safest
+approach" the operator selected when offered three
+alternatives.</p></li>
+<li><p><strong>Pack-dir convention wiring.</strong>
+<code>scripts/run-emulator-tests.sh</code> today accepts
+<code>--evidence-dir &lt;path&gt;</code> with a default of
+<code>.lava-ci-evidence/&lt;UTC&gt;-matrix</code>. Group B adds a
+Lava-side wrapper convention: the script auto-detects
+<code>versionName</code> and <code>versionCode</code> from
+<code>app/build.gradle.kts</code> and constructs the evidence path as
+<code>.lava-ci-evidence/Lava-Android-&lt;versionName&gt;-&lt;versionCode&gt;/matrix/&lt;UTC&gt;/</code>.
+<code>--tag &lt;tag&gt;</code> overrides the
+<code>Lava-Android-&lt;v&gt;-&lt;vc&gt;</code> prefix verbatim (used by
+<code>scripts/tag.sh</code> to anchor evidence under the exact tag being
+cut). <code>--evidence-dir</code> (the existing flag) still wins if both
+are passed — the override layer is <code>--evidence-dir</code> &gt;
+<code>--tag</code> &gt; auto-detect. The Containers
+<code>cmd/emulator-matrix</code> binary is <em>not</em> changed; the
+convention is Lava-domain (which version string, which tag prefix) and
+stays in the Lava-side bash wrapper per Decoupled Reusable
+Architecture.</p></li>
+<li><p><strong>JUnit XML failure parsing →
+<code>failure_summaries[]</code> in attestation row.</strong>
+<code>pkg/emulator.AndroidRunner</code> already copies the JUnit XML
+report into
+<code>&lt;EvidenceDir&gt;/&lt;avd.Name&gt;/test-report/</code> (Group
+A-prime). Group B parses each XML file post-test, extracts every
+<code>&lt;failure&gt;</code> and <code>&lt;error&gt;</code> element's
+<code>message</code> attribute and full text content, and writes a
+<code>failure_summaries: [{class, name, type, message, body}]</code>
+array on the row. Empty array on success; missing
+<code>&lt;failure&gt;</code>+<code>&lt;error&gt;</code> is success;
+parse error is recorded as a synthetic
+<code>{class:"&lt;unparseable&gt;", message:"junit-xml parse failed: &lt;err&gt;"}</code>
+entry but does NOT fail the row (the JUnit XML is evidence, not the
+gating signal — Sixth Law clause 3 puts the gating signal on the
+user-visible test outcome, which is <code>passed: bool</code>).</p></li>
+<li><p><strong>Concurrent-mode opt-in with gating-flip.</strong>
+<code>cmd/emulator-matrix</code> gains two flags:</p>
+<ul>
+<li><code>--concurrent N</code> (default <code>1</code>): worker pool of
+N goroutines pulling from the AVD list. Each worker boots its own
+emulator on a unique console port (5554, 5556, 5558, …), runs the test,
+tears down. Default 1 preserves today's serial behavior.</li>
+<li><code>--dev</code>: developer-iteration mode. Implies
+<code>--no-cold-boot</code> is OK, implies snapshot reload is OK,
+implies the row may carry an unbooted emulator timeout without
+re-attempting. Convenience for fast iteration. Either flag
+(<code>--concurrent != 1</code> OR <code>--dev</code>) sets
+<code>gating: false</code> on the run-level attestation field.
+<code>gating: true</code> is the clause-6.I- clause-7-acceptable signal;
+<code>scripts/tag.sh</code> MUST refuse any commit whose
+<code>real-device-verification.json</code> carries
+<code>gating: false</code> or whose per-row <code>diag.sdk</code> does
+not equal the row's <code>api_level</code>. The flag defaults preserve
+today's gating behavior — a developer who runs the matrix the way Group
+A-prime ships gets <code>gating: true</code> for free.</li>
+</ul></li>
+</ol>
+<h3 id="12-out-of-scope-deferred-to-later-groups">1.2 Out of scope
+(deferred to later groups)</h3>
+<ul>
+<li>Network simulation / cellular profile per AVD (Group C
+territory).</li>
+<li>Hardware-screenshot capture per row (Group C — separate evidence
+pipeline, separate disk-pressure analysis).</li>
+<li>AVD download / image-cache management (Containers concern; out of
+Lava matrix-runner scope).</li>
+<li>Multi-host worker distribution (Containers
+<code>cmd/distributed-test</code> territory; the current matrix runner
+is single-host by design).</li>
+<li>iOS / non-Android emulator support (6.K-debt roadmap item).</li>
+</ul>
+<h3 id="13-non-goals">1.3 Non-goals</h3>
+<ul>
+<li><strong>Not</strong> a re-design of the matrix runner. Group B
+layers reliability
+<ul>
+<li>observability fixes onto the Group A-prime architecture; the per-AVD
+attestation row, the cold-boot mandate, the <code>gating: true</code>
+default, the 4-mirror push gate all stay.</li>
+</ul></li>
+<li><strong>Not</strong> a relaxation of any clause. Every Group B
+addition tightens the gate (Teardown is more reliable, evidence row
+carries more detail, developer-mode is opt-in and self-flags as
+non-gating). Nothing weakens the existing gating signal.</li>
+<li><strong>Not</strong> a Lava-only change. Components A, B, C, D, E
+live in the Containers submodule because they are matrix-runner
+reliability and evidence concerns that the next vasic-digital project to
+use the emulator package would want identically. Components F, G live in
+the Lava parent because the version-string auto-detect and the
+<code>tag.sh</code> gate are Lava-domain (per Decoupled Reusable
+Architecture).</li>
+</ul>
+<h2 id="2-architecture">2. Architecture</h2>
+<pre><code>┌─────────────────────────────────────────────────────────────────────┐
+│                   Containers submodule                              │
+│                   (branch lava-pin/2026-05-06-group-b)              │
+│                                                                     │
+│  pkg/emulator/                                                      │
+│  ├── cleanup.go       (+) KillByPort(port) (KillReport, error)     │
+│  │                          strict /proc walk, &quot;-port N&quot; adjacent  │
+│  │                          token match; SIGTERM 5s SIGKILL        │
+│  ├── android.go       (~) Teardown: after 30s adb-emu-kill grace,  │
+│  │                          invoke KillByPort(port); skip on       │
+│  │                          mismatch; log outcome to row           │
+│  ├── types.go         (+) DiagnosticInfo struct                    │
+│  │                    (+) KillReport struct                        │
+│  │                    (~) AVDRow.Diag, FailureSummaries, Concurrent│
+│  │                    (~) RunReport.Gating                         │
+│  ├── matrix.go        (~) Capture diag pre-test (target via avd    │
+│  │                          manager, sdk via getprop, device via   │
+│  │                          getprop, adb_devices_state via adb     │
+│  │                          devices -l). Parse JUnit XML post-test.│
+│  │                          Optional worker pool when concurrent&gt;1.│
+│  └── *_test.go        (+) Tests for KillByPort strict-match,       │
+│                              KillByPort no-match no-op,            │
+│                              Teardown fast-path success,           │
+│                              Teardown fast-path skip-on-mismatch,  │
+│                              JUnit XML parse happy + parse-error   │
+│                              fallback, concurrent worker pool basic│
+│                                                                     │
+│  cmd/emulator-matrix/                                               │
+│  └── main.go          (~) --concurrent N (default 1)               │
+│                       (~) --dev                                     │
+│                          either flag → run.Gating = false          │
+└─────────────────────────────────────────────────────────────────────┘
+                               │ pinned by submodule SHA
+                               ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                   Lava parent (master)                              │
+│                                                                     │
+│  scripts/                                                           │
+│  ├── run-emulator-tests.sh                                          │
+│  │     (~) auto-detect versionName + versionCode from              │
+│  │             app/build.gradle.kts (regex on `versionName &quot;X.Y.Z&quot;` │
+│  │             + `versionCode N`)                                  │
+│  │     (~) construct evidence dir as                               │
+│  │             .lava-ci-evidence/Lava-Android-&lt;v&gt;-&lt;vc&gt;/matrix/&lt;UTC&gt;/│
+│  │     (~) --tag &lt;tag&gt; overrides the prefix                        │
+│  │     (~) --evidence-dir &lt;path&gt; still wins if both given           │
+│  │     (~) forwards --concurrent + --dev to emulator-matrix         │
+│  └── tag.sh                                                         │
+│        (~) gate 1: reject if attestation has concurrent != 1       │
+│        (~) gate 2: reject if attestation has gating: false          │
+│        (~) gate 3: assert per-row diag.sdk == row.api_level         │
+│                       — divergence rejects the tag                  │
+│                                                                     │
+│  tests/                                                             │
+│  ├── tag-helper/                                                    │
+│  │     test_tag_rejects_concurrent_attestation.sh                   │
+│  │     test_tag_rejects_non_gating_attestation.sh                   │
+│  │     test_tag_rejects_diag_sdk_mismatch.sh                        │
+│  │     test_tag_accepts_gating_serial_attestation.sh                │
+│  └── pre-push/                                                      │
+│        (no new files; Group A-prime Check 4 already covers          │
+│         changes to scripts/run-emulator-tests.sh + scripts/tag.sh)  │
+│                                                                     │
+│  .lava-ci-evidence/                                                 │
+│  ├── bluff-hunt/2026-05-06-group-b-evening.json                    │
+│  └── Phase-Group-B-closure-2026-05-06-evening.json                  │
+│                                                                     │
+│  CLAUDE.md                                                          │
+│        (~) §6.I clause 4 — extend AVDRow row schema documentation   │
+│             with diag + failure_summaries + concurrent fields       │
+└─────────────────────────────────────────────────────────────────────┘</code></pre>
+<h2 id="3-components">3. Components</h2>
+<h3 id="a-killbyport-in-pkgemulatorcleanupgo-containers">A.
+<code>KillByPort</code> in <code>pkg/emulator/cleanup.go</code>
+(Containers)</h3>
+<p><strong>Signature:</strong></p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">// KillByPort attempts to terminate the QEMU process whose cmdline contains</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co">// &quot;-port &lt;port&gt;&quot; as adjacent argv tokens. It is strict by construction:</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co">//</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co">//   - substring match is forbidden — &quot;-port 5554&quot; must NOT match a process</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co">//     whose argv contains &quot;-port&quot; &quot;25554&quot; or &quot;55540&quot;</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co">//   - if no /proc entry has the adjacent token pair, KillByPort is a no-op</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co">//     and reports KillReport{Matched: 0}</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="co">//   - the matched process receives SIGTERM, then up to 5s grace, then</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="co">//     SIGKILL if still alive</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="co">//   - the procWalker + killer interface seams from Cleanup() are reused</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="co">//</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="co">// Concurrent emulators on other ports are NOT touched. Other vasic-digital</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="co">// projects or developer-spawned QEMU instances on other ports are NOT</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="co">// touched. The 1-process-1-port invariant is the safety property.</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> KillByPort<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> port <span class="dt">int</span><span class="op">)</span> <span class="op">(</span>KillReport<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="co">// killByPortWithDeps is the testable core; production KillByPort wires the</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="co">// real procWalker + killer.</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> killByPortWithDeps<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> port <span class="dt">int</span><span class="op">,</span> w procWalker<span class="op">,</span> k killer<span class="op">)</span> <span class="op">(</span>KillReport<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span></code></pre></div>
+<p><strong>Strict matching algorithm:</strong></p>
+<pre><code>for each /proc/&lt;pid&gt;:
+  read /proc/&lt;pid&gt;/cmdline (NUL-separated argv)
+  split into argv slice
+  for i := 0; i &lt; len(argv)-1; i++:
+    if argv[i] == &quot;-port&quot; &amp;&amp; argv[i+1] == strconv.Itoa(port):
+      MATCH — record pid
+      break inner loop
+  (no match — skip this pid)
+
+if matched.empty():
+  return KillReport{Matched: 0}, nil  # no-op safe
+
+for each matched pid:
+  send SIGTERM via killer
+poll up to 5s for /proc/&lt;pid&gt; disappearance
+for each still-alive pid:
+  send SIGKILL via killer
+return KillReport{Matched: len(matched), Sigtermed: ..., Sigkilled: ...}</code></pre>
+<p><strong>Why strict adjacency.</strong> A naive
+<code>strings.Contains(cmdline, "-port 5554")</code> matches
+<code>-port 25554</code> because the cmdline is NUL-separated and the
+substring search ignores word boundaries. A naive
+<code>regexp.MustCompile(\b-port 5554\b)</code> matches the same because
+<code>\b</code> does not honour QEMU's argv tokenization. The only
+correct implementation is to split on NUL and compare adjacent tokens —
+which is what the production code does. The accompanying
+<code>TestKillByPort_StrictMatch</code> test covers exactly this case
+(it injects a procWalker that returns a process whose cmdline contains
+<code>-port 25554</code> and asserts <code>Matched == 0</code>).</p>
+<h3 id="b-teardown-fast-path-in-pkgemulatorandroidgo-containers">B.
+<code>Teardown</code> fast-path in <code>pkg/emulator/android.go</code>
+(Containers)</h3>
+<p><strong>Today</strong> (Group A-prime end state):</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>r <span class="op">*</span>AndroidRunner<span class="op">)</span> Teardown<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> avd AVD<span class="op">)</span> <span class="dt">error</span> <span class="op">{</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="co">// best-effort: adb -s &lt;serial&gt; emu kill</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="co">// wait up to 30s for the emulator to exit</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="co">// return the wait outcome</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>Group B extension:</strong></p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>r <span class="op">*</span>AndroidRunner<span class="op">)</span> Teardown<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> avd AVD<span class="op">)</span> <span class="dt">error</span> <span class="op">{</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="co">// existing: adb -s &lt;serial&gt; emu kill, wait up to 30s</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> exited <span class="op">:=</span> waitForExit<span class="op">(</span>ctx<span class="op">,</span> avd<span class="op">,</span> <span class="dv">30</span><span class="op">*</span>time<span class="op">.</span>Second<span class="op">);</span> exited <span class="op">{</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="ot">nil</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>  <span class="co">// fast-path: KillByPort on the AVD&#39;s console port</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>  report<span class="op">,</span> err <span class="op">:=</span> KillByPort<span class="op">(</span>ctx<span class="op">,</span> avd<span class="op">.</span>ConsolePort<span class="op">)</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    <span class="co">// forensic-only: log, do not fail Teardown</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    r<span class="op">.</span>log<span class="op">.</span>Warnf<span class="op">(</span><span class="st">&quot;Teardown KillByPort failed for %s on port %d: %v&quot;</span><span class="op">,</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>                avd<span class="op">.</span>Name<span class="op">,</span> avd<span class="op">.</span>ConsolePort<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> report<span class="op">.</span>Matched <span class="op">==</span> <span class="dv">0</span> <span class="op">{</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    <span class="co">// safety: no process matched the strict criterion → fall back to</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>    <span class="co">// the adb-emu-kill outcome</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> errors<span class="op">.</span>New<span class="op">(</span><span class="st">&quot;teardown timeout, KillByPort matched 0 processes&quot;</span><span class="op">)</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>  <span class="co">// KillByPort handled it; re-poll briefly for /proc clearing</span></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> exited <span class="op">:=</span> waitForExit<span class="op">(</span>ctx<span class="op">,</span> avd<span class="op">,</span> <span class="dv">5</span><span class="op">*</span>time<span class="op">.</span>Second<span class="op">);</span> exited <span class="op">{</span></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="ot">nil</span></span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> errors<span class="op">.</span>New<span class="op">(</span><span class="st">&quot;teardown timeout, KillByPort ran but emulator still present&quot;</span><span class="op">)</span></span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>Safety invariants:</strong></p>
+<ol type="1">
+<li>KillByPort is the second resort, not the first. The upstream
+<code>adb emu kill</code> retains its 30-second window — a healthy
+emulator exits cleanly there.</li>
+<li>KillByPort is strict — no port-suffix collision risk.</li>
+<li>KillByPort skips on mismatch — concurrent emulators /
+sibling-project QEMUs are untouched.</li>
+<li>The Teardown error is preserved — a stuck emulator that the
+fast-path could not even <em>find</em> still surfaces as a Teardown
+failure (the matrix runner already records this as a row failure).</li>
+</ol>
+<h3
+id="c-diagnosticinfo--killreport-in-pkgemulatortypesgo-containers">C.
+<code>DiagnosticInfo</code> + <code>KillReport</code> in
+<code>pkg/emulator/types.go</code> (Containers)</h3>
+<div class="sourceCode" id="cb6"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co">// DiagnosticInfo is the per-AVD forensic snapshot captured immediately</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="co">// before instrumentation invocation. Reviewer-facing — answers &quot;is the AVD</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="co">// the matrix claims it ran the AVD that actually ran?&quot;.</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> DiagnosticInfo <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  Target          <span class="dt">string</span> <span class="st">`json:&quot;target&quot;`</span>             <span class="co">// system-images package id, e.g. &quot;system-images;android-34;google_apis;x86_64&quot;</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>  SDK             <span class="dt">int</span>    <span class="st">`json:&quot;sdk&quot;`</span>                <span class="co">// ro.build.version.sdk</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>  Device          <span class="dt">string</span> <span class="st">`json:&quot;device&quot;`</span>             <span class="co">// ro.product.model || ro.product.device</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>  ADBDevicesState <span class="dt">string</span> <span class="st">`json:&quot;adb_devices_state&quot;`</span>  <span class="co">// line from `adb devices -l` for this emulator</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="co">// FailureSummary is one parsed JUnit &lt;failure&gt; or &lt;error&gt; entry.</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> FailureSummary <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>  Class   <span class="dt">string</span> <span class="st">`json:&quot;class&quot;`</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>  Name    <span class="dt">string</span> <span class="st">`json:&quot;name&quot;`</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>  Type    <span class="dt">string</span> <span class="st">`json:&quot;type&quot;`</span>              <span class="co">// &quot;failure&quot; | &quot;error&quot; | &quot;&lt;unparseable&gt;&quot;</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>  Message <span class="dt">string</span> <span class="st">`json:&quot;message&quot;`</span>           <span class="co">// &lt;failure message=&quot;...&quot;&gt; attribute</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>  Body    <span class="dt">string</span> <span class="st">`json:&quot;body,omitempty&quot;`</span>    <span class="co">// text content of the &lt;failure&gt; element</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a><span class="co">// KillReport is what cleanup.KillByPort returns to its caller.</span></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> KillReport <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>  Matched   <span class="dt">int</span>   <span class="st">`json:&quot;matched&quot;`</span>           <span class="co">// # of /proc entries matched</span></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>  Sigtermed <span class="op">[]</span><span class="dt">int</span> <span class="st">`json:&quot;sigtermed,omitempty&quot;`</span></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>  Sigkilled <span class="op">[]</span><span class="dt">int</span> <span class="st">`json:&quot;sigkilled,omitempty&quot;`</span> <span class="co">// ones that needed SIGKILL after the 5s grace</span></span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a><span class="co">// AVDRow extension (Group B fields appended; existing fields unchanged):</span></span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> AVDRow <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>  <span class="co">// ... existing fields (Name, APILevel, FormFactor, Passed, GradleLogPath,</span></span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>  <span class="co">//     TestReportDir, BootDuration, TestDuration, Timestamp) ...</span></span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a>  Diag             DiagnosticInfo   <span class="st">`json:&quot;diag&quot;`</span></span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a>  FailureSummaries <span class="op">[]</span>FailureSummary <span class="st">`json:&quot;failure_summaries&quot;`</span> <span class="co">// [] on pass</span></span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a>  Concurrent       <span class="dt">int</span>              <span class="st">`json:&quot;concurrent&quot;`</span>        <span class="co">// 1 in serial mode</span></span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a><span class="co">// RunReport extension (run-level field):</span></span>
+<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> RunReport <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb6-38"><a href="#cb6-38" aria-hidden="true" tabindex="-1"></a>  <span class="co">// ... existing fields ...</span></span>
+<span id="cb6-39"><a href="#cb6-39" aria-hidden="true" tabindex="-1"></a>  Gating <span class="dt">bool</span> <span class="st">`json:&quot;gating&quot;`</span> <span class="co">// false if --concurrent != 1 OR --dev</span></span>
+<span id="cb6-40"><a href="#cb6-40" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3
+id="d-diagnostic-capture--junit-xml-parse--worker-pool-in-pkgemulatormatrixgo-containers">D.
+Diagnostic capture + JUnit XML parse + worker pool in
+<code>pkg/emulator/matrix.go</code> (Containers)</h3>
+<p><strong>Diagnostic capture (per AVD, pre-test):</strong></p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>r <span class="op">*</span>AndroidMatrixRunner<span class="op">)</span> captureDiagnostic<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> avd AVD<span class="op">)</span> DiagnosticInfo <span class="op">{</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  d <span class="op">:=</span> DiagnosticInfo<span class="op">{}</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="co">// adb -s &lt;serial&gt; shell getprop ro.build.version.sdk</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> sdk<span class="op">,</span> err <span class="op">:=</span> r<span class="op">.</span>adb<span class="op">.</span>Getprop<span class="op">(</span>ctx<span class="op">,</span> avd<span class="op">.</span>Serial<span class="op">,</span> <span class="st">&quot;ro.build.version.sdk&quot;</span><span class="op">);</span> err <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    d<span class="op">.</span>SDK<span class="op">,</span> _ <span class="op">=</span> strconv<span class="op">.</span>Atoi<span class="op">(</span>strings<span class="op">.</span>TrimSpace<span class="op">(</span>sdk<span class="op">))</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>  <span class="co">// adb -s &lt;serial&gt; shell getprop ro.product.model (fallback ro.product.device)</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> model<span class="op">,</span> err <span class="op">:=</span> r<span class="op">.</span>adb<span class="op">.</span>Getprop<span class="op">(</span>ctx<span class="op">,</span> avd<span class="op">.</span>Serial<span class="op">,</span> <span class="st">&quot;ro.product.model&quot;</span><span class="op">);</span> err <span class="op">==</span> <span class="ot">nil</span> <span class="op">&amp;&amp;</span> strings<span class="op">.</span>TrimSpace<span class="op">(</span>model<span class="op">)</span> <span class="op">!=</span> <span class="st">&quot;&quot;</span> <span class="op">{</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    d<span class="op">.</span>Device <span class="op">=</span> strings<span class="op">.</span>TrimSpace<span class="op">(</span>model<span class="op">)</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span> <span class="cf">else</span> <span class="cf">if</span> dev<span class="op">,</span> err <span class="op">:=</span> r<span class="op">.</span>adb<span class="op">.</span>Getprop<span class="op">(</span>ctx<span class="op">,</span> avd<span class="op">.</span>Serial<span class="op">,</span> <span class="st">&quot;ro.product.device&quot;</span><span class="op">);</span> err <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    d<span class="op">.</span>Device <span class="op">=</span> strings<span class="op">.</span>TrimSpace<span class="op">(</span>dev<span class="op">)</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>  <span class="co">// avdmanager list avd → find the entry whose Name == avd.Name → Target field</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> target<span class="op">,</span> err <span class="op">:=</span> r<span class="op">.</span>avdmanager<span class="op">.</span>GetTarget<span class="op">(</span>ctx<span class="op">,</span> avd<span class="op">.</span>Name<span class="op">);</span> err <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>    d<span class="op">.</span>Target <span class="op">=</span> target</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>  <span class="co">// adb devices -l → grep for avd.Serial → record full line</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> line<span class="op">,</span> err <span class="op">:=</span> r<span class="op">.</span>adb<span class="op">.</span>DevicesLine<span class="op">(</span>ctx<span class="op">,</span> avd<span class="op">.</span>Serial<span class="op">);</span> err <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>    d<span class="op">.</span>ADBDevicesState <span class="op">=</span> line</span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> d</span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>JUnit XML parse (post-test, every run):</strong></p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> parseJUnitFailures<span class="op">(</span>xmlPath <span class="dt">string</span><span class="op">)</span> <span class="op">[]</span>FailureSummary <span class="op">{</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  data<span class="op">,</span> err <span class="op">:=</span> os<span class="op">.</span>ReadFile<span class="op">(</span>xmlPath<span class="op">)</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="op">[]</span>FailureSummary<span class="op">{{</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>      Class<span class="op">:</span> <span class="st">&quot;&lt;unparseable&gt;&quot;</span><span class="op">,</span> Type<span class="op">:</span> <span class="st">&quot;&lt;unparseable&gt;&quot;</span><span class="op">,</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>      Message<span class="op">:</span> <span class="st">&quot;junit-xml read failed: &quot;</span> <span class="op">+</span> err<span class="op">.</span>Error<span class="op">(),</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">}}</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>  <span class="co">// walk every &lt;testsuite&gt;/&lt;testcase&gt;; for each &lt;testcase&gt; with a</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>  <span class="co">// &lt;failure&gt; or &lt;error&gt; child, append a FailureSummary</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>  <span class="co">// ... (encoding/xml decoder) ...</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> summaries  <span class="co">// empty slice on all-pass</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The parser MUST be tolerant of:</p>
+<ul>
+<li>Multiple <code>&lt;testsuite&gt;</code> siblings (Gradle's per-class
+XML output).</li>
+<li><code>&lt;testcase&gt;</code> with both <code>&lt;failure&gt;</code>
+and <code>&lt;error&gt;</code> (record both).</li>
+<li><code>&lt;failure&gt;</code> with no <code>message</code> attribute
+(use empty string).</li>
+<li><code>&lt;failure&gt;</code> with no text content (empty
+<code>Body</code>).</li>
+<li>Malformed XML (return the synthetic <code>&lt;unparseable&gt;</code>
+entry — does NOT fail the row).</li>
+</ul>
+<p><strong>Worker pool (concurrent mode, opt-in):</strong></p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>r <span class="op">*</span>AndroidMatrixRunner<span class="op">)</span> Run<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="op">(</span>RunReport<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  rows <span class="op">:=</span> <span class="bu">make</span><span class="op">([]</span>AVDRow<span class="op">,</span> <span class="dv">0</span><span class="op">,</span> <span class="bu">len</span><span class="op">(</span>r<span class="op">.</span>AVDs<span class="op">))</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> r<span class="op">.</span>Concurrent <span class="op">&lt;=</span> <span class="dv">1</span> <span class="op">{</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    <span class="co">// existing serial path, unchanged</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> avd <span class="op">:=</span> <span class="kw">range</span> r<span class="op">.</span>AVDs <span class="op">{</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>      rows <span class="op">=</span> <span class="bu">append</span><span class="op">(</span>rows<span class="op">,</span> r<span class="op">.</span>runOne<span class="op">(</span>ctx<span class="op">,</span> avd<span class="op">))</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span> <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    <span class="co">// concurrent: bounded worker pool</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    queue <span class="op">:=</span> <span class="bu">make</span><span class="op">(</span><span class="kw">chan</span> AVD<span class="op">)</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>    results <span class="op">:=</span> <span class="bu">make</span><span class="op">(</span><span class="kw">chan</span> AVDRow<span class="op">,</span> <span class="bu">len</span><span class="op">(</span>r<span class="op">.</span>AVDs<span class="op">))</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> wg sync<span class="op">.</span>WaitGroup</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="op">:=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> r<span class="op">.</span>Concurrent<span class="op">;</span> i<span class="op">++</span> <span class="op">{</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>      wg<span class="op">.</span>Add<span class="op">(</span><span class="dv">1</span><span class="op">)</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>      <span class="cf">go</span> <span class="kw">func</span><span class="op">(</span>workerIdx <span class="dt">int</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>        <span class="cf">defer</span> wg<span class="op">.</span>Done<span class="op">()</span></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> avd <span class="op">:=</span> <span class="kw">range</span> queue <span class="op">{</span></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>          <span class="co">// assign a unique console port per worker:</span></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>          <span class="co">//   port = 5554 + 2*workerIdx</span></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>          avd<span class="op">.</span>ConsolePort <span class="op">=</span> <span class="dv">5554</span> <span class="op">+</span> <span class="dv">2</span><span class="op">*</span>workerIdx</span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>          results <span class="op">&lt;-</span> r<span class="op">.</span>runOne<span class="op">(</span>ctx<span class="op">,</span> avd<span class="op">)</span></span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>      <span class="op">}(</span>i<span class="op">)</span></span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> avd <span class="op">:=</span> <span class="kw">range</span> r<span class="op">.</span>AVDs <span class="op">{</span> queue <span class="op">&lt;-</span> avd <span class="op">}</span></span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>    <span class="bu">close</span><span class="op">(</span>queue<span class="op">)</span></span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a>    wg<span class="op">.</span>Wait<span class="op">()</span></span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a>    <span class="bu">close</span><span class="op">(</span>results<span class="op">)</span></span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> row <span class="op">:=</span> <span class="kw">range</span> results <span class="op">{</span> rows <span class="op">=</span> <span class="bu">append</span><span class="op">(</span>rows<span class="op">,</span> row<span class="op">)</span> <span class="op">}</span></span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> RunReport<span class="op">{</span></span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a>    Rows<span class="op">:</span>   rows<span class="op">,</span></span>
+<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a>    Gating<span class="op">:</span> r<span class="op">.</span>Concurrent <span class="op">==</span> <span class="dv">1</span> <span class="op">&amp;&amp;</span> <span class="op">!</span>r<span class="op">.</span>Dev<span class="op">,</span></span>
+<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a>  <span class="op">},</span> <span class="ot">nil</span></span>
+<span id="cb9-35"><a href="#cb9-35" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The 1-process-1-port invariant guarantees
+<code>KillByPort(workerPort)</code> in Teardown only matches the
+worker's own emulator.</p>
+<h3
+id="e---concurrent----dev-flags-in-cmdemulator-matrixmaingo-containers">E.
+<code>--concurrent</code> + <code>--dev</code> flags in
+<code>cmd/emulator-matrix/main.go</code> (Containers)</h3>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">var</span> <span class="op">(</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="co">// ... existing flags ...</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  concurrent <span class="op">=</span> flag<span class="op">.</span>Int<span class="op">(</span><span class="st">&quot;concurrent&quot;</span><span class="op">,</span> <span class="dv">1</span><span class="op">,</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;max concurrent emulators (default 1; &gt;1 sets gating=false)&quot;</span><span class="op">)</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>  dev <span class="op">=</span> flag<span class="op">.</span>Bool<span class="op">(</span><span class="st">&quot;dev&quot;</span><span class="op">,</span> <span class="ot">false</span><span class="op">,</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;developer iteration mode; permits snapshot reload, sets gating=false&quot;</span><span class="op">)</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="co">// ...</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>runner <span class="op">:=</span> <span class="op">&amp;</span>emulator<span class="op">.</span>AndroidMatrixRunner<span class="op">{</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>  <span class="co">// ... existing fields ...</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>  Concurrent<span class="op">:</span> <span class="op">*</span>concurrent<span class="op">,</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>  Dev<span class="op">:</span>        <span class="op">*</span>dev<span class="op">,</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The flags propagate to <code>RunReport.Gating</code> via the runner's
+<code>Gating: r.Concurrent == 1 &amp;&amp; !r.Dev</code> calculation.
+The CLI does NOT need to print the gating flag at the top — the JSON
+evidence file is the source of truth, and <code>tag.sh</code> reads it
+from there.</p>
+<h3
+id="f-evidence-path-auto-detection-in-scriptsrun-emulator-testssh-lava">F.
+Evidence-path auto-detection in
+<code>scripts/run-emulator-tests.sh</code> (Lava)</h3>
+<p><strong>Auto-detect <code>versionName</code> +
+<code>versionCode</code> from
+<code>app/build.gradle.kts</code>:</strong></p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">detect_version()</span> <span class="kw">{</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="bu">local</span> <span class="va">f</span><span class="op">=</span><span class="st">&quot;</span><span class="va">$PROJECT_DIR</span><span class="st">/app/build.gradle.kts&quot;</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">[[</span> <span class="ot">-f</span> <span class="st">&quot;</span><span class="va">$f</span><span class="st">&quot;</span> <span class="kw">]]</span> <span class="kw">||</span> <span class="cf">return</span> <span class="dv">1</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  <span class="co"># versionName &quot;X.Y.Z&quot; — handle single + double quotes, leading whitespace</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>  <span class="bu">local</span> <span class="va">v</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>  <span class="va">v</span><span class="op">=</span><span class="va">$(</span><span class="fu">grep</span> <span class="at">-oE</span> <span class="st">&#39;versionName[[:space:]]+&quot;[^&quot;]+&quot;&#39;</span> <span class="st">&quot;</span><span class="va">$f</span><span class="st">&quot;</span> <span class="kw">|</span> <span class="fu">head</span> <span class="at">-n1</span> <span class="kw">|</span> <span class="fu">sed</span> <span class="st">&#39;s/.*&quot;\([^&quot;]*\)&quot;/\1/&#39;</span><span class="va">)</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>  <span class="kw">[[</span> <span class="ot">-n</span> <span class="st">&quot;</span><span class="va">$v</span><span class="st">&quot;</span> <span class="kw">]]</span> <span class="kw">||</span> <span class="cf">return</span> <span class="dv">1</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>  <span class="bu">local</span> <span class="va">vc</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>  <span class="va">vc</span><span class="op">=</span><span class="va">$(</span><span class="fu">grep</span> <span class="at">-oE</span> <span class="st">&#39;versionCode[[:space:]]+[0-9]+&#39;</span> <span class="st">&quot;</span><span class="va">$f</span><span class="st">&quot;</span> <span class="kw">|</span> <span class="fu">head</span> <span class="at">-n1</span> <span class="kw">|</span> <span class="fu">awk</span> <span class="st">&#39;{print $NF}&#39;</span><span class="va">)</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>  <span class="kw">[[</span> <span class="ot">-n</span> <span class="st">&quot;</span><span class="va">$vc</span><span class="st">&quot;</span> <span class="kw">]]</span> <span class="kw">||</span> <span class="cf">return</span> <span class="dv">1</span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>  <span class="bu">echo</span> <span class="st">&quot;Lava-Android-</span><span class="va">${v}</span><span class="st">-</span><span class="va">${vc}</span><span class="st">&quot;</span></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a><span class="kw">}</span></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a><span class="co"># evidence-path resolution priority:</span></span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a><span class="co">#   1. --evidence-dir &lt;path&gt;   (existing flag, wins)</span></span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a><span class="co">#   2. --tag &lt;tag&gt;             (new; &lt;tag&gt;/matrix/&lt;UTC&gt;/)</span></span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a><span class="co">#   3. auto-detect             (Lava-Android-&lt;v&gt;-&lt;vc&gt;/matrix/&lt;UTC&gt;/)</span></span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="kw">[[</span> <span class="ot">-n</span> <span class="st">&quot;</span><span class="va">${EVIDENCE_DIR_OVERRIDE</span><span class="op">:-</span><span class="va">}</span><span class="st">&quot;</span> <span class="kw">]];</span> <span class="cf">then</span></span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>  <span class="va">EVIDENCE_DIR</span><span class="op">=</span><span class="st">&quot;</span><span class="va">$EVIDENCE_DIR_OVERRIDE</span><span class="st">&quot;</span></span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a><span class="cf">elif</span> <span class="kw">[[</span> <span class="ot">-n</span> <span class="st">&quot;</span><span class="va">${TAG_OVERRIDE</span><span class="op">:-</span><span class="va">}</span><span class="st">&quot;</span> <span class="kw">]];</span> <span class="cf">then</span></span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>  <span class="va">EVIDENCE_DIR</span><span class="op">=</span><span class="st">&quot;.lava-ci-evidence/</span><span class="va">${TAG_OVERRIDE}</span><span class="st">/matrix/</span><span class="va">$(</span><span class="fu">date</span> <span class="at">-u</span> +%Y-%m-%dT%H-%M-%SZ<span class="va">)</span><span class="st">&quot;</span></span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span></span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a>  <span class="va">prefix</span><span class="op">=</span><span class="va">$(</span><span class="ex">detect_version</span><span class="va">)</span> <span class="kw">||</span> <span class="va">prefix</span><span class="op">=</span><span class="st">&quot;Lava-Android-unknown&quot;</span></span>
+<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a>  <span class="va">EVIDENCE_DIR</span><span class="op">=</span><span class="st">&quot;.lava-ci-evidence/</span><span class="va">${prefix}</span><span class="st">/matrix/</span><span class="va">$(</span><span class="fu">date</span> <span class="at">-u</span> +%Y-%m-%dT%H-%M-%SZ<span class="va">)</span><span class="st">&quot;</span></span>
+<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a><span class="cf">fi</span></span></code></pre></div>
+<p><strong>New flags forwarded to
+<code>cmd/emulator-matrix</code>:</strong></p>
+<ul>
+<li><code>--concurrent N</code> → forwards to
+<code>--concurrent N</code></li>
+<li><code>--dev</code> → forwards to <code>--dev</code></li>
+<li><code>--tag &lt;tag&gt;</code> → consumed by the wrapper; does NOT
+forward (Containers binary has no concept of "tag")</li>
+</ul>
+<h3 id="g-scriptstagsh-extension-lava">G. <code>scripts/tag.sh</code>
+extension (Lava)</h3>
+<p>The Group A-prime <code>tag.sh</code> already requires
+<code>.lava-ci-evidence/&lt;tag&gt;/real-device-verification.{json,md}</code>
+to exist. Group B adds three gates that read the JSON:</p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="va">attest_json</span><span class="op">=</span><span class="st">&quot;.lava-ci-evidence/</span><span class="va">${TAG}</span><span class="st">/real-device-verification.json&quot;</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="kw">[[</span> <span class="ot">-f</span> <span class="st">&quot;</span><span class="va">$attest_json</span><span class="st">&quot;</span> <span class="kw">]]</span> <span class="kw">||</span> <span class="ex">die</span> <span class="st">&quot;missing </span><span class="va">$attest_json</span><span class="st">&quot;</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Gate 1: reject if any row carries concurrent != 1</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="ex">jq</span> <span class="at">-e</span> <span class="st">&#39;.rows[] | select(.concurrent != 1)&#39;</span> <span class="st">&quot;</span><span class="va">$attest_json</span><span class="st">&quot;</span> <span class="op">&gt;</span>/dev/null<span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  <span class="ex">die</span> <span class="st">&quot;tag refused: attestation contains concurrent != 1 rows (developer-iteration evidence cannot gate a tag)&quot;</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="cf">fi</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Gate 2: reject if run-level gating is false</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="kw">[[</span> <span class="st">&quot;</span><span class="va">$(</span><span class="ex">jq</span> <span class="at">-r</span> <span class="st">&#39;.gating&#39;</span> <span class="st">&quot;</span><span class="va">$attest_json</span><span class="st">&quot;</span><span class="va">)</span><span class="st">&quot;</span> <span class="ot">!=</span> <span class="st">&quot;true&quot;</span> <span class="kw">]];</span> <span class="cf">then</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>  <span class="ex">die</span> <span class="st">&quot;tag refused: attestation has gating: false (run was --concurrent or --dev)&quot;</span></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a><span class="cf">fi</span></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Gate 3: assert per-row diag.sdk == row.api_level</span></span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="ex">jq</span> <span class="at">-e</span> <span class="st">&#39;.rows[] | select(.diag.sdk != .api_level)&#39;</span> <span class="st">&quot;</span><span class="va">$attest_json</span><span class="st">&quot;</span> <span class="op">&gt;</span>/dev/null<span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>  <span class="va">bad</span><span class="op">=</span><span class="va">$(</span><span class="ex">jq</span> <span class="at">-r</span> <span class="st">&#39;.rows[] | select(.diag.sdk != .api_level) | &quot;\(.name): claimed api=\(.api_level) but diag.sdk=\(.diag.sdk)&quot;&#39;</span> <span class="st">&quot;</span><span class="va">$attest_json</span><span class="st">&quot;</span><span class="va">)</span></span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>  <span class="ex">die</span> <span class="st">&quot;tag refused: per-row diag.sdk mismatches api_level:</span></span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a><span class="va">$bad</span><span class="st">&quot;</span></span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a><span class="cf">fi</span></span></code></pre></div>
+<p>The three gates are the mechanical anti-bluff teeth of Group B:</p>
+<ul>
+<li><strong>Gate 1</strong> prevents a developer's iteration matrix from
+accidentally gating a release tag.</li>
+<li><strong>Gate 2</strong> is the run-level safety net — even if Gate
+1's per-row check somehow misses a case (e.g. the runner mis-records the
+row), the run-level <code>gating: false</code> flag rejects.</li>
+<li><strong>Gate 3</strong> is the <em>forensic</em> gate — a row that
+claims it ran on API 34 but whose AVD reported
+<code>ro.build.version.sdk=33</code> is the canonical "AVD shadow"
+bluff. This gate makes that bluff unshippable.</li>
+</ul>
+<h3 id="h-tests--bluff-hunt--closure-attestation">H. Tests + bluff-hunt
++ closure attestation</h3>
+<p><strong>Containers tests (added in
+<code>pkg/emulator/</code>):</strong></p>
+<table>
+<thead>
+<tr>
+<th>Test</th>
+<th>What it verifies</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>TestKillByPort_NoMatch_NoOp</code></td>
+<td>KillByPort with no matching process returns Matched=0, no kill calls
+issued</td>
+</tr>
+<tr>
+<td><code>TestKillByPort_StrictAdjacentMatch</code></td>
+<td>A process whose cmdline has <code>-port</code> <code>5554</code>
+adjacent → matched; <code>-port</code> <code>25554</code> adjacent → NOT
+matched</td>
+</tr>
+<tr>
+<td><code>TestKillByPort_SubstringSafety</code></td>
+<td>A process whose argv contains <code>25554</code> (no adjacent
+<code>-port</code>) does NOT match for port 5554</td>
+</tr>
+<tr>
+<td><code>TestKillByPort_RequiresSIGKILL_AfterGrace</code></td>
+<td>A process that survives SIGTERM gets SIGKILL after 5s;
+KillReport.Sigkilled contains the pid</td>
+</tr>
+<tr>
+<td><code>TestTeardown_FastPath_Succeeds</code></td>
+<td>After 30s adb-emu-kill grace expires, KillByPort matches and clears
+the emulator</td>
+</tr>
+<tr>
+<td><code>TestTeardown_FastPath_SkipOnMismatch</code></td>
+<td>KillByPort.Matched == 0 → Teardown returns the original timeout
+error (no other processes touched)</td>
+</tr>
+<tr>
+<td><code>TestParseJUnitFailures_AllPass_EmptySlice</code></td>
+<td>Well-formed JUnit XML with no failures → empty slice</td>
+</tr>
+<tr>
+<td><code>TestParseJUnitFailures_OneFailure_OneError_BothCaptured</code></td>
+<td>JUnit XML with 1 <code>&lt;failure&gt;</code> + 1
+<code>&lt;error&gt;</code> → 2 entries with correct Type/Message</td>
+</tr>
+<tr>
+<td><code>TestParseJUnitFailures_MalformedXML_SyntheticEntry</code></td>
+<td>Truncated XML → 1 synthetic <code>&lt;unparseable&gt;</code> entry;
+row not failed</td>
+</tr>
+<tr>
+<td><code>TestParseJUnitFailures_MultiTestsuite</code></td>
+<td>2 sibling <code>&lt;testsuite&gt;</code> elements both contributing
+failures → all captured</td>
+</tr>
+<tr>
+<td><code>TestRun_Concurrent_AssignsUniquePorts</code></td>
+<td>--concurrent 3 → workers get ports 5554/5556/5558; each row records
+its assigned port</td>
+</tr>
+<tr>
+<td><code>TestRun_Gating_TrueOnDefaults</code></td>
+<td>--concurrent 1, --dev=false → RunReport.Gating == true</td>
+</tr>
+<tr>
+<td><code>TestRun_Gating_FalseOnConcurrent</code></td>
+<td>--concurrent 2 → RunReport.Gating == false</td>
+</tr>
+<tr>
+<td><code>TestRun_Gating_FalseOnDev</code></td>
+<td>--dev=true → RunReport.Gating == false</td>
+</tr>
+</tbody>
+</table>
+<p>Every test MUST be falsifiable per Sixth Law clause 2 — the
+implementer's commit body records 5 mutation rehearsals (KillByPort
+strict-match dropped → TestKillByPort_StrictAdjacentMatch fails; SIGKILL
+grace skipped → TestKillByPort_RequiresSIGKILL fails; Teardown
+skip-on-mismatch dropped → TestTeardown_FastPath_SkipOnMismatch fails;
+JUnit <code>&lt;error&gt;</code> elements ignored →
+TestParseJUnitFailures_OneFailure_OneError fails; Gating defaulted to
+false → TestRun_Gating_TrueOnDefaults fails).</p>
+<p><strong>Lava parent tests (added under
+<code>tests/tag-helper/</code>):</strong></p>
+<table>
+<thead>
+<tr>
+<th>Test</th>
+<th>What it verifies</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>test_tag_rejects_concurrent_attestation.sh</code></td>
+<td>tag.sh refuses an attestation whose any row has concurrent != 1</td>
+</tr>
+<tr>
+<td><code>test_tag_rejects_non_gating_attestation.sh</code></td>
+<td>tag.sh refuses an attestation with run-level gating: false</td>
+</tr>
+<tr>
+<td><code>test_tag_rejects_diag_sdk_mismatch.sh</code></td>
+<td>tag.sh refuses an attestation with diag.sdk != api_level on any
+row</td>
+</tr>
+<tr>
+<td><code>test_tag_accepts_gating_serial_attestation.sh</code></td>
+<td>tag.sh accepts a clean serial attestation with all 3 gates
+green</td>
+</tr>
+</tbody>
+</table>
+<p>The tests construct fixture JSON attestations + minimal git history
+and exercise tag.sh end-to-end (similar to the Group A-prime
+<code>tests/pre-push/check{4,5}_test.sh</code> harnesses).</p>
+<p><strong>Bluff-hunt evidence
+(<code>.lava-ci-evidence/bluff-hunt/2026-05-06-group-b-evening.json</code>):</strong></p>
+<p>Per §6.N.1.1 subsequent-same-day rule, a 1-2-file lighter incident-
+response hunt. Targets: 2 production files from the gate-shaping surface
+this group touched (cleanup.go::KillByPort +
+matrix.go::parseJUnitFailures). For each target: deliberate mutation,
+observed test failure, revert confirmation.</p>
+<p><strong>Closure attestation
+(<code>.lava-ci-evidence/Phase-Group-B-closure-2026-05-06-evening.json</code>):</strong></p>
+<p>The closure attestation records:</p>
+<ul>
+<li>The Containers branch HEAD SHA + 4-mirror SHAs</li>
+<li>The Lava parent commit SHA + 4-mirror SHAs</li>
+<li>Per-component check: each of A-H's commit SHA + tests count +
+bluff-hunt reference</li>
+<li>The 5 mutation rehearsals with observed failures + revert
+confirmations</li>
+<li>A pointer to the bluff-hunt JSON</li>
+<li>A "next group preview" line naming what Group C is candidate-scoped
+to cover (network simulation, hardware-screenshot capture, AVD
+image-cache management) — this is forward-looking only; no
+commitment.</li>
+</ul>
+<h2 id="4-data-flow">4. Data Flow</h2>
+<h3 id="41-successful-gating-run-the-canonical-path">4.1 Successful
+gating run (the canonical path)</h3>
+<pre><code>operator: ./scripts/run-emulator-tests.sh
+  └── auto-detect Lava-Android-X.Y.Z-NN
+  └── EVIDENCE_DIR = .lava-ci-evidence/Lava-Android-X.Y.Z-NN/matrix/&lt;UTC&gt;/
+  └── invoke cmd/emulator-matrix --concurrent 1 (default)
+
+cmd/emulator-matrix
+  └── for each AVD (serial, 1 emulator at a time):
+      ├── boot (cold-boot mandate, port 5554)
+      ├── captureDiagnostic → DiagnosticInfo{target, sdk, device, adb_devices_state}
+      ├── install APK
+      ├── run instrumentation
+      ├── copy gradle.log (Group A-prime)
+      ├── copy test-report/ (Group A-prime)
+      ├── parseJUnitFailures → [] (all pass)
+      ├── Teardown
+      │     ├── adb -s emulator-5554 emu kill
+      │     ├── wait 30s — exits cleanly → Teardown returns nil
+      │     └── (KillByPort fast-path NOT invoked — emulator already gone)
+      └── append AVDRow{passed:true, diag, failure_summaries:[], concurrent:1}
+  └── write real-device-verification.json with gating: true
+  └── write real-device-verification.md (human-readable mirror)
+  └── exit 0
+
+operator: scripts/tag.sh Lava-Android-X.Y.Z-NN
+  ├── existing pretag-verify.sh (parser, mirror SHAs, etc.)
+  ├── Gate 1: jq → no rows with concurrent != 1 → pass
+  ├── Gate 2: jq → run-level gating == true → pass
+  ├── Gate 3: jq → all rows diag.sdk == api_level → pass
+  ├── existing 4-mirror push convergence verification
+  └── tag created</code></pre>
+<h3 id="42-developer-iteration-run-non-gating">4.2 Developer-iteration
+run (non-gating)</h3>
+<pre><code>operator: ./scripts/run-emulator-tests.sh --concurrent 4 --dev
+  └── EVIDENCE_DIR = .lava-ci-evidence/Lava-Android-X.Y.Z-NN/matrix/&lt;UTC&gt;/
+  └── invoke cmd/emulator-matrix --concurrent 4 --dev
+
+cmd/emulator-matrix
+  └── 4-worker pool, ports 5554/5556/5558/5560
+  └── for each AVD: boot, capture, run, parse, Teardown
+  └── write real-device-verification.json with:
+        gating: false      ← --concurrent != 1 OR --dev
+        rows[].concurrent: 4
+  └── exit 0
+
+operator: scripts/tag.sh Lava-Android-X.Y.Z-NN
+  ├── Gate 1: jq → rows have concurrent: 4 → REJECT
+  └── tag NOT created — operator must re-run gating matrix first</code></pre>
+<h3 id="43-forensic-divergence-row-the-bluff-that-gate-3-catches">4.3
+Forensic-divergence row (the bluff that Gate 3 catches)</h3>
+<pre><code>attestation row: {name:&quot;CZ_API34_Phone&quot;, api_level:34, diag:{sdk:33, ...}}
+  → CZ_API34_Phone is misconfigured (its system-image is android-33)
+  → matrix runner did NOT detect this — the AVD label said &quot;API34&quot;
+  → Gate 3: jq → diag.sdk(33) != api_level(34) → REJECT
+  → operator: fix the AVD config, re-run, attestation row&#39;s diag.sdk
+              matches api_level, tag passes</code></pre>
+<h3 id="44-stuck-emulator-path-teardown-fast-path-proves-out">4.4
+Stuck-emulator path (Teardown fast-path proves out)</h3>
+<pre><code>cmd/emulator-matrix → Teardown(avd):
+  ├── adb emu kill — issued
+  ├── wait 30s — emulator process still in /proc (QEMU GPU lockup)
+  ├── KillByPort(5554) →
+  │     ├── /proc walk
+  │     ├── matches 1 pid (QEMU with cmdline ... -port 5554 ...)
+  │     ├── no other process matches (port 5556 pid is untouched)
+  │     ├── SIGTERM → exits → Sigkilled list empty
+  │     └── returns KillReport{Matched:1, Sigtermed:[12345]}
+  └── re-poll 5s → emulator gone → Teardown returns nil
+  → next AVD boots clean (no zombie left for cmd/emulator-cleanup)</code></pre>
+<h2 id="5-error-handling">5. Error Handling</h2>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Behavior</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>KillByPort</code> /proc read fails on one pid</td>
+<td>Skip that pid, continue walking</td>
+<td>Best-effort; one unreadable /proc entry must not block the kill</td>
+</tr>
+<tr>
+<td><code>KillByPort</code> no match (Matched=0)</td>
+<td>Return KillReport{Matched:0}, nil</td>
+<td>Safety; concurrent emulators / sibling-project QEMUs untouched</td>
+</tr>
+<tr>
+<td><code>KillByPort</code> SIGTERM fails on a pid (process gone
+meanwhile)</td>
+<td>Treat as success; remove from grace-poll list</td>
+<td>Race between the /proc walk and the kill is benign</td>
+</tr>
+<tr>
+<td><code>KillByPort</code> SIGKILL fails</td>
+<td>Append to KillReport.Sigkilled with negative marker; do NOT block
+return</td>
+<td>Best-effort — the alternative is an unbounded loop</td>
+</tr>
+<tr>
+<td>Teardown fast-path runs, KillByPort matches but emulator still in
+/proc after 5s</td>
+<td>Return error from Teardown; matrix runner records row failure</td>
+<td>Honest signal — the emulator was unkillable; row is failure</td>
+</tr>
+<tr>
+<td><code>parseJUnitFailures</code> file missing</td>
+<td>Return single synthetic entry
+<code>{class:"&lt;unparseable&gt;", message:"junit-xml read failed: ..."}</code>;
+row NOT failed by this</td>
+<td>JUnit XML is evidence, not gating — Sixth Law clause 3</td>
+</tr>
+<tr>
+<td><code>parseJUnitFailures</code> malformed XML</td>
+<td>Same as missing</td>
+<td>Same — evidence corruption is non-fatal to the gating signal</td>
+</tr>
+<tr>
+<td><code>captureDiagnostic</code> getprop fails for one field</td>
+<td>Leave that field zero/empty in DiagnosticInfo; continue</td>
+<td>Partial diag is better than no diag</td>
+</tr>
+<tr>
+<td><code>captureDiagnostic</code> <code>adb devices -l</code>
+fails</td>
+<td>Leave ADBDevicesState empty; continue</td>
+<td>Same</td>
+</tr>
+<tr>
+<td>Concurrent worker boot fails for 1 AVD</td>
+<td>Row failure for that AVD; other workers continue</td>
+<td>Bounded; the worker pool channel is drained either way</td>
+</tr>
+<tr>
+<td><code>--tag</code> and <code>--evidence-dir</code> both passed</td>
+<td><code>--evidence-dir</code> wins; warn on stderr</td>
+<td>Existing flag retains existing semantics</td>
+</tr>
+<tr>
+<td><code>app/build.gradle.kts</code> missing or unparseable</td>
+<td>Auto-detect returns "Lava-Android-unknown"; matrix continues</td>
+<td>Iteration runs without a version do not crash; tag.sh's gates
+already reject this evidence anyway</td>
+</tr>
+<tr>
+<td><code>tag.sh</code> Gate 1/2/3 reject</td>
+<td>Print the exact violating row(s); exit non-zero; tag NOT
+created</td>
+<td>Anti-bluff teeth — refuse with diagnostic, not silently</td>
+</tr>
+</tbody>
+</table>
+<h2 id="6-testing">6. Testing</h2>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>What</th>
+<th>Real-stack?</th>
+<th>Falsifiability rehearsal?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>TestKillByPort_*</code> (Containers)</td>
+<td>strict-adjacent matcher, no-op-on-mismatch, SIGKILL grace</td>
+<td>injected procWalker + killer fakes (boundary mocks per Sixth
+Law)</td>
+<td>YES — drop adjacency check → strict test fails</td>
+</tr>
+<tr>
+<td><code>TestParseJUnitFailures_*</code> (Containers)</td>
+<td>encoding/xml decoder happy + error paths</td>
+<td>real <code>os.ReadFile</code> + real <code>encoding/xml</code></td>
+<td>YES — drop <code>&lt;error&gt;</code> element handling →
+mixed-failure test fails</td>
+</tr>
+<tr>
+<td><code>TestRun_Concurrent_*</code> (Containers)</td>
+<td>worker pool port assignment + Gating field</td>
+<td>real goroutines + injected boot/teardown fakes</td>
+<td>YES — default Gating to false → defaults test fails</td>
+</tr>
+<tr>
+<td><code>TestTeardown_FastPath_*</code> (Containers)</td>
+<td>fallback timing, skip-on-mismatch safety</td>
+<td>injected adb fake + injected KillByPort</td>
+<td>YES — drop skip-on-mismatch → safety test fails</td>
+</tr>
+<tr>
+<td><code>tests/tag-helper/test_tag_rejects_*.sh</code> (Lava)</td>
+<td>real tag.sh against fixture attestation JSON</td>
+<td>real bash + real jq + real git fixture repo</td>
+<td>YES — drop Gate 3 → diag-mismatch test fails</td>
+</tr>
+<tr>
+<td><code>tests/tag-helper/test_tag_accepts_*.sh</code> (Lava)</td>
+<td>golden-path serial attestation passes all 3 gates</td>
+<td>same</td>
+<td>YES — flip Gate 1 to "reject if concurrent == 1" → accept test
+fails</td>
+</tr>
+<tr>
+<td>Bluff-hunt (<code>.lava-ci-evidence/bluff-hunt/...</code>)</td>
+<td>1-2 production files from gate-shaping surface</td>
+<td>per §6.N.1.1 subsequent-same-day procedure</td>
+<td>YES (mutation per file recorded)</td>
+</tr>
+<tr>
+<td>Real-stack matrix run (operator)</td>
+<td><code>./scripts/run-emulator-tests.sh</code> against the 4-AVD
+minimum coverage from clause 6.I; produces a Group B attestation row for
+each AVD with diag + failure_summaries + concurrent</td>
+<td>YES — real cold-boot AVDs, real apk install, real
+instrumentation</td>
+<td>NOT applicable to a single test — but the matrix run itself
+satisfies clause 6.I</td>
+</tr>
+</tbody>
+</table>
+<h2 id="7-order-of-operations">7. Order of operations</h2>
+<table>
+<thead>
+<tr>
+<th>Phase</th>
+<th>Branch</th>
+<th>Files</th>
+<th>Commits</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>A.</strong> Containers code</td>
+<td>Containers <code>lava-pin/2026-05-06-group-b</code></td>
+<td><code>pkg/emulator/cleanup.go</code>,
+<code>pkg/emulator/cleanup_test.go</code>,
+<code>pkg/emulator/android.go</code>,
+<code>pkg/emulator/android_test.go</code>,
+<code>pkg/emulator/types.go</code>, <code>pkg/emulator/matrix.go</code>,
+<code>pkg/emulator/matrix_test.go</code>,
+<code>cmd/emulator-matrix/main.go</code></td>
+<td>1 commit (subagent dispatched per Component A→E with two-stage
+review per Group A-prime pattern)</td>
+</tr>
+<tr>
+<td><strong>B.</strong> Lava parent code</td>
+<td>Lava <code>master</code></td>
+<td><code>scripts/run-emulator-tests.sh</code>,
+<code>scripts/tag.sh</code>,
+<code>tests/tag-helper/test_tag_rejects_concurrent_attestation.sh</code>,
+<code>tests/tag-helper/test_tag_rejects_non_gating_attestation.sh</code>,
+<code>tests/tag-helper/test_tag_rejects_diag_sdk_mismatch.sh</code>,
+<code>tests/tag-helper/test_tag_accepts_gating_serial_attestation.sh</code>,
+<code>CLAUDE.md</code> (§6.I clause 4 doc extension)</td>
+<td>1 commit</td>
+</tr>
+<tr>
+<td><strong>C.</strong> Pin bump + closure evidence</td>
+<td>Lava <code>master</code></td>
+<td><code>submodules/containers</code> SHA bump,
+<code>.lava-ci-evidence/bluff-hunt/2026-05-06-group-b-evening.json</code>,
+<code>.lava-ci-evidence/Phase-Group-B-closure-2026-05-06-evening.json</code></td>
+<td>1 commit</td>
+</tr>
+</tbody>
+</table>
+<p>Total: <strong>3 Lava parent commits + 1 Containers commit</strong>
+(with the intra-phase fix-up commits the subagent-driven workflow may
+emit per the two-stage review). Mirror push to all 4 upstreams after
+each commit; 4-mirror SHA convergence verified via live
+<code>git ls-remote</code> (NOT stale
+<code>.git/refs/remotes/&lt;r&gt;/master</code> cache — Group A-prime
+forensics already recorded that lesson).</p>
+<p>Estimated wall-clock: 6-8 hours (Phase A is the bulk; Phases B + C
+are mechanical once Phase A is green).</p>
+<h2 id="8-constitutional-bindings">8. Constitutional bindings</h2>
+<ul>
+<li><strong>Sixth Law clauses 1-5.</strong> Every Group B test traverses
+the production code path the Lava operator's matrix run triggers.
+Falsifiability rehearsal recorded per test class. Primary assertion is
+on user-visible outcomes (KillByPort report, parsed FailureSummary,
+Gating bool, tag.sh exit code).</li>
+<li><strong>Sixth Law clause 6 (inheritance).</strong> Every Group B
+file inherits the Anti-Bluff Pact recursively into Containers and Lava
+both.</li>
+<li><strong>Seventh Law clause 1 (Bluff-Audit stamp).</strong> Every
+commit's body carries the test/mutation/observed/reverted block per
+§6.N.1.2 (which Group A-prime already enforces via pre-push Check
+4).</li>
+<li><strong>Clause 6.I (Multi-Emulator Container Matrix).</strong> Group
+B <em>strengthens</em> the matrix gate (Gate 3's diag.sdk == api_level
+enforcement) without changing the per-AVD attestation row schema's
+existing fields.</li>
+<li><strong>Clause 6.J (Anti-Bluff Functional Reality Mandate).</strong>
+The three new tag.sh gates exist for one reason: prevent a tag from
+being cut against evidence that does not represent a
+real-user-completes-the-flow run. <code>--dev</code> and
+<code>--concurrent</code> exist precisely so a developer can iterate
+fast WITHOUT polluting the gating signal.</li>
+<li><strong>Clause 6.K (Builds-Inside-Containers Mandate) — debt
+status.</strong> Group B does NOT close 6.K-debt (still owed;
+<code>pkg/vm/</code> for QEMU and the host toolchain → Containers
+extraction remain open). The matrix runner reliability fixes here are
+independent of the build-path discussion.</li>
+<li><strong>Clause 6.M (Host-Stability Forensic Discipline).</strong>
+KillByPort is scoped to the matrix runner's own QEMU children —
+strict-adjacent match means no host-process collateral. Per the recorded
+Container- runtime safety analysis, podman-rootless cannot cause Class I
+host events; KillByPort's process-targeting widens nothing the runtime
+doesn't already permit.</li>
+<li><strong>Clause 6.N (Bluff-Hunt Cadence Tightening).</strong> Phase
+C's bluff-hunt JSON is the §6.N.1.1 subsequent-same-day record. Group
+A-prime's pre-push Check 5 will mechanically validate it on push.</li>
+<li><strong>Decoupled Reusable Architecture.</strong> Components A-E
+live in Containers because matrix-runner reliability + per-AVD diag +
+JUnit XML parsing
+<ul>
+<li>worker pool are the kind of capability the next vasic-digital
+consumer of <code>pkg/emulator/</code> would want identically.
+Components F + G live in Lava because the version-string detection and
+the tag.sh gates are Lava-domain.</li>
+</ul></li>
+<li><strong>Local-Only CI/CD.</strong> No new hosted-CI surface. All
+gates are pre-push hooks + tag.sh + the operator's
+<code>./scripts/run-emulator-tests.sh</code> invocation.</li>
+</ul>
+<h2 id="9-mirror-policy">9. Mirror policy</h2>
+<p>Per §6.C (mirror-state mismatch checks) and the Decoupled Reusable
+Architecture rule:</p>
+<ul>
+<li>Containers branch <code>lava-pin/2026-05-06-group-b</code> MUST
+converge at the same SHA on all 4 upstreams (github + gitflic + gitlab +
+gitverse) before the Lava parent's pin-bump commit references it.</li>
+<li>Lava parent commits (Phases B and C) MUST converge at the same SHA
+on all 4 upstreams before the closure attestation is finalized.</li>
+<li>Convergence verified via live
+<code>git ls-remote &lt;upstream&gt; &lt;ref&gt;</code> — NOT via the
+stale <code>.git/refs/remotes/&lt;r&gt;/master</code> cache. Group
+A-prime's reviewer iterations recorded the false-positive divergences
+this cache produces; do not repeat them.</li>
+</ul>
+<h2 id="10-self-review-checklist">10. Self-review checklist</h2>
+<p>Run by the spec author after writing this document, per the
+brainstorming skill's required checklist:</p>
+<ul class="task-list">
+<li><label><input type="checkbox" checked="" /><strong>Placeholder
+scan.</strong> No "TBD", no "TODO", no "to be detailed later". Every
+component (A-H) has signature/algorithm/test detail.</label></li>
+<li><label><input type="checkbox" checked="" /><strong>Internal
+consistency.</strong> The architecture diagram, the components section,
+the data flow, the testing table, and the order-of-operations table all
+reference the same 5 in-scope items, the same 6+2 modified files (6
+Containers + 2 Lava parent + tests/evidence), the same branch name
+(<code>lava-pin/2026-05-06-group-b</code>), the same gating-flip
+semantics (<code>--concurrent != 1 OR --dev</code> →
+<code>gating: false</code>).</label></li>
+<li><label><input type="checkbox" checked="" /><strong>Scope
+check.</strong> Single matrix-runner reliability + observability
+increment. Each of the 5 components is independently shippable but
+bundled because they share the same evidence schema (<code>AVDRow</code>
+extension) and the same tag.sh gate touches both <code>concurrent</code>
+and <code>gating</code>. Not too large for one plan.</label></li>
+<li><label><input type="checkbox" checked="" /><strong>Ambiguity
+check.</strong> Every "MUST" / "MAY" / "SHOULD" usage is intentional.
+The KillByPort safety property is stated three times in three contexts
+(component A, error handling, constitutional bindings) precisely because
+the operator's "go with the safest approach, other processes may be used
+by other projects" instruction needs zero room for
+misreading.</label></li>
+</ul>
+<hr />
+<p><strong>Spec status:</strong> approved (operator, 2026-05-05
+evening). Awaiting operator review of this written form before
+transitioning to <code>superpowers:writing-plans</code> for the
+implementation plan.</p>
+</body>
+</html>
