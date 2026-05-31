@@ -161,11 +161,12 @@ repo has drifted, the agent acts on the claim.
 
 | Surface | Current state | Pin |
 |---|---|---|
-| Lava parent on master | 2 mirrors (GitHub + GitLab) at HEAD | `23c508e9` (pre-68th-cycle) |
+| Lava parent on master | 2 mirrors (GitHub + GitLab) at HEAD | `4f3d9a2c` (§6.L 68th cycle) |
 | API (lava-api-go) | 2.3.22 (code 2322) — `internal/version/version.go` | container `lava-api-go-thinker` |
 | Android Firebase | 1.2.33 (1053) distributed to testers (2026-05-18, last user-visible release; `last-version-{debug,release}` both = 1053) | `lava-vasic-digital` Firebase project |
 | 17 own-org submodules | all pushed (16 vasic-digital + 1 HelixDevelopment HelixQA) | see §3 |
-| constitution submodule | at upstream HEAD `208e2c8` (adds §11.4.78 CodeGraph mandate) | HelixDevelopment/HelixConstitution |
+| constitution submodule | at upstream HEAD `883ccc1` (§11.4.79–§11.4.106 adopted via §6.AF) | HelixDevelopment/HelixConstitution |
+| LVA ticket system | `tools/lava-tickets` + `docs/tickets/tickets.db` (tracked, 8 items LVA-1..8) | §11.4.93/95/106 + operator LVA key |
 | codegraph | incorporated 2026-05-20 (§11.4.78); local SQLite index at `.codegraph/` (1,182 files / 18,567 nodes) | `@colbymchenry/codegraph` MCP |
 | Verify-all sweep | 40/40 PASS, fully STRICT mode (last attested prior cycle; 68th-cycle re-run in progress) | `.lava-ci-evidence/verify-all/` |
 | Coverage ledger | 48 covered / 10 partial / 0 gap (58 rows) | `docs/coverage-ledger.yaml` |
@@ -329,6 +330,24 @@ work.
   session transcript (NOT committed to git). **OPERATOR MUST ROTATE**
   (`firebase logout` → `firebase login:ci`). Incident:
   `.lava-ci-evidence/sixth-law-incidents/2026-05-20-firebase-token-echo-leak.json`.
+- **LVA-8 — HelixQA desktop crash-detector bluffs on macOS** (§6.L 68th, 2026-05-31):
+  `internal/qa/validator` has 6 failing tests because HelixQA's `isPIDAlive`
+  (`submodules/helixqa/pkg/detector/desktop.go`) shells `exec kill -0 <pid>` and
+  `/bin/kill -0 <absent-pid>` returns EXIT 0 on macOS (bash builtin returns 1), so
+  a dead PID reads as alive → Validator reports StepPassed on a crashed step (the
+  canonical §6.J bluff). ROOT CAUSE CONFIRMED (captured evidence). Fix belongs
+  UPSTREAM in HelixQA (use `syscall.Kill` not `/bin/kill`) per CONST-051 + CONST-049.
+  Incident: `.lava-ci-evidence/sixth-law-incidents/2026-05-31-helixqa-validator-killbinary-macos-bluff.json`.
+  The Lava adapter is a faithful pass-through (0-byte `internal/` diff) — the
+  defect is entirely HelixQA-side. **Operator decision owed:** authorize the HelixQA
+  upstream fix cycle (fix → push to HelixQA → bump pin).
+- **LVA-3 — LVA-vs-canonical-workable-items reconciliation** (§6.L 68th): the
+  constitution ships a canonical `workable-items` Go binary at
+  `constitution/scripts/workable-items/` keyed `docs/workable_items.db`; Lava built
+  a parallel LVA-keyed system at `tools/lava-tickets/` + `docs/tickets/tickets.db`.
+  Both satisfy §11.4.93/95/106; whether LVA supersedes or complements the canonical
+  binary (§11.4.74 catalogue-first) is an **operator decision**. Until ratified both
+  the LVA system AND the §6.AD.3 Path-B `.lava-ci-evidence/` ledgers stay in force.
 - **macOS emulator stall** (2026-05-15 incident): Pixel_7_Pro on macOS
   + emulator 36.1.9 stalls indefinitely. Three candidate root-causes
   recorded as `PENDING_FORENSICS:` (T7 external drive contention,
