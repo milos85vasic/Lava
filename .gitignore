@@ -112,3 +112,4 @@ docs/tickets/tickets.db-shm
 docs/tickets/tickets.db-journal
 tools/lava-tickets/bin/
 tools/lava-tickets/_*.sh
+tools/lava-tickets/digital.vasic.lava.tickets
