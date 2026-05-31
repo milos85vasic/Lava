@@ -361,6 +361,30 @@ work.
   regenerating the ledger). Regenerated via `scripts/generate-coverage-ledger.sh`;
   `check-coverage-ledger.sh --strict` now EXIT=0. Sweep → **47/47 PASS**.
 
+#### LVA ticket system NEW (§6.L 68th, §11.4.93/95/106)
+
+The operator's "define ticket key LVA + SQLite workable-items DB + Issues/Fixed/
+Issues_Summary/Fixed_Summary + PDF/HTML/DOCX exports" directive is the same
+requirement as the new HelixConstitution **§11.4.93/95/106** (workable-items
+SQLite DB tracked-in-git + mechanical md↔DB byte-identical sync). Built as a
+pure-Go module at `tools/lava-tickets/` (`digital.vasic.lava.tickets`, Go 1.26,
+`modernc.org/sqlite` — no CGO, no sudo). Key prefix **`LVA`** (LVA-1, LVA-2, …;
+the Lava instantiation of §11.4.54 ATM-NNN). The DB
+`docs/tickets/tickets.db` **IS tracked** (§11.4.95 — never gitignored); only
+`*.db-wal/-shm/-journal` sidecars + `bin/` + scratch are ignored. Subcommands:
+`init/add/update/close/reopen/gen/verify/import/export/list/version`. `go test`
+7/7 PASS (incl. §11.4.106 round-trip + falsifiability, §11.4.33 type-aware
+closure, §11.4.34 reopen-attribution); `verify` byte-identical PASS (exits 1 on
+drift — independently confirmed). Exports: HTML (pure-Go) ✓, DOCX (podman
+`pandoc/core`) ✓, **PDF honestly BLOCKED** (container lacks a LaTeX engine — tool
+exits 3, writes NO fake file; remediation: `pandoc/latex` image or host
+`weasyprint`). 7 real LVA tickets seeded from actual project state (no invented
+SHAs). Design + verbatim build evidence: `docs/tickets/DESIGN.md` +
+`docs/tickets/BUILD-EVIDENCE.md`. **OPEN (operator decision, LVA-3):** whether
+the LVA system supersedes or complements the §6.AD.3 Path-B `.lava-ci-evidence/`
+ledgers — until ratified, the Path-B mapping remains the binding compliance
+surface and the LVA DB is seeded from it (reconciled, not replacing).
+
 #### Resolved in prior (constitution-compliance) cycle
 
 - **Ledger-staleness drift class** — Phase 7-debt closure (`0c87b6ae`)

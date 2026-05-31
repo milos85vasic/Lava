@@ -104,3 +104,11 @@ app/build/generated/lava-auth/
 # regenerable by re-running scripts/verify-codegraph.sh. The suite scripts
 # under tests/codegraph/ ARE the committed artifact.
 .lava-ci-evidence/codegraph/
+
+# LVA ticket system (tools/lava-tickets) — §11.4.95: tickets.db IS TRACKED, never ignored.
+# Only the transient SQLite journal sidecars + the build output + the scratch driver are ignored.
+docs/tickets/tickets.db-wal
+docs/tickets/tickets.db-shm
+docs/tickets/tickets.db-journal
+tools/lava-tickets/bin/
+tools/lava-tickets/_*.sh
