@@ -66,6 +66,13 @@ class OnboardingViewModel @Inject constructor(
     // Providers — same as the pre-60th flow.
     @javax.inject.Named("apiSelectionEnabled")
     private val apiSelectionEnabled: Boolean,
+    // 2026-05-31 operator request — Cloud / remote-server section default.
+    // The configured default cloud API origin (e.g. "https://lava.app:7777")
+    // comes from build-time config (.env → BuildConfig.DEFAULT_CLOUD_API),
+    // injected via [OnboardingHiltModule] (§6.R: never a source literal).
+    // Tests construct the VM directly and pass any value (or "").
+    @javax.inject.Named("defaultCloudApi")
+    private val defaultCloudApi: String,
 ) : ViewModel(), ContainerHost<OnboardingState, OnboardingSideEffect> {
     private val logger = loggerFactory.get("OnboardingViewModel")
 
@@ -95,6 +102,34 @@ class OnboardingViewModel @Inject constructor(
                 val current = container.stateFlow.value.selectedApi
                 if (current != null) onSelectApi(current)
             }
+            is OnboardingAction.CloudAddressChanged -> onCloudAddressChanged(action.value)
+            is OnboardingAction.AddCloudApi -> onAddCloudApi()
+        }
+    }
+
+    /** Update the manual cloud-address field; clear any prior parse error. */
+    private fun onCloudAddressChanged(value: String) = intent {
+        reduce { state.copy(cloudAddressInput = value, cloudAddressError = null) }
+    }
+
+    /**
+     * Parse the manual cloud-address field into an [Endpoint.GoApi]. On parse
+     * failure, surface [OnboardingState.cloudAddressError] (user-visible) and do
+     * NOT advance. On success, reuse the existing [onSelectApi] flow (probe →
+     * persist → advance) — no new persistence/probe path.
+     */
+    private fun onAddCloudApi() = intent {
+        val raw = state.cloudAddressInput
+        val parsed = CloudApiDefaults.parse(raw)
+        if (parsed == null) {
+            reduce {
+                state.copy(
+                    cloudAddressError = "Enter a valid address like https://host:port",
+                )
+            }
+        } else {
+            reduce { state.copy(cloudAddressError = null) }
+            onSelectApi(parsed)
         }
     }
 
@@ -114,6 +149,12 @@ class OnboardingViewModel @Inject constructor(
                 discoveredApis = emptyList(),
                 selectedApi = null,
                 apiConnectivity = ApiConnectivityState.Idle,
+                // Populate the Cloud-section pre-installed defaults from build
+                // config (empty list when unconfigured — the manual-entry field
+                // still renders). §6.R: value injected, never literal.
+                cloudDefaults = CloudApiDefaults.defaultsFrom(defaultCloudApi),
+                cloudAddressInput = "",
+                cloudAddressError = null,
             )
         }
         // Collect each DiscoveredEndpoint into the running list.

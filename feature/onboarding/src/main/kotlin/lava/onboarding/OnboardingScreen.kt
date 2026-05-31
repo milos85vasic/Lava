@@ -97,6 +97,12 @@ fun OnboardingScreen(
                 onSelect = { viewModel.perform(OnboardingAction.SelectApi(it)) },
                 onRetryDiscovery = { viewModel.perform(OnboardingAction.NextStep) }, // re-enters discovery via step refresh
                 onRetryProbe = { viewModel.perform(OnboardingAction.RetryApiProbe) },
+                // Cloud / remote-server section (2026-05-31 operator request)
+                cloudInput = state.cloudAddressInput,
+                cloudDefaults = state.cloudDefaults,
+                cloudError = state.cloudAddressError,
+                onCloudInputChange = { viewModel.perform(OnboardingAction.CloudAddressChanged(it)) },
+                onAddCloud = { viewModel.perform(OnboardingAction.AddCloudApi) },
             )
             OnboardingStep.Providers -> ProvidersStep(
                 providers = state.providers,

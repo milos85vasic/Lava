@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -63,6 +64,12 @@ fun ApiSelectionStep(
     onSelect: (Endpoint) -> Unit,
     onRetryDiscovery: () -> Unit,
     onRetryProbe: () -> Unit,
+    // Cloud / remote-server section (2026-05-31 operator request).
+    cloudInput: String,
+    cloudDefaults: List<Endpoint>,
+    cloudError: String?,
+    onCloudInputChange: (String) -> Unit,
+    onAddCloud: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Surface(
@@ -80,11 +87,21 @@ fun ApiSelectionStep(
             )
             Spacer(Modifier.height(8.dp))
             Text(
-                text = "Lava talks to a Lava-API service running on your local network. Pick the one you want to use.",
+                text = "Lava talks to a Lava-API service. Pick one running on your local " +
+                    "network, or connect to a cloud / remote server. You only need to choose one.",
                 style = AppTheme.typography.bodyMedium,
                 color = AppTheme.colors.onSurfaceVariant,
             )
             Spacer(Modifier.height(20.dp))
+
+            // ── Section 1: On your network ──────────────────────────────
+            Text(
+                text = "On your network",
+                style = AppTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.semantics { contentDescription = "api-section-local" },
+            )
+            Spacer(Modifier.height(12.dp))
 
             // Status line — tells the user what's happening
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -155,6 +172,67 @@ fun ApiSelectionStep(
                 enabled = !discoveryRunning,
                 modifier = Modifier.fillMaxWidth(),
             )
+
+            Spacer(Modifier.height(28.dp))
+
+            // ── Section 2: Cloud / remote server ────────────────────────
+            Text(
+                text = "Cloud / remote server",
+                style = AppTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.semantics { contentDescription = "api-section-cloud" },
+            )
+            Spacer(Modifier.height(8.dp))
+            Text(
+                text = "Connect to a Lava-API hosted elsewhere. Pick a preset, or enter the " +
+                    "address and port of your own server.",
+                style = AppTheme.typography.bodyMedium,
+                color = AppTheme.colors.onSurfaceVariant,
+            )
+            Spacer(Modifier.height(12.dp))
+
+            // Pre-installed default options (e.g. https://lava.app:7777). Each
+            // taps into the SAME SelectApi → probe → persist → advance flow.
+            cloudDefaults.forEach { endpoint ->
+                ApiRow(
+                    endpoint = endpoint,
+                    isSelected = endpoint == selected,
+                    connectivity = if (endpoint == selected) connectivity else ApiConnectivityState.Idle,
+                    onClick = { onSelect(endpoint) },
+                    contentTag = "api-cloud-default",
+                )
+                Spacer(Modifier.height(8.dp))
+            }
+
+            // Manual entry: address + port.
+            OutlinedTextField(
+                value = cloudInput,
+                onValueChange = onCloudInputChange,
+                singleLine = true,
+                isError = cloudError != null,
+                label = { Text("Server address (https://host:port)") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .semantics { contentDescription = "api-cloud-input" },
+            )
+            if (cloudError != null) {
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    text = cloudError,
+                    style = AppTheme.typography.bodySmall,
+                    color = AppTheme.colors.error,
+                    modifier = Modifier.semantics { contentDescription = "api-cloud-error" },
+                )
+            }
+            Spacer(Modifier.height(8.dp))
+            Button(
+                text = "Add server",
+                onClick = onAddCloud,
+                enabled = cloudInput.isNotBlank(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .semantics { contentDescription = "api-cloud-add" },
+            )
         }
     }
 }
@@ -165,10 +243,13 @@ private fun ApiRow(
     isSelected: Boolean,
     connectivity: ApiConnectivityState,
     onClick: () -> Unit,
+    contentTag: String = "api-row",
 ) {
     Surface(
         onClick = onClick,
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .semantics { contentDescription = contentTag },
         shape = AppTheme.shapes.medium,
         color = if (isSelected) {
             AppTheme.colors.primary.copy(alpha = 0.12f)

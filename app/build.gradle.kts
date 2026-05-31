@@ -50,6 +50,12 @@ android {
         buildConfigField("String", "KINOZAL_PASSWORD", "\"${env["KINOZAL_PASSWORD"].orEmpty()}\"")
         buildConfigField("String", "NNMCLUB_USERNAME", "\"${env["NNMCLUB_USERNAME"].orEmpty()}\"")
         buildConfigField("String", "NNMCLUB_PASSWORD", "\"${env["NNMCLUB_PASSWORD"].orEmpty()}\"")
+        // 2026-05-31: default Cloud / remote-server API option for the
+        // onboarding "Choose your API" screen. §6.R: the value lives in .env
+        // (placeholder https://lava.app:7777 documented in .env.example),
+        // never a source literal. Empty when unconfigured → the cloud section
+        // still renders the manual-entry field with no preset.
+        buildConfigField("String", "DEFAULT_CLOUD_API", "\"${env["LAVA_DEFAULT_CLOUD_API"].orEmpty()}\"")
     }
 
     buildFeatures {
