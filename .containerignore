@@ -12,6 +12,10 @@
 # below is excluded from the build context at source — the proper fix versus
 # growing the VM disk. (§6.M storage discipline; operator T7 fast-storage directive.)
 
+# Stale .git safety backups (CONST-049 / worktree-cleanup) — 18 GB at repo root,
+# the dominant build-context bloat that refilled the podman VM. Never in an image.
+.git-backup*
+
 # Release artifacts — gigabytes of prior + current APKs/JARs/images, never needed in the Go build.
 releases/
 
