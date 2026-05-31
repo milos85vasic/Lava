@@ -186,6 +186,12 @@ run_gate "commit-docs-exists" "CM-COMMIT-DOCS-EXISTS / HelixConstitution §11.4.
 run_gate "subagent-delegation-audit" "CM-SUBAGENT-DELEGATION-AUDIT / HelixConstitution §11.4.x (last 5 commits)" \
     "LAVA_COMMIT_RANGE='HEAD~5..HEAD' bash scripts/check-subagent-delegation-audit.sh"
 
+# CM-LVA-TICKETS-SYNC §11.4.93/95/106 (advisory until baseline normalizes; the
+# build-advisory-then-strict-flip convention — same path coverage-ledger took).
+# The strict-flip is a follow-up after the gate's baseline is confirmed stable.
+run_gate "lva-tickets-sync" "CM-LVA-TICKETS-SYNC / HelixConstitution §11.4.93/95/106" \
+    "bash scripts/check-lva-tickets.sh --advisory"
+
 # Hermetic test suites (each suite's own paired-mutation contracts)
 for suite in tests/firebase tests/ci-sh tests/compose-layout tests/tag-helper \
              tests/vm-images tests/vm-signing tests/vm-distro; do
