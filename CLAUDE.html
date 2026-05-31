@@ -3645,6 +3645,64 @@ automation owed). Until these close, the affected clauses are
 operator-and-reviewer-verified manually; the parent CLAUDE.md §6.AF
 enumeration is binding by transitive reference per §6.AD.8.</p>
 <h5
+id="6ag--containers-submodule-driven-emulators-mandate-added-2026-05-31-6l-68th-invocation">6.AG
+— Containers-Submodule-Driven Emulators Mandate (added 2026-05-31, §6.L
+68th invocation)</h5>
+<p><strong>Forensic anchor:</strong> 2026-05-31 operator directive (§6.L
+68th, stream D): "If any test devices are needed use as always our
+Containers Submodule to boot emulators inside the containers or qemu…
+once all needed emulators are up and running continue all work! do not
+use any live ADB device if available as they all are used now by other
+projects!!!" Plus: "this MUST become of project's constitution rule /
+mandatory constraint ALWAYS in container, qemu or similar technology
+driven by our Containers Submodule! Make sure these Constitution.md,
+CLAUDE.md, AGENTS.md, QWEN.md and other relevant related files changes
+are updated on <strong>project level, not the root constitution
+Submodule</strong>!"</p>
+<p><strong>Rule.</strong> Every test that needs an Android device —
+Compose UI Challenge Tests, <code>connectedAndroidTest</code>,
+<code>-PdeviceTests=true</code>, the §6.AE matrix, any emulator-bearing
+gate — MUST obtain that device from an <strong>emulator instance brought
+up + managed by the <code>vasic-digital/Containers</code>
+submodule</strong> (<code>submodules/containers/pkg/emulator/</code> +
+<code>cmd/emulator-matrix</code>), via
+<code>scripts/run-challenge-matrix.sh</code> /
+<code>scripts/run-emulator-tests.sh</code> glue. The device is a
+<strong>cold-booted emulator AVD</strong>, NEVER a live/physical ADB
+device — physical devices attached to the host are presumed in use by
+other projects and MUST NOT be targeted.</p>
+<p><strong>Per-OS implementation (the §6.X acceleration model IS the
+implementation of this rule, not an exception):</strong> Linux x86_64 →
+emulator process INSIDE a podman/docker container
+(<code>containerized.go</code>, <code>--device /dev/kvm</code>);
+macOS/arm64 → host-direct+HVF cold-boot (a Linux container cannot reach
+<code>/dev/kvm</code> — absent in the podman VM, CONFIRMED — nor HVF, a
+host-only API; the Containers <code>emulator-matrix --runner=auto</code>
+resolves host-direct+HVF, still emulator-matrix-driven, still an
+emulator, NOT a live device — the §6.X-resolved macOS gate path);
+Windows → host-direct+WHPX; QEMU full-system (<code>pkg/vm/</code>) for
+non-Android device emulation.</p>
+<p><strong>No live-device fallback.</strong> A test redirected to a
+physical <code>adb</code>-attached device because an emulator was
+slow/unavailable is a §6.AG violation; the test is OWED, not silently
+redirected (§6.Z/§6.J — no bluffed pass). <strong>Provisioning
+precondition:</strong> the §6.AE.2 minimum AVD set (AVD defs + cached
+system-images) MUST be provisioned on the gate host; where absent, the
+run is honestly BLOCKED (incident + §6.AF-debt) OR run via the
+<code>--avds</code> override against an existing provisioned emulator
+AVD — never against a live device.</p>
+<p><strong>Project-level, not root-constitution</strong> (operator
+instruction + §11.4.35 canonical-root-vs-consumer): this clause lives in
+Lava's consumer governance (<code>CLAUDE.md</code> +
+<code>AGENTS.md</code> + <code>QWEN.md</code>-by-pointer), NOT the
+shared <code>constitution/</code> submodule — Lava's deployment-policy
+stance, not a universal-rule change. Composes with inherited §6.X / §6.V
+/ §6.I / §6.AE / §11.4.76; MUST NOT relax any.</p>
+<p><code>Classification:</code> project-specific (the
+Containers-driven-emulator + no-live-device stance is Lava's; the
+underlying container-emulator capability is universal, inherited from
+the Containers submodule + §6.X/§6.V).</p>
+<h5
 id="6l--anti-bluff-functional-reality-mandate-operators-standing-order-repeated-2026-05-04">6.L
 — Anti-Bluff Functional Reality Mandate (Operator's Standing Order,
 repeated 2026-05-04)</h5>

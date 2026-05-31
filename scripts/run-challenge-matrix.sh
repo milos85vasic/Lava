@@ -15,7 +15,19 @@
 #       [--test-class lava.app.challenges.ChallengeNN_Foo]   # default: ALL Challenges
 #       [--evidence-dir .lava-ci-evidence/<tag>]             # default: dated dir
 #       [--no-build]                                         # skip APK rebuild
-#       [--latest-api 36]                                    # override "latest stable"
+#       [--avds "name:api:form[,name:api:form...]"]          # REPLACE the §6.AE.2
+#                                                            # default matrix entirely with an
+#                                                            # explicit AVD list. Use this to target
+#                                                            # EXISTING host AVDs (e.g. on a macOS
+#                                                            # host-direct+HVF gate run where the
+#                                                            # default CZ_API* images are not
+#                                                            # provisioned). When supplied, --latest-api
+#                                                            # / --add-tv / --add-foldable are IGNORED
+#                                                            # (those only shape the default matrix).
+#                                                            # NOTE: a sub-minimum --avds list is a
+#                                                            # development-iteration run, NOT a
+#                                                            # §6.AE.2-conformant gate matrix.
+#       [--latest-api 36]                                    # override "latest stable" (default matrix only)
 #       [--add-tv]                                           # add TV-class AVD when feature touches TvActivity
 #       [--add-foldable]                                     # add foldable AVD
 #       [--include-helixqa]                                  # ALSO invoke the 11 HelixQA Challenge scripts
@@ -66,6 +78,7 @@ LATEST_API="36"                 # current "latest stable" as of 2026-05
 ADD_TV=0
 ADD_FOLDABLE=0
 INCLUDE_HELIXQA=0               # per HelixQA integration-design Option 1
+AVDS_OVERRIDE=""                # when non-empty, REPLACES the §6.AE.2 default matrix
 
 # §6.AE.2 minimum AVD matrix. Format: name:apiLevel:formFactor.
 # This is the constitutional minimum for gate runs. Sub-minimums are
@@ -85,26 +98,38 @@ while [[ $# -gt 0 ]]; do
         --test-class)    TEST_CLASS="$2"; shift 2 ;;
         --evidence-dir)  EVIDENCE_DIR="$2"; shift 2 ;;
         --no-build)      NO_BUILD=1; shift ;;
+        --avds)          AVDS_OVERRIDE="$2"; shift 2 ;;
         --latest-api)    LATEST_API="$2"; shift 2 ;;
         --add-tv)        ADD_TV=1; shift ;;
         --add-foldable)  ADD_FOLDABLE=1; shift ;;
         --include-helixqa) INCLUDE_HELIXQA=1; shift ;;
-        -h|--help)       sed -n '3,54p' "$0"; exit 0 ;;
+        -h|--help)       sed -n '3,66p' "$0"; exit 0 ;;
         *)               echo "ERROR: unknown argument: $1" >&2; exit 2 ;;
     esac
 done
 
-# Add the latest-stable phone to BASE_AVDS (per §6.AE.2 mandatory minimum).
-BASE_AVDS+=("CZ_API${LATEST_API}_Phone:${LATEST_API}:phone")
+if [[ -n "$AVDS_OVERRIDE" ]]; then
+    # --avds supplied: REPLACE the §6.AE.2 default matrix entirely with the
+    # operator-provided list. This is the path for targeting EXISTING host
+    # AVDs (e.g. macOS host-direct+HVF gate runs where the default CZ_API*
+    # images are not provisioned). --latest-api / --add-tv / --add-foldable
+    # are intentionally NOT applied — they only shape the default matrix.
+    AVDS_JOINED="$AVDS_OVERRIDE"
+    echo "==> --avds override active: default §6.AE.2 matrix REPLACED with operator list"
+    echo "    (sub-minimum lists are development-iteration runs, not §6.AE.2-conformant gate matrices)"
+else
+    # Add the latest-stable phone to BASE_AVDS (per §6.AE.2 mandatory minimum).
+    BASE_AVDS+=("CZ_API${LATEST_API}_Phone:${LATEST_API}:phone")
 
-if [[ "$ADD_TV" == "1" ]]; then
-    BASE_AVDS+=("CZ_API${LATEST_API}_TV:${LATEST_API}:tv")
-fi
-if [[ "$ADD_FOLDABLE" == "1" ]]; then
-    BASE_AVDS+=("CZ_API${LATEST_API}_Foldable:${LATEST_API}:foldable")
-fi
+    if [[ "$ADD_TV" == "1" ]]; then
+        BASE_AVDS+=("CZ_API${LATEST_API}_TV:${LATEST_API}:tv")
+    fi
+    if [[ "$ADD_FOLDABLE" == "1" ]]; then
+        BASE_AVDS+=("CZ_API${LATEST_API}_Foldable:${LATEST_API}:foldable")
+    fi
 
-AVDS_JOINED=$(IFS=,; echo "${BASE_AVDS[*]}")
+    AVDS_JOINED=$(IFS=,; echo "${BASE_AVDS[*]}")
+fi
 
 mkdir -p "$EVIDENCE_DIR"
 

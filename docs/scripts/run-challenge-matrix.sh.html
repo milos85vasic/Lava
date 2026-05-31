@@ -285,8 +285,12 @@ class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="
 <span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Skip APK rebuild</span></span>
 <span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> scripts/run-challenge-matrix.sh <span class="at">--no-build</span></span>
 <span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="co"># ALSO invoke the 11 HelixQA Challenge scripts (Option 1 wiring)</span></span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> scripts/run-challenge-matrix.sh <span class="at">--include-helixqa</span></span></code></pre></div>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="co"># Override the matrix entirely with explicit AVDs (target EXISTING host AVDs).</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Use on a macOS host-direct+HVF run where the default CZ_API* images are not provisioned.</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> scripts/run-challenge-matrix.sh <span class="at">--avds</span> <span class="st">&quot;CZ_API35_Phone_Fresh:35:phone&quot;</span> <span class="at">--no-build</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a><span class="co"># ALSO invoke the 11 HelixQA Challenge scripts (Option 1 wiring)</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> scripts/run-challenge-matrix.sh <span class="at">--include-helixqa</span></span></code></pre></div>
 <h2 id="inputs">Inputs</h2>
 <table>
 <thead>
@@ -311,8 +315,25 @@ class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="
 <td>Skip the <code>:app:assembleDebug</code> step</td>
 </tr>
 <tr>
+<td><code>--avds "&lt;name:api:form[,...]&gt;"</code></td>
+<td><strong>Replace</strong> the §6.AE.2 default matrix entirely with an
+explicit comma-separated AVD list. Use to target <strong>existing host
+AVDs</strong> (e.g. <code>CZ_API35_Phone_Fresh:35:phone</code> on a
+macOS host-direct+HVF run where the default <code>CZ_API*</code> images
+are not provisioned). When set, <code>--latest-api</code> /
+<code>--add-tv</code> / <code>--add-foldable</code> are ignored. A
+sub-minimum list is a <strong>development-iteration</strong> run,
+<strong>not</strong> a §6.AE.2-conformant gate matrix. NOTE: the
+Containers CLI still resolves each AVD's system image through
+<code>tools/lava-containers/vm-images.json</code>
+(<code>--image-manifest</code>); the manifest must contain a matching
+image id (e.g. <code>android-35-phone</code>) or the runner fails with
+<code>no image with id</code>.</td>
+</tr>
+<tr>
 <td><code>--latest-api &lt;N&gt;</code></td>
-<td>Override the "latest stable" API level (default: 36)</td>
+<td>Override the "latest stable" API level (default: 36; ignored when
+<code>--avds</code> is set)</td>
 </tr>
 <tr>
 <td><code>--add-tv</code></td>

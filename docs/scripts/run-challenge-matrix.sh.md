@@ -39,6 +39,10 @@ bash scripts/run-challenge-matrix.sh --latest-api 36
 # Skip APK rebuild
 bash scripts/run-challenge-matrix.sh --no-build
 
+# Override the matrix entirely with explicit AVDs (target EXISTING host AVDs).
+# Use on a macOS host-direct+HVF run where the default CZ_API* images are not provisioned.
+bash scripts/run-challenge-matrix.sh --avds "CZ_API35_Phone_Fresh:35:phone" --no-build
+
 # ALSO invoke the 11 HelixQA Challenge scripts (Option 1 wiring)
 bash scripts/run-challenge-matrix.sh --include-helixqa
 ```
@@ -50,7 +54,8 @@ bash scripts/run-challenge-matrix.sh --include-helixqa
 | `--test-class <fqn>` | Specific Challenge to run (default: all under `lava.app.challenges`) |
 | `--evidence-dir <dir>` | Output directory (default: dated under `.lava-ci-evidence/`) |
 | `--no-build` | Skip the `:app:assembleDebug` step |
-| `--latest-api <N>` | Override the "latest stable" API level (default: 36) |
+| `--avds "<name:api:form[,...]>"` | **Replace** the §6.AE.2 default matrix entirely with an explicit comma-separated AVD list. Use to target **existing host AVDs** (e.g. `CZ_API35_Phone_Fresh:35:phone` on a macOS host-direct+HVF run where the default `CZ_API*` images are not provisioned). When set, `--latest-api` / `--add-tv` / `--add-foldable` are ignored. A sub-minimum list is a **development-iteration** run, **not** a §6.AE.2-conformant gate matrix. NOTE: the Containers CLI still resolves each AVD's system image through `tools/lava-containers/vm-images.json` (`--image-manifest`); the manifest must contain a matching image id (e.g. `android-35-phone`) or the runner fails with `no image with id`. |
+| `--latest-api <N>` | Override the "latest stable" API level (default: 36; ignored when `--avds` is set) |
 | `--add-tv` | Add a TV-class AVD to the matrix |
 | `--add-foldable` | Add a foldable AVD |
 | `--include-helixqa` | ALSO invoke `scripts/run-helixqa-challenges.sh` (the 11 HelixQA Challenge scripts per Option 1 wiring). OFF by default so existing matrix runs are unaffected. HelixQA runs on the HOST BEFORE the AVD matrix → independent of §6.X-debt darwin/arm64 gate-host gap. HelixQA wrapper evidence lands at `<evidence-dir>/helixqa/`. Non-zero HelixQA exit promotes the final aggregate exit code (matrix exit dominates if both fail). See `docs/scripts/run-helixqa-challenges.sh.md` for full details. |
