@@ -12,6 +12,7 @@ import android.os.Build
 import android.os.IBinder
 import android.os.PowerManager
 import androidx.core.app.NotificationCompat
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -20,11 +21,9 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import lava.api.app.MainActivity
 import lava.api.app.R
-import lava.api.app.auth.ApiKeyStoreImpl
 import lava.api.app.control.ApiControlState
 import lava.api.app.control.ApiEngineController
-import lava.api.app.net.NetworkInterfaceLanIpProvider
-import lava.apiengine.NativeApiEngine
+import javax.inject.Inject
 
 /**
  * Foreground [Service] hosting the embedded Lava API.
@@ -45,9 +44,19 @@ import lava.apiengine.NativeApiEngine
  * State collection runs on a service-scoped [CoroutineScope] cancelled in
  * [onDestroy].
  */
+@AndroidEntryPoint
 class ApiEngineService : Service() {
 
-    private lateinit var controller: ApiEngineController
+    /**
+     * The SHARED singleton controller (provided by [lava.api.app.control.ApiControlModule]).
+     * The same instance backs [lava.api.app.control.ApiControlViewModel], so the
+     * Service and the UI observe one [ApiEngineController.state] StateFlow. The
+     * VM is the lifecycle DRIVER (start/stop/restart); the Service only manages
+     * the OS locks + the foreground notification off the shared state.
+     */
+    @Inject
+    lateinit var controller: ApiEngineController
+
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private var multicastLock: WifiManager.MulticastLock? = null
     private var wifiLock: WifiManager.WifiLock? = null
@@ -56,7 +65,6 @@ class ApiEngineService : Service() {
     override fun onCreate() {
         super.onCreate()
         ensureChannel()
-        controller = buildController()
 
         // Reflect controller state into locks + the foreground notification.
         serviceScope.launch {
@@ -90,10 +98,17 @@ class ApiEngineService : Service() {
         startForeground(NOTIFICATION_ID, buildNotification(getString(R.string.api_notification_title)))
 
         when (intent?.action) {
+            // Notification-button actions drive the SHARED controller directly
+            // (the user tapped Stop/Restart on the ongoing notification, which
+            // may be the only surface visible).
             ACTION_STOP -> serviceScope.launch { controller.stop() }
             ACTION_RESTART -> serviceScope.launch { controller.restart() }
-            // Default + ACTION_START: bring the API up.
-            else -> serviceScope.launch { controller.start() }
+            // ACTION_START (and the default) is a pure foreground-promotion: the
+            // VM (or the notification) is the lifecycle driver, so the Service
+            // must NOT also call controller.start() here — a second start while
+            // already running would trip the engine's already-running guard. We
+            // only promote-to-foreground (done above) to hold the OS locks.
+            else -> Unit
         }
         return START_STICKY
     }
@@ -105,27 +120,6 @@ class ApiEngineService : Service() {
         serviceScope.cancel()
         super.onDestroy()
     }
-
-    private fun buildController(): ApiEngineController {
-        val engine = NativeApiEngine()
-        val isDev = packageName.endsWith(DEV_SUFFIX)
-        val advertiser = NsdMdnsAdvertiser(
-            context = applicationContext,
-            engine = if (isDev) AdvertisedEngine.GO_DEV else AdvertisedEngine.GO,
-            versionProvider = { engine.status().version },
-        )
-        val keyStore = ApiKeyStoreImpl.create(applicationContext)
-        return ApiEngineController(
-            engine = engine,
-            advertiser = advertiser,
-            keyStore = keyStore,
-            lanIpProvider = NetworkInterfaceLanIpProvider()::invoke,
-            sqlitePathProvider = { sqlitePath() },
-        )
-    }
-
-    private fun sqlitePath(): String =
-        applicationContext.filesDir.resolve(SQLITE_FILE).absolutePath
 
     // ── Locks ────────────────────────────────────────────────────────────
 
@@ -184,7 +178,12 @@ class ApiEngineService : Service() {
     }
 
     private fun updateNotification(state: ApiControlState.Running) {
-        val body = "${state.url}  •  ${state.requestCount} req"
+        // Body: the reachable URL a peer device hits + the live request count.
+        val body = getString(
+            R.string.api_notification_running_body,
+            state.url,
+            state.requestCount,
+        )
         updateNotificationText(body)
     }
 
@@ -238,14 +237,16 @@ class ApiEngineService : Service() {
 
         private const val CHANNEL_ID = "lava.api.app.server"
         private const val NOTIFICATION_ID = 0x1A7A // "LAVA"-ish
-        private const val SQLITE_FILE = "lava-api.db"
-        private const val DEV_SUFFIX = ".dev"
         private const val MULTICAST_LOCK_TAG = "lava.api.multicast"
         private const val WIFI_LOCK_TAG = "lava.api.wifi"
         private const val WAKE_LOCK_TAG = "lava.api:server"
 
-        /** Builds an intent that starts/ensures the API is running. */
+        /** Builds an intent that promotes the API Service to the foreground. */
         fun startIntent(context: Context): Intent =
             Intent(context, ApiEngineService::class.java).setAction(ACTION_START)
+
+        /** Builds an intent that asks the Service to stop the API. */
+        fun stopIntent(context: Context): Intent =
+            Intent(context, ApiEngineService::class.java).setAction(ACTION_STOP)
     }
 }

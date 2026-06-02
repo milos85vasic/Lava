@@ -96,6 +96,10 @@ dependencies {
     implementation(project(":core:apiengine"))
     implementation(project(":core:designsystem"))
     implementation(project(":core:notifications"))
+    // LavaTheme's `theme: Theme = Theme.SYSTEM` default arg references
+    // lava.models.settings.Theme; :core:designsystem exposes it as `implementation`
+    // (not api), so declare :core:models here for the classpath.
+    implementation(project(":core:models"))
 
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.core.ktx)
@@ -116,4 +120,8 @@ dependencies {
     testImplementation(libs.junit4)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.orbit.test)
+    // Reuse the canonical MainDispatcherRule (swaps Dispatchers.Main for the
+    // test scheduler so the ViewModel's viewModelScope coroutines run under
+    // runTest). Same pattern every feature ViewModel test uses.
+    testImplementation(project(":core:testing"))
 }
