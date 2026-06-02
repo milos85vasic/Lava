@@ -36,9 +36,11 @@ const (
 // is generated, written to disk, and used.
 //
 // sanIPs are added to the cert's IPAddresses so peers addressing the embed by
-// LAN IP do not get a host-mismatch error. A DNS wildcard ("*") is also added
-// so name-based addressing does not mismatch either; full client-trust handling
-// is a later sub-project.
+// LAN IP do not get a host-mismatch error. The cert's DNS SANs are limited to
+// "localhost" (security-review finding 2: the previous bare "*" wildcard DNS
+// SAN matched ANY hostname, defeating name verification entirely). LAN peers
+// address the embed by IP and rely on the IPAddresses SAN; full client-trust
+// handling is a later sub-project.
 func loadOrCreateTLS(sqlitePath string, sanIPs []net.IP) (*tls.Config, error) {
 	dir := filepath.Dir(sqlitePath)
 	certPath := filepath.Join(dir, certFileName)
@@ -97,9 +99,12 @@ func generateSelfSigned(sanIPs []net.IP) (tls.Certificate, []byte, []byte, error
 		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
 		BasicConstraintsValid: true,
 		IPAddresses:           ips,
-		// Wildcard DNS SAN so peers addressing the embed by hostname do not
-		// hit a name mismatch. Out-of-band leaf trust is the model for now.
-		DNSNames: []string{"*", "localhost"},
+		// DNS SANs are limited to "localhost" (security-review finding 2): a
+		// bare "*" wildcard SAN matched ANY hostname and defeated name-based
+		// verification. Peers address the embed by LAN IP (covered by
+		// IPAddresses above) or by "localhost" on-device. Out-of-band leaf
+		// trust remains the model for now.
+		DNSNames: []string{"localhost"},
 	}
 
 	der, err := x509.CreateCertificate(rand.Reader, &tmpl, &tmpl, &priv.PublicKey, priv)

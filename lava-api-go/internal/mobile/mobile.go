@@ -28,6 +28,19 @@
 // and other phones). The automated security-review finding that suggested
 // loopback-only is therefore explicitly overridden here.
 //
+// Trust boundary (security-review finding 1): because the embed IS
+// network-exposed, it MUST authenticate. It enforces the SAME Lava-Auth gate
+// the production LAN binary uses (internal/auth.NewMiddleware +
+// NewBackoffMiddleware over the shared internal/config.Config) — there is NO
+// "trusted LAN" shortcut. The host Android app supplies the auth key via the
+// Start config; if none is supplied the embed GENERATES one and surfaces it via
+// Status() (authKey field) so the app always has a key to display. A request
+// without the valid credential is rejected with 401 by the identical middleware
+// host instances run; a request with it is served. Persistence of the key
+// across restarts and the UI that shows it are the Android app's responsibility
+// (a later sub-project); this surface only ENFORCES whatever key is in effect
+// and reports it.
+//
 // TLS: a self-signed cert+key is generated on first boot into the SQLite
 // directory (cert.pem / key.pem alongside the DB) and persisted across
 // restarts. The cert's SANs include the loopback addresses, the host's
@@ -46,7 +59,12 @@ package mobile
 
 import (
 	"context"
+	"crypto/hmac"
+	"crypto/rand"
+	"crypto/sha256"
 	"crypto/tls"
+	"encoding/base64"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -70,6 +88,7 @@ import (
 	"digital.vasic.lava.apigo/internal/rutracker"
 	"digital.vasic.lava.apigo/internal/storage"
 	"digital.vasic.lava.apigo/internal/version"
+	"digital.vasic.ratelimiter/pkg/ladder"
 )
 
 const (
@@ -81,25 +100,59 @@ const (
 	defaultPort = 8443
 	// scheme is reported by Status(); the embed always serves HTTPS.
 	scheme = "https"
+	// defaultAuthFieldName is the HTTP header the embed reads the Lava-Auth
+	// credential from when the host app does not supply one. It matches the
+	// header the production binary reads (cfg.AuthFieldName from
+	// LAVA_AUTH_FIELD_NAME). The host app SHOULD pass authFieldName explicitly
+	// so the embed's header matches whatever the deployment's clients send;
+	// this constant only provides a sane default so the gate is never disabled.
+	defaultAuthFieldName = "Lava-Auth"
+	// embedClientName labels the single auto-provisioned client identity the
+	// embed accepts. It is purely cosmetic (surfaces as c.Set("client_name"));
+	// it is NOT a secret.
+	embedClientName = "lava-embed-client"
+	// hmacSecretLen is the byte length of the auto-generated HMAC secret. The
+	// config validator requires ≥16; 32 bytes (256 bits) is the SHA-256 block
+	// size and the production recommendation.
+	hmacSecretLen = 32
+	// uuidLen is the byte length of the auth key the host app presents. The
+	// production middleware base64-decodes the header into a UUID blob and
+	// HMACs it; a 16-byte (128-bit) random value is the production UUID width.
+	uuidLen = 16
 )
 
 // startConfig is the DTO parsed from the Start(configJSON) argument. It is an
 // internal type (never crosses the gobind boundary) so it may use rich Go
 // types freely.
+//
+// AuthSharedKey is the credential the LAN clients present in the AuthFieldName
+// header. It is the base64 encoding of a UUID blob (the production wire shape:
+// the middleware base64-decodes the header, then HMACs the bytes). When empty,
+// Start GENERATES one and surfaces it via Status().authKey (security-review
+// finding 1: the embed is authenticated by default; there is no unauthenticated
+// mode).
+//
+// AuthFieldName is the HTTP header name the credential is read from. When empty
+// it defaults to defaultAuthFieldName. It matches the production
+// cfg.AuthFieldName mechanism exactly.
 type startConfig struct {
-	BindAddr   string `json:"bindAddr"`
-	Port       int    `json:"port"`
-	SQLitePath string `json:"sqlitePath"`
+	BindAddr      string `json:"bindAddr"`
+	Port          int    `json:"port"`
+	SQLitePath    string `json:"sqlitePath"`
+	AuthSharedKey string `json:"authSharedKey"`
+	AuthFieldName string `json:"authFieldName"`
 }
 
 // instance holds the running server state. A nil package-level pointer means
 // "stopped".
 type instance struct {
-	httpSrv  *http.Server
-	store    storage.Storage
-	bindAddr string
-	port     int
-	reqCount *int64
+	httpSrv       *http.Server
+	store         storage.Storage
+	bindAddr      string
+	port          int
+	reqCount      *int64
+	authKey       string // the in-effect base64 UUID credential clients present
+	authFieldName string // the header name clients send the credential in
 }
 
 var (
@@ -173,15 +226,44 @@ func Start(configJSON string) error {
 		return errors.New("mobile: sqlitePath is required")
 	}
 
-	// Build a config.Config for the storage factory. We force the SQLite
-	// backend — the embedded surface never connects to Postgres. We do NOT
-	// call config.Load (env-var driven, requires auth/TLS material managed
-	// differently for an on-device embed); we construct the minimal fields
-	// the storage factory consumes.
-	cfg := &config.Config{
-		StorageBackend: config.BackendSQLite,
-		SQLitePath:     sc.SQLitePath,
+	authFieldName := sc.AuthFieldName
+	if authFieldName == "" {
+		authFieldName = defaultAuthFieldName
 	}
+
+	// Resolve the auth key. The host app supplies it via authSharedKey; if it
+	// does not, GENERATE one (security-review finding 1: the embed is
+	// authenticated by default — there is no unauthenticated mode). Either way
+	// the embed enforces the SAME Lava-Auth gate the production binary uses and
+	// surfaces the in-effect key via Status() so the app can display it.
+	authKey := sc.AuthSharedKey
+	if authKey == "" {
+		generated, genErr := generateAuthKey()
+		if genErr != nil {
+			return fmt.Errorf("mobile: generate auth key: %w", genErr)
+		}
+		authKey = generated
+	}
+
+	// Build a config.Config wired with the EXACT auth fields the production
+	// internal/auth middleware consumes (AuthFieldName + AuthHMACSecret +
+	// AuthActiveClients), so the embed enforces the identical gate host
+	// instances run. We force the SQLite backend — the embedded surface never
+	// connects to Postgres. We do NOT call config.Load (env-var driven); we
+	// construct exactly the fields the router's auth + storage paths consume.
+	//
+	// ProtocolMetric/Brotli/AltSvc are explicitly disabled: those success-path
+	// middlewares are transport-tuning for the LAN binary, not security; the
+	// embed keeps them off so it does not touch the prometheus default
+	// registerer across repeated in-process Start/Stop cycles. The auth +
+	// backoff gate is the security-relevant chain and is fully enabled.
+	authCfg, err := buildAuthConfig(authKey, authFieldName)
+	if err != nil {
+		return fmt.Errorf("mobile: build auth config: %w", err)
+	}
+	cfg := authCfg
+	cfg.StorageBackend = config.BackendSQLite
+	cfg.SQLitePath = sc.SQLitePath
 
 	store, ready, err := storage.New(cfg)
 	if err != nil {
@@ -189,7 +271,7 @@ func Start(configJSON string) error {
 	}
 
 	var reqCount int64
-	engine := buildRouter(store, observability.ReadinessProbe(ready))
+	engine := buildRouter(cfg, store, observability.ReadinessProbe(ready))
 	// Wrap the engine in a request-counting http.Handler so Status()
 	// reports real traffic. Counting at the transport layer (rather than as a
 	// Gin middleware) keeps it ahead of every route without re-registering the
@@ -229,11 +311,13 @@ func Start(configJSON string) error {
 	// accepted connections. So by the time net.Listen returned, the port
 	// accepts. Returning here means the listener is live.
 	current = &instance{
-		httpSrv:  httpSrv,
-		store:    store,
-		bindAddr: sc.BindAddr,
-		port:     sc.Port,
-		reqCount: &reqCount,
+		httpSrv:       httpSrv,
+		store:         store,
+		bindAddr:      sc.BindAddr,
+		port:          sc.Port,
+		reqCount:      &reqCount,
+		authKey:       authKey,
+		authFieldName: authFieldName,
 	}
 	return nil
 }
@@ -281,6 +365,16 @@ func Status() string {
 		RequestCount int64  `json:"requestCount"`
 		Backend      string `json:"backend"`
 		Version      string `json:"version"`
+		// AuthEnabled is always true while running — the embed enforces the
+		// Lava-Auth gate unconditionally (security-review finding 1).
+		AuthEnabled bool `json:"authEnabled"`
+		// AuthFieldName is the HTTP header clients present the credential in.
+		AuthFieldName string `json:"authFieldName,omitempty"`
+		// AuthKey is the in-effect credential clients must present (base64 UUID
+		// blob). It is surfaced HERE — and ONLY here — so the host app can show
+		// it to the user / configure peer devices. It is deliberately NEVER
+		// written to a log line (§6.H / §6.AC redaction).
+		AuthKey string `json:"authKey,omitempty"`
 	}
 
 	doc := statusDoc{
@@ -294,6 +388,9 @@ func Status() string {
 		doc.BindAddr = current.bindAddr
 		doc.Port = current.port
 		doc.RequestCount = atomic.LoadInt64(current.reqCount)
+		doc.AuthEnabled = true
+		doc.AuthFieldName = current.authFieldName
+		doc.AuthKey = current.authKey
 	}
 
 	b, err := json.Marshal(doc)
@@ -309,21 +406,105 @@ func Status() string {
 // probe is wired to the SQLite-backed storage probe so /ready genuinely
 // reflects the DB handle's health.
 //
-// Cfg is left nil in router.Build's Deps: the on-device embed is reached by
-// trusted LAN clients and does not run the Lava-Auth HMAC gate (which is for
-// the public LAN binary). Leaving Cfg nil skips the auth/backoff/protocol-
-// metric/brotli/alt-svc middlewares; the full handler + /v1 route set is still
-// registered. The served routes are therefore identical to production minus
-// the auth gate — the same anti-bluff property the route-count test pins.
-func buildRouter(store storage.Storage, ready observability.ReadinessProbe) *gin.Engine {
+// Cfg + AuthLadder are passed so router.Build wires the SAME Lava-Auth
+// middleware chain (auth.NewBackoffMiddleware + auth.NewMiddleware) the
+// production binary runs (security-review finding 1: the embed is
+// network-exposed and MUST authenticate). The ladder is constructed from
+// cfg.AuthBackoffSteps exactly as cmd/lava-api-go/main.go does, so a missing /
+// wrong credential yields 401 and repeated failures escalate to 429 — identical
+// host behavior. /health + /ready are registered BEFORE the auth middleware in
+// router.Build, so the orchestrator probes still work without a credential.
+func buildRouter(cfg *config.Config, store storage.Storage, ready observability.ReadinessProbe) *gin.Engine {
 	scraper, registry := scraperFactory()
 
+	// Shared ladder instance — BackoffMiddleware (front) and AuthMiddleware
+	// (behind) MUST consume the same *ladder.Ladder, exactly as main.go wires.
+	authLadder := ladder.New(cfg.AuthBackoffSteps)
+
 	return apirouter.Build(apirouter.Deps{
-		Cache:     store,
-		Scraper:   scraper,
-		Registry:  registry,
-		Readiness: ready,
+		Cfg:        cfg,
+		AuthLadder: authLadder,
+		Cache:      store,
+		Scraper:    scraper,
+		Registry:   registry,
+		Readiness:  ready,
 	})
+}
+
+// generateAuthKey mints a fresh random auth credential in the production wire
+// shape: base64(random 16-byte UUID blob). The production middleware
+// base64-decodes the AuthFieldName header into a UUID blob, HMACs it, and
+// compares against the active-clients map; this key is exactly such a blob.
+func generateAuthKey() (string, error) {
+	blob := make([]byte, uuidLen)
+	if _, err := rand.Read(blob); err != nil {
+		return "", fmt.Errorf("read random: %w", err)
+	}
+	return base64.StdEncoding.EncodeToString(blob), nil
+}
+
+// buildAuthConfig constructs a *config.Config whose auth fields make the
+// production internal/auth middleware accept exactly the supplied authKey
+// (base64 UUID blob) presented in the authFieldName header, and reject anything
+// else.
+//
+// It mirrors the production load path: a random HMAC secret is generated, then
+// the active-clients map is keyed by hex(HMAC-SHA256(uuid_bytes, secret)) — the
+// SAME key derivation config.parseClientsList + auth.hashUUIDBlob perform. The
+// secret never leaves the process and is never logged.
+func buildAuthConfig(authKey, authFieldName string) (*config.Config, error) {
+	blob, err := base64.StdEncoding.DecodeString(authKey)
+	if err != nil {
+		return nil, fmt.Errorf("authSharedKey is not valid base64: %w", err)
+	}
+	if len(blob) == 0 {
+		return nil, errors.New("authSharedKey decodes to empty bytes")
+	}
+
+	secret := make([]byte, hmacSecretLen)
+	if _, err := rand.Read(secret); err != nil {
+		return nil, fmt.Errorf("read random secret: %w", err)
+	}
+
+	mac := hmac.New(sha256.New, secret)
+	mac.Write(blob)
+	activeHash := hex.EncodeToString(mac.Sum(nil))
+	// Zeroize the plaintext blob per §6.H — never linger in memory.
+	for i := range blob {
+		blob[i] = 0
+	}
+
+	return &config.Config{
+		AuthFieldName:     authFieldName,
+		AuthHMACSecret:    secret,
+		AuthActiveClients: map[string]string{activeHash: embedClientName},
+		// No retired clients on the embed. The backoff ladder uses the same
+		// default steps the production config validator applies so repeated bad
+		// credentials escalate to 429 identically.
+		AuthRetiredClients: map[string]string{},
+		AuthBackoffSteps:   defaultBackoffSteps(),
+		// Transport-tuning middlewares stay off (see Start's comment); they are
+		// not security-relevant and avoid touching the prometheus default
+		// registerer across repeated in-process Start/Stop cycles.
+		ProtocolMetricEnabled: false,
+		BrotliResponseEnabled: false,
+		HTTP3Enabled:          false,
+	}, nil
+}
+
+// defaultBackoffSteps returns the monotonic backoff ladder the embed uses. It
+// matches the production default (LAVA_AUTH_BACKOFF_STEPS=2s,5s,10s,30s,1m,1h)
+// so a credential-guessing attacker against the embed faces the same escalating
+// 429 lockout host instances impose.
+func defaultBackoffSteps() []time.Duration {
+	return []time.Duration{
+		2 * time.Second,
+		5 * time.Second,
+		10 * time.Second,
+		30 * time.Second,
+		time.Minute,
+		time.Hour,
+	}
 }
 
 // countingHandler wraps an http.Handler so every inbound request increments

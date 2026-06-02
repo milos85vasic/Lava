@@ -5,6 +5,7 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/json"
+	"encoding/pem"
 	"errors"
 	"fmt"
 	"net"
@@ -102,7 +103,35 @@ func tempSQLitePath(t *testing.T) string {
 	return filepath.Join(t.TempDir(), "lava-mobile-test.db")
 }
 
+// testAuthFieldName is the header the tests configure the embed to read the
+// Lava-Auth credential from. testAuthKey is a fixed base64 UUID blob (16 bytes)
+// the embed will accept. These let the tests present a known-valid credential.
+const (
+	testAuthFieldName = "Lava-Auth"
+	// testAuthKey is base64("0123456789abcdef") — a deterministic 16-byte blob
+	// in the production wire shape (the middleware base64-decodes the header).
+	// NOT a real production credential (§6.H/§6.R: synthetic test fixture only).
+	testAuthKey = "MDEyMzQ1Njc4OWFiY2RlZg=="
+)
+
+// configJSON builds a Start config WITH the test auth credential so requests
+// presenting testAuthKey in the testAuthFieldName header are served.
 func configJSON(bind string, port int, dbPath string) string {
+	cfg := map[string]any{
+		"bindAddr":      bind,
+		"port":          port,
+		"sqlitePath":    dbPath,
+		"authSharedKey": testAuthKey,
+		"authFieldName": testAuthFieldName,
+	}
+	b, _ := json.Marshal(cfg)
+	return string(b)
+}
+
+// configJSONNoAuth builds a Start config WITHOUT an authSharedKey so the embed
+// generates one (surfaced via Status().authKey). Used to prove the
+// generate-and-report default.
+func configJSONNoAuth(bind string, port int, dbPath string) string {
 	cfg := map[string]any{
 		"bindAddr":   bind,
 		"port":       port,
@@ -110,6 +139,18 @@ func configJSON(bind string, port int, dbPath string) string {
 	}
 	b, _ := json.Marshal(cfg)
 	return string(b)
+}
+
+// authedGet performs an https GET adding the test Lava-Auth credential so the
+// production auth middleware admits the request.
+func authedGet(t *testing.T, client *http.Client, url string) (*http.Response, error) {
+	t.Helper()
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		t.Fatalf("new request: %v", err)
+	}
+	req.Header.Set(testAuthFieldName, testAuthKey)
+	return client.Do(req)
 }
 
 // tlsClient builds an https client that trusts ONLY the cert the embed wrote
@@ -220,14 +261,14 @@ func TestRealProductionRouteOverTLS(t *testing.T) {
 	t.Cleanup(func() { _ = Stop() })
 
 	client := tlsClient(t, dbPath)
-	resp, err := client.Get(fmt.Sprintf("https://%s/index", addr))
+	resp, err := authedGet(t, client, fmt.Sprintf("https://%s/index", addr))
 	if err != nil {
 		t.Fatalf("https GET(/index): %v", err)
 	}
 	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
-		t.Fatalf("/index status = %d, want 200 (real production route)", resp.StatusCode)
+		t.Fatalf("/index status = %d, want 200 (real production route, authed)", resp.StatusCode)
 	}
 	// The handler writes a bare JSON boolean — assert it equals the stubbed
 	// upstream result. A 502/error page would NOT decode into a bool true here.
@@ -411,6 +452,228 @@ func TestRequestCountIncrements(t *testing.T) {
 	}
 	if rc := int(st["requestCount"].(float64)); rc < 3 {
 		t.Fatalf("requestCount = %d, want >= 3 (real traffic counted)", rc)
+	}
+}
+
+// TestAuthGateRejectsMissingCredential is the load-bearing security-review
+// finding-1 anti-bluff test: a REAL https request to an AUTH-GATED production
+// route WITHOUT the Lava-Auth credential MUST be rejected with 401 by the SAME
+// middleware host instances run. /index is auth-gated (unlike /health), so an
+// unauthenticated request to it proves the gate is enforced, not bypassed.
+func TestAuthGateRejectsMissingCredential(t *testing.T) {
+	withStubScraper(t, stubScraper{checkAuthorised: true})
+
+	port := freePort(t)
+	bind := "127.0.0.1"
+	addr := fmt.Sprintf("%s:%d", bind, port)
+	dbPath := tempSQLitePath(t)
+
+	if err := Start(configJSON(bind, port, dbPath)); err != nil {
+		t.Fatalf("Start: %v", err)
+	}
+	t.Cleanup(func() { _ = Stop() })
+
+	client := tlsClient(t, dbPath)
+
+	// No credential → 401.
+	resp, err := client.Get(fmt.Sprintf("https://%s/index", addr))
+	if err != nil {
+		t.Fatalf("https GET(/index) no-cred: %v", err)
+	}
+	defer func() { _ = resp.Body.Close() }()
+	if resp.StatusCode != http.StatusUnauthorized {
+		t.Fatalf("/index without credential status = %d, want 401 (auth gate MUST reject)", resp.StatusCode)
+	}
+	var body map[string]any
+	if err := json.NewDecoder(resp.Body).Decode(&body); err != nil {
+		t.Fatalf("decode 401 body: %v", err)
+	}
+	if body["error"] != "unauthorized" {
+		t.Fatalf("401 body error = %v, want \"unauthorized\" (real production middleware response)", body["error"])
+	}
+}
+
+// TestAuthGateAdmitsValidCredential is the positive half of finding 1: the SAME
+// request WITH the valid Lava-Auth credential is served with 200 + the real
+// JSON body the production handler produces.
+func TestAuthGateAdmitsValidCredential(t *testing.T) {
+	withStubScraper(t, stubScraper{checkAuthorised: true})
+
+	port := freePort(t)
+	bind := "127.0.0.1"
+	addr := fmt.Sprintf("%s:%d", bind, port)
+	dbPath := tempSQLitePath(t)
+
+	if err := Start(configJSON(bind, port, dbPath)); err != nil {
+		t.Fatalf("Start: %v", err)
+	}
+	t.Cleanup(func() { _ = Stop() })
+
+	client := tlsClient(t, dbPath)
+	resp, err := authedGet(t, client, fmt.Sprintf("https://%s/index", addr))
+	if err != nil {
+		t.Fatalf("https GET(/index) authed: %v", err)
+	}
+	defer func() { _ = resp.Body.Close() }()
+
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("/index with valid credential status = %d, want 200", resp.StatusCode)
+	}
+	var ok bool
+	if err := json.NewDecoder(resp.Body).Decode(&ok); err != nil {
+		t.Fatalf("/index authed body not a JSON bool: %v", err)
+	}
+	if !ok {
+		t.Fatalf("/index authed body = %v, want true (the stubbed CheckAuthorised result)", ok)
+	}
+}
+
+// TestAuthGateRejectsWrongCredential asserts a request presenting a
+// well-formed-but-WRONG credential (a different base64 UUID blob the embed was
+// not configured with) is rejected with 401 — proving the gate verifies the
+// actual key, not merely the presence of the header.
+func TestAuthGateRejectsWrongCredential(t *testing.T) {
+	withStubScraper(t, stubScraper{checkAuthorised: true})
+
+	port := freePort(t)
+	bind := "127.0.0.1"
+	addr := fmt.Sprintf("%s:%d", bind, port)
+	dbPath := tempSQLitePath(t)
+
+	if err := Start(configJSON(bind, port, dbPath)); err != nil {
+		t.Fatalf("Start: %v", err)
+	}
+	t.Cleanup(func() { _ = Stop() })
+
+	client := tlsClient(t, dbPath)
+	req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("https://%s/index", addr), nil)
+	// A different valid base64 UUID blob the embed was NOT configured with.
+	req.Header.Set(testAuthFieldName, "ZmVkY2JhOTg3NjU0MzIxMA==")
+	resp, err := client.Do(req)
+	if err != nil {
+		t.Fatalf("https GET(/index) wrong-cred: %v", err)
+	}
+	defer func() { _ = resp.Body.Close() }()
+	if resp.StatusCode != http.StatusUnauthorized {
+		t.Fatalf("/index with WRONG credential status = %d, want 401", resp.StatusCode)
+	}
+}
+
+// TestStatusReportsInEffectAuthKey is the finding-1 reporting half: when no
+// authSharedKey is supplied, the embed GENERATES one and Status() surfaces it
+// (authKey + authFieldName + authEnabled) so the host app can display it. The
+// reported key MUST actually work against the gate — proving Status() reports
+// the genuinely in-effect credential, not a placeholder.
+func TestStatusReportsInEffectAuthKey(t *testing.T) {
+	withStubScraper(t, stubScraper{checkAuthorised: true})
+
+	port := freePort(t)
+	bind := "127.0.0.1"
+	addr := fmt.Sprintf("%s:%d", bind, port)
+	dbPath := tempSQLitePath(t)
+
+	if err := Start(configJSONNoAuth(bind, port, dbPath)); err != nil {
+		t.Fatalf("Start (no auth key supplied): %v", err)
+	}
+	t.Cleanup(func() { _ = Stop() })
+
+	var st map[string]any
+	if err := json.Unmarshal([]byte(Status()), &st); err != nil {
+		t.Fatalf("Status JSON: %v", err)
+	}
+	if st["authEnabled"] != true {
+		t.Fatalf("Status authEnabled = %v, want true (embed is always authenticated)", st["authEnabled"])
+	}
+	genKey, _ := st["authKey"].(string)
+	if genKey == "" {
+		t.Fatal("Status authKey is empty — generate-and-report default did not surface a key")
+	}
+	genField, _ := st["authFieldName"].(string)
+	if genField == "" {
+		t.Fatal("Status authFieldName is empty — app cannot know which header to send")
+	}
+
+	// The reported key MUST genuinely admit a request (anti-bluff: Status must
+	// report the in-effect credential, not a fake).
+	client := tlsClient(t, dbPath)
+	req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("https://%s/index", addr), nil)
+	req.Header.Set(genField, genKey)
+	resp, err := client.Do(req)
+	if err != nil {
+		t.Fatalf("https GET(/index) with Status-reported key: %v", err)
+	}
+	defer func() { _ = resp.Body.Close() }()
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("/index with Status-reported generated key status = %d, want 200 (key must actually work)", resp.StatusCode)
+	}
+
+	// And a request WITHOUT it is still rejected — proving the generated key is
+	// not a no-op gate.
+	noCred, err := client.Get(fmt.Sprintf("https://%s/index", addr))
+	if err != nil {
+		t.Fatalf("https GET(/index) no-cred under generated key: %v", err)
+	}
+	defer func() { _ = noCred.Body.Close() }()
+	if noCred.StatusCode != http.StatusUnauthorized {
+		t.Fatalf("/index no-cred under generated key status = %d, want 401", noCred.StatusCode)
+	}
+}
+
+// TestGeneratedTLSCertHasNoWildcardDNSSAN is the security-review finding-2 test:
+// the generated cert's DNSNames MUST NOT contain the bare "*" wildcard, MUST
+// contain "localhost", and MUST carry IP SANs (loopback at minimum). It parses
+// the ACTUAL cert the embed presents over the wire, not the on-disk file.
+func TestGeneratedTLSCertHasNoWildcardDNSSAN(t *testing.T) {
+	port := freePort(t)
+	bind := "127.0.0.1"
+	dbPath := tempSQLitePath(t)
+
+	if err := Start(configJSON(bind, port, dbPath)); err != nil {
+		t.Fatalf("Start: %v", err)
+	}
+	t.Cleanup(func() { _ = Stop() })
+
+	// Read the persisted cert and parse it (the same bytes served over TLS;
+	// TestCertPersistsAcrossRestart proves on-disk == served).
+	certPath := filepath.Join(filepath.Dir(dbPath), certFileName)
+	pemBytes, err := os.ReadFile(certPath)
+	if err != nil {
+		t.Fatalf("read embed cert: %v", err)
+	}
+	block, _ := pem.Decode(pemBytes)
+	if block == nil {
+		t.Fatal("cert PEM did not decode")
+	}
+	cert, err := x509.ParseCertificate(block.Bytes)
+	if err != nil {
+		t.Fatalf("parse cert: %v", err)
+	}
+
+	for _, name := range cert.DNSNames {
+		if name == "*" {
+			t.Fatalf("cert DNSNames contains bare wildcard %q — finding 2 not fixed (DNSNames=%v)", name, cert.DNSNames)
+		}
+	}
+	hasLocalhost := false
+	for _, name := range cert.DNSNames {
+		if name == "localhost" {
+			hasLocalhost = true
+		}
+	}
+	if !hasLocalhost {
+		t.Fatalf("cert DNSNames does not contain \"localhost\" (DNSNames=%v)", cert.DNSNames)
+	}
+	if len(cert.IPAddresses) == 0 {
+		t.Fatal("cert has no IP SANs — IP-addressed LAN peers cannot verify")
+	}
+	hasLoopback := false
+	for _, ip := range cert.IPAddresses {
+		if ip.IsLoopback() {
+			hasLoopback = true
+		}
+	}
+	if !hasLoopback {
+		t.Fatalf("cert IP SANs do not include loopback (IPs=%v)", cert.IPAddresses)
 	}
 }
 
