@@ -113,9 +113,11 @@ func TestLoad_SqliteBackendRequiresPath(t *testing.T) {
 
 ---
 
-## Phase B — `internal/mobile` gomobile surface + `.aar` build
+## Phase B — `internal/mobile` native surface + `c-shared .so` build
 
-> Blocker check: requires PF2 (gomobile) + PF3 (NDK). If unavailable, STOP and surface the blocker; do not fake the `.aar`.
+> **DECISION 2026-06-02 (operator):** `gomobile bind` is BLOCKED by lava-api-go's 16 relative `replace ../submodules/*` directives (gomobile's overlay-module generator writes a 0-byte go.mod; proven on NDK 21.4 + 25.1). Replaced with **`go build -buildmode=c-shared`** (honors replace directives) + a hand-written JNI bridge. Still in-process, still cross-compiled Go. The `internal/mobile` Go package (B1, commit `b03150eb`) is done + tested; the gomobile build script (B2, `d1022a1f`) is superseded by the c-shared build (B2'). Requires NDK clang as CGO cross-compiler (CGO_ENABLED=1, CC=NDK clang per ABI).
+>
+> **Scope fix:** the embed must serve the FULL production router (the same handlers `cmd/lava-api-go` builds — search/browse/topic/auth), bound to `0.0.0.0` (designed network exposure) with a self-signed TLS cert generated at first boot, SQLite-backed — not just `/health`+`/ready` on loopback. Bind addr validated via `net.ParseIP` (security-review hardening) while explicitly allowing non-loopback.
 
 ### Task B1: `internal/mobile` package
 **Files:** Create `lava-api-go/internal/mobile/mobile.go`; Test `lava-api-go/internal/mobile/mobile_test.go`.
