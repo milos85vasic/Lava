@@ -328,3 +328,65 @@ and Challenges do work in anti-bluff manner ... they MUST confirm that
 all tested codebase really works as expected! ... execution of tests
 and Challenges MUST guarantee the quality, the completition and full
 usability by end users of the product!"
+
+---
+
+## 2026-06-02 — apiengine-missing-serialization-plugin
+
+**Root cause:** `:core:apiengine` (`core/apiengine/build.gradle.kts`) applied
+only `id("lava.android.library")` and did NOT apply the kotlinx-serialization
+compiler plugin (`id("lava.kotlin.serialization")`). `NativeApiEngine.start()`
+calls `json.encodeToString(config.toDto())` on the `@Serializable ConfigDto`
+(and `status()` decodes `@Serializable StatusDto`), but without the compiler
+plugin no serializers are generated, so the reflective lookup threw at runtime:
+`kotlinx.serialization.SerializationException: Serializer for class 'ConfigDto'
+is not found. Please ensure that class is marked as '@Serializable' and that the
+serialization compiler plugin is applied.` This is independent of R8 — the DEBUG
+build reproduces it. The on-device controller mapped the failure to Error, so the
+:api-app landing screen never reached "Running"; the Phase E real-device
+Challenges C02/C03/C04 timed out waiting for "Running". Fake-based unit tests
+(FakeApiEngine) passed because they bypass the real serializer — the canonical
+§6.J/§6.Z bluff class.
+
+**Affected files:**
+- `core/apiengine/build.gradle.kts` — applied `id("lava.kotlin.serialization")`;
+  removed the now-redundant explicit `kotlinx.serialization.json` dep (the
+  convention plugin contributes it).
+- `core/apiengine/src/main/kotlin/lava/apiengine/NativeApiEngine.kt` —
+  `ConfigDto`/`StatusDto` + `toDto()`/`toApiStatus()` changed `private` →
+  `internal`, and the `defaultJson` companion `private` → `internal`, so the JVM
+  regression test exercises the EXACT production serializer path. (Public
+  `ApiEngine`/`ApiConfig`/`ApiStatus` API unchanged.)
+
+**Fix:** apply the project's kotlinx-serialization convention plugin so the
+`@Serializable` DTOs get generated serializers.
+
+**Verification test/challenge:**
+- `core/apiengine/src/test/kotlin/lava/apiengine/ConfigSerializationTest.kt`
+  (cheap JVM, §6.T.1 reproduction). RED with plugin removed:
+  `kotlinx.serialization.SerializationException: Serializer for class 'ConfigDto'
+  is not found ...` (4/4 FAIL); GREEN with plugin applied:
+  `:core:apiengine:testDebugUnitTest BUILD SUCCESSFUL` (13/13).
+- Real-device re-run (Pixel_8 / API35 / arm64-v8a, host-direct+HVF cold boot):
+  serialization fix PROVEN — `grep -c SerializationException` over the post-Start
+  logcat is **0** (was the Phase E blocker). C01 PASS. Evidence:
+  `.lava-ci-evidence/phase-e-api-app/2026-06-02-challenge-green-after-serialization-fix.md`.
+
+**Remaining defect (separate, out of this task's scope — reported, not fixed):**
+The Challenge re-run surfaced a DISTINCT pre-existing native-linking defect in
+`lava-api-go/`: the prebuilt Go c-shared `liblavaapi.so` has no `SONAME`, so the
+JNI bridge `liblavaapi_jni.so` records the absolute host build path
+(`/Users/.../lava-api-go/build/jniLibs/arm64-v8a/liblavaapi.so`) as its
+`DT_NEEDED`, which the on-device linker cannot resolve → `dlopen failed` →
+embed-start unreachable → C02/C03/C04 still time out. Remediation (owed to
+`lava-api-go/`, NOT applied here): add
+`-ldflags="-extldflags=-Wl,-soname,liblavaapi.so"` to the `go build
+-buildmode=c-shared` in `lava-api-go/scripts/build-cshared.sh`. Full diagnosis in
+the evidence file above.
+
+**Fix commit:** _(this commit)_
+
+**Forensic anchor:** Phase E real-device Challenge run caught the serialization
+defect (`.lava-ci-evidence/phase-e-api-app/2026-06-02-phase-e-challenge-execution.md`)
+— the §6.J/§6.Z bluff class: JVM unit tests green, real embed-start broken for
+every user.

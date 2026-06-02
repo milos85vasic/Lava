@@ -35,6 +35,12 @@ import org.gradle.internal.os.OperatingSystem
 
 plugins {
     id("lava.android.library")
+    // kotlinx-serialization compiler plugin: NativeApiEngine serializes
+    // `@Serializable` ConfigDto/StatusDto via `Json.encodeToString` /
+    // `decodeFromString`. Without this plugin no serializers are generated and
+    // the on-device embed-start throws `Serializer for class 'ConfigDto' is not
+    // found` at runtime (caught by the Phase E real-device Challenge).
+    id("lava.kotlin.serialization")
 }
 
 // Absolute paths to the lava-api-go c-shared build script + its output layout.
@@ -110,7 +116,8 @@ android {
 
 dependencies {
     implementation(libs.kotlinx.coroutines.core)
-    implementation(libs.kotlinx.serialization.json)
+    // kotlinx.serialization.json is contributed by the lava.kotlin.serialization
+    // convention plugin applied above; do not double-declare it here.
 
     testImplementation(libs.junit4)
     testImplementation(libs.kotlinx.coroutines.test)

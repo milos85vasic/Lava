@@ -58,7 +58,12 @@ class NativeApiEngine(
         return dto.toApiStatus()
     }
 
-    private companion object {
+    internal companion object {
+        // The production Json configuration used for both ConfigDto encoding
+        // (start) and StatusDto decoding (status). Exposed `internal` so the
+        // JVM regression test exercises the exact same serializer path the
+        // on-device embed-start uses (the path the Phase E Challenge proved
+        // broken when the serialization compiler plugin was absent).
         val defaultJson = Json {
             ignoreUnknownKeys = true
             encodeDefaults = true
@@ -76,7 +81,7 @@ class ApiEngineException(message: String) : Exception(message)
  * treats empty as "generate one").
  */
 @Serializable
-private data class ConfigDto(
+internal data class ConfigDto(
     @SerialName("bindAddr") val bindAddr: String,
     @SerialName("port") val port: Int,
     @SerialName("sqlitePath") val sqlitePath: String,
@@ -84,7 +89,7 @@ private data class ConfigDto(
     @SerialName("authFieldName") val authFieldName: String,
 )
 
-private fun ApiConfig.toDto(): ConfigDto =
+internal fun ApiConfig.toDto(): ConfigDto =
     ConfigDto(
         bindAddr = bindAddr,
         port = port,
@@ -100,7 +105,7 @@ private fun ApiConfig.toDto(): ConfigDto =
  * they default to stopped-state zero values here.
  */
 @Serializable
-private data class StatusDto(
+internal data class StatusDto(
     @SerialName("state") val state: String = "stopped",
     @SerialName("scheme") val scheme: String = "https",
     @SerialName("bindAddr") val bindAddr: String = "",
@@ -113,7 +118,7 @@ private data class StatusDto(
     @SerialName("authKey") val authKey: String? = null,
 )
 
-private fun StatusDto.toApiStatus(): ApiStatus =
+internal fun StatusDto.toApiStatus(): ApiStatus =
     ApiStatus(
         state = state,
         bindAddr = bindAddr,
