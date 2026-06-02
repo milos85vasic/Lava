@@ -52,8 +52,11 @@ an additive SQLite storage backend (selected by `LAVA_API_STORAGE_BACKEND`,
 default `postgres` — existing deployments are unchanged) and an in-process embed
 cross-compiled for Android.
 
-The storage backend and the in-process embed (Phases A + B) have landed; the
-Android app UI is in progress. See
+The storage backend + in-process embed (Phases A + B), the `:core:apiengine`
+Kotlin JNI wrapper (Phase C), and the standalone `:api-app` infrastructure
+(Phase D-infra — the foreground service that runs the API, the mDNS announcer,
+and the encrypted per-install access-key store) have landed. The on-screen
+control panel (Phase D-ui) is in progress. See
 [`docs/ON_DEVICE_API.md`](docs/ON_DEVICE_API.md) for the architecture and
 [`docs/guides/ON_DEVICE_API_USER_GUIDE.md`](docs/guides/ON_DEVICE_API_USER_GUIDE.md)
 for the user guide.
