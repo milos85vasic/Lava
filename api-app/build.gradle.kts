@@ -51,6 +51,10 @@ android {
         // standalone API-server app reasonably targets API 23+ (the client app
         // keeps minSdk 21).
         minSdk = 23
+        // Phase E: the Compose UI Challenge Tests are @HiltAndroidTest; the
+        // custom runner swaps in HiltTestApplication so injection works in the
+        // instrumented environment (same pattern :app uses).
+        testInstrumentationRunner = "lava.api.app.LavaApiHiltTestRunner"
     }
 
     signingConfigs {
@@ -124,4 +128,28 @@ dependencies {
     // test scheduler so the ViewModel's viewModelScope coroutines run under
     // runTest). Same pattern every feature ViewModel test uses.
     testImplementation(project(":core:testing"))
+
+    // ----------------------------------------------------------------
+    // Phase E: Compose UI Challenge Tests (instrumented). These drive the
+    // REAL ApiControlScreen + ApiControlViewModel + ApiEngineController +
+    // foreground Service on a real device/emulator, then issue real HTTPS
+    // requests to the on-device embed. The Compose BOM is applied to
+    // androidTestImplementation by the AndroidCompose convention plugin, so
+    // the compose-ui-test libraries resolve without explicit versions.
+    // ----------------------------------------------------------------
+    androidTestImplementation(libs.androidx.compose.ui.test)
+    debugImplementation(libs.androidx.compose.ui.testManifest)
+    androidTestImplementation(libs.androidx.test.core)
+    androidTestImplementation(libs.androidx.test.ext)
+    androidTestImplementation(libs.androidx.test.runner)
+    androidTestImplementation(libs.androidx.test.rules)
+    androidTestImplementation(libs.androidx.test.espresso.core)
+    androidTestImplementation(libs.junit4)
+    androidTestImplementation(libs.kotlinx.coroutines.test)
+    androidTestImplementation(libs.hilt.android.testing)
+    // OkHttp is the real HTTPS client the Challenges use to hit the on-device
+    // embed over TLS (C02/C03). It is a test-only boundary tool — the embed
+    // itself is the production artifact under test.
+    androidTestImplementation(libs.okhttp.core)
+    kspAndroidTest(libs.hilt.compiler)
 }
