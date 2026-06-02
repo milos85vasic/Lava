@@ -4,20 +4,26 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import dagger.hilt.android.AndroidEntryPoint
+import lava.api.app.ui.ApiControlScreen
+import lava.designsystem.theme.LavaTheme
 
 /**
- * Placeholder entry-point Activity.
+ * Entry-point Activity hosting the Lava API landing screen (Phase D-ui).
  *
- * Phase D-infra delivers only the headless infrastructure (Service, controller,
- * advertiser, key store). The real landing screen — start/stop control, the
- * reachable URL, the auth key, the live request count — is Phase D-ui. This
- * empty Compose host keeps the manifest valid and the APK assemblable; D-ui
- * replaces the body with the actual screen + ViewModel.
+ * The screen renders the live [lava.api.app.control.ApiControlState] from the
+ * Hilt-injected [lava.api.app.control.ApiControlViewModel] (which shares the
+ * singleton [lava.api.app.control.ApiEngineController] with the foreground
+ * Service) — start/stop/restart controls, the reachable URL + LAN IPs, the live
+ * request count, and the access key.
  */
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent { }
+        setContent {
+            LavaTheme {
+                ApiControlScreen()
+            }
+        }
     }
 }

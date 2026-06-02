@@ -2,10 +2,34 @@
 <resources>
     <string name="api_app_name">Lava API</string>
 
-    <!-- Foreground-service notification (D-ui refines the copy). -->
+    <!-- Foreground-service notification. -->
     <string name="api_notification_channel_name">Lava API server</string>
     <string name="api_notification_channel_description">Shown while the on-device Lava API is serving the LAN.</string>
     <string name="api_notification_title">Lava API running</string>
+    <!-- %1$s = reachable URL, %2$d = inbound request count. -->
+    <string name="api_notification_running_body">%1$s · %2$d requests served</string>
     <string name="api_notification_action_stop">Stop</string>
     <string name="api_notification_action_restart">Restart</string>
+
+    <!-- Landing screen (Phase D-ui). -->
+    <string name="api_screen_status_stopped">Stopped</string>
+    <string name="api_screen_status_starting">Starting…</string>
+    <string name="api_screen_status_running">Running</string>
+    <string name="api_screen_status_stopping">Stopping…</string>
+    <string name="api_screen_status_error">Error</string>
+
+    <string name="api_screen_button_start">Start</string>
+    <string name="api_screen_button_stop">Stop</string>
+    <string name="api_screen_button_restart">Restart</string>
+
+    <string name="api_screen_reachable_at">Reachable at</string>
+    <string name="api_screen_other_addresses">Other addresses on this network</string>
+    <string name="api_screen_requests_served">Requests served</string>
+    <string name="api_screen_access_key">Access key</string>
+    <string name="api_screen_access_key_hint">Other devices need this key to connect.</string>
+    <string name="api_screen_copy_key">Copy</string>
+    <string name="api_screen_key_copied">Access key copied</string>
+
+    <string name="api_screen_running_explainer">The Lava API is running on this device. Other devices on the same Wi‑Fi network can discover it automatically and use it as their Lava backend — they just need the access key shown above.</string>
+    <string name="api_screen_stopped_explainer">Start the API to serve other devices on your network. While it is running, this device acts as the Lava backend that phones and tablets on the same Wi‑Fi network can connect to.</string>
 </resources>
