@@ -1,0 +1,165 @@
+#!/usr/bin/env bash
+#
+# build-cshared.sh — cross-compile the lava-api-go embed into Android-loadable
+# native libraries via `go build -buildmode=c-shared`.
+#
+# For each Android ABI, this sets CGO_ENABLED=1 + the matching NDK clang as CC,
+# then builds ./cmd/lavaapi-cshared into build/jniLibs/<abi>/liblavaapi.so plus
+# the cgo-generated liblavaapi.h header. After each build it prints the .so's
+# sha256 + size and verifies the exported LavaApi* symbols are present via the
+# NDK's llvm-nm. Unlike gomobile bind, c-shared uses normal Go module
+# resolution, so it HONORS lava-api-go's relative `replace ../submodules/*`
+# directives.
+#
+# Usage:
+#   scripts/build-cshared.sh [ABI ...]
+#     ABI ∈ { arm64-v8a, x86_64, armeabi-v7a }; default = all three.
+#
+# Env overrides:
+#   ANDROID_NDK_HOME   NDK root (default: ~/Library/Android/sdk/ndk/25.1.8937393)
+#   ANDROID_API        Android API level for the clang wrapper (default: 28)
+#
+# Anti-Bluff: this script reports REAL build output. A failed build or a missing
+# exported symbol is reported as a failure with verbatim output; no .so is
+# faked. The .so binaries are NOT committed (build/jniLibs is gitignored).
+#
+# See docs/scripts/build-cshared.sh.md for the full guide.
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+MODULE_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
+OUT_ROOT="${MODULE_DIR}/build/jniLibs"
+PKG="./cmd/lavaapi-cshared"
+
+ANDROID_NDK_HOME="${ANDROID_NDK_HOME:-${HOME}/Library/Android/sdk/ndk/25.1.8937393}"
+ANDROID_API="${ANDROID_API:-28}"
+
+# Resolve the NDK toolchain bin dir. The prebuilt dir is named for the BUILD
+# host; on Apple Silicon macs it is still 'darwin-x86_64' (run via Rosetta), so
+# we probe for whichever exists rather than assuming.
+TOOLCHAIN_ROOT="${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt"
+NDK_BIN=""
+for cand in darwin-arm64 darwin-x86_64 linux-x86_64; do
+    if [[ -d "${TOOLCHAIN_ROOT}/${cand}/bin" ]]; then
+        NDK_BIN="${TOOLCHAIN_ROOT}/${cand}/bin"
+        break
+    fi
+done
+if [[ -z "${NDK_BIN}" ]]; then
+    echo "FATAL: no NDK toolchain bin dir found under ${TOOLCHAIN_ROOT}" >&2
+    echo "       (looked for darwin-arm64 / darwin-x86_64 / linux-x86_64)" >&2
+    exit 2
+fi
+
+LLVM_NM="${NDK_BIN}/llvm-nm"
+if [[ ! -x "${LLVM_NM}" ]]; then
+    echo "FATAL: llvm-nm not found/executable at ${LLVM_NM}" >&2
+    exit 2
+fi
+
+echo "NDK:       ${ANDROID_NDK_HOME}"
+echo "NDK bin:   ${NDK_BIN}"
+echo "API level: ${ANDROID_API}"
+echo "Go:        $(go version)"
+echo
+
+# ABI → (GOARCH, clang-wrapper-basename, optional GOARM). The clang wrappers are
+# named <triple><api>-clang under the NDK bin dir.
+abi_to_goarch() {
+    case "$1" in
+        arm64-v8a)   echo "arm64" ;;
+        x86_64)      echo "amd64" ;;
+        armeabi-v7a) echo "arm" ;;
+        *) echo "" ;;
+    esac
+}
+abi_to_clang() {
+    case "$1" in
+        arm64-v8a)   echo "aarch64-linux-android${ANDROID_API}-clang" ;;
+        x86_64)      echo "x86_64-linux-android${ANDROID_API}-clang" ;;
+        armeabi-v7a) echo "armv7a-linux-androideabi${ANDROID_API}-clang" ;;
+        *) echo "" ;;
+    esac
+}
+
+ABIS=("$@")
+if [[ ${#ABIS[@]} -eq 0 ]]; then
+    ABIS=(arm64-v8a x86_64 armeabi-v7a)
+fi
+
+overall_rc=0
+
+for ABI in "${ABIS[@]}"; do
+    GOARCH="$(abi_to_goarch "${ABI}")"
+    CLANG_NAME="$(abi_to_clang "${ABI}")"
+    if [[ -z "${GOARCH}" || -z "${CLANG_NAME}" ]]; then
+        echo "ERROR: unknown ABI '${ABI}' (expected arm64-v8a|x86_64|armeabi-v7a)" >&2
+        overall_rc=1
+        continue
+    fi
+    CC="${NDK_BIN}/${CLANG_NAME}"
+    if [[ ! -x "${CC}" ]]; then
+        echo "ERROR [${ABI}]: clang wrapper not found at ${CC}" >&2
+        overall_rc=1
+        continue
+    fi
+
+    OUT_DIR="${OUT_ROOT}/${ABI}"
+    OUT_SO="${OUT_DIR}/liblavaapi.so"
+    mkdir -p "${OUT_DIR}"
+
+    echo "=== Building ${ABI} (GOARCH=${GOARCH}) ==="
+    echo "CC=${CC}"
+
+    set +e
+    (
+        cd "${MODULE_DIR}"
+        CGO_ENABLED=1 GOOS=android GOARCH="${GOARCH}" CC="${CC}" \
+            GOMAXPROCS=2 nice -n 19 \
+            go build -buildmode=c-shared -o "${OUT_SO}" "${PKG}"
+    )
+    build_rc=$?
+    set -e
+
+    if [[ ${build_rc} -ne 0 ]]; then
+        echo "FAILED [${ABI}]: go build exited ${build_rc}" >&2
+        overall_rc=1
+        echo
+        continue
+    fi
+
+    if [[ ! -f "${OUT_SO}" ]]; then
+        echo "FAILED [${ABI}]: build reported success but ${OUT_SO} is missing" >&2
+        overall_rc=1
+        echo
+        continue
+    fi
+
+    # Real evidence: file type, size, sha256.
+    SIZE="$(wc -c < "${OUT_SO}" | tr -d ' ')"
+    SHA="$(shasum -a 256 "${OUT_SO}" | awk '{print $1}')"
+    echo "Output:  ${OUT_SO}"
+    echo "Size:    ${SIZE} bytes"
+    echo "SHA256:  ${SHA}"
+    echo "File:    $(file "${OUT_SO}")"
+
+    # Verify exported symbols via the NDK llvm-nm. -D lists dynamic symbols.
+    echo "--- llvm-nm -D (LavaApi symbols) ---"
+    NM_OUT="$("${LLVM_NM}" -D "${OUT_SO}" 2>&1 | grep -E 'LavaApi' || true)"
+    echo "${NM_OUT}"
+    if echo "${NM_OUT}" | grep -q 'LavaApiStart'; then
+        echo "OK [${ABI}]: LavaApiStart present in dynamic symbol table"
+    else
+        echo "FAILED [${ABI}]: LavaApiStart NOT found in dynamic symbols" >&2
+        overall_rc=1
+    fi
+    echo
+done
+
+if [[ ${overall_rc} -eq 0 ]]; then
+    echo "ALL REQUESTED ABIS BUILT OK"
+else
+    echo "ONE OR MORE ABIS FAILED (rc=${overall_rc})" >&2
+fi
+exit ${overall_rc}

@@ -1,5 +1,8 @@
 bin/
 build/
+# c-shared Android native libs (liblavaapi.so per ABI) — built by
+# scripts/build-cshared.sh; covered by build/ above, anchored here explicitly.
+build/jniLibs/
 *.test
 *.out
 coverage.*
