@@ -26,6 +26,76 @@ Format per entry:
 
 ---
 
+## 2026-06-02 — api-app-ondevice-challenges-three-defects + harness-isolation
+
+The Containers `emulator-matrix` CLI gained a generic `--gradle-module`
+flag (Containers commit `9a61a153`); the Lava glue
+`scripts/run-api-app-challenge-matrix.sh` now forwards it so the
+`:api-app` Compose UI Challenges (C01–C04) finally **execute** against the
+`:api-app` module instead of a 0-test false-green against `:app`. Running
+them for real surfaced **three latent product defects** (all previously
+invisible because the tests had never actually run) plus a test-harness
+isolation flaw. All proven fixed: clean sequential 4/4 green on a
+cold-booted Pixel_8/API35 via the Containers runner (host-direct+HVF,
+`gating=true`).
+
+**Root cause 1 (C02 — mDNS service-name shadow → API35 crash):** in
+`NsdMdnsAdvertiser.register()`, `NsdServiceInfo().apply { this.serviceName
+= serviceName }` — inside `apply{}` the implicit receiver is the
+`NsdServiceInfo`, whose own `serviceName` property **shadowed** the
+advertiser's constructor val, so the RHS `serviceName` resolved to the
+receiver's (null) value. The service registered with an EMPTY name →
+Android 15 `NsdManager.validateService` threw `IllegalArgumentException`
+("The service name or the service type is missing") → uncaught → engine
+start crashed → instrumentation process crash (C01 ok, C02 crashed,
+C03/C04 never ran).
+
+**Root cause 2 (C03 — cross-test native-engine pollution):** the Go embed's
+`internal/mobile.current` is process-global, but Hilt rebuilds the
+`@Singleton ApiEngineController` per test. C02 starts the engine and never
+stops it; C03 then tries to Start → `mobile.Start` sees `current != nil` →
+"already running" → C03's start→Running wait times out.
+
+**Root cause 3 (C04 — notification restart-after-stop):** two bugs. (a)
+`ApiEngineController.restart()` called `stop()` first unconditionally;
+after a Stop the engine is already stopped → `mobile.Stop` returns "no
+server running" → `Error` state → `restart()` bailed before `start()`. (b)
+`ApiEngineService`'s state collector called `stopSelf()` on ANY `Stopped`,
+including the INITIAL `Stopped` a freshly-recreated Service sees while
+handling an ACTION_RESTART — destroying the Service and cancelling the
+restart coroutine before it could drive the engine up.
+
+**Root cause 4 (harness isolation flakiness):** the foreground
+`ApiEngineService` is a process-singleton that outlives the per-test Hilt
+`@Singleton` controller, so a stale Service from a prior test intercepted
+the next test's start/notification actions (driving the wrong, stale
+controller) — producing run-to-run inconsistent failures. Plus the
+on-device `OnDeviceApiClient` 15s readTimeout flaked the HTTP/2 stream
+(`SocketTimeoutException`) on the emulator's first cold-serve.
+
+**Affected files:**
+- `submodules/containers/.../cmd/emulator-matrix` + `pkg/emulator/*` (the `--gradle-module` flag, Containers commit `9a61a153`)
+- `scripts/run-api-app-challenge-matrix.sh` (forward `--gradle-module`)
+- `api-app/src/main/kotlin/lava/api/app/service/NsdMdnsAdvertiser.kt` (RC1)
+- `api-app/src/main/kotlin/lava/api/app/control/ApiEngineController.kt` (RC3a)
+- `api-app/src/main/kotlin/lava/api/app/service/ApiEngineService.kt` (RC3b)
+- `api-app/src/androidTest/.../Challenge0{1,2,3,4}*Test.kt` (RC2 + RC4 `@Before` reset + Service teardown)
+- `api-app/src/androidTest/.../OnDeviceApiClient.kt` (RC4 timeout)
+- `lava-api-go/internal/mobile/restart_repro_test.go` (NEW Go same-port-restart coverage — proved the Go embed restart is innocent)
+
+**Fix:**
+1. RC1 — capture `serviceName`/`serviceType` into LOCALS before the `apply{}` (kills the shadow) + wrap `registerService` in `runCatching` so a future platform rejection degrades gracefully instead of crashing the engine.
+2. RC2 + RC4 — each Challenge `@Before` resets the process-global native engine (`NativeApiEngine().stop()`) AND kills any stale foreground Service (`stopService`).
+3. RC3a — `restart()` skips `stop()` when already `Stopped` (just `start()`).
+4. RC3b — the Service collector self-stops only on a genuine running→stopped transition (`sawRunning` flag), never on the initial `Stopped`.
+5. RC4 — `OnDeviceApiClient` connect/read timeouts 10/15s → 20/30s.
+
+**Verification test/challenge:** `:api-app` Challenge C01–C04 EXECUTED green on cold-booted Pixel_8/API35 via the Containers runner (gating=true, host-direct+HVF). Evidence: `.lava-ci-evidence/phase-e-api-app/2026-06-02T11-32-48Z-gate/` (+ a confirmation run). Each fix falsifiability-rehearsed; the gate itself is the load-bearing on-device acceptance gate (§6.AE / §6.Z).
+**Fix commit:** `<this commit>` (parent) + Containers `9a61a153`.
+**Forensic anchor:** the `--gradle-module` flag made the never-before-run `:api-app` Challenges execute for real — the textbook §6.J/§6.L payoff: three real product defects had been invisible behind a 0-test false-green.
+
+---
+
 ## 2026-05-06 — phase1-distribute-three-bugs
 
 The first real-distribute of Lava-Android-1.2.7-1027 + lava-api-go-2.1.0

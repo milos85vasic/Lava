@@ -20,15 +20,13 @@
 #       [--no-build]                     # skip the :api-app APK rebuild
 #
 # Constitutional note (§6.AG / §6.X): the emulator boot is Containers-driven.
-# The Containers cmd/emulator-matrix CLI's instrumentation step is hardwired to
-# `./gradlew :app:connectedDebugAndroidTest` (pkg/emulator/android.go:858 +
-# containerized.go:320). It does NOT expose a --gradle-module override. Adding
-# that generic flag is a Containers-submodule change (out of this task's scope).
-# Until that flag lands, the gradle-module is parameterised HERE (--gradle-module,
-# default :api-app) and forwarded to the CLI via the LAVA_GRADLE_MODULE env var,
-# which a future Containers RunInstrumentation MAY honour. When the CLI ignores
-# it (current pin 6aff7ea8), the run is HONESTLY reported as the wrong-module
-# blocker — never a faked green (§6.Z/§6.J).
+# The Containers cmd/emulator-matrix CLI now exposes a generic --gradle-module
+# flag (landed in Containers commit 9a61a153; bare module name, default "app";
+# the runner targets :<module>:connectedDebugAndroidTest at BOTH RunInstrumentation
+# call sites — host-direct android.go + container containerized.go). This script
+# forwards --gradle-module "${GRADLE_MODULE#:}" so the :api-app instrumentation
+# tests actually run against the :api-app module instead of a 0-test false-green
+# against :app (§6.Z/§6.J).
 #
 # Classification: project-specific (Lava :api-app module + APK paths; the
 # emulator-orchestration delegation is universal per §6.X).
@@ -128,11 +126,11 @@ fi
 # --- delegate the emulator boot + instrumentation to the Containers CLI ---
 # Per §6.X/§6.AG: --runner=auto resolves to host-direct+HVF on macOS (the
 # Containers-orchestrated macOS gate runner). The CLI boots the AVD, installs
-# $APK, runs the instrumentation, and tears down. LAVA_GRADLE_MODULE is exported
-# so a future Containers RunInstrumentation that honours it runs the correct
-# module; the current pin (6aff7ea8) hardwires :app:connectedDebugAndroidTest.
+# $APK, runs the instrumentation against the --gradle-module module, and tears
+# down.
 echo "==> Delegating to Containers/cmd/emulator-matrix --runner=auto (module=$GRADLE_MODULE)"
-LAVA_GRADLE_MODULE="$GRADLE_MODULE" "$CONTAINERS_CLI" \
+"$CONTAINERS_CLI" \
+    --gradle-module "${GRADLE_MODULE#:}" \
     --runner=auto \
     --apk "$APK" \
     --avds "$AVDS_OVERRIDE" \

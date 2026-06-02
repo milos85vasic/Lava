@@ -39,6 +39,7 @@
  */
 package lava.api.app.challenges
 
+import android.content.Intent
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
@@ -48,12 +49,15 @@ import androidx.compose.ui.test.performClick
 import androidx.test.platform.app.InstrumentationRegistry
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
+import kotlinx.coroutines.runBlocking
 import lava.api.app.MainActivity
+import lava.api.app.service.ApiEngineService
 import lava.api.app.ui.TAG_RESTART
 import lava.api.app.ui.TAG_START
 import lava.api.app.ui.TAG_STATUS
 import lava.api.app.ui.TAG_STOP
 import lava.api.app.ui.TAG_URL
+import lava.apiengine.NativeApiEngine
 import org.junit.Assert.assertEquals
 import org.junit.Assert.fail
 import org.junit.Before
@@ -71,7 +75,20 @@ class Challenge03StopRestartTest {
 
     @Before
     fun freshInstallState() {
+        // Reset the process-global native engine a prior Challenge class may
+        // have left running. The Go embed's `current` is process-global, but
+        // Hilt rebuilds the @Singleton ApiEngineController per test — so without
+        // this, the next Start hits mobile.Start's "already running" guard and
+        // the start→Running wait times out. runCatching swallows the benign
+        // "no server running" when nothing was left over. (Surfaced by C03/C04
+        // once the :api-app gate first actually ran them.)
+        runCatching { runBlocking { NativeApiEngine().stop() } }
         val ctx = InstrumentationRegistry.getInstrumentation().targetContext
+        // Kill any foreground Service a prior Challenge left running: it holds
+        // that prior test's @Singleton controller (Hilt rebuilds the controller
+        // per test), and a stale Service would intercept THIS test's start /
+        // notification actions, driving the wrong (stale) controller.
+        ctx.stopService(Intent(ctx, ApiEngineService::class.java))
         ctx.filesDir.listFiles()?.forEach { it.deleteRecursively() }
     }
 

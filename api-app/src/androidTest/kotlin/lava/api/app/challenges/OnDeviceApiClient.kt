@@ -82,8 +82,12 @@ class OnDeviceApiClient(
         }
         return OkHttpClient.Builder()
             .sslSocketFactory(sslContext.socketFactory, trustManager)
-            .connectTimeout(10, TimeUnit.SECONDS)
-            .readTimeout(15, TimeUnit.SECONDS)
+            // Generous timeouts: the on-device embed's FIRST request after a
+            // cold start does a TLS handshake against a just-bound listener on a
+            // resource-constrained emulator; 15s readTimeout flaked the HTTP/2
+            // stream (SocketTimeoutException). 20s/30s absorbs that cold-serve.
+            .connectTimeout(20, TimeUnit.SECONDS)
+            .readTimeout(30, TimeUnit.SECONDS)
             .build()
     }
 

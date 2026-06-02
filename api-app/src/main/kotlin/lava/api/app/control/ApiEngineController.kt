@@ -82,13 +82,21 @@ class ApiEngineController(
         )
     }
 
-    /** Stops then starts, passing through [ApiControlState.Starting]. */
+    /**
+     * Restart always ends [ApiControlState.Running] regardless of the starting
+     * state. When the embed is already stopped (e.g. the user tapped Stop then
+     * Restart, or the notification Restart action fires after a Stop) there is
+     * nothing to stop — calling [stop] would hit the embed's "no server running"
+     * guard and surface a spurious [ApiControlState.Error], so we skip straight
+     * to [start]. Only a stop that FAILS from a live state leaves an unknown
+     * state worth halting on (that branch still returns Error and does NOT
+     * start). Passes through [ApiControlState.Starting].
+     */
     suspend fun restart() {
-        stop()
-        // Only proceed to start if the stop did not surface an error; a failed
-        // stop leaves the embed in an unknown state, so surfacing Error and
-        // halting is the honest behavior.
-        if (_state.value is ApiControlState.Error) return
+        if (_state.value !is ApiControlState.Stopped) {
+            stop()
+            if (_state.value is ApiControlState.Error) return
+        }
         start()
     }
 

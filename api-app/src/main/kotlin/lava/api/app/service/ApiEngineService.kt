@@ -62,6 +62,15 @@ class ApiEngineService : Service() {
     private var wifiLock: WifiManager.WifiLock? = null
     private var wakeLock: PowerManager.WakeLock? = null
 
+    // True once the engine has been observed Running in THIS Service instance.
+    // The collector self-stops the Service only on a GENUINE running→stopped
+    // transition — NOT on the INITIAL Stopped a freshly-created Service sees when
+    // it was started to handle ACTION_START/ACTION_RESTART while the engine is
+    // currently stopped (otherwise the Service self-destructs and cancels the
+    // action's controller.restart()/start() coroutine before it can drive the
+    // engine up — the notification Restart-after-Stop defect C04 surfaced).
+    private var sawRunning = false
+
     override fun onCreate() {
         super.onCreate()
         ensureChannel()
@@ -71,13 +80,19 @@ class ApiEngineService : Service() {
             controller.state.collectLatest { state ->
                 when (state) {
                     is ApiControlState.Running -> {
+                        sawRunning = true
                         acquireLocks()
                         updateNotification(state)
                     }
                     is ApiControlState.Stopped -> {
                         releaseLocks()
-                        stopForeground(STOP_FOREGROUND_REMOVE)
-                        stopSelf()
+                        // Only tear the Service down on a real running→stopped
+                        // transition; never on the initial Stopped a fresh
+                        // Service sees while handling an ACTION_RESTART/START.
+                        if (sawRunning) {
+                            stopForeground(STOP_FOREGROUND_REMOVE)
+                            stopSelf()
+                        }
                     }
                     is ApiControlState.Error -> {
                         releaseLocks()

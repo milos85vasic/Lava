@@ -1,0 +1,26 @@
+{
+  "all_passed": true,
+  "finished_at": "2026-06-02T16:33:59+05:00",
+  "gating": true,
+  "rows": [
+    {
+      "avd": "Pixel_8",
+      "api_level": 35,
+      "form_factor": "phone",
+      "boot_seconds": 16.590906875,
+      "test_class": "lava.api.app.challenges.Challenge01ApiAppColdStartTest,lava.api.app.challenges.Challenge02ApiAppBootAndServeTest,lava.api.app.challenges.Challenge03StopRestartTest,lava.api.app.challenges.Challenge04NotificationActionsTest",
+      "test_passed": true,
+      "test_seconds": 34.080838167,
+      "gradle_log_path": "Pixel_8/gradle.log",
+      "diag": {
+        "target": "Android 15.0 (\"VanillaIceCream\") Tag/ABI: google_apis_playstore/arm64-v8a",
+        "sdk": 35,
+        "device": "sdk_gphone64_arm64",
+        "adb_devices_state": "localhost:5555         device product:sdk_gphone64_arm64 model:sdk_gphone64_arm64 device:emu64a transport_id:34"
+      },
+      "failure_summaries": [],
+      "concurrent": 1
+    }
+  ],
+  "started_at": "2026-06-02T16:33:05+05:00"
+}
