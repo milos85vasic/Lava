@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Material3 base theme. The Compose UI applies LavaTheme at runtime;
+         this manifest theme only needs to be a valid AppCompat-free
+         Material3 parent for the splash/window background. -->
+    <style name="Theme.LavaApi" parent="android:Theme.Material.Light.NoActionBar" />
+</resources>

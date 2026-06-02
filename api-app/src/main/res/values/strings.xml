@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="api_app_name">Lava API</string>
+
+    <!-- Foreground-service notification (D-ui refines the copy). -->
+    <string name="api_notification_channel_name">Lava API server</string>
+    <string name="api_notification_channel_description">Shown while the on-device Lava API is serving the LAN.</string>
+    <string name="api_notification_title">Lava API running</string>
+    <string name="api_notification_action_stop">Stop</string>
+    <string name="api_notification_action_restart">Restart</string>
+</resources>
