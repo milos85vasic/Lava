@@ -55,3 +55,38 @@ The proxy listens on `0.0.0.0:8080` and advertises itself via mDNS.
 | Discovery is slow | mDNS can take a few seconds. The scan timeout is 5 seconds. |
 | Auto-connect didn't happen | If you already have a custom mirror configured, the app will not auto-switch. Manually select the discovered endpoint in connection settings. |
 | mDNS blocked on corporate networks | Some corporate networks block multicast. Use manual endpoint entry instead. |
+
+## On-device API instances (`platform=android`)
+
+In addition to a host-run `lava-api-go` server, a phone or tablet running the
+**Lava API Android app** can itself become a LAN-reachable API (see
+[`ON_DEVICE_API.md`](ON_DEVICE_API.md)). It advertises on the same service types
+the client already watches, distinguished only by a TXT key:
+
+| Source | Service type | TXT records |
+|---|---|---|
+| Host server (release) | `_lava-api._tcp` | `engine=go`, `platform=server` (or absent) |
+| Host server (dev) | `_lava-api-dev._tcp` | `engine=go-dev` |
+| On-device app (release) | `_lava-api._tcp` | `engine=go`, **`platform=android`**, `storage=sqlite`, `version=<n>` |
+| On-device app (dev) | `_lava-api-dev._tcp` | `engine=go-dev`, **`platform=android`**, `storage=sqlite` |
+
+The client discovery (`LocalNetworkDiscoveryServiceImpl`) already resolves these
+to `Endpoint.GoApi(host, port)` via the authoritative TXT `engine` attribute
+(falling back to the service type). Instances without a `platform` key render
+exactly as today, so this is fully backward compatible. The client labelling
+that calls out "an Android device on this network" using the `platform=android`
+key is **PENDING sub-project 2**.
+
+> **PENDING (Phase D):** the on-device *advertiser* (the embed registering itself
+> via `NsdManager`) is not yet in the tree. The client-side discovery described
+> above is in-tree and unchanged.
+
+### Authentication when connecting to a discovered API
+
+Discovery only finds an instance; **connecting requires the Lava-Auth key**.
+Every `lava-api-go` instance — host-run or on-device — enforces a Lava-Auth gate
+(HMAC-SHA256 over a base64 UUID credential in the `Lava-Auth` header, with a
+per-IP backoff ladder). `/health` and `/ready` answer without a credential so
+discovery probes work, but any data endpoint returns 401 without the correct
+key. For an on-device API, the key is generated (or supplied) by the API app and
+shown for pairing — see the [user guide](guides/ON_DEVICE_API_USER_GUIDE.md).

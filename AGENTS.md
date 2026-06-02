@@ -25,6 +25,8 @@ The agent instruction file for Qwen Code is `QWEN.md` (a plain-text pointer to
 2. **Go API Service** (`lava-api-go/`) — a headless Go/Gin server (SP-2 onward) that scrapes rutracker.org and exposes a JSON REST API over HTTP/3 and HTTP/2. This is the primary backend.
 3. **Proxy Server** (`:proxy`) — a legacy Ktor/Netty server that also scrapes rutracker.org. It is built as a fat JAR and containerized with Docker. Retained as an opt-in fallback.
 
+A fourth artifact is in progress: the **Lava API Android app** (`:api-app`, applicationId `digital.vasic.lava.api`) — a standalone app that boots the full `lava-api-go` server **in-process** on a phone/tablet, backed by a local SQLite database, and exposes it on the LAN via mDNS. Phases A (additive SQLite storage backend, selected by `LAVA_API_STORAGE_BACKEND`; Postgres default unchanged) and B (the `internal/mobile` `Start`/`Stop`/`Status` embed + the `go build -buildmode=c-shared` native build at `lava-api-go/scripts/build-cshared.sh` + JNI bridge `digital.vasic.lava.apigo.LavaNative`) have landed. The `:core:apiengine` wrapper, `:api-app` Compose module, foreground service, on-device NsdManager advertiser, and landing UI are **PENDING (Phases C/D/E)**. See [`docs/ON_DEVICE_API.md`](docs/ON_DEVICE_API.md) and [`docs/scripts/build-cshared.sh.md`](docs/scripts/build-cshared.sh.md). Note: `gomobile bind` is blocked on this module by the relative `replace ../submodules/*` directives — c-shared is the chosen path.
+
 The project is a fork of `andrikeev/Flow`, maintained under `milos85vasic/Lava`. All source code, comments, and documentation are in **English**.
 
 - **App ID:** `digital.vasic.lava.client`
@@ -113,7 +115,7 @@ Consult `settings.gradle.kts` for the live module list. The exact count fluctuat
 
 - `:app` — Entry point. Contains `Application`, `MainActivity`, `TvActivity`, and the top-level navigation graph. Depends on every core and feature module.
 - `:proxy` — Ktor/Netty server exposing REST endpoints. Built as a fat JAR and containerized with Docker. Legacy fallback.
-- `lava-api-go/` — Go/Gin server exposing REST endpoints over HTTP/3 + HTTP/2. Primary backend. Built as a static binary and a distroless Docker image.
+- `lava-api-go/` — Go/Gin server exposing REST endpoints over HTTP/3 + HTTP/2. Primary backend. Built as a static binary and a distroless Docker image. Also hosts the on-device-API additions: `internal/storage/` (backend-agnostic cache boundary with `postgres` + pure-Go `sqlite` impls), `internal/mobile/` (the in-process `Start`/`Stop`/`Status` embed), and `cmd/lavaapi-cshared/` (the `go build -buildmode=c-shared` native entry + `jni/` bridge). See [`docs/ON_DEVICE_API.md`](docs/ON_DEVICE_API.md).
 - `core:*` — Shared libraries. Pure Kotlin modules (`models`, `common`, `auth/api`, `network/api`, `tracker:api`, `tracker:registry`, `tracker:mirror`, `tracker:rutracker`, `tracker:rutor`, `tracker:testing`, `work/api`) have **no Android dependency**. The Android-bearing tracker module is `:core:tracker:client` (Hilt + WorkManager + Room access).
 - `feature:*` — Screen-level modules. Each feature typically contains a ViewModel (Orbit MVI), Compose screens, and a navigation contract.
 

@@ -251,3 +251,39 @@ feature:menu
 proxy
     └── JmDNS advertisement
 ```
+
+---
+
+## On-Device Lava API (Android) — third app + SQLite backend
+
+A third artifact is being added alongside `:app` (the client) and the host
+`lava-api-go` server: a standalone **Lava API Android app** (`:api-app`,
+applicationId `digital.vasic.lava.api`, debug suffix `.dev`) that boots the full
+Lava API **in-process** on a phone/tablet, backed by a local SQLite database,
+and exposes it on the LAN via mDNS.
+
+**Landed (Phases A + B):**
+
+- **Additive SQLite storage backend** in `lava-api-go`. A `storage.Storage`
+  interface (`Get`/`Set`/`Invalidate`/`Close`) with two interchangeable
+  implementations — the existing Postgres adapter (unchanged) and a new pure-Go
+  `modernc.org/sqlite` impl (WAL, INCREMENTAL auto_vacuum, 10-min background GC,
+  lazy TTL expiry). Selected at startup by `LAVA_API_STORAGE_BACKEND`
+  (`postgres` default | `sqlite`). The Postgres default behaves byte-for-byte as
+  before.
+- **In-process Go embed** (`internal/mobile`): `Start`/`Stop`/`Status` boot the
+  EXACT production Gin router (shared `internal/router.Build`) over HTTP/1.1+H2
+  TLS, bound to `0.0.0.0`, SQLite-backed, enforcing the identical Lava-Auth gate
+  the host binary uses. Cross-compiled for Android via
+  `go build -buildmode=c-shared` (gomobile is blocked by the relative
+  `replace ../submodules/*` directives) plus a hand-written JNI bridge exposing
+  `digital.vasic.lava.apigo.LavaNative` (`nativeStart`/`Stop`/`Status`).
+
+**Pending (Phases C/D/E):** the `:core:apiengine` Kotlin wrapper, the `:api-app`
+Compose module, the foreground `ApiEngineService`, the on-device `NsdManager`
+advertiser (TXT `engine=go, platform=android, storage=sqlite`), the landing UI,
+and the instrumented Challenge tests.
+
+Full detail and Mermaid diagrams (component, lifecycle, mDNS+auth sequence,
+build pipeline): [`docs/ON_DEVICE_API.md`](ON_DEVICE_API.md). User-facing guide:
+[`docs/guides/ON_DEVICE_API_USER_GUIDE.md`](guides/ON_DEVICE_API_USER_GUIDE.md).

@@ -42,6 +42,22 @@ seven-step recipe in [`docs/sdk-developer-guide.md`](docs/sdk-developer-guide.md
 [<img src="badges/github-badge.png" alt="Get it on GitHub" height="90">][3]
 [<img src="badges/rustore-badge.png" alt="Get it on RuStore" height="90">][4]
 
+## Run the Lava API on your device (new)
+
+Lava is adding a standalone **Lava API Android app** that boots the full Lava
+API server **in-process** on a phone or tablet, backed by a local **SQLite**
+database, and exposes it on your Wi-Fi so other Lava devices can discover and
+use it — no separate server needed. The same `lava-api-go` server now supports
+an additive SQLite storage backend (selected by `LAVA_API_STORAGE_BACKEND`,
+default `postgres` — existing deployments are unchanged) and an in-process embed
+cross-compiled for Android.
+
+The storage backend and the in-process embed (Phases A + B) have landed; the
+Android app UI is in progress. See
+[`docs/ON_DEVICE_API.md`](docs/ON_DEVICE_API.md) for the architecture and
+[`docs/guides/ON_DEVICE_API_USER_GUIDE.md`](docs/guides/ON_DEVICE_API_USER_GUIDE.md)
+for the user guide.
+
 ## Screenshots
 
 <details>
