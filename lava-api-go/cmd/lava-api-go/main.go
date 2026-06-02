@@ -36,12 +36,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus"
 
-	pgcache "digital.vasic.cache/pkg/postgres"
 	"digital.vasic.ratelimiter/pkg/ladder"
 
 	"digital.vasic.lava.apigo/internal/archiveorg"
 	"digital.vasic.lava.apigo/internal/auth"
-	"digital.vasic.lava.apigo/internal/cache"
 	"digital.vasic.lava.apigo/internal/config"
 	"digital.vasic.lava.apigo/internal/discovery"
 	"digital.vasic.lava.apigo/internal/firebase"
@@ -56,6 +54,7 @@ import (
 	"digital.vasic.lava.apigo/internal/ratelimit"
 	"digital.vasic.lava.apigo/internal/rutracker"
 	"digital.vasic.lava.apigo/internal/server"
+	"digital.vasic.lava.apigo/internal/storage"
 	"digital.vasic.lava.apigo/internal/version"
 )
 
@@ -117,20 +116,17 @@ func run() error {
 		tracer = nil
 	}
 
-	pgClient, err := pgcache.ConnectFromURL(ctx, &pgcache.Config{
-		URL:        cfg.PGUrl,
-		SchemaName: cfg.PGSchema,
-		TableName:  "response_cache",
-		GCInterval: 10 * time.Minute,
-	})
+	// Storage backend selection (Phase A). The factory connects/opens the
+	// configured backend (postgres = the exact pgcache config the server has
+	// always used; sqlite = pure-Go modernc.org/sqlite) and returns the
+	// backend-agnostic Storage + its /ready probe. Default is postgres, so
+	// existing deployments are unaffected.
+	store, storeReady, err := storage.New(cfg)
 	if err != nil {
-		return fmt.Errorf("postgres connect: %w", err)
+		return fmt.Errorf("storage init: %w", err)
 	}
-	defer func() { _ = pgClient.Close() }()
-	pgClient.Start()
-
-	c := cache.New(pgClient)
-	_ = c // currently consumed by handlers.Register; kept for explicitness when handlers grow
+	defer func() { _ = store.Close() }()
+	c := store // consumed by handlers.Register as handlers.Cache / v1.Cache
 
 	_ = ratelimit.New(ratelimit.DefaultConfig()) // route-class limiters; per-route mounting deferred to Phase 10/11
 
@@ -175,12 +171,7 @@ func run() error {
 		Metrics:    metrics,
 		PromReg:    metricsRegistry,
 		Firebase:   fbClient,
-		Readiness: func(ctx context.Context) error {
-			if err := pgClient.HealthCheck(ctx); err != nil {
-				return fmt.Errorf("postgres: %w", err)
-			}
-			return nil
-		},
+		Readiness: observability.ReadinessProbe(storeReady),
 	})
 
 	tlsConfig, err := loadTLSConfig(cfg.TLSCertPath, cfg.TLSKeyPath)
