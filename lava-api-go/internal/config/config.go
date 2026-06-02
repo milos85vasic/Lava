@@ -21,8 +21,19 @@ import (
 	"time"
 )
 
+// Storage backend identifiers (LAVA_API_STORAGE_BACKEND values).
+const (
+	BackendPostgres = "postgres"
+	BackendSQLite   = "sqlite"
+)
+
 // Config is the validated runtime configuration for the lava-api-go service.
 type Config struct {
+	// Storage backend selection (additive — default preserves today's
+	// Postgres-only behavior exactly).
+	StorageBackend string // "postgres" (default) | "sqlite"
+	SQLitePath     string // required IFF StorageBackend == "sqlite"
+
 	// Postgres
 	PGUrl    string
 	PGSchema string
@@ -75,6 +86,8 @@ type Config struct {
 // variable is missing or out of range.
 func Load() (*Config, error) {
 	cfg := &Config{
+		StorageBackend:     envDefault("LAVA_API_STORAGE_BACKEND", BackendPostgres),
+		SQLitePath:         os.Getenv("LAVA_API_SQLITE_PATH"),
 		PGUrl:              os.Getenv("LAVA_API_PG_URL"),
 		PGSchema:           envDefault("LAVA_API_PG_SCHEMA", "lava_api"),
 		Listen:             envDefault("LAVA_API_LISTEN", ":8443"),
@@ -142,8 +155,23 @@ func Load() (*Config, error) {
 	cfg.BrotliRequestDecodeEnabled = envBool("LAVA_API_BROTLI_REQUEST_DECODE_ENABLED", false)
 	cfg.ProtocolMetricEnabled = envBool("LAVA_API_PROTOCOL_METRIC_ENABLED", true)
 
-	if cfg.PGUrl == "" {
-		return nil, errors.New("config: LAVA_API_PG_URL is required (P1 hard-dep)")
+	// === Storage backend validation (additive) ===
+	// PGUrl is required IFF the backend is postgres (preserves today's
+	// hard-dep behavior for the default + explicit postgres backend).
+	// SQLitePath is required IFF the backend is sqlite. Unknown backends
+	// are rejected outright.
+	switch cfg.StorageBackend {
+	case BackendPostgres:
+		if cfg.PGUrl == "" {
+			return nil, errors.New("config: LAVA_API_PG_URL is required (P1 hard-dep)")
+		}
+	case BackendSQLite:
+		if cfg.SQLitePath == "" {
+			return nil, errors.New("config: LAVA_API_SQLITE_PATH is required when LAVA_API_STORAGE_BACKEND=sqlite")
+		}
+	default:
+		return nil, fmt.Errorf("config: unknown storage backend %q (want %q or %q)",
+			cfg.StorageBackend, BackendPostgres, BackendSQLite)
 	}
 	if cfg.TLSCertPath == "" || cfg.TLSKeyPath == "" {
 		return nil, errors.New("config: LAVA_API_TLS_CERT and LAVA_API_TLS_KEY are required")
