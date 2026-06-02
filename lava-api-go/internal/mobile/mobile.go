@@ -43,9 +43,10 @@
 //
 // TLS: a self-signed cert+key is generated on first boot into the SQLite
 // directory (cert.pem / key.pem alongside the DB) and persisted across
-// restarts. The cert's SANs include the loopback addresses, the host's
-// non-loopback LAN IPs discovered at boot, and a DNS wildcard so other devices
-// addressing this server by IP do not get a hostname-mismatch error. Full
+// restarts. The cert's SANs cover the loopback addresses and the host's
+// non-loopback LAN IPs discovered at boot (IP SANs), plus the "localhost" DNS
+// name; the bare DNS wildcard was removed per the 2026-06-02 security review, so
+// devices address this server by its LAN IP (matched via the IP SANs). Full
 // client-trust handling (pinning the cert on the consuming devices, or an ACME/
 // local-CA flow) is a later sub-project; today the SAN coverage minimizes
 // host-mismatch errors and the consuming client is expected to trust the

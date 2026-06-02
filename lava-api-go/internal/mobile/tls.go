@@ -75,8 +75,9 @@ func tlsConfigFrom(cert tls.Certificate) *tls.Config {
 }
 
 // generateSelfSigned mints a fresh ECDSA P-256 self-signed certificate covering
-// loopback + the supplied LAN IPs + a DNS wildcard, returning the parsed
-// tls.Certificate plus its PEM encodings for persistence.
+// loopback + the supplied LAN IPs (IP SANs) plus the "localhost" DNS name —
+// no wildcard DNS SAN (removed per the 2026-06-02 security review). Returns the
+// parsed tls.Certificate plus its PEM encodings for persistence.
 func generateSelfSigned(sanIPs []net.IP) (tls.Certificate, []byte, []byte, error) {
 	priv, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	if err != nil {
