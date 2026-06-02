@@ -19,6 +19,7 @@ dependencyResolutionManagement {
 rootProject.name = "Lava"
 
 include(":app")
+include(":core:apiengine")
 include(":core:auth:api")
 include(":core:auth:impl")
 include(":core:common")
