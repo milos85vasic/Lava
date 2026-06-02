@@ -15,6 +15,7 @@ import (
 	"digital.vasic.lava.apigo/internal/cache"
 	gen "digital.vasic.lava.apigo/internal/gen/server"
 	"digital.vasic.lava.apigo/internal/observability"
+	apirouter "digital.vasic.lava.apigo/internal/router"
 	"digital.vasic.lava.apigo/internal/rutracker"
 )
 
@@ -127,7 +128,7 @@ func TestMain_BuildsAndPrintsHelp(t *testing.T) {
 func TestMain_BuildRouterRegistersAllRoutes(t *testing.T) {
 	metrics := observability.NewMetrics(prometheus.NewRegistry())
 
-	router := buildRouter(routerDeps{
+	engine := apirouter.Build(apirouter.Deps{
 		Cache:     stubCache{},
 		Scraper:   stubScraper{},
 		Metrics:   metrics,
@@ -135,9 +136,9 @@ func TestMain_BuildRouterRegistersAllRoutes(t *testing.T) {
 	})
 
 	const want = 15
-	got := len(router.Routes())
+	got := len(engine.Routes())
 	if got < want {
-		t.Fatalf("buildRouter registered %d routes; want >= %d (13 handler routes + /health + /ready)", got, want)
+		t.Fatalf("router.Build registered %d routes; want >= %d (13 handler routes + /health + /ready)", got, want)
 	}
 
 	// Sanity-check a couple of well-known routes are present so a
@@ -148,7 +149,7 @@ func TestMain_BuildRouterRegistersAllRoutes(t *testing.T) {
 		"POST": "/login",
 	}
 	have := map[string]map[string]bool{}
-	for _, r := range router.Routes() {
+	for _, r := range engine.Routes() {
 		if have[r.Method] == nil {
 			have[r.Method] = map[string]bool{}
 		}
@@ -156,7 +157,7 @@ func TestMain_BuildRouterRegistersAllRoutes(t *testing.T) {
 	}
 	for method, path := range mustHave {
 		if !have[method][path] {
-			t.Errorf("route %s %s is missing from buildRouter output", method, path)
+			t.Errorf("route %s %s is missing from router.Build output", method, path)
 		}
 	}
 }

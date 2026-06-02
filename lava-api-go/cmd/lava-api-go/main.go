@@ -33,25 +33,21 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus"
 
 	"digital.vasic.ratelimiter/pkg/ladder"
 
 	"digital.vasic.lava.apigo/internal/archiveorg"
-	"digital.vasic.lava.apigo/internal/auth"
 	"digital.vasic.lava.apigo/internal/config"
 	"digital.vasic.lava.apigo/internal/discovery"
 	"digital.vasic.lava.apigo/internal/firebase"
 	"digital.vasic.lava.apigo/internal/gutenberg"
-	"digital.vasic.lava.apigo/internal/handlers"
-	v1handlers "digital.vasic.lava.apigo/internal/handlers/v1"
 	"digital.vasic.lava.apigo/internal/kinozal"
-	"digital.vasic.lava.apigo/internal/middleware"
 	"digital.vasic.lava.apigo/internal/nnmclub"
 	"digital.vasic.lava.apigo/internal/observability"
 	"digital.vasic.lava.apigo/internal/provider"
 	"digital.vasic.lava.apigo/internal/ratelimit"
+	apirouter "digital.vasic.lava.apigo/internal/router"
 	"digital.vasic.lava.apigo/internal/rutracker"
 	"digital.vasic.lava.apigo/internal/server"
 	"digital.vasic.lava.apigo/internal/storage"
@@ -162,7 +158,7 @@ func run() error {
 	// advance the counter again.
 	authLadder := ladder.New(cfg.AuthBackoffSteps)
 
-	router := buildRouter(routerDeps{
+	engine := apirouter.Build(apirouter.Deps{
 		Cfg:        cfg,
 		AuthLadder: authLadder,
 		Cache:      c,
@@ -171,7 +167,7 @@ func run() error {
 		Metrics:    metrics,
 		PromReg:    metricsRegistry,
 		Firebase:   fbClient,
-		Readiness: observability.ReadinessProbe(storeReady),
+		Readiness:  observability.ReadinessProbe(storeReady),
 	})
 
 	tlsConfig, err := loadTLSConfig(cfg.TLSCertPath, cfg.TLSKeyPath)
@@ -182,7 +178,7 @@ func run() error {
 	srv, err := server.New(server.Config{
 		Listen:         cfg.Listen,
 		MetricsListen:  cfg.MetricsListen,
-		Engine:         router,
+		Engine:         engine,
 		MetricsHandler: metrics.Handler(),
 		TLSConfig:      tlsConfig,
 	})
@@ -238,89 +234,6 @@ func run() error {
 
 	logger.Info("shutdown complete")
 	return nil
-}
-
-// routerDeps bundles what buildRouter needs. Held as a struct so a
-// future addition (rate limiter, audit writer, …) does not change the
-// function signature.
-type routerDeps struct {
-	Cfg        *config.Config
-	AuthLadder *ladder.Ladder
-	Cache      handlers.Cache
-	Scraper    handlers.ScraperClient
-	Registry   *provider.ProviderRegistry
-	Metrics    *observability.Metrics
-	PromReg    prometheus.Registerer
-	Readiness  observability.ReadinessProbe
-	Firebase   firebase.Client
-}
-
-// buildRouter assembles the Gin engine. Factored out of run() so it can
-// be exercised by main_test.go without booting Postgres or HTTP/3 — the
-// Sixth Law clause 2 falsifiability rehearsal targets this function:
-// removing handlers.Register here makes len(router.Routes()) drop
-// below the expected count and the test fails with a clear message.
-func buildRouter(deps routerDeps) *gin.Engine {
-	gin.SetMode(gin.ReleaseMode)
-	router := gin.New()
-	router.Use(gin.Recovery())
-	router.Use(middleware.FirebaseTelemetry(deps.Firebase))
-
-	// Phase 1 (2026-05-06): /health + /ready MUST be registered BEFORE
-	// the auth middleware so the orchestrator's liveness probe (podman
-	// HEALTHCHECK, k8s readiness, scripts/distribute-api-remote.sh's
-	// 60-second health wait) can hit them without a Lava-Auth header.
-	// Without this exemption the auth middleware returns 401, the
-	// orchestrator marks the container unhealthy, and a restart loop
-	// kicks in. Liveness/readiness probes are infrastructure, not
-	// user-facing API surfaces — they predate Phase 1's auth model.
-	router.GET("/health", observability.LivenessHandler())
-	router.GET("/ready", observability.ReadinessHandler(deps.Readiness))
-
-	// Phase 2a (2026-05-07): /v1/search registered BEFORE auth middleware
-	// so multi-provider SSE search works without the Lava-Auth header.
-	// Individual providers handle their own authentication through
-	// per-provider credentials (FORM_LOGIN, cookies, etc.). The per-provider
-	// /v1/:provider/search routes below auth middleware still require
-	// Lava-Auth — this exemption is scoped to the aggregator endpoint only.
-
-	// Phase 8 protocol metric MUST be first in the auth-gated chain so
-	// its post-c.Next() block reads the final c.Writer.Status() —
-	// including 401/426/429 from auth + backoff middlewares that abort
-	// early.
-	if deps.Cfg != nil {
-		router.Use(server.NewProtocolMetricMiddleware(deps.Cfg.ProtocolMetricEnabled, deps.PromReg))
-	}
-	// Phase 7 (§6.G): backoff fires FIRST among auth middlewares so
-	// blocked IPs short-circuit with 429 + Retry-After before
-	// AuthMiddleware can advance the counter again. Both middlewares
-	// share the same ladder.Ladder instance constructed in run().
-	if deps.Cfg != nil && deps.AuthLadder != nil {
-		router.Use(auth.NewBackoffMiddleware(deps.AuthLadder, deps.Cfg.AuthTrustedProxies))
-		router.Use(auth.NewMiddleware(deps.Cfg, deps.AuthLadder))
-	}
-	router.Use(auth.GinMiddleware())
-	if deps.Metrics != nil {
-		router.Use(deps.Metrics.GinMiddleware())
-	}
-	// Brotli + Alt-Svc on the success path (after auth gates).
-	if deps.Cfg != nil {
-		router.Use(server.NewBrotliMiddleware(deps.Cfg.BrotliResponseEnabled, deps.Cfg.BrotliQuality))
-		router.Use(server.NewAltSvcMiddleware(deps.Cfg.HTTP3Enabled, deps.Cfg.Listen))
-	}
-
-	handlers.Register(router, &handlers.Deps{
-		Cache:   deps.Cache,
-		Scraper: deps.Scraper,
-	})
-
-	// v1 provider-agnostic routes
-	v1 := router.Group("/v1/:provider")
-	v1handlers.Register(v1, &v1handlers.Deps{
-		Cache: deps.Cache,
-	})
-
-	return router
 }
 
 // loadTLSConfig builds a tls.Config suitable for HTTP/3 (TLS 1.3, h3

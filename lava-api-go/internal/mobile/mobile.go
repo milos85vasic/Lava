@@ -12,25 +12,41 @@
 //   - Exactly one server instance may run per process. A package-level handle
 //     guarded by a mutex enforces this; Start while running returns an error.
 //
-// Transport choice (documented per the Phase B task): the production
-// cmd/lava-api-go binary serves HTTP/3 + HTTP/2-over-TLS on the LAN, requiring
-// on-disk TLS material and UDP/QUIC sockets. Neither is appropriate for an
-// in-process embed that the host Android app reaches over loopback. This
-// surface therefore serves PLAIN HTTP on the configured loopback bind address.
-// It is NOT a LAN listener: it is an in-app local server the client talks to
-// over 127.0.0.1, so TLS would only add a self-signed-cert dance with no
-// security benefit on loopback. The real storage backend (SQLite via the
-// production storage.New factory) and the real /health + /ready handlers are
-// used unchanged — only the transport differs from the LAN binary, by design.
+// What this surface serves: the FULL production API. The embed builds the EXACT
+// SAME Gin engine the production cmd/lava-api-go binary builds, via the shared
+// internal/router.Build constructor (search/browse/topic/forum/torrent/login/
+// favorites/captcha + /v1/{provider}/... + /health + /ready). The ONLY
+// difference from the LAN binary is transport: the embed serves HTTP/1.1 + H2
+// over TLS using a standard net/http server, where the binary additionally
+// serves HTTP/3 (QUIC). HTTP/3 is not required for the embed — the LAN clients
+// that discover this on-device API speak ordinary HTTPS.
+//
+// Network exposure is the intended design per the on-device-API spec: this
+// server binds 0.0.0.0 by default so OTHER devices on the LAN can discover and
+// use it. Loopback-only would defeat the feature (the whole point is that a
+// phone running the embed becomes a LAN-reachable Lava API for tablets, TVs,
+// and other phones). The automated security-review finding that suggested
+// loopback-only is therefore explicitly overridden here.
+//
+// TLS: a self-signed cert+key is generated on first boot into the SQLite
+// directory (cert.pem / key.pem alongside the DB) and persisted across
+// restarts. The cert's SANs include the loopback addresses, the host's
+// non-loopback LAN IPs discovered at boot, and a DNS wildcard so other devices
+// addressing this server by IP do not get a hostname-mismatch error. Full
+// client-trust handling (pinning the cert on the consuming devices, or an ACME/
+// local-CA flow) is a later sub-project; today the SAN coverage minimizes
+// host-mismatch errors and the consuming client is expected to trust the
+// presented leaf cert out-of-band.
 //
 // Decoupled Reusable rationale: this file is Lava-domain glue tying the
-// existing internal packages (storage, observability) into an embeddable
-// lifecycle. It introduces no logic another vasic-digital project would
-// consume directly.
+// existing internal packages (router, storage, observability, rutracker +
+// the provider adapters) into an embeddable lifecycle. It introduces no logic
+// another vasic-digital project would consume directly.
 package mobile
 
 import (
 	"context"
+	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -42,10 +58,29 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"digital.vasic.lava.apigo/internal/archiveorg"
 	"digital.vasic.lava.apigo/internal/config"
+	"digital.vasic.lava.apigo/internal/gutenberg"
+	"digital.vasic.lava.apigo/internal/handlers"
+	"digital.vasic.lava.apigo/internal/kinozal"
+	"digital.vasic.lava.apigo/internal/nnmclub"
 	"digital.vasic.lava.apigo/internal/observability"
+	"digital.vasic.lava.apigo/internal/provider"
+	apirouter "digital.vasic.lava.apigo/internal/router"
+	"digital.vasic.lava.apigo/internal/rutracker"
 	"digital.vasic.lava.apigo/internal/storage"
 	"digital.vasic.lava.apigo/internal/version"
+)
+
+const (
+	// defaultBindAddr is the wildcard address. Network exposure is the
+	// intended design per the on-device-API spec; loopback-only would defeat
+	// the feature.
+	defaultBindAddr = "0.0.0.0"
+	// defaultPort matches the production LAN listener's default.
+	defaultPort = 8443
+	// scheme is reported by Status(); the embed always serves HTTPS.
+	scheme = "https"
 )
 
 // startConfig is the DTO parsed from the Start(configJSON) argument. It is an
@@ -72,15 +107,40 @@ var (
 	current *instance
 )
 
+// scraperFactory builds the production rutracker scraper + multi-provider
+// registry the served handlers depend on. It is a package var so tests can
+// substitute a stub scraper that does not reach the live rutracker.org
+// upstream (the parity_test.go pattern — stub the upstream tracker boundary).
+// Production code uses the default factory below, wiring the EXACT same
+// adapters cmd/lava-api-go/main.go registers.
+var scraperFactory = newProductionScraperDeps
+
+// newProductionScraperDeps wires the real rutracker scraper + the
+// multi-provider registry exactly as cmd/lava-api-go/main.go does.
+func newProductionScraperDeps() (handlers.ScraperClient, *provider.ProviderRegistry) {
+	scraper := rutracker.NewClient("https://rutracker.org/forum")
+	registry := provider.NewRegistry()
+	registry.Register(rutracker.NewProviderAdapter(scraper))
+	registry.Register(nnmclub.NewProviderAdapter(nnmclub.NewClient("https://nnmclub.to")))
+	registry.Register(kinozal.NewProviderAdapter(kinozal.NewClient("https://kinozal.tv")))
+	registry.Register(archiveorg.NewProviderAdapter(archiveorg.NewClient("https://archive.org")))
+	registry.Register(gutenberg.NewProviderAdapter(gutenberg.NewClient("https://gutendex.com")))
+	return scraper, registry
+}
+
 // Start parses configJSON, opens the real SQLite storage backend via the
-// production storage.New factory, builds the real /health + /ready Gin router,
-// binds a plain-HTTP listener on bindAddr:port, and serves on a goroutine.
+// production storage.New factory, builds the FULL production Gin router via
+// internal/router.Build, loads-or-generates a persisted self-signed TLS
+// certificate, binds a TLS listener on bindAddr:port, and serves on a
+// goroutine.
 //
 // It returns only once the listener is actually accepting connections (or the
 // bind/open error). Calling Start while a server is already running returns an
 // error — exactly one instance per process.
 //
-// configJSON shape: {"bindAddr":"127.0.0.1","port":8099,"sqlitePath":"/data/x.db"}
+// configJSON shape: {"bindAddr":"0.0.0.0","port":8443,"sqlitePath":"/data/x.db"}
+// bindAddr and port are optional; they default to 0.0.0.0:8443 (network
+// exposure is the intended design — see the package comment).
 func Start(configJSON string) error {
 	mu.Lock()
 	defer mu.Unlock()
@@ -94,9 +154,19 @@ func Start(configJSON string) error {
 		return fmt.Errorf("mobile: parse configJSON: %w", err)
 	}
 	if sc.BindAddr == "" {
-		return errors.New("mobile: bindAddr is required")
+		sc.BindAddr = defaultBindAddr
 	}
-	if sc.Port <= 0 || sc.Port > 65535 {
+	// Validate the bind address with net.ParseIP. We explicitly ALLOW
+	// non-loopback (including the 0.0.0.0 wildcard) — network exposure is the
+	// intended design per the on-device-API spec; loopback-only would defeat
+	// the feature. We reject only addresses that are not parseable IPs.
+	if net.ParseIP(sc.BindAddr) == nil {
+		return fmt.Errorf("mobile: bindAddr %q is not a valid IP address", sc.BindAddr)
+	}
+	if sc.Port == 0 {
+		sc.Port = defaultPort
+	}
+	if sc.Port < 0 || sc.Port > 65535 {
 		return fmt.Errorf("mobile: port %d out of range (1..65535)", sc.Port)
 	}
 	if sc.SQLitePath == "" {
@@ -105,9 +175,9 @@ func Start(configJSON string) error {
 
 	// Build a config.Config for the storage factory. We force the SQLite
 	// backend — the embedded surface never connects to Postgres. We do NOT
-	// call config.Load (env-var driven, requires auth/TLS material that is
-	// meaningless for an in-process loopback embed); we construct the minimal
-	// fields the storage factory consumes.
+	// call config.Load (env-var driven, requires auth/TLS material managed
+	// differently for an on-device embed); we construct the minimal fields
+	// the storage factory consumes.
 	cfg := &config.Config{
 		StorageBackend: config.BackendSQLite,
 		SQLitePath:     sc.SQLitePath,
@@ -119,30 +189,45 @@ func Start(configJSON string) error {
 	}
 
 	var reqCount int64
-	router := buildRouter(observability.ReadinessProbe(ready), &reqCount)
+	engine := buildRouter(store, observability.ReadinessProbe(ready))
+	// Wrap the engine in a request-counting http.Handler so Status()
+	// reports real traffic. Counting at the transport layer (rather than as a
+	// Gin middleware) keeps it ahead of every route without re-registering the
+	// route table or disturbing path-param binding.
+	handler := countingHandler(engine, &reqCount)
 
-	addr := fmt.Sprintf("%s:%d", sc.BindAddr, sc.Port)
+	// Load (or generate-and-persist) the self-signed TLS material next to the
+	// SQLite DB so it survives restarts. localIPs() feeds the cert SANs so LAN
+	// peers addressing this server by IP do not hit a host-mismatch error.
+	tlsCfg, err := loadOrCreateTLS(sc.SQLitePath, localIPs())
+	if err != nil {
+		_ = store.Close()
+		return fmt.Errorf("mobile: tls material: %w", err)
+	}
+
+	addr := net.JoinHostPort(sc.BindAddr, fmt.Sprintf("%d", sc.Port))
 	ln, err := net.Listen("tcp", addr)
 	if err != nil {
 		_ = store.Close()
 		return fmt.Errorf("mobile: listen %s: %w", addr, err)
 	}
+	tlsLn := tls.NewListener(ln, tlsCfg)
 
 	httpSrv := &http.Server{
-		Handler:           router,
+		Handler:           handler,
 		ReadHeaderTimeout: 5 * time.Second,
 	}
 
 	go func() {
 		// Serve blocks until Shutdown/Close. http.ErrServerClosed is the
 		// normal stop signal and is not an error worth surfacing.
-		_ = httpSrv.Serve(ln)
+		_ = httpSrv.Serve(tlsLn)
 	}()
 
-	// ln is already bound and accepting (net.Listen returns a listening
-	// socket); the goroutine's Serve only dequeues accepted connections. So
-	// by the time net.Listen returned, the port accepts. Returning here means
-	// the listener is live.
+	// ln (and the wrapping tlsLn) is already bound and accepting (net.Listen
+	// returns a listening socket); the goroutine's Serve only dequeues
+	// accepted connections. So by the time net.Listen returned, the port
+	// accepts. Returning here means the listener is live.
 	current = &instance{
 		httpSrv:  httpSrv,
 		store:    store,
@@ -190,6 +275,7 @@ func Status() string {
 
 	type statusDoc struct {
 		State        string `json:"state"`
+		Scheme       string `json:"scheme"`
 		BindAddr     string `json:"bindAddr"`
 		Port         int    `json:"port"`
 		RequestCount int64  `json:"requestCount"`
@@ -199,6 +285,7 @@ func Status() string {
 
 	doc := statusDoc{
 		State:   "stopped",
+		Scheme:  scheme,
 		Backend: config.BackendSQLite,
 		Version: version.Name,
 	}
@@ -211,24 +298,40 @@ func Status() string {
 
 	b, err := json.Marshal(doc)
 	if err != nil {
-		return `{"state":"stopped","backend":"sqlite"}`
+		return `{"state":"stopped","scheme":"https","backend":"sqlite"}`
 	}
 	return string(b)
 }
 
-// buildRouter assembles the minimal Gin engine for the embedded surface: a
-// request-counting middleware + the real liveness/readiness handlers. The
-// readiness handler is wired to the storage-backed probe so /ready genuinely
-// reflects the SQLite handle's health.
-func buildRouter(ready observability.ReadinessProbe, reqCount *int64) *gin.Engine {
-	gin.SetMode(gin.ReleaseMode)
-	router := gin.New()
-	router.Use(gin.Recovery())
-	router.Use(func(c *gin.Context) {
-		atomic.AddInt64(reqCount, 1)
-		c.Next()
+// buildRouter assembles the FULL production engine for the embedded surface.
+// It reuses internal/router.Build — the EXACT same constructor cmd/lava-api-go
+// uses — so the embed serves identical routes to production. The readiness
+// probe is wired to the SQLite-backed storage probe so /ready genuinely
+// reflects the DB handle's health.
+//
+// Cfg is left nil in router.Build's Deps: the on-device embed is reached by
+// trusted LAN clients and does not run the Lava-Auth HMAC gate (which is for
+// the public LAN binary). Leaving Cfg nil skips the auth/backoff/protocol-
+// metric/brotli/alt-svc middlewares; the full handler + /v1 route set is still
+// registered. The served routes are therefore identical to production minus
+// the auth gate — the same anti-bluff property the route-count test pins.
+func buildRouter(store storage.Storage, ready observability.ReadinessProbe) *gin.Engine {
+	scraper, registry := scraperFactory()
+
+	return apirouter.Build(apirouter.Deps{
+		Cache:     store,
+		Scraper:   scraper,
+		Registry:  registry,
+		Readiness: ready,
 	})
-	router.GET("/health", observability.LivenessHandler())
-	router.GET("/ready", observability.ReadinessHandler(ready))
-	return router
+}
+
+// countingHandler wraps an http.Handler so every inbound request increments
+// the atomic counter before being served. Counting at the transport layer
+// keeps it ahead of the whole Gin chain without touching the route table.
+func countingHandler(next http.Handler, reqCount *int64) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		atomic.AddInt64(reqCount, 1)
+		next.ServeHTTP(w, r)
+	})
 }
