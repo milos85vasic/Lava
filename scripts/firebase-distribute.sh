@@ -45,29 +45,90 @@ cd "$LAVA_REPO_ROOT"
 # launch via R8 + painterResource layer-list rejection).
 MODE="debug"
 RELEASE_NOTES_OVERRIDE=""
+# §6.P "Stream-D" app selector: --app client|api-app (default: client).
+# client  → the main Android user app  (:app, digital.vasic.lava.client)
+# api-app → the on-device API server app (:api-app, digital.vasic.lava.api)
+SELECTED_APP="client"
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --debug-only) MODE="debug"; shift ;;
         --release-only) MODE="release"; shift ;;
         --debug-and-release|--both) MODE="both"; shift ;;
         --release-notes) RELEASE_NOTES_OVERRIDE="$2"; shift 2 ;;
+        --app) SELECTED_APP="$2"; shift 2 ;;
         *) shift ;;
     esac
 done
 
 # ----------------------------------------------------------------
-# 1. Resolve current Android version + build number from app gradle
+# 0. Resolve per-app configuration (set just after arg parsing so all
+#    subsequent logic works with the resolved vars regardless of --app).
+#
+# For each artifact we set:
+#   GRADLE_VERSION_FILE — source of versionName / versionCode
+#   RELEASE_BASE        — directory root where APKs live after build
+#   CHANGELOG_DIR       — .lava-ci-evidence channel directory
+#   DEBUG_APP_ID_VAR    — name of the env-var holding the debug Firebase app-id
+#   RELEASE_APP_ID_VAR  — name of the env-var holding the release Firebase app-id
+#   CHANGELOG_PATTERN   — regex used by Gate 2 to match the CHANGELOG.md entry
+#   SKIP_PHASE1_AUTH    — "yes" when Phase-1 Gates 4+5 are not applicable
+#
+# §6.R: app-ids come from .env-exported vars (via firebase-env.sh's
+# LAVA_FIREBASE_* wildcard export), never as literals here.
+# §6.H: we reference the VAR NAME here and dereference only when needed.
 # ----------------------------------------------------------------
-APP_VERSION="$(grep -E '^\s+versionName\s*=' app/build.gradle.kts \
+case "$SELECTED_APP" in
+    client)
+        GRADLE_VERSION_FILE="app/build.gradle.kts"
+        RELEASE_BASE_TMPL="releases/APP_VERSION"   # APP_VERSION injected after parse
+        CHANGELOG_CHANNEL="firebase-app-distribution"
+        DEBUG_APP_ID_VAR="LAVA_FIREBASE_ANDROID_DEV_APP_ID"
+        RELEASE_APP_ID_VAR="LAVA_FIREBASE_ANDROID_APP_ID"
+        # Gate 2 pattern: accepts both dash-form and paren-form used in CHANGELOG.md
+        CHANGELOG_PATTERN_TMPL='Lava-Android-?APP_VERSION-?APP_VERSION_CODE|Lava-Android APP_VERSION \(APP_VERSION_CODE\)'
+        SKIP_PHASE1_AUTH="no"
+        APP_DISPLAY="Lava Android"
+        ;;
+    api-app)
+        GRADLE_VERSION_FILE="api-app/build.gradle.kts"
+        RELEASE_BASE_TMPL="releases/api-app/APP_VERSION"
+        CHANGELOG_CHANNEL="firebase-app-distribution-api-app"
+        DEBUG_APP_ID_VAR="LAVA_FIREBASE_API_APP_DEV_APP_ID"
+        RELEASE_APP_ID_VAR="LAVA_FIREBASE_API_APP_ID"
+        CHANGELOG_PATTERN_TMPL='Lava-API-App-?APP_VERSION-?APP_VERSION_CODE|Lava-API-App APP_VERSION \(APP_VERSION_CODE\)'
+        SKIP_PHASE1_AUTH="yes"
+        APP_DISPLAY="Lava API App"
+        ;;
+    *)
+        echo "FATAL: --app must be 'client' or 'api-app' (got '$SELECTED_APP')" >&2
+        exit 1
+        ;;
+esac
+
+# ----------------------------------------------------------------
+# 1. Resolve current Android version + build number from the
+#    per-app gradle file (client: app/build.gradle.kts;
+#    api-app: api-app/build.gradle.kts).
+# ----------------------------------------------------------------
+APP_VERSION="$(grep -E '^\s+versionName\s*=' "$GRADLE_VERSION_FILE" \
     | head -1 | sed 's/.*"\([^"]*\)".*/\1/')"
-APP_VERSION_CODE="$(grep -E '^\s+versionCode\s*=' app/build.gradle.kts \
+APP_VERSION_CODE="$(grep -E '^\s+versionCode\s*=' "$GRADLE_VERSION_FILE" \
     | head -1 | sed 's/.*= \([0-9]*\).*/\1/')"
 
 if [[ -z "$APP_VERSION" || -z "$APP_VERSION_CODE" ]]; then
-    echo "FATAL: could not parse versionName/versionCode from app/build.gradle.kts" >&2
+    echo "FATAL: could not parse versionName/versionCode from $GRADLE_VERSION_FILE" >&2
     exit 1
 fi
-echo "==> Distributing Lava Android $APP_VERSION ($APP_VERSION_CODE)"
+
+# Resolve the release-base and changelog-pattern now that APP_VERSION is known.
+RELEASE_BASE="${RELEASE_BASE_TMPL/APP_VERSION/$APP_VERSION}"
+# Substitute APP_VERSION_CODE FIRST (longer token, avoids the APP_VERSION
+# prefix from clobbering the "APP_VERSION_CODE" substring during the
+# APP_VERSION pass).
+CHANGELOG_PATTERN="${CHANGELOG_PATTERN_TMPL//APP_VERSION_CODE/$APP_VERSION_CODE}"
+CHANGELOG_PATTERN="${CHANGELOG_PATTERN//APP_VERSION/$APP_VERSION}"
+
+echo "==> Distributing $APP_DISPLAY $APP_VERSION ($APP_VERSION_CODE)"
 
 # ----------------------------------------------------------------
 # 1a. §6.P (Distribution Versioning + Changelog Mandate) gates.
@@ -76,7 +137,7 @@ echo "==> Distributing Lava Android $APP_VERSION ($APP_VERSION_CODE)"
 #   - CHANGELOG.md lacks entry for this version
 #   - per-version snapshot file is missing
 # ----------------------------------------------------------------
-CHANGELOG_DIR="$LAVA_REPO_ROOT/.lava-ci-evidence/distribute-changelog/firebase-app-distribution"
+CHANGELOG_DIR="$LAVA_REPO_ROOT/.lava-ci-evidence/distribute-changelog/$CHANGELOG_CHANNEL"
 # Legacy single-channel pointer (kept for backward compat + scripts/tag.sh).
 LAST_VERSION_FILE="$CHANGELOG_DIR/last-version"
 # §6.AA-debt PARTIAL CLOSE 2026-05-14: per-channel last-version pointers.
@@ -152,8 +213,8 @@ if [[ "$MODE" == "release" && -f "$LAST_VERSION_DEBUG_FILE" ]]; then
     fi
 fi
 
-# Gate 2: CHANGELOG.md entry
-if ! grep -qE "Lava-Android-?$APP_VERSION-?$APP_VERSION_CODE|Lava-Android $APP_VERSION \\($APP_VERSION_CODE\\)" "$LAVA_REPO_ROOT/CHANGELOG.md"; then
+# Gate 2: CHANGELOG.md entry (pattern is per-app, resolved in §0 above)
+if ! grep -qE "$CHANGELOG_PATTERN" "$LAVA_REPO_ROOT/CHANGELOG.md"; then
     echo "FATAL §6.P: CHANGELOG.md does not contain an entry for version $APP_VERSION ($APP_VERSION_CODE)." >&2
     echo "       Add an entry to CHANGELOG.md before distributing." >&2
     exit 1
@@ -187,12 +248,19 @@ echo "    §6.P gates passed: versionCode monotonic; CHANGELOG.md entry present;
 #    entry is missing from LAVA_AUTH_ACTIVE_CLIENTS. Either case
 #    means the Phase-11 codegen would generate a UUID for the wrong
 #    client identifier — a silent rotation bug.
+#
+#  NOTE: Gates 4+5 apply ONLY to the client app (SELECTED_APP=client).
+#  The api-app artifact is the SERVER side of the auth scheme — it does
+#  not embed the client AuthInterceptor obfuscation pepper and the
+#  android-<ver> client-name concept is inapplicable to it.
 # ----------------------------------------------------------------
 ENV_FILE="$LAVA_REPO_ROOT/.env"
 PEPPER_HISTORY="$CHANGELOG_DIR/pepper-history.sha256"
 touch "$PEPPER_HISTORY"
 
-if [[ -f "$ENV_FILE" ]]; then
+if [[ "$SKIP_PHASE1_AUTH" == "yes" ]]; then
+    echo "    Phase 1 Gates 4+5 skipped for api-app (server artifact, no client pepper)."
+elif [[ -f "$ENV_FILE" ]]; then
     PEPPER_VALUE="$(grep -E '^LAVA_AUTH_OBFUSCATION_PEPPER=' "$ENV_FILE" | head -1 | cut -d= -f2-)"
     if [[ -n "$PEPPER_VALUE" ]]; then
         PEPPER_SHA="$(printf '%s' "$PEPPER_VALUE" | sha256sum | awk '{print $1}')"
@@ -221,7 +289,7 @@ if [[ -f "$ENV_FILE" ]]; then
         EXPECTED_NAME="android-$APP_VERSION-$APP_VERSION_CODE"
         if [[ "$CURRENT_NAME" != "$EXPECTED_NAME" ]]; then
             echo "FATAL Phase 1 Gate 5: LAVA_AUTH_CURRENT_CLIENT_NAME=$CURRENT_NAME does not match expected $EXPECTED_NAME." >&2
-            echo "       The expected name is derived from app/build.gradle.kts versionName/versionCode." >&2
+            echo "       The expected name is derived from $GRADLE_VERSION_FILE versionName/versionCode." >&2
             echo "       Update LAVA_AUTH_CURRENT_CLIENT_NAME in .env." >&2
             exit 1
         fi
@@ -257,8 +325,10 @@ fi
 
 # ----------------------------------------------------------------
 # 3. Locate built APKs
+#    RELEASE_BASE is per-app (client: releases/$APP_VERSION;
+#    api-app: releases/api-app/$APP_VERSION), resolved in §0.
 # ----------------------------------------------------------------
-RELEASE_DIR="releases/$APP_VERSION"
+RELEASE_DIR="$RELEASE_BASE"
 DEBUG_APK="$(find "$RELEASE_DIR/android-debug" -maxdepth 1 -name '*.apk' 2>/dev/null | head -1 || true)"
 RELEASE_APK="$(find "$RELEASE_DIR/android-release" -maxdepth 1 -name '*.apk' 2>/dev/null | head -1 || true)"
 
@@ -279,7 +349,45 @@ fi
 
 # ----------------------------------------------------------------
 # 4. Upload to Firebase App Distribution
+#
+# Resolve the Firebase app-ids from environment at this point.
+# §6.R: the app-id values come from .env (loaded by firebase-env.sh's
+# LAVA_FIREBASE_* wildcard export); we dereference by var-name here,
+# never embed literals.
+#
+# For api-app: validate the two IDs are present (firebase-env.sh does NOT
+# put them in required[]; they are validated lazily here so the client-only
+# flow is never broken when api-app IDs are absent from .env).
 # ----------------------------------------------------------------
+if [[ "$SELECTED_APP" == "api-app" ]]; then
+    API_APP_DEBUG_ID="${!DEBUG_APP_ID_VAR:-}"
+    API_APP_RELEASE_ID="${!RELEASE_APP_ID_VAR:-}"
+    if [[ -z "$API_APP_DEBUG_ID" ]]; then
+        echo "FATAL: $DEBUG_APP_ID_VAR is not set in .env." >&2
+        echo "       Create the Firebase app first:" >&2
+        echo "         firebase apps:create ANDROID \"Lava API (debug)\" \\" >&2
+        echo "           --package-name digital.vasic.lava.api.dev \\" >&2
+        echo "           --project \$LAVA_FIREBASE_PROJECT_ID" >&2
+        echo "       Then set $DEBUG_APP_ID_VAR=<app-id> in .env." >&2
+        exit 1
+    fi
+    if [[ -z "$API_APP_RELEASE_ID" ]]; then
+        echo "FATAL: $RELEASE_APP_ID_VAR is not set in .env." >&2
+        echo "       Create the Firebase app first:" >&2
+        echo "         firebase apps:create ANDROID \"Lava API (release)\" \\" >&2
+        echo "           --package-name digital.vasic.lava.api \\" >&2
+        echo "           --project \$LAVA_FIREBASE_PROJECT_ID" >&2
+        echo "       Then set $RELEASE_APP_ID_VAR=<app-id> in .env." >&2
+        exit 1
+    fi
+    RESOLVED_DEBUG_APP_ID="$API_APP_DEBUG_ID"
+    RESOLVED_RELEASE_APP_ID="$API_APP_RELEASE_ID"
+else
+    # client: the vars are guaranteed non-empty by firebase-env.sh required[]
+    RESOLVED_DEBUG_APP_ID="${!DEBUG_APP_ID_VAR}"
+    RESOLVED_RELEASE_APP_ID="${!RELEASE_APP_ID_VAR}"
+fi
+
 distribute_apk() {
     local apk="$1"
     local label="$2"
@@ -296,19 +404,21 @@ distribute_apk() {
 
 if [[ "$MODE" == "debug" || "$MODE" == "both" ]]; then
     # Debug APK uses applicationIdSuffix .dev → registered as a separate
-    # Firebase Android app (LAVA_FIREBASE_ANDROID_DEV_APP_ID).
-    distribute_apk "$DEBUG_APK" "debug" "$LAVA_FIREBASE_ANDROID_DEV_APP_ID"
+    # Firebase Android app (per-app: LAVA_FIREBASE_ANDROID_DEV_APP_ID for client,
+    # LAVA_FIREBASE_API_APP_DEV_APP_ID for api-app).
+    distribute_apk "$DEBUG_APK" "debug" "$RESOLVED_DEBUG_APP_ID"
 fi
 if [[ "$MODE" == "release" || "$MODE" == "both" ]]; then
-    distribute_apk "$RELEASE_APK" "release" "$LAVA_FIREBASE_ANDROID_APP_ID"
+    distribute_apk "$RELEASE_APK" "release" "$RESOLVED_RELEASE_APP_ID"
 fi
 
 # ----------------------------------------------------------------
 # 5. Local distribution log (gitignored per .gitignore firebase-distribute-*.log)
 # ----------------------------------------------------------------
-LOG="firebase-distribute-${APP_VERSION}-${APP_VERSION_CODE}-${TIMESTAMP}.log"
+LOG="firebase-distribute-${SELECTED_APP}-${APP_VERSION}-${APP_VERSION_CODE}-${TIMESTAMP}.log"
 {
     echo "timestamp=$TIMESTAMP"
+    echo "app=$SELECTED_APP"
     echo "version=$APP_VERSION ($APP_VERSION_CODE)"
     echo "branch=$GIT_BRANCH sha=$GIT_SHA"
     echo "mode=$MODE"
@@ -349,10 +459,11 @@ esac
 
 # Phase 1 Gate 4: persist the pepper SHA after a successful distribute so
 # the next session refuses to reuse it.
-if [[ -n "${PEPPER_SHA:-}" ]]; then
+# (Only applicable to the client app — api-app skips Gates 4+5 entirely.)
+if [[ "$SKIP_PHASE1_AUTH" != "yes" && -n "${PEPPER_SHA:-}" ]]; then
     echo "$PEPPER_SHA  # $APP_VERSION-$APP_VERSION_CODE  $TIMESTAMP" >> "$PEPPER_HISTORY"
     echo "==> Phase 1 Gate 4 pepper SHA recorded: $PEPPER_SHA → $PEPPER_HISTORY"
 fi
 
-echo "==> Firebase distribute complete."
+echo "==> Firebase distribute complete ($SELECTED_APP)."
 echo "    Console: https://console.firebase.google.com/project/$LAVA_FIREBASE_PROJECT_ID/appdistribution"

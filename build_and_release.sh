@@ -21,6 +21,10 @@ cd "$SCRIPT_DIR"
 APP_VERSION=$(grep -E '^\s+versionName\s*=' app/build.gradle.kts | sed 's/.*"\([^"]*\)".*/\1/')
 APP_VERSION_CODE=$(grep -E '^\s+versionCode\s*=' app/build.gradle.kts | sed 's/.*= \([0-9]*\).*/\1/')
 
+# Extract :api-app version and versionCode from api-app/build.gradle.kts
+API_APP_VERSION=$(grep -E '^\s+versionName\s*=' api-app/build.gradle.kts | sed 's/.*"\([^"]*\)".*/\1/')
+API_APP_VERSION_CODE=$(grep -E '^\s+versionCode\s*=' api-app/build.gradle.kts | sed 's/.*= \([0-9]*\).*/\1/')
+
 # Extract lava-api-go version from internal/version/version.go (same regex
 # tag.sh uses, kept inline so this script remains standalone).
 APIGO_VERSION=$(grep -E '^[[:space:]]*Name *= *"[^"]+"' lava-api-go/internal/version/version.go | head -1 | sed -E 's/.*"([^"]+)".*/\1/')
@@ -30,36 +34,47 @@ echo "========================================"
 echo "  Lava Build & Release"
 echo "========================================"
 echo "  App version:     $APP_VERSION ($APP_VERSION_CODE)"
+echo "  API-App version: $API_APP_VERSION ($API_APP_VERSION_CODE)"
 echo "  API-Go version:  $APIGO_VERSION ($APIGO_VERSION_CODE)"
 echo "========================================"
 echo ""
 
 RELEASE_DIR="releases/$APP_VERSION"
+API_APP_RELEASE_DIR="releases/api-app/$API_APP_VERSION"
 
 # Clean previous builds for this version
 rm -rf "$RELEASE_DIR"
+rm -rf "$API_APP_RELEASE_DIR"
 mkdir -p "$RELEASE_DIR/android-debug"
 mkdir -p "$RELEASE_DIR/android-release"
 mkdir -p "$RELEASE_DIR/api-go"
+mkdir -p "$API_APP_RELEASE_DIR/android-debug"
+mkdir -p "$API_APP_RELEASE_DIR/android-release"
 
 # Clean and build
-echo "[1/4] Cleaning previous build artifacts..."
+echo "[1/6] Cleaning previous build artifacts..."
 ./gradlew clean --quiet
 
-echo "[2/4] Building Android debug APK..."
+echo "[2/6] Building Android client debug APK (:app)..."
 ./gradlew :app:assembleDebug
 
-echo "[3/4] Building Android release APK..."
+echo "[3/6] Building Android client release APK (:app)..."
 ./gradlew :app:assembleRelease
 
-echo "[4/4] Building lava-api-go static binary..."
+echo "[4/6] Building on-device API app debug APK (:api-app)..."
+./gradlew :api-app:assembleDebug
+
+echo "[5/6] Building on-device API app release APK (:api-app)..."
+./gradlew :api-app:assembleRelease
+
+echo "[6/6] Building lava-api-go static binary..."
 APIGO_BIN_DST="$SCRIPT_DIR/$RELEASE_DIR/api-go/lava-api-go-${APIGO_VERSION}"
 (
     cd lava-api-go
     CGO_ENABLED=0 go build -trimpath -ldflags='-s -w' -o "$APIGO_BIN_DST" ./cmd/lava-api-go
 )
 
-# Copy artifacts with descriptive names
+# Copy artifacts with descriptive names — client app
 DEBUG_APK_SRC="app/build/outputs/apk/debug/app-debug.apk"
 RELEASE_APK_SRC="app/build/outputs/apk/release/app-release.apk"
 
@@ -68,6 +83,16 @@ RELEASE_APK_DST="$RELEASE_DIR/android-release/digital.vasic.lava.client-${APP_VE
 
 cp "$DEBUG_APK_SRC" "$DEBUG_APK_DST"
 cp "$RELEASE_APK_SRC" "$RELEASE_APK_DST"
+
+# Copy artifacts with descriptive names — on-device API app
+API_APP_DEBUG_APK_SRC="api-app/build/outputs/apk/debug/api-app-debug.apk"
+API_APP_RELEASE_APK_SRC="api-app/build/outputs/apk/release/api-app-release.apk"
+
+API_APP_DEBUG_APK_DST="$API_APP_RELEASE_DIR/android-debug/digital.vasic.lava.api-${API_APP_VERSION}-debug.apk"
+API_APP_RELEASE_APK_DST="$API_APP_RELEASE_DIR/android-release/digital.vasic.lava.api-${API_APP_VERSION}-release.apk"
+
+cp "$API_APP_DEBUG_APK_SRC" "$API_APP_DEBUG_APK_DST"
+cp "$API_APP_RELEASE_APK_SRC" "$API_APP_RELEASE_APK_DST"
 
 # Force docker-format image builds so HEALTHCHECK directives are persisted
 # in the image config. podman defaults to OCI format which silently drops
@@ -116,6 +141,8 @@ echo "  Release artifacts ready"
 echo "========================================"
 echo "  $DEBUG_APK_DST"
 echo "  $RELEASE_APK_DST"
+echo "  $API_APP_DEBUG_APK_DST"
+echo "  $API_APP_RELEASE_APK_DST"
 echo "  $APIGO_BIN_DST"
 [[ -f "$APIGO_IMAGE_DST" ]] && echo "  $APIGO_IMAGE_DST"
 echo "========================================"

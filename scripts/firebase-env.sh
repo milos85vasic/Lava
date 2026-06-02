@@ -40,6 +40,11 @@ required=(
     LAVA_FIREBASE_TESTERS_DEVELOPER
     LAVA_FIREBASE_TESTERS_TESTER
 )
+# NOTE: LAVA_FIREBASE_API_APP_ID and LAVA_FIREBASE_API_APP_DEV_APP_ID are
+# NOT in required[] — they are loaded automatically by the LAVA_FIREBASE_*
+# wildcard above but validated lazily by firebase-distribute.sh when
+# --app api-app is chosen. Keeping them absent here ensures the client-only
+# flow (the common case) does not fail when the api-app IDs are unset.
 missing=()
 for k in "${required[@]}"; do
     if [[ -z "${!k:-}" ]]; then
