@@ -56,6 +56,14 @@ android {
         // never a source literal. Empty when unconfigured → the cloud section
         // still renders the manual-entry field with no preset.
         buildConfigField("String", "DEFAULT_CLOUD_API", "\"${env["LAVA_DEFAULT_CLOUD_API"].orEmpty()}\"")
+        // Sub-project 2 (on-device API): download page for the separate Lava
+        // API app, used by the Settings "Run the API on this device" row when
+        // the API app is not installed. §6.R: the value lives in .env
+        // (placeholder https://lava.app/download/api-app documented in
+        // .env.example); TODO sub-project 4: wire the real Firebase App
+        // Distribution link. Empty when unconfigured → app-layer wiring falls
+        // back to the documented placeholder constant.
+        buildConfigField("String", "LAVA_API_APP_DOWNLOAD_URL", "\"${env["LAVA_API_APP_DOWNLOAD_URL"].orEmpty()}\"")
     }
 
     buildFeatures {

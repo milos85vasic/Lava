@@ -26,6 +26,9 @@
     <string name="menu_settings_history_sync">History sync</string>
     <string name="menu_settings_endpoint">Endpoint</string>
     <string name="menu_settings_theme">Theme</string>
+    <string name="menu_settings_run_api_open">Open the Lava API app</string>
+    <string name="menu_settings_run_api_download">Download the Lava API app</string>
+    <string name="menu_settings_run_api_description">Runs the Lava API on THIS device and exposes it to your local network, so this app (and others on the network) can use it.</string>
     <string name="menu_sign_out">Sign out</string>
     <string name="menu_sign_out_title">Sign Out</string>
     <string name="menu_sign_out_confirmation">Are you sure you want to sign out?</string>

@@ -112,6 +112,13 @@ internal class LocalNetworkDiscoveryServiceImpl @Inject constructor(
                                 port = port,
                                 name = name,
                                 engine = engineFor(watchedServiceType, serviceInfo),
+                                // Sub-project 2: capture the platform/storage TXT
+                                // attributes so the discovered-instance list can
+                                // distinguish an on-device (platform=android) API
+                                // from a host/server one. Absent attributes → null,
+                                // rendered exactly as a host instance.
+                                platform = txtAttribute(serviceInfo, "platform"),
+                                storage = txtAttribute(serviceInfo, "storage"),
                             ),
                         )
                     }
@@ -154,6 +161,17 @@ internal class LocalNetworkDiscoveryServiceImpl @Inject constructor(
             else -> DiscoveredEndpoint.Engine.Unknown
         }
     }
+
+    /**
+     * Read a TXT-record attribute as a trimmed UTF-8 string, or `null` when
+     * absent / empty / unreadable. Sub-project 2 uses this for `platform` and
+     * `storage`. Same defensive runCatching posture as [engineFor] — a real
+     * device's NsdManager occasionally returns malformed attribute bytes.
+     */
+    @Suppress("SameParameterValue")
+    private fun txtAttribute(info: NsdServiceInfo, key: String): String? = runCatching {
+        info.attributes[key]?.decodeToString()?.trim()?.ifEmpty { null }
+    }.getOrNull()
 
     companion object {
         // Re-export from the api-layer catalog so the existing in-file

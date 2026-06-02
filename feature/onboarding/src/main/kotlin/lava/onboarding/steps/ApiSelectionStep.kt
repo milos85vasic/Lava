@@ -21,6 +21,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import lava.data.api.service.discoveredApiLabel
 import lava.designsystem.component.Button
 import lava.designsystem.component.Surface
 import lava.designsystem.component.Text
@@ -301,7 +302,12 @@ internal fun Endpoint.displayHostPort(): String = when (this) {
 }
 
 internal fun Endpoint.displaySubtitle(): String = when (this) {
-    is Endpoint.GoApi -> "Lava API"
+    // Sub-project 2: distinguish an on-device API instance (platform=android)
+    // from a host/server one in the discovered list. A GoApi with no platform
+    // attribute (host/server, or a cloud preset) renders exactly as before
+    // ("Lava API · On this network"); one advertising platform=android adds the
+    // "Android device" tail via discoveredApiLabel.
+    is Endpoint.GoApi -> "Lava API · ${discoveredApiLabel(platform)}"
     is Endpoint.Mirror -> "Mirror"
     is Endpoint.Rutracker -> "Direct"
 }

@@ -22,12 +22,23 @@ interface LocalNetworkDiscoveryService {
  * advertisements should be `_lava-api._tcp` (Go). [engine] defaults to
  * [Engine.Ktor] for that historical-compatibility reason; new fakes and
  * tests should explicitly pass [Engine.Go].
+ *
+ * Sub-project 2 (on-device API, 2026-06-02) added [platform] and [storage],
+ * parsed from the advertisement's TXT records. The on-device Lava-API app
+ * advertises TXT `engine=go`, `platform=android`, `storage=sqlite`; the
+ * host/server advertiser carries `engine=go` but omits `platform`. Both
+ * default to `null` (additive) so existing fakes and tests that do not pass
+ * them keep compiling and render exactly as a host/server instance. The
+ * label that distinguishes the two for the user is computed by
+ * [discoveredApiLabel].
  */
 data class DiscoveredEndpoint(
     val host: String,
     val port: Int,
     val name: String,
     val engine: Engine = Engine.Ktor,
+    val platform: String? = null,
+    val storage: String? = null,
 ) {
     enum class Engine {
         /**
@@ -57,3 +68,38 @@ data class DiscoveredEndpoint(
         Unknown,
     }
 }
+
+/**
+ * The user-facing label used in "available API instances" lists (onboarding
+ * ApiSelection step, Connections screen) to distinguish an API running ON THE
+ * USER'S OWN ANDROID DEVICE from one running on a host/server.
+ *
+ * The mapping is driven purely by the `platform` TXT-record value Sub-project 1
+ * publishes:
+ *   - `platform=android`  → [LABEL_ANDROID_DEVICE] ("On this network · Android device")
+ *   - any other non-blank platform → [LABEL_NETWORK] ("On this network") + the
+ *     raw platform value in parens, so an unexpected platform is surfaced
+ *     honestly rather than silently mislabeled as a host.
+ *   - blank / absent platform → [LABEL_NETWORK] ("On this network") — the
+ *     host/server advertiser, rendered exactly as before Sub-project 2.
+ *
+ * No underscores in any returned label (operator directive). Pure function so
+ * the TXT→label mapping is unit-testable without an emulator or NsdManager.
+ */
+fun discoveredApiLabel(platform: String?): String {
+    val normalized = platform?.trim()?.lowercase()
+    return when {
+        normalized == PLATFORM_ANDROID -> LABEL_ANDROID_DEVICE
+        normalized.isNullOrEmpty() -> LABEL_NETWORK
+        else -> "$LABEL_NETWORK ($normalized)"
+    }
+}
+
+/** The `platform` TXT value an on-device Lava-API instance advertises. */
+const val PLATFORM_ANDROID: String = "android"
+
+/** Label for an on-device (this-phone-or-another-Android) API instance. */
+const val LABEL_ANDROID_DEVICE: String = "On this network · Android device"
+
+/** Label for a host/server API instance discovered on the LAN. */
+const val LABEL_NETWORK: String = "On this network"

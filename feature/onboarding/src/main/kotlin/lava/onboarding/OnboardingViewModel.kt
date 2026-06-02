@@ -4,8 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import lava.auth.api.AuthService
@@ -163,7 +163,15 @@ class OnboardingViewModel @Inject constructor(
         // Collect each DiscoveredEndpoint into the running list.
         discoveryJob = discoveryService.discover()
             .onEach { hit ->
-                val endpoint = Endpoint.GoApi(host = hit.host, port = hit.port)
+                // Sub-project 2: carry the platform/storage TXT attributes onto
+                // the Endpoint so the rendered list can label an on-device
+                // (platform=android) API distinctly from a host instance.
+                val endpoint = Endpoint.GoApi(
+                    host = hit.host,
+                    port = hit.port,
+                    platform = hit.platform,
+                    storage = hit.storage,
+                )
                 intent {
                     val existing = state.discoveredApis
                     if (existing.none { it is Endpoint.GoApi && it.host == hit.host && it.port == hit.port }) {
