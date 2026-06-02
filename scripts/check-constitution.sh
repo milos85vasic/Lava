@@ -439,6 +439,15 @@ if [[ -f submodules/containers/cmd/emulator-matrix/main.go ]]; then
   fi
 fi
 
+# 6.X(6) — enforcement check (c) made mechanical: any NEW emulator/Challenge
+# attestation evidence file that records emulator execution MUST declare
+# `runner: containers-submodule`. Previously paper-only ("rejected by tag.sh");
+# now also checked here at pre-push time, going-forward (pre-existing committed
+# evidence grandfathered). Delegated to the standalone scanner so the hermetic
+# test (tests/check-constitution/test_emulator_runner_tag.sh) can invoke the
+# SAME rule in isolation with injected fixtures.
+bash scripts/check-emulator-runner-tag.sh
+
 # -----------------------------------------------------------------------------
 # §6.AD HelixConstitution Inheritance — closes §6.AD-debt items 1 + 7.
 # Added 2026-05-14 (29th §6.L cycle).
