@@ -112,12 +112,26 @@ for ABI in "${ABIS[@]}"; do
     echo "=== Building ${ABI} (GOARCH=${GOARCH}) ==="
     echo "CC=${CC}"
 
+    # SONAME fix (2026-06-02): pass `-Wl,-soname,liblavaapi.so` to the NDK
+    # linker so the produced .so records a DT_SONAME of `liblavaapi.so`. Without
+    # it, any consumer that links against this .so by its absolute on-disk path
+    # (the JNI bridge's CMake `IMPORTED_LOCATION` does exactly that) records the
+    # ABSOLUTE HOST BUILD PATH as its DT_NEEDED entry. On-device, the Android
+    # linker cannot resolve that host path → `dlopen failed: library
+    # "/Users/.../liblavaapi.so" not found` → the embed never starts. With the
+    # SONAME present, the linker records the SONAME (`liblavaapi.so`, relative)
+    # instead of the path, so the runtime resolves it from the APK's lib dir.
+    # Proven by `llvm-readelf -d` (DT_SONAME on this .so + DT_NEEDED on the
+    # bridge). Forensic anchor:
+    # .lava-ci-evidence/phase-e-api-app/2026-06-02-challenge-green-after-serialization-fix.md
     set +e
     (
         cd "${MODULE_DIR}"
         CGO_ENABLED=1 GOOS=android GOARCH="${GOARCH}" CC="${CC}" \
             GOMAXPROCS=2 nice -n 19 \
-            go build -buildmode=c-shared -o "${OUT_SO}" "${PKG}"
+            go build -buildmode=c-shared \
+                -ldflags="-extldflags=-Wl,-soname,liblavaapi.so" \
+                -o "${OUT_SO}" "${PKG}"
     )
     build_rc=$?
     set -e

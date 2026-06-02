@@ -390,3 +390,61 @@ the evidence file above.
 defect (`.lava-ci-evidence/phase-e-api-app/2026-06-02-phase-e-challenge-execution.md`)
 — the §6.J/§6.Z bluff class: JVM unit tests green, real embed-start broken for
 every user.
+
+## 2026-06-02 — cshared-liblavaapi-missing-soname
+
+**Root cause:** the prebuilt Go c-shared `liblavaapi.so` (built by
+`lava-api-go/scripts/build-cshared.sh` via `go build -buildmode=c-shared`) had
+NO `DT_SONAME`. The JNI bridge `liblavaapi_jni.so`
+(`lava-api-go/cmd/lavaapi-cshared/jni/CMakeLists.txt`) imports it as a CMake
+`IMPORTED SHARED` library via its absolute `IMPORTED_LOCATION`, so the NDK
+linker recorded the **absolute host build path**
+(`/Users/.../lava-api-go/build/jniLibs/arm64-v8a/liblavaapi.so`) as the bridge's
+`DT_NEEDED`. On-device, the Android dynamic linker cannot resolve a host
+filesystem path → `dlopen failed: library "/Users/.../liblavaapi.so" not found:
+needed by .../liblavaapi_jni.so` → `LavaNative.nativeStart` is unreachable →
+`ApiEngineController.start()` maps to Error → the :api-app Challenges C02/C03/C04
+time out waiting for "Running". Proven with `llvm-readelf -d`, NOT guessed.
+(This is the "remaining defect" the 2026-06-02 serialization-fix entry above
+recorded as out-of-scope; it is now fixed.)
+
+**Affected files:**
+- `lava-api-go/scripts/build-cshared.sh` — added the NDK linker soname flag to
+  the c-shared `go build`: `-ldflags="-extldflags=-Wl,-soname,liblavaapi.so"`.
+
+**Fix:** give the c-shared `.so` a real `DT_SONAME` (`liblavaapi.so`, relative)
+so any consumer linking against it records the SONAME — not the absolute host
+path — in `DT_NEEDED`. The Android linker then resolves it from the APK's lib
+dir at `dlopen` time.
+
+**Verification (ELF-level, definitive):**
+- `llvm-readelf -d` of all 3 rebuilt ABIs: `DT_SONAME = liblavaapi.so` present
+  (was absent before). `go build` EXIT 0 for arm64-v8a / x86_64 / armeabi-v7a;
+  `LavaApiStart` present in each dynamic symbol table.
+- `llvm-readelf -d` of `liblavaapi_jni.so` **inside the rebuilt
+  `api-app-debug.apk`**: `(NEEDED) liblavaapi.so` (relative) — was the absolute
+  host path. The APK ships both `lib/arm64-v8a/liblavaapi.so` (53 MB) +
+  `liblavaapi_jni.so` (25 KB). `:api-app:assembleDebug :api-app:assembleDebugAndroidTest`
+  BUILD SUCCESSFUL.
+- Full evidence:
+  `.lava-ci-evidence/phase-e-api-app/2026-06-02-soname-fix-and-containers-gate-blocker.md`.
+
+**Runtime gate status (honest, §6.Z/§6.J/§6.AG):** the C01-04 runtime GREEN
+through the Containers submodule is OWED on a Containers `cmd/emulator-matrix`
+`--gradle-module` flag — the CLI is hardwired to `:app:connectedDebugAndroidTest`
+(`submodules/containers/pkg/emulator/{android,containerized}.go`) and cannot run
+`:api-app` Challenges; that submodule is out of this task's touch-list. The
+emulator boot itself WAS Containers-orchestrated (`--runner=auto`→host-direct+HVF,
+Pixel_8/API35 cold-booted AVD), proven by the runner's `[matrix-diag]` output.
+No green was faked; the wrong-module run was stopped before it could false-pass.
+`scripts/run-api-app-challenge-matrix.sh` (added this commit) is module-parameterised
+so the gate runs the moment Containers gains the flag.
+
+**Fix commit:** _(this commit)_
+
+**Forensic anchor:** the soname defect was caught by the Phase E real-device
+Challenge re-run AFTER the serialization fix
+(`.lava-ci-evidence/phase-e-api-app/2026-06-02-challenge-green-after-serialization-fix.md`)
+— a native-ELF bluff vector invisible to every JVM/host test: the libraries
+link + the APK assembles fine on the host, but the embed cannot `dlopen` on
+the user's device.
