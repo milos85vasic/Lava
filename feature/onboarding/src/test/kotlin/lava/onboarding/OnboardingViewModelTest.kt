@@ -9,7 +9,6 @@ import lava.auth.api.AuthService
 import lava.common.analytics.AnalyticsTracker
 import lava.credentials.CredentialEncryptor
 import lava.credentials.CredentialsRepository
-import lava.credentials.ProviderConfig
 import lava.credentials.ProviderConfigRepository
 import lava.credentials.ProviderCredentialManager
 import lava.database.dao.ClonedProviderDao
@@ -20,6 +19,7 @@ import lava.database.entity.ProviderConfigEntity
 import lava.database.entity.ProviderCredentialsEntity
 import lava.models.auth.AuthResult
 import lava.models.auth.AuthState
+import lava.onboarding.steps.displaySubtitle
 import lava.sdk.api.MirrorUrl
 import lava.sdk.api.PluginConfig
 import lava.sdk.registry.PluginFactory
@@ -678,6 +678,141 @@ class OnboardingViewModelTest {
                 assertFalse(
                     "a malformed address MUST NOT advance the wizard to Providers; was ${errored.step}",
                     errored.step == OnboardingStep.Providers,
+                )
+
+                cancelAndIgnoreRemainingItems()
+            }
+        }
+
+    // ── Sub-project 2 (on-device API): discovery labeling in ApiSelection ──
+    //
+    // FALSIFIABILITY REHEARSAL (per §6.J / Sixth Law clause 2). Deliberate
+    // break tried while authoring this test: in OnboardingViewModel.startApiDiscovery
+    // drop `platform = hit.platform` from the Endpoint.GoApi(...) constructed in
+    // the discovery `onEach`. Expected failure:
+    //   - `discovered android-platform api renders with the android-device label`
+    //     fails its `displaySubtitle()` assertion — the GoApi.platform is null,
+    //     so discoveredApiLabel(null) returns "On this network" instead of
+    //     "On this network · Android device", and assertEquals reports
+    //     expected:<...· Android device> but was:<On this network>. Reverted.
+    //
+    // This helper holds a reference to the discovery service so the test can
+    // emit a real DiscoveredEndpoint (carrying platform=android, as Sub-project 1
+    // advertises) into the production discovery flow the ViewModel collects.
+    private fun TestScope.createViewModelWithDiscovery(
+        discovery: lava.testing.service.TestLocalNetworkDiscoveryService,
+    ): OnboardingViewModel {
+        return OnboardingViewModel(
+            sdk = sdk,
+            credentialManager = credentialManager,
+            authService = authService,
+            loggerFactory = TestLoggerFactory(),
+            analytics = object : AnalyticsTracker {
+                override fun event(name: String, params: Map<String, String>) {}
+                override fun setUserId(userId: String?) {}
+                override fun setProperty(key: String, value: String?) {}
+                override fun recordNonFatal(throwable: Throwable, context: Map<String, String>) {}
+                override fun recordWarning(message: String, context: Map<String, String>) {}
+                override fun log(message: String) {}
+            },
+            providerConfigRepository = providerConfigRepository,
+            clonedProviderDao = clonedProviderDao,
+            discoveryService = discovery,
+            connectionService = object : lava.data.api.service.ConnectionService {
+                override val networkUpdates: kotlinx.coroutines.flow.Flow<Boolean> =
+                    kotlinx.coroutines.flow.emptyFlow()
+                override suspend fun isReachable(endpoint: lava.models.settings.Endpoint): Boolean = true
+                override suspend fun isInternetReachable(): Boolean = true
+            },
+            endpointsRepository = lava.testing.repository.TestEndpointsRepository(),
+            // apiSelectionEnabled=true so NextStep from Welcome enters
+            // ApiSelection and startApiDiscovery() begins collecting.
+            apiSelectionEnabled = true,
+        )
+    }
+
+    // CHALLENGE — primary assertion on the user-visible subtitle rendered by the
+    // production ApiSelectionStep.displaySubtitle() for an on-device API hit. An
+    // android-platform DiscoveredEndpoint MUST surface the distinct "Android
+    // device" label, while a host hit (no platform) MUST render without it.
+    @Test
+    fun `discovered android-platform api renders with the android-device label`() =
+        runTest(dispatcherRule.testDispatcher) {
+            val discovery = lava.testing.service.TestLocalNetworkDiscoveryService()
+            val viewModel = createViewModelWithDiscovery(discovery)
+            viewModel.test(this) {
+                runOnCreate()
+                expectInitialState()
+                awaitState() // providers + configs reduced
+
+                // Welcome → ApiSelection starts discovery collection.
+                viewModel.perform(OnboardingAction.NextStep)
+
+                // Sub-project 1 advertises platform=android, storage=sqlite for
+                // the on-device API; the host advertiser omits platform.
+                discovery.emit(
+                    lava.data.api.service.DiscoveredEndpoint(
+                        host = "192.0.2.10:8443",
+                        port = 8443,
+                        name = "Lava API (on device)",
+                        engine = lava.data.api.service.DiscoveredEndpoint.Engine.Go,
+                        platform = "android",
+                        storage = "sqlite",
+                    ),
+                )
+                discovery.emit(
+                    lava.data.api.service.DiscoveredEndpoint(
+                        host = "192.0.2.20:8443",
+                        port = 8443,
+                        name = "Lava API (server)",
+                        engine = lava.data.api.service.DiscoveredEndpoint.Engine.Go,
+                        platform = null,
+                        storage = null,
+                    ),
+                )
+
+                // Walk states until both discovered APIs have landed. Each
+                // emit adds one GoApi via a nested intent{} reduce; the loop
+                // breaks as soon as the list reaches 2 so it never awaits past
+                // the last distinct state (Orbit dedups no-op reduces).
+                var discovered: List<lava.models.settings.Endpoint.GoApi> = emptyList()
+                var guard = 0
+                while (guard < 12 && discovered.size < 2) {
+                    guard++
+                    val s = awaitState()
+                    val apis = s.discoveredApis.filterIsInstance<lava.models.settings.Endpoint.GoApi>()
+                    if (apis.size > discovered.size) discovered = apis
+                }
+                // OnboardingViewModel.startApiDiscovery passes hit.host through
+                // verbatim (it carries "ip:port"), so match the full string.
+                val androidApi = discovered.firstOrNull { it.host == "192.0.2.10:8443" }
+                val hostApi = discovered.firstOrNull { it.host == "192.0.2.20:8443" }
+
+                assertNotNull(
+                    "the android-platform API MUST appear in the discovered list (saw ${discovered.size})",
+                    androidApi,
+                )
+                assertNotNull(
+                    "the host API MUST appear in the discovered list (saw ${discovered.size})",
+                    hostApi,
+                )
+                assertEquals(
+                    "the on-device API's platform TXT attribute MUST be carried through to the Endpoint",
+                    "android",
+                    androidApi!!.platform,
+                )
+                // The load-bearing user-visible assertion: the production
+                // rendering function distinguishes the two instances in the list
+                // the user actually sees.
+                assertEquals(
+                    "the android-platform API MUST render with the distinct Android-device label",
+                    "Lava API · On this network · Android device",
+                    androidApi!!.displaySubtitle(),
+                )
+                assertEquals(
+                    "the host API MUST render with the plain network label (no Android-device tail)",
+                    "Lava API · On this network",
+                    hostApi!!.displaySubtitle(),
                 )
 
                 cancelAndIgnoreRemainingItems()

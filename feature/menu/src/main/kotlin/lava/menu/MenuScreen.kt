@@ -67,6 +67,7 @@ import lava.menu.MenuAction.SetCredentialsSyncPeriod
 import lava.menu.MenuAction.SetFavoritesSyncPeriod
 import lava.menu.MenuAction.SetHistorySyncPeriod
 import lava.menu.MenuAction.SetTheme
+import lava.menu.apiapp.ApiAppLauncher
 import lava.models.settings.SyncPeriod
 import lava.models.settings.Theme
 import lava.navigation.viewModel
@@ -87,12 +88,14 @@ fun MenuScreen(
     openLogin: () -> Unit,
     openCredentials: () -> Unit = {},
     openProviderConfig: (String) -> Unit = {},
+    apiAppLauncher: ApiAppLauncher? = null,
 ) {
     MenuScreen(
         viewModel = viewModel(),
         openLogin = openLogin,
         openCredentials = openCredentials,
         openProviderConfig = openProviderConfig,
+        apiAppLauncher = apiAppLauncher,
     )
 }
 
@@ -102,6 +105,7 @@ private fun MenuScreen(
     openLogin: () -> Unit,
     openCredentials: () -> Unit = {},
     openProviderConfig: (String) -> Unit = {},
+    apiAppLauncher: ApiAppLauncher? = null,
 ) {
     val openLinkHandler = LocalOpenLinkHandler.current
     val confirmationDialogState = rememberConfirmationDialogState()
@@ -141,9 +145,13 @@ private fun MenuScreen(
         }
     }
     val state by viewModel.collectAsState()
-    MenuScreen(state, viewModel::perform, openConnectionSettings) {
-        openConnectionSettings = false
-    }
+    MenuScreen(
+        state = state,
+        onAction = viewModel::perform,
+        openConnectionSettings = openConnectionSettings,
+        onConnectionSettingsShown = { openConnectionSettings = false },
+        apiAppLauncher = apiAppLauncher,
+    )
 }
 
 @Composable
@@ -152,6 +160,7 @@ private fun MenuScreen(
     onAction: (MenuAction) -> Unit,
     openConnectionSettings: Boolean = false,
     onConnectionSettingsShown: () -> Unit = {},
+    apiAppLauncher: ApiAppLauncher? = null,
 ) = Scaffold(
     topBar = { appBarState ->
         AppBar(
@@ -198,6 +207,12 @@ private fun MenuScreen(
             onSelect = { theme -> onAction(SetTheme(theme)) },
         )
         endpointSelectionItem(openConnectionSettings, onConnectionSettingsShown)
+        // Sub-project 2 (on-device API): "Run the API on this device" row.
+        // Only shown when the app-layer wired an ApiAppLauncher (production
+        // builds always do; preview / older call sites pass null → omitted).
+        if (apiAppLauncher != null) {
+            runApiOnDeviceItem(apiAppLauncher)
+        }
         // Multi-Provider Extension: entry to the provider credentials screen.
         // SP-4 Phase C (2026-05-13): the legacy "Trackers" menu entry was
         // removed; per-provider configuration is reachable by tapping a
@@ -324,6 +339,65 @@ private fun LazyListScope.endpointSelectionItem(
         requestShowDialog = openConnectionSettings,
         onDialogShown = onConnectionSettingsShown,
     )
+}
+
+private fun LazyListScope.runApiOnDeviceItem(
+    apiAppLauncher: ApiAppLauncher,
+) = item { RunApiOnDeviceItem(apiAppLauncher) }
+
+/**
+ * Sub-project 2 (on-device API): the "Run the API on this device" Settings row.
+ *
+ * If the Lava API app is installed → tapping opens it (which boots its
+ * on-device API and makes it appear in the discovered-instances list via mDNS).
+ * If not installed → tapping opens the configured download page so the user can
+ * install it first. The description line states plainly that this runs the API
+ * ON THIS device and exposes it to the local network — the operator demands
+ * zero confusion about controlling the local API instance.
+ *
+ * Install state is read once per composition entry (a side-effect-free
+ * [ApiAppLauncher.isInstalled] call) so the title flips correctly between
+ * "Open" and "Download" after the user installs the API app and returns.
+ */
+@Composable
+private fun RunApiOnDeviceItem(apiAppLauncher: ApiAppLauncher) {
+    val context = LocalContext.current
+    val installed = remember { apiAppLauncher.isInstalled() }
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .defaultMinSize(minHeight = AppTheme.sizes.extraLarge),
+        onClick = {
+            val intent = if (installed) {
+                apiAppLauncher.intentToOpen() ?: apiAppLauncher.intentToDownload()
+            } else {
+                apiAppLauncher.intentToDownload()
+            }
+            runCatching { context.startActivity(intent) }
+        },
+    ) {
+        Column(
+            modifier = Modifier.padding(
+                horizontal = AppTheme.spaces.large,
+                vertical = AppTheme.spaces.small,
+            ),
+            verticalArrangement = Arrangement.Center,
+        ) {
+            BodyLarge(
+                text = stringResource(
+                    if (installed) {
+                        R.string.menu_settings_run_api_open
+                    } else {
+                        R.string.menu_settings_run_api_download
+                    },
+                ),
+            )
+            BodySmall(
+                text = stringResource(R.string.menu_settings_run_api_description),
+                color = AppTheme.colors.outline,
+            )
+        }
+    }
 }
 
 private fun <T> LazyListScope.menuSelectionItem(

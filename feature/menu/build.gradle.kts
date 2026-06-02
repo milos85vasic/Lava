@@ -5,6 +5,15 @@ plugins {
 
 android {
     namespace = "lava.menu"
+
+    testOptions {
+        unitTests {
+            // Sub-project 2: ApiAppLauncherTest uses real Intent/Uri via
+            // Robolectric (RobolectricTestRunner) rather than default-value
+            // stubs, so its assertions exercise the real Intent the OS receives.
+            isIncludeAndroidResources = true
+        }
+    }
 }
 
 dependencies {
@@ -17,4 +26,6 @@ dependencies {
     implementation(project(":feature:connection"))
 
     testImplementation(libs.okhttp.core)
+    // Sub-project 2: real Intent/Uri behavior in ApiAppLauncherTest.
+    testImplementation(libs.robolectric)
 }

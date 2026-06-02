@@ -43,9 +43,39 @@ sealed interface Endpoint {
      * through the wrong scheme. Carrying it on the type makes the URL
      * builder's job unambiguous.
      */
-    data class GoApi(override val host: String, val port: Int = DEFAULT_PORT) : Endpoint {
+    data class GoApi(
+        override val host: String,
+        val port: Int = DEFAULT_PORT,
+        /**
+         * The `platform` TXT-record value the mDNS advertisement carried,
+         * if any (Sub-project 2, on-device API integration). The on-device
+         * Lava-API app advertises `platform=android`; the host/server
+         * advertiser omits the attribute. `null` means "no platform
+         * attribute was advertised" — render exactly as a host/server
+         * instance does. ADDITIVE field with a `null` default so persisted
+         * [lava.securestorage.model.EndpointConverter] rows written before
+         * Sub-project 2 (which carry no `platform` key) deserialize
+         * unchanged, and so existing equals()/copy() call sites that do not
+         * mention the field keep compiling.
+         */
+        val platform: String? = null,
+        /**
+         * The `storage` TXT-record value the mDNS advertisement carried,
+         * if any (`sqlite` for the on-device app). `null` when unadvertised.
+         * Additive, default `null`, for the same back-compat reason as
+         * [platform].
+         */
+        val storage: String? = null,
+    ) : Endpoint {
         companion object {
             const val DEFAULT_PORT: Int = 8443
+
+            /**
+             * The `platform` TXT-record value an on-device Lava-API instance
+             * advertises. Used to distinguish an Android-device API instance
+             * from a host/server one in discovered-instance lists.
+             */
+            const val PLATFORM_ANDROID: String = "android"
         }
     }
 

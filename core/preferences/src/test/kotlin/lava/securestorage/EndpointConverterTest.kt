@@ -126,4 +126,57 @@ class EndpointConverterTest {
         // same wrong value, e.g. both 8443).
         assertEquals(9443, (parsed as Endpoint.GoApi).port)
     }
+
+    // ── Sub-project 2 (on-device API): platform/storage round-trip ──
+    //
+    // FALSIFIABILITY REHEARSAL (per §6.J / Sixth Law clause 2). Deliberate
+    // break tried while authoring: in EndpointConverter.toJson drop the
+    // `platform?.let { put(PlatformKey, it) }` line. Expected failure:
+    //   - `roundtrip GoApi preserves platform and storage attributes` fails
+    //     with expected:<...platform=android...> but was:<null> for the parsed
+    //     GoApi.platform, proving the platform persist path is load-bearing for
+    //     the on-device-instance label that survives an app restart. Reverted.
+
+    // CHALLENGE — an on-device API endpoint (platform=android) survives a full
+    // persist/re-hydrate cycle, so the distinct "Android device" label still
+    // renders after the user restarts the app.
+    @Test
+    fun `roundtrip GoApi preserves platform and storage attributes`() {
+        val original = Endpoint.GoApi(
+            host = "10.0.0.42",
+            port = 8443,
+            platform = "android",
+            storage = "sqlite",
+        )
+        val json = with(EndpointConverter) { original.toJson() }
+        val parsed = with(EndpointConverter) { fromJson(json) } as Endpoint.GoApi
+        assertEquals(original, parsed)
+        assertEquals("android", parsed.platform)
+        assertEquals("sqlite", parsed.storage)
+    }
+
+    // CHALLENGE — back-compat: a legacy GoApi record written before Sub-project 2
+    // (no platform / storage keys) deserializes with null attributes, i.e.
+    // renders exactly as a host/server instance, never crashing on the missing
+    // keys.
+    @Test
+    fun `parse legacy GoApi without platform or storage yields null attributes`() {
+        val parsed = with(EndpointConverter) {
+            fromJson("{\"host\":\"192.168.1.100\",\"port\":8443,\"type\":\"GoApi\"}")
+        } as Endpoint.GoApi
+        assertEquals("192.168.1.100", parsed.host)
+        assertEquals(8443, parsed.port)
+        assertEquals(null, parsed.platform)
+        assertEquals(null, parsed.storage)
+    }
+
+    // CHALLENGE — a host/server GoApi (no platform) serializes WITHOUT the
+    // platform/storage keys, so legacy rows round-trip byte-equivalently and no
+    // spurious attribute leaks into persisted state.
+    @Test
+    fun `convert host GoApi without platform omits platform and storage keys`() {
+        val json = JSONObject(with(EndpointConverter) { Endpoint.GoApi("192.168.1.100", 8443).toJson() })
+        assertEquals(false, json.has("platform"))
+        assertEquals(false, json.has("storage"))
+    }
 }
