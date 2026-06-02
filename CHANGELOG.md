@@ -1,4 +1,43 @@
 # Changelog
+## Lava-API-App-0.1.0-1 — 2026-06-02 (First distribution: standalone on-device Lava API server app)
+
+**Previous published:** none — first distribution.
+
+- **Brand-new "Lava API" Android app** (`digital.vasic.lava.api`, debug suffix `.dev`):
+  runs the full lava-api-go server in-process on the device over HTTPS on the local
+  network, advertised over mDNS (`_lava-api._tcp`, TXT `engine=go,platform=android,storage=sqlite`)
+  so other devices — incl. the Lava client's "Choose your API" screen — discover it.
+- Foreground service with start/stop/restart notification controls; per-install
+  auth-key store (EncryptedSharedPreferences); SQLite storage backend; `minSdk 23`.
+- Shares the SAME signing keystore as the client app (no separate keys, §6.R/§6.H).
+- §6.Z: on-device Challenges C01–C04 EXECUTED green on cold-booted Pixel_8/API35 via
+  the Containers runner (host-direct+HVF). Evidence:
+  `.lava-ci-evidence/distribute-changelog/firebase-app-distribution-api-app/0.1.0-1-test-evidence.md`.
+
+## Lava-Android-1.2.36-1056 / Lava-API-Go-2.3.23-2323 — 2026-06-02 (On-device API client integration; §6.L 69th)
+
+**Previous published:** Lava-Android-1.2.35-1055 (debug + release, 2026-06-01).
+
+- **On-device API support in the client** (commit 199f1404 / merge 7fce7cf9): the
+  network-discovery list now parses + labels API instances advertised with
+  `platform=android`; the onboarding "Choose your API" step labels on-device
+  instances distinctly; and **Settings → "Run the API on this device"** installs or
+  launches the standalone Lava API app (`digital.vasic.lava.api`), or opens its
+  download link when not installed (§6.R-sourced `LAVA_API_APP_DOWNLOAD_URL`).
+- Client half of the new on-device API capability; the server half ships as the
+  standalone Lava API app (Lava-API-App-0.1.0-1 above), first-distributed this cycle.
+- Fresh signed debug + release build with rotated auth pepper, prepared for the §6.AA
+  two-stage flow (debug first, release after on-device verification).
+- lava-api-go unchanged this cycle → stays 2.3.23-2323.
+- **Distribution status: DEFERRED.** Version bumped + APKs built, but the §6.Z client
+  device gate (C00/C01) is infra-BLOCKED this cycle — the Pixel_8/API35 emulator failed
+  to reach `boot_completed` across 5 cold-boot attempts (host emulator-boot wedge that
+  developed mid-session; booted fine at 11:35 today; root causes investigated per §6.M,
+  forensics at `.lava-ci-evidence/sixth-law-incidents/2026-06-02-emulator-boot-wedge.json`).
+  Per §6.Z the client is NOT distributed without a green gate; the distribute waits for a
+  bootable gate host. The new api-app (Lava-API-App-0.1.0-1) shipped its debug stage this
+  cycle on independently-solid transferred evidence.
+
 ## Lava-Android-1.2.35-1055 / Lava-API-Go-2.3.23-2323 — 2026-06-01 ("Choose your API" two sections; §6.L 69th)
 
 - **Onboarding "Choose your API" now has two sections** (commit 26ee4433): the existing

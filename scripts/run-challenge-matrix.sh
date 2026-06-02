@@ -79,6 +79,9 @@ ADD_TV=0
 ADD_FOLDABLE=0
 INCLUDE_HELIXQA=0               # per HelixQA integration-design Option 1
 AVDS_OVERRIDE=""                # when non-empty, REPLACES the §6.AE.2 default matrix
+BOOT_TIMEOUT=""                 # forwarded to emulator-matrix --boot-timeout (default 5m).
+                                # Raise on a loaded host where an ARM/HVF cold-boot legitimately
+                                # exceeds 5m on contention (NOT a product defect). Empty = CLI default.
 
 # §6.AE.2 minimum AVD matrix. Format: name:apiLevel:formFactor.
 # This is the constitutional minimum for gate runs. Sub-minimums are
@@ -99,6 +102,7 @@ while [[ $# -gt 0 ]]; do
         --evidence-dir)  EVIDENCE_DIR="$2"; shift 2 ;;
         --no-build)      NO_BUILD=1; shift ;;
         --avds)          AVDS_OVERRIDE="$2"; shift 2 ;;
+        --boot-timeout)  BOOT_TIMEOUT="$2"; shift 2 ;;
         --latest-api)    LATEST_API="$2"; shift 2 ;;
         --add-tv)        ADD_TV=1; shift ;;
         --add-foldable)  ADD_FOLDABLE=1; shift ;;
@@ -306,6 +310,7 @@ echo "==> Delegating to Containers/cmd/emulator-matrix --runner=auto (resolves t
     --avds "$AVDS_JOINED" \
     --evidence-dir "$EVIDENCE_DIR" \
     --image-manifest tools/lava-containers/vm-images.json \
+    ${BOOT_TIMEOUT:+--boot-timeout "$BOOT_TIMEOUT"} \
     --cold-boot \
     "${TEST_CLASS_ARGS[@]}"
 RC=$?

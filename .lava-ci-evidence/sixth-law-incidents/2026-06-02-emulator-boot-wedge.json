@@ -1,0 +1,27 @@
+{
+  "incident": "2026-06-02-emulator-boot-wedge",
+  "date_utc": "2026-06-02",
+  "class": "infra — emulator gate-host boot failure (host-direct+HVF, darwin/arm64)",
+  "summary": "During the 1.2.36-1056 / api-app-0.1.0-1 §6.Z device-gate cycle, the Pixel_8/API35 emulator (Containers runner, host-direct+HVF) failed to reach sys.boot_completed across 5 consecutive cold-boot attempts. The SAME host + AVD booted green TWICE at 11:35 the same day (item-1 api-app gate), so the wedge developed mid-session.",
+  "impact": "Client 1.2.36-1056 §6.Z gate (C00/C01) could not produce green evidence -> client debug+release distribute DEFERRED per §6.Z (no distribute without a green gate). api-app 0.1.0-1 was UNAFFECTED: it shipped its debug stage on transferred green-x2 evidence from the 11:35 gate (source-identity proven unchanged).",
+  "attempts": [
+    {"run": "api-app-c01-04",        "boot_seconds": 359, "boot_timeout": "5m",  "result": "FAIL: boot not completed"},
+    {"run": "api-app-c01-04-rerun",  "boot_seconds": 360, "boot_timeout": "5m",  "result": "FAIL (after freeing 930MB RAM via gradle --stop)"},
+    {"run": "api-app-c01-04-run3",   "boot_seconds": 974, "boot_timeout": "15m", "result": "FAIL (boot-timeout raised to 15m)"},
+    {"run": "client-c00-c01",        "boot_seconds": 974, "boot_timeout": "15m", "result": "FAIL (after Kaspersky AV settled to 34% CPU)"},
+    {"run": "client-c00-c01-cleanavd","boot_seconds": 994,"boot_timeout": "15m", "result": "FAIL (after full AVD-overlay wipe + clean cold boot, quiet host load 6.5)"}
+  ],
+  "boot_pattern_note": "The emulator process ran the FULL timeout window every attempt (boot_seconds approximately equals the timeout), i.e. the process did not crash early -- it ran but never signalled sys.boot_completed. Consistent across loaded host, quiet host, and a freshly-wiped AVD.",
+  "hypotheses_tested_and_eliminated": [
+    {"hypothesis": "Kaspersky AV CPU saturation", "evidence": "AV reached 318-395% CPU scanning the new 184MB/164MB APK + emulator image writes; a monitored run waited until AV settled to 34% CPU (load 6.5) and boot STILL failed at 994s.", "verdict": "contributory but NOT sole cause"},
+    {"hypothesis": "host memory pressure", "evidence": "freed ~930MB by stopping gradle daemons (pages free 4431 -> 238683); boot still failed.", "verdict": "eliminated as sole cause"},
+    {"hypothesis": "stale qemu zombie holding AVD lock", "evidence": "each timed-out run left a qemu-system-aarch64 zombie (PIDs 58920, 71249, 60060, ...); all killed (targeted SIGKILL, §6.M); locks cleared; boot still failed on the next clean attempt.", "verdict": "real secondary issue, not the cause"},
+    {"hypothesis": "AVD overlay corruption from SIGKILL of mid-boot qemu", "evidence": "userdata-qemu.img.qcow2 had bloated to 8.47GB; wiped all qcow2 overlays + snapshots + locks so cold-boot regenerates from base images; boot STILL failed at 994s on the clean AVD.", "verdict": "eliminated"}
+  ],
+  "PENDING_FORENSICS": "The exact wedge mechanism is UNCONFIRMED. The emulator booted green twice at 11:35 on this same host/AVD and fails consistently after ~16:00 across a fresh AVD and a quiet host. The leading-but-unverified explanation is a wedged host HVF/adb/emulator-daemon state that a host reboot would clear -- this CANNOT be tested by the agent (host reboot is operator-only per the Host Stability Directive). Tracked-task: operator to reboot the gate host (or run the §6.Z client gate on a quieter / freshly-booted host) and re-run scripts/run-challenge-matrix.sh --boot-timeout 15m --avds Pixel_8:35:phone --test-class Challenge00CrashSurvivalTest,Challenge01AppLaunchAndTrackerSelectionTest .",
+  "remediation_landed_this_session": [
+    "Added --boot-timeout passthrough to scripts/run-api-app-challenge-matrix.sh and scripts/run-challenge-matrix.sh (forwards the Containers emulator-matrix --boot-timeout flag; default 5m, raisable on loaded hosts).",
+    "Stopped the podman VM (freed 2 CPU + 4GiB) since lava-api-go is not distributed this cycle."
+  ],
+  "constitutional_posture": "Per §6.J / §6.L / §6.Z: NO bluffed pass. The client distribute is DEFERRED honestly rather than shipped without a green gate (which is exactly the §6.Z failure mode that bricked 1.2.19-1039). The api-app debug distribute proceeded only because its green-x2 evidence is <24h and the artifact is git-diff-proven byte-identical."
+}

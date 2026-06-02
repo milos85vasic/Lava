@@ -42,6 +42,11 @@ GRADLE_MODULE=":api-app"
 AVDS_OVERRIDE="Pixel_8:35:phone"   # the provisioned macOS-host AVD (§6.AG --avds path)
 EVIDENCE_DIR=".lava-ci-evidence/phase-e-api-app/$(date -u +%Y-%m-%dT%H-%M-%SZ)-gate"
 NO_BUILD=0
+# Per-AVD cold-boot timeout forwarded to the Containers emulator-matrix CLI
+# (its --boot-timeout flag, default 5m). On a loaded macOS host an ARM/HVF
+# cold-boot can exceed 5m purely on host contention (NOT a product defect);
+# raise this to give the boot headroom. Empty = use the CLI default.
+BOOT_TIMEOUT=""
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -49,6 +54,7 @@ while [[ $# -gt 0 ]]; do
         --gradle-module) GRADLE_MODULE="$2"; shift 2 ;;
         --avds)          AVDS_OVERRIDE="$2"; shift 2 ;;
         --evidence-dir)  EVIDENCE_DIR="$2"; shift 2 ;;
+        --boot-timeout)  BOOT_TIMEOUT="$2"; shift 2 ;;
         --no-build)      NO_BUILD=1; shift ;;
         -h|--help)       sed -n '3,40p' "$0"; exit 0 ;;
         *)               echo "ERROR: unknown argument: $1" >&2; exit 2 ;;
@@ -137,6 +143,7 @@ echo "==> Delegating to Containers/cmd/emulator-matrix --runner=auto (module=$GR
     --test-class "$TEST_CLASS" \
     --evidence-dir "$EVIDENCE_DIR" \
     --image-manifest tools/lava-containers/vm-images.json \
+    ${BOOT_TIMEOUT:+--boot-timeout "$BOOT_TIMEOUT"} \
     --cold-boot \
     --concurrent=1
 RC=$?
