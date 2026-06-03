@@ -102,7 +102,9 @@ class LoginViewModelTest {
             viewModel.test(this) {
                 viewModel.perform(LoginAction.SubmitClick)
                 // Drain orbit-test buffer in arrival order.
-                awaitItem(); awaitItem(); awaitItem()
+                awaitItem()
+                awaitItem()
+                awaitItem()
                 val afterSubmit = viewModel.container.stateFlow.value
                 assertEquals(
                     "precondition: banner populated after SubmitClick → ServiceUnavailable",
@@ -131,7 +133,9 @@ class LoginViewModelTest {
             authService.response = AuthResult.ServiceUnavailable(reason = "Parser Unknown")
             viewModel.test(this) {
                 viewModel.perform(LoginAction.SubmitClick)
-                awaitItem(); awaitItem(); awaitItem()
+                awaitItem()
+                awaitItem()
+                awaitItem()
                 assertEquals(
                     "Parser Unknown",
                     viewModel.container.stateFlow.value.serviceUnavailable,
@@ -170,7 +174,9 @@ class LoginViewModelTest {
             authService.response = AuthResult.CaptchaRequired(captcha = captcha)
             viewModel.test(this) {
                 viewModel.perform(LoginAction.SubmitClick)
-                awaitItem(); awaitItem(); awaitItem()
+                awaitItem()
+                awaitItem()
+                awaitItem()
                 assertNotNull(
                     "precondition: captcha populated after CaptchaRequired",
                     viewModel.container.stateFlow.value.captcha,
@@ -178,7 +184,8 @@ class LoginViewModelTest {
 
                 authService.response = AuthResult.ServiceUnavailable(reason = "503 after captcha")
                 viewModel.perform(LoginAction.SubmitClick)
-                awaitItem(); awaitItem()
+                awaitItem()
+                awaitItem()
 
                 val afterServiceUnavailable = viewModel.container.stateFlow.value
                 assertNull(

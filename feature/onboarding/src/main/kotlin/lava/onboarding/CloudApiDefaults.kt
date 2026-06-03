@@ -61,15 +61,21 @@ object CloudApiDefaults {
         return when (colonCount) {
             0 -> {
                 // bare host → default port
-                if (schemeStripped.isBlank()) null
-                else Endpoint.GoApi(host = schemeStripped, port = Endpoint.GoApi.DEFAULT_PORT)
+                if (schemeStripped.isBlank()) {
+                    null
+                } else {
+                    Endpoint.GoApi(host = schemeStripped, port = Endpoint.GoApi.DEFAULT_PORT)
+                }
             }
             1 -> {
                 val host = schemeStripped.substringBefore(':')
                 val portStr = schemeStripped.substringAfter(':')
                 val port = portStr.toIntOrNull()
-                if (host.isBlank() || port == null || port !in 1..65535) null
-                else Endpoint.GoApi(host = host, port = port)
+                if (host.isBlank() || port == null || port !in 1..65535) {
+                    null
+                } else {
+                    Endpoint.GoApi(host = host, port = port)
+                }
             }
             // More than one ':' would be an IPv6 literal or malformed — out of
             // scope for the cloud-default UX (which targets DNS hostnames).

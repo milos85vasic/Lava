@@ -4,8 +4,8 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.android.components.ViewModelComponent
 import dagger.hilt.testing.TestInstallIn
-import javax.inject.Named
 import lava.onboarding.OnboardingHiltModule
+import javax.inject.Named
 
 /**
  * Test-only Hilt override of [OnboardingHiltModule] (60th §6.L invocation,

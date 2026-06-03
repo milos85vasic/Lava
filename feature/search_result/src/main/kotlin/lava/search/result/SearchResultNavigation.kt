@@ -25,6 +25,7 @@ private const val AuthorNameKey = "pn"
 private const val SortKey = "o"
 private const val OrderKey = "s"
 private const val PeriodKey = "tm"
+
 // Bug 2 fix (2026-05-17): prior to this commit `providerIds` was missing
 // from the nav serializer + deserializer; the SearchInputViewModel posted
 // OpenSearch(filter.providerIds=[archiveorg, gutenberg]) but the receiving

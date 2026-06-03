@@ -31,7 +31,6 @@ import lava.favorites.FavoritesViewModel
 import org.junit.Rule
 import org.junit.Test
 
-
 @HiltAndroidTest
 class Challenge32FavoritesScreenReachableTest {
 

@@ -34,7 +34,6 @@ import lava.forum.category.openCategory
 import org.junit.Rule
 import org.junit.Test
 
-
 @HiltAndroidTest
 class Challenge34CategoryNavigationReachableTest {
 

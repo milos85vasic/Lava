@@ -48,7 +48,6 @@ import digital.vasic.lava.client.MainActivity
 import org.junit.Rule
 import org.junit.Test
 
-
 @HiltAndroidTest
 class Challenge31VisitedScreenReachableTest {
 
