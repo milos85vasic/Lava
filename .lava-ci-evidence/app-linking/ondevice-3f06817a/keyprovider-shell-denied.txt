@@ -1,0 +1,4 @@
+Error while accessing provider:digital.vasic.lava.api.dev.keyprovider
+java.lang.SecurityException: Permission Denial: reading lava.api.app.handoff.ApiKeyProvider uri content://digital.vasic.lava.api.dev.keyprovider from pid=23025, uid=2000 requires digital.vasic.lava.permission.READ_API_KEY, or grantUriPermission()
+	at android.os.Parcel.createExceptionOrNull(Parcel.java:3354)
+	at android.os.Parcel.createException(Parcel.java:3338)

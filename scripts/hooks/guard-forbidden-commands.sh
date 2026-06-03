@@ -156,6 +156,23 @@ block() {
 # --------------------------------------------------------------------------
 EMULATOR_MSG="Gate emulator runs MUST go via scripts/run-challenge-matrix.sh → Containers submodule (§6.X). Raw host-direct adb/emulator is dev-iteration only, never gate evidence."
 
+# Scoped REAL-PHYSICAL-DEVICE exception (operator-authorized 2026-06-03).
+# §6.AH permits a real PHYSICAL device as a §6.Z surface (it is NOT an
+# emulator/virtual device), and the container-emulator gate cannot boot on the
+# macOS host (§6.X-debt). adb commands EXPLICITLY targeting an authorized real
+# physical serial (`adb -s <serial> …`) are therefore permitted. Emulator
+# serials (`emulator-*`) and un-serialed adb stay BLOCKED — an ambiguous/absent
+# target could be an emulator, which §6.X still forbids host-direct.
+# Env-overridable allowlist; default = the operator-connected Samsung S23 Ultra.
+LAVA_REAL_DEVICE_SERIALS="${LAVA_REAL_DEVICE_SERIALS:-R5CW33CBVQV}"
+REAL_DEVICE_ADB=""
+for _serial in $LAVA_REAL_DEVICE_SERIALS; do
+  if [[ "$_serial" != emulator-* ]] && \
+     [[ "$COMMAND" =~ (^|[^[:alnum:]_/.-])adb[[:space:]]+-s[[:space:]]+"$_serial"([[:space:]]|$) ]]; then
+    REAL_DEVICE_ADB=1
+  fi
+done
+
 # raw `emulator -avd ...` or a path ending in .../emulator referencing an SDK env
 if [[ "$COMMAND" =~ (^|[^[:alnum:]_/.-])emulator[[:space:]]+-avd([[:space:]]|$) ]]; then
   block "§6.X emulator gate" "$EMULATOR_MSG"
@@ -165,12 +182,17 @@ if [[ "$COMMAND" =~ \$(ANDROID_[A-Z_]+|\{ANDROID_[A-Z_]+\})[^[:space:]]*/emulato
 fi
 
 # top-level `adb install` / `adb -s <serial> install`
-if [[ "$COMMAND" =~ (^|[^[:alnum:]_/.-])adb([[:space:]]+-s[[:space:]]+[^[:space:]]+)?[[:space:]]+install([[:space:]]|$) ]]; then
+# Permitted only when the command explicitly targets an authorized real
+# physical serial (REAL_DEVICE_ADB); emulator/un-serialed installs stay blocked.
+if [[ -z "$REAL_DEVICE_ADB" ]] && \
+   [[ "$COMMAND" =~ (^|[^[:alnum:]_/.-])adb([[:space:]]+-s[[:space:]]+[^[:space:]]+)?[[:space:]]+install([[:space:]]|$) ]]; then
   block "§6.X emulator gate" "$EMULATOR_MSG"
 fi
 
 # `am instrument` (instrumentation runner invoked host-direct)
-if [[ "$COMMAND" =~ (^|[^[:alnum:]_/.-])am[[:space:]]+instrument([[:space:]]|$) ]]; then
+# Permitted only when wrapped in `adb -s <authorized-real-serial> shell am instrument`.
+if [[ -z "$REAL_DEVICE_ADB" ]] && \
+   [[ "$COMMAND" =~ (^|[^[:alnum:]_/.-])am[[:space:]]+instrument([[:space:]]|$) ]]; then
   block "§6.X emulator gate" "$EMULATOR_MSG"
 fi
 
