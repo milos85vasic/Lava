@@ -14,6 +14,7 @@ import lava.network.data.NetworkApiRepository
 import lava.network.data.NetworkApiRepositoryImpl
 import lava.network.impl.DelegatingProxySelector
 import lava.network.impl.ImageLoaderImpl
+import lava.network.impl.LavaAuthBlobProvider
 import lava.network.impl.SwitchingNetworkApi
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
@@ -55,6 +56,26 @@ internal interface NetworkModule {
     fun proxySelector(impl: DelegatingProxySelector): ProxySelector
 
     companion object {
+        /**
+         * The HTTP header name used to authenticate requests to both the
+         * build-time UUID path ([lava.network.impl.AuthInterceptor]) and the
+         * per-endpoint on-device key path ([NetworkApiRepositoryImpl.withKeyOverride]).
+         *
+         * Provided by [LavaAuthBlobProvider.getFieldName] so the value is
+         * consistent with the on-device API app's server-side expectation
+         * (both read the same source — the `LAVA_AUTH_FIELD_NAME` build-config
+         * or env var, defaulting to "Lava-Auth").
+         *
+         * Option A per the client-api-app linking design (§5).
+         */
+        @Provides
+        @Singleton
+        @Named("authFieldName")
+        fun authFieldName(blobProvider: LavaAuthBlobProvider): String =
+            blobProvider.getFieldName().ifEmpty { DEFAULT_AUTH_FIELD_NAME }
+
+        private const val DEFAULT_AUTH_FIELD_NAME = "Lava-Auth"
+
         /**
          * Default OkHttp client. Uses the JVM/Android system trust store
          * (system CAs only — no user-installed CA acceptance). Used for

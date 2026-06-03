@@ -179,4 +179,49 @@ class EndpointConverterTest {
         assertEquals(false, json.has("platform"))
         assertEquals(false, json.has("storage"))
     }
+
+    // ── Option A per-instance key (client-api-app linking design §5) ─────────
+    //
+    // FALSIFIABILITY REHEARSAL (per §6.J / Sixth Law clause 2).
+    // Deliberate break: in EndpointConverter.toJson drop the
+    //   `key?.let { put(KeyKey, it) }` line.
+    // Expected failure: `roundtrip GoApi preserves per-instance key` fails
+    //   with expected:<...key=abc-key-123...> but was:<null> for
+    //   parsed.key, proving the key persist path is load-bearing for the
+    //   on-device auth flow: without it the HTTP layer sees key=null on
+    //   next launch and 401s every call. Reverted.
+
+    // CHALLENGE — an on-device GoApi endpoint with a key survives a full
+    // persist/re-hydrate cycle so the HTTP auth layer sees the key on every
+    // subsequent launch.
+    @Test
+    fun `roundtrip GoApi preserves per-instance key`() {
+        val original = Endpoint.GoApi(
+            host = "127.0.0.1",
+            port = 8443,
+            key = "abc-key-123",
+        )
+        val json = with(EndpointConverter) { original.toJson() }
+        val parsed = with(EndpointConverter) { fromJson(json) } as Endpoint.GoApi
+        assertEquals(original, parsed)
+        assertEquals("abc-key-123", parsed.key)
+    }
+
+    // CHALLENGE — a GoApi without a key (cloud/mDNS) serializes WITHOUT the
+    // key field so legacy rows round-trip byte-equivalently.
+    @Test
+    fun `convert GoApi without key omits key field`() {
+        val json = JSONObject(with(EndpointConverter) { Endpoint.GoApi("192.168.1.100", 8443).toJson() })
+        assertEquals(false, json.has("key"))
+    }
+
+    // CHALLENGE — back-compat: a legacy GoApi record written before Option A
+    // (no key field) deserializes with key=null, never crashing.
+    @Test
+    fun `parse legacy GoApi without key yields null key`() {
+        val parsed = with(EndpointConverter) {
+            fromJson("{\"host\":\"192.168.1.100\",\"port\":8443,\"type\":\"GoApi\"}")
+        } as Endpoint.GoApi
+        assertEquals(null, parsed.key)
+    }
 }

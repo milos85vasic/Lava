@@ -189,6 +189,10 @@ open class MainActivity : ComponentActivity() {
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
+        // IMPORTANT-3b: singleInstance correctness — setIntent so that
+        // getIntent() in any subsequent call (e.g. deepLink re-read on
+        // resume) returns the NEW intent, not the stale launch intent.
+        setIntent(intent)
         val logger = loggerFactory.get("MainActivity")
         logger.d { "New intent: $intent" }
         deepLinks.deepLink = intent.data

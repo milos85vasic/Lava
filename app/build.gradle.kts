@@ -73,6 +73,11 @@ android {
         // These are build constants (not secrets), so they live in BuildConfig
         // per the §6.R exemption for package IDs.
         buildConfigField("String", "API_RELEASE_PACKAGE", "\"digital.vasic.lava.api\"")
+        // API_TARGET_PACKAGE is overridden per build type below (debug → .dev,
+        // release → same as API_RELEASE_PACKAGE). Declared here as a
+        // placeholder so the field always exists in BuildConfig; the per-type
+        // override wins at build time.
+        buildConfigField("String", "API_TARGET_PACKAGE", "\"digital.vasic.lava.api\"")
     }
 
     buildFeatures {
@@ -126,6 +131,10 @@ android {
             isMinifyEnabled = false
             signingConfig = signingConfigs.getByName("debug")
             applicationIdSuffix = ".dev"
+            // IMPORTANT-3a: debug client targets the .dev API app, not the
+            // release one. The release fallback (API_RELEASE_PACKAGE) still
+            // points to the Play Store listing (release id, no .dev suffix).
+            buildConfigField("String", "API_TARGET_PACKAGE", "\"digital.vasic.lava.api.dev\"")
         }
     }
 

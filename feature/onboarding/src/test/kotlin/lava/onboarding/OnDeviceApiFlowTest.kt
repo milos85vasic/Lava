@@ -62,6 +62,15 @@ import org.orbitmvi.orbit.test.test
  *     repo only contained Rutracker (the seeded default).
  *   Reverted: yes
  *
+ * FALSIFIABILITY REHEARSAL 4 — OnDeviceApiReturned key persist (Option A):
+ *   Mutation: in onOnDeviceApiReturned change
+ *             `Endpoint.GoApi(host = host, port = port, key = apiKey)`
+ *             back to `Endpoint.GoApi(host = host, port = port)`.
+ *   Observed failure: `on_device_api_returned_persists_endpoint_and_advances`
+ *     fails — assertNotNull("Endpoint.GoApi.key must be non-null...") fails
+ *     because persisted endpoint has key=null.
+ *   Reverted: yes
+ *
  * FALSIFIABILITY REHEARSAL 3 — OnDeviceApiReturned advance:
  *   Mutation: break the probe by making MockWebServer return 503 for /health.
  *   Observed failure: step stays at ApiSelection (ApiConnectivityState.Failure),
@@ -150,6 +159,9 @@ class OnDeviceApiFlowTest {
     private fun createViewModel(
         apiInstalled: Boolean = true,
         apiKey: String? = "test-key-abc",
+        // IMPORTANT-3a: variant-aware target package. Tests can pass a
+        // different package to simulate the debug-variant (.dev) case.
+        apiTargetPackage: String = AppLinkContract.API_RELEASE_PACKAGE,
     ): OnboardingViewModel {
         val launcher = CrossAppLauncher(checker(apiInstalled))
         val connectionService = object : ConnectionService {
@@ -191,6 +203,9 @@ class OnDeviceApiFlowTest {
             // crossAppLauncher is now non-nullable (not a function type, so Hilt
             // can inject it); tests pass a real CrossAppLauncher with a fake checker.
             crossAppLauncher = launcher,
+            // IMPORTANT-3a: pass variant-aware target package so tests can
+            // verify debug builds target the .dev package.
+            apiTargetPackage = apiTargetPackage,
         ).also { vm ->
             // apiKeyReader cannot be injected via Hilt (Kotlin function types are not
             // Dagger-injectable). Set via setApiKeyReader() after construction.
@@ -322,7 +337,114 @@ class OnDeviceApiFlowTest {
                     loopbackEndpoint,
                 )
 
+                // CRITICAL (Option A anti-bluff): the persisted endpoint MUST
+                // carry the key from the handoff so the HTTP layer can
+                // authenticate correctly. If key == null here, every real
+                // authenticated call to the on-device API will 401.
+                //
+                // FALSIFIABILITY REHEARSAL (added 2026-06-03):
+                //   Mutation: in onOnDeviceApiReturned change
+                //     `Endpoint.GoApi(host = host, port = port, key = apiKey)`
+                //     back to `Endpoint.GoApi(host = host, port = port)`.
+                //   Expected failure: assertNotNull below fails —
+                //     "Endpoint.GoApi.key must be non-null after on-device
+                //     API return but was null".
+                //   Reverted: yes.
+                assertNotNull(
+                    "Endpoint.GoApi.key must be non-null after on-device API return " +
+                        "(Option A: key is captured from the handoff and stored on the endpoint). " +
+                        "If key == null, every authenticated call to the on-device API will 401.",
+                    loopbackEndpoint?.key,
+                )
+                assertEquals(
+                    "Endpoint.GoApi.key must equal the handoff key passed via apiKeyReader",
+                    "probe-key",
+                    loopbackEndpoint?.key,
+                )
+
                 cancelAndIgnoreRemainingItems()
+            }
+        }
+
+    // ── VM-CONTRACT: IMPORTANT-3a — debug-variant target package ────────────
+
+    /**
+     * IMPORTANT-3a: when the API app is installed under the .dev package
+     * (debug variant), [OnboardingAction.LaunchOnDeviceApi] must emit
+     * [OnboardingSideEffect.LaunchApiApp] with the .dev target — NOT a
+     * Play-Store redirect (which is what happens when targetPackage is
+     * hardcoded to the release id and only the .dev app is installed).
+     *
+     * FALSIFIABILITY REHEARSAL:
+     *   Mutation: in onLaunchOnDeviceApi change `targetPackage = apiTargetPackage`
+     *     back to `targetPackage = releasePackage`.
+     *   Expected failure: this test fails — `checker` says the .dev package is
+     *     installed but decideLaunch is called with the release package id, so
+     *     `installedLaunchIntent(releasePackage)` returns null → StoreRedirect.
+     *     Observed: "debug-variant target installed → must emit LaunchApiApp,
+     *     got OpenPlayStore(...)". Reverted: yes.
+     */
+    // VM-CONTRACT
+    @Test
+    fun debug_variant_target_installed_emits_LaunchApiApp_not_StoreRedirect() =
+        runTest(dispatcherRule.testDispatcher) {
+            val devPackage = "digital.vasic.lava.api.dev"
+            // checker: only the .dev package is installed (release is absent)
+            val devOnlyChecker = object : PackageChecker {
+                override fun installedLaunchIntent(pkg: String): Any? =
+                    if (pkg == devPackage) "installed-sentinel" else null
+            }
+            val launcher = CrossAppLauncher(devOnlyChecker)
+            val connectionService = object : ConnectionService {
+                override val networkUpdates = emptyFlow<Boolean>()
+                override suspend fun isReachable(endpoint: Endpoint): Boolean = true
+                override suspend fun isInternetReachable(): Boolean = true
+            }
+            val viewModel = OnboardingViewModel(
+                sdk = sdk,
+                credentialManager = credentialManager,
+                authService = authService,
+                loggerFactory = TestLoggerFactory(),
+                analytics = object : AnalyticsTracker {
+                    override fun event(name: String, params: Map<String, String>) {}
+                    override fun setUserId(userId: String?) {}
+                    override fun setProperty(key: String, value: String?) {}
+                    override fun recordNonFatal(t: Throwable, ctx: Map<String, String>) {}
+                    override fun recordWarning(msg: String, ctx: Map<String, String>) {}
+                    override fun log(message: String) {}
+                },
+                providerConfigRepository = providerConfigRepository,
+                clonedProviderDao = clonedProviderDao,
+                discoveryService = TestLocalNetworkDiscoveryService(),
+                connectionService = connectionService,
+                endpointsRepository = endpointsRepository,
+                apiSelectionEnabled = true,
+                crossAppLauncher = launcher,
+                // IMPORTANT-3a: pass the .dev target package (simulating a debug build)
+                apiTargetPackage = devPackage,
+            )
+
+            viewModel.test(this) {
+                runOnCreate()
+                expectInitialState()
+                awaitState() // providers loaded
+
+                viewModel.perform(OnboardingAction.LaunchOnDeviceApi)
+
+                val effect = awaitSideEffect()
+                assertTrue(
+                    "debug-variant target installed → must emit LaunchApiApp, got $effect. " +
+                        "If this fails with OpenPlayStore, apiTargetPackage was not used " +
+                        "(the release package was passed to decideLaunch instead).",
+                    effect is OnboardingSideEffect.LaunchApiApp,
+                )
+                val launchEffect = effect as OnboardingSideEffect.LaunchApiApp
+                val launch = launchEffect.decision as LaunchDecision.Launch
+                assertEquals(
+                    "launch targetPackage must be the .dev package, not the release package",
+                    devPackage,
+                    launch.targetPackage,
+                )
             }
         }
 }

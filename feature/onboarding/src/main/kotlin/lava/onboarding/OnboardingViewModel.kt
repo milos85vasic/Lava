@@ -87,6 +87,14 @@ class OnboardingViewModel @Inject constructor(
     // Note: crossAppLauncher is non-nullable + @Inject-able (not a Kotlin
     // function type); Hilt can provide CrossAppLauncher directly.
     private val crossAppLauncher: CrossAppLauncher,
+    // IMPORTANT-3a: variant-aware target package for the API app launch.
+    // release → "digital.vasic.lava.api", debug → "digital.vasic.lava.api.dev".
+    // Provided by OnboardingAppLinkModule (@Named("apiTargetPackage")) from
+    // BuildConfig.API_TARGET_PACKAGE in :app. Default matches release package
+    // (same as API_RELEASE_PACKAGE) so existing tests that don't set this
+    // still compile without a Hilt override.
+    @javax.inject.Named("apiTargetPackage")
+    private val apiTargetPackage: String = AppLinkContract.API_RELEASE_PACKAGE,
 ) : ViewModel(), ContainerHost<OnboardingState, OnboardingSideEffect> {
     // [apiKeyReader] is a function seam (authority: String) -> key: String?
     // Cannot be injected via Hilt (function types are not Dagger-injectable).
@@ -576,15 +584,16 @@ class OnboardingViewModel @Inject constructor(
      * emitted SideEffect type + its decision fields (user-visible outcome).
      */
     internal fun onLaunchOnDeviceApi() = intent {
-        val launcher = crossAppLauncher ?: run {
-            logger.d { "onLaunchOnDeviceApi: crossAppLauncher not wired (no-op)" }
-            return@intent
-        }
+        // MINOR: crossAppLauncher is non-nullable (constructor type); this
+        // dead null-guard is removed. The ?: run block below was unreachable.
         val releasePackage = AppLinkContract.API_RELEASE_PACKAGE
-        // §6.R: client release package comes from AppLinkContract.CLIENT_RELEASE_PACKAGE
-        // which reads BuildConfig.CLIENT_RELEASE_PACKAGE — never a literal here.
-        val decision = launcher.decideLaunch(
-            targetPackage = releasePackage,
+        // IMPORTANT-3a: pass the variant-aware target package so debug builds
+        // launch the .dev API app (installed side-loaded) rather than
+        // redirecting to the Play Store for the release app.
+        // §6.R: apiTargetPackage comes from BuildConfig.API_TARGET_PACKAGE
+        // via @Named("apiTargetPackage") — never a literal here.
+        val decision = crossAppLauncher.decideLaunch(
+            targetPackage = apiTargetPackage,
             releasePackage = releasePackage,
             extras = mapOf(
                 AppLinkContract.EXTRA_START_API to "true",
@@ -607,25 +616,26 @@ class OnboardingViewModel @Inject constructor(
     /**
      * The API app returned with loopback [host] + [port]. Reads the key via
      * the [apiKeyReader] seam (null = engine not running or not installed →
-     * graceful no-op), builds [Endpoint.GoApi], and funnels into the EXISTING
-     * [onSelectApi] probe → persist → advance pipeline.
+     * graceful degradation), builds [Endpoint.GoApi] WITH the key embedded
+     * (Option A per the client-api-app linking design §5), and funnels into
+     * the EXISTING [onSelectApi] probe → persist → advance pipeline.
      *
      * §6.J anti-bluff: reuses [onSelectApi] end-to-end — NO parallel path.
-     * The key is read but not stored in [Endpoint.GoApi] (the model has no
-     * key field); it serves as a liveness signal that the engine is running
-     * and accessible before attempting the probe. If the key is null
-     * (engine not started), we proceed anyway and let the probe fail
-     * naturally — [ApiConnectivityState.Failure] + "Try again" affords recovery.
+     * The key is stored on [Endpoint.GoApi.key] so the HTTP layer
+     * ([lava.network.data.NetworkApiRepositoryImpl]) can send it as
+     * `Lava-Auth` instead of the build-time UUID for this specific endpoint.
+     * If the key is null (engine not started or provider absent), we build
+     * a key-null endpoint and let the probe fail naturally — the existing
+     * [ApiConnectivityState.Failure] + "Try again" affordance handles recovery.
      */
     internal fun onOnDeviceApiReturned(host: String, port: Int) = intent {
         logger.d { "onOnDeviceApiReturned: host=$host port=$port" }
-        // Read the key as a liveness signal (engine is running). If null,
-        // the probe will still run — the /health endpoint is the real gate.
-        // Key is intentionally not logged (§6.H).
-        try {
+        // Read the per-instance access key from the API app's ContentProvider.
+        // Key is intentionally not logged (§6.H — never include in logcat).
+        val apiKey: String? = try {
             apiKeyReader?.invoke(AppLinkContract.API_RELEASE_PACKAGE + ".keyprovider")
         } catch (e: Exception) {
-            logger.d { "apiKeyReader threw (engine not running?) — proceeding to probe" }
+            logger.d { "apiKeyReader threw (engine not running?) — proceeding to probe without key" }
             analytics.recordWarning(
                 "on_device_api_key_read_failed",
                 mapOf(
@@ -633,10 +643,13 @@ class OnboardingViewModel @Inject constructor(
                     // no-telemetry: key value is never included — §6.H
                 ),
             )
+            null
         }
         // §6.J anti-bluff: funnel into the SAME probe→persist→advance
         // pipeline that the cloud "Add server" flow uses. No parallel path.
-        val endpoint = Endpoint.GoApi(host = host, port = port)
+        // The key is carried on the endpoint so the HTTP layer can authenticate
+        // correctly — Option A (per-endpoint key) from the linking design §5.
+        val endpoint = Endpoint.GoApi(host = host, port = port, key = apiKey)
         onSelectApi(endpoint)
     }
 }

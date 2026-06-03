@@ -15,6 +15,11 @@ internal object EndpointConverter {
     private const val PlatformKey = "platform"
     private const val StorageKey = "storage"
 
+    // Option A (client-api-app linking design §5): per-instance access key
+    // for on-device endpoints. Written only when non-null (cloud/mDNS
+    // endpoints never carry a key → legacy rows round-trip byte-identically).
+    private const val KeyKey = "key"
+
     fun Endpoint.toJson(): String {
         return JSONObject().apply {
             when (this@toJson) {
@@ -31,6 +36,10 @@ internal object EndpointConverter {
                     // carried these) round-trip byte-identically.
                     platform?.let { put(PlatformKey, it) }
                     storage?.let { put(StorageKey, it) }
+                    // Option A per-instance key: only written for on-device
+                    // endpoints that carry one; cloud/mDNS endpoints leave
+                    // key=null and are unaffected.
+                    key?.let { put(KeyKey, it) }
                 }
             }
         }.toString()
@@ -65,6 +74,10 @@ internal object EndpointConverter {
                         // legacy host row as carrying an empty platform.
                         platform = if (jsonObject.has(PlatformKey)) jsonObject.getString(PlatformKey) else null,
                         storage = if (jsonObject.has(StorageKey)) jsonObject.getString(StorageKey) else null,
+                        // Option A per-instance key: null when absent (all legacy
+                        // rows + cloud/mDNS endpoints); non-null only for
+                        // on-device endpoints that carried a key at persist time.
+                        key = if (jsonObject.has(KeyKey)) jsonObject.getString(KeyKey) else null,
                     )
                     else -> null
                 }

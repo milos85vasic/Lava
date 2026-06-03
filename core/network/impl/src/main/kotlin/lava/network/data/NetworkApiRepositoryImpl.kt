@@ -14,6 +14,7 @@ import lava.network.api.NetworkApi
 import lava.network.impl.ProxyNetworkApi
 import lava.network.serialization.JsonFactory
 import lava.tracker.rutracker.api.RuTrackerApiFactory
+import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import javax.inject.Inject
 import javax.inject.Named
@@ -24,6 +25,11 @@ internal class NetworkApiRepositoryImpl @Inject constructor(
     private val okHttpClient: OkHttpClient,
     @Named("lan") private val lanOkHttpClient: OkHttpClient,
     private val networkLogger: NetworkLogger,
+    // Option A (client-api-app linking design §5): header name for the
+    // per-endpoint key override interceptor. Injected so it stays
+    // consistent with the on-device API server's LAVA_AUTH_FIELD_NAME.
+    // Provided by NetworkModule via @Named("authFieldName").
+    @Named("authFieldName") private val authFieldName: String,
 ) : NetworkApiRepository {
     private val apiMap = mutableMapOf<Endpoint, NetworkApi>()
 
@@ -33,12 +39,23 @@ internal class NetworkApiRepositoryImpl @Inject constructor(
             when (endpoint) {
                 // LAN lava-api-go — permissive TLS via lanOkHttpClient.
                 // Trust boundary documented in NetworkModule.lanOkHttpClient KDoc.
-                is Endpoint.GoApi -> proxyApi(
-                    host = endpoint.host,
-                    port = endpoint.port,
-                    scheme = "https",
-                    client = lanOkHttpClient,
-                )
+                // Option A (client-api-app linking design §5): when the endpoint
+                // carries a per-instance key (on-device API), build a derived
+                // OkHttpClient that overrides Lava-Auth with that key instead of
+                // the build-time UUID from AuthInterceptor.
+                is Endpoint.GoApi -> {
+                    val endpointKey = endpoint.key
+                    proxyApi(
+                        host = endpoint.host,
+                        port = endpoint.port,
+                        scheme = "https",
+                        client = if (endpointKey != null) {
+                            lanOkHttpClient.withKeyOverride(endpointKey, authFieldName)
+                        } else {
+                            lanOkHttpClient
+                        },
+                    )
+                }
                 is Endpoint.RutrackerEndpoint -> {
                     if (endpoint.host.isLocalHost()) {
                         // SP-3.3 (2026-04-29). Mirror entries on the LAN
@@ -190,6 +207,33 @@ internal class NetworkApiRepositoryImpl @Inject constructor(
     private fun goApiUrl(endpoint: Endpoint.GoApi, path: String): String {
         return "https://${endpoint.host}:${endpoint.port}$path"
     }
+
+    /**
+     * Returns a derived [OkHttpClient] that overrides the [fieldName] header
+     * with [key] on every request.  Used for on-device API endpoints that
+     * carry their own per-instance key (Option A, linking design §5).
+     *
+     * The base [lanOkHttpClient] already contains [lava.network.impl.AuthInterceptor]
+     * which sets the build-time UUID.  The new interceptor is added LAST
+     * in the application-interceptor chain, so it runs last and its
+     * [okhttp3.Request.newBuilder] call replaces whatever the earlier
+     * interceptors set.  The key string from [ApiKeyStore] is already the
+     * correct wire value (base64 of 16 random bytes — identical format to
+     * what AuthInterceptor produces for the UUID path).
+     *
+     * §6.H: [key] is never logged here.
+     */
+    internal fun OkHttpClient.withKeyOverride(key: String, fieldName: String): OkHttpClient =
+        newBuilder()
+            .addInterceptor(
+                Interceptor { chain ->
+                    val request = chain.request().newBuilder()
+                        .header(fieldName, key)
+                        .build()
+                    chain.proceed(request)
+                },
+            )
+            .build()
 
     private fun String.encode(): String {
         return Base64.UrlSafe.encode(encodeToByteArray())

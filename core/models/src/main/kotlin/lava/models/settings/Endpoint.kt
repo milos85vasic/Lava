@@ -66,6 +66,23 @@ sealed interface Endpoint {
          * [platform].
          */
         val storage: String? = null,
+        /**
+         * Per-instance access key for an on-device Lava-API endpoint.
+         *
+         * Set to the key returned by `ApiKeyClient` / `ApiHandoff` when the
+         * user selects "On this device" in the onboarding API-selection step.
+         * `null` for all cloud and mDNS-discovered endpoints — they use the
+         * build-time AES-GCM blob via [lava.network.impl.AuthInterceptor].
+         *
+         * Option A per the client-api-app linking design (§5): the key
+         * is stored on the endpoint model so the HTTP layer can send the
+         * correct `Lava-Auth` value per-endpoint without a global side-channel.
+         *
+         * ADDITIVE field with a `null` default so all existing persisted
+         * [lava.securestorage.model.EndpointConverter] rows (which carry no
+         * `key` field) deserialize unchanged.
+         */
+        val key: String? = null,
     ) : Endpoint {
         companion object {
             const val DEFAULT_PORT: Int = 8443
