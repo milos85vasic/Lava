@@ -15,15 +15,17 @@ sealed interface LaunchDecision {
 
 class CrossAppLauncher(private val checker: PackageChecker) {
     /**
-     * @param targetPackage variant-aware package to launch (e.g. ….api.dev on debug)
-     * @param releasePackage the Play-Store listing id (always the release id)
+     * @param targetPackage variant-aware package to launch
+     *   (e.g. `digital.vasic.lava.api.dev` on debug builds)
+     * @param releasePackage the Play-Store listing id (always the release id,
+     *   e.g. `digital.vasic.lava.api`); used only for the store-redirect URIs
      */
     fun decideLaunch(
         targetPackage: String,
         releasePackage: String,
         extras: Map<String, String>,
     ): LaunchDecision =
-        if (checker.isInstalled(targetPackage)) {
+        if (checker.installedLaunchIntent(targetPackage) != null) {
             LaunchDecision.Launch(targetPackage, extras)
         } else {
             LaunchDecision.StoreRedirect(
