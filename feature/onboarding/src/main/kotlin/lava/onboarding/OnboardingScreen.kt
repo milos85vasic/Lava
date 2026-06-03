@@ -43,6 +43,11 @@ fun OnboardingScreen(
             // launch will re-enter onboarding because
             // `onboardingComplete` was never written.
             is OnboardingSideEffect.ExitApp -> onExitApp()
+            // Task 3.5 (2026-06-03): LaunchApiApp + OpenPlayStore handlers
+            // wired in Task 3.5 with context.startActivity / ACTION_VIEW.
+            // Stub branches keep the when exhaustive now.
+            is OnboardingSideEffect.LaunchApiApp -> Unit
+            is OnboardingSideEffect.OpenPlayStore -> Unit
         }
     }
 

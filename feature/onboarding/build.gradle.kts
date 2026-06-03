@@ -14,6 +14,9 @@ android {
 }
 
 dependencies {
+    // Task 3.2 (2026-06-03): shared cross-app linking contract + launcher
+    // (AppLinkContract, CrossAppLauncher, LaunchDecision, PackageChecker).
+    implementation(project(":core:applink"))
     implementation(project(":core:auth:api"))
     implementation(project(":core:credentials"))
     // Sweep Finding #8 (2026-05-17, §6.L 59th): onboarding needs the

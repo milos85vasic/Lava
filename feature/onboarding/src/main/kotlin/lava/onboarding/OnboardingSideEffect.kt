@@ -1,5 +1,7 @@
 package lava.onboarding
 
+import lava.applink.LaunchDecision
+
 sealed interface OnboardingSideEffect {
     /**
      * The user has successfully completed the onboarding wizard with at
@@ -22,4 +24,26 @@ sealed interface OnboardingSideEffect {
      * least one Provider, the app keeps prompting onboarding" gate.
      */
     data object ExitApp : OnboardingSideEffect
+
+    // Task 3.2 (2026-06-03): "On this device" side effects.
+
+    /**
+     * The API app IS installed — launch it as an explicit-component
+     * [Intent] with [lava.applink.AppLinkContract.EXTRA_START_API] +
+     * [lava.applink.AppLinkContract.EXTRA_RETURN_TO] extras.
+     * [decision] is a [LaunchDecision.Launch] carrying the target
+     * package + the pre-built extras map.
+     */
+    data class LaunchApiApp(val decision: LaunchDecision) : OnboardingSideEffect
+
+    /**
+     * The API app is NOT installed (or the debug variant is absent) —
+     * open the Play Store listing for the release package id. The host
+     * screen tries the [marketUri] first; on [android.content.ActivityNotFoundException]
+     * it falls back to [webUri].
+     */
+    data class OpenPlayStore(
+        val marketUri: String,
+        val webUri: String,
+    ) : OnboardingSideEffect
 }

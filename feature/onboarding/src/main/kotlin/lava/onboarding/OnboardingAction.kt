@@ -1,5 +1,6 @@
 package lava.onboarding
 
+import lava.applink.AppLinkContract
 import lava.models.settings.Endpoint
 
 sealed interface OnboardingAction {
@@ -31,4 +32,23 @@ sealed interface OnboardingAction {
      * path. (Tapping a pre-installed default option reuses [SelectApi] directly.)
      */
     data object AddCloudApi : OnboardingAction
+
+    // Task 3.2 (2026-06-03): "On this device" section actions.
+
+    /**
+     * User tapped the "On this device" button. The ViewModel consults
+     * [CrossAppLauncher] and emits either [OnboardingSideEffect.LaunchApiApp]
+     * (installed) or [OnboardingSideEffect.OpenPlayStore] (absent).
+     * [AppLinkContract] is imported for documentation only — the actual
+     * extras are assembled in the ViewModel.
+     */
+    @Suppress("unused") // AppLinkContract import used via this action's handler
+    data object LaunchOnDeviceApi : OnboardingAction
+
+    /**
+     * The API app has returned with the loopback endpoint details. The host
+     * is [AppLinkContract.LOOPBACK_HOST] by convention; [port] is the live
+     * port the API app's engine is bound to (from [AppLinkContract.EXTRA_API_PORT]).
+     */
+    data class OnDeviceApiReturned(val host: String, val port: Int) : OnboardingAction
 }

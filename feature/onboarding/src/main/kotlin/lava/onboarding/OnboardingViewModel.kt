@@ -107,6 +107,9 @@ class OnboardingViewModel @Inject constructor(
             }
             is OnboardingAction.CloudAddressChanged -> onCloudAddressChanged(action.value)
             is OnboardingAction.AddCloudApi -> onAddCloudApi()
+            // Task 3.3 (2026-06-03): "On this device" handlers — implemented below.
+            is OnboardingAction.LaunchOnDeviceApi -> onLaunchOnDeviceApi()
+            is OnboardingAction.OnDeviceApiReturned -> onOnDeviceApiReturned(action.host, action.port)
         }
     }
 
@@ -535,4 +538,29 @@ class OnboardingViewModel @Inject constructor(
     fun hasSelectedProviders(): Boolean = container.stateFlow.value.providers.any { it.selected }
 
     fun hasConfiguredProvider(): Boolean = container.stateFlow.value.configs.values.any { it.configured }
+
+    // ── Task 3.3 stubs (2026-06-03) — full implementation added in Task 3.3 ──
+
+    /**
+     * User tapped "On this device". Consults [CrossAppLauncher] for the API
+     * package: installed → emit [OnboardingSideEffect.LaunchApiApp]; absent →
+     * emit [OnboardingSideEffect.OpenPlayStore].
+     * Full implementation in Task 3.3.
+     */
+    internal fun onLaunchOnDeviceApi() = intent {
+        // Stub — real CrossAppLauncher wiring added in Task 3.3.
+    }
+
+    /**
+     * The API app returned with loopback [host] + [port]. Reads the key via
+     * the injected key-reader seam, builds [lava.models.settings.Endpoint.GoApi],
+     * and funnels into the EXISTING [onSelectApi] probe → persist → advance
+     * pipeline (§6.J anti-bluff: no parallel path).
+     * Full implementation in Task 3.3.
+     */
+    internal fun onOnDeviceApiReturned(host: String, port: Int) = intent {
+        // Stub — real key-reader + onSelectApi wiring added in Task 3.3.
+        val endpoint = lava.models.settings.Endpoint.GoApi(host = host, port = port)
+        onSelectApi(endpoint)
+    }
 }
