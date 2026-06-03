@@ -12,3 +12,7 @@ android {
     }
     buildFeatures { buildConfig = true }
 }
+
+dependencies {
+    testImplementation(libs.junit4)
+}
