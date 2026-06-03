@@ -1059,6 +1059,21 @@ The §6.AE.7 darwin/arm64 host gap is a STANDING §6.X-debt sub-item, not a §6.
 
 `Classification:` project-specific (the Containers-driven-emulator + no-live-device stance is Lava's; the underlying container-emulator capability is universal, inherited from the Containers submodule + §6.X/§6.V).
 
+##### 6.AH — Virtual Devices / Emulators in Containers or VMs ONLY (added 2026-06-03)
+
+**Forensic anchor:** 2026-06-03 operator directive: "Add rule / constraint that you will always remember: Any virtual devices or emulators MUST run in Containers or VMs!" — issued after a host-direct+HVF macOS emulator wedged for ~10 consecutive §6.Z gate attempts (qemu ran at ~398% CPU but the guest's adbd never reached `device` state; not the AVD — recreated fresh; not Kaspersky — closed; forensics `.lava-ci-evidence/sixth-law-incidents/2026-06-03-emulator-boot-offline.json`). Host-direct emulator execution is non-reproducible across machines AND proved fragile in exactly the way the anti-bluff gate cannot tolerate.
+
+**Rule.** EVERY virtual device, Android emulator, or guest OS used ANYWHERE in this project — Challenge Tests, `connectedAndroidTest`, `-PdeviceTests=true`, the §6.AE matrix, the §6.Z release canary, any future iOS/desktop/other virtual device — MUST run inside a **Container** (podman/docker, via `submodules/containers/pkg/emulator/`) OR a **VM** (QEMU/`pkg/vm/`). **Host-direct emulator/VM execution is FORBIDDEN**, on every OS, with no exception — including macOS.
+
+1. **Supersedes the §6.X macOS host-direct allowance.** §6.X / §6.AG resolved the macOS gate path to host-direct+HVF because a Linux container cannot reach the host-only HVF API. §6.AH REMOVES that allowance: on macOS the emulator MUST still run in a container/VM. Since the podman `applehv` VM exposes neither `/dev/kvm` nor HVF passthrough, the container path uses **TCG software emulation** (slower) OR a QEMU full-system VM — the Containers submodule MUST be extended with whatever no-acceleration / VM support is missing so the container/VM path works on **Linux + macOS both**. Slower-but-reproducible beats fast-but-host-direct.
+2. **Runner enforcement.** `scripts/run-challenge-matrix.sh` + `scripts/run-api-app-challenge-matrix.sh` MUST force `--runner=containerized` (or a `vm` runner) — NOT `--runner=auto` when auto would resolve to host-direct. A gate attestation whose `runner` is `host-direct` is NON-COMPLIANT and `scripts/tag.sh` MUST refuse it.
+3. **No host-direct fallback, ever.** If the container/VM path cannot boot on a given host, the run is honestly BLOCKED (incident JSON) — it is NEVER silently redirected to a host-direct emulator or a physical device (§6.Z/§6.J/§6.AG — no bluffed pass).
+4. **Project-level** (operator instruction + §11.4.35): lives in Lava's consumer governance (`CLAUDE.md`/`AGENTS.md`/`QWEN.md`-by-pointer), not the shared `constitution/`. Strengthens inherited §6.X/§6.V/§6.AG/§6.AE; MUST NOT relax any.
+
+**§6.AH-debt (added 2026-06-03):** the container/VM path does not yet boot on this macOS host (the existing `containerized.go` hard-requires `/dev/kvm`; a no-KVM TCG mode + the macOS `/proc`-reap fix are OWED to the Containers submodule). Until that ships + boots, the §6.Z release canary + client gate are honestly BLOCKED per clause 3 — no host-direct fallback. The §6.X-debt darwin/arm64 entry folds into this.
+
+`Classification:` project-specific (the no-host-direct stance is Lava's deployment policy; the container/VM emulator capability is universal, inherited from the Containers submodule).
+
 ##### 6.L — Anti-Bluff Functional Reality Mandate (Operator's Standing Order, repeated 2026-05-04)
 
 > **Operational summary (read this first; the wall below is the forensic record):** every test, every Challenge Test, every CI gate has exactly one job — confirm the feature works for a real user end-to-end on the gating matrix (§6.I). CI green is necessary, NEVER sufficient. If you find yourself thinking *"this test is a small exception"* — STOP, scroll to the bottom of this clause, read the closing two sentences. There are no small exceptions. The wall of text below is intentional: the operator has restated this mandate 23 times because prior layers of constitutional plumbing did not evict the bluff class on their own. Each restatement is preserved verbatim — the repetition itself is the constitutional record.
