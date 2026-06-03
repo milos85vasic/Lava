@@ -1,7 +1,6 @@
 package lava.api.app.ui
 
-import android.content.Intent
-import android.net.Uri
+import android.content.ActivityNotFoundException
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -48,7 +47,6 @@ import lava.api.app.control.ApiControlAction
 import lava.api.app.control.ApiControlSideEffect
 import lava.api.app.control.ApiControlState
 import lava.api.app.control.ApiControlViewModel
-import lava.applink.LaunchDecision
 
 /**
  * The Lava API landing screen — the single user surface of the standalone API
@@ -107,67 +105,16 @@ fun ApiControlScreen(
                 is ApiControlSideEffect.ShowError ->
                     scope.launch { snackbarHostState.showSnackbar(effect.message) }
                 is ApiControlSideEffect.LaunchClient -> {
-                    // Execute the launch decision from the screen's context so
-                    // we can call context.startActivity directly without needing
-                    // the Activity reference. The screen is always composed
-                    // inside the Activity so context is the Activity context.
-                    when (val decision = effect.decision) {
-                        is LaunchDecision.Launch -> {
-                            try {
-                                val intent = context.packageManager
-                                    .getLaunchIntentForPackage(decision.targetPackage)
-                                    ?.apply {
-                                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                        decision.extras.forEach { (k, v) -> putExtra(k, v) }
-                                    }
-                                if (intent != null) {
-                                    context.startActivity(intent)
-                                } else {
-                                    // Target installed but no launch intent (unlikely — fall
-                                    // back to store). §6.AC: no-telemetry: api-app has no
-                                    // AnalyticsTracker yet.
-                                    context.startActivity(
-                                        Intent(
-                                            Intent.ACTION_VIEW,
-                                            Uri.parse(
-                                                lava.applink.AppLinkContract.marketUri(
-                                                    lava.api.app.BuildConfig.CLIENT_RELEASE_PACKAGE,
-                                                ),
-                                            ),
-                                        ),
-                                    )
-                                }
-                            } catch (e: android.content.ActivityNotFoundException) {
-                                // §6.AC: no-telemetry: api-app has no AnalyticsTracker yet.
-                                // Web fallback when Play Store app is absent.
-                                runCatching {
-                                    context.startActivity(
-                                        Intent(
-                                            Intent.ACTION_VIEW,
-                                            Uri.parse(
-                                                lava.applink.AppLinkContract.playWebUri(
-                                                    lava.api.app.BuildConfig.CLIENT_RELEASE_PACKAGE,
-                                                ),
-                                            ),
-                                        ),
-                                    )
-                                }
-                            }
-                        }
-                        is LaunchDecision.StoreRedirect -> {
-                            try {
-                                context.startActivity(
-                                    Intent(Intent.ACTION_VIEW, Uri.parse(decision.marketUri)),
-                                )
-                            } catch (e: android.content.ActivityNotFoundException) {
-                                // §6.AC: no-telemetry: api-app has no AnalyticsTracker yet.
-                                runCatching {
-                                    context.startActivity(
-                                        Intent(Intent.ACTION_VIEW, Uri.parse(decision.webUri)),
-                                    )
-                                }
-                            }
-                        }
+                    // The ViewModel resolved "installed → launch intent with
+                    // return extras" vs "not installed → Firebase download URL"
+                    // via SiblingAppLauncher. The screen just fires startActivity.
+                    // No market:// URI, no URI-scheme branching.
+                    // §6.AC: no-telemetry — api-app has no AnalyticsTracker yet.
+                    try {
+                        context.startActivity(effect.intent)
+                    } catch (e: ActivityNotFoundException) {
+                        // Graceful no-op: package uninstalled between check and tap,
+                        // or ACTION_VIEW scheme not handled (unlikely for https://).
                     }
                 }
             }

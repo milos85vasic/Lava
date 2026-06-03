@@ -35,6 +35,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import lava.applink.SiblingAppLauncher
 import lava.connection.ConnectionItem
 import lava.designsystem.component.AppBar
 import lava.designsystem.component.Body
@@ -67,7 +68,6 @@ import lava.menu.MenuAction.SetCredentialsSyncPeriod
 import lava.menu.MenuAction.SetFavoritesSyncPeriod
 import lava.menu.MenuAction.SetHistorySyncPeriod
 import lava.menu.MenuAction.SetTheme
-import lava.menu.apiapp.ApiAppLauncher
 import lava.models.settings.SyncPeriod
 import lava.models.settings.Theme
 import lava.navigation.viewModel
@@ -88,7 +88,7 @@ fun MenuScreen(
     openLogin: () -> Unit,
     openCredentials: () -> Unit = {},
     openProviderConfig: (String) -> Unit = {},
-    apiAppLauncher: ApiAppLauncher? = null,
+    apiAppLauncher: SiblingAppLauncher? = null,
 ) {
     MenuScreen(
         viewModel = viewModel(),
@@ -105,7 +105,7 @@ private fun MenuScreen(
     openLogin: () -> Unit,
     openCredentials: () -> Unit = {},
     openProviderConfig: (String) -> Unit = {},
-    apiAppLauncher: ApiAppLauncher? = null,
+    apiAppLauncher: SiblingAppLauncher? = null,
 ) {
     val openLinkHandler = LocalOpenLinkHandler.current
     val confirmationDialogState = rememberConfirmationDialogState()
@@ -160,7 +160,7 @@ private fun MenuScreen(
     onAction: (MenuAction) -> Unit,
     openConnectionSettings: Boolean = false,
     onConnectionSettingsShown: () -> Unit = {},
-    apiAppLauncher: ApiAppLauncher? = null,
+    apiAppLauncher: SiblingAppLauncher? = null,
 ) = Scaffold(
     topBar = { appBarState ->
         AppBar(
@@ -208,7 +208,7 @@ private fun MenuScreen(
         )
         endpointSelectionItem(openConnectionSettings, onConnectionSettingsShown)
         // Sub-project 2 (on-device API): "Run the API on this device" row.
-        // Only shown when the app-layer wired an ApiAppLauncher (production
+        // Only shown when the app-layer wired an SiblingAppLauncher (production
         // builds always do; preview / older call sites pass null → omitted).
         if (apiAppLauncher != null) {
             runApiOnDeviceItem(apiAppLauncher)
@@ -342,7 +342,7 @@ private fun LazyListScope.endpointSelectionItem(
 }
 
 private fun LazyListScope.runApiOnDeviceItem(
-    apiAppLauncher: ApiAppLauncher,
+    apiAppLauncher: SiblingAppLauncher,
 ) = item { RunApiOnDeviceItem(apiAppLauncher) }
 
 /**
@@ -356,11 +356,11 @@ private fun LazyListScope.runApiOnDeviceItem(
  * zero confusion about controlling the local API instance.
  *
  * Install state is read once per composition entry (a side-effect-free
- * [ApiAppLauncher.isInstalled] call) so the title flips correctly between
+ * [SiblingAppLauncher.isInstalled] call) so the title flips correctly between
  * "Open" and "Download" after the user installs the API app and returns.
  */
 @Composable
-private fun RunApiOnDeviceItem(apiAppLauncher: ApiAppLauncher) {
+private fun RunApiOnDeviceItem(apiAppLauncher: SiblingAppLauncher) {
     val context = LocalContext.current
     val installed = remember { apiAppLauncher.isInstalled() }
     Surface(

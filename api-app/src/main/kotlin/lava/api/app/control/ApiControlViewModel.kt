@@ -5,11 +5,9 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import lava.api.app.BuildConfig
 import lava.api.app.service.ApiServiceStarter
 import lava.applink.AppLinkContract
-import lava.applink.CrossAppLauncher
-import lava.applink.PackageChecker
+import lava.applink.SiblingAppLauncher
 import org.orbitmvi.orbit.Container
 import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.syntax.simple.intent
@@ -40,10 +38,10 @@ import javax.inject.Inject
  * [AppLinkContract.EXTRA_START_API]=true. It starts the engine identically to
  * [ApiControlAction.StartClicked] but via a dedicated path for test clarity.
  *
- * **Task 2.3 — client navigation:** [ApiControlAction.OpenClient] uses the injected
- * [CrossAppLauncher] to decide whether to launch the installed client or redirect
- * to the Play Store, then posts [ApiControlSideEffect.LaunchClient]. When
- * [launchedFromClient] is true (set by [MainActivity] when detecting
+ * **Task 2.3 — client navigation:** [ApiControlAction.OpenClient] uses the
+ * injected [SiblingAppLauncher] to decide whether to launch the installed client
+ * or open the Firebase download page, then posts [ApiControlSideEffect.LaunchClient].
+ * When [launchedFromClient] is true (set by [MainActivity] when detecting
  * [AppLinkContract.EXTRA_RETURN_TO]), the return extras include
  * [AppLinkContract.EXTRA_API_HOST]/[AppLinkContract.EXTRA_API_PORT].
  *
@@ -55,7 +53,7 @@ import javax.inject.Inject
 class ApiControlViewModel @Inject constructor(
     private val controller: ApiEngineController,
     private val serviceStarter: ApiServiceStarter,
-    private val packageChecker: PackageChecker,
+    private val clientLauncher: SiblingAppLauncher,
 ) : ViewModel(), ContainerHost<ApiControlState, ApiControlSideEffect> {
 
     /**
@@ -66,15 +64,6 @@ class ApiControlViewModel @Inject constructor(
      * include host/port.
      */
     var launchedFromClient: Boolean = false
-
-    /**
-     * Variant-aware client package to launch. Debug: `…client.dev`;
-     * Release: `…client`. Set once from [BuildConfig] via [MainActivity];
-     * overrideable in tests for launch-decision assertions.
-     */
-    var clientPackage: String = AppLinkContract.CLIENT_RELEASE_PACKAGE
-
-    private val launcher: CrossAppLauncher = CrossAppLauncher(packageChecker)
 
     override val container: Container<ApiControlState, ApiControlSideEffect> = container(
         initialState = controller.state.value,
@@ -143,20 +132,26 @@ class ApiControlViewModel @Inject constructor(
     private fun onStartRequested() = onStart()
 
     /**
-     * "Back to Lava client" / "Open Lava client" tapped. Uses
-     * [CrossAppLauncher.decideLaunch] to produce a [ApiControlSideEffect.LaunchClient]
-     * side effect the Activity executes:
-     * - [lava.applink.LaunchDecision.Launch] → explicit Intent to the client package
-     *   with return extras (host/port when [launchedFromClient]).
-     * - [lava.applink.LaunchDecision.StoreRedirect] → Play Store (market:// + web fallback).
+     * "Back to Lava client" / "Open Lava client" tapped.
+     *
+     * Uses [clientLauncher] ([SiblingAppLauncher]) to produce an [android.content.Intent]:
+     * - installed → [SiblingAppLauncher.intentToOpen] with return extras (host/port
+     *   when [launchedFromClient]).
+     * - not installed → [SiblingAppLauncher.intentToDownload] (Firebase download URL;
+     *   never market://).
+     *
+     * Both cases post [ApiControlSideEffect.LaunchClient] carrying the ready Intent.
      */
     private fun onOpenClient() = intent {
-        val decision = launcher.decideLaunch(
-            targetPackage = clientPackage,
-            releasePackage = AppLinkContract.CLIENT_RELEASE_PACKAGE,
-            extras = buildReturnExtras(),
-        )
-        postSideEffect(ApiControlSideEffect.LaunchClient(decision))
+        val openIntent = clientLauncher.intentToOpen()
+        val launchIntent = if (openIntent != null) {
+            openIntent.apply {
+                buildReturnExtras().forEach { (k, v) -> putExtra(k, v) }
+            }
+        } else {
+            clientLauncher.intentToDownload()
+        }
+        postSideEffect(ApiControlSideEffect.LaunchClient(launchIntent))
     }
 
     private fun buildReturnExtras(): Map<String, String> =

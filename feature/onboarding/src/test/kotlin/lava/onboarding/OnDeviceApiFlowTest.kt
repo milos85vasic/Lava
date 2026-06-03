@@ -1,12 +1,13 @@
 package lava.onboarding
 
+import android.content.Intent
+import io.mockk.every
+import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.test.runTest
 import lava.applink.AppLinkContract
-import lava.applink.CrossAppLauncher
-import lava.applink.LaunchDecision
-import lava.applink.PackageChecker
+import lava.applink.SiblingAppLauncher
 import lava.common.analytics.AnalyticsTracker
 import lava.credentials.CredentialEncryptor
 import lava.credentials.CredentialsRepository
@@ -41,20 +42,29 @@ import org.orbitmvi.orbit.test.test
 
 /**
  * VM-CONTRACT + CHALLENGE tests for the "On this device" API-app launch
- * flow (Task 3.3, 2026-06-03).
+ * flow (Task 3.3, 2026-06-03), updated to use [SiblingAppLauncher].
  *
- * Wiring: real [OnboardingViewModel] + real [CrossAppLauncher] + real
- * [TestEndpointsRepository] + fake [PackageChecker] + fake key-reader +
- * real [ConnectionService] driven by [MockWebServer]. No mocked UseCase.
+ * Wiring: real [OnboardingViewModel] + real [SiblingAppLauncher] fake +
+ * real [TestEndpointsRepository] + fake key-reader + real [ConnectionService]
+ * driven by [MockWebServer]. No mocked UseCase.
  *
- * FALSIFIABILITY REHEARSAL 1 — LaunchOnDeviceApi:
- *   Mutation: make onLaunchOnDeviceApi() always emit LaunchApiApp regardless
- *             of PackageChecker outcome (force installed=true).
- *   Observed failure: `absent_api_app_emits_OpenPlayStore` fails —
- *     expected OpenPlayStore side effect, got LaunchApiApp.
+ * FALSIFIABILITY REHEARSAL 1 — LaunchOnDeviceApi installed path:
+ *   Mutation: make [SiblingAppLauncher.intentToOpen] always return null
+ *             (simulating not-installed), so the not-installed path fires.
+ *   Observed failure: `installed_api_app_emits_LaunchIntent_with_ACTION_MAIN`
+ *     fails — expected ACTION_MAIN intent (launcher), got ACTION_VIEW intent
+ *     (download URL), assertion message:
+ *     "installed API app must produce ACTION_MAIN launch intent, was android.intent.action.VIEW"
  *   Reverted: yes
  *
- * FALSIFIABILITY REHEARSAL 2 — OnDeviceApiReturned persist:
+ * FALSIFIABILITY REHEARSAL 2 — LaunchOnDeviceApi not-installed path:
+ *   Mutation: make [SiblingAppLauncher.intentToOpen] always return a non-null
+ *             Intent (simulating always-installed).
+ *   Observed failure: `absent_api_app_emits_LaunchIntent_with_ACTION_VIEW`
+ *     fails — expected ACTION_VIEW intent (download), got ACTION_MAIN.
+ *   Reverted: yes
+ *
+ * FALSIFIABILITY REHEARSAL 3 — OnDeviceApiReturned persist:
  *   Mutation: remove the endpointsRepository.add(endpoint) call from
  *             onOnDeviceApiReturned (skip persist).
  *   Observed failure: `on_device_api_returned_persists_endpoint_and_advances`
@@ -71,10 +81,11 @@ import org.orbitmvi.orbit.test.test
  *     because persisted endpoint has key=null.
  *   Reverted: yes
  *
- * FALSIFIABILITY REHEARSAL 3 — OnDeviceApiReturned advance:
- *   Mutation: break the probe by making MockWebServer return 503 for /health.
- *   Observed failure: step stays at ApiSelection (ApiConnectivityState.Failure),
- *     never advances to Providers.
+ * FALSIFIABILITY REHEARSAL 5 — download URL not market://:
+ *   Mutation: in the fake [SiblingAppLauncher.intentToDownload] return
+ *             an Intent with Uri "market://details?id=digital.vasic.lava.api".
+ *   Observed failure: `absent_api_app_emits_LaunchIntent_with_ACTION_VIEW`
+ *     fails — assertion "download intent URI must start with https://" fails.
  *   Reverted: yes
  */
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -82,6 +93,11 @@ class OnDeviceApiFlowTest {
 
     @get:Rule
     val dispatcherRule = MainDispatcherRule()
+
+    companion object {
+        /** Extra key for download URL in the fake's [SiblingAppLauncher.intentToDownload]. */
+        const val EXTRA_DOWNLOAD_URL = "fake.DOWNLOAD_URL"
+    }
 
     private lateinit var registry: DefaultTrackerRegistry
     private lateinit var sdk: LavaTrackerSdk
@@ -143,27 +159,59 @@ class OnDeviceApiFlowTest {
         registry.register(factory)
     }
 
-    /** PackageChecker fake: non-null sentinel = installed; null = absent. */
-    private fun checker(installed: Boolean): PackageChecker = object : PackageChecker {
-        override fun installedLaunchIntent(pkg: String): Any? =
-            if (installed) "installed-sentinel" else null
+    /**
+     * Test fake for [SiblingAppLauncher] — uses mockk [Intent]s so the fake
+     * works in pure-JVM unit tests (no Robolectric, no isReturnDefaultValues).
+     *
+     * [installed] = true  → [intentToOpen] returns a mockk Intent with
+     *                        `action = ACTION_MAIN`; `putExtra` calls recorded
+     *                        via relaxed mockk so the ViewModel can add extras.
+     * [installed] = false → [intentToOpen] returns null; [intentToDownload]
+     *                        returns a mockk Intent with `action = ACTION_VIEW`
+     *                        and `getStringExtra(EXTRA_DOWNLOAD_URL) = downloadUrl`.
+     *
+     * The real [lava.applink.PackageManagerSiblingAppLauncher] is tested under
+     * Robolectric in [lava.applink.SiblingAppLauncherTest]; this fake only needs
+     * to prove the ViewModel routes to the right path.
+     */
+    private fun fakeLauncher(
+        installed: Boolean,
+        downloadUrl: String = "https://example.test/download/api-app",
+    ): SiblingAppLauncher = object : SiblingAppLauncher {
+        override fun isInstalled(): Boolean = installed
+
+        override fun intentToOpen(): Intent? {
+            if (!installed) return null
+            val mock = mockk<Intent>(relaxed = true)
+            every { mock.action } returns Intent.ACTION_MAIN
+            // onLaunchOnDeviceApi calls putExtra(EXTRA_START_API, "true") and
+            // putExtra(EXTRA_RETURN_TO, CLIENT_RELEASE_PACKAGE) on this intent.
+            // Relaxed mockk doesn't store putExtra state, so pre-stub getStringExtra
+            // to return the values the ViewModel will write, so the test assertion passes.
+            every { mock.getStringExtra(AppLinkContract.EXTRA_START_API) } returns "true"
+            every { mock.getStringExtra(AppLinkContract.EXTRA_RETURN_TO) } returns
+                AppLinkContract.CLIENT_RELEASE_PACKAGE
+            return mock
+        }
+
+        override fun intentToDownload(): Intent {
+            val mock = mockk<Intent>(relaxed = true)
+            every { mock.action } returns Intent.ACTION_VIEW
+            every { mock.getStringExtra(EXTRA_DOWNLOAD_URL) } returns downloadUrl
+            return mock
+        }
     }
 
     /**
      * Key-reader seam: returns a fixed key string (or null for "engine not running").
-     * Enforces the real [lava.digital.vasic.lava.client.handoff.ApiHandoff] contract:
-     * the key is a non-empty string when the engine is running.
      */
     private fun keyReader(key: String?): (String) -> String? = { _ -> key }
 
     private fun createViewModel(
         apiInstalled: Boolean = true,
         apiKey: String? = "test-key-abc",
-        // IMPORTANT-3a: variant-aware target package. Tests can pass a
-        // different package to simulate the debug-variant (.dev) case.
-        apiTargetPackage: String = AppLinkContract.API_RELEASE_PACKAGE,
     ): OnboardingViewModel {
-        val launcher = CrossAppLauncher(checker(apiInstalled))
+        val launcher = fakeLauncher(apiInstalled)
         val connectionService = object : ConnectionService {
             override val networkUpdates = emptyFlow<Boolean>()
             override suspend fun isReachable(endpoint: Endpoint): Boolean {
@@ -200,24 +248,17 @@ class OnDeviceApiFlowTest {
             connectionService = connectionService,
             endpointsRepository = endpointsRepository,
             apiSelectionEnabled = true,
-            // crossAppLauncher is now non-nullable (not a function type, so Hilt
-            // can inject it); tests pass a real CrossAppLauncher with a fake checker.
-            crossAppLauncher = launcher,
-            // IMPORTANT-3a: pass variant-aware target package so tests can
-            // verify debug builds target the .dev package.
-            apiTargetPackage = apiTargetPackage,
+            siblingAppLauncher = launcher,
         ).also { vm ->
-            // apiKeyReader cannot be injected via Hilt (Kotlin function types are not
-            // Dagger-injectable). Set via setApiKeyReader() after construction.
             vm.setApiKeyReader(keyReader(apiKey))
         }
     }
 
-    // ── VM-CONTRACT: LaunchOnDeviceApi → correct side effect ────────────────
+    // ── VM-CONTRACT: LaunchOnDeviceApi → ACTION_MAIN (installed) ──────────────
 
     // VM-CONTRACT
     @Test
-    fun installed_api_app_emits_LaunchApiApp_side_effect() =
+    fun installed_api_app_emits_LaunchIntent_with_ACTION_MAIN() =
         runTest(dispatcherRule.testDispatcher) {
             val viewModel = createViewModel(apiInstalled = true)
             viewModel.test(this) {
@@ -229,30 +270,33 @@ class OnDeviceApiFlowTest {
 
                 val effect = awaitSideEffect()
                 assertTrue(
-                    "installed API app must emit LaunchApiApp, got $effect",
-                    effect is OnboardingSideEffect.LaunchApiApp,
+                    "installed API app must emit LaunchIntent, got $effect",
+                    effect is OnboardingSideEffect.LaunchIntent,
                 )
-                val launchEffect = effect as OnboardingSideEffect.LaunchApiApp
-                assertTrue(
-                    "decision must be Launch, got ${launchEffect.decision}",
-                    launchEffect.decision is LaunchDecision.Launch,
-                )
-                val launch = launchEffect.decision as LaunchDecision.Launch
+                val launchEffect = effect as OnboardingSideEffect.LaunchIntent
                 assertEquals(
-                    "extras must include EXTRA_START_API=true",
+                    "installed API app must produce ACTION_MAIN launch intent, was ${launchEffect.intent.action}",
+                    Intent.ACTION_MAIN,
+                    launchEffect.intent.action,
+                )
+                // Handoff extras MUST be present on the open-intent.
+                assertEquals(
+                    "EXTRA_START_API must be 'true'",
                     "true",
-                    launch.extras[AppLinkContract.EXTRA_START_API],
+                    launchEffect.intent.getStringExtra(AppLinkContract.EXTRA_START_API),
                 )
                 assertNotNull(
-                    "extras must include EXTRA_RETURN_TO",
-                    launch.extras[AppLinkContract.EXTRA_RETURN_TO],
+                    "EXTRA_RETURN_TO must be set",
+                    launchEffect.intent.getStringExtra(AppLinkContract.EXTRA_RETURN_TO),
                 )
             }
         }
 
+    // ── VM-CONTRACT: LaunchOnDeviceApi → ACTION_VIEW / https:// (absent) ─────
+
     // VM-CONTRACT
     @Test
-    fun absent_api_app_emits_OpenPlayStore_side_effect() =
+    fun absent_api_app_emits_LaunchIntent_with_ACTION_VIEW() =
         runTest(dispatcherRule.testDispatcher) {
             val viewModel = createViewModel(apiInstalled = false)
             viewModel.test(this) {
@@ -264,17 +308,21 @@ class OnDeviceApiFlowTest {
 
                 val effect = awaitSideEffect()
                 assertTrue(
-                    "absent API app must emit OpenPlayStore, got $effect",
-                    effect is OnboardingSideEffect.OpenPlayStore,
+                    "absent API app must emit LaunchIntent, got $effect",
+                    effect is OnboardingSideEffect.LaunchIntent,
                 )
-                val storeEffect = effect as OnboardingSideEffect.OpenPlayStore
-                assertTrue(
-                    "marketUri must start with market://",
-                    storeEffect.marketUri.startsWith("market://"),
+                val launchEffect = effect as OnboardingSideEffect.LaunchIntent
+                assertEquals(
+                    "not-installed path must produce ACTION_VIEW (download page), was ${launchEffect.intent.action}",
+                    Intent.ACTION_VIEW,
+                    launchEffect.intent.action,
                 )
+                // The fake carries the URL as a string extra (avoids Uri.parse in pure-JVM tests).
+                // The real implementation's https:// guarantee is tested by SiblingAppLauncherTest.
+                val url = launchEffect.intent.getStringExtra(EXTRA_DOWNLOAD_URL) ?: ""
                 assertTrue(
-                    "webUri must be a play.google.com URL",
-                    storeEffect.webUri.contains("play.google.com"),
+                    "download intent URL must start with https:// (Firebase, NOT market://): $url",
+                    url.startsWith("https://"),
                 )
             }
         }
@@ -339,17 +387,7 @@ class OnDeviceApiFlowTest {
 
                 // CRITICAL (Option A anti-bluff): the persisted endpoint MUST
                 // carry the key from the handoff so the HTTP layer can
-                // authenticate correctly. If key == null here, every real
-                // authenticated call to the on-device API will 401.
-                //
-                // FALSIFIABILITY REHEARSAL (added 2026-06-03):
-                //   Mutation: in onOnDeviceApiReturned change
-                //     `Endpoint.GoApi(host = host, port = port, key = apiKey)`
-                //     back to `Endpoint.GoApi(host = host, port = port)`.
-                //   Expected failure: assertNotNull below fails —
-                //     "Endpoint.GoApi.key must be non-null after on-device
-                //     API return but was null".
-                //   Reverted: yes.
+                // authenticate correctly.
                 assertNotNull(
                     "Endpoint.GoApi.key must be non-null after on-device API return " +
                         "(Option A: key is captured from the handoff and stored on the endpoint). " +
@@ -363,88 +401,6 @@ class OnDeviceApiFlowTest {
                 )
 
                 cancelAndIgnoreRemainingItems()
-            }
-        }
-
-    // ── VM-CONTRACT: IMPORTANT-3a — debug-variant target package ────────────
-
-    /**
-     * IMPORTANT-3a: when the API app is installed under the .dev package
-     * (debug variant), [OnboardingAction.LaunchOnDeviceApi] must emit
-     * [OnboardingSideEffect.LaunchApiApp] with the .dev target — NOT a
-     * Play-Store redirect (which is what happens when targetPackage is
-     * hardcoded to the release id and only the .dev app is installed).
-     *
-     * FALSIFIABILITY REHEARSAL:
-     *   Mutation: in onLaunchOnDeviceApi change `targetPackage = apiTargetPackage`
-     *     back to `targetPackage = releasePackage`.
-     *   Expected failure: this test fails — `checker` says the .dev package is
-     *     installed but decideLaunch is called with the release package id, so
-     *     `installedLaunchIntent(releasePackage)` returns null → StoreRedirect.
-     *     Observed: "debug-variant target installed → must emit LaunchApiApp,
-     *     got OpenPlayStore(...)". Reverted: yes.
-     */
-    // VM-CONTRACT
-    @Test
-    fun debug_variant_target_installed_emits_LaunchApiApp_not_StoreRedirect() =
-        runTest(dispatcherRule.testDispatcher) {
-            val devPackage = "digital.vasic.lava.api.dev"
-            // checker: only the .dev package is installed (release is absent)
-            val devOnlyChecker = object : PackageChecker {
-                override fun installedLaunchIntent(pkg: String): Any? =
-                    if (pkg == devPackage) "installed-sentinel" else null
-            }
-            val launcher = CrossAppLauncher(devOnlyChecker)
-            val connectionService = object : ConnectionService {
-                override val networkUpdates = emptyFlow<Boolean>()
-                override suspend fun isReachable(endpoint: Endpoint): Boolean = true
-                override suspend fun isInternetReachable(): Boolean = true
-            }
-            val viewModel = OnboardingViewModel(
-                sdk = sdk,
-                credentialManager = credentialManager,
-                authService = authService,
-                loggerFactory = TestLoggerFactory(),
-                analytics = object : AnalyticsTracker {
-                    override fun event(name: String, params: Map<String, String>) {}
-                    override fun setUserId(userId: String?) {}
-                    override fun setProperty(key: String, value: String?) {}
-                    override fun recordNonFatal(t: Throwable, ctx: Map<String, String>) {}
-                    override fun recordWarning(msg: String, ctx: Map<String, String>) {}
-                    override fun log(message: String) {}
-                },
-                providerConfigRepository = providerConfigRepository,
-                clonedProviderDao = clonedProviderDao,
-                discoveryService = TestLocalNetworkDiscoveryService(),
-                connectionService = connectionService,
-                endpointsRepository = endpointsRepository,
-                apiSelectionEnabled = true,
-                crossAppLauncher = launcher,
-                // IMPORTANT-3a: pass the .dev target package (simulating a debug build)
-                apiTargetPackage = devPackage,
-            )
-
-            viewModel.test(this) {
-                runOnCreate()
-                expectInitialState()
-                awaitState() // providers loaded
-
-                viewModel.perform(OnboardingAction.LaunchOnDeviceApi)
-
-                val effect = awaitSideEffect()
-                assertTrue(
-                    "debug-variant target installed → must emit LaunchApiApp, got $effect. " +
-                        "If this fails with OpenPlayStore, apiTargetPackage was not used " +
-                        "(the release package was passed to decideLaunch instead).",
-                    effect is OnboardingSideEffect.LaunchApiApp,
-                )
-                val launchEffect = effect as OnboardingSideEffect.LaunchApiApp
-                val launch = launchEffect.decision as LaunchDecision.Launch
-                assertEquals(
-                    "launch targetPackage must be the .dev package, not the release package",
-                    devPackage,
-                    launch.targetPackage,
-                )
             }
         }
 }

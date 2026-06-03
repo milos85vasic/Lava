@@ -1,6 +1,6 @@
 package lava.onboarding
 
-import lava.applink.LaunchDecision
+import android.content.Intent
 
 sealed interface OnboardingSideEffect {
     /**
@@ -25,25 +25,22 @@ sealed interface OnboardingSideEffect {
      */
     data object ExitApp : OnboardingSideEffect
 
-    // Task 3.2 (2026-06-03): "On this device" side effects.
-
     /**
-     * The API app IS installed — launch it as an explicit-component
-     * [Intent] with [lava.applink.AppLinkContract.EXTRA_START_API] +
-     * [lava.applink.AppLinkContract.EXTRA_RETURN_TO] extras.
-     * [decision] is a [LaunchDecision.Launch] carrying the target
-     * package + the pre-built extras map.
+     * Launch [intent] via [android.content.Context.startActivity].
+     *
+     * Covers BOTH the "API app installed — launch it" case and the
+     * "API app not installed — open the Firebase download page" case.
+     * The [intent] is produced by [lava.applink.SiblingAppLauncher]:
+     *   - installed  → [lava.applink.SiblingAppLauncher.intentToOpen]  (with
+     *     [lava.applink.AppLinkContract.EXTRA_START_API] +
+     *     [lava.applink.AppLinkContract.EXTRA_RETURN_TO] extras applied by
+     *     the ViewModel before emitting)
+     *   - not installed → [lava.applink.SiblingAppLauncher.intentToDownload]
+     *     (Firebase App Distribution URL; never `market://`)
+     *
+     * There is no separate "OpenPlayStore" effect — both paths produce an
+     * [Intent] the screen can hand to `startActivity` without any
+     * URI-scheme branching logic in the UI layer.
      */
-    data class LaunchApiApp(val decision: LaunchDecision) : OnboardingSideEffect
-
-    /**
-     * The API app is NOT installed (or the debug variant is absent) —
-     * open the Play Store listing for the release package id. The host
-     * screen tries the [marketUri] first; on [android.content.ActivityNotFoundException]
-     * it falls back to [webUri].
-     */
-    data class OpenPlayStore(
-        val marketUri: String,
-        val webUri: String,
-    ) : OnboardingSideEffect
+    data class LaunchIntent(val intent: Intent) : OnboardingSideEffect
 }

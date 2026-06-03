@@ -71,10 +71,10 @@ data class OnboardingState(
     val cloudAddressError: String? = null,
 
     // Task 3.2 (2026-06-03): "On this device" section.
-    // True when the API app is installed (checked via PackageChecker on
-    // launch/resume from OnboardingScreen). Drives the button label:
+    // True when the API app is installed (tracked via OnboardingScreen's
+    // side-effect handler: LaunchIntent with ACTION_MAIN = installed).
+    // Drives the button label:
     //   installed  → "Open Lava API app"
     //   absent     → "Install Lava API app"
-    // and the side effect emitted on tap (LaunchApiApp vs OpenPlayStore).
     val onDeviceApiInstalled: Boolean = false,
 )

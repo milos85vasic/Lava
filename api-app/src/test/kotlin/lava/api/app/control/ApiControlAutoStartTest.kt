@@ -55,11 +55,17 @@ class ApiControlAutoStartTest {
         override fun stop() { stopCalls++ }
     }
 
-    /** Fake PackageChecker — returns non-null (installed) for all packages by default. */
-    private class FakePackageChecker(private val installed: Boolean = true) :
-        lava.applink.PackageChecker {
-        override fun installedLaunchIntent(pkg: String): Any? = if (installed) pkg else null
-    }
+    /** No-op fake — these tests don't exercise the launch-client flow. */
+    private val noOpClientLauncher: lava.applink.SiblingAppLauncher =
+        object : lava.applink.SiblingAppLauncher {
+            override fun isInstalled(): Boolean = false
+            override fun intentToOpen(): android.content.Intent? = null
+            override fun intentToDownload(): android.content.Intent =
+                android.content.Intent(
+                    android.content.Intent.ACTION_VIEW,
+                    android.net.Uri.parse("https://lava.app/download/client"),
+                )
+        }
 
     private fun controller(
         port: Int = 8443,
@@ -75,9 +81,8 @@ class ApiControlAutoStartTest {
     private fun viewModel(
         controller: ApiEngineController = controller(),
         starter: RecordingServiceStarter = RecordingServiceStarter(),
-        packageChecker: lava.applink.PackageChecker = FakePackageChecker(),
     ): Pair<ApiControlViewModel, RecordingServiceStarter> =
-        ApiControlViewModel(controller, starter, packageChecker) to starter
+        ApiControlViewModel(controller, starter, noOpClientLauncher) to starter
 
     // ── PRIMARY TEST: auto-start produces Running state with live port ────
 

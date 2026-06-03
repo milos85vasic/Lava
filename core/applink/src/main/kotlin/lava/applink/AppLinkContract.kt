@@ -21,21 +21,7 @@ object AppLinkContract {
     /** Signature-level permission guarding the key provider read. */
     const val PERMISSION_READ_API_KEY = "digital.vasic.lava.permission.READ_API_KEY"
 
-    /** Release package ids (Play-Store fallback target). */
+    /** Release package ids. */
     val CLIENT_RELEASE_PACKAGE: String get() = BuildConfig.CLIENT_RELEASE_PACKAGE
     val API_RELEASE_PACKAGE: String get() = BuildConfig.API_RELEASE_PACKAGE
-
-    /**
-     * `market://` deep-link that opens the Play Store app directly on the
-     * listing for [releasePackage].  Resolves only when the Play Store app is
-     * installed; pair with [playWebUri] as a web fallback.
-     */
-    fun marketUri(releasePackage: String) = "market://details?id=$releasePackage"
-
-    /**
-     * HTTPS Play Store web URL for [releasePackage], used as a fallback when
-     * the Play Store app is absent or cannot handle `market://` URIs.
-     */
-    fun playWebUri(releasePackage: String) =
-        "https://play.google.com/store/apps/details?id=$releasePackage"
 }

@@ -30,9 +30,9 @@ sealed interface ApiControlAction {
 
     /**
      * "Back to Lava client" / "Open Lava client" button tapped. The ViewModel
-     * uses [lava.applink.CrossAppLauncher] to decide whether to launch the
-     * installed client or redirect to the Play Store, then posts a
-     * [ApiControlSideEffect.LaunchClient] side effect the Activity executes.
+     * uses [lava.applink.SiblingAppLauncher] to produce a launch [android.content.Intent]
+     * (installed client) or a Firebase download-page Intent (not installed), then
+     * posts a [ApiControlSideEffect.LaunchClient] side effect the screen executes.
      */
     data object OpenClient : ApiControlAction
 }

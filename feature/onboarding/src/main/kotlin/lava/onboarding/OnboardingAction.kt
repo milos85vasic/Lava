@@ -37,12 +37,10 @@ sealed interface OnboardingAction {
 
     /**
      * User tapped the "On this device" button. The ViewModel consults
-     * [CrossAppLauncher] and emits either [OnboardingSideEffect.LaunchApiApp]
-     * (installed) or [OnboardingSideEffect.OpenPlayStore] (absent).
-     * [AppLinkContract] is imported for documentation only — the actual
-     * extras are assembled in the ViewModel.
+     * [lava.applink.SiblingAppLauncher] and emits
+     * [OnboardingSideEffect.LaunchIntent] carrying either the API-app launch
+     * intent (installed) or the Firebase download-page intent (not installed).
      */
-    @Suppress("unused") // AppLinkContract import used via this action's handler
     data object LaunchOnDeviceApi : OnboardingAction
 
     /**

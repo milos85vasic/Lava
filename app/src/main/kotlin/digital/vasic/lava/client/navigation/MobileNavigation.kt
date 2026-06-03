@@ -7,6 +7,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import digital.vasic.lava.client.BuildConfig
 import digital.vasic.lava.client.R
+import lava.applink.PackageManagerSiblingAppLauncher
 import lava.credentials.manager.addCredentialsManager
 import lava.credentials.manager.openCredentialsManager
 import lava.designsystem.component.Page
@@ -22,7 +23,6 @@ import lava.forum.category.openCategory
 import lava.login.addLogin
 import lava.login.openLogin
 import lava.menu.MenuScreen
-import lava.menu.apiapp.PackageManagerApiAppLauncher
 import lava.navigation.NavigationController
 import lava.navigation.model.NavigationBarItem
 import lava.navigation.model.NavigationGraphBuilder
@@ -251,20 +251,21 @@ private fun addMenu(
     route = BottomRoute.Menu.route,
     animations = BottomRoute.Menu.animations,
     content = {
-        // Sub-project 2 (on-device API): build the ApiAppLauncher here in the
-        // app layer where Context + BuildConfig are available. The download URL
-        // comes from BuildConfig (§6.R, sourced from .env); when unconfigured
-        // it falls back to the documented placeholder docs URL.
-        // TODO sub-project 4: replace the placeholder with the real Firebase
-        // App Distribution link for digital.vasic.lava.api.
+        // Sub-project 2 (on-device API): build the SiblingAppLauncher here in
+        // the app layer where Context + BuildConfig are available. The download
+        // URL comes from BuildConfig (§6.R, sourced from .env); when
+        // unconfigured it falls back to the documented placeholder. No market://
+        // anywhere — both apps are distributed via Firebase App Distribution.
         val context = LocalContext.current
         val apiAppLauncher = remember(context) {
-            // PackageManagerApiAppLauncher.from falls back to its documented
-            // placeholder when the config value is blank, so no URL literal
-            // lives here (§6.R).
-            PackageManagerApiAppLauncher.from(
+            PackageManagerSiblingAppLauncher.from(
                 context = context,
+                candidatePackageIds = listOf(
+                    BuildConfig.API_RELEASE_PACKAGE,
+                    BuildConfig.API_TARGET_PACKAGE,
+                ).distinct(),
                 downloadUrl = BuildConfig.LAVA_API_APP_DOWNLOAD_URL,
+                fallbackDownloadUrl = "https://lava.app/download/api-app",
             )
         }
         MenuScreen(

@@ -73,15 +73,23 @@ class ApiControlViewModelTest {
         port = 8443,
     )
 
-    private class FakePackageChecker : lava.applink.PackageChecker {
-        override fun installedLaunchIntent(pkg: String): Any? = pkg // always "installed"
-    }
+    /** No-op fake — ApiControlViewModelTest tests state/lifecycle, not launch-client. */
+    private val noOpClientLauncher: lava.applink.SiblingAppLauncher =
+        object : lava.applink.SiblingAppLauncher {
+            override fun isInstalled(): Boolean = false
+            override fun intentToOpen(): android.content.Intent? = null
+            override fun intentToDownload(): android.content.Intent =
+                android.content.Intent(
+                    android.content.Intent.ACTION_VIEW,
+                    android.net.Uri.parse("https://lava.app/download/client"),
+                )
+        }
 
     private fun viewModel(
         controller: ApiEngineController = controller(),
         starter: RecordingServiceStarter = RecordingServiceStarter(),
     ): Pair<ApiControlViewModel, RecordingServiceStarter> =
-        ApiControlViewModel(controller, starter, FakePackageChecker()) to starter
+        ApiControlViewModel(controller, starter, noOpClientLauncher) to starter
 
     // CHALLENGE — primary assertion on emitted Running state (user-visible).
     @Test

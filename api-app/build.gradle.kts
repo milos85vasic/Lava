@@ -44,12 +44,20 @@ android {
 
     defaultConfig {
         applicationId = "digital.vasic.lava.api"
-        // CLIENT_RELEASE_PACKAGE: Play-Store fallback target for CrossAppLauncher.
+        // CLIENT_RELEASE_PACKAGE: used by SiblingAppLauncher for the client app.
         // §6.R: package-id constant, not a credential — permitted as BuildConfig.
         buildConfigField(
             "String",
             "CLIENT_RELEASE_PACKAGE",
             "\"digital.vasic.lava.client\"",
+        )
+        // §6.R: client app download URL (Firebase App Distribution) — value lives
+        // in .env (LAVA_CLIENT_APP_DOWNLOAD_URL). Empty when unconfigured →
+        // SiblingAppLauncher falls back to a placeholder constant.
+        buildConfigField(
+            "String",
+            "LAVA_CLIENT_APP_DOWNLOAD_URL",
+            "\"${env.getOrDefault("LAVA_CLIENT_APP_DOWNLOAD_URL", "")}\"",
         )
         // API_KEY_AUTHORITY default (release). Debug variant overrides below.
         // The manifest placeholder is set per-variant so the ContentProvider
@@ -131,9 +139,9 @@ android {
 }
 
 dependencies {
-    // Shared cross-app intent contract (AppLinkContract, CrossAppLauncher,
-    // PackageChecker). Both :app and :api-app depend on this so the intent
-    // contract cannot drift between the two apps. §4 of the design spec.
+    // Shared cross-app intent contract (AppLinkContract, SiblingAppLauncher,
+    // PackageManagerSiblingAppLauncher). Both :app and :api-app depend on this
+    // so the intent contract cannot drift between the two apps. §4 design spec.
     implementation(project(":core:applink"))
     implementation(project(":core:apiengine"))
     implementation(project(":core:designsystem"))
@@ -162,6 +170,7 @@ dependencies {
     testImplementation(libs.junit4)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.orbit.test)
+    testImplementation(libs.mockk)
     // Reuse the canonical MainDispatcherRule (swaps Dispatchers.Main for the
     // test scheduler so the ViewModel's viewModelScope coroutines run under
     // runTest). Same pattern every feature ViewModel test uses.

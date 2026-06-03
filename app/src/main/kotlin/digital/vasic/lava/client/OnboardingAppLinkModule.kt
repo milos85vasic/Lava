@@ -6,53 +6,51 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ViewModelComponent
 import dagger.hilt.android.qualifiers.ApplicationContext
-import lava.applink.CrossAppLauncher
-import lava.applink.PackageManagerChecker
-import lava.onboarding.OnboardingViewModel
-import javax.inject.Named
+import lava.applink.PackageManagerSiblingAppLauncher
+import lava.applink.SiblingAppLauncher
 
 /**
- * Provides the [CrossAppLauncher] and variant-aware package bindings needed
- * by [OnboardingViewModel.onLaunchOnDeviceApi].
+ * Provides the [SiblingAppLauncher] needed by
+ * [lava.onboarding.OnboardingViewModel.onLaunchOnDeviceApi].
  *
  * This module lives in `:app` (not `:feature:onboarding`) because:
- *   1. [PackageManagerChecker] needs an Android [Context].
+ *   1. [android.content.pm.PackageManager] needs an Android [Context].
  *   2. [BuildConfig] is per-module — only `:app` has the app BuildConfig.
  *   3. [BuildConfig.API_TARGET_PACKAGE] is variant-aware (debug → .dev,
  *      release → base id) — §6.R: no literals in source.
+ *   4. [BuildConfig.LAVA_API_APP_DOWNLOAD_URL] is from .env — §6.R.
  *
- * Hilt aggregates all `@InstallIn(ViewModelComponent::class)` modules into
- * the app component, so [OnboardingViewModel] (in `:feature:onboarding`)
- * resolves these bindings from here.
- * This is the same pattern used by [CloudApiModule] for `@Named("defaultCloudApi")`.
+ * Both the API-app candidate package ids and the download URL are wired from
+ * BuildConfig so the launcher never contains source literals (§6.R).
  *
- * IMPORTANT-3a fix: [apiTargetPackage] uses [BuildConfig.API_TARGET_PACKAGE]
- * (debug = `digital.vasic.lava.api.dev`, release = `digital.vasic.lava.api`)
- * so a debug client launches the installed .dev API app instead of redirecting
- * to the Play Store for the release app.
+ * The production variant-aware list: release id first (preferred), dev id
+ * second. [PackageManagerSiblingAppLauncher] checks them in order and returns
+ * the first installed one, so a device with both gets the release app.
  *
- * Test override: instrumented tests that need a fake PackageChecker should
- * replace this module via `@TestInstallIn` (same pattern as
- * [lava.app.di.TestOnboardingHiltModule] for `apiSelectionEnabled`).
+ * The fallback placeholder URL is used ONLY when LAVA_API_APP_DOWNLOAD_URL is
+ * blank (CI / fresh checkout with no `.env`). It is the same placeholder
+ * documented in [lava.applink.PackageManagerSiblingAppLauncher].
  */
 @Module
 @InstallIn(ViewModelComponent::class)
 object OnboardingAppLinkModule {
 
-    @Provides
-    fun crossAppLauncher(
-        @ApplicationContext context: Context,
-    ): CrossAppLauncher = CrossAppLauncher(PackageManagerChecker(context))
+    /** Placeholder for unconfigured builds (no .env). §6.R: constant, not secret. */
+    private const val API_APP_FALLBACK_URL = "https://lava.app/download/api-app"
 
-    /**
-     * IMPORTANT-3a: variant-aware target package for the API app.
-     * debug build → "digital.vasic.lava.api.dev" (side-loaded .dev app)
-     * release build → "digital.vasic.lava.api" (Play Store app)
-     *
-     * §6.R: value comes from [BuildConfig.API_TARGET_PACKAGE] which is set
-     * per build type in app/build.gradle.kts — never a literal in source.
-     */
     @Provides
-    @Named("apiTargetPackage")
-    fun apiTargetPackage(): String = BuildConfig.API_TARGET_PACKAGE
+    fun siblingAppLauncherForApiApp(
+        @ApplicationContext context: Context,
+    ): SiblingAppLauncher = PackageManagerSiblingAppLauncher.from(
+        context = context,
+        // IMPORTANT-3a: release id first so release builds prefer the release
+        // app; debug variant (.dev) is the fallback for dev devices.
+        // §6.R: IDs come from BuildConfig, never from source literals.
+        candidatePackageIds = listOf(
+            BuildConfig.API_RELEASE_PACKAGE,
+            BuildConfig.API_TARGET_PACKAGE,
+        ).distinct(), // remove duplicate when release == target (release build)
+        downloadUrl = BuildConfig.LAVA_API_APP_DOWNLOAD_URL,
+        fallbackDownloadUrl = API_APP_FALLBACK_URL,
+    )
 }

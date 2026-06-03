@@ -71,12 +71,10 @@ class MainActivity : ComponentActivity() {
 
         // Task 2.3: track whether we were launched from the client so the ViewModel
         // can include return extras (host/port) in the LaunchClient side effect.
-        val returnTo = intent.getStringExtra(AppLinkContract.EXTRA_RETURN_TO)
-        if (returnTo != null) {
+        // The target client package is resolved by the injected SiblingAppLauncher's
+        // candidate list (release first, dev second) rather than a mutable field.
+        if (intent.getStringExtra(AppLinkContract.EXTRA_RETURN_TO) != null) {
             viewModel.launchedFromClient = true
-            // Store the variant-aware client package from the intent so the launcher
-            // targets the exact variant that launched us (debug ↔ debug, release ↔ release).
-            viewModel.clientPackage = returnTo
         }
 
         // Task 2.2: auto-start the engine when the client launches us with START_API=true.

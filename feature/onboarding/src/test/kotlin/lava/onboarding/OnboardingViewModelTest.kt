@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
+import lava.applink.SiblingAppLauncher
 import lava.auth.api.AuthService
 import lava.common.analytics.AnalyticsTracker
 import lava.credentials.CredentialEncryptor
@@ -47,6 +48,21 @@ class OnboardingViewModelTest {
 
     @get:Rule
     val dispatcherRule = MainDispatcherRule()
+
+    /**
+     * No-op [SiblingAppLauncher] for tests that do not exercise the
+     * "On this device" launch flow — always reports not-installed so
+     * the download intent path fires (a harmless no-op in these tests).
+     */
+    private val noOpSiblingAppLauncher: SiblingAppLauncher = object : SiblingAppLauncher {
+        override fun isInstalled(): Boolean = false
+        override fun intentToOpen(): android.content.Intent? = null
+        override fun intentToDownload(): android.content.Intent =
+            android.content.Intent(
+                android.content.Intent.ACTION_VIEW,
+                android.net.Uri.parse("https://lava.app/download/api-app"),
+            )
+    }
 
     private lateinit var registry: DefaultTrackerRegistry
     private lateinit var sdk: LavaTrackerSdk
@@ -129,15 +145,9 @@ class OnboardingViewModelTest {
             },
             endpointsRepository = lava.testing.repository.TestEndpointsRepository(),
             apiSelectionEnabled = false, // pre-60th flow preserved for these tests
-            // Task 3.3 (2026-06-03): crossAppLauncher now required (non-nullable).
-            // These tests do not exercise the on-device API flow; a no-op checker
-            // (always returns null = not installed) is sufficient to keep the
-            // existing Welcome → Providers → Configure → Summary assertions intact.
-            crossAppLauncher = lava.applink.CrossAppLauncher(
-                object : lava.applink.PackageChecker {
-                    override fun installedLaunchIntent(pkg: String): Any? = null
-                },
-            ),
+            // Task 3.3: siblingAppLauncher required; these tests don't exercise the
+            // on-device flow, so the no-op (not-installed) launcher is sufficient.
+            siblingAppLauncher = noOpSiblingAppLauncher,
         )
     }
 
@@ -574,11 +584,7 @@ class OnboardingViewModelTest {
             endpointsRepository = lava.testing.repository.TestEndpointsRepository(),
             apiSelectionEnabled = false,
             defaultCloudApi = "",
-            crossAppLauncher = lava.applink.CrossAppLauncher(
-                object : lava.applink.PackageChecker {
-                    override fun installedLaunchIntent(pkg: String): Any? = null
-                },
-            ),
+            siblingAppLauncher = noOpSiblingAppLauncher,
         )
     }
 
@@ -742,11 +748,7 @@ class OnboardingViewModelTest {
             // apiSelectionEnabled=true so NextStep from Welcome enters
             // ApiSelection and startApiDiscovery() begins collecting.
             apiSelectionEnabled = true,
-            crossAppLauncher = lava.applink.CrossAppLauncher(
-                object : lava.applink.PackageChecker {
-                    override fun installedLaunchIntent(pkg: String): Any? = null
-                },
-            ),
+            siblingAppLauncher = noOpSiblingAppLauncher,
         )
     }
 

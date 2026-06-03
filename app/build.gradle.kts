@@ -64,6 +64,10 @@ android {
         // Distribution link. Empty when unconfigured → app-layer wiring falls
         // back to the documented placeholder constant.
         buildConfigField("String", "LAVA_API_APP_DOWNLOAD_URL", "\"${env["LAVA_API_APP_DOWNLOAD_URL"].orEmpty()}\"")
+        // §6.R: client app download URL (Firebase App Distribution) — value lives
+        // in .env (LAVA_CLIENT_APP_DOWNLOAD_URL). Empty when unconfigured →
+        // OnboardingAppLinkModule falls back to a placeholder constant.
+        buildConfigField("String", "LAVA_CLIENT_APP_DOWNLOAD_URL", "\"${env["LAVA_CLIENT_APP_DOWNLOAD_URL"].orEmpty()}\"")
 
         // Task 3.1 (2026-06-03): variant-aware authority + package for the
         // API app's key ContentProvider. The authority is the API app's

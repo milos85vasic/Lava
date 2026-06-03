@@ -15,7 +15,7 @@ android {
 
 dependencies {
     // Task 3.2 (2026-06-03): shared cross-app linking contract + launcher
-    // (AppLinkContract, CrossAppLauncher, LaunchDecision, PackageChecker).
+    // (AppLinkContract, SiblingAppLauncher, PackageManagerSiblingAppLauncher).
     implementation(project(":core:applink"))
     implementation(project(":core:auth:api"))
     implementation(project(":core:credentials"))

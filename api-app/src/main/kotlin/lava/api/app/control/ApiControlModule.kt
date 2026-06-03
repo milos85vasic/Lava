@@ -7,6 +7,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import lava.api.app.BuildConfig
 import lava.api.app.auth.ApiKeyStore
 import lava.api.app.auth.ApiKeyStoreImpl
 import lava.api.app.net.NetworkInterfaceLanIpProvider
@@ -17,8 +18,8 @@ import lava.api.app.service.MdnsAdvertiser
 import lava.api.app.service.NsdMdnsAdvertiser
 import lava.apiengine.ApiEngine
 import lava.apiengine.NativeApiEngine
-import lava.applink.PackageChecker
-import lava.applink.PackageManagerChecker
+import lava.applink.PackageManagerSiblingAppLauncher
+import lava.applink.SiblingAppLauncher
 import javax.inject.Singleton
 
 /**
@@ -46,10 +47,35 @@ interface ApiControlModule {
         private const val SQLITE_FILE = "lava-api.db"
         private const val DEV_SUFFIX = ".dev"
 
+        /**
+         * Placeholder download URL for the Lava client, used when
+         * [BuildConfig.LAVA_CLIENT_APP_DOWNLOAD_URL] is blank (CI / fresh
+         * checkout with no `.env`). §6.R: constant not secret.
+         */
+        private const val CLIENT_FALLBACK_URL = "https://lava.app/download/client"
+
+        /**
+         * Provides a [SiblingAppLauncher] for the Lava client app.
+         *
+         * Candidate ids: release first (preferred), dev second.
+         * Download URL: from [BuildConfig.LAVA_CLIENT_APP_DOWNLOAD_URL] (.env)
+         * — Firebase App Distribution, never `market://`.
+         * §6.R: both ids are build constants (package ids, not secrets).
+         */
         @Provides
         @Singleton
-        fun providePackageChecker(@ApplicationContext context: Context): PackageChecker =
-            PackageManagerChecker(context)
+        fun provideClientLauncher(@ApplicationContext context: Context): SiblingAppLauncher {
+            val isDev = context.packageName.endsWith(DEV_SUFFIX)
+            val releaseId = BuildConfig.CLIENT_RELEASE_PACKAGE
+            val devId = "$releaseId.dev"
+            return PackageManagerSiblingAppLauncher.from(
+                context = context,
+                // On a debug api-app build prefer the .dev client; on release prefer release.
+                candidatePackageIds = if (isDev) listOf(devId, releaseId) else listOf(releaseId, devId),
+                downloadUrl = BuildConfig.LAVA_CLIENT_APP_DOWNLOAD_URL,
+                fallbackDownloadUrl = CLIENT_FALLBACK_URL,
+            )
+        }
 
         @Provides
         @Singleton

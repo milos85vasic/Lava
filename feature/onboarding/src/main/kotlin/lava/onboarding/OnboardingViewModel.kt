@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import lava.applink.AppLinkContract
-import lava.applink.CrossAppLauncher
+import lava.applink.SiblingAppLauncher
 import lava.auth.api.AuthService
 import lava.common.analytics.AnalyticsTracker
 import lava.credentials.ProviderCredentialManager
@@ -78,23 +78,11 @@ class OnboardingViewModel @Inject constructor(
     // binding in production (via app-side CloudApiModule).
     @javax.inject.Named("defaultCloudApi")
     private val defaultCloudApi: String = "",
-    // Task 3.3 (2026-06-03): cross-app launch decision.
-    // [crossAppLauncher] consults PackageChecker to decide whether to launch
-    // the API app or redirect to the Play Store.
-    // Production Hilt binding provided by OnboardingAppLinkModule in :app
-    // (same pattern as CloudApiModule for @Named("defaultCloudApi")).
-    // Tests pass a CrossAppLauncher wrapping a fake PackageChecker directly.
-    // Note: crossAppLauncher is non-nullable + @Inject-able (not a Kotlin
-    // function type); Hilt can provide CrossAppLauncher directly.
-    private val crossAppLauncher: CrossAppLauncher,
-    // IMPORTANT-3a: variant-aware target package for the API app launch.
-    // release → "digital.vasic.lava.api", debug → "digital.vasic.lava.api.dev".
-    // Provided by OnboardingAppLinkModule (@Named("apiTargetPackage")) from
-    // BuildConfig.API_TARGET_PACKAGE in :app. Default matches release package
-    // (same as API_RELEASE_PACKAGE) so existing tests that don't set this
-    // still compile without a Hilt override.
-    @javax.inject.Named("apiTargetPackage")
-    private val apiTargetPackage: String = AppLinkContract.API_RELEASE_PACKAGE,
+    // Task 3.3 (2026-06-03): [siblingAppLauncher] checks whether the API app is
+    // installed and returns a ready-to-use Intent (open) or a Firebase download
+    // Intent — no market:// anywhere. Production Hilt binding provided by
+    // OnboardingAppLinkModule in :app.
+    private val siblingAppLauncher: SiblingAppLauncher,
 ) : ViewModel(), ContainerHost<OnboardingState, OnboardingSideEffect> {
     // [apiKeyReader] is a function seam (authority: String) -> key: String?
     // Cannot be injected via Hilt (function types are not Dagger-injectable).
@@ -572,45 +560,33 @@ class OnboardingViewModel @Inject constructor(
     // ── Task 3.3 (2026-06-03): "On this device" handlers ──────────────────
 
     /**
-     * User tapped "On this device". Consults [CrossAppLauncher] for the API
-     * app's variant-aware package (installed → [OnboardingSideEffect.LaunchApiApp];
-     * absent → [OnboardingSideEffect.OpenPlayStore]).
+     * User tapped "On this device". Uses [siblingAppLauncher] to produce the
+     * correct [android.content.Intent]:
+     *   - installed → [SiblingAppLauncher.intentToOpen] with
+     *     [AppLinkContract.EXTRA_START_API] + [AppLinkContract.EXTRA_RETURN_TO]
+     *     added, so the API app auto-starts and knows to return here.
+     *   - not installed → [SiblingAppLauncher.intentToDownload] (Firebase App
+     *     Distribution URL; never market://).
      *
-     * The target package is the API app's variant-aware id (release or .dev);
-     * the release package is always the non-.dev id (Play Store listing).
-     * Both values come from [AppLinkContract] / BuildConfig — §6.R: no literals.
+     * Both cases emit [OnboardingSideEffect.LaunchIntent] — the screen calls
+     * startActivity on whatever intent arrives, with no URI-scheme branching.
      *
      * §6.J anti-bluff: primary assertion in OnDeviceApiFlowTest is on the
-     * emitted SideEffect type + its decision fields (user-visible outcome).
+     * emitted intent's action/data (user-visible outcome).
      */
     internal fun onLaunchOnDeviceApi() = intent {
-        // MINOR: crossAppLauncher is non-nullable (constructor type); this
-        // dead null-guard is removed. The ?: run block below was unreachable.
-        val releasePackage = AppLinkContract.API_RELEASE_PACKAGE
-        // IMPORTANT-3a: pass the variant-aware target package so debug builds
-        // launch the .dev API app (installed side-loaded) rather than
-        // redirecting to the Play Store for the release app.
-        // §6.R: apiTargetPackage comes from BuildConfig.API_TARGET_PACKAGE
-        // via @Named("apiTargetPackage") — never a literal here.
-        val decision = crossAppLauncher.decideLaunch(
-            targetPackage = apiTargetPackage,
-            releasePackage = releasePackage,
-            extras = mapOf(
-                AppLinkContract.EXTRA_START_API to "true",
-                AppLinkContract.EXTRA_RETURN_TO to AppLinkContract.CLIENT_RELEASE_PACKAGE,
-            ),
-        )
-        when (decision) {
-            is lava.applink.LaunchDecision.Launch ->
-                postSideEffect(OnboardingSideEffect.LaunchApiApp(decision))
-            is lava.applink.LaunchDecision.StoreRedirect ->
-                postSideEffect(
-                    OnboardingSideEffect.OpenPlayStore(
-                        marketUri = decision.marketUri,
-                        webUri = decision.webUri,
-                    ),
-                )
+        val openIntent = siblingAppLauncher.intentToOpen()
+        val launchIntent = if (openIntent != null) {
+            // Installed: add the handoff extras before handing to the screen.
+            openIntent.apply {
+                putExtra(AppLinkContract.EXTRA_START_API, "true")
+                putExtra(AppLinkContract.EXTRA_RETURN_TO, AppLinkContract.CLIENT_RELEASE_PACKAGE)
+            }
+        } else {
+            // Not installed: Firebase download page (never market://).
+            siblingAppLauncher.intentToDownload()
         }
+        postSideEffect(OnboardingSideEffect.LaunchIntent(launchIntent))
     }
 
     /**

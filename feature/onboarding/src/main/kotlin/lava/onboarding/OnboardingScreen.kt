@@ -2,7 +2,6 @@ package lava.onboarding
 
 import android.content.ActivityNotFoundException
 import android.content.Intent
-import android.net.Uri
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -24,7 +23,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import lava.applink.LaunchDecision
 import lava.onboarding.steps.ApiSelectionStep
 import lava.onboarding.steps.ConfigureStep
 import lava.onboarding.steps.ProvidersStep
@@ -56,10 +54,8 @@ fun OnboardingScreen(
     }
 
     // Task 3.5 (2026-06-03): track whether the API app is installed so
-    // ApiSelectionStep can show the correct button label. Updated in the
-    // side-effect handler and read from injected PackageChecker on first
-    // composition. A plain mutableStateOf is sufficient — this value is
-    // only read by the Composable (no coroutine subscription needed).
+    // ApiSelectionStep can show the correct button label. Updated by the
+    // LaunchIntent side-effect handler: ACTION_MAIN = installed, ACTION_VIEW = absent.
     val onDeviceApiInstalled = remember { mutableStateOf(false) }
 
     viewModel.collectSideEffect { sideEffect ->
@@ -71,63 +67,25 @@ fun OnboardingScreen(
             // launch will re-enter onboarding because
             // `onboardingComplete` was never written.
             is OnboardingSideEffect.ExitApp -> onExitApp()
-            // Task 3.5 (2026-06-03): Launch the API app via an explicit-
-            // component Intent. On ActivityNotFoundException (api app not
-            // installed despite the checker saying installed — race condition)
-            // log a warning; the user can retry.
-            // §6.AC: no-telemetry comment below because AnalyticsTracker is
-            // not injected into the Composable (it lives in the ViewModel);
-            // the ViewModel's error path is the telemetry surface.
-            is OnboardingSideEffect.LaunchApiApp -> {
-                val decision = sideEffect.decision
-                when (decision) {
-                    is LaunchDecision.Launch -> {
-                        try {
-                            val intent = Intent().apply {
-                                setPackage(decision.targetPackage)
-                                action = Intent.ACTION_MAIN
-                                addCategory(Intent.CATEGORY_LAUNCHER)
-                                decision.extras.forEach { (k, v) -> putExtra(k, v) }
-                            }
-                            context.startActivity(intent)
-                        } catch (e: ActivityNotFoundException) {
-                            // Race: package was uninstalled between checker and tap.
-                            // Graceful no-op — user sees nothing changed; they can
-                            // retry which will now see the "Install" label.
-                            // no-telemetry: AnalyticsTracker not available in Composable;
-                            // ViewModel's onLaunchOnDeviceApi logs at debug level.
-                        }
-                    }
-                    is LaunchDecision.StoreRedirect -> {
-                        // LaunchApiApp should only carry Launch; StoreRedirect
-                        // is carried by OpenPlayStore. Defensive no-op.
-                    }
-                }
-                onDeviceApiInstalled.value = decision is LaunchDecision.Launch
-            }
-            // Task 3.5 (2026-06-03): Open the Play Store listing. Try the
-            // native market:// scheme first; fall back to the web URL when
-            // the Play Store app is absent (e.g. custom AOSP devices).
-            is OnboardingSideEffect.OpenPlayStore -> {
-                val launched = try {
-                    context.startActivity(
-                        Intent(Intent.ACTION_VIEW, Uri.parse(sideEffect.marketUri)),
-                    )
-                    true
+            // Task 3.5 (2026-06-03), refactored: the ViewModel already resolved
+            // "installed → open intent WITH handoff extras" vs "not installed →
+            // Firebase download URL intent" — the screen just fires startActivity.
+            // Installed path: ACTION_MAIN + CATEGORY_LAUNCHER + extras (no market://).
+            // Not-installed path: ACTION_VIEW → Firebase distribution URL.
+            // §6.AC: no-telemetry — AnalyticsTracker not in Composable; ViewModel
+            // error path is the telemetry surface.
+            is OnboardingSideEffect.LaunchIntent -> {
+                val isLaunchIntent = sideEffect.intent.action == Intent.ACTION_MAIN
+                try {
+                    context.startActivity(sideEffect.intent)
+                    // Track install state: ACTION_MAIN = app was installed.
+                    onDeviceApiInstalled.value = isLaunchIntent
                 } catch (e: ActivityNotFoundException) {
-                    false
+                    // Race: app was uninstalled between check and tap.
+                    // Or: ACTION_VIEW intent URI scheme not handled (unlikely for https://).
+                    // Graceful no-op — user can retry.
+                    onDeviceApiInstalled.value = false
                 }
-                if (!launched) {
-                    try {
-                        context.startActivity(
-                            Intent(Intent.ACTION_VIEW, Uri.parse(sideEffect.webUri)),
-                        )
-                    } catch (e: ActivityNotFoundException) {
-                        // no-telemetry: AnalyticsTracker not available in Composable.
-                        // Both URIs failed — nothing to do; user sees button unchanged.
-                    }
-                }
-                onDeviceApiInstalled.value = false
             }
         }
     }
