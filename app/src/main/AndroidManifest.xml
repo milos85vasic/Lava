@@ -3,6 +3,10 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Task 3.1 (2026-06-03): signature-level permission to read the API
+         app's key ContentProvider. Both apps share the same keystore, so
+         only the genuine Lava client is granted this at install time. -->
+    <uses-permission android:name="digital.vasic.lava.permission.READ_API_KEY" />
 
     <uses-feature
         android:name="android.software.leanback"
@@ -10,6 +14,24 @@
     <uses-feature
         android:name="android.hardware.touchscreen"
         android:required="false" />
+
+    <!-- Task 3.6 (2026-06-03): package visibility for Android 11+ (API 30).
+         Without these <queries> entries, getLaunchIntentForPackage returns
+         null even when the API app IS installed — silent false-not-installed
+         → Play Store redirect loop (the exact defect §4 of the design warns
+         about). Both release + debug package ids are declared. -->
+    <queries>
+        <package android:name="digital.vasic.lava.api" />
+        <package android:name="digital.vasic.lava.api.dev" />
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="market" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="https" />
+        </intent>
+    </queries>
 
     <application
         android:name=".LavaApplication"

@@ -64,6 +64,15 @@ android {
         // Distribution link. Empty when unconfigured → app-layer wiring falls
         // back to the documented placeholder constant.
         buildConfigField("String", "LAVA_API_APP_DOWNLOAD_URL", "\"${env["LAVA_API_APP_DOWNLOAD_URL"].orEmpty()}\"")
+
+        // Task 3.1 (2026-06-03): variant-aware authority + package for the
+        // API app's key ContentProvider. The authority is the API app's
+        // applicationId + ".keyprovider". §6.R: no literals in source code —
+        // the debug applicationId is "digital.vasic.lava.api.dev" (the api-app's
+        // debug applicationIdSuffix = ".dev"); release is "digital.vasic.lava.api".
+        // These are build constants (not secrets), so they live in BuildConfig
+        // per the §6.R exemption for package IDs.
+        buildConfigField("String", "API_RELEASE_PACKAGE", "\"digital.vasic.lava.api\"")
     }
 
     buildFeatures {
@@ -77,6 +86,9 @@ android {
     // about real Bundle/Log behavior.
     testOptions {
         unitTests.isReturnDefaultValues = true
+        // Task 3.1 (2026-06-03): enable Android resources for Robolectric
+        // (ApiKeyClientTest uses ApplicationProvider + ShadowContentResolver).
+        unitTests.isIncludeAndroidResources = true
     }
 
     signingConfigs {
@@ -192,6 +204,8 @@ afterEvaluate {
 }
 
 dependencies {
+    // Task 3.1 (2026-06-03): shared cross-app linking contract + launcher.
+    implementation(project(":core:applink"))
     implementation(project(":core:auth:impl"))
     implementation(project(":core:common"))
     implementation(project(":core:data"))
@@ -249,6 +263,9 @@ dependencies {
     // JVM unit tests for app-internal helpers (FirebaseInitializer post-§6.O)
     testImplementation(libs.junit4)
     testImplementation(libs.mockk)
+    // Task 3.1 (2026-06-03): Robolectric for ApiKeyClientTest (ContentResolver stub)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.androidx.test.core)
 
     // ----------------------------------------------------------------
     // SP-3a Step 6 (2026-04-30): Compose UI + Hilt instrumentation test
