@@ -54,3 +54,6 @@
 [submodule "submodules/helixqa"]
 	path = submodules/helixqa
 	url = git@github.com:HelixDevelopment/helixqa.git
+[submodule "panoptic"]
+	path = panoptic
+	url = git@github.com:vasic-digital/Panoptic.git

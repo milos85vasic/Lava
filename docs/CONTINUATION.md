@@ -359,8 +359,9 @@ Last Firebase distribute: 1.2.22-1042 / 2.3.11-2311 (2026-05-14). This cycle mad
 
 ## 3. Submodule pin index
 
-17 own-org submodules + 1 universal-rules submodule (constitution).
+18 own-org submodules + 1 universal-rules submodule (constitution).
 Bumping a pin is a deliberate operator action; never auto-update.
+**`panoptic` is at the PROJECT ROOT (`Lava/panoptic`), NOT under `submodules/`** — operator directive 2026-06-03: every submodule MUST be reachable through the project root with NO nesting (CONST-051(C)). The former nested `submodules/challenges/Panoptic` stray clone was removed and re-incorporated here at root.
 
 **2026-06-03 reconciliation (operator-directed "obtain latest versions of all Submodules"):** every submodule advanced to its latest unified `main` and ALL upstreams reconciled to convergence via **fast-forward only — NO force-push** (per the new constitution §11.4.113). All github↔gitlab divergence resolved: every diverged mirror was `gitlab`-behind-`github` (a strict ancestor), so `gitlab` was fast-forwarded to the `github` tip; no merge commits needed, no commits lost. CONTINUATION §4.5 OWED#2 (mirror divergence) is CLOSED. ⚠️ **Build-verification of these advanced pins against the Lava build is OWED** (the full Android + Go build was not run on this host) — verify before any release/distribute.
 
@@ -379,13 +380,14 @@ Bumping a pin is a deliberate operator action; never auto-update.
 | `mdns` | `ba1d2385` | GitHub + GitLab | helix-deps.yaml + install_upstreams.sh (already converged) |
 | `middleware` | `ccf237a` | GitHub + GitLab | helix-deps.yaml + install_upstreams.sh |
 | `observability` | `73bbd1b` | GitHub + GitLab | helix-deps.yaml present; gitlab FF-reconciled 2026-06-03 |
+| `panoptic` (ROOT: `Lava/panoptic`) | `2f8e7c2` | GitHub + GitLab | added at project root 2026-06-03 (flattened from the stray `challenges/Panoptic` nesting per CONST-051(C)); gitlab FF-reconciled to github tip |
 | `ratelimiter` | `92b01ea` | GitHub + GitLab | helix-deps.yaml + install_upstreams.sh; gitlab FF-reconciled 2026-06-03 |
 | `recovery` | `0eb87cf` | GitHub + GitLab | helix-deps.yaml + install_upstreams.sh |
 | `security` | `16ae574` | GitHub + GitLab | helix-deps.yaml present; gitlab FF-reconciled 2026-06-03 |
 | `tracker_sdk` | `7afc37aa` | GitHub (origin) | already at origin/main (converged) |
 | `constitution` | `d90ab87` | universal (HelixConstitution: github+gitlab+gitflic+gitverse) | **§11.4.113 absolute no-force-push + merge-onto-latest-main mandate** (2026-06-03); converged on all 4 upstreams |
 
-**Internal-to-submodule nested submodules:** `submodules/challenges` had a nested `Panoptic` submodule that was removed via the github cascade merge in Phase 5-debt closure (CONST-051(C) flat-layout enforcement); Challenges now declares Panoptic as a `layout: flat` dependency in its `helix-deps.yaml`.
+**Internal-to-submodule nested submodules — NONE (CONST-051(C) fully satisfied 2026-06-03).** `submodules/challenges` previously had a stray nested `Panoptic` clone (the last tracked `CM-NO-NESTED-OWN-ORG-SUBMODULES` exposure). It was removed and `vasic-digital/Panoptic` is now incorporated as a **root-level submodule at `Lava/panoptic`** per operator directive (every submodule reachable through the project root, no nesting). Challenges still declares Panoptic as a `layout: flat` dependency in its `helix-deps.yaml`; that declaration now resolves to the root `panoptic` submodule. No submodule nests any own-org submodule.
 
 ---
 
