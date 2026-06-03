@@ -1,5 +1,7 @@
 package lava.api.app.ui
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -30,8 +32,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ClipboardManager
 import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -43,6 +48,7 @@ import lava.api.app.control.ApiControlAction
 import lava.api.app.control.ApiControlSideEffect
 import lava.api.app.control.ApiControlState
 import lava.api.app.control.ApiControlViewModel
+import lava.applink.LaunchDecision
 
 /**
  * The Lava API landing screen — the single user surface of the standalone API
@@ -66,6 +72,7 @@ fun ApiControlScreen(
         state = state,
         sideEffects = viewModel.container.sideEffectFlow,
         onAction = viewModel::perform,
+        launchedFromClient = viewModel.launchedFromClient,
         modifier = modifier,
     )
 }
@@ -73,6 +80,9 @@ fun ApiControlScreen(
 /**
  * Stateless screen body — driven entirely by [state] + [onAction], so the
  * Challenge Test can render it with a real VM and assert on the rendered text.
+ *
+ * @param launchedFromClient when true the client-navigation button label is
+ *   "Back to Lava client"; otherwise "Open Lava client".
  */
 @OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 @Composable
@@ -80,10 +90,12 @@ fun ApiControlScreen(
     state: ApiControlState,
     sideEffects: Flow<ApiControlSideEffect>,
     onAction: (ApiControlAction) -> Unit,
+    launchedFromClient: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val clipboard: ClipboardManager = LocalClipboardManager.current
+    val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val keyCopiedMsg = stringResource(R.string.api_screen_key_copied)
 
@@ -94,10 +106,70 @@ fun ApiControlScreen(
                     scope.launch { snackbarHostState.showSnackbar(keyCopiedMsg) }
                 is ApiControlSideEffect.ShowError ->
                     scope.launch { snackbarHostState.showSnackbar(effect.message) }
-                // LaunchClient is handled in MainActivity (needs startActivity context);
-                // the screen only observes it for completeness — the Activity's
-                // LaunchedEffect / collectLatest handles the navigation.
-                is ApiControlSideEffect.LaunchClient -> Unit
+                is ApiControlSideEffect.LaunchClient -> {
+                    // Execute the launch decision from the screen's context so
+                    // we can call context.startActivity directly without needing
+                    // the Activity reference. The screen is always composed
+                    // inside the Activity so context is the Activity context.
+                    when (val decision = effect.decision) {
+                        is LaunchDecision.Launch -> {
+                            try {
+                                val intent = context.packageManager
+                                    .getLaunchIntentForPackage(decision.targetPackage)
+                                    ?.apply {
+                                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                        decision.extras.forEach { (k, v) -> putExtra(k, v) }
+                                    }
+                                if (intent != null) {
+                                    context.startActivity(intent)
+                                } else {
+                                    // Target installed but no launch intent (unlikely — fall
+                                    // back to store). §6.AC: no-telemetry: api-app has no
+                                    // AnalyticsTracker yet.
+                                    context.startActivity(
+                                        Intent(
+                                            Intent.ACTION_VIEW,
+                                            Uri.parse(
+                                                lava.applink.AppLinkContract.marketUri(
+                                                    lava.api.app.BuildConfig.CLIENT_RELEASE_PACKAGE,
+                                                ),
+                                            ),
+                                        ),
+                                    )
+                                }
+                            } catch (e: android.content.ActivityNotFoundException) {
+                                // §6.AC: no-telemetry: api-app has no AnalyticsTracker yet.
+                                // Web fallback when Play Store app is absent.
+                                runCatching {
+                                    context.startActivity(
+                                        Intent(
+                                            Intent.ACTION_VIEW,
+                                            Uri.parse(
+                                                lava.applink.AppLinkContract.playWebUri(
+                                                    lava.api.app.BuildConfig.CLIENT_RELEASE_PACKAGE,
+                                                ),
+                                            ),
+                                        ),
+                                    )
+                                }
+                            }
+                        }
+                        is LaunchDecision.StoreRedirect -> {
+                            try {
+                                context.startActivity(
+                                    Intent(Intent.ACTION_VIEW, Uri.parse(decision.marketUri)),
+                                )
+                            } catch (e: android.content.ActivityNotFoundException) {
+                                // §6.AC: no-telemetry: api-app has no AnalyticsTracker yet.
+                                runCatching {
+                                    context.startActivity(
+                                        Intent(Intent.ACTION_VIEW, Uri.parse(decision.webUri)),
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }
@@ -118,7 +190,9 @@ fun ApiControlScreen(
             StatusIndicator(state)
             Spacer(Modifier.height(20.dp))
             ControlButtons(state, onAction)
-            Spacer(Modifier.height(20.dp))
+            Spacer(Modifier.height(12.dp))
+            OpenClientButton(launchedFromClient, onAction)
+            Spacer(Modifier.height(12.dp))
 
             when (state) {
                 is ApiControlState.Running -> RunningDetails(
@@ -133,6 +207,30 @@ fun ApiControlScreen(
             }
             Spacer(Modifier.height(24.dp))
         }
+    }
+}
+
+/**
+ * "Back to Lava client" (when [launchedFromClient]=true) or "Open Lava client"
+ * button. Always visible so the user can navigate to the client regardless of
+ * how they arrived at this screen (spec §6.2 Direction 2).
+ *
+ * `contentDescription = "open-client-button"` is the stable test-tag used by
+ * Challenge Tests and instrumented UI tests to locate this button.
+ */
+@Composable
+private fun OpenClientButton(
+    launchedFromClient: Boolean,
+    onAction: (ApiControlAction) -> Unit,
+) {
+    val label = if (launchedFromClient) "Back to Lava client" else "Open Lava client"
+    Button(
+        modifier = Modifier
+            .testTag(TAG_OPEN_CLIENT)
+            .semantics { contentDescription = "open-client-button" },
+        onClick = { onAction(ApiControlAction.OpenClient) },
+    ) {
+        Text(label)
     }
 }
 
@@ -302,3 +400,4 @@ const val TAG_REQUEST_COUNT = "api_request_count"
 const val TAG_ACCESS_KEY = "api_access_key"
 const val TAG_COPY_KEY = "api_copy_key"
 const val TAG_ERROR_MESSAGE = "api_error"
+const val TAG_OPEN_CLIENT = "api_btn_open_client"

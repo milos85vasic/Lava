@@ -2,7 +2,6 @@ package lava.api.app.handoff
 
 import android.app.Application
 import android.content.ContentValues
-import android.net.Uri
 import androidx.test.core.app.ApplicationProvider
 import org.junit.Assert.assertEquals
 import org.junit.Test

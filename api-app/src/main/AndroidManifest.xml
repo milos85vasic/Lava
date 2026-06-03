@@ -21,6 +21,25 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
+    <!-- Package visibility (Android 11+ / API 30): declare the Lava client
+         packages so getLaunchIntentForPackage returns non-null for them, and
+         declare market:// + https:// so the Play Store store-redirect works.
+         Without these <queries> entries, getLaunchIntentForPackage returns null
+         on API 30+ even when the app IS installed — a silent false-not-installed
+         bluff the <queries> block prevents. -->
+    <queries>
+        <package android:name="digital.vasic.lava.client" />
+        <package android:name="digital.vasic.lava.client.dev" />
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="market" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="https" />
+        </intent>
+    </queries>
+
     <application
         android:name=".ApiApplication"
         android:allowBackup="false"
