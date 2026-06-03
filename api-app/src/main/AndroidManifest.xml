@@ -4,6 +4,14 @@
 
     <!-- The embedded API serves HTTPS over the LAN and discovers/advertises
          itself over mDNS; it runs as a long-lived foreground service. -->
+    <!-- Signature-level permission guarding ApiKeyProvider. Only an app signed
+         with the same certificate (the genuine Lava client) can read the
+         provider — third-party apps are denied at the OS level. §5 of the
+         design spec; §6.H credential security. -->
+    <permission
+        android:name="digital.vasic.lava.permission.READ_API_KEY"
+        android:protectionLevel="signature" />
+
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
@@ -39,5 +47,17 @@
             android:name=".service.ApiEngineService"
             android:exported="false"
             android:foregroundServiceType="dataSync" />
+
+        <!-- Key provider: exposes {access_key, loopback_port} to the Lava
+             client app via a signature-permission ContentProvider (spec §5).
+             The authority is variant-aware via the apiKeyAuthority placeholder
+             set in build.gradle.kts per build type. android:exported="true" is
+             required so the client process (a different UID) can query it;
+             android:readPermission restricts access to same-certificate signers. -->
+        <provider
+            android:name=".handoff.ApiKeyProvider"
+            android:authorities="${apiKeyAuthority}"
+            android:exported="true"
+            android:readPermission="digital.vasic.lava.permission.READ_API_KEY" />
     </application>
 </manifest>

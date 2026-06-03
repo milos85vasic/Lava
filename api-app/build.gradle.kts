@@ -44,6 +44,22 @@ android {
 
     defaultConfig {
         applicationId = "digital.vasic.lava.api"
+        // CLIENT_RELEASE_PACKAGE: Play-Store fallback target for CrossAppLauncher.
+        // §6.R: package-id constant, not a credential — permitted as BuildConfig.
+        buildConfigField(
+            "String",
+            "CLIENT_RELEASE_PACKAGE",
+            "\"digital.vasic.lava.client\"",
+        )
+        // API_KEY_AUTHORITY default (release). Debug variant overrides below.
+        // The manifest placeholder is set per-variant so the ContentProvider
+        // authority matches the variant applicationId.
+        buildConfigField(
+            "String",
+            "API_KEY_AUTHORITY",
+            "\"digital.vasic.lava.api.keyprovider\"",
+        )
+        manifestPlaceholders["apiKeyAuthority"] = "digital.vasic.lava.api.keyprovider"
         versionCode = 4
         versionName = "0.2.0"
         // EncryptedSharedPreferences (androidx.security-crypto) requires API 23+
@@ -92,11 +108,33 @@ android {
             isMinifyEnabled = false
             signingConfig = signingConfigs.getByName("debug")
             applicationIdSuffix = ".dev"
+            // Debug app-id is digital.vasic.lava.api.dev, so the provider
+            // authority and the manifest placeholder must use the .dev suffix.
+            buildConfigField(
+                "String",
+                "API_KEY_AUTHORITY",
+                "\"digital.vasic.lava.api.dev.keyprovider\"",
+            )
+            manifestPlaceholders["apiKeyAuthority"] = "digital.vasic.lava.api.dev.keyprovider"
+        }
+    }
+
+    buildFeatures { buildConfig = true }
+
+    testOptions {
+        unitTests {
+            // Required by Robolectric so it can find the app's resources
+            // (e.g., ApplicationProvider.getApplicationContext()) in JVM tests.
+            isIncludeAndroidResources = true
         }
     }
 }
 
 dependencies {
+    // Shared cross-app intent contract (AppLinkContract, CrossAppLauncher,
+    // PackageChecker). Both :app and :api-app depend on this so the intent
+    // contract cannot drift between the two apps. §4 of the design spec.
+    implementation(project(":core:applink"))
     implementation(project(":core:apiengine"))
     implementation(project(":core:designsystem"))
     implementation(project(":core:notifications"))
@@ -128,6 +166,11 @@ dependencies {
     // test scheduler so the ViewModel's viewModelScope coroutines run under
     // runTest). Same pattern every feature ViewModel test uses.
     testImplementation(project(":core:testing"))
+    // Robolectric: used by ApiKeyProviderTest to exercise ContentProvider
+    // query() against a real Robolectric application context without a device.
+    // Pattern mirrors core:designsystem's PaletteContractTest.
+    testImplementation(libs.robolectric)
+    testImplementation(libs.androidx.test.core)
 
     // ----------------------------------------------------------------
     // Phase E: Compose UI Challenge Tests (instrumented). These drive the
