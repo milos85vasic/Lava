@@ -18,7 +18,7 @@ repo has drifted, the agent acts on the claim.
 > - **2026-06-03 commit-push session (this session):** landed the §6.AH-debt per-OS procWalker WIP (OWED#3 below) in Containers `6f4f415` (pushed, github+gitlab converged) + the C02 api-app test-fix (OWED#1 below). Containers pin advanced `f10a011`→`6f4f415`. `constitution` pin held at `1d9e5d6` (no work; 1 behind upstream `6da1171` by deliberate freeze).
 > - **OWED (resume here tomorrow):**
 >   1. **C02 test-fix commit** (`api-app/.../Challenge02ApiAppBootAndServeTest.kt` short-read gate-verdict + `OnDeviceApiClient.kt` `getWithKeyShortRead`) — ✅ **COMMITTED + PUSHED 2026-06-03** with a §6.J Bluff-Audit stamp whose on-device rehearsal is marked **PENDING** (the bogus-key → assert(c) fast-401 fail → revert rehearsal still cannot run: no API≤35 emulator boots on this macOS host per §6.X/§6.AH-debt, and the S23 Ultra keyguard blocks the operator path). STILL OWED: execute that rehearsal on a real surface — unlock the S23 Ultra (R5CW33CBVQV) + keep awake (Settings→Dev options→Stay awake) → run the bogus-key rehearsal (full suite so C01 warms compose first) → confirm C02 fails at the assertNotEquals(401) → revert → record the observed failure in a follow-up §6.J note.
->   2. **Submodule cross-mirror divergence (PRE-EXISTING, ~2 weeks old, NOT this session):** 13 submodules (auth/cache/challenges/concurrency/config/containers/database/discovery/middleware/observability/ratelimiter/recovery/security) have an unpushed §11.4.78 codegraph-cascade commit AND 3-way-diverged github/gitlab/local HEADs. FF pushes mostly REJECTED (harmless, no force). Needs CAREFUL per-submodule reconciliation (review what each mirror has; do NOT blind `-s ours` — risks losing commits per §9). constitution already converged FF this session. This session's own submodule work (constitution `1d9e5d6`, containers `f10a011`) IS pushed.
+>   2. **Submodule cross-mirror divergence — ✅ CLOSED 2026-06-03.** The diagnosis was refined (§11.4.6): after a fresh fetch, NO submodule had unpushed local commits (all `0`-ahead); the only real divergence was `gitlab`-behind-`github` where `gitlab/main` was a strict ANCESTOR of `github/main` (8 submodules: auth/cache/config/discovery/http3/observability/ratelimiter/security). Resolved by **fast-forwarding `gitlab`→`github` tip — NO force-push, NO merge, NO commit loss** (per new constitution §11.4.113). Every submodule's github==gitlab==local now. `constitution` advanced to `d90ab87` (§11.4.113, all 4 upstreams). `helixqa` FF→`5112906` (origin, always-track-upstream). `tracker_sdk` already at origin/main. Parent pins bumped accordingly. **Build-verification of advanced pins against the Lava build is OWED before any release/distribute.**
 >   3. **§6.AH-debt:** ✅ the partial WIP is now **LANDED + PUSHED** in Containers `6f4f415` (per-OS procWalker `cleanup_os.go` — Linux `/proc` + macOS `ps -A`; conditional `--device /dev/kvm` via `kvmAvailable()`; build-break fix in `cleanup.go`; new tests `cleanup_os_test.go` + `containerized_kvm_test.go` + updated `containerized_test.go`; the `emulator-matrix` build binary CONST-053-gitignored, NOT committed). STILL OWED (the actual debt): a no-KVM/TCG **containerized** emulator that BOOTS on macOS — the conditional-KVM code now lets the args omit `/dev/kvm`, but the §6.AG/§6.AH container/VM path still does not boot on this host (host-direct adbd-offline wedge; the real S23 Ultra remains the current §6.Z surface).
 >   4. **§6.AH client gate:** full C00/C01 instrumentation on an API≤35 surface (the container emulator OR an API≤35 device OR a Compose-BOM update lifting the API-36 `@SdkSuppress`); 1.2.36 shipped on the cold-start-canary basis.
 >   5. **§11.4.109** anti-forgetting clause still carries the `UNCONFIRMED:` marker — replace with the operator's verbatim quote + re-push 4 upstreams + re-bump the constitution pin.
@@ -362,26 +362,28 @@ Last Firebase distribute: 1.2.22-1042 / 2.3.11-2311 (2026-05-14). This cycle mad
 17 own-org submodules + 1 universal-rules submodule (constitution).
 Bumping a pin is a deliberate operator action; never auto-update.
 
+**2026-06-03 reconciliation (operator-directed "obtain latest versions of all Submodules"):** every submodule advanced to its latest unified `main` and ALL upstreams reconciled to convergence via **fast-forward only — NO force-push** (per the new constitution §11.4.113). All github↔gitlab divergence resolved: every diverged mirror was `gitlab`-behind-`github` (a strict ancestor), so `gitlab` was fast-forwarded to the `github` tip; no merge commits needed, no commits lost. CONTINUATION §4.5 OWED#2 (mirror divergence) is CLOSED. ⚠️ **Build-verification of these advanced pins against the Lava build is OWED** (the full Android + Go build was not run on this host) — verify before any release/distribute.
+
 | Submodule | Pin | Mirrors | Notes |
 |---|---|---|---|
-| `auth` | `24ca50db` | GitHub + GitLab | helix-deps.yaml + §11.4.78 CodeGraph cascade |
-| `cache` | `30bb8581` | GitHub + GitLab | helix-deps.yaml present |
-| `challenges` | `09c55f48` | GitHub + GitLab | helix-deps.yaml + flat layout (Panoptic dep declared) |
-| `concurrency` | `7c74625b` | GitHub + GitLab | helix-deps.yaml present |
-| `config` | `9491f8b4` | GitHub + GitLab | helix-deps.yaml + install_upstreams.sh |
+| `auth` | `a3fc97d` | GitHub + GitLab | helix-deps.yaml + §11.4.78 CodeGraph cascade; gitlab FF-reconciled 2026-06-03 |
+| `cache` | `7853368` | GitHub + GitLab | helix-deps.yaml present; gitlab FF-reconciled 2026-06-03 |
+| `challenges` | `dfb5f9c` | GitHub + GitLab | helix-deps.yaml + flat layout (Panoptic dep declared) |
+| `concurrency` | `711499e` | GitHub + GitLab | helix-deps.yaml present |
+| `config` | `344073f` | GitHub + GitLab | helix-deps.yaml + install_upstreams.sh; gitlab FF-reconciled 2026-06-03 |
 | `containers` | `6f4f415` | GitHub + GitLab | per-OS procWalker (Linux /proc + macOS `ps`) + conditional `--device /dev/kvm` (§6.AH-debt); SELinux relabel cross-platform; per-OS emulator acceleration |
-| `database` | `4ead6233` | GitHub + GitLab | helix-deps.yaml present |
-| `discovery` | `2bddf64c` | GitHub + GitLab | helix-deps.yaml + install_upstreams.sh |
-| `helixqa` | `8b12e922` | GitHub | HelixDevelopment org; always-track-upstream per §6.AD Q9 waiver |
-| `http3` | `1d0df7b7` | GitHub + GitLab | helix-deps.yaml + install_upstreams.sh |
-| `mdns` | `ba1d2385` | GitHub + GitLab | helix-deps.yaml + install_upstreams.sh |
-| `middleware` | `6ee9c0ec` | GitHub + GitLab | helix-deps.yaml + install_upstreams.sh |
-| `observability` | `2b8c1633` | GitHub + GitLab | helix-deps.yaml present |
-| `ratelimiter` | `9da442cb` | GitHub + GitLab | helix-deps.yaml + install_upstreams.sh |
-| `recovery` | `58f9b4f9` | GitHub + GitLab | helix-deps.yaml + install_upstreams.sh |
-| `security` | `a388cc44` | GitHub + GitLab | helix-deps.yaml present |
-| `tracker_sdk` | `7afc37aa` | GitHub + GitLab | helix-deps.yaml + install_upstreams.sh |
-| `constitution` | `208e2c8` | universal (HelixConstitution upstream) | adds §11.4.78 CodeGraph mandate |
+| `database` | `d822b33` | GitHub + GitLab | helix-deps.yaml present |
+| `discovery` | `11bb596` | GitHub + GitLab | helix-deps.yaml + install_upstreams.sh; gitlab FF-reconciled 2026-06-03 |
+| `helixqa` | `5112906` | GitHub | HelixDevelopment org; always-track-upstream per §6.AD Q9 waiver; FF to origin/main 2026-06-03 |
+| `http3` | `7ddc6e8` | GitHub + GitLab | helix-deps.yaml + install_upstreams.sh; gitlab FF-reconciled 2026-06-03 |
+| `mdns` | `ba1d2385` | GitHub + GitLab | helix-deps.yaml + install_upstreams.sh (already converged) |
+| `middleware` | `ccf237a` | GitHub + GitLab | helix-deps.yaml + install_upstreams.sh |
+| `observability` | `73bbd1b` | GitHub + GitLab | helix-deps.yaml present; gitlab FF-reconciled 2026-06-03 |
+| `ratelimiter` | `92b01ea` | GitHub + GitLab | helix-deps.yaml + install_upstreams.sh; gitlab FF-reconciled 2026-06-03 |
+| `recovery` | `0eb87cf` | GitHub + GitLab | helix-deps.yaml + install_upstreams.sh |
+| `security` | `16ae574` | GitHub + GitLab | helix-deps.yaml present; gitlab FF-reconciled 2026-06-03 |
+| `tracker_sdk` | `7afc37aa` | GitHub (origin) | already at origin/main (converged) |
+| `constitution` | `d90ab87` | universal (HelixConstitution: github+gitlab+gitflic+gitverse) | **§11.4.113 absolute no-force-push + merge-onto-latest-main mandate** (2026-06-03); converged on all 4 upstreams |
 
 **Internal-to-submodule nested submodules:** `submodules/challenges` had a nested `Panoptic` submodule that was removed via the github cascade merge in Phase 5-debt closure (CONST-051(C) flat-layout enforcement); Challenges now declares Panoptic as a `layout: flat` dependency in its `helix-deps.yaml`.
 
