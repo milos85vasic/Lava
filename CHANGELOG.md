@@ -62,14 +62,15 @@
 - Fresh signed debug + release build with rotated auth pepper, prepared for the §6.AA
   two-stage flow (debug first, release after on-device verification).
 - lava-api-go unchanged this cycle → stays 2.3.23-2323.
-- **Distribution status: DEFERRED.** Version bumped + APKs built, but the §6.Z client
-  device gate (C00/C01) is infra-BLOCKED this cycle — the Pixel_8/API35 emulator failed
-  to reach `boot_completed` across 5 cold-boot attempts (host emulator-boot wedge that
-  developed mid-session; booted fine at 11:35 today; root causes investigated per §6.M,
-  forensics at `.lava-ci-evidence/sixth-law-incidents/2026-06-02-emulator-boot-wedge.json`).
-  Per §6.Z the client is NOT distributed without a green gate; the distribute waits for a
-  bootable gate host. The new api-app (Lava-API-App-0.1.0-1) shipped its debug stage this
-  cycle on independently-solid transferred evidence.
+- **§6.Z: cold-start canary GREEN on a real Samsung Galaxy S23 Ultra (SM-S918B, Android 16)** —
+  both variants install + cold-launch without crash; release MainActivity RESUMED+FOCUSED,
+  fatal=0 (the §6.Z.4 load-bearing check, on the same device class as the 1.2.19 crash).
+  Evidence: `.lava-ci-evidence/2026-06-03-client-1.2.36-1056-canary-device/`. **Documented gap
+  (operator-authorized, not a bluff):** full C00/C01 instrumentation could not run — C00/C01 are
+  `@SdkSuppress(maxSdkVersion=35)` for a documented API-36 Compose/Espresso test-infra crash, the
+  S23 Ultra is API 36, and the API-35 emulator is wedged (§6.AH containerized path OWED). 1.2.35-1055
+  had full C00/C01 green on API-35; the 1.2.36 delta (on-device-API client integration) doesn't
+  change the launch path. Released on the cold-start-canary basis per operator decision 2026-06-03.
 
 ## Lava-Android-1.2.35-1055 / Lava-API-Go-2.3.23-2323 — 2026-06-01 ("Choose your API" two sections; §6.L 69th)
 
