@@ -24,6 +24,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import dagger.hilt.android.AndroidEntryPoint
+import digital.vasic.lava.client.handoff.ApiKeyClient
 import digital.vasic.lava.client.navigation.MobileNavigation
 import digital.vasic.lava.client.platform.OpenFileHandlerImpl
 import digital.vasic.lava.client.platform.OpenLinkHandlerImpl
@@ -165,6 +166,11 @@ open class MainActivity : ComponentActivity() {
                                 // working (probed with success)" the app keeps
                                 // re-prompting.
                                 onExitApp = { finishAffinity() },
+                                // Task 3.6 (2026-06-03): pass the API-key reader so
+                                // the ViewModel can read the loopback key after the
+                                // API app returns. Authority is variant-aware via
+                                // BuildConfig (§6.R: no literal authority string).
+                                apiKeyReader = buildApiKeyReader(),
                             )
                         }
                     } else if (showOnboarding == false) {
@@ -201,6 +207,20 @@ open class MainActivity : ComponentActivity() {
                 OnboardingAction.OnDeviceApiReturned(host = apiHost, port = apiPort),
             )
         }
+    }
+
+    /**
+     * Builds the API-key reader lambda for the onboarding screen.
+     *
+     * The lambda reads the running API app's access key via [ApiKeyClient]
+     * using the variant-aware authority (§6.R: no literal string).
+     * Called once per composition — [ApiKeyClient] is stateless.
+     */
+    private fun buildApiKeyReader(): (String) -> String? {
+        val suffix = if (BuildConfig.DEBUG) ".dev.keyprovider" else ".keyprovider"
+        val authority = BuildConfig.API_RELEASE_PACKAGE + suffix
+        val client = ApiKeyClient(this, authority)
+        return { _ -> client.read()?.key }
     }
 
     @Composable

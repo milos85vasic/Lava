@@ -129,6 +129,15 @@ class OnboardingViewModelTest {
             },
             endpointsRepository = lava.testing.repository.TestEndpointsRepository(),
             apiSelectionEnabled = false, // pre-60th flow preserved for these tests
+            // Task 3.3 (2026-06-03): crossAppLauncher now required (non-nullable).
+            // These tests do not exercise the on-device API flow; a no-op checker
+            // (always returns null = not installed) is sufficient to keep the
+            // existing Welcome → Providers → Configure → Summary assertions intact.
+            crossAppLauncher = lava.applink.CrossAppLauncher(
+                object : lava.applink.PackageChecker {
+                    override fun installedLaunchIntent(pkg: String): Any? = null
+                },
+            ),
         )
     }
 
@@ -565,6 +574,11 @@ class OnboardingViewModelTest {
             endpointsRepository = lava.testing.repository.TestEndpointsRepository(),
             apiSelectionEnabled = false,
             defaultCloudApi = "",
+            crossAppLauncher = lava.applink.CrossAppLauncher(
+                object : lava.applink.PackageChecker {
+                    override fun installedLaunchIntent(pkg: String): Any? = null
+                },
+            ),
         )
     }
 
@@ -728,6 +742,11 @@ class OnboardingViewModelTest {
             // apiSelectionEnabled=true so NextStep from Welcome enters
             // ApiSelection and startApiDiscovery() begins collecting.
             apiSelectionEnabled = true,
+            crossAppLauncher = lava.applink.CrossAppLauncher(
+                object : lava.applink.PackageChecker {
+                    override fun installedLaunchIntent(pkg: String): Any? = null
+                },
+            ),
         )
     }
 

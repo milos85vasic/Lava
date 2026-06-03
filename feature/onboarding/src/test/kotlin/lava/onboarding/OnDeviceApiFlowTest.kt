@@ -7,17 +7,12 @@ import lava.applink.AppLinkContract
 import lava.applink.CrossAppLauncher
 import lava.applink.LaunchDecision
 import lava.applink.PackageChecker
-import lava.auth.api.AuthService
 import lava.common.analytics.AnalyticsTracker
 import lava.credentials.CredentialEncryptor
 import lava.credentials.CredentialsRepository
 import lava.credentials.ProviderConfigRepository
 import lava.credentials.ProviderCredentialManager
 import lava.data.api.service.ConnectionService
-import lava.database.dao.ClonedProviderDao
-import lava.database.dao.ProviderConfigDao
-import lava.database.entity.ClonedProviderEntity
-import lava.database.entity.ProviderConfigEntity
 import lava.models.settings.Endpoint
 import lava.sdk.api.MirrorUrl
 import lava.sdk.api.PluginConfig
@@ -193,9 +188,14 @@ class OnDeviceApiFlowTest {
             connectionService = connectionService,
             endpointsRepository = endpointsRepository,
             apiSelectionEnabled = true,
+            // crossAppLauncher is now non-nullable (not a function type, so Hilt
+            // can inject it); tests pass a real CrossAppLauncher with a fake checker.
             crossAppLauncher = launcher,
-            apiKeyReader = keyReader(apiKey),
-        )
+        ).also { vm ->
+            // apiKeyReader cannot be injected via Hilt (Kotlin function types are not
+            // Dagger-injectable). Set via setApiKeyReader() after construction.
+            vm.setApiKeyReader(keyReader(apiKey))
+        }
     }
 
     // ── VM-CONTRACT: LaunchOnDeviceApi → correct side effect ────────────────

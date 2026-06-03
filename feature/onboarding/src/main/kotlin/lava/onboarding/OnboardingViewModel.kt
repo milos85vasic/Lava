@@ -78,20 +78,27 @@ class OnboardingViewModel @Inject constructor(
     // binding in production (via app-side CloudApiModule).
     @javax.inject.Named("defaultCloudApi")
     private val defaultCloudApi: String = "",
-    // Task 3.3 (2026-06-03): cross-app launch decision + key-reader seam.
+    // Task 3.3 (2026-06-03): cross-app launch decision.
     // [crossAppLauncher] consults PackageChecker to decide whether to launch
     // the API app or redirect to the Play Store.
     // Production Hilt binding provided by OnboardingAppLinkModule in :app
     // (same pattern as CloudApiModule for @Named("defaultCloudApi")).
-    // Kotlin default (null) keeps the existing pre-3.3 test call sites
-    // (OnboardingViewModelTest, CloudApiDefaultsTest) that construct the
-    // VM without these params compiling without changes.
-    private val crossAppLauncher: CrossAppLauncher? = null,
-    // [apiKeyReader] is a function seam (authority: String) -> key: String?
-    // Tests pass a lambda; production reads via ApiKeyClient.
-    // Kotlin default (null) keeps existing test call sites compiling.
-    private val apiKeyReader: ((authority: String) -> String?)? = null,
+    // Tests pass a CrossAppLauncher wrapping a fake PackageChecker directly.
+    // Note: crossAppLauncher is non-nullable + @Inject-able (not a Kotlin
+    // function type); Hilt can provide CrossAppLauncher directly.
+    private val crossAppLauncher: CrossAppLauncher,
 ) : ViewModel(), ContainerHost<OnboardingState, OnboardingSideEffect> {
+    // [apiKeyReader] is a function seam (authority: String) -> key: String?
+    // Cannot be injected via Hilt (function types are not Dagger-injectable).
+    // Production: set via [setApiKeyReader] from OnboardingScreen/app context.
+    // Tests: set directly before calling perform(OnDeviceApiReturned).
+    // Null means "no key reader configured" — probe still runs, key is omitted.
+    private var apiKeyReader: ((authority: String) -> String?)? = null
+
+    /** Called by [OnboardingScreen] (or tests) to wire the key-reader seam. */
+    fun setApiKeyReader(reader: ((authority: String) -> String?)?) {
+        apiKeyReader = reader
+    }
     private val logger = loggerFactory.get("OnboardingViewModel")
 
     /** Tracks the in-flight discovery flow collection so we can cancel + restart. */

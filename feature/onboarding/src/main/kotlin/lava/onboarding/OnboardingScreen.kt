@@ -18,12 +18,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import lava.applink.AppLinkContract
 import lava.applink.LaunchDecision
 import lava.onboarding.steps.ApiSelectionStep
 import lava.onboarding.steps.ConfigureStep
@@ -38,10 +38,22 @@ fun OnboardingScreen(
     viewModel: OnboardingViewModel,
     onComplete: () -> Unit,
     onExitApp: () -> Unit,
+    // Task 3.5/3.6 (2026-06-03): optional key-reader seam. Production
+    // callers (MainActivity) pass an ApiKeyClient-backed lambda; the
+    // default null leaves apiKeyReader unwired (key is omitted but probe
+    // still runs — graceful degradation per spec §7).
+    // The lambda type is a pure Kotlin function — no import from :app needed.
+    apiKeyReader: ((authority: String) -> String?)? = null,
     modifier: Modifier = Modifier,
 ) {
     val state by viewModel.collectAsState()
     val context = LocalContext.current
+
+    // Wire the key-reader into the ViewModel once on first composition.
+    // Uses Unit as the key so this fires exactly once per screen lifetime.
+    LaunchedEffect(Unit) {
+        viewModel.setApiKeyReader(apiKeyReader)
+    }
 
     // Task 3.5 (2026-06-03): track whether the API app is installed so
     // ApiSelectionStep can show the correct button label. Updated in the
