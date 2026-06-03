@@ -32,4 +32,7 @@
 
     <string name="api_screen_running_explainer">The Lava API is running on this device. Other devices on the same Wi‑Fi network can discover it automatically and use it as their Lava backend — they just need the access key shown above.</string>
     <string name="api_screen_stopped_explainer">Start the API to serve other devices on your network. While it is running, this device acts as the Lava backend that phones and tablets on the same Wi‑Fi network can connect to.</string>
+
+    <string name="api_screen_back_to_client">Back to Lava client</string>
+    <string name="api_screen_open_client">Open Lava client</string>
 </resources>

@@ -223,7 +223,7 @@ private fun OpenClientButton(
     launchedFromClient: Boolean,
     onAction: (ApiControlAction) -> Unit,
 ) {
-    val label = if (launchedFromClient) "Back to Lava client" else "Open Lava client"
+    val label = stringResource(if (launchedFromClient) R.string.api_screen_back_to_client else R.string.api_screen_open_client)
     Button(
         modifier = Modifier
             .testTag(TAG_OPEN_CLIENT)

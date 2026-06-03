@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.ContentValues
 import androidx.test.core.app.ApplicationProvider
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -88,9 +89,9 @@ class ApiKeyProviderTest {
         provider.attachInfoForTest(ApplicationProvider.getApplicationContext())
         val uri = provider.contentUri()
 
-        // insert, update, delete must return 0 / null as the spec says.
-        assertEquals(null, provider.getType(uri))
-        assertEquals(uri, provider.insert(uri, ContentValues()))
+        // insert, update, delete must return null / 0 per the ContentProvider contract.
+        assertNull(provider.getType(uri))
+        assertNull(provider.insert(uri, ContentValues()))
         assertEquals(0, provider.update(uri, ContentValues(), null, null))
         assertEquals(0, provider.delete(uri, null, null))
     }

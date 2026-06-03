@@ -98,7 +98,7 @@ class ApiKeyProvider : ContentProvider() {
 
     override fun getType(uri: Uri): String? = null
 
-    override fun insert(uri: Uri, values: ContentValues?): Uri? = uri
+    override fun insert(uri: Uri, values: ContentValues?): Uri? = null
 
     override fun update(
         uri: Uri,

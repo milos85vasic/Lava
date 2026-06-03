@@ -74,7 +74,7 @@ class ApiControlViewModel @Inject constructor(
      */
     var clientPackage: String = AppLinkContract.CLIENT_RELEASE_PACKAGE
 
-    private val launcher: CrossAppLauncher get() = CrossAppLauncher(packageChecker)
+    private val launcher: CrossAppLauncher = CrossAppLauncher(packageChecker)
 
     override val container: Container<ApiControlState, ApiControlSideEffect> = container(
         initialState = controller.state.value,
@@ -137,14 +137,10 @@ class ApiControlViewModel @Inject constructor(
     /**
      * Programmatic start triggered when the launch intent carries
      * [AppLinkContract.EXTRA_START_API]=true. Promotes the foreground Service
-     * then drives the shared controller up — identical to [onStart] in effect.
-     * The live [ApiControlState.Running.port] is subsequently readable by
-     * [lava.api.app.handoff.ApiKeyProvider] so the client can auto-connect.
+     * then drives the shared controller up — delegates to [onStart] so any
+     * future error-handling or telemetry added there applies here too.
      */
-    private fun onStartRequested() = intent {
-        serviceStarter.ensureRunning()
-        controller.start()
-    }
+    private fun onStartRequested() = onStart()
 
     /**
      * "Back to Lava client" / "Open Lava client" tapped. Uses
@@ -165,7 +161,7 @@ class ApiControlViewModel @Inject constructor(
 
     private fun buildReturnExtras(): Map<String, String> =
         if (launchedFromClient) {
-            val port = (container.stateFlow.value as? ApiControlState.Running)?.port
+            val port = (controller.state.value as? ApiControlState.Running)?.port
             buildMap {
                 put(AppLinkContract.EXTRA_API_HOST, AppLinkContract.LOOPBACK_HOST)
                 if (port != null) put(AppLinkContract.EXTRA_API_PORT, port.toString())
