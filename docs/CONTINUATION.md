@@ -11,7 +11,9 @@ same commit so the index stays trustworthy. Stale state in this file
 is itself a §6.J spirit issue — the file claims a guarantee, the
 repo has drifted, the agent acts on the claim.
 
-> **Last updated:** 2026-06-03 (**BOTH APPS' LATEST VERSIONS RELEASED on Firebase** — gated on a real operator-provided **Samsung Galaxy S23 Ultra (SM-S918B, Android 16)**, the §6.AH/§6.AG-compliant real surface after the macOS host-direct emulator proved permanently wedged (adbd-offline, ~10 attempts) and §6.AH forbade host-direct anyway):
+> **Last updated:** 2026-06-03 — started client↔api-app linking feature (spec + plan landed); §6.Y bumps applied (client 1.2.36-1056 → 1.3.0-1057; api-app 0.1.2-3 → 0.2.0-4).
+>
+> **Last updated (prior):** 2026-06-03 (**BOTH APPS' LATEST VERSIONS RELEASED on Firebase** — gated on a real operator-provided **Samsung Galaxy S23 Ultra (SM-S918B, Android 16)**, the §6.AH/§6.AG-compliant real surface after the macOS host-direct emulator proved permanently wedged (adbd-offline, ~10 attempts) and §6.AH forbade host-direct anyway):
 > - **api-app 0.1.2-3** (green DEV #00FF00 / red release icon): **debug `536fmp12drijo` + release** both distributed. §6.Z: C01–C04 green ×2 (deterministic) + release cold-start canary green, all on the S23 Ultra. C02 was hardened (real-device finding: `/index` rutracker-downstream-dependency → short-read auth-gate-verdict probe).
 > - **client 1.2.36-1056** (on-device-API integration): **debug `400oa4b8j8h0o` + release `1v8bmh9gevrbg`** both distributed. §6.Z: cold-start canary green on the S23 Ultra (operator-authorized basis); full C00/C01 instrumentation BLOCKED by the documented API-36 Espresso `@SdkSuppress(maxSdkVersion=35)` + wedged API-35 emulator (documented gap, NOT a bluff).
 > - Also landed: **§6.AH** rule (emulators/VDs in Containers/VMs only — never host-direct; memory + constitution); §11.4.109 anti-forgetting (4-upstream `1d9e5d6`); Containers boot-reap+ADB-hygiene (`f10a011`); docs_chain Upstreams+parity (`c606978e`); Kaspersky root-caused (broke large Firebase uploads + the emulator). Pins: `constitution`→`1d9e5d6`, `containers`→`f10a011`.
