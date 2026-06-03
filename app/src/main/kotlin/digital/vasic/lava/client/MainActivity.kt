@@ -30,6 +30,7 @@ import digital.vasic.lava.client.platform.OpenLinkHandlerImpl
 import digital.vasic.lava.client.platform.ShareLinkHandlerImpl
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
+import lava.applink.AppLinkContract
 import lava.designsystem.platform.LocalPlatformType
 import lava.designsystem.platform.PlatformType
 import lava.logger.api.LoggerFactory
@@ -39,7 +40,9 @@ import lava.models.settings.Theme
 import lava.navigation.DeepLinks
 import lava.navigation.LocalDeepLinks
 import lava.navigation.rememberNavigationController
+import lava.onboarding.OnboardingAction
 import lava.onboarding.OnboardingScreen
+import lava.onboarding.OnboardingViewModel
 import lava.rating.RatingDialog
 import lava.securestorage.PreferencesStorage
 import lava.ui.platform.LocalLoggerFactory
@@ -61,6 +64,14 @@ open class MainActivity : ComponentActivity() {
     lateinit var preferencesStorage: PreferencesStorage
 
     private val viewModel: MainViewModel by viewModels()
+
+    // Task 3.6 (2026-06-03): OnboardingViewModel held at Activity level so
+    // onNewIntent can route EXTRA_API_HOST + EXTRA_API_PORT back to it.
+    // `by viewModels()` keeps the VM in the Activity's ViewModelStore — the
+    // same instance hiltViewModel() inside setContent resolves (both use the
+    // same ViewModelStoreOwner: this Activity). MainActivity is declared
+    // singleInstance in the manifest, so onNewIntent fires reliably.
+    private val onboardingViewModel: OnboardingViewModel by viewModels()
 
     private val deepLinks = DeepLinks()
 
@@ -172,8 +183,24 @@ open class MainActivity : ComponentActivity() {
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        loggerFactory.get("MainActivity").d { "New intent: $intent" }
+        val logger = loggerFactory.get("MainActivity")
+        logger.d { "New intent: $intent" }
         deepLinks.deepLink = intent.data
+
+        // Task 3.6 (2026-06-03): API-app return intent — carry the loopback
+        // host + port to the OnboardingViewModel so it can probe + persist.
+        // The API app sends EXTRA_API_HOST + EXTRA_API_PORT when the user
+        // taps "Back to Lava client" after starting the on-device API.
+        // Only route if BOTH extras are present (defensive — ordinary deeplinks
+        // will not carry these keys).
+        val apiHost = intent.getStringExtra(AppLinkContract.EXTRA_API_HOST)
+        val apiPort = intent.getIntExtra(AppLinkContract.EXTRA_API_PORT, -1)
+        if (apiHost != null && apiPort > 0) {
+            logger.d { "API-app return: host=$apiHost port=$apiPort — routing to OnboardingViewModel" }
+            onboardingViewModel.perform(
+                OnboardingAction.OnDeviceApiReturned(host = apiHost, port = apiPort),
+            )
+        }
     }
 
     @Composable
