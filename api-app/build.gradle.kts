@@ -44,8 +44,8 @@ android {
 
     defaultConfig {
         applicationId = "digital.vasic.lava.api"
-        versionCode = 2
-        versionName = "0.1.1"
+        versionCode = 3
+        versionName = "0.1.2"
         // EncryptedSharedPreferences (androidx.security-crypto) requires API 23+
         // — the per-install auth-key store ([ApiKeyStore]) relies on it. The
         // standalone API-server app reasonably targets API 23+ (the client app

@@ -1,4 +1,18 @@
 # Changelog
+## Lava-API-App-0.1.2-3 — 2026-06-03 (DEV launcher background → green, like the client DEV)
+
+**Previous published:** Lava-API-App-0.1.1-2 (debug, 2026-06-03).
+
+- **Debug ("Lava API DEV") launcher background is now GREEN (#00FF00)** — matching the client
+  DEV convention (a `src/debug` adaptive-icon override → green vector `@drawable/ic_launcher_background`,
+  Lava-logo foreground), so DEV is visually distinct from release at a glance.
+- **Release ("Lava API") keeps the current RED background** (main `mipmap` PNG) — unchanged.
+- Icon background hint only; no functional change vs 0.1.1-2.
+- §6.Z: DEBUG runtime = transferred item-1 C01–C04 green ×2; green bg verified by aapt2 +
+  operator visual check. Fresh gate + RELEASE R8 canary still emulator-BLOCKED (adbd-offline
+  wedge; forensics `2026-06-03-emulator-boot-offline.json`) → **RELEASE HELD**. Debug evidence:
+  `.lava-ci-evidence/distribute-changelog/firebase-app-distribution-api-app/0.1.2-3-test-evidence.md`.
+
 ## Lava-API-App-0.1.1-2 — 2026-06-03 (proper launcher icon + DEV debug name)
 
 **Previous published:** Lava-API-App-0.1.0-1 (debug, 2026-06-02).
