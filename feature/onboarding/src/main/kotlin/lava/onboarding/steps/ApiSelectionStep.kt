@@ -73,6 +73,12 @@ fun ApiSelectionStep(
     cloudError: String? = null,
     onCloudInputChange: (String) -> Unit = {},
     onAddCloud: () -> Unit = {},
+    // Task 3.4 (2026-06-03): "On this device" section.
+    // Defaults keep existing call sites (Challenge26, Challenge30, etc.)
+    // compiling without changes — matches the existing default-param
+    // convention in this file (cloudInput, cloudDefaults, etc.).
+    onLaunchOnDeviceApi: () -> Unit = {},
+    onDeviceApiInstalled: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
     Surface(
@@ -178,7 +184,34 @@ fun ApiSelectionStep(
 
             Spacer(Modifier.height(28.dp))
 
-            // ── Section 2: Cloud / remote server ────────────────────────
+            // ── Section 2: On this device ────────────────────────────────
+            // §6.Q: plain Column children — NOT a LazyColumn inside a
+            // verticalScroll parent. The section has exactly one Button.
+            Text(
+                text = "On this device",
+                style = AppTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.semantics { contentDescription = "api-section-ondevice" },
+            )
+            Spacer(Modifier.height(8.dp))
+            Text(
+                text = "Run the Lava API app directly on this Android device for a zero-config, " +
+                    "mDNS-free local connection.",
+                style = AppTheme.typography.bodyMedium,
+                color = AppTheme.colors.onSurfaceVariant,
+            )
+            Spacer(Modifier.height(12.dp))
+            Button(
+                text = if (onDeviceApiInstalled) "Open Lava API app" else "Install Lava API app",
+                onClick = onLaunchOnDeviceApi,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .semantics { contentDescription = "api-ondevice-launch" },
+            )
+
+            Spacer(Modifier.height(28.dp))
+
+            // ── Section 3: Cloud / remote server ────────────────────────
             Text(
                 text = "Cloud / remote server",
                 style = AppTheme.typography.titleMedium,
