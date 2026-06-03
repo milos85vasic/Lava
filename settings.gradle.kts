@@ -21,6 +21,7 @@ rootProject.name = "Lava"
 include(":app")
 include(":api-app")
 include(":core:apiengine")
+include(":core:applink")
 include(":core:auth:api")
 include(":core:auth:impl")
 include(":core:common")
