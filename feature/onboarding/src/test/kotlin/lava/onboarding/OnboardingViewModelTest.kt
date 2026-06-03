@@ -804,19 +804,30 @@ class OnboardingViewModelTest {
                     val apis = s.discoveredApis.filterIsInstance<lava.models.settings.Endpoint.GoApi>()
                     if (apis.size > discovered.size) discovered = apis
                 }
-                // OnboardingViewModel.startApiDiscovery passes hit.host through
-                // verbatim (it carries "ip:port"), so match the full string.
-                val androidApi = discovered.firstOrNull { it.host == "192.0.2.10:8443" }
-                val hostApi = discovered.firstOrNull { it.host == "192.0.2.20:8443" }
+                // Bug A regression (operator-reported 2026-06-04): startApiDiscovery
+                // MUST strip the embedded ":port" from the legacy "ip:port"
+                // DiscoveredEndpoint.host so GoApi.host is the BARE address. Before
+                // the fix this test asserted `host == "192.0.2.10:8443"` — it had
+                // encoded the bug as correct, which is why "API did not respond"
+                // shipped: GoApi.host="ip:port" makes ConnectionService.connectTarget()
+                // hand InetSocketAddress an invalid host and the TCP probe fails.
+                val androidApi = discovered.firstOrNull { it.host == "192.0.2.10" }
+                val hostApi = discovered.firstOrNull { it.host == "192.0.2.20" }
 
                 assertNotNull(
-                    "the android-platform API MUST appear in the discovered list (saw ${discovered.size})",
+                    "the android-platform API MUST appear in the discovered list with a BARE host " +
+                        "(port stripped); saw hosts=${discovered.map { it.host }}",
                     androidApi,
                 )
                 assertNotNull(
-                    "the host API MUST appear in the discovered list (saw ${discovered.size})",
+                    "the host API MUST appear in the discovered list with a BARE host; " +
+                        "saw hosts=${discovered.map { it.host }}",
                     hostApi,
                 )
+                // Explicit no-embedded-port regression assertion: the host is the
+                // bare IP and the port lives in the separate GoApi.port field.
+                assertEquals("on-device API host must be the bare IP", "192.0.2.10", androidApi!!.host)
+                assertEquals("on-device API port must be the separate field", 8443, androidApi.port)
                 assertEquals(
                     "the on-device API's platform TXT attribute MUST be carried through to the Endpoint",
                     "android",

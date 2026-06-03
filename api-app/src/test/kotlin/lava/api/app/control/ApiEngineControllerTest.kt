@@ -85,6 +85,39 @@ class ApiEngineControllerTest {
         assertEquals(1, advertiser.registerCalls)
     }
 
+    // Bug B regression (operator-reported 2026-06-04): re-launching the API app
+    // (e.g. tapping "Open Lava API app" from the client while it is already
+    // serving) MUST surface the live Running state, NOT bind the listener a
+    // second time — a second bind crashes with "listen 0.0.0.0:8443; bind:
+    // address already in use". start() is idempotent: a redundant start on a
+    // Running engine is a no-op that neither re-binds nor re-advertises.
+    @Test
+    fun `start is idempotent — redundant start does not re-bind or re-advertise`() = runTest {
+        val (c, advertiser, _) = controller()
+
+        c.start()
+        assertTrue("first start → Running", c.state.value is ApiControlState.Running)
+        assertEquals("first start registers exactly once", 1, advertiser.registerCalls)
+
+        // Redundant start while already Running (the relaunch path).
+        c.start()
+
+        // PRIMARY: state stays Running (the UI shows the live engine).
+        assertTrue(
+            "state MUST stay Running after a redundant start; was ${c.state.value}",
+            c.state.value is ApiControlState.Running,
+        )
+        // The load-bearing signal: NO second bind/advertise. register() runs only
+        // from onStarted() after a real engine.start(); registerCalls staying 1
+        // proves the second start() short-circuited before re-binding (which is
+        // the 'address already in use' crash this guard prevents).
+        assertEquals(
+            "a redundant start MUST NOT re-bind/re-advertise (idempotent)",
+            1,
+            advertiser.registerCalls,
+        )
+    }
+
     @Test
     fun `stop emits Stopped and unregisters mDNS`() = runTest {
         val (c, advertiser, _) = controller()

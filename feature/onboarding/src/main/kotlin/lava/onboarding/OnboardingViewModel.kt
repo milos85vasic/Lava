@@ -184,18 +184,28 @@ class OnboardingViewModel @Inject constructor(
         // Collect each DiscoveredEndpoint into the running list.
         discoveryJob = discoveryService.discover()
             .onEach { hit ->
+                // `hit.host` is the legacy DiscoveredEndpoint "ip:port" string
+                // (LocalNetworkDiscoveryServiceImpl emits "$ip:$port"); GoApi
+                // carries host + port SEPARATELY. Strip the embedded port —
+                // matching DiscoverLocalEndpointsUseCase — otherwise GoApi.host
+                // becomes "ip:port" and ConnectionService.connectTarget() hands
+                // InetSocketAddress an invalid host, so the TCP probe fails and
+                // the user sees "API did not respond" for a perfectly reachable
+                // on-device API (operator-reported 2026-06-04). IPv6 keeps its
+                // colons: only the trailing ":port" is removed.
+                val bareHost = hit.host.substringBeforeLast(":").ifEmpty { hit.host }
                 // Sub-project 2: carry the platform/storage TXT attributes onto
                 // the Endpoint so the rendered list can label an on-device
                 // (platform=android) API distinctly from a host instance.
                 val endpoint = Endpoint.GoApi(
-                    host = hit.host,
+                    host = bareHost,
                     port = hit.port,
                     platform = hit.platform,
                     storage = hit.storage,
                 )
                 intent {
                     val existing = state.discoveredApis
-                    if (existing.none { it is Endpoint.GoApi && it.host == hit.host && it.port == hit.port }) {
+                    if (existing.none { it is Endpoint.GoApi && it.host == bareHost && it.port == hit.port }) {
                         reduce { state.copy(discoveredApis = existing + endpoint) }
                     }
                 }

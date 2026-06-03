@@ -50,6 +50,19 @@ class ApiEngineController(
      * [ApiControlState.Error] and does NOT advertise.
      */
     suspend fun start() {
+        // Idempotent: if the embed is already serving (Running) or a start is
+        // in flight (Starting), do NOT bind the listener again — a second
+        // bind fails with "listen 0.0.0.0:<port>; bind: address already in
+        // use" and would crash a perfectly healthy engine. This is the
+        // operator-reported bug from re-launching the API app (e.g. tapping
+        // "Open Lava API app" from the client) while it was already running:
+        // the relaunch MUST surface the live Running state, never re-start.
+        // Stopped/Error fall through and (re)start normally.
+        val current = _state.value
+        if (current is ApiControlState.Running || current is ApiControlState.Starting) {
+            return
+        }
+
         _state.value = ApiControlState.Starting
 
         val key = keyStore.getOrCreate()
