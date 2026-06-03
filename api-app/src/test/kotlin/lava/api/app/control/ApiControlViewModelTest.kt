@@ -73,11 +73,15 @@ class ApiControlViewModelTest {
         port = 8443,
     )
 
+    private class FakePackageChecker : lava.applink.PackageChecker {
+        override fun installedLaunchIntent(pkg: String): Any? = pkg // always "installed"
+    }
+
     private fun viewModel(
         controller: ApiEngineController = controller(),
         starter: RecordingServiceStarter = RecordingServiceStarter(),
     ): Pair<ApiControlViewModel, RecordingServiceStarter> =
-        ApiControlViewModel(controller, starter) to starter
+        ApiControlViewModel(controller, starter, FakePackageChecker()) to starter
 
     // CHALLENGE — primary assertion on emitted Running state (user-visible).
     @Test

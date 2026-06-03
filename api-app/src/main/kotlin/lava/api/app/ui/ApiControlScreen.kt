@@ -94,6 +94,10 @@ fun ApiControlScreen(
                     scope.launch { snackbarHostState.showSnackbar(keyCopiedMsg) }
                 is ApiControlSideEffect.ShowError ->
                     scope.launch { snackbarHostState.showSnackbar(effect.message) }
+                // LaunchClient is handled in MainActivity (needs startActivity context);
+                // the screen only observes it for completeness — the Activity's
+                // LaunchedEffect / collectLatest handles the navigation.
+                is ApiControlSideEffect.LaunchClient -> Unit
             }
         }
     }

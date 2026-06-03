@@ -18,4 +18,21 @@ sealed interface ApiControlAction {
 
     /** "Copy" tapped on the access key — request a clipboard copy + confirmation. */
     data class CopyKeyClicked(val key: String) : ApiControlAction
+
+    /**
+     * Auto-start requested programmatically — triggered by [lava.api.app.MainActivity]
+     * when the launch intent carries [lava.applink.AppLinkContract.EXTRA_START_API]=true.
+     * Behaves identically to [StartClicked] but is dispatched by the Activity, not
+     * the user. Separated so tests can assert on the exact dispatch path without
+     * ambiguity.
+     */
+    data object StartRequested : ApiControlAction
+
+    /**
+     * "Back to Lava client" / "Open Lava client" button tapped. The ViewModel
+     * uses [lava.applink.CrossAppLauncher] to decide whether to launch the
+     * installed client or redirect to the Play Store, then posts a
+     * [ApiControlSideEffect.LaunchClient] side effect the Activity executes.
+     */
+    data object OpenClient : ApiControlAction
 }

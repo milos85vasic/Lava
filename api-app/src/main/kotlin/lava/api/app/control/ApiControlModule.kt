@@ -17,6 +17,8 @@ import lava.api.app.service.MdnsAdvertiser
 import lava.api.app.service.NsdMdnsAdvertiser
 import lava.apiengine.ApiEngine
 import lava.apiengine.NativeApiEngine
+import lava.applink.PackageChecker
+import lava.applink.PackageManagerChecker
 import javax.inject.Singleton
 
 /**
@@ -43,6 +45,11 @@ interface ApiControlModule {
     companion object {
         private const val SQLITE_FILE = "lava-api.db"
         private const val DEV_SUFFIX = ".dev"
+
+        @Provides
+        @Singleton
+        fun providePackageChecker(@ApplicationContext context: Context): PackageChecker =
+            PackageManagerChecker(context)
 
         @Provides
         @Singleton

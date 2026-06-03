@@ -17,9 +17,16 @@ interface PackageChecker {
 }
 
 /**
- * Real impl. NOTE: getLaunchIntentForPackage returns null on API 30+ for an
- * INSTALLED app unless the caller declares a `<queries>` entry for it — both
- * app manifests MUST declare the counterpart package (see Tasks 2.3 / 3.6).
+ * Real impl backed by [android.content.pm.PackageManager].
+ *
+ * NOTE: getLaunchIntentForPackage returns null on API 30+ for an INSTALLED app
+ * unless the caller declares a `<queries>` entry for it — both app manifests
+ * MUST declare the counterpart package (see Tasks 2.3 / 3.6).
+ *
+ * Constructed via a `@Provides` factory in the consuming app's Hilt module
+ * (ApiControlModule) rather than `@Inject constructor` so that core:applink
+ * stays free of Hilt annotations and the javax.inject dependency is not
+ * forced onto the shared library.
  */
 class PackageManagerChecker(private val context: Context) : PackageChecker {
     override fun installedLaunchIntent(pkg: String): Any? =
