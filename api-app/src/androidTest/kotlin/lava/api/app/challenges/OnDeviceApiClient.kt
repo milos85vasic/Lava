@@ -44,6 +44,19 @@ class OnDeviceApiClient(
 
     private val client: OkHttpClient by lazy { buildTrustingClient() }
 
+    /**
+     * A sibling client with a SHORT read timeout, used to observe the auth
+     * GATE VERDICT without waiting on a downstream third-party fetch. The gate
+     * decides (401-vs-pass) BEFORE any rutracker call, so a rejecting gate
+     * returns 401 in well under a second; a SHORT read timeout therefore
+     * distinguishes "gate rejected (fast 401)" from "gate accepted, handler now
+     * doing downstream work" (read times out). connectTimeout stays generous for
+     * the cold-serve TLS handshake; only the response-read window is short.
+     */
+    private val shortReadClient: OkHttpClient by lazy {
+        client.newBuilder().readTimeout(SHORT_READ_TIMEOUT_SECONDS, TimeUnit.SECONDS).build()
+    }
+
     /** Issues GET [path] with no auth header. Caller closes the [Response]. */
     fun get(path: String): Response =
         client.newCall(Request.Builder().url(baseUrl + path).get().build()).execute()
@@ -54,6 +67,23 @@ class OnDeviceApiClient(
      */
     fun getWithKey(path: String, authKey: String, fieldName: String): Response =
         client.newCall(
+            Request.Builder()
+                .url(baseUrl + path)
+                .header(fieldName, authKey)
+                .get()
+                .build(),
+        ).execute()
+
+    /**
+     * Like [getWithKey] but with a SHORT read timeout — for asserting the auth
+     * GATE VERDICT only. Throws [java.net.SocketTimeoutException] when the gate
+     * ACCEPTS the key and the request proceeds into a downstream handler that
+     * does not respond within the short window (e.g. a rutracker-backed route on
+     * a device where rutracker is unreachable). A REJECTING gate instead returns
+     * 401 well within the window, so the caller distinguishes the two.
+     */
+    fun getWithKeyShortRead(path: String, authKey: String, fieldName: String): Response =
+        shortReadClient.newCall(
             Request.Builder()
                 .url(baseUrl + path)
                 .header(fieldName, authKey)
@@ -95,5 +125,11 @@ class OnDeviceApiClient(
         // Matches lava-api-go/internal/mobile/tls.go certFileName.
         const val CERT_FILE_NAME = "lava-embed-cert.pem"
         const val LOOPBACK = "127.0.0.1"
+
+        // Short response-read window for the gate-verdict probe. A rejecting
+        // auth gate returns 401 sub-second (the gate decides before any
+        // downstream call), so 6s cleanly separates "fast 401 = rejected" from
+        // "no fast 401 = accepted, handler now doing downstream work".
+        const val SHORT_READ_TIMEOUT_SECONDS = 6L
     }
 }
