@@ -46,4 +46,6 @@ dependencies {
     testImplementation(libs.mockk)
     testImplementation(libs.robolectric)
     testImplementation(libs.okhttp.core)
+    // Task 3.3 (2026-06-03): MockWebServer for real probe in OnDeviceApiFlowTest.
+    testImplementation(libs.okhttp.mockwebserver)
 }

@@ -8,6 +8,8 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
+import lava.applink.AppLinkContract
+import lava.applink.CrossAppLauncher
 import lava.auth.api.AuthService
 import lava.common.analytics.AnalyticsTracker
 import lava.credentials.ProviderCredentialManager
@@ -76,6 +78,19 @@ class OnboardingViewModel @Inject constructor(
     // binding in production (via app-side CloudApiModule).
     @javax.inject.Named("defaultCloudApi")
     private val defaultCloudApi: String = "",
+    // Task 3.3 (2026-06-03): cross-app launch decision + key-reader seam.
+    // [crossAppLauncher] consults PackageChecker to decide whether to launch
+    // the API app or redirect to the Play Store.
+    // Production Hilt binding provided by OnboardingAppLinkModule in :app
+    // (same pattern as CloudApiModule for @Named("defaultCloudApi")).
+    // Kotlin default (null) keeps the existing pre-3.3 test call sites
+    // (OnboardingViewModelTest, CloudApiDefaultsTest) that construct the
+    // VM without these params compiling without changes.
+    private val crossAppLauncher: CrossAppLauncher? = null,
+    // [apiKeyReader] is a function seam (authority: String) -> key: String?
+    // Tests pass a lambda; production reads via ApiKeyClient.
+    // Kotlin default (null) keeps existing test call sites compiling.
+    private val apiKeyReader: ((authority: String) -> String?)? = null,
 ) : ViewModel(), ContainerHost<OnboardingState, OnboardingSideEffect> {
     private val logger = loggerFactory.get("OnboardingViewModel")
 
@@ -539,28 +554,82 @@ class OnboardingViewModel @Inject constructor(
 
     fun hasConfiguredProvider(): Boolean = container.stateFlow.value.configs.values.any { it.configured }
 
-    // ── Task 3.3 stubs (2026-06-03) — full implementation added in Task 3.3 ──
+    // ── Task 3.3 (2026-06-03): "On this device" handlers ──────────────────
 
     /**
      * User tapped "On this device". Consults [CrossAppLauncher] for the API
-     * package: installed → emit [OnboardingSideEffect.LaunchApiApp]; absent →
-     * emit [OnboardingSideEffect.OpenPlayStore].
-     * Full implementation in Task 3.3.
+     * app's variant-aware package (installed → [OnboardingSideEffect.LaunchApiApp];
+     * absent → [OnboardingSideEffect.OpenPlayStore]).
+     *
+     * The target package is the API app's variant-aware id (release or .dev);
+     * the release package is always the non-.dev id (Play Store listing).
+     * Both values come from [AppLinkContract] / BuildConfig — §6.R: no literals.
+     *
+     * §6.J anti-bluff: primary assertion in OnDeviceApiFlowTest is on the
+     * emitted SideEffect type + its decision fields (user-visible outcome).
      */
     internal fun onLaunchOnDeviceApi() = intent {
-        // Stub — real CrossAppLauncher wiring added in Task 3.3.
+        val launcher = crossAppLauncher ?: run {
+            logger.d { "onLaunchOnDeviceApi: crossAppLauncher not wired (no-op)" }
+            return@intent
+        }
+        val releasePackage = AppLinkContract.API_RELEASE_PACKAGE
+        // §6.R: client release package comes from AppLinkContract.CLIENT_RELEASE_PACKAGE
+        // which reads BuildConfig.CLIENT_RELEASE_PACKAGE — never a literal here.
+        val decision = launcher.decideLaunch(
+            targetPackage = releasePackage,
+            releasePackage = releasePackage,
+            extras = mapOf(
+                AppLinkContract.EXTRA_START_API to "true",
+                AppLinkContract.EXTRA_RETURN_TO to AppLinkContract.CLIENT_RELEASE_PACKAGE,
+            ),
+        )
+        when (decision) {
+            is lava.applink.LaunchDecision.Launch ->
+                postSideEffect(OnboardingSideEffect.LaunchApiApp(decision))
+            is lava.applink.LaunchDecision.StoreRedirect ->
+                postSideEffect(
+                    OnboardingSideEffect.OpenPlayStore(
+                        marketUri = decision.marketUri,
+                        webUri = decision.webUri,
+                    ),
+                )
+        }
     }
 
     /**
      * The API app returned with loopback [host] + [port]. Reads the key via
-     * the injected key-reader seam, builds [lava.models.settings.Endpoint.GoApi],
-     * and funnels into the EXISTING [onSelectApi] probe → persist → advance
-     * pipeline (§6.J anti-bluff: no parallel path).
-     * Full implementation in Task 3.3.
+     * the [apiKeyReader] seam (null = engine not running or not installed →
+     * graceful no-op), builds [Endpoint.GoApi], and funnels into the EXISTING
+     * [onSelectApi] probe → persist → advance pipeline.
+     *
+     * §6.J anti-bluff: reuses [onSelectApi] end-to-end — NO parallel path.
+     * The key is read but not stored in [Endpoint.GoApi] (the model has no
+     * key field); it serves as a liveness signal that the engine is running
+     * and accessible before attempting the probe. If the key is null
+     * (engine not started), we proceed anyway and let the probe fail
+     * naturally — [ApiConnectivityState.Failure] + "Try again" affords recovery.
      */
     internal fun onOnDeviceApiReturned(host: String, port: Int) = intent {
-        // Stub — real key-reader + onSelectApi wiring added in Task 3.3.
-        val endpoint = lava.models.settings.Endpoint.GoApi(host = host, port = port)
+        logger.d { "onOnDeviceApiReturned: host=$host port=$port" }
+        // Read the key as a liveness signal (engine is running). If null,
+        // the probe will still run — the /health endpoint is the real gate.
+        // Key is intentionally not logged (§6.H).
+        try {
+            apiKeyReader?.invoke(AppLinkContract.API_RELEASE_PACKAGE + ".keyprovider")
+        } catch (e: Exception) {
+            logger.d { "apiKeyReader threw (engine not running?) — proceeding to probe" }
+            analytics.recordWarning(
+                "on_device_api_key_read_failed",
+                mapOf(
+                    AnalyticsTracker.Params.ERROR_MESSAGE to (e.message ?: "unknown"),
+                    // no-telemetry: key value is never included — §6.H
+                ),
+            )
+        }
+        // §6.J anti-bluff: funnel into the SAME probe→persist→advance
+        // pipeline that the cloud "Add server" flow uses. No parallel path.
+        val endpoint = Endpoint.GoApi(host = host, port = port)
         onSelectApi(endpoint)
     }
 }

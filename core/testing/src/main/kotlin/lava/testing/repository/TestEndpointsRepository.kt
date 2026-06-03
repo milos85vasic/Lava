@@ -64,4 +64,15 @@ class TestEndpointsRepository : EndpointsRepository {
     override suspend fun remove(endpoint: Endpoint) {
         mutableEndpoints.value = mutableEndpoints.value - endpoint
     }
+
+    /**
+     * Synchronous snapshot of the current endpoint list — for test assertions
+     * that need to inspect persisted state without collecting the flow.
+     *
+     * Note: the seeding-on-first-observation behavior (insert Rutracker when
+     * empty) is NOT triggered by this call because it is tied to [observeAll]'s
+     * `onStart` operator. Test assertions using this method see the raw list
+     * including any [add]s that happened before observation started.
+     */
+    fun currentEndpoints(): List<Endpoint> = mutableEndpoints.value
 }
