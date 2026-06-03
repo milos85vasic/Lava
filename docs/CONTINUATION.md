@@ -11,7 +11,19 @@ same commit so the index stays trustworthy. Stale state in this file
 is itself a §6.J spirit issue — the file claims a guarantee, the
 repo has drifted, the agent acts on the claim.
 
-> **Last updated:** 2026-06-03 — started client↔api-app linking feature (spec + plan landed); §6.Y bumps applied (client 1.2.36-1056 → 1.3.0-1057; api-app 0.1.2-3 → 0.2.0-4).
+> **Last updated:** 2026-06-04 — **client↔api-app linking shipped; BOTH apps, BOTH variants distributed on Firebase.** The bidirectional client↔api-app linking feature (onboarding "On this device" section + auto-start + ContentProvider key handoff + loopback auto-connect; Firebase-download fallback, no dead Play-Store links) is complete and consolidated onto the pre-existing `feature/menu/apiapp` launcher (§11.4.74). Two operator-reported on-device bugs were root-caused, fixed, falsifiably regression-tested, and on-device-verified on the real Samsung S23 Ultra (R5CW33CBVQV, API 36) in `848ce20c`:
+>   - **Bug A** — "Could not reach this API: API did not respond" selecting the discovered on-device API → doubled port (`…:8443:8443`); host is now the bare IP (`OnboardingViewModel`). Covered by `OnboardingViewModelTest` (15/15).
+>   - **Bug B** — "listen 0.0.0.0:8443; bind: address already in use" re-opening the API app → `ApiEngineController.start()` is now idempotent. Covered by `ApiEngineControllerTest` (7/7).
+>
+>   **Distributed 2026-06-04** (operator directive: both apps + both variants, iterate on issues):
+>   - **client 1.3.0-1057** — debug `2st6d7c65r8r0` + release `7jka0995hbhl8`. REBUILT after a §RELEASE-ROTATION auth rotation (fresh pepper + new UUID for `android-1.3.0-1057`, all 22 prior clients kept ACTIVE → 1.2.36-1056 not regressed). §6.Z: AuthInterceptorTest 3/3 (rotated crypto round-trip decrypts → no first-request crash), OnboardingViewModelTest 15/15, ApiEngineControllerTest 7/7, all BUILD SUCCESSFUL; aapt2 versionCode 1057 + signed; on-device cold-start/linking re-verification DEFERRED to operator post-distribute testing (S23 offline this session).
+>   - **api-app 0.2.0-4** — debug `4hd1ci7i9hovg` + release `7ep8h6p7416co`. Server artifact; Gates 4+5 inapplicable.
+>
+>   **§6.Y post-distribute bump applied this commit:** client → 1.3.1-1058, api-app → 0.2.1-5.
+>
+>   **OWED (resume here) — cloud-search auth lag:** the client cloud-API option (`https://lava.app:7777`) returns **401** for 1.3.0-1057 until the cloud server (`thinker.local`) registers `android-1.3.0-1057`. `thinker.local` was UNREACHABLE this session, so RELEASE-ROTATION step 7 (`scripts/distribute-api-remote.sh` — syncs the rotated `.env` + reloads + /health) is OWED. The on-device client↔api-app linking (loopback + per-endpoint key) is UNAFFECTED. Operator explicitly accepted shipping now + iterating. **Action:** run `scripts/distribute-api-remote.sh` when `thinker.local` is reachable.
+
+> **Last updated (prior):** 2026-06-03 — started client↔api-app linking feature (spec + plan landed); §6.Y bumps applied (client 1.2.36-1056 → 1.3.0-1057; api-app 0.1.2-3 → 0.2.0-4).
 >
 > **Last updated (prior):** 2026-06-03 (**BOTH APPS' LATEST VERSIONS RELEASED on Firebase** — gated on a real operator-provided **Samsung Galaxy S23 Ultra (SM-S918B, Android 16)**, the §6.AH/§6.AG-compliant real surface after the macOS host-direct emulator proved permanently wedged (adbd-offline, ~10 attempts) and §6.AH forbade host-direct anyway):
 > - **api-app 0.1.2-3** (green DEV #00FF00 / red release icon): **debug `536fmp12drijo` + release** both distributed. §6.Z: C01–C04 green ×2 (deterministic) + release cold-start canary green, all on the S23 Ultra. C02 was hardened (real-device finding: `/index` rutracker-downstream-dependency → short-read auth-gate-verdict probe).

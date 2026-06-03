@@ -1,4 +1,37 @@
 # Changelog
+## Lava-Android-1.3.0-1057 — 2026-06-04 (Client ↔ API-app linking + onboarding "On this device")
+
+**Previous published:** Lava-Android-1.2.36-1056 (debug).
+
+- **New feature — connect the client and the on-device API app**: onboarding "Choose your API"
+  gains an **"On this device"** section that opens the Lava API app ("Open Lava API app"), or
+  routes to the Firebase download page if it isn't installed ("Install Lava API app" — no dead
+  Play-Store links). The API app auto-starts + offers "Back to Lava client"; the client then
+  auto-connects to the on-device API over loopback, with the key handed over via a
+  same-signature ContentProvider. Bidirectional (the API app also opens the client).
+- **Bug A fix** (operator-reported 2026-06-04, verified on a real S23 Ultra): selecting the
+  discovered on-device API no longer fails with "Could not reach this API: API did not respond" —
+  the discovered endpoint carried a doubled port (`…:8443:8443`); the host is now the bare IP, so
+  it connects + advances to "Pick your providers".
+- §6.Z: `.lava-ci-evidence/app-linking/ondevice-dc547861/` + falsifiable unit regression tests
+  (commit `dc547861`). Debug-stage evidence:
+  `.lava-ci-evidence/distribute-changelog/firebase-app-distribution/1.3.0-1057-test-evidence.md`.
+
+## Lava-API-App-0.2.0-4 — 2026-06-04 (Cross-app linking + idempotent engine start)
+
+**Previous published:** Lava-API-App-0.1.2-3 (debug).
+
+- **New feature — links with the Lava client**: auto-starts the engine when opened to "start the
+  API"; "Back to Lava client" / "Open Lava client" button (Firebase download if the client is
+  absent); exposes its access key to the genuine same-signature client via a signature-permission
+  ContentProvider.
+- **Bug B fix** (operator-reported 2026-06-04, verified on a real S23 Ultra): re-opening the API
+  app no longer crashes with "listen 0.0.0.0:8443; bind: address already in use" — start is now
+  idempotent (a redundant start surfaces the live running state, never re-binds).
+- §6.Z: `.lava-ci-evidence/app-linking/ondevice-dc547861/` (double-start → no bind error, engine
+  health=200) + falsifiable `ApiEngineControllerTest` (commit `dc547861`). Debug-stage evidence:
+  `.lava-ci-evidence/distribute-changelog/firebase-app-distribution-api-app/0.2.0-4-test-evidence.md`.
+
 ## Lava-API-App-0.1.2-3 — 2026-06-03 (DEV launcher background → green, like the client DEV)
 
 **Previous published:** Lava-API-App-0.1.1-2 (debug, 2026-06-03).
