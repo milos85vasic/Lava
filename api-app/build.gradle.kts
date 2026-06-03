@@ -68,8 +68,8 @@ android {
             "\"digital.vasic.lava.api.keyprovider\"",
         )
         manifestPlaceholders["apiKeyAuthority"] = "digital.vasic.lava.api.keyprovider"
-        versionCode = 4
-        versionName = "0.2.0"
+        versionCode = 5
+        versionName = "0.2.1"
         // EncryptedSharedPreferences (androidx.security-crypto) requires API 23+
         // — the per-install auth-key store ([ApiKeyStore]) relies on it. The
         // standalone API-server app reasonably targets API 23+ (the client app
