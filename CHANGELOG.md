@@ -1,4 +1,23 @@
 # Changelog
+## Lava-API-App-0.1.1-2 — 2026-06-03 (proper launcher icon + DEV debug name)
+
+**Previous published:** Lava-API-App-0.1.0-1 (debug, 2026-06-02).
+
+- **Proper launcher icon**: api-app now uses the SAME adaptive launcher icon as the Lava
+  client (colored Lava logo foreground + background hint color; per-density PNGs +
+  `mipmap-anydpi-v26` adaptive icon + monochrome layer). Replaces the 0.1.0-1 placeholder.
+- **Debug variant named "Lava API DEV"**: the `.dev` build shows a `DEV` name suffix on the
+  launcher (`api-app/src/debug/res/values/strings.xml` override), mirroring the client's
+  "Lava DEV" convention.
+- Icon + naming only; no server/functional change vs 0.1.0-1.
+- §6.Z: DEBUG runtime covered by transferred item-1 C01–C04 green ×2 (runtime code
+  git-diff-unchanged); launcher icon verified by operator on-device visual check of the
+  Firebase debug build (§6.AA). The fresh 0.1.1 gate + RELEASE R8 cold-start canary are
+  infra-BLOCKED (emulator boot wedge, ~8 attempts; forensics
+  `.lava-ci-evidence/sixth-law-incidents/2026-06-03-emulator-boot-offline.json`), so the
+  **RELEASE distribute is HELD** until the emulator host is bootable. Debug-stage evidence:
+  `.lava-ci-evidence/distribute-changelog/firebase-app-distribution-api-app/0.1.1-2-test-evidence.md`.
+
 ## Lava-API-App-0.1.0-1 — 2026-06-02 (First distribution: standalone on-device Lava API server app)
 
 **Previous published:** none — first distribution.

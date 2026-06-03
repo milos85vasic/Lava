@@ -1,0 +1,6 @@
+<resources>
+    <!-- Debug (.dev) variant name suffix — mirrors the client app's
+         app/src/debug/res/values/strings.xml "Lava DEV" override so the
+         on-device launcher distinguishes the debug build. -->
+    <string name="api_app_name" translatable="false">Lava API DEV</string>
+</resources>
