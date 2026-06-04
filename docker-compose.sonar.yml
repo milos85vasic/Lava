@@ -1,0 +1,86 @@
+# docker-compose.sonar.yml — local, rootless-friendly SonarQube Community
+# Edition + a dedicated Postgres, for the Lava completeness program.
+#
+# Brought up via `scripts/sonar-scan.sh` (auto-detects podman/docker). All
+# ports are bound to 127.0.0.1 only — this stack is for local analysis on the
+# operator's / gate-host's machine, never exposed to a network.
+#
+# ── ROOTLESS + §6.U (NO sudo) NOTE ─────────────────────────────────────────
+# SonarQube embeds an Elasticsearch instance. On most Linux container runtimes
+# ES requires the host kernel parameter `vm.max_map_count >= 262144`. Setting
+# that value is a root operation (`sysctl -w vm.max_map_count=262144` or an
+# /etc/sysctl.d drop-in). Per Lava §6.U, this project MUST NOT run sudo/su, so
+# this compose file deliberately does NOT attempt to set the sysctl, and uses
+# NO `privileged: true` and NO `sysctls:` block that would need elevated rights.
+#
+# Consequence (honest): on a host where vm.max_map_count is below 262144, the
+# `sonarqube` container's Elasticsearch sub-process will refuse to start and the
+# container will exit / stay unhealthy. That is an OPERATOR / GATE-HOST action,
+# documented in docs/security/2026-06-04-sonarqube-snyk-setup.md. We set
+# `SONAR_ES_BOOTSTRAP_CHECKS_DISABLE=true` below, which relaxes ES bootstrap
+# checks where the runtime permits it (e.g. podman machine VMs that already
+# have a sufficient default), but it canNOT substitute for a kernel value the
+# runtime genuinely enforces. We never bluff: if it cannot come up, the script
+# captures the exact error and records it as a blocker.
+#
+#   macOS / Windows: the value lives inside the podman/docker VM, not the host.
+#     `podman machine ssh sudo sysctl -w vm.max_map_count=262144` is the
+#     operator step (run by the operator, NOT by this project's scripts).
+#   Linux: an operator-owned /etc/sysctl.d/99-sonarqube.conf drop-in.
+
+services:
+  sonarqube-db:
+    image: postgres:16-alpine
+    container_name: lava-sonar-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${SONAR_DB_USER:-sonar}
+      POSTGRES_PASSWORD: ${SONAR_DB_PASSWORD:-sonar}
+      POSTGRES_DB: ${SONAR_DB_NAME:-sonar}
+    volumes:
+      - lava_sonar_pgdata:/var/lib/postgresql/data
+    # Bound to loopback only; not reachable off-host.
+    ports:
+      - "127.0.0.1:5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${SONAR_DB_USER:-sonar} -d ${SONAR_DB_NAME:-sonar}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  sonarqube:
+    image: sonarqube:community
+    container_name: lava-sonarqube
+    restart: unless-stopped
+    depends_on:
+      sonarqube-db:
+        condition: service_healthy
+    environment:
+      SONAR_JDBC_URL: jdbc:postgresql://sonarqube-db:5432/${SONAR_DB_NAME:-sonar}
+      SONAR_JDBC_USERNAME: ${SONAR_DB_USER:-sonar}
+      SONAR_JDBC_PASSWORD: ${SONAR_DB_PASSWORD:-sonar}
+      # Relax ES bootstrap checks where the runtime permits — see header note.
+      # This does NOT set vm.max_map_count and does NOT require root.
+      SONAR_ES_BOOTSTRAP_CHECKS_DISABLE: "true"
+    # Bound to loopback only.
+    ports:
+      - "127.0.0.1:9000:9000"
+    volumes:
+      - lava_sonar_data:/opt/sonarqube/data
+      - lava_sonar_extensions:/opt/sonarqube/extensions
+      - lava_sonar_logs:/opt/sonarqube/logs
+    healthcheck:
+      # SonarQube reports readiness on /api/system/status (UP/STARTING/DOWN).
+      test:
+        ["CMD-SHELL",
+         "curl -sf http://127.0.0.1:9000/api/system/status | grep -q '\"status\":\"UP\"' || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 40
+      start_period: 120s
+
+volumes:
+  lava_sonar_pgdata:
+  lava_sonar_data:
+  lava_sonar_extensions:
+  lava_sonar_logs:

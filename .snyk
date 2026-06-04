@@ -1,0 +1,23 @@
+# Snyk policy file (.snyk) — Lava.
+#
+# Consumed by `scripts/snyk-scan.sh` (the containerized snyk/snyk image reads
+# this file at the project root). It declares known-issue ignores and patch
+# directives. Keep it minimal and audited — every ignore MUST carry a reason
+# and an expiry so suppressions don't silently rot (anti-bluff: an unexplained
+# permanent ignore hides a real vulnerability).
+version: v1.5.0
+
+# `ignore` maps a Snyk vulnerability ID to a list of path-scoped suppressions.
+# EXAMPLE shape (commented; add real entries only with a reason + expiry):
+#
+# ignore:
+#   SNYK-JAVA-EXAMPLE-000000:
+#     - '*':
+#         reason: >-
+#           No fixed upstream version yet; not reachable from Lava code paths.
+#           Re-evaluate on the date below.
+#         expires: 2026-09-01T00:00:00.000Z
+ignore: {}
+
+# `patch` directives are managed by `snyk wizard`/`snyk protect`; left empty.
+patch: {}
