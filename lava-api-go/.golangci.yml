@@ -1,0 +1,86 @@
+# .golangci.yml — curated linter config for lava-api-go.
+#
+# Schema: golangci-lint v2 (run via scripts/golangci-lint.sh — containerized,
+# rootless, no auth/token; falls back to a host binary if present).
+#
+# High-value, low-noise set. Style/complexity backlog linters (gocyclo, lll,
+# funlen, etc.) are intentionally NOT enabled to keep the gate passable and
+# focused on correctness + security. Generated code (internal/gen/) and Go
+# fuzz-corpus dirs are excluded; some checks are relaxed for *_test.go.
+version: "2"
+
+run:
+  timeout: 5m
+  tests: true
+
+linters:
+  default: none
+  enable:
+    - govet        # correctness (superset of `go vet`)
+    - staticcheck  # correctness + simplifications (absorbs gosimple/stylecheck in v2)
+    - errcheck     # unchecked errors
+    - ineffassign  # ineffective assignments
+    - unused       # dead code
+    - gosec        # security scanner
+  settings:
+    gosec:
+      # Documented gosec exclusions (see docs/security/2026-06-04-golangci-triage.md
+      # for the per-rule rationale). Each is a noise class for THIS codebase, not
+      # a blanket security waiver — the correctness-relevant gosec rules stay on.
+      excludes:
+        - G104  # unhandled errors — overlaps errcheck; covered there.
+        - G115  # int->int32 conversion — page/comment counts from HTML scrapes
+                # are bounded small ints; not an attacker-controlled overflow.
+        - G109  # strconv.Atoi -> int32 — same bounded-scrape-count class.
+        - G301  # dir perms 0750 — QA-evidence/ticket dirs are local artifacts.
+        - G302  # file perms 0600 — same local-artifact class.
+        - G306  # WriteFile perms — same local-artifact class.
+        - G304  # file inclusion via var — QA-evidence collector reads paths it
+                # itself produced under a controlled evidence root.
+        - G703  # path traversal taint — firebase credPath is config/env-driven
+                # (GOOGLE_APPLICATION_CREDENTIALS), os.Stat-guarded, no-op on miss.
+        - G117  # marshaled "AuthKey" matches secret pattern — it's a local
+                # /status diagnostic doc field in internal/mobile, NOT a wire
+                # secret leak; mobile.go is also frozen by the §6.R contract test.
+    errcheck:
+      # Deferred resource Close() and help-text Fprintf are idiomatic Go where
+      # the error is genuinely uninteresting; checking adds noise without
+      # changing behavior. Only these specific forms are allowed; all OTHER
+      # unchecked errors still fail the gate.
+      exclude-functions:
+        - (*os.File).Close
+        - (io.Closer).Close
+        - fmt.Fprintf
+        - (*github.com/quic-go/quic-go/http3.Transport).Close
+  exclusions:
+    generated: lax
+    rules:
+      # Generated server/client: do not lint third-party-shaped output.
+      - path: internal/gen/
+        linters:
+          - govet
+          - staticcheck
+          - errcheck
+          - ineffassign
+          - unused
+          - gosec
+      # Test files: relax security + unchecked-error + style noise (test fixtures
+      # use synthetic data, intentionally ignore setup/teardown errors, and a
+      # `string(Body.Bytes())` vs `Body.String()` style nit is not worth gating).
+      - path: _test\.go
+        linters:
+          - gosec
+          - errcheck
+          - staticcheck
+      # Intentional documentation/forward-use identifiers flagged by `unused`.
+      # These *RouteTemplate consts + a handful of helpers document the route
+      # shapes / are kept for a planned use; they are a known, bounded dead-code
+      # backlog (see docs/security/2026-06-04-golangci-triage.md), not a
+      # correctness defect. `unused` stays enabled everywhere else.
+      - linters:
+          - unused
+        text: "(RouteTemplate is unused|func intQuery is unused|field once is unused|func withTimeout is unused|func statusAllowsBody is unused)"
+
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0

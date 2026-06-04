@@ -171,10 +171,6 @@ func (m *Metrics) GinMiddleware() gin.HandlerFunc {
 			route = c.Request.URL.Path
 		}
 		method := c.Request.Method
-		status := http.StatusText(c.Writer.Status())
-		if status == "" {
-			status = httpStatusCode(c.Writer.Status())
-		}
 
 		m.HTTPRequestsTotal.WithLabelValues(method, route, statusBucket(c.Writer.Status())).Inc()
 		m.HTTPRequestDurationSeconds.WithLabelValues(method, route).Observe(duration.Seconds())
@@ -197,15 +193,4 @@ func statusBucket(code int) string {
 	default:
 		return "5xx"
 	}
-}
-
-// httpStatusCode is a fallback string for non-standard codes. It is
-// kept private and unused by the exported middleware in favour of
-// statusBucket; it exists to make the unstandard-code case explicit
-// for future readers.
-func httpStatusCode(code int) string {
-	if code <= 0 {
-		return "unknown"
-	}
-	return "code-" + http.StatusText(code)
 }

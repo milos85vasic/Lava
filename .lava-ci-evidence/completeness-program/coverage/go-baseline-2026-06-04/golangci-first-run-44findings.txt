@@ -1,0 +1,138 @@
+[1;36m[golangci][0m running via podman image golangci/golangci-lint:latest (mount /Users/milosvasic/Projects/Lava/.claude/worktrees/agent-a367aa1aa376c49f1 -> /app, wd /app/lava-api-go)
+cmd/healthprobe/main.go:60:16: Error return value of `rt.Close` is not checked (errcheck)
+	defer rt.Close()
+	              ^
+cmd/healthprobe/main.go:68:23: Error return value of `resp.Body.Close` is not checked (errcheck)
+	defer resp.Body.Close()
+	                     ^
+cmd/lava-api-go/main.go:263:13: Error return value of `fmt.Fprintf` is not checked (errcheck)
+	fmt.Fprintf(os.Stdout, `lava-api-go %s — Lava Go API service.
+	           ^
+internal/archiveorg/client.go:60:23: Error return value of `resp.Body.Close` is not checked (errcheck)
+	defer resp.Body.Close()
+	                     ^
+internal/archiveorg/download.go:23:18: Error return value of `body.Close` is not checked (errcheck)
+	defer body.Close()
+	                ^
+internal/archiveorg/provider.go:228:17: Error return value of `resp.Body.Close` is not checked (errcheck)
+	resp.Body.Close()
+	               ^
+internal/kinozal/client.go:98:24: Error return value of `resp.Body.Close` is not checked (errcheck)
+		defer resp.Body.Close()
+		                     ^
+internal/kinozal/client.go:133:24: Error return value of `resp.Body.Close` is not checked (errcheck)
+		defer resp.Body.Close()
+		                     ^
+internal/kinozal/client.go:171:24: Error return value of `resp.Body.Close` is not checked (errcheck)
+		defer resp.Body.Close()
+		                     ^
+internal/qa/evidence/collector.go:287:21: Error return value of `srcFile.Close` is not checked (errcheck)
+	defer srcFile.Close()
+	                   ^
+internal/qa/evidence/collector.go:292:21: Error return value of `dstFile.Close` is not checked (errcheck)
+	defer dstFile.Close()
+	                   ^
+internal/firebase/firebase.go:85:22: G703: Path traversal via taint analysis (gosec)
+	if _, err := os.Stat(credPath); err != nil {
+	                    ^
+internal/mobile/mobile.go:397:12: G117: Marshaled struct field "AuthKey" (JSON key "authKey") matches secret pattern (gosec)
+	b, err := json.Marshal(doc)
+	          ^
+internal/mobile/tls.go:60:12: G306: Expect WriteFile permissions to be 0600 or less (gosec)
+	if err := os.WriteFile(certPath, certPEM, 0o644); err != nil {
+	          ^
+internal/qa/evidence/collector.go:121:12: G301: Expect directory permissions to be 0750 or less (gosec)
+	if err := os.MkdirAll(c.outDir, 0o755); err != nil {
+	          ^
+internal/qa/evidence/collector.go:136:12: G306: Expect WriteFile permissions to be 0600 or less (gosec)
+	if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
+	          ^
+internal/qa/evidence/collector.go:179:12: G301: Expect directory permissions to be 0750 or less (gosec)
+	if err := os.MkdirAll(c.outDir, 0o755); err != nil {
+	          ^
+internal/qa/evidence/collector.go:283:18: G304: Potential file inclusion via variable (gosec)
+	srcFile, err := os.Open(src)
+	                ^
+internal/qa/evidence/collector.go:288:18: G302: Expect file permissions to be 0600 or less (gosec)
+	dstFile, err := os.OpenFile(dst, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0o644)
+	                ^
+internal/qa/ticket/generator.go:234:12: G301: Expect directory permissions to be 0750 or less (gosec)
+	if err := os.MkdirAll(g.outDir, 0o755); err != nil {
+	          ^
+internal/qa/ticket/generator.go:247:12: G306: Expect WriteFile permissions to be 0600 or less (gosec)
+	if err := os.WriteFile(path, content, 0o644); err != nil {
+	          ^
+internal/rutracker/comments.go:86:15: G115: integer overflow conversion int -> int32 (gosec)
+		Page:  int32(currentPage),
+		            ^
+internal/rutracker/comments.go:87:15: G115: integer overflow conversion int -> int32 (gosec)
+		Pages: int32(totalPages),
+		            ^
+internal/rutracker/forum.go:275:15: G115: integer overflow conversion int -> int32 (gosec)
+		Page:  int32(currentPage),
+		            ^
+internal/rutracker/forum.go:276:15: G115: integer overflow conversion int -> int32 (gosec)
+		Pages: int32(totalPages),
+		            ^
+internal/rutracker/post.go:544:26: G109: Potential Integer overflow made by strconv.Atoi result conversion to int16/32 (gosec)
+		return styleSize{size: int32(n)}
+		                       ^
+internal/rutracker/search.go:164:18: G115: integer overflow conversion int -> int32 (gosec)
+		Page:     int32(currentPage),
+		               ^
+internal/rutracker/search.go:165:18: G115: integer overflow conversion int -> int32 (gosec)
+		Pages:    int32(totalPages),
+		               ^
+internal/rutracker/topic.go:87:16: G115: integer overflow conversion int -> int32 (gosec)
+			Page:  int32(currentPage),
+			            ^
+internal/rutracker/topic.go:88:16: G115: integer overflow conversion int -> int32 (gosec)
+			Pages: int32(totalPages),
+			            ^
+internal/handlers/forum_test.go:560:5: S1030: should use w.Body.String() instead of string(w.Body.Bytes()) (staticcheck)
+	if string(w.Body.Bytes()) != string(want) {
+	   ^
+internal/archiveorg/client.go:87:6: func intQuery is unused (unused)
+func intQuery(q url.Values, key string, value int) url.Values {
+     ^
+internal/firebase/firebase.go:137:2: field once is unused (unused)
+	once      sync.Once
+	^
+internal/handlers/captcha.go:42:7: const captchaRouteTemplate is unused (unused)
+const captchaRouteTemplate = "/captcha/{path}"
+      ^
+internal/handlers/comments_add.go:49:7: const commentsAddRouteTemplate is unused (unused)
+const commentsAddRouteTemplate = "/comments/{id}/add"
+      ^
+internal/handlers/index.go:38:2: const rootRouteTemplate is unused (unused)
+	rootRouteTemplate  = "/"
+	^
+internal/handlers/index.go:39:2: const indexRouteTemplate is unused (unused)
+	indexRouteTemplate = "/index"
+	^
+internal/handlers/login.go:46:7: const loginRouteTemplate is unused (unused)
+const loginRouteTemplate = "/login"
+      ^
+internal/handlers/v1/captcha.go:9:7: const captchaRouteTemplate is unused (unused)
+const captchaRouteTemplate = "/v1/{provider}/captcha/{path}"
+      ^
+internal/handlers/v1/comments.go:18:7: const addCommentRouteTemplate is unused (unused)
+const addCommentRouteTemplate = "/v1/{provider}/comments/{id}/add"
+      ^
+internal/handlers/v1/login.go:11:7: const loginRouteTemplate is unused (unused)
+const loginRouteTemplate = "/v1/{provider}/login"
+      ^
+internal/handlers/v1/torrent.go:17:7: const downloadRouteTemplate is unused (unused)
+const downloadRouteTemplate = "/v1/{provider}/download/{id}"
+      ^
+internal/middleware/firebase.go:105:6: func withTimeout is unused (unused)
+func withTimeout(parent context.Context, d time.Duration) (context.Context, context.CancelFunc) {
+     ^
+internal/server/brotli.go:143:6: func statusAllowsBody is unused (unused)
+func statusAllowsBody(code int) bool {
+     ^
+44 issues:
+* errcheck: 11
+* gosec: 19
+* staticcheck: 1
+* unused: 13

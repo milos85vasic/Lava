@@ -13,4 +13,6 @@ docker/tls/*.key
 *.swp
 .DS_Store
 testdata/fuzz/.cache/
+# golangci-lint cache (written by scripts/golangci-lint.sh inside the mount)
+.golangci-cache/
 /lava-api-go
