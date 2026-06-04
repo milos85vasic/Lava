@@ -1,0 +1,10 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>LongMethod:MainActivity.kt$MainActivity$override fun onCreate(savedInstanceState: Bundle?)</ID>
+    <ID>LongMethod:MobileNavigation.kt$@Composable fun MobileNavigation(navigationController: NavigationController)</ID>
+    <ID>LongParameterList:FirebaseInitializer.kt$FirebaseInitializer$( crashlytics: () -&gt; FirebaseCrashlytics?, analytics: () -&gt; FirebaseAnalytics?, performance: () -&gt; FirebasePerformance?, isDebug: Boolean, versionName: String, versionCode: Int, applicationId: String, warn: (String, Throwable) -&gt; Unit, )</ID>
+    <ID>MagicNumber:FirebaseAnalyticsTracker.kt$FirebaseAnalyticsTracker$32</ID>
+  </CurrentIssues>
+</SmellBaseline>

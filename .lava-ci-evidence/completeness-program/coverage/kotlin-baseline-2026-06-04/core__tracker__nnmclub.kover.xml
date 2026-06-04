@@ -1,0 +1,1087 @@
+<?xml version="1.0" ?>
+<report name="Kover Gradle Plugin XML report for :core:tracker:nnmclub">
+<package name="lava/tracker/nnmclub/http">
+<class name="lava/tracker/nnmclub/http/CircuitBreaker" sourcefilename="NnmclubHttpClient.kt">
+<method name="guard" desc="(Lkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="2" covered="22"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="5"/>
+</method>
+<method name="onSuccess" desc="()V">
+<counter type="INSTRUCTION" missed="0" covered="28"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="5"/>
+</method>
+<method name="&lt;init&gt;" desc="(IJJLkotlin/jvm/functions/Function0;)V">
+<counter type="INSTRUCTION" missed="0" covered="29"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="6"/>
+</method>
+<method name="onFailure" desc="()V">
+<counter type="INSTRUCTION" missed="73" covered="0"/>
+<counter type="BRANCH" missed="8" covered="0"/>
+<counter type="LINE" missed="14" covered="0"/>
+</method>
+<method name="admit" desc="()V">
+<counter type="INSTRUCTION" missed="27" covered="23"/>
+<counter type="BRANCH" missed="3" covered="1"/>
+<counter type="LINE" missed="5" covered="3"/>
+</method>
+<counter type="INSTRUCTION" missed="102" covered="102"/>
+<counter type="BRANCH" missed="11" covered="1"/>
+<counter type="LINE" missed="20" covered="19"/>
+<counter type="METHOD" missed="1" covered="4"/>
+</class>
+<class name="lava/tracker/nnmclub/http/CircuitBreaker$State" sourcefilename="NnmclubHttpClient.kt">
+<method name="&lt;clinit&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="0" covered="24"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<counter type="INSTRUCTION" missed="0" covered="24"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+<counter type="METHOD" missed="0" covered="1"/>
+</class>
+<class name="lava/tracker/nnmclub/http/CircuitBreakerOpenException" sourcefilename="NnmclubHttpClient.kt">
+<method name="&lt;init&gt;" desc="(Ljava/lang/String;)V">
+<counter type="INSTRUCTION" missed="3" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="3" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/tracker/nnmclub/http/InMemoryCookieJar" sourcefilename="NnmclubHttpClient.kt">
+<method name="loadForRequest" desc="(Lokhttp3/HttpUrl;)Ljava/util/List;">
+<counter type="INSTRUCTION" missed="2" covered="16"/>
+<counter type="BRANCH" missed="1" covered="1"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="allCookies" desc="()Ljava/util/List;">
+<counter type="INSTRUCTION" missed="0" covered="8"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="0" covered="7"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="2"/>
+</method>
+<method name="saveFromResponse" desc="(Lokhttp3/HttpUrl;Ljava/util/List;)V">
+<counter type="INSTRUCTION" missed="6" covered="39"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="0" covered="5"/>
+</method>
+<counter type="INSTRUCTION" missed="8" covered="70"/>
+<counter type="BRANCH" missed="3" covered="1"/>
+<counter type="LINE" missed="0" covered="9"/>
+<counter type="METHOD" missed="0" covered="4"/>
+</class>
+<class name="lava/tracker/nnmclub/http/NnmclubHttpClient" sourcefilename="NnmclubHttpClient.kt">
+<method name="get" desc="(Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="0" covered="11"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="executeOrThrow" desc="(Lokhttp3/Request;)Lokhttp3/Response;">
+<counter type="INSTRUCTION" missed="16" covered="15"/>
+<counter type="BRANCH" missed="4" covered="2"/>
+<counter type="LINE" missed="1" covered="3"/>
+</method>
+<method name="cookieValue" desc="(Ljava/lang/String;)Ljava/lang/String;">
+<counter type="INSTRUCTION" missed="2" covered="45"/>
+<counter type="BRANCH" missed="1" covered="3"/>
+<counter type="LINE" missed="0" covered="3"/>
+</method>
+<method name="&lt;init&gt;" desc="(Llava/tracker/nnmclub/http/CircuitBreaker;)V">
+<counter type="INSTRUCTION" missed="0" covered="35"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="10"/>
+</method>
+<method name="clearCookies" desc="()V">
+<counter type="INSTRUCTION" missed="1" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="postForm" desc="(Ljava/lang/String;Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="0" covered="12"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="download" desc="(Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="0" covered="11"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="0" covered="11"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="hasCookie" desc="(Ljava/lang/String;)Z">
+<counter type="INSTRUCTION" missed="0" covered="7"/>
+<counter type="BRANCH" missed="0" covered="2"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<counter type="INSTRUCTION" missed="19" covered="147"/>
+<counter type="BRANCH" missed="5" covered="7"/>
+<counter type="LINE" missed="2" covered="21"/>
+<counter type="METHOD" missed="1" covered="8"/>
+</class>
+<class name="lava/tracker/nnmclub/http/NnmclubHttpClient$download$2" sourcefilename="NnmclubHttpClient.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="0" covered="21"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<counter type="INSTRUCTION" missed="0" covered="21"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+<counter type="METHOD" missed="0" covered="1"/>
+</class>
+<class name="lava/tracker/nnmclub/http/NnmclubHttpClient$download$2$1" sourcefilename="NnmclubHttpClient.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="7" covered="73"/>
+<counter type="BRANCH" missed="3" covered="3"/>
+<counter type="LINE" missed="0" covered="7"/>
+</method>
+<counter type="INSTRUCTION" missed="7" covered="73"/>
+<counter type="BRANCH" missed="3" covered="3"/>
+<counter type="LINE" missed="0" covered="7"/>
+<counter type="METHOD" missed="0" covered="1"/>
+</class>
+<class name="lava/tracker/nnmclub/http/NnmclubHttpClient$get$2" sourcefilename="NnmclubHttpClient.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="0" covered="21"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<counter type="INSTRUCTION" missed="0" covered="21"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+<counter type="METHOD" missed="0" covered="1"/>
+</class>
+<class name="lava/tracker/nnmclub/http/NnmclubHttpClient$get$2$1" sourcefilename="NnmclubHttpClient.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="0" covered="25"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="4"/>
+</method>
+<counter type="INSTRUCTION" missed="0" covered="25"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="4"/>
+<counter type="METHOD" missed="0" covered="1"/>
+</class>
+<class name="lava/tracker/nnmclub/http/NnmclubHttpClient$postForm$2" sourcefilename="NnmclubHttpClient.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="0" covered="23"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<counter type="INSTRUCTION" missed="0" covered="23"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+<counter type="METHOD" missed="0" covered="1"/>
+</class>
+<class name="lava/tracker/nnmclub/http/NnmclubHttpClient$postForm$2$1" sourcefilename="NnmclubHttpClient.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="0" covered="62"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="9"/>
+</method>
+<counter type="INSTRUCTION" missed="0" covered="62"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="9"/>
+<counter type="METHOD" missed="0" covered="1"/>
+</class>
+<sourcefile name="NnmclubHttpClient.kt">
+<line nr="23" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="24" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="28" mi="0" ci="16" mb="0" cb="0"/>
+<line nr="29" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="30" mi="6" ci="13" mb="2" cb="0"/>
+<line nr="31" mi="0" ci="4" mb="0" cb="0"/>
+<line nr="32" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="37" mi="2" ci="16" mb="1" cb="1"/>
+<line nr="40" mi="0" ci="8" mb="0" cb="0"/>
+<line nr="44" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="47" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="48" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="49" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="50" mi="0" ci="6" mb="0" cb="0"/>
+<line nr="52" mi="0" ci="24" mb="0" cb="0"/>
+<line nr="54" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="55" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="61" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="63" mi="0" ci="12" mb="0" cb="0"/>
+<line nr="64" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="65" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="67" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="68" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="73" mi="0" ci="17" mb="0" cb="0"/>
+<line nr="74" mi="0" ci="4" mb="1" cb="1"/>
+<line nr="75" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="76" mi="5" ci="0" mb="2" cb="0"/>
+<line nr="77" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="79" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="80" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="84" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="88" mi="0" ci="17" mb="0" cb="0"/>
+<line nr="89" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="90" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="91" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="92" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="96" mi="17" ci="0" mb="0" cb="0"/>
+<line nr="97" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="98" mi="4" ci="0" mb="2" cb="0"/>
+<line nr="99" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="100" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="101" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="103" mi="11" ci="0" mb="4" cb="0"/>
+<line nr="104" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="105" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="107" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="109" mi="5" ci="0" mb="2" cb="0"/>
+<line nr="110" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="111" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="113" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="124" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="125" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="127" mi="0" ci="11" mb="0" cb="0"/>
+<line nr="129" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="130" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="131" mi="0" ci="4" mb="0" cb="0"/>
+<line nr="132" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="133" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="134" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="135" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="137" mi="0" ci="7" mb="0" cb="0"/>
+<line nr="139" mi="0" ci="11" mb="0" cb="0"/>
+<line nr="140" mi="0" ci="21" mb="0" cb="0"/>
+<line nr="141" mi="0" ci="12" mb="0" cb="0"/>
+<line nr="142" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="143" mi="0" ci="10" mb="0" cb="0"/>
+<line nr="144" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="150" mi="0" ci="12" mb="0" cb="0"/>
+<line nr="151" mi="0" ci="23" mb="0" cb="0"/>
+<line nr="152" mi="0" ci="15" mb="0" cb="0"/>
+<line nr="153" mi="0" ci="13" mb="0" cb="0"/>
+<line nr="154" mi="0" ci="17" mb="0" cb="0"/>
+<line nr="155" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="156" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="157" mi="0" ci="8" mb="0" cb="0"/>
+<line nr="158" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="159" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="160" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="165" mi="0" ci="11" mb="0" cb="0"/>
+<line nr="166" mi="0" ci="21" mb="0" cb="0"/>
+<line nr="167" mi="0" ci="12" mb="0" cb="0"/>
+<line nr="168" mi="0" ci="4" mb="0" cb="0"/>
+<line nr="169" mi="0" ci="10" mb="0" cb="0"/>
+<line nr="170" mi="0" ci="25" mb="0" cb="0"/>
+<line nr="171" mi="0" ci="14" mb="1" cb="1"/>
+<line nr="172" mi="7" ci="7" mb="2" cb="2"/>
+<line nr="173" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="179" mi="0" ci="6" mb="0" cb="0"/>
+<line nr="180" mi="7" ci="8" mb="4" cb="2"/>
+<line nr="182" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="184" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="187" mi="0" ci="7" mb="0" cb="2"/>
+<line nr="190" mi="0" ci="9" mb="0" cb="0"/>
+<line nr="191" mi="2" ci="18" mb="1" cb="1"/>
+<line nr="192" mi="0" ci="18" mb="0" cb="2"/>
+<line nr="197" mi="1" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="139" covered="568"/>
+<counter type="BRANCH" missed="22" covered="12"/>
+<counter type="LINE" missed="23" covered="73"/>
+</sourcefile>
+<counter type="INSTRUCTION" missed="139" covered="568"/>
+<counter type="BRANCH" missed="22" covered="12"/>
+<counter type="LINE" missed="23" covered="73"/>
+<counter type="METHOD" missed="3" covered="23"/>
+<counter type="CLASS" missed="1" covered="10"/>
+</package>
+<package name="lava/tracker/nnmclub/feature">
+<class name="lava/tracker/nnmclub/feature/NnmclubAuth" sourcefilename="NnmclubAuth.kt">
+<method name="login" desc="(Llava/tracker/api/model/LoginRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="2" covered="92"/>
+<counter type="BRANCH" missed="2" covered="2"/>
+<counter type="LINE" missed="0" covered="10"/>
+</method>
+<method name="&lt;init&gt;" desc="(Llava/tracker/nnmclub/http/NnmclubHttpClient;Llava/tracker/nnmclub/parser/NnmclubLoginParser;)V">
+<counter type="INSTRUCTION" missed="0" covered="8"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="3"/>
+</method>
+<method name="checkAuth" desc="(Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="0" covered="10"/>
+<counter type="BRANCH" missed="0" covered="2"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="&lt;init&gt;" desc="(Llava/tracker/nnmclub/http/NnmclubHttpClient;Llava/tracker/nnmclub/parser/NnmclubLoginParser;Ljava/lang/String;)V">
+<counter type="INSTRUCTION" missed="0" covered="7"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="2"/>
+</method>
+<method name="getBaseUrl" desc="()Ljava/lang/String;">
+<counter type="INSTRUCTION" missed="2" covered="4"/>
+<counter type="BRANCH" missed="1" covered="1"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="logout" desc="(Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="3" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="7" covered="121"/>
+<counter type="BRANCH" missed="3" covered="5"/>
+<counter type="LINE" missed="1" covered="17"/>
+<counter type="METHOD" missed="1" covered="5"/>
+</class>
+<class name="lava/tracker/nnmclub/feature/NnmclubBrowse" sourcefilename="NnmclubBrowse.kt">
+<method name="&lt;init&gt;" desc="(Llava/tracker/nnmclub/http/NnmclubHttpClient;Llava/tracker/nnmclub/parser/NnmclubBrowseParser;)V">
+<counter type="INSTRUCTION" missed="0" covered="8"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="3"/>
+</method>
+<method name="buildBrowseUrl$nnmclub" desc="(Ljava/lang/String;I)Ljava/lang/String;">
+<counter type="INSTRUCTION" missed="1" covered="35"/>
+<counter type="BRANCH" missed="2" covered="6"/>
+<counter type="LINE" missed="0" covered="5"/>
+</method>
+<method name="&lt;init&gt;" desc="(Llava/tracker/nnmclub/http/NnmclubHttpClient;Llava/tracker/nnmclub/parser/NnmclubBrowseParser;Ljava/lang/String;)V">
+<counter type="INSTRUCTION" missed="0" covered="7"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="2"/>
+</method>
+<method name="getBaseUrl" desc="()Ljava/lang/String;">
+<counter type="INSTRUCTION" missed="2" covered="4"/>
+<counter type="BRANCH" missed="1" covered="1"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="browse" desc="(Ljava/lang/String;ILkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="2" covered="61"/>
+<counter type="BRANCH" missed="2" covered="2"/>
+<counter type="LINE" missed="0" covered="4"/>
+</method>
+<method name="getForumTree" desc="(Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="0" covered="1"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<counter type="INSTRUCTION" missed="5" covered="116"/>
+<counter type="BRANCH" missed="5" covered="9"/>
+<counter type="LINE" missed="0" covered="16"/>
+<counter type="METHOD" missed="0" covered="6"/>
+</class>
+<class name="lava/tracker/nnmclub/feature/NnmclubComments" sourcefilename="NnmclubComments.kt">
+<method name="&lt;init&gt;" desc="(Llava/tracker/nnmclub/http/NnmclubHttpClient;)V">
+<counter type="INSTRUCTION" missed="0" covered="5"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="2"/>
+</method>
+<method name="getComments" desc="(Ljava/lang/String;ILkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="113" covered="0"/>
+<counter type="BRANCH" missed="16" covered="0"/>
+<counter type="LINE" missed="14" covered="0"/>
+</method>
+<method name="addComment" desc="(Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="getBaseUrl" desc="()Ljava/lang/String;">
+<counter type="INSTRUCTION" missed="6" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Llava/tracker/nnmclub/http/NnmclubHttpClient;Ljava/lang/String;)V">
+<counter type="INSTRUCTION" missed="0" covered="6"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="2"/>
+</method>
+<counter type="INSTRUCTION" missed="121" covered="11"/>
+<counter type="BRANCH" missed="18" covered="0"/>
+<counter type="LINE" missed="16" covered="4"/>
+<counter type="METHOD" missed="3" covered="2"/>
+</class>
+<class name="lava/tracker/nnmclub/feature/NnmclubDownload" sourcefilename="NnmclubDownload.kt">
+<method name="&lt;init&gt;" desc="(Llava/tracker/nnmclub/http/NnmclubHttpClient;)V">
+<counter type="INSTRUCTION" missed="0" covered="5"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="2"/>
+</method>
+<method name="getBaseUrl" desc="()Ljava/lang/String;">
+<counter type="INSTRUCTION" missed="2" covered="4"/>
+<counter type="BRANCH" missed="1" covered="1"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="downloadTorrentFile" desc="(Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="0" covered="8"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="getMagnetLink" desc="(Ljava/lang/String;)Ljava/lang/String;">
+<counter type="INSTRUCTION" missed="0" covered="1"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="&lt;init&gt;" desc="(Llava/tracker/nnmclub/http/NnmclubHttpClient;Ljava/lang/String;)V">
+<counter type="INSTRUCTION" missed="0" covered="6"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="2"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="24"/>
+<counter type="BRANCH" missed="1" covered="1"/>
+<counter type="LINE" missed="0" covered="7"/>
+<counter type="METHOD" missed="0" covered="5"/>
+</class>
+<class name="lava/tracker/nnmclub/feature/NnmclubSearch" sourcefilename="NnmclubSearch.kt">
+<method name="buildSearchUrl$nnmclub" desc="(Ljava/lang/String;I)Ljava/lang/String;">
+<counter type="INSTRUCTION" missed="0" covered="29"/>
+<counter type="BRANCH" missed="0" covered="2"/>
+<counter type="LINE" missed="0" covered="5"/>
+</method>
+<method name="&lt;init&gt;" desc="(Llava/tracker/nnmclub/http/NnmclubHttpClient;Llava/tracker/nnmclub/parser/NnmclubSearchParser;)V">
+<counter type="INSTRUCTION" missed="0" covered="8"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="3"/>
+</method>
+<method name="search" desc="(Llava/tracker/api/model/SearchRequest;ILkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="2" covered="62"/>
+<counter type="BRANCH" missed="2" covered="2"/>
+<counter type="LINE" missed="0" covered="4"/>
+</method>
+<method name="&lt;init&gt;" desc="(Llava/tracker/nnmclub/http/NnmclubHttpClient;Llava/tracker/nnmclub/parser/NnmclubSearchParser;Ljava/lang/String;)V">
+<counter type="INSTRUCTION" missed="0" covered="7"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="2"/>
+</method>
+<method name="getBaseUrl" desc="()Ljava/lang/String;">
+<counter type="INSTRUCTION" missed="2" covered="4"/>
+<counter type="BRANCH" missed="1" covered="1"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<counter type="INSTRUCTION" missed="4" covered="110"/>
+<counter type="BRANCH" missed="3" covered="5"/>
+<counter type="LINE" missed="0" covered="15"/>
+<counter type="METHOD" missed="0" covered="5"/>
+</class>
+<class name="lava/tracker/nnmclub/feature/NnmclubTopic" sourcefilename="NnmclubTopic.kt">
+<method name="getTopicPage" desc="(Ljava/lang/String;ILkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="0" covered="22"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="&lt;init&gt;" desc="(Llava/tracker/nnmclub/http/NnmclubHttpClient;Llava/tracker/nnmclub/parser/NnmclubTopicParser;)V">
+<counter type="INSTRUCTION" missed="0" covered="8"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="3"/>
+</method>
+<method name="&lt;init&gt;" desc="(Llava/tracker/nnmclub/http/NnmclubHttpClient;Llava/tracker/nnmclub/parser/NnmclubTopicParser;Ljava/lang/String;)V">
+<counter type="INSTRUCTION" missed="0" covered="7"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="2"/>
+</method>
+<method name="getBaseUrl" desc="()Ljava/lang/String;">
+<counter type="INSTRUCTION" missed="2" covered="4"/>
+<counter type="BRANCH" missed="1" covered="1"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="getTopic" desc="(Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="2" covered="52"/>
+<counter type="BRANCH" missed="2" covered="2"/>
+<counter type="LINE" missed="0" covered="3"/>
+</method>
+<counter type="INSTRUCTION" missed="4" covered="93"/>
+<counter type="BRANCH" missed="3" covered="3"/>
+<counter type="LINE" missed="0" covered="10"/>
+<counter type="METHOD" missed="0" covered="5"/>
+</class>
+<sourcefile name="NnmclubBrowse.kt">
+<line nr="15" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="16" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="17" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="24" mi="0" ci="4" mb="0" cb="0"/>
+<line nr="25" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="29" mi="2" ci="4" mb="1" cb="1"/>
+<line nr="32" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="33" mi="0" ci="17" mb="0" cb="0"/>
+<line nr="34" mi="2" ci="34" mb="2" cb="2"/>
+<line nr="35" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="38" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="41" mi="1" ci="19" mb="2" cb="4"/>
+<line nr="42" mi="0" ci="4" mb="0" cb="0"/>
+<line nr="43" mi="0" ci="2" mb="0" cb="2"/>
+<line nr="44" mi="0" ci="6" mb="0" cb="0"/>
+<line nr="46" mi="0" ci="4" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="5" covered="116"/>
+<counter type="BRANCH" missed="5" covered="9"/>
+<counter type="LINE" missed="0" covered="16"/>
+</sourcefile>
+<sourcefile name="NnmclubComments.kt">
+<line nr="16" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="17" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="20" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="21" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="25" mi="6" ci="0" mb="2" cb="0"/>
+<line nr="28" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="29" mi="41" ci="0" mb="4" cb="0"/>
+<line nr="30" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="32" mi="13" ci="0" mb="0" cb="0"/>
+<line nr="33" mi="15" ci="0" mb="4" cb="0"/>
+<line nr="34" mi="15" ci="0" mb="4" cb="0"/>
+<line nr="35" mi="4" ci="0" mb="4" cb="0"/>
+<line nr="36" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="38" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="39" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="42" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="43" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="44" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="45" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="51" mi="2" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="121" covered="11"/>
+<counter type="BRANCH" missed="18" covered="0"/>
+<counter type="LINE" missed="16" covered="4"/>
+</sourcefile>
+<sourcefile name="NnmclubAuth.kt">
+<line nr="17" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="18" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="19" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="26" mi="0" ci="4" mb="0" cb="0"/>
+<line nr="27" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="31" mi="2" ci="4" mb="1" cb="1"/>
+<line nr="34" mi="0" ci="12" mb="0" cb="0"/>
+<line nr="35" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="36" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="37" mi="0" ci="15" mb="0" cb="0"/>
+<line nr="38" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="39" mi="0" ci="4" mb="0" cb="0"/>
+<line nr="42" mi="2" ci="34" mb="2" cb="2"/>
+<line nr="43" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="44" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="45" mi="0" ci="7" mb="0" cb="0"/>
+<line nr="49" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="53" mi="0" ci="10" mb="0" cb="2"/>
+<counter type="INSTRUCTION" missed="7" covered="121"/>
+<counter type="BRANCH" missed="3" covered="5"/>
+<counter type="LINE" missed="1" covered="17"/>
+</sourcefile>
+<sourcefile name="NnmclubTopic.kt">
+<line nr="16" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="17" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="18" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="25" mi="0" ci="4" mb="0" cb="0"/>
+<line nr="26" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="30" mi="2" ci="4" mb="1" cb="1"/>
+<line nr="33" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="34" mi="2" ci="42" mb="2" cb="2"/>
+<line nr="35" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="39" mi="0" ci="22" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="4" covered="93"/>
+<counter type="BRANCH" missed="3" covered="3"/>
+<counter type="LINE" missed="0" covered="10"/>
+</sourcefile>
+<sourcefile name="NnmclubSearch.kt">
+<line nr="17" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="18" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="19" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="26" mi="0" ci="4" mb="0" cb="0"/>
+<line nr="27" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="31" mi="2" ci="4" mb="1" cb="1"/>
+<line nr="34" mi="0" ci="6" mb="0" cb="0"/>
+<line nr="35" mi="0" ci="17" mb="0" cb="0"/>
+<line nr="36" mi="2" ci="34" mb="2" cb="2"/>
+<line nr="37" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="41" mi="0" ci="13" mb="0" cb="0"/>
+<line nr="42" mi="0" ci="4" mb="0" cb="0"/>
+<line nr="43" mi="0" ci="2" mb="0" cb="2"/>
+<line nr="44" mi="0" ci="6" mb="0" cb="0"/>
+<line nr="46" mi="0" ci="4" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="4" covered="110"/>
+<counter type="BRANCH" missed="3" covered="5"/>
+<counter type="LINE" missed="0" covered="15"/>
+</sourcefile>
+<sourcefile name="NnmclubDownload.kt">
+<line nr="12" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="13" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="16" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="17" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="21" mi="2" ci="4" mb="1" cb="1"/>
+<line nr="24" mi="0" ci="8" mb="0" cb="0"/>
+<line nr="26" mi="0" ci="1" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="2" covered="24"/>
+<counter type="BRANCH" missed="1" covered="1"/>
+<counter type="LINE" missed="0" covered="7"/>
+</sourcefile>
+<counter type="INSTRUCTION" missed="143" covered="475"/>
+<counter type="BRANCH" missed="33" covered="23"/>
+<counter type="LINE" missed="17" covered="69"/>
+<counter type="METHOD" missed="4" covered="28"/>
+<counter type="CLASS" missed="0" covered="6"/>
+</package>
+<package name="lava/tracker/nnmclub/parser">
+<class name="lava/tracker/nnmclub/parser/NnmclubBrowseParser" sourcefilename="NnmclubBrowseParser.kt">
+<method name="parse" desc="(Ljava/lang/String;I)Llava/tracker/api/model/BrowseResult;">
+<counter type="INSTRUCTION" missed="0" covered="23"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="8"/>
+</method>
+<method name="&lt;clinit&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="0" covered="5"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="0" covered="7"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="2"/>
+</method>
+<method name="parsePagination" desc="(Lorg/jsoup/nodes/Document;)I">
+<counter type="INSTRUCTION" missed="34" covered="18"/>
+<counter type="BRANCH" missed="7" covered="1"/>
+<counter type="LINE" missed="3" covered="2"/>
+</method>
+<method name="parse" desc="(Llava/tracker/nnmclub/parser/NnmclubBrowseParser;Ljava/lang/String;I)Llava/tracker/api/model/BrowseResult;">
+<counter type="INSTRUCTION" missed="10" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="44" covered="53"/>
+<counter type="BRANCH" missed="7" covered="1"/>
+<counter type="LINE" missed="4" covered="13"/>
+<counter type="METHOD" missed="1" covered="4"/>
+</class>
+<class name="lava/tracker/nnmclub/parser/NnmclubLoginParser" sourcefilename="NnmclubLoginParser.kt">
+<method name="parse" desc="(Ljava/lang/String;)Llava/tracker/api/model/LoginResult;">
+<counter type="INSTRUCTION" missed="1" covered="37"/>
+<counter type="BRANCH" missed="1" covered="7"/>
+<counter type="LINE" missed="0" covered="8"/>
+</method>
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="0" covered="2"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<counter type="INSTRUCTION" missed="1" covered="39"/>
+<counter type="BRANCH" missed="1" covered="7"/>
+<counter type="LINE" missed="0" covered="9"/>
+<counter type="METHOD" missed="0" covered="2"/>
+</class>
+<class name="lava/tracker/nnmclub/parser/NnmclubSearchParser" sourcefilename="NnmclubSearchParser.kt">
+<method name="parse" desc="(Llava/tracker/nnmclub/parser/NnmclubSearchParser;Ljava/lang/String;I)Llava/tracker/api/model/SearchResult;">
+<counter type="INSTRUCTION" missed="10" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="parseRows" desc="(Lorg/jsoup/nodes/Document;)Ljava/util/List;">
+<counter type="INSTRUCTION" missed="0" covered="14"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="2"/>
+</method>
+<method name="&lt;clinit&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="0" covered="5"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="0" covered="2"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="parse" desc="(Ljava/lang/String;I)Llava/tracker/api/model/SearchResult;">
+<counter type="INSTRUCTION" missed="0" covered="19"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="7"/>
+</method>
+<method name="parseRow" desc="(Lorg/jsoup/nodes/Element;)Llava/tracker/api/model/TorrentItem;">
+<counter type="INSTRUCTION" missed="12" covered="119"/>
+<counter type="BRANCH" missed="10" covered="12"/>
+<counter type="LINE" missed="0" covered="20"/>
+</method>
+<method name="parsePagination" desc="(Lorg/jsoup/nodes/Document;)I">
+<counter type="INSTRUCTION" missed="2" covered="50"/>
+<counter type="BRANCH" missed="3" covered="5"/>
+<counter type="LINE" missed="0" covered="5"/>
+</method>
+<counter type="INSTRUCTION" missed="24" covered="209"/>
+<counter type="BRANCH" missed="13" covered="17"/>
+<counter type="LINE" missed="1" covered="36"/>
+<counter type="METHOD" missed="1" covered="6"/>
+</class>
+<class name="lava/tracker/nnmclub/parser/NnmclubSearchParser$Companion" sourcefilename="NnmclubSearchParser.kt">
+<method name="parseSize" desc="(Ljava/lang/String;)Ljava/lang/Long;">
+<counter type="INSTRUCTION" missed="58" covered="72"/>
+<counter type="BRANCH" missed="7" covered="4"/>
+<counter type="LINE" missed="6" covered="7"/>
+</method>
+<method name="extractTopicId" desc="(Ljava/lang/String;)Ljava/lang/String;">
+<counter type="INSTRUCTION" missed="2" covered="21"/>
+<counter type="BRANCH" missed="2" covered="2"/>
+<counter type="LINE" missed="0" covered="2"/>
+</method>
+<counter type="INSTRUCTION" missed="60" covered="93"/>
+<counter type="BRANCH" missed="9" covered="6"/>
+<counter type="LINE" missed="6" covered="9"/>
+<counter type="METHOD" missed="0" covered="2"/>
+</class>
+<class name="lava/tracker/nnmclub/parser/NnmclubTopicParser" sourcefilename="NnmclubTopicParser.kt">
+<method name="extractTitle" desc="(Lorg/jsoup/nodes/Document;)Ljava/lang/String;">
+<counter type="INSTRUCTION" missed="14" covered="23"/>
+<counter type="BRANCH" missed="4" covered="4"/>
+<counter type="LINE" missed="2" covered="2"/>
+</method>
+<method name="extractDescription" desc="(Lorg/jsoup/nodes/Document;)Ljava/lang/String;">
+<counter type="INSTRUCTION" missed="7" covered="31"/>
+<counter type="BRANCH" missed="5" covered="5"/>
+<counter type="LINE" missed="0" covered="3"/>
+</method>
+<method name="&lt;clinit&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="0" covered="5"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="parse" desc="(Ljava/lang/String;Ljava/lang/String;)Llava/tracker/api/model/TopicDetail;">
+<counter type="INSTRUCTION" missed="22" covered="103"/>
+<counter type="BRANCH" missed="11" covered="9"/>
+<counter type="LINE" missed="0" covered="19"/>
+</method>
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="0" covered="2"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="parse" desc="(Llava/tracker/nnmclub/parser/NnmclubTopicParser;Ljava/lang/String;Ljava/lang/String;)Llava/tracker/api/model/TopicDetail;">
+<counter type="INSTRUCTION" missed="10" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="53" covered="164"/>
+<counter type="BRANCH" missed="20" covered="18"/>
+<counter type="LINE" missed="3" covered="26"/>
+<counter type="METHOD" missed="1" covered="5"/>
+</class>
+<sourcefile name="NnmclubTopicParser.kt">
+<line nr="18" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="20" mi="10" ci="0" mb="0" cb="0"/>
+<line nr="21" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="23" mi="3" ci="17" mb="3" cb="3"/>
+<line nr="24" mi="0" ci="6" mb="0" cb="0"/>
+<line nr="25" mi="0" ci="4" mb="0" cb="0"/>
+<line nr="27" mi="2" ci="9" mb="1" cb="1"/>
+<line nr="28" mi="13" ci="15" mb="4" cb="2"/>
+<line nr="30" mi="2" ci="15" mb="1" cb="1"/>
+<line nr="32" mi="0" ci="12" mb="0" cb="0"/>
+<line nr="33" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="34" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="35" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="36" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="37" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="38" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="39" mi="2" ci="10" mb="2" cb="2"/>
+<line nr="42" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="43" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="44" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="45" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="50" mi="2" ci="13" mb="2" cb="2"/>
+<line nr="51" mi="2" ci="10" mb="2" cb="2"/>
+<line nr="52" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="53" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="57" mi="0" ci="4" mb="0" cb="0"/>
+<line nr="58" mi="2" ci="11" mb="2" cb="2"/>
+<line nr="59" mi="5" ci="16" mb="3" cb="3"/>
+<line nr="64" mi="0" ci="5" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="53" covered="164"/>
+<counter type="BRANCH" missed="20" covered="18"/>
+<counter type="LINE" missed="3" covered="26"/>
+</sourcefile>
+<sourcefile name="NnmclubLoginParser.kt">
+<line nr="15" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="18" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="19" mi="0" ci="8" mb="0" cb="2"/>
+<line nr="20" mi="0" ci="5" mb="0" cb="2"/>
+<line nr="21" mi="1" ci="6" mb="1" cb="1"/>
+<line nr="23" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="24" mi="0" ci="5" mb="0" cb="2"/>
+<line nr="25" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="27" mi="0" ci="6" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="1" covered="39"/>
+<counter type="BRANCH" missed="1" covered="7"/>
+<counter type="LINE" missed="0" covered="9"/>
+</sourcefile>
+<sourcefile name="NnmclubSearchParser.kt">
+<line nr="19" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="21" mi="10" ci="0" mb="0" cb="0"/>
+<line nr="22" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="23" mi="0" ci="6" mb="0" cb="0"/>
+<line nr="24" mi="0" ci="4" mb="0" cb="0"/>
+<line nr="25" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="26" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="27" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="28" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="33" mi="0" ci="4" mb="0" cb="0"/>
+<line nr="34" mi="0" ci="10" mb="0" cb="0"/>
+<line nr="38" mi="0" ci="5" mb="0" cb="2"/>
+<line nr="40" mi="2" ci="6" mb="1" cb="1"/>
+<line nr="41" mi="0" ci="10" mb="0" cb="0"/>
+<line nr="42" mi="2" ci="6" mb="1" cb="1"/>
+<line nr="43" mi="0" ci="9" mb="0" cb="0"/>
+<line nr="45" mi="2" ci="16" mb="3" cb="3"/>
+<line nr="46" mi="2" ci="16" mb="3" cb="3"/>
+<line nr="48" mi="0" ci="4" mb="0" cb="0"/>
+<line nr="49" mi="1" ci="17" mb="1" cb="1"/>
+<line nr="50" mi="0" ci="4" mb="0" cb="0"/>
+<line nr="52" mi="3" ci="8" mb="1" cb="1"/>
+<line nr="54" mi="0" ci="10" mb="0" cb="0"/>
+<line nr="55" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="56" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="57" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="58" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="59" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="60" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="61" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="62" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="67" mi="0" ci="17" mb="0" cb="2"/>
+<line nr="68" mi="0" ci="4" mb="0" cb="0"/>
+<line nr="69" mi="2" ci="21" mb="3" cb="3"/>
+<line nr="70" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="71" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="76" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="79" mi="0" ci="11" mb="0" cb="0"/>
+<line nr="80" mi="2" ci="10" mb="2" cb="2"/>
+<line nr="84" mi="0" ci="11" mb="0" cb="0"/>
+<line nr="85" mi="1" ci="5" mb="1" cb="1"/>
+<line nr="87" mi="0" ci="11" mb="0" cb="0"/>
+<line nr="88" mi="0" ci="2" mb="1" cb="1"/>
+<line nr="89" mi="2" ci="17" mb="1" cb="1"/>
+<line nr="90" mi="16" ci="13" mb="4" cb="1"/>
+<line nr="91" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="92" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="93" mi="10" ci="0" mb="0" cb="0"/>
+<line nr="94" mi="0" ci="13" mb="0" cb="0"/>
+<line nr="95" mi="16" ci="0" mb="0" cb="0"/>
+<line nr="96" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="99" mi="1" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="84" covered="302"/>
+<counter type="BRANCH" missed="22" covered="23"/>
+<counter type="LINE" missed="7" covered="45"/>
+</sourcefile>
+<sourcefile name="NnmclubBrowseParser.kt">
+<line nr="15" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="17" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="19" mi="10" ci="0" mb="0" cb="0"/>
+<line nr="20" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="21" mi="0" ci="7" mb="0" cb="0"/>
+<line nr="22" mi="0" ci="6" mb="0" cb="0"/>
+<line nr="23" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="24" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="25" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="26" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="27" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="32" mi="2" ci="15" mb="1" cb="1"/>
+<line nr="33" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="34" mi="23" ci="0" mb="6" cb="0"/>
+<line nr="35" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="36" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="40" mi="0" ci="5" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="44" covered="53"/>
+<counter type="BRANCH" missed="7" covered="1"/>
+<counter type="LINE" missed="4" covered="13"/>
+</sourcefile>
+<counter type="INSTRUCTION" missed="182" covered="558"/>
+<counter type="BRANCH" missed="50" covered="49"/>
+<counter type="LINE" missed="14" covered="93"/>
+<counter type="METHOD" missed="3" covered="19"/>
+<counter type="CLASS" missed="0" covered="5"/>
+</package>
+<package name="lava/tracker/nnmclub">
+<class name="lava/tracker/nnmclub/NnmclubClient" sourcefilename="NnmclubClient.kt">
+<method name="getFeature" desc="(Lkotlin/reflect/KClass;)Llava/tracker/api/TrackerFeature;">
+<counter type="INSTRUCTION" missed="12" covered="103"/>
+<counter type="BRANCH" missed="6" covered="18"/>
+<counter type="LINE" missed="0" covered="9"/>
+</method>
+<method name="healthCheck" desc="(Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="62" covered="0"/>
+<counter type="BRANCH" missed="6" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Llava/tracker/nnmclub/http/NnmclubHttpClient;Llava/tracker/nnmclub/feature/NnmclubSearch;Llava/tracker/nnmclub/feature/NnmclubBrowse;Llava/tracker/nnmclub/feature/NnmclubTopic;Llava/tracker/nnmclub/feature/NnmclubComments;Llava/tracker/nnmclub/feature/NnmclubAuth;Llava/tracker/nnmclub/feature/NnmclubDownload;)V">
+<counter type="INSTRUCTION" missed="0" covered="29"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="9"/>
+</method>
+<method name="close" desc="()V">
+<counter type="INSTRUCTION" missed="1" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="75" covered="132"/>
+<counter type="BRANCH" missed="12" covered="18"/>
+<counter type="LINE" missed="7" covered="18"/>
+<counter type="METHOD" missed="2" covered="2"/>
+</class>
+<class name="lava/tracker/nnmclub/NnmclubClientFactory" sourcefilename="NnmclubClientFactory.kt">
+<method name="create" desc="(Llava/sdk/api/PluginConfig;)Llava/tracker/api/TrackerClient;">
+<counter type="INSTRUCTION" missed="0" covered="62"/>
+<counter type="BRANCH" missed="0" covered="2"/>
+<counter type="LINE" missed="0" covered="11"/>
+</method>
+<method name="&lt;init&gt;" desc="(Ljavax/inject/Provider;Llava/tracker/nnmclub/http/NnmclubHttpClient;Llava/tracker/nnmclub/parser/NnmclubSearchParser;Llava/tracker/nnmclub/parser/NnmclubBrowseParser;Llava/tracker/nnmclub/parser/NnmclubTopicParser;Llava/tracker/nnmclub/parser/NnmclubLoginParser;)V">
+<counter type="INSTRUCTION" missed="0" covered="26"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="8"/>
+</method>
+<counter type="INSTRUCTION" missed="0" covered="88"/>
+<counter type="BRANCH" missed="0" covered="2"/>
+<counter type="LINE" missed="0" covered="19"/>
+<counter type="METHOD" missed="0" covered="2"/>
+</class>
+<class name="lava/tracker/nnmclub/NnmclubDescriptor" sourcefilename="NnmclubDescriptor.kt">
+<method name="getBaseUrls" desc="()Ljava/util/List;">
+<counter type="INSTRUCTION" missed="0" covered="3"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="getAuthType" desc="()Llava/tracker/api/AuthType;">
+<counter type="INSTRUCTION" missed="0" covered="3"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="&lt;clinit&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="0" covered="62"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="9"/>
+</method>
+<method name="getTrackerId" desc="()Ljava/lang/String;">
+<counter type="INSTRUCTION" missed="0" covered="3"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="getExpectedHealthMarker" desc="()Ljava/lang/String;">
+<counter type="INSTRUCTION" missed="0" covered="3"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="getEncoding" desc="()Ljava/lang/String;">
+<counter type="INSTRUCTION" missed="0" covered="3"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="getApiSupported" desc="()Z">
+<counter type="INSTRUCTION" missed="0" covered="3"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="getCapabilities" desc="()Ljava/util/Set;">
+<counter type="INSTRUCTION" missed="0" covered="3"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="getDisplayName" desc="()Ljava/lang/String;">
+<counter type="INSTRUCTION" missed="0" covered="3"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="getVerified" desc="()Z">
+<counter type="INSTRUCTION" missed="1" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="1" covered="86"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="17"/>
+<counter type="METHOD" missed="1" covered="9"/>
+</class>
+<sourcefile name="NnmclubDescriptor.kt">
+<line nr="16" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="17" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="18" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="19" mi="0" ci="19" mb="0" cb="0"/>
+<line nr="20" mi="0" ci="11" mb="0" cb="0"/>
+<line nr="22" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="23" mi="0" ci="20" mb="0" cb="0"/>
+<line nr="24" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="25" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="26" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="27" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="28" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="29" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="33" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="34" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="35" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="43" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="45" mi="0" ci="3" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="1" covered="86"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="17"/>
+</sourcefile>
+<sourcefile name="NnmclubClient.kt">
+<line nr="29" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="30" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="31" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="32" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="33" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="34" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="35" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="36" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="39" mi="0" ci="6" mb="0" cb="0"/>
+<line nr="42" mi="33" ci="0" mb="0" cb="0"/>
+<line nr="43" mi="18" ci="0" mb="6" cb="0"/>
+<line nr="44" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="45" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="46" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="49" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="54" mi="0" ci="4" mb="0" cb="0"/>
+<line nr="55" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="56" mi="2" ci="16" mb="1" cb="3"/>
+<line nr="57" mi="2" ci="16" mb="1" cb="3"/>
+<line nr="58" mi="2" ci="16" mb="1" cb="3"/>
+<line nr="59" mi="2" ci="16" mb="1" cb="3"/>
+<line nr="60" mi="2" ci="16" mb="1" cb="3"/>
+<line nr="61" mi="2" ci="16" mb="1" cb="3"/>
+<line nr="62" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="68" mi="1" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="75" covered="132"/>
+<counter type="BRANCH" missed="12" covered="18"/>
+<counter type="LINE" missed="7" covered="18"/>
+</sourcefile>
+<sourcefile name="NnmclubClientFactory.kt">
+<line nr="35" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="36" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="37" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="38" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="39" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="40" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="41" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="43" mi="0" ci="6" mb="0" cb="0"/>
+<line nr="46" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="47" mi="0" ci="2" mb="0" cb="2"/>
+<line nr="48" mi="0" ci="4" mb="0" cb="0"/>
+<line nr="49" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="50" mi="0" ci="8" mb="0" cb="0"/>
+<line nr="51" mi="0" ci="8" mb="0" cb="0"/>
+<line nr="52" mi="0" ci="8" mb="0" cb="0"/>
+<line nr="53" mi="0" ci="6" mb="0" cb="0"/>
+<line nr="54" mi="0" ci="8" mb="0" cb="0"/>
+<line nr="55" mi="0" ci="6" mb="0" cb="0"/>
+<line nr="58" mi="0" ci="7" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="0" covered="88"/>
+<counter type="BRANCH" missed="0" covered="2"/>
+<counter type="LINE" missed="0" covered="19"/>
+</sourcefile>
+<counter type="INSTRUCTION" missed="76" covered="306"/>
+<counter type="BRANCH" missed="12" covered="20"/>
+<counter type="LINE" missed="8" covered="54"/>
+<counter type="METHOD" missed="3" covered="13"/>
+<counter type="CLASS" missed="0" covered="3"/>
+</package>
+<counter type="INSTRUCTION" missed="540" covered="1907"/>
+<counter type="BRANCH" missed="117" covered="104"/>
+<counter type="LINE" missed="62" covered="289"/>
+<counter type="METHOD" missed="13" covered="83"/>
+<counter type="CLASS" missed="1" covered="24"/>
+</report>

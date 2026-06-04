@@ -1,0 +1,24 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>LongMethod:TopicListItem.kt$@Composable @Preview(showBackground = true) private fun TopicListItem()</ID>
+    <ID>LongMethod:TopicListItem.kt$@Composable private fun Topic( modifier: Modifier = Modifier, topic: Topic, showCategory: Boolean = true, contentColor: Color, providerLabel: ProviderLabel? = null, action: @Composable (() -&gt; Unit)? = null, onClick: () -&gt; Unit, )</ID>
+    <ID>LongMethod:TopicListItem.kt$@Composable private fun Torrent( modifier: Modifier = Modifier, torrent: Torrent, showCategory: Boolean = true, contentColor: Color, providerLabel: ProviderLabel? = null, action: @Composable (() -&gt; Unit)? = null, onClick: () -&gt; Unit, )</ID>
+    <ID>LongParameterList:Image.kt$( src: String?, modifier: Modifier = Modifier, contentDescription: String?, onLoading: @Composable () -&gt; Unit, onSuccess: @Composable (Painter) -&gt; Unit, onError: @Composable () -&gt; Unit, )</ID>
+    <ID>LongParameterList:TopicListItem.kt$( modifier: Modifier = Modifier, topic: Topic, showCategory: Boolean = true, containerColor: Color = AppTheme.colors.surface, contentColor: Color = AppTheme.colors.contentColorFor(containerColor), providerLabel: ProviderLabel? = null, action: @Composable (() -&gt; Unit)? = null, onClick: () -&gt; Unit, )</ID>
+    <ID>LongParameterList:TopicListItem.kt$( modifier: Modifier = Modifier, topic: Topic, showCategory: Boolean = true, contentColor: Color, providerLabel: ProviderLabel? = null, action: @Composable (() -&gt; Unit)? = null, onClick: () -&gt; Unit, )</ID>
+    <ID>LongParameterList:TopicListItem.kt$( modifier: Modifier = Modifier, torrent: Torrent, showCategory: Boolean = true, contentColor: Color, providerLabel: ProviderLabel? = null, action: @Composable (() -&gt; Unit)? = null, onClick: () -&gt; Unit, )</ID>
+    <ID>LongParameterList:TopicListItem.kt$( topicModel: TopicModel&lt;out Topic&gt;, modifier: Modifier = Modifier, showCategory: Boolean = true, dimVisited: Boolean = true, providerLabel: ProviderLabel? = null, onClick: () -&gt; Unit, onFavoriteClick: () -&gt; Unit, )</ID>
+    <ID>LongParameterList:TorrentStatus.kt$( modifier: Modifier = Modifier, status: TorrentStatus? = null, dateSeconds: Long? = null, date: String? = null, size: String? = null, seeds: Int? = null, leeches: Int? = null, )</ID>
+    <ID>MagicNumber:TopicListItem.kt$0.5f</ID>
+    <ID>MagicNumber:TorrentStatus.kt$1000</ID>
+    <ID>MatchingDeclarationName:Parcel.kt$OptionalParceler&lt;T&gt; : Parceler</ID>
+    <ID>MatchingDeclarationName:Visibility.kt$VisibilityState</ID>
+    <ID>MaxLineLength:TopicListItem.kt$title = "Сияние / The Shining (Стэнли Кубрик / S 23 3 Kubrick) 2x MVO + DVO + 4x AVO (Володарский, Гаврилов, Живов, Кузнецов) + VO + Sub Rus, Eng + Comm + Original Eng"</ID>
+    <ID>MaxLineLength:TorrentStatus.kt$title = "Сияние / The Shining (Стэнли Кубрик / S 23 3 Kubrick) 2x MVO + DVO + 4x AVO (Володарский, Гаврилов, Живов, Кузнецов) + VO + Sub Rus, Eng + Comm + Original Eng"</ID>
+    <ID>TooManyFunctions:Parcel.kt$lava.ui.parcel.Parcel.kt</ID>
+    <ID>UnusedPrivateMember:Avatar.kt$@ThemePreviews @Composable private fun Avatar_Preview()</ID>
+    <ID>UnusedPrivateMember:TopicListItem.kt$@ThemePreviews @Composable private fun TopicListItem_Preview()</ID>
+  </CurrentIssues>
+</SmellBaseline>

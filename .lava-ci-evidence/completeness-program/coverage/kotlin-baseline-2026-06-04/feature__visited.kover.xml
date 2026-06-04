@@ -1,0 +1,574 @@
+<?xml version="1.0" ?>
+<report name="Kover Gradle Plugin XML report for :feature:visited">
+<package name="hilt_aggregated_deps">
+<class name="hilt_aggregated_deps/_lava_visited_VisitedViewModel_HiltModules_BindsModule" sourcefilename="_lava_visited_VisitedViewModel_HiltModules_BindsModule.java">
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="hilt_aggregated_deps/_lava_visited_VisitedViewModel_HiltModules_KeyModule" sourcefilename="_lava_visited_VisitedViewModel_HiltModules_KeyModule.java">
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<sourcefile name="_lava_visited_VisitedViewModel_HiltModules_BindsModule.java">
+<line nr="14" mi="2" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</sourcefile>
+<sourcefile name="_lava_visited_VisitedViewModel_HiltModules_KeyModule.java">
+<line nr="14" mi="2" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</sourcefile>
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+<counter type="CLASS" missed="2" covered="0"/>
+</package>
+<package name="lava/visited">
+<class name="lava/visited/VisitedAction$FavoriteClick" sourcefilename="VisitedAction.kt">
+<method name="&lt;init&gt;" desc="(Llava/models/topic/TopicModel;)V">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/visited/VisitedAction$TopicClick" sourcefilename="VisitedAction.kt">
+<method name="&lt;init&gt;" desc="(Llava/models/topic/TopicModel;)V">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/visited/VisitedScreenKt" sourcefilename="VisitedScreen.kt">
+<method name="VisitedScreen" desc="(Llava/visited/VisitedState;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;I)V">
+<counter type="INSTRUCTION" missed="216" covered="0"/>
+<counter type="BRANCH" missed="13" covered="1"/>
+<counter type="LINE" missed="11" covered="0"/>
+</method>
+<method name="VisitedScreen" desc="(Llava/visited/VisitedViewModel;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;I)V">
+<counter type="INSTRUCTION" missed="189" covered="0"/>
+<counter type="BRANCH" missed="4" covered="0"/>
+<counter type="LINE" missed="7" covered="0"/>
+</method>
+<method name="VisitedScreen" desc="(Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;I)V">
+<counter type="INSTRUCTION" missed="75" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+</method>
+<method name="VisitedScreen$lambda$9$lambda$8" desc="(Llava/visited/VisitedState;Lkotlin/jvm/functions/Function1;Landroidx/compose/foundation/lazy/LazyListScope;)Lkotlin/Unit;">
+<counter type="INSTRUCTION" missed="6" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="486" covered="0"/>
+<counter type="BRANCH" missed="19" covered="1"/>
+<counter type="LINE" missed="23" covered="0"/>
+<counter type="METHOD" missed="4" covered="0"/>
+</class>
+<class name="lava/visited/VisitedScreenKt$VisitedScreen$2$1" sourcefilename="VisitedScreen.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="38" covered="0"/>
+<counter type="BRANCH" missed="3" covered="1"/>
+<counter type="LINE" missed="3" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="38" covered="0"/>
+<counter type="BRANCH" missed="3" covered="1"/>
+<counter type="LINE" missed="3" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/visited/VisitedScreenKt$VisitedScreen$5$1$1$1$1" sourcefilename="VisitedScreen.kt">
+<method name="invoke" desc="()V">
+<counter type="INSTRUCTION" missed="9" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="9" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/visited/VisitedScreenKt$VisitedScreen$5$1$1$2$1" sourcefilename="VisitedScreen.kt">
+<method name="invoke" desc="()V">
+<counter type="INSTRUCTION" missed="9" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="9" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/visited/VisitedScreenKt$VisitedScreen$lambda$9$lambda$8$$inlined$items$default$1" sourcefilename="LazyDsl.kt">
+<method name="invoke" desc="(Ljava/lang/Object;)Ljava/lang/Void;">
+<counter type="INSTRUCTION" missed="1" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="1" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/visited/VisitedScreenKt$VisitedScreen$lambda$9$lambda$8$$inlined$items$default$2" sourcefilename="LazyDsl.kt">
+<method name="invoke" desc="(I)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/visited/VisitedScreenKt$VisitedScreen$lambda$9$lambda$8$$inlined$items$default$3" sourcefilename="LazyDsl.kt">
+<method name="invoke" desc="(I)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/visited/VisitedSideEffect$OpenTopic" sourcefilename="VisitedSideEffect.kt">
+<method name="&lt;init&gt;" desc="(Ljava/lang/String;)V">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/visited/VisitedSideEffect$ShowFavoriteToggleError" sourcefilename="VisitedSideEffect.kt">
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/visited/VisitedState$Empty" sourcefilename="VisitedState.kt">
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/visited/VisitedState$Initial" sourcefilename="VisitedState.kt">
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/visited/VisitedState$VisitedList" sourcefilename="VisitedState.kt">
+<method name="&lt;init&gt;" desc="(Ljava/util/List;)V">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/visited/VisitedViewModel" sourcefilename="VisitedViewModel.kt">
+<method name="onFavoriteClick" desc="(Llava/models/topic/TopicModel;)Lkotlinx/coroutines/Job;">
+<counter type="INSTRUCTION" missed="13" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Llava/domain/usecase/ObserveVisitedUseCase;Llava/domain/usecase/ToggleFavoriteUseCase;Llava/logger/api/LoggerFactory;)V">
+<counter type="INSTRUCTION" missed="30" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+</method>
+<method name="perform" desc="(Llava/visited/VisitedAction;)V">
+<counter type="INSTRUCTION" missed="26" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+</method>
+<method name="onTopicClick" desc="(Llava/models/topic/TopicModel;)Lkotlinx/coroutines/Job;">
+<counter type="INSTRUCTION" missed="12" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="observeVisited" desc="()Lkotlinx/coroutines/Job;">
+<counter type="INSTRUCTION" missed="12" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="93" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="13" covered="0"/>
+<counter type="METHOD" missed="5" covered="0"/>
+</class>
+<class name="lava/visited/VisitedViewModel$container$1" sourcefilename="VisitedViewModel.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="10" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="10" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/visited/VisitedViewModel$observeVisited$1" sourcefilename="VisitedViewModel.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="27" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="27" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/visited/VisitedViewModel$observeVisited$1$2" sourcefilename="VisitedViewModel.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="21" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</method>
+<method name="invokeSuspend$lambda$1" desc="(Ljava/util/List;Lorg/orbitmvi/orbit/syntax/simple/SimpleContext;)Llava/visited/VisitedState;">
+<counter type="INSTRUCTION" missed="11" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="32" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="5" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+</class>
+<class name="lava/visited/VisitedViewModel$onFavoriteClick$1" sourcefilename="VisitedViewModel.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="62" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="62" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/visited/VisitedViewModel$onTopicClick$1" sourcefilename="VisitedViewModel.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="17" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="17" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/visited/VisitedViewModel_Factory" sourcefilename="VisitedViewModel_Factory.java">
+<method name="get" desc="()Llava/visited/VisitedViewModel;">
+<counter type="INSTRUCTION" missed="13" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Ldagger/internal/Provider;Ldagger/internal/Provider;Ldagger/internal/Provider;)V">
+<counter type="INSTRUCTION" missed="11" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+</method>
+<method name="create" desc="(Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Llava/visited/VisitedViewModel_Factory;">
+<counter type="INSTRUCTION" missed="9" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="newInstance" desc="(Llava/domain/usecase/ObserveVisitedUseCase;Llava/domain/usecase/ToggleFavoriteUseCase;Llava/logger/api/LoggerFactory;)Llava/visited/VisitedViewModel;">
+<counter type="INSTRUCTION" missed="6" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="create" desc="(Ldagger/internal/Provider;Ldagger/internal/Provider;Ldagger/internal/Provider;)Llava/visited/VisitedViewModel_Factory;">
+<counter type="INSTRUCTION" missed="6" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="45" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="8" covered="0"/>
+<counter type="METHOD" missed="5" covered="0"/>
+</class>
+<class name="lava/visited/VisitedViewModel_HiltModules$BindsModule" sourcefilename="VisitedViewModel_HiltModules.java">
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/visited/VisitedViewModel_HiltModules$KeyModule" sourcefilename="VisitedViewModel_HiltModules.java">
+<method name="provide" desc="()Z">
+<counter type="INSTRUCTION" missed="1" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="1" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/visited/VisitedViewModel_HiltModules_BindsModule_Binds_LazyMapKey" sourcefilename="VisitedViewModel_HiltModules_BindsModule_Binds_LazyMapKey.java">
+<method name="&lt;clinit&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+</class>
+<class name="lava/visited/VisitedViewModel_HiltModules_KeyModule_ProvideFactory" sourcefilename="VisitedViewModel_HiltModules_KeyModule_ProvideFactory.java">
+<method name="create" desc="()Llava/visited/VisitedViewModel_HiltModules_KeyModule_ProvideFactory;">
+<counter type="INSTRUCTION" missed="1" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="provide" desc="()Z">
+<counter type="INSTRUCTION" missed="1" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="get" desc="()Ljava/lang/Boolean;">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="6" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+<counter type="METHOD" missed="4" covered="0"/>
+</class>
+<class name="lava/visited/VisitedViewModel_HiltModules_KeyModule_ProvideFactory$InstanceHolder" sourcefilename="VisitedViewModel_HiltModules_KeyModule_ProvideFactory.java">
+<method name="&lt;clinit&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/visited/VisitedViewModel_HiltModules_KeyModule_Provide_LazyMapKey" sourcefilename="VisitedViewModel_HiltModules_KeyModule_Provide_LazyMapKey.java">
+<method name="&lt;clinit&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+</class>
+<sourcefile name="LazyDsl.kt">
+<line nr="171" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="176" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="177" mi="7" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="15" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</sourcefile>
+<sourcefile name="VisitedViewModel_HiltModules_KeyModule_Provide_LazyMapKey.java">
+<line nr="23" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="27" mi="2" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</sourcefile>
+<sourcefile name="VisitedViewModel.kt">
+<line nr="21" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="22" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="24" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="25" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="27" mi="16" ci="0" mb="0" cb="0"/>
+<line nr="28" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="29" mi="10" ci="0" mb="0" cb="0"/>
+<line nr="33" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="34" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="35" mi="9" ci="0" mb="2" cb="0"/>
+<line nr="36" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="40" mi="12" ci="0" mb="0" cb="0"/>
+<line nr="41" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="42" mi="21" ci="0" mb="0" cb="0"/>
+<line nr="43" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="44" mi="13" ci="0" mb="0" cb="0"/>
+<line nr="45" mi="3" ci="0" mb="2" cb="0"/>
+<line nr="46" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="48" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="54" mi="13" ci="0" mb="0" cb="0"/>
+<line nr="55" mi="41" ci="0" mb="0" cb="0"/>
+<line nr="56" mi="21" ci="0" mb="2" cb="0"/>
+<line nr="59" mi="12" ci="0" mb="0" cb="0"/>
+<line nr="60" mi="17" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="241" covered="0"/>
+<counter type="BRANCH" missed="6" covered="0"/>
+<counter type="LINE" missed="24" covered="0"/>
+</sourcefile>
+<sourcefile name="VisitedViewModel_HiltModules_BindsModule_Binds_LazyMapKey.java">
+<line nr="23" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="27" mi="2" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</sourcefile>
+<sourcefile name="VisitedState.kt">
+<line nr="7" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="8" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="9" mi="7" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="11" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</sourcefile>
+<sourcefile name="VisitedViewModel_Factory.java">
+<line nr="39" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="40" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="41" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="42" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="47" mi="13" ci="0" mb="0" cb="0"/>
+<line nr="54" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="61" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="66" mi="6" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="45" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="8" covered="0"/>
+</sourcefile>
+<sourcefile name="VisitedSideEffect.kt">
+<line nr="4" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="5" mi="2" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="9" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</sourcefile>
+<sourcefile name="VisitedViewModel_HiltModules_KeyModule_ProvideFactory.java">
+<line nr="25" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="28" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="32" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="36" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="40" mi="4" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="10" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="5" covered="0"/>
+</sourcefile>
+<sourcefile name="VisitedAction.kt">
+<line nr="7" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="8" mi="7" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="14" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</sourcefile>
+<sourcefile name="VisitedViewModel_HiltModules.java">
+<line nr="27" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="48" mi="1" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="3" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</sourcefile>
+<sourcefile name="VisitedScreen.kt">
+<line nr="24" mi="45" ci="0" mb="2" cb="0"/>
+<line nr="25" mi="11" ci="0" mb="0" cb="0"/>
+<line nr="26" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="27" mi="12" ci="0" mb="0" cb="0"/>
+<line nr="33" mi="52" ci="0" mb="4" cb="0"/>
+<line nr="34" mi="12" ci="0" mb="0" cb="0"/>
+<line nr="35" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="36" mi="53" ci="0" mb="0" cb="0"/>
+<line nr="37" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="38" mi="11" ci="0" mb="2" cb="0"/>
+<line nr="39" mi="21" ci="0" mb="1" cb="1"/>
+<line nr="42" mi="18" ci="0" mb="0" cb="0"/>
+<line nr="43" mi="36" ci="0" mb="0" cb="0"/>
+<line nr="44" mi="13" ci="0" mb="0" cb="0"/>
+<line nr="50" mi="75" ci="0" mb="4" cb="0"/>
+<line nr="51" mi="17" ci="0" mb="2" cb="0"/>
+<line nr="52" mi="14" ci="0" mb="2" cb="0"/>
+<line nr="53" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="54" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="55" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="57" mi="13" ci="0" mb="1" cb="1"/>
+<line nr="58" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="59" mi="47" ci="0" mb="4" cb="0"/>
+<line nr="60" mi="24" ci="0" mb="0" cb="0"/>
+<line nr="61" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="69" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="70" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="74" mi="13" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="542" covered="0"/>
+<counter type="BRANCH" missed="22" covered="2"/>
+<counter type="LINE" missed="28" covered="0"/>
+</sourcefile>
+<counter type="INSTRUCTION" missed="898" covered="0"/>
+<counter type="BRANCH" missed="28" covered="2"/>
+<counter type="LINE" missed="81" covered="0"/>
+<counter type="METHOD" missed="44" covered="0"/>
+<counter type="CLASS" missed="27" covered="0"/>
+</package>
+<counter type="INSTRUCTION" missed="902" covered="0"/>
+<counter type="BRANCH" missed="28" covered="2"/>
+<counter type="LINE" missed="83" covered="0"/>
+<counter type="METHOD" missed="46" covered="0"/>
+<counter type="CLASS" missed="29" covered="0"/>
+</report>

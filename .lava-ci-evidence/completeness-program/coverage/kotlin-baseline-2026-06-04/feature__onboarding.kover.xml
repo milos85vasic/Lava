@@ -1,0 +1,2136 @@
+<?xml version="1.0" ?>
+<report name="Kover Gradle Plugin XML report for :feature:onboarding">
+<package name="lava/onboarding">
+<class name="lava/onboarding/ApiConnectivityState$Failure" sourcefilename="OnboardingState.kt">
+<method name="&lt;init&gt;" desc="(Ljava/lang/String;)V">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/onboarding/ApiConnectivityState$Idle" sourcefilename="OnboardingState.kt">
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="0" covered="2"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<counter type="INSTRUCTION" missed="0" covered="2"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+<counter type="METHOD" missed="0" covered="1"/>
+</class>
+<class name="lava/onboarding/ApiConnectivityState$Testing" sourcefilename="OnboardingState.kt">
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="0" covered="2"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<counter type="INSTRUCTION" missed="0" covered="2"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+<counter type="METHOD" missed="0" covered="1"/>
+</class>
+<class name="lava/onboarding/CloudApiDefaults" sourcefilename="CloudApiDefaults.kt">
+<method name="defaultsFrom" desc="(Ljava/lang/String;)Ljava/util/List;">
+<counter type="INSTRUCTION" missed="2" covered="33"/>
+<counter type="BRANCH" missed="1" covered="3"/>
+<counter type="LINE" missed="0" covered="3"/>
+</method>
+<method name="parse" desc="(Ljava/lang/String;)Llava/models/settings/Endpoint$GoApi;">
+<counter type="INSTRUCTION" missed="6" covered="143"/>
+<counter type="BRANCH" missed="5" covered="25"/>
+<counter type="LINE" missed="1" covered="18"/>
+</method>
+<counter type="INSTRUCTION" missed="8" covered="176"/>
+<counter type="BRANCH" missed="6" covered="28"/>
+<counter type="LINE" missed="1" covered="21"/>
+<counter type="METHOD" missed="0" covered="2"/>
+</class>
+<class name="lava/onboarding/OnboardingAction$AddCloudApi" sourcefilename="OnboardingAction.kt">
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="0" covered="2"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<counter type="INSTRUCTION" missed="0" covered="2"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+<counter type="METHOD" missed="0" covered="1"/>
+</class>
+<class name="lava/onboarding/OnboardingAction$BackStep" sourcefilename="OnboardingAction.kt">
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="0" covered="2"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<counter type="INSTRUCTION" missed="0" covered="2"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+<counter type="METHOD" missed="0" covered="1"/>
+</class>
+<class name="lava/onboarding/OnboardingAction$CloudAddressChanged" sourcefilename="OnboardingAction.kt">
+<method name="&lt;init&gt;" desc="(Ljava/lang/String;)V">
+<counter type="INSTRUCTION" missed="0" covered="7"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<counter type="INSTRUCTION" missed="0" covered="7"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+<counter type="METHOD" missed="0" covered="1"/>
+</class>
+<class name="lava/onboarding/OnboardingAction$Finish" sourcefilename="OnboardingAction.kt">
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="0" covered="2"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<counter type="INSTRUCTION" missed="0" covered="2"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+<counter type="METHOD" missed="0" covered="1"/>
+</class>
+<class name="lava/onboarding/OnboardingAction$NextStep" sourcefilename="OnboardingAction.kt">
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="0" covered="2"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<counter type="INSTRUCTION" missed="0" covered="2"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+<counter type="METHOD" missed="0" covered="1"/>
+</class>
+<class name="lava/onboarding/OnboardingAction$PasswordChanged" sourcefilename="OnboardingAction.kt">
+<method name="&lt;init&gt;" desc="(Ljava/lang/String;)V">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/onboarding/OnboardingAction$RetryApiProbe" sourcefilename="OnboardingAction.kt">
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/onboarding/OnboardingAction$SelectApi" sourcefilename="OnboardingAction.kt">
+<method name="&lt;init&gt;" desc="(Llava/models/settings/Endpoint;)V">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/onboarding/OnboardingAction$TestAndContinue" sourcefilename="OnboardingAction.kt">
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="0" covered="2"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<counter type="INSTRUCTION" missed="0" covered="2"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+<counter type="METHOD" missed="0" covered="1"/>
+</class>
+<class name="lava/onboarding/OnboardingAction$ToggleAnonymous" sourcefilename="OnboardingAction.kt">
+<method name="&lt;init&gt;" desc="(Z)V">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/onboarding/OnboardingAction$ToggleProvider" sourcefilename="OnboardingAction.kt">
+<method name="&lt;init&gt;" desc="(Ljava/lang/String;)V">
+<counter type="INSTRUCTION" missed="0" covered="7"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<counter type="INSTRUCTION" missed="0" covered="7"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+<counter type="METHOD" missed="0" covered="1"/>
+</class>
+<class name="lava/onboarding/OnboardingAction$UsernameChanged" sourcefilename="OnboardingAction.kt">
+<method name="&lt;init&gt;" desc="(Ljava/lang/String;)V">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/onboarding/OnboardingHiltModule" sourcefilename="OnboardingHiltModule.kt">
+<method name="apiSelectionEnabled" desc="()Z">
+<counter type="INSTRUCTION" missed="1" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="1" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/onboarding/OnboardingHiltModule_ApiSelectionEnabledFactory" sourcefilename="OnboardingHiltModule_ApiSelectionEnabledFactory.java">
+<method name="apiSelectionEnabled" desc="()Z">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="create" desc="()Llava/onboarding/OnboardingHiltModule_ApiSelectionEnabledFactory;">
+<counter type="INSTRUCTION" missed="1" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="get" desc="()Ljava/lang/Boolean;">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+<counter type="METHOD" missed="4" covered="0"/>
+</class>
+<class name="lava/onboarding/OnboardingHiltModule_ApiSelectionEnabledFactory$InstanceHolder" sourcefilename="OnboardingHiltModule_ApiSelectionEnabledFactory.java">
+<method name="&lt;clinit&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/onboarding/OnboardingScreenKt" sourcefilename="OnboardingScreen.kt">
+<method name="OnboardingScreen" desc="(Llava/onboarding/OnboardingViewModel;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V">
+<counter type="INSTRUCTION" missed="292" covered="0"/>
+<counter type="BRANCH" missed="6" covered="0"/>
+<counter type="LINE" missed="13" covered="0"/>
+</method>
+<method name="OnboardingScreen$lambda$7$lambda$6$lambda$4" desc="(II)I">
+<counter type="INSTRUCTION" missed="16" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="OnboardingScreen$lambda$3$lambda$2" desc="(Llava/onboarding/OnboardingViewModel;)Lkotlin/Unit;">
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="OnboardingScreen$lambda$7$lambda$6$lambda$5" desc="(II)I">
+<counter type="INSTRUCTION" missed="16" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="OnboardingScreen$lambda$7$lambda$6" desc="(Landroidx/compose/animation/AnimatedContentTransitionScope;)Landroidx/compose/animation/ContentTransform;">
+<counter type="INSTRUCTION" missed="27" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="7" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="355" covered="0"/>
+<counter type="BRANCH" missed="8" covered="0"/>
+<counter type="LINE" missed="23" covered="0"/>
+<counter type="METHOD" missed="5" covered="0"/>
+</class>
+<class name="lava/onboarding/OnboardingScreenKt$OnboardingScreen$1$1" sourcefilename="OnboardingScreen.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="17" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="17" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/onboarding/OnboardingScreenKt$OnboardingScreen$4" sourcefilename="OnboardingScreen.kt">
+<method name="invoke" desc="(Landroidx/compose/animation/AnimatedContentScope;Llava/onboarding/OnboardingStep;Landroidx/compose/runtime/Composer;I)V">
+<counter type="INSTRUCTION" missed="660" covered="9"/>
+<counter type="BRANCH" missed="9" covered="0"/>
+<counter type="LINE" missed="37" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="660" covered="9"/>
+<counter type="BRANCH" missed="9" covered="0"/>
+<counter type="LINE" missed="37" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/onboarding/OnboardingSideEffect$ExitApp" sourcefilename="OnboardingSideEffect.kt">
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="0" covered="2"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<counter type="INSTRUCTION" missed="0" covered="2"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+<counter type="METHOD" missed="0" covered="1"/>
+</class>
+<class name="lava/onboarding/OnboardingSideEffect$Finish" sourcefilename="OnboardingSideEffect.kt">
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="0" covered="2"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<counter type="INSTRUCTION" missed="0" covered="2"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+<counter type="METHOD" missed="0" covered="1"/>
+</class>
+<class name="lava/onboarding/OnboardingState" sourcefilename="OnboardingState.kt">
+<method name="&lt;init&gt;" desc="(Llava/onboarding/OnboardingStep;Ljava/util/List;Ljava/util/Map;IZLjava/util/List;ZLlava/models/settings/Endpoint;Llava/onboarding/ApiConnectivityState;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;)V">
+<counter type="INSTRUCTION" missed="0" covered="85"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="12"/>
+</method>
+<counter type="INSTRUCTION" missed="0" covered="85"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="12"/>
+<counter type="METHOD" missed="0" covered="1"/>
+</class>
+<class name="lava/onboarding/OnboardingStep" sourcefilename="OnboardingState.kt">
+<method name="&lt;clinit&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="0" covered="36"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<counter type="INSTRUCTION" missed="0" covered="36"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+<counter type="METHOD" missed="0" covered="1"/>
+</class>
+<class name="lava/onboarding/OnboardingViewModel" sourcefilename="OnboardingViewModel.kt">
+<method name="onCloudAddressChanged" desc="(Ljava/lang/String;)Lkotlinx/coroutines/Job;">
+<counter type="INSTRUCTION" missed="0" covered="12"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="startApiDiscovery" desc="()Lkotlinx/coroutines/Job;">
+<counter type="INSTRUCTION" missed="0" covered="12"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="onPasswordChanged" desc="(Ljava/lang/String;)Lkotlinx/coroutines/Job;">
+<counter type="INSTRUCTION" missed="15" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="onAddCloudApi" desc="()Lkotlinx/coroutines/Job;">
+<counter type="INSTRUCTION" missed="0" covered="12"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="onUsernameChanged" desc="(Ljava/lang/String;)Lkotlinx/coroutines/Job;">
+<counter type="INSTRUCTION" missed="15" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="onNextStep" desc="()Lkotlinx/coroutines/Job;">
+<counter type="INSTRUCTION" missed="0" covered="12"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="hasSelectedProviders" desc="()Z">
+<counter type="INSTRUCTION" missed="12" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="currentProviderId" desc="()Ljava/lang/String;">
+<counter type="INSTRUCTION" missed="2" covered="27"/>
+<counter type="BRANCH" missed="2" covered="2"/>
+<counter type="LINE" missed="0" covered="3"/>
+</method>
+<method name="onBackStep" desc="()Lkotlinx/coroutines/Job;">
+<counter type="INSTRUCTION" missed="0" covered="12"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="onFinish" desc="()Lkotlinx/coroutines/Job;">
+<counter type="INSTRUCTION" missed="0" covered="12"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="currentProvider" desc="()Llava/tracker/api/TrackerDescriptor;">
+<counter type="INSTRUCTION" missed="45" covered="0"/>
+<counter type="BRANCH" missed="8" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</method>
+<method name="onToggleProvider" desc="(Ljava/lang/String;)Lkotlinx/coroutines/Job;">
+<counter type="INSTRUCTION" missed="0" covered="12"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="&lt;init&gt;" desc="(Llava/tracker/client/LavaTrackerSdk;Llava/credentials/ProviderCredentialManager;Llava/auth/api/AuthService;Llava/logger/api/LoggerFactory;Llava/common/analytics/AnalyticsTracker;Llava/credentials/ProviderConfigRepository;Llava/database/dao/ClonedProviderDao;Llava/data/api/service/LocalNetworkDiscoveryService;Llava/data/api/service/ConnectionService;Llava/data/api/repository/EndpointsRepository;ZLjava/lang/String;)V">
+<counter type="INSTRUCTION" missed="0" covered="75"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="16"/>
+</method>
+<method name="hasConfiguredProvider" desc="()Z">
+<counter type="INSTRUCTION" missed="13" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="updateCurrentConfig" desc="(Lkotlin/jvm/functions/Function1;)Lkotlinx/coroutines/Job;">
+<counter type="INSTRUCTION" missed="13" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="advanceToNextProvider" desc="()Lkotlinx/coroutines/Job;">
+<counter type="INSTRUCTION" missed="0" covered="11"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="perform" desc="(Llava/onboarding/OnboardingAction;)V">
+<counter type="INSTRUCTION" missed="39" covered="77"/>
+<counter type="BRANCH" missed="7" covered="17"/>
+<counter type="LINE" missed="2" covered="14"/>
+</method>
+<method name="onSelectApi" desc="(Llava/models/settings/Endpoint;)Lkotlinx/coroutines/Job;">
+<counter type="INSTRUCTION" missed="0" covered="13"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="onToggleAnonymous" desc="(Z)Lkotlinx/coroutines/Job;">
+<counter type="INSTRUCTION" missed="15" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="loadProviders" desc="()Lkotlinx/coroutines/Job;">
+<counter type="INSTRUCTION" missed="0" covered="12"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="onTestAndContinue" desc="()Lkotlinx/coroutines/Job;">
+<counter type="INSTRUCTION" missed="0" covered="12"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<counter type="INSTRUCTION" missed="169" covered="311"/>
+<counter type="BRANCH" missed="17" covered="19"/>
+<counter type="LINE" missed="11" covered="44"/>
+<counter type="METHOD" missed="7" covered="14"/>
+</class>
+<class name="lava/onboarding/OnboardingViewModel$advanceToNextProvider$1" sourcefilename="OnboardingViewModel.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="0" covered="83"/>
+<counter type="BRANCH" missed="0" covered="2"/>
+<counter type="LINE" missed="0" covered="5"/>
+</method>
+<counter type="INSTRUCTION" missed="0" covered="83"/>
+<counter type="BRANCH" missed="0" covered="2"/>
+<counter type="LINE" missed="0" covered="5"/>
+<counter type="METHOD" missed="0" covered="1"/>
+</class>
+<class name="lava/onboarding/OnboardingViewModel$container$1" sourcefilename="OnboardingViewModel.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="0" covered="10"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<counter type="INSTRUCTION" missed="0" covered="10"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+<counter type="METHOD" missed="0" covered="1"/>
+</class>
+<class name="lava/onboarding/OnboardingViewModel$loadProviders$1" sourcefilename="OnboardingViewModel.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="0" covered="114"/>
+<counter type="BRANCH" missed="2" covered="2"/>
+<counter type="LINE" missed="0" covered="7"/>
+</method>
+<counter type="INSTRUCTION" missed="0" covered="114"/>
+<counter type="BRANCH" missed="2" covered="2"/>
+<counter type="LINE" missed="0" covered="7"/>
+<counter type="METHOD" missed="0" covered="1"/>
+</class>
+<class name="lava/onboarding/OnboardingViewModel$onAddCloudApi$1" sourcefilename="OnboardingViewModel.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="0" covered="63"/>
+<counter type="BRANCH" missed="0" covered="2"/>
+<counter type="LINE" missed="0" covered="6"/>
+</method>
+<method name="invokeSuspend$lambda$0" desc="(Lorg/orbitmvi/orbit/syntax/simple/SimpleContext;)Llava/onboarding/OnboardingState;">
+<counter type="INSTRUCTION" missed="0" covered="18"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="2"/>
+</method>
+<counter type="INSTRUCTION" missed="0" covered="81"/>
+<counter type="BRANCH" missed="0" covered="2"/>
+<counter type="LINE" missed="0" covered="8"/>
+<counter type="METHOD" missed="0" covered="2"/>
+</class>
+<class name="lava/onboarding/OnboardingViewModel$onBackStep$1" sourcefilename="OnboardingViewModel.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="24" covered="144"/>
+<counter type="BRANCH" missed="3" covered="6"/>
+<counter type="LINE" missed="2" covered="9"/>
+</method>
+<method name="invokeSuspend$lambda$1" desc="(Llava/onboarding/OnboardingViewModel;Lorg/orbitmvi/orbit/syntax/simple/SimpleContext;)Llava/onboarding/OnboardingState;">
+<counter type="INSTRUCTION" missed="2" covered="21"/>
+<counter type="BRANCH" missed="1" covered="1"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="invokeSuspend$lambda$0" desc="(Lorg/orbitmvi/orbit/syntax/simple/SimpleContext;)Llava/onboarding/OnboardingState;">
+<counter type="INSTRUCTION" missed="27" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+</method>
+<method name="invokeSuspend$lambda$5" desc="(ILorg/orbitmvi/orbit/syntax/simple/SimpleContext;)Llava/onboarding/OnboardingState;">
+<counter type="INSTRUCTION" missed="0" covered="18"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<counter type="INSTRUCTION" missed="53" covered="183"/>
+<counter type="BRANCH" missed="4" covered="7"/>
+<counter type="LINE" missed="8" covered="11"/>
+<counter type="METHOD" missed="1" covered="3"/>
+</class>
+<class name="lava/onboarding/OnboardingViewModel$onCloudAddressChanged$1" sourcefilename="OnboardingViewModel.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="0" covered="31"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<counter type="INSTRUCTION" missed="0" covered="31"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+<counter type="METHOD" missed="0" covered="1"/>
+</class>
+<class name="lava/onboarding/OnboardingViewModel$onFinish$1" sourcefilename="OnboardingViewModel.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="9" covered="183"/>
+<counter type="BRANCH" missed="8" covered="14"/>
+<counter type="LINE" missed="1" covered="15"/>
+</method>
+<method name="invokeSuspend$lambda$3" desc="(Llava/onboarding/ProviderOnboardingItem;Ljava/lang/String;ILorg/orbitmvi/orbit/syntax/simple/SimpleContext;)Llava/onboarding/OnboardingState;">
+<counter type="INSTRUCTION" missed="19" covered="56"/>
+<counter type="BRANCH" missed="2" covered="2"/>
+<counter type="LINE" missed="2" covered="8"/>
+</method>
+<counter type="INSTRUCTION" missed="28" covered="239"/>
+<counter type="BRANCH" missed="10" covered="16"/>
+<counter type="LINE" missed="3" covered="23"/>
+<counter type="METHOD" missed="0" covered="2"/>
+</class>
+<class name="lava/onboarding/OnboardingViewModel$onNextStep$1" sourcefilename="OnboardingViewModel.kt">
+<method name="invokeSuspend$lambda$3" desc="(Lorg/orbitmvi/orbit/syntax/simple/SimpleContext;)Llava/onboarding/OnboardingState;">
+<counter type="INSTRUCTION" missed="0" covered="18"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="6" covered="116"/>
+<counter type="BRANCH" missed="3" covered="6"/>
+<counter type="LINE" missed="1" covered="9"/>
+</method>
+<counter type="INSTRUCTION" missed="6" covered="134"/>
+<counter type="BRANCH" missed="3" covered="6"/>
+<counter type="LINE" missed="1" covered="10"/>
+<counter type="METHOD" missed="0" covered="2"/>
+</class>
+<class name="lava/onboarding/OnboardingViewModel$onSelectApi$1" sourcefilename="OnboardingViewModel.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="0" covered="33"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="2"/>
+</method>
+<method name="invokeSuspend$lambda$0" desc="(Llava/models/settings/Endpoint;Lorg/orbitmvi/orbit/syntax/simple/SimpleContext;)Llava/onboarding/OnboardingState;">
+<counter type="INSTRUCTION" missed="0" covered="19"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="3"/>
+</method>
+<counter type="INSTRUCTION" missed="0" covered="52"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="5"/>
+<counter type="METHOD" missed="0" covered="2"/>
+</class>
+<class name="lava/onboarding/OnboardingViewModel$onSelectApi$1$2" sourcefilename="OnboardingViewModel.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="54" covered="63"/>
+<counter type="BRANCH" missed="2" covered="2"/>
+<counter type="LINE" missed="7" covered="6"/>
+</method>
+<counter type="INSTRUCTION" missed="54" covered="63"/>
+<counter type="BRANCH" missed="2" covered="2"/>
+<counter type="LINE" missed="7" covered="6"/>
+<counter type="METHOD" missed="0" covered="1"/>
+</class>
+<class name="lava/onboarding/OnboardingViewModel$onSelectApi$1$2$2" sourcefilename="OnboardingViewModel.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="0" covered="11"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="invokeSuspend$lambda$0" desc="(Lorg/orbitmvi/orbit/syntax/simple/SimpleContext;)Llava/onboarding/OnboardingState;">
+<counter type="INSTRUCTION" missed="0" covered="25"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="3"/>
+</method>
+<counter type="INSTRUCTION" missed="0" covered="36"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="4"/>
+<counter type="METHOD" missed="0" covered="2"/>
+</class>
+<class name="lava/onboarding/OnboardingViewModel$onSelectApi$1$2$3" sourcefilename="OnboardingViewModel.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="11" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="invokeSuspend$lambda$0" desc="(Lorg/orbitmvi/orbit/syntax/simple/SimpleContext;)Llava/onboarding/OnboardingState;">
+<counter type="INSTRUCTION" missed="22" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="33" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+</class>
+<class name="lava/onboarding/OnboardingViewModel$onSelectApi$1$2$5" sourcefilename="OnboardingViewModel.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="13" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="invokeSuspend$lambda$0" desc="(Ljava/lang/Exception;Lorg/orbitmvi/orbit/syntax/simple/SimpleContext;)Llava/onboarding/OnboardingState;">
+<counter type="INSTRUCTION" missed="27" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="40" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+</class>
+<class name="lava/onboarding/OnboardingViewModel$onTestAndContinue$1" sourcefilename="OnboardingViewModel.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="3" covered="116"/>
+<counter type="BRANCH" missed="5" covered="7"/>
+<counter type="LINE" missed="0" covered="5"/>
+</method>
+<counter type="INSTRUCTION" missed="3" covered="116"/>
+<counter type="BRANCH" missed="5" covered="7"/>
+<counter type="LINE" missed="0" covered="5"/>
+<counter type="METHOD" missed="0" covered="1"/>
+</class>
+<class name="lava/onboarding/OnboardingViewModel$onTestAndContinue$1$2" sourcefilename="OnboardingViewModel.kt">
+<method name="invokeSuspend$lambda$3" desc="(Ljava/lang/String;)Ljava/lang/String;">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="93" covered="134"/>
+<counter type="BRANCH" missed="4" covered="4"/>
+<counter type="LINE" missed="10" covered="17"/>
+</method>
+<method name="invokeSuspend$lambda$6" desc="(Ljava/lang/String;Llava/onboarding/ProviderConfigState;Lorg/orbitmvi/orbit/syntax/simple/SimpleContext;)Llava/onboarding/OnboardingState;">
+<counter type="INSTRUCTION" missed="0" covered="39"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="3"/>
+</method>
+<method name="invokeSuspend$lambda$4" desc="(Ljava/lang/String;Llava/onboarding/ProviderConfigState;Lorg/orbitmvi/orbit/syntax/simple/SimpleContext;)Llava/onboarding/OnboardingState;">
+<counter type="INSTRUCTION" missed="39" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</method>
+<method name="invokeSuspend$lambda$8" desc="(Ljava/lang/String;Llava/onboarding/ProviderConfigState;Ljava/lang/Exception;Lorg/orbitmvi/orbit/syntax/simple/SimpleContext;)Llava/onboarding/OnboardingState;">
+<counter type="INSTRUCTION" missed="44" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="178" covered="173"/>
+<counter type="BRANCH" missed="6" covered="4"/>
+<counter type="LINE" missed="17" covered="20"/>
+<counter type="METHOD" missed="3" covered="2"/>
+</class>
+<class name="lava/onboarding/OnboardingViewModel$onToggleProvider$1" sourcefilename="OnboardingViewModel.kt">
+<method name="invokeSuspend$lambda$1" desc="(Ljava/lang/String;Lorg/orbitmvi/orbit/syntax/simple/SimpleContext;)Llava/onboarding/OnboardingState;">
+<counter type="INSTRUCTION" missed="1" covered="44"/>
+<counter type="BRANCH" missed="1" covered="1"/>
+<counter type="LINE" missed="0" covered="3"/>
+</method>
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="0" covered="13"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<counter type="INSTRUCTION" missed="1" covered="57"/>
+<counter type="BRANCH" missed="1" covered="1"/>
+<counter type="LINE" missed="0" covered="4"/>
+<counter type="METHOD" missed="0" covered="2"/>
+</class>
+<class name="lava/onboarding/OnboardingViewModel$startApiDiscovery$1" sourcefilename="OnboardingViewModel.kt">
+<method name="invokeSuspend$lambda$0" desc="(Llava/onboarding/OnboardingViewModel;Lorg/orbitmvi/orbit/syntax/simple/SimpleContext;)Llava/onboarding/OnboardingState;">
+<counter type="INSTRUCTION" missed="0" covered="30"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="8"/>
+</method>
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="5" covered="57"/>
+<counter type="BRANCH" missed="1" covered="1"/>
+<counter type="LINE" missed="0" covered="6"/>
+</method>
+<counter type="INSTRUCTION" missed="5" covered="87"/>
+<counter type="BRANCH" missed="1" covered="1"/>
+<counter type="LINE" missed="0" covered="14"/>
+<counter type="METHOD" missed="0" covered="2"/>
+</class>
+<class name="lava/onboarding/OnboardingViewModel$startApiDiscovery$1$2" sourcefilename="OnboardingViewModel.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="0" covered="27"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="6"/>
+</method>
+<counter type="INSTRUCTION" missed="0" covered="27"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="6"/>
+<counter type="METHOD" missed="0" covered="1"/>
+</class>
+<class name="lava/onboarding/OnboardingViewModel$startApiDiscovery$1$2$1" sourcefilename="OnboardingViewModel.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="9" covered="59"/>
+<counter type="BRANCH" missed="5" covered="3"/>
+<counter type="LINE" missed="0" covered="3"/>
+</method>
+<counter type="INSTRUCTION" missed="9" covered="59"/>
+<counter type="BRANCH" missed="5" covered="3"/>
+<counter type="LINE" missed="0" covered="3"/>
+<counter type="METHOD" missed="0" covered="1"/>
+</class>
+<class name="lava/onboarding/OnboardingViewModel$startApiDiscovery$1$3" sourcefilename="OnboardingViewModel.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="0" covered="29"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="2"/>
+</method>
+<counter type="INSTRUCTION" missed="0" covered="29"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="2"/>
+<counter type="METHOD" missed="0" covered="1"/>
+</class>
+<class name="lava/onboarding/OnboardingViewModel$startApiDiscovery$1$3$1" sourcefilename="OnboardingViewModel.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="0" covered="6"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<counter type="INSTRUCTION" missed="0" covered="6"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+<counter type="METHOD" missed="0" covered="1"/>
+</class>
+<class name="lava/onboarding/OnboardingViewModel$startApiDiscovery$1$3$2" sourcefilename="OnboardingViewModel.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="0" covered="40"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<counter type="INSTRUCTION" missed="0" covered="40"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+<counter type="METHOD" missed="0" covered="1"/>
+</class>
+<class name="lava/onboarding/OnboardingViewModel$updateCurrentConfig$1" sourcefilename="OnboardingViewModel.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="21" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</method>
+<method name="invokeSuspend$lambda$0" desc="(Ljava/lang/String;Lkotlin/jvm/functions/Function1;Lorg/orbitmvi/orbit/syntax/simple/SimpleContext;)Llava/onboarding/OnboardingState;">
+<counter type="INSTRUCTION" missed="34" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="55" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+</class>
+<class name="lava/onboarding/OnboardingViewModel_Factory" sourcefilename="OnboardingViewModel_Factory.java">
+<method name="get" desc="()Llava/onboarding/OnboardingViewModel;">
+<counter type="INSTRUCTION" missed="50" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="create" desc="(Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Llava/onboarding/OnboardingViewModel_Factory;">
+<counter type="INSTRUCTION" missed="27" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="newInstance" desc="(Llava/tracker/client/LavaTrackerSdk;Llava/credentials/ProviderCredentialManager;Llava/auth/api/AuthService;Llava/logger/api/LoggerFactory;Llava/common/analytics/AnalyticsTracker;Llava/credentials/ProviderConfigRepository;Llava/database/dao/ClonedProviderDao;Llava/data/api/service/LocalNetworkDiscoveryService;Llava/data/api/service/ConnectionService;Llava/data/api/repository/EndpointsRepository;ZLjava/lang/String;)Llava/onboarding/OnboardingViewModel;">
+<counter type="INSTRUCTION" missed="15" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Ldagger/internal/Provider;Ldagger/internal/Provider;Ldagger/internal/Provider;Ldagger/internal/Provider;Ldagger/internal/Provider;Ldagger/internal/Provider;Ldagger/internal/Provider;Ldagger/internal/Provider;Ldagger/internal/Provider;Ldagger/internal/Provider;Ldagger/internal/Provider;Ldagger/internal/Provider;)V">
+<counter type="INSTRUCTION" missed="38" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="13" covered="0"/>
+</method>
+<method name="create" desc="(Ldagger/internal/Provider;Ldagger/internal/Provider;Ldagger/internal/Provider;Ldagger/internal/Provider;Ldagger/internal/Provider;Ldagger/internal/Provider;Ldagger/internal/Provider;Ldagger/internal/Provider;Ldagger/internal/Provider;Ldagger/internal/Provider;Ldagger/internal/Provider;Ldagger/internal/Provider;)Llava/onboarding/OnboardingViewModel_Factory;">
+<counter type="INSTRUCTION" missed="15" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="145" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="17" covered="0"/>
+<counter type="METHOD" missed="5" covered="0"/>
+</class>
+<class name="lava/onboarding/OnboardingViewModel_HiltModules$BindsModule" sourcefilename="OnboardingViewModel_HiltModules.java">
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/onboarding/OnboardingViewModel_HiltModules$KeyModule" sourcefilename="OnboardingViewModel_HiltModules.java">
+<method name="provide" desc="()Z">
+<counter type="INSTRUCTION" missed="1" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="1" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/onboarding/OnboardingViewModel_HiltModules_BindsModule_Binds_LazyMapKey" sourcefilename="OnboardingViewModel_HiltModules_BindsModule_Binds_LazyMapKey.java">
+<method name="&lt;clinit&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+</class>
+<class name="lava/onboarding/OnboardingViewModel_HiltModules_KeyModule_ProvideFactory" sourcefilename="OnboardingViewModel_HiltModules_KeyModule_ProvideFactory.java">
+<method name="provide" desc="()Z">
+<counter type="INSTRUCTION" missed="1" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="create" desc="()Llava/onboarding/OnboardingViewModel_HiltModules_KeyModule_ProvideFactory;">
+<counter type="INSTRUCTION" missed="1" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="get" desc="()Ljava/lang/Boolean;">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="6" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+<counter type="METHOD" missed="4" covered="0"/>
+</class>
+<class name="lava/onboarding/OnboardingViewModel_HiltModules_KeyModule_ProvideFactory$InstanceHolder" sourcefilename="OnboardingViewModel_HiltModules_KeyModule_ProvideFactory.java">
+<method name="&lt;clinit&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/onboarding/OnboardingViewModel_HiltModules_KeyModule_Provide_LazyMapKey" sourcefilename="OnboardingViewModel_HiltModules_KeyModule_Provide_LazyMapKey.java">
+<method name="&lt;clinit&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+</class>
+<class name="lava/onboarding/ProviderConfigState" sourcefilename="OnboardingState.kt">
+<method name="&lt;init&gt;" desc="(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZZZLjava/lang/String;)V">
+<counter type="INSTRUCTION" missed="0" covered="47"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="7"/>
+</method>
+<counter type="INSTRUCTION" missed="0" covered="47"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="7"/>
+<counter type="METHOD" missed="0" covered="1"/>
+</class>
+<class name="lava/onboarding/ProviderOnboardingItem" sourcefilename="OnboardingState.kt">
+<method name="&lt;init&gt;" desc="(Llava/tracker/api/TrackerDescriptor;Z)V">
+<counter type="INSTRUCTION" missed="0" covered="12"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="2"/>
+</method>
+<counter type="INSTRUCTION" missed="0" covered="12"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="2"/>
+<counter type="METHOD" missed="0" covered="1"/>
+</class>
+<sourcefile name="OnboardingScreen.kt">
+<line nr="33" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="34" mi="114" ci="0" mb="6" cb="0"/>
+<line nr="35" mi="18" ci="0" mb="0" cb="0"/>
+<line nr="37" mi="53" ci="0" mb="0" cb="0"/>
+<line nr="38" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="39" mi="8" ci="0" mb="2" cb="0"/>
+<line nr="45" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="52" mi="29" ci="0" mb="0" cb="0"/>
+<line nr="53" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="61" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="62" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="63" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="64" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="65" mi="15" ci="0" mb="0" cb="0"/>
+<line nr="66" mi="11" ci="0" mb="0" cb="0"/>
+<line nr="73" mi="13" ci="0" mb="2" cb="0"/>
+<line nr="74" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="75" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="76" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="78" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="79" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="80" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="82" mi="16" ci="0" mb="0" cb="0"/>
+<line nr="83" mi="16" ci="0" mb="0" cb="0"/>
+<line nr="85" mi="14" ci="0" mb="0" cb="0"/>
+<line nr="86" mi="10" ci="9" mb="5" cb="0"/>
+<line nr="87" mi="10" ci="0" mb="0" cb="0"/>
+<line nr="88" mi="18" ci="0" mb="0" cb="0"/>
+<line nr="89" mi="24" ci="0" mb="0" cb="0"/>
+<line nr="92" mi="10" ci="0" mb="0" cb="0"/>
+<line nr="93" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="94" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="95" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="96" mi="17" ci="0" mb="0" cb="0"/>
+<line nr="97" mi="39" ci="0" mb="0" cb="0"/>
+<line nr="98" mi="37" ci="0" mb="0" cb="0"/>
+<line nr="99" mi="25" ci="0" mb="0" cb="0"/>
+<line nr="101" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="102" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="103" mi="17" ci="0" mb="0" cb="0"/>
+<line nr="104" mi="45" ci="0" mb="0" cb="0"/>
+<line nr="105" mi="35" ci="0" mb="0" cb="0"/>
+<line nr="107" mi="10" ci="0" mb="0" cb="0"/>
+<line nr="108" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="109" mi="16" ci="0" mb="0" cb="0"/>
+<line nr="110" mi="37" ci="0" mb="0" cb="0"/>
+<line nr="111" mi="26" ci="0" mb="0" cb="0"/>
+<line nr="113" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="114" mi="12" ci="0" mb="2" cb="0"/>
+<line nr="115" mi="17" ci="0" mb="2" cb="0"/>
+<line nr="116" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="117" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="118" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="119" mi="17" ci="0" mb="0" cb="0"/>
+<line nr="120" mi="38" ci="0" mb="0" cb="0"/>
+<line nr="121" mi="39" ci="0" mb="0" cb="0"/>
+<line nr="122" mi="40" ci="0" mb="0" cb="0"/>
+<line nr="123" mi="29" ci="0" mb="0" cb="0"/>
+<line nr="126" mi="10" ci="0" mb="0" cb="0"/>
+<line nr="127" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="128" mi="17" ci="0" mb="0" cb="0"/>
+<line nr="129" mi="25" ci="0" mb="0" cb="0"/>
+<line nr="133" mi="16" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="1032" covered="9"/>
+<counter type="BRANCH" missed="19" covered="0"/>
+<counter type="LINE" missed="63" covered="0"/>
+</sourcefile>
+<sourcefile name="OnboardingViewModel_HiltModules.java">
+<line nr="27" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="48" mi="1" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="3" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</sourcefile>
+<sourcefile name="OnboardingSideEffect.kt">
+<line nr="10" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="24" mi="0" ci="2" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="0" covered="4"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="2"/>
+</sourcefile>
+<sourcefile name="OnboardingState.kt">
+<line nr="14" mi="0" ci="36" mb="0" cb="0"/>
+<line nr="17" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="18" mi="0" ci="7" mb="0" cb="0"/>
+<line nr="22" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="23" mi="0" ci="7" mb="0" cb="0"/>
+<line nr="24" mi="0" ci="7" mb="0" cb="0"/>
+<line nr="25" mi="0" ci="7" mb="0" cb="0"/>
+<line nr="26" mi="0" ci="7" mb="0" cb="0"/>
+<line nr="27" mi="0" ci="7" mb="0" cb="0"/>
+<line nr="28" mi="0" ci="7" mb="0" cb="0"/>
+<line nr="40" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="41" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="42" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="46" mi="0" ci="7" mb="0" cb="0"/>
+<line nr="47" mi="0" ci="7" mb="0" cb="0"/>
+<line nr="48" mi="0" ci="7" mb="0" cb="0"/>
+<line nr="49" mi="0" ci="7" mb="0" cb="0"/>
+<line nr="50" mi="0" ci="7" mb="0" cb="0"/>
+<line nr="53" mi="0" ci="7" mb="0" cb="0"/>
+<line nr="54" mi="0" ci="7" mb="0" cb="0"/>
+<line nr="55" mi="0" ci="7" mb="0" cb="0"/>
+<line nr="56" mi="0" ci="8" mb="0" cb="0"/>
+<line nr="69" mi="0" ci="7" mb="0" cb="0"/>
+<line nr="70" mi="0" ci="7" mb="0" cb="0"/>
+<line nr="71" mi="0" ci="7" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="7" covered="184"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="24"/>
+</sourcefile>
+<sourcefile name="CloudApiDefaults.kt">
+<line nr="44" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="45" mi="0" ci="6" mb="0" cb="2"/>
+<line nr="49" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="50" mi="0" ci="12" mb="0" cb="2"/>
+<line nr="51" mi="0" ci="12" mb="0" cb="2"/>
+<line nr="52" mi="0" ci="10" mb="0" cb="2"/>
+<line nr="53" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="55" mi="1" ci="5" mb="1" cb="1"/>
+<line nr="58" mi="2" ci="17" mb="2" cb="6"/>
+<line nr="60" mi="0" ci="12" mb="0" cb="2"/>
+<line nr="61" mi="0" ci="2" mb="0" cb="2"/>
+<line nr="64" mi="2" ci="4" mb="1" cb="1"/>
+<line nr="65" mi="0" ci="10" mb="0" cb="0"/>
+<line nr="68" mi="0" ci="7" mb="0" cb="0"/>
+<line nr="69" mi="0" ci="7" mb="0" cb="0"/>
+<line nr="70" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="71" mi="0" ci="17" mb="1" cb="5"/>
+<line nr="72" mi="0" ci="11" mb="0" cb="0"/>
+<line nr="76" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="87" mi="2" ci="10" mb="1" cb="3"/>
+<line nr="88" mi="0" ci="17" mb="0" cb="0"/>
+<line nr="89" mi="0" ci="6" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="8" covered="176"/>
+<counter type="BRANCH" missed="6" covered="28"/>
+<counter type="LINE" missed="1" covered="21"/>
+</sourcefile>
+<sourcefile name="OnboardingAction.kt">
+<line nr="6" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="7" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="8" mi="0" ci="7" mb="0" cb="0"/>
+<line nr="9" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="10" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="11" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="12" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="13" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="17" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="20" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="24" mi="0" ci="7" mb="0" cb="0"/>
+<line nr="33" mi="0" ci="2" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="30" covered="24"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="5" covered="7"/>
+</sourcefile>
+<sourcefile name="OnboardingViewModel_Factory.java">
+<line nr="71" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="72" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="73" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="74" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="75" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="76" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="77" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="78" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="79" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="80" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="81" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="82" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="83" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="88" mi="50" ci="0" mb="0" cb="0"/>
+<line nr="104" mi="27" ci="0" mb="0" cb="0"/>
+<line nr="117" mi="15" ci="0" mb="0" cb="0"/>
+<line nr="127" mi="15" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="145" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="17" covered="0"/>
+</sourcefile>
+<sourcefile name="OnboardingViewModel_HiltModules_KeyModule_ProvideFactory.java">
+<line nr="25" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="28" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="32" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="36" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="40" mi="4" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="10" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="5" covered="0"/>
+</sourcefile>
+<sourcefile name="OnboardingHiltModule.kt">
+<line nr="26" mi="1" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="1" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</sourcefile>
+<sourcefile name="OnboardingViewModel_HiltModules_KeyModule_Provide_LazyMapKey.java">
+<line nr="23" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="27" mi="2" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</sourcefile>
+<sourcefile name="OnboardingHiltModule_ApiSelectionEnabledFactory.java">
+<line nr="25" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="28" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="32" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="36" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="40" mi="4" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="11" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="5" covered="0"/>
+</sourcefile>
+<sourcefile name="OnboardingViewModel_HiltModules_BindsModule_Binds_LazyMapKey.java">
+<line nr="23" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="27" mi="2" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</sourcefile>
+<sourcefile name="OnboardingViewModel.kt">
+<line nr="35" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="36" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="37" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="39" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="51" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="57" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="59" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="60" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="61" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="67" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="77" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="78" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="79" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="80" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="85" mi="0" ci="16" mb="0" cb="0"/>
+<line nr="86" mi="0" ci="17" mb="0" cb="0"/>
+<line nr="87" mi="0" ci="10" mb="0" cb="0"/>
+<line nr="93" mi="0" ci="10" mb="0" cb="0"/>
+<line nr="94" mi="0" ci="7" mb="0" cb="0"/>
+<line nr="95" mi="0" ci="6" mb="0" cb="2"/>
+<line nr="96" mi="0" ci="6" mb="0" cb="2"/>
+<line nr="97" mi="0" ci="9" mb="0" cb="2"/>
+<line nr="98" mi="6" ci="3" mb="1" cb="1"/>
+<line nr="99" mi="6" ci="3" mb="1" cb="1"/>
+<line nr="100" mi="6" ci="3" mb="1" cb="1"/>
+<line nr="101" mi="0" ci="6" mb="0" cb="2"/>
+<line nr="102" mi="0" ci="6" mb="0" cb="2"/>
+<line nr="103" mi="6" ci="3" mb="1" cb="1"/>
+<line nr="104" mi="0" ci="3" mb="1" cb="1"/>
+<line nr="105" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="106" mi="8" ci="0" mb="2" cb="0"/>
+<line nr="108" mi="0" ci="9" mb="0" cb="2"/>
+<line nr="109" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="114" mi="0" ci="12" mb="0" cb="0"/>
+<line nr="115" mi="0" ci="31" mb="0" cb="0"/>
+<line nr="124" mi="0" ci="12" mb="0" cb="0"/>
+<line nr="125" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="126" mi="0" ci="4" mb="0" cb="0"/>
+<line nr="127" mi="0" ci="2" mb="0" cb="2"/>
+<line nr="128" mi="0" ci="13" mb="0" cb="0"/>
+<line nr="129" mi="0" ci="17" mb="0" cb="0"/>
+<line nr="130" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="134" mi="0" ci="32" mb="0" cb="0"/>
+<line nr="135" mi="0" ci="7" mb="0" cb="0"/>
+<line nr="147" mi="0" ci="12" mb="0" cb="0"/>
+<line nr="148" mi="5" ci="6" mb="1" cb="1"/>
+<line nr="149" mi="0" ci="13" mb="0" cb="0"/>
+<line nr="150" mi="0" ci="13" mb="0" cb="0"/>
+<line nr="151" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="152" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="153" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="154" mi="0" ci="4" mb="0" cb="0"/>
+<line nr="158" mi="0" ci="6" mb="0" cb="0"/>
+<line nr="159" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="160" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="164" mi="0" ci="8" mb="0" cb="0"/>
+<line nr="165" mi="0" ci="8" mb="0" cb="0"/>
+<line nr="169" mi="0" ci="4" mb="0" cb="0"/>
+<line nr="170" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="171" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="172" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="173" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="175" mi="0" ci="15" mb="0" cb="0"/>
+<line nr="176" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="177" mi="9" ci="19" mb="5" cb="3"/>
+<line nr="178" mi="0" ci="35" mb="0" cb="0"/>
+<line nr="182" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="185" mi="0" ci="17" mb="0" cb="0"/>
+<line nr="186" mi="0" ci="21" mb="0" cb="0"/>
+<line nr="187" mi="0" ci="54" mb="0" cb="0"/>
+<line nr="191" mi="0" ci="13" mb="0" cb="0"/>
+<line nr="192" mi="0" ci="13" mb="0" cb="0"/>
+<line nr="193" mi="0" ci="16" mb="0" cb="0"/>
+<line nr="194" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="195" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="198" mi="0" ci="20" mb="0" cb="0"/>
+<line nr="200" mi="0" ci="17" mb="0" cb="0"/>
+<line nr="201" mi="0" ci="2" mb="1" cb="1"/>
+<line nr="204" mi="0" ci="14" mb="0" cb="0"/>
+<line nr="205" mi="0" ci="10" mb="0" cb="0"/>
+<line nr="206" mi="0" ci="13" mb="0" cb="0"/>
+<line nr="207" mi="0" ci="11" mb="0" cb="0"/>
+<line nr="208" mi="0" ci="18" mb="0" cb="0"/>
+<line nr="209" mi="0" ci="4" mb="0" cb="0"/>
+<line nr="210" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="214" mi="5" ci="7" mb="1" cb="1"/>
+<line nr="216" mi="14" ci="0" mb="0" cb="0"/>
+<line nr="217" mi="11" ci="0" mb="0" cb="0"/>
+<line nr="218" mi="17" ci="0" mb="0" cb="0"/>
+<line nr="219" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="220" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="227" mi="11" ci="0" mb="0" cb="0"/>
+<line nr="228" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="229" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="230" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="231" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="234" mi="14" ci="0" mb="0" cb="0"/>
+<line nr="235" mi="13" ci="0" mb="0" cb="0"/>
+<line nr="236" mi="17" ci="0" mb="0" cb="0"/>
+<line nr="237" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="238" mi="6" ci="0" mb="2" cb="0"/>
+<line nr="247" mi="0" ci="12" mb="0" cb="0"/>
+<line nr="255" mi="0" ci="21" mb="0" cb="0"/>
+<line nr="256" mi="0" ci="9" mb="0" cb="0"/>
+<line nr="257" mi="0" ci="11" mb="2" cb="2"/>
+<line nr="259" mi="0" ci="15" mb="0" cb="0"/>
+<line nr="260" mi="0" ci="6" mb="0" cb="0"/>
+<line nr="261" mi="0" ci="18" mb="0" cb="0"/>
+<line nr="263" mi="0" ci="34" mb="0" cb="0"/>
+<line nr="266" mi="0" ci="12" mb="0" cb="0"/>
+<line nr="267" mi="0" ci="13" mb="2" cb="3"/>
+<line nr="269" mi="0" ci="4" mb="0" cb="2"/>
+<line nr="270" mi="0" ci="29" mb="0" cb="0"/>
+<line nr="271" mi="0" ci="6" mb="0" cb="0"/>
+<line nr="273" mi="0" ci="31" mb="0" cb="0"/>
+<line nr="279" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="281" mi="0" ci="11" mb="0" cb="0"/>
+<line nr="282" mi="1" ci="3" mb="1" cb="1"/>
+<line nr="283" mi="0" ci="13" mb="0" cb="0"/>
+<line nr="284" mi="0" ci="18" mb="0" cb="0"/>
+<line nr="287" mi="0" ci="6" mb="0" cb="0"/>
+<line nr="292" mi="0" ci="12" mb="0" cb="0"/>
+<line nr="293" mi="0" ci="13" mb="1" cb="4"/>
+<line nr="301" mi="0" ci="13" mb="0" cb="0"/>
+<line nr="303" mi="11" ci="0" mb="2" cb="0"/>
+<line nr="304" mi="13" ci="0" mb="0" cb="0"/>
+<line nr="305" mi="15" ci="0" mb="0" cb="0"/>
+<line nr="306" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="307" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="308" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="309" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="310" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="314" mi="0" ci="15" mb="0" cb="0"/>
+<line nr="315" mi="2" ci="21" mb="1" cb="1"/>
+<line nr="321" mi="0" ci="5" mb="0" cb="2"/>
+<line nr="322" mi="0" ci="36" mb="0" cb="0"/>
+<line nr="324" mi="0" ci="31" mb="0" cb="0"/>
+<line nr="330" mi="0" ci="11" mb="0" cb="0"/>
+<line nr="331" mi="0" ci="6" mb="0" cb="0"/>
+<line nr="332" mi="0" ci="14" mb="0" cb="0"/>
+<line nr="333" mi="0" ci="18" mb="0" cb="0"/>
+<line nr="339" mi="0" ci="12" mb="0" cb="0"/>
+<line nr="340" mi="0" ci="13" mb="0" cb="0"/>
+<line nr="341" mi="0" ci="17" mb="0" cb="0"/>
+<line nr="342" mi="0" ci="10" mb="0" cb="0"/>
+<line nr="343" mi="1" ci="17" mb="1" cb="1"/>
+<line nr="349" mi="15" ci="0" mb="0" cb="0"/>
+<line nr="350" mi="15" ci="0" mb="0" cb="0"/>
+<line nr="351" mi="15" ci="0" mb="0" cb="0"/>
+<line nr="353" mi="13" ci="0" mb="0" cb="0"/>
+<line nr="354" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="355" mi="3" ci="0" mb="2" cb="0"/>
+<line nr="356" mi="14" ci="0" mb="0" cb="0"/>
+<line nr="357" mi="34" ci="0" mb="0" cb="0"/>
+<line nr="361" mi="0" ci="12" mb="0" cb="0"/>
+<line nr="362" mi="0" ci="8" mb="1" cb="1"/>
+<line nr="363" mi="0" ci="12" mb="1" cb="1"/>
+<line nr="364" mi="3" ci="33" mb="3" cb="5"/>
+<line nr="366" mi="0" ci="41" mb="0" cb="0"/>
+<line nr="368" mi="0" ci="22" mb="0" cb="0"/>
+<line nr="370" mi="0" ci="9" mb="1" cb="3"/>
+<line nr="371" mi="0" ci="9" mb="0" cb="0"/>
+<line nr="372" mi="0" ci="7" mb="0" cb="0"/>
+<line nr="376" mi="0" ci="9" mb="0" cb="0"/>
+<line nr="377" mi="0" ci="10" mb="0" cb="0"/>
+<line nr="378" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="379" mi="0" ci="8" mb="0" cb="0"/>
+<line nr="380" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="381" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="384" mi="0" ci="11" mb="0" cb="0"/>
+<line nr="400" mi="0" ci="2" mb="1" cb="1"/>
+<line nr="401" mi="0" ci="7" mb="0" cb="0"/>
+<line nr="402" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="405" mi="0" ci="7" mb="0" cb="0"/>
+<line nr="410" mi="5" ci="0" mb="2" cb="0"/>
+<line nr="411" mi="16" ci="0" mb="0" cb="0"/>
+<line nr="412" mi="18" ci="0" mb="0" cb="0"/>
+<line nr="413" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="414" mi="20" ci="0" mb="0" cb="0"/>
+<line nr="419" mi="20" ci="0" mb="0" cb="0"/>
+<line nr="427" mi="0" ci="15" mb="0" cb="0"/>
+<line nr="429" mi="0" ci="10" mb="0" cb="0"/>
+<line nr="430" mi="0" ci="16" mb="0" cb="0"/>
+<line nr="431" mi="0" ci="18" mb="0" cb="0"/>
+<line nr="432" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="433" mi="0" ci="20" mb="0" cb="0"/>
+<line nr="436" mi="0" ci="6" mb="0" cb="0"/>
+<line nr="438" mi="11" ci="0" mb="0" cb="0"/>
+<line nr="439" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="440" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="441" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="442" mi="13" ci="0" mb="0" cb="0"/>
+<line nr="443" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="446" mi="17" ci="0" mb="0" cb="0"/>
+<line nr="447" mi="18" ci="0" mb="0" cb="0"/>
+<line nr="448" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="449" mi="25" ci="0" mb="2" cb="0"/>
+<line nr="456" mi="0" ci="11" mb="0" cb="0"/>
+<line nr="457" mi="0" ci="11" mb="0" cb="0"/>
+<line nr="458" mi="0" ci="7" mb="0" cb="0"/>
+<line nr="459" mi="0" ci="4" mb="0" cb="2"/>
+<line nr="460" mi="0" ci="32" mb="0" cb="0"/>
+<line nr="462" mi="0" ci="29" mb="0" cb="0"/>
+<line nr="466" mi="0" ci="12" mb="0" cb="0"/>
+<line nr="477" mi="0" ci="18" mb="0" cb="2"/>
+<line nr="478" mi="0" ci="3" mb="0" cb="2"/>
+<line nr="485" mi="0" ci="11" mb="0" cb="0"/>
+<line nr="486" mi="0" ci="6" mb="0" cb="0"/>
+<line nr="487" mi="0" ci="14" mb="0" cb="0"/>
+<line nr="488" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="489" mi="0" ci="14" mb="0" cb="0"/>
+<line nr="490" mi="0" ci="17" mb="0" cb="0"/>
+<line nr="491" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="492" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="493" mi="0" ci="4" mb="1" cb="1"/>
+<line nr="494" mi="0" ci="6" mb="0" cb="0"/>
+<line nr="495" mi="0" ci="4" mb="0" cb="0"/>
+<line nr="496" mi="1" ci="11" mb="1" cb="1"/>
+<line nr="497" mi="14" ci="0" mb="0" cb="0"/>
+<line nr="498" mi="0" ci="10" mb="0" cb="0"/>
+<line nr="501" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="508" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="509" mi="0" ci="19" mb="0" cb="2"/>
+<line nr="510" mi="3" ci="29" mb="3" cb="3"/>
+<line nr="511" mi="0" ci="21" mb="0" cb="0"/>
+<line nr="512" mi="2" ci="10" mb="3" cb="3"/>
+<line nr="513" mi="2" ci="8" mb="2" cb="2"/>
+<line nr="515" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="517" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="520" mi="0" ci="20" mb="0" cb="0"/>
+<line nr="524" mi="0" ci="6" mb="0" cb="0"/>
+<line nr="525" mi="0" ci="9" mb="0" cb="0"/>
+<line nr="526" mi="2" ci="12" mb="2" cb="2"/>
+<line nr="530" mi="7" ci="0" mb="2" cb="0"/>
+<line nr="531" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="532" mi="32" ci="0" mb="6" cb="0"/>
+<line nr="535" mi="12" ci="0" mb="0" cb="0"/>
+<line nr="537" mi="13" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="634" covered="1931"/>
+<counter type="BRANCH" missed="60" covered="72"/>
+<counter type="LINE" missed="59" covered="181"/>
+</sourcefile>
+<counter type="INSTRUCTION" missed="1889" covered="2328"/>
+<counter type="BRANCH" missed="85" covered="100"/>
+<counter type="LINE" missed="163" covered="235"/>
+<counter type="METHOD" missed="52" covered="61"/>
+<counter type="CLASS" missed="22" covered="37"/>
+</package>
+<package name="lava/onboarding/steps">
+<class name="lava/onboarding/steps/ApiSelectionStepKt" sourcefilename="ApiSelectionStep.kt">
+<method name="ApiSelectionStep" desc="(ZLjava/util/List;Llava/models/settings/Endpoint;Llava/onboarding/ApiConnectivityState;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Ljava/lang/String;Ljava/util/List;Ljava/lang/String;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function0;Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;III)V">
+<counter type="INSTRUCTION" missed="479" covered="0"/>
+<counter type="BRANCH" missed="40" covered="0"/>
+<counter type="LINE" missed="12" covered="0"/>
+</method>
+<method name="ApiRow" desc="(Llava/models/settings/Endpoint;ZLlava/onboarding/ApiConnectivityState;Lkotlin/jvm/functions/Function0;Ljava/lang/String;Landroidx/compose/runtime/Composer;II)V">
+<counter type="INSTRUCTION" missed="305" covered="0"/>
+<counter type="BRANCH" missed="12" covered="0"/>
+<counter type="LINE" missed="14" covered="0"/>
+</method>
+<method name="displayHostPort" desc="(Llava/models/settings/Endpoint;)Ljava/lang/String;">
+<counter type="INSTRUCTION" missed="27" covered="0"/>
+<counter type="BRANCH" missed="4" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+</method>
+<method name="displaySubtitle" desc="(Llava/models/settings/Endpoint;)Ljava/lang/String;">
+<counter type="INSTRUCTION" missed="8" covered="15"/>
+<counter type="BRANCH" missed="3" covered="1"/>
+<counter type="LINE" missed="2" covered="2"/>
+</method>
+<counter type="INSTRUCTION" missed="819" covered="15"/>
+<counter type="BRANCH" missed="59" covered="1"/>
+<counter type="LINE" missed="32" covered="2"/>
+<counter type="METHOD" missed="3" covered="1"/>
+</class>
+<class name="lava/onboarding/steps/ApiSelectionStepKt$ApiRow$2" sourcefilename="ApiSelectionStep.kt">
+<method name="invoke" desc="(Landroidx/compose/foundation/layout/BoxScope;Landroidx/compose/runtime/Composer;I)V">
+<counter type="INSTRUCTION" missed="193" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="22" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="193" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="22" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/onboarding/steps/ApiSelectionStepKt$ApiSelectionStep$3" sourcefilename="ApiSelectionStep.kt">
+<method name="invoke" desc="(Landroidx/compose/foundation/layout/BoxScope;Landroidx/compose/runtime/Composer;I)V">
+<counter type="INSTRUCTION" missed="1136" covered="0"/>
+<counter type="BRANCH" missed="16" covered="0"/>
+<counter type="LINE" missed="115" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="1136" covered="0"/>
+<counter type="BRANCH" missed="16" covered="0"/>
+<counter type="LINE" missed="115" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/onboarding/steps/ComposableSingletons$ApiSelectionStepKt" sourcefilename="ApiSelectionStep.kt">
+<method name="&lt;clinit&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="6" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="6" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/onboarding/steps/ComposableSingletons$ApiSelectionStepKt$lambda-1$1" sourcefilename="ApiSelectionStep.kt">
+<method name="invoke" desc="(Landroidx/compose/runtime/Composer;I)V">
+<counter type="INSTRUCTION" missed="42" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="42" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/onboarding/steps/ComposableSingletons$ConfigureStepKt" sourcefilename="ConfigureStep.kt">
+<method name="&lt;clinit&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="12" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="12" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/onboarding/steps/ComposableSingletons$ConfigureStepKt$lambda-1$1" sourcefilename="ConfigureStep.kt">
+<method name="invoke" desc="(Landroidx/compose/runtime/Composer;I)V">
+<counter type="INSTRUCTION" missed="42" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="42" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/onboarding/steps/ComposableSingletons$ConfigureStepKt$lambda-2$1" sourcefilename="ConfigureStep.kt">
+<method name="invoke" desc="(Landroidx/compose/runtime/Composer;I)V">
+<counter type="INSTRUCTION" missed="42" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="42" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/onboarding/steps/ConfigureStepKt" sourcefilename="ConfigureStep.kt">
+<method name="ConfigureStep" desc="(Llava/tracker/api/TrackerDescriptor;Llava/onboarding/ProviderConfigState;ZLkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function0;Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V">
+<counter type="INSTRUCTION" missed="289" covered="0"/>
+<counter type="BRANCH" missed="22" covered="0"/>
+<counter type="LINE" missed="9" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="289" covered="0"/>
+<counter type="BRANCH" missed="22" covered="0"/>
+<counter type="LINE" missed="9" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/onboarding/steps/ConfigureStepKt$ConfigureStep$1" sourcefilename="ConfigureStep.kt">
+<method name="invoke" desc="(Landroidx/compose/foundation/layout/BoxScope;Landroidx/compose/runtime/Composer;I)V">
+<counter type="INSTRUCTION" missed="513" covered="0"/>
+<counter type="BRANCH" missed="16" covered="0"/>
+<counter type="LINE" missed="59" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="513" covered="0"/>
+<counter type="BRANCH" missed="16" covered="0"/>
+<counter type="LINE" missed="59" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/onboarding/steps/ConfigureStepKt$ConfigureStep$1$1$2" sourcefilename="ConfigureStep.kt">
+<method name="invoke" desc="(Landroidx/compose/foundation/layout/RowScope;Landroidx/compose/runtime/Composer;I)V">
+<counter type="INSTRUCTION" missed="95" covered="0"/>
+<counter type="BRANCH" missed="4" covered="0"/>
+<counter type="LINE" missed="7" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="95" covered="0"/>
+<counter type="BRANCH" missed="4" covered="0"/>
+<counter type="LINE" missed="7" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/onboarding/steps/ProvidersStepKt" sourcefilename="ProvidersStep.kt">
+<method name="ProvidersStep" desc="(Ljava/util/List;ZLkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function0;Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V">
+<counter type="INSTRUCTION" missed="199" covered="0"/>
+<counter type="BRANCH" missed="8" covered="0"/>
+<counter type="LINE" missed="7" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="199" covered="0"/>
+<counter type="BRANCH" missed="8" covered="0"/>
+<counter type="LINE" missed="7" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/onboarding/steps/ProvidersStepKt$ProvidersStep$1" sourcefilename="ProvidersStep.kt">
+<method name="invoke" desc="(Landroidx/compose/foundation/layout/BoxScope;Landroidx/compose/runtime/Composer;I)V">
+<counter type="INSTRUCTION" missed="283" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="31" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="283" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="31" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/onboarding/steps/ProvidersStepKt$ProvidersStep$1$1$1$1$2" sourcefilename="ProvidersStep.kt">
+<method name="invoke" desc="(Landroidx/compose/foundation/layout/BoxScope;Landroidx/compose/runtime/Composer;I)V">
+<counter type="INSTRUCTION" missed="236" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="19" covered="0"/>
+</method>
+<method name="invoke$lambda$5$lambda$1$lambda$0" desc="(Llava/onboarding/ProviderOnboardingItem;Landroidx/compose/ui/graphics/drawscope/DrawScope;)Lkotlin/Unit;">
+<counter type="INSTRUCTION" missed="15" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="251" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="20" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+</class>
+<class name="lava/onboarding/steps/SummaryStepKt" sourcefilename="SummaryStep.kt">
+<method name="SummaryStep" desc="(Ljava/util/List;Ljava/util/Map;Lkotlin/jvm/functions/Function0;Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V">
+<counter type="INSTRUCTION" missed="174" covered="0"/>
+<counter type="BRANCH" missed="6" covered="0"/>
+<counter type="LINE" missed="7" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="174" covered="0"/>
+<counter type="BRANCH" missed="6" covered="0"/>
+<counter type="LINE" missed="7" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/onboarding/steps/SummaryStepKt$SummaryStep$1" sourcefilename="SummaryStep.kt">
+<method name="invoke" desc="(Landroidx/compose/foundation/layout/BoxScope;Landroidx/compose/runtime/Composer;I)V">
+<counter type="INSTRUCTION" missed="368" covered="0"/>
+<counter type="BRANCH" missed="8" covered="0"/>
+<counter type="LINE" missed="41" covered="0"/>
+</method>
+<method name="invoke$lambda$6$lambda$5$lambda$4$lambda$3$lambda$2$lambda$1" desc="(Llava/onboarding/ProviderOnboardingItem;Landroidx/compose/ui/graphics/drawscope/DrawScope;)Lkotlin/Unit;">
+<counter type="INSTRUCTION" missed="15" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="383" covered="0"/>
+<counter type="BRANCH" missed="8" covered="0"/>
+<counter type="LINE" missed="42" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+</class>
+<class name="lava/onboarding/steps/WelcomeStepKt" sourcefilename="WelcomeStep.kt">
+<method name="WelcomeStep" desc="(ILkotlin/jvm/functions/Function0;Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V">
+<counter type="INSTRUCTION" missed="149" covered="0"/>
+<counter type="BRANCH" missed="4" covered="0"/>
+<counter type="LINE" missed="7" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="149" covered="0"/>
+<counter type="BRANCH" missed="4" covered="0"/>
+<counter type="LINE" missed="7" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/onboarding/steps/WelcomeStepKt$WelcomeStep$1" sourcefilename="WelcomeStep.kt">
+<method name="invoke" desc="(Landroidx/compose/foundation/layout/BoxScope;Landroidx/compose/runtime/Composer;I)V">
+<counter type="INSTRUCTION" missed="233" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="31" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="233" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="31" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<sourcefile name="ApiSelectionStep.kt">
+<line nr="71" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="72" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="73" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="74" mi="23" ci="0" mb="0" cb="0"/>
+<line nr="75" mi="23" ci="0" mb="0" cb="0"/>
+<line nr="76" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="77" mi="336" ci="0" mb="40" cb="0"/>
+<line nr="78" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="79" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="80" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="81" mi="24" ci="0" mb="0" cb="0"/>
+<line nr="82" mi="58" ci="0" mb="0" cb="0"/>
+<line nr="83" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="84" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="85" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="87" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="88" mi="15" ci="0" mb="0" cb="0"/>
+<line nr="89" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="91" mi="10" ci="0" mb="0" cb="0"/>
+<line nr="92" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="93" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="95" mi="11" ci="0" mb="0" cb="0"/>
+<line nr="96" mi="19" ci="0" mb="0" cb="0"/>
+<line nr="98" mi="10" ci="0" mb="0" cb="0"/>
+<line nr="101" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="102" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="103" mi="11" ci="0" mb="0" cb="0"/>
+<line nr="104" mi="13" ci="0" mb="0" cb="0"/>
+<line nr="105" mi="32" ci="0" mb="0" cb="0"/>
+<line nr="107" mi="10" ci="0" mb="0" cb="0"/>
+<line nr="110" mi="10" ci="0" mb="0" cb="0"/>
+<line nr="111" mi="13" ci="0" mb="2" cb="0"/>
+<line nr="112" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="113" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="114" mi="11" ci="0" mb="0" cb="0"/>
+<line nr="115" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="117" mi="10" ci="0" mb="0" cb="0"/>
+<line nr="118" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="119" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="120" mi="11" ci="0" mb="0" cb="0"/>
+<line nr="121" mi="42" ci="0" mb="0" cb="0"/>
+<line nr="123" mi="12" ci="0" mb="2" cb="0"/>
+<line nr="124" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="125" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="126" mi="11" ci="0" mb="0" cb="0"/>
+<line nr="127" mi="19" ci="0" mb="0" cb="0"/>
+<line nr="128" mi="29" ci="0" mb="0" cb="0"/>
+<line nr="130" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="131" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="132" mi="12" ci="0" mb="2" cb="0"/>
+<line nr="133" mi="11" ci="0" mb="0" cb="0"/>
+<line nr="134" mi="42" ci="0" mb="0" cb="0"/>
+<line nr="137" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="138" mi="16" ci="0" mb="0" cb="0"/>
+<line nr="141" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="142" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="143" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="144" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="145" mi="24" ci="0" mb="2" cb="0"/>
+<line nr="146" mi="25" ci="0" mb="0" cb="0"/>
+<line nr="148" mi="10" ci="0" mb="0" cb="0"/>
+<line nr="149" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="151" mi="10" ci="0" mb="0" cb="0"/>
+<line nr="154" mi="14" ci="0" mb="2" cb="0"/>
+<line nr="155" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="156" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="157" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="158" mi="11" ci="0" mb="0" cb="0"/>
+<line nr="159" mi="19" ci="0" mb="0" cb="0"/>
+<line nr="160" mi="29" ci="0" mb="0" cb="0"/>
+<line nr="162" mi="10" ci="0" mb="0" cb="0"/>
+<line nr="163" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="164" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="165" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="166" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="168" mi="12" ci="0" mb="0" cb="0"/>
+<line nr="172" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="173" mi="7" ci="0" mb="2" cb="0"/>
+<line nr="174" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="175" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="176" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="179" mi="10" ci="0" mb="0" cb="0"/>
+<line nr="182" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="183" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="184" mi="11" ci="0" mb="0" cb="0"/>
+<line nr="185" mi="13" ci="0" mb="0" cb="0"/>
+<line nr="186" mi="32" ci="0" mb="0" cb="0"/>
+<line nr="188" mi="10" ci="0" mb="0" cb="0"/>
+<line nr="189" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="190" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="192" mi="11" ci="0" mb="0" cb="0"/>
+<line nr="193" mi="19" ci="0" mb="0" cb="0"/>
+<line nr="195" mi="16" ci="0" mb="0" cb="0"/>
+<line nr="199" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="200" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="201" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="202" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="203" mi="24" ci="0" mb="2" cb="0"/>
+<line nr="204" mi="21" ci="0" mb="0" cb="0"/>
+<line nr="205" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="207" mi="10" ci="0" mb="0" cb="0"/>
+<line nr="208" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="211" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="212" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="213" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="214" mi="11" ci="0" mb="0" cb="0"/>
+<line nr="215" mi="10" ci="0" mb="2" cb="0"/>
+<line nr="216" mi="48" ci="0" mb="0" cb="0"/>
+<line nr="217" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="218" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="219" mi="38" ci="0" mb="0" cb="0"/>
+<line nr="221" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="222" mi="10" ci="0" mb="0" cb="0"/>
+<line nr="223" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="224" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="225" mi="11" ci="0" mb="0" cb="0"/>
+<line nr="226" mi="19" ci="0" mb="0" cb="0"/>
+<line nr="227" mi="29" ci="0" mb="0" cb="0"/>
+<line nr="230" mi="10" ci="0" mb="0" cb="0"/>
+<line nr="231" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="232" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="233" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="234" mi="10" ci="0" mb="0" cb="0"/>
+<line nr="235" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="236" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="237" mi="27" ci="0" mb="0" cb="0"/>
+<line nr="239" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="241" mi="26" ci="0" mb="0" cb="0"/>
+<line nr="249" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="250" mi="145" ci="0" mb="8" cb="0"/>
+<line nr="251" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="252" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="253" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="254" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="255" mi="40" ci="0" mb="2" cb="0"/>
+<line nr="256" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="257" mi="20" ci="0" mb="2" cb="0"/>
+<line nr="258" mi="12" ci="0" mb="0" cb="0"/>
+<line nr="259" mi="10" ci="0" mb="0" cb="0"/>
+<line nr="260" mi="12" ci="0" mb="0" cb="0"/>
+<line nr="262" mi="20" ci="0" mb="0" cb="0"/>
+<line nr="263" mi="31" ci="0" mb="0" cb="0"/>
+<line nr="264" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="265" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="266" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="268" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="269" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="270" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="271" mi="11" ci="0" mb="0" cb="0"/>
+<line nr="272" mi="18" ci="0" mb="2" cb="0"/>
+<line nr="274" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="275" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="276" mi="11" ci="0" mb="0" cb="0"/>
+<line nr="277" mi="19" ci="0" mb="0" cb="0"/>
+<line nr="279" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="280" mi="15" ci="0" mb="0" cb="0"/>
+<line nr="281" mi="11" ci="0" mb="0" cb="0"/>
+<line nr="282" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="283" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="284" mi="11" ci="0" mb="0" cb="0"/>
+<line nr="285" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="288" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="289" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="291" mi="17" ci="0" mb="0" cb="0"/>
+<line nr="298" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="299" mi="11" ci="0" mb="2" cb="0"/>
+<line nr="300" mi="7" ci="0" mb="2" cb="0"/>
+<line nr="301" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="304" mi="0" ci="6" mb="0" cb="0"/>
+<line nr="310" mi="0" ci="9" mb="1" cb="1"/>
+<line nr="311" mi="5" ci="0" mb="2" cb="0"/>
+<line nr="312" mi="3" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="2196" covered="15"/>
+<counter type="BRANCH" missed="77" covered="1"/>
+<counter type="LINE" missed="171" covered="2"/>
+</sourcefile>
+<sourcefile name="SummaryStep.kt">
+<line nr="34" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="35" mi="114" ci="0" mb="6" cb="0"/>
+<line nr="36" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="37" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="38" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="39" mi="15" ci="0" mb="0" cb="0"/>
+<line nr="40" mi="31" ci="0" mb="0" cb="0"/>
+<line nr="41" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="43" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="44" mi="15" ci="0" mb="0" cb="0"/>
+<line nr="45" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="47" mi="10" ci="0" mb="0" cb="0"/>
+<line nr="48" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="49" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="50" mi="11" ci="0" mb="0" cb="0"/>
+<line nr="51" mi="19" ci="0" mb="0" cb="0"/>
+<line nr="53" mi="10" ci="0" mb="0" cb="0"/>
+<line nr="54" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="55" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="56" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="57" mi="10" ci="0" mb="0" cb="0"/>
+<line nr="59" mi="18" ci="0" mb="0" cb="0"/>
+<line nr="60" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="61" mi="13" ci="0" mb="4" cb="0"/>
+<line nr="62" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="63" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="64" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="65" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="66" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="68" mi="35" ci="0" mb="0" cb="0"/>
+<line nr="69" mi="15" ci="0" mb="0" cb="0"/>
+<line nr="71" mi="10" ci="0" mb="0" cb="0"/>
+<line nr="72" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="73" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="74" mi="11" ci="0" mb="0" cb="0"/>
+<line nr="75" mi="23" ci="0" mb="0" cb="0"/>
+<line nr="77" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="78" mi="7" ci="0" mb="2" cb="0"/>
+<line nr="79" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="80" mi="38" ci="0" mb="2" cb="0"/>
+<line nr="82" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="83" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="84" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="85" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="86" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="87" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="88" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="90" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="92" mi="16" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="557" covered="0"/>
+<counter type="BRANCH" missed="14" covered="0"/>
+<counter type="LINE" missed="49" covered="0"/>
+</sourcefile>
+<sourcefile name="ConfigureStep.kt">
+<line nr="38" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="39" mi="206" ci="0" mb="20" cb="0"/>
+<line nr="40" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="41" mi="8" ci="0" mb="2" cb="0"/>
+<line nr="43" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="44" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="45" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="46" mi="21" ci="0" mb="0" cb="0"/>
+<line nr="47" mi="49" ci="0" mb="0" cb="0"/>
+<line nr="48" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="49" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="50" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="52" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="53" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="54" mi="11" ci="0" mb="0" cb="0"/>
+<line nr="55" mi="13" ci="0" mb="0" cb="0"/>
+<line nr="57" mi="10" ci="0" mb="0" cb="0"/>
+<line nr="58" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="59" mi="8" ci="0" mb="2" cb="0"/>
+<line nr="60" mi="11" ci="0" mb="0" cb="0"/>
+<line nr="61" mi="19" ci="0" mb="0" cb="0"/>
+<line nr="63" mi="16" ci="0" mb="0" cb="0"/>
+<line nr="65" mi="5" ci="0" mb="2" cb="0"/>
+<line nr="66" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="67" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="68" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="70" mi="18" ci="0" mb="0" cb="0"/>
+<line nr="71" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="72" mi="15" ci="0" mb="0" cb="0"/>
+<line nr="73" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="75" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="76" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="77" mi="11" ci="0" mb="0" cb="0"/>
+<line nr="78" mi="19" ci="0" mb="0" cb="0"/>
+<line nr="80" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="81" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="82" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="83" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="84" mi="11" ci="0" mb="0" cb="0"/>
+<line nr="86" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="87" mi="12" ci="0" mb="0" cb="0"/>
+<line nr="90" mi="22" ci="0" mb="2" cb="0"/>
+<line nr="92" mi="5" ci="0" mb="2" cb="0"/>
+<line nr="93" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="94" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="95" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="96" mi="48" ci="0" mb="0" cb="0"/>
+<line nr="97" mi="21" ci="0" mb="0" cb="0"/>
+<line nr="98" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="100" mi="10" ci="0" mb="0" cb="0"/>
+<line nr="101" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="102" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="103" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="104" mi="48" ci="0" mb="0" cb="0"/>
+<line nr="105" mi="21" ci="0" mb="0" cb="0"/>
+<line nr="106" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="108" mi="18" ci="0" mb="0" cb="0"/>
+<line nr="111" mi="3" ci="0" mb="2" cb="0"/>
+<line nr="112" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="113" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="114" mi="17" ci="0" mb="0" cb="0"/>
+<line nr="115" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="117" mi="12" ci="0" mb="0" cb="0"/>
+<line nr="120" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="121" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="122" mi="18" ci="0" mb="6" cb="0"/>
+<line nr="123" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="124" mi="15" ci="0" mb="0" cb="0"/>
+<line nr="125" mi="27" ci="0" mb="2" cb="0"/>
+<line nr="126" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="127" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="128" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="129" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="131" mi="12" ci="0" mb="0" cb="0"/>
+<line nr="132" mi="30" ci="0" mb="2" cb="0"/>
+<line nr="135" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="137" mi="20" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="993" covered="0"/>
+<counter type="BRANCH" missed="42" covered="0"/>
+<counter type="LINE" missed="79" covered="0"/>
+</sourcefile>
+<sourcefile name="ProvidersStep.kt">
+<line nr="35" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="36" mi="137" ci="0" mb="8" cb="0"/>
+<line nr="37" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="38" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="39" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="40" mi="16" ci="0" mb="0" cb="0"/>
+<line nr="41" mi="34" ci="0" mb="0" cb="0"/>
+<line nr="42" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="44" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="45" mi="15" ci="0" mb="0" cb="0"/>
+<line nr="46" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="48" mi="10" ci="0" mb="0" cb="0"/>
+<line nr="49" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="50" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="51" mi="11" ci="0" mb="0" cb="0"/>
+<line nr="52" mi="19" ci="0" mb="0" cb="0"/>
+<line nr="54" mi="10" ci="0" mb="0" cb="0"/>
+<line nr="55" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="56" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="57" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="58" mi="10" ci="0" mb="0" cb="0"/>
+<line nr="60" mi="13" ci="0" mb="0" cb="0"/>
+<line nr="61" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="62" mi="21" ci="0" mb="0" cb="0"/>
+<line nr="63" mi="24" ci="0" mb="0" cb="0"/>
+<line nr="64" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="65" mi="19" ci="0" mb="0" cb="0"/>
+<line nr="66" mi="15" ci="0" mb="0" cb="0"/>
+<line nr="67" mi="28" ci="0" mb="0" cb="0"/>
+<line nr="68" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="69" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="71" mi="35" ci="0" mb="0" cb="0"/>
+<line nr="72" mi="15" ci="0" mb="0" cb="0"/>
+<line nr="74" mi="10" ci="0" mb="0" cb="0"/>
+<line nr="75" mi="16" ci="0" mb="0" cb="0"/>
+<line nr="76" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="77" mi="17" ci="0" mb="0" cb="0"/>
+<line nr="78" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="80" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="81" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="82" mi="11" ci="0" mb="0" cb="0"/>
+<line nr="83" mi="19" ci="0" mb="0" cb="0"/>
+<line nr="85" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="86" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="87" mi="18" ci="0" mb="0" cb="0"/>
+<line nr="88" mi="23" ci="0" mb="0" cb="0"/>
+<line nr="89" mi="21" ci="0" mb="0" cb="0"/>
+<line nr="91" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="93" mi="10" ci="0" mb="0" cb="0"/>
+<line nr="94" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="95" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="96" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="97" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="98" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="99" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="100" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="102" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="104" mi="17" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="733" covered="0"/>
+<counter type="BRANCH" missed="8" covered="0"/>
+<counter type="LINE" missed="58" covered="0"/>
+</sourcefile>
+<sourcefile name="WelcomeStep.kt">
+<line nr="28" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="29" mi="91" ci="0" mb="4" cb="0"/>
+<line nr="30" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="31" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="32" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="33" mi="14" ci="0" mb="0" cb="0"/>
+<line nr="34" mi="28" ci="0" mb="0" cb="0"/>
+<line nr="35" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="36" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="37" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="45" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="46" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="47" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="48" mi="14" ci="0" mb="0" cb="0"/>
+<line nr="50" mi="10" ci="0" mb="0" cb="0"/>
+<line nr="51" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="52" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="53" mi="11" ci="0" mb="0" cb="0"/>
+<line nr="54" mi="10" ci="0" mb="0" cb="0"/>
+<line nr="56" mi="10" ci="0" mb="0" cb="0"/>
+<line nr="57" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="58" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="59" mi="11" ci="0" mb="0" cb="0"/>
+<line nr="60" mi="10" ci="0" mb="0" cb="0"/>
+<line nr="61" mi="13" ci="0" mb="0" cb="0"/>
+<line nr="63" mi="10" ci="0" mb="0" cb="0"/>
+<line nr="64" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="65" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="66" mi="11" ci="0" mb="0" cb="0"/>
+<line nr="67" mi="10" ci="0" mb="0" cb="0"/>
+<line nr="68" mi="13" ci="0" mb="0" cb="0"/>
+<line nr="70" mi="10" ci="0" mb="0" cb="0"/>
+<line nr="71" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="72" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="73" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="74" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="76" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="78" mi="15" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="382" covered="0"/>
+<counter type="BRANCH" missed="4" covered="0"/>
+<counter type="LINE" missed="38" covered="0"/>
+</sourcefile>
+<counter type="INSTRUCTION" missed="4861" covered="15"/>
+<counter type="BRANCH" missed="145" covered="1"/>
+<counter type="LINE" missed="395" covered="2"/>
+<counter type="METHOD" missed="22" covered="1"/>
+<counter type="CLASS" missed="17" covered="1"/>
+</package>
+<package name="hilt_aggregated_deps">
+<class name="hilt_aggregated_deps/_lava_onboarding_OnboardingHiltModule" sourcefilename="_lava_onboarding_OnboardingHiltModule.java">
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="hilt_aggregated_deps/_lava_onboarding_OnboardingViewModel_HiltModules_BindsModule" sourcefilename="_lava_onboarding_OnboardingViewModel_HiltModules_BindsModule.java">
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="hilt_aggregated_deps/_lava_onboarding_OnboardingViewModel_HiltModules_KeyModule" sourcefilename="_lava_onboarding_OnboardingViewModel_HiltModules_KeyModule.java">
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<sourcefile name="_lava_onboarding_OnboardingViewModel_HiltModules_BindsModule.java">
+<line nr="14" mi="2" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</sourcefile>
+<sourcefile name="_lava_onboarding_OnboardingHiltModule.java">
+<line nr="14" mi="2" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</sourcefile>
+<sourcefile name="_lava_onboarding_OnboardingViewModel_HiltModules_KeyModule.java">
+<line nr="14" mi="2" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</sourcefile>
+<counter type="INSTRUCTION" missed="6" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+<counter type="METHOD" missed="3" covered="0"/>
+<counter type="CLASS" missed="3" covered="0"/>
+</package>
+<package name="lava/onboarding/util">
+<class name="lava/onboarding/util/AuthTypeDisplayKt" sourcefilename="AuthTypeDisplay.kt">
+<method name="displayLabel" desc="(Llava/tracker/api/AuthType;)Ljava/lang/String;">
+<counter type="INSTRUCTION" missed="0" covered="39"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="5"/>
+</method>
+<method name="displayLabel$lambda$1" desc="(Ljava/lang/String;)Ljava/lang/CharSequence;">
+<counter type="INSTRUCTION" missed="2" covered="36"/>
+<counter type="BRANCH" missed="2" covered="2"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="75"/>
+<counter type="BRANCH" missed="2" covered="2"/>
+<counter type="LINE" missed="0" covered="6"/>
+<counter type="METHOD" missed="0" covered="2"/>
+</class>
+<sourcefile name="AuthTypeDisplay.kt">
+<line nr="17" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="18" mi="0" ci="12" mb="0" cb="0"/>
+<line nr="19" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="20" mi="0" ci="14" mb="0" cb="0"/>
+<line nr="21" mi="0" ci="10" mb="0" cb="0"/>
+<line nr="22" mi="2" ci="36" mb="2" cb="2"/>
+<counter type="INSTRUCTION" missed="2" covered="75"/>
+<counter type="BRANCH" missed="2" covered="2"/>
+<counter type="LINE" missed="0" covered="6"/>
+</sourcefile>
+<counter type="INSTRUCTION" missed="2" covered="75"/>
+<counter type="BRANCH" missed="2" covered="2"/>
+<counter type="LINE" missed="0" covered="6"/>
+<counter type="METHOD" missed="0" covered="2"/>
+<counter type="CLASS" missed="0" covered="1"/>
+</package>
+<counter type="INSTRUCTION" missed="6758" covered="2418"/>
+<counter type="BRANCH" missed="232" covered="103"/>
+<counter type="LINE" missed="561" covered="243"/>
+<counter type="METHOD" missed="77" covered="64"/>
+<counter type="CLASS" missed="42" covered="39"/>
+</report>

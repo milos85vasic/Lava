@@ -1,0 +1,13 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>LongMethod:CategoryScreen.kt$@Composable private fun CategoryScreenList( modifier: Modifier = Modifier, state: CategoryPageState, onAction: (CategoryAction) -&gt; Unit, )</ID>
+    <ID>LongParameterList:CategoryNavigation.kt$( back: () -&gt; Unit, openCategory: (id: String) -&gt; Unit, openLogin: () -&gt; Unit, openSearchInput: (query: String) -&gt; Unit, openTopic: (id: String) -&gt; Unit, deepLinkUrls: List&lt;String&gt; = emptyList(), animations: NavigationAnimations, )</ID>
+    <ID>LongParameterList:CategoryScreen.kt$( viewModel: CategoryViewModel, back: () -&gt; Unit, openCategory: (id: String) -&gt; Unit, openLogin: () -&gt; Unit, openSearchInput: (categoryId: String) -&gt; Unit, openTopic: (id: String) -&gt; Unit, )</ID>
+    <ID>LongParameterList:CategoryViewModel.kt$CategoryViewModel$( savedStateHandle: SavedStateHandle, loggerFactory: LoggerFactory, private val authStateUseCase: ObserveAuthStateUseCase, private val observeCategoryPagingDataUseCase: ObserveCategoryPagingDataUseCase, private val observeCategoryModelUseCase: ObserveCategoryModelUseCase, private val toggleBookmarkUseCase: ToggleBookmarkUseCase, private val toggleFavoriteUseCase: ToggleFavoriteUseCase, )</ID>
+    <ID>TooManyFunctions:CategoryViewModel.kt$CategoryViewModel : ViewModelContainerHost</ID>
+    <ID>TopLevelPropertyNaming:CategoryNavigation.kt$private const val CategoryIdKey = "f"</ID>
+    <ID>TopLevelPropertyNaming:CategoryNavigation.kt$private const val CategoryRoute = "category"</ID>
+  </CurrentIssues>
+</SmellBaseline>

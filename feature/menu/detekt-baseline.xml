@@ -1,0 +1,20 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>CyclomaticComplexMethod:MenuViewModel.kt$MenuViewModel$fun perform(action: MenuAction)</ID>
+    <ID>DestructuringDeclarationWithTooManyEntries:MenuScreen.kt$val (theme, favoritesSyncPeriod, bookmarksSyncPeriod, historySyncPeriod, credentialsSyncPeriod) = state</ID>
+    <ID>EmptyFunctionBlock:MenuViewModelTest.kt$MenuViewModelTest.&lt;no name provided&gt;${}</ID>
+    <ID>LongMethod:MenuScreen.kt$@Composable private fun MenuScreen( state: MenuState, onAction: (MenuAction) -&gt; Unit, openConnectionSettings: Boolean = false, onConnectionSettingsShown: () -&gt; Unit = {}, apiAppLauncher: ApiAppLauncher? = null, )</ID>
+    <ID>LongMethod:MenuViewModelTest.kt$MenuViewModelTest$private fun TestScope.createViewModel(): MenuViewModel</ID>
+    <ID>LongParameterList:MenuScreen.kt$( title: @Composable () -&gt; Unit, items: List&lt;T&gt;, selected: T, labelMapper: @Composable (T) -&gt; String, iconMapper: (@Composable (T) -&gt; Unit)? = null, onSelect: (T) -&gt; Unit, )</ID>
+    <ID>LongParameterList:MenuScreen.kt$( title: @Composable () -&gt; Unit, items: List&lt;T&gt;, selected: T, labelMapper: @Composable (T) -&gt; String, iconMapper: (@Composable (T) -&gt; Unit)? = null, onSelect: (T) -&gt; Unit, onDismiss: () -&gt; Unit, )</ID>
+    <ID>LongParameterList:MenuViewModel.kt$MenuViewModel$( private val clearBookmarksUseCase: ClearBookmarksUseCase, private val clearLocalFavoritesUseCase: ClearLocalFavoritesUseCase, private val clearHistoryUseCase: ClearHistoryUseCase, private val discoverLocalEndpointsUseCase: DiscoverLocalEndpointsUseCase, private val observeSettingsUseCase: ObserveSettingsUseCase, private val setBookmarksSyncPeriodUseCase: SetBookmarksSyncPeriodUseCase, private val setCredentialsSyncPeriodUseCase: SetCredentialsSyncPeriodUseCase, private val setEndpointUseCase: SetEndpointUseCase, private val setFavoritesSyncPeriodUseCase: SetFavoritesSyncPeriodUseCase, private val setHistorySyncPeriodUseCase: SetHistorySyncPeriodUseCase, private val setThemeUseCase: SetThemeUseCase, private val sdk: LavaTrackerSdk, private val credentialManager: ProviderCredentialManager, private val authService: AuthService, loggerFactory: LoggerFactory, private val analytics: AnalyticsTracker, )</ID>
+    <ID>MaxLineLength:MenuScreen.kt$Text(stringResource(R.string.app_version, packageInfo.getAppVersionName(), packageInfo.getAppVersionCode()))</ID>
+    <ID>MaxLineLength:MenuViewModelTest.kt$MenuViewModelTest$fun</ID>
+    <ID>TooGenericExceptionCaught:MenuViewModel.kt$MenuViewModel$e: Throwable</ID>
+    <ID>TooManyFunctions:MenuScreen.kt$lava.menu.MenuScreen.kt</ID>
+    <ID>TooManyFunctions:MenuViewModel.kt$MenuViewModel : ViewModelContainerHost</ID>
+    <ID>UnusedPrivateMember:MenuScreen.kt$@ThemePreviews @Composable private fun AboutDialog_Preview()</ID>
+  </CurrentIssues>
+</SmellBaseline>

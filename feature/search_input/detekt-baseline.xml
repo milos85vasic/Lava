@@ -1,0 +1,18 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>LongParameterList:SearchInputScreen.kt$( modifier: Modifier = Modifier, inputValue: TextFieldValue, onInputValueChange: (TextFieldValue) -&gt; Unit, showClearButton: Boolean, onClearButtonClick: () -&gt; Unit, onSubmitClick: () -&gt; Unit, )</ID>
+    <ID>LongParameterList:SearchInputScreen.kt$( modifier: Modifier = Modifier, inputValue: TextFieldValue, onInputValueChange: (TextFieldValue) -&gt; Unit, showClearButton: Boolean, onClearButtonClick: () -&gt; Unit, onSubmitClick: () -&gt; Unit, onBackClick: () -&gt; Unit, appBarState: AppBarState, )</ID>
+    <ID>MatchingDeclarationName:ProviderChipBar.kt$ProviderChip</ID>
+    <ID>TooGenericExceptionCaught:SearchInputViewModel.kt$SearchInputViewModel$e: Exception</ID>
+    <ID>TopLevelPropertyNaming:SearchInputNavigation.kt$private const val AuthorIdKey = "author_id"</ID>
+    <ID>TopLevelPropertyNaming:SearchInputNavigation.kt$private const val AuthorNameKey = "author_name"</ID>
+    <ID>TopLevelPropertyNaming:SearchInputNavigation.kt$private const val CategoriesKey = "categories"</ID>
+    <ID>TopLevelPropertyNaming:SearchInputNavigation.kt$private const val OrderKey = "order"</ID>
+    <ID>TopLevelPropertyNaming:SearchInputNavigation.kt$private const val PeriodKey = "period"</ID>
+    <ID>TopLevelPropertyNaming:SearchInputNavigation.kt$private const val QueryKey = "query"</ID>
+    <ID>TopLevelPropertyNaming:SearchInputNavigation.kt$private const val SearchInputRoute = "search_input"</ID>
+    <ID>TopLevelPropertyNaming:SearchInputNavigation.kt$private const val SortKey = "sort"</ID>
+  </CurrentIssues>
+</SmellBaseline>

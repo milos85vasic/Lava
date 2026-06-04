@@ -1,0 +1,56 @@
+<?xml version="1.0" ?>
+<report name="Kover Gradle Plugin XML report for :core:tracker:registry">
+<package name="lava/tracker/registry">
+<class name="lava/tracker/registry/DefaultTrackerRegistry" sourcefilename="DefaultTrackerRegistry.kt">
+<method name="&lt;init&gt;" desc="(Llava/sdk/registry/PluginRegistry;)V">
+<counter type="INSTRUCTION" missed="0" covered="8"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="2"/>
+</method>
+<method name="trackersWithCapability" desc="(Llava/tracker/api/TrackerCapability;)Ljava/util/List;">
+<counter type="INSTRUCTION" missed="0" covered="10"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<counter type="INSTRUCTION" missed="0" covered="18"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="3"/>
+<counter type="METHOD" missed="0" covered="2"/>
+</class>
+<class name="lava/tracker/registry/PluginConfigExtKt" sourcefilename="PluginConfigExt.kt">
+<method name="getCloneBaseUrlOverride" desc="(Llava/sdk/api/PluginConfig;)Ljava/lang/String;">
+<counter type="INSTRUCTION" missed="12" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="12" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<sourcefile name="DefaultTrackerRegistry.kt">
+<line nr="16" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="17" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="20" mi="0" ci="10" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="0" covered="18"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="3"/>
+</sourcefile>
+<sourcefile name="PluginConfigExt.kt">
+<line nr="25" mi="12" ci="0" mb="2" cb="0"/>
+<counter type="INSTRUCTION" missed="12" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</sourcefile>
+<counter type="INSTRUCTION" missed="12" covered="18"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="1" covered="3"/>
+<counter type="METHOD" missed="1" covered="2"/>
+<counter type="CLASS" missed="1" covered="1"/>
+</package>
+<counter type="INSTRUCTION" missed="12" covered="18"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="1" covered="3"/>
+<counter type="METHOD" missed="1" covered="2"/>
+<counter type="CLASS" missed="1" covered="1"/>
+</report>

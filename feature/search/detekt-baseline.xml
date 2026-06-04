@@ -1,0 +1,31 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>LongMethod:SearchScreen.kt$@Composable private fun SearchScreen( state: SearchState, onAction: (SearchAction) -&gt; Unit, )</ID>
+    <ID>LongMethod:SearchScreen.kt$@Composable private fun SwipeLayout( id: Int, swipeState: SwipeState, modifier: Modifier = Modifier, onLeftActionTriggered: () -&gt; Unit, onRightActionTriggered: () -&gt; Unit, leftAction: @Composable () -&gt; Unit, rightAction: @Composable () -&gt; Unit, content: @Composable () -&gt; Unit, )</ID>
+    <ID>LongParameterList:SearchScreen.kt$( id: Int, swipeState: SwipeState, modifier: Modifier = Modifier, onLeftActionTriggered: () -&gt; Unit, onRightActionTriggered: () -&gt; Unit, leftAction: @Composable () -&gt; Unit, rightAction: @Composable () -&gt; Unit, content: @Composable () -&gt; Unit, )</ID>
+    <ID>LongParameterList:SearchScreen.kt$( modifier: Modifier, search: Search, swipeState: SwipeState, onClick: () -&gt; Unit, onPinClick: () -&gt; Unit, onDeleteClick: () -&gt; Unit, )</ID>
+    <ID>LongParameterList:SearchScreen.kt$( modifier: Modifier, search: Search, swipeState: SwipeState, onClick: () -&gt; Unit, onUnpinClick: () -&gt; Unit, onDeleteClick: () -&gt; Unit, )</ID>
+    <ID>LongParameterList:SearchViewModel.kt$SearchViewModel$( private val observeAuthStateUseCase: ObserveAuthStateUseCase, private val observeSearchHistoryUseCase: ObserveSearchHistoryUseCase, private val removeSearchHistoryUseCase: RemoveSearchHistoryUseCase, private val pinSearchHistoryUseCase: PinSearchHistoryUseCase, private val unpinSearchHistoryUseCase: UnpinSearchHistoryUseCase, private val analytics: AnalyticsTracker, loggerFactory: LoggerFactory, )</ID>
+    <ID>MagicNumber:SearchScreen.kt$SearchStateProvider$10</ID>
+    <ID>MagicNumber:SearchScreen.kt$SearchStateProvider$11</ID>
+    <ID>MagicNumber:SearchScreen.kt$SearchStateProvider$12</ID>
+    <ID>MagicNumber:SearchScreen.kt$SearchStateProvider$13</ID>
+    <ID>MagicNumber:SearchScreen.kt$SearchStateProvider$14</ID>
+    <ID>MagicNumber:SearchScreen.kt$SearchStateProvider$15</ID>
+    <ID>MagicNumber:SearchScreen.kt$SearchStateProvider$16</ID>
+    <ID>MagicNumber:SearchScreen.kt$SearchStateProvider$17</ID>
+    <ID>MagicNumber:SearchScreen.kt$SearchStateProvider$18</ID>
+    <ID>MagicNumber:SearchScreen.kt$SearchStateProvider$3</ID>
+    <ID>MagicNumber:SearchScreen.kt$SearchStateProvider$4</ID>
+    <ID>MagicNumber:SearchScreen.kt$SearchStateProvider$5</ID>
+    <ID>MagicNumber:SearchScreen.kt$SearchStateProvider$6</ID>
+    <ID>MagicNumber:SearchScreen.kt$SearchStateProvider$7</ID>
+    <ID>MagicNumber:SearchScreen.kt$SearchStateProvider$8</ID>
+    <ID>MagicNumber:SearchScreen.kt$SearchStateProvider$9</ID>
+    <ID>TooManyFunctions:SearchScreen.kt$lava.search.SearchScreen.kt</ID>
+    <ID>TopLevelPropertyNaming:SearchNavigation.kt$private const val SearchHistoryRoute = "search_history"</ID>
+    <ID>UnusedPrivateMember:SearchScreen.kt$@ThemePreviews @Composable private fun SearchScreenPreview(@PreviewParameter(SearchStateProvider::class) state: SearchState)</ID>
+  </CurrentIssues>
+</SmellBaseline>

@@ -1,0 +1,7 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>UnusedPrivateMember:AccountItem.kt$@ThemePreviews @Composable private fun AccountItem_Preview( @PreviewParameter(AccountItemParamProvider::class) authState: AuthState, )</ID>
+  </CurrentIssues>
+</SmellBaseline>

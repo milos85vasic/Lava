@@ -1,0 +1,14 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>EmptyFunctionBlock:CloneProviderUseCaseTest.kt$CloneProviderUseCaseTest.FakeOutbox${}</ID>
+    <ID>LongParameterList:LogoutUseCase.kt$LogoutUseCaseImpl$( private val authService: AuthService, private val backgroundService: BackgroundService, private val bookmarksRepository: BookmarksRepository, private val favoritesRepository: FavoritesRepository, private val searchHistoryRepository: SearchHistoryRepository, private val suggestsRepository: SuggestsRepository, private val visitedRepository: VisitedRepository, private val dispatchers: Dispatchers, )</ID>
+    <ID>MagicNumber:DiscoverLocalEndpointsUseCase.kt$DiscoverLocalEndpointsUseCaseImpl$5_000</ID>
+    <ID>MagicNumber:ProbeMirrorUseCase.kt$ProbeMirrorUseCase$200</ID>
+    <ID>MagicNumber:ProbeMirrorUseCase.kt$ProbeMirrorUseCase$399</ID>
+    <ID>SwallowedException:TestInfrastructureContractTest.kt$TestInfrastructureContractTest$e: IllegalStateException</ID>
+    <ID>TooManyFunctions:DomainModule.kt$DomainModule</ID>
+    <ID>TooManyFunctions:PagingDataLoader.kt$PagingDataLoader$Companion</ID>
+  </CurrentIssues>
+</SmellBaseline>

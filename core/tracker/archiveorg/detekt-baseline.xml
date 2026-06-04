@@ -1,0 +1,11 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>MagicNumber:ArchiveOrgDto.kt$SearchResponseDto$50</ID>
+    <ID>MagicNumber:ArchiveOrgHttpClient.kt$ArchiveOrgHttpClient$10</ID>
+    <ID>MagicNumber:ArchiveOrgHttpClient.kt$ArchiveOrgHttpClient$30</ID>
+    <ID>MaxLineLength:ArchiveOrgDescriptorTest.kt$ArchiveOrgDescriptorTest$fun</ID>
+    <ID>UnusedPrivateProperty:ArchiveOrgClient.kt$ArchiveOrgClient$private val download: ArchiveOrgDownload</ID>
+  </CurrentIssues>
+</SmellBaseline>

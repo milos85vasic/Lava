@@ -1,0 +1,172 @@
+<?xml version="1.0" ?>
+<report name="Kover Gradle Plugin XML report for :core:sync">
+<package name="lava/sync/di">
+<class name="lava/sync/di/SyncModule" sourcefilename="SyncModule.kt">
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<sourcefile name="SyncModule.kt">
+<line nr="11" mi="2" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</sourcefile>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+<counter type="CLASS" missed="1" covered="0"/>
+</package>
+<package name="hilt_aggregated_deps">
+<class name="hilt_aggregated_deps/_lava_sync_di_SyncModule" sourcefilename="_lava_sync_di_SyncModule.java">
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<sourcefile name="_lava_sync_di_SyncModule.java">
+<line nr="14" mi="2" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</sourcefile>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+<counter type="CLASS" missed="1" covered="0"/>
+</package>
+<package name="lava/sync">
+<class name="lava/sync/SyncOutboxImpl" sourcefilename="SyncOutboxImpl.kt">
+<method name="enqueue" desc="(Llava/sync/SyncOutboxKind;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="0" covered="14"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="5"/>
+</method>
+<method name="ack" desc="(JLkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="0" covered="10"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="&lt;init&gt;" desc="(Llava/database/dao/SyncOutboxDao;)V">
+<counter type="INSTRUCTION" missed="0" covered="5"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="2"/>
+</method>
+<method name="observe" desc="()Lkotlinx/coroutines/flow/Flow;">
+<counter type="INSTRUCTION" missed="0" covered="3"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<counter type="INSTRUCTION" missed="0" covered="32"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="9"/>
+<counter type="METHOD" missed="0" covered="4"/>
+</class>
+<class name="lava/sync/SyncOutboxImpl_Factory" sourcefilename="SyncOutboxImpl_Factory.java">
+<method name="create" desc="(Ldagger/internal/Provider;)Llava/sync/SyncOutboxImpl_Factory;">
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Ldagger/internal/Provider;)V">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</method>
+<method name="get" desc="()Llava/sync/SyncOutboxImpl;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="create" desc="(Ljavax/inject/Provider;)Llava/sync/SyncOutboxImpl_Factory;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="newInstance" desc="(Llava/database/dao/SyncOutboxDao;)Llava/sync/SyncOutboxImpl;">
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="23" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+<counter type="METHOD" missed="5" covered="0"/>
+</class>
+<class name="lava/sync/SyncOutboxKind" sourcefilename="SyncOutboxKind.kt">
+<method name="&lt;clinit&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="0" covered="41"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="5"/>
+</method>
+<method name="&lt;init&gt;" desc="(Ljava/lang/String;ILjava/lang/String;)V">
+<counter type="INSTRUCTION" missed="0" covered="9"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<counter type="INSTRUCTION" missed="0" covered="50"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="6"/>
+<counter type="METHOD" missed="0" covered="2"/>
+</class>
+<sourcefile name="SyncOutboxImpl.kt">
+<line nr="10" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="11" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="14" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="15" mi="0" ci="7" mb="0" cb="0"/>
+<line nr="16" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="17" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="18" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="22" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="24" mi="0" ci="10" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="0" covered="32"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="9"/>
+</sourcefile>
+<sourcefile name="SyncOutboxImpl_Factory.java">
+<line nr="31" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="32" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="37" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="41" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="45" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="49" mi="4" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="23" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+</sourcefile>
+<sourcefile name="SyncOutboxKind.kt">
+<line nr="3" mi="0" ci="9" mb="0" cb="0"/>
+<line nr="4" mi="0" ci="7" mb="0" cb="0"/>
+<line nr="5" mi="0" ci="7" mb="0" cb="0"/>
+<line nr="6" mi="0" ci="7" mb="0" cb="0"/>
+<line nr="7" mi="0" ci="7" mb="0" cb="0"/>
+<line nr="8" mi="0" ci="13" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="0" covered="50"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="6"/>
+</sourcefile>
+<counter type="INSTRUCTION" missed="23" covered="82"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="6" covered="15"/>
+<counter type="METHOD" missed="5" covered="6"/>
+<counter type="CLASS" missed="1" covered="2"/>
+</package>
+<counter type="INSTRUCTION" missed="27" covered="82"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="8" covered="15"/>
+<counter type="METHOD" missed="7" covered="6"/>
+<counter type="CLASS" missed="3" covered="2"/>
+</report>

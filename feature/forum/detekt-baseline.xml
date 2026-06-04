@@ -1,0 +1,11 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>LongMethod:ForumScreen.kt$@Composable private fun RootCategory( rootCategory: ForumCategory, isExpanded: Boolean, onCategoryClick: (ForumCategory) -&gt; Unit, onExpandClick: () -&gt; Unit, )</ID>
+    <ID>MagicNumber:ForumScreen.kt$10</ID>
+    <ID>MagicNumber:ForumScreen.kt$100</ID>
+    <ID>MagicNumber:ForumScreen.kt$500</ID>
+    <ID>UnusedPrivateMember:ForumScreen.kt$@ThemePreviews @Composable private fun ForumScreen_Preview()</ID>
+  </CurrentIssues>
+</SmellBaseline>

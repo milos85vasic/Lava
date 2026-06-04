@@ -1,0 +1,9 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>TooGenericExceptionCaught:SyncCredentialsWorker.kt$SyncCredentialsWorker$e: Exception</ID>
+    <ID>TopLevelPropertyNaming:Utils.kt$private const val BackgroundWorkNotificationId = 0</ID>
+    <ID>TopLevelPropertyNaming:Utils.kt$private const val RetryAttemptsMaxCount = 3</ID>
+  </CurrentIssues>
+</SmellBaseline>

@@ -1,0 +1,9 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>MagicNumber:Utils.kt$0x7F</ID>
+    <ID>MagicNumber:Utils.kt$3</ID>
+    <ID>TopLevelPropertyNaming:Utils.kt$private const val maxBytes = 255</ID>
+  </CurrentIssues>
+</SmellBaseline>

@@ -1,0 +1,28 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>CyclomaticComplexMethod:ProviderLoginViewModel.kt$ProviderLoginViewModel$private fun onSubmitClick()</ID>
+    <ID>EmptyFunctionBlock:LoginViewModelTest.kt$LoginViewModelTest.&lt;no name provided&gt;${}</ID>
+    <ID>EmptyFunctionBlock:ProviderLoginViewModelTest.kt$ProviderLoginViewModelTest.&lt;no name provided&gt;${}</ID>
+    <ID>LongMethod:LoginScreenCommon.kt$@Composable internal fun PasswordInputField( modifier: Modifier = Modifier, state: LoginState, onChanged: (TextFieldValue) -&gt; Unit, onSelectNext: () -&gt; Unit, onSubmit: () -&gt; Unit, )</ID>
+    <ID>LongMethod:LoginViewModel.kt$LoginViewModel$private fun onSubmitClick()</ID>
+    <ID>LongMethod:ProviderLoginScreen.kt$@Composable private fun ProviderCredentialForm( state: ProviderLoginState, onAction: (ProviderLoginAction) -&gt; Unit, )</ID>
+    <ID>LongMethod:ProviderLoginViewModel.kt$ProviderLoginViewModel$private fun onSubmitClick()</ID>
+    <ID>MaxLineLength:ProviderLoginViewModel.kt$ProviderLoginViewModel$providerType = if (desc.capabilities.any { it.name.contains("TORRENT") }) "Tracker" else "HTTP Library"</ID>
+    <ID>MaxLineLength:ProviderLoginViewModelTest.kt$ProviderLoginViewModelTest$"signalAuthorized MUST NOT be called for FORM_LOGIN provider with supportsAnonymous=false; recorded names = ${authService.signaledNames}"</ID>
+    <ID>MaxLineLength:ProviderLoginViewModelTest.kt$ProviderLoginViewModelTest$"signalAuthorized MUST NOT be called when ServiceUnavailable fires; recorded names = ${authService.signaledNames}"</ID>
+    <ID>MaxLineLength:ProviderLoginViewModelTest.kt$ProviderLoginViewModelTest$"signalAuthorized MUST be called for AuthType.NONE provider; recorded names = ${authService.signaledNames}"</ID>
+    <ID>MaxLineLength:ProviderLoginViewModelTest.kt$ProviderLoginViewModelTest$"signalAuthorized MUST be called when anonymous mode is allowed; recorded names = ${authService.signaledNames}"</ID>
+    <ID>MaxLineLength:ProviderLoginViewModelTest.kt$ProviderLoginViewModelTest$*</ID>
+    <ID>MaxLineLength:ProviderLoginViewModelTest.kt$ProviderLoginViewModelTest$authService.signaledNames.any { it.contains("Internet Archive", ignoreCase = true) || it.contains("archiveorg", ignoreCase = true) }</ID>
+    <ID>TooGenericExceptionCaught:ProviderLoginViewModel.kt$ProviderLoginViewModel$t: Throwable</ID>
+    <ID>TopLevelPropertyNaming:LoginNavigation.kt$private const val LoginRoute = "login"</ID>
+    <ID>TopLevelPropertyNaming:ProviderLoginScreen.kt$/** * Test tag for the Anonymous Access switch on the provider list. Used by * `app/src/androidTest/.../Challenge03AnonymousSearchOnRuTorTest` and any * future Compose UI tests that need to interact with the toggle without * relying on coordinate-based input. */ const val AnonymousAccessSwitchTestTag = "anonymous_access_switch"</ID>
+    <ID>TopLevelPropertyNaming:ProviderLoginScreen.kt$/** * Test tag for the Bug 1 (§6.L 57th invocation) "Service unavailable" * banner that appears on the provider login form when the SDK reports * an upstream infrastructure error. Used by * `Challenge36LoginServiceUnavailableShowsAccurateMessageTest` to * locate the banner without relying on text matching (which would be * fragile under translation). */ const val ServiceUnavailableTextTestTag = "service_unavailable_banner"</ID>
+    <ID>UnusedPrivateMember:LoginScreen.kt$@ThemePreviews @Composable private fun LoginScreenPreview_CaptchaRequired()</ID>
+    <ID>UnusedPrivateMember:LoginScreen.kt$@ThemePreviews @Composable private fun LoginScreenPreview_DefaultState()</ID>
+    <ID>UnusedPrivateMember:LoginScreen.kt$@ThemePreviews @Composable private fun LoginScreenPreview_ErrorState()</ID>
+    <ID>UnusedPrivateMember:LoginScreen.kt$@ThemePreviews @Composable private fun LoginScreenPreview_LoadingState()</ID>
+  </CurrentIssues>
+</SmellBaseline>

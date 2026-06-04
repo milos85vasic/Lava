@@ -1,0 +1,13 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>ConstructorParameterNaming:GutenbergModels.kt$Book$val download_count: Int = 0</ID>
+    <ID>MagicNumber:BookExtensions.kt$32</ID>
+    <ID>MagicNumber:GutenbergHttpClient.kt$GutenbergHttpClient$10</ID>
+    <ID>MagicNumber:GutenbergHttpClient.kt$GutenbergHttpClient$15</ID>
+    <ID>MaxLineLength:GutenbergBrowseTest.kt$GutenbergBrowseTest$val json = """{"count": 1, "results": [{"id": 1, "title": "Any", "authors": [], "formats": {}, "download_count": 0}]}"""</ID>
+    <ID>UseCheckOrError:GutenbergBrowse.kt$GutenbergBrowse$throw IllegalStateException("Invalid base URL")</ID>
+    <ID>UseCheckOrError:GutenbergSearch.kt$GutenbergSearch$throw IllegalStateException("Invalid base URL")</ID>
+  </CurrentIssues>
+</SmellBaseline>

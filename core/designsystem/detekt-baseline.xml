@@ -1,0 +1,217 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>CyclomaticComplexMethod:Theme.kt$@Composable fun LavaTheme( theme: Theme = Theme.SYSTEM, isDark: Boolean = isSystemInDarkTheme(), isDynamic: Boolean = isMaterialYouAvailable(), content: @Composable () -&gt; Unit, )</ID>
+    <ID>ForbiddenComment:FloatingActionButton.kt$// TODO: add contentDescription</ID>
+    <ID>ForbiddenComment:Placeholder.kt$// TODO: add contentDescription</ID>
+    <ID>LongMethod:AppColors.kt$@Suppress("LongParameterList") private fun paletteColors(accent: Color, isDark: Boolean): AppColors</ID>
+    <ID>LongMethod:DropdownMenu.kt$@Composable fun DropdownMenu( expanded: Boolean, onDismissRequest: () -&gt; Unit, modifier: Modifier = Modifier, shape: Shape = AppTheme.shapes.small, content: @Composable ColumnScope.() -&gt; Unit, )</ID>
+    <ID>LongMethod:ModalBottomSheet.kt$@Composable fun ModalBottomSheet( visible: Boolean, onDismissRequest: () -&gt; Unit, content: @Composable ColumnScope.() -&gt; Unit, )</ID>
+    <ID>LongMethod:Pagination.kt$@Composable fun Pagination( currentPage: Int, totalPages: Int, onPageSelected: (Int) -&gt; Unit, )</ID>
+    <ID>LongParameterList:AppBar.kt$( modifier: Modifier = Modifier, navigationIcon: @Composable () -&gt; Unit = {}, title: @Composable () -&gt; Unit = {}, actions: @Composable RowScope.() -&gt; Unit = {}, expanded: Boolean, appBarState: AppBarState = rememberPinnedAppBarState(), expandableContent: @Composable () -&gt; Unit = {}, )</ID>
+    <ID>LongParameterList:Buttons.kt$( icon: Icon, contentDescription: String?, modifier: Modifier = Modifier, enabled: Boolean = true, tint: Color = Color.Unspecified, onClick: () -&gt; Unit, )</ID>
+    <ID>LongParameterList:Buttons.kt$( onClick: () -&gt; Unit, enabled: Boolean, modifier: Modifier = Modifier, shape: Shape = AppTheme.shapes.medium, contentColor: Color = AppTheme.colors.primary, content: @Composable RowScope.() -&gt; Unit, )</ID>
+    <ID>LongParameterList:Dialog.kt$( icon: @Composable (() -&gt; Unit)? = null, title: @Composable (() -&gt; Unit)? = null, text: @Composable (() -&gt; Unit)? = null, shape: Shape = AlertDialogDefaults.shape, containerColor: Color = AppTheme.colors.surface, iconContentColor: Color = AppTheme.colors.primary, titleContentColor: Color = AppTheme.colors.onSurface, textContentColor: Color = AppTheme.colors.outline, tonalElevation: Dp = AppTheme.elevations.large, confirmButton: @Composable () -&gt; Unit, dismissButton: @Composable (() -&gt; Unit)? = null, onDismissRequest: () -&gt; Unit, )</ID>
+    <ID>LongParameterList:Dialog.kt$( icon: Icon?, title: String, message: String, positiveButtonText: String, negativeButtonText: String, onDismiss: () -&gt; Unit, onConfirm: () -&gt; Unit, )</ID>
+    <ID>LongParameterList:Dialog.kt$ConfirmationDialogState$( icon: Icon? = null, @StringRes title: Int, @StringRes text: Int, @StringRes positiveButtonText: Int = R.string.designsystem_action_yes, @StringRes negativeButtonText: Int = R.string.designsystem_action_no, onConfirm: () -&gt; Unit, onDismiss: () -&gt; Unit, )</ID>
+    <ID>LongParameterList:DropdownMenu.kt$( expanded: Boolean, onDismissRequest: () -&gt; Unit, items: Iterable&lt;T&gt;, labelMapper: @Composable (T) -&gt; String, modifier: Modifier = Modifier, offset: DpOffset = DpOffset( x = AppTheme.spaces.zero, y = AppTheme.spaces.zero, ), onSelect: (T) -&gt; Unit, )</ID>
+    <ID>LongParameterList:LazyList.kt$( modifier: Modifier = Modifier, state: LazyListState = rememberLazyListState(), contentPadding: PaddingValues = PaddingValues(AppTheme.spaces.zero), verticalArrangement: Arrangement.Vertical = Arrangement.Top, horizontalAlignment: Alignment.Horizontal = Alignment.Start, onFirstItemVisible: () -&gt; Unit = {}, onLastItemVisible: () -&gt; Unit = {}, onLastVisibleIndexChanged: (Int) -&gt; Unit = {}, content: LazyListScope.() -&gt; Unit, )</ID>
+    <ID>LongParameterList:Surface.kt$( modifier: Modifier = Modifier, onClick: () -&gt; Unit, enabled: Boolean = true, shape: Shape = AppTheme.shapes.rectangle, color: Color = AppTheme.colors.surface, contentColor: Color = AppTheme.colors.contentColorFor(color), tonalElevation: Dp = AppTheme.elevations.zero, shadowElevation: Dp = AppTheme.elevations.zero, border: BorderStroke? = null, interactionSource: MutableInteractionSource = remember { MutableInteractionSource() }, content: @Composable BoxScope.() -&gt; Unit, )</ID>
+    <ID>LongParameterList:Surface.kt$( modifier: Modifier = Modifier, shape: Shape = AppTheme.shapes.rectangle, color: Color = AppTheme.colors.surface, contentColor: Color = AppTheme.colors.contentColorFor(color), tonalElevation: Dp = AppTheme.elevations.zero, shadowElevation: Dp = AppTheme.elevations.zero, border: BorderStroke? = null, content: @Composable BoxScope.() -&gt; Unit, )</ID>
+    <ID>LongParameterList:Text.kt$( text: AnnotatedString, modifier: Modifier = Modifier, color: Color = Color.Unspecified, fontSize: TextUnit = TextUnit.Unspecified, fontStyle: FontStyle? = null, fontWeight: FontWeight? = null, fontFamily: FontFamily? = null, letterSpacing: TextUnit = TextUnit.Unspecified, textDecoration: TextDecoration? = null, textAlign: TextAlign? = null, lineHeight: TextUnit = TextUnit.Unspecified, overflow: TextOverflow = TextOverflow.Clip, softWrap: Boolean = true, maxLines: Int = Int.MAX_VALUE, inlineContent: Map&lt;String, InlineTextContent&gt; = mapOf(), onTextLayout: (TextLayoutResult) -&gt; Unit = {}, style: TextStyle = LocalTextStyle.current, )</ID>
+    <ID>LongParameterList:Text.kt$( text: AnnotatedString, modifier: Modifier = Modifier, style: TextStyle = LocalTextStyle.current, softWrap: Boolean = true, overflow: TextOverflow = TextOverflow.Clip, maxLines: Int = Int.MAX_VALUE, onTextLayout: (TextLayoutResult) -&gt; Unit = {}, onClick: (Int) -&gt; Unit, )</ID>
+    <ID>LongParameterList:Text.kt$( text: String, modifier: Modifier = Modifier, color: Color = Color.Unspecified, fontSize: TextUnit = TextUnit.Unspecified, fontStyle: FontStyle? = null, fontWeight: FontWeight? = null, fontFamily: FontFamily? = null, letterSpacing: TextUnit = TextUnit.Unspecified, textDecoration: TextDecoration? = null, textAlign: TextAlign? = null, lineHeight: TextUnit = TextUnit.Unspecified, overflow: TextOverflow = TextOverflow.Clip, softWrap: Boolean = true, maxLines: Int = Int.MAX_VALUE, onTextLayout: (TextLayoutResult) -&gt; Unit = {}, style: TextStyle = LocalTextStyle.current, )</ID>
+    <ID>LongParameterList:TextField.kt$( value: String, onValueChange: (String) -&gt; Unit, modifier: Modifier = Modifier, enabled: Boolean = true, readOnly: Boolean = false, textStyle: TextStyle = AppTheme.typography.bodyMedium, label: @Composable (() -&gt; Unit)? = null, placeholder: @Composable (() -&gt; Unit)? = null, leadingIcon: @Composable (() -&gt; Unit)? = null, trailingIcon: @Composable (() -&gt; Unit)? = null, supportingText: @Composable (() -&gt; Unit)? = null, isError: Boolean = false, visualTransformation: VisualTransformation = VisualTransformation.None, keyboardOptions: KeyboardOptions = KeyboardOptions.Default, keyboardActions: KeyboardActions = KeyboardActions.Default, singleLine: Boolean = false, maxLines: Int = Int.MAX_VALUE, interactionSource: MutableInteractionSource = remember { MutableInteractionSource() }, )</ID>
+    <ID>LongParameterList:TextField.kt$( value: TextFieldValue, onValueChange: (TextFieldValue) -&gt; Unit, modifier: Modifier = Modifier, enabled: Boolean = true, readOnly: Boolean = false, textStyle: TextStyle = AppTheme.typography.bodyMedium, label: @Composable (() -&gt; Unit)? = null, placeholder: @Composable (() -&gt; Unit)? = null, leadingIcon: @Composable (() -&gt; Unit)? = null, trailingIcon: @Composable (() -&gt; Unit)? = null, prefix: @Composable (() -&gt; Unit)? = null, suffix: @Composable (() -&gt; Unit)? = null, supportingText: @Composable (() -&gt; Unit)? = null, isError: Boolean = false, visualTransformation: VisualTransformation = VisualTransformation.None, keyboardOptions: KeyboardOptions = KeyboardOptions.Default, keyboardActions: KeyboardActions = KeyboardActions.Default, singleLine: Boolean = false, maxLines: Int = Int.MAX_VALUE, interactionSource: MutableInteractionSource = remember { MutableInteractionSource() }, )</ID>
+    <ID>LongParameterList:TextField.kt$( value: TextFieldValue, onValueChange: (TextFieldValue) -&gt; Unit, modifier: Modifier = Modifier, enabled: Boolean = true, readOnly: Boolean = false, textStyle: TextStyle = AppTheme.typography.bodyMedium, label: @Composable (() -&gt; Unit)? = null, placeholder: @Composable (() -&gt; Unit)? = null, leadingIcon: @Composable (() -&gt; Unit)? = null, trailingIcon: @Composable (() -&gt; Unit)? = null, supportingText: @Composable (() -&gt; Unit)? = null, isError: Boolean = false, visualTransformation: VisualTransformation = VisualTransformation.None, keyboardOptions: KeyboardOptions = KeyboardOptions.Default, keyboardActions: KeyboardActions = KeyboardActions.Default, singleLine: Boolean = false, maxLines: Int = Int.MAX_VALUE, interactionSource: MutableInteractionSource = remember { MutableInteractionSource() }, )</ID>
+    <ID>LongParameterList:TextField.kt$TextFieldDefaults$( focusedTextColor: Color = LocalContentColor.current, unfocusedTextColor: Color = LocalContentColor.current, disabledTextColor: Color = LocalContentColor.current.copy(alpha = DisabledOpacity), errorTextColor: Color = ErrorColor, focusedContainerColor: Color = Color.Transparent, unfocusedContainerColor: Color = Color.Transparent, disabledContainerColor: Color = Color.Transparent, errorContainerColor: Color = Color.Transparent, cursorColor: Color = FocusedColor, errorCursorColor: Color = ErrorColor, selectionColors: TextSelectionColors = LocalTextSelectionColors.current, focusedIndicatorColor: Color = FocusedColor, unfocusedIndicatorColor: Color = UnfocusedColor, disabledIndicatorColor: Color = DisabledColor, errorIndicatorColor: Color = ErrorColor, focusedLeadingIconColor: Color = FocusedColor, unfocusedLeadingIconColor: Color = UnfocusedColor, disabledLeadingIconColor: Color = DisabledColor, errorLeadingIconColor: Color = ErrorColor, focusedTrailingIconColor: Color = FocusedColor, unfocusedTrailingIconColor: Color = UnfocusedColor, disabledTrailingIconColor: Color = DisabledColor, errorTrailingIconColor: Color = ErrorColor, focusedLabelColor: Color = FocusedColor, unfocusedLabelColor: Color = UnfocusedColor, disabledLabelColor: Color = DisabledColor, errorLabelColor: Color = ErrorColor, focusedPlaceholderColor: Color = UnfocusedColor, unfocusedPlaceholderColor: Color = UnfocusedColor, disabledPlaceholderColor: Color = DisabledColor, errorPlaceholderColor: Color = ErrorColor, focusedSupportingTextColor: Color = FocusedColor, unfocusedSupportingTextColor: Color = UnfocusedColor, disabledSupportingTextColor: Color = DisabledColor, errorSupportingTextColor: Color = ErrorColor, focusedPrefixColor: Color = FocusedColor, unfocusedPrefixColor: Color = UnfocusedColor, disabledPrefixColor: Color = DisabledColor, errorPrefixColor: Color = ErrorColor, focusedSuffixColor: Color = FocusedColor, unfocusedSuffixColor: Color = UnfocusedColor, disabledSuffixColor: Color = DisabledColor, errorSuffixColor: Color = ErrorColor, )</ID>
+    <ID>MagicNumber:AppColors.kt$0.3f</ID>
+    <ID>MagicNumber:AppColors.kt$0.4f</ID>
+    <ID>MagicNumber:AppColors.kt$0.8f</ID>
+    <ID>MagicNumber:AppColors.kt$0xFF410002</ID>
+    <ID>MagicNumber:AppColors.kt$0xFF690005</ID>
+    <ID>MagicNumber:AppColors.kt$0xFF93000A</ID>
+    <ID>MagicNumber:AppColors.kt$0xFFFFDAD6</ID>
+    <ID>MagicNumber:AppColors.kt$0xFFFFFFFF</ID>
+    <ID>MagicNumber:AppColors.kt$120f</ID>
+    <ID>MagicNumber:AppColors.kt$360f</ID>
+    <ID>MagicNumber:CheckBox.kt$0.85f</ID>
+    <ID>MagicNumber:Colors.kt$0xFF000000</ID>
+    <ID>MagicNumber:Colors.kt$0xFF00150A</ID>
+    <ID>MagicNumber:Colors.kt$0xFF002112</ID>
+    <ID>MagicNumber:Colors.kt$0xFF002C1A</ID>
+    <ID>MagicNumber:Colors.kt$0xFF003822</ID>
+    <ID>MagicNumber:Colors.kt$0xFF00452A</ID>
+    <ID>MagicNumber:Colors.kt$0xFF005233</ID>
+    <ID>MagicNumber:Colors.kt$0xFF005F3C</ID>
+    <ID>MagicNumber:Colors.kt$0xFF006C45</ID>
+    <ID>MagicNumber:Colors.kt$0xFF008858</ID>
+    <ID>MagicNumber:Colors.kt$0xFF1A1717</ID>
+    <ID>MagicNumber:Colors.kt$0xFF1C1A1A</ID>
+    <ID>MagicNumber:Colors.kt$0xFF24005B</ID>
+    <ID>MagicNumber:Colors.kt$0xFF290400</ID>
+    <ID>MagicNumber:Colors.kt$0xFF2C0008</ID>
+    <ID>MagicNumber:Colors.kt$0xFF2D0001</ID>
+    <ID>MagicNumber:Colors.kt$0xFF2DA46F</ID>
+    <ID>MagicNumber:Colors.kt$0xFF302C2B</ID>
+    <ID>MagicNumber:Colors.kt$0xFF312F2E</ID>
+    <ID>MagicNumber:Colors.kt$0xFF3B3737</ID>
+    <ID>MagicNumber:Colors.kt$0xFF3C0700</ID>
+    <ID>MagicNumber:Colors.kt$0xFF3C3A39</ID>
+    <ID>MagicNumber:Colors.kt$0xFF3D008F</ID>
+    <ID>MagicNumber:Colors.kt$0xFF3F0017</ID>
+    <ID>MagicNumber:Colors.kt$0xFF400010</ID>
+    <ID>MagicNumber:Colors.kt$0xFF410002</ID>
+    <ID>MagicNumber:Colors.kt$0xFF474342</ID>
+    <ID>MagicNumber:Colors.kt$0xFF484645</ID>
+    <ID>MagicNumber:Colors.kt$0xFF49189B</ID>
+    <ID>MagicNumber:Colors.kt$0xFF4EBF88</ID>
+    <ID>MagicNumber:Colors.kt$0xFF4F0C00</ID>
+    <ID>MagicNumber:Colors.kt$0xFF530017</ID>
+    <ID>MagicNumber:Colors.kt$0xFF534E4D</ID>
+    <ID>MagicNumber:Colors.kt$0xFF540004</ID>
+    <ID>MagicNumber:Colors.kt$0xFF545151</ID>
+    <ID>MagicNumber:Colors.kt$0xFF5528A7</ID>
+    <ID>MagicNumber:Colors.kt$0xFF5F5A59</ID>
+    <ID>MagicNumber:Colors.kt$0xFF605D5C</ID>
+    <ID>MagicNumber:Colors.kt$0xFF6137B3</ID>
+    <ID>MagicNumber:Colors.kt$0xFF621100</ID>
+    <ID>MagicNumber:Colors.kt$0xFF660029</ID>
+    <ID>MagicNumber:Colors.kt$0xFF67001F</ID>
+    <ID>MagicNumber:Colors.kt$0xFF690005</ID>
+    <ID>MagicNumber:Colors.kt$0xFF6CDBA2</ID>
+    <ID>MagicNumber:Colors.kt$0xFF6D44C0</ID>
+    <ID>MagicNumber:Colors.kt$0xFF751700</ID>
+    <ID>MagicNumber:Colors.kt$0xFF787271</ID>
+    <ID>MagicNumber:Colors.kt$0xFF797675</ID>
+    <ID>MagicNumber:Colors.kt$0xFF7B0033</ID>
+    <ID>MagicNumber:Colors.kt$0xFF7C0026</ID>
+    <ID>MagicNumber:Colors.kt$0xFF7E0007</ID>
+    <ID>MagicNumber:Colors.kt$0xFF875FDB</ID>
+    <ID>MagicNumber:Colors.kt$0xFF89F8BD</ID>
+    <ID>MagicNumber:Colors.kt$0xFF8A1D01</ID>
+    <ID>MagicNumber:Colors.kt$0xFF90003D</ID>
+    <ID>MagicNumber:Colors.kt$0xFF91002F</ID>
+    <ID>MagicNumber:Colors.kt$0xFF928C8B</ID>
+    <ID>MagicNumber:Colors.kt$0xFF93000A</ID>
+    <ID>MagicNumber:Colors.kt$0xFF93908F</ID>
+    <ID>MagicNumber:Colors.kt$0xFF9A290B</ID>
+    <ID>MagicNumber:Colors.kt$0xFF9F1E17</ID>
+    <ID>MagicNumber:Colors.kt$0xFFA179F8</ID>
+    <ID>MagicNumber:Colors.kt$0xFFA50048</ID>
+    <ID>MagicNumber:Colors.kt$0xFFA70037</ID>
+    <ID>MagicNumber:Colors.kt$0xFFA80710</ID>
+    <ID>MagicNumber:Colors.kt$0xFFAB3517</ID>
+    <ID>MagicNumber:Colors.kt$0xFFADA7A6</ID>
+    <ID>MagicNumber:Colors.kt$0xFFAEAAA9</ID>
+    <ID>MagicNumber:Colors.kt$0xFFB3261E</ID>
+    <ID>MagicNumber:Colors.kt$0xFFBA1A1A</ID>
+    <ID>MagicNumber:Colors.kt$0xFFBA9AFF</ID>
+    <ID>MagicNumber:Colors.kt$0xFFBB0152</ID>
+    <ID>MagicNumber:Colors.kt$0xFFBE0040</ID>
+    <ID>MagicNumber:Colors.kt$0xFFC0FFD8</ID>
+    <ID>MagicNumber:Colors.kt$0xFFC8C2C1</ID>
+    <ID>MagicNumber:Colors.kt$0xFFC9C5C4</ID>
+    <ID>MagicNumber:Colors.kt$0xFFCD4D2D</ID>
+    <ID>MagicNumber:Colors.kt$0xFFD1BCFF</ID>
+    <ID>MagicNumber:Colors.kt$0xFFDE2C6A</ID>
+    <ID>MagicNumber:Colors.kt$0xFFDE3730</ID>
+    <ID>MagicNumber:Colors.kt$0xFFE4DEDD</ID>
+    <ID>MagicNumber:Colors.kt$0xFFE5E1E0</ID>
+    <ID>MagicNumber:Colors.kt$0xFFE8FFEE</ID>
+    <ID>MagicNumber:Colors.kt$0xFFEADDFF</ID>
+    <ID>MagicNumber:Colors.kt$0xFFEC0051</ID>
+    <ID>MagicNumber:Colors.kt$0xFFEF6543</ID>
+    <ID>MagicNumber:Colors.kt$0xFFF2EEED</ID>
+    <ID>MagicNumber:Colors.kt$0xFFF4FFF5</ID>
+    <ID>MagicNumber:Colors.kt$0xFFF6EDFF</ID>
+    <ID>MagicNumber:Colors.kt$0xFFF9F8F8</ID>
+    <ID>MagicNumber:Colors.kt$0xFFFEF7FF</ID>
+    <ID>MagicNumber:Colors.kt$0xFFFEFBFA</ID>
+    <ID>MagicNumber:Colors.kt$0xFFFF4C84</ID>
+    <ID>MagicNumber:Colors.kt$0xFFFF5070</ID>
+    <ID>MagicNumber:Colors.kt$0xFFFF5449</ID>
+    <ID>MagicNumber:Colors.kt$0xFFFF85A2</ID>
+    <ID>MagicNumber:Colors.kt$0xFFFF8796</ID>
+    <ID>MagicNumber:Colors.kt$0xFFFF897D</ID>
+    <ID>MagicNumber:Colors.kt$0xFFFF8B6E</ID>
+    <ID>MagicNumber:Colors.kt$0xFFFFB1C1</ID>
+    <ID>MagicNumber:Colors.kt$0xFFFFB2B9</ID>
+    <ID>MagicNumber:Colors.kt$0xFFFFB4A2</ID>
+    <ID>MagicNumber:Colors.kt$0xFFFFB4A9</ID>
+    <ID>MagicNumber:Colors.kt$0xFFFFB4AB</ID>
+    <ID>MagicNumber:Colors.kt$0xFFFFD9DF</ID>
+    <ID>MagicNumber:Colors.kt$0xFFFFDAD2</ID>
+    <ID>MagicNumber:Colors.kt$0xFFFFDAD5</ID>
+    <ID>MagicNumber:Colors.kt$0xFFFFDAD6</ID>
+    <ID>MagicNumber:Colors.kt$0xFFFFDADC</ID>
+    <ID>MagicNumber:Colors.kt$0xFFFFECED</ID>
+    <ID>MagicNumber:Colors.kt$0xFFFFECEE</ID>
+    <ID>MagicNumber:Colors.kt$0xFFFFEDE9</ID>
+    <ID>MagicNumber:Colors.kt$0xFFFFEDEA</ID>
+    <ID>MagicNumber:Colors.kt$0xFFFFF8F6</ID>
+    <ID>MagicNumber:Colors.kt$0xFFFFF8F7</ID>
+    <ID>MagicNumber:Colors.kt$0xFFFFFBFA</ID>
+    <ID>MagicNumber:Colors.kt$0xFFFFFBFF</ID>
+    <ID>MagicNumber:Colors.kt$0xFFFFFFFF</ID>
+    <ID>MagicNumber:Pagination.kt$50</ID>
+    <ID>MagicNumber:PaletteTokens.kt$PaletteTokens$0xFF121212</ID>
+    <ID>MagicNumber:PaletteTokens.kt$PaletteTokens$0xFF1E1E1E</ID>
+    <ID>MagicNumber:PaletteTokens.kt$PaletteTokens$0xFF212121</ID>
+    <ID>MagicNumber:PaletteTokens.kt$PaletteTokens$0xFF268BD2</ID>
+    <ID>MagicNumber:PaletteTokens.kt$PaletteTokens$0xFF2A2A2A</ID>
+    <ID>MagicNumber:PaletteTokens.kt$PaletteTokens$0xFF404040</ID>
+    <ID>MagicNumber:PaletteTokens.kt$PaletteTokens$0xFF4CAF50</ID>
+    <ID>MagicNumber:PaletteTokens.kt$PaletteTokens$0xFF555555</ID>
+    <ID>MagicNumber:PaletteTokens.kt$PaletteTokens$0xFF61AFEF</ID>
+    <ID>MagicNumber:PaletteTokens.kt$PaletteTokens$0xFF757575</ID>
+    <ID>MagicNumber:PaletteTokens.kt$PaletteTokens$0xFF7AA2F7</ID>
+    <ID>MagicNumber:PaletteTokens.kt$PaletteTokens$0xFF808080</ID>
+    <ID>MagicNumber:PaletteTokens.kt$PaletteTokens$0xFF81C784</ID>
+    <ID>MagicNumber:PaletteTokens.kt$PaletteTokens$0xFF88C0D0</ID>
+    <ID>MagicNumber:PaletteTokens.kt$PaletteTokens$0xFF9D001E</ID>
+    <ID>MagicNumber:PaletteTokens.kt$PaletteTokens$0xFF9E9E9E</ID>
+    <ID>MagicNumber:PaletteTokens.kt$PaletteTokens$0xFFB0B0B0</ID>
+    <ID>MagicNumber:PaletteTokens.kt$PaletteTokens$0xFFBDBDBD</ID>
+    <ID>MagicNumber:PaletteTokens.kt$PaletteTokens$0xFFE0E0E0</ID>
+    <ID>MagicNumber:PaletteTokens.kt$PaletteTokens$0xFFEEEEEE</ID>
+    <ID>MagicNumber:PaletteTokens.kt$PaletteTokens$0xFFEF5350</ID>
+    <ID>MagicNumber:PaletteTokens.kt$PaletteTokens$0xFFF44336</ID>
+    <ID>MagicNumber:PaletteTokens.kt$PaletteTokens$0xFFF5F5F5</ID>
+    <ID>MagicNumber:PaletteTokens.kt$PaletteTokens$0xFFF92672</ID>
+    <ID>MagicNumber:PaletteTokens.kt$PaletteTokens$0xFFFB4934</ID>
+    <ID>MagicNumber:PaletteTokens.kt$PaletteTokens$0xFFFF79C6</ID>
+    <ID>MagicNumber:PaletteTokens.kt$PaletteTokens$0xFFFF9800</ID>
+    <ID>MagicNumber:PaletteTokens.kt$PaletteTokens$0xFFFFB74D</ID>
+    <ID>MagicNumber:PaletteTokens.kt$PaletteTokens$0xFFFFFFFF</ID>
+    <ID>MagicNumber:ProviderColors.kt$ProviderColors$0xFF00897B</ID>
+    <ID>MagicNumber:ProviderColors.kt$ProviderColors$0xFF1976D2</ID>
+    <ID>MagicNumber:ProviderColors.kt$ProviderColors$0xFF7B1FA2</ID>
+    <ID>MagicNumber:ProviderColors.kt$ProviderColors$0xFFD32F2F</ID>
+    <ID>MagicNumber:ProviderColors.kt$ProviderColors$0xFFE64A19</ID>
+    <ID>MagicNumber:ProviderColors.kt$ProviderColors$0xFFF9A825</ID>
+    <ID>MagicNumber:Surface.kt$100f</ID>
+    <ID>MagicNumber:Surface.kt$4.5f</ID>
+    <ID>MaxLineLength:AppColors.kt$primaryContainer = dynamicColorScheme.primaryContainer</ID>
+    <ID>MaxLineLength:AppColors.kt$secondaryContainer = dynamicColorScheme.secondaryContainer</ID>
+    <ID>MaxLineLength:AppColors.kt$tertiaryContainer = dynamicColorScheme.tertiaryContainer</ID>
+    <ID>TooManyFunctions:AppColors.kt$lava.designsystem.theme.AppColors.kt</ID>
+    <ID>TooManyFunctions:Buttons.kt$lava.designsystem.component.Buttons.kt</ID>
+    <ID>UnusedPrivateMember:AppBar.kt$@ThemePreviews @Composable private fun AppBarPreview(@PreviewParameter(AppBarParamsProvider::class) params: AppBarParams)</ID>
+    <ID>UnusedPrivateMember:AppBar.kt$@ThemePreviews @Composable private fun ExpandableAppBarPreview( @PreviewParameter(ExpandableAppBarParamsProvider::class) params: ExpandableAppBarParams, )</ID>
+    <ID>UnusedPrivateMember:AppBar.kt$@ThemePreviews @Composable private fun TabBarPreview(@PreviewParameter(AppBarParamsProvider::class) params: AppBarParams)</ID>
+    <ID>UnusedPrivateMember:AppColors.kt$@Preview( group = "Colors light", uiMode = Configuration.UI_MODE_NIGHT_NO, name = "Light theme", showBackground = true, backgroundColor = 0xEEEEEE, ) @Preview( group = "Colors dark", uiMode = Configuration.UI_MODE_NIGHT_YES, name = "Dark theme", showBackground = true, backgroundColor = 0x111111, ) @Composable private fun ColorsPreview()</ID>
+    <ID>UnusedPrivateMember:Buttons.kt$@ThemePreviews @Composable private fun ButtonPreview(@PreviewParameter(ButtonParamsProvider::class) enabled: Boolean)</ID>
+    <ID>UnusedPrivateMember:Buttons.kt$@ThemePreviews @Composable private fun TextButtonPreview(@PreviewParameter(ButtonParamsProvider::class) enabled: Boolean)</ID>
+    <ID>UnusedPrivateMember:CheckBox.kt$@ThemePreviews @Composable private fun CheckBoxIconPreview()</ID>
+    <ID>UnusedPrivateMember:Dialog.kt$@ThemePreviews @Composable private fun ConfirmationDialogPreview()</ID>
+    <ID>UnusedPrivateMember:Dialog.kt$@ThemePreviews @Composable private fun Dialog1Preview()</ID>
+    <ID>UnusedPrivateMember:Dialog.kt$@ThemePreviews @Composable private fun Dialog2Preview()</ID>
+    <ID>UnusedPrivateMember:Divider.kt$@ThemePreviews @Composable private fun DividerPreview()</ID>
+    <ID>UnusedPrivateMember:DropdownMenu.kt$@ThemePreviews @Composable private fun DropdownMenuPreview()</ID>
+    <ID>UnusedPrivateMember:FloatingActionButton.kt$@ThemePreviews @Composable private fun ScrollBackFloatingActionButtonPreview()</ID>
+    <ID>UnusedPrivateMember:Pagination.kt$@ThemePreviews @Composable private fun Pagination_Preview()</ID>
+    <ID>UnusedPrivateMember:TextField.kt$@ThemePreviews @Composable private fun TextFieldPreview()</ID>
+  </CurrentIssues>
+</SmellBaseline>

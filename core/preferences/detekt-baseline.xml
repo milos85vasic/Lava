@@ -1,0 +1,10 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>ComplexCondition:PreferencesStorageImpl.kt$PreferencesStorageImpl$id != null &amp;&amp; username != null &amp;&amp; token != null &amp;&amp; password != null</ID>
+    <ID>CyclomaticComplexMethod:PreferencesStorageImpl.kt$PreferencesStorageImpl$override suspend fun getSettings(): Settings</ID>
+    <ID>TooManyFunctions:PreferencesStorage.kt$PreferencesStorage</ID>
+    <ID>TooManyFunctions:PreferencesStorageImpl.kt$PreferencesStorageImpl : PreferencesStorage</ID>
+  </CurrentIssues>
+</SmellBaseline>

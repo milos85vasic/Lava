@@ -1,0 +1,20 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>MagicNumber:AesGcm.kt$AesGcm$12</ID>
+    <ID>MagicNumber:AesGcm.kt$AesGcm$32</ID>
+    <ID>MagicNumber:HKDF.kt$HKDF$255</ID>
+    <ID>MagicNumber:HKDF.kt$HKDF$31</ID>
+    <ID>MagicNumber:HKDF.kt$HKDF$32</ID>
+    <ID>MagicNumber:NetworkModule.kt$NetworkModule.Companion$30</ID>
+    <ID>MaxLineLength:SwitchingNetworkApiAuthTest.kt$SwitchingNetworkApiAuthTest$fun</ID>
+    <ID>ReturnCount:SwitchingNetworkApi.kt$SwitchingNetworkApi$override suspend fun download(token: String, id: String): FileDto</ID>
+    <ID>ReturnCount:SwitchingNetworkApi.kt$SwitchingNetworkApi$override suspend fun getTorrent(token: String, id: String): TorrentDto</ID>
+    <ID>SwallowedException:AuthInterceptorTest.kt$AuthInterceptorTest$e: java.io.IOException</ID>
+    <ID>TooManyFunctions:NetworkApiRepositoryImpl.kt$NetworkApiRepositoryImpl : NetworkApiRepository</ID>
+    <ID>TooManyFunctions:ProxyNetworkApi.kt$ProxyNetworkApi : NetworkApi</ID>
+    <ID>TooManyFunctions:SwitchingNetworkApi.kt$SwitchingNetworkApi : NetworkApi</ID>
+    <ID>UseCheckOrError:SwitchingNetworkApi.kt$SwitchingNetworkApi$throw IllegalStateException("All ${outcome.failedTrackerId} mirrors unavailable")</ID>
+  </CurrentIssues>
+</SmellBaseline>

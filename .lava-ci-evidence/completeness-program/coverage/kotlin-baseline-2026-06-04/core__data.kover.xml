@@ -1,0 +1,3066 @@
+<?xml version="1.0" ?>
+<report name="Kover Gradle Plugin XML report for :core:data">
+<package name="hilt_aggregated_deps">
+<class name="hilt_aggregated_deps/_lava_data_di_HiltWrapper_DataModule" sourcefilename="_lava_data_di_HiltWrapper_DataModule.java">
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<sourcefile name="_lava_data_di_HiltWrapper_DataModule.java">
+<line nr="14" mi="2" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</sourcefile>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+<counter type="CLASS" missed="1" covered="0"/>
+</package>
+<package name="lava/data/impl/repository">
+<class name="lava/data/impl/repository/BookmarksRepositoryImpl" sourcefilename="BookmarksRepositoryImpl.kt">
+<method name="getNewTopics" desc="(Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="19" covered="0"/>
+<counter type="BRANCH" missed="4" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="isBookmark" desc="(Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="getAllBookmarks" desc="(Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="14" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="getTopics" desc="(Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="19" covered="0"/>
+<counter type="BRANCH" missed="4" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="add" desc="(Llava/models/forum/Category;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="11" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="remove" desc="(Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="10" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="observeIds" desc="()Lkotlinx/coroutines/flow/Flow;">
+<counter type="INSTRUCTION" missed="3" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="observeNewTopics" desc="(Ljava/lang/String;)Lkotlinx/coroutines/flow/Flow;">
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="update" desc="(Ljava/lang/String;Ljava/util/List;Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="58" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+</method>
+<method name="clear" desc="(Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="9" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Llava/database/dao/BookmarkDao;)V">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</method>
+<method name="observeBookmarks" desc="()Lkotlinx/coroutines/flow/Flow;">
+<counter type="INSTRUCTION" missed="6" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="observeNewTopics" desc="()Lkotlinx/coroutines/flow/Flow;">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="170" covered="0"/>
+<counter type="BRANCH" missed="10" covered="0"/>
+<counter type="LINE" missed="20" covered="0"/>
+<counter type="METHOD" missed="13" covered="0"/>
+</class>
+<class name="lava/data/impl/repository/BookmarksRepositoryImpl_Factory" sourcefilename="BookmarksRepositoryImpl_Factory.java">
+<method name="newInstance" desc="(Llava/database/dao/BookmarkDao;)Llava/data/impl/repository/BookmarksRepositoryImpl;">
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="get" desc="()Llava/data/impl/repository/BookmarksRepositoryImpl;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Ldagger/internal/Provider;)V">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</method>
+<method name="create" desc="(Ljavax/inject/Provider;)Llava/data/impl/repository/BookmarksRepositoryImpl_Factory;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="create" desc="(Ldagger/internal/Provider;)Llava/data/impl/repository/BookmarksRepositoryImpl_Factory;">
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="23" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+<counter type="METHOD" missed="5" covered="0"/>
+</class>
+<class name="lava/data/impl/repository/EndpointsRepositoryImpl" sourcefilename="EndpointsRepositoryImpl.kt">
+<method name="purgeRutrackerLegacy" desc="(Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="0" covered="33"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="remove" desc="(Llava/models/settings/Endpoint;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="11" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;clinit&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="0" covered="2"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="&lt;init&gt;" desc="(Llava/database/dao/EndpointDao;)V">
+<counter type="INSTRUCTION" missed="0" covered="5"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="2"/>
+</method>
+<method name="observeAll" desc="(Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="0" covered="16"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="4"/>
+</method>
+<method name="add" desc="(Llava/models/settings/Endpoint;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="11" covered="4"/>
+<counter type="BRANCH" missed="1" covered="1"/>
+<counter type="LINE" missed="1" covered="1"/>
+</method>
+<counter type="INSTRUCTION" missed="22" covered="60"/>
+<counter type="BRANCH" missed="1" covered="1"/>
+<counter type="LINE" missed="2" covered="9"/>
+<counter type="METHOD" missed="1" covered="5"/>
+</class>
+<class name="lava/data/impl/repository/EndpointsRepositoryImpl$Companion" sourcefilename="EndpointsRepositoryImpl.kt">
+<method name="getDefaultEndpoints" desc="()Ljava/util/List;">
+<counter type="INSTRUCTION" missed="0" covered="1"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<counter type="INSTRUCTION" missed="0" covered="1"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+<counter type="METHOD" missed="0" covered="1"/>
+</class>
+<class name="lava/data/impl/repository/EndpointsRepositoryImpl$observeAll$2" sourcefilename="EndpointsRepositoryImpl.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="0" covered="66"/>
+<counter type="BRANCH" missed="0" covered="2"/>
+<counter type="LINE" missed="0" covered="5"/>
+</method>
+<counter type="INSTRUCTION" missed="0" covered="66"/>
+<counter type="BRANCH" missed="0" covered="2"/>
+<counter type="LINE" missed="0" covered="5"/>
+<counter type="METHOD" missed="0" covered="1"/>
+</class>
+<class name="lava/data/impl/repository/EndpointsRepositoryImpl$observeAll$3" sourcefilename="EndpointsRepositoryImpl.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="0" covered="11"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="3"/>
+</method>
+<counter type="INSTRUCTION" missed="0" covered="11"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="3"/>
+<counter type="METHOD" missed="0" covered="1"/>
+</class>
+<class name="lava/data/impl/repository/EndpointsRepositoryImpl_Factory" sourcefilename="EndpointsRepositoryImpl_Factory.java">
+<method name="create" desc="(Ljavax/inject/Provider;)Llava/data/impl/repository/EndpointsRepositoryImpl_Factory;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Ldagger/internal/Provider;)V">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</method>
+<method name="newInstance" desc="(Llava/database/dao/EndpointDao;)Llava/data/impl/repository/EndpointsRepositoryImpl;">
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="create" desc="(Ldagger/internal/Provider;)Llava/data/impl/repository/EndpointsRepositoryImpl_Factory;">
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="get" desc="()Llava/data/impl/repository/EndpointsRepositoryImpl;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="23" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+<counter type="METHOD" missed="5" covered="0"/>
+</class>
+<class name="lava/data/impl/repository/FavoriteSearchRepositoryImpl" sourcefilename="FavoriteSearchRepositoryImpl.kt">
+<method name="&lt;init&gt;" desc="(Llava/database/dao/FavoriteSearchDao;)V">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</method>
+<method name="clear" desc="(Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="9" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="add" desc="(ILkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="13" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="observeAll" desc="()Lkotlinx/coroutines/flow/Flow;">
+<counter type="INSTRUCTION" missed="6" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="remove" desc="(ILkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="13" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="46" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+<counter type="METHOD" missed="5" covered="0"/>
+</class>
+<class name="lava/data/impl/repository/FavoriteSearchRepositoryImpl_Factory" sourcefilename="FavoriteSearchRepositoryImpl_Factory.java">
+<method name="&lt;init&gt;" desc="(Ldagger/internal/Provider;)V">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</method>
+<method name="create" desc="(Ldagger/internal/Provider;)Llava/data/impl/repository/FavoriteSearchRepositoryImpl_Factory;">
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="create" desc="(Ljavax/inject/Provider;)Llava/data/impl/repository/FavoriteSearchRepositoryImpl_Factory;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="newInstance" desc="(Llava/database/dao/FavoriteSearchDao;)Llava/data/impl/repository/FavoriteSearchRepositoryImpl;">
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="get" desc="()Llava/data/impl/repository/FavoriteSearchRepositoryImpl;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="23" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+<counter type="METHOD" missed="5" covered="0"/>
+</class>
+<class name="lava/data/impl/repository/FavoritesRepositoryImpl" sourcefilename="FavoritesRepositoryImpl.kt">
+<method name="markVisited" desc="(Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="10" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Llava/database/dao/FavoriteTopicDao;Llava/logger/api/LoggerFactory;)V">
+<counter type="INSTRUCTION" missed="10" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</method>
+<method name="observeTopics" desc="()Lkotlinx/coroutines/flow/Flow;">
+<counter type="INSTRUCTION" missed="28" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="5" covered="0"/>
+</method>
+<method name="getTorrents" desc="(Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="18" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</method>
+<method name="remove" desc="(Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="18" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="contains" desc="(Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="17" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="removeById" desc="(Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="10" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="add" desc="(Llava/models/topic/Topic;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="11" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="getIds" desc="(Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="observeIds" desc="()Lkotlinx/coroutines/flow/Flow;">
+<counter type="INSTRUCTION" missed="10" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</method>
+<method name="remove" desc="(Llava/models/topic/Topic;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="11" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="clear" desc="(Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="9" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="updateTorrent" desc="(Llava/models/topic/Torrent;ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="96" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="18" covered="0"/>
+</method>
+<method name="add" desc="(Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="234" covered="0"/>
+<counter type="BRANCH" missed="24" covered="0"/>
+<counter type="LINE" missed="32" covered="0"/>
+</method>
+<method name="removeById" desc="(Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="11" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="observeUpdatedIds" desc="()Lkotlinx/coroutines/flow/Flow;">
+<counter type="INSTRUCTION" missed="3" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="500" covered="0"/>
+<counter type="BRANCH" missed="26" covered="0"/>
+<counter type="LINE" missed="73" covered="0"/>
+<counter type="METHOD" missed="16" covered="0"/>
+</class>
+<class name="lava/data/impl/repository/FavoritesRepositoryImpl$observeIds$1" sourcefilename="FavoritesRepositoryImpl.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="14" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="14" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/data/impl/repository/FavoritesRepositoryImpl$observeTopics$1" sourcefilename="FavoritesRepositoryImpl.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="21" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="21" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/data/impl/repository/FavoritesRepositoryImpl$observeTopics$2" sourcefilename="FavoritesRepositoryImpl.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="22" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="22" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/data/impl/repository/FavoritesRepositoryImpl$observeTopics$4" sourcefilename="FavoritesRepositoryImpl.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="22" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="22" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/data/impl/repository/FavoritesRepositoryImpl_Factory" sourcefilename="FavoritesRepositoryImpl_Factory.java">
+<method name="newInstance" desc="(Llava/database/dao/FavoriteTopicDao;Llava/logger/api/LoggerFactory;)Llava/data/impl/repository/FavoritesRepositoryImpl;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="create" desc="(Ljavax/inject/Provider;Ljavax/inject/Provider;)Llava/data/impl/repository/FavoritesRepositoryImpl_Factory;">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="create" desc="(Ldagger/internal/Provider;Ldagger/internal/Provider;)Llava/data/impl/repository/FavoritesRepositoryImpl_Factory;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="get" desc="()Llava/data/impl/repository/FavoritesRepositoryImpl;">
+<counter type="INSTRUCTION" missed="9" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Ldagger/internal/Provider;Ldagger/internal/Provider;)V">
+<counter type="INSTRUCTION" missed="8" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="34" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="7" covered="0"/>
+<counter type="METHOD" missed="5" covered="0"/>
+</class>
+<class name="lava/data/impl/repository/ForumRepositoryImpl" sourcefilename="ForumRepositoryImpl.kt">
+<method name="isNotEmpty" desc="(Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="getForum" desc="(Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="58" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+</method>
+<method name="flattenCategories" desc="(Llava/data/impl/repository/ForumRepositoryImpl;Ljava/util/List;Ljava/util/List;Ljava/lang/String;)V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="flattenCategories" desc="(Ljava/util/List;Ljava/util/List;Ljava/lang/String;)V">
+<counter type="INSTRUCTION" missed="21" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+</method>
+<method name="forumCategoryToEntity" desc="(Llava/data/impl/repository/ForumRepositoryImpl;Llava/models/forum/ForumCategory;Ljava/lang/String;I)Llava/database/entity/ForumCategoryEntity;">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="buildCategoryTree" desc="(Llava/database/entity/ForumCategoryEntity;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="55" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Llava/database/dao/ForumCategoryDao;Llava/database/dao/ForumMetadataDao;Llava/logger/api/LoggerFactory;)V">
+<counter type="INSTRUCTION" missed="13" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+</method>
+<method name="getCategory" desc="(Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="25" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</method>
+<method name="forumEntityToCategory" desc="(Llava/database/entity/ForumCategoryEntity;Ljava/util/List;)Llava/models/forum/ForumCategory;">
+<counter type="INSTRUCTION" missed="8" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+</method>
+<method name="isForumFresh" desc="(ILkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="41" covered="0"/>
+<counter type="BRANCH" missed="4" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+</method>
+<method name="forumCategoryToEntity" desc="(Llava/models/forum/ForumCategory;Ljava/lang/String;I)Llava/database/entity/ForumCategoryEntity;">
+<counter type="INSTRUCTION" missed="9" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="5" covered="0"/>
+</method>
+<method name="storeForum" desc="(Llava/models/forum/Forum;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="72" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="7" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="310" covered="0"/>
+<counter type="BRANCH" missed="8" covered="0"/>
+<counter type="LINE" missed="45" covered="0"/>
+<counter type="METHOD" missed="12" covered="0"/>
+</class>
+<class name="lava/data/impl/repository/ForumRepositoryImpl_Factory" sourcefilename="ForumRepositoryImpl_Factory.java">
+<method name="newInstance" desc="(Llava/database/dao/ForumCategoryDao;Llava/database/dao/ForumMetadataDao;Llava/logger/api/LoggerFactory;)Llava/data/impl/repository/ForumRepositoryImpl;">
+<counter type="INSTRUCTION" missed="6" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="get" desc="()Llava/data/impl/repository/ForumRepositoryImpl;">
+<counter type="INSTRUCTION" missed="13" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Ldagger/internal/Provider;Ldagger/internal/Provider;Ldagger/internal/Provider;)V">
+<counter type="INSTRUCTION" missed="11" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+</method>
+<method name="create" desc="(Ldagger/internal/Provider;Ldagger/internal/Provider;Ldagger/internal/Provider;)Llava/data/impl/repository/ForumRepositoryImpl_Factory;">
+<counter type="INSTRUCTION" missed="6" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="create" desc="(Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Llava/data/impl/repository/ForumRepositoryImpl_Factory;">
+<counter type="INSTRUCTION" missed="9" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="45" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="8" covered="0"/>
+<counter type="METHOD" missed="5" covered="0"/>
+</class>
+<class name="lava/data/impl/repository/RatingRepositoryImpl" sourcefilename="RatingRepositoryImpl.kt">
+<method name="setLaunchCount" desc="(ILkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="33" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</method>
+<method name="getLaunchCount" desc="(Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="observeRatingRequestDisabled" desc="()Lkotlinx/coroutines/flow/Flow;">
+<counter type="INSTRUCTION" missed="11" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Llava/securestorage/PreferencesStorage;)V">
+<counter type="INSTRUCTION" missed="11" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+</method>
+<method name="postponeRatingRequest" desc="(Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="10" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="disableRatingRequest" desc="(Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="30" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</method>
+<method name="isRatingRequestPostponed" desc="(Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="observeLaunchCount" desc="()Lkotlinx/coroutines/flow/Flow;">
+<counter type="INSTRUCTION" missed="11" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="114" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="17" covered="0"/>
+<counter type="METHOD" missed="8" covered="0"/>
+</class>
+<class name="lava/data/impl/repository/RatingRepositoryImpl$observeLaunchCount$1" sourcefilename="RatingRepositoryImpl.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="49" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="49" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/data/impl/repository/RatingRepositoryImpl$observeRatingRequestDisabled$1" sourcefilename="RatingRepositoryImpl.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="50" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="50" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/data/impl/repository/RatingRepositoryImpl_Factory" sourcefilename="RatingRepositoryImpl_Factory.java">
+<method name="&lt;init&gt;" desc="(Ldagger/internal/Provider;)V">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</method>
+<method name="create" desc="(Ljavax/inject/Provider;)Llava/data/impl/repository/RatingRepositoryImpl_Factory;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="get" desc="()Llava/data/impl/repository/RatingRepositoryImpl;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="newInstance" desc="(Llava/securestorage/PreferencesStorage;)Llava/data/impl/repository/RatingRepositoryImpl;">
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="create" desc="(Ldagger/internal/Provider;)Llava/data/impl/repository/RatingRepositoryImpl_Factory;">
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="23" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+<counter type="METHOD" missed="5" covered="0"/>
+</class>
+<class name="lava/data/impl/repository/SearchHistoryRepositoryImpl" sourcefilename="SearchHistoryRepositoryImpl.kt">
+<method name="clear" desc="(Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="9" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Llava/database/dao/SearchHistoryDao;)V">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</method>
+<method name="observeAll" desc="()Lkotlinx/coroutines/flow/Flow;">
+<counter type="INSTRUCTION" missed="6" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="add" desc="(Llava/models/search/Filter;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="11" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="remove" desc="(ILkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="10" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="41" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+<counter type="METHOD" missed="5" covered="0"/>
+</class>
+<class name="lava/data/impl/repository/SearchHistoryRepositoryImpl_Factory" sourcefilename="SearchHistoryRepositoryImpl_Factory.java">
+<method name="create" desc="(Ldagger/internal/Provider;)Llava/data/impl/repository/SearchHistoryRepositoryImpl_Factory;">
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="newInstance" desc="(Llava/database/dao/SearchHistoryDao;)Llava/data/impl/repository/SearchHistoryRepositoryImpl;">
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Ldagger/internal/Provider;)V">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</method>
+<method name="get" desc="()Llava/data/impl/repository/SearchHistoryRepositoryImpl;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="create" desc="(Ljavax/inject/Provider;)Llava/data/impl/repository/SearchHistoryRepositoryImpl_Factory;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="23" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+<counter type="METHOD" missed="5" covered="0"/>
+</class>
+<class name="lava/data/impl/repository/SettingsRepositoryImpl" sourcefilename="SettingsRepositoryImpl.kt">
+<method name="getSettings" desc="(Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="updateSettings" desc="(Lkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="56" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="5" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Llava/securestorage/PreferencesStorage;)V">
+<counter type="INSTRUCTION" missed="8" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</method>
+<method name="setTheme" desc="(Llava/models/settings/Theme;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="21" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="observeSettings" desc="()Lkotlinx/coroutines/flow/Flow;">
+<counter type="INSTRUCTION" missed="11" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</method>
+<method name="setEndpoint" desc="(Llava/models/settings/Endpoint;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="21" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="setHistorySyncPeriod" desc="(Llava/models/settings/SyncPeriod;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="21" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="setFavoritesSyncPeriod" desc="(Llava/models/settings/SyncPeriod;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="21" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="setBookmarksSyncPeriod" desc="(Llava/models/settings/SyncPeriod;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="21" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="setCredentialsSyncPeriod" desc="(Llava/models/settings/SyncPeriod;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="21" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="205" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="18" covered="0"/>
+<counter type="METHOD" missed="10" covered="0"/>
+</class>
+<class name="lava/data/impl/repository/SettingsRepositoryImpl$observeSettings$1" sourcefilename="SettingsRepositoryImpl.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="49" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="49" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/data/impl/repository/SettingsRepositoryImpl_Factory" sourcefilename="SettingsRepositoryImpl_Factory.java">
+<method name="create" desc="(Ljavax/inject/Provider;)Llava/data/impl/repository/SettingsRepositoryImpl_Factory;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="create" desc="(Ldagger/internal/Provider;)Llava/data/impl/repository/SettingsRepositoryImpl_Factory;">
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Ldagger/internal/Provider;)V">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</method>
+<method name="newInstance" desc="(Llava/securestorage/PreferencesStorage;)Llava/data/impl/repository/SettingsRepositoryImpl;">
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="get" desc="()Llava/data/impl/repository/SettingsRepositoryImpl;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="23" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+<counter type="METHOD" missed="5" covered="0"/>
+</class>
+<class name="lava/data/impl/repository/SuggestsRepositoryImpl" sourcefilename="SuggestsRepositoryImpl.kt">
+<method name="observeSuggests" desc="()Lkotlinx/coroutines/flow/Flow;">
+<counter type="INSTRUCTION" missed="6" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Llava/database/dao/SuggestDao;)V">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</method>
+<method name="clear" desc="(Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="9" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="addSuggest" desc="(Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="11" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="31" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="5" covered="0"/>
+<counter type="METHOD" missed="4" covered="0"/>
+</class>
+<class name="lava/data/impl/repository/SuggestsRepositoryImpl_Factory" sourcefilename="SuggestsRepositoryImpl_Factory.java">
+<method name="get" desc="()Llava/data/impl/repository/SuggestsRepositoryImpl;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="newInstance" desc="(Llava/database/dao/SuggestDao;)Llava/data/impl/repository/SuggestsRepositoryImpl;">
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Ldagger/internal/Provider;)V">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</method>
+<method name="create" desc="(Ljavax/inject/Provider;)Llava/data/impl/repository/SuggestsRepositoryImpl_Factory;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="create" desc="(Ldagger/internal/Provider;)Llava/data/impl/repository/SuggestsRepositoryImpl_Factory;">
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="23" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+<counter type="METHOD" missed="5" covered="0"/>
+</class>
+<class name="lava/data/impl/repository/VisitedRepositoryImpl" sourcefilename="VisitedRepositoryImpl.kt">
+<method name="observeTopics" desc="()Lkotlinx/coroutines/flow/Flow;">
+<counter type="INSTRUCTION" missed="6" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="observeIds" desc="()Lkotlinx/coroutines/flow/Flow;">
+<counter type="INSTRUCTION" missed="3" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="clear" desc="(Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="9" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Llava/database/dao/VisitedTopicDao;)V">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</method>
+<method name="add" desc="(Llava/models/topic/TopicPage;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="11" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="34" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+<counter type="METHOD" missed="5" covered="0"/>
+</class>
+<class name="lava/data/impl/repository/VisitedRepositoryImpl_Factory" sourcefilename="VisitedRepositoryImpl_Factory.java">
+<method name="create" desc="(Ldagger/internal/Provider;)Llava/data/impl/repository/VisitedRepositoryImpl_Factory;">
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Ldagger/internal/Provider;)V">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</method>
+<method name="get" desc="()Llava/data/impl/repository/VisitedRepositoryImpl;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="create" desc="(Ljavax/inject/Provider;)Llava/data/impl/repository/VisitedRepositoryImpl_Factory;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="newInstance" desc="(Llava/database/dao/VisitedTopicDao;)Llava/data/impl/repository/VisitedRepositoryImpl;">
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="23" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+<counter type="METHOD" missed="5" covered="0"/>
+</class>
+<sourcefile name="ForumRepositoryImpl.kt">
+<line nr="16" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="17" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="18" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="21" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="25" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="28" mi="13" ci="0" mb="0" cb="0"/>
+<line nr="29" mi="9" ci="0" mb="2" cb="0"/>
+<line nr="30" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="31" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="32" mi="8" ci="0" mb="2" cb="0"/>
+<line nr="33" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="37" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="38" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="39" mi="16" ci="0" mb="0" cb="0"/>
+<line nr="40" mi="18" ci="0" mb="0" cb="0"/>
+<line nr="41" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="42" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="43" mi="14" ci="0" mb="0" cb="0"/>
+<line nr="47" mi="3" ci="0" mb="2" cb="0"/>
+<line nr="48" mi="13" ci="0" mb="0" cb="0"/>
+<line nr="49" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="50" mi="25" ci="0" mb="0" cb="0"/>
+<line nr="52" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="54" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="58" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="59" mi="18" ci="0" mb="2" cb="0"/>
+<line nr="64" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="66" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="67" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="68" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="69" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="70" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="76" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="77" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="78" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="79" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="85" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="87" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="88" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="89" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="90" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="94" mi="19" ci="0" mb="0" cb="0"/>
+<line nr="95" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="96" mi="30" ci="0" mb="0" cb="0"/>
+<line nr="97" mi="4" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="310" covered="0"/>
+<counter type="BRANCH" missed="8" covered="0"/>
+<counter type="LINE" missed="45" covered="0"/>
+</sourcefile>
+<sourcefile name="BookmarksRepositoryImpl.kt">
+<line nr="14" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="15" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="18" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="30" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="34" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="35" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="45" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="49" mi="14" ci="0" mb="0" cb="0"/>
+<line nr="53" mi="19" ci="0" mb="4" cb="0"/>
+<line nr="57" mi="19" ci="0" mb="4" cb="0"/>
+<line nr="61" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="65" mi="11" ci="0" mb="0" cb="0"/>
+<line nr="69" mi="29" ci="0" mb="2" cb="0"/>
+<line nr="70" mi="18" ci="0" mb="0" cb="0"/>
+<line nr="71" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="72" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="73" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="76" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="80" mi="10" ci="0" mb="0" cb="0"/>
+<line nr="84" mi="9" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="170" covered="0"/>
+<counter type="BRANCH" missed="10" covered="0"/>
+<counter type="LINE" missed="20" covered="0"/>
+</sourcefile>
+<sourcefile name="EndpointsRepositoryImpl_Factory.java">
+<line nr="31" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="32" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="37" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="42" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="46" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="50" mi="4" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="23" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+</sourcefile>
+<sourcefile name="BookmarksRepositoryImpl_Factory.java">
+<line nr="31" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="32" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="37" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="42" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="46" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="50" mi="4" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="23" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+</sourcefile>
+<sourcefile name="SettingsRepositoryImpl_Factory.java">
+<line nr="31" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="32" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="37" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="42" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="47" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="51" mi="4" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="23" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+</sourcefile>
+<sourcefile name="FavoritesRepositoryImpl_Factory.java">
+<line nr="35" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="36" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="37" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="42" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="48" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="54" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="59" mi="5" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="34" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="7" covered="0"/>
+</sourcefile>
+<sourcefile name="ForumRepositoryImpl_Factory.java">
+<line nr="39" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="40" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="41" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="42" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="47" mi="13" ci="0" mb="0" cb="0"/>
+<line nr="54" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="61" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="66" mi="6" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="45" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="8" covered="0"/>
+</sourcefile>
+<sourcefile name="SearchHistoryRepositoryImpl_Factory.java">
+<line nr="31" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="32" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="37" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="42" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="47" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="51" mi="4" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="23" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+</sourcefile>
+<sourcefile name="FavoriteSearchRepositoryImpl.kt">
+<line nr="10" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="11" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="14" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="18" mi="13" ci="0" mb="0" cb="0"/>
+<line nr="22" mi="13" ci="0" mb="0" cb="0"/>
+<line nr="26" mi="9" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="46" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+</sourcefile>
+<sourcefile name="EndpointsRepositoryImpl.kt">
+<line nr="14" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="15" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="18" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="19" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="20" mi="0" ci="7" mb="0" cb="0"/>
+<line nr="21" mi="0" ci="20" mb="0" cb="0"/>
+<line nr="22" mi="0" ci="12" mb="0" cb="0"/>
+<line nr="23" mi="0" ci="17" mb="0" cb="2"/>
+<line nr="24" mi="0" ci="15" mb="0" cb="0"/>
+<line nr="26" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="28" mi="0" ci="6" mb="0" cb="0"/>
+<line nr="29" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="30" mi="0" ci="4" mb="0" cb="0"/>
+<line nr="31" mi="0" ci="4" mb="0" cb="0"/>
+<line nr="36" mi="0" ci="4" mb="1" cb="1"/>
+<line nr="37" mi="11" ci="0" mb="0" cb="0"/>
+<line nr="41" mi="11" ci="0" mb="0" cb="0"/>
+<line nr="50" mi="0" ci="33" mb="0" cb="0"/>
+<line nr="59" mi="0" ci="3" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="22" covered="138"/>
+<counter type="BRANCH" missed="1" covered="3"/>
+<counter type="LINE" missed="2" covered="18"/>
+</sourcefile>
+<sourcefile name="VisitedRepositoryImpl.kt">
+<line nr="14" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="15" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="18" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="24" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="28" mi="11" ci="0" mb="0" cb="0"/>
+<line nr="32" mi="9" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="34" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+</sourcefile>
+<sourcefile name="RatingRepositoryImpl.kt">
+<line nr="10" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="11" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="13" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="14" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="16" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="18" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="19" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="20" mi="56" ci="0" mb="0" cb="0"/>
+<line nr="23" mi="18" ci="0" mb="0" cb="0"/>
+<line nr="24" mi="15" ci="0" mb="0" cb="0"/>
+<line nr="27" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="28" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="29" mi="57" ci="0" mb="0" cb="0"/>
+<line nr="32" mi="15" ci="0" mb="0" cb="0"/>
+<line nr="33" mi="15" ci="0" mb="0" cb="0"/>
+<line nr="37" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="41" mi="10" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="213" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="19" covered="0"/>
+</sourcefile>
+<sourcefile name="FavoriteSearchRepositoryImpl_Factory.java">
+<line nr="31" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="32" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="37" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="42" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="47" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="51" mi="4" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="23" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+</sourcefile>
+<sourcefile name="RatingRepositoryImpl_Factory.java">
+<line nr="31" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="32" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="37" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="42" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="47" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="51" mi="4" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="23" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+</sourcefile>
+<sourcefile name="FavoritesRepositoryImpl.kt">
+<line nr="18" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="19" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="22" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="25" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="26" mi="28" ci="0" mb="0" cb="0"/>
+<line nr="27" mi="30" ci="0" mb="0" cb="0"/>
+<line nr="28" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="29" mi="29" ci="0" mb="0" cb="0"/>
+<line nr="33" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="34" mi="21" ci="0" mb="0" cb="0"/>
+<line nr="38" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="42" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="46" mi="10" ci="0" mb="0" cb="0"/>
+<line nr="47" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="48" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="52" mi="17" ci="0" mb="0" cb="0"/>
+<line nr="56" mi="11" ci="0" mb="0" cb="0"/>
+<line nr="60" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="61" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="62" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="64" mi="23" ci="0" mb="0" cb="0"/>
+<line nr="66" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="67" mi="19" ci="0" mb="0" cb="0"/>
+<line nr="68" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="69" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="70" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="71" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="72" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="73" mi="20" ci="0" mb="0" cb="0"/>
+<line nr="74" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="75" mi="13" ci="0" mb="2" cb="0"/>
+<line nr="76" mi="4" ci="0" mb="2" cb="0"/>
+<line nr="77" mi="3" ci="0" mb="2" cb="0"/>
+<line nr="78" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="79" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="80" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="81" mi="7" ci="0" mb="2" cb="0"/>
+<line nr="82" mi="7" ci="0" mb="2" cb="0"/>
+<line nr="83" mi="7" ci="0" mb="2" cb="0"/>
+<line nr="84" mi="7" ci="0" mb="2" cb="0"/>
+<line nr="85" mi="7" ci="0" mb="2" cb="0"/>
+<line nr="86" mi="7" ci="0" mb="2" cb="0"/>
+<line nr="87" mi="7" ci="0" mb="2" cb="0"/>
+<line nr="88" mi="7" ci="0" mb="2" cb="0"/>
+<line nr="89" mi="7" ci="0" mb="2" cb="0"/>
+<line nr="90" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="91" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="92" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="94" mi="25" ci="0" mb="0" cb="0"/>
+<line nr="98" mi="11" ci="0" mb="0" cb="0"/>
+<line nr="102" mi="18" ci="0" mb="0" cb="0"/>
+<line nr="106" mi="10" ci="0" mb="0" cb="0"/>
+<line nr="110" mi="11" ci="0" mb="0" cb="0"/>
+<line nr="114" mi="21" ci="0" mb="0" cb="0"/>
+<line nr="115" mi="2" ci="0" mb="2" cb="0"/>
+<line nr="116" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="117" mi="19" ci="0" mb="0" cb="0"/>
+<line nr="119" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="120" mi="15" ci="0" mb="0" cb="0"/>
+<line nr="121" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="122" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="123" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="124" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="125" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="126" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="127" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="128" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="129" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="130" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="131" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="132" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="139" mi="10" ci="0" mb="0" cb="0"/>
+<line nr="143" mi="9" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="579" covered="0"/>
+<counter type="BRANCH" missed="26" covered="0"/>
+<counter type="LINE" missed="77" covered="0"/>
+</sourcefile>
+<sourcefile name="SuggestsRepositoryImpl.kt">
+<line nr="11" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="12" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="14" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="19" mi="11" ci="0" mb="0" cb="0"/>
+<line nr="23" mi="9" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="31" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="5" covered="0"/>
+</sourcefile>
+<sourcefile name="VisitedRepositoryImpl_Factory.java">
+<line nr="31" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="32" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="37" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="42" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="47" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="51" mi="4" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="23" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+</sourcefile>
+<sourcefile name="SettingsRepositoryImpl.kt">
+<line nr="14" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="15" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="17" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="19" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="21" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="22" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="23" mi="56" ci="0" mb="0" cb="0"/>
+<line nr="26" mi="21" ci="0" mb="0" cb="0"/>
+<line nr="30" mi="21" ci="0" mb="0" cb="0"/>
+<line nr="34" mi="21" ci="0" mb="0" cb="0"/>
+<line nr="38" mi="21" ci="0" mb="0" cb="0"/>
+<line nr="42" mi="21" ci="0" mb="0" cb="0"/>
+<line nr="46" mi="21" ci="0" mb="0" cb="0"/>
+<line nr="50" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="51" mi="13" ci="0" mb="0" cb="0"/>
+<line nr="52" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="53" mi="17" ci="0" mb="0" cb="0"/>
+<line nr="54" mi="18" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="254" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="19" covered="0"/>
+</sourcefile>
+<sourcefile name="SearchHistoryRepositoryImpl.kt">
+<line nr="14" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="15" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="18" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="24" mi="11" ci="0" mb="0" cb="0"/>
+<line nr="28" mi="10" ci="0" mb="0" cb="0"/>
+<line nr="32" mi="9" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="41" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+</sourcefile>
+<sourcefile name="SuggestsRepositoryImpl_Factory.java">
+<line nr="31" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="32" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="37" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="42" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="46" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="50" mi="4" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="23" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+</sourcefile>
+<counter type="INSTRUCTION" missed="1963" covered="138"/>
+<counter type="BRANCH" missed="45" covered="3"/>
+<counter type="LINE" missed="268" covered="18"/>
+<counter type="METHOD" missed="136" covered="8"/>
+<counter type="CLASS" missed="26" covered="4"/>
+</package>
+<package name="lava/data/di">
+<class name="lava/data/di/HiltWrapper_DataModule" sourcefilename="HiltWrapper_DataModule.java">
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<sourcefile name="HiltWrapper_DataModule.java">
+<line nr="17" mi="2" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</sourcefile>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+<counter type="CLASS" missed="1" covered="0"/>
+</package>
+<package name="lava/data/impl/service">
+<class name="lava/data/impl/service/ConnectionServiceImpl" sourcefilename="ConnectionServiceImpl.kt">
+<method name="isReachable" desc="(Llava/models/settings/Endpoint;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="12" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="isNetworkConnected" desc="(Landroid/net/ConnectivityManager;)Z">
+<counter type="INSTRUCTION" missed="40" covered="0"/>
+<counter type="BRANCH" missed="10" covered="0"/>
+<counter type="LINE" missed="7" covered="0"/>
+</method>
+<method name="isInternetReachable" desc="(Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="11" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Landroid/content/Context;Llava/dispatchers/api/Dispatchers;Llava/logger/api/LoggerFactory;)V">
+<counter type="INSTRUCTION" missed="35" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="7" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="98" covered="0"/>
+<counter type="BRANCH" missed="10" covered="0"/>
+<counter type="LINE" missed="16" covered="0"/>
+<counter type="METHOD" missed="4" covered="0"/>
+</class>
+<class name="lava/data/impl/service/ConnectionServiceImpl$isInternetReachable$2" sourcefilename="ConnectionServiceImpl.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="77" covered="0"/>
+<counter type="BRANCH" missed="6" covered="0"/>
+<counter type="LINE" missed="10" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="77" covered="0"/>
+<counter type="BRANCH" missed="6" covered="0"/>
+<counter type="LINE" missed="10" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/data/impl/service/ConnectionServiceImpl$isReachable$2" sourcefilename="ConnectionServiceImpl.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="85" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="7" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="85" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="7" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/data/impl/service/ConnectionServiceImpl$networkUpdates$1" sourcefilename="ConnectionServiceImpl.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="62" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="12" covered="0"/>
+</method>
+<method name="invokeSuspend$lambda$0" desc="(Landroid/net/ConnectivityManager;Llava/data/impl/service/ConnectionServiceImpl$networkUpdates$1$callback$1;)Lkotlin/Unit;">
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="66" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="13" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+</class>
+<class name="lava/data/impl/service/ConnectionServiceImpl$networkUpdates$1$callback$1" sourcefilename="ConnectionServiceImpl.kt">
+<method name="onAvailable" desc="(Landroid/net/Network;)V">
+<counter type="INSTRUCTION" missed="8" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</method>
+<method name="notifyNetworksChanged" desc="()V">
+<counter type="INSTRUCTION" missed="11" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Lkotlinx/coroutines/channels/ProducerScope;)V">
+<counter type="INSTRUCTION" missed="8" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</method>
+<method name="onLost" desc="(Landroid/net/Network;)V">
+<counter type="INSTRUCTION" missed="8" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="35" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="7" covered="0"/>
+<counter type="METHOD" missed="4" covered="0"/>
+</class>
+<class name="lava/data/impl/service/ConnectionServiceImpl$networkUpdates$2" sourcefilename="ConnectionServiceImpl.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="15" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="15" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/data/impl/service/ConnectionServiceImplKt" sourcefilename="ConnectionServiceImpl.kt">
+<method name="connectTarget" desc="(Llava/models/settings/Endpoint;)Lkotlin/Pair;">
+<counter type="INSTRUCTION" missed="0" covered="59"/>
+<counter type="BRANCH" missed="0" covered="8"/>
+<counter type="LINE" missed="0" covered="7"/>
+</method>
+<method name="parseHostPort" desc="(Ljava/lang/String;)Lkotlin/Pair;">
+<counter type="INSTRUCTION" missed="0" covered="32"/>
+<counter type="BRANCH" missed="0" covered="2"/>
+<counter type="LINE" missed="0" covered="4"/>
+</method>
+<counter type="INSTRUCTION" missed="0" covered="91"/>
+<counter type="BRANCH" missed="0" covered="10"/>
+<counter type="LINE" missed="0" covered="11"/>
+<counter type="METHOD" missed="0" covered="2"/>
+</class>
+<class name="lava/data/impl/service/ConnectionServiceImpl_Factory" sourcefilename="ConnectionServiceImpl_Factory.java">
+<method name="&lt;init&gt;" desc="(Ldagger/internal/Provider;Ldagger/internal/Provider;Ldagger/internal/Provider;)V">
+<counter type="INSTRUCTION" missed="11" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+</method>
+<method name="create" desc="(Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Llava/data/impl/service/ConnectionServiceImpl_Factory;">
+<counter type="INSTRUCTION" missed="9" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="newInstance" desc="(Landroid/content/Context;Llava/dispatchers/api/Dispatchers;Llava/logger/api/LoggerFactory;)Llava/data/impl/service/ConnectionServiceImpl;">
+<counter type="INSTRUCTION" missed="6" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="get" desc="()Llava/data/impl/service/ConnectionServiceImpl;">
+<counter type="INSTRUCTION" missed="13" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="create" desc="(Ldagger/internal/Provider;Ldagger/internal/Provider;Ldagger/internal/Provider;)Llava/data/impl/service/ConnectionServiceImpl_Factory;">
+<counter type="INSTRUCTION" missed="6" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="45" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="8" covered="0"/>
+<counter type="METHOD" missed="5" covered="0"/>
+</class>
+<class name="lava/data/impl/service/FavoritesServiceImpl" sourcefilename="FavoritesServiceImpl.kt">
+<method name="&lt;init&gt;" desc="(Llava/auth/api/AuthService;Llava/auth/api/TokenProvider;Llava/network/api/NetworkApi;)V">
+<counter type="INSTRUCTION" missed="11" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+</method>
+<method name="getFavorites" desc="(Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="82" covered="0"/>
+<counter type="BRANCH" missed="4" covered="0"/>
+<counter type="LINE" missed="5" covered="0"/>
+</method>
+<method name="remove" desc="(Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="58" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</method>
+<method name="add" desc="(Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="58" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="209" covered="0"/>
+<counter type="BRANCH" missed="8" covered="0"/>
+<counter type="LINE" missed="15" covered="0"/>
+<counter type="METHOD" missed="4" covered="0"/>
+</class>
+<class name="lava/data/impl/service/FavoritesServiceImpl_Factory" sourcefilename="FavoritesServiceImpl_Factory.java">
+<method name="newInstance" desc="(Llava/auth/api/AuthService;Llava/auth/api/TokenProvider;Llava/network/api/NetworkApi;)Llava/data/impl/service/FavoritesServiceImpl;">
+<counter type="INSTRUCTION" missed="6" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Ldagger/internal/Provider;Ldagger/internal/Provider;Ldagger/internal/Provider;)V">
+<counter type="INSTRUCTION" missed="11" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+</method>
+<method name="create" desc="(Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Llava/data/impl/service/FavoritesServiceImpl_Factory;">
+<counter type="INSTRUCTION" missed="9" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="get" desc="()Llava/data/impl/service/FavoritesServiceImpl;">
+<counter type="INSTRUCTION" missed="13" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="create" desc="(Ldagger/internal/Provider;Ldagger/internal/Provider;Ldagger/internal/Provider;)Llava/data/impl/service/FavoritesServiceImpl_Factory;">
+<counter type="INSTRUCTION" missed="6" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="45" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="8" covered="0"/>
+<counter type="METHOD" missed="5" covered="0"/>
+</class>
+<class name="lava/data/impl/service/ForumServiceImpl" sourcefilename="ForumServiceImpl.kt">
+<method name="getCategoryPage" desc="(Ljava/lang/String;ILkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="15" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="getForum" desc="(Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="12" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Llava/network/api/NetworkApi;)V">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="32" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+<counter type="METHOD" missed="3" covered="0"/>
+</class>
+<class name="lava/data/impl/service/ForumServiceImpl_Factory" sourcefilename="ForumServiceImpl_Factory.java">
+<method name="create" desc="(Ldagger/internal/Provider;)Llava/data/impl/service/ForumServiceImpl_Factory;">
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="create" desc="(Ljavax/inject/Provider;)Llava/data/impl/service/ForumServiceImpl_Factory;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Ldagger/internal/Provider;)V">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</method>
+<method name="get" desc="()Llava/data/impl/service/ForumServiceImpl;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="newInstance" desc="(Llava/network/api/NetworkApi;)Llava/data/impl/service/ForumServiceImpl;">
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="23" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+<counter type="METHOD" missed="5" covered="0"/>
+</class>
+<class name="lava/data/impl/service/LocalNetworkDiscoveryServiceImpl" sourcefilename="LocalNetworkDiscoveryServiceImpl.kt">
+<method name="discover" desc="()Lkotlinx/coroutines/flow/Flow;">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="txtAttribute" desc="(Landroid/net/nsd/NsdServiceInfo;Ljava/lang/String;)Ljava/lang/String;">
+<counter type="INSTRUCTION" missed="57" covered="0"/>
+<counter type="BRANCH" missed="10" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Landroid/content/Context;Llava/dispatchers/api/Dispatchers;Ljava/util/List;)V">
+<counter type="INSTRUCTION" missed="21" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+</method>
+<method name="buildDiscoveryListener" desc="(Landroid/net/nsd/NsdManager;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Landroid/net/nsd/NsdManager$DiscoveryListener;">
+<counter type="INSTRUCTION" missed="8" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="engineFor" desc="(Ljava/lang/String;Landroid/net/nsd/NsdServiceInfo;)Llava/data/api/service/DiscoveredEndpoint$Engine;">
+<counter type="INSTRUCTION" missed="119" covered="0"/>
+<counter type="BRANCH" missed="20" covered="0"/>
+<counter type="LINE" missed="13" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="212" covered="0"/>
+<counter type="BRANCH" missed="32" covered="0"/>
+<counter type="LINE" missed="22" covered="0"/>
+<counter type="METHOD" missed="5" covered="0"/>
+</class>
+<class name="lava/data/impl/service/LocalNetworkDiscoveryServiceImpl$buildDiscoveryListener$1" sourcefilename="LocalNetworkDiscoveryServiceImpl.kt">
+<method name="&lt;init&gt;" desc="(Ljava/lang/String;Landroid/net/nsd/NsdManager;Lkotlin/jvm/functions/Function1;Llava/data/impl/service/LocalNetworkDiscoveryServiceImpl;)V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="onDiscoveryStarted" desc="(Ljava/lang/String;)V">
+<counter type="INSTRUCTION" missed="0" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="onStartDiscoveryFailed" desc="(Ljava/lang/String;I)V">
+<counter type="INSTRUCTION" missed="0" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="onDiscoveryStopped" desc="(Ljava/lang/String;)V">
+<counter type="INSTRUCTION" missed="0" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="onStopDiscoveryFailed" desc="(Ljava/lang/String;I)V">
+<counter type="INSTRUCTION" missed="0" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="onServiceFound" desc="(Landroid/net/nsd/NsdServiceInfo;)V">
+<counter type="INSTRUCTION" missed="23" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+</method>
+<method name="onServiceLost" desc="(Landroid/net/nsd/NsdServiceInfo;)V">
+<counter type="INSTRUCTION" missed="0" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="25" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="10" covered="0"/>
+<counter type="METHOD" missed="7" covered="0"/>
+</class>
+<class name="lava/data/impl/service/LocalNetworkDiscoveryServiceImpl$buildDiscoveryListener$1$onServiceFound$1" sourcefilename="LocalNetworkDiscoveryServiceImpl.kt">
+<method name="onServiceResolved" desc="(Landroid/net/nsd/NsdServiceInfo;)V">
+<counter type="INSTRUCTION" missed="45" covered="0"/>
+<counter type="BRANCH" missed="4" covered="0"/>
+<counter type="LINE" missed="11" covered="0"/>
+</method>
+<method name="onResolveFailed" desc="(Landroid/net/nsd/NsdServiceInfo;I)V">
+<counter type="INSTRUCTION" missed="0" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Lkotlin/jvm/functions/Function1;Llava/data/impl/service/LocalNetworkDiscoveryServiceImpl;Ljava/lang/String;)V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="47" covered="0"/>
+<counter type="BRANCH" missed="4" covered="0"/>
+<counter type="LINE" missed="13" covered="0"/>
+<counter type="METHOD" missed="3" covered="0"/>
+</class>
+<class name="lava/data/impl/service/LocalNetworkDiscoveryServiceImpl$discover$1" sourcefilename="LocalNetworkDiscoveryServiceImpl.kt">
+<method name="invokeSuspend$lambda$1" desc="(Ljava/util/List;Lkotlinx/coroutines/channels/ProducerScope;Landroid/net/nsd/NsdManager;)Lkotlin/Unit;">
+<counter type="INSTRUCTION" missed="32" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</method>
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="108" covered="0"/>
+<counter type="BRANCH" missed="4" covered="0"/>
+<counter type="LINE" missed="9" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="140" covered="0"/>
+<counter type="BRANCH" missed="6" covered="0"/>
+<counter type="LINE" missed="11" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+</class>
+<class name="lava/data/impl/service/LocalNetworkDiscoveryServiceImpl$discover$1$1" sourcefilename="LocalNetworkDiscoveryServiceImpl.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="8" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="8" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/data/impl/service/LocalNetworkDiscoveryServiceImplKt" sourcefilename="LocalNetworkDiscoveryServiceImpl.kt">
+<method name="matchesServiceType" desc="(Ljava/lang/String;Ljava/lang/String;)Z">
+<counter type="INSTRUCTION" missed="0" covered="58"/>
+<counter type="BRANCH" missed="0" covered="2"/>
+<counter type="LINE" missed="0" covered="3"/>
+</method>
+<counter type="INSTRUCTION" missed="0" covered="58"/>
+<counter type="BRANCH" missed="0" covered="2"/>
+<counter type="LINE" missed="0" covered="3"/>
+<counter type="METHOD" missed="0" covered="1"/>
+</class>
+<class name="lava/data/impl/service/LocalNetworkDiscoveryServiceImpl_Factory" sourcefilename="LocalNetworkDiscoveryServiceImpl_Factory.java">
+<method name="&lt;init&gt;" desc="(Ldagger/internal/Provider;Ldagger/internal/Provider;Ldagger/internal/Provider;)V">
+<counter type="INSTRUCTION" missed="11" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+</method>
+<method name="newInstance" desc="(Landroid/content/Context;Llava/dispatchers/api/Dispatchers;Ljava/util/List;)Llava/data/impl/service/LocalNetworkDiscoveryServiceImpl;">
+<counter type="INSTRUCTION" missed="6" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="create" desc="(Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Llava/data/impl/service/LocalNetworkDiscoveryServiceImpl_Factory;">
+<counter type="INSTRUCTION" missed="9" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="get" desc="()Llava/data/impl/service/LocalNetworkDiscoveryServiceImpl;">
+<counter type="INSTRUCTION" missed="13" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="create" desc="(Ldagger/internal/Provider;Ldagger/internal/Provider;Ldagger/internal/Provider;)Llava/data/impl/service/LocalNetworkDiscoveryServiceImpl_Factory;">
+<counter type="INSTRUCTION" missed="6" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="45" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="8" covered="0"/>
+<counter type="METHOD" missed="5" covered="0"/>
+</class>
+<class name="lava/data/impl/service/SearchServiceImpl" sourcefilename="SearchServiceImpl.kt">
+<method name="search" desc="(Llava/models/search/Filter;ILkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="125" covered="0"/>
+<counter type="BRANCH" missed="14" covered="0"/>
+<counter type="LINE" missed="11" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Llava/network/api/NetworkApi;Llava/auth/api/TokenProvider;)V">
+<counter type="INSTRUCTION" missed="8" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="133" covered="0"/>
+<counter type="BRANCH" missed="14" covered="0"/>
+<counter type="LINE" missed="14" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+</class>
+<class name="lava/data/impl/service/SearchServiceImpl_Factory" sourcefilename="SearchServiceImpl_Factory.java">
+<method name="create" desc="(Ljavax/inject/Provider;Ljavax/inject/Provider;)Llava/data/impl/service/SearchServiceImpl_Factory;">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="create" desc="(Ldagger/internal/Provider;Ldagger/internal/Provider;)Llava/data/impl/service/SearchServiceImpl_Factory;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="newInstance" desc="(Llava/network/api/NetworkApi;Llava/auth/api/TokenProvider;)Llava/data/impl/service/SearchServiceImpl;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="get" desc="()Llava/data/impl/service/SearchServiceImpl;">
+<counter type="INSTRUCTION" missed="9" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Ldagger/internal/Provider;Ldagger/internal/Provider;)V">
+<counter type="INSTRUCTION" missed="8" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="34" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="7" covered="0"/>
+<counter type="METHOD" missed="5" covered="0"/>
+</class>
+<class name="lava/data/impl/service/StoreServiceImpl" sourcefilename="StoreServiceImpl.kt">
+<method name="getStore" desc="()Llava/models/Store;">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Landroid/content/Context;)V">
+<counter type="INSTRUCTION" missed="21" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</method>
+<method name="getResolvableLink" desc="()Ljava/lang/String;">
+<counter type="INSTRUCTION" missed="30" covered="0"/>
+<counter type="BRANCH" missed="4" covered="0"/>
+<counter type="LINE" missed="8" covered="0"/>
+</method>
+<method name="isRuStoreInstalled" desc="()Z">
+<counter type="INSTRUCTION" missed="12" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="65" covered="0"/>
+<counter type="BRANCH" missed="4" covered="0"/>
+<counter type="LINE" missed="14" covered="0"/>
+<counter type="METHOD" missed="4" covered="0"/>
+</class>
+<class name="lava/data/impl/service/StoreServiceImpl_Factory" sourcefilename="StoreServiceImpl_Factory.java">
+<method name="create" desc="(Ljavax/inject/Provider;)Llava/data/impl/service/StoreServiceImpl_Factory;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Ldagger/internal/Provider;)V">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</method>
+<method name="get" desc="()Llava/data/impl/service/StoreServiceImpl;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="newInstance" desc="(Landroid/content/Context;)Llava/data/impl/service/StoreServiceImpl;">
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="create" desc="(Ldagger/internal/Provider;)Llava/data/impl/service/StoreServiceImpl_Factory;">
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="23" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+<counter type="METHOD" missed="5" covered="0"/>
+</class>
+<class name="lava/data/impl/service/TopicServiceImpl" sourcefilename="TopicServiceImpl.kt">
+<method name="addComment" desc="(Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="44" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="getCommentsPage" desc="(Ljava/lang/String;ILkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="44" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="getTopicPage" desc="(Ljava/lang/String;Ljava/lang/Integer;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="46" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Llava/network/api/NetworkApi;Llava/auth/api/TokenProvider;)V">
+<counter type="INSTRUCTION" missed="8" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</method>
+<method name="getTopic" desc="(Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="40" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="182" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="7" covered="0"/>
+<counter type="METHOD" missed="5" covered="0"/>
+</class>
+<class name="lava/data/impl/service/TopicServiceImpl_Factory" sourcefilename="TopicServiceImpl_Factory.java">
+<method name="newInstance" desc="(Llava/network/api/NetworkApi;Llava/auth/api/TokenProvider;)Llava/data/impl/service/TopicServiceImpl;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="create" desc="(Ljavax/inject/Provider;Ljavax/inject/Provider;)Llava/data/impl/service/TopicServiceImpl_Factory;">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="create" desc="(Ldagger/internal/Provider;Ldagger/internal/Provider;)Llava/data/impl/service/TopicServiceImpl_Factory;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="get" desc="()Llava/data/impl/service/TopicServiceImpl;">
+<counter type="INSTRUCTION" missed="9" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Ldagger/internal/Provider;Ldagger/internal/Provider;)V">
+<counter type="INSTRUCTION" missed="8" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="34" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="7" covered="0"/>
+<counter type="METHOD" missed="5" covered="0"/>
+</class>
+<class name="lava/data/impl/service/TorrentServiceImpl" sourcefilename="TorrentServiceImpl.kt">
+<method name="getTorrent" desc="(Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="39" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Llava/network/api/NetworkApi;Llava/auth/api/TokenProvider;)V">
+<counter type="INSTRUCTION" missed="8" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="47" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+</class>
+<class name="lava/data/impl/service/TorrentServiceImpl_Factory" sourcefilename="TorrentServiceImpl_Factory.java">
+<method name="get" desc="()Llava/data/impl/service/TorrentServiceImpl;">
+<counter type="INSTRUCTION" missed="9" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="create" desc="(Ljavax/inject/Provider;Ljavax/inject/Provider;)Llava/data/impl/service/TorrentServiceImpl_Factory;">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="newInstance" desc="(Llava/network/api/NetworkApi;Llava/auth/api/TokenProvider;)Llava/data/impl/service/TorrentServiceImpl;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="create" desc="(Ldagger/internal/Provider;Ldagger/internal/Provider;)Llava/data/impl/service/TorrentServiceImpl_Factory;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Ldagger/internal/Provider;Ldagger/internal/Provider;)V">
+<counter type="INSTRUCTION" missed="8" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="34" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="7" covered="0"/>
+<counter type="METHOD" missed="5" covered="0"/>
+</class>
+<sourcefile name="ForumServiceImpl.kt">
+<line nr="12" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="13" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="16" mi="12" ci="0" mb="0" cb="0"/>
+<line nr="20" mi="15" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="32" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+</sourcefile>
+<sourcefile name="TopicServiceImpl.kt">
+<line nr="15" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="16" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="17" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="20" mi="40" ci="0" mb="0" cb="0"/>
+<line nr="24" mi="46" ci="0" mb="0" cb="0"/>
+<line nr="28" mi="44" ci="0" mb="0" cb="0"/>
+<line nr="32" mi="44" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="182" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="7" covered="0"/>
+</sourcefile>
+<sourcefile name="ConnectionServiceImpl_Factory.java">
+<line nr="38" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="39" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="40" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="41" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="46" mi="13" ci="0" mb="0" cb="0"/>
+<line nr="52" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="57" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="62" mi="6" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="45" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="8" covered="0"/>
+</sourcefile>
+<sourcefile name="LocalNetworkDiscoveryServiceImpl.kt">
+<line nr="34" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="36" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="37" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="40" mi="13" ci="0" mb="2" cb="0"/>
+<line nr="42" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="43" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="44" mi="2" ci="0" mb="2" cb="0"/>
+<line nr="45" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="51" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="53" mi="12" ci="0" mb="2" cb="0"/>
+<line nr="54" mi="11" ci="0" mb="0" cb="0"/>
+<line nr="55" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="56" mi="36" ci="0" mb="0" cb="0"/>
+<line nr="57" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="61" mi="26" ci="0" mb="0" cb="0"/>
+<line nr="62" mi="10" ci="0" mb="2" cb="0"/>
+<line nr="63" mi="22" ci="0" mb="0" cb="0"/>
+<line nr="72" mi="10" ci="0" mb="0" cb="0"/>
+<line nr="73" mi="0" ci="0" mb="0" cb="0"/>
+<line nr="74" mi="0" ci="0" mb="0" cb="0"/>
+<line nr="75" mi="0" ci="0" mb="0" cb="0"/>
+<line nr="76" mi="0" ci="0" mb="0" cb="0"/>
+<line nr="96" mi="9" ci="0" mb="2" cb="0"/>
+<line nr="99" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="100" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="101" mi="12" ci="0" mb="0" cb="0"/>
+<line nr="102" mi="0" ci="0" mb="0" cb="0"/>
+<line nr="106" mi="9" ci="0" mb="4" cb="0"/>
+<line nr="107" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="108" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="109" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="110" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="111" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="112" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="113" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="114" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="120" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="121" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="129" mi="0" ci="0" mb="0" cb="0"/>
+<line nr="142" mi="23" ci="0" mb="0" cb="0"/>
+<line nr="143" mi="23" ci="0" mb="6" cb="0"/>
+<line nr="144" mi="7" ci="0" mb="2" cb="0"/>
+<line nr="146" mi="23" ci="0" mb="6" cb="0"/>
+<line nr="147" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="148" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="149" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="150" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="156" mi="11" ci="0" mb="2" cb="0"/>
+<line nr="157" mi="11" ci="0" mb="2" cb="0"/>
+<line nr="158" mi="11" ci="0" mb="2" cb="0"/>
+<line nr="159" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="161" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="172" mi="22" ci="0" mb="0" cb="0"/>
+<line nr="173" mi="28" ci="0" mb="8" cb="0"/>
+<line nr="174" mi="7" ci="0" mb="2" cb="0"/>
+<line nr="202" mi="0" ci="22" mb="0" cb="0"/>
+<line nr="203" mi="0" ci="22" mb="0" cb="0"/>
+<line nr="204" mi="0" ci="14" mb="0" cb="2"/>
+<counter type="INSTRUCTION" missed="432" covered="58"/>
+<counter type="BRANCH" missed="44" covered="2"/>
+<counter type="LINE" missed="57" covered="3"/>
+</sourcefile>
+<sourcefile name="TopicServiceImpl_Factory.java">
+<line nr="35" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="36" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="37" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="42" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="48" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="53" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="57" mi="5" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="34" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="7" covered="0"/>
+</sourcefile>
+<sourcefile name="LocalNetworkDiscoveryServiceImpl_Factory.java">
+<line nr="41" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="42" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="43" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="44" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="49" mi="13" ci="0" mb="0" cb="0"/>
+<line nr="56" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="61" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="66" mi="6" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="45" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="8" covered="0"/>
+</sourcefile>
+<sourcefile name="SearchServiceImpl_Factory.java">
+<line nr="35" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="36" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="37" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="42" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="48" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="53" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="57" mi="5" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="34" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="7" covered="0"/>
+</sourcefile>
+<sourcefile name="SearchServiceImpl.kt">
+<line nr="14" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="15" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="16" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="20" mi="17" ci="0" mb="0" cb="0"/>
+<line nr="21" mi="20" ci="0" mb="0" cb="0"/>
+<line nr="22" mi="8" ci="0" mb="2" cb="0"/>
+<line nr="23" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="24" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="25" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="26" mi="14" ci="0" mb="4" cb="0"/>
+<line nr="27" mi="14" ci="0" mb="4" cb="0"/>
+<line nr="28" mi="32" ci="0" mb="4" cb="0"/>
+<line nr="29" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="30" mi="2" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="133" covered="0"/>
+<counter type="BRANCH" missed="14" covered="0"/>
+<counter type="LINE" missed="14" covered="0"/>
+</sourcefile>
+<sourcefile name="TorrentServiceImpl.kt">
+<line nr="10" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="11" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="12" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="15" mi="39" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="47" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+</sourcefile>
+<sourcefile name="ConnectionServiceImpl.kt">
+<line nr="54" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="56" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="59" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="60" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="62" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="63" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="64" mi="2" ci="0" mb="2" cb="0"/>
+<line nr="65" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="66" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="68" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="69" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="72" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="73" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="77" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="78" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="82" mi="11" ci="0" mb="0" cb="0"/>
+<line nr="85" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="86" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="87" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="88" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="89" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="91" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="93" mi="13" ci="0" mb="0" cb="0"/>
+<line nr="94" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="98" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="99" mi="24" ci="0" mb="0" cb="0"/>
+<line nr="101" mi="12" ci="0" mb="0" cb="0"/>
+<line nr="102" mi="13" ci="0" mb="0" cb="0"/>
+<line nr="103" mi="19" ci="0" mb="0" cb="0"/>
+<line nr="104" mi="30" ci="0" mb="0" cb="0"/>
+<line nr="105" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="106" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="107" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="108" mi="11" ci="0" mb="2" cb="0"/>
+<line nr="111" mi="11" ci="0" mb="0" cb="0"/>
+<line nr="112" mi="19" ci="0" mb="0" cb="0"/>
+<line nr="113" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="114" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="116" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="117" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="118" mi="15" ci="0" mb="4" cb="0"/>
+<line nr="125" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="127" mi="11" ci="0" mb="0" cb="0"/>
+<line nr="128" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="129" mi="11" ci="0" mb="2" cb="0"/>
+<line nr="133" mi="6" ci="0" mb="2" cb="0"/>
+<line nr="134" mi="3" ci="0" mb="2" cb="0"/>
+<line nr="135" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="136" mi="10" ci="0" mb="2" cb="0"/>
+<line nr="137" mi="6" ci="0" mb="2" cb="0"/>
+<line nr="139" mi="9" ci="0" mb="2" cb="0"/>
+<line nr="140" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="159" mi="0" ci="6" mb="0" cb="0"/>
+<line nr="160" mi="0" ci="12" mb="0" cb="2"/>
+<line nr="161" mi="0" ci="10" mb="0" cb="2"/>
+<line nr="162" mi="0" ci="3" mb="0" cb="2"/>
+<line nr="163" mi="0" ci="13" mb="0" cb="0"/>
+<line nr="164" mi="0" ci="10" mb="0" cb="2"/>
+<line nr="165" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="170" mi="0" ci="9" mb="0" cb="0"/>
+<line nr="171" mi="0" ci="2" mb="0" cb="2"/>
+<line nr="172" mi="0" ci="18" mb="0" cb="0"/>
+<line nr="174" mi="0" ci="3" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="376" covered="91"/>
+<counter type="BRANCH" missed="20" covered="10"/>
+<counter type="LINE" missed="54" covered="11"/>
+</sourcefile>
+<sourcefile name="ForumServiceImpl_Factory.java">
+<line nr="31" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="32" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="37" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="42" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="46" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="50" mi="4" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="23" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+</sourcefile>
+<sourcefile name="StoreServiceImpl.kt">
+<line nr="13" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="14" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="16" mi="16" ci="0" mb="0" cb="0"/>
+<line nr="18" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="22" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="23" mi="3" ci="0" mb="2" cb="0"/>
+<line nr="24" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="26" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="27" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="28" mi="6" ci="0" mb="2" cb="0"/>
+<line nr="29" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="31" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="37" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="42" mi="3" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="65" covered="0"/>
+<counter type="BRANCH" missed="4" covered="0"/>
+<counter type="LINE" missed="14" covered="0"/>
+</sourcefile>
+<sourcefile name="StoreServiceImpl_Factory.java">
+<line nr="31" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="32" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="37" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="41" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="45" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="49" mi="4" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="23" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+</sourcefile>
+<sourcefile name="TorrentServiceImpl_Factory.java">
+<line nr="35" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="36" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="37" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="42" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="48" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="53" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="57" mi="5" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="34" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="7" covered="0"/>
+</sourcefile>
+<sourcefile name="FavoritesServiceImpl_Factory.java">
+<line nr="38" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="39" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="40" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="41" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="46" mi="13" ci="0" mb="0" cb="0"/>
+<line nr="53" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="58" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="63" mi="6" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="45" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="8" covered="0"/>
+</sourcefile>
+<sourcefile name="FavoritesServiceImpl.kt">
+<line nr="11" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="12" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="13" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="14" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="18" mi="16" ci="0" mb="2" cb="0"/>
+<line nr="19" mi="22" ci="0" mb="0" cb="0"/>
+<line nr="20" mi="32" ci="0" mb="0" cb="0"/>
+<line nr="21" mi="11" ci="0" mb="2" cb="0"/>
+<line nr="23" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="28" mi="19" ci="0" mb="2" cb="0"/>
+<line nr="29" mi="37" ci="0" mb="0" cb="0"/>
+<line nr="31" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="36" mi="19" ci="0" mb="2" cb="0"/>
+<line nr="37" mi="37" ci="0" mb="0" cb="0"/>
+<line nr="39" mi="2" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="209" covered="0"/>
+<counter type="BRANCH" missed="8" covered="0"/>
+<counter type="LINE" missed="15" covered="0"/>
+</sourcefile>
+<counter type="INSTRUCTION" missed="1759" covered="149"/>
+<counter type="BRANCH" missed="90" covered="12"/>
+<counter type="LINE" missed="226" covered="14"/>
+<counter type="METHOD" missed="91" covered="3"/>
+<counter type="CLASS" missed="25" covered="2"/>
+</package>
+<package name="lava/data/api/service">
+<class name="lava/data/api/service/DiscoveredEndpoint" sourcefilename="LocalNetworkDiscoveryService.kt">
+<method name="&lt;init&gt;" desc="(Ljava/lang/String;ILjava/lang/String;Llava/data/api/service/DiscoveredEndpoint$Engine;Ljava/lang/String;Ljava/lang/String;)V">
+<counter type="INSTRUCTION" missed="36" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="36" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/data/api/service/DiscoveredEndpoint$Engine" sourcefilename="LocalNetworkDiscoveryService.kt">
+<method name="&lt;clinit&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="30" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="30" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/data/api/service/DiscoveryServiceTypeCatalog" sourcefilename="DiscoveryServiceTypes.kt">
+<method name="getSERVICE_TYPES_RELEASE" desc="()Ljava/util/List;">
+<counter type="INSTRUCTION" missed="0" covered="15"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="getSERVICE_TYPES_DEBUG" desc="()Ljava/util/List;">
+<counter type="INSTRUCTION" missed="0" covered="8"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<counter type="INSTRUCTION" missed="0" covered="23"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="2"/>
+<counter type="METHOD" missed="0" covered="2"/>
+</class>
+<class name="lava/data/api/service/LocalNetworkDiscoveryServiceKt" sourcefilename="LocalNetworkDiscoveryService.kt">
+<method name="discoveredApiLabel" desc="(Ljava/lang/String;)Ljava/lang/String;">
+<counter type="INSTRUCTION" missed="2" covered="37"/>
+<counter type="BRANCH" missed="1" covered="9"/>
+<counter type="LINE" missed="0" covered="5"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="37"/>
+<counter type="BRANCH" missed="1" covered="9"/>
+<counter type="LINE" missed="0" covered="5"/>
+<counter type="METHOD" missed="0" covered="1"/>
+</class>
+<class name="lava/data/api/service/TopicService$DefaultImpls" sourcefilename="TopicService.kt">
+<method name="getTopicPage" desc="(Llava/data/api/service/TopicService;Ljava/lang/String;Ljava/lang/Integer;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="18" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="18" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<sourcefile name="DiscoveryServiceTypes.kt">
+<line nr="31" mi="0" ci="15" mb="0" cb="0"/>
+<line nr="32" mi="0" ci="8" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="0" covered="23"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="2"/>
+</sourcefile>
+<sourcefile name="LocalNetworkDiscoveryService.kt">
+<line nr="36" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="37" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="38" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="39" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="40" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="41" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="51" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="54" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="65" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="68" mi="12" ci="0" mb="0" cb="0"/>
+<line nr="90" mi="2" ci="15" mb="1" cb="3"/>
+<line nr="91" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="92" mi="0" ci="6" mb="0" cb="2"/>
+<line nr="93" mi="0" ci="13" mb="0" cb="4"/>
+<line nr="94" mi="0" ci="2" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="68" covered="37"/>
+<counter type="BRANCH" missed="1" covered="9"/>
+<counter type="LINE" missed="10" covered="5"/>
+</sourcefile>
+<sourcefile name="TopicService.kt">
+<line nr="10" mi="18" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="18" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</sourcefile>
+<counter type="INSTRUCTION" missed="86" covered="60"/>
+<counter type="BRANCH" missed="1" covered="9"/>
+<counter type="LINE" missed="11" covered="7"/>
+<counter type="METHOD" missed="3" covered="3"/>
+<counter type="CLASS" missed="3" covered="2"/>
+</package>
+<package name="lava/data/api/repository">
+<class name="lava/data/api/repository/ForumRepository$DefaultImpls" sourcefilename="ForumRepository.kt">
+<method name="isForumFresh" desc="(Llava/data/api/repository/ForumRepository;ILkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="17" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="17" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<sourcefile name="ForumRepository.kt">
+<line nr="8" mi="17" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="17" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</sourcefile>
+<counter type="INSTRUCTION" missed="17" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+<counter type="CLASS" missed="1" covered="0"/>
+</package>
+<package name="lava/data/converters">
+<class name="lava/data/converters/EndpointKt" sourcefilename="Endpoint.kt">
+<method name="toModel" desc="(Llava/database/entity/EndpointEntity;)Llava/models/settings/Endpoint;">
+<counter type="INSTRUCTION" missed="2" covered="94"/>
+<counter type="BRANCH" missed="2" covered="6"/>
+<counter type="LINE" missed="0" covered="11"/>
+</method>
+<method name="toEntity" desc="(Llava/models/settings/Endpoint;)Llava/database/entity/EndpointEntity;">
+<counter type="INSTRUCTION" missed="0" covered="57"/>
+<counter type="BRANCH" missed="0" covered="10"/>
+<counter type="LINE" missed="0" covered="12"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="151"/>
+<counter type="BRANCH" missed="2" covered="16"/>
+<counter type="LINE" missed="0" covered="23"/>
+<counter type="METHOD" missed="0" covered="2"/>
+</class>
+<class name="lava/data/converters/ForumKt" sourcefilename="Forum.kt">
+<method name="toForumCategory" desc="(Llava/network/dto/forum/CategoryDto;)Llava/models/forum/ForumCategory;">
+<counter type="INSTRUCTION" missed="41" covered="0"/>
+<counter type="BRANCH" missed="4" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+</method>
+<method name="toCategoryPage" desc="(Llava/network/dto/forum/CategoryPageDto;)Llava/models/Page;">
+<counter type="INSTRUCTION" missed="61" covered="0"/>
+<counter type="BRANCH" missed="6" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+</method>
+<method name="toCategory" desc="(Llava/database/entity/ForumCategoryEntity;)Llava/models/forum/Category;">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="toForumItem" desc="(Llava/network/dto/forum/SectionDto;)Llava/models/forum/ForumItem;">
+<counter type="INSTRUCTION" missed="11" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="toForumItem" desc="(Llava/network/dto/topic/ForumTopicDto;)Llava/models/forum/ForumItem;">
+<counter type="INSTRUCTION" missed="6" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="toCategory" desc="(Llava/network/dto/forum/CategoryDto;)Llava/models/forum/Category;">
+<counter type="INSTRUCTION" missed="18" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="toForum" desc="(Llava/network/dto/forum/ForumDto;)Llava/models/forum/Forum;">
+<counter type="INSTRUCTION" missed="48" covered="0"/>
+<counter type="BRANCH" missed="4" covered="0"/>
+<counter type="LINE" missed="7" covered="0"/>
+</method>
+<method name="toForumItem" desc="(Llava/network/dto/forum/CategoryDto;)Llava/models/forum/ForumItem;">
+<counter type="INSTRUCTION" missed="6" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="toBookmarkEntity" desc="(Llava/models/forum/Category;)Llava/database/entity/BookmarkEntity;">
+<counter type="INSTRUCTION" missed="11" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="209" covered="0"/>
+<counter type="BRANCH" missed="16" covered="0"/>
+<counter type="LINE" missed="26" covered="0"/>
+<counter type="METHOD" missed="9" covered="0"/>
+</class>
+<class name="lava/data/converters/PostConvertersKt" sourcefilename="PostConverters.kt">
+<method name="toContent$addSpacer" desc="(Ljava/util/List;Lkotlin/jvm/internal/Ref$ObjectRef;)V">
+<counter type="INSTRUCTION" missed="17" covered="0"/>
+<counter type="BRANCH" missed="4" covered="0"/>
+<counter type="LINE" missed="5" covered="0"/>
+</method>
+<method name="toContent$addDivider" desc="(Ljava/util/List;Lkotlin/jvm/internal/Ref$ObjectRef;)V">
+<counter type="INSTRUCTION" missed="20" covered="0"/>
+<counter type="BRANCH" missed="4" covered="0"/>
+<counter type="LINE" missed="5" covered="0"/>
+</method>
+<method name="toContent$addContent" desc="(Lkotlin/jvm/internal/Ref$ObjectRef;Llava/models/topic/Content;)V">
+<counter type="INSTRUCTION" missed="6" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="toContent" desc="(Ljava/util/List;)Llava/models/topic/Content;">
+<counter type="INSTRUCTION" missed="381" covered="0"/>
+<counter type="BRANCH" missed="49" covered="1"/>
+<counter type="LINE" missed="65" covered="0"/>
+</method>
+<method name="getTextColor" desc="(Llava/network/dto/topic/Color;)Llava/models/topic/ColorValue;">
+<counter type="INSTRUCTION" missed="21" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</method>
+<method name="toTextContent" desc="(Ljava/util/List;)Llava/models/topic/TextContent;">
+<counter type="INSTRUCTION" missed="112" covered="0"/>
+<counter type="BRANCH" missed="16" covered="0"/>
+<counter type="LINE" missed="14" covered="0"/>
+</method>
+<method name="toContent$isTextRow" desc="(Ljava/util/List;)Z">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="toPosts" desc="(Ljava/util/List;)Ljava/util/List;">
+<counter type="INSTRUCTION" missed="9" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="toPost" desc="(Llava/network/dto/topic/PostDto;)Llava/models/topic/Post;">
+<counter type="INSTRUCTION" missed="13" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="5" covered="0"/>
+</method>
+<method name="toContent$toContent" desc="(Ljava/util/List;)Llava/models/topic/Content;">
+<counter type="INSTRUCTION" missed="109" covered="0"/>
+<counter type="BRANCH" missed="14" covered="0"/>
+<counter type="LINE" missed="20" covered="0"/>
+</method>
+<method name="toContent$addBreak" desc="(Lkotlin/jvm/internal/Ref$ObjectRef;Ljava/util/List;)V">
+<counter type="INSTRUCTION" missed="33" covered="0"/>
+<counter type="BRANCH" missed="4" covered="0"/>
+<counter type="LINE" missed="5" covered="0"/>
+</method>
+<method name="getTextAlignment" desc="(Llava/network/dto/topic/Align;)Llava/models/topic/TextAlignment;">
+<counter type="INSTRUCTION" missed="15" covered="4"/>
+<counter type="BRANCH" missed="4" covered="0"/>
+<counter type="LINE" missed="5" covered="0"/>
+</method>
+<method name="isTextElement" desc="(Llava/network/dto/topic/PostElementDto;)Z">
+<counter type="INSTRUCTION" missed="80" covered="0"/>
+<counter type="BRANCH" missed="14" covered="0"/>
+<counter type="LINE" missed="9" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="823" covered="4"/>
+<counter type="BRANCH" missed="111" covered="1"/>
+<counter type="LINE" missed="139" covered="0"/>
+<counter type="METHOD" missed="13" covered="0"/>
+</class>
+<class name="lava/data/converters/SearchKt" sourcefilename="Search.kt">
+<method name="toEntity" desc="(Llava/models/search/Filter;)Llava/database/entity/SearchHistoryEntity;">
+<counter type="INSTRUCTION" missed="18" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="9" covered="0"/>
+</method>
+<method name="toSearchPage" desc="(Llava/network/dto/search/SearchPageDto;)Llava/models/Page;">
+<counter type="INSTRUCTION" missed="23" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+</method>
+<method name="toDto" desc="(Llava/models/search/Period;)Llava/network/dto/search/SearchPeriodDto;">
+<counter type="INSTRUCTION" missed="18" covered="4"/>
+<counter type="BRANCH" missed="6" covered="0"/>
+<counter type="LINE" missed="7" covered="0"/>
+</method>
+<method name="toEntity" desc="(Ljava/lang/String;)Llava/database/entity/SuggestEntity;">
+<counter type="INSTRUCTION" missed="12" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+</method>
+<method name="id" desc="(Llava/models/search/Filter;)I">
+<counter type="INSTRUCTION" missed="76" covered="0"/>
+<counter type="BRANCH" missed="10" covered="0"/>
+<counter type="LINE" missed="5" covered="0"/>
+</method>
+<method name="toSearch" desc="(Llava/database/entity/SearchHistoryEntity;)Llava/models/search/Search;">
+<counter type="INSTRUCTION" missed="23" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="9" covered="0"/>
+</method>
+<method name="toDto" desc="(Llava/models/search/Sort;)Llava/network/dto/search/SearchSortTypeDto;">
+<counter type="INSTRUCTION" missed="18" covered="4"/>
+<counter type="BRANCH" missed="6" covered="0"/>
+<counter type="LINE" missed="7" covered="0"/>
+</method>
+<method name="toDto" desc="(Llava/models/search/Order;)Llava/network/dto/search/SearchSortOrderDto;">
+<counter type="INSTRUCTION" missed="10" covered="4"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="198" covered="12"/>
+<counter type="BRANCH" missed="24" covered="0"/>
+<counter type="LINE" missed="48" covered="0"/>
+<counter type="METHOD" missed="8" covered="0"/>
+</class>
+<class name="lava/data/converters/TopicKt" sourcefilename="Topic.kt">
+<method name="toAuthor" desc="(Llava/network/dto/topic/AuthorDto;)Llava/models/topic/Author;">
+<counter type="INSTRUCTION" missed="9" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="toTorrentData" desc="(Llava/network/dto/topic/TorrentDataDto;)Llava/models/topic/TorrentData;">
+<counter type="INSTRUCTION" missed="25" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="9" covered="0"/>
+</method>
+<method name="toFavorites" desc="(Llava/network/dto/user/FavoritesDto;)Ljava/util/List;">
+<counter type="INSTRUCTION" missed="10" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="toVisitedEntity" desc="(Llava/models/topic/TopicPage;)Llava/database/entity/VisitedTopicEntity;">
+<counter type="INSTRUCTION" missed="65" covered="0"/>
+<counter type="BRANCH" missed="12" covered="0"/>
+<counter type="LINE" missed="13" covered="0"/>
+</method>
+<method name="toTopic" desc="(Llava/database/entity/VisitedTopicEntity;)Llava/models/topic/Topic;">
+<counter type="INSTRUCTION" missed="54" covered="0"/>
+<counter type="BRANCH" missed="10" covered="0"/>
+<counter type="LINE" missed="18" covered="0"/>
+</method>
+<method name="toStatus" desc="(Llava/network/dto/topic/TorrentStatusDto;)Llava/models/topic/TorrentStatus;">
+<counter type="INSTRUCTION" missed="22" covered="4"/>
+<counter type="BRANCH" missed="8" covered="0"/>
+<counter type="LINE" missed="9" covered="0"/>
+</method>
+<method name="toFavoriteEntity" desc="(Llava/models/topic/Topic;)Llava/database/entity/FavoriteTopicEntity;">
+<counter type="INSTRUCTION" missed="78" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="20" covered="0"/>
+</method>
+<method name="toTopic" desc="(Llava/network/dto/topic/ForumTopicDto;)Llava/models/topic/Topic;">
+<counter type="INSTRUCTION" missed="73" covered="0"/>
+<counter type="BRANCH" missed="12" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+</method>
+<method name="toTopicPage" desc="(Llava/network/dto/topic/TopicPageDto;)Llava/models/topic/TopicPage;">
+<counter type="INSTRUCTION" missed="50" covered="0"/>
+<counter type="BRANCH" missed="6" covered="0"/>
+<counter type="LINE" missed="10" covered="0"/>
+</method>
+<method name="toCommentsPage" desc="(Llava/network/dto/topic/TopicPageDto;)Llava/models/Page;">
+<counter type="INSTRUCTION" missed="19" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+</method>
+<method name="toTorrent" desc="(Llava/network/dto/topic/TorrentDto;)Llava/models/topic/Torrent;">
+<counter type="INSTRUCTION" missed="65" covered="0"/>
+<counter type="BRANCH" missed="6" covered="0"/>
+<counter type="LINE" missed="12" covered="0"/>
+</method>
+<method name="toTopicModel" desc="(Llava/database/entity/FavoriteTopicEntity;)Llava/models/topic/TopicModel;">
+<counter type="INSTRUCTION" missed="13" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+</method>
+<method name="toTopic" desc="(Llava/database/entity/FavoriteTopicEntity;)Llava/models/topic/Topic;">
+<counter type="INSTRUCTION" missed="54" covered="0"/>
+<counter type="BRANCH" missed="10" covered="0"/>
+<counter type="LINE" missed="18" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="537" covered="4"/>
+<counter type="BRANCH" missed="68" covered="0"/>
+<counter type="LINE" missed="123" covered="0"/>
+<counter type="METHOD" missed="13" covered="0"/>
+</class>
+<sourcefile name="Search.kt">
+<line nr="20" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="21" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="22" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="23" mi="12" ci="0" mb="0" cb="0"/>
+<line nr="27" mi="6" ci="4" mb="6" cb="0"/>
+<line nr="28" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="29" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="30" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="31" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="32" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="33" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="36" mi="6" ci="4" mb="6" cb="0"/>
+<line nr="37" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="38" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="39" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="40" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="41" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="42" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="45" mi="6" ci="4" mb="2" cb="0"/>
+<line nr="46" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="47" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="51" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="52" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="53" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="54" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="55" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="56" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="57" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="58" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="59" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="65" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="66" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="67" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="68" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="69" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="70" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="71" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="72" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="73" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="78" mi="9" ci="0" mb="2" cb="0"/>
+<line nr="79" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="80" mi="16" ci="0" mb="4" cb="0"/>
+<line nr="81" mi="42" ci="0" mb="4" cb="0"/>
+<line nr="82" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="86" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="87" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="88" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="89" mi="1" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="198" covered="12"/>
+<counter type="BRANCH" missed="24" covered="0"/>
+<counter type="LINE" missed="48" covered="0"/>
+</sourcefile>
+<sourcefile name="Topic.kt">
+<line nr="26" mi="10" ci="0" mb="0" cb="0"/>
+<line nr="29" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="30" mi="32" ci="0" mb="6" cb="0"/>
+<line nr="31" mi="32" ci="0" mb="6" cb="0"/>
+<line nr="32" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="36" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="37" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="38" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="39" mi="8" ci="0" mb="2" cb="0"/>
+<line nr="40" mi="8" ci="0" mb="2" cb="0"/>
+<line nr="41" mi="8" ci="0" mb="2" cb="0"/>
+<line nr="42" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="43" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="44" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="45" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="51" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="52" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="53" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="54" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="58" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="60" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="61" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="62" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="63" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="64" mi="10" ci="0" mb="2" cb="0"/>
+<line nr="65" mi="10" ci="0" mb="2" cb="0"/>
+<line nr="66" mi="10" ci="0" mb="2" cb="0"/>
+<line nr="67" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="68" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="69" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="70" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="71" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="74" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="75" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="76" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="77" mi="8" ci="0" mb="2" cb="0"/>
+<line nr="78" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="79" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="80" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="81" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="82" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="85" mi="6" ci="4" mb="8" cb="0"/>
+<line nr="86" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="87" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="88" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="89" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="90" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="91" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="92" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="93" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="97" mi="15" ci="0" mb="10" cb="0"/>
+<line nr="98" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="99" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="100" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="101" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="102" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="105" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="106" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="107" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="108" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="109" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="110" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="111" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="112" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="113" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="114" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="115" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="116" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="121" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="122" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="123" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="124" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="129" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="130" mi="17" ci="0" mb="2" cb="0"/>
+<line nr="131" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="132" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="133" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="134" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="135" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="138" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="139" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="140" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="141" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="142" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="143" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="144" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="145" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="146" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="147" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="148" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="149" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="150" mi="23" ci="0" mb="0" cb="0"/>
+<line nr="156" mi="15" ci="0" mb="10" cb="0"/>
+<line nr="157" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="158" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="159" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="160" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="161" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="164" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="165" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="166" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="167" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="168" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="169" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="170" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="171" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="172" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="173" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="174" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="175" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="181" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="182" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="183" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="184" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="185" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="186" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="187" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="188" mi="8" ci="0" mb="2" cb="0"/>
+<line nr="189" mi="8" ci="0" mb="2" cb="0"/>
+<line nr="190" mi="8" ci="0" mb="2" cb="0"/>
+<line nr="191" mi="8" ci="0" mb="2" cb="0"/>
+<line nr="192" mi="8" ci="0" mb="2" cb="0"/>
+<line nr="193" mi="8" ci="0" mb="2" cb="0"/>
+<counter type="INSTRUCTION" missed="537" covered="4"/>
+<counter type="BRANCH" missed="68" covered="0"/>
+<counter type="LINE" missed="123" covered="0"/>
+</sourcefile>
+<sourcefile name="PostConverters.kt">
+<line nr="33" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="35" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="36" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="37" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="38" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="39" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="43" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="44" mi="10" ci="0" mb="0" cb="0"/>
+<line nr="47" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="51" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="52" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="53" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="54" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="55" mi="6" ci="0" mb="4" cb="0"/>
+<line nr="56" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="57" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="59" mi="6" ci="0" mb="4" cb="0"/>
+<line nr="60" mi="14" ci="0" mb="0" cb="0"/>
+<line nr="61" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="64" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="65" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="66" mi="5" ci="0" mb="2" cb="0"/>
+<line nr="67" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="68" mi="3" ci="0" mb="2" cb="0"/>
+<line nr="69" mi="13" ci="0" mb="0" cb="0"/>
+<line nr="71" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="76" mi="4" ci="0" mb="2" cb="0"/>
+<line nr="77" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="79" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="84" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="85" mi="5" ci="0" mb="2" cb="0"/>
+<line nr="86" mi="14" ci="0" mb="2" cb="0"/>
+<line nr="87" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="89" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="93" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="94" mi="0" ci="0" mb="0" cb="0"/>
+<line nr="95" mi="5" ci="0" mb="2" cb="0"/>
+<line nr="96" mi="5" ci="0" mb="2" cb="0"/>
+<line nr="98" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="103" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="104" mi="5" ci="0" mb="2" cb="0"/>
+<line nr="105" mi="5" ci="0" mb="2" cb="0"/>
+<line nr="106" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="108" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="113" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="116" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="117" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="118" mi="6" ci="0" mb="2" cb="0"/>
+<line nr="119" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="120" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="121" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="125" mi="6" ci="0" mb="2" cb="0"/>
+<line nr="126" mi="3" ci="0" mb="2" cb="0"/>
+<line nr="127" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="129" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="133" mi="14" ci="0" mb="2" cb="0"/>
+<line nr="135" mi="7" ci="0" mb="2" cb="0"/>
+<line nr="137" mi="6" ci="0" mb="2" cb="0"/>
+<line nr="138" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="139" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="140" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="144" mi="6" ci="0" mb="2" cb="0"/>
+<line nr="145" mi="3" ci="0" mb="2" cb="0"/>
+<line nr="146" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="147" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="148" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="151" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="152" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="153" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="158" mi="6" ci="0" mb="2" cb="0"/>
+<line nr="159" mi="3" ci="0" mb="2" cb="0"/>
+<line nr="160" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="162" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="166" mi="7" ci="0" mb="2" cb="0"/>
+<line nr="168" mi="13" ci="0" mb="2" cb="0"/>
+<line nr="170" mi="7" ci="0" mb="2" cb="0"/>
+<line nr="172" mi="6" ci="0" mb="2" cb="0"/>
+<line nr="173" mi="3" ci="0" mb="2" cb="0"/>
+<line nr="174" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="176" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="180" mi="6" ci="0" mb="2" cb="0"/>
+<line nr="181" mi="3" ci="0" mb="2" cb="0"/>
+<line nr="182" mi="12" ci="0" mb="0" cb="0"/>
+<line nr="184" mi="11" ci="0" mb="0" cb="0"/>
+<line nr="188" mi="7" ci="0" mb="2" cb="0"/>
+<line nr="190" mi="6" ci="0" mb="2" cb="0"/>
+<line nr="191" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="192" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="193" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="197" mi="6" ci="0" mb="2" cb="0"/>
+<line nr="198" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="199" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="200" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="204" mi="6" ci="0" mb="2" cb="0"/>
+<line nr="205" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="206" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="207" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="211" mi="13" ci="0" mb="2" cb="0"/>
+<line nr="213" mi="14" ci="0" mb="2" cb="0"/>
+<line nr="215" mi="6" ci="0" mb="1" cb="1"/>
+<line nr="216" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="217" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="219" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="223" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="224" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="226" mi="4" ci="0" mb="2" cb="0"/>
+<line nr="227" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="229" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="234" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="235" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="236" mi="12" ci="0" mb="2" cb="0"/>
+<line nr="237" mi="15" ci="0" mb="2" cb="0"/>
+<line nr="238" mi="12" ci="0" mb="2" cb="0"/>
+<line nr="239" mi="12" ci="0" mb="2" cb="0"/>
+<line nr="240" mi="15" ci="0" mb="2" cb="0"/>
+<line nr="241" mi="11" ci="0" mb="2" cb="0"/>
+<line nr="242" mi="12" ci="0" mb="2" cb="0"/>
+<line nr="243" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="244" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="246" mi="4" ci="0" mb="2" cb="0"/>
+<line nr="247" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="249" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="254" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="255" mi="11" ci="0" mb="2" cb="0"/>
+<line nr="256" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="260" mi="7" ci="4" mb="4" cb="0"/>
+<line nr="261" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="262" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="263" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="264" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="267" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="268" mi="12" ci="0" mb="2" cb="0"/>
+<line nr="269" mi="12" ci="0" mb="2" cb="0"/>
+<line nr="270" mi="12" ci="0" mb="2" cb="0"/>
+<line nr="271" mi="12" ci="0" mb="2" cb="0"/>
+<line nr="272" mi="12" ci="0" mb="2" cb="0"/>
+<line nr="273" mi="5" ci="0" mb="2" cb="0"/>
+<line nr="274" mi="12" ci="0" mb="2" cb="0"/>
+<line nr="275" mi="1" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="823" covered="4"/>
+<counter type="BRANCH" missed="111" covered="1"/>
+<counter type="LINE" missed="139" covered="0"/>
+</sourcefile>
+<sourcefile name="Forum.kt">
+<line nr="17" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="18" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="19" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="20" mi="7" ci="0" mb="2" cb="0"/>
+<line nr="21" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="22" mi="16" ci="0" mb="2" cb="0"/>
+<line nr="23" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="27" mi="10" ci="0" mb="0" cb="0"/>
+<line nr="28" mi="13" ci="0" mb="2" cb="0"/>
+<line nr="29" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="30" mi="16" ci="0" mb="2" cb="0"/>
+<line nr="33" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="34" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="35" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="36" mi="20" ci="0" mb="2" cb="0"/>
+<line nr="37" mi="15" ci="0" mb="2" cb="0"/>
+<line nr="38" mi="15" ci="0" mb="2" cb="0"/>
+<line nr="41" mi="18" ci="0" mb="2" cb="0"/>
+<line nr="43" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="44" mi="11" ci="0" mb="0" cb="0"/>
+<line nr="45" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="47" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="48" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="49" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="50" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="53" mi="7" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="209" covered="0"/>
+<counter type="BRANCH" missed="16" covered="0"/>
+<counter type="LINE" missed="26" covered="0"/>
+</sourcefile>
+<sourcefile name="Endpoint.kt">
+<line nr="14" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="15" mi="0" ci="6" mb="0" cb="0"/>
+<line nr="16" mi="0" ci="5" mb="0" cb="2"/>
+<line nr="17" mi="0" ci="8" mb="0" cb="2"/>
+<line nr="18" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="20" mi="0" ci="6" mb="0" cb="0"/>
+<line nr="21" mi="0" ci="5" mb="0" cb="2"/>
+<line nr="22" mi="0" ci="5" mb="0" cb="2"/>
+<line nr="23" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="25" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="26" mi="0" ci="10" mb="0" cb="2"/>
+<line nr="27" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="38" mi="0" ci="22" mb="0" cb="4"/>
+<line nr="39" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="40" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="41" mi="0" ci="7" mb="0" cb="0"/>
+<line nr="43" mi="0" ci="10" mb="0" cb="0"/>
+<line nr="44" mi="0" ci="2" mb="1" cb="1"/>
+<line nr="45" mi="0" ci="9" mb="0" cb="0"/>
+<line nr="46" mi="2" ci="15" mb="1" cb="1"/>
+<line nr="47" mi="0" ci="10" mb="0" cb="0"/>
+<line nr="49" mi="0" ci="12" mb="0" cb="0"/>
+<line nr="52" mi="0" ci="1" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="2" covered="151"/>
+<counter type="BRANCH" missed="2" covered="16"/>
+<counter type="LINE" missed="0" covered="23"/>
+</sourcefile>
+<counter type="INSTRUCTION" missed="1769" covered="171"/>
+<counter type="BRANCH" missed="221" covered="17"/>
+<counter type="LINE" missed="336" covered="23"/>
+<counter type="METHOD" missed="43" covered="2"/>
+<counter type="CLASS" missed="4" covered="1"/>
+</package>
+<counter type="INSTRUCTION" missed="5598" covered="518"/>
+<counter type="BRANCH" missed="357" covered="41"/>
+<counter type="LINE" missed="844" covered="62"/>
+<counter type="METHOD" missed="276" covered="16"/>
+<counter type="CLASS" missed="61" covered="9"/>
+</report>

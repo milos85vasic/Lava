@@ -1,0 +1,9 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>LongMethod:ConnectionsList.kt$@Composable private fun ConnectionsList( state: ConnectionsState, onAction: (ConnectionsAction) -&gt; Unit, )</ID>
+    <ID>LongMethod:ConnectionsList.kt$@Composable private fun Endpoint( state: ConnectionsState, endpointState: EndpointState, onAction: (ConnectionsAction) -&gt; Unit, onRequestRemove: (Endpoint) -&gt; Unit, )</ID>
+    <ID>MaxLineLength:ConnectionsViewModelTest.kt$ConnectionsViewModelTest$fun</ID>
+  </CurrentIssues>
+</SmellBaseline>

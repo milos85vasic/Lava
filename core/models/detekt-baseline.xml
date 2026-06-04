@@ -1,0 +1,19 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>CyclomaticComplexMethod:HostUtils.kt$fun String.isLocalHost(): Boolean</ID>
+    <ID>MagicNumber:HostUtils.kt$0xfc00</ID>
+    <ID>MagicNumber:HostUtils.kt$0xfdff</ID>
+    <ID>MagicNumber:HostUtils.kt$10</ID>
+    <ID>MagicNumber:HostUtils.kt$127</ID>
+    <ID>MagicNumber:HostUtils.kt$16</ID>
+    <ID>MagicNumber:HostUtils.kt$168</ID>
+    <ID>MagicNumber:HostUtils.kt$172</ID>
+    <ID>MagicNumber:HostUtils.kt$192</ID>
+    <ID>MagicNumber:HostUtils.kt$31</ID>
+    <ID>MagicNumber:HostUtils.kt$4</ID>
+    <ID>NestedBlockDepth:HostUtils.kt$fun String.isLocalHost(): Boolean</ID>
+    <ID>ReturnCount:HostUtils.kt$fun String.isLocalHost(): Boolean</ID>
+  </CurrentIssues>
+</SmellBaseline>

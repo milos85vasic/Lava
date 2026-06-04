@@ -1,0 +1,847 @@
+<?xml version="1.0" ?>
+<report name="Kover Gradle Plugin XML report for :feature:forum">
+<package name="hilt_aggregated_deps">
+<class name="hilt_aggregated_deps/_lava_forum_ForumViewModel_HiltModules_BindsModule" sourcefilename="_lava_forum_ForumViewModel_HiltModules_BindsModule.java">
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="hilt_aggregated_deps/_lava_forum_ForumViewModel_HiltModules_KeyModule" sourcefilename="_lava_forum_ForumViewModel_HiltModules_KeyModule.java">
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<sourcefile name="_lava_forum_ForumViewModel_HiltModules_BindsModule.java">
+<line nr="14" mi="2" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</sourcefile>
+<sourcefile name="_lava_forum_ForumViewModel_HiltModules_KeyModule.java">
+<line nr="14" mi="2" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</sourcefile>
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+<counter type="CLASS" missed="2" covered="0"/>
+</package>
+<package name="lava/forum">
+<class name="lava/forum/ComposableSingletons$ForumScreenKt" sourcefilename="ForumScreen.kt">
+<method name="&lt;clinit&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="18" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="18" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/ComposableSingletons$ForumScreenKt$lambda-1$1" sourcefilename="ForumScreen.kt">
+<method name="invoke" desc="(Landroidx/compose/foundation/layout/BoxScope;Landroidx/compose/runtime/Composer;I)V">
+<counter type="INSTRUCTION" missed="113" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="21" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="113" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="21" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/ComposableSingletons$ForumScreenKt$lambda-2$1" sourcefilename="ForumScreen.kt">
+<method name="invoke" desc="(Landroidx/compose/foundation/layout/PaddingValues;Landroidx/compose/runtime/Composer;I)V">
+<counter type="INSTRUCTION" missed="44" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="44" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/ComposableSingletons$ForumScreenKt$lambda-3$1" sourcefilename="ForumScreen.kt">
+<method name="invoke" desc="(Landroidx/compose/runtime/Composer;I)V">
+<counter type="INSTRUCTION" missed="24" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="24" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/Expandable" sourcefilename="ForumState.kt">
+<method name="&lt;init&gt;" desc="(Ljava/lang/Object;Z)V">
+<counter type="INSTRUCTION" missed="12" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="12" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/ForumAction$CategoryClick" sourcefilename="ForumAction.kt">
+<method name="&lt;init&gt;" desc="(Llava/models/forum/ForumCategory;)V">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/ForumAction$ExpandClick" sourcefilename="ForumAction.kt">
+<method name="&lt;init&gt;" desc="(Llava/forum/Expandable;)V">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/ForumAction$RetryClick" sourcefilename="ForumAction.kt">
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/ForumScreenKt" sourcefilename="ForumScreen.kt">
+<method name="ForumScreen" desc="(Llava/forum/ForumState;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;I)V">
+<counter type="INSTRUCTION" missed="157" covered="0"/>
+<counter type="BRANCH" missed="8" covered="0"/>
+<counter type="LINE" missed="5" covered="0"/>
+</method>
+<method name="RootCategoryStub" desc="(Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V">
+<counter type="INSTRUCTION" missed="117" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="11" covered="0"/>
+</method>
+<method name="ForumScreen" desc="(Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;I)V">
+<counter type="INSTRUCTION" missed="75" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+</method>
+<method name="RootCategory" desc="(Llava/models/forum/ForumCategory;ZLkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function0;Landroidx/compose/runtime/Composer;I)V">
+<counter type="INSTRUCTION" missed="197" covered="0"/>
+<counter type="BRANCH" missed="10" covered="0"/>
+<counter type="LINE" missed="16" covered="0"/>
+</method>
+<method name="LoadingItem" desc="(Landroidx/compose/runtime/Composer;I)V">
+<counter type="INSTRUCTION" missed="172" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="27" covered="0"/>
+</method>
+<method name="ForumScreen$lambda$9$lambda$8" desc="(Llava/forum/ForumState;Lkotlin/jvm/functions/Function1;Landroidx/compose/foundation/lazy/LazyListScope;)Lkotlin/Unit;">
+<counter type="INSTRUCTION" missed="28" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</method>
+<method name="ForumScreen_Preview" desc="(Landroidx/compose/runtime/Composer;I)V">
+<counter type="INSTRUCTION" missed="43" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</method>
+<method name="ForumScreen" desc="(Llava/forum/ForumViewModel;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;I)V">
+<counter type="INSTRUCTION" missed="162" covered="0"/>
+<counter type="BRANCH" missed="4" covered="0"/>
+<counter type="LINE" missed="5" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="951" covered="0"/>
+<counter type="BRANCH" missed="28" covered="0"/>
+<counter type="LINE" missed="74" covered="0"/>
+<counter type="METHOD" missed="8" covered="0"/>
+</class>
+<class name="lava/forum/ForumScreenKt$ForumScreen$2$1" sourcefilename="ForumScreen.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/ForumScreenKt$ForumScreen$5$1$1" sourcefilename="ForumScreen.kt">
+<method name="invoke" desc="(Landroidx/compose/foundation/lazy/LazyItemScope;Landroidx/compose/runtime/Composer;I)V">
+<counter type="INSTRUCTION" missed="39" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="39" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/ForumScreenKt$ForumScreen$5$1$1$1" sourcefilename="ForumScreen.kt">
+<method name="invoke" desc="(Llava/forum/ForumState$ForumLoadingState;Landroidx/compose/runtime/Composer;I)V">
+<counter type="INSTRUCTION" missed="98" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="7" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="98" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="7" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/ForumScreenKt$ForumScreen$5$1$2$1$1" sourcefilename="ForumScreen.kt">
+<method name="invoke" desc="(Llava/models/forum/ForumCategory;)V">
+<counter type="INSTRUCTION" missed="8" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="8" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/ForumScreenKt$ForumScreen$5$1$2$2$1" sourcefilename="ForumScreen.kt">
+<method name="invoke" desc="()V">
+<counter type="INSTRUCTION" missed="9" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="9" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/ForumScreenKt$ForumScreen$lambda$9$lambda$8$$inlined$items$default$1" sourcefilename="LazyDsl.kt">
+<method name="invoke" desc="(Ljava/lang/Object;)Ljava/lang/Void;">
+<counter type="INSTRUCTION" missed="1" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="1" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/ForumScreenKt$ForumScreen$lambda$9$lambda$8$$inlined$items$default$2" sourcefilename="LazyDsl.kt">
+<method name="invoke" desc="(I)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/ForumScreenKt$ForumScreen$lambda$9$lambda$8$$inlined$items$default$3" sourcefilename="LazyDsl.kt">
+<method name="invoke" desc="(I)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/ForumScreenKt$RootCategory$1" sourcefilename="ForumScreen.kt">
+<method name="invoke" desc="(Landroidx/compose/foundation/layout/BoxScope;Landroidx/compose/runtime/Composer;I)V">
+<counter type="INSTRUCTION" missed="164" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="22" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="164" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="22" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/ForumScreenKt$RootCategory$1$1$2" sourcefilename="ForumScreen.kt">
+<method name="invoke" desc="(Landroidx/compose/animation/AnimatedVisibilityScope;Landroidx/compose/runtime/Composer;I)V">
+<counter type="INSTRUCTION" missed="138" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="12" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="138" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="12" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/ForumScreenKt$RootCategory$1$1$2$1$1$2" sourcefilename="ForumScreen.kt">
+<method name="invoke" desc="(Landroidx/compose/foundation/layout/BoxScope;Landroidx/compose/runtime/Composer;I)V">
+<counter type="INSTRUCTION" missed="74" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="11" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="74" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="11" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/ForumSideEffect$OpenCategory" sourcefilename="ForumSideEffect.kt">
+<method name="&lt;init&gt;" desc="(Ljava/lang/String;)V">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/ForumState$Error" sourcefilename="ForumState.kt">
+<method name="&lt;init&gt;" desc="(Ljava/lang/Throwable;)V">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/ForumState$Loaded" sourcefilename="ForumState.kt">
+<method name="&lt;init&gt;" desc="(Ljava/util/List;)V">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/ForumState$Loading" sourcefilename="ForumState.kt">
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/ForumViewModel" sourcefilename="ForumViewModel.kt">
+<method name="onExpandClick" desc="(Llava/forum/Expandable;)Lkotlinx/coroutines/Job;">
+<counter type="INSTRUCTION" missed="12" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="perform" desc="(Llava/forum/ForumAction;)V">
+<counter type="INSTRUCTION" missed="35" covered="0"/>
+<counter type="BRANCH" missed="4" covered="0"/>
+<counter type="LINE" missed="5" covered="0"/>
+</method>
+<method name="loadForum" desc="()Lkotlinx/coroutines/Job;">
+<counter type="INSTRUCTION" missed="12" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="onCategoryClick" desc="(Llava/models/forum/ForumCategory;)Lkotlinx/coroutines/Job;">
+<counter type="INSTRUCTION" missed="12" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Llava/domain/usecase/GetForumUseCase;Llava/logger/api/LoggerFactory;)V">
+<counter type="INSTRUCTION" missed="27" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="5" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="98" covered="0"/>
+<counter type="BRANCH" missed="4" covered="0"/>
+<counter type="LINE" missed="13" covered="0"/>
+<counter type="METHOD" missed="5" covered="0"/>
+</class>
+<class name="lava/forum/ForumViewModel$container$1" sourcefilename="ForumViewModel.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="10" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="10" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/ForumViewModel$loadForum$1" sourcefilename="ForumViewModel.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="161" covered="0"/>
+<counter type="BRANCH" missed="4" covered="0"/>
+<counter type="LINE" missed="11" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="161" covered="0"/>
+<counter type="BRANCH" missed="4" covered="0"/>
+<counter type="LINE" missed="11" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/ForumViewModel$loadForum$1$3$1" sourcefilename="ForumViewModel.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="21" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="21" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/ForumViewModel$onCategoryClick$1" sourcefilename="ForumViewModel.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="16" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="16" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/ForumViewModel$onExpandClick$1" sourcefilename="ForumViewModel.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="13" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="invokeSuspend$lambda$1" desc="(Llava/forum/Expandable;Lorg/orbitmvi/orbit/syntax/simple/SimpleContext;)Llava/forum/ForumState;">
+<counter type="INSTRUCTION" missed="56" covered="0"/>
+<counter type="BRANCH" missed="6" covered="0"/>
+<counter type="LINE" missed="9" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="69" covered="0"/>
+<counter type="BRANCH" missed="6" covered="0"/>
+<counter type="LINE" missed="10" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+</class>
+<class name="lava/forum/ForumViewModel_Factory" sourcefilename="ForumViewModel_Factory.java">
+<method name="get" desc="()Llava/forum/ForumViewModel;">
+<counter type="INSTRUCTION" missed="9" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="newInstance" desc="(Llava/domain/usecase/GetForumUseCase;Llava/logger/api/LoggerFactory;)Llava/forum/ForumViewModel;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="create" desc="(Ldagger/internal/Provider;Ldagger/internal/Provider;)Llava/forum/ForumViewModel_Factory;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="create" desc="(Ljavax/inject/Provider;Ljavax/inject/Provider;)Llava/forum/ForumViewModel_Factory;">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Ldagger/internal/Provider;Ldagger/internal/Provider;)V">
+<counter type="INSTRUCTION" missed="8" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="34" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="7" covered="0"/>
+<counter type="METHOD" missed="5" covered="0"/>
+</class>
+<class name="lava/forum/ForumViewModel_HiltModules$BindsModule" sourcefilename="ForumViewModel_HiltModules.java">
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/ForumViewModel_HiltModules$KeyModule" sourcefilename="ForumViewModel_HiltModules.java">
+<method name="provide" desc="()Z">
+<counter type="INSTRUCTION" missed="1" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="1" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/ForumViewModel_HiltModules_BindsModule_Binds_LazyMapKey" sourcefilename="ForumViewModel_HiltModules_BindsModule_Binds_LazyMapKey.java">
+<method name="&lt;clinit&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+</class>
+<class name="lava/forum/ForumViewModel_HiltModules_KeyModule_ProvideFactory" sourcefilename="ForumViewModel_HiltModules_KeyModule_ProvideFactory.java">
+<method name="provide" desc="()Z">
+<counter type="INSTRUCTION" missed="1" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="create" desc="()Llava/forum/ForumViewModel_HiltModules_KeyModule_ProvideFactory;">
+<counter type="INSTRUCTION" missed="1" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="get" desc="()Ljava/lang/Boolean;">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="6" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+<counter type="METHOD" missed="4" covered="0"/>
+</class>
+<class name="lava/forum/ForumViewModel_HiltModules_KeyModule_ProvideFactory$InstanceHolder" sourcefilename="ForumViewModel_HiltModules_KeyModule_ProvideFactory.java">
+<method name="&lt;clinit&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/ForumViewModel_HiltModules_KeyModule_Provide_LazyMapKey" sourcefilename="ForumViewModel_HiltModules_KeyModule_Provide_LazyMapKey.java">
+<method name="&lt;clinit&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+</class>
+<sourcefile name="ForumViewModel_HiltModules_BindsModule_Binds_LazyMapKey.java">
+<line nr="23" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="27" mi="2" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</sourcefile>
+<sourcefile name="LazyDsl.kt">
+<line nr="171" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="176" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="177" mi="7" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="15" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</sourcefile>
+<sourcefile name="ForumViewModel.kt">
+<line nr="19" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="21" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="22" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="24" mi="16" ci="0" mb="0" cb="0"/>
+<line nr="25" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="26" mi="10" ci="0" mb="0" cb="0"/>
+<line nr="30" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="31" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="32" mi="9" ci="0" mb="2" cb="0"/>
+<line nr="33" mi="9" ci="0" mb="2" cb="0"/>
+<line nr="34" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="38" mi="12" ci="0" mb="0" cb="0"/>
+<line nr="39" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="40" mi="16" ci="0" mb="0" cb="0"/>
+<line nr="41" mi="60" ci="0" mb="0" cb="0"/>
+<line nr="42" mi="13" ci="0" mb="2" cb="0"/>
+<line nr="43" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="44" mi="38" ci="0" mb="0" cb="0"/>
+<line nr="45" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="46" mi="14" ci="0" mb="2" cb="0"/>
+<line nr="47" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="48" mi="22" ci="0" mb="0" cb="0"/>
+<line nr="49" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="52" mi="12" ci="0" mb="0" cb="0"/>
+<line nr="53" mi="16" ci="0" mb="0" cb="0"/>
+<line nr="56" mi="12" ci="0" mb="0" cb="0"/>
+<line nr="57" mi="13" ci="0" mb="0" cb="0"/>
+<line nr="58" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="59" mi="5" ci="0" mb="2" cb="0"/>
+<line nr="60" mi="8" ci="0" mb="2" cb="0"/>
+<line nr="61" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="62" mi="6" ci="0" mb="2" cb="0"/>
+<line nr="63" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="65" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="66" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="70" mi="3" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="375" covered="0"/>
+<counter type="BRANCH" missed="14" covered="0"/>
+<counter type="LINE" missed="37" covered="0"/>
+</sourcefile>
+<sourcefile name="ForumState.kt">
+<line nr="7" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="8" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="9" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="13" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="14" mi="7" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="28" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="5" covered="0"/>
+</sourcefile>
+<sourcefile name="ForumViewModel_Factory.java">
+<line nr="35" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="36" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="37" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="42" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="48" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="53" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="58" mi="5" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="34" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="7" covered="0"/>
+</sourcefile>
+<sourcefile name="ForumScreen.kt">
+<line nr="61" mi="45" ci="0" mb="2" cb="0"/>
+<line nr="62" mi="11" ci="0" mb="0" cb="0"/>
+<line nr="63" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="64" mi="12" ci="0" mb="0" cb="0"/>
+<line nr="70" mi="52" ci="0" mb="4" cb="0"/>
+<line nr="71" mi="43" ci="0" mb="0" cb="0"/>
+<line nr="72" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="73" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="76" mi="18" ci="0" mb="0" cb="0"/>
+<line nr="77" mi="36" ci="0" mb="0" cb="0"/>
+<line nr="78" mi="13" ci="0" mb="0" cb="0"/>
+<line nr="84" mi="65" ci="0" mb="4" cb="0"/>
+<line nr="85" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="86" mi="47" ci="0" mb="4" cb="0"/>
+<line nr="87" mi="24" ci="0" mb="0" cb="0"/>
+<line nr="88" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="89" mi="19" ci="0" mb="2" cb="0"/>
+<line nr="90" mi="20" ci="0" mb="0" cb="0"/>
+<line nr="91" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="92" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="93" mi="14" ci="0" mb="0" cb="0"/>
+<line nr="94" mi="30" ci="0" mb="0" cb="0"/>
+<line nr="95" mi="14" ci="0" mb="2" cb="0"/>
+<line nr="96" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="97" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="98" mi="17" ci="0" mb="0" cb="0"/>
+<line nr="99" mi="26" ci="0" mb="0" cb="0"/>
+<line nr="102" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="107" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="111" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="112" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="116" mi="14" ci="0" mb="0" cb="0"/>
+<line nr="124" mi="80" ci="0" mb="8" cb="0"/>
+<line nr="125" mi="10" ci="0" mb="0" cb="0"/>
+<line nr="126" mi="13" ci="0" mb="2" cb="0"/>
+<line nr="127" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="128" mi="11" ci="0" mb="0" cb="0"/>
+<line nr="129" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="131" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="133" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="134" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="135" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="136" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="138" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="139" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="140" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="141" mi="20" ci="0" mb="0" cb="0"/>
+<line nr="142" mi="31" ci="0" mb="0" cb="0"/>
+<line nr="143" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="144" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="145" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="146" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="147" mi="10" ci="0" mb="0" cb="0"/>
+<line nr="148" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="150" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="151" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="152" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="153" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="154" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="155" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="157" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="159" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="160" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="161" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="162" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="163" mi="14" ci="0" mb="0" cb="0"/>
+<line nr="164" mi="15" ci="0" mb="0" cb="0"/>
+<line nr="165" mi="18" ci="0" mb="0" cb="0"/>
+<line nr="166" mi="14" ci="0" mb="0" cb="0"/>
+<line nr="167" mi="14" ci="0" mb="0" cb="0"/>
+<line nr="168" mi="16" ci="0" mb="0" cb="0"/>
+<line nr="169" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="170" mi="22" ci="0" mb="0" cb="0"/>
+<line nr="171" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="173" mi="26" ci="0" mb="0" cb="0"/>
+<line nr="174" mi="14" ci="0" mb="0" cb="0"/>
+<line nr="175" mi="25" ci="0" mb="0" cb="0"/>
+<line nr="176" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="177" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="178" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="179" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="181" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="182" mi="11" ci="0" mb="0" cb="0"/>
+<line nr="183" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="184" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="186" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="188" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="190" mi="5" ci="0" mb="2" cb="0"/>
+<line nr="191" mi="13" ci="0" mb="0" cb="0"/>
+<line nr="193" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="194" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="197" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="199" mi="15" ci="0" mb="0" cb="0"/>
+<line nr="202" mi="19" ci="0" mb="0" cb="0"/>
+<line nr="203" mi="14" ci="0" mb="0" cb="0"/>
+<line nr="204" mi="14" ci="0" mb="0" cb="0"/>
+<line nr="205" mi="16" ci="0" mb="2" cb="0"/>
+<line nr="206" mi="11" ci="0" mb="0" cb="0"/>
+<line nr="207" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="208" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="209" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="210" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="211" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="212" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="214" mi="10" ci="0" mb="0" cb="0"/>
+<line nr="216" mi="11" ci="0" mb="0" cb="0"/>
+<line nr="217" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="218" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="219" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="220" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="221" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="222" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="224" mi="10" ci="0" mb="0" cb="0"/>
+<line nr="226" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="227" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="228" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="229" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="231" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="232" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="233" mi="11" ci="0" mb="0" cb="0"/>
+<line nr="236" mi="54" ci="0" mb="0" cb="0"/>
+<line nr="237" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="238" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="239" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="240" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="241" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="243" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="244" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="245" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="246" mi="12" ci="0" mb="0" cb="0"/>
+<line nr="247" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="248" mi="21" ci="0" mb="0" cb="0"/>
+<line nr="249" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="250" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="251" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="252" mi="10" ci="0" mb="0" cb="0"/>
+<line nr="253" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="255" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="256" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="257" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="258" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="259" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="261" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="262" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="263" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="264" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="266" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="268" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="269" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="270" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="271" mi="10" ci="0" mb="0" cb="0"/>
+<line nr="273" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="275" mi="13" ci="0" mb="0" cb="0"/>
+<line nr="279" mi="27" ci="0" mb="0" cb="0"/>
+<line nr="280" mi="11" ci="0" mb="0" cb="0"/>
+<line nr="281" mi="30" ci="0" mb="0" cb="0"/>
+<line nr="282" mi="44" ci="0" mb="0" cb="0"/>
+<line nr="285" mi="11" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="1687" covered="0"/>
+<counter type="BRANCH" missed="32" covered="0"/>
+<counter type="LINE" missed="160" covered="0"/>
+</sourcefile>
+<sourcefile name="ForumSideEffect.kt">
+<line nr="4" mi="7" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</sourcefile>
+<sourcefile name="ForumViewModel_HiltModules_KeyModule_Provide_LazyMapKey.java">
+<line nr="23" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="27" mi="2" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</sourcefile>
+<sourcefile name="ForumViewModel_HiltModules.java">
+<line nr="27" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="48" mi="1" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="3" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</sourcefile>
+<sourcefile name="ForumAction.kt">
+<line nr="6" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="7" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="8" mi="2" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="16" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</sourcefile>
+<sourcefile name="ForumViewModel_HiltModules_KeyModule_ProvideFactory.java">
+<line nr="25" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="28" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="32" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="36" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="40" mi="4" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="10" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="5" covered="0"/>
+</sourcefile>
+<counter type="INSTRUCTION" missed="2183" covered="0"/>
+<counter type="BRANCH" missed="46" covered="0"/>
+<counter type="LINE" missed="227" covered="0"/>
+<counter type="METHOD" missed="58" covered="0"/>
+<counter type="CLASS" missed="37" covered="0"/>
+</package>
+<counter type="INSTRUCTION" missed="2187" covered="0"/>
+<counter type="BRANCH" missed="46" covered="0"/>
+<counter type="LINE" missed="229" covered="0"/>
+<counter type="METHOD" missed="60" covered="0"/>
+<counter type="CLASS" missed="39" covered="0"/>
+</report>

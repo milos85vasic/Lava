@@ -1,0 +1,41 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>EmptyFunctionBlock:LavaTrackerSdkCloneSearchTest.kt$LavaTrackerSdkCloneSearchTest.FakeSourceClient${}</ID>
+    <ID>EmptyFunctionBlock:LavaTrackerSdkParallelSearchTest.kt$LavaTrackerSdkParallelSearchTest.SuspendingFakeClient${}</ID>
+    <ID>LongMethod:LavaTrackerSdk.kt$LavaTrackerSdk$fun streamMultiSearch( request: SearchRequest, providerIds: List&lt;String&gt;, page: Int = 0, ): Flow&lt;MultiSearchEvent&gt;</ID>
+    <ID>LongMethod:LavaTrackerSdkCrossTrackerFallbackTest.kt$LavaTrackerSdkCrossTrackerFallbackTest$@Test fun search_succeeds_normally_when_mirrors_healthy()</ID>
+    <ID>LongParameterList:DeduplicationEngineTest.kt$DeduplicationEngineTest$( trackerId: String = "rutracker", torrentId: String = "t1", infoHash: String? = null, title: String = "Title", sizeBytes: Long? = null, seeders: Int? = null, )</ID>
+    <ID>LongParameterList:LavaTrackerSdk.kt$LavaTrackerSdk$( private val registry: TrackerRegistry, /** * Optional collaborators introduced in SP-3a Phase 4 (Tasks 4.4–4.5). * They are nullable so unit tests that construct the SDK with only a * registry (Phase 1–3 surface) keep compiling. Production wiring via * Hilt always supplies them. */ private val mirrorManagerHolder: LavaMirrorManagerHolder? = null, private val mirrorHealthRepository: MirrorHealthRepository? = null, private val mirrorConfigLoader: MirrorConfigLoader? = null, private val crossTrackerFallback: CrossTrackerFallbackPolicy? = null, private val okHttpClient: OkHttpClient? = null, /** * SP-4 Phase A+B (Task 15) — user-cloned providers persisted by * [lava.domain.usecase.CloneProviderUseCase]. Nullable so legacy unit * tests that construct the SDK with only a registry keep compiling. * Production wiring via Hilt supplies it. */ private val clonedProviderDao: ClonedProviderDao? = null, )</ID>
+    <ID>LongParameterList:LavaTrackerSdk.kt$LavaTrackerSdk$( trackerId: String, capability: TrackerCapability, crossinline op: suspend () -&gt; Result, crossinline wrapSuccess: (Result) -&gt; Outcome, crossinline wrapFailure: (reason: String, cause: Throwable?) -&gt; Outcome, crossinline wrapFallback: (proposed: TrackerDescriptor) -&gt; Outcome, )</ID>
+    <ID>LongParameterList:TrackerClientModule.kt$TrackerClientModule$( rutrackerFactory: RuTrackerClientFactory, rutorFactory: RuTorClientFactory, nnmclubFactory: NnmclubClientFactory, kinozalFactory: KinozalClientFactory, archiveOrgFactory: ArchiveOrgClientFactory, gutenbergFactory: GutenbergClientFactory, )</ID>
+    <ID>MagicNumber:DeduplicationEngine.kt$DeduplicationEngine$100.0</ID>
+    <ID>MagicNumber:TrackerClientModule.kt$TrackerClientModule$30_000</ID>
+    <ID>MagicNumber:TrackerClientModule.kt$TrackerClientModule$60_000</ID>
+    <ID>MaxLineLength:LavaTrackerSdk.kt$LavaTrackerSdk.ProviderOutcome$is NotRegistered -&gt; ProviderSearchStatus(id, id, ProviderSearchState.FAILURE, errorMessage = "not registered")</ID>
+    <ID>MaxLineLength:LavaTrackerSdkCloneUrlInjectionTest.kt$LavaTrackerSdkCloneUrlInjectionTest$fun</ID>
+    <ID>MaxLineLength:LavaTrackerSdkParallelSearchTest.kt$LavaTrackerSdkParallelSearchTest$assertTrue("expected AllProvidersDone as the last event; got: $terminal", terminal is MultiSearchEvent.AllProvidersDone)</ID>
+    <ID>MaxLineLength:LavaTrackerSdkRealStackTest.kt$LavaTrackerSdkRealStackTest$val factoryA = RuTrackerClientFactory(Provider { firstClient }, Provider { mockk&lt;lava.auth.api.TokenProvider&gt;(relaxed = true) })</ID>
+    <ID>MaxLineLength:LavaTrackerSdkRealStackTest.kt$LavaTrackerSdkRealStackTest$val factoryB = RuTrackerClientFactory(Provider { secondClient }, Provider { mockk&lt;lava.auth.api.TokenProvider&gt;(relaxed = true) })</ID>
+    <ID>MaxLineLength:LavaTrackerSdkRealStackTest.kt$LavaTrackerSdkRealStackTest$val rutrackerFactory = RuTrackerClientFactory(Provider { rutrackerClient }, Provider { mockk&lt;lava.auth.api.TokenProvider&gt;(relaxed = true) })</ID>
+    <ID>MaxLineLength:MirrorHealthRepositoryTest.kt$MirrorHealthRepositoryTest$MirrorState(mirrorA, HealthState.HEALTHY, lastCheck = Instant.fromEpochMilliseconds(1_000), consecutiveFailures = 0)</ID>
+    <ID>MaxLineLength:MirrorHealthRepositoryTest.kt$MirrorHealthRepositoryTest$MirrorState(mirrorB, HealthState.DEGRADED, lastCheck = Instant.fromEpochMilliseconds(7_000), consecutiveFailures = 2)</ID>
+    <ID>MaxLineLength:MirrorHealthRepositoryTest.kt$MirrorHealthRepositoryTest$MirrorState(mirrorB, HealthState.UNHEALTHY, lastCheck = Instant.fromEpochMilliseconds(2_000), consecutiveFailures = 5)</ID>
+    <ID>MaxLineLength:MirrorHealthRepositoryTest.kt$MirrorHealthRepositoryTest$repo.upsert("rutracker", MirrorState(mirrorA, HealthState.UNHEALTHY, lastCheck = Instant.fromEpochMilliseconds(42), consecutiveFailures = 9))</ID>
+    <ID>MaxLineLength:ProviderVerifiedContractTest.kt$ProviderVerifiedContractTest$"ArchiveOrgDescriptor.verified MUST stay true — C11 shallow Continue-to-authorized-main-app passing on CZ_API34_Phone via Phase 3 matrix infrastructure (Phase 4.1a, 2026-05-04). Deep-coverage search assertion owed pending nav-compose upgrade."</ID>
+    <ID>MaxLineLength:ProviderVerifiedContractTest.kt$ProviderVerifiedContractTest$"GutenbergDescriptor.verified MUST stay true — C12 shallow Continue-to-authorized-main-app passing on CZ_API34_Phone via Phase 3 matrix infrastructure (Phase 4.1b, 2026-05-04). Deep-coverage search assertion owed pending nav-compose upgrade."</ID>
+    <ID>MaxLineLength:ProviderVerifiedContractTest.kt$ProviderVerifiedContractTest$"KinozalDescriptor.verified MUST stay false until Challenge Test C9 passes on the gating matrix and the post-login navigation bug is fixed"</ID>
+    <ID>MaxLineLength:ProviderVerifiedContractTest.kt$ProviderVerifiedContractTest$"NnmclubDescriptor.verified MUST stay false until C10 lands AND NNMCLUB credentials are added to .env AND post-login navigation is fixed"</ID>
+    <ID>MaxLineLength:TrackerClientModule.kt$TrackerClientModule$agent = "Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36"</ID>
+    <ID>ReturnCount:DeduplicationEngine.kt$DeduplicationEngine$internal fun matches(a: TorrentItem, b: TorrentItem): Boolean</ID>
+    <ID>ReturnCount:LavaTrackerSdk.kt$LavaTrackerSdk$fun listAvailableTrackers(): List&lt;TrackerDescriptor&gt;</ID>
+    <ID>ReturnCount:LavaTrackerSdk.kt$LavaTrackerSdk$private suspend fun runOneProvider( id: String, request: SearchRequest, page: Int, ): ProviderOutcome</ID>
+    <ID>SwallowedException:MirrorHealthCheckWorker.kt$MirrorHealthCheckWorker$t: Throwable</ID>
+    <ID>TooGenericExceptionCaught:LavaTrackerSdk.kt$LavaTrackerSdk$t: Throwable</ID>
+    <ID>TooGenericExceptionCaught:MirrorHealthCheckWorker.kt$MirrorHealthCheckWorker$t: Throwable</ID>
+    <ID>TooManyFunctions:LavaTrackerSdk.kt$LavaTrackerSdk</ID>
+    <ID>TooManyFunctions:TrackerClientModule.kt$TrackerClientModule</ID>
+    <ID>UseCheckOrError:LavaTrackerSdk.kt$LavaTrackerSdk$throw IllegalStateException( "Clone $id references unknown source ${cloned.sourceTrackerId}", )</ID>
+  </CurrentIssues>
+</SmellBaseline>

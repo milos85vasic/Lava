@@ -1,0 +1,3135 @@
+<?xml version="1.0" ?>
+<report name="Kover Gradle Plugin XML report for :core:tracker:client">
+<package name="lava/tracker/client/work">
+<class name="lava/tracker/client/work/MirrorHealthCheckWorker" sourcefilename="MirrorHealthCheckWorker.kt">
+<method name="&lt;init&gt;" desc="(Landroid/content/Context;Landroidx/work/WorkerParameters;Llava/tracker/client/LavaTrackerSdk;)V">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</method>
+<method name="doWork" desc="(Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="59" covered="0"/>
+<counter type="BRANCH" missed="6" covered="0"/>
+<counter type="LINE" missed="8" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="66" covered="0"/>
+<counter type="BRANCH" missed="6" covered="0"/>
+<counter type="LINE" missed="10" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+</class>
+<class name="lava/tracker/client/work/MirrorHealthCheckWorker$Companion" sourcefilename="MirrorHealthCheckWorker.kt">
+<method name="schedule" desc="(Landroidx/work/WorkManager;)V">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+</method>
+<method name="buildRequest" desc="()Landroidx/work/PeriodicWorkRequest;">
+<counter type="INSTRUCTION" missed="0" covered="17"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="8"/>
+</method>
+<counter type="INSTRUCTION" missed="7" covered="17"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="4" covered="8"/>
+<counter type="METHOD" missed="1" covered="1"/>
+</class>
+<class name="lava/tracker/client/work/MirrorHealthCheckWorker_Factory" sourcefilename="MirrorHealthCheckWorker_Factory.java">
+<method name="create" desc="(Ljavax/inject/Provider;)Llava/tracker/client/work/MirrorHealthCheckWorker_Factory;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="create" desc="(Ldagger/internal/Provider;)Llava/tracker/client/work/MirrorHealthCheckWorker_Factory;">
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="newInstance" desc="(Landroid/content/Context;Landroidx/work/WorkerParameters;Llava/tracker/client/LavaTrackerSdk;)Llava/tracker/client/work/MirrorHealthCheckWorker;">
+<counter type="INSTRUCTION" missed="6" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Ldagger/internal/Provider;)V">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</method>
+<method name="get" desc="(Landroid/content/Context;Landroidx/work/WorkerParameters;)Llava/tracker/client/work/MirrorHealthCheckWorker;">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="27" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+<counter type="METHOD" missed="5" covered="0"/>
+</class>
+<sourcefile name="MirrorHealthCheckWorker.kt">
+<line nr="32" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="33" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="36" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="37" mi="12" ci="0" mb="2" cb="0"/>
+<line nr="39" mi="23" ci="0" mb="0" cb="0"/>
+<line nr="44" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="47" mi="13" ci="0" mb="4" cb="0"/>
+<line nr="48" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="49" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="50" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="58" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="59" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="60" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="62" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="63" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="64" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="65" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="67" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="75" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="76" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="77" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="78" mi="2" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="73" covered="17"/>
+<counter type="BRANCH" missed="6" covered="0"/>
+<counter type="LINE" missed="14" covered="8"/>
+</sourcefile>
+<sourcefile name="MirrorHealthCheckWorker_Factory.java">
+<line nr="32" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="33" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="37" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="42" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="46" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="51" mi="6" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="27" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+</sourcefile>
+<counter type="INSTRUCTION" missed="100" covered="17"/>
+<counter type="BRANCH" missed="6" covered="0"/>
+<counter type="LINE" missed="20" covered="8"/>
+<counter type="METHOD" missed="8" covered="1"/>
+<counter type="CLASS" missed="2" covered="1"/>
+</package>
+<package name="hilt_aggregated_deps">
+<class name="hilt_aggregated_deps/_lava_tracker_client_di_TrackerClientModule" sourcefilename="_lava_tracker_client_di_TrackerClientModule.java">
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<sourcefile name="_lava_tracker_client_di_TrackerClientModule.java">
+<line nr="14" mi="2" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</sourcefile>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+<counter type="CLASS" missed="1" covered="0"/>
+</package>
+<package name="lava/tracker/client">
+<class name="lava/tracker/client/BrowseOutcome$CrossTrackerFallbackProposed" sourcefilename="BrowseOutcome.kt">
+<method name="&lt;init&gt;" desc="(Ljava/lang/String;Ljava/lang/String;Llava/tracker/api/TrackerCapability;Lkotlin/jvm/functions/Function1;)V">
+<counter type="INSTRUCTION" missed="22" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="5" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="22" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="5" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/tracker/client/BrowseOutcome$Failure" sourcefilename="BrowseOutcome.kt">
+<method name="&lt;init&gt;" desc="(Ljava/lang/String;Ljava/util/List;Ljava/lang/Throwable;)V">
+<counter type="INSTRUCTION" missed="19" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="19" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/tracker/client/BrowseOutcome$Success" sourcefilename="BrowseOutcome.kt">
+<method name="&lt;init&gt;" desc="(Llava/tracker/api/model/BrowseResult;Ljava/lang/String;)V">
+<counter type="INSTRUCTION" missed="12" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="12" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/tracker/client/ClonedRoutingTrackerClient" sourcefilename="ClonedRoutingTrackerClient.kt">
+<method name="&lt;init&gt;" desc="(Llava/tracker/api/TrackerClient;Llava/tracker/api/TrackerDescriptor;)V">
+<counter type="INSTRUCTION" missed="0" covered="14"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="4"/>
+</method>
+<method name="getFeature" desc="(Lkotlin/reflect/KClass;)Llava/tracker/api/TrackerFeature;">
+<counter type="INSTRUCTION" missed="0" covered="4"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="healthCheck" desc="(Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="close" desc="()V">
+<counter type="INSTRUCTION" missed="3" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="7" covered="18"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="5"/>
+<counter type="METHOD" missed="2" covered="2"/>
+</class>
+<class name="lava/tracker/client/ClonedTrackerDescriptor" sourcefilename="ClonedTrackerDescriptor.kt">
+<method name="getSupportsAnonymous" desc="()Z">
+<counter type="INSTRUCTION" missed="3" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Llava/tracker/api/TrackerDescriptor;Llava/database/entity/ClonedProviderEntity;)V">
+<counter type="INSTRUCTION" missed="0" covered="41"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="7"/>
+</method>
+<method name="getAuthType" desc="()Llava/tracker/api/AuthType;">
+<counter type="INSTRUCTION" missed="0" covered="3"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="getExpectedHealthMarker" desc="()Ljava/lang/String;">
+<counter type="INSTRUCTION" missed="3" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="getEncoding" desc="()Ljava/lang/String;">
+<counter type="INSTRUCTION" missed="0" covered="3"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="getApiSupported" desc="()Z">
+<counter type="INSTRUCTION" missed="0" covered="3"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="getCapabilities" desc="()Ljava/util/Set;">
+<counter type="INSTRUCTION" missed="0" covered="3"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="getVerified" desc="()Z">
+<counter type="INSTRUCTION" missed="0" covered="3"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<counter type="INSTRUCTION" missed="6" covered="56"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="12"/>
+<counter type="METHOD" missed="2" covered="6"/>
+</class>
+<class name="lava/tracker/client/CrossTrackerFallbackPolicy" sourcefilename="CrossTrackerFallbackPolicy.kt">
+<method name="proposeFallback" desc="(Ljava/lang/String;Llava/tracker/api/TrackerCapability;Z)Llava/tracker/api/TrackerDescriptor;">
+<counter type="INSTRUCTION" missed="0" covered="17"/>
+<counter type="BRANCH" missed="0" covered="2"/>
+<counter type="LINE" missed="0" covered="3"/>
+</method>
+<method name="&lt;init&gt;" desc="(Llava/tracker/registry/TrackerRegistry;)V">
+<counter type="INSTRUCTION" missed="0" covered="5"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="2"/>
+</method>
+<method name="proposeFallback" desc="(Llava/tracker/client/CrossTrackerFallbackPolicy;Ljava/lang/String;Llava/tracker/api/TrackerCapability;Z)Llava/tracker/api/TrackerDescriptor;">
+<counter type="INSTRUCTION" missed="0" covered="2"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<counter type="INSTRUCTION" missed="0" covered="24"/>
+<counter type="BRANCH" missed="0" covered="2"/>
+<counter type="LINE" missed="0" covered="6"/>
+<counter type="METHOD" missed="0" covered="3"/>
+</class>
+<class name="lava/tracker/client/CrossTrackerFallbackPolicy_Factory" sourcefilename="CrossTrackerFallbackPolicy_Factory.java">
+<method name="&lt;init&gt;" desc="(Ldagger/internal/Provider;)V">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</method>
+<method name="create" desc="(Ldagger/internal/Provider;)Llava/tracker/client/CrossTrackerFallbackPolicy_Factory;">
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="create" desc="(Ljavax/inject/Provider;)Llava/tracker/client/CrossTrackerFallbackPolicy_Factory;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="get" desc="()Llava/tracker/client/CrossTrackerFallbackPolicy;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="newInstance" desc="(Llava/tracker/registry/TrackerRegistry;)Llava/tracker/client/CrossTrackerFallbackPolicy;">
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="23" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+<counter type="METHOD" missed="5" covered="0"/>
+</class>
+<class name="lava/tracker/client/LavaTrackerSdk" sourcefilename="LavaTrackerSdk.kt">
+<method name="getActiveClient$client_debug" desc="()Llava/tracker/api/TrackerClient;">
+<counter type="INSTRUCTION" missed="0" covered="4"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="streamMultiSearch" desc="(Llava/tracker/api/model/SearchRequest;Ljava/util/List;I)Lkotlinx/coroutines/flow/Flow;">
+<counter type="INSTRUCTION" missed="0" covered="10"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="addComment" desc="(Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="32" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</method>
+<method name="multiSearch" desc="(Llava/tracker/api/model/SearchRequest;Ljava/util/List;ILkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="0" covered="11"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="switchTracker" desc="(Ljava/lang/String;)V">
+<counter type="INSTRUCTION" missed="0" covered="31"/>
+<counter type="BRANCH" missed="0" covered="2"/>
+<counter type="LINE" missed="0" covered="3"/>
+</method>
+<method name="firstOrEmpty" desc="(Lkotlinx/coroutines/flow/Flow;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="0" covered="15"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="2"/>
+</method>
+<method name="logout" desc="(Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="22" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</method>
+<method name="browse" desc="(Ljava/lang/String;ILkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="105" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="21" covered="0"/>
+</method>
+<method name="getTopic" desc="(Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="27" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</method>
+<method name="probeMirrorsFor" desc="(Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="4" covered="86"/>
+<counter type="BRANCH" missed="2" covered="2"/>
+<counter type="LINE" missed="0" covered="4"/>
+</method>
+<method name="downloadTorrent" desc="(Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="27" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Llava/tracker/registry/TrackerRegistry;Llava/tracker/client/persistence/LavaMirrorManagerHolder;Llava/tracker/client/persistence/MirrorHealthRepository;Llava/tracker/client/persistence/MirrorConfigLoader;Llava/tracker/client/CrossTrackerFallbackPolicy;Lokhttp3/OkHttpClient;Llava/database/dao/ClonedProviderDao;)V">
+<counter type="INSTRUCTION" missed="0" covered="36"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="8"/>
+</method>
+<method name="login" desc="(Ljava/lang/String;Llava/tracker/api/model/LoginRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="18" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</method>
+<method name="checkAuth" desc="(Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="27" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</method>
+<method name="activeTrackerId" desc="()Ljava/lang/String;">
+<counter type="INSTRUCTION" missed="0" covered="2"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="observeMirrorHealth" desc="(Ljava/lang/String;)Lkotlinx/coroutines/flow/Flow;">
+<counter type="INSTRUCTION" missed="3" covered="8"/>
+<counter type="BRANCH" missed="1" covered="1"/>
+<counter type="LINE" missed="0" covered="2"/>
+</method>
+<method name="search" desc="(Llava/tracker/client/LavaTrackerSdk;Llava/tracker/api/model/SearchRequest;ILkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="0" covered="11"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="search" desc="(Llava/tracker/api/model/SearchRequest;ILkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="0" covered="105"/>
+<counter type="BRANCH" missed="0" covered="2"/>
+<counter type="LINE" missed="0" covered="21"/>
+</method>
+<method name="initialize" desc="(Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="41" covered="198"/>
+<counter type="BRANCH" missed="7" covered="11"/>
+<counter type="LINE" missed="2" covered="13"/>
+</method>
+<method name="login" desc="(Llava/tracker/api/model/LoginRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="15" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</method>
+<method name="runWithMirrorFallback" desc="(Ljava/lang/String;Llava/tracker/api/TrackerCapability;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="12" covered="108"/>
+<counter type="BRANCH" missed="6" covered="6"/>
+<counter type="LINE" missed="0" covered="13"/>
+</method>
+<method name="streamMultiSearch" desc="(Llava/tracker/client/LavaTrackerSdk;Llava/tracker/api/model/SearchRequest;Ljava/util/List;I)Lkotlinx/coroutines/flow/Flow;">
+<counter type="INSTRUCTION" missed="0" covered="2"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="addFavorite" desc="(Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="31" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</method>
+<method name="checkAuth" desc="(Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="30" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+</method>
+<method name="persistMirrorHealthSnapshot" desc="(Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="0" covered="51"/>
+<counter type="BRANCH" missed="2" covered="2"/>
+<counter type="LINE" missed="0" covered="4"/>
+</method>
+<method name="getTopicPage" desc="(Ljava/lang/String;ILkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="28" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</method>
+<method name="runOneProvider" desc="(Ljava/lang/String;Llava/tracker/api/model/SearchRequest;ILkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="16" covered="70"/>
+<counter type="BRANCH" missed="4" covered="4"/>
+<counter type="LINE" missed="3" covered="7"/>
+</method>
+<method name="getCommentsPage" desc="(Ljava/lang/String;ILkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="28" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</method>
+<method name="removeFavorite" desc="(Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="31" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</method>
+<method name="listAvailableTrackers" desc="()Ljava/util/List;">
+<counter type="INSTRUCTION" missed="0" covered="64"/>
+<counter type="BRANCH" missed="0" covered="6"/>
+<counter type="LINE" missed="0" covered="9"/>
+</method>
+<method name="getFavorites" desc="(Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="26" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</method>
+<method name="multiSearch" desc="(Llava/tracker/client/LavaTrackerSdk;Llava/tracker/api/model/SearchRequest;Ljava/util/List;ILkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="0" covered="2"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="logout" desc="(Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="25" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</method>
+<method name="streamSearch" desc="(Llava/models/search/Filter;Ljava/util/List;Ljava/lang/String;)Lkotlinx/coroutines/flow/Flow;">
+<counter type="INSTRUCTION" missed="74" covered="0"/>
+<counter type="BRANCH" missed="4" covered="0"/>
+<counter type="LINE" missed="8" covered="0"/>
+</method>
+<method name="browse" desc="(Llava/tracker/client/LavaTrackerSdk;Ljava/lang/String;ILkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="11" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="clientFor" desc="(Ljava/lang/String;)Llava/tracker/api/TrackerClient;">
+<counter type="INSTRUCTION" missed="9" covered="86"/>
+<counter type="BRANCH" missed="1" covered="5"/>
+<counter type="LINE" missed="2" covered="10"/>
+</method>
+<method name="getMagnetLink" desc="(Ljava/lang/String;)Ljava/lang/String;">
+<counter type="INSTRUCTION" missed="2" covered="12"/>
+<counter type="BRANCH" missed="1" covered="1"/>
+<counter type="LINE" missed="0" covered="2"/>
+</method>
+<method name="getForumTree" desc="(Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="26" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="670" covered="912"/>
+<counter type="BRANCH" missed="60" covered="42"/>
+<counter type="LINE" missed="81" covered="105"/>
+<counter type="METHOD" missed="18" covered="20"/>
+</class>
+<class name="lava/tracker/client/LavaTrackerSdk$ProviderOutcome$DefaultImpls" sourcefilename="LavaTrackerSdk.kt">
+<method name="displayName" desc="(Llava/tracker/client/LavaTrackerSdk$ProviderOutcome;Ljava/lang/String;)Ljava/lang/String;">
+<counter type="INSTRUCTION" missed="10" covered="20"/>
+<counter type="BRANCH" missed="3" covered="3"/>
+<counter type="LINE" missed="2" covered="3"/>
+</method>
+<method name="toStatus" desc="(Llava/tracker/client/LavaTrackerSdk$ProviderOutcome;Ljava/lang/String;)Llava/tracker/client/ProviderSearchStatus;">
+<counter type="INSTRUCTION" missed="19" covered="43"/>
+<counter type="BRANCH" missed="3" covered="3"/>
+<counter type="LINE" missed="2" covered="3"/>
+</method>
+<counter type="INSTRUCTION" missed="29" covered="63"/>
+<counter type="BRANCH" missed="6" covered="6"/>
+<counter type="LINE" missed="4" covered="6"/>
+<counter type="METHOD" missed="0" covered="2"/>
+</class>
+<class name="lava/tracker/client/LavaTrackerSdk$ProviderOutcome$Failure" sourcefilename="LavaTrackerSdk.kt">
+<method name="&lt;init&gt;" desc="(Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)V">
+<counter type="INSTRUCTION" missed="0" covered="23"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<counter type="INSTRUCTION" missed="0" covered="23"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+<counter type="METHOD" missed="0" covered="1"/>
+</class>
+<class name="lava/tracker/client/LavaTrackerSdk$ProviderOutcome$NotRegistered" sourcefilename="LavaTrackerSdk.kt">
+<method name="&lt;init&gt;" desc="(Ljava/lang/String;)V">
+<counter type="INSTRUCTION" missed="13" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="13" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/tracker/client/LavaTrackerSdk$ProviderOutcome$Success" sourcefilename="LavaTrackerSdk.kt">
+<method name="&lt;init&gt;" desc="(Ljava/util/List;Ljava/lang/String;)V">
+<counter type="INSTRUCTION" missed="0" covered="18"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<counter type="INSTRUCTION" missed="0" covered="18"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+<counter type="METHOD" missed="0" covered="1"/>
+</class>
+<class name="lava/tracker/client/LavaTrackerSdk$ProviderOutcome$Unsupported" sourcefilename="LavaTrackerSdk.kt">
+<method name="&lt;init&gt;" desc="(Ljava/lang/String;)V">
+<counter type="INSTRUCTION" missed="13" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="13" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/tracker/client/LavaTrackerSdk$RehydratedFailure" sourcefilename="LavaTrackerSdk.kt">
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="0" covered="3"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<counter type="INSTRUCTION" missed="0" covered="3"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+<counter type="METHOD" missed="0" covered="1"/>
+</class>
+<class name="lava/tracker/client/LavaTrackerSdk$browse$5$1" sourcefilename="LavaTrackerSdk.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="99" covered="0"/>
+<counter type="BRANCH" missed="4" covered="0"/>
+<counter type="LINE" missed="10" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="99" covered="0"/>
+<counter type="BRANCH" missed="4" covered="0"/>
+<counter type="LINE" missed="10" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/tracker/client/LavaTrackerSdk$clientFor$cloned$1" sourcefilename="LavaTrackerSdk.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="0" covered="20"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<counter type="INSTRUCTION" missed="0" covered="20"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+<counter type="METHOD" missed="0" covered="1"/>
+</class>
+<class name="lava/tracker/client/LavaTrackerSdk$listAvailableTrackers$cloned$1" sourcefilename="LavaTrackerSdk.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="0" covered="20"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<counter type="INSTRUCTION" missed="0" covered="20"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+<counter type="METHOD" missed="0" covered="1"/>
+</class>
+<class name="lava/tracker/client/LavaTrackerSdk$multiSearch$2" sourcefilename="LavaTrackerSdk.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="0" covered="126"/>
+<counter type="BRANCH" missed="0" covered="4"/>
+<counter type="LINE" missed="0" covered="15"/>
+</method>
+<counter type="INSTRUCTION" missed="0" covered="126"/>
+<counter type="BRANCH" missed="0" covered="4"/>
+<counter type="LINE" missed="0" covered="15"/>
+<counter type="METHOD" missed="0" covered="1"/>
+</class>
+<class name="lava/tracker/client/LavaTrackerSdk$multiSearch$2$outcomes$1$1" sourcefilename="LavaTrackerSdk.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="0" covered="39"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<counter type="INSTRUCTION" missed="0" covered="39"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+<counter type="METHOD" missed="0" covered="1"/>
+</class>
+<class name="lava/tracker/client/LavaTrackerSdk$runWithMirrorFallback$result$1" sourcefilename="LavaTrackerSdk.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="0" covered="23"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<counter type="INSTRUCTION" missed="0" covered="23"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+<counter type="METHOD" missed="0" covered="1"/>
+</class>
+<class name="lava/tracker/client/LavaTrackerSdk$search$5$1" sourcefilename="LavaTrackerSdk.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="50" covered="49"/>
+<counter type="BRANCH" missed="3" covered="1"/>
+<counter type="LINE" missed="6" covered="4"/>
+</method>
+<counter type="INSTRUCTION" missed="50" covered="49"/>
+<counter type="BRANCH" missed="3" covered="1"/>
+<counter type="LINE" missed="6" covered="4"/>
+<counter type="METHOD" missed="0" covered="1"/>
+</class>
+<class name="lava/tracker/client/LavaTrackerSdk$streamMultiSearch$1" sourcefilename="LavaTrackerSdk.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="0" covered="110"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="15"/>
+</method>
+<counter type="INSTRUCTION" missed="0" covered="110"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="15"/>
+<counter type="METHOD" missed="0" covered="1"/>
+</class>
+<class name="lava/tracker/client/LavaTrackerSdk$streamMultiSearch$1$inner$1" sourcefilename="LavaTrackerSdk.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="0" covered="41"/>
+<counter type="BRANCH" missed="0" covered="2"/>
+<counter type="LINE" missed="0" covered="2"/>
+</method>
+<counter type="INSTRUCTION" missed="0" covered="41"/>
+<counter type="BRANCH" missed="0" covered="2"/>
+<counter type="LINE" missed="0" covered="2"/>
+<counter type="METHOD" missed="0" covered="1"/>
+</class>
+<class name="lava/tracker/client/LavaTrackerSdk$streamMultiSearch$1$inner$1$1" sourcefilename="LavaTrackerSdk.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="166" covered="246"/>
+<counter type="BRANCH" missed="5" covered="5"/>
+<counter type="LINE" missed="22" covered="26"/>
+</method>
+<counter type="INSTRUCTION" missed="166" covered="246"/>
+<counter type="BRANCH" missed="5" covered="5"/>
+<counter type="LINE" missed="22" covered="26"/>
+<counter type="METHOD" missed="0" covered="1"/>
+</class>
+<class name="lava/tracker/client/LavaTrackerSdk_Factory" sourcefilename="LavaTrackerSdk_Factory.java">
+<method name="create" desc="(Ldagger/internal/Provider;Ldagger/internal/Provider;Ldagger/internal/Provider;Ldagger/internal/Provider;Ldagger/internal/Provider;Ldagger/internal/Provider;Ldagger/internal/Provider;)Llava/tracker/client/LavaTrackerSdk_Factory;">
+<counter type="INSTRUCTION" missed="10" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="newInstance" desc="(Llava/tracker/registry/TrackerRegistry;Llava/tracker/client/persistence/LavaMirrorManagerHolder;Llava/tracker/client/persistence/MirrorHealthRepository;Llava/tracker/client/persistence/MirrorConfigLoader;Llava/tracker/client/CrossTrackerFallbackPolicy;Lokhttp3/OkHttpClient;Llava/database/dao/ClonedProviderDao;)Llava/tracker/client/LavaTrackerSdk;">
+<counter type="INSTRUCTION" missed="10" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Ldagger/internal/Provider;Ldagger/internal/Provider;Ldagger/internal/Provider;Ldagger/internal/Provider;Ldagger/internal/Provider;Ldagger/internal/Provider;Ldagger/internal/Provider;)V">
+<counter type="INSTRUCTION" missed="23" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="8" covered="0"/>
+</method>
+<method name="create" desc="(Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Llava/tracker/client/LavaTrackerSdk_Factory;">
+<counter type="INSTRUCTION" missed="17" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="get" desc="()Llava/tracker/client/LavaTrackerSdk;">
+<counter type="INSTRUCTION" missed="29" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="89" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="12" covered="0"/>
+<counter type="METHOD" missed="5" covered="0"/>
+</class>
+<class name="lava/tracker/client/MultiSearchEvent$AllProvidersDone" sourcefilename="MultiSearchEvent.kt">
+<method name="&lt;init&gt;" desc="(Ljava/lang/String;Llava/tracker/client/UnifiedSearchResult;)V">
+<counter type="INSTRUCTION" missed="0" covered="12"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="2"/>
+</method>
+<counter type="INSTRUCTION" missed="0" covered="12"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="2"/>
+<counter type="METHOD" missed="0" covered="1"/>
+</class>
+<class name="lava/tracker/client/MultiSearchEvent$ProviderFailure" sourcefilename="MultiSearchEvent.kt">
+<method name="&lt;init&gt;" desc="(Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)V">
+<counter type="INSTRUCTION" missed="0" covered="17"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="3"/>
+</method>
+<counter type="INSTRUCTION" missed="0" covered="17"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="3"/>
+<counter type="METHOD" missed="0" covered="1"/>
+</class>
+<class name="lava/tracker/client/MultiSearchEvent$ProviderResults" sourcefilename="MultiSearchEvent.kt">
+<method name="&lt;init&gt;" desc="(Ljava/lang/String;Ljava/util/List;)V">
+<counter type="INSTRUCTION" missed="0" covered="12"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="3"/>
+</method>
+<counter type="INSTRUCTION" missed="0" covered="12"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="3"/>
+<counter type="METHOD" missed="0" covered="1"/>
+</class>
+<class name="lava/tracker/client/MultiSearchEvent$ProviderStart" sourcefilename="MultiSearchEvent.kt">
+<method name="&lt;init&gt;" desc="(Ljava/lang/String;Ljava/lang/String;)V">
+<counter type="INSTRUCTION" missed="0" covered="12"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="3"/>
+</method>
+<counter type="INSTRUCTION" missed="0" covered="12"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="3"/>
+<counter type="METHOD" missed="0" covered="1"/>
+</class>
+<class name="lava/tracker/client/MultiSearchEvent$ProviderUnsupported" sourcefilename="MultiSearchEvent.kt">
+<method name="&lt;init&gt;" desc="(Ljava/lang/String;)V">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/tracker/client/ProviderOccurrence" sourcefilename="UnifiedSearchResult.kt">
+<method name="&lt;init&gt;" desc="(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;Ljava/lang/String;Ljava/lang/String;)V">
+<counter type="INSTRUCTION" missed="0" covered="42"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="9"/>
+</method>
+<counter type="INSTRUCTION" missed="0" covered="42"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="9"/>
+<counter type="METHOD" missed="0" covered="1"/>
+</class>
+<class name="lava/tracker/client/ProviderSearchState" sourcefilename="UnifiedSearchResult.kt">
+<method name="&lt;clinit&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="0" covered="36"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="5"/>
+</method>
+<counter type="INSTRUCTION" missed="0" covered="36"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="5"/>
+<counter type="METHOD" missed="0" covered="1"/>
+</class>
+<class name="lava/tracker/client/ProviderSearchStatus" sourcefilename="UnifiedSearchResult.kt">
+<method name="&lt;init&gt;" desc="(Ljava/lang/String;Ljava/lang/String;Llava/tracker/client/ProviderSearchState;ILjava/lang/String;)V">
+<counter type="INSTRUCTION" missed="0" covered="29"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="5"/>
+</method>
+<counter type="INSTRUCTION" missed="0" covered="29"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="5"/>
+<counter type="METHOD" missed="0" covered="1"/>
+</class>
+<class name="lava/tracker/client/SearchOutcome$CrossTrackerFallbackProposed" sourcefilename="SearchOutcome.kt">
+<method name="&lt;init&gt;" desc="(Ljava/lang/String;Ljava/lang/String;Llava/tracker/api/TrackerCapability;Lkotlin/jvm/functions/Function1;)V">
+<counter type="INSTRUCTION" missed="0" covered="22"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="5"/>
+</method>
+<counter type="INSTRUCTION" missed="0" covered="22"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="5"/>
+<counter type="METHOD" missed="0" covered="1"/>
+</class>
+<class name="lava/tracker/client/SearchOutcome$Failure" sourcefilename="SearchOutcome.kt">
+<method name="&lt;init&gt;" desc="(Ljava/lang/String;Ljava/util/List;Ljava/lang/Throwable;)V">
+<counter type="INSTRUCTION" missed="0" covered="19"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="3"/>
+</method>
+<counter type="INSTRUCTION" missed="0" covered="19"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="3"/>
+<counter type="METHOD" missed="0" covered="1"/>
+</class>
+<class name="lava/tracker/client/SearchOutcome$Success" sourcefilename="SearchOutcome.kt">
+<method name="&lt;init&gt;" desc="(Llava/tracker/api/model/SearchResult;Ljava/lang/String;)V">
+<counter type="INSTRUCTION" missed="0" covered="12"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="3"/>
+</method>
+<counter type="INSTRUCTION" missed="0" covered="12"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="3"/>
+<counter type="METHOD" missed="0" covered="1"/>
+</class>
+<class name="lava/tracker/client/UnifiedSearchResult" sourcefilename="UnifiedSearchResult.kt">
+<method name="&lt;init&gt;" desc="(Ljava/lang/String;ILjava/util/List;ILjava/util/List;)V">
+<counter type="INSTRUCTION" missed="0" covered="27"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="6"/>
+</method>
+<counter type="INSTRUCTION" missed="0" covered="27"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="6"/>
+<counter type="METHOD" missed="0" covered="1"/>
+</class>
+<class name="lava/tracker/client/UnifiedTorrentItem" sourcefilename="UnifiedSearchResult.kt">
+<method name="&lt;init&gt;" desc="(Llava/tracker/api/model/TorrentItem;Ljava/util/List;Ljava/lang/String;)V">
+<counter type="INSTRUCTION" missed="0" covered="17"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="4"/>
+</method>
+<counter type="INSTRUCTION" missed="0" covered="17"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="4"/>
+<counter type="METHOD" missed="0" covered="1"/>
+</class>
+<sourcefile name="ClonedTrackerDescriptor.kt">
+<line nr="31" mi="0" ci="4" mb="0" cb="0"/>
+<line nr="32" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="33" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="35" mi="0" ci="7" mb="0" cb="0"/>
+<line nr="36" mi="0" ci="7" mb="0" cb="0"/>
+<line nr="37" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="38" mi="0" ci="12" mb="0" cb="0"/>
+<line nr="40" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="41" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="42" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="43" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="44" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="45" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="46" mi="0" ci="3" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="6" covered="56"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="12"/>
+</sourcefile>
+<sourcefile name="MultiSearchEvent.kt">
+<line nr="33" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="34" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="35" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="42" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="43" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="44" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="53" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="54" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="55" mi="0" ci="7" mb="0" cb="0"/>
+<line nr="64" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="65" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="76" mi="0" ci="7" mb="0" cb="0"/>
+<line nr="77" mi="0" ci="5" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="7" covered="53"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="11"/>
+</sourcefile>
+<sourcefile name="CrossTrackerFallbackPolicy.kt">
+<line nr="20" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="21" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="32" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="34" mi="0" ci="3" mb="0" cb="2"/>
+<line nr="35" mi="0" ci="6" mb="0" cb="0"/>
+<line nr="36" mi="0" ci="8" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="0" covered="24"/>
+<counter type="BRANCH" missed="0" covered="2"/>
+<counter type="LINE" missed="0" covered="6"/>
+</sourcefile>
+<sourcefile name="UnifiedSearchResult.kt">
+<line nr="14" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="15" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="16" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="17" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="18" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="19" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="25" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="26" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="27" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="28" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="34" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="35" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="36" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="37" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="38" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="39" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="40" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="41" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="42" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="49" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="50" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="51" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="52" mi="0" ci="7" mb="0" cb="0"/>
+<line nr="53" mi="0" ci="7" mb="0" cb="0"/>
+<line nr="57" mi="0" ci="6" mb="0" cb="0"/>
+<line nr="58" mi="0" ci="6" mb="0" cb="0"/>
+<line nr="59" mi="0" ci="6" mb="0" cb="0"/>
+<line nr="60" mi="0" ci="6" mb="0" cb="0"/>
+<line nr="61" mi="0" ci="12" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="0" covered="151"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="29"/>
+</sourcefile>
+<sourcefile name="LavaTrackerSdk_Factory.java">
+<line nr="54" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="55" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="56" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="57" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="58" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="59" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="60" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="61" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="66" mi="29" ci="0" mb="0" cb="0"/>
+<line nr="77" mi="17" ci="0" mb="0" cb="0"/>
+<line nr="87" mi="10" ci="0" mb="0" cb="0"/>
+<line nr="94" mi="10" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="89" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="12" covered="0"/>
+</sourcefile>
+<sourcefile name="LavaTrackerSdk.kt">
+<line nr="77" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="84" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="85" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="86" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="87" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="88" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="95" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="97" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="113" mi="0" ci="4" mb="0" cb="0"/>
+<line nr="114" mi="0" ci="7" mb="0" cb="2"/>
+<line nr="120" mi="0" ci="32" mb="0" cb="0"/>
+<line nr="121" mi="0" ci="4" mb="0" cb="2"/>
+<line nr="122" mi="0" ci="10" mb="0" cb="0"/>
+<line nr="123" mi="0" ci="6" mb="0" cb="0"/>
+<line nr="124" mi="0" ci="11" mb="0" cb="2"/>
+<line nr="125" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="127" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="144" mi="0" ci="14" mb="0" cb="2"/>
+<line nr="145" mi="0" ci="14" mb="0" cb="0"/>
+<line nr="147" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="162" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="170" mi="0" ci="11" mb="0" cb="0"/>
+<line nr="171" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="172" mi="0" ci="4" mb="0" cb="0"/>
+<line nr="173" mi="0" ci="9" mb="0" cb="2"/>
+<line nr="174" mi="0" ci="6" mb="0" cb="0"/>
+<line nr="175" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="176" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="178" mi="0" ci="4" mb="0" cb="0"/>
+<line nr="180" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="181" mi="0" ci="15" mb="0" cb="0"/>
+<line nr="182" mi="0" ci="12" mb="0" cb="0"/>
+<line nr="184" mi="0" ci="12" mb="0" cb="0"/>
+<line nr="185" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="186" mi="0" ci="6" mb="0" cb="0"/>
+<line nr="187" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="188" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="191" mi="0" ci="4" mb="0" cb="0"/>
+<line nr="192" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="193" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="194" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="195" mi="0" ci="10" mb="0" cb="0"/>
+<line nr="196" mi="0" ci="7" mb="0" cb="0"/>
+<line nr="197" mi="1" ci="8" mb="1" cb="1"/>
+<line nr="198" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="199" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="200" mi="16" ci="0" mb="0" cb="0"/>
+<line nr="203" mi="0" ci="28" mb="0" cb="0"/>
+<line nr="205" mi="0" ci="6" mb="0" cb="0"/>
+<line nr="206" mi="6" ci="0" mb="2" cb="0"/>
+<line nr="207" mi="16" ci="0" mb="0" cb="0"/>
+<line nr="208" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="212" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="222" mi="11" ci="0" mb="0" cb="0"/>
+<line nr="223" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="224" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="225" mi="9" ci="0" mb="2" cb="0"/>
+<line nr="226" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="227" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="228" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="230" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="232" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="233" mi="15" ci="0" mb="0" cb="0"/>
+<line nr="234" mi="12" ci="0" mb="0" cb="0"/>
+<line nr="236" mi="12" ci="0" mb="0" cb="0"/>
+<line nr="237" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="238" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="239" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="240" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="243" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="244" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="245" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="246" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="247" mi="10" ci="0" mb="0" cb="0"/>
+<line nr="248" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="249" mi="9" ci="0" mb="2" cb="0"/>
+<line nr="250" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="251" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="252" mi="16" ci="0" mb="0" cb="0"/>
+<line nr="255" mi="28" ci="0" mb="0" cb="0"/>
+<line nr="257" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="258" mi="6" ci="0" mb="2" cb="0"/>
+<line nr="259" mi="16" ci="0" mb="0" cb="0"/>
+<line nr="260" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="264" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="275" mi="11" ci="0" mb="2" cb="0"/>
+<line nr="277" mi="13" ci="0" mb="0" cb="0"/>
+<line nr="279" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="289" mi="2" ci="9" mb="1" cb="1"/>
+<line nr="290" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="299" mi="11" ci="0" mb="2" cb="0"/>
+<line nr="301" mi="13" ci="0" mb="0" cb="0"/>
+<line nr="303" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="316" mi="11" ci="0" mb="2" cb="0"/>
+<line nr="318" mi="14" ci="0" mb="0" cb="0"/>
+<line nr="320" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="330" mi="11" ci="0" mb="2" cb="0"/>
+<line nr="332" mi="14" ci="0" mb="0" cb="0"/>
+<line nr="334" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="346" mi="12" ci="0" mb="2" cb="0"/>
+<line nr="348" mi="15" ci="0" mb="0" cb="0"/>
+<line nr="350" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="359" mi="11" ci="0" mb="2" cb="0"/>
+<line nr="361" mi="12" ci="0" mb="0" cb="0"/>
+<line nr="363" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="373" mi="11" ci="0" mb="2" cb="0"/>
+<line nr="375" mi="12" ci="0" mb="0" cb="0"/>
+<line nr="377" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="386" mi="12" ci="0" mb="2" cb="0"/>
+<line nr="388" mi="14" ci="0" mb="0" cb="0"/>
+<line nr="390" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="400" mi="12" ci="0" mb="2" cb="0"/>
+<line nr="402" mi="14" ci="0" mb="0" cb="0"/>
+<line nr="404" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="416" mi="11" ci="0" mb="2" cb="0"/>
+<line nr="417" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="427" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="428" mi="10" ci="0" mb="2" cb="0"/>
+<line nr="429" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="438" mi="11" ci="0" mb="2" cb="0"/>
+<line nr="440" mi="12" ci="0" mb="0" cb="0"/>
+<line nr="442" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="453" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="454" mi="10" ci="0" mb="2" cb="0"/>
+<line nr="456" mi="12" ci="0" mb="0" cb="0"/>
+<line nr="458" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="467" mi="11" ci="0" mb="2" cb="0"/>
+<line nr="469" mi="11" ci="0" mb="0" cb="0"/>
+<line nr="482" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="483" mi="10" ci="0" mb="2" cb="0"/>
+<line nr="485" mi="11" ci="0" mb="0" cb="0"/>
+<line nr="506" mi="0" ci="4" mb="0" cb="0"/>
+<line nr="535" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="536" mi="0" ci="2" mb="0" cb="2"/>
+<line nr="537" mi="0" ci="40" mb="0" cb="0"/>
+<line nr="538" mi="0" ci="2" mb="0" cb="2"/>
+<line nr="539" mi="1" ci="16" mb="1" cb="1"/>
+<line nr="540" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="541" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="543" mi="0" ci="6" mb="0" cb="0"/>
+<line nr="544" mi="0" ci="9" mb="0" cb="0"/>
+<line nr="545" mi="0" ci="9" mb="0" cb="0"/>
+<line nr="546" mi="0" ci="7" mb="0" cb="0"/>
+<line nr="549" mi="0" ci="12" mb="0" cb="0"/>
+<line nr="574" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="576" mi="0" ci="2" mb="0" cb="2"/>
+<line nr="578" mi="0" ci="11" mb="0" cb="0"/>
+<line nr="580" mi="4" ci="10" mb="2" cb="0"/>
+<line nr="585" mi="0" ci="10" mb="0" cb="0"/>
+<line nr="586" mi="0" ci="38" mb="0" cb="0"/>
+<line nr="587" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="589" mi="0" ci="9" mb="0" cb="0"/>
+<line nr="590" mi="2" ci="15" mb="1" cb="1"/>
+<line nr="591" mi="0" ci="2" mb="0" cb="2"/>
+<line nr="592" mi="0" ci="4" mb="0" cb="0"/>
+<line nr="594" mi="2" ci="12" mb="1" cb="1"/>
+<line nr="597" mi="4" ci="10" mb="2" cb="0"/>
+<line nr="613" mi="2" ci="5" mb="1" cb="1"/>
+<line nr="614" mi="0" ci="19" mb="0" cb="0"/>
+<line nr="615" mi="0" ci="42" mb="0" cb="0"/>
+<line nr="616" mi="2" ci="20" mb="1" cb="1"/>
+<line nr="626" mi="3" ci="5" mb="1" cb="1"/>
+<line nr="627" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="640" mi="0" ci="7" mb="1" cb="1"/>
+<line nr="641" mi="0" ci="7" mb="1" cb="1"/>
+<line nr="642" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="643" mi="0" ci="12" mb="0" cb="2"/>
+<line nr="644" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="647" mi="0" ci="31" mb="0" cb="0"/>
+<line nr="648" mi="3" ci="37" mb="2" cb="2"/>
+<line nr="649" mi="0" ci="32" mb="0" cb="0"/>
+<line nr="650" mi="0" ci="10" mb="0" cb="2"/>
+<line nr="651" mi="0" ci="3" mb="1" cb="1"/>
+<line nr="652" mi="0" ci="12" mb="0" cb="2"/>
+<line nr="653" mi="0" ci="40" mb="0" cb="0"/>
+<line nr="654" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="655" mi="4" ci="0" mb="2" cb="0"/>
+<line nr="656" mi="34" ci="0" mb="0" cb="0"/>
+<line nr="664" mi="0" ci="12" mb="0" cb="0"/>
+<line nr="666" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="678" mi="0" ci="7" mb="1" cb="1"/>
+<line nr="679" mi="0" ci="7" mb="1" cb="1"/>
+<line nr="681" mi="0" ci="18" mb="0" cb="0"/>
+<line nr="682" mi="0" ci="19" mb="0" cb="0"/>
+<line nr="689" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="708" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="709" mi="0" ci="11" mb="0" cb="0"/>
+<line nr="710" mi="0" ci="16" mb="0" cb="0"/>
+<line nr="711" mi="0" ci="56" mb="0" cb="0"/>
+<line nr="712" mi="0" ci="7" mb="0" cb="0"/>
+<line nr="714" mi="0" ci="19" mb="0" cb="0"/>
+<line nr="715" mi="0" ci="14" mb="0" cb="0"/>
+<line nr="716" mi="0" ci="17" mb="0" cb="4"/>
+<line nr="717" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="718" mi="0" ci="19" mb="0" cb="0"/>
+<line nr="719" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="721" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="722" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="723" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="724" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="725" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="726" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="750" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="751" mi="0" ci="10" mb="0" cb="0"/>
+<line nr="756" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="757" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="758" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="759" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="761" mi="0" ci="19" mb="0" cb="0"/>
+<line nr="762" mi="0" ci="11" mb="0" cb="2"/>
+<line nr="763" mi="0" ci="30" mb="0" cb="0"/>
+<line nr="767" mi="0" ci="16" mb="0" cb="0"/>
+<line nr="768" mi="0" ci="2" mb="1" cb="1"/>
+<line nr="769" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="770" mi="10" ci="0" mb="0" cb="0"/>
+<line nr="771" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="772" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="773" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="774" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="776" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="777" mi="29" ci="0" mb="0" cb="0"/>
+<line nr="780" mi="0" ci="17" mb="0" cb="0"/>
+<line nr="781" mi="0" ci="30" mb="0" cb="0"/>
+<line nr="783" mi="0" ci="6" mb="1" cb="1"/>
+<line nr="784" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="785" mi="11" ci="0" mb="0" cb="0"/>
+<line nr="786" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="787" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="788" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="790" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="791" mi="28" ci="0" mb="0" cb="0"/>
+<line nr="798" mi="0" ci="6" mb="0" cb="0"/>
+<line nr="799" mi="0" ci="6" mb="0" cb="0"/>
+<line nr="800" mi="0" ci="2" mb="1" cb="1"/>
+<line nr="801" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="802" mi="11" ci="0" mb="0" cb="0"/>
+<line nr="803" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="804" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="805" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="807" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="808" mi="28" ci="0" mb="0" cb="0"/>
+<line nr="813" mi="0" ci="17" mb="0" cb="0"/>
+<line nr="814" mi="0" ci="12" mb="0" cb="0"/>
+<line nr="815" mi="0" ci="6" mb="0" cb="0"/>
+<line nr="816" mi="0" ci="10" mb="0" cb="0"/>
+<line nr="817" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="818" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="819" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="820" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="822" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="823" mi="0" ci="38" mb="0" cb="0"/>
+<line nr="825" mi="0" ci="9" mb="0" cb="0"/>
+<line nr="826" mi="0" ci="14" mb="0" cb="0"/>
+<line nr="827" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="828" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="829" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="830" mi="2" ci="4" mb="1" cb="1"/>
+<line nr="832" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="833" mi="2" ci="36" mb="1" cb="1"/>
+<line nr="839" mi="0" ci="23" mb="0" cb="0"/>
+<line nr="845" mi="0" ci="6" mb="0" cb="0"/>
+<line nr="846" mi="0" ci="20" mb="0" cb="0"/>
+<line nr="847" mi="0" ci="8" mb="0" cb="0"/>
+<line nr="848" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="849" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="850" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="851" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="852" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="853" mi="0" ci="4" mb="0" cb="0"/>
+<line nr="860" mi="0" ci="18" mb="0" cb="0"/>
+<line nr="861" mi="0" ci="23" mb="0" cb="0"/>
+<line nr="862" mi="13" ci="0" mb="0" cb="0"/>
+<line nr="863" mi="13" ci="0" mb="0" cb="0"/>
+<line nr="865" mi="0" ci="6" mb="0" cb="0"/>
+<line nr="866" mi="0" ci="7" mb="0" cb="2"/>
+<line nr="867" mi="0" ci="7" mb="1" cb="1"/>
+<line nr="868" mi="7" ci="0" mb="2" cb="0"/>
+<line nr="869" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="872" mi="0" ci="6" mb="0" cb="0"/>
+<line nr="873" mi="0" ci="19" mb="0" cb="2"/>
+<line nr="874" mi="0" ci="18" mb="1" cb="1"/>
+<line nr="875" mi="16" ci="0" mb="2" cb="0"/>
+<line nr="876" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="891" mi="0" ci="15" mb="1" cb="1"/>
+<line nr="892" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="893" mi="0" ci="5" mb="1" cb="1"/>
+<line nr="894" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="896" mi="0" ci="4" mb="0" cb="0"/>
+<line nr="897" mi="0" ci="9" mb="1" cb="1"/>
+<line nr="898" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="900" mi="0" ci="14" mb="0" cb="0"/>
+<line nr="901" mi="0" ci="10" mb="0" cb="0"/>
+<line nr="903" mi="2" ci="13" mb="1" cb="1"/>
+<line nr="912" mi="16" ci="0" mb="2" cb="0"/>
+<line nr="913" mi="11" ci="0" mb="0" cb="0"/>
+<line nr="914" mi="10" ci="0" mb="2" cb="0"/>
+<line nr="915" mi="16" ci="0" mb="0" cb="0"/>
+<line nr="916" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="917" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="918" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="919" mi="8" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="1040" covered="1693"/>
+<counter type="BRANCH" missed="78" covered="60"/>
+<counter type="LINE" missed="125" covered="180"/>
+</sourcefile>
+<sourcefile name="CrossTrackerFallbackPolicy_Factory.java">
+<line nr="31" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="32" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="37" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="42" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="47" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="51" mi="4" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="23" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+</sourcefile>
+<sourcefile name="SearchOutcome.kt">
+<line nr="22" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="23" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="24" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="28" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="29" mi="0" ci="7" mb="0" cb="0"/>
+<line nr="30" mi="0" ci="7" mb="0" cb="0"/>
+<line nr="33" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="34" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="35" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="36" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="37" mi="0" ci="5" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="0" covered="53"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="11"/>
+</sourcefile>
+<sourcefile name="BrowseOutcome.kt">
+<line nr="15" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="16" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="17" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="21" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="22" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="23" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="26" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="27" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="28" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="29" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="30" mi="5" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="53" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="11" covered="0"/>
+</sourcefile>
+<sourcefile name="ClonedRoutingTrackerClient.kt">
+<line nr="44" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="45" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="46" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="49" mi="0" ci="6" mb="0" cb="0"/>
+<line nr="51" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="53" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="56" mi="0" ci="4" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="7" covered="18"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="5"/>
+</sourcefile>
+<counter type="INSTRUCTION" missed="1225" covered="2048"/>
+<counter type="BRANCH" missed="78" covered="62"/>
+<counter type="LINE" missed="160" covered="254"/>
+<counter type="METHOD" missed="39" covered="57"/>
+<counter type="CLASS" missed="9" covered="29"/>
+</package>
+<package name="lava/tracker/client/di">
+<class name="lava/tracker/client/di/TrackerClientModule" sourcefilename="TrackerClientModule.kt">
+<method name="provideWithTokenVerificationUseCase" desc="()Llava/tracker/rutracker/domain/WithTokenVerificationUseCase;">
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="provideRuTrackerHttpClient$lambda$7$lambda$3" desc="(Lio/ktor/client/plugins/HttpTimeout$HttpTimeoutCapabilityConfiguration;)Lkotlin/Unit;">
+<counter type="INSTRUCTION" missed="12" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</method>
+<method name="provideAddCommentUseCase" desc="(Llava/tracker/rutracker/api/RuTrackerInnerApi;Llava/tracker/rutracker/domain/WithTokenVerificationUseCase;Llava/tracker/rutracker/domain/WithAuthorisedCheckUseCase;)Llava/tracker/rutracker/domain/AddCommentUseCase;">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="provideGetCommentsPageUseCase" desc="(Llava/tracker/rutracker/api/RuTrackerInnerApi;)Llava/tracker/rutracker/domain/GetCommentsPageUseCase;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="provideGetForumUseCase" desc="(Llava/tracker/rutracker/api/RuTrackerInnerApi;)Llava/tracker/rutracker/domain/GetForumUseCase;">
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="provideRuTrackerHttpClient" desc="()Lio/ktor/client/HttpClient;">
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="provideRuTrackerHttpClient$lambda$7$lambda$5" desc="(Lio/ktor/client/plugins/cookies/HttpCookies$Config;)Lkotlin/Unit;">
+<counter type="INSTRUCTION" missed="6" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="provideLoginUseCase" desc="(Llava/tracker/rutracker/api/RuTrackerInnerApi;Llava/tracker/rutracker/domain/GetCurrentProfileUseCase;)Llava/tracker/rutracker/domain/LoginUseCase;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="provideGetMagnetLinkUseCase" desc="()Llava/tracker/rutracker/domain/GetMagnetLinkUseCase;">
+<counter type="INSTRUCTION" missed="3" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="provideRuTrackerInnerApi" desc="(Lio/ktor/client/HttpClient;)Llava/tracker/rutracker/api/RuTrackerInnerApi;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="provideGetTorrentFileUseCase" desc="(Llava/tracker/rutracker/api/RuTrackerInnerApi;Llava/tracker/rutracker/domain/WithTokenVerificationUseCase;)Llava/tracker/rutracker/domain/GetTorrentFileUseCase;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="provideGetFavoritesUseCase" desc="(Llava/tracker/rutracker/api/RuTrackerInnerApi;Llava/tracker/rutracker/domain/WithTokenVerificationUseCase;Llava/tracker/rutracker/domain/WithAuthorisedCheckUseCase;)Llava/tracker/rutracker/domain/GetFavoritesUseCase;">
+<counter type="INSTRUCTION" missed="6" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="provideLogoutUseCase" desc="(Llava/auth/api/TokenProvider;)Llava/tracker/rutracker/domain/LogoutUseCase;">
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="provideRuTrackerHttpClient$lambda$7" desc="(Lio/ktor/client/HttpClientConfig;)Lkotlin/Unit;">
+<counter type="INSTRUCTION" missed="28" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+</method>
+<method name="provideGetTopicUseCase" desc="(Llava/tracker/rutracker/api/RuTrackerInnerApi;)Llava/tracker/rutracker/domain/GetTopicUseCase;">
+<counter type="INSTRUCTION" missed="6" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="provideRemoveFavoriteUseCase" desc="(Llava/tracker/rutracker/api/RuTrackerInnerApi;Llava/tracker/rutracker/domain/WithTokenVerificationUseCase;Llava/tracker/rutracker/domain/WithAuthorisedCheckUseCase;)Llava/tracker/rutracker/domain/RemoveFavoriteUseCase;">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="provideRuTrackerHttpClient$lambda$7$lambda$4" desc="(Lio/ktor/client/plugins/UserAgent$Config;)Lkotlin/Unit;">
+<counter type="INSTRUCTION" missed="3" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="provideGetTopicPageUseCase" desc="(Llava/tracker/rutracker/api/RuTrackerInnerApi;)Llava/tracker/rutracker/domain/GetTopicPageUseCase;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="provideCheckAuthorisedUseCase" desc="(Llava/tracker/rutracker/api/RuTrackerInnerApi;)Llava/tracker/rutracker/domain/CheckAuthorisedUseCase;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="provideRuTrackerHttpClient$lambda$7$lambda$0" desc="(Lio/ktor/client/plugins/DefaultRequest$DefaultRequestBuilder;)Lkotlin/Unit;">
+<counter type="INSTRUCTION" missed="18" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+</method>
+<method name="provideGetCategoryPageUseCase" desc="(Llava/tracker/rutracker/api/RuTrackerInnerApi;)Llava/tracker/rutracker/domain/GetCategoryPageUseCase;">
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="provideGetSearchPageUseCase" desc="(Llava/tracker/rutracker/api/RuTrackerInnerApi;Llava/tracker/rutracker/domain/WithTokenVerificationUseCase;Llava/tracker/rutracker/domain/WithAuthorisedCheckUseCase;)Llava/tracker/rutracker/domain/GetSearchPageUseCase;">
+<counter type="INSTRUCTION" missed="6" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="provideGetProfileUseCase" desc="(Llava/tracker/rutracker/api/RuTrackerInnerApi;)Llava/tracker/rutracker/domain/GetProfileUseCase;">
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="provideWithAuthorisedCheckUseCase" desc="()Llava/tracker/rutracker/domain/WithAuthorisedCheckUseCase;">
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="provideGetCurrentProfileUseCase" desc="(Llava/tracker/rutracker/api/RuTrackerInnerApi;Llava/tracker/rutracker/domain/GetProfileUseCase;)Llava/tracker/rutracker/domain/GetCurrentProfileUseCase;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="provideRuTrackerHttpClient$lambda$7$lambda$2$lambda$1" desc="(Lkotlinx/serialization/json/JsonBuilder;)Lkotlin/Unit;">
+<counter type="INSTRUCTION" missed="15" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="provideRuTrackerHttpClient$lambda$7$lambda$6" desc="(Lio/ktor/client/plugins/logging/Logging$Config;)Lkotlin/Unit;">
+<counter type="INSTRUCTION" missed="9" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</method>
+<method name="provideTrackerRegistry" desc="(Llava/tracker/rutracker/RuTrackerClientFactory;Llava/tracker/rutor/RuTorClientFactory;Llava/tracker/nnmclub/NnmclubClientFactory;Llava/tracker/kinozal/KinozalClientFactory;Llava/tracker/archiveorg/ArchiveOrgClientFactory;Llava/tracker/gutenberg/GutenbergClientFactory;)Llava/tracker/registry/TrackerRegistry;">
+<counter type="INSTRUCTION" missed="38" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="8" covered="0"/>
+</method>
+<method name="provideAddFavoriteUseCase" desc="(Llava/tracker/rutracker/api/RuTrackerInnerApi;Llava/tracker/rutracker/domain/WithTokenVerificationUseCase;Llava/tracker/rutracker/domain/WithAuthorisedCheckUseCase;)Llava/tracker/rutracker/domain/AddFavoriteUseCase;">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="234" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="47" covered="0"/>
+<counter type="METHOD" missed="29" covered="0"/>
+</class>
+<class name="lava/tracker/client/di/TrackerClientModule$provideRuTrackerHttpClient$1$6$1" sourcefilename="TrackerClientModule.kt">
+<method name="log" desc="(Ljava/lang/String;)V">
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="6" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+</class>
+<class name="lava/tracker/client/di/TrackerClientModule_ProvideAddCommentUseCaseFactory" sourcefilename="TrackerClientModule_ProvideAddCommentUseCaseFactory.java">
+<method name="create" desc="(Ldagger/internal/Provider;Ldagger/internal/Provider;Ldagger/internal/Provider;)Llava/tracker/client/di/TrackerClientModule_ProvideAddCommentUseCaseFactory;">
+<counter type="INSTRUCTION" missed="6" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="provideAddCommentUseCase" desc="(Llava/tracker/rutracker/api/RuTrackerInnerApi;Llava/tracker/rutracker/domain/WithTokenVerificationUseCase;Llava/tracker/rutracker/domain/WithAuthorisedCheckUseCase;)Llava/tracker/rutracker/domain/AddCommentUseCase;">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Ldagger/internal/Provider;Ldagger/internal/Provider;Ldagger/internal/Provider;)V">
+<counter type="INSTRUCTION" missed="11" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+</method>
+<method name="create" desc="(Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Llava/tracker/client/di/TrackerClientModule_ProvideAddCommentUseCaseFactory;">
+<counter type="INSTRUCTION" missed="9" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="get" desc="()Llava/tracker/rutracker/domain/AddCommentUseCase;">
+<counter type="INSTRUCTION" missed="13" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="46" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="8" covered="0"/>
+<counter type="METHOD" missed="5" covered="0"/>
+</class>
+<class name="lava/tracker/client/di/TrackerClientModule_ProvideAddFavoriteUseCaseFactory" sourcefilename="TrackerClientModule_ProvideAddFavoriteUseCaseFactory.java">
+<method name="create" desc="(Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Llava/tracker/client/di/TrackerClientModule_ProvideAddFavoriteUseCaseFactory;">
+<counter type="INSTRUCTION" missed="9" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Ldagger/internal/Provider;Ldagger/internal/Provider;Ldagger/internal/Provider;)V">
+<counter type="INSTRUCTION" missed="11" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+</method>
+<method name="get" desc="()Llava/tracker/rutracker/domain/AddFavoriteUseCase;">
+<counter type="INSTRUCTION" missed="13" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="provideAddFavoriteUseCase" desc="(Llava/tracker/rutracker/api/RuTrackerInnerApi;Llava/tracker/rutracker/domain/WithTokenVerificationUseCase;Llava/tracker/rutracker/domain/WithAuthorisedCheckUseCase;)Llava/tracker/rutracker/domain/AddFavoriteUseCase;">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="create" desc="(Ldagger/internal/Provider;Ldagger/internal/Provider;Ldagger/internal/Provider;)Llava/tracker/client/di/TrackerClientModule_ProvideAddFavoriteUseCaseFactory;">
+<counter type="INSTRUCTION" missed="6" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="46" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="8" covered="0"/>
+<counter type="METHOD" missed="5" covered="0"/>
+</class>
+<class name="lava/tracker/client/di/TrackerClientModule_ProvideCheckAuthorisedUseCaseFactory" sourcefilename="TrackerClientModule_ProvideCheckAuthorisedUseCaseFactory.java">
+<method name="create" desc="(Ljavax/inject/Provider;)Llava/tracker/client/di/TrackerClientModule_ProvideCheckAuthorisedUseCaseFactory;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Ldagger/internal/Provider;)V">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</method>
+<method name="provideCheckAuthorisedUseCase" desc="(Llava/tracker/rutracker/api/RuTrackerInnerApi;)Llava/tracker/rutracker/domain/CheckAuthorisedUseCase;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="create" desc="(Ldagger/internal/Provider;)Llava/tracker/client/di/TrackerClientModule_ProvideCheckAuthorisedUseCaseFactory;">
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="get" desc="()Llava/tracker/rutracker/domain/CheckAuthorisedUseCase;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="24" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+<counter type="METHOD" missed="5" covered="0"/>
+</class>
+<class name="lava/tracker/client/di/TrackerClientModule_ProvideGetCategoryPageUseCaseFactory" sourcefilename="TrackerClientModule_ProvideGetCategoryPageUseCaseFactory.java">
+<method name="get" desc="()Llava/tracker/rutracker/domain/GetCategoryPageUseCase;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="create" desc="(Ldagger/internal/Provider;)Llava/tracker/client/di/TrackerClientModule_ProvideGetCategoryPageUseCaseFactory;">
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Ldagger/internal/Provider;)V">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</method>
+<method name="provideGetCategoryPageUseCase" desc="(Llava/tracker/rutracker/api/RuTrackerInnerApi;)Llava/tracker/rutracker/domain/GetCategoryPageUseCase;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="create" desc="(Ljavax/inject/Provider;)Llava/tracker/client/di/TrackerClientModule_ProvideGetCategoryPageUseCaseFactory;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="24" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+<counter type="METHOD" missed="5" covered="0"/>
+</class>
+<class name="lava/tracker/client/di/TrackerClientModule_ProvideGetCommentsPageUseCaseFactory" sourcefilename="TrackerClientModule_ProvideGetCommentsPageUseCaseFactory.java">
+<method name="create" desc="(Ldagger/internal/Provider;)Llava/tracker/client/di/TrackerClientModule_ProvideGetCommentsPageUseCaseFactory;">
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Ldagger/internal/Provider;)V">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</method>
+<method name="provideGetCommentsPageUseCase" desc="(Llava/tracker/rutracker/api/RuTrackerInnerApi;)Llava/tracker/rutracker/domain/GetCommentsPageUseCase;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="get" desc="()Llava/tracker/rutracker/domain/GetCommentsPageUseCase;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="create" desc="(Ljavax/inject/Provider;)Llava/tracker/client/di/TrackerClientModule_ProvideGetCommentsPageUseCaseFactory;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="24" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+<counter type="METHOD" missed="5" covered="0"/>
+</class>
+<class name="lava/tracker/client/di/TrackerClientModule_ProvideGetCurrentProfileUseCaseFactory" sourcefilename="TrackerClientModule_ProvideGetCurrentProfileUseCaseFactory.java">
+<method name="provideGetCurrentProfileUseCase" desc="(Llava/tracker/rutracker/api/RuTrackerInnerApi;Llava/tracker/rutracker/domain/GetProfileUseCase;)Llava/tracker/rutracker/domain/GetCurrentProfileUseCase;">
+<counter type="INSTRUCTION" missed="6" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="get" desc="()Llava/tracker/rutracker/domain/GetCurrentProfileUseCase;">
+<counter type="INSTRUCTION" missed="9" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="create" desc="(Ljavax/inject/Provider;Ljavax/inject/Provider;)Llava/tracker/client/di/TrackerClientModule_ProvideGetCurrentProfileUseCaseFactory;">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="create" desc="(Ldagger/internal/Provider;Ldagger/internal/Provider;)Llava/tracker/client/di/TrackerClientModule_ProvideGetCurrentProfileUseCaseFactory;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Ldagger/internal/Provider;Ldagger/internal/Provider;)V">
+<counter type="INSTRUCTION" missed="8" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="35" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="7" covered="0"/>
+<counter type="METHOD" missed="5" covered="0"/>
+</class>
+<class name="lava/tracker/client/di/TrackerClientModule_ProvideGetFavoritesUseCaseFactory" sourcefilename="TrackerClientModule_ProvideGetFavoritesUseCaseFactory.java">
+<method name="get" desc="()Llava/tracker/rutracker/domain/GetFavoritesUseCase;">
+<counter type="INSTRUCTION" missed="13" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Ldagger/internal/Provider;Ldagger/internal/Provider;Ldagger/internal/Provider;)V">
+<counter type="INSTRUCTION" missed="11" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+</method>
+<method name="provideGetFavoritesUseCase" desc="(Llava/tracker/rutracker/api/RuTrackerInnerApi;Llava/tracker/rutracker/domain/WithTokenVerificationUseCase;Llava/tracker/rutracker/domain/WithAuthorisedCheckUseCase;)Llava/tracker/rutracker/domain/GetFavoritesUseCase;">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="create" desc="(Ldagger/internal/Provider;Ldagger/internal/Provider;Ldagger/internal/Provider;)Llava/tracker/client/di/TrackerClientModule_ProvideGetFavoritesUseCaseFactory;">
+<counter type="INSTRUCTION" missed="6" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="create" desc="(Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Llava/tracker/client/di/TrackerClientModule_ProvideGetFavoritesUseCaseFactory;">
+<counter type="INSTRUCTION" missed="9" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="46" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="8" covered="0"/>
+<counter type="METHOD" missed="5" covered="0"/>
+</class>
+<class name="lava/tracker/client/di/TrackerClientModule_ProvideGetForumUseCaseFactory" sourcefilename="TrackerClientModule_ProvideGetForumUseCaseFactory.java">
+<method name="&lt;init&gt;" desc="(Ldagger/internal/Provider;)V">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</method>
+<method name="provideGetForumUseCase" desc="(Llava/tracker/rutracker/api/RuTrackerInnerApi;)Llava/tracker/rutracker/domain/GetForumUseCase;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="create" desc="(Ldagger/internal/Provider;)Llava/tracker/client/di/TrackerClientModule_ProvideGetForumUseCaseFactory;">
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="get" desc="()Llava/tracker/rutracker/domain/GetForumUseCase;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="create" desc="(Ljavax/inject/Provider;)Llava/tracker/client/di/TrackerClientModule_ProvideGetForumUseCaseFactory;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="24" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+<counter type="METHOD" missed="5" covered="0"/>
+</class>
+<class name="lava/tracker/client/di/TrackerClientModule_ProvideGetMagnetLinkUseCaseFactory" sourcefilename="TrackerClientModule_ProvideGetMagnetLinkUseCaseFactory.java">
+<method name="create" desc="()Llava/tracker/client/di/TrackerClientModule_ProvideGetMagnetLinkUseCaseFactory;">
+<counter type="INSTRUCTION" missed="1" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="provideGetMagnetLinkUseCase" desc="()Llava/tracker/rutracker/domain/GetMagnetLinkUseCase;">
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="get" desc="()Llava/tracker/rutracker/domain/GetMagnetLinkUseCase;">
+<counter type="INSTRUCTION" missed="1" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="8" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+<counter type="METHOD" missed="4" covered="0"/>
+</class>
+<class name="lava/tracker/client/di/TrackerClientModule_ProvideGetMagnetLinkUseCaseFactory$InstanceHolder" sourcefilename="TrackerClientModule_ProvideGetMagnetLinkUseCaseFactory.java">
+<method name="&lt;clinit&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/tracker/client/di/TrackerClientModule_ProvideGetProfileUseCaseFactory" sourcefilename="TrackerClientModule_ProvideGetProfileUseCaseFactory.java">
+<method name="get" desc="()Llava/tracker/rutracker/domain/GetProfileUseCase;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Ldagger/internal/Provider;)V">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</method>
+<method name="create" desc="(Ljavax/inject/Provider;)Llava/tracker/client/di/TrackerClientModule_ProvideGetProfileUseCaseFactory;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="provideGetProfileUseCase" desc="(Llava/tracker/rutracker/api/RuTrackerInnerApi;)Llava/tracker/rutracker/domain/GetProfileUseCase;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="create" desc="(Ldagger/internal/Provider;)Llava/tracker/client/di/TrackerClientModule_ProvideGetProfileUseCaseFactory;">
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="24" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+<counter type="METHOD" missed="5" covered="0"/>
+</class>
+<class name="lava/tracker/client/di/TrackerClientModule_ProvideGetSearchPageUseCaseFactory" sourcefilename="TrackerClientModule_ProvideGetSearchPageUseCaseFactory.java">
+<method name="&lt;init&gt;" desc="(Ldagger/internal/Provider;Ldagger/internal/Provider;Ldagger/internal/Provider;)V">
+<counter type="INSTRUCTION" missed="11" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+</method>
+<method name="create" desc="(Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Llava/tracker/client/di/TrackerClientModule_ProvideGetSearchPageUseCaseFactory;">
+<counter type="INSTRUCTION" missed="9" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="provideGetSearchPageUseCase" desc="(Llava/tracker/rutracker/api/RuTrackerInnerApi;Llava/tracker/rutracker/domain/WithTokenVerificationUseCase;Llava/tracker/rutracker/domain/WithAuthorisedCheckUseCase;)Llava/tracker/rutracker/domain/GetSearchPageUseCase;">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="get" desc="()Llava/tracker/rutracker/domain/GetSearchPageUseCase;">
+<counter type="INSTRUCTION" missed="13" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="create" desc="(Ldagger/internal/Provider;Ldagger/internal/Provider;Ldagger/internal/Provider;)Llava/tracker/client/di/TrackerClientModule_ProvideGetSearchPageUseCaseFactory;">
+<counter type="INSTRUCTION" missed="6" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="46" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="8" covered="0"/>
+<counter type="METHOD" missed="5" covered="0"/>
+</class>
+<class name="lava/tracker/client/di/TrackerClientModule_ProvideGetTopicPageUseCaseFactory" sourcefilename="TrackerClientModule_ProvideGetTopicPageUseCaseFactory.java">
+<method name="create" desc="(Ljavax/inject/Provider;)Llava/tracker/client/di/TrackerClientModule_ProvideGetTopicPageUseCaseFactory;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Ldagger/internal/Provider;)V">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</method>
+<method name="provideGetTopicPageUseCase" desc="(Llava/tracker/rutracker/api/RuTrackerInnerApi;)Llava/tracker/rutracker/domain/GetTopicPageUseCase;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="get" desc="()Llava/tracker/rutracker/domain/GetTopicPageUseCase;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="create" desc="(Ldagger/internal/Provider;)Llava/tracker/client/di/TrackerClientModule_ProvideGetTopicPageUseCaseFactory;">
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="24" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+<counter type="METHOD" missed="5" covered="0"/>
+</class>
+<class name="lava/tracker/client/di/TrackerClientModule_ProvideGetTopicUseCaseFactory" sourcefilename="TrackerClientModule_ProvideGetTopicUseCaseFactory.java">
+<method name="provideGetTopicUseCase" desc="(Llava/tracker/rutracker/api/RuTrackerInnerApi;)Llava/tracker/rutracker/domain/GetTopicUseCase;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Ldagger/internal/Provider;)V">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</method>
+<method name="create" desc="(Ldagger/internal/Provider;)Llava/tracker/client/di/TrackerClientModule_ProvideGetTopicUseCaseFactory;">
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="get" desc="()Llava/tracker/rutracker/domain/GetTopicUseCase;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="create" desc="(Ljavax/inject/Provider;)Llava/tracker/client/di/TrackerClientModule_ProvideGetTopicUseCaseFactory;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="24" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+<counter type="METHOD" missed="5" covered="0"/>
+</class>
+<class name="lava/tracker/client/di/TrackerClientModule_ProvideGetTorrentFileUseCaseFactory" sourcefilename="TrackerClientModule_ProvideGetTorrentFileUseCaseFactory.java">
+<method name="provideGetTorrentFileUseCase" desc="(Llava/tracker/rutracker/api/RuTrackerInnerApi;Llava/tracker/rutracker/domain/WithTokenVerificationUseCase;)Llava/tracker/rutracker/domain/GetTorrentFileUseCase;">
+<counter type="INSTRUCTION" missed="6" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="get" desc="()Llava/tracker/rutracker/domain/GetTorrentFileUseCase;">
+<counter type="INSTRUCTION" missed="9" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="create" desc="(Ljavax/inject/Provider;Ljavax/inject/Provider;)Llava/tracker/client/di/TrackerClientModule_ProvideGetTorrentFileUseCaseFactory;">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="create" desc="(Ldagger/internal/Provider;Ldagger/internal/Provider;)Llava/tracker/client/di/TrackerClientModule_ProvideGetTorrentFileUseCaseFactory;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Ldagger/internal/Provider;Ldagger/internal/Provider;)V">
+<counter type="INSTRUCTION" missed="8" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="35" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="7" covered="0"/>
+<counter type="METHOD" missed="5" covered="0"/>
+</class>
+<class name="lava/tracker/client/di/TrackerClientModule_ProvideLoginUseCaseFactory" sourcefilename="TrackerClientModule_ProvideLoginUseCaseFactory.java">
+<method name="provideLoginUseCase" desc="(Llava/tracker/rutracker/api/RuTrackerInnerApi;Llava/tracker/rutracker/domain/GetCurrentProfileUseCase;)Llava/tracker/rutracker/domain/LoginUseCase;">
+<counter type="INSTRUCTION" missed="6" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="create" desc="(Ljavax/inject/Provider;Ljavax/inject/Provider;)Llava/tracker/client/di/TrackerClientModule_ProvideLoginUseCaseFactory;">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="create" desc="(Ldagger/internal/Provider;Ldagger/internal/Provider;)Llava/tracker/client/di/TrackerClientModule_ProvideLoginUseCaseFactory;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="get" desc="()Llava/tracker/rutracker/domain/LoginUseCase;">
+<counter type="INSTRUCTION" missed="9" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Ldagger/internal/Provider;Ldagger/internal/Provider;)V">
+<counter type="INSTRUCTION" missed="8" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="35" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="7" covered="0"/>
+<counter type="METHOD" missed="5" covered="0"/>
+</class>
+<class name="lava/tracker/client/di/TrackerClientModule_ProvideLogoutUseCaseFactory" sourcefilename="TrackerClientModule_ProvideLogoutUseCaseFactory.java">
+<method name="create" desc="(Ldagger/internal/Provider;)Llava/tracker/client/di/TrackerClientModule_ProvideLogoutUseCaseFactory;">
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Ldagger/internal/Provider;)V">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</method>
+<method name="create" desc="(Ljavax/inject/Provider;)Llava/tracker/client/di/TrackerClientModule_ProvideLogoutUseCaseFactory;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="get" desc="()Llava/tracker/rutracker/domain/LogoutUseCase;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="provideLogoutUseCase" desc="(Llava/auth/api/TokenProvider;)Llava/tracker/rutracker/domain/LogoutUseCase;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="24" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+<counter type="METHOD" missed="5" covered="0"/>
+</class>
+<class name="lava/tracker/client/di/TrackerClientModule_ProvideRemoveFavoriteUseCaseFactory" sourcefilename="TrackerClientModule_ProvideRemoveFavoriteUseCaseFactory.java">
+<method name="create" desc="(Ldagger/internal/Provider;Ldagger/internal/Provider;Ldagger/internal/Provider;)Llava/tracker/client/di/TrackerClientModule_ProvideRemoveFavoriteUseCaseFactory;">
+<counter type="INSTRUCTION" missed="6" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="provideRemoveFavoriteUseCase" desc="(Llava/tracker/rutracker/api/RuTrackerInnerApi;Llava/tracker/rutracker/domain/WithTokenVerificationUseCase;Llava/tracker/rutracker/domain/WithAuthorisedCheckUseCase;)Llava/tracker/rutracker/domain/RemoveFavoriteUseCase;">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Ldagger/internal/Provider;Ldagger/internal/Provider;Ldagger/internal/Provider;)V">
+<counter type="INSTRUCTION" missed="11" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+</method>
+<method name="get" desc="()Llava/tracker/rutracker/domain/RemoveFavoriteUseCase;">
+<counter type="INSTRUCTION" missed="13" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="create" desc="(Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Llava/tracker/client/di/TrackerClientModule_ProvideRemoveFavoriteUseCaseFactory;">
+<counter type="INSTRUCTION" missed="9" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="46" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="8" covered="0"/>
+<counter type="METHOD" missed="5" covered="0"/>
+</class>
+<class name="lava/tracker/client/di/TrackerClientModule_ProvideRuTrackerHttpClientFactory" sourcefilename="TrackerClientModule_ProvideRuTrackerHttpClientFactory.java">
+<method name="create" desc="()Llava/tracker/client/di/TrackerClientModule_ProvideRuTrackerHttpClientFactory;">
+<counter type="INSTRUCTION" missed="1" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="get" desc="()Lio/ktor/client/HttpClient;">
+<counter type="INSTRUCTION" missed="1" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="provideRuTrackerHttpClient" desc="()Lio/ktor/client/HttpClient;">
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="8" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+<counter type="METHOD" missed="4" covered="0"/>
+</class>
+<class name="lava/tracker/client/di/TrackerClientModule_ProvideRuTrackerHttpClientFactory$InstanceHolder" sourcefilename="TrackerClientModule_ProvideRuTrackerHttpClientFactory.java">
+<method name="&lt;clinit&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/tracker/client/di/TrackerClientModule_ProvideRuTrackerInnerApiFactory" sourcefilename="TrackerClientModule_ProvideRuTrackerInnerApiFactory.java">
+<method name="create" desc="(Ldagger/internal/Provider;)Llava/tracker/client/di/TrackerClientModule_ProvideRuTrackerInnerApiFactory;">
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Ldagger/internal/Provider;)V">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</method>
+<method name="get" desc="()Llava/tracker/rutracker/api/RuTrackerInnerApi;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="provideRuTrackerInnerApi" desc="(Lio/ktor/client/HttpClient;)Llava/tracker/rutracker/api/RuTrackerInnerApi;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="create" desc="(Ljavax/inject/Provider;)Llava/tracker/client/di/TrackerClientModule_ProvideRuTrackerInnerApiFactory;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="24" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+<counter type="METHOD" missed="5" covered="0"/>
+</class>
+<class name="lava/tracker/client/di/TrackerClientModule_ProvideTrackerRegistryFactory" sourcefilename="TrackerClientModule_ProvideTrackerRegistryFactory.java">
+<method name="get" desc="()Llava/tracker/registry/TrackerRegistry;">
+<counter type="INSTRUCTION" missed="25" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="create" desc="(Ldagger/internal/Provider;Ldagger/internal/Provider;Ldagger/internal/Provider;Ldagger/internal/Provider;Ldagger/internal/Provider;Ldagger/internal/Provider;)Llava/tracker/client/di/TrackerClientModule_ProvideTrackerRegistryFactory;">
+<counter type="INSTRUCTION" missed="9" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="provideTrackerRegistry" desc="(Llava/tracker/rutracker/RuTrackerClientFactory;Llava/tracker/rutor/RuTorClientFactory;Llava/tracker/nnmclub/NnmclubClientFactory;Llava/tracker/kinozal/KinozalClientFactory;Llava/tracker/archiveorg/ArchiveOrgClientFactory;Llava/tracker/gutenberg/GutenbergClientFactory;)Llava/tracker/registry/TrackerRegistry;">
+<counter type="INSTRUCTION" missed="10" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="create" desc="(Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Llava/tracker/client/di/TrackerClientModule_ProvideTrackerRegistryFactory;">
+<counter type="INSTRUCTION" missed="15" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Ldagger/internal/Provider;Ldagger/internal/Provider;Ldagger/internal/Provider;Ldagger/internal/Provider;Ldagger/internal/Provider;Ldagger/internal/Provider;)V">
+<counter type="INSTRUCTION" missed="20" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="7" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="79" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="11" covered="0"/>
+<counter type="METHOD" missed="5" covered="0"/>
+</class>
+<class name="lava/tracker/client/di/TrackerClientModule_ProvideWithAuthorisedCheckUseCaseFactory" sourcefilename="TrackerClientModule_ProvideWithAuthorisedCheckUseCaseFactory.java">
+<method name="create" desc="()Llava/tracker/client/di/TrackerClientModule_ProvideWithAuthorisedCheckUseCaseFactory;">
+<counter type="INSTRUCTION" missed="1" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="get" desc="()Llava/tracker/rutracker/domain/WithAuthorisedCheckUseCase;">
+<counter type="INSTRUCTION" missed="1" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="provideWithAuthorisedCheckUseCase" desc="()Llava/tracker/rutracker/domain/WithAuthorisedCheckUseCase;">
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="8" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+<counter type="METHOD" missed="4" covered="0"/>
+</class>
+<class name="lava/tracker/client/di/TrackerClientModule_ProvideWithAuthorisedCheckUseCaseFactory$InstanceHolder" sourcefilename="TrackerClientModule_ProvideWithAuthorisedCheckUseCaseFactory.java">
+<method name="&lt;clinit&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/tracker/client/di/TrackerClientModule_ProvideWithTokenVerificationUseCaseFactory" sourcefilename="TrackerClientModule_ProvideWithTokenVerificationUseCaseFactory.java">
+<method name="provideWithTokenVerificationUseCase" desc="()Llava/tracker/rutracker/domain/WithTokenVerificationUseCase;">
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="create" desc="()Llava/tracker/client/di/TrackerClientModule_ProvideWithTokenVerificationUseCaseFactory;">
+<counter type="INSTRUCTION" missed="1" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="get" desc="()Llava/tracker/rutracker/domain/WithTokenVerificationUseCase;">
+<counter type="INSTRUCTION" missed="1" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="8" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+<counter type="METHOD" missed="4" covered="0"/>
+</class>
+<class name="lava/tracker/client/di/TrackerClientModule_ProvideWithTokenVerificationUseCaseFactory$InstanceHolder" sourcefilename="TrackerClientModule_ProvideWithTokenVerificationUseCaseFactory.java">
+<method name="&lt;clinit&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<sourcefile name="TrackerClientModule_ProvideGetCurrentProfileUseCaseFactory.java">
+<line nr="37" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="38" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="39" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="44" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="50" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="55" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="60" mi="6" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="35" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="7" covered="0"/>
+</sourcefile>
+<sourcefile name="TrackerClientModule_ProvideGetForumUseCaseFactory.java">
+<line nr="34" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="35" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="40" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="45" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="50" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="54" mi="5" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="24" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+</sourcefile>
+<sourcefile name="TrackerClientModule_ProvideGetTopicUseCaseFactory.java">
+<line nr="34" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="35" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="40" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="45" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="50" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="54" mi="5" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="24" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+</sourcefile>
+<sourcefile name="TrackerClientModule_ProvideWithAuthorisedCheckUseCaseFactory.java">
+<line nr="27" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="30" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="34" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="38" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="42" mi="4" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="12" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="5" covered="0"/>
+</sourcefile>
+<sourcefile name="TrackerClientModule_ProvideGetSearchPageUseCaseFactory.java">
+<line nr="42" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="43" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="44" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="45" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="50" mi="13" ci="0" mb="0" cb="0"/>
+<line nr="57" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="64" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="69" mi="7" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="46" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="8" covered="0"/>
+</sourcefile>
+<sourcefile name="TrackerClientModule_ProvideLoginUseCaseFactory.java">
+<line nr="37" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="38" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="39" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="44" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="50" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="56" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="61" mi="6" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="35" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="7" covered="0"/>
+</sourcefile>
+<sourcefile name="TrackerClientModule_ProvideRemoveFavoriteUseCaseFactory.java">
+<line nr="42" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="43" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="44" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="45" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="50" mi="13" ci="0" mb="0" cb="0"/>
+<line nr="57" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="64" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="69" mi="7" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="46" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="8" covered="0"/>
+</sourcefile>
+<sourcefile name="TrackerClientModule_ProvideAddCommentUseCaseFactory.java">
+<line nr="42" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="43" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="44" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="45" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="50" mi="13" ci="0" mb="0" cb="0"/>
+<line nr="57" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="64" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="69" mi="7" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="46" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="8" covered="0"/>
+</sourcefile>
+<sourcefile name="TrackerClientModule_ProvideGetProfileUseCaseFactory.java">
+<line nr="34" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="35" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="40" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="45" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="50" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="54" mi="5" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="24" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+</sourcefile>
+<sourcefile name="TrackerClientModule_ProvideWithTokenVerificationUseCaseFactory.java">
+<line nr="27" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="30" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="34" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="38" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="42" mi="4" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="12" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="5" covered="0"/>
+</sourcefile>
+<sourcefile name="TrackerClientModule_ProvideGetMagnetLinkUseCaseFactory.java">
+<line nr="27" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="30" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="34" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="38" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="42" mi="4" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="12" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="5" covered="0"/>
+</sourcefile>
+<sourcefile name="TrackerClientModule_ProvideGetCommentsPageUseCaseFactory.java">
+<line nr="34" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="35" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="40" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="45" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="50" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="54" mi="5" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="24" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+</sourcefile>
+<sourcefile name="TrackerClientModule_ProvideRuTrackerHttpClientFactory.java">
+<line nr="27" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="30" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="34" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="38" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="42" mi="4" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="12" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="5" covered="0"/>
+</sourcefile>
+<sourcefile name="TrackerClientModule_ProvideRuTrackerInnerApiFactory.java">
+<line nr="34" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="35" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="40" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="45" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="50" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="54" mi="5" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="24" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+</sourcefile>
+<sourcefile name="TrackerClientModule_ProvideGetCategoryPageUseCaseFactory.java">
+<line nr="34" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="35" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="40" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="45" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="50" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="54" mi="5" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="24" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+</sourcefile>
+<sourcefile name="TrackerClientModule_ProvideGetTorrentFileUseCaseFactory.java">
+<line nr="38" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="39" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="40" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="45" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="51" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="57" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="62" mi="6" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="35" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="7" covered="0"/>
+</sourcefile>
+<sourcefile name="TrackerClientModule_ProvideGetFavoritesUseCaseFactory.java">
+<line nr="42" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="43" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="44" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="45" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="50" mi="13" ci="0" mb="0" cb="0"/>
+<line nr="57" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="64" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="69" mi="7" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="46" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="8" covered="0"/>
+</sourcefile>
+<sourcefile name="TrackerClientModule.kt">
+<line nr="90" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="91" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="92" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="93" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="94" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="95" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="97" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="98" mi="15" ci="0" mb="0" cb="0"/>
+<line nr="100" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="101" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="102" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="103" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="105" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="106" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="108" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="109" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="111" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="112" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="113" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="115" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="125" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="135" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="140" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="152" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="157" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="162" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="167" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="172" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="177" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="185" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="193" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="201" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="209" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="214" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="221" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="228" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="233" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="238" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="245" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="249" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="269" mi="13" ci="0" mb="0" cb="0"/>
+<line nr="270" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="271" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="272" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="273" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="274" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="275" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="276" mi="1" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="240" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="49" covered="0"/>
+</sourcefile>
+<sourcefile name="TrackerClientModule_ProvideTrackerRegistryFactory.java">
+<line nr="54" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="55" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="56" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="57" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="58" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="59" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="60" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="65" mi="25" ci="0" mb="0" cb="0"/>
+<line nr="75" mi="15" ci="0" mb="0" cb="0"/>
+<line nr="85" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="92" mi="10" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="79" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="11" covered="0"/>
+</sourcefile>
+<sourcefile name="TrackerClientModule_ProvideAddFavoriteUseCaseFactory.java">
+<line nr="42" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="43" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="44" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="45" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="50" mi="13" ci="0" mb="0" cb="0"/>
+<line nr="57" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="64" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="69" mi="7" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="46" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="8" covered="0"/>
+</sourcefile>
+<sourcefile name="TrackerClientModule_ProvideLogoutUseCaseFactory.java">
+<line nr="33" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="34" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="39" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="44" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="49" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="53" mi="5" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="24" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+</sourcefile>
+<sourcefile name="TrackerClientModule_ProvideCheckAuthorisedUseCaseFactory.java">
+<line nr="34" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="35" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="40" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="45" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="50" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="54" mi="5" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="24" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+</sourcefile>
+<sourcefile name="TrackerClientModule_ProvideGetTopicPageUseCaseFactory.java">
+<line nr="34" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="35" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="40" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="45" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="50" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="54" mi="5" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="24" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+</sourcefile>
+<counter type="INSTRUCTION" missed="918" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="195" covered="0"/>
+<counter type="METHOD" missed="141" covered="0"/>
+<counter type="CLASS" missed="28" covered="0"/>
+</package>
+<package name="lava/tracker/client/dedup">
+<class name="lava/tracker/client/dedup/DeduplicationEngine" sourcefilename="DeduplicationEngine.kt">
+<method name="sizeWithinTolerance" desc="(Llava/tracker/client/dedup/DeduplicationEngine;JJD)Z">
+<counter type="INSTRUCTION" missed="0" covered="11"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="toProviderOccurrence" desc="(Llava/tracker/client/dedup/DeduplicationEngine$Occurrence;)Llava/tracker/client/ProviderOccurrence;">
+<counter type="INSTRUCTION" missed="0" covered="19"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="9"/>
+</method>
+<method name="matches$client_debug" desc="(Llava/tracker/api/model/TorrentItem;Llava/tracker/api/model/TorrentItem;)Z">
+<counter type="INSTRUCTION" missed="2" covered="65"/>
+<counter type="BRANCH" missed="5" covered="13"/>
+<counter type="LINE" missed="0" covered="11"/>
+</method>
+<method name="deduplicate" desc="(Ljava/util/Map;Ljava/util/Map;)Ljava/util/List;">
+<counter type="INSTRUCTION" missed="2" covered="118"/>
+<counter type="BRANCH" missed="1" covered="7"/>
+<counter type="LINE" missed="0" covered="16"/>
+</method>
+<method name="normalize" desc="(Ljava/lang/String;)Ljava/lang/String;">
+<counter type="INSTRUCTION" missed="0" covered="22"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="3"/>
+</method>
+<method name="sizeWithinTolerance" desc="(JJD)Z">
+<counter type="INSTRUCTION" missed="0" covered="29"/>
+<counter type="BRANCH" missed="0" covered="4"/>
+<counter type="LINE" missed="0" covered="4"/>
+</method>
+<method name="toOccurrence" desc="(Llava/tracker/api/model/TorrentItem;Ljava/lang/String;Ljava/lang/String;)Llava/tracker/client/dedup/DeduplicationEngine$Occurrence;">
+<counter type="INSTRUCTION" missed="0" covered="18"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="10"/>
+</method>
+<counter type="INSTRUCTION" missed="4" covered="282"/>
+<counter type="BRANCH" missed="6" covered="24"/>
+<counter type="LINE" missed="0" covered="54"/>
+<counter type="METHOD" missed="0" covered="7"/>
+</class>
+<class name="lava/tracker/client/dedup/DeduplicationEngine$Occurrence" sourcefilename="DeduplicationEngine.kt">
+<method name="&lt;init&gt;" desc="(Llava/tracker/api/model/TorrentItem;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Long;Ljava/lang/String;Ljava/lang/String;)V">
+<counter type="INSTRUCTION" missed="0" covered="47"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="10"/>
+</method>
+<counter type="INSTRUCTION" missed="0" covered="47"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="10"/>
+<counter type="METHOD" missed="0" covered="1"/>
+</class>
+<sourcefile name="DeduplicationEngine.kt">
+<line nr="38" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="40" mi="0" ci="19" mb="0" cb="2"/>
+<line nr="41" mi="0" ci="10" mb="0" cb="2"/>
+<line nr="42" mi="2" ci="11" mb="1" cb="1"/>
+<line nr="43" mi="0" ci="7" mb="0" cb="0"/>
+<line nr="44" mi="0" ci="11" mb="0" cb="0"/>
+<line nr="46" mi="0" ci="2" mb="0" cb="2"/>
+<line nr="47" mi="0" ci="4" mb="0" cb="0"/>
+<line nr="49" mi="0" ci="13" mb="0" cb="0"/>
+<line nr="54" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="55" mi="0" ci="4" mb="0" cb="0"/>
+<line nr="56" mi="0" ci="9" mb="0" cb="0"/>
+<line nr="57" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="58" mi="0" ci="11" mb="0" cb="0"/>
+<line nr="59" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="60" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="69" mi="2" ci="22" mb="2" cb="6"/>
+<line nr="70" mi="0" ci="6" mb="0" cb="0"/>
+<line nr="74" mi="0" ci="10" mb="0" cb="0"/>
+<line nr="75" mi="0" ci="2" mb="0" cb="2"/>
+<line nr="76" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="77" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="78" mi="0" ci="4" mb="1" cb="3"/>
+<line nr="79" mi="0" ci="9" mb="0" cb="0"/>
+<line nr="82" mi="0" ci="4" mb="2" cb="2"/>
+<line nr="83" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="86" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="89" mi="0" ci="11" mb="0" cb="0"/>
+<line nr="90" mi="0" ci="5" mb="0" cb="2"/>
+<line nr="91" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="92" mi="0" ci="7" mb="0" cb="0"/>
+<line nr="93" mi="0" ci="12" mb="0" cb="2"/>
+<line nr="97" mi="0" ci="8" mb="0" cb="0"/>
+<line nr="98" mi="0" ci="11" mb="0" cb="0"/>
+<line nr="99" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="101" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="102" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="103" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="104" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="105" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="106" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="107" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="108" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="109" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="110" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="114" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="115" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="116" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="117" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="118" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="119" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="120" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="121" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="122" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="123" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="127" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="128" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="129" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="130" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="131" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="132" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="133" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="134" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="135" mi="0" ci="2" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="4" covered="329"/>
+<counter type="BRANCH" missed="6" covered="24"/>
+<counter type="LINE" missed="0" covered="64"/>
+</sourcefile>
+<counter type="INSTRUCTION" missed="4" covered="329"/>
+<counter type="BRANCH" missed="6" covered="24"/>
+<counter type="LINE" missed="0" covered="64"/>
+<counter type="METHOD" missed="0" covered="8"/>
+<counter type="CLASS" missed="0" covered="2"/>
+</package>
+<package name="lava/tracker/client/persistence">
+<class name="lava/tracker/client/persistence/LavaMirrorManagerHolder" sourcefilename="LavaMirrorManagerHolder.kt">
+<method name="probeAll" desc="(Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="0" covered="26"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="managerForOrNull" desc="(Ljava/lang/String;)Llava/sdk/mirror/MirrorManager;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="observeHealthOrEmpty" desc="(Ljava/lang/String;)Lkotlinx/coroutines/flow/Flow;">
+<counter type="INSTRUCTION" missed="0" covered="14"/>
+<counter type="BRANCH" missed="0" covered="2"/>
+<counter type="LINE" missed="0" covered="2"/>
+</method>
+<method name="managerFor" desc="(Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="20" covered="113"/>
+<counter type="BRANCH" missed="4" covered="6"/>
+<counter type="LINE" missed="1" covered="12"/>
+</method>
+<method name="&lt;init&gt;" desc="(Llava/tracker/registry/TrackerRegistry;Llava/tracker/client/persistence/MirrorConfigLoader;)V">
+<counter type="INSTRUCTION" missed="0" covered="23"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="6"/>
+</method>
+<method name="observeHealth" desc="(Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="0" covered="16"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="&lt;init&gt;" desc="(Llava/tracker/registry/TrackerRegistry;Llava/tracker/client/persistence/MirrorConfigLoader;Llava/tracker/client/persistence/LavaMirrorManagerHolder$HealthProbeFactory;)V">
+<counter type="INSTRUCTION" missed="0" covered="7"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="2"/>
+</method>
+<counter type="INSTRUCTION" missed="25" covered="199"/>
+<counter type="BRANCH" missed="4" covered="8"/>
+<counter type="LINE" missed="2" covered="24"/>
+<counter type="METHOD" missed="1" covered="6"/>
+</class>
+<class name="lava/tracker/client/persistence/LavaMirrorManagerHolder$DefaultHealthProbeFactory" sourcefilename="LavaMirrorManagerHolder.kt">
+<method name="create" desc="(Ljava/lang/String;)Llava/sdk/mirror/HealthProbe;">
+<counter type="INSTRUCTION" missed="15" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="15" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/tracker/client/persistence/LavaMirrorManagerHolder_Factory" sourcefilename="LavaMirrorManagerHolder_Factory.java">
+<method name="create" desc="(Ldagger/internal/Provider;Ldagger/internal/Provider;)Llava/tracker/client/persistence/LavaMirrorManagerHolder_Factory;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="get" desc="()Llava/tracker/client/persistence/LavaMirrorManagerHolder;">
+<counter type="INSTRUCTION" missed="9" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="newInstance" desc="(Llava/tracker/registry/TrackerRegistry;Llava/tracker/client/persistence/MirrorConfigLoader;)Llava/tracker/client/persistence/LavaMirrorManagerHolder;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="create" desc="(Ljavax/inject/Provider;Ljavax/inject/Provider;)Llava/tracker/client/persistence/LavaMirrorManagerHolder_Factory;">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Ldagger/internal/Provider;Ldagger/internal/Provider;)V">
+<counter type="INSTRUCTION" missed="8" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="34" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="7" covered="0"/>
+<counter type="METHOD" missed="5" covered="0"/>
+</class>
+<class name="lava/tracker/client/persistence/MirrorConfigLoader" sourcefilename="MirrorConfigLoader.kt">
+<method name="bundledFor" desc="(Ljava/lang/String;)Ljava/util/List;">
+<counter type="INSTRUCTION" missed="2" covered="10"/>
+<counter type="BRANCH" missed="2" covered="2"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="bundledMarkerFor" desc="(Ljava/lang/String;)Ljava/lang/String;">
+<counter type="INSTRUCTION" missed="0" covered="11"/>
+<counter type="BRANCH" missed="0" covered="2"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="loadBundled" desc="(Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="11" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</method>
+<method name="bundled" desc="()Ljava/util/Map;">
+<counter type="INSTRUCTION" missed="3" covered="76"/>
+<counter type="BRANCH" missed="1" covered="3"/>
+<counter type="LINE" missed="0" covered="5"/>
+</method>
+<method name="loadFor" desc="(Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="0" covered="34"/>
+<counter type="BRANCH" missed="1" covered="3"/>
+<counter type="LINE" missed="0" covered="3"/>
+</method>
+<method name="&lt;init&gt;" desc="(Landroid/content/Context;Llava/tracker/client/persistence/UserMirrorRepository;)V">
+<counter type="INSTRUCTION" missed="0" covered="8"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="3"/>
+</method>
+<method name="mergeAndSort" desc="(Ljava/util/List;Ljava/util/List;)Ljava/util/List;">
+<counter type="INSTRUCTION" missed="0" covered="39"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="4"/>
+</method>
+<counter type="INSTRUCTION" missed="16" covered="178"/>
+<counter type="BRANCH" missed="4" covered="10"/>
+<counter type="LINE" missed="2" covered="17"/>
+<counter type="METHOD" missed="1" covered="6"/>
+</class>
+<class name="lava/tracker/client/persistence/MirrorConfigLoader_Factory" sourcefilename="MirrorConfigLoader_Factory.java">
+<method name="get" desc="()Llava/tracker/client/persistence/MirrorConfigLoader;">
+<counter type="INSTRUCTION" missed="9" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="create" desc="(Ldagger/internal/Provider;Ldagger/internal/Provider;)Llava/tracker/client/persistence/MirrorConfigLoader_Factory;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Ldagger/internal/Provider;Ldagger/internal/Provider;)V">
+<counter type="INSTRUCTION" missed="8" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</method>
+<method name="create" desc="(Ljavax/inject/Provider;Ljavax/inject/Provider;)Llava/tracker/client/persistence/MirrorConfigLoader_Factory;">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="newInstance" desc="(Landroid/content/Context;Llava/tracker/client/persistence/UserMirrorRepository;)Llava/tracker/client/persistence/MirrorConfigLoader;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="34" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="7" covered="0"/>
+<counter type="METHOD" missed="5" covered="0"/>
+</class>
+<class name="lava/tracker/client/persistence/MirrorHealthRepository" sourcefilename="MirrorHealthRepository.kt">
+<method name="loadStates" desc="(Ljava/lang/String;Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="3" covered="67"/>
+<counter type="BRANCH" missed="1" covered="3"/>
+<counter type="LINE" missed="0" covered="9"/>
+</method>
+<method name="loadAll" desc="(Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="0" covered="5"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="observeStates" desc="(Ljava/lang/String;Ljava/util/List;)Lkotlinx/coroutines/flow/Flow;">
+<counter type="INSTRUCTION" missed="17" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</method>
+<method name="observe" desc="(Ljava/lang/String;)Lkotlinx/coroutines/flow/Flow;">
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="upsert" desc="(Ljava/lang/String;Llava/sdk/api/MirrorState;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="0" covered="13"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="&lt;init&gt;" desc="(Llava/database/dao/MirrorHealthDao;)V">
+<counter type="INSTRUCTION" missed="0" covered="5"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="2"/>
+</method>
+<method name="clear" desc="(Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="0" covered="10"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="upsertAll" desc="(Ljava/lang/String;Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="1" covered="23"/>
+<counter type="BRANCH" missed="1" covered="1"/>
+<counter type="LINE" missed="0" covered="2"/>
+</method>
+<method name="toEntity" desc="(Llava/sdk/api/MirrorState;Ljava/lang/String;)Llava/database/entity/MirrorHealthEntity;">
+<counter type="INSTRUCTION" missed="0" covered="21"/>
+<counter type="BRANCH" missed="0" covered="2"/>
+<counter type="LINE" missed="0" covered="6"/>
+</method>
+<counter type="INSTRUCTION" missed="25" covered="144"/>
+<counter type="BRANCH" missed="2" covered="6"/>
+<counter type="LINE" missed="3" covered="22"/>
+<counter type="METHOD" missed="2" covered="7"/>
+</class>
+<class name="lava/tracker/client/persistence/MirrorHealthRepository$Companion" sourcefilename="MirrorHealthRepository.kt">
+<method name="mirrorUrlFromProtocol" desc="(Ljava/lang/String;)Llava/sdk/api/Protocol;">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/tracker/client/persistence/MirrorHealthRepository_Factory" sourcefilename="MirrorHealthRepository_Factory.java">
+<method name="newInstance" desc="(Llava/database/dao/MirrorHealthDao;)Llava/tracker/client/persistence/MirrorHealthRepository;">
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="get" desc="()Llava/tracker/client/persistence/MirrorHealthRepository;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="create" desc="(Ljavax/inject/Provider;)Llava/tracker/client/persistence/MirrorHealthRepository_Factory;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Ldagger/internal/Provider;)V">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</method>
+<method name="create" desc="(Ldagger/internal/Provider;)Llava/tracker/client/persistence/MirrorHealthRepository_Factory;">
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="23" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+<counter type="METHOD" missed="5" covered="0"/>
+</class>
+<class name="lava/tracker/client/persistence/UserMirrorRepository" sourcefilename="UserMirrorRepository.kt">
+<method name="toMirrorUrl" desc="(Llava/database/entity/UserMirrorEntity;)Llava/sdk/api/MirrorUrl;">
+<counter type="INSTRUCTION" missed="0" covered="14"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="5"/>
+</method>
+<method name="&lt;init&gt;" desc="(Llava/database/dao/UserMirrorDao;)V">
+<counter type="INSTRUCTION" missed="0" covered="5"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="2"/>
+</method>
+<method name="loadAll" desc="(Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="0" covered="5"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="loadAsMirrorUrls" desc="(Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="0" covered="19"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="add" desc="(Llava/tracker/client/persistence/UserMirrorRepository;Ljava/lang/String;Ljava/lang/String;ILlava/sdk/api/Protocol;JLkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="0" covered="2"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="observeAsMirrorUrls" desc="(Ljava/lang/String;)Lkotlinx/coroutines/flow/Flow;">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="remove" desc="(Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="0" covered="11"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="observe" desc="(Ljava/lang/String;)Lkotlinx/coroutines/flow/Flow;">
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="add" desc="(Ljava/lang/String;Ljava/lang/String;ILlava/sdk/api/Protocol;JLkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="0" covered="72"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="9"/>
+</method>
+<method name="clear" desc="(Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="0" covered="10"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<counter type="INSTRUCTION" missed="11" covered="138"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="21"/>
+<counter type="METHOD" missed="2" covered="8"/>
+</class>
+<class name="lava/tracker/client/persistence/UserMirrorRepository_Factory" sourcefilename="UserMirrorRepository_Factory.java">
+<method name="create" desc="(Ljavax/inject/Provider;)Llava/tracker/client/persistence/UserMirrorRepository_Factory;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="create" desc="(Ldagger/internal/Provider;)Llava/tracker/client/persistence/UserMirrorRepository_Factory;">
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Ldagger/internal/Provider;)V">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</method>
+<method name="newInstance" desc="(Llava/database/dao/UserMirrorDao;)Llava/tracker/client/persistence/UserMirrorRepository;">
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="get" desc="()Llava/tracker/client/persistence/UserMirrorRepository;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="23" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+<counter type="METHOD" missed="5" covered="0"/>
+</class>
+<sourcefile name="MirrorConfigLoader_Factory.java">
+<line nr="34" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="35" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="36" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="41" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="46" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="51" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="55" mi="5" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="34" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="7" covered="0"/>
+</sourcefile>
+<sourcefile name="MirrorConfigLoader.kt">
+<line nr="21" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="22" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="23" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="33" mi="0" ci="13" mb="1" cb="3"/>
+<line nr="34" mi="0" ci="17" mb="0" cb="0"/>
+<line nr="35" mi="0" ci="4" mb="0" cb="0"/>
+<line nr="39" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="41" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="46" mi="2" ci="10" mb="2" cb="2"/>
+<line nr="50" mi="0" ci="11" mb="0" cb="2"/>
+<line nr="60" mi="0" ci="8" mb="0" cb="2"/>
+<line nr="61" mi="3" ci="57" mb="1" cb="1"/>
+<line nr="62" mi="0" ci="7" mb="0" cb="0"/>
+<line nr="63" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="64" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="68" mi="0" ci="4" mb="0" cb="0"/>
+<line nr="69" mi="0" ci="13" mb="0" cb="0"/>
+<line nr="70" mi="0" ci="13" mb="0" cb="0"/>
+<line nr="71" mi="0" ci="9" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="16" covered="178"/>
+<counter type="BRANCH" missed="4" covered="10"/>
+<counter type="LINE" missed="2" covered="17"/>
+</sourcefile>
+<sourcefile name="UserMirrorRepository.kt">
+<line nr="22" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="23" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="26" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="28" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="31" mi="0" ci="19" mb="0" cb="0"/>
+<line nr="34" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="48" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="50" mi="0" ci="34" mb="0" cb="0"/>
+<line nr="51" mi="0" ci="24" mb="0" cb="0"/>
+<line nr="52" mi="0" ci="4" mb="0" cb="0"/>
+<line nr="53" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="54" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="55" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="56" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="57" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="60" mi="0" ci="4" mb="0" cb="0"/>
+<line nr="64" mi="0" ci="11" mb="0" cb="0"/>
+<line nr="68" mi="0" ci="10" mb="0" cb="0"/>
+<line nr="71" mi="0" ci="6" mb="0" cb="0"/>
+<line nr="72" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="73" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="74" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="75" mi="0" ci="3" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="11" covered="138"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="21"/>
+</sourcefile>
+<sourcefile name="LavaMirrorManagerHolder_Factory.java">
+<line nr="34" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="35" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="36" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="41" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="47" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="52" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="57" mi="5" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="34" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="7" covered="0"/>
+</sourcefile>
+<sourcefile name="MirrorHealthRepository.kt">
+<line nr="26" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="27" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="30" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="32" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="41" mi="0" ci="10" mb="0" cb="0"/>
+<line nr="42" mi="0" ci="14" mb="0" cb="0"/>
+<line nr="43" mi="0" ci="11" mb="0" cb="2"/>
+<line nr="44" mi="0" ci="11" mb="0" cb="0"/>
+<line nr="45" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="46" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="47" mi="3" ci="14" mb="1" cb="1"/>
+<line nr="48" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="49" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="57" mi="10" ci="0" mb="0" cb="0"/>
+<line nr="58" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="72" mi="1" ci="3" mb="1" cb="1"/>
+<line nr="73" mi="0" ci="20" mb="0" cb="0"/>
+<line nr="77" mi="0" ci="13" mb="0" cb="0"/>
+<line nr="81" mi="0" ci="10" mb="0" cb="0"/>
+<line nr="85" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="86" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="87" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="88" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="89" mi="0" ci="9" mb="0" cb="2"/>
+<line nr="90" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="94" mi="2" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="27" covered="144"/>
+<counter type="BRANCH" missed="2" covered="6"/>
+<counter type="LINE" missed="4" covered="22"/>
+</sourcefile>
+<sourcefile name="MirrorHealthRepository_Factory.java">
+<line nr="31" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="32" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="37" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="42" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="46" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="50" mi="4" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="23" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+</sourcefile>
+<sourcefile name="LavaMirrorManagerHolder.kt">
+<line nr="29" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="30" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="31" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="42" mi="0" ci="4" mb="0" cb="0"/>
+<line nr="43" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="46" mi="0" ci="4" mb="0" cb="0"/>
+<line nr="48" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="49" mi="0" ci="6" mb="0" cb="0"/>
+<line nr="52" mi="0" ci="10" mb="0" cb="2"/>
+<line nr="53" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="54" mi="0" ci="11" mb="1" cb="1"/>
+<line nr="55" mi="1" ci="15" mb="1" cb="1"/>
+<line nr="56" mi="19" ci="0" mb="0" cb="0"/>
+<line nr="57" mi="0" ci="34" mb="1" cb="1"/>
+<line nr="58" mi="0" ci="10" mb="1" cb="1"/>
+<line nr="59" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="60" mi="0" ci="9" mb="0" cb="0"/>
+<line nr="61" mi="0" ci="7" mb="0" cb="0"/>
+<line nr="62" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="64" mi="0" ci="7" mb="0" cb="0"/>
+<line nr="65" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="70" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="74" mi="0" ci="26" mb="0" cb="0"/>
+<line nr="79" mi="0" ci="16" mb="0" cb="0"/>
+<line nr="88" mi="0" ci="11" mb="0" cb="2"/>
+<line nr="89" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="98" mi="15" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="40" covered="199"/>
+<counter type="BRANCH" missed="4" covered="8"/>
+<counter type="LINE" missed="3" covered="24"/>
+</sourcefile>
+<sourcefile name="UserMirrorRepository_Factory.java">
+<line nr="31" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="32" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="37" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="42" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="46" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="50" mi="4" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="23" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+</sourcefile>
+<counter type="INSTRUCTION" missed="208" covered="659"/>
+<counter type="BRANCH" missed="10" covered="24"/>
+<counter type="LINE" missed="37" covered="84"/>
+<counter type="METHOD" missed="28" covered="27"/>
+<counter type="CLASS" missed="6" covered="4"/>
+</package>
+<counter type="INSTRUCTION" missed="2457" covered="3053"/>
+<counter type="BRANCH" missed="100" covered="110"/>
+<counter type="LINE" missed="413" covered="410"/>
+<counter type="METHOD" missed="217" covered="93"/>
+<counter type="CLASS" missed="46" covered="36"/>
+</report>

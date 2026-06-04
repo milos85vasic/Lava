@@ -1,0 +1,24 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>ComplexCondition:Topic.kt$tags == null &amp;&amp; status == null &amp;&amp; size == null &amp;&amp; seeds == null &amp;&amp; leeches == null</ID>
+    <ID>CyclomaticComplexMethod:PostConverters.kt$private fun List&lt;PostElementDto&gt;.toContent(): Content</ID>
+    <ID>EmptyFunctionBlock:LocalNetworkDiscoveryServiceImpl.kt$LocalNetworkDiscoveryServiceImpl.&lt;no name provided&gt;${}</ID>
+    <ID>EmptyFunctionBlock:LocalNetworkDiscoveryServiceImpl.kt$LocalNetworkDiscoveryServiceImpl.&lt;no name provided&gt;.&lt;no name provided&gt;${}</ID>
+    <ID>LongMethod:PostConverters.kt$private fun List&lt;PostElementDto&gt;.toContent(): Content</ID>
+    <ID>MagicNumber:ConnectionServiceImpl.kt$ConnectionServiceImpl$200</ID>
+    <ID>MagicNumber:ConnectionServiceImpl.kt$ConnectionServiceImpl$399</ID>
+    <ID>MagicNumber:PostConverters.kt$14</ID>
+    <ID>MagicNumber:PostConverters.kt$20</ID>
+    <ID>MagicNumber:Search.kt$31</ID>
+    <ID>SwallowedException:ConnectionServiceImpl.kt$ConnectionServiceImpl$e: IOException</ID>
+    <ID>SwallowedException:StoreServiceImpl.kt$StoreServiceImpl$e: PackageManager.NameNotFoundException</ID>
+    <ID>TooManyFunctions:BookmarksRepository.kt$BookmarksRepository</ID>
+    <ID>TooManyFunctions:BookmarksRepositoryImpl.kt$BookmarksRepositoryImpl : BookmarksRepository</ID>
+    <ID>TooManyFunctions:DataModule.kt$DataModule</ID>
+    <ID>TooManyFunctions:FavoritesRepository.kt$FavoritesRepository</ID>
+    <ID>TooManyFunctions:FavoritesRepositoryImpl.kt$FavoritesRepositoryImpl : FavoritesRepository</ID>
+    <ID>TooManyFunctions:Topic.kt$lava.data.converters.Topic.kt</ID>
+  </CurrentIssues>
+</SmellBaseline>

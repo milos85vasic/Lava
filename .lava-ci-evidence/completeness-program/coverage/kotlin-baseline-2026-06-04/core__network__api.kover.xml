@@ -1,0 +1,1868 @@
+<?xml version="1.0" ?>
+<report name="Kover Gradle Plugin XML report for :core:network:api">
+<package name="lava/network/dto/search">
+<class name="lava/network/dto/search/SearchPageDto" sourcefilename="SearchPageDto.kt">
+<method name="write$Self$api" desc="(Llava/network/dto/search/SearchPageDto;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V">
+<counter type="INSTRUCTION" missed="66" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(IILjava/util/List;)V">
+<counter type="INSTRUCTION" missed="17" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="83" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="5" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+</class>
+<class name="lava/network/dto/search/SearchPageDto$Companion" sourcefilename="SearchPageDto.kt">
+<method name="serializer" desc="()Lkotlinx/serialization/KSerializer;">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/network/dto/search/SearchPeriodDto" sourcefilename="SearchPeriodDto.kt">
+<method name="&lt;clinit&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="53" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Ljava/lang/String;ILjava/lang/String;)V">
+<counter type="INSTRUCTION" missed="9" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="_init_$_anonymous_" desc="()Lkotlinx/serialization/KSerializer;">
+<counter type="INSTRUCTION" missed="8" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="70" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="8" covered="0"/>
+<counter type="METHOD" missed="3" covered="0"/>
+</class>
+<class name="lava/network/dto/search/SearchPeriodDto$Companion" sourcefilename="SearchPeriodDto.kt">
+<method name="serializer" desc="()Lkotlinx/serialization/KSerializer;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/network/dto/search/SearchSortOrderDto" sourcefilename="SearchSortOrderDto.kt">
+<method name="&lt;clinit&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="25" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Ljava/lang/String;ILjava/lang/String;)V">
+<counter type="INSTRUCTION" missed="9" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="_init_$_anonymous_" desc="()Lkotlinx/serialization/KSerializer;">
+<counter type="INSTRUCTION" missed="8" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="42" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+<counter type="METHOD" missed="3" covered="0"/>
+</class>
+<class name="lava/network/dto/search/SearchSortOrderDto$Companion" sourcefilename="SearchSortOrderDto.kt">
+<method name="serializer" desc="()Lkotlinx/serialization/KSerializer;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/network/dto/search/SearchSortTypeDto" sourcefilename="SearchSortTypeDto.kt">
+<method name="&lt;clinit&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="53" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Ljava/lang/String;ILjava/lang/String;)V">
+<counter type="INSTRUCTION" missed="9" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="_init_$_anonymous_" desc="()Lkotlinx/serialization/KSerializer;">
+<counter type="INSTRUCTION" missed="8" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="70" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="8" covered="0"/>
+<counter type="METHOD" missed="3" covered="0"/>
+</class>
+<class name="lava/network/dto/search/SearchSortTypeDto$Companion" sourcefilename="SearchSortTypeDto.kt">
+<method name="serializer" desc="()Lkotlinx/serialization/KSerializer;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<sourcefile name="SearchPageDto.kt">
+<line nr="6" mi="68" ci="0" mb="2" cb="0"/>
+<line nr="7" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="8" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="9" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="10" mi="5" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="85" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+</sourcefile>
+<sourcefile name="SearchPeriodDto.kt">
+<line nr="5" mi="13" ci="0" mb="0" cb="0"/>
+<line nr="6" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="7" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="8" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="9" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="10" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="11" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="12" mi="18" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="75" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="9" covered="0"/>
+</sourcefile>
+<sourcefile name="SearchSortOrderDto.kt">
+<line nr="5" mi="13" ci="0" mb="0" cb="0"/>
+<line nr="6" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="7" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="8" mi="18" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="47" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="5" covered="0"/>
+</sourcefile>
+<sourcefile name="SearchSortTypeDto.kt">
+<line nr="5" mi="13" ci="0" mb="0" cb="0"/>
+<line nr="6" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="7" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="8" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="9" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="10" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="11" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="12" mi="18" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="75" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="9" covered="0"/>
+</sourcefile>
+<counter type="INSTRUCTION" missed="282" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="29" covered="0"/>
+<counter type="METHOD" missed="15" covered="0"/>
+<counter type="CLASS" missed="8" covered="0"/>
+</package>
+<package name="lava/network/serialization">
+<class name="lava/network/serialization/JsonFactory" sourcefilename="JsonFactory.kt">
+<method name="create" desc="()Lkotlinx/serialization/json/Json;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="create$lambda$0" desc="(Lkotlinx/serialization/json/JsonBuilder;)Lkotlin/Unit;">
+<counter type="INSTRUCTION" missed="9" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="14" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+</class>
+<sourcefile name="JsonFactory.kt">
+<line nr="7" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="8" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="9" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="10" mi="3" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="14" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+</sourcefile>
+<counter type="INSTRUCTION" missed="14" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+<counter type="CLASS" missed="1" covered="0"/>
+</package>
+<package name="lava/network/dto">
+<class name="lava/network/dto/FileDto" sourcefilename="FileDto.kt">
+<method name="write$Self$api" desc="(Llava/network/dto/FileDto;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V">
+<counter type="INSTRUCTION" missed="41" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Ljava/lang/String;Ljava/lang/String;[B)V">
+<counter type="INSTRUCTION" missed="17" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="58" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="5" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+</class>
+<class name="lava/network/dto/FileDto$Companion" sourcefilename="FileDto.kt">
+<method name="serializer" desc="()Lkotlinx/serialization/KSerializer;">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<sourcefile name="FileDto.kt">
+<line nr="5" mi="43" ci="0" mb="2" cb="0"/>
+<line nr="6" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="7" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="8" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="9" mi="5" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="60" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+</sourcefile>
+<counter type="INSTRUCTION" missed="60" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+<counter type="METHOD" missed="3" covered="0"/>
+<counter type="CLASS" missed="2" covered="0"/>
+</package>
+<package name="lava/network/dto/user">
+<class name="lava/network/dto/user/FavoritesDto" sourcefilename="FavoritesDto.kt">
+<method name="write$Self$api" desc="(Llava/network/dto/user/FavoritesDto;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V">
+<counter type="INSTRUCTION" missed="82" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Ljava/util/List;)V">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="89" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+</class>
+<class name="lava/network/dto/user/FavoritesDto$Companion" sourcefilename="FavoritesDto.kt">
+<method name="serializer" desc="()Lkotlinx/serialization/KSerializer;">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/network/dto/user/ProfileDto" sourcefilename="ProfileDto.kt">
+<method name="&lt;init&gt;" desc="(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V">
+<counter type="INSTRUCTION" missed="17" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="write$Self$api" desc="(Llava/network/dto/user/ProfileDto;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V">
+<counter type="INSTRUCTION" missed="39" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="56" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+</class>
+<class name="lava/network/dto/user/ProfileDto$Companion" sourcefilename="ProfileDto.kt">
+<method name="serializer" desc="()Lkotlinx/serialization/KSerializer;">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<sourcefile name="ProfileDto.kt">
+<line nr="5" mi="41" ci="0" mb="2" cb="0"/>
+<line nr="6" mi="17" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="58" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</sourcefile>
+<sourcefile name="FavoritesDto.kt">
+<line nr="6" mi="84" ci="0" mb="2" cb="0"/>
+<line nr="7" mi="7" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="91" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</sourcefile>
+<counter type="INSTRUCTION" missed="149" covered="0"/>
+<counter type="BRANCH" missed="4" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+<counter type="METHOD" missed="6" covered="0"/>
+<counter type="CLASS" missed="4" covered="0"/>
+</package>
+<package name="lava/network/sse">
+<class name="lava/network/sse/SseClient" sourcefilename="SseClient.kt">
+<method name="connect" desc="(Llava/network/sse/SseClient;Ljava/lang/String;Ljava/util/Map;)Lkotlinx/coroutines/flow/Flow;">
+<counter type="INSTRUCTION" missed="0" covered="19"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="&lt;init&gt;" desc="(Lokhttp3/OkHttpClient;)V">
+<counter type="INSTRUCTION" missed="0" covered="14"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="4"/>
+</method>
+<counter type="INSTRUCTION" missed="0" covered="33"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="5"/>
+<counter type="METHOD" missed="0" covered="2"/>
+</class>
+<class name="lava/network/sse/SseClient$connect$1" sourcefilename="SseClient.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="29" covered="209"/>
+<counter type="BRANCH" missed="5" covered="15"/>
+<counter type="LINE" missed="4" covered="33"/>
+</method>
+<counter type="INSTRUCTION" missed="29" covered="209"/>
+<counter type="BRANCH" missed="5" covered="15"/>
+<counter type="LINE" missed="4" covered="33"/>
+<counter type="METHOD" missed="0" covered="1"/>
+</class>
+<class name="lava/network/sse/SseEvent$Error" sourcefilename="SseClient.kt">
+<method name="&lt;init&gt;" desc="(Ljava/lang/String;)V">
+<counter type="INSTRUCTION" missed="0" covered="7"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<counter type="INSTRUCTION" missed="0" covered="7"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+<counter type="METHOD" missed="0" covered="1"/>
+</class>
+<class name="lava/network/sse/SseEvent$Event" sourcefilename="SseClient.kt">
+<method name="&lt;init&gt;" desc="(Ljava/lang/String;Ljava/lang/String;)V">
+<counter type="INSTRUCTION" missed="0" covered="12"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<counter type="INSTRUCTION" missed="0" covered="12"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+<counter type="METHOD" missed="0" covered="1"/>
+</class>
+<class name="lava/network/sse/SseEvent$StreamEnd" sourcefilename="SseClient.kt">
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="0" covered="2"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<counter type="INSTRUCTION" missed="0" covered="2"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+<counter type="METHOD" missed="0" covered="1"/>
+</class>
+<sourcefile name="SseClient.kt">
+<line nr="13" mi="0" ci="12" mb="0" cb="0"/>
+<line nr="14" mi="0" ci="7" mb="0" cb="0"/>
+<line nr="15" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="19" mi="0" ci="6" mb="0" cb="0"/>
+<line nr="20" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="21" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="22" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="24" mi="0" ci="19" mb="0" cb="0"/>
+<line nr="25" mi="0" ci="10" mb="0" cb="0"/>
+<line nr="26" mi="0" ci="18" mb="0" cb="0"/>
+<line nr="28" mi="0" ci="7" mb="0" cb="0"/>
+<line nr="29" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="30" mi="0" ci="4" mb="0" cb="0"/>
+<line nr="32" mi="0" ci="9" mb="0" cb="0"/>
+<line nr="33" mi="0" ci="7" mb="0" cb="0"/>
+<line nr="37" mi="0" ci="3" mb="0" cb="2"/>
+<line nr="38" mi="0" ci="11" mb="0" cb="0"/>
+<line nr="40" mi="0" ci="7" mb="0" cb="0"/>
+<line nr="44" mi="2" ci="7" mb="1" cb="1"/>
+<line nr="45" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="47" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="48" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="51" mi="0" ci="10" mb="0" cb="0"/>
+<line nr="52" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="53" mi="0" ci="4" mb="0" cb="0"/>
+<line nr="56" mi="0" ci="4" mb="0" cb="0"/>
+<line nr="57" mi="0" ci="10" mb="0" cb="2"/>
+<line nr="58" mi="0" ci="8" mb="1" cb="1"/>
+<line nr="59" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="60" mi="0" ci="7" mb="0" cb="2"/>
+<line nr="61" mi="0" ci="9" mb="0" cb="0"/>
+<line nr="63" mi="0" ci="7" mb="0" cb="2"/>
+<line nr="64" mi="0" ci="8" mb="0" cb="0"/>
+<line nr="66" mi="0" ci="5" mb="1" cb="1"/>
+<line nr="67" mi="1" ci="7" mb="2" cb="2"/>
+<line nr="68" mi="0" ci="5" mb="0" cb="2"/>
+<line nr="69" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="71" mi="0" ci="12" mb="0" cb="0"/>
+<line nr="73" mi="0" ci="4" mb="0" cb="0"/>
+<line nr="74" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="75" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="81" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="83" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="86" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="89" mi="0" ci="7" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="29" covered="263"/>
+<counter type="BRANCH" missed="5" covered="15"/>
+<counter type="LINE" missed="4" covered="41"/>
+</sourcefile>
+<counter type="INSTRUCTION" missed="29" covered="263"/>
+<counter type="BRANCH" missed="5" covered="15"/>
+<counter type="LINE" missed="4" covered="41"/>
+<counter type="METHOD" missed="0" covered="6"/>
+<counter type="CLASS" missed="0" covered="5"/>
+</package>
+<package name="lava/network/dto/auth">
+<class name="lava/network/dto/auth/AuthResponseDto$CaptchaRequired" sourcefilename="AuthResponseDto.kt">
+<method name="write$Self$api" desc="(Llava/network/dto/auth/AuthResponseDto$CaptchaRequired;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V">
+<counter type="INSTRUCTION" missed="23" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Llava/network/dto/auth/CaptchaDto;)V">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="30" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+</class>
+<class name="lava/network/dto/auth/AuthResponseDto$CaptchaRequired$Companion" sourcefilename="AuthResponseDto.kt">
+<method name="serializer" desc="()Lkotlinx/serialization/KSerializer;">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/network/dto/auth/AuthResponseDto$Companion" sourcefilename="AuthResponseDto.kt">
+<method name="serializer" desc="()Lkotlinx/serialization/KSerializer;">
+<counter type="INSTRUCTION" missed="53" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="53" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/network/dto/auth/AuthResponseDto$ServiceUnavailable" sourcefilename="AuthResponseDto.kt">
+<method name="&lt;init&gt;" desc="(Ljava/lang/String;Llava/network/dto/auth/CaptchaDto;)V">
+<counter type="INSTRUCTION" missed="13" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</method>
+<method name="write$Self$api" desc="(Llava/network/dto/auth/AuthResponseDto$ServiceUnavailable;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V">
+<counter type="INSTRUCTION" missed="53" covered="0"/>
+<counter type="BRANCH" missed="10" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="66" covered="0"/>
+<counter type="BRANCH" missed="10" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+</class>
+<class name="lava/network/dto/auth/AuthResponseDto$ServiceUnavailable$Companion" sourcefilename="AuthResponseDto.kt">
+<method name="serializer" desc="()Lkotlinx/serialization/KSerializer;">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/network/dto/auth/AuthResponseDto$Success" sourcefilename="AuthResponseDto.kt">
+<method name="&lt;init&gt;" desc="(Llava/network/dto/auth/UserDto;)V">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="write$Self$api" desc="(Llava/network/dto/auth/AuthResponseDto$Success;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V">
+<counter type="INSTRUCTION" missed="23" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="30" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+</class>
+<class name="lava/network/dto/auth/AuthResponseDto$Success$Companion" sourcefilename="AuthResponseDto.kt">
+<method name="serializer" desc="()Lkotlinx/serialization/KSerializer;">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/network/dto/auth/AuthResponseDto$WrongCredits" sourcefilename="AuthResponseDto.kt">
+<method name="write$Self$api" desc="(Llava/network/dto/auth/AuthResponseDto$WrongCredits;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V">
+<counter type="INSTRUCTION" missed="23" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Llava/network/dto/auth/CaptchaDto;)V">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="30" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+</class>
+<class name="lava/network/dto/auth/AuthResponseDto$WrongCredits$Companion" sourcefilename="AuthResponseDto.kt">
+<method name="serializer" desc="()Lkotlinx/serialization/KSerializer;">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/network/dto/auth/CaptchaDto" sourcefilename="CaptchaDto.kt">
+<method name="&lt;init&gt;" desc="(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V">
+<counter type="INSTRUCTION" missed="17" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+</method>
+<method name="write$Self$api" desc="(Llava/network/dto/auth/CaptchaDto;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V">
+<counter type="INSTRUCTION" missed="39" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="56" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="5" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+</class>
+<class name="lava/network/dto/auth/CaptchaDto$Companion" sourcefilename="CaptchaDto.kt">
+<method name="serializer" desc="()Lkotlinx/serialization/KSerializer;">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/network/dto/auth/UserDto" sourcefilename="UserDto.kt">
+<method name="write$Self$api" desc="(Llava/network/dto/auth/UserDto;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V">
+<counter type="INSTRUCTION" missed="39" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V">
+<counter type="INSTRUCTION" missed="17" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="56" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="5" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+</class>
+<class name="lava/network/dto/auth/UserDto$Companion" sourcefilename="UserDto.kt">
+<method name="serializer" desc="()Lkotlinx/serialization/KSerializer;">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<sourcefile name="AuthResponseDto.kt">
+<line nr="31" mi="53" ci="0" mb="0" cb="0"/>
+<line nr="33" mi="25" ci="0" mb="2" cb="0"/>
+<line nr="35" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="37" mi="25" ci="0" mb="2" cb="0"/>
+<line nr="39" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="41" mi="25" ci="0" mb="2" cb="0"/>
+<line nr="43" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="59" mi="55" ci="0" mb="10" cb="0"/>
+<line nr="62" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="63" mi="8" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="217" covered="0"/>
+<counter type="BRANCH" missed="16" covered="0"/>
+<counter type="LINE" missed="14" covered="0"/>
+</sourcefile>
+<sourcefile name="CaptchaDto.kt">
+<line nr="5" mi="41" ci="0" mb="2" cb="0"/>
+<line nr="6" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="7" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="8" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="9" mi="5" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="58" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+</sourcefile>
+<sourcefile name="UserDto.kt">
+<line nr="5" mi="41" ci="0" mb="2" cb="0"/>
+<line nr="6" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="7" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="8" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="9" mi="5" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="58" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+</sourcefile>
+<counter type="INSTRUCTION" missed="333" covered="0"/>
+<counter type="BRANCH" missed="20" covered="0"/>
+<counter type="LINE" missed="26" covered="0"/>
+<counter type="METHOD" missed="19" covered="0"/>
+<counter type="CLASS" missed="13" covered="0"/>
+</package>
+<package name="lava/network/dto/topic">
+<class name="lava/network/dto/topic/Align" sourcefilename="PostElementDto.kt">
+<method name="&lt;init&gt;" desc="(Llava/network/dto/topic/TextAlignment;Ljava/util/List;)V">
+<counter type="INSTRUCTION" missed="12" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</method>
+<method name="write$Self$api" desc="(Llava/network/dto/topic/Align;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V">
+<counter type="INSTRUCTION" missed="262" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="274" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+</class>
+<class name="lava/network/dto/topic/Align$Companion" sourcefilename="PostElementDto.kt">
+<method name="serializer" desc="()Lkotlinx/serialization/KSerializer;">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/network/dto/topic/Alignment" sourcefilename="PostElementDto.kt">
+<method name="&lt;clinit&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="35" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="_init_$_anonymous_" desc="()Lkotlinx/serialization/KSerializer;">
+<counter type="INSTRUCTION" missed="8" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="43" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+</class>
+<class name="lava/network/dto/topic/Alignment$Companion" sourcefilename="PostElementDto.kt">
+<method name="serializer" desc="()Lkotlinx/serialization/KSerializer;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/network/dto/topic/AuthorDto" sourcefilename="AuthorDto.kt">
+<method name="&lt;init&gt;" desc="(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V">
+<counter type="INSTRUCTION" missed="21" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</method>
+<method name="write$Self$api" desc="(Llava/network/dto/topic/AuthorDto;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V">
+<counter type="INSTRUCTION" missed="85" covered="0"/>
+<counter type="BRANCH" missed="18" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="106" covered="0"/>
+<counter type="BRANCH" missed="18" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+</class>
+<class name="lava/network/dto/topic/AuthorDto$Companion" sourcefilename="AuthorDto.kt">
+<method name="serializer" desc="()Lkotlinx/serialization/KSerializer;">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/network/dto/topic/Bold" sourcefilename="PostElementDto.kt">
+<method name="write$Self$api" desc="(Llava/network/dto/topic/Bold;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V">
+<counter type="INSTRUCTION" missed="244" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Ljava/util/List;)V">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="251" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+</class>
+<class name="lava/network/dto/topic/Bold$Companion" sourcefilename="PostElementDto.kt">
+<method name="serializer" desc="()Lkotlinx/serialization/KSerializer;">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/network/dto/topic/Box" sourcefilename="PostElementDto.kt">
+<method name="write$Self$api" desc="(Llava/network/dto/topic/Box;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V">
+<counter type="INSTRUCTION" missed="244" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Ljava/util/List;)V">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="251" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+</class>
+<class name="lava/network/dto/topic/Box$Companion" sourcefilename="PostElementDto.kt">
+<method name="serializer" desc="()Lkotlinx/serialization/KSerializer;">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/network/dto/topic/Br" sourcefilename="PostElementDto.kt">
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="19" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="19" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/network/dto/topic/Code" sourcefilename="PostElementDto.kt">
+<method name="write$Self$api" desc="(Llava/network/dto/topic/Code;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V">
+<counter type="INSTRUCTION" missed="257" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Ljava/lang/String;Ljava/util/List;)V">
+<counter type="INSTRUCTION" missed="12" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="269" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+</class>
+<class name="lava/network/dto/topic/Code$Companion" sourcefilename="PostElementDto.kt">
+<method name="serializer" desc="()Lkotlinx/serialization/KSerializer;">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/network/dto/topic/Color" sourcefilename="PostElementDto.kt">
+<method name="&lt;init&gt;" desc="(Llava/network/dto/topic/ColorValue;Ljava/util/List;)V">
+<counter type="INSTRUCTION" missed="12" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</method>
+<method name="write$Self$api" desc="(Llava/network/dto/topic/Color;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V">
+<counter type="INSTRUCTION" missed="294" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="306" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+</class>
+<class name="lava/network/dto/topic/Color$Companion" sourcefilename="PostElementDto.kt">
+<method name="serializer" desc="()Lkotlinx/serialization/KSerializer;">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/network/dto/topic/ColorValue$Companion" sourcefilename="PostElementDto.kt">
+<method name="serializer" desc="()Lkotlinx/serialization/KSerializer;">
+<counter type="INSTRUCTION" missed="35" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="35" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/network/dto/topic/ColorValue$Hex" sourcefilename="PostElementDto.kt">
+<method name="write$Self$api" desc="(Llava/network/dto/topic/ColorValue$Hex;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V">
+<counter type="INSTRUCTION" missed="21" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(J)V">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="28" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+</class>
+<class name="lava/network/dto/topic/ColorValue$Hex$Companion" sourcefilename="PostElementDto.kt">
+<method name="serializer" desc="()Lkotlinx/serialization/KSerializer;">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/network/dto/topic/ColorValue$Name" sourcefilename="PostElementDto.kt">
+<method name="&lt;init&gt;" desc="(Ljava/lang/String;)V">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="write$Self$api" desc="(Llava/network/dto/topic/ColorValue$Name;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V">
+<counter type="INSTRUCTION" missed="21" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="28" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+</class>
+<class name="lava/network/dto/topic/ColorValue$Name$Companion" sourcefilename="PostElementDto.kt">
+<method name="serializer" desc="()Lkotlinx/serialization/KSerializer;">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/network/dto/topic/CommentsPageDto" sourcefilename="TopicDto.kt">
+<method name="write$Self$api" desc="(Llava/network/dto/topic/CommentsPageDto;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V">
+<counter type="INSTRUCTION" missed="164" covered="0"/>
+<counter type="BRANCH" missed="18" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Ljava/lang/String;Ljava/lang/String;Llava/network/dto/topic/AuthorDto;Llava/network/dto/forum/CategoryDto;IILjava/util/List;)V">
+<counter type="INSTRUCTION" missed="41" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="7" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="205" covered="0"/>
+<counter type="BRANCH" missed="18" covered="0"/>
+<counter type="LINE" missed="8" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+</class>
+<class name="lava/network/dto/topic/CommentsPageDto$Companion" sourcefilename="TopicDto.kt">
+<method name="serializer" desc="()Lkotlinx/serialization/KSerializer;">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/network/dto/topic/Crossed" sourcefilename="PostElementDto.kt">
+<method name="write$Self$api" desc="(Llava/network/dto/topic/Crossed;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V">
+<counter type="INSTRUCTION" missed="244" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Ljava/util/List;)V">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="251" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+</class>
+<class name="lava/network/dto/topic/Crossed$Companion" sourcefilename="PostElementDto.kt">
+<method name="serializer" desc="()Lkotlinx/serialization/KSerializer;">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/network/dto/topic/ForumTopicDto$Companion" sourcefilename="TopicDto.kt">
+<method name="serializer" desc="()Lkotlinx/serialization/KSerializer;">
+<counter type="INSTRUCTION" missed="44" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="44" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/network/dto/topic/Hr" sourcefilename="PostElementDto.kt">
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="19" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="19" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/network/dto/topic/Image" sourcefilename="PostElementDto.kt">
+<method name="write$Self$api" desc="(Llava/network/dto/topic/Image;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V">
+<counter type="INSTRUCTION" missed="21" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Ljava/lang/String;)V">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="28" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+</class>
+<class name="lava/network/dto/topic/Image$Companion" sourcefilename="PostElementDto.kt">
+<method name="serializer" desc="()Lkotlinx/serialization/KSerializer;">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/network/dto/topic/ImageAligned" sourcefilename="PostElementDto.kt">
+<method name="&lt;init&gt;" desc="(Ljava/lang/String;Llava/network/dto/topic/Alignment;)V">
+<counter type="INSTRUCTION" missed="12" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</method>
+<method name="write$Self$api" desc="(Llava/network/dto/topic/ImageAligned;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V">
+<counter type="INSTRUCTION" missed="50" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="62" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+</class>
+<class name="lava/network/dto/topic/ImageAligned$Companion" sourcefilename="PostElementDto.kt">
+<method name="serializer" desc="()Lkotlinx/serialization/KSerializer;">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/network/dto/topic/Italic" sourcefilename="PostElementDto.kt">
+<method name="write$Self$api" desc="(Llava/network/dto/topic/Italic;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V">
+<counter type="INSTRUCTION" missed="244" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Ljava/util/List;)V">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="251" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+</class>
+<class name="lava/network/dto/topic/Italic$Companion" sourcefilename="PostElementDto.kt">
+<method name="serializer" desc="()Lkotlinx/serialization/KSerializer;">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/network/dto/topic/Link" sourcefilename="PostElementDto.kt">
+<method name="write$Self$api" desc="(Llava/network/dto/topic/Link;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V">
+<counter type="INSTRUCTION" missed="257" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Ljava/lang/String;Ljava/util/List;)V">
+<counter type="INSTRUCTION" missed="12" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="269" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+</class>
+<class name="lava/network/dto/topic/Link$Companion" sourcefilename="PostElementDto.kt">
+<method name="serializer" desc="()Lkotlinx/serialization/KSerializer;">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/network/dto/topic/PostBr" sourcefilename="PostElementDto.kt">
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="19" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="19" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/network/dto/topic/PostDto" sourcefilename="PostDto.kt">
+<method name="write$Self$api" desc="(Llava/network/dto/topic/PostDto;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V">
+<counter type="INSTRUCTION" missed="285" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Ljava/lang/String;Llava/network/dto/topic/AuthorDto;Ljava/lang/String;Ljava/util/List;)V">
+<counter type="INSTRUCTION" missed="22" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="5" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="307" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+</class>
+<class name="lava/network/dto/topic/PostDto$Companion" sourcefilename="PostDto.kt">
+<method name="serializer" desc="()Lkotlinx/serialization/KSerializer;">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/network/dto/topic/PostElementDto$Companion" sourcefilename="PostElementDto.kt">
+<method name="serializer" desc="()Lkotlinx/serialization/KSerializer;">
+<counter type="INSTRUCTION" missed="206" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="206" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/network/dto/topic/Quote" sourcefilename="PostElementDto.kt">
+<method name="&lt;init&gt;" desc="(Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)V">
+<counter type="INSTRUCTION" missed="17" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+</method>
+<method name="write$Self$api" desc="(Llava/network/dto/topic/Quote;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V">
+<counter type="INSTRUCTION" missed="270" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="287" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="5" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+</class>
+<class name="lava/network/dto/topic/Quote$Companion" sourcefilename="PostElementDto.kt">
+<method name="serializer" desc="()Lkotlinx/serialization/KSerializer;">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/network/dto/topic/Size" sourcefilename="PostElementDto.kt">
+<method name="&lt;init&gt;" desc="(ILjava/util/List;)V">
+<counter type="INSTRUCTION" missed="12" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</method>
+<method name="write$Self$api" desc="(Llava/network/dto/topic/Size;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V">
+<counter type="INSTRUCTION" missed="257" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="269" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+</class>
+<class name="lava/network/dto/topic/Size$Companion" sourcefilename="PostElementDto.kt">
+<method name="serializer" desc="()Lkotlinx/serialization/KSerializer;">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/network/dto/topic/Spoiler" sourcefilename="PostElementDto.kt">
+<method name="&lt;init&gt;" desc="(Ljava/lang/String;Ljava/util/List;)V">
+<counter type="INSTRUCTION" missed="12" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</method>
+<method name="write$Self$api" desc="(Llava/network/dto/topic/Spoiler;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V">
+<counter type="INSTRUCTION" missed="257" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="269" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+</class>
+<class name="lava/network/dto/topic/Spoiler$Companion" sourcefilename="PostElementDto.kt">
+<method name="serializer" desc="()Lkotlinx/serialization/KSerializer;">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/network/dto/topic/Text" sourcefilename="PostElementDto.kt">
+<method name="&lt;init&gt;" desc="(Ljava/lang/String;)V">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="write$Self$api" desc="(Llava/network/dto/topic/Text;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V">
+<counter type="INSTRUCTION" missed="21" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="28" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+</class>
+<class name="lava/network/dto/topic/Text$Companion" sourcefilename="PostElementDto.kt">
+<method name="serializer" desc="()Lkotlinx/serialization/KSerializer;">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/network/dto/topic/TextAlignment" sourcefilename="PostElementDto.kt">
+<method name="&lt;clinit&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="35" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="_init_$_anonymous_" desc="()Lkotlinx/serialization/KSerializer;">
+<counter type="INSTRUCTION" missed="8" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="43" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+</class>
+<class name="lava/network/dto/topic/TextAlignment$Companion" sourcefilename="PostElementDto.kt">
+<method name="serializer" desc="()Lkotlinx/serialization/KSerializer;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/network/dto/topic/TopicDto" sourcefilename="TopicDto.kt">
+<method name="write$Self$api" desc="(Llava/network/dto/topic/TopicDto;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V">
+<counter type="INSTRUCTION" missed="94" covered="0"/>
+<counter type="BRANCH" missed="18" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Ljava/lang/String;Ljava/lang/String;Llava/network/dto/topic/AuthorDto;Llava/network/dto/forum/CategoryDto;)V">
+<counter type="INSTRUCTION" missed="26" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="120" covered="0"/>
+<counter type="BRANCH" missed="18" covered="0"/>
+<counter type="LINE" missed="5" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+</class>
+<class name="lava/network/dto/topic/TopicDto$Companion" sourcefilename="TopicDto.kt">
+<method name="serializer" desc="()Lkotlinx/serialization/KSerializer;">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/network/dto/topic/TopicPageCommentsDto" sourcefilename="TopicPageDto.kt">
+<method name="write$Self$api" desc="(Llava/network/dto/topic/TopicPageCommentsDto;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V">
+<counter type="INSTRUCTION" missed="66" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(IILjava/util/List;)V">
+<counter type="INSTRUCTION" missed="17" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="83" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="5" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+</class>
+<class name="lava/network/dto/topic/TopicPageCommentsDto$Companion" sourcefilename="TopicPageDto.kt">
+<method name="serializer" desc="()Lkotlinx/serialization/KSerializer;">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/network/dto/topic/TopicPageDto" sourcefilename="TopicPageDto.kt">
+<method name="&lt;init&gt;" desc="(Ljava/lang/String;Ljava/lang/String;Llava/network/dto/topic/AuthorDto;Llava/network/dto/forum/CategoryDto;Llava/network/dto/topic/TorrentDataDto;Llava/network/dto/topic/TopicPageCommentsDto;)V">
+<counter type="INSTRUCTION" missed="32" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="7" covered="0"/>
+</method>
+<method name="write$Self$api" desc="(Llava/network/dto/topic/TopicPageDto;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V">
+<counter type="INSTRUCTION" missed="74" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="106" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="8" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+</class>
+<class name="lava/network/dto/topic/TopicPageDto$Companion" sourcefilename="TopicPageDto.kt">
+<method name="serializer" desc="()Lkotlinx/serialization/KSerializer;">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/network/dto/topic/TorrentDataDto" sourcefilename="TopicPageDto.kt">
+<method name="&lt;init&gt;" desc="(Ljava/lang/String;Ljava/lang/String;Llava/network/dto/topic/TorrentStatusDto;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/String;)V">
+<counter type="INSTRUCTION" missed="64" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="8" covered="0"/>
+</method>
+<method name="write$Self$api" desc="(Llava/network/dto/topic/TorrentDataDto;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V">
+<counter type="INSTRUCTION" missed="309" covered="0"/>
+<counter type="BRANCH" missed="66" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="373" covered="0"/>
+<counter type="BRANCH" missed="66" covered="0"/>
+<counter type="LINE" missed="9" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+</class>
+<class name="lava/network/dto/topic/TorrentDataDto$Companion" sourcefilename="TopicPageDto.kt">
+<method name="serializer" desc="()Lkotlinx/serialization/KSerializer;">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/network/dto/topic/TorrentDescriptionDto" sourcefilename="TorrentDescriptionDto.kt">
+<method name="write$Self$api" desc="(Llava/network/dto/topic/TorrentDescriptionDto;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V">
+<counter type="INSTRUCTION" missed="244" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Ljava/util/List;)V">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="251" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+</class>
+<class name="lava/network/dto/topic/TorrentDescriptionDto$Companion" sourcefilename="TorrentDescriptionDto.kt">
+<method name="serializer" desc="()Lkotlinx/serialization/KSerializer;">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/network/dto/topic/TorrentDto" sourcefilename="TopicDto.kt">
+<method name="write$Self$api" desc="(Llava/network/dto/topic/TorrentDto;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V">
+<counter type="INSTRUCTION" missed="408" covered="0"/>
+<counter type="BRANCH" missed="82" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Ljava/lang/String;Ljava/lang/String;Llava/network/dto/topic/AuthorDto;Llava/network/dto/forum/CategoryDto;Ljava/lang/String;Llava/network/dto/topic/TorrentStatusDto;Ljava/lang/Long;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/String;Llava/network/dto/topic/TorrentDescriptionDto;)V">
+<counter type="INSTRUCTION" missed="90" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="12" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="498" covered="0"/>
+<counter type="BRANCH" missed="82" covered="0"/>
+<counter type="LINE" missed="13" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+</class>
+<class name="lava/network/dto/topic/TorrentDto$Companion" sourcefilename="TopicDto.kt">
+<method name="serializer" desc="()Lkotlinx/serialization/KSerializer;">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/network/dto/topic/TorrentStatusDto" sourcefilename="TorrentStatusDto.kt">
+<method name="&lt;clinit&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="59" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="8" covered="0"/>
+</method>
+<method name="_init_$_anonymous_" desc="()Lkotlinx/serialization/KSerializer;">
+<counter type="INSTRUCTION" missed="8" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="67" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="9" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+</class>
+<class name="lava/network/dto/topic/TorrentStatusDto$Companion" sourcefilename="TorrentStatusDto.kt">
+<method name="serializer" desc="()Lkotlinx/serialization/KSerializer;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/network/dto/topic/UList" sourcefilename="PostElementDto.kt">
+<method name="write$Self$api" desc="(Llava/network/dto/topic/UList;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V">
+<counter type="INSTRUCTION" missed="244" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Ljava/util/List;)V">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="251" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+</class>
+<class name="lava/network/dto/topic/UList$Companion" sourcefilename="PostElementDto.kt">
+<method name="serializer" desc="()Lkotlinx/serialization/KSerializer;">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/network/dto/topic/Underscore" sourcefilename="PostElementDto.kt">
+<method name="write$Self$api" desc="(Llava/network/dto/topic/Underscore;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V">
+<counter type="INSTRUCTION" missed="244" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Ljava/util/List;)V">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="251" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+</class>
+<class name="lava/network/dto/topic/Underscore$Companion" sourcefilename="PostElementDto.kt">
+<method name="serializer" desc="()Lkotlinx/serialization/KSerializer;">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<sourcefile name="PostDto.kt">
+<line nr="5" mi="287" ci="0" mb="2" cb="0"/>
+<line nr="6" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="7" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="8" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="9" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="10" mi="5" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="309" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="7" covered="0"/>
+</sourcefile>
+<sourcefile name="TopicDto.kt">
+<line nr="7" mi="44" ci="0" mb="0" cb="0"/>
+<line nr="15" mi="96" ci="0" mb="18" cb="0"/>
+<line nr="18" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="19" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="20" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="21" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="24" mi="410" ci="0" mb="82" cb="0"/>
+<line nr="27" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="28" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="29" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="30" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="31" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="32" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="33" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="34" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="35" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="36" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="37" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="38" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="41" mi="166" ci="0" mb="18" cb="0"/>
+<line nr="44" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="45" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="46" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="47" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="48" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="49" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="50" mi="5" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="873" covered="0"/>
+<counter type="BRANCH" missed="118" covered="0"/>
+<counter type="LINE" missed="30" covered="0"/>
+</sourcefile>
+<sourcefile name="TorrentDescriptionDto.kt">
+<line nr="5" mi="246" ci="0" mb="2" cb="0"/>
+<line nr="6" mi="7" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="253" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</sourcefile>
+<sourcefile name="PostElementDto.kt">
+<line nr="6" mi="13" ci="0" mb="0" cb="0"/>
+<line nr="7" mi="35" ci="0" mb="0" cb="0"/>
+<line nr="9" mi="13" ci="0" mb="0" cb="0"/>
+<line nr="10" mi="35" ci="0" mb="0" cb="0"/>
+<line nr="12" mi="35" ci="0" mb="0" cb="0"/>
+<line nr="14" mi="23" ci="0" mb="2" cb="0"/>
+<line nr="16" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="18" mi="23" ci="0" mb="2" cb="0"/>
+<line nr="20" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="23" mi="206" ci="0" mb="0" cb="0"/>
+<line nr="26" mi="23" ci="0" mb="2" cb="0"/>
+<line nr="28" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="30" mi="246" ci="0" mb="2" cb="0"/>
+<line nr="32" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="34" mi="264" ci="0" mb="2" cb="0"/>
+<line nr="36" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="37" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="38" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="41" mi="259" ci="0" mb="2" cb="0"/>
+<line nr="43" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="44" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="45" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="48" mi="296" ci="0" mb="2" cb="0"/>
+<line nr="50" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="51" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="52" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="55" mi="246" ci="0" mb="2" cb="0"/>
+<line nr="57" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="59" mi="246" ci="0" mb="2" cb="0"/>
+<line nr="61" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="63" mi="246" ci="0" mb="2" cb="0"/>
+<line nr="65" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="67" mi="246" ci="0" mb="2" cb="0"/>
+<line nr="69" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="71" mi="272" ci="0" mb="2" cb="0"/>
+<line nr="73" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="74" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="75" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="76" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="79" mi="259" ci="0" mb="2" cb="0"/>
+<line nr="81" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="82" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="83" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="86" mi="259" ci="0" mb="2" cb="0"/>
+<line nr="88" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="89" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="90" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="93" mi="23" ci="0" mb="2" cb="0"/>
+<line nr="95" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="97" mi="52" ci="0" mb="2" cb="0"/>
+<line nr="99" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="100" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="101" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="104" mi="259" ci="0" mb="2" cb="0"/>
+<line nr="106" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="107" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="108" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="111" mi="246" ci="0" mb="2" cb="0"/>
+<line nr="113" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="115" mi="19" ci="0" mb="0" cb="0"/>
+<line nr="119" mi="19" ci="0" mb="0" cb="0"/>
+<line nr="123" mi="19" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="4053" covered="0"/>
+<counter type="BRANCH" missed="36" covered="0"/>
+<counter type="LINE" missed="82" covered="0"/>
+</sourcefile>
+<sourcefile name="AuthorDto.kt">
+<line nr="5" mi="87" ci="0" mb="18" cb="0"/>
+<line nr="7" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="8" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="9" mi="8" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="108" covered="0"/>
+<counter type="BRANCH" missed="18" covered="0"/>
+<counter type="LINE" missed="5" covered="0"/>
+</sourcefile>
+<sourcefile name="TorrentStatusDto.kt">
+<line nr="5" mi="13" ci="0" mb="0" cb="0"/>
+<line nr="7" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="8" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="9" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="10" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="11" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="12" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="13" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="14" mi="17" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="72" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="10" covered="0"/>
+</sourcefile>
+<sourcefile name="TopicPageDto.kt">
+<line nr="6" mi="76" ci="0" mb="2" cb="0"/>
+<line nr="7" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="8" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="9" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="10" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="11" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="12" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="13" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="16" mi="311" ci="0" mb="66" cb="0"/>
+<line nr="18" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="19" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="20" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="21" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="22" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="23" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="24" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="25" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="28" mi="68" ci="0" mb="2" cb="0"/>
+<line nr="29" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="30" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="31" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="32" mi="5" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="568" covered="0"/>
+<counter type="BRANCH" missed="70" covered="0"/>
+<counter type="LINE" missed="25" covered="0"/>
+</sourcefile>
+<counter type="INSTRUCTION" missed="6236" covered="0"/>
+<counter type="BRANCH" missed="246" covered="0"/>
+<counter type="LINE" missed="162" covered="0"/>
+<counter type="METHOD" missed="96" covered="0"/>
+<counter type="CLASS" missed="66" covered="0"/>
+</package>
+<package name="lava/network/dto/forum">
+<class name="lava/network/dto/forum/CategoryDto" sourcefilename="CategoryDto.kt">
+<method name="write$Self$api" desc="(Llava/network/dto/forum/CategoryDto;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V">
+<counter type="INSTRUCTION" missed="89" covered="0"/>
+<counter type="BRANCH" missed="18" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)V">
+<counter type="INSTRUCTION" missed="21" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="110" covered="0"/>
+<counter type="BRANCH" missed="18" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+</class>
+<class name="lava/network/dto/forum/CategoryDto$Companion" sourcefilename="CategoryDto.kt">
+<method name="serializer" desc="()Lkotlinx/serialization/KSerializer;">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/network/dto/forum/CategoryPageDto" sourcefilename="CategoryPageDto.kt">
+<method name="&lt;init&gt;" desc="(Llava/network/dto/forum/CategoryDto;IILjava/util/List;Ljava/util/List;Ljava/util/List;)V">
+<counter type="INSTRUCTION" missed="39" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+</method>
+<method name="write$Self$api" desc="(Llava/network/dto/forum/CategoryPageDto;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V">
+<counter type="INSTRUCTION" missed="228" covered="0"/>
+<counter type="BRANCH" missed="26" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="267" covered="0"/>
+<counter type="BRANCH" missed="26" covered="0"/>
+<counter type="LINE" missed="7" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+</class>
+<class name="lava/network/dto/forum/CategoryPageDto$Companion" sourcefilename="CategoryPageDto.kt">
+<method name="serializer" desc="()Lkotlinx/serialization/KSerializer;">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/network/dto/forum/ForumDto" sourcefilename="ForumDto.kt">
+<method name="write$Self$api" desc="(Llava/network/dto/forum/ForumDto;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V">
+<counter type="INSTRUCTION" missed="40" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Ljava/util/List;)V">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="47" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+</class>
+<class name="lava/network/dto/forum/ForumDto$Companion" sourcefilename="ForumDto.kt">
+<method name="serializer" desc="()Lkotlinx/serialization/KSerializer;">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/network/dto/forum/SectionDto" sourcefilename="SectionDto.kt">
+<method name="write$Self$api" desc="(Llava/network/dto/forum/SectionDto;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V">
+<counter type="INSTRUCTION" missed="53" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Ljava/lang/String;Ljava/util/List;)V">
+<counter type="INSTRUCTION" missed="12" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="65" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+</class>
+<class name="lava/network/dto/forum/SectionDto$Companion" sourcefilename="SectionDto.kt">
+<method name="serializer" desc="()Lkotlinx/serialization/KSerializer;">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<sourcefile name="CategoryPageDto.kt">
+<line nr="6" mi="230" ci="0" mb="26" cb="0"/>
+<line nr="8" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="9" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="10" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="11" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="12" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="13" mi="8" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="269" covered="0"/>
+<counter type="BRANCH" missed="26" covered="0"/>
+<counter type="LINE" missed="8" covered="0"/>
+</sourcefile>
+<sourcefile name="ForumDto.kt">
+<line nr="5" mi="42" ci="0" mb="2" cb="0"/>
+<line nr="6" mi="7" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="49" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</sourcefile>
+<sourcefile name="SectionDto.kt">
+<line nr="5" mi="55" ci="0" mb="2" cb="0"/>
+<line nr="6" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="7" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="8" mi="5" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="67" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="5" covered="0"/>
+</sourcefile>
+<sourcefile name="CategoryDto.kt">
+<line nr="5" mi="91" ci="0" mb="18" cb="0"/>
+<line nr="7" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="8" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="9" mi="8" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="112" covered="0"/>
+<counter type="BRANCH" missed="18" covered="0"/>
+<counter type="LINE" missed="5" covered="0"/>
+</sourcefile>
+<counter type="INSTRUCTION" missed="497" covered="0"/>
+<counter type="BRANCH" missed="48" covered="0"/>
+<counter type="LINE" missed="21" covered="0"/>
+<counter type="METHOD" missed="12" covered="0"/>
+<counter type="CLASS" missed="8" covered="0"/>
+</package>
+<counter type="INSTRUCTION" missed="7600" covered="263"/>
+<counter type="BRANCH" missed="327" covered="15"/>
+<counter type="LINE" missed="258" covered="41"/>
+<counter type="METHOD" missed="153" covered="6"/>
+<counter type="CLASS" missed="102" covered="5"/>
+</report>

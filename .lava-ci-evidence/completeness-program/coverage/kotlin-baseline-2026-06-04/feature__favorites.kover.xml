@@ -1,0 +1,619 @@
+<?xml version="1.0" ?>
+<report name="Kover Gradle Plugin XML report for :feature:favorites">
+<package name="hilt_aggregated_deps">
+<class name="hilt_aggregated_deps/_lava_favorites_FavoritesViewModel_HiltModules_BindsModule" sourcefilename="_lava_favorites_FavoritesViewModel_HiltModules_BindsModule.java">
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="hilt_aggregated_deps/_lava_favorites_FavoritesViewModel_HiltModules_KeyModule" sourcefilename="_lava_favorites_FavoritesViewModel_HiltModules_KeyModule.java">
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<sourcefile name="_lava_favorites_FavoritesViewModel_HiltModules_BindsModule.java">
+<line nr="14" mi="2" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</sourcefile>
+<sourcefile name="_lava_favorites_FavoritesViewModel_HiltModules_KeyModule.java">
+<line nr="14" mi="2" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</sourcefile>
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+<counter type="CLASS" missed="2" covered="0"/>
+</package>
+<package name="lava/favorites">
+<class name="lava/favorites/FavoritesAction$SyncNowClick" sourcefilename="FavoritesAction.kt">
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/favorites/FavoritesAction$TopicClick" sourcefilename="FavoritesAction.kt">
+<method name="&lt;init&gt;" desc="(Llava/models/topic/TopicModel;)V">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/favorites/FavoritesScreenKt" sourcefilename="FavoritesScreen.kt">
+<method name="FavoritesScreen" desc="(Llava/favorites/FavoritesState;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;I)V">
+<counter type="INSTRUCTION" missed="335" covered="0"/>
+<counter type="BRANCH" missed="15" covered="1"/>
+<counter type="LINE" missed="26" covered="0"/>
+</method>
+<method name="FavoritesScreen$lambda$11$lambda$8$lambda$7" desc="(Llava/favorites/FavoritesState;Lkotlin/jvm/functions/Function1;Landroidx/compose/foundation/lazy/LazyListScope;)Lkotlin/Unit;">
+<counter type="INSTRUCTION" missed="6" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="FavoritesScreen" desc="(Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;I)V">
+<counter type="INSTRUCTION" missed="75" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+</method>
+<method name="FavoritesScreen" desc="(Llava/favorites/FavoritesViewModel;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;I)V">
+<counter type="INSTRUCTION" missed="162" covered="0"/>
+<counter type="BRANCH" missed="4" covered="0"/>
+<counter type="LINE" missed="5" covered="0"/>
+</method>
+<method name="FavoriteTopic" desc="(Llava/models/topic/TopicModel;Lkotlin/jvm/functions/Function0;Landroidx/compose/runtime/Composer;I)V">
+<counter type="INSTRUCTION" missed="113" covered="0"/>
+<counter type="BRANCH" missed="4" covered="0"/>
+<counter type="LINE" missed="8" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="691" covered="0"/>
+<counter type="BRANCH" missed="25" covered="1"/>
+<counter type="LINE" missed="44" covered="0"/>
+<counter type="METHOD" missed="5" covered="0"/>
+</class>
+<class name="lava/favorites/FavoritesScreenKt$FavoriteTopic$1" sourcefilename="FavoritesScreen.kt">
+<method name="invoke" desc="(Landroidx/compose/runtime/Composer;I)V">
+<counter type="INSTRUCTION" missed="42" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="5" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="42" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="5" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/favorites/FavoritesScreenKt$FavoritesScreen$2$1" sourcefilename="FavoritesScreen.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/favorites/FavoritesScreenKt$FavoritesScreen$5$1$1$1$1$1" sourcefilename="FavoritesScreen.kt">
+<method name="invoke" desc="()V">
+<counter type="INSTRUCTION" missed="9" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="9" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/favorites/FavoritesScreenKt$FavoritesScreen$lambda$11$lambda$8$lambda$7$$inlined$items$default$1" sourcefilename="LazyDsl.kt">
+<method name="invoke" desc="(Ljava/lang/Object;)Ljava/lang/Void;">
+<counter type="INSTRUCTION" missed="1" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="1" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/favorites/FavoritesScreenKt$FavoritesScreen$lambda$11$lambda$8$lambda$7$$inlined$items$default$2" sourcefilename="LazyDsl.kt">
+<method name="invoke" desc="(I)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/favorites/FavoritesScreenKt$FavoritesScreen$lambda$11$lambda$8$lambda$7$$inlined$items$default$3" sourcefilename="LazyDsl.kt">
+<method name="invoke" desc="(I)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/favorites/FavoritesSideEffect$OpenTopic" sourcefilename="FavoritesSideEffect.kt">
+<method name="&lt;init&gt;" desc="(Ljava/lang/String;)V">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/favorites/FavoritesState$Empty" sourcefilename="FavoritesState.kt">
+<method name="&lt;init&gt;" desc="(Z)V">
+<counter type="INSTRUCTION" missed="16" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="16" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/favorites/FavoritesState$FavoritesList" sourcefilename="FavoritesState.kt">
+<method name="&lt;init&gt;" desc="(Ljava/util/List;Z)V">
+<counter type="INSTRUCTION" missed="12" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="12" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/favorites/FavoritesState$Initial" sourcefilename="FavoritesState.kt">
+<method name="&lt;init&gt;" desc="(Z)V">
+<counter type="INSTRUCTION" missed="16" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="16" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/favorites/FavoritesViewModel" sourcefilename="FavoritesViewModel.kt">
+<method name="onTopicClick" desc="(Llava/models/topic/TopicModel;)Lkotlinx/coroutines/Job;">
+<counter type="INSTRUCTION" missed="12" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Llava/domain/usecase/ObserveFavoritesUseCase;Llava/domain/usecase/RefreshFavoritesUseCase;Llava/logger/api/LoggerFactory;Llava/common/analytics/AnalyticsTracker;)V">
+<counter type="INSTRUCTION" missed="38" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="7" covered="0"/>
+</method>
+<method name="perform" desc="(Llava/favorites/FavoritesAction;)V">
+<counter type="INSTRUCTION" missed="26" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+</method>
+<method name="observeFavorites" desc="()Lkotlinx/coroutines/Job;">
+<counter type="INSTRUCTION" missed="12" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="onSyncNow" desc="()Lkotlinx/coroutines/Job;">
+<counter type="INSTRUCTION" missed="12" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="100" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="14" covered="0"/>
+<counter type="METHOD" missed="5" covered="0"/>
+</class>
+<class name="lava/favorites/FavoritesViewModel$container$1" sourcefilename="FavoritesViewModel.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="10" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="10" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/favorites/FavoritesViewModel$observeFavorites$1" sourcefilename="FavoritesViewModel.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="46" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="46" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/favorites/FavoritesViewModel$observeFavorites$1$2" sourcefilename="FavoritesViewModel.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="29" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</method>
+<method name="invokeSuspend$lambda$1" desc="(Ljava/util/List;ZLorg/orbitmvi/orbit/syntax/simple/SimpleContext;)Llava/favorites/FavoritesState;">
+<counter type="INSTRUCTION" missed="15" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="44" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+</class>
+<class name="lava/favorites/FavoritesViewModel$onSyncNow$1" sourcefilename="FavoritesViewModel.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="65" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+</method>
+<method name="invokeSuspend$lambda$2" desc="(Lorg/orbitmvi/orbit/syntax/simple/SimpleContext;)Llava/favorites/FavoritesState;">
+<counter type="INSTRUCTION" missed="31" covered="0"/>
+<counter type="BRANCH" missed="4" covered="0"/>
+<counter type="LINE" missed="5" covered="0"/>
+</method>
+<method name="invokeSuspend$lambda$0" desc="(Lorg/orbitmvi/orbit/syntax/simple/SimpleContext;)Llava/favorites/FavoritesState;">
+<counter type="INSTRUCTION" missed="31" covered="0"/>
+<counter type="BRANCH" missed="4" covered="0"/>
+<counter type="LINE" missed="5" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="127" covered="0"/>
+<counter type="BRANCH" missed="8" covered="0"/>
+<counter type="LINE" missed="16" covered="0"/>
+<counter type="METHOD" missed="3" covered="0"/>
+</class>
+<class name="lava/favorites/FavoritesViewModel$onTopicClick$1" sourcefilename="FavoritesViewModel.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="17" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="17" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/favorites/FavoritesViewModel_Factory" sourcefilename="FavoritesViewModel_Factory.java">
+<method name="newInstance" desc="(Llava/domain/usecase/ObserveFavoritesUseCase;Llava/domain/usecase/RefreshFavoritesUseCase;Llava/logger/api/LoggerFactory;Llava/common/analytics/AnalyticsTracker;)Llava/favorites/FavoritesViewModel;">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Ldagger/internal/Provider;Ldagger/internal/Provider;Ldagger/internal/Provider;Ldagger/internal/Provider;)V">
+<counter type="INSTRUCTION" missed="14" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="5" covered="0"/>
+</method>
+<method name="get" desc="()Llava/favorites/FavoritesViewModel;">
+<counter type="INSTRUCTION" missed="17" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="create" desc="(Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Llava/favorites/FavoritesViewModel_Factory;">
+<counter type="INSTRUCTION" missed="11" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="create" desc="(Ldagger/internal/Provider;Ldagger/internal/Provider;Ldagger/internal/Provider;Ldagger/internal/Provider;)Llava/favorites/FavoritesViewModel_Factory;">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="56" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="9" covered="0"/>
+<counter type="METHOD" missed="5" covered="0"/>
+</class>
+<class name="lava/favorites/FavoritesViewModel_HiltModules$BindsModule" sourcefilename="FavoritesViewModel_HiltModules.java">
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/favorites/FavoritesViewModel_HiltModules$KeyModule" sourcefilename="FavoritesViewModel_HiltModules.java">
+<method name="provide" desc="()Z">
+<counter type="INSTRUCTION" missed="1" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="1" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/favorites/FavoritesViewModel_HiltModules_BindsModule_Binds_LazyMapKey" sourcefilename="FavoritesViewModel_HiltModules_BindsModule_Binds_LazyMapKey.java">
+<method name="&lt;clinit&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+</class>
+<class name="lava/favorites/FavoritesViewModel_HiltModules_KeyModule_ProvideFactory" sourcefilename="FavoritesViewModel_HiltModules_KeyModule_ProvideFactory.java">
+<method name="provide" desc="()Z">
+<counter type="INSTRUCTION" missed="1" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="get" desc="()Ljava/lang/Boolean;">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="create" desc="()Llava/favorites/FavoritesViewModel_HiltModules_KeyModule_ProvideFactory;">
+<counter type="INSTRUCTION" missed="1" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="6" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+<counter type="METHOD" missed="4" covered="0"/>
+</class>
+<class name="lava/favorites/FavoritesViewModel_HiltModules_KeyModule_ProvideFactory$InstanceHolder" sourcefilename="FavoritesViewModel_HiltModules_KeyModule_ProvideFactory.java">
+<method name="&lt;clinit&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/favorites/FavoritesViewModel_HiltModules_KeyModule_Provide_LazyMapKey" sourcefilename="FavoritesViewModel_HiltModules_KeyModule_Provide_LazyMapKey.java">
+<method name="&lt;clinit&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+</class>
+<sourcefile name="FavoritesViewModel_Factory.java">
+<line nr="43" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="44" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="45" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="46" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="47" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="52" mi="17" ci="0" mb="0" cb="0"/>
+<line nr="60" mi="11" ci="0" mb="0" cb="0"/>
+<line nr="67" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="73" mi="7" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="56" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="9" covered="0"/>
+</sourcefile>
+<sourcefile name="FavoritesViewModel_HiltModules_KeyModule_Provide_LazyMapKey.java">
+<line nr="23" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="27" mi="2" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</sourcefile>
+<sourcefile name="LazyDsl.kt">
+<line nr="171" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="176" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="177" mi="7" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="15" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</sourcefile>
+<sourcefile name="FavoritesState.kt">
+<line nr="9" mi="16" ci="0" mb="0" cb="0"/>
+<line nr="10" mi="16" ci="0" mb="0" cb="0"/>
+<line nr="12" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="13" mi="7" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="44" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+</sourcefile>
+<sourcefile name="FavoritesViewModel.kt">
+<line nr="23" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="24" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="26" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="27" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="28" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="30" mi="16" ci="0" mb="0" cb="0"/>
+<line nr="31" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="32" mi="10" ci="0" mb="0" cb="0"/>
+<line nr="36" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="37" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="38" mi="9" ci="0" mb="2" cb="0"/>
+<line nr="39" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="43" mi="12" ci="0" mb="0" cb="0"/>
+<line nr="44" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="45" mi="40" ci="0" mb="0" cb="0"/>
+<line nr="46" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="47" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="48" mi="15" ci="0" mb="0" cb="0"/>
+<line nr="49" mi="3" ci="0" mb="2" cb="0"/>
+<line nr="50" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="52" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="58" mi="12" ci="0" mb="0" cb="0"/>
+<line nr="59" mi="17" ci="0" mb="0" cb="0"/>
+<line nr="62" mi="12" ci="0" mb="0" cb="0"/>
+<line nr="63" mi="14" ci="0" mb="0" cb="0"/>
+<line nr="64" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="65" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="66" mi="9" ci="0" mb="2" cb="0"/>
+<line nr="67" mi="9" ci="0" mb="2" cb="0"/>
+<line nr="68" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="71" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="72" mi="17" ci="0" mb="0" cb="0"/>
+<line nr="74" mi="10" ci="0" mb="0" cb="0"/>
+<line nr="75" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="77" mi="14" ci="0" mb="0" cb="0"/>
+<line nr="78" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="79" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="80" mi="9" ci="0" mb="2" cb="0"/>
+<line nr="81" mi="9" ci="0" mb="2" cb="0"/>
+<line nr="82" mi="3" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="344" covered="0"/>
+<counter type="BRANCH" missed="12" covered="0"/>
+<counter type="LINE" missed="40" covered="0"/>
+</sourcefile>
+<sourcefile name="FavoritesSideEffect.kt">
+<line nr="4" mi="7" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</sourcefile>
+<sourcefile name="FavoritesAction.kt">
+<line nr="7" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="8" mi="2" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="9" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</sourcefile>
+<sourcefile name="FavoritesViewModel_HiltModules_KeyModule_ProvideFactory.java">
+<line nr="25" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="28" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="32" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="36" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="40" mi="4" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="10" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="5" covered="0"/>
+</sourcefile>
+<sourcefile name="FavoritesScreen.kt">
+<line nr="32" mi="45" ci="0" mb="2" cb="0"/>
+<line nr="33" mi="11" ci="0" mb="0" cb="0"/>
+<line nr="34" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="35" mi="12" ci="0" mb="0" cb="0"/>
+<line nr="41" mi="52" ci="0" mb="4" cb="0"/>
+<line nr="42" mi="43" ci="0" mb="0" cb="0"/>
+<line nr="43" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="44" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="47" mi="18" ci="0" mb="0" cb="0"/>
+<line nr="48" mi="36" ci="0" mb="0" cb="0"/>
+<line nr="49" mi="13" ci="0" mb="0" cb="0"/>
+<line nr="55" mi="74" ci="0" mb="4" cb="0"/>
+<line nr="56" mi="13" ci="0" mb="0" cb="0"/>
+<line nr="57" mi="17" ci="0" mb="2" cb="0"/>
+<line nr="58" mi="14" ci="0" mb="2" cb="0"/>
+<line nr="59" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="60" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="61" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="63" mi="13" ci="0" mb="1" cb="1"/>
+<line nr="64" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="65" mi="47" ci="0" mb="4" cb="0"/>
+<line nr="66" mi="24" ci="0" mb="0" cb="0"/>
+<line nr="67" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="70" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="75" mi="12" ci="0" mb="2" cb="0"/>
+<line nr="76" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="77" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="78" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="79" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="80" mi="10" ci="0" mb="0" cb="0"/>
+<line nr="82" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="83" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="84" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="85" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="86" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="87" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="88" mi="25" ci="0" mb="0" cb="0"/>
+<line nr="89" mi="27" ci="0" mb="0" cb="0"/>
+<line nr="92" mi="14" ci="0" mb="0" cb="0"/>
+<line nr="98" mi="57" ci="0" mb="4" cb="0"/>
+<line nr="99" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="100" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="101" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="103" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="104" mi="10" ci="0" mb="0" cb="0"/>
+<line nr="105" mi="10" ci="0" mb="0" cb="0"/>
+<line nr="106" mi="19" ci="0" mb="2" cb="0"/>
+<line nr="107" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="108" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="109" mi="12" ci="0" mb="0" cb="0"/>
+<line nr="110" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="114" mi="13" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="749" covered="0"/>
+<counter type="BRANCH" missed="27" covered="1"/>
+<counter type="LINE" missed="52" covered="0"/>
+</sourcefile>
+<sourcefile name="FavoritesViewModel_HiltModules_BindsModule_Binds_LazyMapKey.java">
+<line nr="23" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="27" mi="2" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</sourcefile>
+<sourcefile name="FavoritesViewModel_HiltModules.java">
+<line nr="27" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="48" mi="1" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="3" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</sourcefile>
+<counter type="INSTRUCTION" missed="1245" covered="0"/>
+<counter type="BRANCH" missed="39" covered="1"/>
+<counter type="LINE" missed="122" covered="0"/>
+<counter type="METHOD" missed="46" covered="0"/>
+<counter type="CLASS" missed="26" covered="0"/>
+</package>
+<counter type="INSTRUCTION" missed="1249" covered="0"/>
+<counter type="BRANCH" missed="39" covered="1"/>
+<counter type="LINE" missed="124" covered="0"/>
+<counter type="METHOD" missed="48" covered="0"/>
+<counter type="CLASS" missed="28" covered="0"/>
+</report>

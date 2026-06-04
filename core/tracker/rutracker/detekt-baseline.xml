@@ -1,0 +1,43 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>ComplexCondition:ParseTopicPageUseCase.kt$ParseTopicPageUseCase$seeds != null || leeches != null || status != null || !size.isNullOrBlank()</ID>
+    <ID>CyclomaticComplexMethod:ParsePostUseCase.kt$ParsePostUseCase$private fun ElementsList.appendNode(node: Node)</ID>
+    <ID>CyclomaticComplexMethod:PostElementFlatten.kt$private fun PostElementDto.appendInto(sb: StringBuilder)</ID>
+    <ID>CyclomaticComplexMethod:RuTrackerClient.kt$RuTrackerClient$@Suppress("UNCHECKED_CAST") override fun &lt;T : TrackerFeature&gt; getFeature(featureClass: KClass&lt;T&gt;): T?</ID>
+    <ID>CyclomaticComplexMethod:SearchPageMapper.kt$fun SearchRequest.toLegacySearchParams(): LegacySearchParams</ID>
+    <ID>FunctionOnlyReturningConstant:GetMagnetLinkUseCase.kt$GetMagnetLinkUseCase$operator fun invoke(id: String): String?</ID>
+    <ID>ImplicitDefaultLocale:Utils.kt$String.format("%.1f %sB", sizeBytes / 1024.0.pow(exp.toDouble()), pre)</ID>
+    <ID>LongMethod:GetCategoryPageUseCase.kt$GetCategoryPageUseCase.Companion$private fun parseCategoryPage(html: String, forumId: String): CategoryPageDto</ID>
+    <ID>LongParameterList:GetSearchPageUseCase.kt$GetSearchPageUseCase$( token: String, searchQuery: String?, categories: String?, author: String?, authorId: String?, sortType: SearchSortTypeDto?, sortOrder: SearchSortOrderDto?, period: SearchPeriodDto?, page: Int?, )</ID>
+    <ID>LongParameterList:RuTrackerClient.kt$RuTrackerClient$( private val search: RuTrackerSearch, private val browse: RuTrackerBrowse, private val topic: RuTrackerTopic, private val comments: RuTrackerComments, private val favorites: RuTrackerFavorites, private val auth: RuTrackerAuth, private val download: RuTrackerDownload, )</ID>
+    <ID>LongParameterList:RuTrackerInnerApi.kt$RuTrackerInnerApi$( token: String, searchQuery: String?, categories: String?, author: String?, authorId: String?, sortType: SearchSortTypeDto?, sortOrder: SearchSortOrderDto?, period: SearchPeriodDto?, page: Int?, )</ID>
+    <ID>LongParameterList:RuTrackerNetworkApi.kt$RuTrackerNetworkApi$( private val addCommentUseCase: AddCommentUseCase, private val addFavoriteUseCase: AddFavoriteUseCase, private val checkAuthorisedUseCase: CheckAuthorisedUseCase, private val getCategoryPageUseCase: GetCategoryPageUseCase, private val getCommentsPageUseCase: GetCommentsPageUseCase, private val getFavoritesUseCase: GetFavoritesUseCase, private val getForumUseCase: GetForumUseCase, private val getSearchPageUseCase: GetSearchPageUseCase, private val getTopicUseCase: GetTopicUseCase, private val getTopicPageUseCase: GetTopicPageUseCase, private val getTorrentFileUseCase: GetTorrentFileUseCase, private val getTorrentUseCase: GetTorrentUseCase, private val loginUseCase: LoginUseCase, private val removeFavoriteUseCase: RemoveFavoriteUseCase, )</ID>
+    <ID>MagicNumber:RuTrackerInnerApiImpl.kt$RuTrackerInnerApiImpl$30</ID>
+    <ID>MagicNumber:RuTrackerInnerApiImpl.kt$RuTrackerInnerApiImpl$50</ID>
+    <ID>MagicNumber:RuTrackerSizeParser.kt$RuTrackerSizeParser$1_024L</ID>
+    <ID>MagicNumber:Utils.kt$1024</ID>
+    <ID>MagicNumber:Utils.kt$1024.0</ID>
+    <ID>MaxLineLength:RuTrackerHttpClientFactory.kt$RuTrackerHttpClientFactory$"Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36"</ID>
+    <ID>NestedBlockDepth:GetForumUseCase.kt$GetForumUseCase.Companion$private fun parseForumTree(html: String): ForumDto</ID>
+    <ID>PrintStackTrace:RuTrackerAuth.kt$RuTrackerAuth$t</ID>
+    <ID>PrintStackTrace:RuTrackerNetworkApi.kt$RuTrackerNetworkApi$t</ID>
+    <ID>ReturnCount:RuTrackerSizeParser.kt$RuTrackerSizeParser$fun parse(s: String?): Long?</ID>
+    <ID>SwallowedException:ParseTorrentUseCase.kt$ParseTorrentUseCase$e: Throwable</ID>
+    <ID>ThrowsCount:GetCommentsPageUseCase.kt$GetCommentsPageUseCase$suspend operator fun invoke( token: String, id: String, page: Int?, ): CommentsPageDto</ID>
+    <ID>ThrowsCount:GetTopicPageUseCase.kt$GetTopicPageUseCase$suspend operator fun invoke( token: String, id: String, page: Int?, ): TopicPageDto</ID>
+    <ID>ThrowsCount:GetTopicUseCase.kt$GetTopicUseCase$suspend operator fun invoke( token: String, id: String, page: Int?, ): ForumTopicDto</ID>
+    <ID>ThrowsCount:GetTorrentUseCase.kt$GetTorrentUseCase$suspend operator fun invoke(token: String, id: String): TorrentDto</ID>
+    <ID>TooGenericExceptionCaught:ParseTorrentUseCase.kt$ParseTorrentUseCase$e: Throwable</ID>
+    <ID>TooGenericExceptionCaught:RuTrackerAuth.kt$RuTrackerAuth$t: Throwable</ID>
+    <ID>TooGenericExceptionCaught:RuTrackerNetworkApi.kt$RuTrackerNetworkApi$t: Throwable</ID>
+    <ID>TooManyFunctions:ParsePostUseCase.kt$ParsePostUseCase</ID>
+    <ID>TooManyFunctions:ParseTopicPageUseCase.kt$ParseTopicPageUseCase</ID>
+    <ID>TooManyFunctions:RuTrackerInnerApi.kt$RuTrackerInnerApi</ID>
+    <ID>TooManyFunctions:RuTrackerInnerApiImpl.kt$RuTrackerInnerApiImpl : RuTrackerInnerApi</ID>
+    <ID>TooManyFunctions:RuTrackerNetworkApi.kt$RuTrackerNetworkApi : NetworkApi</ID>
+    <ID>TooManyFunctions:Utils.kt$lava.tracker.rutracker.domain.Utils.kt</ID>
+    <ID>UnusedPrivateProperty:LogoutUseCase.kt$LogoutUseCase$private val tokenProvider: TokenProvider</ID>
+  </CurrentIssues>
+</SmellBaseline>

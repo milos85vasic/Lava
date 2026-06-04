@@ -1,0 +1,7 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>EmptyFunctionBlock:TrackerDescriptorContractTest.kt$TrackerDescriptorContractTest.SampleClient${}</ID>
+  </CurrentIssues>
+</SmellBaseline>

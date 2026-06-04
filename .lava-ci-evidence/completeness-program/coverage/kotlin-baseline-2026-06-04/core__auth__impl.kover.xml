@@ -1,0 +1,237 @@
+<?xml version="1.0" ?>
+<report name="Kover Gradle Plugin XML report for :core:auth:impl">
+<package name="lava/auth/di">
+<class name="lava/auth/di/HiltWrapper_AuthModule" sourcefilename="HiltWrapper_AuthModule.java">
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<sourcefile name="HiltWrapper_AuthModule.java">
+<line nr="17" mi="2" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</sourcefile>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+<counter type="CLASS" missed="1" covered="0"/>
+</package>
+<package name="hilt_aggregated_deps">
+<class name="hilt_aggregated_deps/_lava_auth_di_HiltWrapper_AuthModule" sourcefilename="_lava_auth_di_HiltWrapper_AuthModule.java">
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<sourcefile name="_lava_auth_di_HiltWrapper_AuthModule.java">
+<line nr="14" mi="2" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</sourcefile>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+<counter type="CLASS" missed="1" covered="0"/>
+</package>
+<package name="lava/auth/impl">
+<class name="lava/auth/impl/AuthServiceImpl" sourcefilename="AuthServiceImpl.kt">
+<method name="login$toCaptcha" desc="(Llava/network/dto/auth/CaptchaDto;)Llava/models/auth/Captcha;">
+<counter type="INSTRUCTION" missed="16" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="getToken" desc="(Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="30" covered="0"/>
+<counter type="BRANCH" missed="4" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="login" desc="(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="121" covered="0"/>
+<counter type="BRANCH" missed="8" covered="0"/>
+<counter type="LINE" missed="17" covered="0"/>
+</method>
+<method name="observeAuthState" desc="()Lkotlinx/coroutines/flow/Flow;">
+<counter type="INSTRUCTION" missed="0" covered="11"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="3"/>
+</method>
+<method name="getAuthState" desc="(Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="0" covered="66"/>
+<counter type="BRANCH" missed="0" covered="6"/>
+<counter type="LINE" missed="0" covered="9"/>
+</method>
+<method name="&lt;init&gt;" desc="(Llava/network/api/NetworkApi;Llava/securestorage/PreferencesStorage;)V">
+<counter type="INSTRUCTION" missed="0" covered="11"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="4"/>
+</method>
+<method name="signalAuthorized" desc="(Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="0" covered="46"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="4"/>
+</method>
+<method name="isAuthorized" desc="(Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="0" covered="20"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="refreshToken" desc="(Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="89" covered="0"/>
+<counter type="BRANCH" missed="4" covered="0"/>
+<counter type="LINE" missed="8" covered="0"/>
+</method>
+<method name="saveAccount" desc="(Llava/securestorage/model/Account;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="41" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</method>
+<method name="logout" desc="(Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="0" covered="45"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="4"/>
+</method>
+<counter type="INSTRUCTION" missed="297" covered="199"/>
+<counter type="BRANCH" missed="18" covered="6"/>
+<counter type="LINE" missed="29" covered="25"/>
+<counter type="METHOD" missed="5" covered="6"/>
+</class>
+<class name="lava/auth/impl/AuthServiceImpl$observeAuthState$1" sourcefilename="AuthServiceImpl.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="0" covered="49"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<counter type="INSTRUCTION" missed="0" covered="49"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+<counter type="METHOD" missed="0" covered="1"/>
+</class>
+<class name="lava/auth/impl/AuthServiceImpl_Factory" sourcefilename="AuthServiceImpl_Factory.java">
+<method name="get" desc="()Llava/auth/impl/AuthServiceImpl;">
+<counter type="INSTRUCTION" missed="9" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="newInstance" desc="(Llava/network/api/NetworkApi;Llava/securestorage/PreferencesStorage;)Llava/auth/impl/AuthServiceImpl;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="create" desc="(Ldagger/internal/Provider;Ldagger/internal/Provider;)Llava/auth/impl/AuthServiceImpl_Factory;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="create" desc="(Ljavax/inject/Provider;Ljavax/inject/Provider;)Llava/auth/impl/AuthServiceImpl_Factory;">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Ldagger/internal/Provider;Ldagger/internal/Provider;)V">
+<counter type="INSTRUCTION" missed="8" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="34" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="7" covered="0"/>
+<counter type="METHOD" missed="5" covered="0"/>
+</class>
+<sourcefile name="AuthServiceImpl_Factory.java">
+<line nr="35" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="36" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="37" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="42" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="47" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="52" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="56" mi="5" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="34" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="7" covered="0"/>
+</sourcefile>
+<sourcefile name="AuthServiceImpl.kt">
+<line nr="21" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="22" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="23" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="25" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="38" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="39" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="40" mi="0" ci="56" mb="0" cb="0"/>
+<line nr="42" mi="0" ci="20" mb="0" cb="0"/>
+<line nr="44" mi="30" ci="0" mb="4" cb="0"/>
+<line nr="53" mi="16" ci="0" mb="2" cb="0"/>
+<line nr="54" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="55" mi="18" ci="0" mb="0" cb="0"/>
+<line nr="56" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="57" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="58" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="59" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="60" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="63" mi="3" ci="0" mb="2" cb="0"/>
+<line nr="64" mi="20" ci="0" mb="2" cb="0"/>
+<line nr="67" mi="3" ci="0" mb="2" cb="0"/>
+<line nr="68" mi="13" ci="0" mb="0" cb="0"/>
+<line nr="69" mi="26" ci="0" mb="0" cb="0"/>
+<line nr="70" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="73" mi="3" ci="0" mb="2" cb="0"/>
+<line nr="74" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="85" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="86" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="92" mi="13" ci="0" mb="0" cb="0"/>
+<line nr="93" mi="2" ci="0" mb="2" cb="0"/>
+<line nr="94" mi="23" ci="0" mb="0" cb="0"/>
+<line nr="95" mi="3" ci="0" mb="2" cb="0"/>
+<line nr="96" mi="27" ci="0" mb="0" cb="0"/>
+<line nr="97" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="100" mi="15" ci="0" mb="0" cb="0"/>
+<line nr="101" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="105" mi="0" ci="13" mb="0" cb="0"/>
+<line nr="106" mi="0" ci="4" mb="0" cb="0"/>
+<line nr="110" mi="0" ci="13" mb="0" cb="0"/>
+<line nr="111" mi="0" ci="15" mb="0" cb="0"/>
+<line nr="134" mi="0" ci="6" mb="0" cb="0"/>
+<line nr="135" mi="0" ci="4" mb="0" cb="0"/>
+<line nr="140" mi="0" ci="18" mb="0" cb="0"/>
+<line nr="141" mi="0" ci="18" mb="0" cb="0"/>
+<line nr="145" mi="17" ci="0" mb="0" cb="0"/>
+<line nr="146" mi="24" ci="0" mb="0" cb="0"/>
+<line nr="154" mi="0" ci="7" mb="0" cb="2"/>
+<line nr="158" mi="0" ci="19" mb="0" cb="2"/>
+<line nr="159" mi="0" ci="8" mb="0" cb="0"/>
+<line nr="160" mi="0" ci="4" mb="0" cb="0"/>
+<line nr="161" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="163" mi="0" ci="13" mb="0" cb="0"/>
+<line nr="164" mi="0" ci="2" mb="0" cb="2"/>
+<line nr="165" mi="0" ci="9" mb="0" cb="0"/>
+<line nr="167" mi="0" ci="2" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="297" covered="248"/>
+<counter type="BRANCH" missed="18" covered="6"/>
+<counter type="LINE" missed="29" covered="26"/>
+</sourcefile>
+<counter type="INSTRUCTION" missed="331" covered="248"/>
+<counter type="BRANCH" missed="18" covered="6"/>
+<counter type="LINE" missed="36" covered="26"/>
+<counter type="METHOD" missed="10" covered="7"/>
+<counter type="CLASS" missed="1" covered="2"/>
+</package>
+<counter type="INSTRUCTION" missed="335" covered="248"/>
+<counter type="BRANCH" missed="18" covered="6"/>
+<counter type="LINE" missed="38" covered="26"/>
+<counter type="METHOD" missed="12" covered="7"/>
+<counter type="CLASS" missed="3" covered="2"/>
+</report>

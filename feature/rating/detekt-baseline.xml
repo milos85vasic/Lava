@@ -1,0 +1,9 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>MagicNumber:RatingDialog.kt$0.5</ID>
+    <ID>TopLevelPropertyNaming:RatingDialog.kt$private const val StarsNumber = 5</ID>
+    <ID>UnusedPrivateMember:RatingDialog.kt$@ThemePreviews @Composable private fun RatingDialog_Preview()</ID>
+  </CurrentIssues>
+</SmellBaseline>

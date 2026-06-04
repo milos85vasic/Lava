@@ -1,0 +1,14 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>EmptyFunctionBlock:TestBookmarksRepository.kt$TestBookmarksRepository${ }</ID>
+    <ID>EmptyFunctionBlock:TestFavoritesRepository.kt$TestFavoritesRepository${ }</ID>
+    <ID>EmptyFunctionBlock:TestSuggestsRepository.kt$TestSuggestsRepository${ }</ID>
+    <ID>EmptyFunctionBlock:TestVisitedRepository.kt$TestVisitedRepository${ }</ID>
+    <ID>ThrowingExceptionsWithoutMessageOrCause:TestAuthService.kt$TestAuthService$Throwable()</ID>
+    <ID>TooManyFunctions:TestBookmarksRepository.kt$TestBookmarksRepository : BookmarksRepository</ID>
+    <ID>TooManyFunctions:TestFavoritesRepository.kt$TestFavoritesRepository : FavoritesRepository</ID>
+    <ID>UseCheckOrError:TestEndpointsRepository.kt$TestEndpointsRepository$throw IllegalStateException( "Endpoint $endpoint already exists (simulating Room PRIMARY KEY conflict)", )</ID>
+  </CurrentIssues>
+</SmellBaseline>

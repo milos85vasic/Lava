@@ -1,0 +1,23 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>LongParameterList:NnmclubClient.kt$NnmclubClient$( private val http: NnmclubHttpClient, private val search: NnmclubSearch, private val browse: NnmclubBrowse, private val topic: NnmclubTopic, private val comments: NnmclubComments, private val auth: NnmclubAuth, private val download: NnmclubDownload, )</ID>
+    <ID>MagicNumber:NnmclubBrowse.kt$NnmclubBrowse$50</ID>
+    <ID>MagicNumber:NnmclubBrowseParser.kt$NnmclubBrowseParser$50</ID>
+    <ID>MagicNumber:NnmclubHttpClient.kt$NnmclubHttpClient$10</ID>
+    <ID>MagicNumber:NnmclubHttpClient.kt$NnmclubHttpClient$15</ID>
+    <ID>MagicNumber:NnmclubHttpClient.kt$NnmclubHttpClient$500</ID>
+    <ID>MagicNumber:NnmclubHttpClient.kt$NnmclubHttpClient$599</ID>
+    <ID>MagicNumber:NnmclubSearch.kt$NnmclubSearch$50</ID>
+    <ID>MagicNumber:NnmclubSearchParser.kt$NnmclubSearchParser$5</ID>
+    <ID>MagicNumber:NnmclubSearchParser.kt$NnmclubSearchParser$50</ID>
+    <ID>MagicNumber:NnmclubSearchParser.kt$NnmclubSearchParser$6</ID>
+    <ID>MagicNumber:NnmclubSearchParser.kt$NnmclubSearchParser.Companion$1024</ID>
+    <ID>MagicNumber:NnmclubSearchParser.kt$NnmclubSearchParser.Companion$1024L</ID>
+    <ID>ReturnCount:NnmclubSearchParser.kt$NnmclubSearchParser$private fun parseRow(row: org.jsoup.nodes.Element): TorrentItem?</ID>
+    <ID>ReturnCount:NnmclubSearchParser.kt$NnmclubSearchParser.Companion$private fun parseSize(text: String): Long?</ID>
+    <ID>TooGenericExceptionCaught:NnmclubHttpClient.kt$CircuitBreaker$t: Throwable</ID>
+    <ID>UnusedPrivateProperty:NnmclubLoginParser.kt$NnmclubLoginParser$val hasLoginForm = doc.selectFirst("input[name=username]") != null &amp;&amp; doc.selectFirst("input[name=password]") != null</ID>
+  </CurrentIssues>
+</SmellBaseline>

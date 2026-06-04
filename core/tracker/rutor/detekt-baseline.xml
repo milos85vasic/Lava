@@ -1,0 +1,36 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>CyclomaticComplexMethod:RuTorClient.kt$RuTorClient$@Suppress("UNCHECKED_CAST") override fun &lt;T : TrackerFeature&gt; getFeature(featureClass: KClass&lt;T&gt;): T?</ID>
+    <ID>LongParameterList:RuTorClient.kt$RuTorClient$( private val http: RuTorHttpClient, private val search: RuTorSearch, private val browse: RuTorBrowse, private val topic: RuTorTopic, private val comments: RuTorComments, private val auth: RuTorAuth, private val download: RuTorDownload, )</ID>
+    <ID>LongParameterList:RuTorClientFactory.kt$RuTorClientFactory$( private val clientProvider: Provider&lt;RuTorClient&gt;, private val http: RuTorHttpClient, private val searchParser: RuTorSearchParser, private val browseParser: RuTorBrowseParser, private val topicParser: RuTorTopicParser, private val commentsParser: RuTorCommentsParser, private val loginParser: RuTorLoginParser, )</ID>
+    <ID>MagicNumber:RuTorDateParser.kt$RuTorDateParser$10</ID>
+    <ID>MagicNumber:RuTorDateParser.kt$RuTorDateParser$11</ID>
+    <ID>MagicNumber:RuTorDateParser.kt$RuTorDateParser$12</ID>
+    <ID>MagicNumber:RuTorDateParser.kt$RuTorDateParser$2000</ID>
+    <ID>MagicNumber:RuTorDateParser.kt$RuTorDateParser$3</ID>
+    <ID>MagicNumber:RuTorDateParser.kt$RuTorDateParser$4</ID>
+    <ID>MagicNumber:RuTorDateParser.kt$RuTorDateParser$5</ID>
+    <ID>MagicNumber:RuTorDateParser.kt$RuTorDateParser$6</ID>
+    <ID>MagicNumber:RuTorDateParser.kt$RuTorDateParser$7</ID>
+    <ID>MagicNumber:RuTorDateParser.kt$RuTorDateParser$8</ID>
+    <ID>MagicNumber:RuTorDateParser.kt$RuTorDateParser$9</ID>
+    <ID>MagicNumber:RuTorHttpClient.kt$RuTorHttpClient$10</ID>
+    <ID>MagicNumber:RuTorHttpClient.kt$RuTorHttpClient$15</ID>
+    <ID>MagicNumber:RuTorHttpClient.kt$RuTorHttpClient$500</ID>
+    <ID>MagicNumber:RuTorHttpClient.kt$RuTorHttpClient$599</ID>
+    <ID>MagicNumber:RuTorSizeParser.kt$RuTorSizeParser$1_024L</ID>
+    <ID>ReturnCount:RuTorBrowseParser.kt$RuTorBrowseParser$private fun parsePagination(doc: Document): Int</ID>
+    <ID>ReturnCount:RuTorDateParser.kt$RuTorDateParser$fun parse(s: String, now: () -&gt; Instant = Clock.System::now): Instant?</ID>
+    <ID>ReturnCount:RuTorSearchParser.kt$RuTorSearchParser$private fun parsePagination(doc: Document): Int</ID>
+    <ID>ReturnCount:RuTorSearchParser.kt$RuTorSearchParser$private fun parseRow(row: Element): TorrentItem?</ID>
+    <ID>ReturnCount:RuTorSizeParser.kt$RuTorSizeParser$fun parse(s: String): Long?</ID>
+    <ID>ReturnCount:RuTorTopicParser.kt$RuTorTopicParser$private fun extractDescription(doc: Document): String?</ID>
+    <ID>ReturnCount:RuTorTopicParser.kt$RuTorTopicParser$private fun extractSizeBytes(raw: String?): Long?</ID>
+    <ID>ReturnCount:RuTorTopicParser.kt$RuTorTopicParser$private fun parseFileRow(row: Element): TorrentFile?</ID>
+    <ID>ReturnCount:RuTorTopicParser.kt$RuTorTopicParser$private fun parseFiles(doc: Document): List&lt;TorrentFile&gt;</ID>
+    <ID>ReturnCount:RuTorTopicTest.kt$RuTorTopicTest.&lt;no name provided&gt;$override fun dispatch(request: RecordedRequest): MockResponse</ID>
+    <ID>TooGenericExceptionCaught:RuTorHttpClient.kt$CircuitBreaker$t: Throwable</ID>
+  </CurrentIssues>
+</SmellBaseline>

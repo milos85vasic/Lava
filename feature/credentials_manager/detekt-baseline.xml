@@ -1,0 +1,9 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>LongMethod:CredentialsManagerScreen.kt$@Composable private fun EditDialog( entry: CredentialsEntry, onSave: (String, CredentialSecret) -&gt; Unit, onCancel: () -&gt; Unit, )</ID>
+    <ID>MaxLineLength:CredentialsManagerViewModel.kt$CredentialsManagerViewModel$private</ID>
+    <ID>TopLevelPropertyNaming:Navigation.kt$private const val CredentialsManagerRoute = "credentials_manager"</ID>
+  </CurrentIssues>
+</SmellBaseline>

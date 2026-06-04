@@ -1,5 +1,7 @@
 [versions]
 accompanist = "0.34.0"
+detektGradlePlugin = "1.23.8"
+koverGradlePlugin = "0.9.1"
 androidGradlePlugin = "8.6.1"
 androidxActivity = "1.10.1"
 androidxComposeBom = "2025.06.01"
@@ -127,6 +129,8 @@ room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
 
 android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "androidGradlePlugin" }
+detekt-gradlePlugin = { group = "io.gitlab.arturbosch.detekt", name = "detekt-gradle-plugin", version.ref = "detektGradlePlugin" }
+kover-gradlePlugin = { group = "org.jetbrains.kotlinx", name = "kover-gradle-plugin", version.ref = "koverGradlePlugin" }
 firebase-crashlytics-gradlePlugin = { group = "com.google.firebase", name = "firebase-crashlytics-gradle", version.ref = "firebaseCrashlyticsGradlePlugin" }
 google-services-gradlePlugin = { group = "com.google.gms", name = "google-services", version.ref = "googleServicesGradlePlugin" }
 hilt-gradlePlugin = { group = "com.google.dagger", name = "hilt-android-gradle-plugin", version.ref = "hilt" }

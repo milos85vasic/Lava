@@ -1,0 +1,11 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>MagicNumber:KinozalHttpClient.kt$KinozalHttpClient$10</ID>
+    <ID>MagicNumber:KinozalHttpClient.kt$KinozalHttpClient$15</ID>
+    <ID>MagicNumber:KinozalHttpClient.kt$KinozalHttpClient$500</ID>
+    <ID>MagicNumber:KinozalHttpClient.kt$KinozalHttpClient$599</ID>
+    <ID>TooGenericExceptionCaught:KinozalHttpClient.kt$CircuitBreaker$t: Throwable</ID>
+  </CurrentIssues>
+</SmellBaseline>

@@ -1,0 +1,42 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>CyclomaticComplexMethod:SearchResultScreen.kt$@Composable private fun SearchResultList( modifier: Modifier, state: SearchPageState, onAction: (SearchResultAction) -&gt; Unit, )</ID>
+    <ID>CyclomaticComplexMethod:SearchResultViewModel.kt$SearchResultViewModel$fun perform(action: SearchResultAction)</ID>
+    <ID>CyclomaticComplexMethod:SearchResultViewModel.kt$SearchResultViewModel$private fun handleSseEvent(event: SseEvent.Event)</ID>
+    <ID>EmptyFunctionBlock:SearchResultViewModelFallbackTest.kt$SearchResultViewModelFallbackTest.&lt;no name provided&gt;${}</ID>
+    <ID>LongMethod:CategorySelectionDialog.kt$@Composable internal fun CategorySelectionDialog( state: VisibilityState, available: List&lt;Category&gt;, selected: List&lt;Category&gt;?, onSubmit: (List&lt;Category&gt;?) -&gt; Unit, onDismiss: () -&gt; Unit, )</ID>
+    <ID>LongMethod:SearchResultScreen.kt$@Composable private fun SearchResultList( modifier: Modifier, state: SearchPageState, onAction: (SearchResultAction) -&gt; Unit, )</ID>
+    <ID>LongMethod:SearchResultViewModel.kt$SearchResultViewModel$private fun handleSseEvent(event: SseEvent.Event)</ID>
+    <ID>LongParameterList:CategoryListItem.kt$( modifier: Modifier = Modifier, text: String, contentPadding: PaddingValues = PaddingValues( start = AppTheme.spaces.large, end = AppTheme.spaces.small, ), expanded: Boolean, selected: ToggleableState, onExpand: () -&gt; Unit, onSelect: () -&gt; Unit, )</ID>
+    <ID>LongParameterList:FilterBar.kt$( filter: Filter, categories: List&lt;Category&gt;, onSelectSort: (Sort) -&gt; Unit, onSelectOrder: (Order) -&gt; Unit, onSelectPeriod: (Period) -&gt; Unit, onSelectAuthor: (Author?) -&gt; Unit, onSelectCategories: (List&lt;Category&gt;?) -&gt; Unit, )</ID>
+    <ID>LongParameterList:SearchResultNavigation.kt$( back: () -&gt; Unit, openSearchInput: (filter: Filter) -&gt; Unit, openSearchResult: (filter: Filter) -&gt; Unit, openTopic: (id: String) -&gt; Unit, // SP-3.2 (2026-04-29): hook for the Unauthorized empty-state's // Login button — replaces the misleading "Nothing found" UI. openLogin: () -&gt; Unit, deepLinkUrls: List&lt;String&gt; = emptyList(), animations: NavigationAnimations, )</ID>
+    <ID>LongParameterList:SearchResultScreen.kt$( viewModel: SearchResultViewModel, back: () -&gt; Unit, openSearchInput: (filter: Filter) -&gt; Unit, openSearchResult: (filter: Filter) -&gt; Unit, openTopic: (id: String) -&gt; Unit, // SP-3.2 (2026-04-29): hooked up so the Unauthorized empty-state's // Login button can navigate to the login screen. openLogin: () -&gt; Unit, )</ID>
+    <ID>LongParameterList:SearchResultViewModel.kt$SearchResultViewModel$( savedStateHandle: SavedStateHandle, loggerFactory: LoggerFactory, private val observeSearchPagingDataUseCase: ObserveSearchPagingDataUseCase, private val addSearchHistoryUseCase: AddSearchHistoryUseCase, private val enrichFilterUseCase: EnrichFilterUseCase, private val toggleFavoriteUseCase: ToggleFavoriteUseCase, // SP-3.2 (2026-04-29): observe auth state to render Unauthorized // empty-state instead of the misleading "Nothing found" when the // user has not signed in to the upstream tracker. private val observeAuthStateUseCase: ObserveAuthStateUseCase, private val observeSettingsUseCase: ObserveSettingsUseCase, private val analytics: AnalyticsTracker, private val sdk: LavaTrackerSdk, )</ID>
+    <ID>MagicNumber:SearchResultScreen.kt$0.7f</ID>
+    <ID>MagicNumber:SearchResultScreen.kt$3</ID>
+    <ID>MagicNumber:SearchResultScreen.kt$4</ID>
+    <ID>MagicNumber:SearchResultScreen.kt$5</ID>
+    <ID>MagicNumber:SearchResultScreen.kt$6</ID>
+    <ID>MagicNumber:SearchResultScreen.kt$7</ID>
+    <ID>MagicNumber:SearchResultScreen.kt$8</ID>
+    <ID>MagicNumber:SearchResultScreen.kt$9</ID>
+    <ID>MaxLineLength:SearchResultViewModelFallbackTest.kt$SearchResultViewModelFallbackTest$fun</ID>
+    <ID>SpreadOperator:CategorySelectionDialog.kt$(*selected.orEmpty().toTypedArray())</ID>
+    <ID>SwallowedException:SearchResultViewModel.kt$SearchResultViewModel$t: Throwable</ID>
+    <ID>TooGenericExceptionCaught:SearchResultViewModel.kt$SearchResultViewModel$t: Throwable</ID>
+    <ID>TooManyFunctions:SearchResultViewModel.kt$SearchResultViewModel : ViewModelContainerHost</ID>
+    <ID>TopLevelPropertyNaming:SearchResultNavigation.kt$// Bug 2 fix (2026-05-17): prior to this commit `providerIds` was missing // from the nav serializer + deserializer; the SearchInputViewModel posted // OpenSearch(filter.providerIds=[archiveorg, gutenberg]) but the receiving // SearchResultViewModel read SavedStateHandle.filter with providerIds=null // — which routed the user into observePagingData() (the single-tracker // rutracker-direct path), failed at auth, and rendered "Something went // wrong" via LoadState.Error. Anonymous-only search was unreachable. private const val ProviderIdsKey = "pids"</ID>
+    <ID>TopLevelPropertyNaming:SearchResultNavigation.kt$private const val AuthorIdKey = "pid"</ID>
+    <ID>TopLevelPropertyNaming:SearchResultNavigation.kt$private const val AuthorNameKey = "pn"</ID>
+    <ID>TopLevelPropertyNaming:SearchResultNavigation.kt$private const val CategoriesKey = "f"</ID>
+    <ID>TopLevelPropertyNaming:SearchResultNavigation.kt$private const val OrderKey = "s"</ID>
+    <ID>TopLevelPropertyNaming:SearchResultNavigation.kt$private const val PeriodKey = "tm"</ID>
+    <ID>TopLevelPropertyNaming:SearchResultNavigation.kt$private const val QueryKey = "nm"</ID>
+    <ID>TopLevelPropertyNaming:SearchResultNavigation.kt$private const val SearchResultRoute = "search_result"</ID>
+    <ID>TopLevelPropertyNaming:SearchResultNavigation.kt$private const val SortKey = "o"</ID>
+    <ID>UnusedPrivateMember:FilterAuthorItem.kt$@ThemePreviews @Composable private fun AuthorDialogPreview( @PreviewParameter(FilterAuthorPreviewParamProvider::class) author: Author?, )</ID>
+    <ID>UnusedPrivateMember:FilterAuthorItem.kt$@ThemePreviews @Composable private fun FilterAuthorItemPreview( @PreviewParameter(FilterAuthorPreviewParamProvider::class) author: Author?, )</ID>
+  </CurrentIssues>
+</SmellBaseline>

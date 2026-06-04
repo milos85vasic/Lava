@@ -1,0 +1,9 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>InvalidPackageDeclaration:LavaNative.kt$package digital.vasic.lava.apigo</ID>
+    <ID>ReturnCount:FakeApiEngine.kt$FakeApiEngine$override suspend fun start(config: ApiConfig): Result&lt;ApiStatus&gt;</ID>
+    <ID>ReturnCount:FakeApiEngine.kt$FakeApiEngine$override suspend fun stop(): Result&lt;Unit&gt;</ID>
+  </CurrentIssues>
+</SmellBaseline>

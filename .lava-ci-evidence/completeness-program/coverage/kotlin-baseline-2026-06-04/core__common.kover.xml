@@ -1,0 +1,109 @@
+<?xml version="1.0" ?>
+<report name="Kover Gradle Plugin XML report for :core:common">
+<package name="lava/common">
+<class name="lava/common/CollectionsKt" sourcefilename="Collections.kt">
+<method name="mapInstanceOf" desc="(Ljava/util/List;Lkotlin/jvm/functions/Function1;)Ljava/util/List;">
+<counter type="INSTRUCTION" missed="8" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="8" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/common/CoroutinesKt" sourcefilename="Coroutines.kt">
+<method name="newCancelableScope" desc="(Lkotlinx/coroutines/CoroutineScope;)Lkotlinx/coroutines/CoroutineScope;">
+<counter type="INSTRUCTION" missed="9" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="relaunch" desc="(Lkotlinx/coroutines/CoroutineScope;Lkotlin/jvm/functions/Function2;)V">
+<counter type="INSTRUCTION" missed="14" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="23" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+</class>
+<class name="lava/common/MutableSharedFlowKt" sourcefilename="MutableSharedFlow.kt">
+<method name="SingleItemMutableSharedFlow" desc="()Lkotlinx/coroutines/flow/MutableSharedFlow;">
+<counter type="INSTRUCTION" missed="6" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="6" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<sourcefile name="MutableSharedFlow.kt">
+<line nr="8" mi="6" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="6" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</sourcefile>
+<sourcefile name="Coroutines.kt">
+<line nr="8" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="11" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="12" mi="8" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="23" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</sourcefile>
+<sourcefile name="Collections.kt">
+<line nr="4" mi="8" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="8" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</sourcefile>
+<counter type="INSTRUCTION" missed="37" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="5" covered="0"/>
+<counter type="METHOD" missed="4" covered="0"/>
+<counter type="CLASS" missed="3" covered="0"/>
+</package>
+<package name="lava/common/analytics">
+<class name="lava/common/analytics/AnalyticsTracker$DefaultImpls" sourcefilename="AnalyticsTracker.kt">
+<method name="recordWarning" desc="(Llava/common/analytics/AnalyticsTracker;Ljava/lang/String;Ljava/util/Map;)V">
+<counter type="INSTRUCTION" missed="17" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="event" desc="(Llava/common/analytics/AnalyticsTracker;Ljava/lang/String;Ljava/util/Map;)V">
+<counter type="INSTRUCTION" missed="17" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="recordNonFatal" desc="(Llava/common/analytics/AnalyticsTracker;Ljava/lang/Throwable;Ljava/util/Map;)V">
+<counter type="INSTRUCTION" missed="17" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="51" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+<counter type="METHOD" missed="3" covered="0"/>
+</class>
+<sourcefile name="AnalyticsTracker.kt">
+<line nr="15" mi="17" ci="0" mb="0" cb="0"/>
+<line nr="33" mi="17" ci="0" mb="0" cb="0"/>
+<line nr="49" mi="17" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="51" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</sourcefile>
+<counter type="INSTRUCTION" missed="51" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+<counter type="METHOD" missed="3" covered="0"/>
+<counter type="CLASS" missed="1" covered="0"/>
+</package>
+<counter type="INSTRUCTION" missed="88" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="8" covered="0"/>
+<counter type="METHOD" missed="7" covered="0"/>
+<counter type="CLASS" missed="4" covered="0"/>
+</report>

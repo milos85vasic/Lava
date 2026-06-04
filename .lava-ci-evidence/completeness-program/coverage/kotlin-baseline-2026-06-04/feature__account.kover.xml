@@ -1,0 +1,568 @@
+<?xml version="1.0" ?>
+<report name="Kover Gradle Plugin XML report for :feature:account">
+<package name="hilt_aggregated_deps">
+<class name="hilt_aggregated_deps/_lava_account_AccountViewModel_HiltModules_BindsModule" sourcefilename="_lava_account_AccountViewModel_HiltModules_BindsModule.java">
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="hilt_aggregated_deps/_lava_account_AccountViewModel_HiltModules_KeyModule" sourcefilename="_lava_account_AccountViewModel_HiltModules_KeyModule.java">
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<sourcefile name="_lava_account_AccountViewModel_HiltModules_BindsModule.java">
+<line nr="14" mi="2" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</sourcefile>
+<sourcefile name="_lava_account_AccountViewModel_HiltModules_KeyModule.java">
+<line nr="14" mi="2" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</sourcefile>
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+<counter type="CLASS" missed="2" covered="0"/>
+</package>
+<package name="lava/account">
+<class name="lava/account/AccountAction$ConfirmLogoutClick" sourcefilename="AccountAction.kt">
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/account/AccountAction$LoginClick" sourcefilename="AccountAction.kt">
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/account/AccountAction$LogoutClick" sourcefilename="AccountAction.kt">
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/account/AccountItemKt" sourcefilename="AccountItem.kt">
+<method name="AccountItem" desc="(Landroidx/compose/ui/Modifier;Llava/models/auth/AuthState;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V">
+<counter type="INSTRUCTION" missed="192" covered="0"/>
+<counter type="BRANCH" missed="6" covered="0"/>
+<counter type="LINE" missed="13" covered="0"/>
+</method>
+<method name="AccountItem" desc="(Landroidx/compose/ui/Modifier;Llava/account/AccountViewModel;Lkotlin/jvm/functions/Function0;Landroidx/compose/runtime/Composer;II)V">
+<counter type="INSTRUCTION" missed="241" covered="0"/>
+<counter type="BRANCH" missed="4" covered="0"/>
+<counter type="LINE" missed="11" covered="0"/>
+</method>
+<method name="AccountItem" desc="(Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function0;Landroidx/compose/runtime/Composer;II)V">
+<counter type="INSTRUCTION" missed="122" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+</method>
+<method name="AccountItem_Preview" desc="(Llava/models/auth/AuthState;Landroidx/compose/runtime/Composer;I)V">
+<counter type="INSTRUCTION" missed="71" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="626" covered="0"/>
+<counter type="BRANCH" missed="14" covered="0"/>
+<counter type="LINE" missed="32" covered="0"/>
+<counter type="METHOD" missed="4" covered="0"/>
+</class>
+<class name="lava/account/AccountItemKt$AccountItem$2$1" sourcefilename="AccountItem.kt">
+<method name="invokeSuspend$lambda$0" desc="(Llava/account/AccountViewModel;)Lkotlin/Unit;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="34" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="39" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="7" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+</class>
+<class name="lava/account/AccountItemKt$AccountItem$5" sourcefilename="AccountItem.kt">
+<method name="invoke" desc="(Landroidx/compose/foundation/layout/BoxScope;Landroidx/compose/runtime/Composer;I)V">
+<counter type="INSTRUCTION" missed="218" covered="0"/>
+<counter type="BRANCH" missed="3" covered="1"/>
+<counter type="LINE" missed="23" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="218" covered="0"/>
+<counter type="BRANCH" missed="3" covered="1"/>
+<counter type="LINE" missed="23" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/account/AccountItemKt$AccountItem_Preview$1" sourcefilename="AccountItem.kt">
+<method name="invoke" desc="(Landroidx/compose/runtime/Composer;I)V">
+<counter type="INSTRUCTION" missed="46" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="46" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/account/AccountItemParamProvider" sourcefilename="AccountItem.kt">
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="18" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="18" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/account/AccountSideEffect$OpenLogin" sourcefilename="AccountSideEffect.kt">
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/account/AccountSideEffect$ShowLogoutConfirmation" sourcefilename="AccountSideEffect.kt">
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/account/AccountViewModel" sourcefilename="AccountViewModel.kt">
+<method name="onLoginClick" desc="()Lkotlinx/coroutines/Job;">
+<counter type="INSTRUCTION" missed="11" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Llava/domain/usecase/LogoutUseCase;Llava/domain/usecase/ObserveAuthStateUseCase;Llava/logger/api/LoggerFactory;)V">
+<counter type="INSTRUCTION" missed="30" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+</method>
+<method name="onLogoutClick" desc="()Lkotlinx/coroutines/Job;">
+<counter type="INSTRUCTION" missed="11" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="onConfirmLogoutClick" desc="()Lkotlinx/coroutines/Job;">
+<counter type="INSTRUCTION" missed="12" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="perform" desc="(Llava/account/AccountAction;)V">
+<counter type="INSTRUCTION" missed="32" covered="0"/>
+<counter type="BRANCH" missed="4" covered="0"/>
+<counter type="LINE" missed="5" covered="0"/>
+</method>
+<method name="observeAuthState" desc="()Lkotlinx/coroutines/Job;">
+<counter type="INSTRUCTION" missed="12" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="108" covered="0"/>
+<counter type="BRANCH" missed="4" covered="0"/>
+<counter type="LINE" missed="15" covered="0"/>
+<counter type="METHOD" missed="6" covered="0"/>
+</class>
+<class name="lava/account/AccountViewModel$container$1" sourcefilename="AccountViewModel.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="10" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="10" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/account/AccountViewModel$observeAuthState$1" sourcefilename="AccountViewModel.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="28" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="28" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/account/AccountViewModel$observeAuthState$1$2" sourcefilename="AccountViewModel.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="22" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="22" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/account/AccountViewModel$onConfirmLogoutClick$1" sourcefilename="AccountViewModel.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="11" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="11" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/account/AccountViewModel$onLoginClick$1" sourcefilename="AccountViewModel.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="11" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="11" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/account/AccountViewModel$onLogoutClick$1" sourcefilename="AccountViewModel.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="11" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="11" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/account/AccountViewModel_Factory" sourcefilename="AccountViewModel_Factory.java">
+<method name="create" desc="(Ldagger/internal/Provider;Ldagger/internal/Provider;Ldagger/internal/Provider;)Llava/account/AccountViewModel_Factory;">
+<counter type="INSTRUCTION" missed="6" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="get" desc="()Llava/account/AccountViewModel;">
+<counter type="INSTRUCTION" missed="13" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Ldagger/internal/Provider;Ldagger/internal/Provider;Ldagger/internal/Provider;)V">
+<counter type="INSTRUCTION" missed="11" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+</method>
+<method name="newInstance" desc="(Llava/domain/usecase/LogoutUseCase;Llava/domain/usecase/ObserveAuthStateUseCase;Llava/logger/api/LoggerFactory;)Llava/account/AccountViewModel;">
+<counter type="INSTRUCTION" missed="6" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="create" desc="(Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Llava/account/AccountViewModel_Factory;">
+<counter type="INSTRUCTION" missed="9" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="45" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="8" covered="0"/>
+<counter type="METHOD" missed="5" covered="0"/>
+</class>
+<class name="lava/account/AccountViewModel_HiltModules$BindsModule" sourcefilename="AccountViewModel_HiltModules.java">
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/account/AccountViewModel_HiltModules$KeyModule" sourcefilename="AccountViewModel_HiltModules.java">
+<method name="provide" desc="()Z">
+<counter type="INSTRUCTION" missed="1" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="1" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/account/AccountViewModel_HiltModules_BindsModule_Binds_LazyMapKey" sourcefilename="AccountViewModel_HiltModules_BindsModule_Binds_LazyMapKey.java">
+<method name="&lt;clinit&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+</class>
+<class name="lava/account/AccountViewModel_HiltModules_KeyModule_ProvideFactory" sourcefilename="AccountViewModel_HiltModules_KeyModule_ProvideFactory.java">
+<method name="provide" desc="()Z">
+<counter type="INSTRUCTION" missed="1" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="create" desc="()Llava/account/AccountViewModel_HiltModules_KeyModule_ProvideFactory;">
+<counter type="INSTRUCTION" missed="1" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="get" desc="()Ljava/lang/Boolean;">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="6" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+<counter type="METHOD" missed="4" covered="0"/>
+</class>
+<class name="lava/account/AccountViewModel_HiltModules_KeyModule_ProvideFactory$InstanceHolder" sourcefilename="AccountViewModel_HiltModules_KeyModule_ProvideFactory.java">
+<method name="&lt;clinit&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/account/AccountViewModel_HiltModules_KeyModule_Provide_LazyMapKey" sourcefilename="AccountViewModel_HiltModules_KeyModule_Provide_LazyMapKey.java">
+<method name="&lt;clinit&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+</class>
+<sourcefile name="AccountViewModel_HiltModules_KeyModule_Provide_LazyMapKey.java">
+<line nr="23" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="27" mi="2" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</sourcefile>
+<sourcefile name="AccountItem.kt">
+<line nr="35" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="37" mi="73" ci="0" mb="2" cb="0"/>
+<line nr="38" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="39" mi="11" ci="0" mb="0" cb="0"/>
+<line nr="40" mi="12" ci="0" mb="0" cb="0"/>
+<line nr="41" mi="14" ci="0" mb="0" cb="0"/>
+<line nr="45" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="48" mi="93" ci="0" mb="4" cb="0"/>
+<line nr="49" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="50" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="51" mi="55" ci="0" mb="0" cb="0"/>
+<line nr="52" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="53" mi="8" ci="0" mb="2" cb="0"/>
+<line nr="54" mi="12" ci="0" mb="0" cb="0"/>
+<line nr="55" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="56" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="57" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="58" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="62" mi="20" ci="0" mb="0" cb="0"/>
+<line nr="63" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="64" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="65" mi="14" ci="0" mb="0" cb="0"/>
+<line nr="66" mi="23" ci="0" mb="0" cb="0"/>
+<line nr="68" mi="15" ci="0" mb="0" cb="0"/>
+<line nr="72" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="75" mi="100" ci="0" mb="4" cb="0"/>
+<line nr="76" mi="11" ci="0" mb="0" cb="0"/>
+<line nr="77" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="78" mi="7" ci="0" mb="2" cb="0"/>
+<line nr="79" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="80" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="82" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="83" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="84" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="85" mi="15" ci="0" mb="0" cb="0"/>
+<line nr="86" mi="15" ci="0" mb="0" cb="0"/>
+<line nr="87" mi="31" ci="0" mb="0" cb="0"/>
+<line nr="88" mi="12" ci="0" mb="0" cb="0"/>
+<line nr="89" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="91" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="92" mi="12" ci="0" mb="0" cb="0"/>
+<line nr="93" mi="12" ci="0" mb="2" cb="0"/>
+<line nr="94" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="95" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="96" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="97" mi="12" ci="0" mb="0" cb="0"/>
+<line nr="98" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="99" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="100" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="102" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="103" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="104" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="105" mi="17" ci="0" mb="0" cb="0"/>
+<line nr="106" mi="25" ci="0" mb="0" cb="0"/>
+<line nr="110" mi="12" ci="0" mb="1" cb="1"/>
+<line nr="111" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="112" mi="17" ci="0" mb="0" cb="0"/>
+<line nr="113" mi="24" ci="0" mb="0" cb="0"/>
+<line nr="117" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="119" mi="15" ci="0" mb="0" cb="0"/>
+<line nr="125" mi="59" ci="0" mb="2" cb="0"/>
+<line nr="126" mi="46" ci="0" mb="0" cb="0"/>
+<line nr="127" mi="12" ci="0" mb="0" cb="0"/>
+<line nr="129" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="130" mi="10" ci="0" mb="0" cb="0"/>
+<line nr="131" mi="6" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="947" covered="0"/>
+<counter type="BRANCH" missed="19" covered="1"/>
+<counter type="LINE" missed="66" covered="0"/>
+</sourcefile>
+<sourcefile name="AccountViewModel.kt">
+<line nr="20" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="21" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="23" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="24" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="26" mi="16" ci="0" mb="0" cb="0"/>
+<line nr="27" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="28" mi="10" ci="0" mb="0" cb="0"/>
+<line nr="32" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="33" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="34" mi="7" ci="0" mb="2" cb="0"/>
+<line nr="35" mi="7" ci="0" mb="2" cb="0"/>
+<line nr="36" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="40" mi="12" ci="0" mb="0" cb="0"/>
+<line nr="41" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="42" mi="22" ci="0" mb="0" cb="0"/>
+<line nr="43" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="44" mi="14" ci="0" mb="0" cb="0"/>
+<line nr="48" mi="12" ci="0" mb="0" cb="0"/>
+<line nr="49" mi="11" ci="0" mb="2" cb="0"/>
+<line nr="52" mi="11" ci="0" mb="0" cb="0"/>
+<line nr="53" mi="11" ci="0" mb="0" cb="0"/>
+<line nr="56" mi="11" ci="0" mb="0" cb="0"/>
+<line nr="57" mi="11" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="201" covered="0"/>
+<counter type="BRANCH" missed="6" covered="0"/>
+<counter type="LINE" missed="23" covered="0"/>
+</sourcefile>
+<sourcefile name="AccountViewModel_Factory.java">
+<line nr="39" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="40" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="41" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="42" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="47" mi="13" ci="0" mb="0" cb="0"/>
+<line nr="54" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="60" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="65" mi="6" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="45" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="8" covered="0"/>
+</sourcefile>
+<sourcefile name="AccountViewModel_HiltModules_BindsModule_Binds_LazyMapKey.java">
+<line nr="23" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="27" mi="2" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</sourcefile>
+<sourcefile name="AccountViewModel_HiltModules.java">
+<line nr="27" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="48" mi="1" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="3" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</sourcefile>
+<sourcefile name="AccountAction.kt">
+<line nr="4" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="5" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="6" mi="2" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="6" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</sourcefile>
+<sourcefile name="AccountViewModel_HiltModules_KeyModule_ProvideFactory.java">
+<line nr="25" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="28" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="32" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="36" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="40" mi="4" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="10" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="5" covered="0"/>
+</sourcefile>
+<sourcefile name="AccountSideEffect.kt">
+<line nr="4" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="5" mi="2" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</sourcefile>
+<counter type="INSTRUCTION" missed="1224" covered="0"/>
+<counter type="BRANCH" missed="25" covered="1"/>
+<counter type="LINE" missed="113" covered="0"/>
+<counter type="METHOD" missed="42" covered="0"/>
+<counter type="CLASS" missed="24" covered="0"/>
+</package>
+<counter type="INSTRUCTION" missed="1228" covered="0"/>
+<counter type="BRANCH" missed="25" covered="1"/>
+<counter type="LINE" missed="115" covered="0"/>
+<counter type="METHOD" missed="44" covered="0"/>
+<counter type="CLASS" missed="26" covered="0"/>
+</report>

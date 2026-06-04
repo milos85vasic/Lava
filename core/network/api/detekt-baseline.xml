@@ -1,0 +1,13 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>CyclomaticComplexMethod:SseClient.kt$SseClient$fun connect(url: String, headers: Map&lt;String, String&gt; = emptyMap()): Flow&lt;SseEvent&gt;</ID>
+    <ID>LongMethod:SseClient.kt$SseClient$fun connect(url: String, headers: Map&lt;String, String&gt; = emptyMap()): Flow&lt;SseEvent&gt;</ID>
+    <ID>LongParameterList:NetworkApi.kt$NetworkApi$( token: String, searchQuery: String?, categories: String?, author: String?, authorId: String?, sortType: SearchSortTypeDto?, sortOrder: SearchSortOrderDto?, period: SearchPeriodDto?, page: Int?, )</ID>
+    <ID>MagicNumber:SseClient.kt$SseClient$30</ID>
+    <ID>MagicNumber:SseClient.kt$SseClient$5</ID>
+    <ID>TooGenericExceptionCaught:SseClient.kt$SseClient$e: Exception</ID>
+    <ID>TooManyFunctions:NetworkApi.kt$NetworkApi</ID>
+  </CurrentIssues>
+</SmellBaseline>

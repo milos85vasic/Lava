@@ -1,0 +1,425 @@
+<?xml version="1.0" ?>
+<report name="Kover Gradle Plugin XML report for :core:tracker:testing">
+<package name="lava/tracker/testing">
+<class name="lava/tracker/testing/FakeTrackerClient" sourcefilename="FakeTrackerClient.kt">
+<method name="getBrowseResultProvider" desc="()Lkotlin/jvm/functions/Function2;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="getDownloadProvider" desc="()Lkotlin/jvm/functions/Function1;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="getSearchResultProvider" desc="()Lkotlin/jvm/functions/Function2;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="getFeature" desc="(Lkotlin/reflect/KClass;)Llava/tracker/api/TrackerFeature;">
+<counter type="INSTRUCTION" missed="109" covered="24"/>
+<counter type="BRANCH" missed="25" covered="3"/>
+<counter type="LINE" missed="7" covered="3"/>
+</method>
+<method name="getTopicProvider" desc="()Lkotlin/jvm/functions/Function1;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="healthCheck" desc="(Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="3" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Llava/tracker/api/TrackerDescriptor;)V">
+<counter type="INSTRUCTION" missed="0" covered="103"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="13"/>
+</method>
+<method name="close" desc="()V">
+<counter type="INSTRUCTION" missed="1" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="133" covered="127"/>
+<counter type="BRANCH" missed="25" covered="3"/>
+<counter type="LINE" missed="13" covered="16"/>
+<counter type="METHOD" missed="6" covered="2"/>
+</class>
+<class name="lava/tracker/testing/FakeTrackerClient$auth$1" sourcefilename="FakeTrackerClient.kt">
+<method name="login" desc="(Llava/tracker/api/model/LoginRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="17" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Llava/tracker/testing/FakeTrackerClient;)V">
+<counter type="INSTRUCTION" missed="0" covered="2"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="checkAuth" desc="(Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="3" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="logout" desc="(Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="6" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="26" covered="2"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="3" covered="1"/>
+<counter type="METHOD" missed="3" covered="1"/>
+</class>
+<class name="lava/tracker/testing/FakeTrackerClient$browse$1" sourcefilename="FakeTrackerClient.kt">
+<method name="&lt;init&gt;" desc="(Llava/tracker/testing/FakeTrackerClient;)V">
+<counter type="INSTRUCTION" missed="0" covered="2"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="browse" desc="(Ljava/lang/String;ILkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="getForumTree" desc="(Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="1" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="8" covered="2"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="1"/>
+<counter type="METHOD" missed="2" covered="1"/>
+</class>
+<class name="lava/tracker/testing/FakeTrackerClient$comments$1" sourcefilename="FakeTrackerClient.kt">
+<method name="getComments" desc="(Ljava/lang/String;ILkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="6" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="addComment" desc="(Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="0" covered="2"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<counter type="INSTRUCTION" missed="8" covered="2"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="1"/>
+<counter type="METHOD" missed="2" covered="1"/>
+</class>
+<class name="lava/tracker/testing/FakeTrackerClient$download$1" sourcefilename="FakeTrackerClient.kt">
+<method name="&lt;init&gt;" desc="(Llava/tracker/testing/FakeTrackerClient;)V">
+<counter type="INSTRUCTION" missed="0" covered="2"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="downloadTorrentFile" desc="(Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="13" covered="0"/>
+<counter type="BRANCH" missed="4" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="getMagnetLink" desc="(Ljava/lang/String;)Ljava/lang/String;">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="15" covered="2"/>
+<counter type="BRANCH" missed="4" covered="0"/>
+<counter type="LINE" missed="2" covered="1"/>
+<counter type="METHOD" missed="2" covered="1"/>
+</class>
+<class name="lava/tracker/testing/FakeTrackerClient$favorites$1" sourcefilename="FakeTrackerClient.kt">
+<method name="&lt;init&gt;" desc="(Llava/tracker/testing/FakeTrackerClient;)V">
+<counter type="INSTRUCTION" missed="0" covered="8"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="2"/>
+</method>
+<method name="remove" desc="(Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="list" desc="(Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="32" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</method>
+<method name="add" desc="(Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="42" covered="8"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="4" covered="2"/>
+<counter type="METHOD" missed="3" covered="1"/>
+</class>
+<class name="lava/tracker/testing/FakeTrackerClient$search$1" sourcefilename="FakeTrackerClient.kt">
+<method name="search" desc="(Llava/tracker/api/model/SearchRequest;ILkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Llava/tracker/testing/FakeTrackerClient;)V">
+<counter type="INSTRUCTION" missed="0" covered="2"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<counter type="INSTRUCTION" missed="7" covered="2"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="1"/>
+<counter type="METHOD" missed="1" covered="1"/>
+</class>
+<class name="lava/tracker/testing/FakeTrackerClient$topic$1" sourcefilename="FakeTrackerClient.kt">
+<method name="getTopicPage" desc="(Ljava/lang/String;ILkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="25" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Llava/tracker/testing/FakeTrackerClient;)V">
+<counter type="INSTRUCTION" missed="0" covered="2"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="getTopic" desc="(Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="18" covered="0"/>
+<counter type="BRANCH" missed="4" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="43" covered="2"/>
+<counter type="BRANCH" missed="4" covered="0"/>
+<counter type="LINE" missed="3" covered="1"/>
+<counter type="METHOD" missed="2" covered="1"/>
+</class>
+<class name="lava/tracker/testing/LavaFixtureLoader" sourcefilename="LavaFixtureLoader.kt">
+<method name="load" desc="(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;">
+<counter type="INSTRUCTION" missed="6" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Ljava/lang/String;)V">
+<counter type="INSTRUCTION" missed="13" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="19" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+</class>
+<class name="lava/tracker/testing/SearchRequestBuilder" sourcefilename="SearchRequestBuilder.kt">
+<method name="getAuthor" desc="()Ljava/lang/String;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="34" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="5" covered="0"/>
+</method>
+<method name="getPeriod" desc="()Llava/tracker/api/model/TimePeriod;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="build" desc="()Llava/tracker/api/model/SearchRequest;">
+<counter type="INSTRUCTION" missed="15" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="59" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="8" covered="0"/>
+<counter type="METHOD" missed="4" covered="0"/>
+</class>
+<class name="lava/tracker/testing/SearchRequestBuilderKt" sourcefilename="SearchRequestBuilder.kt">
+<method name="searchRequest" desc="(Lkotlin/jvm/functions/Function1;)Llava/tracker/api/model/SearchRequest;">
+<counter type="INSTRUCTION" missed="10" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="10" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/tracker/testing/TorrentItemBuilder" sourcefilename="TorrentItemBuilder.kt">
+<method name="getDownloadUrl" desc="()Ljava/lang/String;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="getDetailUrl" desc="()Ljava/lang/String;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="getCategory" desc="()Ljava/lang/String;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="getPublishDate" desc="()Lkotlinx/datetime/Instant;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="getInfoHash" desc="()Ljava/lang/String;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="getMagnetUri" desc="()Ljava/lang/String;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="52" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="7" covered="0"/>
+</method>
+<method name="build" desc="()Llava/tracker/api/model/TorrentItem;">
+<counter type="INSTRUCTION" missed="29" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</method>
+<method name="getSizeBytes" desc="()Ljava/lang/Long;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="116" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="17" covered="0"/>
+<counter type="METHOD" missed="9" covered="0"/>
+</class>
+<class name="lava/tracker/testing/TorrentItemBuilderKt" sourcefilename="TorrentItemBuilder.kt">
+<method name="torrent" desc="(Lkotlin/jvm/functions/Function1;)Llava/tracker/api/model/TorrentItem;">
+<counter type="INSTRUCTION" missed="10" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="10" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<sourcefile name="TorrentItemBuilder.kt">
+<line nr="5" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="6" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="7" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="8" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="9" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="10" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="11" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="12" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="13" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="14" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="15" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="16" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="17" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="18" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="20" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="21" mi="12" ci="0" mb="0" cb="0"/>
+<line nr="22" mi="14" ci="0" mb="0" cb="0"/>
+<line nr="26" mi="10" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="126" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="18" covered="0"/>
+</sourcefile>
+<sourcefile name="LavaFixtureLoader.kt">
+<line nr="6" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="7" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="8" mi="6" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="19" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</sourcefile>
+<sourcefile name="FakeTrackerClient.kt">
+<line nr="26" mi="0" ci="7" mb="0" cb="0"/>
+<line nr="28" mi="0" ci="8" mb="0" cb="0"/>
+<line nr="29" mi="0" ci="9" mb="0" cb="0"/>
+<line nr="30" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="31" mi="0" ci="9" mb="0" cb="0"/>
+<line nr="32" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="33" mi="0" ci="12" mb="0" cb="0"/>
+<line nr="34" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="35" mi="0" ci="17" mb="0" cb="0"/>
+<line nr="36" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="38" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="43" mi="0" ci="4" mb="0" cb="0"/>
+<line nr="44" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="45" mi="0" ci="18" mb="1" cb="3"/>
+<line nr="46" mi="18" ci="0" mb="4" cb="0"/>
+<line nr="47" mi="18" ci="0" mb="4" cb="0"/>
+<line nr="48" mi="18" ci="0" mb="4" cb="0"/>
+<line nr="49" mi="18" ci="0" mb="4" cb="0"/>
+<line nr="50" mi="18" ci="0" mb="4" cb="0"/>
+<line nr="51" mi="18" ci="0" mb="4" cb="0"/>
+<line nr="52" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="56" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="58" mi="0" ci="8" mb="0" cb="0"/>
+<line nr="59" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="61" mi="0" ci="8" mb="0" cb="0"/>
+<line nr="62" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="63" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="65" mi="0" ci="8" mb="0" cb="0"/>
+<line nr="66" mi="13" ci="0" mb="4" cb="0"/>
+<line nr="67" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="70" mi="25" ci="0" mb="0" cb="0"/>
+<line nr="72" mi="0" ci="7" mb="0" cb="0"/>
+<line nr="73" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="74" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="76" mi="0" ci="8" mb="0" cb="0"/>
+<line nr="77" mi="0" ci="6" mb="0" cb="0"/>
+<line nr="78" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="79" mi="23" ci="0" mb="0" cb="0"/>
+<line nr="82" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="83" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="85" mi="0" ci="8" mb="0" cb="0"/>
+<line nr="86" mi="17" ci="0" mb="0" cb="0"/>
+<line nr="87" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="88" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="90" mi="0" ci="8" mb="0" cb="0"/>
+<line nr="92" mi="13" ci="0" mb="4" cb="0"/>
+<line nr="94" mi="2" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="282" covered="147"/>
+<counter type="BRANCH" missed="33" covered="3"/>
+<counter type="LINE" missed="30" covered="24"/>
+</sourcefile>
+<sourcefile name="SearchRequestBuilder.kt">
+<line nr="8" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="9" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="10" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="11" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="12" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="13" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="14" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="16" mi="15" ci="0" mb="0" cb="0"/>
+<line nr="19" mi="10" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="69" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="9" covered="0"/>
+</sourcefile>
+<counter type="INSTRUCTION" missed="496" covered="147"/>
+<counter type="BRANCH" missed="33" covered="3"/>
+<counter type="LINE" missed="60" covered="24"/>
+<counter type="METHOD" missed="38" covered="9"/>
+<counter type="CLASS" missed="5" covered="8"/>
+</package>
+<counter type="INSTRUCTION" missed="496" covered="147"/>
+<counter type="BRANCH" missed="33" covered="3"/>
+<counter type="LINE" missed="60" covered="24"/>
+<counter type="METHOD" missed="38" covered="9"/>
+<counter type="CLASS" missed="5" covered="8"/>
+</report>

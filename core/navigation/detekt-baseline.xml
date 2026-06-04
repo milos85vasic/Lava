@@ -1,0 +1,8 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>LongParameterList:NavigationGraphBuilder.kt$NavigationGraphBuilder$( route: String = Root, isStartRoute: Boolean = route == Root, arguments: List&lt;NavigationArgument&gt; = emptyList(), deepLinks: List&lt;NavigationDeepLink&gt; = emptyList(), animations: NavigationAnimations = NavigationAnimations.Default, options: NavigationOptions = NavigationOptions.Empty, content: @Composable () -&gt; Unit, )</ID>
+    <ID>TopLevelPropertyNaming:NavigationGraphBuilder.kt$private const val Root = "root"</ID>
+  </CurrentIssues>
+</SmellBaseline>

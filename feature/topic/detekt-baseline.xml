@@ -1,0 +1,23 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>CyclomaticComplexMethod:Post.kt$@Composable private fun PostContent(content: Content)</ID>
+    <ID>CyclomaticComplexMethod:TopicScreen.kt$@Composable internal fun TopicScreen( viewModel: TopicViewModel, back: () -&gt; Unit, openCategory: (id: String) -&gt; Unit, openLogin: () -&gt; Unit, openSearch: (filter: Filter) -&gt; Unit, )</ID>
+    <ID>LongMethod:Post.kt$@ThemePreviews @Composable private fun ContentPreview()</ID>
+    <ID>LongMethod:TopicScreen.kt$@Composable private fun DownloadDialog( state: DownloadState, onAction: (TopicAction) -&gt; Unit, onDismiss: () -&gt; Unit, )</ID>
+    <ID>LongMethod:TopicScreen.kt$@Composable private fun TorrentAppBar( topicContent: TopicContent.Torrent, favoriteState: TopicFavoriteState, appBarState: AppBarState, onAction: (TopicAction) -&gt; Unit, )</ID>
+    <ID>LongParameterList:TopicNavigation.kt$( back: () -&gt; Unit, openCategory: (id: String) -&gt; Unit, openLogin: () -&gt; Unit, openSearch: (filter: Filter) -&gt; Unit, deepLinkUrls: List&lt;String&gt; = emptyList(), animations: NavigationAnimations, )</ID>
+    <ID>LongParameterList:TopicViewModel.kt$TopicViewModel$( savedStateHandle: SavedStateHandle, private val addCommentUseCase: AddCommentUseCase, private val downloadTorrentUseCase: DownloadTorrentUseCase, private val getTopicUseCase: GetTopicUseCase, private val isAuthorizedUseCase: IsAuthorizedUseCase, private val observeFavoriteStateUseCase: ObserveFavoriteStateUseCase, private val observeTopicPagingDataUseCase: ObserveTopicPagingDataUseCase, private val toggleFavoriteUseCase: ToggleFavoriteUseCase, private val analytics: AnalyticsTracker, loggerFactory: LoggerFactory, )</ID>
+    <ID>MaxLineLength:Post.kt$TextContent.Text(": Screen Gems, 2.0 Entertainment, Loyola Productions")</ID>
+    <ID>TooManyFunctions:Post.kt$lava.topic.Post.kt</ID>
+    <ID>TooManyFunctions:TopicScreen.kt$lava.topic.TopicScreen.kt</ID>
+    <ID>TooManyFunctions:TopicViewModel.kt$TopicViewModel : ViewModelContainerHost</ID>
+    <ID>TopLevelPropertyNaming:TopicNavigation.kt$private const val TopicIdKey = "t"</ID>
+    <ID>TopLevelPropertyNaming:TopicNavigation.kt$private const val TopicRoute = "topic"</ID>
+    <ID>UnusedPrivateMember:Post.kt$@ThemePreviews @Composable private fun ContentPreview()</ID>
+    <ID>UnusedPrivateMember:TopicScreen.kt$@ThemePreviews @Composable private fun DownloadDialogPreview()</ID>
+    <ID>UnusedPrivateMember:TopicScreen.kt$@ThemePreviews @Composable private fun MagnetDialogPreview()</ID>
+    <ID>UnusedPrivateMember:TopicScreen.kt$@ThemePreviews @Composable private fun PostItemPreview()</ID>
+  </CurrentIssues>
+</SmellBaseline>

@@ -1,0 +1,1398 @@
+<?xml version="1.0" ?>
+<report name="Kover Gradle Plugin XML report for :feature:category">
+<package name="lava/forum/category">
+<class name="lava/forum/category/CategoryAction$BackClick" sourcefilename="CategoryAction.kt">
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/category/CategoryAction$BookmarkClick" sourcefilename="CategoryAction.kt">
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/category/CategoryAction$CategoryClick" sourcefilename="CategoryAction.kt">
+<method name="&lt;init&gt;" desc="(Llava/models/forum/Category;)V">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/category/CategoryAction$EndOfListReached" sourcefilename="CategoryAction.kt">
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/category/CategoryAction$FavoriteClick" sourcefilename="CategoryAction.kt">
+<method name="&lt;init&gt;" desc="(Llava/models/topic/TopicModel;)V">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/category/CategoryAction$LoginClick" sourcefilename="CategoryAction.kt">
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/category/CategoryAction$RetryClick" sourcefilename="CategoryAction.kt">
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/category/CategoryAction$SearchClick" sourcefilename="CategoryAction.kt">
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/category/CategoryAction$TopicClick" sourcefilename="CategoryAction.kt">
+<method name="&lt;init&gt;" desc="(Llava/models/topic/TopicModel;)V">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/category/CategoryContent$Content" sourcefilename="CategoryPageState.kt">
+<method name="&lt;init&gt;" desc="(Ljava/util/List;)V">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/category/CategoryContent$Empty" sourcefilename="CategoryPageState.kt">
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/category/CategoryContent$Initial" sourcefilename="CategoryPageState.kt">
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/category/CategoryItem$Category" sourcefilename="CategoryPageState.kt">
+<method name="&lt;init&gt;" desc="(Llava/models/forum/Category;)V">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/category/CategoryItem$SectionHeader" sourcefilename="CategoryPageState.kt">
+<method name="&lt;init&gt;" desc="(Ljava/lang/String;)V">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/category/CategoryItem$Topic" sourcefilename="CategoryPageState.kt">
+<method name="&lt;init&gt;" desc="(Llava/models/topic/TopicModel;)V">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/category/CategoryNavigationKt" sourcefilename="CategoryNavigation.kt">
+<method name="openCategory$lambda$3" desc="(Ljava/lang/String;Ljava/lang/StringBuilder;)Lkotlin/Unit;">
+<counter type="INSTRUCTION" missed="11" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="addCategory$lambda$0" desc="(Ljava/lang/StringBuilder;)Lkotlin/Unit;">
+<counter type="INSTRUCTION" missed="11" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="getCategoryId" desc="(Landroidx/lifecycle/SavedStateHandle;)Ljava/lang/String;">
+<counter type="INSTRUCTION" missed="6" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="addCategory" desc="(Llava/navigation/model/NavigationGraphBuilder;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Ljava/util/List;Llava/navigation/ui/NavigationAnimations;)V">
+<counter type="INSTRUCTION" missed="66" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="9" covered="0"/>
+</method>
+<method name="openCategory" desc="(Llava/navigation/model/NavigationGraphBuilder;Llava/navigation/NavigationController;Ljava/lang/String;)V">
+<counter type="INSTRUCTION" missed="10" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="104" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="15" covered="0"/>
+<counter type="METHOD" missed="5" covered="0"/>
+</class>
+<class name="lava/forum/category/CategoryNavigationKt$addCategory$3" sourcefilename="CategoryNavigation.kt">
+<method name="invoke" desc="(Landroidx/compose/runtime/Composer;I)V">
+<counter type="INSTRUCTION" missed="32" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="32" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/category/CategoryPageState" sourcefilename="CategoryPageState.kt">
+<method name="&lt;init&gt;" desc="(Llava/models/auth/AuthState;Llava/forum/category/CategoryState;Llava/forum/category/CategoryContent;Llava/domain/model/LoadStates;)V">
+<counter type="INSTRUCTION" missed="32" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="32" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/category/CategoryScreenKt" sourcefilename="CategoryScreen.kt">
+<method name="CategoryScreen" desc="(Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;I)V">
+<counter type="INSTRUCTION" missed="163" covered="0"/>
+<counter type="BRANCH" missed="10" covered="0"/>
+<counter type="LINE" missed="8" covered="0"/>
+</method>
+<method name="CategoryScreen" desc="(Llava/forum/category/CategoryPageState;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;I)V">
+<counter type="INSTRUCTION" missed="99" covered="0"/>
+<counter type="BRANCH" missed="4" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+</method>
+<method name="CategoryScreenList$lambda$16$lambda$15$lambda$9" desc="(Lkotlin/jvm/functions/Function1;)Lkotlin/Unit;">
+<counter type="INSTRUCTION" missed="19" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="CategoryScreenList" desc="(Landroidx/compose/ui/Modifier;Llava/forum/category/CategoryPageState;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V">
+<counter type="INSTRUCTION" missed="229" covered="0"/>
+<counter type="BRANCH" missed="4" covered="0"/>
+<counter type="LINE" missed="9" covered="0"/>
+</method>
+<method name="LoginDialog" desc="(Llava/ui/component/VisibilityState;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;I)V">
+<counter type="INSTRUCTION" missed="91" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="5" covered="0"/>
+</method>
+<method name="CategoryScreen" desc="(Llava/forum/category/CategoryViewModel;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;I)V">
+<counter type="INSTRUCTION" missed="331" covered="0"/>
+<counter type="BRANCH" missed="20" covered="0"/>
+<counter type="LINE" missed="9" covered="0"/>
+</method>
+<method name="CategoryAppBar" desc="(Llava/forum/category/CategoryState;Llava/designsystem/component/AppBarState;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;I)V">
+<counter type="INSTRUCTION" missed="135" covered="0"/>
+<counter type="BRANCH" missed="4" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+</method>
+<method name="CategoryScreenList$lambda$16$lambda$15" desc="(Llava/forum/category/CategoryPageState;Lkotlin/jvm/functions/Function1;Landroidx/compose/foundation/lazy/LazyListScope;)Lkotlin/Unit;">
+<counter type="INSTRUCTION" missed="67" covered="0"/>
+<counter type="BRANCH" missed="8" covered="2"/>
+<counter type="LINE" missed="14" covered="0"/>
+</method>
+<method name="Category" desc="(Llava/models/forum/Category;Lkotlin/jvm/functions/Function0;Landroidx/compose/runtime/Composer;I)V">
+<counter type="INSTRUCTION" missed="117" covered="0"/>
+<counter type="BRANCH" missed="4" covered="0"/>
+<counter type="LINE" missed="9" covered="0"/>
+</method>
+<method name="CategoryScreenList$lambda$16$lambda$15$lambda$14" desc="(Lkotlin/jvm/functions/Function1;)Lkotlin/Unit;">
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="1256" covered="0"/>
+<counter type="BRANCH" missed="58" covered="2"/>
+<counter type="LINE" missed="66" covered="0"/>
+<counter type="METHOD" missed="10" covered="0"/>
+</class>
+<class name="lava/forum/category/CategoryScreenKt$Category$1" sourcefilename="CategoryScreen.kt">
+<method name="invoke" desc="(Landroidx/compose/foundation/layout/BoxScope;Landroidx/compose/runtime/Composer;I)V">
+<counter type="INSTRUCTION" missed="100" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="17" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="100" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="17" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/category/CategoryScreenKt$CategoryAppBar$1" sourcefilename="CategoryScreen.kt">
+<method name="invoke" desc="(Landroidx/compose/runtime/Composer;I)V">
+<counter type="INSTRUCTION" missed="54" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="54" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/category/CategoryScreenKt$CategoryAppBar$2" sourcefilename="CategoryScreen.kt">
+<method name="invoke" desc="(Landroidx/compose/runtime/Composer;I)V">
+<counter type="INSTRUCTION" missed="58" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="58" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/category/CategoryScreenKt$CategoryAppBar$3" sourcefilename="CategoryScreen.kt">
+<method name="invoke" desc="(Landroidx/compose/foundation/layout/RowScope;Landroidx/compose/runtime/Composer;I)V">
+<counter type="INSTRUCTION" missed="99" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="5" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="99" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="5" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/category/CategoryScreenKt$CategoryScreen$3$1" sourcefilename="CategoryScreen.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="83" covered="0"/>
+<counter type="BRANCH" missed="13" covered="1"/>
+<counter type="LINE" missed="8" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="83" covered="0"/>
+<counter type="BRANCH" missed="13" covered="1"/>
+<counter type="LINE" missed="8" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/category/CategoryScreenKt$CategoryScreen$6" sourcefilename="CategoryScreen.kt">
+<method name="invoke" desc="(Llava/designsystem/component/AppBarState;Landroidx/compose/runtime/Composer;I)V">
+<counter type="INSTRUCTION" missed="32" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="32" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/category/CategoryScreenKt$CategoryScreen$7" sourcefilename="CategoryScreen.kt">
+<method name="invoke" desc="(Landroidx/compose/foundation/layout/PaddingValues;Landroidx/compose/runtime/Composer;I)V">
+<counter type="INSTRUCTION" missed="31" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="31" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/category/CategoryScreenKt$CategoryScreenList$2$1$2$1$1" sourcefilename="CategoryScreen.kt">
+<method name="invoke" desc="()V">
+<counter type="INSTRUCTION" missed="11" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="11" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/category/CategoryScreenKt$CategoryScreenList$2$1$2$2$1" sourcefilename="CategoryScreen.kt">
+<method name="invoke" desc="()V">
+<counter type="INSTRUCTION" missed="11" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="11" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/category/CategoryScreenKt$CategoryScreenList$2$1$2$3$1" sourcefilename="CategoryScreen.kt">
+<method name="invoke" desc="()V">
+<counter type="INSTRUCTION" missed="11" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="11" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/category/CategoryScreenKt$CategoryScreenList$lambda$16$lambda$15$$inlined$items$default$1" sourcefilename="LazyDsl.kt">
+<method name="invoke" desc="(Ljava/lang/Object;)Ljava/lang/Void;">
+<counter type="INSTRUCTION" missed="1" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="1" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/category/CategoryScreenKt$CategoryScreenList$lambda$16$lambda$15$$inlined$items$default$2" sourcefilename="LazyDsl.kt">
+<method name="invoke" desc="(I)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/category/CategoryScreenKt$CategoryScreenList$lambda$16$lambda$15$$inlined$items$default$3" sourcefilename="LazyDsl.kt">
+<method name="invoke" desc="(I)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/category/CategoryScreenKt$LoginDialog$1" sourcefilename="CategoryScreen.kt">
+<method name="invoke" desc="(Landroidx/compose/animation/AnimatedVisibilityScope;Landroidx/compose/runtime/Composer;I)V">
+<counter type="INSTRUCTION" missed="86" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="86" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/category/CategoryScreenKt$LoginDialog$1$1" sourcefilename="CategoryScreen.kt">
+<method name="invoke$lambda$1$lambda$0" desc="(Lkotlin/jvm/functions/Function1;Llava/ui/component/VisibilityState;)Lkotlin/Unit;">
+<counter type="INSTRUCTION" missed="6" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</method>
+<method name="invoke" desc="(Landroidx/compose/runtime/Composer;I)V">
+<counter type="INSTRUCTION" missed="68" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="74" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="5" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+</class>
+<class name="lava/forum/category/CategoryScreenKt$LoginDialog$1$2" sourcefilename="CategoryScreen.kt">
+<method name="invoke" desc="(Landroidx/compose/runtime/Composer;I)V">
+<counter type="INSTRUCTION" missed="62" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="62" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/category/CategorySideEffect$Back" sourcefilename="CategorySideEffect.kt">
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/category/CategorySideEffect$OpenCategory" sourcefilename="CategorySideEffect.kt">
+<method name="&lt;init&gt;" desc="(Ljava/lang/String;)V">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/category/CategorySideEffect$OpenLogin" sourcefilename="CategorySideEffect.kt">
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/category/CategorySideEffect$OpenSearch" sourcefilename="CategorySideEffect.kt">
+<method name="&lt;init&gt;" desc="(Ljava/lang/String;)V">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/category/CategorySideEffect$OpenTopic" sourcefilename="CategorySideEffect.kt">
+<method name="&lt;init&gt;" desc="(Ljava/lang/String;)V">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/category/CategorySideEffect$ShowFavoriteToggleError" sourcefilename="CategorySideEffect.kt">
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/category/CategorySideEffect$ShowLoginDialog" sourcefilename="CategorySideEffect.kt">
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/category/CategoryState$Category" sourcefilename="CategoryPageState.kt">
+<method name="&lt;init&gt;" desc="(Ljava/lang/String;Z)V">
+<counter type="INSTRUCTION" missed="12" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="12" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/category/CategoryState$Initial" sourcefilename="CategoryPageState.kt">
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/category/CategoryViewModel" sourcefilename="CategoryViewModel.kt">
+<method name="onBackClick" desc="()Lkotlinx/coroutines/Job;">
+<counter type="INSTRUCTION" missed="11" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="onLoginClick" desc="()Lkotlinx/coroutines/Job;">
+<counter type="INSTRUCTION" missed="11" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="onSearchClick" desc="()Lkotlinx/coroutines/Job;">
+<counter type="INSTRUCTION" missed="12" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="onFavoriteClick" desc="(Llava/models/topic/TopicModel;)Lkotlinx/coroutines/Job;">
+<counter type="INSTRUCTION" missed="13" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="onBookmarkClick" desc="()Lkotlinx/coroutines/Job;">
+<counter type="INSTRUCTION" missed="12" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="onCategoryClick" desc="(Llava/models/forum/Category;)Lkotlinx/coroutines/Job;">
+<counter type="INSTRUCTION" missed="12" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="onTopicClick" desc="(Llava/models/topic/TopicModel;)Lkotlinx/coroutines/Job;">
+<counter type="INSTRUCTION" missed="12" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="toContent" desc="(Llava/domain/model/category/CategoryPage;)Llava/forum/category/CategoryContent$Content;">
+<counter type="INSTRUCTION" missed="81" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="12" covered="0"/>
+</method>
+<method name="observeAuthState" desc="()Lkotlinx/coroutines/Job;">
+<counter type="INSTRUCTION" missed="12" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="observePagingData" desc="()Lkotlinx/coroutines/Job;">
+<counter type="INSTRUCTION" missed="12" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="perform" desc="(Llava/forum/category/CategoryAction;)V">
+<counter type="INSTRUCTION" missed="71" covered="0"/>
+<counter type="BRANCH" missed="16" covered="0"/>
+<counter type="LINE" missed="11" covered="0"/>
+</method>
+<method name="onRetryClick" desc="()Lkotlinx/coroutines/Job;">
+<counter type="INSTRUCTION" missed="12" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="appendPage" desc="()Lkotlinx/coroutines/Job;">
+<counter type="INSTRUCTION" missed="12" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Landroidx/lifecycle/SavedStateHandle;Llava/logger/api/LoggerFactory;Llava/domain/usecase/ObserveAuthStateUseCase;Llava/domain/usecase/ObserveCategoryPagingDataUseCase;Llava/domain/usecase/ObserveCategoryModelUseCase;Llava/domain/usecase/ToggleBookmarkUseCase;Llava/domain/usecase/ToggleFavoriteUseCase;)V">
+<counter type="INSTRUCTION" missed="59" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="11" covered="0"/>
+</method>
+<method name="observeCategoryModel" desc="()Lkotlinx/coroutines/Job;">
+<counter type="INSTRUCTION" missed="12" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="354" covered="0"/>
+<counter type="BRANCH" missed="18" covered="0"/>
+<counter type="LINE" missed="46" covered="0"/>
+<counter type="METHOD" missed="15" covered="0"/>
+</class>
+<class name="lava/forum/category/CategoryViewModel$appendPage$1" sourcefilename="CategoryViewModel.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="13" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="13" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/category/CategoryViewModel$container$1" sourcefilename="CategoryViewModel.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="12" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="12" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/category/CategoryViewModel$observeAuthState$1" sourcefilename="CategoryViewModel.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="26" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="26" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/category/CategoryViewModel$observeAuthState$1$2" sourcefilename="CategoryViewModel.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="23" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="23" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/category/CategoryViewModel$observeCategoryModel$1" sourcefilename="CategoryViewModel.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="43" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="43" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/category/CategoryViewModel$observeCategoryModel$1$2" sourcefilename="CategoryViewModel.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="33" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="33" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/category/CategoryViewModel$observePagingData$1" sourcefilename="CategoryViewModel.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="52" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="52" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/category/CategoryViewModel$observePagingData$1$2" sourcefilename="CategoryViewModel.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="32" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</method>
+<method name="invokeSuspend$lambda$0" desc="(Llava/domain/model/category/CategoryPage;Llava/forum/category/CategoryViewModel;Llava/domain/model/LoadStates;Lorg/orbitmvi/orbit/syntax/simple/SimpleContext;)Llava/forum/category/CategoryPageState;">
+<counter type="INSTRUCTION" missed="25" covered="0"/>
+<counter type="BRANCH" missed="4" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="57" covered="0"/>
+<counter type="BRANCH" missed="4" covered="0"/>
+<counter type="LINE" missed="8" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+</class>
+<class name="lava/forum/category/CategoryViewModel$onBackClick$1" sourcefilename="CategoryViewModel.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="11" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="11" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/category/CategoryViewModel$onBookmarkClick$1" sourcefilename="CategoryViewModel.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="15" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="15" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/category/CategoryViewModel$onCategoryClick$1" sourcefilename="CategoryViewModel.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="16" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="16" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/category/CategoryViewModel$onFavoriteClick$1" sourcefilename="CategoryViewModel.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="62" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="62" covered="0"/>
+<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/category/CategoryViewModel$onLoginClick$1" sourcefilename="CategoryViewModel.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="11" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="11" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/category/CategoryViewModel$onRetryClick$1" sourcefilename="CategoryViewModel.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="13" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="13" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/category/CategoryViewModel$onSearchClick$1" sourcefilename="CategoryViewModel.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="46" covered="0"/>
+<counter type="BRANCH" missed="3" covered="1"/>
+<counter type="LINE" missed="3" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="46" covered="0"/>
+<counter type="BRANCH" missed="3" covered="1"/>
+<counter type="LINE" missed="3" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/category/CategoryViewModel$onTopicClick$1" sourcefilename="CategoryViewModel.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="17" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="17" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/category/CategoryViewModel_Factory" sourcefilename="CategoryViewModel_Factory.java">
+<method name="get" desc="()Llava/forum/category/CategoryViewModel;">
+<counter type="INSTRUCTION" missed="29" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="(Ldagger/internal/Provider;Ldagger/internal/Provider;Ldagger/internal/Provider;Ldagger/internal/Provider;Ldagger/internal/Provider;Ldagger/internal/Provider;Ldagger/internal/Provider;)V">
+<counter type="INSTRUCTION" missed="23" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="8" covered="0"/>
+</method>
+<method name="create" desc="(Ldagger/internal/Provider;Ldagger/internal/Provider;Ldagger/internal/Provider;Ldagger/internal/Provider;Ldagger/internal/Provider;Ldagger/internal/Provider;Ldagger/internal/Provider;)Llava/forum/category/CategoryViewModel_Factory;">
+<counter type="INSTRUCTION" missed="10" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="create" desc="(Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Llava/forum/category/CategoryViewModel_Factory;">
+<counter type="INSTRUCTION" missed="17" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="newInstance" desc="(Landroidx/lifecycle/SavedStateHandle;Llava/logger/api/LoggerFactory;Llava/domain/usecase/ObserveAuthStateUseCase;Llava/domain/usecase/ObserveCategoryPagingDataUseCase;Llava/domain/usecase/ObserveCategoryModelUseCase;Llava/domain/usecase/ToggleBookmarkUseCase;Llava/domain/usecase/ToggleFavoriteUseCase;)Llava/forum/category/CategoryViewModel;">
+<counter type="INSTRUCTION" missed="10" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="89" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="12" covered="0"/>
+<counter type="METHOD" missed="5" covered="0"/>
+</class>
+<class name="lava/forum/category/CategoryViewModel_HiltModules$BindsModule" sourcefilename="CategoryViewModel_HiltModules.java">
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/category/CategoryViewModel_HiltModules$KeyModule" sourcefilename="CategoryViewModel_HiltModules.java">
+<method name="provide" desc="()Z">
+<counter type="INSTRUCTION" missed="1" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="1" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/category/CategoryViewModel_HiltModules_BindsModule_Binds_LazyMapKey" sourcefilename="CategoryViewModel_HiltModules_BindsModule_Binds_LazyMapKey.java">
+<method name="&lt;clinit&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+</class>
+<class name="lava/forum/category/CategoryViewModel_HiltModules_KeyModule_ProvideFactory" sourcefilename="CategoryViewModel_HiltModules_KeyModule_ProvideFactory.java">
+<method name="provide" desc="()Z">
+<counter type="INSTRUCTION" missed="1" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="create" desc="()Llava/forum/category/CategoryViewModel_HiltModules_KeyModule_ProvideFactory;">
+<counter type="INSTRUCTION" missed="1" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="get" desc="()Ljava/lang/Boolean;">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="6" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+<counter type="METHOD" missed="4" covered="0"/>
+</class>
+<class name="lava/forum/category/CategoryViewModel_HiltModules_KeyModule_ProvideFactory$InstanceHolder" sourcefilename="CategoryViewModel_HiltModules_KeyModule_ProvideFactory.java">
+<method name="&lt;clinit&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/category/CategoryViewModel_HiltModules_KeyModule_Provide_LazyMapKey" sourcefilename="CategoryViewModel_HiltModules_KeyModule_Provide_LazyMapKey.java">
+<method name="&lt;clinit&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+</class>
+<class name="lava/forum/category/ComposableSingletons$CategoryScreenKt" sourcefilename="CategoryScreen.kt">
+<method name="&lt;clinit&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="24" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="24" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/category/ComposableSingletons$CategoryScreenKt$lambda-1$1" sourcefilename="CategoryScreen.kt">
+<method name="invoke" desc="(Landroidx/compose/runtime/Composer;I)V">
+<counter type="INSTRUCTION" missed="26" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="26" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/category/ComposableSingletons$CategoryScreenKt$lambda-2$1" sourcefilename="CategoryScreen.kt">
+<method name="invoke" desc="(Landroidx/compose/runtime/Composer;I)V">
+<counter type="INSTRUCTION" missed="32" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="32" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/category/ComposableSingletons$CategoryScreenKt$lambda-3$1" sourcefilename="CategoryScreen.kt">
+<method name="invoke" desc="(Landroidx/compose/runtime/Composer;I)V">
+<counter type="INSTRUCTION" missed="45" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="45" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/forum/category/ComposableSingletons$CategoryScreenKt$lambda-4$1" sourcefilename="CategoryScreen.kt">
+<method name="invoke" desc="(Landroidx/compose/runtime/Composer;I)V">
+<counter type="INSTRUCTION" missed="45" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="45" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<sourcefile name="CategoryPageState.kt">
+<line nr="8" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="9" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="10" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="11" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="15" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="16" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="17" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="18" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="23" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="24" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="25" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="29" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="30" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="31" mi="7" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="78" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="14" covered="0"/>
+</sourcefile>
+<sourcefile name="LazyDsl.kt">
+<line nr="171" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="176" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="177" mi="7" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="15" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</sourcefile>
+<sourcefile name="CategoryViewModel_HiltModules_BindsModule_Binds_LazyMapKey.java">
+<line nr="23" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="27" mi="2" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</sourcefile>
+<sourcefile name="CategoryScreen.kt">
+<line nr="54" mi="101" ci="0" mb="10" cb="0"/>
+<line nr="55" mi="11" ci="0" mb="0" cb="0"/>
+<line nr="56" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="57" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="58" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="59" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="60" mi="31" ci="0" mb="0" cb="0"/>
+<line nr="61" mi="16" ci="0" mb="0" cb="0"/>
+<line nr="71" mi="108" ci="0" mb="16" cb="0"/>
+<line nr="72" mi="12" ci="0" mb="0" cb="0"/>
+<line nr="73" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="74" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="75" mi="31" ci="0" mb="0" cb="0"/>
+<line nr="76" mi="98" ci="0" mb="4" cb="0"/>
+<line nr="77" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="78" mi="8" ci="0" mb="2" cb="0"/>
+<line nr="79" mi="11" ci="0" mb="2" cb="0"/>
+<line nr="80" mi="11" ci="0" mb="2" cb="0"/>
+<line nr="81" mi="11" ci="0" mb="2" cb="0"/>
+<line nr="82" mi="7" ci="0" mb="2" cb="0"/>
+<line nr="83" mi="8" ci="0" mb="2" cb="0"/>
+<line nr="84" mi="21" ci="0" mb="1" cb="1"/>
+<line nr="87" mi="18" ci="0" mb="0" cb="0"/>
+<line nr="88" mi="36" ci="0" mb="0" cb="0"/>
+<line nr="89" mi="17" ci="0" mb="0" cb="0"/>
+<line nr="95" mi="58" ci="0" mb="4" cb="0"/>
+<line nr="96" mi="14" ci="0" mb="0" cb="0"/>
+<line nr="97" mi="20" ci="0" mb="0" cb="0"/>
+<line nr="98" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="99" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="100" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="103" mi="14" ci="0" mb="0" cb="0"/>
+<line nr="104" mi="20" ci="0" mb="0" cb="0"/>
+<line nr="105" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="106" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="107" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="110" mi="32" ci="0" mb="0" cb="0"/>
+<line nr="111" mi="13" ci="0" mb="0" cb="0"/>
+<line nr="115" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="118" mi="96" ci="0" mb="4" cb="0"/>
+<line nr="119" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="120" mi="25" ci="0" mb="0" cb="0"/>
+<line nr="121" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="122" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="124" mi="45" ci="0" mb="0" cb="0"/>
+<line nr="125" mi="26" ci="0" mb="0" cb="0"/>
+<line nr="126" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="127" mi="19" ci="0" mb="2" cb="0"/>
+<line nr="128" mi="9" ci="0" mb="2" cb="0"/>
+<line nr="129" mi="3" ci="0" mb="1" cb="1"/>
+<line nr="130" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="131" mi="3" ci="0" mb="2" cb="0"/>
+<line nr="132" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="133" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="139" mi="11" ci="0" mb="0" cb="0"/>
+<line nr="159" mi="11" ci="0" mb="0" cb="0"/>
+<line nr="160" mi="11" ci="0" mb="0" cb="0"/>
+<line nr="165" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="166" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="167" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="171" mi="9" ci="0" mb="2" cb="0"/>
+<line nr="172" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="173" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="174" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="177" mi="9" ci="0" mb="1" cb="1"/>
+<line nr="181" mi="16" ci="0" mb="0" cb="0"/>
+<line nr="187" mi="57" ci="0" mb="4" cb="0"/>
+<line nr="188" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="189" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="190" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="192" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="193" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="194" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="195" mi="16" ci="0" mb="0" cb="0"/>
+<line nr="196" mi="25" ci="0" mb="0" cb="0"/>
+<line nr="197" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="198" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="199" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="200" mi="10" ci="0" mb="0" cb="0"/>
+<line nr="201" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="203" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="204" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="205" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="206" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="207" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="208" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="210" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="212" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="213" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="214" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="216" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="217" mi="13" ci="0" mb="0" cb="0"/>
+<line nr="224" mi="80" ci="0" mb="4" cb="0"/>
+<line nr="225" mi="64" ci="0" mb="0" cb="0"/>
+<line nr="226" mi="10" ci="0" mb="0" cb="0"/>
+<line nr="227" mi="19" ci="0" mb="2" cb="0"/>
+<line nr="228" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="229" mi="16" ci="0" mb="0" cb="0"/>
+<line nr="230" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="231" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="232" mi="11" ci="0" mb="0" cb="0"/>
+<line nr="236" mi="11" ci="0" mb="0" cb="0"/>
+<line nr="237" mi="48" ci="0" mb="0" cb="0"/>
+<line nr="238" mi="4" ci="0" mb="2" cb="0"/>
+<line nr="239" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="240" mi="18" ci="0" mb="0" cb="0"/>
+<line nr="241" mi="24" ci="0" mb="0" cb="0"/>
+<line nr="245" mi="10" ci="0" mb="0" cb="0"/>
+<line nr="246" mi="14" ci="0" mb="0" cb="0"/>
+<line nr="252" mi="57" ci="0" mb="2" cb="0"/>
+<line nr="253" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="254" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="255" mi="14" ci="0" mb="0" cb="0"/>
+<line nr="256" mi="17" ci="0" mb="0" cb="0"/>
+<line nr="257" mi="38" ci="0" mb="0" cb="0"/>
+<line nr="258" mi="51" ci="0" mb="0" cb="0"/>
+<line nr="259" mi="51" ci="0" mb="0" cb="0"/>
+<line nr="260" mi="13" ci="0" mb="0" cb="0"/>
+<line nr="261" mi="20" ci="0" mb="0" cb="0"/>
+<line nr="262" mi="23" ci="0" mb="0" cb="0"/>
+<line nr="263" mi="25" ci="0" mb="0" cb="0"/>
+<line nr="264" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="265" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="269" mi="11" ci="0" mb="0" cb="0"/>
+<line nr="270" mi="20" ci="0" mb="0" cb="0"/>
+<line nr="271" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="272" mi="37" ci="0" mb="0" cb="0"/>
+<line nr="275" mi="45" ci="0" mb="0" cb="0"/>
+<line nr="277" mi="13" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="2140" covered="0"/>
+<counter type="BRANCH" missed="75" covered="3"/>
+<counter type="LINE" missed="134" covered="0"/>
+</sourcefile>
+<sourcefile name="CategoryViewModel_HiltModules_KeyModule_ProvideFactory.java">
+<line nr="25" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="28" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="32" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="36" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="40" mi="4" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="10" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="5" covered="0"/>
+</sourcefile>
+<sourcefile name="CategoryAction.kt">
+<line nr="8" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="9" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="10" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="11" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="12" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="13" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="14" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="15" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="16" mi="7" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="33" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="9" covered="0"/>
+</sourcefile>
+<sourcefile name="CategoryViewModel_Factory.java">
+<line nr="55" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="56" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="57" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="58" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="59" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="60" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="61" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="62" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="67" mi="29" ci="0" mb="0" cb="0"/>
+<line nr="78" mi="17" ci="0" mb="0" cb="0"/>
+<line nr="89" mi="10" ci="0" mb="0" cb="0"/>
+<line nr="97" mi="10" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="89" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="12" covered="0"/>
+</sourcefile>
+<sourcefile name="CategoryViewModel.kt">
+<line nr="36" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="37" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="38" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="39" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="40" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="41" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="42" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="43" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="44" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="46" mi="16" ci="0" mb="0" cb="0"/>
+<line nr="47" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="49" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="50" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="51" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="56" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="57" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="58" mi="6" ci="0" mb="2" cb="0"/>
+<line nr="59" mi="6" ci="0" mb="2" cb="0"/>
+<line nr="60" mi="9" ci="0" mb="2" cb="0"/>
+<line nr="61" mi="6" ci="0" mb="2" cb="0"/>
+<line nr="62" mi="9" ci="0" mb="2" cb="0"/>
+<line nr="63" mi="6" ci="0" mb="2" cb="0"/>
+<line nr="64" mi="6" ci="0" mb="2" cb="0"/>
+<line nr="65" mi="6" ci="0" mb="2" cb="0"/>
+<line nr="66" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="70" mi="12" ci="0" mb="0" cb="0"/>
+<line nr="71" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="72" mi="20" ci="0" mb="0" cb="0"/>
+<line nr="73" mi="23" ci="0" mb="0" cb="0"/>
+<line nr="77" mi="12" ci="0" mb="0" cb="0"/>
+<line nr="78" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="79" mi="37" ci="0" mb="0" cb="0"/>
+<line nr="80" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="81" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="82" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="84" mi="24" ci="0" mb="0" cb="0"/>
+<line nr="88" mi="12" ci="0" mb="0" cb="0"/>
+<line nr="89" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="90" mi="13" ci="0" mb="0" cb="0"/>
+<line nr="91" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="92" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="93" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="94" mi="36" ci="0" mb="0" cb="0"/>
+<line nr="95" mi="16" ci="0" mb="0" cb="0"/>
+<line nr="96" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="97" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="98" mi="5" ci="0" mb="2" cb="0"/>
+<line nr="99" mi="6" ci="0" mb="2" cb="0"/>
+<line nr="100" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="102" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="108" mi="11" ci="0" mb="0" cb="0"/>
+<line nr="109" mi="11" ci="0" mb="0" cb="0"/>
+<line nr="112" mi="12" ci="0" mb="0" cb="0"/>
+<line nr="113" mi="15" ci="0" mb="0" cb="0"/>
+<line nr="116" mi="12" ci="0" mb="0" cb="0"/>
+<line nr="117" mi="16" ci="0" mb="0" cb="0"/>
+<line nr="120" mi="12" ci="0" mb="0" cb="0"/>
+<line nr="121" mi="13" ci="0" mb="0" cb="0"/>
+<line nr="124" mi="13" ci="0" mb="0" cb="0"/>
+<line nr="125" mi="41" ci="0" mb="0" cb="0"/>
+<line nr="126" mi="21" ci="0" mb="2" cb="0"/>
+<line nr="129" mi="11" ci="0" mb="0" cb="0"/>
+<line nr="130" mi="11" ci="0" mb="0" cb="0"/>
+<line nr="133" mi="12" ci="0" mb="0" cb="0"/>
+<line nr="134" mi="13" ci="0" mb="0" cb="0"/>
+<line nr="137" mi="12" ci="0" mb="0" cb="0"/>
+<line nr="138" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="139" mi="21" ci="0" mb="2" cb="0"/>
+<line nr="140" mi="16" ci="0" mb="1" cb="1"/>
+<line nr="144" mi="12" ci="0" mb="0" cb="0"/>
+<line nr="145" mi="17" ci="0" mb="0" cb="0"/>
+<line nr="149" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="150" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="151" mi="13" ci="0" mb="0" cb="0"/>
+<line nr="152" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="153" mi="3" ci="0" mb="0" cb="0"/>
+<line nr="154" mi="13" ci="0" mb="0" cb="0"/>
+<line nr="156" mi="11" ci="0" mb="0" cb="0"/>
+<line nr="157" mi="2" ci="0" mb="2" cb="0"/>
+<line nr="158" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="160" mi="12" ci="0" mb="0" cb="0"/>
+<line nr="161" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="162" mi="1" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="804" covered="0"/>
+<counter type="BRANCH" missed="27" covered="1"/>
+<counter type="LINE" missed="84" covered="0"/>
+</sourcefile>
+<sourcefile name="CategoryViewModel_HiltModules.java">
+<line nr="27" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="48" mi="1" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="3" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</sourcefile>
+<sourcefile name="CategoryViewModel_HiltModules_KeyModule_Provide_LazyMapKey.java">
+<line nr="23" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="27" mi="2" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</sourcefile>
+<sourcefile name="CategoryNavigation.kt">
+<line nr="26" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="28" mi="6" ci="0" mb="0" cb="0"/>
+<line nr="29" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="30" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="31" mi="11" ci="0" mb="0" cb="0"/>
+<line nr="33" mi="10" ci="0" mb="0" cb="0"/>
+<line nr="34" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="35" mi="19" ci="0" mb="0" cb="0"/>
+<line nr="37" mi="12" ci="0" mb="0" cb="0"/>
+<line nr="38" mi="20" ci="0" mb="0" cb="0"/>
+<line nr="39" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="40" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="41" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="42" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="43" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="46" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="51" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="52" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="53" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="54" mi="11" ci="0" mb="0" cb="0"/>
+<line nr="60" mi="6" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="136" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="21" covered="0"/>
+</sourcefile>
+<sourcefile name="CategorySideEffect.kt">
+<line nr="4" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="5" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="6" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="7" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="8" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="9" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="10" mi="2" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="29" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="7" covered="0"/>
+</sourcefile>
+<counter type="INSTRUCTION" missed="3345" covered="0"/>
+<counter type="BRANCH" missed="102" covered="4"/>
+<counter type="LINE" missed="295" covered="0"/>
+<counter type="METHOD" missed="111" covered="0"/>
+<counter type="CLASS" missed="73" covered="0"/>
+</package>
+<package name="hilt_aggregated_deps">
+<class name="hilt_aggregated_deps/_lava_forum_category_CategoryViewModel_HiltModules_BindsModule" sourcefilename="_lava_forum_category_CategoryViewModel_HiltModules_BindsModule.java">
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="hilt_aggregated_deps/_lava_forum_category_CategoryViewModel_HiltModules_KeyModule" sourcefilename="_lava_forum_category_CategoryViewModel_HiltModules_KeyModule.java">
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<sourcefile name="_lava_forum_category_CategoryViewModel_HiltModules_BindsModule.java">
+<line nr="14" mi="2" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</sourcefile>
+<sourcefile name="_lava_forum_category_CategoryViewModel_HiltModules_KeyModule.java">
+<line nr="14" mi="2" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</sourcefile>
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+<counter type="CLASS" missed="2" covered="0"/>
+</package>
+<counter type="INSTRUCTION" missed="3349" covered="0"/>
+<counter type="BRANCH" missed="102" covered="4"/>
+<counter type="LINE" missed="297" covered="0"/>
+<counter type="METHOD" missed="113" covered="0"/>
+<counter type="CLASS" missed="75" covered="0"/>
+</report>

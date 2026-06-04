@@ -1,0 +1,8 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>CyclomaticComplexMethod:FakeTrackerClient.kt$FakeTrackerClient$@Suppress("UNCHECKED_CAST") override fun &lt;T : TrackerFeature&gt; getFeature(featureClass: KClass&lt;T&gt;): T?</ID>
+    <ID>EmptyFunctionBlock:FakeTrackerClient.kt$FakeTrackerClient${}</ID>
+  </CurrentIssues>
+</SmellBaseline>

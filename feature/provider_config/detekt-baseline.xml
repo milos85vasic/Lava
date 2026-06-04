@@ -1,0 +1,17 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>CyclomaticComplexMethod:ProviderConfigViewModel.kt$ProviderConfigViewModel$fun perform(action: ProviderConfigAction)</ID>
+    <ID>EmptyFunctionBlock:ProviderConfigViewModelTest.kt$ProviderConfigViewModelTest.&lt;no name provided&gt;${}</ID>
+    <ID>LongMethod:ProviderConfigViewModel.kt$ProviderConfigViewModel$fun perform(action: ProviderConfigAction)</ID>
+    <ID>LongParameterList:ProviderConfigViewModel.kt$ProviderConfigViewModel$( savedStateHandle: SavedStateHandle, private val sdk: LavaTrackerSdk, private val credentialsRepo: CredentialsEntryRepository, private val providerConfigRepository: ProviderConfigRepository, private val bindingDao: ProviderCredentialBindingDao, private val toggleDao: ProviderSyncToggleDao, private val userMirrorDao: UserMirrorDao, private val clonedProviderDao: ClonedProviderDao, private val probe: ProbeMirrorUseCase, private val cloneProvider: CloneProviderUseCase, private val removeClonedProvider: RemoveClonedProviderUseCase, private val outbox: SyncOutbox, private val analytics: AnalyticsTracker, )</ID>
+    <ID>MagicNumber:ProviderConfigViewModel.kt$ProviderConfigViewModel$3</ID>
+    <ID>MaxLineLength:ProviderConfigViewModel.kt$ProviderConfigViewModel$outbox.enqueue(SyncOutboxKind.BINDING, json.encodeToString(WireBinding(providerId, action.credentialId)))</ID>
+    <ID>MaxLineLength:ProviderConfigViewModel.kt$ProviderConfigViewModel$outbox.enqueue(SyncOutboxKind.BINDING, json.encodeToString(WireBinding(providerId, credentialId = null)))</ID>
+    <ID>MaxLineLength:ProviderConfigViewModel.kt$ProviderConfigViewModel$private</ID>
+    <ID>MaxLineLength:ProviderConfigViewModelTest.kt$ProviderConfigViewModelTest$fun</ID>
+    <ID>TopLevelPropertyNaming:ProviderConfigNavigation.kt$private const val ProviderConfigRoute = "provider_config"</ID>
+    <ID>TopLevelPropertyNaming:ProviderConfigNavigation.kt$private const val ProviderIdKey = ProviderConfigViewModel.PROVIDER_ID_KEY</ID>
+  </CurrentIssues>
+</SmellBaseline>

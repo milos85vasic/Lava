@@ -1,0 +1,744 @@
+<?xml version="1.0" ?>
+<report name="Kover Gradle Plugin XML report for :core:tracker:archiveorg">
+<package name="lava/tracker/archiveorg">
+<class name="lava/tracker/archiveorg/ArchiveOrgClient" sourcefilename="ArchiveOrgClient.kt">
+<method name="getFeature" desc="(Lkotlin/reflect/KClass;)Llava/tracker/api/TrackerFeature;">
+<counter type="INSTRUCTION" missed="7" covered="82"/>
+<counter type="BRANCH" missed="4" covered="16"/>
+<counter type="LINE" missed="1" covered="9"/>
+</method>
+<method name="&lt;init&gt;" desc="(Llava/tracker/archiveorg/http/ArchiveOrgHttpClient;Llava/tracker/archiveorg/feature/ArchiveOrgSearch;Llava/tracker/archiveorg/feature/ArchiveOrgBrowse;Llava/tracker/archiveorg/feature/ArchiveOrgTopic;Llava/tracker/archiveorg/feature/ArchiveOrgDownload;)V">
+<counter type="INSTRUCTION" missed="0" covered="23"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="7"/>
+</method>
+<method name="healthCheck" desc="(Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="37" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+</method>
+<method name="close" desc="()V">
+<counter type="INSTRUCTION" missed="1" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="45" covered="105"/>
+<counter type="BRANCH" missed="4" covered="16"/>
+<counter type="LINE" missed="5" covered="16"/>
+<counter type="METHOD" missed="2" covered="2"/>
+</class>
+<class name="lava/tracker/archiveorg/ArchiveOrgClientFactory" sourcefilename="ArchiveOrgClientFactory.kt">
+<method name="&lt;init&gt;" desc="(Ljavax/inject/Provider;Llava/tracker/archiveorg/http/ArchiveOrgHttpClient;)V">
+<counter type="INSTRUCTION" missed="0" covered="14"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="4"/>
+</method>
+<method name="create" desc="(Llava/sdk/api/PluginConfig;)Llava/tracker/api/TrackerClient;">
+<counter type="INSTRUCTION" missed="0" covered="42"/>
+<counter type="BRANCH" missed="0" covered="2"/>
+<counter type="LINE" missed="0" covered="9"/>
+</method>
+<counter type="INSTRUCTION" missed="0" covered="56"/>
+<counter type="BRANCH" missed="0" covered="2"/>
+<counter type="LINE" missed="0" covered="13"/>
+<counter type="METHOD" missed="0" covered="2"/>
+</class>
+<class name="lava/tracker/archiveorg/ArchiveOrgDescriptor" sourcefilename="ArchiveOrgDescriptor.kt">
+<method name="getSupportsAnonymous" desc="()Z">
+<counter type="INSTRUCTION" missed="0" covered="3"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="getBaseUrls" desc="()Ljava/util/List;">
+<counter type="INSTRUCTION" missed="0" covered="3"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="getAuthType" desc="()Llava/tracker/api/AuthType;">
+<counter type="INSTRUCTION" missed="0" covered="3"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="&lt;clinit&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="0" covered="30"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="5"/>
+</method>
+<method name="getTrackerId" desc="()Ljava/lang/String;">
+<counter type="INSTRUCTION" missed="0" covered="3"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="getExpectedHealthMarker" desc="()Ljava/lang/String;">
+<counter type="INSTRUCTION" missed="0" covered="3"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="getEncoding" desc="()Ljava/lang/String;">
+<counter type="INSTRUCTION" missed="0" covered="3"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="getApiSupported" desc="()Z">
+<counter type="INSTRUCTION" missed="0" covered="3"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="getCapabilities" desc="()Ljava/util/Set;">
+<counter type="INSTRUCTION" missed="0" covered="3"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="getDisplayName" desc="()Ljava/lang/String;">
+<counter type="INSTRUCTION" missed="0" covered="3"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="getVerified" desc="()Z">
+<counter type="INSTRUCTION" missed="0" covered="3"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<counter type="INSTRUCTION" missed="0" covered="60"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="15"/>
+<counter type="METHOD" missed="0" covered="11"/>
+</class>
+<sourcefile name="ArchiveOrgClient.kt">
+<line nr="36" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="37" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="38" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="39" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="40" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="41" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="44" mi="0" ci="6" mb="0" cb="0"/>
+<line nr="47" mi="30" ci="0" mb="0" cb="0"/>
+<line nr="48" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="51" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="56" mi="0" ci="4" mb="0" cb="0"/>
+<line nr="57" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="58" mi="2" ci="16" mb="1" cb="3"/>
+<line nr="59" mi="2" ci="16" mb="1" cb="3"/>
+<line nr="60" mi="2" ci="16" mb="1" cb="3"/>
+<line nr="62" mi="0" ci="7" mb="0" cb="2"/>
+<line nr="63" mi="0" ci="7" mb="0" cb="2"/>
+<line nr="64" mi="0" ci="7" mb="0" cb="2"/>
+<line nr="67" mi="0" ci="7" mb="1" cb="1"/>
+<line nr="68" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="74" mi="1" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="45" covered="105"/>
+<counter type="BRANCH" missed="4" covered="16"/>
+<counter type="LINE" missed="5" covered="16"/>
+</sourcefile>
+<sourcefile name="ArchiveOrgDescriptor.kt">
+<line nr="20" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="21" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="22" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="23" mi="0" ci="10" mb="0" cb="0"/>
+<line nr="25" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="26" mi="0" ci="14" mb="0" cb="0"/>
+<line nr="27" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="28" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="29" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="33" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="34" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="35" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="50" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="55" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="56" mi="0" ci="3" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="0" covered="60"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="15"/>
+</sourcefile>
+<sourcefile name="ArchiveOrgClientFactory.kt">
+<line nr="28" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="29" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="30" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="32" mi="0" ci="6" mb="0" cb="0"/>
+<line nr="35" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="36" mi="0" ci="2" mb="0" cb="2"/>
+<line nr="37" mi="0" ci="4" mb="0" cb="0"/>
+<line nr="38" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="39" mi="0" ci="6" mb="0" cb="0"/>
+<line nr="40" mi="0" ci="6" mb="0" cb="0"/>
+<line nr="41" mi="0" ci="6" mb="0" cb="0"/>
+<line nr="42" mi="0" ci="6" mb="0" cb="0"/>
+<line nr="45" mi="0" ci="7" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="0" covered="56"/>
+<counter type="BRANCH" missed="0" covered="2"/>
+<counter type="LINE" missed="0" covered="13"/>
+</sourcefile>
+<counter type="INSTRUCTION" missed="45" covered="221"/>
+<counter type="BRANCH" missed="4" covered="18"/>
+<counter type="LINE" missed="5" covered="44"/>
+<counter type="METHOD" missed="2" covered="15"/>
+<counter type="CLASS" missed="0" covered="3"/>
+</package>
+<package name="lava/tracker/archiveorg/http">
+<class name="lava/tracker/archiveorg/http/ArchiveOrgHttpClient" sourcefilename="ArchiveOrgHttpClient.kt">
+<method name="json$lambda$0" desc="(Lkotlinx/serialization/json/JsonBuilder;)Lkotlin/Unit;">
+<counter type="INSTRUCTION" missed="0" covered="6"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="2"/>
+</method>
+<method name="get" desc="(Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="0" covered="11"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="download" desc="(Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="0" covered="11"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="0" covered="25"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="7"/>
+</method>
+<counter type="INSTRUCTION" missed="0" covered="53"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="11"/>
+<counter type="METHOD" missed="0" covered="4"/>
+</class>
+<class name="lava/tracker/archiveorg/http/ArchiveOrgHttpClient$download$2" sourcefilename="ArchiveOrgHttpClient.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="7" covered="71"/>
+<counter type="BRANCH" missed="2" covered="4"/>
+<counter type="LINE" missed="0" covered="9"/>
+</method>
+<counter type="INSTRUCTION" missed="7" covered="71"/>
+<counter type="BRANCH" missed="2" covered="4"/>
+<counter type="LINE" missed="0" covered="9"/>
+<counter type="METHOD" missed="0" covered="1"/>
+</class>
+<class name="lava/tracker/archiveorg/http/ArchiveOrgHttpClient$get$2" sourcefilename="ArchiveOrgHttpClient.kt">
+<method name="invokeSuspend" desc="(Ljava/lang/Object;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="0" covered="18"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="6"/>
+</method>
+<counter type="INSTRUCTION" missed="0" covered="18"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="6"/>
+<counter type="METHOD" missed="0" covered="1"/>
+</class>
+<sourcefile name="ArchiveOrgHttpClient.kt">
+<line nr="24" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="26" mi="0" ci="9" mb="0" cb="0"/>
+<line nr="27" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="28" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="31" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="32" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="33" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="34" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="35" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="37" mi="0" ci="11" mb="0" cb="0"/>
+<line nr="38" mi="0" ci="4" mb="0" cb="0"/>
+<line nr="39" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="40" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="41" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="42" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="43" mi="0" ci="6" mb="0" cb="0"/>
+<line nr="46" mi="0" ci="11" mb="0" cb="0"/>
+<line nr="47" mi="0" ci="4" mb="0" cb="0"/>
+<line nr="48" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="49" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="50" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="51" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="52" mi="0" ci="36" mb="0" cb="0"/>
+<line nr="53" mi="0" ci="12" mb="0" cb="2"/>
+<line nr="54" mi="0" ci="4" mb="0" cb="0"/>
+<line nr="56" mi="7" ci="7" mb="2" cb="2"/>
+<counter type="INSTRUCTION" missed="7" covered="142"/>
+<counter type="BRANCH" missed="2" covered="4"/>
+<counter type="LINE" missed="0" covered="26"/>
+</sourcefile>
+<counter type="INSTRUCTION" missed="7" covered="142"/>
+<counter type="BRANCH" missed="2" covered="4"/>
+<counter type="LINE" missed="0" covered="26"/>
+<counter type="METHOD" missed="0" covered="6"/>
+<counter type="CLASS" missed="0" covered="3"/>
+</package>
+<package name="lava/tracker/archiveorg/feature">
+<class name="lava/tracker/archiveorg/feature/ArchiveOrgBrowse" sourcefilename="ArchiveOrgBrowse.kt">
+<method name="&lt;init&gt;" desc="(Llava/tracker/archiveorg/http/ArchiveOrgHttpClient;)V">
+<counter type="INSTRUCTION" missed="0" covered="5"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="2"/>
+</method>
+<method name="getBaseUrl" desc="()Ljava/lang/String;">
+<counter type="INSTRUCTION" missed="2" covered="4"/>
+<counter type="BRANCH" missed="1" covered="1"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="encode" desc="(Ljava/lang/String;)Ljava/lang/String;">
+<counter type="INSTRUCTION" missed="0" covered="6"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="&lt;init&gt;" desc="(Llava/tracker/archiveorg/http/ArchiveOrgHttpClient;Ljava/lang/String;)V">
+<counter type="INSTRUCTION" missed="0" covered="6"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="2"/>
+</method>
+<method name="browse" desc="(Ljava/lang/String;ILkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="3" covered="93"/>
+<counter type="BRANCH" missed="4" covered="6"/>
+<counter type="LINE" missed="0" covered="6"/>
+</method>
+<method name="getForumTree" desc="(Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="0" covered="68"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="7"/>
+</method>
+<counter type="INSTRUCTION" missed="5" covered="182"/>
+<counter type="BRANCH" missed="5" covered="7"/>
+<counter type="LINE" missed="0" covered="19"/>
+<counter type="METHOD" missed="0" covered="6"/>
+</class>
+<class name="lava/tracker/archiveorg/feature/ArchiveOrgDownload" sourcefilename="ArchiveOrgDownload.kt">
+<method name="&lt;init&gt;" desc="(Llava/tracker/archiveorg/http/ArchiveOrgHttpClient;)V">
+<counter type="INSTRUCTION" missed="0" covered="5"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="2"/>
+</method>
+<method name="getBaseUrl" desc="()Ljava/lang/String;">
+<counter type="INSTRUCTION" missed="2" covered="4"/>
+<counter type="BRANCH" missed="1" covered="1"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="downloadTorrentFile" desc="(Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="0" covered="65"/>
+<counter type="BRANCH" missed="1" covered="5"/>
+<counter type="LINE" missed="0" covered="5"/>
+</method>
+<method name="&lt;init&gt;" desc="(Llava/tracker/archiveorg/http/ArchiveOrgHttpClient;Ljava/lang/String;)V">
+<counter type="INSTRUCTION" missed="0" covered="6"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="2"/>
+</method>
+<method name="getMagnetLink" desc="(Ljava/lang/String;)Ljava/lang/String;">
+<counter type="INSTRUCTION" missed="0" covered="1"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="81"/>
+<counter type="BRANCH" missed="2" covered="6"/>
+<counter type="LINE" missed="0" covered="11"/>
+<counter type="METHOD" missed="0" covered="5"/>
+</class>
+<class name="lava/tracker/archiveorg/feature/ArchiveOrgSearch" sourcefilename="ArchiveOrgSearch.kt">
+<method name="search" desc="(Llava/tracker/api/model/SearchRequest;ILkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="2" covered="70"/>
+<counter type="BRANCH" missed="2" covered="2"/>
+<counter type="LINE" missed="0" covered="5"/>
+</method>
+<method name="buildSearchUrl$archiveorg" desc="(Ljava/lang/String;I)Ljava/lang/String;">
+<counter type="INSTRUCTION" missed="0" covered="16"/>
+<counter type="BRANCH" missed="0" covered="2"/>
+<counter type="LINE" missed="0" covered="2"/>
+</method>
+<method name="&lt;init&gt;" desc="(Llava/tracker/archiveorg/http/ArchiveOrgHttpClient;)V">
+<counter type="INSTRUCTION" missed="0" covered="5"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="2"/>
+</method>
+<method name="getBaseUrl" desc="()Ljava/lang/String;">
+<counter type="INSTRUCTION" missed="2" covered="4"/>
+<counter type="BRANCH" missed="1" covered="1"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="encode" desc="(Ljava/lang/String;)Ljava/lang/String;">
+<counter type="INSTRUCTION" missed="0" covered="6"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="&lt;init&gt;" desc="(Llava/tracker/archiveorg/http/ArchiveOrgHttpClient;Ljava/lang/String;)V">
+<counter type="INSTRUCTION" missed="0" covered="6"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="2"/>
+</method>
+<counter type="INSTRUCTION" missed="4" covered="107"/>
+<counter type="BRANCH" missed="3" covered="5"/>
+<counter type="LINE" missed="0" covered="13"/>
+<counter type="METHOD" missed="0" covered="6"/>
+</class>
+<class name="lava/tracker/archiveorg/feature/ArchiveOrgTopic" sourcefilename="ArchiveOrgTopic.kt">
+<method name="getTopicPage" desc="(Ljava/lang/String;ILkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="0" covered="22"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="&lt;init&gt;" desc="(Llava/tracker/archiveorg/http/ArchiveOrgHttpClient;)V">
+<counter type="INSTRUCTION" missed="0" covered="5"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="2"/>
+</method>
+<method name="getBaseUrl" desc="()Ljava/lang/String;">
+<counter type="INSTRUCTION" missed="2" covered="4"/>
+<counter type="BRANCH" missed="1" covered="1"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="&lt;init&gt;" desc="(Llava/tracker/archiveorg/http/ArchiveOrgHttpClient;Ljava/lang/String;)V">
+<counter type="INSTRUCTION" missed="0" covered="6"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="2"/>
+</method>
+<method name="getTopic" desc="(Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
+<counter type="INSTRUCTION" missed="2" covered="69"/>
+<counter type="BRANCH" missed="2" covered="2"/>
+<counter type="LINE" missed="0" covered="5"/>
+</method>
+<counter type="INSTRUCTION" missed="4" covered="106"/>
+<counter type="BRANCH" missed="3" covered="3"/>
+<counter type="LINE" missed="0" covered="11"/>
+<counter type="METHOD" missed="0" covered="5"/>
+</class>
+<class name="lava/tracker/archiveorg/feature/FileDto" sourcefilename="ArchiveOrgTopic.kt">
+<method name="&lt;init&gt;" desc="(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V">
+<counter type="INSTRUCTION" missed="8" covered="13"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="2"/>
+</method>
+<method name="write$Self$archiveorg" desc="(Llava/tracker/archiveorg/feature/FileDto;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V">
+<counter type="INSTRUCTION" missed="43" covered="42"/>
+<counter type="BRANCH" missed="14" covered="4"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<counter type="INSTRUCTION" missed="51" covered="55"/>
+<counter type="BRANCH" missed="14" covered="4"/>
+<counter type="LINE" missed="1" covered="3"/>
+<counter type="METHOD" missed="0" covered="2"/>
+</class>
+<class name="lava/tracker/archiveorg/feature/FileDto$Companion" sourcefilename="ArchiveOrgTopic.kt">
+<method name="serializer" desc="()Lkotlinx/serialization/KSerializer;">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/tracker/archiveorg/feature/MetadataDto" sourcefilename="ArchiveOrgTopic.kt">
+<method name="write$Self$archiveorg" desc="(Llava/tracker/archiveorg/feature/MetadataDto;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V">
+<counter type="INSTRUCTION" missed="84" covered="65"/>
+<counter type="BRANCH" missed="25" covered="9"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="&lt;init&gt;" desc="(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V">
+<counter type="INSTRUCTION" missed="0" covered="37"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="5"/>
+</method>
+<counter type="INSTRUCTION" missed="84" covered="102"/>
+<counter type="BRANCH" missed="25" covered="9"/>
+<counter type="LINE" missed="0" covered="6"/>
+<counter type="METHOD" missed="0" covered="2"/>
+</class>
+<class name="lava/tracker/archiveorg/feature/MetadataDto$Companion" sourcefilename="ArchiveOrgTopic.kt">
+<method name="serializer" desc="()Lkotlinx/serialization/KSerializer;">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/tracker/archiveorg/feature/MetadataResponseDto" sourcefilename="ArchiveOrgTopic.kt">
+<method name="&lt;init&gt;" desc="(Llava/tracker/archiveorg/feature/MetadataDto;Ljava/util/List;)V">
+<counter type="INSTRUCTION" missed="14" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</method>
+<method name="toDomain" desc="(Ljava/lang/String;)Llava/tracker/api/model/TopicDetail;">
+<counter type="INSTRUCTION" missed="0" covered="160"/>
+<counter type="BRANCH" missed="0" covered="8"/>
+<counter type="LINE" missed="0" covered="18"/>
+</method>
+<method name="write$Self$archiveorg" desc="(Llava/tracker/archiveorg/feature/MetadataResponseDto;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V">
+<counter type="INSTRUCTION" missed="20" covered="54"/>
+<counter type="BRANCH" missed="6" covered="2"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<counter type="INSTRUCTION" missed="34" covered="214"/>
+<counter type="BRANCH" missed="6" covered="10"/>
+<counter type="LINE" missed="2" covered="19"/>
+<counter type="METHOD" missed="1" covered="2"/>
+</class>
+<class name="lava/tracker/archiveorg/feature/MetadataResponseDto$Companion" sourcefilename="ArchiveOrgTopic.kt">
+<method name="serializer" desc="()Lkotlinx/serialization/KSerializer;">
+<counter type="INSTRUCTION" missed="0" covered="2"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<counter type="INSTRUCTION" missed="0" covered="2"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+<counter type="METHOD" missed="0" covered="1"/>
+</class>
+<class name="lava/tracker/archiveorg/feature/ResponseDto" sourcefilename="ArchiveOrgDto.kt">
+<method name="write$Self$archiveorg" desc="(Llava/tracker/archiveorg/feature/ResponseDto;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V">
+<counter type="INSTRUCTION" missed="5" covered="61"/>
+<counter type="BRANCH" missed="1" covered="1"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="&lt;init&gt;" desc="(IILjava/util/List;)V">
+<counter type="INSTRUCTION" missed="7" covered="10"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="2"/>
+</method>
+<counter type="INSTRUCTION" missed="12" covered="71"/>
+<counter type="BRANCH" missed="1" covered="1"/>
+<counter type="LINE" missed="2" covered="3"/>
+<counter type="METHOD" missed="0" covered="2"/>
+</class>
+<class name="lava/tracker/archiveorg/feature/ResponseDto$Companion" sourcefilename="ArchiveOrgDto.kt">
+<method name="serializer" desc="()Lkotlinx/serialization/KSerializer;">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/tracker/archiveorg/feature/SearchDocDto" sourcefilename="ArchiveOrgDto.kt">
+<method name="&lt;init&gt;" desc="(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/Long;Ljava/lang/String;Ljava/lang/String;)V">
+<counter type="INSTRUCTION" missed="18" covered="32"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="3" covered="4"/>
+</method>
+<method name="toDomain" desc="()Llava/tracker/api/model/TorrentItem;">
+<counter type="INSTRUCTION" missed="0" covered="130"/>
+<counter type="BRANCH" missed="0" covered="6"/>
+<counter type="LINE" missed="0" covered="11"/>
+</method>
+<method name="write$Self$archiveorg" desc="(Llava/tracker/archiveorg/feature/SearchDocDto;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V">
+<counter type="INSTRUCTION" missed="106" covered="84"/>
+<counter type="BRANCH" missed="32" covered="10"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<counter type="INSTRUCTION" missed="124" covered="246"/>
+<counter type="BRANCH" missed="32" covered="16"/>
+<counter type="LINE" missed="3" covered="16"/>
+<counter type="METHOD" missed="0" covered="3"/>
+</class>
+<class name="lava/tracker/archiveorg/feature/SearchDocDto$Companion" sourcefilename="ArchiveOrgDto.kt">
+<method name="serializer" desc="()Lkotlinx/serialization/KSerializer;">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="lava/tracker/archiveorg/feature/SearchResponseDto" sourcefilename="ArchiveOrgDto.kt">
+<method name="toDomain" desc="(I)Llava/tracker/api/model/SearchResult;">
+<counter type="INSTRUCTION" missed="0" covered="41"/>
+<counter type="BRANCH" missed="0" covered="2"/>
+<counter type="LINE" missed="0" covered="8"/>
+</method>
+<method name="toBrowseResult" desc="(I)Llava/tracker/api/model/BrowseResult;">
+<counter type="INSTRUCTION" missed="0" covered="44"/>
+<counter type="BRANCH" missed="0" covered="2"/>
+<counter type="LINE" missed="0" covered="8"/>
+</method>
+<method name="&lt;init&gt;" desc="(Llava/tracker/archiveorg/feature/ResponseDto;)V">
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</method>
+<method name="write$Self$archiveorg" desc="(Llava/tracker/archiveorg/feature/SearchResponseDto;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V">
+<counter type="INSTRUCTION" missed="5" covered="18"/>
+<counter type="BRANCH" missed="1" covered="1"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<counter type="INSTRUCTION" missed="12" covered="103"/>
+<counter type="BRANCH" missed="1" covered="5"/>
+<counter type="LINE" missed="2" covered="17"/>
+<counter type="METHOD" missed="1" covered="3"/>
+</class>
+<class name="lava/tracker/archiveorg/feature/SearchResponseDto$Companion" sourcefilename="ArchiveOrgDto.kt">
+<method name="serializer" desc="()Lkotlinx/serialization/KSerializer;">
+<counter type="INSTRUCTION" missed="0" covered="2"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<counter type="INSTRUCTION" missed="0" covered="2"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+<counter type="METHOD" missed="0" covered="1"/>
+</class>
+<sourcefile name="ArchiveOrgSearch.kt">
+<line nr="17" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="18" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="22" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="23" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="27" mi="2" ci="4" mb="1" cb="1"/>
+<line nr="30" mi="0" ci="6" mb="0" cb="0"/>
+<line nr="31" mi="0" ci="17" mb="0" cb="0"/>
+<line nr="32" mi="2" ci="34" mb="2" cb="2"/>
+<line nr="33" mi="0" ci="10" mb="0" cb="0"/>
+<line nr="34" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="38" mi="0" ci="9" mb="0" cb="2"/>
+<line nr="39" mi="0" ci="7" mb="0" cb="0"/>
+<line nr="43" mi="0" ci="6" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="4" covered="107"/>
+<counter type="BRANCH" missed="3" covered="5"/>
+<counter type="LINE" missed="0" covered="13"/>
+</sourcefile>
+<sourcefile name="ArchiveOrgTopic.kt">
+<line nr="21" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="22" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="25" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="26" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="30" mi="2" ci="4" mb="1" cb="1"/>
+<line nr="33" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="34" mi="0" ci="17" mb="0" cb="0"/>
+<line nr="35" mi="2" ci="34" mb="2" cb="2"/>
+<line nr="36" mi="0" ci="10" mb="0" cb="0"/>
+<line nr="37" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="41" mi="0" ci="22" mb="0" cb="0"/>
+<line nr="48" mi="20" ci="56" mb="6" cb="2"/>
+<line nr="50" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="51" mi="9" ci="0" mb="0" cb="0"/>
+<line nr="54" mi="0" ci="45" mb="0" cb="0"/>
+<line nr="55" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="56" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="57" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="58" mi="0" ci="20" mb="0" cb="0"/>
+<line nr="59" mi="0" ci="15" mb="0" cb="2"/>
+<line nr="60" mi="0" ci="15" mb="0" cb="2"/>
+<line nr="61" mi="0" ci="14" mb="0" cb="2"/>
+<line nr="62" mi="0" ci="15" mb="0" cb="0"/>
+<line nr="64" mi="0" ci="7" mb="0" cb="0"/>
+<line nr="65" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="66" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="67" mi="0" ci="8" mb="0" cb="2"/>
+<line nr="68" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="70" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="71" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="72" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="73" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="78" mi="86" ci="65" mb="25" cb="9"/>
+<line nr="80" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="81" mi="0" ci="8" mb="0" cb="0"/>
+<line nr="82" mi="0" ci="8" mb="0" cb="0"/>
+<line nr="83" mi="0" ci="8" mb="0" cb="0"/>
+<line nr="84" mi="0" ci="8" mb="0" cb="0"/>
+<line nr="87" mi="45" ci="42" mb="14" cb="4"/>
+<line nr="89" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="90" mi="0" ci="8" mb="0" cb="0"/>
+<line nr="91" mi="8" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="177" covered="479"/>
+<counter type="BRANCH" missed="48" covered="26"/>
+<counter type="LINE" missed="5" covered="40"/>
+</sourcefile>
+<sourcefile name="ArchiveOrgBrowse.kt">
+<line nr="20" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="21" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="24" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="25" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="29" mi="2" ci="4" mb="1" cb="1"/>
+<line nr="32" mi="1" ci="19" mb="2" cb="4"/>
+<line nr="33" mi="0" ci="10" mb="0" cb="0"/>
+<line nr="34" mi="0" ci="17" mb="0" cb="0"/>
+<line nr="35" mi="2" ci="34" mb="2" cb="2"/>
+<line nr="36" mi="0" ci="10" mb="0" cb="0"/>
+<line nr="37" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="40" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="41" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="42" mi="0" ci="24" mb="0" cb="0"/>
+<line nr="43" mi="0" ci="10" mb="0" cb="0"/>
+<line nr="44" mi="0" ci="10" mb="0" cb="0"/>
+<line nr="45" mi="0" ci="10" mb="0" cb="0"/>
+<line nr="46" mi="0" ci="10" mb="0" cb="0"/>
+<line nr="51" mi="0" ci="6" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="5" covered="182"/>
+<counter type="BRANCH" missed="5" covered="7"/>
+<counter type="LINE" missed="0" covered="19"/>
+</sourcefile>
+<sourcefile name="ArchiveOrgDownload.kt">
+<line nr="25" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="26" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="29" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="30" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="34" mi="2" ci="4" mb="1" cb="1"/>
+<line nr="37" mi="0" ci="16" mb="0" cb="0"/>
+<line nr="38" mi="0" ci="28" mb="1" cb="5"/>
+<line nr="39" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="41" mi="0" ci="10" mb="0" cb="0"/>
+<line nr="42" mi="0" ci="9" mb="0" cb="0"/>
+<line nr="45" mi="0" ci="1" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="2" covered="81"/>
+<counter type="BRANCH" missed="2" covered="6"/>
+<counter type="LINE" missed="0" covered="11"/>
+</sourcefile>
+<sourcefile name="ArchiveOrgDto.kt">
+<line nr="9" mi="5" ci="20" mb="1" cb="1"/>
+<line nr="10" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="11" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="14" mi="0" ci="12" mb="0" cb="0"/>
+<line nr="15" mi="0" ci="10" mb="0" cb="0"/>
+<line nr="16" mi="0" ci="11" mb="0" cb="2"/>
+<line nr="17" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="18" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="19" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="20" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="21" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="26" mi="0" ci="12" mb="0" cb="0"/>
+<line nr="27" mi="0" ci="10" mb="0" cb="0"/>
+<line nr="28" mi="0" ci="11" mb="0" cb="2"/>
+<line nr="29" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="30" mi="0" ci="6" mb="0" cb="0"/>
+<line nr="31" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="32" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="33" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="38" mi="7" ci="61" mb="1" cb="1"/>
+<line nr="39" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="40" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="41" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="42" mi="0" ci="5" mb="0" cb="0"/>
+<line nr="45" mi="108" ci="84" mb="32" cb="10"/>
+<line nr="47" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="48" mi="5" ci="0" mb="0" cb="0"/>
+<line nr="49" mi="0" ci="8" mb="0" cb="0"/>
+<line nr="50" mi="0" ci="8" mb="0" cb="0"/>
+<line nr="51" mi="0" ci="8" mb="0" cb="0"/>
+<line nr="52" mi="8" ci="0" mb="0" cb="0"/>
+<line nr="53" mi="0" ci="8" mb="0" cb="0"/>
+<line nr="55" mi="0" ci="42" mb="0" cb="0"/>
+<line nr="56" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="57" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="58" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="59" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="60" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="61" mi="0" ci="20" mb="0" cb="0"/>
+<line nr="62" mi="0" ci="14" mb="0" cb="2"/>
+<line nr="63" mi="0" ci="17" mb="0" cb="2"/>
+<line nr="64" mi="0" ci="13" mb="0" cb="2"/>
+<line nr="65" mi="0" ci="15" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="152" covered="422"/>
+<counter type="BRANCH" missed="34" covered="22"/>
+<counter type="LINE" missed="9" covered="37"/>
+</sourcefile>
+<counter type="INSTRUCTION" missed="340" covered="1271"/>
+<counter type="BRANCH" missed="92" covered="66"/>
+<counter type="LINE" missed="14" covered="120"/>
+<counter type="METHOD" missed="6" covered="38"/>
+<counter type="CLASS" missed="4" covered="12"/>
+</package>
+<counter type="INSTRUCTION" missed="392" covered="1634"/>
+<counter type="BRANCH" missed="98" covered="88"/>
+<counter type="LINE" missed="19" covered="190"/>
+<counter type="METHOD" missed="8" covered="59"/>
+<counter type="CLASS" missed="4" covered="18"/>
+</report>
