@@ -1,0 +1,54 @@
+ok  	digital.vasic.lava.apigo/cmd/healthprobe	(cached)
+ok  	digital.vasic.lava.apigo/cmd/lava-api-go	8.894s
+?   	digital.vasic.lava.apigo/cmd/lavaapi-cshared	[no test files]
+ok  	digital.vasic.lava.apigo/internal/archiveorg	(cached)
+ok  	digital.vasic.lava.apigo/internal/auth	(cached)
+ok  	digital.vasic.lava.apigo/internal/cache	(cached)
+ok  	digital.vasic.lava.apigo/internal/config	(cached)
+ok  	digital.vasic.lava.apigo/internal/discovery	(cached)
+ok  	digital.vasic.lava.apigo/internal/firebase	(cached)
+?   	digital.vasic.lava.apigo/internal/gen/client	[no test files]
+?   	digital.vasic.lava.apigo/internal/gen/server	[no test files]
+ok  	digital.vasic.lava.apigo/internal/gutenberg	(cached)
+ok  	digital.vasic.lava.apigo/internal/handlers	(cached)
+ok  	digital.vasic.lava.apigo/internal/handlers/v1	(cached)
+ok  	digital.vasic.lava.apigo/internal/kinozal	(cached)
+ok  	digital.vasic.lava.apigo/internal/middleware	(cached)
+?   	digital.vasic.lava.apigo/internal/migrations/sqlite	[no test files]
+ok  	digital.vasic.lava.apigo/internal/mobile	1.201s
+ok  	digital.vasic.lava.apigo/internal/nnmclub	(cached)
+ok  	digital.vasic.lava.apigo/internal/observability	(cached)
+ok  	digital.vasic.lava.apigo/internal/provider	(cached)
+2026/06/04 11:30:08 WARN non-fatal event error="qa/detector: process name is empty" error_class=error feature=qa.detector operation=CheckGoProcess
+2026/06/04 11:30:08 WARN non-fatal event error="qa/detector: process name is empty" error_class=error operation=CheckGoProcess feature=qa.detector
+2026/06/04 11:30:08 WARN non-fatal event error="qa/detector: pid must be positive" error_class=error feature=qa.detector operation=CheckGoProcessByPID pid=-1
+2026/06/04 11:30:08 WARN non-fatal event error="qa/detector: pid must be positive" error_class=error feature=qa.detector operation=CheckGoProcessByPID pid=0
+--- FAIL: TestCheckGoProcessByPID_Alive (0.00s)
+    detector_test.go:252: Report.Alive = false; want true (kill -0 succeeded)
+    detector_test.go:255: Report.Crashed = true; want false
+    detector_test.go:261: fakeRunner saw zero kill calls; PID path was not taken
+FAIL
+FAIL	digital.vasic.lava.apigo/internal/qa/detector	0.630s
+ok  	digital.vasic.lava.apigo/internal/qa/evidence	(cached)
+ok  	digital.vasic.lava.apigo/internal/qa/ticket	(cached)
+ok  	digital.vasic.lava.apigo/internal/qa/validator	(cached)
+ok  	digital.vasic.lava.apigo/internal/ratelimit	(cached)
+?   	digital.vasic.lava.apigo/internal/router	[no test files]
+ok  	digital.vasic.lava.apigo/internal/rutracker	(cached)
+ok  	digital.vasic.lava.apigo/internal/server	(cached)
+ok  	digital.vasic.lava.apigo/internal/storage	(cached)
+ok  	digital.vasic.lava.apigo/internal/version	(cached)
+ok  	digital.vasic.lava.apigo/tests/compose	(cached)
+--- FAIL: TestAuthFieldName_NoLiteralInProductionGoSource (0.02s)
+    auth_field_name_contract_test.go:60: §6.R violation: literal "Lava-Auth" found in production source:
+          /Users/milosvasic/Projects/Lava/lava-api-go/internal/mobile/mobile.go
+FAIL
+FAIL	digital.vasic.lava.apigo/tests/contract	19.048s
+ok  	digital.vasic.lava.apigo/tests/e2e	0.946s
+ok  	digital.vasic.lava.apigo/tests/integration	(cached)
+?   	digital.vasic.lava.apigo/tests/integration/testenv	[no test files]
+ok  	digital.vasic.lava.apigo/tests/load	0.633s
+ok  	digital.vasic.lava.apigo/tests/parity	(cached)
+ok  	digital.vasic.lava.apigo/tests/scripts	1.275s
+FAIL
+GO_EXIT=1
