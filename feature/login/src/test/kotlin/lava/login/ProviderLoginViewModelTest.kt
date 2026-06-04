@@ -638,6 +638,24 @@ class ProviderLoginViewModelTest {
      *             "username MUST NOT be Invalid when ServiceUnavailable
      *             fires — that is the §6.J bluff. was Invalid(...)".
      *   Reverted: yes.
+     *
+     * Deflake note (§11.4.50, 2026-06-04): this test PASSED isolated but
+     * FAILED under the loaded full-suite run with a wall-clock
+     * TurbineTimeoutCancellationException ⇐ TurbineAssertionError — the
+     * logic was always correct. The fix replaces the fixed single
+     * `awaitState()` + direct `container.stateFlow.value` read with a
+     * bounded await-until-condition on the DETERMINISTIC submit-settle
+     * signal (`isLoading == false`, which every terminal branch sets) and
+     * then asserts on the user-visible `serviceUnavailable` banner. The
+     * PRIMARY assertion stays on user-visible state per §6.J and the
+     * discrimination is preserved: with the mutation above applied, the
+     * loop still terminates (the mutated branch also sets isLoading=false)
+     * and the test fails with the CLEAR assertion
+     * "serviceUnavailable MUST carry the reason verbatim — was null
+     * expected:<Unknown: parser found no expected markers> but was:<null>",
+     * NOT a Turbine timeout. (Gating the loop on `serviceUnavailable`
+     * itself would convert that regression into a "No value produced in 3s"
+     * timeout — the §11.4.50 anti-pattern that the isLoading-gate avoids.)
      */
     @Test
     fun `service unavailable shows banner does NOT mark creds Invalid does NOT signal authorized`() =
@@ -670,12 +688,40 @@ class ProviderLoginViewModelTest {
                 val effect = awaitSideEffect()
                 assertTrue("first effect must be HideKeyboard, was $effect", effect is LoginSideEffect.HideKeyboard)
 
-                // Drain post-submit state(s) so Turbine doesn't fail on
-                // unconsumed events at scope close; final state is read
-                // directly from container.stateFlow below.
-                awaitState() // post-submit state
-
-                val finalState = viewModel.container.stateFlow.value
+                // Deflake (§11.4.50, 2026-06-04): the original form drained ONE
+                // post-submit state with a fixed `awaitState()` then read
+                // `container.stateFlow.value` directly. onSubmitClick emits TWO
+                // reduces — `isLoading = true, serviceUnavailable = null` (the
+                // submit-start reduce, line 223) then `isLoading = false, ...`
+                // (the terminal branch — ServiceUnavailable here, line 395). The
+                // intervening `sdk.login()` round-trip can resume its
+                // continuation on a turn the single fixed `awaitState()` lands
+                // one emission early — on the loading=true state — and the
+                // direct stateFlow read could then race the second reduce under
+                // full-suite CPU load. That produced the wall-clock
+                // `TurbineTimeoutCancellationException` ⇐ `TurbineAssertionError`
+                // this test failed with under load (it PASSED isolated; the
+                // logic is correct).
+                //
+                // Await the DETERMINISTIC settle signal instead of a fixed
+                // emission count: every terminal branch of onSubmitClick (Success
+                // / WrongCredits / CaptchaRequired / Error / ServiceUnavailable)
+                // sets `isLoading = false`, so the submit always settles to a
+                // loading=false state and the loop is guaranteed to terminate.
+                // Gating on `isLoading` rather than on `serviceUnavailable` (the
+                // field under test) is the key anti-bluff property: a genuine
+                // ServiceUnavailable regression — e.g. the branch collapsing into
+                // the WrongCredits/Invalid-creds bluff path — STILL reaches a
+                // loading=false state, so the loop exits and the assertions below
+                // fail with a CLEAR message, NOT a Turbine timeout. (Gating on
+                // serviceUnavailable instead would convert that regression into a
+                // "No value produced in 3s" timeout, the §11.4.50 anti-pattern.)
+                var finalState = awaitState()
+                var guard = 0
+                while (finalState.isLoading && guard < 4) {
+                    finalState = awaitState()
+                    guard++
+                }
 
                 // PRIMARY user-visible assertion (§6.J): banner reason is set.
                 assertEquals(
@@ -696,13 +742,18 @@ class ProviderLoginViewModelTest {
                     finalState.passwordInput is InputState.Invalid,
                 )
 
-                // ANTI-BLUFF assertion 2: NOT signalAuthorized.
+                // ANTI-BLUFF assertion 2: NOT signalAuthorized. authService is
+                // the real FakeAuthService SUT collaborator (not a mock); this
+                // reads its recorded names, a user-visible-equivalent signal
+                // (the Search tab unblocks on signalAuthorized) per §6.J.
                 assertFalse(
                     "signalAuthorized MUST NOT be called when ServiceUnavailable fires; recorded names = ${authService.signaledNames}",
                     authService.signaledNames.isNotEmpty(),
                 )
 
-                // Loading cleared.
+                // Loading cleared (same awaited state that carries the banner —
+                // the ServiceUnavailable reduce sets isLoading=false + the
+                // reason together, so the awaited state proves both).
                 assertFalse("isLoading MUST be false after ServiceUnavailable", finalState.isLoading)
             }
         }
