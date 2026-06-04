@@ -182,9 +182,10 @@ internal fun Placeholder(
 @NonRestartableComposable
 internal fun Illustration(
     @DrawableRes resId: Int,
+    contentDescription: String = stringResource(R.string.designsystem_content_description_placeholder_illustration),
 ) = Image(
     modifier = Modifier.size(160.dp),
     painter = painterResource(resId),
-    contentDescription = null, // TODO: add contentDescription
+    contentDescription = contentDescription,
     colorFilter = ColorFilter.tint(color = AppTheme.colors.primary),
 )

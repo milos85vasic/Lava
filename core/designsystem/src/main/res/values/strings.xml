@@ -29,6 +29,9 @@
     <string name="designsystem_content_description_state_collapsed">Collapsed</string>
     <string name="designsystem_content_description_state_expanded">Expanded</string>
     <string name="designsystem_content_description_state_edit">Edit</string>
+    <string name="designsystem_content_description_action_scroll_to_top">Scroll to top</string>
+    <string name="designsystem_content_description_action_add_comment">Add comment</string>
+    <string name="designsystem_content_description_placeholder_illustration">Illustration</string>
 
     <string name="designsystem_pagination_action_first_page">First page</string>
     <string name="designsystem_pagination_action_previous_page">Previous page</string>

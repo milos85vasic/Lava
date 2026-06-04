@@ -8,11 +8,16 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import lava.designsystem.R
 import lava.designsystem.drawables.LavaIcons
 import lava.designsystem.theme.AppTheme
 
 @Composable
-fun ScrollBackFloatingActionButton(modifier: Modifier = Modifier) {
+fun ScrollBackFloatingActionButton(
+    modifier: Modifier = Modifier,
+    contentDescription: String = stringResource(R.string.designsystem_content_description_action_scroll_to_top),
+) {
     val scrollState = LocalScrollState.current
     AnimatedVisibility(
         visible = scrollState.canScrollUp,
@@ -29,7 +34,7 @@ fun ScrollBackFloatingActionButton(modifier: Modifier = Modifier) {
                 Icon(
                     modifier = Modifier.padding(AppTheme.spaces.medium),
                     icon = LavaIcons.ScrollToTop,
-                    contentDescription = null, // TODO: add contentDescription
+                    contentDescription = contentDescription,
                 )
             },
         )
@@ -40,6 +45,7 @@ fun ScrollBackFloatingActionButton(modifier: Modifier = Modifier) {
 @NonRestartableComposable
 fun AddCommentFloatingActionButton(
     modifier: Modifier = Modifier,
+    contentDescription: String = stringResource(R.string.designsystem_content_description_action_add_comment),
     onClick: () -> Unit,
 ) = Surface(
     modifier = modifier.size(AppTheme.sizes.default),
@@ -51,7 +57,7 @@ fun AddCommentFloatingActionButton(
         Icon(
             modifier = Modifier.padding(AppTheme.spaces.medium),
             icon = LavaIcons.Comment,
-            contentDescription = null, // TODO: add contentDescription
+            contentDescription = contentDescription,
         )
     },
 )
