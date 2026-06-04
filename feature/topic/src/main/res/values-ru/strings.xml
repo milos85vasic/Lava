@@ -21,6 +21,9 @@
     <string name="topics_login_required_for_comment">Для того чтобы оставить комментарий, необходимо авторизоваться</string>
 
     <string name="topic_new_comment">Новое сообщение</string>
+    <string name="topic_add_comment_title">Добавить комментарий</string>
+    <string name="topic_add_comment_placeholder">Напишите сообщение…</string>
+    <string name="topic_add_comment_error">Не удалось отправить комментарий. Попробуйте ещё раз.</string>
 
     <string name="topic_poster_image">Постер</string>
 

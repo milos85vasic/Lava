@@ -22,6 +22,9 @@
     <string name="topics_login_required_for_comment">In order to write messages you need to be authorized</string>
 
     <string name="topic_new_comment">New message</string>
+    <string name="topic_add_comment_title">Add a comment</string>
+    <string name="topic_add_comment_placeholder">Write your message…</string>
+    <string name="topic_add_comment_error">Could not post your comment. Please try again.</string>
 
     <string name="topic_poster_image">Poster</string>
 

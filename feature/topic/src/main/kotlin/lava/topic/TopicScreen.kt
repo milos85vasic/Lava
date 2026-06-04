@@ -45,6 +45,7 @@ import lava.designsystem.component.Icon
 import lava.designsystem.component.IconButton
 import lava.designsystem.component.LazyList
 import lava.designsystem.component.LocalSnackbarHostState
+import lava.designsystem.component.OutlinedTextField
 import lava.designsystem.component.Pagination
 import lava.designsystem.component.ProvideTextStyle
 import lava.designsystem.component.Scaffold
@@ -98,6 +99,8 @@ internal fun TopicScreen(
     val magnetDialogState = rememberMagnetDialogState()
     val loginRequestDialogState = rememberVisibilityState()
     val downloadDialogState = rememberVisibilityState()
+    val addCommentDialogState = rememberVisibilityState()
+    val addCommentError = stringResource(R.string.topic_add_comment_error)
     viewModel.collectSideEffect { sideEffect ->
         when (sideEffect) {
             is TopicSideEffect.Back -> back()
@@ -106,8 +109,8 @@ internal fun TopicScreen(
             is TopicSideEffect.OpenLogin -> openLogin()
             is TopicSideEffect.OpenSearch -> openSearch(sideEffect.filter)
             is TopicSideEffect.ShareLink -> shareLinkHandler.shareLink(sideEffect.link)
-            is TopicSideEffect.ShowAddCommentDialog -> Unit // TODO
-            is TopicSideEffect.ShowAddCommentError -> Unit // TODO
+            is TopicSideEffect.ShowAddCommentDialog -> addCommentDialogState.show()
+            is TopicSideEffect.ShowAddCommentError -> snackbarHost.showSnackbar(addCommentError)
             is TopicSideEffect.ShowDownloadProgress -> downloadDialogState.show()
             is TopicSideEffect.ShowFavoriteToggleError -> snackbarHost.showSnackbar(favoriteToggleError)
             is TopicSideEffect.ShowLoginRequired -> loginRequestDialogState.show()
@@ -119,6 +122,16 @@ internal fun TopicScreen(
         LoginRequestDialog(
             onDismiss = loginRequestDialogState::hide,
             onLogin = openLogin,
+        )
+    }
+
+    if (addCommentDialogState.visible) {
+        AddCommentDialog(
+            onDismiss = addCommentDialogState::hide,
+            onSubmit = { message ->
+                addCommentDialogState.hide()
+                viewModel.perform(TopicAction.AddComment(message))
+            },
         )
     }
 
@@ -551,6 +564,41 @@ private fun LoginRequestDialog(
     },
     onDismissRequest = onDismiss,
 )
+
+@Composable
+private fun AddCommentDialog(
+    onDismiss: () -> Unit,
+    onSubmit: (message: String) -> Unit,
+) {
+    var message by remember { mutableStateOf("") }
+    Dialog(
+        icon = { Icon(icon = LavaIcons.Comment, contentDescription = null) },
+        title = { Text(stringResource(R.string.topic_add_comment_title)) },
+        text = {
+            OutlinedTextField(
+                modifier = Modifier.fillMaxWidth(),
+                value = message,
+                onValueChange = { message = it },
+                placeholder = { Text(stringResource(R.string.topic_add_comment_placeholder)) },
+                maxLines = 4,
+            )
+        },
+        confirmButton = {
+            TextButton(
+                text = stringResource(lava.designsystem.R.string.designsystem_action_send),
+                enabled = message.isNotBlank(),
+                onClick = { onSubmit(message.trim()) },
+            )
+        },
+        dismissButton = {
+            TextButton(
+                text = stringResource(lava.designsystem.R.string.designsystem_action_cancel),
+                onClick = onDismiss,
+            )
+        },
+        onDismissRequest = onDismiss,
+    )
+}
 
 @Composable
 private fun WriteStoragePermissionRationaleDialog(
