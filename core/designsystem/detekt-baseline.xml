@@ -3,8 +3,6 @@
   <ManuallySuppressedIssues/>
   <CurrentIssues>
     <ID>CyclomaticComplexMethod:Theme.kt$@Composable fun LavaTheme( theme: Theme = Theme.SYSTEM, isDark: Boolean = isSystemInDarkTheme(), isDynamic: Boolean = isMaterialYouAvailable(), content: @Composable () -&gt; Unit, )</ID>
-    <ID>ForbiddenComment:FloatingActionButton.kt$// TODO: add contentDescription</ID>
-    <ID>ForbiddenComment:Placeholder.kt$// TODO: add contentDescription</ID>
     <ID>LongMethod:AppColors.kt$@Suppress("LongParameterList") private fun paletteColors(accent: Color, isDark: Boolean): AppColors</ID>
     <ID>LongMethod:DropdownMenu.kt$@Composable fun DropdownMenu( expanded: Boolean, onDismissRequest: () -&gt; Unit, modifier: Modifier = Modifier, shape: Shape = AppTheme.shapes.small, content: @Composable ColumnScope.() -&gt; Unit, )</ID>
     <ID>LongMethod:ModalBottomSheet.kt$@Composable fun ModalBottomSheet( visible: Boolean, onDismissRequest: () -&gt; Unit, content: @Composable ColumnScope.() -&gt; Unit, )</ID>

@@ -6,5 +6,9 @@
     <ID>LongMethod:MobileNavigation.kt$@Composable fun MobileNavigation(navigationController: NavigationController)</ID>
     <ID>LongParameterList:FirebaseInitializer.kt$FirebaseInitializer$( crashlytics: () -&gt; FirebaseCrashlytics?, analytics: () -&gt; FirebaseAnalytics?, performance: () -&gt; FirebasePerformance?, isDebug: Boolean, versionName: String, versionCode: Int, applicationId: String, warn: (String, Throwable) -&gt; Unit, )</ID>
     <ID>MagicNumber:FirebaseAnalyticsTracker.kt$FirebaseAnalyticsTracker$32</ID>
+    <ID>MaxLineLength:ApiKeyClientTest.kt$ApiKeyClientTest.FakeKeyProvider$override fun update(uri: Uri, values: ContentValues?, selection: String?, selectionArgs: Array&lt;out String&gt;?): Int</ID>
+    <ID>SwallowedException:ApiKeyClient.kt$ApiKeyClient$e: Exception</ID>
+    <ID>SwallowedException:ApiKeyClient.kt$ApiKeyClient$e: SecurityException</ID>
+    <ID>TooGenericExceptionCaught:ApiKeyClient.kt$ApiKeyClient$e: Exception</ID>
   </CurrentIssues>
 </SmellBaseline>

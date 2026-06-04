@@ -2,10 +2,15 @@
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
+    <ID>EmptyFunctionBlock:ApiControlAutoStartTest.kt$ApiControlAutoStartTest.RecordingAdvertiser${}</ID>
     <ID>EmptyFunctionBlock:ApiKeyStoreTest.kt$ApiKeyStoreTest.FakeSharedPreferences${}</ID>
     <ID>EmptyFunctionBlock:NsdMdnsAdvertiser.kt$NsdMdnsAdvertiser.&lt;no name provided&gt;${}</ID>
+    <ID>EmptyFunctionBlock:OpenClientDecisionTest.kt$OpenClientDecisionTest.RecordingAdvertiser${}</ID>
+    <ID>EmptyFunctionBlock:OpenClientDecisionTest.kt$OpenClientDecisionTest.RecordingServiceStarter${}</ID>
     <ID>LongMethod:ApiControlScreen.kt$@Composable private fun RunningDetails( state: ApiControlState.Running, onCopyKey: (String) -&gt; Unit, )</ID>
+    <ID>MaxLineLength:ApiControlScreen.kt$val label = stringResource(if (launchedFromClient) R.string.api_screen_back_to_client else R.string.api_screen_open_client)</ID>
     <ID>MaxLineLength:ApiKeyStoreTest.kt$ApiKeyStoreTest.FakeSharedPreferences$override fun unregisterOnSharedPreferenceChangeListener(l: SharedPreferences.OnSharedPreferenceChangeListener?)</ID>
+    <ID>SwallowedException:ApiControlScreen.kt$e: ActivityNotFoundException</ID>
     <ID>TooManyFunctions:ApiEngineService.kt$ApiEngineService : Service</ID>
   </CurrentIssues>
 </SmellBaseline>

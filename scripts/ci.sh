@@ -204,6 +204,28 @@ if [[ "$MODE" == "--changed-only" ]]; then
 fi
 
 # ---------------------------------------------------------------------
+# 5c. Detekt static analysis (Phase 2 completeness program, 2026-06-04).
+# Wired via buildSrc convention plugins with per-module config/detekt
+# baselines capturing the existing findings; the gate FAILS on any NEW
+# finding outside the baselines. Full-mode only — the whole-project run
+# is heavier than the changed-only push budget (same rationale as the
+# whole-project spotlessCheck above). No failure-swallow (§6.J).
+# ---------------------------------------------------------------------
+echo "==> Detekt static analysis (whole project)"
+./gradlew --no-daemon detekt
+
+# ---------------------------------------------------------------------
+# 5d. Go vet gate for lava-api-go (Phase 2 completeness program). Native,
+# no container, blocking. golangci-lint (containerized) + Kover coverage
+# report are wired as runnable tools (lava-api-go `make lint`/`make cover`
+# + Gradle `koverXmlReport`) but their ci.sh enforcement is OWED in a
+# focused follow-up (exact task-name + container-availability handling)
+# — tracked in docs/CONTINUATION.md; run them manually until then.
+# ---------------------------------------------------------------------
+echo "==> Go vet (lava-api-go)"
+( cd lava-api-go && make vet )
+
+# ---------------------------------------------------------------------
 # 6. SwitchingNetworkApi parity gate (full mode).
 # ---------------------------------------------------------------------
 echo "==> SwitchingNetworkApi parity gate"

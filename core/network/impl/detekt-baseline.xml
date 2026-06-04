@@ -2,6 +2,7 @@
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
+    <ID>EmptyFunctionBlock:NetworkApiRepositoryKeyOverrideTest.kt$NetworkApiRepositoryKeyOverrideTest.&lt;no name provided&gt;.&lt;no name provided&gt;${}</ID>
     <ID>MagicNumber:AesGcm.kt$AesGcm$12</ID>
     <ID>MagicNumber:AesGcm.kt$AesGcm$32</ID>
     <ID>MagicNumber:HKDF.kt$HKDF$255</ID>
@@ -16,5 +17,6 @@
     <ID>TooManyFunctions:ProxyNetworkApi.kt$ProxyNetworkApi : NetworkApi</ID>
     <ID>TooManyFunctions:SwitchingNetworkApi.kt$SwitchingNetworkApi : NetworkApi</ID>
     <ID>UseCheckOrError:SwitchingNetworkApi.kt$SwitchingNetworkApi$throw IllegalStateException("All ${outcome.failedTrackerId} mirrors unavailable")</ID>
+    <ID>VariableNaming:NetworkApiRepositoryKeyOverrideTest.kt$NetworkApiRepositoryKeyOverrideTest$private val AUTH_FIELD = "Lava-Auth"</ID>
   </CurrentIssues>
 </SmellBaseline>
