@@ -1,6 +1,7 @@
 package lava.api.app.control
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import lava.api.app.auth.ApiKeyStore
 import lava.api.app.service.ApiServiceStarter
@@ -125,44 +126,67 @@ class ApiControlAutoStartTest {
             }
         }
 
-    // ── SECONDARY TEST: StartRequested when already running surfaces Error ─
+    // ── SECONDARY TEST: StartRequested when already running is idempotent ──
     //
-    // The FakeApiEngine (and NativeApiEngine) returns "server already running"
-    // when start() is called on a live server. This is the engine's real
-    // contract: calling start() twice transitions to Error. The test confirms
-    // the VM surfaces this faithfully (it does NOT silently swallow the error)
-    // so the screen can show "Start" again (Error state enables Start).
+    // covers-feature: api-app on-device engine start (Bug B idempotency)
+    //
+    // Bug B (commit 848ce20c) made [ApiEngineController.start] IDEMPOTENT: a
+    // second start while the embed is already Running is a NO-OP — it does NOT
+    // re-bind the listener (a second bind fails with "address already in use"
+    // and would crash a healthy engine), does NOT emit Error, and does NOT
+    // change the live Running state. This is the operator-reported flow: the
+    // user re-opens the API app (e.g. tapping "Open Lava API app" from the
+    // client, which dispatches [ApiControlAction.StartRequested]) while the API
+    // is already serving — the relaunch MUST keep showing the live Running
+    // state with the SAME port, never re-start, never error.
+    //
+    // Bluff-Audit (commit body):
+    //   Mutation: delete the early `return` in ApiEngineController.start()'s
+    //     `if (current is Running || current is Starting)` guard, so a
+    //     double-start re-enters Starting and re-binds.
+    //   Observed: this test FAILS — the second StartRequested emits a fresh
+    //     Starting→Running cycle, so expectNoItems() trips with an unexpected
+    //     state emission (and the port-stability invariant is violated).
+    //   Reverted: yes
 
     @Test
-    fun `startRequested_when_already_running_surfaces_engine_error`() =
+    fun `startRequested_when_already_running_is_idempotent_stays_running`() =
         runTest(dispatcherRule.testDispatcher) {
-            val sharedController = controller()
+            val sharedController = controller(port = 8443)
             val (vm, _) = viewModel(controller = sharedController)
 
             vm.test(this) {
                 runOnCreate()
-                expectInitialState()
+                expectInitialState() // Stopped
 
-                // First start — transitions to Running.
+                // First start — transitions to Running on the live port.
                 vm.perform(ApiControlAction.StartClicked)
                 var state = awaitState()
                 while (state !is ApiControlState.Running) state = awaitState()
+                val runningPort = (state as ApiControlState.Running).port
+                assertEquals("first start must reach the live port", 8443, runningPort)
 
-                // Second StartRequested — engine rejects; VM surfaces Error state.
+                // Second StartRequested (the relaunch double-start) — idempotent
+                // no-op: no re-bind, no Error, no state change. Let the VM/engine
+                // settle on virtual time; nothing new may be emitted.
                 vm.perform(ApiControlAction.StartRequested)
-                var afterSecond = awaitState()
-                while (afterSecond is ApiControlState.Running) afterSecond = awaitState()
+                advanceUntilIdle()
 
-                // PRIMARY: the VM surfaced the engine's rejection as Error (not crash,
-                // not Stopped) — the screen can show "Start" again (Error enables Start).
+                // PRIMARY: nothing new was emitted — the live Running state was NOT
+                // disturbed by the second start (no Starting, no re-Running, no Error).
+                expectNoItems()
+
+                // PRIMARY: the controller's single-source-of-truth state is STILL the
+                // same live Running on the SAME port — proving no re-bind happened.
+                val current = sharedController.state.value
                 assertTrue(
-                    "expected Error from double-start but was $afterSecond",
-                    afterSecond is ApiControlState.Error,
+                    "engine must stay Running after idempotent double-start — was $current",
+                    current is ApiControlState.Running,
                 )
-                val error = afterSecond as ApiControlState.Error
-                assertTrue(
-                    "error message must mention 'already running'",
-                    error.message.contains("already running", ignoreCase = true),
+                assertEquals(
+                    "Running.port must be unchanged (no re-bind) after idempotent double-start",
+                    runningPort,
+                    (current as ApiControlState.Running).port,
                 )
 
                 cancelAndIgnoreRemainingItems()
