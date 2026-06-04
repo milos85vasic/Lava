@@ -30,6 +30,7 @@ import org.junit.runner.RunWith
 import org.orbitmvi.orbit.test.test
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * Anti-bluff test for [CredentialsViewModel].
@@ -153,35 +154,80 @@ class CredentialsViewModelTest {
 
     @Test
     fun `select provider updates selectedProvider`() = runTest(mainDispatcherRule.testDispatcher) {
-        viewModel.test(this) {
+        // Root cause of the prior flake (a real DISPATCHER LEAK at the Room
+        // boundary, NOT virtual-time nondeterminism): CredentialsViewModel.load()
+        // collects credentialManager.observeAll() — a Room Flow whose emissions
+        // are delivered on Room's InvalidationTracker executor (a real background
+        // thread), NOT this test's UnconfinedTestDispatcher. That executor is
+        // below the ViewModel and outside our injection control. The onCreate ->
+        // load() collection it starts therefore lingers as a live coroutine that
+        // settles on WALL-CLOCK time, and orbit-test's default end-of-block
+        // "wait for remaining intents to complete" wall-clock timeout (~ a few
+        // seconds) trips under the loaded full-suite multi-module run when that
+        // executor thread is CPU-starved — producing the
+        // TurbineTimeoutCancellationException / TurbineAssertionError the test was
+        // failing with (passed isolated, failed under load).
+        //
+        // Robust deterministic fix, eliminating wall-clock dependence entirely:
+        //   1. await-until the user-visible outcome (selectedProvider ==
+        //      "rutracker") rather than a fixed emission count, so emission
+        //      ordering between load()'s reduce and the SelectProvider reduce is
+        //      irrelevant (the bounded guard is NOT wall-clock — it cannot flake);
+        //   2. cancelAndIgnoreRemainingItems() AFTER the assertion, so orbit-test
+        //      does NOT wall-clock-wait for the lingering Room-executor-backed
+        //      load() collection to drain at teardown. The generous 10s .test
+        //      timeout is a belt-and-braces upper bound that the cancel makes
+        //      unreachable under normal load.
+        // selectedProvider null -> "rutracker" is a real StateFlow change
+        // guaranteed to be emitted; a genuine SelectProvider regression never
+        // reaches the outcome and fails the assertion below with a clear message
+        // (proven by the §6.J rehearsal in the commit body). Flake recorded at
+        // .lava-ci-evidence/sixth-law-incidents/2026-05-20-flaky-credentialsviewmodeltest.json.
+        viewModel.test(this, timeout = 10.seconds) {
             runOnCreate()
-            awaitState() // loading
-            awaitState() // loaded
 
             viewModel.onAction(CredentialsAction.SelectProvider("rutracker"))
 
-            // CredentialsViewModel.load() collects credentialManager.observeAll()
-            // via Room's Flow, whose first() emission is delivered on Room's
-            // InvalidationTracker executor (a real background thread), NOT the
-            // StandardTestDispatcher. Under full-suite CPU load the resume of
-            // load()'s final reduce can interleave with this SelectProvider
-            // reduce, so a fixed awaitState() count is non-deterministic and
-            // can land one emission early on the loaded state where
-            // selectedProvider is still null (flake recorded at
-            // .lava-ci-evidence/sixth-law-incidents/2026-05-20-flaky-credentialsviewmodeltest.json).
-            // Await until the user-visible outcome is observed instead of
-            // assuming an emission count. selectedProvider null -> "rutracker"
-            // is a real StateFlow change, so a state carrying it is guaranteed
-            // to be emitted; the bound prevents an unbounded await — a genuine
-            // SelectProvider regression never reaches the outcome and fails
-            // the assertion below with a clear message.
+            // Bounded await-until-condition. The bound (12) is generous relative
+            // to the at-most-3 states this flow can emit (initial loading, loaded,
+            // selected) plus any interleaving the Room executor introduces; it
+            // only prevents an unbounded await on a genuine regression — it is NOT
+            // a wall-clock bound, so it cannot flake under host load.
+            //
+            // A genuine SelectProvider regression (the reduce never writes
+            // action.providerId) never reaches the outcome, so awaitState() would
+            // eventually drain the channel and surface a Turbine timeout. We catch
+            // that here and re-raise as a PRIMARY assertEquals on the user-visible
+            // selectedProvider so the §6.J failure signal is a clear assertion on
+            // user-visible state, not an opaque timeout.
             var state = awaitState()
             var guard = 0
-            while (state.selectedProvider != "rutracker" && guard < 4) {
-                state = awaitState()
-                guard++
+            try {
+                while (state.selectedProvider != "rutracker" && guard < 12) {
+                    state = awaitState()
+                    guard++
+                }
+            } catch (awaitFailure: Throwable) {
+                // awaitState() drained / wall-clock-timed-out before the outcome
+                // appeared. Both Turbine's TurbineAssertionError ("No value
+                // produced") and orbit's internal timeout are non-public types, so
+                // we catch broadly and re-raise as a clear assertion on the
+                // user-visible state — the §6.J failure signal is then an explicit
+                // "expected rutracker" message, never an opaque timeout stack.
+                throw AssertionError(
+                    "SelectProvider did not update selectedProvider: " +
+                        "expected \"rutracker\" but the screen state never " +
+                        "carried it (last observed=${state.selectedProvider}). " +
+                        "Underlying await failed: ${awaitFailure.message}",
+                )
             }
+            // PRIMARY assertion on user-visible state (§6.J): the selected
+            // provider the screen renders the active-highlight for.
             assertEquals("rutracker", state.selectedProvider)
+
+            // Stop the wall-clock teardown wait on the lingering Room-Flow
+            // collection (see root-cause note above).
+            cancelAndIgnoreRemainingItems()
         }
     }
 
