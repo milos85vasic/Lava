@@ -20,6 +20,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
 	"strings"
 	"sync"
 	"testing"
@@ -235,57 +236,53 @@ func TestCheckGoProcessByPID_NonPositivePID_ReturnsErrInvalidPID(t *testing.T) {
 
 // --- CheckGoProcessByPID: alive + dead paths ---
 
-// TestCheckGoProcessByPID_Alive verifies the PID path translates
-// HelixQA's `kill -0 <pid>` success into Alive=true. Falsifiability:
-// flip the Alive mapping in translate() — this test FAILs immediately.
+// TestCheckGoProcessByPID_Alive verifies the PID path reports Alive=true
+// for a process that genuinely exists.
+//
+// Contract note (§6.F submodule inheritance): HelixQA's desktop PID
+// liveness was changed (LVA-8 fix in
+// submodules/helixqa/pkg/detector/desktop.go) from a `kill -0 <pid>`
+// shell-out to a direct in-process syscall.Kill(pid, 0) signal-0 probe
+// — because macOS's /bin/kill binary exits 0 for absent out-of-range
+// PIDs, reading dead processes as alive. The command runner is
+// therefore NOT consulted for the PID path. We assert against
+// os.Getpid(), which is always alive (this very test process), so the
+// test exercises the real signal-0 probe rather than a mocked shell-out.
+// Falsifiability: flip the Alive mapping in translate() — this test
+// FAILs immediately.
 func TestCheckGoProcessByPID_Alive(t *testing.T) {
-	fake := newFakeRunner()
-	// kill -0 exits 0 (no output, no err) when the process exists.
-	fake.on("kill", nil, nil)
-
-	d := New("/tmp", WithCommandRunner(fake))
-	report, err := d.CheckGoProcessByPID(context.Background(), 12345)
+	d := New(t.TempDir())
+	report, err := d.CheckGoProcessByPID(context.Background(), os.Getpid())
 	if err != nil {
 		t.Fatalf("CheckGoProcessByPID error: %v", err)
 	}
 	if !report.Alive {
-		t.Errorf("Report.Alive = false; want true (kill -0 succeeded)")
+		t.Errorf("Report.Alive = false; want true for live self PID %d", os.Getpid())
 	}
 	if report.Crashed {
-		t.Errorf("Report.Crashed = true; want false")
-	}
-	// Verify the fake observed a `kill` call with `-0` arg (proves the
-	// HelixQA Detector took the PID code path, not processName).
-	calls := fake.callsFor("kill")
-	if len(calls) == 0 {
-		t.Fatalf("fakeRunner saw zero kill calls; PID path was not taken")
-	}
-	foundDashZero := false
-	for _, c := range calls {
-		for _, a := range c.args {
-			if a == "-0" {
-				foundDashZero = true
-			}
-		}
-	}
-	if !foundDashZero {
-		t.Errorf("kill calls missing -0 arg; HelixQA contract changed? calls=%+v", calls)
+		t.Errorf("Report.Crashed = true; want false for a live process")
 	}
 }
 
-// TestCheckGoProcessByPID_Dead verifies that kill -0 failure maps to
-// Crashed=true, Alive=false.
+// TestCheckGoProcessByPID_Dead verifies a genuinely-absent PID maps to
+// Alive=false, Crashed=true via the syscall.Kill signal-0 probe (ESRCH).
+//
+// PID 99999 is above the default maximum PID on both Linux (default
+// kernel.pid_max 32768) and macOS (99998), so it is guaranteed to be
+// never-allocated → reliably dead, with no command-runner dependency
+// (see the LVA-8 contract note on TestCheckGoProcessByPID_Alive). The
+// previous version mocked a `kill` shell-out that no longer happens —
+// a §6.F stale-setup bluff — so the fake runner is dropped.
+// Falsifiability: flip the Alive/Crashed mapping in translate() — this
+// test FAILs.
 func TestCheckGoProcessByPID_Dead(t *testing.T) {
-	fake := newFakeRunner()
-	fake.on("kill", nil, errors.New("no such process"))
-
-	d := New("/tmp", WithCommandRunner(fake))
+	d := New(t.TempDir())
 	report, err := d.CheckGoProcessByPID(context.Background(), 99999)
 	if err != nil {
 		t.Fatalf("CheckGoProcessByPID error: %v", err)
 	}
 	if report.Alive {
-		t.Errorf("Report.Alive = true; want false (kill -0 failed)")
+		t.Errorf("Report.Alive = true; want false for absent PID 99999")
 	}
 	if !report.Crashed {
 		t.Errorf("Report.Crashed = false; want true (PID dead → crashed)")
