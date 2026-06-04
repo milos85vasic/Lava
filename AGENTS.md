@@ -23,7 +23,7 @@ The agent instruction file for Qwen Code is `QWEN.md` (a plain-text pointer to
 
 1. **Android App** (`:app`) — a modular Android application written in Kotlin, using Jetpack Compose for the UI.
 2. **Go API Service** (`lava-api-go/`) — a headless Go/Gin server (SP-2 onward) that scrapes rutracker.org and exposes a JSON REST API over HTTP/3 and HTTP/2. This is the primary backend.
-3. **Proxy Server** (`:proxy`) — a legacy Ktor/Netty server that also scrapes rutracker.org. It is built as a fat JAR and containerized with Docker. Retained as an opt-in fallback.
+3. **Proxy Server** (`:proxy`) — **REMOVED 2026-05-06.** The legacy Ktor/Netty proxy was deleted when the SP-2 migration made `lava-api-go` the sole backend. There is no `proxy/` directory, it is not in `settings.gradle.kts`, and there is no `--legacy` fallback. (`build_and_release.sh`, `docker-compose.yml`, and `start.sh` carry comments documenting the removal.)
 
 A fourth artifact is in progress: the **Lava API Android app** (`:api-app`, applicationId `digital.vasic.lava.api`, debug `.dev`) — a standalone app that boots the full `lava-api-go` server **in-process** on a phone/tablet, backed by a local SQLite database, and exposes it on the LAN via mDNS. Phases A (additive SQLite storage backend, selected by `LAVA_API_STORAGE_BACKEND`; Postgres default unchanged), B (the `internal/mobile` `Start`/`Stop`/`Status` embed + the `go build -buildmode=c-shared` native build at `lava-api-go/scripts/build-cshared.sh` + JNI bridge `digital.vasic.lava.apigo.LavaNative`), C (the `:core:apiengine` Kotlin JNI wrapper — `ApiEngine`/`NativeApiEngine`/`FakeApiEngine` + the `buildCshared`→jniLibs→`externalNativeBuild` Gradle pipeline packaging `liblavaapi.so` + `liblavaapi_jni.so` per ABI; commit `ef109760`), and D-infra (the `:api-app` module: foreground `ApiEngineService` with Wifi/Multicast/Wake locks, the Android-free `ApiEngineController` Stopped/Starting/Running/Stopping/Error state machine, the `NsdMdnsAdvertiser` emitting `_lava-api._tcp`/`_lava-api-dev._tcp` + TXT `engine`/`platform=android`/`storage=sqlite`/`version`, and the per-install `ApiKeyStore` base64-UUID credential in `EncryptedSharedPreferences`; commit `e62e0fa8`) have landed. The landing UI + control screen + ViewModel (D-ui), the instrumented Compose UI Challenge tests (E), and the client-side distinct labelling of Android instances (sub-project 2) are **PENDING**. See [`docs/ON_DEVICE_API.md`](docs/ON_DEVICE_API.md) and [`docs/scripts/build-cshared.sh.md`](docs/scripts/build-cshared.sh.md). Note: `gomobile bind` is blocked on this module by the relative `replace ../submodules/*` directives — c-shared is the chosen path.
 
@@ -81,8 +81,7 @@ The repository is a **multi-module Gradle project** with an embedded Go service 
 ```
 Lava/
 ├── app/                    # Android application module
-├── proxy/                  # Ktor proxy server module (legacy)
-├── lava-api-go/            # Go API service (SP-2 onward, primary backend)
+├── lava-api-go/            # Go API service (SP-2 onward, sole backend)
 ├── buildSrc/               # Custom Gradle convention plugins
 ├── core/                   # 25 core library modules
 │   ├── auth/api, auth/impl
@@ -114,8 +113,8 @@ Consult `settings.gradle.kts` for the live module list. The exact count fluctuat
 ### Module responsibilities
 
 - `:app` — Entry point. Contains `Application`, `MainActivity`, `TvActivity`, and the top-level navigation graph. Depends on every core and feature module.
-- `:proxy` — Ktor/Netty server exposing REST endpoints. Built as a fat JAR and containerized with Docker. Legacy fallback.
-- `lava-api-go/` — Go/Gin server exposing REST endpoints over HTTP/3 + HTTP/2. Primary backend. Built as a static binary and a distroless Docker image. Also hosts the on-device-API additions: `internal/storage/` (backend-agnostic cache boundary with `postgres` + pure-Go `sqlite` impls), `internal/mobile/` (the in-process `Start`/`Stop`/`Status` embed), and `cmd/lavaapi-cshared/` (the `go build -buildmode=c-shared` native entry + `jni/` bridge). See [`docs/ON_DEVICE_API.md`](docs/ON_DEVICE_API.md).
+- `:proxy` — **REMOVED 2026-05-06** (legacy Ktor/Netty server). Superseded by `lava-api-go`; no `proxy/` module remains.
+- `lava-api-go/` — Go/Gin server exposing REST endpoints over HTTP/3 + HTTP/2. Sole backend. Built as a static binary and a distroless Docker image. Also hosts the on-device-API additions: `internal/storage/` (backend-agnostic cache boundary with `postgres` + pure-Go `sqlite` impls), `internal/mobile/` (the in-process `Start`/`Stop`/`Status` embed), and `cmd/lavaapi-cshared/` (the `go build -buildmode=c-shared` native entry + `jni/` bridge). See [`docs/ON_DEVICE_API.md`](docs/ON_DEVICE_API.md).
 - `core:*` — Shared libraries. Pure Kotlin modules (`models`, `common`, `auth/api`, `network/api`, `tracker:api`, `tracker:registry`, `tracker:mirror`, `tracker:rutracker`, `tracker:rutor`, `tracker:testing`, `work/api`) have **no Android dependency**. The Android-bearing tracker module is `:core:tracker:client` (Hilt + WorkManager + Room access).
 - `:core:apiengine` — Android library wrapping the embedded `lava-api-go` server (a Go c-shared `.so` loaded over JNI) behind the Kotlin `ApiEngine` API (`NativeApiEngine` real impl + `FakeApiEngine` JVM fake). Consumed by `:api-app`; packages `liblavaapi.so` + `liblavaapi_jni.so` per ABI via a `buildCshared` task + `externalNativeBuild` CMake. Phase C of the on-device-API sub-project; see [`docs/ON_DEVICE_API.md`](docs/ON_DEVICE_API.md).
 - `:api-app` — standalone Lava API Android app (`digital.vasic.lava.api`, debug `.dev`); foreground service hosting the embed + mDNS advertiser + per-install auth-key store (Phase D-infra). See [`docs/ON_DEVICE_API.md`](docs/ON_DEVICE_API.md).
@@ -225,7 +224,7 @@ Shared build constants live in `buildSrc/src/main/kotlin/lava/conventions/`:
 
 ### Key build files
 
-- `settings.gradle.kts` — Includes `:app`, `:proxy`, all `core:*` and `feature:*` modules, plus the `Tracker-SDK` composite build.
+- `settings.gradle.kts` — Includes `:app`, `:api-app`, all `core:*` and `feature:*` modules, plus the `Tracker-SDK` composite build. (The legacy `:proxy` was removed 2026-05-06.)
 - `gradle/libs.versions.toml` — Version catalog with libraries, plugins, and bundles (`coil`, `ktor`, `orbit`, `room`, `work`).
 - `gradle.properties` — Standard Android properties (`android.useAndroidX=true`, `kotlin.code.style=official`, `android.nonFinalResIds=false`, etc.).
 
@@ -240,8 +239,8 @@ Because there is no root build script, you invoke tasks via the Gradle wrapper a
 # Build the Android app (release)
 ./gradlew :app:assembleRelease
 
-# Build the proxy fat JAR
-./gradlew :proxy:buildFatJar
+# (The legacy `:proxy:buildFatJar` task was removed 2026-05-06 — the
+#  backend is now lava-api-go; build it with `cd lava-api-go && make build`.)
 
 # Run Spotless formatting/checks
 ./gradlew spotlessApply
@@ -589,39 +588,19 @@ The Go API is the primary backend. It is built as a static binary and a distrole
    - `HEALTHCHECK CMD ["/usr/local/bin/healthprobe"]` (JSON-array form for distroless compat)
    - Entrypoint: `/usr/local/bin/lava-api-go`
 
-4. **Orchestration:** `docker-compose.yml` at the project root defines services for Postgres, migrations, lava-api-go, legacy proxy, and an observability stack (Prometheus, Loki, Grafana, Tempo). Use `./start.sh` and `./stop.sh` to manage the stack.
+4. **Orchestration:** `docker-compose.yml` at the project root defines services for Postgres, migrations, lava-api-go, and an observability stack (Prometheus, Loki, Grafana, Tempo). Use `./start.sh` and `./stop.sh` to manage the stack. (The legacy proxy service was removed 2026-05-06.)
 
-### Proxy Server (Legacy)
+### Proxy Server (Legacy) — REMOVED 2026-05-06
 
-The proxy is built as a Ktor fat JAR and deployed as a Docker image.
-
-1. **Build the fat JAR:**
-   ```bash
-   ./gradlew :proxy:buildFatJar
-   ```
-   Output: `proxy/build/libs/app.jar`
-
-2. **Build & push the Docker image:**
-   ```bash
-   ./build_and_push_docker_image.sh
-   ```
-
-   The script does the following:
-   ```bash
-   docker build -t lava-app-proxy ./proxy
-   docker tag lava-app-proxy registry.digitalocean.com/lava-app/lava-app-proxy
-   docker push registry.digitalocean.com/lava-app/lava-app-proxy
-   ```
-
-3. **Dockerfile** (`proxy/Dockerfile`):
-   - Base image: `openjdk:17.0.1-jdk-slim` (`linux/amd64`)
-   - Exposes port `8080`
-   - Entrypoint: `java -jar /app/app.jar`
+The legacy Ktor/Netty proxy was deleted in the SP-2 migration; `lava-api-go`
+is the sole backend. There is no `proxy/` directory, no `:proxy:buildFatJar`
+task, and `build_and_push_docker_image.sh` now builds the lava-api-go image.
+To build/deploy the backend, see the lava-api-go deployment section and
+`cd lava-api-go && make build && make image`.
 
 ## Security Considerations
 
-- **Proxy auth** — The proxy expects an `Auth-Token` header but does not implement OAuth or JWT; it forwards rutracker session state.
-- **Go API auth** — The Go API uses passthrough auth middleware that forwards the `Auth-Token` header as a cookie to upstream rutracker.org.
+- **Go API auth** — The Go API uses passthrough auth middleware that forwards the `Auth-Token` header as a cookie to upstream rutracker.org. (The legacy `:proxy`'s equivalent auth was removed with the module on 2026-05-06.)
 - **Encrypted preferences** — `core:preferences` uses `androidx.security:security-crypto-ktx` (`1.1.0-alpha03`) to store credentials and settings.
 - **Cleartext traffic** — `android:usesCleartextTraffic="true"` is enabled in the app manifest. Be cautious when changing this.
 - **Signing configuration** — Both debug and release builds use dedicated keystores located under `keystores/`. Keystore paths and passwords are loaded from a `.env` file via `KEYSTORE_ROOT_DIR` and `KEYSTORE_PASSWORD`. See `.env.example` for the required variables. Never commit the `.env` file or the `keystores/` directory.

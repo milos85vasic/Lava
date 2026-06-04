@@ -8,8 +8,7 @@ modules:
    per-tracker plugin modules, generic primitives in a `vasic-digital`
    submodule.
 2. **Local Network Discovery** — the mDNS / NsdManager flow that
-   auto-discovers the lava-api-go service or the legacy `:proxy` on
-   the LAN.
+   auto-discovers the lava-api-go service on the LAN.
 
 For per-feature MVI shapes, see the relevant `feature/*/README.md` (or
 the source — every feature mirrors `XxxState` + `XxxAction` +
