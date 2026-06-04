@@ -32,6 +32,28 @@ MODULE_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 OUT_ROOT="${MODULE_DIR}/build/jniLibs"
 PKG="./cmd/lavaapi-cshared"
 
+# §6.R no-hardcoding: the embed's default Lava-Auth header name MUST NOT be a
+# source literal. It is injected into internal/mobile.defaultAuthFieldName at
+# build time via `-ldflags -X`, sourced from LAVA_AUTH_FIELD_NAME in the
+# gitignored repo-root .env (or an already-exported env var). The value never
+# appears in any tracked file. The Android host app also passes authFieldName in
+# the Start config, so this default is only a fallback; injecting it keeps the
+# embed honest when the host config omits it.
+REPO_ROOT="$(cd "${MODULE_DIR}/.." && pwd)"
+if [[ -z "${LAVA_AUTH_FIELD_NAME:-}" && -f "${REPO_ROOT}/.env" ]]; then
+    LAVA_AUTH_FIELD_NAME="$(grep -E '^LAVA_AUTH_FIELD_NAME=' "${REPO_ROOT}/.env" | head -1 | cut -d= -f2- | tr -d '"' | tr -d "'")"
+fi
+MOBILE_PKG="digital.vasic.lava.apigo/internal/mobile"
+EXTRA_LDFLAGS=""
+if [[ -n "${LAVA_AUTH_FIELD_NAME:-}" ]]; then
+    EXTRA_LDFLAGS="-X ${MOBILE_PKG}.defaultAuthFieldName=${LAVA_AUTH_FIELD_NAME}"
+    echo "Auth field name injected via -ldflags -X (from .env/env)"
+else
+    echo "WARNING: LAVA_AUTH_FIELD_NAME not set and no repo-root .env — the embed's" >&2
+    echo "         default auth field name will be empty; Start() will REQUIRE the" >&2
+    echo "         host app to pass authFieldName in its Start config (§6.R)." >&2
+fi
+
 ANDROID_NDK_HOME="${ANDROID_NDK_HOME:-${HOME}/Library/Android/sdk/ndk/25.1.8937393}"
 ANDROID_API="${ANDROID_API:-28}"
 
@@ -130,7 +152,7 @@ for ABI in "${ABIS[@]}"; do
         CGO_ENABLED=1 GOOS=android GOARCH="${GOARCH}" CC="${CC}" \
             GOMAXPROCS=2 nice -n 19 \
             go build -buildmode=c-shared \
-                -ldflags="-extldflags=-Wl,-soname,liblavaapi.so" \
+                -ldflags="-extldflags=-Wl,-soname,liblavaapi.so ${EXTRA_LDFLAGS}" \
                 -o "${OUT_SO}" "${PKG}"
     )
     build_rc=$?

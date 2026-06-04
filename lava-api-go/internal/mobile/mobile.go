@@ -101,13 +101,6 @@ const (
 	defaultPort = 8443
 	// scheme is reported by Status(); the embed always serves HTTPS.
 	scheme = "https"
-	// defaultAuthFieldName is the HTTP header the embed reads the Lava-Auth
-	// credential from when the host app does not supply one. It matches the
-	// header the production binary reads (cfg.AuthFieldName from
-	// LAVA_AUTH_FIELD_NAME). The host app SHOULD pass authFieldName explicitly
-	// so the embed's header matches whatever the deployment's clients send;
-	// this constant only provides a sane default so the gate is never disabled.
-	defaultAuthFieldName = "Lava-Auth"
 	// embedClientName labels the single auto-provisioned client identity the
 	// embed accepts. It is purely cosmetic (surfaces as c.Set("client_name"));
 	// it is NOT a secret.
@@ -155,6 +148,21 @@ type instance struct {
 	authKey       string // the in-effect base64 UUID credential clients present
 	authFieldName string // the header name clients send the credential in
 }
+
+// defaultAuthFieldName is the HTTP header the embed reads the Lava-Auth
+// credential from when the host app does not supply one (sc.AuthFieldName ==
+// "" in the Start config). It matches the header the production binary reads
+// (cfg.AuthFieldName from LAVA_AUTH_FIELD_NAME).
+//
+// Per §6.R (No-Hardcoding): the field name MUST NOT be a source literal —
+// otherwise it silently shadows whatever an operator sets in LAVA_AUTH_FIELD_NAME.
+// It is injected at build time via `-ldflags "-X
+// digital.vasic.lava.apigo/internal/mobile.defaultAuthFieldName=$LAVA_AUTH_FIELD_NAME"`
+// (the Go-idiomatic equivalent of §6.R's allowed "generated config reading
+// .env"). When NOT injected it is empty; in that case Start REQUIRES the host
+// to pass a non-empty authFieldName and fail-fasts otherwise — the auth gate is
+// NEVER served with an empty header name.
+var defaultAuthFieldName string
 
 var (
 	mu      sync.Mutex
@@ -230,6 +238,17 @@ func Start(configJSON string) error {
 	authFieldName := sc.AuthFieldName
 	if authFieldName == "" {
 		authFieldName = defaultAuthFieldName
+	}
+	// Fail-fast if neither the host config nor the build-time injected default
+	// supplies a field name. Serving with an empty header name would disable the
+	// auth gate (every request would carry the "" header), which the embed's
+	// security posture forbids — there is no unauthenticated mode. This mirrors
+	// production's config.Load fail-fast on a missing LAVA_AUTH_FIELD_NAME
+	// (TestLoad_RejectsMissingAuthFieldName).
+	if authFieldName == "" {
+		return errors.New("mobile: authFieldName is required " +
+			"(pass it in the Start config, or build with " +
+			"-ldflags -X .../internal/mobile.defaultAuthFieldName=$LAVA_AUTH_FIELD_NAME)")
 	}
 
 	// Resolve the auth key. The host app supplies it via authSharedKey; if it

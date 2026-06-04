@@ -678,6 +678,17 @@ func TestGeneratedTLSCertHasNoWildcardDNSSAN(t *testing.T) {
 }
 
 func TestMain(m *testing.M) {
+	// Simulate the build-time `-ldflags -X
+	// digital.vasic.lava.apigo/internal/mobile.defaultAuthFieldName=$LAVA_AUTH_FIELD_NAME`
+	// injection the real c-shared / aar build performs (scripts/build-cshared.sh,
+	// scripts/build-aar.sh). Production source carries NO field-name literal
+	// (§6.R, enforced by tests/contract TestAuthFieldName_NoLiteralInProductionGoSource);
+	// the default is injected at link time. Under `go test` there is no link-time
+	// injection, so we set it here from the test fixture constant — this lets the
+	// fallback-path tests (configJSONNoAuth, which omits authFieldName) exercise
+	// the real production fallback to defaultAuthFieldName. Tests that pass an
+	// explicit authFieldName (configJSON) are unaffected.
+	defaultAuthFieldName = testAuthFieldName
 	code := m.Run()
 	_ = Stop()
 	os.Exit(code)

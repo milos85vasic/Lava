@@ -38,6 +38,22 @@ ANDROIDAPI="${LAVAAPI_ANDROIDAPI:-28}"
 OUT_DIR="${MODULE_DIR}/build"
 OUT_AAR="${OUT_DIR}/lavaapi.aar"
 
+# §6.R no-hardcoding: inject the embed's default Lava-Auth header name into
+# internal/mobile.defaultAuthFieldName at build time from LAVA_AUTH_FIELD_NAME
+# (gitignored repo-root .env or an exported env var). The value never appears in
+# any tracked file. When unset, Start() requires the host to pass authFieldName.
+REPO_ROOT="$(cd "${MODULE_DIR}/.." && pwd)"
+if [[ -z "${LAVA_AUTH_FIELD_NAME:-}" && -f "${REPO_ROOT}/.env" ]]; then
+  LAVA_AUTH_FIELD_NAME="$(grep -E '^LAVA_AUTH_FIELD_NAME=' "${REPO_ROOT}/.env" | head -1 | cut -d= -f2- | tr -d '"' | tr -d "'")"
+fi
+MOBILE_LDFLAGS=()
+if [[ -n "${LAVA_AUTH_FIELD_NAME:-}" ]]; then
+  MOBILE_LDFLAGS=(-ldflags "-X digital.vasic.lava.apigo/internal/mobile.defaultAuthFieldName=${LAVA_AUTH_FIELD_NAME}")
+  echo "    auth field name: injected via -ldflags -X (from .env/env)"
+else
+  echo "    auth field name: NOT injected (Start will require host authFieldName per §6.R)" >&2
+fi
+
 echo "==> build-aar.sh: lava-api-go Android .aar"
 echo "    module:     ${MODULE_DIR}"
 echo "    javapkg:    ${JAVAPKG}"
@@ -102,6 +118,7 @@ GOMAXPROCS=2 nice -n19 gomobile bind \
   -target=android \
   -androidapi "${ANDROIDAPI}" \
   -javapkg "${JAVAPKG}" \
+  "${MOBILE_LDFLAGS[@]}" \
   -o "${OUT_AAR}" \
   ./internal/mobile
 
