@@ -583,6 +583,9 @@ docs/todos/Lava_TODOs_001.md committed as historical; etc.)
 
 ## 7. RESUME PROMPT
 
+> **⏩ CURRENT RESUME (2026-06-04) — a bare "continue" means: resume the COMPLETENESS PROGRAM at Phase 3.**
+> Check out branch `completeness-program-2026-06-04` (17 commits ahead of master, not merged), read §0's top block + `docs/superpowers/plans/2026-06-04-completeness-program-master-plan.md`, then start **Phase 3 (concurrency/responsiveness:** `go test -race`, leak/deadlock/race sweep with reproducing tests, lazy-init/semaphores/non-blocking, consolidate onto `submodules/{concurrency,ratelimiter}`; plus fix the Detekt backlog `ImplicitDefaultLocale` in `core/tracker/rutracker/.../Utils.kt:102` + `SwallowedException` in `api-app/.../ApiControlScreen.kt:115`**).** Method: 2–3 parallel disjoint-module subagent-driven worktree streams (5 trips a rate-limit). Worktrees branch from master → verify Phase-0/1 fixes survive each cherry-pick + regenerate detekt baselines on-branch. `[GATE-HOST]` Challenge/device steps need Linux x86_64+KVM (§6.AH-debt). The `.remember/remember.md` handoff carries the same. **The block below is the STALE 2026-05-16 constitution-compliance prompt — superseded; ignore it.**
+
 Paste the following into a new CLI agent session to continue this
 work. The agent needs no scrollback — everything it needs is in this
 file plus the spec/plan/CLAUDE.md set referenced from it.
