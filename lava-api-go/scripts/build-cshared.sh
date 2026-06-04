@@ -44,9 +44,16 @@ if [[ -z "${LAVA_AUTH_FIELD_NAME:-}" && -f "${REPO_ROOT}/.env" ]]; then
     LAVA_AUTH_FIELD_NAME="$(grep -E '^LAVA_AUTH_FIELD_NAME=' "${REPO_ROOT}/.env" | head -1 | cut -d= -f2- | tr -d '"' | tr -d "'")"
 fi
 MOBILE_PKG="digital.vasic.lava.apigo/internal/mobile"
-EXTRA_LDFLAGS=""
+# Assemble the full -ldflags as a single quoted unit in an array so a
+# LAVA_AUTH_FIELD_NAME containing whitespace does not split into bogus link
+# tokens (mirrors the robust array pattern in build-aar.sh). The -extldflags
+# soname directive is always present; the -X injection is appended only when the
+# env var is set. Go concatenates multiple space-separated entries within one
+# -ldflags value, and the -X 'sym=value' form (quoted) keeps a spaced value
+# intact as a single linker symbol assignment.
+LDFLAGS_VALUE="-extldflags=-Wl,-soname,liblavaapi.so"
 if [[ -n "${LAVA_AUTH_FIELD_NAME:-}" ]]; then
-    EXTRA_LDFLAGS="-X ${MOBILE_PKG}.defaultAuthFieldName=${LAVA_AUTH_FIELD_NAME}"
+    LDFLAGS_VALUE="${LDFLAGS_VALUE} -X '${MOBILE_PKG}.defaultAuthFieldName=${LAVA_AUTH_FIELD_NAME}'"
     echo "Auth field name injected via -ldflags -X (from .env/env)"
 else
     echo "WARNING: LAVA_AUTH_FIELD_NAME not set and no repo-root .env — the embed's" >&2
@@ -149,10 +156,13 @@ for ABI in "${ABIS[@]}"; do
     set +e
     (
         cd "${MODULE_DIR}"
+        # -ldflags + its value are two separate argv tokens (the robust form),
+        # so the shell does not field-split the value; the -X 'sym=value' inside
+        # is quoted so a spaced field name stays one linker symbol assignment.
         CGO_ENABLED=1 GOOS=android GOARCH="${GOARCH}" CC="${CC}" \
             GOMAXPROCS=2 nice -n 19 \
             go build -buildmode=c-shared \
-                -ldflags="-extldflags=-Wl,-soname,liblavaapi.so ${EXTRA_LDFLAGS}" \
+                -ldflags "${LDFLAGS_VALUE}" \
                 -o "${OUT_SO}" "${PKG}"
     )
     build_rc=$?

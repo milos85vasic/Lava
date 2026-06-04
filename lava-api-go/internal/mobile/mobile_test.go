@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
@@ -412,6 +413,71 @@ func TestStartWhileRunning(t *testing.T) {
 	err := Start(configJSON(bind, freePort(t), tempSQLitePath(t)))
 	if err == nil {
 		t.Fatal("Start-while-running returned nil, want error")
+	}
+}
+
+// TestStart_FailsFast_WhenNoAuthFieldName is the load-bearing §6.J/§6.AB test
+// for the both-empty fail-fast branch in Start: when NEITHER the build-time
+// injected defaultAuthFieldName (the -ldflags -X value, simulated here by
+// blanking the package var) NOR the host's Start config supplies a field name,
+// Start MUST refuse to serve. Serving with an empty header name would disable
+// the auth gate (every request would carry the "" header), so the embed's
+// security posture forbids it — there is no unauthenticated mode.
+//
+// TestMain globally sets defaultAuthFieldName = testAuthFieldName to simulate
+// the -X injection, which makes this branch structurally unreachable in every
+// other test. This test temporarily un-sets it so the load-bearing guard is
+// actually exercised.
+//
+// FALSIFIABILITY REHEARSAL: deleting the `return` in Start's authFieldName ==
+// "" branch (letting it fall through and serve with an empty field name) makes
+// this test FAIL — the assertions below (non-nil error + not-running Status)
+// no longer hold.
+func TestStart_FailsFast_WhenNoAuthFieldName(t *testing.T) {
+	// Save and restore the build-time-injected default so we don't leak the
+	// blanked value into other tests (Go runs tests in a single package serially
+	// unless t.Parallel() is called; this defer restores it regardless).
+	prev := defaultAuthFieldName
+	defaultAuthFieldName = ""
+	defer func() { defaultAuthFieldName = prev }()
+
+	// A config that supplies EVERY other required field (a valid bindAddr, a
+	// free port, a real SQLite path) but OMITS authFieldName — so the field-name
+	// check is the ONLY thing that can fail. We deliberately do NOT use
+	// configJSON (which sets authFieldName) — we hand-build a no-field-name body.
+	bind := "127.0.0.1"
+	port := freePort(t)
+	dbPath := tempSQLitePath(t)
+	cfg := map[string]any{
+		"bindAddr":      bind,
+		"port":          port,
+		"sqlitePath":    dbPath,
+		"authSharedKey": testAuthKey,
+		// authFieldName intentionally omitted.
+	}
+	b, _ := json.Marshal(cfg)
+
+	err := Start(string(b))
+	if err == nil {
+		_ = Stop()
+		t.Fatal("Start with no authFieldName (and no -X injection) returned nil, " +
+			"want error — the auth gate MUST NEVER be served with an empty header name")
+	}
+	if !strings.Contains(err.Error(), "authFieldName is required") {
+		_ = Stop()
+		t.Fatalf("Start error = %q, want it to contain \"authFieldName is required\"", err.Error())
+	}
+
+	// The embed MUST NOT have started serving: Status() reports stopped. This is
+	// the user-visible-state assertion (§6.AB clause 1): a fail-fast that still
+	// left a listener running would be the bluff.
+	var st map[string]any
+	if err := json.Unmarshal([]byte(Status()), &st); err != nil {
+		t.Fatalf("Status() not valid JSON: %v", err)
+	}
+	if st["state"] != "stopped" {
+		_ = Stop()
+		t.Fatalf("Status state = %v after fail-fast, want stopped (no listener may be left running)", st["state"])
 	}
 }
 
