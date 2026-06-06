@@ -61,3 +61,32 @@ reflect the fixed state.
 - `NsdMdnsAdvertiser` (api-app): single nullable `registrationListener`;
   `unregisterService` paired with `registerService`; degraded-advertisement
   path logs instead of crashing.
+
+### DOCUMENTED FINDING (reachable, but not unit-falsifiable — deferred to Phase 4)
+- `ApiEngineController.start()` guards re-entry with a read-then-set on a
+  `MutableStateFlow` (read `_state.value`, check Running/Starting, then set
+  `Starting`). This is a TOCTOU: two concurrent `start()` calls can both
+  observe `Stopped` and both bind the embed → the "address already in use"
+  double-bind the guard exists to prevent.
+- REACHABILITY (confirmed, not assumed): the controller is a Hilt singleton
+  driven by TWO collaborators on DIFFERENT dispatchers — `ApiControlViewModel`
+  via Orbit intents (Dispatchers.Default) and `ApiEngineService` via
+  `serviceScope` (Dispatchers.Main.immediate, ACTION_STOP/RESTART). A UI
+  Restart racing the notification Restart action is genuine parallelism.
+- WHY NOT FIXED THIS INCREMENT (anti-bluff honesty, §6.J Fifth Law): the
+  obvious fix (atomic `compareAndSet` guard) is correct, but the read→set gap
+  is nanoseconds while post-barrier thread-scheduling jitter is microseconds,
+  so a stress test (400 rounds × 16 concurrent callers) does NOT reliably
+  fail against the broken read-then-set guard — i.e. the fix is not
+  unit-falsifiable as-is. Shipping the fix with a test that is green against
+  BOTH the fixed and broken code would be a bluff test by definition (§6.J),
+  and shipping the fix with no falsifiable test violates the Fifth Law.
+- PLANNED RESOLUTION (Phase 4): refactor for testability per the Fifth Law —
+  add a `@VisibleForTesting` guard-checkpoint seam (a no-op hook invoked
+  between the guard read and the CAS) so a test can deterministically park
+  caller A in the gap, run caller B fully, release A, and assert the embed
+  bound exactly once. With that seam the atomic `compareAndSet` fix becomes
+  deterministically falsifiable (read-then-set → double-bind → FAIL). Until
+  then the sequential idempotency contract remains covered by the existing
+  falsifiable `start is idempotent` test in ApiEngineControllerTest. Severity:
+  LOW (requires near-simultaneous UI+notification Restart).
