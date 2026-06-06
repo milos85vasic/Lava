@@ -61,6 +61,28 @@ else
     echo "         host app to pass authFieldName in its Start config (§6.R)." >&2
 fi
 
+# API↔embed sync (drift prevention): compute the SINGLE-SOURCE-OF-TRUTH hash of
+# the exact lava-api-go source codebase that compiles into this .so, via
+# scripts/compute-api-source-hash.sh in the repo root. Inject it into
+# internal/version.SourceHash so the running embed reports — through
+# mobile.Status() — precisely which source it contains. After the per-ABI
+# builds succeed we ALSO write this hash to the committed manifest
+# core/apiengine/src/main/resources/api-source.hash, which the gate
+# scripts/check-api-app-sync.sh recompares. Equal hashes prove the on-device
+# embed equals the current API codebase; any drift is mechanically loud.
+VERSION_PKG="digital.vasic.lava.apigo/internal/version"
+HASH_SCRIPT="${REPO_ROOT}/scripts/compute-api-source-hash.sh"
+API_SOURCE_HASH=""
+if [[ -x "${HASH_SCRIPT}" ]]; then
+    API_SOURCE_HASH="$(bash "${HASH_SCRIPT}")"
+    LDFLAGS_VALUE="${LDFLAGS_VALUE} -X '${VERSION_PKG}.SourceHash=${API_SOURCE_HASH}'"
+    echo "API source hash injected via -ldflags -X: ${API_SOURCE_HASH}"
+else
+    echo "WARNING: ${HASH_SCRIPT} not found/executable — the embed will report an" >&2
+    echo "         EMPTY SourceHash; the on-device sync Challenge treats empty as a" >&2
+    echo "         hard fail, and the manifest will NOT be refreshed." >&2
+fi
+
 ANDROID_NDK_HOME="${ANDROID_NDK_HOME:-${HOME}/Library/Android/sdk/ndk/25.1.8937393}"
 ANDROID_API="${ANDROID_API:-28}"
 
@@ -205,6 +227,20 @@ done
 
 if [[ ${overall_rc} -eq 0 ]]; then
     echo "ALL REQUESTED ABIS BUILT OK"
+    # Refresh the committed API↔embed sync manifest with the SAME hash that was
+    # injected into every freshly-built .so. The gate (check-api-app-sync.sh)
+    # compares a live recompute against THIS file; writing it here keeps "the .so
+    # I built" and "the hash I claim it was built from" in lockstep. Only written
+    # on a full successful build with a computed hash — never faked, never stale.
+    if [[ -n "${API_SOURCE_HASH}" ]]; then
+        MANIFEST="${REPO_ROOT}/core/apiengine/src/main/resources/api-source.hash"
+        mkdir -p "$(dirname "${MANIFEST}")"
+        printf '%s\n' "${API_SOURCE_HASH}" > "${MANIFEST}"
+        echo "API↔embed sync manifest refreshed: ${MANIFEST}"
+        echo "  hash: ${API_SOURCE_HASH}"
+    else
+        echo "NOTE: API source hash was not computed; manifest left unchanged." >&2
+    fi
 else
     echo "ONE OR MORE ABIS FAILED (rc=${overall_rc})" >&2
 fi

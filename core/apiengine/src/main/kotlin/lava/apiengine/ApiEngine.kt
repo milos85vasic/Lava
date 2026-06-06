@@ -57,6 +57,12 @@ data class ApiConfig(
  * @param authFieldName the header clients present the credential in.
  * @param authKey the in-effect credential (base64-UUID blob) the host app can
  *   display to configure peer devices. Null when stopped or not surfaced.
+ * @param sourceHash the 64-hex sha256 of the lava-api-go source codebase
+ *   compiled into the running embed (`version.SourceHash`, ldflags-injected by
+ *   `build-cshared.sh`). Empty when the `.so` was built without injection. The
+ *   on-device sync Challenge asserts this equals `BuildConfig.LAVA_API_SOURCE_HASH`
+ *   — equal hashes prove the embed contains EXACTLY the current lava-api-go
+ *   codebase (no drift).
  */
 data class ApiStatus(
     val state: String,
@@ -69,6 +75,7 @@ data class ApiStatus(
     val authEnabled: Boolean,
     val authFieldName: String,
     val authKey: String?,
+    val sourceHash: String = "",
 )
 
 /**

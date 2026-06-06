@@ -116,6 +116,7 @@ internal data class StatusDto(
     @SerialName("authEnabled") val authEnabled: Boolean = false,
     @SerialName("authFieldName") val authFieldName: String = "",
     @SerialName("authKey") val authKey: String? = null,
+    @SerialName("sourceHash") val sourceHash: String = "",
 )
 
 internal fun StatusDto.toApiStatus(): ApiStatus =
@@ -130,4 +131,5 @@ internal fun StatusDto.toApiStatus(): ApiStatus =
         authEnabled = authEnabled,
         authFieldName = authFieldName,
         authKey = authKey,
+        sourceHash = sourceHash,
     )

@@ -385,6 +385,13 @@ func Status() string {
 		RequestCount int64  `json:"requestCount"`
 		Backend      string `json:"backend"`
 		Version      string `json:"version"`
+		// SourceHash is the 64-hex sha256 of the lava-api-go source codebase
+		// compiled into THIS .so (version.SourceHash, ldflags-injected by
+		// build-cshared.sh). It is reported whether running or stopped so the
+		// on-device sync Challenge can read the embed's source identity and
+		// assert it matches the host APK's BuildConfig.LAVA_API_SOURCE_HASH
+		// (no drift). Empty when the .so was built without injection.
+		SourceHash string `json:"sourceHash,omitempty"`
 		// AuthEnabled is always true while running — the embed enforces the
 		// Lava-Auth gate unconditionally (security-review finding 1).
 		AuthEnabled bool `json:"authEnabled"`
@@ -398,10 +405,11 @@ func Status() string {
 	}
 
 	doc := statusDoc{
-		State:   "stopped",
-		Scheme:  scheme,
-		Backend: config.BackendSQLite,
-		Version: version.Name,
+		State:      "stopped",
+		Scheme:     scheme,
+		Backend:    config.BackendSQLite,
+		Version:    version.Name,
+		SourceHash: version.SourceHash,
 	}
 	if current != nil {
 		doc.State = "running"
