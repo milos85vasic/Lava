@@ -156,14 +156,18 @@ block() {
 # --------------------------------------------------------------------------
 EMULATOR_MSG="Gate emulator runs MUST go via scripts/run-challenge-matrix.sh → Containers submodule (§6.X). Raw host-direct adb/emulator is dev-iteration only, never gate evidence."
 
-# Scoped REAL-PHYSICAL-DEVICE exception (operator-authorized 2026-06-03).
-# §6.AH permits a real PHYSICAL device as a §6.Z surface (it is NOT an
-# emulator/virtual device), and the container-emulator gate cannot boot on the
-# macOS host (§6.X-debt). adb commands EXPLICITLY targeting an authorized real
-# physical serial (`adb -s <serial> …`) are therefore permitted. Emulator
-# serials (`emulator-*`) and un-serialed adb stay BLOCKED — an ambiguous/absent
-# target could be an emulator, which §6.X still forbids host-direct.
+# Scoped REAL-PHYSICAL-DEVICE / VM exception (operator-authorized 2026-06-03,
+# extended 2026-06-06 for Genymotion).
+# §6.AH permits a real PHYSICAL device OR a VM-backed virtual device (Genymotion
+# runs Android inside a VM — NOT a host-direct `emulator -avd` AVD) as a §6.Z
+# surface. adb commands EXPLICITLY targeting an authorized serial (`adb -s
+# <serial> …`) are therefore permitted. Emulator serials (`emulator-*`) and
+# un-serialed adb stay BLOCKED — an ambiguous/absent target could be a
+# host-direct AVD, which §6.X/§6.AH still forbid.
 # Env-overridable allowlist; default = the operator-connected Samsung S23 Ultra.
+# scripts/run-genymotion-challenges.sh exports the running Genymotion adb serial
+# (e.g. 127.0.0.1:6555) into LAVA_REAL_DEVICE_SERIALS so its connected-test path
+# is permitted — a §6.AH-compliant VM surface driven by the Containers submodule.
 LAVA_REAL_DEVICE_SERIALS="${LAVA_REAL_DEVICE_SERIALS:-R5CW33CBVQV}"
 REAL_DEVICE_ADB=""
 for _serial in $LAVA_REAL_DEVICE_SERIALS; do
