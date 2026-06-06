@@ -863,6 +863,57 @@ errors, 1 for build/symbol failures) — no `.so` is faked (§6.J / Anti-Bluff).
 > embed on a real emulator and issue a real HTTPS request (Phase E) are not yet
 > in the tree.
 
+## 5A. API↔embed sync guarantee (no drift) — §11.4.69 / §6.J
+
+The on-device embed (`liblavaapi.so`) MUST contain EXACTLY the current
+`lava-api-go` source codebase — a stale `.so` would serve old API behaviour
+while every other gate looked green (the canonical "tests pass, wrong-version
+feature" bluff). A four-part mechanism, anchored on ONE hash function, makes
+drift mechanically impossible to hide:
+
+1. **Single source of truth — `scripts/compute-api-source-hash.sh`.** A
+   deterministic bare-64-hex sha256 over the EXACT file set that compiles into
+   the `.so`: every non-test `.go` under `lava-api-go/cmd/lavaapi-cshared` +
+   `lava-api-go/internal`, plus `go.mod` + `go.sum`. The list is byte-sorted and
+   each file's relative path + content is hashed, so a rename, move, content
+   edit, or dependency bump each change the digest; `*_test.go` and the other
+   `cmd/` entrypoints are excluded (they do not link into the embed).
+
+2. **Build-time injection + committed manifest — `build-cshared.sh`.** The build
+   computes the hash via (1) and injects it into `internal/version.SourceHash`
+   via `-ldflags -X`, so the RUNNING `.so` reports it through `mobile.Status()`
+   (`sourceHash` field → Kotlin `ApiStatus.sourceHash`). On a successful build it
+   also writes the committed manifest
+   `core/apiengine/src/main/resources/api-source.hash`.
+
+3. **CI gate — `scripts/check-api-app-sync.sh`.** Wired into `scripts/ci.sh`
+   (both `--changed-only` and `--full`). Recomputes the live hash and compares it
+   to the committed manifest; on mismatch it exits 1 loudly
+   (`on-device API embed is STALE vs lava-api-go — rebuild liblavaapi.so via
+   build-cshared.sh`). Pure bash + git, fast, no failure-swallow (§6.J).
+
+4. **Gradle input-correctness — `core/apiengine/build.gradle.kts`.** The
+   `buildCshared` task declares the lava-api-go embed-source dirs +
+   `go.mod`/`go.sum` as inputs (and the manifest as an output), so Gradle re-runs
+   `build-cshared.sh` on ANY embed-source change — killing the stale-cache drift
+   at the root. (Before this fix the task declared only the script as an input
+   and went up-to-date whenever the `.so` outputs existed, even after the Go
+   source changed.)
+
+**Runtime proof on device — api-app Challenge C05.**
+`Challenge05ApiEmbedSourceHashMatchesTest` starts the real embed (real UI → real
+controller → real `NativeApiEngine` → real `.so`) and asserts the running
+embed's `ApiStatus.sourceHash` equals the APK's `BuildConfig.LAVA_API_SOURCE_HASH`
+(both computed from the SAME script), with an empty-hash hard-fail. Equal hashes
+prove the packaged embed equals the source the APK was built against.
+
+**Go contract test.** `lava-api-go/tests/contract/sourcehash_contract_test.go`
+asserts hash stability, manifest-matches-live, and falsifiability (a content
+edit to a tracked embed-linked `.go` changes the hash).
+
+Per-script guides: [`docs/scripts/compute-api-source-hash.sh.md`](scripts/compute-api-source-hash.sh.md)
+and [`docs/scripts/check-api-app-sync.sh.md`](scripts/check-api-app-sync.sh.md).
+
 ## 6. Constitutional alignment (what the landed code already satisfies)
 
 - **§6.R No-Hardcoding** — SQLite path, bind addr, port, header name, and NDK
