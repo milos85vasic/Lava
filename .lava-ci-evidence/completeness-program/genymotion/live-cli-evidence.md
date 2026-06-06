@@ -4,7 +4,7 @@
 ## version
 3.10.0
 ## list
-On	127.0.0.1:6555	ed811e5e-df4d-46d8-ab1f-4250058e57e3	Google Pixel 9
+On	127.0.0.1:6555	<genymotion-vm-uuid-redacted>	Google Pixel 9
 ## serial Google Pixel 9
 127.0.0.1:6555
 ## go test ./pkg/genymotion/
