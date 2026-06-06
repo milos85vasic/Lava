@@ -124,3 +124,6 @@ toPdfViaTempFile*
 
 # markdown-export hermetic-test completion marker (scratch)
 tests/check-markdown-export-sync/.fin
+
+# Genymotion CLI downloaded tool binary (not evidence — fetched per run)
+.lava-ci-evidence/genymotion/*/genymotion-cli
