@@ -549,3 +549,76 @@ expected vs actual page-count mismatch; reverting to `/50` passes. The test
 matrix also covers `toBrowseResult` totalPages and the conditional metadata map.
 
 **Fix commit:** _(this commit)_
+
+---
+
+## formatSize rendered comma-decimal separators on non-US locales
+
+**Discovered:** 2026-06-06 (Completeness Program Phase 3, Detekt correctness backlog).
+
+**Root cause:** `core/tracker/rutracker/.../domain/Utils.kt:102` `formatSize` used
+`String.format("%.1f %sB", …)` without a `Locale`, so the JVM default locale
+applied. On any comma-decimal locale (de/ru/fr/…) a 1.5 MB torrent rendered as
+"1,5 MB".
+
+**Fix:** `String.format(Locale.ROOT, …)`.
+
+**Verification:** `FormatSizeLocaleTest` forces `Locale.GERMANY`/`ru-RU` and
+asserts dot output. Falsifiability: Locale-less format → 2 of 4 tests FAIL
+(expected "1.5 MB" but was "1,5 MB"). **Fix commit:** bc0a478d.
+
+---
+
+## DownloadServiceImpl cache data race
+
+**Discovered:** 2026-06-06 (Completeness Program Phase 3, Android leak/race sweep).
+
+**Root cause:** `DownloadServiceImpl.cache` was a plain HashMap read on the
+caller's coroutine dispatcher (`downloadTorrentFile`) and written from the
+`DownloadManager` `BroadcastReceiver.onReceive` (main thread). Concurrent
+downloads touched a non-thread-safe map across two threads.
+
+**Fix:** extracted `DownloadUriCache` backed by `ConcurrentHashMap` (pure-JVM,
+unit-testable per Fifth Law).
+
+**Verification:** `DownloadUriCacheConcurrencyTest` (16 threads × 500 keys).
+Falsifiability: HashMap backing → test FAILS; ConcurrentHashMap → 3/3 green.
+**Fix commit:** 76fb0879.
+
+---
+
+## ApiEngineController.start() TOCTOU double-bind
+
+**Discovered:** 2026-06-06 (Completeness Program Phase 3/4).
+
+**Root cause:** `ApiEngineController.start()` re-entry guard was a read-then-set
+on `MutableStateFlow`. The controller is a Hilt singleton driven by the
+ViewModel (Dispatchers.Default) and the Service (Main.immediate, ACTION_RESTART);
+two concurrent start() calls could both observe Stopped and both bind the embed
+("address already in use").
+
+**Fix:** atomic `_state.compareAndSet` guard loop + a `@VisibleForTesting`
+guard-checkpoint seam (Fifth Law: refactor for testability).
+
+**Verification:** `ApiEngineControllerTest.concurrent start parked in the guard
+gap binds the embed exactly once` parks one caller in the read→set gap. 
+Falsifiability: read-then-set → test FAILS (double-bind); compareAndSet → 8/8.
+**Fix commit:** 30e880c6.
+
+---
+
+## TestSearchHistoryRepository.remove kept the matched row (bluff fake)
+
+**Discovered:** 2026-06-06 (Completeness Program Phase 4, flagged independently by
+two subagent streams).
+
+**Root cause:** the shared `:core:testing` fake's `remove(id)` did
+`filter { it.id == id }` — it KEPT the matched row and dropped the others, the
+inverse of the real `SearchHistoryRepositoryImpl.remove` (Room `delete(id)`). A
+Third-Law bluff fake.
+
+**Fix:** `filterNot { it.id == id }`; added `TestSearchHistoryRepositoryTest`.
+
+**Verification:** the test asserts remove(1) on [0,1,2] leaves [0,2].
+Falsifiability: the shipped bug fails it (expected [0,2] but was [1]).
+feature/search + feature/menu stay green. **Fix commit:** _(this session)_.
