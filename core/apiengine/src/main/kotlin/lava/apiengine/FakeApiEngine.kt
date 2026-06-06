@@ -29,10 +29,23 @@ class FakeApiEngine(
     private val version: String = "fake-1.0.0",
 ) : ApiEngine {
 
+    private val lock = Any()
     private var running = false
     private var current: ApiStatus = stoppedStatus()
     private var injectedError: Throwable? = null
     private var requestCount: Long = 0
+
+    /**
+     * Count of [start] calls that reached the bind decision. The real embed
+     * (`internal/mobile`) is a single global server guarded by a Go mutex, so a
+     * correct idempotent controller binds it exactly once even under concurrent
+     * start() calls; a controller TOCTOU shows up here as a value > 1. The fake
+     * is synchronized so this counter and `running` are race-free — the test
+     * measures the CONTROLLER, not a race inside the double (Third Law).
+     */
+    @Volatile
+    var startAttempts: Int = 0
+        private set
 
     /** Injects an error to be returned by the NEXT [start] or [stop] call. */
     fun failWith(error: Throwable) {
@@ -47,7 +60,8 @@ class FakeApiEngine(
         }
     }
 
-    override suspend fun start(config: ApiConfig): Result<ApiStatus> {
+    override suspend fun start(config: ApiConfig): Result<ApiStatus> = synchronized(lock) {
+        startAttempts++
         injectedError?.let {
             injectedError = null
             return Result.failure(it)
@@ -77,7 +91,7 @@ class FakeApiEngine(
         return Result.success(current)
     }
 
-    override suspend fun stop(): Result<Unit> {
+    override suspend fun stop(): Result<Unit> = synchronized(lock) {
         injectedError?.let {
             injectedError = null
             return Result.failure(it)

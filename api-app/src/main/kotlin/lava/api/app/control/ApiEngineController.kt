@@ -1,5 +1,6 @@
 package lava.api.app.control
 
+import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -44,6 +45,16 @@ class ApiEngineController(
     val state: StateFlow<ApiControlState> = _state.asStateFlow()
 
     /**
+     * Test-only seam invoked inside [start]'s guard loop, between reading
+     * [_state] and the compare-and-set. No-op in production. A concurrency test
+     * sets it to park one caller in the read→set gap so the TOCTOU the atomic
+     * guard closes becomes DETERMINISTICALLY falsifiable (Fifth Law: refactor
+     * for testability). See `ApiEngineControllerTest`.
+     */
+    @VisibleForTesting
+    internal var guardCheckpoint: () -> Unit = {}
+
+    /**
      * Starts the embed and, on success, registers the mDNS advertisement and
      * emits [ApiControlState.Running] built from the REAL post-start
      * [ApiStatus] + the host's LAN IPs. On engine failure emits
@@ -58,12 +69,28 @@ class ApiEngineController(
         // "Open Lava API app" from the client) while it was already running:
         // the relaunch MUST surface the live Running state, never re-start.
         // Stopped/Error fall through and (re)start normally.
-        val current = _state.value
-        if (current is ApiControlState.Running || current is ApiControlState.Starting) {
-            return
+        //
+        // The guard is an ATOMIC compare-and-set, not a read-then-set: a plain
+        // `if (_state.value …) … _state.value = Starting` is a TOCTOU race. The
+        // controller is a Hilt singleton driven by TWO collaborators on
+        // DIFFERENT dispatchers — ApiControlViewModel via Orbit intents
+        // (Dispatchers.Default) and ApiEngineService via serviceScope
+        // (Dispatchers.Main.immediate, ACTION_RESTART → restart → start). A UI
+        // Restart racing the notification Restart action could let both callers
+        // observe Stopped and both bind the listener → the "address already in
+        // use" double-bind this guard exists to prevent. compareAndSet lets
+        // exactly one caller win the {Stopped|Error} → Starting transition; the
+        // losers re-read and return.
+        while (true) {
+            val current = _state.value
+            guardCheckpoint() // test seam (no-op in production)
+            if (current is ApiControlState.Running || current is ApiControlState.Starting) {
+                return
+            }
+            if (_state.compareAndSet(current, ApiControlState.Starting)) {
+                break
+            }
         }
-
-        _state.value = ApiControlState.Starting
 
         val key = keyStore.getOrCreate()
         val config = ApiConfig(

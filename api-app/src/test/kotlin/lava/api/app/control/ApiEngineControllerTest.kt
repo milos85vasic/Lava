@@ -1,6 +1,9 @@
 package lava.api.app.control
 
+import kotlinx.coroutines.asCoroutineDispatcher
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import lava.api.app.auth.ApiKeyStore
 import lava.api.app.service.MdnsAdvertiser
@@ -10,6 +13,9 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.Executors
+import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * Anti-Bluff load-bearing test for the lifecycle core.
@@ -113,6 +119,67 @@ class ApiEngineControllerTest {
         // the 'address already in use' crash this guard prevents).
         assertEquals(
             "a redundant start MUST NOT re-bind/re-advertise (idempotent)",
+            1,
+            advertiser.registerCalls,
+        )
+    }
+
+    // Concurrency regression (completeness Phase 3/4 leak/race sweep): start() is
+    // documented idempotent, but a read-then-set guard is a TOCTOU. The
+    // controller is a Hilt singleton driven by the ViewModel (Orbit /
+    // Dispatchers.Default) AND the Service (Dispatchers.Main.immediate,
+    // ACTION_RESTART), so two start() calls can genuinely run in parallel.
+    //
+    // The read→set window is nanoseconds — too narrow to hit reliably by just
+    // firing concurrent calls. So we use the production `guardCheckpoint` seam
+    // to DETERMINISTICALLY park caller A in the gap (after it read Stopped,
+    // before the compare-and-set), run caller B to completion, then release A.
+    // With the ATOMIC compareAndSet guard, A's CAS fails (state is now Running)
+    // → A re-reads Running → returns, so the embed binds exactly once. With a
+    // read-then-set guard A would re-set Starting and bind a SECOND time.
+    //
+    // PRIMARY: the embed is bound exactly once (startAttempts == 1) and the
+    // user-visible state ends Running — never Error from a double-bind.
+    @Test
+    fun `concurrent start parked in the guard gap binds the embed exactly once`() = runBlocking {
+        val (c, advertiser, engine) = controller()
+        val aParked = CountDownLatch(1)
+        val bDone = CountDownLatch(1)
+        val firstCheckpoint = AtomicBoolean(true)
+        c.guardCheckpoint = {
+            // Only the FIRST caller to reach the guard parks; it has already read
+            // the state (Stopped) and is poised at the compare-and-set.
+            if (firstCheckpoint.compareAndSet(true, false)) {
+                aParked.countDown()
+                bDone.await()
+            }
+        }
+
+        val pool = Executors.newFixedThreadPool(2)
+        val dispatcher = pool.asCoroutineDispatcher()
+        try {
+            val a = async(dispatcher) { c.start() }
+            aParked.await() // A has read Stopped and is parked in the read→set gap
+            val b = async(dispatcher) { c.start() } // B runs fully: binds + Running
+            b.await()
+            bDone.countDown() // release A; it must NOT bind a second time
+            a.await()
+        } finally {
+            dispatcher.close()
+            pool.shutdownNow()
+        }
+
+        assertEquals(
+            "the embed MUST bind exactly once even when a 2nd start() is parked in the guard gap",
+            1,
+            engine.startAttempts,
+        )
+        assertTrue(
+            "concurrent start MUST end Running, not Error from a double-bind; was ${c.state.value}",
+            c.state.value is ApiControlState.Running,
+        )
+        assertEquals(
+            "exactly one mDNS registration across the racing starts",
             1,
             advertiser.registerCalls,
         )

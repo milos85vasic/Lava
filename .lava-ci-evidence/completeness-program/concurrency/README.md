@@ -90,3 +90,16 @@ reflect the fixed state.
   then the sequential idempotency contract remains covered by the existing
   falsifiable `start is idempotent` test in ApiEngineControllerTest. Severity:
   LOW (requires near-simultaneous UI+notification Restart).
+
+### RESOLVED (same session, Phase-4 testability refactor applied)
+The ApiEngineController TOCTOU above is now FIXED. Per the Fifth Law, a
+`@VisibleForTesting internal var guardCheckpoint: () -> Unit = {}` seam was
+added (no-op in production), invoked between the guard read and the
+compare-and-set. The guard is now an atomic `_state.compareAndSet(...)` loop.
+`ApiEngineControllerTest.concurrent start parked in the guard gap binds the
+embed exactly once` parks caller A in the gap via the seam, runs caller B to
+completion, releases A, and asserts the embed bound exactly once
+(`FakeApiEngine.startAttempts == 1`) ending Running. Falsifiability (verified):
+reverting only the loop/CAS to a read-then-set (seam kept) makes that test
+FAIL (1 of 8) — A re-sets Starting and double-binds. With compareAndSet: 8/8
+green. The fix is therefore deterministically unit-falsifiable, not a bluff.
