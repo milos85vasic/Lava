@@ -30,10 +30,10 @@ import kotlin.coroutines.suspendCoroutine
 class DownloadServiceImpl @Inject constructor(
     @ApplicationContext private val context: Context,
 ) : DownloadService {
-    private val cache = mutableMapOf<String, String>()
+    private val cache = DownloadUriCache()
 
     override suspend fun downloadTorrentFile(downloadRequest: DownloadRequest): String? {
-        val cachedUri = cache[downloadRequest.id]
+        val cachedUri = cache.get(downloadRequest.id)
         if (cachedUri != null && File(URI.create(cachedUri)).exists()) {
             return cachedUri
         } else {
@@ -58,7 +58,7 @@ class DownloadServiceImpl @Inject constructor(
                                 downloadManager.getDownloadedFileUri(downloadId)
                             }
                             if (fileUri != null) {
-                                cache[downloadRequest.id] = fileUri
+                                cache.put(downloadRequest.id, fileUri)
                             }
                             continuation.resume(fileUri)
                         }

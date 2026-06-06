@@ -28,3 +28,36 @@ Branch: `completeness-program-2026-06-04`
 
 Both module detekt baselines regenerated (−1 entry each) so they honestly
 reflect the fixed state.
+
+## Task 3.1 — Android hazard sweep findings
+
+### FIXED: DownloadServiceImpl cache data race (core/downloads)
+- `DownloadServiceImpl.cache` was a plain `mutableMapOf()` (HashMap) read on
+  the caller's coroutine dispatcher (`downloadTorrentFile`) and written from
+  the `DownloadManager` `BroadcastReceiver.onReceive`, which Android delivers
+  on the MAIN thread. Concurrent downloads → unsynchronized HashMap access
+  across two threads (lost writes / ConcurrentModificationException / resize
+  spin). Extracted to `DownloadUriCache` backed by `ConcurrentHashMap`
+  (Fifth-Law testability refactor — pure JVM, no emulator).
+- Reproducing test: `DownloadUriCacheConcurrencyTest` (16 threads × 500 keys,
+  interleaved get/put). Falsifiability rehearsed: HashMap → 1 test FAILED;
+  ConcurrentHashMap → 3/3 green.
+
+### KNOWN LIMITATION (documented, not fixed this increment)
+- `DownloadServiceImpl.registerDownloadCompleteReceiver` self-unregisters the
+  `BroadcastReceiver` only on `ACTION_DOWNLOAD_COMPLETE` for the matching id.
+  A download that never completes (cancelled / app killed / failure that does
+  not emit COMPLETE for this id) leaves the receiver registered AND the
+  `suspendCoroutine` continuation un-resumed (receiver + continuation leak).
+  Robust fix needs download-failure/timeout handling; tracked for Phase 4/5
+  (needs Robolectric/instrumented coverage — the module has no Android test
+  harness today). Severity: bounded (one receiver per in-flight download;
+  released on normal completion).
+
+### AUDITED CLEAN (symmetric lifecycle, no fix needed)
+- `LocalNetworkDiscoveryServiceImpl` (core/data): each `discoverServices`
+  listener is collected into a list and every one gets `stopServiceDiscovery`
+  in the flow's teardown (`runCatching` guarded). Scoped to the discovery flow.
+- `NsdMdnsAdvertiser` (api-app): single nullable `registrationListener`;
+  `unregisterService` paired with `registerService`; degraded-advertisement
+  path logs instead of crashing.

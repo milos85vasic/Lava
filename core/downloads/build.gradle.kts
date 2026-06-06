@@ -6,3 +6,7 @@ plugins {
 android {
     namespace = "lava.downloads"
 }
+
+dependencies {
+    testImplementation(libs.junit4)
+}
