@@ -20,6 +20,30 @@ val env = loadEnv()
 val keystorePassword = env["KEYSTORE_PASSWORD"] ?: "l@vAfl0wZ!"
 val keystoreRootDir = env["KEYSTORE_ROOT_DIR"] ?: "keystores"
 
+// API↔embed source-sync (§11.4.69 / §6.J, 2026-06-06): compute the
+// single-source-of-truth hash of the lava-api-go source codebase compiled into
+// the on-device embed (liblavaapi.so), at Gradle-config time, via the SAME
+// script the build + gate use (scripts/compute-api-source-hash.sh). It is baked
+// into BuildConfig.LAVA_API_SOURCE_HASH so the on-device sync Challenge can
+// assert the RUNNING embed's reported hash (ApiStatus.sourceHash, surfaced from
+// the .so's ldflags-injected version.SourceHash) equals the hash THIS APK was
+// built against — equal hashes prove the embed contains EXACTLY the current API
+// codebase (no drift). Empty when the script is unavailable; the Challenge
+// treats empty as a hard fail so a hashless build cannot pass the gate silently.
+val lavaApiSourceHash: String = run {
+    val script = rootProject.file("scripts/compute-api-source-hash.sh")
+    if (!script.exists()) return@run ""
+    runCatching {
+        val proc = ProcessBuilder("bash", script.absolutePath)
+            .directory(rootProject.projectDir)
+            .redirectErrorStream(false)
+            .start()
+        val out = proc.inputStream.bufferedReader().readText().trim()
+        proc.waitFor()
+        if (proc.exitValue() == 0) out else ""
+    }.getOrDefault("")
+}
+
 android {
     namespace = "digital.vasic.lava.client"
 
@@ -76,6 +100,14 @@ android {
         // debug applicationIdSuffix = ".dev"); release is "digital.vasic.lava.api".
         // These are build constants (not secrets), so they live in BuildConfig
         // per the §6.R exemption for package IDs.
+        // API↔embed source-sync hash (§11.4.69 / §6.J, 2026-06-06): the 64-hex
+        // sha256 of the lava-api-go source the embed was built from, computed at
+        // config time (see lavaApiSourceHash above). The on-device sync Challenge
+        // asserts ApiStatus.sourceHash == this value. NOT a secret — it is a
+        // build-derived integrity fingerprint, so a source literal here is the
+        // generated-config form §6.R permits (it is computed from source, never
+        // hand-typed).
+        buildConfigField("String", "LAVA_API_SOURCE_HASH", "\"$lavaApiSourceHash\"")
         buildConfigField("String", "API_RELEASE_PACKAGE", "\"digital.vasic.lava.api\"")
         // API_TARGET_PACKAGE is overridden per build type below (debug → .dev,
         // release → same as API_RELEASE_PACKAGE). Declared here as a

@@ -39,6 +39,31 @@ val env = loadEnv()
 val keystorePassword = env["KEYSTORE_PASSWORD"] ?: "l@vAfl0wZ!"
 val keystoreRootDir = env["KEYSTORE_ROOT_DIR"] ?: "keystores"
 
+// API↔embed source-sync (§11.4.69 / §6.J, 2026-06-06): compute the
+// single-source-of-truth hash of the lava-api-go source codebase compiled into
+// the embed (liblavaapi.so, packaged into THIS api-app APK via :core:apiengine),
+// at Gradle-config time, via the SAME script the build + gate use
+// (scripts/compute-api-source-hash.sh). It is baked into
+// BuildConfig.LAVA_API_SOURCE_HASH so the on-device sync Challenge (C05) asserts
+// the RUNNING embed's reported hash (ApiStatus.sourceHash, surfaced from the
+// .so's ldflags-injected version.SourceHash) equals the hash THIS APK was built
+// against — equal hashes prove the on-device embed contains EXACTLY the current
+// API codebase (no drift). Empty when the script is unavailable; the Challenge
+// treats empty as a hard fail so a hashless build cannot pass the gate silently.
+val lavaApiSourceHash: String = run {
+    val script = rootProject.file("scripts/compute-api-source-hash.sh")
+    if (!script.exists()) return@run ""
+    runCatching {
+        val proc = ProcessBuilder("bash", script.absolutePath)
+            .directory(rootProject.projectDir)
+            .redirectErrorStream(false)
+            .start()
+        val out = proc.inputStream.bufferedReader().readText().trim()
+        proc.waitFor()
+        if (proc.exitValue() == 0) out else ""
+    }.getOrDefault("")
+}
+
 android {
     namespace = "lava.api.app"
 
@@ -68,6 +93,13 @@ android {
             "\"digital.vasic.lava.api.keyprovider\"",
         )
         manifestPlaceholders["apiKeyAuthority"] = "digital.vasic.lava.api.keyprovider"
+        // API↔embed source-sync hash (§11.4.69 / §6.J): the 64-hex sha256 of the
+        // lava-api-go source the embed in this APK was built from (see
+        // lavaApiSourceHash above). The on-device sync Challenge C05 asserts
+        // NativeApiEngine().status().sourceHash == this value. NOT a secret — a
+        // build-derived integrity fingerprint, so the generated-config form §6.R
+        // permits (computed from source, never hand-typed).
+        buildConfigField("String", "LAVA_API_SOURCE_HASH", "\"$lavaApiSourceHash\"")
         versionCode = 5
         versionName = "0.2.1"
         // EncryptedSharedPreferences (androidx.security-crypto) requires API 23+
