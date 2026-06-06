@@ -518,3 +518,34 @@ Challenge re-run AFTER the serialization fix
 — a native-ELF bluff vector invisible to every JVM/host test: the libraries
 link + the APK assembles fine on the host, but the embed cannot `dlopen` on
 the user's device.
+
+---
+
+## archiveorg search pagination halved totalPages (under-reported page count)
+
+**Discovered:** 2026-06-06 (Completeness Program Phase 4, Stream B), while adding
+anti-bluff unit tests for the Internet Archive DTO→domain mapping.
+
+**Root cause:** `SearchResponseDto.toDomain()` computed `totalPages` with page
+size 100 (`response.numFound / 100`), while the search request issued by
+`ArchiveOrgSearch` (and `ArchiveOrgBrowse`) uses `rows=50`. `toBrowseResult()`
+already used the correct `/50`. Because the divisor was double the real page
+size, `totalPages` for search results was under-reported by ~half — the search
+UI could not paginate into the back half of any result set with more than 50
+hits (e.g. 1234 hits reported 13 pages instead of 25).
+
+**Affected files:**
+- `core/tracker/archiveorg/src/main/kotlin/lava/tracker/archiveorg/feature/ArchiveOrgDto.kt`
+  — `toDomain()` divisor 100 → 50, matching the `rows=50` request and
+  `toBrowseResult()`.
+
+**Fix:** use page size 50 in `toDomain()` to derive `totalPages`, with a comment
+anchoring the value to the `rows=50` request in `ArchiveOrgSearch`.
+
+**Verification:** `ArchiveOrgDtoTest.toDomain computes total pages by ceiling
+division of numFound by 50` asserts exact totalPages for 0/1/50/51/100/101/1234
+hits. Falsifiability: re-introducing the `/100` divisor fails that test with the
+expected vs actual page-count mismatch; reverting to `/50` passes. The test
+matrix also covers `toBrowseResult` totalPages and the conditional metadata map.
+
+**Fix commit:** _(this commit)_
