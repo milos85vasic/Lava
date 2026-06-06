@@ -17,7 +17,12 @@ class TestSearchHistoryRepository : SearchHistoryRepository {
     }
 
     override suspend fun remove(id: Int) {
-        searchFlow.update { it.filter { it.id == id } }
+        // Third Law: mirror SearchHistoryRepositoryImpl.remove → DAO delete(id),
+        // i.e. drop the matching row and keep the rest. The historical
+        // `filter { it.id == id }` kept the matched row and dropped the others
+        // (the inverse) — a bluff fake that would pass a "remove from history"
+        // test while the real remove was broken.
+        searchFlow.update { list -> list.filterNot { it.id == id } }
     }
 
     override suspend fun clear() {
