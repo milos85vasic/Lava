@@ -1,0 +1,13 @@
+# Genymotion Challenge run — 20260606T171744Z
+device: 127.0.0.1:6555
+module: app  test-class: lava.app.challenges.Challenge00CrashSurvivalTest
+gradle exit: 0
+BUILD SUCCESSFUL in 1m 56s
+
+ANTI-BLUFF CONFIRMATION (§11.4 / §6.J):
+  testsuite Challenge00CrashSurvivalTest: tests=1 failures=0 errors=0 skipped=0
+  testcase: continueOnArchiveOrg_persists_signaledAuthState_to_disk (3.527s) PASS
+  device: Genymotion Pixel 9 / Android 15 / API 35 / arm64 @ 127.0.0.1:6555
+  -> 1 real instrumented Compose-UI test EXECUTED + PASSED on the real VM.
+  §6.AH-debt (device gate unbootable on macOS) RESOLVED via Genymotion.
+  JUnit XML preserved: TEST-Challenge00-Pixel9-API35.xml
