@@ -163,6 +163,19 @@ echo "==> §11.4.32 verify-all-constitution-rules sweep (STRICT)"
 echo "    ✓ §11.4.32 enforcement-engine sweep PASS"
 
 # ---------------------------------------------------------------------
+# 5a5. API↔embed source-sync gate (§11.4.69 / §6.J, added 2026-06-06).
+# Guarantees the on-device Lava API embed (liblavaapi.so packaged by
+# :core:apiengine) is built from EXACTLY the current lava-api-go source —
+# no drift. Recomputes the single-source-of-truth hash and compares it to
+# the committed manifest core/apiengine/src/main/resources/api-source.hash.
+# Runs in BOTH --changed-only and --full (it is pure bash + git, fast, and
+# a stale embed is a release blocker regardless of mode). No failure-swallow
+# (§6.J): a mismatch exits non-zero and propagates via set -euo pipefail.
+# ---------------------------------------------------------------------
+echo "==> API↔embed source-sync gate (no drift)"
+./scripts/check-api-app-sync.sh
+
+# ---------------------------------------------------------------------
 # 5b. Hermetic bash test suites (added 2026-05-05 to close the gap that
 # regression tests under tests/ were only run on manual operator trigger).
 # Each suite is independent and self-contained: a `run_all.sh` that runs

@@ -31,6 +31,7 @@
 //     exist before CMake configures.
 @file:Suppress("UnstableApiUsage")
 
+import org.gradle.api.tasks.PathSensitivity
 import org.gradle.internal.os.OperatingSystem
 
 plugins {
@@ -64,10 +65,49 @@ val buildCshared by tasks.registering(Exec::class) {
     description = "Cross-compiles the lava-api-go embed into per-ABI liblavaapi.so via build-cshared.sh"
 
     inputs.file(cSharedScript)
+
+    // DRIFT FIX (2026-06-06, STREAM API-SYNC): the lava-api-go SOURCE TREE that
+    // compiles into liblavaapi.so MUST be declared as task inputs. Before this
+    // fix the task declared ONLY `inputs.file(cSharedScript)`, so Gradle
+    // considered it up-to-date whenever the .so/.h outputs existed — even after
+    // the lava-api-go Go source changed. Result: editing lava-api-go did NOT
+    // rebuild the .so, and the on-device embed silently drifted from the API
+    // codebase (the exact §11.4.69 / §6.J failure this stream exists to kill).
+    //
+    // Declaring the embed-linked source (cmd/lavaapi-cshared + internal + the
+    // dependency pins go.mod/go.sum + the per-ABI JNI bridge sources) as inputs
+    // makes Gradle re-run build-cshared.sh on ANY change to that source — which
+    // re-injects the fresh source hash into the .so AND refreshes the committed
+    // core/apiengine/src/main/resources/api-source.hash manifest. The
+    // single-source-of-truth hash (scripts/compute-api-source-hash.sh) hashes
+    // EXACTLY this same file set, so the Gradle up-to-date check and the sync
+    // gate agree on "what is the embed source". Belt-and-braces with the
+    // check-api-app-sync.sh CI gate: Gradle rebuilds on drift; the gate refuses
+    // to ship if a manifest somehow lags.
+    val embedSourceDirs = listOf(
+        File(lavaApiGoDir, "cmd/lavaapi-cshared"),
+        File(lavaApiGoDir, "internal"),
+    )
+    embedSourceDirs.forEach { dir ->
+        // Only the .go source (and the JNI bridge C/CMake under
+        // cmd/lavaapi-cshared/jni) affects the .so; ignore nothing here because
+        // these dirs are pure source. `*_test.go` files do not compile into the
+        // .so, but including them as inputs only causes (harmless) extra rebuilds
+        // — never staleness — so we keep the input set a conservative superset of
+        // what compute-api-source-hash.sh hashes to guarantee NO missed rebuild.
+        inputs.dir(dir).withPathSensitivity(PathSensitivity.RELATIVE)
+    }
+    inputs.file(File(lavaApiGoDir, "go.mod"))
+    inputs.file(File(lavaApiGoDir, "go.sum"))
+
     supportedAbis.forEach { abi ->
         outputs.file(File(prebuiltJniLibsDir, "$abi/liblavaapi.so"))
         outputs.file(File(prebuiltJniLibsDir, "$abi/liblavaapi.h"))
     }
+    // The refreshed sync manifest is also an output of this task (build-cshared.sh
+    // rewrites it on a successful build), so Gradle tracks it for up-to-date +
+    // wires the implicit dependency for any task that consumes the manifest.
+    outputs.file(File(rootProject.projectDir, "core/apiengine/src/main/resources/api-source.hash"))
 
     workingDir = lavaApiGoDir
     if (OperatingSystem.current().isWindows) {
