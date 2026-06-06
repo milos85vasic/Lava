@@ -6,3 +6,11 @@ plugins {
 android {
     namespace = "lava.forum.bookmarks"
 }
+
+dependencies {
+    // BookmarksViewModelTest wires the REAL SyncBookmarksUseCase, whose
+    // constructor needs the NotificationService boundary type. core:domain
+    // depends on core:notifications via `implementation`, so it is not on
+    // this module's test classpath transitively — add it for tests only.
+    testImplementation(project(":core:notifications"))
+}
