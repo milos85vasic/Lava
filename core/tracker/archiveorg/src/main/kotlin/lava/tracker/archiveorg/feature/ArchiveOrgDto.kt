@@ -12,8 +12,8 @@ internal data class SearchResponseDto(
 ) {
     fun toDomain(page: Int): SearchResult {
         val items = response.docs.map { it.toDomain() }
-        val totalPages = (response.numFound / 50).let {
-            if (response.numFound % 50 != 0) it + 1 else it
+        val totalPages = (response.numFound / 100).let {
+            if (response.numFound % 100 != 0) it + 1 else it
         }.coerceAtLeast(1)
         return SearchResult(
             items = items,
