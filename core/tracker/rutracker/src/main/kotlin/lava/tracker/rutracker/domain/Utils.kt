@@ -3,6 +3,7 @@ package lava.tracker.rutracker.domain
 import org.jsoup.nodes.Element
 import org.jsoup.select.Elements
 import java.net.URI
+import java.util.Locale
 import java.util.regex.Pattern
 import kotlin.math.ln
 import kotlin.math.pow
@@ -99,7 +100,7 @@ internal fun formatSize(sizeBytes: Long): String {
     }
     val exp = (ln(sizeBytes.toDouble()) / ln(1024.0)).toInt()
     val pre = "KMGTPE"[exp - 1].toString()
-    return String.format("%.1f %sB", sizeBytes / 1024.0.pow(exp.toDouble()), pre)
+    return String.format(Locale.ROOT, "%.1f %sB", sizeBytes / 1024.0.pow(exp.toDouble()), pre)
 }
 
 private fun parseUrl(url: String) = runCatching {

@@ -1,6 +1,7 @@
 package lava.api.app.ui
 
 import android.content.ActivityNotFoundException
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -96,6 +97,7 @@ fun ApiControlScreen(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val keyCopiedMsg = stringResource(R.string.api_screen_key_copied)
+    val launchFailedMsg = stringResource(R.string.api_screen_launch_client_failed)
 
     LaunchedEffect(sideEffects) {
         sideEffects.collect { effect ->
@@ -109,12 +111,17 @@ fun ApiControlScreen(
                     // return extras" vs "not installed → Firebase download URL"
                     // via SiblingAppLauncher. The screen just fires startActivity.
                     // No market:// URI, no URI-scheme branching.
-                    // §6.AC: no-telemetry — api-app has no AnalyticsTracker yet.
+                    // §6.AC: api-app has no AnalyticsTracker yet, so the error
+                    // path surfaces to the user (snackbar) AND to logcat instead
+                    // of being silently swallowed (§6.AB gating: a failed launch
+                    // MUST give the user feedback, not a dead tap).
                     try {
                         context.startActivity(effect.intent)
                     } catch (e: ActivityNotFoundException) {
-                        // Graceful no-op: package uninstalled between check and tap,
+                        // Package uninstalled between the installed-check and the tap,
                         // or ACTION_VIEW scheme not handled (unlikely for https://).
+                        Log.w("ApiControlScreen", "Failed to launch Lava client", e)
+                        scope.launch { snackbarHostState.showSnackbar(launchFailedMsg) }
                     }
                 }
             }

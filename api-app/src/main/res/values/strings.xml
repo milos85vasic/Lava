@@ -35,4 +35,5 @@
 
     <string name="api_screen_back_to_client">Back to Lava client</string>
     <string name="api_screen_open_client">Open Lava client</string>
+    <string name="api_screen_launch_client_failed">Could not open the Lava client — it may have been uninstalled.</string>
 </resources>

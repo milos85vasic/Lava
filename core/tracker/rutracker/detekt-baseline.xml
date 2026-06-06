@@ -8,7 +8,6 @@
     <ID>CyclomaticComplexMethod:RuTrackerClient.kt$RuTrackerClient$@Suppress("UNCHECKED_CAST") override fun &lt;T : TrackerFeature&gt; getFeature(featureClass: KClass&lt;T&gt;): T?</ID>
     <ID>CyclomaticComplexMethod:SearchPageMapper.kt$fun SearchRequest.toLegacySearchParams(): LegacySearchParams</ID>
     <ID>FunctionOnlyReturningConstant:GetMagnetLinkUseCase.kt$GetMagnetLinkUseCase$operator fun invoke(id: String): String?</ID>
-    <ID>ImplicitDefaultLocale:Utils.kt$String.format("%.1f %sB", sizeBytes / 1024.0.pow(exp.toDouble()), pre)</ID>
     <ID>LongMethod:GetCategoryPageUseCase.kt$GetCategoryPageUseCase.Companion$private fun parseCategoryPage(html: String, forumId: String): CategoryPageDto</ID>
     <ID>LongParameterList:GetSearchPageUseCase.kt$GetSearchPageUseCase$( token: String, searchQuery: String?, categories: String?, author: String?, authorId: String?, sortType: SearchSortTypeDto?, sortOrder: SearchSortOrderDto?, period: SearchPeriodDto?, page: Int?, )</ID>
     <ID>LongParameterList:RuTrackerClient.kt$RuTrackerClient$( private val search: RuTrackerSearch, private val browse: RuTrackerBrowse, private val topic: RuTrackerTopic, private val comments: RuTrackerComments, private val favorites: RuTrackerFavorites, private val auth: RuTrackerAuth, private val download: RuTrackerDownload, )</ID>

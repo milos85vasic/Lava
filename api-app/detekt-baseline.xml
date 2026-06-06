@@ -10,7 +10,6 @@
     <ID>LongMethod:ApiControlScreen.kt$@Composable private fun RunningDetails( state: ApiControlState.Running, onCopyKey: (String) -&gt; Unit, )</ID>
     <ID>MaxLineLength:ApiControlScreen.kt$val label = stringResource(if (launchedFromClient) R.string.api_screen_back_to_client else R.string.api_screen_open_client)</ID>
     <ID>MaxLineLength:ApiKeyStoreTest.kt$ApiKeyStoreTest.FakeSharedPreferences$override fun unregisterOnSharedPreferenceChangeListener(l: SharedPreferences.OnSharedPreferenceChangeListener?)</ID>
-    <ID>SwallowedException:ApiControlScreen.kt$e: ActivityNotFoundException</ID>
     <ID>TooManyFunctions:ApiEngineService.kt$ApiEngineService : Service</ID>
   </CurrentIssues>
 </SmellBaseline>

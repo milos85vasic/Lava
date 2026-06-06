@@ -1,0 +1,39 @@
+ok  	digital.vasic.lava.apigo/cmd/healthprobe	3.143s
+ok  	digital.vasic.lava.apigo/cmd/lava-api-go	10.975s
+?   	digital.vasic.lava.apigo/cmd/lavaapi-cshared	[no test files]
+ok  	digital.vasic.lava.apigo/internal/archiveorg	1.602s
+ok  	digital.vasic.lava.apigo/internal/auth	1.348s
+ok  	digital.vasic.lava.apigo/internal/cache	1.334s
+ok  	digital.vasic.lava.apigo/internal/config	1.291s
+ok  	digital.vasic.lava.apigo/internal/discovery	9.697s
+ok  	digital.vasic.lava.apigo/internal/firebase	1.273s
+?   	digital.vasic.lava.apigo/internal/gen/client	[no test files]
+?   	digital.vasic.lava.apigo/internal/gen/server	[no test files]
+ok  	digital.vasic.lava.apigo/internal/gutenberg	1.320s
+ok  	digital.vasic.lava.apigo/internal/handlers	1.418s
+ok  	digital.vasic.lava.apigo/internal/handlers/v1	1.450s
+ok  	digital.vasic.lava.apigo/internal/kinozal	1.357s
+ok  	digital.vasic.lava.apigo/internal/middleware	1.361s
+?   	digital.vasic.lava.apigo/internal/migrations/sqlite	[no test files]
+ok  	digital.vasic.lava.apigo/internal/mobile	2.114s
+ok  	digital.vasic.lava.apigo/internal/nnmclub	1.402s
+ok  	digital.vasic.lava.apigo/internal/observability	1.547s
+ok  	digital.vasic.lava.apigo/internal/provider	1.494s
+ok  	digital.vasic.lava.apigo/internal/qa/detector	1.426s
+ok  	digital.vasic.lava.apigo/internal/qa/evidence	1.445s
+ok  	digital.vasic.lava.apigo/internal/qa/ticket	1.438s
+ok  	digital.vasic.lava.apigo/internal/qa/validator	1.471s
+ok  	digital.vasic.lava.apigo/internal/ratelimit	1.341s
+?   	digital.vasic.lava.apigo/internal/router	[no test files]
+ok  	digital.vasic.lava.apigo/internal/rutracker	1.519s
+ok  	digital.vasic.lava.apigo/internal/server	1.611s
+ok  	digital.vasic.lava.apigo/internal/storage	1.556s
+ok  	digital.vasic.lava.apigo/internal/version	1.263s
+ok  	digital.vasic.lava.apigo/tests/compose	1.283s
+ok  	digital.vasic.lava.apigo/tests/contract	16.749s
+ok  	digital.vasic.lava.apigo/tests/e2e	7.479s
+ok  	digital.vasic.lava.apigo/tests/integration	1.671s
+?   	digital.vasic.lava.apigo/tests/integration/testenv	[no test files]
+ok  	digital.vasic.lava.apigo/tests/load	1.281s
+ok  	digital.vasic.lava.apigo/tests/parity	1.306s
+ok  	digital.vasic.lava.apigo/tests/scripts	2.037s
