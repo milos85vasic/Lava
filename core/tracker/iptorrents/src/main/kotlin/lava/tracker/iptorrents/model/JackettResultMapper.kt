@@ -43,6 +43,7 @@ class JackettResultMapper @Inject constructor() {
         title = title,
         sizeBytes = sizeBytes,
         seeders = seeders,
+        leechers = leechers,
         infoHash = infoHash?.takeIf { it.isNotBlank() },
         magnetUri = magnetLink?.takeIf { it.isNotBlank() },
         downloadUrl = downloadUrl?.takeIf { it.isNotBlank() },
