@@ -963,3 +963,39 @@ parsed `TorrentItem.magnetUri` from the topic/search fetch to the synchronous
 **Forensic anchor:** SA4 §6.E honesty audit, 2026-06-08 parallel-fleet session.
 Full-loop (topic fetch → cache → download) covered on-device by the restored
 C05/C06 Challenges (device run owed).
+
+---
+
+## §6.Q/C37 — CrossTrackerFallbackModal dead-ended at the screen layer (2026-06-08)
+
+**Class:** dead-UI (capability present in code, unreachable by users — the §6.Q/C37 class).
+
+**Symptom:** `feature/search_result` has a full cross-tracker-fallback feature —
+`CrossTrackerFallbackModal` composable + `SearchResultViewModel.proposeFallback`/
+`onFallbackAccept`/`onFallbackDismiss` + `SearchResultAction.FallbackAccept`/
+`FallbackDismiss` + `SearchResultState.crossTrackerFallback` — BUT
+`SearchResultScreen` never read `state.crossTrackerFallback` and never called
+`CrossTrackerFallbackModal(...)`. A real user whose search failed on one tracker
+could never see the "Try <other tracker>" offer. Found by the SA5 Challenge
+restoration audit (C07/C08 had to be written as contract guards, not the real
+flow, because the real flow was unreachable).
+
+**Affected files:**
+- `feature/search_result/.../SearchResultScreen.kt` (renders the modal)
+- `app/src/androidTest/.../challenges/Challenge07CrossTrackerFallbackAcceptTest.kt`
+- `app/src/androidTest/.../challenges/Challenge08CrossTrackerFallbackDismissTest.kt`
+
+**Fix:** in `SearchResultScreen`, render `CrossTrackerFallbackModal(failedTracker,
+proposedTracker, onAccept = { onAction(FallbackAccept) }, onDismiss = { onAction(
+FallbackDismiss) })` when `state.crossTrackerFallback != null` (display names via
+the existing `state.providerDisplayNames`). C07/C08 upgraded from contract guards
+to real rendered-modal Compose tests (C30 pattern): render → assert
+"RuTracker is unavailable" + "Try RuTor"/"Cancel" → tap → assert the callback fires.
+
+**Verification:** `:feature:search_result:compileDebugKotlin` +
+`:app:compileDebugAndroidTestKotlin` BUILD SUCCESSFUL. §6.J falsifiability (KDoc):
+delete the `state.crossTrackerFallback?.let{}` block → dead-end returns; or change
+the confirm/dismiss label → the rendered test's `onNodeWithText` finds no node →
+assert fails. Device-run of C07/C08 owed on the VM (network-independent).
+
+**Forensic anchor:** SA5 Challenge-restoration finding, 2026-06-08 parallel-fleet session.

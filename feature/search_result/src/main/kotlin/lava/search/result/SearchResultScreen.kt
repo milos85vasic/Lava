@@ -46,6 +46,7 @@ import lava.models.search.Filter
 import lava.models.search.Period
 import lava.models.topic.Topic
 import lava.models.topic.TopicModel
+import lava.search.result.components.CrossTrackerFallbackModal
 import lava.search.result.filter.FilterBar
 import lava.ui.component.TopicListItem
 import lava.ui.component.appendItems
@@ -90,23 +91,46 @@ internal fun SearchResultScreen(
 private fun SearchResultScreen(
     state: SearchPageState,
     onAction: (SearchResultAction) -> Unit,
-) = Scaffold(
-    topBar = { appBarState ->
-        SearchAppBar(
-            state = state,
-            onAction = onAction,
-            appBarState = appBarState,
+) {
+    Scaffold(
+        topBar = { appBarState ->
+            SearchAppBar(
+                state = state,
+                onAction = onAction,
+                appBarState = appBarState,
+            )
+        },
+        content = { padding ->
+            SearchResultList(
+                modifier = Modifier.padding(padding),
+                state = state,
+                onAction = onAction,
+            )
+        },
+        floatingActionButton = { ScrollBackFloatingActionButton() },
+    )
+
+    // SP-3a Phase 4 (Task 4.18) wiring closure (2026-06-08). When the
+    // SDK emits a CrossTrackerFallbackProposed proposal, the ViewModel
+    // populates [SearchPageState.crossTrackerFallback]; the screen MUST
+    // render the [CrossTrackerFallbackModal] so a real user can accept
+    // (re-run on the proposed tracker) or cancel (surface the explicit
+    // "<tracker> is unavailable" failure). Pre-fix the modal Composable +
+    // FallbackAccept/FallbackDismiss actions existed but the screen never
+    // read this slot — the modal was dead-ended (§6.Q/C37 class) and a
+    // user could never see it. Tapping a button dispatches through the
+    // same `onAction` idiom every other control uses.
+    state.crossTrackerFallback?.let { proposal ->
+        CrossTrackerFallbackModal(
+            failedTracker = state.providerDisplayNames[proposal.failedTrackerId]
+                ?: proposal.failedTrackerId,
+            proposedTracker = state.providerDisplayNames[proposal.proposedTrackerId]
+                ?: proposal.proposedTrackerId,
+            onAccept = { onAction(SearchResultAction.FallbackAccept) },
+            onDismiss = { onAction(SearchResultAction.FallbackDismiss) },
         )
-    },
-    content = { padding ->
-        SearchResultList(
-            modifier = Modifier.padding(padding),
-            state = state,
-            onAction = onAction,
-        )
-    },
-    floatingActionButton = { ScrollBackFloatingActionButton() },
-)
+    }
+}
 
 @Composable
 private fun SearchAppBar(
