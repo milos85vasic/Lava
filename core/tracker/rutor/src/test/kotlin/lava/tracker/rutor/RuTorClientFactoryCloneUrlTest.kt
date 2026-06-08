@@ -6,6 +6,7 @@ import lava.tracker.api.feature.SearchableTracker
 import lava.tracker.api.model.SearchRequest
 import lava.tracker.registry.CLONE_BASE_URL_CONFIG_KEY
 import lava.tracker.rutor.http.RuTorHttpClient
+import lava.tracker.rutor.magnet.RuTorMagnetCache
 import lava.tracker.rutor.parser.RuTorBrowseParser
 import lava.tracker.rutor.parser.RuTorCommentsParser
 import lava.tracker.rutor.parser.RuTorLoginParser
@@ -69,6 +70,7 @@ class RuTorClientFactoryCloneUrlTest {
             topicParser = p.topic,
             commentsParser = p.comments,
             loginParser = p.login,
+            magnetCache = RuTorMagnetCache(),
         )
 
         val config = MapPluginConfig(mapOf(CLONE_BASE_URL_CONFIG_KEY to overrideBaseUrl))
@@ -92,14 +94,15 @@ class RuTorClientFactoryCloneUrlTest {
         val http = RuTorHttpClient()
         val p = parsers()
         var providerCalled = false
+        val magnetCache = RuTorMagnetCache()
         val singleton = RuTorClient(
             http = http,
-            search = lava.tracker.rutor.feature.RuTorSearch(http, p.search),
+            search = lava.tracker.rutor.feature.RuTorSearch(http, p.search, magnetCache),
             browse = lava.tracker.rutor.feature.RuTorBrowse(http, p.browse),
-            topic = lava.tracker.rutor.feature.RuTorTopic(http, p.topic),
+            topic = lava.tracker.rutor.feature.RuTorTopic(http, p.topic, magnetCache),
             comments = lava.tracker.rutor.feature.RuTorComments(http, p.comments),
             auth = lava.tracker.rutor.feature.RuTorAuth(http, p.login),
-            download = lava.tracker.rutor.feature.RuTorDownload(http),
+            download = lava.tracker.rutor.feature.RuTorDownload(http, magnetCache),
         )
         val provider = Provider<RuTorClient> {
             providerCalled = true
@@ -113,6 +116,7 @@ class RuTorClientFactoryCloneUrlTest {
             topicParser = p.topic,
             commentsParser = p.comments,
             loginParser = p.login,
+            magnetCache = RuTorMagnetCache(),
         )
 
         val client = factory.create(MapPluginConfig())

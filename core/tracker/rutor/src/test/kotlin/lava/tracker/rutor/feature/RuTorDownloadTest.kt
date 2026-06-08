@@ -2,6 +2,7 @@ package lava.tracker.rutor.feature
 
 import kotlinx.coroutines.runBlocking
 import lava.tracker.rutor.http.RuTorHttpClient
+import lava.tracker.rutor.magnet.RuTorMagnetCache
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import okio.Buffer
@@ -22,9 +23,9 @@ import org.junit.Test
  *
  * Falsifiability rehearsed —
  *  - Replacing `/download/$id` with `/dl/$id` fails the path assertion.
- *  - Replacing `getMagnetLink` to return a synthetic "magnet:?xt=..." string
- *    fails the null-only assertion (Capability Honesty: rutor has no
- *    synchronous magnet — that bluff is what this test guards against).
+ *  - Reverting `getMagnetLink` to an unconditional `null` (the historical §6.E
+ *    bluff) fails the honest-absence test: an id never surfaced returns null,
+ *    but the exposure path is covered by [RuTorMagnetExposureTest].
  */
 class RuTorDownloadTest {
 
@@ -49,7 +50,7 @@ class RuTorDownloadTest {
                 .setResponseCode(200),
         )
         val baseUrl = server.url("/").toString().trimEnd('/')
-        val feature = RuTorDownload(RuTorHttpClient(), baseUrl)
+        val feature = RuTorDownload(RuTorHttpClient(), RuTorMagnetCache(), baseUrl)
 
         val bytes = feature.downloadTorrentFile("1052665")
 
@@ -60,8 +61,12 @@ class RuTorDownloadTest {
     }
 
     @Test
-    fun `getMagnetLink returns null because rutor has no synchronous magnet (Capability Honesty)`() {
-        val feature = RuTorDownload(RuTorHttpClient(), "https://unused")
+    fun `getMagnetLink returns null for an id never surfaced (honest absence)`() {
+        // No topic/search fetch has surfaced this id — synchronous magnet is
+        // genuinely unavailable without an HTTP fetch (DownloadableTracker
+        // contract). Honest null, not a bluff: the cache is empty. The genuine
+        // exposure path is asserted in RuTorMagnetExposureTest.
+        val feature = RuTorDownload(RuTorHttpClient(), RuTorMagnetCache(), "https://unused")
         assertNull(feature.getMagnetLink("1052665"))
     }
 }

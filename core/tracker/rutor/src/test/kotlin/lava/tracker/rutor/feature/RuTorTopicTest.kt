@@ -2,6 +2,7 @@ package lava.tracker.rutor.feature
 
 import kotlinx.coroutines.runBlocking
 import lava.tracker.rutor.http.RuTorHttpClient
+import lava.tracker.rutor.magnet.RuTorMagnetCache
 import lava.tracker.rutor.parser.RuTorTopicParser
 import lava.tracker.testing.LavaFixtureLoader
 import okhttp3.mockwebserver.Dispatcher
@@ -59,7 +60,7 @@ class RuTorTopicTest {
             ),
         )
         val baseUrl = server.url("/").toString().trimEnd('/')
-        val feature = RuTorTopic(RuTorHttpClient(), parser, baseUrl)
+        val feature = RuTorTopic(RuTorHttpClient(), parser, RuTorMagnetCache(), baseUrl)
 
         val detail = feature.getTopic("1000000")
 
@@ -92,7 +93,7 @@ class RuTorTopicTest {
                 }
         }
         val baseUrl = server.url("/").toString().trimEnd('/')
-        val feature = RuTorTopic(RuTorHttpClient(), parser, baseUrl)
+        val feature = RuTorTopic(RuTorHttpClient(), parser, RuTorMagnetCache(), baseUrl)
 
         val detail = feature.getTopic("1052665")
 
@@ -115,7 +116,7 @@ class RuTorTopicTest {
             ),
         )
         val baseUrl = server.url("/").toString().trimEnd('/')
-        val feature = RuTorTopic(RuTorHttpClient(), parser, baseUrl)
+        val feature = RuTorTopic(RuTorHttpClient(), parser, RuTorMagnetCache(), baseUrl)
 
         val page = feature.getTopicPage("1052665", page = 0)
 

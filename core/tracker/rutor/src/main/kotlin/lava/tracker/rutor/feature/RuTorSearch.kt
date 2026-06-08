@@ -4,6 +4,7 @@ import lava.tracker.api.feature.SearchableTracker
 import lava.tracker.api.model.SearchRequest
 import lava.tracker.api.model.SearchResult
 import lava.tracker.rutor.http.RuTorHttpClient
+import lava.tracker.rutor.magnet.RuTorMagnetCache
 import lava.tracker.rutor.parser.RuTorSearchParser
 import java.net.URLEncoder
 import javax.inject.Inject
@@ -30,18 +31,25 @@ import javax.inject.Inject
  * The [baseUrl] constructor parameter exists so the MockWebServer-backed tests
  * (Sixth Law clause 3) can swap in a `http://localhost:<port>` URL without
  * patching the live rutor.info host. Production use takes the default.
+ *
+ * §6.E Capability Honesty: each result row that carries a magnet is recorded in
+ * [RuTorMagnetCache] keyed by its torrent id, so the synchronous
+ * [lava.tracker.rutor.feature.RuTorDownload.getMagnetLink] can surface it
+ * without a further fetch.
  */
 class RuTorSearch @Inject constructor(
     private val http: RuTorHttpClient,
     private val parser: RuTorSearchParser,
+    private val magnetCache: RuTorMagnetCache,
 ) : SearchableTracker {
 
     /** Test-only constructor; production callers use the @Inject one. */
     internal constructor(
         http: RuTorHttpClient,
         parser: RuTorSearchParser,
+        magnetCache: RuTorMagnetCache,
         baseUrl: String,
-    ) : this(http, parser) {
+    ) : this(http, parser, magnetCache) {
         this.baseUrlOverride = baseUrl
     }
 
@@ -53,7 +61,9 @@ class RuTorSearch @Inject constructor(
         val url = buildSearchUrl(request.query, page)
         val response = http.get(url)
         val body = response.use { it.body?.string() ?: "" }
-        return parser.parse(body, pageHint = page)
+        val result = parser.parse(body, pageHint = page)
+        result.items.forEach { magnetCache.put(it.torrentId, it.magnetUri) }
+        return result
     }
 
     /** Visible for tests so they can assert on the exact URL the client constructs. */

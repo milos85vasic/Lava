@@ -3,6 +3,7 @@ package lava.tracker.rutor.feature
 import kotlinx.coroutines.runBlocking
 import lava.tracker.api.model.SearchRequest
 import lava.tracker.rutor.http.RuTorHttpClient
+import lava.tracker.rutor.magnet.RuTorMagnetCache
 import lava.tracker.rutor.parser.RuTorSearchParser
 import lava.tracker.testing.LavaFixtureLoader
 import okhttp3.mockwebserver.MockResponse
@@ -54,7 +55,7 @@ class RuTorSearchTest {
         val html = loader.load("search", "search-normal-2026-04-30.html")
         server.enqueue(MockResponse().setBody(html).setResponseCode(200))
         val baseUrl = server.url("/").toString().trimEnd('/')
-        val feature = RuTorSearch(RuTorHttpClient(), parser, baseUrl)
+        val feature = RuTorSearch(RuTorHttpClient(), parser, RuTorMagnetCache(), baseUrl)
 
         val result = feature.search(SearchRequest(query = "ubuntu"), page = 1)
 
@@ -82,7 +83,7 @@ class RuTorSearchTest {
         val html = loader.load("search", "search-cyrillic-2026-04-30.html")
         server.enqueue(MockResponse().setBody(html).setResponseCode(200))
         val baseUrl = server.url("/").toString().trimEnd('/')
-        val feature = RuTorSearch(RuTorHttpClient(), parser, baseUrl)
+        val feature = RuTorSearch(RuTorHttpClient(), parser, RuTorMagnetCache(), baseUrl)
 
         // "Кино новинки" — Cyrillic + space; rutor expects %20 path encoding.
         feature.search(SearchRequest(query = "Кино новинки"), page = 0)
@@ -101,7 +102,7 @@ class RuTorSearchTest {
         val html = loader.load("search", "search-empty-2026-04-30.html")
         server.enqueue(MockResponse().setBody(html).setResponseCode(200))
         val baseUrl = server.url("/").toString().trimEnd('/')
-        val feature = RuTorSearch(RuTorHttpClient(), parser, baseUrl)
+        val feature = RuTorSearch(RuTorHttpClient(), parser, RuTorMagnetCache(), baseUrl)
 
         val result = feature.search(SearchRequest(query = "lkjasdlkfjasdlkfjasldkfj"), page = 0)
 

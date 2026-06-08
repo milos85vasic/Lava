@@ -57,3 +57,18 @@
 [submodule "panoptic"]
 	path = panoptic
 	url = git@github.com:vasic-digital/Panoptic.git
+[submodule "submodules/doc_processor"]
+	path = submodules/doc_processor
+	url = git@github.com:vasic-digital/DocProcessor.git
+[submodule "submodules/llm_orchestrator"]
+	path = submodules/llm_orchestrator
+	url = git@github.com:vasic-digital/LLMOrchestrator.git
+[submodule "submodules/llm_provider"]
+	path = submodules/llm_provider
+	url = git@github.com:vasic-digital/LLMProvider.git
+[submodule "submodules/llms_verifier"]
+	path = submodules/llms_verifier
+	url = git@github.com:vasic-digital/LLMsVerifier.git
+[submodule "submodules/vision_engine"]
+	path = submodules/vision_engine
+	url = git@github.com:vasic-digital/VisionEngine.git

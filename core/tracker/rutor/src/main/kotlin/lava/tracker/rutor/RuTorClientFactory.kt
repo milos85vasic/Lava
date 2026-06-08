@@ -12,6 +12,7 @@ import lava.tracker.rutor.feature.RuTorDownload
 import lava.tracker.rutor.feature.RuTorSearch
 import lava.tracker.rutor.feature.RuTorTopic
 import lava.tracker.rutor.http.RuTorHttpClient
+import lava.tracker.rutor.magnet.RuTorMagnetCache
 import lava.tracker.rutor.parser.RuTorBrowseParser
 import lava.tracker.rutor.parser.RuTorCommentsParser
 import lava.tracker.rutor.parser.RuTorLoginParser
@@ -42,6 +43,7 @@ class RuTorClientFactory @Inject constructor(
     private val topicParser: RuTorTopicParser,
     private val commentsParser: RuTorCommentsParser,
     private val loginParser: RuTorLoginParser,
+    private val magnetCache: RuTorMagnetCache,
 ) : TrackerClientFactory {
     override val descriptor: TrackerDescriptor = RuTorDescriptor
 
@@ -50,12 +52,12 @@ class RuTorClientFactory @Inject constructor(
         if (override != null) {
             return RuTorClient(
                 http = http,
-                search = RuTorSearch(http, searchParser, override),
+                search = RuTorSearch(http, searchParser, magnetCache, override),
                 browse = RuTorBrowse(http, browseParser, override),
-                topic = RuTorTopic(http, topicParser, override),
+                topic = RuTorTopic(http, topicParser, magnetCache, override),
                 comments = RuTorComments(http, commentsParser, override),
                 auth = RuTorAuth(http, loginParser, override),
-                download = RuTorDownload(http, override),
+                download = RuTorDownload(http, magnetCache, override),
             )
         }
         return clientProvider.get()

@@ -4,6 +4,7 @@ import lava.tracker.api.feature.TopicTracker
 import lava.tracker.api.model.TopicDetail
 import lava.tracker.api.model.TopicPage
 import lava.tracker.rutor.http.RuTorHttpClient
+import lava.tracker.rutor.magnet.RuTorMagnetCache
 import lava.tracker.rutor.parser.RuTorTopicParser
 import javax.inject.Inject
 
@@ -33,17 +34,23 @@ import javax.inject.Inject
  * `/comment/<id>`. [getTopicPage] therefore always returns
  * `TopicPage(getTopic(id), totalPages = 1, currentPage = 0)` and the page
  * argument is ignored.
+ *
+ * §6.E Capability Honesty: when a topic page yields a magnet it is recorded in
+ * [RuTorMagnetCache] so the synchronous [lava.tracker.rutor.feature.RuTorDownload.getMagnetLink]
+ * can surface it for the same torrent id.
  */
 class RuTorTopic @Inject constructor(
     private val http: RuTorHttpClient,
     private val parser: RuTorTopicParser,
+    private val magnetCache: RuTorMagnetCache,
 ) : TopicTracker {
 
     internal constructor(
         http: RuTorHttpClient,
         parser: RuTorTopicParser,
+        magnetCache: RuTorMagnetCache,
         baseUrl: String,
-    ) : this(http, parser) {
+    ) : this(http, parser, magnetCache) {
         this.baseUrlOverride = baseUrl
     }
 
@@ -54,6 +61,7 @@ class RuTorTopic @Inject constructor(
         val topicUrl = "$baseUrl/torrent/$id"
         val topicHtml = http.get(topicUrl).use { it.body?.string() ?: "" }
         val baseDetail = parser.parse(topicHtml, topicIdHint = id)
+        magnetCache.put(id, baseDetail.torrent.magnetUri)
 
         val files = fetchFilesOrEmpty(id)
         return if (files.isEmpty()) baseDetail else baseDetail.copy(files = files)

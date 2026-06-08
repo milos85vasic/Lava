@@ -15,6 +15,7 @@ import lava.tracker.rutor.feature.RuTorDownload
 import lava.tracker.rutor.feature.RuTorSearch
 import lava.tracker.rutor.feature.RuTorTopic
 import lava.tracker.rutor.http.RuTorHttpClient
+import lava.tracker.rutor.magnet.RuTorMagnetCache
 import lava.tracker.rutor.parser.RuTorBrowseParser
 import lava.tracker.rutor.parser.RuTorCommentsParser
 import lava.tracker.rutor.parser.RuTorLoginParser
@@ -48,14 +49,15 @@ class RuTorClientTest {
 
     private fun newClient(): RuTorClient {
         val http = RuTorHttpClient()
+        val magnetCache = RuTorMagnetCache()
         return RuTorClient(
             http = http,
-            search = RuTorSearch(http, RuTorSearchParser()),
+            search = RuTorSearch(http, RuTorSearchParser(), magnetCache),
             browse = RuTorBrowse(http, RuTorBrowseParser()),
-            topic = RuTorTopic(http, RuTorTopicParser()),
+            topic = RuTorTopic(http, RuTorTopicParser(), magnetCache),
             comments = RuTorComments(http, RuTorCommentsParser()),
             auth = RuTorAuth(http, RuTorLoginParser()),
-            download = RuTorDownload(http),
+            download = RuTorDownload(http, magnetCache),
         )
     }
 
