@@ -3,6 +3,7 @@ package lava.tracker.iptorrents.model
 import kotlinx.serialization.json.Json
 import lava.tracker.api.model.SearchResult
 import lava.tracker.api.model.TorrentItem
+import javax.inject.Inject
 
 /**
  * Maps the lava-api-go `/jackett/search` JSON wire format
@@ -20,9 +21,9 @@ import lava.tracker.api.model.TorrentItem
  *   - downloadUrl → downloadUrl (.torrent Jackett /dl/ proxy link)
  *   - category    → category    (the route stamps the indexer id here)
  */
-class JackettResultMapper(
-    private val json: Json = DEFAULT_JSON,
-) {
+class JackettResultMapper @Inject constructor() {
+
+    private val json: Json = DEFAULT_JSON
 
     /** Parses the raw route JSON body and maps it to a domain [SearchResult]. */
     fun map(trackerId: String, body: String): SearchResult {
