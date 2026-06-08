@@ -19,6 +19,7 @@ import android.os.Environment.DIRECTORY_DOWNLOADS
 import android.os.StrictMode
 import androidx.core.content.getSystemService
 import dagger.hilt.android.qualifiers.ApplicationContext
+import lava.common.analytics.AnalyticsTracker
 import lava.downloads.api.DownloadRequest
 import lava.downloads.api.DownloadService
 import java.io.File
@@ -29,13 +30,23 @@ import kotlin.coroutines.suspendCoroutine
 
 class DownloadServiceImpl @Inject constructor(
     @ApplicationContext private val context: Context,
+    private val analytics: AnalyticsTracker,
 ) : DownloadService {
     private val cache = DownloadUriCache()
+    private val guard = TorrentDownloadGuard(analytics)
 
     override suspend fun downloadTorrentFile(downloadRequest: DownloadRequest): String? {
         val cachedUri = cache.get(downloadRequest.id)
         if (cachedUri != null && File(URI.create(cachedUri)).exists()) {
-            return cachedUri
+            // Re-validate the cached file: a previously-cached payload may have
+            // been written before this guard existed, or the on-disk bytes may
+            // have changed. A cached-but-corrupt file must not be reused.
+            return if (isValidTorrentFile(downloadRequest, cachedUri)) {
+                cachedUri
+            } else {
+                cache.remove(downloadRequest.id)
+                null
+            }
         } else {
             return suspendCoroutine { continuation ->
                 context.getSystemService<DownloadManager>()?.let { downloadManager ->
@@ -57,10 +68,19 @@ class DownloadServiceImpl @Inject constructor(
                             val fileUri = allowDiskReads {
                                 downloadManager.getDownloadedFileUri(downloadId)
                             }
-                            if (fileUri != null) {
+                            if (fileUri == null) {
+                                continuation.resume(null)
+                            } else if (isValidTorrentFile(downloadRequest, fileUri)) {
                                 cache.put(downloadRequest.id, fileUri)
+                                continuation.resume(fileUri)
+                            } else {
+                                // Corrupt / HTML-error / truncated .torrent: discard the
+                                // file and report failure rather than handing the user a
+                                // file no BitTorrent client can open. The guard has already
+                                // recorded the §6.AC non-fatal telemetry.
+                                allowDiskReads { deleteFileQuietly(fileUri) }
+                                continuation.resume(null)
                             }
-                            continuation.resume(fileUri)
                         }
                     }
                 }
@@ -120,6 +140,38 @@ class DownloadServiceImpl @Inject constructor(
             }
         }
     }.getOrNull()
+
+    /**
+     * Reads the downloaded `.torrent` bytes at [fileUri] and runs the real
+     * [TorrentDownloadGuard] over them. Returns `true` only when the bytes are a
+     * genuinely-valid `.torrent`. If the file cannot be read, treats it as
+     * invalid (a download we cannot read is not a download we can trust) and
+     * records a §6.AC non-fatal.
+     */
+    private fun isValidTorrentFile(downloadRequest: DownloadRequest, fileUri: String): Boolean {
+        val bytes = allowDiskReads { readFileBytesQuietly(fileUri) }
+        if (bytes == null) {
+            analytics.recordWarning(
+                "downloaded .torrent could not be read for validation",
+                mapOf(
+                    AnalyticsTracker.Params.MODULE to "downloads",
+                    AnalyticsTracker.Params.OPERATION to "read_downloaded_torrent",
+                    AnalyticsTracker.Params.ERROR_CLASS to "UnreadableTorrentFile",
+                    AnalyticsTracker.Params.TOPIC_ID to downloadRequest.id,
+                ),
+            )
+            return false
+        }
+        return guard.verifyValid(downloadRequest.id, downloadRequest.title, bytes)
+    }
+
+    private fun readFileBytesQuietly(fileUri: String): ByteArray? = runCatching {
+        File(URI.create(fileUri)).readBytes()
+    }.getOrNull()
+
+    private fun deleteFileQuietly(fileUri: String) {
+        runCatching { File(URI.create(fileUri)).delete() }
+    }
 
     private fun <T> allowDiskReads(block: () -> T): T {
         val oldPolicy = StrictMode.allowThreadDiskReads()

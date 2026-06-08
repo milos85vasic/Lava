@@ -30,4 +30,9 @@ internal class DownloadUriCache {
     fun put(id: String, fileUri: String) {
         entries[id] = fileUri
     }
+
+    /** Removes any cached URI for [id] (e.g. a cached-but-corrupt file). */
+    fun remove(id: String) {
+        entries.remove(id)
+    }
 }
