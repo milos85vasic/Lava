@@ -1,0 +1,23 @@
+{
+  "date": "2026-06-08",
+  "title": "nav-compose 2.9.1 does NOT fix the NavBackStackEntry teardown crash on the search_input route",
+  "class": "Sixth-Law / §6.J device-gate finding — a 'fixed, device-verification owed' claim falsified by real device evidence",
+  "discovered_by": "scripts/run-genymotion-challenges.sh on the Genymotion Pixel 9 VM (API 35, arm64) — Challenge11ArchiveOrgAnonymousSearchTest",
+  "device": {"serial": "127.0.0.1:6555", "model": "Pixel 9", "android_release": "15", "sdk": 35, "abi": "arm64-v8a"},
+  "run_result": "7 tests, 6 PASS (C00 cold-start, C01 launch+tracker, C07/C08 rendered CrossTrackerFallbackModal), 1 FAIL (C11)",
+  "crash": {
+    "signal": "Process crashed — Unable to destroy activity MainActivity",
+    "exception": "java.lang.IllegalStateException: State must be at least 'CREATED' to be moved to 'DESTROYED'",
+    "component": "NavBackStackEntry route=search/search_input?query={query}&categories={categories}&author_name={author_name}&author_id={author_id}&sort={sort}&order={order}&period={period}",
+    "top_frame": "androidx.lifecycle.LifecycleRegistryKt.checkLifecycleStateTransition(LifecycleRegistry.kt:92)",
+    "evidence": ".lava-ci-evidence/genymotion/9e7505b3-fleet-run/connected-test.log + verdict.txt + app/build/outputs/androidTest-results/connected/debug/TEST-Pixel 9 - 15-_app-.xml"
+  },
+  "prior_claim_falsified": {
+    "commit": "7e6e7bcb",
+    "claim": "bump androidx-navigation-compose 2.9.0 -> 2.9.1 fixes the test-teardown lifecycle race; race-fix confirmation device-gated + OWED",
+    "reality": "device run shows 2.9.1 STILL crashes MainActivity destroy when a search_input single-top NavBackStackEntry is on the back stack at teardown"
+  },
+  "classification": "CONFIRMED reproducible crash at activity-destroy with search_input nav state. UNCONFIRMED whether real users hit it (depends on the OS destroying the activity from this transient state — e.g. 'Don't keep activities', config change, process death). Needs systematic-debugging: try a newer androidx-navigation, or a NavHost/teardown lifecycle guard, then device re-verify on the VM.",
+  "status": "OPEN — queued for a dedicated systematic-debugging + fix cycle. C11 correctly remains RED until fixed (no bluffed green).",
+  "no_guessing": "§11.4.6: crash signature + route + stack frames are captured verbatim from the device log, not surmised."
+}

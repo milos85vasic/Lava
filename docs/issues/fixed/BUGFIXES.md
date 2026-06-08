@@ -999,3 +999,25 @@ the confirm/dismiss label → the rendered test's `onNodeWithText` finds no node
 assert fails. Device-run of C07/C08 owed on the VM (network-independent).
 
 **Forensic anchor:** SA5 Challenge-restoration finding, 2026-06-08 parallel-fleet session.
+
+---
+
+## §6.J DEVICE-GATE CORRECTION — nav-compose 2.9.1 does NOT fully fix the NavBackStackEntry teardown crash (2026-06-08)
+
+**Correcting the 2.9.0→2.9.1 entry (commit `7e6e7bcb`).** That bump claimed to
+fix the test-teardown NavBackStackEntry lifecycle race and explicitly marked the
+device confirmation OWED. Device confirmation is now done — on the Genymotion
+Pixel 9 VM (API 35) — and it **FALSIFIES the claim** for the `search_input`
+route: `Challenge11ArchiveOrgAnonymousSearchTest` crashes the app at
+`MainActivity` destroy with
+`IllegalStateException: State must be at least 'CREATED' to be moved to
+'DESTROYED'` on the `search/search_input?...` NavBackStackEntry
+(`LifecycleRegistry.kt:92`). 2.9.1 was necessary but NOT sufficient.
+
+**Status:** OPEN. C00/C01/C07/C08 PASS on the VM (6/7); C11 RED. NOT bluffed
+green. Incident:
+`.lava-ci-evidence/sixth-law-incidents/2026-06-08-navbackstackentry-teardown-crash-2.9.1-incomplete.json`.
+Evidence: `.lava-ci-evidence/genymotion/9e7505b3-fleet-run/`.
+
+**Next:** dedicated systematic-debugging cycle — evaluate a newer
+androidx-navigation OR a NavHost/teardown lifecycle guard, then device re-verify.
