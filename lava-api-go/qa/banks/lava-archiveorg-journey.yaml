@@ -16,6 +16,20 @@
 # CircularProgressIndicator because the no-auth "Continue" path did not
 # short-circuit. The auth step below explicitly verifies the anonymous
 # "Continue" path reaches the app instead of spinning forever.
+#
+# Executor contract (submodules/helixqa pkg/orchestrator/definition_challenge.go):
+#   - platforms: [android] routes each case to executeAndroidVisionSteps,
+#     which builds a visionnav.Target{LaunchAction, ScreenGoals} and drives
+#     the real device through the vision loop.
+#   - LaunchAction (deriveLaunchAction): the FIRST non-skipped `adb_shell:`/
+#     `shell:` step. Every case below opens with a launch step that monkey-
+#     starts digital.vasic.lava.client.dev, so the derived launch action is
+#     `shell monkey -p digital.vasic.lava.client.dev 1` (NON-EMPTY — passes
+#     Target.Validate). Without such a step the case is "not drivable".
+#   - ScreenGoals (deriveScreenGoals): each entry in `required_evidence`,
+#     then `expected_result`. These become OCR goal substrings the vision
+#     model confirms from a real screenshot. The required_evidence tokens
+#     below are short, screen-visible phrases a user would actually see.
 version: "1.0"
 name: "Lava — Internet Archive Provider Journey"
 description: "End-to-end Internet Archive journey on the Lava Android app: onboard, anonymous (no-auth) continue, search, browse, open item, obtain a working HTTP download link."
@@ -33,9 +47,10 @@ test_cases:
     category: functional
     priority: critical
     platforms: [android]
+    dispatches_to: "monkey -p digital.vasic.lava.client.dev 1"
     steps:
       - name: "Launch Lava and reach onboarding"
-        action: "Cold-start the app; wait for the onboarding/welcome surface"
+        action: "adb_shell: monkey -p digital.vasic.lava.client.dev 1"
         expected: "Onboarding Welcome screen is visible without a crash"
       - name: "Advance to the provider selection step"
         action: "Tap the primary continue control to reach provider configuration"
@@ -43,54 +58,73 @@ test_cases:
       - name: "Select Internet Archive"
         action: "Tap the Internet Archive provider entry"
         expected: "Internet Archive is marked selected; because auth_type is NONE no credential fields are required"
+    required_evidence:
+      - "Internet Archive"
+      - "provider"
     tags: [archiveorg, onboarding, provider-selection, anonymous]
-    expected_result: "A real user can choose Internet Archive during onboarding without being asked for credentials"
+    expected_result: "The provider list is on screen and Internet Archive is a selectable entry that a user can choose without being asked for credentials"
 
   - id: LAVA-ARCHIVEORG-002
     name: "Continue anonymously without hanging on the loading indicator"
     category: functional
     priority: critical
     platforms: [android]
+    dispatches_to: "monkey -p digital.vasic.lava.client.dev 1"
     steps:
+      - name: "Launch Lava (cold start)"
+        action: "adb_shell: monkey -p digital.vasic.lava.client.dev 1"
+        expected: "App cold-starts to the onboarding/welcome surface without a crash"
       - name: "Trigger the anonymous Continue path"
-        action: "Tap the Continue control for the no-auth Internet Archive provider"
+        action: "Select Internet Archive and tap the Continue control for the no-auth provider"
         expected: "The no-auth path short-circuits: the loading indicator does NOT spin indefinitely"
       - name: "Reach the main/search surface"
         action: "Wait for navigation to complete after Continue"
         expected: "The app reaches its main/search surface within a few seconds (regression guard for the historical stuck-spinner defect)"
+    required_evidence:
+      - "Search"
     tags: [archiveorg, auth, anonymous, regression]
     documentation_refs:
       - type: constitution
         section: "6.G"
         path: "CLAUDE.md"
-    expected_result: "A real user completes anonymous Internet Archive access and lands in the app instead of a perpetual spinner"
+    expected_result: "After anonymous Continue the app lands on a usable Search surface instead of a perpetual spinner"
 
   - id: LAVA-ARCHIVEORG-003
     name: "Search Internet Archive for a realistic query and browse results"
     category: functional
     priority: high
     platforms: [android]
+    dispatches_to: "monkey -p digital.vasic.lava.client.dev 1"
     steps:
+      - name: "Launch Lava"
+        action: "adb_shell: monkey -p digital.vasic.lava.client.dev 1"
+        expected: "App reaches its main surface"
       - name: "Open the search input"
         action: "Navigate to the search surface and focus the query field"
         expected: "Search input is editable"
       - name: "Submit a realistic query"
-        action: "Enter a realistic real-world query (e.g. a public-domain film or audio title) and submit to the live archive.org API"
+        action: "Enter a realistic real-world query (e.g. the public-domain film 'Night of the Living Dead') and submit to the live archive.org API"
         expected: "A result list renders with rows carrying item title and metadata"
       - name: "Scroll the result list"
         action: "Swipe up to scroll additional results"
         expected: "List scrolls smoothly without crash"
+    required_evidence:
+      - "results"
     tags: [archiveorg, search, browse]
-    expected_result: "A real user can search the live Internet Archive and see a populated, scrollable result list"
+    expected_result: "A populated, scrollable result list of Internet Archive items is visible on screen for the submitted query"
 
   - id: LAVA-ARCHIVEORG-004
     name: "Open an item and obtain a working HTTP download link"
     category: functional
     priority: critical
     platforms: [android]
+    dispatches_to: "monkey -p digital.vasic.lava.client.dev 1"
     steps:
+      - name: "Launch Lava"
+        action: "adb_shell: monkey -p digital.vasic.lava.client.dev 1"
+        expected: "App reaches its main surface"
       - name: "Open a search result item"
-        action: "Tap the first result row to open its item/detail screen"
+        action: "Run a search, then tap the first result row to open its item/detail screen"
         expected: "Item detail renders with title, metadata and a download/file affordance"
       - name: "Locate the HTTP download affordance"
         action: "Find the file/download control (Internet Archive serves over HTTP — there is NO torrent/magnet control for this provider)"
@@ -98,9 +132,11 @@ test_cases:
       - name: "Resolve the download URL"
         action: "Trigger the download; capture the resolved file URL/payload"
         expected: "A reachable https://archive.org/download/... file URL is resolved and returns a non-empty payload (HTTP 200)"
+    required_evidence:
+      - "Download"
     tags: [archiveorg, download, http]
     documentation_refs:
       - type: constitution
         section: "6.G"
         path: "CLAUDE.md"
-    expected_result: "A real user reaches a working, non-empty HTTP file download for an Internet Archive item — the provider's primary deliverable"
+    expected_result: "The item detail screen shows a working HTTP Download control for an Internet Archive item — the provider's primary deliverable"
