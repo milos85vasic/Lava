@@ -18,6 +18,35 @@
     "reality": "device run shows 2.9.1 STILL crashes MainActivity destroy when a search_input single-top NavBackStackEntry is on the back stack at teardown"
   },
   "classification": "CONFIRMED reproducible crash at activity-destroy with search_input nav state. UNCONFIRMED whether real users hit it (depends on the OS destroying the activity from this transient state — e.g. 'Don't keep activities', config change, process death). Needs systematic-debugging: try a newer androidx-navigation, or a NavHost/teardown lifecycle guard, then device re-verify on the VM.",
-  "status": "OPEN — queued for a dedicated systematic-debugging + fix cycle. C11 correctly remains RED until fixed (no bluffed green).",
-  "no_guessing": "§11.4.6: crash signature + route + stack frames are captured verbatim from the device log, not surmised."
+  "status": "OPEN — two fix hypotheses device-tested + FALSIFIED on 2026-06-08 (see systematic_debug_2026_06_08). C11 correctly remains RED (no bluffed green). Deferred to a future focused nav-internals session OR an upstream androidx fix.",
+  "systematic_debug_2026_06_08": {
+    "device": "Genymotion Pixel 9 / API 35 / arm64 (127.0.0.1:6555)",
+    "hypothesis_1": {
+      "change": "bump androidx-navigation 2.9.1 -> 2.9.8 (latest stable; 7 patch releases)",
+      "result": "FALSIFIED — identical crash. Same IllegalStateException on route=search/search_input at activity-destroy. No nav version through 2.9.8 fixes it.",
+      "evidence": ".lava-ci-evidence/genymotion/c11-nav298-r2-20260608T165908Z/"
+    },
+    "hypothesis_1b": {
+      "change": "add LenientTeardownRule (extended to walk the cause chain) to C11, wrapping the compose rule",
+      "result": "FALSIFIED — NO TestRule can catch it. The ISE is rethrown as RuntimeException('Unable to destroy activity') inside Instrumentation.callActivityOnDestroy -> ActivityThread.performDestroyActivity and KILLS THE PROCESS ('Instrumentation run failed due to Process crashed'); it never propagates synchronously through the JUnit statement chain.",
+      "evidence": ".lava-ci-evidence/genymotion/c11-fix-20260608T171332Z/"
+    },
+    "hypothesis_2": {
+      "change": "production atomic-replace navigation — search_input -> search_result via a single navigateReplacingCurrent (popUpTo(current){inclusive=true}) transaction instead of popBackStack(); navigate(), in both addSearchInput call sites",
+      "result": "FALSIFIED — identical crash. The feature still works (search_result + real archive.org result row renders before teardown), but search_input is STILL tracked as INITIALIZED at host-destroy. Crash site: androidx.navigation.internal.NavControllerImpl.lifecycleObserver$lambda$1 -> NavBackStackEntryImpl.updateState (the NavController's host ON_DESTROY observer moving an INITIALIZED entry to DESTROYED). Reverted (unverified fix not shipped, per §6.T.1).",
+      "evidence": ".lava-ci-evidence/genymotion/c11-atomicfix-r2-20260608T172702Z/"
+    },
+    "confirmed_facts": [
+      "The C11 feature WORKS: the real archive.org result row renders; the crash is strictly post-assertion at activity-destroy.",
+      "search_input (the inner nested 'search' graph child, route prefix search/) is INITIALIZED at destroy and the NavController's host-lifecycle observer crashes moving it to DESTROYED.",
+      "Reproduces on the latest stable androidx-navigation (2.9.8); survives atomic-replace navigation; uncatchable by any JUnit TestRule (process death).",
+      "It involves a NESTED NavHost (addNestedNavigation -> NestedMobileNavigation -> 'search' graph) — likely a nested-NavHost teardown-ordering interaction."
+    ],
+    "next_hypotheses_untried": [
+      "Scope/lifecycle of the inner rememberNestedNavigationController vs the outer host at destroy.",
+      "An upstream androidx issue report + watch for a fix; or a minimal repro filed to issuetracker.",
+      "A production guard that force-completes the inner NavHost's in-progress/INITIALIZED entries on host ON_STOP before ON_DESTROY."
+    ]
+  },
+  "no_guessing": "§11.4.6: every crash signature, route, stack frame, and falsified-hypothesis result is captured verbatim from device logs under .lava-ci-evidence/genymotion/, not surmised."
 }

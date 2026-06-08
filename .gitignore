@@ -15,6 +15,12 @@ keystores/
 releases/
 tools/lava-containers/bin/
 
+# Jackett sidecar /config volume — §6.H secrets store (api_key + per-indexer
+# credentials, generated on first run). NEVER committed. Default location per
+# LAVA_JACKETT_CONFIG_DIR in .env.example; the glob covers relocations too.
+.jackett-config/
+**/.jackett-config/
+
 # Hardlinked .git mirrors created before destructive operations
 # (HelixConstitution §9 absolute-data-safety). Per §6.AD: never tracked,
 # always recreated on demand, retention is operator's choice.

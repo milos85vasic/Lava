@@ -1,38 +1,51 @@
 # Lava Jackett-sidecar compose fragment.
 #
 # Adds a Jackett (Torznab indexer proxy) + FlareSolverr (Cloudflare-challenge
-# solver, needed for IPTorrents) service set to the Lava local stack. Both stay
-# on the existing `lava-net` bridge and are reachable ONLY by lava-api-go —
-# neither port (9117 / 8191) is published to the LAN. The Android app continues
-# to see exactly one endpoint (`_lava-api._tcp` = lava-api-go); lava-api-go
-# proxies Torznab server-side and holds the Jackett api_key (§6.H).
+# solver, needed for IPTorrents) service set to the Lava local stack. Neither
+# port is published to the LAN — both bind to the host loopback (127.0.0.1)
+# only, matching the root compose's lava-postgres / observability pattern. The
+# Android app continues to see exactly ONE endpoint (`_lava-api._tcp` =
+# lava-api-go); lava-api-go proxies Torznab server-side and holds the Jackett
+# api_key (§6.H). The app never talks to Jackett directly.
 #
 # Topology (from docs/qa/jackett-local-stack-research.md §"Recommended topology"):
 #
 #   Android app ──mDNS(_lava-api._tcp)──▶ lava-api-go (:8443, host-net, TLS+HMAC)
 #                                              │  (server-side HTTP, holds api_key)
 #                                              ▼
-#                                         jackett (:9117)   ── lava-net, NOT advertised
+#                                  127.0.0.1:9117  →  lava-jackett   (NOT advertised)
 #                                              │
 #                                (only when profile=cloudflare)
 #                                              ▼
-#                                      flaresolverr (:8191) ── lava-net
+#                                  127.0.0.1:8191  →  lava-flaresolverr
+#
+# WHY 127.0.0.1-loopback publish (not bridge `expose:` only):
+#   lava-api-go runs `network_mode: host` (mDNS requires host net). A host-net
+#   container CANNOT resolve the bridge DNS name `lava-jackett`, and a
+#   bridge-only `expose: 9117` port is NOT reachable via
+#   `host.containers.internal`. Publishing to 127.0.0.1 makes Jackett reachable
+#   from BOTH the host-net lava-api-go (`http://127.0.0.1:9117`) AND a host-side
+#   validation curl, while keeping it off the LAN (loopback bind, not 0.0.0.0).
+#   This is the same security posture lava-postgres uses (`127.0.0.1:8432:5432`).
+#   => set LAVA_API_JACKETT_URL=http://127.0.0.1:9117 in .env for this stack.
 #
 # Profiles:
 #   jackett     — brings up lava-jackett only.
 #   cloudflare  — additionally brings up lava-flaresolverr (RAM-heavy Chromium;
 #                 keep OFF for RuTracker/RuTor/NNMClub-only sessions).
 #
-# §6.R no-hardcoding: image digests, the api_key, and tracker credentials are
-# NOT literals here. ${LAVA_JACKETT_IMAGE} / ${LAVA_FLARESOLVERR_IMAGE} (digest-
-# pinned) and ${LAVA_JACKETT_TZ} come from the gitignored .env (placeholders in
-# .env.example). The Jackett api_key is generated on first run into the
-# gitignored /config volume's ServerConfig.json; lava-api-go reads it from there
-# at startup (LAVA_JACKETT_API_KEY env, populated by the Containers glue) — it is
-# NEVER committed and NEVER sent to the device.
+# §6.R no-hardcoding: images, the api_key, the loopback bind host, and tracker
+# credentials are NOT literals here. They come from the gitignored .env
+# (placeholders in .env.example). The env var names are EXACTLY the ones
+# lava-api-go reads (lava-api-go/internal/config/config.go):
+# LAVA_API_JACKETT_APIKEY / LAVA_API_JACKETT_URL — so one .env value drives
+# both the container healthcheck AND the Go service; there is no parallel name
+# set to drift. The Jackett api_key is generated on first run into the
+# gitignored /config volume's ServerConfig.json; it is NEVER committed and
+# NEVER sent to the device.
 #
 # §6.B readiness: the healthcheck is a Torznab `t=caps` probe (HTTP 200 +
-# parseable <caps>), NOT a bare TCP-9117 check. "Up" != "application-healthy";
+# parseable body), NOT a bare TCP-9117 check. "Up" != "application-healthy";
 # a caps probe proves the Torznab surface is live AND the api_key is valid —
 # the same code path lava-api-go consumes. `start_period` is generous to cover
 # the .NET runtime + indexer-def cold-load (UNCONFIRMED cold-start seconds per
@@ -42,6 +55,7 @@
 # tools/lava-containers/cmd/lava-containers. Merge with the root compose via:
 #   docker compose -f ../../docker-compose.yml -f docker-compose.jackett.yml \
 #     --profile api-go --profile jackett config
+# Or validate end-to-end via scripts/validate-jackett-sidecar.sh.
 #
 # Verify parse before use: `docker compose -f docker-compose.jackett.yml config --quiet`.
 
@@ -55,11 +69,12 @@ services:
     image: ${LAVA_JACKETT_IMAGE:-lscr.io/linuxserver/jackett:latest}
     container_name: lava-jackett
     networks: [lava-net]
-    # NOT exposed to the LAN — no `ports:` mapping. lava-api-go reaches Jackett
-    # over the bridge at http://lava-jackett:9117 (or host.containers.internal
-    # from a host-net peer); the WebUI/admin surface stays internal.
-    expose:
-      - "9117"
+    # Published to LOOPBACK ONLY (127.0.0.1) — reachable by the host-net
+    # lava-api-go and by a host-side validation curl, but NOT on the LAN.
+    # The WebUI/admin surface stays off the network. The host-side port is
+    # configurable (default 9117) so it can be moved if 9117 is taken.
+    ports:
+      - "${LAVA_JACKETT_BIND_HOST:-127.0.0.1}:${LAVA_JACKETT_HOST_PORT:-9117}:9117"
     environment:
       PUID: "${LAVA_JACKETT_PUID:-1000}"
       PGID: "${LAVA_JACKETT_PGID:-1000}"
@@ -80,7 +95,7 @@ services:
       # we fetch to a discardable target and let a non-zero wget exit fail it.
       test:
         - "CMD-SHELL"
-        - "wget -q -O /dev/null \"http://127.0.0.1:9117/api/v2.0/indexers/${LAVA_JACKETT_HEALTH_INDEXER:-all}/results/torznab/api?t=caps&apikey=${LAVA_JACKETT_API_KEY:?LAVA_JACKETT_API_KEY required for healthcheck}\""
+        - "wget -q -O /dev/null \"http://127.0.0.1:9117/api/v2.0/indexers/${LAVA_API_JACKETT_DEFAULT_INDEXER:-all}/results/torznab/api?t=caps&apikey=${LAVA_API_JACKETT_APIKEY:?LAVA_API_JACKETT_APIKEY required for healthcheck}\""
       interval: 15s
       timeout: 10s
       retries: 6
@@ -93,21 +108,24 @@ services:
   # IPTorrents) is enabled. FlareSolverr runs a headless Chromium PER concurrent
   # challenge — the heaviest component in the stack — so it is profiled off by
   # default. Jackett is pointed at it via a FlareSolverr URL in Jackett's config
-  # (http://lava-flaresolverr:8191), set at indexer-provisioning time.
+  # (http://lava-flaresolverr:8191), set at indexer-provisioning time. Jackett
+  # reaches FlareSolverr over the lava-net bridge (both are bridge members), so
+  # the bridge DNS name `lava-flaresolverr` resolves there; the loopback publish
+  # below is only for the host-side validation curl.
   lava-flaresolverr:
     profiles: [cloudflare]
     image: ${LAVA_FLARESOLVERR_IMAGE:-ghcr.io/flaresolverr/flaresolverr:latest}
     container_name: lava-flaresolverr
     networks: [lava-net]
-    expose:
-      - "8191"
+    ports:
+      - "${LAVA_FLARESOLVERR_BIND_HOST:-127.0.0.1}:${LAVA_FLARESOLVERR_HOST_PORT:-8191}:8191"
     environment:
       LOG_LEVEL: "${LAVA_FLARESOLVERR_LOG_LEVEL:-info}"
       HOST: "0.0.0.0"
       PORT: "8191"
       HEADLESS: "true"
     healthcheck:
-      # FlareSolverr has no /health endpoint; sessions.list is the de-facto
+      # FlareSolverr has no GET /health endpoint; sessions.list is the de-facto
       # liveness probe (POST /v1 {"cmd":"sessions.list"} → 200). A bare TCP/8191
       # check would be a bluff (the Python proxy binds before Chromium is ready).
       test:
@@ -123,6 +141,8 @@ services:
 # `lava-net` is declared `external: true` here so this fragment composes with
 # the root docker-compose.yml (which owns the bridge definition) without
 # redefining it. When merged via `-f`, Docker uses the root file's `lava-net`.
+# The standalone validation script (scripts/validate-jackett-sidecar.sh)
+# creates this network first so the fragment can be brought up on its own.
 networks:
   lava-net:
     external: true
