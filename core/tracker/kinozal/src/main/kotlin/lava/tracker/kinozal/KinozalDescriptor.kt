@@ -23,7 +23,12 @@ object KinozalDescriptor : TrackerDescriptor {
         TrackerCapability.SEARCH,
         TrackerCapability.BROWSE,
         TrackerCapability.TOPIC,
-        TrackerCapability.COMMENTS,
+        // No COMMENTS — Kinozal has no CommentsTracker impl (no KinozalComments
+        // class; no comments parsing in KinozalTopic) and KinozalClient.getFeature(
+        // CommentsTracker) returns null. Declaring COMMENTS here was the canonical
+        // §6.E "declared-but-empty capability" bluff, surfaced by
+        // CapabilityHonestyContractTest. Re-add ONLY together with a real
+        // KinozalComments impl wired into KinozalClient.getFeature.
         TrackerCapability.TORRENT_DOWNLOAD,
         TrackerCapability.MAGNET_LINK,
         TrackerCapability.AUTH_REQUIRED,

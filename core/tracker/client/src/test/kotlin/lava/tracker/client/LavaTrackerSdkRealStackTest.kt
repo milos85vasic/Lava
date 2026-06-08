@@ -100,14 +100,15 @@ class LavaTrackerSdkRealStackTest {
 
     private fun realRuTorClient(): RuTorClient {
         val http = RuTorHttpClient()
+        val magnetCache = lava.tracker.rutor.magnet.RuTorMagnetCache()
         return RuTorClient(
             http = http,
-            search = RuTorSearch(http, RuTorSearchParser()),
+            search = RuTorSearch(http, RuTorSearchParser(), magnetCache),
             browse = RuTorBrowse(http, RuTorBrowseParser()),
-            topic = RuTorTopic(http, RuTorTopicParser()),
+            topic = RuTorTopic(http, RuTorTopicParser(), magnetCache),
             comments = RuTorComments(http, RuTorCommentsParser()),
             auth = RuTorAuth(http, RuTorLoginParser()),
-            download = RuTorDownload(http),
+            download = RuTorDownload(http, magnetCache),
         )
     }
 
@@ -170,6 +171,7 @@ class LavaTrackerSdkRealStackTest {
             topicParser = lava.tracker.rutor.parser.RuTorTopicParser(),
             commentsParser = lava.tracker.rutor.parser.RuTorCommentsParser(),
             loginParser = lava.tracker.rutor.parser.RuTorLoginParser(),
+            magnetCache = lava.tracker.rutor.magnet.RuTorMagnetCache(),
         )
 
         // Production registry (DefaultTrackerRegistry) populated with both
