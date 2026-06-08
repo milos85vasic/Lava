@@ -37,46 +37,53 @@ func recoverGuard(t *testing.T, name string, fn func()) {
 // property under test is GRACEFUL degradation: no panic, and any failure is
 // surfaced through the documented contract (a non-nil error from Set).
 //
-// FLAGGED FINDING (real, surfaced by this chaos test 2026-06-08): the SQLite
-// backend handles a NIL value and an EMPTY-BUT-NON-NIL value INCONSISTENTLY.
-//   - Set(key, []byte{}, ttl)  → succeeds; Get reads back a non-nil empty HIT
-//     (documented + covered by TestSQLiteZeroLengthValueRoundTrip).
-//   - Set(key, nil, ttl)       → ERRORS with
+// RESOLVED PARITY GAP (2026-06-08): the SQLite backend formerly handled a NIL
+// value and an EMPTY-BUT-NON-NIL value INCONSISTENTLY —
+//   - Set(key, []byte{}, ttl)  → succeeded; Get read back a non-nil empty HIT.
+//   - Set(key, nil, ttl)        → ERRORED with
 //     "constraint failed: NOT NULL constraint failed: response_cache.value (1299)"
-//     because a nil Go []byte binds to SQL NULL and the column is NOT NULL.
-// The Postgres backend may not share this asymmetry (BYTEA NULL vs empty), so
-// this is a candidate cross-backend PARITY gap. It is NOT a crash — Set returns
-// a clean wrapped error, which IS graceful. This subtest asserts the ACTUAL
-// production behavior (graceful error, no panic) and documents the divergence;
-// it deliberately does NOT silently "fix" production code beyond test scope.
+//     because a nil Go []byte binds to SQL NULL against the NOT NULL column.
+// This chaos test flagged it as a candidate cross-backend parity gap and
+// predicted that resolving it would require updating this subtest. It was
+// resolved: sqliteStorage.Set (and internal/cache.Client.Set for Postgres) now
+// normalize nil → []byte{} at the Set boundary, so Set(key, nil) and
+// Set(key, []byte{}) are observably identical on BOTH backends — both store an
+// empty blob that Get returns as a non-nil empty HIT. The pinned cross-backend
+// contract + its falsifiability rehearsal live in nil_empty_parity_test.go.
+// This subtest now asserts that NEW, correct round-trip behavior.
 //
 // FALSIFIABILITY: if Set(nil) ever panicked or nil-deref'd, recoverGuard fires.
-// If the production behavior were changed so Set(nil) silently succeeded, the
-// "want a surfaced error" assertion fires (a reviewer would then update this
-// test in lockstep with the parity fix).
+// Removing the nil→empty guard from sqliteStorage.Set re-introduces the NOT
+// NULL error, failing the "Set(nil) must succeed" assertion below.
 func TestChaosNilAndEmptyInputs(t *testing.T) {
 	ctx := context.Background()
 	s := newStressStore(t)
 
-	t.Run("nil value is rejected gracefully (no panic), not silently mangled", func(t *testing.T) {
+	t.Run("nil value round-trips as a non-nil empty HIT (parity with empty slice)", func(t *testing.T) {
 		var setErr error
 		recoverGuard(t, "Set(nil value)", func() {
 			setErr = s.Set(ctx, "chaos/nil-value", nil, time.Hour)
 		})
-		// Graceful: a surfaced error, never a panic. (See FLAGGED FINDING above:
-		// nil binds to SQL NULL against a NOT NULL column.)
-		if setErr == nil {
-			t.Errorf("Set(nil value) returned nil error; production currently surfaces a NOT NULL " +
-				"constraint error — if this changed, the cross-backend parity gap was addressed and " +
-				"this test must be updated to assert the new round-trip behavior")
+		// Set(nil) must succeed (nil is normalized to an empty blob), never panic,
+		// never surface a NOT NULL error. (See RESOLVED PARITY GAP above.)
+		if setErr != nil {
+			t.Fatalf("Set(nil value) returned error %v; want success (nil must normalize to an empty blob for cross-backend parity)", setErr)
 		}
-		// Because the nil Set failed, the key was never written: Get is a graceful miss.
-		_, outcome, err := s.Get(ctx, "chaos/nil-value")
+		// A stored nil reads back as a HIT serving a non-nil empty body — NOT a
+		// miss. A miss here would silently re-hit upstream on every request for
+		// this (empty-bodied) cache entry.
+		got, outcome, err := s.Get(ctx, "chaos/nil-value")
 		if err != nil {
 			t.Fatalf("Get(nil value key): %v", err)
 		}
-		if outcome != cache.OutcomeMiss {
-			t.Errorf("nil-value outcome=%q want miss (the failing Set wrote nothing)", outcome)
+		if outcome != cache.OutcomeHit {
+			t.Errorf("nil-value outcome=%q want hit (stored nil must round-trip, not fall through to upstream)", outcome)
+		}
+		if got == nil {
+			t.Errorf("nil-value Get returned a nil slice; want non-nil empty (a HIT must not look like a MISS)")
+		}
+		if len(got) != 0 {
+			t.Errorf("nil-value Get returned %d bytes; want 0 (empty)", len(got))
 		}
 	})
 

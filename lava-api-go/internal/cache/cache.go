@@ -91,7 +91,19 @@ func (c *Client) Get(ctx context.Context, key string) ([]byte, Outcome, error) {
 }
 
 // Set stores a value with the given TTL.
+//
+// A nil value is normalized to a non-nil empty slice before it reaches the
+// pgcache layer. The response_cache.value column is `BYTEA NOT NULL`; pgx
+// binds a Go nil []byte as SQL NULL, which the NOT NULL constraint rejects.
+// Normalizing here makes Set(key, nil) and Set(key, []byte{}) observably
+// identical — both store an empty BYTEA that Get returns as a non-nil empty
+// HIT (v != nil => OutcomeHit) — matching the SQLite backend's normalization
+// in sqliteStorage.Set. See storage/nil_empty_parity_test.go for the pinned
+// cross-backend contract.
 func (c *Client) Set(ctx context.Context, key string, value []byte, ttl time.Duration) error {
+	if value == nil {
+		value = []byte{}
+	}
 	return c.inner.Set(ctx, key, value, ttl)
 }
 

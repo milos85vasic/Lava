@@ -223,6 +223,15 @@ func (s *sqliteStorage) Get(ctx context.Context, key string) ([]byte, cache.Outc
 // Set stores value under key. ttl > 0 sets an absolute expiry; ttl <= 0 stores
 // a non-expiring entry (expires_at NULL), matching cache.Client/pgcache.
 func (s *sqliteStorage) Set(ctx context.Context, key string, value []byte, ttl time.Duration) error {
+	// Normalize a nil value to a non-nil empty slice so the `value BLOB NOT NULL`
+	// constraint is satisfied (modernc.org/sqlite binds Go nil as SQL NULL, which
+	// the NOT NULL column rejects). This makes Set(key, nil) and Set(key, []byte{})
+	// observably identical — both store an empty blob that Get returns as a non-nil
+	// empty HIT — matching the Postgres backend's normalization. See
+	// nil_empty_parity_test.go for the pinned contract + falsifiability rehearsal.
+	if value == nil {
+		value = []byte{}
+	}
 	var expires interface{} // nil → SQL NULL
 	if ttl > 0 {
 		expires = time.Now().Add(ttl).UnixNano()
