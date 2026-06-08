@@ -1,0 +1,158 @@
+# SPDX-FileCopyrightText: 2026 Milos Vasic
+# SPDX-License-Identifier: Apache-2.0
+#
+# HelixQA Test Bank: Lava — IPTorrents provider journey
+# Real human journey: onboard -> select IPTorrents (anonymous app-side; NO
+# in-app login) -> search -> browse -> open result -> obtain a working
+# .torrent / magnet download via the lava-api-go /jackett/search sidecar.
+#
+# Provider facts (from core/tracker/iptorrents/.../IPTorrentsDescriptor.kt):
+#   id=iptorrents  displayName="IPTorrents"
+#   capabilities: SEARCH, TORRENT_DOWNLOAD, MAGNET_LINK (search-only; NO
+#                 BROWSE / TOPIC / COMMENTS / FAVORITES route exists)
+#   authType=FORM_LOGIN is DESCRIPTOR METADATA describing how Jackett
+#     authenticates UPSTREAM — it is NOT an app-surfaced capability. The
+#     Android app NEVER performs a login against IPTorrents; there is no
+#     AUTH_REQUIRED capability and no AuthenticatableTracker impl. From the
+#     user's perspective onboarding is ANONYMOUS (no credential fields).
+#   supportsAnonymous=false (no app-side anonymous toggle, because the app
+#     never authenticates against IPTorrents at all).
+#
+# IMPORTANT — descriptor verified=false: IPTorrents is HIDDEN from the
+# user-facing provider list (fail-closed) until the §6.G real-stack proof
+# (search -> real .torrent/magnet via the running sidecar) has executed AND
+# an operator real-device attestation has been recorded. This bank is the
+# definition of that proof; it is expected to be exercisable only once the
+# provider is unhidden for the test build.
+#
+# IMPORTANT — sidecar prerequisite: IPTorrents gates every request behind
+# Cloudflare's JS/Turnstile challenge, which the SDK's OkHttp+Jsoup providers
+# physically cannot pass. The provider's feature impls DELEGATE to the local
+# lava-api-go `GET /jackett/search?indexer=iptorrents` route, which drives
+# Jackett's Cardigann IPTorrents definition + FlareSolverr (Cloudflare bypass)
+# server-side. The lava-api-go sidecar (with Jackett + FlareSolverr + the
+# IPTorrents credentials in Jackett's gitignored config volume, §6.H) MUST be
+# running for cases 003 and 004 to produce results — without it, search/download
+# return empty. Onboarding cases 001/002 do not require the sidecar.
+#
+# Executor contract (submodules/helixqa pkg/orchestrator/definition_challenge.go):
+#   - platforms: [android] routes each case to executeAndroidVisionSteps,
+#     which builds a visionnav.Target{LaunchAction, ScreenGoals} and drives
+#     the real device through the vision loop.
+#   - LaunchAction (deriveLaunchAction): the FIRST non-skipped `adb_shell:`/
+#     `shell:` step. Every case opens with an explicit-component launch
+#     (am start -n .../MainActivity) because the debug build's LeakCanary
+#     registers a 2nd LAUNCHER activity, making `monkey -p <pkg>` ambiguous.
+#   - ScreenGoals (deriveScreenGoals): each entry in `required_evidence`,
+#     then `expected_result`. These become OCR goal substrings the vision
+#     model confirms from a real screenshot.
+version: "1.0"
+name: "Lava — IPTorrents Provider Journey"
+description: "End-to-end IPTorrents journey on the Lava Android app: onboard anonymously (no in-app login; Jackett authenticates server-side), search, browse, open result, obtain torrent/magnet download via the lava-api-go /jackett/search sidecar."
+metadata:
+  author: "vasic-digital"
+  app: "Lava"
+  application_id: "digital.vasic.lava.client.dev"
+  provider_id: "iptorrents"
+  provider_display_name: "IPTorrents"
+  auth_type: "FORM_LOGIN"
+
+test_cases:
+  - id: LAVA-IPTORRENTS-001
+    name: "Onboard and select the IPTorrents provider"
+    category: functional
+    priority: critical
+    platforms: [android]
+    dispatches_to: "monkey -p digital.vasic.lava.client.dev 1"
+    steps:
+      - name: "Launch Lava and reach onboarding"
+        action: "adb_shell: am start -n digital.vasic.lava.client.dev/digital.vasic.lava.client.MainActivity"
+        expected: "Onboarding Welcome screen is visible without a crash"
+      - name: "Advance to the provider selection step"
+        action: "Tap the primary continue control to reach provider configuration"
+        expected: "Provider list shows IPTorrents as a selectable entry (only when the descriptor is unhidden for the test build; verified=false hides it from the shipped list)"
+      - name: "Select IPTorrents"
+        action: "Tap the IPTorrents provider entry"
+        expected: "IPTorrents is marked selected; the app surfaces NO credential fields (authentication is delegated to Jackett server-side, not the app)"
+    required_evidence:
+      - "IPTorrents"
+      - "provider"
+    tags: [iptorrents, onboarding, provider-selection, anonymous, jackett]
+    expected_result: "The provider list is on screen and IPTorrents is a selectable entry that a user can choose without being asked for credentials (the app never logs in to IPTorrents)"
+
+  - id: LAVA-IPTORRENTS-002
+    name: "Continue anonymously without an in-app login or stuck spinner"
+    category: functional
+    priority: critical
+    platforms: [android]
+    dispatches_to: "monkey -p digital.vasic.lava.client.dev 1"
+    steps:
+      - name: "Launch Lava (cold start)"
+        action: "adb_shell: am start -n digital.vasic.lava.client.dev/digital.vasic.lava.client.MainActivity"
+        expected: "App cold-starts to the onboarding/welcome surface without a crash"
+      - name: "Select IPTorrents and continue"
+        action: "Select IPTorrents and tap the Continue control; no credential entry is requested by the app (Jackett holds the upstream IPTorrents login server-side)"
+        expected: "The Continue path short-circuits without prompting for IPTorrents credentials; the loading indicator does NOT spin indefinitely"
+      - name: "Reach the main/search surface"
+        action: "Wait for navigation to complete after Continue"
+        expected: "The app reaches its main/search surface within a few seconds (regression guard for the historical stuck-spinner defect)"
+    required_evidence:
+      - "Search"
+    tags: [iptorrents, auth, anonymous, regression, jackett]
+    documentation_refs:
+      - type: constitution
+        section: "6.G"
+        path: "CLAUDE.md"
+    expected_result: "After Continue the app lands on a usable Search surface with no in-app IPTorrents login and no perpetual spinner"
+
+  - id: LAVA-IPTORRENTS-003
+    name: "Search IPTorrents via the Jackett sidecar and browse results"
+    category: functional
+    priority: high
+    platforms: [android]
+    dispatches_to: "monkey -p digital.vasic.lava.client.dev 1"
+    steps:
+      - name: "Launch Lava"
+        action: "adb_shell: am start -n digital.vasic.lava.client.dev/digital.vasic.lava.client.MainActivity"
+        expected: "App reaches its main surface"
+      - name: "Open the search input"
+        action: "Navigate to the search surface and focus the query field"
+        expected: "Search input is editable"
+      - name: "Submit a realistic query"
+        action: "Enter a realistic real-world query (e.g. a popular film title) and submit; the request goes to the lava-api-go GET /jackett/search?indexer=iptorrents route (the running sidecar drives Jackett + FlareSolverr server-side)"
+        expected: "A result list renders with rows carrying title, size and seed/leech counts (requires the lava-api-go sidecar to be running)"
+      - name: "Scroll the result list"
+        action: "Swipe up to scroll additional results"
+        expected: "List scrolls smoothly without crash"
+    required_evidence:
+      - "results"
+    tags: [iptorrents, search, browse, jackett, sidecar]
+    expected_result: "A populated, scrollable result list of IPTorrents torrents (served via the lava-api-go /jackett/search sidecar) is visible on screen for the submitted query"
+
+  - id: LAVA-IPTORRENTS-004
+    name: "Open a result and obtain a working download option via the sidecar"
+    category: functional
+    priority: critical
+    platforms: [android]
+    dispatches_to: "monkey -p digital.vasic.lava.client.dev 1"
+    steps:
+      - name: "Launch Lava"
+        action: "adb_shell: am start -n digital.vasic.lava.client.dev/digital.vasic.lava.client.MainActivity"
+        expected: "App reaches its main surface"
+      - name: "Open a search result row"
+        action: "Run a sidecar-backed search, then tap the first result row to open its detail screen"
+        expected: "Result detail renders with title, metadata and download affordances (search-only provider: NO browse/topic/comments controls are expected)"
+      - name: "Locate the download affordances"
+        action: "Find the .torrent download control and the magnet control (IPTorrents declares TORRENT_DOWNLOAD + MAGNET_LINK; each row's downloadUrl is a Jackett /dl/ .torrent proxy link and magnetLink is mapped from the Torznab enclosure)"
+        expected: "Both a torrent-file download control and a magnet control are present and enabled"
+      - name: "Obtain the torrent payload"
+        action: "Trigger the .torrent download; the app fetches the Jackett /dl/ proxy link via the sidecar; capture the resulting payload"
+        expected: "A non-empty .torrent file payload is produced (valid bencoded torrent) OR a magnet URI magnet:?xt=urn:btih:<hash> is resolved"
+    required_evidence:
+      - "Magnet"
+    tags: [iptorrents, download, torrent, magnet, jackett, sidecar]
+    documentation_refs:
+      - type: constitution
+        section: "6.G"
+        path: "CLAUDE.md"
+    expected_result: "The result detail screen shows a working Magnet and/or torrent Download control for an IPTorrents result delivered through the lava-api-go /jackett/search sidecar — the provider's primary deliverable"
