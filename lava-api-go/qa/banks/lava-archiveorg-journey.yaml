@@ -50,7 +50,7 @@ test_cases:
     dispatches_to: "monkey -p digital.vasic.lava.client.dev 1"
     steps:
       - name: "Launch Lava and reach onboarding"
-        action: "adb_shell: monkey -p digital.vasic.lava.client.dev 1"
+        action: "adb_shell: am start -n digital.vasic.lava.client.dev/digital.vasic.lava.client.MainActivity"
         expected: "Onboarding Welcome screen is visible without a crash"
       - name: "Advance to the provider selection step"
         action: "Tap the primary continue control to reach provider configuration"
@@ -72,7 +72,7 @@ test_cases:
     dispatches_to: "monkey -p digital.vasic.lava.client.dev 1"
     steps:
       - name: "Launch Lava (cold start)"
-        action: "adb_shell: monkey -p digital.vasic.lava.client.dev 1"
+        action: "adb_shell: am start -n digital.vasic.lava.client.dev/digital.vasic.lava.client.MainActivity"
         expected: "App cold-starts to the onboarding/welcome surface without a crash"
       - name: "Trigger the anonymous Continue path"
         action: "Select Internet Archive and tap the Continue control for the no-auth provider"
@@ -97,7 +97,7 @@ test_cases:
     dispatches_to: "monkey -p digital.vasic.lava.client.dev 1"
     steps:
       - name: "Launch Lava"
-        action: "adb_shell: monkey -p digital.vasic.lava.client.dev 1"
+        action: "adb_shell: am start -n digital.vasic.lava.client.dev/digital.vasic.lava.client.MainActivity"
         expected: "App reaches its main surface"
       - name: "Open the search input"
         action: "Navigate to the search surface and focus the query field"
@@ -121,7 +121,7 @@ test_cases:
     dispatches_to: "monkey -p digital.vasic.lava.client.dev 1"
     steps:
       - name: "Launch Lava"
-        action: "adb_shell: monkey -p digital.vasic.lava.client.dev 1"
+        action: "adb_shell: am start -n digital.vasic.lava.client.dev/digital.vasic.lava.client.MainActivity"
         expected: "App reaches its main surface"
       - name: "Open a search result item"
         action: "Run a search, then tap the first result row to open its item/detail screen"

@@ -47,7 +47,7 @@ test_cases:
     dispatches_to: "monkey -p digital.vasic.lava.client.dev 1"
     steps:
       - name: "Launch Lava and reach onboarding"
-        action: "adb_shell: monkey -p digital.vasic.lava.client.dev 1"
+        action: "adb_shell: am start -n digital.vasic.lava.client.dev/digital.vasic.lava.client.MainActivity"
         expected: "Onboarding Welcome screen is visible without a crash"
       - name: "Advance to the provider selection step"
         action: "Tap the primary continue control to reach provider configuration"
@@ -69,7 +69,7 @@ test_cases:
     dispatches_to: "monkey -p digital.vasic.lava.client.dev 1"
     steps:
       - name: "Launch Lava"
-        action: "adb_shell: monkey -p digital.vasic.lava.client.dev 1"
+        action: "adb_shell: am start -n digital.vasic.lava.client.dev/digital.vasic.lava.client.MainActivity"
         expected: "App reaches onboarding/provider selection"
       - name: "Open the RuTor login form"
         action: "Select RuTor and open its credential entry surface"
@@ -97,7 +97,7 @@ test_cases:
     dispatches_to: "monkey -p digital.vasic.lava.client.dev 1"
     steps:
       - name: "Launch Lava"
-        action: "adb_shell: monkey -p digital.vasic.lava.client.dev 1"
+        action: "adb_shell: am start -n digital.vasic.lava.client.dev/digital.vasic.lava.client.MainActivity"
         expected: "App reaches its main surface"
       - name: "Open the search input"
         action: "Navigate to the search surface and focus the query field"
@@ -121,7 +121,7 @@ test_cases:
     dispatches_to: "monkey -p digital.vasic.lava.client.dev 1"
     steps:
       - name: "Launch Lava"
-        action: "adb_shell: monkey -p digital.vasic.lava.client.dev 1"
+        action: "adb_shell: am start -n digital.vasic.lava.client.dev/digital.vasic.lava.client.MainActivity"
         expected: "App reaches its main surface"
       - name: "Open a search result topic"
         action: "Run a search, then tap the first result row to open its topic/detail screen"
