@@ -25,6 +25,7 @@ import (
 	"digital.vasic.lava.apigo/internal/firebase"
 	"digital.vasic.lava.apigo/internal/handlers"
 	v1handlers "digital.vasic.lava.apigo/internal/handlers/v1"
+	"digital.vasic.lava.apigo/internal/jackett"
 	"digital.vasic.lava.apigo/internal/middleware"
 	"digital.vasic.lava.apigo/internal/observability"
 	"digital.vasic.lava.apigo/internal/provider"
@@ -103,6 +104,20 @@ func Build(deps Deps) *gin.Engine {
 	v1handlers.Register(v1, &v1handlers.Deps{
 		Cache: deps.Cache,
 	})
+
+	// Jackett sidecar route — registered ONLY when the sidecar is enabled AND
+	// fully configured (§6.R: no hardcoded base URL / api_key; the route is a
+	// no-op by default). The app reaches Jackett ONLY through this surface; it
+	// never talks to the sidecar directly.
+	if deps.Cfg != nil && deps.Cfg.JackettEnabled {
+		if jc, err := jackett.NewClient(jackett.Config{
+			BaseURL: deps.Cfg.JackettBaseURL,
+			APIKey:  deps.Cfg.JackettAPIKey,
+		}); err == nil {
+			jh := v1handlers.NewJackettHandler(jc, deps.Cfg.JackettDefaultIndexer)
+			engine.GET("/jackett/search", jh.GetSearch)
+		}
+	}
 
 	return engine
 }

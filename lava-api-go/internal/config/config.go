@@ -62,6 +62,22 @@ type Config struct {
 	// rutracker upstream
 	RutrackerBaseURL string
 
+	// === Jackett sidecar (optional / profile-gated) ===
+	// JackettEnabled turns the /jackett/search route on. It is OFF by
+	// default; the route is a no-op (never registered) unless this is
+	// true AND BaseURL + APIKey are present (§6.R — no hardcoded values;
+	// the sidecar is optional).
+	JackettEnabled bool
+	// JackettBaseURL is the Jackett sidecar base, e.g. "http://jackett:9117"
+	// (injected via env / Containers glue — never a literal).
+	JackettBaseURL string
+	// JackettAPIKey is the Jackett api_key (§6.H secret — server-side only,
+	// never shipped to the device).
+	JackettAPIKey string
+	// JackettDefaultIndexer is the indexer id used when a request omits the
+	// `indexer` query parameter (defaults to "all" = every configured indexer).
+	JackettDefaultIndexer string
+
 	// === Phase 1: Auth (read at boot from .env / runtime env vars) ===
 	AuthFieldName               string
 	AuthHMACSecret              []byte            // base64-decoded, ≥16 bytes
@@ -108,6 +124,12 @@ func Load() (*Config, error) {
 		// slash is omitted here because Client.Fetch builds c.base + path
 		// where path starts with `/`.
 		RutrackerBaseURL: envDefault("LAVA_API_RUTRACKER_URL", "https://rutracker.org/forum"),
+
+		// Jackett sidecar — all injected; OFF by default per §6.R.
+		JackettEnabled:        envBool("LAVA_API_JACKETT_ENABLED", false),
+		JackettBaseURL:        os.Getenv("LAVA_API_JACKETT_URL"),
+		JackettAPIKey:         os.Getenv("LAVA_API_JACKETT_APIKEY"),
+		JackettDefaultIndexer: envDefault("LAVA_API_JACKETT_DEFAULT_INDEXER", "all"),
 	}
 
 	// === Phase 1: auth field reads ===
@@ -181,6 +203,12 @@ func Load() (*Config, error) {
 	}
 	if cfg.MDNSPort <= 0 || cfg.MDNSPort > 65535 {
 		return nil, fmt.Errorf("config: LAVA_API_MDNS_PORT %d out of range (1..65535)", cfg.MDNSPort)
+	}
+	// Jackett: when enabled the sidecar coordinates MUST be present (§6.R —
+	// the route exists only when fully configured). When disabled the route
+	// is never registered, so missing BaseURL/APIKey is not an error.
+	if cfg.JackettEnabled && (cfg.JackettBaseURL == "" || cfg.JackettAPIKey == "") {
+		return nil, errors.New("config: LAVA_API_JACKETT_URL and LAVA_API_JACKETT_APIKEY are required when LAVA_API_JACKETT_ENABLED=true")
 	}
 	return cfg, nil
 }
