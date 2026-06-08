@@ -48,6 +48,10 @@ done
 TS="$(date -u +%Y%m%dT%H%M%SZ)"
 EVIDENCE_DIR="${EVIDENCE_DIR:-$ROOT/.lava-ci-evidence/genymotion/$TS}"
 mkdir -p "$EVIDENCE_DIR"
+# Absolutize AFTER mkdir so the directory exists for the subshell `cd`. This
+# must happen BEFORE any `cd "$CONTAINERS"` consumes a relative EVIDENCE_DIR
+# (e.g. GM_BIN below + every later "$EVIDENCE_DIR/..." write).
+EVIDENCE_DIR="$( cd "$EVIDENCE_DIR" && pwd )"
 
 # 1. Build the Containers genymotion CLI (thin-glue → Containers submodule).
 GM_BIN="$EVIDENCE_DIR/genymotion-cli"
