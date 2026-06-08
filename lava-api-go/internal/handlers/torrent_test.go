@@ -214,7 +214,7 @@ func TestTorrentHandler_GetTorrent_AuthRealmHashAffectsCacheKey(t *testing.T) {
 // the binary bytes byte-for-byte and forwards the upstream
 // Content-Disposition + Content-Type headers verbatim.
 func TestTorrentHandler_GetDownload_HappyPath(t *testing.T) {
-	wantBytes := []byte{0xde, 0xad, 0xbe, 0xef, 0x00, 0x42}
+	wantBytes := validTorrentBytes
 	wantDisposition := `attachment; filename="rutracker_42.torrent"`
 	wantContentType := "application/x-bittorrent"
 
@@ -251,7 +251,7 @@ func TestTorrentHandler_GetDownload_HappyPath(t *testing.T) {
 // is NEVER cached at the API tier. Two GETs MUST produce two scraper
 // calls. Cache invocation counter MUST NOT increment.
 func TestTorrentHandler_GetDownload_NeverCached(t *testing.T) {
-	wantBytes := []byte{0x01, 0x02, 0x03}
+	wantBytes := validTorrentBytes
 	scraper := &fakeScraper{torrentFileReturn: &rutracker.TorrentFile{
 		Bytes:              wantBytes,
 		ContentDisposition: `attachment; filename="rutracker_42.torrent"`,
@@ -329,7 +329,7 @@ func TestTorrentHandler_GetDownload_NotFound_Returns404(t *testing.T) {
 // Content-Type — the OpenAPI declares the 200 media type, so an empty
 // Content-Type would be a contract violation.
 func TestTorrentHandler_GetDownload_DefaultsContentTypeWhenAbsent(t *testing.T) {
-	wantBytes := []byte{0xa1, 0xb2}
+	wantBytes := validTorrentBytes
 	scraper := &fakeScraper{torrentFileReturn: &rutracker.TorrentFile{
 		Bytes:              wantBytes,
 		ContentDisposition: `attachment; filename="rutracker_42.torrent"`,
@@ -354,7 +354,7 @@ func TestTorrentHandler_GetDownload_DefaultsContentTypeWhenAbsent(t *testing.T) 
 // when upstream did NOT set Content-Disposition, the handler MUST NOT
 // invent one. An absent (or empty) header is the correct shape.
 func TestTorrentHandler_GetDownload_OmitsContentDispositionWhenAbsent(t *testing.T) {
-	wantBytes := []byte{0xab}
+	wantBytes := validTorrentBytes
 	scraper := &fakeScraper{torrentFileReturn: &rutracker.TorrentFile{
 		Bytes:              wantBytes,
 		ContentDisposition: "", // upstream did not set it
@@ -372,6 +372,138 @@ func TestTorrentHandler_GetDownload_OmitsContentDispositionWhenAbsent(t *testing
 	}
 	if got := w.Header().Get("Content-Disposition"); got != "" {
 		t.Fatalf("Content-Disposition=%q want \"\" (must be absent when upstream omits)", got)
+	}
+}
+
+// validTorrentBytes is a minimal but structurally-honest bencoded
+// .torrent metainfo dict: a top-level dictionary `d...e` carrying both the
+// mandatory `info` dictionary (BEP-3) and an `announce` URL. It is what the
+// W2 looksLikeTorrent guard MUST pass through unchanged. Using a real
+// bencode shape (rather than arbitrary bytes) is the point: the guard's job
+// is precisely to distinguish this from an HTML error page.
+var validTorrentBytes = []byte(
+	"d8:announce30:http://tracker.example/announce" +
+		"4:infod6:lengthi12e4:name6:foobar12:piece lengthi16384e6:pieces0:ee",
+)
+
+// htmlErrorBytes is the failure class W2 exists to catch: a Cloudflare /
+// upstream HTML error page returned with a 200 status. Streaming this under
+// `application/x-bittorrent` would hand the client a "torrent" that is
+// actually an HTML page — the §6.E/§6.G honesty gap. The guard MUST reject
+// it with a real error status instead.
+var htmlErrorBytes = []byte(
+	"<!DOCTYPE html><html><head><title>Attention Required! | Cloudflare</title>" +
+		"</head><body><h1>Please complete the security check to access</h1></body></html>",
+)
+
+// TestTorrentHandler_GetDownload_RejectsNonBencodeBody is the W2 contract
+// test: when the upstream returns a 200 with a NON-bencode body (an HTML
+// error page / Cloudflare interstitial), the handler MUST NOT mislabel it
+// as a .torrent. It returns 502 with a JSON error body, and crucially does
+// NOT emit `application/x-bittorrent` over a body that is HTML.
+//
+// Primary assertion is on the user-visible HTTP response (status + body +
+// Content-Type), per §6.J — not on whether the guard function was called.
+//
+// Falsifiability (§6.J clause 2): disabling the guard in GetDownload (e.g.
+// `if false { ... }` around the looksLikeTorrent check, or deleting the
+// block) makes this test fail — the HTML body is streamed back as 200
+// `application/x-bittorrent`, and the status/Content-Type assertions fire:
+//
+//	status=200 want 502 (HTML error page must NOT be served as a .torrent)
+func TestTorrentHandler_GetDownload_RejectsNonBencodeBody(t *testing.T) {
+	scraper := &fakeScraper{torrentFileReturn: &rutracker.TorrentFile{
+		Bytes:              htmlErrorBytes,
+		ContentDisposition: `attachment; filename="rutracker_42.torrent"`,
+		// Upstream lies and claims it's a torrent — the guard must not trust it.
+		ContentType: "application/x-bittorrent",
+	}}
+	r := newTestRouter(&Deps{Cache: newFakeCache(), Scraper: scraper})
+
+	w := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "/download/42", nil)
+	req.Header.Set(auth.HeaderName, "tok")
+	r.ServeHTTP(w, req)
+
+	if w.Code != http.StatusBadGateway {
+		t.Fatalf("status=%d want 502 (HTML error page must NOT be served as a .torrent); body=%q", w.Code, w.Body.String())
+	}
+	// The response body MUST be the JSON error shape, NOT the HTML bytes —
+	// a client that received the HTML verbatim would save a broken .torrent.
+	if ct := w.Header().Get("Content-Type"); ct != "application/json" {
+		t.Fatalf("Content-Type=%q want application/json (must not mislabel HTML as a torrent)", ct)
+	}
+	if got := w.Body.String(); got == string(htmlErrorBytes) {
+		t.Fatalf("body streamed the upstream HTML verbatim (%q); the guard must reject it", got)
+	}
+	var body map[string]any
+	if err := json.Unmarshal(w.Body.Bytes(), &body); err != nil {
+		t.Fatalf("error body not json: %v (%s)", err, w.Body.String())
+	}
+	if len(body) != 0 {
+		t.Errorf("body=%v want empty {}", body)
+	}
+}
+
+// TestTorrentHandler_GetDownload_RejectsEmptyAndTruncatedBodies extends the
+// W2 guard to the other non-bencode shapes a broken upstream produces:
+// empty bodies and truncated junk. Each MUST surface as 502, never as a
+// 200 `application/x-bittorrent`.
+func TestTorrentHandler_GetDownload_RejectsEmptyAndTruncatedBodies(t *testing.T) {
+	cases := []struct {
+		name  string
+		bytes []byte
+	}{
+		{name: "empty", bytes: []byte{}},
+		{name: "truncated_non_dict", bytes: []byte("not-a-torrent")},
+		// Opens like a dict but carries none of the mandatory key markers.
+		{name: "dict_without_info_or_announce", bytes: []byte("d3:foo3:bare")},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			scraper := &fakeScraper{torrentFileReturn: &rutracker.TorrentFile{
+				Bytes:       tc.bytes,
+				ContentType: "application/x-bittorrent",
+			}}
+			r := newTestRouter(&Deps{Cache: newFakeCache(), Scraper: scraper})
+
+			w := httptest.NewRecorder()
+			req := httptest.NewRequest(http.MethodGet, "/download/42", nil)
+			req.Header.Set(auth.HeaderName, "tok")
+			r.ServeHTTP(w, req)
+
+			if w.Code != http.StatusBadGateway {
+				t.Fatalf("status=%d want 502 (non-bencode body must be rejected); body=%q", w.Code, w.Body.String())
+			}
+		})
+	}
+}
+
+// TestTorrentHandler_GetDownload_PassesValidBencodeThrough is the positive
+// half of the W2 contract: a structurally-valid bencoded .torrent MUST be
+// streamed through byte-for-byte under the torrent media type. The guard
+// rejects garbage WITHOUT regressing the legitimate download path.
+func TestTorrentHandler_GetDownload_PassesValidBencodeThrough(t *testing.T) {
+	scraper := &fakeScraper{torrentFileReturn: &rutracker.TorrentFile{
+		Bytes:              validTorrentBytes,
+		ContentDisposition: `attachment; filename="rutracker_42.torrent"`,
+		ContentType:        "application/x-bittorrent",
+	}}
+	r := newTestRouter(&Deps{Cache: newFakeCache(), Scraper: scraper})
+
+	w := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "/download/42", nil)
+	req.Header.Set(auth.HeaderName, "tok")
+	r.ServeHTTP(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("status=%d want 200 (valid bencode must pass through); body=%q", w.Code, w.Body.String())
+	}
+	if got := w.Body.Bytes(); string(got) != string(validTorrentBytes) {
+		t.Fatalf("body=%q want %q (valid torrent must stream byte-for-byte)", got, validTorrentBytes)
+	}
+	if ct := w.Header().Get("Content-Type"); ct != "application/x-bittorrent" {
+		t.Fatalf("Content-Type=%q want application/x-bittorrent", ct)
 	}
 }
 

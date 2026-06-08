@@ -31,6 +31,7 @@
 package handlers
 
 import (
+	"bytes"
 	"encoding/json"
 	"net/http"
 	"time"
@@ -119,6 +120,21 @@ func (h *TorrentHandler) GetDownload(c *gin.Context) {
 		return
 	}
 
+	// §6.E/§6.G honesty guard: confirm the payload is actually a bencoded
+	// .torrent before labelling it `application/x-bittorrent`. A misbehaving
+	// or Cloudflare-fronted upstream can return an HTML error page (or an
+	// empty / truncated body) with a 200 status; streaming those verbatim
+	// under a torrent media type hands the client a file that looks like a
+	// torrent but is garbage. We do NOT fully parse the metainfo (that would
+	// be wasteful for large payloads); a header/structure guard is enough to
+	// reject the non-bencode bodies a broken upstream actually produces.
+	if !looksLikeTorrent(file.Bytes) {
+		// 502: the upstream returned a 200 with a body that is not a
+		// .torrent — we could not make sense of what we were handed.
+		writeJSON(c, http.StatusBadGateway, gin.H{})
+		return
+	}
+
 	if file.ContentDisposition != "" {
 		c.Header("Content-Disposition", file.ContentDisposition)
 	}
@@ -131,4 +147,39 @@ func (h *TorrentHandler) GetDownload(c *gin.Context) {
 		contentType = "application/x-bittorrent"
 	}
 	c.Data(http.StatusOK, contentType, file.Bytes)
+}
+
+// looksLikeTorrent reports whether b has the structural markers of a real
+// bencoded .torrent metainfo file, WITHOUT fully decoding it.
+//
+// A bencoded .torrent is a top-level dictionary, so it MUST begin with the
+// bencode dict marker 'd' and end with the matching 'e'. A real metainfo
+// dict always carries an `info` dictionary (the only mandatory key per
+// BEP-3) and, for the public-tracker torrents Lava downloads, an `announce`
+// URL. We require the top-level structure PLUS at least one of those two
+// keys expressed in bencode string form (`4:info` / `8:announce`).
+//
+// This is deliberately a guard, not a parser:
+//   - It rejects the bodies a broken upstream actually returns — HTML error
+//     pages ("<!DOCTYPE html>…" / "<html>…"), Cloudflare interstitials,
+//     empty bodies, and truncated junk — because none of them start with
+//     'd' / contain the bencode-encoded key markers.
+//   - It does not attempt to validate piece hashes, lengths, or nested
+//     structure; that would be wasteful for multi-megabyte payloads and is
+//     not needed to catch the "served HTML as a torrent" failure class.
+func looksLikeTorrent(b []byte) bool {
+	// A minimal valid metainfo dict is at least `d4:info...e` — anything
+	// shorter cannot carry the required structure.
+	if len(b) < 4 {
+		return false
+	}
+	// Top-level bencode dictionary: opens with 'd', closes with 'e'.
+	if b[0] != 'd' || b[len(b)-1] != 'e' {
+		return false
+	}
+	// Require the bencode-string form of one of the mandatory keys. The
+	// `<len>:<value>` framing means a real key appears as `4:info` /
+	// `8:announce` — markers that an HTML page or Cloudflare body will not
+	// contain by construction.
+	return bytes.Contains(b, []byte("4:info")) || bytes.Contains(b, []byte("8:announce"))
 }
