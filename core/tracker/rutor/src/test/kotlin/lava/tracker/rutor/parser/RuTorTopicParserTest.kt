@@ -3,6 +3,7 @@ package lava.tracker.rutor.parser
 import lava.tracker.testing.LavaFixtureLoader
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -108,5 +109,34 @@ class RuTorTopicParserTest {
         )
         // Exact bytes from "(4224020480 Bytes)".
         assertEquals(4_224_020_480L, detail.torrent.sizeBytes)
+    }
+
+    @Test
+    fun `empty or garbage topic HTML does not throw and yields an empty-but-valid TopicDetail`() {
+        // A truncated proxy body / error page must degrade to a TopicDetail whose torrent carries
+        // the caller's id hint and the tracker id, with every optional field null and no files —
+        // never an exception.
+        listOf("", "   ", "<html><body>404 Not Found</body></html>").forEach { html ->
+            val detail = parser.parse(html, topicIdHint = "999999")
+
+            assertEquals("rutor", detail.torrent.trackerId)
+            assertEquals("999999", detail.torrent.torrentId)
+            assertNull("garbage page must not invent a size", detail.torrent.sizeBytes)
+            assertNull("garbage page must not invent a magnet", detail.torrent.magnetUri)
+            assertNull("garbage page must not invent an infoHash", detail.torrent.infoHash)
+            assertEquals("garbage page must surface no files", 0, detail.files.size)
+        }
+    }
+
+    @Test
+    fun `topic page with no id hint still produces a TopicDetail without throwing`() {
+        // When neither a hint nor an extractable download id is present, torrentId degrades to the
+        // empty string rather than throwing — the page is still mapped.
+        val detail = parser.parse("<html><body><h1>Бессылочная страница</h1></body></html>")
+
+        assertEquals("rutor", detail.torrent.trackerId)
+        assertEquals("", detail.torrent.torrentId)
+        assertEquals("Бессылочная страница", detail.torrent.title)
+        assertNull(detail.torrent.magnetUri)
     }
 }

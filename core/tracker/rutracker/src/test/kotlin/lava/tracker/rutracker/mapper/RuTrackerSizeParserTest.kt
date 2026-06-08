@@ -104,4 +104,29 @@ class RuTrackerSizeParserTest {
     fun `no whitespace between number and unit`() {
         assertEquals(1_073_741_824L, RuTrackerSizeParser.parse("1GB"))
     }
+
+    @Test
+    fun `extracts size embedded in surrounding text`() {
+        // metadata["rutracker.size_text"] can carry extra prose; the parser must find the size
+        // token rather than requiring an exact whole-string match.
+        assertEquals(5_046_586_572L, RuTrackerSizeParser.parse("Размер 4.7 GB"))
+        assertEquals(500L * 1024L, RuTrackerSizeParser.parse("500 KB (zip)"))
+    }
+
+    @Test
+    fun `zero-byte size parses to zero not null`() {
+        // "0 B" is a real (if rare) value; mapping it to null would let a size filter skip it.
+        assertEquals(0L, RuTrackerSizeParser.parse("0 B"))
+    }
+
+    @Test
+    fun `picks the first size token when several appear`() {
+        assertEquals(1_073_741_824L, RuTrackerSizeParser.parse("1 GB then 2 GB"))
+    }
+
+    @Test
+    fun `large integer 3 TB has no double-rounding loss`() {
+        // 3 * 2^40 is exactly representable.
+        assertEquals(3_298_534_883_328L, RuTrackerSizeParser.parse("3 TB"))
+    }
 }

@@ -4,6 +4,7 @@ import lava.tracker.testing.LavaFixtureLoader
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -115,5 +116,85 @@ class RuTorSearchParserTest {
         assertNotNull("malformed HTML must still produce a SearchResult", result)
         // currentPage must echo the hint we passed.
         assertEquals(0, result.currentPage)
+    }
+
+    @Test
+    fun `empty string and garbage HTML produce an empty-but-valid SearchResult`() {
+        // A truncated/garbage response (proxy returned an error body, a redirect stub, etc.)
+        // must degrade to zero items + totalPages defaulting to 1 — never an exception, never a
+        // negative or zero totalPages that a paginating UI would choke on.
+        listOf(
+            "",
+            "   ",
+            "<html><body>503 Service Unavailable</body></html>",
+            "<!DOCTYPE html><html><head><title>rutor.info</title></head><body><div id=\"menu\"></div></body></html>",
+        ).forEach { html ->
+            val result = parser.parse(html, pageHint = 3)
+            assertTrue("garbage HTML must surface no items for input '${html.take(20)}'", result.items.isEmpty())
+            assertEquals("totalPages must default to 1 for input '${html.take(20)}'", 1, result.totalPages)
+            // currentPage echoes the caller hint even on a degraded page.
+            assertEquals(3, result.currentPage)
+        }
+    }
+
+    @Test
+    fun `missing optional fields per row degrade to null without dropping the row`() {
+        val html = loader.load("search", "search-missing-fields-2026-04-30.html")
+        val result = parser.parse(html, pageHint = 0)
+
+        // All four rows are still surfaced — a missing optional field never drops the torrent.
+        assertEquals(
+            "all four edge rows must be parsed; got titles=${result.items.map { it.title }}",
+            4,
+            result.items.size,
+        )
+        val byId = result.items.associateBy { it.torrentId }
+
+        // Row 1: control — every field present.
+        val control = byId.getValue("1052665")
+        assertEquals(4_563_402_752L, control.sizeBytes) // 4.25 * 2^30
+        assertNotNull("control row must carry a magnet", control.magnetUri)
+        assertEquals("fb3e518132e636b798c4ae4b346b60578665e09e", control.infoHash)
+        assertEquals(7, control.seeders)
+        assertEquals(2, control.leechers)
+
+        // Row 2: no magnet anchor → magnetUri and infoHash null, but the row survives with a
+        // parseable title and a download URL.
+        val noMagnet = byId.getValue("1050403")
+        assertNull("row without a magnet anchor must expose null magnetUri", noMagnet.magnetUri)
+        assertNull("row without a magnet anchor must expose null infoHash", noMagnet.infoHash)
+        assertTrue("title must still be parsed", noMagnet.title.contains("без магнет-ссылки"))
+        assertEquals("https://d.rutor.info/download/1050403", noMagnet.downloadUrl)
+        assertEquals(4_413_078_896L, noMagnet.sizeBytes) // 4.11 * 2^30 truncated
+
+        // Row 3: no peers spans → seeders/leechers null, size still recovered by content.
+        val noPeers = byId.getValue("1049194")
+        assertNull("row without span.green must expose null seeders", noPeers.seeders)
+        assertNull("row without span.red must expose null leechers", noPeers.leechers)
+        assertEquals(4_252_017_623L, noPeers.sizeBytes) // 3.96 * 2^30 truncated
+
+        // Row 4: no parseable size cell (em-dash placeholder) → sizeBytes null, peers still read.
+        val noSize = byId.getValue("1049193")
+        assertNull("em-dash size cell must yield null sizeBytes", noSize.sizeBytes)
+        assertEquals(3, noSize.seeders)
+        assertEquals(1, noSize.leechers)
+    }
+
+    @Test
+    fun `Cyrillic titles are preserved verbatim without mojibake`() {
+        val html = loader.load("search", "search-missing-fields-2026-04-30.html")
+        val result = parser.parse(html, pageHint = 0)
+
+        // UTF-8 decode must keep the exact Cyrillic prose — a charset regression would surface
+        // replacement chars or Latin-1 mojibake, not the literal Russian text.
+        val titles = result.items.map { it.title }
+        assertTrue(
+            "Cyrillic title must round-trip exactly; got $titles",
+            titles.any { it.contains("Раздача без магнет-ссылки") },
+        )
+        assertTrue(
+            "no title may contain the Unicode replacement char (mojibake signal); got $titles",
+            titles.none { it.contains('�') },
+        )
     }
 }

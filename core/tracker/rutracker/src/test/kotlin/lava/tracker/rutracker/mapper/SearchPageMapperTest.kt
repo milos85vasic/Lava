@@ -118,4 +118,120 @@ class SearchPageMapperTest {
             item.metadata.isEmpty(),
         )
     }
+
+    @Test
+    fun `comma-decimal size string from a mirror parses to bytes`() {
+        // Third-party rutracker mirrors occasionally emit a comma decimal separator. The mapper
+        // must still surface a non-null sizeBytes while preserving the verbatim display string.
+        val dto = SearchPageDto(
+            page = 1,
+            pages = 1,
+            torrents = listOf(TorrentDto(id = "1", title = "comma size", size = "1,5 GB")),
+        )
+
+        val item = mapper.toSearchResult(dto, currentPage = 1).items.single()
+
+        // 1.5 * 2^30 = 1_610_612_736.
+        assertEquals(java.lang.Long.valueOf(1_610_612_736L), item.sizeBytes)
+        assertEquals("1,5 GB", item.metadata["rutracker.size_text"])
+    }
+
+    @Test
+    fun `non-breaking space inside the size string is tolerated`() {
+        // The scraper sometimes leaves U+00A0 between the number and the unit.
+        val dto = SearchPageDto(
+            page = 1,
+            pages = 1,
+            torrents = listOf(TorrentDto(id = "1", title = "nbsp size", size = "2 GB")),
+        )
+
+        val item = mapper.toSearchResult(dto, currentPage = 1).items.single()
+
+        // 2 * 2^30 = 2_147_483_648.
+        assertEquals(java.lang.Long.valueOf(2_147_483_648L), item.sizeBytes)
+    }
+
+    @Test
+    fun `unparseable size yields null bytes but keeps the user-visible size text`() {
+        // When the scraper stored something the parser can't read, sizeBytes must be null while
+        // the original string survives in metadata as the user-facing fallback — never a crash.
+        val dto = SearchPageDto(
+            page = 1,
+            pages = 1,
+            torrents = listOf(TorrentDto(id = "1", title = "weird size", size = "несколько гигов")),
+        )
+
+        val item = mapper.toSearchResult(dto, currentPage = 1).items.single()
+
+        assertNull("unparseable size must yield null sizeBytes", item.sizeBytes)
+        assertEquals("несколько гигов", item.metadata["rutracker.size_text"])
+    }
+
+    @Test
+    fun `Cyrillic title is preserved verbatim through the mapping`() {
+        val dto = SearchPageDto(
+            page = 1,
+            pages = 1,
+            torrents = listOf(
+                TorrentDto(
+                    id = "1",
+                    title = "Война и мир (2025) [сезон 1] WEB-DL",
+                    category = CategoryDto(id = "4", name = "Наши сериалы"),
+                ),
+            ),
+        )
+
+        val item = mapper.toSearchResult(dto, currentPage = 1).items.single()
+
+        assertEquals("Война и мир (2025) [сезон 1] WEB-DL", item.title)
+        assertEquals("Наши сериалы", item.category)
+    }
+
+    @Test
+    fun `pages value of zero is threaded through unchanged for the caller to clamp`() {
+        // The mapper is a pure pass-through for pagination — it must not silently invent a page
+        // count. A boundary value (0) is reported as-is so the caller's clamp logic is exercised
+        // on the real value rather than a mapper-side default that would mask a scraper bug.
+        val dto = SearchPageDto(page = 0, pages = 0, torrents = emptyList())
+
+        val result = mapper.toSearchResult(dto, currentPage = 0)
+
+        assertEquals(0, result.totalPages)
+        assertEquals(0, result.currentPage)
+        assertTrue(result.items.isEmpty())
+    }
+
+    @Test
+    fun `mixed list maps each row independently with its own optional fields`() {
+        // A realistic page mixes fully-populated rows with sparse ones; each must map on its own
+        // merits without one row's missing field affecting a neighbour.
+        val dto = SearchPageDto(
+            page = 1,
+            pages = 3,
+            torrents = listOf(
+                TorrentDto(
+                    id = "100",
+                    title = "full row",
+                    size = "700 MB",
+                    seeds = 9,
+                    leeches = 1,
+                    magnetLink = "magnet:?xt=urn:btih:aaa",
+                ),
+                TorrentDto(id = "200", title = "no peers", size = "1 GB"),
+            ),
+        )
+
+        val items = mapper.toSearchResult(dto, currentPage = 1).items
+        assertEquals(2, items.size)
+
+        val full = items.first { it.torrentId == "100" }
+        assertEquals(java.lang.Long.valueOf(700L * 1024L * 1024L), full.sizeBytes)
+        assertEquals(9, full.seeders)
+        assertEquals("magnet:?xt=urn:btih:aaa", full.magnetUri)
+
+        val sparse = items.first { it.torrentId == "200" }
+        assertEquals(java.lang.Long.valueOf(1_073_741_824L), sparse.sizeBytes)
+        assertNull("sparse row has no seeders", sparse.seeders)
+        assertNull("sparse row has no magnet", sparse.magnetUri)
+    }
 }

@@ -1,5 +1,14 @@
 # Lava — Bug Fix Audit Trail
 
+> **Revision §11.4.44 (2026-06-08):** appended the 2026-06-08 session's six
+> real defect fixes — the four §6.E capability-honesty bluffs (kinozal /
+> nnmclub / rutor magnet wire-through + gutenberg `TORRENT_DOWNLOAD` drop),
+> the HelixQA broken-pin go.mod conflict that broke `lava-api-go`'s build,
+> and the nav-compose `2.9.0 → 2.9.1` test-teardown lifecycle race. Each
+> entry below cites its real commit SHA + real files (verified against
+> `git show --stat`). Per §11.4.6 no-guessing, details that could not be
+> confirmed from git are marked `UNCONFIRMED`.
+
 Per constitutional clause **§6.T.4 (Bugfix Documentation)** — every bug
 fix in this project MUST be documented here with root cause analysis,
 affected files, fix description, link to the verification test/
@@ -671,3 +680,243 @@ edit to a tracked embed-linked `.go` changes the hash). 3/3 PASS. The gate
 rehearsal: appending a byte to `internal/version/version.go` → gate exits 1
 ("on-device API embed is STALE"); revert → exit 0. **Fix commit:** _(this
 session)_.
+
+---
+
+## 2026-06-08 — kinozal-magnet-link-declared-but-null (§6.E bluff)
+
+**Root cause:** `KinozalDescriptor` declares the `MAGNET_LINK` capability,
+but `KinozalDownload.getMagnetLink()` returned `null` even though the magnet
+is parsed from the topic/search HTML — a declared-but-empty capability, i.e.
+a §6.E capability-honesty bluff. The `getMagnetLink` interface method is
+non-suspend and cannot itself fetch.
+
+**Affected files:**
+- `core/tracker/kinozal/src/main/kotlin/lava/tracker/kinozal/feature/KinozalDownload.kt`
+- `core/tracker/kinozal/src/main/kotlin/lava/tracker/kinozal/feature/KinozalTopic.kt`
+- `core/tracker/kinozal/src/main/kotlin/lava/tracker/kinozal/magnet/KinozalMagnetCache.kt` (NEW)
+- `core/tracker/kinozal/src/main/kotlin/lava/tracker/kinozal/KinozalClientFactory.kt`
+- `core/tracker/kinozal/src/test/kotlin/lava/tracker/kinozal/feature/KinozalDownloadTest.kt`
+- `core/tracker/kinozal/src/test/kotlin/lava/tracker/kinozal/feature/KinozalTopicTest.kt`
+- `core/tracker/kinozal/src/test/kotlin/lava/tracker/kinozal/KinozalClientFactoryCloneUrlTest.kt`
+
+**Fix:** wire it honestly — a `@Singleton KinozalMagnetCache` populated by the
+real topic-view path (`KinozalTopic.getTopic`), read back synchronously by
+`getMagnetLink(id)`; honest `null` until a topic surfaces it. Same pattern
+RuTracker documents for `GetMagnetLinkUseCase`. Cache threaded through the
+clone-override path.
+
+**Verification test/challenge:** `KinozalDownloadTest` — "getMagnetLink
+returns real magnet after the topic page has been viewed". Falsifiability
+rehearsal (per commit body): reverting `getMagnetLink` to `= null` (the
+original defect) FAILED with `AssertionError: magnet should be exposed after
+topic view (KinozalDownloadTest.kt:59)`; reverted, `core:tracker:kinozal:test`
+all green (forced `--rerun-tasks`).
+
+**Fix commit:** `6fa31ad2`
+
+**Forensic anchor:** §6.E capability-honesty audit, 2026-06-08 session.
+
+---
+
+## 2026-06-08 — nnmclub-magnet-link-declared-but-null (§6.E bluff)
+
+**Root cause:** `NnmclubDescriptor` declares `MAGNET_LINK`, but
+`NnmclubDownload.getMagnetLink()` returned `null` though both
+`NnmclubSearchParser` and `NnmclubTopicParser` parse the genuine magnet from
+NNM-Club HTML — a §6.E bluff.
+
+**Affected files:**
+- `core/tracker/nnmclub/src/main/kotlin/lava/tracker/nnmclub/feature/NnmclubDownload.kt`
+- `core/tracker/nnmclub/src/main/kotlin/lava/tracker/nnmclub/feature/NnmclubTopic.kt`
+- `core/tracker/nnmclub/src/main/kotlin/lava/tracker/nnmclub/feature/NnmclubSearch.kt`
+- `core/tracker/nnmclub/src/main/kotlin/lava/tracker/nnmclub/http/NnmclubMagnetCache.kt` (NEW)
+- `core/tracker/nnmclub/src/main/kotlin/lava/tracker/nnmclub/NnmclubClientFactory.kt`
+- `core/tracker/nnmclub/src/test/kotlin/lava/tracker/nnmclub/feature/NnmclubMagnetExposureTest.kt` (NEW)
+- `core/tracker/nnmclub/src/test/kotlin/lava/tracker/nnmclub/feature/NnmclubDownloadTest.kt`
+- `core/tracker/nnmclub/src/test/kotlin/lava/tracker/nnmclub/feature/NnmclubSearchTest.kt`
+- `core/tracker/nnmclub/src/test/kotlin/lava/tracker/nnmclub/feature/NnmclubTopicTest.kt`
+- `core/tracker/nnmclub/src/test/kotlin/lava/tracker/nnmclub/NnmclubClientTest.kt`
+- `core/tracker/nnmclub/src/test/kotlin/lava/tracker/nnmclub/NnmclubClientFactoryCloneUrlTest.kt`
+- `core/tracker/nnmclub/src/test/resources/fixtures/nnmclub/search/search-with-magnet-2026-06-08.html` (NEW fixture)
+
+**Fix:** wire it honestly — a `@Singleton NnmclubMagnetCache` populated by the
+real topic-view (`NnmclubTopic.getTopic`) and search-row
+(`NnmclubSearch.search`) paths, read back by `getMagnetLink(id)`; honest
+`null` when nothing has surfaced it. Cache threaded through the clone-override
+path. Adds a real fixture (`search-with-magnet-2026-06-08.html`) containing a
+magnet row.
+
+**Verification test/challenge:** `NnmclubMagnetExposureTest`
+(`lava.tracker.nnmclub.feature`). Falsifiability rehearsal (per commit body):
+reverting `getMagnetLink` to `return null` (the historical bluff) FAILED 2 of
+3 — "exposes the parsed magnet after the topic page surfaces it" +
+"after a search row surfaces it" — `AssertionError` at
+`NnmclubMagnetExposureTest.kt:50` and `:82`; reverted,
+`core:tracker:nnmclub:test` 27 tests / 0 failures (forced `--rerun-tasks`).
+
+**Fix commit:** `13703bc8`
+
+**Forensic anchor:** §6.E capability-honesty audit, 2026-06-08 session.
+
+---
+
+## 2026-06-08 — rutor-magnet-link-declared-but-null + bluff-codifying test (§6.E)
+
+**Root cause:** `RuTorDescriptor` declares `MAGNET_LINK` but
+`RuTorDownload.getMagnetLink()` returned an unconditional `null` though
+`RuTorTopicParser` + `RuTorSearchParser` parse the genuine magnet from RuTor
+HTML — a §6.E bluff. Worse, a pre-existing test "rutor has no synchronous
+magnet (Capability Honesty)" CODIFIED the bluff as intentional.
+
+**Affected files:**
+- `core/tracker/rutor/.../feature/RuTorDownload.kt`
+- `core/tracker/rutor/.../feature/RuTorTopic.kt`
+- `core/tracker/rutor/.../feature/RuTorSearch.kt`
+- `core/tracker/rutor/.../magnet/RuTorMagnetCache.kt` (NEW)
+- `core/tracker/rutor/.../RuTorClientFactory.kt`
+- `core/tracker/rutor/.../feature/RuTorMagnetExposureTest.kt` (NEW)
+- `core/tracker/rutor/.../feature/RuTorDownloadTest.kt`
+- `core/tracker/rutor/.../feature/RuTorSearchTest.kt`
+- `core/tracker/rutor/.../feature/RuTorTopicTest.kt`
+- `core/tracker/rutor/.../RuTorClientTest.kt`
+- `core/tracker/rutor/.../RuTorClientFactoryCloneUrlTest.kt`
+- `.gitmodules` + `submodules/{doc_processor,llm_orchestrator,llm_provider,llms_verifier,vision_engine}` (the 5 HelixQA dep submodule gitlinks landed in this same commit; see the HelixQA pin entry below)
+
+> UNCONFIRMED: the exact `core/tracker/rutor` source-root prefix is abbreviated
+> above; `git show --stat 6d87019d` reports the file basenames but the path
+> column is truncated in the stat output. The basenames + `feature/` /
+> `magnet/` subdirs are confirmed.
+
+**Fix:** wire it honestly via a `@Singleton RuTorMagnetCache` populated by the
+real topic-view + search-row paths, read back by `getMagnetLink(id)`; honest
+`null` on miss. Threaded through the clone-override path. The bluff-codifying
+test was replaced with honest-absence semantics.
+
+**Verification test/challenge:** `RuTorMagnetExposureTest`. Falsifiability
+rehearsal (per commit body): reverting `getMagnetLink` to `return null` (the
+historical bluff) FAILED 2 of 3 — "exposes the parsed magnet after the topic
+page surfaces it" + "after a search row surfaces it" — `AssertionError` at
+`RuTorMagnetExposureTest.kt:57` and `:97`; reverted,
+`core:tracker:rutor:test` 76 tests / 0 failures; `RuTorMagnetExposureTest`
+3/0/0 (forced `--rerun-tasks`).
+
+**Fix commit:** `6d87019d`
+
+**Forensic anchor:** §6.E capability-honesty audit, 2026-06-08 session — this
+one is the sharpest §6.J case of the four because a passing test had been
+encoding the bluff as the intended contract.
+
+---
+
+## 2026-06-08 — gutenberg-dishonest-torrent-download-capability (§6.E)
+
+**Root cause:** `GutenbergDescriptor` declared `TORRENT_DOWNLOAD` but the
+provider serves HTTP e-books (Gutendex EPUB/text/HTML), not `.torrent` files
+— a §6.E capability-honesty bluff. The downloaded artifact is not a bencoded
+`.torrent`.
+
+**Affected files:**
+- `core/tracker/gutenberg/src/main/kotlin/lava/tracker/gutenberg/GutenbergDescriptor.kt`
+- `core/tracker/gutenberg/src/main/kotlin/lava/tracker/gutenberg/GutenbergClient.kt`
+- `core/tracker/gutenberg/src/test/kotlin/lava/tracker/gutenberg/GutenbergCapabilityHonestyTest.kt` (NEW)
+- `core/tracker/gutenberg/src/test/kotlin/lava/tracker/gutenberg/GutenbergClientTest.kt`
+- `core/tracker/gutenberg/src/test/kotlin/lava/tracker/gutenberg/GutenbergDescriptorTest.kt`
+
+**Fix:** mirror archiveorg's established honest pattern — drop
+`TORRENT_DOWNLOAD` from the descriptor; `GutenbergClient.getFeature(
+DownloadableTracker::class)` returns `null` explicitly (the `GutenbergDownload`
+impl stays wired but unexposed via the torrent surface). No enum/api change.
+Stale tests that encoded the bluff were removed.
+
+**Verification test/challenge:** `GutenbergCapabilityHonestyTest` pins the
+contract. Falsifiability rehearsal (per commit body): re-declaring
+`TORRENT_DOWNLOAD` + re-gating `getFeature` so the EPUB-serving impl is again
+exposed via the torrent-download surface FAILED — "download capability is
+honest about the artifact it produces" — `AssertionError: TORRENT_DOWNLOAD
+declared but downloaded artifact is not a bencoded .torrent (first byte was
+'e', expected 'd') (GutenbergCapabilityHonestyTest.kt:91)`; reverted,
+independently re-verified `GutenbergCapabilityHonestyTest` 2/0/0.
+
+**Fix commit:** `b197f96d`
+
+**Forensic anchor:** §6.E capability-honesty audit, 2026-06-08 session.
+
+---
+
+## 2026-06-08 — helixqa-broken-pin-gomod-conflict-markers (broke lava-api-go build)
+
+**Root cause:** HelixQA's `go.mod` `replace` directives require 8 sibling
+own-org (`digital.vasic.*`) Go modules; 3 were present
+(challenges/containers/security), 5 were MISSING, so the full `helixqa` binary
+could not build. The broken pinned HelixQA `go.mod` also carried unresolved
+merge-conflict markers (at lines 124 / 131 / 138 per the commit body), which
+broke `lava-api-go`'s Go build.
+
+**Affected files:**
+- `submodules/helixqa` (pin bump `5112906` → `dd3cf1d`)
+- `docs/qa/helixqa-dependency-submodules.md` (NEW doc)
+- `docs/CONTINUATION.md` (§0 + §3 sync)
+- (paired commit `6d87019d` adds the 5 dep submodule gitlinks
+  `submodules/{doc_processor,llm_orchestrator,llm_provider,llms_verifier,vision_engine}`
+  from `vasic-digital/{DocProcessor,LLMOrchestrator,LLMProvider,LLMsVerifier,VisionEngine}`)
+
+> UNCONFIRMED: the conflict-marker line numbers 124/131/138 are quoted from the
+> commit body, not independently re-diffed in this audit. The pin SHAs
+> `5112906 → dd3cf1d` and the `submodules/helixqa` change are confirmed by
+> `git show --stat dd72669b`.
+
+**Fix:** bump the helixqa pin `5112906 → dd3cf1d` (clean `go.mod`); add the 5
+missing dep submodules (local paths lowercase snake_case per §11.4.29 matching
+HelixQA's `../doc_processor` replace targets; URLs use the real CamelCase repo
+names per the must-not-break-technology carve-out).
+
+**Verification:** physical proof recorded in the commit body — `go build
+./cmd/helixqa` exit 0 → 29.7 MB binary; `helixqa version` → v0.2.0; and
+`lava-api-go` builds (exit 0).
+
+**Fix commit:** `dd72669b` (pin bump + doc) — the 5 dep submodule gitlinks
+landed in companion commit `6d87019d`.
+
+**Forensic anchor:** operator directive ("add all missing dependency
+Submodules from vasic-digital/HelixDevelopment") + §11.4.27/§11.4.28 (own-org
+deps reachable from root). OWED (tracked in CONTINUATION): §6.W GitLab mirrors
+for the 5 new submodules; §11.4.29 upstream CamelCase→snake_case repo rename.
+
+---
+
+## 2026-06-08 — nav-compose-2.9.0-test-teardown-lifecycle-race
+
+**Root cause (confirmed, stack-trace-quoted in the systematic-debugging
+investigation):** androidx-navigation-compose 2.9.0's single-top
+`NavBackStackEntry` lifecycle reaches `CREATED` asynchronously; the
+Espresso/Compose test-runner's immediate `Activity.performDestroy` then tries
+`INITIALIZED → DESTROYED` in one step → `IllegalStateException "State must be
+at least 'CREATED' to be moved to 'DESTROYED'"`. 2.9.1 release note: "Fixed an
+issue that caused NavEntries instantiated using single top to never go beyond
+CREATED in their Lifecycle.State" ([I043ba], b/421095236) — matches exactly
+(Lava uses `launchSingleTop=true`).
+
+**User impact:** NONE — real users get intervening lifecycle pauses. It is a
+synthetic test-teardown artifact that had forced Challenge tests C04–C08 +
+deep C11 to be gutted to shallow versions. Blast radius LOW: single direct
+consumer (`core/navigation`); `-Xcontext-receivers` is orthogonal (a Kotlin
+compiler feature, not the nav lib).
+
+**Affected files:**
+- `gradle/libs.versions.toml` (pin `2.9.0 → 2.9.1`)
+
+**Fix:** bump `androidx-navigation-compose` `2.9.0 → 2.9.1`.
+
+**Verification:** `./gradlew :core:navigation:compileDebugKotlin` → BUILD
+SUCCESSFUL with 2.9.1.
+
+> UNCONFIRMED / OWED (per commit body): the race-fix confirmation (restoring
+> the deep C04–C08/C11 Challenges + proving the teardown crash is gone) is
+> device-gated — requires the Genymotion VM / a real device, OWED when a
+> device is booted. Not yet verified on-device in this session.
+
+**Fix commit:** `7e6e7bcb`
+
+**Forensic anchor:** systematic-debugging investigation of the C04–C08/C11
+shallow-test regression, 2026-06-08 session.

@@ -1,0 +1,46 @@
+<!-- HAND-CRAFTED FIXTURE — does not represent a literal rutor.info capture; constructed for
+     parser edge-case robustness testing per the core/CLAUDE.md tracker-plugin test contract.
+     Structure (div#index > tr.gai/tr.tum rows, td colspan="2" title cell, a.downgif download
+     anchor, a[href^=magnet:] magnet anchor, span.green/span.red peers) is copied verbatim from
+     search-normal-2026-04-30.html so the production RuTorSearchParser selectors apply unchanged.
+     Each row deliberately omits one optional field a real rutor row may lack:
+       Row 1 (1052665): FULL row — control. Title, size, magnet, both peer counts present.
+       Row 2 (1050403): NO magnet anchor (and therefore no infoHash). All other fields present.
+       Row 3 (1049194): NO peers spans (span.green / span.red absent) — seeders/leechers null.
+       Row 4 (1049193): NO parseable size cell (size td replaced with em-dash placeholder).
+     All four rows carry synthetic infoHashes / ids; no real credentials or production literals.
+     The parser MUST NOT throw and MUST return a TorrentItem per row with the missing field null. -->
+<html>
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+	<title>rutor.info :: Поиск</title>
+</head>
+<body>
+<div id="all">
+<div id="up">
+<table id="news_table">
+  <tr><td colspan="2"><strong>Новости трекера</strong></td></tr><tr><td class="news_date">22-Апр</td>
+  	<td class="news_title"><a href="/torrent/472" target="_blank" id="news89">Новый Адрес: RUTOR.INFO и RUTOR.IS</a></td></tr><tr><td class="news_date">09-Окт</td>
+  	<td class="news_title"><a href="/torrent/145012" target="_blank" id="news59">Путеводитель по RUTOR.is: Правила, Руководства, Секреты</a></td></tr></table>
+</div>
+<div id="menu">
+<a href="/" class="menu_b"><div>Главная</div></a>
+</div>
+<h1>Поиск</h1>
+</div>
+<div id="ws">
+<div id="content">
+<div id="index"><b>Страницы:  1 <a href="/search/1/0/000/0/edge">2</a></b> Результатов поиска 4 (max. 2000)<table width="100%"><tr class="backgr"><td width="10px">Добавлен</td><td colspan="2">Название</td><td width="1px">Размер</td><td width="1px">Пиры</td></tr><tr class="gai"><td>11&nbsp;Сен&nbsp;25</td><td colspan = "2"><a class="downgif" href="//d.rutor.info/download/1052665"><img src="//cdnbunny.org/i/d.gif" alt="D" /></a><a href="magnet:?xt=urn:btih:fb3e518132e636b798c4ae4b346b60578665e09e&dn=rutor.info&tr=udp://opentor.net:6969"><img src="//cdnbunny.org/i/m.png" alt="M" /></a>
+<a href="/torrent/1052665/full-control-row">Полный ряд (контрольный) [amd64] (2025) PC </a></td>
+<td align="right">4.25&nbsp;GB</td><td align="center"><span class="green"><img src="//cdnbunny.org/t/arrowup.gif" alt="S" />&nbsp;7</span>&nbsp;<img src="//cdnbunny.org/t/arrowdown.gif" alt="L" /><span class="red">&nbsp;2</span></td></tr><tr class="tum"><td>25&nbsp;Авг&nbsp;25</td><td colspan = "2"><a class="downgif" href="//d.rutor.info/download/1050403"><img src="//cdnbunny.org/i/d.gif" alt="D" /></a>
+<a href="/torrent/1050403/no-magnet-row">Раздача без магнет-ссылки [amd64] (2025) PC </a></td>
+<td align="right">4.11&nbsp;GB</td><td align="center"><span class="green"><img src="//cdnbunny.org/t/arrowup.gif" alt="S" />&nbsp;5</span>&nbsp;<img src="//cdnbunny.org/t/arrowdown.gif" alt="L" /><span class="red">&nbsp;0</span></td></tr><tr class="gai"><td>16&nbsp;Авг&nbsp;25</td><td colspan = "2"><a class="downgif" href="//d.rutor.info/download/1049194"><img src="//cdnbunny.org/i/d.gif" alt="D" /></a><a href="magnet:?xt=urn:btih:34aa0670cdcb1a53543c1455332d8c104793a720&dn=rutor.info&tr=udp://opentor.net:6969"><img src="//cdnbunny.org/i/m.png" alt="M" /></a>
+<a href="/torrent/1049194/no-peers-row">Раздача без счётчика пиров [amd64] (2025) PC </a></td>
+<td align="right">3.96&nbsp;GB</td><td align="center"></td></tr><tr class="tum"><td>16&nbsp;Авг&nbsp;25</td><td colspan = "2"><a class="downgif" href="//d.rutor.info/download/1049193"><img src="//cdnbunny.org/i/d.gif" alt="D" /></a><a href="magnet:?xt=urn:btih:828ddf9adce79ff16cec5c1966604aba79d77a4a&dn=rutor.info&tr=udp://opentor.net:6969"><img src="//cdnbunny.org/i/m.png" alt="M" /></a>
+<a href="/torrent/1049193/no-size-row">Раздача без размера [amd64] (2025) PC </a></td>
+<td align="right">—</td><td align="center"><span class="green"><img src="//cdnbunny.org/t/arrowup.gif" alt="S" />&nbsp;3</span>&nbsp;<img src="//cdnbunny.org/t/arrowdown.gif" alt="L" /><span class="red">&nbsp;1</span></td></tr></table><b>Страницы:  1 <a href="/search/1/0/000/0/edge">2</a></b></div>
+</div>
+</div>
+</div>
+</body>
+</html>
