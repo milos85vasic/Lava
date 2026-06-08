@@ -2,6 +2,7 @@ package lava.tracker.nnmclub.feature
 
 import kotlinx.coroutines.runBlocking
 import lava.tracker.nnmclub.http.NnmclubHttpClient
+import lava.tracker.nnmclub.http.NnmclubMagnetCache
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import okio.Buffer
@@ -35,7 +36,7 @@ class NnmclubDownloadTest {
                 .setResponseCode(200),
         )
         val baseUrl = server.url("/").toString().trimEnd('/')
-        val feature = NnmclubDownload(NnmclubHttpClient(), baseUrl)
+        val feature = NnmclubDownload(NnmclubHttpClient(), NnmclubMagnetCache(), baseUrl)
 
         val bytes = feature.downloadTorrentFile("1001")
 
@@ -44,8 +45,12 @@ class NnmclubDownloadTest {
     }
 
     @Test
-    fun `getMagnetLink returns null because NNM-Club has no synchronous magnet (Capability Honesty)`() {
-        val feature = NnmclubDownload(NnmclubHttpClient(), "https://unused")
+    fun `getMagnetLink returns null when no fetch has surfaced a magnet (honest absence)`() {
+        // Empty cache: no topic/search fetch has surfaced this id, so the magnet
+        // is genuinely not synchronously available (DownloadableTracker contract).
+        // The MAGNET_LINK capability honesty is proven by NnmclubMagnetExposureTest,
+        // which populates the cache via the real topic/search path.
+        val feature = NnmclubDownload(NnmclubHttpClient(), NnmclubMagnetCache(), "https://unused")
         assertNull(feature.getMagnetLink("1001"))
     }
 }

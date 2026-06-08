@@ -10,6 +10,7 @@ import lava.tracker.nnmclub.feature.NnmclubDownload
 import lava.tracker.nnmclub.feature.NnmclubSearch
 import lava.tracker.nnmclub.feature.NnmclubTopic
 import lava.tracker.nnmclub.http.NnmclubHttpClient
+import lava.tracker.nnmclub.http.NnmclubMagnetCache
 import lava.tracker.nnmclub.parser.NnmclubBrowseParser
 import lava.tracker.nnmclub.parser.NnmclubLoginParser
 import lava.tracker.nnmclub.parser.NnmclubSearchParser
@@ -39,6 +40,7 @@ class NnmclubClientFactory @Inject constructor(
     private val browseParser: NnmclubBrowseParser,
     private val topicParser: NnmclubTopicParser,
     private val loginParser: NnmclubLoginParser,
+    private val magnetCache: NnmclubMagnetCache,
 ) : TrackerClientFactory {
     override val descriptor: TrackerDescriptor = NnmclubDescriptor
 
@@ -47,12 +49,12 @@ class NnmclubClientFactory @Inject constructor(
         if (override != null) {
             return NnmclubClient(
                 http = http,
-                search = NnmclubSearch(http, searchParser, override),
+                search = NnmclubSearch(http, searchParser, magnetCache, override),
                 browse = NnmclubBrowse(http, browseParser, override),
-                topic = NnmclubTopic(http, topicParser, override),
+                topic = NnmclubTopic(http, topicParser, magnetCache, override),
                 comments = NnmclubComments(http, override),
                 auth = NnmclubAuth(http, loginParser, override),
-                download = NnmclubDownload(http, override),
+                download = NnmclubDownload(http, magnetCache, override),
             )
         }
         return clientProvider.get()

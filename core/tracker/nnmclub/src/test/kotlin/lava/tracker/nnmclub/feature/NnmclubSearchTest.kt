@@ -3,6 +3,7 @@ package lava.tracker.nnmclub.feature
 import kotlinx.coroutines.runBlocking
 import lava.tracker.api.model.SearchRequest
 import lava.tracker.nnmclub.http.NnmclubHttpClient
+import lava.tracker.nnmclub.http.NnmclubMagnetCache
 import lava.tracker.nnmclub.parser.NnmclubSearchParser
 import lava.tracker.testing.LavaFixtureLoader
 import okhttp3.mockwebserver.MockResponse
@@ -34,7 +35,7 @@ class NnmclubSearchTest {
         val html = loader.load("search", "search-normal-2026-05-02.html")
         server.enqueue(MockResponse().setBody(html).setResponseCode(200))
         val baseUrl = server.url("/").toString().trimEnd('/')
-        val feature = NnmclubSearch(NnmclubHttpClient(), parser, baseUrl)
+        val feature = NnmclubSearch(NnmclubHttpClient(), parser, NnmclubMagnetCache(), baseUrl)
 
         val result = feature.search(SearchRequest(query = "linux"), page = 0)
 
@@ -53,7 +54,7 @@ class NnmclubSearchTest {
         val html = loader.load("search", "search-empty-2026-05-02.html")
         server.enqueue(MockResponse().setBody(html).setResponseCode(200))
         val baseUrl = server.url("/").toString().trimEnd('/')
-        val feature = NnmclubSearch(NnmclubHttpClient(), parser, baseUrl)
+        val feature = NnmclubSearch(NnmclubHttpClient(), parser, NnmclubMagnetCache(), baseUrl)
 
         feature.search(SearchRequest(query = "ubuntu"), page = 2)
 

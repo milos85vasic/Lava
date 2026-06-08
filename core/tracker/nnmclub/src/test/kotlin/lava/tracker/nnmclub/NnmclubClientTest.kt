@@ -19,6 +19,7 @@ class NnmclubClientTest {
             search = lava.tracker.nnmclub.feature.NnmclubSearch(
                 lava.tracker.nnmclub.http.NnmclubHttpClient(),
                 lava.tracker.nnmclub.parser.NnmclubSearchParser(),
+                lava.tracker.nnmclub.http.NnmclubMagnetCache(),
             ),
             browse = lava.tracker.nnmclub.feature.NnmclubBrowse(
                 lava.tracker.nnmclub.http.NnmclubHttpClient(),
@@ -27,6 +28,7 @@ class NnmclubClientTest {
             topic = lava.tracker.nnmclub.feature.NnmclubTopic(
                 lava.tracker.nnmclub.http.NnmclubHttpClient(),
                 lava.tracker.nnmclub.parser.NnmclubTopicParser(),
+                lava.tracker.nnmclub.http.NnmclubMagnetCache(),
             ),
             comments = lava.tracker.nnmclub.feature.NnmclubComments(
                 lava.tracker.nnmclub.http.NnmclubHttpClient(),
@@ -37,6 +39,7 @@ class NnmclubClientTest {
             ),
             download = lava.tracker.nnmclub.feature.NnmclubDownload(
                 lava.tracker.nnmclub.http.NnmclubHttpClient(),
+                lava.tracker.nnmclub.http.NnmclubMagnetCache(),
             ),
         )
 
@@ -55,6 +58,7 @@ class NnmclubClientTest {
             search = lava.tracker.nnmclub.feature.NnmclubSearch(
                 lava.tracker.nnmclub.http.NnmclubHttpClient(),
                 lava.tracker.nnmclub.parser.NnmclubSearchParser(),
+                lava.tracker.nnmclub.http.NnmclubMagnetCache(),
             ),
             browse = lava.tracker.nnmclub.feature.NnmclubBrowse(
                 lava.tracker.nnmclub.http.NnmclubHttpClient(),
@@ -63,6 +67,7 @@ class NnmclubClientTest {
             topic = lava.tracker.nnmclub.feature.NnmclubTopic(
                 lava.tracker.nnmclub.http.NnmclubHttpClient(),
                 lava.tracker.nnmclub.parser.NnmclubTopicParser(),
+                lava.tracker.nnmclub.http.NnmclubMagnetCache(),
             ),
             comments = lava.tracker.nnmclub.feature.NnmclubComments(
                 lava.tracker.nnmclub.http.NnmclubHttpClient(),
@@ -73,6 +78,7 @@ class NnmclubClientTest {
             ),
             download = lava.tracker.nnmclub.feature.NnmclubDownload(
                 lava.tracker.nnmclub.http.NnmclubHttpClient(),
+                lava.tracker.nnmclub.http.NnmclubMagnetCache(),
             ),
         )
 

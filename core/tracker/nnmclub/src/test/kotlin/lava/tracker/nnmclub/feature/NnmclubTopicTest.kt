@@ -2,6 +2,7 @@ package lava.tracker.nnmclub.feature
 
 import kotlinx.coroutines.runBlocking
 import lava.tracker.nnmclub.http.NnmclubHttpClient
+import lava.tracker.nnmclub.http.NnmclubMagnetCache
 import lava.tracker.nnmclub.parser.NnmclubTopicParser
 import lava.tracker.testing.LavaFixtureLoader
 import okhttp3.mockwebserver.MockResponse
@@ -33,7 +34,7 @@ class NnmclubTopicTest {
         val html = loader.load("topic", "topic-normal-2026-05-02.html")
         server.enqueue(MockResponse().setBody(html).setResponseCode(200))
         val baseUrl = server.url("/").toString().trimEnd('/')
-        val feature = NnmclubTopic(NnmclubHttpClient(), parser, baseUrl)
+        val feature = NnmclubTopic(NnmclubHttpClient(), parser, NnmclubMagnetCache(), baseUrl)
 
         val detail = feature.getTopic("1001")
 
@@ -47,7 +48,7 @@ class NnmclubTopicTest {
         val html = loader.load("topic", "topic-normal-2026-05-02.html")
         server.enqueue(MockResponse().setBody(html).setResponseCode(200))
         val baseUrl = server.url("/").toString().trimEnd('/')
-        val feature = NnmclubTopic(NnmclubHttpClient(), parser, baseUrl)
+        val feature = NnmclubTopic(NnmclubHttpClient(), parser, NnmclubMagnetCache(), baseUrl)
 
         val page = feature.getTopicPage("1001", page = 0)
 

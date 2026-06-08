@@ -5,6 +5,7 @@ import lava.sdk.api.MapPluginConfig
 import lava.tracker.api.feature.SearchableTracker
 import lava.tracker.api.model.SearchRequest
 import lava.tracker.nnmclub.http.NnmclubHttpClient
+import lava.tracker.nnmclub.http.NnmclubMagnetCache
 import lava.tracker.nnmclub.parser.NnmclubBrowseParser
 import lava.tracker.nnmclub.parser.NnmclubLoginParser
 import lava.tracker.nnmclub.parser.NnmclubSearchParser
@@ -62,6 +63,7 @@ class NnmclubClientFactoryCloneUrlTest {
             browseParser = browseParser,
             topicParser = topicParser,
             loginParser = loginParser,
+            magnetCache = NnmclubMagnetCache(),
         )
 
         val config = MapPluginConfig(mapOf(CLONE_BASE_URL_CONFIG_KEY to overrideBaseUrl))
@@ -88,14 +90,15 @@ class NnmclubClientFactoryCloneUrlTest {
         val topicParser = NnmclubTopicParser()
         val loginParser = NnmclubLoginParser()
         var providerCalled = false
+        val magnetCache = NnmclubMagnetCache()
         val singleton = NnmclubClient(
             http = http,
-            search = lava.tracker.nnmclub.feature.NnmclubSearch(http, searchParser),
+            search = lava.tracker.nnmclub.feature.NnmclubSearch(http, searchParser, magnetCache),
             browse = lava.tracker.nnmclub.feature.NnmclubBrowse(http, browseParser),
-            topic = lava.tracker.nnmclub.feature.NnmclubTopic(http, topicParser),
+            topic = lava.tracker.nnmclub.feature.NnmclubTopic(http, topicParser, magnetCache),
             comments = lava.tracker.nnmclub.feature.NnmclubComments(http),
             auth = lava.tracker.nnmclub.feature.NnmclubAuth(http, loginParser),
-            download = lava.tracker.nnmclub.feature.NnmclubDownload(http),
+            download = lava.tracker.nnmclub.feature.NnmclubDownload(http, magnetCache),
         )
         val provider = Provider<NnmclubClient> {
             providerCalled = true
@@ -108,6 +111,7 @@ class NnmclubClientFactoryCloneUrlTest {
             browseParser = browseParser,
             topicParser = topicParser,
             loginParser = loginParser,
+            magnetCache = magnetCache,
         )
 
         val client = factory.create(MapPluginConfig())
