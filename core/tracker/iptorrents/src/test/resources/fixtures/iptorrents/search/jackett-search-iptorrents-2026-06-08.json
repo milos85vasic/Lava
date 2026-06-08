@@ -1,0 +1,39 @@
+{
+  "provider": "jackett",
+  "page": 1,
+  "totalPages": 1,
+  "results": [
+    {
+      "id": "https://iptorrents.com/details.php?id=8675309",
+      "title": "Ubuntu 24.04 LTS Desktop amd64",
+      "size": "5.79 GB",
+      "sizeBytes": 6221934592,
+      "seeders": 142,
+      "leechers": 7,
+      "category": "iptorrents",
+      "downloadUrl": "https://localhost:8443/jackett/dl/iptorrents/?path=Q29uZmln&file=ubuntu-24.04.torrent",
+      "magnetLink": "magnet:?xt=urn:btih:c12fe1c06bba254a9dc9f519b335aa7c1367a88a&dn=Ubuntu+24.04",
+      "infoHash": "c12fe1c06bba254a9dc9f519b335aa7c1367a88a"
+    },
+    {
+      "id": "https://iptorrents.com/details.php?id=1111111",
+      "title": "Debian 12 netinst",
+      "size": "628.00 MB",
+      "sizeBytes": 658505728,
+      "seeders": 58,
+      "category": "iptorrents",
+      "magnetLink": "magnet:?xt=urn:btih:1f129d8c4b8e2b3a4c5d6e7f8091a2b3c4d5e6f7&dn=Debian+12",
+      "infoHash": "1f129d8c4b8e2b3a4c5d6e7f8091a2b3c4d5e6f7"
+    },
+    {
+      "id": "https://iptorrents.com/details.php?id=2222222",
+      "title": "Arch Linux 2026.06 ISO",
+      "size": "1.10 GB",
+      "sizeBytes": 1181116006,
+      "seeders": 33,
+      "category": "iptorrents",
+      "downloadUrl": "https://localhost:8443/jackett/dl/iptorrents/?path=QXJjaA&file=archlinux-2026.06.torrent",
+      "infoHash": "aabbccddeeff00112233445566778899aabbccdd"
+    }
+  ]
+}

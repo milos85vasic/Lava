@@ -2,6 +2,7 @@ package lava.tracker.client
 
 import lava.tracker.archiveorg.ArchiveOrgDescriptor
 import lava.tracker.gutenberg.GutenbergDescriptor
+import lava.tracker.iptorrents.IPTorrentsDescriptor
 import lava.tracker.kinozal.KinozalDescriptor
 import lava.tracker.nnmclub.NnmclubDescriptor
 import lava.tracker.rutor.RuTorDescriptor
@@ -71,6 +72,12 @@ class ProviderVerifiedContractTest {
     private val unverifiedIds = setOf(
         KinozalDescriptor.trackerId,
         NnmclubDescriptor.trackerId,
+        // IPTorrents (Jackett-delegating, design option 3b): verified=false until
+        // the §6.G real-stack proof runs against a running lava-api-go
+        // /jackett/search sidecar AND an operator real-device attestation is
+        // recorded. No Challenge Test can pass on the gating matrix without the
+        // sidecar up — fail-closed until then.
+        IPTorrentsDescriptor.trackerId,
     )
 
     @Test
@@ -122,6 +129,14 @@ class ProviderVerifiedContractTest {
     }
 
     @Test
+    fun `IPTorrents is NOT verified — §6_G real-stack sidecar proof not yet executed`() {
+        assertFalse(
+            "IPTorrentsDescriptor.verified MUST stay false until the §6.G real-stack test passes against a running lava-api-go /jackett/search sidecar AND an operator real-device attestation is recorded",
+            IPTorrentsDescriptor.verified,
+        )
+    }
+
+    @Test
     fun `verified set + unverified set covers every shipped descriptor exactly once`() {
         val intersection = verifiedIds intersect unverifiedIds
         assertTrue(
@@ -129,8 +144,8 @@ class ProviderVerifiedContractTest {
             intersection.isEmpty(),
         )
         assertEquals(
-            "Total descriptors covered: ${verifiedIds.size} verified + ${unverifiedIds.size} unverified = 6 shipped",
-            6,
+            "Total descriptors covered: ${verifiedIds.size} verified + ${unverifiedIds.size} unverified = 7 shipped",
+            7,
             verifiedIds.size + unverifiedIds.size,
         )
     }

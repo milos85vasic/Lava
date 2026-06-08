@@ -22,6 +22,7 @@ import kotlinx.serialization.json.Json
 import lava.auth.api.TokenProvider
 import lava.tracker.archiveorg.ArchiveOrgClientFactory
 import lava.tracker.gutenberg.GutenbergClientFactory
+import lava.tracker.iptorrents.IPTorrentsClientFactory
 import lava.tracker.kinozal.KinozalClientFactory
 import lava.tracker.nnmclub.NnmclubClientFactory
 import lava.tracker.registry.DefaultTrackerRegistry
@@ -264,6 +265,7 @@ object TrackerClientModule {
         rutorFactory: RuTorClientFactory,
         nnmclubFactory: NnmclubClientFactory,
         kinozalFactory: KinozalClientFactory,
+        iptorrentsFactory: IPTorrentsClientFactory,
         archiveOrgFactory: ArchiveOrgClientFactory,
         gutenbergFactory: GutenbergClientFactory,
     ): TrackerRegistry = DefaultTrackerRegistry().apply {
@@ -271,6 +273,7 @@ object TrackerClientModule {
         register(rutorFactory)
         register(nnmclubFactory)
         register(kinozalFactory)
+        register(iptorrentsFactory)
         register(archiveOrgFactory)
         register(gutenbergFactory)
     }

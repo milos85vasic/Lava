@@ -22,6 +22,7 @@ dependencies {
     api(project(":core:tracker:rutor"))
     api(project(":core:tracker:nnmclub"))
     api(project(":core:tracker:kinozal"))
+    api(project(":core:tracker:iptorrents"))
     api(project(":core:tracker:archiveorg"))
     api(project(":core:tracker:gutenberg"))
 

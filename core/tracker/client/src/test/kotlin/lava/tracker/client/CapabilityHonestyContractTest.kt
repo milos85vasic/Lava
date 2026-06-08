@@ -15,6 +15,7 @@ import lava.tracker.api.feature.SearchableTracker
 import lava.tracker.api.feature.TopicTracker
 import lava.tracker.archiveorg.ArchiveOrgClient
 import lava.tracker.gutenberg.GutenbergClient
+import lava.tracker.iptorrents.IPTorrentsClient
 import lava.tracker.kinozal.KinozalClient
 import lava.tracker.nnmclub.NnmclubClient
 import lava.tracker.rutor.RuTorClient
@@ -38,8 +39,8 @@ import kotlin.reflect.KClass
  *   returns NON-NULL.
  *
  * This gate enumerates EVERY client wired into [TrackerClientModule]'s
- * registry (the six factories registered there — rutracker, rutor, nnmclub,
- * kinozal, archiveorg, gutenberg), and for each one, for every declared
+ * registry (the factories registered there — rutracker, rutor, nnmclub,
+ * kinozal, iptorrents, archiveorg, gutenberg), and for each one, for every declared
  * capability that has a matching feature interface, asserts the REAL
  * production [TrackerClient.getFeature] returns a non-null impl.
  *
@@ -147,6 +148,10 @@ class CapabilityHonestyContractTest {
             auth = mockk(relaxed = true),
             download = mockk(relaxed = true),
         ),
+        IPTorrentsClient(
+            search = mockk(relaxed = true),
+            download = mockk(relaxed = true),
+        ),
         ArchiveOrgClient(
             http = mockk(relaxed = true),
             search = mockk(relaxed = true),
@@ -196,19 +201,18 @@ class CapabilityHonestyContractTest {
     }
 
     /**
-     * Coverage assertion: this gate must guard exactly the six clients the
-     * Hilt registry registers. If a seventh provider is added to
-     * [TrackerClientModule] without being added to [registeredClients], the
-     * gate would silently stop guarding it — this test forces the two lists
-     * to stay in lockstep.
+     * Coverage assertion: this gate must guard exactly the clients the Hilt
+     * registry registers. If a new provider is added to [TrackerClientModule]
+     * without being added to [registeredClients], the gate would silently stop
+     * guarding it — this test forces the two lists to stay in lockstep.
      */
     @Test
-    fun `gate guards exactly the six registered providers`() {
+    fun `gate guards exactly the registered providers`() {
         val guarded = registeredClients().map { it.descriptor.trackerId }.toSet()
-        val expected = setOf("rutracker", "rutor", "nnmclub", "kinozal", "archiveorg", "gutenberg")
+        val expected = setOf("rutracker", "rutor", "nnmclub", "kinozal", "iptorrents", "archiveorg", "gutenberg")
         assertTrue(
             "Registered clients guarded by the 6.E gate ($guarded) must equal the " +
-                "six factories TrackerClientModule registers ($expected). If you added a " +
+                "factories TrackerClientModule registers ($expected). If you added a " +
                 "provider to the Hilt registry, add it to registeredClients() too.",
             guarded == expected,
         )
