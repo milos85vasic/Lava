@@ -123,7 +123,10 @@ class Challenge26ApiDiscoveryAndConnectivityTest {
 
         composeRule.onNodeWithText("Found 1 API:").assertIsDisplayed()
         composeRule.onNodeWithText("192.168.1.42:8443").assertIsDisplayed()
-        composeRule.onNodeWithText("Lava API").assertIsDisplayed()
+        // The GoApi row subtitle is "Lava API · ${discoveredApiLabel(platform)}"; a no-platform
+        // GoApi renders LABEL_NETWORK = "On this network" (Sub-project 2). onNodeWithText is an
+        // EXACT match, so the bare "Lava API" expectation was stale — assert the real rendered text.
+        composeRule.onNodeWithText("Lava API · On this network").assertIsDisplayed()
     }
 
     @Test
