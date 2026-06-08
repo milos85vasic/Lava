@@ -247,7 +247,9 @@ object TrackerClientModule {
 
     @Provides
     @Singleton
-    fun provideGetMagnetLinkUseCase(): GetMagnetLinkUseCase = GetMagnetLinkUseCase()
+    fun provideGetMagnetLinkUseCase(
+        magnetCache: lava.tracker.rutracker.magnet.RuTrackerMagnetCache,
+    ): GetMagnetLinkUseCase = GetMagnetLinkUseCase(magnetCache)
 
     // -----------------------------------------------------------------
     // Registry — populated with both the RuTracker and RuTor factories

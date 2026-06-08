@@ -34,6 +34,7 @@ import lava.tracker.rutracker.feature.RuTrackerFavorites
 import lava.tracker.rutracker.feature.RuTrackerSearch
 import lava.tracker.rutracker.feature.RuTrackerTopic
 import lava.tracker.rutracker.impl.RuTrackerInnerApiImpl
+import lava.tracker.rutracker.magnet.RuTrackerMagnetCache
 import lava.tracker.rutracker.mapper.AuthMapper
 import lava.tracker.rutracker.mapper.CategoryPageMapper
 import lava.tracker.rutracker.mapper.CommentsMapper
@@ -91,7 +92,10 @@ object RuTrackerSubgraphBuilder {
         val logout = LogoutUseCase(tokenProvider)
         val checkAuthorised = CheckAuthorisedUseCase(innerApi, VerifyAuthorisedUseCase)
         val getTorrentFile = GetTorrentFileUseCase(innerApi, withToken)
-        val getMagnetLink = GetMagnetLinkUseCase()
+        // §6.E: one shared magnet cache per cloned subgraph — topic/search
+        // populate it from the parsed magnetUri, download reads it.
+        val magnetCache = RuTrackerMagnetCache()
+        val getMagnetLink = GetMagnetLinkUseCase(magnetCache)
 
         // 8 mappers (all @Inject constructor() — no args)
         val searchMapper = SearchPageMapper()
@@ -103,9 +107,9 @@ object RuTrackerSubgraphBuilder {
         val favoritesMapper = FavoritesMapper()
 
         // 7 feature impls
-        val search = RuTrackerSearch(getSearchPage, searchMapper, tokenProvider)
+        val search = RuTrackerSearch(getSearchPage, searchMapper, tokenProvider, magnetCache)
         val browse = RuTrackerBrowse(getCategoryPage, getForum, categoryMapper, forumMapper)
-        val topic = RuTrackerTopic(getTopic, getTopicPage, topicMapper, tokenProvider)
+        val topic = RuTrackerTopic(getTopic, getTopicPage, topicMapper, tokenProvider, magnetCache)
         val comments = RuTrackerComments(getCommentsPage, addComment, commentsMapper, tokenProvider)
         val auth = RuTrackerAuth(login, logout, checkAuthorised, authMapper, tokenProvider)
         val download = RuTrackerDownload(getTorrentFile, getMagnetLink, tokenProvider)

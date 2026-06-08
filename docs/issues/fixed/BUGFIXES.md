@@ -920,3 +920,46 @@ SUCCESSFUL with 2.9.1.
 
 **Forensic anchor:** systematic-debugging investigation of the C04–C08/C11
 shallow-test regression, 2026-06-08 session.
+
+---
+
+## §6.E — RuTracker `MAGNET_LINK` declared but `getMagnetLink` returned null (2026-06-08)
+
+**Class:** §6.E capability-honesty bluff (declared-but-empty capability).
+
+**Symptom:** `RuTrackerDescriptor` declares `TrackerCapability.MAGNET_LINK`
+(`RuTrackerDescriptor.kt:36`) and `getFeature(DownloadableTracker)` resolves to a
+non-null `RuTrackerDownload`, but the only reachable `getMagnetLink` impl
+(`GetMagnetLinkUseCase`) returned `null` unconditionally for EVERY id on the real
+stack — even though RuTracker genuinely parses the magnet (`TopicMapper.kt:121`).
+A user tapping "Magnet" on a RuTracker topic could never get the magnet the app
+had already parsed. Identical to the bluff RuTor closed with `RuTorMagnetCache`.
+
+**Root cause:** `GetMagnetLinkUseCase.invoke(id) = null` stub; no path carried the
+parsed `TorrentItem.magnetUri` from the topic/search fetch to the synchronous
+`DownloadableTracker.getMagnetLink`. Audit: `docs/qa/magnet-label-honesty-audit-2026-06-08.md` (W4a).
+
+**Affected files:**
+- `core/tracker/rutracker/.../magnet/RuTrackerMagnetCache.kt` (new — RuTor pattern)
+- `core/tracker/rutracker/.../domain/GetMagnetLinkUseCase.kt` (reads the cache)
+- `core/tracker/rutracker/.../feature/RuTrackerTopic.kt` (populates on getTopic)
+- `core/tracker/rutracker/.../feature/RuTrackerSearch.kt` (populates per result row)
+- `core/tracker/rutracker/.../RuTrackerSubgraphBuilder.kt` (shared cache, clone path)
+- `core/tracker/client/.../di/TrackerClientModule.kt` (Hilt @Provides reads the cache)
+
+**Fix:** adopt the RuTor magnet-cache pattern — a `@Singleton` process-lifetime
+`RuTrackerMagnetCache` populated by `RuTrackerTopic.getTopic` /
+`RuTrackerSearch.search` from the already-mapped `magnetUri`, read by
+`GetMagnetLinkUseCase`. Honest null preserved for ids never surfaced.
+
+**Verification (§6.T.1 reproduction-before-fix):**
+- RED (pre-fix, against the stub): `RuTrackerMagnetExposureTest > getMagnetLink
+  exposes the magnet the topic mapper surfaced` FAILED — "§6.E BLUFF: ... getMagnetLink
+  returned null".
+- Mutation rehearsal (post-fix, `invoke → null`): same test FAILED again (exit 1).
+- GREEN (fix): `RuTrackerMagnetExposureTest` 2/2 PASS; `:core:tracker:client:testDebugUnitTest`
+  BUILD SUCCESSFUL (Hilt graph valid; enumeration gate 5/5 + 8/8).
+
+**Forensic anchor:** SA4 §6.E honesty audit, 2026-06-08 parallel-fleet session.
+Full-loop (topic fetch → cache → download) covered on-device by the restored
+C05/C06 Challenges (device run owed).
