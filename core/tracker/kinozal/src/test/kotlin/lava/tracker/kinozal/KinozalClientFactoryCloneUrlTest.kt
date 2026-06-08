@@ -5,6 +5,7 @@ import lava.sdk.api.MapPluginConfig
 import lava.tracker.api.feature.SearchableTracker
 import lava.tracker.api.model.SearchRequest
 import lava.tracker.kinozal.http.KinozalHttpClient
+import lava.tracker.kinozal.magnet.KinozalMagnetCache
 import lava.tracker.kinozal.parser.KinozalSearchParser
 import lava.tracker.kinozal.parser.KinozalTopicParser
 import lava.tracker.registry.CLONE_BASE_URL_CONFIG_KEY
@@ -55,7 +56,7 @@ class KinozalClientFactoryCloneUrlTest {
         val singletonProvider = Provider<KinozalClient> {
             error("singleton path must NOT be taken when override is present")
         }
-        val factory = KinozalClientFactory(singletonProvider, http, searchParser, topicParser)
+        val factory = KinozalClientFactory(singletonProvider, http, searchParser, topicParser, KinozalMagnetCache())
 
         val config = MapPluginConfig(mapOf(CLONE_BASE_URL_CONFIG_KEY to overrideBaseUrl))
         val client = factory.create(config)
@@ -78,20 +79,21 @@ class KinozalClientFactoryCloneUrlTest {
         val http = KinozalHttpClient()
         val searchParser = KinozalSearchParser()
         val topicParser = KinozalTopicParser()
+        val magnetCache = KinozalMagnetCache()
         var providerCalled = false
         val singleton = KinozalClient(
             http = http,
             search = lava.tracker.kinozal.feature.KinozalSearch(http, searchParser),
             browse = lava.tracker.kinozal.feature.KinozalBrowse(http, searchParser),
-            topic = lava.tracker.kinozal.feature.KinozalTopic(http, topicParser),
+            topic = lava.tracker.kinozal.feature.KinozalTopic(http, topicParser, magnetCache),
             auth = lava.tracker.kinozal.feature.KinozalAuth(http),
-            download = lava.tracker.kinozal.feature.KinozalDownload(http),
+            download = lava.tracker.kinozal.feature.KinozalDownload(http, magnetCache),
         )
         val provider = Provider<KinozalClient> {
             providerCalled = true
             singleton
         }
-        val factory = KinozalClientFactory(provider, http, searchParser, topicParser)
+        val factory = KinozalClientFactory(provider, http, searchParser, topicParser, magnetCache)
 
         val client = factory.create(MapPluginConfig())
 

@@ -2,6 +2,7 @@ package lava.tracker.kinozal.feature
 
 import kotlinx.coroutines.runBlocking
 import lava.tracker.kinozal.http.KinozalHttpClient
+import lava.tracker.kinozal.magnet.KinozalMagnetCache
 import lava.tracker.kinozal.parser.KinozalTopicParser
 import lava.tracker.testing.LavaFixtureLoader
 import okhttp3.mockwebserver.MockResponse
@@ -32,7 +33,7 @@ class KinozalTopicTest {
         val html = loader.load("topic", "topic-normal-2026-05-02.html")
         server.enqueue(MockResponse().setBody(html).setResponseCode(200))
         val baseUrl = server.url("/").toString().trimEnd('/')
-        val feature = KinozalTopic(KinozalHttpClient(), parser, baseUrl)
+        val feature = KinozalTopic(KinozalHttpClient(), parser, KinozalMagnetCache(), baseUrl)
 
         val result = feature.getTopic("12345")
 

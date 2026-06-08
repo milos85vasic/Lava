@@ -9,6 +9,7 @@ import lava.tracker.kinozal.feature.KinozalDownload
 import lava.tracker.kinozal.feature.KinozalSearch
 import lava.tracker.kinozal.feature.KinozalTopic
 import lava.tracker.kinozal.http.KinozalHttpClient
+import lava.tracker.kinozal.magnet.KinozalMagnetCache
 import lava.tracker.kinozal.parser.KinozalSearchParser
 import lava.tracker.kinozal.parser.KinozalTopicParser
 import lava.tracker.registry.TrackerClientFactory
@@ -35,19 +36,24 @@ class KinozalClientFactory @Inject constructor(
     private val http: KinozalHttpClient,
     private val searchParser: KinozalSearchParser,
     private val topicParser: KinozalTopicParser,
+    private val magnetCache: KinozalMagnetCache,
 ) : TrackerClientFactory {
     override val descriptor: TrackerDescriptor = KinozalDescriptor
 
     override fun create(config: PluginConfig): TrackerClient {
         val override = config.cloneBaseUrlOverride
         if (override != null) {
+            // Share ONE magnet cache between the clone's topic + download
+            // features so a topic view feeds the synchronous magnet lookup
+            // (§6.E — see KinozalMagnetCache). The singleton cache is reused;
+            // it keys by topic id, which is mirror-independent.
             return KinozalClient(
                 http = http,
                 search = KinozalSearch(http, searchParser, override),
                 browse = KinozalBrowse(http, searchParser, override),
-                topic = KinozalTopic(http, topicParser, override),
+                topic = KinozalTopic(http, topicParser, magnetCache, override),
                 auth = KinozalAuth(http, override),
-                download = KinozalDownload(http, override),
+                download = KinozalDownload(http, magnetCache, override),
             )
         }
         return clientProvider.get()
