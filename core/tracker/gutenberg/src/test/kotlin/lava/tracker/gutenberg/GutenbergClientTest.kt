@@ -26,7 +26,6 @@ class GutenbergClientTest {
         assertNotNull(client.getFeature(SearchableTracker::class))
         assertNotNull(client.getFeature(BrowsableTracker::class))
         assertNotNull(client.getFeature(TopicTracker::class))
-        assertNotNull(client.getFeature(DownloadableTracker::class))
     }
 
     @Test
@@ -42,5 +41,8 @@ class GutenbergClientTest {
         assertNull(client.getFeature(lava.tracker.api.feature.CommentsTracker::class))
         assertNull(client.getFeature(lava.tracker.api.feature.AuthenticatableTracker::class))
         assertNull(client.getFeature(lava.tracker.api.feature.FavoritesTracker::class))
+        // Clause 6.E: gutenberg serves HTTP e-books, not `.torrent` files, so
+        // DownloadableTracker is intentionally null (TORRENT_DOWNLOAD undeclared).
+        assertNull(client.getFeature(DownloadableTracker::class))
     }
 }

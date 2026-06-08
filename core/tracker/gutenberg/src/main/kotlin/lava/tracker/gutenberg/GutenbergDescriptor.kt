@@ -14,8 +14,14 @@ import lava.tracker.api.TrackerDescriptor
  *
  * Capability Honesty (clause 6.E): the capabilities set is the exact set of
  * TrackerFeature impls GutenbergClient.getFeature() will resolve.
- * FORUM, FAVORITES, COMMENTS, AUTH_REQUIRED, MAGNET_LINK and RSS are
- * intentionally absent — Project Gutenberg does not offer these surfaces.
+ * TORRENT_DOWNLOAD, FORUM, FAVORITES, COMMENTS, AUTH_REQUIRED, MAGNET_LINK and
+ * RSS are intentionally absent — Project Gutenberg does not offer these
+ * surfaces. In particular it serves EPUB / plain-text / HTML e-books over
+ * HTTP, NOT `.torrent` files, so declaring TORRENT_DOWNLOAD would be a 6.E
+ * bluff (capability declared but the claimed `.torrent` artifact is never
+ * produced). The HTTP-download impl is wired but unexposed via getFeature,
+ * mirroring the Internet Archive provider — TrackerCapability has no
+ * HTTP_DOWNLOAD value today.
  */
 object GutenbergDescriptor : TrackerDescriptor {
     override val trackerId: String = "gutenberg"
@@ -27,7 +33,8 @@ object GutenbergDescriptor : TrackerDescriptor {
         TrackerCapability.SEARCH,
         TrackerCapability.BROWSE,
         TrackerCapability.TOPIC,
-        TrackerCapability.TORRENT_DOWNLOAD,
+        // No TORRENT_DOWNLOAD — Project Gutenberg serves e-books over HTTP,
+        // not `.torrent` files (clause 6.E). No MAGNET_LINK either.
     )
     override val authType: AuthType = AuthType.NONE
     override val encoding: String = "UTF-8"

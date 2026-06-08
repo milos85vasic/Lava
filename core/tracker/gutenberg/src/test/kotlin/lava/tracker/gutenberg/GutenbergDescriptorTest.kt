@@ -23,7 +23,9 @@ class GutenbergDescriptorTest {
                 TrackerCapability.SEARCH,
                 TrackerCapability.BROWSE,
                 TrackerCapability.TOPIC,
-                TrackerCapability.TORRENT_DOWNLOAD,
+                // No TORRENT_DOWNLOAD — gutenberg serves HTTP e-books, not
+                // `.torrent` files (clause 6.E). See
+                // GutenbergCapabilityHonestyTest for the download-artifact gate.
             ),
             caps,
         )
