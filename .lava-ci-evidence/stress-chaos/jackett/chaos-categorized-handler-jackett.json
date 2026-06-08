@@ -1,0 +1,57 @@
+{
+  "any_panicked": false,
+  "captured_at": "2026-06-08T12:18:16Z",
+  "outcomes": [
+    {
+      "category": "missing_query",
+      "injected_fault": "no q parameter",
+      "want_status": 400,
+      "got_status": 400,
+      "panicked": false,
+      "degraded_as": "http-400"
+    },
+    {
+      "category": "malformed_xml",
+      "injected_fault": "upstream returns truncated XML",
+      "want_status": 502,
+      "got_status": 502,
+      "panicked": false,
+      "degraded_as": "http-502"
+    },
+    {
+      "category": "invalid_utf8",
+      "injected_fault": "upstream returns 0xff bytes in title",
+      "want_status": 502,
+      "got_status": 502,
+      "panicked": false,
+      "degraded_as": "http-502"
+    },
+    {
+      "category": "http_500",
+      "injected_fault": "upstream returns 500",
+      "want_status": 502,
+      "got_status": 502,
+      "panicked": false,
+      "degraded_as": "http-502"
+    },
+    {
+      "category": "http_503",
+      "injected_fault": "upstream returns 503",
+      "want_status": 502,
+      "got_status": 502,
+      "panicked": false,
+      "degraded_as": "http-502"
+    },
+    {
+      "category": "connection_drop",
+      "injected_fault": "upstream declares large Content-Length then hijacks+closes",
+      "want_status": 502,
+      "got_status": 502,
+      "panicked": false,
+      "degraded_as": "http-502"
+    }
+  ],
+  "surface": "GET /jackett/search via real Gin engine + real jackett.Client (fault-injected upstream)",
+  "test": "TestChaos_Handler",
+  "total_faults": 6
+}

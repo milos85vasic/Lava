@@ -1,0 +1,22 @@
+{
+  "all_succeeded": true,
+  "captured_at": "2026-06-08T12:18:10Z",
+  "iterations": 200,
+  "latency_human": {
+    "max": "4.510375ms",
+    "min": "1.241959ms",
+    "p50": "1.976417ms",
+    "p95": "3.020417ms",
+    "p99": "3.337375ms"
+  },
+  "latency_ns": {
+    "max": 4510375,
+    "min": 1241959,
+    "p50": 1976417,
+    "p95": 3020417,
+    "p99": 3337375
+  },
+  "results_per_iteration": 2,
+  "surface": "jackett.Client.Search -\u003e ParseResults (real stack, fake Torznab upstream)",
+  "test": "TestStress_Sustained_ParseSearch"
+}

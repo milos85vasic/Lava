@@ -1,0 +1,80 @@
+{
+  "any_panicked": false,
+  "captured_at": "2026-06-08T12:18:13Z",
+  "outcomes": [
+    {
+      "category": "malformed_xml",
+      "injected_fault": "truncated \u003crss\u003e\u003cchannel\u003e with no close tags",
+      "surface": "jackett.ParseResults",
+      "got_error": true,
+      "error_text": "jackett: torznab xml decode: XML syntax error on line 1: unexpected EOF",
+      "panicked": false,
+      "degraded_as": "typed-error"
+    },
+    {
+      "category": "invalid_utf8",
+      "injected_fault": "raw 0xff bytes inside a \u003ctitle\u003e",
+      "surface": "jackett.ParseResults",
+      "got_error": true,
+      "error_text": "jackett: torznab xml decode: XML syntax error on line 1: invalid UTF-8",
+      "panicked": false,
+      "degraded_as": "typed-error"
+    },
+    {
+      "category": "http_500",
+      "injected_fault": "upstream always returns 500",
+      "surface": "jackett.Client.Search",
+      "got_error": true,
+      "error_text": "jackett: search status 500",
+      "panicked": false,
+      "degraded_as": "typed-error"
+    },
+    {
+      "category": "http_503",
+      "injected_fault": "upstream always returns 503",
+      "surface": "jackett.Client.Search",
+      "got_error": true,
+      "error_text": "jackett: search status 503",
+      "panicked": false,
+      "degraded_as": "typed-error"
+    },
+    {
+      "category": "timeout",
+      "injected_fault": "upstream sleeps beyond client Timeout",
+      "surface": "jackett.Client.Search",
+      "got_error": true,
+      "error_text": "jackett: search request: Get \"http://127.0.0.1:63475/api/v2.0/indexers/all/results/torznab/api?apikey=k\u0026q=x\u0026t=search\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+      "panicked": false,
+      "degraded_as": "typed-error"
+    },
+    {
+      "category": "connection_drop",
+      "injected_fault": "handler declares large Content-Length then hijacks+closes after partial write",
+      "surface": "jackett.Client.Search",
+      "got_error": true,
+      "error_text": "unexpected EOF",
+      "panicked": false,
+      "degraded_as": "typed-error"
+    },
+    {
+      "category": "redirect_302_magnet",
+      "injected_fault": "download link answers 302 with Location: magnet:",
+      "surface": "jackett.Client.Download",
+      "got_error": false,
+      "panicked": false,
+      "degraded_as": "graceful-magnet-capture"
+    },
+    {
+      "category": "missing_config",
+      "injected_fault": "NewClient called with empty APIKey",
+      "surface": "jackett.NewClient",
+      "got_error": true,
+      "error_text": "jackett: BaseURL and APIKey are required",
+      "panicked": false,
+      "degraded_as": "typed-error(ErrMissingConfig)"
+    }
+  ],
+  "surface": "jackett client + parser (real stack, fault-injected boundaries)",
+  "test": "TestChaos_Jackett",
+  "total_faults": 8
+}

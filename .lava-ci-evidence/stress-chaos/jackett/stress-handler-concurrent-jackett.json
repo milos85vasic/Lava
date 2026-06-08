@@ -1,0 +1,13 @@
+{
+  "all_200_with_2_items": true,
+  "calls_per_worker": 25,
+  "captured_at": "2026-06-08T12:18:16Z",
+  "goroutine_leak": false,
+  "goroutines_after": 9,
+  "goroutines_baseline": 3,
+  "race_detector": "run under `go test -race`",
+  "surface": "GET /jackett/search via real Gin engine + real jackett.Client (fake Torznab upstream)",
+  "test": "TestStress_Handler_Concurrent",
+  "total_calls": 400,
+  "workers": 16
+}

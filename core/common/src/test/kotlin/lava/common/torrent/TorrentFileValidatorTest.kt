@@ -47,6 +47,15 @@ class TorrentFileValidatorTest {
     private fun benInt(n: Long): ByteArray =
         ("i" + n + "e").toByteArray(Charsets.US_ASCII)
 
+    /** Bencodes a list of already-bencoded elements: `l<elements>e`. */
+    private fun benList(vararg elements: ByteArray): ByteArray {
+        val out = ByteArrayOutputStream()
+        out.write('l'.code)
+        elements.forEach { out.write(it) }
+        out.write('e'.code)
+        return out.toByteArray()
+    }
+
     /** Builds the bencoded `info` dict. Keys MUST be emitted in lexicographic order. */
     private fun buildInfoDict(
         name: String = "ubuntu-test.iso",
@@ -214,5 +223,252 @@ class TorrentFileValidatorTest {
         val result = validator.validate(ByteArray(0))
         assertFalse("empty input must be rejected", result.valid)
         assertNotNull(result.reason)
+    }
+
+    // ---- validator edge cases: structure ----
+
+    @Test
+    fun torrentWithNestedListsAndDicts_validates() {
+        // Real .torrent files commonly carry an "announce-list" = list of lists
+        // of strings, and a nested "httpseeds" list. The validator must accept
+        // arbitrary well-formed sibling structures and still hash the info dict.
+        val infoDict = buildInfoDict(name = "nested.iso")
+        val out = ByteArrayOutputStream()
+        out.write('d'.code)
+        out.write(benStr("announce"))
+        out.write(benStr("http://tracker.example.invalid/announce"))
+        // announce-list: l l 4:tier e e  (list of lists of byte strings)
+        out.write(benStr("announce-list"))
+        out.write(
+            benList(
+                benList(benStr("http://a.invalid/x"), benStr("http://b.invalid/y")),
+                benList(benStr("udp://c.invalid:80")),
+            ),
+        )
+        out.write(benStr("info"))
+        out.write(infoDict)
+        out.write('e'.code)
+
+        val result = validator.validate(out.toByteArray())
+
+        assertTrue("nested structures must be accepted, got: ${result.reason}", result.valid)
+        assertEquals(sha1Hex(infoDict), result.infoHashHex)
+    }
+
+    @Test
+    fun trailingGarbageAfterTopDict_isRejected() {
+        val torrent = buildTorrent()
+        val withGarbage = torrent + "junk".toByteArray(Charsets.US_ASCII)
+        val result = validator.validate(withGarbage)
+        assertFalse("trailing bytes after the top-level dict must be rejected", result.valid)
+        assertNotNull(result.reason)
+        assertNull(result.infoHashHex)
+    }
+
+    @Test
+    fun emptyInfoDict_isRejected() {
+        // info = `de` (an empty dict) → no name → invalid.
+        val torrent = buildTorrent(infoDict = "de".toByteArray(Charsets.US_ASCII))
+        val result = validator.validate(torrent)
+        assertFalse("empty info dict must be rejected", result.valid)
+        assertNotNull(result.reason)
+    }
+
+    @Test
+    fun infoIsNotADictionary_isRejected() {
+        // info = integer instead of dict.
+        val out = ByteArrayOutputStream()
+        out.write('d'.code)
+        out.write(benStr("info"))
+        out.write(benInt(7))
+        out.write('e'.code)
+        val result = validator.validate(out.toByteArray())
+        assertFalse("'info' that is not a dict must be rejected", result.valid)
+        assertNotNull(result.reason)
+    }
+
+    @Test
+    fun missingPieceLength_isRejected() {
+        // info dict with name + pieces but no "piece length" (keys lex-ordered).
+        val out = ByteArrayOutputStream()
+        out.write('d'.code)
+        out.write(benStr("name"))
+        out.write(benStr("nolen.iso"))
+        out.write(benStr("pieces"))
+        out.write(benBytes(ByteArray(20)))
+        out.write('e'.code)
+        val result = validator.validate(buildTorrent(infoDict = out.toByteArray()))
+        assertFalse("missing 'piece length' must be rejected", result.valid)
+        assertNotNull(result.reason)
+    }
+
+    @Test
+    fun pieceLengthNotAnInteger_isRejected() {
+        // "piece length" present but a byte string instead of an integer.
+        val out = ByteArrayOutputStream()
+        out.write('d'.code)
+        out.write(benStr("name"))
+        out.write(benStr("badlen.iso"))
+        out.write(benStr("piece length"))
+        out.write(benStr("16384")) // a STRING, not an integer
+        out.write(benStr("pieces"))
+        out.write(benBytes(ByteArray(20)))
+        out.write('e'.code)
+        val result = validator.validate(buildTorrent(infoDict = out.toByteArray()))
+        assertFalse("'piece length' that is not an integer must be rejected", result.valid)
+    }
+
+    @Test
+    fun piecesNotAString_isRejected() {
+        // "pieces" present but an integer instead of a byte string.
+        val out = ByteArrayOutputStream()
+        out.write('d'.code)
+        out.write(benStr("name"))
+        out.write(benStr("badpieces.iso"))
+        out.write(benStr("piece length"))
+        out.write(benInt(16384))
+        out.write(benStr("pieces"))
+        out.write(benInt(20))
+        out.write('e'.code)
+        val result = validator.validate(buildTorrent(infoDict = out.toByteArray()))
+        assertFalse("'pieces' that is not a string must be rejected", result.valid)
+    }
+
+    // ---- validator edge cases: pieces-length boundary ----
+
+    @Test
+    fun piecesLengthExactly20_validates() {
+        val infoDict = buildInfoDict(pieces = ByteArray(20) { 0x05 })
+        val result = validator.validate(buildTorrent(infoDict = infoDict))
+        assertTrue("exactly 20 bytes (one piece) must validate", result.valid)
+        assertEquals(sha1Hex(infoDict), result.infoHashHex)
+    }
+
+    @Test
+    fun piecesLengthExactly40_validates() {
+        // 40 bytes = exactly two 20-byte SHA-1 pieces.
+        val infoDict = buildInfoDict(pieces = ByteArray(40) { (it % 5).toByte() })
+        val result = validator.validate(buildTorrent(infoDict = infoDict))
+        assertTrue("exactly 40 bytes (two pieces) must validate", result.valid)
+        assertEquals(sha1Hex(infoDict), result.infoHashHex)
+    }
+
+    @Test
+    fun piecesLength21_isRejected() {
+        // 21 bytes is one-past a multiple of 20.
+        val infoDict = buildInfoDict(pieces = ByteArray(21) { 0x02 })
+        val result = validator.validate(buildTorrent(infoDict = infoDict))
+        assertFalse("21 bytes (not a multiple of 20) must be rejected", result.valid)
+        assertNotNull(result.reason)
+    }
+
+    // ---- validator edge cases: name bytes ----
+
+    @Test
+    fun nonAsciiNameBytes_validatesAndHashesVerbatim() {
+        // A name carrying raw non-ASCII (Cyrillic + an emoji) bytes. The
+        // validator only requires a non-empty byte string; the info-hash is
+        // SHA-1 of the verbatim bytes regardless of the name's encoding.
+        val rawName = "Фильм-релиз 🎬".toByteArray(Charsets.UTF_8)
+        val out = ByteArrayOutputStream()
+        out.write('d'.code)
+        out.write(benStr("name"))
+        out.write(benBytes(rawName))
+        out.write(benStr("piece length"))
+        out.write(benInt(16384))
+        out.write(benStr("pieces"))
+        out.write(benBytes(ByteArray(20) { 0x09 }))
+        out.write('e'.code)
+        val infoDict = out.toByteArray()
+
+        val result = validator.validate(buildTorrent(infoDict = infoDict))
+
+        assertTrue("non-ASCII name bytes must validate, got: ${result.reason}", result.valid)
+        assertEquals(sha1Hex(infoDict), result.infoHashHex)
+    }
+
+    // ---- bencode parser edge cases (internal, same-module access) ----
+
+    @Test
+    fun bencode_negativeInteger_parses() {
+        val node = BencodeParser("i-42e".toByteArray(Charsets.US_ASCII)).parseWhole()
+        assertTrue(node is BNode.BInt)
+        assertEquals(-42L, (node as BNode.BInt).value)
+    }
+
+    @Test
+    fun bencode_zeroInteger_parses() {
+        val node = BencodeParser("i0e".toByteArray(Charsets.US_ASCII)).parseWhole()
+        assertEquals(0L, (node as BNode.BInt).value)
+    }
+
+    @Test(expected = BencodeException::class)
+    fun bencode_leadingZeroInteger_isRejected() {
+        // `i03e` — leading zero is malformed bencode.
+        BencodeParser("i03e".toByteArray(Charsets.US_ASCII)).parseWhole()
+    }
+
+    @Test(expected = BencodeException::class)
+    fun bencode_negativeZeroInteger_isRejected() {
+        BencodeParser("i-0e".toByteArray(Charsets.US_ASCII)).parseWhole()
+    }
+
+    @Test(expected = BencodeException::class)
+    fun bencode_negativeLeadingZeroInteger_isRejected() {
+        // `i-03e` — leading zero after the minus sign.
+        BencodeParser("i-03e".toByteArray(Charsets.US_ASCII)).parseWhole()
+    }
+
+    @Test(expected = BencodeException::class)
+    fun bencode_byteStringLeadingZeroLength_isRejected() {
+        // `01:a` — leading zero in a byte-string length prefix.
+        BencodeParser("01:a".toByteArray(Charsets.US_ASCII)).parseWhole()
+    }
+
+    @Test
+    fun bencode_emptyByteString_parses() {
+        // `0:` is a valid empty byte string.
+        val node = BencodeParser("0:".toByteArray(Charsets.US_ASCII)).parseWhole()
+        assertTrue(node is BNode.BStr)
+        assertEquals(0, (node as BNode.BStr).bytes.size)
+    }
+
+    @Test
+    fun bencode_emptyListAndEmptyDict_parse() {
+        val list = BencodeParser("le".toByteArray(Charsets.US_ASCII)).parseWhole()
+        assertTrue(list is BNode.BList)
+        assertTrue((list as BNode.BList).items.isEmpty())
+
+        val dict = BencodeParser("de".toByteArray(Charsets.US_ASCII)).parseWhole()
+        assertTrue(dict is BNode.BDict)
+        assertTrue((dict as BNode.BDict).map.isEmpty())
+    }
+
+    @Test
+    fun bencode_deeplyNestedStructure_parses() {
+        // d 1:a l i1e d 1:b l i2e e e e e  → dict{a: [1, dict{b: [2]}]}
+        val bytes = "d1:ali1ed1:bli2eeeee".toByteArray(Charsets.US_ASCII)
+        val node = BencodeParser(bytes).parseWhole()
+        assertTrue(node is BNode.BDict)
+        val outer = (node as BNode.BDict).map["a"]
+        assertTrue(outer is BNode.BList)
+        val items = (outer as BNode.BList).items
+        assertEquals(2, items.size)
+        assertEquals(1L, (items[0] as BNode.BInt).value)
+        val innerDict = items[1] as BNode.BDict
+        val innerList = innerDict.map["b"] as BNode.BList
+        assertEquals(2L, (innerList.items[0] as BNode.BInt).value)
+    }
+
+    @Test(expected = BencodeException::class)
+    fun bencode_trailingBytesAfterValue_isRejected() {
+        // `i1ex` — a trailing byte after a complete top-level value.
+        BencodeParser("i1ex".toByteArray(Charsets.US_ASCII)).parseWhole()
+    }
+
+    @Test(expected = BencodeException::class)
+    fun bencode_dictKeyNotAByteString_isRejected() {
+        // `di1ei2ee` — dict key is an integer, not a byte string.
+        BencodeParser("di1ei2ee".toByteArray(Charsets.US_ASCII)).parseWhole()
     }
 }
