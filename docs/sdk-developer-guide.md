@@ -582,4 +582,228 @@ this file.
 
 ---
 
-*Last updated: 2026-05-01 (SP-3a Lava-Android-1.2.0-1020 docs polish).*
+## 8. The magnet-cache pattern (§6.E Capability Honesty)
+
+`DownloadableTracker` declares two methods:
+
+```kotlin
+interface DownloadableTracker : TrackerFeature {
+    suspend fun downloadTorrentFile(id: String): ByteArray
+    /** Returns null if the magnet URI is not synchronously available without an HTTP fetch. */
+    fun getMagnetLink(id: String): String?
+}
+```
+
+`getMagnetLink` is the **only non-suspend** method on any feature interface —
+so it **cannot** make an HTTP call. Its contract is: return the magnet *only if
+synchronously available*, else `null`. Historically the no-magnet providers just
+`return null` unconditionally — but that is a §6.E **bluff** when the descriptor
+declares `MAGNET_LINK`: the capability is advertised, yet the feature never
+produces a magnet.
+
+The fix that `kinozal`, `nnmclub`, and `rutor` use — and that **every new
+provider declaring `MAGNET_LINK` MUST follow** — is a per-provider
+**magnet cache**: a `@Singleton` in-memory map that the *suspend* topic/search
+path populates from genuinely-parsed magnets, read back by the *non-suspend*
+`getMagnetLink`.
+
+### 8.1 The cache
+
+```kotlin
+// core/tracker/<id>/.../<dir>/<TrackerId>MagnetCache.kt
+@Singleton
+class <TrackerId>MagnetCache @Inject constructor() {
+    private val byId = ConcurrentHashMap<String, String>()
+
+    /** Records a genuinely-parsed magnet; blank inputs are ignored. */
+    fun put(id: String, magnet: String?) {
+        if (id.isBlank() || magnet.isNullOrBlank()) return
+        byId[id] = magnet
+    }
+
+    /** Returns the cached magnet, or null if none was surfaced yet. */
+    fun get(id: String): String? = byId[id]
+}
+```
+
+`ConcurrentHashMap` because the search and topic features may write from
+different coroutines while the download feature reads. `@Singleton` so all three
+features share one instance per process.
+
+Real implementations to copy:
+- `core/tracker/kinozal/src/main/kotlin/lava/tracker/kinozal/magnet/KinozalMagnetCache.kt`
+- `core/tracker/nnmclub/src/main/kotlin/lava/tracker/nnmclub/http/NnmclubMagnetCache.kt`
+- `core/tracker/rutor/src/main/kotlin/lava/tracker/rutor/magnet/RuTorMagnetCache.kt`
+
+### 8.2 Populate it on the real fetch path
+
+Every place the production parser surfaces a magnet, write it into the cache.
+Two write sites:
+
+**Topic fetch** (`KinozalTopic.getTopic`, `core/tracker/kinozal/…/feature/KinozalTopic.kt`):
+
+```kotlin
+override suspend fun getTopic(id: String): TopicDetail {
+    val detail = parser.parse(body, topicIdHint = id)
+    detail.torrent.magnetUri?.let { magnetCache.put(id, it) }   // ← write
+    return detail
+}
+```
+
+**Search rows** (`NnmclubSearch.search`, `core/tracker/nnmclub/…/feature/NnmclubSearch.kt`):
+
+```kotlin
+override suspend fun search(request: SearchRequest, page: Int): SearchResult {
+    val result = parser.parse(body, pageHint = page)
+    result.items.forEach { magnetCache.put(it.torrentId, it.magnetUri) }   // ← write
+    return result
+}
+```
+
+### 8.3 Read it from the synchronous method
+
+```kotlin
+// <TrackerId>Download.kt
+class <TrackerId>Download @Inject constructor(
+    private val http: <TrackerId>HttpClient,
+    private val magnetCache: <TrackerId>MagnetCache,
+) : DownloadableTracker {
+    override suspend fun downloadTorrentFile(id: String): ByteArray =
+        http.download("$baseUrl/download.php?id=$id")
+
+    override fun getMagnetLink(id: String): String? = magnetCache.get(id)   // ← read
+}
+```
+
+### 8.4 Share ONE instance across the clone path
+
+When a provider is cloned (SP-4 Phase F.2), `TrackerClientFactory.create` builds
+per-call feature instances routed at the clone's `primaryUrl`. The magnet cache
+MUST be the **shared singleton** so a topic view feeds the download lookup — the
+cache keys by topic id, which is mirror-independent. From
+`core/tracker/kinozal/src/main/kotlin/lava/tracker/kinozal/KinozalClientFactory.kt`:
+
+```kotlin
+override fun create(config: PluginConfig): TrackerClient {
+    val override = config.cloneBaseUrlOverride
+    if (override != null) {
+        return KinozalClient(
+            // ...
+            topic    = KinozalTopic(http, topicParser, magnetCache, override),
+            download = KinozalDownload(http, magnetCache, override),  // SAME magnetCache
+        )
+    }
+    return clientProvider.get()
+}
+```
+
+### 8.5 Why this is honest (not a bluff)
+
+- `get(id)` returns `null` when an id was never surfaced — an honest "not
+  synchronously available without an HTTP fetch" per the contract, **never** a
+  fabricated string.
+- The cache is only ever populated with magnets the **production parser**
+  extracted from a real page.
+- Once the user has opened a topic (or seen a search row), the synchronous
+  lookup returns the **real** magnet — no extra HTTP round-trip, no fabrication,
+  no hidden fetch inside the synchronous method.
+
+The architecture-level diagram of this pattern lives in
+[`docs/architecture/tracker-sdk.md` §6](architecture/tracker-sdk.md).
+
+---
+
+## 9. Proving a download is real — the torrent validators
+
+`core:common` ships two validators that turn "we returned bytes / a string" into
+"we returned a **genuinely-usable** download". They are the canonical anti-bluff
+way to assert a `Downloadable` feature actually works (the Anti-Bluff Pact's
+"primary assertion on user-visible state" — a download a real BitTorrent client
+would accept).
+
+| Validator | File | Input | Output |
+|---|---|---|---|
+| `TorrentFileValidator` | `core/common/src/main/kotlin/lava/common/torrent/TorrentFileValidator.kt` | `.torrent` `ByteArray` | `DownloadValidationResult` |
+| `MagnetLinkValidator` | `core/common/src/main/kotlin/lava/common/torrent/MagnetLinkValidator.kt` | `magnet:` `String` | `DownloadValidationResult` |
+
+Both produce the **same** result type, keyed on the same lowercase 40-char
+info-hash, so a `.torrent` file and a magnet for the same content cross-check:
+
+```kotlin
+data class DownloadValidationResult(
+    val valid: Boolean,
+    val infoHashHex: String?,   // lowercase 40-char hex (SHA-1), or null
+    val reason: String?,        // human-readable reason when !valid
+)
+```
+
+### 9.1 `TorrentFileValidator`
+
+A `.torrent` is valid only when **all** hold (verbatim from the class KDoc):
+
+- the bytes are well-formed bencode with a dictionary at the top level;
+- that dictionary contains an `info` dictionary;
+- `info.name` is a non-empty byte string;
+- `info.piece length` is an integer strictly greater than 0;
+- `info.pieces` is a byte string whose length is a **positive multiple of 20**
+  (each piece's SHA-1 is exactly 20 bytes; empty `pieces` describes a torrent
+  with no data and is not a real download).
+
+The info-hash is `SHA-1(verbatim bencoded info dict)` — computed over the exact
+original bytes (recovered via `valueRanges`), not a re-encoding, so it matches
+what a real BitTorrent client and the magnet form compute. (The bencode parser
+is `core/common/src/main/kotlin/lava/common/torrent/Bencode.kt`.)
+
+```kotlin
+val result = TorrentFileValidator().validate(downloadedBytes)
+assertTrue(result.reason ?: "", result.valid)          // primary user-visible assertion
+assertEquals("c12fe1c0…", result.infoHashHex)           // identity assertion
+```
+
+### 9.2 `MagnetLinkValidator`
+
+A magnet is valid when it carries `xt=urn:btih:<hash>` where `<hash>` is **40
+hex chars** OR **32 base32 chars** (RFC 4648). The extracted hash is normalized
+to lowercase hex, so it compares directly against `TorrentFileValidator`'s
+output. Links with multiple `xt` entries are accepted as long as one is a valid
+`urn:btih`.
+
+```kotlin
+val result = MagnetLinkValidator().validate(magnetUri)
+assertTrue(result.reason ?: "", result.valid)
+```
+
+### 9.3 Use them as the download-feature acceptance assertion
+
+A `DownloadableTracker` real-stack test (Step 6/7 of the recipe) MUST assert on
+the validator output, not on "bytes were non-empty":
+
+```kotlin
+@Test fun `download yields a real torrent`() = runTest {
+    val bytes = download.downloadTorrentFile(KNOWN_ID)
+    val v = TorrentFileValidator().validate(bytes)
+    assertTrue("torrent invalid: ${v.reason}", v.valid)
+}
+
+@Test fun `getMagnetLink yields a real magnet after a topic view`() = runTest {
+    topic.getTopic(KNOWN_ID)                              // populates the magnet cache (§8)
+    val magnet = download.getMagnetLink(KNOWN_ID)!!
+    val v = MagnetLinkValidator().validate(magnet)
+    assertTrue("magnet invalid: ${v.reason}", v.valid)
+}
+```
+
+Existing tests to mirror:
+- `core/common/src/test/kotlin/lava/common/torrent/TorrentFileValidatorTest.kt`
+- `core/common/src/test/kotlin/lava/common/torrent/MagnetLinkValidatorTest.kt`
+
+> **Server-side counterpart:** `lava-api-go`'s Torznab client
+> (`internal/jackett/`) faces the same "is this download real?" problem and
+> handles the 302→magnet edge case so a magnet is captured rather than
+> auto-followed. See
+> [`docs/architecture/local-stack-topology.md` §4.2](architecture/local-stack-topology.md).
+
+---
+
+*Last updated: 2026-06-08 (added §8 magnet-cache pattern + §9 download
+validators; §1–§7 unchanged from the 2026-05-01 SP-3a polish).*
