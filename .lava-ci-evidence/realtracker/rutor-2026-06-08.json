@@ -1,0 +1,21 @@
+{
+  "provider": "rutor",
+  "baseUrl": "https://rutor.info",
+  "timestampUtc": "2026-06-08T11:31:36.635608Z",
+  "username": "i@mvasic.ru",
+  "authenticated": false,
+  "searchQuery": "matrix",
+  "searchResultCount": 100,
+  "topicId": "1085666",
+  "torrentByteLength": 21933,
+  "torrentSha256": "37902681b1423e8343e717cef136e9ae4c5a5fde53bf81ccb2c5d579725752a2",
+  "torrentValid": true,
+  "torrentInfoHash": "ae0cf422fa0bc9669ad605ea564999a8fbe5aa4b",
+  "torrentValidatorReason": null,
+  "magnetUri": "magnet:?xt=urn:btih:ae0cf422fa0bc9669ad605ea564999a8fbe5aa4b&dn=rutor.info_%D0%9C%D0%B0%D1%82%D1%80%D0%B8%D1%86%D0%B0%3A+%D0%92%D0%BE%D1%81%D0%BA%D1%80%D0%B5%D1%88%D0%B5%D0%BD%D0%B8%D0%B5+%2F+The+Matrix+Resurrections+%282021%29+WEB-DL+1080p+%7C+D+%7C+%D0%9B%D0%BE%D0%BA%D0%B0%D0%BB%D0%B8%D0%B7%D0%BE%D0%B2%D0%B0%D0%BD%D0%BD%D0%B0%D1%8F+%D0%B2%D0%B5%D1%80%D1%81%D0%B8%D1%8F&tr=udp://opentor.net:6969&tr=http://retracker.local/announce",
+  "magnetValid": true,
+  "magnetInfoHash": "ae0cf422fa0bc9669ad605ea564999a8fbe5aa4b",
+  "magnetValidatorReason": null,
+  "infoHashCrossCheckMatch": true,
+  "notes": "Real rutor.info crown-jewel run; auth: login rejected (continued anonymously per rutor's anonymous policy)."
+}

@@ -30,4 +30,25 @@ dependencies {
     // MockWebServer for the F.2.6 falsifiability-rehearsal Challenge Test.
     testImplementation(libs.okhttp.mockwebserver)
     // Jsoup is brought in by the convention plugin; do not re-declare.
+
+    // CROWN-JEWEL real-network suite support (RealTrackerHarness + validators).
+    testImplementation(project(":core:tracker:testing"))
+}
+
+// CROWN-JEWEL real-network gate: forward `-PrealTrackers=true` into the `test`
+// JVM as a system property so RuTrackerRealNetworkDownloadTest can read it via
+// RealTrackerTestSupport.realTrackersEnabled(). Without the property the test
+// `assumeTrue`-SKIPs and makes no outbound calls (suite gated off by default).
+// The forked test JVM inherits the host environment, so the real credentials in
+// the gitignored `.env` (RUTRACKER_USERNAME/PASSWORD) reach System.getenv when
+// the operator has exported them — never hardcoded (§6.R).
+tasks.named<Test>("test") {
+    systemProperty("realTrackers", project.findProperty("realTrackers")?.toString() ?: "false")
+    // Surface the honest SKIP reason (the assumeTrue message) so an unreachable /
+    // login-failed crown-jewel run is auditable in the gradle output, not silent.
+    testLogging {
+        events("skipped", "failed", "passed")
+        showStandardStreams = true
+        exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+    }
 }
