@@ -128,9 +128,13 @@ services:
       # FlareSolverr has no GET /health endpoint; sessions.list is the de-facto
       # liveness probe (POST /v1 {"cmd":"sessions.list"} → 200). A bare TCP/8191
       # check would be a bluff (the Python proxy binds before Chromium is ready).
+      # NOTE: the FlareSolverr image is Python/Ubuntu-based and ships `curl` but
+      # NOT `wget` (verified 2026-06-08) — using wget here left the container
+      # perpetually `starting` (healthcheck exit 1: "wget: not found") even while
+      # the service was serving. `curl -f` fails the check on any non-2xx status.
       test:
         - "CMD-SHELL"
-        - "wget -q -O /dev/null --header='Content-Type: application/json' --post-data='{\"cmd\":\"sessions.list\"}' http://127.0.0.1:8191/v1"
+        - "curl -fsS -o /dev/null -H 'Content-Type: application/json' -d '{\"cmd\":\"sessions.list\"}' http://127.0.0.1:8191/v1"
       interval: 20s
       timeout: 15s
       retries: 5
