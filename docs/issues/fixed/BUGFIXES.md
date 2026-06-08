@@ -1021,3 +1021,22 @@ Evidence: `.lava-ci-evidence/genymotion/9e7505b3-fleet-run/`.
 
 **Next:** dedicated systematic-debugging cycle — evaluate a newer
 androidx-navigation OR a NavHost/teardown lifecycle guard, then device re-verify.
+
+## api-source.hash manifest staleness — §6.A contract test RED→GREEN (2026-06-08)
+
+Commit `7ce9c2b2` edited two embed-linked lava-api-go sources
+(`internal/cache/cache.go` + `internal/storage/sqlite.go`) without regenerating
+the API↔embed sync manifest, so `TestSourceHash_ManifestMatchesLive`
+(`lava-api-go/tests/contract`) failed: committed
+`95c36d1773362cee2b90db398f2e2827586fef83071ba3feb12ce51e02e12b9d` !=
+live `70ebb53a1a9c3365f651ae7ae651dd4404d58976b97b3b2589db39f4d7752470`.
+Root cause: the manifest at `core/apiengine/src/main/resources/api-source.hash`
+was last written at `e153d7c0` (2026-06-06), pre-dating `7ce9c2b2`. The contract
+test correctly caught real source/embed drift — exactly its §6.A purpose.
+
+**Fix:** regenerated `api-source.hash` to the live
+`scripts/compute-api-source-hash.sh` value (the canonical mechanism
+`build-cshared.sh` uses). NOT a test edit — the regeneration the test's own error
+message prescribes. Verified: `go test ./tests/contract -run TestSourceHash` →
+3/3 PASS (incl. the falsifiability sibling `…ContentEditChangesHash`); full
+`go test ./...` → exit 0 (39 packages ok, real Postgres-in-podman e2e ran).
