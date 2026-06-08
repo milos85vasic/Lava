@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>helixqa-vision-qa-guide</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1 id="helixqa-autonomous-vision-qa-guide">HelixQA Autonomous Vision QA
+Guide</h1>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Revision</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Created</td>
+<td>2026-06-08</td>
+</tr>
+<tr>
+<td>Last modified</td>
+<td>2026-06-08</td>
+</tr>
+<tr>
+<td>Status</td>
+<td>active</td>
+</tr>
+<tr>
+<td>Issues</td>
+<td>LVA-009 (launch-dispatch exit-127)</td>
+</tr>
+<tr>
+<td>Issues summary</td>
+<td>one open known issue — see §6 Troubleshooting</td>
+</tr>
+<tr>
+<td>Fixed</td>
+<td>claude-CLI bridge 3-layer incompatibility (<code>--json</code>,
+<code>--image</code>, prompt position)</td>
+</tr>
+<tr>
+<td>Continuation</td>
+<td>docs/CONTINUATION.md</td>
+</tr>
+</tbody>
+</table>
+<p>This guide documents the HelixQA autonomous vision QA path as it
+actually works in this repository today: Claude vision drives the real
+Lava Android app running on a Genymotion VM, analysing live screenshots
+and deciding ADB actions. It is accurate to the source files cited in
+§8; it makes no aspirational claims. One known issue (LVA-009) is open
+and documented as such.</p>
+<h2 id="table-of-contents">Table of contents</h2>
+<ul>
+<li><a href="#1-overview">1. Overview</a></li>
+<li><a href="#2-prerequisites">2. Prerequisites</a></li>
+<li><a href="#3-how-the-claude-cli-bridge-works">3. How the claude-CLI
+bridge works</a></li>
+<li><a href="#4-running-a-bank">4. Running a bank</a></li>
+<li><a href="#5-writing-a-new-bank">5. Writing a new bank</a></li>
+<li><a href="#6-troubleshooting">6. Troubleshooting</a></li>
+<li><a href="#7-anti-bluff-posture">7. Anti-bluff posture</a></li>
+<li><a href="#8-sources-cited">8. Sources cited</a></li>
+</ul>
+<h2 id="1-overview">1. Overview</h2>
+<p>The HelixQA autonomous vision QA replaces manual exploratory testing
+of the Lava Android app with a Claude-vision agent that drives the real
+app on a real (virtualised) device:</p>
+<ol type="1">
+<li>HelixQA takes a screenshot of the live device over ADB.</li>
+<li>The screenshot path is handed to the <code>claude</code> CLI (the
+vision bridge), which reads and analyses the image and returns a single
+next action (<code>tap</code>, <code>key</code>, <code>back</code>,
+<code>home</code>, <code>text</code>, <code>launch</code>,
+<code>shell</code>, or <code>noop</code>).</li>
+<li>HelixQA dispatches that action against the device over ADB and
+captures a new screenshot.</li>
+<li>The loop repeats (up to a bounded step count) until the model
+reports the per-case goal reached or the step budget is exhausted.</li>
+</ol>
+<p>Every test case comes from a YAML <strong>bank</strong>. Each case
+declares a launch step, <code>required_evidence</code> (screen-visible
+substrings the model confirms), and an <code>expected_result</code>. The
+orchestrator turns those into a
+<code>visionnav.Target{LaunchAction, ScreenGoals}</code> and runs the
+vision loop — this wiring lives in
+<code>submodules/helixqa/pkg/orchestrator/definition_challenge.go</code>
+and <code>cmd/helixqa/main.go</code>'s
+<code>buildAndroidVisionContext</code>.</p>
+<h3 id="relationship-to-the-6ae--6g-challenge-gate">Relationship to the
+§6.AE / §6.G Challenge gate</h3>
+<p>The vision QA is <strong>complementary</strong> to, not a replacement
+for, the Compose UI Challenge Tests run via
+<code>connectedDebugAndroidTest</code> (the §6.AE per-feature Challenge
+mandate, §6.G end-to-end provider verification, gated through the
+Containers/Genymotion VM path in
+<code>scripts/run-genymotion-challenges.sh</code>):</p>
+<ul>
+<li>The Challenge Tests are deterministic instrumentation tests authored
+in Kotlin; they are the load-bearing acceptance gate that
+<code>scripts/tag.sh</code> consults.</li>
+<li>The vision QA is an autonomous, exploratory, screenshot-driven layer
+that exercises the same real provider journeys (onboard → select
+provider → search → browse → open item → obtain download) that the §6.G
+banks describe, but driven by a vision model rather than hard-coded test
+code. It surfaces user-visible breakage the deterministic suite may not
+assert against, in the §6.J / §6.L "tests pass but feature doesn't work
+for users" spirit.</li>
+</ul>
+<p>Both run the emulator inside a VM (Genymotion) per §6.AH — never
+host-direct, never a live ADB device that other projects are using.</p>
+<h2 id="2-prerequisites">2. Prerequisites</h2>
+<table>
+<thead>
+<tr>
+<th>Prerequisite</th>
+<th>Why</th>
+<th>How</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A Genymotion VM (or container/VM per §6.AH) running Android,
+reachable over ADB</td>
+<td>§6.AH forbids host-direct emulators; the vision loop needs a real
+device serial to drive</td>
+<td>Boot a Genymotion device; confirm <code>adb devices</code> lists its
+serial (the evidence runs used <code>127.0.0.1:6555</code>)</td>
+</tr>
+<tr>
+<td><code>claude</code> CLI on <code>PATH</code></td>
+<td>It IS the vision bridge — the only vision-capable provider HelixQA
+wires today</td>
+<td><code>buildAndroidVisionContext</code> calls
+<code>osexec.LookPath("claude")</code>; if absent, android cases
+honestly SKIP (never a fake PASS)</td>
+</tr>
+<tr>
+<td>Lava debug app installed on the VM</td>
+<td>The banks launch <code>digital.vasic.lava.client.dev</code></td>
+<td>Install via <code>./gradlew :app:installDebug</code> — NOT a raw
+<code>adb install</code> (the §6.X guard hook gates raw installs; the
+Gradle task is the sanctioned path)</td>
+</tr>
+<tr>
+<td>Tracker/RUTOR credentials in <code>.env</code> (form-login banks
+only)</td>
+<td>Form-login providers (RuTor, RuTracker, Kinozal, NNM-Club) need real
+credentials to complete their journey; archiveorg/gutenberg are
+<code>AuthType.NONE</code> and need none</td>
+<td>Populate the gitignored <code>.env</code> per §6.H — never commit
+credentials</td>
+</tr>
+<tr>
+<td>The <code>helixqa</code> binary built</td>
+<td>The runnable QA driver</td>
+<td><code>cd submodules/helixqa &amp;&amp; go build -o bin/helixqa ./cmd/helixqa</code></td>
+</tr>
+</tbody>
+</table>
+<p>Optional (not required for a working vision run):</p>
+<ul>
+<li><code>HELIX_TESSERACT_URL</code> — when set, an OCR-backed explorer
+captures an <code>OCRSnapshot</code> and runs the §11.4.52 OCR
+goal-match alongside the vision path. When unset, goal detection comes
+purely from the vision provider's own <code>Decision.GoalReached</code>
+(the model sees each screenshot and confirms goal reached) — this is
+what lets the vision run work with no OCR infra.</li>
+<li><code>HELIX_VISION_MAX_STEPS</code> — overrides the default
+12-step-per-case budget.</li>
+</ul>
+<h2 id="3-how-the-claude-cli-bridge-works">3. How the claude-CLI bridge
+works</h2>
+<p>The bridge is
+<code>submodules/helixqa/pkg/llm/bridge_provider.go</code>
+(<code>BridgedCLIProvider</code>). It shells out to the
+<code>claude</code> CLI in non-interactive print mode and parses the
+JSON response. Three invocation specifics are load-bearing — each was a
+real incompatibility that was fixed this session, and each is documented
+in-source so a future maintainer does not regress it.</p>
+<h3 id="31---output-format-json-not---json">3.1
+<code>--output-format json</code>, not <code>--json</code></h3>
+<p>The argument list built in <code>buildArgs</code> is:</p>
+<pre><code>claude --print &quot;&lt;prompt&gt;&quot; --output-format json [--allowedTools Read] [--model &lt;m&gt;]</code></pre>
+<p>The current Claude CLI selects structured output via
+<code>--output-format json</code>. The obsolete <code>--json</code> flag
+is rejected with <code>unknown option '--json'</code>. The JSON
+response's primary content field is <code>result</code> (with
+<code>content</code> / <code>text</code> fallbacks handled in
+<code>parseResponse</code>).</p>
+<h3
+id="32-no---image-flag--the-screenshot-path-is-embedded-in-the-prompt">3.2
+No <code>--image</code> flag — the screenshot path is embedded in the
+prompt</h3>
+<p>The current Claude CLI has <strong>no</strong> <code>--image</code> /
+<code>--attach</code> option (it is rejected with
+<code>unknown option '--image'</code>). Instead,
+<code>Vision()</code>:</p>
+<ol type="1">
+<li>Writes the screenshot bytes to a temp <code>.png</code> file
+(absolute path).</li>
+<li>Prepends a directive to the prompt via
+<code>buildVisionPrompt</code>:
+<code>"Here is the current screen. Read the screenshot image at &lt;abspath&gt; and analyse it. &lt;original prompt&gt;"</code>.</li>
+<li>Passes <code>--allowedTools Read</code> so Claude Code's built-in
+<strong>Read</strong> tool reads and analyses the image regardless of
+the host's default tool-permission config.</li>
+</ol>
+<p><code>SupportsVision()</code> returns true only for
+<code>cliName == "claude"</code>. The path MUST be absolute (the Read
+tool needs it); <code>os.CreateTemp</code> already returns an absolute
+path and <code>Vision()</code> absolutizes defensively.</p>
+<h3 id="33-prompt-position--before-the-variadic---allowedtools">3.3
+Prompt position — before the variadic <code>--allowedTools</code></h3>
+<p>This is the subtle trap. The prompt MUST be passed as the
+<strong>value immediately after <code>--print</code></strong>, NOT as a
+trailing positional argument:</p>
+<pre><code>GOOD: claude --print &quot;&lt;prompt&gt;&quot; --output-format json --allowedTools Read
+BAD:  claude --print --output-format json --allowedTools Read &quot;&lt;prompt&gt;&quot;</code></pre>
+<p><code>--allowedTools</code> is <strong>variadic</strong>: if the
+prompt trails it, commander.js consumes the prompt as just another tool
+name, leaving <code>claude</code> with no prompt at all
+(<code>Input must be provided either through stdin or as a prompt argument when using --print</code>).
+<code>buildArgs</code> therefore builds
+<code>{"--print", prompt, "--output-format", "json"}</code> first and
+only then appends the variadic <code>--allowedTools Read</code>. This
+was verified on the host and is recorded verbatim in the
+<code>buildArgs</code> comment.</p>
+<h2 id="4-running-a-bank">4. Running a bank</h2>
+<p>The exact command (archiveorg journey example):</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> submodules/helixqa</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./bin/helixqa</span> run <span class="dt">\</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">--banks</span> ../../lava-api-go/qa/banks/lava-archiveorg-journey.yaml <span class="dt">\</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">--platform</span> android <span class="dt">\</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">--device</span> 127.0.0.1:6555 <span class="dt">\</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">--package</span> digital.vasic.lava.client.dev <span class="dt">\</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">--output</span> <span class="op">&lt;</span>out<span class="op">&gt;</span> <span class="dt">\</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">--report</span> markdown</span></code></pre></div>
+<p>Flag notes (from <code>cmd/helixqa/main.go</code>
+<code>cmdRun</code>):</p>
+<ul>
+<li><code>--banks</code> is required (comma-separated files or
+directories).</li>
+<li><code>--device</code> is the Android serial. Supplying it triggers
+<code>buildAndroidVisionContext</code>; on success the run prints
+<code>Android vision backend: ENABLED (serial=...)</code>. If
+<code>claude</code> is not on <code>PATH</code> (or another prerequisite
+is missing) it prints
+<code>Android vision backend: disabled (&lt;reason&gt;) — android cases will honestly SKIP</code>.</li>
+<li><code>--package</code> is the app package the banks launch
+(<code>digital.vasic.lava.client.dev</code> for the debug build).</li>
+<li><code>--report</code> is <code>markdown</code> | <code>html</code> |
+<code>json</code> (default <code>markdown</code>).</li>
+<li><code>--output</code> is the results/evidence directory (default
+<code>qa-results</code>).</li>
+<li>Other defaults: <code>--validate</code> (crash detection) on,
+<code>--record</code> on, <code>--tickets</code> on,
+<code>--timeout 30m</code>, <code>--speed normal</code>.</li>
+</ul>
+<h3 id="where-evidence-lands">Where evidence lands</h3>
+<ul>
+<li>The report is written under the run's <code>--output</code>
+directory; its path is printed as <code>Report: &lt;path&gt;</code> at
+the end of the run.</li>
+<li>Per-device vision evidence (every screenshot + the provider's
+recorded rationale, for §11.4.83 replay) is persisted under
+<code>&lt;output&gt;/vision-evidence/&lt;serial&gt;/</code> via the
+<code>FileSink</code>.</li>
+<li>In this repository, completed VM QA runs are archived under
+<code>.lava-ci-evidence/helixqa/&lt;run-id&gt;/</code> — e.g.
+<code>.lava-ci-evidence/helixqa/vm-qa-vision2-20260608T182251Z/</code>
+holds <code>qa-report.md</code> and <code>run.log</code>.</li>
+</ul>
+<h3 id="how-to-read-the-verdict">How to read the verdict</h3>
+<p>Each vision case produces two assertions in the report — these are
+the real anti-bluff signals:</p>
+<table>
+<thead>
+<tr>
+<th>Assertion</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>vision-screen-changed</code>
+(<code>session.ScreenChanged</code>)</td>
+<td>The dispatched actions produced an <strong>observable
+change</strong> on screen. If <code>false</code>, the case FAILs with
+<code>zero-screen-delta across all steps (actions produced no observable change — goal match is unearned)</code>
+even if the model claimed the goal was reached.</td>
+</tr>
+<tr>
+<td><code>vision-goal-reached</code>
+(<code>session.GoalReached</code>)</td>
+<td>The vision model confirmed the case's <code>expected_result</code> /
+<code>required_evidence</code> goal from a real screenshot.</td>
+</tr>
+</tbody>
+</table>
+<p>A case PASSes only when both hold. A
+<code>vision-goal-reached: PASS</code> with a
+<code>vision-screen-changed: FAIL</code> is explicitly treated as an
+<strong>unearned</strong> goal match — see §7.</p>
+<h2 id="5-writing-a-new-bank">5. Writing a new bank</h2>
+<p>Mirror
+<code>lava-api-go/qa/banks/lava-archiveorg-journey.yaml</code>. Banks
+live under <code>lava-api-go/qa/banks/lava-*-journey.yaml</code>.
+Top-level shape:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">version</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;1.0&quot;</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">name</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Lava — &lt;Provider&gt; Provider Journey&quot;</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="fu">description</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;End-to-end &lt;provider&gt; journey on the Lava Android app: ...&quot;</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="fu">metadata</span><span class="kw">:</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">author</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;vasic-digital&quot;</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">app</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Lava&quot;</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">application_id</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;digital.vasic.lava.client.dev&quot;</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">provider_id</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;&lt;provider-id&gt;&quot;</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">provider_display_name</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;&lt;Display Name&gt;&quot;</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">auth_type</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;NONE | FORM_LOGIN | API_KEY&quot;</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="fu">test_cases</span><span class="kw">:</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">id</span><span class="kw">:</span><span class="at"> LAVA-&lt;PROVIDER&gt;-001</span><span class="co">            # per-case id convention: LAVA-&lt;PROVIDER&gt;-NNN</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">name</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Onboard and select the &lt;Provider&gt; provider&quot;</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">category</span><span class="kw">:</span><span class="at"> functional</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">priority</span><span class="kw">:</span><span class="at"> critical</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">platforms</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">android</span><span class="kw">]</span><span class="co">              # routes the case to the android vision backend</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">dispatches_to</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;monkey -p digital.vasic.lava.client.dev 1&quot;</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">steps</span><span class="kw">:</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Launch Lava and reach onboarding&quot;</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">action</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;adb_shell: monkey -p digital.vasic.lava.client.dev 1&quot;</span></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">expected</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Onboarding Welcome screen is visible without a crash&quot;</span></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Advance to provider selection&quot;</span></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">action</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Tap the primary continue control to reach provider configuration&quot;</span></span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">expected</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Provider list shows &lt;Provider&gt; as a selectable entry&quot;</span></span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">required_evidence</span><span class="kw">:</span><span class="co">                # become OCR/vision goal substrings the model confirms</span></span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="st">&quot;&lt;Display Name&gt;&quot;</span></span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="st">&quot;provider&quot;</span></span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">tags</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">&lt;provider-id&gt;</span><span class="kw">,</span><span class="at"> onboarding</span><span class="kw">,</span><span class="at"> provider-selection</span><span class="kw">]</span></span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">expected_result</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;The provider list is on screen and &lt;Provider&gt; is selectable&quot;</span></span></code></pre></div>
+<p>Required structural rules (enforced by
+<code>pkg/orchestrator/definition_challenge.go</code>):</p>
+<ul>
+<li><strong>The launch step is mandatory and must come first.</strong>
+The launch action (<code>deriveLaunchAction</code>) is the first
+non-skipped <code>adb_shell:</code> / <code>shell:</code> step. Every
+case opens with a step that monkey-starts the app, so the derived launch
+action is <code>shell monkey -p digital.vasic.lava.client.dev 1</code>
+(non-empty — it must pass <code>Target.Validate</code>; without it the
+case is "not drivable").</li>
+<li><strong><code>required_evidence</code></strong> entries plus
+<code>expected_result</code> become the <code>ScreenGoals</code>
+(OCR/vision goal substrings the model confirms from a real screenshot).
+Keep them short, screen-visible phrases a real user would actually see
+(e.g. <code>"Search"</code>, <code>"results"</code>,
+<code>"Download"</code>, <code>"Internet Archive"</code>).</li>
+<li><strong><code>expected_result</code></strong> is the human-readable
+success criterion and the final screen goal.</li>
+<li><strong><code>platforms: [android]</code></strong> routes the case
+through the android vision backend.</li>
+<li><strong>Per-case <code>id</code></strong> follows
+<code>LAVA-&lt;PROVIDER&gt;-NNN</code> (zero-padded, sequential), e.g.
+<code>LAVA-ARCHIVEORG-001</code> … <code>-004</code>.</li>
+</ul>
+<p>For <code>AuthType.NONE</code> providers (archiveorg, gutenberg)
+include the anonymous "Continue without hanging on the loading
+indicator" regression case (the §6.G forensic anchor — the historical
+stuck-<code>CircularProgressIndicator</code> defect). For
+<code>FORM_LOGIN</code> providers the journey enters real credentials
+sourced from <code>.env</code> (§6.H — never inline them in the
+bank).</p>
+<h2 id="6-troubleshooting">6. Troubleshooting</h2>
+<h3 id="61-bridge-errors--all-fixed-history-kept-as-forensic-record">6.1
+Bridge errors — all fixed (history kept as forensic record)</h3>
+<table>
+<thead>
+<tr>
+<th>Symptom</th>
+<th>Cause</th>
+<th>Fix (landed)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>unknown option '--json'</code></td>
+<td>obsolete flag</td>
+<td>use <code>--output-format json</code> (§3.1)</td>
+</tr>
+<tr>
+<td><code>unknown option '--image'</code></td>
+<td>the CLI has no image flag</td>
+<td>embed the absolute screenshot path in the prompt +
+<code>--allowedTools Read</code> (§3.2)</td>
+</tr>
+<tr>
+<td><code>Input must be provided either through stdin or as a prompt argument when using --print</code></td>
+<td>prompt placed after the variadic <code>--allowedTools</code>, which
+consumed it as a tool name</td>
+<td>pass the prompt as <code>--print</code>'s value, before
+<code>--allowedTools</code> (§3.3)</td>
+</tr>
+</tbody>
+</table>
+<p>All three are fixed in <code>pkg/llm/bridge_provider.go</code> and
+documented in-source. If any recurs, check <code>buildArgs</code> /
+<code>Vision</code> / <code>buildVisionPrompt</code> first.</p>
+<h3 id="62-open-lva-009--launch-dispatch-exit-127">6.2 Open: LVA-009 —
+launch-dispatch exit-127</h3>
+<p><strong>Status: OPEN.</strong> In the latest VM run
+(<code>.lava-ci-evidence/helixqa/vm-qa-vision2-20260608T182251Z/qa-report.md</code>),
+the first case (<code>LAVA-ARCHIVEORG-001</code>) ERRORed with:</p>
+<pre><code>android vision run aborted: visionnav: step 2: dispatch
+&quot;launch digital.vasic.lava.client.dev&quot;: exit status 127</code></pre>
+<p>Exit status 127 is "command not found" from the dispatched
+<code>launch</code> action. The vision model correctly analysed the
+home-launcher screen and decided to launch the Lava client, but the
+dispatch of that <code>launch</code> action failed with 127. The
+remaining cases in that run then degraded to a stable LeakCanary screen
+with zero screen delta (the app's debug LeakCanary UI), so they FAILed
+on <code>vision-screen-changed</code> despite the model reporting
+<code>vision-goal-reached</code> — the unearned-goal guard correctly
+caught them. This launch-dispatch exit-127 is the single known remaining
+issue and is <strong>not yet fixed</strong>.</p>
+<h3
+id="63-android-vision-backend-disabled--android-cases-will-honestly-skip">6.3
+"Android vision backend: disabled — android cases will honestly
+SKIP"</h3>
+<p>A prerequisite is missing. The printed reason names which one (no
+<code>claude</code> on <code>PATH</code>, no device serial,
+evidence-sink error, etc.). The cases SKIP — they do
+<strong>not</strong> fake a PASS. Fix the named prerequisite (§2) and
+re-run.</p>
+<h3 id="64-vision-screen-changed-fail-on-every-step">6.4
+<code>vision-screen-changed: FAIL</code> on every step</h3>
+<p>The dispatched actions produced no observable change (the run got
+stuck on one screen). Confirm the app actually launched (see LVA-009
+above), that the correct package is installed via
+<code>./gradlew :app:installDebug</code>, and that the device serial is
+the live VM.</p>
+<h2 id="7-anti-bluff-posture">7. Anti-bluff posture</h2>
+<p>The vision QA is built to make a false PASS hard, per §6.J / §6.L and
+the HelixQA §107 / §11.4 anti-bluff covenant:</p>
+<ul>
+<li><strong><code>vision-screen-changed</code> is the load-bearing real
+signal.</strong> If the model claims the goal is reached but the screen
+never changed, the case FAILs with
+<code>zero-screen-delta across all steps (actions produced no observable change — goal match is unearned)</code>.
+Goal match without observable change is treated as
+<strong>unearned</strong> — exactly the bluff this guard exists to
+catch.</li>
+<li><strong><code>vision-goal-reached</code> comes from a real
+screenshot</strong>, analysed by the vision model (or, when
+<code>HELIX_TESSERACT_URL</code> is set, cross-checked by OCR
+goal-match). It is never a metadata-only or config-only assertion.</li>
+<li><strong>Honest SKIP vs ERROR vs FAIL</strong>:
+<ul>
+<li><strong>SKIP</strong> — a prerequisite is genuinely absent (no
+<code>claude</code>, no device). The case does not run and is not
+counted as PASS. This is the honest "we could not test this" state.</li>
+<li><strong>ERROR</strong> — the run aborted on an infrastructure fault
+during the case (e.g. LVA-009's launch-dispatch exit-127). The case is a
+failure, not a PASS.</li>
+<li><strong>FAIL</strong> — the case ran but the user-visible goal was
+not genuinely reached (including the unearned-goal / zero-screen-delta
+case).</li>
+</ul></li>
+<li><strong>The report itself is the auditable proof.</strong>
+<code>qa-report.md</code> records the per-challenge captured runtime
+output, the model's rationale, and the assertion ledger
+(<code>vision-goal-reached</code>, <code>vision-screen-changed</code>) —
+the report IS the §107.x / §11.4.83 captured evidence that the command
+ran and emitted the asserted output, with every screenshot persisted
+under <code>vision-evidence/&lt;serial&gt;/</code>.</li>
+</ul>
+<p>A green vision run means a vision agent genuinely drove the real app
+on a real VM and observed the user-visible journey complete. CI green is
+necessary, never sufficient.</p>
+<h2 id="8-sources-cited">8. Sources cited</h2>
+<p>This guide was written against the live source in this repository
+(§11.4.99 latest-source discipline). The cited files:</p>
+<ul>
+<li><code>/Volumes/T7/Projects/Lava/submodules/helixqa/pkg/llm/bridge_provider.go</code>
+— the claude-CLI bridge: <code>buildArgs</code>, <code>Vision</code>,
+<code>buildVisionPrompt</code>, <code>SupportsVision</code>,
+<code>parseResponse</code> (the three §3 invocation specifics).</li>
+<li><code>/Volumes/T7/Projects/Lava/submodules/helixqa/cmd/helixqa/main.go</code>
+— the <code>run</code> command flag surface (<code>cmdRun</code>) and
+<code>buildAndroidVisionContext</code> (the vision-backend wiring +
+honest-SKIP behaviour).</li>
+<li><code>/Volumes/T7/Projects/Lava/lava-api-go/qa/banks/lava-archiveorg-journey.yaml</code>
+— the bank schema, launch-step / <code>required_evidence</code> /
+<code>expected_result</code> contract, and the per-case <code>id</code>
+convention.</li>
+<li><code>/Volumes/T7/Projects/Lava/.lava-ci-evidence/helixqa/vm-qa-vision2-20260608T182251Z/qa-report.md</code>
+— the real run evidence: the <code>vision-goal-reached</code> /
+<code>vision-screen-changed</code> assertions and the LVA-009
+launch-dispatch exit-127 ERROR.</li>
+<li><code>/Volumes/T7/Projects/Lava/scripts/run-genymotion-challenges.sh</code>
+— the §6.AH VM Challenge path and
+<code>./gradlew :app:installDebug</code> / Containers-driven Genymotion
+context the vision QA shares.</li>
+</ul>
+<h2 id="sources-verified">Sources verified</h2>
+<p>Sources verified 2026-06-08 (in-repo source, not external docs): the
+five files listed in §8, read directly at the revisions present in the
+working tree this session.</p>
+</body>
+</html>
