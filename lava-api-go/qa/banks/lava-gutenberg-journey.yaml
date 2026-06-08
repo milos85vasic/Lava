@@ -1,0 +1,100 @@
+# SPDX-FileCopyrightText: 2026 Milos Vasic
+# SPDX-License-Identifier: Apache-2.0
+#
+# HelixQA Test Bank: Lava — Project Gutenberg (gutenberg) provider journey
+# Real human journey: onboard -> select Project Gutenberg (NONE auth,
+# anonymous) -> search -> browse -> open result -> obtain a working download
+# option (Gutenberg declares TORRENT_DOWNLOAD; HTTP file fallback also valid).
+#
+# Provider facts (from core/tracker/gutenberg/.../GutenbergDescriptor.kt):
+#   id=gutenberg  displayName="Project Gutenberg"  authType=NONE
+#   capabilities: SEARCH, BROWSE, TOPIC, TORRENT_DOWNLOAD
+#   No AUTH_REQUIRED — anonymous public-domain ebook library.
+version: "1.0"
+name: "Lava — Project Gutenberg Provider Journey"
+description: "End-to-end Project Gutenberg journey on the Lava Android app: onboard, anonymous (no-auth) continue, search, browse, open item, obtain a working download (torrent or HTTP file)."
+metadata:
+  author: "vasic-digital"
+  app: "Lava"
+  application_id: "digital.vasic.lava.client.dev"
+  provider_id: "gutenberg"
+  provider_display_name: "Project Gutenberg"
+  auth_type: "NONE"
+
+test_cases:
+  - id: LAVA-GUTENBERG-001
+    name: "Onboard and select the Project Gutenberg provider"
+    category: functional
+    priority: critical
+    platforms: [android]
+    steps:
+      - name: "Launch Lava and reach onboarding"
+        action: "Cold-start the app; wait for the onboarding/welcome surface"
+        expected: "Onboarding Welcome screen is visible without a crash"
+      - name: "Advance to the provider selection step"
+        action: "Tap the primary continue control to reach provider configuration"
+        expected: "Provider list shows Project Gutenberg as a selectable entry"
+      - name: "Select Project Gutenberg"
+        action: "Tap the Project Gutenberg provider entry"
+        expected: "Project Gutenberg is marked selected; because auth_type is NONE no credential fields are required"
+    tags: [gutenberg, onboarding, provider-selection, anonymous]
+    expected_result: "A real user can choose Project Gutenberg during onboarding without being asked for credentials"
+
+  - id: LAVA-GUTENBERG-002
+    name: "Continue anonymously without hanging on the loading indicator"
+    category: functional
+    priority: critical
+    platforms: [android]
+    steps:
+      - name: "Trigger the anonymous Continue path"
+        action: "Tap the Continue control for the no-auth Project Gutenberg provider"
+        expected: "The no-auth path short-circuits: the loading indicator does NOT spin indefinitely"
+      - name: "Reach the main/search surface"
+        action: "Wait for navigation to complete after Continue"
+        expected: "The app reaches its main/search surface within a few seconds"
+    tags: [gutenberg, auth, anonymous, regression]
+    documentation_refs:
+      - type: constitution
+        section: "6.G"
+        path: "CLAUDE.md"
+    expected_result: "A real user completes anonymous Project Gutenberg access and lands in the app instead of a perpetual spinner"
+
+  - id: LAVA-GUTENBERG-003
+    name: "Search Project Gutenberg for a realistic query and browse results"
+    category: functional
+    priority: high
+    platforms: [android]
+    steps:
+      - name: "Open the search input"
+        action: "Navigate to the search surface and focus the query field"
+        expected: "Search input is editable"
+      - name: "Submit a realistic query"
+        action: "Enter a realistic real-world query (e.g. a public-domain book or author title) and submit to the live Gutenberg catalogue"
+        expected: "A result list renders with rows carrying book title and author metadata"
+      - name: "Scroll the result list"
+        action: "Swipe up to scroll additional results"
+        expected: "List scrolls smoothly without crash"
+    tags: [gutenberg, search, browse]
+    expected_result: "A real user can search the live Project Gutenberg and see a populated, scrollable result list"
+
+  - id: LAVA-GUTENBERG-004
+    name: "Open an item and obtain a working download option"
+    category: functional
+    priority: critical
+    platforms: [android]
+    steps:
+      - name: "Open a search result item"
+        action: "Tap the first result row to open its item/detail screen"
+        expected: "Item detail renders with title, author/metadata and a download affordance"
+      - name: "Locate the download affordance"
+        action: "Find the download control (Gutenberg declares TORRENT_DOWNLOAD; an HTTP file link is an acceptable equivalent deliverable)"
+        expected: "A working download control is present and enabled"
+      - name: "Obtain the download payload"
+        action: "Trigger the download; capture the resolved payload or URL"
+        expected: "A non-empty .torrent file payload (valid bencoded torrent) OR a reachable HTTP file URL returning a non-empty payload (HTTP 200) is produced"
+    tags: [gutenberg, download, torrent, http]
+    documentation_refs:
+      - type: constitution
+        section: "6.G"
+        path: "CLAUDE.md"
+    expected_result: "A real user reaches a working, non-empty download (torrent or HTTP file) for a Project Gutenberg item"

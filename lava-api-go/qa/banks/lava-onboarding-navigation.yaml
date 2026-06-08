@@ -1,0 +1,169 @@
+# SPDX-FileCopyrightText: 2026 Milos Vasic
+# SPDX-License-Identifier: Apache-2.0
+#
+# HelixQA Test Bank: Lava — cross-cutting onboarding + navigation
+# Provider-independent flows: cold-start survival, onboarding completion
+# gating, back-navigation, multi-provider configuration, theme + rotation,
+# and primary in-app navigation. Complements the six per-provider journey
+# banks in this directory.
+#
+# Anchored to real CLAUDE.md anti-bluff forensics:
+#   §6.Z  — cold-start crash survival (the painterResource layer-list crash)
+#   §6.AB — onboarding "complete" gate must NOT fire on first-screen back-press
+#   §6.Q  — no nested-scroll crash (LazyColumn inside verticalScroll)
+version: "1.0"
+name: "Lava — Onboarding and Navigation"
+description: "Provider-independent cross-cutting flows for the Lava Android app: cold-start survival, onboarding completion gating, back navigation, multi-provider config, theme/rotation, and primary navigation."
+metadata:
+  author: "vasic-digital"
+  app: "Lava"
+  application_id: "digital.vasic.lava.client.dev"
+
+test_cases:
+  - id: LAVA-NAV-001
+    name: "Cold-start survival (no crash on first launch)"
+    category: functional
+    priority: critical
+    platforms: [android]
+    steps:
+      - name: "Clear app state"
+        action: "pm clear digital.vasic.lava.client.dev to force a true cold start"
+        expected: "App data is cleared"
+      - name: "Cold launch the app"
+        action: "Start the launcher activity and wait for the first frame"
+        expected: "The app renders its first screen without crashing (no LavaApplication.onCreate / MainActivity.setContent failure)"
+    tags: [onboarding, cold-start, crash-survival, regression]
+    documentation_refs:
+      - type: constitution
+        section: "6.Z"
+        path: "CLAUDE.md"
+    expected_result: "A real user's very first cold launch reaches a rendered screen instead of an immediate crash"
+
+  - id: LAVA-NAV-002
+    name: "Welcome brand mark renders in colour, not a white placeholder"
+    category: ux
+    priority: high
+    platforms: [android]
+    steps:
+      - name: "Reach the Welcome screen"
+        action: "Cold-start the app and wait for the onboarding Welcome surface"
+        expected: "Welcome screen is visible"
+      - name: "Inspect the rendered brand mark region"
+        action: "Sample the rendered colour of the brand-mark region of the Welcome screen"
+        expected: "The brand mark renders in its intended colour range (not a solid-white/monochrome placeholder)"
+    tags: [onboarding, rendering, brand-mark, regression]
+    documentation_refs:
+      - type: constitution
+        section: "6.AB"
+        path: "CLAUDE.md"
+    expected_result: "A real user sees the coloured Lava brand mark on Welcome, not a white blob"
+
+  - id: LAVA-NAV-003
+    name: "Full onboarding happy path reaches the main app"
+    category: functional
+    priority: critical
+    platforms: [android]
+    steps:
+      - name: "Start onboarding"
+        action: "From a cold start, begin the onboarding flow at Welcome"
+        expected: "Welcome step is shown"
+      - name: "Advance through each onboarding step"
+        action: "Tap the primary continue control through Welcome, provider configuration, and any summary step"
+        expected: "Each step transitions forward to the next without crash or dead-end"
+      - name: "Finish onboarding"
+        action: "Complete the final onboarding step (e.g. Start Exploring)"
+        expected: "The app navigates to the main/home surface"
+    tags: [onboarding, happy-path, navigation]
+    expected_result: "A real user completes the full onboarding flow and lands on the main app screen"
+
+  - id: LAVA-NAV-004
+    name: "Back-press on the first onboarding screen does NOT mark onboarding complete"
+    category: functional
+    priority: critical
+    platforms: [android]
+    steps:
+      - name: "Reach the first onboarding screen"
+        action: "Cold-start the app and stop at the Welcome step with zero providers configured"
+        expected: "Welcome step is shown"
+      - name: "Press hardware back on Welcome"
+        action: "Send the hardware back key while on the first onboarding screen"
+        expected: "Onboarding is NOT marked complete; the user is not dumped into a half-functional home with zero providers"
+      - name: "Re-launch and confirm onboarding is still pending"
+        action: "Relaunch the app"
+        expected: "Onboarding is presented again (the completion gate only fires on real completion, not on first-screen back-press)"
+    tags: [onboarding, gating, back-press, regression]
+    documentation_refs:
+      - type: constitution
+        section: "6.AB"
+        path: "CLAUDE.md"
+    expected_result: "A real user who backs out of the first onboarding screen is not falsely treated as onboarded"
+
+  - id: LAVA-NAV-005
+    name: "Configure multiple providers during onboarding"
+    category: functional
+    priority: high
+    platforms: [android]
+    steps:
+      - name: "Reach provider configuration"
+        action: "Advance onboarding to the provider selection step"
+        expected: "Provider list is shown with all supported providers selectable"
+      - name: "Select two no-auth providers"
+        action: "Select Internet Archive and Project Gutenberg (both auth_type NONE)"
+        expected: "Both providers are marked selected; no credential prompt blocks progress"
+      - name: "Continue to the main app"
+        action: "Complete onboarding with the two providers configured"
+        expected: "The app reaches the main surface with the two chosen providers active"
+    tags: [onboarding, multi-provider, configuration]
+    expected_result: "A real user can onboard with more than one provider configured at once"
+
+  - id: LAVA-NAV-006
+    name: "Open Trackers from Settings without a nested-scroll crash"
+    category: functional
+    priority: high
+    platforms: [android]
+    steps:
+      - name: "Reach Settings"
+        action: "From the main app, navigate to Settings/More"
+        expected: "Settings surface is shown"
+      - name: "Open the Trackers selector"
+        action: "Tap the Trackers entry to open the tracker selector list"
+        expected: "The tracker selector list renders without an IllegalStateException (no LazyColumn-inside-verticalScroll measurement crash)"
+    tags: [navigation, settings, trackers, nested-scroll, regression]
+    documentation_refs:
+      - type: constitution
+        section: "6.Q"
+        path: "CLAUDE.md"
+    expected_result: "A real user can open the Trackers settings screen without crashing the app"
+
+  - id: LAVA-NAV-007
+    name: "Theme switch and rotation preserve state"
+    category: ux
+    priority: medium
+    platforms: [android]
+    steps:
+      - name: "Toggle dark/light theme"
+        action: "Switch the app theme from the settings/theme control"
+        expected: "The UI re-renders in the selected theme without crash; previously visible content remains present"
+      - name: "Rotate to landscape"
+        action: "Rotate the device to landscape orientation"
+        expected: "Layout adapts without crash; the active screen's content stays visible and consistent"
+    tags: [navigation, theme, rotation]
+    expected_result: "A real user can switch theme and rotate the device without losing screen state or crashing"
+
+  - id: LAVA-NAV-008
+    name: "Primary in-app navigation reaches search, results and back"
+    category: functional
+    priority: high
+    platforms: [android]
+    steps:
+      - name: "Open search from the main surface"
+        action: "Navigate to the search input from the home/menu surface"
+        expected: "Search input screen is shown"
+      - name: "Run a search and open a result"
+        action: "Submit a realistic query and open the first result"
+        expected: "Result list renders and the detail screen opens for the tapped result"
+      - name: "Navigate back to the previous screen"
+        action: "Press back from the detail screen"
+        expected: "The previous (result list) screen is restored, not a crash or app exit"
+    tags: [navigation, search, back-stack]
+    expected_result: "A real user can traverse home -> search -> results -> detail -> back without dead-ends or crashes"

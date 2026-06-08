@@ -1,0 +1,108 @@
+# SPDX-FileCopyrightText: 2026 Milos Vasic
+# SPDX-License-Identifier: Apache-2.0
+#
+# HelixQA Test Bank: Lava — RuTracker.org provider journey
+# Real human journey: onboard -> select RuTracker (CAPTCHA_LOGIN auth) ->
+# search -> browse results -> open a result -> obtain a working .torrent /
+# magnet download option.
+#
+# Provider facts (from core/tracker/rutracker/.../RuTrackerDescriptor.kt):
+#   id=rutracker  displayName="RuTracker.org"  authType=CAPTCHA_LOGIN
+#   capabilities: SEARCH, BROWSE, FORUM, TOPIC, COMMENTS, FAVORITES,
+#                 TORRENT_DOWNLOAD, MAGNET_LINK, AUTH_REQUIRED, CAPTCHA_LOGIN
+#
+# Credentials per §6.H / §11.4.10: NEVER inline. The authenticating step
+# loads RUTRACKER_USERNAME / RUTRACKER_PASSWORD from the runtime env / the
+# autonomous-session .env at execution time. This bank describes structure,
+# not secrets, per CONST-046.
+version: "1.0"
+name: "Lava — RuTracker.org Provider Journey"
+description: "End-to-end RuTracker journey on the Lava Android app: onboard, captcha-login auth, search, browse, open topic, obtain torrent/magnet download."
+metadata:
+  author: "vasic-digital"
+  app: "Lava"
+  application_id: "digital.vasic.lava.client.dev"
+  provider_id: "rutracker"
+  provider_display_name: "RuTracker.org"
+  auth_type: "CAPTCHA_LOGIN"
+
+test_cases:
+  - id: LAVA-RUTRACKER-001
+    name: "Onboard and select the RuTracker provider"
+    category: functional
+    priority: critical
+    platforms: [android]
+    steps:
+      - name: "Launch Lava and reach onboarding"
+        action: "Cold-start the app; wait for the onboarding/welcome surface"
+        expected: "Onboarding Welcome screen is visible without a crash"
+      - name: "Advance to the provider selection step"
+        action: "Tap the primary continue/get-started control to reach provider configuration"
+        expected: "Provider list is shown with RuTracker.org as a selectable entry"
+      - name: "Select RuTracker"
+        action: "Tap the RuTracker.org provider entry"
+        expected: "RuTracker is marked selected and its login surface is reachable (auth_type indicates credential login)"
+    tags: [rutracker, onboarding, provider-selection]
+    expected_result: "A real user can choose RuTracker during onboarding and reach its credential login surface"
+
+  - id: LAVA-RUTRACKER-002
+    name: "Authenticate to RuTracker with captcha-login credentials"
+    category: functional
+    priority: critical
+    platforms: [android]
+    steps:
+      - name: "Open the RuTracker login form"
+        action: "From provider selection, open the RuTracker credential entry surface"
+        expected: "Username, password and captcha entry fields are presented (CAPTCHA_LOGIN)"
+      - name: "Enter real credentials from the runtime environment"
+        action: "Type RUTRACKER_USERNAME and RUTRACKER_PASSWORD loaded from env (never hardcoded); solve the presented captcha"
+        expected: "Fields accept input; no validation error before submit"
+      - name: "Submit and authenticate against the real RuTracker service"
+        action: "Tap the submit/login control; wait for the network round-trip to complete"
+        expected: "Authentication succeeds; the loading indicator clears and the main/search surface becomes reachable (no stuck spinner)"
+    tags: [rutracker, auth, captcha-login, real-service]
+    documentation_refs:
+      - type: constitution
+        section: "6.G"
+        path: "CLAUDE.md"
+    expected_result: "A real user with valid RuTracker credentials reaches an authenticated session against the live service"
+
+  - id: LAVA-RUTRACKER-003
+    name: "Search RuTracker for a realistic query and browse results"
+    category: functional
+    priority: high
+    platforms: [android]
+    steps:
+      - name: "Open the search input"
+        action: "Navigate to the search surface and focus the query field"
+        expected: "Search input is editable"
+      - name: "Submit a realistic query"
+        action: "Enter a realistic real-world query (e.g. a popular film or distro title) and submit the search to the live tracker"
+        expected: "A result list renders with one or more rows carrying title, size and seed/leech counts"
+      - name: "Scroll the result list"
+        action: "Swipe up to load/scroll additional results"
+        expected: "List scrolls smoothly; additional rows become visible without crash"
+    tags: [rutracker, search, browse]
+    expected_result: "A real user can search the live RuTracker and see a populated, scrollable result list"
+
+  - id: LAVA-RUTRACKER-004
+    name: "Open a result and obtain a working download option"
+    category: functional
+    priority: critical
+    platforms: [android]
+    steps:
+      - name: "Open a search result topic"
+        action: "Tap the first result row to open its topic/detail screen"
+        expected: "Topic detail renders with title, description/metadata and download affordances"
+      - name: "Locate the download affordances"
+        action: "Find the .torrent download control and the magnet-link control on the topic screen (RuTracker declares TORRENT_DOWNLOAD + MAGNET_LINK)"
+        expected: "Both a torrent-file download control and a magnet control are present and enabled"
+      - name: "Obtain the torrent payload"
+        action: "Trigger the .torrent download; capture the resulting payload"
+        expected: "A non-empty .torrent file payload is produced (valid bencoded torrent) OR a magnet URI of the form magnet:?xt=urn:btih:<hash> is resolved"
+    tags: [rutracker, download, torrent, magnet]
+    documentation_refs:
+      - type: constitution
+        section: "6.G"
+        path: "CLAUDE.md"
+    expected_result: "A real user reaches a working, non-empty torrent file or a valid magnet URI for a RuTracker result — the provider's primary deliverable"

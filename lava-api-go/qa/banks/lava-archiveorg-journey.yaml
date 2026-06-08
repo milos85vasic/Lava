@@ -1,0 +1,106 @@
+# SPDX-FileCopyrightText: 2026 Milos Vasic
+# SPDX-License-Identifier: Apache-2.0
+#
+# HelixQA Test Bank: Lava — Internet Archive (archiveorg) provider journey
+# Real human journey: onboard -> select Internet Archive (NONE auth, anonymous)
+# -> search -> browse -> open result -> obtain a working HTTP download link.
+#
+# Provider facts (from core/tracker/archiveorg/.../ArchiveOrgDescriptor.kt):
+#   id=archiveorg  displayName="Internet Archive"  authType=NONE
+#   capabilities: SEARCH, BROWSE, FORUM, TOPIC
+#   NO TORRENT_DOWNLOAD, NO MAGNET_LINK, NO AUTH_REQUIRED — Internet Archive
+#   serves files over HTTP. The download deliverable here is a working HTTP
+#   file link, NOT a torrent/magnet.
+#
+# Forensic note (CLAUDE.md §6.G): archiveorg historically hung on a
+# CircularProgressIndicator because the no-auth "Continue" path did not
+# short-circuit. The auth step below explicitly verifies the anonymous
+# "Continue" path reaches the app instead of spinning forever.
+version: "1.0"
+name: "Lava — Internet Archive Provider Journey"
+description: "End-to-end Internet Archive journey on the Lava Android app: onboard, anonymous (no-auth) continue, search, browse, open item, obtain a working HTTP download link."
+metadata:
+  author: "vasic-digital"
+  app: "Lava"
+  application_id: "digital.vasic.lava.client.dev"
+  provider_id: "archiveorg"
+  provider_display_name: "Internet Archive"
+  auth_type: "NONE"
+
+test_cases:
+  - id: LAVA-ARCHIVEORG-001
+    name: "Onboard and select the Internet Archive provider"
+    category: functional
+    priority: critical
+    platforms: [android]
+    steps:
+      - name: "Launch Lava and reach onboarding"
+        action: "Cold-start the app; wait for the onboarding/welcome surface"
+        expected: "Onboarding Welcome screen is visible without a crash"
+      - name: "Advance to the provider selection step"
+        action: "Tap the primary continue control to reach provider configuration"
+        expected: "Provider list shows Internet Archive as a selectable entry"
+      - name: "Select Internet Archive"
+        action: "Tap the Internet Archive provider entry"
+        expected: "Internet Archive is marked selected; because auth_type is NONE no credential fields are required"
+    tags: [archiveorg, onboarding, provider-selection, anonymous]
+    expected_result: "A real user can choose Internet Archive during onboarding without being asked for credentials"
+
+  - id: LAVA-ARCHIVEORG-002
+    name: "Continue anonymously without hanging on the loading indicator"
+    category: functional
+    priority: critical
+    platforms: [android]
+    steps:
+      - name: "Trigger the anonymous Continue path"
+        action: "Tap the Continue control for the no-auth Internet Archive provider"
+        expected: "The no-auth path short-circuits: the loading indicator does NOT spin indefinitely"
+      - name: "Reach the main/search surface"
+        action: "Wait for navigation to complete after Continue"
+        expected: "The app reaches its main/search surface within a few seconds (regression guard for the historical stuck-spinner defect)"
+    tags: [archiveorg, auth, anonymous, regression]
+    documentation_refs:
+      - type: constitution
+        section: "6.G"
+        path: "CLAUDE.md"
+    expected_result: "A real user completes anonymous Internet Archive access and lands in the app instead of a perpetual spinner"
+
+  - id: LAVA-ARCHIVEORG-003
+    name: "Search Internet Archive for a realistic query and browse results"
+    category: functional
+    priority: high
+    platforms: [android]
+    steps:
+      - name: "Open the search input"
+        action: "Navigate to the search surface and focus the query field"
+        expected: "Search input is editable"
+      - name: "Submit a realistic query"
+        action: "Enter a realistic real-world query (e.g. a public-domain film or audio title) and submit to the live archive.org API"
+        expected: "A result list renders with rows carrying item title and metadata"
+      - name: "Scroll the result list"
+        action: "Swipe up to scroll additional results"
+        expected: "List scrolls smoothly without crash"
+    tags: [archiveorg, search, browse]
+    expected_result: "A real user can search the live Internet Archive and see a populated, scrollable result list"
+
+  - id: LAVA-ARCHIVEORG-004
+    name: "Open an item and obtain a working HTTP download link"
+    category: functional
+    priority: critical
+    platforms: [android]
+    steps:
+      - name: "Open a search result item"
+        action: "Tap the first result row to open its item/detail screen"
+        expected: "Item detail renders with title, metadata and a download/file affordance"
+      - name: "Locate the HTTP download affordance"
+        action: "Find the file/download control (Internet Archive serves over HTTP — there is NO torrent/magnet control for this provider)"
+        expected: "A working HTTP file/download control is present and enabled; no torrent/magnet control is expected"
+      - name: "Resolve the download URL"
+        action: "Trigger the download; capture the resolved file URL/payload"
+        expected: "A reachable https://archive.org/download/... file URL is resolved and returns a non-empty payload (HTTP 200)"
+    tags: [archiveorg, download, http]
+    documentation_refs:
+      - type: constitution
+        section: "6.G"
+        path: "CLAUDE.md"
+    expected_result: "A real user reaches a working, non-empty HTTP file download for an Internet Archive item — the provider's primary deliverable"
