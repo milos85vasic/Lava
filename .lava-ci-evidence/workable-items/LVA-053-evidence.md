@@ -1,0 +1,1 @@
+# LVA-053 — commit 608c3bf9; PostConverters.removeLast() desugars to java.util.List.removeLast() absent <API35 → NoSuchMethodError topic-screen crash on PostBr+Hr; fixed to removeAt(lastIndex); +28 converter tests; Bluff-Audit in commit

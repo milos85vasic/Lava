@@ -390,3 +390,39 @@ archiveorg/gutenberg wire a real HTTP-download impl that is deliberately not exp
 
 scripts/record-device-session.sh + hermetic path test landed; device-bound capture UNCONFIRMED without a live device.
 
+## LVA-048 — feature/search_input writes author NAME under AuthorIdKey (wrong nav key)
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** .lava-ci-evidence/workable-items/LVA-048-evidence.md
+**Severity:** P2
+
+SearchInputNavigation openSearchInput appends filter.author?.name under AuthorIdKey instead of AuthorNameKey. Flagged by wave-4 §6.Q agent (out of its scope). Needs fix + roundtrip test.
+
+## LVA-049 — navigation route values not URL-encoded (reserved chars in search query corrupt route)
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Task
+**Evidence:** .lava-ci-evidence/workable-items/LVA-049-evidence.md
+**Severity:** P3
+
+appendOptionalParams passes raw query; a query with &/? corrupts the route. Add Uri.encode at call sites + roundtrip test.
+
+## LVA-050 — A11yContentDescriptionTest teardown RuntimeException (Robolectric RoboMonitoringInstrumentation) reds :core:designsystem:test despite assertions passing
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Task
+**Evidence:** .lava-ci-evidence/workable-items/LVA-050-evidence.md
+**Severity:** P3
+
+All 4 test bodies pass (XML failures=0) but a teardown RuntimeException makes Gradle report FAILED. Quarantine/fix the teardown.
+
+## LVA-053 — PostConverters.removeLast() crashes topic screen on Android <API 35 (NoSuchMethodError)
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** .lava-ci-evidence/workable-items/LVA-053-evidence.md
+**Severity:** P1
+
+Kotlin removeLast() desugars to java.util.List.removeLast (JDK21 SequencedCollection) absent on Android <35 → a PostBr followed by Hr crashes the topic screen. Fixed to removeAt(lastIndex) + 28 converter tests.
+

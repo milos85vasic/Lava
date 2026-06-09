@@ -39,35 +39,27 @@ Challenge11ArchiveOrgAnonymousSearchTest crashes the app PROCESS at activity-des
 
 github/master and gitlab/master diverged at d2a2151 with unique non-doc go.mod content each; LVA-030 commit landed gitlab+working-tree but github refused non-FF. Needs a content-merge decision (operator-gated, NO force-push per §6.T.3).
 
-## LVA-048 — feature/search_input writes author NAME under AuthorIdKey (wrong nav key)
-
-**Status:** Queued
-**Type:** Bug
-**Severity:** P2
-
-SearchInputNavigation openSearchInput appends filter.author?.name under AuthorIdKey instead of AuthorNameKey. Flagged by wave-4 §6.Q agent (out of its scope). Needs fix + roundtrip test.
-
-## LVA-049 — navigation route values not URL-encoded (reserved chars in search query corrupt route)
-
-**Status:** Queued
-**Type:** Task
-**Severity:** P3
-
-appendOptionalParams passes raw query; a query with &/? corrupts the route. Add Uri.encode at call sites + roundtrip test.
-
-## LVA-050 — A11yContentDescriptionTest teardown RuntimeException (Robolectric RoboMonitoringInstrumentation) reds :core:designsystem:test despite assertions passing
-
-**Status:** Queued
-**Type:** Task
-**Severity:** P3
-
-All 4 test bodies pass (XML failures=0) but a teardown RuntimeException makes Gradle report FAILED. Quarantine/fix the teardown.
-
 ## LVA-052 — Wire HTTP_DOWNLOAD into the topic/download UI (consume HttpDownloadableTracker, write artifact to disk)
 
 **Status:** Queued
 **Type:** Feature
 **Severity:** P3
 
-LVA-044 made HTTP_DOWNLOAD SDK-reachable; the download UI consumes DownloadableTracker (.torrent) only. OWED: a UI surface that calls downloadHttpFile + saves the file.
+HTTP_DOWNLOAD UI wiring. A full impl exists on branch worktree-agent-ad695086c8735d60a (commit c8951eee) but it re-derived LVA-044 substrate → conflicts with master's landed LVA-044; needs a clean re-apply of the LVA-052 net-new files (HttpDownloadSource/DownloadHttpFileUseCase/DownloadService.downloadHttpFile/SDK.downloadHttpFile) on top of master. Topic-screen Compose routing (provider id through nav) still OWED.
+
+## LVA-054 — Audit codebase for removeLast/removeFirst/getFirst/getLast SequencedCollection calls that crash on Android <API35
+
+**Status:** Queued
+**Type:** Task
+**Severity:** P1
+
+LVA-053 class: Kotlin stdlib these desugar to java.util.* methods absent below API35. Sweep all modules + add a lint/detekt guard.
+
+## LVA-055 — run-test-pg.sh integration list omits ./internal/storage (Postgres legs skipped by canonical harness)
+
+**Status:** Queued
+**Type:** Task
+**Severity:** P3
+
+scripts/run-test-pg.sh runs only ./internal/cache + ./tests/integration; add ./internal/storage so its Postgres legs run in the canonical harness.
 
