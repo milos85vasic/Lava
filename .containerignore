@@ -37,9 +37,18 @@ keystores/
 app/google-services.json
 local.properties
 
-# Submodules not needed by the Go build (lava-api-go is self-contained)
-submodules/
+# Submodules: lava-api-go/go.mod has `replace digital.vasic.X => ../submodules/X`
+# for ~14 submodules, so the in-container `go build` REQUIRES their source. We must
+# NOT blanket-exclude submodules/ (LVA-078: doing so broke the image build with
+# "replacement directory ../submodules/X does not exist"). Instead exclude only the
+# heavy non-source parts of each submodule (their nested .git history + build output,
+# already covered by **/build/ below). The constitution submodule is NOT a go.mod
+# replace target, so it stays excluded.
 constitution/
+
+# Nested VCS history (submodules' .git) — never needed by `go build`, trims ~100s MB.
+**/.git/
+**/.git-backup*/
 
 # IDE / OS cruft
 .idea/
