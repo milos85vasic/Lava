@@ -82,6 +82,113 @@ class TestEndpointsRepositoryEquivalenceTest {
     }
 
     /**
+     * LVA-011 regression — Third-Law (behavioural-equivalence) bluff fix.
+     *
+     * Real counterpart: `EndpointsRepositoryImpl.add()` early-returns for
+     * `Endpoint.Rutracker`:
+     *
+     *     override suspend fun add(endpoint: Endpoint) {
+     *         if (endpoint is Endpoint.Rutracker) return   // ← no-op
+     *         endpointDao.insert(endpoint.toEntity())
+     *     }
+     *
+     * i.e. adding direct rutracker.org is a SILENT no-op — it is never
+     * persisted (operator directive 2026-05-12: rutracker.org is no longer a
+     * user-addable endpoint). The previous fake STORED Rutracker (and would
+     * raise a duplicate-conflict on a second Rutracker add), so a test
+     * asserting "adding Rutracker is a no-op" would pass against the fake
+     * while exercising DIFFERENT behaviour than production. This test locks
+     * the parity fix in place by asserting ALL THREE real constraints in one
+     * place:
+     *
+     *  1. add(Rutracker) is a no-op — the store does not grow, and a second
+     *     add(Rutracker) does NOT throw (proving Rutracker never entered the
+     *     dup-tracked set), matching the real impl's early-return.
+     *  2. Real (non-Rutracker) duplicates are STILL rejected with
+     *     IllegalStateException, matching Room's PRIMARY KEY conflict.
+     *  3. The isEmpty()-guarded default seeding still fires on first observe.
+     *
+     * Bluff-Audit (Sixth Law clause 6.A / Seventh Law clause 1):
+     *   Mutation: remove `if (endpoint is Endpoint.Rutracker) return` from
+     *             TestEndpointsRepository.add (the LVA-011 no-op branch).
+     *   Observed-Failure: this test fails on the post-add snapshot assertion —
+     *     "add(Rutracker) MUST be a no-op (real impl early-returns) — store
+     *      grew to [Rutracker] / or the second add(Rutracker) threw …"
+     *   Reverted: yes.
+     *
+     * Primary assertion: user-visible persisted state — the snapshot list
+     * after add(Rutracker) is unchanged (empty), and the real Mirror duplicate
+     * is rejected.
+     */
+    @Test
+    fun fake_no_ops_rutracker_add_like_real_impl() = runTest {
+        val repository = TestEndpointsRepository()
+
+        // (1) add(Rutracker) MUST be a no-op — real impl early-returns and
+        //     never persists it. The store stays empty.
+        repository.add(Endpoint.Rutracker)
+        assertTrue(
+            "add(Endpoint.Rutracker) MUST be a no-op (real impl early-returns " +
+                "in EndpointsRepositoryImpl.add) — but the store grew to " +
+                "${repository.currentEndpoints()}. This is the LVA-011 " +
+                "Third-Law bluff fake: the fake stored Rutracker while " +
+                "production never does.",
+            repository.currentEndpoints().isEmpty(),
+        )
+
+        // A SECOND add(Rutracker) MUST ALSO be a silent no-op — it must NOT
+        // throw a duplicate-conflict. The real impl early-returns before the
+        // insert, so Rutracker never enters the dup-tracked set. If the fake
+        // had stored Rutracker on the first add, this second call would throw.
+        repository.add(Endpoint.Rutracker)
+        assertTrue(
+            "A second add(Endpoint.Rutracker) MUST also be a silent no-op " +
+                "(real impl early-returns before any persistence, so Rutracker " +
+                "is never in the dup-tracked set). Store is now: " +
+                "${repository.currentEndpoints()}",
+            repository.currentEndpoints().isEmpty(),
+        )
+
+        // (2) Real (non-Rutracker) endpoints MUST still be persisted AND
+        //     duplicate-rejected, exactly as before — the no-op branch must
+        //     not weaken the Room PRIMARY KEY parity.
+        val mirror = Endpoint.Mirror("192.168.1.100:8080")
+        repository.add(mirror)
+        assertEquals(
+            "A real (non-Rutracker) endpoint MUST be persisted by the fake — " +
+                "the LVA-011 no-op branch must only short-circuit Rutracker.",
+            listOf(mirror),
+            repository.currentEndpoints(),
+        )
+        try {
+            repository.add(mirror)
+            fail(
+                "Adding the same non-Rutracker endpoint twice MUST still throw " +
+                    "IllegalStateException — the LVA-011 no-op branch must not " +
+                    "disable the Room PRIMARY KEY duplicate-rejection parity.",
+            )
+        } catch (e: IllegalStateException) {
+            assertTrue(
+                "Duplicate-rejection message MUST contain 'already exists' — " +
+                    "got: ${e.message}",
+                e.message?.contains("already exists") == true,
+            )
+        }
+
+        // (3) Default seeding still fires on first observation (isEmpty()-guarded).
+        //     Adding the Mirror above means the store is no longer empty, so a
+        //     fresh repository is used to prove the seed branch is intact.
+        val freshRepository = TestEndpointsRepository()
+        assertEquals(
+            "First observation against an empty store MUST still seed the " +
+                "default — the LVA-011 add() fix must not disturb the " +
+                "isEmpty()-guarded seeding branch.",
+            listOf(Endpoint.Rutracker),
+            freshRepository.observeAll().first(),
+        )
+    }
+
+    /**
      * The real impl's seeding branch is `if (endpointDao.isEmpty()) { … }`.
      * That guard fires exactly once: on first observation against an
      * empty table. A second observation, after the table is populated,

@@ -53,6 +53,24 @@ class TestEndpointsRepository : EndpointsRepository {
         }
 
     override suspend fun add(endpoint: Endpoint) {
+        // Third-Law branch parity (LVA-011, 2026-06-09). Source of truth:
+        // `lava.data.impl.repository.EndpointsRepositoryImpl.add()`, which
+        // early-returns for Endpoint.Rutracker:
+        //
+        //     override suspend fun add(endpoint: Endpoint) {
+        //         if (endpoint is Endpoint.Rutracker) return   // ← no-op, never persisted
+        //         endpointDao.insert(endpoint.toEntity())
+        //     }
+        //
+        // Operator directive 2026-05-12: direct rutracker.org is no longer a
+        // user-addable endpoint — the real DAO never stores it. The previous
+        // form of this fake STORED Endpoint.Rutracker (and would even raise a
+        // duplicate-conflict for it), so a test asserting "adding Rutracker is
+        // a no-op" would pass against the fake while exercising different
+        // behaviour than production. That is a Third-Law (behavioural-
+        // equivalence) bluff fake. The branch below restores parity: the fake
+        // silently no-ops on Rutracker add, exactly as the real impl does.
+        if (endpoint is Endpoint.Rutracker) return
         if (mutableEndpoints.value.contains(endpoint)) {
             throw IllegalStateException(
                 "Endpoint $endpoint already exists (simulating Room PRIMARY KEY conflict)",
