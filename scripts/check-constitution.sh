@@ -314,6 +314,14 @@ bash scripts/scan-no-hardcoded-uuid.sh
 bash scripts/scan-no-hardcoded-ipv4.sh
 bash scripts/scan-no-hardcoded-hostport.sh
 
+# LVA-054: no JDK21 SequencedCollection-shaped List methods in production Kotlin.
+# removeLast()/removeFirst()/getFirst()/getLast() desugar to java.util.List.*
+# (SequencedCollection) which is ABSENT on Android < API 35 -> NoSuchMethodError
+# at runtime while JVM unit tests pass (the bluff). Same delegate-to-standalone
+# pattern so tests/check-constitution/test_no_removelast_seqcoll.sh can invoke
+# the SAME rule in isolation.
+bash scripts/scan-no-removelast-seqcoll.sh
+
 # ---------------------------------------------------------------------
 # 6.S — Continuation Document Maintenance Mandate enforcement
 # ---------------------------------------------------------------------

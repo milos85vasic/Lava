@@ -119,7 +119,10 @@ private class NestedNavigationControllerImpl(
             navHostController.navigateUp() -> true
             topLevelBackStack.isNotEmpty() -> {
                 navigate(
-                    route = topLevelBackStack.removeLast(),
+                    // LVA-054: removeLast() desugars to java.util.List.removeLast (JDK21
+                    // SequencedCollection), absent on Android < API 35 -> NoSuchMethodError.
+                    // removeAt(lastIndex) removes and returns the same element, API-safe.
+                    route = topLevelBackStack.removeAt(topLevelBackStack.lastIndex),
                     addBackStack = false,
                     retain = true,
                 )
