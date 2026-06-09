@@ -291,3 +291,66 @@ doc_processor/helixqa/llm_orchestrator/llm_provider/llms_verifier/vision_engine 
 
 scan-no-hardcoded-hostport.sh regex had /test/ but not top-level tests/ → flagged tests/check-constitution/test_no_hardcoded_hostport.sh → check-constitution exit 1 → pre-push blocked. Added ^tests/ exemption.
 
+## LVA-038 — brotli middleware emitted Content-Encoding br on bodyless 204/304 (statusAllowsBody dead code)
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** .lava-ci-evidence/workable-items/LVA-038-evidence.md
+**Severity:** P2
+
+Wave-3 parallel-fleet find; fixed in f3b2d269; falsifiability-proven; main-stream re-verified.
+
+## LVA-039 — ProviderLoginViewModel.onReloadCaptchaClick leaves stale serviceUnavailable banner
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** .lava-ci-evidence/workable-items/LVA-039-evidence.md
+**Severity:** P2
+
+Wave-3 parallel-fleet find; fixed in 9f895502; falsifiability-proven; main-stream re-verified.
+
+## LVA-040 — onboarding anonymous-mode choice never persisted to provider_configs
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** .lava-ci-evidence/workable-items/LVA-040-evidence.md
+**Severity:** P1
+
+Wave-3 parallel-fleet find; fixed in 8e0720ab; falsifiability-proven; main-stream re-verified.
+
+## LVA-041 — SyncPeriod.DAY background-sync flex interval 6.days should be 6.hours (WorkManager clamp)
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** .lava-ci-evidence/workable-items/LVA-041-evidence.md
+**Severity:** P2
+
+Wave-3 parallel-fleet find; fixed in 0cecbe4e; falsifiability-proven; main-stream re-verified.
+
+## LVA-042 — SyncOutbox FIFO Third-Law fake divergence + createdAt regression coverage
+
+**Status:** Completed (→ Fixed.md)
+**Type:** Task
+**Evidence:** .lava-ci-evidence/workable-items/LVA-042-evidence.md
+**Severity:** P2
+
+Wave-3 parallel-fleet find; fixed in a11aee32; falsifiability-proven; main-stream re-verified.
+
+## LVA-043 — §6.E reverse-gate phantom-capability honesty assertion
+
+**Status:** Completed (→ Fixed.md)
+**Type:** Task
+**Evidence:** .lava-ci-evidence/workable-items/LVA-043-evidence.md
+**Severity:** P2
+
+Wave-3 parallel-fleet find; fixed in c117caeb; falsifiability-proven; main-stream re-verified.
+
+## LVA-045 — §6.AI-debt CM-COVENANT-114-* §11.4.128-141 propagation gate + slash-command docs
+
+**Status:** Completed (→ Fixed.md)
+**Type:** Task
+**Evidence:** .lava-ci-evidence/workable-items/LVA-045-evidence.md
+**Severity:** P2
+
+Wave-3 parallel-fleet find; fixed in c37995a7; falsifiability-proven; main-stream re-verified.
+

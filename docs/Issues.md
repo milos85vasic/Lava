@@ -39,3 +39,11 @@ Challenge11ArchiveOrgAnonymousSearchTest crashes the app PROCESS at activity-des
 
 github/master and gitlab/master diverged at d2a2151 with unique non-doc go.mod content each; LVA-030 commit landed gitlab+working-tree but github refused non-FF. Needs a content-merge decision (operator-gated, NO force-push per §6.T.3).
 
+## LVA-044 — Add HTTP_DOWNLOAD TrackerCapability so archiveorg/gutenberg can surface their working HTTP file download
+
+**Status:** Queued
+**Type:** Feature
+**Severity:** P3
+
+archiveorg/gutenberg wire a real HTTP-download impl that is deliberately not exposed (no capability) → user-unreachable. Not a bluff (§6.E honest), a functionality gap. Needs a new capability + feature interface.
+
