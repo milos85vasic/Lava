@@ -183,6 +183,13 @@ internal class ProviderLoginViewModel @Inject constructor(
 
     private fun onReloadCaptchaClick() = intent {
         val providerId = state.selectedProviderId ?: return@intent
+        // LVA-025 (2026-06-09): tapping retry-captcha is a fresh attempt by
+        // the user; clear any stale ServiceUnavailable banner so they aren't
+        // shown a stale infra-error from an earlier submit on top of the
+        // fresh captcha. Mirrors the legacy LoginViewModel.onReloadCaptchaClick
+        // banner-clear + the Sweep Finding #6 selectProvider/validate*/submit
+        // clears that missed this reload path.
+        reduce { state.copy(serviceUnavailable = null) }
         val result = sdk.login(
             providerId,
             LoginRequest(
@@ -207,6 +214,20 @@ internal class ProviderLoginViewModel @Inject constructor(
                             isLoading = false,
                             captcha = response.captcha,
                             captchaInput = InputState.Empty,
+                        )
+                    }
+                    // LVA-025: if the retry round-trip itself lands a
+                    // ServiceUnavailable, surface the fresh reason rather
+                    // than swallowing it (the prior `else -> Unit` left the
+                    // user with no feedback during a Cloudflare outage). We
+                    // just cleared the prior banner above, so this is the
+                    // fresh reason — and we drop the now-stale captcha sid.
+                    is AuthResult.ServiceUnavailable -> reduce {
+                        state.copy(
+                            isLoading = false,
+                            serviceUnavailable = response.reason,
+                            captcha = null,
+                            captchaInput = InputState.Initial,
                         )
                     }
                     else -> Unit

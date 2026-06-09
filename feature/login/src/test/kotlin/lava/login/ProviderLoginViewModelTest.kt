@@ -849,6 +849,86 @@ class ProviderLoginViewModelTest {
             }
         }
 
+    /**
+     * LVA-025 (2026-06-09): the captcha "retry" button (CaptchaImage
+     * onRetry → ReloadCaptchaClick) is reachable only while a captcha is
+     * shown. The multi-provider sweep that closed the banner-staleness
+     * findings (#4/#5/#6) covered SelectProvider / BackToProviders /
+     * validate* / onSubmitClick but MISSED onReloadCaptchaClick — so a
+     * user who got a Cloudflare ServiceUnavailable banner on submit, then
+     * a captcha appeared on a later turn, then tapped retry, would keep
+     * seeing the stale ServiceUnavailable banner from the earlier attempt
+     * on top of the fresh captcha. The legacy single-tracker
+     * LoginViewModel.onReloadCaptchaClick already clears the banner; the
+     * multi-provider VM did not. This is the same un-cleared-state class
+     * the prior login banner-staleness sweep fixed.
+     *
+     * Falsifiability rehearsal:
+     *   Mutation: remove `serviceUnavailable = null` from
+     *             ProviderLoginViewModel.onReloadCaptchaClick's reduce.
+     *   Observed: this test fails with
+     *             "serviceUnavailable MUST be null after ReloadCaptchaClick
+     *             — was Cloudflare 503".
+     *   Reverted: yes.
+     */
+    @Test
+    fun `LVA-025 - ReloadCaptchaClick clears stale serviceUnavailable banner`() =
+        runTest(mainDispatcherRule.testDispatcher) {
+            // First login attempt surfaces a ServiceUnavailable banner.
+            rutrackerClient.loginProvider = { _ ->
+                LoginResult(state = AuthState.ServiceUnavailable(reason = "Cloudflare 503"))
+            }
+            viewModel.test(this) {
+                runOnCreate()
+                awaitState() // loading
+                awaitState() // loaded
+
+                viewModel.perform(ProviderLoginAction.SelectProvider("rutracker"))
+                awaitState()
+                viewModel.perform(ProviderLoginAction.UsernameChanged(TextFieldValue("vasya")))
+                awaitState()
+                viewModel.perform(ProviderLoginAction.PasswordChanged(TextFieldValue("anything")))
+                awaitState()
+
+                viewModel.perform(ProviderLoginAction.SubmitClick)
+                awaitSideEffect() // HideKeyboard
+                awaitState() // banner populated
+                assertEquals(
+                    "precondition: banner populated after ServiceUnavailable",
+                    "Cloudflare 503",
+                    viewModel.container.stateFlow.value.serviceUnavailable,
+                )
+
+                // Now the upstream comes back and a captcha is presented on
+                // the next round-trip the retry button triggers. The fresh
+                // attempt MUST clear the stale infra-error banner.
+                rutrackerClient.loginProvider = { _ ->
+                    LoginResult(
+                        state = AuthState.CaptchaRequired(
+                            CaptchaChallenge(
+                                sid = "sid-after-retry",
+                                code = "code1",
+                                imageUrl = "https://cap/retry.png",
+                            ),
+                        ),
+                    )
+                }
+
+                viewModel.perform(ProviderLoginAction.ReloadCaptchaClick)
+                awaitState()
+
+                // PRIMARY user-visible assertion (§6.J): the stale banner is
+                // gone after a fresh retry round-trip.
+                assertNull(
+                    "serviceUnavailable MUST be null after ReloadCaptchaClick — " +
+                        "was ${viewModel.container.stateFlow.value.serviceUnavailable}",
+                    viewModel.container.stateFlow.value.serviceUnavailable,
+                )
+
+                cancelAndIgnoreRemainingItems()
+            }
+        }
+
     private fun descriptor(
         id: String,
         name: String,
