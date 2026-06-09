@@ -44,6 +44,31 @@ against the new upstream release. See `git log` 54eedd92..HEAD and `docs/Fixed.m
   (commit `dc547861`). Debug-stage evidence:
   `.lava-ci-evidence/distribute-changelog/firebase-app-distribution/1.3.0-1057-test-evidence.md`.
 
+## Lava-API-App-0.2.1-5 — 2026-06-09 (Embedded-API bug-fix wave + 1.3.1 client auth allowlist; device-verified)
+
+**Previous published:** Lava-API-App-0.2.0-4 (debug).
+
+The on-device API app embeds the lava-api-go engine; this build ships the same real
+bug-fix wave that landed across the 1.3.1 cycle plus the rotated auth allowlist so the new
+Lava-Android-1.3.1-1058 client authenticates to the local API:
+
+- **Zero-downtime embed TLS** — the embedded API now re-mints its TLS leaf mid-process before
+  expiry (LVA-068) and regenerates a persisted-but-expired leaf on boot (LVA-064), surfacing
+  each rotation to telemetry (LVA-072) — no more stale-cert handshake failures.
+- **Login honesty** — rutracker login honors the auth discriminator instead of reporting a
+  fake success on wrong credentials (LVA-046).
+- **Multi-search SSE** — deterministic provider ordering (LVA-059) and unknown requested
+  providers are no longer silently dropped (LVA-057).
+- **Captcha** — v1 captcha submits under the correct dynamic field name and propagates the
+  upstream image Content-Type (LVA-025/026).
+- **Correctness** — rutracker browse/favorites no longer blind-casts Topic→Torrent (LVA-032);
+  brotli no longer emits Content-Encoding on bodyless 204/304 (LVA-038).
+- **Auth allowlist** — `android-1.3.1-1058` added to the accepted-clients list (prior clients
+  retained) so the freshly distributed client can reach the on-device API.
+
+Device-verified: cold-start canary on a Genymotion Pixel 9 / API 35 VM (debug channel only —
+the api-app has no release Firebase app configured).
+
 ## Lava-API-App-0.2.0-4 — 2026-06-04 (Cross-app linking + idempotent engine start)
 
 **Previous published:** Lava-API-App-0.1.2-3 (debug).
