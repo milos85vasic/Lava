@@ -174,3 +174,12 @@ internal/rutracker/provider.go ProviderAdapter.Login returned success.User.Id (n
 
 internal/rutracker/provider.go fromTopicPage wedged the size string into a synthetic file entry → topic detail screen shows one nonsense 'Size' file instead of the real list. The existing TestFromTopicPage asserted the bogus file (bluff).
 
+## LVA-027 — Kinozal search sizeBytes hardcoded null — every result drops its size
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** KinozalSizeParser (binary mult, comma/dot, Latin+Cyrillic units) + KinozalSearchParser sizeBytes wired; KinozalSizeParserTest 5 tests incl end-to-end. Bluff-Audit: revert sizeBytes→null → 'search row carries sizeBytes end to end FAILED', reverted; :core:tracker:kinozal:test GREEN
+**Created-By:** AI
+
+KinozalSearchParser parsed the size string into a local var then emitted sizeBytes=null, so every Kinozal row dropped size (size sort/filter + cross-tracker ranking blind). Found by parallel Kotlin tracker bug-hunt.
+

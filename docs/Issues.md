@@ -55,3 +55,19 @@ internal/handlers/v1 LoginOpts has only CaptchaCode (used as the answer) but rut
 
 internal/handlers/v1/captcha.go serves c.Data(200, image/png, ...) but rutracker.FetchCaptcha captures the real Content-Type, dropped by the adapter (no ContentType field on provider.CaptchaImage). Minor (most decoders sniff). Found by parallel Go bug-hunt.
 
+## LVA-028 — Nnmclub search publishDate dropped (date column present + parseable)
+
+**Status:** Queued
+**Type:** Bug
+**Created-By:** AI
+
+NnmclubSearchParser reads row.select('td') but never maps cells[4] (ISO yyyy-MM-dd date) into TorrentItem.publishDate → Nnmclub results have no date. Found by parallel Kotlin tracker bug-hunt. (Also UNCONFIRMED: nnmclub/kinozal parseSize Latin-only regex may miss Cyrillic units in real HTML — kinozal already handles both as of LVA-027.)
+
+## LVA-029 — isLocalHost() fc/fd false-positive misclassifies public hosts as IPv6 unique-local
+
+**Status:** Queued
+**Type:** Bug
+**Created-By:** AI
+
+core/models HostUtils.isLocalHost runs the fc00::/7 unique-local check (startsWith fc/fd + take(4) hex in 0xfc00..0xfdff) on ANY host string without requiring an IPv6 literal, so a DNS host like fcba.example.com / fdcdn.net is routed as LAN (http://host:8080) instead of https://host/forum/ → no green dot, every request fails. Fix: gate on contains(':') before the hex parse. Found by parallel core/network bug-hunt.
+

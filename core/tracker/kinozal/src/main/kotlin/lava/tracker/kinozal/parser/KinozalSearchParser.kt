@@ -55,7 +55,10 @@ class KinozalSearchParser @Inject constructor() {
                 trackerId = TRACKER_ID,
                 torrentId = id,
                 title = title,
-                sizeBytes = null,
+                // LVA-027: the size string was parsed into `size` then dropped
+                // (sizeBytes hardcoded null). Convert it so every Kinozal row
+                // carries its real size.
+                sizeBytes = size?.let { KinozalSizeParser.parse(it) },
                 seeders = seeders,
                 leechers = leechers,
                 magnetUri = magnetUri,
