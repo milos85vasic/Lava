@@ -109,8 +109,11 @@ sleep 2
 # 7. Capture proof + verdict.
 adb -s "$SERIAL" shell screencap -p /sdcard/canary.png >/dev/null 2>&1 || true
 adb -s "$SERIAL" pull /sdcard/canary.png "$EVIDENCE_DIR/cold-start.png" >/dev/null 2>&1 || true
-PID="$(adb -s "$SERIAL" shell pidof "$PKG" 2>/dev/null | tr -d '\r')"
-RESUMED="$(adb -s "$SERIAL" shell dumpsys activity activities 2>/dev/null | tr -d '\r' | grep -aE "mResumedActivity|ResumedActivity" | grep -a "$PKG" | head -1)"
+# `|| true` on each: under host CPU starvation grep/pidof may find nothing and
+# return non-zero; without this `set -e` would abort BEFORE the verdict write,
+# leaving an empty verdict.txt (the chief evidence artifact). Tolerate no-match.
+PID="$(adb -s "$SERIAL" shell pidof "$PKG" 2>/dev/null | tr -d '\r' || true)"
+RESUMED="$(adb -s "$SERIAL" shell dumpsys activity activities 2>/dev/null | tr -d '\r' | grep -aE "mResumedActivity|ResumedActivity" | grep -a "$PKG" | head -1 || true)"
 FATAL="$(grep -aiE "FATAL EXCEPTION|AndroidRuntime.*$PKG|Process.*$PKG.*died|ANR in $PKG" "$EVIDENCE_DIR/logcat-window.txt" | head -5 || true)"
 
 {

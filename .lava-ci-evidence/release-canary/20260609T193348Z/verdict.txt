@@ -1,0 +1,8 @@
+# Release cold-start canary — 20260609T193348Z
+package: digital.vasic.lava.client
+apk: releases/1.3.1/android-release/digital.vasic.lava.client-1.3.1-release.apk
+serial: 127.0.0.1:6555
+pid_after_launch: 10962
+resumed_activity:     topResumedActivity=ActivityRecord{8246561 u0 digital.vasic.lava.client/.MainActivity t108}
+fatal_lines:
+E/ActivityManager( 2295): ANR in digital.vasic.lava.client
