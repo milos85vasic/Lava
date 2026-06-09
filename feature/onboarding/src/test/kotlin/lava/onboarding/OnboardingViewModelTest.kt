@@ -541,6 +541,106 @@ class OnboardingViewModelTest {
             }
         }
 
+    /**
+     * LVA — onboarding anonymous-mode choice MUST persist to provider_configs.
+     *
+     * Forensic anchor: Sweep Finding #1 (2026-05-17) fixed the *Provider Config
+     * screen* so the anonymous Switch round-trips through `use_anonymous`. But
+     * the *onboarding* path that ALSO lets the user choose anonymous (for any
+     * provider whose `supportsAnonymous == true` but whose authType is NOT
+     * AuthType.NONE — ConfigureStep renders the `anonymous_switch`) never
+     * persisted the choice. `onTestAndContinue` reads `config.useAnonymous` to
+     * pick the anon branch but then calls only
+     * `providerConfigRepository.ensureDefault(currentId)` — which writes (or
+     * preserves) a row with the DEFAULT `useAnonymous = false`. Result: a user
+     * who onboards a provider in anonymous mode gets a persisted row that says
+     * `use_anonymous = false`; the Provider Config screen later shows the
+     * Switch OFF and downstream search treats the provider as credentialed.
+     * This is the same bluff-class as Finding #1, one layer up.
+     *
+     * Real-stack: real OnboardingViewModel → real ProviderConfigRepository →
+     * behaviourally-equivalent FakeProviderConfigDao (Anti-Bluff Pact Third
+     * Law). PRIMARY assertion is on the persisted DB row the user's later
+     * screens read.
+     *
+     * Falsifiability rehearsal (per §6.J / Sixth Law clause 2):
+     *   Mutation: keep only `providerConfigRepository.ensureDefault(currentId)`
+     *             in onTestAndContinue (the pre-fix shape — i.e. remove the
+     *             `setUseAnonymous` call the fix adds).
+     *   Observed: this test FAILS with
+     *             "onboarding anonymous choice MUST persist useAnonymous=true
+     *              to provider_configs — was false".
+     *   Reverted: yes (fix is the production change).
+     */
+    @Test
+    fun `onboarding anonymous toggle persists useAnonymous to provider config`() =
+        runTest(dispatcherRule.testDispatcher) {
+            // Register a provider that renders the onboarding anonymous Switch:
+            // supportsAnonymous = true AND authType != AuthType.NONE (so the
+            // wizard does NOT take the AuthType.NONE short-circuit and instead
+            // honours the per-config `useAnonymous` the user toggled).
+            val anonCapableDesc = object : TrackerDescriptor {
+                override val trackerId: String = "anon-capable"
+                override val displayName: String = "Anon Capable"
+                override val baseUrls = listOf(MirrorUrl(url = "https://anon.example", isPrimary = true))
+                override val capabilities = setOf(TrackerCapability.SEARCH)
+                override val authType: AuthType = AuthType.FORM_LOGIN
+                override val supportsAnonymous: Boolean = true
+                override val encoding = "UTF-8"
+                override val expectedHealthMarker = "ok"
+                override val verified = true
+                override val apiSupported = true
+            }
+            val anonCapableFactory = object : PluginFactory<TrackerDescriptor, TrackerClient> {
+                override val descriptor: TrackerDescriptor = anonCapableDesc
+                override fun create(config: PluginConfig): TrackerClient = FakeTrackerClient(anonCapableDesc)
+            }
+            registry.register(anonCapableFactory)
+            sdk = LavaTrackerSdk(registry, clonedProviderDao = clonedProviderDao)
+
+            val viewModel = createViewModel()
+            viewModel.test(this) {
+                runOnCreate()
+                expectInitialState()
+                awaitState() // providers + configs reduced
+
+                viewModel.perform(OnboardingAction.NextStep) // → Providers
+                expectState { copy(step = OnboardingStep.Providers) }
+                // Deselect the base AuthType.NONE test-tracker so the only
+                // provider configured is the anon-capable FORM_LOGIN one and
+                // its Configure page (index 0) is the one being driven.
+                viewModel.perform(OnboardingAction.ToggleProvider("test-tracker"))
+                awaitState()
+                viewModel.perform(OnboardingAction.NextStep) // → Configure idx 0 (anon-capable)
+                expectState { copy(step = OnboardingStep.Configure, currentProviderIndex = 0) }
+
+                // User flips the onboarding anonymous Switch ON.
+                viewModel.perform(OnboardingAction.ToggleAnonymous(enabled = true))
+                awaitState()
+
+                // User taps Continue — anon branch runs, then persistence.
+                viewModel.perform(OnboardingAction.TestAndContinue)
+                awaitState() // running=true
+                awaitState() // configured=true, tested=true (anon path)
+                cancelAndIgnoreRemainingItems()
+            }
+
+            // PRIMARY anti-bluff assertion: the persisted provider_configs row
+            // (the source of truth every later screen + search reads) reflects
+            // the user's anonymous choice. Pre-fix this was false.
+            val persisted = providerConfigRepository.load("anon-capable")
+            assertNotNull(
+                "onboarding MUST persist a provider_configs row for the configured provider",
+                persisted,
+            )
+            assertTrue(
+                "onboarding anonymous choice MUST persist useAnonymous=true to " +
+                    "provider_configs (Sweep Finding #1 one layer up) — was " +
+                    "${persisted?.useAnonymous}",
+                persisted?.useAnonymous == true,
+            )
+        }
+
     // ── ApiSelection Cloud / remote-server section (2026-05-31) ───────────
     //
     // FALSIFIABILITY REHEARSAL (per §6.J / Sixth Law clause 2). Deliberate

@@ -457,6 +457,20 @@ class OnboardingViewModel @Inject constructor(
                 // ensureDefault is idempotent — safe to call on re-onboarding.
                 providerConfigRepository.ensureDefault(currentId)
 
+                // LVA fix: persist the user's onboarding anonymous choice so it
+                // survives into the Provider Config screen + downstream search.
+                // Pre-fix, only ensureDefault() ran — it writes (or preserves) a
+                // row with the DEFAULT useAnonymous=false, silently dropping a
+                // user who toggled anonymous ON in onboarding (the
+                // `anonymous_switch` ConfigureStep renders for any provider whose
+                // supportsAnonymous==true and authType != NONE). This is the
+                // exact bluff-class as Sweep Finding #1 (which fixed only the
+                // Provider Config screen), one layer up. AuthType.NONE providers
+                // are anonymous-by-construction; treat them as useAnonymous=true
+                // too so the persisted row is honest about how the provider runs.
+                val isAnonymous = provider.authType == AuthType.NONE || config.useAnonymous
+                providerConfigRepository.setUseAnonymous(currentId, isAnonymous)
+
                 logger.d { "test ok: advance to next/Summary for $currentId" }
                 reduce {
                     state.copy(
