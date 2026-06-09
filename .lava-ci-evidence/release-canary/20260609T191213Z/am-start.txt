@@ -1,0 +1,7 @@
+Starting: Intent { cmp=android/com.android.internal.app.ResolverActivity }
+Status: ok
+LaunchState: COLD
+Activity: android/com.android.internal.app.ResolverActivity
+TotalTime: 1427
+WaitTime: 1435
+Complete

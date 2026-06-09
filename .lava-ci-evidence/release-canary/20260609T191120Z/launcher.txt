@@ -1,0 +1,1 @@
+launcher: digital.vasic.lava.client/.MainActivity
