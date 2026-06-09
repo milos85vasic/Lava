@@ -525,3 +525,12 @@ wave-6 §6.N.2 found CM-WORKABLE-ITEMS-SYNC clause-3 was uncovered; sweep other 
 
 Added 9 falsifiable tests for the credentials dialog SubmitDialog flows, §6.G verified filter, and the credentials_manager FirstTimeSetup/AddNew/Edit/DismissEdit lifecycle.
 
+## LVA-066 — validate new Jackett release against the Lava Torznab sidecar integration
+
+**Status:** Completed (→ Fixed.md)
+**Type:** Task
+**Evidence:** .lava-ci-evidence/workable-items/LVA-066-evidence.md
+**Severity:** P2
+
+Operator flagged a new Jackett version. Booted lscr.io/linuxserver/jackett v0.24.2040-ls426 via podman in the loopback topology: api_key bootstrap + Torznab /caps endpoint served valid XML at the exact path IPTorrentsJackettApi uses; JVM parser tests green; pinned the validated digest in .env.example.
+
