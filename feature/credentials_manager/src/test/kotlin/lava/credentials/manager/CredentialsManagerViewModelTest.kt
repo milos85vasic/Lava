@@ -3,7 +3,6 @@ package lava.credentials.manager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.runTest
 import lava.credentials.CredentialsEntryRepository
@@ -14,6 +13,7 @@ import lava.credentials.session.CredentialsKeyHolder
 import lava.testing.rule.MainDispatcherRule
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -276,6 +276,172 @@ class CredentialsManagerViewModelTest {
                     "the deleted credential MUST be removed from the repository",
                     listOf("Keep Me"),
                     remaining,
+                )
+                cancelAndIgnoreRemainingItems()
+            }
+        }
+
+    // CHALLENGE
+    /**
+     * First-time setup with a fresh vault → the passphrase is initialized (real
+     * PBKDF2 + verifier write), the vault unlocks, and the entries become
+     * observable. This is the very first screen a new user sees; a regression
+     * here either bricks setup or unlocks without a passphrase.
+     *
+     * Falsifiability rehearsal (PERFORMED 2026-06-09):
+     *   Mutation: in CredentialsManagerViewModel.FirstTimeSetup, drop the
+     *             `passphrase.firstTimeSetup(action.passphrase)` line.
+     *   Observed: this test FAILS at "first-time setup MUST initialize the vault"
+     *             — passphrase.isInitialized() stays false.
+     *   Reverted: yes.
+     */
+    @Test
+    fun `first time setup initializes vault unlocks and surfaces entries`() =
+        runTest(dispatcherRule.testDispatcher) {
+            // Fresh vault: nothing initialized yet.
+            assertFalse("precondition: vault not yet initialized", passphrase.isInitialized())
+            repo.seed(entry("e1", "Internet Archive", CredentialSecret.BearerToken("t-1")))
+
+            val viewModel = newViewModel()
+            viewModel.test(this) {
+                runOnCreate()
+                awaitState() // initial (needsFirstTimeSetup = true, locked)
+
+                viewModel.perform(CredentialsManagerAction.FirstTimeSetup(correctPassphrase))
+                awaitState() // unlocked = true, needsFirstTimeSetup = false
+                awaitState() // entries collected
+
+                val state = viewModel.container.stateFlow.value
+                assertTrue(
+                    "first-time setup MUST initialize the vault",
+                    passphrase.isInitialized(),
+                )
+                assertTrue(
+                    "first-time setup MUST unlock the vault — was unlocked=${state.unlocked}",
+                    state.unlocked,
+                )
+                assertFalse(
+                    "first-time setup MUST clear the needsFirstTimeSetup flag",
+                    state.needsFirstTimeSetup,
+                )
+                assertEquals(
+                    "the seeded credential MUST be visible after setup",
+                    listOf("Internet Archive"),
+                    state.entries.map { it.displayName },
+                )
+                cancelAndIgnoreRemainingItems()
+            }
+        }
+
+    // CHALLENGE
+    /**
+     * AddNew → the editing draft opens with a blank credential, so the screen
+     * shows the empty "new credential" form rather than null (no form).
+     *
+     * Falsifiability rehearsal (PERFORMED 2026-06-09):
+     *   Mutation: in CredentialsManagerViewModel.AddNew, replace
+     *             `reduce { state.copy(editing = empty()) }` with
+     *             `reduce { state.copy(editing = null) }`.
+     *   Observed: this test FAILS at "AddNew MUST open a blank editing draft"
+     *             — editing stays null so the form never appears.
+     *   Reverted: yes.
+     */
+    @Test
+    fun `add new opens a blank editing draft`() =
+        runTest(dispatcherRule.testDispatcher) {
+            passphrase.firstTimeSetup(correctPassphrase) // leaves session unlocked
+
+            val viewModel = newViewModel()
+            viewModel.test(this) {
+                runOnCreate()
+                awaitState() // initial
+
+                viewModel.perform(CredentialsManagerAction.AddNew)
+                val state = awaitState()
+                assertNotNull(
+                    "AddNew MUST open a blank editing draft",
+                    state.editing,
+                )
+                assertEquals(
+                    "the AddNew draft MUST start with an empty display name",
+                    "",
+                    state.editing?.displayName,
+                )
+                cancelAndIgnoreRemainingItems()
+            }
+        }
+
+    // CHALLENGE
+    /**
+     * Edit on an existing id → the editing draft is populated with that stored
+     * entry, so the screen pre-fills the form with the saved data the user edits.
+     *
+     * Falsifiability rehearsal (PERFORMED 2026-06-09):
+     *   Mutation: in CredentialsManagerViewModel.Edit, replace
+     *             `reduce { state.copy(editing = existing) }` with
+     *             `reduce { state.copy(editing = empty()) }`.
+     *   Observed: this test FAILS — the editing draft carries a random UUID id and
+     *             a blank name instead of the stored "edit-me"/"Edit Me".
+     *   Reverted: yes.
+     */
+    @Test
+    fun `edit populates the editing draft from the stored entry`() =
+        runTest(dispatcherRule.testDispatcher) {
+            passphrase.firstTimeSetup(correctPassphrase)
+            repo.seed(entry("edit-me", "Edit Me", CredentialSecret.ApiKey("k-edit")))
+
+            val viewModel = newViewModel()
+            viewModel.test(this) {
+                runOnCreate()
+                awaitState() // initial
+                awaitState() // onCreate observe() collected the seeded entry
+
+                viewModel.perform(CredentialsManagerAction.Edit("edit-me"))
+                val state = awaitState()
+                assertNotNull("Edit MUST open the editing draft", state.editing)
+                assertEquals(
+                    "Edit MUST populate the draft with the stored entry's id",
+                    "edit-me",
+                    state.editing?.id,
+                )
+                assertEquals(
+                    "Edit MUST populate the draft with the stored display name",
+                    "Edit Me",
+                    state.editing?.displayName,
+                )
+                cancelAndIgnoreRemainingItems()
+            }
+        }
+
+    // CHALLENGE
+    /**
+     * DismissEdit while a draft is open → the editing form is closed (editing =
+     * null), so the screen returns to the entry list.
+     *
+     * Falsifiability rehearsal (PERFORMED 2026-06-09):
+     *   Mutation: in CredentialsManagerViewModel.DismissEdit, replace the body
+     *             with `Unit` (do nothing).
+     *   Observed: this test FAILS at "DismissEdit MUST close the editing form" —
+     *             editing remains the open draft instead of becoming null.
+     *   Reverted: yes.
+     */
+    @Test
+    fun `dismiss edit closes the editing form`() =
+        runTest(dispatcherRule.testDispatcher) {
+            passphrase.firstTimeSetup(correctPassphrase)
+
+            val viewModel = newViewModel()
+            viewModel.test(this) {
+                runOnCreate()
+                awaitState() // initial
+
+                viewModel.perform(CredentialsManagerAction.AddNew)
+                assertNotNull("precondition: a draft is open", awaitState().editing)
+
+                viewModel.perform(CredentialsManagerAction.DismissEdit)
+                assertNull(
+                    "DismissEdit MUST close the editing form",
+                    awaitState().editing,
                 )
                 cancelAndIgnoreRemainingItems()
             }
