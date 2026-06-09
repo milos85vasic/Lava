@@ -1,0 +1,10 @@
+# Genymotion Challenge run — 20260609T164755Z
+device: 127.0.0.1:6555
+module: app  test-class: lava.app.challenges.Challenge21OnboardingBackPressClosesAppTest,lava.app.challenges.Challenge23OnboardingThemeRenderingTest,lava.app.challenges.Challenge25OnboardingInsetSafeDrawingTest,lava.app.challenges.Challenge26WelcomeColoredLogoTest,lava.app.challenges.Challenge27WelcomeColoredLogoNotWhitePlaceholderTest,lava.app.challenges.Challenge28OnboardingWelcomeBackClosesAppTest
+gradle exit: 1
+lava.app.challenges.Challenge26WelcomeColoredLogoTest > welcomeScreen_logoRendersInColor[Pixel 9 - 15] [31mFAILED [0m
+Tests on Pixel 9 - 15 failed: There was 1 failure(s).
+> Task :app:connectedDebugAndroidTest FAILED
+BUILD FAILED in 2m 12s
+runner: containers-submodule
+runtime: genymotion-vm
