@@ -9,7 +9,9 @@ import com.google.firebase.crashlytics.ktx.crashlytics
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.perf.ktx.performance
 import dagger.hilt.android.HiltAndroidApp
+import digital.vasic.lava.client.crash.NavTeardownCrashReporter
 import digital.vasic.lava.client.firebase.FirebaseInitializer
+import lava.common.analytics.AnalyticsTracker
 import lava.network.api.ImageLoader
 import lava.tracker.client.work.MirrorHealthCheckWorker
 import javax.inject.Inject
@@ -21,6 +23,9 @@ class LavaApplication : Application() {
 
     @Inject
     lateinit var workManager: WorkManager
+
+    @Inject
+    lateinit var analytics: AnalyticsTracker
 
     override fun onCreate() {
         if (BuildConfig.DEBUG) {
@@ -55,6 +60,12 @@ class LavaApplication : Application() {
             applicationId = BuildConfig.APPLICATION_ID,
             warn = { msg, t -> Log.w(TAG, msg, t) },
         )
+
+        // LVA-008 (§6.AC, operator-accepted 2026-06-09): tag the known upstream
+        // androidx-navigation teardown crash with attributable context before the
+        // process dies, so it surfaces in Crashlytics as a known/triageable defect
+        // rather than a mystery fatal. Instruments only — never swallows the crash.
+        NavTeardownCrashReporter.install(analytics)
 
         imageLoader.setup()
         MirrorHealthCheckWorker.schedule(workManager)
