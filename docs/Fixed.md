@@ -282,3 +282,12 @@ Added PagingDataLoaderTest (append-terminal off-by-one + refresh-error regressio
 
 doc_processor/helixqa/llm_orchestrator/llm_provider/llms_verifier/vision_engine CLAUDE.md lack the §6.R No-Hardcoding inheritance block; scripts/check-constitution.sh full-run exits 1 on them. Pre-existing from the 5-dep + helixqa adoption; orthogonal to the 60e2d66 constitution bump. Each needs a submodule commit + push + parent pin bump (helixqa is always-track-upstream per Q9). Surfaced by full check-constitution during the constitution-bump cycle.
 
+## LVA-037 — §6.R hostport scanner flags its own tests/ hermetic fixture (missing tests/ exemption)
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** .lava-ci-evidence/workable-items/LVA-037-evidence.md
+**Severity:** P2
+
+scan-no-hardcoded-hostport.sh regex had /test/ but not top-level tests/ → flagged tests/check-constitution/test_no_hardcoded_hostport.sh → check-constitution exit 1 → pre-push blocked. Added ^tests/ exemption.
+
