@@ -163,13 +163,17 @@ dependencies {
     testImplementation(libs.kotlinx.coroutines.test)
 }
 
-// Ensure the prebuilt Go .so/.h exist before any native build / merge task
-// runs (CMake configure reads the IMPORTED .so; jniLibs merge reads the dir).
+// Ensure the prebuilt Go .so/.h exist before any native build / merge / packaging
+// task runs (CMake configure reads the IMPORTED .so; jniLibs merge reads the dir;
+// process*JavaRes stages the prebuiltJniLibsDir contents). The process*JavaRes
+// edge was an implicit dependency Gradle flags as a validation error on a clean
+// build (.cxx purged) — declaring it explicitly per Gradle's own remediation hint.
 tasks.matching {
     it.name.startsWith("externalNativeBuild") ||
         it.name.startsWith("configureCMake") ||
         it.name.startsWith("buildCMake") ||
-        it.name.startsWith("merge") && it.name.contains("JniLibFolders")
+        (it.name.startsWith("merge") && it.name.contains("JniLibFolders")) ||
+        (it.name.startsWith("process") && it.name.endsWith("JavaRes"))
 }.configureEach {
     dependsOn(buildCshared)
 }
