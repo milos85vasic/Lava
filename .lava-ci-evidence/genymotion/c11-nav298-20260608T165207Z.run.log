@@ -1,0 +1,5 @@
+==> building Containers genymotion CLI
+==> detecting Genymotion install
+/Applications/Genymotion.app/Contents/MacOS/gmtool
+On	127.0.0.1:6555	ed811e5e-df4d-46d8-ab1f-4250058e57e3	Google Pixel 9
+genymotion: no running device named "127.0.0.1:6555"

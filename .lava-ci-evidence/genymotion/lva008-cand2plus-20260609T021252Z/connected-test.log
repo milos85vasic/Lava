@@ -1,14 +1,3 @@
-==> building Containers genymotion CLI
-==> detecting Genymotion install
-/Applications/Genymotion.app/Contents/MacOS/gmtool
-On	127.0.0.1:6555	<genymotion-vm-uuid-redacted>	Google Pixel 9
-==> target Genymotion serial: 127.0.0.1:6555
-serial=127.0.0.1:6555
-android_release=15
-sdk=35
-model=Pixel 9
-abi=arm64-v8a
-==> running :app:connectedDebugAndroidTest on 127.0.0.1:6555 (test-class: lava.app.challenges.Challenge11ArchiveOrgAnonymousSearchTest)
 To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.9/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
 Daemon will be stopped at the end of the build 
 > Task :buildSrc:checkKotlinGradlePluginConfigurationErrors
@@ -828,7 +817,7 @@ Daemon will be stopped at the end of the build
 > Task :app:kspDebugKotlin UP-TO-DATE
 > Task :app:compileDebugKotlin UP-TO-DATE
 > Task :app:javaPreCompileDebug UP-TO-DATE
-> Task :app:compileDebugJavaWithJavac UP-TO-DATE
+> Task :app:compileDebugJavaWithJavac
 > Task :app:mergeDebugShaders UP-TO-DATE
 > Task :app:compileDebugShaders NO-SOURCE
 > Task :app:generateDebugAssets UP-TO-DATE
@@ -995,20 +984,17 @@ Daemon will be stopped at the end of the build
 > Task :feature:rating:bundleLibRuntimeToJarDebug UP-TO-DATE
 > Task :feature:search:bundleLibRuntimeToJarDebug UP-TO-DATE
 > Task :feature:search_input:bundleLibRuntimeToJarDebug UP-TO-DATE
-> Task :feature:search_result:bundleLibRuntimeToJarDebug UP-TO-DATE
 > Task :feature:topic:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :feature:search_result:bundleLibRuntimeToJarDebug
 > Task :feature:credentials:bundleLibRuntimeToJarDebug UP-TO-DATE
 > Task :feature:provider_config:bundleLibRuntimeToJarDebug UP-TO-DATE
 > Task :feature:visited:bundleLibRuntimeToJarDebug UP-TO-DATE
 > Task :core:network:impl:bundleLibRuntimeToJarDebug UP-TO-DATE
 > Task :app:desugarDebugFileDependencies UP-TO-DATE
+> Task :core:applink:processDebugJavaRes UP-TO-DATE
 > Task :app:hiltAggregateDepsDebug UP-TO-DATE
 > Task :app:hiltJavaCompileDebug UP-TO-DATE
-> Task :app:transformDebugClassesWithAsm UP-TO-DATE
-> Task :app:dexBuilderDebug UP-TO-DATE
-> Task :app:mergeDebugGlobalSynthetics UP-TO-DATE
 > Task :app:processDebugJavaRes UP-TO-DATE
-> Task :core:applink:processDebugJavaRes UP-TO-DATE
 > Task :core:credentials:processDebugJavaRes UP-TO-DATE
 > Task :core:data:processDebugJavaRes UP-TO-DATE
 > Task :core:database:processDebugJavaRes UP-TO-DATE
@@ -1047,9 +1033,11 @@ Daemon will be stopped at the end of the build
 > Task :core:work:impl:processDebugJavaRes UP-TO-DATE
 > Task :app:mergeDebugJavaResource UP-TO-DATE
 > Task :app:checkDebugDuplicateClasses UP-TO-DATE
+> Task :app:transformDebugClassesWithAsm
 > Task :app:mergeExtDexDebug UP-TO-DATE
-> Task :app:mergeLibDexDebug UP-TO-DATE
-> Task :app:mergeProjectDexDebug UP-TO-DATE
+> Task :app:dexBuilderDebug
+> Task :app:mergeDebugGlobalSynthetics UP-TO-DATE
+> Task :app:mergeProjectDexDebug
 > Task :app:mergeDebugJniLibFolders UP-TO-DATE
 > Task :core:applink:mergeDebugJniLibFolders UP-TO-DATE
 > Task :core:applink:mergeDebugNativeLibs NO-SOURCE
@@ -1167,18 +1155,19 @@ Daemon will be stopped at the end of the build
 > Task :app:validateSigningDebug UP-TO-DATE
 > Task :app:writeDebugAppMetadata UP-TO-DATE
 > Task :app:writeDebugSigningConfigVersions UP-TO-DATE
-> Task :app:packageDebug UP-TO-DATE
-> Task :app:createDebugApkListingFileRedirect UP-TO-DATE
-> Task :app:bundleDebugClassesToCompileJar UP-TO-DATE
+> Task :app:mergeLibDexDebug
+> Task :app:bundleDebugClassesToCompileJar
 > Task :app:preDebugAndroidTestBuild SKIPPED
 > Task :app:processDebugAndroidTestManifest UP-TO-DATE
-> Task :app:generateDebugAndroidTestBuildConfig UP-TO-DATE
+> Task :app:generateDebugAndroidTestBuildConfig
 > Task :app:checkDebugAndroidTestAarMetadata UP-TO-DATE
 > Task :app:generateDebugAndroidTestResValues UP-TO-DATE
 > Task :app:mapDebugAndroidTestSourceSetPaths UP-TO-DATE
 > Task :app:generateDebugAndroidTestResources UP-TO-DATE
 > Task :app:mergeDebugAndroidTestResources UP-TO-DATE
 > Task :app:processDebugAndroidTestResources UP-TO-DATE
+> Task :app:packageDebug
+> Task :app:createDebugApkListingFileRedirect UP-TO-DATE
 > Task :app:javaPreCompileDebugAndroidTest UP-TO-DATE
 > Task :app:mergeDebugAndroidTestShaders UP-TO-DATE
 > Task :app:compileDebugAndroidTestShaders NO-SOURCE
@@ -1198,7 +1187,7 @@ Daemon will be stopped at the end of the build
 > Task :app:compileDebugAndroidTestKotlin
 > Task :app:compileDebugAndroidTestJavaWithJavac
 > Task :app:hiltAggregateDepsDebugAndroidTest UP-TO-DATE
-> Task :app:hiltJavaCompileDebugAndroidTest
+> Task :app:hiltJavaCompileDebugAndroidTest UP-TO-DATE
 > Task :app:processDebugAndroidTestJavaRes UP-TO-DATE
 > Task :app:mergeDebugAndroidTestJavaResource UP-TO-DATE
 > Task :app:transformDebugAndroidTestClassesWithAsm
@@ -1209,21 +1198,21 @@ Daemon will be stopped at the end of the build
 > Task :app:createDebugAndroidTestApkListingFileRedirect UP-TO-DATE
 
 > Task :app:connectedDebugAndroidTest
-Starting 1 tests on Pixel 9 - 15
+Starting 2 tests on Pixel 9 - 15
 
-lava.app.challenges.Challenge11ArchiveOrgAnonymousSearchTest > pickArchiveOrg_continue_thenSearch_rendersRealResultRow[Pixel 9 - 15] [31mFAILED [0m
-	java.lang.IllegalStateException: State must be at least 'CREATED' to be moved to 'DESTROYED' in component NavBackStackEntry(<nav-backstack-entry-uuid-redacted>) destination=Destination(0xe36e02dd) route=search/search_input?query={query}&categories={categories}&author_name={author_name}&author_id={author_id}&sort={sort}&order={order}&period={period}
+lava.app.challenges.Challenge06DownloadTorrentFileTest > searchTapResult_tapTorrent_downloadDialogRenders[Pixel 9 - 15] [31mFAILED [0m
+	java.lang.IllegalStateException: State must be at least 'CREATED' to be moved to 'DESTROYED' in component NavBackStackEntry(dbbeda5d-592e-4270-ac70-43c8ddade7ee) destination=Destination(0x807eb690) route=search_input?query={query}&categories={categories}&author_name={author_name}&author_id={author_id}&sort={sort}&order={order}&period={period}
 	at androidx.lifecycle.LifecycleRegistryKt.checkLifecycleStateTransition(LifecycleRegistry.kt:92)
 
-Pixel 9 - 15 Tests 1/1 completed. (0 skipped) (1 failed)
+Pixel 9 - 15 Tests 1/2 completed. (0 skipped) (1 failed)
 Finished 1 tests on Pixel 9 - 15
 
 > Task :app:connectedDebugAndroidTest
 Tests on Pixel 9 - 15 failed: There was 1 failure(s).
 Test run failed to complete. Instrumentation run failed due to Process crashed.
 Logcat of last crash: 
-Process: digital.vasic.lava.client.dev, PID: 7056
-java.lang.RuntimeException: Unable to destroy activity {digital.vasic.lava.client.dev/digital.vasic.lava.client.MainActivity}: java.lang.IllegalStateException: State must be at least 'CREATED' to be moved to 'DESTROYED' in component NavBackStackEntry(<nav-backstack-entry-uuid-redacted>) destination=Destination(0xe36e02dd) route=search/search_input?query={query}&categories={categories}&author_name={author_name}&author_id={author_id}&sort={sort}&order={order}&period={period}
+Process: digital.vasic.lava.client.dev, PID: 9679
+java.lang.RuntimeException: Unable to destroy activity {digital.vasic.lava.client.dev/digital.vasic.lava.client.MainActivity}: java.lang.IllegalStateException: State must be at least 'CREATED' to be moved to 'DESTROYED' in component NavBackStackEntry(dbbeda5d-592e-4270-ac70-43c8ddade7ee) destination=Destination(0x807eb690) route=search_input?query={query}&categories={categories}&author_name={author_name}&author_id={author_id}&sort={sort}&order={order}&period={period}
 	at android.app.ActivityThread.performDestroyActivity(ActivityThread.java:5963)
 	at android.app.ActivityThread.handleDestroyActivity(ActivityThread.java:5995)
 	at android.app.servertransaction.DestroyActivityItem.execute(DestroyActivityItem.java:46)
@@ -1239,20 +1228,9 @@ java.lang.RuntimeException: Unable to destroy activity {digital.vasic.lava.clien
 	at java.lang.reflect.Method.invoke(Native Method)
 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:580)
 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:886)
-Caused by: java.lang.IllegalStateException: State must be at least 'CREATED' to be moved to 'DESTROYED' in component NavBackStackEntry(<nav-backstack-entry-uuid-redacted>) destination=Destination(0xe36e02dd) route=search/search_input?query={query}&categories={categories}&author_name={author_name}&author_id={author_id}&sort={sort}&order={order}&period={period}
+Caused by: java.lang.IllegalStateException: State must be at least 'CREATED' to be moved to 'DESTROYED' in component NavBackStackEntry(dbbeda5d-592e-4270-ac70-43c8ddade7ee) destination=Destination(0x807eb690) route=search_input?query={query}&categories={categories}&author_name={author_name}&author_id={author_id}&sort={sort}&order={order}&period={period}
 	at androidx.lifecycle.LifecycleRegistryKt.checkLifecycleStateTransition(LifecycleRegistry.kt:92)
 	at androidx.lifecycle.LifecycleRegistry.moveToState(LifecycleRegistry.jvm.kt:126)
-	at androidx.lifecycle.LifecycleRegistry.setCurrentState(LifecycleRegistry.jvm.kt:102)
-	at androidx.navigation.internal.NavBackStackEntryImpl.updateState$navigation_common_release(NavBackStackEntryImpl.kt:107)
-	at androidx.navigation.internal.NavBackStackEntryImpl.handleLifecycleEvent$navigation_common_release(NavBackStackEntryImpl.kt:92)
-	at androidx.navigation.NavBackStackEntry.handleLifecycleEvent(NavBackStackEntry.android.kt:116)
-	at androidx.navigation.internal.NavControllerImpl.lifecycleObserver$lambda$1(NavControllerImpl.kt:153)
-	at androidx.navigation.internal.NavControllerImpl.$r8$lambda$NoxMp6GNHB-Ld29Z6h5JLrOHxiQ(Unknown Source:0)
-	at androidx.navigation.internal.NavControllerImpl$$ExternalSyntheticLambda8.onStateChanged(D8$$SyntheticClass:0)
-	at androidx.lifecycle.LifecycleRegistry$ObserverWithState.dispatchEvent(LifecycleRegistry.jvm.kt:313)
-	at androidx.lifecycle.LifecycleRegistry.backwardPass(LifecycleRegistry.jvm.kt:266)
-	at androidx.lifecycle.LifecycleRegistry.sync(LifecycleRegistry.jvm.kt:284)
-	at androidx.lifecycle.LifecycleRegistry.moveToState(LifecycleRegistry.jvm.kt:135)
 	at androidx.lifecycle.LifecycleRegistry.setCurrentState(LifecycleRegistry.jvm.kt:102)
 	at androidx.navigation.internal.NavBackStackEntryImpl.updateState$navigation_common_release(NavBackStackEntryImpl.kt:107)
 	at androidx.navigation.internal.NavBackStackEntryImpl.handleLifecycleEvent$navigation_common_release(NavBackStackEntryImpl.kt:92)
@@ -1289,14 +1267,5 @@ Execution failed for task ':app:connectedDebugAndroidTest'.
 > Run with --scan to get full insights.
 > Get more help at https://help.gradle.org.
 
-BUILD FAILED in 1m 9s
-886 actionable tasks: 10 executed, 876 up-to-date
-# Genymotion Challenge run — 20260608T171332Z
-device: 127.0.0.1:6555
-module: app  test-class: lava.app.challenges.Challenge11ArchiveOrgAnonymousSearchTest
-gradle exit: 1
-lava.app.challenges.Challenge11ArchiveOrgAnonymousSearchTest > pickArchiveOrg_continue_thenSearch_rendersRealResultRow[Pixel 9 - 15] [31mFAILED [0m
-Tests on Pixel 9 - 15 failed: There was 1 failure(s).
-> Task :app:connectedDebugAndroidTest FAILED
-BUILD FAILED in 1m 9s
-==> GENYMOTION CHALLENGE FAIL (evidence: /Volumes/T7/Projects/Lava/.lava-ci-evidence/genymotion/c11-fix-20260608T171332Z)
+BUILD FAILED in 1m 4s
+886 actionable tasks: 18 executed, 868 up-to-date

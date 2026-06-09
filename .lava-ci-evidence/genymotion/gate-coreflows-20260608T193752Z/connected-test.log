@@ -1,14 +1,3 @@
-==> building Containers genymotion CLI
-==> detecting Genymotion install
-/Applications/Genymotion.app/Contents/MacOS/gmtool
-On	127.0.0.1:6555	<genymotion-vm-uuid-redacted>	Google Pixel 9
-==> target Genymotion serial: 127.0.0.1:6555
-serial=127.0.0.1:6555
-android_release=15
-sdk=35
-model=Pixel 9
-abi=arm64-v8a
-==> running :app:connectedDebugAndroidTest on 127.0.0.1:6555 (test-class: lava.app.challenges.Challenge11ArchiveOrgAnonymousSearchTest)
 To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.9/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
 Daemon will be stopped at the end of the build 
 > Task :buildSrc:checkKotlinGradlePluginConfigurationErrors
@@ -130,7 +119,7 @@ Daemon will be stopped at the end of the build
 > Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
 > Task :app:preBuild UP-TO-DATE
 > Task :app:preDebugBuild UP-TO-DATE
-> Task :app:generateDebugBuildConfig UP-TO-DATE
+> Task :app:generateDebugBuildConfig
 > Task :app:generateLavaAuthClassDebug UP-TO-DATE
 > Task :core:applink:preBuild UP-TO-DATE
 > Task :core:applink:preDebugBuild UP-TO-DATE
@@ -656,28 +645,28 @@ Daemon will be stopped at the end of the build
 > Task :feature:account:compileDebugKotlin UP-TO-DATE
 > Task :feature:account:javaPreCompileDebug UP-TO-DATE
 > Task :feature:account:compileDebugJavaWithJavac UP-TO-DATE
-> Task :feature:account:transformDebugClassesWithAsm UP-TO-DATE
+> Task :feature:account:transformDebugClassesWithAsm
 > Task :feature:account:bundleLibCompileToJarDebug UP-TO-DATE
 > Task :feature:bookmarks:checkKotlinGradlePluginConfigurationErrors SKIPPED
 > Task :feature:bookmarks:kspDebugKotlin UP-TO-DATE
 > Task :feature:bookmarks:compileDebugKotlin UP-TO-DATE
 > Task :feature:bookmarks:javaPreCompileDebug UP-TO-DATE
 > Task :feature:bookmarks:compileDebugJavaWithJavac UP-TO-DATE
-> Task :feature:bookmarks:transformDebugClassesWithAsm UP-TO-DATE
+> Task :feature:bookmarks:transformDebugClassesWithAsm
 > Task :feature:bookmarks:bundleLibCompileToJarDebug UP-TO-DATE
 > Task :feature:category:checkKotlinGradlePluginConfigurationErrors SKIPPED
 > Task :feature:category:kspDebugKotlin UP-TO-DATE
 > Task :feature:category:compileDebugKotlin UP-TO-DATE
 > Task :feature:category:javaPreCompileDebug UP-TO-DATE
 > Task :feature:category:compileDebugJavaWithJavac UP-TO-DATE
-> Task :feature:category:transformDebugClassesWithAsm UP-TO-DATE
+> Task :feature:category:transformDebugClassesWithAsm
 > Task :feature:category:bundleLibCompileToJarDebug UP-TO-DATE
 > Task :feature:connection:checkKotlinGradlePluginConfigurationErrors SKIPPED
 > Task :feature:connection:kspDebugKotlin UP-TO-DATE
 > Task :feature:connection:compileDebugKotlin UP-TO-DATE
 > Task :feature:connection:javaPreCompileDebug UP-TO-DATE
 > Task :feature:connection:compileDebugJavaWithJavac UP-TO-DATE
-> Task :feature:connection:transformDebugClassesWithAsm UP-TO-DATE
+> Task :feature:connection:transformDebugClassesWithAsm
 > Task :feature:connection:bundleLibCompileToJarDebug UP-TO-DATE
 > Task :core:credentials:checkKotlinGradlePluginConfigurationErrors SKIPPED
 > Task :core:credentials:kspDebugKotlin UP-TO-DATE
@@ -695,13 +684,8 @@ Daemon will be stopped at the end of the build
 > Task :core:tracker:client:compileDebugJavaWithJavac UP-TO-DATE
 > Task :core:tracker:client:transformDebugClassesWithAsm UP-TO-DATE
 > Task :core:tracker:client:bundleLibCompileToJarDebug UP-TO-DATE
-> Task :feature:credentials:kspDebugKotlin UP-TO-DATE
-> Task :feature:credentials:compileDebugKotlin UP-TO-DATE
 > Task :feature:credentials:javaPreCompileDebug UP-TO-DATE
-> Task :feature:credentials:compileDebugJavaWithJavac UP-TO-DATE
 > Task :core:tracker:client:bundleLibRuntimeToJarDebug UP-TO-DATE
-> Task :feature:credentials:transformDebugClassesWithAsm UP-TO-DATE
-> Task :feature:credentials:bundleLibCompileToJarDebug UP-TO-DATE
 > Task :feature:credentials_manager:checkKotlinGradlePluginConfigurationErrors SKIPPED
 > Task :feature:credentials_manager:kspDebugKotlin UP-TO-DATE
 > Task :feature:credentials_manager:compileDebugKotlin UP-TO-DATE
@@ -714,95 +698,95 @@ Daemon will be stopped at the end of the build
 > Task :feature:favorites:compileDebugKotlin UP-TO-DATE
 > Task :feature:favorites:javaPreCompileDebug UP-TO-DATE
 > Task :feature:favorites:compileDebugJavaWithJavac UP-TO-DATE
-> Task :feature:favorites:transformDebugClassesWithAsm UP-TO-DATE
+> Task :feature:favorites:transformDebugClassesWithAsm
 > Task :feature:favorites:bundleLibCompileToJarDebug UP-TO-DATE
 > Task :feature:forum:checkKotlinGradlePluginConfigurationErrors SKIPPED
 > Task :feature:forum:kspDebugKotlin UP-TO-DATE
 > Task :feature:forum:compileDebugKotlin UP-TO-DATE
 > Task :feature:forum:javaPreCompileDebug UP-TO-DATE
 > Task :feature:forum:compileDebugJavaWithJavac UP-TO-DATE
-> Task :feature:forum:transformDebugClassesWithAsm UP-TO-DATE
+> Task :feature:forum:transformDebugClassesWithAsm
 > Task :feature:forum:bundleLibCompileToJarDebug UP-TO-DATE
 > Task :feature:login:checkKotlinGradlePluginConfigurationErrors SKIPPED
-> Task :feature:login:kspDebugKotlin UP-TO-DATE
-> Task :feature:login:compileDebugKotlin UP-TO-DATE
+> Task :feature:credentials:kspDebugKotlin
+> Task :feature:credentials:compileDebugKotlin
+> Task :feature:credentials:compileDebugJavaWithJavac UP-TO-DATE
+> Task :feature:login:kspDebugKotlin
+> Task :feature:credentials:transformDebugClassesWithAsm
+> Task :feature:credentials:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :feature:login:compileDebugKotlin
 > Task :feature:login:javaPreCompileDebug UP-TO-DATE
 > Task :feature:login:compileDebugJavaWithJavac UP-TO-DATE
-> Task :feature:login:transformDebugClassesWithAsm UP-TO-DATE
+> Task :feature:login:transformDebugClassesWithAsm
 > Task :feature:login:bundleLibCompileToJarDebug UP-TO-DATE
 > Task :feature:main:checkKotlinGradlePluginConfigurationErrors SKIPPED
 > Task :feature:main:kspDebugKotlin UP-TO-DATE
 > Task :feature:main:compileDebugKotlin UP-TO-DATE
 > Task :feature:main:javaPreCompileDebug UP-TO-DATE
 > Task :feature:main:compileDebugJavaWithJavac UP-TO-DATE
-> Task :feature:main:transformDebugClassesWithAsm UP-TO-DATE
-> Task :feature:main:bundleLibCompileToJarDebug UP-TO-DATE
 > Task :core:applink:bundleLibRuntimeToJarDebug UP-TO-DATE
 > Task :feature:account:bundleLibRuntimeToJarDebug UP-TO-DATE
 > Task :feature:connection:bundleLibRuntimeToJarDebug UP-TO-DATE
 > Task :feature:menu:checkKotlinGradlePluginConfigurationErrors SKIPPED
-> Task :feature:menu:kspDebugKotlin UP-TO-DATE
-> Task :feature:menu:compileDebugKotlin UP-TO-DATE
+> Task :feature:main:transformDebugClassesWithAsm
+> Task :feature:main:bundleLibCompileToJarDebug UP-TO-DATE
 > Task :feature:menu:javaPreCompileDebug UP-TO-DATE
-> Task :feature:menu:compileDebugJavaWithJavac UP-TO-DATE
-> Task :feature:menu:transformDebugClassesWithAsm UP-TO-DATE
-> Task :feature:menu:bundleLibCompileToJarDebug UP-TO-DATE
 > Task :feature:onboarding:checkKotlinGradlePluginConfigurationErrors SKIPPED
-> Task :feature:onboarding:kspDebugKotlin UP-TO-DATE
-> Task :feature:onboarding:compileDebugKotlin UP-TO-DATE
+> Task :feature:menu:kspDebugKotlin
+> Task :feature:menu:compileDebugKotlin
+> Task :feature:menu:compileDebugJavaWithJavac UP-TO-DATE
+> Task :feature:menu:transformDebugClassesWithAsm
+> Task :feature:menu:bundleLibCompileToJarDebug UP-TO-DATE
 > Task :feature:onboarding:javaPreCompileDebug UP-TO-DATE
-> Task :feature:onboarding:compileDebugJavaWithJavac UP-TO-DATE
-> Task :feature:onboarding:transformDebugClassesWithAsm UP-TO-DATE
-> Task :feature:onboarding:bundleLibCompileToJarDebug UP-TO-DATE
 > Task :feature:credentials_manager:bundleLibRuntimeToJarDebug UP-TO-DATE
 > Task :feature:provider_config:checkKotlinGradlePluginConfigurationErrors SKIPPED
-> Task :feature:provider_config:kspDebugKotlin UP-TO-DATE
-> Task :feature:provider_config:compileDebugKotlin UP-TO-DATE
+> Task :feature:onboarding:kspDebugKotlin
+> Task :feature:onboarding:compileDebugKotlin
+> Task :feature:onboarding:compileDebugJavaWithJavac UP-TO-DATE
+> Task :feature:onboarding:transformDebugClassesWithAsm
+> Task :feature:onboarding:bundleLibCompileToJarDebug UP-TO-DATE
 > Task :feature:provider_config:javaPreCompileDebug UP-TO-DATE
-> Task :feature:provider_config:compileDebugJavaWithJavac UP-TO-DATE
-> Task :feature:provider_config:transformDebugClassesWithAsm UP-TO-DATE
-> Task :feature:provider_config:bundleLibCompileToJarDebug UP-TO-DATE
 > Task :feature:rating:checkKotlinGradlePluginConfigurationErrors SKIPPED
 > Task :feature:rating:kspDebugKotlin UP-TO-DATE
 > Task :feature:rating:compileDebugKotlin UP-TO-DATE
 > Task :feature:rating:javaPreCompileDebug UP-TO-DATE
 > Task :feature:rating:compileDebugJavaWithJavac UP-TO-DATE
-> Task :feature:rating:transformDebugClassesWithAsm UP-TO-DATE
+> Task :feature:rating:transformDebugClassesWithAsm
 > Task :feature:rating:bundleLibCompileToJarDebug UP-TO-DATE
 > Task :feature:search:checkKotlinGradlePluginConfigurationErrors SKIPPED
 > Task :feature:search:kspDebugKotlin UP-TO-DATE
 > Task :feature:search:compileDebugKotlin UP-TO-DATE
 > Task :feature:search:javaPreCompileDebug UP-TO-DATE
 > Task :feature:search:compileDebugJavaWithJavac UP-TO-DATE
-> Task :feature:search:transformDebugClassesWithAsm UP-TO-DATE
+> Task :feature:search:transformDebugClassesWithAsm
 > Task :feature:search:bundleLibCompileToJarDebug UP-TO-DATE
 > Task :feature:search_input:checkKotlinGradlePluginConfigurationErrors SKIPPED
 > Task :feature:search_input:kspDebugKotlin UP-TO-DATE
 > Task :feature:search_input:compileDebugKotlin UP-TO-DATE
 > Task :feature:search_input:javaPreCompileDebug UP-TO-DATE
 > Task :feature:search_input:compileDebugJavaWithJavac UP-TO-DATE
-> Task :feature:search_input:transformDebugClassesWithAsm UP-TO-DATE
+> Task :feature:search_input:transformDebugClassesWithAsm
 > Task :feature:search_input:bundleLibCompileToJarDebug UP-TO-DATE
 > Task :feature:search_result:checkKotlinGradlePluginConfigurationErrors SKIPPED
-> Task :feature:search_result:kspDebugKotlin UP-TO-DATE
-> Task :feature:search_result:compileDebugKotlin UP-TO-DATE
+> Task :feature:provider_config:kspDebugKotlin
+> Task :feature:provider_config:compileDebugKotlin
+> Task :feature:provider_config:compileDebugJavaWithJavac UP-TO-DATE
+> Task :feature:provider_config:transformDebugClassesWithAsm
+> Task :feature:provider_config:bundleLibCompileToJarDebug UP-TO-DATE
 > Task :feature:search_result:javaPreCompileDebug UP-TO-DATE
-> Task :feature:search_result:compileDebugJavaWithJavac UP-TO-DATE
-> Task :feature:search_result:transformDebugClassesWithAsm UP-TO-DATE
-> Task :feature:search_result:bundleLibCompileToJarDebug UP-TO-DATE
 > Task :feature:topic:checkKotlinGradlePluginConfigurationErrors SKIPPED
 > Task :feature:topic:kspDebugKotlin UP-TO-DATE
 > Task :feature:topic:compileDebugKotlin UP-TO-DATE
 > Task :feature:topic:javaPreCompileDebug UP-TO-DATE
 > Task :feature:topic:compileDebugJavaWithJavac UP-TO-DATE
-> Task :feature:topic:transformDebugClassesWithAsm UP-TO-DATE
+> Task :feature:topic:transformDebugClassesWithAsm
 > Task :feature:topic:bundleLibCompileToJarDebug UP-TO-DATE
 > Task :feature:visited:checkKotlinGradlePluginConfigurationErrors SKIPPED
 > Task :feature:visited:kspDebugKotlin UP-TO-DATE
 > Task :feature:visited:compileDebugKotlin UP-TO-DATE
 > Task :feature:visited:javaPreCompileDebug UP-TO-DATE
 > Task :feature:visited:compileDebugJavaWithJavac UP-TO-DATE
-> Task :feature:visited:transformDebugClassesWithAsm UP-TO-DATE
+> Task :feature:visited:transformDebugClassesWithAsm
 > Task :feature:visited:bundleLibCompileToJarDebug UP-TO-DATE
 > Task :core:auth:impl:checkKotlinGradlePluginConfigurationErrors SKIPPED
 > Task :core:auth:impl:kspDebugKotlin UP-TO-DATE
@@ -812,12 +796,15 @@ Daemon will be stopped at the end of the build
 > Task :core:auth:impl:transformDebugClassesWithAsm UP-TO-DATE
 > Task :core:auth:impl:bundleLibCompileToJarDebug UP-TO-DATE
 > Task :core:network:impl:checkKotlinGradlePluginConfigurationErrors SKIPPED
-> Task :core:network:impl:kspDebugKotlin UP-TO-DATE
-> Task :core:network:impl:compileDebugKotlin UP-TO-DATE
+> Task :core:network:impl:kspDebugKotlin
+> Task :feature:search_result:kspDebugKotlin
+> Task :core:network:impl:compileDebugKotlin
+> Task :feature:search_result:compileDebugKotlin
+> Task :feature:search_result:compileDebugJavaWithJavac UP-TO-DATE
 > Task :core:network:impl:javaPreCompileDebug UP-TO-DATE
 > Task :core:network:impl:compileDebugJavaWithJavac UP-TO-DATE
-> Task :core:network:impl:transformDebugClassesWithAsm UP-TO-DATE
-> Task :core:network:impl:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :feature:search_result:transformDebugClassesWithAsm
+> Task :feature:search_result:bundleLibCompileToJarDebug UP-TO-DATE
 > Task :core:work:impl:checkKotlinGradlePluginConfigurationErrors SKIPPED
 > Task :core:work:impl:kspDebugKotlin UP-TO-DATE
 > Task :core:work:impl:compileDebugKotlin UP-TO-DATE
@@ -825,10 +812,7 @@ Daemon will be stopped at the end of the build
 > Task :core:work:impl:compileDebugJavaWithJavac UP-TO-DATE
 > Task :core:work:impl:transformDebugClassesWithAsm UP-TO-DATE
 > Task :core:work:impl:bundleLibCompileToJarDebug UP-TO-DATE
-> Task :app:kspDebugKotlin UP-TO-DATE
-> Task :app:compileDebugKotlin UP-TO-DATE
 > Task :app:javaPreCompileDebug UP-TO-DATE
-> Task :app:compileDebugJavaWithJavac UP-TO-DATE
 > Task :app:mergeDebugShaders UP-TO-DATE
 > Task :app:compileDebugShaders NO-SOURCE
 > Task :app:generateDebugAssets UP-TO-DATE
@@ -852,7 +836,9 @@ Daemon will be stopped at the end of the build
 > Task :core:designsystem:compileDebugShaders NO-SOURCE
 > Task :core:designsystem:generateDebugAssets UP-TO-DATE
 > Task :core:designsystem:packageDebugAssets UP-TO-DATE
+> Task :core:network:impl:transformDebugClassesWithAsm
 > Task :core:dispatchers:mergeDebugShaders UP-TO-DATE
+> Task :core:network:impl:bundleLibCompileToJarDebug UP-TO-DATE
 > Task :core:dispatchers:compileDebugShaders NO-SOURCE
 > Task :core:dispatchers:generateDebugAssets UP-TO-DATE
 > Task :core:dispatchers:packageDebugAssets UP-TO-DATE
@@ -985,6 +971,7 @@ Daemon will be stopped at the end of the build
 > Task :core:auth:impl:bundleLibRuntimeToJarDebug UP-TO-DATE
 > Task :core:work:impl:bundleLibRuntimeToJarDebug UP-TO-DATE
 > Task :feature:menu:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :app:kspDebugKotlin
 > Task :feature:bookmarks:bundleLibRuntimeToJarDebug UP-TO-DATE
 > Task :feature:category:bundleLibRuntimeToJarDebug UP-TO-DATE
 > Task :feature:favorites:bundleLibRuntimeToJarDebug UP-TO-DATE
@@ -997,16 +984,32 @@ Daemon will be stopped at the end of the build
 > Task :feature:search_input:bundleLibRuntimeToJarDebug UP-TO-DATE
 > Task :feature:search_result:bundleLibRuntimeToJarDebug UP-TO-DATE
 > Task :feature:topic:bundleLibRuntimeToJarDebug UP-TO-DATE
+
+> Task :app:compileDebugKotlin
+w: file:///Volumes/T7/Projects/Lava/app/src/main/kotlin/digital/vasic/lava/client/navigation/MobileNavigation.kt:115:1 Experimental context receivers are deprecated and will be superseded by context parameters. Please don't use context receivers. You can either pass parameters explicitly or use members with extensions.
+
+See new context parameters proposal: https://github.com/Kotlin/KEEP/blob/context-parameters/proposals/context-parameters.md. During the transition period, neither context receivers nor context parameters will be supported. This warning will become an error in future releases.
+w: file:///Volumes/T7/Projects/Lava/app/src/main/kotlin/digital/vasic/lava/client/navigation/MobileNavigation.kt:151:1 Experimental context receivers are deprecated and will be superseded by context parameters. Please don't use context receivers. You can either pass parameters explicitly or use members with extensions.
+
+See new context parameters proposal: https://github.com/Kotlin/KEEP/blob/context-parameters/proposals/context-parameters.md. During the transition period, neither context receivers nor context parameters will be supported. This warning will become an error in future releases.
+w: file:///Volumes/T7/Projects/Lava/app/src/main/kotlin/digital/vasic/lava/client/navigation/MobileNavigation.kt:184:1 Experimental context receivers are deprecated and will be superseded by context parameters. Please don't use context receivers. You can either pass parameters explicitly or use members with extensions.
+
+See new context parameters proposal: https://github.com/Kotlin/KEEP/blob/context-parameters/proposals/context-parameters.md. During the transition period, neither context receivers nor context parameters will be supported. This warning will become an error in future releases.
+w: file:///Volumes/T7/Projects/Lava/app/src/main/kotlin/digital/vasic/lava/client/navigation/MobileNavigation.kt:222:1 Experimental context receivers are deprecated and will be superseded by context parameters. Please don't use context receivers. You can either pass parameters explicitly or use members with extensions.
+
+See new context parameters proposal: https://github.com/Kotlin/KEEP/blob/context-parameters/proposals/context-parameters.md. During the transition period, neither context receivers nor context parameters will be supported. This warning will become an error in future releases.
+w: file:///Volumes/T7/Projects/Lava/app/src/main/kotlin/digital/vasic/lava/client/navigation/MobileNavigation.kt:245:1 Experimental context receivers are deprecated and will be superseded by context parameters. Please don't use context receivers. You can either pass parameters explicitly or use members with extensions.
+
+See new context parameters proposal: https://github.com/Kotlin/KEEP/blob/context-parameters/proposals/context-parameters.md. During the transition period, neither context receivers nor context parameters will be supported. This warning will become an error in future releases.
+
+> Task :app:compileDebugJavaWithJavac
 > Task :feature:credentials:bundleLibRuntimeToJarDebug UP-TO-DATE
 > Task :feature:provider_config:bundleLibRuntimeToJarDebug UP-TO-DATE
 > Task :feature:visited:bundleLibRuntimeToJarDebug UP-TO-DATE
 > Task :core:network:impl:bundleLibRuntimeToJarDebug UP-TO-DATE
 > Task :app:desugarDebugFileDependencies UP-TO-DATE
 > Task :app:hiltAggregateDepsDebug UP-TO-DATE
-> Task :app:hiltJavaCompileDebug UP-TO-DATE
-> Task :app:transformDebugClassesWithAsm UP-TO-DATE
-> Task :app:dexBuilderDebug UP-TO-DATE
-> Task :app:mergeDebugGlobalSynthetics UP-TO-DATE
+> Task :app:hiltJavaCompileDebug
 > Task :app:processDebugJavaRes UP-TO-DATE
 > Task :core:applink:processDebugJavaRes UP-TO-DATE
 > Task :core:credentials:processDebugJavaRes UP-TO-DATE
@@ -1045,11 +1048,13 @@ Daemon will be stopped at the end of the build
 > Task :core:network:impl:processDebugJavaRes UP-TO-DATE
 > Task :core:tracker:client:processDebugJavaRes UP-TO-DATE
 > Task :core:work:impl:processDebugJavaRes UP-TO-DATE
-> Task :app:mergeDebugJavaResource UP-TO-DATE
+> Task :app:transformDebugClassesWithAsm
+> Task :app:dexBuilderDebug
+> Task :app:mergeDebugGlobalSynthetics UP-TO-DATE
 > Task :app:checkDebugDuplicateClasses UP-TO-DATE
+> Task :app:mergeDebugJavaResource
 > Task :app:mergeExtDexDebug UP-TO-DATE
-> Task :app:mergeLibDexDebug UP-TO-DATE
-> Task :app:mergeProjectDexDebug UP-TO-DATE
+> Task :app:mergeProjectDexDebug
 > Task :app:mergeDebugJniLibFolders UP-TO-DATE
 > Task :core:applink:mergeDebugJniLibFolders UP-TO-DATE
 > Task :core:applink:mergeDebugNativeLibs NO-SOURCE
@@ -1167,18 +1172,19 @@ Daemon will be stopped at the end of the build
 > Task :app:validateSigningDebug UP-TO-DATE
 > Task :app:writeDebugAppMetadata UP-TO-DATE
 > Task :app:writeDebugSigningConfigVersions UP-TO-DATE
-> Task :app:packageDebug UP-TO-DATE
-> Task :app:createDebugApkListingFileRedirect UP-TO-DATE
-> Task :app:bundleDebugClassesToCompileJar UP-TO-DATE
+> Task :app:mergeLibDexDebug
+> Task :app:bundleDebugClassesToCompileJar
 > Task :app:preDebugAndroidTestBuild SKIPPED
 > Task :app:processDebugAndroidTestManifest UP-TO-DATE
-> Task :app:generateDebugAndroidTestBuildConfig UP-TO-DATE
+> Task :app:generateDebugAndroidTestBuildConfig
 > Task :app:checkDebugAndroidTestAarMetadata UP-TO-DATE
 > Task :app:generateDebugAndroidTestResValues UP-TO-DATE
 > Task :app:mapDebugAndroidTestSourceSetPaths UP-TO-DATE
 > Task :app:generateDebugAndroidTestResources UP-TO-DATE
 > Task :app:mergeDebugAndroidTestResources UP-TO-DATE
 > Task :app:processDebugAndroidTestResources UP-TO-DATE
+> Task :app:packageDebug
+> Task :app:createDebugApkListingFileRedirect UP-TO-DATE
 > Task :app:javaPreCompileDebugAndroidTest UP-TO-DATE
 > Task :app:mergeDebugAndroidTestShaders UP-TO-DATE
 > Task :app:compileDebugAndroidTestShaders NO-SOURCE
@@ -1197,7 +1203,7 @@ Daemon will be stopped at the end of the build
 > Task :app:kspDebugAndroidTestKotlin
 > Task :app:compileDebugAndroidTestKotlin
 > Task :app:compileDebugAndroidTestJavaWithJavac
-> Task :app:hiltAggregateDepsDebugAndroidTest UP-TO-DATE
+> Task :app:hiltAggregateDepsDebugAndroidTest
 > Task :app:hiltJavaCompileDebugAndroidTest
 > Task :app:processDebugAndroidTestJavaRes UP-TO-DATE
 > Task :app:mergeDebugAndroidTestJavaResource UP-TO-DATE
@@ -1209,21 +1215,21 @@ Daemon will be stopped at the end of the build
 > Task :app:createDebugAndroidTestApkListingFileRedirect UP-TO-DATE
 
 > Task :app:connectedDebugAndroidTest
-Starting 1 tests on Pixel 9 - 15
+Starting 7 tests on Pixel 9 - 15
 
-lava.app.challenges.Challenge11ArchiveOrgAnonymousSearchTest > pickArchiveOrg_continue_thenSearch_rendersRealResultRow[Pixel 9 - 15] [31mFAILED [0m
-	java.lang.IllegalStateException: State must be at least 'CREATED' to be moved to 'DESTROYED' in component NavBackStackEntry(<nav-backstack-entry-uuid-redacted>) destination=Destination(0xe36e02dd) route=search/search_input?query={query}&categories={categories}&author_name={author_name}&author_id={author_id}&sort={sort}&order={order}&period={period}
+lava.app.challenges.Challenge06DownloadTorrentFileTest > searchTapResult_tapTorrent_downloadDialogRenders[Pixel 9 - 15] [31mFAILED [0m
+	java.lang.IllegalStateException: State must be at least 'CREATED' to be moved to 'DESTROYED' in component NavBackStackEntry(136c59d9-0cb8-47ac-91b6-455502fe724b) destination=Destination(0xe36e02dd) route=search/search_input?query={query}&categories={categories}&author_name={author_name}&author_id={author_id}&sort={sort}&order={order}&period={period}
 	at androidx.lifecycle.LifecycleRegistryKt.checkLifecycleStateTransition(LifecycleRegistry.kt:92)
 
-Pixel 9 - 15 Tests 1/1 completed. (0 skipped) (1 failed)
-Finished 1 tests on Pixel 9 - 15
+Pixel 9 - 15 Tests 3/7 completed. (0 skipped) (1 failed)
+Finished 3 tests on Pixel 9 - 15
 
 > Task :app:connectedDebugAndroidTest
 Tests on Pixel 9 - 15 failed: There was 1 failure(s).
 Test run failed to complete. Instrumentation run failed due to Process crashed.
 Logcat of last crash: 
-Process: digital.vasic.lava.client.dev, PID: 7056
-java.lang.RuntimeException: Unable to destroy activity {digital.vasic.lava.client.dev/digital.vasic.lava.client.MainActivity}: java.lang.IllegalStateException: State must be at least 'CREATED' to be moved to 'DESTROYED' in component NavBackStackEntry(<nav-backstack-entry-uuid-redacted>) destination=Destination(0xe36e02dd) route=search/search_input?query={query}&categories={categories}&author_name={author_name}&author_id={author_id}&sort={sort}&order={order}&period={period}
+Process: digital.vasic.lava.client.dev, PID: 8659
+java.lang.RuntimeException: Unable to destroy activity {digital.vasic.lava.client.dev/digital.vasic.lava.client.MainActivity}: java.lang.IllegalStateException: State must be at least 'CREATED' to be moved to 'DESTROYED' in component NavBackStackEntry(136c59d9-0cb8-47ac-91b6-455502fe724b) destination=Destination(0xe36e02dd) route=search/search_input?query={query}&categories={categories}&author_name={author_name}&author_id={author_id}&sort={sort}&order={order}&period={period}
 	at android.app.ActivityThread.performDestroyActivity(ActivityThread.java:5963)
 	at android.app.ActivityThread.handleDestroyActivity(ActivityThread.java:5995)
 	at android.app.servertransaction.DestroyActivityItem.execute(DestroyActivityItem.java:46)
@@ -1239,7 +1245,7 @@ java.lang.RuntimeException: Unable to destroy activity {digital.vasic.lava.clien
 	at java.lang.reflect.Method.invoke(Native Method)
 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:580)
 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:886)
-Caused by: java.lang.IllegalStateException: State must be at least 'CREATED' to be moved to 'DESTROYED' in component NavBackStackEntry(<nav-backstack-entry-uuid-redacted>) destination=Destination(0xe36e02dd) route=search/search_input?query={query}&categories={categories}&author_name={author_name}&author_id={author_id}&sort={sort}&order={order}&period={period}
+Caused by: java.lang.IllegalStateException: State must be at least 'CREATED' to be moved to 'DESTROYED' in component NavBackStackEntry(136c59d9-0cb8-47ac-91b6-455502fe724b) destination=Destination(0xe36e02dd) route=search/search_input?query={query}&categories={categories}&author_name={author_name}&author_id={author_id}&sort={sort}&order={order}&period={period}
 	at androidx.lifecycle.LifecycleRegistryKt.checkLifecycleStateTransition(LifecycleRegistry.kt:92)
 	at androidx.lifecycle.LifecycleRegistry.moveToState(LifecycleRegistry.jvm.kt:126)
 	at androidx.lifecycle.LifecycleRegistry.setCurrentState(LifecycleRegistry.jvm.kt:102)
@@ -1289,14 +1295,5 @@ Execution failed for task ':app:connectedDebugAndroidTest'.
 > Run with --scan to get full insights.
 > Get more help at https://help.gradle.org.
 
-BUILD FAILED in 1m 9s
-886 actionable tasks: 10 executed, 876 up-to-date
-# Genymotion Challenge run — 20260608T171332Z
-device: 127.0.0.1:6555
-module: app  test-class: lava.app.challenges.Challenge11ArchiveOrgAnonymousSearchTest
-gradle exit: 1
-lava.app.challenges.Challenge11ArchiveOrgAnonymousSearchTest > pickArchiveOrg_continue_thenSearch_rendersRealResultRow[Pixel 9 - 15] [31mFAILED [0m
-Tests on Pixel 9 - 15 failed: There was 1 failure(s).
-> Task :app:connectedDebugAndroidTest FAILED
-BUILD FAILED in 1m 9s
-==> GENYMOTION CHALLENGE FAIL (evidence: /Volumes/T7/Projects/Lava/.lava-ci-evidence/genymotion/c11-fix-20260608T171332Z)
+BUILD FAILED in 1m 36s
+886 actionable tasks: 57 executed, 829 up-to-date

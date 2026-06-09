@@ -1,7 +1,7 @@
 ==> building Containers genymotion CLI
 ==> detecting Genymotion install
 /Applications/Genymotion.app/Contents/MacOS/gmtool
-On	127.0.0.1:6555	ed811e5e-df4d-46d8-ab1f-4250058e57e3	Google Pixel 9
+On	127.0.0.1:6555	<genymotion-vm-uuid-redacted>	Google Pixel 9
 ==> target Genymotion serial: 127.0.0.1:6555
 serial=127.0.0.1:6555
 android_release=15
@@ -1212,7 +1212,7 @@ Daemon will be stopped at the end of the build
 Starting 1 tests on Pixel 9 - 15
 
 lava.app.challenges.Challenge11ArchiveOrgAnonymousSearchTest > pickArchiveOrg_continue_thenSearch_rendersRealResultRow[Pixel 9 - 15] [31mFAILED [0m
-	java.lang.IllegalStateException: State must be at least 'CREATED' to be moved to 'DESTROYED' in component NavBackStackEntry(3c4e01a6-bc5c-4b8e-ba6e-ccb0f66d0c7f) destination=Destination(0xe36e02dd) route=search/search_input?query={query}&categories={categories}&author_name={author_name}&author_id={author_id}&sort={sort}&order={order}&period={period}
+	java.lang.IllegalStateException: State must be at least 'CREATED' to be moved to 'DESTROYED' in component NavBackStackEntry(<nav-backstack-entry-uuid-redacted>) destination=Destination(0xe36e02dd) route=search/search_input?query={query}&categories={categories}&author_name={author_name}&author_id={author_id}&sort={sort}&order={order}&period={period}
 	at androidx.lifecycle.LifecycleRegistryKt.checkLifecycleStateTransition(LifecycleRegistry.kt:92)
 
 Pixel 9 - 15 Tests 1/1 completed. (0 skipped) (1 failed)
@@ -1223,7 +1223,7 @@ Tests on Pixel 9 - 15 failed: There was 1 failure(s).
 Test run failed to complete. Instrumentation run failed due to Process crashed.
 Logcat of last crash: 
 Process: digital.vasic.lava.client.dev, PID: 7414
-java.lang.RuntimeException: Unable to destroy activity {digital.vasic.lava.client.dev/digital.vasic.lava.client.MainActivity}: java.lang.IllegalStateException: State must be at least 'CREATED' to be moved to 'DESTROYED' in component NavBackStackEntry(3c4e01a6-bc5c-4b8e-ba6e-ccb0f66d0c7f) destination=Destination(0xe36e02dd) route=search/search_input?query={query}&categories={categories}&author_name={author_name}&author_id={author_id}&sort={sort}&order={order}&period={period}
+java.lang.RuntimeException: Unable to destroy activity {digital.vasic.lava.client.dev/digital.vasic.lava.client.MainActivity}: java.lang.IllegalStateException: State must be at least 'CREATED' to be moved to 'DESTROYED' in component NavBackStackEntry(<nav-backstack-entry-uuid-redacted>) destination=Destination(0xe36e02dd) route=search/search_input?query={query}&categories={categories}&author_name={author_name}&author_id={author_id}&sort={sort}&order={order}&period={period}
 	at android.app.ActivityThread.performDestroyActivity(ActivityThread.java:5963)
 	at android.app.ActivityThread.handleDestroyActivity(ActivityThread.java:5995)
 	at android.app.servertransaction.DestroyActivityItem.execute(DestroyActivityItem.java:46)
@@ -1239,7 +1239,7 @@ java.lang.RuntimeException: Unable to destroy activity {digital.vasic.lava.clien
 	at java.lang.reflect.Method.invoke(Native Method)
 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:580)
 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:886)
-Caused by: java.lang.IllegalStateException: State must be at least 'CREATED' to be moved to 'DESTROYED' in component NavBackStackEntry(3c4e01a6-bc5c-4b8e-ba6e-ccb0f66d0c7f) destination=Destination(0xe36e02dd) route=search/search_input?query={query}&categories={categories}&author_name={author_name}&author_id={author_id}&sort={sort}&order={order}&period={period}
+Caused by: java.lang.IllegalStateException: State must be at least 'CREATED' to be moved to 'DESTROYED' in component NavBackStackEntry(<nav-backstack-entry-uuid-redacted>) destination=Destination(0xe36e02dd) route=search/search_input?query={query}&categories={categories}&author_name={author_name}&author_id={author_id}&sort={sort}&order={order}&period={period}
 	at androidx.lifecycle.LifecycleRegistryKt.checkLifecycleStateTransition(LifecycleRegistry.kt:92)
 	at androidx.lifecycle.LifecycleRegistry.moveToState(LifecycleRegistry.jvm.kt:126)
 	at androidx.lifecycle.LifecycleRegistry.setCurrentState(LifecycleRegistry.jvm.kt:102)
