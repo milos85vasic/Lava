@@ -12,8 +12,8 @@ import lava.models.topic.Post
 import lava.models.topic.Topic
 import lava.models.topic.TopicModel
 import lava.models.topic.TopicPage
-import lava.models.topic.TorrentData
 import lava.models.topic.Torrent
+import lava.models.topic.TorrentData
 import lava.testing.TestDispatchers
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull

@@ -106,7 +106,8 @@ class TestEndpointsRepositoryEquivalenceTest {
      *     dup-tracked set), matching the real impl's early-return.
      *  2. Real (non-Rutracker) duplicates are STILL rejected with
      *     IllegalStateException, matching Room's PRIMARY KEY conflict.
-     *  3. The isEmpty()-guarded default seeding still fires on first observe.
+     *  3. First observe against an empty store emits [] (LVA-013) — real impl
+     *     seeds nothing (defaultEndpoints empty) and filters Rutracker out.
      *
      * Bluff-Audit (Sixth Law clause 6.A / Seventh Law clause 1):
      *   Mutation: remove `if (endpoint is Endpoint.Rutracker) return` from
@@ -175,52 +176,91 @@ class TestEndpointsRepositoryEquivalenceTest {
             )
         }
 
-        // (3) Default seeding still fires on first observation (isEmpty()-guarded).
-        //     Adding the Mirror above means the store is no longer empty, so a
-        //     fresh repository is used to prove the seed branch is intact.
+        // (3) First observation against an empty store emits an EMPTY list
+        //     (LVA-013). The real EndpointsRepositoryImpl.observeAll seeds
+        //     nothing (defaultEndpoints is emptyList() per operator directive
+        //     2026-05-12) and filterNot { it is Rutracker } on every emission,
+        //     so production NEVER lists Rutracker. The PRIOR assertion here
+        //     expected [Endpoint.Rutracker] — a Third-Law phantom the fake
+        //     showed but production never did.
         val freshRepository = TestEndpointsRepository()
         assertEquals(
-            "First observation against an empty store MUST still seed the " +
-                "default — the LVA-011 add() fix must not disturb the " +
-                "isEmpty()-guarded seeding branch.",
-            listOf(Endpoint.Rutracker),
+            "First observation against an empty store MUST emit [] — the real " +
+                "EndpointsRepositoryImpl seeds nothing (defaultEndpoints is " +
+                "empty) and filters Rutracker out of every emission.",
+            emptyList<Endpoint>(),
             freshRepository.observeAll().first(),
         )
     }
 
     /**
-     * The real impl's seeding branch is `if (endpointDao.isEmpty()) { … }`.
-     * That guard fires exactly once: on first observation against an
-     * empty table. A second observation, after the table is populated,
-     * must NOT re-insert the defaults.
+     * LVA-013 — deeper Third-Law (behavioural-equivalence) parity for
+     * `observeAll()`.
      *
-     * Primary assertion: observing `observeAll()` twice in a row yields
-     * the same `[Endpoint.Rutracker]` snapshot — NOT
-     * `[Endpoint.Rutracker, Endpoint.Rutracker]`.
+     * Real counterpart: `EndpointsRepositoryImpl.observeAll()` seeds
+     * `defaultEndpoints` (which is `emptyList()` since the operator directive
+     * 2026-05-12), `purgeRutrackerLegacy()`s any stale row, and ends its
+     * `mapLatest` with `.filterNot { it is Endpoint.Rutracker }` on every
+     * emission. Net PRODUCTION behaviour: `Endpoint.Rutracker` is NEVER
+     * listed; a fresh-install user's first observe emits `[]`.
+     *
+     * The PRIOR fake SEEDED + EMITTED `[Endpoint.Rutracker]` on first observe,
+     * so every consumer test asserting "Rutracker is seeded" was asserting a
+     * phantom endpoint production never shows — a Sixth-Law-clause-3 bluff.
+     * This test locks the corrected contract in place.
+     *
+     * Bluff-Audit (Seventh Law clause 1):
+     *   Mutation: in `TestEndpointsRepository.observeAll`, drop the
+     *             `.map { it.filterNot { e -> e is Endpoint.Rutracker } }` and
+     *             re-add the old onStart seed
+     *             `mutableEndpoints.value = listOf(Endpoint.Rutracker)`.
+     *   Observed-Failure: this test fails on the first assertion —
+     *     "First observation against an empty store MUST emit [] … got
+     *      [Rutracker]".
+     *   Reverted: yes.
+     *
+     * Primary assertion: user-visible listed state — Rutracker is absent on a
+     * fresh store, a real Mirror is listed exactly once across repeated
+     * observation, and Rutracker is never listed even after an add attempt.
      */
     @Test
-    fun fake_seeds_default_only_when_empty_like_real_impl() = runTest {
+    fun fake_observeAll_never_emits_rutracker_like_real_impl() = runTest {
         val repository = TestEndpointsRepository()
 
-        // First observation triggers `onStart` and seeds the default.
-        val firstSnapshot = repository.observeAll().first()
+        // Fresh-install: first observation against an empty store emits [].
         assertEquals(
-            "First observation against an empty store MUST seed exactly " +
-                "[Endpoint.Rutracker] — this is the fresh-install user-visible state.",
-            listOf(Endpoint.Rutracker),
-            firstSnapshot,
+            "First observation against an empty store MUST emit [] — the real " +
+                "impl seeds nothing (defaultEndpoints empty) and filters " +
+                "Rutracker out of every emission.",
+            emptyList<Endpoint>(),
+            repository.observeAll().first(),
         )
 
-        // Second observation must NOT re-seed — the store is no longer empty.
-        // If the fake re-runs the seed unconditionally, the snapshot would
-        // be [Rutracker, Rutracker] (or worse, the store would silently grow
-        // without bound on every observation, which is a Third-Law bluff).
-        val secondSnapshot = repository.observeAll().first()
+        // A real (non-Rutracker) endpoint IS listed; observing twice is stable
+        // — no re-seed, no unbounded growth.
+        val mirror = Endpoint.Mirror("192.168.1.100:8080")
+        repository.add(mirror)
         assertEquals(
-            "Second observation MUST NOT re-seed (real impl is " +
-                "isEmpty()-guarded). Got: $secondSnapshot",
-            listOf(Endpoint.Rutracker),
-            secondSnapshot,
+            "After adding a Mirror, observeAll MUST emit exactly [mirror].",
+            listOf(mirror),
+            repository.observeAll().first(),
+        )
+        assertEquals(
+            "Re-observing MUST be stable — no re-seed, no duplication.",
+            listOf(mirror),
+            repository.observeAll().first(),
+        )
+
+        // Rutracker is filtered from every emission. add(Rutracker) is a no-op
+        // (real impl early-returns), so the listed state stays [mirror] — never
+        // [mirror, Rutracker].
+        repository.add(Endpoint.Rutracker)
+        assertEquals(
+            "observeAll MUST NEVER emit Endpoint.Rutracker — real impl " +
+                "filterNot { it is Rutracker } on every emission. Got: " +
+                "${repository.observeAll().first()}",
+            listOf(mirror),
+            repository.observeAll().first(),
         )
     }
 }

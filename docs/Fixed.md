@@ -56,3 +56,13 @@ core/testing TestEndpointsRepository.add() stores an Endpoint.Rutracker and can 
 
 core/testing TestVisitedRepository, TestFavoritesRepository, TestBookmarksRepository have observe/contains/add/etc methods that are TODO('Not yet implemented') (throw). They are unusable for behavioral wiring — feature ViewModel tests (account, visited, rating) work around them with local in-memory fakes. Per the Third Law these shared fakes should be behaviorally-equivalent to the real repos so tests can use them directly. Flagged by the rating+visited VM-test agent (2026-06-09). Fix: implement the stubs as real in-memory fakes matching the real repo contracts + add equivalence tests.
 
+## LVA-013 — TestEndpointsRepository.observeAll seeds [Rutracker] but real impl never emits Rutracker (deeper Third-Law divergence)
+
+**Status:** Completed (→ Fixed.md)
+**Type:** Task
+**Evidence:** core/testing TestEndpointsRepository.observeAll filterNot Rutracker + no-seed (matches EndpointsRepositoryImpl); 4 phantom-seed test methods rewritten across 3 files; Bluff-Audit: mutation reintroducing onStart seed → core/testing TestEndpointsRepositoryEquivalenceTest expected:<[]> but was:<[Rutracker]> + core/domain TestInfrastructureContractTest 'Fresh-install first observe MUST emit []... Got: [Rutracker]', reverted; GREEN core:testing 24/0, core:domain 57/0, feature:connection 10/0
+**Severity:** P3
+**Created-By:** AI
+
+Beyond LVA-011 (add no-op, fixed): the fake's observeAll() seeds + emits [Endpoint.Rutracker] while the real EndpointsRepositoryImpl.observeAll() filterNot{it is Rutracker} + purges Rutracker every observe (never emits it). ~12 consumer tests (core/domain + core/testing) are written around the fake's [Rutracker] seed contract, so fixing the fake requires updating those tests in lockstep. Flagged by the LVA-011 agent (2026-06-09).
+

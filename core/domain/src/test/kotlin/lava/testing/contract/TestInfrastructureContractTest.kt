@@ -118,24 +118,35 @@ class TestInfrastructureContractTest {
     }
 
     /**
-     * CHALLENGE — when the repo IS empty, observeAll DOES seed with
-     * the default endpoints. Both branches of the
-     * `if (isEmpty())` guard are exercised.
+     * CHALLENGE — when the repo IS empty, observeAll emits an EMPTY list and
+     * NEVER lists Endpoint.Rutracker.
      *
-     * SP-3.2 (2026-04-29): the seeded set is now `{Rutracker}` only;
-     * `Endpoint.Proxy` was removed from the model. Sixth-Law clause 3
-     * primary assertion: a fresh-install user lands on Rutracker direct
-     * — no longer on the public Proxy endpoint that no operator wants.
+     * LVA-013 (2026-06-09): the real `EndpointsRepositoryImpl.observeAll`
+     * seeds `defaultEndpoints` (which is `emptyList()` per operator directive
+     * 2026-05-12), `purgeRutrackerLegacy()`s any stale row, and
+     * `.filterNot { it is Endpoint.Rutracker }` on every emission — so a
+     * fresh-install user lands on an EMPTY list (mDNS discovery then populates
+     * it). The PRIOR form asserted "Rutracker must be seeded" — a Third-Law
+     * phantom production never showed. Sixth-Law clause 3 primary assertion:
+     * the fresh-install user-visible list is empty and never contains Rutracker.
      */
     @Test
-    fun `observe on empty repo seeds Rutracker default`() = runTest {
+    fun `observe on empty repo emits empty list and never Rutracker`() = runTest {
         val repo = TestEndpointsRepository()
         val all = repo.observeAll().first()
-        assertTrue("Rutracker must be seeded", all.any { it == Endpoint.Rutracker })
-        // Falsifiability rehearsal anchor: re-add Endpoint.Proxy to
-        // the seeded list and watch the next assertion fire.
         assertTrue(
-            "Endpoint.Proxy must NOT be in the seeded set after SP-3.2",
+            "Fresh-install first observe MUST emit [] — real impl seeds nothing " +
+                "and filters Rutracker out of every emission. Got: $all",
+            all.isEmpty(),
+        )
+        assertTrue(
+            "Endpoint.Rutracker must NEVER be listed (real impl filterNot Rutracker)",
+            all.none { it == Endpoint.Rutracker },
+        )
+        // Falsifiability rehearsal anchor: re-add the onStart Rutracker seed
+        // to TestEndpointsRepository.observeAll and watch the first assertion fire.
+        assertTrue(
+            "Endpoint.Proxy must NOT be present (SP-3.2)",
             all.none { it::class.simpleName == "Proxy" },
         )
     }

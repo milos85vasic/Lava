@@ -196,8 +196,15 @@ class DiscoverLocalEndpointsUseCaseTest {
         assertTrue(result is DiscoverLocalEndpointsResult.Discovered)
     }
 
+    // LVA-013 (2026-06-09): renamed from `default endpoints are seeded and
+    // discovery adds a new mirror`. The real EndpointsRepositoryImpl.observeAll
+    // seeds NOTHING (defaultEndpoints is emptyList() per operator 2026-05-12)
+    // and `.filterNot { it is Endpoint.Rutracker }` on every emission, so
+    // production NEVER lists Rutracker. The prior assertion "Rutracker should
+    // be seeded" was a Third-Law phantom (TestEndpointsRepository seeded
+    // [Rutracker] while production filtered it out).
     @Test
-    fun `default endpoints are seeded and discovery adds a new mirror`() = runTest {
+    fun `discovery adds a new mirror and Rutracker is never listed`() = runTest {
         val useCase = createUseCase()
         val discovered = DiscoveredEndpoint(
             host = "192.168.1.100:8080",
@@ -212,19 +219,19 @@ class DiscoverLocalEndpointsUseCaseTest {
         useCase()
 
         val all = endpointsRepository.observeAll().first()
-        // SP-3.2: Endpoint.Proxy is GONE — assert it does NOT appear
-        // in the seeded set, plus assert what should be there.
-        assertTrue("Rutracker should be seeded", all.any { it == Endpoint.Rutracker })
+        // Sixth-Law clause 3: primary user-visible state — Rutracker is never
+        // listed (real impl filters it out of every emission).
+        assertTrue(
+            "Endpoint.Rutracker must NOT be listed (real impl filterNot Rutracker)",
+            all.none { it == Endpoint.Rutracker },
+        )
         assertTrue(
             "Discovered mirror should be added (bare host per SP-3.3)",
             all.any { it is Endpoint.Mirror && it.host == "192.168.1.100" },
         )
-        // Sixth-Law clause 3: primary user-visible state assertion that
-        // Proxy is gone from the seeded list. Reverting the SP-3.2
-        // EndpointsRepositoryImpl.defaultEndpoints to include Proxy
-        // would make this fail with a clear message.
+        // Endpoint.Proxy is GONE (SP-3.2) — must not appear in the list.
         assertTrue(
-            "Endpoint.Proxy must NOT be present in the seeded list (SP-3.2)",
+            "Endpoint.Proxy must NOT be present in the list (SP-3.2)",
             all.none { it::class.simpleName == "Proxy" },
         )
     }
