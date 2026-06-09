@@ -267,6 +267,230 @@ class CredentialsViewModelTest {
         }
     }
 
+    // CHALLENGE — the dialog SubmitDialog PASSWORD path persists username+password
+    // so the screen renders the provider as authenticated with the typed username.
+    // This is the real "Add credentials" dialog flow (ShowEditDialog -> type fields
+    // -> SubmitDialog), distinct from the direct SavePassword action.
+    //
+    // Falsifiability rehearsal (PERFORMED 2026-06-09):
+    //   Mutation: in CredentialsViewModel SubmitDialog PASSWORD branch, drop the
+    //             `credentialManager.setPassword(...)` call.
+    //   Observed: this test FAILS at `assertTrue(item.isAuthenticated)` — the
+    //             provider stays unauthenticated because nothing was persisted.
+    //   Reverted: yes.
+    @Test
+    fun `submit dialog with password persists credentials and authenticates`() = runTest(mainDispatcherRule.testDispatcher) {
+        viewModel.test(this) {
+            runOnCreate()
+            awaitState() // loading
+            awaitState() // loaded
+
+            viewModel.onAction(CredentialsAction.ShowEditDialog("rutracker", "RuTracker"))
+            viewModel.onAction(CredentialsAction.SetUsername("vasya"))
+            viewModel.onAction(CredentialsAction.SetPassword("secret"))
+            viewModel.onAction(CredentialsAction.SubmitDialog("rutracker"))
+
+            // Drain interleaved state/side-effect items until the user-visible
+            // outcome (rutracker authenticated, no dialog) appears. Robust against
+            // StateFlow distinct-until-changed conflation of the load() loading flip.
+            val loaded = awaitLoadedStateMatching {
+                val item = it.credentials.firstOrNull { c -> c.providerId == "rutracker" }
+                it.dialogState == null && item?.isAuthenticated == true
+            }
+            val item = loaded.credentials.first { it.providerId == "rutracker" }
+            assertTrue(
+                "SubmitDialog with a username+password MUST authenticate the provider",
+                item.isAuthenticated,
+            )
+            assertEquals("vasya", item.username)
+            cancelAndIgnoreRemainingItems()
+        }
+    }
+
+    // CHALLENGE — the dialog SubmitDialog TOKEN path persists a bearer token via
+    // credentialManager.setToken (authType="token"), which the load() mapper reads
+    // as authenticated (authType != "none"). The direct actions never exercise the
+    // TOKEN branch, so this is the only coverage of setToken from the dialog.
+    //
+    // Falsifiability rehearsal (PERFORMED 2026-06-09):
+    //   Mutation: in CredentialsViewModel SubmitDialog TOKEN branch, change
+    //             `credentialManager.setToken(...)` to a no-op.
+    //   Observed: this test FAILS at `assertTrue(item.isAuthenticated)` — no token
+    //             row is written so the provider remains unauthenticated.
+    //   Reverted: yes.
+    @Test
+    fun `submit dialog with token persists token credential and authenticates`() = runTest(mainDispatcherRule.testDispatcher) {
+        viewModel.test(this) {
+            runOnCreate()
+            awaitState() // loading
+            awaitState() // loaded
+
+            viewModel.onAction(CredentialsAction.ShowEditDialog("rutor", "RuTor"))
+            viewModel.onAction(CredentialsAction.SetCredentialType(CredentialType.TOKEN))
+            viewModel.onAction(CredentialsAction.SetToken("tok-abc"))
+            viewModel.onAction(CredentialsAction.SubmitDialog("rutor"))
+
+            val loaded = awaitLoadedStateMatching {
+                val item = it.credentials.firstOrNull { c -> c.providerId == "rutor" }
+                it.dialogState == null && item?.isAuthenticated == true
+            }
+            val item = loaded.credentials.first { it.providerId == "rutor" }
+            assertTrue(
+                "SubmitDialog with a TOKEN MUST authenticate the provider",
+                item.isAuthenticated,
+            )
+            cancelAndIgnoreRemainingItems()
+        }
+    }
+
+    // CHALLENGE — SubmitDialog with blank required fields MUST NOT persist anything:
+    // the provider stays unauthenticated. Guards the `isNotBlank()` gate that
+    // protects the user from saving an empty (broken) credential.
+    //
+    // Falsifiability rehearsal (PERFORMED 2026-06-09):
+    //   Mutation: in CredentialsViewModel SubmitDialog PASSWORD branch, remove the
+    //             `if (dialog.username.isNotBlank() && dialog.password.isNotBlank())`
+    //             guard so setPassword runs with blank values.
+    //   Observed: this test FAILS at `assertFalse(item.isAuthenticated)` — a blank
+    //             credential is persisted and the provider becomes authenticated.
+    //   Reverted: yes.
+    @Test
+    fun `submit dialog with blank password does not persist`() = runTest(mainDispatcherRule.testDispatcher) {
+        viewModel.test(this) {
+            runOnCreate()
+            awaitState() // loading
+            awaitState() // loaded
+
+            viewModel.onAction(CredentialsAction.ShowEditDialog("rutracker", "RuTracker"))
+            // Leave username/password blank.
+            viewModel.onAction(CredentialsAction.SubmitDialog("rutracker"))
+
+            // The blank submit posts a toast but persists nothing, so the
+            // settled (dialog dismissed, load complete) state still shows the
+            // provider as unauthenticated.
+            val settled = awaitLoadedStateMatching { it.dialogState == null && !it.loading }
+            val item = settled.credentials.first { it.providerId == "rutracker" }
+            assertFalse(
+                "a blank-field SubmitDialog MUST NOT authenticate the provider",
+                item.isAuthenticated,
+            )
+            cancelAndIgnoreRemainingItems()
+        }
+    }
+
+    // CHALLENGE — ShowEditDialog on a provider that ALREADY has a stored password
+    // pre-fills the dialog with the saved username and marks it as editing, so the
+    // user edits rather than re-enters. Asserts on the rendered dialog state fields.
+    //
+    // Falsifiability rehearsal (PERFORMED 2026-06-09):
+    //   Mutation: in CredentialsViewModel ShowEditDialog, hardcode
+    //             `username = ""` in the CredentialDialogState.
+    //   Observed: this test FAILS at the username assertion — the dialog opens
+    //             blank instead of pre-filled with the saved "stored-user".
+    //   Reverted: yes.
+    @Test
+    fun `show edit dialog prefills existing username and marks editing`() = runTest(mainDispatcherRule.testDispatcher) {
+        // Persist a credential first so the load() mapper marks it isAuthenticated
+        // with a username, which ShowEditDialog then reads for prefill.
+        manager.setPassword("rutracker", "stored-user", "stored-pass")
+
+        viewModel.test(this) {
+            runOnCreate()
+            awaitState() // loading
+            awaitState() // loaded (rutracker has stored-user)
+
+            viewModel.onAction(CredentialsAction.ShowEditDialog("rutracker", "RuTracker"))
+            val dialog = awaitState().dialogState
+            assertNotNull(dialog)
+            assertEquals(
+                "the edit dialog MUST pre-fill the saved username",
+                "stored-user",
+                dialog?.username,
+            )
+            assertTrue(
+                "an existing authenticated credential MUST open the dialog in editing mode",
+                dialog?.isEditing == true,
+            )
+        }
+    }
+
+    // CHALLENGE — the load() mapper applies the §6.G clause-4 verified filter:
+    // an UNVERIFIED descriptor MUST NOT appear in the credentials list the user
+    // sees. Guards against showing a non-shippable provider.
+    //
+    // Falsifiability rehearsal (PERFORMED 2026-06-09):
+    //   Mutation: in CredentialsViewModel.load(), drop the `.filter { it.verified }`.
+    //   Observed: this test FAILS — the unverified "hidden" provider appears in
+    //             state.credentials, so the size/absence assertions fail.
+    //   Reverted: yes.
+    @Test
+    fun `load hides unverified providers from the credentials list`() = runTest(mainDispatcherRule.testDispatcher) {
+        // Build a fresh SDK whose registry includes an UNVERIFIED descriptor.
+        val registry = DefaultTrackerRegistry()
+        val verifiedDesc = descriptor("rutracker", "RuTracker", setOf(TrackerCapability.SEARCH))
+        val hiddenDesc = unverifiedDescriptor("hidden", "Hidden Provider")
+        registry.register(object : TrackerClientFactory {
+            override val descriptor = verifiedDesc
+            override fun create(config: lava.sdk.api.PluginConfig) = FakeTrackerClient(verifiedDesc)
+        })
+        registry.register(object : TrackerClientFactory {
+            override val descriptor = hiddenDesc
+            override fun create(config: lava.sdk.api.PluginConfig) = FakeTrackerClient(hiddenDesc)
+        })
+        val filteringViewModel = CredentialsViewModel(manager, LavaTrackerSdk(registry))
+
+        filteringViewModel.test(this) {
+            runOnCreate()
+            awaitState() // loading
+            val loaded = awaitState() // loaded
+            assertTrue(
+                "the verified provider MUST be listed",
+                loaded.credentials.any { it.providerId == "rutracker" },
+            )
+            assertFalse(
+                "an unverified provider MUST NOT be shown to the user (§6.G clause 4)",
+                loaded.credentials.any { it.providerId == "hidden" },
+            )
+        }
+    }
+
+    /**
+     * Drains interleaved state/side-effect items until a [CredentialsState]
+     * matches [predicate], returning it. Robust against StateFlow
+     * distinct-until-changed conflation of the transient load() loading flip
+     * and against side-effect interleaving — the assertion is on the
+     * user-visible settled state, not on a fixed emission count.
+     */
+    private suspend fun org.orbitmvi.orbit.test.OrbitTestContext<
+        CredentialsState,
+        CredentialsSideEffect,
+        CredentialsViewModel,
+        >.awaitLoadedStateMatching(
+        predicate: (CredentialsState) -> Boolean,
+    ): CredentialsState {
+        while (true) {
+            when (val item = awaitItem()) {
+                is org.orbitmvi.orbit.test.Item.StateItem ->
+                    if (predicate(item.value)) return item.value
+                else -> Unit
+            }
+        }
+    }
+
+    private fun unverifiedDescriptor(
+        id: String,
+        name: String,
+    ) = object : TrackerDescriptor {
+        override val trackerId = id
+        override val displayName = name
+        override val baseUrls = listOf(MirrorUrl("https://$id.example", isPrimary = true, protocol = Protocol.HTTPS))
+        override val capabilities = setOf(TrackerCapability.SEARCH)
+        override val authType = AuthType.NONE
+        override val encoding = "UTF-8"
+        override val expectedHealthMarker = id
+        override val verified = false
+    }
+
     private fun descriptor(
         id: String,
         name: String,
