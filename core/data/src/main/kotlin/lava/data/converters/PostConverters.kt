@@ -103,7 +103,12 @@ private fun List<PostElementDto>.toContent(): Content {
         addBreak()
         if (column.lastOrNull() != PostContent.Divider) {
             if (column.lastOrNull() == PostContent.Spacer) {
-                column.removeLast()
+                // removeAt(lastIndex), not removeLast(): kotlin-stdlib's
+                // MutableList.removeLast() compiles to java.util.List.removeLast()
+                // (JDK 21 SequencedCollection), which is absent on Android runtimes
+                // below API 35 and throws NoSuchMethodError at runtime — crashing the
+                // topic screen on any post that has a PostBr immediately followed by Hr.
+                column.removeAt(column.lastIndex)
             }
             column.add(PostContent.Divider)
         }
