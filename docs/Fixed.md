@@ -426,3 +426,12 @@ All 4 test bodies pass (XML failures=0) but a teardown RuntimeException makes Gr
 
 Kotlin removeLast() desugars to java.util.List.removeLast (JDK21 SequencedCollection) absent on Android <35 → a PostBr followed by Hr crashes the topic screen. Fixed to removeAt(lastIndex) + 28 converter tests.
 
+## LVA-056 — §6.R IPv4 scanner flags device-recorder tests/ hermetic fixture (missing tests/ exemption)
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** .lava-ci-evidence/workable-items/LVA-056-evidence.md
+**Severity:** P2
+
+scan-no-hardcoded-ipv4.sh regex lacked top-level tests/ → flagged tests/device-recording synthetic 127.0.0.1:6555 → check-constitution exit 1 (LVA-037 class). Added ^tests/.
+
