@@ -5,6 +5,7 @@ import kotlinx.coroutines.test.runTest
 import lava.auth.api.TokenProvider
 import lava.downloads.api.DownloadRequest
 import lava.downloads.api.DownloadService
+import lava.downloads.api.HttpFileDownloadRequest
 import lava.network.api.NetworkApi
 import lava.network.data.NetworkApiRepository
 import lava.testing.TestDispatchers
@@ -54,8 +55,14 @@ class DownloadTorrentUseCaseTest {
     /** In-memory DownloadService — records the request and returns a canned result. */
     private class RecordingDownloadService(private val result: String?) : DownloadService {
         var lastRequest: DownloadRequest? = null
+        var lastHttpRequest: HttpFileDownloadRequest? = null
         override suspend fun downloadTorrentFile(downloadRequest: DownloadRequest): String? {
             lastRequest = downloadRequest
+            return result
+        }
+
+        override suspend fun downloadHttpFile(downloadRequest: HttpFileDownloadRequest): String? {
+            lastHttpRequest = downloadRequest
             return result
         }
     }
