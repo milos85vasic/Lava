@@ -18,9 +18,16 @@ fun String.isLocalHost(): Boolean {
     val lowercaseOriginal = original.lowercase()
     if (lowercaseOriginal == "::1") return true
     if (lowercaseOriginal.startsWith("fe80:")) return true
-    if (lowercaseOriginal.startsWith("fc") || lowercaseOriginal.startsWith("fd")) {
-        val prefix = lowercaseOriginal.take(4)
-        val hex = prefix.toIntOrNull(16)
+    // IPv6 unique-local (fc00::/7). Only a genuine IPv6 literal qualifies: it MUST
+    // contain a colon. A public hostname that merely starts with "fc"/"fd"
+    // (e.g. "fcbarcelona.com", "fde7.example.com") is NOT a ULA address and must
+    // not be misclassified as local. The first hextet's high bits must match
+    // 1111110x — i.e. the hextet value is in 0xfc00..0xfdff.
+    if (lowercaseOriginal.contains(':') &&
+        (lowercaseOriginal.startsWith("fc") || lowercaseOriginal.startsWith("fd"))
+    ) {
+        val firstHextet = lowercaseOriginal.substringBefore(':')
+        val hex = firstHextet.toIntOrNull(16)
         if (hex != null && hex in 0xfc00..0xfdff) return true
     }
 

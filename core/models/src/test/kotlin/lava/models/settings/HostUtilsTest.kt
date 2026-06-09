@@ -91,4 +91,24 @@ class HostUtilsTest {
     fun `IPv6_link_local_is_local`() {
         assertTrue("fe80::1".isLocalHost())
     }
+
+    @Test
+    fun `IPv6_unique_local_literals_are_local`() {
+        // Genuine ULA (fc00::/7) literals must still be classified local.
+        assertTrue("fc00::1".isLocalHost())
+        assertTrue("fd12:3456:789a::1".isLocalHost())
+        assertTrue("fdfe:dcba:9876::1".isLocalHost())
+    }
+
+    @Test
+    fun `LVA-029 public hosts starting with fc or fd are not local`() {
+        // Regression: hosts beginning with the ULA hex prefix "fc"/"fd" must NOT
+        // be misclassified as IPv6 unique-local addresses. They are public
+        // hostnames (no colon, not an IPv6 literal). Misclassifying them routes
+        // public traffic over the cleartext/loopback LAN path.
+        assertFalse("fcbarcelona.com".isLocalHost())
+        assertFalse("fde7.example.com".isLocalHost())
+        assertFalse("fdn.example.org".isLocalHost())
+        assertFalse("fc-store.net".isLocalHost())
+    }
 }
