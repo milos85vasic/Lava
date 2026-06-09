@@ -13,12 +13,14 @@ import lava.data.api.repository.VisitedRepository
 import lava.data.api.service.TopicService
 import lava.domain.usecase.AddCommentUseCase
 import lava.domain.usecase.AddLocalFavoriteUseCase
+import lava.domain.usecase.DownloadHttpFileUseCase
 import lava.domain.usecase.DownloadTorrentUseCase
 import lava.domain.usecase.GetTopicUseCase
 import lava.domain.usecase.IsAuthorizedUseCase
 import lava.domain.usecase.ObserveFavoriteStateUseCase
 import lava.domain.usecase.ObserveTopicPagingDataUseCase
 import lava.domain.usecase.RemoveLocalFavoriteUseCase
+import lava.domain.usecase.ResolveProviderDownloadKindUseCase
 import lava.domain.usecase.ToggleFavoriteUseCaseImpl
 import lava.domain.usecase.VisitTopicUseCase
 import lava.models.Page
@@ -112,6 +114,12 @@ class TopicViewModelTest {
             // (the SUT is the add-comment path: AddCommentUseCase /
             // IsAuthorizedUseCase, both wired as real instances above/below).
             downloadTorrentUseCase = mockk<DownloadTorrentUseCase>(relaxed = true),
+            // LVA-052 — the download branch is not the SUT for the add-comment
+            // tests; these two are outermost-boundary deps (same justification as
+            // downloadTorrentUseCase above). The dedicated download branching SUT
+            // lives in TopicViewModelHttpDownloadTest.
+            downloadHttpFileUseCase = mockk<DownloadHttpFileUseCase>(relaxed = true),
+            resolveProviderDownloadKindUseCase = mockk<ResolveProviderDownloadKindUseCase>(relaxed = true),
             getTopicUseCase = GetTopicUseCase(topicService, visitTopicUseCase, dispatchers),
             isAuthorizedUseCase = IsAuthorizedUseCase(authService),
             observeFavoriteStateUseCase = ObserveFavoriteStateUseCase(favoritesRepository),

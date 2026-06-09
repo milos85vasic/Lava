@@ -12,16 +12,19 @@ import lava.domain.model.PagingAction
 import lava.domain.model.refresh
 import lava.domain.model.retry
 import lava.domain.usecase.AddCommentUseCase
+import lava.domain.usecase.DownloadHttpFileUseCase
 import lava.domain.usecase.DownloadTorrentUseCase
 import lava.domain.usecase.GetTopicUseCase
 import lava.domain.usecase.IsAuthorizedUseCase
 import lava.domain.usecase.ObserveFavoriteStateUseCase
 import lava.domain.usecase.ObserveTopicPagingDataUseCase
+import lava.domain.usecase.ResolveProviderDownloadKindUseCase
 import lava.domain.usecase.ToggleFavoriteUseCase
 import lava.logger.api.LoggerFactory
 import lava.models.forum.Category
 import lava.models.search.Filter
 import lava.models.topic.Author
+import lava.network.api.ProviderDownloadKind
 import org.orbitmvi.orbit.Container
 import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.syntax.simple.intent
@@ -35,6 +38,8 @@ internal class TopicViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val addCommentUseCase: AddCommentUseCase,
     private val downloadTorrentUseCase: DownloadTorrentUseCase,
+    private val downloadHttpFileUseCase: DownloadHttpFileUseCase,
+    private val resolveProviderDownloadKindUseCase: ResolveProviderDownloadKindUseCase,
     private val getTopicUseCase: GetTopicUseCase,
     private val isAuthorizedUseCase: IsAuthorizedUseCase,
     private val observeFavoriteStateUseCase: ObserveFavoriteStateUseCase,
@@ -45,6 +50,11 @@ internal class TopicViewModel @Inject constructor(
 ) : ViewModel(), ContainerHost<TopicState, TopicSideEffect> {
     private val logger = loggerFactory.get("OpenTopicViewModel")
     private val id = savedStateHandle.id
+
+    // LVA-052 — source-provider id (null for favorites/visited/deep-link, which
+    // can't supply one yet). Empty string ⇒ the resolve use case falls back to
+    // the active tracker, preserving legacy single-tracker behaviour.
+    private val providerId = savedStateHandle.providerId.orEmpty()
     private val pagingActions = MutableSharedFlow<PagingAction>()
 
     override val container: Container<TopicState, TopicSideEffect> = container(
@@ -202,6 +212,25 @@ internal class TopicViewModel @Inject constructor(
     }
 
     private fun onTorrentFileClick(title: String) = intent {
+        // LVA-052 — branch on the SOURCE provider's download shape so the topic
+        // download button reaches HTTP_DOWNLOAD providers (archiveorg /
+        // gutenberg → real file on disk) as well as `.torrent` providers
+        // (rutracker / rutor). The active descriptor's capability set is the
+        // single source of truth (Capability Honesty, 6.E) — resolved off the
+        // tracker SDK via the network seam, never a hardcoded id (§6.R).
+        when (resolveProviderDownloadKindUseCase(providerId)) {
+            ProviderDownloadKind.HTTP -> downloadHttpFile()
+            // TORRENT and NONE both take the legacy `.torrent` path: NONE keeps
+            // the prior behaviour (the download button only shows for torrent
+            // topics today), and the `.torrent` use case returns null on
+            // failure → DownloadState.Error, which the screen already renders.
+            ProviderDownloadKind.TORRENT,
+            ProviderDownloadKind.NONE,
+            -> downloadTorrentFile(title)
+        }
+    }
+
+    private fun downloadTorrentFile(title: String) = intent {
         if (isAuthorizedUseCase()) {
             analytics.event(
                 AnalyticsTracker.Events.DOWNLOAD_TORRENT,
@@ -224,6 +253,35 @@ internal class TopicViewModel @Inject constructor(
             }
         } else {
             intent { postSideEffect(TopicSideEffect.ShowLoginRequired) }
+        }
+    }
+
+    /**
+     * LVA-052 — HTTP-file download path for HTTP_DOWNLOAD providers. These
+     * providers are anonymous (AuthType.NONE), so this path does NOT gate on
+     * [isAuthorizedUseCase] — requiring login would make the download
+     * unreachable for archiveorg / gutenberg (the §6.G "auth-type honesty"
+     * lesson). The real bytes reach disk via [downloadHttpFileUseCase].
+     */
+    private fun downloadHttpFile() = intent {
+        analytics.event(
+            AnalyticsTracker.Events.DOWNLOAD_TORRENT,
+            mapOf(AnalyticsTracker.Params.TOPIC_ID to id.toString()),
+        )
+        postSideEffect(TopicSideEffect.ShowDownloadProgress)
+        reduce { state.copy(downloadState = DownloadState.Started) }
+        val uri = downloadHttpFileUseCase(providerId, id)
+        if (uri != null) {
+            intent { reduce { state.copy(downloadState = DownloadState.Completed(uri)) } }
+        } else {
+            analytics.event(
+                AnalyticsTracker.Events.DOWNLOAD_TORRENT_FAILURE,
+                mapOf(
+                    AnalyticsTracker.Params.TOPIC_ID to id.toString(),
+                    AnalyticsTracker.Params.ERROR to "http_download_failed",
+                ),
+            )
+            intent { reduce { state.copy(downloadState = DownloadState.Error) } }
         }
     }
 

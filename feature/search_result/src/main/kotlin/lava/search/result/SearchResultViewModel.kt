@@ -543,7 +543,15 @@ internal class SearchResultViewModel @Inject constructor(
     }
 
     private fun onTopicClick(topicModel: TopicModel<out Topic>) = intent {
-        postSideEffect(SearchResultSideEffect.OpenTopic(topicModel.topic.id))
+        // LVA-052 — multi-search result items carry their source providerId;
+        // thread it so the topic download action can branch HTTP-file vs
+        // `.torrent`. Null on the single-tracker paging path.
+        postSideEffect(
+            SearchResultSideEffect.OpenTopic(
+                id = topicModel.topic.id,
+                providerId = topicModel.providerId,
+            ),
+        )
     }
 }
 

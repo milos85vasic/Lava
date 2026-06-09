@@ -41,7 +41,9 @@ fun addSearchResult(
     back: () -> Unit,
     openSearchInput: (filter: Filter) -> Unit,
     openSearchResult: (filter: Filter) -> Unit,
-    openTopic: (id: String) -> Unit,
+    // LVA-052 — providerId threads the source provider so the topic download
+    // action can branch HTTP-file (archiveorg/gutenberg) vs `.torrent`.
+    openTopic: (id: String, providerId: String?) -> Unit,
     // SP-3.2 (2026-04-29): hook for the Unauthorized empty-state's
     // Login button — replaces the misleading "Nothing found" UI.
     openLogin: () -> Unit,

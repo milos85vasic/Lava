@@ -64,7 +64,9 @@ internal fun SearchResultScreen(
     back: () -> Unit,
     openSearchInput: (filter: Filter) -> Unit,
     openSearchResult: (filter: Filter) -> Unit,
-    openTopic: (id: String) -> Unit,
+    // LVA-052 — providerId threads the source provider so the topic screen can
+    // branch the download action (HTTP-file vs `.torrent`); null = active tracker.
+    openTopic: (id: String, providerId: String?) -> Unit,
     // SP-3.2 (2026-04-29): hooked up so the Unauthorized empty-state's
     // Login button can navigate to the login screen.
     openLogin: () -> Unit,
@@ -77,7 +79,7 @@ internal fun SearchResultScreen(
             is SearchResultSideEffect.OpenLogin -> openLogin()
             is SearchResultSideEffect.OpenSearchInput -> openSearchInput(sideEffect.filter)
             is SearchResultSideEffect.OpenSearchResult -> openSearchResult(sideEffect.filter)
-            is SearchResultSideEffect.OpenTopic -> openTopic(sideEffect.id)
+            is SearchResultSideEffect.OpenTopic -> openTopic(sideEffect.id, sideEffect.providerId)
             is SearchResultSideEffect.ShowFavoriteToggleError -> snackbarHost.showSnackbar(favoriteToggleError)
             is SearchResultSideEffect.ShowFallbackDismissedError ->
                 snackbarHost.showSnackbar("${sideEffect.failedTracker} is unavailable")

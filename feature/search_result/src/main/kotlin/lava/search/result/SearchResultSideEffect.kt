@@ -5,7 +5,12 @@ import lava.models.search.Filter
 internal sealed interface SearchResultSideEffect {
     data class OpenSearchInput(val filter: Filter) : SearchResultSideEffect
     data class OpenSearchResult(val filter: Filter) : SearchResultSideEffect
-    data class OpenTopic(val id: String) : SearchResultSideEffect
+
+    // LVA-052 — carry the source-provider id so the topic screen can branch the
+    // download action (HTTP-file for archiveorg/gutenberg vs `.torrent`). Null
+    // for the legacy single-tracker paging path (rutracker-direct), which the
+    // topic screen resolves to the active tracker.
+    data class OpenTopic(val id: String, val providerId: String?) : SearchResultSideEffect
     data object Back : SearchResultSideEffect
     data object ShowFavoriteToggleError : SearchResultSideEffect
 

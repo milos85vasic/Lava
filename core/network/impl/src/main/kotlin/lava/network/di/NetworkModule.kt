@@ -10,6 +10,7 @@ import dagger.multibindings.Multibinds
 import lava.network.api.HttpDownloadSource
 import lava.network.api.ImageLoader
 import lava.network.api.NetworkApi
+import lava.network.api.ProviderCapabilitySource
 import lava.network.data.ImageLoaderFactoryImpl
 import lava.network.data.NetworkApiRepository
 import lava.network.data.NetworkApiRepositoryImpl
@@ -17,6 +18,7 @@ import lava.network.impl.DelegatingProxySelector
 import lava.network.impl.HttpDownloadSourceImpl
 import lava.network.impl.ImageLoaderImpl
 import lava.network.impl.LavaAuthBlobProvider
+import lava.network.impl.ProviderCapabilitySourceImpl
 import lava.network.impl.SwitchingNetworkApi
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
@@ -48,6 +50,10 @@ internal interface NetworkModule {
     @Binds
     @Singleton
     fun httpDownloadSource(impl: HttpDownloadSourceImpl): HttpDownloadSource
+
+    @Binds
+    @Singleton
+    fun providerCapabilitySource(impl: ProviderCapabilitySourceImpl): ProviderCapabilitySource
 
     @Binds
     @Singleton

@@ -79,7 +79,10 @@ fun MobileNavigation(navigationController: NavigationController) {
                 back = ::popBackStack,
                 openSearchInput = { openSearchInput(it) },
                 openSearchResult = { openSearchResult(it) },
-                openTopic = { openTopic(it) },
+                // LVA-052 — thread the source providerId from multi-search
+                // results so the topic download action branches HTTP-file vs
+                // `.torrent`; null falls back to the active tracker.
+                openTopic = { id, providerId -> openTopic(id, providerId) },
                 openLogin = { openLogin() },
                 deepLinkUrls = DeepLinks.searchResultUrls,
                 animations = NavigationAnimations.Default,
@@ -104,7 +107,7 @@ fun MobileNavigation(navigationController: NavigationController) {
             addNestedNavigation(
                 openSearchInput = { openSearchInput(it) },
                 openLogin = { openLogin() },
-                openTopic = { openTopic(it) },
+                openTopic = { id, providerId -> openTopic(id, providerId) },
                 openCredentials = { openCredentialsManager() },
                 openProviderConfig = { openProviderConfig(it) },
             )
@@ -116,7 +119,11 @@ context(NavigationGraphBuilder)
 private fun addNestedNavigation(
     openSearchInput: (id: String) -> Unit,
     openLogin: () -> Unit,
-    openTopic: (id: String) -> Unit,
+    // LVA-052 — providerId threads the source provider for the topic download
+    // branch. The bottom-nav Search tab (which runs multi-search across
+    // archiveorg/gutenberg/rutracker) supplies it; forum/favorites/visited
+    // pass null (→ active-tracker fallback).
+    openTopic: (id: String, providerId: String?) -> Unit,
     openCredentials: () -> Unit,
     openProviderConfig: (String) -> Unit,
 ) = addDestination {
@@ -134,10 +141,13 @@ private fun addNestedNavigation(
             addForum(
                 openSearchInput = openSearchInput,
                 openLogin = openLogin,
-                openTopic = openTopic,
+                // forum/category topics are single-tracker → active-tracker default.
+                openTopic = { id -> openTopic(id, null) },
             )
             addTopics(
-                openTopic = openTopic,
+                // favorites/visited cannot supply a providerId without a Room
+                // column (OWED) → active-tracker default.
+                openTopic = { id -> openTopic(id, null) },
             )
             addMenu(
                 openLogin = openLogin,
@@ -151,7 +161,9 @@ private fun addNestedNavigation(
 context(NavigationGraphBuilder, NavigationController)
 private fun addSearch(
     openLogin: () -> Unit,
-    openTopic: (id: String) -> Unit,
+    // LVA-052 — providerId threads the multi-search result's source provider
+    // for the topic download branch.
+    openTopic: (id: String, providerId: String?) -> Unit,
 ) = addGraph(
     isStartRoute = true,
     route = BottomRoute.Search.route,
