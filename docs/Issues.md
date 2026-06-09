@@ -41,25 +41,25 @@ github/master and gitlab/master diverged at d2a2151 with unique non-doc go.mod c
 
 ## LVA-067 — persist per-row providerId on favorite/visited rows so their topics can route to HTTP_DOWNLOAD
 
-**Status:** Queued
+**Status:** In progress
 **Type:** Task
 **Severity:** P3
 
 LVA-052 scoped favorites/visited topic downloads to the active-tracker default because the favorite/visited Room rows store no provider id; add a providerId column + migration so an archiveorg/gutenberg favorite routes to HTTP_DOWNLOAD.
 
-## LVA-068 — proactively re-mint embed TLS leaf mid-process when it crosses the expiry margin
+## LVA-070 — thread source providerId through favorite/visited write+read path to complete HTTP_DOWNLOAD routing
 
 **Status:** Queued
 **Type:** Task
 **Severity:** P3
 
-tls.go only re-checks cert expiry at Start; a multi-month-running embed could serve a leaf that expires without a restart. Add a periodic re-mint check.
+LVA-067 laid the providerId Room column; complete it by threading providerId through ToggleFavoriteUseCase/AddLocalFavoriteUseCase/GetTopicUseCase + the Topic/TopicPage models (write) and TopicModel + favorites/visited side-effects to openTopic(id,providerId) (read), mirroring search_result.
 
-## LVA-069 — cover SearchResultViewModel SSE raw-JSON parsing + onRetryClick re-dispatch
+## LVA-071 — inject SseClient + base-URL into SearchResultViewModel.observeSseSearch for hermetic MockWebServer testing
 
 **Status:** Queued
 **Type:** Task
 **Severity:** P3
 
-handleSseEvent raw-JSON parsing (provider_start/results/provider_done/provider_error) and onRetryClick Error-state re-dispatch are untested production branches.
+observeSseSearch internally constructs the SseClient with a hardcoded https base; inject it so the full SSE error to Error to retry path is hermetically testable against a MockWebServer.
 

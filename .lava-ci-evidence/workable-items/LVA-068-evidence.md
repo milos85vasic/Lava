@@ -1,0 +1,1 @@
+# LVA-068 — commit 590dd710; embed TLS cert now zero-downtime rotates mid-process via GetCertificate callback + atomic rotatingCert holder (re-mints within expiry margin, same IP-SANs, no dropped conns); real x509 + injectable clock; Bluff-Audit in commit; SourceHash GREEN.

@@ -552,3 +552,21 @@ The TLS reuse gate checks IP-SAN coverage but not certificate expiry, so a persi
 
 SearchViewModel was not inspected in depth this loop; audit its error and paging-state branches and add falsifiable coverage where real gaps exist.
 
+## LVA-068 — proactively re-mint embed TLS leaf mid-process when it crosses the expiry margin
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Task
+**Evidence:** .lava-ci-evidence/workable-items/LVA-068-evidence.md
+**Severity:** P3
+
+tls.go only re-checks cert expiry at Start; a multi-month-running embed could serve a leaf that expires without a restart. Add a periodic re-mint check.
+
+## LVA-069 — cover SearchResultViewModel SSE raw-JSON parsing + onRetryClick re-dispatch
+
+**Status:** Completed (→ Fixed.md)
+**Type:** Task
+**Evidence:** .lava-ci-evidence/workable-items/LVA-069-evidence.md
+**Severity:** P3
+
+handleSseEvent raw-JSON parsing (provider_start/results/provider_done/provider_error) and onRetryClick Error-state re-dispatch are untested production branches.
+
