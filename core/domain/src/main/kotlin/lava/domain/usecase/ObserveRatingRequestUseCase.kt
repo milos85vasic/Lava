@@ -10,7 +10,12 @@ import javax.inject.Inject
 
 interface ObserveRatingRequestUseCase : suspend () -> Flow<RatingRequest>
 
-internal class ObserveRatingRequestUseCaseImpl @Inject constructor(
+// Public (was internal) so feature-module tests can wire the REAL use case
+// instead of a hand-rolled re-implementation that omits the engagement gate
+// (LVA-016 — Fifth Law: refactor for testability). Still bound via @Binds in
+// DomainModule; production consumers depend on the ObserveRatingRequestUseCase
+// interface, not this class.
+class ObserveRatingRequestUseCaseImpl @Inject constructor(
     private val observeSearchHistoryUseCase: ObserveSearchHistoryUseCase,
     private val observeVisitedUseCase: ObserveVisitedUseCase,
     private val observeBookmarksUseCase: ObserveBookmarksUseCase,

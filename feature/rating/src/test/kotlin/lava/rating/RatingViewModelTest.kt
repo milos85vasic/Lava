@@ -3,20 +3,30 @@ package lava.rating
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import lava.data.api.repository.FavoriteSearchRepository
 import lava.data.api.repository.RatingRepository
 import lava.data.api.service.StoreService
 import lava.domain.model.rating.RatingRequest
 import lava.domain.usecase.AppLaunchedUseCase
 import lava.domain.usecase.DisableRatingRequestUseCase
+import lava.domain.usecase.EnrichTopicsUseCase
 import lava.domain.usecase.GetRatingStoreUseCase
-import lava.domain.usecase.ObserveRatingRequestUseCase
+import lava.domain.usecase.ObserveBookmarksUseCase
+import lava.domain.usecase.ObserveRatingRequestUseCaseImpl
+import lava.domain.usecase.ObserveSearchHistoryUseCase
+import lava.domain.usecase.ObserveVisitedUseCase
 import lava.domain.usecase.PostponeRatingRequestUseCase
 import lava.models.Store
+import lava.models.forum.Category
+import lava.testing.TestDispatchers
 import lava.testing.logger.TestLoggerFactory
+import lava.testing.repository.TestBookmarksRepository
+import lava.testing.repository.TestFavoritesRepository
+import lava.testing.repository.TestSearchHistoryRepository
+import lava.testing.repository.TestVisitedRepository
 import lava.testing.rule.MainDispatcherRule
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -29,33 +39,28 @@ import org.orbitmvi.orbit.test.test
 /**
  * Anti-bluff coverage for [RatingViewModel].
  *
+ * LVA-016 (2026-06-09) — the observe use case is now the REAL
+ * [ObserveRatingRequestUseCaseImpl] (made public for testability, Fifth Law),
+ * wired over the shared in-memory fakes that became usable after LVA-012/015.
+ * The PRIOR test used a hand-rolled `RealObserveRatingRequestUseCase` that
+ * DROPPED the engagement gate (pinned>1 OR other>3 OR visited>5 OR bookmarks>2),
+ * so `Show rating request is rendered when conditions are met` asserted the
+ * dialog SHOWS with zero engagement — an outcome the REAL use case would NOT
+ * produce (it emits Hide). That was a Second-Law / §6.J bluff: the test
+ * re-implemented internal business logic AND asserted a user-visible outcome
+ * production never gives. Now the Show-path tests seed real engagement
+ * (3 bookmarks > the BookmarksCounter of 2), so a green test means the dialog
+ * truly shows for an engaged user.
+ *
  * Constitution (Second Law — no mocking of internal business logic):
  *  - The SUT is [RatingViewModel]; it is a REAL instance, never mocked.
- *  - The five rating use cases are behaviorally-equivalent implementations of
- *    their PUBLIC interfaces ([AppLaunchedUseCase], [DisableRatingRequestUseCase],
- *    [GetRatingStoreUseCase], [ObserveRatingRequestUseCase],
- *    [PostponeRatingRequestUseCase]). The production `*Impl` classes are
- *    `internal` to `:core:domain` and therefore not reachable from this feature
- *    module, so — exactly like `AccountViewModelTest`'s `RealLogoutUseCase` —
- *    these test impls perform the SAME observable operations the production
- *    impls perform against the SAME real collaborators:
- *      * AppLaunchedUseCaseImpl       → decrements the persisted launch count
- *      * DisableRatingRequestUseCaseImpl → sets the disabled flag
- *      * PostponeRatingRequestUseCaseImpl → resets launch count + sets postponed
- *      * GetRatingStoreUseCaseImpl    → reads the store link from StoreService
- *      * ObserveRatingRequestUseCaseImpl → emits Show/Hide off the repo flags
- *    None of these is a mock of the SUT; they are the VM's collaborators, and
- *    every primary assertion below is on user-visible state driven by the REAL
- *    in-memory [FakeRatingRepository] (which obeys the [RatingRepository]
- *    contract) and the REAL [FakeStoreService].
- *  - The repository fake holds real in-memory state (launch count, disabled,
- *    postponed) so the use cases' writes have an observable effect (Third Law:
- *    a fake that ignored disableRatingRequest() would diverge from the
- *    SharedPreferences-backed prod repo).
- *
- * Primary assertions (Sixth Law clause 3) are on user-visible state/side
- * effects: the rendered [RatingRequest] (the dialog the screen shows/hides) and
- * the [RatingSideEffect.OpenLink] the screen reacts to by opening the store.
+ *  - The observe use case is the REAL production impl. The other four use cases
+ *    (AppLaunched / Disable / Postpone / GetRatingStore) are behaviorally-
+ *    equivalent impls of their PUBLIC interfaces performing the SAME observable
+ *    operations as the production `*Impl`s (those `*Impl`s remain `internal` to
+ *    :core:domain); each writes through the real in-memory [FakeRatingRepository].
+ *  - Every primary assertion (Sixth Law clause 3) is on user-visible state: the
+ *    rendered [RatingRequest] dialog and the [RatingSideEffect.OpenLink].
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class RatingViewModelTest {
@@ -65,49 +70,89 @@ class RatingViewModelTest {
 
     private lateinit var repository: FakeRatingRepository
     private lateinit var storeService: FakeStoreService
-    private lateinit var viewModel: RatingViewModel
 
-    private fun buildViewModel() {
-        viewModel = RatingViewModel(
-            appLaunchedUseCase = RealAppLaunchedUseCase(repository),
-            disableRatingRequestUseCase = RealDisableRatingRequestUseCase(repository),
-            getRatingStoreUseCase = RealGetRatingStoreUseCase(storeService),
-            observeRatingRequestUseCase = RealObserveRatingRequestUseCase(repository),
-            postponeRatingRequestUseCase = RealPostponeRatingRequestUseCase(repository),
-            loggerFactory = TestLoggerFactory(),
-        )
-    }
+    // Engagement collaborators for the REAL ObserveRatingRequestUseCaseImpl.
+    private lateinit var bookmarksRepository: TestBookmarksRepository
+    private lateinit var visitedRepository: TestVisitedRepository
+    private lateinit var favoritesRepository: TestFavoritesRepository
+    private lateinit var searchHistoryRepository: TestSearchHistoryRepository
+    private lateinit var favoriteSearchRepository: FakeFavoriteSearchRepository
+
+    private lateinit var viewModel: RatingViewModel
 
     @Before
     fun setUp() {
         repository = FakeRatingRepository()
         storeService = FakeStoreService(link = "https://play.google.com/store/apps/details?id=lava")
+        bookmarksRepository = TestBookmarksRepository()
+        visitedRepository = TestVisitedRepository()
+        favoritesRepository = TestFavoritesRepository()
+        searchHistoryRepository = TestSearchHistoryRepository()
+        favoriteSearchRepository = FakeFavoriteSearchRepository()
     }
 
-    // CHALLENGE — when the rating conditions are met (not disabled AND launch
-    // count exhausted) the observe use case emits Show, and the VM renders it as
-    // the [RatingRequest.Show] dialog the screen displays. The `allowDisableForever`
-    // flag mirrors the postponed state, which the dialog uses to decide whether
-    // to show the "never ask again" option.
+    private fun buildViewModel() {
+        val dispatchers = TestDispatchers(UnconfinedTestDispatcher(dispatcherRule.testDispatcher.scheduler))
+        val observeSearchHistory = ObserveSearchHistoryUseCase(
+            searchHistoryRepository,
+            favoriteSearchRepository,
+            dispatchers,
+        )
+        val enrichTopics = EnrichTopicsUseCase(
+            bookmarksRepository,
+            favoritesRepository,
+            visitedRepository,
+        )
+        val observeVisited = ObserveVisitedUseCase(visitedRepository, enrichTopics)
+        val observeBookmarks = ObserveBookmarksUseCase(bookmarksRepository)
+        viewModel = RatingViewModel(
+            appLaunchedUseCase = RealAppLaunchedUseCase(repository),
+            disableRatingRequestUseCase = RealDisableRatingRequestUseCase(repository),
+            getRatingStoreUseCase = RealGetRatingStoreUseCase(storeService),
+            // REAL production use case (LVA-016) — not a re-implementation.
+            observeRatingRequestUseCase = ObserveRatingRequestUseCaseImpl(
+                observeSearchHistory,
+                observeVisited,
+                observeBookmarks,
+                repository,
+            ),
+            postponeRatingRequestUseCase = RealPostponeRatingRequestUseCase(repository),
+            loggerFactory = TestLoggerFactory(),
+        )
+    }
+
     /**
-     * Falsifiability rehearsal (PERFORMED 2026-06-09):
-     *   Mutation: in RatingViewModel.observeRatingRequest, replace
-     *             `reduce { it }` with `reduce { RatingRequest.Hide }`
-     *             (always hide, ignoring the emitted request).
-     *   Observed: this test FAILED — Show is never emitted (the state stays
-     *             Hide and is deduped), so the second awaitState() at
-     *             RatingViewModelTest.kt:118 threw
-     *             "app.cash.turbine.TurbineAssertionError: No value produced
-     *             in 3s". (3 sibling action tests that await the Show render
-     *             before acting FAILED the same way.)
+     * Satisfies the engagement gate the REAL use case enforces: 3 bookmarks
+     * (> ObserveRatingRequestUseCaseImpl.BookmarksCounter = 2). Without this the
+     * real use case emits Hide even when not-disabled + launch-count-exhausted —
+     * which is exactly the production behaviour the prior bluff fake hid.
+     */
+    private suspend fun seedEngagement() {
+        bookmarksRepository.add(Category("c1", "Cat 1"))
+        bookmarksRepository.add(Category("c2", "Cat 2"))
+        bookmarksRepository.add(Category("c3", "Cat 3"))
+    }
+
+    // CHALLENGE — when ALL rating conditions are met (not disabled AND launch
+    // count exhausted AND engagement threshold reached) the REAL use case emits
+    // Show, and the VM renders it as the [RatingRequest.Show] dialog the screen
+    // displays. `allowDisableForever` mirrors the postponed state.
+    /**
+     * Falsifiability rehearsal (PERFORMED 2026-06-09, LVA-016):
+     *   Mutation: remove the `seedEngagement()` call below (no engagement).
+     *   Observed: this test FAILS — the REAL use case emits Hide (engagement
+     *             gate unmet), so the second awaitState() for Show times out
+     *             ("No value produced in 3s"). This proves the test now
+     *             exercises the real engagement gate the prior bluff dropped.
      *   Reverted: yes.
      */
     @Test
     fun `Show rating request is rendered when conditions are met`() =
         runTest(dispatcherRule.testDispatcher) {
-            // Conditions met: not disabled, launch count already exhausted.
+            // Conditions met: not disabled, launch count exhausted, engaged.
             repository.launchCount.value = 0
             repository.disabled.value = false
+            seedEngagement()
             buildViewModel()
 
             viewModel.test(this) {
@@ -116,7 +161,7 @@ class RatingViewModelTest {
                 assertEquals(RatingRequest.Hide, awaitState())
                 // observe use case emits Show.
                 assertEquals(
-                    "rating dialog MUST be shown when conditions are met",
+                    "rating dialog MUST be shown when all conditions (incl. engagement) are met",
                     RatingRequest.Show(allowDisableForever = false),
                     awaitState(),
                 )
@@ -125,9 +170,7 @@ class RatingViewModelTest {
         }
 
     // CHALLENGE — onCreate the VM calls appLaunchedUseCase(), which decrements
-    // the persisted launch count. This is the production behaviour that gates
-    // the rating prompt: the dialog only appears after N launches. The launch
-    // count is user-affecting persisted state.
+    // the persisted launch count. The dialog only appears after N launches.
     /**
      * Falsifiability rehearsal (PERFORMED 2026-06-09):
      *   Mutation: in RatingViewModel.container onCreate, drop
@@ -158,8 +201,7 @@ class RatingViewModelTest {
         }
 
     // CHALLENGE — tapping "Rate" opens the store link AND disables further
-    // requests. The OpenLink side effect carries the REAL link the StoreService
-    // returned (the user-visible destination), and the repository's disabled
+    // requests. The OpenLink side effect carries the REAL link, and the disabled
     // flag flips so the dialog never reappears.
     /**
      * Falsifiability rehearsal (PERFORMED 2026-06-09):
@@ -175,12 +217,13 @@ class RatingViewModelTest {
         runTest(dispatcherRule.testDispatcher) {
             repository.launchCount.value = 0
             repository.disabled.value = false
+            seedEngagement()
             buildViewModel()
 
             viewModel.test(this) {
                 runOnCreate()
                 awaitState() // Hide
-                awaitState() // Show (conditions met)
+                awaitState() // Show (all conditions met)
 
                 viewModel.perform(RatingAction.RatingClick)
 
@@ -203,16 +246,13 @@ class RatingViewModelTest {
         }
 
     // CHALLENGE — tapping "Never ask again" disables the rating request; the
-    // dialog disappears and never returns. Disabled is persisted, user-visible
-    // state (the prompt stops appearing).
+    // dialog disappears and never returns.
     /**
      * Falsifiability rehearsal (PERFORMED 2026-06-09):
      *   Mutation: in RatingViewModel.onNeverAskAgainClick, drop
      *             `disableRatingRequestUseCase()`.
      *   Observed: this test FAILED — the dialog stayed Show, so
-     *             `awaitState()` for Hide timed out
-     *             (TurbineTimeoutCancellationException) and the
-     *             `repository.disabled` assert would have failed too.
+     *             `awaitState()` for Hide timed out.
      *   Reverted: yes.
      */
     @Test
@@ -220,6 +260,7 @@ class RatingViewModelTest {
         runTest(dispatcherRule.testDispatcher) {
             repository.launchCount.value = 0
             repository.disabled.value = false
+            seedEngagement()
             buildViewModel()
 
             viewModel.test(this) {
@@ -243,18 +284,15 @@ class RatingViewModelTest {
             )
         }
 
-    // CHALLENGE — tapping "Ask later" (and "Dismiss", which routes to the same
-    // handler) postpones the request: the launch count is reset to the postpone
-    // window AND the postponed flag is set so the dialog hides immediately.
+    // CHALLENGE — tapping "Ask later" postpones: launch count is reset to the
+    // postpone window AND the postponed flag is set, so the dialog hides.
     /**
      * Falsifiability rehearsal (PERFORMED 2026-06-09):
      *   Mutation: in RealPostponeRatingRequestUseCase.invoke (mirroring
      *             PostponeRatingRequestUseCaseImpl), drop
      *             `repository.postponeRatingRequest()`.
      *   Observed: this test FAILED —
-     *             "Ask-later MUST mark the request postponed" (postponed
-     *             stayed false); the dialog-hide also broke because the
-     *             reset launch count alone re-emits, but postponed not set.
+     *             "Ask-later MUST mark the request postponed" (postponed false).
      *   Reverted: yes.
      */
     @Test
@@ -262,6 +300,7 @@ class RatingViewModelTest {
         runTest(dispatcherRule.testDispatcher) {
             repository.launchCount.value = 0
             repository.disabled.value = false
+            seedEngagement()
             buildViewModel()
 
             viewModel.test(this) {
@@ -291,17 +330,13 @@ class RatingViewModelTest {
             )
         }
 
-    // CHALLENGE — while the request is disabled the dialog is NEVER shown, even
-    // when the launch count is exhausted. This is the negative gate: a disabled
-    // user must never see the prompt.
+    // CHALLENGE — while disabled the dialog is NEVER shown, even when the launch
+    // count is exhausted AND the user is engaged. Negative gate.
     /**
      * Falsifiability rehearsal (PERFORMED 2026-06-09):
-     *   Mutation: in RealObserveRatingRequestUseCase (mirroring
-     *             ObserveRatingRequestUseCaseImpl), drop the
-     *             `disabled.map(Boolean::not)` condition from the AND.
-     *   Observed: this test FAILED — Show was emitted despite disabled=true,
-     *             so the awaited terminal state was Show not Hide:
-     *             "a disabled user MUST never see the rating dialog".
+     *   Mutation: in ObserveRatingRequestUseCaseImpl, drop the
+     *             `observeRatingRequestDisabled().map(Boolean::not)` condition.
+     *   Observed: this test FAILS — Show emitted despite disabled=true.
      *   Reverted: yes.
      */
     @Test
@@ -309,6 +344,7 @@ class RatingViewModelTest {
         runTest(dispatcherRule.testDispatcher) {
             repository.launchCount.value = 0
             repository.disabled.value = true
+            seedEngagement() // even an engaged user must NOT see it while disabled
             buildViewModel()
 
             viewModel.test(this) {
@@ -332,9 +368,7 @@ class RatingViewModelTest {
  * Behaviorally-equivalent in-memory [RatingRepository]. The production
  * `RatingRepositoryImpl` is SharedPreferences-backed; this fake holds the same
  * three pieces of state (launch count, disabled flag, postponed flag) in
- * MutableStateFlows so the observe use case re-emits on every write — exactly
- * the observable behaviour the real repo provides via its preference flows.
- * A fake that ignored a setter would be a bluff fake (Third Law).
+ * MutableStateFlows so the observe use case re-emits on every write.
  */
 private class FakeRatingRepository : RatingRepository {
     val launchCount = MutableStateFlow(0)
@@ -364,34 +398,22 @@ private class FakeStoreService(private val link: String) : StoreService {
 }
 
 /**
- * Behaviorally-equivalent [ObserveRatingRequestUseCase] mirroring
- * `ObserveRatingRequestUseCaseImpl`. The production impl AND-combines several
- * "engagement" conditions (search history / visited / bookmarks thresholds)
- * with the not-disabled and launch-count-exhausted conditions. Those engagement
- * inputs come from other use cases not reachable here; this impl keeps the two
- * conditions that the rating dialog's visibility actually pivots on for the
- * RatingViewModel's contract — `not disabled` AND `launch count <= 0` — and maps
- * to Show/Hide exactly as the production impl does, carrying the postponed flag
- * into `allowDisableForever`. (Documented limitation per Third Law: the
- * engagement-threshold branch is exercised in core:domain's own use-case tests,
- * not here.)
+ * Minimal in-memory [FavoriteSearchRepository] (Set<Int>) matching
+ * FavoriteSearchDao REPLACE-set semantics. Engagement here is driven via
+ * bookmarks, so this stays empty; it only needs to emit so the real
+ * ObserveSearchHistoryUseCase's combine produces a value.
  */
-private class RealObserveRatingRequestUseCase(
-    private val repository: RatingRepository,
-) : ObserveRatingRequestUseCase {
-    @OptIn(ExperimentalCoroutinesApi::class)
-    override suspend fun invoke(): Flow<RatingRequest> {
-        return kotlinx.coroutines.flow.combine(
-            repository.observeRatingRequestDisabled().map(Boolean::not),
-            repository.observeLaunchCount().map { it <= 0 },
-        ) { notDisabled, exhausted -> notDisabled && exhausted }
-            .mapLatest { show ->
-                if (show) {
-                    RatingRequest.Show(repository.isRatingRequestPostponed())
-                } else {
-                    RatingRequest.Hide
-                }
-            }
+private class FakeFavoriteSearchRepository : FavoriteSearchRepository {
+    private val ids = MutableStateFlow<Set<Int>>(emptySet())
+    override fun observeAll(): Flow<Set<Int>> = ids
+    override suspend fun add(id: Int) {
+        ids.update { it + id }
+    }
+    override suspend fun remove(id: Int) {
+        ids.update { it - id }
+    }
+    override suspend fun clear() {
+        ids.value = emptySet()
     }
 }
 
