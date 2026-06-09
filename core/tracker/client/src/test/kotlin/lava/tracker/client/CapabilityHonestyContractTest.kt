@@ -201,6 +201,106 @@ class CapabilityHonestyContractTest {
     }
 
     /**
+     * THE 6.E REVERSE GATE (phantom-capability bluff).
+     *
+     * The forward gate above catches "declared but doesn't resolve". This gate
+     * catches the INVERSE bluff: a client whose [TrackerClient.getFeature]
+     * RESOLVES a feature interface that the descriptor does NOT declare the
+     * matching capability for. That is just as much a §6.E lie — the user-facing
+     * surface (e.g. a download button) works against a provider whose descriptor
+     * claims it cannot download, so any consumer that gates UI on
+     * `descriptor.capabilities` is out of sync with what the client actually does.
+     *
+     * Forensic anchor: archiveorg + gutenberg wire a real HTTP-download impl into
+     * their constructors but DELIBERATELY return null from
+     * getFeature(DownloadableTracker) because TrackerCapability has no
+     * HTTP_DOWNLOAD value and the artifact is not a `.torrent` (see those
+     * clients' KDoc). Before this gate existed, a regression flipping that
+     * `null` to `download as T` shipped green — the forward gate never checks
+     * the reverse direction. This test makes that regression fail.
+     *
+     * For every registered client, for every feature interface in the map, if
+     * getFeature(<interface>) is non-null, then AT LEAST ONE capability mapping
+     * to that interface MUST be present in descriptor.capabilities.
+     */
+    @Test
+    fun `every resolved feature is backed by a declared capability`() {
+        // Inverse of CAPABILITY_TO_FEATURE: feature interface -> the capabilities
+        // that legitimately back it. DownloadableTracker is backed by either
+        // TORRENT_DOWNLOAD or MAGNET_LINK; AuthenticatableTracker by AUTH_REQUIRED
+        // or CAPTCHA_LOGIN.
+        val featureToBackingCapabilities: Map<KClass<out TrackerFeature>, Set<TrackerCapability>> =
+            CAPABILITY_TO_FEATURE.entries
+                .groupBy({ it.value }, { it.key })
+                .mapValues { it.value.toSet() }
+
+        val violations = mutableListOf<String>()
+
+        for (client in registeredClients()) {
+            val declared = client.descriptor.capabilities
+            for ((featureClass, backingCaps) in featureToBackingCapabilities) {
+                val resolved = client.getFeature(featureClass)
+                if (resolved != null && backingCaps.none { it in declared }) {
+                    violations += "[${client.descriptor.trackerId}] getFeature(${featureClass.simpleName}) " +
+                        "returned a non-null impl but the descriptor declares NONE of $backingCaps " +
+                        "(§6.E phantom-capability violation: a feature MUST NOT be reachable unless its " +
+                        "capability is declared, or consumers that gate on descriptor.capabilities are lied to)"
+                }
+            }
+        }
+
+        assertTrue(
+            "§6.E phantom-capability violations (feature resolves but capability undeclared):\n" +
+                violations.joinToString("\n"),
+            violations.isEmpty(),
+        )
+    }
+
+    /**
+     * Falsifiability proof for the reverse gate. A synthetic client that
+     * resolves a [DownloadableTracker] while declaring NEITHER TORRENT_DOWNLOAD
+     * NOR MAGNET_LINK MUST be flagged by the reverse-gate logic. Without this,
+     * the reverse gate could be a vacuous always-green assertion.
+     */
+    @Test
+    fun `reverse gate FAILS when a client resolves a feature whose capability is undeclared`() {
+        val phantomDownload = mockk<DownloadableTracker>(relaxed = true)
+        val phantomClient = object : TrackerClient {
+            override val descriptor: TrackerDescriptor = object : TrackerDescriptor {
+                override val trackerId = "synthetic-phantom"
+                override val displayName = "Synthetic Phantom"
+                override val baseUrls = emptyList<lava.sdk.api.MirrorUrl>()
+
+                // Declares SEARCH only — NOT TORRENT_DOWNLOAD / MAGNET_LINK.
+                override val capabilities = setOf(TrackerCapability.SEARCH)
+                override val authType = AuthType.NONE
+                override val encoding = "UTF-8"
+                override val expectedHealthMarker = "x"
+            }
+
+            override suspend fun healthCheck() = true
+
+            @Suppress("UNCHECKED_CAST")
+            override fun <T : TrackerFeature> getFeature(featureClass: KClass<T>): T? =
+                // Phantom: resolves a download feature the descriptor never declared.
+                if (featureClass == DownloadableTracker::class) phantomDownload as T else null
+
+            override fun close() {}
+        }
+
+        val downloadBackers = setOf(TrackerCapability.TORRENT_DOWNLOAD, TrackerCapability.MAGNET_LINK)
+        val declared = phantomClient.descriptor.capabilities
+        val resolved = phantomClient.getFeature(DownloadableTracker::class)
+        val flagged = resolved != null && downloadBackers.none { it in declared }
+
+        assertTrue(
+            "Falsifiability: the reverse §6.E gate MUST flag a client that resolves a feature " +
+                "whose backing capability is undeclared. If this is false, the reverse gate is vacuous.",
+            flagged,
+        )
+    }
+
+    /**
      * Coverage assertion: this gate must guard exactly the clients the Hilt
      * registry registers. If a new provider is added to [TrackerClientModule]
      * without being added to [registeredClients], the gate would silently stop
