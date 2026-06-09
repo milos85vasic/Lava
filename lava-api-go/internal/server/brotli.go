@@ -42,17 +42,25 @@ func NewBrotliMiddleware(enabled bool, quality int) gin.HandlerFunc {
 			return
 		}
 
-		bw := brotli.NewWriterLevel(c.Writer, quality)
-		defer func() { _ = bw.Close() }()
-
-		c.Header("Content-Encoding", "br")
+		// Vary is correct to advertise regardless of the eventual status —
+		// the response DID vary on Accept-Encoding even if this particular
+		// status carries no body. Content-Encoding, by contrast, is only
+		// emitted once we know the status permits a body (decided in
+		// brotliWriter.WriteHeader), so a 204/304 never gets a misleading
+		// `Content-Encoding: br` header on an empty stream (RFC 9110 §15).
 		c.Header("Vary", "Accept-Encoding")
-		// Length is unknown post-compression — strip any precomputed
-		// header so the response framing falls back to chunked or
-		// connection-close as the underlying transport dictates.
-		c.Header("Content-Length", "")
 
+		bw := brotli.NewWriterLevel(c.Writer, quality)
 		bwriter := &brotliWriter{ResponseWriter: c.Writer, bw: bw}
+		// Close the encoder only if it was actually engaged — a bodyless
+		// status leaves compress=false and the encoder unused, so flushing
+		// it would emit a stray empty brotli stream.
+		defer func() {
+			if bwriter.compress {
+				_ = bw.Close()
+			}
+		}()
+
 		c.Writer = bwriter
 		c.Next()
 	}
@@ -112,25 +120,68 @@ func hasZeroQ(params string) bool {
 }
 
 // brotliWriter wraps gin.ResponseWriter and re-routes Write/WriteString
-// through a brotli.Writer. Header / status methods remain on the
-// underlying ResponseWriter unchanged.
+// through a brotli.Writer — but ONLY when the response status permits a
+// body. The compress decision is made in WriteHeader (the first point at
+// which the status is known); a no-body status (1xx, 204, 304) leaves
+// compress=false and every write passes straight through to the
+// underlying ResponseWriter with NO Content-Encoding header, per the
+// brotli.go docstring's RFC 9110 §15 promise.
 type brotliWriter struct {
 	gin.ResponseWriter
-	bw *brotli.Writer
+	bw            *brotli.Writer
+	compress      bool // set in WriteHeader once the status is known
+	headerWritten bool
 }
 
-// Write proxies into the brotli encoder. Callers (e.g. c.JSON) MUST
-// not assume the byte count returned matches the on-the-wire byte
-// count — brotli buffers internally; what matters is the byte count
-// of plaintext consumed, which is what the contract requires.
+// WriteHeader decides — at the one moment the status code is known —
+// whether this response is eligible for brotli. Only then is the
+// Content-Encoding: br header emitted and the Content-Length stripped.
+// A no-body status writes the header through untouched: no
+// Content-Encoding, no encoder engagement. Idempotent: the first call
+// fixes the decision (Gin/net-http may call WriteHeader at most once per
+// response, but we guard anyway).
+func (w *brotliWriter) WriteHeader(code int) {
+	if !w.headerWritten {
+		w.headerWritten = true
+		if statusAllowsBody(code) {
+			w.compress = true
+			w.ResponseWriter.Header().Set("Content-Encoding", "br")
+			// Length is unknown post-compression — strip any precomputed
+			// header so the response framing falls back to chunked or
+			// connection-close as the underlying transport dictates.
+			w.ResponseWriter.Header().Del("Content-Length")
+		}
+	}
+	w.ResponseWriter.WriteHeader(code)
+}
+
+// Write proxies into the brotli encoder when compression is engaged,
+// else straight to the underlying writer. If a handler writes a body
+// without an explicit WriteHeader, Gin's implicit 200 path triggers
+// WriteHeader(200) here first, so compress is resolved before any byte
+// reaches the wire. Callers (e.g. c.JSON) MUST not assume the byte count
+// returned matches the on-the-wire byte count — brotli buffers
+// internally; what matters is the byte count of plaintext consumed.
 func (w *brotliWriter) Write(b []byte) (int, error) {
-	return w.bw.Write(b)
+	if !w.headerWritten {
+		w.WriteHeader(http.StatusOK)
+	}
+	if w.compress {
+		return w.bw.Write(b)
+	}
+	return w.ResponseWriter.Write(b)
 }
 
 // WriteString mirrors Write for the c.String / c.HTML helper paths
 // that route through the io.StringWriter optimization.
 func (w *brotliWriter) WriteString(s string) (int, error) {
-	return w.bw.Write([]byte(s))
+	if !w.headerWritten {
+		w.WriteHeader(http.StatusOK)
+	}
+	if w.compress {
+		return w.bw.Write([]byte(s))
+	}
+	return w.ResponseWriter.WriteString(s)
 }
 
 // statusAllowsBody reports whether a response with the given status

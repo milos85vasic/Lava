@@ -42,9 +42,12 @@ func TestBrotliWriter_WriteString_RoutesThroughEncoder(t *testing.T) {
 	var dst bytes.Buffer
 	bw := brotli.NewWriterLevel(&dst, 4)
 
-	// Embedded gin.ResponseWriter is irrelevant to WriteString (it only touches
-	// w.bw); leave it nil — WriteString must never reach into the embedded field.
-	w := &brotliWriter{bw: bw}
+	// Embedded gin.ResponseWriter is irrelevant to the encoder-routing path:
+	// drive the writer in its resolved compressing state (headerWritten=true,
+	// compress=true) exactly as production reaches it once WriteHeader has run
+	// for a body-bearing status. WriteString must never reach into the embedded
+	// field on this path.
+	w := &brotliWriter{bw: bw, compress: true, headerWritten: true}
 
 	n, err := w.WriteString(payload)
 	if err != nil {
@@ -89,7 +92,7 @@ func TestBrotliWriter_IoWriteString_UsesStringWriterFastPath(t *testing.T) {
 
 	var dst bytes.Buffer
 	bw := brotli.NewWriterLevel(&dst, 4)
-	w := &brotliWriter{bw: bw}
+	w := &brotliWriter{bw: bw, compress: true, headerWritten: true}
 
 	if _, err := io.WriteString(w, payload); err != nil {
 		t.Fatalf("io.WriteString: %v", err)
