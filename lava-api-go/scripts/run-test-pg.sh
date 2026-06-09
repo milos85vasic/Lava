@@ -16,7 +16,7 @@ cd "$ROOT"
 # If an external URL is supplied, just run the tests against it.
 if [[ -n "${POSTGRES_TEST_URL:-}" ]]; then
   echo "[pg-test] using external POSTGRES_TEST_URL"
-  exec go test -race -count=1 -v ./internal/cache/... ./tests/integration/...
+  exec go test -race -count=1 -v ./internal/cache/... ./internal/storage/... ./tests/integration/...
 fi
 
 # Otherwise launch a transient container.
@@ -71,6 +71,7 @@ echo "[pg-test] running integration tests"
 # pass so the smoke harness in scripts/migrate.sh remains exercisable.
 PKGS=()
 [[ -d ./internal/cache ]] && PKGS+=("./internal/cache/...")
+[[ -d ./internal/storage ]] && PKGS+=("./internal/storage/...")
 [[ -d ./tests/integration ]] && PKGS+=("./tests/integration/...")
 if (( ${#PKGS[@]} == 0 )); then
   echo "[pg-test] no integration packages on disk yet; smoke run only"
