@@ -122,9 +122,20 @@ class ProviderConfigViewModelTest {
             vm2.container.stateFlow.collect { /* keep alive */ }
         }
         try {
-            repeat(200) {
-                if (vm2.container.stateFlow.value.anonymous) return@repeat
-                kotlinx.coroutines.delay(20)
+            // Room's invalidation-tracker Flow emits on a real background executor
+            // (default I/O executor — no setQueryExecutor), so the persisted row
+            // reaches vm2's container in REAL wall-clock time, not the virtual test
+            // clock. Wait in real time on Dispatchers.Default; the UnconfinedTest
+            // dispatcher processes the emission eagerly once it arrives. Bounded +
+            // deterministic — was flaky because a virtual `delay` under runTest never
+            // actually waited for the real cross-thread emission (1/3 pass).
+            kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default) {
+                val deadline = System.currentTimeMillis() + 5_000
+                while (System.currentTimeMillis() < deadline &&
+                    !vm2.container.stateFlow.value.anonymous
+                ) {
+                    kotlinx.coroutines.delay(20)
+                }
             }
             val finalState = vm2.container.stateFlow.value
             assertTrue(
