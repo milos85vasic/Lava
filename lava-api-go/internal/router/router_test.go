@@ -14,11 +14,19 @@
 // its handler:
 //   - the legacy rutracker routes invoke their real handlers, which (with
 //     the stub scraper returning errors) map to 502 via writeUpstreamError;
-//   - the /v1/{provider} routes reach their handler too — but because
-//     router.Build mounts the /v1/:provider group WITHOUT the provider
-//     middleware, the v1 handlers' currentProvider() lookup panics, which
-//     gin.Recovery() turns into 500.
-// In BOTH cases the status is NOT 404 — which is exactly what proves the
+//   - the /v1/{provider} routes reach their handler too. newTestEngine()
+//     passes a NIL registry, so v1handlers.Register mounts these routes
+//     WITHOUT the provider middleware; the handlers' currentProvider() lookup
+//     then panics and gin.Recovery() turns it into 500. That 500 is fine for
+//     THIS test, whose only job is route-resolution (non-404).
+//
+// NOTE: route resolution (this file) is necessary but NOT sufficient — a
+// route that resolves to a 500 on every request is still broken for users.
+// The user-visible dispatch behavior (registry wired → provider reached →
+// 200, unknown provider → 404, unsupported capability → 501) is the LVA-010
+// gate and lives in router_provider_dispatch_test.go.
+//
+// In BOTH cases here the status is NOT 404 — which is exactly what proves the
 // route is wired. An UNregistered path (e.g. /v1/rutracker/does-not-exist)
 // returns Gin's 404, the negative control this test also asserts.
 //

@@ -99,11 +99,16 @@ func Build(deps Deps) *gin.Engine {
 		Scraper: deps.Scraper,
 	})
 
-	// v1 provider-agnostic routes
+	// v1 provider-agnostic routes. The provider-resolution middleware is
+	// mounted PER ROUTE inside v1handlers.Register (each endpoint asserts a
+	// different §6.E capability). deps.Registry is the production registry
+	// built by the composition root (cmd/lava-api-go/main.go / internal/
+	// mobile); passing it here is what makes /v1/{provider}/... dispatch to a
+	// real provider instead of panicking in currentProvider() → 500 (LVA-010).
 	v1 := engine.Group("/v1/:provider")
 	v1handlers.Register(v1, &v1handlers.Deps{
 		Cache: deps.Cache,
-	})
+	}, deps.Registry)
 
 	// Jackett sidecar route — registered ONLY when the sidecar is enabled AND
 	// fully configured (§6.R: no hardcoded base URL / api_key; the route is a

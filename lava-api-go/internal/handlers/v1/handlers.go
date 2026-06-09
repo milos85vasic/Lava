@@ -39,39 +39,68 @@ type Cache interface {
 }
 
 // Register wires every v1 handler's routes onto the given router group.
-// The group is expected to have the provider middleware already mounted
-// (e.g. router.Group("/v1/:provider", middleware.ProviderMiddleware(...))).
-func Register(group *gin.RouterGroup, deps *Deps) {
+//
+// The provider-resolution middleware is mounted PER ROUTE here (not on the
+// group), because each endpoint asserts a different provider capability
+// (§6.E Capability Honesty). middleware.ProviderMiddleware(reg, cap):
+//   - resolves the :provider path segment to a Provider and stores it in the
+//     Gin context (so currentProvider() finds it instead of panicking — the
+//     LVA-010 production gap was that this middleware was never mounted, so
+//     every /v1/{provider}/... handler panicked in currentProvider() and
+//     gin.Recovery() turned the panic into a 500);
+//   - aborts with 404 when the provider is unknown;
+//   - aborts with 501 when the provider does not declare the capability.
+//
+// reg MAY be nil (route-registration tests that only assert "the route
+// resolves, not 404" pass no registry); in that case the routes are mounted
+// WITHOUT the provider middleware and handlers panic→500 on dispatch, which
+// is still a non-404 status those tests assert on. Production (router.Build
+// from cmd/lava-api-go/main.go and internal/mobile) ALWAYS passes a real
+// registry, so production dispatch reaches the provider.
+func Register(group *gin.RouterGroup, deps *Deps, reg *provider.ProviderRegistry) {
+	// chain prepends the per-route provider middleware (for the given
+	// capability) before the handler, or mounts the bare handler when reg is
+	// nil (registration-only test path).
+	chain := func(cap provider.ProviderCapability, h gin.HandlerFunc) []gin.HandlerFunc {
+		if reg == nil {
+			return []gin.HandlerFunc{h}
+		}
+		return []gin.HandlerFunc{middleware.ProviderMiddleware(reg, cap), h}
+	}
+
 	search := NewSearchHandler(deps)
-	group.GET("/search", search.GetSearch)
+	group.GET("/search", chain(provider.CapSearch, search.GetSearch)...)
 
 	browse := NewBrowseHandler(deps)
-	group.GET("/browse/:id", browse.GetBrowse)
+	group.GET("/browse/:id", chain(provider.CapBrowse, browse.GetBrowse)...)
 
 	forum := NewForumHandler(deps)
-	group.GET("/forum", forum.GetForum)
+	group.GET("/forum", chain(provider.CapForumTree, forum.GetForum)...)
 
 	topic := NewTopicHandler(deps)
-	group.GET("/topic/:id", topic.GetTopic)
+	group.GET("/topic/:id", chain(provider.CapTopic, topic.GetTopic)...)
 
 	torrent := NewTorrentHandler(deps)
-	group.GET("/torrent/:id", torrent.GetTorrent)
-	group.GET("/download/:id", torrent.GetDownload)
+	group.GET("/torrent/:id", chain(provider.CapTorrentDownload, torrent.GetTorrent)...)
+	group.GET("/download/:id", chain(provider.CapTorrentDownload, torrent.GetDownload)...)
 
 	comments := NewCommentsHandler(deps)
-	group.GET("/comments/:id", comments.GetComments)
-	group.POST("/comments/:id/add", comments.AddComment)
+	group.GET("/comments/:id", chain(provider.CapComments, comments.GetComments)...)
+	group.POST("/comments/:id/add", chain(provider.CapComments, comments.AddComment)...)
 
 	fav := NewFavoritesHandler(deps)
-	group.GET("/favorites", fav.GetFavorites)
-	group.POST("/favorites/add/:id", fav.AddFavorite)
-	group.POST("/favorites/remove/:id", fav.RemoveFavorite)
+	group.GET("/favorites", chain(provider.CapFavorites, fav.GetFavorites)...)
+	group.POST("/favorites/add/:id", chain(provider.CapFavorites, fav.AddFavorite)...)
+	group.POST("/favorites/remove/:id", chain(provider.CapFavorites, fav.RemoveFavorite)...)
 
+	// login + captcha gate on CapSearch: every provider that serves the v1
+	// API declares SEARCH, so this resolves the provider without over-
+	// restricting auth endpoints to a capability they don't map to 1:1.
 	login := NewLoginHandler(deps)
-	group.POST("/login", login.PostLogin)
+	group.POST("/login", chain(provider.CapSearch, login.PostLogin)...)
 
 	captcha := NewCaptchaHandler(deps)
-	group.GET("/captcha/:path", captcha.GetCaptcha)
+	group.GET("/captcha/:path", chain(provider.CapSearch, captcha.GetCaptcha)...)
 }
 
 // currentProvider extracts the Provider from the Gin context.

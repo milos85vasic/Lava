@@ -115,7 +115,11 @@ func setupTestRouter(p provider.Provider) *gin.Engine {
 		c.Set("__provider__", p)
 		c.Next()
 	})
-	Register(group, &Deps{Cache: newFakeCache()})
+	// nil registry: this harness injects its own fake provider into the
+	// context via the group middleware above, so Register must NOT also mount
+	// the real ProviderMiddleware (which would try to resolve "test" against
+	// an empty registry and 404 before the fake-provider handler runs).
+	Register(group, &Deps{Cache: newFakeCache()}, nil)
 	return router
 }
 
