@@ -2,6 +2,7 @@ package provider
 
 import (
 	"fmt"
+	"sort"
 	"sync"
 )
 
@@ -47,6 +48,16 @@ func (r *ProviderRegistry) Get(id string) (Provider, error) {
 
 // IDs returns the canonical IDs of every registered provider in
 // lexicographic order.
+//
+// The sort is REQUIRED, not a convenience: consumers that surface this set to
+// users — notably the multi-search SSE auto-discovery path (handlers/v1
+// GetMultiSearch), which streams provider_start / results / provider_done
+// events in IDs() order — depend on a deterministic, stable sequence so the
+// Android client renders providers in a fixed order across repeated searches
+// and the SSE event order is testable. Returning Go's randomized
+// map-iteration order here (the pre-LVA-059 behaviour) reshuffled the provider
+// list on almost every request. See TestRegistry_IDs_LexicographicAndDeterministic
+// and the handler-level TestMultiSearch_AutoDiscoveryStreamsProvidersInDeterministicOrder.
 func (r *ProviderRegistry) IDs() []string {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
@@ -54,7 +65,7 @@ func (r *ProviderRegistry) IDs() []string {
 	for id := range r.m {
 		out = append(out, id)
 	}
-	// callers may sort if they need determinism
+	sort.Strings(out)
 	return out
 }
 

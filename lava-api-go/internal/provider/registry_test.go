@@ -126,6 +126,43 @@ func TestRegistry_IDs(t *testing.T) {
 	}
 }
 
+// TestRegistry_IDs_LexicographicAndDeterministic is the LVA-059 regression
+// guard. IDs() documents "in lexicographic order", and the multi-search SSE
+// auto-discovery path (handlers/v1 GetMultiSearch) relies on that order for a
+// deterministic, testable SSE event sequence the Android client consumes.
+// Before the fix, IDs() iterated the backing map, so the order was Go's
+// randomized map-iteration order — non-deterministic across calls AND across
+// process restarts. This test registers ids in NON-sorted insertion order and
+// asserts the returned slice is sorted lexicographically AND identical across
+// repeated calls on the same registry.
+//
+// FALSIFIABILITY: removing the sort.Strings(out) call in IDs() makes this test
+// FAIL — the returned slice falls back to map order, which is not guaranteed
+// sorted (and on most runs is not).
+func TestRegistry_IDs_LexicographicAndDeterministic(t *testing.T) {
+	r := NewRegistry()
+	// Insert in deliberately non-sorted order.
+	for _, id := range []string{"rutor", "kinozal", "archiveorg", "rutracker", "nnmclub"} {
+		r.Register(&fakeProvider{id: id})
+	}
+
+	want := []string{"archiveorg", "kinozal", "nnmclub", "rutor", "rutracker"}
+
+	// Call several times; every call MUST yield the same sorted order.
+	for call := 0; call < 20; call++ {
+		got := r.IDs()
+		if len(got) != len(want) {
+			t.Fatalf("call %d: len = %d, want %d", call, len(got), len(want))
+		}
+		for i := range want {
+			if got[i] != want[i] {
+				t.Fatalf("call %d: IDs()[%d] = %q, want %q (full=%v, want lexicographic+deterministic)",
+					call, i, got[i], want[i], got)
+			}
+		}
+	}
+}
+
 func TestRegistry_All(t *testing.T) {
 	r := NewRegistry()
 	r.Register(&fakeProvider{id: "x"})

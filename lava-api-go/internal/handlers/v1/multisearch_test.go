@@ -2,6 +2,7 @@ package v1
 
 import (
 	"context"
+	"encoding/json"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -181,6 +182,94 @@ func TestMultiSearch_ProviderErrorEmitsErrorEvent(t *testing.T) {
 	}
 	if !strings.Contains(body, `"providers_failed":1`) {
 		t.Errorf("stream_end missing providers_failed:1\n--- body ---\n%s", body)
+	}
+}
+
+// orderOfProviderStartEvents parses an SSE body and returns the provider_id
+// values of every provider_start event in the order they appear on the wire —
+// i.e. the order the user/client observes providers being searched.
+func orderOfProviderStartEvents(t *testing.T, body string) []string {
+	t.Helper()
+	var order []string
+	lines := strings.Split(body, "\n")
+	for i := 0; i < len(lines); i++ {
+		if strings.TrimSpace(lines[i]) != "event: provider_start" {
+			continue
+		}
+		// The data line follows the event line.
+		for j := i + 1; j < len(lines); j++ {
+			l := lines[j]
+			if !strings.HasPrefix(l, "data: ") {
+				continue
+			}
+			var status providerStreamStatus
+			if err := json.Unmarshal([]byte(strings.TrimPrefix(l, "data: ")), &status); err != nil {
+				t.Fatalf("unmarshal provider_start data %q: %v", l, err)
+			}
+			order = append(order, status.ProviderID)
+			break
+		}
+	}
+	return order
+}
+
+// TestMultiSearch_AutoDiscoveryStreamsProvidersInDeterministicOrder is the
+// LVA-059 regression guard. When the client omits ?providers= the handler
+// auto-discovers search-capable providers from the registry. Before the fix it
+// iterated registry.IDs() in Go's randomized map-iteration order, so the SSE
+// provider_start / results / provider_done sequence the Android client renders
+// arrived in a different order on (almost) every request — un-testable and a
+// jarring UX (provider list reshuffles each search). After the fix the order is
+// the registry's lexicographic order, stable across repeated calls.
+//
+// The assertion is on the SSE wire body the client parses (the user-visible
+// surface): the provider_start events MUST appear sorted by provider id, and
+// MUST be identical across repeated requests.
+//
+// FALSIFIABILITY: reverting IDs() to unsorted map iteration (or replacing the
+// handler's discovered-id slice with a shuffled copy) makes this test FAIL —
+// the observed order stops matching the sorted expectation and stops being
+// stable across calls.
+func TestMultiSearch_AutoDiscoveryStreamsProvidersInDeterministicOrder(t *testing.T) {
+	reg := provider.NewRegistry()
+	// Register in deliberately NON-sorted insertion order so map order != sorted.
+	for _, id := range []string{"rutor", "kinozal", "archiveorg", "rutracker", "nnmclub"} {
+		reg.Register(&streamProvider{
+			id: id,
+			result: &provider.SearchResult{
+				Provider: id, Page: 1, TotalPages: 1,
+				Results: []provider.SearchItem{{ID: "1", Title: id + "-result"}},
+			},
+		})
+	}
+	want := []string{"archiveorg", "kinozal", "nnmclub", "rutor", "rutracker"}
+
+	var first []string
+	for call := 0; call < 8; call++ {
+		// No ?providers= → auto-discovery path.
+		code, body, _ := getSSE(t, reg, "/v1/search?q=movie")
+		if code != http.StatusOK {
+			t.Fatalf("call %d: status = %d, want 200\n%s", call, code, body)
+		}
+		got := orderOfProviderStartEvents(t, body)
+		if len(got) != len(want) {
+			t.Fatalf("call %d: got %d provider_start events, want %d (order=%v)", call, len(got), len(want), got)
+		}
+		for i := range want {
+			if got[i] != want[i] {
+				t.Fatalf("call %d: provider_start order[%d] = %q, want %q (full=%v) — auto-discovery is not deterministically sorted",
+					call, i, got[i], want[i], got)
+			}
+		}
+		if first == nil {
+			first = got
+		} else {
+			for i := range first {
+				if got[i] != first[i] {
+					t.Fatalf("call %d order %v differs from first call order %v — non-deterministic", call, got, first)
+				}
+			}
+		}
 	}
 }
 
