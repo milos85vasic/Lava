@@ -20,13 +20,13 @@ type searchResponse struct {
 
 // searchDoc is a single result document from the search endpoint.
 type searchDoc struct {
-	Identifier string  `json:"identifier"`
-	Title      string  `json:"title"`
-	Creator    *string `json:"creator"`
-	Downloads  *int    `json:"downloads"`
-	ItemSize   *int64  `json:"item_size"`
-	Mediatype  *string `json:"mediatype"`
-	Year       *string `json:"year"`
+	Identifier string     `json:"identifier"`
+	Title      flexString `json:"title"`
+	Creator    flexString `json:"creator"`
+	Downloads  *int       `json:"downloads"`
+	ItemSize   *int64     `json:"item_size"`
+	Mediatype  flexString `json:"mediatype"`
+	Year       flexString `json:"year"`
 }
 
 // SearchResult is the domain type returned by Client.Search.
@@ -73,23 +73,17 @@ func (c *Client) Search(ctx context.Context, query string, page int) (*SearchRes
 	items := make([]SearchItem, 0, len(sr.Response.Docs))
 	for _, d := range sr.Response.Docs {
 		item := SearchItem{
-			ID:    d.Identifier,
-			Title: d.Title,
-		}
-		if d.Creator != nil {
-			item.Creator = *d.Creator
+			ID:        d.Identifier,
+			Title:     string(d.Title),
+			Creator:   string(d.Creator),
+			MediaType: string(d.Mediatype),
+			Year:      string(d.Year),
 		}
 		if d.Downloads != nil {
 			item.Downloads = *d.Downloads
 		}
 		if d.ItemSize != nil {
 			item.SizeBytes = *d.ItemSize
-		}
-		if d.Mediatype != nil {
-			item.MediaType = *d.Mediatype
-		}
-		if d.Year != nil {
-			item.Year = *d.Year
 		}
 		items = append(items, item)
 	}

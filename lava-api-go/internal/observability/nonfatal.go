@@ -35,6 +35,7 @@ package observability
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log/slog"
 	"strings"
 )
@@ -168,14 +169,19 @@ func underlyingTypeName(err error) string {
 	if n, ok := err.(namer); ok {
 		return n.Name()
 	}
-	// Fallback: reflect-free type discovery via interface-level identity.
+	// LVA-021: real lava-api-go errors are fmt.Errorf-wrapped stdlib typed
+	// errors (*fs.PathError, *net.OpError, *url.Error, *strconv.NumError, pgx
+	// errors) that do NOT implement Name(). The prior fallback returned the
+	// literal "error" for ALL of them, collapsing error_class into one bucket
+	// and defeating §6.AC per-type triage in Loki/Tempo. %T yields the actual
+	// distinguishing type name. The context sentinels keep their friendly names.
 	switch err {
 	case context.Canceled:
 		return "context.Canceled"
 	case context.DeadlineExceeded:
 		return "context.DeadlineExceeded"
 	}
-	return "error"
+	return fmt.Sprintf("%T", err)
 }
 
 // truncate enforces §6.AC.3's 1024-char message-attribute cap.

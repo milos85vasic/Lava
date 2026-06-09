@@ -400,3 +400,49 @@ func TestAdapter_HealthCheck_Unhealthy(t *testing.T) {
 		t.Error("HealthCheck Healthy = true, want false (upstream returned 5xx)")
 	}
 }
+
+// TestAdapter_Login_ReturnsSessionCookieNotDataUID_E2E drives ProviderAdapter.Login
+// through the REAL Client (real HTTP round-trip: POST /login.php → Set-Cookie →
+// GET /index.php → GET /profile.php → parse) and asserts the user-visible
+// LoginResult.AuthToken is the SESSION COOKIE, not the numeric profile data-uid.
+//
+// LVA-023: the prior adapter returned success.User.Id (the data-uid) as
+// AuthToken. Login "succeeded" but the returned token was not a valid cookie,
+// so every subsequent authenticated v1 call (favorites / add-comment /
+// download) sent it and got 401 — login was effectively broken. There was no
+// e2e login test, which is why it shipped.
+//
+// Falsifiability: revert provider.go to `AuthToken: success.User.Id` → this
+// fails: "AuthToken = the data-uid \"99999\" — login returns a non-cookie value".
+func TestAdapter_Login_ReturnsSessionCookieNotDataUID_E2E(t *testing.T) {
+	const dataUID = "99999"
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch {
+		case strings.HasPrefix(r.URL.Path, "/login.php"):
+			http.SetCookie(w, &http.Cookie{Name: "bb_data", Value: "SESSIONCOOKIEVALUE"})
+			_, _ = w.Write([]byte("<html>ok</html>"))
+		case strings.HasPrefix(r.URL.Path, "/index.php"):
+			_, _ = w.Write([]byte(`<html><body><a id="logged-in-username" ` +
+				`href="profile.php?mode=viewprofile&u=12345">user</a></body></html>`))
+		case strings.HasPrefix(r.URL.Path, "/profile.php"):
+			_, _ = w.Write([]byte(`<html><body><span id="profile-uname" data-uid="` +
+				dataUID + `">user</span></body></html>`))
+		default:
+			w.WriteHeader(http.StatusNotFound)
+		}
+	}))
+	defer srv.Close()
+	a := NewProviderAdapter(NewClient(srv.URL))
+
+	res, err := a.Login(context.Background(), provider.LoginOpts{Username: "user", Password: "pass"})
+	if err != nil {
+		t.Fatalf("Login: %v", err)
+	}
+	if res.AuthToken == dataUID {
+		t.Fatalf("AuthToken = the data-uid %q — login returns a non-cookie value; "+
+			"authenticated v1 calls would 401", dataUID)
+	}
+	if !strings.Contains(res.AuthToken, "SESSIONCOOKIEVALUE") {
+		t.Fatalf("AuthToken = %q, want the session cookie (containing SESSIONCOOKIEVALUE)", res.AuthToken)
+	}
+}

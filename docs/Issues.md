@@ -39,3 +39,19 @@ HelixConstitution §11.4.93/95/106 materialization. Go CLI (modernc.org/sqlite, 
 
 Challenge11ArchiveOrgAnonymousSearchTest crashes the app PROCESS at activity-destroy: IllegalStateException 'State must be at least CREATED to be moved to DESTROYED' on the inner search/search_input entry. Root-caused (2026-06-08): the inner nested NavController's host is the outer addNestedNavigation NavBackStackEntry, driven to DESTROYED out from under the inner controller while search_input is still INITIALIZED. FALSIFIED on device: nav 2.9.1->2.9.8, LenientTeardownRule (uncatchable process death), atomic popUpTo replace. Feature WORKS (result row renders pre-teardown). Candidate fixes ranked in incident JSON (inner NavHost Activity-scoped LifecycleOwner; move search to outer NavHost; ON_STOP pop). Forensics: .lava-ci-evidence/sixth-law-incidents/2026-06-08-navbackstackentry-teardown-crash-2.9.1-incomplete.json
 
+## LVA-025 — v1 captcha login sends the answer under the wrong form-field name (captcha login can never succeed)
+
+**Status:** Queued
+**Type:** Bug
+**Created-By:** AI
+
+internal/handlers/v1 LoginOpts has only CaptchaCode (used as the answer) but rutracker needs CaptchaCode=dynamic-field-NAME (cap_code_<sid>) + CaptchaValue=answer. The adapter sets both to the answer (self-acknowledged TODO provider.go:221). Needs LoginOpts + OpenAPI model change (CaptchaValue field) — deferred. Found by parallel Go bug-hunt.
+
+## LVA-026 — v1 captcha response hardcodes image/png, discards upstream Content-Type
+
+**Status:** Queued
+**Type:** Task
+**Created-By:** AI
+
+internal/handlers/v1/captcha.go serves c.Data(200, image/png, ...) but rutracker.FetchCaptcha captures the real Content-Type, dropped by the adapter (no ContentType field on provider.CaptchaImage). Minor (most decoders sniff). Found by parallel Go bug-hunt.
+

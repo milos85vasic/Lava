@@ -34,23 +34,17 @@ func (c *Client) Browse(ctx context.Context, collectionID string, page int) (*Se
 	items := make([]SearchItem, 0, len(sr.Response.Docs))
 	for _, d := range sr.Response.Docs {
 		item := SearchItem{
-			ID:    d.Identifier,
-			Title: d.Title,
-		}
-		if d.Creator != nil {
-			item.Creator = *d.Creator
+			ID:        d.Identifier,
+			Title:     string(d.Title),
+			Creator:   string(d.Creator),
+			MediaType: string(d.Mediatype),
+			Year:      string(d.Year),
 		}
 		if d.Downloads != nil {
 			item.Downloads = *d.Downloads
 		}
 		if d.ItemSize != nil {
 			item.SizeBytes = *d.ItemSize
-		}
-		if d.Mediatype != nil {
-			item.MediaType = *d.Mediatype
-		}
-		if d.Year != nil {
-			item.Year = *d.Year
 		}
 		items = append(items, item)
 	}

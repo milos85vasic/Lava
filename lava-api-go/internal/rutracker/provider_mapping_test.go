@@ -209,9 +209,17 @@ func TestFromForumDto_Recursive(t *testing.T) {
 	}
 }
 
-// TestFromTopicPage verifies the topic detail mapping including the
-// TorrentData->MagnetLink / Size synthesis. The magnet link is the user's
-// actual download action target.
+// TestFromTopicPage verifies the topic detail mapping. The magnet link is the
+// user's actual download action target.
+//
+// LVA-024: this test previously asserted `len(Files)==1 && Files[0].Size=="4 GB"`
+// — locking in a bug where the torrent SIZE string was wedged into a synthetic
+// TopicFile{Name:"Size"}, so the topic screen showed one nonsense "Size" file
+// instead of the (empty) real file list. The size is not a file; the corrected
+// contract is that no synthetic file is fabricated.
+//
+// Falsifiability: restore the `out.Files = []provider.TopicFile{{Name:"Size", …}}`
+// line in fromTopicPage → this fails "Files = [{Size 4 GB ...}], want 0 entries".
 func TestFromTopicPage(t *testing.T) {
 	tp := &gen.TopicPageDto{
 		Id:    "555",
@@ -229,8 +237,8 @@ func TestFromTopicPage(t *testing.T) {
 	if got.MagnetLink != "magnet:?xt=urn:btih:xyz" {
 		t.Errorf("MagnetLink = %q, want magnet:?xt=urn:btih:xyz", got.MagnetLink)
 	}
-	if len(got.Files) != 1 || got.Files[0].Size != "4 GB" {
-		t.Errorf("Files = %+v, want one entry with Size=4 GB", got.Files)
+	if len(got.Files) != 0 {
+		t.Errorf("Files = %+v, want 0 entries (the size string is NOT a file — LVA-024)", got.Files)
 	}
 }
 

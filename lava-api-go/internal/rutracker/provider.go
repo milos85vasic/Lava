@@ -242,8 +242,13 @@ func (a *ProviderAdapter) Login(ctx context.Context, opts provider.LoginOpts) (*
 		return nil, provider.ErrUnauthorized
 	}
 	return &provider.LoginResult{
-		Success:   true,
-		AuthToken: success.User.Id,
+		Success: true,
+		// LVA-023: AuthToken MUST be the session cookie (User.Token), NOT the
+		// numeric profile data-uid (User.Id). The prior code returned User.Id,
+		// so every subsequent authenticated v1 call (favorites / add-comment /
+		// download) sent that non-cookie value and got 401 — login "succeeded"
+		// but the session was unusable.
+		AuthToken: success.User.Token,
 	}, nil
 }
 
@@ -436,9 +441,10 @@ func fromTopicPage(tp *gen.TopicPageDto) *provider.TopicResult {
 		if tp.TorrentData.MagnetLink != nil {
 			out.MagnetLink = *tp.TorrentData.MagnetLink
 		}
-		if tp.TorrentData.Size != nil {
-			out.Files = []provider.TopicFile{{Name: "Size", Size: *tp.TorrentData.Size}}
-		}
+		// LVA-024: the torrent size is NOT a file. The prior code wedged the
+		// size string into a synthetic TopicFile{Name:"Size"}, so the topic
+		// detail screen showed one nonsense "Size" row instead of the real
+		// (empty here) file list. Drop the fabricated entry.
 	}
 	return out
 }

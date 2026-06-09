@@ -10,16 +10,18 @@ func pickBestFormatURL(formats map[string]string) string {
 	if formats == nil {
 		return ""
 	}
+	// LVA-022: Gutendex emits text formats WITH a charset suffix
+	// ("text/plain; charset=utf-8", "text/plain; charset=us-ascii"), so match by
+	// MIME base prefix, not exact key — otherwise the preferred ordering is
+	// silently skipped and selection falls through to an arbitrary sorted key.
 	preferred := []string{
 		"application/epub+zip",
 		"text/plain",
 		"text/html",
 		"application/pdf",
-		"text/plain; charset=utf-8",
-		"text/html; charset=utf-8",
 	}
-	for _, mime := range preferred {
-		if url, ok := formats[mime]; ok && url != "" {
+	for _, base := range preferred {
+		if url := matchFormatByPrefix(formats, base); url != "" {
 			return url
 		}
 	}
@@ -40,14 +42,30 @@ func bestFormatName(formats map[string]string) string {
 	if formats == nil {
 		return ""
 	}
-	if _, ok := formats["application/epub+zip"]; ok {
+	// LVA-022: prefix-match so charset-suffixed Gutendex keys
+	// ("text/plain; charset=us-ascii") still produce a non-blank format label.
+	switch {
+	case matchFormatByPrefix(formats, "application/epub+zip") != "":
 		return "EPUB"
-	}
-	if _, ok := formats["text/plain"]; ok {
+	case matchFormatByPrefix(formats, "text/plain") != "":
 		return "Text"
-	}
-	if _, ok := formats["text/html"]; ok {
+	case matchFormatByPrefix(formats, "text/html") != "":
 		return "HTML"
+	}
+	return ""
+}
+
+// matchFormatByPrefix returns the first non-empty URL whose MIME key equals
+// base or starts with "base;" (a charset-suffixed variant), preferring an
+// exact match. Gutendex routinely suffixes text MIME types with "; charset=…".
+func matchFormatByPrefix(formats map[string]string, base string) string {
+	if url, ok := formats[base]; ok && url != "" {
+		return url
+	}
+	for k, url := range formats {
+		if url != "" && strings.HasPrefix(k, base+";") {
+			return url
+		}
 	}
 	return ""
 }

@@ -129,3 +129,48 @@ internal/nnmclub/login.go IsAuthorised used unquoted CSS attribute selectors a[h
 
 §11.4.85 (new universal anchor) mandates a stress + chaos test class. Lava has no chaos/stress suite today. Assess + scaffold when pin is bumped. **Source:** self-discovered — .lava-ci-evidence/constitution-review/2026-05-31-68th-cycle-review.md
 
+## LVA-020 — archiveorg array-valued creator/title/year/date fails the WHOLE search/browse/topic response
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** flexString type (string|number|array→joined) in internal/archiveorg/flexstring.go; structs+map sites in search/browse/topic.go converted; flexstring_test.go. Bluff-Audit: route '[' away from array case → TestSearchResponse_ArrayValuedFields + TestMetadataResponse + TestFlexString FAIL, reverted; go test GREEN, api-source.hash regenerated, sourcehash contract GREEN
+**Created-By:** AI
+
+internal/archiveorg search.go/browse.go/topic.go decoded creator/title/year/date as string/*string; archive.org returns these as JSON arrays for multi-author/date items → json.Unmarshal fails the ENTIRE response (every result), not one row. Found by parallel Go bug-hunt.
+
+## LVA-021 — observability error_class collapses to literal "error" for all real typed errors (telemetry blindness)
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** underlyingTypeName fallback → fmt.Sprintf(%T, err); nonfatal_typed_errorclass_test.go (unnamed typed + *fs.PathError chain + context sentinels). Bluff-Audit: revert to "error" → TestClassOf_UnnamedTypedError + _StdlibTypedError FAIL 'collapsed to error', reverted; GREEN
+**Created-By:** AI
+
+internal/observability/nonfatal.go underlyingTypeName returned "error" for any error without Name() or the 2 context sentinels — i.e. virtually every real *fs.PathError/*net.OpError/*url.Error/pgx error → §6.AC per-type triage defeated. Existing nonfatal_errorclass_test was a bluff (only tested Name()-implementers).
+
+## LVA-022 — gutenberg bestFormatName returns blank label for charset-suffixed Gutendex MIME keys
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** matchFormatByPrefix helper; bestFormatName+pickBestFormatURL prefix-match; utils_charset_format_test.go. Bluff-Audit: disable charset prefix → TestBestFormatName_CharsetSuffixed + TestPickBestFormatURL FAIL, reverted; existing TestBestFormatName_Table still GREEN (PDF-label scope-creep reverted)
+**Created-By:** AI
+
+internal/gutenberg/utils.go bestFormatName + pickBestFormatURL exact-matched bare MIME keys (text/plain) but Gutendex always suffixes charset (text/plain; charset=utf-8) → blank Format label + skipped preferred ordering for text-only books.
+
+## LVA-023 — v1 login returns User.Id (profile data-uid) as AuthToken instead of User.Token (session cookie)
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** provider.go AuthToken: success.User.Token; provider_adapter_e2e_test.go TestAdapter_Login_ReturnsSessionCookieNotDataUID_E2E (real POST /login.php→/index.php→/profile.php flow). Bluff-Audit: revert to User.Id → test FAILS 'AuthToken = the data-uid 99999', reverted; GREEN
+**Created-By:** AI
+
+internal/rutracker/provider.go ProviderAdapter.Login returned success.User.Id (numeric data-uid) as AuthToken; the real session cookie is User.Token. Login 'succeeds' but every authenticated v1 call (favorites/add-comment/download) sends a non-cookie value → 401. No e2e login test existed (why it shipped).
+
+## LVA-024 — v1 GetTopic fabricates a bogus TopicFile{Name:"Size"} from the torrent size string
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** provider.go drops the synthetic Files entry; provider_mapping_test.go TestFromTopicPage rewritten to assert len(Files)==0. Bluff-Audit: restore the Size-file line → TestFromTopicPage FAILS 'want 0 entries', reverted; GREEN
+**Created-By:** AI
+
+internal/rutracker/provider.go fromTopicPage wedged the size string into a synthetic file entry → topic detail screen shows one nonsense 'Size' file instead of the real list. The existing TestFromTopicPage asserted the bogus file (bluff).
+

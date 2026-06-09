@@ -9,11 +9,11 @@ import (
 // metadataResponse is the JSON envelope returned by /metadata/{identifier}.
 type metadataResponse struct {
 	Metadata struct {
-		Title       string  `json:"title"`
-		Creator     *string `json:"creator"`
-		Description *string `json:"description"`
-		Date        *string `json:"date"`
-		Mediatype   *string `json:"mediatype"`
+		Title       flexString `json:"title"`
+		Creator     flexString `json:"creator"`
+		Description flexString `json:"description"`
+		Date        flexString `json:"date"`
+		Mediatype   flexString `json:"mediatype"`
 	} `json:"metadata"`
 	Files []metadataFile `json:"files"`
 }
@@ -58,20 +58,12 @@ func (c *Client) Topic(ctx context.Context, identifier string) (*TopicResult, er
 	}
 
 	result := TopicResult{
-		ID:    identifier,
-		Title: mr.Metadata.Title,
-	}
-	if mr.Metadata.Creator != nil {
-		result.Creator = *mr.Metadata.Creator
-	}
-	if mr.Metadata.Description != nil {
-		result.Description = *mr.Metadata.Description
-	}
-	if mr.Metadata.Date != nil {
-		result.Date = *mr.Metadata.Date
-	}
-	if mr.Metadata.Mediatype != nil {
-		result.MediaType = *mr.Metadata.Mediatype
+		ID:          identifier,
+		Title:       string(mr.Metadata.Title),
+		Creator:     string(mr.Metadata.Creator),
+		Description: string(mr.Metadata.Description),
+		Date:        string(mr.Metadata.Date),
+		MediaType:   string(mr.Metadata.Mediatype),
 	}
 
 	files := make([]TopicFile, 0, len(mr.Files))
