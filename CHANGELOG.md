@@ -1,4 +1,31 @@
 # Changelog
+## Lava-Android-1.3.1-1058 — 2026-06-09 (Stability + real-bug fixes; HTTP file download; device-verified)
+
+**Previous published:** Lava-Android-1.3.0-1057 (debug+release).
+
+User-visible fixes (all device-verified on a Genymotion Pixel 9 / API 35; core-flow
+Challenges C00/C01/C07/C08 GREEN):
+
+- **Login fixed** — RuTracker login no longer reports a false "success" on wrong credentials
+  (every authenticated call would then 401); the captcha login now submits the answer under
+  the correct dynamic field and serves the real captcha image type.
+- **Downloads** — a favorited/visited magnet-only torrent is no longer dropped (it stayed
+  un-downloadable); topic-screen crash on Android < 15 from a list operation is fixed; magnet
+  links with uppercase `urn:BTIH:` are now accepted; archive.org / Project Gutenberg file
+  download is now reachable from search results (new HTTP_DOWNLOAD capability).
+- **Search** — multi-provider search no longer silently drops an unknown provider; the search
+  filter no longer mis-files the author name; results pagination (scroll up/down) hardened.
+- **Onboarding** — the anonymous-mode choice is now persisted; subtitles render real spaces.
+- **Connectivity** — public hosts beginning with "fc"/"fd" are no longer misrouted as local;
+  on-device API endpoints keep their access key (no more 401 when re-selected from the list).
+- **Reliability/telemetry** — the embed API's TLS certificate rotates before expiry and surfaces
+  rotations to telemetry; the known upstream navigation teardown crash (search → rotate /
+  config-change) is now tagged in Crashlytics as a known issue rather than a mystery fatal.
+
+Internal: ~22 real shipped bugs fixed with falsifiable regression tests; full constitution
+gate green; lava-api-go real-Postgres integration coverage; Jackett Torznab sidecar validated
+against the new upstream release. See `git log` 54eedd92..HEAD and `docs/Fixed.md` (LVA ledger).
+
 ## Lava-Android-1.3.0-1057 — 2026-06-04 (Client ↔ API-app linking + onboarding "On this device")
 
 **Previous published:** Lava-Android-1.2.36-1056 (debug).
