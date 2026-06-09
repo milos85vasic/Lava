@@ -41,10 +41,13 @@ import org.orbitmvi.orbit.test.test
  * favorites set). No UseCase is mocked (§6.J, Second Law).
  *
  * The project's [lava.testing.repository.TestSearchHistoryRepository] is
- * NOT reused for the favorites-driven assertions here because its
- * `remove(id)` retains rather than removes the matching row; these tests
- * use a behaviorally-correct in-memory fake so the assertion on
- * pinned/other partitioning reflects real production behaviour.
+ * not reused here only because these tests seed history state by assigning
+ * the backing flow directly (with explicit ids that mirror the favorites
+ * set), which the shared fake intentionally keeps private. The shared fake's
+ * behaviour is otherwise correct as of LVA-015 (content-id UPSERT, newest-
+ * first, `remove(id)` deletes the matching row); this local fake mirrors the
+ * same production semantics in `add` so it is not a divergent (Third-Law)
+ * fake even though these VM-CONTRACT tests seed via `searchFlow` directly.
  *
  * ## Test classification
  * VM-CONTRACT — primary assertions on the rendered ViewModel state
@@ -65,13 +68,30 @@ class SearchViewModelTest {
         val searchFlow = MutableStateFlow<List<Search>>(emptyList())
         override fun observeAll(): Flow<List<Search>> = searchFlow
         override suspend fun add(filter: Filter) {
-            searchFlow.update { it + Search(it.size, filter) }
+            // Mirror SearchHistoryRepositoryImpl: content-derived id (Filter.id()),
+            // @Insert REPLACE UPSERT, newest-first (timestamp DESC). NOT the old
+            // positional-append form (LVA-015), so this fake is not divergent.
+            val id = filter.contentId()
+            searchFlow.update { current ->
+                listOf(Search(id, filter)) + current.filterNot { it.id == id }
+            }
         }
         override suspend fun remove(id: Int) {
             searchFlow.update { list -> list.filterNot { it.id == id } }
         }
         override suspend fun clear() {
             searchFlow.value = emptyList()
+        }
+
+        // Replicates the private Filter.id() in core/data Search.kt (the Room
+        // primary-key source of truth): query + period + author.id + categories,
+        // deliberately ignoring sort/order/providerIds.
+        private fun Filter.contentId(): Int {
+            var id = query?.hashCode() ?: 0
+            id = 31 * id + period.ordinal
+            id = 31 * id + (author?.id?.hashCode() ?: 0)
+            id = 31 * id + (categories?.sumOf { it.hashCode() } ?: 0)
+            return id
         }
     }
 
