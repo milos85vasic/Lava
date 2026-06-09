@@ -237,16 +237,34 @@ func (a *ProviderAdapter) Login(ctx context.Context, opts provider.LoginOpts) (*
 	if err != nil {
 		return nil, mapError(err)
 	}
-	// AuthResponseDto is a discriminated union. We only care about the
-	// Success branch for the provider-agnostic result.
-	success, err := resp.AsAuthResponseDtoSuccess()
+	if res := loginResultFromAuthResponse(resp); res != nil {
+		return res, nil
+	}
+	// Non-Success variant (WrongCredits / CaptchaRequired / ServiceUnavailable).
+	// no-telemetry: discriminated-union narrowing — the variant detection
+	// happens at the upstream caller via mapError; ErrUnauthorized is the
+	// correct provider-agnostic propagation for "login did not succeed".
+	return nil, provider.ErrUnauthorized
+}
+
+// loginResultFromAuthResponse narrows an AuthResponseDto discriminated union to
+// the provider-agnostic LoginResult, returning nil for any non-Success variant.
+//
+// LVA-046 (same bug class as LVA-032 / LVA-025): the prior code called the BLIND
+// generated accessor resp.AsAuthResponseDtoSuccess(), which json.Unmarshals the
+// union bytes into AuthResponseDtoSuccess WITHOUT consulting the "type"
+// discriminator. Because AuthResponseDtoSuccess.User is a non-pointer UserDto, a
+// WrongCredits union (no "user" key) decodes into it with NO error — User stays
+// zero — so the `err != nil` guard never fired and Login returned
+// {Success:true, AuthToken:""} for rejected credentials: a fake successful login
+// with an empty session token. AsAuthResponseDtoSuccessChecked reads the
+// discriminator first and returns *ErrDiscriminatorMismatch for any non-Success
+// variant, so this helper returns nil and Login correctly surfaces
+// ErrUnauthorized.
+func loginResultFromAuthResponse(resp *gen.AuthResponseDto) *provider.LoginResult {
+	success, err := resp.AsAuthResponseDtoSuccessChecked()
 	if err != nil {
-		// no-telemetry: discriminated-union narrowing — when the response
-		// is NOT the Success variant, the error here means the response
-		// matched a different variant (WrongCredits, Captcha, etc).
-		// ErrUnauthorized is the correct semantic propagation; the variant
-		// detection happens at the upstream caller via mapError.
-		return nil, provider.ErrUnauthorized
+		return nil
 	}
 	return &provider.LoginResult{
 		Success: true,
@@ -256,7 +274,7 @@ func (a *ProviderAdapter) Login(ctx context.Context, opts provider.LoginOpts) (*
 		// download) sent that non-cookie value and got 401 — login "succeeded"
 		// but the session was unusable.
 		AuthToken: success.User.Token,
-	}, nil
+	}
 }
 
 // FetchCaptcha delegates to FetchCaptcha.
