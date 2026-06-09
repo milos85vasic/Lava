@@ -1,6 +1,7 @@
 package mobile
 
 import (
+	"context"
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
@@ -13,9 +14,12 @@ import (
 	"net"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"digital.vasic.lava.apigo/internal/observability"
 )
 
 // certFileName / keyFileName are the on-disk names of the persisted self-signed
@@ -164,11 +168,57 @@ func (rc *rotatingCert) current() (*tls.Certificate, error) {
 	fresh, err := mintAndPersist(rc.sanIPs, rc.certPath, rc.keyPath)
 	if err != nil {
 		// Keep serving the current leaf (still valid until NotAfter) rather than
-		// dropping the connection; the next handshake retries.
+		// dropping the connection; the next handshake retries. §6.AC: surface the
+		// re-mint failure so an operator sees a long-lived embed degrade.
+		recordRotation(context.Background(), "embed TLS leaf re-mint failed; serving near-expiry leaf", observability.NonFatalAttributes{
+			observability.AttrFeature:      "tls",
+			observability.AttrOperation:    "cert-rotation",
+			observability.AttrErrorClass:   "remint-failed",
+			observability.AttrErrorMessage: err.Error(),
+		})
 		return cur, nil
 	}
 	rc.cert.Store(&fresh)
+	// LVA-072 / §6.AC: the mid-process leaf swap (LVA-068) was SILENT — an operator
+	// had no signal that a long-lived embed rotated its cert. Surface it with public
+	// cert metadata only (old/new NotAfter + IP-SANs are NOT secrets per §6.H; the
+	// private key material is never in attrs).
+	recordRotation(context.Background(), "embed TLS leaf rotated mid-process", observability.NonFatalAttributes{
+		observability.AttrFeature:   "tls",
+		observability.AttrOperation: "cert-rotation",
+		"old_not_after":             notAfterString(cur),
+		"new_not_after":             notAfterString(&fresh),
+		"ip_sans":                   ipSANsString(rc.sanIPs),
+	})
 	return &fresh, nil
+}
+
+// recordRotation is the §6.AC telemetry seam for the mid-process leaf swap. It
+// defaults to observability.RecordWarning so a rotation surfaces to the operator
+// non-fatal feed. Tests override it to capture the emitted event + assert context.
+var recordRotation = observability.RecordWarning
+
+// notAfterString formats a leaf's NotAfter as RFC3339, or "" if unparsable. Public
+// certificate metadata — never key material (§6.H).
+func notAfterString(c *tls.Certificate) string {
+	if c == nil {
+		return ""
+	}
+	leaf := parsedLeaf(*c)
+	if leaf == nil {
+		return ""
+	}
+	return leaf.NotAfter.UTC().Format(time.RFC3339)
+}
+
+// ipSANsString joins the SAN IPs for telemetry context. IP addresses are public
+// certificate metadata, not secrets (§6.H).
+func ipSANsString(ips []net.IP) string {
+	parts := make([]string, 0, len(ips))
+	for _, ip := range ips {
+		parts = append(parts, ip.String())
+	}
+	return strings.Join(parts, ",")
 }
 
 // tlsConfig wires rc.current as GetCertificate so every handshake re-checks
