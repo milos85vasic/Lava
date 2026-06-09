@@ -1,6 +1,7 @@
 package lava.data.converters
 
 import lava.database.entity.FavoriteTopicEntity
+import lava.database.entity.VisitedTopicEntity
 import lava.models.forum.Category
 import lava.models.topic.Author
 import lava.models.topic.BaseTopic
@@ -35,6 +36,21 @@ import org.junit.Test
  * test FAILED with:
  *   java.lang.AssertionError: expected:<CLOSED> but was:<APPROVED>
  * Reverted; test passes.
+ *
+ * LVA-057 REGRESSION (added 2026-06-09): the FavoriteTopicEntity/VisitedTopicEntity
+ * Torrent-vs-BaseTopic discriminator originally checked only
+ * `tags/status/size/seeds/leeches == null` and IGNORED `date` and `magnetLink`. A
+ * magnet-only torrent (e.g. a favorited search result with only a magnet link) was
+ * persisted with its magnetLink, then read back as a BaseTopic — silently DROPPING
+ * the magnet so the user could no longer download it. Fix: include `date` and
+ * `magnetLink` in the discriminator for both entities.
+ *
+ * FALSIFIABILITY REHEARSAL (LVA-057): reverted the FavoriteTopicEntity discriminator
+ * to omit `magnetLink`/`date`. The two favorite round-trip tests FAILED with:
+ *   java.lang.AssertionError: a torrent with a magnet link must survive the entity round-trip as a Torrent
+ *   java.lang.AssertionError: a torrent with a date must survive the entity round-trip as a Torrent
+ * (the visited test stayed green, proving each assertion targets its own production
+ * path). Reverted the mutation; all tests pass.
  */
 class TopicConverterTest {
 
@@ -192,6 +208,84 @@ class TopicConverterTest {
         assertThrows(IllegalArgumentException::class.java) {
             dto.toTopic()
         }
+    }
+
+    @Test
+    fun `favorite Torrent with only magnetLink round-trips as Torrent preserving the magnet`() {
+        // LVA-057: a magnet-only torrent (no tags/status/size/seeds/leeches, but a
+        // magnetLink the user needs to download it) MUST reconstruct as a Torrent.
+        // The discriminator that decides Torrent-vs-BaseTopic on read-back must
+        // account for magnetLink, otherwise the download link is silently dropped.
+        val torrent = Torrent(
+            id = "magnet1",
+            title = "Magnet-only release",
+            magnetLink = "magnet:?xt=urn:btih:DEADBEEF",
+        )
+
+        val roundTripped = torrent.toFavoriteEntity().toTopic()
+
+        assertTrue(
+            "a torrent with a magnet link must survive the entity round-trip as a Torrent",
+            roundTripped is Torrent,
+        )
+        assertEquals(
+            "magnet:?xt=urn:btih:DEADBEEF",
+            (roundTripped as Torrent).magnetLink,
+        )
+    }
+
+    @Test
+    fun `favorite Torrent with only date round-trips as Torrent preserving the date`() {
+        // LVA-057: same discriminator bug, date branch — a torrent whose only
+        // distinguishing field is its publish date must not collapse to BaseTopic.
+        val torrent = Torrent(
+            id = "dated1",
+            title = "Dated release",
+            date = 1700000000000L,
+        )
+
+        val roundTripped = torrent.toFavoriteEntity().toTopic()
+
+        assertTrue(
+            "a torrent with a date must survive the entity round-trip as a Torrent",
+            roundTripped is Torrent,
+        )
+        assertEquals(1700000000000L, (roundTripped as Torrent).date)
+    }
+
+    @Test
+    fun `visited Torrent with only magnetLink round-trips as Torrent preserving the magnet`() {
+        // LVA-057: VisitedTopicEntity.toTopic() has the identical discriminator bug.
+        // A visited magnet-only torrent must keep its magnet so the user can
+        // re-download it from history.
+        val torrent = Torrent(
+            id = "vismagnet1",
+            title = "Visited magnet release",
+            magnetLink = "magnet:?xt=urn:btih:CAFEBABE",
+        )
+
+        // Mirror the production write path: a visited torrent is persisted via a
+        // TopicPage's TorrentData. Build the entity from the Torrent's magnet by
+        // converting through TorrentData-equivalent fields the entity stores.
+        val entity = VisitedTopicEntity(
+            id = torrent.id,
+            timestamp = 0L,
+            title = torrent.title,
+            author = null,
+            category = null,
+            magnetLink = torrent.magnetLink,
+        )
+
+        val roundTripped = entity.toTopic()
+
+        assertTrue(
+            "a visited torrent with a magnet link must reconstruct as a Torrent",
+            roundTripped is Torrent,
+        )
+        assertEquals(
+            "magnet:?xt=urn:btih:CAFEBABE",
+            (roundTripped as Torrent).magnetLink,
+        )
     }
 
     @Test

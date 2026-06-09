@@ -94,7 +94,9 @@ internal fun TorrentStatusDto.toStatus(): TorrentStatus = when (this) {
 }
 
 internal fun FavoriteTopicEntity.toTopic(): Topic =
-    if (tags == null && status == null && size == null && seeds == null && leeches == null) {
+    if (tags == null && status == null && date == null && size == null &&
+        seeds == null && leeches == null && magnetLink == null
+    ) {
         BaseTopic(
             id = id,
             title = title,
@@ -153,7 +155,9 @@ internal fun Topic.toFavoriteEntity(): FavoriteTopicEntity {
 }
 
 internal fun VisitedTopicEntity.toTopic(): Topic {
-    return if (tags == null && status == null && size == null && seeds == null && leeches == null) {
+    return if (tags == null && status == null && date == null && size == null &&
+        seeds == null && leeches == null && magnetLink == null
+    ) {
         BaseTopic(
             id = id,
             title = title,
