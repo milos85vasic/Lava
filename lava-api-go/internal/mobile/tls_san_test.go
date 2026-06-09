@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 )
 
 // readPersistedCert parses the cert PEM the embed persisted next to dbPath.
@@ -147,5 +148,82 @@ func TestLoadOrCreateTLS_ReusesWhenPersistedCertCoversCurrentIP(t *testing.T) {
 	if string(before) != string(after) {
 		t.Fatalf("cert was regenerated even though it already covered the current IP %v — "+
 			"out-of-band leaf pins would break needlessly", currentIP)
+	}
+}
+
+// TestLoadOrCreateTLS_RegeneratesWhenPersistedCertExpired is the LVA-064
+// regression guard. The embed REUSES a persisted cert across restarts (LVA-061
+// added the IP-SAN coverage gate). But the self-signed cert has a finite
+// NotAfter; once it passes (or comes within the safety margin), reusing it
+// hands every LAN peer a leaf that fails verification with "x509: certificate
+// has expired or is not yet valid" — the embed is unreachable over TLS until
+// the cert is regenerated.
+//
+// Before the fix, loadOrCreateTLS reused any persisted cert whose IP SANs still
+// covered the current device IP, never checking NotAfter — so an expired cert
+// (whose SANs are unchanged) was silently reused forever. This test:
+//  1. Mints + persists a REAL cert with tlsNow set far in the past, so its
+//     NotAfter (mint-time + 10y validity) is itself in the past relative to the
+//     real current time — i.e. an already-expired leaf whose IP SAN still
+//     covers the current device IP.
+//  2. Restores tlsNow and calls loadOrCreateTLS with the SAME current IP (so the
+//     IP-SAN gate alone would say "reuse").
+//  3. Asserts the persisted-on-disk cert is now UN-expired — i.e. it was
+//     regenerated, not reused.
+//
+// Uses real x509 cert generation throughout (generateSelfSigned) — no crypto is
+// mocked. The clock seam tlsNow is the only injection point.
+//
+// FALSIFIABILITY: removing the certExpired check from the reuse gate in
+// loadOrCreateTLS (so it reuses any IP-covering cert regardless of NotAfter)
+// makes this test FAIL — the on-disk cert after the call is still the expired
+// leaf. Proven in the LVA-064 Bluff-Audit.
+func TestLoadOrCreateTLS_RegeneratesWhenPersistedCertExpired(t *testing.T) {
+	dbPath := filepath.Join(t.TempDir(), "lava.db")
+	dir := filepath.Dir(dbPath)
+
+	currentIP := net.ParseIP("198.51.100.7") // TEST-NET-2, the device IP (unchanged)
+
+	// 1. Mint a REAL cert "in the past" so its NotAfter (past + certValidity) is
+	//    itself already in the past relative to real now. Validity is 10y; mint
+	//    20y ago so NotAfter is ~10y in the past — unambiguously expired.
+	restore := tlsNow
+	tlsNow = func() time.Time { return time.Now().Add(-20 * 365 * 24 * time.Hour) }
+	_, certPEM, keyPEM, err := generateSelfSigned([]net.IP{currentIP})
+	tlsNow = restore
+	if err != nil {
+		t.Fatalf("seed cert: %v", err)
+	}
+	if err := os.WriteFile(filepath.Join(dir, certFileName), certPEM, 0o644); err != nil {
+		t.Fatalf("write seed cert: %v", err)
+	}
+	if err := os.WriteFile(filepath.Join(dir, keyFileName), keyPEM, 0o600); err != nil {
+		t.Fatalf("write seed key: %v", err)
+	}
+
+	// Sanity: the seeded cert is genuinely expired AND covers the current IP
+	// (else the test would be vacuous — it must isolate the expiry branch from
+	// the LVA-061 IP-SAN branch).
+	seeded := readPersistedCert(t, dbPath)
+	if !certCoversIP(seeded, currentIP) {
+		t.Fatalf("seeded cert unexpectedly misses current IP %v — test would not isolate the expiry branch", currentIP)
+	}
+	if seeded.NotAfter.After(time.Now()) {
+		t.Fatalf("seeded cert NotAfter %v is not in the past — test is vacuous (cert not actually expired)", seeded.NotAfter)
+	}
+
+	// 2. Load with the SAME current device IP (IP-SAN gate alone would reuse).
+	if _, err := loadOrCreateTLS(dbPath, []net.IP{currentIP}); err != nil {
+		t.Fatalf("loadOrCreateTLS: %v", err)
+	}
+
+	// 3. The persisted cert must now be UN-expired — proving it was regenerated
+	//    (the user-visible outcome: a LAN peer can complete the TLS handshake
+	//    instead of hitting "certificate has expired").
+	after := readPersistedCert(t, dbPath)
+	if !after.NotAfter.After(time.Now()) {
+		t.Fatalf("persisted cert is still expired after load (NotAfter=%v) — "+
+			"expired cert was reused; LAN peers will hit \"x509: certificate has expired\"",
+			after.NotAfter)
 	}
 }

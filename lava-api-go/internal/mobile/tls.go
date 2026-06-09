@@ -26,7 +26,19 @@ const (
 	// sub-project (client-trust + rotation is a later sub-project per the
 	// package comment).
 	certValidity = 10 * 365 * 24 * time.Hour
+	// certExpiryMargin is the safety window before NotAfter within which a
+	// persisted cert is treated as already-stale and regenerated. Regenerating
+	// slightly ahead of true expiry avoids handing a peer a leaf that expires
+	// mid-session right after the TLS handshake (LVA-064).
+	certExpiryMargin = 24 * time.Hour
 )
+
+// tlsNow is the clock seam for cert minting (NotBefore/NotAfter) and the
+// persisted-cert expiry gate. It defaults to time.Now in production; tests
+// override it to mint a back-dated (expired) cert and confirm the load path
+// regenerates. Keeping a single seam for both mint + check means a test can
+// mint "in the past" and the real-now check then correctly sees expiry.
+var tlsNow = time.Now
 
 // loadOrCreateTLS returns a *tls.Config holding the self-signed certificate for
 // the embed. The cert+key live in the SQLite DB's directory; if both files
@@ -56,10 +68,13 @@ func loadOrCreateTLS(sqlitePath string, sanIPs []net.IP) (*tls.Config, error) {
 	// cert is reused verbatim, preserving any out-of-band leaf pin (the reason
 	// the cert is persisted at all).
 	if cert, err := tls.LoadX509KeyPair(certPath, keyPath); err == nil {
-		if leaf := parsedLeaf(cert); leaf != nil && certCoversAllIPs(leaf, sanIPs) {
+		if leaf := parsedLeaf(cert); leaf != nil &&
+			certCoversAllIPs(leaf, sanIPs) &&
+			!certExpired(leaf) {
 			return tlsConfigFrom(cert), nil
 		}
-		// else: stale SANs — regenerate below so the new device IP is covered.
+		// else: stale SANs OR expired (within the safety margin) — regenerate
+		// below so peers get a valid, IP-covering leaf.
 	}
 
 	cert, certPEM, keyPEM, err := generateSelfSigned(sanIPs)
@@ -120,6 +135,17 @@ func certCoversAllIPs(leaf *x509.Certificate, want []net.IP) bool {
 	return true
 }
 
+// certExpired reports whether the leaf is past its NotAfter, or within
+// certExpiryMargin of it (so a near-expiry leaf is regenerated before it can
+// expire mid-session). This is the LVA-064 staleness check: before LVA-064 the
+// reuse gate only checked IP-SAN coverage (LVA-061) and silently reused a
+// persisted cert whose NotAfter had already passed — every peer then hit
+// "x509: certificate has expired or is not yet valid". The clock is tlsNow so
+// tests can exercise the expiry branch deterministically without sleeping.
+func certExpired(leaf *x509.Certificate) bool {
+	return !tlsNow().Add(certExpiryMargin).Before(leaf.NotAfter)
+}
+
 func tlsConfigFrom(cert tls.Certificate) *tls.Config {
 	return &tls.Config{
 		Certificates: []tls.Certificate{cert},
@@ -148,8 +174,8 @@ func generateSelfSigned(sanIPs []net.IP) (tls.Certificate, []byte, []byte, error
 	tmpl := x509.Certificate{
 		SerialNumber:          serial,
 		Subject:               pkix.Name{CommonName: "lava-api-go embed"},
-		NotBefore:             time.Now().Add(-time.Hour),
-		NotAfter:              time.Now().Add(certValidity),
+		NotBefore:             tlsNow().Add(-time.Hour),
+		NotAfter:              tlsNow().Add(certValidity),
 		KeyUsage:              x509.KeyUsageDigitalSignature | x509.KeyUsageKeyEncipherment,
 		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
 		BasicConstraintsValid: true,
