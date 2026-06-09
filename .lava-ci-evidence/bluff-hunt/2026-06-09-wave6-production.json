@@ -1,0 +1,70 @@
+{
+  "hunt": "§6.N.2 production-code bluff hunt — wave 6",
+  "date": "2026-06-09",
+  "agent": "wave-6 production-gate subagent (Opus 4.8)",
+  "scope": "gate-shaping production scripts under scripts/ + their hermetic tests under tests/ (avoided lava-api-go + feature/core per wave assignment)",
+  "head_at_start": "453fe2b63b8a48ed5d8d6ec6727d76936670a352",
+  "protocol": "CLAUDE.md Seventh-Law clause-5 + §6.N.2 mutation-rehearsal: pick gate-shaping file -> apply deliberate mutation that should flip the gate verdict -> run gate + hermetic test -> if verdict unchanged it is a bluff -> classify/fix -> revert byte-identical",
+  "targets": [
+    {
+      "file": "scripts/check-emulator-runner-tag.sh",
+      "gate": "§6.X emulator-runner-tag (CM clause-c: attestation MUST declare runner: containers-submodule)",
+      "hermetic_test": "tests/check-constitution/test_emulator_runner_tag.sh",
+      "mutation": "Broadened RUNNER_OK regex from the exact 'runner: containers-submodule' pattern to bare 'runner' — would WRONGLY accept a 'runner: host-direct' attestation (a §6.X / §6.AH violation).",
+      "observed": "Hermetic test test_host_direct_runner_fails FLIPPED to FAIL: 'expected exit 1, got 0'. Direct malformed-fixture run (markers + no runner tag) correctly rejected (exit 1); correct-tag fixture accepted (exit 0).",
+      "verdict": "GENUINE",
+      "classification": "none — gate genuinely enforces the containers-submodule runner tag and rejects host-direct + tagless attestations",
+      "reverted": "yes (git diff --quiet byte-identical)"
+    },
+    {
+      "file": "scripts/check-workable-items.sh",
+      "gate": "CM-WORKABLE-ITEMS-SYNC (§11.4.93/95: DB validate + DB<->Markdown diff + DB git-tracked)",
+      "hermetic_test": "tests/check-workable-items/test_workable_items_sync.sh",
+      "mutation_a": "Inverted clause-3 condition (removed '!' on git ls-files --error-unmatch) — incidentally caught by the existing positive case (rejected the real tracked DB), but for the WRONG reason.",
+      "mutation_b": "DELETED clause 3 entirely (the §11.4.95 DB-tracked assertion, lines ~47-51). An UNTRACKED SSoT DB would then ship silently.",
+      "observed_b": "OLD hermetic test STILL reported 'PASS: CM-WORKABLE-ITEMS-SYNC gate is falsifiable' with clause 3 removed — the test NEVER exercised the git-tracking branch (its own comment hand-waved 'conceptually untracked is covered').",
+      "verdict": "BLUFF / FALSIFIABILITY GAP (§6.A/§6.N.2)",
+      "classification": "uncovered gate branch — the §11.4.95 DB-tracked clause could be silently dropped and CI stays green",
+      "fix": "ADDITIVE: gate now honors LAVA_WORKABLE_ITEMS_DB/ISSUES/FIXED env overrides (defaults unchanged, consistent with sibling gates' hermetic-injection pattern). Added a clause-3 falsifiability sub-test that builds a temp git repo with a tracked Markdown pair + an UNTRACKED fixture DB, points the gate at it, and asserts rejection.",
+      "fix_proof": "After fix, deleting clause 3 (mutation_b) now makes the augmented test FAIL with 'gate accepted an UNTRACKED DB (clause-3 §11.4.95 not enforced)'; post-revert PASS.",
+      "reverted": "yes — both gate mutations reverted byte-identical; the additive override + sub-test are the kept fix"
+    },
+    {
+      "file": "scripts/check-no-guessing-vocabulary.sh",
+      "gate": "§6.AD.6 / §11.4.6 no-guessing vocabulary",
+      "hermetic_test": "tests/check-constitution/test_no_guessing_vocabulary.sh",
+      "mutation": "Dropped 'probably' from the forbidden_guess_words alternation — the gate would then WRONGLY pass a description containing 'probably'.",
+      "observed": "Hermetic test test_forbidden_word_rejected FLIPPED to FAIL: 'rc=0 out=§11.4.6 no-guessing vocabulary gate clean.'",
+      "verdict": "GENUINE",
+      "classification": "none — gate genuinely enforces the forbidden-vocabulary list; UNCONFIRMED/PENDING_FORENSICS whitelist + forensic-anchor exemption also verified by the test suite",
+      "reverted": "yes (git diff --quiet byte-identical)"
+    }
+  ],
+  "malformed_input_verification": {
+    "emulator_runner_tag": "Constructed temp JSON with emulator markers + no runner tag -> gate exit 1 (rejected). Same with runner: containers-submodule -> exit 0 (accepted).",
+    "workable_items_diff": "Existing corrupted-Issues.md negative case -> gate exit 1. New clause-3 untracked-DB fixture -> gate exit 1."
+  },
+  "incidental_finding_out_of_scope": {
+    "file": "scripts/scan-no-hardcoded-ipv4.sh + docs/workable_items.db",
+    "observation": "check-constitution.sh exits 1 at PRISTINE HEAD (reproduced with all my edits stashed) because scan-no-hardcoded-ipv4.sh flags the binary docs/workable_items.db ('Binary file ... matches') for the loopback literal 127.0.0.1 embedded in a workable-item description. The scan's documented loopback exemption (127.0.0.0/8) operates on TEXT lines and does NOT apply to binary-file grep matches — so the loopback exemption is a PARTIAL BLUFF for binary-tracked files.",
+    "status": "PRE-EXISTING, not introduced by this hunt; out of this wave's assigned 3 picks and touches the SSoT DB content. NOT fixed here to avoid scope collision; surfaced for an LVA item.",
+    "evidence": "git stash of my 2 edits + check-constitution.sh => still EXIT 1 with identical 'Binary file docs/workable_items.db matches' message."
+  },
+  "files_changed_by_this_hunt": [
+    "scripts/check-workable-items.sh (additive env overrides)",
+    "tests/check-workable-items/test_workable_items_sync.sh (clause-3 falsifiability sub-test)",
+    ".lava-ci-evidence/bluff-hunt/2026-06-09-wave6-production.json (this evidence)"
+  ],
+  "lva_suggestions": [
+    {
+      "id": "LVA-057",
+      "type": "Task",
+      "title": "scan-no-hardcoded-ipv4.sh loopback exemption does not apply to binary-file matches (docs/workable_items.db with 127.0.0.1 fails check-constitution at HEAD)"
+    },
+    {
+      "id": "LVA-058",
+      "type": "Task",
+      "title": "Audit remaining gate-shaping scripts for uncovered branches like the CM-WORKABLE-ITEMS-SYNC clause-3 gap closed in wave-6 (each gate clause must have a branch-covering falsifiability sub-test)"
+    }
+  ]
+}

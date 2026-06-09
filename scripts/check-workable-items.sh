@@ -25,9 +25,11 @@ cd "$ROOT"
 
 MODULE_DIR="constitution/scripts/workable-items"
 WI_BIN="$MODULE_DIR/bin/workable-items"
-DB="docs/workable_items.db"
-ISSUES="docs/Issues.md"
-FIXED="docs/Fixed.md"
+# Paths are overridable for hermetic testing (e.g. to point the §11.4.95
+# DB-tracked assertion at an untracked fixture DB). Defaults are the real tree.
+DB="${LAVA_WORKABLE_ITEMS_DB:-docs/workable_items.db}"
+ISSUES="${LAVA_WORKABLE_ITEMS_ISSUES:-docs/Issues.md}"
+FIXED="${LAVA_WORKABLE_ITEMS_FIXED:-docs/Fixed.md}"
 
 # Build the canonical binary if absent (must cd into the module dir; no root go.mod).
 if [[ ! -x "$WI_BIN" ]]; then
