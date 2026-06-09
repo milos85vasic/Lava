@@ -1,0 +1,1 @@
+# LVA-070 — commit eebd12a3; favorite/visited providerId threaded end-to-end (write+read); real-Room round-trip + ViewModel tests; archiveorg favorite/visited now routes to HTTP_DOWNLOAD. Falsifiability-proven; all fakes updated; :app compiles; full module suite green.

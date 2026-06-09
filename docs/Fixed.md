@@ -597,3 +597,39 @@ LVA-068 rotates the embed leaf mid-process but the swap is silent; emit a Record
 
 A sleeping VM screen idles the render pipeline causing SurfaceFlinger commit timeouts and spurious No-compose-hierarchies Challenge failures; the runner now wakes and keeps the screen on, proven by C00/C01/C07/C08 going green after the wake.
 
+## LVA-070 — thread source providerId through favorite/visited write+read path to complete HTTP_DOWNLOAD routing
+
+**Status:** Completed (→ Fixed.md)
+**Type:** Task
+**Evidence:** .lava-ci-evidence/workable-items/LVA-070-evidence.md
+**Severity:** P3
+
+LVA-067 laid the providerId Room column; complete it by threading providerId through ToggleFavoriteUseCase/AddLocalFavoriteUseCase/GetTopicUseCase + the Topic/TopicPage models (write) and TopicModel + favorites/visited side-effects to openTopic(id,providerId) (read), mirroring search_result.
+
+## LVA-071 — inject SseClient + base-URL into SearchResultViewModel.observeSseSearch for hermetic MockWebServer testing
+
+**Status:** Completed (→ Fixed.md)
+**Type:** Task
+**Evidence:** .lava-ci-evidence/workable-items/LVA-071-evidence.md
+**Severity:** P3
+
+observeSseSearch internally constructs the SseClient with a hardcoded https base; inject it so the full SSE error to Error to retry path is hermetically testable against a MockWebServer.
+
+## LVA-067 — persist per-row providerId on favorite/visited rows so their topics can route to HTTP_DOWNLOAD
+
+**Status:** Completed (→ Fixed.md)
+**Type:** Task
+**Evidence:** .lava-ci-evidence/workable-items/LVA-067-evidence.md
+**Severity:** P3
+
+LVA-052 scoped favorites/visited topic downloads to the active-tracker default because the favorite/visited Room rows store no provider id; add a providerId column + migration so an archiveorg/gutenberg favorite routes to HTTP_DOWNLOAD.
+
+## LVA-4 — LVA workable-items ticket system (SQLite DB + Go CLI + md/HTML/PDF/DOCX export)
+
+**Status:** Implemented (→ Fixed.md)
+**Type:** Feature
+**Evidence:** .lava-ci-evidence/workable-items/LVA-4-evidence.md
+**Severity:** P1
+
+HelixConstitution §11.4.93/95/106 materialization. Go CLI (modernc.org/sqlite, no CGO) with init/add/update/close/reopen/gen/verify/import/export. Operator directive §6.L 68th invocation, key prefix LVA. Superseded by migration to the canonical constitution binary (docs/tickets/MIGRATION-TO-CANONICAL.md). **Source:** operator-report — docs/tickets/DESIGN.md
+

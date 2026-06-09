@@ -1,1 +1,1 @@
-# LVA-067 — commit badca5f5; Room v11→v12 MIGRATION_11_12 adds nullable providerId to favorite/visited rows + schema 12.json + converters; real-SQLite migration test (non-destructive, 3 tests) + converter round-trip; Bluff-Audit in commit. PARTIAL: persistence column laid; write-path threading of providerId through Topic/TopicPage + use cases still OWED (→ LVA-070).
+# LVA-067 — subsumed/completed by LVA-070: the Room providerId column laid by LVA-067 is now populated+read end-to-end. Favorite/visited HTTP_DOWNLOAD reachable.
