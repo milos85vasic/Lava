@@ -9,6 +9,8 @@
 #     production Kotlin makes the scanner FAIL (exit 1) and name the file
 #   - test/androidTest sources are NOT flagged (JVM-safe, out of scope)
 #   - the `// seqcoll-safe:` opt-out suppresses an intentional custom-type use
+#   - a comment-ONLY mention of removeLast()/... (the LVA-053 fix's own
+#     explanatory docstring class) does NOT trip the gate (comment-strip branch)
 #
 # A scanner that cannot be made to fail by reintroducing the exact crash it
 # claims to prevent would be a bluff gate; the falsifiability case is the proof.
@@ -152,15 +154,68 @@ KT
   rm -rf "$d"
 }
 
+# --- Test 6 (comment-strip branch, LVA-062): a removeLast() that appears ONLY
+#     inside a comment (the LVA-053 fix's own explanatory docstring) is NOT a
+#     real call and MUST NOT be flagged. This exercises the sed comment-stripping
+#     branch (line/block/KDoc) in the scanner — without it, the gate would raise
+#     a false positive on its own documentation, breaking the build. Proven
+#     falsifiable: stubbing `stripped="$body"` (skipping the strip) makes this
+#     fixture FAIL with the comment line flagged. ---
+test_comment_only_mention_passes() {
+  local d; d=$(mktemp -d)
+  make_repo "$d"
+  mkdir -p "$d/core/data/src/main/kotlin/lava/data"
+  cat > "$d/core/data/src/main/kotlin/lava/data/Doc.kt" <<'KT'
+package lava.data
+// The LVA-053 fix replaced l.removeLast() with l.removeAt(l.lastIndex).
+/* getFirst()/getLast() also desugar to SequencedCollection accessors. */
+fun f(l: MutableList<Int>): Int = l.removeAt(l.lastIndex)
+KT
+  local out rc=0
+  out=$( ( cd "$d" && git add -A && bash scripts/scan-no-removelast-seqcoll.sh ) 2>&1 ) || rc=$?
+  if [[ $rc -eq 0 ]]; then
+    echo "PASS test_comment_only_mention_passes"
+  else
+    echo "FAIL test_comment_only_mention_passes: expected exit 0 (comment-only mention out of scope), got $rc: $out" >&2
+    fail=1
+  fi
+  rm -rf "$d"
+}
+
+# --- Test 7 (comment-strip discrimination): a REAL call with a trailing
+#     `// note` is STILL flagged — comment-stripping must drop only the note,
+#     never the live call. Without this, a naive whole-line strip would bluff a
+#     pass on `l.removeLast() // ok`. ---
+test_real_call_with_trailing_comment_fails() {
+  local d; d=$(mktemp -d)
+  make_repo "$d"
+  mkdir -p "$d/core/data/src/main/kotlin/lava/data"
+  cat > "$d/core/data/src/main/kotlin/lava/data/Trail.kt" <<'KT'
+package lava.data
+fun f(l: MutableList<Int>): Int = l.removeLast() // intentional, reviewed
+KT
+  local out rc=0
+  out=$( ( cd "$d" && git add -A && bash scripts/scan-no-removelast-seqcoll.sh ) 2>&1 ) || rc=$?
+  if [[ $rc -ne 0 ]] && echo "$out" | grep -q 'Trail.kt'; then
+    echo "PASS test_real_call_with_trailing_comment_fails"
+  else
+    echo "FAIL test_real_call_with_trailing_comment_fails: expected non-zero + Trail.kt flagged, got rc=$rc: $out" >&2
+    fail=1
+  fi
+  rm -rf "$d"
+}
+
 test_safe_apis_pass
 test_unsafe_removelast_fails
 test_unsafe_accessors_fail
 test_test_sources_exempt
 test_optout_suppresses
+test_comment_only_mention_passes
+test_real_call_with_trailing_comment_fails
 
 if [[ $fail -ne 0 ]]; then
   echo "FAIL test_no_removelast_seqcoll (one or more cases failed)" >&2
   exit 1
 fi
-echo "PASS test_no_removelast_seqcoll (all 5 cases)"
+echo "PASS test_no_removelast_seqcoll (all 7 cases)"
 exit 0

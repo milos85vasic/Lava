@@ -1,0 +1,117 @@
+{
+  "date": "2026-06-09",
+  "wave": "wave-7",
+  "ticket": "LVA-062",
+  "kind": "gate-script-clause-coverage-sweep",
+  "rule_basis": "§6.A real-binary contract tests applied to gate scripts; §6.N.2 production-code coverage; §6.J anti-bluff",
+  "scope": "scripts/ (gate-shaping scanners) + their hermetic tests under tests/check-constitution/",
+  "premise": "wave-6 found check-workable-items.sh clause-3 (§11.4.95 DB-tracked) had no falsifiability coverage. This sweep checks the OTHER gate-shaping scanners for the same class of gap: each distinct gate CLAUSE/branch must have a branch-covering falsifiability sub-test.",
+  "gates_inventoried": [
+    {
+      "gate": "scripts/check-emulator-runner-tag.sh",
+      "test": "tests/check-constitution/test_emulator_runner_tag.sh",
+      "clauses": ["no-runner-tag-fails", "host-direct-fails", "containers-passes", "equals-form", "non-emulator-no-false-positive", "advisory-mode", "real-tree"],
+      "coverage_before": "FULL (7 cases, all branches)",
+      "coverage_after": "FULL — no gap, no change",
+      "verdict": "already well-covered"
+    },
+    {
+      "gate": "scripts/scan-no-hardcoded-uuid.sh",
+      "test": "tests/check-constitution/test_no_hardcoded_uuid.sh",
+      "clauses": {
+        "real-uuid-detector": "before: UNCOVERED (test was thin-delegating, ran scanner against live tree only) | after: COVERED (test_real_uuid_flagged)",
+        "nil-uuid-exemption": "before: UNCOVERED | after: COVERED (test_nil_uuid_exempt)",
+        "test-source-exemption": "before: UNCOVERED | after: COVERED (test_test_source_uuid_exempt)",
+        "db-exemption-LVA-058": "before: UNCOVERED | after: COVERED (test_db_file_exempt)",
+        "live-tree-pass": "before: COVERED | after: COVERED"
+      },
+      "coverage_before": "1 branch (live-tree only)",
+      "coverage_after": "5 branches",
+      "verdict": "GAP FOUND + CLOSED — rewrote thin-delegating test into hermetic-fixture test"
+    },
+    {
+      "gate": "scripts/scan-no-hardcoded-ipv4.sh",
+      "test": "tests/check-constitution/test_no_hardcoded_ipv4.sh",
+      "clauses": {
+        "real-ipv4-detector": "before: NO TEST EXISTED | after: COVERED (test_real_ipv4_flagged)",
+        "loopback-reserved-exemption": "before: NO TEST | after: COVERED (test_loopback_exempt)",
+        "rfc5737-doc-range-exemption": "before: NO TEST | after: COVERED (test_rfc5737_doc_range_exempt)",
+        "file-ext-exemption": "before: NO TEST | after: COVERED (test_json_config_exempt)",
+        "db-exemption-LVA-058": "before: NO TEST | after: COVERED (test_db_file_exempt)",
+        "live-tree-pass": "before: NO TEST | after: COVERED (test_live_repo_passes)"
+      },
+      "coverage_before": "ZERO — no hermetic test existed for this scanner at all",
+      "coverage_after": "6 branches",
+      "verdict": "BIGGEST GAP — created the missing test file from scratch"
+    },
+    {
+      "gate": "scripts/scan-no-hardcoded-hostport.sh",
+      "test": "tests/check-constitution/test_no_hardcoded_hostport.sh",
+      "clauses": {
+        "comment-strip-line/kdoc/shell": "before: COVERED | after: COVERED",
+        "real-code-detector": "before: COVERED | after: COVERED",
+        "trailing-comment-preservation": "before: COVERED | after: COVERED",
+        "loopback/container-alias-exemption": "before: COVERED | after: COVERED",
+        "db-exemption-LVA-058": "before: UNCOVERED | after: COVERED (test_db_file_exempt)"
+      },
+      "coverage_before": "7 branches (comment-strip well-covered)",
+      "coverage_after": "8 branches",
+      "verdict": "GAP FOUND + CLOSED — added .db exemption sub-test"
+    },
+    {
+      "gate": "scripts/scan-no-removelast-seqcoll.sh",
+      "test": "tests/check-constitution/test_no_removelast_seqcoll.sh",
+      "clauses": {
+        "unsafe-removeLast-detector": "before: COVERED | after: COVERED",
+        "unsafe-accessors-detector": "before: COVERED | after: COVERED",
+        "test-source-exemption": "before: COVERED | after: COVERED",
+        "seqcoll-safe-optout": "before: COVERED | after: COVERED",
+        "comment-strip-branch-LVA-054": "before: UNCOVERED (the sed comment-strip that prevents flagging the LVA-053 fix's own docstring) | after: COVERED (test_comment_only_mention_passes + test_real_call_with_trailing_comment_fails)"
+      },
+      "coverage_before": "5 cases",
+      "coverage_after": "7 cases",
+      "verdict": "GAP FOUND + CLOSED — added comment-strip branch coverage (both directions)"
+    }
+  ],
+  "subtests_added": [
+    "test_no_hardcoded_uuid.sh: test_real_uuid_flagged, test_nil_uuid_exempt, test_test_source_uuid_exempt, test_db_file_exempt (rewrite from thin-delegating)",
+    "test_no_hardcoded_ipv4.sh: ENTIRE FILE NEW — test_live_repo_passes, test_real_ipv4_flagged, test_loopback_exempt, test_rfc5737_doc_range_exempt, test_json_config_exempt, test_db_file_exempt",
+    "test_no_hardcoded_hostport.sh: test_db_file_exempt",
+    "test_no_removelast_seqcoll.sh: test_comment_only_mention_passes, test_real_call_with_trailing_comment_fails"
+  ],
+  "falsifiability_rehearsals": [
+    {
+      "branch": "IPv4 \\.db$ exemption",
+      "mutation": "removed |\\.db$ from scan-no-hardcoded-ipv4.sh exclusion regex",
+      "observed": "FAIL test_db_file_exempt: expected 0 (.db exempt), got 1; ALSO flagged live tree (real tracked .db carries an IP-shaped sequence — exemption is load-bearing in prod)",
+      "reverted": "yes — ALL PASS after revert"
+    },
+    {
+      "branch": "hostport \\.db$ exemption",
+      "mutation": "removed |\\.db$ from scan-no-hardcoded-hostport.sh exclusion regex",
+      "observed": "FAIL test_db_file_exempt: expected 0 (.db exempt), got 1",
+      "reverted": "yes — ALL PASS after revert"
+    },
+    {
+      "branch": "UUID \\.db$ exemption",
+      "mutation": "removed |\\.db$ from scan-no-hardcoded-uuid.sh exclusion regex",
+      "observed": "FAIL test_db_file_exempt: expected 0 (.db exempt), got 1",
+      "reverted": "yes — ALL PASS after revert"
+    },
+    {
+      "branch": "seqcoll comment-strip",
+      "mutation": "replaced stripped=\"$(printf ... | sed ...)\" with stripped=\"$body\" (skip comment-stripping)",
+      "observed": "FAIL test_comment_only_mention_passes: expected exit 0, got 1 (LVA-054 VIOLATION flagged the comment-only docstring line)",
+      "reverted": "yes — all 7 cases PASS after revert"
+    }
+  ],
+  "scanner_drift_check": "git diff --stat on all four scan-*.sh scripts is EMPTY — scanners byte-identical to HEAD; only test files changed",
+  "check_constitution_exit": 0,
+  "runner_discovery": "verify-all-constitution-rules.sh line 227 globs tests/check-constitution/test_*.sh — new test_no_hardcoded_ipv4.sh auto-discovered",
+  "honest_result": "4 of 5 sampled gate scanners had at least one uncovered clause/branch; all closed. The 5th (emulator-runner-tag) was already exemplary (7 cases, full branch coverage) — recorded as-is, no manufactured gap.",
+  "suggested_next_ticket": {
+    "id": "LVA-063",
+    "type": "Task",
+    "title": "Gate-script clause-coverage backfill: add falsifiability sub-tests for uncovered branches in the §6.R hardcoded scanners + seqcoll guard (the .db exemption + comment-strip branches), and create the missing IPv4 scanner hermetic test"
+  }
+}

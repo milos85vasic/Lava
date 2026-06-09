@@ -116,6 +116,21 @@ else
   fail=1
 fi
 
+# Test 6 (LVA-058 / LVA-062): a tracked .db file (e.g. docs/workable_items.db,
+# the §11.4.95 git-tracked SQLite ticket DB) is in the exemption set — a
+# host:port literal inside it does NOT fail the gate. This covers the `\.db$`
+# branch the 2026-06 scanner gained. Proven falsifiable: removing `\.db$` from
+# the scanner's exclusion regex makes this fixture FAIL (the literal is no
+# longer exempt). Without coverage a refactor could silently drop the branch
+# and the next sync of a binary DB carrying a URL would break the build.
+rc=$(run_fixture docs/workable_items.db 'note: api at http://lava.example.com:9100')
+if [[ "$rc" == "0" ]]; then
+  echo "PASS test_db_file_exempt"
+else
+  echo "FAIL test_db_file_exempt: expected 0 (.db exempt), got $rc" >&2
+  fail=1
+fi
+
 if [[ "$fail" == "0" ]]; then
   echo "ALL PASS test_no_hardcoded_hostport"
   exit 0

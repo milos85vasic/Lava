@@ -46,9 +46,20 @@ func loadOrCreateTLS(sqlitePath string, sanIPs []net.IP) (*tls.Config, error) {
 	certPath := filepath.Join(dir, certFileName)
 	keyPath := filepath.Join(dir, keyFileName)
 
-	// Reuse existing material if present and valid.
+	// Reuse existing material if present, valid, AND still covering the current
+	// device IPs. The device's LAN IP can change between boots (DHCP renewal,
+	// switching networks); a persisted cert whose IP SANs predate that change no
+	// longer covers the new bind/advertise IP, so every LAN peer addressing the
+	// embed by that IP hits a TLS host-mismatch (LVA-061). Only reuse when the
+	// leaf SANs already cover every current sanIP — otherwise fall through and
+	// regenerate with the up-to-date IP set. When the IP set is unchanged the
+	// cert is reused verbatim, preserving any out-of-band leaf pin (the reason
+	// the cert is persisted at all).
 	if cert, err := tls.LoadX509KeyPair(certPath, keyPath); err == nil {
-		return tlsConfigFrom(cert), nil
+		if leaf := parsedLeaf(cert); leaf != nil && certCoversAllIPs(leaf, sanIPs) {
+			return tlsConfigFrom(cert), nil
+		}
+		// else: stale SANs — regenerate below so the new device IP is covered.
 	}
 
 	cert, certPEM, keyPEM, err := generateSelfSigned(sanIPs)
@@ -64,6 +75,49 @@ func loadOrCreateTLS(sqlitePath string, sanIPs []net.IP) (*tls.Config, error) {
 		return nil, fmt.Errorf("write key: %w", err)
 	}
 	return tlsConfigFrom(cert), nil
+}
+
+// parsedLeaf returns the parsed leaf x509 certificate for a loaded keypair.
+// tls.LoadX509KeyPair may leave cert.Leaf nil (it is only populated on newer Go
+// when the leaf is parsed during load), so fall back to parsing cert.Certificate[0]
+// ourselves. Returns nil if the leaf cannot be obtained, in which case the
+// caller treats the persisted material as not-reusable and regenerates.
+func parsedLeaf(cert tls.Certificate) *x509.Certificate {
+	if cert.Leaf != nil {
+		return cert.Leaf
+	}
+	if len(cert.Certificate) == 0 {
+		return nil
+	}
+	leaf, err := x509.ParseCertificate(cert.Certificate[0])
+	if err != nil {
+		return nil
+	}
+	return leaf
+}
+
+// certCoversAllIPs reports whether the leaf's IPAddresses SAN set contains every
+// IP in want. An empty want set is trivially covered (no LAN IPs to advertise —
+// loopback coverage from generateSelfSigned is unaffected). This is the LVA-061
+// staleness check: if the current device IPs are not all covered, the persisted
+// cert is stale and MUST be regenerated.
+func certCoversAllIPs(leaf *x509.Certificate, want []net.IP) bool {
+	for _, w := range want {
+		if w == nil {
+			continue
+		}
+		found := false
+		for _, sanIP := range leaf.IPAddresses {
+			if sanIP.Equal(w) {
+				found = true
+				break
+			}
+		}
+		if !found {
+			return false
+		}
+	}
+	return true
 }
 
 func tlsConfigFrom(cert tls.Certificate) *tls.Config {
