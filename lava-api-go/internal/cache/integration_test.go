@@ -36,6 +36,41 @@ func mustClient(t *testing.T) (*cache.Client, func()) {
 	}
 }
 
+// mustClientWithCloser is like mustClient but additionally returns a closer that
+// closes ONLY the underlying pgcache pool (not the schema teardown). Tests use it
+// to force a real driver error by closing the live pool mid-test, exercising the
+// error→Bypass fallthrough against the real Postgres surface (no mocking).
+func mustClientWithCloser(t *testing.T) (*cache.Client, func(), func()) {
+	t.Helper()
+	url := os.Getenv("POSTGRES_TEST_URL")
+	if url == "" {
+		t.Skip("POSTGRES_TEST_URL not set; run scripts/run-test-pg.sh")
+	}
+	inner, err := pgcache.ConnectFromURL(context.Background(), &pgcache.Config{
+		URL:        url,
+		SchemaName: "lava_api_test_err",
+		TableName:  "response_cache_e",
+		GCInterval: 0,
+	})
+	if err != nil {
+		t.Fatalf("ConnectFromURL: %v", err)
+	}
+	if err := inner.CreateSchema(context.Background()); err != nil {
+		_ = inner.Close()
+		t.Fatalf("CreateSchema: %v", err)
+	}
+	closeInner := func() { _ = inner.Close() }
+	cleanup := func() {
+		// Best-effort schema teardown; if the pool was already closed by the
+		// test's closeInner, this is a no-op and we just stop here.
+		if u := inner.Underlying(); u != nil {
+			_, _ = u.Exec(context.Background(), `DROP SCHEMA IF EXISTS lava_api_test_err CASCADE`)
+		}
+		closeInner()
+	}
+	return cache.New(inner), closeInner, cleanup
+}
+
 func TestSetGetReturnsHit(t *testing.T) {
 	c, cleanup := mustClient(t)
 	defer cleanup()
