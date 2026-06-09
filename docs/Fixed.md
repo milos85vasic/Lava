@@ -633,3 +633,30 @@ LVA-052 scoped favorites/visited topic downloads to the active-tracker default b
 
 HelixConstitution §11.4.93/95/106 materialization. Go CLI (modernc.org/sqlite, no CGO) with init/add/update/close/reopen/gen/verify/import/export. Operator directive §6.L 68th invocation, key prefix LVA. Superseded by migration to the canonical constitution binary (docs/tickets/MIGRATION-TO-CANONICAL.md). **Source:** operator-report — docs/tickets/DESIGN.md
 
+## LVA-076 — apiengine processJavaRes buildCshared task dependency + Gradle heap
+
+**Status:** Completed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** docs/CONTINUATION.md
+**Severity:** medium
+
+Gradle validation BUILD FAILED on clean .cxx: process JavaRes consumed buildCshared output without a declared edge; D8 OOM on 2g heap. Declared dependency plus bumped heap to 4g.
+
+## LVA-077 — release cold-start canary script for the R8 release artifact
+
+**Status:** Completed (→ Fixed.md)
+**Type:** Task
+**Evidence:** docs/CONTINUATION.md
+**Severity:** medium
+
+App has no connectedReleaseAndroidTest because testBuildType is debug; added scripts run-release-canary.sh to validate the exact R8 release APK cold-start on the Genymotion VM per clause 6.Z.
+
+## LVA-078 — restore lava-api-go container image build broken containerignore
+
+**Status:** Completed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** docs/CONTINUATION.md
+**Severity:** medium
+
+Root containerignore blanket-excluded submodules but go.mod replaces parent submodules X; in-container go build failed on missing replacement dirs. Excluded only nested git and build, kept source.
+
