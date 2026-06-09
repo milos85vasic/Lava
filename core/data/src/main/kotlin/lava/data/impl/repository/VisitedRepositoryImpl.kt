@@ -24,8 +24,16 @@ class VisitedRepositoryImpl @Inject constructor(
         return visitedTopicDao.observerAllIds()
     }
 
-    override suspend fun add(topic: TopicPage) {
-        visitedTopicDao.insert(topic.toVisitedEntity())
+    override fun observeProviderIds(): Flow<Map<String, String?>> {
+        // LVA-070 — derive the id→providerId map from the same rows observeTopics
+        // reads. associate keeps the newest row's provider id on a duplicate id.
+        return visitedTopicDao.observerAll().map { entities ->
+            entities.associate { it.id to it.providerId }
+        }
+    }
+
+    override suspend fun add(topic: TopicPage, providerId: String?) {
+        visitedTopicDao.insert(topic.toVisitedEntity(providerId))
     }
 
     override suspend fun clear() {

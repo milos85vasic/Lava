@@ -12,7 +12,15 @@ interface FavoritesRepository {
     suspend fun getIds(): List<String>
     suspend fun getTorrents(): List<Torrent>
     suspend fun contains(id: String): Boolean
-    suspend fun add(topic: Topic)
+
+    /**
+     * LVA-070 — [providerId] is the id of the source tracker/provider the topic
+     * came from; persisted on the favorite row so the topic screen can route an
+     * archiveorg/gutenberg favorite to HTTP_DOWNLOAD instead of falling back to
+     * the active tracker. Null (the default) keeps every existing caller
+     * compiling and persists NULL ⇒ active-tracker fallback (legacy behaviour).
+     */
+    suspend fun add(topic: Topic, providerId: String? = null)
     suspend fun add(topics: List<Topic>)
     suspend fun remove(topic: Topic)
     suspend fun remove(topics: List<Topic>)

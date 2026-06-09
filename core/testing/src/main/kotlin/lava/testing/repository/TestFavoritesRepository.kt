@@ -54,6 +54,10 @@ class TestFavoritesRepository : FavoritesRepository {
         val topic: Topic,
         val timestamp: Long,
         val hasUpdate: Boolean,
+        // LVA-070 — mirrors FavoriteTopicEntity.providerId: the source provider id
+        // persisted with the favorite so the topic screen can route to
+        // HTTP_DOWNLOAD. Null ⇒ active-tracker fallback (legacy behaviour).
+        val providerId: String? = null,
     )
 
     // Stored newest-first (Room `ORDER BY timestamp DESC`).
@@ -69,7 +73,14 @@ class TestFavoritesRepository : FavoritesRepository {
 
     override fun observeTopics(): Flow<List<TopicModel<out Topic>>> = rowsFlow.map { rows ->
         rows.map { row ->
-            TopicModel(topic = row.topic, isFavorite = true, hasUpdate = row.hasUpdate)
+            TopicModel(
+                topic = row.topic,
+                isFavorite = true,
+                hasUpdate = row.hasUpdate,
+                // LVA-070 — surface the persisted provider id on the list item so
+                // the favorites list can route a topic-open to HTTP_DOWNLOAD.
+                providerId = row.providerId,
+            )
         }
     }
 
@@ -85,11 +96,13 @@ class TestFavoritesRepository : FavoritesRepository {
 
     override suspend fun contains(id: String): Boolean = rowsFlow.value.any { it.topic.id == id }
 
-    override suspend fun add(topic: Topic) {
+    override suspend fun add(topic: Topic, providerId: String?) {
         // DAO insert is UPSERT-by-id with a fresh timestamp → moves to newest and
         // resets hasUpdate (a plain toFavoriteEntity carries hasUpdate = false).
+        // LVA-070 — the providerId is persisted on the row, exactly as
+        // FavoritesRepositoryImpl.add forwards it to toFavoriteEntity(providerId).
         val withoutExisting = rowsFlow.value.filterNot { it.topic.id == topic.id }
-        val row = Row(topic = topic, timestamp = nextTimestamp++, hasUpdate = false)
+        val row = Row(topic = topic, timestamp = nextTimestamp++, hasUpdate = false, providerId = providerId)
         rowsFlow.value = sorted(withoutExisting + row)
     }
 
@@ -160,6 +173,14 @@ class TestFavoritesRepository : FavoritesRepository {
 
     /** Synchronous snapshot for assertions that don't collect the flow. */
     fun currentTopics(): List<Topic> = rowsFlow.value.map { it.topic }
+
+    /**
+     * LVA-070 — synchronous read-back of the persisted provider id for a stored
+     * favorite, or null when the id is absent or was stored with no provider.
+     * Mirrors reading FavoriteTopicEntity.providerId back out of Room.
+     */
+    fun providerIdOf(id: String): String? =
+        rowsFlow.value.firstOrNull { it.topic.id == id }?.providerId
 
     private fun magnetChanged(old: Topic, update: Topic): Boolean {
         val oldMagnet = (old as? Torrent)?.magnetLink

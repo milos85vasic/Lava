@@ -57,6 +57,8 @@ internal class VisitedViewModel @Inject constructor(
     }
 
     private fun onTopicClick(topicModel: TopicModel<out Topic>) = intent {
-        postSideEffect(VisitedSideEffect.OpenTopic(topicModel.topic.id))
+        // LVA-070 — carry the persisted source provider so the topic screen can
+        // route to HTTP_DOWNLOAD for archiveorg/gutenberg visited topics.
+        postSideEffect(VisitedSideEffect.OpenTopic(topicModel.topic.id, topicModel.providerId))
     }
 }

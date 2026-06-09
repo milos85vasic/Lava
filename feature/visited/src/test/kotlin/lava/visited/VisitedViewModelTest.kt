@@ -222,7 +222,45 @@ class VisitedViewModelTest {
 
                 assertEquals(
                     "tapping a topic MUST navigate to that topic's id",
-                    VisitedSideEffect.OpenTopic("42"),
+                    VisitedSideEffect.OpenTopic("42", null),
+                    awaitSideEffect(),
+                )
+                cancelAndIgnoreRemainingItems()
+            }
+        }
+
+    // CHALLENGE — LVA-070: tapping a visited archiveorg topic posts OpenTopic
+    // carrying the PERSISTED source provider, so the topic screen routes the
+    // download button to HTTP_DOWNLOAD instead of the active tracker. The
+    // provider id flows DB row → observeProviderIds overlay → TopicModel →
+    // OpenTopic side effect through the real ObserveVisitedUseCase overlay.
+    /**
+     * Falsifiability rehearsal (PERFORMED 2026-06-09):
+     *   Mutation: in ObserveVisitedUseCase.invoke, drop the providerId overlay
+     *             (remove the `.combine(observeProviderIds()) { ... }` block).
+     *   Observed: this test FAILED —
+     *             "a visited archiveorg topic MUST open with its provider
+     *              expected:<OpenTopic(id=arch, providerId=archiveorg)>
+     *              but was:<OpenTopic(id=arch, providerId=null)>".
+     *   Reverted: yes.
+     */
+    @Test
+    fun `TopicClick on an archiveorg visited topic carries its persisted provider`() =
+        runTest(dispatcherRule.testDispatcher) {
+            visited.setTopics(listOf(topic("arch")))
+            visited.setProviderIds(mapOf("arch" to "archiveorg"))
+            buildViewModel()
+
+            viewModel.test(this) {
+                runOnCreate()
+                awaitState() // Initial
+                val items = (awaitState() as VisitedState.VisitedList).items
+
+                viewModel.perform(VisitedAction.TopicClick(items.first { it.topic.id == "arch" }))
+
+                assertEquals(
+                    "a visited archiveorg topic MUST open with its persisted provider",
+                    VisitedSideEffect.OpenTopic("arch", "archiveorg"),
                     awaitSideEffect(),
                 )
                 cancelAndIgnoreRemainingItems()
@@ -323,6 +361,10 @@ class VisitedViewModelTest {
 private class FakeVisitedRepository : VisitedRepository {
     private val topicsFlow = MutableStateFlow<List<Topic>>(emptyList())
     val idsFlow = MutableStateFlow<List<String>>(emptyList())
+
+    // LVA-070 — mirror VisitedTopicEntity.providerId: the per-id source provider
+    // the visited list overlays onto its models (id → providerId).
+    private val providerIdsFlow = MutableStateFlow<Map<String, String?>>(emptyMap())
     var cleared = false
 
     fun setTopics(topics: List<Topic>) {
@@ -330,18 +372,27 @@ private class FakeVisitedRepository : VisitedRepository {
         idsFlow.update { topics.map(Topic::id) }
     }
 
+    /** LVA-070 — seed the persisted id→providerId map for the overlay test. */
+    fun setProviderIds(providerIds: Map<String, String?>) {
+        providerIdsFlow.update { providerIds }
+    }
+
     override fun observeTopics(): Flow<List<Topic>> = topicsFlow
     override fun observeIds(): Flow<List<String>> = idsFlow
-    override suspend fun add(topic: TopicPage) {
-        // Mirror the prod repo's insert: append a BaseTopic for the page id.
+    override fun observeProviderIds(): Flow<Map<String, String?>> = providerIdsFlow
+    override suspend fun add(topic: TopicPage, providerId: String?) {
+        // Mirror the prod repo's insert: append a BaseTopic for the page id and
+        // persist the source provider (LVA-070).
         topicsFlow.update { it + BaseTopic(id = topic.id, title = topic.title) }
         idsFlow.update { it + topic.id }
+        providerIdsFlow.update { it + (topic.id to providerId) }
     }
 
     override suspend fun clear() {
         cleared = true
         topicsFlow.update { emptyList() }
         idsFlow.update { emptyList() }
+        providerIdsFlow.update { emptyMap() }
     }
 }
 
@@ -359,7 +410,7 @@ private class FakeFavoritesRepository : FavoritesRepository {
     override fun observeUpdatedIds(): Flow<List<String>> = updatedIds
     override fun observeTopics(): Flow<List<TopicModel<out Topic>>> = MutableStateFlow(emptyList())
     override suspend fun contains(id: String): Boolean = ids.value.contains(id)
-    override suspend fun add(topic: Topic) {
+    override suspend fun add(topic: Topic, providerId: String?) {
         ids.update { if (it.contains(topic.id)) it else it + topic.id }
     }
     override suspend fun removeById(id: String) {
@@ -407,11 +458,11 @@ private class FakeBookmarksRepository : BookmarksRepository {
 private class RealToggleFavoriteUseCase(
     private val favoritesRepository: FavoritesRepository,
 ) : ToggleFavoriteUseCase {
-    override suspend fun invoke(id: String) {
+    override suspend fun invoke(id: String, providerId: String?) {
         if (favoritesRepository.contains(id)) {
             favoritesRepository.removeById(id)
         } else {
-            favoritesRepository.add(BaseTopic(id = id, title = ""))
+            favoritesRepository.add(BaseTopic(id = id, title = ""), providerId)
         }
     }
 }
@@ -419,7 +470,7 @@ private class RealToggleFavoriteUseCase(
 /** A toggle use case whose real operation fails — exercises the VM's
  *  runCatching/onFailure error branch. */
 private class ThrowingToggleFavoriteUseCase : ToggleFavoriteUseCase {
-    override suspend fun invoke(id: String) {
+    override suspend fun invoke(id: String, providerId: String?) {
         throw IllegalStateException("toggle favorite failed")
     }
 }

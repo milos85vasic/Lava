@@ -28,7 +28,7 @@ import org.orbitmvi.orbit.compose.collectSideEffect
 
 @Composable
 fun FavoritesScreen(
-    openTopic: (id: String) -> Unit,
+    openTopic: (id: String, providerId: String?) -> Unit,
 ) = FavoritesScreen(
     viewModel = viewModel(),
     openTopic = openTopic,
@@ -37,11 +37,11 @@ fun FavoritesScreen(
 @Composable
 private fun FavoritesScreen(
     viewModel: FavoritesViewModel,
-    openTopic: (id: String) -> Unit,
+    openTopic: (id: String, providerId: String?) -> Unit,
 ) {
     viewModel.collectSideEffect { sideEffect ->
         when (sideEffect) {
-            is FavoritesSideEffect.OpenTopic -> openTopic(sideEffect.id)
+            is FavoritesSideEffect.OpenTopic -> openTopic(sideEffect.id, sideEffect.providerId)
         }
     }
     val state by viewModel.collectAsState()

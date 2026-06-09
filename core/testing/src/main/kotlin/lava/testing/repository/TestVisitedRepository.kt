@@ -38,21 +38,44 @@ import lava.models.topic.Torrent
  */
 class TestVisitedRepository : VisitedRepository {
 
-    /** Newest-first list of stored topics, mirroring `timestamp DESC` ordering. */
-    private val topicsFlow = MutableStateFlow<List<Topic>>(emptyList())
+    /**
+     * One stored visited row. Mirrors the relevant columns of
+     * `VisitedTopicEntity`: the converted topic payload + the LVA-070
+     * `providerId` (the source provider, persisted so the topic screen can route
+     * a visited archiveorg/gutenberg topic to HTTP_DOWNLOAD; null ⇒ active-tracker
+     * fallback).
+     */
+    private data class Row(val topic: Topic, val providerId: String?)
 
-    override fun observeTopics(): Flow<List<Topic>> = topicsFlow
+    /** Newest-first list of stored rows, mirroring `timestamp DESC` ordering. */
+    private val rowsFlow = MutableStateFlow<List<Row>>(emptyList())
 
-    override fun observeIds(): Flow<List<String>> = topicsFlow.map { list -> list.map(Topic::id) }
+    override fun observeTopics(): Flow<List<Topic>> = rowsFlow.map { rows -> rows.map { it.topic } }
 
-    override suspend fun add(topic: TopicPage) {
+    override fun observeIds(): Flow<List<String>> = rowsFlow.map { rows -> rows.map { it.topic.id } }
+
+    override fun observeProviderIds(): Flow<Map<String, String?>> =
+        rowsFlow.map { rows -> rows.associate { it.topic.id to it.providerId } }
+
+    override suspend fun add(topic: TopicPage, providerId: String?) {
+        // LVA-070 — the providerId is persisted on the row, exactly as
+        // VisitedRepositoryImpl.add forwards it to toVisitedEntity(providerId).
         val converted = topic.toVisitedTopic()
-        topicsFlow.value = listOf(converted) + topicsFlow.value.filterNot { it.id == converted.id }
+        val row = Row(topic = converted, providerId = providerId)
+        rowsFlow.value = listOf(row) + rowsFlow.value.filterNot { it.topic.id == converted.id }
     }
 
     override suspend fun clear() {
-        topicsFlow.value = emptyList()
+        rowsFlow.value = emptyList()
     }
+
+    /**
+     * LVA-070 — synchronous read-back of the persisted provider id for a stored
+     * visited topic, or null when the id is absent or was stored with no
+     * provider. Mirrors reading VisitedTopicEntity.providerId back out of Room.
+     */
+    fun providerIdOf(id: String): String? =
+        rowsFlow.value.firstOrNull { it.topic.id == id }?.providerId
 
     /**
      * Mirrors `VisitedTopicEntity.toTopic`'s branch: a [Torrent] when any torrent

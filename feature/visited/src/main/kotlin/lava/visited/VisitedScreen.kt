@@ -20,7 +20,7 @@ import org.orbitmvi.orbit.compose.collectSideEffect
 
 @Composable
 fun VisitedScreen(
-    openTopic: (id: String) -> Unit,
+    openTopic: (id: String, providerId: String?) -> Unit,
 ) = VisitedScreen(
     viewModel = viewModel(),
     openTopic = openTopic,
@@ -29,13 +29,13 @@ fun VisitedScreen(
 @Composable
 private fun VisitedScreen(
     viewModel: VisitedViewModel,
-    openTopic: (id: String) -> Unit,
+    openTopic: (id: String, providerId: String?) -> Unit,
 ) {
     val snackbarHost = LocalSnackbarHostState.current
     val favoriteToggleError = stringResource(lava.ui.R.string.error_title)
     viewModel.collectSideEffect { sideEffect ->
         when (sideEffect) {
-            is VisitedSideEffect.OpenTopic -> openTopic(sideEffect.id)
+            is VisitedSideEffect.OpenTopic -> openTopic(sideEffect.id, sideEffect.providerId)
             is VisitedSideEffect.ShowFavoriteToggleError -> snackbarHost.showSnackbar(favoriteToggleError)
         }
     }

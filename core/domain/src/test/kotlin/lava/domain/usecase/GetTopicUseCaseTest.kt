@@ -42,7 +42,8 @@ class GetTopicUseCaseTest {
         override fun observeTopics(): Flow<List<Topic>> = MutableStateFlow(emptyList())
         override fun observeIds(): Flow<List<String>> =
             MutableStateFlow(added.map { it.id })
-        override suspend fun add(topic: TopicPage) { added += topic }
+        override fun observeProviderIds(): Flow<Map<String, String?>> = MutableStateFlow(emptyMap())
+        override suspend fun add(topic: TopicPage, providerId: String?) { added += topic }
         override suspend fun clear() { added.clear() }
     }
 
@@ -56,7 +57,7 @@ class GetTopicUseCaseTest {
         override suspend fun getIds(): List<String> = emptyList()
         override suspend fun getTorrents(): List<Torrent> = emptyList()
         override suspend fun contains(id: String): Boolean = false
-        override suspend fun add(topic: Topic) = Unit
+        override suspend fun add(topic: Topic, providerId: String?) = Unit
         override suspend fun add(topics: List<Topic>) = Unit
         override suspend fun remove(topic: Topic) = Unit
         override suspend fun remove(topics: List<Topic>) = Unit

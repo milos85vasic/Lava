@@ -49,7 +49,7 @@ class EnrichTopicsUseCaseTest {
         override suspend fun getIds(): List<String> = idsFlow.value
         override suspend fun getTorrents(): List<Torrent> = emptyList()
         override suspend fun contains(id: String): Boolean = id in idsFlow.value
-        override suspend fun add(topic: Topic) = Unit
+        override suspend fun add(topic: Topic, providerId: String?) = Unit
         override suspend fun add(topics: List<Topic>) = Unit
         override suspend fun remove(topic: Topic) = Unit
         override suspend fun remove(topics: List<Topic>) = Unit
@@ -65,7 +65,8 @@ class EnrichTopicsUseCaseTest {
         override fun observeIds(): Flow<List<String>> = idsFlow
         override fun observeTopics(): Flow<List<Topic>> =
             throw UnsupportedOperationException("not used by EnrichTopicsUseCase")
-        override suspend fun add(topic: TopicPage) = Unit
+        override fun observeProviderIds(): Flow<Map<String, String?>> = MutableStateFlow(emptyMap())
+        override suspend fun add(topic: TopicPage, providerId: String?) = Unit
         override suspend fun clear() = Unit
     }
 

@@ -270,7 +270,7 @@ class CategoryViewModelTest {
 private class RecordingToggleFavoriteUseCase : ToggleFavoriteUseCase {
     var shouldThrow: Boolean = false
     val toggledIds = mutableListOf<String>()
-    override suspend fun invoke(id: String) {
+    override suspend fun invoke(id: String, providerId: String?) {
         if (shouldThrow) error("toggle favorite failed for $id")
         toggledIds += id
     }

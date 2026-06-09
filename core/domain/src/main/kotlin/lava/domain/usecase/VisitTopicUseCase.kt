@@ -12,10 +12,10 @@ class VisitTopicUseCase @Inject constructor(
     private val favoritesRepository: FavoritesRepository,
     private val dispatchers: Dispatchers,
 ) {
-    suspend operator fun invoke(topic: TopicPage) {
+    suspend operator fun invoke(topic: TopicPage, providerId: String? = null) {
         withContext(dispatchers.default) {
             favoritesRepository.markVisited(topic.id)
-            visitedRepository.add(topic)
+            visitedRepository.add(topic, providerId)
         }
     }
 }

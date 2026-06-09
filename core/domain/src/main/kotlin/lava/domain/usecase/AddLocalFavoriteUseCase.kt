@@ -11,10 +11,10 @@ class AddLocalFavoriteUseCase @Inject constructor(
     private val favoritesRepository: FavoritesRepository,
     private val dispatchers: Dispatchers,
 ) {
-    suspend operator fun invoke(id: String) {
+    suspend operator fun invoke(id: String, providerId: String? = null) {
         withContext(dispatchers.default) {
             val topic = topicService.getTopic(id)
-            favoritesRepository.add(topic)
+            favoritesRepository.add(topic, providerId)
         }
     }
 }

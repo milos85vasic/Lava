@@ -124,6 +124,11 @@ internal fun FavoriteTopicEntity.toTopicModel(): TopicModel<out Topic> {
         topic = toTopic(),
         isFavorite = true,
         hasUpdate = hasUpdate,
+        // LVA-070 — surface the persisted source provider on the favorites list
+        // item so a favorited archiveorg/gutenberg topic reopens with its provider
+        // (?p=<providerId>) and routes to HTTP_DOWNLOAD instead of the active
+        // tracker. Null ⇒ active-tracker fallback (legacy rows).
+        providerId = providerId,
     )
 }
 

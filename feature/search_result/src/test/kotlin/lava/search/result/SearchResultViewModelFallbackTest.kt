@@ -149,7 +149,7 @@ class SearchResultViewModelFallbackTest {
     private class FakeToggleFavoriteUseCase : ToggleFavoriteUseCase {
         val toggledIds = mutableListOf<String>()
 
-        override suspend fun invoke(id: String) {
+        override suspend fun invoke(id: String, providerId: String?) {
             toggledIds += id
         }
     }

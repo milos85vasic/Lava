@@ -11,10 +11,13 @@ class GetTopicUseCase @Inject constructor(
     private val visitTopicUseCase: VisitTopicUseCase,
     private val dispatchers: Dispatchers,
 ) {
-    suspend operator fun invoke(id: String): TopicPage {
+    suspend operator fun invoke(id: String, providerId: String? = null): TopicPage {
         return withContext(dispatchers.default) {
             topicService.getTopicPage(id).also {
-                visitTopicUseCase(it)
+                // LVA-070 — thread the source provider into the visited record so
+                // an archiveorg/gutenberg topic opened from search persists its
+                // provider and later routes to HTTP_DOWNLOAD on the topic screen.
+                visitTopicUseCase(it, providerId)
             }
         }
     }

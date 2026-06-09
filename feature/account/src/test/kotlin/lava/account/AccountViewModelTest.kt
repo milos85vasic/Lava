@@ -293,7 +293,7 @@ private class CountingFavoritesRepository : FavoritesRepository {
     override suspend fun getIds(): List<String> = emptyList()
     override suspend fun getTorrents(): List<Torrent> = emptyList()
     override suspend fun contains(id: String): Boolean = false
-    override suspend fun add(topic: Topic) = Unit
+    override suspend fun add(topic: Topic, providerId: String?) = Unit
     override suspend fun add(topics: List<Topic>) = Unit
     override suspend fun remove(topic: Topic) = Unit
     override suspend fun remove(topics: List<Topic>) = Unit
@@ -323,6 +323,7 @@ private class CountingVisitedRepository : VisitedRepository {
     var cleared = false
     override fun observeTopics(): Flow<List<Topic>> = MutableStateFlow(emptyList())
     override fun observeIds(): Flow<List<String>> = MutableStateFlow(emptyList())
-    override suspend fun add(topic: TopicPage) = Unit
+    override fun observeProviderIds(): Flow<Map<String, String?>> = MutableStateFlow(emptyMap())
+    override suspend fun add(topic: TopicPage, providerId: String?) = Unit
     override suspend fun clear() { cleared = true }
 }

@@ -52,8 +52,8 @@ class FavoritesRepositoryImpl @Inject constructor(
         return favoriteTopicDao.getAllIds().contains(id)
     }
 
-    override suspend fun add(topic: Topic) {
-        favoriteTopicDao.insert(topic.toFavoriteEntity())
+    override suspend fun add(topic: Topic, providerId: String?) {
+        favoriteTopicDao.insert(topic.toFavoriteEntity(providerId))
     }
 
     override suspend fun add(topics: List<Topic>) {

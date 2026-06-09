@@ -56,7 +56,9 @@ class FavoritesViewModel @Inject constructor(
     }
 
     private fun onTopicClick(topicModel: TopicModel<out Topic>) = intent {
-        postSideEffect(FavoritesSideEffect.OpenTopic(topicModel.topic.id))
+        // LVA-070 — carry the persisted source provider so the topic screen can
+        // route to HTTP_DOWNLOAD for archiveorg/gutenberg favorites.
+        postSideEffect(FavoritesSideEffect.OpenTopic(topicModel.topic.id, topicModel.providerId))
     }
 
     private fun onSyncNow() = intent {

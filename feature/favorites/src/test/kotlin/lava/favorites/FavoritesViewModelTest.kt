@@ -183,7 +183,43 @@ class FavoritesViewModelTest {
                     ),
                 )
                 val effect = awaitSideEffect()
-                assertEquals(FavoritesSideEffect.OpenTopic("42"), effect)
+                assertEquals(FavoritesSideEffect.OpenTopic("42", null), effect)
+                cancelAndIgnoreRemainingItems()
+            }
+        }
+
+    /**
+     * CHALLENGE — LVA-070: tapping a favorited archiveorg topic posts
+     * [FavoritesSideEffect.OpenTopic] carrying the persisted source provider, so
+     * the topic screen routes the download button to HTTP_DOWNLOAD instead of the
+     * active tracker. The provider id rides on the list item's
+     * [TopicModel.providerId] (populated by `FavoriteTopicEntity.toTopicModel`).
+     *
+     * Falsifiability rehearsal (PERFORMED 2026-06-09):
+     *   Mutation: in FavoritesViewModel.onTopicClick, post
+     *             `OpenTopic(topicModel.topic.id, null)` (drop the provider).
+     *   Observed: this test FAILED — expected
+     *             OpenTopic(id=arch, providerId=archiveorg) but was
+     *             OpenTopic(id=arch, providerId=null).
+     *   Reverted: yes.
+     */
+    @Test
+    fun `TopicClick on an archiveorg favorite carries its persisted provider`() =
+        runTest(dispatcherRule.testDispatcher) {
+            repository.emit(emptyList())
+            viewModel.test(this) {
+                runOnCreate()
+                awaitItemMatching { it is FavoritesState.Empty }
+                viewModel.perform(
+                    FavoritesAction.TopicClick(
+                        TopicModel(
+                            topic = BaseTopic(id = "arch", title = "Archive item"),
+                            providerId = "archiveorg",
+                        ),
+                    ),
+                )
+                val effect = awaitSideEffect()
+                assertEquals(FavoritesSideEffect.OpenTopic("arch", "archiveorg"), effect)
                 cancelAndIgnoreRemainingItems()
             }
         }
@@ -335,11 +371,13 @@ private class InMemoryFavoritesRepository : FavoritesRepository {
     override suspend fun getIds(): List<String> = ids.value
     override suspend fun getTorrents(): List<Torrent> = torrents
     override suspend fun contains(id: String): Boolean = ids.value.contains(id)
-    override suspend fun add(topic: Topic) {
+    override suspend fun add(topic: Topic, providerId: String?) {
         // LVA-017: mirror FavoriteTopicDao.insert @Insert(onConflict = REPLACE) —
         // the id is the PK, so re-adding an existing id REPLACEs its entry
         // rather than appending a duplicate (Anti-Bluff Third Law).
-        topics.value = topics.value.filterNot { it.topic.id == topic.id } + TopicModel(topic)
+        // LVA-070: persist the source provider on the row's TopicModel.
+        topics.value = topics.value.filterNot { it.topic.id == topic.id } +
+            TopicModel(topic, providerId = providerId)
         ids.value = ids.value.filterNot { it == topic.id } + topic.id
     }
     override suspend fun add(topics: List<Topic>) {

@@ -316,7 +316,7 @@ private class FakeFavoritesRepository : FavoritesRepository {
 
     // LVA-017: mirror FavoriteTopicDao.insert @Insert(onConflict = REPLACE) — the
     // id is the PK, so re-adding an existing id REPLACEs rather than duplicates.
-    override suspend fun add(topic: Topic) { ids.value = ids.value.filterNot { it == topic.id } + topic.id }
+    override suspend fun add(topic: Topic, providerId: String?) { ids.value = ids.value.filterNot { it == topic.id } + topic.id }
     override suspend fun add(topics: List<Topic>) {
         val incoming = topics.map { it.id }
         ids.value = ids.value.filterNot { it in incoming } + incoming
@@ -334,6 +334,7 @@ private class FakeFavoritesRepository : FavoritesRepository {
 private class FakeVisitedRepository : VisitedRepository {
     override fun observeTopics(): Flow<List<Topic>> = flowOf(emptyList())
     override fun observeIds(): Flow<List<String>> = flowOf(emptyList())
-    override suspend fun add(topic: TopicPage) = Unit
+    override fun observeProviderIds(): Flow<Map<String, String?>> = flowOf(emptyMap())
+    override suspend fun add(topic: TopicPage, providerId: String?) = Unit
     override suspend fun clear() = Unit
 }

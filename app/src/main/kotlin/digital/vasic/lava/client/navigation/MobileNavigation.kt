@@ -145,9 +145,11 @@ private fun addNestedNavigation(
                 openTopic = { id -> openTopic(id, null) },
             )
             addTopics(
-                // favorites/visited cannot supply a providerId without a Room
-                // column (OWED) → active-tracker default.
-                openTopic = { id -> openTopic(id, null) },
+                // LVA-070 — favorites/visited now persist the source provider
+                // (Room providerId column), so a favorited/visited archiveorg/
+                // gutenberg topic reopens with `?p=<providerId>` and routes to
+                // HTTP_DOWNLOAD. Null ⇒ active-tracker fallback (legacy rows).
+                openTopic = { id, providerId -> openTopic(id, providerId) },
             )
             addMenu(
                 openLogin = openLogin,
@@ -233,7 +235,9 @@ private fun addForum(
 
 context(NavigationGraphBuilder)
 private fun addTopics(
-    openTopic: (id: String) -> Unit,
+    // LVA-070 — favorites/visited now persist the source provider, so their
+    // open-topic callback carries it through to route HTTP_DOWNLOAD providers.
+    openTopic: (id: String, providerId: String?) -> Unit,
 ) = addDestination(
     route = BottomRoute.Topics.route,
     animations = BottomRoute.Topics.animations,

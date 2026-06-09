@@ -104,7 +104,7 @@ class SearchResultRetryTest {
     }
 
     private class FakeToggleFavoriteUseCase : ToggleFavoriteUseCase {
-        override suspend fun invoke(id: String) = Unit
+        override suspend fun invoke(id: String, providerId: String?) = Unit
     }
 
     private class FakeObserveAuthStateUseCase(

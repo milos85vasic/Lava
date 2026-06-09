@@ -15,7 +15,13 @@ import javax.inject.Inject
  * [ToggleFavoriteUseCaseImpl] to this interface.
  */
 interface ToggleFavoriteUseCase {
-    suspend operator fun invoke(id: String)
+    /**
+     * LVA-070 — [providerId] is threaded through to the persisted favorite row
+     * so an archiveorg/gutenberg topic favorited from the topic screen records
+     * its source provider and later routes to HTTP_DOWNLOAD. Null (the default)
+     * keeps every existing caller compiling and preserves legacy behaviour.
+     */
+    suspend operator fun invoke(id: String, providerId: String? = null)
 }
 
 class ToggleFavoriteUseCaseImpl @Inject constructor(
@@ -25,14 +31,14 @@ class ToggleFavoriteUseCaseImpl @Inject constructor(
     private val backgroundService: BackgroundService,
     private val dispatchers: Dispatchers,
 ) : ToggleFavoriteUseCase {
-    override suspend operator fun invoke(id: String) {
+    override suspend operator fun invoke(id: String, providerId: String?) {
         withContext(dispatchers.default) {
             val isFavorites = favoritesRepository.contains(id)
             if (isFavorites) {
                 removeLocalFavoriteUseCase(id)
                 backgroundService.removeFavoriteTopic(id)
             } else {
-                addLocalFavoriteUseCase(id)
+                addLocalFavoriteUseCase(id, providerId)
                 backgroundService.addFavoriteTopic(id)
             }
         }

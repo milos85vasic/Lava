@@ -90,7 +90,13 @@ internal class TopicViewModel @Inject constructor(
             AnalyticsTracker.Events.VIEW_TOPIC,
             mapOf(AnalyticsTracker.Params.TOPIC_ID to id.toString()),
         )
-        runCatching { coroutineScope { getTopicUseCase(id) } }
+        runCatching {
+            coroutineScope {
+                // LVA-070 — pass the source provider so the visited record
+                // persists it (HTTP_DOWNLOAD routing for archiveorg/gutenberg).
+                getTopicUseCase(id, providerId.ifBlank { null })
+            }
+        }
             .onSuccess { topic ->
                 reduce {
                     val torrentData = topic.torrentData
@@ -172,7 +178,9 @@ internal class TopicViewModel @Inject constructor(
     }
 
     private fun onFavoriteClick() = intent {
-        runCatching { toggleFavoriteUseCase(id) }
+        // LVA-070 — pass the source provider so an archiveorg/gutenberg favorite
+        // persists its provider id and later routes to HTTP_DOWNLOAD.
+        runCatching { toggleFavoriteUseCase(id, providerId.ifBlank { null }) }
             .onFailure {
                 analytics.recordNonFatal(
                     it,
