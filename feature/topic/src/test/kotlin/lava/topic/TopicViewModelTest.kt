@@ -23,6 +23,7 @@ import lava.domain.usecase.ToggleFavoriteUseCaseImpl
 import lava.domain.usecase.VisitTopicUseCase
 import lava.models.Page
 import lava.models.auth.AuthState
+import lava.models.topic.BaseTopic
 import lava.models.topic.Post
 import lava.models.topic.Topic
 import lava.models.topic.TopicModel
@@ -241,6 +242,18 @@ class TopicViewModelTest {
             }
         }
     }
+
+    // CHALLENGE — LVA-017: re-adding the same favorite id REPLACEs (matches
+    // FavoriteTopicDao @Insert(onConflict = REPLACE)), never duplicates. Makes
+    // the fake's dedup falsifiable (the prior append-form yielded [7, 7]).
+    @Test
+    fun `FakeFavoritesRepository re-add keeps a single id`() =
+        runTest(dispatcherRule.testDispatcher) {
+            val repo = FakeFavoritesRepository()
+            repo.add(BaseTopic(id = "7", title = "v1"))
+            repo.add(BaseTopic(id = "7", title = "v2"))
+            assertEquals(listOf("7"), repo.getIds())
+        }
 }
 
 /**
@@ -292,8 +305,14 @@ private class FakeFavoritesRepository : FavoritesRepository {
     override suspend fun getIds(): List<String> = ids.value
     override suspend fun getTorrents(): List<Torrent> = emptyList()
     override suspend fun contains(id: String): Boolean = ids.value.contains(id)
-    override suspend fun add(topic: Topic) { ids.value = ids.value + topic.id }
-    override suspend fun add(topics: List<Topic>) { ids.value = ids.value + topics.map { it.id } }
+
+    // LVA-017: mirror FavoriteTopicDao.insert @Insert(onConflict = REPLACE) — the
+    // id is the PK, so re-adding an existing id REPLACEs rather than duplicates.
+    override suspend fun add(topic: Topic) { ids.value = ids.value.filterNot { it == topic.id } + topic.id }
+    override suspend fun add(topics: List<Topic>) {
+        val incoming = topics.map { it.id }
+        ids.value = ids.value.filterNot { it in incoming } + incoming
+    }
     override suspend fun remove(topic: Topic) { ids.value = ids.value - topic.id }
     override suspend fun remove(topics: List<Topic>) { ids.value = ids.value - topics.map { it.id }.toSet() }
     override suspend fun removeById(id: String) { ids.value = ids.value - id }

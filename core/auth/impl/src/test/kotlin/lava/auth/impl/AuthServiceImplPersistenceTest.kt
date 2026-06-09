@@ -226,9 +226,7 @@ class AuthServiceImplPersistenceTest {
         private var historySyncPeriod: SyncPeriod = SyncPeriod.OFF
         private var credentialsSyncPeriod: SyncPeriod = SyncPeriod.OFF
 
-        override fun getHistorySyncPeriod(): SyncPeriod = historySyncPeriod
         override fun setHistorySyncPeriod(period: SyncPeriod) { historySyncPeriod = period }
-        override fun getCredentialsSyncPeriod(): SyncPeriod = credentialsSyncPeriod
         override fun setCredentialsSyncPeriod(period: SyncPeriod) { credentialsSyncPeriod = period }
     }
 

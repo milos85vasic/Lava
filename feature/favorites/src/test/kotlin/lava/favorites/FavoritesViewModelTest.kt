@@ -285,6 +285,18 @@ class FavoritesViewModelTest {
             }
         }
     }
+
+    // CHALLENGE — LVA-017: re-adding the same favorite id REPLACEs (matches
+    // FavoriteTopicDao @Insert(onConflict = REPLACE)), never duplicates. Makes
+    // the fake's dedup falsifiable (the prior append-form yielded [7, 7]).
+    @Test
+    fun `InMemoryFavoritesRepository re-add keeps a single entry`() =
+        runTest(dispatcherRule.testDispatcher) {
+            val repo = InMemoryFavoritesRepository()
+            repo.add(BaseTopic(id = "7", title = "v1"))
+            repo.add(BaseTopic(id = "7", title = "v2"))
+            assertEquals(listOf("7"), repo.getIds())
+        }
 }
 
 private class RecordingAnalytics : AnalyticsTracker {
@@ -324,8 +336,11 @@ private class InMemoryFavoritesRepository : FavoritesRepository {
     override suspend fun getTorrents(): List<Torrent> = torrents
     override suspend fun contains(id: String): Boolean = ids.value.contains(id)
     override suspend fun add(topic: Topic) {
-        topics.value = topics.value + TopicModel(topic)
-        ids.value = ids.value + topic.id
+        // LVA-017: mirror FavoriteTopicDao.insert @Insert(onConflict = REPLACE) —
+        // the id is the PK, so re-adding an existing id REPLACEs its entry
+        // rather than appending a duplicate (Anti-Bluff Third Law).
+        topics.value = topics.value.filterNot { it.topic.id == topic.id } + TopicModel(topic)
+        ids.value = ids.value.filterNot { it == topic.id } + topic.id
     }
     override suspend fun add(topics: List<Topic>) {
         topics.forEach { add(it) }

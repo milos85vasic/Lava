@@ -86,9 +86,10 @@ interface PreferencesStorage {
     suspend fun clearSignaledAuthState()
 
     fun getDeviceId(): String
-    fun getHistorySyncPeriod(): SyncPeriod
+
+    // LVA-018: getHistorySyncPeriod()/getCredentialsSyncPeriod() removed — zero
+    // call sites (sync-period values are surfaced via getSettings()/Settings).
     fun setHistorySyncPeriod(period: SyncPeriod)
-    fun getCredentialsSyncPeriod(): SyncPeriod
     fun setCredentialsSyncPeriod(period: SyncPeriod)
 }
 

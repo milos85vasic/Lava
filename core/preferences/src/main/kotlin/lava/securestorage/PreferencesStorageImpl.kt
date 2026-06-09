@@ -243,18 +243,10 @@ internal class PreferencesStorageImpl @Inject constructor(
         }
     }
 
-    override fun getHistorySyncPeriod(): SyncPeriod {
-        val stored = settingsPreferences.getString(historySyncPeriodKey, null)
-        return stored?.let { enumValueOf<SyncPeriod>(it) } ?: SyncPeriod.OFF
-    }
-
+    // LVA-018: getHistorySyncPeriod()/getCredentialsSyncPeriod() removed (dead —
+    // zero call sites; values flow to the UI via getSettings()/Settings).
     override fun setHistorySyncPeriod(period: SyncPeriod) {
         settingsPreferences.edit { putString(historySyncPeriodKey, period.name) }
-    }
-
-    override fun getCredentialsSyncPeriod(): SyncPeriod {
-        val stored = settingsPreferences.getString(credentialsSyncPeriodKey, null)
-        return stored?.let { enumValueOf<SyncPeriod>(it) } ?: SyncPeriod.OFF
     }
 
     override fun setCredentialsSyncPeriod(period: SyncPeriod) {
