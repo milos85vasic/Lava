@@ -35,7 +35,8 @@ import lava.models.topic.Author
 import lava.models.topic.Topic
 import lava.models.topic.TopicModel
 import lava.models.topic.Torrent
-import lava.network.sse.SseClient
+import lava.network.sse.SseBaseUrlBuilder
+import lava.network.sse.SseClientFactory
 import lava.network.sse.SseEvent
 import lava.tracker.api.model.SearchRequest
 import lava.tracker.api.model.SortField
@@ -65,6 +66,14 @@ internal class SearchResultViewModel @Inject constructor(
     private val observeSettingsUseCase: ObserveSettingsUseCase,
     private val analytics: AnalyticsTracker,
     private val sdk: LavaTrackerSdk,
+    // LVA-071 (2026-06-09): SSE client + base-URL builder injected so the
+    // error → Error → retry path is hermetically testable against a
+    // MockWebServer. Defaults preserve pre-LVA-071 production behaviour for
+    // any caller that still constructs the VM directly without supplying
+    // them (the previous code created `SseClient()` inline + built the
+    // `https://host:port` URL inline).
+    private val sseClientFactory: SseClientFactory = SseClientFactory.Default,
+    private val sseBaseUrlBuilder: SseBaseUrlBuilder = SseBaseUrlBuilder.Https,
 ) : ViewModel(), ContainerHost<SearchPageState, SearchResultSideEffect> {
     private val logger = loggerFactory.get("SearchResultViewModel")
     private val mutableFilter = MutableStateFlow(savedStateHandle.filter)
@@ -329,10 +338,10 @@ internal class SearchResultViewModel @Inject constructor(
             )
         }
 
-        val client = SseClient()
+        val client = sseClientFactory.create()
         val currentSettings = observeSettingsUseCase().first()
         val apiBaseUrl = when (val ep = currentSettings.endpoint) {
-            is Endpoint.GoApi -> "https://${ep.host}:${ep.port}"
+            is Endpoint.GoApi -> sseBaseUrlBuilder.build(ep.host, ep.port)
             else -> return@intent
         }
         val params = buildString {

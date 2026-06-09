@@ -19,4 +19,9 @@ dependencies {
     // compiler needs the type accessible in the test classpath even
     // when callers use the default null value.
     testImplementation(project(":core:database"))
+
+    // LVA-071 (2026-06-09): the SSE error → Error → retry hermetic test
+    // (`SearchResultSseErrorRetryTest`) drives the REAL SseClient against a
+    // MockWebServer that returns an erroring SSE response.
+    testImplementation(libs.okhttp.mockwebserver)
 }
