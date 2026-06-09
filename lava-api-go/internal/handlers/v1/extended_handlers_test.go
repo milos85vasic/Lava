@@ -332,10 +332,14 @@ func TestGetDownload_ProviderError(t *testing.T) {
 	}
 }
 
-// TestGetCaptcha_Success verifies the captcha handler streams the PNG bytes.
+// TestGetCaptcha_Success verifies the captcha handler streams the bytes under
+// the upstream-reported Content-Type. LVA-026: the handler propagates the
+// provider's CaptchaImage.ContentType verbatim (it no longer hardcodes
+// image/png); a PNG upstream is served as image/png because the provider says
+// so, not because the type is assumed.
 func TestGetCaptcha_Success(t *testing.T) {
 	pngBytes := []byte{0x89, 0x50, 0x4E, 0x47}
-	fp := &richProvider{captcha: &provider.CaptchaImage{Path: "cap.png", Data: pngBytes}}
+	fp := &richProvider{captcha: &provider.CaptchaImage{Path: "cap.png", ContentType: "image/png", Data: pngBytes}}
 	router := setupTestRouter(fp)
 
 	w := httptest.NewRecorder()
@@ -346,7 +350,7 @@ func TestGetCaptcha_Success(t *testing.T) {
 		t.Fatalf("status = %d, want 200; body=%s", w.Code, w.Body.String())
 	}
 	if ct := w.Header().Get("Content-Type"); ct != "image/png" {
-		t.Errorf("Content-Type = %q, want image/png", ct)
+		t.Errorf("Content-Type = %q, want image/png (propagated from upstream)", ct)
 	}
 	if !bytes.Equal(w.Body.Bytes(), pngBytes) {
 		t.Errorf("body = %v, want %v", w.Body.Bytes(), pngBytes)

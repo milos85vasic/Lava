@@ -23,6 +23,12 @@ func (h *LoginHandler) PostLogin(c *gin.Context) {
 		Username    string `json:"username"`
 		Password    string `json:"password"`
 		CaptchaCode string `json:"captchaCode,omitempty"`
+		// CaptchaName is the dynamic form-field NAME rutracker delivered as
+		// CaptchaDto.Code (e.g. "cap_code_<sid>") in the CaptchaRequired
+		// response. The client echoes it back so the answer is submitted under
+		// the correct, rotating field name (LVA-025). Empty for providers with
+		// a fixed captcha field name.
+		CaptchaName string `json:"captchaName,omitempty"`
 		CaptchaSID  string `json:"captchaSid,omitempty"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -34,6 +40,7 @@ func (h *LoginHandler) PostLogin(c *gin.Context) {
 		Username:    req.Username,
 		Password:    req.Password,
 		CaptchaCode: req.CaptchaCode,
+		CaptchaName: req.CaptchaName,
 		CaptchaSID:  req.CaptchaSID,
 	})
 	if err != nil {

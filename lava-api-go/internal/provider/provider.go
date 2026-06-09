@@ -198,10 +198,19 @@ type FileDownload struct {
 }
 
 // LoginOpts carries the credentials a user supplies during login.
+//
+// CaptchaCode is the user-typed captcha ANSWER. CaptchaName is the dynamic
+// form-field NAME under which that answer must be submitted — rutracker
+// rotates it on each captcha render and delivers it as CaptchaDto.Code in the
+// CaptchaRequired response (e.g. "cap_code_<sid>"). The client echoes that name
+// back here so the re-submission carries `<CaptchaName>=<CaptchaCode>`. When a
+// provider's captcha form uses a fixed field name, CaptchaName is left empty
+// and the provider adapter supplies its own default (LVA-025).
 type LoginOpts struct {
 	Username    string
 	Password    string
 	CaptchaCode string
+	CaptchaName string
 	CaptchaSID  string
 }
 
@@ -213,9 +222,16 @@ type LoginResult struct {
 }
 
 // CaptchaImage is a captcha challenge for visual display.
+//
+// ContentType is the upstream image MIME type (e.g. "image/jpeg",
+// "image/gif"), propagated verbatim so the captcha handler serves the bytes
+// under their real type instead of an assumed one (LVA-026). Empty when the
+// upstream omitted a Content-Type; the handler then applies a safe image/*
+// fallback.
 type CaptchaImage struct {
-	Path string `json:"path"`
-	Data []byte `json:"data"`
+	Path        string `json:"path"`
+	ContentType string `json:"contentType,omitempty"`
+	Data        []byte `json:"data"`
 }
 
 // HealthStatus is the result of a provider health probe.

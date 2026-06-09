@@ -367,6 +367,95 @@ func TestAdapter_RemoveFavorite_AnonymousUnauthorized(t *testing.T) {
 	}
 }
 
+// TestAdapter_Login_SendsDynamicCaptchaFieldName_E2E drives ProviderAdapter.Login
+// through the REAL Client and asserts the captcha answer is submitted under the
+// DYNAMIC field name rutracker delivered in the CaptchaRequired challenge
+// (cap_code_<sid>), NOT under the user's answer string.
+//
+// LVA-025: rutracker's captcha form names the answer field dynamically — the
+// CaptchaDto.Code the client received during the CaptchaRequired response IS that
+// field name (e.g. "cap_code_abc123"). The user then re-submits with that name +
+// their answer, so the wire form MUST carry `cap_code_abc123=<answer>` AND
+// `cap_sid=<sid>`. The prior adapter had no field to carry the dynamic name: it
+// mapped lp.CaptchaCode = opts.CaptchaCode (the ANSWER) and lp.CaptchaValue =
+// opts.CaptchaCode (the answer again), so the wire form was `<answer>=<answer>`
+// — the cap_code_<sid> field rutracker validates was never sent, and login
+// looped on CaptchaRequired forever.
+//
+// Sixth Law clause 3: primary assertion is on the form bytes the upstream
+// receives (cap_code_<sid> presence + value), not a mock call count.
+//
+// Falsifiability: revert provider.go to the old mapping (lp.CaptchaCode =
+// &opts.CaptchaCode; val := opts.CaptchaCode; lp.CaptchaValue = &val) → the
+// upstream sees no cap_code_abc123 field (or sees the answer string as a field
+// NAME), and this test fails with a clear assertion.
+func TestAdapter_Login_SendsDynamicCaptchaFieldName_E2E(t *testing.T) {
+	const (
+		captchaSid     = "sid-XYZ-123"
+		captchaFieldNm = "cap_code_abc123" // the dynamic NAME from CaptchaDto.Code
+		userAnswer     = "7Q4kZ"           // the user-typed captcha solution
+	)
+	var (
+		gotCapSid       string
+		gotDynamicField string
+		dynamicPresent  bool
+		// Defensive: capture whether the answer string was (wrongly) used as a
+		// form-field NAME — the exact shape the bug produced.
+		answerUsedAsKey bool
+	)
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch {
+		case strings.HasPrefix(r.URL.Path, "/login.php"):
+			if err := r.ParseForm(); err != nil {
+				t.Errorf("ParseForm: %v", err)
+			}
+			gotCapSid = r.PostForm.Get("cap_sid")
+			_, dynamicPresent = r.PostForm[captchaFieldNm]
+			gotDynamicField = r.PostForm.Get(captchaFieldNm)
+			_, answerUsedAsKey = r.PostForm[userAnswer]
+			// Succeed so the adapter reaches the Success branch and we can
+			// also observe the login completed once the captcha is correct.
+			http.SetCookie(w, &http.Cookie{Name: "bb_data", Value: "SESSIONCOOKIEVALUE"})
+			_, _ = w.Write([]byte("<html>ok</html>"))
+		case strings.HasPrefix(r.URL.Path, "/index.php"):
+			_, _ = w.Write([]byte(`<html><body><a id="logged-in-username" ` +
+				`href="profile.php?mode=viewprofile&u=12345">user</a></body></html>`))
+		case strings.HasPrefix(r.URL.Path, "/profile.php"):
+			_, _ = w.Write([]byte(`<html><body><span id="profile-uname" data-uid="42">user</span></body></html>`))
+		default:
+			w.WriteHeader(http.StatusNotFound)
+		}
+	}))
+	defer srv.Close()
+	a := NewProviderAdapter(NewClient(srv.URL))
+
+	_, err := a.Login(context.Background(), provider.LoginOpts{
+		Username:    "user",
+		Password:    "pass",
+		CaptchaSID:  captchaSid,
+		CaptchaName: captchaFieldNm,
+		CaptchaCode: userAnswer,
+	})
+	if err != nil {
+		t.Fatalf("Login: %v", err)
+	}
+
+	if gotCapSid != captchaSid {
+		t.Errorf("cap_sid=%q want %q", gotCapSid, captchaSid)
+	}
+	if answerUsedAsKey {
+		t.Errorf("the user answer %q was submitted as a FORM-FIELD NAME — "+
+			"the dynamic cap_code_<sid> name was lost (LVA-025 regression)", userAnswer)
+	}
+	if !dynamicPresent {
+		t.Fatalf("dynamic captcha field %q absent from the login form — rutracker "+
+			"will never accept the captcha (LVA-025)", captchaFieldNm)
+	}
+	if gotDynamicField != userAnswer {
+		t.Errorf("%s=%q want the user answer %q", captchaFieldNm, gotDynamicField, userAnswer)
+	}
+}
+
 // TestAdapter_FetchCaptcha_InvalidPath verifies the captcha delegation
 // surfaces an error for an undecodable captcha path — the client must show a
 // failure, not a blank image.

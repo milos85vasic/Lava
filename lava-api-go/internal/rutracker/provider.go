@@ -214,15 +214,22 @@ func (a *ProviderAdapter) Login(ctx context.Context, opts provider.LoginOpts) (*
 		Username: opts.Username,
 		Password: opts.Password,
 	}
-	if opts.CaptchaSID != "" && opts.CaptchaCode != "" {
+	if opts.CaptchaSID != "" && opts.CaptchaCode != "" && opts.CaptchaName != "" {
+		// LVA-025: rutracker names the captcha answer field dynamically. The
+		// CaptchaDto.Code the client received during the CaptchaRequired
+		// challenge IS that field NAME (e.g. "cap_code_<sid>"); the client
+		// echoes it back as opts.CaptchaName. The user's typed answer is
+		// opts.CaptchaCode. So the form MUST carry:
+		//   cap_sid=<CaptchaSID>
+		//   <CaptchaName>=<CaptchaCode>
+		// LoginParams.CaptchaCode is the dynamic field NAME; LoginParams.
+		// CaptchaValue is the answer (see LoginParams doc). The prior code
+		// put the answer in BOTH the name and the value slot, so the wire
+		// form was `<answer>=<answer>` and the cap_code_<sid> field rutracker
+		// validates was never sent — login looped on CaptchaRequired.
 		lp.CaptchaSid = &opts.CaptchaSID
-		lp.CaptchaCode = &opts.CaptchaCode
-		// CaptchaValue is the actual user-typed answer; for rutracker the
-		// CaptchaCode IS the field name and CaptchaValue is the answer.
-		// Our LoginOpts only has CaptchaCode (the answer), so we use it
-		// as the value and leave the dynamic field-name empty — the
-		// adapter consumer is expected to supply the full rutracker shape.
-		// TODO: revisit when we wire the real multi-provider auth flow.
+		name := opts.CaptchaName
+		lp.CaptchaCode = &name
 		val := opts.CaptchaCode
 		lp.CaptchaValue = &val
 	}
@@ -260,7 +267,11 @@ func (a *ProviderAdapter) FetchCaptcha(ctx context.Context, path string) (*provi
 	}
 	return &provider.CaptchaImage{
 		Path: path,
-		Data: ci.Bytes,
+		// LVA-026: propagate the upstream Content-Type the client captured
+		// (CaptchaImage.ContentType) so the handler serves the bytes under
+		// their real MIME type instead of an assumed one.
+		ContentType: ci.ContentType,
+		Data:        ci.Bytes,
 	}, nil
 }
 
