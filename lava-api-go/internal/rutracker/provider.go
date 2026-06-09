@@ -407,7 +407,11 @@ func fromCategoryPage(page *gen.CategoryPageDto) *provider.BrowseResult {
 	if page.Topics != nil {
 		out.Items = make([]provider.SearchItem, 0, len(*page.Topics))
 		for _, t := range *page.Topics {
-			if torrent, err := t.AsForumTopicDtoTorrent(); err == nil {
+			// LVA-025: a category page mixes Torrent and Topic union variants.
+			// AsForumTopicDtoTorrentChecked consults the "type" discriminator,
+			// so a non-torrent Topic (a forum thread) is skipped instead of
+			// being silently mapped into a fake empty-torrent SearchItem.
+			if torrent, err := t.AsForumTopicDtoTorrentChecked(); err == nil {
 				out.Items = append(out.Items, fromTorrentDto(torrent))
 			}
 		}
@@ -483,7 +487,10 @@ func fromFavoritesDto(fav *gen.FavoritesDto) *provider.FavoritesResult {
 		Items:    make([]provider.SearchItem, 0, len(fav.Topics)),
 	}
 	for _, t := range fav.Topics {
-		if torrent, err := t.AsForumTopicDtoTorrent(); err == nil {
+		// LVA-025: a bookmarked row with no torrent status is a Topic union
+		// variant (a saved forum thread). The discriminator-honoring accessor
+		// skips it instead of rendering a fake empty torrent in favorites.
+		if torrent, err := t.AsForumTopicDtoTorrentChecked(); err == nil {
 			out.Items = append(out.Items, fromTorrentDto(torrent))
 		}
 	}

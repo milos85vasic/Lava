@@ -294,6 +294,90 @@ func TestFromFavoritesDto(t *testing.T) {
 	}
 }
 
+// TestFromCategoryPage_SkipsNonTorrentVariant is the LVA-025 regression.
+//
+// A rutracker category page can carry mixed ForumTopicDto union variants:
+// Torrent rows AND Topic rows (forum threads / announcements that have no
+// torrent attached). The blind generated accessor AsForumTopicDtoTorrent()
+// does NOT consult the union "type" discriminator — a Topic union round-trips
+// through it with NO error because all variants share Id/Title/Author/Category
+// and every torrent-specific field is a nilable pointer. Consequence: a Topic
+// row was silently mapped into a SearchItem with empty Size/Seeders/MagnetLink,
+// so the browse screen showed a garbage "torrent" with no size and no download
+// action instead of skipping the non-torrent entry.
+//
+// The fix routes fromCategoryPage through AsForumTopicDtoTorrentChecked(), which
+// returns a discriminator-mismatch error for the Topic union, so the Topic is
+// skipped and only the real Torrent appears.
+//
+// Falsifiability: revert fromCategoryPage to the blind AsForumTopicDtoTorrent()
+// → len(Items) == 2 and the fake topic row (empty Size, 0 Seeders) appears →
+// "Items len = 2, want 1 (the Topic variant must be skipped, LVA-025)".
+func TestFromCategoryPage_SkipsNonTorrentVariant(t *testing.T) {
+	var torrentUnion gen.ForumTopicDto
+	if err := torrentUnion.FromForumTopicDtoTorrent(gen.ForumTopicDtoTorrent{
+		Id: "200", Title: "Real Torrent", Seeds: i32ptr(7),
+		Size: strptr("1 GB"), MagnetLink: strptr("magnet:?xt=urn:btih:real"),
+		Type: "Torrent",
+	}); err != nil {
+		t.Fatalf("build torrent union: %v", err)
+	}
+	var topicUnion gen.ForumTopicDto
+	if err := topicUnion.FromForumTopicDtoTopic(gen.ForumTopicDtoTopic{
+		Id: "300", Title: "Forum Thread (no torrent)", Type: "Topic",
+	}); err != nil {
+		t.Fatalf("build topic union: %v", err)
+	}
+
+	topics := []gen.ForumTopicDto{torrentUnion, topicUnion}
+	got := fromCategoryPage(&gen.CategoryPageDto{Page: 1, Topics: &topics})
+
+	if len(got.Items) != 1 {
+		t.Fatalf("Items len = %d, want 1 (the Topic variant must be skipped, LVA-025); items=%+v", len(got.Items), got.Items)
+	}
+	it := got.Items[0]
+	if it.ID != "200" {
+		t.Errorf("surviving item ID = %q, want 200 (the real Torrent)", it.ID)
+	}
+	if it.Size != "1 GB" || it.Seeders != 7 || it.MagnetLink != "magnet:?xt=urn:btih:real" {
+		t.Errorf("torrent item lost data: %+v, want Size=1GB Seeders=7 magnet set", it)
+	}
+}
+
+// TestFromFavoritesDto_SkipsNonTorrentVariant is the LVA-025 regression for the
+// favorites/bookmarks surface. favorites.go genuinely produces a Topic union
+// when a bookmarked row has no torrent status (a bookmarked forum thread), and
+// a Torrent union otherwise. The blind accessor turned the bookmarked Topic
+// into a fake empty torrent row in the user's favorites list.
+//
+// Falsifiability: revert fromFavoritesDto to the blind accessor → len(Items)==2
+// and the empty fake torrent for "fav-topic" appears → "Items len = 2, want 1".
+func TestFromFavoritesDto_SkipsNonTorrentVariant(t *testing.T) {
+	var torrentUnion gen.ForumTopicDto
+	if err := torrentUnion.FromForumTopicDtoTorrent(gen.ForumTopicDtoTorrent{
+		Id: "fav-torrent", Title: "Saved Torrent", Size: strptr("2 GB"), Type: "Torrent",
+	}); err != nil {
+		t.Fatalf("build torrent union: %v", err)
+	}
+	var topicUnion gen.ForumTopicDto
+	if err := topicUnion.FromForumTopicDtoTopic(gen.ForumTopicDtoTopic{
+		Id: "fav-topic", Title: "Saved Forum Thread", Type: "Topic",
+	}); err != nil {
+		t.Fatalf("build topic union: %v", err)
+	}
+
+	got := fromFavoritesDto(&gen.FavoritesDto{
+		Topics: []gen.ForumTopicDto{torrentUnion, topicUnion},
+	})
+
+	if len(got.Items) != 1 {
+		t.Fatalf("Items len = %d, want 1 (the bookmarked Topic must be skipped, LVA-025); items=%+v", len(got.Items), got.Items)
+	}
+	if got.Items[0].ID != "fav-torrent" || got.Items[0].Size != "2 GB" {
+		t.Errorf("surviving favorite = %+v, want id=fav-torrent size=2GB", got.Items[0])
+	}
+}
+
 // TestToRutrackerSearchOpts verifies the provider→rutracker option mapping,
 // asserting on which pointers are set vs left nil (nil ⇒ param omitted from
 // the upstream query — wrong nil-ness breaks the user's search filter).
