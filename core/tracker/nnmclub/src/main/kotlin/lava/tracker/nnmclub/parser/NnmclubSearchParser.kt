@@ -13,6 +13,7 @@ import javax.inject.Inject
  *  - Result rows live inside `table.forumline`.
  *  - Title anchor has class `genmed` and href `viewtopic.php?t=12345`.
  *  - Seeders and leechers are in `.seedmed` and `.leechmed`.
+ *  - The posted-on date is in the 5th `<td>` column (`yyyy-MM-dd`).
  *  - Size is in the 6th `<td>` column.
  *  - Magnet link may be present as `a[href^=magnet:]`.
  */
@@ -49,6 +50,12 @@ class NnmclubSearchParser @Inject constructor() {
         val sizeText = if (cells.size >= 6) cells[5].text().trim() else ""
         val sizeBytes = parseSize(sizeText)
 
+        // LVA-028: the Date column (5th `<td>`) was never read, so publishDate
+        // was always null even though the HTML carries a parseable yyyy-MM-dd
+        // value. Parse it so every nnmclub search row carries its real date.
+        val dateText = if (cells.size >= 5) cells[4].text().trim() else ""
+        val publishDate = NnmclubDateParser.parse(dateText)
+
         val magnetUri = row.selectFirst("a[href^=magnet:]")?.attr("href")
 
         return TorrentItem(
@@ -60,6 +67,7 @@ class NnmclubSearchParser @Inject constructor() {
             leechers = leechers,
             magnetUri = magnetUri,
             detailUrl = href,
+            publishDate = publishDate,
         )
     }
 
