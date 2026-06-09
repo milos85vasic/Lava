@@ -33,7 +33,11 @@ func IsAuthorised(html []byte) bool {
 		return true
 	}
 	// Also accept a user-profile link that isn't the login page.
-	if doc.Find("a[href*=login.php]").Length() == 0 && doc.Find("a[href*=profile.php]").Length() > 0 {
+	// NOTE: the attribute-selector values MUST be quoted — an unquoted
+	// CSS attribute value containing '.' (e.g. login.php) is not a valid
+	// identifier and goquery/cascadia matches it against nothing, which
+	// silently disables this fallback. See login_isauthorised_branch_test.go.
+	if doc.Find(`a[href*="login.php"]`).Length() == 0 && doc.Find(`a[href*="profile.php"]`).Length() > 0 {
 		return true
 	}
 	return false

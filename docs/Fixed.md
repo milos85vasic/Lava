@@ -93,3 +93,39 @@ core/testing TestSearchHistoryRepository.add used positional id (it.size) + alwa
 
 feature/rating RatingViewModelTest's local RealObserveRatingRequestUseCase re-implements ObserveRatingRequestUseCaseImpl but OMITS the 3rd condition (engagement: pinned>1 OR other>3 OR visited>5 OR bookmarks>2). The test 'Show rating request is rendered when conditions are met' seeds ZERO engagement + asserts Show, but the REAL use case would emit Hide for that user state. Second-Law/§6.J bluff: re-implements internal business logic + asserts an outcome production would not produce. Fix: wire the real ObserveRatingRequestUseCaseImpl (deep tree: ObserveSearchHistory/Visited[->EnrichTopics]/Bookmarks use cases over shared in-memory fakes, now usable post LVA-012/015) + seed engagement in the Show test. Source: parallel fake-audit 2026-06-09.
 
+## LVA-017 — feature favorites/topic local fakes: add() lacks REPLACE dedup (LATENT)
+
+**Status:** Completed (→ Fixed.md)
+**Type:** Task
+**Evidence:** feature/favorites InMemoryFavoritesRepository.add + feature/topic FakeFavoritesRepository.add now dedup-by-id (REPLACE) + 2 falsifiability tests. Bluff-Audit: revert to append → 'expected:<[7]> but was:<[7, 7]>', reverted; feature:favorites 6/0, feature:topic 4/0
+**Created-By:** AI
+
+feature/favorites InMemoryFavoritesRepository.add + feature/topic FakeFavoritesRepository.add append without dedup, while FavoritesRepositoryImpl/FavoriteTopicDao are @Insert REPLACE (id PK). LATENT: no test re-adds a duplicate id, so unexercised. Tighten add() to replace-by-id for consistency with LVA-011..015. Source: parallel fake-audit 2026-06-09.
+
+## LVA-018 — core/preferences dead getters getHistorySyncPeriod/getCredentialsSyncPeriod (zero call sites)
+
+**Status:** Completed (→ Fixed.md)
+**Type:** Task
+**Evidence:** core/preferences PreferencesStorage[Impl] getHistorySyncPeriod/getCredentialsSyncPeriod removed (zero call sites, proven) + 2 test-fake overrides removed; core:preferences 22/0, core:auth:impl 14/0; values still surfaced via getSettings()
+**Created-By:** AI
+
+PreferencesStorage.getHistorySyncPeriod()/getCredentialsSyncPeriod() (interface + Impl) have zero production call sites; sync-period values are surfaced via getSettings() instead. Orphaned per-field-getter leftover (no Favorites/Bookmarks counterpart). Remove decl + override. Source: parallel dead-code audit 2026-06-09 (codebase otherwise clean: 0 shipped TODO(), 0 if(false), 0 silent-no-op effect methods).
+
+## LVA-019 — nnmclub IsAuthorised profile-link fallback was dead (unquoted CSS attribute selectors)
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** internal/nnmclub/login.go selectors quoted; login_isauthorised_branch_test.go (IsAuthorised 77.8→88.9%); Bluff-Audit: revert to unquoted → TestIsAuthorised_ProfileLinkFallback_NoLoginLink fails 'expected IsAuthorised=true', reverted; nnmclub tests + index_anon/logged_in fixtures pass; api-source.hash regenerated, sourcehash contract GREEN
+**Created-By:** AI
+
+internal/nnmclub/login.go IsAuthorised used unquoted CSS attribute selectors a[href*=login.php]/a[href*=profile.php]; an unquoted value containing '.' is not a valid CSS identifier so cascadia/goquery matched NOTHING — the profile-link auth-detection fallback was dead code. Fixed to quoted form a[href*="..."]. Found by parallel hermetic-coverage agent; real production bug.
+
+## LVA-7 — §11.4.85 stress + chaos test scaffold
+
+**Status:** Completed (→ Fixed.md)
+**Type:** Task
+**Evidence:** lava-api-go/internal/handlers/v1/search_thundering_herd_test.go — 512 concurrent identical-key reqs through REAL read-through cache; asserts all-200 + post-burst upstream loads=0 (convergence) + no goroutine-leak + -race clean. Bluff-Audit: delete cache.Set in search.go → 'convergence FAILED: post-burst loads=1 (want 0)', reverted. First runnable §11.4.85 chaos dim beyond phase-1; evidence JSON committed.
+**Severity:** P2
+
+§11.4.85 (new universal anchor) mandates a stress + chaos test class. Lava has no chaos/stress suite today. Assess + scaffold when pin is bumped. **Source:** self-discovered — .lava-ci-evidence/constitution-review/2026-05-31-68th-cycle-review.md
+
