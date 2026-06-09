@@ -1,0 +1,7 @@
+# Genymotion Challenge run — 20260609T164222Z
+device: 127.0.0.1:6555
+module: app  test-class: lava.app.challenges.Challenge13FirebaseColdStartResilienceTest,lava.app.challenges.Challenge30RatingDialogReachableTest,lava.app.challenges.Challenge31VisitedScreenReachableTest,lava.app.challenges.Challenge32FavoritesScreenReachableTest,lava.app.challenges.Challenge33BookmarksScreenReachableTest,lava.app.challenges.Challenge34CategoryNavigationReachableTest,lava.app.challenges.Challenge35ConnectionItemReachableTest
+gradle exit: 0
+BUILD SUCCESSFUL in 1m
+runner: containers-submodule
+runtime: genymotion-vm
