@@ -45,5 +45,13 @@ dependencies {
     testImplementation(libs.mockk)
     testImplementation(libs.robolectric)
     testImplementation(libs.androidx.test.core)
+    testImplementation(libs.androidx.compose.ui.test)
+    // ui-test-manifest contributes the ComponentActivity host-activity declaration that
+    // createComposeRule() launches via Robolectric's ActivityScenario. Without it on the
+    // unit-test classpath of BOTH variants, the release variant's merged test manifest
+    // omits ComponentActivity (the ui-tooling that declares it is debugApi-scoped), so
+    // Robolectric throws RuntimeException("Unable to resolve activity for ...") at
+    // RoboMonitoringInstrumentation.java:101. See A11yContentDescriptionTest for details.
+    testImplementation(libs.androidx.compose.ui.testManifest)
     testImplementation(project(":core:testing"))
 }

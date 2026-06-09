@@ -49,8 +49,31 @@ import org.robolectric.annotation.Config
  * (`contentDescription = null` → scrollBackFab_* fails) and to `Illustration`
  * (`contentDescription = null` → illustration_* fails).
  */
+/*
+ * NOTE on the manifest: `createComposeRule()` launches an
+ * `androidx.activity.ComponentActivity` host via Robolectric's `ActivityScenario`.
+ * Robolectric resolves that host through
+ * `RoboMonitoringInstrumentation.startActivitySyncInternal`, which calls
+ * `intent.resolveActivityInfo(packageManager, 0)` and throws
+ * `RuntimeException("Unable to resolve activity for ...")` at
+ * `RoboMonitoringInstrumentation.java:101` when the activity is NOT declared in the
+ * AGP-merged unit-test manifest.
+ *
+ * The original `@Config(manifest = Config.NONE)` discarded that manifest entirely, so
+ * the host-activity launch/teardown could trip the line-101 throw — reding the Gradle
+ * task while the JUnit XML records failures=0/errors=0. Dropping `Config.NONE` alone is
+ * insufficient: the artifact that declares `ComponentActivity` for tests was
+ * `debugApi`-scoped (`androidx.compose.ui:ui-tooling`), so the DEBUG variant's merged
+ * test manifest declared it but `testReleaseUnitTest` did NOT and failed outright at
+ * `ActivityScenarioRule.before()`.
+ *
+ * The fix (in build.gradle.kts) adds `androidx.compose.ui:ui-test-manifest` as a
+ * `testImplementation` — the AndroidX artifact whose AAR manifest declares
+ * `ComponentActivity` specifically for Compose Robolectric/instrumentation tests — so
+ * the host resolves in BOTH variants. Assertions here are unchanged.
+ */
 @RunWith(RobolectricTestRunner::class)
-@Config(manifest = Config.NONE, sdk = [33])
+@Config(sdk = [33])
 class A11yContentDescriptionTest {
 
     @get:Rule
