@@ -154,4 +154,151 @@ class PagingDataLoaderTest {
             assertEquals(listOf("ok"), recovered.data)
             assertEquals(LoadState.NotLoading, recovered.loadStates.refresh)
         }
+
+    // CHALLENGE
+    //
+    // Covers the PREPEND path — the user deep-links to a mid-list page
+    // (e.g. a bookmarked "Page 3 of 5" forum scroll position) and scrolls
+    // UP, which the screen translates into PagingAction.Prepend. This whole
+    // production branch (`prepend()` + `MutableStateFlow<Pagination>.prepend`
+    // + `MutableStateFlow<List>.prepend` which PREPENDS rather than appends)
+    // had ZERO coverage before this test; the existing tests only exercised
+    // refresh + append. A bug in the prepend order (e.g. appending instead
+    // of prepending the earlier page) renders the earlier page BELOW the
+    // current one — visibly wrong scroll content.
+    //
+    // Falsifiability rehearsal (Sixth Law clause 2): see commit Bluff-Audit.
+    @Test
+    fun `refresh at a mid-list page then prepend loads earlier pages above and stops at page 1`() =
+        runTest(UnconfinedTestDispatcher()) {
+            val actions = MutableSharedFlow<PagingAction>(extraBufferCapacity = 16)
+            val requestedPages = mutableListOf<Int>()
+            val loader = PagingDataLoader(
+                fetchData = { p ->
+                    requestedPages += p
+                    when (p) {
+                        // 1-indexed pages; total of 3 pages.
+                        1 -> page(listOf("p1"), page = 1, pages = 3)
+                        2 -> page(listOf("p2"), page = 2, pages = 3)
+                        3 -> page(listOf("p3"), page = 3, pages = 3)
+                        // Page 0 does not exist. Returning a real (empty) page
+                        // here — rather than throwing — means an off-by-one
+                        // terminal guard (`>= 1` instead of `> 1`) is NOT masked
+                        // by a swallowed error; it surfaces as a real request for
+                        // page 0 the `requestedPages` assertion below catches.
+                        else -> page(emptyList(), page = p, pages = 3)
+                    }
+                },
+                transform = ::identityTransform,
+                actions = actions,
+                scope = backgroundScope,
+                logger = logger,
+            )
+
+            // Deep-link: the user opened the list already scrolled to page 3.
+            actions.emit(PagingAction.Refresh(3))
+            val afterRefresh = loader.flow.first { it.data == listOf("p3") }
+            assertEquals(listOf("p3"), afterRefresh.data)
+            assertEquals(3..3, afterRefresh.pagination.loadedPages)
+
+            // Scroll up — page 2 must be loaded and rendered ABOVE page 3.
+            actions.emit(PagingAction.Prepend)
+            val afterPage2 = loader.flow.first { it.data?.size == 2 }
+            assertEquals(
+                "prepended page must appear ABOVE the current page, not below",
+                listOf("p2", "p3"),
+                afterPage2.data,
+            )
+            assertEquals(2..3, afterPage2.pagination.loadedPages)
+
+            // Scroll up again — page 1 prepended above page 2.
+            actions.emit(PagingAction.Prepend)
+            val afterPage1 = loader.flow.first { it.data?.size == 3 }
+            assertEquals(listOf("p1", "p2", "p3"), afterPage1.data)
+            assertEquals(1..3, afterPage1.pagination.loadedPages)
+
+            // A further prepend at the FIRST page MUST be a no-op — it MUST NOT
+            // request page 0 and MUST NOT change the rendered list. This is the
+            // top-of-list terminal guard, symmetric to the append bottom guard.
+            actions.emit(PagingAction.Prepend)
+            val finalState = loader.flow.first()
+            assertEquals(
+                "prepending past page 1 must not change the rendered list",
+                listOf("p1", "p2", "p3"),
+                finalState.data,
+            )
+            assertEquals(1..3, finalState.pagination.loadedPages)
+            assertEquals(
+                "the terminal prepend must never request a page before page 1",
+                listOf(3, 2, 1),
+                requestedPages,
+            )
+        }
+
+    // CHALLENGE
+    //
+    // Covers the APPEND-ERROR → RETRY recovery path. The user scrolls to the
+    // bottom, the next-page fetch fails (transient network), the screen shows
+    // an inline "load more" error chip with a Retry; the user taps it and the
+    // page loads. Before this test, only the REFRESH-error→retry branch was
+    // covered — `retry()`'s `isAppendError()` dispatch arm was untested, and
+    // crucially the retry MUST re-issue the SAME page (lastPage + 1), not
+    // skip it or re-request the already-loaded page.
+    //
+    // Falsifiability rehearsal (Sixth Law clause 2): see commit Bluff-Audit.
+    @Test
+    fun `append failure surfaces an append LoadState_Error then retry loads the same next page`() =
+        runTest(UnconfinedTestDispatcher()) {
+            val actions = MutableSharedFlow<PagingAction>(extraBufferCapacity = 16)
+            val requestedPages = mutableListOf<Int>()
+            var failPage2Once = true
+            val loader = PagingDataLoader(
+                fetchData = { p ->
+                    requestedPages += p
+                    if (p == 2 && failPage2Once) {
+                        failPage2Once = false
+                        error("simulated network failure on page $p")
+                    }
+                    when (p) {
+                        1 -> page(listOf("a1"), page = 1, pages = 2)
+                        2 -> page(listOf("a2"), page = 2, pages = 2)
+                        else -> page(emptyList(), page = p, pages = 2)
+                    }
+                },
+                transform = ::identityTransform,
+                actions = actions,
+                scope = backgroundScope,
+                logger = logger,
+            )
+
+            actions.emit(PagingAction.Refresh(1))
+            assertEquals(listOf("a1"), loader.flow.first { it.data == listOf("a1") }.data)
+
+            // Scroll to bottom — page 2 fetch fails.
+            actions.emit(PagingAction.Append)
+            val errored = loader.flow.first { it.loadStates.append is LoadState.Error }
+            // User-visible: an inline append-error (NOT a full-screen refresh
+            // error, and the already-loaded page 1 stays rendered).
+            assertTrue(errored.loadStates.append is LoadState.Error)
+            assertEquals(LoadState.NotLoading, errored.loadStates.refresh)
+            assertEquals(
+                "the already-loaded first page must remain rendered during an append error",
+                listOf("a1"),
+                errored.data,
+            )
+
+            // Tap Retry — the SAME next page (2) is re-requested and appended.
+            actions.emit(PagingAction.Retry)
+            val recovered = loader.flow.first { it.data?.size == 2 }
+            assertEquals(listOf("a1", "a2"), recovered.data)
+            assertEquals(LoadState.NotLoading, recovered.loadStates.append)
+            assertEquals(1..2, recovered.pagination.loadedPages)
+            // Retry MUST re-request page 2 (the failed page), never skip to 3
+            // and never re-fetch the already-loaded page 1.
+            assertEquals(
+                "append-retry must re-request exactly the failed next page",
+                listOf(1, 2, 2),
+                requestedPages,
+            )
+        }
 }

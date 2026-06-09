@@ -177,6 +177,37 @@ class SearchViewModelTest {
         }
 
     // VM-CONTRACT
+    //
+    // Covers the auth-state TOGGLE the nested `collectLatest` in
+    // `observeSearchHistory` exists to handle: a user who is signed in and
+    // viewing their search history, then signs out (token expiry / explicit
+    // logout). The outer auth `collectLatest` MUST cancel the inner history
+    // collection and re-render `Unauthorised` — otherwise the screen would
+    // keep showing the now-unauthorised user's private search history. No
+    // existing test drove this transition; the prior tests only set a single
+    // fixed initial auth state. A mutation that drops the `else -> reduce {
+    // Unauthorised }` arm leaves the stale SearchList rendered, which this
+    // catches.
+    @Test
+    fun signing_out_while_viewing_history_re_renders_Unauthorised() =
+        runTest(mainDispatcherRule.testDispatcher) {
+            val vm = createViewModel(initialAuth = AuthState.Authorized("user", null))
+            historyRepo.searchFlow.value = listOf(search(0, "ubuntu"))
+            vm.test(this) {
+                runOnCreate()
+                // Confirm we start in the authorised SearchList state.
+                assertTrue(
+                    "expected SearchList while authorised",
+                    vm.container.stateFlow.value is SearchState.SearchList,
+                )
+                // The user signs out.
+                authState.value = AuthState.Unauthorized
+                cancelAndIgnoreRemainingItems()
+            }
+            assertEquals(SearchState.Unauthorised, vm.container.stateFlow.value)
+        }
+
+    // VM-CONTRACT
     @Test
     fun authorised_with_history_partitions_pinned_and_other() =
         runTest(mainDispatcherRule.testDispatcher) {
