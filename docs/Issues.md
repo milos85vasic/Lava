@@ -63,11 +63,3 @@ LVA-067 laid the providerId Room column; complete it by threading providerId thr
 
 observeSseSearch internally constructs the SseClient with a hardcoded https base; inject it so the full SSE error to Error to retry path is hermetically testable against a MockWebServer.
 
-## LVA-072 — §6.AC telemetry on mid-process embed TLS cert rotation (LVA-068 swap is silent)
-
-**Status:** Queued
-**Type:** Task
-**Severity:** P3
-
-LVA-068 rotates the embed leaf mid-process but the swap is silent; emit a RecordWarning on rotation with feature/operation/old+new NotAfter/IP-SANs context (no secrets per §6.H). A wave-10 attempt was discarded because its falsifiability rehearsal was inconclusive and the SourceHash contract failed; redo with a test that fails when the actual rotation-path RecordWarning call is removed.
-

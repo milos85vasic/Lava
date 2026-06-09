@@ -579,3 +579,12 @@ handleSseEvent raw-JSON parsing (provider_start/results/provider_done/provider_e
 
 Per operator accept-with-telemetry decision, NavTeardownCrashReporter (chained uncaught handler) tags the known upstream androidx nav-teardown ISE with attributable §6.AC Crashlytics context before the process dies, so it surfaces as a known/triageable defect; 6 falsifiable JVM tests; wired into LavaApplication.
 
+## LVA-072 — §6.AC telemetry on mid-process embed TLS cert rotation (LVA-068 swap is silent)
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Task
+**Evidence:** .lava-ci-evidence/workable-items/LVA-072-evidence.md
+**Severity:** P3
+
+LVA-068 rotates the embed leaf mid-process but the swap is silent; emit a RecordWarning on rotation with feature/operation/old+new NotAfter/IP-SANs context (no secrets per §6.H). A wave-10 attempt was discarded because its falsifiability rehearsal was inconclusive and the SourceHash contract failed; redo with a test that fails when the actual rotation-path RecordWarning call is removed.
+
