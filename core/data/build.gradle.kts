@@ -18,4 +18,8 @@ dependencies {
     implementation(project(":core:preferences"))
 
     testImplementation(libs.junit4)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.bundles.room)
+    testImplementation(libs.androidx.test.core)
+    testImplementation(libs.kotlinx.coroutines.test)
 }

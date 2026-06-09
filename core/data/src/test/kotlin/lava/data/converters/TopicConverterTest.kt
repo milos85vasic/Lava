@@ -51,6 +51,20 @@ import org.junit.Test
  *   java.lang.AssertionError: a torrent with a date must survive the entity round-trip as a Torrent
  * (the visited test stayed green, proving each assertion targets its own production
  * path). Reverted the mutation; all tests pass.
+ *
+ * LVA-067 (added 2026-06-09): the favorite/visited write converters thread the
+ * SOURCE provider id onto the persisted row so an archiveorg/gutenberg
+ * favorite/visited topic can later resolve HTTP_DOWNLOAD instead of falling back
+ * to the active tracker. providerId is an explicit converter parameter (the
+ * Topic/TopicPage domain models carry no provenance), defaulting null for
+ * back-compat.
+ *
+ * FALSIFIABILITY REHEARSAL (LVA-067): replaced `providerId = providerId` with
+ * `providerId = null` in `Topic.toFavoriteEntity()`'s Torrent branch. The
+ * `toFavoriteEntity persists the source providerId` test FAILED with:
+ *   java.lang.AssertionError: expected:<archiveorg> but was:<null>
+ * (the null-default and other tests stayed green, proving the assertion targets
+ * its own production path). Reverted; all tests pass.
  */
 class TopicConverterTest {
 
@@ -286,6 +300,78 @@ class TopicConverterTest {
             "magnet:?xt=urn:btih:CAFEBABE",
             (roundTripped as Torrent).magnetLink,
         )
+    }
+
+    @Test
+    fun `toFavoriteEntity persists the source providerId`() {
+        // LVA-067: a favorite written WITH a source provider id (e.g. archiveorg)
+        // must persist that id on the row so the topic-screen download branch can
+        // later resolve HTTP_DOWNLOAD instead of falling back to the active tracker.
+        val torrent = Torrent(id = "p1", title = "Archive item")
+
+        val entity = torrent.toFavoriteEntity(providerId = "archiveorg")
+
+        assertEquals("archiveorg", entity.providerId)
+    }
+
+    @Test
+    fun `toFavoriteEntity defaults providerId to null for back-compat`() {
+        // LVA-067: omitting the source provider (favorites toggled without a known
+        // provider — the current write path) writes NULL ⇒ active-tracker fallback,
+        // identical to pre-LVA-067 behaviour.
+        val entity = Torrent(id = "p2", title = "No provider").toFavoriteEntity()
+
+        assertEquals(null, entity.providerId)
+    }
+
+    @Test
+    fun `favorite providerId survives the entity copy round-trip`() {
+        // LVA-067: the persisted providerId must read back unchanged so a favorite
+        // archiveorg/gutenberg topic can be reopened with its source provider. (The
+        // real Room insert+read round-trip is covered by FavoriteVisitedProviderId
+        // MigrationTest; this asserts the entity field itself carries the value.)
+        val entity = FavoriteTopicEntity(
+            id = "rt-p",
+            timestamp = 0L,
+            title = "round trip",
+            author = null,
+            category = null,
+            providerId = "gutenberg",
+        )
+
+        assertEquals("gutenberg", entity.copy().providerId)
+    }
+
+    @Test
+    fun `toVisitedEntity persists the source providerId`() {
+        // LVA-067: a visited topic written WITH a source provider id must persist it
+        // so a history tap can reopen the topic with its provider for HTTP_DOWNLOAD.
+        val page = lava.models.topic.TopicPage(
+            id = "v1",
+            title = "Visited archive item",
+            author = null,
+            category = null,
+            torrentData = null,
+            commentsPage = lava.models.Page(page = 1, pages = 1, items = emptyList()),
+        )
+
+        val entity = page.toVisitedEntity(providerId = "archiveorg")
+
+        assertEquals("archiveorg", entity.providerId)
+    }
+
+    @Test
+    fun `toVisitedEntity defaults providerId to null for back-compat`() {
+        val page = lava.models.topic.TopicPage(
+            id = "v2",
+            title = "No provider",
+            author = null,
+            category = null,
+            torrentData = null,
+            commentsPage = lava.models.Page(page = 1, pages = 1, items = emptyList()),
+        )
+
+        assertEquals(null, page.toVisitedEntity().providerId)
     }
 
     @Test

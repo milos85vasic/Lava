@@ -70,7 +70,7 @@ import lava.database.entity.VisitedTopicEntity
         UserMirrorEntity::class,
         VisitedTopicEntity::class,
     ],
-    version = 11,
+    version = 12,
     exportSchema = true,
 )
 @TypeConverters(Converters::class)
@@ -310,6 +310,30 @@ abstract class AppDatabase : RoomDatabase() {
                 db.execSQL(
                     "ALTER TABLE provider_configs ADD COLUMN use_anonymous INTEGER NOT NULL DEFAULT 0",
                 )
+            }
+        }
+
+        /**
+         * LVA-067 (2026-06-09). Adds a nullable `providerId` column to the
+         * `FavoriteTopic` and `HistoryTopic` (visited) tables so a favorited /
+         * visited topic remembers which tracker/provider it came from.
+         *
+         * Pre-fix (LVA-052 limitation): favorites/visited rows carried no
+         * provider id, so the topic-screen download branch could only fall back
+         * to the active-tracker default. An archiveorg / gutenberg favorite
+         * therefore could not resolve HTTP_DOWNLOAD. This column is the
+         * persistence foundation that lets the source provider id survive the
+         * round-trip.
+         *
+         * Nullable, default NULL: existing rows migrate without data loss and
+         * read providerId = NULL (⇒ active-tracker fallback, identical to today's
+         * behaviour). `ALTER TABLE ... ADD COLUMN` is non-destructive — no row is
+         * touched, only the new column is appended.
+         */
+        val MIGRATION_11_12 = object : Migration(11, 12) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE `FavoriteTopic` ADD COLUMN `providerId` TEXT DEFAULT NULL")
+                db.execSQL("ALTER TABLE `HistoryTopic` ADD COLUMN `providerId` TEXT DEFAULT NULL")
             }
         }
     }

@@ -21,6 +21,13 @@ data class FavoriteTopicEntity(
     val leeches: Int? = null,
     val magnetLink: String? = null,
     val hasUpdate: Boolean = false,
+    // LVA-067 — source-provider id of the tracker this topic came from. Nullable
+    // for back-compat: existing rows (and rows written before the source provider
+    // is threaded through the write path) read NULL ⇒ the topic-screen download
+    // branch falls back to the active tracker (legacy single-tracker behaviour).
+    // When populated (archiveorg / gutenberg), it lets the favorite route open the
+    // topic with `?p=<providerId>` so the download resolves HTTP_DOWNLOAD.
+    val providerId: String? = null,
 ) {
     override fun equals(other: Any?): Boolean {
         return other is FavoriteTopicEntity && other.id == this.id

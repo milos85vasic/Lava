@@ -9,6 +9,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import lava.database.AppDatabase
 import lava.database.AppDatabase.Companion.MIGRATION_10_11
+import lava.database.AppDatabase.Companion.MIGRATION_11_12
 import lava.database.AppDatabase.Companion.MIGRATION_3_4
 import lava.database.AppDatabase.Companion.MIGRATION_4_5
 import lava.database.AppDatabase.Companion.MIGRATION_5_6
@@ -37,6 +38,7 @@ object DatabaseModule {
             .addMigrations(MIGRATION_8_9)
             .addMigrations(MIGRATION_9_10)
             .addMigrations(MIGRATION_10_11)
+            .addMigrations(MIGRATION_11_12)
             .fallbackToDestructiveMigration(true)
             .build()
 }

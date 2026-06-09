@@ -20,4 +20,9 @@ data class VisitedTopicEntity(
     val seeds: Int? = null,
     val leeches: Int? = null,
     val magnetLink: String? = null,
+    // LVA-067 — source-provider id of the tracker this topic came from. Nullable
+    // for back-compat: existing rows read NULL ⇒ the topic-screen download branch
+    // falls back to the active tracker. When populated it lets a visited-history
+    // tap reopen the topic with `?p=<providerId>` so HTTP_DOWNLOAD resolves.
+    val providerId: String? = null,
 )

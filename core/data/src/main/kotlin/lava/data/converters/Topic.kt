@@ -127,7 +127,15 @@ internal fun FavoriteTopicEntity.toTopicModel(): TopicModel<out Topic> {
     )
 }
 
-internal fun Topic.toFavoriteEntity(): FavoriteTopicEntity {
+/**
+ * LVA-067 — [providerId] is the id of the source tracker/provider this topic
+ * came from. It is an explicit parameter (NOT a field of the [Topic] sealed
+ * model) because the domain model does not carry provenance; the write call
+ * site supplies it where it knows the source provider, and passes null
+ * otherwise (in which case the persisted row reads NULL ⇒ active-tracker
+ * fallback on the topic screen, identical to pre-LVA-067 behaviour).
+ */
+internal fun Topic.toFavoriteEntity(providerId: String? = null): FavoriteTopicEntity {
     return when (this) {
         is BaseTopic -> FavoriteTopicEntity(
             id = id,
@@ -135,6 +143,7 @@ internal fun Topic.toFavoriteEntity(): FavoriteTopicEntity {
             title = title,
             author = author,
             category = category,
+            providerId = providerId,
         )
 
         is Torrent -> FavoriteTopicEntity(
@@ -150,6 +159,7 @@ internal fun Topic.toFavoriteEntity(): FavoriteTopicEntity {
             seeds = seeds,
             leeches = leeches,
             magnetLink = magnetLink,
+            providerId = providerId,
         )
     }
 }
@@ -181,7 +191,13 @@ internal fun VisitedTopicEntity.toTopic(): Topic {
     }
 }
 
-internal fun TopicPage.toVisitedEntity(): VisitedTopicEntity {
+/**
+ * LVA-067 — [providerId] is the id of the source tracker/provider this topic
+ * page came from. Explicit parameter (the [TopicPage] model carries no
+ * provenance); the visit-write call site supplies it where known, null
+ * otherwise (⇒ persisted NULL ⇒ active-tracker fallback on the topic screen).
+ */
+internal fun TopicPage.toVisitedEntity(providerId: String? = null): VisitedTopicEntity {
     val timestamp = System.currentTimeMillis()
     return VisitedTopicEntity(
         id = id,
@@ -195,5 +211,6 @@ internal fun TopicPage.toVisitedEntity(): VisitedTopicEntity {
         seeds = torrentData?.seeds,
         leeches = torrentData?.leeches,
         magnetLink = torrentData?.magnetLink,
+        providerId = providerId,
     )
 }
