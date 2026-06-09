@@ -39,8 +39,12 @@ class MagnetLinkValidator {
             return DownloadValidationResult.invalid("magnet missing 'xt' parameter")
         }
 
+        // The URN namespace prefix is case-insensitive (RFC 8141): `urn:btih:`,
+        // `urn:BTIH:` and `URN:Btih:` all name the same torrent. Match the prefix
+        // ignoring case but keep the hash bytes verbatim (the hash's own casing is
+        // normalized later by [normalizeBtih]).
         val btih = xtValues
-            .filter { it.startsWith(BTIH_PREFIX) }
+            .filter { it.length >= BTIH_PREFIX.length && it.regionMatches(0, BTIH_PREFIX, 0, BTIH_PREFIX.length, ignoreCase = true) }
             .map { it.substring(BTIH_PREFIX.length) }
             .firstOrNull()
             ?: return DownloadValidationResult.invalid("no 'urn:btih' info-hash in 'xt'")

@@ -222,4 +222,46 @@ class MagnetLinkValidatorTest {
         assertTrue("multiple btih xt must be accepted", result.valid)
         assertEquals(first, result.infoHashHex)
     }
+
+    // ---- LVA-046: urn namespace prefix is case-insensitive (RFC 8141 / BEP-9) ----
+
+    @Test
+    fun uppercaseUrnBtihPrefix_isAccepted() {
+        // Real-world magnets and some trackers emit `urn:BTIH:` (the URN
+        // namespace identifier is case-insensitive per RFC 8141). The same
+        // torrent must be accepted regardless of the prefix casing — exactly as
+        // the validator already accepts upper- and mixed-case hex hashes.
+        val hash = "0123456789abcdef0123456789abcdef01234567"
+        val result = validator.validate("magnet:?xt=urn:BTIH:$hash&dn=X")
+
+        assertTrue(
+            "an uppercase `urn:BTIH:` prefix names the same torrent and must be " +
+                "accepted, not silently rejected, got: ${result.reason}",
+            result.valid,
+        )
+        assertEquals(hash, result.infoHashHex)
+    }
+
+    @Test
+    fun mixedCaseUrnBtihPrefix_isAccepted() {
+        // `URN:Btih:` — mixed casing across both the `urn` scheme and the `btih`
+        // namespace. RFC 8141 makes both case-insensitive.
+        val hash = "fedcba9876543210fedcba9876543210fedcba98"
+        val result = validator.validate("magnet:?xt=URN:Btih:$hash")
+
+        assertTrue("mixed-case urn:btih prefix must be accepted, got: ${result.reason}", result.valid)
+        assertEquals(hash, result.infoHashHex)
+    }
+
+    @Test
+    fun uppercaseUrnBtihPrefix_withBase32Hash_isAccepted() {
+        // Upper-case prefix carrying a base32 hash, both legal — the validator
+        // must accept and decode to the same 40-hex info-hash.
+        val base32 = "MFRGGZDFMZTWQ2LKNNWG23TPOBYXE43U"
+        val result = validator.validate("magnet:?xt=urn:BTIH:$base32")
+
+        assertTrue("uppercase prefix + base32 hash must be accepted, got: ${result.reason}", result.valid)
+        assertEquals(40, result.infoHashHex!!.length)
+        assertTrue(result.infoHashHex!!.all { it in "0123456789abcdef" })
+    }
 }
