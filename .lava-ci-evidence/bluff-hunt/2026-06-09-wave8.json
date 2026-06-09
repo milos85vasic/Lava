@@ -1,0 +1,70 @@
+{
+  "hunt": "2026-06-09-wave8",
+  "protocol": "§6.N / Seventh Law clause 5 — production-code-mutation bluff hunt over *Test.kt",
+  "constitution_refs": ["§6.N.1", "§6.N.2", "§6.J", "Seventh Law clause 4 (Forbidden Test Patterns)"],
+  "agent_role": "wave-8 bluff-hunt subagent (shared tree, read-only + test-only edits)",
+  "base_commit": "04e5156a931488df7d8dcabce70b0b043a0ec36b",
+  "method": "For each target: located the production class it claims to cover, applied a deliberate non-crashing mutation to that PRODUCTION code path (Edit, never committed), ran the test via Gradle, recorded survives/fails, then reverted the production mutation. Tests run serially (shared tree). After the hunt, all 5 production files were verified byte-identical to HEAD (git diff --quiet on core/ + feature/ returned CLEAN).",
+  "safe_module_scope": "core/{auth,work,sync,preferences,models}, feature/{onboarding,provider_config,connection,bookmarks,favorites,visited,account,menu,rating}, core/tracker/{rutor,kinozal,nnmclub} parsers — avoided modules under edit this wave (feature/topic, feature/search*, core/domain search use cases, lava-api-go, core/tracker/api+client+archiveorg+gutenberg).",
+  "rotation_note": "Targets chosen to NOT overlap earlier loop hunts (TopicConverterTest, EndpointEntityGoApiFieldsTest, EnrichFilterUseCaseTest, CategoryViewModelTest, RatingViewModelTest, ProbeMirrorUseCaseTest, EndpointConverterTest, LoginViewModelTest, and wave6/wave7 gate-script targets). Spans 4 architectural layers: scheduling-mapping, outbox-FIFO, HTML parser, auth-service DTO mapping, ViewModel persistence.",
+  "targets": [
+    {
+      "test_file": "core/work/impl/src/test/kotlin/lava/work/impl/SyncPeriodIntervalsTest.kt",
+      "production_class": "core/work/impl/src/main/kotlin/lava/work/impl/WorkBackgroundService.kt (internal val SyncPeriod.flexIntervalMillis)",
+      "layer": "WorkManager scheduling interval mapping",
+      "mutation": "SyncPeriod.DAY flex `6.hours` -> `6.days` (re-introduce the documented historical regression where flex 6 days > repeat 1 day, which WorkManager silently clamps to the full period — destroying the user's flex window).",
+      "test_task": "./gradlew :core:work:impl:testDebugUnitTest --tests 'lava.work.impl.SyncPeriodIntervalsTest'",
+      "verdict": "GENUINE",
+      "observed": "2 tests FAILED: `DAY sync flex is six hours, not six days` (AssertionError at SyncPeriodIntervalsTest.kt:62) and `flex interval never exceeds repeat interval for any periodic SyncPeriod` (AssertionError at SyncPeriodIntervalsTest.kt:46). 3 tests completed, 2 failed.",
+      "reverted": true
+    },
+    {
+      "test_file": "core/sync/src/test/kotlin/lava/sync/SyncOutboxImplTest.kt",
+      "production_class": "core/sync/src/main/kotlin/lava/sync/SyncOutboxImpl.kt (enqueue)",
+      "layer": "Sync outbox FIFO replay queue producer",
+      "mutation": "`createdAt = System.currentTimeMillis()` -> `createdAt = 0` (stop stamping a real monotonic wall-clock; the FIFO sort the consumer relies on becomes meaningless).",
+      "test_task": "./gradlew :core:sync:testDebugUnitTest --tests 'lava.sync.SyncOutboxImplTest'",
+      "verdict": "GENUINE",
+      "observed": "1 test FAILED: `enqueue stamps real createdAt and observe replays in FIFO order` (AssertionError at SyncOutboxImplTest.kt:84 — `every enqueued row MUST carry a real (non-zero) createdAt timestamp`). 3 tests completed, 1 failed. Matches the rehearsal documented in the test KDoc.",
+      "reverted": true
+    },
+    {
+      "test_file": "core/tracker/nnmclub/src/test/kotlin/lava/tracker/nnmclub/parser/NnmclubSearchParserSizeUnitTest.kt",
+      "production_class": "core/tracker/nnmclub/src/main/kotlin/lava/tracker/nnmclub/parser/NnmclubSearchParser.kt (private parseSize when-branch)",
+      "layer": "HTML search-row size-unit parser",
+      "mutation": "MB branch `(num * 1024 * 1024)` -> `(num * 1024)` (drop one 1024 factor so a 1.5 MB row is parsed as 1536 bytes instead of 1572864 — a 1024x user-visible size error).",
+      "test_task": "./gradlew :core:tracker:nnmclub:test --tests 'lava.tracker.nnmclub.parser.NnmclubSearchParserSizeUnitTest'",
+      "verdict": "GENUINE",
+      "observed": "1 test FAILED: `GB MB KB B units each map to the binary multiplier` (the MB assertion). Other 4 tests (TB, comma-decimal GB, zero-byte, unrecognised-unit) PASSED — failure localized to exactly the mutated MB branch. 5 tests completed, 1 failed.",
+      "reverted": true
+    },
+    {
+      "test_file": "core/auth/impl/src/test/kotlin/lava/auth/impl/AuthServiceImplLoginTest.kt",
+      "production_class": "core/auth/impl/src/main/kotlin/lava/auth/impl/AuthServiceImpl.kt (login when-branch)",
+      "layer": "Auth service DTO->domain mapping",
+      "mutation": "`is AuthResponseDto.ServiceUnavailable -> AuthResult.ServiceUnavailable(dto.reason)` -> `AuthResult.WrongCredits(null)` (re-introduce the historical Bug-1 §6.L-57th bluff where a service outage was misreported to the user as 'Wrong credentials').",
+      "test_task": "./gradlew :core:auth:impl:testDebugUnitTest --tests 'lava.auth.impl.AuthServiceImplLoginTest'",
+      "verdict": "GENUINE",
+      "observed": "1 test FAILED: `login ServiceUnavailable maps to ServiceUnavailable with the verbatim reason` (AssertionError at AuthServiceImplLoginTest.kt:141). 8 tests completed, 1 failed — failure localized to exactly the mutated branch.",
+      "reverted": true
+    },
+    {
+      "test_file": "feature/provider_config/src/test/kotlin/lava/provider/config/ProviderConfigViewModelTest.kt",
+      "production_class": "feature/provider_config/src/main/kotlin/lava/provider/config/ProviderConfigViewModel.kt (ToggleAnonymous handler)",
+      "layer": "ViewModel persistence (Robolectric + real Room in-memory DB)",
+      "mutation": "Revert the ToggleAnonymous handler from `providerConfigRepository.setUseAnonymous(providerId, !current)` to the pre-fix in-memory-only `reduce { state.copy(anonymous = !state.anonymous) }` (Sweep Finding #1 bluff class — toggle survives in-state but is lost across process restart).",
+      "test_task": "./gradlew :feature:provider_config:testDebugUnitTest --tests 'lava.provider.config.ProviderConfigViewModelTest'",
+      "verdict": "GENUINE",
+      "observed": "1 test FAILED: `Finding 1 - ToggleAnonymous persists across ViewModel recreation` (AssertionError). The vm2 (process-restart equivalent) never observed anonymous=true because the toggle was never persisted. 2 tests completed, 1 failed.",
+      "reverted": true
+    }
+  ],
+  "summary": {
+    "targets_count": 5,
+    "genuine": 5,
+    "bluffs": 0,
+    "tests_rewritten": 0,
+    "production_tree_byte_identical_to_HEAD_after_hunt": true,
+    "verdict": "All 5 sampled tests are GENUINE anti-bluff tests — each provably FAILED with a clear, localized assertion when its production code path was deliberately broken with a non-crashing mutation. 0 bluffs surfaced. No LVA ticket required."
+  }
+}
