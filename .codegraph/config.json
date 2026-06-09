@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "_policy": "Index scope reconciled with constitution §11.4.79 (LVA-6): own-org submodule SOURCE (vasic-digital + HelixDevelopment) IS in-scope; blanket submodules/** exclude REMOVED. Credential/secret paths (§6.H/§11.4.10), build artifacts, and nested third-party vendor trees stay excluded everywhere INCLUDING inside submodules. The constitution/ governance submodule (docs, no callable code) stays excluded per §11.4.79 clause 4. STATUS (verified 2026-05-31, LVA-6 CLOSED): own-org submodule SOURCE IS physically indexed (1,842 submodule files / 1,673 .kt+.go in the index; cross-submodule probe DefaultPluginRegistry resolves). codegraph v0.9.7 discovers submodule source via 'git ls-files -c --recurse-submodules' (extraction/index.js), which only lists submodules that are git-active — so the OPERATIONAL PRECONDITION is that 'git submodule init' (or 'git submodule update --init', respecting pins, NEVER --remote) has run for the submodules/* paths before 'codegraph index'. The earlier 'walker does not cross the gitlink boundary' note was INCORRECT for installed v0.9.7 and is retracted; the real gate was submodule registration in .git/config, not a codegraph capability gap. See docs/codegraph-11479-reconciliation.md 'Remediation attempt 2026-05-31'.",
+  "_policy": "Index scope reconciled with constitution \u00a711.4.79 (LVA-6): own-org submodule SOURCE (vasic-digital + HelixDevelopment) IS in-scope; blanket submodules/** exclude REMOVED. Credential/secret paths (\u00a76.H/\u00a711.4.10), build artifacts, and nested third-party vendor trees stay excluded everywhere INCLUDING inside submodules. The constitution/ governance submodule (docs, no callable code) stays excluded per \u00a711.4.79 clause 4. STATUS (verified 2026-05-31, LVA-6 CLOSED): own-org submodule SOURCE IS physically indexed (1,842 submodule files / 1,673 .kt+.go in the index; cross-submodule probe DefaultPluginRegistry resolves). codegraph v0.9.7 discovers submodule source via 'git ls-files -c --recurse-submodules' (extraction/index.js), which only lists submodules that are git-active \u2014 so the OPERATIONAL PRECONDITION is that 'git submodule init' (or 'git submodule update --init', respecting pins, NEVER --remote) has run for the submodules/* paths before 'codegraph index'. The earlier 'walker does not cross the gitlink boundary' note was INCORRECT for installed v0.9.7 and is retracted; the real gate was submodule registration in .git/config, not a codegraph capability gap. See docs/codegraph-11479-reconciliation.md 'Remediation attempt 2026-05-31'.",
   "include": [
     "**/*.ts",
     "**/*.tsx",
@@ -37,6 +37,7 @@
     "releases/**",
     "**/releases/**",
     ".lava-ci-evidence/**",
+    ".lava-ci-evidence/device-recordings/**",
     ".git-backup-*/**",
     "keystores/**",
     "**/keystores/**",

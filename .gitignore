@@ -133,3 +133,9 @@ tests/check-markdown-export-sync/.fin
 
 # Genymotion CLI downloaded tool binary (not evidence — fetched per run)
 .lava-ci-evidence/genymotion/*/genymotion-cli
+
+# §11.4.128 always-on device-recorder RAW output (logcat / screenrecord /
+# screenshots / pids). Capture-and-store by default; only CURATED evidence is
+# ever promoted out of this dir and committed. Raw is git-ignored + codegraph-
+# excluded (.codegraph/config.json) so it never pollutes the index or history.
+.lava-ci-evidence/device-recordings/
