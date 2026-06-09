@@ -13,6 +13,8 @@ import (
 	"net"
 	"os"
 	"path/filepath"
+	"sync"
+	"sync/atomic"
 	"time"
 )
 
@@ -71,25 +73,115 @@ func loadOrCreateTLS(sqlitePath string, sanIPs []net.IP) (*tls.Config, error) {
 		if leaf := parsedLeaf(cert); leaf != nil &&
 			certCoversAllIPs(leaf, sanIPs) &&
 			!certExpired(leaf) {
-			return tlsConfigFrom(cert), nil
+			return newRotatingCert(cert, sanIPs, certPath, keyPath).tlsConfig(), nil
 		}
 		// else: stale SANs OR expired (within the safety margin) — regenerate
 		// below so peers get a valid, IP-covering leaf.
 	}
 
-	cert, certPEM, keyPEM, err := generateSelfSigned(sanIPs)
+	cert, err := mintAndPersist(sanIPs, certPath, keyPath)
 	if err != nil {
 		return nil, err
 	}
+	return newRotatingCert(cert, sanIPs, certPath, keyPath).tlsConfig(), nil
+}
 
-	// Persist (0600 on the key — it is private material).
+// mintAndPersist generates a fresh self-signed cert covering sanIPs and writes
+// the cert+key PEM to disk (0600 on the key — it is private material). Returns
+// the parsed tls.Certificate. Shared by the initial load path and the
+// mid-process re-mint (rotatingCert.current), so persistence behaviour is
+// identical whether the cert is minted at Start or rotated in mid-flight.
+func mintAndPersist(sanIPs []net.IP, certPath, keyPath string) (tls.Certificate, error) {
+	cert, certPEM, keyPEM, err := generateSelfSigned(sanIPs)
+	if err != nil {
+		return tls.Certificate{}, err
+	}
 	if err := os.WriteFile(certPath, certPEM, 0o644); err != nil {
-		return nil, fmt.Errorf("write cert: %w", err)
+		return tls.Certificate{}, fmt.Errorf("write cert: %w", err)
 	}
 	if err := os.WriteFile(keyPath, keyPEM, 0o600); err != nil {
-		return nil, fmt.Errorf("write key: %w", err)
+		return tls.Certificate{}, fmt.Errorf("write key: %w", err)
 	}
-	return tlsConfigFrom(cert), nil
+	return cert, nil
+}
+
+// rotatingCert holds the active leaf behind an atomic pointer and re-mints it
+// in-flight when it comes within certExpiryMargin of NotAfter. This is the
+// LVA-068 mid-process rotation: loadOrCreateTLS only checked expiry AT LOAD
+// (LVA-064), so a multi-month-running embed could cross its leaf's NotAfter
+// without a restart and start handing every LAN peer an expired leaf. The
+// holder is wired as tls.Config.GetCertificate, the standard Go idiom for
+// zero-downtime cert rotation: every TLS handshake calls current(), which
+// returns the live leaf or atomically swaps in a freshly-minted one — existing
+// accepted connections are never dropped, only NEW handshakes after the swap
+// observe the new leaf.
+type rotatingCert struct {
+	// cert is *tls.Certificate, swapped atomically so concurrent GetCertificate
+	// callbacks (one per in-flight handshake) always read a consistent leaf.
+	cert atomic.Pointer[tls.Certificate]
+	// sanIPs / certPath / keyPath are the inputs to a re-mint: the IP-SAN set the
+	// leaf must keep covering and the on-disk paths to persist the new material
+	// (so a subsequent restart reuses the rotated leaf, not the expired one).
+	sanIPs   []net.IP
+	certPath string
+	keyPath  string
+	// mintMu serialises re-mints so a burst of near-expiry handshakes mints once,
+	// not once-per-handshake. A handshake that loses the race re-reads the (now
+	// fresh) pointer under the same lock.
+	mintMu sync.Mutex
+}
+
+func newRotatingCert(cert tls.Certificate, sanIPs []net.IP, certPath, keyPath string) *rotatingCert {
+	rc := &rotatingCert{sanIPs: sanIPs, certPath: certPath, keyPath: keyPath}
+	c := cert
+	rc.cert.Store(&c)
+	return rc
+}
+
+// current returns the leaf to present for an incoming handshake. The fast path
+// is a single atomic load; only when the active leaf is within certExpiryMargin
+// of expiry does it take mintMu, re-mint+persist a fresh leaf covering the same
+// IP-SANs, and atomically swap it in. If the re-mint fails (e.g. disk full) the
+// existing (near-expiry but still-valid-until-NotAfter) leaf is returned so the
+// server keeps serving rather than failing the handshake outright — the next
+// handshake retries the re-mint.
+func (rc *rotatingCert) current() (*tls.Certificate, error) {
+	cur := rc.cert.Load()
+	leaf := parsedLeaf(*cur)
+	if leaf != nil && !certExpired(leaf) {
+		return cur, nil
+	}
+
+	rc.mintMu.Lock()
+	defer rc.mintMu.Unlock()
+
+	// Re-check under the lock: another handshake may have already rotated.
+	cur = rc.cert.Load()
+	if leaf := parsedLeaf(*cur); leaf != nil && !certExpired(leaf) {
+		return cur, nil
+	}
+
+	fresh, err := mintAndPersist(rc.sanIPs, rc.certPath, rc.keyPath)
+	if err != nil {
+		// Keep serving the current leaf (still valid until NotAfter) rather than
+		// dropping the connection; the next handshake retries.
+		return cur, nil
+	}
+	rc.cert.Store(&fresh)
+	return &fresh, nil
+}
+
+// tlsConfig wires rc.current as GetCertificate so every handshake re-checks
+// expiry and rotates if needed. GetCertificate takes precedence over a static
+// Certificates slice, so the leaf is always freshly resolved per handshake.
+func (rc *rotatingCert) tlsConfig() *tls.Config {
+	return &tls.Config{
+		GetCertificate: func(*tls.ClientHelloInfo) (*tls.Certificate, error) {
+			return rc.current()
+		},
+		MinVersion: tls.VersionTLS12,
+		NextProtos: []string{"h2", "http/1.1"},
+	}
 }
 
 // parsedLeaf returns the parsed leaf x509 certificate for a loaded keypair.
@@ -144,14 +236,6 @@ func certCoversAllIPs(leaf *x509.Certificate, want []net.IP) bool {
 // tests can exercise the expiry branch deterministically without sleeping.
 func certExpired(leaf *x509.Certificate) bool {
 	return !tlsNow().Add(certExpiryMargin).Before(leaf.NotAfter)
-}
-
-func tlsConfigFrom(cert tls.Certificate) *tls.Config {
-	return &tls.Config{
-		Certificates: []tls.Certificate{cert},
-		MinVersion:   tls.VersionTLS12,
-		NextProtos:   []string{"h2", "http/1.1"},
-	}
 }
 
 // generateSelfSigned mints a fresh ECDSA P-256 self-signed certificate covering
