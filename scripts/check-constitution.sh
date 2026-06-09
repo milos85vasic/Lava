@@ -549,6 +549,69 @@ if [[ ! -x scripts/run-challenge-matrix.sh ]]; then
 fi
 
 # -----------------------------------------------------------------------------
+# CM-COVENANT-114-*-PROPAGATION — §11.4.128–§11.4.141 literal-anchor gate.
+# Closes §6.AI-debt item 4. Added 2026-06-09.
+#
+# §6.AI ("HelixConstitution §11.4.128–§11.4.141 Adoption") + §6.AJ
+# ("Universal Action-Prefix Recognition") claim the new universal clause
+# anchors are wired into root CLAUDE.md. The constitution submodule's
+# CM-COVENANT-114-*-PROPAGATION scans look for these literal tokens to
+# confirm a consuming project has adopted (not silently dropped) each
+# universal clause. This gate enforces that the literal "11.4.N" tokens
+# remain present in CLAUDE.md for every UNIVERSAL clause §6.AI adopts.
+#
+# Scope note: §11.4.135–§11.4.139 are the ATMosphere-TV-specific
+# audio/SurfaceFlinger batch that §6.AI EXPLICITLY demotes as project-
+# specific to ATMosphere and NOT binding on Lava — so they are
+# deliberately NOT required here. Only the 9 universal anchors §6.AI
+# enumerates as adopted/equivalence-mapped are gated.
+# -----------------------------------------------------------------------------
+# 6.AI(1): root CLAUDE.md MUST contain the §6.AI clause itself.
+if ! grep -qF '##### 6.AI — HelixConstitution §11.4.128' CLAUDE.md; then
+  echo "MISSING 6.AI clause in CLAUDE.md (CM-COVENANT-114)" >&2
+  echo "  → Add the §6.AI HelixConstitution §11.4.128–§11.4.141 Adoption clause." >&2
+  exit 1
+fi
+
+# 6.AI(2): root CLAUDE.md MUST contain the §6.AJ action-prefix clause.
+if ! grep -qF '##### 6.AJ — Universal Action-Prefix Recognition' CLAUDE.md; then
+  echo "MISSING 6.AJ clause in CLAUDE.md (CM-COVENANT-114, §11.4.140 LAYER 1)" >&2
+  echo "  → Add the §6.AJ Universal Action-Prefix Recognition clause." >&2
+  exit 1
+fi
+
+# 6.AI(3): every UNIVERSAL §11.4.N propagation anchor MUST appear as a
+# literal token in CLAUDE.md. A removed anchor = a silently-dropped
+# universal clause = a CM-COVENANT-114-N-PROPAGATION failure.
+covenant_114_anchors=(
+  "11.4.128"
+  "11.4.129"
+  "11.4.130"
+  "11.4.131"
+  "11.4.132"
+  "11.4.133"
+  "11.4.134"
+  "11.4.140"
+  "11.4.141"
+)
+covenant_114_missing=()
+for anchor in "${covenant_114_anchors[@]}"; do
+  if ! grep -qF "$anchor" CLAUDE.md; then
+    covenant_114_missing+=("$anchor")
+  fi
+done
+if [[ ${#covenant_114_missing[@]} -gt 0 ]]; then
+  echo "CM-COVENANT-114 VIOLATION: ${#covenant_114_missing[@]} universal clause anchor(s) missing from CLAUDE.md:" >&2
+  for a in "${covenant_114_missing[@]}"; do
+    echo "    §$a — propagation anchor absent (CM-COVENANT-114-${a##*.}-PROPAGATION)" >&2
+  done
+  echo "  → §6.AI/§6.AJ claim these universal clauses are adopted; the literal" >&2
+  echo "    '11.4.N' token MUST remain in the §6.AI enumeration so the" >&2
+  echo "    constitution's CM-COVENANT-114-* scans can confirm adoption." >&2
+  exit 1
+fi
+
+# -----------------------------------------------------------------------------
 # §6.W applicability boundary check — closes §6.AD-debt item 7.
 # The 2-mirror rule (GitHub + GitLab only) applies to the parent + every
 # vasic-digital submodule. The constitution submodule (HelixDevelopment-domain)
@@ -598,5 +661,6 @@ echo "clause-6.K Containers extension present; §6.X Container-Submodule"
 echo "Emulator Wiring inherited in all submodule + lava-api-go docs;"
 echo "§6.X runtime checks (a) Containerized impl + (b) --runner flag active;"
 echo "§6.AD HelixConstitution clause + constitution submodule + 54 per-scope"
-echo "inheritance pointer-blocks present; §6.W remote-host boundary clean;"
-echo "§11.4.6 no-guessing vocabulary gate clean."
+echo "inheritance pointer-blocks present; §6.AI/§6.AJ clauses + 9 universal"
+echo "CM-COVENANT-114-* §11.4.128–141 propagation anchors present;"
+echo "§6.W remote-host boundary clean; §11.4.6 no-guessing vocabulary gate clean."
