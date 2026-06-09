@@ -39,11 +39,35 @@ Challenge11ArchiveOrgAnonymousSearchTest crashes the app PROCESS at activity-des
 
 github/master and gitlab/master diverged at d2a2151 with unique non-doc go.mod content each; LVA-030 commit landed gitlab+working-tree but github refused non-FF. Needs a content-merge decision (operator-gated, NO force-push per §6.T.3).
 
-## LVA-044 — Add HTTP_DOWNLOAD TrackerCapability so archiveorg/gutenberg can surface their working HTTP file download
+## LVA-048 — feature/search_input writes author NAME under AuthorIdKey (wrong nav key)
+
+**Status:** Queued
+**Type:** Bug
+**Severity:** P2
+
+SearchInputNavigation openSearchInput appends filter.author?.name under AuthorIdKey instead of AuthorNameKey. Flagged by wave-4 §6.Q agent (out of its scope). Needs fix + roundtrip test.
+
+## LVA-049 — navigation route values not URL-encoded (reserved chars in search query corrupt route)
+
+**Status:** Queued
+**Type:** Task
+**Severity:** P3
+
+appendOptionalParams passes raw query; a query with &/? corrupts the route. Add Uri.encode at call sites + roundtrip test.
+
+## LVA-050 — A11yContentDescriptionTest teardown RuntimeException (Robolectric RoboMonitoringInstrumentation) reds :core:designsystem:test despite assertions passing
+
+**Status:** Queued
+**Type:** Task
+**Severity:** P3
+
+All 4 test bodies pass (XML failures=0) but a teardown RuntimeException makes Gradle report FAILED. Quarantine/fix the teardown.
+
+## LVA-052 — Wire HTTP_DOWNLOAD into the topic/download UI (consume HttpDownloadableTracker, write artifact to disk)
 
 **Status:** Queued
 **Type:** Feature
 **Severity:** P3
 
-archiveorg/gutenberg wire a real HTTP-download impl that is deliberately not exposed (no capability) → user-unreachable. Not a bluff (§6.E honest), a functionality gap. Needs a new capability + feature interface.
+LVA-044 made HTTP_DOWNLOAD SDK-reachable; the download UI consumes DownloadableTracker (.torrent) only. OWED: a UI surface that calls downloadHttpFile + saves the file.
 

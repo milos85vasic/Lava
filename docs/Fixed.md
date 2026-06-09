@@ -354,3 +354,39 @@ Wave-3 parallel-fleet find; fixed in c117caeb; falsifiability-proven; main-strea
 
 Wave-3 parallel-fleet find; fixed in c37995a7; falsifiability-proven; main-stream re-verified.
 
+## LVA-046 — rutracker Login reported fake success on wrong credentials (blind AuthResponseDto union accessor ignored discriminator)
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** .lava-ci-evidence/workable-items/LVA-046-evidence.md
+**Severity:** P2
+
+AsAuthResponseDtoSuccess() blind-decodes a WrongCredits union into non-pointer UserDto with no error → Login returns Success:true AuthToken:'' for wrong creds → every authed call 401s. LVA-032 class. Fixed via AsAuthResponseDtoSuccessChecked.
+
+## LVA-047 — MagnetLinkValidator rejects case-insensitive urn:btih prefix (RFC 8141)
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** .lava-ci-evidence/workable-items/LVA-047-evidence.md
+**Severity:** P2
+
+case-sensitive startsWith rejected magnet:?xt=urn:BTIH:<hash>; fixed to regionMatches ignoreCase.
+
+## LVA-044 — Add HTTP_DOWNLOAD TrackerCapability so archiveorg/gutenberg can surface their working HTTP file download
+
+**Status:** Implemented (→ Fixed.md)
+**Type:** Feature
+**Evidence:** .lava-ci-evidence/workable-items/LVA-044-evidence.md
+**Severity:** P3
+
+archiveorg/gutenberg wire a real HTTP-download impl that is deliberately not exposed (no capability) → user-unreachable. Not a bluff (§6.E honest), a functionality gap. Needs a new capability + feature interface.
+
+## LVA-051 — §11.4.128 always-on device-recorder skeleton + deterministic-path test (device capture OWED)
+
+**Status:** Completed (→ Fixed.md)
+**Type:** Task
+**Evidence:** .lava-ci-evidence/workable-items/LVA-051-evidence.md
+**Severity:** P2
+
+scripts/record-device-session.sh + hermetic path test landed; device-bound capture UNCONFIRMED without a live device.
+
