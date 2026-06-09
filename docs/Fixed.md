@@ -435,3 +435,57 @@ Kotlin removeLast() desugars to java.util.List.removeLast (JDK21 SequencedCollec
 
 scan-no-hardcoded-ipv4.sh regex lacked top-level tests/ → flagged tests/device-recording synthetic 127.0.0.1:6555 → check-constitution exit 1 (LVA-037 class). Added ^tests/.
 
+## LVA-052 — Wire HTTP_DOWNLOAD into the topic/download UI (consume HttpDownloadableTracker, write artifact to disk)
+
+**Status:** Implemented (→ Fixed.md)
+**Type:** Feature
+**Evidence:** .lava-ci-evidence/workable-items/LVA-052-evidence.md
+**Severity:** P3
+
+HTTP_DOWNLOAD UI wiring. A full impl exists on branch worktree-agent-ad695086c8735d60a (commit c8951eee) but it re-derived LVA-044 substrate → conflicts with master's landed LVA-044; needs a clean re-apply of the LVA-052 net-new files (HttpDownloadSource/DownloadHttpFileUseCase/DownloadService.downloadHttpFile/SDK.downloadHttpFile) on top of master. Topic-screen Compose routing (provider id through nav) still OWED.
+
+## LVA-054 — Audit codebase for removeLast/removeFirst/getFirst/getLast SequencedCollection calls that crash on Android <API35
+
+**Status:** Completed (→ Fixed.md)
+**Type:** Task
+**Evidence:** .lava-ci-evidence/workable-items/LVA-054-evidence.md
+**Severity:** P1
+
+LVA-053 class: Kotlin stdlib these desugar to java.util.* methods absent below API35. Sweep all modules + add a lint/detekt guard.
+
+## LVA-055 — run-test-pg.sh integration list omits ./internal/storage (Postgres legs skipped by canonical harness)
+
+**Status:** Completed (→ Fixed.md)
+**Type:** Task
+**Evidence:** .lava-ci-evidence/workable-items/LVA-055-evidence.md
+**Severity:** P3
+
+scripts/run-test-pg.sh runs only ./internal/cache + ./tests/integration; add ./internal/storage so its Postgres legs run in the canonical harness.
+
+## LVA-057 — multi-search SSE silently drops unknown requested providers
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** .lava-ci-evidence/workable-items/LVA-057-evidence.md
+**Severity:** P2
+
+GetMultiSearch continued past an unknown ?providers= id with no provider_error event and no failed counter, while total_providers still counted it — the user's requested provider vanished with zero client signal. Now emits provider_error + counts failed.
+
+## LVA-058 — §6.R scanners flag binary workable_items.db SSoT (LVA-037/056 class)
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** .lava-ci-evidence/workable-items/LVA-058-evidence.md
+**Severity:** P2
+
+The ipv4/hostport/uuid source-literal scanners scanned the tracked binary SQLite SSoT docs/workable_items.db, which stores ticket text quoting IP/host/UUID literals, producing a Binary file matches violation. Added .db exemption to all three.
+
+## LVA-060 — favorite/visited Torrent reconstruction drops magnetLink and date
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** .lava-ci-evidence/workable-items/LVA-060-evidence.md
+**Severity:** P1
+
+FavoriteTopicEntity/VisitedTopicEntity toTopic() reconstructed Torrent vs BaseTopic without checking date/magnetLink, so a magnet-only favorited or visited torrent was read back as BaseTopic and became un-downloadable, and getTorrents() filtered it out entirely. Added both fields to the discriminator.
+

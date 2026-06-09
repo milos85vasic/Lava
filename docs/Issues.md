@@ -39,27 +39,27 @@ Challenge11ArchiveOrgAnonymousSearchTest crashes the app PROCESS at activity-des
 
 github/master and gitlab/master diverged at d2a2151 with unique non-doc go.mod content each; LVA-030 commit landed gitlab+working-tree but github refused non-FF. Needs a content-merge decision (operator-gated, NO force-push per §6.T.3).
 
-## LVA-052 — Wire HTTP_DOWNLOAD into the topic/download UI (consume HttpDownloadableTracker, write artifact to disk)
-
-**Status:** Queued
-**Type:** Feature
-**Severity:** P3
-
-HTTP_DOWNLOAD UI wiring. A full impl exists on branch worktree-agent-ad695086c8735d60a (commit c8951eee) but it re-derived LVA-044 substrate → conflicts with master's landed LVA-044; needs a clean re-apply of the LVA-052 net-new files (HttpDownloadSource/DownloadHttpFileUseCase/DownloadService.downloadHttpFile/SDK.downloadHttpFile) on top of master. Topic-screen Compose routing (provider id through nav) still OWED.
-
-## LVA-054 — Audit codebase for removeLast/removeFirst/getFirst/getLast SequencedCollection calls that crash on Android <API35
-
-**Status:** Queued
-**Type:** Task
-**Severity:** P1
-
-LVA-053 class: Kotlin stdlib these desugar to java.util.* methods absent below API35. Sweep all modules + add a lint/detekt guard.
-
-## LVA-055 — run-test-pg.sh integration list omits ./internal/storage (Postgres legs skipped by canonical harness)
+## LVA-059 — sort ProviderRegistry.IDs() consumers for deterministic multi-search SSE provider ordering
 
 **Status:** Queued
 **Type:** Task
 **Severity:** P3
 
-scripts/run-test-pg.sh runs only ./internal/cache + ./tests/integration; add ./internal/storage so its Postgres legs run in the canonical harness.
+multi-search auto-discovery emits providers in non-deterministic map order (cosmetic).
+
+## LVA-061 — mobile/tls.go regenerate embed cert when persisted IP-SANs no longer cover device LAN IP
+
+**Status:** Queued
+**Type:** Task
+**Severity:** P3
+
+self-signed cert reused across restarts without re-checking IP-SAN; LAN IP change → host-mismatch.
+
+## LVA-062 — audit gate-shaping scripts for uncovered clauses (each gate clause needs a branch-covering falsifiability sub-test)
+
+**Status:** Queued
+**Type:** Task
+**Severity:** P3
+
+wave-6 §6.N.2 found CM-WORKABLE-ITEMS-SYNC clause-3 was uncovered; sweep other gates.
 

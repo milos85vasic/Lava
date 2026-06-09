@@ -1,0 +1,1 @@
+# LVA-054 — commit d99b10ad; SequencedCollection sweep — NavigationController.removeLast() crash fixed + guard scan-no-removelast-seqcoll.sh (comment-stripping) + hermetic 5/5 + check-constitution wired GREEN. Bluff-Audit in commit.
