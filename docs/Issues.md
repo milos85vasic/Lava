@@ -24,7 +24,7 @@ HelixConstitution §11.4.93/95/106 materialization. Go CLI (modernc.org/sqlite, 
 
 ## LVA-008 — C11 search_input NavBackStackEntry teardown crash (nested-NavHost lifecycle)
 
-**Status:** Queued
+**Status:** In progress
 **Type:** Bug
 **Severity:** P1
 **Created-By:** AI

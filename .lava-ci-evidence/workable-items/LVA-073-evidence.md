@@ -1,0 +1,1 @@
+# LVA-073 — commit 06f599b5; §6.AC NavTeardownCrashReporter tags the accepted LVA-008 upstream nav-teardown crash with attributable Crashlytics context before process death (instruments, never swallows). 6 falsifiable JVM tests; :app compiles. Operator accept-with-telemetry decision 2026-06-09.

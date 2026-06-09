@@ -570,3 +570,12 @@ tls.go only re-checks cert expiry at Start; a multi-month-running embed could se
 
 handleSseEvent raw-JSON parsing (provider_start/results/provider_done/provider_error) and onRetryClick Error-state re-dispatch are untested production branches.
 
+## LVA-073 — §6.AC telemetry instrumentation for the accepted LVA-008 nav-teardown crash
+
+**Status:** Completed (→ Fixed.md)
+**Type:** Task
+**Evidence:** .lava-ci-evidence/workable-items/LVA-073-evidence.md
+**Severity:** P1
+
+Per operator accept-with-telemetry decision, NavTeardownCrashReporter (chained uncaught handler) tags the known upstream androidx nav-teardown ISE with attributable §6.AC Crashlytics context before the process dies, so it surfaces as a known/triageable defect; 6 falsifiable JVM tests; wired into LavaApplication.
+
