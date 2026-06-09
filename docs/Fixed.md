@@ -228,3 +228,57 @@ core/models HostUtils.isLocalHost runs the fc00::/7 unique-local check (startsWi
 
 §11.4.79 (new) requires own-org submodules IN the codegraph index; Lava currently EXCLUDES submodules/ per docs/CODEGRAPH.md + 63rd-cycle policy. Reconcile .codegraph config + docs when pin is bumped. **Source:** self-discovered — .lava-ci-evidence/constitution-review/2026-05-31-68th-cycle-review.md
 
+## LVA-031 — Genymotion VM+nav UUIDs in tracked evidence trip §6.R scanner
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** .lava-ci-evidence/workable-items/../codegraph/lva6-groundtruth-20260609.md
+**Severity:** P2
+
+scan-no-hardcoded-uuid.sh flags VM UUID + NavBackStackEntry UUIDs in 14 tracked genymotion evidence files → check-constitution exit 1. Redacted per e767b701 precedent.
+
+## LVA-032 — rutracker browse/favorites blind-cast Topic→Torrent type confusion
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** .lava-ci-evidence/workable-items/LVA-032-evidence.md
+**Severity:** P1
+
+fromCategoryPage/fromFavoritesDto called AsForumTopicDtoTorrent ignoring the union discriminator → Topic variants render as empty fake-torrent rows. Fixed via AsForumTopicDtoTorrentChecked.
+
+## LVA-033 — rutor topic page drops Добавлен publishDate
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** .lava-ci-evidence/workable-items/LVA-033-evidence.md
+**Severity:** P2
+
+RuTorTopicParser dropped the Добавлен date despite the fixture carrying it. Added dotted DD-MM-YYYY shape to RuTorDateParser.
+
+## LVA-034 — Room endpoint-list converter drops GoApi platform/storage/key on round-trip
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** .lava-ci-evidence/workable-items/LVA-034-evidence.md
+**Severity:** P1
+
+host:port-only packing dropped the per-instance key → list-selected on-device Lava-API endpoint 401s (withKeyOverride dead). Fixed via #-sentinel encoded packing.
+
+## LVA-035 — PagingDataLoader pagination state-machine had zero tests
+
+**Status:** Completed (→ Fixed.md)
+**Type:** Task
+**Evidence:** .lava-ci-evidence/workable-items/LVA-035-evidence.md
+**Severity:** P2
+
+Added PagingDataLoaderTest (append-terminal off-by-one + refresh-error regression), production byte-identical.
+
+## LVA-030 — 6 recently-added submodules missing §6.R inheritance pointer (pre-existing §6.AD-debt)
+
+**Status:** Completed (→ Fixed.md)
+**Type:** Task
+**Evidence:** .lava-ci-evidence/workable-items/LVA-030-evidence.md
+**Created-By:** AI
+
+doc_processor/helixqa/llm_orchestrator/llm_provider/llms_verifier/vision_engine CLAUDE.md lack the §6.R No-Hardcoding inheritance block; scripts/check-constitution.sh full-run exits 1 on them. Pre-existing from the 5-dep + helixqa adoption; orthogonal to the 60e2d66 constitution bump. Each needs a submodule commit + push + parent pin bump (helixqa is always-track-upstream per Q9). Surfaced by full check-constitution during the constitution-bump cycle.
+
