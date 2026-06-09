@@ -179,25 +179,40 @@ internal class WorkBackgroundService @Inject constructor(
                 .setRequiredNetworkType(NetworkType.CONNECTED)
                 .build()
         }
-
-        val SyncPeriod.repeatIntervalMillis: Long
-            get() = when (this) {
-                SyncPeriod.OFF -> Duration.ZERO
-                SyncPeriod.HOUR -> 1.hours
-                SyncPeriod.SIX_HOURS -> 6.hours
-                SyncPeriod.TWELVE_HOURS -> 12.hours
-                SyncPeriod.DAY -> 1.days
-                SyncPeriod.WEEK -> 7.days
-            }.inWholeMilliseconds
-
-        val SyncPeriod.flexIntervalMillis: Long
-            get() = when (this) {
-                SyncPeriod.OFF -> Duration.ZERO
-                SyncPeriod.HOUR -> 15.minutes
-                SyncPeriod.SIX_HOURS -> 1.hours
-                SyncPeriod.TWELVE_HOURS -> 2.hours
-                SyncPeriod.DAY -> 6.days
-                SyncPeriod.WEEK -> 1.days
-            }.inWholeMilliseconds
     }
 }
+
+/**
+ * Repeat interval for a periodic sync, in millis. This is the period at which
+ * WorkManager re-runs the sync worker.
+ *
+ * Extracted to module-`internal` so [SyncPeriodIntervalsTest] can exercise the
+ * REAL production mapping (Anti-Bluff Pact Second Law — no testing a copy).
+ */
+internal val SyncPeriod.repeatIntervalMillis: Long
+    get() = when (this) {
+        SyncPeriod.OFF -> Duration.ZERO
+        SyncPeriod.HOUR -> 1.hours
+        SyncPeriod.SIX_HOURS -> 6.hours
+        SyncPeriod.TWELVE_HOURS -> 12.hours
+        SyncPeriod.DAY -> 1.days
+        SyncPeriod.WEEK -> 7.days
+    }.inWholeMilliseconds
+
+/**
+ * Flex interval for a periodic sync, in millis — the tail-of-period window
+ * during which WorkManager MAY run the work. WorkManager requires
+ * `flexInterval <= repeatInterval`; a flex larger than the repeat is silently
+ * clamped to the full period (no flex window). Each value here is a fraction of
+ * its [repeatIntervalMillis] (HOUR=1/4, SIX_HOURS=1/6, TWELVE_HOURS=1/6,
+ * DAY=1/4, WEEK=1/7).
+ */
+internal val SyncPeriod.flexIntervalMillis: Long
+    get() = when (this) {
+        SyncPeriod.OFF -> Duration.ZERO
+        SyncPeriod.HOUR -> 15.minutes
+        SyncPeriod.SIX_HOURS -> 1.hours
+        SyncPeriod.TWELVE_HOURS -> 2.hours
+        SyncPeriod.DAY -> 6.hours
+        SyncPeriod.WEEK -> 1.days
+    }.inWholeMilliseconds

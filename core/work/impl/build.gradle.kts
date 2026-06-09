@@ -17,4 +17,6 @@ dependencies {
     implementation(project(":core:tracker:client"))
 
     implementation(libs.bundles.work)
+
+    testImplementation(libs.junit4)
 }
