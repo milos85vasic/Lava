@@ -588,3 +588,12 @@ Per operator accept-with-telemetry decision, NavTeardownCrashReporter (chained u
 
 LVA-068 rotates the embed leaf mid-process but the swap is silent; emit a RecordWarning on rotation with feature/operation/old+new NotAfter/IP-SANs context (no secrets per §6.H). A wave-10 attempt was discarded because its falsifiability rehearsal was inconclusive and the SourceHash contract failed; redo with a test that fails when the actual rotation-path RecordWarning call is removed.
 
+## LVA-074 — Genymotion runner must wake+stay-on the VM screen before connectedDebugAndroidTest
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Task
+**Evidence:** .lava-ci-evidence/workable-items/LVA-074-evidence.md
+**Severity:** P2
+
+A sleeping VM screen idles the render pipeline causing SurfaceFlinger commit timeouts and spurious No-compose-hierarchies Challenge failures; the runner now wakes and keeps the screen on, proven by C00/C01/C07/C08 going green after the wake.
+
