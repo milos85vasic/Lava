@@ -101,6 +101,15 @@ echo "==> target Genymotion serial: $SERIAL"
 export ANDROID_SERIAL="$SERIAL"
 export LAVA_REAL_DEVICE_SERIALS="$SERIAL"
 
+# Wake + keep the VM screen on. A sleeping Genymotion screen idles the render
+# pipeline -> SurfaceFlinger "Sync transaction timed out waiting for commit
+# callback" -> the ComposeTestRule window-recomposer finds no committed surface
+# -> spurious "No compose hierarchies found" failures even though the app
+# composes fine. Forensic anchor:
+# .lava-ci-evidence/sixth-law-incidents/2026-06-09-genymotion-surface-render-timeout.json
+adb -s "$SERIAL" shell input keyevent KEYCODE_WAKEUP >/dev/null 2>&1 || true
+adb -s "$SERIAL" shell svc power stayon true >/dev/null 2>&1 || true
+
 GRADLE_TASK=":$MODULE:connectedDebugAndroidTest"
 GRADLE_ARGS=( "$GRADLE_TASK" --no-daemon --max-workers=2 )
 [[ "$NO_BUILD" == "1" ]] && GRADLE_ARGS+=( -x assembleDebug )
