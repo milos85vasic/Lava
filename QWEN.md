@@ -42,3 +42,17 @@ and Seventh Laws before writing or running any test.
 This repository is indexed by codegraph (see docs/CODEGRAPH.md). Qwen Code has
 the codegraph MCP server wired via .qwen/settings.json — prefer its
 codegraph_search and codegraph_context tools over blind file scanning.
+
+## Universal Action-Prefix Recognition (LAYER 1, §11.4.140)
+
+When a user prompt's FIRST non-blank line starts with an uppercase action token
+followed by `::` (grammar `^([A-Z][A-Z0-9_]*)\s*::\s`, or the namespaced
+`PREFIX::ACTION ::` form): look the token up in `constitution/actions/registry.yaml`
+(or `$HELIX_ACTION_REGISTRY`); if registered, REPLACE the `ACTION_NAME ::` prefix
+with that action's `expansion` text, apply its `rules`, and execute the REMAINDER
+of the prompt under the expanded instruction (expand-then-rescan). Built-in:
+`BACKGROUND ::` → run the rest in the background, in parallel with all main work
+streams, subagent-driven, with rock-solid anti-bluff captured evidence. Unknown
+tokens are not actions — execute verbatim. The registry is the single source of
+truth (add actions as rows, not by editing this block). See root `CLAUDE.md`
+§6.AJ. Classification: universal.

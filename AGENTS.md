@@ -788,3 +788,17 @@ After every successful distribution of any artifact (Android APK via Firebase Ap
 
 §6.Y-debt is open: pre-push hook + `scripts/check-constitution.sh` enforcement of the bump-first ordering is documented but not yet mechanically enforced. Until §6.Y-debt closes, reviewers MUST manually verify bump-first ordering on every commit that lands after a distribute. The forensic anchor: 2026-05-14 operator directive immediately after the 1.2.18-1038 Firebase distribute success: "after every application's distribution ... before any new changes have been applied to the product version code MUST BE increased to proper buildable target - API or Application! If it is required and it makes sense version MUST BE increased as well!" Inheritance: applies recursively to every submodule's distributable artifacts and every new artifact added to the project. Submodule constitutions MAY add stricter rules but MUST NOT relax this clause.
 
+
+## Universal Action-Prefix Recognition (LAYER 1, §11.4.140)
+
+When a user prompt's FIRST non-blank line starts with an uppercase action token
+followed by `::` (grammar `^([A-Z][A-Z0-9_]*)\s*::\s`, or the namespaced
+`PREFIX::ACTION ::` form): look the token up in `constitution/actions/registry.yaml`
+(or `$HELIX_ACTION_REGISTRY`); if registered, REPLACE the `ACTION_NAME ::` prefix
+with that action's `expansion` text, apply its `rules`, and execute the REMAINDER
+of the prompt under the expanded instruction (expand-then-rescan). Built-in:
+`BACKGROUND ::` → run the rest in the background, in parallel with all main work
+streams, subagent-driven, with rock-solid anti-bluff captured evidence. Unknown
+tokens are not actions — execute verbatim. The registry is the single source of
+truth (add actions as rows, not by editing this block). See root `CLAUDE.md`
+§6.AJ. Classification: universal.

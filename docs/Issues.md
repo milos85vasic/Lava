@@ -71,3 +71,11 @@ NnmclubSearchParser reads row.select('td') but never maps cells[4] (ISO yyyy-MM-
 
 core/models HostUtils.isLocalHost runs the fc00::/7 unique-local check (startsWith fc/fd + take(4) hex in 0xfc00..0xfdff) on ANY host string without requiring an IPv6 literal, so a DNS host like fcba.example.com / fdcdn.net is routed as LAN (http://host:8080) instead of https://host/forum/ → no green dot, every request fails. Fix: gate on contains(':') before the hex parse. Found by parallel core/network bug-hunt.
 
+## LVA-030 — 6 recently-added submodules missing §6.R inheritance pointer (pre-existing §6.AD-debt)
+
+**Status:** Queued
+**Type:** Task
+**Created-By:** AI
+
+doc_processor/helixqa/llm_orchestrator/llm_provider/llms_verifier/vision_engine CLAUDE.md lack the §6.R No-Hardcoding inheritance block; scripts/check-constitution.sh full-run exits 1 on them. Pre-existing from the 5-dep + helixqa adoption; orthogonal to the 60e2d66 constitution bump. Each needs a submodule commit + push + parent pin bump (helixqa is always-track-upstream per Q9). Surfaced by full check-constitution during the constitution-bump cycle.
+
