@@ -27,6 +27,8 @@ import lava.tracker.api.feature.BrowsableTracker
 import lava.tracker.api.feature.CommentsTracker
 import lava.tracker.api.feature.DownloadableTracker
 import lava.tracker.api.feature.FavoritesTracker
+import lava.tracker.api.feature.HttpDownloadResult
+import lava.tracker.api.feature.HttpDownloadableTracker
 import lava.tracker.api.feature.SearchableTracker
 import lava.tracker.api.feature.TopicTracker
 import lava.tracker.api.model.AuthState
@@ -299,6 +301,49 @@ class LavaTrackerSdk @Inject constructor(
         val feature = getActiveClient().getFeature(DownloadableTracker::class) ?: return null
         return try {
             feature.downloadTorrentFile(topicId)
+        } catch (_: Throwable) {
+            null
+        }
+    }
+
+    /**
+     * LVA-052 — downloads the HTTP-served artifact identified by [id] from the
+     * provider [trackerId] (Internet Archive, Project Gutenberg, …). Resolves
+     * the provider's [HttpDownloadableTracker] (Capability Honesty, clause 6.E)
+     * and performs the real HTTP fetch.
+     *
+     * Returns null — never throws — when the provider does NOT declare
+     * `HTTP_DOWNLOAD` (its `getFeature(HttpDownloadableTracker)` resolves null)
+     * or when the underlying fetch fails. Null is an honest "no HTTP-download
+     * surface / fetch failed" signal, never a fabricated artifact.
+     *
+     * Unlike [downloadTorrent], this resolves the client by explicit
+     * [trackerId] rather than the deprecated single-active-tracker knob, so the
+     * caller picks the provider whose topic the user is viewing.
+     */
+    suspend fun downloadHttpFile(trackerId: String, id: String): HttpDownloadResult? {
+        val client = try {
+            clientFor(trackerId)
+        } catch (_: Throwable) {
+            return null
+        }
+        val feature = client.getFeature(HttpDownloadableTracker::class) ?: return null
+        return try {
+            feature.downloadHttpFile(id)
+        } catch (_: Throwable) {
+            null
+        }
+    }
+
+    /**
+     * Convenience overload of [downloadHttpFile] resolving against the active
+     * tracker. Retained for parity with [downloadTorrent]'s active-tracker
+     * shape; new callers SHOULD pass an explicit `trackerId`.
+     */
+    suspend fun downloadHttpFile(id: String): HttpDownloadResult? {
+        val feature = getActiveClient().getFeature(HttpDownloadableTracker::class) ?: return null
+        return try {
+            feature.downloadHttpFile(id)
         } catch (_: Throwable) {
             null
         }

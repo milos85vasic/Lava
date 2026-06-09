@@ -47,5 +47,9 @@ dependencies {
     testImplementation(libs.bundles.room)
     testImplementation(libs.androidx.test.core)
     testImplementation(libs.robolectric)
+    // LVA-052 real-stack: drive the SDK HTTP-download seam against a faked
+    // socket boundary (MockWebServer) — the only boundary BELOW the SUT.
+    testImplementation(libs.okhttp.core)
+    testImplementation(libs.okhttp.mockwebserver)
     testImplementation(project(":core:tracker:testing"))
 }

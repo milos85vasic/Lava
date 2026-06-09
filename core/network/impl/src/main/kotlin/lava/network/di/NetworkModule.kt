@@ -7,12 +7,14 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import dagger.multibindings.Multibinds
+import lava.network.api.HttpDownloadSource
 import lava.network.api.ImageLoader
 import lava.network.api.NetworkApi
 import lava.network.data.ImageLoaderFactoryImpl
 import lava.network.data.NetworkApiRepository
 import lava.network.data.NetworkApiRepositoryImpl
 import lava.network.impl.DelegatingProxySelector
+import lava.network.impl.HttpDownloadSourceImpl
 import lava.network.impl.ImageLoaderImpl
 import lava.network.impl.LavaAuthBlobProvider
 import lava.network.impl.SwitchingNetworkApi
@@ -42,6 +44,10 @@ internal interface NetworkModule {
 
     @Multibinds
     fun interceptors(): Set<@JvmSuppressWildcards Interceptor>
+
+    @Binds
+    @Singleton
+    fun httpDownloadSource(impl: HttpDownloadSourceImpl): HttpDownloadSource
 
     @Binds
     @Singleton

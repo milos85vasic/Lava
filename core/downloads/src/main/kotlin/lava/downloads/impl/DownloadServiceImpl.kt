@@ -9,19 +9,23 @@ import android.app.DownloadManager.EXTRA_DOWNLOAD_ID
 import android.app.DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED
 import android.app.DownloadManager.STATUS_SUCCESSFUL
 import android.content.BroadcastReceiver
+import android.content.ContentValues
 import android.content.Context
 import android.content.Context.RECEIVER_EXPORTED
 import android.content.Intent
 import android.content.IntentFilter
 import android.net.Uri
 import android.os.Build
+import android.os.Environment
 import android.os.Environment.DIRECTORY_DOWNLOADS
 import android.os.StrictMode
+import android.provider.MediaStore
 import androidx.core.content.getSystemService
 import dagger.hilt.android.qualifiers.ApplicationContext
 import lava.common.analytics.AnalyticsTracker
 import lava.downloads.api.DownloadRequest
 import lava.downloads.api.DownloadService
+import lava.downloads.api.HttpFileDownloadRequest
 import java.io.File
 import java.net.URI
 import javax.inject.Inject
@@ -86,6 +90,78 @@ class DownloadServiceImpl @Inject constructor(
                 }
             }
         }
+    }
+
+    override suspend fun downloadHttpFile(downloadRequest: HttpFileDownloadRequest): String? {
+        if (downloadRequest.bytes.isEmpty()) {
+            // §6.AC: an empty artifact is a fetch/parse defect upstream — record
+            // it rather than silently writing a 0-byte file the user can't open.
+            analytics.recordWarning(
+                "HTTP download produced empty bytes; nothing written",
+                mapOf(
+                    AnalyticsTracker.Params.MODULE to "downloads",
+                    AnalyticsTracker.Params.OPERATION to "download_http_file",
+                    AnalyticsTracker.Params.ERROR_CLASS to "EmptyHttpArtifact",
+                    AnalyticsTracker.Params.TOPIC_ID to downloadRequest.id,
+                ),
+            )
+            return null
+        }
+        val fileName = buildValidFatFilename(downloadRequest.fileName)
+        return try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                writeViaMediaStore(fileName, downloadRequest.bytes)
+            } else {
+                writeToPublicDownloads(fileName, downloadRequest.bytes)
+            }
+        } catch (t: Throwable) {
+            analytics.recordNonFatal(
+                t,
+                mapOf(
+                    AnalyticsTracker.Params.MODULE to "downloads",
+                    AnalyticsTracker.Params.OPERATION to "download_http_file",
+                    AnalyticsTracker.Params.ERROR_CLASS to (t::class.simpleName ?: "HttpDownloadWriteError"),
+                    AnalyticsTracker.Params.TOPIC_ID to downloadRequest.id,
+                ),
+            )
+            null
+        }
+    }
+
+    /**
+     * API 29+ scoped-storage path: insert into the public Downloads MediaStore
+     * collection and stream the bytes into the returned content URI. Returns the
+     * content URI string the system assigns (the user-visible saved location).
+     */
+    private fun writeViaMediaStore(fileName: String, bytes: ByteArray): String? {
+        val resolver = context.contentResolver
+        val values = ContentValues().apply {
+            put(MediaStore.Downloads.DISPLAY_NAME, fileName)
+            put(MediaStore.Downloads.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
+            put(MediaStore.Downloads.IS_PENDING, 1)
+        }
+        val collection = MediaStore.Downloads.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
+        val itemUri = resolver.insert(collection, values) ?: return null
+        resolver.openOutputStream(itemUri)?.use { it.write(bytes) } ?: run {
+            resolver.delete(itemUri, null, null)
+            return null
+        }
+        values.clear()
+        values.put(MediaStore.Downloads.IS_PENDING, 0)
+        resolver.update(itemUri, values, null, null)
+        return itemUri.toString()
+    }
+
+    /**
+     * Pre-API-29 path: write to the public external Downloads directory.
+     * Returns the file URI string of the written file.
+     */
+    private fun writeToPublicDownloads(fileName: String, bytes: ByteArray): String? = allowDiskReads {
+        val dir = Environment.getExternalStoragePublicDirectory(DIRECTORY_DOWNLOADS)
+        if (!dir.exists() && !dir.mkdirs()) return@allowDiskReads null
+        val target = File(dir, fileName)
+        target.writeBytes(bytes)
+        Uri.fromFile(target).toString()
     }
 
     @SuppressLint("UnspecifiedRegisterReceiverFlag")
