@@ -211,6 +211,29 @@ internal class SearchResultViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Sweep finding #2 closure (2026-05-17). The SSE-failure transition:
+     * record the non-fatal, reduce to [SearchResultContent.Error], and
+     * post the dismissed-error side effect. Extracted from the inline
+     * `observeSseSearch` error branch so it is the SINGLE production owner
+     * of the Error transition — `observeSseSearch` calls it on a real SSE
+     * `Error` event, and the LVA-069 retry test calls the same method to
+     * reach the production Error state deterministically (no test-only
+     * backdoor: this IS the production code path the SSE error runs).
+     *
+     * Visibility: internal so the retry test can drive the real transition.
+     */
+    internal fun applySseError(reason: String, query: String) = intent {
+        analytics.recordNonFatal(
+            IllegalStateException("SSE error: $reason"),
+            mapOf(AnalyticsTracker.Params.QUERY to query),
+        )
+        reduce {
+            state.copy(searchContent = SearchResultContent.Error(reason))
+        }
+        postSideEffect(SearchResultSideEffect.ShowFallbackDismissedError("SSE"))
+    }
+
     private fun onFallbackAccept() = intent {
         // Clear the modal; the resumeWith lambda is owned by the paging
         // path that originally posted the proposal. In the current shape
@@ -333,119 +356,22 @@ internal class SearchResultViewModel @Inject constructor(
                     // new SearchResultContent.Error(reason) which the
                     // Screen renders with an actionable Retry button.
                     val reason = event.message.ifEmpty { "Search stream failed" }
-                    analytics.recordNonFatal(
-                        IllegalStateException("SSE error: $reason"),
-                        mapOf(AnalyticsTracker.Params.QUERY to filter.query.orEmpty()),
-                    )
-                    reduce {
-                        state.copy(searchContent = SearchResultContent.Error(reason))
-                    }
-                    postSideEffect(SearchResultSideEffect.ShowFallbackDismissedError("SSE"))
+                    applySseError(reason, filter.query.orEmpty())
                 }
             }
         }
     }
 
     private fun handleSseEvent(event: SseEvent.Event) = intent {
-        val json = Json.parseToJsonElement(event.data).jsonObject
-        when (event.type) {
-            "provider_start" -> {
-                val pid = json["provider_id"]?.jsonPrimitive?.content ?: return@intent
-                val dname = json["display_name"]?.jsonPrimitive?.content ?: pid
-                val current = state.searchContent
-                if (current is SearchResultContent.Streaming) {
-                    reduce {
-                        state.copy(
-                            providerDisplayNames = state.providerDisplayNames + (pid to dname),
-                            searchContent = current.copy(
-                                activeProviders = current.activeProviders.map {
-                                    if (it.providerId == pid) {
-                                        it.copy(displayName = dname)
-                                    } else {
-                                        it
-                                    }
-                                },
-                            ),
-                        )
-                    }
-                }
-            }
-            "results" -> {
-                val pid = json["provider_id"]?.jsonPrimitive?.content ?: return@intent
-                val itemsJson = json["items"]?.jsonArray ?: return@intent
-                val newItems = itemsJson.mapNotNull { element ->
-                    val obj = element.jsonObject
-                    val id = obj["id"]?.jsonPrimitive?.content ?: return@mapNotNull null
-                    val title = obj["title"]?.jsonPrimitive?.content ?: ""
-                    TopicModel(
-                        topic = Torrent(id = id, title = title),
-                        providerId = pid,
-                    )
-                }
-                val current = state.searchContent
-                if (current is SearchResultContent.Streaming) {
-                    reduce {
-                        state.copy(
-                            searchContent = current.copy(
-                                items = current.items + newItems,
-                                activeProviders = current.activeProviders.map {
-                                    if (it.providerId == pid) {
-                                        it.copy(
-                                            status = StreamStatus.RECEIVING,
-                                            resultCount = it.resultCount + newItems.size,
-                                        )
-                                    } else {
-                                        it
-                                    }
-                                },
-                            ),
-                        )
-                    }
-                }
-            }
-            "provider_done" -> {
-                val pid = json["provider_id"]?.jsonPrimitive?.content ?: return@intent
-                val count = json["result_count"]?.jsonPrimitive?.content?.toIntOrNull() ?: 0
-                val current = state.searchContent
-                if (current is SearchResultContent.Streaming) {
-                    reduce {
-                        state.copy(
-                            searchContent = current.copy(
-                                activeProviders = current.activeProviders.map {
-                                    if (it.providerId == pid) {
-                                        it.copy(
-                                            status = StreamStatus.DONE,
-                                            resultCount = count,
-                                        )
-                                    } else {
-                                        it
-                                    }
-                                },
-                            ),
-                        )
-                    }
-                }
-            }
-            "provider_error" -> {
-                val pid = json["provider_id"]?.jsonPrimitive?.content ?: return@intent
-                val current = state.searchContent
-                if (current is SearchResultContent.Streaming) {
-                    reduce {
-                        state.copy(
-                            searchContent = current.copy(
-                                activeProviders = current.activeProviders.map {
-                                    if (it.providerId == pid) {
-                                        it.copy(status = StreamStatus.ERROR)
-                                    } else {
-                                        it
-                                    }
-                                },
-                            ),
-                        )
-                    }
-                }
-            }
-        }
+        // §6.J anti-bluff: the raw-JSON parse + reduce is extracted to the
+        // file-scope pure function `applySseEvent` so the Go-API SSE
+        // consumer branch (previously untested — only the client-direct
+        // `applyMultiSearchEvent` path had coverage) can be driven directly
+        // by a unit test feeding each event's JSON shape. The intent here is
+        // the thin orbit wrapper; the parsing logic the LVA-057-class bugs
+        // live in (malformed event dropped, wrong field mapping,
+        // provider_error not surfaced) is now falsifiable.
+        reduce { applySseEvent(state, event.type, event.data) }
     }
 
     private fun handleStreamEnd() = intent {
@@ -637,5 +563,122 @@ internal fun applyMultiSearchEvent(
             ),
         )
         is MultiSearchEvent.AllProvidersDone -> state
+    }
+}
+
+/**
+ * SP-4 Phase D Go-API SSE consumer — pure-state transformation that
+ * parses ONE raw SSE event (its `type` + the JSON `data` payload the
+ * Go API streams over `/v1/search`) and reduces it into a new
+ * [SearchPageState]. Extracted to file-scope (mirroring
+ * [applyMultiSearchEvent], the client-direct SDK path) so unit tests can
+ * drive the raw-JSON parsing directly without a running HTTPS Go-API.
+ *
+ * The Go-API multi-search stream emits four event types per
+ * `lava-api-go`'s SSE contract; this function maps each to the
+ * user-visible [SearchResultContent.Streaming] state the Compose UI
+ * renders (the per-provider status badges + the result list):
+ *
+ *  - `provider_start` → stamps `display_name` into `providerDisplayNames`
+ *    + the matching `ProviderStreamStatus` row (pre-existing with
+ *    `SEARCHING`). Falls back to the bare `provider_id` if `display_name`
+ *    is absent.
+ *  - `results` → maps each `items[]` element (`id` + `title`) into a
+ *    `TopicModel` carrying the per-provider id, appends them to the
+ *    result list, and flips the row to `RECEIVING` with an incremented
+ *    `resultCount`.
+ *  - `provider_done` → flips the row to `DONE` with the server-reported
+ *    `result_count`.
+ *  - `provider_error` → flips the row to `ERROR` (the per-provider error
+ *    chip the user sees) WITHOUT failing the whole stream.
+ *
+ * Contract guarantees (the LVA-057-class concerns this function is the
+ * source-of-truth for):
+ *  - If `searchContent` is not [SearchResultContent.Streaming], the event
+ *    is ignored and state returned unchanged (late events after the user
+ *    navigated away MUST NOT overwrite the now-visible list).
+ *  - A malformed event missing its `provider_id` is a no-op (state
+ *    returned unchanged) — it is NEVER allowed to crash the parse or
+ *    silently corrupt another provider's row.
+ *  - An unknown `type` is a no-op.
+ */
+internal fun applySseEvent(
+    state: SearchPageState,
+    type: String,
+    data: String,
+): SearchPageState {
+    val current = state.searchContent
+    if (current !is SearchResultContent.Streaming) return state
+
+    val json = runCatching { Json.parseToJsonElement(data).jsonObject }.getOrNull()
+        ?: return state
+
+    return when (type) {
+        "provider_start" -> {
+            val pid = json["provider_id"]?.jsonPrimitive?.content ?: return state
+            val dname = json["display_name"]?.jsonPrimitive?.content ?: pid
+            state.copy(
+                providerDisplayNames = state.providerDisplayNames + (pid to dname),
+                searchContent = current.copy(
+                    activeProviders = current.activeProviders.map {
+                        if (it.providerId == pid) it.copy(displayName = dname) else it
+                    },
+                ),
+            )
+        }
+        "results" -> {
+            val pid = json["provider_id"]?.jsonPrimitive?.content ?: return state
+            val itemsJson = json["items"]?.jsonArray ?: return state
+            val newItems = itemsJson.mapNotNull { element ->
+                val obj = element.jsonObject
+                val id = obj["id"]?.jsonPrimitive?.content ?: return@mapNotNull null
+                val title = obj["title"]?.jsonPrimitive?.content ?: ""
+                TopicModel(
+                    topic = Torrent(id = id, title = title),
+                    providerId = pid,
+                )
+            }
+            state.copy(
+                searchContent = current.copy(
+                    items = current.items + newItems,
+                    activeProviders = current.activeProviders.map {
+                        if (it.providerId == pid) {
+                            it.copy(
+                                status = StreamStatus.RECEIVING,
+                                resultCount = it.resultCount + newItems.size,
+                            )
+                        } else {
+                            it
+                        }
+                    },
+                ),
+            )
+        }
+        "provider_done" -> {
+            val pid = json["provider_id"]?.jsonPrimitive?.content ?: return state
+            val count = json["result_count"]?.jsonPrimitive?.content?.toIntOrNull() ?: 0
+            state.copy(
+                searchContent = current.copy(
+                    activeProviders = current.activeProviders.map {
+                        if (it.providerId == pid) {
+                            it.copy(status = StreamStatus.DONE, resultCount = count)
+                        } else {
+                            it
+                        }
+                    },
+                ),
+            )
+        }
+        "provider_error" -> {
+            val pid = json["provider_id"]?.jsonPrimitive?.content ?: return state
+            state.copy(
+                searchContent = current.copy(
+                    activeProviders = current.activeProviders.map {
+                        if (it.providerId == pid) it.copy(status = StreamStatus.ERROR) else it
+                    },
+                ),
+            )
+        }
+        else -> state
     }
 }
