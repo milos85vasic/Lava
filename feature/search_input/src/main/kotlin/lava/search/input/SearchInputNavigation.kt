@@ -1,5 +1,6 @@
 package lava.search.input
 
+import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import lava.models.forum.Category
 import lava.models.search.Filter
@@ -72,10 +73,10 @@ fun openSearchInput(filter: Filter = Filter()) {
             route = SearchInputRoute,
             optionalArgsBuilder = {
                 appendOptionalParams(
-                    QueryKey to filter.query?.takeIf(String::isNotBlank),
+                    QueryKey to filter.query?.takeIf(String::isNotBlank)?.urlEncoded(),
                     CategoriesKey to filter.categories.queryParam(),
-                    AuthorIdKey to filter.author?.id,
-                    AuthorIdKey to filter.author?.name,
+                    AuthorIdKey to filter.author?.id?.urlEncoded(),
+                    AuthorNameKey to filter.author?.name?.urlEncoded(),
                     SortKey to filter.sort.queryParam,
                     OrderKey to filter.order.queryParam,
                     PeriodKey to filter.period.queryParam,
@@ -92,7 +93,7 @@ fun openSearchInput(categoryId: String) {
             route = SearchInputRoute,
             optionalArgsBuilder = {
                 appendOptionalParams(
-                    CategoriesKey to categoryId,
+                    CategoriesKey to categoryId.urlEncoded(),
                 )
             },
         ),
@@ -123,9 +124,19 @@ private val SavedStateHandle.author: Author?
 
 private fun List<Category>?.queryParam(): String? {
     return this?.takeIf(List<Category>::isNotEmpty)
-        ?.map(Category::id)
+        ?.map { it.id.urlEncoded() }
         ?.joinToString(",")
 }
+
+/**
+ * Percent-encodes a route parameter value (LVA-049). Without this, a value
+ * containing route-reserved characters (`&`, `?`, `=`, `#`, spaces) corrupts the
+ * navigation route: everything after a raw `&`/`?` is parsed as a separate query
+ * parameter (or dropped). The matching decode happens in Navigation-Compose when
+ * the host navigates the route (`Uri.decode`), so the [SavedStateHandle.filter]
+ * getter receives the original value back verbatim.
+ */
+private fun String.urlEncoded(): String = Uri.encode(this)
 
 private val Sort.queryParam
     get() = when (this) {
