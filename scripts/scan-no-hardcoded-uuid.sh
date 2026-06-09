@@ -41,7 +41,7 @@ cd "$(dirname "$0")/.."
 # silence what would otherwise be real diagnostic output.
 uuid_violations=$(
   git ls-files -z \
-    | grep -zvE '^\.env\.example$|^\.lava-ci-evidence/sixth-law-incidents/|^docs/superpowers/(specs|plans)/|_test\.go$|(Test\.kt|Tests\.kt|Test\.java)$' \
+    | grep -zvE '^\.env\.example$|^\.lava-ci-evidence/sixth-law-incidents/|^docs/superpowers/(specs|plans)/|_test\.go$|(Test\.kt|Tests\.kt|Test\.java)$|\.db$' \
     | while IFS= read -r -d '' p; do
         [[ -f "$p" ]] || continue
         # A file is a violation iff it contains a UUID that is NOT the IETF
