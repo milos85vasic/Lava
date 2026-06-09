@@ -11,6 +11,7 @@ import lava.tracker.api.feature.BrowsableTracker
 import lava.tracker.api.feature.CommentsTracker
 import lava.tracker.api.feature.DownloadableTracker
 import lava.tracker.api.feature.FavoritesTracker
+import lava.tracker.api.feature.HttpDownloadableTracker
 import lava.tracker.api.feature.SearchableTracker
 import lava.tracker.api.feature.TopicTracker
 import lava.tracker.archiveorg.ArchiveOrgClient
@@ -69,6 +70,7 @@ import kotlin.reflect.KClass
  *   AUTH_REQUIRED    -> AuthenticatableTracker
  *   CAPTCHA_LOGIN    -> AuthenticatableTracker  (a login variant; same feature)
  *   TORRENT_DOWNLOAD -> DownloadableTracker
+ *   HTTP_DOWNLOAD    -> HttpDownloadableTracker  (HTTP file download, e.g. e-books)
  *   MAGNET_LINK      -> DownloadableTracker      (magnet is a download artifact)
  *
  * --------------------------------------------------------------------------
@@ -421,6 +423,7 @@ class CapabilityHonestyContractTest {
             TrackerCapability.AUTH_REQUIRED to AuthenticatableTracker::class,
             TrackerCapability.CAPTCHA_LOGIN to AuthenticatableTracker::class,
             TrackerCapability.TORRENT_DOWNLOAD to DownloadableTracker::class,
+            TrackerCapability.HTTP_DOWNLOAD to HttpDownloadableTracker::class,
             TrackerCapability.MAGNET_LINK to DownloadableTracker::class,
         )
 

@@ -18,13 +18,16 @@ class ArchiveOrgDescriptorTest {
     }
 
     @Test
-    fun `declares exactly 4 capabilities and excludes TORRENT_DOWNLOAD, MAGNET_LINK, COMMENTS, FAVORITES, AUTH_REQUIRED`() {
+    fun `declares exactly 5 capabilities including HTTP_DOWNLOAD and excludes TORRENT_DOWNLOAD, MAGNET_LINK, COMMENTS, FAVORITES, AUTH_REQUIRED`() {
         val caps = ArchiveOrgDescriptor.capabilities
-        assertEquals(4, caps.size)
+        assertEquals(5, caps.size)
         assertTrue(TrackerCapability.SEARCH in caps)
         assertTrue(TrackerCapability.BROWSE in caps)
         assertTrue(TrackerCapability.FORUM in caps)
         assertTrue(TrackerCapability.TOPIC in caps)
+        // LVA-044: HTTP_DOWNLOAD is the honest home for archive.org's HTTP file
+        // download (e-books / media served over HTTPS, not `.torrent`).
+        assertTrue("HTTP_DOWNLOAD must be declared", TrackerCapability.HTTP_DOWNLOAD in caps)
         assertFalse("TORRENT_DOWNLOAD must not be declared", TrackerCapability.TORRENT_DOWNLOAD in caps)
         assertFalse("MAGNET_LINK must not be declared", TrackerCapability.MAGNET_LINK in caps)
         assertFalse("COMMENTS must not be declared", TrackerCapability.COMMENTS in caps)

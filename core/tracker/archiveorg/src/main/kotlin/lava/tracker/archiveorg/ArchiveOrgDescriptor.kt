@@ -27,7 +27,10 @@ object ArchiveOrgDescriptor : TrackerDescriptor {
         TrackerCapability.BROWSE,
         TrackerCapability.FORUM,
         TrackerCapability.TOPIC,
-        // No TORRENT_DOWNLOAD — Internet Archive serves files over HTTP.
+        // HTTP_DOWNLOAD — Internet Archive serves files over plain HTTPS
+        // (resolved by ArchiveOrgClient.getFeature(HttpDownloadableTracker)).
+        TrackerCapability.HTTP_DOWNLOAD,
+        // No TORRENT_DOWNLOAD — Internet Archive serves no `.torrent` files.
         // No MAGNET_LINK, no COMMENTS, no FAVORITES, no AUTH_REQUIRED.
     )
     override val authType: AuthType = AuthType.NONE

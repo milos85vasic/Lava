@@ -33,8 +33,11 @@ object GutenbergDescriptor : TrackerDescriptor {
         TrackerCapability.SEARCH,
         TrackerCapability.BROWSE,
         TrackerCapability.TOPIC,
-        // No TORRENT_DOWNLOAD — Project Gutenberg serves e-books over HTTP,
-        // not `.torrent` files (clause 6.E). No MAGNET_LINK either.
+        // HTTP_DOWNLOAD — Project Gutenberg serves EPUB / text / HTML e-books
+        // over HTTP (resolved by GutenbergClient.getFeature(HttpDownloadableTracker)).
+        TrackerCapability.HTTP_DOWNLOAD,
+        // No TORRENT_DOWNLOAD — Project Gutenberg serves no `.torrent` files
+        // (clause 6.E). No MAGNET_LINK either.
     )
     override val authType: AuthType = AuthType.NONE
     override val encoding: String = "UTF-8"

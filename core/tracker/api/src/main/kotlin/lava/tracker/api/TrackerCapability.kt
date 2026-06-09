@@ -11,6 +11,7 @@ enum class TrackerCapability {
     COMMENTS,
     FAVORITES,
     TORRENT_DOWNLOAD,
+    HTTP_DOWNLOAD,
     MAGNET_LINK,
     AUTH_REQUIRED,
     CAPTCHA_LOGIN,

@@ -5,8 +5,8 @@ import org.junit.Test
 
 class TrackerCapabilityTest {
     @Test
-    fun `enum has 13 values matching spec`() {
-        assertEquals(13, TrackerCapability.entries.size)
+    fun `enum has 14 values matching spec`() {
+        assertEquals(14, TrackerCapability.entries.size)
     }
 
     @Test
@@ -15,7 +15,7 @@ class TrackerCapabilityTest {
         assertEquals(
             setOf(
                 "SEARCH", "BROWSE", "FORUM", "TOPIC", "COMMENTS", "FAVORITES",
-                "TORRENT_DOWNLOAD", "MAGNET_LINK", "AUTH_REQUIRED",
+                "TORRENT_DOWNLOAD", "HTTP_DOWNLOAD", "MAGNET_LINK", "AUTH_REQUIRED",
                 "CAPTCHA_LOGIN", "RSS", "UPLOAD", "USER_PROFILE",
             ),
             names,

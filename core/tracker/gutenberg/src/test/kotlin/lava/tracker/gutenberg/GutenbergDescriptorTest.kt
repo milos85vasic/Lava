@@ -23,9 +23,11 @@ class GutenbergDescriptorTest {
                 TrackerCapability.SEARCH,
                 TrackerCapability.BROWSE,
                 TrackerCapability.TOPIC,
-                // No TORRENT_DOWNLOAD — gutenberg serves HTTP e-books, not
-                // `.torrent` files (clause 6.E). See
-                // GutenbergCapabilityHonestyTest for the download-artifact gate.
+                // LVA-044: HTTP_DOWNLOAD is the honest home for gutenberg's HTTP
+                // e-book download (EPUB / text / HTML), NOT TORRENT_DOWNLOAD —
+                // gutenberg serves no `.torrent` files (clause 6.E). See
+                // GutenbergCapabilityHonestyTest + GutenbergHttpDownloadRealStackTest.
+                TrackerCapability.HTTP_DOWNLOAD,
             ),
             caps,
         )

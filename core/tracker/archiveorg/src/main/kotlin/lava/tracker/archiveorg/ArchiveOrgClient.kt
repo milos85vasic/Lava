@@ -9,6 +9,7 @@ import lava.tracker.api.feature.BrowsableTracker
 import lava.tracker.api.feature.CommentsTracker
 import lava.tracker.api.feature.DownloadableTracker
 import lava.tracker.api.feature.FavoritesTracker
+import lava.tracker.api.feature.HttpDownloadableTracker
 import lava.tracker.api.feature.SearchableTracker
 import lava.tracker.api.feature.TopicTracker
 import lava.tracker.archiveorg.feature.ArchiveOrgBrowse
@@ -62,8 +63,12 @@ class ArchiveOrgClient @Inject constructor(
             AuthenticatableTracker::class -> null
             CommentsTracker::class -> null
             FavoritesTracker::class -> null
-            // HTTP download is implemented but not declared as a capability
-            // because TrackerCapability lacks HTTP_DOWNLOAD today.
+            // HTTP file download (e-books / media over HTTPS) — declared as
+            // HTTP_DOWNLOAD and resolved here (clause 6.E).
+            HttpDownloadableTracker::class ->
+                if (TrackerCapability.HTTP_DOWNLOAD in caps) download as T else null
+            // No `.torrent`/magnet surface — TORRENT_DOWNLOAD is NOT declared,
+            // so DownloadableTracker intentionally does not resolve.
             DownloadableTracker::class -> null
             else -> null
         }

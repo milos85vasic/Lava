@@ -582,6 +582,40 @@ this file.
 
 ---
 
+### 7.1 HTTP file download (`HttpDownloadableTracker` / `HTTP_DOWNLOAD`)
+
+Not every provider serves `.torrent` files. Internet Archive (`archiveorg`)
+and Project Gutenberg (`gutenberg`) are digital libraries that serve their
+artifact (EPUB / plain-text / HTML e-books, raw media) over plain HTTP(S).
+Routing those bytes through `DownloadableTracker.downloadTorrentFile` would be
+a §6.E bluff: the consumer expects a bencoded `.torrent`, not an e-book.
+
+The honest home for them is a distinct capability + feature interface:
+
+```kotlin
+interface HttpDownloadableTracker : TrackerFeature {
+    /** Bytes + resolved source URL + suggested filename. Throws on non-2xx / empty. */
+    suspend fun downloadHttpFile(id: String): HttpDownloadResult
+}
+
+data class HttpDownloadResult(val bytes: ByteArray, val sourceUrl: String, val fileName: String)
+```
+
+A provider that serves files over HTTP declares `TrackerCapability.HTTP_DOWNLOAD`
+in its descriptor and resolves `HttpDownloadableTracker` (NOT
+`DownloadableTracker`) from `getFeature`. The §6.E gate
+(`CapabilityHonestyContractTest`, forward + reverse) enforces both directions:
+`HTTP_DOWNLOAD` declared ⇒ `getFeature(HttpDownloadableTracker)` non-null, and
+`HTTP_DOWNLOAD` undeclared ⇒ it stays null. `archiveorg` + `gutenberg` are the
+reference implementations.
+
+> **SDK-layer note (LVA-044):** the capability + interface + per-provider real-stack
+> tests are wired at the SDK layer. End-to-end UI wiring (a download surface that
+> calls `downloadHttpFile` and writes the artifact to disk for the user) is still
+> OWED — the current topic/download screen only handles `.torrent`/magnet via
+> `DownloadableTracker`. Until that lands, `HTTP_DOWNLOAD` is honestly
+> SDK-reachable, not yet end-user-reachable.
+
 ## 8. The magnet-cache pattern (§6.E Capability Honesty)
 
 `DownloadableTracker` declares two methods:
