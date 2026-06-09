@@ -39,27 +39,19 @@ Challenge11ArchiveOrgAnonymousSearchTest crashes the app PROCESS at activity-des
 
 github/master and gitlab/master diverged at d2a2151 with unique non-doc go.mod content each; LVA-030 commit landed gitlab+working-tree but github refused non-FF. Needs a content-merge decision (operator-gated, NO force-push per §6.T.3).
 
-## LVA-059 — sort ProviderRegistry.IDs() consumers for deterministic multi-search SSE provider ordering
+## LVA-064 — loadOrCreateTLS does not detect expired persisted cert (NotAfter passed)
 
 **Status:** Queued
 **Type:** Task
 **Severity:** P3
 
-multi-search auto-discovery emits providers in non-deterministic map order (cosmetic).
+The TLS reuse gate checks IP-SAN coverage but not certificate expiry, so a persisted cert past its NotAfter is silently reused; add an expiry check to the reuse gate with a test.
 
-## LVA-061 — mobile/tls.go regenerate embed cert when persisted IP-SANs no longer cover device LAN IP
-
-**Status:** Queued
-**Type:** Task
-**Severity:** P3
-
-self-signed cert reused across restarts without re-checking IP-SAN; LAN IP change → host-mismatch.
-
-## LVA-062 — audit gate-shaping scripts for uncovered clauses (each gate clause needs a branch-covering falsifiability sub-test)
+## LVA-065 — audit feature/search SearchViewModel for untested error/paging branches
 
 **Status:** Queued
 **Type:** Task
 **Severity:** P3
 
-wave-6 §6.N.2 found CM-WORKABLE-ITEMS-SYNC clause-3 was uncovered; sweep other gates.
+SearchViewModel was not inspected in depth this loop; audit its error and paging-state branches and add falsifiable coverage where real gaps exist.
 

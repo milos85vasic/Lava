@@ -489,3 +489,39 @@ The ipv4/hostport/uuid source-literal scanners scanned the tracked binary SQLite
 
 FavoriteTopicEntity/VisitedTopicEntity toTopic() reconstructed Torrent vs BaseTopic without checking date/magnetLink, so a magnet-only favorited or visited torrent was read back as BaseTopic and became un-downloadable, and getTorrents() filtered it out entirely. Added both fields to the discriminator.
 
+## LVA-059 — sort ProviderRegistry.IDs() consumers for deterministic multi-search SSE provider ordering
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Task
+**Evidence:** .lava-ci-evidence/workable-items/LVA-059-evidence.md
+**Severity:** P3
+
+multi-search auto-discovery emits providers in non-deterministic map order (cosmetic).
+
+## LVA-061 — mobile/tls.go regenerate embed cert when persisted IP-SANs no longer cover device LAN IP
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Task
+**Evidence:** .lava-ci-evidence/workable-items/LVA-061-evidence.md
+**Severity:** P3
+
+self-signed cert reused across restarts without re-checking IP-SAN; LAN IP change → host-mismatch.
+
+## LVA-062 — audit gate-shaping scripts for uncovered clauses (each gate clause needs a branch-covering falsifiability sub-test)
+
+**Status:** Completed (→ Fixed.md)
+**Type:** Task
+**Evidence:** .lava-ci-evidence/workable-items/LVA-062-evidence.md
+**Severity:** P3
+
+wave-6 §6.N.2 found CM-WORKABLE-ITEMS-SYNC clause-3 was uncovered; sweep other gates.
+
+## LVA-063 — cover CredentialsViewModel + CredentialsManager vault lifecycle branches
+
+**Status:** Completed (→ Fixed.md)
+**Type:** Task
+**Evidence:** .lava-ci-evidence/workable-items/LVA-063-evidence.md
+**Severity:** P3
+
+Added 9 falsifiable tests for the credentials dialog SubmitDialog flows, §6.G verified filter, and the credentials_manager FirstTimeSetup/AddNew/Edit/DismissEdit lifecycle.
+
