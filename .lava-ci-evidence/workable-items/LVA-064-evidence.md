@@ -1,0 +1,1 @@
+# LVA-064 — commit 21d8fc23; loadOrCreateTLS regenerates embed cert when persisted leaf is expired (NotAfter past or within 24h margin); injectable clock seam; real x509; Bluff-Audit in commit; SourceHash GREEN.

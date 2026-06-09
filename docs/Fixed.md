@@ -534,3 +534,21 @@ Added 9 falsifiable tests for the credentials dialog SubmitDialog flows, §6.G v
 
 Operator flagged a new Jackett version. Booted lscr.io/linuxserver/jackett v0.24.2040-ls426 via podman in the loopback topology: api_key bootstrap + Torznab /caps endpoint served valid XML at the exact path IPTorrentsJackettApi uses; JVM parser tests green; pinned the validated digest in .env.example.
 
+## LVA-064 — loadOrCreateTLS does not detect expired persisted cert (NotAfter passed)
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Task
+**Evidence:** .lava-ci-evidence/workable-items/LVA-064-evidence.md
+**Severity:** P3
+
+The TLS reuse gate checks IP-SAN coverage but not certificate expiry, so a persisted cert past its NotAfter is silently reused; add an expiry check to the reuse gate with a test.
+
+## LVA-065 — audit feature/search SearchViewModel for untested error/paging branches
+
+**Status:** Completed (→ Fixed.md)
+**Type:** Task
+**Evidence:** .lava-ci-evidence/workable-items/LVA-065-evidence.md
+**Severity:** P3
+
+SearchViewModel was not inspected in depth this loop; audit its error and paging-state branches and add falsifiable coverage where real gaps exist.
+

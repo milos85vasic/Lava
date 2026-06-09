@@ -1,0 +1,1 @@
+# LVA-065 — commit 1a55a4ab/9f634e16; SearchViewModel bug-hunt CLEAN + 3 real coverage gaps closed (PagingDataLoader prepend, append-error retry, SearchViewModel sign-out privacy reduction), each falsifiability-proven.

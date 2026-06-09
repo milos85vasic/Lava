@@ -39,19 +39,27 @@ Challenge11ArchiveOrgAnonymousSearchTest crashes the app PROCESS at activity-des
 
 github/master and gitlab/master diverged at d2a2151 with unique non-doc go.mod content each; LVA-030 commit landed gitlab+working-tree but github refused non-FF. Needs a content-merge decision (operator-gated, NO force-push per §6.T.3).
 
-## LVA-064 — loadOrCreateTLS does not detect expired persisted cert (NotAfter passed)
+## LVA-067 — persist per-row providerId on favorite/visited rows so their topics can route to HTTP_DOWNLOAD
 
 **Status:** Queued
 **Type:** Task
 **Severity:** P3
 
-The TLS reuse gate checks IP-SAN coverage but not certificate expiry, so a persisted cert past its NotAfter is silently reused; add an expiry check to the reuse gate with a test.
+LVA-052 scoped favorites/visited topic downloads to the active-tracker default because the favorite/visited Room rows store no provider id; add a providerId column + migration so an archiveorg/gutenberg favorite routes to HTTP_DOWNLOAD.
 
-## LVA-065 — audit feature/search SearchViewModel for untested error/paging branches
+## LVA-068 — proactively re-mint embed TLS leaf mid-process when it crosses the expiry margin
 
 **Status:** Queued
 **Type:** Task
 **Severity:** P3
 
-SearchViewModel was not inspected in depth this loop; audit its error and paging-state branches and add falsifiable coverage where real gaps exist.
+tls.go only re-checks cert expiry at Start; a multi-month-running embed could serve a leaf that expires without a restart. Add a periodic re-mint check.
+
+## LVA-069 — cover SearchResultViewModel SSE raw-JSON parsing + onRetryClick re-dispatch
+
+**Status:** Queued
+**Type:** Task
+**Severity:** P3
+
+handleSseEvent raw-JSON parsing (provider_start/results/provider_done/provider_error) and onRetryClick Error-state re-dispatch are untested production branches.
 
