@@ -1,0 +1,21 @@
+{
+  "date": "2026-06-09",
+  "class": "II",
+  "title": "Genymotion VM surface-render timeout blocks the device Challenge gate (NOT a code defect)",
+  "summary": "C00 + C01 device Challenges FAIL on the freshly-booted Genymotion Pixel 9 / API35 VM with 'No compose hierarchies found'. Root-caused to the VM's window-surface rendering timing out, NOT a Lava code regression.",
+  "evidence": {
+    "app_launches_clean": "MainActivity PRE_ON_CREATE -> CREATED -> STARTED -> RESUMED (fully visible); FirebaseCrashlytics init OK; NO FATAL, NO crash, NO nav-graph IllegalArgumentException, NO compose exception from the app process.",
+    "surface_render_failure": [
+      "W SurfaceComposerClient: Sync transaction timed out waiting for commit callback",
+      "E BufferQueueProducer: [VRI[InstrumentationActivityInvoker$EmptyActivity]] allocateBuffers: failed to allocate buffer (0 x 0, format 1, usage 0xb00)"
+    ],
+    "test_failure_site": "androidx.compose.ui.test.AndroidComposeUiTestEnvironment.withWindowRecomposer (ComposeUiTest.android.kt:413) -> 'No compose hierarchies found' (the window-recomposer found no composition attached to a committed surface).",
+    "code_exoneration": [
+      "LVA-008 NavTeardownCrashReporter.install isolation test: C00 FAILS even with the install DISABLED -> LVA-008 is NOT the cause.",
+      "LVA-052 topic route added NavigationArgument(ProviderIdKey, nullable=true) as an OPTIONAL arg (?p=...) with existing openTopic(id) call sites unchanged; NO nav-graph build exception in logcat."
+    ],
+    "prior_pass": "2026-06-08 gate-coreflows on a Genymotion Pixel 9 had C00 + C01 + C07 + C08 PASS (only C06 FAILED) -> a properly-rendering Genymotion VM passes these; the regression is the VM render state, not Lava code."
+  },
+  "remediation": "Environment-side: the Genymotion VM needs a working GPU/display render surface. Candidate fixes (PENDING_FORENSICS — confirm on a re-render): ensure the VM screen is unlocked/on; enable hardware OpenGL in the Genymotion VM settings (Use virtual hardware GPU); or restart the VM with display/GPU acceleration. Then re-run scripts/run-genymotion-challenges.sh.",
+  "distribute_impact": "Per §6.Z the Firebase re-distribute stays BLOCKED on a GREEN device gate. A distribute on a red gate is the exact §6.Z bluff (cf. 1.2.19-1039); NOT performed."
+}
