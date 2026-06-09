@@ -237,3 +237,52 @@ func TestParseProviderList(t *testing.T) {
 		}
 	}
 }
+
+// TestMultiSearch_UnknownProviderEmitsErrorEvent is the LVA-057 regression
+// guard. When the user EXPLICITLY requests a provider id via ?providers= that
+// is not registered, the handler MUST surface a provider_error SSE event for
+// that id AND count it as failed in stream_end — exactly as a registered-but-
+// failing provider does. Before the fix, registry.Get(pid) failed and the
+// handler silently `continue`d: no provider_error, no failed-count increment,
+// yet total_providers still counted the bogus id, so the client's requested
+// provider vanished with zero signal (a §6.AB silent-omission bluff: the user
+// asked for "ghost", got no error and no results).
+//
+// Assertions are on the SSE wire body the Android client parses — the
+// user-visible surface.
+func TestMultiSearch_UnknownProviderEmitsErrorEvent(t *testing.T) {
+	reg := provider.NewRegistry()
+	reg.Register(&streamProvider{
+		id:   "kinozal",
+		name: "Kinozal.tv",
+		result: &provider.SearchResult{
+			Provider:   "kinozal",
+			Page:       1,
+			TotalPages: 1,
+			Results:    []provider.SearchItem{{ID: "1", Title: "Real Result"}},
+		},
+	})
+
+	// User asks for one real provider and one that does not exist.
+	_, body, _ := getSSE(t, reg, "/v1/search?q=x&providers=kinozal,ghost")
+
+	// The real provider must still stream its result.
+	if !strings.Contains(body, "Real Result") {
+		t.Errorf("SSE body missing the real provider's result\n--- body ---\n%s", body)
+	}
+	// The unknown provider MUST surface as a provider_error naming its id —
+	// not be silently dropped.
+	if !strings.Contains(body, "event: provider_error") {
+		t.Errorf("SSE body missing provider_error event for the unknown provider\n--- body ---\n%s", body)
+	}
+	if !strings.Contains(body, `"provider_id":"ghost"`) {
+		t.Errorf("provider_error event must name the unknown provider id \"ghost\"\n--- body ---\n%s", body)
+	}
+	// And it MUST count as failed in the aggregate (1 searched ok, 1 failed).
+	if !strings.Contains(body, `"providers_failed":1`) {
+		t.Errorf("stream_end must count the unknown provider as failed\n--- body ---\n%s", body)
+	}
+	if !strings.Contains(body, `"providers_searched":2`) {
+		t.Errorf("stream_end providers_searched must account for both requested ids\n--- body ---\n%s", body)
+	}
+}

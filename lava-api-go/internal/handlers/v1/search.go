@@ -156,6 +156,26 @@ func (h *MultiSearchHandler) GetMultiSearch(c *gin.Context) {
 		for _, pid := range providerIDs {
 			p, err := h.registry.Get(pid)
 			if err != nil {
+				// The user EXPLICITLY requested this provider id (or it came
+				// from the auto-discovery list, which only ever yields
+				// registered ids). An unknown id reaching here therefore means
+				// the client asked for a provider that does not exist; surface
+				// it as a provider_error SSE event and count it as failed
+				// rather than silently dropping it (§6.AB: a silently-omitted
+				// requested provider is a no-signal bluff — the client gets no
+				// error and no results for the id it asked for, and the
+				// stream_end aggregate hides the omission). The id is echoed so
+				// the consumer can map the failure back to its request.
+				failed++
+				searched++
+				errEvt := providerStreamStatus{
+					ProviderID: pid,
+					Error:      err.Error(),
+				}
+				data, _ := json.Marshal(errEvt)
+				if err := streamEvent(w, sseEvent{Event: "provider_error", Data: string(data)}); err != nil {
+					return false
+				}
 				continue
 			}
 
