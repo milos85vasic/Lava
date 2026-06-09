@@ -1,5 +1,6 @@
 package lava.tracker.rutor.parser
 
+import kotlinx.datetime.Instant
 import lava.tracker.testing.LavaFixtureLoader
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -55,6 +56,25 @@ class RuTorTopicParserTest {
         assertEquals(0, detail.files.size)
         // Category is the category anchor text inside the "Категория" row.
         assertEquals("Софт", detail.torrent.category)
+    }
+
+    @Test
+    fun `topic-normal surfaces seeders leechers and the Добавлен publish date`() {
+        // The #details table carries "Раздают" (seeders), "Качают" (leechers), and
+        // "Добавлен" (added/publish date "11-09-2025 12:32:55") — all three are
+        // user-visible on the topic screen. Dropping publishDate is the LVA-028
+        // bug class (present in the HTML, mapped to null in the domain model).
+        val html = loader.load("topic", "topic-normal-2026-04-30.html")
+        val detail = parser.parse(html, topicIdHint = "1052665")
+
+        assertEquals(1, detail.torrent.seeders)
+        assertEquals(0, detail.torrent.leechers)
+        // "Добавлен: 11-09-2025 12:32:55" → 2025-09-11 at start of UTC day.
+        assertEquals(
+            "topic publishDate must be parsed from the Добавлен row",
+            Instant.parse("2025-09-11T00:00:00Z"),
+            detail.torrent.publishDate,
+        )
     }
 
     @Test

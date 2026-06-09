@@ -37,6 +37,15 @@ object RuTorDateParser {
 
     private val numericPattern = Regex("""(\d{1,2})\s+(\S+)\s+(\d{2,4})""")
 
+    /**
+     * Topic-page "Добавлен" stamp: "11-09-2025 12:32:55 (8 месяцев назад)".
+     * Day-month-year with a leading numeric day, dash-separated, optionally followed
+     * by a clock and a parenthetical relative-time suffix. The search-listing format
+     * ([numericPattern], "11 Сен 25") uses a Russian month abbreviation instead — the
+     * two shapes are disjoint, so both can be attempted without ambiguity.
+     */
+    private val dottedDatePattern = Regex("""(\d{1,2})[.\-/](\d{1,2})[.\-/](\d{4})""")
+
     fun parse(s: String, now: () -> Instant = Clock.System::now): Instant? {
         val trimmed = s.trim()
         return when {
@@ -48,6 +57,20 @@ object RuTorDateParser {
                     .minus(1, ChronoUnit.DAYS)
                     .toKotlinInstant()
             else -> {
+                // Try the topic-page "DD-MM-YYYY ..." shape first (it has no Russian
+                // month abbreviation, so it never collides with [numericPattern]).
+                dottedDatePattern.find(trimmed)?.let { dotted ->
+                    val (dayStr, monthStr, yearStr) = dotted.destructured
+                    val day = dayStr.toIntOrNull() ?: return null
+                    val month = monthStr.toIntOrNull() ?: return null
+                    val year = yearStr.toIntOrNull() ?: return null
+                    return runCatching {
+                        LocalDate.of(year, month, day)
+                            .atStartOfDay(ZoneOffset.UTC)
+                            .toInstant()
+                            .toKotlinInstant()
+                    }.getOrNull()
+                }
                 val match = numericPattern.find(trimmed) ?: return null
                 val (dayStr, monthAbbr, yearStr) = match.destructured
                 val month = months[monthAbbr.take(3)] ?: return null

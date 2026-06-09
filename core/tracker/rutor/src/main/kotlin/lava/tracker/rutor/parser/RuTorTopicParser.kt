@@ -73,6 +73,10 @@ class RuTorTopicParser @Inject constructor() {
         val sizeBytes = extractSizeBytes(labelToValue["Размер"])
         val seeders = labelToValue["Раздают"]?.replace(' ', ' ')?.trim()?.toIntOrNull()
         val leechers = labelToValue["Качают"]?.replace(' ', ' ')?.trim()?.toIntOrNull()
+        // "Добавлен: 11-09-2025 12:32:55 (8 месяцев назад)" — the topic-page posted-on
+        // stamp. Present in the #details table on every real topic page; dropping it
+        // is the LVA-028 bug class (HTML carries the field, domain model loses it).
+        val publishDate = labelToValue["Добавлен"]?.let { RuTorDateParser.parse(it) }
         val category = doc.selectFirst("table#details tr:has(td.header:matchesOwn(^Категория$)) td:not(.header) a")
             ?.text()
             ?.trim()
@@ -92,6 +96,7 @@ class RuTorTopicParser @Inject constructor() {
             downloadUrl = downloadUrl,
             detailUrl = if (torrentId.isNotEmpty()) "/torrent/$torrentId" else null,
             category = category,
+            publishDate = publishDate,
         )
 
         return TopicDetail(
