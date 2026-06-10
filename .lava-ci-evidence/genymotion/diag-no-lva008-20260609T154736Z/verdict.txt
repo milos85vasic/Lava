@@ -1,0 +1,8 @@
+# Genymotion Challenge run — 20260609T154736Z
+device: 127.0.0.1:6555
+module: app  test-class: lava.app.challenges.Challenge00CrashSurvivalTest
+gradle exit: 1
+lava.app.challenges.Challenge00CrashSurvivalTest > continueOnArchiveOrg_persists_signaledAuthState_to_disk[Pixel 9 - 15] [31mFAILED [0m
+Tests on Pixel 9 - 15 failed: There was 1 failure(s).
+> Task :app:connectedDebugAndroidTest FAILED
+BUILD FAILED in 1m 5s

@@ -1,0 +1,9 @@
+# Genymotion Challenge run — 20260609T161941Z
+device: 127.0.0.1:6555
+module: app  test-class: lava.app.challenges.Challenge11ArchiveOrgSearchTest,lava.app.challenges.Challenge06DownloadTorrentFileTest
+gradle exit: 1
+lava.app.challenges.Challenge11ArchiveOrgSearchTest > initializationError[Pixel 9 - 15] [31mFAILED [0m
+lava.app.challenges.Challenge06DownloadTorrentFileTest > searchTapResult_tapTorrent_downloadDialogRenders[Pixel 9 - 15] [31mFAILED [0m
+Tests on Pixel 9 - 15 failed: There was 2 failure(s).
+> Task :app:connectedDebugAndroidTest FAILED
+BUILD FAILED in 1m 29s

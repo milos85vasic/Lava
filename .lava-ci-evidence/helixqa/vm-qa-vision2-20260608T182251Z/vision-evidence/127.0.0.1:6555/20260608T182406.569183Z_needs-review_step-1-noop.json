@@ -1,0 +1,8 @@
+{
+  "timestamp": "2026-06-08T18:24:06.569183Z",
+  "description": "step 1: noop",
+  "ocr_snapshot": "",
+  "verdict": "needs-review",
+  "notes": "The screen shows the LeakCanary \"0 Distinct Leaks\" list view with the Leaks/Heap Dumps/About bottom navigation, a stable rendered destination screen matching the expected result.",
+  "provider_rationale": "The screen shows the LeakCanary \"0 Distinct Leaks\" list view with the Leaks/Heap Dumps/About bottom navigation, a stable rendered destination screen matching the expected result."
+}
