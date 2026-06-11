@@ -1,8 +1,8 @@
 package lava.domain.usecase
 
-import javax.inject.Inject
 import lava.data.provider.ProviderCatalogRepository
 import lava.tracker.api.RemoteTrackerDescriptor
+import javax.inject.Inject
 
 /**
  * Dynamic Provider Discovery (2026-06-11, spec §4.2 / plan Task 3.3).
@@ -17,6 +17,9 @@ import lava.tracker.api.RemoteTrackerDescriptor
 class FetchProvidersUseCase @Inject constructor(
     private val repository: ProviderCatalogRepository,
 ) {
-    suspend operator fun invoke(apiBaseUrl: String): Result<List<RemoteTrackerDescriptor>> =
-        repository.fetchProviders(apiBaseUrl)
+    suspend operator fun invoke(
+        apiBaseUrl: String,
+        authKey: String? = null,
+    ): Result<List<RemoteTrackerDescriptor>> =
+        repository.fetchProviders(apiBaseUrl, authKey)
 }

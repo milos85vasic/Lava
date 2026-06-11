@@ -35,6 +35,39 @@ Format per entry:
 
 ---
 
+## 2026-06-12 — provider-catalogue fetch fails self-signed-LAN TLS handshake (Defect A — "only 4 providers")
+
+**Root cause:** `ProviderCatalogRepository` injected the *unqualified* strict-TLS
+`OkHttpClient` (system trust store only) and sent no auth key. The on-device
+api-app serves `GET /providers` over a self-signed LAN cert behind the `Lava-Auth`
+gate, so every real-device fetch died at the TLS handshake
+(`CertPathValidatorException: Trust anchor … not found`) → `Result.failure` →
+onboarding fell back to the 4 bundled `verified && apiSupported` descriptors.
+**Real-device proof:** Crashlytics NON_FATAL `042b9b61`
+(`provider_catalog_fetch_failed`), 1.3.3-1060, Galaxy S23 Ultra / Android 16.
+**Affected files:** `core/data/.../ProviderCatalogRepository.kt` (inject
+`@Named("lan")` client + `@Named("authFieldName")`; `fetchProviders(apiBaseUrl,
+authKey)` + `withAuthKey`), `core/domain/.../FetchProvidersUseCase.kt` (thread
+`authKey`), `feature/onboarding/.../OnboardingViewModel.kt` (pass
+`Endpoint.GoApi.key`), `core/data/build.gradle.kts` + `gradle/libs.versions.toml`
+(okhttp-tls for self-signed-HTTPS tests).
+**Fix:** route the catalogue fetch through the permissive LAN client (accepts the
+self-signed cert) + attach the endpoint's per-instance key — mirrors the existing
+`NetworkApiRepositoryImpl.getApi()` `Endpoint.GoApi` path.
+**Verification test/challenge:** `ProviderCatalogRepositoryTest` rewritten to cross
+a real self-signed-HTTPS + auth-gated MockWebServer (6/6;
+`strictClientFailsTheHandshake` = codified pre-fix mutation;
+`missingAuthKeyIsRejectedByTheGate` proves the header is load-bearing);
+`OnboardingViewModelDynamicProvidersTest` green.
+**Fix commit:** `<this commit>`
+**Forensic anchor:** operator "only 4 providers in onboarding wizard"; §6.O closure
+log `.lava-ci-evidence/crashlytics-resolved/2026-06-12-provider-catalog-fetch-tls.md`.
+**Scope note:** Defect B (embedded Jackett in the api-app) still OPEN — the client
+now shows whatever the api-app serves, but the api-app serves only native providers
+until embedded Jackett lands.
+
+---
+
 ## 2026-06-02 — api-app-ondevice-challenges-three-defects + harness-isolation
 
 The Containers `emulator-matrix` CLI gained a generic `--gradle-module`

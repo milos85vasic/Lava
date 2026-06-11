@@ -1,8 +1,5 @@
 package lava.data.provider
 
-import java.util.concurrent.ConcurrentHashMap
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -13,6 +10,10 @@ import lava.network.serialization.JsonFactory
 import lava.tracker.api.RemoteTrackerDescriptor
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import java.util.concurrent.ConcurrentHashMap
+import javax.inject.Inject
+import javax.inject.Named
+import javax.inject.Singleton
 
 /**
  * Local store for the discovered provider catalogue, keyed by API base URL so
@@ -46,11 +47,24 @@ class InMemoryProviderCatalogStore @Inject constructor() : ProviderCatalogStore 
  * Dynamic Provider Discovery (2026-06-11, spec §4.2 / plan Task 3.3).
  *
  * Fetches the provider catalogue from the chosen lava-api-go instance over real
- * HTTP (`GET {apiBaseUrl}/v1/providers`), parses [ProvidersResponseDto], maps
+ * HTTPS (`GET {apiBaseUrl}/providers`), parses [ProvidersResponseDto], maps
  * each entry to a [RemoteTrackerDescriptor], and write-through-caches the result
  * keyed by `apiBaseUrl`.
  *
- * **Error contract (spec §5):** any 4xx/5xx/timeout/parse failure is captured
+ * **TLS + auth boundary (Defect-A fix, 2026-06-12).** The on-device api-app
+ * serves `/providers` over a **self-signed LAN cert** and behind the
+ * `Lava-Auth` header gate. This repository therefore MUST use the permissive
+ * LAN [OkHttpClient] (`@Named("lan")` — accepts the self-signed cert, the same
+ * client [lava.network.data.NetworkApiRepository.getApi] uses for
+ * `Endpoint.GoApi`), and MUST attach the chosen endpoint's per-instance key via
+ * [authKey]. The prior wiring injected the *unqualified* strict-TLS client and
+ * sent no key, so every real-device fetch died at the TLS handshake
+ * (`CertPathValidatorException: Trust anchor for certification path not found`,
+ * Crashlytics `042b9b61` / `provider_catalog_fetch_failed`, 1.3.3-1060) → fell
+ * back to the 4 bundled `verified && apiSupported` descriptors. That is the
+ * "only 4 providers in onboarding" bug.
+ *
+ * **Error contract (spec §5):** any TLS/4xx/5xx/timeout/parse failure is captured
  * into `Result.failure` — this method NEVER throws to the caller. The onboarding
  * layer falls back to the bundled descriptors on failure (never a blank screen).
  *
@@ -61,11 +75,13 @@ class InMemoryProviderCatalogStore @Inject constructor() : ProviderCatalogStore 
  */
 @Singleton
 class ProviderCatalogRepository @Inject constructor(
-    private val httpClient: OkHttpClient,
+    @Named("lan") private val lanHttpClient: OkHttpClient,
+    @Named("authFieldName") private val authFieldName: String,
     private val store: ProviderCatalogStore,
 ) {
     // Non-injected collaborators with safe defaults so unit tests construct the
-    // repo with just (client, store); production binds the same defaults.
+    // repo with just (lanHttpClient, authFieldName, store); production binds the
+    // same defaults via DI.
     private val json: Json = JsonFactory.create()
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
     private var warn: (String) -> Unit = {}
@@ -75,12 +91,23 @@ class ProviderCatalogRepository @Inject constructor(
         warn = sink
     }
 
-    suspend fun fetchProviders(apiBaseUrl: String): Result<List<RemoteTrackerDescriptor>> =
+    /**
+     * @param authKey the chosen [lava.models.settings.Endpoint.GoApi]'s
+     *   per-instance key (from `ApiKeyStore` via the client↔api-app link). When
+     *   non-null it is attached as the [authFieldName] header so the api-app's
+     *   `Lava-Auth` gate admits the request; null for unauthenticated targets.
+     */
+    suspend fun fetchProviders(
+        apiBaseUrl: String,
+        authKey: String? = null,
+    ): Result<List<RemoteTrackerDescriptor>> =
         withContext(ioDispatcher) {
             runCatching {
+                val client =
+                    if (authKey != null) lanHttpClient.withAuthKey(authKey, authFieldName) else lanHttpClient
                 val url = apiBaseUrl.trimEnd('/') + PROVIDERS_PATH
                 val request = Request.Builder().url(url).get().build()
-                httpClient.newCall(request).execute().use { response ->
+                client.newCall(request).execute().use { response ->
                     if (!response.isSuccessful) {
                         error("provider discovery failed: HTTP ${response.code} for $url")
                     }
@@ -96,6 +123,20 @@ class ProviderCatalogRepository @Inject constructor(
 
     /** Last persisted catalogue for [apiBaseUrl] (empty if never fetched). */
     fun cachedProviders(apiBaseUrl: String): List<RemoteTrackerDescriptor> = store.load(apiBaseUrl)
+
+    /**
+     * Returns a derived client that sets the [fieldName] header to [key] on
+     * every request — mirrors
+     * [lava.network.data.NetworkApiRepositoryImpl.withKeyOverride] (which is
+     * `internal` to `:core:network:impl` and so cannot be reused across the
+     * module boundary). §6.H: [key] is never logged.
+     */
+    private fun OkHttpClient.withAuthKey(key: String, fieldName: String): OkHttpClient =
+        newBuilder()
+            .addInterceptor { chain ->
+                chain.proceed(chain.request().newBuilder().header(fieldName, key).build())
+            }
+            .build()
 
     companion object {
         /**

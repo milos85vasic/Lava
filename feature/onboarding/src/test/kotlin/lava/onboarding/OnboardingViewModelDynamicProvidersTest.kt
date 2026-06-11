@@ -62,11 +62,12 @@ import org.orbitmvi.orbit.test.test
  *
  *   lava.tracker.api.RemoteTrackerDescriptor.from(fields…): verified=true,
  *       apiSupported=true (so OnboardingViewModel.loadProviders' filter passes).
- *   lava.data.provider.ProviderCatalogRepository(httpClient, store):
- *       suspend fun fetchProviders(apiBaseUrl: String): Result<List<RemoteTrackerDescriptor>>
- *       GETs {apiBaseUrl}/providers, parses ProvidersResponseDto, maps each entry.
+ *   lava.data.provider.ProviderCatalogRepository(@Named("lan") lanHttpClient, @Named("authFieldName") authFieldName, store):
+ *       suspend fun fetchProviders(apiBaseUrl: String, authKey: String?): Result<List<RemoteTrackerDescriptor>>
+ *       GETs {apiBaseUrl}/providers over the LAN client (self-signed-cert tolerant) with the
+ *       per-endpoint Lava-Auth key, parses ProvidersResponseDto, maps each entry.
  *   lava.domain.usecase.FetchProvidersUseCase(repository):
- *       suspend operator fun invoke(apiBaseUrl: String): Result<List<RemoteTrackerDescriptor>>
+ *       suspend operator fun invoke(apiBaseUrl: String, authKey: String?): Result<List<RemoteTrackerDescriptor>>
  *   lava.tracker.registry.TrackerRegistry.populateFrom(descriptors):
  *       registers one ApiBackedTrackerClient per descriptor (via the installed
  *       setApiClientFactory) into THIS registry instance.
@@ -217,6 +218,7 @@ class OnboardingViewModelDynamicProvidersTest {
         discoveryService = lava.testing.service.TestLocalNetworkDiscoveryService(),
         connectionService = object : lava.data.api.service.ConnectionService {
             override val networkUpdates = emptyFlow<Boolean>()
+
             // Probe boundary is faked (outermost boundary per Anti-Bluff Pact);
             // the catalogue fetch is REAL over MockWebServer.
             override suspend fun isReachable(endpoint: Endpoint): Boolean = true
@@ -370,8 +372,15 @@ class OnboardingViewModelDynamicProvidersTest {
     private fun buildRealFetchProvidersUseCase(
         @Suppress("UNUSED_PARAMETER") server: MockWebServer,
     ): lava.domain.usecase.FetchProvidersUseCase {
+        // Plain-HTTP MockWebServer here: this VM-layer test covers the
+        // wiring + the >4-providers user-visible outcome. The self-signed-TLS +
+        // Lava-Auth boundary (the Defect-A failure mode) is decisively covered
+        // one layer down in ProviderCatalogRepositoryTest, which crosses the
+        // real cert + header gate. A vanilla client over plain http suffices to
+        // exercise the registry-population path the VM owns.
         val repository = lava.data.provider.ProviderCatalogRepository(
-            httpClient = okhttp3.OkHttpClient(),
+            lanHttpClient = okhttp3.OkHttpClient(),
+            authFieldName = "Lava-Auth",
             store = lava.data.provider.InMemoryProviderCatalogStore(),
         )
         return lava.domain.usecase.FetchProvidersUseCase(repository)

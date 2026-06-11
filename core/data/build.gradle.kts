@@ -27,4 +27,8 @@ dependencies {
     testImplementation(libs.androidx.test.core)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.okhttp.mockwebserver)
+    // Self-signed-HTTPS MockWebServer for ProviderCatalogRepositoryTest: the
+    // on-device api-app serves the provider catalogue over a self-signed LAN
+    // cert, so the falsifiable test MUST cross that exact TLS boundary (§6.J).
+    testImplementation(libs.okhttp.tls)
 }

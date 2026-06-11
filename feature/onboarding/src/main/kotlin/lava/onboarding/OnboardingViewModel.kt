@@ -730,7 +730,12 @@ class OnboardingViewModel @Inject constructor(
         // injected builder (no scheme/host/port literal in this VM).
         val apiBaseUrl = apiBaseUrlBuilder.build(goApi.host, goApi.port)
         return try {
-            useCase(apiBaseUrl).fold(
+            // Defect-A fix (2026-06-12): pass the endpoint's per-instance key so
+            // the fetch clears the api-app's Lava-Auth gate; the repository
+            // already routes through the permissive LAN client for the
+            // self-signed cert. Without both, the fetch died at the TLS
+            // handshake and onboarding fell back to the 4 bundled providers.
+            useCase(apiBaseUrl, goApi.key).fold(
                 onSuccess = { descriptors ->
                     // Set the ACTIVE lava-api-go base URL the registry's
                     // ApiBackedTrackerClient factory reads (ApiBaseUrlHolder.current())
