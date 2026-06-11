@@ -31,6 +31,17 @@ dependencies {
     implementation(project(":core:models"))
     implementation(project(":core:tracker:api"))
     implementation(project(":core:tracker:client"))
+    // Phase 5 (2026-06-11) dynamic provider discovery:
+    //   :core:domain            → FetchProvidersUseCase (String-keyed; wraps
+    //                             ProviderCatalogRepository.fetchProviders).
+    //   :core:tracker:registry  → TrackerRegistry.populateFrom(), which
+    //                             OnboardingViewModel calls after the API
+    //                             catalogue is fetched.
+    //   :core:network:api       → SseBaseUrlBuilder, the §6.R-clean
+    //                             Endpoint.GoApi → base-URL seam.
+    implementation(project(":core:domain"))
+    implementation(project(":core:tracker:registry"))
+    implementation(project(":core:network:api"))
     implementation(project(":core:designsystem"))
     implementation(project(":core:navigation"))
     implementation(project(":core:ui"))

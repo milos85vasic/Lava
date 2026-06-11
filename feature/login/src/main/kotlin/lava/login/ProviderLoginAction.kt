@@ -8,6 +8,12 @@ internal sealed interface ProviderLoginAction {
     data class UsernameChanged(val value: TextFieldValue) : ProviderLoginAction
     data class PasswordChanged(val value: TextFieldValue) : ProviderLoginAction
     data class CaptchaChanged(val value: TextFieldValue) : ProviderLoginAction
+
+    /**
+     * Phase 5 (2026-06-11): user edited the API-key field for an
+     * [lava.tracker.api.AuthType.API_KEY] provider.
+     */
+    data class ApiKeyChanged(val value: TextFieldValue) : ProviderLoginAction
     data object ReloadCaptchaClick : ProviderLoginAction
     data object SubmitClick : ProviderLoginAction
     data object BackToProviders : ProviderLoginAction

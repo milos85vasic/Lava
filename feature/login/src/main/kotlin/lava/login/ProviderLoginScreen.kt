@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -25,11 +27,15 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.TextFieldValue
 import lava.designsystem.component.AppBar
 import lava.designsystem.component.BackButton
 import lava.designsystem.component.Button
 import lava.designsystem.component.CircularProgressIndicator
 import lava.designsystem.component.Icon
+import lava.designsystem.component.OutlinedTextField
 import lava.designsystem.component.Scaffold
 import lava.designsystem.component.Text
 import lava.designsystem.drawables.LavaIcons
@@ -300,6 +306,23 @@ private fun ProviderCredentialForm(
                     onClick = { onAction(ProviderLoginAction.SubmitClick) },
                     modifier = Modifier.fillMaxWidth(),
                 )
+            } else if (provider.authType == "API_KEY") {
+                // Phase 5 (2026-06-11): API_KEY providers render a single key
+                // field instead of username/password. Surfaced dynamically when
+                // the chosen API declares a key-gated provider.
+                ApiKeyInputField(
+                    value = state.apiKeyInput.value,
+                    onChanged = { onAction(ProviderLoginAction.ApiKeyChanged(it)) },
+                    isError = state.apiKeyInput.isError(),
+                    enabled = !state.isLoading,
+                    onSubmit = { onAction(ProviderLoginAction.SubmitClick) },
+                )
+                Button(
+                    text = stringResource(R.string.login_screen_action_sign_in),
+                    onClick = { onAction(ProviderLoginAction.SubmitClick) },
+                    enabled = !state.isLoading && state.apiKeyInput.isValid(),
+                    modifier = Modifier.fillMaxWidth(),
+                )
             } else {
                 // Show the existing credential form
                 UsernameInputField(
@@ -357,6 +380,44 @@ private fun ProviderCredentialForm(
     }
 }
 
+/**
+ * Phase 5 (2026-06-11): single-field API-key input for
+ * [lava.tracker.api.AuthType.API_KEY] providers. Mirrors the username/password
+ * field shape (designsystem [OutlinedTextField], submit-on-IME-Done) but carries
+ * a single secret key. Tagged with [ApiKeyInputFieldTestTag] so Compose tests
+ * can assert its presence without fragile label matching.
+ */
+@Composable
+private fun ApiKeyInputField(
+    value: TextFieldValue,
+    onChanged: (TextFieldValue) -> Unit,
+    isError: Boolean,
+    enabled: Boolean,
+    onSubmit: () -> Unit,
+) = OutlinedTextField(
+    modifier = Modifier
+        .fillMaxWidth()
+        .testTag(ApiKeyInputFieldTestTag),
+    value = value,
+    onValueChange = onChanged,
+    singleLine = true,
+    enabled = enabled,
+    isError = isError,
+    label = { Text(stringResource(R.string.provider_login_api_key_hint)) },
+    leadingIcon = {
+        Icon(
+            icon = LavaIcons.Password,
+            contentDescription = stringResource(R.string.provider_login_api_key_hint),
+        )
+    },
+    keyboardOptions = KeyboardOptions(
+        keyboardType = KeyboardType.Password,
+        imeAction = ImeAction.Done,
+        autoCorrectEnabled = false,
+    ),
+    keyboardActions = KeyboardActions(onDone = { onSubmit() }),
+)
+
 @Composable
 private fun providerColor(providerId: String): Color {
     return when (providerId) {
@@ -387,3 +448,11 @@ const val AnonymousAccessSwitchTestTag = "anonymous_access_switch"
  * fragile under translation).
  */
 const val ServiceUnavailableTextTestTag = "service_unavailable_banner"
+
+/**
+ * Test tag for the Phase 5 API-key field rendered for
+ * [lava.tracker.api.AuthType.API_KEY] providers. Used by
+ * `ProviderLoginAuthUiTest` to assert the API_KEY auth UI renders the key
+ * field (and NOT the username/password fields) without fragile copy matching.
+ */
+const val ApiKeyInputFieldTestTag = "api_key_input_field"

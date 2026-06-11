@@ -51,6 +51,7 @@ internal class ProviderLoginViewModel @Inject constructor(
             is ProviderLoginAction.UsernameChanged -> validateUsername(action.value)
             is ProviderLoginAction.PasswordChanged -> validatePassword(action.value)
             is ProviderLoginAction.CaptchaChanged -> validateCaptcha(action.value)
+            is ProviderLoginAction.ApiKeyChanged -> validateApiKey(action.value)
             is ProviderLoginAction.ReloadCaptchaClick -> onReloadCaptchaClick()
             is ProviderLoginAction.SubmitClick -> onSubmitClick()
             is ProviderLoginAction.BackToProviders -> backToProviders()
@@ -181,6 +182,22 @@ internal class ProviderLoginViewModel @Inject constructor(
         }
     }
 
+    private fun validateApiKey(value: TextFieldValue) = intent {
+        reduce {
+            state.copy(
+                apiKeyInput = if (validateInputUseCase(value.text)) {
+                    InputState.Valid(value)
+                } else {
+                    InputState.Empty
+                },
+                // Mirror the username/password retry-clears-banner behaviour
+                // (Sweep Finding #6) so a fresh key keystroke clears a stale
+                // infra-error banner.
+                serviceUnavailable = null,
+            )
+        }
+    }
+
     private fun onReloadCaptchaClick() = intent {
         val providerId = state.selectedProviderId ?: return@intent
         // LVA-025 (2026-06-09): tapping retry-captcha is a fresh attempt by
@@ -305,14 +322,32 @@ internal class ProviderLoginViewModel @Inject constructor(
             )
         }
 
-        val result = sdk.login(
-            providerId,
+        // Phase 5 (2026-06-11): API_KEY providers (surfaced dynamically by the
+        // chosen API) submit a single key instead of username/password.
+        val loginRequest = if (provider?.authType == "API_KEY") {
+            // RECONCILED (2026-06-11) against the committed
+            // lava.tracker.api.model.LoginRequest(username, password, captcha) —
+            // it has NO dedicated `apiKey` field, so the API key is carried in
+            // `password` (username blank). This is the correct, final mapping
+            // for the current contract: ApiBackedTrackerClient.login() POSTs
+            // {username, password} to /v1/{id}/login and the API side reads the
+            // single secret from the password field for API_KEY providers. If a
+            // dedicated `apiKey` field is later added to LoginRequest + the
+            // server-side mapping, swap this single line to use it.
+            LoginRequest(
+                username = "",
+                password = state.apiKeyInput.value.text,
+                captcha = captchaSolution,
+            )
+        } else {
             LoginRequest(
                 username = state.usernameInput.value.text,
                 password = state.passwordInput.value.text,
                 captcha = captchaSolution,
-            ),
-        )
+            )
+        }
+
+        val result = sdk.login(providerId, loginRequest)
 
         when (result) {
             null -> {

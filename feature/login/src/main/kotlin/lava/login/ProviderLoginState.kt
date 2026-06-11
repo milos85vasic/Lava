@@ -13,6 +13,14 @@ data class ProviderLoginState(
     val usernameInput: InputState = InputState.Initial,
     val passwordInput: InputState = InputState.Initial,
     val captchaInput: InputState = InputState.Initial,
+    /**
+     * Phase 5 (2026-06-11) dynamic provider discovery: API-key field for
+     * providers whose [TrackerDescriptor.authType] is [AuthType.API_KEY]
+     * (e.g. a future key-gated provider surfaced dynamically by the chosen
+     * API). The credential form renders a single key field instead of
+     * username/password for these providers — see [ProviderCredentialForm].
+     */
+    val apiKeyInput: InputState = InputState.Initial,
     val captcha: lava.models.auth.Captcha? = null,
     val error: String? = null,
     /**

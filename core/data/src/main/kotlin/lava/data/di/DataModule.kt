@@ -45,6 +45,19 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 internal interface DataModule {
+    /**
+     * Dynamic Provider Discovery (2026-06-11, spec §4.2). Binds the provider-
+     * catalogue store interface to its in-memory implementation so
+     * [lava.data.provider.ProviderCatalogRepository]'s `store` dependency
+     * resolves in the SingletonComponent. A durable (DataStore/Room) binding
+     * MAY replace this later; the seam is the interface.
+     */
+    @Binds
+    @Singleton
+    fun providerCatalogStore(
+        impl: lava.data.provider.InMemoryProviderCatalogStore,
+    ): lava.data.provider.ProviderCatalogStore
+
     @Binds
     @Singleton
     fun bookmarksRepository(impl: BookmarksRepositoryImpl): BookmarksRepository

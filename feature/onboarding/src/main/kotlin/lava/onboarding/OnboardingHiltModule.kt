@@ -24,4 +24,12 @@ object OnboardingHiltModule {
     @Provides
     @Named("apiSelectionEnabled")
     fun apiSelectionEnabled(): Boolean = true
+
+    // NOTE (2026-06-11): the SseBaseUrlBuilder the OnboardingViewModel uses to
+    // address the chosen lava-api-go instance is ALREADY provided in the
+    // ViewModelComponent by SearchResultHiltModule.sseBaseUrlBuilder()
+    // (SseBaseUrlBuilder.Https). Providing it here too is a Dagger duplicate
+    // binding — so it is intentionally NOT re-bound. The OnboardingViewModel's
+    // Kotlin default (SseBaseUrlBuilder.Https) keeps direct-construction tests
+    // compiling; Hilt resolves the shared binding in production.
 }

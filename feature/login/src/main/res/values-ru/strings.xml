@@ -22,6 +22,7 @@
     <string name="provider_login_sign_in_to">Вход в %s</string>
     <string name="provider_login_no_auth_required">Этот провайдер не требует аутентификации.</string>
     <string name="provider_login_continue">Продолжить</string>
+    <string name="provider_login_api_key_hint">API-ключ</string>
     <string name="provider_login_back">Назад</string>
     <string name="provider_login_authenticated">Авторизован</string>
 </resources>

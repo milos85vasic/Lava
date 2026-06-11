@@ -17,6 +17,7 @@ import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import lava.designsystem.color.ProviderColors
 import lava.designsystem.component.Button
@@ -33,6 +34,10 @@ fun ProvidersStep(
     onToggle: (String) -> Unit,
     onNext: () -> Unit,
     modifier: Modifier = Modifier,
+    // Phase 5 (2026-06-11): non-blocking notice shown when the chosen API's
+    // provider catalogue could not be fetched and the bundled list is being
+    // shown instead (§6.AB — never a blank list). `null` = no notice.
+    catalogNotice: String? = null,
 ) {
     Surface(
         modifier = modifier.fillMaxSize(),
@@ -51,6 +56,15 @@ fun ProvidersStep(
                 style = AppTheme.typography.bodyMedium,
                 color = AppTheme.colors.onSurfaceVariant,
             )
+            if (catalogNotice != null) {
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    text = catalogNotice,
+                    style = AppTheme.typography.bodySmall,
+                    color = AppTheme.colors.error,
+                    modifier = Modifier.testTag(ProviderCatalogNoticeTestTag),
+                )
+            }
             Spacer(Modifier.height(20.dp))
             Column(
                 modifier = Modifier
@@ -102,3 +116,11 @@ fun ProvidersStep(
         }
     }
 }
+
+/**
+ * Test tag for the Phase 5 dynamic-provider-discovery fallback notice. Used by
+ * Compose UI Challenge tests to assert the notice renders (without relying on
+ * fragile copy matching) when the API catalogue fetch fails and the bundled
+ * provider list is shown instead.
+ */
+const val ProviderCatalogNoticeTestTag = "provider_catalog_notice"

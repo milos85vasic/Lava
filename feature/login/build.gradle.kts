@@ -5,6 +5,15 @@ plugins {
 
 android {
     namespace = "lava.login"
+
+    // Phase 5 (2026-06-11): ProviderLoginAuthUiTest renders the real Compose
+    // auth form under Robolectric and asserts node presence — needs merged
+    // Android resources on the unit-test classpath.
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = true
+        }
+    }
 }
 
 dependencies {
@@ -24,4 +33,11 @@ dependencies {
     testImplementation(libs.robolectric)
     testImplementation(libs.bundles.room)
     testImplementation(libs.ktor.client.okhttp)
+    // Phase 5 (2026-06-11): Robolectric Compose UI test (ProviderLoginAuthUiTest).
+    // ui-test-manifest contributes the ComponentActivity host so createComposeRule
+    // resolves its host activity in BOTH debug + release unit-test variants —
+    // mirrors core/designsystem/build.gradle.kts (A11yContentDescriptionTest).
+    testImplementation(libs.androidx.test.core)
+    testImplementation(libs.androidx.compose.ui.test)
+    testImplementation(libs.androidx.compose.ui.testManifest)
 }

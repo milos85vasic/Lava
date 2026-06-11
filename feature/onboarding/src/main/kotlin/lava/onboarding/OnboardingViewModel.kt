@@ -83,6 +83,38 @@ class OnboardingViewModel @Inject constructor(
     // Intent — no market:// anywhere. Production Hilt binding provided by
     // OnboardingAppLinkModule in :app.
     private val siblingAppLauncher: SiblingAppLauncher,
+    // ── Dynamic provider discovery (Phase 5, 2026-06-11) ──────────────────
+    // Integration (2026-06-11): the committed FetchProvidersUseCase is
+    // String-keyed —
+    //     suspend operator fun invoke(
+    //         apiBaseUrl: String,
+    //     ): Result<List<lava.tracker.api.RemoteTrackerDescriptor>>
+    // (it wraps lava.data.provider.ProviderCatalogRepository.fetchProviders).
+    // This VM derives the base URL from the probed Endpoint.GoApi via the
+    // injected [apiBaseUrlBuilder] (the canonical core/network seam, default
+    // [SseBaseUrlBuilder.Https]) so NO scheme/host/port literal appears here
+    // (§6.R), then calls the String-keyed use case.
+    //
+    // [fetchProvidersUseCase] + [trackerRegistry] remain nullable with a null
+    // default so existing direct-construction test call sites keep compiling
+    // and a null wiring degrades gracefully to bundled-only providers (the
+    // same fail-safe the catalogue-fetch-failure path takes). Production Hilt
+    // (OnboardingHiltModule + TrackerClientModule) always provides both.
+    private val fetchProvidersUseCase: lava.domain.usecase.FetchProvidersUseCase? = null,
+    // The SAME registry instance [LavaTrackerSdk] reads through
+    // listAvailableTrackers(); populating it makes [loadProviders] reflect the
+    // chosen API's catalogue. Its ApiBackedTrackerClient factory is installed
+    // at DI time (TrackerClientModule.provideTrackerRegistry) and resolves the
+    // active base URL via [lava.tracker.client.ApiBaseUrlHolder], which this VM
+    // sets to the probed API's base URL BEFORE populateFrom (so the dynamic
+    // clients target the chosen instance).
+    private val trackerRegistry: lava.tracker.registry.TrackerRegistry? = null,
+    // §6.R-clean Endpoint.GoApi → "scheme://host:port" base-URL builder.
+    // Default [SseBaseUrlBuilder.Https] is the production wire scheme; a
+    // MockWebServer-backed test substitutes an http builder. Hilt provides
+    // the Https binding via OnboardingHiltModule.
+    private val apiBaseUrlBuilder: lava.network.sse.SseBaseUrlBuilder =
+        lava.network.sse.SseBaseUrlBuilder.Https,
 ) : ViewModel(), ContainerHost<OnboardingState, OnboardingSideEffect> {
     // [apiKeyReader] is a function seam (authority: String) -> key: String?
     // Cannot be injected via Hilt (function types are not Dagger-injectable).
@@ -233,11 +265,26 @@ class OnboardingViewModel @Inject constructor(
                     // Persist the selected endpoint so the rest of the app
                     // (search, network, etc.) routes through it.
                     endpointsRepository.add(endpoint)
+                    // Phase 5 (2026-06-11) dynamic provider discovery: fetch the
+                    // chosen API's catalogue (GET /v1/providers) and populate the
+                    // registry so loadProviders() — which reads
+                    // sdk.listAvailableTrackers() — reflects the API's providers,
+                    // INCLUDING ones the compiled-in registry does not have (e.g.
+                    // a Jackett indexer). On fetch failure the registry keeps its
+                    // bundled providers and we carry a non-blocking notice; the
+                    // list is NEVER blank (§6.AB rendering-correctness lesson).
+                    val catalogNotice = fetchAndPopulateProviders(endpoint)
+                    // Refresh the provider list from the (now possibly populated)
+                    // registry. Queued as a separate Orbit intent that runs before
+                    // the step-advance intent below, so the final state carries
+                    // both the refreshed providers and step = Providers.
+                    loadProviders()
                     logger.d { "ApiSelection: probe OK for $endpoint — advance to Providers" }
                     intent {
                         reduce {
                             state.copy(
                                 apiConnectivity = ApiConnectivityState.Idle,
+                                providerCatalogNotice = catalogNotice,
                                 step = OnboardingStep.Providers,
                             )
                         }
@@ -651,5 +698,75 @@ class OnboardingViewModel @Inject constructor(
         // correctly — Option A (per-endpoint key) from the linking design §5.
         val endpoint = Endpoint.GoApi(host = host, port = port, key = apiKey)
         onSelectApi(endpoint)
+    }
+
+    // ── Phase 5 (2026-06-11): dynamic provider discovery ──────────────────
+
+    /**
+     * Fetches the chosen API instance's provider catalogue and populates the
+     * tracker registry. Runs as a plain `suspend` helper inside the existing
+     * probe coroutine (NOT an Orbit intent), so it completes — populating the
+     * registry — before the caller queues [loadProviders] + the step advance.
+     *
+     * Returns `null` on success (no notice) OR when no [fetchProvidersUseCase]
+     * is wired (bundled-only mode). Returns [PROVIDER_CATALOG_FALLBACK_NOTICE]
+     * when the fetch fails — the caller surfaces it as a non-blocking notice on
+     * the (bundled) provider list so the user is never shown a blank screen
+     * (§6.AB). Telemetry on the failure path per §6.AC.
+     *
+     * §6.J anti-bluff: this method only ever ADDS providers to the list the
+     * user sees; a fetch failure leaves the bundled list intact. The Phase 5
+     * unit test [OnboardingViewModelDynamicProvidersTest] asserts on the
+     * resulting `state.providers` (API list incl. an API-only provider) and on
+     * the fallback `state.providerCatalogNotice` — both user-visible state.
+     */
+    private suspend fun fetchAndPopulateProviders(endpoint: Endpoint): String? {
+        val useCase = fetchProvidersUseCase ?: return null
+        // Only Endpoint.GoApi instances back a lava-api-go provider catalogue;
+        // a non-GoApi selection (e.g. a rutracker mirror) has no /providers
+        // route — keep the bundled list (no notice, bundled-only mode).
+        val goApi = endpoint as? Endpoint.GoApi ?: return null
+        // §6.R-clean: derive the base URL from the endpoint's host+port via the
+        // injected builder (no scheme/host/port literal in this VM).
+        val apiBaseUrl = apiBaseUrlBuilder.build(goApi.host, goApi.port)
+        return try {
+            useCase(apiBaseUrl).fold(
+                onSuccess = { descriptors ->
+                    // Set the ACTIVE lava-api-go base URL the registry's
+                    // ApiBackedTrackerClient factory reads (ApiBaseUrlHolder.current())
+                    // BEFORE populateFrom, so each dynamic client targets the chosen
+                    // instance (task §2). populateFrom registers one
+                    // ApiBackedTrackerClient per descriptor into the same registry
+                    // the SDK reads via listAvailableTrackers().
+                    lava.tracker.client.ApiBaseUrlHolder.set(apiBaseUrl)
+                    trackerRegistry?.populateFrom(descriptors)
+                    null
+                },
+                onFailure = { e ->
+                    analytics.recordNonFatal(
+                        e,
+                        mapOf(AnalyticsTracker.Params.ERROR to "provider_catalog_fetch_failed"),
+                    )
+                    PROVIDER_CATALOG_FALLBACK_NOTICE
+                },
+            )
+        } catch (e: Exception) {
+            logger.e(t = e) { "Provider catalogue fetch failed for $endpoint" }
+            analytics.recordNonFatal(
+                e,
+                mapOf(AnalyticsTracker.Params.ERROR to "provider_catalog_fetch_failed"),
+            )
+            PROVIDER_CATALOG_FALLBACK_NOTICE
+        }
+    }
+
+    companion object {
+        /**
+         * Non-blocking notice shown on the (bundled) provider list when the
+         * chosen API's catalogue could not be fetched. User-facing copy — not
+         * a connection/secret literal, so outside the §6.R no-hardcoding scope.
+         */
+        internal const val PROVIDER_CATALOG_FALLBACK_NOTICE: String =
+            "Couldn't reach the selected API — showing bundled providers."
     }
 }

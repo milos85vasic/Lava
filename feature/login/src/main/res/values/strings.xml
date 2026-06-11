@@ -21,6 +21,8 @@
     <string name="provider_login_sign_in_to">Sign in to %s</string>
     <string name="provider_login_no_auth_required">This provider does not require authentication.</string>
     <string name="provider_login_continue">Continue</string>
+    <!-- Phase 5 (2026-06-11): label for the API-key field shown for API_KEY providers. -->
+    <string name="provider_login_api_key_hint">API key</string>
     <string name="provider_login_back">Back</string>
     <string name="provider_login_authenticated">Authenticated</string>
 

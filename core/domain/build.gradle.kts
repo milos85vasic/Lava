@@ -19,6 +19,7 @@ dependencies {
     implementation(project(":core:network:api"))
     implementation(project(":core:notifications"))
     implementation(project(":core:sync"))
+    implementation(project(":core:tracker:api"))
     implementation(project(":core:work:api"))
 
     implementation(libs.javax.inject)

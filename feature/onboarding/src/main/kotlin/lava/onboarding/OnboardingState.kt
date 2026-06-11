@@ -49,6 +49,16 @@ data class OnboardingState(
     val currentProviderIndex: Int = 0,
     val connectionTestRunning: Boolean = false,
 
+    // Dynamic provider discovery (Phase 5, 2026-06-11). After the
+    // ApiSelection probe succeeds, the chosen API's catalogue
+    // (`GET /v1/providers`) is fetched and the registry is populated so
+    // [providers] reflects the API's list. When the catalogue fetch FAILS
+    // (or no FetchProvidersUseCase is wired), the wizard falls back to the
+    // bundled provider list and surfaces this NON-BLOCKING notice — it is
+    // never a blank screen (§6.AB rendering-correctness lesson). `null`
+    // means "no notice" (fetch succeeded, or bundled-only mode).
+    val providerCatalogNotice: String? = null,
+
     // ApiSelection step (60th §6.L invocation, 2026-05-18)
     val discoveredApis: List<Endpoint> = emptyList(),
     val apiDiscoveryRunning: Boolean = false,
