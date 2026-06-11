@@ -163,6 +163,17 @@ declare -a HELIXQA_SCRIPTS=(
     "ux_end_to_end_flow_challenge.sh"
 )
 
+# --- Lava-domain QA-session scenarios (NOT in the HelixQA submodule) ---
+# Per CONST-051(B) / the Decoupled Reusable Architecture rule, project-specific
+# scenarios (Lava onboarding, Lava API selection, the Lava provider catalogue)
+# MUST NOT be injected into the vasic-digital/HelixQA submodule — that submodule
+# stays project-not-aware. They live in the Lava tree and are discovered here.
+# `--only <basename>` matches these exactly like the HelixQA scripts above.
+LAVA_SCENARIOS_DIR="$REPO_ROOT/challenges/helixqa-sessions"
+declare -a LAVA_SCENARIOS=(
+    "dynamic-provider-discovery.sh"
+)
+
 # --- Q2: per-script toolchain requirement map (§6.J anti-bluff) ---
 # Each entry: "<script>:<toolchain>". Toolchains:
 #   go   — needs Go toolchain + `go mod download` in HelixQA worktree

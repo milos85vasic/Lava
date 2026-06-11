@@ -1,0 +1,103 @@
+# SPDX-FileCopyrightText: 2026 Milos Vasic
+# SPDX-License-Identifier: Apache-2.0
+#
+# HelixQA Test Bank — Lava Dynamic Provider Discovery (vision-guided QA session)
+#
+# Lava-domain bank. Per CONST-051(B) / the Decoupled Reusable Architecture rule
+# this scenario is project-specific (Lava onboarding + API selection + the
+# API-driven provider list), so it lives in the Lava tree — NOT inside the
+# vasic-digital/HelixQA submodule (which must stay project-not-aware).
+#
+# Consumed by the Lava scenario wrapper
+#   challenges/helixqa-sessions/dynamic-provider-discovery.sh
+# which delegates to `helixqa run -platform android -banks <this file>` when the
+# HelixQA binary + a VM/container-backed Android device are available (§6.AG/§6.AH).
+#
+# Each step is the vision-guided Observation -> Decide -> Decision loop:
+#   action   = the Decision the navigator executes on the live screen
+#   expected = the Observation the navigator must confirm before advancing
+# A step's `expected` is the user-visible assertion; a PASS therefore guarantees
+# the real end user can complete the flow (§6.J / §11.4 anti-bluff).
+
+version: "1.0"
+name: "Lava Dynamic Provider Discovery"
+description: "Launch -> onboarding -> choose an API instance -> provider list populated FROM the API -> pick a provider -> search -> see results. Validates the dynamic (API-backed) provider catalogue end-to-end on a real Android device."
+metadata:
+  author: "vasic-digital"
+  app: "Lava"
+  package: "digital.vasic.lava.client.dev"
+  feature: "dynamic-provider-discovery"
+  spec: "docs/superpowers/specs/2026-06-11-dynamic-provider-discovery-design.md"
+  plan: "docs/superpowers/plans/2026-06-11-dynamic-provider-discovery.md#task-63"
+
+test_cases:
+  - id: LDPD-001
+    name: "Cold launch survives onboarding entry"
+    category: functional
+    priority: critical
+    platforms: [android]
+    steps:
+      - name: "Launch the Lava client cold"
+        action: "Cold-start the app (pm clear then monkey launch the launcher intent)"
+        expected: "The onboarding Welcome screen renders without a crash dialog / ANR"
+    tags: [onboarding, cold-start, dynamic-provider-discovery]
+    estimated_duration: "30s"
+    expected_result: "App reaches onboarding alive (no FATAL in logcat for the package)"
+
+  - id: LDPD-002
+    name: "Onboarding offers an API-instance choice before providers"
+    category: functional
+    priority: critical
+    platforms: [android]
+    steps:
+      - name: "Advance from Welcome to the API selection step"
+        action: "Tap Get Started / Continue on the Welcome screen"
+        expected: "The API selection step lists at least one reachable API instance (mDNS-discovered or manual)"
+      - name: "Select an API instance and run its connectivity probe"
+        action: "Tap a discovered API instance entry"
+        expected: "The /health connectivity probe succeeds and the flow advances to the provider step"
+    tags: [onboarding, api-selection, dynamic-provider-discovery]
+    estimated_duration: "45s"
+    expected_result: "An API instance is chosen and passes its connectivity test"
+
+  - id: LDPD-003
+    name: "Provider list is populated FROM the chosen API"
+    category: functional
+    priority: critical
+    platforms: [android]
+    steps:
+      - name: "Observe the provider list after API selection"
+        action: "Read the rendered provider list on the Providers onboarding step"
+        expected: "The list contains providers sourced from GET /v1/providers — including at least one provider the compiled-in offline fallback set does NOT ship (e.g. a Jackett indexer such as 1337x)"
+    tags: [providers, api-backed-catalogue, jackett, dynamic-provider-discovery]
+    estimated_duration: "30s"
+    expected_result: "A provider unique to the API catalogue is visible — proving the list came from the API, not the bundled registry"
+
+  - id: LDPD-004
+    name: "Pick an API-discovered provider and reach search"
+    category: functional
+    priority: high
+    platforms: [android]
+    steps:
+      - name: "Select an API-sourced provider and finish onboarding"
+        action: "Tap an API-discovered provider, then finish onboarding into the app"
+        expected: "The main screen renders with the chosen provider active"
+      - name: "Open search and submit a query"
+        action: "Open the search input, type a non-empty query, submit"
+        expected: "A search-results screen renders for the chosen provider"
+    tags: [providers, search, dynamic-provider-discovery]
+    estimated_duration: "45s"
+    expected_result: "Search runs against the API-discovered provider"
+
+  - id: LDPD-005
+    name: "Search returns real result rows"
+    category: functional
+    priority: critical
+    platforms: [android]
+    steps:
+      - name: "Observe the search results"
+        action: "Read the search-results list for the submitted query"
+        expected: "At least one real result row renders (title text visible), not an empty/error state"
+    tags: [search, results, dynamic-provider-discovery]
+    estimated_duration: "30s"
+    expected_result: "A real result row is visible to the user — the end-to-end dynamic-provider flow works"
