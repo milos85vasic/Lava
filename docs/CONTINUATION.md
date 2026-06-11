@@ -11,7 +11,16 @@ same commit so the index stays trustworthy. Stale state in this file
 is itself a §6.J spirit issue — the file claims a guarantee, the
 repo has drifted, the agent acts on the claim.
 
-> **Last updated:** 2026-06-09 (**✅ AUTONOMOUS OVERNIGHT CLOSE-OUT — DISTRIBUTED**). Operator away; agent fully autonomous, stability-first / zero-bluff. The full rebuild→retest→rotate→distribute chain is COMPLETE.
+> **Last updated:** 2026-06-11 (**✅ RELEASE BUILDS OF ALL APPS DISTRIBUTED**). Operator-directed: build + Firebase-distribute the release build of all apps, with any missing release config created + the same release signing key for all Android apps.
+> - **🚀 RELEASE distribute (1.3.2-1059 client + 0.2.2-6 api-app), §6.AA two-stage debug→release, rotated auth for android-1.3.2-1059, device-verified on Genymotion Pixel 9 / API 35:**
+>   - client **DEBUG** 1.3.2-1059 + **RELEASE** 1.3.2-1059 (canary `92c72c8a` PASS / 0 ANR / 0 FATAL)
+>   - api-app **DEBUG** 0.2.2-6 + **RELEASE** 0.2.2-6 — **first-ever api-app release distribution** (Firebase app `digital.vasic.lava.api`, release `7tph66froilu0`; canary `2758ff36` PASS)
+> - **api-app release Firebase app wired:** the "Lava API (release)" app already existed in the project; the prior "held" was a wrong-env-var-name check. `LAVA_FIREBASE_API_APP_ID` now correctly points to it (`…d57b960e`).
+> - **Shared release signing VERIFIED:** both client + api-app release APKs carry the identical cert SHA-256 `94:B3:21:1A:06:DA:0A:B3:…` (shared `keystores/release.keystore`).
+> - **Tester note (api-app):** the release (`digital.vasic.lava.api`) and debug (`…api.dev`) API apps declare the same custom permission and cannot coexist — testers uninstall the debug API app before installing the release (documented in the CHANGELOG release notes).
+> - **§6.Y next-cycle bump:** client `1.3.3-1060`, api-app `0.2.3-7`, api-go `2.3.25-2325`.
+>
+> **Last updated (prior):** 2026-06-09 (**✅ AUTONOMOUS OVERNIGHT CLOSE-OUT — DISTRIBUTED**). Operator away; agent fully autonomous, stability-first / zero-bluff. The full rebuild→retest→rotate→distribute chain is COMPLETE.
 > - **🚀 DISTRIBUTED to Firebase App Distribution (rotated auth, device-verified):**
 >   - client **DEBUG** `Lava-Android-1.3.1-1058` → release `2jko9l0cntu98`
 >   - client **RELEASE** `Lava-Android-1.3.1-1058` → release `2hnvk6nde9rag` (§6.AA stage 2 after debug + §6.Z R8 canary PASS)

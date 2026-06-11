@@ -9,10 +9,10 @@ package version
 
 const (
 	// Name is the service's semver. Tag prefix: Lava-API-Go-<Name>-<Code>.
-	Name = "2.3.24"
+	Name = "2.3.25"
 
 	// Code is the integer release counter. New tags MUST increment.
-	Code = 2324
+	Code = 2325
 )
 
 // SourceHash is the 64-hex sha256 of the EXACT lava-api-go source codebase that
