@@ -16,6 +16,7 @@ import (
 
 // fakeProvider is a minimal Provider implementation for handler tests.
 type fakeProvider struct {
+	provider.BaseProvider
 	id             string
 	name           string
 	searchResult   *provider.SearchResult

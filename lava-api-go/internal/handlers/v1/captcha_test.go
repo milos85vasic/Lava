@@ -15,6 +15,7 @@ import (
 // CaptchaImage, so the v1 captcha handler can be driven end-to-end through the
 // real Gin route without reaching a live upstream.
 type captchaFakeProvider struct {
+	provider.BaseProvider
 	fakeProvider
 	img *provider.CaptchaImage
 	err error

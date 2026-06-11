@@ -7,6 +7,7 @@ import (
 
 // fakeProvider is a minimal Provider implementation for testing.
 type fakeProvider struct {
+	BaseProvider // catalogue-metadata defaults for the test fake
 	id           string
 	caps         []ProviderCapability
 	auth         AuthType

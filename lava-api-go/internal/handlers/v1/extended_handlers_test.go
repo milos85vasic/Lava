@@ -18,6 +18,7 @@ import (
 // the extended v1 handlers (comments, favorites, login, torrent, captcha)
 // end-to-end through the real Gin engine + the production handler code.
 type richProvider struct {
+	provider.BaseProvider
 	comments  *provider.CommentsResult
 	addOK     bool
 	favorites *provider.FavoritesResult

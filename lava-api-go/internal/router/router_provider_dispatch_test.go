@@ -38,7 +38,7 @@ import (
 // result, so a request that actually reaches dispatch produces a 200 with a
 // recognizable body. It declares SEARCH but NOT FAVORITES, so the capability
 // gate (§6.E) can be exercised.
-type dispatchProvider struct{ id string }
+type dispatchProvider struct{ provider.BaseProvider; id string }
 
 func (p *dispatchProvider) ID() string          { return p.id }
 func (p *dispatchProvider) DisplayName() string { return "Dispatch" }

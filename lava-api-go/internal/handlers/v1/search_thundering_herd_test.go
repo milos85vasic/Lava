@@ -75,6 +75,7 @@ import (
 // race window so concurrent callers genuinely overlap inside GetSearch between
 // the cache miss and the cache write.
 type countingSearchProvider struct {
+	provider.BaseProvider
 	id        string
 	delay     time.Duration
 	searchCnt int64 // atomic — number of upstream Search() invocations

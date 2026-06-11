@@ -16,10 +16,15 @@ dependencies {
     implementation(project(":core:models"))
     implementation(project(":core:network:api"))
     implementation(project(":core:preferences"))
+    implementation(project(":core:tracker:api"))
+
+    implementation(libs.okhttp.core)
+    implementation(libs.kotlinx.serialization.json)
 
     testImplementation(libs.junit4)
     testImplementation(libs.robolectric)
     testImplementation(libs.bundles.room)
     testImplementation(libs.androidx.test.core)
     testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.okhttp.mockwebserver)
 }

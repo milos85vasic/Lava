@@ -17,6 +17,7 @@ import (
 // real Gin engine; only the provider's upstream calls are stubbed (these
 // are never invoked by the middleware path under test).
 type stubProvider struct {
+	provider.BaseProvider
 	id   string
 	caps []provider.ProviderCapability
 }

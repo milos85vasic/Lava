@@ -19,7 +19,11 @@ import (
 var _ provider.Provider = (*ProviderAdapter)(nil)
 
 // ProviderAdapter wraps *Client to satisfy provider.Provider.
+//
+// Embeds provider.BaseProvider for the catalogue-metadata defaults
+// (Kind()=="native", SupportsAnonymous()==false); BaseURLs is overridden below.
 type ProviderAdapter struct {
+	provider.BaseProvider
 	client *Client
 }
 

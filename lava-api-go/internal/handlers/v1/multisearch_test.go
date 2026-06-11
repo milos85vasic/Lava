@@ -18,6 +18,7 @@ import (
 // configurable result or error, used to drive the SSE MultiSearchHandler
 // against the real registry + real Gin engine.
 type streamProvider struct {
+	provider.BaseProvider
 	id     string
 	name   string
 	result *provider.SearchResult

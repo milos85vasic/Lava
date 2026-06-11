@@ -18,6 +18,7 @@ import (
 // error branches of the GET handlers (Browse/Forum/Topic/Search), none of
 // which were covered before.
 type errProvider struct {
+	provider.BaseProvider
 	err error
 }
 
@@ -272,6 +273,7 @@ func contains(s, sub string) bool {
 // invocations so cache-hit tests can prove the provider was NOT re-hit on
 // the second request.
 type countingProvider struct {
+	provider.BaseProvider
 	searchResult *provider.SearchResult
 	browseResult *provider.BrowseResult
 	onSearch     func()
@@ -338,6 +340,7 @@ func (p *countingProvider) HealthCheck(ctx context.Context) (*provider.HealthSta
 // cacheCountProvider counts every read endpoint so the cache-hit table test
 // can prove the second request was served from cache.
 type cacheCountProvider struct {
+	provider.BaseProvider
 	forum, topic, torrent, comments, favorites int
 }
 
@@ -400,6 +403,7 @@ func (p *cacheCountProvider) HealthCheck(ctx context.Context) (*provider.HealthS
 // credCaptureProvider records the credentials its Search received so the
 // header-parsing test can assert the forwarded credentials.
 type credCaptureProvider struct {
+	provider.BaseProvider
 	onSearch func(provider.Credentials)
 }
 

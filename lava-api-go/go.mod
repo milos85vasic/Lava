@@ -54,6 +54,7 @@ require (
 	github.com/quic-go/quic-go v0.59.0
 	golang.org/x/net v0.52.0
 	gopkg.in/yaml.v3 v3.0.1
+	modernc.org/sqlite v1.18.1
 )
 
 require (
@@ -281,7 +282,6 @@ require (
 	modernc.org/opt v0.1.3 // indirect
 	modernc.org/ql v1.0.0 // indirect
 	modernc.org/sortutil v1.1.0 // indirect
-	modernc.org/sqlite v1.18.1 // indirect
 	modernc.org/strutil v1.1.3 // indirect
 	modernc.org/token v1.0.0 // indirect
 	modernc.org/zappy v1.0.0 // indirect

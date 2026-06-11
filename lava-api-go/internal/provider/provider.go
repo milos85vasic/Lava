@@ -249,6 +249,25 @@ type Provider interface {
 	AuthType() AuthType
 	Encoding() string
 
+	// Catalogue metadata — surfaced by GET /v1/providers so the Android
+	// client can populate its provider list + per-provider sign-in UI
+	// dynamically (dynamic provider discovery, 2026-06-11 spec §4.1).
+	//
+	//   - Kind discriminates native, compiled-in providers ("native") from
+	//     dynamically-discovered ones (e.g. "jackett" for Jackett indexers).
+	//   - SupportsAnonymous reports whether the provider can be used without
+	//     credentials (search/browse/download as an anonymous user).
+	//   - BaseURLs lists the upstream mirror base URLs for informational
+	//     display; empty for providers the API fronts entirely server-side
+	//     (e.g. Jackett indexers).
+	//
+	// Existing implementations satisfy these by embedding BaseProvider, which
+	// supplies the safe defaults ("native" / false / nil); each provider
+	// overrides only the methods whose real value differs.
+	Kind() string
+	SupportsAnonymous() bool
+	BaseURLs() []string
+
 	// Core capabilities — every provider MUST implement these.
 	Search(ctx context.Context, opts SearchOpts, cred Credentials) (*SearchResult, error)
 	Browse(ctx context.Context, categoryID string, page int, cred Credentials) (*BrowseResult, error)
@@ -273,3 +292,25 @@ type Provider interface {
 	// Health
 	HealthCheck(ctx context.Context) (*HealthStatus, error)
 }
+
+// BaseProvider supplies safe defaults for the catalogue-metadata methods
+// (Kind/SupportsAnonymous/BaseURLs) so existing Provider implementations
+// satisfy the extended interface by embedding it. Defaults:
+//
+//	Kind()              == "native"
+//	SupportsAnonymous() == false
+//	BaseURLs()          == nil
+//
+// A provider overrides only the method whose real value differs from the
+// default (e.g. an anonymous-capable HTTP library overrides SupportsAnonymous;
+// a Jackett indexer overrides Kind).
+type BaseProvider struct{}
+
+// Kind returns the default provider kind, "native".
+func (BaseProvider) Kind() string { return "native" }
+
+// SupportsAnonymous reports the default: providers require credentials.
+func (BaseProvider) SupportsAnonymous() bool { return false }
+
+// BaseURLs returns the default: no advertised mirror base URLs.
+func (BaseProvider) BaseURLs() []string { return nil }
