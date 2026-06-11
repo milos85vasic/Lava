@@ -1,4 +1,22 @@
 # Changelog
+## Lava-Android-1.3.3-1060 — 2026-06-11 (Dynamic provider discovery; device-verified)
+
+**Previous published:** Lava-Android-1.3.2-1059 (debug+release).
+
+- **Dynamic providers** — the app now learns its list of trackers/providers **from the API
+  instance you choose**, instead of a fixed built-in list. Pick an API in onboarding and the
+  provider list + the sign-in fields for each provider are populated live from that server. If
+  the API can't be reached, the app falls back to the built-in providers (never a blank list).
+- **Jackett indexers as providers** — every indexer configured on the chosen API's Jackett is
+  offered as its own selectable provider, searchable + downloadable like any other.
+- **Sign-in fix** — API-key providers now show a key field (previously they were wrongly shown a
+  username/password form).
+
+Device-verified on a Genymotion Pixel 9 / API 35: cold-start + provider-selection Challenges
+C00/C01 GREEN on this build. The dynamic-discovery logic is proven end-to-end over the real
+repository→use-case→registry→ViewModel chain; the new C39/C40 Challenges that assert an API-only
+provider need a Jackett-backed API to run for real (infra follow-up).
+
 ## Lava-Android-1.3.2-1059 — 2026-06-11 (Signed release build for testing; build-pipeline + auth hardening; device-verified)
 
 **Previous published:** Lava-Android-1.3.1-1058 (debug+release).
@@ -64,6 +82,24 @@ against the new upstream release. See `git log` 54eedd92..HEAD and `docs/Fixed.m
 - §6.Z: `.lava-ci-evidence/app-linking/ondevice-dc547861/` + falsifiable unit regression tests
   (commit `dc547861`). Debug-stage evidence:
   `.lava-ci-evidence/distribute-changelog/firebase-app-distribution/1.3.0-1057-test-evidence.md`.
+
+## Lava-API-App-0.2.3-7 — 2026-06-11 (Provider-catalogue endpoint + 1.3.3 client auth allowlist; device-verified)
+
+**Previous published:** Lava-API-App-0.2.2-6 (debug+release).
+
+The on-device API app embeds the lava-api-go engine; this build adds the **provider-discovery
+catalogue** the new dynamic client reads:
+
+- **`GET /providers`** — returns the full list of supported providers with their capabilities +
+  auth type, so the Lava client populates its provider list + sign-in UI dynamically.
+- **Jackett indexers as providers** — every configured Jackett indexer is enumerated at startup
+  and offered as a first-class provider (native providers win any id collision).
+- **Auth allowlist** — `android-1.3.3-1060` added to the accepted-clients list (all prior retained).
+- Built with the same release signing key as the Lava client.
+
+> **Testers:** the release API app (`digital.vasic.lava.api`) and the debug API app
+> (`digital.vasic.lava.api.dev`) declare the same custom permission and **cannot be installed at
+> the same time**. Uninstall **"Lava API (debug)"** before installing this release build.
 
 ## Lava-API-App-0.2.2-6 — 2026-06-11 (First signed RELEASE distribution; 1.3.2 client auth allowlist; device-verified)
 
