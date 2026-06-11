@@ -1,0 +1,3 @@
+Performing Streamed Install
+adb: failed to install releases/api-app/0.2.2/android-release/digital.vasic.lava.api-0.2.2-release.apk: Failure [INSTALL_FAILED_DUPLICATE_PERMISSION: Package digital.vasic.lava.api attempting to redeclare permission digital.vasic.lava.permission.READ_API_KEY already owned by digital.vasic.lava.api.dev]
+

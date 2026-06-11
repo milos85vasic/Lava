@@ -1,4 +1,25 @@
 # Changelog
+## Lava-Android-1.3.2-1059 — 2026-06-11 (Signed release build for testing; build-pipeline + auth hardening; device-verified)
+
+**Previous published:** Lava-Android-1.3.1-1058 (debug+release).
+
+Same user-facing feature set as 1.3.1-1058 — this is a fresh, fully-signed **release** build cut
+for tester validation, carrying the build-infrastructure and per-release-auth hardening from the
+1.3.2 cycle:
+
+- **Per-release auth rotated** — fresh obfuscation pepper + per-build client UUID; `android-1.3.2-1059`
+  added to the accepted-clients allowlist (all prior clients retained) so the on-device API accepts
+  this build.
+- **Build pipeline restored** — the container image build was repaired (LVA-078: the build context
+  no longer excludes the Go submodule sources it needs) and the `apiengine` Gradle task graph +
+  dexing heap were fixed (LVA-076), so the release artifacts are produced through a clean, reproducible
+  build.
+- **Release cold-start verified** — the exact R8/minified release APK was installed and cold-launched
+  on a Genymotion Pixel 9 / API 35 VM: reaches MainActivity, zero crash, zero ANR
+  (`run-release-canary.sh`, LVA-077).
+
+Distributed to Firebase App Distribution (debug stage 1 → release stage 2, §6.AA).
+
 ## Lava-Android-1.3.1-1058 — 2026-06-09 (Stability + real-bug fixes; HTTP file download; device-verified)
 
 **Previous published:** Lava-Android-1.3.0-1057 (debug+release).
@@ -43,6 +64,24 @@ against the new upstream release. See `git log` 54eedd92..HEAD and `docs/Fixed.m
 - §6.Z: `.lava-ci-evidence/app-linking/ondevice-dc547861/` + falsifiable unit regression tests
   (commit `dc547861`). Debug-stage evidence:
   `.lava-ci-evidence/distribute-changelog/firebase-app-distribution/1.3.0-1057-test-evidence.md`.
+
+## Lava-API-App-0.2.2-6 — 2026-06-11 (First signed RELEASE distribution; 1.3.2 client auth allowlist; device-verified)
+
+**Previous published:** Lava-API-App-0.2.1-5 (debug).
+
+The on-device API app's **first release-channel distribution** (previously debug-only). Same
+embedded-engine feature set as 0.2.1-5, rebuilt as a signed release alongside the 1.3.2 client:
+
+- **Auth allowlist** — `android-1.3.2-1059` added to the accepted-clients list (all prior retained)
+  so the freshly distributed 1.3.2 client reaches the on-device API.
+- **Signed release** — built with the same release signing key as the Lava client (shared
+  `keystores/release.keystore`).
+- **Release cold-start verified** — the exact release APK was installed and cold-launched on a
+  Genymotion Pixel 9 / API 35 VM: reaches `lava.api.app.MainActivity`, zero crash, zero ANR.
+
+> **Testers:** the release API app (`digital.vasic.lava.api`) and the debug API app
+> (`digital.vasic.lava.api.dev`) declare the same custom permission and **cannot be installed at
+> the same time**. Uninstall **"Lava API (debug)"** before installing this release build.
 
 ## Lava-API-App-0.2.1-5 — 2026-06-09 (Embedded-API bug-fix wave + 1.3.1 client auth allowlist; device-verified)
 
