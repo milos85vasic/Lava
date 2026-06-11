@@ -18,7 +18,13 @@ cd "$(dirname "$0")/.."
 # their own §INHERITED FROM Helix Constitution pointer block) rather
 # than Lava-specific clause headings.
 # ---------------------------------------------------------------------
-HELIX_DEV_OWNED=("HelixQA")
+# HelixDevelopment-owned submodules exempt from the §6.R-block propagation gate
+# (Lava does not force its governance structure onto externally-owned repos).
+# Both the historical CamelCase dir name and the post-snake_case-migration
+# lowercase path are listed so the exemption survives the dir rename — the
+# 2026-06-11 helixqa upstream pull surfaced the case-mismatch when the new pin's
+# CLAUDE.md dropped the §6.R block that the old pin happened to carry.
+HELIX_DEV_OWNED=("HelixQA" "helixqa")
 
 is_helix_dev_owned() {
   local path=$1
