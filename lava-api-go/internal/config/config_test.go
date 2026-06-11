@@ -159,7 +159,7 @@ func TestLoadRejectsMDNSPortOutOfRange(t *testing.T) {
 
 func TestParseClientsList_ValidEntry(t *testing.T) {
 	secret := []byte("test-secret-for-hashing-1234567890")
-	m, err := parseClientsList("android-1.2.7-1027:<vm-instance-uuid-redacted>", secret)
+	m, err := parseClientsList("android-1.2.7-1027:00000000-0000-0000-0000-000000000001", secret)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -178,7 +178,7 @@ func TestParseClientsList_ValidEntry(t *testing.T) {
 func TestParseClientsList_MultipleEntries(t *testing.T) {
 	secret := []byte("test-secret-for-hashing-1234567890")
 	m, err := parseClientsList(
-		"android-1.2.7-1027:<vm-instance-uuid-redacted>,android-1.2.6-1026:<vm-instance-uuid-redacted>",
+		"android-1.2.7-1027:00000000-0000-0000-0000-000000000001,android-1.2.6-1026:00000000-0000-0000-0000-000000000002",
 		secret,
 	)
 	if err != nil {
@@ -224,7 +224,7 @@ func TestParseClientsList_BadUUID(t *testing.T) {
 }
 
 func TestParseUUID_Valid(t *testing.T) {
-	b, err := parseUUID("<vm-instance-uuid-redacted>")
+	b, err := parseUUID("01020304-0506-0708-090a-0b0c0d0e0f10")
 	if err != nil {
 		t.Fatalf("err: %v", err)
 	}
@@ -374,7 +374,7 @@ func TestEnvBool_DefaultOnGarbage(t *testing.T) {
 func TestParseClientsList_HMACDeterminism(t *testing.T) {
 	secret1 := []byte("test-secret-1234567890ABCDEF1234")
 	secret2 := []byte("a-different-secret-WXYZ1234567890")
-	entry := "android-1.2.7-1027:<vm-instance-uuid-redacted>"
+	entry := "android-1.2.7-1027:00000000-0000-0000-0000-000000000001"
 
 	m1a, err := parseClientsList(entry, secret1)
 	if err != nil {
