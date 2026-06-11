@@ -100,8 +100,8 @@ android {
         // build-derived integrity fingerprint, so the generated-config form §6.R
         // permits (computed from source, never hand-typed).
         buildConfigField("String", "LAVA_API_SOURCE_HASH", "\"$lavaApiSourceHash\"")
-        versionCode = 7
-        versionName = "0.2.3"
+        versionCode = 8
+        versionName = "0.2.4"
         // EncryptedSharedPreferences (androidx.security-crypto) requires API 23+
         // — the per-install auth-key store ([ApiKeyStore]) relies on it. The
         // standalone API-server app reasonably targets API 23+ (the client app
