@@ -1,0 +1,26 @@
+[
+  {
+    "id": "1337x",
+    "name": "1337x",
+    "description": "1337x is a general-purpose torrent site",
+    "type": "public",
+    "configured": true,
+    "site_link": "https://1337x.to/",
+    "caps": [
+      { "ID": "2000", "Name": "Movies" },
+      { "ID": "5000", "Name": "TV" },
+      { "ID": "3000", "Name": "Audio" }
+    ]
+  },
+  {
+    "id": "rutracker",
+    "name": "RuTracker",
+    "description": "RuTracker is a Russian bittorrent tracker",
+    "type": "private",
+    "configured": true,
+    "site_link": "https://rutracker.org/",
+    "caps": [
+      { "ID": "2000", "Name": "Movies" }
+    ]
+  }
+]

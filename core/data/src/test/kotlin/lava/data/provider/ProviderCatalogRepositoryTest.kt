@@ -111,7 +111,7 @@ class ProviderCatalogRepositoryTest {
 
         // The request hit the discovery route (user-observable on the wire).
         val recorded = server.takeRequest()
-        assertEquals("/v1/providers", recorded.path)
+        assertEquals("/providers", recorded.path)
 
         // Write-through cache survives for cold-start rendering.
         assertEquals(2, store.load(baseUrl()).size)

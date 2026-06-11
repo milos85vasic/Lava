@@ -17,6 +17,9 @@
 package router
 
 import (
+	"context"
+	"time"
+
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus"
 
@@ -29,6 +32,7 @@ import (
 	"digital.vasic.lava.apigo/internal/middleware"
 	"digital.vasic.lava.apigo/internal/observability"
 	"digital.vasic.lava.apigo/internal/provider"
+	"digital.vasic.lava.apigo/internal/provider/jackettprovider"
 	"digital.vasic.lava.apigo/internal/server"
 	"digital.vasic.ratelimiter/pkg/ladder"
 )
@@ -110,6 +114,11 @@ func Build(deps Deps) *gin.Engine {
 		Cache: deps.Cache,
 	}, deps.Registry)
 
+	// GET /providers — the provider catalogue for dynamic provider discovery
+	// (spec 2026-06-11). Mounted at the ROOT, NOT under /v1/:provider: a literal
+	// /v1/providers would collide with the :provider wildcard in gin's radix tree.
+	engine.GET("/providers", v1handlers.NewProvidersHandler(deps.Registry).GetProviders)
+
 	// Jackett sidecar route — registered ONLY when the sidecar is enabled AND
 	// fully configured (§6.R: no hardcoded base URL / api_key; the route is a
 	// no-op by default). The app reaches Jackett ONLY through this surface; it
@@ -121,6 +130,35 @@ func Build(deps Deps) *gin.Engine {
 		}); err == nil {
 			jh := v1handlers.NewJackettHandler(jc, deps.Cfg.JackettDefaultIndexer)
 			engine.GET("/jackett/search", jh.GetSearch)
+
+			// Each configured Jackett indexer becomes a first-class discoverable
+			// provider (spec §4.1): enumerate at startup + register one provider
+			// per indexer. Native providers win on id collision (§6.E); a failed
+			// enumeration is non-fatal — native providers still serve.
+			if deps.Registry != nil {
+				regCtx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+				if idxs, lerr := jc.ListIndexers(regCtx); lerr == nil {
+					for _, idx := range idxs {
+						if existing, _ := deps.Registry.Get(idx.ID); existing != nil {
+							observability.RecordWarning(regCtx,
+								"jackett indexer id collides with a native provider; native wins",
+								observability.NonFatalAttributes{
+									observability.AttrFeature:   "provider-discovery",
+									observability.AttrOperation: "jackett-register",
+									observability.AttrTrackerID: idx.ID,
+								})
+							continue
+						}
+						deps.Registry.Register(jackettprovider.New(idx.ID, idx.Name, jc))
+					}
+				} else {
+					observability.RecordNonFatal(regCtx, lerr, observability.NonFatalAttributes{
+						observability.AttrFeature:   "provider-discovery",
+						observability.AttrOperation: "jackett-list-indexers",
+					})
+				}
+				cancel()
+			}
 		}
 	}
 

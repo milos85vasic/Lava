@@ -98,8 +98,13 @@ class ProviderCatalogRepository @Inject constructor(
     fun cachedProviders(apiBaseUrl: String): List<RemoteTrackerDescriptor> = store.load(apiBaseUrl)
 
     companion object {
-        /** API contract route (not a connection address/port — §6.R exempt, like the other `/v1/...` paths). */
-        const val PROVIDERS_PATH = "/v1/providers"
+        /**
+         * Discovery route — served at the engine ROOT (`/providers`), NOT under
+         * `/v1/`: a literal `/v1/providers` collides with the `:provider` wildcard
+         * in the API's gin radix tree. Per-provider operations still use
+         * `/v1/{id}/{op}`. (API contract route, not a connection address — §6.R exempt.)
+         */
+        const val PROVIDERS_PATH = "/providers"
     }
 }
 
