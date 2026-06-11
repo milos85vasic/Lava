@@ -84,7 +84,7 @@ func TestDevCompose_AllEnvVarsBindToConfig(t *testing.T) {
 	// fields without erroring on missing required values.
 	t.Setenv("LAVA_AUTH_FIELD_NAME", "Lava-Auth-Test")
 	t.Setenv("LAVA_AUTH_HMAC_SECRET", "dGVzdC1obWFjLXNlY3JldC1mb3ItY29udHJhY3QtdGVzdA==")
-	t.Setenv("LAVA_AUTH_ACTIVE_CLIENTS", "test:00000000-0000-0000-0000-000000000000")
+	t.Setenv("LAVA_AUTH_ACTIVE_CLIENTS", "test:<vm-instance-uuid-redacted>")
 
 	// Per-key sentinel values that should round-trip into Config.
 	t.Setenv("LAVA_API_LISTEN", ":8543")

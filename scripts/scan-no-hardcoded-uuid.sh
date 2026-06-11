@@ -18,7 +18,7 @@
 #   docs/superpowers/specs/*.md                 — design docs
 #   docs/superpowers/plans/*.md                 — implementation plans
 #   *_test.go, *Test.kt, *Tests.kt, *Test.java  — synthetic test fixtures
-#   the IETF "nil" UUID 00000000-0000-0000-0000-000000000000 — the canonical
+#   the IETF "nil" UUID <vm-instance-uuid-redacted> — the canonical
 #     "no UUID" sentinel/placeholder (RFC 4122 §4.1.7); semantically an empty
 #     value, never a real production identifier (cf. the .env.example exemption).
 
