@@ -1,0 +1,50 @@
+{
+  "status": "ok",
+  "status_message": "Query was successful",
+  "data": {
+    "movie_count": 1,
+    "limit": 50,
+    "page_number": 1,
+    "movies": [
+      {
+        "id": 57427,
+        "title_long": "Ubuntu (2019)",
+        "year": 2019,
+        "torrents": [
+          {
+            "url": "https://yts.mx/torrent/download/34930674EF3BB9317FB5F263CCA830C52A1E5DA8",
+            "hash": "34930674EF3BB9317FB5F263CCA830C52A1E5DA8",
+            "quality": "1080p",
+            "type": "web",
+            "is_repack": "0",
+            "video_codec": "x264",
+            "bit_depth": "8",
+            "audio_channels": "2.0",
+            "seeds": 142,
+            "peers": 5,
+            "size": "1.45 GB",
+            "size_bytes": 1557135360,
+            "date_uploaded": "2019-08-12 10:30:00",
+            "date_uploaded_unix": 1650499200
+          },
+          {
+            "url": "https://yts.mx/torrent/download/a1b2c3d4e5f60718293a4b5c6d7e8f9012345678",
+            "hash": "a1b2c3d4e5f60718293a4b5c6d7e8f9012345678",
+            "quality": "720p",
+            "type": "web",
+            "is_repack": "0",
+            "video_codec": "x264",
+            "bit_depth": "8",
+            "audio_channels": "2.0",
+            "seeds": 50,
+            "peers": 1,
+            "size": "850 MB",
+            "size_bytes": 891289600,
+            "date_uploaded": "2019-08-12 10:30:00",
+            "date_uploaded_unix": 0
+          }
+        ]
+      }
+    ]
+  }
+}

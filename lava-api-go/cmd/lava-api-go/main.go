@@ -46,6 +46,7 @@ import (
 	"digital.vasic.lava.apigo/internal/nnmclub"
 	"digital.vasic.lava.apigo/internal/observability"
 	"digital.vasic.lava.apigo/internal/provider"
+	"digital.vasic.lava.apigo/internal/provider/curated"
 	"digital.vasic.lava.apigo/internal/ratelimit"
 	apirouter "digital.vasic.lava.apigo/internal/router"
 	"digital.vasic.lava.apigo/internal/rutracker"
@@ -135,6 +136,10 @@ func run() error {
 	registry.Register(kinozal.NewProviderAdapter(kinozal.NewClient("https://kinozal.tv")))
 	registry.Register(archiveorg.NewProviderAdapter(archiveorg.NewClient("https://archive.org")))
 	registry.Register(gutenberg.NewProviderAdapter(gutenberg.NewClient("https://gutendex.com")))
+	// Curated compiled-in public-tracker providers (Defect B, 2026-06-12) —
+	// same call in internal/mobile/mobile.go so embed + server expose the same
+	// curated set (§6.J registration-parity guard).
+	curated.RegisterAll(registry)
 
 	// Firebase telemetry — Admin-SDK-backed when LAVA_FIREBASE_ADMIN_KEY (or
 	// GOOGLE_APPLICATION_CREDENTIALS) points at a service-account JSON;

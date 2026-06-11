@@ -85,6 +85,7 @@ import (
 	"digital.vasic.lava.apigo/internal/nnmclub"
 	"digital.vasic.lava.apigo/internal/observability"
 	"digital.vasic.lava.apigo/internal/provider"
+	"digital.vasic.lava.apigo/internal/provider/curated"
 	apirouter "digital.vasic.lava.apigo/internal/router"
 	"digital.vasic.lava.apigo/internal/rutracker"
 	"digital.vasic.lava.apigo/internal/storage"
@@ -187,6 +188,11 @@ func newProductionScraperDeps() (handlers.ScraperClient, *provider.ProviderRegis
 	registry.Register(kinozal.NewProviderAdapter(kinozal.NewClient("https://kinozal.tv")))
 	registry.Register(archiveorg.NewProviderAdapter(archiveorg.NewClient("https://archive.org")))
 	registry.Register(gutenberg.NewProviderAdapter(gutenberg.NewClient("https://gutendex.com")))
+	// Curated compiled-in public-tracker providers (Defect B, 2026-06-12):
+	// The Pirate Bay, etc. — so the on-device api-app's GET /providers exposes
+	// more than the natives without an external Jackett. Same call in
+	// cmd/lava-api-go/main.go → embed + server cannot drift (§6.J parity).
+	curated.RegisterAll(registry)
 	return scraper, registry
 }
 
