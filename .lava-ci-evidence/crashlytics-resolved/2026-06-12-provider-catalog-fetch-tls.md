@@ -70,7 +70,7 @@ Challenges C39/C40 still owe a real run with a Jackett-backed api-app (Defect B)
 
 ## Fix commit
 
-`<this commit SHA>` (lands on the §6.Y-bumped 1.3.4-1061 cycle).
+`0deb54e7` (lands on the §6.Y-bumped 1.3.4-1061 cycle).
 
 ## HONEST scope note (Defect B still open)
 

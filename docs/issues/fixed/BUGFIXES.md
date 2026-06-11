@@ -59,7 +59,7 @@ a real self-signed-HTTPS + auth-gated MockWebServer (6/6;
 `strictClientFailsTheHandshake` = codified pre-fix mutation;
 `missingAuthKeyIsRejectedByTheGate` proves the header is load-bearing);
 `OnboardingViewModelDynamicProvidersTest` green.
-**Fix commit:** `<this commit>`
+**Fix commit:** `0deb54e7`
 **Forensic anchor:** operator "only 4 providers in onboarding wizard"; §6.O closure
 log `.lava-ci-evidence/crashlytics-resolved/2026-06-12-provider-catalog-fetch-tls.md`.
 **Scope note:** Defect B (embedded Jackett in the api-app) still OPEN — the client
@@ -133,7 +133,7 @@ on-device `OnDeviceApiClient` 15s readTimeout flaked the HTTP/2 stream
 5. RC4 — `OnDeviceApiClient` connect/read timeouts 10/15s → 20/30s.
 
 **Verification test/challenge:** `:api-app` Challenge C01–C04 EXECUTED green on cold-booted Pixel_8/API35 via the Containers runner (gating=true, host-direct+HVF). Evidence: `.lava-ci-evidence/phase-e-api-app/2026-06-02T11-32-48Z-gate/` (+ a confirmation run). Each fix falsifiability-rehearsed; the gate itself is the load-bearing on-device acceptance gate (§6.AE / §6.Z).
-**Fix commit:** `<this commit>` (parent) + Containers `9a61a153`.
+**Fix commit:** `0deb54e7` (parent) + Containers `9a61a153`.
 **Forensic anchor:** the `--gradle-module` flag made the never-before-run `:api-app` Challenges execute for real — the textbook §6.J/§6.L payoff: three real product defects had been invisible behind a 0-test false-green.
 
 ---
