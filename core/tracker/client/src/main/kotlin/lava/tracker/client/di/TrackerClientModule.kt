@@ -20,6 +20,8 @@ import io.ktor.client.request.url
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import lava.auth.api.TokenProvider
+import lava.tracker.client.ApiBackedTrackerClient
+import lava.tracker.client.ApiBaseUrlHolder
 import lava.tracker.archiveorg.ArchiveOrgClientFactory
 import lava.tracker.gutenberg.GutenbergClientFactory
 import lava.tracker.iptorrents.IPTorrentsClientFactory
@@ -270,7 +272,10 @@ object TrackerClientModule {
         iptorrentsFactory: IPTorrentsClientFactory,
         archiveOrgFactory: ArchiveOrgClientFactory,
         gutenbergFactory: GutenbergClientFactory,
+        httpClient: okhttp3.OkHttpClient,
     ): TrackerRegistry = DefaultTrackerRegistry().apply {
+        // Bundled fallback: the 7 compiled-in providers. They are also the
+        // offline-default / fetch-failure fallback per DefaultTrackerRegistry.
         register(rutrackerFactory)
         register(rutorFactory)
         register(nnmclubFactory)
@@ -278,6 +283,25 @@ object TrackerClientModule {
         register(iptorrentsFactory)
         register(archiveOrgFactory)
         register(gutenbergFactory)
+
+        // Dynamic Provider Discovery (spec §4.2): install the builder that turns
+        // an API-vended RemoteTrackerDescriptor into a live ApiBackedTrackerClient.
+        // populateFrom(catalogue) (called by the onboarding/data layer after the
+        // ApiSelection probe succeeds) then registers one client per descriptor.
+        //
+        // PENDING-INTEGRATION: apiBaseUrl is the ACTIVE lava-api-go endpoint, not
+        // the tracker's own baseUrl. The active-endpoint source lives in the
+        // settings/endpoint layer (held work). Until that holder is wired in, the
+        // builder resolves the API base from the holder set by the caller; the
+        // onboarding integration (plan Phase 5) calls setApiClientFactory with the
+        // probed apiBaseUrl captured in its closure, overriding this default.
+        setApiClientFactory { descriptor ->
+            ApiBackedTrackerClient(
+                descriptor = descriptor,
+                apiBaseUrl = ApiBaseUrlHolder.current(),
+                httpClient = httpClient,
+            )
+        }
     }
 
     private const val RUTRACKER_HTTP_CLIENT = "rutracker"
