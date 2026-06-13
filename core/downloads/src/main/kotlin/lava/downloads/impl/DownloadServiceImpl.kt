@@ -23,6 +23,7 @@ import android.provider.MediaStore
 import androidx.core.content.getSystemService
 import dagger.hilt.android.qualifiers.ApplicationContext
 import lava.common.analytics.AnalyticsTracker
+import lava.common.analytics.rethrowIfCancellation
 import lava.downloads.api.DownloadRequest
 import lava.downloads.api.DownloadService
 import lava.downloads.api.HttpFileDownloadRequest
@@ -115,6 +116,11 @@ class DownloadServiceImpl @Inject constructor(
                 writeToPublicDownloads(fileName, downloadRequest.bytes)
             }
         } catch (t: Throwable) {
+            // Normal coroutine cancellation (scope cleared / user left the screen
+            // mid-write) is control flow, NOT a download failure. Re-throw it
+            // BEFORE recording any non-fatal so it never pollutes Crashlytics
+            // (issue 7df61fdb) and cooperative cancellation is honoured.
+            t.rethrowIfCancellation()
             analytics.recordNonFatal(
                 t,
                 mapOf(

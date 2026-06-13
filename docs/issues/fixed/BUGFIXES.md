@@ -1218,3 +1218,43 @@ data pulled from Firebase (project `lava-vasic-digital`, release app). Per-issue
 (coroutines-test dep); `feature/search_result/.../SearchResultViewModel.kt`
 (SSE severity classifier). `ProbeMirrorUseCase.kt` + rutracker
 `GetCurrentProfileUseCase.kt` UNCHANGED (already-correct fixes; tests added).
+
+## §6.AC/§6.O — JobCancellation non-fatal noise: download catch-site rethrow (2026-06-13)
+
+**Crashlytics:** `7df61fdba64f9928b067624d6db395ca` (NON_FATAL,
+`kotlinx.coroutines.JobCancellationException` — "StandaloneCoroutine was
+cancelled", 8 events / 1 user / first=last 1.2.21; not recurring on 1.3.x).
+
+**Root cause.** `DownloadServiceImpl.downloadHttpFile` (`core/downloads`) — a
+`suspend fun` — wrapped its write path in a broad `catch (t: Throwable)` that
+called `analytics.recordNonFatal(t, ...)`. When the download is abandoned
+mid-write (calling scope cancelled — user left the screen / ViewModel cleared),
+`CancellationException` was swallowed AND recorded as a non-fatal: false
+telemetry (issue `7df61fdb` dashboard noise) plus broken cooperative
+cancellation (the catch returned `null` instead of letting the cancellation
+propagate). A grep of every telemetry-recording `catch` across
+`core/ feature/ app/` main sources confirmed this was the ONLY remaining
+offending site — all 8 feature ViewModels + `LavaApplication` already call
+`rethrowIfCancellation()`.
+
+**Fix.** `t.rethrowIfCancellation()` (the existing shared
+`lava.common.analytics` helper — reused, not re-created) is now the FIRST
+statement of the `downloadHttpFile` catch, before `recordNonFatal`.
+
+**Verification test.**
+`core/downloads/src/test/.../DownloadServiceCancellationTest.kt` (new) —
+`cancellation during http write is rethrown and never recorded as non-fatal`.
+Real `DownloadServiceImpl` + recording `AnalyticsTracker`; only the outermost
+Android boundary (`Context` / the `Environment` static the write path uses) is
+faked to throw `CancellationException` mid-write. Asserts the cancellation
+PROPAGATES and the recorded-non-fatal count is `0`.
+Bluff-Audit: delete the rethrow line → `AssertionError: cancellation must
+propagate, not be swallowed into a null return`
+(`DownloadServiceCancellationTest.kt:87`); reverted → BUILD SUCCESSFUL.
+
+**Affected files:** `core/downloads/.../DownloadServiceImpl.kt` (rethrow),
+`core/downloads/build.gradle.kts` (mockk + coroutines-test test deps +
+`returnDefaultValues`), `core/downloads/.../DownloadServiceCancellationTest.kt`
+(new). Closure log:
+`.lava-ci-evidence/crashlytics-resolved/2026-06-13-cancellation-noise-7df61fdb.md`.
+Queued for the 1.3.7 release cycle (version files NOT touched).
