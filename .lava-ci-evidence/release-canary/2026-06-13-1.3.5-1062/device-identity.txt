@@ -1,0 +1,8 @@
+serial=127.0.0.1:6555
+android_release=15
+sdk=35
+model=Pixel 9
+abi=arm64-v8a
+apk=releases/1.3.5/android-release/digital.vasic.lava.client-1.3.5-release.apk
+apk_sha256=c059a3589946d0375d0f40926ce5549a75ffcb34ae9259dd27b4e9f5ee2c5bbe
+git_sha=d8be7e4e36e9933e5b0551d95a7e38f51a44a8f4

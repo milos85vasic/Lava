@@ -1,4 +1,23 @@
 # Changelog
+## Lava-Android-1.3.5-1062 — 2026-06-13 (Onboarding back-navigation fix + full onboarding test coverage; device-verified)
+
+**Previous published:** Lava-Android-1.3.4-1061 (debug+release).
+
+- **Onboarding back-navigation fix** — when you go back from the "Choose your API"
+  screen to Welcome, the screen no longer keeps a stale typed cloud address, a
+  leftover address-parse error, or a provider-fallback notice from your previous
+  attempt; re-entering the step is clean. (Carries forward everything from 1.3.4:
+  12 providers, providers available everywhere incl. after restart, API-app crash
+  reporting.)
+- **Full onboarding test coverage** — the entire onboarding state machine (API
+  discovery + selection, connectivity probe success/failure/retry, the back
+  transitions, and provider sign-in success/failure) is now covered by automated
+  tests, so onboarding regressions are caught before they ship.
+
+Device-verified on a Genymotion Pixel 9 / API 35 (arm64): cold-start (C00), launch
++ tracker selection (C01), apiSupported filter (C16), onboarding fresh-install (C25)
+Challenges + R8 release cold-start canary all GREEN on this exact build.
+
 ## Lava-Android-1.3.4-1061 — 2026-06-13 (More providers, available everywhere; API-app crash reporting; device-verified)
 
 **Previous published:** Lava-Android-1.3.3-1060 (debug+release).
@@ -107,6 +126,16 @@ against the new upstream release. See `git log` 54eedd92..HEAD and `docs/Fixed.m
 - §6.Z: `.lava-ci-evidence/app-linking/ondevice-dc547861/` + falsifiable unit regression tests
   (commit `dc547861`). Debug-stage evidence:
   `.lava-ci-evidence/distribute-changelog/firebase-app-distribution/1.3.0-1057-test-evidence.md`.
+
+## Lava-API-App-0.2.5-9 — 2026-06-13 (1.3.5 client auth allowlist; carries the Crashlytics + 12-provider embed)
+
+**Previous published:** Lava-API-App-0.2.4-8 (debug+release).
+
+- **1.3.5 client auth allowlist** — `android-1.3.5-1062` added to the accepted-clients
+  allowlist so the matching client build authenticates against the on-device API.
+- Carries forward the 0.2.4 feature set: Firebase Crashlytics crash/ANR/non-fatal
+  reporting + the 7 curated providers embedded in the on-device API (12 total via
+  `GET /providers`), all verified live-reachable.
 
 ## Lava-API-App-0.2.4-8 — 2026-06-13 (Crashlytics crash reporting + 7 curated providers + 1.3.4 client auth allowlist)
 
