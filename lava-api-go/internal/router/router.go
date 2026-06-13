@@ -74,6 +74,23 @@ func Build(deps Deps) *gin.Engine {
 	engine.GET("/health", observability.LivenessHandler())
 	engine.GET("/ready", observability.ReadinessHandler(deps.Readiness))
 
+	// GET /providers — the provider catalogue for dynamic provider discovery
+	// (spec 2026-06-11). It MUST be registered BEFORE the auth middleware, like
+	// /health/ready: it is PUBLIC, non-sensitive provider metadata (ids,
+	// capabilities, authType, baseUrls — no credentials, no user data), and the
+	// Android client MUST be able to fetch it during ONBOARDING against a
+	// freshly-DISCOVERED API (mDNS) that has no pre-shared Lava-Auth key with the
+	// client and whose allowlist may not yet include the client's build. Gating
+	// the catalogue behind auth is a chicken-and-egg: onboarding needs the
+	// catalogue to configure providers, but auth is exactly what onboarding is
+	// establishing. Real-device root cause (Crashlytics 47b000d5, v1.3.4): the
+	// fetch returned "HTTP 401 for https://<api>/providers" → the wizard fell
+	// back to bundled providers ("Couldn't reach the selected API"). Mounted at
+	// ROOT, NOT under /v1/:provider (a literal /v1/providers would collide with
+	// the :provider wildcard in gin's radix tree). Per-provider operations
+	// (/v1/:provider/...) stay auth-gated below.
+	engine.GET("/providers", v1handlers.NewProvidersHandler(deps.Registry).GetProviders)
+
 	// Phase 8 protocol metric MUST be first in the auth-gated chain so its
 	// post-c.Next() block reads the final c.Writer.Status() — including
 	// 401/426/429 from auth + backoff middlewares that abort early.
@@ -113,11 +130,8 @@ func Build(deps Deps) *gin.Engine {
 	v1handlers.Register(v1, &v1handlers.Deps{
 		Cache: deps.Cache,
 	}, deps.Registry)
-
-	// GET /providers — the provider catalogue for dynamic provider discovery
-	// (spec 2026-06-11). Mounted at the ROOT, NOT under /v1/:provider: a literal
-	// /v1/providers would collide with the :provider wildcard in gin's radix tree.
-	engine.GET("/providers", v1handlers.NewProvidersHandler(deps.Registry).GetProviders)
+	// NOTE: GET /providers is registered ABOVE, before the auth middleware (it is
+	// public catalogue metadata — see the rationale there).
 
 	// Jackett sidecar route — registered ONLY when the sidecar is enabled AND
 	// fully configured (§6.R: no hardcoded base URL / api_key; the route is a

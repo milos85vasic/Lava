@@ -3,6 +3,7 @@ package router
 import (
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 	"time"
 
@@ -165,5 +166,55 @@ func TestBuild_HealthOpenWithFullAuthChain(t *testing.T) {
 	if w.Code != http.StatusOK {
 		t.Fatalf("GET /health with full auth chain mounted returned %d (body=%q); "+
 			"want 200 — liveness probe must bypass auth", w.Code, w.Body.String())
+	}
+}
+
+// TestBuild_ProvidersOpenWithFullAuthChain is the regression test for the
+// real-device onboarding bug (Crashlytics 47b000d5, v1.3.4): the Android client
+// fetched GET /providers during onboarding against a freshly-DISCOVERED API and
+// got "HTTP 401 for https://<api>/providers" → the wizard fell back to bundled
+// providers ("Couldn't reach the selected API"). Root cause: /providers was
+// registered AFTER the auth middleware, so a client with no pre-shared
+// Lava-Auth key (every just-discovered API) was rejected. The catalogue is
+// PUBLIC, non-sensitive provider metadata and MUST be reachable without auth so
+// onboarding can populate the provider list.
+//
+// Primary assertion: the HTTP status an UNAUTHENTICATED catalogue fetch receives
+// — with the full auth chain mounted — is 200, not 401.
+//
+// Falsifiability: move the `engine.GET("/providers", ...)` registration back to
+// AFTER the `engine.Use(auth.GinMiddleware())` block (the original bug) and this
+// test fails — /providers returns 401 to the header-less fetch, exactly the
+// real-device symptom.
+func TestBuild_ProvidersOpenWithFullAuthChain(t *testing.T) {
+	cfg := fullCfg()
+
+	engine := Build(Deps{
+		Cfg:        cfg,
+		Cache:      stubCache{},
+		Scraper:    stubScraper{},
+		PromReg:    prometheus.NewRegistry(),
+		AuthLadder: ladder.New([]time.Duration{time.Second}),
+	})
+
+	w := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "/providers", nil)
+	// Deliberately NO Lava-Auth header — the onboarding catalogue fetch from a
+	// freshly-discovered API carries no pre-shared key. It MUST still succeed.
+	engine.ServeHTTP(w, req)
+
+	if w.Code == http.StatusUnauthorized {
+		t.Fatalf("GET /providers with full auth chain mounted returned 401 to a "+
+			"header-less fetch — this IS the real-device onboarding bug (the "+
+			"catalogue is auth-gated). It must be registered before the auth "+
+			"middleware. body=%q", w.Body.String())
+	}
+	if w.Code != http.StatusOK {
+		t.Fatalf("GET /providers returned %d (body=%q); want 200 — the provider "+
+			"catalogue must be publicly reachable for onboarding", w.Code, w.Body.String())
+	}
+	// The body must be the catalogue JSON (a "providers" array), not an auth error.
+	if !strings.Contains(w.Body.String(), "\"providers\"") {
+		t.Errorf("GET /providers body = %q; want a providers catalogue JSON", w.Body.String())
 	}
 }
