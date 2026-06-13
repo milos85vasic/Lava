@@ -1,4 +1,24 @@
 # Changelog
+## Lava-Android-1.3.7-1064 — 2026-06-13 (New Tokyo Toshokan provider + more reliable provider reachability + cleaner diagnostics)
+
+**Previous published:** Lava-Android-1.3.6-1063 (debug+release).
+
+- **New provider — Tokyo Toshokan** — an additional curated public tracker focused on
+  anime / Asian media, with anonymous free-text search + magnet links (no setup). The
+  on-device API now serves **13** providers (5 built-in + 8 curated). Its search was
+  verified to genuinely filter on your query (not a global list) against the live site.
+- **More reliable provider reachability** — The Pirate Bay and Torrents-CSV now use a
+  mirror-failover strategy: if their primary domain ever rotates or goes down, the app
+  automatically tries the next known endpoint instead of failing. (Both currently have a
+  single live endpoint; the failover is hardening against the kind of domain-rotation
+  outage that briefly affected YTS.)
+- **Cleaner crash diagnostics** — normal screen-change cancellations during a `.torrent`
+  download are no longer mis-reported as errors, so the crash dashboard reflects real
+  issues only.
+
+Carries forward everything from 1.3.6 (onboarding loads providers from the chosen API).
+Paired with on-device API app 0.2.7-11.
+
 ## Lava-Android-1.3.6-1063 — 2026-06-13 (Onboarding now loads providers from the chosen API — fixes the "Couldn't reach the selected API" error)
 
 **Previous published:** Lava-Android-1.3.5-1062 (debug+release).
@@ -153,6 +173,22 @@ against the new upstream release. See `git log` 54eedd92..HEAD and `docs/Fixed.m
 - §6.Z: `.lava-ci-evidence/app-linking/ondevice-dc547861/` + falsifiable unit regression tests
   (commit `dc547861`). Debug-stage evidence:
   `.lava-ci-evidence/distribute-changelog/firebase-app-distribution/1.3.0-1057-test-evidence.md`.
+
+## Lava-API-App-0.2.7-11 — 2026-06-13 (Tokyo Toshokan provider + TPB/Torrents-CSV mirror-failover hardening)
+
+**Previous published:** Lava-API-App-0.2.6-10 (debug+release).
+
+- **New embedded provider — Tokyo Toshokan** — the on-device API now serves the Tokyo
+  Toshokan curated tracker (anime/Asian-media RSS, anonymous free-text search + magnet),
+  bringing the embedded `GET /providers` catalogue to **13** providers (5 built-in + 8
+  curated). Honest CapSearch verified live (the query genuinely narrows results).
+- **Mirror-failover for The Pirate Bay + Torrents-CSV** — each now carries a failover
+  endpoint list (first live mirror wins, per-attempt timeout cap) so a future domain
+  rotation/outage degrades gracefully instead of breaking the provider. No fabricated
+  mirrors — each currently has one real endpoint; the architecture is the hardening.
+
+Pairs with client 1.3.7-1064. Carries forward the public `/providers` catalogue from
+0.2.6-10.
 
 ## Lava-API-App-0.2.6-10 — 2026-06-13 (Public provider catalogue — onboarding reads providers from a freshly-discovered API)
 
