@@ -173,3 +173,65 @@ func TestGetBrowsePage_500ReturnsStatusError(t *testing.T) {
 		t.Errorf("GetBrowsePage(502) returned non-nil result; must be nil")
 	}
 }
+
+// TestParseSearchPage_MagnetExtracted closes a real coverage gap surfaced by the
+// 2026-06-13 §6.N go-parsers bluff hunt: ParseSearchPage extracts the magnet
+// link (the URI a user taps to download a torrent from a search result) at
+// search.go lines 70-74, but NO existing test exercised it — the search
+// fixtures carry no magnet anchors. Disabling the extraction left every nnmclub
+// test green (a §6.J bluff: the download-link parse path was unverified).
+//
+// This test parses a search-results row that carries a magnet anchor and a
+// pagination link (start=50 → page 2) and asserts the user-visible fields:
+// the magnet URI, the title, size, seeders/leechers, and the computed
+// TotalPages.
+//
+// FALSIFIABILITY (rehearsed 2026-06-13): deleting the
+// `row.Find(`a[href^="magnet:"]`)` extraction block in ParseSearchPage makes
+// item.MagnetLink empty → this test FAILS with
+//
+//	"results[0].MagnetLink = \"\", want the magnet href".
+//
+// Reverting restores green.
+func TestParseSearchPage_MagnetExtracted(t *testing.T) {
+	const html = `<html><body>
+<table class="forumline">
+  <tr><th>Header row that must be skipped</th></tr>
+  <tr>
+    <td><a class="genmed" href="viewtopic.php?t=7777">Debian 12 netinst</a></td>
+    <td></td><td></td><td></td><td></td>
+    <td>700 MB</td>
+    <td class="seedmed">88</td>
+    <td class="leechmed">7</td>
+    <td><a href="magnet:?xt=urn:btih:deadbeef0001">magnet</a></td>
+  </tr>
+</table>
+<a href="tracker.php?nm=debian&start=50">2</a>
+</body></html>`
+	out, err := ParseSearchPage([]byte(html), 1)
+	if err != nil {
+		t.Fatalf("ParseSearchPage error: %v", err)
+	}
+	if len(out.Results) != 1 {
+		t.Fatalf("expected 1 result (header row skipped), got %d: %+v", len(out.Results), out.Results)
+	}
+	r0 := out.Results[0]
+	if r0.MagnetLink != "magnet:?xt=urn:btih:deadbeef0001" {
+		t.Errorf("results[0].MagnetLink = %q, want the magnet href", r0.MagnetLink)
+	}
+	if r0.ID != "7777" {
+		t.Errorf("results[0].ID = %q, want 7777", r0.ID)
+	}
+	if r0.Title != "Debian 12 netinst" {
+		t.Errorf("results[0].Title = %q, want \"Debian 12 netinst\"", r0.Title)
+	}
+	if r0.Size != "700 MB" {
+		t.Errorf("results[0].Size = %q, want \"700 MB\"", r0.Size)
+	}
+	if r0.Seeders != 88 || r0.Leechers != 7 {
+		t.Errorf("seeders/leechers = %d/%d, want 88/7", r0.Seeders, r0.Leechers)
+	}
+	if out.TotalPages != 2 {
+		t.Errorf("TotalPages = %d, want 2 (start=50 → page 2)", out.TotalPages)
+	}
+}
