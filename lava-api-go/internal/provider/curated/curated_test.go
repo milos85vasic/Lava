@@ -37,7 +37,7 @@ func TestRegisterAll_RegistersCuratedProviders(t *testing.T) {
 	// Every curated provider must be SEARCH + MAGNET_LINK capable, anonymous,
 	// and AuthNone — assert across the whole curated set so adding one that
 	// breaks the contract fails here.
-	for _, id := range []string{"thepiratebay", "yts", "torrentscsv", "bitsearch", "knaben"} {
+	for _, id := range []string{"thepiratebay", "yts", "torrentscsv", "bitsearch", "knaben", "nyaa"} {
 		p, err := r.Get(id)
 		if err != nil {
 			t.Fatalf("curated provider %q not registered: %v", id, err)

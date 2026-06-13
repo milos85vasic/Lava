@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:nyaa="https://nyaa.si/xmlns/nyaa">
+  <channel>
+    <title>Nyaa - "naruto"</title>
+    <item>
+      <title>[Naruto-Kun] Naruto - 120 [1080p].mkv</title>
+      <link>https://nyaa.si/download/2120752.torrent</link>
+      <guid isPermaLink="true">https://nyaa.si/view/2120752</guid>
+      <pubDate>Fri, 12 Jun 2026 03:12:16 -0000</pubDate>
+      <nyaa:seeders>371</nyaa:seeders>
+      <nyaa:leechers>12</nyaa:leechers>
+      <nyaa:downloads>1227</nyaa:downloads>
+      <nyaa:infoHash>a59cd8b4a43e993ecee79202b3d2fe9a7e6adb22</nyaa:infoHash>
+      <nyaa:categoryId>1_3</nyaa:categoryId>
+      <nyaa:category>Anime - Non-English-translated</nyaa:category>
+      <nyaa:size>400 MiB</nyaa:size>
+    </item>
+    <item>
+      <title>[Subs] Bleach - Complete [720p]</title>
+      <link>https://nyaa.si/download/2120999.torrent</link>
+      <guid isPermaLink="true">https://nyaa.si/view/2120999</guid>
+      <pubDate></pubDate>
+      <nyaa:seeders>50</nyaa:seeders>
+      <nyaa:leechers>3</nyaa:leechers>
+      <nyaa:downloads>900</nyaa:downloads>
+      <nyaa:infoHash>f33ca2c8a4255b223005e90548142e94487d1e0f</nyaa:infoHash>
+      <nyaa:categoryId>1_2</nyaa:categoryId>
+      <nyaa:category>Anime - English-translated</nyaa:category>
+      <nyaa:size>1.5 GiB</nyaa:size>
+    </item>
+    <item>
+      <title>synthetic edge row: short non-40-hex infoHash must be filtered</title>
+      <link>https://nyaa.si/download/1.torrent</link>
+      <guid isPermaLink="true">https://nyaa.si/view/1</guid>
+      <pubDate>Fri, 12 Jun 2026 03:12:16 -0000</pubDate>
+      <nyaa:seeders>1</nyaa:seeders>
+      <nyaa:leechers>0</nyaa:leechers>
+      <nyaa:downloads>0</nyaa:downloads>
+      <nyaa:infoHash>deadbeef</nyaa:infoHash>
+      <nyaa:categoryId>1_2</nyaa:categoryId>
+      <nyaa:category>Anime</nyaa:category>
+      <nyaa:size>1 B</nyaa:size>
+    </item>
+  </channel>
+</rss>
