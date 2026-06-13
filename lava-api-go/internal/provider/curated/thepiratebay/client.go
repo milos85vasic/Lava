@@ -23,15 +23,45 @@ import (
 // own JSON search API (protocol endpoint = the provider's identity, the same
 // way the native adapters encode their canonical base, e.g.
 // rutracker.NewClient("https://rutracker.org/forum")). §6.R: not a deployment
-// address — it is this provider's fixed upstream.
+// address — it is this provider's fixed upstream. Kept for the single-URL test
+// seam and as the sole member of DefaultBaseURLs.
 const DefaultBaseURL = "https://apibay.org"
+
+// DefaultBaseURLs is the FAILOVER list of apibay JSON API mirrors, tried in
+// order — the same domain-rotation resilience the YTS provider carries (see
+// internal/provider/curated/yts/client.go). The structure exists so that if
+// apibay.org rotates out of DNS (the YTS-class failure: yts.mx was observed
+// NXDOMAIN on 2026-06-13 while siblings served HTTP 200) a verified-live
+// replacement host is a ONE-LINE addition here, not a client rewrite.
+//
+// HONEST MIRROR INVENTORY (§6.L — a fabricated mirror is a bluff): as of
+// 2026-06-13, live HTTP probing found exactly ONE real apibay-compatible JSON
+// endpoint. apibay.org/q.php served HTTP 200 application/json; the TPB frontend
+// proxies (thepiratebay.org/apibay 302-redirects to a static SPA, tpb.party and
+// thepiratebay10.xyz 404 the /q.php path) do NOT expose a compatible JSON API.
+// apibay.org IS The Pirate Bay's canonical internal JSON API and the wrapper
+// ecosystem (Jackett #9447 and the apibay TS/Python libraries) all hit
+// apibay.org exclusively. So this list contains the ONE verified-live host; we
+// deliberately do NOT pad it with dead .xyz/.party domains that would only add
+// latency and failover noise. The failover code path is real and unit-tested
+// (httptest servers) so adding a second real host later requires no further
+// change. These are protocol mirrors of the SAME public API (the provider's
+// identity), not deployment addresses — package constants, same §6.R rationale
+// as publicTrackers below.
+var DefaultBaseURLs = []string{
+	"https://apibay.org",
+}
 
 // searchPath is the apibay query endpoint. `cat=0` = all categories.
 const searchPath = "/q.php"
 
-// DefaultTimeout bounds each upstream request when the caller does not supply a
-// pre-configured *http.Client.
+// DefaultTimeout bounds the whole HTTP client (TLS + headers + body).
 const DefaultTimeout = 20 * time.Second
+
+// perAttemptTimeout bounds EACH mirror attempt during failover so one
+// dead/hanging mirror cannot consume the entire search budget. Only applied
+// when more than one mirror is configured.
+const perAttemptTimeout = 8 * time.Second
 
 // publicTrackers are well-known public BitTorrent tracker announce URLs added
 // to every built magnet so the link is usable without apibay supplying a
@@ -52,23 +82,34 @@ var publicTrackers = []string{
 // placeholder as a real result).
 const noResultsHash = "0000000000000000000000000000000000000000"
 
-// Client talks to the apibay JSON API. The base URL + *http.Client are
-// injectable so tests drive it against an httptest.Server (no live calls in the
-// default `go test`).
+// Client talks to the apibay JSON API across a failover list of mirror base
+// URLs. The base URLs + *http.Client are injectable so tests drive it against
+// httptest.Servers (no live calls in the default `go test`).
 type Client struct {
-	baseURL string
-	http    *http.Client
+	baseURLs []string
+	http     *http.Client
 }
 
-// NewClient returns a Client for the given base URL (DefaultBaseURL when empty)
-// with a default-timeout HTTP client.
+// NewClient returns a single-base-URL Client (DefaultBaseURLs failover list when
+// empty). The single-URL form preserves the httptest seam used by the parser
+// tests; production registration uses NewClientWithMirrors(DefaultBaseURLs).
 func NewClient(baseURL string) *Client {
 	if baseURL == "" {
-		baseURL = DefaultBaseURL
+		return NewClientWithMirrors(DefaultBaseURLs)
+	}
+	return NewClientWithMirrors([]string{baseURL})
+}
+
+// NewClientWithMirrors returns a Client that tries each base URL in order until
+// one answers successfully — the resilience against apibay domain rotation.
+func NewClientWithMirrors(urls []string) *Client {
+	bases := make([]string, 0, len(urls))
+	for _, u := range urls {
+		bases = append(bases, strings.TrimRight(u, "/"))
 	}
 	return &Client{
-		baseURL: strings.TrimRight(baseURL, "/"),
-		http:    &http.Client{Timeout: DefaultTimeout},
+		baseURLs: bases,
+		http:     &http.Client{Timeout: DefaultTimeout},
 	}
 }
 
@@ -101,7 +142,39 @@ func (c *Client) Search(ctx context.Context, query string, page int) (*provider.
 		return &provider.SearchResult{Provider: providerID, Page: page, TotalPages: 1}, nil
 	}
 
-	u := c.baseURL + searchPath + "?" + url.Values{
+	// Failover: try each mirror in order, returning the first that answers
+	// successfully. A mirror that is DNS-dead, 5xx, or otherwise errors is
+	// skipped; only an unreachable ENTIRE list surfaces the last error (so the
+	// historical single-host tests still see their 5xx). When more than one
+	// mirror is configured, each attempt is bounded by perAttemptTimeout so a
+	// single dead/hanging mirror cannot stall the whole search.
+	var lastErr error
+	for _, base := range c.baseURLs {
+		attemptCtx := ctx
+		var cancel context.CancelFunc
+		if len(c.baseURLs) > 1 {
+			attemptCtx, cancel = context.WithTimeout(ctx, perAttemptTimeout)
+		}
+		res, err := c.searchOne(attemptCtx, base, query)
+		if cancel != nil {
+			cancel()
+		}
+		if err == nil {
+			return res, nil
+		}
+		lastErr = err
+	}
+	if lastErr == nil {
+		// No base URLs configured at all.
+		lastErr = fmt.Errorf("%s: no mirrors configured: %w", providerID, provider.ErrUnknown)
+	}
+	return nil, lastErr
+}
+
+// searchOne performs a single-mirror query + parse. Search wraps it with
+// across-mirror failover.
+func (c *Client) searchOne(ctx context.Context, base, query string) (*provider.SearchResult, error) {
+	u := base + searchPath + "?" + url.Values{
 		"q":   {query},
 		"cat": {"0"},
 	}.Encode()

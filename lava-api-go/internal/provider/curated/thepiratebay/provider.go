@@ -31,8 +31,8 @@ func NewProviderAdapter(client *Client) *ProviderAdapter {
 }
 
 // New is the convenience constructor used at registration: a production client
-// against the default apibay base.
-func New() *ProviderAdapter { return NewProviderAdapter(NewClient(DefaultBaseURL)) }
+// across the apibay mirror failover list (apibay.org may rotate out of DNS).
+func New() *ProviderAdapter { return NewProviderAdapter(NewClientWithMirrors(DefaultBaseURLs)) }
 
 // ID returns the canonical provider identifier.
 func (a *ProviderAdapter) ID() string { return providerID }

@@ -35,6 +35,63 @@ Format per entry:
 
 ---
 
+## 2026-06-13 — curated TPB + Torrents-CSV providers single-domain rotation risk (no mirror failover)
+
+**Root cause:** the embedded curated providers `thepiratebay` (apibay.org) and
+`torrentscsv` (torrents-csv.com) each hardcoded a SINGLE base domain in their
+`Client`. Public-tracker domains rotate frequently under takedown pressure — the
+companion YTS provider was caught by exactly this on 2026-06-13 (yts.mx went
+NXDOMAIN on public DNS while yts.bz still served HTTP 200). A single-domain
+client goes silently unreachable the moment that one domain drops, so the
+provider would appear in the on-device `GET /providers` catalogue but every
+search would error for the user — a reachability bluff waiting to happen.
+
+**Fix:** refactored both clients to the YTS mirror-failover pattern —
+`NewClientWithMirrors(DefaultBaseURLs)`, a first-live-mirror-wins loop in
+`Search`, and a `perAttemptTimeout` (8s) cap per mirror so one dead/hanging host
+cannot stall the whole search. `New()` registration now goes through the mirror
+list. The failover ARCHITECTURE is the load-bearing change; the production
+`DefaultBaseURLs` for each provider deliberately contains only ONE host because
+live HTTP probing on 2026-06-13 found exactly one real endpoint per provider:
+- **TPB:** apibay.org/q.php = HTTP 200 JSON; the TPB frontend proxies
+  (thepiratebay.org/apibay 302→SPA, tpb.party / thepiratebay10.xyz 404 /q.php)
+  expose NO compatible JSON API. apibay.org is TPB's canonical internal API.
+- **Torrents-CSV:** torrents-csv.com/service/search = HTTP 200 JSON;
+  torrents-csv.ml = 404, torrents-csv.org / api.torrents-csv.com = NXDOMAIN.
+  torrents-csv.com is the canonical public instance (git.torrents-csv.com is the
+  Gitea code repo, not a search API).
+Per §6.L, fabricating dead `.xyz`/`.party`/`.ml`/`.org` mirror entries would be
+a bluff (they'd only add latency + failover noise), so each list stays a real
+single-element slice; a future real mirror is a one-line addition with no client
+change. YTS itself genuinely has 4 live mirrors and keeps its multi-host list.
+
+**Affected files:** `lava-api-go/internal/provider/curated/thepiratebay/client.go`,
+`.../thepiratebay/provider.go`, `.../thepiratebay/thepiratebay_test.go`,
+`.../torrentscsv/client.go`, `.../torrentscsv/provider.go`,
+`.../torrentscsv/torrentscsv_test.go`,
+`core/apiengine/src/main/resources/api-source.hash` (recomputed for the embed).
+
+**Verification test/challenge:** new fast fixture (httptest, no live net) tests in
+each package: `TestSearch_FailsOverToHealthyMirror` (dead 503 first mirror →
+returns the SECOND healthy mirror's real parsed `SearchItem` rows — primary
+assertion on user-visible info_hash, not a call count) +
+`TestSearch_AllMirrorsDownSurfacesError` (all mirrors error → no fake empty
+success). `go test ./internal/provider/curated/...` = all `ok`.
+
+**Bluff-Audit:** TPB `TestSearch_FailsOverToHealthyMirror` — Mutation: add
+`return nil, lastErr` after the first loop iteration in `Search` (break failover
+after first mirror). Observed: `Search across [dead, healthy] mirrors should
+fail over, got error: thepiratebay: HTTP 503: provider: unknown error`.
+Torrents-CSV `TestSearch_FailsOverToHealthyMirror` — same mutation. Observed:
+`Search across [dead, healthy] mirrors should fail over, got error: torrentscsv:
+HTTP 503: provider: unknown error`. Reverted: yes (both re-run `ok`).
+
+**Fix commit:** (this worktree commit — see git log)
+
+**Forensic anchor:** YTS domain-failover fix
+`.lava-ci-evidence/bluff-hunt/2026-06-13-yts-domain-failover.json`; the same
+single-domain rotation class applied to the two sibling curated providers.
+
 ## 2026-06-13 — onboarding catalogue fetch 401 against a freshly-discovered API (`GET /providers` auth-gated)
 
 **Root cause:** `lava-api-go/internal/router/router.go` registered

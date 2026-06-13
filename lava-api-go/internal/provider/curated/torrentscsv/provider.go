@@ -31,8 +31,9 @@ func NewProviderAdapter(client *Client) *ProviderAdapter {
 }
 
 // New is the convenience constructor used at registration: a production client
-// against the default Torrents-CSV base.
-func New() *ProviderAdapter { return NewProviderAdapter(NewClient(DefaultBaseURL)) }
+// across the Torrents-CSV mirror failover list (the canonical instance may
+// rotate out of DNS).
+func New() *ProviderAdapter { return NewProviderAdapter(NewClientWithMirrors(DefaultBaseURLs)) }
 
 // ID returns the canonical provider identifier.
 func (a *ProviderAdapter) ID() string { return providerID }
