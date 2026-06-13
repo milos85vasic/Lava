@@ -55,6 +55,28 @@ class SseClientTest {
         assertTrue(events[1] is SseEvent.Event && (events[1] as SseEvent.Event).type == "results")
         assertTrue(events[2] is SseEvent.Event && (events[2] as SseEvent.Event).type == "provider_done")
         assertTrue(events[3] is SseEvent.StreamEnd)
+
+        // §6.N bluff-hunt 2026-06-13 (GAP closure): the original test asserted
+        // ONLY event TYPES + count, never the `data` payload — so a mutation that
+        // corrupts `data: ` parsing (dropping the real payload while keeping the
+        // empty-line framing) survived GREEN, while a real user would see search
+        // results with empty/garbled titles + links. The chief user-visible state
+        // an SSE event carries IS its `data` JSON; assert it exactly.
+        val providerStartEvent = events[0] as SseEvent.Event
+        assertEquals(
+            "the `provider_start` event MUST carry its exact data payload " +
+                "(the provider the user sees searching) — was: ${providerStartEvent.data}",
+            """{"provider_id":"test1","display_name":"Test One"}""",
+            providerStartEvent.data,
+        )
+        val resultsEvent = events[1] as SseEvent.Event
+        assertEquals(
+            "the `results` event MUST carry the exact JSON payload the server sent " +
+                "(the search items the user sees) — was: ${resultsEvent.data}",
+            """{"provider_id":"test1","items":[{"id":"1","title":"Item One"}],""" +
+                """"page":1,"total_pages":1}""",
+            resultsEvent.data,
+        )
     }
 
     @Test

@@ -1,0 +1,53 @@
+{
+  "date": "2026-06-13",
+  "kind": "§6.N bluff-hunt — KOTLIN / client side (fresh-areas parallel fleet cycle)",
+  "protocol": "Seventh Law clause 5 + §6.N.2 production-code coverage. Pick gate-shaping Kotlin production files NOT yet hunted this cycle; apply ONE non-crashing user-visible mutation; run the single module test with --max-workers=2; confirm RED (or surviving GREEN = GAP); revert; on GAP write a falsifiable test that bites. All observed-failure evidence captured VERBATIM from JUnit XML reports.",
+  "scope": "Kotlin / Android client. Sibling Go-side hunts this cycle covered auth-middleware + providers-handler + router + parsers. Prior Kotlin hunts this cycle covered ProviderCatalogRepository + DefaultTrackerRegistry + DownloadService/TorrentDownloadGuard + RemoteTrackerDescriptor.from(). This hunt covers TWO DISTINCT fresh gate-shaping paths those did not touch: (1) the SSE live-search streaming parser SseClient.connect() — a bug = search shows nothing / wrong results; (2) the cold-start provider re-fetch RepopulateProvidersOnStartupUseCase.invoke() — a bug = 'only bundled providers after restart'.",
+  "base_commit": "b2bffee3a7a4b445018a3b91a0cf9cb3364c4de0",
+  "worktree_branch": "worktree-agent-ac4c78c58afd66917",
+  "tooling": "GOMAXPROCS=2 nice -n 19 ./gradlew :<module>:test (or :testDebugUnitTest) --tests <FQTN> --max-workers=2 --no-daemon --console=plain (per-module, not the tree; §6.T.2 resource limits). worktree submodule submodules/tracker_sdk was uninitialized (gitlink, settings.gradle.kts includeBuild :api); populated build-only from the main checkout's pinned SHA 7afc37a so Gradle could resolve, .git link stripped so the gitlink stays clean.",
+  "targets": [
+    {
+      "id": "T1",
+      "production_file": "core/network/api/src/main/kotlin/lava/network/sse/SseClient.kt",
+      "production_path": "SseClient.connect() — the SSE framing parser (event:/data:/empty-line dispatch, lines 119-138). The lava-api-go live-search streaming endpoint's client-side parser. The `data:` JSON payload it accumulates per event IS the search results (provider names, item titles, download links) the user sees.",
+      "test_file": "core/network/api/src/test/kotlin/lava/network/sse/SseClientTest.kt",
+      "test_method": "parses SSE events correctly",
+      "user_visible_behavior": "A search streams provider_start / results / provider_done / stream_end events; each event's `data` payload carries the JSON the user-facing search list renders. Corrupt the payload and the user sees empty / garbled search results.",
+      "mutation": "In SseClient.connect(), the `data: ` branch line `dataBuilder.append(currentLine.removePrefix(\"data: \"))` changed to `dataBuilder.append(\"MUTATED\")` — drops the REAL payload while keeping it non-empty so the empty-line dispatch (`if (dataBuilder.isNotEmpty())`) STILL fires and event TYPES still parse. This simulates the realistic 'framing intact, content corrupted' defect class.",
+      "first_run_verdict": "GAP — MUTATION SURVIVED GREEN",
+      "first_run_observed": "BUILD SUCCESSFUL in 18s; TEST-lava.network.sse.SseClientTest.xml reported tests=3 failures=0 errors=0. The test asserted ONLY event TYPES (provider_start/results/provider_done/StreamEnd) + count (4), NEVER the `data` payload — so the corrupted-payload mutation passed clean while a real user would see empty/garbled search results.",
+      "bluff_classification": "Discrimination gap (§6.AB 'rendering correctness, not just rendering presence', applied to a stream parser): the test confirmed events of the right TYPE arrive, but not that they carry the right CONTENT — the chief user-visible state an SSE event carries IS its `data` JSON.",
+      "remediation": "Extended `parses SSE events correctly` with two byte-exact `data`-payload assertions (provider_start event data + results event data), each with a user-visible failure message. The test now bites the exact mutation that previously survived.",
+      "new_test_added": "core/network/api/src/test/kotlin/lava/network/sse/SseClientTest.kt — 2 new assertEquals on SseEvent.Event.data (provider_start + results payloads).",
+      "discrimination_proof": {
+        "green_on_unmutated": "BUILD SUCCESSFUL in 18s (strengthened test passes against original production).",
+        "red_on_remutation": "BUILD FAILED; `SseClientTest > parses SSE events correctly FAILED`.",
+        "verbatim_failure": "org.junit.ComparisonFailure: the `provider_start` event MUST carry its exact data payload (the provider the user sees searching) — was: MUTATED expected:<[{\"provider_id\":\"test1\",\"display_name\":\"Test One\"}]> but was:<[MUTATED]>",
+        "reverted": "yes — git checkout SseClient.kt; final BUILD SUCCESSFUL confirms green on unmutated."
+      }
+    },
+    {
+      "id": "T2",
+      "production_file": "core/domain/src/main/kotlin/lava/domain/usecase/RepopulateProvidersOnStartupUseCase.kt",
+      "production_path": "RepopulateProvidersOnStartupUseCase.invoke() — cold-start provider re-fetch. On a persisted Endpoint.GoApi it re-fetches GET /providers and calls trackerRegistry.populateFrom(descriptors) so Settings/Menu/search list the full dynamic catalogue. The exact fix for the operator's 'we used to have only 4 providers' report.",
+      "test_file": "core/domain/src/test/kotlin/lava/domain/usecase/RepopulateProvidersOnStartupUseCaseTest.kt",
+      "test_method": "cold start with a persisted GoApi endpoint repopulates ALL 12 providers app-wide",
+      "user_visible_behavior": "After a cold restart with a configured lava-api-go instance, sdk.listAvailableTrackers() (the list Settings/Menu/ProviderConfig render) MUST show all 12 providers, not the 4 bundled. Drop the populate and the user sees 'only 4 providers'.",
+      "mutation": "In invoke()'s onSuccess branch, deleted `trackerRegistry.populateFrom(descriptors)` (kept `activator.activate(...)` + `true`) — the documented Mutation A, the seam that closes the gap.",
+      "first_run_verdict": "GENUINE — MUTATION CAUGHT (RED)",
+      "first_run_observed": "BUILD FAILED; `RepopulateProvidersOnStartupUseCaseTest > cold start with a persisted GoApi endpoint repopulates ALL 12 providers app-wide FAILED` at RepopulateProvidersOnStartupUseCaseTest.kt:212.",
+      "verbatim_failure": "java.lang.AssertionError: after the cold-start re-populate the SDK MUST list ALL 12 providers (5 native + 7 curated) — was [nnmclub, rutracker, rutor, kinozal] expected:<12> but was:<4>",
+      "real_stack_note": "The test is full real-stack per §6.J Second Law: real RepopulateProvidersOnStartupUseCase + real FetchProvidersUseCase + real ProviderCatalogRepository (real OkHttpClient + InMemoryProviderCatalogStore) + real DefaultTrackerRegistry.populateFrom + real LavaTrackerSdk; only the network socket (MockWebServer) is faked. PRIMARY assertion is on sdk.listAvailableTrackers() — the exact list MenuViewModel/ProviderConfigViewModel render — by FULL count (12), not a weak >= 1. The KDoc-documented falsifiability rehearsal (Mutation A) is now VERIFIED real, not a bluff-claim.",
+      "reverted": "yes — git checkout RepopulateProvidersOnStartupUseCase.kt; line 83 populateFrom restored."
+    }
+  ],
+  "summary": {
+    "files_hunted": 2,
+    "genuine": 1,
+    "gap": 1,
+    "bluff": 0,
+    "new_tests": 1,
+    "notes": "T1 SseClient: GAP found + closed (data-payload assertions added, discrimination proven). T2 RepopulateProvidersOnStartupUseCase: GENUINE (primary challenge test bites the cold-start 'only 4 providers' defect with a user-visible 12-vs-4 assertion). Honesty over green: the SSE streaming parser's existing test was a partial bluff — it confirmed the right event TYPES arrived but not the right CONTENT, so a corrupted search-results payload passed clean. Now closed."
+  }
+}
