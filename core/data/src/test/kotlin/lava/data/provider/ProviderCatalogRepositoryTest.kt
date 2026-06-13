@@ -177,6 +177,13 @@ class ProviderCatalogRepositoryTest {
         assertEquals(AuthType.CAPTCHA_LOGIN, native.authType)
         assertEquals("https://rutracker.org", native.baseUrls.first().url)
         assertFalse(native.supportsAnonymous)
+        // Encoding MUST survive the DTO→RemoteTrackerDescriptor bridge: rutracker's
+        // Windows-1251 charset is what decodes Cyrillic torrent titles correctly.
+        // If toRemoteDescriptor() drops `encoding = encoding` (e.g. hardcodes UTF-8)
+        // every Cyrillic title renders as mojibake — a silent user-visible break the
+        // bluff-hunt of 2026-06-13 found uncovered at this DTO boundary.
+        assertEquals("Windows-1251", native.encoding)
+        assertEquals("UTF-8", jackett.encoding)
 
         // The auth header crossed the wire (api-app gate would have 401'd otherwise).
         val recorded = server.takeRequest()
