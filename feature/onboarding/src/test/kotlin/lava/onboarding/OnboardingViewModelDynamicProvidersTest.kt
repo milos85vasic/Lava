@@ -31,6 +31,7 @@ import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
@@ -430,12 +431,14 @@ class OnboardingViewModelDynamicProvidersTest {
                 viewModel.perform(OnboardingAction.SelectApi(goApiEndpoint()))
 
                 var providersOnScreen: List<String> = emptyList()
+                var noticeOnSuccess: String? = OnboardingViewModel.PROVIDER_CATALOG_FALLBACK_NOTICE
                 var advanced = false
                 var guard = 0
                 while (guard < 12) {
                     guard++
                     val s = awaitState()
                     providersOnScreen = s.providers.map { it.descriptor.trackerId }
+                    noticeOnSuccess = s.providerCatalogNotice
                     if (s.step == OnboardingStep.Providers && providersOnScreen.contains("thepiratebay")) {
                         advanced = true
                         break
@@ -444,6 +447,17 @@ class OnboardingViewModelDynamicProvidersTest {
                 cancelAndIgnoreRemainingItems()
 
                 assertTrue("wizard MUST advance to Providers with the API list", advanced)
+                // PRIMARY 0 (the user's literal symptom): the chosen API IS
+                // reachable (200), so the "Couldn't reach the selected API — showing
+                // bundled providers" fallback banner MUST be ABSENT. The real-device
+                // bug (Crashlytics 47b000d5, v1.3.4) was exactly this banner showing
+                // because GET /providers returned 401; the server fix 9ae9ab90 makes
+                // the catalogue public so the success path — and a null notice — is
+                // the real-user path.
+                assertNull(
+                    "API reachable (200) MUST NOT surface the fallback banner — was $noticeOnSuccess",
+                    noticeOnSuccess,
+                )
                 // PRIMARY 1: the API's providers are shown.
                 assertTrue(
                     "the chosen API's providers MUST be shown — expected thepiratebay+yts, was $providersOnScreen",
