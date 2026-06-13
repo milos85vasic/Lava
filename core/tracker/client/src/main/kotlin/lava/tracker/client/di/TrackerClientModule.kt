@@ -20,9 +20,9 @@ import io.ktor.client.request.url
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import lava.auth.api.TokenProvider
+import lava.tracker.archiveorg.ArchiveOrgClientFactory
 import lava.tracker.client.ApiBackedTrackerClient
 import lava.tracker.client.ApiBaseUrlHolder
-import lava.tracker.archiveorg.ArchiveOrgClientFactory
 import lava.tracker.gutenberg.GutenbergClientFactory
 import lava.tracker.iptorrents.IPTorrentsClientFactory
 import lava.tracker.kinozal.KinozalClientFactory

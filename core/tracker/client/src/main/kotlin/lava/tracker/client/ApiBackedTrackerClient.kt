@@ -6,7 +6,6 @@ import kotlinx.serialization.json.Json
 import lava.tracker.api.RemoteTrackerDescriptor
 import lava.tracker.api.TrackerCapability
 import lava.tracker.api.TrackerClient
-import lava.tracker.api.TrackerDescriptor
 import lava.tracker.api.TrackerFeature
 import lava.tracker.api.feature.AuthenticatableTracker
 import lava.tracker.api.feature.BrowsableTracker
@@ -25,11 +24,11 @@ import lava.tracker.api.model.SearchResult
 import lava.tracker.api.model.TopicDetail
 import lava.tracker.api.model.TopicPage
 import lava.tracker.api.model.TorrentItem
-import okhttp3.OkHttpClient
 import okhttp3.HttpUrl.Companion.toHttpUrl
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
-import okhttp3.MediaType.Companion.toMediaType
 import kotlin.reflect.KClass
 
 /**
