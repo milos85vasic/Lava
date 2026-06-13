@@ -1,0 +1,44 @@
+{
+  "cycle": "2026-06-13-topic-download",
+  "clause": "§6.N.1.1 + §6.N.2 (production-code coverage)",
+  "topic": "TOPIC-DETAIL -> DOWNLOAD-TRIGGER path (the user's final step to get a torrent)",
+  "agent": "§6.N bluff-hunt subagent (isolated git worktree, SAFE evidence-only)",
+  "host": "darwin/arm64",
+  "test_command": "GOMAXPROCS=2 ./gradlew :feature:<module>:testDebugUnitTest --max-workers=2 --console=plain",
+  "baseline": "both modules GREEN before any mutation (BUILD SUCCESSFUL, 1m11s cold)",
+  "files_hunted": [
+    {
+      "file": "feature/topic/src/main/kotlin/lava/topic/TopicViewModel.kt",
+      "production_path": "onTorrentFileClick -> resolveProviderDownloadKindUseCase routing: HTTP_DOWNLOAD providers (archiveorg/gutenberg) -> downloadHttpFile() (real bytes to disk); TORRENT/NONE (rutracker/rutor) -> downloadTorrentFile(). This is the user-visible 'get this torrent/file' download-trigger.",
+      "covering_test": "feature/topic/src/test/kotlin/lava/topic/TopicViewModelHttpDownloadTest.kt :: archiveorg HTTP_DOWNLOAD topic downloads the real file to disk",
+      "mutation": "TopicViewModel.kt line 233: `ProviderDownloadKind.HTTP -> downloadHttpFile()` changed to `ProviderDownloadKind.HTTP -> downloadTorrentFile(title)` -- a NON-CRASHING mis-route: an archiveorg/gutenberg download is silently sent down the .torrent writer instead of the HTTP-file writer, so the real fetched bytes never reach disk.",
+      "result": "RED",
+      "observed_failure": "java.lang.IllegalArgumentException: the HTTP-file path MUST hand the fetched bytes to the disk writer\n\tat lava.topic.TopicViewModelHttpDownloadTest$archiveorg HTTP_DOWNLOAD topic downloads the real file to disk$1.invokeSuspend(TopicViewModelHttpDownloadTest.kt:196)",
+      "user_visible_assertion": "the bytes/filename that reach RecordingDownloadService (the on-disk artifact) + DownloadState.Completed URI the screen renders -- Sixth Law clause 3 (file written to disk).",
+      "reverted": "yes (git checkout)",
+      "post_revert": "GREEN",
+      "verdict": "GENUINE"
+    },
+    {
+      "file": "feature/favorites/src/main/kotlin/lava/favorites/FavoritesViewModel.kt",
+      "production_path": "observeFavorites -> reduce empty/list branch: an empty favorites list renders FavoritesState.Empty (placeholder), a non-empty list renders FavoritesState.FavoritesList(items). This is the user-visible 'saved torrents' list state that feeds back into the topic-detail/download flow.",
+      "covering_test": "feature/favorites/src/test/kotlin/lava/favorites/FavoritesViewModelTest.kt :: `non-empty favorites render the list` + `empty favorites render the empty placeholder`",
+      "mutation": "FavoritesViewModel.kt line 50: `if (items.isEmpty())` changed to `if (items.isNotEmpty())` -- a NON-CRASHING state inversion: a populated favorites list renders the empty placeholder and an empty list renders a (degenerate empty) list, so the user sees the wrong list state.",
+      "result": "RED",
+      "observed_failure": "app.cash.turbine.TurbineAssertionError: No value produced in 3s\n\tat app//app.cash.turbine.ChannelKt.awaitEvent(channel.kt:89)  (awaitItemMatching never observes the FavoritesList / Empty state the inverted branch can no longer produce; 5 of 7 tests failed)",
+      "user_visible_assertion": "the rendered favorites list (FavoritesState.FavoritesList items) vs the empty placeholder (FavoritesState.Empty) -- Sixth Law clause 3 (rendered UI state).",
+      "reverted": "yes (git checkout)",
+      "post_revert": "GREEN",
+      "verdict": "GENUINE"
+    }
+  ],
+  "summary": {
+    "files": 2,
+    "genuine": 2,
+    "bluff": 0,
+    "gap": 0,
+    "new_tests_written": 0,
+    "production_reverted": true
+  },
+  "notes": "Recorded falsifiability rehearsals in both test files were re-PERFORMED (not trusted) per §6.N: the mutations target the exact production code paths the tests claim to cover, and each test's chief failure signal is on user-visible state (bytes-to-disk + rendered list state), never call-counting. Submodules were git-submodule-update --init in the worktree to enable the Gradle build (read-equivalent); no production source was changed. The download-trigger routing (HTTP vs .torrent) and the saved-list rendering are both genuinely anti-bluff."
+}
