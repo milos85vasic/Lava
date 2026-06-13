@@ -39,15 +39,19 @@ func TestEmbedPath_RegistersCuratedProviders(t *testing.T) {
 		t.Error("embed thepiratebay must be anonymous-capable")
 	}
 
-	// yts is the second curated provider registered via the same RegisterAll.
+	// yts + torrentscsv are the other curated providers registered via the same
+	// RegisterAll.
 	if _, err := registry.Get("yts"); err != nil {
 		t.Errorf("embed path did not register curated provider yts: %v", err)
+	}
+	if _, err := registry.Get("torrentscsv"); err != nil {
+		t.Errorf("embed path did not register curated provider torrentscsv: %v", err)
 	}
 
 	// The on-device catalogue is now strictly larger than the 5 bundled natives
 	// (rutracker, nnmclub, kinozal, archiveorg, gutenberg) — the curated set is
 	// additive. This is the "more than the natives" assertion in concrete form.
-	if got := len(registry.All()); got < 7 {
-		t.Errorf("embed registry has %d providers, want >= 7 (5 natives + 2 curated)", got)
+	if got := len(registry.All()); got < 8 {
+		t.Errorf("embed registry has %d providers, want >= 8 (5 natives + 3 curated)", got)
 	}
 }

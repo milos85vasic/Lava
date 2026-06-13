@@ -17,6 +17,7 @@ package curated
 import (
 	"digital.vasic.lava.apigo/internal/provider"
 	"digital.vasic.lava.apigo/internal/provider/curated/thepiratebay"
+	"digital.vasic.lava.apigo/internal/provider/curated/torrentscsv"
 	"digital.vasic.lava.apigo/internal/provider/curated/yts"
 )
 
@@ -25,4 +26,5 @@ import (
 func RegisterAll(r *provider.ProviderRegistry) {
 	r.Register(thepiratebay.New())
 	r.Register(yts.New())
+	r.Register(torrentscsv.New())
 }
