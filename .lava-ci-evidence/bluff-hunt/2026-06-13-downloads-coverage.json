@@ -1,0 +1,68 @@
+{
+  "date": "2026-06-13",
+  "cycle": "§6.N incident-response bluff-hunt — .torrent / HTTP file DOWNLOAD path",
+  "scope": "core/downloads — DownloadServiceImpl (the tap-result -> download user flow) + sibling TorrentDownloadGuard",
+  "base_commit": "7d5e8941743db0190ea5f7aa6bad593cbf5d826d",
+  "module_under_test": "core/downloads",
+  "build_note": "worktree submodule submodules/tracker_sdk was uninitialized (gitlink, settings.gradle.kts includeBuild); populated from the main checkout's pinned SHA 7afc37a so the Gradle build could resolve. Build-only plumbing; its copied .git link was removed before commit so git status stays clean (gitlink unchanged).",
+  "resource_limits": "GOMAXPROCS=2 nice -n 19, --max-workers=2, --no-daemon (per §6.T.2)",
+  "targets": [
+    {
+      "id": "M1",
+      "target_file": "core/downloads/src/main/kotlin/lava/downloads/impl/TorrentDownloadGuard.kt",
+      "target_method": "verifyValid (post-download .torrent integrity gate — accept/reject decision)",
+      "user_visible_behavior": "a corrupt/HTML-error/truncated/empty .torrent must be REJECTED (download reported as failure), not handed to the user as a successful-but-unopenable download",
+      "covering_test": "core/downloads/src/test/kotlin/lava/downloads/impl/TorrentDownloadGuardTest.kt",
+      "mutation": "replace `return result.valid` with `return true` (accept every payload — the original DEAD-CODE state where validation never gates the download)",
+      "result": "RED — 3 of 4 guard tests failed",
+      "observed_failures": [
+        "htmlErrorPagePayloadIsRejectedAndSurfacesWarning: java.lang.AssertionError: an HTML error page is NOT a usable .torrent and must be rejected, not silently handed to the user as a successful download",
+        "truncatedBencodePayloadIsRejectedAndSurfacesWarning: java.lang.AssertionError: a truncated .torrent must be rejected, not surfaced as success",
+        "emptyPayloadIsRejected: java.lang.AssertionError: an empty download is not a valid .torrent"
+      ],
+      "reverted": true,
+      "verdict": "GENUINE",
+      "verdict_reason": "the guard test catches the dead-code regression with clear user-visible assertion messages; real TorrentFileValidator wired through real TorrentDownloadGuard, only telemetry faked"
+    },
+    {
+      "id": "M2",
+      "target_file": "core/downloads/src/main/kotlin/lava/downloads/impl/DownloadServiceImpl.kt",
+      "target_method": "downloadHttpFile — empty-bytes guard (lines 96-109)",
+      "user_visible_behavior": "a 0-byte HTTP artifact (fetch/parse defect, Cloudflare 204, truncated body) must be REJECTED (return null, nothing saved) + a §6.AC operator warning surfaced — the user must NOT be handed a saved 0-byte file no reader can open",
+      "covering_test_before": "NONE — no test constructed DownloadServiceImpl; TopicViewModelHttpDownloadTest uses a RecordingDownloadService FAKE; SDK-level tests test the SDK, not this Android-boundary impl",
+      "mutation": "change `if (downloadRequest.bytes.isEmpty())` to `if (false && downloadRequest.bytes.isEmpty())` (never reject empty — fall through to the write path)",
+      "result_before_new_test": "SURVIVED — all tests stayed green (this proved the COVERAGE GAP)",
+      "remediation": "added DownloadServiceImplHttpEmptyBytesTest.kt — REAL DownloadServiceImpl, only AnalyticsTracker + Android Context faked (Context never dereferenced on the empty path), primary assertion on user-visible outcome (returns null + EmptyHttpArtifact warning)",
+      "result_after_new_test": "RED under the same mutation",
+      "observed_failure": "emptyHttpBytesSurfaceWarningAndSaveNothing: java.lang.AssertionError: empty HTTP artifact must surface a §6.AC warning so the operator sees the bad download expected:<1> but was:<0>",
+      "reverted": true,
+      "new_test_green_on_revert": true,
+      "verdict": "COVERAGE_GAP_CLOSED",
+      "verdict_reason": "pre-existing GAP (mutation survived) is now closed by a falsifiable real-stack test that fails RED on the mutation and passes on revert"
+    },
+    {
+      "id": "M3",
+      "target_file": "core/downloads/src/main/kotlin/lava/downloads/impl/DownloadServiceImpl.kt",
+      "target_method": "isValidTorrentFile — unreadable-file warning branch (lines 229-240)",
+      "user_visible_behavior": "a downloaded .torrent that cannot be read back from disk must be treated as INVALID (download fails) + a §6.AC UnreadableTorrentFile warning surfaced — a download we cannot read is not a download we can trust",
+      "covering_test": "NONE",
+      "mutation": "in `if (bytes == null)` add `return true` (treat an unreadable download as a valid .torrent)",
+      "result": "SURVIVED — BUILD SUCCESSFUL, all tests green while the unreadable-torrent path is broken",
+      "reverted": true,
+      "verdict": "COVERAGE_GAP_OPEN",
+      "verdict_reason": "this branch is reachable only through the Android DownloadManager orchestration in downloadTorrentFile (registerDownloadCompleteReceiver -> getDownloadedFileUri -> isValidTorrentFile), which needs a real device/emulator (§6.AE matrix) OR a refactor extracting the readability check off the Android boundary. Reported honestly rather than fake-closed; honest gap > fake pass."
+    }
+  ],
+  "behavioral_coverage_6D": {
+    "interface": "lava.downloads.api.DownloadService",
+    "downloadTorrentFile": "PARTIAL — the pure decision logic (TorrentFileValidator via TorrentDownloadGuard) is real-stack covered (M1 GENUINE). The Android DownloadManager orchestration (cache hit/miss revalidation, enqueue-null failure, BroadcastReceiver completion, getDownloadedFileUri status filtering, delete-on-invalid, unreadable-file warning M3) has NO JVM test — requires the §6.AE container/emulator matrix.",
+    "downloadHttpFile": "PARTIAL — empty-bytes guard now real-stack covered (M2, this commit). The MediaStore (API 29+) write path (writeViaMediaStore) and the pre-API-29 writeToPublicDownloads path, plus the catch->recordNonFatal branch, have NO JVM test — they cross the Android ContentResolver/Environment boundary and require the emulator matrix."
+  },
+  "tests_added": [
+    "core/downloads/src/test/kotlin/lava/downloads/impl/DownloadServiceImplHttpEmptyBytesTest.kt"
+  ],
+  "build_changes": [
+    "core/downloads/build.gradle.kts — testOptions.unitTests.isReturnDefaultValues = true + testImplementation(libs.mockk)"
+  ],
+  "final_state": "core/downloads:testDebugUnitTest BUILD SUCCESSFUL — 8 tests / 0 failures (DownloadServiceImplHttpEmptyBytesTest=1, DownloadUriCacheConcurrencyTest=3, TorrentDownloadGuardTest=4). spotlessApply run. Production code fully reverted (git diff empty on both .kt impl files)."
+}
