@@ -357,6 +357,116 @@ class OnboardingViewModelDynamicProvidersTest {
         }
 
     /**
+     * Captured catalogue that DELIBERATELY EXCLUDES the bundled "rutracker": the
+     * chosen API supports a different provider set. This is the operator's exact
+     * requirement — "all listed providers MUST be obtained from the API because
+     * some APIs may or may not support all providers". After a successful fetch
+     * the wizard MUST show ONLY the API's set (thepiratebay + yts) and the bundled
+     * "rutracker" the API does NOT offer MUST be ABSENT (populateFrom REPLACES,
+     * does not merge).
+     */
+    private val apiOnlyCatalogueWithoutRutracker = """
+        {
+          "providers": [
+            {
+              "id": "thepiratebay",
+              "displayName": "The Pirate Bay",
+              "kind": "native",
+              "capabilities": ["SEARCH","MAGNET_LINK"],
+              "authType": "NONE",
+              "encoding": "UTF-8",
+              "baseUrls": ["https://thepiratebay.org"],
+              "supportsAnonymous": true
+            },
+            {
+              "id": "yts",
+              "displayName": "YTS",
+              "kind": "native",
+              "capabilities": ["SEARCH","MAGNET_LINK"],
+              "authType": "NONE",
+              "encoding": "UTF-8",
+              "baseUrls": ["https://yts.mx"],
+              "supportsAnonymous": true
+            }
+          ]
+        }
+    """.trimIndent()
+
+    // CHALLENGE — the operator's load-bearing requirement: the provider list comes
+    // FROM the chosen API. A bundled provider the API does NOT offer is REPLACED
+    // out (not merged in), because some APIs may not support all providers.
+    //
+    // FALSIFIABILITY (§6.J clause 2):
+    //   Mutation: in OnboardingViewModel.fetchAndPopulateProviders, drop the
+    //             `trackerRegistry?.populateFrom(descriptors)` call (success path).
+    //   Observed: this test FAILS — the bundled "rutracker" survives (no replace)
+    //             so `providersOnScreen` still contains "rutracker" while the API's
+    //             "thepiratebay"/"yts" are absent.
+    //   Reverted: yes.
+    @Test
+    fun `onboarding shows ONLY the chosen API's providers replacing bundled ones the API lacks`() =
+        runTest(dispatcherRule.testDispatcher) {
+            // Bundled registry holds "rutracker" (registered in setup()); the API
+            // catalogue below does NOT include it.
+            server.enqueue(
+                MockResponse()
+                    .setResponseCode(200)
+                    .setHeader("Content-Type", "application/json")
+                    .setBody(apiOnlyCatalogueWithoutRutracker),
+            )
+            val fetchUseCase = buildRealFetchProvidersUseCase(server)
+            val viewModel = createViewModel(fetchUseCase)
+            viewModel.test(this) {
+                runOnCreate()
+                expectInitialState()
+                val bundled = awaitState().providers.map { it.descriptor.trackerId }
+                // Precondition: bundled list DID contain rutracker before the API fetch.
+                assertTrue(
+                    "precondition: bundled list must contain 'rutracker' before the API fetch — was $bundled",
+                    bundled.contains("rutracker"),
+                )
+
+                viewModel.perform(OnboardingAction.NextStep) // Welcome → ApiSelection
+                viewModel.perform(OnboardingAction.SelectApi(goApiEndpoint()))
+
+                var providersOnScreen: List<String> = emptyList()
+                var advanced = false
+                var guard = 0
+                while (guard < 12) {
+                    guard++
+                    val s = awaitState()
+                    providersOnScreen = s.providers.map { it.descriptor.trackerId }
+                    if (s.step == OnboardingStep.Providers && providersOnScreen.contains("thepiratebay")) {
+                        advanced = true
+                        break
+                    }
+                }
+                cancelAndIgnoreRemainingItems()
+
+                assertTrue("wizard MUST advance to Providers with the API list", advanced)
+                // PRIMARY 1: the API's providers are shown.
+                assertTrue(
+                    "the chosen API's providers MUST be shown — expected thepiratebay+yts, was $providersOnScreen",
+                    providersOnScreen.containsAll(listOf("thepiratebay", "yts")),
+                )
+                // PRIMARY 2 (the operator's requirement): the bundled 'rutracker'
+                // the API does NOT offer MUST be ABSENT — providers come FROM the
+                // API (replace, not merge).
+                assertFalse(
+                    "bundled 'rutracker' (NOT in the chosen API's catalogue) MUST be " +
+                        "ABSENT — the list comes FROM the API, not merged with bundled. was $providersOnScreen",
+                    providersOnScreen.contains("rutracker"),
+                )
+                // The list is EXACTLY the API set (no stray bundled entries).
+                assertEquals(
+                    "provider list MUST equal the chosen API's set",
+                    setOf("thepiratebay", "yts"),
+                    providersOnScreen.toSet(),
+                )
+            }
+        }
+
+    /**
      * Constructs the REAL [lava.domain.usecase.FetchProvidersUseCase] over the
      * REAL [lava.data.provider.ProviderCatalogRepository] (a real
      * [okhttp3.OkHttpClient] + the real [lava.data.provider.InMemoryProviderCatalogStore])
