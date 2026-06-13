@@ -1,4 +1,29 @@
 # Changelog
+## Lava-Android-1.3.4-1061 — 2026-06-13 (More providers, available everywhere; API-app crash reporting; device-verified)
+
+**Previous published:** Lava-Android-1.3.3-1060 (debug+release).
+
+- **More providers** — the on-device API now serves **12 providers** (up from the
+  earlier few): the built-in trackers plus seven curated public trackers — **The
+  Pirate Bay, YTS, Torrents-CSV, BitSearch, Knaben, Nyaa, TorrentDownloads** — each
+  with anonymous free-text search + magnet links (no extra setup). All seven were
+  verified reachable + actually searching against their live sites.
+- **Providers available everywhere, including after a restart** — the full provider
+  list now appears in **both onboarding AND Settings**, and **persists across app
+  restarts** (fix: previously, after closing + reopening the app, Settings could
+  fall back to only the built-in few — the app now re-fetches the full catalogue on
+  launch). This was the "only a few providers show up" issue.
+- **Crash reporting for the API app** — the on-device API app now reports crashes,
+  ANRs, and non-fatals to Crashlytics (it previously had none), so problems are
+  visible and fixable.
+- **Cleaner diagnostics** — normal screen-change cancellations are no longer
+  mis-reported as errors, so the crash dashboard reflects real issues only.
+
+Device-verified on a Genymotion Pixel 9 / API 35 (arm64): cold-start survival (C00),
+app launch + tracker/provider selection (C01), apiSupported filter (C16), and
+onboarding fresh-install (C25) Challenges all GREEN on this exact build. All 7 curated
+providers confirmed live-reachable.
+
 ## Lava-Android-1.3.3-1060 — 2026-06-11 (Dynamic provider discovery; device-verified)
 
 **Previous published:** Lava-Android-1.3.2-1059 (debug+release).
@@ -82,6 +107,21 @@ against the new upstream release. See `git log` 54eedd92..HEAD and `docs/Fixed.m
 - §6.Z: `.lava-ci-evidence/app-linking/ondevice-dc547861/` + falsifiable unit regression tests
   (commit `dc547861`). Debug-stage evidence:
   `.lava-ci-evidence/distribute-changelog/firebase-app-distribution/1.3.0-1057-test-evidence.md`.
+
+## Lava-API-App-0.2.4-8 — 2026-06-13 (Crashlytics crash reporting + 7 curated providers + 1.3.4 client auth allowlist)
+
+**Previous published:** Lava-API-App-0.2.3-7 (debug+release).
+
+- **Crash reporting added** — the on-device API app now reports crashes, ANRs, and
+  non-fatals to Firebase Crashlytics (it previously reported nothing), via a shared
+  `:core:analytics-firebase` module; server-side errors from the embedded Go API are
+  bridged through the same telemetry. This closes the API app's monitoring gap.
+- **7 curated providers embedded** — the embedded Go API now serves The Pirate Bay,
+  YTS, Torrents-CSV, BitSearch, Knaben, Nyaa, and TorrentDownloads (in addition to
+  the built-in trackers), so the on-device `GET /providers` catalogue exposes 12
+  providers — all verified live-reachable.
+- **1.3.4 client auth allowlist** — `android-1.3.4-1061` added to the accepted-clients
+  allowlist so the matching client build authenticates against the on-device API.
 
 ## Lava-API-App-0.2.3-7 — 2026-06-11 (Provider-catalogue endpoint + 1.3.3 client auth allowlist; device-verified)
 
