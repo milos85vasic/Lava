@@ -170,6 +170,96 @@ func TestProvider_DownloadFileDelegates(t *testing.T) {
 	}
 }
 
+// TestProvider_DownloadFileMagnet asserts the user-visible magnet branch of
+// DownloadFile: when the Jackett client resolves a download link to a magnet
+// URI, the provider surfaces the magnet text as the body, a text/plain content
+// type, and a ".magnet" filename — the exact shape a client hands to a torrent
+// app. The prior suite only covered the .torrent-bytes branch (DownloadFile at
+// 57.1% coverage), so this magnet path — a real path a user hits when an
+// indexer serves magnets — was untested (§6.N "would a bug here be invisible to
+// existing tests?").
+//
+// Bluff-Audit:
+//
+//	Test:     TestProvider_DownloadFileMagnet
+//	Mutation: in DownloadFile()'s magnet branch, set out.ContentType = "" (drop
+//	          the text/plain assignment) — a real client then gets an unset
+//	          content type for a magnet body.
+//	Observed: `magnet ContentType = "", want text/plain`.
+//	Reverted: yes.
+func TestProvider_DownloadFileMagnet(t *testing.T) {
+	const magnet = "magnet:?xt=urn:btih:cafebabe&dn=Ubuntu"
+	fake := &fakeJackettClient{
+		downloadRes: &jackett.DownloadResult{Magnet: magnet},
+	}
+	p := New("1337x", "1337x", fake)
+
+	dl, err := p.DownloadFile(context.Background(), magnet, provider.Credentials{})
+	if err != nil {
+		t.Fatalf("DownloadFile: %v", err)
+	}
+	// Primary, user-visible assertions: a client handing this to a torrent app
+	// needs the magnet URI as the body, text/plain so it is not mistaken for a
+	// .torrent file, and a .magnet filename.
+	if string(dl.Body) != magnet {
+		t.Errorf("magnet body = %q, want the magnet URI %q", string(dl.Body), magnet)
+	}
+	if dl.ContentType != "text/plain" {
+		t.Errorf("magnet ContentType = %q, want text/plain", dl.ContentType)
+	}
+	if dl.Filename != "1337x.magnet" {
+		t.Errorf("magnet Filename = %q, want 1337x.magnet", dl.Filename)
+	}
+	if dl.Provider != "1337x" {
+		t.Errorf("download.Provider = %q, want 1337x", dl.Provider)
+	}
+}
+
+// TestProvider_GetTorrentResolvesTorrentBytes asserts the /v1/{id}/torrent route
+// path: GetTorrent delegates through DownloadFile and surfaces the resolved
+// .torrent bytes under the TorrentResult shape the route serializes. GetTorrent
+// was at 0% coverage despite being the production method a real user's
+// ".torrent download" tap reaches.
+//
+// Bluff-Audit:
+//
+//	Test:     TestProvider_GetTorrentResolvesTorrentBytes
+//	Mutation: in GetTorrent(), set TorrentResult.Body: nil (drop dl.Body) — a
+//	          real client then receives an empty .torrent download.
+//	Observed: `GetTorrent Body = "", want the .torrent bytes`.
+//	Reverted: yes.
+func TestProvider_GetTorrentResolvesTorrentBytes(t *testing.T) {
+	fake := &fakeJackettClient{
+		downloadRes: &jackett.DownloadResult{
+			TorrentBytes: []byte("d8:announce20:http://tracker/anne"),
+			ContentType:  jackett.EnclosureTypeTorrent,
+		},
+	}
+	p := New("rutor", "RuTor", fake)
+
+	tr, err := p.GetTorrent(context.Background(), "http://jackett/dl/rutor/xyz", provider.Credentials{})
+	if err != nil {
+		t.Fatalf("GetTorrent: %v", err)
+	}
+	if fake.downloadURL != "http://jackett/dl/rutor/xyz" {
+		t.Errorf("delegated download url = %q, want the requested id", fake.downloadURL)
+	}
+	// Primary, user-visible assertions: the bytes the client writes to disk as a
+	// .torrent file, with the right content type + a .torrent filename.
+	if string(tr.Body) != "d8:announce20:http://tracker/anne" {
+		t.Errorf("GetTorrent Body = %q, want the .torrent bytes", string(tr.Body))
+	}
+	if tr.ContentType != jackett.EnclosureTypeTorrent {
+		t.Errorf("GetTorrent ContentType = %q, want %q", tr.ContentType, jackett.EnclosureTypeTorrent)
+	}
+	if tr.Filename != "rutor.torrent" {
+		t.Errorf("GetTorrent Filename = %q, want rutor.torrent", tr.Filename)
+	}
+	if tr.Provider != "rutor" || tr.ID != "http://jackett/dl/rutor/xyz" {
+		t.Errorf("GetTorrent provider/id mismapped: provider=%q id=%q", tr.Provider, tr.ID)
+	}
+}
+
 // TestProvider_ExtendedCapsUnsupported asserts an extended capability the
 // indexer does NOT declare returns the standard not-implemented sentinel
 // (capability honesty, §6.E — the middleware 501s before reaching here, but the
