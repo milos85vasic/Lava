@@ -1,0 +1,42 @@
+<?xml version='1.0' encoding='iso-8859-1' ?>
+<rss version='2.0'>
+<channel>
+<title><![CDATA[RSS Torrent Downloads, Search "ubuntu"]]></title>
+<link>http://www.torrentdownloads.pro/</link>
+<description>RSS Torrent Downloads Bittorrent download source!</description>
+<language>en-us</language>
+  <item>
+    <title>Ubuntu 12 10 Server 64 Bit</title>
+    <pubDate>Mon, 21 Oct 2013 13:20:49 +0200</pubDate>
+    <category><![CDATA[]]></category>
+    <link>/torrent/1656525368/Ubuntu-12-10-Server-64-Bit</link>
+    <info_hash>19987310611f0fae3b2c9678601b92967d938aff</info_hash>
+    <seeders>978</seeders>
+    <leechers>30</leechers>
+    <size>24898149</size>
+    <description><![CDATA[Ubuntu server iso]]></description>
+  </item>
+  <item>
+    <title>Ubuntu 22.04 Desktop amd64</title>
+    <pubDate></pubDate>
+    <category><![CDATA[]]></category>
+    <link>/torrent/2/Ubuntu-22-04</link>
+    <info_hash>f33ca2c8a4255b223005e90548142e94487d1e0f</info_hash>
+    <seeders>500</seeders>
+    <leechers>12</leechers>
+    <size>3826831360</size>
+    <description><![CDATA[desktop iso]]></description>
+  </item>
+  <item>
+    <title>synthetic edge row: short non-40-hex info_hash must be filtered</title>
+    <pubDate>Mon, 21 Oct 2013 13:20:49 +0200</pubDate>
+    <category><![CDATA[]]></category>
+    <link>/torrent/3/x</link>
+    <info_hash>deadbeef</info_hash>
+    <seeders>1</seeders>
+    <leechers>0</leechers>
+    <size>1</size>
+    <description><![CDATA[x]]></description>
+  </item>
+</channel>
+</rss>

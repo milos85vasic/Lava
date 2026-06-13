@@ -20,6 +20,7 @@ import (
 	"digital.vasic.lava.apigo/internal/provider/curated/knaben"
 	"digital.vasic.lava.apigo/internal/provider/curated/nyaa"
 	"digital.vasic.lava.apigo/internal/provider/curated/thepiratebay"
+	"digital.vasic.lava.apigo/internal/provider/curated/torrentdownloads"
 	"digital.vasic.lava.apigo/internal/provider/curated/torrentscsv"
 	"digital.vasic.lava.apigo/internal/provider/curated/yts"
 )
@@ -33,4 +34,5 @@ func RegisterAll(r *provider.ProviderRegistry) {
 	r.Register(bitsearch.New())
 	r.Register(knaben.New())
 	r.Register(nyaa.New())
+	r.Register(torrentdownloads.New())
 }
