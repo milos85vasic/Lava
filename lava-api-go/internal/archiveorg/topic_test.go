@@ -72,6 +72,62 @@ func TestTopic_HappyPath(t *testing.T) {
 	}
 }
 
+// TestTopic_FileSourceParsed pins the per-file "source" field, which the
+// real archive.org /metadata API returns ("original" / "derivative") and which
+// TopicResult exposes as a user-visible TopicFile.Source. The happy-path
+// fixtures above omit "source", so this field had zero behavioral coverage:
+// a §6.N bluff-hunt mutation (tf.Source = "MUTATED-WRONG") left every existing
+// test green. This test closes that gap by asserting the parsed value.
+//
+// Falsifiability rehearsal (§6.N / Sixth Law clause 2):
+//
+//	Mutation:  topic.go  `tf.Source = *f.Source`  →  `tf.Source = "MUTATED-WRONG"`
+//	Observed:  files[0].Source="MUTATED-WRONG" want original
+//	Reverted:  yes
+func TestTopic_FileSourceParsed(t *testing.T) {
+	jsonBody := `{
+		"metadata": {"title": "With Sources", "mediatype": "movies"},
+		"files": [
+			{"name": "movie.mp4", "size": "734003200", "format": "h.264", "source": "original"},
+			{"name": "movie_thumb.jpg", "format": "JPEG Thumb", "source": "derivative"},
+			{"name": "movie_meta.xml", "format": "Metadata"}
+		]
+	}`
+
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte(jsonBody))
+	}))
+	defer srv.Close()
+
+	c := NewClient(srv.URL)
+	result, err := c.Topic(context.Background(), "with-sources")
+	if err != nil {
+		t.Fatalf("Topic: %v", err)
+	}
+	if len(result.Files) != 3 {
+		t.Fatalf("expected 3 files, got %d", len(result.Files))
+	}
+	// User-visible Source values must be parsed verbatim from the upstream JSON.
+	if result.Files[0].Source != "original" {
+		t.Errorf("files[0].Source=%q want original", result.Files[0].Source)
+	}
+	if result.Files[1].Source != "derivative" {
+		t.Errorf("files[1].Source=%q want derivative", result.Files[1].Source)
+	}
+	// A file with no "source" key must leave Source empty (omitempty contract),
+	// not inherit a stale value from a sibling entry.
+	if result.Files[2].Source != "" {
+		t.Errorf("files[2].Source=%q want empty (no source key)", result.Files[2].Source)
+	}
+	// Guard that Source is not silently swapped with a neighbouring field:
+	// the derivative thumb's format must still be its own, distinct from source.
+	if result.Files[1].Format != "JPEG Thumb" {
+		t.Errorf("files[1].Format=%q want 'JPEG Thumb'", result.Files[1].Format)
+	}
+}
+
 func TestTopic_MinimalMetadata(t *testing.T) {
 	jsonBody := `{"metadata":{"title":"Minimal"},"files":[]}`
 
