@@ -20,7 +20,15 @@ import (
 // NOT BROWSE, so the supported/unsupported capability gate can be exercised
 // under load. Only the methods the middleware path touches return meaningful
 // values; the rest are honest ErrUnsupported (never invoked by the stress path).
-type stressProvider struct{ id string }
+//
+// Embeds provider.BaseProvider for the catalogue-metadata methods
+// (Kind/SupportsAnonymous/BaseURLs) added to the Provider interface by the
+// 2026-06-11 dynamic-provider-discovery spec — so it still satisfies the current
+// interface that reg.Register requires.
+type stressProvider struct {
+	provider.BaseProvider
+	id string
+}
 
 func (p *stressProvider) ID() string          { return p.id }
 func (p *stressProvider) DisplayName() string { return "Stress" }
