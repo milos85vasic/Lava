@@ -1,0 +1,57 @@
+{
+  "date": "2026-06-13",
+  "cycle": "search-flow §6.N bluff hunt",
+  "clause": "§6.N.2 production-code + §6.N.1.1 incident-response, search flow (most-used user feature)",
+  "scope": "SAFE evidence-only (test changes + evidence; production mutated-then-reverted during rehearsal)",
+  "base_head": "dcf478c007a793a3ee1d47653ec2233705e23323",
+  "branch": "worktree-agent-aa331524b8957c1aa",
+  "environment": {
+    "host": "darwin/arm64",
+    "gradle_user_home": "/Volumes/T7/Gradle",
+    "resource_limits": "GOMAXPROCS=2 nice -n 19, --max-workers=2, --no-daemon (per §6.T.2)",
+    "submodule_note": "worktree submodules were uninitialized; `git submodule update --init` populated them from the shared .git/modules store (no constitution/source change). llm_orchestrator failed on a network ref but is not needed for the Android feature build."
+  },
+  "files_hunted": [
+    {
+      "file": "feature/search_input/src/main/kotlin/lava/search/input/SearchInputViewModel.kt",
+      "test": "feature/search_input/src/test/kotlin/lava/search/input/SearchInputViewModelTest.kt",
+      "production_path": "resolveProviderIdsForSubmit() — the provider-selection-for-search logic (operator-reported Bug 3 'search selects all providers' + Bug 2 'anonymous-only search')",
+      "filter_question": "Would a bug here be invisible to existing tests? — NO (test bites).",
+      "mutation": "resolveProviderIdsForSubmit(): replaced `return if (selected.size == availableProviders.size) null else selected` with `return null` — the exact Bug-3 regression (always 'search all providers', re-selecting providers the user never onboarded).",
+      "test_command": "./gradlew :feature:search_input:testDebugUnitTest --tests lava.search.input.SearchInputViewModelTest",
+      "observed_failure": "SearchInputViewModelTest > SubmitClick_with_subset_of_providers_emits_OpenSearch_with_that_subset FAILED — java.lang.AssertionError: expected:<[archiveorg]> but was:<null> (at SearchInputViewModelTest.kt:216, primary assertion on OpenSearch.filter.providerIds)",
+      "reverted": true,
+      "post_revert": "BUILD SUCCESSFUL (8/8 tests pass)",
+      "verdict": "GENUINE",
+      "verdict_detail": "The real-stack VM test (real SearchInputViewModel + real ObserveSuggestsUseCase/AddSuggestUseCase + real ProviderConfigRepository, only the Room DAO + SuggestsRepository faked) catches the Bug-3 production regression with a primary assertion on the user-visible OpenSearch payload. Not a bluff."
+    },
+    {
+      "file": "feature/search_result/src/main/kotlin/lava/search/result/SearchResultNavigation.kt",
+      "test_before": "NONE — no existing test exercised the openSearchResult serialize → SavedStateHandle.filter deserialize round-trip for providerIds. The four existing search_result tests (SearchResultRetryTest, SearchResultSseErrorRetryTest, SearchResultSseConnectivityTelemetryTest, SearchResultViewModelFallbackTest) inject SavedStateHandle(mapOf(\"pids\" to \"rutracker\")) DIRECTLY, bypassing both the serializer (openSearchResult line 120) and the deserializer (SavedStateHandle.filter lines 135-138).",
+      "production_path": "ProviderIdsKey serialize/deserialize round-trip in openSearchResult + SavedStateHandle.filter — Bug-2-Layer-3 (the deeplink/route providerIds path that made anonymous-only search unreachable; ProviderIdsKey constant added 2026-05-17 to prevent exactly this).",
+      "filter_question": "Would a bug here be invisible to existing tests? — YES (this is the GAP).",
+      "gap_proof_mutation": "openSearchResult: replaced `ProviderIdsKey to filter.providerIds?.takeIf(List<String>::isNotEmpty)?.joinToString(\",\")` with `ProviderIdsKey to null`.",
+      "gap_proof_command": "./gradlew :feature:search_result:testDebugUnitTest (whole module)",
+      "gap_proof_observed": "BUILD SUCCESSFUL — the ENTIRE search_result suite stayed GREEN while the production route dropped providerIds. Confirms the round-trip is uncovered: a Bug-2-Layer-3 regression would ship green.",
+      "verdict": "GAP",
+      "remediation": "Wrote feature/search_result/src/test/kotlin/lava/search/result/SearchResultNavigationProviderIdsRoundtripTest.kt — a real-stack Robolectric round-trip (REAL openSearchResult + REAL SavedStateHandle.filter + REAL android.net.Uri encode/decode; only the navigation graph + controller faked), mirroring feature/search_input's SearchInputNavigationRoundtripTest. 3 tests: multi-provider subset, single-provider subset, null-stays-null. Primary assertion on the decoded Filter.providerIds (the user-visible determinant of the search path: multi-provider streaming vs single-tracker paging). Added testImplementation(libs.robolectric) + testImplementation(libs.androidx.navigation.compose) to search_result/build.gradle.kts (the search_input module already had them).",
+      "new_test_falsifiability": {
+        "mutation_A_serialize": "openSearchResult: ProviderIdsKey value -> null",
+        "mutation_A_observed": "providerIds roundtrip preserves a multi-provider subset FAILED — java.lang.AssertionError: expected:<[archiveorg, gutenberg]> but was:<null>; providerIds roundtrip preserves a single-provider subset FAILED — expected:<[archiveorg]> but was:<null>",
+        "mutation_A_reverted": true,
+        "post_revert": "BUILD SUCCESSFUL (3/3 new tests pass; full search_result suite GREEN)"
+      }
+    }
+  ],
+  "summary": {
+    "files_hunted": 2,
+    "genuine": 1,
+    "bluff": 0,
+    "gap": 1,
+    "new_tests": 1,
+    "new_test_file": "feature/search_result/src/test/kotlin/lava/search/result/SearchResultNavigationProviderIdsRoundtripTest.kt",
+    "production_source_changed": false,
+    "version_files_touched": false,
+    "distribute": false
+  }
+}
