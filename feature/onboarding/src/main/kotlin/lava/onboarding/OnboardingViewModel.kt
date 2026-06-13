@@ -212,6 +212,11 @@ class OnboardingViewModel @Inject constructor(
                 cloudDefaults = CloudApiDefaults.defaultsFrom(defaultCloudApi),
                 cloudAddressInput = "",
                 cloudAddressError = null,
+                // F1 (2026-06-13 audit): clear any stale Providers-step fallback
+                // notice when (re-)entering discovery, so a notice carried from a
+                // prior probe is not shown on a fresh ApiSelection entry. The
+                // success path overwrites it; this guarantees a clean entry too.
+                providerCatalogNotice = null,
             )
         }
         // Collect each DiscoveredEndpoint into the running list.
@@ -388,6 +393,15 @@ class OnboardingViewModel @Inject constructor(
                         discoveredApis = emptyList(),
                         selectedApi = null,
                         apiConnectivity = ApiConnectivityState.Idle,
+                        // F1 (2026-06-13 audit): the back-to-Welcome reset MUST be
+                        // symmetric with the forward startApiDiscovery() reset —
+                        // otherwise a typed cloud address, its parse error, or a
+                        // provider-catalogue fallback notice survive the round-trip
+                        // and re-render stale on the next ApiSelection entry
+                        // (§6.AB state-machine completeness + rendering correctness).
+                        cloudAddressInput = "",
+                        cloudAddressError = null,
+                        providerCatalogNotice = null,
                     )
                 }
             }

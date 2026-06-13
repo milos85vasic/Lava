@@ -1003,6 +1003,14 @@ internal class FakeClonedProviderDao : ClonedProviderDao {
 class FakeAuthService : AuthService {
     private val authorizedNames = mutableListOf<String>()
 
+    /**
+     * The most recent name passed to [signalAuthorized], or null if none.
+     * Exposes the user-visible account label onboarding records on finish so
+     * tests can assert a credentialed provider signs in with the username (not
+     * "Anonymous (...)"). Read-only view — does not mutate internal state.
+     */
+    fun lastAuthorizedName(): String? = authorizedNames.lastOrNull()
+
     override suspend fun isAuthorized(): Boolean = authorizedNames.isNotEmpty()
 
     override fun observeAuthState() = emptyFlow<AuthState>()
