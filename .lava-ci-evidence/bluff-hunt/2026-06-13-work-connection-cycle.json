@@ -1,0 +1,56 @@
+{
+  "date": "2026-06-13",
+  "cycle": "work-connection-cycle",
+  "agent": "§6.N bluff-hunt subagent (background-sync + connection-health layer)",
+  "scope": "SAFE evidence-only: production mutated-then-reverted during rehearsal; only a new test + this evidence file committed.",
+  "protocol": "§6.N.2 production-code-coverage hunt — pick 2 fresh gate-shaping files (filter: would a bug here be invisible to existing tests?), apply ONE non-crashing mutation per file that changes user-visible/observable behavior, run the module test, confirm RED on user-visible state (or surviving GREEN = GAP), revert.",
+  "resource_limits": "GOMAXPROCS=2 nice -n 19, --max-workers=2, --no-daemon per §6.T.2",
+  "worktree": "/Volumes/T7/Projects/Lava/.claude/worktrees/agent-a6934d614ecc5bb80",
+  "files_hunted": [
+    {
+      "file": "core/work/impl/src/main/kotlin/lava/work/impl/WorkBackgroundService.kt",
+      "production_path": "SyncPeriod.flexIntervalMillis — the flex-interval mapping WorkBackgroundService.periodicWorkRequest() feeds into WorkManager's PeriodicWorkRequestBuilder(repeat, flex). The flex window is the tail-of-period during which the periodic sync (favorites / bookmarks / history / credentials) runs. WorkManager requires flexInterval <= repeatInterval; a flex larger than the repeat is silently clamped to the full period, degrading the user's sync schedule from 'run near the end of the period' to 'run anytime in the period'.",
+      "claiming_test": "core/work/impl/src/test/kotlin/lava/work/impl/SyncPeriodIntervalsTest.kt",
+      "test_task": ":core:work:impl:testDebugUnitTest",
+      "layer": "background-work / WorkManager scheduling (core/work impl)",
+      "mutation": "SyncPeriod.flexIntervalMillis: SyncPeriod.DAY -> 6.hours  =>  SyncPeriod.DAY -> 6.days (the historical 6.days-for-6.hours regression the test's KDoc names; flex 6 days > repeat 1 day → WorkManager clamps, destroying the DAY flex window).",
+      "observed_failure_verbatim": [
+        "SyncPeriodIntervalsTest > DAY sync flex is six hours, not six days FAILED",
+        "  java.lang.AssertionError: expected:<21600000> but was:<518400000>  (SyncPeriodIntervalsTest.kt:62)",
+        "SyncPeriodIntervalsTest > flex interval never exceeds repeat interval for any periodic SyncPeriod FAILED",
+        "  java.lang.AssertionError: SyncPeriod.DAY: flexInterval (518400000 ms) MUST be <= repeatInterval (86400000 ms) or WorkManager clamps it to the full period, destroying the flex window  (SyncPeriodIntervalsTest.kt:46)"
+      ],
+      "red_then_green": "2 of 3 tests RED with mutation; reverted (6.days -> 6.hours); :core:work:impl:testDebugUnitTest BUILD SUCCESSFUL.",
+      "verdict": "GENUINE",
+      "verdict_reason": "SyncPeriodIntervalsTest provably catches the user-visible-schedule-degradation break it claims to cover. Primary assertions are on the actual ms values WorkManager consumes (518400000 vs 21600000 / 86400000). The documented falsifiability rehearsal in the test's KDoc is verified real, not a bluff-claim."
+    },
+    {
+      "file": "feature/connection/src/main/kotlin/lava/connection/ConnectionsViewModel.kt",
+      "production_path": "ConnectionsViewModel.observeConnections() — the onCreate collector that consumes observeEndpointsStatusUseCase() and reduces it into ConnectionsState.selected (the active-endpoint highlight a user sees) + ConnectionsState.connections (the rendered connection list). This is the user-visible 'which API/endpoint is active + here are all your endpoints' surface.",
+      "claiming_test": "feature/connection/src/test/kotlin/lava/connection/ConnectionsViewModelTest.kt",
+      "test_task": ":feature:connection:testDebugUnitTest",
+      "layer": "feature ViewModel — connection/API health state shown to the user",
+      "mutation": "observeConnections() reduce: `selected = connections.firstOrNull(EndpointState::selected)` => `selected = connections.firstOrNull { !it.selected }` (highlight points at the WRONG, non-selected endpoint) AND `connections = connections` => `connections = emptyList()` (the rendered connection list is always empty).",
+      "observed_before_new_test": "The ENTIRE existing ConnectionsViewModelTest suite stayed GREEN (BUILD SUCCESSFUL) with both outputs of observeConnections broken. The MockObserveEndpointsStatusUseCase.emit() helper existed but was never invoked by any test — observeConnections (the onCreate path populating selected + connections) had ZERO coverage.",
+      "verdict": "GAP (closed)",
+      "verdict_reason": "A real user-visible defect — wrong active-endpoint highlight + empty connection list — was invisible to the existing suite. Per §6.N this is a coverage GAP, closed by a new falsifiable real-stack test.",
+      "remediation": {
+        "new_test": "feature/connection/src/test/kotlin/lava/connection/ConnectionsViewModelTest.kt :: `observe connections sets selected to the active endpoint and exposes the full list`",
+        "classification": "CHALLENGE",
+        "real_stack": "ConnectionsViewModel (real) wired to real Add/Remove/Set/DiscoverLocalEndpoints UseCase impls; ObserveEndpointsStatusUseCase mocked ONLY because it crosses the ConnectionService network boundary (Second Law boundary-only mocking). runOnCreate() fires the real onCreate collector; emit() drives two EndpointState rows through it.",
+        "primary_assertions": [
+          "state.connections == both emitted EndpointState rows (the rendered list)",
+          "state.selected == the selected=true row (the active-endpoint highlight), NOT the first-in-list unselected row",
+          "state.selected.selected == true"
+        ],
+        "falsifiability_rehearsal": {
+          "mutation": "observeConnections reduce: firstOrNull(EndpointState::selected) -> firstOrNull { !it.selected } AND connections=connections -> connections=emptyList()",
+          "observed_failure_verbatim": "java.lang.AssertionError: All emitted endpoints must populate the rendered connection list expected:<[EndpointState(endpoint=Rutracker, selected=false, status=NoInternet), EndpointState(endpoint=Mirror(host=192.168.1.100), selected=true, status=Active)]> but was:<[]>",
+          "reverted": "yes — production restored to firstOrNull(EndpointState::selected) + connections=connections; full :feature:connection:testDebugUnitTest BUILD SUCCESSFUL."
+        }
+      }
+    }
+  ],
+  "build_environment_note": "Worktree submodules are uninitialized and cannot clone offline. To compile the two modules, submodules/tracker_sdk was temporarily symlinked to the main checkout's populated working tree (same pinned SHA 7afc37a, read-only). The symlink was removed and the gitlink restored to its recorded empty state before committing, so only the test file is staged.",
+  "summary": "2 files hunted. WorkBackgroundService flex-interval mapping = GENUINE (SyncPeriodIntervalsTest bites). ConnectionsViewModel.observeConnections = GAP (active-endpoint highlight + connection list had zero coverage) — closed with a new CHALLENGE test, falsifiability-proven. 0 surviving bluffs; 1 GAP closed."
+}

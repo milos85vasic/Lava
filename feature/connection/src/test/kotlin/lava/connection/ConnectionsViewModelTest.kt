@@ -7,6 +7,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import lava.domain.model.endpoint.EndpointState
+import lava.domain.model.endpoint.EndpointStatus
 import lava.domain.usecase.AddEndpointUseCaseImpl
 import lava.domain.usecase.DiscoverLocalEndpointsUseCaseImpl
 import lava.domain.usecase.ObserveEndpointsStatusUseCase
@@ -326,6 +327,77 @@ class ConnectionsViewModelTest {
 
         assertEquals(Endpoint.Rutracker, settingsRepository.getSettings().endpoint)
     }
+
+    // CHALLENGE — primary assertion on `state.selected` (the active-endpoint
+    // highlight a real user sees in the connection list) AND `state.connections`
+    // (the rendered list itself). `observeConnections()` is the `onCreate` path
+    // that populates BOTH from `observeEndpointsStatusUseCase()`; before this test
+    // it had ZERO coverage — `MockObserveEndpointsStatusUseCase.emit()` was dead
+    // code, so a bug in the `firstOrNull(EndpointState::selected)` predicate or in
+    // storing `connections` was invisible (§6.N bluff-hunt GAP, 2026-06-14).
+    //
+    // FALSIFIABILITY REHEARSAL (recorded 2026-06-14):
+    //   Mutation: ConnectionsViewModel.observeConnections reduce
+    //     `selected = connections.firstOrNull(EndpointState::selected)`
+    //     → `selected = connections.firstOrNull { !it.selected }`
+    //     AND `connections = connections` → `connections = emptyList()`.
+    //   Observed before this test existed: whole suite GREEN (the GAP).
+    //   Observed with this test: FAILS — `selected` asserts the Mirror(active,
+    //   selected=true) row but receives the Rutracker(selected=false) row; and
+    //   `connections` asserts size 2 but receives empty.
+    //   Reverted: yes.
+    @Test
+    fun `observe connections sets selected to the active endpoint and exposes the full list`() =
+        runTest(dispatcherRule.testDispatcher) {
+            val selectedEndpoint = Endpoint.Mirror("192.168.1.100")
+            val unselectedEndpoint = Endpoint.Rutracker
+            val states = listOf(
+                EndpointState(
+                    endpoint = unselectedEndpoint,
+                    selected = false,
+                    status = EndpointStatus.NoInternet,
+                ),
+                EndpointState(
+                    endpoint = selectedEndpoint,
+                    selected = true,
+                    status = EndpointStatus.Active,
+                ),
+            )
+            val viewModel = createViewModel()
+            viewModel.test(this) {
+                // orbit-test 7.x: explicit runOnCreate() fires the container's
+                // onCreate (which launches observeConnections() — the collector
+                // that populates `selected` + `connections`). Earlier orbit
+                // versions auto-fired this on subscribe.
+                runOnCreate()
+                expectInitialState()
+                // observeConnections() subscribes lazily on container start; emit
+                // from a child coroutine so the value lands after subscription,
+                // mirroring the discovery tests' `launch { discoveryService.emit() }`.
+                launch { observeEndpointsStatusUseCase.emit(states) }
+                val populated = awaitState()
+                // User-visible: the connection list rendered on screen.
+                assertEquals(
+                    "All emitted endpoints must populate the rendered connection list",
+                    states,
+                    populated.connections,
+                )
+                // User-visible: the highlighted active-endpoint row. MUST be the
+                // selected=true endpoint, NEVER the first-in-list (unselected) one.
+                assertEquals(
+                    "selected MUST be the endpoint whose selected flag is true",
+                    states[1],
+                    populated.selected,
+                )
+                assertTrue(
+                    "the highlighted endpoint MUST actually be flagged selected",
+                    populated.selected?.selected == true,
+                )
+                // observeConnections is an infinite collector; cancel so the
+                // orbit-test block can close without an OrbitTimeout.
+                cancelAndIgnoreRemainingItems()
+            }
+        }
 
     /**
      * Mock of [ObserveEndpointsStatusUseCase] that exposes a [MutableSharedFlow]
