@@ -20,6 +20,7 @@ dependencies {
     implementation(project(":core:notifications"))
     implementation(project(":core:sync"))
     implementation(project(":core:tracker:api"))
+    implementation(project(":core:tracker:registry"))
     implementation(project(":core:work:api"))
 
     implementation(libs.javax.inject)
@@ -27,6 +28,12 @@ dependencies {
     implementation(libs.okhttp.core)
 
     testImplementation(project(":core:testing"))
+    // Startup re-populate use case test drives the REAL DefaultTrackerRegistry +
+    // ApiBaseUrlHolder + LavaTrackerSdk over a MockWebServer-backed real
+    // FetchProvidersUseCase/ProviderCatalogRepository (Anti-Bluff Second Law).
+    testImplementation(project(":core:tracker:registry"))
+    testImplementation(project(":core:tracker:client"))
+    testImplementation(project(":core:tracker:testing"))
     testImplementation(libs.okhttp.mockwebserver)
 }
 

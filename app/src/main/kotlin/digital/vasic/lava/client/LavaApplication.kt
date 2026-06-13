@@ -10,8 +10,14 @@ import com.google.firebase.ktx.Firebase
 import com.google.firebase.perf.ktx.performance
 import dagger.hilt.android.HiltAndroidApp
 import digital.vasic.lava.client.crash.NavTeardownCrashReporter
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import lava.analytics.firebase.FirebaseInitializer
 import lava.common.analytics.AnalyticsTracker
+import lava.common.analytics.rethrowIfCancellation
+import lava.domain.usecase.RepopulateProvidersOnStartupUseCase
 import lava.network.api.ImageLoader
 import lava.tracker.client.work.MirrorHealthCheckWorker
 import javax.inject.Inject
@@ -26,6 +32,16 @@ class LavaApplication : Application() {
 
     @Inject
     lateinit var analytics: AnalyticsTracker
+
+    // Provider-availability restore on cold start (operator directive
+    // 2026-06-13). After a process restart the in-memory tracker registry has
+    // reverted to the bundled provider set; this re-fetches the chosen
+    // lava-api-go instance's full /providers catalogue so Settings, search, and
+    // onboarding re-entry all see ALL providers — not just the bundled subset.
+    @Inject
+    lateinit var repopulateProviders: RepopulateProvidersOnStartupUseCase
+
+    private val startupScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
     override fun onCreate() {
         if (BuildConfig.DEBUG) {
@@ -69,6 +85,24 @@ class LavaApplication : Application() {
 
         imageLoader.setup()
         MirrorHealthCheckWorker.schedule(workManager)
+
+        // Re-populate the dynamic provider catalogue from the persisted active
+        // lava-api-go endpoint on every cold start, off the main thread, BEFORE
+        // the user opens Settings/search. Degrades to the bundled set (no-op) if
+        // no GoApi endpoint is configured or the API is unreachable — never
+        // blocks onCreate, never throws into the process. §6.AC telemetry on the
+        // unexpected-failure path.
+        startupScope.launch {
+            try {
+                repopulateProviders()
+            } catch (e: Throwable) {
+                e.rethrowIfCancellation()
+                analytics.recordNonFatal(
+                    e,
+                    mapOf(AnalyticsTracker.Params.ERROR to "startup_provider_repopulate_failed"),
+                )
+            }
+        }
     }
 
     companion object {

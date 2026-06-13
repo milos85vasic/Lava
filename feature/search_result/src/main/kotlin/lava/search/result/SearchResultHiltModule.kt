@@ -4,7 +4,6 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ViewModelComponent
-import lava.network.sse.SseBaseUrlBuilder
 import lava.network.sse.SseClientFactory
 
 /**
@@ -29,6 +28,8 @@ object SearchResultHiltModule {
     @Provides
     fun sseClientFactory(): SseClientFactory = SseClientFactory.Default
 
-    @Provides
-    fun sseBaseUrlBuilder(): SseBaseUrlBuilder = SseBaseUrlBuilder.Https
+    // SseBaseUrlBuilder is now provided app-wide at SingletonComponent scope
+    // (app/StartupProvidersModule) because RepopulateProvidersOnStartupUseCase
+    // needs it at cold start; ViewModelComponent inherits it, so this module no
+    // longer binds it (a duplicate here would be a Hilt double-binding error).
 }
