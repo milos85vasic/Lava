@@ -5,6 +5,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.collectLatest
 import lava.auth.api.AuthService
 import lava.common.analytics.AnalyticsTracker
+import lava.common.analytics.rethrowIfCancellation
 import lava.credentials.ProviderCredentialManager
 import lava.designsystem.color.ProviderColors
 import lava.domain.usecase.ClearBookmarksUseCase
@@ -96,6 +97,7 @@ internal class MenuViewModel @Inject constructor(
                 try {
                     sdk.checkAuth(descriptor.trackerId)
                 } catch (e: Throwable) {
+                    e.rethrowIfCancellation()
                     analytics.recordNonFatal(e, mapOf(AnalyticsTracker.Params.PROVIDER to descriptor.trackerId))
                     null
                 }
@@ -106,6 +108,7 @@ internal class MenuViewModel @Inject constructor(
             val credentials = try {
                 credentialManager.getCredentials(descriptor.trackerId)
             } catch (e: Throwable) {
+                e.rethrowIfCancellation()
                 analytics.recordNonFatal(e, mapOf(AnalyticsTracker.Params.PROVIDER to descriptor.trackerId))
                 null
             }
@@ -145,6 +148,7 @@ internal class MenuViewModel @Inject constructor(
         try {
             authService.logout()
         } catch (e: Throwable) {
+            e.rethrowIfCancellation()
             analytics.recordNonFatal(e, mapOf(AnalyticsTracker.Params.PROVIDER to providerId))
         }
         try {
@@ -154,11 +158,13 @@ internal class MenuViewModel @Inject constructor(
                 sdk.logout(providerId)
             }
         } catch (e: Throwable) {
+            e.rethrowIfCancellation()
             analytics.recordNonFatal(e, mapOf(AnalyticsTracker.Params.PROVIDER to providerId))
         }
         try {
             credentialManager.clear(providerId)
         } catch (e: Throwable) {
+            e.rethrowIfCancellation()
             analytics.recordNonFatal(e, mapOf(AnalyticsTracker.Params.PROVIDER to providerId))
         }
         loadProviders()

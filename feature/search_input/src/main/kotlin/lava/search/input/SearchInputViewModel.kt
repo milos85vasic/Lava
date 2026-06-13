@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import lava.common.analytics.AnalyticsTracker
+import lava.common.analytics.rethrowIfCancellation
 import lava.common.newCancelableScope
 import lava.common.relaunch
 import lava.credentials.ProviderConfigRepository
@@ -115,6 +116,7 @@ internal class SearchInputViewModel @Inject constructor(
                     reduce { state.copy(suggests = suggests) }
                 }
             } catch (e: Exception) {
+                e.rethrowIfCancellation()
                 analytics.recordNonFatal(e, mapOf(AnalyticsTracker.Params.QUERY to value.text))
             }
         }

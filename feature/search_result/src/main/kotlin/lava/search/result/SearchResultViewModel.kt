@@ -14,6 +14,7 @@ import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import lava.common.analytics.AnalyticsTracker
+import lava.common.analytics.rethrowIfCancellation
 import lava.domain.model.PagingAction
 import lava.domain.model.append
 import lava.domain.model.retry
@@ -101,6 +102,7 @@ internal class SearchResultViewModel @Inject constructor(
         return try {
             observeSettingsUseCase().first().endpoint is Endpoint.GoApi
         } catch (t: Throwable) {
+            t.rethrowIfCancellation()
             // no-telemetry: feature-flag-style endpoint probe — the
             // boolean false return causes the ViewModel to fall through
             // to the client-direct SDK path (SP-4 Phase D), which IS the
@@ -233,14 +235,58 @@ internal class SearchResultViewModel @Inject constructor(
      * Visibility: internal so the retry test can drive the real transition.
      */
     internal fun applySseError(reason: String, query: String) = intent {
-        analytics.recordNonFatal(
-            IllegalStateException("SSE error: $reason"),
-            mapOf(AnalyticsTracker.Params.QUERY to query),
-        )
+        // §6.O telemetry refinement for Crashlytics issue `3937b7f0…`
+        // (NON_FATAL "Unable to resolve host lava-api.local", 1.3.0). An
+        // mDNS `.local` host that won't resolve, a refused connection, or a
+        // timed-out connect are EXPECTED connectivity conditions when the
+        // lava-api-go engine app is not running or the device has left the
+        // LAN — NOT backend defects. Recording each one as a non-fatal
+        // (which surfaces in the crash feed) pollutes the feed the same way
+        // the §6.AC cancellation noise did. Classify connectivity-class
+        // reasons as a lower-severity warning (still operator-visible for
+        // triage) and reserve recordNonFatal for genuine stream/backend
+        // errors. The user-visible Error + Retry state is UNCHANGED — the
+        // user still sees an actionable error and can retry.
+        if (reason.isConnectivityFailure()) {
+            analytics.recordWarning(
+                "sse_endpoint_unreachable",
+                mapOf(
+                    AnalyticsTracker.Params.QUERY to query,
+                    // The sink (FirebaseAnalyticsTracker) caps values at its
+                    // own MAX_VALUE_CHARS; no extra truncation needed here.
+                    AnalyticsTracker.Params.ERROR to reason,
+                ),
+            )
+        } else {
+            analytics.recordNonFatal(
+                IllegalStateException("SSE error: $reason"),
+                mapOf(AnalyticsTracker.Params.QUERY to query),
+            )
+        }
         reduce {
             state.copy(searchContent = SearchResultContent.Error(reason))
         }
         postSideEffect(SearchResultSideEffect.ShowFallbackDismissedError("SSE"))
+    }
+
+    /**
+     * True if an SSE [SseEvent.Error] message describes an EXPECTED
+     * connectivity condition rather than a backend defect. The SSE client
+     * formats connect-time failures as `"Connection failed: <cause>"`
+     * (see `SseClient.connect`), where `<cause>` is the OkHttp/JDK message —
+     * e.g. `Unable to resolve host "lava-api.local"` (UnknownHostException,
+     * the mDNS engine not on the LAN), `Failed to connect to ...` /
+     * `Connection refused` (engine not listening), or `timeout`.
+     */
+    private fun String.isConnectivityFailure(): Boolean {
+        val r = lowercase()
+        return r.contains("unable to resolve host") ||
+            r.contains("connection failed") ||
+            r.contains("failed to connect") ||
+            r.contains("connection refused") ||
+            r.contains("unknownhost") ||
+            r.contains("timeout") ||
+            r.contains("timed out")
     }
 
     private fun onFallbackAccept() = intent {
@@ -416,6 +462,7 @@ internal class SearchResultViewModel @Inject constructor(
     private fun onFavoriteClick(topicModel: TopicModel<out Topic>) = intent {
         runCatching { toggleFavoriteUseCase(topicModel.topic.id) }
             .onFailure {
+                it.rethrowIfCancellation()
                 analytics.recordNonFatal(
                     it,
                     mapOf(AnalyticsTracker.Params.TOPIC_ID to topicModel.topic.id),

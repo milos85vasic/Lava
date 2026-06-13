@@ -1110,3 +1110,63 @@ regenerated `0d7da603`; `check-api-app-sync.sh` GREEN. Evidence:
 **Follow-up:** TPB (apibay.org) + Torrents-CSV (torrents-csv.com) still hardcode
 a single domain — same rotation-risk class; mirror-failover hardening noted as a
 follow-up.
+
+## Crashlytics remediation sweep — 6 open issues (2026-06-13)
+
+Operator directive: investigate ALL open Crashlytics issues, systematic-debug,
+fix/improve, cover with falsifiable validation tests + §6.O closure logs. Real
+data pulled from Firebase (project `lava-vasic-digital`, release app). Per-issue:
+
+- **`7df61fdb` NON_FATAL JobCancellationException (8 events, 1.2.21) — FIXED.**
+  Catch-site rethrow (defense-in-depth over the prior sink-level filter). New
+  `Throwable.rethrowIfCancellation()` in `core/common/.../analytics/CancellationRethrow.kt`
+  called first in every coroutine catch/onFailure that records a non-fatal across
+  8 ViewModels (onboarding, login, menu, search_input, search_result, topic,
+  bookmarks, favorites). Root cause: broad `catch (e: Exception)` swallowed
+  Kotlin's structured-concurrency `CancellationException` — both telemetry
+  pollution AND broken cooperative cancellation. Test:
+  `core/common/.../CancellationRethrowTest.kt` (5 tests). Bluff-Audit: no-op the
+  rethrow → 3 tests RED at CancellationRethrowTest.kt:75; reverted.
+  Closure: `.lava-ci-evidence/crashlytics-resolved/2026-06-13-jobcancellation-catch-site-rethrow.md`.
+
+- **`40a62f97` FATAL painterResource layer-list (1.2.19) — VERIFIED already
+  covered.** `LavaIconsAppIconColorRegressionTest` + closure
+  `2026-05-14-welcome-layerlist-painter-crash.md` already in place. No change.
+
+- **`39469d3b` FATAL okhttp schemeless URL "djdnjd" (1.2.21) — FIXED (owed
+  regression test added).** The prior closure admitted the use-case test was
+  "owed in a follow-up"; this is it. New
+  `ProbeMirrorUseCaseTest.schemeless URL returns Unreachable instead of crashing`
+  (real `ProbeMirrorUseCase` + real OkHttpClient). Bluff-Audit: change the
+  `catch (IllegalArgumentException)` to a non-matching type → test RED with the
+  leaked `IllegalArgumentException` at :80; reverted.
+  Closure: `.lava-ci-evidence/crashlytics-resolved/2026-06-13-probemirror-schemeless-url-regression.md`.
+
+- **`042b9b61` NON_FATAL CertPath trust-anchor (1.3.3) — VERIFIED already
+  covered.** Fixed at 1.3.4 (commit `0deb54e7`); `ProviderCatalogRepositoryTest`
+  uses a self-signed-TLS MockWebServer; closure
+  `2026-06-12-provider-catalog-fetch-tls.md` present. No change.
+
+- **`6519b490` NON_FATAL rutracker parseUserId "user-id not found" (1.2.22) —
+  WORKING-AS-DESIGNED (no production change).** New
+  `GetCurrentProfileUseCaseUserIdTest` proves the 4 production selectors DO parse
+  a logged-in page (not stale) and the non-fatal fires only on a genuine
+  guest/expired page. The logged-in test is the future staleness canary.
+  Bluff-Audit: reduce selectors to a non-matching one → canary RED at :100;
+  reverted. Closure: `.lava-ci-evidence/crashlytics-resolved/2026-06-13-rutracker-parseuserid-guest-page.md`.
+
+- **`3937b7f0` NON_FATAL SSE "Unable to resolve host lava-api.local" (1.3.0) —
+  IMPROVED.** `SearchResultViewModel.applySseError` now classifies
+  connectivity-class reasons (host-resolve / refused / timeout) as a
+  lower-severity `recordWarning("sse_endpoint_unreachable")` instead of a
+  crash-feed non-fatal; genuine backend errors stay non-fatals. User-visible
+  Error + Retry UX unchanged. New `String.isConnectivityFailure()` helper. Test:
+  `SearchResultSseConnectivityTelemetryTest` (2 tests). Bluff-Audit: force the
+  classifier to `if (false)` → host-resolve test RED; reverted.
+  Closure: `.lava-ci-evidence/crashlytics-resolved/2026-06-13-sse-host-resolve-telemetry-severity.md`.
+
+**Affected production files:** `core/common/.../analytics/CancellationRethrow.kt` (new);
+8 feature ViewModels (rethrow calls); `core/common/build.gradle.kts`
+(coroutines-test dep); `feature/search_result/.../SearchResultViewModel.kt`
+(SSE severity classifier). `ProbeMirrorUseCase.kt` + rutracker
+`GetCurrentProfileUseCase.kt` UNCHANGED (already-correct fixes; tests added).

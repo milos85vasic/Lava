@@ -6,6 +6,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.first
 import lava.auth.api.AuthService
 import lava.common.analytics.AnalyticsTracker
+import lava.common.analytics.rethrowIfCancellation
 import lava.credentials.ProviderCredentialManager
 import lava.domain.usecase.ValidateInputUseCase
 import lava.logger.api.LoggerFactory
@@ -86,6 +87,7 @@ internal class ProviderLoginViewModel @Inject constructor(
             }
             reduce { state.copy(isLoading = false, providers = items) }
         } catch (t: Throwable) {
+            t.rethrowIfCancellation()
             analytics.recordNonFatal(t, mapOf(AnalyticsTracker.Params.ERROR to "load_providers_failed"))
             logger.e(t) { "Failed to load providers" }
             reduce { state.copy(isLoading = false, error = t.message) }
@@ -286,6 +288,7 @@ internal class ProviderLoginViewModel @Inject constructor(
             }
             runCatching { sdk.switchTracker(providerId) }
                 .onFailure {
+                    it.rethrowIfCancellation()
                     analytics.recordNonFatal(
                         it,
                         mapOf(AnalyticsTracker.Params.PROVIDER to providerId),
@@ -355,6 +358,7 @@ internal class ProviderLoginViewModel @Inject constructor(
                 logger.d { "Tracker $providerId does not support auth" }
                 runCatching { sdk.switchTracker(providerId) }
                     .onFailure {
+                        it.rethrowIfCancellation()
                         analytics.recordNonFatal(
                             it,
                             mapOf(AnalyticsTracker.Params.PROVIDER to providerId),
@@ -379,6 +383,7 @@ internal class ProviderLoginViewModel @Inject constructor(
                         )
                         runCatching { sdk.switchTracker(providerId) }
                             .onFailure {
+                                it.rethrowIfCancellation()
                                 analytics.recordNonFatal(
                                     it,
                                     mapOf(AnalyticsTracker.Params.PROVIDER to providerId),

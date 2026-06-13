@@ -8,6 +8,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collectLatest
 import lava.common.analytics.AnalyticsTracker
+import lava.common.analytics.rethrowIfCancellation
 import lava.domain.model.PagingAction
 import lava.domain.model.refresh
 import lava.domain.model.retry
@@ -113,6 +114,7 @@ internal class TopicViewModel @Inject constructor(
                 }
             }
             .onFailure { err ->
+                err.rethrowIfCancellation()
                 analytics.recordNonFatal(
                     err,
                     mapOf(
@@ -182,6 +184,7 @@ internal class TopicViewModel @Inject constructor(
         // persists its provider id and later routes to HTTP_DOWNLOAD.
         runCatching { toggleFavoriteUseCase(id, providerId.ifBlank { null }) }
             .onFailure {
+                it.rethrowIfCancellation()
                 analytics.recordNonFatal(
                     it,
                     mapOf(AnalyticsTracker.Params.TOPIC_ID to id.toString()),

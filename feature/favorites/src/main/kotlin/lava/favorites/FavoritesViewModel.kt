@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.collectLatest
 import lava.common.analytics.AnalyticsTracker
+import lava.common.analytics.rethrowIfCancellation
 import lava.domain.usecase.ObserveFavoritesUseCase
 import lava.domain.usecase.RefreshFavoritesUseCase
 import lava.logger.api.LoggerFactory
@@ -73,6 +74,7 @@ class FavoritesViewModel @Inject constructor(
         try {
             refreshFavoritesUseCase()
         } catch (e: Exception) {
+            e.rethrowIfCancellation()
             analytics.recordNonFatal(e, mapOf(AnalyticsTracker.Params.ERROR to "sync_favorites_failed"))
             logger.e(e) { "Sync now failed" }
         }

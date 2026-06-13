@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.collectLatest
 import lava.common.analytics.AnalyticsTracker
+import lava.common.analytics.rethrowIfCancellation
 import lava.domain.usecase.ObserveBookmarksUseCase
 import lava.domain.usecase.SyncBookmarksUseCase
 import lava.logger.api.LoggerFactory
@@ -66,6 +67,7 @@ internal class BookmarksViewModel @Inject constructor(
         try {
             syncBookmarksUseCase()
         } catch (e: Exception) {
+            e.rethrowIfCancellation()
             analytics.recordNonFatal(e, mapOf(AnalyticsTracker.Params.ERROR to "sync_bookmarks_failed"))
             logger.e(e) { "Sync now failed" }
         }

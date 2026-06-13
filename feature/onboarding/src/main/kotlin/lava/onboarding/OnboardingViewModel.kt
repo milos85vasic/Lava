@@ -12,6 +12,7 @@ import lava.applink.AppLinkContract
 import lava.applink.SiblingAppLauncher
 import lava.auth.api.AuthService
 import lava.common.analytics.AnalyticsTracker
+import lava.common.analytics.rethrowIfCancellation
 import lava.credentials.ProviderCredentialManager
 import lava.data.api.repository.EndpointsRepository
 import lava.data.api.service.ConnectionService
@@ -302,6 +303,7 @@ class OnboardingViewModel @Inject constructor(
                     }
                 }
             } catch (e: Exception) {
+                e.rethrowIfCancellation()
                 logger.e(t = e) { "ApiSelection probe failed for $endpoint" }
                 analytics.recordNonFatal(
                     e,
@@ -527,6 +529,7 @@ class OnboardingViewModel @Inject constructor(
                 }
                 advanceToNextProvider()
             } catch (e: Exception) {
+                e.rethrowIfCancellation()
                 logger.e(t = e) { "Connection test failed for $currentId" }
                 analytics.recordNonFatal(
                     e,
@@ -682,6 +685,7 @@ class OnboardingViewModel @Inject constructor(
         val apiKey: String? = try {
             apiKeyReader?.invoke(AppLinkContract.API_RELEASE_PACKAGE + ".keyprovider")
         } catch (e: Exception) {
+            e.rethrowIfCancellation()
             logger.d { "apiKeyReader threw (engine not running?) — proceeding to probe without key" }
             analytics.recordWarning(
                 "on_device_api_key_read_failed",
@@ -748,6 +752,7 @@ class OnboardingViewModel @Inject constructor(
                     null
                 },
                 onFailure = { e ->
+                    e.rethrowIfCancellation()
                     analytics.recordNonFatal(
                         e,
                         mapOf(AnalyticsTracker.Params.ERROR to "provider_catalog_fetch_failed"),
@@ -756,6 +761,7 @@ class OnboardingViewModel @Inject constructor(
                 },
             )
         } catch (e: Exception) {
+            e.rethrowIfCancellation()
             logger.e(t = e) { "Provider catalogue fetch failed for $endpoint" }
             analytics.recordNonFatal(
                 e,
