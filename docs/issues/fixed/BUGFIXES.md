@@ -91,6 +91,52 @@ HTTP 503: provider: unknown error`. Reverted: yes (both re-run `ok`).
 **Forensic anchor:** YTS domain-failover fix
 `.lava-ci-evidence/bluff-hunt/2026-06-13-yts-domain-failover.json`; the same
 single-domain rotation class applied to the two sibling curated providers.
+## 2026-06-13 — Tokyo Toshokan curated provider added (Defect B — anime/Asian-media RSS, honest CapSearch)
+
+**Type:** feature (curated embedded provider), logged here per §6.T.4 because it
+extends the user-reachable provider catalogue.
+
+**What:** new compiled-in curated provider `tokyotosho`
+(`lava-api-go/internal/provider/curated/tokyotosho/`) sourcing the public Tokyo
+Toshokan RSS search feed (`https://www.tokyotosho.info/rss.php?terms=<q>`),
+AuthType NONE / SupportsAnonymous true, capabilities SEARCH + MAGNET_LINK.
+Registered in `curated.RegisterAll` (both startup paths). Broadens the
+anime/Asian-media niche alongside `nyaa`.
+
+**Wire-shape specifics (differ from nyaa):** the magnet is embedded in each
+item's `<description>` CDATA HTML (`<a href="magnet:?xt=urn:btih:<HASH>…">`),
+extracted by regex; the info_hash is BASE32 (32 chars), not 40-hex; the RSS
+carries NO seeders field, so `Seeders` defaults to 0 (documented, honest
+absence); size is decimal SI (`113.89MB` → 113890000 bytes), not nyaa's IEC.
+
+**§6.E honesty (the load-bearing check):** the `terms=` parameter genuinely
+filters — verified LIVE 2026-06-13 (real HTTP): `terms=naruto` → 93% of titles
+contain "naruto"; `terms=bleach` → 98% contain "bleach"; the empty feed contains
+neither; naruto vs bleach result sets are near-disjoint (2 of ~140 overlap). So
+CapSearch is honest — NOT the EZTV/Knaben-`search_type` no-op-query bluff. The
+`//go:build realtrackers` `TestLive_QueryActuallyFilters` encodes both proofs
+(term-match-rate ≥ 50% + ≤ 50% cross-query info_hash overlap) and PASSED against
+the real endpoint.
+
+**Affected files:** `lava-api-go/internal/provider/curated/tokyotosho/{client.go,provider.go,tokyotosho_test.go,live_realtrackers_test.go,testdata/tokyotosho_naruto.xml}` (new); `lava-api-go/internal/provider/curated/curated.go` (one import + one `r.Register` line); `core/apiengine/src/main/resources/api-source.hash` (recomputed).
+
+**Verification:** fixture test `tokyotosho_test.go` (real Client + httptest.Server
+serving captured real RSS bytes; asserts parsed title/infohash/magnet/size/no-magnet-filter)
++ live `live_realtrackers_test.go` (`TestLive_SearchReturnsRealMagnets` +
+`TestLive_QueryActuallyFilters`, both PASS against the real endpoint).
+`go test ./internal/provider/curated/...` = all `ok`.
+
+**Bluff-Audit (§6.J clause 2 / Seventh Law clause 1):**
+- Mutation: `extractInfoHash` returns `""` unconditionally (magnet extraction off)
+  → `TestSearch_ParsesFixture` FAILED `got 0 results, want 2 (the no-magnet row must be filtered)`. Reverted.
+- Mutation: send the query as `xterms` not `terms` (query-not-sent under the
+  honored name) → `TestSearch_SendsTermsParam` FAILED `Search: tokyotosho: HTTP 400: provider: unknown error`. Reverted.
+- Mutation: `MB` multiplier `1e6 → 1<<20` (IEC instead of decimal SI) →
+  `TestSearch_ParsesFixture` FAILED `sizeBytes = 119422320, want 113890000 (113.89 MB decimal)`. Reverted.
+
+**Fix commit:** see this commit (worktree).
+
+---
 
 ## 2026-06-13 — onboarding catalogue fetch 401 against a freshly-discovered API (`GET /providers` auth-gated)
 
