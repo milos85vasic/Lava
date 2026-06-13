@@ -35,6 +35,54 @@ Format per entry:
 
 ---
 
+## 2026-06-13 — onboarding catalogue fetch 401 against a freshly-discovered API (`GET /providers` auth-gated)
+
+**Root cause:** `lava-api-go/internal/router/router.go` registered
+`engine.GET("/providers", …)` AFTER `engine.Use(auth.GinMiddleware())` (and the
+`auth.NewMiddleware` chain). The provider catalogue is the endpoint the Android
+client fetches during ONBOARDING against an API it has just discovered on the LAN —
+at which point the client holds no pre-shared `Lava-Auth` key with that API. The
+auth gate therefore rejected the fetch with HTTP 401 → `OnboardingViewModel`
+`fetchAndPopulateProviders` caught the failure and surfaced
+`PROVIDER_CATALOG_FALLBACK_NOTICE` ("Couldn't reach the selected API — showing
+bundled providers"), so a perfectly reachable API showed the bundled fallback. This
+is distinct from Defect A (2026-06-12, a TLS+missing-key client problem on the
+*client* side); Defect A's fix made the client send the key, but the api-app's
+allowlist need not include a just-discovered client at all — the catalogue is
+public metadata and must not be gated in the first place.
+
+**Affected files:** `lava-api-go/internal/router/router.go` (registration moved
+before the auth middleware, with rationale comment + a NOTE where it used to live);
+`lava-api-go/internal/router/router_config_wiring_test.go` (+`TestBuild_ProvidersOpenWithFullAuthChain`);
+`lava-api-go/tests/contract/providers_public_auth_boundary_test.go` (new, real-binary 3-way boundary);
+`feature/onboarding/src/test/kotlin/lava/onboarding/OnboardingViewModelDynamicProvidersTest.kt`
+(+replace-not-merge success test + no-banner-on-success assertion);
+`core/apiengine/src/main/resources/api-source.hash` (recomputed).
+
+**Fix:** register `GET /providers` BEFORE the auth middleware, alongside
+`/health`+`/ready`. It is public, non-sensitive provider metadata (ids,
+capabilities, authType, baseUrls — no credentials, no user data). Per-provider
+operations under `/v1/:provider/…` remain fully auth-gated. The standalone binary
+and the embedded api-app share the exact `router.Build`, so the one edit fixes both
+surfaces (DRY; a divergent embed router would be a §6.J bluff vector).
+
+**Verification test/challenge:** server `TestBuild_ProvidersOpenWithFullAuthChain`
+(unit) + `TestProviders_PublicCatalogue_PerProviderStillGated` (real-binary e2e,
+proves unauth `/providers`→200 while unauth `/v1/…`→401 and authed `/v1/…` crosses
+the gate); client `OnboardingViewModelDynamicProvidersTest` (success → exactly the
+API's set, bundled-absent, no banner; failure → banner + non-blank). Every layer's
+falsifiability mutation re-performed by the main stream (not trusted from the
+subagent worktree): gate `/providers` → e2e sub-test A 401; drop `populateFrom` →
+replace test FAILED; success-emits-banner → assertNull FAILED. All reverted GREEN.
+
+**Fix commit:** `9ae9ab90` (server fix) + `132d1b07` (real-binary e2e) +
+`99e5893a`/`6ce100bc` (client full-flow tests).
+
+**Forensic anchor:** operator real-device report (2026-06-13) — "choose discovered
+API 192.168.0.107:8443 → next screen shows 'Couldn't reach the selected API —
+showing bundled providers'". Crashlytics non-fatal `47b000d5`
+(`provider_catalog_fetch_failed`, HTTP 401).
+
 ## 2026-06-12 — provider-catalogue fetch fails self-signed-LAN TLS handshake (Defect A — "only 4 providers")
 
 **Root cause:** `ProviderCatalogRepository` injected the *unqualified* strict-TLS

@@ -1,4 +1,31 @@
 # Changelog
+## Lava-Android-1.3.6-1063 — 2026-06-13 (Onboarding now loads providers from the chosen API — fixes the "Couldn't reach the selected API" error)
+
+**Previous published:** Lava-Android-1.3.5-1062 (debug+release).
+
+- **The provider list now comes from the API you choose** — when you pick a
+  discovered API on the "Choose your API" onboarding step, the next screen now
+  correctly loads **that API's** provider catalogue. Previously, selecting a
+  perfectly-reachable API (e.g. your local API at `…:8443`) showed the error
+  **"Couldn't reach the selected API — showing bundled providers"** and fell back
+  to the built-in list. Root cause: the API's public provider-catalogue endpoint
+  (`GET /providers`) was incorrectly behind the authentication gate, so a freshly
+  discovered API — which has no pre-shared key yet during onboarding — was rejected
+  with HTTP 401. The catalogue is public, non-sensitive metadata (provider ids,
+  capabilities, sign-in type) and is now reachable without auth, exactly like the
+  health probe. Per-provider operations (search/download) remain fully
+  authenticated — only the catalogue listing was opened.
+- **Some APIs offer different providers** — because the list is now genuinely
+  sourced from the chosen API, an API that supports a different provider set than
+  the built-in one shows exactly its set (providers are taken **from** the API, not
+  merged with the built-in list).
+
+Paired server fix in the on-device API app (0.2.6-10) so the embedded API serves
+the public catalogue too. Covered by new automated full-flow tests: a real
+HTTP-stack test proving the catalogue is reachable without auth while per-provider
+calls stay gated, and an onboarding-flow test proving the wizard shows ONLY the
+chosen API's providers (and NO fallback banner) when the API is reachable.
+
 ## Lava-Android-1.3.5-1062 — 2026-06-13 (Onboarding back-navigation fix + full onboarding test coverage; device-verified)
 
 **Previous published:** Lava-Android-1.3.4-1061 (debug+release).
