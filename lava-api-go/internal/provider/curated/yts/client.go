@@ -18,18 +18,37 @@ import (
 	"digital.vasic.lava.apigo/internal/provider"
 )
 
-// DefaultBaseURL is the YTS JSON API base. yts.mx is YTS's own movie-search
-// API (protocol endpoint = the provider's identity, the same way the native
-// adapters encode their canonical base). §6.R: not a deployment address — it is
-// this provider's fixed upstream.
+// DefaultBaseURL is the canonical YTS JSON API base, kept for the single-URL
+// test seam. yts.mx is YTS's own movie-search API (protocol endpoint = the
+// provider's identity). §6.R: not a deployment address — it is this provider's
+// fixed upstream.
 const DefaultBaseURL = "https://yts.mx"
+
+// DefaultBaseURLs is the FAILOVER list of YTS API mirrors, tried in order. YTS
+// rotates its domain frequently under takedown pressure (yts.mx was observed
+// NXDOMAIN on public DNS on 2026-06-13 while yts.lt / yts.am served HTTP 200
+// "status":"ok" — see .lava-ci-evidence/bluff-hunt/2026-06-13-yts-domain-failover.json),
+// so hardcoding a single domain makes the provider silently unreachable the
+// moment that one domain drops. These are protocol mirrors of the SAME public
+// API (the provider's identity), not deployment addresses — package constants,
+// same §6.R rationale as publicTrackers below.
+var DefaultBaseURLs = []string{
+	"https://yts.mx",
+	"https://yts.bz",
+	"https://yts.lt",
+	"https://yts.am",
+}
 
 // searchPath is the YTS list_movies query endpoint.
 const searchPath = "/api/v2/list_movies.json"
 
-// DefaultTimeout bounds each upstream request when the caller does not supply a
-// pre-configured *http.Client.
+// DefaultTimeout bounds the whole HTTP client (TLS + headers + body).
 const DefaultTimeout = 20 * time.Second
+
+// perAttemptTimeout bounds EACH mirror attempt during failover so one
+// dead/hanging mirror (e.g. a stale yts.mx DNS entry that connects but stalls)
+// cannot consume the entire search budget. Only applied when >1 mirror is set.
+const perAttemptTimeout = 8 * time.Second
 
 // publicTrackers are well-known public BitTorrent tracker announce URLs added
 // to every built magnet so the link is usable without YTS supplying a tracker
@@ -43,23 +62,34 @@ var publicTrackers = []string{
 	"udp://tracker.torrent.eu.org:451/announce",
 }
 
-// Client talks to the YTS JSON API. The base URL + *http.Client are injectable
-// so tests drive it against an httptest.Server (no live calls in the default
-// `go test`).
+// Client talks to the YTS JSON API across a failover list of mirror base URLs.
+// The base URLs + *http.Client are injectable so tests drive it against
+// httptest.Servers (no live calls in the default `go test`).
 type Client struct {
-	baseURL string
-	http    *http.Client
+	baseURLs []string
+	http     *http.Client
 }
 
-// NewClient returns a Client for the given base URL (DefaultBaseURL when empty)
-// with a default-timeout HTTP client.
+// NewClient returns a single-base-URL Client (DefaultBaseURLs failover list when
+// empty). The single-URL form preserves the httptest seam used by the parser
+// tests; production registration uses NewClientWithMirrors(DefaultBaseURLs).
 func NewClient(baseURL string) *Client {
 	if baseURL == "" {
-		baseURL = DefaultBaseURL
+		return NewClientWithMirrors(DefaultBaseURLs)
+	}
+	return NewClientWithMirrors([]string{baseURL})
+}
+
+// NewClientWithMirrors returns a Client that tries each base URL in order until
+// one answers successfully — the resilience against YTS domain rotation.
+func NewClientWithMirrors(urls []string) *Client {
+	bases := make([]string, 0, len(urls))
+	for _, u := range urls {
+		bases = append(bases, strings.TrimRight(u, "/"))
 	}
 	return &Client{
-		baseURL: strings.TrimRight(baseURL, "/"),
-		http:    &http.Client{Timeout: DefaultTimeout},
+		baseURLs: bases,
+		http:     &http.Client{Timeout: DefaultTimeout},
 	}
 }
 
@@ -106,7 +136,40 @@ func (c *Client) Search(ctx context.Context, query string, page int) (*provider.
 		return &provider.SearchResult{Provider: providerID, Page: page, TotalPages: 1}, nil
 	}
 
-	u := c.baseURL + searchPath + "?" + url.Values{
+	// Failover: try each mirror in order, returning the first that answers
+	// successfully. A mirror that is DNS-dead (yts.mx as of 2026-06-13), 5xx,
+	// or otherwise errors is skipped; only an unreachable ENTIRE list surfaces
+	// the last error (so the historical single-host tests still see their 5xx).
+	// When more than one mirror is configured, each attempt is bounded by
+	// perAttemptTimeout so a single dead/hanging mirror cannot stall the whole
+	// search — failover stays snappy.
+	var lastErr error
+	for _, base := range c.baseURLs {
+		attemptCtx := ctx
+		var cancel context.CancelFunc
+		if len(c.baseURLs) > 1 {
+			attemptCtx, cancel = context.WithTimeout(ctx, perAttemptTimeout)
+		}
+		res, err := c.searchOne(attemptCtx, base, query)
+		if cancel != nil {
+			cancel()
+		}
+		if err == nil {
+			return res, nil
+		}
+		lastErr = err
+	}
+	if lastErr == nil {
+		// No base URLs configured at all.
+		lastErr = fmt.Errorf("%s: no mirrors configured: %w", providerID, provider.ErrUnknown)
+	}
+	return nil, lastErr
+}
+
+// searchOne performs a single-mirror query + parse. Search wraps it with
+// across-mirror failover.
+func (c *Client) searchOne(ctx context.Context, base, query string) (*provider.SearchResult, error) {
+	u := base + searchPath + "?" + url.Values{
 		"query_term": {query},
 		"limit":      {"50"},
 	}.Encode()

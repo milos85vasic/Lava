@@ -20,12 +20,16 @@ func TestLive_SearchReturnsRealMagnets(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	res, err := NewClient(DefaultBaseURL).Search(ctx, "1080p", 0)
+	// Use the production mirror failover list — a single hardcoded yts.mx would
+	// be NXDOMAIN-dead as of 2026-06-13; the provider must reach a live mirror.
+	// Query a real movie TITLE (YTS query_term searches titles; "1080p" matches
+	// no movie and legitimately returns 0).
+	res, err := NewClientWithMirrors(DefaultBaseURLs).Search(ctx, "interstellar", 0)
 	if err != nil {
-		t.Fatalf("live Search: %v", err)
+		t.Fatalf("live Search across mirrors %v: %v", DefaultBaseURLs, err)
 	}
 	if len(res.Results) == 0 {
-		t.Fatal("live YTS returned 0 results for '1080p' — provider is not user-reachable")
+		t.Fatal("live YTS returned 0 results for 'interstellar' across all mirrors — provider is not user-reachable")
 	}
 	for _, item := range res.Results {
 		if !hex40.MatchString(item.InfoHash) {

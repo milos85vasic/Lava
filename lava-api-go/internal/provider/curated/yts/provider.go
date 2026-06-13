@@ -31,8 +31,8 @@ func NewProviderAdapter(client *Client) *ProviderAdapter {
 }
 
 // New is the convenience constructor used at registration: a production client
-// against the default YTS base.
-func New() *ProviderAdapter { return NewProviderAdapter(NewClient(DefaultBaseURL)) }
+// across the YTS mirror failover list (yts.mx rotates out of DNS periodically).
+func New() *ProviderAdapter { return NewProviderAdapter(NewClientWithMirrors(DefaultBaseURLs)) }
 
 // ID returns the canonical provider identifier.
 func (a *ProviderAdapter) ID() string { return providerID }

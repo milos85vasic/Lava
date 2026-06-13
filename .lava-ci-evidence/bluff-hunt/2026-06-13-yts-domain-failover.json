@@ -1,0 +1,35 @@
+{
+  "date": "2026-06-13",
+  "trigger": "Main-stream §6.J re-verification of the curated providers shipped 2026-06-12 (TPB + YTS). Operator standing anti-bluff mandate (§6.L) + 'real results, no bluff' directive.",
+  "method": "Ran the documented falsifiability rehearsals AND the live `-tags realtrackers` tests for thepiratebay + yts, instead of trusting the prior commit-body claims (§6.J: verify, do not trust).",
+  "findings": [
+    {
+      "provider": "thepiratebay",
+      "verdict": "GENUINE",
+      "evidence": "Live realtrackers PASS (real apibay magnets). Documented mutation re-performed: Seeders<-Leechers -> 'thepiratebay_test.go:86: seeders = 3, want 142'; reverted -> green."
+    },
+    {
+      "provider": "yts",
+      "verdict": "REAL DEFECT — provider was NOT user-reachable",
+      "root_cause": "The provider hardcoded a single base URL https://yts.mx. As of 2026-06-13 yts.mx has NO A record on public DNS (1.1.1.1 and 8.8.8.8 both return <none>) — YTS rotated its domain out since the provider shipped 2026-06-12. The fixture unit tests passed (parser correct) while the LIVE call failed: 'live Search: yts: provider: unknown error'. Classic fixture-green / feature-broken-for-users (§6.G/§6.L).",
+      "probes": [
+        "dig +short A yts.mx @1.1.1.1 -> <none>; @8.8.8.8 -> <none>",
+        "dig +short A apibay.org @1.1.1.1 -> 104.21.62.171 (TPB host is fine; its earlier HTTP=000 was the flaky local resolver 127.17.53.243)",
+        "yts.lt / yts.am resolve and HTTP 301-redirect to yts.bz (the current live canonical YTS API host) -> 200 {\"status\":\"ok\"}",
+        "yts.bz query_term=interstellar -> movie_count 2; query_term=batman -> movie_count 55; query_term=1080p -> movie_count 0 (1080p is not a movie TITLE — explains the bad prior live-test query)"
+      ],
+      "fix": "Mirror failover: Client now holds a list of base URLs (DefaultBaseURLs = yts.mx, yts.bz, yts.lt, yts.am) tried in order; first successful answer wins; each attempt bounded by perAttemptTimeout=8s so a dead/hanging mirror cannot stall the search. NewClient(single) preserved as the httptest seam; New() registration uses NewClientWithMirrors(DefaultBaseURLs). Live realtrackers test fixed to query a real movie title (interstellar) and to use the mirror list.",
+      "falsifiability": {
+        "test": "TestSearch_FailsOverToHealthyMirror (yts_test.go)",
+        "mutation": "break the failover loop after the first iteration (only the first/dead mirror is tried)",
+        "observed": "yts_test.go:211: Search across [dead, healthy] mirrors should fail over, got error: yts: HTTP 503: provider: unknown error",
+        "reverted": "yes"
+      },
+      "live_after_fix": "go test -tags realtrackers -run TestLive ./internal/provider/curated/yts/... -> PASS in 0.559s (fast failover past dead yts.mx to a live mirror, real magnets returned)."
+    }
+  ],
+  "host_condition_note": "The local DNS resolver 127.17.53.243 was observed intermittently NXDOMAIN-ing working domains and HTTP=000-ing apibay.org during this session (§6.M Class III host condition, distinct from the yts.mx rotation). Public-resolver probes (@1.1.1.1 / @8.8.8.8) were used to isolate the genuine yts.mx death from the local resolver flake.",
+  "followups": [
+    "TPB (apibay.org) and Torrents-CSV (torrents-csv.com) still hardcode a single domain — same rotation risk class. Consider the same mirror-failover hardening as a follow-up (TPB has apibay mirrors; Torrents-CSV is currently single-homed)."
+  ]
+}

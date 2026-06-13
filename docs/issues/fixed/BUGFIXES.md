@@ -1073,3 +1073,40 @@ test correctly caught real source/embed drift — exactly its §6.A purpose.
 message prescribes. Verified: `go test ./tests/contract -run TestSourceHash` →
 3/3 PASS (incl. the falsifiability sibling `…ContentEditChangesHash`); full
 `go test ./...` → exit 0 (39 packages ok, real Postgres-in-podman e2e ran).
+
+## YTS curated provider unreachable — yts.mx domain rotated out of DNS (2026-06-13)
+
+**Symptom:** the YTS curated provider (shipped 2026-06-12, commit `462a0308`)
+passed all fixture unit tests but its LIVE call failed:
+`live Search: yts: provider: unknown error`. Surfaced by a main-stream §6.J
+re-verification (running the `-tags realtrackers` live tests instead of trusting
+the prior commit-body claim).
+
+**Root cause:** the provider hardcoded a single base URL `https://yts.mx`. As of
+2026-06-13 `yts.mx` has NO A record on public DNS (confirmed `dig @1.1.1.1` and
+`@8.8.8.8` both return `<none>`) — YTS rotated its domain since the provider
+shipped. The fixture parser was correct (unit tests green) while the feature was
+broken for real users (§6.G/§6.L fixture-green / feature-broken). The current
+live canonical host is `yts.bz` (yts.lt / yts.am 301-redirect to it).
+
+**Affected files:** `lava-api-go/internal/provider/curated/yts/{client.go,provider.go,live_realtrackers_test.go,yts_test.go}`.
+
+**Fix:** mirror failover — `Client` now holds a list of base URLs
+(`DefaultBaseURLs` = yts.mx, yts.bz, yts.lt, yts.am) tried in order; the first
+successful answer wins; each attempt is bounded by `perAttemptTimeout` (8s) so a
+dead/hanging mirror cannot stall the search. `NewClient(single)` preserved as the
+httptest seam; production `New()` uses `NewClientWithMirrors(DefaultBaseURLs)`.
+The live test now queries a real movie TITLE (`interstellar`; `1080p` matches no
+movie and legitimately returns 0) across the mirror list.
+
+**Verification:** new `TestSearch_FailsOverToHealthyMirror` (falsifiable: break
+the failover loop → `Search across [dead, healthy] mirrors should fail over, got
+error: yts: HTTP 503`; reverted) + `TestSearch_AllMirrorsDownSurfacesError`.
+Live `-tags realtrackers` PASS in 0.559s (fast failover past dead yts.mx to a
+live mirror, real magnets). Full `go test ./...` → 0 FAIL; embed source-hash
+regenerated `0d7da603`; `check-api-app-sync.sh` GREEN. Evidence:
+`.lava-ci-evidence/bluff-hunt/2026-06-13-yts-domain-failover.json`.
+
+**Follow-up:** TPB (apibay.org) + Torrents-CSV (torrents-csv.com) still hardcode
+a single domain — same rotation-risk class; mirror-failover hardening noted as a
+follow-up.

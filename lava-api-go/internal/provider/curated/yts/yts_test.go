@@ -170,6 +170,74 @@ func TestSearch_ServerErrorSurfaces(t *testing.T) {
 	}
 }
 
+// TestSearch_FailsOverToHealthyMirror proves the YTS-domain-rotation fix: when
+// the first mirror is dead (the real-world yts.mx NXDOMAIN case, simulated here
+// by a 503 server), Search transparently falls over to a healthy mirror and
+// returns its real parsed results. The primary assertion is on user-visible
+// SearchItem data sourced from the SECOND server — not a call count.
+//
+// FALSIFIABILITY REHEARSAL (§6.J clause 2) — recorded in the Bluff-Audit stamp:
+//
+//	Mutation: in client.go Search, `return nil, lastErr` after the FIRST
+//	          iteration (break the failover loop so only the first mirror is
+//	          tried).
+//	Observed: TestSearch_FailsOverToHealthyMirror → "Search: yts: HTTP 503:
+//	          unknown error" (the dead first mirror's error surfaces instead of
+//	          the healthy mirror's results).
+//	Reverted: yes.
+func TestSearch_FailsOverToHealthyMirror(t *testing.T) {
+	dead := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusServiceUnavailable)
+	}))
+	t.Cleanup(dead.Close)
+
+	body, err := os.ReadFile(filepath.Join("testdata", "yts_ubuntu.json"))
+	if err != nil {
+		t.Fatalf("read fixture: %v", err)
+	}
+	healthy := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != searchPath {
+			http.NotFound(w, r)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write(body)
+	}))
+	t.Cleanup(healthy.Close)
+
+	c := NewClientWithMirrors([]string{dead.URL, healthy.URL})
+	res, err := c.Search(context.Background(), "ubuntu", 0)
+	if err != nil {
+		t.Fatalf("Search across [dead, healthy] mirrors should fail over, got error: %v", err)
+	}
+	// Results came from the SECOND (healthy) mirror's fixture.
+	if len(res.Results) != 2 {
+		t.Fatalf("got %d results, want 2 (parsed from the healthy fallback mirror)", len(res.Results))
+	}
+	const wantHash = "34930674ef3bb9317fb5f263cca830c52a1e5da8"
+	if res.Results[0].InfoHash != wantHash {
+		t.Errorf("first infoHash = %q, want %q (from the healthy mirror)", res.Results[0].InfoHash, wantHash)
+	}
+}
+
+// TestSearch_AllMirrorsDownSurfacesError proves failover does not hide a total
+// outage: when EVERY mirror errors, the last error surfaces (no fake success).
+func TestSearch_AllMirrorsDownSurfacesError(t *testing.T) {
+	dead1 := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusServiceUnavailable)
+	}))
+	t.Cleanup(dead1.Close)
+	dead2 := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusBadGateway)
+	}))
+	t.Cleanup(dead2.Close)
+
+	c := NewClientWithMirrors([]string{dead1.URL, dead2.URL})
+	if _, err := c.Search(context.Background(), "ubuntu", 0); err == nil {
+		t.Fatal("all mirrors down must surface an error, not a fake empty success")
+	}
+}
+
 // Provider-adapter contract: capabilities are honest (§6.E) + the catalogue
 // metadata reflects an anonymous, magnet-only public tracker.
 func TestProviderAdapter_CatalogueMetadata(t *testing.T) {
