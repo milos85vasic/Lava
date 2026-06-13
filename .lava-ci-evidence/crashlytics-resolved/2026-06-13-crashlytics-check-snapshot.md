@@ -46,3 +46,11 @@ api-app builds will report here; this is honest (not a gap), the wiring is new.
   already-fixed (`042b9b61` Defect-A), 2 to investigate (`6519b490`, `3937b7f0`).
 - No false "all clear" — every issue is enumerated with its real event count +
   version + disposition.
+
+## All-apps Crashlytics sweep (completed 2026-06-13)
+Per the operator "ALWAYS check ALL of it" mandate, all 4 Firebase apps checked:
+- **client release** (`…456475e2…`): 6 issues — enumerated above, handled (remediation `333c6c6e`).
+- **client debug** (`…54ca2ca3…`): NO data (debug builds not distributed — expected).
+- **api-app release** (`…d57b960e…`): NO data (request times out — Crashlytics only just wired `07f83eef`, build not yet distributed — honest, not a gap).
+- **api-app debug** (`…2932451e…`): NO data (same — freshly wired).
+Once the Crashlytics-wired api-app build is distributed, the api-app surfaces will report and MUST be checked per §11.4.152.
