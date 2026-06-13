@@ -174,7 +174,7 @@ func TestProvidersHandler_IncludesRealCuratedProvidersEndToEnd(t *testing.T) {
 
 	// Every curated public-tracker provider MUST appear in the body with honest
 	// SEARCH + MAGNET_LINK caps, anonymous + AuthNone, compiled-in (native).
-	for _, id := range []string{"thepiratebay", "yts", "torrentscsv"} {
+	for _, id := range []string{"thepiratebay", "yts", "torrentscsv", "bitsearch"} {
 		got, ok := byID[id]
 		if !ok {
 			t.Fatalf("GET /providers body is missing curated provider %q (registry→handler→body drift)", id)

@@ -1,0 +1,43 @@
+{
+  "results": [
+    {
+      "id": "5cb8afc48700981f3e5b00c4",
+      "infohash": "D540FC48EB12F2833163EED6421D449DD8F1CE1F",
+      "title": "ubuntu-19.04-desktop-amd64.iso",
+      "size": 2097152000,
+      "category": 1,
+      "subCategory": 7,
+      "seeders": 28,
+      "leechers": 41,
+      "downloads": 0,
+      "verified": false,
+      "updatedAt": "2026-06-13T08:15:34.896Z"
+    },
+    {
+      "id": "6cb8afc48700981f3e5b00d5",
+      "infohash": "f33ca2c8a4255b223005e90548142e94487d1e0f",
+      "title": "debian-12.10.0-amd64-DVD-1.iso",
+      "size": 4096000000,
+      "category": 1,
+      "subCategory": 7,
+      "seeders": 10,
+      "leechers": 2,
+      "downloads": 0,
+      "verified": true,
+      "updatedAt": ""
+    },
+    {
+      "id": "7cb8afc48700981f3e5b00e6",
+      "infohash": "deadbeef",
+      "title": "synthetic edge row: short non-40-hex infohash must be filtered",
+      "size": 1,
+      "category": 1,
+      "subCategory": 7,
+      "seeders": 1,
+      "leechers": 0,
+      "downloads": 0,
+      "verified": false,
+      "updatedAt": "2026-06-13T00:00:00.000Z"
+    }
+  ]
+}
