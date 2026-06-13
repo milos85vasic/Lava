@@ -217,8 +217,12 @@ class Challenge39DynamicProviderDiscoveryTest {
 
         // Step 4: deselect the bundled defaults, keep only the API-only provider.
         arrayOf(
-            "RuTracker.org", "RuTor.info", "Kinozal.tv", "NNM-Club",
-            "Project Gutenberg", "Internet Archive",
+            "RuTracker.org",
+            "RuTor.info",
+            "Kinozal.tv",
+            "NNM-Club",
+            "Project Gutenberg",
+            "Internet Archive",
         ).forEach { name ->
             try { composeRule.onNodeWithText(name).performClick() } catch (_: AssertionError) { }
         }

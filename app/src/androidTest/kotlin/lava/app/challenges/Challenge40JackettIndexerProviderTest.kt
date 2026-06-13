@@ -201,8 +201,12 @@ class Challenge40JackettIndexerProviderTest {
 
         // Step 4: keep only the indexer.
         arrayOf(
-            "RuTracker.org", "RuTor.info", "Kinozal.tv", "NNM-Club",
-            "Project Gutenberg", "Internet Archive",
+            "RuTracker.org",
+            "RuTor.info",
+            "Kinozal.tv",
+            "NNM-Club",
+            "Project Gutenberg",
+            "Internet Archive",
         ).forEach { name ->
             try { composeRule.onNodeWithText(name).performClick() } catch (_: AssertionError) { }
         }
