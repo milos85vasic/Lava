@@ -30,9 +30,17 @@ import org.junit.Test
 class LocalNetworkDiscoveryContractTest {
 
     /**
-     * Mirrors the SP-3.4 matching logic in
-     * [LocalNetworkDiscoveryServiceImpl.onServiceFound] verbatim.
-     * If the production code drifts, this test breaks.
+     * Reference SPECIFICATION of the SP-3.4 service-type matching contract — a
+     * re-implementation of the rule the production
+     * [lava.data.impl.service.LocalNetworkDiscoveryServiceImpl] `matchesServiceType`
+     * MUST honour, used here to pin the EXPECTED behaviour at the contract level.
+     *
+     * HONESTY NOTE (§6.J/§6.N): this is a COPY, so production-code drift does NOT
+     * automatically break this test — it asserts on the spec below, not on the real
+     * function. Drift of the PRODUCTION `matchesServiceType` is caught by the
+     * real-function test `lava.data.LocalNetworkDiscoveryServiceTypeTest` in
+     * `:core:data`, which calls the production fn directly. Keep this spec and that
+     * test in agreement; if the contract changes, update BOTH.
      */
     private fun matches(watchedServiceType: String, foundServiceType: String): Boolean {
         val watched = watchedServiceType.trim().trim('.').removePrefix("_").lowercase()
