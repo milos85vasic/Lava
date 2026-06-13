@@ -1,4 +1,4 @@
-package digital.vasic.lava.client.firebase
+package lava.analytics.firebase
 
 import android.content.Context
 import android.util.Log
@@ -29,7 +29,7 @@ import javax.inject.Singleton
  */
 @Module
 @InstallIn(SingletonComponent::class)
-internal object FirebaseProvidesModule {
+object FirebaseProvidesModule {
     private const val TAG = "FirebaseProvides"
 
     @Provides

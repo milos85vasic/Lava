@@ -176,6 +176,16 @@ dependencies {
     // so the intent contract cannot drift between the two apps. §4 design spec.
     implementation(project(":core:applink"))
     implementation(project(":core:apiengine"))
+    // Firebase Crashlytics/Analytics non-fatal telemetry (§6.AC / §6.O). The
+    // shared :core:analytics-firebase module provides the AnalyticsTracker Hilt
+    // binding + the resilient FirebaseInitializer + the Firebase artifacts
+    // (transitively, via its api(...) deps). The google-services + crashlytics
+    // gradle plugins are inherited via lava.android.application and process
+    // THIS app's api-app/google-services.json (registers digital.vasic.lava.api
+    // + .api.dev). NO Go-side REST key in the .so (§6.H) — telemetry routes
+    // through this Kotlin bridge.
+    implementation(project(":core:analytics-firebase"))
+    implementation(project(":core:common"))
     implementation(project(":core:designsystem"))
     implementation(project(":core:notifications"))
     // LavaTheme's `theme: Theme = Theme.SYSTEM` default arg references

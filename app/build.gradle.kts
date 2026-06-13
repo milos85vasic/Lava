@@ -298,10 +298,14 @@ dependencies {
     implementation(libs.bundles.work)
     implementation(libs.androidx.hilt.navigation.compose)
 
-    implementation(platform(libs.firebase.bom))
-    implementation(libs.firebase.analytics)
-    implementation(libs.firebase.crashlytics)
-    implementation(libs.firebase.perf)
+    // Firebase telemetry. The impl + DI + initializer live in the shared
+    // :core:analytics-firebase module (Decoupled Reusable Architecture — both
+    // :app and :api-app consume it; no copy-paste). The Firebase BOM +
+    // analytics/crashlytics/perf artifacts come transitively via that module's
+    // `api(...)` deps, so LavaApplication's Firebase.crashlytics/analytics/
+    // performance ktx accessors + the google-services/crashlytics gradle
+    // plugins (inherited via lava.android.application) still resolve.
+    implementation(project(":core:analytics-firebase"))
 
     debugImplementation(libs.leakcanary)
 

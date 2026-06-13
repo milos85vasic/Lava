@@ -9,7 +9,10 @@
  * Constitutional binding: §6.O Crashlytics-Resolved Issue Coverage Mandate
  * (added 2026-05-05). This is the Challenge Test required by §6.O clause 2
  * for the Firebase-init crashes. The matching JVM validation test is at
- * `app/src/test/kotlin/digital/vasic/lava/client/firebase/FirebaseInitializerTest.kt`.
+ * `core/analytics-firebase/src/test/kotlin/lava/analytics/firebase/FirebaseInitializerTest.kt`
+ * (moved 2026-06-13 from `:app` into the shared :core:analytics-firebase
+ * module so both :app and :api-app consume one Firebase impl — Decoupled
+ * Reusable Architecture).
  *
  * What this test asserts: cold-starting the app on the gating matrix
  * does NOT crash, AND the user reaches the launcher activity within a

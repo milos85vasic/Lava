@@ -1,4 +1,4 @@
-package digital.vasic.lava.client.firebase
+package lava.analytics.firebase
 
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.crashlytics.FirebaseCrashlytics

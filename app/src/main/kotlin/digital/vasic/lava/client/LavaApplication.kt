@@ -10,7 +10,7 @@ import com.google.firebase.ktx.Firebase
 import com.google.firebase.perf.ktx.performance
 import dagger.hilt.android.HiltAndroidApp
 import digital.vasic.lava.client.crash.NavTeardownCrashReporter
-import digital.vasic.lava.client.firebase.FirebaseInitializer
+import lava.analytics.firebase.FirebaseInitializer
 import lava.common.analytics.AnalyticsTracker
 import lava.network.api.ImageLoader
 import lava.tracker.client.work.MirrorHealthCheckWorker

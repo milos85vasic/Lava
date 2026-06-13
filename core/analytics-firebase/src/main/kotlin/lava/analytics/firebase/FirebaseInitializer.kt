@@ -1,4 +1,4 @@
-package digital.vasic.lava.client.firebase
+package lava.analytics.firebase
 
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.crashlytics.FirebaseCrashlytics
@@ -22,7 +22,7 @@ import com.google.firebase.perf.FirebasePerformance
  *        callback gives the test a primary assertion target on
  *        user-visible (well, operator-visible) state.
  */
-internal object FirebaseInitializer {
+object FirebaseInitializer {
     fun initialize(
         crashlytics: () -> FirebaseCrashlytics?,
         analytics: () -> FirebaseAnalytics?,

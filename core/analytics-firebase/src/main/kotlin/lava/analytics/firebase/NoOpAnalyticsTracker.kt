@@ -1,4 +1,4 @@
-package digital.vasic.lava.client.firebase
+package lava.analytics.firebase
 
 import android.util.Log
 import lava.common.analytics.AnalyticsTracker

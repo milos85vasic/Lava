@@ -20,6 +20,7 @@ rootProject.name = "Lava"
 
 include(":app")
 include(":api-app")
+include(":core:analytics-firebase")
 include(":core:apiengine")
 include(":core:applink")
 include(":core:auth:api")
