@@ -1,0 +1,113 @@
+{
+  "kind": "curated-provider-live-reachability",
+  "purpose": "Rock-solid REAL evidence (no fixtures, no bluff) that the embedded curated torrent providers actually reach their LIVE sites and that CapSearch is honest (q= genuinely filters). §6.G/§6.L/§6.D/§6.E class.",
+  "verification_only": true,
+  "command": "GOMAXPROCS=2 nice -n 19 go test -tags realtrackers -count=1 -v ./internal/provider/curated/<provider>/...",
+  "host": "darwin/arm64",
+  "go_version": "go1.26.2 darwin/arm64",
+  "repo_head_sha": "bbc53f35a54a238c56ccf66ec97d4eff2310f39c",
+  "run_timestamp_utc": "2026-06-13T18:55:14Z",
+  "result_count_note": "Live tests assert len(res.Results) > 0 (non-empty) AND every result has a 40-hex info_hash AND a non-empty magnet link; the query-filter tests additionally assert the term appears in at least one returned title. A PASS therefore proves: real results returned (>=1), all magnets valid, and (where the test exists) the q= filter is honored. The tests do not t.Logf an exact integer count, so per-provider count is recorded as '>=1 (validated)'.",
+  "providers": [
+    {
+      "provider": "thepiratebay",
+      "package": "internal/provider/curated/thepiratebay",
+      "live_site": "apibay (DefaultBaseURL)",
+      "live_query": "ubuntu",
+      "live_test": "TestLive_SearchUbuntuReturnsRealMagnets",
+      "live_result": "PASS",
+      "elapsed": "1.82s",
+      "result_count": ">=1 (validated: every result 40-hex info_hash + non-empty magnet)",
+      "query_filter_test_present": false,
+      "filter_holds": "n/a (no TestLive_QueryActuallyFilters in this package)",
+      "verbatim_failure": null
+    },
+    {
+      "provider": "torrentscsv",
+      "package": "internal/provider/curated/torrentscsv",
+      "live_site": "Torrents-CSV API (DefaultBaseURL)",
+      "live_query": "ubuntu / debian",
+      "live_test": "TestLive_SearchUbuntuReturnsRealMagnets + TestLive_QueryActuallyFilters",
+      "live_result": "PASS",
+      "elapsed": "0.19s / 0.06s",
+      "result_count": ">=1 (validated)",
+      "query_filter_test_present": true,
+      "filter_holds": "YES (>=1 'debian' result contained the query term)",
+      "verbatim_failure": null
+    },
+    {
+      "provider": "yts",
+      "package": "internal/provider/curated/yts",
+      "live_site": "YTS API via DefaultBaseURLs mirror-failover list",
+      "live_query": "interstellar",
+      "live_test": "TestLive_SearchReturnsRealMagnets",
+      "live_result": "PASS",
+      "elapsed": "0.46s",
+      "result_count": ">=1 (validated: every result 40-hex info_hash + non-empty magnet, reached a live mirror)",
+      "query_filter_test_present": false,
+      "filter_holds": "n/a (no TestLive_QueryActuallyFilters in this package; live test uses a real movie title so a non-empty return already implies title-search reached a live mirror)",
+      "verbatim_failure": null
+    },
+    {
+      "provider": "bitsearch",
+      "package": "internal/provider/curated/bitsearch",
+      "live_site": "BitSearch API (DefaultBaseURL)",
+      "live_query": "ubuntu / debian",
+      "live_test": "TestLive_SearchUbuntuReturnsRealMagnets + TestLive_QueryActuallyFilters",
+      "live_result": "PASS",
+      "elapsed": "0.54s / 0.40s",
+      "result_count": ">=1 (validated)",
+      "query_filter_test_present": true,
+      "filter_holds": "YES (>=1 'debian' result contained the query term)",
+      "verbatim_failure": null
+    },
+    {
+      "provider": "knaben",
+      "package": "internal/provider/curated/knaben",
+      "live_site": "Knaben API (DefaultBaseURL)",
+      "live_query": "ubuntu / debian",
+      "live_test": "TestLive_SearchUbuntuReturnsRealMagnets + TestLive_QueryActuallyFilters",
+      "live_result": "PASS",
+      "elapsed": "0.29s / 0.13s",
+      "result_count": ">=1 (validated)",
+      "query_filter_test_present": true,
+      "filter_holds": "YES (>=1 'debian' result contained the query term)",
+      "verbatim_failure": null
+    },
+    {
+      "provider": "nyaa",
+      "package": "internal/provider/curated/nyaa",
+      "live_site": "Nyaa RSS feed (DefaultBaseURL)",
+      "live_query": "naruto / bleach",
+      "live_test": "TestLive_SearchReturnsRealMagnets + TestLive_QueryActuallyFilters",
+      "live_result": "PASS",
+      "elapsed": "0.55s / 0.54s",
+      "result_count": ">=1 (validated)",
+      "query_filter_test_present": true,
+      "filter_holds": "YES (>=1 'bleach' result contained the query term)",
+      "verbatim_failure": null
+    },
+    {
+      "provider": "torrentdownloads",
+      "package": "internal/provider/curated/torrentdownloads",
+      "live_site": "TorrentDownloads RSS feed (DefaultBaseURL)",
+      "live_query": "ubuntu / debian",
+      "live_test": "TestLive_SearchReturnsRealMagnets + TestLive_QueryActuallyFilters",
+      "live_result": "PASS",
+      "elapsed": "0.39s / 0.32s",
+      "result_count": ">=1 (validated)",
+      "query_filter_test_present": true,
+      "filter_holds": "YES (>=1 'debian' result contained the query term)",
+      "verbatim_failure": null
+    }
+  ],
+  "summary": {
+    "providers_tested": 7,
+    "providers_live_pass": 7,
+    "providers_live_broken": 0,
+    "providers_with_query_filter_test": 5,
+    "providers_query_filter_holds": 5,
+    "providers_without_query_filter_test": ["thepiratebay", "yts"],
+    "all_packages_exit_code": 0
+  }
+}

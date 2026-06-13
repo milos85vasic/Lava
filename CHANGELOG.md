@@ -154,6 +154,27 @@ against the new upstream release. See `git log` 54eedd92..HEAD and `docs/Fixed.m
   (commit `dc547861`). Debug-stage evidence:
   `.lava-ci-evidence/distribute-changelog/firebase-app-distribution/1.3.0-1057-test-evidence.md`.
 
+## Lava-API-App-0.2.6-10 — 2026-06-13 (Public provider catalogue — onboarding reads providers from a freshly-discovered API)
+
+**Previous published:** Lava-API-App-0.2.5-9 (debug+release).
+
+- **Provider catalogue is now public** — the embedded on-device API serves its provider
+  list (`GET /providers`) without requiring the Lava-Auth header, exactly like the
+  health/readiness probes. This is what lets the Lava client read the provider list
+  during onboarding against an API it has just discovered on the network (and therefore
+  has no pre-shared key with yet). Previously this endpoint was behind the auth gate, so
+  the client got HTTP 401 and fell back to the built-in providers with a "Couldn't reach
+  the selected API" notice (Crashlytics 47b000d5).
+- **Per-provider operations remain authenticated** — only the non-sensitive catalogue
+  listing was opened; search/download under `/v1/<provider>/…` still require a valid
+  Lava-Auth key. Proven by a real-binary test asserting the three-way boundary (unauth
+  `/providers`→200, unauth `/v1/…`→401, authed `/v1/…`→crosses the gate).
+- Pairs with client 1.3.6-1063. Same one-line `router.Build` registration-order fix
+  covers both the standalone binary and this embedded API (DRY).
+
+Device-verified on a Genymotion Pixel 9 / API 35 (arm64): cold-start canary GREEN on
+this exact build (COLD launch 3.2s, MainActivity resumed, 0 fatal).
+
 ## Lava-API-App-0.2.5-9 — 2026-06-13 (1.3.5 client auth allowlist; carries the Crashlytics + 12-provider embed)
 
 **Previous published:** Lava-API-App-0.2.4-8 (debug+release).
