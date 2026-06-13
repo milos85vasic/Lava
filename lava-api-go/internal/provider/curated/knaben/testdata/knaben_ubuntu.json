@@ -1,0 +1,36 @@
+{
+  "hits": [
+    {
+      "title": "Ubuntu",
+      "hash": "8E1E7AD6A7198D1BEA2D8564F40EC3480C490301",
+      "bytes": 732912680,
+      "seeders": 100,
+      "peers": 7,
+      "date": "2009-06-10T22:00:00+00:00",
+      "category": "PC",
+      "tracker": "The Pirate Bay"
+    },
+    {
+      "title": "Debian DVD",
+      "hash": "f33ca2c8a4255b223005e90548142e94487d1e0f",
+      "bytes": 4096000000,
+      "seeders": 50,
+      "peers": 3,
+      "date": "",
+      "category": "PC",
+      "tracker": "Knaben"
+    },
+    {
+      "title": "synthetic edge row: short non-40-hex hash must be filtered",
+      "hash": "deadbeef",
+      "bytes": 1,
+      "seeders": 1,
+      "peers": 0,
+      "date": "2026-01-01T00:00:00+00:00",
+      "category": "PC",
+      "tracker": "x"
+    }
+  ],
+  "max_score": 1.0,
+  "total": 3
+}

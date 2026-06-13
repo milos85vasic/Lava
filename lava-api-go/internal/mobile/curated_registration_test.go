@@ -50,11 +50,14 @@ func TestEmbedPath_RegistersCuratedProviders(t *testing.T) {
 	if _, err := registry.Get("bitsearch"); err != nil {
 		t.Errorf("embed path did not register curated provider bitsearch: %v", err)
 	}
+	if _, err := registry.Get("knaben"); err != nil {
+		t.Errorf("embed path did not register curated provider knaben: %v", err)
+	}
 
 	// The on-device catalogue is now strictly larger than the 5 bundled natives
 	// (rutracker, nnmclub, kinozal, archiveorg, gutenberg) — the curated set is
 	// additive. This is the "more than the natives" assertion in concrete form.
-	if got := len(registry.All()); got < 9 {
-		t.Errorf("embed registry has %d providers, want >= 9 (5 natives + 4 curated)", got)
+	if got := len(registry.All()); got < 10 {
+		t.Errorf("embed registry has %d providers, want >= 10 (5 natives + 5 curated)", got)
 	}
 }
