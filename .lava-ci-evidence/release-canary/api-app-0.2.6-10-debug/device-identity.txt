@@ -1,0 +1,8 @@
+serial=127.0.0.1:6555
+android_release=15
+sdk=35
+model=Pixel 9
+abi=arm64-v8a
+apk=api-app/build/outputs/apk/debug/api-app-debug.apk
+apk_sha256=0c803fde0ea67bd1bb62183138fc19015e7fa0b97c8d2502a77fe187afbcd662
+git_sha=2ea37a021316a383ccce8caf23ea29d770a0d602

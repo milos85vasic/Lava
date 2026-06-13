@@ -1,0 +1,61 @@
+{
+  "date": "2026-06-13",
+  "scope": "lava-api-go §6.N production bluff-hunt — fleet cycle: auth gate (internal/auth/middleware.go) + provider catalogue (internal/handlers/v1/providers.go)",
+  "base_commit": "6f28b990",
+  "worktree": ".claude/worktrees/agent-ac77edb60df50d0c7",
+  "protocol": "Seventh Law clause 5 + §6.N.2 production-code coverage (gate-shaping); §6.AB discrimination",
+  "resource_limits": "GOMAXPROCS=2 nice -n 19 (per §6.T.2)",
+  "environment_note": "worktree submodules dir was unpopulated; symlinked .claude/worktrees/agent-ac77edb60df50d0c7/submodules -> /Volumes/T7/Projects/Lava/submodules so the go.mod relative replace directives (../submodules/cache etc.) resolve read-only. No production file outside lava-api-go was touched.",
+  "file_selection_filter": "would a bug here be invisible to existing tests? — both are gate-shaping: middleware.go IS the /v1 auth gate (a bug = security hole / lockout); providers.go just became load-bearing for Android onboarding (a dropped field = broken provider list)",
+  "targets": [
+    {
+      "file": "internal/auth/middleware.go",
+      "function": "NewMiddleware / constantTimeMapLookup",
+      "user_visible_behavior": "every /v1 request is gated on the Lava-Auth header: active client hash -> 200 + ladder reset; retired hash -> 426 + min-version JSON; unknown/missing/malformed -> 401 + backoff advance. The constant-time allowlist lookup decides which branch fires — i.e. who reaches the protected API.",
+      "mutation": "constantTimeMapLookup: `if eq == 1` -> `if eq == 0` (invert the ConstantTimeCompare verdict — the canonical auth-gate logic break)",
+      "tests_claiming_coverage": [
+        "TestAuthMiddleware_ActiveUuid_Returns200",
+        "TestAuthMiddleware_RetiredUuid_Returns426WithMinVersion",
+        "TestAuthMiddleware_ActiveUuid_ResetsBackoffCounter",
+        "TestAuthMiddleware_RetiredUuid_DoesNotAdvanceBackoff",
+        "TestAuthMiddleware_UnknownUuid_Returns401_AndAdvancesBackoff"
+      ],
+      "verdict": "GENUINE",
+      "falsifiability": {
+        "mutation_applied": "if eq == 1  ->  if eq == 0",
+        "observed_failure_verbatim": "--- FAIL: TestAuthMiddleware_ActiveUuid_Returns200 (0.00s)\n    middleware_test.go:65: status = 401, want 200; body=\"{\\\"error\\\":\\\"unauthorized\\\"}\"\n--- FAIL: TestAuthMiddleware_RetiredUuid_Returns426WithMinVersion (0.00s)\n    middleware_test.go:94: status = 401, want 426; body=\"{\\\"error\\\":\\\"unauthorized\\\"}\"\n--- FAIL: TestAuthMiddleware_ActiveUuid_ResetsBackoffCounter (0.00s)\n    middleware_test.go:246: status = 401, want 200\n--- FAIL: TestAuthMiddleware_RetiredUuid_DoesNotAdvanceBackoff (0.00s)\n    middleware_test.go:284: status = 401, want 426\nFAIL\nFAIL\tdigital.vasic.lava.apigo/internal/auth\t0.210s",
+        "failures_count": 4,
+        "localized": "yes — failures are exactly on the active-hash + retired-hash acceptance paths the inverted compare breaks; missing/malformed/empty 401 tests stayed green (those paths never reach the inverted lookup)",
+        "reverted": "yes (git checkout internal/auth/middleware.go; re-run: ok digital.vasic.lava.apigo/internal/auth)",
+        "primary_assertion_on_user_visible_state": "HTTP status code + response body — the user-visible gate verdict (§6.AB compliant)"
+      }
+    },
+    {
+      "file": "internal/handlers/v1/providers.go",
+      "function": "GetProviders",
+      "user_visible_behavior": "GET /providers serializes each registered provider's catalogue metadata into the response body the Android onboarding renders its provider list + auth UI from (dynamic provider discovery). The `if dto.Kind == \"jackett\"` branch sets `indexer` only for jackett-kind providers, leaving native providers' indexer empty — the client distinguishes native vs jackett-indexer rows on that field.",
+      "mutation": "`if dto.Kind == \"jackett\"` -> `if dto.Kind == \"native\"` (invert which kind gets the indexer field populated)",
+      "tests_claiming_coverage": [
+        "TestProvidersHandler_ReturnsCatalogue",
+        "TestProvidersHandler_IncludesRealCuratedProvidersEndToEnd"
+      ],
+      "verdict": "GENUINE",
+      "falsifiability": {
+        "mutation_applied": "if dto.Kind == \"jackett\"  ->  if dto.Kind == \"native\"",
+        "observed_failure_verbatim": "--- FAIL: TestProvidersHandler_ReturnsCatalogue (0.00s)\n    providers_test.go:92: rutracker kind=\"native\" indexer=\"rutracker\", want native/empty\n    providers_test.go:106: 1337x indexer=\"\", want 1337x\nFAIL\nFAIL\tdigital.vasic.lava.apigo/internal/handlers/v1\t0.441s",
+        "failures_count": 1,
+        "localized": "yes — the native row (rutracker) wrongly gained indexer=\"rutracker\" AND the jackett row (1337x) wrongly lost its indexer, both asserted directly on the deserialized response body",
+        "reverted": "yes (git checkout internal/handlers/v1/providers.go; re-run TestProvidersHandler*: ok)",
+        "primary_assertion_on_user_visible_state": "deserialized GET /providers JSON body fields (kind + indexer) — exactly what the onboarding UI reads (§6.AB compliant — asserts body content, not status)"
+      }
+    }
+  ],
+  "summary": {
+    "files_hunted": 2,
+    "genuine": 2,
+    "bluffs_found": 0,
+    "new_tests_written": 0,
+    "router_go_avoided": "yes (already covered earlier today per scope instruction)",
+    "production_files_reverted_unmutated": "yes — git status clean for both internal/auth/middleware.go and internal/handlers/v1/providers.go after the cycle"
+  }
+}
