@@ -40,41 +40,54 @@ class ApiKeyProvider : ContentProvider() {
 
     /**
      * Returns the current access key, or `null` when the engine is not running
-     * or the key store is unavailable. Set by [withFakes] in tests; production
-     * wiring overrides this in [onCreate].
+     * or the key store is unavailable. Set by [withFakes] in tests; the
+     * production default below resolves the process-wide holders LAZILY per call.
      */
-    internal var keyProvider: () -> String? = { null }
+    internal var keyProvider: () -> String? = { resolveRunningKey() }
 
     /**
      * Returns the current loopback port the engine is listening on, or `null`
-     * when the engine is not running. Set by [withFakes] in tests; production
-     * wiring overrides this in [onCreate].
+     * when the engine is not running. Set by [withFakes] in tests; the
+     * production default below resolves the holders LAZILY per call.
      */
-    internal var portProvider: () -> Int? = { null }
+    internal var portProvider: () -> Int? = { resolveRunningPort() }
 
     // ── ContentProvider lifecycle ─────────────────────────────────────────
 
     override fun onCreate(): Boolean {
-        // Wire the production providers from the process-wide companion holders
-        // that ApiApplication populates during its own onCreate(). ContentProvider
-        // onCreate() is called after Application.onCreate() on the main thread,
-        // so the holders are available here. The companion object on ApiApplication
-        // is package-accessible; we import it explicitly to avoid a circular
-        // compilation dependency (both classes are in the api-app module).
-        val controller = ApiApplication.controllerHolder
-        val keyStore = ApiApplication.keyStoreHolder
-        if (controller != null && keyStore != null) {
-            keyProvider = {
-                val s = controller.state.value
-                if (s is ApiControlState.Running) keyStore.getOrCreate() else null
-            }
-            portProvider = {
-                val s = controller.state.value
-                if (s is ApiControlState.Running) s.port else null
-            }
-        }
+        // 2026-06-14 SEARCH KEY-HANDOFF FIX — root cause of the operator-reported
+        // "search does not work in any scenario". Every auth-gated /v1/{provider}
+        // request 401'd because the client's ApiKeyClient.read() received an EMPTY
+        // cursor from this provider.
+        //
+        // The previous code CACHED the key/port lambdas HERE, gated on
+        // `ApiApplication.controllerHolder/keyStoreHolder != null`, with a comment
+        // claiming "ContentProvider onCreate() is called AFTER Application.onCreate()".
+        // That ordering is INVERTED: Android runs ContentProvider.onCreate() BEFORE
+        // Application.onCreate(), and the holders are populated in
+        // ApiApplication.onCreate() (lines 46-49). So the holders were ALWAYS null
+        // here, the `if` was ALWAYS skipped, the lambdas stayed at `{ null }` for the
+        // whole process, and this provider served an empty cursor forever. Public
+        // routes (/providers, /health) need no key so they worked; only the
+        // auth-gated search/browse/topic/download 401'd. On-device pinpoint:
+        // .lava-ci-evidence/search-verification/2026-06-14-keyloss-pinpoint.md.
+        //
+        // Fix: do NOT cache here — the default lambdas (above) resolve the holders +
+        // the Running state LAZILY on every query(), so the key is returned the
+        // moment the engine is Running, independent of onCreate ordering.
         return true
     }
+
+    /** Resolve the access key from the live holders, only while the engine is Running. */
+    private fun resolveRunningKey(): String? {
+        val controller = ApiApplication.controllerHolder ?: return null
+        val keyStore = ApiApplication.keyStoreHolder ?: return null
+        return if (controller.state.value is ApiControlState.Running) keyStore.getOrCreate() else null
+    }
+
+    /** Resolve the live loopback port from the controller, only while Running. */
+    private fun resolveRunningPort(): Int? =
+        (ApiApplication.controllerHolder?.state?.value as? ApiControlState.Running)?.port
 
     // ── Query — the only supported operation ─────────────────────────────
 

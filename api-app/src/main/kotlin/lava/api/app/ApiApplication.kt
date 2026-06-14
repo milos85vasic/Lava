@@ -2,6 +2,7 @@ package lava.api.app
 
 import android.app.Application
 import android.util.Log
+import androidx.annotation.VisibleForTesting
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.crashlytics.ktx.crashlytics
 import com.google.firebase.ktx.Firebase
@@ -84,5 +85,22 @@ class ApiApplication : Application() {
         @Volatile
         var keyStoreHolder: ApiKeyStore? = null
             private set
+
+        /**
+         * Test-only seam: publishes the process-wide holders WITHOUT the
+         * Android Application lifecycle, so [lava.api.app.handoff.ApiKeyProvider]'s
+         * REAL lazy default lambdas (which read these holders per query()) can be
+         * exercised in a Robolectric unit test. Mirrors the assignments
+         * [onCreate] performs. `null` resets the holders to their pre-onCreate
+         * state (the test @After uses this to avoid cross-test leakage, since the
+         * companion fields are process-wide statics).
+         *
+         * NOT a production path — production sets the holders only via [onCreate].
+         */
+        @VisibleForTesting
+        fun setHoldersForTest(controller: ApiEngineController?, keyStore: ApiKeyStore?) {
+            controllerHolder = controller
+            keyStoreHolder = keyStore
+        }
     }
 }
