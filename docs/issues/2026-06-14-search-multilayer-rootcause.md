@@ -3,22 +3,36 @@
 **Status:** Layers 1 + 2 + 3 fixed (L1+L2 on-device-verified; L3 RED→GREEN at the
 test layer). Layer 4 (`READ_API_KEY` permission grant) proven to be a **TEST-VM
 ARTIFACT, production-safe**. Layer 5 (`Lava-Auth` key not reaching the search
-request) is **OPEN / VERIFYING** — even on a clean matched pair with the
-permission granted and the engine running, `/v1/{provider}/search` STILL returns
-401, so **search does NOT yet work on-device**. 1.3.9 is client-only and is **not
-shipped** until the L5 on-device gate is GREEN.
+request) is now **ROOT-CAUSE-FOUND + FIX-APPLIED (on-device verification in
+progress)**: the api-app's `ApiKeyProvider` ContentProvider cached its
+key/port resolver lambdas in `onCreate()` gated on the `ApiApplication` holders
+being non-null, on a FALSE assumption about Android's lifecycle ordering
+(`ContentProvider.onCreate` runs BEFORE `Application.onCreate`, not after) — so
+the holders were always null at cache time and the provider served an EMPTY
+cursor for the whole process, dropping the key. The fix resolves the holders
+LAZILY per `query()`. **The fix is applied and the root cause is understood; the
+on-device proof that search returns RESULTS is still running** — so search is
+**NOT yet claimed to work on-device** and 1.3.9 is **not shipped** until that
+device gate is GREEN.
+
+**Release scope change:** 1.3.9 is **NO LONGER client-only** — the L5 fix is in
+the **api-app**, so **client 1.3.9-1066 + api-app 0.2.9-14 ship together** (§6.Y
+bump applied).
 
 **Fix commits:** `d05bc71e` (L1+L2), `21031f2a` (L3 key restore),
-`addaacd0` (L4 cleanup — dropped ignored authority param + dead SSE path).
+`addaacd0` (L4 cleanup — dropped ignored authority param + dead SSE path),
+plus the L5 api-app `ApiKeyProvider` lazy-resolution fix (this cycle).
 **Operator report:** "search still does not work in any scenario" (1.3.8-1065).
 
 **No-guessing note (§11.4.6):** every claim below is anchored to git truth (the
 fix diffs + the incident JSON
 `.lava-ci-evidence/sixth-law-incidents/2026-06-14-sse-search-v1search-unserved-bluff.json`
-+ the L4 analysis `docs/issues/2026-06-14-readapikey-permission-variant-analysis.md`)
-or marked `VERIFYING` / `OPEN` / `OWED`. Nothing here is asserted as "fixed"
-beyond what is proven, and **search is NOT claimed to work on-device** — it does
-not (L5 open).
++ the L4 analysis `docs/issues/2026-06-14-readapikey-permission-variant-analysis.md`
++ the L5 on-device pinpoint `.lava-ci-evidence/search-verification/2026-06-14-keyloss-pinpoint.md`)
+or marked `VERIFYING` / `OWED`. The L5 root cause and fix are asserted as fact
+(anchored to the source + the LAVAKEYDBG logcat pinpoint); the on-device proof
+that **search returns results** is `VERIFYING` (in progress) — search is **NOT
+claimed to work on-device** until that gate is GREEN.
 
 ---
 
@@ -28,8 +42,11 @@ A single user-visible failure ("search returns nothing / error in any scenario")
 was the surface of FIVE independent defects stacked on the GoApi search path. Each
 had to be addressed; fixing only some still leaves search broken. The cascade was
 peeled back one layer at a time from on-device evidence across this cycle: the
-first three were code defects, the fourth a test-environment artifact, and the
-fifth (still open) is the per-request auth key not reaching the search call.
+first three were client-side code defects, the fourth a test-environment
+artifact, and the fifth (root-caused + fixed this cycle, on-device verification
+in progress) is an **api-app** defect — the per-request auth key was being
+dropped at its source (the key ContentProvider served an empty cursor for the
+whole process) so it never reached the search call.
 
 ### Layer 1 — onboarding never wrote `settings.endpoint`
 
@@ -114,27 +131,63 @@ grant path production hits (§6.J — a test environment that can't grant the
 permission is testing a different thing than production). Not shipping-blocking;
 production already grants it.
 
-### Layer 5 — `Lava-Auth` key not reaching the `ApiBackedTrackerClient` search request (OPEN / VERIFYING)
+### Layer 5 — api-app `ApiKeyProvider` served an empty cursor for the whole process (ROOT-CAUSE-FOUND + FIX-APPLIED; device-verify in progress)
 
-This is the **load-bearing open layer**. On a CLEAN matched pair — release client
-+ release api-app, same signature, `granted=true`, engine running, fresh
-onboard — `/v1/{provider}/search` **STILL returns 401**. The key is granted and
-readable, but it is **not reaching the search request** that
-`ApiBackedTrackerClient` issues.
+This was the **load-bearing layer** and is now **root-caused and fixed in code**;
+the on-device proof that search returns RESULTS is still running. On a CLEAN
+matched pair — release client + release api-app, same signature, `granted=true`,
+engine running, fresh onboard — `/v1/{provider}/search` STILL returned 401
+because the per-instance `Lava-Auth` key was being dropped **at its source on the
+api-app side** before the client could ever read it.
 
-**Important evidence caveat:** a public `GET /providers` → 200 on the same host
-proves only **reachability + that the host/TLS path works** — `/providers` is
-registered BEFORE the auth middleware (the 2026-06-13 onboarding fix), so a 200
-there does NOT prove the `Lava-Auth` key is present or valid. Only an authed
-`/v1/{provider}/…` request exercises the key. So the 200-on-`/providers` is not
-evidence that L5 is fixed.
+**Root cause (proven, not guessed):**
+`api-app/src/main/kotlin/lava/api/app/handoff/ApiKeyProvider.kt` cached its key
+and port resolver lambdas in `ContentProvider.onCreate()`, gated on
+`ApiApplication.controllerHolder` / `keyStoreHolder` being non-null, on the FALSE
+inline comment "ContentProvider.onCreate runs AFTER Application.onCreate." Android
+runs `ContentProvider.onCreate` **BEFORE** `Application.onCreate`. The holders are
+set inside `ApiApplication.onCreate` (lines 46-49), so at `ApiKeyProvider.onCreate`
+time they were **always null** → the resolver lambdas stayed `{ null }` for the
+entire process lifetime → every `query()` served an **empty cursor**. The client's
+`ApiKeyClient.read()` therefore got null → `withLocalApiKeyIfMissing` produced a
+keyless endpoint → `ApiBaseUrlHolder.set(url, null)` → `ApiBackedTrackerClient`
+was built with `authKey=null` → no `Lava-Auth` header → every
+`/v1/{provider}/search` 401'd. Public routes (`/providers`, `/health`) need no key
+so they worked — which is exactly why search NEVER worked while everything else
+did.
 
-**Status:** the exact link in the key-flow chain (§5) where the key is dropped
-between the persisted/restored `settings.endpoint` and the outgoing
-`/v1/{provider}/search` header is being pinpointed by a **logcat-instrumentation
-run in progress**. Until that run identifies and the fix proves search returns
-RESULTS on-device, **search does not work** and 1.3.9 does not ship. No layer
-above this one makes search functional on its own.
+**On-device pinpoint evidence:**
+`.lava-ci-evidence/search-verification/2026-06-14-keyloss-pinpoint.md` — the
+LAVAKEYDBG logcat line `withLocalApiKey readerSet=true readLen=-1` shows the key
+read returned null **at the source** (reader wired, read length -1), pinning the
+drop to the ContentProvider, not the client.
+
+**The withFakes bluff:** the existing `ApiKeyProvider` unit test exercised the
+provider through a test-only `withFakes` seam that injected the resolver lambdas
+directly, **bypassing the real `onCreate` → holder path** — i.e. it skipped the
+exact lifecycle ordering where the bug lives. It passed green while the production
+path served an empty cursor. A real-holder regression test (driving the real
+`onCreate` ordering) is being added so this class of defect cannot recur green.
+
+**Fix (applied):** `ApiKeyProvider` no longer caches resolvers in `onCreate()`.
+It resolves the holders + the engine's Running state **LAZILY per `query()`**
+(via `resolveRunningKey()` / `resolveRunningPort()` defaults), removing the
+`onCreate`-ordering dependency entirely. By the time any `query()` arrives the
+client process has long since finished `ApiApplication.onCreate`, so the holders
+are populated and the real key flows.
+
+**Important evidence caveat (unchanged):** a public `GET /providers` → 200 on the
+same host proves only **reachability + that the host/TLS path works** —
+`/providers` is registered BEFORE the auth middleware (the 2026-06-13 onboarding
+fix), so a 200 there does NOT prove the `Lava-Auth` key is present or valid. Only
+an authed `/v1/{provider}/…` request exercises the key.
+
+**Status:** the fix is applied and the root cause is understood. The on-device
+proof that search returns RESULTS (authed `/v1/{provider}/search` → 200 + result
+rows) is **VERIFYING (in progress)**. Until that run is GREEN, **search is not
+claimed to work on-device** and the bundled release (client 1.3.9-1066 + api-app
+0.2.9-14) does not ship. No layer above this one makes search functional on its
+own.
 
 ---
 
@@ -206,12 +259,17 @@ outgoing header. Pinpointing that link is the open L5 work.
 
 ## 6. Open follow-ups (OPEN / OWED / VERIFYING)
 
-- **Layer 5 — `Lava-Auth` key not reaching the search request (OPEN, top
-  priority).** Clean matched pair, `granted=true`, engine up, fresh onboard →
-  `/v1/{provider}/search` still 401. The key is read but not delivered on the
-  request. A logcat-instrumentation run is in progress to identify the exact
-  drop point. This is the load-bearing gate for 1.3.9 (client-only); api-app
-  unchanged at 0.2.8-12. **Search does not work on-device until this closes.**
+- **Layer 5 — api-app `ApiKeyProvider` empty-cursor (FIX-APPLIED; device-verify
+  in progress).** Root cause found + fixed: the key ContentProvider cached its
+  resolver lambdas in `onCreate()` gated on holders that are still null at that
+  point (ContentProvider.onCreate runs BEFORE Application.onCreate) → empty
+  cursor → keyless endpoint → `/v1/{provider}/search` 401. Fix: lazy
+  per-`query()` holder resolution. The on-device proof that search returns
+  RESULTS is **VERIFYING (in progress)** — the load-bearing gate for the bundled
+  1.3.9 release. **Release scope: client 1.3.9-1066 + api-app 0.2.9-14 ship
+  together (§6.Y bumped).** A real-holder regression test (real `onCreate`
+  ordering, no `withFakes` seam) is OWED to retire the bypass-bluff. **Search is
+  not claimed to work on-device until the device gate is GREEN.**
 - **Layer 4 — variant-suffix the permission name (OWED, MEDIUM/QA-fidelity).**
   Production grant is already safe (§1 Layer 4); the suffix makes the test VM
   exercise the production grant path so a mixed-install VM can never recreate the
@@ -247,9 +305,14 @@ outgoing header. Pinpointing that link is the open L5 work.
 - **On-device evidence (L4):** clean matched-pair install →
   `READ_API_KEY` `granted=true` (production grant path confirmed). Analysis:
   `docs/issues/2026-06-14-readapikey-permission-variant-analysis.md`.
-- **On-device evidence (L5, OPEN):** clean matched pair, `granted=true`, engine
-  running → `/v1/{provider}/search` STILL 401; public `/providers` → 200 (proves
-  reachability only, NOT key validity). Logcat-instrumentation run in progress.
+- **On-device evidence (L5, FIX-APPLIED):** clean matched pair, `granted=true`,
+  engine running → `/v1/{provider}/search` was STILL 401 because the api-app
+  `ApiKeyProvider` served an empty cursor (LAVAKEYDBG logcat
+  `withLocalApiKey readerSet=true readLen=-1` = key read returned null at the
+  source). Pinpoint: `.lava-ci-evidence/search-verification/2026-06-14-keyloss-pinpoint.md`.
+  Fix applied (lazy per-`query()` holder resolution); on-device proof that search
+  returns RESULTS is VERIFYING (in progress). Public `/providers` → 200 still
+  proves reachability only, NOT key validity.
 - **§6.T.4 BUGFIXES entry:** `docs/issues/fixed/BUGFIXES.md` — "search does not
   work in any scenario" (5-layer cascade, 2026-06-14).
 
@@ -280,3 +343,18 @@ like a fix" but does not touch the real defect path is a bluff regardless of the
 subagent's confidence. This is the same discipline §6.L restates: green-looking
 output is necessary, never sufficient — the main stream confirms the proposed
 change actually reaches the failing code path before it is applied.
+
+**The L5 §6.J meta-lesson — a test that bypasses the real lifecycle via a
+test-only seam is a bluff by construction.** The `ApiKeyProvider` unit test drove
+the provider through a `withFakes` seam that injected the resolver lambdas
+directly, never going through the real `onCreate` → `ApiApplication` holder path.
+The L5 bug lived in **exactly the path the seam skipped** — the
+`ContentProvider.onCreate`-before-`Application.onCreate` ordering that left the
+holders null and the cached resolvers `{ null }`. So the test passed green while
+the production provider served an empty cursor for the whole process. This is the
+canonical Sixth-Law clause-1 failure: the test did not traverse the production
+code path the user's action triggers. A seam that exists to make a unit test
+easier MUST NOT skip the lifecycle ordering or wiring where the defect can live;
+when it does, the test guarantees nothing about the real path. The remediation is
+a real-holder regression test that drives the actual `onCreate` ordering (no
+`withFakes`), so the empty-cursor defect would fail RED before the fix.

@@ -80,6 +80,41 @@ final gate via the §6.AE/HelixQA video pass.
 Kinozal; searched 'prince' via the Android API with all 3 selected → 'Error,
 Something went wrong, please try again'."
 
+**Update (2026-06-14) — L5 root cause FOUND + fixed (api-app `ApiKeyProvider`),
+release scope now client + api-app, status: on-device verification in progress —
+NOT yet shipped.** After the client-side fixes above (now framed as L1–L4 of a
+5-layer cascade — see `docs/issues/2026-06-14-search-multilayer-rootcause.md`),
+search STILL returned 401 on a clean matched pair (`granted=true`, engine up).
+The load-bearing fifth layer (L5) was an **api-app** defect, not a client one:
+`api-app/src/main/kotlin/lava/api/app/handoff/ApiKeyProvider.kt` cached its key
+and port resolver lambdas in `ContentProvider.onCreate()`, gated on the
+`ApiApplication.controllerHolder`/`keyStoreHolder` being non-null, on the FALSE
+inline comment "ContentProvider.onCreate runs AFTER Application.onCreate."
+Android runs `ContentProvider.onCreate` **BEFORE** `Application.onCreate`, and
+the holders are set inside `ApiApplication.onCreate` (lines 46-49) — so at cache
+time the holders were **always null**, the resolver lambdas stayed `{ null }` for
+the whole process, and the provider served an **empty cursor**. The full key-loss
+chain: client `ApiKeyClient.read()` → null → `withLocalApiKeyIfMissing` → keyless
+endpoint → `ApiBaseUrlHolder.set(url, null)` → `ApiBackedTrackerClient` built with
+`authKey=null` → no `Lava-Auth` header → every `/v1/{provider}/search` 401.
+Public routes (`/providers`, `/health`) need no key, so they worked — which is why
+search NEVER worked while everything else did. The existing `withFakes` unit test
+was a **bluff**: it injected the resolver lambdas through a test-only seam,
+bypassing the real `onCreate` → holder path where the bug lives, so it passed
+green against the empty-cursor production path. **Fix (applied):** `ApiKeyProvider`
+resolves the holders + the engine Running state **LAZILY per `query()`**
+(`resolveRunningKey()` / `resolveRunningPort()` defaults), removing the
+`onCreate`-ordering dependency. **On-device pinpoint:**
+`.lava-ci-evidence/search-verification/2026-06-14-keyloss-pinpoint.md` (LAVAKEYDBG
+logcat `withLocalApiKey readerSet=true readLen=-1` = key read returned null at the
+source). **Verification OWED:** a real-holder regression test driving the actual
+`onCreate` ordering (no `withFakes` seam) so the empty-cursor defect fails RED
+before the fix. **Release scope change:** 1.3.9 is NO LONGER client-only — the L5
+fix is in the api-app, so **client 1.3.9-1066 + api-app 0.2.9-14 ship together**
+(§6.Y bump applied). **Status: fix applied, on-device verification in progress —
+NOT yet shipped.** Search is NOT claimed to work on-device until the device gate
+(authed `/v1/{provider}/search` → 200 + result rows) is GREEN.
+
 ## 2026-06-13 — curated TPB + Torrents-CSV providers single-domain rotation risk (no mirror failover)
 
 **Root cause:** the embedded curated providers `thepiratebay` (apibay.org) and
