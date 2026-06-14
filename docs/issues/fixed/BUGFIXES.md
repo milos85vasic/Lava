@@ -1608,3 +1608,92 @@ cold-start canary passes on the rebuilt artifact. Once 0.2.8-12 is distributed +
 observed, api-app crashes will appear under the api-app dashboard (operator
 confirms post-distribute).
 **Fix commit:** this cycle (config replaced on disk; findings doc `fb0bfec9`).
+
+## search does not work in any scenario — 3-layer cascade (2026-06-14)
+
+**Symptom (operator-reported, 1.3.8-1065):** "search still does not work in any
+scenario." Searching any query against the chosen on-device / LAN API returned
+no results across every provider. The HelixQA video-QA agent could not produce a
+search-results walkthrough because search genuinely failed.
+
+**Root cause (CONFIRMED — a CASCADE of three independent bugs, all proven from
+on-device evidence, not one):**
+
+- **Layer 1 — onboarding never persisted the chosen API to `settings.endpoint`.**
+  `OnboardingViewModel.onSelectApi` wrote the selected API to the Room `Endpoint`
+  list + `ApiBaseUrlHolder` (what `GET /providers` + the dynamic SDK clients
+  read) but NEVER to `settings.endpoint`. The home search resolves its target
+  host from `SettingsRepository.getSettings().endpoint`
+  (`NetworkApiRepositoryImpl.endpoint()`), which therefore stayed at the default
+  `Endpoint.GoApi("lava-api.local")` → `UnknownHostException` (the host never
+  resolves on the LAN). So search targeted the wrong host even though
+  `/providers` worked.
+- **Layer 2 — GoApi search routed to `GET /v1/search`, a route NO backend
+  serves.** `SearchResultViewModel`'s dispatch sent every GoApi multi-provider
+  search to `observeSseSearch` → `GET {base}/v1/search`. Verified across the
+  whole Go codebase: `internal/router/router.go` serves `/providers` +
+  `/v1/:provider/{op}` + `/jackett/search` + `/health/ready`; the standalone
+  serves legacy `/search` + `/v1/{provider}/search`; **neither registers
+  `/v1/search`** → 404 for every GoApi user.
+- **Layer 3 — per-instance `Lava-Auth` key was null on the VM (root-caused,
+  matched-pair verification in progress, NOT yet closed).** `/v1/{provider}/search`
+  returned 401 because the per-instance key read off the variant-aware key
+  ContentProvider was null. This is a **debug-client / release-api-app SIGNATURE
+  MISMATCH**: the key ContentProvider is signature-permission-protected, and the
+  variant-aware reader reads the `.dev` api-app which was not installed on the VM
+  during this run. This is NOT a production bug for a matched (same-signature)
+  client/api-app pair. Matched-pair on-device verification is in progress.
+
+**Affected files:**
+- `feature/onboarding/src/main/kotlin/lava/onboarding/OnboardingViewModel.kt`
+  (`onSelectApi` now calls `SetEndpointUseCase` to persist the active
+  `settings.endpoint`; nullable injected seam, real impl bound by Hilt).
+- `core/domain/src/main/kotlin/lava/domain/usecase/RepopulateProvidersOnStartupUseCase.kt`
+  (`reconcileActiveEndpoint()` heals existing installs whose onboarding pre-dated
+  the Layer-1 fix — adopts the Room GoApi when `settings.endpoint` is an orphan
+  default).
+- `feature/search_result/src/main/kotlin/lava/search/result/SearchResultViewModel.kt`
+  (GoApi multi-provider search re-routed from `observeSseSearch` → `/v1/search`
+  to `observeStreamMultiSearch` → `sdk.streamMultiSearch` → `GET
+  /v1/{provider}/search`, the served path that carries the per-instance
+  `Lava-Auth` key + permissive-LAN client from the 1.3.8 wiring).
+
+**Verification tests added (real-stack reproduction, falsifiability-rehearsed):**
+- `OnboardingViewModelDynamicProvidersTest` — `selecting an API persists it as the
+  active settings endpoint the search path reads` (real ViewModel +
+  `SetEndpointUseCase` seam; reproduces Layer 1: without the persist write, the
+  active endpoint stays the orphan default).
+- `RepopulateProvidersOnStartupUseCaseTest` — `cold start heals a stale orphan
+  active endpoint to the onboarded server in the list` (real use case; reproduces
+  the existing-install heal path).
+
+**On-device Chucker evidence (1.3.8 debug client, Genymotion VM):** `GET
+https://10.0.3.16/providers` → 200; `GET
+https://lava-api.local/search?query=prince…` → `UnknownHostException` (host never
+resolves; api-app "Requests served: 0"). Traced via the flow-db `Endpoint` row +
+`chucker.db` transactions; surfaced by the HelixQA video-QA agent.
+
+**§6.J bluff removed:** `SearchResultSseErrorRetryTest` drove `observeSseSearch`
+over a `MockWebServer` that SERVED `/v1/search` — the route no backend registers
+— and asserted SSE error/retry rendering. It passed green while the real feature
+404'd (Seventh Law clause 4: mock served the endpoint production 404s). Removed.
+Incident:
+`.lava-ci-evidence/sixth-law-incidents/2026-06-14-sse-search-v1search-unserved-bluff.json`.
+
+**Fix commit:** `d05bc71e`.
+
+**REMAINING / VERIFYING (honest, per §6.T.1 / §11.4.6):**
+- Layer 3 matched-pair on-device verification (same-signature client + api-app)
+  that fresh-onboard search returns RESULTS is **in progress** — 1.3.9 is
+  client-only and NOT shipped until that on-device gate is GREEN.
+- Existing installs that do NOT re-onboard get a keyless healed endpoint → `/v1`
+  ops 401 (the per-instance key lives only in `settings.endpoint` via
+  `EndpointConverter`, never in the Room `Endpoint` row, and the old onboarding
+  never wrote it). Fresh onboard flows the key correctly; an existing-install
+  key-restore is **owed**.
+- Dormant SSE path: `observeSseSearch` + `applySseError` +
+  `SseConnectivityTelemetryTest` + `SearchResultRetryTest` still cover the
+  unserved `/v1/search` SSE consumer. Follow-up: either implement a server-side
+  `/v1/search` SSE aggregator and revive the path, or remove the dead client SSE
+  consumer + its remaining tests. Not shipping-blocking for 1.3.9 (GoApi search
+  now uses the served per-provider SDK path).
