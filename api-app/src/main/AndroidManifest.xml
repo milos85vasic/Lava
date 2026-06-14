@@ -17,7 +17,12 @@
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+    <!-- specialUse FGS: the embed is a long-lived LAN API server with no
+         cumulative runtime budget. dataSync (the prior type) is capped at
+         ~6h/24h on Android 14+ and CRASHED the service (ForegroundServiceStart-
+         NotAllowedException) once exhausted. See
+         docs/issues/2026-06-14-apiapp-fgs-datasync-budget-fix-design.md. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
@@ -60,12 +65,20 @@
             </intent-filter>
         </activity>
 
-        <!-- foregroundServiceType=dataSync: the embed continuously serves LAN
-             API requests + advertises over mDNS, the closest standard type. -->
+        <!-- foregroundServiceType=specialUse: the embed continuously serves LAN
+             API requests + advertises over mDNS. This is a long-lived server
+             that does NOT fit any of the standard typed categories, and it must
+             run far longer than the dataSync 6h/24h budget. The
+             PROPERTY_SPECIAL_USE_FGS_SUBTYPE value is the free-form Google Play
+             Console review justification. -->
         <service
             android:name=".service.ApiEngineService"
             android:exported="false"
-            android:foregroundServiceType="dataSync" />
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="@string/api_fgs_special_use_justification" />
+        </service>
 
         <!-- Key provider: exposes {access_key, loopback_port} to the Lava
              client app via a signature-permission ContentProvider (spec §5).

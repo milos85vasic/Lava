@@ -1,5 +1,6 @@
 package lava.api.app.service
 
+import android.app.ForegroundServiceStartNotAllowedException
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -110,7 +111,29 @@ class ApiEngineService : Service() {
         // Promote to foreground immediately so the OS does not kill us before
         // the first state emission (notification body is refined as state
         // arrives).
-        startForeground(NOTIFICATION_ID, buildNotification(getString(R.string.api_notification_title)))
+        //
+        // DEFENSIVE GUARD (type-agnostic): the service type is now `specialUse`
+        // (no cumulative runtime budget), but we still wrap startForeground so
+        // that if ANY foreground-service-start restriction is hit on ANY OEM /
+        // OS version (e.g. a future policy, or a mis-declared variant), we
+        // degrade to a clean stop instead of the FATAL
+        // ForegroundServiceStartNotAllowedException that crashed the prior
+        // dataSync build at this exact line (Crashlytics 9ba8502e…).
+        try {
+            startForeground(
+                NOTIFICATION_ID,
+                buildNotification(getString(R.string.api_notification_title)),
+            )
+        } catch (e: ForegroundServiceStartNotAllowedException) {
+            // TODO(§6.AC): route through an AnalyticsTracker.recordNonFatal once
+            // the api-app wires one into the Service (no-telemetry: the api-app
+            // has no AnalyticsTracker injected here yet). The OS denied the
+            // foreground promotion; we cannot serve, so stop cleanly rather than
+            // crash. The shared engine is driven by the VM/controller, which is
+            // unaffected; the user can retry from the app UI.
+            stopSelf()
+            return START_NOT_STICKY
+        }
 
         when (intent?.action) {
             // Notification-button actions drive the SHARED controller directly
@@ -126,6 +149,24 @@ class ApiEngineService : Service() {
             else -> Unit
         }
         return START_STICKY
+    }
+
+    /**
+     * Foreground-service timeout callback (API 35+).
+     *
+     * The system calls this when a TIME-BUDGETED foreground-service type (e.g.
+     * dataSync / mediaProcessing) reaches its cumulative limit. The current
+     * type is `specialUse`, which is NOT budgeted, so this should not normally
+     * fire — but we override it defensively so that on ANY device/OEM that DOES
+     * impose a timeout we stop gracefully within the few-second window the OS
+     * allows, instead of triggering the
+     * ForegroundServiceDidNotStopInTimeException class that the prior dataSync
+     * build hit (Crashlytics b9baeaede…).
+     */
+    override fun onTimeout(startId: Int, fgsType: Int) {
+        releaseLocks()
+        stopForeground(STOP_FOREGROUND_REMOVE)
+        stopSelf(startId)
     }
 
     override fun onBind(intent: Intent): IBinder? = null

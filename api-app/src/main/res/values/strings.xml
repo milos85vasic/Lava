@@ -2,6 +2,11 @@
 <resources>
     <string name="api_app_name">Lava API</string>
 
+    <!-- Google Play Console review justification for the specialUse foreground
+         service type (PROPERTY_SPECIAL_USE_FGS_SUBTYPE). Operator-editable
+         before Play submission; see the FGS design doc. -->
+    <string name="api_fgs_special_use_justification">Runs an on-device HTTP API server that other Lava devices on the same local Wi-Fi network discover via mDNS and connect to. The service must stay running indefinitely while the user keeps the API enabled so peer devices can reach it at any time; this long-lived local-server use case is not covered by the other foreground service types.</string>
+
     <!-- Foreground-service notification. -->
     <string name="api_notification_channel_name">Lava API server</string>
     <string name="api_notification_channel_description">Shown while the on-device Lava API is serving the LAN.</string>
