@@ -131,15 +131,18 @@ class OnboardingViewModel @Inject constructor(
     // production Hilt binds the real impl (DomainModule §setEndpointUseCase).
     private val setEndpointUseCase: lava.domain.usecase.SetEndpointUseCase? = null,
 ) : ViewModel(), ContainerHost<OnboardingState, OnboardingSideEffect> {
-    // [apiKeyReader] is a function seam (authority: String) -> key: String?
+    // [apiKeyReader] is a no-arg function seam () -> key: String?
     // Cannot be injected via Hilt (function types are not Dagger-injectable).
     // Production: set via [setApiKeyReader] from OnboardingScreen/app context.
     // Tests: set directly before calling perform(OnDeviceApiReturned).
     // Null means "no key reader configured" — probe still runs, key is omitted.
-    private var apiKeyReader: ((authority: String) -> String?)? = null
+    // The production reader (ApiKeyClient over the api-app's signature-protected
+    // ContentProvider) resolves its OWN variant-aware authority internally, so the
+    // seam takes no authority argument — passing one was always discarded.
+    private var apiKeyReader: (() -> String?)? = null
 
     /** Called by [OnboardingScreen] (or tests) to wire the key-reader seam. */
-    fun setApiKeyReader(reader: ((authority: String) -> String?)?) {
+    fun setApiKeyReader(reader: (() -> String?)?) {
         apiKeyReader = reader
     }
     private val logger = loggerFactory.get("OnboardingViewModel")
@@ -371,15 +374,15 @@ class OnboardingViewModel @Inject constructor(
      * per-instance key (the mDNS discovery path — TXT records carry no secret),
      * read the local api-app's access key via the [apiKeyReader] seam and return a
      * keyed copy so search/`/v1` ops authenticate. The production reader
-     * (ApiKeyClient over the api-app's signature-protected ContentProvider) ignores
-     * the passed authority and uses its own variant-aware one, returning null when
+     * (ApiKeyClient over the api-app's signature-protected ContentProvider) resolves
+     * its own variant-aware authority internally, returning null when
      * no local api-app key is available — then the endpoint is returned unchanged
      * (keyless, e.g. a remote/cloud or no-auth API). §6.H: the key is never logged.
      */
     private fun Endpoint.withLocalApiKeyIfMissing(): Endpoint {
         if (this !is Endpoint.GoApi || !key.isNullOrBlank()) return this
         val read = try {
-            apiKeyReader?.invoke(AppLinkContract.API_RELEASE_PACKAGE + ".keyprovider")
+            apiKeyReader?.invoke()
         } catch (e: Exception) {
             e.rethrowIfCancellation()
             null
@@ -769,7 +772,7 @@ class OnboardingViewModel @Inject constructor(
         // Read the per-instance access key from the API app's ContentProvider.
         // Key is intentionally not logged (§6.H — never include in logcat).
         val apiKey: String? = try {
-            apiKeyReader?.invoke(AppLinkContract.API_RELEASE_PACKAGE + ".keyprovider")
+            apiKeyReader?.invoke()
         } catch (e: Exception) {
             e.rethrowIfCancellation()
             logger.d { "apiKeyReader threw (engine not running?) — proceeding to probe without key" }

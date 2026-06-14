@@ -205,7 +205,7 @@ class OnDeviceApiFlowTest {
     /**
      * Key-reader seam: returns a fixed key string (or null for "engine not running").
      */
-    private fun keyReader(key: String?): (String) -> String? = { _ -> key }
+    private fun keyReader(key: String?): () -> String? = { key }
 
     private fun createViewModel(
         apiInstalled: Boolean = true,

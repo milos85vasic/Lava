@@ -220,11 +220,11 @@ open class MainActivity : ComponentActivity() {
      * using the variant-aware authority (§6.R: no literal string).
      * Called once per composition — [ApiKeyClient] is stateless.
      */
-    private fun buildApiKeyReader(): (String) -> String? {
+    private fun buildApiKeyReader(): () -> String? {
         val suffix = if (BuildConfig.DEBUG) ".dev.keyprovider" else ".keyprovider"
         val authority = BuildConfig.API_RELEASE_PACKAGE + suffix
         val client = ApiKeyClient(this, authority)
-        return { _ -> client.read()?.key }
+        return { client.read()?.key }
     }
 
     @Composable

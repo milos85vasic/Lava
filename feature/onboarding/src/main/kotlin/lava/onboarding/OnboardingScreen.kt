@@ -41,7 +41,8 @@ fun OnboardingScreen(
     // default null leaves apiKeyReader unwired (key is omitted but probe
     // still runs — graceful degradation per spec §7).
     // The lambda type is a pure Kotlin function — no import from :app needed.
-    apiKeyReader: ((authority: String) -> String?)? = null,
+    // No-arg: the production reader resolves its own variant-aware authority.
+    apiKeyReader: (() -> String?)? = null,
     modifier: Modifier = Modifier,
 ) {
     val state by viewModel.collectAsState()

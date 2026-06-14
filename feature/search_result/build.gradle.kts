@@ -11,6 +11,9 @@ dependencies {
     implementation(project(":core:network:api"))
     implementation(project(":core:tracker:client"))
     implementation(project(":core:tracker:api"))
+    // okhttp.core is needed on the (test) classpath because LavaTrackerSdk's
+    // transitive type graph references okhttp3.OkHttpClient — the
+    // SearchResultViewModelFallbackTest constructs a real SDK.
     implementation(libs.okhttp.core)
     implementation(libs.androidx.compose.material3)
 
@@ -19,11 +22,6 @@ dependencies {
     // compiler needs the type accessible in the test classpath even
     // when callers use the default null value.
     testImplementation(project(":core:database"))
-
-    // LVA-071 (2026-06-09): the SSE error → Error → retry hermetic test
-    // (`SearchResultSseErrorRetryTest`) drives the REAL SseClient against a
-    // MockWebServer that returns an erroring SSE response.
-    testImplementation(libs.okhttp.mockwebserver)
 
     // SearchResultNavigationProviderIdsRoundtripTest (Bug-2-Layer-3 / §6.N
     // bluff-hunt 2026-06-13) runs under Robolectric so the REAL
