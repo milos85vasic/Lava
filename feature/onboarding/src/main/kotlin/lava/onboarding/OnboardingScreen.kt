@@ -155,6 +155,7 @@ fun OnboardingScreen(
                 providers = state.providers,
                 hasSelection = viewModel.hasSelectedProviders(),
                 onToggle = { viewModel.perform(OnboardingAction.ToggleProvider(it)) },
+                onToggleAll = { viewModel.perform(OnboardingAction.ToggleAllProviders) },
                 onNext = { viewModel.perform(OnboardingAction.NextStep) },
                 // Phase 5 (2026-06-11): surface the dynamic-discovery fallback
                 // notice when the API catalogue fetch failed (bundled list shown).

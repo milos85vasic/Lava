@@ -1,6 +1,7 @@
 package lava.onboarding.steps
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -32,6 +33,7 @@ fun ProvidersStep(
     providers: List<ProviderOnboardingItem>,
     hasSelection: Boolean,
     onToggle: (String) -> Unit,
+    onToggleAll: () -> Unit,
     onNext: () -> Unit,
     modifier: Modifier = Modifier,
     // Phase 5 (2026-06-11): non-blocking notice shown when the chosen API's
@@ -64,6 +66,32 @@ fun ProvidersStep(
                     color = AppTheme.colors.error,
                     modifier = Modifier.testTag(ProviderCatalogNoticeTestTag),
                 )
+            }
+            // Select-all / deselect-all — shown when there are at least 2
+            // providers (the chosen API's catalogue can be dozens; the operator
+            // asked for a single control so the user need not tap each row).
+            if (providers.size >= 2) {
+                val allSelected = providers.all { it.selected }
+                Spacer(Modifier.height(12.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag(SelectAllProvidersTestTag)
+                        .clickable { onToggleAll() }
+                        .padding(vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Checkbox(
+                        checked = allSelected,
+                        onCheckedChange = { onToggleAll() },
+                        colors = CheckboxDefaults.colors(checkedColor = AppTheme.colors.primary),
+                    )
+                    Spacer(Modifier.width(4.dp))
+                    Text(
+                        text = if (allSelected) "Deselect all" else "Select all",
+                        style = AppTheme.typography.bodyMedium,
+                    )
+                }
             }
             Spacer(Modifier.height(20.dp))
             Column(
@@ -124,3 +152,10 @@ fun ProvidersStep(
  * provider list is shown instead.
  */
 const val ProviderCatalogNoticeTestTag = "provider_catalog_notice"
+
+/**
+ * Test tag for the Select-all / Deselect-all control (shown when ≥2 providers).
+ * Lets Compose UI Challenge tests tap the control and assert that every provider
+ * row's checkbox flips.
+ */
+const val SelectAllProvidersTestTag = "select_all_providers"

@@ -7,6 +7,14 @@ sealed interface OnboardingAction {
     data object NextStep : OnboardingAction
     data object BackStep : OnboardingAction
     data class ToggleProvider(val providerId: String) : OnboardingAction
+
+    /**
+     * Header "Select all / Deselect all" control on the Pick-your-providers step.
+     * Selects every provider if not all are currently selected; otherwise
+     * deselects every provider. Useful when the chosen API offers many providers
+     * (the catalogue can be dozens) so the user need not tap each row.
+     */
+    data object ToggleAllProviders : OnboardingAction
     data class UsernameChanged(val value: String) : OnboardingAction
     data class PasswordChanged(val value: String) : OnboardingAction
     data class ToggleAnonymous(val enabled: Boolean) : OnboardingAction

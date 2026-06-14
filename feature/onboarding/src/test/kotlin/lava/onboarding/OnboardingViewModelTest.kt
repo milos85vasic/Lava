@@ -190,6 +190,54 @@ class OnboardingViewModelTest {
     }
 
     @Test
+    fun `toggle all providers deselects all when all selected, selects all otherwise (incl mixed)`() =
+        runTest(dispatcherRule.testDispatcher) {
+            // Two providers so "all / none" is meaningful (setup() already
+            // registered "test-tracker"; both default to selected).
+            registerTracker("second-tracker", "Second Tracker", "https://second.example.com")
+            val viewModel = createViewModel()
+            viewModel.test(this) {
+                runOnCreate()
+                expectInitialState()
+                awaitState()
+
+                viewModel.perform(OnboardingAction.NextStep)
+                expectState { copy(step = OnboardingStep.Providers) }
+
+                // All selected → toggle-all → deselect EVERY provider.
+                viewModel.perform(OnboardingAction.ToggleAllProviders)
+                val afterDeselect = awaitState()
+                assertTrue(
+                    "toggle-all when all selected MUST deselect every provider — was " +
+                        "${afterDeselect.providers.map { it.descriptor.trackerId to it.selected }}",
+                    afterDeselect.providers.size >= 2 && afterDeselect.providers.none { it.selected },
+                )
+
+                // None selected → toggle-all → select EVERY provider.
+                viewModel.perform(OnboardingAction.ToggleAllProviders)
+                val afterSelect = awaitState()
+                assertTrue(
+                    "toggle-all when none selected MUST select every provider — was " +
+                        "${afterSelect.providers.map { it.descriptor.trackerId to it.selected }}",
+                    afterSelect.providers.all { it.selected },
+                )
+
+                // MIXED (one off) → toggle-all → select ALL (not deselect the rest).
+                viewModel.perform(OnboardingAction.ToggleProvider("test-tracker"))
+                awaitState()
+                viewModel.perform(OnboardingAction.ToggleAllProviders)
+                val afterMixed = awaitState()
+                assertTrue(
+                    "toggle-all from a MIXED selection MUST select every provider — was " +
+                        "${afterMixed.providers.map { it.descriptor.trackerId to it.selected }}",
+                    afterMixed.providers.all { it.selected },
+                )
+
+                cancelAndIgnoreRemainingItems()
+            }
+        }
+
+    @Test
     fun `finish emits Finish side effect when at least one provider is configured AND tested`() =
         runTest(dispatcherRule.testDispatcher) {
             val viewModel = createViewModel()

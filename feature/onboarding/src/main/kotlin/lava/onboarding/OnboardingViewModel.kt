@@ -146,6 +146,7 @@ class OnboardingViewModel @Inject constructor(
             is OnboardingAction.NextStep -> onNextStep()
             is OnboardingAction.BackStep -> onBackStep()
             is OnboardingAction.ToggleProvider -> onToggleProvider(action.providerId)
+            is OnboardingAction.ToggleAllProviders -> onToggleAllProviders()
             is OnboardingAction.UsernameChanged -> onUsernameChanged(action.value)
             is OnboardingAction.PasswordChanged -> onPasswordChanged(action.value)
             is OnboardingAction.ToggleAnonymous -> onToggleAnonymous(action.enabled)
@@ -437,6 +438,20 @@ class OnboardingViewModel @Inject constructor(
                     if (p.descriptor.trackerId == providerId) p.copy(selected = !p.selected) else p
                 },
             )
+        }
+    }
+
+    /**
+     * Select-all / deselect-all for the Pick-your-providers list. If every
+     * provider is currently selected, deselect them all; otherwise select them
+     * all. An empty list is a no-op (vacuously "all selected" → target=false →
+     * maps over nothing). The Next gate ([hasSelectedProviders]) reacts to the
+     * resulting selection like any per-row toggle does.
+     */
+    private fun onToggleAllProviders() = intent {
+        reduce {
+            val target = !(state.providers.isNotEmpty() && state.providers.all { it.selected })
+            state.copy(providers = state.providers.map { it.copy(selected = target) })
         }
     }
 
