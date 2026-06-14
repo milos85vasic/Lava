@@ -345,5 +345,17 @@ dependencies {
     androidTestImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(libs.hilt.android.testing)
     androidTestImplementation(libs.androidx.security.ktx)
+    // C44 (Challenge44ApiSearchAuthTest) runs an on-device MockWebServer
+    // inside the instrumented test process to stand in for the auth-gated
+    // lava-api-go / on-device api-app deterministically (the real backend is
+    // an e2e flow tracked separately). Same boundary the unit
+    // ApiBackedTrackerClientTest fakes; here on a real device.
+    androidTestImplementation(libs.okhttp.mockwebserver)
+    // C43 (Challenge43ServerListNoDuplicateTest) builds a REAL in-memory
+    // lava.database.AppDatabase on-device via Room.inMemoryDatabaseBuilder
+    // to drive the real EndpointsRepositoryImpl de-dup path. :core:database
+    // keeps room-runtime as `implementation`, so the Room entry point is not
+    // on the app androidTest classpath transitively — declare it here.
+    androidTestImplementation(libs.room.runtime)
     kspAndroidTest(libs.hilt.compiler)
 }
