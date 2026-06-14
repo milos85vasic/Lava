@@ -1609,7 +1609,18 @@ observed, api-app crashes will appear under the api-app dashboard (operator
 confirms post-distribute).
 **Fix commit:** this cycle (config replaced on disk; findings doc `fb0bfec9`).
 
-## search does not work in any scenario — 3-layer cascade (2026-06-14)
+## search does not work in any scenario — 5-layer cascade (2026-06-14)
+
+> **STATUS (honest, §6.T.1/§11.4.6): search does NOT yet work on-device.** Layers
+> 1+2+3 are fixed (L1+L2 device-verified, L3 RED→GREEN at the test layer). Layer 4
+> is proven a TEST-VM artifact (production grant is safe — clean matched-pair run
+> showed `granted=true`). **Layer 5 is OPEN/VERIFYING** — even on a clean matched
+> pair with the permission granted and the engine running, `/v1/{provider}/search`
+> STILL 401s; the `Lava-Auth` key is not reaching the search request. A
+> logcat-instrumentation run is in progress. **1.3.9 (client-only) is NOT shipped**
+> until the L5 on-device gate is GREEN. api-app unchanged at 0.2.8-12. This entry
+> was extended from 3 to 5 layers as the cascade was peeled back; do not read any
+> "fixed" below as "search works" — it does not yet.
 
 **Symptom (operator-reported, 1.3.8-1065):** "search still does not work in any
 scenario." Searching any query against the chosen on-device / LAN API returned
@@ -1635,14 +1646,39 @@ on-device evidence, not one):**
   `/v1/:provider/{op}` + `/jackett/search` + `/health/ready`; the standalone
   serves legacy `/search` + `/v1/{provider}/search`; **neither registers
   `/v1/search`** → 404 for every GoApi user.
-- **Layer 3 — per-instance `Lava-Auth` key was null on the VM (root-caused,
-  matched-pair verification in progress, NOT yet closed).** `/v1/{provider}/search`
-  returned 401 because the per-instance key read off the variant-aware key
-  ContentProvider was null. This is a **debug-client / release-api-app SIGNATURE
-  MISMATCH**: the key ContentProvider is signature-permission-protected, and the
-  variant-aware reader reads the `.dev` api-app which was not installed on the VM
-  during this run. This is NOT a production bug for a matched (same-signature)
-  client/api-app pair. Matched-pair on-device verification is in progress.
+- **Layer 3 — mDNS-discovered endpoint persisted without its `Lava-Auth` key
+  (FIXED, `21031f2a`).** `onSelectApi` adopted a discovered API's host/port but
+  never attached the locally-readable key, so the persisted `settings.endpoint`
+  was keyless → `/v1` ops 401 even when the key was readable. Fix: `onSelectApi`
+  reads the local api-app key for keyless mDNS endpoints + an app-side cold-start
+  key-restore heals an already-persisted keyless endpoint. Both RED→GREEN at the
+  test layer.
+- **Layer 4 — `READ_API_KEY` signature permission not granted on the test VM
+  (TEST-VM ARTIFACT, production-safe).** After L3, the key reader still returned
+  null because the signature permission `digital.vasic.lava.permission.READ_API_KEY`
+  was not granted to the client on the VM. Root cause (proven, full evidence in
+  `docs/issues/2026-06-14-readapikey-permission-variant-analysis.md`): the
+  permission name is a **fixed literal** (no `.dev` suffix) while every other
+  cross-app identifier is variant-suffixed, and the VM had BOTH differently-signed
+  api-app variants (debug `…api.dev` + release `…api`) in its install history →
+  the Android `INSTALL_FAILED_DUPLICATE_PERMISSION` trap denies the grant.
+  **Production is SAFE** — the shipped release-client + release-api-app pair shares
+  one signing cert and grants the permission at install; **a clean matched-pair
+  install confirmed `granted=true` on-device.** Real users never co-install debug
+  + release variants. A MEDIUM-priority QA-fidelity hardening (variant-suffix the
+  permission name, like the authority already is) is recommended so the test VM
+  exercises the production grant path — not shipping-blocking.
+- **Layer 5 — `Lava-Auth` key not reaching the `ApiBackedTrackerClient` search
+  request (OPEN / VERIFYING — the load-bearing open layer).** On a CLEAN matched
+  pair (release client + release api-app, same signature, `granted=true`, engine
+  running, fresh onboard), `/v1/{provider}/search` STILL returns 401. The key is
+  granted and readable but is not reaching the search request. **Evidence caveat:**
+  a public `GET /providers` → 200 proves reachability ONLY — `/providers` is
+  registered BEFORE the auth middleware, so a 200 there does NOT prove the key is
+  present/valid; only an authed `/v1/{provider}/…` exercises the key. A
+  logcat-instrumentation run is in progress to pinpoint exactly which link in the
+  key-flow drops the key. **Until this closes, search does NOT work on-device** and
+  no layer above it makes search functional on its own.
 
 **Affected files:**
 - `feature/onboarding/src/main/kotlin/lava/onboarding/OnboardingViewModel.kt`
@@ -1656,7 +1692,13 @@ on-device evidence, not one):**
   (GoApi multi-provider search re-routed from `observeSseSearch` → `/v1/search`
   to `observeStreamMultiSearch` → `sdk.streamMultiSearch` → `GET
   /v1/{provider}/search`, the served path that carries the per-instance
-  `Lava-Auth` key + permissive-LAN client from the 1.3.8 wiring).
+  `Lava-Auth` key + permissive-LAN client from the 1.3.8 wiring). The dead
+  `observeSseSearch` → `/v1/search` consumer + its 3 SSE bluff tests were deleted
+  in `addaacd0`.
+- `feature/onboarding/.../OnboardingViewModel.kt` + `MainActivity` key-restore
+  (Layer 3, `21031f2a`): `onSelectApi` reads the local api-app key for keyless
+  mDNS-discovered endpoints; cold-start key-restore heals a persisted keyless
+  endpoint.
 
 **Verification tests added (real-stack reproduction, falsifiability-rehearsed):**
 - `OnboardingViewModelDynamicProvidersTest` — `selecting an API persists it as the
@@ -1680,20 +1722,32 @@ over a `MockWebServer` that SERVED `/v1/search` — the route no backend registe
 Incident:
 `.lava-ci-evidence/sixth-law-incidents/2026-06-14-sse-search-v1search-unserved-bluff.json`.
 
-**Fix commit:** `d05bc71e`.
+**Fix commits:** `d05bc71e` (L1+L2), `21031f2a` (L3 key restore), `addaacd0`
+(L4 cleanup — dropped ignored authority param + dead SSE path).
 
-**REMAINING / VERIFYING (honest, per §6.T.1 / §11.4.6):**
-- Layer 3 matched-pair on-device verification (same-signature client + api-app)
-  that fresh-onboard search returns RESULTS is **in progress** — 1.3.9 is
-  client-only and NOT shipped until that on-device gate is GREEN.
+**§6.J meta-lesson (this cycle):** a verification subagent proposed an L4 fix — a
+hardcoded `".keyprovider"` authority string — and the main stream REJECTED it
+after reading the source: `MainActivity.buildApiKeyReader` returns
+`{ -> client.read()?.key }`, which takes no authority arg and ignores any passed.
+The proposed change would not have touched the real grant condition (the signature
+match) → a §6.J bluff (and a §6.R hardcoded literal). Verify subagents root-cause;
+the main stream verifies a proposed change reaches the failing path before applying.
+
+**REMAINING / OPEN / VERIFYING (honest, per §6.T.1 / §11.4.6 — search does NOT yet
+work on-device):**
+- **Layer 5 (OPEN, top priority):** clean matched pair, `granted=true`, engine up,
+  fresh onboard → `/v1/{provider}/search` STILL 401; the `Lava-Auth` key is read
+  but not delivered on the search request. Logcat-instrumentation run in progress
+  to find the drop point. **1.3.9 (client-only) NOT shipped until this gate is
+  GREEN.** api-app unchanged at 0.2.8-12.
+- **Layer 4 (OWED, MEDIUM/QA-fidelity):** variant-suffix the `READ_API_KEY`
+  permission name so the test VM exercises the production grant path; production
+  grant is already safe. Not shipping-blocking.
 - Existing installs that do NOT re-onboard get a keyless healed endpoint → `/v1`
   ops 401 (the per-instance key lives only in `settings.endpoint` via
-  `EndpointConverter`, never in the Room `Endpoint` row, and the old onboarding
-  never wrote it). Fresh onboard flows the key correctly; an existing-install
-  key-restore is **owed**.
-- Dormant SSE path: `observeSseSearch` + `applySseError` +
-  `SseConnectivityTelemetryTest` + `SearchResultRetryTest` still cover the
-  unserved `/v1/search` SSE consumer. Follow-up: either implement a server-side
-  `/v1/search` SSE aggregator and revive the path, or remove the dead client SSE
-  consumer + its remaining tests. Not shipping-blocking for 1.3.9 (GoApi search
-  now uses the served per-provider SDK path).
+  `EndpointConverter`, never in the Room `Endpoint` row). Fresh onboard flows the
+  key correctly; the L3 cold-start key-restore addresses keyless mDNS endpoints,
+  but a full existing-install key-restore is still **owed**.
+- Dead SSE path **CLOSED** (`addaacd0`): `observeSseSearch` + the 3 SSE bluff
+  tests serving the unserved `/v1/search` were removed. A server-side `/v1/search`
+  SSE aggregator, if ever wanted, is a fresh feature, not a revival.
