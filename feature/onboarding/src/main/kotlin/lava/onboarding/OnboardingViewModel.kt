@@ -272,7 +272,17 @@ class OnboardingViewModel @Inject constructor(
         }
     }
 
-    private fun onSelectApi(endpoint: Endpoint) = intent {
+    private fun onSelectApi(rawEndpoint: Endpoint) = intent {
+        // 2026-06-14 SEARCH KEY-DELIVERY FIX (matched-pair on-device finding): the
+        // mDNS "On your network" discovery row reaches here with a KEYLESS
+        // Endpoint.GoApi — mDNS TXT records carry no secret — so search 401'd even
+        // after the host+route fixes. Only the on-device HANDOFF path
+        // (onOnDeviceApiReturned) read the per-instance key. Resolve it HERE too so
+        // a fresh mDNS onboard authenticates search in the SAME session (the
+        // app-side startup key-restore only covers restarts / existing installs).
+        // No-op for an already-keyed endpoint (handoff path) or when no local
+        // api-app key is available (returns the endpoint unchanged → keyless).
+        val endpoint = rawEndpoint.withLocalApiKeyIfMissing()
         reduce {
             state.copy(
                 selectedApi = endpoint,
@@ -354,6 +364,27 @@ class OnboardingViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    /**
+     * If [this] is an on-device-API [Endpoint.GoApi] that arrived WITHOUT a
+     * per-instance key (the mDNS discovery path — TXT records carry no secret),
+     * read the local api-app's access key via the [apiKeyReader] seam and return a
+     * keyed copy so search/`/v1` ops authenticate. The production reader
+     * (ApiKeyClient over the api-app's signature-protected ContentProvider) ignores
+     * the passed authority and uses its own variant-aware one, returning null when
+     * no local api-app key is available — then the endpoint is returned unchanged
+     * (keyless, e.g. a remote/cloud or no-auth API). §6.H: the key is never logged.
+     */
+    private fun Endpoint.withLocalApiKeyIfMissing(): Endpoint {
+        if (this !is Endpoint.GoApi || !key.isNullOrBlank()) return this
+        val read = try {
+            apiKeyReader?.invoke(AppLinkContract.API_RELEASE_PACKAGE + ".keyprovider")
+        } catch (e: Exception) {
+            e.rethrowIfCancellation()
+            null
+        }
+        return if (!read.isNullOrBlank()) copy(key = read) else this
     }
 
     private fun loadProviders() = intent {

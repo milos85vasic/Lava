@@ -356,6 +356,60 @@ class OnboardingViewModelDynamicProvidersTest {
             assertEquals(chosen, settingsRepo.getSettings().endpoint)
         }
 
+    // CHALLENGE — primary assertion on the PERSISTED active endpoint's KEY, which
+    // ApiBackedTrackerClient attaches as the Lava-Auth header on every
+    // /v1/{provider}/search. Matched-pair on-device finding 2026-06-14: the mDNS
+    // "On your network" row reaches onSelectApi with a KEYLESS GoApi (TXT records
+    // carry no secret), so /v1/{provider}/search → 401 → "Nothing found". The
+    // selection-time key-read resolves the local api-app's key so search
+    // authenticates in the SAME session.
+    //
+    // §6.J FALSIFIABILITY: delete the `rawEndpoint.withLocalApiKeyIfMissing()` call
+    // (use rawEndpoint directly) in OnboardingViewModel.onSelectApi → the persisted
+    // endpoint stays keyless and this assertEquals(key) fails (expected "k", got
+    // null). Confirmed.
+    @Test
+    fun `selecting a keyless on-device API reads and persists the local api key for search auth`() =
+        runTest(dispatcherRule.testDispatcher) {
+            server.enqueue(
+                MockResponse()
+                    .setResponseCode(200)
+                    .setHeader("Content-Type", "application/json")
+                    .setBody(catalogueJson),
+            )
+            val fetchUseCase: lava.domain.usecase.FetchProvidersUseCase =
+                buildRealFetchProvidersUseCase(server)
+            val viewModel = createViewModel(fetchUseCase)
+            // The local api-app's per-instance key the ContentProvider would hand back.
+            viewModel.setApiKeyReader { "k" }
+            // mDNS-style selection: a KEYLESS GoApi (no secret in TXT records).
+            val keyless = goApiEndpoint()
+            check(keyless.key == null) { "fixture must be keyless to reproduce the defect" }
+
+            viewModel.test(this) {
+                runOnCreate()
+                expectInitialState()
+                awaitState()
+                viewModel.perform(OnboardingAction.NextStep)
+                viewModel.perform(OnboardingAction.SelectApi(keyless))
+                var guard = 0
+                while (guard < 12) {
+                    guard++
+                    if (awaitState().step == OnboardingStep.Providers) break
+                }
+                cancelAndIgnoreRemainingItems()
+            }
+
+            // PRIMARY: the persisted active endpoint now carries the local key, so
+            // search's Lava-Auth header is set and /v1/{provider}/search ≠ 401.
+            val persisted = settingsRepo.getSettings().endpoint
+            assertTrue(
+                "the local api-app key MUST be read + persisted onto the keyless " +
+                    "mDNS-selected endpoint (was $persisted)",
+                persisted is Endpoint.GoApi && persisted.key == "k",
+            )
+        }
+
     // CHALLENGE — primary assertion on the non-blocking notice + non-blank list.
     @Test
     fun `catalogue fetch failure falls back to bundled providers with a non-blocking notice not a blank list`() =
