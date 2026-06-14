@@ -1,0 +1,225 @@
+# SPDX-FileCopyrightText: 2026 Milos Vasic
+# SPDX-License-Identifier: Apache-2.0
+#
+# Lava reported-issues HelixQA test bank.
+#
+# This is a REAL HelixQA test bank: it deserialises into
+# digital.vasic.helixqa/pkg/testbank.BankFile via testbank.LoadFile and
+# passes that package's intra-bank validation (every case has a non-empty
+# id + name, no duplicate ids). The Go loader contract is exercised by
+# lava-api-go/internal/qa/testbank/bank_loader_test.go (run `go test`).
+#
+# One TestCase per operator-reported issue. Each case is the machine-
+# readable SPECIFICATION of the issue: Given/When/Then steps, the
+# user-visible expected outcome, the mapped Compose UI Challenge class,
+# and the validation method. EXECUTION evidence is the connectedAndroid-
+# Test verdict + the recorded video (see ExpectedResult + the
+# documentation_refs `video_evidence` entries) — NOT this YAML. This bank
+# does NOT claim HelixQA vision-validation ran; the Challenge verdict +
+# recorded video are the execution proofs (videos for issues 1-2 already
+# produced; 3-4 recording in the same cycle).
+#
+# Action types: the steps use ActionTypeDescription (legacy prose) because
+# these are Compose UI flows whose execution body is the consumer-owned
+# connectedAndroidTest Challenge class named in `challenge_id` +
+# `dispatches_to`. HelixQA's structured Android action types
+# (adb_shell / tap / text / screenshot) describe the device-level steps a
+# dispatched runner WOULD issue; the authoritative execution is the
+# Gradle connectedDebugAndroidTest verdict for the mapped Challenge.
+version: "1.0"
+name: lava-reported-issues
+description: >-
+  HelixQA test bank for the four operator-reported Lava issues
+  (onboarding select-all/deselect-all, provider Configure password
+  masking + eye toggle, search "Something went wrong" / per-endpoint
+  /v1 auth, Settings duplicate online server). One TestCase per issue;
+  each maps to a Compose UI Challenge class validated on a connected
+  Android emulator/device with a recorded video as captured evidence.
+
+metadata:
+  project: lava
+  source: operator-reported
+  bank_kind: autonomous-test-bank
+  validation_method: connectedAndroidTest verdict + recorded video (§6.AE / §11.4.83)
+  recording_helper: scripts/record-challenge-video.sh
+  honesty_note: >-
+    The bank is the machine-readable spec. HelixQA LLM vision-validation
+    has NOT been run against these cases; the load+validate proof is the
+    Go test, and the per-issue execution proof is the Challenge verdict
+    plus recorded video.
+
+test_cases:
+  # ---------------------------------------------------------------------
+  # Issue 1 — onboarding select-all / deselect-all
+  # ---------------------------------------------------------------------
+  - id: LVA-REPORTED-ISSUE-01-ONBOARDING-SELECT-ALL
+    name: "Onboarding select-all / deselect-all toggles every provider checkbox"
+    description: >-
+      On the onboarding provider-selection step, the select-all control
+      must check every provider in the list, and deselect-all must clear
+      every provider — the bulk toggle must drive the real selection
+      state the rest of onboarding consumes, not a cosmetic header.
+    category: functional
+    priority: critical
+    platforms: [android]
+    challenge_id: Challenge41
+    dispatches_to: lava.app.challenges.Challenge41OnboardingSelectAllDeselectAllTest
+    domains: [onboarding, selection]
+    estimated_duration: "90s"
+    tags: [onboarding, select-all, deselect-all, providers, reported]
+    steps:
+      - name: "Given the onboarding provider-selection step is shown"
+        action: "Launch app to onboarding; advance to the provider-selection step so the provider list and the select-all/deselect-all control are visible"
+        expected: "Provider list renders with per-provider checkboxes all initially unchecked"
+      - name: "When the user taps select-all"
+        action: "Tap the select-all control"
+        expected: "Every provider checkbox becomes checked and the underlying selection state contains all providers"
+      - name: "And the user taps deselect-all"
+        action: "Tap the deselect-all control"
+        expected: "Every provider checkbox becomes unchecked and the underlying selection state is empty"
+      - name: "Then the bulk toggle drove real selection state"
+        action: "Assert the count of selected providers via the rendered checkbox state after each toggle"
+        expected: "select-all -> N selected (N = provider count); deselect-all -> 0 selected"
+    expected_result: >-
+      A real user on the onboarding provider step can tap select-all to
+      select every provider and deselect-all to clear them; the checkbox
+      UI and the selection state agree. Validated by Challenge41 on a
+      connected Android emulator/device; recorded video is the captured
+      evidence (already produced for this issue).
+    documentation_refs:
+      - type: challenge
+        section: Challenge41OnboardingSelectAllDeselectAllTest
+        path: app/src/androidTest/kotlin/lava/app/challenges/Challenge41OnboardingSelectAllDeselectAllTest.kt
+      - type: video_evidence
+        section: select-all
+        path: docs/qa/video-challenge-recording.md
+
+  # ---------------------------------------------------------------------
+  # Issue 2 — provider Configure password masking + eye toggle
+  # ---------------------------------------------------------------------
+  - id: LVA-REPORTED-ISSUE-02-PROVIDER-CONFIG-PASSWORD-MASK
+    name: "Provider Configure masks the password and the eye toggle reveals/hides it"
+    description: >-
+      On the provider Configure screen, the password field must render
+      masked by default (dots, not plaintext), and the trailing eye icon
+      must toggle visibility — revealing the typed value on first tap and
+      re-masking on second tap.
+    category: functional
+    priority: critical
+    platforms: [android]
+    challenge_id: Challenge42
+    dispatches_to: lava.app.challenges.Challenge42ProviderConfigPasswordMaskTest
+    domains: [provider_config, credentials, security]
+    estimated_duration: "90s"
+    tags: [provider-config, password, masking, eye-toggle, reported]
+    steps:
+      - name: "Given the provider Configure screen with a password field"
+        action: "Open a provider's Configure screen that has a password (FORM_LOGIN) field"
+        expected: "Password field is present with a trailing eye/visibility icon"
+      - name: "When the user types a password"
+        action: "Type a password value into the password field"
+        expected: "The field renders the value MASKED (visual-transformation dots), not plaintext"
+      - name: "And the user taps the eye toggle"
+        action: "Tap the trailing eye icon"
+        expected: "The typed password becomes visible as plaintext"
+      - name: "And the user taps the eye toggle again"
+        action: "Tap the trailing eye icon a second time"
+        expected: "The password is masked again (dots)"
+      - name: "Then default-masked + toggle-reveal + toggle-hide all hold"
+        action: "Assert the rendered field is masked initially, plaintext after first eye tap, masked after second"
+        expected: "masked -> visible -> masked across the two eye taps"
+    expected_result: >-
+      A real user configuring a provider sees the password masked by
+      default and can reveal/hide it with the eye toggle. Validated by
+      Challenge42 on a connected Android emulator/device; recorded video
+      is the captured evidence (already produced for this issue).
+    documentation_refs:
+      - type: challenge
+        section: Challenge42ProviderConfigPasswordMaskTest
+        path: app/src/androidTest/kotlin/lava/app/challenges/Challenge42ProviderConfigPasswordMaskTest.kt
+      - type: video_evidence
+        section: password-mask
+        path: docs/qa/video-challenge-recording.md
+
+  # ---------------------------------------------------------------------
+  # Issue 3 — search "Something went wrong" -> per-endpoint /v1 auth
+  # ---------------------------------------------------------------------
+  - id: LVA-REPORTED-ISSUE-03-SEARCH-PER-ENDPOINT-V1-AUTH
+    name: "Search returns results instead of \"Something went wrong\" (per-endpoint /v1 auth)"
+    description: >-
+      Submitting a search must reach the selected provider's /v1 endpoint
+      with the correct per-endpoint authentication and return results
+      (or an honest empty state) — NOT the generic "Something went wrong"
+      error that the auth-routing defect produced.
+    category: integration
+    priority: critical
+    platforms: [android]
+    challenge_id: Challenge44
+    dispatches_to: lava.app.challenges.Challenge44SearchPerEndpointAuthTest
+    domains: [search, auth, networking]
+    estimated_duration: "120s"
+    tags: [search, something-went-wrong, per-endpoint-auth, v1, reported]
+    steps:
+      - name: "Given an onboarded provider whose API requires per-endpoint /v1 auth"
+        action: "Complete onboarding/login for a provider so a valid per-endpoint auth key is held for its /v1 endpoint"
+        expected: "Provider is configured and selected for search"
+      - name: "When the user submits a search query"
+        action: "Enter a search term and submit"
+        expected: "The request is sent to the provider's /v1 endpoint with the per-endpoint auth applied"
+      - name: "Then the search result screen shows results, not the error"
+        action: "Assert the rendered search-result state is a result list (or honest empty state), and the text \"Something went wrong\" is NOT present"
+        expected: "Search results render; \"Something went wrong\" is absent"
+    expected_result: >-
+      A real user who searches with an onboarded provider gets results
+      routed through the correct per-endpoint /v1 authentication, instead
+      of the generic "Something went wrong" failure. Validated by
+      Challenge44 on a connected Android emulator/device; recorded video
+      is the captured evidence (recording in this cycle).
+    documentation_refs:
+      - type: challenge
+        section: Challenge44SearchPerEndpointAuthTest
+        path: app/src/androidTest/kotlin/lava/app/challenges/Challenge44SearchPerEndpointAuthTest.kt
+      - type: video_evidence
+        section: per-endpoint-auth
+        path: docs/qa/video-challenge-recording.md
+
+  # ---------------------------------------------------------------------
+  # Issue 4 — Settings server list shows chosen online server twice
+  # ---------------------------------------------------------------------
+  - id: LVA-REPORTED-ISSUE-04-SETTINGS-DUPLICATE-ONLINE-SERVER
+    name: "Settings server list shows the chosen online server exactly once (no duplicate)"
+    description: >-
+      In Settings, the server list must show the chosen online server
+      exactly once. The reported defect rendered the selected online
+      server twice (once from discovery, once from the persisted
+      selection) — the dedup must collapse identical entries.
+    category: functional
+    priority: high
+    platforms: [android]
+    challenge_id: Challenge43
+    dispatches_to: lava.app.challenges.Challenge43SettingsServerListNoDuplicateTest
+    domains: [settings, server_list, discovery]
+    estimated_duration: "90s"
+    tags: [settings, server-list, duplicate, online-server, reported]
+    steps:
+      - name: "Given an online server has been chosen"
+        action: "Choose/select an online server so it is both discoverable and the persisted selection"
+        expected: "The chosen online server is the active selection"
+      - name: "When the user opens the Settings server list"
+        action: "Navigate to Settings and open the server list"
+        expected: "The server list renders with the chosen online server present"
+      - name: "Then the chosen online server appears exactly once"
+        action: "Assert the count of list entries matching the chosen online server's identity is exactly 1 (no duplicate row)"
+        expected: "Chosen online server entry count == 1"
+    expected_result: >-
+      A real user opening the Settings server list sees their chosen
+      online server listed exactly once, not duplicated. Validated by
+      Challenge43 on a connected Android emulator/device; recorded video
+      is the captured evidence (recording in this cycle).
+    documentation_refs:
+      - type: challenge
+        section: Challenge43SettingsServerListNoDuplicateTest
+        path: app/src/androidTest/kotlin/lava/app/challenges/Challenge43SettingsServerListNoDuplicateTest.kt
+      - type: video_evidence
+        section: duplicate-server
+        path: docs/qa/video-challenge-recording.md
