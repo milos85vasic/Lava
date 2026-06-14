@@ -1,4 +1,27 @@
 # Changelog
+## Lava-Android-1.3.8-1065 — 2026-06-14 (Search fixed + no duplicate servers + select-all providers + password show/hide)
+
+**Previous published:** Lava-Android-1.3.7-1064 (debug+release).
+
+- **Search works again across your providers** — searching across providers via the
+  on-device API no longer fails with "Something went wrong, please try again." The app
+  now authenticates every per-provider request to the chosen API (it previously used the
+  wrong, stricter network client and didn't send the API's per-instance key, so the
+  self-signed local API rejected the search). This fixes search for RuTracker, YTS,
+  Kinozal and every other provider served by the on-device / LAN API.
+- **No more duplicate servers in Settings** — the server you chose no longer appears
+  twice in Settings → the server list (the same server reached via two paths is now shown
+  once).
+- **Select-all / Deselect-all providers** — the onboarding "Pick your providers" screen
+  now has a single control to check or uncheck every provider at once (handy when an API
+  offers many).
+- **Standard password field** — the provider sign-in password field now masks characters
+  by default with a show/hide (eye) toggle, like any normal password field.
+
+Each fix is covered by an automated reproduction test and a device-run UI/instrumented
+Challenge that passed on a Genymotion Pixel 9 / API 35 VM. Paired with on-device API app
+0.2.8-12.
+
 ## Lava-Android-1.3.7-1064 — 2026-06-13 (New Tokyo Toshokan provider + more reliable provider reachability + cleaner diagnostics)
 
 **Previous published:** Lava-Android-1.3.6-1063 (debug+release).
@@ -173,6 +196,21 @@ against the new upstream release. See `git log` 54eedd92..HEAD and `docs/Fixed.m
 - §6.Z: `.lava-ci-evidence/app-linking/ondevice-dc547861/` + falsifiable unit regression tests
   (commit `dc547861`). Debug-stage evidence:
   `.lava-ci-evidence/distribute-changelog/firebase-app-distribution/1.3.0-1057-test-evidence.md`.
+
+## Lava-API-App-0.2.8-12 — 2026-06-14 (Foreground service no longer crashes after long uptime — dataSync → specialUse)
+
+**Previous published:** Lava-API-App-0.2.7-11 (debug+release).
+
+- **The on-device API no longer crashes after running for a long time** — the background
+  foreground service used the Android `dataSync` type, which Android 14+ caps at a ~6-hour
+  cumulative runtime budget; once exhausted, the service crashed
+  (`ForegroundServiceStartNotAllowedException`). The long-lived LAN API server now uses the
+  `specialUse` foreground-service type (no cumulative-time budget) and gracefully stops if
+  the OS ever signals a timeout, instead of crashing. The embedded provider catalogue and
+  search are unchanged from 0.2.7-11.
+
+Note (Play Store): the `specialUse` type carries a free-form Play Console review
+justification (in the manifest property) describing the long-lived LAN API-server use case.
 
 ## Lava-API-App-0.2.7-11 — 2026-06-13 (Tokyo Toshokan provider + TPB/Torrents-CSV mirror-failover hardening)
 
