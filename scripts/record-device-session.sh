@@ -227,6 +227,19 @@ rds_main() {
       for pidf in "$last"/logcat.pid "$last"/screenrecord.pid "$last"/screenshot.pid; do
         [[ -f "$pidf" ]] || continue
         local pid; pid="$(cat "$pidf")"
+        if [[ "$pidf" == *screenrecord.pid ]]; then
+          # `adb shell screenrecord` finalizes the .mp4 container ONLY when its
+          # DEVICE-SIDE process receives SIGINT (graceful) — killing the LOCAL
+          # adb wrapper truncates the file AND skips the wrapper's `&& adb pull`,
+          # which was the "Challenge PASSED but no video" defect (2026-06-14).
+          # SIGINT the device-side process so it finalizes + exits 0, then let the
+          # wrapper subshell complete its pull (bounded wait) before reaping.
+          adb -s "$SERIAL" shell pkill -INT screenrecord >/dev/null 2>&1 || true
+          local waited=0
+          while kill -0 "$pid" 2>/dev/null && [[ "$waited" -lt 20 ]]; do
+            sleep 1; waited=$((waited + 1))
+          done
+        fi
         if kill "$pid" 2>/dev/null; then echo "==> stopped $(basename "$pidf") (pid $pid)"; fi
         rm -f "$pidf"
       done
