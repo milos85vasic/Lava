@@ -87,6 +87,7 @@ class RepopulateProvidersOnStartupUseCaseTest {
     private lateinit var registry: DefaultTrackerRegistry
     private lateinit var sdk: LavaTrackerSdk
     private lateinit var settings: TestSettingsRepository
+    private val endpoints = lava.testing.repository.TestEndpointsRepository()
     private var activatedBaseUrl: String? = null
     private var activatedKey: String? = null
 
@@ -206,6 +207,7 @@ class RepopulateProvidersOnStartupUseCaseTest {
             // MockWebServer serves plain HTTP — substitute an http builder for
             // the production Https one (the exact seam SseBaseUrlBuilder exposes).
             apiBaseUrlBuilder = SseBaseUrlBuilder { host, port -> "http://$host:$port" },
+            endpointsRepository = endpoints,
         )
     }
 
@@ -270,6 +272,42 @@ class RepopulateProvidersOnStartupUseCaseTest {
                 "k",
                 activatedKey,
             )
+        }
+
+    // CHALLENGE — existing-install HEAL (2026-06-14 search-routing fix). Primary
+    // assertion on the PERSISTED active endpoint (settings.endpoint) — the exact
+    // value the home search resolves its target host from
+    // (NetworkApiRepositoryImpl.endpoint()). Reproduces the operator's broken
+    // state: an install whose onboarding pre-dated the settings.endpoint write, so
+    // the active endpoint is an orphan default NOT in the Room list while the REAL
+    // chosen server lives only in the Room list. On-device Chucker proof:
+    // /providers → real IP (200), /search → orphan host (UnknownHostException).
+    //
+    // §6.J FALSIFIABILITY: delete the `settingsRepository.setEndpoint(roomGoApis.last())`
+    // line in RepopulateProvidersOnStartupUseCase.reconcileActiveEndpoint() →
+    // settings.endpoint stays the orphan and this assertEquals fails (expected the
+    // onboarded server, got the orphan). Confirmed.
+    @Test
+    fun `cold start heals a stale orphan active endpoint to the onboarded server in the list`() =
+        runTest {
+            // Orphan active endpoint the old onboarding never overwrote — a GoApi
+            // whose host:port is NOT among the user's actual added servers.
+            settings.setEndpoint(Endpoint.GoApi(host = "stale-orphan.invalid"))
+            // The user's REAL onboarded server lives only in the Room list.
+            val real = Endpoint.GoApi(host = server.hostName, port = server.port, key = "k")
+            endpoints.add(real)
+            server.enqueue(
+                MockResponse().setResponseCode(200)
+                    .setHeader("Content-Type", "application/json")
+                    .setBody(catalogueJson()),
+            )
+
+            buildUseCase().invoke()
+
+            // PRIMARY: the active endpoint the search path reads is now the REAL
+            // onboarded server (host:port + key), NOT the unreachable orphan — so
+            // search targets the right host instead of failing to resolve.
+            assertEquals(real, settings.getSettings().endpoint)
         }
 
     // CHALLENGE — graceful degradation: a non-GoApi active endpoint is a no-op,

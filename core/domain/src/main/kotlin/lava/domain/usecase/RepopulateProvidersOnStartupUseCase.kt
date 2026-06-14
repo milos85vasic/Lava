@@ -1,5 +1,7 @@
 package lava.domain.usecase
 
+import kotlinx.coroutines.flow.first
+import lava.data.api.repository.EndpointsRepository
 import lava.data.api.repository.SettingsRepository
 import lava.models.settings.Endpoint
 import lava.network.sse.SseBaseUrlBuilder
@@ -68,8 +70,14 @@ class RepopulateProvidersOnStartupUseCase @Inject constructor(
     private val trackerRegistry: TrackerRegistry,
     private val activator: ActiveApiBaseUrlActivator,
     private val apiBaseUrlBuilder: SseBaseUrlBuilder,
+    // 2026-06-14 existing-install HEAL (search-routing fix). See
+    // [reconcileActiveEndpoint].
+    private val endpointsRepository: EndpointsRepository,
 ) {
     suspend operator fun invoke(): Boolean {
+        // Heal the active endpoint BEFORE reading it (existing installs whose
+        // onboarding pre-dates the 2026-06-14 settings.endpoint write).
+        reconcileActiveEndpoint()
         val endpoint = runCatching { settingsRepository.getSettings().endpoint }.getOrNull()
         val goApi = endpoint as? Endpoint.GoApi ?: return false
         val apiBaseUrl = apiBaseUrlBuilder.build(goApi.host, goApi.port)
@@ -92,6 +100,46 @@ class RepopulateProvidersOnStartupUseCase @Inject constructor(
             // the failure into Result.failure; we just decline to repopulate.
             onFailure = { false },
         )
+    }
+
+    /**
+     * Heal the active [settings.endpoint] for installs whose onboarding ran on a
+     * build PRE-DATING the 2026-06-14 fix (when [OnboardingViewModel.onSelectApi]
+     * began persisting the chosen API to `settings.endpoint`, not only the Room
+     * endpoint list).
+     *
+     * Root cause of the operator-reported "search → problem reaching the trackers
+     * in any scenario" (2026-06-14): the home search resolves its target host from
+     * `settings.endpoint` (NetworkApiRepositoryImpl.endpoint()), which stayed at
+     * the unreachable default `Endpoint.GoApi("lava-api.local")` because the old
+     * onboarding never wrote it — while the user's REAL chosen server lived only in
+     * the Room [EndpointsRepository] list. On-device Chucker proof: `/providers` →
+     * 10.0.3.16 (200), `/search` → lava-api.local (UnknownHostException).
+     *
+     * Heal rule (conservative, literal-free — §6.R): if the persisted active
+     * endpoint is NOT one of the user's actual added servers (no Room GoApi shares
+     * its host:port) AND the Room list DOES contain a GoApi, adopt the most-recently
+     * added Room GoApi as the active endpoint. This fires ONLY for the orphan-default
+     * case: a freshly onboarded (post-fix) install has settings.endpoint already in
+     * the Room list → no-op; a never-onboarded install has an empty Room list →
+     * no-op. NEVER throws.
+     */
+    private suspend fun reconcileActiveEndpoint() {
+        runCatching {
+            val active = settingsRepository.getSettings().endpoint as? Endpoint.GoApi
+            val roomGoApis = endpointsRepository.observeAll().first()
+                .filterIsInstance<Endpoint.GoApi>()
+            if (roomGoApis.isEmpty()) return
+            val activeIsKnownServer = active != null &&
+                roomGoApis.any { it.host == active.host && it.port == active.port }
+            if (!activeIsKnownServer) {
+                // Adopt the onboarded server so search (settings.endpoint) targets
+                // the right host:port + per-instance key instead of the orphan
+                // default. distinctBy in EndpointsRepositoryImpl already de-dups by
+                // server identity, so last() is the richest (keyed) entry.
+                settingsRepository.setEndpoint(roomGoApis.last())
+            }
+        }
     }
 }
 

@@ -206,6 +206,13 @@ class OnboardingViewModelDynamicProvidersTest {
         )
     }
 
+    // Real settings store so a Challenge can assert the ACTIVE endpoint search
+    // reads (settings.endpoint) is persisted when the user selects an API. The
+    // 2026-06-14 search-routing fix: onSelectApi must write settings.endpoint, not
+    // only the Room Endpoint list. Wired through the REAL SetEndpointUseCaseImpl
+    // (fake only at the SettingsRepository boundary, per the Anti-Bluff Pact).
+    private val settingsRepo = lava.testing.repository.TestSettingsRepository()
+
     private fun TestScope.createViewModel(
         fetchProvidersUseCase: lava.domain.usecase.FetchProvidersUseCase?,
     ): OnboardingViewModel = OnboardingViewModel(
@@ -236,6 +243,7 @@ class OnboardingViewModelDynamicProvidersTest {
         // exact MockWebServer-substitution the builder seam was designed for
         // (see SseBaseUrlBuilder KDoc); no scheme literal in production code.
         apiBaseUrlBuilder = lava.network.sse.SseBaseUrlBuilder { host, port -> "http://$host:$port" },
+        setEndpointUseCase = lava.domain.usecase.SetEndpointUseCaseImpl(settingsRepo),
     )
 
     private fun goApiEndpoint(): Endpoint.GoApi =
@@ -296,6 +304,56 @@ class OnboardingViewModelDynamicProvidersTest {
                     providersOnScreen.contains("1337x"),
                 )
             }
+        }
+
+    // CHALLENGE — primary assertion on the PERSISTED active endpoint
+    // (settings.endpoint), the exact value the home search resolves its target
+    // host from (NetworkApiRepositoryImpl.endpoint()). Operator-reported defect
+    // 2026-06-14: search → "Something went wrong" / "problem reaching the
+    // trackers". Root cause (1.3.8 on-device Chucker repro): onSelectApi wrote the
+    // chosen API to the Room Endpoint list + ApiBaseUrlHolder but NOT to
+    // settings.endpoint, so search kept hitting the default GoApi("lava-api.local")
+    // → UnknownHostException, while GET /providers (which uses ApiBaseUrlHolder)
+    // worked. This test pins the active endpoint to the chosen API.
+    //
+    // §6.J FALSIFIABILITY: delete `setEndpointUseCase?.invoke(endpoint)` from
+    // OnboardingViewModel.onSelectApi → settings.endpoint stays at the Settings()
+    // default and the assertEquals fails (expected the chosen GoApi host:port, got
+    // the default). Confirmed RED before the fix line, GREEN after.
+    @Test
+    fun `selecting an API persists it as the active settings endpoint the search path reads`() =
+        runTest(dispatcherRule.testDispatcher) {
+            server.enqueue(
+                MockResponse()
+                    .setResponseCode(200)
+                    .setHeader("Content-Type", "application/json")
+                    .setBody(catalogueJson),
+            )
+            val fetchUseCase: lava.domain.usecase.FetchProvidersUseCase =
+                buildRealFetchProvidersUseCase(server)
+            val viewModel = createViewModel(fetchUseCase)
+            val chosen = goApiEndpoint()
+
+            viewModel.test(this) {
+                runOnCreate()
+                expectInitialState()
+                awaitState()
+                viewModel.perform(OnboardingAction.NextStep) // Welcome → ApiSelection
+                viewModel.perform(OnboardingAction.SelectApi(chosen))
+                // Walk states until the wizard advances past the reachable-probe
+                // branch (proves onSelectApi's persist path ran to completion).
+                var guard = 0
+                while (guard < 12) {
+                    guard++
+                    if (awaitState().step == OnboardingStep.Providers) break
+                }
+                cancelAndIgnoreRemainingItems()
+            }
+
+            // PRIMARY (user-visible-equivalent): the active endpoint the search
+            // path resolves its target host from (settings.endpoint) is now EXACTLY
+            // the chosen API — not the default unreachable "lava-api.local".
+            assertEquals(chosen, settingsRepo.getSettings().endpoint)
         }
 
     // CHALLENGE — primary assertion on the non-blocking notice + non-blank list.

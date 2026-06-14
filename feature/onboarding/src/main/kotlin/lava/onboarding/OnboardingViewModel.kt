@@ -116,6 +116,20 @@ class OnboardingViewModel @Inject constructor(
     // the Https binding via OnboardingHiltModule.
     private val apiBaseUrlBuilder: lava.network.sse.SseBaseUrlBuilder =
         lava.network.sse.SseBaseUrlBuilder.Https,
+    // 2026-06-14 SEARCH-ROUTING FIX (root cause of the operator-reported
+    // "Something went wrong" / "problem reaching the trackers" on search).
+    // onSelectApi persisted the chosen API to the Room Endpoint list +
+    // ApiBaseUrlHolder (what GET /providers + the dynamic SDK clients read) but
+    // NEVER to settings.endpoint. The home search resolves its target host via
+    // SettingsRepository.getSettings().endpoint (NetworkApiRepositoryImpl.endpoint())
+    // which therefore stayed at the default Endpoint.GoApi("lava-api.local") — so
+    // every search died with UnknownHostException ("problem reaching the trackers").
+    // Persisting the ACTIVE endpoint here routes search to the chosen API
+    // (host:port + per-instance key — the GoApi branch of NetworkApiRepositoryImpl
+    // already uses the permissive LAN client + withKeyOverride). Nullable + null
+    // default mirrors fetchProvidersUseCase for direct-construction tests;
+    // production Hilt binds the real impl (DomainModule §setEndpointUseCase).
+    private val setEndpointUseCase: lava.domain.usecase.SetEndpointUseCase? = null,
 ) : ViewModel(), ContainerHost<OnboardingState, OnboardingSideEffect> {
     // [apiKeyReader] is a function seam (authority: String) -> key: String?
     // Cannot be injected via Hilt (function types are not Dagger-injectable).
@@ -272,6 +286,18 @@ class OnboardingViewModel @Inject constructor(
                     // Persist the selected endpoint so the rest of the app
                     // (search, network, etc.) routes through it.
                     endpointsRepository.add(endpoint)
+                    // ROUTE THE HOME SEARCH AT THE CHOSEN API (2026-06-14 fix).
+                    // The search/network layer resolves its target host from
+                    // settings.endpoint (NetworkApiRepositoryImpl.endpoint()), NOT
+                    // the Room Endpoint list above nor ApiBaseUrlHolder. Without
+                    // this write the active endpoint stayed at the default
+                    // GoApi("lava-api.local") and every search died with
+                    // UnknownHostException ("problem reaching the trackers"),
+                    // even though GET /providers worked. The chosen GoApi carries
+                    // host:port + the per-instance key, which the GoApi branch of
+                    // NetworkApiRepositoryImpl turns into a permissive-LAN-client +
+                    // withKeyOverride request.
+                    setEndpointUseCase?.invoke(endpoint)
                     // Phase 5 (2026-06-11) dynamic provider discovery: fetch the
                     // chosen API's catalogue (GET /v1/providers) and populate the
                     // registry so loadProviders() — which reads

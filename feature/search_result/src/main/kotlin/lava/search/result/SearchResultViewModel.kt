@@ -87,7 +87,16 @@ internal class SearchResultViewModel @Inject constructor(
             val filter = mutableFilter.value
             when {
                 filter.providerIds == null -> observePagingData()
-                currentEndpointIsGoApi() -> observeSseSearch(filter)
+                // 2026-06-14 SEARCH FIX (operator-reported "problem reaching the
+                // trackers in any scenario"): multi-provider search fans out
+                // client-side via sdk.streamMultiSearch → GET /v1/{provider}/search,
+                // which IS served by both the embedded on-device api-app and the
+                // standalone lava-api-go. The old GoApi → observeSseSearch branch
+                // targeted GET /v1/search — an endpoint NO backend registers (verified:
+                // neither internal/router/router.go nor the standalone handlers) — so
+                // every GoApi search 404'd. Route GoApi through the proven per-provider
+                // SDK path (it carries the per-instance Lava-Auth key + permissive-LAN
+                // client from the 1.3.8 wiring via ApiBaseUrlHolder).
                 else -> observeStreamMultiSearch(filter)
             }
         },
@@ -488,7 +497,16 @@ internal class SearchResultViewModel @Inject constructor(
             val filter = mutableFilter.value
             when {
                 filter.providerIds == null -> observePagingData()
-                currentEndpointIsGoApi() -> observeSseSearch(filter)
+                // 2026-06-14 SEARCH FIX (operator-reported "problem reaching the
+                // trackers in any scenario"): multi-provider search fans out
+                // client-side via sdk.streamMultiSearch → GET /v1/{provider}/search,
+                // which IS served by both the embedded on-device api-app and the
+                // standalone lava-api-go. The old GoApi → observeSseSearch branch
+                // targeted GET /v1/search — an endpoint NO backend registers (verified:
+                // neither internal/router/router.go nor the standalone handlers) — so
+                // every GoApi search 404'd. Route GoApi through the proven per-provider
+                // SDK path (it carries the per-instance Lava-Auth key + permissive-LAN
+                // client from the 1.3.8 wiring via ApiBaseUrlHolder).
                 else -> observeStreamMultiSearch(filter)
             }
             return@intent

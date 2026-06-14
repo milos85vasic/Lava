@@ -1,0 +1,15 @@
+{
+  "date": "2026-06-14",
+  "title": "GoApi search routed to /v1/search — an endpoint NO backend serves; SSE tests were green bluffs",
+  "operator_report": "search still does not work in any scenario (1.3.8-1065)",
+  "clause": ["6.J", "6.L", "Seventh Law clause 4 (mock-served endpoint)"],
+  "root_cause": {
+    "layer_1": "OnboardingViewModel.onSelectApi persisted the chosen API to the Room Endpoint list + ApiBaseUrlHolder but NEVER to settings.endpoint. The legacy/SSE search paths read settings.endpoint, which stayed at the default Endpoint.GoApi('lava-api.local') -> UnknownHostException. FIX: onSelectApi now calls SetEndpointUseCase; RepopulateProvidersOnStartupUseCase heals existing installs.",
+    "layer_2": "SearchResultViewModel dispatch routed every GoApi search to observeSseSearch -> GET {base}/v1/search. NO backend registers /v1/search (verified: internal/router/router.go serves /providers + /v1/:provider/{op} + /jackett/search + /health/ready; the standalone serves legacy /search + /v1/{provider}/search; neither serves /v1/search). So every GoApi search 404'd. FIX: route GoApi multi-provider search to observeStreamMultiSearch -> sdk.streamMultiSearch -> GET /v1/{provider}/search (served by both backends; carries the per-instance Lava-Auth key + permissive-LAN client from the 1.3.8 wiring)."
+  },
+  "the_bluff": "SearchResultSseErrorRetryTest (+ SseConnectivityTelemetryTest, SearchResultRetryTest) drove observeSseSearch over a MockWebServer that SERVED /v1/search and asserted SSE error/retry rendering. They passed green because the mock served the route the real backends never register. Classic 'mock served the endpoint production 404s' bluff (Seventh Law clause 4). They converted 'search is 404 for every GoApi user' into believed safety.",
+  "on_device_evidence": "1.3.8 debug client Chucker DB on Genymotion: GET https://10.0.3.16/providers -> 200; GET https://lava-api.local/search?query=prince... -> UnknownHostException (host never resolves; api-app 'Requests served: 0'). Found by the HelixQA video-QA agent (could not produce a search-results video because search genuinely fails) + traced via flow-db Endpoint row + chucker.db transactions.",
+  "fix_commits": "this cycle (1.3.9)",
+  "remediation": "Removed SearchResultSseErrorRetryTest (dead-path bluff). Added reproduction tests on the REAL path: OnboardingViewModelDynamicProvidersTest 'selecting an API persists it as the active settings endpoint' + RepopulateProvidersOnStartupUseCaseTest 'cold start heals a stale orphan active endpoint'. On-device search-returns-results e2e is the load-bearing gate before 1.3.9 ships.",
+  "follow_up_owed": "observeSseSearch + applySseError + SseConnectivityTelemetryTest + SearchResultRetryTest cover the dormant /v1/search SSE path (no server route). Either implement a server-side /v1/search SSE aggregator (api-app + standalone) and revive the path, or remove the dead client SSE consumer + its 2 remaining tests. Tracked as a follow-up; not shipping-blocking for 1.3.9 (GoApi search now uses the served SDK path)."
+}
