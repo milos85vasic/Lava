@@ -1466,3 +1466,145 @@ SUCCESSFUL (5/5).
 **Fix commit:** this commit.
 **Forensic anchor:** operator-reported 2026-06-14; reproduced before fix per
 §6.T.1. Version files NOT touched.
+
+## search "Something went wrong" across providers via the on-device/LAN API (2026-06-14)
+
+**Symptom (operator-reported):** onboarded RuTracker + YTS + Kinozal, searched
+"prince" on Home with all 3 selected, using the Android (on-device) API as the
+endpoint → "Error: Something went wrong, please try again." Every provider
+failed.
+
+**Root cause (CONFIRMED — same class as SP-3.1 / Defect-A, fixed for /providers
+but never for per-provider ops):** `ApiBackedTrackerClient` per-provider requests
+(search/getString/getBytes/postJson/healthCheck) were built on the UNQUALIFIED,
+strict, system-trust `OkHttpClient` and carried NO per-instance auth key. The
+on-device / LAN API is self-signed (so the system-trust client fails the TLS
+handshake) AND auth-gated by the `Lava-Auth` header (so even on plain HTTP it
+401s without the per-instance key). Either way the SDK surfaced the generic
+"Something went wrong." `NetworkModule.kt:101` documents that the unqualified
+client "MUST NOT be used for LAN endpoints"; only the `@Named("lan")` permissive
+client may. `/providers` had been migrated to the LAN client + key, but
+per-provider ops had not.
+
+**Affected files:** `core/tracker/client/.../ApiBackedTrackerClient.kt` (+
+`withAuth()` on every request), `.../ApiBaseUrlHolder.kt` (per-endpoint key),
+`.../di/TrackerClientModule.kt` (factory now injects `@Named("lan")` client +
+`authFieldName` + `ApiBaseUrlHolder.currentKey()`),
+`feature/onboarding/.../OnboardingViewModel.kt` (`ApiBaseUrlHolder.set(url,key)`),
+`core/domain/.../RepopulateProvidersOnStartupUseCase.kt` +
+`app/.../StartupProvidersModule.kt` (cold-start key thread-through).
+
+**Fix:** the active-API base URL is now stored WITH its per-instance key in
+`ApiBaseUrlHolder`; `TrackerClientModule` builds every `ApiBackedTrackerClient`
+with the `@Named("lan")` permissive-TLS client and threads
+`authFieldName`+`authKey`; `withAuth()` attaches `Lava-Auth: <key>` to every
+per-provider request. So search/browse/download against a self-signed,
+auth-gated on-device API succeed instead of failing the handshake or 401ing.
+
+**Verification test/challenge:**
+- Unit (reproduction): `ApiBackedTrackerClientTest.search_attachesPerEndpointAuthKey_soAuthGatedApiReturnsResults`
+  (on-device MockWebServer 401s without `Lava-Auth: k`, returns results with it)
+  + `search_withoutAuthKey_throwsOnAuthGatedApi`. Bluff-Audit: dropping
+  `.withAuth()` → search 401s → test FAILED; restored → GREEN.
+- Wiring contract: `LanHttpClientWiringContractTest` reflectively asserts the
+  factory's OkHttpClient param is `@Named("lan")` (closes the gap that nothing
+  asserted the registry was wired with the permissive client).
+- Device: Challenge44ApiSearchAuthTest (on-device MockWebServer) — PASS on the
+  Genymotion VM in the 1.3.8-1065 client gate (BUILD SUCCESSFUL).
+
+**Fix commit:** landed in the 1.3.8-1065 cycle (search-auth thread-through).
+**Forensic anchor:** operator-reported 2026-06-14; reproduced before fix (§6.T.1).
+
+## onboarding "Pick your providers": select-all / deselect-all control (2026-06-14)
+
+**Symptom (operator request):** "On pick your providers onboarding screen we
+must have check and uncheck all checker, especially if there are multiple
+choices in dozens." No way to toggle every provider at once.
+
+**Fix:** added `OnboardingAction.ToggleAllProviders` +
+`OnboardingViewModel.onToggleAllProviders()` (computes a single target =
+`!(all currently selected)` and maps every provider to it — so it acts as
+select-all when not all are selected, deselect-all when all are). `ProvidersStep`
+renders a `select_all_providers`-tagged control when `providers.size >= 2`.
+**Affected files:** `feature/onboarding/.../OnboardingAction.kt`,
+`OnboardingViewModel.kt`, `steps/ProvidersStep.kt`, `OnboardingScreen.kt`.
+**Verification:** Challenge41OnboardingSelectAllProvidersTest — PASS on the
+Genymotion VM (1.3.8-1065 gate). Drives the real ProvidersStep, taps select-all,
+asserts all selected; taps again, asserts all cleared.
+**Fix commit:** 1.3.8-1065 cycle.
+
+## onboarding provider Configure: password field masking + eye toggle (2026-06-14)
+
+**Symptom (operator request):** "password field MUST behave like every regular
+password field — masking letters, with eye icon to show password." The Configure
+step's password was plain text.
+
+**Fix:** `ConfigureStep` password field now uses
+`visualTransformation = if (passwordVisible) None else PasswordVisualTransformation()`
++ `KeyboardType.Password` + a trailing eye control (`password_visibility_toggle`,
+content descriptions "Show password"/"Hide password") that flips `passwordVisible`.
+**Affected files:** `feature/onboarding/.../steps/ConfigureStep.kt`.
+**Verification:** Challenge42OnboardingPasswordMaskingTest — PASS on the
+Genymotion VM (1.3.8-1065 gate). NOTE (anti-bluff): Compose retains the RAW text
+in EditableText regardless of the visual mask, so `assertDoesNotExist(plaintext)`
+is INVALID — the test asserts the masking STATE via the eye control's
+content-description round-trip (Show→Hide→Show). The original `assertDoesNotExist`
+form FAILED on device; the device run caught the test bug (a real §6.Z win) and
+it was rewritten to the content-description contract.
+**Fix commit:** 1.3.8-1065 cycle (test corrected in c366454f).
+
+## api-app foreground service crashes after ~6h — dataSync → specialUse (2026-06-14)
+
+**Symptom (Crashlytics FATAL):** `ForegroundServiceStartNotAllowedException` +
+`ForegroundServiceDidNotStopInTimeException` on the long-lived on-device API
+server after ~6h uptime (Galaxy S23 Ultra / Android 16). Issues
+`9ba8502ee0ba0d1fdd03987650b8acf8` + `b9baeaede585fc3bc9b515c27cde532c`.
+
+**Root cause (CONFIRMED):** `ApiEngineService` used
+`foregroundServiceType="dataSync"`, which Android 14+ caps at ~6h cumulative
+runtime/24h; the long-lived LAN API server exhausts the budget and
+`startForeground` then throws.
+
+**Fix (operator-approved specialUse):** `foregroundServiceType` `dataSync` →
+`specialUse` (no time budget) + `FOREGROUND_SERVICE_SPECIAL_USE` permission +
+`PROPERTY_SPECIAL_USE_FGS_SUBTYPE` (Play-review justification). Defensive:
+`startForeground` wrapped in `try/catch (ForegroundServiceStartNotAllowedException)`
+→ graceful `stopSelf`, and an `onTimeout(startId, fgsType)` override stops
+cleanly — so even a future budget degrades gracefully instead of crashing.
+**Affected files:** `api-app/src/main/AndroidManifest.xml`,
+`api-app/.../service/ApiEngineService.kt`. Design:
+`docs/issues/2026-06-14-apiapp-fgs-datasync-budget-fix-design.md`.
+**Verification:** `:api-app:compileDebugKotlin` SUCCESSFUL + the 0.2.8-12
+release FGS `specialUse` cold-start canary on the Genymotion VM (the service
+starts under specialUse with no FGS exception — a misconfigured type would throw
+at startForeground → FATAL). §6.O closure log:
+`.lava-ci-evidence/crashlytics-resolved/2026-06-14-apiapp-fgs-datasync-budget.md`.
+**Fix commit:** `ed03cac2` (cherry-picked to master from 10f39f43).
+
+## Defect B — api-app Crashlytics telemetry misattributed to the CLIENT Firebase app (2026-06-14)
+
+**Symptom:** api-app crashes/non-fatals (incl. the FGS FATALs above) landed under
+the CLIENT Firebase app's dashboard, not the api-app's own app — so api-app
+telemetry was indistinguishable from client telemetry.
+
+**Root cause (CONFIRMED via Firebase MCP):** the tracked (gitignored)
+`api-app/google-services.json` mapped the api-app package names
+(`digital.vasic.lava.api` / `.api.dev`) to the CLIENT app's `mobilesdk_app_id`
+values. The `google-services` Gradle plugin matches the `client[]` entry by
+`package_name`, so the api-app build baked in the client app id and registered
+as the client app.
+
+**Fix:** replaced `api-app/google-services.json` (gitignored, on-disk only —
+never committed per §6.H) with the correct config mapping the api-app packages
+to the real "Lava API (release)" `...d57b960e955645f6cfd20a` / "Lava API (debug)"
+`...2932451e07ca80a7cfd20a` app ids, fetched via Firebase MCP from project
+`lava-vasic-digital` (both api-app Firebase apps already exist — no creation
+needed). api-app rebuilt + re-staged for 0.2.8-12.
+**Affected files:** `api-app/google-services.json` (gitignored secret — NOT
+committed). Findings:
+`docs/issues/2026-06-14-defect-b-telemetry-attribution-findings.md`.
+**Verification:** api-app rebuilt SUCCESSFUL with the corrected config + the FGS
+cold-start canary passes on the rebuilt artifact. Once 0.2.8-12 is distributed +
+observed, api-app crashes will appear under the api-app dashboard (operator
+confirms post-distribute).
+**Fix commit:** this cycle (config replaced on disk; findings doc `fb0bfec9`).
