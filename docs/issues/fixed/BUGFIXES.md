@@ -1406,3 +1406,63 @@ propagate, not be swallowed into a null return`
 (new). Closure log:
 `.lava-ci-evidence/crashlytics-resolved/2026-06-13-cancellation-noise-7df61fdb.md`.
 Queued for the 1.3.7 release cycle (version files NOT touched).
+
+## chosen online server appears TWICE in Settings → Server list (2026-06-14)
+
+**Symptom (operator-reported):** "When we open settings Server list, the chosen
+online server appears TWICE in the list." The user onboarded with an
+online/cloud API endpoint; in Settings → the server/connection list, that
+chosen endpoint is shown duplicated.
+
+**Root cause:** `core/data/src/main/kotlin/lava/data/converters/Endpoint.kt:69`
+builds the Room PRIMARY KEY id for an `Endpoint.GoApi` as `GoApi(${packHost()})`,
+and `packHost()` (`Endpoint.kt:52-60`) appends the additive
+`key`/`platform`/`storage` fields after a `#` sentinel. The SAME physical
+server (same host:port) reaches the persisted list via TWO paths that differ
+only in those additive fields:
+- the cloud "Add server" flow
+  (`feature/onboarding/.../OnboardingViewModel.kt:179 onAddCloudApi` →
+  `CloudApiDefaults.parse`) builds a BARE `GoApi(host, port)` (key=null,
+  platform=null, storage=null) → id `GoApi(host:port)`;
+- the on-device / mDNS-discovered flow
+  (`OnboardingViewModel.kt:710 onOnDeviceApiReturned` carries a per-instance
+  `key`; `OnboardingViewModel.kt:239 startApiDiscovery` carries `platform`+
+  `storage` TXT attributes) builds a KEYED `GoApi` → id `GoApi(host:port#k=…)`.
+
+Both call `endpointsRepository.add()` →
+`EndpointDao.insert(OnConflictStrategy.REPLACE)`. REPLACE de-dups ONLY on a
+matching primary-key id, so the two different ids produce TWO Room rows for the
+one server. `EndpointsRepositoryImpl.observeAll()` mapped the DAO list straight
+through with no de-dup by server identity, so the Connections/Server list
+(`feature/connection/.../ConnectionsViewModel.kt:79 observeConnections` →
+`ObserveEndpointsStatusUseCase`) rendered the same host:port twice.
+
+**Affected files:**
+`core/data/src/main/kotlin/lava/data/impl/repository/EndpointsRepositoryImpl.kt`
+(fix), `core/data/src/test/.../EndpointsRepositoryImplFilterTest.kt` (tests).
+
+**Fix:** `EndpointsRepositoryImpl.observeAll()` now applies
+`.distinctBy(::serverIdentity)` after the model-map / Rutracker-filter step.
+`serverIdentity(GoApi)` is `"GoApi(host:port)"` — the transport-defining
+identity, deliberately EXCLUDING the additive `key`/`platform`/`storage` fields
+that bloat the Room id — so one row shows per actual server regardless of which
+path added it. `distinctBy` keeps the first occurrence (Room emits in insertion
+order). Per-endpoint auth is unaffected: the active endpoint's own key is
+persisted separately by `lava.securestorage.model.EndpointConverter`, not by
+this list path.
+
+**Verification test/challenge:**
+`EndpointsRepositoryImplFilterTest.observeAll_deduplicates_same_server_added_via_two_paths`
+(new) — inserts the same host:port via a bare GoApi and a keyed GoApi, asserts
+the emitted list contains that server exactly once. Companion
+`observeAll_keeps_distinct_servers` guards that two genuinely different servers
+both survive (the de-dup is by identity, not a blanket collapse).
+Bluff-Audit: with the `.distinctBy(::serverIdentity)` line removed, the test
+FAILED `java.lang.AssertionError: The chosen online server MUST appear exactly
+ONCE in the Server list, not twice (operator defect 2026-06-14) expected:<1> but
+was:<2>` (`EndpointsRepositoryImplFilterTest.kt:125`); restored → BUILD
+SUCCESSFUL (5/5).
+
+**Fix commit:** this commit.
+**Forensic anchor:** operator-reported 2026-06-14; reproduced before fix per
+§6.T.1. Version files NOT touched.

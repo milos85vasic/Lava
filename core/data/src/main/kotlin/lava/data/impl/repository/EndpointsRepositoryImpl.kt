@@ -29,7 +29,35 @@ class EndpointsRepositoryImpl @Inject constructor(
                 entities
                     .mapNotNull(EndpointEntity::toModel)
                     .filterNot { it is Endpoint.Rutracker }
+                    .distinctBy(::serverIdentity)
             }
+    }
+
+    /**
+     * Stable per-SERVER identity used to de-duplicate the Connections list.
+     *
+     * Operator-reported defect 2026-06-14: "the chosen online server appears
+     * TWICE in the Server list." Root cause: the Room primary-key id for an
+     * [Endpoint.GoApi] is `GoApi(${packHost()})` and `packHost()` appends the
+     * additive `key`/`platform`/`storage` fields (see
+     * `lava.data.converters.Endpoint.packHost`). The SAME physical server
+     * (same host:port) persisted via two paths that differ only in those
+     * fields — the cloud "Add server" flow writes a bare GoApi (key=null)
+     * while the on-device / mDNS-discovered flow writes a GoApi carrying a
+     * per-instance key and/or platform+storage TXT attributes — gets TWO
+     * distinct primary keys (`OnConflictStrategy.REPLACE` de-dups only on a
+     * matching id), so two rows reach this list. De-dup on the
+     * transport-defining identity (host + port for GoApi; host for Mirror)
+     * so the user sees one row per actual server regardless of which path
+     * added it. The richer (keyed) entry wins because `distinctBy` keeps the
+     * first occurrence and Room emits in insertion order — but auth still
+     * resolves through the active endpoint's own persisted key in
+     * `lava.securestorage.model.EndpointConverter`, which is unaffected here.
+     */
+    private fun serverIdentity(endpoint: Endpoint): String = when (endpoint) {
+        is Endpoint.GoApi -> "GoApi(${endpoint.host}:${endpoint.port})"
+        is Endpoint.Mirror -> "Mirror(${endpoint.host})"
+        is Endpoint.Rutracker -> "Rutracker"
     }
 
     override suspend fun add(endpoint: Endpoint) {
