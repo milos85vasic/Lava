@@ -35,6 +35,51 @@ Format per entry:
 
 ---
 
+## 2026-06-14 — search "Something went wrong" across providers via the on-device API (ApiBackedTrackerClient used the strict client + no per-endpoint key)
+
+**Root cause:** the dynamic `ApiBackedTrackerClient` (the client that issues
+`GET|POST /v1/{provider}/{op}` against the chosen lava-api-go / on-device api-app)
+was wired in `core/tracker/client/.../di/TrackerClientModule.kt:275/302` with the
+**unqualified `okHttpClient`** — which (per `NetworkModule.kt:101`) uses the
+system trust store only and is explicitly documented "MUST NOT be used for LAN
+endpoints." The on-device api-app serves over HTTPS with a **self-signed LAN
+cert**, so every search failed at the TLS handshake (`CertPathValidatorException`);
+and even past TLS, `ApiBackedTrackerClient` attached **no per-endpoint Lava-Auth
+key**, so the auth-gated `/v1/{provider}/search` returned **HTTP 401**. Either way
+`getString` threw → `SearchResultViewModel` mapped the Throwable to
+`error_something_goes_wrong` ("Something went wrong, please try again"). This is
+the exact SP-3.1 / Defect-A class that was fixed for the `/providers` catalogue
+fetch (`ProviderCatalogRepository` got the `@Named("lan")` client + `goApi.key`)
+but **never fixed for the per-provider search/browse/topic/download/login** path.
+
+**Affected files:** `core/tracker/client/.../di/TrackerClientModule.kt` (factory →
+`@Named("lan")` client + `@Named("authFieldName")` + `authKey = ApiBaseUrlHolder.currentKey()`);
+`core/tracker/client/.../ApiBackedTrackerClient.kt` (+`authFieldName`/`authKey`
+ctor params + `Request.Builder.withAuth()` on every request); `core/tracker/client/.../ApiBaseUrlHolder.kt`
+(now holds the per-endpoint key); `core/domain/.../RepopulateProvidersOnStartupUseCase.kt`
++ `ActiveApiBaseUrlActivator` (cold-start threads the key); `feature/onboarding/.../OnboardingViewModel.kt`
+(`ApiBaseUrlHolder.set(apiBaseUrl, goApi.key)`); `app/.../StartupProvidersModule.kt`.
+
+**Fix:** the dynamic client now uses the permissive-TLS `@Named("lan")` client
+(accepts the self-signed LAN cert) and attaches the active endpoint's per-instance
+key as the Lava-Auth header on EVERY `/v1` request — mirroring the proven Defect-A
+pattern. The key is threaded from onboarding AND the cold-start re-populate.
+
+**Verification test/challenge:** `ApiBackedTrackerClientTest.search_attachesPerEndpointAuthKey_soAuthGatedApiReturnsResults`
+(real client + MockWebServer that 401s without the key → asserts a real result row
++ the `Lava-Auth: k` header on the wire) + `…search_withoutAuthKey_throwsOnAuthGatedApi`
+(discriminator) + `RepopulateProvidersOnStartupUseCaseTest` (asserts the cold-start
+activator receives the key). Falsifiability (re-performed): neuter
+`ApiBackedTrackerClient.withAuth()` → the search test FAILS with HTTP 401; reverted
+→ green. Device-level proof (search on the VM against the real api-app) is the
+final gate via the §6.AE/HelixQA video pass.
+
+**Fix commit:** (this commit).
+
+**Forensic anchor:** operator report (2026-06-14) — "onboarded RuTracker, YTS,
+Kinozal; searched 'prince' via the Android API with all 3 selected → 'Error,
+Something went wrong, please try again'."
+
 ## 2026-06-13 — curated TPB + Torrents-CSV providers single-domain rotation risk (no mirror failover)
 
 **Root cause:** the embedded curated providers `thepiratebay` (apibay.org) and

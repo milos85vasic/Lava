@@ -79,7 +79,11 @@ class RepopulateProvidersOnStartupUseCase @Inject constructor(
                 // ApiBackedTrackerClient factory reads BEFORE populateFrom, so
                 // each dynamic client targets the chosen instance — identical
                 // ordering to OnboardingViewModel.fetchAndPopulateProviders.
-                activator.activate(apiBaseUrl)
+                // Pass the per-endpoint key too so the cold-start-built dynamic
+                // clients authenticate their /v1/{id}/{op} calls — otherwise a
+                // restart would 401 every search ("Something went wrong") even
+                // though the same-session onboarding worked (2026-06-14 fix).
+                activator.activate(apiBaseUrl, goApi.key)
                 trackerRegistry.populateFrom(descriptors)
                 true
             },
@@ -96,10 +100,10 @@ class RepopulateProvidersOnStartupUseCase @Inject constructor(
  * [lava.tracker.client.ApiBackedTrackerClient]s the registry builds.
  *
  * Production binding (in `:app`) delegates to
- * `lava.tracker.client.ApiBaseUrlHolder.set(baseUrl)` — keeping `:core:domain`
+ * `lava.tracker.client.ApiBaseUrlHolder.set(baseUrl, key)` — keeping `:core:domain`
  * free of a `:core:tracker:client` dependency edge. Tests substitute a capturing
- * fake to assert the activation happened with the right base URL.
+ * fake to assert the activation happened with the right base URL + key.
  */
 fun interface ActiveApiBaseUrlActivator {
-    fun activate(apiBaseUrl: String)
+    fun activate(apiBaseUrl: String, key: String?)
 }

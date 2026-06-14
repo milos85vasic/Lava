@@ -23,9 +23,26 @@ import java.util.concurrent.atomic.AtomicReference
 object ApiBaseUrlHolder {
     private val ref = AtomicReference<String?>(null)
 
-    /** Sets the active API base URL (no trailing slash required). */
+    // The active endpoint's per-instance Lava-Auth key. The on-device api-app
+    // (and any auth-gated lava-api-go) gates EVERY /v1/{provider}/{op} request
+    // on this key — exactly like ProviderCatalogRepository attaches goApi.key to
+    // the /providers catalogue fetch (Defect-A, 2026-06-12). Without it, a
+    // freshly-linked api-app rejects search/browse/topic/download with HTTP 401
+    // → the user sees "Something went wrong". `null` = no key (anonymous/legacy).
+    private val keyRef = AtomicReference<String?>(null)
+
+    /** Sets the active API base URL (no trailing slash required), no auth key. */
     fun set(apiBaseUrl: String) {
+        set(apiBaseUrl, null)
+    }
+
+    /**
+     * Sets the active API base URL AND the per-endpoint Lava-Auth key so every
+     * [ApiBackedTrackerClient] built afterwards authenticates its /v1 requests.
+     */
+    fun set(apiBaseUrl: String, key: String?) {
         ref.set(apiBaseUrl.trimEnd('/'))
+        keyRef.set(key)
     }
 
     /**
@@ -42,8 +59,12 @@ object ApiBaseUrlHolder {
                 "before any ApiBackedTrackerClient is built.",
         )
 
+    /** Current active per-endpoint Lava-Auth key, or null if none was set. */
+    fun currentKey(): String? = keyRef.get()
+
     /** Test/teardown hook. */
     fun reset() {
         ref.set(null)
+        keyRef.set(null)
     }
 }

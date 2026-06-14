@@ -775,8 +775,11 @@ class OnboardingViewModel @Inject constructor(
                     // BEFORE populateFrom, so each dynamic client targets the chosen
                     // instance (task §2). populateFrom registers one
                     // ApiBackedTrackerClient per descriptor into the same registry
-                    // the SDK reads via listAvailableTrackers().
-                    lava.tracker.client.ApiBaseUrlHolder.set(apiBaseUrl)
+                    // the SDK reads via listAvailableTrackers(). The per-endpoint
+                    // KEY goes in too so each dynamic client authenticates its
+                    // /v1/{id}/{op} calls — without it search → HTTP 401 →
+                    // "Something went wrong" (2026-06-14 fix).
+                    lava.tracker.client.ApiBaseUrlHolder.set(apiBaseUrl, goApi.key)
                     trackerRegistry?.populateFrom(descriptors)
                     null
                 },

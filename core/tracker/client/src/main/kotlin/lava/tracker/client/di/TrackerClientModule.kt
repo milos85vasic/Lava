@@ -272,7 +272,16 @@ object TrackerClientModule {
         iptorrentsFactory: IPTorrentsClientFactory,
         archiveOrgFactory: ArchiveOrgClientFactory,
         gutenbergFactory: GutenbergClientFactory,
-        httpClient: okhttp3.OkHttpClient,
+        // The dynamic ApiBackedTrackerClient talks to the chosen lava-api-go /
+        // on-device api-app over /v1/{id}/{op}. That endpoint is on the LAN with a
+        // self-signed cert AND auth-gated per-provider — so it MUST use the
+        // permissive-TLS @Named("lan") client (system-trust strict client fails
+        // the self-signed handshake) and attach the per-endpoint Lava-Auth key.
+        // Using the strict unqualified client here was the "search → Something
+        // went wrong" bug (2026-06-14): the same SP-3.1/Defect-A class that
+        // ProviderCatalogRepository fixed for the /providers catalogue fetch.
+        @Named("lan") lanHttpClient: okhttp3.OkHttpClient,
+        @Named("authFieldName") authFieldName: String,
     ): TrackerRegistry = DefaultTrackerRegistry().apply {
         // Bundled fallback: the 7 compiled-in providers. They are also the
         // offline-default / fetch-failure fallback per DefaultTrackerRegistry.
@@ -299,7 +308,9 @@ object TrackerClientModule {
             ApiBackedTrackerClient(
                 descriptor = descriptor,
                 apiBaseUrl = ApiBaseUrlHolder.current(),
-                httpClient = httpClient,
+                httpClient = lanHttpClient,
+                authFieldName = authFieldName,
+                authKey = ApiBaseUrlHolder.currentKey(),
             )
         }
     }

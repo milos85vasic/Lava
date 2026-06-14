@@ -72,6 +72,7 @@ class DynamicRegistryRealClientTest {
                     descriptor = descriptor,
                     apiBaseUrl = ApiBaseUrlHolder.current(),
                     httpClient = httpClient,
+                    authFieldName = "Lava-Auth",
                 )
             }
         }

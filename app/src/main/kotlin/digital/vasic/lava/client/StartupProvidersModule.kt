@@ -29,7 +29,7 @@ object StartupProvidersModule {
     @Provides
     @Singleton
     fun provideActiveApiBaseUrlActivator(): ActiveApiBaseUrlActivator =
-        ActiveApiBaseUrlActivator { apiBaseUrl -> ApiBaseUrlHolder.set(apiBaseUrl) }
+        ActiveApiBaseUrlActivator { apiBaseUrl, key -> ApiBaseUrlHolder.set(apiBaseUrl, key) }
 
     /**
      * Singleton-scoped [SseBaseUrlBuilder] (the canonical `https://host:port`

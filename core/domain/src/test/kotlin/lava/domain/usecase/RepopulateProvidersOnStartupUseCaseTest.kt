@@ -88,6 +88,7 @@ class RepopulateProvidersOnStartupUseCaseTest {
     private lateinit var sdk: LavaTrackerSdk
     private lateinit var settings: TestSettingsRepository
     private var activatedBaseUrl: String? = null
+    private var activatedKey: String? = null
 
     /**
      * The 4 bundled providers a cold-started registry holds before any dynamic
@@ -198,7 +199,10 @@ class RepopulateProvidersOnStartupUseCaseTest {
             settingsRepository = settings,
             fetchProvidersUseCase = FetchProvidersUseCase(repository),
             trackerRegistry = registry,
-            activator = ActiveApiBaseUrlActivator { url -> activatedBaseUrl = url },
+            activator = ActiveApiBaseUrlActivator { url, key ->
+                activatedBaseUrl = url
+                activatedKey = key
+            },
             // MockWebServer serves plain HTTP — substitute an http builder for
             // the production Https one (the exact seam SseBaseUrlBuilder exposes).
             apiBaseUrlBuilder = SseBaseUrlBuilder { host, port -> "http://$host:$port" },
@@ -259,6 +263,13 @@ class RepopulateProvidersOnStartupUseCaseTest {
             }
             // SECONDARY: the dynamic clients were pointed at the chosen instance.
             assertEquals("http://${server.hostName}:${server.port}", activatedBaseUrl)
+            // SECONDARY (2026-06-14 search fix): the per-endpoint key MUST be
+            // activated too, else every cold-start search 401s ("Something went wrong").
+            assertEquals(
+                "the per-endpoint Lava-Auth key MUST be activated for the dynamic clients",
+                "k",
+                activatedKey,
+            )
         }
 
     // CHALLENGE — graceful degradation: a non-GoApi active endpoint is a no-op,

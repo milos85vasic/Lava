@@ -12,8 +12,10 @@ import lava.tracker.api.model.AuthState
 import lava.tracker.api.model.LoginRequest
 import lava.tracker.api.model.SearchRequest
 import okhttp3.OkHttpClient
+import okhttp3.mockwebserver.Dispatcher
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
+import okhttp3.mockwebserver.RecordedRequest
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -74,6 +76,7 @@ class ApiBackedTrackerClientTest {
             descriptor = descriptor,
             apiBaseUrl = server.url("/").toString().trimEnd('/'),
             httpClient = httpClient,
+            authFieldName = "Lava-Auth",
         )
 
     @Test
@@ -147,6 +150,74 @@ class ApiBackedTrackerClientTest {
         assertEquals(42, item.seeders)
         assertEquals("magnet:?xt=urn:btih:ABCDEF", item.magnetUri)
         assertEquals("https://rutracker.org/dl/12345.torrent", item.downloadUrl)
+    }
+
+    private fun newClientWithKey(descriptor: RemoteTrackerDescriptor, key: String) =
+        ApiBackedTrackerClient(
+            descriptor = descriptor,
+            apiBaseUrl = server.url("/").toString().trimEnd('/'),
+            httpClient = httpClient,
+            authFieldName = "Lava-Auth",
+            authKey = key,
+        )
+
+    // CHALLENGE — regression for the 2026-06-14 "search → Something went wrong"
+    // bug. The on-device api-app gates EVERY /v1/{provider}/{op} on the Lava-Auth
+    // header carrying the endpoint's per-instance key; ApiBackedTrackerClient MUST
+    // attach it or the server 401s, search() throws, and the user sees the generic
+    // "Something went wrong" error (Throwable.getStringRes()).
+    //
+    // FALSIFIABILITY (§6.J): remove `.withAuth()` from the request builders (or
+    // pass authKey=null) → the keyless request is 401'd → search throws
+    // IllegalStateException("API request failed: HTTP 401 …") → this test FAILS.
+    // The discriminator `search_withoutAuthKey_throwsOnAuthGatedApi` below proves
+    // the key is load-bearing (no key → throw).
+    @Test
+    fun search_attachesPerEndpointAuthKey_soAuthGatedApiReturnsResults() = runTest {
+        server.dispatcher = object : Dispatcher() {
+            override fun dispatch(request: RecordedRequest): MockResponse =
+                if (request.getHeader("Lava-Auth") == "k") {
+                    MockResponse()
+                        .setHeader("Content-Type", "application/json")
+                        .setBody(
+                            """
+                            {"provider":"rutracker","page":0,"totalPages":1,
+                             "results":[{"id":"1","title":"Prince - Greatest Hits","sizeBytes":1,
+                                         "seeders":7,"leechers":0,"magnetLink":"magnet:?xt=urn:btih:AB",
+                                         "downloadUrl":"https://x/1.torrent","infoHash":"AB","category":"Music"}]}
+                            """.trimIndent(),
+                        )
+                } else {
+                    MockResponse().setResponseCode(401).setBody("""{"error":"unauthorized"}""")
+                }
+        }
+
+        val searchable = newClientWithKey(searchDownloadDescriptor(), key = "k")
+            .getFeature(SearchableTracker::class)!!
+        val result = searchable.search(SearchRequest(query = "prince"), page = 0)
+
+        // PRIMARY 1 — the user gets a real result (search succeeded, NOT the error).
+        assertEquals(1, result.items.size)
+        assertEquals("Prince - Greatest Hits", result.items.single().title)
+        // PRIMARY 2 — the client attached the per-endpoint key on the wire.
+        assertEquals("k", server.takeRequest().getHeader("Lava-Auth"))
+    }
+
+    // The discriminator: WITHOUT the key, the auth-gated api-app 401s and search
+    // throws — exactly the production failure before the fix.
+    @Test(expected = IllegalStateException::class)
+    fun search_withoutAuthKey_throwsOnAuthGatedApi() = runTest {
+        server.dispatcher = object : Dispatcher() {
+            override fun dispatch(request: RecordedRequest): MockResponse =
+                if (request.getHeader("Lava-Auth") == "k") {
+                    MockResponse().setBody("""{"results":[]}""")
+                } else {
+                    MockResponse().setResponseCode(401)
+                }
+        }
+        newClient(searchDownloadDescriptor()) // no key → unauthenticated
+            .getFeature(SearchableTracker::class)!!
+            .search(SearchRequest(query = "prince"), page = 0)
     }
 
     @Test

@@ -66,8 +66,19 @@ class ApiBackedTrackerClient(
     override val descriptor: RemoteTrackerDescriptor,
     private val apiBaseUrl: String,
     private val httpClient: OkHttpClient,
+    // Lava-Auth header NAME (injected from config, §6.R — never hardcoded) and the
+    // active endpoint's per-instance KEY. The on-device api-app (and any auth-gated
+    // lava-api-go) gates EVERY /v1/{provider}/{op} on this header; without it the
+    // server returns HTTP 401 and the user sees "Something went wrong". Mirrors
+    // ProviderCatalogRepository's Defect-A fix for the /providers catalogue fetch.
+    private val authFieldName: String,
+    private val authKey: String? = null,
     private val json: Json = DEFAULT_JSON,
 ) : TrackerClient {
+
+    /** Attaches the per-endpoint Lava-Auth key when one is configured. */
+    private fun Request.Builder.withAuth(): Request.Builder =
+        if (authKey != null) header(authFieldName, authKey) else this
 
     // ---- feature impls (each gated on a capability in getFeature) -----------
 
@@ -183,7 +194,7 @@ class ApiBackedTrackerClient(
     }
 
     override suspend fun healthCheck(): Boolean = try {
-        httpClient.newCall(Request.Builder().url(baseUrl("health").toString()).get().build())
+        httpClient.newCall(Request.Builder().url(baseUrl("health").toString()).get().withAuth().build())
             .execute()
             .use { it.isSuccessful }
     } catch (_: Throwable) {
@@ -201,13 +212,13 @@ class ApiBackedTrackerClient(
         (apiBaseUrl.trimEnd('/') + "/v1/" + descriptor.trackerId + "/" + op).toHttpUrl()
 
     private fun getString(url: String): String =
-        httpClient.newCall(Request.Builder().url(url).get().build()).execute().use { resp ->
+        httpClient.newCall(Request.Builder().url(url).get().withAuth().build()).execute().use { resp ->
             if (!resp.isSuccessful) error("API request failed: HTTP ${resp.code} for $url")
             resp.body?.string() ?: error("API request returned empty body for $url")
         }
 
     private fun getBytes(url: String): ByteArray =
-        httpClient.newCall(Request.Builder().url(url).get().build()).execute().use { resp ->
+        httpClient.newCall(Request.Builder().url(url).get().withAuth().build()).execute().use { resp ->
             if (!resp.isSuccessful) error("API request failed: HTTP ${resp.code} for $url")
             resp.body?.bytes() ?: error("API request returned empty body for $url")
         }
@@ -216,6 +227,7 @@ class ApiBackedTrackerClient(
         val request = Request.Builder()
             .url(url)
             .post(payload.toRequestBody(JSON_MEDIA_TYPE))
+            .withAuth()
             .build()
         return httpClient.newCall(request).execute().use { resp ->
             if (!resp.isSuccessful) error("API request failed: HTTP ${resp.code} for $url")
