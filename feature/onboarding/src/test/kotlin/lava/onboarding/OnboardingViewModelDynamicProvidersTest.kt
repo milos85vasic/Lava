@@ -13,6 +13,7 @@ import lava.credentials.ProviderCredentialManager
 import lava.database.dao.ProviderCredentialsDao
 import lava.database.entity.ProviderCredentialsEntity
 import lava.models.settings.Endpoint
+import lava.models.settings.isLocalHost
 import lava.sdk.api.MirrorUrl
 import lava.sdk.api.PluginConfig
 import lava.sdk.registry.PluginFactory
@@ -407,6 +408,105 @@ class OnboardingViewModelDynamicProvidersTest {
                 "the local api-app key MUST be read + persisted onto the keyless " +
                     "mDNS-selected endpoint (was $persisted)",
                 persisted is Endpoint.GoApi && persisted.key == "k",
+            )
+        }
+
+    // CHALLENGE — primary assertion on the PERSISTED active endpoint's KEY for a
+    // REMOTE/cloud API. P1-4 (2026-06-14): withLocalApiKeyIfMissing must attach the
+    // LOCAL on-device api-app key ONLY to a LOCAL endpoint. A remote/cloud GoApi has
+    // a DIFFERENT per-instance key, so attaching our local key 401s the remote. The
+    // guard gates the read on host.isLocalHost(); a public host ("cloud.example.com")
+    // is remote → the endpoint stays keyless even though apiKeyReader would return "k".
+    //
+    // §6.J FALSIFIABILITY (rehearsed): remove the `if (!host.isLocalHost()) return this`
+    // guard from OnboardingViewModel.withLocalApiKeyIfMissing → the remote endpoint
+    // WRONGLY gets keyed with the local "k" and the assertNull(persisted.key) below
+    // FAILS with "remote/cloud endpoint MUST stay keyless … but was keyed with the
+    // LOCAL api-app key". Reverted: yes.
+    //
+    // Note: the connectivity probe (ConnectionService.isReachable) is faked → true in
+    // createViewModel, so a non-loopback host still advances to Providers; this test
+    // exercises the key-attachment guard, not real reachability. A *remote* catalogue
+    // base URL is built via the http apiBaseUrlBuilder pointed at the MockWebServer,
+    // so the fetch still lands on the local socket — only the Endpoint.host (the
+    // local/remote signal the guard reads) is the public name.
+    @Test
+    fun `selecting a keyless REMOTE cloud API does NOT attach the local api key`() =
+        runTest(dispatcherRule.testDispatcher) {
+            server.enqueue(
+                MockResponse()
+                    .setResponseCode(200)
+                    .setHeader("Content-Type", "application/json")
+                    .setBody(catalogueJson),
+            )
+            // The catalogue fetch must still reach the MockWebServer socket even
+            // though the endpoint host is a public name: build the base URL from the
+            // server's real host:port, ignoring the (remote) endpoint host. Only the
+            // Endpoint.host carries the local/remote signal the guard inspects.
+            val repository = lava.data.provider.ProviderCatalogRepository(
+                lanHttpClient = okhttp3.OkHttpClient(),
+                authFieldName = "Lava-Auth",
+                store = lava.data.provider.InMemoryProviderCatalogStore(),
+            )
+            val fetchUseCase = lava.domain.usecase.FetchProvidersUseCase(repository)
+            val viewModel = OnboardingViewModel(
+                sdk = sdk,
+                credentialManager = credentialManager,
+                authService = FakeAuthService(),
+                loggerFactory = TestLoggerFactory(),
+                analytics = NoOpAnalytics,
+                providerConfigRepository = providerConfigRepository,
+                clonedProviderDao = FakeClonedProviderDao(),
+                discoveryService = lava.testing.service.TestLocalNetworkDiscoveryService(),
+                connectionService = object : lava.data.api.service.ConnectionService {
+                    override val networkUpdates = emptyFlow<Boolean>()
+                    override suspend fun isReachable(endpoint: Endpoint): Boolean = true
+                    override suspend fun isInternetReachable(): Boolean = true
+                },
+                endpointsRepository = lava.testing.repository.TestEndpointsRepository(),
+                apiSelectionEnabled = true,
+                siblingAppLauncher = noOpSiblingAppLauncher,
+                fetchProvidersUseCase = fetchUseCase,
+                trackerRegistry = registry,
+                // Catalogue fetch is routed to the MockWebServer socket regardless of
+                // the (remote) endpoint host, so the success path still runs.
+                apiBaseUrlBuilder = lava.network.sse.SseBaseUrlBuilder { _, _ ->
+                    "http://${server.hostName}:${server.port}"
+                },
+                setEndpointUseCase = lava.domain.usecase.SetEndpointUseCaseImpl(settingsRepo),
+            )
+            // The local api-app's key the ContentProvider would hand back. The guard
+            // MUST refuse to attach it to a remote endpoint.
+            viewModel.setApiKeyReader { "k" }
+            // A public host — NOT loopback / RFC-1918 / *.local → remote per isLocalHost.
+            val remote = Endpoint.GoApi(host = "cloud.example.com", port = 8443)
+            check(remote.key == null) { "fixture must be keyless to reproduce the defect" }
+            check(!remote.host.isLocalHost()) {
+                "fixture host must be REMOTE for this test to be meaningful"
+            }
+
+            viewModel.test(this) {
+                runOnCreate()
+                expectInitialState()
+                awaitState()
+                viewModel.perform(OnboardingAction.NextStep)
+                viewModel.perform(OnboardingAction.SelectApi(remote))
+                var guard = 0
+                while (guard < 12) {
+                    guard++
+                    if (awaitState().step == OnboardingStep.Providers) break
+                }
+                cancelAndIgnoreRemainingItems()
+            }
+
+            // PRIMARY: the persisted active endpoint for a REMOTE selection MUST stay
+            // keyless — the LOCAL api-app key was NOT attached (it would 401 there).
+            val persisted = settingsRepo.getSettings().endpoint
+            assertTrue("expected a GoApi endpoint, was $persisted", persisted is Endpoint.GoApi)
+            assertNull(
+                "remote/cloud endpoint MUST stay keyless — the LOCAL api-app key " +
+                    "(\"k\") was wrongly attached to a remote host",
+                (persisted as Endpoint.GoApi).key,
             )
         }
 

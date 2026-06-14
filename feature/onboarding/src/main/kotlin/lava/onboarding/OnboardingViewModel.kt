@@ -20,6 +20,7 @@ import lava.data.api.service.LocalNetworkDiscoveryService
 import lava.database.dao.ClonedProviderDao
 import lava.logger.api.LoggerFactory
 import lava.models.settings.Endpoint
+import lava.models.settings.isLocalHost
 import lava.tracker.api.AuthType
 import lava.tracker.api.TrackerDescriptor
 import lava.tracker.api.model.AuthState
@@ -370,17 +371,41 @@ class OnboardingViewModel @Inject constructor(
     }
 
     /**
-     * If [this] is an on-device-API [Endpoint.GoApi] that arrived WITHOUT a
+     * If [this] is a LOCAL on-device-API [Endpoint.GoApi] that arrived WITHOUT a
      * per-instance key (the mDNS discovery path — TXT records carry no secret),
      * read the local api-app's access key via the [apiKeyReader] seam and return a
      * keyed copy so search/`/v1` ops authenticate. The production reader
      * (ApiKeyClient over the api-app's signature-protected ContentProvider) resolves
      * its own variant-aware authority internally, returning null when
      * no local api-app key is available — then the endpoint is returned unchanged
-     * (keyless, e.g. a remote/cloud or no-auth API). §6.H: the key is never logged.
+     * (keyless). §6.H: the key is never logged.
+     *
+     * P1-4 LOCAL/REMOTE GUARD (2026-06-14): the [apiKeyReader] hands back the key
+     * of the api-app running ON THIS DEVICE. Attaching it to a REMOTE/cloud GoApi
+     * (a different device's api-app on the LAN, or a cloud API) is wrong — that
+     * remote instance has a DIFFERENT per-instance key, so our local key makes its
+     * Lava-Auth gate reject the request (HTTP 401). The key is therefore attached
+     * ONLY when the endpoint host is local.
+     *
+     * Signal: [String.isLocalHost] (loopback / RFC-1918 private ranges / IPv6
+     * loopback+ULA / `localhost` / `*.local`). This is sound for the two paths that
+     * reach here keyless: the on-device api-app advertises/hands off on a loopback
+     * or LAN-private host, and mDNS-discovered LAN instances are on `*.local` /
+     * RFC-1918 addresses — all classified local. The cloud "Add server" path
+     * ([onAddCloudApi]) carries a public host → classified remote → key NOT
+     * attached. Honest limit: a remote api-app reachable on a private/`.local`
+     * host that the user nonetheless intends as a separate instance would still be
+     * treated as local; that is the same address space the local api-app lives in
+     * and is not user-distinguishable by host alone — the on-device HANDOFF path
+     * ([onOnDeviceApiReturned]) already carries the correct key explicitly and is
+     * a no-op here (the `!key.isNullOrBlank()` early-return), so the only endpoints
+     * this branch keys are genuinely-keyless local-host selections.
      */
     private fun Endpoint.withLocalApiKeyIfMissing(): Endpoint {
         if (this !is Endpoint.GoApi || !key.isNullOrBlank()) return this
+        // Only the LOCAL on-device api-app's key is readable via apiKeyReader;
+        // never attach it to a remote/cloud endpoint (it would 401 there).
+        if (!host.isLocalHost()) return this
         val read = try {
             apiKeyReader?.invoke()
         } catch (e: Exception) {
