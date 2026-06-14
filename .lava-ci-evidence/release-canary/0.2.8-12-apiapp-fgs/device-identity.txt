@@ -1,0 +1,8 @@
+serial=127.0.0.1:6555
+android_release=15
+sdk=35
+model=Pixel 9
+abi=arm64-v8a
+apk=releases/api-app/0.2.8/android-release/lava-api-app-0.2.8-12-release.apk
+apk_sha256=b8ac0e7709787ea67077bdb5c29584169159849e454b289860fe6eb5e68ad100
+git_sha=fb0bfec97ee0aa685f1c464b9ace5efc4efa0d0c
