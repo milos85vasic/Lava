@@ -139,3 +139,5 @@ tests/check-markdown-export-sync/.fin
 # ever promoted out of this dir and committed. Raw is git-ignored + codegraph-
 # excluded (.codegraph/config.json) so it never pollutes the index or history.
 .lava-ci-evidence/device-recordings/
+.lava-ci-evidence/video-analysis/*/raw/
+.lava-ci-evidence/challenge-video/
