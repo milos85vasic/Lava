@@ -9,7 +9,7 @@
          provider — third-party apps are denied at the OS level. §5 of the
          design spec; §6.H credential security. -->
     <permission
-        android:name="digital.vasic.lava.permission.READ_API_KEY"
+        android:name="${apiKeyPermission}"
         android:protectionLevel="signature" />
 
     <uses-permission android:name="android.permission.INTERNET" />
@@ -90,6 +90,6 @@
             android:name=".handoff.ApiKeyProvider"
             android:authorities="${apiKeyAuthority}"
             android:exported="true"
-            android:readPermission="digital.vasic.lava.permission.READ_API_KEY" />
+            android:readPermission="${apiKeyPermission}" />
     </application>
 </manifest>

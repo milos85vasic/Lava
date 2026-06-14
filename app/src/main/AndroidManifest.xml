@@ -6,7 +6,7 @@
     <!-- Task 3.1 (2026-06-03): signature-level permission to read the API
          app's key ContentProvider. Both apps share the same keystore, so
          only the genuine Lava client is granted this at install time. -->
-    <uses-permission android:name="digital.vasic.lava.permission.READ_API_KEY" />
+    <uses-permission android:name="${apiKeyPermission}" />
 
     <uses-feature
         android:name="android.software.leanback"

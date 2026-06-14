@@ -93,6 +93,22 @@ android {
             "\"digital.vasic.lava.api.keyprovider\"",
         )
         manifestPlaceholders["apiKeyAuthority"] = "digital.vasic.lava.api.keyprovider"
+        // P2-1 (2026-06-14): variant-suffix the READ_API_KEY signature permission
+        // so a device with BOTH the debug (.dev) and release api-app installed
+        // never hits INSTALL_FAILED_DUPLICATE_PERMISSION (two differently-signed
+        // packages contending to DEFINE the same fixed permission name). Mirrors
+        // how apiKeyAuthority is already variant-suffixed. Release keeps the
+        // BYTE-IDENTICAL name so existing release grants survive; debug overrides
+        // to the .dev-suffixed name below. §6.R: no manifest literal — the name
+        // flows from this placeholder. The matching BuildConfig field keeps
+        // runtime code (ApiKeyProvider.attachInfoForTest) in lockstep with the
+        // manifest per variant.
+        manifestPlaceholders["apiKeyPermission"] = "digital.vasic.lava.permission.READ_API_KEY"
+        buildConfigField(
+            "String",
+            "API_KEY_PERMISSION",
+            "\"digital.vasic.lava.permission.READ_API_KEY\"",
+        )
         // API↔embed source-sync hash (§11.4.69 / §6.J): the 64-hex sha256 of the
         // lava-api-go source the embed in this APK was built from (see
         // lavaApiSourceHash above). The on-device sync Challenge C05 asserts
@@ -156,6 +172,14 @@ android {
                 "\"digital.vasic.lava.api.dev.keyprovider\"",
             )
             manifestPlaceholders["apiKeyAuthority"] = "digital.vasic.lava.api.dev.keyprovider"
+            // P2-1: debug defines the .dev-suffixed permission name so the
+            // debug (.dev) and release api-app never collide on the same device.
+            manifestPlaceholders["apiKeyPermission"] = "digital.vasic.lava.permission.dev.READ_API_KEY"
+            buildConfigField(
+                "String",
+                "API_KEY_PERMISSION",
+                "\"digital.vasic.lava.permission.dev.READ_API_KEY\"",
+            )
         }
     }
 

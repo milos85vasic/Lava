@@ -114,6 +114,15 @@ android {
         // placeholder so the field always exists in BuildConfig; the per-type
         // override wins at build time.
         buildConfigField("String", "API_TARGET_PACKAGE", "\"digital.vasic.lava.api\"")
+        // P2-1 (2026-06-14): the client's <uses-permission> name for the
+        // api-app's signature permission must match the api-app's variant-
+        // defined name (release → READ_API_KEY, debug → dev.READ_API_KEY) so a
+        // device with both variants installed never hits
+        // INSTALL_FAILED_DUPLICATE_PERMISSION. §6.R: the manifest name flows
+        // from the apiKeyPermission placeholder; release keeps the BYTE-IDENTICAL
+        // name so existing release grants survive. Debug overrides below.
+        manifestPlaceholders["apiKeyPermission"] = "digital.vasic.lava.permission.READ_API_KEY"
+        buildConfigField("String", "API_KEY_PERMISSION", "\"digital.vasic.lava.permission.READ_API_KEY\"")
     }
 
     buildFeatures {
@@ -171,6 +180,10 @@ android {
             // release one. The release fallback (API_RELEASE_PACKAGE) still
             // points to the Play Store listing (release id, no .dev suffix).
             buildConfigField("String", "API_TARGET_PACKAGE", "\"digital.vasic.lava.api.dev\"")
+            // P2-1: debug client requests the .dev-suffixed permission the debug
+            // api-app defines, matching the variant pair.
+            manifestPlaceholders["apiKeyPermission"] = "digital.vasic.lava.permission.dev.READ_API_KEY"
+            buildConfigField("String", "API_KEY_PERMISSION", "\"digital.vasic.lava.permission.dev.READ_API_KEY\"")
         }
     }
 

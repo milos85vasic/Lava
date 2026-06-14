@@ -19,8 +19,11 @@ import lava.api.app.control.ApiControlState
  * engine is stopped or the values are unavailable. The client reads this after
  * the API app returns to it (Direction 1 handoff, spec §5).
  *
- * **Security (§6.H):** the read is guarded by
- * `android:readPermission="digital.vasic.lava.permission.READ_API_KEY"` declared
+ * **Security (§6.H):** the read is guarded by a signature-level
+ * `android:readPermission` whose name is the variant-aware `${'$'}{apiKeyPermission}`
+ * placeholder (release: `digital.vasic.lava.permission.READ_API_KEY`, debug:
+ * `digital.vasic.lava.permission.dev.READ_API_KEY` — P2-1, so debug + release
+ * never collide on one device) declared
  * as `android:protectionLevel="signature"` in the manifest. Only an app signed
  * with the SAME signing certificate (i.e. the genuine Lava client) can read the
  * provider; third-party apps are denied at the OS level before [query] is called.
@@ -150,7 +153,12 @@ class ApiKeyProvider : ContentProvider() {
         val info = android.content.pm.ProviderInfo().apply {
             authority = BuildConfig.API_KEY_AUTHORITY
             exported = true
-            readPermission = lava.applink.AppLinkContract.PERMISSION_READ_API_KEY
+            // P2-1 (2026-06-14): use the variant-aware permission name so the
+            // test seam matches the manifest's variant-defined readPermission
+            // (release → READ_API_KEY, debug → dev.READ_API_KEY). The
+            // AppLinkContract constant is the release literal only; this api-app
+            // BuildConfig field is the per-variant source of truth.
+            readPermission = BuildConfig.API_KEY_PERMISSION
         }
         attachInfo(context, info)
     }

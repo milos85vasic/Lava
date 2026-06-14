@@ -1,5 +1,19 @@
 # READ_API_KEY Permission — Variant-Safety Analysis
 
+**Status:** FIXED (P2-1, 2026-06-14). The permission name is now variant-suffixed
+via the `${apiKeyPermission}` manifest placeholder in BOTH apps — release keeps the
+byte-identical `digital.vasic.lava.permission.READ_API_KEY` (existing release grants
+survive); debug uses `digital.vasic.lava.permission.dev.READ_API_KEY`. A device with
+both variants installed can no longer hit `INSTALL_FAILED_DUPLICATE_PERMISSION`.
+Verified by `:app`/`:api-app` `processDebugManifest` + `processReleaseManifest`
+merges: debug resolves to the `.dev` name (uses-permission + `<permission>` +
+provider `readPermission`), release resolves byte-identically to the original.
+Runtime alignment: `ApiKeyProvider.attachInfoForTest` now reads the variant-aware
+`BuildConfig.API_KEY_PERMISSION` (api-app) instead of the release-only
+`AppLinkContract.PERMISSION_READ_API_KEY` constant. Changed files:
+`app/build.gradle.kts`, `api-app/build.gradle.kts`, both `AndroidManifest.xml`,
+`api-app/.../ApiKeyProvider.kt`. See §1.4 ("Minimal fix") below for the design.
+
 **Date:** 2026-06-14
 **Author:** analysis (read-only, manifest + build-file evidence only)
 **Scope:** Is the on-device search 401 (key read returned null because
