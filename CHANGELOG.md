@@ -1,4 +1,21 @@
 # Changelog
+## Lava-Android-1.3.10-1067 — 2026-06-14 (Auth-provider search groundwork + security/robustness hardening)
+
+**Previous published:** Lava-Android-1.3.9-1066.
+
+- **Search across login-required providers (RuTracker, Kinozal) — groundwork shipped for testing.**
+  1.3.9 fixed search end-to-end for no-auth providers (Internet Archive, etc.). This build adds the
+  missing piece for **login-required** providers: the app now sends your provider login session
+  (`Auth-Token`) alongside the per-instance key on every search, so an authenticated provider can
+  return your results instead of an empty/login response. Please test RuTracker/Kinozal search and
+  report back — the no-auth path is unchanged and remains device-verified.
+- **Security hardening** — the on-device API access permission is now build-variant-specific, so a
+  device that has both a debug and a release build installed can no longer collide on it.
+- **Robustness** — the on-device API key is now only ever read for a *local* on-device API, never
+  attached to a remote/cloud server (prevents a wrong-key rejection in that edge case).
+
+Paired with on-device API app 0.2.10-15.
+
 ## Lava-Android-1.3.9-1066 — 2026-06-14 (Search fixed end-to-end)
 
 **Previous published:** Lava-Android-1.3.8-1065 (debug+release).
@@ -21,6 +38,15 @@ onboarding (Welcome → mDNS-discovered "On your network" API → Internet Archi
 and a live "prince" search that rendered real Internet Archive results — with an
 ESTABLISHED TCP connection to the engine on :8443 observed at search time. Paired with
 on-device API app 0.2.9-14.
+
+## Lava-API-App-0.2.10-15 — 2026-06-14 (Variant-specific access permission)
+
+**Previous published:** Lava-API-App-0.2.9-14.
+
+- **Build-variant-specific access permission** — the `READ_API_KEY` signature permission is now
+  suffixed per variant (debug vs release) so debug + release installs never collide
+  (`INSTALL_FAILED_DUPLICATE_PERMISSION`). Release value is byte-identical to 0.2.9, so existing
+  release installs keep their grant. The embedded API + the 0.2.9 key-handoff fix are unchanged.
 
 ## Lava-API-App-0.2.9-14 — 2026-06-14 (Key handoff fixed → client search authenticates)
 

@@ -1786,3 +1786,47 @@ work on-device):**
 - Dead SSE path **CLOSED** (`addaacd0`): `observeSseSearch` + the 3 SSE bluff
   tests serving the unserved `/v1/search` were removed. A server-side `/v1/search`
   SSE aggregator, if ever wanted, is a fresh feature, not a revival.
+
+## auth-provider search — Auth-Token (login session) not threaded onto dynamic /v1 requests (2026-06-14, P0-1)
+
+**Symptom:** after the 5-layer search fix shipped (1.3.9), search returned real results for
+NO-AUTH providers (Internet Archive) but NOT for login-required RuTracker/Kinozal (the operator's
+original report). **Root cause:** the Go `/v1/{provider}/search` path needs TWO credentials —
+`Lava-Auth` (per-instance key, fixed in 1.3.9) AND `Auth-Token` (the provider login session,
+`{provider}:cookie:{session}`, parsed in `lava-api-go/internal/handlers/handlers.go:118`).
+`ApiBackedTrackerClient.withAuth()` attached only `Lava-Auth`, so authed providers reached the
+server anonymous (`Type:"none"`) → empty/login.
+**Fix:** new `ProviderSessionTokenHolder` seam (parallel to `ApiBaseUrlHolder`); `ProviderLoginViewModel`
+writes the session on login; `TrackerClientModule`'s factory reads it; `ApiBackedTrackerClient.withAuth()`
+attaches `Auth-Token: {trackerId}:cookie:{session}` IN ADDITION to `Lava-Auth` when present. Additive —
+no-auth providers attach nothing, unchanged.
+**Affected files:** `core/tracker/client/.../ApiBackedTrackerClient.kt`, `.../ProviderSessionTokenHolder.kt`
+(new), `.../di/TrackerClientModule.kt`, `feature/login/.../ProviderLoginViewModel.kt`.
+**Verification:** `ProviderSessionTokenEndToEndWiringTest` — real holder→factory→`withAuth` over MockWebServer
+with an auth-gated dispatcher; PRIMARY assertion `RecordedRequest.getHeader("Auth-Token")` present for
+authed / absent for no-auth. Bluff-Audit: drop the attach → `authProviderSession_isThreaded_ontoTheAuthTokenHeader`
+FAILED (Auth-Token absent → 401); reverted → :core:tracker:client + :feature:login GREEN. **ON-DEVICE
+VERIFY WITH REAL RUTRACKER CREDS OWED** (subagent rate-limit) — shipped in 1.3.10 for tester verification.
+**Fix commit:** `3b1b6a14`.
+
+## remote/cloud GoApi wrongly given the LOCAL api-app key (2026-06-14, P1-4)
+
+**Symptom (edge):** `OnboardingViewModel.withLocalApiKeyIfMissing()` read the LOCAL on-device api-app key
+for ANY keyless `Endpoint.GoApi` — correct for the local api-app, but a remote/cloud GoApi would get the
+local key → 401. No tests covered it.
+**Fix:** gate the key-read on `String.isLocalHost()` (loopback / RFC-1918 / `.local`); remote hosts stay
+keyless. **Affected:** `feature/onboarding/.../OnboardingViewModel.kt` + test. Bluff-Audit: remove the
+`isLocalHost` guard → remote endpoint wrongly keyed → test FAILED; reverted → GREEN (6/6). On-device mDNS
+flow not regressed. **Fix commit:** `b3cb6de2`.
+
+## READ_API_KEY permission not variant-suffixed → debug+release collide (2026-06-14, P2-1)
+
+**Symptom (QA-fidelity/security):** the signature permission `digital.vasic.lava.permission.READ_API_KEY`
+was a fixed literal (the authority was already variant-suffixed). A device with BOTH debug+release variants
+co-installed hit `INSTALL_FAILED_DUPLICATE_PERMISSION` / broken grant — which cost hours of test-VM debugging
+in the search cycle (it masked the real grant path).
+**Fix:** `${apiKeyPermission}` manifest placeholder per build type — release byte-identical
+`...permission.READ_API_KEY` (existing grants survive), debug `...permission.dev.READ_API_KEY`. Both manifests
+merge-verified; `ApiKeyProvider.attachInfoForTest` now reads the variant-aware `BuildConfig.API_KEY_PERMISSION`.
+**Affected:** `app/build.gradle.kts`, `api-app/build.gradle.kts`, both `AndroidManifest.xml`, `ApiKeyProvider.kt`.
+**Fix commit:** `4026756c`. Analysis: `docs/issues/2026-06-14-readapikey-permission-variant-analysis.md`.
