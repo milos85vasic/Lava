@@ -92,6 +92,20 @@ class RepopulateProvidersOnStartupUseCaseTest {
     private var activatedKey: String? = null
 
     /**
+     * Fake [ApiKeyProvider] standing in for the production [ApiKeyClient] read
+     * from the on-device api-app's key ContentProvider. [apiKeyToReturn] is what
+     * the api-app would hand back at runtime (null = api-app absent / not running
+     * / permission denied). [keyForCalls] records the host/port the use case asked
+     * for, so we can assert the restore path was reached for the right endpoint.
+     */
+    private var apiKeyToReturn: String? = null
+    private val keyForCalls = mutableListOf<Pair<String, Int>>()
+    private val fakeApiKeyProvider = ApiKeyProvider { host, port ->
+        keyForCalls.add(host to port)
+        apiKeyToReturn
+    }
+
+    /**
      * The 4 bundled providers a cold-started registry holds before any dynamic
      * fetch (the "only 4 providers" baseline the operator reported).
      */
@@ -208,6 +222,7 @@ class RepopulateProvidersOnStartupUseCaseTest {
             // the production Https one (the exact seam SseBaseUrlBuilder exposes).
             apiBaseUrlBuilder = SseBaseUrlBuilder { host, port -> "http://$host:$port" },
             endpointsRepository = endpoints,
+            apiKeyProvider = fakeApiKeyProvider,
         )
     }
 
@@ -308,6 +323,94 @@ class RepopulateProvidersOnStartupUseCaseTest {
             // onboarded server (host:port + key), NOT the unreachable orphan — so
             // search targets the right host instead of failing to resolve.
             assertEquals(real, settings.getSettings().endpoint)
+        }
+
+    // CHALLENGE — existing-install KEY-RESTORE (2026-06-14 search-auth fix).
+    // Primary assertion on the PERSISTED active endpoint's key (settings.endpoint
+    // .key) — the exact value the dynamic ApiBackedTrackerClients send as the
+    // per-instance Lava-Auth header on /v1/{provider}/search. Reproduces the
+    // existing-install gap: settings.endpoint carries host:port but a NULL key (an
+    // old onboarding persisted it keyless, OR the heal adopted a Room GoApi whose
+    // row never packed the key) → every cold-start search 401s ("Something went
+    // wrong"). The api-app's key ContentProvider CAN re-hand the key at runtime;
+    // the ApiKeyProvider seam reads it and the use case persists it back.
+    //
+    // §6.J FALSIFIABILITY: delete the
+    // `settingsRepository.setEndpoint(active.copy(key = restored))` line in
+    // RepopulateProvidersOnStartupUseCase.restoreActiveEndpointKey() →
+    // settings.endpoint.key stays null and this assertEquals FAILS (expected "k",
+    // got null). Captured RED below. Confirmed.
+    @Test
+    fun `cold start restores a missing endpoint key from the api-app provider for search auth`() =
+        runTest {
+            // Existing-install state: the active endpoint has the right host:port
+            // but NO key (key never persisted on this install).
+            settings.setEndpoint(Endpoint.GoApi(host = server.hostName, port = server.port, key = null))
+            // The on-device api-app would re-hand this key at runtime.
+            apiKeyToReturn = "k"
+            server.enqueue(
+                MockResponse().setResponseCode(200)
+                    .setHeader("Content-Type", "application/json")
+                    .setBody(catalogueJson()),
+            )
+
+            buildUseCase().invoke()
+
+            // PRIMARY: the active endpoint the search path reads now carries the
+            // restored key — so /v1/{provider}/search authenticates instead of 401.
+            val healed = settings.getSettings().endpoint as Endpoint.GoApi
+            assertEquals(
+                "the per-instance Lava-Auth key MUST be restored onto the active " +
+                    "endpoint so cold-start search authenticates — was ${healed.key}",
+                "k",
+                healed.key,
+            )
+            // SECONDARY: the restore asked the provider for THIS endpoint's host/port.
+            assertTrue(
+                "the key provider MUST be queried for the active endpoint host:port",
+                keyForCalls.contains(server.hostName to server.port),
+            )
+            // SECONDARY: the restored key flows on to the dynamic-client activation
+            // (so the cold-start-built ApiBackedTrackerClients authenticate).
+            assertEquals(
+                "the restored key MUST be the one activated for the dynamic clients",
+                "k",
+                activatedKey,
+            )
+        }
+
+    // CHALLENGE — KEY-RESTORE no-op when the provider has nothing to give. An
+    // already-keyed endpoint MUST NOT be clobbered, and a provider returning null
+    // (api-app absent / not running / permission denied) MUST leave the endpoint
+    // untouched (never blanks the existing key).
+    @Test
+    fun `cold start does not overwrite an existing key and tolerates a null provider`() =
+        runTest {
+            // Freshly onboarded (post-fix) install: the key is already present.
+            settings.setEndpoint(Endpoint.GoApi(host = server.hostName, port = server.port, key = "real"))
+            // The provider would return a DIFFERENT value — it MUST NOT be consulted
+            // (and even if it were, the existing key wins).
+            apiKeyToReturn = "should-not-be-used"
+            server.enqueue(
+                MockResponse().setResponseCode(200)
+                    .setHeader("Content-Type", "application/json")
+                    .setBody(catalogueJson()),
+            )
+
+            buildUseCase().invoke()
+
+            // PRIMARY: the already-present key is preserved verbatim.
+            val endpoint = settings.getSettings().endpoint as Endpoint.GoApi
+            assertEquals(
+                "an endpoint that already has a key MUST keep it (no clobber) — was ${endpoint.key}",
+                "real",
+                endpoint.key,
+            )
+            // SECONDARY: the provider was never even asked (short-circuit on present key).
+            assertTrue(
+                "the key provider MUST NOT be queried when the endpoint already has a key",
+                keyForCalls.isEmpty(),
+            )
         }
 
     // CHALLENGE — graceful degradation: a non-GoApi active endpoint is a no-op,

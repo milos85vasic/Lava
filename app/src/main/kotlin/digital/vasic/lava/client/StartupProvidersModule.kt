@@ -1,10 +1,14 @@
 package digital.vasic.lava.client
 
+import android.content.Context
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import digital.vasic.lava.client.handoff.ApiKeyClient
 import lava.domain.usecase.ActiveApiBaseUrlActivator
+import lava.domain.usecase.ApiKeyProvider
 import lava.network.sse.SseBaseUrlBuilder
 import lava.tracker.client.ApiBaseUrlHolder
 import javax.inject.Singleton
@@ -42,4 +46,34 @@ object StartupProvidersModule {
      */
     @Provides
     fun provideSseBaseUrlBuilder(): SseBaseUrlBuilder = SseBaseUrlBuilder.Https
+
+    /**
+     * Production binding for [ApiKeyProvider] (2026-06-14 existing-install
+     * key-restore for search). [RepopulateProvidersOnStartupUseCase] calls this
+     * at cold start to re-read the per-instance `Lava-Auth` key for the active
+     * on-device lava-api-go endpoint when its persisted key is null/blank
+     * (existing installs whose key was never packed into the Room Endpoint row).
+     *
+     * Delegates to [ApiKeyClient] using the SAME variant-aware authority as
+     * `MainActivity.buildApiKeyReader()` — `.dev.keyprovider` for debug,
+     * `.keyprovider` for release — so no literal authority is embedded (§6.R).
+     * The key is never logged (§6.H). Returns null when the api-app is absent,
+     * the engine is not running, or the signature permission is denied — in
+     * which case the use case leaves the endpoint keyless (no-op) rather than
+     * blanking any state.
+     *
+     * The current on-device api-app exposes a single loopback instance, so the
+     * host/port arguments are not used to disambiguate; the seam carries them so
+     * a future multi-instance contract stays source-compatible.
+     */
+    @Provides
+    @Singleton
+    fun provideApiKeyProvider(
+        @ApplicationContext context: Context,
+    ): ApiKeyProvider {
+        val suffix = if (BuildConfig.DEBUG) ".dev.keyprovider" else ".keyprovider"
+        val authority = BuildConfig.API_RELEASE_PACKAGE + suffix
+        val client = ApiKeyClient(context, authority)
+        return ApiKeyProvider { _, _ -> client.read()?.key }
+    }
 }

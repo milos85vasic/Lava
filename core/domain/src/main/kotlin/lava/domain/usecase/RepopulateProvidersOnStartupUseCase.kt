@@ -73,8 +73,17 @@ class RepopulateProvidersOnStartupUseCase @Inject constructor(
     // 2026-06-14 existing-install HEAL (search-routing fix). See
     // [reconcileActiveEndpoint].
     private val endpointsRepository: EndpointsRepository,
+    // 2026-06-14 existing-install KEY-RESTORE (search-auth fix). See
+    // [restoreActiveEndpointKey].
+    private val apiKeyProvider: ApiKeyProvider,
 ) {
     suspend operator fun invoke(): Boolean {
+        // Restore the per-instance Lava-Auth key onto the active endpoint BEFORE
+        // anything reads it for search (existing installs whose persisted
+        // settings.endpoint carries host:port but NO key — the key was never
+        // packed into the Room Endpoint row, only into the same-session
+        // settings.endpoint that a pre-2026-06-14 onboarding wrote without it).
+        restoreActiveEndpointKey()
         // Heal the active endpoint BEFORE reading it (existing installs whose
         // onboarding pre-dates the 2026-06-14 settings.endpoint write).
         reconcileActiveEndpoint()
@@ -124,6 +133,45 @@ class RepopulateProvidersOnStartupUseCase @Inject constructor(
      * the Room list → no-op; a never-onboarded install has an empty Room list →
      * no-op. NEVER throws.
      */
+    /**
+     * Restore the per-instance `Lava-Auth` key onto the persisted active
+     * [Endpoint.GoApi] for EXISTING installs whose key was never persisted.
+     *
+     * Root cause of the operator-reported cold-start search 401 ("Something went
+     * wrong" / "problem reaching the trackers") on installs that onboarded BEFORE
+     * the key was carried end-to-end: the per-instance key lives only on
+     * `settings.endpoint` (via [lava.securestorage.model.EndpointConverter]) and
+     * in the Room [EndpointsRepository] list — but the Room row packs only
+     * host:port + platform/storage, NOT the key. So when [reconcileActiveEndpoint]
+     * adopts a Room GoApi (existing-install heal path), or when an old onboarding
+     * persisted a keyless `settings.endpoint`, the active endpoint is KEYLESS →
+     * the dynamic `ApiBackedTrackerClient`s built at cold start have no
+     * `Lava-Auth` value → `/v1/{provider}/search` returns 401.
+     *
+     * The key CAN be re-read at runtime from the on-device api-app's key
+     * ContentProvider (the same source the onboarding handoff uses). The
+     * [apiKeyProvider] seam does that read in `:app` (it owns the Android
+     * ContentProvider authority); `:core:domain` stays Android-free.
+     *
+     * Restore rule (conservative, literal-free — §6.R): fires ONLY when the
+     * active endpoint is an [Endpoint.GoApi] whose [Endpoint.GoApi.key] is
+     * null/blank. For a freshly onboarded (post-fix) install the key is already
+     * present → no-op. For a non-GoApi active endpoint → no-op. If the provider
+     * returns null (api-app not co-installed, not running, or permission denied)
+     * → no-op (search will still surface its own error; we never blank state).
+     * NEVER throws. NEVER logs the key (§6.H).
+     */
+    private suspend fun restoreActiveEndpointKey() {
+        runCatching {
+            val active = settingsRepository.getSettings().endpoint as? Endpoint.GoApi ?: return
+            if (!active.key.isNullOrBlank()) return
+            val restored = apiKeyProvider.keyFor(active.host, active.port)
+            if (!restored.isNullOrBlank()) {
+                settingsRepository.setEndpoint(active.copy(key = restored))
+            }
+        }
+    }
+
     private suspend fun reconcileActiveEndpoint() {
         runCatching {
             val active = settingsRepository.getSettings().endpoint as? Endpoint.GoApi
@@ -154,4 +202,28 @@ class RepopulateProvidersOnStartupUseCase @Inject constructor(
  */
 fun interface ActiveApiBaseUrlActivator {
     fun activate(apiBaseUrl: String, key: String?)
+}
+
+/**
+ * Thin seam that re-reads the per-instance `Lava-Auth` access key for an
+ * on-device lava-api-go endpoint at app startup.
+ *
+ * Production binding (in `:app`) delegates to the api-app's key
+ * ContentProvider via `digital.vasic.lava.client.handoff.ApiKeyClient` (the same
+ * variant-aware authority `MainActivity.buildApiKeyReader()` uses) — keeping
+ * `:core:domain` free of an Android ContentProvider dependency edge. Tests
+ * substitute a fake returning a known key (or null) to assert the restore
+ * happened — or did not, when the provider has nothing to give.
+ *
+ * Returns the access key for the running api-app instance, or `null` when the
+ * api-app is not co-installed, not running, or the signature permission is
+ * denied. The key is NEVER logged (§6.H).
+ *
+ * @param host the active endpoint's host (for a future multi-instance match; the
+ *   current on-device api-app exposes a single loopback instance so the binding
+ *   ignores it, but the seam carries it so the contract is host-aware).
+ * @param port the active endpoint's port (same rationale as [host]).
+ */
+fun interface ApiKeyProvider {
+    fun keyFor(host: String, port: Int): String?
 }
