@@ -172,6 +172,10 @@ class ApiBackedTrackerClientTest {
     // IllegalStateException("API request failed: HTTP 401 …") → this test FAILS.
     // The discriminator `search_withoutAuthKey_throwsOnAuthGatedApi` below proves
     // the key is load-bearing (no key → throw).
+    // PARTIAL: bypasses ApiBaseUrlHolder→factory; constructs ApiBackedTrackerClient
+    // with authKey="k" directly. Covers withAuth() in isolation (fine), but NOT the
+    // end-to-end holder-set key flow that actually 401'd on device — see
+    // ApiAuthKeyEndToEndWiringTest.holderKey_isThreadedThroughFactory_ontoTheLavaAuthHeader.
     @Test
     fun search_attachesPerEndpointAuthKey_soAuthGatedApiReturnsResults() = runTest {
         server.dispatcher = object : Dispatcher() {
