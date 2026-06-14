@@ -1,0 +1,8 @@
+recording-analyzer — post-hoc liveness correlator (§11.4.107)
+  recording      : .lava-ci-evidence/video-analysis/2026-06-14-rerecord/issue4-raw.mp4
+  expected-disp  : -1
+  codec          : detected="h264" expected=""
+  decoded-frames : 28
+  max-freeze-run : 0.50s (window 1.00s)
+  min-adj-sim    : 0.4999
+  DECISION       : PASS — live: 28 decoded frames, max freeze run 0.50s < window 1.00s, min adjacent similarity 0.4999 — advancing content
