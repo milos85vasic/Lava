@@ -73,12 +73,44 @@ class ApiBackedTrackerClient(
     // ProviderCatalogRepository's Defect-A fix for the /providers catalogue fetch.
     private val authFieldName: String,
     private val authKey: String? = null,
+    // P0-1 (2026-06-14): the dynamic-auth provider's LOGIN SESSION token (e.g.
+    // RuTracker's `bb_session=…` cookie value). DISTINCT from [authKey] (the
+    // per-endpoint Lava-Auth key): this is the SECOND credential the upstream
+    // tracker needs so an auth-required provider's search/browse/topic/download
+    // reaches the site authenticated rather than anonymous. `null` for no-auth
+    // providers (Internet Archive, YTS curated) AND for not-yet-logged-in
+    // auth providers — in both cases NOTHING is attached (additive, §6.J).
+    private val sessionToken: String? = null,
     private val json: Json = DEFAULT_JSON,
 ) : TrackerClient {
 
-    /** Attaches the per-endpoint Lava-Auth key when one is configured. */
-    private fun Request.Builder.withAuth(): Request.Builder =
-        if (authKey != null) header(authFieldName, authKey) else this
+    /**
+     * Attaches the per-endpoint Lava-Auth key when one is configured AND the
+     * provider's login-session [sessionToken] (as `Auth-Token`) when present.
+     *
+     * The two headers are independent and additive:
+     *  - `Lava-Auth: {authKey}` authenticates the CLIENT to the lava-api-go
+     *    endpoint (gates 200-vs-401 at the api-app boundary).
+     *  - `Auth-Token: {trackerId}:cookie:{sessionToken}` carries the PROVIDER
+     *    login session so the server runs the upstream scrape authenticated.
+     *    The wire format matches `auth.ParseAuthToken` in
+     *    `lava-api-go/internal/auth/multiprovider.go`
+     *    (`provider_id:credential_type:credential_value`), which yields
+     *    `Credentials{Type:"cookie", CookieValue:sessionToken}` —
+     *    exactly what the rutracker provider's `credToCookie` reads back.
+     */
+    private fun Request.Builder.withAuth(): Request.Builder {
+        if (authKey != null) header(authFieldName, authKey)
+        sessionToken?.let { token ->
+            // §6.R note: AUTH_TOKEN_HEADER + the `:cookie:` credential-type are
+            // SERVER WIRE-PROTOCOL CONSTANTS (the `auth` package's fixed header
+            // name + ParseAuthToken's fixed grammar), exempt exactly like the
+            // `/v1/{id}/{op}` API CONTRACT ROUTE strings above — not connection
+            // addresses/ports/credentials. The credential VALUE is config/runtime.
+            header(AUTH_TOKEN_HEADER, "${descriptor.trackerId}:cookie:$token")
+        }
+        return this
+    }
 
     // ---- feature impls (each gated on a capability in getFeature) -----------
 
@@ -236,6 +268,10 @@ class ApiBackedTrackerClient(
     }
 
     companion object {
+        // Server wire-protocol header carrying the provider login session
+        // (`auth.HeaderName` in lava-api-go/internal/auth/passthrough.go). A
+        // fixed protocol constant — §6.R-exempt like the /v1 route paths.
+        private const val AUTH_TOKEN_HEADER = "Auth-Token"
         private val JSON_MEDIA_TYPE = "application/json; charset=utf-8".toMediaType()
         private val DEFAULT_JSON = Json {
             ignoreUnknownKeys = true

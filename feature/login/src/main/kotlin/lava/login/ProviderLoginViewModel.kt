@@ -14,6 +14,7 @@ import lava.models.auth.AuthResult
 import lava.tracker.api.model.CaptchaSolution
 import lava.tracker.api.model.LoginRequest
 import lava.tracker.client.LavaTrackerSdk
+import lava.tracker.client.ProviderSessionTokenHolder
 import org.orbitmvi.orbit.Container
 import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.syntax.simple.intent
@@ -376,6 +377,15 @@ internal class ProviderLoginViewModel @Inject constructor(
                 when (response) {
                     is AuthResult.Success -> {
                         logger.d { "Login success for $providerId" }
+                        // P0-1 (2026-06-14): persist the PROVIDER login session
+                        // token so the dynamic ApiBackedTrackerClient threads it
+                        // as `Auth-Token` onto the provider's /v1 search/browse/
+                        // topic/download — otherwise the request reaches the
+                        // upstream tracker ANONYMOUS and RuTracker/Kinozal return
+                        // login/empty. `result.sessionToken` is the upstream
+                        // session (RuTracker `bb_session=…`); the holder is read
+                        // late-bound by the registry factory at search time.
+                        ProviderSessionTokenHolder.set(providerId, result.sessionToken)
                         credentialManager.setPassword(
                             providerId = providerId,
                             username = state.usernameInput.value.text,

@@ -23,6 +23,7 @@ import lava.auth.api.TokenProvider
 import lava.tracker.archiveorg.ArchiveOrgClientFactory
 import lava.tracker.client.ApiBackedTrackerClient
 import lava.tracker.client.ApiBaseUrlHolder
+import lava.tracker.client.ProviderSessionTokenHolder
 import lava.tracker.gutenberg.GutenbergClientFactory
 import lava.tracker.iptorrents.IPTorrentsClientFactory
 import lava.tracker.kinozal.KinozalClientFactory
@@ -311,6 +312,14 @@ object TrackerClientModule {
                 httpClient = lanHttpClient,
                 authFieldName = authFieldName,
                 authKey = ApiBaseUrlHolder.currentKey(),
+                // P0-1 (2026-06-14): thread the PROVIDER login session token so an
+                // auth-required provider (RuTracker / Kinozal) issues its /v1
+                // search/browse/topic/download AUTHENTICATED via the `Auth-Token`
+                // header. Read LATE-BOUND (per-provider, at build/get time, like
+                // currentKey()): a token written by ProviderLoginViewModel AFTER
+                // login but BEFORE the user searches IS picked up. `null` (no login)
+                // attaches nothing — the no-auth path is unchanged (additive, §6.J).
+                sessionToken = ProviderSessionTokenHolder.tokenFor(descriptor.trackerId),
             )
         }
     }
