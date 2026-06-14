@@ -1,4 +1,44 @@
 # Changelog
+## Lava-Android-1.3.9-1066 — 2026-06-14 (Search fixed end-to-end)
+
+**Previous published:** Lava-Android-1.3.8-1065 (debug+release).
+
+- **Search works across your providers again** — searching across providers via the
+  on-device API now returns results. This fixes the "Something went wrong" / "Nothing
+  found" that affected **every** search. Under the hood, the on-device API's key handoff
+  (a ContentProvider that gives the app the API's per-instance key) served an empty
+  result because of an inverted-lifecycle assumption — Android starts the ContentProvider
+  before the app finishes initializing, so the key was never published and every
+  per-provider search request was rejected (401) while the public `/providers` and
+  `/health` routes kept working, masking the defect. The provider now resolves the key
+  lazily per request, and client-side host / route / key-delivery fixes complete the
+  round-trip. Fixes Internet Archive, RuTracker, YTS, Kinozal and every provider served
+  by the on-device / LAN API.
+
+Device-verified on a Genymotion Pixel 9 / API 35 VM: the R8 **release** client + R8
+**release** on-device API, installed as a matched signed pair, completed a fresh
+onboarding (Welcome → mDNS-discovered "On your network" API → Internet Archive → Home)
+and a live "prince" search that rendered real Internet Archive results — with an
+ESTABLISHED TCP connection to the engine on :8443 observed at search time. Paired with
+on-device API app 0.2.9-14.
+
+## Lava-API-App-0.2.9-14 — 2026-06-14 (Key handoff fixed → client search authenticates)
+
+**Previous published:** Lava-API-App-0.2.8-12 (debug+release).
+
+- **The on-device API now hands its access key to the Lava client correctly** — the
+  key-handoff ContentProvider (`ApiKeyProvider`) cached its key/port lookups in
+  `onCreate()`, but Android runs a ContentProvider's `onCreate()` BEFORE the app's own
+  `onCreate()` publishes those values, so the provider served an empty cursor forever and
+  the client never received the API's per-instance key. Every auth-gated
+  `/v1/{provider}/search` request was therefore rejected and search appeared completely
+  broken. The provider now resolves the running key/port lazily on each request,
+  independent of startup ordering. This is the on-device-API half of the end-to-end
+  search fix. Foreground service (specialUse) unchanged from 0.2.8-12.
+
+Device-verified on a Genymotion Pixel 9 / API 35 VM as the matched release pair serving
+the release client's live search. Paired with client 1.3.9-1066.
+
 ## Lava-Android-1.3.8-1065 — 2026-06-14 (Search fixed + no duplicate servers + select-all providers + password show/hide)
 
 **Previous published:** Lava-Android-1.3.7-1064 (debug+release).
