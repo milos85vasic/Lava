@@ -123,7 +123,7 @@ class RepopulateProvidersOnStartupUseCase @Inject constructor(
      * the unreachable default `Endpoint.GoApi("lava-api.local")` because the old
      * onboarding never wrote it — while the user's REAL chosen server lived only in
      * the Room [EndpointsRepository] list. On-device Chucker proof: `/providers` →
-     * 10.0.3.16 (200), `/search` → lava-api.local (UnknownHostException).
+     * &lt;lan-ip&gt; (200), `/search` → lava-api.local (UnknownHostException).
      *
      * Heal rule (conservative, literal-free — §6.R): if the persisted active
      * endpoint is NOT one of the user's actual added servers (no Room GoApi shares

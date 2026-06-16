@@ -601,6 +601,7 @@ Pre-push rejects on match. Bluff-Audit stamp required on any commit that adds ne
 **Exemptions** (test fixtures, incident docs, design specs):
 - `.env.example` — by definition carries placeholders
 - `.lava-ci-evidence/sixth-law-incidents/*.json` — forensic anchors quoting historical literals
+- `.lava-ci-evidence/**/running-devices.tsv` — real device-serial gate attestation evidence (Genymotion/emulator instance IDs are UUIDs; the serial IS the §6.I per-AVD proof a specific real device ran — redacting it would weaken the attestation, an anti-bluff regression). Added 2026-06-16 (nezha gate-host enablement). UUID-scanner-only exemption; IPv4/host:port still enforced everywhere.
 - `docs/superpowers/specs/*.md`, `docs/superpowers/plans/*.md` — design docs and implementation plans may show example values for clarity (placeholders preferred but examples permitted)
 - `*_test.go`, `*Test.kt`, `*Tests.kt`, `*Test.java` — test fixtures may use synthetic literals, MUST NOT use real production values
 

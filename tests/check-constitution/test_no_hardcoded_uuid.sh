@@ -118,6 +118,22 @@ else
   fail=1
 fi
 
+# Test 6 (nezha gate, 2026-06-16): a real device serial (UUID) inside a
+# .lava-ci-evidence/**/running-devices.tsv attestation file is exempt. Genymotion
+# / emulator instance IDs ARE UUIDs and ARE the §6.I per-AVD proof that a
+# specific real device ran; redacting them would weaken the attestation
+# (anti-bluff). Proven falsifiable: removing the
+# `^\.lava-ci-evidence/.*running-devices\.tsv$` alternative from the scanner's
+# exclusion regex makes this fixture FAIL.
+rc=$(run_fixture .lava-ci-evidence/genymotion/1.3.10-1067-client-gate/running-devices.tsv \
+  "$REAL_UUID	Pixel_8	online")
+if [[ "$rc" == "0" ]]; then
+  echo "PASS test_device_evidence_tsv_exempt"
+else
+  echo "FAIL test_device_evidence_tsv_exempt: expected 0 (device-serial evidence exempt), got $rc" >&2
+  fail=1
+fi
+
 if [[ "$fail" == "0" ]]; then
   echo "ALL PASS test_no_hardcoded_uuid"
   exit 0

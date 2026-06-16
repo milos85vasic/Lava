@@ -15,6 +15,11 @@
 # Exemptions (kept in lockstep with the §6.R clause body):
 #   .env.example                                — placeholder file
 #   .lava-ci-evidence/sixth-law-incidents/      — forensic anchors
+#   .lava-ci-evidence/**/running-devices.tsv    — real device-serial gate
+#       attestation evidence (Genymotion/emulator instance IDs are UUIDs).
+#       The serial IS the §6.I per-AVD proof a specific real device ran;
+#       redacting it would weaken the attestation (anti-bluff). Same
+#       forensic-evidence category as the sixth-law-incidents exemption.
 #   docs/superpowers/specs/*.md                 — design docs
 #   docs/superpowers/plans/*.md                 — implementation plans
 #   *_test.go, *Test.kt, *Tests.kt, *Test.java  — synthetic test fixtures
@@ -41,7 +46,7 @@ cd "$(dirname "$0")/.."
 # silence what would otherwise be real diagnostic output.
 uuid_violations=$(
   git ls-files -z \
-    | grep -zvE '^\.env\.example$|^\.lava-ci-evidence/sixth-law-incidents/|^docs/superpowers/(specs|plans)/|_test\.go$|(Test\.kt|Tests\.kt|Test\.java)$|\.db$' \
+    | grep -zvE '^\.env\.example$|^\.lava-ci-evidence/sixth-law-incidents/|^\.lava-ci-evidence/.*running-devices\.tsv$|^docs/superpowers/(specs|plans)/|_test\.go$|(Test\.kt|Tests\.kt|Test\.java)$|\.db$' \
     | while IFS= read -r -d '' p; do
         [[ -f "$p" ]] || continue
         # A file is a violation iff it contains a UUID that is NOT the IETF
