@@ -1,6 +1,5 @@
 package lava.tracker.registry
 
-import java.util.concurrent.ConcurrentHashMap
 import lava.sdk.api.PluginConfig
 import lava.sdk.registry.DefaultPluginRegistry
 import lava.sdk.registry.PluginFactory
@@ -9,6 +8,7 @@ import lava.tracker.api.RemoteTrackerDescriptor
 import lava.tracker.api.TrackerCapability
 import lava.tracker.api.TrackerClient
 import lava.tracker.api.TrackerDescriptor
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * Lava-domain default registry. Composes the SDK's [DefaultPluginRegistry] via

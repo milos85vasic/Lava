@@ -100,7 +100,13 @@ class DynamicRegistryTest {
     fun populateFrom_emptyList_restoresBundledFallback() {
         // Seven compiled-in providers, exactly like the production fallback count.
         val bundled = listOf(
-            "rutracker", "rutor", "nnmclub", "kinozal", "iptorrents", "archiveorg", "gutenberg",
+            "rutracker",
+            "rutor",
+            "nnmclub",
+            "kinozal",
+            "iptorrents",
+            "archiveorg",
+            "gutenberg",
         )
         val registry = newRegistryWithBundled(*bundled.toTypedArray())
 

@@ -1,10 +1,10 @@
 package lava.tracker.registry
 
+import lava.sdk.registry.PluginRegistry
 import lava.tracker.api.RemoteTrackerDescriptor
 import lava.tracker.api.TrackerCapability
 import lava.tracker.api.TrackerClient
 import lava.tracker.api.TrackerDescriptor
-import lava.sdk.registry.PluginRegistry
 
 interface TrackerRegistry : PluginRegistry<TrackerDescriptor, TrackerClient> {
     fun trackersWithCapability(capability: TrackerCapability): List<TrackerDescriptor>
