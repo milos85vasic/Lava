@@ -1,4 +1,35 @@
 # Changelog
+## Lava-Android-1.3.11-1068 — 2026-06-16 (More reliable provider search — transient-failure retries)
+
+**Previous published:** Lava-Android-1.3.10-1067.
+
+- **Provider searches are more reliable** — when a tracker the app searches through hits a brief,
+  transient upstream hiccup (a momentary 5xx / network blip), the on-device API now automatically
+  retries the request a bounded number of times instead of giving up on the first failure. This
+  covers **all 10 retry-eligible providers** served by the on-device / LAN API: Tokyo Toshokan,
+  Knaben, Nyaa, BitSearch, TorrentDownloads, Project Gutenberg, the FlareSolverr path, Kinozal,
+  NNM-Club, and RuTracker. Terminal errors (real 4xx / genuine failures) are still surfaced
+  immediately — only transient failures are retried (commits `a88467df`, `cd54341c`, `307b4a5d`).
+- The Lava client app itself is unchanged behaviorally; this build re-packages the same client with
+  the improved embedded API (`liblavaapi.so`), so the on-device search round-trip benefits without
+  any new client-side surface.
+
+Paired with on-device API app 0.2.11-16 (same embedded-API retry resilience) and lava-api-go 2.3.31-2331.
+
+## Lava-API-App-0.2.11-16 — 2026-06-16 (More reliable provider search — transient-failure retries)
+
+**Previous published:** Lava-API-App-0.2.10-15.
+
+- **The on-device API now retries transient provider failures** — every per-provider search request
+  that hits a brief, transient upstream failure (momentary 5xx / network blip) is now retried a
+  bounded number of times before the API gives up, across all 10 retry-eligible providers (Tokyo
+  Toshokan, Knaben, Nyaa, BitSearch, TorrentDownloads, Project Gutenberg, FlareSolverr path, Kinozal,
+  NNM-Club, RuTracker). Terminal/non-transient errors are returned immediately, unchanged. This makes
+  search noticeably more dependable when a tracker is briefly flaky (commits `a88467df`, `cd54341c`,
+  `307b4a5d`). Embedded lava-api-go bumped to 2.3.31-2331.
+
+Paired with client 1.3.11-1068.
+
 ## Lava-Android-1.3.10-1067 — 2026-06-14 (Auth-provider search groundwork + security/robustness hardening)
 
 **Previous published:** Lava-Android-1.3.9-1066.
