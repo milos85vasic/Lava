@@ -133,6 +133,73 @@ func TestSearch_ServerErrorSurfaces(t *testing.T) {
 	}
 }
 
+// TestSearch_RetriesOnTransient5xx is the reproduce-first (§6.T.1) regression
+// test for the single-attempt gap: BitSearch's variable live latency
+// occasionally produced a user-facing "unknown error". The provider now retries
+// transient failures (here: a 503 on the first attempt) and recovers.
+//
+// FALSIFIABILITY REHEARSAL (§6.J clause 2):
+//
+//	Mutation: replace the c.fetchResults call in Search with a direct
+//	          c.fetchResultsOnce call (drop the retry loop), restoring the
+//	          single-attempt behavior.
+//	Observed: "Search after transient 503 should recover via retry:
+//	          bitsearch: HTTP 503: provider: unknown error".
+//	Reverted: yes.
+func TestSearch_RetriesOnTransient5xx(t *testing.T) {
+	body, err := os.ReadFile(filepath.Join("testdata", "bitsearch_ubuntu.json"))
+	if err != nil {
+		t.Fatalf("read fixture: %v", err)
+	}
+	var attempts int
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		attempts++
+		if attempts == 1 {
+			// One transient 5xx, then serve the real response (the slow-upstream case).
+			http.Error(w, "transient", http.StatusServiceUnavailable)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write(body)
+	}))
+	t.Cleanup(srv.Close)
+
+	c := NewClient(srv.URL)
+	res, err := c.Search(context.Background(), "ubuntu", 0)
+	if err != nil {
+		t.Fatalf("Search after transient 503 should recover via retry: %v", err)
+	}
+	// Primary assertion: user-visible parsed results (the 2 valid-hash rows).
+	if len(res.Results) != 2 {
+		t.Fatalf("got %d results after retry, want 2", len(res.Results))
+	}
+	// Secondary: the upstream was actually hit more than once (the retry fired).
+	if attempts < 2 {
+		t.Fatalf("expected >=2 upstream attempts (retry), got %d", attempts)
+	}
+}
+
+// TestSearch_TerminalErrorNotRetried proves the retry does NOT waste the budget
+// on a terminal error: a persistent 404 returns ErrNotFound after exactly ONE
+// attempt (no retry of non-transient failures).
+func TestSearch_TerminalErrorNotRetried(t *testing.T) {
+	var attempts int
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		attempts++
+		w.WriteHeader(http.StatusNotFound)
+	}))
+	t.Cleanup(srv.Close)
+
+	c := NewClient(srv.URL)
+	_, err := c.Search(context.Background(), "ubuntu", 0)
+	if !errors.Is(err, provider.ErrNotFound) {
+		t.Fatalf("want ErrNotFound, got %v", err)
+	}
+	if attempts != 1 {
+		t.Fatalf("terminal 404 must NOT be retried; got %d attempts", attempts)
+	}
+}
+
 // Provider-adapter contract: capabilities are honest (§6.E) + the catalogue
 // metadata reflects an anonymous, magnet-only public tracker.
 func TestProviderAdapter_CatalogueMetadata(t *testing.T) {

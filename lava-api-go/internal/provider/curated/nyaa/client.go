@@ -38,6 +38,17 @@ const nyaaNS = "https://nyaa.si/xmlns/nyaa"
 // pre-configured *http.Client.
 const DefaultTimeout = 20 * time.Second
 
+// maxAttempts + retryBackoff bound a small retry on TRANSIENT upstream failures
+// (network/timeout, or a 5xx). Nyaa's live latency is variable and occasionally
+// exceeds a single DefaultTimeout window → a user-facing "unknown error". A
+// bounded retry converts that transient slowness into a successful search.
+// Terminal errors (404 → ErrNotFound, 401/403 → ErrForbidden, decode failure)
+// are NEVER retried — retrying them would only waste the budget.
+const (
+	maxAttempts  = 3
+	retryBackoff = 500 * time.Millisecond
+)
+
 // publicTrackers are well-known public BitTorrent tracker announce URLs added to
 // every built magnet. Protocol data (the public-tracker commons), not a
 // deployment address — package constants (§6.R).
@@ -104,32 +115,9 @@ func (c *Client) Search(ctx context.Context, query string, page int) (*provider.
 		"f":    {"0"},
 	}.Encode()
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u, nil)
+	feed, err := c.fetchFeed(ctx, u)
 	if err != nil {
-		return nil, fmt.Errorf("%s: build request: %w", providerID, err)
-	}
-	req.Header.Set("Accept", "application/xml")
-
-	resp, err := c.http.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("%s: %w", providerID, provider.ErrUnknown)
-	}
-	defer func() { _ = resp.Body.Close() }()
-
-	switch resp.StatusCode {
-	case http.StatusOK:
-		// proceed
-	case http.StatusNotFound:
-		return nil, provider.ErrNotFound
-	case http.StatusForbidden, http.StatusUnauthorized:
-		return nil, provider.ErrForbidden
-	default:
-		return nil, fmt.Errorf("%s: HTTP %d: %w", providerID, resp.StatusCode, provider.ErrUnknown)
-	}
-
-	var feed rssFeed
-	if err := xml.NewDecoder(resp.Body).Decode(&feed); err != nil {
-		return nil, fmt.Errorf("%s: decode: %w", providerID, provider.ErrUnknown)
+		return nil, err
 	}
 
 	items := make([]provider.SearchItem, 0, len(feed.Items))
@@ -159,6 +147,68 @@ func (c *Client) Search(ctx context.Context, query string, page int) (*provider.
 		TotalPages: 1,
 		Results:    items,
 	}, nil
+}
+
+// fetchFeed fetches + decodes the RSS feed at u, retrying up to maxAttempts on
+// TRANSIENT failures (network/timeout from http.Do, or a 5xx). Terminal errors
+// (404/403/401/decode) return immediately. The retry budget is bounded by the
+// caller's ctx — each backoff aborts early if ctx is cancelled/expired.
+func (c *Client) fetchFeed(ctx context.Context, u string) (*rssFeed, error) {
+	var lastErr error
+	for attempt := 1; attempt <= maxAttempts; attempt++ {
+		feed, transient, err := c.fetchFeedOnce(ctx, u)
+		if err == nil {
+			return feed, nil
+		}
+		lastErr = err
+		if !transient || attempt == maxAttempts {
+			return nil, err
+		}
+		select {
+		case <-time.After(retryBackoff):
+			// next attempt
+		case <-ctx.Done():
+			return nil, lastErr
+		}
+	}
+	return nil, lastErr
+}
+
+// fetchFeedOnce performs a single fetch+decode. The bool reports whether the
+// error is transient (worth retrying): true for a network/timeout error or a
+// 5xx status; false for terminal errors (404/403/401/decode) and on success.
+func (c *Client) fetchFeedOnce(ctx context.Context, u string) (*rssFeed, bool, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u, nil)
+	if err != nil {
+		return nil, false, fmt.Errorf("%s: build request: %w", providerID, err)
+	}
+	req.Header.Set("Accept", "application/xml")
+
+	resp, err := c.http.Do(req)
+	if err != nil {
+		// Network/timeout — transient (the slow-upstream case).
+		return nil, true, fmt.Errorf("%s: %w", providerID, provider.ErrUnknown)
+	}
+	defer func() { _ = resp.Body.Close() }()
+
+	switch resp.StatusCode {
+	case http.StatusOK:
+		// proceed
+	case http.StatusNotFound:
+		return nil, false, provider.ErrNotFound
+	case http.StatusForbidden, http.StatusUnauthorized:
+		return nil, false, provider.ErrForbidden
+	default:
+		// 5xx is transient; other unexpected codes are terminal.
+		transient := resp.StatusCode >= 500
+		return nil, transient, fmt.Errorf("%s: HTTP %d: %w", providerID, resp.StatusCode, provider.ErrUnknown)
+	}
+
+	var feed rssFeed
+	if err := xml.NewDecoder(resp.Body).Decode(&feed); err != nil {
+		return nil, false, fmt.Errorf("%s: decode: %w", providerID, provider.ErrUnknown)
+	}
+	return &feed, false, nil
 }
 
 // Health performs a lightweight probe (a fixed query) to confirm Nyaa is

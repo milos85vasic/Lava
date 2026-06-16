@@ -29,6 +29,21 @@ const DefaultMaxTimeout = 60000
 // DefaultTimeout bounds the whole HTTP call to the sidecar (solve budget + slack).
 const DefaultTimeout = 90 * time.Second
 
+// maxAttempts + retryBackoff bound a small retry on TRANSIENT sidecar failures
+// (a network/timeout error from http.Do, or a sidecar 5xx). A single transient
+// blip reaching the FlareSolverr sidecar otherwise surfaces to the user as a
+// failed CF-gated fetch. maxAttempts is deliberately MODEST (2) because each
+// attempt already carries the long DefaultTimeout (90s) + the sidecar's own
+// DefaultMaxTimeout solve budget — a larger count would risk a multi-minute
+// stall. The whole retry budget remains bounded by the caller's ctx (the backoff
+// aborts early when ctx is cancelled/expired). Terminal outcomes (sidecar 4xx,
+// decode failure, status != ok, upstream non-2xx, empty body → all ErrNotSolved)
+// are NEVER retried — retrying them would only waste the (expensive) budget.
+const (
+	maxAttempts  = 2
+	retryBackoff = 500 * time.Millisecond
+)
+
 // solvePath is the FlareSolverr v1 command endpoint.
 const solvePath = "/v1"
 
@@ -93,36 +108,66 @@ func (c *Client) Get(ctx context.Context, targetURL string) (*Solution, error) {
 		return nil, fmt.Errorf("flaresolverr: marshal: %w", err)
 	}
 
+	var lastErr error
+	for attempt := 1; attempt <= maxAttempts; attempt++ {
+		sol, transient, err := c.getOnce(ctx, targetURL, body)
+		if err == nil {
+			return sol, nil
+		}
+		lastErr = err
+		if !transient || attempt == maxAttempts {
+			return nil, err
+		}
+		select {
+		case <-time.After(retryBackoff):
+			// next attempt
+		case <-ctx.Done():
+			return nil, lastErr
+		}
+	}
+	return nil, lastErr
+}
+
+// getOnce performs a single solve round-trip. The bool reports whether the error
+// is transient (worth retrying): true for a network/timeout error from http.Do
+// or a sidecar 5xx; false for terminal outcomes (sidecar 4xx, decode failure,
+// status != ok, upstream non-2xx, empty body — all surfaced as ErrNotSolved) and
+// on success.
+func (c *Client) getOnce(ctx context.Context, targetURL string, body []byte) (*Solution, bool, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.baseURL+solvePath, bytes.NewReader(body))
 	if err != nil {
-		return nil, fmt.Errorf("flaresolverr: build request: %w", err)
+		return nil, false, fmt.Errorf("flaresolverr: build request: %w", err)
 	}
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Accept", "application/json")
 
 	resp, err := c.http.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("flaresolverr: %w", err)
+		// Network/timeout — transient.
+		return nil, true, fmt.Errorf("flaresolverr: %w", err)
 	}
 	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("flaresolverr: sidecar HTTP %d: %w", resp.StatusCode, ErrNotSolved)
+		// A sidecar 5xx is transient (sidecar overloaded/restarting); other
+		// non-200 sidecar statuses (4xx) are terminal.
+		transient := resp.StatusCode >= 500
+		return nil, transient, fmt.Errorf("flaresolverr: sidecar HTTP %d: %w", resp.StatusCode, ErrNotSolved)
 	}
 
 	var out cmdResponse
 	if err := json.NewDecoder(resp.Body).Decode(&out); err != nil {
-		return nil, fmt.Errorf("flaresolverr: decode: %w", err)
+		return nil, false, fmt.Errorf("flaresolverr: decode: %w", err)
 	}
 	if !strings.EqualFold(out.Status, "ok") {
-		return nil, fmt.Errorf("flaresolverr: status %q (%s): %w", out.Status, out.Message, ErrNotSolved)
+		return nil, false, fmt.Errorf("flaresolverr: status %q (%s): %w", out.Status, out.Message, ErrNotSolved)
 	}
 	// A solved-but-still-challenged or upstream-error page is NOT a usable result.
 	if out.Solution.Status < 200 || out.Solution.Status >= 300 {
-		return nil, fmt.Errorf("flaresolverr: upstream HTTP %d: %w", out.Solution.Status, ErrNotSolved)
+		return nil, false, fmt.Errorf("flaresolverr: upstream HTTP %d: %w", out.Solution.Status, ErrNotSolved)
 	}
 	if strings.TrimSpace(out.Solution.Response) == "" {
-		return nil, fmt.Errorf("flaresolverr: empty solved body: %w", ErrNotSolved)
+		return nil, false, fmt.Errorf("flaresolverr: empty solved body: %w", ErrNotSolved)
 	}
 
 	return &Solution{
@@ -130,7 +175,7 @@ func (c *Client) Get(ctx context.Context, targetURL string) (*Solution, error) {
 		Status:    out.Solution.Status,
 		HTML:      out.Solution.Response,
 		UserAgent: out.Solution.UserAgent,
-	}, nil
+	}, false, nil
 }
 
 // Health probes the sidecar with a trivial solve against a known-fast,

@@ -35,6 +35,36 @@ Format per entry:
 
 ---
 
+## 2026-06-16 — 6 sibling providers shared the tokyotosho single-attempt-no-retry gap (knaben, nyaa, bitsearch, torrentdownloads, gutenberg, flaresolverr)
+
+**Root cause:** an audit of every provider HTTP client (triggered by the
+tokyotosho fix below) found the SAME single-attempt-no-retry class in 6 more
+providers: each issued one `http.Do` with no retry, so a transient upstream
+timeout/5xx surfaced a user-facing error even though the next request would
+succeed. Cited from source: knaben/client.go (single Do), nyaa/client.go,
+bitsearch/client.go, torrentdownloads/client.go, internal/gutenberg/client.go
+(getJSON + downloadBytes), internal/provider/flaresolverr/client.go (Get).
+
+**Affected files:** the `client.go` of each of the 6 providers (refactored the
+inline fetch into a bounded-retry loop + a single-attempt helper classifying
+transient = network/timeout-from-http.Do OR 5xx; terminal = 404/403/401/decode
+never retried) + each provider's `*_test.go` (added retry + terminal-not-retried
+tests). flaresolverr uses maxAttempts=2 (its 90s solve budget is already long);
+gutenberg retries BOTH getJSON + downloadBytes via a shared helper.
+
+**Fix:** same bounded-retry pattern as tokyotosho (maxAttempts=3 / 500ms backoff,
+ctx-bounded), adapted to each provider's response shape (RSS/JSON/HTML/latin-1).
+
+**Verification test/challenge:** per provider, `TestSearch_RetriesOnTransient5xx`
+(+ download variant for gutenberg) and `TestSearch_TerminalErrorNotRetried`.
+Falsifiability rehearsed for ALL 6: bypassing the retry loop makes the retry test
+FAIL with the provider's exact `HTTP 503: ... unknown error` (e.g. `knaben: HTTP
+503: provider: unknown error`); reverted → `ok`. go vet + gofmt clean.
+
+**Fix commit:** (this commit)
+**Forensic anchor:** nezha real-tracker E2E surfaced tokyotosho; the systemic
+audit (3-subagent fan-out) surfaced the 6 siblings. Same api-go cycle (2.3.31).
+
 ## 2026-06-16 — tokyotosho curated provider: user-facing "unknown error" on slow upstream (no retry on transient failure)
 
 **Root cause:** `internal/provider/curated/tokyotosho` issued a single HTTP

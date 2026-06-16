@@ -12,6 +12,18 @@ import (
 	"time"
 )
 
+// maxAttempts + retryBackoff bound a small retry on TRANSIENT upstream failures
+// (a network/timeout error from http.Do, or a 5xx status). Gutendex live latency
+// is occasionally variable and a single transient blip otherwise surfaces to the
+// user as a failed search/download. A bounded retry converts that transient
+// failure into a successful request. Terminal errors (4xx, decode) are NEVER
+// retried — retrying them would only waste the budget. The retry budget is
+// bounded by the caller's ctx (each backoff aborts early if ctx is done).
+const (
+	maxAttempts  = 3
+	retryBackoff = 500 * time.Millisecond
+)
+
 // Client is a thin HTTP client for the Gutendex JSON API.
 type Client struct {
 	base string
@@ -32,49 +44,115 @@ func NewClient(base string) *Client {
 	}
 }
 
+// doWithRetry runs once per attempt, retrying up to maxAttempts on TRANSIENT
+// failures. once returns (transient, err): transient=true means the failure is
+// worth retrying (network/timeout from http.Do, or a 5xx). On success once
+// returns (false, nil). Terminal errors (transient=false) return immediately.
+// Each backoff is bounded by ctx.
+func doWithRetry(ctx context.Context, once func() (transient bool, err error)) error {
+	var lastErr error
+	for attempt := 1; attempt <= maxAttempts; attempt++ {
+		transient, err := once()
+		if err == nil {
+			return nil
+		}
+		lastErr = err
+		if !transient || attempt == maxAttempts {
+			return err
+		}
+		select {
+		case <-time.After(retryBackoff):
+			// next attempt
+		case <-ctx.Done():
+			return lastErr
+		}
+	}
+	return lastErr
+}
+
 func (c *Client) getJSON(ctx context.Context, path string, out any) error {
+	return doWithRetry(ctx, func() (bool, error) {
+		return c.getJSONOnce(ctx, path, out)
+	})
+}
+
+// getJSONOnce performs a single fetch+decode. The bool reports whether the error
+// is transient (worth retrying): true for a network/timeout error from http.Do
+// or a 5xx status; false for terminal errors (other non-200, decode) and success.
+func (c *Client) getJSONOnce(ctx context.Context, path string, out any) (bool, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, c.base+path, nil)
 	if err != nil {
-		return err
+		return false, err
 	}
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("User-Agent", "Lava/1.0.0")
 
 	resp, err := c.http.Do(req)
 	if err != nil {
-		return err
+		// Network/timeout — transient.
+		return true, err
 	}
 	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode >= 500 {
-		return fmt.Errorf("gutenberg upstream %d", resp.StatusCode)
+		// 5xx is transient.
+		return true, fmt.Errorf("gutenberg upstream %d", resp.StatusCode)
 	}
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body)
-		return fmt.Errorf("gutenberg GET %s → %d: %s", path, resp.StatusCode, string(body))
+		return false, fmt.Errorf("gutenberg GET %s → %d: %s", path, resp.StatusCode, string(body))
 	}
-	return json.NewDecoder(resp.Body).Decode(out)
+	if err := json.NewDecoder(resp.Body).Decode(out); err != nil {
+		return false, err
+	}
+	return false, nil
 }
 
 func (c *Client) downloadBytes(ctx context.Context, url string) ([]byte, error) {
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	var data []byte
+	err := doWithRetry(ctx, func() (bool, error) {
+		transient, b, err := c.downloadBytesOnce(ctx, url)
+		if err != nil {
+			return transient, err
+		}
+		data = b
+		return false, nil
+	})
 	if err != nil {
 		return nil, err
+	}
+	return data, nil
+}
+
+// downloadBytesOnce performs a single download. The bool reports whether the
+// error is transient (network/timeout from http.Do, or a 5xx); false for
+// terminal errors (other non-200) and success.
+func (c *Client) downloadBytesOnce(ctx context.Context, url string) (bool, []byte, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	if err != nil {
+		return false, nil, err
 	}
 	req.Header.Set("User-Agent", "Lava/1.0.0")
 
 	resp, err := c.http.Do(req)
 	if err != nil {
-		return nil, err
+		// Network/timeout — transient.
+		return true, nil, err
 	}
 	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode >= 500 {
-		return nil, fmt.Errorf("gutenberg upstream %d", resp.StatusCode)
+		// 5xx is transient.
+		return true, nil, fmt.Errorf("gutenberg upstream %d", resp.StatusCode)
 	}
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body)
-		return nil, fmt.Errorf("gutenberg download → %d: %s", resp.StatusCode, string(body))
+		return false, nil, fmt.Errorf("gutenberg download → %d: %s", resp.StatusCode, string(body))
 	}
-	return io.ReadAll(resp.Body)
+	b, err := io.ReadAll(resp.Body)
+	if err != nil {
+		// A read error mid-body is transient (network).
+		return true, nil, err
+	}
+	return false, b, nil
 }

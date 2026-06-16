@@ -140,3 +140,98 @@ func TestGet_SidecarHTTPErrorSurfaces(t *testing.T) {
 		t.Errorf("sidecar 502 err = %v, want a 502 error", err)
 	}
 }
+
+// TestRetriesOnTransient5xx is the reproduce-first (§6.T.1) regression test for
+// the single-attempt gap: a transient sidecar 5xx on the first attempt used to
+// surface to the user as a failed CF-gated fetch. Get now retries the transient
+// failure and recovers with the real solved HTML.
+//
+// FALSIFIABILITY REHEARSAL (§6.J clause 2):
+//
+//	Mutation: in client.go Get, bypass the retry loop by returning getOnce's
+//	          result directly (single attempt).
+//	Observed: "Get after transient 503 should recover via retry:
+//	          flaresolverr: sidecar HTTP 503: flaresolverr: challenge not solved".
+//	Reverted: yes.
+func TestRetriesOnTransient5xx(t *testing.T) {
+	const wantHTML = "<html><body><table class='table-list'>RECOVERED</table></body></html>"
+	var attempts int
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		attempts++
+		if attempts == 1 {
+			// One transient sidecar 5xx, then a real solved reply.
+			w.WriteHeader(http.StatusServiceUnavailable)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(okResp(wantHTML))
+	}))
+	t.Cleanup(srv.Close)
+
+	c := NewClient(srv.URL)
+	sol, err := c.Get(context.Background(), "https://1337x.to/search/ubuntu/1/")
+	if err != nil {
+		t.Fatalf("Get after transient 503 should recover via retry: %v", err)
+	}
+	// Primary assertion: the user-visible solved HTML.
+	if sol.HTML != wantHTML {
+		t.Fatalf("solved HTML = %q, want %q", sol.HTML, wantHTML)
+	}
+	// Secondary: the sidecar was actually hit more than once (the retry fired).
+	if attempts < 2 {
+		t.Fatalf("expected >=2 sidecar attempts (retry), got %d", attempts)
+	}
+}
+
+// TestTerminalErrorNotRetried proves the retry does NOT waste the (expensive,
+// 90s-budgeted) solve budget on terminal outcomes: a persistent sidecar 4xx and
+// a persistent upstream-403 challenge each return after exactly ONE attempt.
+//
+// FALSIFIABILITY REHEARSAL (§6.J clause 2):
+//
+//	Mutation: in client.go getOnce, return true (transient) for the sidecar
+//	          non-200 branch (mark a 4xx as retryable).
+//	Observed: "terminal sidecar 400 must NOT be retried; got 2 attempts".
+//	Reverted: yes.
+func TestTerminalErrorNotRetried(t *testing.T) {
+	t.Run("sidecar 4xx", func(t *testing.T) {
+		var attempts int
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			attempts++
+			w.WriteHeader(http.StatusBadRequest)
+		}))
+		t.Cleanup(srv.Close)
+
+		c := NewClient(srv.URL)
+		_, err := c.Get(context.Background(), "https://1337x.to/")
+		if !errors.Is(err, ErrNotSolved) {
+			t.Fatalf("want ErrNotSolved, got %v", err)
+		}
+		if attempts != 1 {
+			t.Fatalf("terminal sidecar 400 must NOT be retried; got %d attempts", attempts)
+		}
+	})
+
+	t.Run("upstream 403 challenge", func(t *testing.T) {
+		// Sidecar replies ok every time, but the upstream page stays a 403
+		// challenge — terminal, must not be retried.
+		var attempts int
+		srv := solveServer(t, func(cmdRequest) cmdResponse {
+			attempts++
+			var rsp cmdResponse
+			rsp.Status = "ok"
+			rsp.Solution.Status = 403
+			rsp.Solution.Response = "<title>Just a moment...</title>"
+			return rsp
+		})
+		c := NewClient(srv.URL)
+
+		_, err := c.Get(context.Background(), "https://1337x.to/")
+		if !errors.Is(err, ErrNotSolved) {
+			t.Fatalf("want ErrNotSolved, got %v", err)
+		}
+		if attempts != 1 {
+			t.Fatalf("terminal upstream 403 must NOT be retried; got %d attempts", attempts)
+		}
+	})
+}

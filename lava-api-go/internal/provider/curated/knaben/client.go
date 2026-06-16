@@ -42,6 +42,18 @@ const defaultSize = 50
 // pre-configured *http.Client.
 const DefaultTimeout = 20 * time.Second
 
+// maxAttempts + retryBackoff bound a small retry on TRANSIENT upstream failures
+// (network/timeout, or a 5xx). Knaben's meta-aggregation fans out to many
+// upstreams so its live latency is variable and occasionally exceeds a single
+// DefaultTimeout window → a user-facing "unknown error". A bounded retry converts
+// that transient slowness into a successful search. Terminal errors (404 →
+// ErrNotFound, 401/403 → ErrForbidden, decode failure) are NEVER retried —
+// retrying them would only waste the budget.
+const (
+	maxAttempts  = 3
+	retryBackoff = 500 * time.Millisecond
+)
+
 // publicTrackers are well-known public BitTorrent tracker announce URLs added to
 // every built magnet. Protocol data (the public-tracker commons), not a
 // deployment address — package constants (§6.R), identical to thepiratebay.
@@ -114,33 +126,9 @@ func (c *Client) Search(ctx context.Context, query string, page int) (*provider.
 		return nil, fmt.Errorf("%s: marshal request: %w", providerID, err)
 	}
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.baseURL+searchPath, bytes.NewReader(payload))
+	body, err := c.fetchHits(ctx, payload)
 	if err != nil {
-		return nil, fmt.Errorf("%s: build request: %w", providerID, err)
-	}
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Accept", "application/json")
-
-	resp, err := c.http.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("%s: %w", providerID, provider.ErrUnknown)
-	}
-	defer func() { _ = resp.Body.Close() }()
-
-	switch resp.StatusCode {
-	case http.StatusOK:
-		// proceed
-	case http.StatusNotFound:
-		return nil, provider.ErrNotFound
-	case http.StatusForbidden, http.StatusUnauthorized:
-		return nil, provider.ErrForbidden
-	default:
-		return nil, fmt.Errorf("%s: HTTP %d: %w", providerID, resp.StatusCode, provider.ErrUnknown)
-	}
-
-	var body apiResponse
-	if err := json.NewDecoder(resp.Body).Decode(&body); err != nil {
-		return nil, fmt.Errorf("%s: decode: %w", providerID, provider.ErrUnknown)
+		return nil, err
 	}
 
 	items := make([]provider.SearchItem, 0, len(body.Hits))
@@ -170,6 +158,69 @@ func (c *Client) Search(ctx context.Context, query string, page int) (*provider.
 		TotalPages: 1,
 		Results:    items,
 	}, nil
+}
+
+// fetchHits POSTs the payload + decodes the response, retrying up to maxAttempts
+// on TRANSIENT failures (network/timeout from http.Do, or a 5xx). Terminal errors
+// (404/403/401/decode) return immediately. The retry budget is bounded by the
+// caller's ctx — each backoff aborts early if ctx is cancelled/expired.
+func (c *Client) fetchHits(ctx context.Context, payload []byte) (*apiResponse, error) {
+	var lastErr error
+	for attempt := 1; attempt <= maxAttempts; attempt++ {
+		body, transient, err := c.fetchHitsOnce(ctx, payload)
+		if err == nil {
+			return body, nil
+		}
+		lastErr = err
+		if !transient || attempt == maxAttempts {
+			return nil, err
+		}
+		select {
+		case <-time.After(retryBackoff):
+			// next attempt
+		case <-ctx.Done():
+			return nil, lastErr
+		}
+	}
+	return nil, lastErr
+}
+
+// fetchHitsOnce performs a single POST+decode. The bool reports whether the error
+// is transient (worth retrying): true for a network/timeout error or a 5xx
+// status; false for terminal errors (404/403/401/decode) and on success.
+func (c *Client) fetchHitsOnce(ctx context.Context, payload []byte) (*apiResponse, bool, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.baseURL+searchPath, bytes.NewReader(payload))
+	if err != nil {
+		return nil, false, fmt.Errorf("%s: build request: %w", providerID, err)
+	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Accept", "application/json")
+
+	resp, err := c.http.Do(req)
+	if err != nil {
+		// Network/timeout — transient (the slow-aggregation case).
+		return nil, true, fmt.Errorf("%s: %w", providerID, provider.ErrUnknown)
+	}
+	defer func() { _ = resp.Body.Close() }()
+
+	switch resp.StatusCode {
+	case http.StatusOK:
+		// proceed
+	case http.StatusNotFound:
+		return nil, false, provider.ErrNotFound
+	case http.StatusForbidden, http.StatusUnauthorized:
+		return nil, false, provider.ErrForbidden
+	default:
+		// 5xx is transient; other unexpected codes are terminal.
+		transient := resp.StatusCode >= 500
+		return nil, transient, fmt.Errorf("%s: HTTP %d: %w", providerID, resp.StatusCode, provider.ErrUnknown)
+	}
+
+	var body apiResponse
+	if err := json.NewDecoder(resp.Body).Decode(&body); err != nil {
+		return nil, false, fmt.Errorf("%s: decode: %w", providerID, provider.ErrUnknown)
+	}
+	return &body, false, nil
 }
 
 // Health performs a lightweight probe (a fixed query) to confirm Knaben is
