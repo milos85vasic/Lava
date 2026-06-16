@@ -20,8 +20,8 @@ type fakeJackettClient struct {
 	searchErr     error
 
 	downloadURL string
-	downloadRes  *jackett.DownloadResult
-	downloadErr  error
+	downloadRes *jackett.DownloadResult
+	downloadErr error
 }
 
 func (f *fakeJackettClient) Search(_ context.Context, indexerID, query string) ([]jackett.Result, error) {

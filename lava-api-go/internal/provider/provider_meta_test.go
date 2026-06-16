@@ -16,8 +16,8 @@ type minimalProvider struct {
 	provider.BaseProvider
 }
 
-func (minimalProvider) ID() string                              { return "minimal" }
-func (minimalProvider) DisplayName() string                     { return "Minimal" }
+func (minimalProvider) ID() string          { return "minimal" }
+func (minimalProvider) DisplayName() string { return "Minimal" }
 func (minimalProvider) Capabilities() []provider.ProviderCapability {
 	return []provider.ProviderCapability{provider.CapSearch}
 }

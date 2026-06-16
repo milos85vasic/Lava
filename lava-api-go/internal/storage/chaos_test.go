@@ -43,6 +43,7 @@ func recoverGuard(t *testing.T, name string, fn func()) {
 //   - Set(key, nil, ttl)        → ERRORED with
 //     "constraint failed: NOT NULL constraint failed: response_cache.value (1299)"
 //     because a nil Go []byte binds to SQL NULL against the NOT NULL column.
+//
 // This chaos test flagged it as a candidate cross-backend parity gap and
 // predicted that resolving it would require updating this subtest. It was
 // resolved: sqliteStorage.Set (and internal/cache.Client.Set for Postgres) now

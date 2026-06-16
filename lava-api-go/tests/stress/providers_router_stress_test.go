@@ -14,8 +14,8 @@ import (
 	"testing"
 	"time"
 
-	apirouter "digital.vasic.lava.apigo/internal/router"
 	"digital.vasic.lava.apigo/internal/provider"
+	apirouter "digital.vasic.lava.apigo/internal/router"
 )
 
 // providers_router_stress_test.go is the §11.4.85 (Lava equivalent) stress +
@@ -164,12 +164,13 @@ type realRouterCall struct {
 //     200 within 1 request. Graceful degradation, not cascade.
 //
 // FALSIFIABILITY REHEARSAL (Sixth Law clause 2 / §6.J / §11.4.85):
-//   Mutation A (latency budget): inserting `time.Sleep(300 * time.Millisecond)` into
-//   ProvidersHandler.GetProviders trips the p99 < 250ms SLO → S(router) FAILS
-//   "p99 ... exceeds SLO". Mutation B (recovery): make chaosReadiness.probe always
-//   return an error → C(chaos) post-clear assertion fires "ready did not recover".
-//   Mutation C (body correctness): make GetProviders return an empty list → the
-//   "provider count" assertion fires "got 0 providers want 2". All reverted.
+//
+//	Mutation A (latency budget): inserting `time.Sleep(300 * time.Millisecond)` into
+//	ProvidersHandler.GetProviders trips the p99 < 250ms SLO → S(router) FAILS
+//	"p99 ... exceeds SLO". Mutation B (recovery): make chaosReadiness.probe always
+//	return an error → C(chaos) post-clear assertion fires "ready did not recover".
+//	Mutation C (body correctness): make GetProviders return an empty list → the
+//	"provider count" assertion fires "got 0 providers want 2". All reverted.
 const (
 	sloP99Millis      = 250.0 // p99 latency ceiling for the in-process catalogue path
 	wantProviderCount = 2     // catalogueProvider × 2 registered below

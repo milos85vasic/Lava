@@ -14,7 +14,7 @@ var _ provider.Provider = (*ProviderAdapter)(nil)
 // ProviderAdapter wraps *Client to satisfy provider.Provider.
 type ProviderAdapter struct {
 	provider.BaseProvider // catalogue-metadata defaults (Kind=native, SupportsAnonymous=false, BaseURLs=nil)
-	client *Client
+	client                *Client
 }
 
 // NewProviderAdapter returns an adapter for the given kinozal client.

@@ -18,12 +18,13 @@
 // de-authenticates the session.
 //
 // FALSIFIABILITY REHEARSAL (Sixth Law clause 2, §6.J clause 2):
-//   Mutation: in passthrough.go UpstreamCookie, delete the
-//     `if strings.Contains(tok, "=") { return tok }` branch so every
-//     token is wrapped → the regression returns.
-//   Observed: TestUpstreamCookie_AlreadyNameValue_ForwardsVerbatim FAILS:
-//     "cookie=%q want %q" with got="bb_session=bb_session=0-1-…".
-//   Reverted: yes (production code restored; final commit unmutated).
+//
+//	Mutation: in passthrough.go UpstreamCookie, delete the
+//	  `if strings.Contains(tok, "=") { return tok }` branch so every
+//	  token is wrapped → the regression returns.
+//	Observed: TestUpstreamCookie_AlreadyNameValue_ForwardsVerbatim FAILS:
+//	  "cookie=%q want %q" with got="bb_session=bb_session=0-1-…".
+//	Reverted: yes (production code restored; final commit unmutated).
 package auth
 
 import (

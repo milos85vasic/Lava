@@ -18,11 +18,12 @@
 // the real router.
 //
 // FALSIFIABILITY REHEARSAL (Sixth Law clause 2, §6.J clause 2):
-//   Mutation: in handlers.go (v1) writeProviderError, change the
-//     ErrCircuitOpen case to `writeJSON(c, http.StatusBadGateway, ...)`.
-//   Observed: TestSearch_ProviderErrorMapping/circuit_open_503 FAILS:
-//     "status=502 want 503 for ErrCircuitOpen".
-//   Reverted: yes (production code restored; final commit unmutated).
+//
+//	Mutation: in handlers.go (v1) writeProviderError, change the
+//	  ErrCircuitOpen case to `writeJSON(c, http.StatusBadGateway, ...)`.
+//	Observed: TestSearch_ProviderErrorMapping/circuit_open_503 FAILS:
+//	  "status=502 want 503 for ErrCircuitOpen".
+//	Reverted: yes (production code restored; final commit unmutated).
 package v1
 
 import (

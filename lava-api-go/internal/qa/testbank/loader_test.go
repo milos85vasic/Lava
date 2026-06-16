@@ -15,19 +15,19 @@
 // genuinely catches a broken bank rather than rubber-stamping, the bank
 // was deliberately mutated and the test re-run:
 //
-//   Mutation A — rename `name:` to `title:` on case 01 (the canonical S1B
-//   defect HelixQA's loader guards against):
-//     => TestReportedIssuesBank_LoadsAndValidatesAgainstHelixQASchema FAILED
-//        with: "load reported-issues bank ...: bank file ...: test case 0:
-//        test case LVA-REPORTED-ISSUE-01-ONBOARDING-SELECT-ALL missing name"
-//   Mutation B — delete the case 03 (per-endpoint auth) block entirely:
-//     => TestReportedIssuesBank_HasAllFourReportedIssues FAILED with:
-//        "reported-issues bank missing required case id
-//        \"LVA-REPORTED-ISSUE-03-SEARCH-PER-ENDPOINT-V1-AUTH\""
-//   Mutation C — duplicate case 02's id onto case 04:
-//     => load FAILED with HelixQA's: "duplicate test case id ... at
-//        indices 1 and 3"
-//   All three mutations reverted; the test PASSES on the real bank.
+//	Mutation A — rename `name:` to `title:` on case 01 (the canonical S1B
+//	defect HelixQA's loader guards against):
+//	  => TestReportedIssuesBank_LoadsAndValidatesAgainstHelixQASchema FAILED
+//	     with: "load reported-issues bank ...: bank file ...: test case 0:
+//	     test case LVA-REPORTED-ISSUE-01-ONBOARDING-SELECT-ALL missing name"
+//	Mutation B — delete the case 03 (per-endpoint auth) block entirely:
+//	  => TestReportedIssuesBank_HasAllFourReportedIssues FAILED with:
+//	     "reported-issues bank missing required case id
+//	     \"LVA-REPORTED-ISSUE-03-SEARCH-PER-ENDPOINT-V1-AUTH\""
+//	Mutation C — duplicate case 02's id onto case 04:
+//	  => load FAILED with HelixQA's: "duplicate test case id ... at
+//	     indices 1 and 3"
+//	All three mutations reverted; the test PASSES on the real bank.
 //
 // The mutation targets the production loader path the test claims to
 // cover (testbank.LoadFile + IsValid + duplicate-id guard), per §6.J
@@ -121,9 +121,9 @@ func TestReportedIssuesBank_EachCaseMapsToAChallenge(t *testing.T) {
 
 	// challenge_id -> the case it must appear in (one per reported issue).
 	wantChallenge := map[string]string{
-		"LVA-REPORTED-ISSUE-01-ONBOARDING-SELECT-ALL":          "Challenge41",
-		"LVA-REPORTED-ISSUE-02-PROVIDER-CONFIG-PASSWORD-MASK":  "Challenge42",
-		"LVA-REPORTED-ISSUE-03-SEARCH-PER-ENDPOINT-V1-AUTH":    "Challenge44",
+		"LVA-REPORTED-ISSUE-01-ONBOARDING-SELECT-ALL":            "Challenge41",
+		"LVA-REPORTED-ISSUE-02-PROVIDER-CONFIG-PASSWORD-MASK":    "Challenge42",
+		"LVA-REPORTED-ISSUE-03-SEARCH-PER-ENDPOINT-V1-AUTH":      "Challenge44",
 		"LVA-REPORTED-ISSUE-04-SETTINGS-DUPLICATE-ONLINE-SERVER": "Challenge43",
 	}
 

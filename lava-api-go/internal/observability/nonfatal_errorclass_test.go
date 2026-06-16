@@ -13,12 +13,13 @@
 // count.
 //
 // FALSIFIABILITY REHEARSAL (Sixth Law clause 2, §6.J clause 2):
-//   Mutation: in nonfatal.go classOf, replace the body with
-//     `return "error"` so every event reports the same opaque class.
-//   Observed: TestRecordNonFatal_ErrorClass_DistinguishesSentinels
-//     FAILS: "error_class for context.Canceled-derived... " mismatch /
-//     "two distinct sentinel errors collapsed to the same error_class".
-//   Reverted: yes (production code restored; final commit unmutated).
+//
+//	Mutation: in nonfatal.go classOf, replace the body with
+//	  `return "error"` so every event reports the same opaque class.
+//	Observed: TestRecordNonFatal_ErrorClass_DistinguishesSentinels
+//	  FAILS: "error_class for context.Canceled-derived... " mismatch /
+//	  "two distinct sentinel errors collapsed to the same error_class".
+//	Reverted: yes (production code restored; final commit unmutated).
 package observability
 
 import (

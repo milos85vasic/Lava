@@ -38,7 +38,10 @@ import (
 // result, so a request that actually reaches dispatch produces a 200 with a
 // recognizable body. It declares SEARCH but NOT FAVORITES, so the capability
 // gate (§6.E) can be exercised.
-type dispatchProvider struct{ provider.BaseProvider; id string }
+type dispatchProvider struct {
+	provider.BaseProvider
+	id string
+}
 
 func (p *dispatchProvider) ID() string          { return p.id }
 func (p *dispatchProvider) DisplayName() string { return "Dispatch" }
@@ -46,7 +49,7 @@ func (p *dispatchProvider) Capabilities() []provider.ProviderCapability {
 	return []provider.ProviderCapability{provider.CapSearch}
 }
 func (p *dispatchProvider) AuthType() provider.AuthType { return provider.AuthNone }
-func (p *dispatchProvider) Encoding() string           { return "UTF-8" }
+func (p *dispatchProvider) Encoding() string            { return "UTF-8" }
 func (p *dispatchProvider) Search(_ context.Context, _ provider.SearchOpts, _ provider.Credentials) (*provider.SearchResult, error) {
 	return &provider.SearchResult{
 		Provider:   p.id,

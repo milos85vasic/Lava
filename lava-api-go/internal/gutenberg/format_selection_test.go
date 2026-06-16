@@ -12,11 +12,12 @@
 // yes — so it is a bluff-rich target.
 //
 // FALSIFIABILITY REHEARSAL (Sixth Law clause 2, §6.J clause 2):
-//   Mutation: in utils.go pickBestFormatURL, reverse the `preferred`
-//     slice so application/pdf is preferred over application/epub+zip.
-//   Observed: TestPickBestFormatURL_PrefersEpubOverPdf FAILS:
-//     "picked %q want the EPUB url" with got=the pdf URL.
-//   Reverted: yes (production code restored; final commit unmutated).
+//
+//	Mutation: in utils.go pickBestFormatURL, reverse the `preferred`
+//	  slice so application/pdf is preferred over application/epub+zip.
+//	Observed: TestPickBestFormatURL_PrefersEpubOverPdf FAILS:
+//	  "picked %q want the EPUB url" with got=the pdf URL.
+//	Reverted: yes (production code restored; final commit unmutated).
 package gutenberg
 
 import "testing"

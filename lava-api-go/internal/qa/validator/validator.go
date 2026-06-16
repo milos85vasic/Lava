@@ -83,8 +83,8 @@ import (
 	hxqaticket "digital.vasic.helixqa/pkg/ticket"
 	hxqavalidator "digital.vasic.helixqa/pkg/validator"
 
-	qaevidence "digital.vasic.lava.apigo/internal/qa/evidence"
 	"digital.vasic.lava.apigo/internal/observability"
+	qaevidence "digital.vasic.lava.apigo/internal/qa/evidence"
 )
 
 // telemetryFeature is the canonical §6.AC AttrFeature value for events

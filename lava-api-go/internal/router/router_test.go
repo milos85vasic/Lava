@@ -235,19 +235,19 @@ func TestBuild_EveryDeclaredV1RouteIsRegistered(t *testing.T) {
 	engine := Build(Deps{Cache: stubCache{}, Scraper: stubScraper{}})
 
 	want := map[string]bool{
-		"GET /v1/:provider/search":               false,
-		"GET /v1/:provider/browse/:id":           false,
-		"GET /v1/:provider/forum":                false,
-		"GET /v1/:provider/topic/:id":            false,
-		"GET /v1/:provider/torrent/:id":          false,
-		"GET /v1/:provider/download/:id":         false,
-		"GET /v1/:provider/comments/:id":         false,
-		"POST /v1/:provider/comments/:id/add":    false,
-		"GET /v1/:provider/favorites":            false,
-		"POST /v1/:provider/favorites/add/:id":   false,
+		"GET /v1/:provider/search":                false,
+		"GET /v1/:provider/browse/:id":            false,
+		"GET /v1/:provider/forum":                 false,
+		"GET /v1/:provider/topic/:id":             false,
+		"GET /v1/:provider/torrent/:id":           false,
+		"GET /v1/:provider/download/:id":          false,
+		"GET /v1/:provider/comments/:id":          false,
+		"POST /v1/:provider/comments/:id/add":     false,
+		"GET /v1/:provider/favorites":             false,
+		"POST /v1/:provider/favorites/add/:id":    false,
 		"POST /v1/:provider/favorites/remove/:id": false,
-		"POST /v1/:provider/login":               false,
-		"GET /v1/:provider/captcha/:path":        false,
+		"POST /v1/:provider/login":                false,
+		"GET /v1/:provider/captcha/:path":         false,
 	}
 
 	for _, ri := range engine.Routes() {

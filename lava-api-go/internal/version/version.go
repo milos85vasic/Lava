@@ -35,4 +35,3 @@ const (
 // (scripts/check-api-app-sync.sh) recomputes the hash and compares to the
 // committed manifest, making any drift mechanically loud.
 var SourceHash string
-

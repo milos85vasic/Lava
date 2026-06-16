@@ -52,37 +52,37 @@ func errString(err error) *C.char {
 	return C.CString(err.Error())
 }
 
-//export LavaApiStart
-//
 // LavaApiStart parses the config JSON and starts the embedded server. Returns
 // an empty C string on success, or the error message. The caller owns the
 // returned string and MUST release it with LavaApiFree.
+//
+//export LavaApiStart
 func LavaApiStart(configJSON *C.char) *C.char {
 	return errString(mobile.Start(C.GoString(configJSON)))
 }
 
-//export LavaApiStop
-//
 // LavaApiStop gracefully stops the embedded server. Returns an empty C string
 // on success, or the error message. The caller owns the returned string and
 // MUST release it with LavaApiFree.
+//
+//export LavaApiStop
 func LavaApiStop() *C.char {
 	return errString(mobile.Stop())
 }
 
-//export LavaApiStatus
-//
 // LavaApiStatus returns the server-state JSON document (never errors). The
 // caller owns the returned string and MUST release it with LavaApiFree.
+//
+//export LavaApiStatus
 func LavaApiStatus() *C.char {
 	return C.CString(mobile.Status())
 }
 
-//export LavaApiFree
-//
 // LavaApiFree releases a string previously returned by LavaApiStart,
 // LavaApiStop, or LavaApiStatus. Passing nil is a no-op. Passing any other
 // pointer not obtained from this library is undefined behavior.
+//
+//export LavaApiFree
 func LavaApiFree(p *C.char) {
 	if p != nil {
 		C.free(unsafe.Pointer(p))

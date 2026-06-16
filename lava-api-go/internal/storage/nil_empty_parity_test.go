@@ -30,6 +30,7 @@
 //   - sqliteStorage.Set: `if value == nil { value = []byte{} }`
 //   - internal/cache.Client.Set (the Lava-owned Postgres wrapper): same guard,
 //     BEFORE the value reaches pgcache/pgx.
+//
 // On read, both backends return a non-nil empty slice for the stored empty
 // blob (SQLite via the `value := []byte{}` init + nil guard in Get; Postgres
 // via pgx scanning a zero-length BYTEA into a non-nil empty slice), and
@@ -60,10 +61,10 @@ import (
 
 // nilEmptyCase is one row of the observable nil-vs-empty contract.
 type nilEmptyCase struct {
-	name      string
-	stored    []byte // the value passed to Set
-	wantBytes []byte // the bytes Get must return (compared with bytes.Equal)
-	wantNonNil bool  // whether the returned slice must be non-nil (hit must not look like a miss)
+	name       string
+	stored     []byte // the value passed to Set
+	wantBytes  []byte // the bytes Get must return (compared with bytes.Equal)
+	wantNonNil bool   // whether the returned slice must be non-nil (hit must not look like a miss)
 }
 
 // nilEmptyContractCases is the canonical contract every backend must satisfy.

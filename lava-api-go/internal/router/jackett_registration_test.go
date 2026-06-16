@@ -47,7 +47,7 @@ func (nativeRutrackerStub) Capabilities() []provider.ProviderCapability {
 	return []provider.ProviderCapability{provider.CapSearch}
 }
 func (nativeRutrackerStub) AuthType() provider.AuthType { return provider.AuthFormLogin }
-func (nativeRutrackerStub) Encoding() string           { return "windows-1251" }
+func (nativeRutrackerStub) Encoding() string            { return "windows-1251" }
 func (nativeRutrackerStub) Search(context.Context, provider.SearchOpts, provider.Credentials) (*provider.SearchResult, error) {
 	return &provider.SearchResult{Provider: "rutracker"}, nil
 }

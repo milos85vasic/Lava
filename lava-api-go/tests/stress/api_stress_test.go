@@ -165,7 +165,7 @@ func TestStressChaos(t *testing.T) {
 			ID: "C2", Name: "latency-injection", Ran: true, Status: status,
 			Requests: 100, ErrorRate: errRate, Latency: lat,
 			FaultType: "5ms-per-request-latency",
-			Notes: "server stays responsive under injected latency; percentiles degrade, no hang",
+			Notes:     "server stays responsive under injected latency; percentiles degrade, no hang",
 		})
 		if status == "FAIL" {
 			t.Errorf("C2 latency FAILED: errRate=%.3f p50ms=%.2f (expected >=4)", errRate, lat.P50Ms)

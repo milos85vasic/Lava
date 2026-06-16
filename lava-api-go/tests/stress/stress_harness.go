@@ -40,20 +40,20 @@ const (
 
 // LatencyStats is the recorded latency distribution for one dimension.
 type LatencyStats struct {
-	Count   int           `json:"count"`
-	MinNs   int64         `json:"min_ns"`
-	MeanNs  int64         `json:"mean_ns"`
-	P50Ns   int64         `json:"p50_ns"`
-	P95Ns   int64         `json:"p95_ns"`
-	P99Ns   int64         `json:"p99_ns"`
-	MaxNs   int64         `json:"max_ns"`
-	MinMs   float64       `json:"min_ms"`
-	MeanMs  float64       `json:"mean_ms"`
-	P50Ms   float64       `json:"p50_ms"`
-	P95Ms   float64       `json:"p95_ms"`
-	P99Ms   float64       `json:"p99_ms"`
-	MaxMs   float64       `json:"max_ms"`
-	WallSec float64       `json:"wall_clock_sec"`
+	Count   int     `json:"count"`
+	MinNs   int64   `json:"min_ns"`
+	MeanNs  int64   `json:"mean_ns"`
+	P50Ns   int64   `json:"p50_ns"`
+	P95Ns   int64   `json:"p95_ns"`
+	P99Ns   int64   `json:"p99_ns"`
+	MaxNs   int64   `json:"max_ns"`
+	MinMs   float64 `json:"min_ms"`
+	MeanMs  float64 `json:"mean_ms"`
+	P50Ms   float64 `json:"p50_ms"`
+	P95Ms   float64 `json:"p95_ms"`
+	P99Ms   float64 `json:"p99_ms"`
+	MaxMs   float64 `json:"max_ms"`
+	WallSec float64 `json:"wall_clock_sec"`
 }
 
 // computeLatency turns a slice of per-request durations into a percentile distribution.
@@ -97,16 +97,16 @@ func computeLatency(samples []time.Duration, wall time.Duration) LatencyStats {
 
 // DimensionResult is one stress/chaos dimension's outcome.
 type DimensionResult struct {
-	ID          string       `json:"id"`          // S1 / S2 / C1 / C2 / C4a / C5 / C3 / C4b
-	Name        string       `json:"name"`
-	Ran         bool         `json:"ran"`         // false => OPERATOR_GATED or skipped; no fabricated metrics
-	Status      string       `json:"status"`      // PASS / FAIL / OPERATOR_GATED
-	Requests    int          `json:"requests"`
-	Status2xx   int          `json:"status_2xx"`
-	Status4xx   int          `json:"status_4xx"`
-	Status5xx   int          `json:"status_5xx"`
-	ErrorRate   float64      `json:"error_rate"`
-	Latency     LatencyStats `json:"latency"`
+	ID        string       `json:"id"` // S1 / S2 / C1 / C2 / C4a / C5 / C3 / C4b
+	Name      string       `json:"name"`
+	Ran       bool         `json:"ran"`    // false => OPERATOR_GATED or skipped; no fabricated metrics
+	Status    string       `json:"status"` // PASS / FAIL / OPERATOR_GATED
+	Requests  int          `json:"requests"`
+	Status2xx int          `json:"status_2xx"`
+	Status4xx int          `json:"status_4xx"`
+	Status5xx int          `json:"status_5xx"`
+	ErrorRate float64      `json:"error_rate"`
+	Latency   LatencyStats `json:"latency"`
 	// Chaos-specific fields (zero/empty for pure-stress dimensions).
 	FaultType            string  `json:"fault_type,omitempty"`
 	ErrorRateDuringFault float64 `json:"error_rate_during_fault,omitempty"`
@@ -117,21 +117,21 @@ type DimensionResult struct {
 
 // Evidence is the full per-run evidence document.
 type Evidence struct {
-	Clause     string            `json:"clause"`
-	GitSHA     string            `json:"git_sha"`
-	GoVersion  string            `json:"go_version"`
-	GOOS       string            `json:"goos"`
-	GOARCH     string            `json:"goarch"`
-	Host       string            `json:"host"`
-	StartedUTC string            `json:"started_utc"`
-	WallSec    float64           `json:"wall_clock_sec"`
-	GoroutinesBefore int         `json:"goroutines_before"`
-	GoroutinesAfter  int         `json:"goroutines_after"`
-	FDBefore   int               `json:"open_fd_before"`
-	FDAfter    int               `json:"open_fd_after"`
-	Dimensions []DimensionResult `json:"dimensions"`
-	Verdict    string            `json:"verdict"` // PASS / FAIL
-	startTime  time.Time
+	Clause           string            `json:"clause"`
+	GitSHA           string            `json:"git_sha"`
+	GoVersion        string            `json:"go_version"`
+	GOOS             string            `json:"goos"`
+	GOARCH           string            `json:"goarch"`
+	Host             string            `json:"host"`
+	StartedUTC       string            `json:"started_utc"`
+	WallSec          float64           `json:"wall_clock_sec"`
+	GoroutinesBefore int               `json:"goroutines_before"`
+	GoroutinesAfter  int               `json:"goroutines_after"`
+	FDBefore         int               `json:"open_fd_before"`
+	FDAfter          int               `json:"open_fd_after"`
+	Dimensions       []DimensionResult `json:"dimensions"`
+	Verdict          string            `json:"verdict"` // PASS / FAIL
+	startTime        time.Time
 }
 
 func NewEvidence() *Evidence {

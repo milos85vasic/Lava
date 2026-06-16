@@ -17,12 +17,13 @@
 // surface).
 //
 // FALSIFIABILITY REHEARSAL (Sixth Law clause 2, §6.A clause 4, §6.J):
-//   Mutation: in cmd/lava-api-go/main.go, change the --version Printf to
-//     a hard-coded `fmt.Printf("lava-api-go 0.0.0 (build 0)\n")`.
-//   Observed: TestVersionBinaryContract_MatchesVersionPackage FAILS:
-//     "--version stdout %q does not contain Name %q" (got 0.0.0, want
-//     2.3.22).
-//   Reverted: yes (production code restored; final commit unmutated).
+//
+//	Mutation: in cmd/lava-api-go/main.go, change the --version Printf to
+//	  a hard-coded `fmt.Printf("lava-api-go 0.0.0 (build 0)\n")`.
+//	Observed: TestVersionBinaryContract_MatchesVersionPackage FAILS:
+//	  "--version stdout %q does not contain Name %q" (got 0.0.0, want
+//	  2.3.22).
+//	Reverted: yes (production code restored; final commit unmutated).
 package contract
 
 import (

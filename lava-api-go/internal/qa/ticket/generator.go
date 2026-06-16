@@ -276,13 +276,13 @@ func (g *Generator) GenerateClosureLog(ctx context.Context, in ClosureLogInput) 
 // .lava-ci-evidence/crashlytics-resolved/ as of 2026-05-16.
 //
 // Required sections (in order):
-//   1. H1 title — "# Crashlytics issue <ID> — closure log"
-//   2. Metadata bullets — Issue ID, Title, Subtitle, Stack, Type,
-//      Device, Version, State at closure
-//   3. ## Root cause — multi-paragraph
-//   4. ## Fix — multi-paragraph
-//   5. ## Validation test (per §6.O + §6.AB) — path + verification
-//   6. ## Closure protocol — operator-facing closure summary
+//  1. H1 title — "# Crashlytics issue <ID> — closure log"
+//  2. Metadata bullets — Issue ID, Title, Subtitle, Stack, Type,
+//     Device, Version, State at closure
+//  3. ## Root cause — multi-paragraph
+//  4. ## Fix — multi-paragraph
+//  5. ## Validation test (per §6.O + §6.AB) — path + verification
+//  6. ## Closure protocol — operator-facing closure summary
 //
 // Optional: ## Challenge Test, ## Falsifiability rehearsal, ## Fix
 // commit SHA (each appears in some existing closure logs).
