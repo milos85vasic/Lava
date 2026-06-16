@@ -1,0 +1,106 @@
+{
+  "date": "2026-06-17",
+  "protocol": "§6.N / Seventh Law clause 5 — mutate production code each test claims to cover, run the affected test, confirm FAIL (genuine) or PASS-BLUFF, revert every mutation",
+  "resource_caps": "§6.T.2 honored — Gradle --no-daemon --max-workers=2, one test class at a time",
+  "scope": "5 *Test.kt across 5 distinct modules+layers (feature ViewModel / core/domain UseCase / core/data converter / core/preferences serializer / core/tracker parser) + 2 gate-shaping production files (§6.N.2)",
+  "summary": {
+    "targets_total": 7,
+    "genuine": 7,
+    "bluffs": 0,
+    "all_mutations_reverted": true,
+    "my_seven_files_diff_vs_head": "0 lines each (verified)"
+  },
+  "targets": [
+    {
+      "file": "feature/login/src/main/kotlin/lava/login/LoginViewModel.kt",
+      "type": "test",
+      "layer": "feature / ViewModel (Orbit MVI)",
+      "test_file": "feature/login/src/test/kotlin/lava/login/LoginViewModelTest.kt",
+      "test_method": "Finding 4 - UsernameChanged clears stale serviceUnavailable",
+      "production_symbol": "LoginViewModel.validateUsername reduce — serviceUnavailable = null (line 54)",
+      "mutation": "removed `serviceUnavailable = null` from the validateUsername reduce (the documented falsifiability rehearsal mutation)",
+      "command": "./gradlew :feature:login:testDebugUnitTest --tests \"lava.login.LoginViewModelTest\" --no-daemon --max-workers=2 -q",
+      "observed": "3 tests completed, 1 failed — java.lang.AssertionError: serviceUnavailable MUST be null after UsernameChanged — was Cloudflare 503 expected null, but was:<Cloudflare 503>",
+      "verdict": "genuine",
+      "reverted": true
+    },
+    {
+      "file": "core/domain/src/main/kotlin/lava/domain/usecase/ProbeMirrorUseCase.kt",
+      "type": "test",
+      "layer": "core/domain / UseCase (real OkHttpClient + MockWebServer)",
+      "test_file": "core/domain/src/test/kotlin/lava/domain/usecase/ProbeMirrorUseCaseTest.kt",
+      "test_method": "5xx is unhealthy",
+      "production_symbol": "ProbeMirrorUseCase.invoke — reachable range `resp.code in 200..399` (line 33)",
+      "mutation": "widened reachable range 200..399 -> 200..599 (a 503 wrongly becomes Reachable instead of Unhealthy(503))",
+      "command": "./gradlew :core:domain:testDebugUnitTest --tests \"lava.domain.usecase.ProbeMirrorUseCaseTest\" --no-daemon --max-workers=2 -q",
+      "observed": "4 tests completed, 1 failed — only the `5xx is unhealthy` test depends on the 200..399/200..599 boundary; failure localized to the mutated branch (BUILD FAILED, exit non-zero)",
+      "verdict": "genuine",
+      "reverted": true
+    },
+    {
+      "file": "core/data/src/main/kotlin/lava/data/converters/Endpoint.kt",
+      "type": "test",
+      "layer": "core/data / Room entity converter",
+      "test_file": "core/data/src/test/kotlin/lava/data/converters/EndpointEntityConverterTest.kt",
+      "test_method": "Rutracker round-trips through entity converter",
+      "production_symbol": "Endpoint.toEntity() — id mapping `is Endpoint.Rutracker -> \"Rutracker\"` (line 64)",
+      "mutation": "changed Rutracker id from \"Rutracker\" to `host` (would let duplicate seeds and collapse semantics break; documented inline MUTATION comment)",
+      "command": "./gradlew :core:data:testDebugUnitTest --tests \"lava.data.converters.EndpointEntityConverterTest\" --no-daemon --max-workers=2 -q",
+      "observed": "7 tests completed, 1 failed — org.junit.ComparisonFailure: expected:<[Rutracker]> but was:<[rutracker.org]>",
+      "verdict": "genuine",
+      "reverted": true
+    },
+    {
+      "file": "core/preferences/src/main/kotlin/lava/securestorage/model/EndpointConverter.kt",
+      "type": "test",
+      "layer": "core/preferences / JSON serializer (org.json)",
+      "test_file": "core/preferences/src/test/kotlin/lava/securestorage/EndpointConverterTest.kt",
+      "test_method": "legacy Proxy json migrates forward to Rutracker (SP-3_2 back-compat)",
+      "production_symbol": "EndpointConverter.fromJson — `\"Proxy\" -> Endpoint.Rutracker` migration branch (line 61)",
+      "mutation": "removed the `\"Proxy\" -> Endpoint.Rutracker` branch so a legacy Proxy record falls through to `else -> null`",
+      "command": "./gradlew :core:preferences:testDebugUnitTest --tests \"lava.securestorage.EndpointConverterTest\" --no-daemon --max-workers=2 -q",
+      "observed": "16 tests completed, 1 failed — java.lang.AssertionError: expected:<Rutracker> but was:<null>",
+      "verdict": "genuine",
+      "reverted": true
+    },
+    {
+      "file": "core/tracker/rutor/src/main/kotlin/lava/tracker/rutor/parser/RuTorSizeParser.kt",
+      "type": "test",
+      "layer": "core/tracker/rutor / size parser (pure-Kotlin)",
+      "test_file": "core/tracker/rutor/src/test/kotlin/lava/tracker/rutor/parser/RuTorSizeParserTest.kt",
+      "test_method": "multiple (parses 4.5 GB / 1,5 GB / 1024 MB / case-insensitive / no-whitespace / first-token / 0 GB)",
+      "production_symbol": "RuTorSizeParser.parse — GB multiplier `\"GB\" -> 1_024L * 1_024L * 1_024L` (line 28)",
+      "mutation": "changed GB multiplier from binary 1024^3 to decimal 1000^3",
+      "command": "./gradlew :core:tracker:rutor:test --tests \"lava.tracker.rutor.parser.RuTorSizeParserTest\" --no-daemon --max-workers=2 -q",
+      "observed": "13 tests completed, 6 failed — e.g. expected:<4831838208> but was:<4500000000> (4.5 GB), expected:<1073741824> but was:<1000000000> (1024 MB / 1 gb / 1GB), expected:<1610612736> but was:<1500000000> (1,5 GB), expected:<4563402752> but was:<4250000000> (embedded 4.25 GB). B/kB/MB/TB tests still pass — failure localized to GB branch",
+      "verdict": "genuine",
+      "reverted": true
+    },
+    {
+      "file": "scripts/scan-no-hardcoded-ipv4.sh",
+      "type": "production",
+      "layer": "gate-shaping (§6.R IPv4 scanner)",
+      "hermetic_test": "tests/check-constitution/test_no_hardcoded_ipv4.sh",
+      "production_symbol": "candidates exclusion regex — `\\.db$` exemption token",
+      "mutation": "removed `|\\.db$` from the git-ls-files exclusion regex (line 41)",
+      "command": "bash tests/check-constitution/test_no_hardcoded_ipv4.sh",
+      "observed": "FAIL test_db_file_exempt: expected 0 (.db exempt), got 1 — AND FAIL test_live_repo_passes (real tracked docs/workable_items.db now flagged: 'Binary file docs/workable_items.db matches'). Two-way confirmation",
+      "verdict": "genuine",
+      "reverted": true
+    },
+    {
+      "file": "scripts/check-script-docs-sync.sh",
+      "type": "production",
+      "layer": "gate-shaping (CM-SCRIPT-DOCS-SYNC / HelixConstitution §11.4.18)",
+      "hermetic_test": "tests/check-constitution/test_script_docs_sync.sh",
+      "production_symbol": "scripts-without-docs orphan loop — `found=false` initializer (line 45)",
+      "mutation": "changed `found=false` to `found=true` in the scripts-without-docs loop so orphan scripts are never collected",
+      "command": "bash tests/check-constitution/test_script_docs_sync.sh",
+      "observed": "FAIL test_orphan_script_rejected: rc=0 out=CM-SCRIPT-DOCS-SYNC gate clean: 1 scripts ↔ 0 docs (1:1). — gate verdict flipped from reject(1) to pass(0), the exact bluff a weakened gate creates",
+      "verdict": "genuine",
+      "reverted": true
+    }
+  ],
+  "git_status_note": "All 7 mutated files verified at 0 diff-lines vs HEAD after revert. Unrelated pre-existing working-tree changes (lava-api-go/*, .lava-ci-evidence/stress-chaos/jackett/*, submodules/containers, untracked core/domain/.../EnrichTopicUseCaseTest.kt) were present independent of this hunt and were NOT touched — none intersect any of the 7 targets.",
+  "vocabulary_compliance": "§11.4.6 — all observations are CONFIRMED facts copied verbatim from captured Gradle build verdicts + JUnit XML failure messages + hermetic-test stdout. No guessing vocabulary used."
+}
