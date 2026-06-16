@@ -1,0 +1,27 @@
+{
+  "date": "2026-06-17",
+  "class": "operator-resourced blocker (shared-host cgroup memory) — NOT a code defect",
+  "title": "§6.Z device-build (C00 canary) cgroup-OOM-killed on nezha shared user-slice",
+  "root_cause_CONFIRMED": "The milosvasic user-slice cgroup on nezha has MemoryMax=56GiB / MemoryHigh=48GiB and MemoryCurrent=43GiB held by co-tenant ML services (ollama, qdrant, gunicorn = llmsverifier/boba) in the SAME slice. Only ~13GiB headroom to the hard cap. A full Android assembleDebug Gradle daemon (+ the later emu container) needs ~8-15GiB; when co-tenants spike, the slice hits MemoryMax and the kernel cgroup-OOM-kills the NEWCOMER (gradle) instantly. This is why processes die with high system 'available' RAM (52GiB, cache-reclaimable) and no system-wide OOM log.",
+  "attempts": [
+    {"n": 1, "mode": "nohup matrix runner (4g heap)", "result": "ran 5min, died mid-assembleDebug at 02:05 (RAM freer at launch)"},
+    {"n": 2, "mode": "tmux matrix runner", "result": "session gone in ~20s at daemon-fork"},
+    {"n": 3, "mode": "nohup isolated assembleDebug (4g)", "result": "died ~20s, log frozen at daemon-fork msg (279 bytes)"},
+    {"n": 4, "mode": "nohup isolated assembleDebug (3g heap override)", "result": "wrapper DEAD <70s, logsize=0"}
+  ],
+  "hypotheses_eliminated": [
+    "SSH-logout-kill — ELIMINATED (12 active milosvasic sessions keep the user slice alive; nohup builds survived SSH close for minutes)",
+    "tmux-wrapper / GRADLE_OPTS — ELIMINATED (isolated plain nohup build died the same way)",
+    "heap-config-break — ELIMINATED (gradle --version works fine with the override)",
+    "system-wide OOM — ELIMINATED (52GiB available, no kernel OOM log; it is CGROUP-level, not system-level)"
+  ],
+  "kvm_path_status": "WORKING — `accel=kvm runner=containerized (platform=Linux)` resolves correctly on nezha; the §6.X/§6.AH containerized-KVM emulator path is NOT the blocker. Purely a shared-slice memory-cap contention issue.",
+  "build_state": "HEAD aefaf75f: all retry fixes + stress/chaos + manifest + 5 anti-bluff tests + gofmt/spotless landed + pushed; gates green. The product is releasable per runnable gates; ONLY the §6.Z device-execution evidence is missing because the build cannot complete under the shared-slice memory cap.",
+  "operator_unblock_options": [
+    "Free co-tenant MEMORY: stop/pause ollama + qdrant + gunicorn (llmsverifier/boba) so the user-slice drops well below MemoryHigh, giving the Android build + emu sustained headroom.",
+    "Raise the user-slice MemoryMax (root/systemd action) to give headroom alongside co-tenants.",
+    "Dedicated host with its own memory budget.",
+    "Defer redistribute — build is done + stable; redistribute when memory frees."
+  ],
+  "no_guessing": "All limits/usage CONFIRMED via systemctl show user-<uid>.slice + /sys/fs/cgroup; all 4 attempt outcomes captured from logs/ps this session."
+}
