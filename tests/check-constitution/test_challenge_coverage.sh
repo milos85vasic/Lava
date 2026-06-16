@@ -4,6 +4,8 @@
 # scanner, asserts on the result.
 set -euo pipefail
 
+_safe_tmpdir() { local d; d=$(command mktemp -d) || { echo "FATAL: mktemp -d failed (ENOSPC?) — refusing to risk the real repo" >&2; exit 1; }; [[ -n "$d" && -d "$d" && "$d" == /* ]] || { echo "FATAL: invalid tmpdir [$d]" >&2; exit 1; }; printf "%s\n" "$d"; }
+
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 SCANNER="$REPO_ROOT/scripts/check-challenge-coverage.sh"
 
@@ -18,7 +20,7 @@ run_scanner() {
 # Test 1: feature without any Challenge → strict mode rejects
 test_uncovered_feature_rejected() {
     local f
-    f=$(mktemp -d)
+    f=$(_safe_tmpdir)
     cd "$f"
     mkdir -p feature/widgetx app/src/androidTest/kotlin/lava/app/challenges
     touch feature/widgetx/build.gradle.kts
@@ -34,7 +36,7 @@ test_uncovered_feature_rejected() {
 # Test 2: feature with a Challenge that imports it → accepted
 test_covered_via_import_accepted() {
     local f
-    f=$(mktemp -d)
+    f=$(_safe_tmpdir)
     cd "$f"
     mkdir -p feature/widgety app/src/androidTest/kotlin/lava/app/challenges
     touch feature/widgety/build.gradle.kts
@@ -54,7 +56,7 @@ KT
 # Test 3: feature with explicit AE-exempt marker in evidence dir → accepted
 test_exempted_via_marker_accepted() {
     local f
-    f=$(mktemp -d)
+    f=$(_safe_tmpdir)
     cd "$f"
     mkdir -p feature/widgetz app/src/androidTest/kotlin/lava/app/challenges \
              .lava-ci-evidence
@@ -76,7 +78,7 @@ MD
 # Test 4: advisory mode with uncovered → exit 0 (still warns)
 test_advisory_mode_does_not_fail() {
     local f
-    f=$(mktemp -d)
+    f=$(_safe_tmpdir)
     cd "$f"
     mkdir -p feature/widgetw app/src/androidTest/kotlin/lava/app/challenges
     touch feature/widgetw/build.gradle.kts

@@ -2,6 +2,8 @@
 # Tests for scripts/check-helix-deps-manifest.sh — §11.4.31 enforcement.
 set -uo pipefail
 
+_safe_tmpdir() { local d; d=$(command mktemp -d) || { echo "FATAL: mktemp -d failed (ENOSPC?) — refusing to risk the real repo" >&2; exit 1; }; [[ -n "$d" && -d "$d" && "$d" == /* ]] || { echo "FATAL: invalid tmpdir [$d]" >&2; exit 1; }; printf "%s\n" "$d"; }
+
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 SCANNER="$REPO_ROOT/scripts/check-helix-deps-manifest.sh"
 
@@ -27,7 +29,7 @@ EOF
 # Test 1: synthetic compliant fixture passes
 test_compliant_fixture_passes() {
     local f
-    f=$(mktemp -d)
+    f=$(_safe_tmpdir)
     cd "$f"
     mkdir -p submodules/foo
     write_well_formed_manifest helix-deps.yaml
@@ -47,7 +49,7 @@ test_compliant_fixture_passes() {
 # Test 2: missing parent helix-deps.yaml → reject
 test_missing_parent_manifest_rejected() {
     local f
-    f=$(mktemp -d)
+    f=$(_safe_tmpdir)
     cd "$f"
     mkdir -p submodules/foo
     write_well_formed_manifest submodules/foo/helix-deps.yaml
@@ -67,7 +69,7 @@ test_missing_parent_manifest_rejected() {
 # Test 3: missing per-submodule helix-deps.yaml → reject
 test_missing_submodule_manifest_rejected() {
     local f
-    f=$(mktemp -d)
+    f=$(_safe_tmpdir)
     cd "$f"
     mkdir -p submodules/withscript submodules/withoutscript
     write_well_formed_manifest helix-deps.yaml
@@ -88,7 +90,7 @@ test_missing_submodule_manifest_rejected() {
 # Test 4: parent manifest with wrong schema_version → reject
 test_wrong_schema_version_rejected() {
     local f
-    f=$(mktemp -d)
+    f=$(_safe_tmpdir)
     cd "$f"
     mkdir -p submodules/foo
     cat > helix-deps.yaml <<'EOF'
@@ -121,7 +123,7 @@ EOF
 # Test 5: --advisory mode returns 0 even on violation
 test_advisory_mode_returns_zero() {
     local f
-    f=$(mktemp -d)
+    f=$(_safe_tmpdir)
     cd "$f"
     # Empty fixture — every check fails → would normally exit 1
     local rc
@@ -139,7 +141,7 @@ test_advisory_mode_returns_zero() {
 # Test 6: parent .json manifest variant accepted
 test_json_variant_accepted() {
     local f
-    f=$(mktemp -d)
+    f=$(_safe_tmpdir)
     cd "$f"
     mkdir -p submodules/foo
     # JSON-ish content satisfying the structural grep checks (the grep

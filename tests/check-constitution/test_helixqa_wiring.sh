@@ -18,6 +18,8 @@
 
 set -uo pipefail
 
+_safe_tmpdir() { local d; d=$(command mktemp -d) || { echo "FATAL: mktemp -d failed (ENOSPC?) — refusing to risk the real repo" >&2; exit 1; }; [[ -n "$d" && -d "$d" && "$d" == /* ]] || { echo "FATAL: invalid tmpdir [$d]" >&2; exit 1; }; printf "%s\n" "$d"; }
+
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 WRAPPER="$REPO_ROOT/scripts/run-helixqa-challenges.sh"
 
@@ -82,7 +84,7 @@ build_fake_repo_full() {
 # ---------------------------------------------------------------------
 test_passes_when_helixqa_present_and_all_green() {
     local f
-    f=$(mktemp -d)
+    f=$(_safe_tmpdir)
     build_fake_repo_full "$f" 0 "all-green-fixture"
     local ev="$f/evidence"
     LAVA_REPO_ROOT="$f" bash "$f/scripts/run-helixqa-challenges.sh" --evidence-dir "$ev" >"$f/wrapper.log" 2>&1
@@ -133,7 +135,7 @@ test_passes_when_helixqa_present_and_all_green() {
 # ---------------------------------------------------------------------
 test_fails_when_script_missing() {
     local f
-    f=$(mktemp -d)
+    f=$(_safe_tmpdir)
     build_fake_repo_full "$f" 0 "ok"
     rm "$f/submodules/helixqa/challenges/scripts/bluff_scanner_challenge.sh"
     local ev="$f/evidence"
@@ -171,7 +173,7 @@ test_fails_when_script_missing() {
 # ---------------------------------------------------------------------
 test_skip_mode_when_helixqa_absent() {
     local f
-    f=$(mktemp -d)
+    f=$(_safe_tmpdir)
     mkdir -p "$f/scripts"
     cp "$WRAPPER" "$f/scripts/run-helixqa-challenges.sh"
     chmod +x "$f/scripts/run-helixqa-challenges.sh"
@@ -212,7 +214,7 @@ test_skip_mode_when_helixqa_absent() {
 # ---------------------------------------------------------------------
 test_fail_classified_correctly() {
     local f
-    f=$(mktemp -d)
+    f=$(_safe_tmpdir)
     build_fake_repo_full "$f" 0 "ok"
     # Override one script to exit 1 (real defect)
     cat > "$f/submodules/helixqa/challenges/scripts/chaos_failure_injection_challenge.sh" <<'SH'
@@ -261,7 +263,7 @@ SH
 # ---------------------------------------------------------------------
 test_containerized_runner_fails_fast_when_containers_absent() {
     local f
-    f=$(mktemp -d)
+    f=$(_safe_tmpdir)
     build_fake_repo_full "$f" 0 "ok"
     # Deliberately do NOT create submodules/containers
     local ev="$f/evidence"
@@ -311,7 +313,7 @@ test_containerized_runner_fails_fast_when_containers_absent() {
 # ---------------------------------------------------------------------
 test_host_runner_default_attestation_shape() {
     local f
-    f=$(mktemp -d)
+    f=$(_safe_tmpdir)
     build_fake_repo_full "$f" 0 "ok"
     local ev="$f/evidence"
     set +e
@@ -366,7 +368,7 @@ test_host_runner_default_attestation_shape() {
 # ---------------------------------------------------------------------
 test_require_toolchain_go_fails_fast_when_go_absent() {
     local f
-    f=$(mktemp -d)
+    f=$(_safe_tmpdir)
     build_fake_repo_full "$f" 0 "ok"
     local ev="$f/evidence"
     # Strip PATH to a minimal set that does NOT contain 'go'
@@ -416,7 +418,7 @@ test_require_toolchain_go_fails_fast_when_go_absent() {
 # ---------------------------------------------------------------------
 test_require_toolchain_none_skips_go_scripts_when_go_absent() {
     local f
-    f=$(mktemp -d)
+    f=$(_safe_tmpdir)
     build_fake_repo_full "$f" 0 "ok"
     local ev="$f/evidence"
     set +e
@@ -481,7 +483,7 @@ test_require_toolchain_none_skips_go_scripts_when_go_absent() {
 # ---------------------------------------------------------------------
 test_evidence_dir_env_var_override() {
     local f
-    f=$(mktemp -d)
+    f=$(_safe_tmpdir)
     build_fake_repo_full "$f" 0 "ok"
     local ev="$f/my-custom-evidence"
     set +e
@@ -520,7 +522,7 @@ test_evidence_dir_env_var_override() {
 # ---------------------------------------------------------------------
 test_invalid_runner_rejected() {
     local f
-    f=$(mktemp -d)
+    f=$(_safe_tmpdir)
     build_fake_repo_full "$f" 0 "ok"
     set +e
     LAVA_REPO_ROOT="$f" bash "$f/scripts/run-helixqa-challenges.sh" \
@@ -551,7 +553,7 @@ test_invalid_runner_rejected() {
 # ---------------------------------------------------------------------
 test_invalid_require_toolchain_rejected() {
     local f
-    f=$(mktemp -d)
+    f=$(_safe_tmpdir)
     build_fake_repo_full "$f" 0 "ok"
     set +e
     LAVA_REPO_ROOT="$f" bash "$f/scripts/run-helixqa-challenges.sh" \

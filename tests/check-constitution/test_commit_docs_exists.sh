@@ -25,6 +25,15 @@ fi
 # Helper: scaffold a temp git repo + commit a body
 scaffold() {
     local dir="$1"
+    # GUARD (2026-06-16 pollution fix): if mktemp -d failed (e.g. ENOSPC), $dir is
+    # empty and `git -C ""` would operate on the REAL repo (empty -C = current dir),
+    # committing fixtures + planting files into the host history. Refuse loudly
+    # instead of polluting the working repository. Root cause of the 19 stray
+    # "fixture"/"tooling: add foo gate"/… commits on master (2026-06-16).
+    [[ -n "$dir" && -d "$dir" && "$dir" == /* ]] || {
+        echo "FATAL: scaffold got empty/invalid temp dir ('$dir') — mktemp -d likely failed (ENOSPC?); refusing to touch the real repo" >&2
+        exit 1
+    }
     git -C "$dir" init -q -b master 2>/dev/null
     git -C "$dir" config user.email "test@example.com"
     git -C "$dir" config user.name "Test"

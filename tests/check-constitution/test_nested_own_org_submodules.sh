@@ -2,13 +2,15 @@
 # Tests for scripts/check-no-nested-own-org-submodules.sh — §11.4.28 enforcement.
 set -uo pipefail
 
+_safe_tmpdir() { local d; d=$(command mktemp -d) || { echo "FATAL: mktemp -d failed (ENOSPC?) — refusing to risk the real repo" >&2; exit 1; }; [[ -n "$d" && -d "$d" && "$d" == /* ]] || { echo "FATAL: invalid tmpdir [$d]" >&2; exit 1; }; printf "%s\n" "$d"; }
+
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 SCANNER="$REPO_ROOT/scripts/check-no-nested-own-org-submodules.sh"
 
 # Test 1: synthetic fixture with no nested own-org chains → pass
 test_clean_fixture_passes() {
     local f
-    f=$(mktemp -d)
+    f=$(_safe_tmpdir)
     cd "$f"
     mkdir -p submodules/foo
     cat > submodules/foo/.gitmodules <<'EOF'
@@ -31,7 +33,7 @@ EOF
 # Test 2: synthetic fixture with vasic-digital nested chain → reject
 test_vasic_digital_chain_rejected() {
     local f
-    f=$(mktemp -d)
+    f=$(_safe_tmpdir)
     cd "$f"
     mkdir -p submodules/foo
     cat > submodules/foo/.gitmodules <<'EOF'
@@ -54,7 +56,7 @@ EOF
 # Test 3: HelixDevelopment chain via gitlab → reject
 test_helix_dev_gitlab_chain_rejected() {
     local f
-    f=$(mktemp -d)
+    f=$(_safe_tmpdir)
     cd "$f"
     mkdir -p submodules/qux
     cat > submodules/qux/.gitmodules <<'EOF'
@@ -77,7 +79,7 @@ EOF
 # Test 4: --advisory mode returns 0 even on violation
 test_advisory_mode_returns_zero() {
     local f
-    f=$(mktemp -d)
+    f=$(_safe_tmpdir)
     cd "$f"
     mkdir -p submodules/baz
     cat > submodules/baz/.gitmodules <<'EOF'

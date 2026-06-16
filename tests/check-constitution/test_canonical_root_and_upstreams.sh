@@ -2,13 +2,15 @@
 # Tests for scripts/check-canonical-root-and-upstreams.sh — §11.4.35 + §11.4.36.
 set -uo pipefail
 
+_safe_tmpdir() { local d; d=$(command mktemp -d) || { echo "FATAL: mktemp -d failed (ENOSPC?) — refusing to risk the real repo" >&2; exit 1; }; [[ -n "$d" && -d "$d" && "$d" == /* ]] || { echo "FATAL: invalid tmpdir [$d]" >&2; exit 1; }; printf "%s\n" "$d"; }
+
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 SCANNER="$REPO_ROOT/scripts/check-canonical-root-and-upstreams.sh"
 
 # Test 1: synthetic compliant fixture passes
 test_compliant_fixture_passes() {
     local f
-    f=$(mktemp -d)
+    f=$(_safe_tmpdir)
     cd "$f"
     mkdir -p constitution submodules/foo
     cat > CLAUDE.md <<'EOF'
@@ -50,7 +52,7 @@ EOF
 # Test 2: missing root CLAUDE.md inheritance pointer → reject
 test_missing_root_pointer_rejected() {
     local f
-    f=$(mktemp -d)
+    f=$(_safe_tmpdir)
     cd "$f"
     mkdir -p constitution submodules/foo
     cat > CLAUDE.md <<'EOF'
@@ -87,7 +89,7 @@ EOF
 # Test 3: canonical root carrying its own INHERITED FROM → reject
 test_canonical_self_inheritance_rejected() {
     local f
-    f=$(mktemp -d)
+    f=$(_safe_tmpdir)
     cd "$f"
     mkdir -p constitution
     cat > CLAUDE.md <<'EOF'
@@ -125,7 +127,7 @@ EOF
 # Test 4: missing install_upstreams in submodule → reject
 test_missing_install_upstreams_rejected() {
     local f
-    f=$(mktemp -d)
+    f=$(_safe_tmpdir)
     cd "$f"
     mkdir -p constitution submodules/withscript submodules/withoutscript
     cat > CLAUDE.md <<'EOF'
@@ -162,7 +164,7 @@ EOF
 # Test 5: --advisory mode returns 0 even on violation
 test_advisory_mode_returns_zero() {
     local f
-    f=$(mktemp -d)
+    f=$(_safe_tmpdir)
     cd "$f"
     # Empty fixture — every check fails → would normally exit 1 in strict
     local rc
@@ -182,7 +184,7 @@ test_advisory_mode_returns_zero() {
 # inside ```markdown ... ``` blocks; this is documentation, not inheritance)
 test_canonical_fenced_code_block_pointer_passes() {
     local f
-    f=$(mktemp -d)
+    f=$(_safe_tmpdir)
     cd "$f"
     mkdir -p constitution submodules/foo
     cat > CLAUDE.md <<'EOF'

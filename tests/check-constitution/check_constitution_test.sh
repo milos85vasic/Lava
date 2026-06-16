@@ -5,6 +5,8 @@
 # repo + against a temporary fixture that DELETES specific structures.
 set -euo pipefail
 
+_safe_tmpdir() { local d; d=$(command mktemp -d) || { echo "FATAL: mktemp -d failed (ENOSPC?) — refusing to risk the real repo" >&2; exit 1; }; [[ -n "$d" && -d "$d" && "$d" == /* ]] || { echo "FATAL: invalid tmpdir [$d]" >&2; exit 1; }; printf "%s\n" "$d"; }
+
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 SCRIPT="$REPO_ROOT/scripts/check-constitution.sh"
 
@@ -39,7 +41,7 @@ test_live_repo_passes() {
 # root rather than the live repo root.
 make_fixture() {
   local fixture
-  fixture=$(mktemp -d)
+  fixture=$(_safe_tmpdir)
   cp -r "$REPO_ROOT/." "$fixture/" 2>/dev/null || true
   mkdir -p "$fixture/scripts"
   cp "$SCRIPT" "$fixture/scripts/check-constitution.sh"

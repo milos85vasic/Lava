@@ -9,6 +9,8 @@
 
 set -uo pipefail
 
+_safe_tmpdir() { local d; d=$(command mktemp -d) || { echo "FATAL: mktemp -d failed (ENOSPC?) — refusing to risk the real repo" >&2; exit 1; }; [[ -n "$d" && -d "$d" && "$d" == /* ]] || { echo "FATAL: invalid tmpdir [$d]" >&2; exit 1; }; printf "%s\n" "$d"; }
+
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 GENERATOR="$REPO_ROOT/scripts/generate-coverage-ledger.sh"
 VERIFIER="$REPO_ROOT/scripts/check-coverage-ledger.sh"
@@ -47,7 +49,7 @@ verify_in() {
 # -----------------------------------------------------------------------------
 test_clean_fixture_passes() {
     local f
-    f=$(mktemp -d)
+    f=$(_safe_tmpdir)
     make_fixture "$f"
     generate_ledger_in "$f"
     local out rc
@@ -67,7 +69,7 @@ test_clean_fixture_passes() {
 # -----------------------------------------------------------------------------
 test_missing_ledger_rejected() {
     local f
-    f=$(mktemp -d)
+    f=$(_safe_tmpdir)
     make_fixture "$f"
     # Do NOT generate a ledger.
     local out rc
@@ -87,7 +89,7 @@ test_missing_ledger_rejected() {
 # -----------------------------------------------------------------------------
 test_missing_row_rejected() {
     local f
-    f=$(mktemp -d)
+    f=$(_safe_tmpdir)
     make_fixture "$f"
     generate_ledger_in "$f"
     # Add a new feature/* directory AFTER generation → ledger is now stale
@@ -111,7 +113,7 @@ test_missing_row_rejected() {
 # -----------------------------------------------------------------------------
 test_stale_ledger_rejected() {
     local f
-    f=$(mktemp -d)
+    f=$(_safe_tmpdir)
     make_fixture "$f"
     generate_ledger_in "$f"
     # Mutate the ledger by hand: flip a status value. Regeneration would
@@ -137,7 +139,7 @@ test_stale_ledger_rejected() {
 # -----------------------------------------------------------------------------
 test_advisory_mode_returns_zero() {
     local f
-    f=$(mktemp -d)
+    f=$(_safe_tmpdir)
     # Empty fixture — verifier finds no ledger → would normally exit 1.
     mkdir -p "$f/feature/foo"
     touch "$f/feature/foo/build.gradle.kts"
@@ -159,7 +161,7 @@ test_advisory_mode_returns_zero() {
 # -----------------------------------------------------------------------------
 test_generator_deterministic() {
     local f
-    f=$(mktemp -d)
+    f=$(_safe_tmpdir)
     make_fixture "$f"
     local a b
     a=$(LAVA_REPO_ROOT="$f" bash "$GENERATOR" --stdout 2>/dev/null | awk '
