@@ -230,3 +230,69 @@ func TestProviderAdapter_CatalogueMetadata(t *testing.T) {
 		t.Errorf("GetTorrent err = %v, want ErrUnsupported", err)
 	}
 }
+
+// TestSearch_RetriesOnTransient5xx is the reproduce-first (§6.T.1) regression
+// test for the nezha-2026-06-16 finding: Tokyo Toshokan's variable live latency
+// occasionally produced a user-facing "unknown error". The provider now retries
+// transient failures (here: a 503 on the first attempt) and recovers.
+//
+// FALSIFIABILITY REHEARSAL (§6.J clause 2):
+//
+//	Mutation: delete the retry loop in client.go fetchFeed (return fetchFeedOnce
+//	          directly), restoring the single-attempt behavior.
+//	Observed: "Search after transient 503 should recover via retry:
+//	          tokyotosho: HTTP 503: provider: unknown error".
+//	Reverted: yes.
+func TestSearch_RetriesOnTransient5xx(t *testing.T) {
+	body, err := os.ReadFile(filepath.Join("testdata", "tokyotosho_naruto.xml"))
+	if err != nil {
+		t.Fatalf("read fixture: %v", err)
+	}
+	var attempts int
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		attempts++
+		if attempts == 1 {
+			// One transient 5xx, then serve the real feed (the slow-upstream case).
+			http.Error(w, "transient", http.StatusServiceUnavailable)
+			return
+		}
+		w.Header().Set("Content-Type", "application/xml")
+		_, _ = w.Write(body)
+	}))
+	t.Cleanup(srv.Close)
+
+	c := NewClient(srv.URL)
+	res, err := c.Search(context.Background(), "naruto", 0)
+	if err != nil {
+		t.Fatalf("Search after transient 503 should recover via retry: %v", err)
+	}
+	// Primary assertion: user-visible parsed results (the 2 magnet rows).
+	if len(res.Results) != 2 {
+		t.Fatalf("got %d results after retry, want 2", len(res.Results))
+	}
+	// Secondary: the upstream was actually hit more than once (the retry fired).
+	if attempts < 2 {
+		t.Fatalf("expected >=2 upstream attempts (retry), got %d", attempts)
+	}
+}
+
+// TestSearch_TerminalErrorNotRetried proves the retry does NOT waste the budget
+// on a terminal error: a persistent 404 returns ErrNotFound after exactly ONE
+// attempt (no retry of non-transient failures).
+func TestSearch_TerminalErrorNotRetried(t *testing.T) {
+	var attempts int
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		attempts++
+		w.WriteHeader(http.StatusNotFound)
+	}))
+	t.Cleanup(srv.Close)
+
+	c := NewClient(srv.URL)
+	_, err := c.Search(context.Background(), "naruto", 0)
+	if !errors.Is(err, provider.ErrNotFound) {
+		t.Fatalf("want ErrNotFound, got %v", err)
+	}
+	if attempts != 1 {
+		t.Fatalf("terminal 404 must NOT be retried; got %d attempts", attempts)
+	}
+}

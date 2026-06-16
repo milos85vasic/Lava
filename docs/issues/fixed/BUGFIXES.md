@@ -35,6 +35,39 @@ Format per entry:
 
 ---
 
+## 2026-06-16 — tokyotosho curated provider: user-facing "unknown error" on slow upstream (no retry on transient failure)
+
+**Root cause:** `internal/provider/curated/tokyotosho` issued a single HTTP
+request bounded by `DefaultTimeout = 20s`. Tokyo Toshokan's live latency is
+variable (measured on the nezha heavy-test node 2026-06-16: typical 4–8 s,
+occasionally >20 s). When a single request exceeded 20 s the client returned
+`provider: ErrUnknown` ("unknown error") to the user — even though the very next
+request would have succeeded. Surfaced by the `realtrackers` live test
+`TestLive_SearchReturnsRealMagnets`, which PASSED at 16:14 (16.5 s) and FAILED at
+16:15 (the >20 s case), confirming external-latency intermittency, not a parser
+bug (direct curl probes all returned HTTP 200 with valid RSS).
+
+**Affected files:** `lava-api-go/internal/provider/curated/tokyotosho/client.go`
+(added `maxAttempts`/`retryBackoff`; refactored the inline fetch into
+`fetchFeed` (bounded-retry loop) + `fetchFeedOnce` (single attempt classifying
+transient vs terminal)). Terminal errors (404/403/401/decode) are NOT retried.
+
+**Fix:** retry transient failures (network/timeout or 5xx) up to 3 attempts with
+a 500 ms backoff, bounded by the caller's ctx. Converts transient upstream
+slowness into a successful search while leaving the user-visible result shape and
+the production `DefaultTimeout` unchanged.
+
+**Verification test/challenge:** `tokyotosho_test.go::TestSearch_RetriesOnTransient5xx`
+(reproduce-first §6.T.1: 503-once-then-fixture → recovers, 2 results) +
+`TestSearch_TerminalErrorNotRetried` (404 → ErrNotFound after exactly 1 attempt).
+Falsifiability rehearsed: bypassing the retry loop → `TestSearch_RetriesOnTransient5xx`
+FAILS with "should recover via retry: tokyotosho: HTTP 503: provider: unknown error";
+reverted → PASS.
+
+**Fix commit:** (this commit)
+**Forensic anchor:** nezha.local heavy-testing enablement, real-tracker E2E run;
+operator chose "add bounded retry". Evidence: `.lava-ci-evidence/nezha/2026-06-16-system-boot.md`.
+
 ## 2026-06-14 — search "Something went wrong" across providers via the on-device API (ApiBackedTrackerClient used the strict client + no per-endpoint key)
 
 **Root cause:** the dynamic `ApiBackedTrackerClient` (the client that issues
