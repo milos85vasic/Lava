@@ -35,6 +35,39 @@ Format per entry:
 
 ---
 
+## 2026-06-16 — 3 circuit-breaker providers: transient timeout tripped the breaker (kinozal, nnmclub, rutracker)
+
+**Root cause:** kinozal, nnmclub, and rutracker wrap their HTTP calls in a circuit
+breaker (`c.breaker.Execute(closure)`). The closure had no retry, so a single
+transient timeout/5xx returned an error to the breaker → counted as a consecutive
+failure. ~5 transients would OPEN the breaker (~10 s lockout) — strictly WORSE
+than the plain single-attempt gap, because one slow upstream response could lock
+out the user for 10 s.
+
+**Affected files:** `internal/kinozal/client.go` (Fetch/FetchWithHeaders/PostForm),
+`internal/nnmclub/client.go` (4 methods), `internal/rutracker/client.go` (5 methods)
++ each provider's `*_test.go` (nnmclub's `client_test.go` is new). Added
+`maxAttempts=3`/`retryBackoff=500ms` + a `doWithRetry` helper used INSIDE each
+breaker Execute closure.
+
+**Fix:** retry transient failures (network/timeout or 5xx) INSIDE the breaker
+closure, so a recovered transient returns `nil` to the breaker (failure counter
+untouched, breaker stays Closed). Genuine post-retry failures still return one
+error to the breaker — real-outage counting is unchanged. Terminal errors
+(404/403/decode) never retried.
+
+**Verification test/challenge:** per provider, `TestRetriesOnTransient5xx`
+(503-once-then-200 → recovers + asserts `breaker.GetFailures()==0` +
+`GetState()==StateClosed` — the load-bearing proof the transient did NOT trip the
+breaker) + `TestTerminalErrorNotRetried` (404 → 1 attempt, surfaced immediately).
+Falsifiability rehearsed all 3: bypassing the retry → `TestRetriesOnTransient5xx`
+FAILS ("expected transient 503 to be retried into success, got err: <provider>
+upstream 503"); reverted → `ok`. gofmt + go vet clean.
+
+**Fix commit:** (this commit) — completes provider retry-resilience for all 10
+HTTP providers (this 3 + the 7 below). Same undistributed api-go cycle (2.3.31).
+**Forensic anchor:** nezha audit (3-subagent fan-out) of every provider HTTP client.
+
 ## 2026-06-16 — 6 sibling providers shared the tokyotosho single-attempt-no-retry gap (knaben, nyaa, bitsearch, torrentdownloads, gutenberg, flaresolverr)
 
 **Root cause:** an audit of every provider HTTP client (triggered by the

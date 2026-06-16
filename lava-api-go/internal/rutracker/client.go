@@ -198,41 +198,94 @@ func NewClient(base string) *Client {
 	}
 }
 
+// maxAttempts + retryBackoff bound a small retry on TRANSIENT upstream failures
+// (a network/timeout error from http.Do, or a 5xx status). The retry lives
+// INSIDE the breaker's Execute closure so a single slow/flaky upstream is
+// retried BEFORE it ever counts as a breaker failure. Without this, one
+// transient timeout would tick the breaker's consecutive-failure counter, and
+// 5 such transients (MaxFailures) would OPEN the breaker — locking the user out
+// of rutracker for ~10s on what was a single slow request. Terminal errors
+// (4xx, decode failures) are NEVER retried — they will not resolve on a retry
+// and only burn the budget; they DO surface to the breaker as a single genuine
+// failure. Mirrors the tokyotosho transient-vs-terminal classification. The
+// budget is bounded by the caller's ctx — each backoff aborts early if ctx is
+// cancelled/expired.
+const (
+	maxAttempts  = 3
+	retryBackoff = 500 * time.Millisecond
+)
+
+// doWithRetry runs attempt up to maxAttempts times, retrying only while attempt
+// reports the failure was transient. attempt returns (transient, err): err==nil
+// means success (return immediately); transient==true with a non-nil err means
+// "worth retrying"; transient==false means terminal (return the err now). The
+// backoff between attempts is ctx-bounded.
+//
+// Because doWithRetry returns nil whenever a retry ultimately succeeds, the
+// enclosing breaker.Execute sees success and does NOT increment its failure
+// counter — a recovered transient does not move the breaker toward OPEN. Only a
+// genuine (post-retry) failure returns a non-nil error to the breaker, so the
+// breaker's failure-counting for real outages is unchanged.
+func (c *Client) doWithRetry(ctx context.Context, attempt func() (transient bool, err error)) error {
+	var lastErr error
+	for i := 1; i <= maxAttempts; i++ {
+		transient, err := attempt()
+		if err == nil {
+			return nil
+		}
+		lastErr = err
+		if !transient || i == maxAttempts {
+			return err
+		}
+		select {
+		case <-time.After(retryBackoff):
+			// next attempt
+		case <-ctx.Done():
+			return lastErr
+		}
+	}
+	return lastErr
+}
+
 // Fetch performs a GET against base+path with the given cookie value
 // (may be empty for anonymous requests). It returns the response body
 // bytes and the upstream status code. Transient errors (network I/O,
-// 5xx upstream responses) count as breaker-relevant failures.
+// 5xx upstream responses) are retried up to maxAttempts before counting
+// as breaker-relevant failures.
 func (c *Client) Fetch(ctx context.Context, path, cookie string) ([]byte, int, error) {
 	var (
 		body   []byte
 		status int
 	)
 	err := c.breaker.Execute(func() error {
-		req, err := http.NewRequestWithContext(ctx, http.MethodGet, c.base+path, nil)
-		if err != nil {
-			return err
-		}
-		if cookie != "" {
-			req.Header.Set("Cookie", cookie)
-		}
-		resp, err := c.http.Do(req)
-		if err != nil {
-			return err
-		}
-		defer func() { _ = resp.Body.Close() }()
-		b, err := readBodyDecoded(resp)
-		if err != nil {
-			return err
-		}
-		body = b
-		status = resp.StatusCode
-		// Treat 5xx as breaker-relevant errors: a flaky upstream that
-		// returns 502/503/504 should trip the breaker just like a TCP-
-		// level failure would.
-		if resp.StatusCode >= 500 {
-			return fmt.Errorf("rutracker upstream %d", resp.StatusCode)
-		}
-		return nil
+		return c.doWithRetry(ctx, func() (bool, error) {
+			req, err := http.NewRequestWithContext(ctx, http.MethodGet, c.base+path, nil)
+			if err != nil {
+				return false, err
+			}
+			if cookie != "" {
+				req.Header.Set("Cookie", cookie)
+			}
+			resp, err := c.http.Do(req)
+			if err != nil {
+				// Network/timeout — transient; retry before tripping the breaker.
+				return true, err
+			}
+			defer func() { _ = resp.Body.Close() }()
+			b, err := readBodyDecoded(resp)
+			if err != nil {
+				return false, err
+			}
+			body = b
+			status = resp.StatusCode
+			// Treat 5xx as breaker-relevant errors: a flaky upstream that
+			// returns 502/503/504 should trip the breaker just like a TCP-
+			// level failure would — but only after the bounded retry fails.
+			if resp.StatusCode >= 500 {
+				return true, fmt.Errorf("rutracker upstream %d", resp.StatusCode)
+			}
+			return false, nil
+		})
 	})
 	if err != nil {
 		return nil, 0, err
@@ -253,30 +306,32 @@ func (c *Client) FetchWithHeaders(ctx context.Context, path, cookie string) ([]b
 		headers http.Header
 	)
 	err := c.breaker.Execute(func() error {
-		req, err := http.NewRequestWithContext(ctx, http.MethodGet, c.base+path, nil)
-		if err != nil {
-			return err
-		}
-		if cookie != "" {
-			req.Header.Set("Cookie", cookie)
-		}
-		resp, err := c.http.Do(req)
-		if err != nil {
-			return err
-		}
-		defer func() { _ = resp.Body.Close() }()
-		b, err := readBodyDecoded(resp)
-		if err != nil {
-			return err
-		}
-		body = b
-		status = resp.StatusCode
-		headers = resp.Header.Clone()
-		// Treat 5xx as breaker-relevant errors — same policy as Fetch.
-		if resp.StatusCode >= 500 {
-			return fmt.Errorf("rutracker upstream %d", resp.StatusCode)
-		}
-		return nil
+		return c.doWithRetry(ctx, func() (bool, error) {
+			req, err := http.NewRequestWithContext(ctx, http.MethodGet, c.base+path, nil)
+			if err != nil {
+				return false, err
+			}
+			if cookie != "" {
+				req.Header.Set("Cookie", cookie)
+			}
+			resp, err := c.http.Do(req)
+			if err != nil {
+				return true, err
+			}
+			defer func() { _ = resp.Body.Close() }()
+			b, err := readBodyDecoded(resp)
+			if err != nil {
+				return false, err
+			}
+			body = b
+			status = resp.StatusCode
+			headers = resp.Header.Clone()
+			// Treat 5xx as breaker-relevant errors — same policy as Fetch.
+			if resp.StatusCode >= 500 {
+				return true, fmt.Errorf("rutracker upstream %d", resp.StatusCode)
+			}
+			return false, nil
+		})
 	})
 	if err != nil {
 		return nil, 0, nil, err
@@ -298,31 +353,33 @@ func (c *Client) PostFormWithHeaders(ctx context.Context, path string, form url.
 	)
 	encoded := form.Encode()
 	err := c.breaker.Execute(func() error {
-		req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.base+path, strings.NewReader(encoded))
-		if err != nil {
-			return err
-		}
-		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-		if cookie != "" {
-			req.Header.Set("Cookie", cookie)
-		}
-		resp, err := c.http.Do(req)
-		if err != nil {
-			return err
-		}
-		defer func() { _ = resp.Body.Close() }()
-		b, err := readBodyDecoded(resp)
-		if err != nil {
-			return err
-		}
-		body = b
-		status = resp.StatusCode
-		headers = resp.Header.Clone()
-		// Treat 5xx as breaker-relevant errors — same policy as PostForm.
-		if resp.StatusCode >= 500 {
-			return fmt.Errorf("rutracker upstream %d", resp.StatusCode)
-		}
-		return nil
+		return c.doWithRetry(ctx, func() (bool, error) {
+			req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.base+path, strings.NewReader(encoded))
+			if err != nil {
+				return false, err
+			}
+			req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+			if cookie != "" {
+				req.Header.Set("Cookie", cookie)
+			}
+			resp, err := c.http.Do(req)
+			if err != nil {
+				return true, err
+			}
+			defer func() { _ = resp.Body.Close() }()
+			b, err := readBodyDecoded(resp)
+			if err != nil {
+				return false, err
+			}
+			body = b
+			status = resp.StatusCode
+			headers = resp.Header.Clone()
+			// Treat 5xx as breaker-relevant errors — same policy as PostForm.
+			if resp.StatusCode >= 500 {
+				return true, fmt.Errorf("rutracker upstream %d", resp.StatusCode)
+			}
+			return false, nil
+		})
 	})
 	if err != nil {
 		return nil, 0, nil, err
@@ -342,29 +399,31 @@ func (c *Client) GetURL(ctx context.Context, fullURL, cookie string) ([]byte, in
 		headers http.Header
 	)
 	err := c.breaker.Execute(func() error {
-		req, err := http.NewRequestWithContext(ctx, http.MethodGet, fullURL, nil)
-		if err != nil {
-			return err
-		}
-		if cookie != "" {
-			req.Header.Set("Cookie", cookie)
-		}
-		resp, err := c.http.Do(req)
-		if err != nil {
-			return err
-		}
-		defer func() { _ = resp.Body.Close() }()
-		b, err := readBodyDecoded(resp)
-		if err != nil {
-			return err
-		}
-		body = b
-		status = resp.StatusCode
-		headers = resp.Header.Clone()
-		if resp.StatusCode >= 500 {
-			return fmt.Errorf("rutracker upstream %d", resp.StatusCode)
-		}
-		return nil
+		return c.doWithRetry(ctx, func() (bool, error) {
+			req, err := http.NewRequestWithContext(ctx, http.MethodGet, fullURL, nil)
+			if err != nil {
+				return false, err
+			}
+			if cookie != "" {
+				req.Header.Set("Cookie", cookie)
+			}
+			resp, err := c.http.Do(req)
+			if err != nil {
+				return true, err
+			}
+			defer func() { _ = resp.Body.Close() }()
+			b, err := readBodyDecoded(resp)
+			if err != nil {
+				return false, err
+			}
+			body = b
+			status = resp.StatusCode
+			headers = resp.Header.Clone()
+			if resp.StatusCode >= 500 {
+				return true, fmt.Errorf("rutracker upstream %d", resp.StatusCode)
+			}
+			return false, nil
+		})
 	})
 	if err != nil {
 		return nil, 0, nil, err
@@ -388,32 +447,34 @@ func (c *Client) PostForm(ctx context.Context, path string, form url.Values, coo
 	)
 	encoded := form.Encode()
 	err := c.breaker.Execute(func() error {
-		req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.base+path, strings.NewReader(encoded))
-		if err != nil {
-			return err
-		}
-		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-		if cookie != "" {
-			req.Header.Set("Cookie", cookie)
-		}
-		resp, err := c.http.Do(req)
-		if err != nil {
-			return err
-		}
-		defer func() { _ = resp.Body.Close() }()
-		b, err := readBodyDecoded(resp)
-		if err != nil {
-			return err
-		}
-		body = b
-		status = resp.StatusCode
-		// Treat 5xx as breaker-relevant errors for parity with Fetch:
-		// a flaky upstream that returns 502/503/504 should trip the
-		// breaker just like a TCP-level failure would.
-		if resp.StatusCode >= 500 {
-			return fmt.Errorf("rutracker upstream %d", resp.StatusCode)
-		}
-		return nil
+		return c.doWithRetry(ctx, func() (bool, error) {
+			req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.base+path, strings.NewReader(encoded))
+			if err != nil {
+				return false, err
+			}
+			req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+			if cookie != "" {
+				req.Header.Set("Cookie", cookie)
+			}
+			resp, err := c.http.Do(req)
+			if err != nil {
+				return true, err
+			}
+			defer func() { _ = resp.Body.Close() }()
+			b, err := readBodyDecoded(resp)
+			if err != nil {
+				return false, err
+			}
+			body = b
+			status = resp.StatusCode
+			// Treat 5xx as breaker-relevant errors for parity with Fetch:
+			// a flaky upstream that returns 502/503/504 should trip the
+			// breaker just like a TCP-level failure would.
+			if resp.StatusCode >= 500 {
+				return true, fmt.Errorf("rutracker upstream %d", resp.StatusCode)
+			}
+			return false, nil
+		})
 	})
 	if err != nil {
 		return nil, 0, err

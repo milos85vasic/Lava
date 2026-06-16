@@ -19,6 +19,54 @@ import (
 	"golang.org/x/net/html/charset"
 )
 
+// maxAttempts + retryBackoff bound a small retry on TRANSIENT upstream failures
+// (a network/timeout error from http.Do, or a 5xx status). The retry lives
+// INSIDE the breaker's Execute closure so a single slow/flaky upstream is
+// retried BEFORE it ever counts as a breaker failure — without this, one
+// transient timeout would tick the breaker's consecutive-failure counter, and
+// ~5 such transients would OPEN the breaker and lock the user out for ~10s.
+// Terminal errors (4xx, decode failures) are NEVER retried — they will not
+// resolve on a retry and only burn the budget; they DO surface to the breaker
+// as a single genuine failure. Mirrors the tokyotosho transient-vs-terminal
+// classification. The budget is bounded by the caller's ctx — each backoff
+// aborts early if ctx is cancelled/expired.
+const (
+	maxAttempts  = 3
+	retryBackoff = 500 * time.Millisecond
+)
+
+// doWithRetry runs attempt up to maxAttempts times, retrying only while attempt
+// reports the failure was transient. attempt returns (transient, err): err==nil
+// means success (return immediately); transient==true with a non-nil err means
+// "worth retrying"; transient==false means terminal (return the err now). The
+// backoff between attempts is ctx-bounded.
+//
+// Because doWithRetry returns nil whenever a retry ultimately succeeds, the
+// enclosing breaker.Execute sees success and does NOT increment its failure
+// counter — a recovered transient does not move the breaker toward OPEN. Only a
+// genuine (post-retry) failure returns a non-nil error to the breaker, so the
+// breaker's failure-counting for real outages is unchanged.
+func (c *Client) doWithRetry(ctx context.Context, attempt func() (transient bool, err error)) error {
+	var lastErr error
+	for i := 1; i <= maxAttempts; i++ {
+		transient, err := attempt()
+		if err == nil {
+			return nil
+		}
+		lastErr = err
+		if !transient || i == maxAttempts {
+			return err
+		}
+		select {
+		case <-time.After(retryBackoff):
+			// next attempt
+		case <-ctx.Done():
+			return lastErr
+		}
+	}
+	return lastErr
+}
+
 // readBodyDecoded reads resp.Body and transcodes it from the upstream's
 // declared charset to UTF-8. kinozal.tv serves text/html in windows-1251;
 // passing raw bytes to goquery produces mojibake on Cyrillic content.
@@ -84,28 +132,32 @@ func (c *Client) Fetch(ctx context.Context, path, cookie string) ([]byte, int, e
 	var body []byte
 	var status int
 	err := c.breaker.Execute(func() error {
-		req, err := http.NewRequestWithContext(ctx, http.MethodGet, c.base+path, nil)
-		if err != nil {
-			return err
-		}
-		if cookie != "" {
-			req.Header.Set("Cookie", cookie)
-		}
-		resp, err := c.http.Do(req)
-		if err != nil {
-			return err
-		}
-		defer resp.Body.Close()
-		b, err := readBodyDecoded(resp)
-		if err != nil {
-			return err
-		}
-		body = b
-		status = resp.StatusCode
-		if resp.StatusCode >= 500 {
-			return fmt.Errorf("kinozal upstream %d", resp.StatusCode)
-		}
-		return nil
+		return c.doWithRetry(ctx, func() (bool, error) {
+			req, err := http.NewRequestWithContext(ctx, http.MethodGet, c.base+path, nil)
+			if err != nil {
+				return false, err
+			}
+			if cookie != "" {
+				req.Header.Set("Cookie", cookie)
+			}
+			resp, err := c.http.Do(req)
+			if err != nil {
+				// Network/timeout — transient.
+				return true, err
+			}
+			defer resp.Body.Close()
+			b, err := readBodyDecoded(resp)
+			if err != nil {
+				return false, err
+			}
+			body = b
+			status = resp.StatusCode
+			if resp.StatusCode >= 500 {
+				// 5xx is transient.
+				return true, fmt.Errorf("kinozal upstream %d", resp.StatusCode)
+			}
+			return false, nil
+		})
 	})
 	if err != nil {
 		return nil, 0, err
@@ -119,29 +171,31 @@ func (c *Client) FetchWithHeaders(ctx context.Context, path, cookie string) ([]b
 	var status int
 	var headers http.Header
 	err := c.breaker.Execute(func() error {
-		req, err := http.NewRequestWithContext(ctx, http.MethodGet, c.base+path, nil)
-		if err != nil {
-			return err
-		}
-		if cookie != "" {
-			req.Header.Set("Cookie", cookie)
-		}
-		resp, err := c.http.Do(req)
-		if err != nil {
-			return err
-		}
-		defer resp.Body.Close()
-		b, err := readBodyDecoded(resp)
-		if err != nil {
-			return err
-		}
-		body = b
-		status = resp.StatusCode
-		headers = resp.Header.Clone()
-		if resp.StatusCode >= 500 {
-			return fmt.Errorf("kinozal upstream %d", resp.StatusCode)
-		}
-		return nil
+		return c.doWithRetry(ctx, func() (bool, error) {
+			req, err := http.NewRequestWithContext(ctx, http.MethodGet, c.base+path, nil)
+			if err != nil {
+				return false, err
+			}
+			if cookie != "" {
+				req.Header.Set("Cookie", cookie)
+			}
+			resp, err := c.http.Do(req)
+			if err != nil {
+				return true, err
+			}
+			defer resp.Body.Close()
+			b, err := readBodyDecoded(resp)
+			if err != nil {
+				return false, err
+			}
+			body = b
+			status = resp.StatusCode
+			headers = resp.Header.Clone()
+			if resp.StatusCode >= 500 {
+				return true, fmt.Errorf("kinozal upstream %d", resp.StatusCode)
+			}
+			return false, nil
+		})
 	})
 	if err != nil {
 		return nil, 0, nil, err
@@ -156,30 +210,32 @@ func (c *Client) PostForm(ctx context.Context, path string, form url.Values, coo
 	var headers http.Header
 	encoded := form.Encode()
 	err := c.breaker.Execute(func() error {
-		req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.base+path, strings.NewReader(encoded))
-		if err != nil {
-			return err
-		}
-		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-		if cookie != "" {
-			req.Header.Set("Cookie", cookie)
-		}
-		resp, err := c.http.Do(req)
-		if err != nil {
-			return err
-		}
-		defer resp.Body.Close()
-		b, err := readBodyDecoded(resp)
-		if err != nil {
-			return err
-		}
-		body = b
-		status = resp.StatusCode
-		headers = resp.Header.Clone()
-		if resp.StatusCode >= 500 {
-			return fmt.Errorf("kinozal upstream %d", resp.StatusCode)
-		}
-		return nil
+		return c.doWithRetry(ctx, func() (bool, error) {
+			req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.base+path, strings.NewReader(encoded))
+			if err != nil {
+				return false, err
+			}
+			req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+			if cookie != "" {
+				req.Header.Set("Cookie", cookie)
+			}
+			resp, err := c.http.Do(req)
+			if err != nil {
+				return true, err
+			}
+			defer resp.Body.Close()
+			b, err := readBodyDecoded(resp)
+			if err != nil {
+				return false, err
+			}
+			body = b
+			status = resp.StatusCode
+			headers = resp.Header.Clone()
+			if resp.StatusCode >= 500 {
+				return true, fmt.Errorf("kinozal upstream %d", resp.StatusCode)
+			}
+			return false, nil
+		})
 	})
 	if err != nil {
 		return nil, 0, nil, err

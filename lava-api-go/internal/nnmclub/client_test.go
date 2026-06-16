@@ -1,4 +1,4 @@
-package kinozal
+package nnmclub
 
 import (
 	"context"
@@ -88,25 +88,5 @@ func TestTerminalErrorNotRetried(t *testing.T) {
 	}
 	if got := atomic.LoadInt32(&calls); got != 1 {
 		t.Fatalf("upstream hit %d times, want 1 — terminal 404 was retried", got)
-	}
-}
-
-func TestClientFetch(t *testing.T) {
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("hello"))
-	}))
-	defer srv.Close()
-
-	c := NewClient(srv.URL)
-	body, status, err := c.Fetch(context.Background(), "/", "")
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if status != 200 {
-		t.Fatalf("expected 200, got %d", status)
-	}
-	if string(body) != "hello" {
-		t.Fatalf("expected hello, got %s", string(body))
 	}
 }
