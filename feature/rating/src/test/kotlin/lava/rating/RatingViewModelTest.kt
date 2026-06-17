@@ -330,6 +330,64 @@ class RatingViewModelTest {
             )
         }
 
+    // CHALLENGE — dismissing the dialog (tap-outside / swipe-away) MUST behave
+    // exactly like "Ask later": the production reducer routes
+    // `DismissClick -> onAskLaterClick()`, so a dismiss postpones the request
+    // (sets the postponed flag AND resets the launch window) rather than
+    // disabling it forever or leaving it to re-appear on the next launch.
+    // This branch had NO test before LVA (DismissClick was never referenced),
+    // so a change of the `DismissClick -> onAskLaterClick()` arm to
+    // `onNeverAskAgainClick()` (worse UX: user can never rate) or to a no-op
+    // (annoying: dialog reappears every launch) would have shipped unnoticed.
+    /**
+     * Falsifiability rehearsal (PERFORMED 2026-06-17):
+     *   Mutation: in RatingViewModel.perform, change the
+     *             `RatingAction.DismissClick -> onAskLaterClick()` arm to
+     *             `RatingAction.DismissClick -> onNeverAskAgainClick()`.
+     *   Observed: this test FAILED —
+     *             "Dismiss MUST mark the request postponed (route to Ask-later),
+     *              not disable it" (postponed stayed false; disabled flipped true).
+     *   Reverted: yes (git checkout); `git diff` of the production file empty.
+     */
+    @Test
+    fun `DismissClick postpones the request like Ask-later and hides the dialog`() =
+        runTest(dispatcherRule.testDispatcher) {
+            repository.launchCount.value = 0
+            repository.disabled.value = false
+            seedEngagement()
+            buildViewModel()
+
+            viewModel.test(this) {
+                runOnCreate()
+                awaitState() // Hide
+                awaitState() // Show
+
+                viewModel.perform(RatingAction.DismissClick)
+
+                // Postponing resets the launch count to the postpone window (>0),
+                // so the observe use case re-emits Hide.
+                assertEquals(
+                    "after dismissing the dialog MUST be hidden",
+                    RatingRequest.Hide,
+                    awaitState(),
+                )
+                cancelAndIgnoreRemainingItems()
+            }
+
+            assertTrue(
+                "Dismiss MUST reset the launch count to the postpone window (Ask-later behaviour)",
+                repository.launchCount.value > 0,
+            )
+            assertTrue(
+                "Dismiss MUST mark the request postponed (route to Ask-later), not disable it",
+                repository.postponed.value,
+            )
+            assertFalse(
+                "Dismiss MUST NOT disable the rating request (that would deny the user any way to rate)",
+                repository.disabled.value,
+            )
+        }
+
     // CHALLENGE — while disabled the dialog is NEVER shown, even when the launch
     // count is exhausted AND the user is engaged. Negative gate.
     /**
