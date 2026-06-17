@@ -240,6 +240,46 @@ class SearchInputViewModelTest {
         }
 
     // VM-CONTRACT
+    //
+    // Covers the `SuggestClick -> onSubmit(action.suggest.value)` overload,
+    // which had ZERO coverage: every prior submit test drove `SubmitClick`
+    // (the `onSubmit()` overload that reads `state.searchInput.text`).
+    // Tapping a suggestion row is a DISTINCT production path — it searches the
+    // CLICKED suggestion's value, trimmed, NOT whatever the user has typed into
+    // the input field. The load-bearing discrimination assertion: the emitted
+    // OpenSearch query is "debian iso" (the suggest), even though the input
+    // field holds the unrelated "ubuntu". A mutation that routes SuggestClick
+    // through the input-text path (or drops the trim) is caught here.
+    @Test
+    fun SuggestClick_searches_the_clicked_suggest_value_not_the_input_text() =
+        runTest(mainDispatcherRule.testDispatcher) {
+            val vm = createViewModel(testScheduler)
+            // The user onboarded one provider, so the resolved subset is explicit.
+            onboard("archiveorg")
+            var captured: SearchInputSideEffect.OpenSearch? = null
+            vm.test(this) {
+                runOnCreate()
+                // The input field holds something the user typed but did NOT submit.
+                vm.perform(SearchInputAction.InputChanged(TextFieldValue("ubuntu")))
+                // The user instead taps a suggestion row whose value has padding
+                // that the production trim() must strip.
+                vm.perform(SearchInputAction.SuggestClick(Suggest("  debian iso  ")))
+                captured = awaitOpenSearch()
+                cancelAndIgnoreRemainingItems()
+            }
+            // Primary user-visible assertion: the search opens for the CLICKED
+            // suggestion (trimmed), not the unsubmitted input text "ubuntu".
+            assertEquals("debian iso", captured?.filter?.query)
+            // The clicked suggest's value (trimmed) is persisted to history,
+            // and the stale input text "ubuntu" is NOT.
+            assertTrue("clicked suggest must be saved to history", "debian iso" in suggestsRepo.suggests.value)
+            assertTrue("unsubmitted input text must NOT be saved", "ubuntu" !in suggestsRepo.suggests.value)
+            // Bug-2 resolution still applies on this path: a strict subset is
+            // passed explicitly, never collapsed to null.
+            assertEquals(listOf("archiveorg"), captured?.filter?.providerIds)
+        }
+
+    // VM-CONTRACT
     @Test
     fun BackClick_emits_Back_side_effect() =
         runTest(mainDispatcherRule.testDispatcher) {
