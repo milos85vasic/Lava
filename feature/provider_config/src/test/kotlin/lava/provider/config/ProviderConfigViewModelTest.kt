@@ -197,6 +197,79 @@ class ProviderConfigViewModelTest {
         assertEquals(false, row?.enabled)
     }
 
+    /**
+     * AddMirror input-boundary validation — a malformed URL (no http/https
+     * scheme) MUST be rejected at the boundary: the user sees a corrective
+     * ShowToast side effect AND nothing is persisted to the user-mirror DAO.
+     * This is the §6.O closure path for Crashlytics
+     * 39469d3bc00aabf76a86d5d15f2e7f2b (a bare string like "djdnjd" reached
+     * okhttp's URL builder and crashed). No prior test covers AddMirror;
+     * UserMirrorDao.upsert had zero covering tests (codegraph blast-radius).
+     *
+     * Primary assertions are user-visible: the toast text shown to the user
+     * + the persisted DB rows. CHALLENGE per feature/CLAUDE.md classification.
+     *
+     * Falsifiability rehearsal:
+     *   Mutation: remove the scheme guard in the AddMirror handler so the
+     *             malformed URL is persisted —
+     *             `if (!trimmed.startsWith("http://") && ...) { ... return@intent }`
+     *             deleted.
+     *   Observed: this test fails with
+     *             "malformed mirror MUST NOT be persisted — expected:<true>
+     *              but was:<false>" (the DAO now contains the bad row), and
+     *             the side-effect assertion also fails (no toast emitted).
+     *   Reverted: yes.
+     */
+    // CHALLENGE
+    @Test
+    fun `AddMirror rejects URL without scheme - no DAO row and corrective toast`() = runTest(mainDispatcherRule.testDispatcher) {
+        val vm = createViewModel(providerId = "rutracker")
+
+        val sideEffects = mutableListOf<ProviderConfigSideEffect>()
+        val seJob = launch { vm.container.sideEffectFlow.collect { sideEffects.add(it) } }
+        // Subscribe to the state flow so the container's onCreate runs.
+        val stateJob = launch { vm.container.stateFlow.collect { } }
+        try {
+            vm.perform(ProviderConfigAction.AddMirror("djdnjd"))
+
+            // Settle: bounded wait until the corrective toast surfaces.
+            kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default) {
+                val deadline = System.currentTimeMillis() + 5_000
+                while (System.currentTimeMillis() < deadline &&
+                    sideEffects.none { it is ProviderConfigSideEffect.ShowToast }
+                ) {
+                    kotlinx.coroutines.delay(20)
+                }
+            }
+
+            // User-visible outcome #1: NOTHING was persisted for the bad URL.
+            val rows = db.userMirrorDao().loadAll("rutracker")
+            assertTrue(
+                "malformed mirror MUST NOT be persisted — userMirror rows = $rows",
+                rows.none { it.url == "djdnjd" },
+            )
+            assertEquals(
+                "malformed mirror MUST NOT be persisted — expected 0 rows but was $rows",
+                0,
+                rows.size,
+            )
+
+            // User-visible outcome #2: the corrective toast was shown.
+            val toast = sideEffects.filterIsInstance<ProviderConfigSideEffect.ShowToast>().firstOrNull()
+            assertTrue(
+                "user MUST see a corrective toast — side effects = $sideEffects",
+                toast != null,
+            )
+            assertTrue(
+                "toast MUST mention the http/https requirement — was '${toast?.msg}'",
+                toast?.msg?.contains("http://") == true && toast.msg.contains("https://"),
+            )
+        } finally {
+            seJob.cancel()
+            stateJob.cancel()
+        }
+    }
+
     private fun createViewModel(providerId: String): ProviderConfigViewModel {
         val sdk = LavaTrackerSdk(
             registry = DefaultTrackerRegistry(),
