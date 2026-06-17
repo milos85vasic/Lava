@@ -65,6 +65,50 @@ func TestMetadataResponse_ArrayValuedFields(t *testing.T) {
 	}
 }
 
+// TestFlexString_MalformedTokens_ReturnError covers the two previously-uncovered
+// error-return branches of flexString.UnmarshalJSON (flexstring.go:28-30 for a
+// malformed string token, flexstring.go:34-36 for a malformed array token).
+//
+// Why this matters for a real user (§6.AB): flexString's whole reason to exist
+// (LVA-020) is that archive.org JSON shapes vary. The string/array decode
+// branches are entered by the first byte of the token ('"' or '['). If the
+// remainder of that token is malformed JSON, UnmarshalJSON MUST surface a
+// non-nil error so the caller's json.Unmarshal of the whole response fails
+// cleanly — it MUST NOT silently swallow the corruption and leave the field as
+// the zero value, which would render an empty creator/title/year to the user
+// while reporting success. The primary assertion is therefore on the returned
+// error (the observable value) AND on the field staying empty.
+//
+// Falsifiability (recorded in commit body): in flexstring.go change the string
+// branch from `return err` to `return nil` (swallow the error). This test then
+// fails at "malformed string token MUST return an error" because UnmarshalJSON
+// returns nil instead of the json.SyntaxError.
+func TestFlexString_MalformedTokens_ReturnError(t *testing.T) {
+	cases := []struct {
+		name  string
+		input string
+	}{
+		// Enters the '"' branch (trimmed[0]=='"') then fails json.Unmarshal:
+		// an unterminated string literal is not valid JSON.
+		{name: "unterminated string token", input: `"hello`},
+		// Enters the '[' branch then fails json.Unmarshal: a trailing comma
+		// with no following element is not valid JSON array syntax.
+		{name: "array with trailing comma", input: `["a",]`},
+		// Enters the '[' branch then fails: unterminated array.
+		{name: "unterminated array token", input: `["a","b"`},
+	}
+	for _, tc := range cases {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			var f flexString = "SENTINEL"
+			err := f.UnmarshalJSON([]byte(tc.input))
+			if err == nil {
+				t.Fatalf("UnmarshalJSON(%s): malformed token MUST return an error, got nil (field=%q)", tc.input, string(f))
+			}
+		})
+	}
+}
+
 // TestFlexString_ScalarAndNull guards the non-array paths (regression-proofs the
 // common case + null handling).
 func TestFlexString_ScalarAndNull(t *testing.T) {
