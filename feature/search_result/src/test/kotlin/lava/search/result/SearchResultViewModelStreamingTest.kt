@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
+import lava.common.analytics.AnalyticsTracker
 import lava.domain.model.PagingAction
 import lava.domain.model.PagingData
 import lava.domain.usecase.AddSearchHistoryUseCase
@@ -175,9 +176,59 @@ class SearchResultViewModelStreamingTest {
     private lateinit var pagingFake: FakeObserveSearchPagingDataUseCase
     private lateinit var addHistoryFake: FakeAddSearchHistoryUseCase
 
+    /**
+     * Captures §6.AC telemetry so the per-provider-failure recording path can
+     * be asserted. NOT a mock of the SUT (the SUT is the real ViewModel+SDK);
+     * [AnalyticsTracker] is the outermost telemetry boundary — the legitimate
+     * fakeable seam below the SUT.
+     */
+    private class RecordingAnalytics : AnalyticsTracker {
+        data class NonFatal(val throwable: Throwable, val context: Map<String, String>)
+        data class Warning(val message: String, val context: Map<String, String>)
+
+        val nonFatals = mutableListOf<NonFatal>()
+        val warnings = mutableListOf<Warning>()
+
+        override fun event(name: String, params: Map<String, String>) {}
+        override fun setUserId(userId: String?) {}
+        override fun setProperty(key: String, value: String?) {}
+        override fun recordNonFatal(throwable: Throwable, context: Map<String, String>) {
+            nonFatals += NonFatal(throwable, context)
+        }
+        override fun recordWarning(message: String, context: Map<String, String>) {
+            warnings += Warning(message, context)
+        }
+        override fun log(message: String) {}
+    }
+
+    /**
+     * A tracker client whose `search()` THROWS exactly like the real
+     * [lava.tracker.client.ApiBackedTrackerClient.getString] does on a non-2xx
+     * response — `error("API request failed: HTTP <code> for <url>")`. This is
+     * the production failure surface that produced the operator-reported
+     * "Something went wrong" release search bug (2026-06-22).
+     */
+    private class FailingClient(
+        override val descriptor: TrackerDescriptor,
+        private val message: String,
+    ) : TrackerClient {
+        override suspend fun healthCheck(): Boolean = true
+        override fun close() {}
+
+        @Suppress("UNCHECKED_CAST")
+        override fun <T : TrackerFeature> getFeature(featureClass: KClass<T>): T? = when (featureClass) {
+            SearchableTracker::class -> object : SearchableTracker {
+                override suspend fun search(request: SearchRequest, page: Int): SearchResult =
+                    error(message)
+            } as T
+            else -> null
+        }
+    }
+
     private fun createViewModel(
         providerIds: List<String>,
         clients: List<TrackerClient>,
+        analytics: AnalyticsTracker = RecordingAnalytics(),
     ): SearchResultViewModel {
         pagingFake = FakeObserveSearchPagingDataUseCase()
         addHistoryFake = FakeAddSearchHistoryUseCase()
@@ -198,14 +249,7 @@ class SearchResultViewModelStreamingTest {
             toggleFavoriteUseCase = FakeToggleFavoriteUseCase(),
             observeAuthStateUseCase = FakeObserveAuthStateUseCase(),
             observeSettingsUseCase = ObserveSettingsUseCase(TestSettingsRepository()),
-            analytics = object : lava.common.analytics.AnalyticsTracker {
-                override fun event(name: String, params: Map<String, String>) {}
-                override fun setUserId(userId: String?) {}
-                override fun setProperty(key: String, value: String?) {}
-                override fun recordNonFatal(throwable: Throwable, context: Map<String, String>) {}
-                override fun recordWarning(message: String, context: Map<String, String>) {}
-                override fun log(message: String) {}
-            },
+            analytics = analytics,
             sdk = LavaTrackerSdk(registry = registry),
         )
     }
@@ -267,5 +311,61 @@ class SearchResultViewModelStreamingTest {
             // §6.J primary — zero items across all providers MUST render the
             // Empty ("Nothing found") state, never an empty Content list.
             assertEquals(SearchResultContent.Empty, content)
+        }
+
+    // CHALLENGE + §6.AC — regression for the 2026-06-22 operator-reported
+    // release search failure. The api-app search surfaces a non-2xx response
+    // as ApiBackedTrackerClient.getString's `error("API request failed: HTTP
+    // <code> for <url>")`, which the SDK turns into a ProviderFailure. The VM's
+    // collector previously dropped that cause (`-> Unit`), so the user saw
+    // "Something went wrong" with NO captured reason — undiagnosable on a
+    // release build (no Chucker, cause logged nowhere). This asserts the cause
+    // now reaches telemetry with the failing provider + feature context.
+    //
+    // Falsifiability (Sixth Law clause 2): revert the production
+    // `is ProviderFailure -> recordProviderFailure(event)` arm back to `-> Unit`
+    // and this test fails — `analytics.nonFatals` is empty, so
+    // `assertEquals(1, analytics.nonFatals.size)` throws
+    // "a per-provider search failure must be recorded exactly once
+    //  expected:<1> but was:<0>".
+    @Test
+    fun streaming_search_provider_failure_records_http_cause_to_telemetry() =
+        runTest(mainDispatcherRule.testDispatcher) {
+            val analytics = RecordingAnalytics()
+            val httpFailure = "API request failed: HTTP 401 for https://p1.test/v1/p1/search"
+            val vm = createViewModel(
+                providerIds = listOf("p1"),
+                clients = listOf(FailingClient(descriptor("p1"), httpFailure)),
+                analytics = analytics,
+            )
+
+            vm.test(this) {
+                runOnCreate()
+                cancelAndIgnoreRemainingItems()
+            }
+
+            // §6.AC load-bearing — the failing provider's cause (the REAL HTTP
+            // status string from the api client) must reach the non-fatal feed
+            // exactly once, with the provider + feature context, so an operator
+            // can pin the failure mode remotely instead of guessing.
+            assertEquals(
+                "a per-provider search failure must be recorded exactly once",
+                1,
+                analytics.nonFatals.size,
+            )
+            val recorded = analytics.nonFatals.single()
+            assertTrue(
+                "recorded cause must carry the HTTP status from getString, was: ${recorded.throwable.message}",
+                recorded.throwable.message?.contains("HTTP 401") == true,
+            )
+            assertEquals("p1", recorded.context[AnalyticsTracker.Params.PROVIDER])
+            assertEquals("search", recorded.context[AnalyticsTracker.Params.FEATURE])
+
+            // User-visible consequence — the only provider failed, so the user
+            // gets nothing: Empty, never a misleading Content with results.
+            assertEquals(
+                SearchResultContent.Empty,
+                vm.container.stateFlow.value.searchContent,
+            )
         }
 }

@@ -136,7 +136,10 @@ internal class SearchResultViewModel @Inject constructor(
         when (event) {
             is MultiSearchEvent.ProviderStart -> Unit
             is MultiSearchEvent.ProviderResults -> Unit
-            is MultiSearchEvent.ProviderFailure -> Unit
+            is MultiSearchEvent.ProviderFailure -> recordProviderFailure(event)
+            // no-telemetry: a provider lacking TrackerCapability.SEARCH is a
+            // benign terminal state (skipped, not failed) per the
+            // MultiSearchEvent KDoc — not an error worth a non-fatal.
             is MultiSearchEvent.ProviderUnsupported -> Unit
             is MultiSearchEvent.AllProvidersDone -> {
                 // Final snapshot — UI already reflects per-provider
@@ -144,6 +147,44 @@ internal class SearchResultViewModel @Inject constructor(
                 // reduce needed here. handleStreamEnd() in the caller
                 // downgrades to Content/Empty.
             }
+        }
+    }
+
+    /**
+     * §6.AC: record a per-provider streaming-search failure to telemetry.
+     *
+     * This arm was previously `-> Unit`, which DROPPED [MultiSearchEvent.ProviderFailure.cause]
+     * entirely: a per-provider failure (e.g. HTTP 401 / connection-refused
+     * surfaced by `ApiBackedTrackerClient.getString` as
+     * `"API request failed: HTTP <code> for <url>"`) rendered the generic
+     * "Something went wrong" ERROR row with NO captured reason. On a RELEASE
+     * build there is no Chucker and the cause is logged nowhere, so the
+     * failure mode was undiagnosable in the field — exactly the
+     * release-only search failure an operator reported (2026-06-22). Recording
+     * the cause surfaces the precise HTTP status + failing provider in the
+     * operator's Crashlytics non-fatal feed so the root layer can be pinned
+     * from real-user evidence rather than guessed.
+     *
+     * §6.H: the recorded context carries the provider id, the operation, and
+     * the (already user-facing) [MultiSearchEvent.ProviderFailure.reason] — no
+     * credential, token, or cookie. The cause's message is the api-client's
+     * own "HTTP <code> for <url>" string (the url is a LAN/cloud search URL,
+     * not a secret).
+     */
+    private fun recordProviderFailure(event: MultiSearchEvent.ProviderFailure) {
+        val context = mapOf(
+            AnalyticsTracker.Params.FEATURE to "search",
+            AnalyticsTracker.Params.OPERATION to "streamMultiSearch",
+            AnalyticsTracker.Params.SCREEN to "search_result",
+            AnalyticsTracker.Params.PROVIDER to event.providerId,
+            AnalyticsTracker.Params.ERROR_MESSAGE to event.reason,
+        )
+        val cause = event.cause
+        if (cause != null) {
+            cause.rethrowIfCancellation()
+            analytics.recordNonFatal(cause, context)
+        } else {
+            analytics.recordWarning(event.reason, context)
         }
     }
 
