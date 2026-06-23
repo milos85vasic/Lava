@@ -329,8 +329,29 @@ fi
 #    api-app: releases/api-app/$APP_VERSION), resolved in §0.
 # ----------------------------------------------------------------
 RELEASE_DIR="$RELEASE_BASE"
-DEBUG_APK="$(find "$RELEASE_DIR/android-debug" -maxdepth 1 -name '*.apk' 2>/dev/null | head -1 || true)"
-RELEASE_APK="$(find "$RELEASE_DIR/android-release" -maxdepth 1 -name '*.apk' 2>/dev/null | head -1 || true)"
+# §6.J/§6.Z wrong-binary-bluff guard (2026-06-23): select the APK by the EXACT
+# version code being distributed; NEVER silent `find | head -1`. A dir holding
+# APKs for >1 version code (a re-spin's 1068 + 1069) made the old `head -1`
+# upload the lexically-FIRST (stale) APK while every §6.P/§6.Z gate passed —
+# the wrong-binary bluff that shipped 1.3.11-1068 twice (Firebase releases
+# 3r986p5gnfujo + 5h2a747aj9jko). Prefer the version-coded name; if absent,
+# require exactly ONE apk; refuse (FATAL) on ambiguity rather than guess.
+_pick_apk_by_version() {  # $1=dir  $2=buildtype(debug|release)
+    local dir="$1" bt="$2" coded all n
+    coded="$(find "$dir" -maxdepth 1 -name "*-${APP_VERSION_CODE}-${bt}.apk" 2>/dev/null | head -1 || true)"
+    if [[ -n "$coded" ]]; then printf '%s' "$coded"; return 0; fi
+    all="$(find "$dir" -maxdepth 1 -name '*.apk' 2>/dev/null || true)"
+    n="$(printf '%s\n' "$all" | grep -c . || true)"
+    if [[ "$n" -gt 1 ]]; then
+        echo "FATAL §6.Z: $n APKs in $dir but none named *-${APP_VERSION_CODE}-${bt}.apk —" >&2
+        echo "       refusing to guess which to distribute (the wrong-binary bluff guard)." >&2
+        echo "       Remove stale APKs or name the artifact by version code." >&2
+        exit 1
+    fi
+    printf '%s' "$(printf '%s\n' "$all" | head -1)"   # 0 or 1 apk: the not-found check below handles 0
+}
+DEBUG_APK="$(_pick_apk_by_version "$RELEASE_DIR/android-debug" debug)"
+RELEASE_APK="$(_pick_apk_by_version "$RELEASE_DIR/android-release" release)"
 
 if [[ "$MODE" == "debug" || "$MODE" == "both" ]]; then
     if [[ -z "$DEBUG_APK" || ! -f "$DEBUG_APK" ]]; then
