@@ -224,4 +224,48 @@ class EndpointConverterTest {
         } as Endpoint.GoApi
         assertEquals(null, parsed.key)
     }
+
+    // ── Combined full-fidelity round-trip (search-401 root-cause gate) ────────
+    //
+    // GAP CLOSED: every prior GoApi round-trip test isolates ONE additive field
+    // (key alone with default port; platform/storage alone with default port).
+    // None asserts that host + a NON-DEFAULT port + the per-instance key all
+    // survive ONE serialize→deserialize cycle TOGETHER. That combination is the
+    // exact precondition the on-device search path depends on: the search
+    // request only carries the correct `Lava-Auth` header if the key-bearing
+    // GoApi endpoint re-hydrates from `settings.endpoint` with the key intact
+    // ALONGSIDE the right host+port. A `fromJson` reconstruction that dropped
+    // the key specifically when a non-default port is also present (e.g. an
+    // accidental early-return, a key-vs-storage slot swap, or reading the key
+    // from the wrong JSON field) passes every existing single-field test but
+    // 401s the user's real search. This test is the load-bearing gate for that
+    // combined path — the one a real user actually traverses.
+    //
+    // FALSIFIABILITY REHEARSAL (per §6.J / Sixth Law clause 2). Deliberate break
+    // tried while authoring: in EndpointConverter.toJson drop the
+    //   `key?.let { put(KeyKey, it) }` line (so the key is serialized as
+    //   absent → fromJson re-hydrates key=null).
+    // Expected failure: this test fails at `assertEquals("dev-instance-key-XYZ",
+    //   parsed.key)` with expected:<dev-instance-key-XYZ> but was:<null>,
+    //   proving the test would catch a real "search gets no auth key" defect.
+    //   The host/port assertions stay green under that mutation, which is
+    //   exactly why a key-only mutation slips past the host+port-only tests —
+    //   this combined test is the one that catches it. Reverted.
+    @Test
+    fun `roundtrip GoApi preserves host port and key together (on-device search auth)`() {
+        val original = Endpoint.GoApi(
+            host = "10.0.0.42",
+            port = 9443,
+            key = "dev-instance-key-XYZ",
+        )
+        val json = with(EndpointConverter) { original.toJson() }
+        val parsed = with(EndpointConverter) { fromJson(json) } as Endpoint.GoApi
+
+        // Primary assertion on the user-visible routable state: the exact host,
+        // the exact non-default port, AND the exact key all survive together.
+        assertEquals(original, parsed)
+        assertEquals("10.0.0.42", parsed.host)
+        assertEquals(9443, parsed.port)
+        assertEquals("dev-instance-key-XYZ", parsed.key)
+    }
 }
