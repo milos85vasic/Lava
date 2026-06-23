@@ -1,4 +1,32 @@
 # Changelog
+## Lava-Android-1.3.11-1070 — 2026-06-23 (Clean re-spin of 1.3.11 — ships the right binary through the fixed distributor)
+
+**Previous published:** Lava-Android-1.3.11-1069 (corrected binary built, but the
+1069 distribute published the WRONG binary because the old `firebase-distribute.sh`
+APK picker used `find … | head -1` and uploaded the lexically-first stale APK in the
+directory — the wrong-binary saga). That picker bug is now fixed (commit `134d0180`:
+`_pick_apk_by_version` matches `*-<code>-<bt>.apk` and refuses on ambiguity), so the
+distributor now ships the version-matched binary. `last-version-debug` advanced to
+1069, so §6.P forbids re-publishing 1069 — 1070 is the clean re-spin of the SAME
+1.3.11 content, distributed through the now-correct picker. The user-facing version
+name is unchanged (still 1.3.11); only the build code and the rotated auth material
+change. Release identity: **1.3.11 (1070)**.
+
+What the binary carries (the intended 1.3.11 content, now actually shipped):
+
+- **Search no longer dead-ends on failure.** When a multi-provider search stream
+  fails (every selected provider errors / the whole request fails), the results
+  screen shows an explicit **Error state with a Retry action** instead of the
+  misleading "Nothing found" empty state (commit `cfe838bc`).
+- **Search failures are now captured to telemetry.** Per-provider streaming-search
+  failures that were previously dropped silently are recorded as §6.AC non-fatal
+  telemetry events (commit `922ecbca`).
+- **Correct-binary distributor.** The wrong-binary distribute bug is fixed (`134d0180`),
+  so 1070 ships the exact binary built for code 1070 — not a stale neighbour.
+- **Rotated auth pepper.** A fresh `LAVA_AUTH_OBFUSCATION_PEPPER` is embedded and the
+  `android-1.3.11-1070` client identity is appended to the allowlist (append-only,
+  36 active clients — no existing install is forced to upgrade).
+
 ## Lava-Android-1.3.11-1069 — 2026-06-23 (Corrected re-spin of 1.3.11 — ships the right binary)
 
 **Previous published:** Lava-Android-1.3.11-1068.

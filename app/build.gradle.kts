@@ -50,13 +50,18 @@ android {
     defaultConfig {
         applicationId = "digital.vasic.lava.client"
         // §6.Y re-spin: 1068 distribute (Firebase 3r986p5gnfujo) published the
-        // WRONG (stale, pre-pepper, pre-fix) client debug binary and advanced
-        // last-version-debug→1068, so §6.P forbids re-publishing 1068. 1069 is a
-        // corrected re-spin of the SAME 1.3.11 content (search Error+Retry fix
-        // cfe838bc + §6.AC telemetry + rotated pepper). versionName is kept at
+        // WRONG (stale, pre-pepper, pre-fix) client debug binary via the old
+        // `find … | head -1` APK picker; that picker bug is fixed in 134d0180
+        // (_pick_apk_by_version matches *-<code>-<bt>.apk, refuses on ambiguity).
+        // The corrected re-spin advanced last-version-debug→1069, so §6.P forbids
+        // re-publishing 1069. 1070 is the clean re-spin of the SAME 1.3.11 content
+        // (search Error+Retry fix cfe838bc + §6.AC telemetry 922ecbca) distributed
+        // through the now-fixed picker so the version-matched binary actually ships.
+        // A fresh LAVA_AUTH pepper + android-1.3.11-1070 client identity are rotated
+        // in (Phase-1 Gate 4 requires a never-reused pepper). versionName is kept at
         // 1.3.11 deliberately: the user-facing release identity is unchanged; only
-        // the binary that ships under it is corrected. Release identity: 1.3.11 (1069).
-        versionCode = 1069
+        // the binary that ships under it is corrected. Release identity: 1.3.11 (1070).
+        versionCode = 1070
         versionName = "1.3.11"
         // SP-3a Step 6 (2026-04-30): wire Hilt + Compose UI test infra so the
         // 8 Challenge Tests at app/src/androidTest/kotlin/lava/app/challenges/
