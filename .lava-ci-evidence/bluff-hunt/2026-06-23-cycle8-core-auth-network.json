@@ -1,0 +1,54 @@
+{
+  "hunt_date": "2026-06-23",
+  "cycle": "cycle8-core-auth-network",
+  "session_context": "Cycle 8 §6.N bluff hunt: core auth/network/models/work JVM tests — layer not yet hunted this session. Stream safety: only mutated files in core/models, core/auth/impl, core/work/impl (forbidden zones avoided). Zero commits/distributes/bumps.",
+  "scope_restriction": "core/auth/, core/models/, core/work/ only. core/network/impl excluded (touched by concurrent H1 fix stream). lava-api-go excluded. app/feature excluded.",
+  "summary": "3 genuine / 0 bluffs",
+  "targets": [
+    {
+      "target_index": 1,
+      "production_file": "core/models/src/main/kotlin/lava/models/settings/HostUtils.kt",
+      "test_file": "core/models/src/test/kotlin/lava/models/settings/HostUtilsTest.kt",
+      "test_class": "HostUtilsTest",
+      "behavior_guaranteed": "isLocalHost() classifies 172.16.x.x–172.31.x.x as local (RFC-1918 172.16/12 block). Used to select HTTP vs HTTPS for LAN proxy connections — misclassification silently breaks LAN proxy routing for any device with a 172.16–172.31 network.",
+      "mutation": "Changed `ints[1] in 16..31` to `ints[1] in 16..30` in HostUtils.kt line 50, making 172.31.x.x no longer classified as local.",
+      "gradle_task": ":core:models:test --tests *HostUtilsTest*",
+      "observed_failure": "HostUtilsTest > 172_16_through_172_31 is local FAILED\n    java.lang.AssertionError at HostUtilsTest.kt:48\n\n15 tests completed, 1 failed\n\nBUILD FAILED in 24s",
+      "verdict": "GENUINE",
+      "reverted": true,
+      "revert_command": "git checkout -- core/models/src/main/kotlin/lava/models/settings/HostUtils.kt",
+      "re_run_after_revert": "15 tests completed, 0 failed — BUILD SUCCESSFUL in 12s"
+    },
+    {
+      "target_index": 2,
+      "production_file": "core/auth/impl/src/main/kotlin/lava/auth/impl/AuthServiceImpl.kt",
+      "test_file": "core/auth/impl/src/test/kotlin/lava/auth/impl/AuthServiceImplLoginTest.kt",
+      "test_class": "AuthServiceImplLoginTest",
+      "behavior_guaranteed": "login() maps AuthResponseDto.WrongCredits → AuthResult.WrongCredits (carrying any captcha through the DTO→domain mapping), and does NOT persist an account. If this branch were to return Success instead, a user who enters wrong credentials would appear logged in with no account stored — causing silent auth inconsistency and user-visible downstream failures.",
+      "mutation": "Changed the `is AuthResponseDto.WrongCredits` branch in AuthServiceImpl.login() to return `AuthResult.Success` instead of `AuthResult.WrongCredits(dto.captcha.toCaptcha())`.",
+      "gradle_task": ":core:auth:impl:testDebugUnitTest --tests *AuthServiceImplLoginTest*",
+      "observed_failure": "AuthServiceImplLoginTest > login WrongCredits carries the captcha through the DTO mapping FAILED\n    java.lang.ClassCastException at AuthServiceImplLoginTest.kt:101\n\nAuthServiceImplLoginTest > login WrongCredits maps to WrongCredits without persisting an account FAILED\n    java.lang.AssertionError at AuthServiceImplLoginTest.kt:86\n\n8 tests completed, 2 failed\n\nBUILD FAILED in 15s",
+      "verdict": "GENUINE",
+      "reverted": true,
+      "revert_command": "git checkout -- core/auth/impl/src/main/kotlin/lava/auth/impl/AuthServiceImpl.kt",
+      "re_run_after_revert": "8 tests completed, 0 failed — BUILD SUCCESSFUL in 18s"
+    },
+    {
+      "target_index": 3,
+      "production_file": "core/work/impl/src/main/kotlin/lava/work/impl/WorkBackgroundService.kt",
+      "test_file": "core/work/impl/src/test/kotlin/lava/work/impl/SyncPeriodIntervalsTest.kt",
+      "test_class": "SyncPeriodIntervalsTest",
+      "behavior_guaranteed": "SyncPeriod.DAY.flexIntervalMillis == 6.hours (exactly). Also: flex <= repeat for every periodic SyncPeriod. WorkManager silently clamps flex > repeat to the full period, collapsing the intended tail-window to 'run anytime', degrading the user's sync schedule silently.",
+      "mutation": "Changed `SyncPeriod.DAY -> 6.hours` to `SyncPeriod.DAY -> 2.days` in the flexIntervalMillis extension getter in WorkBackgroundService.kt (the exact historical regression this test was written to pin — flex 6.days→2.days > repeat 1.day).",
+      "gradle_task": ":core:work:impl:testDebugUnitTest --tests *SyncPeriodIntervalsTest*",
+      "observed_failure": "SyncPeriodIntervalsTest > DAY sync flex is six hours, not six days FAILED\n    java.lang.AssertionError at SyncPeriodIntervalsTest.kt:62\n\nSyncPeriodIntervalsTest > flex interval never exceeds repeat interval for any periodic SyncPeriod FAILED\n    java.lang.AssertionError at SyncPeriodIntervalsTest.kt:46\n\n3 tests completed, 2 failed\n\nBUILD FAILED in 17s",
+      "verdict": "GENUINE",
+      "reverted": true,
+      "revert_command": "git checkout -- core/work/impl/src/main/kotlin/lava/work/impl/WorkBackgroundService.kt",
+      "re_run_after_revert": "3 tests completed, 0 failed — BUILD SUCCESSFUL in 15s"
+    }
+  ],
+  "bluffs_found": 0,
+  "genuine_count": 3,
+  "notes": "All three hunted tests are genuine anti-bluff tests. Each caught the production mutation within the targeted behavior with no false negatives. No bluffs discovered in this layer (core/models, core/auth/impl, core/work/impl). Files mutated one at a time; each reverted with single-file git checkout before the next mutation was applied. Production state restored to clean HEAD after all three rounds."
+}
