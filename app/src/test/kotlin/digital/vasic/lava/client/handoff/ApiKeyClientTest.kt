@@ -8,6 +8,7 @@ import android.database.Cursor
 import android.database.MatrixCursor
 import android.net.Uri
 import androidx.test.core.app.ApplicationProvider
+import lava.common.analytics.AnalyticsTracker
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
@@ -47,6 +48,20 @@ class ApiKeyClientTest {
     private val testAuthority = "digital.vasic.lava.api.dev.keyprovider"
     private val context: Context get() = ApplicationProvider.getApplicationContext()
 
+    // §6.AC boundary stub: telemetry side-effects are irrelevant in this unit
+    // test scope; the SUT still calls recordWarning() on the SecurityException /
+    // generic-Exception paths — using a no-op here is NOT mocking the SUT, it is
+    // stubbing the external telemetry boundary per the §6.AC opt-out pattern.
+    // no-telemetry: test scope; Robolectric Log.w() captures the calls instead.
+    private val noOpAnalytics = object : AnalyticsTracker {
+        override fun event(name: String, params: Map<String, String>) = Unit
+        override fun setUserId(userId: String?) = Unit
+        override fun setProperty(key: String, value: String?) = Unit
+        override fun recordNonFatal(throwable: Throwable, context: Map<String, String>) = Unit
+        override fun recordWarning(message: String, context: Map<String, String>) = Unit
+        override fun log(message: String) = Unit
+    }
+
     // CHALLENGE — primary assertion on the returned ApiHandoff value (user-visible
     // outcome: the client successfully read the running API app's key + port).
     @Test
@@ -56,7 +71,7 @@ class ApiKeyClientTest {
             FakeKeyProvider(key = "my-test-key", port = 9443),
         )
 
-        val client = ApiKeyClient(context, testAuthority)
+        val client = ApiKeyClient(context, testAuthority, noOpAnalytics)
         val handoff = client.read()
 
         assertNotNull("ApiKeyClient must return non-null when provider is present", handoff)
@@ -70,7 +85,7 @@ class ApiKeyClientTest {
     fun absent_provider_returns_null() {
         // No provider registered for this authority → query returns null
         val unknownAuthority = "digital.vasic.lava.api.dev.keyprovider.absent"
-        val client = ApiKeyClient(context, unknownAuthority)
+        val client = ApiKeyClient(context, unknownAuthority, noOpAnalytics)
         val handoff = client.read()
         assertNull("ApiKeyClient must return null when provider is absent", handoff)
     }
@@ -83,7 +98,7 @@ class ApiKeyClientTest {
             FakeKeyProvider(key = null, port = null),
         )
 
-        val client = ApiKeyClient(context, "digital.vasic.lava.api.dev.keyprovider.empty")
+        val client = ApiKeyClient(context, "digital.vasic.lava.api.dev.keyprovider.empty", noOpAnalytics)
         val handoff = client.read()
         assertNull("ApiKeyClient must return null when cursor is empty", handoff)
     }
