@@ -1,0 +1,21 @@
+{
+  "incident": "api-app 0.2.11-17 RELEASE channel shipped a stale versionCode-16 binary",
+  "date": "2026-06-23",
+  "class": "wrong-binary distribute (§6.Z) — stale build output, distinct from the 1.3.11-1068 picker bug",
+  "what_shipped": {
+    "channel": "firebase-app-distribution-api-app release (digital.vasic.lava.api)",
+    "intended": "0.2.11 (17) with the ApiEngineService FGS non-fatal telemetry",
+    "actual": "0.2.11 (16) — versionCode 16, sha 019eb1812ecc..., byte-identical to the prior 16 release; NO FGS telemetry",
+    "firebase_release": "00m6ja0b4evpg (the same release object as 0.2.11-16)",
+    "impact": "LOW — only the FGS-budget-exhaustion diagnostic non-fatal is absent on the api-app release channel; client debug+release + api-app debug shipped correctly with the full telemetry"
+  },
+  "root_cause": "the first 1.3.11-1071 Android rebuild FAILED at :app:uploadCrashlyticsMappingFileRelease (transient UnknownHostException to firebasecrashlyticssymbols.googleapis.com) BEFORE :api-app:assembleRelease finished packaging. :api-app:clean was NOT in the rebuild, so the release output stayed at the 1070-cycle's versionCode-16 APK. The subsequent type-fix rebuild was :app-only, so the stale api-app release output was never refreshed. It was staged as lava-api-app-0.2.11-17-release.apk (filename 17) but its manifest said 16.",
+  "why_gates_missed_it": "firebase-distribute.sh _pick_apk_by_version matches the FILENAME (*-17-release.apk), not the APK's actual manifest versionCode. §6.P checks build.gradle's versionCode (17) > last-distributed (16) — also filename/config level, not the bytes. So a correctly-NAMED but stale-CONTENT APK passed every gate.",
+  "detection": "post-distribute anti-bluff verification: aapt2 dump badging on each distributed binary revealed api-app-17-release.apk versionCode='16'.",
+  "remediation": {
+    "mechanical": "firebase-distribute.sh now has a §6.Z content-versionCode guard (_assert_apk_versioncode) that aapt2-dumps the picked APK and FATALs if its actual versionCode != APP_VERSION_CODE. This catches the stale-content class the filename picker cannot.",
+    "corrective_ship": "api-app bumped to 0.2.11-18, CLEAN-rebuilt (:api-app:clean), aapt-verified versionCode 18, re-distributed (debug+release) — supersedes the wrong 17 release. Shipped alongside client 1.3.11-1072 (the H1 search fix).",
+    "process": "clean rebuilds (:module:clean) for distribute artifacts + aapt-verify EVERY staged APK's actual versionCode before distribute (no longer filename-trust)."
+  },
+  "honest_note": "found by the conductor's own post-distribute verification, not by a user report — the anti-bluff aapt sweep is exactly why this surfaced in minutes instead of as a field complaint."
+}

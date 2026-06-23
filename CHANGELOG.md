@@ -1,4 +1,24 @@
 # Changelog
+## Lava-Android-1.3.11-1072 — 2026-06-23 (THE SEARCH FIX — the on-device 401 root cause, fixed)
+
+**Previous published:** Lava-Android-1.3.11-1071.
+
+This fixes the long-standing **"Something went wrong" search failure** at its root. The app sends the
+per-install API key to the on-device engine under the `Lava-Auth` header — but the build-time auth
+interceptor was attaching its *own* credential under the **same header name** using a replace (not add),
+and because interceptors run last, it **overwrote the per-install key** with the wrong credential → the
+on-device engine rejected the request (401) → "Something went wrong".
+
+- **Fix:** the build-time interceptor now attaches its credential **only when the request doesn't already
+  carry one**, so the per-install key reaches the engine intact. Proven by a wire-level test that asserts
+  the exact header the server receives; provably safe for both the on-device and remote-API paths.
+- Ships on top of 1071's comprehensive §6.AC search telemetry (which is how the root cause was confirmed).
+- Auth rotated `android-1.3.11-1072` (fresh pepper, append-only). §6.Z C00 cold-start GREEN on real KVM.
+
+> Note: end-to-end on-device search success is best confirmed by testing this build against your engine
+> (see `docs/runbooks/2026-06-23-testing-client-against-network-api.md`); the wire-level test + the
+> telemetry are the pre-ship evidence.
+
 ## Lava-Android-1.3.11-1071 — 2026-06-23 (Comprehensive search-failure telemetry — so broken searches finally tell us why)
 
 **Previous published:** Lava-Android-1.3.11-1070.
@@ -100,6 +120,15 @@ What the correct binary carries (the changes 1068 was supposed to ship but didn'
   providers surface in the operator dashboard instead of vanishing (commit `922ecbca`).
 
 Paired with on-device API app 0.2.11-16 (same embedded-API retry resilience) and lava-api-go 2.3.31-2331.
+
+## Lava-API-App-0.2.11-18 — 2026-06-23 (Corrective clean rebuild — FGS telemetry on both variants)
+
+**Previous published:** Lava-API-App-0.2.11-17 (whose RELEASE channel shipped a stale versionCode-16
+binary because that rebuild failed mid-package; incident
+`.lava-ci-evidence/sixth-law-incidents/2026-06-23-apiapp-17-release-stale-binary.json`). 18 is the
+clean-rebuilt corrective ship carrying the §6.AC `ApiEngineService` FGS-budget non-fatal telemetry on
+BOTH debug and release. `firebase-distribute.sh` now aapt-verifies the picked APK's actual versionCode
+so a stale-content binary can no longer pass the filename picker.
 
 ## Lava-API-App-0.2.11-17 — 2026-06-23 (Foreground-service failure telemetry)
 

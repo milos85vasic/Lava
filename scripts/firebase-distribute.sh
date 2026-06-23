@@ -353,6 +353,39 @@ _pick_apk_by_version() {  # $1=dir  $2=buildtype(debug|release)
 DEBUG_APK="$(_pick_apk_by_version "$RELEASE_DIR/android-debug" debug)"
 RELEASE_APK="$(_pick_apk_by_version "$RELEASE_DIR/android-release" release)"
 
+# §6.Z content-versionCode guard (added 2026-06-23 after Lava-API-App 0.2.11-17's
+# RELEASE channel shipped a STALE versionCode-16 binary: the rebuild FAILED mid-
+# package (transient crashlytics-DNS) so the release output stayed at the prior
+# cycle's 16 APK; the file was named *-17-release.apk but its binary manifest said
+# 16, and the filename-only picker above could not see the mismatch). Assert the
+# picked APK's ACTUAL versionCode (from its binary manifest via aapt2) == the
+# expected APP_VERSION_CODE before upload. The picker matches the name; THIS gate
+# matches the bytes.
+_aapt2() {
+    local sdk="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-$HOME/Library/Android/sdk}}"
+    ls "$sdk"/build-tools/*/aapt2 2>/dev/null | sort -V | tail -1
+}
+_assert_apk_versioncode() {  # $1=apk
+    local apk="$1" aapt actual
+    [[ -z "$apk" || ! -f "$apk" ]] && return 0
+    aapt="$(_aapt2)"
+    if [[ -z "$aapt" ]]; then
+        echo "WARN §6.Z: aapt2 not found (no Android SDK build-tools at ANDROID_SDK_ROOT/ANDROID_HOME) —" >&2
+        echo "          skipping the APK content-versionCode check for $(basename "$apk"). Install build-tools to enable this guard." >&2
+        return 0
+    fi
+    actual="$("$aapt" dump badging "$apk" 2>/dev/null | grep -oE "versionCode='[0-9]+'" | head -1 | grep -oE '[0-9]+')"
+    if [[ -n "$actual" && "$actual" != "$APP_VERSION_CODE" ]]; then
+        echo "FATAL §6.Z: $(basename "$apk") has ACTUAL versionCode $actual but this distribute is for $APP_VERSION_CODE." >&2
+        echo "       The filename says $APP_VERSION_CODE but the binary manifest says $actual — a stale/mis-built APK (the wrong-binary class)." >&2
+        echo "       Rebuild the artifact cleanly (./gradlew :<module>:clean assembleDebug assembleRelease) and re-stage." >&2
+        exit 1
+    fi
+    echo "    §6.Z content-check: $(basename "$apk") actual versionCode $actual == $APP_VERSION_CODE"
+}
+if [[ "$MODE" == "debug"   || "$MODE" == "both" ]]; then _assert_apk_versioncode "$DEBUG_APK"; fi
+if [[ "$MODE" == "release" || "$MODE" == "both" ]]; then _assert_apk_versioncode "$RELEASE_APK"; fi
+
 if [[ "$MODE" == "debug" || "$MODE" == "both" ]]; then
     if [[ -z "$DEBUG_APK" || ! -f "$DEBUG_APK" ]]; then
         echo "FATAL: debug APK not found under $RELEASE_DIR/android-debug/" >&2

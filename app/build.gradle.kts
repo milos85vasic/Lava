@@ -49,28 +49,18 @@ android {
 
     defaultConfig {
         applicationId = "digital.vasic.lava.client"
-        // §6.Y re-spin: 1068 distribute (Firebase 3r986p5gnfujo) published the
-        // WRONG (stale, pre-pepper, pre-fix) client debug binary via the old
-        // `find … | head -1` APK picker; that picker bug is fixed in 134d0180
-        // (_pick_apk_by_version matches *-<code>-<bt>.apk, refuses on ambiguity).
-        // The corrected re-spin advanced last-version-debug→1069, so §6.P forbids
-        // re-publishing 1069. 1070 is the clean re-spin of the SAME 1.3.11 content
-        // (search Error+Retry fix cfe838bc + §6.AC telemetry 922ecbca) distributed
-        // through the now-fixed picker so the version-matched binary actually ships.
-        // A fresh LAVA_AUTH pepper + android-1.3.11-1070 client identity are rotated
-        // in (Phase-1 Gate 4 requires a never-reused pepper). versionName is kept at
-        // 1.3.11 deliberately: the user-facing release identity is unchanged; only
-        // the binary that ships under it is corrected. Release identity: 1.3.11 (1070).
-        // §6.Y post-distribute bump: 1.3.11 (1070) was distributed (debug 7dhneaj2he79g
-        // + release 2tjq0j3ab9e2g) with the §6.Z C00 device gate GREEN (thinker KVM,
-        // boot 33s, all_passed:true). 1071 ships comprehensive §6.AC search-failure
-        // telemetry: ApiBackedTrackerClient throws a typed ApiHttpException (status/url/
-        // method) → SearchResultViewModel.recordProviderFailure records a Crashlytics
-        // non-fatal with http_status/request_url/http_method/base_url_host, plus the
-        // ApiKeyClient handoff-key reader + onboarding telemetry. Auth rotated to
-        // android-1.3.11-1071 (fresh pepper, 37-client append-only). versionName held
-        // (diagnostics-only, no user-visible UI change beyond the already-shipped Error+Retry).
-        versionCode = 1071
+        // Release history (most recent first): 1070 = clean re-spin + §6.AC search
+        // telemetry groundwork; 1071 = comprehensive §6.AC non-fatal telemetry
+        // (distributed debug 0r7c809nc89gg + release 6bl8iu7jvq81g, §6.Z C00 GREEN).
+        // 1072 = THE SEARCH-401 FIX (H1): AuthInterceptor previously overwrote the
+        // per-install handoff key with the build-time LAVA_AUTH UUID (same "Lava-Auth"
+        // header name, OkHttp .header() replace, interceptor fires last) → on-device
+        // 401 → "Something went wrong". Fixed: the interceptor attaches the build-time
+        // UUID ONLY IF the request does not already carry a Lava-Auth header, so the
+        // handoff key survives to the wire (wire-level MockWebServer test, provably safe
+        // for both on-device + remote-API paths). Auth rotated android-1.3.11-1072
+        // (fresh pepper, append-only). versionName held (same 1.3.11 user-facing release).
+        versionCode = 1072
         versionName = "1.3.11"
         // SP-3a Step 6 (2026-04-30): wire Hilt + Compose UI test infra so the
         // 8 Challenge Tests at app/src/androidTest/kotlin/lava/app/challenges/

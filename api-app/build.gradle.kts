@@ -116,11 +116,13 @@ android {
         // build-derived integrity fingerprint, so the generated-config form §6.R
         // permits (computed from source, never hand-typed).
         buildConfigField("String", "LAVA_API_SOURCE_HASH", "\"$lavaApiSourceHash\"")
-        // §6.Y post-distribute bump: 0.2.11 (16) was distributed (debug 7esmk60v7ki0o
-        // + release 00m6ja0b4evpg). 17 ships §6.AC telemetry: ApiEngineService now records
-        // a Crashlytics non-fatal on ForegroundServiceStartNotAllowedException (the FGS
-        // budget-exhaustion path) instead of swallowing it. versionName held (diagnostics-only).
-        versionCode = 17
+        // 17 added §6.AC telemetry (ApiEngineService FGS-budget non-fatal). The 17
+        // RELEASE distribute shipped a STALE versionCode-16 binary (the rebuild failed
+        // mid-package; incident 2026-06-23-apiapp-17-release-stale-binary.json). 18 is the
+        // CLEAN-rebuilt corrective ship carrying the FGS telemetry on BOTH variants;
+        // firebase-distribute.sh now aapt-verifies the picked APK's actual versionCode.
+        // versionName held (diagnostics-only).
+        versionCode = 18
         versionName = "0.2.11"
         // EncryptedSharedPreferences (androidx.security-crypto) requires API 23+
         // — the per-install auth-key store ([ApiKeyStore]) relies on it. The

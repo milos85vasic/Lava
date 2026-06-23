@@ -57,6 +57,21 @@ internal class AuthInterceptor @Inject constructor(
                 info = HKDF_INFO,
                 output = keyBytes,
             )
+            // Only attach the build-time UUID when the request does NOT already
+            // carry a per-endpoint Lava-Auth key.  ApiBackedTrackerClient.withAuth()
+            // sets that header (with the on-device handoff key) BEFORE the request
+            // reaches interceptors; overwriting it here with the build-time UUID was
+            // the root-cause of the weeks-long search-401 regression (H1 / 1072).
+            //
+            // Safety matrix:
+            //  • on-device api-app path  — withAuth() already set the handoff key
+            //    → interceptor sees it present → skips → key survives to the wire ✓
+            //  • remote cloud-API path   — no pre-set Lava-Auth header exists
+            //    → interceptor sees null → attaches build-time UUID as before ✓
+            if (chain.request().header(fieldName) != null) {
+                return chain.proceed(chain.request())
+            }
+
             uuidBytes = AesGcm.decrypt(blob, keyBytes, nonce)
             val headerValue = Base64.getEncoder().encodeToString(uuidBytes)
 
