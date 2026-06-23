@@ -1,5 +1,11 @@
 # Lava — Bug Fix Audit Trail
 
+> **Revision §11.4.44 (2026-06-23):** appended five fixes from the 2026-06-23
+> session — H1 search-401 (AuthInterceptor handoff-key overwrite), api-app-17
+> stale-binary (§6.Z wrong-binary saga), ApiHttpException type regression, 
+> ApiKeyClientTest compile break, and firebase-distribute SIGPIPE. Each entry
+> cites its real commit SHA verified against `git show --stat`.
+
 > **Revision §11.4.44 (2026-06-08):** appended the 2026-06-08 session's six
 > real defect fixes — the four §6.E capability-honesty bluffs (kinozal /
 > nnmclub / rutor magnet wire-through + gutenberg `TORRENT_DOWNLOAD` drop),
@@ -1926,3 +1932,137 @@ in the search cycle (it masked the real grant path).
 merge-verified; `ApiKeyProvider.attachInfoForTest` now reads the variant-aware `BuildConfig.API_KEY_PERMISSION`.
 **Affected:** `app/build.gradle.kts`, `api-app/build.gradle.kts`, both `AndroidManifest.xml`, `ApiKeyProvider.kt`.
 **Fix commit:** `4026756c`. Analysis: `docs/issues/2026-06-14-readapikey-permission-variant-analysis.md`.
+
+---
+
+## 2026-06-23 — H1 search-401: AuthInterceptor overwrote per-install handoff key
+
+**Root cause:** `AuthInterceptor` in `core/network/impl/` attached the build-time
+`LAVA_AUTH` UUID using OkHttp's `.header(fieldName, value)` (replace semantics).
+Interceptors fire last in the OkHttp chain, so it unconditionally overwrote the
+per-install handoff key that `ApiKeyClient` had already placed on the request under
+the same `Lava-Auth` header name. The engine received the wrong (build-time) credential
+and returned HTTP 401, which the app surfaced as "Something went wrong" on every search.
+
+**Affected files:** `core/network/impl/src/main/kotlin/lava/network/impl/AuthInterceptor.kt`
+
+**Fix:** Added an only-if-absent guard — the interceptor attaches the build-time UUID
+only when the request does not already carry the `Lava-Auth` header, so the per-install
+handoff key survives to the wire unchanged.
+
+**Verification test/challenge:** `core/network/impl/.../AuthInterceptorHandoffKeyTest.kt`
+(JVM, 5 tests, falsifiability-proven: reverting the guard caused
+`whenPreExistingHandoffKeyIsPresent_interceptorMustNotOverwrite` to fail with
+`expected:<[HANDOFF-KEY-B64]> but was:<[<build-time-UUID-B64>]>`).
+Challenge45 (`C45`) exercises the full on-device search-auth flow end-to-end.
+
+**Fix commit:** `b58ef78b`
+
+**Forensic anchor:** `docs/issues/2026-06-23-search-401-rootcause-deepening.md`;
+incident surfaced during operator testing of every search returning "Something went wrong".
+
+---
+
+## 2026-06-23 — api-app-17-release stale-binary (§6.Z wrong-binary)
+
+**Root cause:** The 1071 rebuild failed mid-package at `:app:uploadCrashlyticsMappingFileRelease`
+(transient Crashlytics DNS error) before `:api-app:assembleRelease` finished. `:api-app:clean`
+was not run before the next attempt, so the leftover output file was named `*-17-*` (matching
+the new version name) but its embedded `android:versionCode` still declared `16` from the
+previous build. The `firebase-distribute.sh` filename-only picker matched the filename and
+distributed the stale binary; the api-app release channel shipped versionCode 16 as release 17.
+
+**Affected files:** `scripts/firebase-distribute.sh`
+
+**Fix:** (1) api-app rebuilt clean (`./gradlew :api-app:clean :api-app:assembleRelease`) and
+distributed as version 18 (corrective). (2) `firebase-distribute.sh` hardened with a
+`_assert_apk_versioncode` guard that `aapt2`-dumps the picked APK's manifest and fatals if
+its actual `versionCode` differs from `APP_VERSION_CODE` — the filename matches the name,
+this gate matches the bytes.
+
+**Verification test/challenge:** `tests/firebase/test_assert_apk_versioncode.sh` (hermetic;
+exercises the new aapt content-guard with a positive case and a stale-versionCode negative case).
+
+**Fix commit:** `b58ef78b`
+
+**Forensic anchor:** `.lava-ci-evidence/sixth-law-incidents/2026-06-23-apiapp-17-release-stale-binary.json`;
+discovered by the conductor's own post-distribute aapt sweep, not a user report.
+
+---
+
+## 2026-06-23 — ApiHttpException type regression (IOException vs IllegalStateException)
+
+**Root cause:** The §6.AC telemetry commit (`68b6e650`) introduced `ApiHttpException` as a
+typed HTTP-error wrapper extending `IOException`. Four existing tests in `core:tracker:client`
+asserted the historical contract that HTTP errors from `ApiBackedTrackerClient` extend
+`IllegalStateException`. The `IOException` supertype broke those assertions, causing 4 test
+failures surfaced during the integration test run after the telemetry commit landed.
+
+**Affected files:** `core/tracker/client/src/main/kotlin/lava/tracker/client/ApiBackedTrackerClient.kt`
+
+**Fix:** Changed `ApiHttpException` to extend `IllegalStateException` instead of `IOException`,
+preserving the original HTTP-error contract while retaining the structured
+`statusCode`/`requestUrl`/`httpMethod` context fields needed for §6.AC telemetry enrichment.
+
+**Verification test/challenge:** The 4 pre-existing `core:tracker:client` tests asserting the
+`IllegalStateException` HTTP-error contract; all 4 GREEN in the 860/0 full JVM suite attested
+at commit `a6d8cbf7`. Regression surfaced and fixed within the same session (caught by
+integration testing before distribute).
+
+**Fix commit:** `68b6e650`
+
+**Forensic anchor:** Caught during the full `./gradlew testDebugUnitTest` run after the §6.AC
+telemetry commit; not a user report.
+
+---
+
+## 2026-06-23 — ApiKeyClientTest compile break (§6.AC analytics-param addition)
+
+**Root cause:** The §6.AC telemetry commit (`68b6e650`) added an `analytics: AnalyticsTracker`
+constructor parameter to `ApiKeyClient`. `ApiKeyClientTest` was not updated in the same commit,
+so it stopped compiling. The break was not caught by the session's targeted test runs (which
+built `androidTest` APKs, not `:app` JVM unit tests) and was only surfaced by the subsequent
+full-suite attestation run.
+
+**Affected files:** `app/src/test/kotlin/lava/vasic/lava/client/handoff/ApiKeyClientTest.kt`
+
+**Fix:** Passed a no-op `AnalyticsTracker` boundary stub to `ApiKeyClient`'s constructor in the
+test. Telemetry is an outermost boundary per §6.AC; no SUT was mocked and no production code
+was touched. The test's 3 existing key-read assertions were byte-unchanged and remain GREEN.
+
+**Verification test/challenge:** `ApiKeyClientTest` (3 tests); GREEN in the 860/0 full Android
+JVM suite attestation at commit `a6d8cbf7`
+(`.lava-ci-evidence/test-runs/2026-06-23-android-jvm-suite.md`).
+
+**Fix commit:** `a6d8cbf7`
+
+**Forensic anchor:** Surfaced by the comprehensive full-suite attestation run that followed
+targeted C44/C45 on-device validation; not a user report.
+
+---
+
+## 2026-06-23 — firebase-distribute SIGPIPE on head-7 truncation (process discipline)
+
+**Root cause:** A `head -7` truncation inserted in the distribute loop to limit output
+caused `SIGPIPE` to kill the upstream distribute process before it could write the
+`last-version-debug` pointer file. The first client-debug distribute of version 1072 appeared
+to succeed visually (Firebase upload completed) but left the pointer unwritten; the subsequent
+`--release-only` stage saw a stale pointer and blocked on the §6.AA release-after-debug-confirm
+gate.
+
+**Affected files:** `scripts/firebase-distribute.sh` (process discipline note; the `head -7`
+was removed from the distribute loop output path).
+
+**Fix:** Removed the `head -7` truncation from the distribute pipeline so the process
+completes cleanly before the shell closes the write end of the pipe. Pointer files are now
+written atomically after the full distribute subprocess exits.
+
+**Verification test/challenge:** The §6.Z aapt content-guard (`_assert_apk_versioncode`)
+confirmed all 4 binaries of the 1072 cycle distributed correctly after the fix
+(`.lava-ci-evidence/.../2026-06-23-C00-1072-PASS.json`). No dedicated hermetic test added
+(the SIGPIPE is a shell process-discipline issue, not a logic branch in the script).
+
+**Fix commit:** `5dd7ae06`
+
+**Forensic anchor:** Observed in distribute loop output during the 1072 all-4 distribute cycle;
+re-run of client-debug distribute recorded correct `last-version-debug 1072` pointer.

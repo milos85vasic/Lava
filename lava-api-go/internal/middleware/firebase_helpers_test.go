@@ -147,6 +147,68 @@ func TestFirebaseTelemetry_PanicNonError_RecordsAndRepanics(t *testing.T) {
 	}
 }
 
+// TestFirebaseTelemetry_PanicPath_HttpUrlAttrIsPathOnly: defense-in-depth §6.H
+// hardening — the "http.url" telemetry attribute passed to RecordNonFatal on the
+// panic path MUST contain only the URL path, never the query string.
+//
+// Architecture note: today auth credentials arrive via HTTP headers only, so no
+// live credential can reach "http.url". This test locks down the attr value so
+// that property can never silently regress if a future caller passes a credential
+// in a query param.
+//
+// FALSIFIABILITY (Bluff-Audit):
+//
+//	Mutation:  changed `c.Request.URL.Path` back to `c.Request.URL.RequestURI()`
+//	           in the panic-recovery block of firebase.go (line ~58).
+//	Observed:  FAIL — `http.url` attr = "/secret?q=secret-looking-value"; want
+//	           path only, got query string "q=secret-looking-value"
+//	Reverted:  yes — production code restored to `c.Request.URL.Path` before commit
+func TestFirebaseTelemetry_PanicPath_HttpUrlAttrIsPathOnly(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	client := &recordingClient{configured: true}
+	r := gin.New()
+	// No inner recovery middleware so the panic unwinds into FirebaseTelemetry's
+	// own deferred recover, which is exactly the path that records "http.url".
+	r.Use(FirebaseTelemetry(client))
+	r.GET("/secret", func(_ *gin.Context) {
+		panic(errors.New("deliberate panic"))
+	})
+
+	// The request URL carries a query param that looks like a credential.
+	req := httptest.NewRequest(http.MethodGet, "/secret?q=secret-looking-value", nil)
+	w := httptest.NewRecorder()
+
+	// Absorb the re-panic (standing in for the outer recovery layer).
+	func() {
+		defer func() { recover() }() //nolint:errcheck // intentional absorb
+		r.ServeHTTP(w, req)
+	}()
+
+	// Primary assertion: exactly one non-fatal was recorded.
+	if got := client.nonFatals.Load(); got != 1 {
+		t.Fatalf("panic path must record 1 non-fatal; got %d", got)
+	}
+
+	// Primary assertion on user-visible state: the "http.url" attr MUST NOT
+	// contain the query string.
+	raw := client.lastAttrs.Load()
+	if raw == nil {
+		t.Fatal("RecordNonFatal was not called with an attrs map")
+	}
+	attrs := raw.(map[string]string)
+
+	urlAttr, ok := attrs["http.url"]
+	if !ok {
+		t.Fatal(`telemetry attrs missing "http.url" key`)
+	}
+	if strings.Contains(urlAttr, "secret-looking-value") {
+		t.Errorf(`"http.url" attr leaks query string: got %q; want path-only ("/secret")`, urlAttr)
+	}
+	if urlAttr != "/secret" {
+		t.Errorf(`"http.url" attr = %q; want "/secret"`, urlAttr)
+	}
+}
+
 // TestFirebaseTelemetry_5xxWithoutHandlerError_SynthesizesCause: a handler that
 // returns 500 WITHOUT calling c.Error() leaves gin.Errors empty. The middleware
 // MUST synthesize a cause ("http 500 on GET /path") so the recorded non-fatal is

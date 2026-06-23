@@ -55,7 +55,7 @@ func FirebaseTelemetry(client firebase.Client) gin.HandlerFunc {
 				_ = client.RecordNonFatal(c.Request.Context(), err, map[string]string{
 					"http.method":   c.Request.Method,
 					"http.path":     c.FullPath(),
-					"http.url":      c.Request.URL.RequestURI(),
+					"http.url":      c.Request.URL.Path, // path only — query string stripped (§6.H defense-in-depth)
 					"event.type":    "panic",
 					"event.elapsed": time.Since(start).String(),
 				})

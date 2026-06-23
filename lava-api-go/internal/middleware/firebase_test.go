@@ -25,6 +25,7 @@ type recordingClient struct {
 	events     atomic.Int32
 	nonFatals  atomic.Int32
 	lastErrMsg atomic.Value
+	lastAttrs  atomic.Value // stores map[string]string from the most recent RecordNonFatal call
 	configured bool
 }
 
@@ -33,10 +34,18 @@ func (r *recordingClient) LogEvent(_ context.Context, _ string, _ map[string]str
 	return nil
 }
 
-func (r *recordingClient) RecordNonFatal(_ context.Context, err error, _ map[string]string) error {
+func (r *recordingClient) RecordNonFatal(_ context.Context, err error, attrs map[string]string) error {
 	r.nonFatals.Add(1)
 	if err != nil {
 		r.lastErrMsg.Store(err.Error())
+	}
+	if attrs != nil {
+		// Store a copy so callers can assert on individual keys without a data race.
+		cp := make(map[string]string, len(attrs))
+		for k, v := range attrs {
+			cp[k] = v
+		}
+		r.lastAttrs.Store(cp)
 	}
 	return nil
 }
