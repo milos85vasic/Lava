@@ -1,0 +1,26 @@
+[
+  {
+    "test_file": "core/domain/src/test/kotlin/lava/domain/usecase/VisitTopicUseCaseTest.kt",
+    "production_target": "core/domain/src/main/kotlin/lava/domain/usecase/VisitTopicUseCase.kt — VisitTopicUseCase.invoke() persists the topic into Visited history via visitedRepository.add(topic, providerId)",
+    "mutation": "Removed the `visitedRepository.add(topic, providerId)` call from VisitTopicUseCase.invoke(), leaving only favoritesRepository.markVisited(topic.id).",
+    "observed_failure": "java.lang.AssertionError: expected:<[123]> but was:<[]> (test `visiting a topic records it in history and marks it visited`); java.lang.AssertionError: expected:<2> but was:<0> (test `visiting the same topic twice records both visits (no swallowing)`). 2 of 2 tests FAILED.",
+    "reverted": true,
+    "verdict": "GENUINE"
+  },
+  {
+    "test_file": "core/domain/src/test/kotlin/lava/domain/usecase/GetTopicUseCaseTest.kt",
+    "production_target": "core/domain/src/main/kotlin/lava/domain/usecase/GetTopicUseCase.kt — GetTopicUseCase.invoke() chains `.also { visitTopicUseCase(it, providerId) }` so opening a topic persists it into Visited history (LVA-070 provider threading).",
+    "mutation": "Dropped the `.also { visitTopicUseCase(it, providerId) }` side-effect; invoke() now returns `topicService.getTopicPage(id)` directly with no visited-history write.",
+    "observed_failure": "java.lang.AssertionError: expected:<[99]> but was:<[]> (test `opening a topic persists it into Visited history and marks it visited`). The two return-value tests (`returns the topic page carrying the correct magnet link`, `honest null magnet when the topic has none`) correctly stayed GREEN — the mutation only dropped the side-effect, not the returned page, so the test suite localized the failure to exactly the persisted-state assertion. 1 of 3 tests FAILED.",
+    "reverted": true,
+    "verdict": "GENUINE"
+  },
+  {
+    "test_file": "core/domain/src/test/kotlin/lava/domain/usecase/EnrichFilterUseCaseTest.kt",
+    "production_target": "core/domain/src/main/kotlin/lava/domain/usecase/EnrichFilterUseCase.kt — EnrichFilterUseCaseImpl.invoke() re-resolves each filter category id to a fresh forum Category via `filter.categories?.map { getCategoryUseCase(it.id) }`.",
+    "mutation": "Replaced the re-resolution with a pass-through: `filter.copy(categories = filter.categories)` (stale display names not refreshed; cache-miss refresh branch in GetCategoryUseCase never invoked).",
+    "observed_failure": "java.lang.AssertionError: expected:<[Category(id=10, name=Movies), Category(id=20, name=Music)]> but was:<[Category(id=10, name=OLD-Movies), Category(id=20, name=OLD-Music)]> (test `enriches each filter category to the fresh forum category`); expected:<[Category(id=7, name=Books)]> but was:<[Category(id=7, name=stale)]> (test `preserves all non-category filter fields verbatim`); expected:<[Category(id=42, name=Anime)]> but was:<[Category(id=42, name=placeholder)]> (test `resolves a category missing from cache by refreshing the forum`). 3 tests FAILED.",
+    "reverted": true,
+    "verdict": "GENUINE"
+  }
+]
