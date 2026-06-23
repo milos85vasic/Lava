@@ -1,0 +1,76 @@
+{
+  "hunt_id": "2026-06-23-cycle7-feature-viewmodels",
+  "date": "2026-06-23",
+  "protocol": "§6.N anti-bluff hunt — feature-module ViewModel tests",
+  "operator_mandate": "§6.L 68th invocation standing order",
+  "scope": "feature/favorites, feature/credentials, feature/provider_config",
+  "targets": [
+    {
+      "target_index": 1,
+      "production_file": "feature/favorites/src/main/kotlin/lava/favorites/FavoritesViewModel.kt",
+      "test_file": "feature/favorites/src/test/kotlin/lava/favorites/FavoritesViewModelTest.kt",
+      "test_name": "non-empty favorites render the list",
+      "behavior_guaranteed": "When the favorites repository emits a non-empty list, state transitions to FavoritesState.FavoritesList with the correct items",
+      "mutation_description": "In observeFavorites(), replaced the items.isEmpty() conditional branch so it ALWAYS emits FavoritesState.Empty regardless of list content — production lines 50-55",
+      "mutation_diff": "reduce { if (items.isEmpty()) Empty(...) else FavoritesList(items,...) }  →  reduce { Empty(isSyncing = syncing) }",
+      "gradle_command": "nice -n 10 ./gradlew :feature:favorites:testDebugUnitTest --tests 'lava.favorites.FavoritesViewModelTest.non-empty favorites render the list' --no-daemon -q",
+      "result_with_mutation": "FAILED",
+      "verbatim_failure": "app.cash.turbine.TurbineAssertionError at channel.kt:89\n    Caused by: app.cash.turbine.TurbineTimeoutCancellationException at FavoritesViewModelTest.kt:318\n        Caused by: app.cash.turbine.TurbineTimeoutCancellationException at channel.kt:123\n1 test completed, 1 failed",
+      "failure_class": "Turbine await-item timeout — awaitItemMatching { it is FavoritesState.FavoritesList } never received a matching state because the mutation made the flow emit only Empty; no FavoritesList was ever produced",
+      "reverted": true,
+      "revert_command": "git checkout -- feature/favorites/src/main/kotlin/lava/favorites/FavoritesViewModel.kt",
+      "result_after_revert": "EXIT_CODE=0 (GREEN)",
+      "verdict": "GENUINE — test provably catches the production break it claims to cover"
+    },
+    {
+      "target_index": 2,
+      "production_file": "feature/credentials/src/main/kotlin/lava/feature/credentials/CredentialsViewModel.kt",
+      "test_file": "feature/credentials/src/test/kotlin/lava/feature/credentials/CredentialsViewModelTest.kt",
+      "test_name": "select provider updates selectedProvider",
+      "behavior_guaranteed": "When SelectProvider(providerId='rutracker') action is dispatched, state.selectedProvider transitions to 'rutracker'",
+      "mutation_description": "In onAction(SelectProvider), replaced action.providerId with the hardcoded literal 'wrong-provider' in the reduce call — production line 35",
+      "mutation_diff": "reduce { state.copy(selectedProvider = action.providerId) }  →  reduce { state.copy(selectedProvider = \"wrong-provider\") }",
+      "gradle_command": "nice -n 10 ./gradlew :feature:credentials:testDebugUnitTest --tests 'lava.feature.credentials.CredentialsViewModelTest.select provider updates selectedProvider' --no-daemon -q",
+      "result_with_mutation": "FAILED",
+      "verbatim_failure": "java.lang.AssertionError: SelectProvider did not update selectedProvider: expected \"rutracker\" but the screen state never carried it (last observed=wrong-provider). Underlying await failed: No value produced in 10s\n\tat lava.feature.credentials.CredentialsViewModelTest$select provider updates selectedProvider$1$1.invokeSuspend(CredentialsViewModelTest.kt:217)",
+      "failure_class": "Bounded await-until-condition timeout with last-observed diagnostic — test uses a 10s await loop checking for selectedProvider == 'rutracker'; the mutation caused every emitted state to carry 'wrong-provider', so the condition was never satisfied and the test surfaced the last observed wrong value in the assertion message",
+      "reverted": true,
+      "revert_command": "git checkout -- feature/credentials/src/main/kotlin/lava/feature/credentials/CredentialsViewModel.kt",
+      "result_after_revert": "EXIT_CODE=0 (GREEN)",
+      "verdict": "GENUINE — test provably catches the production break it claims to cover"
+    },
+    {
+      "target_index": 3,
+      "production_file": "feature/provider_config/src/main/kotlin/lava/provider/config/ProviderConfigViewModel.kt",
+      "test_file": "feature/provider_config/src/test/kotlin/lava/provider/config/ProviderConfigViewModelTest.kt",
+      "test_name": "AddMirror rejects URL without scheme - no DAO row and corrective toast",
+      "behavior_guaranteed": "When AddMirror('djdnjd') is dispatched, no UserMirrorEntity row is inserted in the DAO AND a ShowToast side effect carrying 'http://' and 'https://' is posted",
+      "mutation_description": "Removed the scheme-guard block entirely (lines 135-155): the !trimmed.startsWith('http://') && !trimmed.startsWith('https://') early-return block was replaced with an if(false){} dead branch, allowing schemeless URLs to proceed to userMirrorDao.upsert()",
+      "mutation_diff": "if (!trimmed.startsWith(\"http://\") && !trimmed.startsWith(\"https://\")) { postSideEffect(...); return@intent }  →  @Suppress(\"ConstantConditionIf\") if (false) { return@intent }",
+      "gradle_command": "nice -n 10 ./gradlew :feature:provider_config:testDebugUnitTest --tests 'lava.provider.config.ProviderConfigViewModelTest.AddMirror rejects URL without scheme - no DAO row and corrective toast' --no-daemon -q",
+      "result_with_mutation": "FAILED",
+      "verbatim_failure": "java.lang.AssertionError: malformed mirror MUST NOT be persisted — userMirror rows = [UserMirrorEntity(trackerId=rutracker, url=djdnjd, priority=1, protocol=HTTPS, addedAt=1782243557907)]\n\tat lava.provider.config.ProviderConfigViewModelTest$AddMirror rejects URL without scheme - no DAO row and corrective toast$1.invokeSuspend(ProviderConfigViewModelTest.kt:247)",
+      "failure_class": "DAO-state assertion on the real Room in-memory database — the mutation allowed 'djdnjd' to be inserted as a UserMirrorEntity; the test's direct DAO query returned a non-empty list, so the 'rows must be empty' assertion fired with the persisted entity as evidence",
+      "reverted": true,
+      "revert_command": "git checkout -- feature/provider_config/src/main/kotlin/lava/provider/config/ProviderConfigViewModel.kt",
+      "result_after_revert": "EXIT_CODE=0 (GREEN)",
+      "verdict": "GENUINE — test provably catches the production break it claims to cover"
+    }
+  ],
+  "summary": {
+    "total_targets": 3,
+    "genuine": 3,
+    "bluffs_found": 0,
+    "all_mutations_applied_and_run": true,
+    "all_reverted": true,
+    "all_green_after_revert": true
+  },
+  "file_safety_compliance": {
+    "allowed_modules_only": true,
+    "revert_method": "git checkout -- <single-file> (never git checkout . or stash)",
+    "one_file_at_a_time": true,
+    "no_commits_created": true,
+    "no_distribution": true,
+    "no_version_bump": true
+  }
+}

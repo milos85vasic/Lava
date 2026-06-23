@@ -1,0 +1,10 @@
+{
+  "all_passed": true,
+  "finished_at": "2026-06-23T22:21:04+03:00",
+  "gating": true,
+  "rows": [
+    {"avd": "default","api_level": 34,"form_factor": "phone","boot_seconds": 31.17685641,"test_class": "lava.app.challenges.Challenge45InterceptorHandoffKeySurvivesTest","test_passed": true,"test_seconds": 38.84894393,"concurrent": 1}
+  ],
+  "started_at": "2026-06-23T22:19:51+03:00",
+  "_note": "On-device PASS (containerized KVM api34, podman, /dev/kvm). SCOPE: debug-APK run — the LavaAuthGenerated blob may be empty so the AuthInterceptor early-exits (no-op); C45-in-debug proves the on-device search-auth FLOW (handoff key reaches the wire, 200) but does NOT isolate the H1 interceptor-overwrite. The DEFINITIVE H1 falsifiability proof is the JVM unit test AuthInterceptorHandoffKeyTest (non-empty blob → interceptor active → guard-removed → ComparisonFailure expected:<HANDOFF-KEY> but was:<3q2+7xEiM0RVZneImaq7zA==> = base64 build-time UUID; reverted → PASS). thinker went offline after this run."
+}
