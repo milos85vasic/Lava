@@ -122,7 +122,7 @@ android {
         // CLEAN-rebuilt corrective ship carrying the FGS telemetry on BOTH variants;
         // firebase-distribute.sh now aapt-verifies the picked APK's actual versionCode.
         // versionName held (diagnostics-only).
-        versionCode = 18
+        versionCode = 19
         versionName = "0.2.11"
         // EncryptedSharedPreferences (androidx.security-crypto) requires API 23+
         // — the per-install auth-key store ([ApiKeyStore]) relies on it. The

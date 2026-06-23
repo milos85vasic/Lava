@@ -60,7 +60,7 @@ android {
         // handoff key survives to the wire (wire-level MockWebServer test, provably safe
         // for both on-device + remote-API paths). Auth rotated android-1.3.11-1072
         // (fresh pepper, append-only). versionName held (same 1.3.11 user-facing release).
-        versionCode = 1072
+        versionCode = 1073
         versionName = "1.3.11"
         // SP-3a Step 6 (2026-04-30): wire Hilt + Compose UI test infra so the
         // 8 Challenge Tests at app/src/androidTest/kotlin/lava/app/challenges/
