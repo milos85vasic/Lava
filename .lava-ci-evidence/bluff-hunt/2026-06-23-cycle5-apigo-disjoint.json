@@ -1,0 +1,66 @@
+{
+  "hunt_id": "2026-06-23-cycle5-apigo-disjoint",
+  "date": "2026-06-23",
+  "cycle": 5,
+  "trigger": "operator anti-bluff-mandate invocation (§6.N.1.1 first invocation of the day — full hunt)",
+  "scope": "lava-api-go Go packages disjoint from cycle4 (allowed: internal/discovery, internal/config, internal/version, internal/server, internal/middleware)",
+  "procedure": "§6.N / Seventh Law clause 5 — mutate production code, run targeted test, record FAIL or SURVIVED=bluff, revert, re-run GREEN",
+  "gomaxprocs": 2,
+  "targets": [
+    {
+      "target": 1,
+      "production_file": "lava-api-go/internal/version/version.go",
+      "test_file": "lava-api-go/internal/version/version_test.go",
+      "test_name": "TestCodeIsPositive",
+      "behavior_guaranteed": "Code constant must be a positive integer (> 0); a zero or negative value would signal an untagged or misconfigured release binary",
+      "mutation": "Changed `Code = 2332` to `Code = 0`",
+      "mutation_rationale": "Code = 0 is the zero value — would slip through if the test only checked Code != 2332 (an anti-pattern) rather than Code > 0",
+      "run_command": "GOMAXPROCS=2 go test ./internal/version/... -run TestCodeIsPositive -count=1 -v",
+      "result": "FAIL",
+      "verbatim_fail_message": "version_test.go:18: Code = 0, want positive\n--- FAIL: TestCodeIsPositive (0.00s)",
+      "verdict": "GENUINE",
+      "reverted": true,
+      "revert_command": "git checkout -- internal/version/version.go",
+      "rerun_after_revert": "PASS"
+    },
+    {
+      "target": 2,
+      "production_file": "lava-api-go/internal/middleware/firebase.go",
+      "test_file": "lava-api-go/internal/middleware/first_error_test.go",
+      "test_name": "TestFirstError_ReturnsFirstConcrete",
+      "behavior_guaranteed": "firstError() returns the FIRST non-nil concrete error from gin.Errors, not the last; mis-labelling a Firebase non-fatal with the wrong error identity would make telemetry misleading",
+      "mutation": "Changed early-return `return e.Err` inside loop to collect `last = e.Err` and `return last` after loop — turning first-wins into last-wins",
+      "mutation_rationale": "The last-wins variant produces the same result for single-error slices (the most common case) and for all-nil slices; only the multi-error case distinguishes them",
+      "run_command": "GOMAXPROCS=2 go test ./internal/middleware/... -run TestFirstError -count=1 -v",
+      "result": "FAIL",
+      "verbatim_fail_message": "first_error_test.go:25: firstError: got boom-2, want first boom-1\n--- FAIL: TestFirstError_ReturnsFirstConcrete (0.00s)",
+      "verdict": "GENUINE",
+      "reverted": true,
+      "revert_command": "git checkout -- internal/middleware/firebase.go",
+      "rerun_after_revert": "PASS (3/3 TestFirstError tests)"
+    },
+    {
+      "target": 3,
+      "production_file": "lava-api-go/internal/discovery/mdns.go",
+      "test_file": "lava-api-go/internal/discovery/announce_unit_test.go",
+      "test_name": "TestAnnounce_DefaultFillThenRegister (primary); also caught TestAnnounce_RejectsOutOfRangePort",
+      "behavior_guaranteed": "Announce() fills port=0 with DefaultPort (8443) before passing to upstream; passing port=0 raw causes upstream validation to reject with 'Port 0 out of range (1..65535)'",
+      "mutation": "Changed `if port == 0 {` to `if port < 0 {` — so port=0 is no longer treated as 'use default', flowing through to upstream which rejects it; simultaneously port=-1 is now incorrectly filled with DefaultPort, silencing the expected out-of-range error",
+      "mutation_rationale": "The off-by-one in the fill guard (`< 0` vs `== 0`) is a realistic typo that passes compilation but breaks both the positive default-fill path and the negative-port rejection path",
+      "run_command": "GOMAXPROCS=2 go test ./internal/discovery/... -run TestAnnounce -count=1 -v",
+      "result": "FAIL",
+      "verbatim_fail_message": "announce_unit_test.go:68: Announce with default instance+port: mdns: Announcement.Port 0 out of range (1..65535)\n--- FAIL: TestAnnounce_DefaultFillThenRegister (0.00s)\nannounce_unit_test.go:50: Announce with port=-1 returned nil error; expected range refusal\n--- FAIL: TestAnnounce_RejectsOutOfRangePort (0.00s)",
+      "verdict": "GENUINE",
+      "reverted": true,
+      "revert_command": "git checkout -- internal/discovery/mdns.go",
+      "rerun_after_revert": "PASS (7/7 TestAnnounce tests)"
+    }
+  ],
+  "summary": {
+    "total_targets": 3,
+    "genuine": 3,
+    "bluffs": 0,
+    "issues_opened": []
+  },
+  "notes": "All three mutations targeted the production code path the test claims to cover (not unrelated branches). Each revert confirmed by re-running the test suite to GREEN. No files were left mutated. No version bumps, commits, or distributes performed."
+}
