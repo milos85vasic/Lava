@@ -1,0 +1,37 @@
+[
+  {
+    "test_file": "core/common/src/test/kotlin/lava/common/torrent/MagnetLinkValidatorTest.kt",
+    "production_target": "core/common/src/main/kotlin/lava/common/torrent/MagnetLinkValidator.kt :: MagnetLinkValidator.normalizeBtih() / companion BASE32_LEN",
+    "mutation": "Changed companion `const val BASE32_LEN = 32` to `31`, so a real 32-char RFC-4648 base32 btih hash no longer matches the base32 branch in normalizeBtih() and is rejected as 'neither 40-char hex nor 32-char base32'.",
+    "run_command": "GRADLE_USER_HOME=/Volumes/T7/Gradle ./gradlew :core:common:test --tests 'lava.common.torrent.MagnetLinkValidatorTest' --max-workers=2 --console=plain",
+    "result_under_mutation": "BUILD FAILED — 4 of 23 tests failed (validBase32Magnet_decodesTo40HexChars, base32AndEquivalentHex_produceSameInfoHash, uppercaseUrnBtihPrefix_withBase32Hash_isAccepted, lowercaseBase32Magnet_decodesToSameHexAsUppercase). Failure localized to exactly the base32-decode path the mutation broke; the 19 hex-path tests passed.",
+    "observed_failure": "java.lang.AssertionError: expected valid base32 magnet, got: btih hash 'MFRGGZDFMZTWQ2LKNNWG23TPOBYXE43U' is neither 40-char hex nor 32-char base32\n\tat org.junit.Assert.fail(Assert.java:89)\n\tat org.junit.Assert.assertTrue(Assert.java:42)\n\tat lava.common.torrent.MagnetLinkValidatorTest.validBase32Magnet_decodesTo40HexChars(MagnetLinkValidatorTest.kt:46)",
+    "reverted": true,
+    "post_revert_result": "BUILD SUCCESSFUL — 23/23 PASS",
+    "verdict": "GENUINE"
+  },
+  {
+    "test_file": "core/models/src/test/kotlin/lava/models/settings/HostUtilsTest.kt",
+    "production_target": "core/models/src/main/kotlin/lava/models/settings/HostUtils.kt :: String.isLocalHost() RFC-1918 172.16.0.0/12 range check",
+    "mutation": "Changed `if (ints[0] == 172 && ints[1] in 16..31) return true` to `in 16..30`, so 172.31.x.x is no longer classified as a private/local address (a real classifier regression that would route 172.31.x.x LAN traffic over the public/HTTPS path).",
+    "run_command": "GRADLE_USER_HOME=/Volumes/T7/Gradle ./gradlew :core:models:test --tests 'lava.models.settings.HostUtilsTest' --max-workers=2 --console=plain",
+    "result_under_mutation": "BUILD FAILED — 1 of 15 tests failed (`172_16_through_172_31 is local`, at HostUtilsTest.kt:48 = assertTrue(\"172.31.255.255\".isLocalHost())). Failure localized to exactly the upper-boundary case the mutation removed.",
+    "observed_failure": "<testcase name=\"172_16_through_172_31 is local\" classname=\"lava.models.settings.HostUtilsTest\">\n  <failure message=\"java.lang.AssertionError\" type=\"java.lang.AssertionError\">java.lang.AssertionError\n\tat org.junit.Assert.fail(Assert.java:87)\n\tat org.junit.Assert.assertTrue(Assert.java:42)\n\tat lava.models.settings.HostUtilsTest.172_16_through_172_31 is local(HostUtilsTest.kt:48)</failure></testcase>",
+    "note": "Assertion at line 48 has no custom message argument, so JUnit emits a bare AssertionError. The stack frame line (HostUtilsTest.kt:48) unambiguously identifies the 172.31.255.255 case.",
+    "reverted": true,
+    "post_revert_result": "BUILD SUCCESSFUL — 15/15 PASS",
+    "verdict": "GENUINE"
+  },
+  {
+    "test_file": "core/domain/src/test/kotlin/lava/domain/usecase/ResolveProviderDownloadKindUseCaseTest.kt",
+    "production_target": "core/domain/src/main/kotlin/lava/domain/usecase/ResolveProviderDownloadKindUseCase.kt :: invoke() delegation to providerCapabilitySource.downloadKind(trackerId)",
+    "mutation": "Replaced `providerCapabilitySource.downloadKind(trackerId)` inside withContext with a hard-coded `ProviderDownloadKind.TORRENT`, severing the real delegation the test pins (the documented KDoc falsifiability rehearsal).",
+    "run_command": "GRADLE_USER_HOME=/Volumes/T7/Gradle ./gradlew :core:domain:testDebugUnitTest --tests 'lava.domain.usecase.ResolveProviderDownloadKindUseCaseTest' --max-workers=2 --console=plain",
+    "result_under_mutation": "BUILD FAILED — 3 of 4 tests failed (`archiveorg resolves to HTTP`, `unknown provider resolves to NONE`, `blank provider id is forwarded for active-tracker fallback`). The 4th test (`rutracker resolves to TORRENT`) passed because the hard-coded return happens to equal its expectation — correct discrimination: only the non-TORRENT expectations broke.",
+    "observed_failure": "<testcase name=\"archiveorg resolves to HTTP\" classname=\"lava.domain.usecase.ResolveProviderDownloadKindUseCaseTest\">\n  <failure message=\"java.lang.AssertionError: expected:<HTTP> but was:<TORRENT>\" type=\"java.lang.AssertionError\">java.lang.AssertionError: expected:<HTTP> but was:<TORRENT>\n\tat org.junit.Assert.fail(Assert.java:89)</failure></testcase>",
+    "matches_documented_rehearsal": "yes — the test KDoc predicted 'archiveorg resolves to HTTP FAILS — expected:<HTTP> but was:<TORRENT>'; the captured failure is byte-for-byte that prediction.",
+    "reverted": true,
+    "post_revert_result": "BUILD SUCCESSFUL — 4/4 PASS",
+    "verdict": "GENUINE"
+  }
+]
