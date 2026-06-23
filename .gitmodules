@@ -47,7 +47,7 @@
 	url = git@github.com:vasic-digital/concurrency.git
 [submodule "submodules/tracker_sdk"]
 	path = submodules/tracker_sdk
-	url = https://github.com/vasic-digital/tracker_sdk.git
+	url = git@github.com:vasic-digital/tracker_sdk.git
 [submodule "constitution"]
 	path = constitution
 	url = git@github.com:HelixDevelopment/HelixConstitution.git
