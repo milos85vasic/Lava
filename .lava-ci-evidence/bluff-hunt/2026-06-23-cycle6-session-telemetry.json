@@ -1,0 +1,53 @@
+{
+  "hunt_date": "2026-06-23",
+  "cycle": "cycle6-session-telemetry",
+  "operator_mandate_invocation": "§6.N / Seventh Law clause 5",
+  "scope": "validate session-added lava-api-go telemetry tests for anti-bluff property",
+  "target_tests": [
+    "internal/observability/webhook_test.go",
+    "internal/handlers/v1/nonfatal_telemetry_test.go"
+  ],
+  "mutations": [
+    {
+      "id": "M1",
+      "file": "internal/handlers/v1/handlers.go",
+      "mutation": "Suppressed the observability.RecordNonFatal(...) call in the default branch of writeProviderError; kept import alive via `_ = observability.AttrFeature` to allow the build to succeed and let the slog assertion fire.",
+      "test_run": "go test ./internal/handlers/v1/... -run TestWriteProviderError_UnexpectedError_RecordsNonFatal -count=1 -v",
+      "verdict": "GENUINE",
+      "verbatim_failure": "=== RUN   TestWriteProviderError_UnexpectedError_RecordsNonFatal\n    nonfatal_telemetry_test.go:68: expected 'non-fatal event' in slog output (RecordNonFatal called); got:\n    nonfatal_telemetry_test.go:71: expected error message in telemetry log; got:\n--- FAIL: TestWriteProviderError_UnexpectedError_RecordsNonFatal (0.00s)\nFAIL\nFAIL\tdigital.vasic.lava.apigo/internal/handlers/v1\t0.606s",
+      "reverted": true,
+      "revert_method": "git checkout -- internal/handlers/v1/handlers.go",
+      "rerun_after_revert": "PASS — ok digital.vasic.lava.apigo/internal/handlers/v1 0.554s"
+    },
+    {
+      "id": "M2",
+      "file": "internal/observability/nonfatal.go",
+      "mutation": "In webhookForward, replaced `safe[k] = redactIfSensitive(k, v)` with `safe[k] = v` (plaintext copy, no-op redaction) — causing tokens and passwords to be forwarded verbatim in the webhook JSON body.",
+      "test_run": "go test ./internal/observability/... -run TestWebhookBridge_RedactsBody -count=1 -v",
+      "verdict": "GENUINE",
+      "verbatim_failure": "=== RUN   TestWebhookBridge_RedactsBody\n2026/06/23 21:53:02 WARN non-fatal event error=\"auth failure\" error_class=*errors.errorString feature=auth token=<redacted> password=<redacted>\n    webhook_test.go:155: sensitive value LEAKED in webhook body: {\"event\":\"non_fatal\",\"error_class\":\"*errors.errorString\",\"error_message\":\"auth failure\",\"attrs\":{\"feature\":\"auth\",\"password\":\"hunter2\",\"token\":\"mysecrettoken\"},\"ts\":\"2026-06-23T18:53:02Z\"}\n--- FAIL: TestWebhookBridge_RedactsBody (0.00s)\nFAIL\nFAIL\tdigital.vasic.lava.apigo/internal/observability\t1.167s",
+      "reverted": true,
+      "revert_method": "git checkout -- internal/observability/nonfatal.go",
+      "rerun_after_revert": "PASS — ok digital.vasic.lava.apigo/internal/observability 0.510s"
+    },
+    {
+      "id": "M3",
+      "file": "internal/observability/nonfatal.go",
+      "mutation": "Inverted the enabled gate in webhookForward: changed `!= \"true\"` to `== \"true\"` so the function posts when LAVA_API_FIREBASE_CRASHLYTICS_ENABLED is UNSET and skips when it is 'true'.",
+      "test_run": "go test ./internal/observability/... -run 'TestWebhookBridge_PostsOnEnabled|TestWebhookBridge_NoPostOnDisabled' -count=1 -v",
+      "verdict": "GENUINE",
+      "verbatim_failure": "=== RUN   TestWebhookBridge_PostsOnEnabled\n2026/06/23 21:55:52 WARN non-fatal event error=\"probe error\" error_class=*errors.errorString feature=test operation=webhook_test\n    webhook_test.go:73: no webhook POST received within 2 s\n--- FAIL: TestWebhookBridge_PostsOnEnabled (2.00s)\n=== RUN   TestWebhookBridge_NoPostOnDisabled\n2026/06/23 21:55:54 WARN non-fatal event error=\"should not forward\" error_class=*errors.errorString\n    webhook_test.go:117: unexpected POST to webhook when disabled; body: {\"event\":\"non_fatal\",\"error_class\":\"*errors.errorString\",\"error_message\":\"should not forward\",\"attrs\":{},\"ts\":\"2026-06-23T18:55:54Z\"}\n--- FAIL: TestWebhookBridge_NoPostOnDisabled (0.00s)\nFAIL\nFAIL\tdigital.vasic.lava.apigo/internal/observability\t2.513s",
+      "reverted": true,
+      "revert_method": "git checkout -- internal/observability/nonfatal.go",
+      "rerun_after_revert": "PASS (both tests) — ok digital.vasic.lava.apigo/internal/observability 7.127s"
+    }
+  ],
+  "summary": {
+    "total_mutations": 3,
+    "genuine": 3,
+    "bluffs": 0,
+    "production_files_clean_at_end": true,
+    "git_diff_after_hunt": "empty — both production files confirmed clean at HEAD"
+  },
+  "conclusion": "3 genuine / 0 bluffs. All three telemetry tests added this session correctly detect their production code paths being broken. No bluffs found."
+}

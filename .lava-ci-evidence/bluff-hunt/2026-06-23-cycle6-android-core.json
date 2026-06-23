@@ -1,0 +1,88 @@
+{
+  "hunt_date": "2026-06-23",
+  "cycle": "cycle6-android-core",
+  "operator": "§6.N / Seventh Law clause 5 — Android (Kotlin) core-module JVM tests",
+  "protocol": "ZERO-BLUFF: real mutations applied/run/observed/reverted — no hypotheticals",
+  "scope": "core/domain, core/data, core/preferences — pure-Kotlin/library modules, testDebugUnitTest (no .env/keystore needed)",
+  "revert_method": "git checkout -- <single-file> ONLY, one file at a time",
+  "summary": {
+    "targets": 3,
+    "genuine": 3,
+    "bluffs": 0,
+    "total_test_failures_observed": 5
+  },
+  "targets": [
+    {
+      "target_id": "T1",
+      "production_file": "core/preferences/src/main/kotlin/lava/securestorage/model/EndpointConverter.kt",
+      "test_file": "core/preferences/src/test/kotlin/lava/securestorage/EndpointConverterTest.kt",
+      "test_class": "lava.securestorage.EndpointConverterTest",
+      "behavior_tested": "GoApi endpoint with a per-instance key serialises the key into JSON and round-trips it correctly; key=null if absent",
+      "mutation": "Removed the line `key?.let { put(KeyKey, it) }` in EndpointConverter.toJson() so the key is never written to the JSON object",
+      "mutation_rationale": "If the key is not persisted, the on-device auth HTTP header sees key=null on next app launch and 401s every search call — user-visible breakage without a crash",
+      "gradle_command": "./gradlew :core:preferences:testDebugUnitTest --tests '*EndpointConverterTest' --console=plain --no-daemon",
+      "result": "GENUINE — 2 failures observed",
+      "tests_failed": [
+        {
+          "name": "roundtrip GoApi preserves per-instance key",
+          "verbatim_failure": "java.lang.AssertionError: expected:<GoApi(host=127.0.0.1, port=8443, platform=null, storage=null, key=abc-key-123)> but was:<GoApi(host=127.0.0.1, port=8443, platform=null, storage=null, key=null)>\n\tat org.junit.Assert.fail(Assert.java:89)\n\tat org.junit.Assert.failNotEquals(Assert.java:835)\n\tat org.junit.Assert.assertEquals(Assert.java:120)\n\tat org.junit.Assert.assertEquals(Assert.java:146)\n\tat lava.securestorage.EndpointConverterTest.roundtrip GoApi preserves per-instance key(EndpointConverterTest.kt:206)"
+        },
+        {
+          "name": "roundtrip GoApi preserves host port and key together (on-device search auth)",
+          "verbatim_failure": "java.lang.AssertionError: expected:<GoApi(host=10.0.0.42, port=9443, platform=null, storage=null, key=dev-instance-key-XYZ)> but was:<GoApi(host=10.0.0.42, port=9443, platform=null, storage=null, key=null)>\n\tat org.junit.Assert.fail(Assert.java:89)\n\tat org.junit.Assert.failNotEquals(Assert.java:835)\n\tat org.junit.Assert.assertEquals(Assert.java:120)\n\tat org.junit.Assert.assertEquals(Assert.java:146)\n\tat lava.securestorage.EndpointConverterTest.roundtrip GoApi preserves host port and key together (on-device search auth)(EndpointConverterTest.kt:266)"
+        }
+      ],
+      "reverted": true,
+      "revert_command": "git checkout -- core/preferences/src/main/kotlin/lava/securestorage/model/EndpointConverter.kt",
+      "re_run_after_revert": "BUILD SUCCESSFUL — 17 tests completed, 0 failed",
+      "verdict": "GENUINE"
+    },
+    {
+      "target_id": "T2",
+      "production_file": "core/data/src/main/kotlin/lava/data/converters/PostConverters.kt",
+      "test_file": "core/data/src/test/kotlin/lava/data/converters/PostConverterTest.kt",
+      "test_class": "lava.data.converters.PostConverterTest",
+      "behavior_tested": "Wire font sizes are clamped to the readable range 14..20; sizes outside that range are never rendered at their wire value",
+      "mutation": "Changed `postElementDto.size.coerceIn(14, 20)` to `postElementDto.size.coerceIn(1, 200)` in PostConverters.kt — the effective range is so wide that no clamping occurs in practice",
+      "mutation_rationale": "Without the clamp, a malicious or oversized post can render at wire size 40 (too large) or 4 (too small) — user-visible layout breakage on the topic screen",
+      "gradle_command": "./gradlew :core:data:testDebugUnitTest --tests '*PostConverterTest' --console=plain --no-daemon",
+      "result": "GENUINE — 2 failures observed",
+      "tests_failed": [
+        {
+          "name": "font size larger than 20 is clamped to the readable maximum",
+          "verbatim_failure": "java.lang.AssertionError: expected:<20> but was:<40>\n\tat org.junit.Assert.fail(Assert.java:89)\n\tat org.junit.Assert.failNotEquals(Assert.java:835)\n\tat org.junit.Assert.assertEquals(Assert.java:120)\n\tat org.junit.Assert.assertEquals(Assert.java:146)\n\tat lava.data.converters.PostConverterTest.font size larger than 20 is clamped to the readable maximum(PostConverterTest.kt:163)"
+        },
+        {
+          "name": "font size smaller than 14 is clamped up to the readable minimum",
+          "verbatim_failure": "java.lang.AssertionError: expected:<14> but was:<4>\n\tat org.junit.Assert.fail(Assert.java:89)\n\tat org.junit.Assert.failNotEquals(Assert.java:835)\n\tat org.junit.Assert.assertEquals(Assert.java:120)\n\tat org.junit.Assert.assertEquals(Assert.java:146)\n\tat lava.data.converters.PostConverterTest.font size smaller than 14 is clamped up to the readable minimum(PostConverterTest.kt:170)"
+        }
+      ],
+      "reverted": true,
+      "revert_command": "git checkout -- core/data/src/main/kotlin/lava/data/converters/PostConverters.kt",
+      "re_run_after_revert": "BUILD SUCCESSFUL — 18 tests completed, 0 failed",
+      "verdict": "GENUINE"
+    },
+    {
+      "target_id": "T3",
+      "production_file": "core/domain/src/main/kotlin/lava/domain/usecase/ProbeMirrorUseCase.kt",
+      "test_file": "core/domain/src/test/kotlin/lava/domain/usecase/ProbeMirrorUseCaseTest.kt",
+      "test_class": "lava.domain.usecase.ProbeMirrorUseCaseTest",
+      "behavior_tested": "A schemeless user-typed URL (e.g. 'djdnjd') yields ProbeResult.Unreachable — never an uncaught IllegalArgumentException (§6.O regression for Crashlytics 39469d3b FATAL crash on 1.2.21)",
+      "mutation": "Removed the `catch (e: IllegalArgumentException)` block entirely from ProbeMirrorUseCase.invoke(), leaving only `catch (e: IOException)`",
+      "mutation_rationale": "Without the IAE catch, a schemeless URL causes okhttp3 to throw IllegalArgumentException at Request.Builder.url() which escapes invoke() — reproducing the exact production FATAL crash that put this test in the suite",
+      "gradle_command": "./gradlew :core:domain:testDebugUnitTest --tests '*ProbeMirrorUseCaseTest' --console=plain --no-daemon",
+      "result": "GENUINE — 1 failure observed",
+      "tests_failed": [
+        {
+          "name": "schemeless URL returns Unreachable instead of crashing (Crashlytics 39469d3b)",
+          "verbatim_failure": "java.lang.IllegalArgumentException: Expected URL scheme 'http' or 'https' but no scheme was found for djdnjd\n\tat okhttp3.HttpUrl$Builder.parse$okhttp(HttpUrl.kt:1261)\n\tat okhttp3.HttpUrl$Companion.get(HttpUrl.kt:1634)\n\tat okhttp3.Request$Builder.url(Request.kt:184)\n\tat lava.domain.usecase.ProbeMirrorUseCase.invoke(ProbeMirrorUseCase.kt:31)\n\tat lava.domain.usecase.ProbeMirrorUseCaseTest$schemeless URL returns Unreachable instead of crashing (Crashlytics 39469d3b)$1.invokeSuspend(ProbeMirrorUseCaseTest.kt:83)"
+        }
+      ],
+      "reverted": true,
+      "revert_command": "git checkout -- core/domain/src/main/kotlin/lava/domain/usecase/ProbeMirrorUseCase.kt",
+      "re_run_after_revert": "BUILD SUCCESSFUL — 4 tests completed, 0 failed",
+      "verdict": "GENUINE"
+    }
+  ],
+  "conclusion": "3 / 3 GENUINE. 0 bluffs found. Every test caught exactly the production defect it claimed to cover. All mutations reverted; all test suites green post-revert."
+}
