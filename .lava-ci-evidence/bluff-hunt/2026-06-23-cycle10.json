@@ -1,0 +1,81 @@
+{
+  "hunt_date": "2026-06-23",
+  "cycle": 10,
+  "protocol": "§6.N anti-bluff hunt — 3 production Kotlin files, real mutations applied/run/observed/reverted",
+  "modules_hunted": [
+    "core/tracker/api",
+    "core/tracker/gutenberg",
+    "core/tracker/kinozal"
+  ],
+  "note": "Modules not covered in cycles 4-9. File-safety constraint honoured: core/network/impl untouched.",
+  "targets": [
+    {
+      "target": 1,
+      "production_file": "core/tracker/api/src/main/kotlin/lava/tracker/api/model/AuthState.kt",
+      "test_file": "core/tracker/api/src/test/kotlin/lava/tracker/api/model/SerializationRoundTripTest.kt",
+      "test_class": "SerializationRoundTripTest",
+      "test_method": "AuthState sealed class round-trips for each variant",
+      "behavior_guaranteed": "Every AuthState variant (Authenticated, Unauthenticated, CaptchaRequired) must survive a JSON encode→decode round-trip and equal the original via kotlinx-serialization polymorphic dispatch.",
+      "mutation": "Removed @Serializable annotation from the CaptchaRequired data class in AuthState.kt (line 13), making it invisible to kotlinx-serialization's polymorphic serializer registry.",
+      "mutation_diff": "-    @Serializable\n     data class CaptchaRequired(val challenge: CaptchaChallenge) : AuthState()",
+      "gradle_command": "./gradlew :core:tracker:api:test --tests '*SerializationRoundTripTest*' --console=plain --no-daemon",
+      "result": "FAIL",
+      "verdict": "GENUINE",
+      "verbatim_failure": "kotlinx.serialization.SerializationException: Serializer for subclass 'CaptchaRequired' is not found in the polymorphic scope of 'AuthState'.\nCheck if class with serial name 'CaptchaRequired' exists and serializer is registered in a corresponding SerializersModule.\nTo be registered automatically, class 'CaptchaRequired' has to be '@Serializable', and the base class 'AuthState' has to be sealed and '@Serializable'.\n\tat kotlinx.serialization.internal.AbstractPolymorphicSerializerKt.throwSubtypeNotRegistered(AbstractPolymorphicSerializer.kt:102)\n\tat lava.tracker.api.model.SerializationRoundTripTest.AuthState sealed class round-trips for each variant(SerializationRoundTripTest.kt:52)",
+      "tests_run": 3,
+      "tests_failed": 1,
+      "reverted": true,
+      "revert_command": "git checkout -- core/tracker/api/src/main/kotlin/lava/tracker/api/model/AuthState.kt",
+      "re_run_after_revert": "BUILD SUCCESSFUL — 3 tests completed, 0 failed"
+    },
+    {
+      "target": 2,
+      "production_file": "core/tracker/gutenberg/src/main/kotlin/lava/tracker/gutenberg/model/BookExtensions.kt",
+      "test_file": "core/tracker/gutenberg/src/test/kotlin/lava/tracker/gutenberg/model/BookExtensionsTest.kt",
+      "test_class": "BookExtensionsTest",
+      "test_method": "pickBestDownloadUrl prefers epub over text and html",
+      "behavior_guaranteed": "pickBestDownloadUrl must return the epub URL when epub, plain-text, and html are all present; the priority order is epub > text/plain > text/html.",
+      "mutation": "Swapped 'application/epub+zip' and 'text/plain' in the preferred MIME list inside pickBestDownloadUrl, making text/plain take priority over epub+zip.",
+      "mutation_diff": "-        \"application/epub+zip\",\n-        \"text/plain\",\n+        \"text/plain\",\n+        \"application/epub+zip\",",
+      "gradle_command": "./gradlew :core:tracker:gutenberg:test --tests '*BookExtensionsTest*' --console=plain --no-daemon",
+      "result": "FAIL",
+      "verdict": "GENUINE",
+      "verbatim_failure": "org.junit.ComparisonFailure: expected:<https://g.org/book.[epub]> but was:<https://g.org/book.[txt]>\n\tat org.junit.Assert.assertEquals(Assert.java:117)\n\tat lava.tracker.gutenberg.model.BookExtensionsTest.pickBestDownloadUrl prefers epub over text and html(BookExtensionsTest.kt:27)",
+      "tests_run": 18,
+      "tests_failed": 1,
+      "reverted": true,
+      "revert_command": "git checkout -- core/tracker/gutenberg/src/main/kotlin/lava/tracker/gutenberg/model/BookExtensions.kt",
+      "re_run_after_revert": "BUILD SUCCESSFUL — 18 tests completed, 0 failed"
+    },
+    {
+      "target": 3,
+      "production_file": "core/tracker/kinozal/src/main/kotlin/lava/tracker/kinozal/parser/KinozalSizeParser.kt",
+      "test_file": "core/tracker/kinozal/src/test/kotlin/lava/tracker/kinozal/parser/KinozalSizeParserTest.kt",
+      "test_class": "KinozalSizeParserTest",
+      "test_method": "parses Latin GB to binary bytes (+ parses comma-decimal + parses Cyrillic units defensively + search row carries sizeBytes end to end)",
+      "behavior_guaranteed": "KinozalSizeParser must use binary (1024-based) multipliers. '1.5 GB' -> 1,610,612,736 bytes (1.5 * 1024^3), not 1,500,000,000 (1.5 * 1000^3). The end-to-end test also guarantees sizeBytes flows through KinozalSearchParser into TorrentItem (LVA-027 regression guard).",
+      "mutation": "Changed the GB/ГБ multiplier in KinozalSizeParser from 1_024L * 1_024L * 1_024L to 1_000L * 1_000L * 1_000L (decimal SI instead of binary IEC).",
+      "mutation_diff": "-            \"GB\", \"ГБ\" -> 1_024L * 1_024L * 1_024L\n+            \"GB\", \"ГБ\" -> 1_000L * 1_000L * 1_000L",
+      "gradle_command": "./gradlew :core:tracker:kinozal:test --tests '*KinozalSizeParserTest*' --console=plain --no-daemon",
+      "result": "FAIL",
+      "verdict": "GENUINE",
+      "verbatim_failure": "java.lang.AssertionError: expected:<1610612736> but was:<1500000000>\n\tat org.junit.Assert.assertEquals(Assert.java:120)\n\tat lava.tracker.kinozal.parser.KinozalSizeParserTest.parses Latin GB to binary bytes(KinozalSizeParserTest.kt:17)",
+      "tests_run": 5,
+      "tests_failed": 4,
+      "additional_failures": [
+        "parses comma-decimal: expected:<1610612736> but was:<1500000000>",
+        "parses Cyrillic units defensively: expected:<1073741824> but was:<1000000000>",
+        "search row carries sizeBytes end to end: expected:<1610612736> but was:<1500000000>"
+      ],
+      "reverted": true,
+      "revert_command": "git checkout -- core/tracker/kinozal/src/main/kotlin/lava/tracker/kinozal/parser/KinozalSizeParser.kt",
+      "re_run_after_revert": "BUILD SUCCESSFUL — 5 tests completed, 0 failed"
+    }
+  ],
+  "summary": {
+    "genuine": 3,
+    "bluffs": 0,
+    "total_targets": 3,
+    "conclusion": "ALL 3 GENUINE. Zero bluffs found. Every hunted test provably catches the production break it claims to verify."
+  }
+}
