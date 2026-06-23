@@ -1,0 +1,21 @@
+{
+  "all_passed": true,
+  "finished_at": "2026-06-23T22:58:28+03:00",
+  "gating": true,
+  "rows": [
+    {
+      "avd": "default",
+      "api_level": 34,
+      "form_factor": "phone",
+      "boot_seconds": 31.300279354,
+      "test_class": "lava.app.challenges.Challenge45InterceptorHandoffKeySurvivesTest",
+      "test_passed": true,
+      "test_seconds": 91.117239067,
+      "gradle_log_path": "default/gradle.log",
+      "diag": {},
+      "failure_summaries": [],
+      "concurrent": 1
+    }
+  ],
+  "started_at": "2026-06-23T22:56:23+03:00"
+}

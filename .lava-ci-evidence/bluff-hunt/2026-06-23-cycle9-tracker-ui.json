@@ -1,0 +1,71 @@
+{
+  "hunt_date": "2026-06-23",
+  "cycle": "9",
+  "label": "tracker-ui",
+  "description": "§6.N bluff hunt — SDK tracker parsers (rutor + rutracker). 3 production files hunted, 3 genuine anti-bluff tests confirmed, 0 bluffs found.",
+  "operator_directive": "Run §6.N anti-bluff hunt on SDK tracker plugins + core:ui/designsystem JVM tests. FILE-SAFETY: mutate-and-revert single files under core/tracker/rutor, core/tracker/rutracker only.",
+  "hunter": "claude-sonnet-4-6 (research agent, foreground)",
+  "targets": [
+    {
+      "target_id": 1,
+      "production_file": "core/tracker/rutor/src/main/kotlin/lava/tracker/rutor/parser/RuTorSizeParser.kt",
+      "test_file": "core/tracker/rutor/src/test/kotlin/lava/tracker/rutor/parser/RuTorSizeParserTest.kt",
+      "test_class": "lava.tracker.rutor.parser.RuTorSizeParserTest",
+      "gradle_task": ":core:tracker:rutor:test --tests \"lava.tracker.rutor.parser.RuTorSizeParserTest\"",
+      "behavior_guaranteed": "kB multiplier is binary 1024 (not decimal 1000); parses '200 kB' as 204_800 bytes; case-insensitive unit matching",
+      "mutation": "Changed '\"KB\" -> 1_024L' to '\"KB\" -> 1_000L' in the when-expression multiplier table",
+      "mutation_line": 26,
+      "observed_failure": "RuTorSizeParserTest > parses 200 kB FAILED\n    java.lang.AssertionError: expected:<204800> but was:<200000>\n        at org.junit.Assert.assertEquals(Assert.java:146)\n        at lava.tracker.rutor.parser.RuTorSizeParserTest.parses 200 kB(RuTorSizeParserTest.kt:28)\n\n13 tests completed, 2 failed",
+      "tests_failed_count": 2,
+      "verdict": "GENUINE",
+      "reverted": true,
+      "revert_method": "git checkout -- core/tracker/rutor/src/main/kotlin/lava/tracker/rutor/parser/RuTorSizeParser.kt",
+      "post_revert_result": "BUILD SUCCESSFUL in 25s — 13 tests completed, 0 failed"
+    },
+    {
+      "target_id": 2,
+      "production_file": "core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker/mapper/RuTrackerSizeParser.kt",
+      "test_file": "core/tracker/rutracker/src/test/kotlin/lava/tracker/rutracker/mapper/RuTrackerSizeParserTest.kt",
+      "test_class": "lava.tracker.rutracker.mapper.RuTrackerSizeParserTest",
+      "gradle_task": ":core:tracker:rutracker:test --tests \"lava.tracker.rutracker.mapper.RuTrackerSizeParserTest\"",
+      "behavior_guaranteed": "GB multiplier is binary 1024^3 = 1_073_741_824; parses '1 GB' as exactly 1_073_741_824 bytes (not SI 10^9 = 1_000_000_000)",
+      "mutation": "Changed '\"GB\" -> 1_024L * 1_024L * 1_024L' to '\"GB\" -> 1_000L * 1_000L * 1_000L' in the when-expression multiplier table",
+      "mutation_line": 63,
+      "observed_failure": "RuTrackerSizeParserTest > no whitespace between number and unit FAILED\n    java.lang.AssertionError: expected:<1073741824> but was:<1000000000>\n        at org.junit.Assert.assertEquals(Assert.java:146)\n        at lava.tracker.rutracker.mapper.RuTrackerSizeParserTest.no whitespace between number and unit(RuTrackerSizeParserTest.kt:105)\n\n19 tests completed, 8 failed",
+      "tests_failed_count": 8,
+      "verdict": "GENUINE",
+      "reverted": true,
+      "revert_method": "git checkout -- core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker/mapper/RuTrackerSizeParser.kt",
+      "post_revert_result": "BUILD SUCCESSFUL in 18s — 19 tests completed, 0 failed"
+    },
+    {
+      "target_id": 3,
+      "production_file": "core/tracker/rutor/src/main/kotlin/lava/tracker/rutor/parser/RuTorSearchParser.kt",
+      "test_file": "core/tracker/rutor/src/test/kotlin/lava/tracker/rutor/parser/RuTorSearchParserTest.kt",
+      "test_class": "lava.tracker.rutor.parser.RuTorSearchParserTest",
+      "gradle_task": ":core:tracker:rutor:test --tests \"lava.tracker.rutor.parser.RuTorSearchParserTest\"",
+      "behavior_guaranteed": "infoHash extracted from magnet URIs is always exactly 40 hex characters; all rows in a normal search result expose a 40-char infoHash",
+      "mutation": "Changed INFO_HASH_PATTERN from Regex(\"[A-Fa-f0-9]{40}\") to Regex(\"[A-Fa-f0-9]{39}\") — causes every 40-char hash to be extracted as a 39-char prefix instead",
+      "mutation_line": 133,
+      "observed_failure": "RuTorSearchParserTest > normal search results contain at least 10 torrents with sizes FAILED\n    java.lang.AssertionError: all rows should expose a 40-char infoHash; offenders=[Ubuntu GamePack 24.04 [amd64] [сентябрь] (2025) PC, Ubuntu ServerPack 24.04 [amd64] ...]\n        at org.junit.Assert.assertTrue(Assert.java:42)\n        at lava.tracker.rutor.parser.RuTorSearchParserTest.normal search results contain at least 10 torrents with sizes(RuTorSearchParserTest.kt:48)\n\n8 tests completed, 2 failed",
+      "tests_failed_count": 2,
+      "verdict": "GENUINE",
+      "reverted": true,
+      "revert_method": "git checkout -- core/tracker/rutor/src/main/kotlin/lava/tracker/rutor/parser/RuTorSearchParser.kt",
+      "post_revert_result": "BUILD SUCCESSFUL in 14s — 8 tests completed, 0 failed"
+    }
+  ],
+  "summary": {
+    "targets_hunted": 3,
+    "genuine": 3,
+    "bluffs_found": 0,
+    "total_test_failures_observed": 12,
+    "verdict": "All 3 tests provably catch their claimed production defects. Zero bluffs found in this layer."
+  },
+  "layers_covered": [
+    "rutor size parser (unit → multiplier table)",
+    "rutracker size parser (GB multiplier binary vs SI)",
+    "rutor search parser (infoHash regex precision)"
+  ],
+  "file_safety_compliance": "Each file mutated and reverted individually using 'git checkout -- <single-file>'. No 'git checkout .' or stash used. No files outside the permitted scope (core/tracker/rutor, core/tracker/rutracker) were touched."
+}
