@@ -1,4 +1,30 @@
 # Changelog
+## Lava-Android-1.3.11-1069 — 2026-06-23 (Corrected re-spin of 1.3.11 — ships the right binary)
+
+**Previous published:** Lava-Android-1.3.11-1068.
+
+This is a **corrected re-spin** of the 1.3.11 content. The 1068 distribute
+(Firebase release `3r986p5gnfujo`, `digital.vasic.lava.client.dev`) published the
+**wrong, stale binary** — built before the rotated auth pepper and before the
+search Error+Retry / telemetry fixes were embedded — and advanced
+`last-version-debug` to 1068, so §6.P forbids re-publishing 1068. 1069 ships the
+**correct** debug binary with all of the intended 1.3.11 changes actually embedded.
+The user-facing version name is unchanged (still 1.3.11); only the binary that
+ships under it is corrected. Release identity: **1.3.11 (1069)**.
+
+What the correct binary carries (the changes 1068 was supposed to ship but didn't):
+
+- **Search no longer dead-ends on failure.** When a multi-provider search stream
+  fails (every selected provider errors / the whole request fails), the results
+  screen now shows an explicit **Error state with a Retry action** instead of the
+  misleading "Nothing found" empty state, so a transient failure is recoverable
+  with one tap (commit `cfe838bc`).
+- **Search failures are now captured to telemetry.** Per-provider streaming-search
+  failures that were previously dropped silently are now recorded as §6.AC
+  non-fatal telemetry events (commit `922ecbca`).
+- **Rotated auth pepper.** A fresh `LAVA_AUTH_OBFUSCATION_PEPPER` is embedded and
+  the `android-1.3.11-1069` client identity is registered in the allowlist.
+
 ## Lava-Android-1.3.11-1068 — 2026-06-16 (More reliable provider search — transient-failure retries)
 
 **Previous published:** Lava-Android-1.3.10-1067.
@@ -13,6 +39,14 @@
 - The Lava client app itself is unchanged behaviorally; this build re-packages the same client with
   the improved embedded API (`liblavaapi.so`), so the on-device search round-trip benefits without
   any new client-side surface.
+
+- **Search no longer dead-ends on failure.** When a multi-provider search stream fails (every
+  selected provider errors / the whole request fails), the results screen now shows an explicit
+  **Error state with a Retry action** instead of the misleading "Nothing found" empty state, so a
+  transient failure is recoverable with one tap (commit `cfe838bc`).
+- **Search failures are now captured to telemetry.** Per-provider streaming-search failures that
+  were previously dropped silently are now recorded as §6.AC non-fatal telemetry events, so flaky
+  providers surface in the operator dashboard instead of vanishing (commit `922ecbca`).
 
 Paired with on-device API app 0.2.11-16 (same embedded-API retry resilience) and lava-api-go 2.3.31-2331.
 

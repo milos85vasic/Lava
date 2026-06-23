@@ -49,7 +49,14 @@ android {
 
     defaultConfig {
         applicationId = "digital.vasic.lava.client"
-        versionCode = 1068
+        // §6.Y re-spin: 1068 distribute (Firebase 3r986p5gnfujo) published the
+        // WRONG (stale, pre-pepper, pre-fix) client debug binary and advanced
+        // last-version-debug→1068, so §6.P forbids re-publishing 1068. 1069 is a
+        // corrected re-spin of the SAME 1.3.11 content (search Error+Retry fix
+        // cfe838bc + §6.AC telemetry + rotated pepper). versionName is kept at
+        // 1.3.11 deliberately: the user-facing release identity is unchanged; only
+        // the binary that ships under it is corrected. Release identity: 1.3.11 (1069).
+        versionCode = 1069
         versionName = "1.3.11"
         // SP-3a Step 6 (2026-04-30): wire Hilt + Compose UI test infra so the
         // 8 Challenge Tests at app/src/androidTest/kotlin/lava/app/challenges/
