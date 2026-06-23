@@ -410,6 +410,17 @@ class OnboardingViewModel @Inject constructor(
             apiKeyReader?.invoke()
         } catch (e: Exception) {
             e.rethrowIfCancellation()
+            // §6.AC: surface reader failures — a dead key reader means unauthenticated
+            // requests and 401 errors; diagnosable only if we surface it here.
+            // §6.H: authority/message only, never the key value.
+            analytics.recordWarning(
+                "API key reader failed for local endpoint: ${e.message}",
+                mapOf(
+                    AnalyticsTracker.Params.FEATURE to "handoff",
+                    AnalyticsTracker.Params.OPERATION to "read_api_key_for_endpoint",
+                    AnalyticsTracker.Params.ERROR_MESSAGE to (e.message ?: "unknown"),
+                ),
+            )
             null
         }
         return if (!read.isNullOrBlank()) copy(key = read) else this

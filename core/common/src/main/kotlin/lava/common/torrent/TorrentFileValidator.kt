@@ -47,6 +47,9 @@ class TorrentFileValidator {
         val root = try {
             BencodeParser(bytes).parseWhole()
         } catch (e: BencodeException) {
+            // no-telemetry: malformed user-supplied .torrent file failing bencode parse is an
+            // expected validation outcome (not an application error); this is a pure validator
+            // with no AnalyticsTracker dependency available in core:common.
             return DownloadValidationResult.invalid("malformed bencode: ${e.message}")
         }
 

@@ -12,12 +12,25 @@
 //     OTLP pipeline (via the package-level slog logger). The structured
 //     attributes are queryable in Loki + Tempo.
 //
-//  2. Optionally: posts to Firebase Crashlytics's REST endpoint (when
-//     LAVA_API_FIREBASE_CRASHLYTICS_ENABLED=true is set in the
-//     environment) so server-side and client-side telemetry land in the
-//     same dashboard. The REST bridge is best-effort (network errors
-//     while reporting telemetry MUST NOT cascade into the user-facing
-//     code path).
+//  2. Optionally (§6.AC-debt closed): posts a JSON event to a configurable
+//     webhook URL when LAVA_API_FIREBASE_CRASHLYTICS_ENABLED=true AND
+//     LAVA_API_NONFATAL_WEBHOOK_URL is set. This is best-effort (a 2 s
+//     timeout, errors swallowed, runs in its own goroutine) so telemetry
+//     NEVER cascades into the user request path.
+//
+// ── HONEST NOTE ON "FIREBASE CRASHLYTICS" ────────────────────────────────
+// Firebase Crashlytics has NO public server-side REST ingest API — it is a
+// mobile-SDK-only product (as of 2026). There is no POST endpoint that
+// accepts non-fatal events from a Go server. The original TODO(§6.AC-debt)
+// described a "REST endpoint" that does not exist; fabricating such a call
+// would be a §6.J bluff. Instead the bridge posts to an operator-supplied
+// webhook (LAVA_API_NONFATAL_WEBHOOK_URL) — a Grafana Loki push endpoint,
+// a custom Cloud Function, a Slack webhook, or any HTTP collector the
+// operator configures. The server-side telemetry dashboard is Loki/Grafana
+// (via the OTLP pipeline). The Crashlytics mobile dashboard shows what the
+// Android client reports; server-side non-fatals reach it only when the
+// operator wires a Cloud Function from the webhook into Crashlytics.
+// ─────────────────────────────────────────────────────────────────────────
 //
 // Mandatory attributes per §6.AC.3 — feature, operation, error_class,
 // error_message (truncated 1024 bytes, NEVER credentials per §6.H),
@@ -33,11 +46,17 @@
 package observability
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log/slog"
+	"net/http"
+	"os"
 	"strings"
+	"sync"
+	"time"
 )
 
 // NonFatalAttributes is the structured context for a non-fatal event.
@@ -117,13 +136,11 @@ func RecordNonFatal(ctx context.Context, err error, attrs NonFatalAttributes) {
 		logAttrs = append(logAttrs, slog.String(k, redactIfSensitive(k, v)))
 	}
 	slog.WarnContext(ctx, "non-fatal event", logAttrs...)
-	// TODO(§6.AC-debt): Firebase Crashlytics REST bridge gated on
-	// LAVA_API_FIREBASE_CRASHLYTICS_ENABLED. Today this is just the
-	// structured log path; Phase D-bridge ships the REST bridge.
+	webhookForward(ctx, "non_fatal", classOf(err), truncate(err.Error()), attrs)
 }
 
 // RecordWarning records a non-throwable warning. Same treatment as
-// RecordNonFatal (structured log + optional REST bridge), but for
+// RecordNonFatal (structured log + optional webhook forward), but for
 // non-error situations: degraded paths, fallback hits, missing
 // resources, capability mismatches, etc.
 func RecordWarning(ctx context.Context, message string, attrs NonFatalAttributes) {
@@ -133,6 +150,88 @@ func RecordWarning(ctx context.Context, message string, attrs NonFatalAttributes
 		logAttrs = append(logAttrs, slog.String(k, redactIfSensitive(k, v)))
 	}
 	slog.WarnContext(ctx, "warning event", logAttrs...)
+	webhookForward(ctx, "warning", "warning", truncate(message), attrs)
+}
+
+// ── Webhook bridge (§6.AC-debt closed) ────────────────────────────────────
+
+// webhookOnce guards the one-time "enabled but no URL" warning so it
+// appears only once per process rather than on every event.
+var webhookOnce sync.Once
+
+// webhookBody is the JSON shape posted to LAVA_API_NONFATAL_WEBHOOK_URL.
+// All string values are already redacted + truncated before reaching here.
+type webhookBody struct {
+	Event      string            `json:"event"`       // "non_fatal" | "warning"
+	ErrorClass string            `json:"error_class"` // stable type name
+	Message    string            `json:"error_message"`
+	Attrs      map[string]string `json:"attrs"`
+	Timestamp  string            `json:"ts"` // RFC 3339
+}
+
+// webhookForward posts a best-effort JSON event to the operator-configured
+// webhook URL. It:
+//   - no-ops when LAVA_API_FIREBASE_CRASHLYTICS_ENABLED != "true"
+//   - emits a one-time WARN and no-ops when the flag is set but
+//     LAVA_API_NONFATAL_WEBHOOK_URL is empty (§6.R: URL from env, never
+//     hardcoded)
+//   - runs in its own goroutine (fire-and-forget)
+//   - applies a 2 s timeout independent of the caller's context
+//   - swallows all errors + recovers from panics so telemetry NEVER
+//     cascades into the user-facing code path
+//   - applies the same §6.H credential redaction to the attrs before
+//     encoding the body
+func webhookForward(ctx context.Context, event, errorClass, message string, attrs NonFatalAttributes) {
+	if os.Getenv("LAVA_API_FIREBASE_CRASHLYTICS_ENABLED") != "true" {
+		return
+	}
+	url := os.Getenv("LAVA_API_NONFATAL_WEBHOOK_URL")
+	if url == "" {
+		webhookOnce.Do(func() {
+			slog.WarnContext(ctx, "observability: LAVA_API_FIREBASE_CRASHLYTICS_ENABLED=true but LAVA_API_NONFATAL_WEBHOOK_URL is not set; non-fatal webhook forwarding disabled")
+		})
+		return
+	}
+
+	// Build redacted attrs copy — never forward plaintext credentials.
+	safe := make(map[string]string, len(attrs))
+	for k, v := range attrs {
+		safe[k] = redactIfSensitive(k, v)
+	}
+
+	body := webhookBody{
+		Event:      event,
+		ErrorClass: errorClass,
+		Message:    message,
+		Attrs:      safe,
+		Timestamp:  time.Now().UTC().Format(time.RFC3339),
+	}
+	encoded, err := json.Marshal(body)
+	if err != nil {
+		// Marshal of plain strings should never fail; log and abandon.
+		slog.WarnContext(ctx, "observability: webhookForward marshal failed", slog.String("err", err.Error()))
+		return
+	}
+
+	targetURL := url // capture for goroutine
+	payload := encoded
+	go func() {
+		defer func() { recover() }() //nolint:errcheck // swallow panics per §6.AC.2
+		reqCtx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+		defer cancel()
+		req, err := http.NewRequestWithContext(reqCtx, http.MethodPost, targetURL, bytes.NewReader(payload))
+		if err != nil {
+			// no-telemetry: best-effort webhook forward MUST NOT cascade or recurse into RecordNonFatal.
+			return
+		}
+		req.Header.Set("Content-Type", "application/json")
+		resp, err := http.DefaultClient.Do(req)
+		if err != nil {
+			// no-telemetry: best-effort webhook forward MUST NOT cascade or recurse into RecordNonFatal.
+			return
+		}
+		_ = resp.Body.Close()
+	}()
 }
 
 // classOf returns a stable name for the error's type. For errors that

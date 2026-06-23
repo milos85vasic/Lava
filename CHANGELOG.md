@@ -1,4 +1,27 @@
 # Changelog
+## Lava-Android-1.3.11-1071 — 2026-06-23 (Comprehensive search-failure telemetry — so broken searches finally tell us why)
+
+**Previous published:** Lava-Android-1.3.11-1070.
+
+This build instruments the search-failure path (and the rest of the app's error paths)
+with comprehensive **Crashlytics non-fatal telemetry** so a search that fails on a real
+device finally reports *why* — the data we need to root-cause the long-standing
+"Something went wrong" search-401 from the field, not just from a debug Chucker session.
+
+- **Search failures now carry full HTTP context.** `ApiBackedTrackerClient` throws a typed
+  `ApiHttpException` (status code + request URL + HTTP method) instead of an opaque error, and
+  `SearchResultViewModel` records a Crashlytics non-fatal enriched with `http_status`,
+  `request_url`, `http_method`, and `base_url_host` — so a 401 vs a connection failure is
+  distinguishable in the dashboard. (§6.AC; §6.H-redacted — no credentials/tokens ever logged.)
+- **On-device API key + onboarding telemetry.** The handoff API-key reader (`ApiKeyClient`) and
+  the onboarding API-discovery path now record warnings when a key read or probe fails, instead
+  of silently degrading.
+- **Comprehensive coverage.** Every production catch/fallback path is now either instrumented or
+  explicitly opted out with a documented reason — `scripts/check-non-fatal-coverage.sh` passes in
+  STRICT mode (0 violations). Full architecture: `docs/telemetry/2026-06-23-comprehensive-nonfatal-telemetry.md`.
+- Auth rotated to `android-1.3.11-1071` (fresh pepper, 37 active clients — append-only, no existing
+  install is forced to upgrade). Device gate: §6.Z C00 cold-start GREEN on real KVM (thinker).
+
 ## Lava-Android-1.3.11-1070 — 2026-06-23 (Clean re-spin of 1.3.11 — ships the right binary through the fixed distributor)
 
 **Previous published:** Lava-Android-1.3.11-1069 (corrected binary built, but the
@@ -77,6 +100,16 @@ What the correct binary carries (the changes 1068 was supposed to ship but didn'
   providers surface in the operator dashboard instead of vanishing (commit `922ecbca`).
 
 Paired with on-device API app 0.2.11-16 (same embedded-API retry resilience) and lava-api-go 2.3.31-2331.
+
+## Lava-API-App-0.2.11-17 — 2026-06-23 (Foreground-service failure telemetry)
+
+**Previous published:** Lava-API-App-0.2.11-16.
+
+- **The on-device API engine now reports foreground-service failures.** When Android refuses to
+  start the engine's foreground service because the `dataSync` budget is exhausted
+  (`ForegroundServiceStartNotAllowedException`), the api-app now records a Crashlytics non-fatal
+  with the engine context instead of swallowing the error — so the budget-exhaustion edge case is
+  visible in telemetry. (§6.AC.)
 
 ## Lava-API-App-0.2.11-16 — 2026-06-16 (More reliable provider search — transient-failure retries)
 

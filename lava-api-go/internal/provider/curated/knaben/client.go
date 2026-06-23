@@ -199,6 +199,8 @@ func (c *Client) fetchHitsOnce(ctx context.Context, payload []byte) (*apiRespons
 	resp, err := c.http.Do(req)
 	if err != nil {
 		// Network/timeout — transient (the slow-aggregation case).
+		// no-telemetry: error is propagated to the caller via the returned error value;
+		// the search handler's RecordNonFatal covers the provider-level failure.
 		return nil, true, fmt.Errorf("%s: %w", providerID, provider.ErrUnknown)
 	}
 	defer func() { _ = resp.Body.Close() }()

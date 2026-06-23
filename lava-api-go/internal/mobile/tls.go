@@ -98,6 +98,8 @@ func loadOrCreateTLS(sqlitePath string, sanIPs []net.IP) (*tls.Config, error) {
 func mintAndPersist(sanIPs []net.IP, certPath, keyPath string) (tls.Certificate, error) {
 	cert, certPEM, keyPEM, err := generateSelfSigned(sanIPs)
 	if err != nil {
+		// no-telemetry: error is returned directly to the caller (Start or rotatingCert);
+		// the caller (rotatingCert.getCurrent) records via recordRotation on failure.
 		return tls.Certificate{}, err
 	}
 	if err := os.WriteFile(certPath, certPEM, 0o644); err != nil {
@@ -170,6 +172,7 @@ func (rc *rotatingCert) current() (*tls.Certificate, error) {
 		// Keep serving the current leaf (still valid until NotAfter) rather than
 		// dropping the connection; the next handshake retries. §6.AC: surface the
 		// re-mint failure so an operator sees a long-lived embed degrade.
+		// no-telemetry: recordRotation (= observability.RecordWarning) IS the §6.AC telemetry call below.
 		recordRotation(context.Background(), "embed TLS leaf re-mint failed; serving near-expiry leaf", observability.NonFatalAttributes{
 			observability.AttrFeature:      "tls",
 			observability.AttrOperation:    "cert-rotation",
@@ -248,6 +251,7 @@ func parsedLeaf(cert tls.Certificate) *x509.Certificate {
 	}
 	leaf, err := x509.ParseCertificate(cert.Certificate[0])
 	if err != nil {
+		// no-telemetry: pure parse helper (parsedLeaf); nil return propagates to caller.
 		return nil
 	}
 	return leaf
@@ -349,6 +353,8 @@ func localIPs() []net.IP {
 	var out []net.IP
 	addrs, err := net.InterfaceAddrs()
 	if err != nil {
+		// no-telemetry: best-effort SAN population; loopback is always covered by
+		// generateSelfSigned regardless of this helper's result.
 		return out
 	}
 	for _, a := range addrs {

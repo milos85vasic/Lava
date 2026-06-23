@@ -187,6 +187,8 @@ func (c *Client) searchOne(ctx context.Context, base, query string) (*provider.S
 
 	resp, err := c.http.Do(req)
 	if err != nil {
+		// no-telemetry: error is propagated to the caller via the returned error value;
+		// the search handler's RecordNonFatal covers the provider-level failure.
 		return nil, fmt.Errorf("%s: %w", providerID, provider.ErrUnknown)
 	}
 	defer func() { _ = resp.Body.Close() }()

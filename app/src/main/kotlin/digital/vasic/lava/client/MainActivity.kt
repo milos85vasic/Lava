@@ -32,6 +32,7 @@ import digital.vasic.lava.client.platform.ShareLinkHandlerImpl
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import lava.applink.AppLinkContract
+import lava.common.analytics.AnalyticsTracker
 import lava.designsystem.platform.LocalPlatformType
 import lava.designsystem.platform.PlatformType
 import lava.logger.api.LoggerFactory
@@ -57,6 +58,9 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 open class MainActivity : ComponentActivity() {
+
+    @Inject
+    lateinit var analytics: AnalyticsTracker
 
     @Inject
     lateinit var loggerFactory: LoggerFactory
@@ -223,7 +227,7 @@ open class MainActivity : ComponentActivity() {
     private fun buildApiKeyReader(): () -> String? {
         val suffix = if (BuildConfig.DEBUG) ".dev.keyprovider" else ".keyprovider"
         val authority = BuildConfig.API_RELEASE_PACKAGE + suffix
-        val client = ApiKeyClient(this, authority)
+        val client = ApiKeyClient(this, authority, analytics)
         return { client.read()?.key }
     }
 

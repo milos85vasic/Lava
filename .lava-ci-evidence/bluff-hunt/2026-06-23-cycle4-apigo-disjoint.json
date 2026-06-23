@@ -1,0 +1,86 @@
+{
+  "hunt_date": "2026-06-23",
+  "hunt_id": "cycle4-apigo-disjoint",
+  "section": "§6.N / Seventh Law clause 5",
+  "scope": "lava-api-go disjoint packages (auth, cache, ratelimit) — concurrent-safe, no forbidden packages touched",
+  "operator": "subagent (claude-sonnet-4-6), dispatched by parent orchestrator",
+  "summary": {
+    "targets_sampled": 3,
+    "genuine": 3,
+    "bluffs": 0
+  },
+  "targets": [
+    {
+      "id": "T1",
+      "production_file": "internal/ratelimit/ratelimit.go",
+      "test_file": "internal/ratelimit/ratelimit_test.go",
+      "test_name": "TestMiddlewareBlocksAfterLimit",
+      "production_behavior_claimed": "After the configured RPM is exhausted, subsequent requests must receive HTTP 429 (Too Many Requests). The middleware's !result.Allowed guard is the gate.",
+      "mutation": {
+        "description": "Flip the enforcement condition from `!result.Allowed` to `result.Allowed` so every request that IS allowed gets a 429 and every request that is OVER the limit passes through.",
+        "diff": "-\t\t\tif !result.Allowed {\n+\t\t\tif result.Allowed {",
+        "file_changed": "internal/ratelimit/ratelimit.go",
+        "line_changed": 112
+      },
+      "test_run_command": "GOMAXPROCS=2 nice -n 19 go test ./internal/ratelimit/... -run TestMiddlewareBlocksAfterLimit -count=1 -v",
+      "observed_failure": "=== RUN   TestMiddlewareBlocksAfterLimit\n    ratelimit_test.go:29: request 0: code=429 body=\"{\\\"error\\\":\\\"rate limited\\\"}\" want 200\n--- FAIL: TestMiddlewareBlocksAfterLimit (0.00s)\nFAIL\nFAIL\tdigital.vasic.lava.apigo/internal/ratelimit\t0.237s",
+      "reverted": true,
+      "revert_command": "git -C /Volumes/T7/Projects/lava/lava-api-go checkout -- internal/ratelimit/ratelimit.go",
+      "post_revert_green": true,
+      "post_revert_run": "PASS: TestMiddlewareBlocksAfterLimit (0.00s)",
+      "verdict": "GENUINE",
+      "discrimination_note": "The test immediately detected the inverted guard because it asserts on the HTTP status code of the very first request (expects 200, got 429). The mutation directly targeted the enforcement branch the test claims to verify."
+    },
+    {
+      "id": "T2",
+      "production_file": "internal/cache/cache.go",
+      "test_file": "internal/cache/cache_test.go",
+      "test_name": "TestKeyAnonDefault",
+      "production_behavior_claimed": "An empty authRealmHash string must be treated as 'anon' so Key(\"\") == Key(\"anon\") — the anonymity-realm normalization contract.",
+      "mutation": {
+        "description": "Change the default realm string from 'anon' to 'MUTATED' so that an empty realm and an explicit 'anon' hash to different keys.",
+        "diff": "-\tauthRealmHash = \"anon\"\n+\tauthRealmHash = \"MUTATED\"",
+        "file_changed": "internal/cache/cache.go",
+        "line_changed": 47
+      },
+      "test_run_command": "GOMAXPROCS=2 nice -n 19 go test ./internal/cache/... -run TestKeyAnonDefault -count=1 -v",
+      "observed_failure": "=== RUN   TestKeyAnonDefault\n    cache_test.go:41: Key for empty realm must match key for explicit 'anon'\n--- FAIL: TestKeyAnonDefault (0.00s)\nFAIL\nFAIL\tdigital.vasic.lava.apigo/internal/cache\t0.292s",
+      "reverted": true,
+      "revert_command": "git -C /Volumes/T7/Projects/lava/lava-api-go checkout -- internal/cache/cache.go",
+      "post_revert_green": true,
+      "post_revert_run": "PASS: TestKeyAnonDefault (0.00s)",
+      "verdict": "GENUINE",
+      "discrimination_note": "The test compares the two SHA-256 hex strings directly. The mutation changes the input fed into SHA-256, which guarantees a different 64-character hex output — the equality assertion on the two Key() return values fires immediately."
+    },
+    {
+      "id": "T3",
+      "production_file": "internal/auth/middleware.go",
+      "test_file": "internal/auth/middleware_test.go",
+      "test_name": "TestAuthMiddleware_ActiveUuid_Returns200 (primary) + TestAuthMiddleware_RetiredUuid_Returns426WithMinVersion + TestAuthMiddleware_UnknownUuid_Returns401_AndAdvancesBackoff",
+      "production_behavior_claimed": "constantTimeMapLookup returns (name, true) iff the hash is found in the map; returning true when NOT found would let unknown UUIDs pass as authenticated, retired UUIDs bypass the upgrade gate, and known-active UUIDs get refused.",
+      "mutation": {
+        "description": "Flip the return condition from `found == 1` to `found == 0` so the function returns true precisely when the hash was NOT found, inverting all auth decisions.",
+        "diff": "-\treturn foundName, found == 1\n+\treturn foundName, found == 0",
+        "file_changed": "internal/auth/middleware.go",
+        "line_changed": 112
+      },
+      "test_run_command": "GOMAXPROCS=2 nice -n 19 go test ./internal/auth/... -run 'TestAuthMiddleware_ActiveUuid_Returns200|TestAuthMiddleware_RetiredUuid_Returns426WithMinVersion|TestAuthMiddleware_UnknownUuid_Returns401_AndAdvancesBackoff' -count=1 -v",
+      "observed_failure": "=== RUN   TestAuthMiddleware_ActiveUuid_Returns200\n    middleware_test.go:65: status = 426, want 200; body=\"{\\\"client_name\\\":\\\"\\\",\\\"error\\\":\\\"client_version_unsupported\\\",\\\"min_supported_version_code\\\":0,\\\"min_supported_version_name\\\":\\\"\\\"}\"\n--- FAIL: TestAuthMiddleware_ActiveUuid_Returns200 (0.00s)\n=== RUN   TestAuthMiddleware_RetiredUuid_Returns426WithMinVersion\n    middleware_test.go:94: status = 200, want 426; body=\"\"\n--- FAIL: TestAuthMiddleware_RetiredUuid_Returns426WithMinVersion (0.00s)\n=== RUN   TestAuthMiddleware_UnknownUuid_Returns401_AndAdvancesBackoff\n    middleware_test.go:129: status = 200, want 401\n--- FAIL: TestAuthMiddleware_UnknownUuid_Returns401_AndAdvancesBackoff (0.00s)\nFAIL\nFAIL\tdigital.vasic.lava.apigo/internal/auth\t0.220s",
+      "reverted": true,
+      "revert_command": "git -C /Volumes/T7/Projects/lava/lava-api-go checkout -- internal/auth/middleware.go",
+      "post_revert_green": true,
+      "post_revert_run": "PASS: TestAuthMiddleware_ActiveUuid_Returns200 (0.00s) | PASS: TestAuthMiddleware_RetiredUuid_Returns426WithMinVersion (0.00s) | PASS: TestAuthMiddleware_UnknownUuid_Returns401_AndAdvancesBackoff (0.00s)",
+      "verdict": "GENUINE",
+      "discrimination_note": "The `found == 0` inversion made constantTimeMapLookup report 'found' for every hash NOT in the map and 'not found' for every hash that IS in the map. This cascaded into three simultaneous HTTP-status assertion failures covering active, retired, and unknown client paths — proving the three tests exercise genuinely independent production code branches and none of them passes from luck or mock-layering."
+    }
+  ],
+  "working_tree_clean_post_hunt": true,
+  "clean_verification": "git diff -- internal/auth/middleware.go internal/cache/cache.go internal/ratelimit/ratelimit.go produced empty output",
+  "files_not_touched": [
+    "internal/handlers/",
+    "internal/observability/",
+    "internal/provider/",
+    "internal/mobile/",
+    "all Android/Kotlin files"
+  ]
+}

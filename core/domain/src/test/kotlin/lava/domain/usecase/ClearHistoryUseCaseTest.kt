@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.test.runTest
 import lava.data.api.repository.FavoriteSearchRepository
 import lava.models.Page
+import lava.models.search.Filter
 import lava.models.topic.Author
 import lava.models.topic.Post
 import lava.models.topic.TopicPage
@@ -14,7 +15,6 @@ import lava.testing.repository.TestSearchHistoryRepository
 import lava.testing.repository.TestSuggestsRepository
 import lava.testing.repository.TestVisitedRepository
 import lava.testing.testDispatchers
-import lava.models.search.Filter
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test

@@ -429,6 +429,8 @@ func Status() string {
 
 	b, err := json.Marshal(doc)
 	if err != nil {
+		// no-telemetry: json.Marshal of a plain struct (only string/bool fields) should
+		// never fail; this is a best-effort state snapshot with no ctx available.
 		return `{"state":"stopped","scheme":"https","backend":"sqlite"}`
 	}
 	return string(b)

@@ -14,6 +14,7 @@ import (
 
 	"digital.vasic.lava.apigo/internal/auth"
 	"digital.vasic.lava.apigo/internal/cache"
+	"digital.vasic.lava.apigo/internal/observability"
 	"digital.vasic.lava.apigo/internal/provider"
 )
 
@@ -156,6 +157,15 @@ func (h *MultiSearchHandler) GetMultiSearch(c *gin.Context) {
 		for _, pid := range providerIDs {
 			p, err := h.registry.Get(pid)
 			if err != nil {
+				// §6.AC: unknown provider id is high-value signal; record before SSE.
+				observability.RecordNonFatal(c.Request.Context(), err, observability.NonFatalAttributes{
+					observability.AttrFeature:      "search",
+					observability.AttrOperation:    "multi_search_get_provider",
+					observability.AttrEndpoint:     c.FullPath(),
+					observability.AttrTrackerID:    pid,
+					observability.AttrErrorClass:   "provider_not_found",
+					observability.AttrErrorMessage: err.Error(),
+				})
 				// The user EXPLICITLY requested this provider id (or it came
 				// from the auto-discovery list, which only ever yields
 				// registered ids). An unknown id reaching here therefore means

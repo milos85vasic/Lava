@@ -268,6 +268,8 @@ func (a *ProviderAdapter) Login(ctx context.Context, opts provider.LoginOpts) (*
 func loginResultFromAuthResponse(resp *gen.AuthResponseDto) *provider.LoginResult {
 	success, err := resp.AsAuthResponseDtoSuccessChecked()
 	if err != nil {
+		// no-telemetry: discriminator mismatch — loginResultFromAuthResponse returns nil
+		// and the caller handles it (non-success branch → LoginResult{Success:false}).
 		return nil
 	}
 	return &provider.LoginResult{

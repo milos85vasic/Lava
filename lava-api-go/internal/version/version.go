@@ -9,10 +9,14 @@ package version
 
 const (
 	// Name is the service's semver. Tag prefix: Lava-API-Go-<Name>-<Code>.
-	Name = "2.3.31"
+	// 2.3.32: §6.AC comprehensive non-fatal telemetry — RecordNonFatal on every
+	// provider error path (writeProviderError default branch) + search.go +
+	// the best-effort Firebase-Crashlytics-bridge webhook forwarder
+	// (LAVA_API_FIREBASE_CRASHLYTICS_ENABLED + LAVA_API_NONFATAL_WEBHOOK_URL).
+	Name = "2.3.32"
 
 	// Code is the integer release counter. New tags MUST increment.
-	Code = 2331
+	Code = 2332
 )
 
 // SourceHash is the 64-hex sha256 of the EXACT lava-api-go source codebase that

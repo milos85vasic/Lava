@@ -82,6 +82,9 @@ fun OnboardingScreen(
                     // Track install state: ACTION_MAIN = app was installed.
                     onDeviceApiInstalled.value = isLaunchIntent
                 } catch (e: ActivityNotFoundException) {
+                    // no-telemetry: ActivityNotFoundException in a Composable — AnalyticsTracker
+                    // is not injectable into a Composable; the ViewModel's onBackStep / error
+                    // side-effect path is the telemetry surface for this flow.
                     // Race: app was uninstalled between check and tap.
                     // Or: ACTION_VIEW intent URI scheme not handled (unlikely for https://).
                     // Graceful no-op — user can retry.

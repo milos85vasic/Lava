@@ -93,6 +93,9 @@ class MagnetLinkValidator {
         try {
             URLDecoder.decode(value, Charsets.UTF_8.name())
         } catch (_: IllegalArgumentException) {
+            // no-telemetry: invalid URL-encoding in user-supplied magnet link is an expected
+            // validation outcome (not an application error); this is a pure validator with no
+            // AnalyticsTracker dependency available in core:common.
             value
         }
 

@@ -24,6 +24,7 @@ import (
 	"digital.vasic.lava.apigo/internal/auth"
 	"digital.vasic.lava.apigo/internal/cache"
 	"digital.vasic.lava.apigo/internal/middleware"
+	"digital.vasic.lava.apigo/internal/observability"
 	"digital.vasic.lava.apigo/internal/provider"
 )
 
@@ -136,6 +137,19 @@ func cacheKey(c *gin.Context, method, routeTemplate string, pathVars map[string]
 	return cache.Key(method, routeTemplate, pv, query, authRealmHash)
 }
 
+// requestID extracts the per-request correlation ID from the Gin context.
+// The ID is set by the Firebase auth middleware (or any upstream request-ID
+// middleware); falls back to the empty string so callers can omit the attr
+// rather than emit a meaningless value.
+func requestID(c *gin.Context) string {
+	if v, ok := c.Get("request_id"); ok {
+		if s, ok := v.(string); ok {
+			return s
+		}
+	}
+	return c.GetHeader("X-Request-ID")
+}
+
 // writeJSON emits a JSON response with Content-Type "application/json"
 // (no charset suffix) for parity with the legacy handlers.
 func writeJSON(c *gin.Context, code int, v any) {
@@ -147,7 +161,14 @@ func writeJSON(c *gin.Context, code int, v any) {
 	c.Data(code, "application/json", body)
 }
 
-// writeProviderError maps provider sentinels to HTTP statuses.
+// writeProviderError maps provider sentinels to HTTP statuses and records a
+// §6.AC non-fatal telemetry event for every non-sentinel (unexpected) error.
+// Sentinel errors (NotFound, Forbidden, Unauthorized, CircuitOpen) are
+// expected user-facing states — they are NOT recorded as non-fatals because
+// they represent normal provider behaviour, not unexpected failures.
+// Unexpected errors (default branch) ARE recorded: they indicate a provider
+// implementation bug, a network failure, or a parsing error that the operator
+// must triage remotely.
 func writeProviderError(c *gin.Context, err error) {
 	switch {
 	case errors.Is(err, provider.ErrNotFound):
@@ -159,6 +180,14 @@ func writeProviderError(c *gin.Context, err error) {
 	case errors.Is(err, provider.ErrCircuitOpen):
 		writeJSON(c, http.StatusServiceUnavailable, gin.H{})
 	default:
+		// Unexpected provider error — surface to telemetry (§6.AC).
+		observability.RecordNonFatal(c.Request.Context(), err, observability.NonFatalAttributes{
+			observability.AttrFeature:   "provider",
+			observability.AttrOperation: c.FullPath(),
+			observability.AttrEndpoint:  c.FullPath(),
+			observability.AttrTrackerID: currentProviderID(c),
+			observability.AttrRequestID: requestID(c),
+		})
 		writeJSON(c, http.StatusBadGateway, gin.H{})
 	}
 }

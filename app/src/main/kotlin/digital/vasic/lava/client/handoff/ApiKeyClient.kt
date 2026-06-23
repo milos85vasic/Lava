@@ -3,6 +3,7 @@ package digital.vasic.lava.client.handoff
 import android.content.Context
 import android.net.Uri
 import android.util.Log
+import lava.common.analytics.AnalyticsTracker
 
 /**
  * Handoff data returned by the on-device API app's key ContentProvider.
@@ -33,6 +34,7 @@ data class ApiHandoff(val port: Int, val key: String)
 class ApiKeyClient(
     private val context: Context,
     private val authority: String,
+    private val analytics: AnalyticsTracker,
 ) {
     fun read(): ApiHandoff? {
         return try {
@@ -61,12 +63,28 @@ class ApiKeyClient(
             // §6.AC: surface the denial (message only, never the key) so a
             // mis-signed build is observable rather than silently keyless.
             Log.w(TAG, "API key provider read denied for $authority: ${e.message}")
+            analytics.recordWarning(
+                "API key provider permission denied for $authority",
+                mapOf(
+                    AnalyticsTracker.Params.FEATURE to "handoff",
+                    AnalyticsTracker.Params.OPERATION to "read_api_key",
+                    AnalyticsTracker.Params.ERROR_MESSAGE to (e.message ?: "SecurityException"),
+                ),
+            )
             null
         } catch (e: Exception) {
             // Provider absent, engine not running, or unexpected I/O failure.
             // §6.AC: non-secret signal so an absent provider / I/O fault is
             // observable in logcat (no key value is ever in the message).
             Log.w(TAG, "API key provider read failed for $authority: ${e.message}")
+            analytics.recordWarning(
+                "API key provider read failed for $authority",
+                mapOf(
+                    AnalyticsTracker.Params.FEATURE to "handoff",
+                    AnalyticsTracker.Params.OPERATION to "read_api_key",
+                    AnalyticsTracker.Params.ERROR_MESSAGE to (e.message ?: "unknown"),
+                ),
+            )
             null
         }
     }

@@ -7,6 +7,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import digital.vasic.lava.client.handoff.ApiKeyClient
+import lava.common.analytics.AnalyticsTracker
 import lava.domain.usecase.ActiveApiBaseUrlActivator
 import lava.domain.usecase.ApiKeyProvider
 import lava.network.sse.SseBaseUrlBuilder
@@ -70,10 +71,11 @@ object StartupProvidersModule {
     @Singleton
     fun provideApiKeyProvider(
         @ApplicationContext context: Context,
+        analytics: AnalyticsTracker,
     ): ApiKeyProvider {
         val suffix = if (BuildConfig.DEBUG) ".dev.keyprovider" else ".keyprovider"
         val authority = BuildConfig.API_RELEASE_PACKAGE + suffix
-        val client = ApiKeyClient(context, authority)
+        val client = ApiKeyClient(context, authority, analytics)
         return ApiKeyProvider { _, _ -> client.read()?.key }
     }
 }

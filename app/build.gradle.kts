@@ -63,8 +63,13 @@ android {
         // the binary that ships under it is corrected. Release identity: 1.3.11 (1070).
         // §6.Y post-distribute bump: 1.3.11 (1070) was distributed (debug 7dhneaj2he79g
         // + release 2tjq0j3ab9e2g) with the §6.Z C00 device gate GREEN (thinker KVM,
-        // boot 33s, all_passed:true). 1071 is the next-cycle placeholder so the working
-        // tree reflects the next releasable code (versionName held until a user-visible change).
+        // boot 33s, all_passed:true). 1071 ships comprehensive §6.AC search-failure
+        // telemetry: ApiBackedTrackerClient throws a typed ApiHttpException (status/url/
+        // method) → SearchResultViewModel.recordProviderFailure records a Crashlytics
+        // non-fatal with http_status/request_url/http_method/base_url_host, plus the
+        // ApiKeyClient handoff-key reader + onboarding telemetry. Auth rotated to
+        // android-1.3.11-1071 (fresh pepper, 37-client append-only). versionName held
+        // (diagnostics-only, no user-visible UI change beyond the already-shipped Error+Retry).
         versionCode = 1071
         versionName = "1.3.11"
         // SP-3a Step 6 (2026-04-30): wire Hilt + Compose UI test infra so the

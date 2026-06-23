@@ -117,7 +117,9 @@ android {
         // permits (computed from source, never hand-typed).
         buildConfigField("String", "LAVA_API_SOURCE_HASH", "\"$lavaApiSourceHash\"")
         // §6.Y post-distribute bump: 0.2.11 (16) was distributed (debug 7esmk60v7ki0o
-        // + release 00m6ja0b4evpg). 17 is the next-cycle placeholder (versionName held).
+        // + release 00m6ja0b4evpg). 17 ships §6.AC telemetry: ApiEngineService now records
+        // a Crashlytics non-fatal on ForegroundServiceStartNotAllowedException (the FGS
+        // budget-exhaustion path) instead of swallowing it. versionName held (diagnostics-only).
         versionCode = 17
         versionName = "0.2.11"
         // EncryptedSharedPreferences (androidx.security-crypto) requires API 23+

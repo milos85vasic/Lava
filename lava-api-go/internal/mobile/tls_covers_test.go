@@ -26,9 +26,9 @@ import (
 // does NOT cover the wanted IP would then be reported as covered (reused),
 // which is exactly the LVA-061 host-mismatch bug this gate prevents.
 func TestCertCoversAllIPs_Contract(t *testing.T) {
-	ip1 := net.ParseIP("198.51.100.7")  // TEST-NET-2
-	ip2 := net.ParseIP("203.0.113.42")  // TEST-NET-3
-	ip3 := net.ParseIP("192.0.2.10")    // TEST-NET-1 (not in any SAN set below)
+	ip1 := net.ParseIP("198.51.100.7") // TEST-NET-2
+	ip2 := net.ParseIP("203.0.113.42") // TEST-NET-3
+	ip3 := net.ParseIP("192.0.2.10")   // TEST-NET-1 (not in any SAN set below)
 	loop := net.ParseIP("127.0.0.1")
 
 	leafWith := func(sans ...net.IP) *x509.Certificate {

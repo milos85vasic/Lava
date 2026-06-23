@@ -204,6 +204,8 @@ func (c *Client) fetchFeedOnce(ctx context.Context, u string) (*rssFeed, bool, e
 	resp, err := c.http.Do(req)
 	if err != nil {
 		// Network/timeout — transient (this is the tokyotosho-slow-upstream case).
+		// no-telemetry: error is propagated to the caller via the returned error value;
+		// the search handler's RecordNonFatal covers the provider-level failure.
 		return nil, true, fmt.Errorf("%s: %w", providerID, provider.ErrUnknown)
 	}
 	defer func() { _ = resp.Body.Close() }()
@@ -288,6 +290,8 @@ func parseHumanSize(description string) int64 {
 		if unit == u.suffix {
 			f, err := strconv.ParseFloat(num, 64)
 			if err != nil {
+				// no-telemetry: pure string-to-float parse for RSS size field; malformed
+				// values return 0 (unknown size); no ctx available in this helper.
 				return 0
 			}
 			return int64(f * u.mult)

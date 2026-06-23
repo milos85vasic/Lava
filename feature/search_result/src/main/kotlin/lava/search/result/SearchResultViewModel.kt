@@ -33,6 +33,7 @@ import lava.models.topic.Torrent
 import lava.tracker.api.model.SearchRequest
 import lava.tracker.api.model.SortField
 import lava.tracker.api.model.SortOrder
+import lava.tracker.client.ApiHttpException
 import lava.tracker.client.LavaTrackerSdk
 import lava.tracker.client.MultiSearchEvent
 import org.orbitmvi.orbit.Container
@@ -172,7 +173,7 @@ internal class SearchResultViewModel @Inject constructor(
      * not a secret).
      */
     private fun recordProviderFailure(event: MultiSearchEvent.ProviderFailure) {
-        val context = mapOf(
+        val baseContext = mapOf(
             AnalyticsTracker.Params.FEATURE to "search",
             AnalyticsTracker.Params.OPERATION to "streamMultiSearch",
             AnalyticsTracker.Params.SCREEN to "search_result",
@@ -182,9 +183,34 @@ internal class SearchResultViewModel @Inject constructor(
         val cause = event.cause
         if (cause != null) {
             cause.rethrowIfCancellation()
+            // §6.AC: When the cause is an ApiHttpException, enrich the context with
+            // structured HTTP diagnostic keys so the Crashlytics non-fatal record
+            // carries enough information to triage the failure (status + url + method
+            // + backend host) without any credentials (§6.H — query-stripped url,
+            // no tokens, no cookies).
+            val context = if (cause is ApiHttpException) {
+                val hostOnly = try {
+                    val idx = cause.requestUrl.indexOf("//").let { if (it >= 0) it + 2 else 0 }
+                    val noScheme = cause.requestUrl.substring(idx)
+                    noScheme.substringBefore("/")
+                } catch (_: Exception) {
+                    // no-telemetry: URL host-string extraction fallback within the non-fatal
+                    // recording helper; the outer analytics.recordNonFatal() call below is the
+                    // real telemetry — this catch only selects the fallback context value.
+                    cause.requestUrl
+                }
+                baseContext + mapOf(
+                    AnalyticsTracker.Params.HTTP_STATUS to cause.statusCode.toString(),
+                    AnalyticsTracker.Params.REQUEST_URL to cause.requestUrl,
+                    AnalyticsTracker.Params.HTTP_METHOD to cause.httpMethod,
+                    AnalyticsTracker.Params.BASE_URL_HOST to hostOnly,
+                )
+            } else {
+                baseContext
+            }
             analytics.recordNonFatal(cause, context)
         } else {
-            analytics.recordWarning(event.reason, context)
+            analytics.recordWarning(event.reason, baseContext)
         }
     }
 

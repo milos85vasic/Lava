@@ -35,6 +35,7 @@ import lava.tracker.api.feature.SearchableTracker
 import lava.tracker.api.model.SearchRequest
 import lava.tracker.api.model.SearchResult
 import lava.tracker.api.model.TorrentItem
+import lava.tracker.client.ApiHttpException
 import lava.tracker.client.LavaTrackerSdk
 import lava.tracker.registry.DefaultTrackerRegistry
 import lava.tracker.registry.TrackerClientFactory
@@ -202,15 +203,21 @@ class SearchResultViewModelStreamingTest {
     }
 
     /**
-     * A tracker client whose `search()` THROWS exactly like the real
-     * [lava.tracker.client.ApiBackedTrackerClient.getString] does on a non-2xx
-     * response — `error("API request failed: HTTP <code> for <url>")`. This is
-     * the production failure surface that produced the operator-reported
-     * "Something went wrong" release search bug (2026-06-22).
+     * A tracker client whose `search()` throws [ApiHttpException] exactly as the
+     * real [lava.tracker.client.ApiBackedTrackerClient.getString] now does on a
+     * non-2xx response. Using the typed exception lets the test assert on the
+     * NEW structured keys ([AnalyticsTracker.Params.HTTP_STATUS], etc.) that
+     * [SearchResultViewModel.recordProviderFailure] adds via the
+     * `is ApiHttpException` branch (§6.AC enrichment).
+     *
+     * §6.J falsifiability: if [SearchResultViewModel.recordProviderFailure] drops
+     * the `is ApiHttpException` branch, the four new context-key assertions below
+     * fail ("expected 'http_status' not present in context").
      */
     private class FailingClient(
         override val descriptor: TrackerDescriptor,
-        private val message: String,
+        private val statusCode: Int = 401,
+        private val requestUrl: String = "https://p1.test/v1/p1/search",
     ) : TrackerClient {
         override suspend fun healthCheck(): Boolean = true
         override fun close() {}
@@ -219,7 +226,13 @@ class SearchResultViewModelStreamingTest {
         override fun <T : TrackerFeature> getFeature(featureClass: KClass<T>): T? = when (featureClass) {
             SearchableTracker::class -> object : SearchableTracker {
                 override suspend fun search(request: SearchRequest, page: Int): SearchResult =
-                    error(message)
+                    throw ApiHttpException(
+                        statusCode = statusCode,
+                        requestUrl = requestUrl,
+                        httpMethod = "GET",
+                        responseSnippet = null,
+                        message = "API request failed: HTTP $statusCode for $requestUrl",
+                    )
             } as T
             else -> null
         }
@@ -315,27 +328,35 @@ class SearchResultViewModelStreamingTest {
 
     // CHALLENGE + §6.AC — regression for the 2026-06-22 operator-reported
     // release search failure. The api-app search surfaces a non-2xx response
-    // as ApiBackedTrackerClient.getString's `error("API request failed: HTTP
-    // <code> for <url>")`, which the SDK turns into a ProviderFailure. The VM's
-    // collector previously dropped that cause (`-> Unit`), so the user saw
-    // "Something went wrong" with NO captured reason — undiagnosable on a
-    // release build (no Chucker, cause logged nowhere). This asserts the cause
-    // now reaches telemetry with the failing provider + feature context.
+    // as ApiBackedTrackerClient.getString's ApiHttpException, which the SDK turns
+    // into a ProviderFailure. This test asserts the typed cause reaches Crashlytics
+    // with the NEW structured HTTP diagnostic keys (§6.AC enrichment) so an
+    // operator can triage the HTTP layer remotely without credentials.
     //
-    // Falsifiability (Sixth Law clause 2): revert the production
-    // `is ProviderFailure -> recordProviderFailure(event)` arm back to `-> Unit`
-    // and this test fails — `analytics.nonFatals` is empty, so
-    // `assertEquals(1, analytics.nonFatals.size)` throws
-    // "a per-provider search failure must be recorded exactly once
-    //  expected:<1> but was:<0>".
+    // Falsifiability (Sixth Law clause 2):
+    //  Mutation 1 — revert `is ProviderFailure -> recordProviderFailure(event)` to
+    //               `-> Unit`  → `analytics.nonFatals.size == 0`, fails at
+    //               "expected:<1> but was:<0>".
+    //  Mutation 2 — remove `is ApiHttpException` branch in recordProviderFailure
+    //               → http_status / request_url / http_method / base_url_host
+    //               keys absent from context, fails at the four assertEquals below.
+    //  Mutation 3 — flip FailingClient to throw bare `error()` instead of
+    //               ApiHttpException → same as Mutation 2 (branch not entered).
+    //  All three mutations revert cleanly; test passes green on unmodified code.
+    //
+    // Bluff-Audit:
+    //   Mutation: removed `is ApiHttpException` branch from recordProviderFailure,
+    //     fell back to baseContext only.
+    //   Observed-Failure: assertEquals("401", recorded.context["http_status"])
+    //     → AssertionError: expected:<401> but was:<null>
+    //   Reverted: yes
     @Test
     fun streaming_search_provider_failure_records_http_cause_to_telemetry() =
         runTest(mainDispatcherRule.testDispatcher) {
             val analytics = RecordingAnalytics()
-            val httpFailure = "API request failed: HTTP 401 for https://p1.test/v1/p1/search"
             val vm = createViewModel(
                 providerIds = listOf("p1"),
-                clients = listOf(FailingClient(descriptor("p1"), httpFailure)),
+                clients = listOf(FailingClient(descriptor("p1"), statusCode = 401)),
                 analytics = analytics,
             )
 
@@ -344,30 +365,50 @@ class SearchResultViewModelStreamingTest {
                 cancelAndIgnoreRemainingItems()
             }
 
-            // §6.AC load-bearing — the failing provider's cause (the REAL HTTP
-            // status string from the api client) must reach the non-fatal feed
-            // exactly once, with the provider + feature context, so an operator
-            // can pin the failure mode remotely instead of guessing.
+            // §6.AC load-bearing — the failing provider's ApiHttpException must
+            // reach the non-fatal feed exactly once, enriched with HTTP diagnostic
+            // context, so an operator can triage the failure remotely.
             assertEquals(
                 "a per-provider search failure must be recorded exactly once",
                 1,
                 analytics.nonFatals.size,
             )
             val recorded = analytics.nonFatals.single()
+
+            // Base context — provider + feature always present (prior assertions).
             assertTrue(
-                "recorded cause must carry the HTTP status from getString, was: ${recorded.throwable.message}",
+                "recorded cause must carry the HTTP status in its message, was: ${recorded.throwable.message}",
                 recorded.throwable.message?.contains("HTTP 401") == true,
             )
             assertEquals("p1", recorded.context[AnalyticsTracker.Params.PROVIDER])
             assertEquals("search", recorded.context[AnalyticsTracker.Params.FEATURE])
 
+            // NEW §6.AC structured HTTP context — the four keys that make the
+            // Crashlytics non-fatal record actionable (not just "something failed").
+            assertEquals(
+                "http_status must carry the numeric HTTP code from ApiHttpException",
+                "401",
+                recorded.context[AnalyticsTracker.Params.HTTP_STATUS],
+            )
+            assertEquals(
+                "request_url must carry the query-stripped URL from ApiHttpException",
+                "https://p1.test/v1/p1/search",
+                recorded.context[AnalyticsTracker.Params.REQUEST_URL],
+            )
+            assertEquals(
+                "http_method must carry the HTTP verb from ApiHttpException",
+                "GET",
+                recorded.context[AnalyticsTracker.Params.HTTP_METHOD],
+            )
+            assertEquals(
+                "base_url_host must carry the backend host extracted from requestUrl",
+                "p1.test",
+                recorded.context[AnalyticsTracker.Params.BASE_URL_HOST],
+            )
+
             // User-visible consequence — the only provider failed, so the user
             // sees the Error state WITH a working Retry affordance, NOT a
-            // misleading "Nothing found" Empty. §11.4.120 reconcile: the
-            // corrected handleStreamEnd (4f8204e0 — failed stream → Error, not
-            // Empty) is the right behavior; this assertion is updated to match
-            // it rather than reverting the fix. The telemetry assertions above
-            // are the load-bearing §6.AC signal and are unchanged.
+            // misleading "Nothing found" Empty.
             val finalContent = vm.container.stateFlow.value.searchContent
             assertTrue(
                 "a fully-failed stream must render Error (Retry affordance), was $finalContent",

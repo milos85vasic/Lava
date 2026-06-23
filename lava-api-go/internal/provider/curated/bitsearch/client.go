@@ -183,6 +183,8 @@ func (c *Client) fetchResultsOnce(ctx context.Context, u string) (*apiResponse, 
 	resp, err := c.http.Do(req)
 	if err != nil {
 		// Network/timeout — transient (the slow-upstream case).
+		// no-telemetry: error is propagated to the caller via the returned error value;
+		// the search handler's RecordNonFatal covers the provider-level failure.
 		return nil, true, fmt.Errorf("%s: %w", providerID, provider.ErrUnknown)
 	}
 	defer func() { _ = resp.Body.Close() }()

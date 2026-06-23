@@ -24,6 +24,7 @@ import lava.api.app.MainActivity
 import lava.api.app.R
 import lava.api.app.control.ApiControlState
 import lava.api.app.control.ApiEngineController
+import lava.common.analytics.AnalyticsTracker
 import javax.inject.Inject
 
 /**
@@ -57,6 +58,10 @@ class ApiEngineService : Service() {
      */
     @Inject
     lateinit var controller: ApiEngineController
+
+    /** §6.AC — non-fatal telemetry for OS-denied foreground-service starts. */
+    @Inject
+    lateinit var analytics: AnalyticsTracker
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private var multicastLock: WifiManager.MulticastLock? = null
@@ -125,12 +130,18 @@ class ApiEngineService : Service() {
                 buildNotification(getString(R.string.api_notification_title)),
             )
         } catch (e: ForegroundServiceStartNotAllowedException) {
-            // TODO(§6.AC): route through an AnalyticsTracker.recordNonFatal once
-            // the api-app wires one into the Service (no-telemetry: the api-app
-            // has no AnalyticsTracker injected here yet). The OS denied the
-            // foreground promotion; we cannot serve, so stop cleanly rather than
-            // crash. The shared engine is driven by the VM/controller, which is
-            // unaffected; the user can retry from the app UI.
+            // §6.AC — the OS denied the foreground promotion. Record as a non-fatal
+            // so operators can see OS-version + OEM patterns in Crashlytics.
+            // §6.H: no credentials in context (none are available here).
+            analytics.recordNonFatal(
+                e,
+                mapOf(
+                    AnalyticsTracker.Params.FEATURE to "api_engine",
+                    AnalyticsTracker.Params.MODULE to "ApiEngineService",
+                    AnalyticsTracker.Params.OPERATION to "onStartCommand",
+                    AnalyticsTracker.Params.ERROR to "foreground_start_not_allowed",
+                ),
+            )
             stopSelf()
             return START_NOT_STICKY
         }

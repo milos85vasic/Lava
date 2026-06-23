@@ -179,6 +179,8 @@ func (c *Client) fetchFeedOnce(ctx context.Context, u string) (*rssFeed, bool, e
 	resp, err := c.http.Do(req)
 	if err != nil {
 		// Network/timeout — transient (the slow-upstream case).
+		// no-telemetry: error is propagated to the caller via the returned error value;
+		// the search handler's RecordNonFatal covers the provider-level failure.
 		return nil, true, fmt.Errorf("%s: %w", providerID, provider.ErrUnknown)
 	}
 	defer func() { _ = resp.Body.Close() }()
@@ -198,6 +200,8 @@ func (c *Client) fetchFeedOnce(ctx context.Context, u string) (*rssFeed, bool, e
 
 	feed, err := parseFeed(resp.Body)
 	if err != nil {
+		// no-telemetry: error is propagated to the caller via the returned error value;
+		// the search handler's RecordNonFatal covers the provider-level failure.
 		return nil, false, fmt.Errorf("%s: %w", providerID, provider.ErrUnknown)
 	}
 	return feed, false, nil

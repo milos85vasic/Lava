@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-06-23-comprehensive-nonfatal-telemetry</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1
+id="comprehensive-non-fatal-telemetry--6ac-surface-reference">Comprehensive
+Non-Fatal Telemetry — §6.AC Surface Reference</h1>
+<p><em>Last updated: 2026-06-23 | Applies to: Android client
+(<code>:app</code>, <code>:core:analytics-firebase</code>) and
+<code>lava-api-go</code> service.</em></p>
+<hr />
+<h2 id="1-architecture-overview">1. Architecture Overview</h2>
+<p>Lava implements §6.AC (Comprehensive Non-Fatal Telemetry Mandate)
+across two distinct artifact stacks. Each stack has its own
+implementation of the same conceptual contract: <strong>every catch /
+error / fallback / unexpected-state path in production code MUST surface
+a telemetry event with enough context to triage the failure
+remotely.</strong></p>
+<pre><code>Android Client                          lava-api-go (Go service)
+─────────────────────────────────────   ────────────────────────────────────────
+AnalyticsTracker (interface)            observability.RecordNonFatal()
+  core/common/…/AnalyticsTracker.kt      lava-api-go/internal/observability/
+  :33  recordNonFatal(throwable,ctx)       nonfatal.go :118
+  :49  recordWarning(message,ctx)          RecordWarning() :146
+
+FirebaseAnalyticsTracker (impl)         OTLP structured log → Loki / Grafana
+  core/analytics-firebase/…/             (primary telemetry surface)
+  FirebaseAnalyticsTracker.kt
+  → Firebase Crashlytics non-fatal        Optional webhook bridge
+    channel (mobile SDK only)             (LAVA_API_NONFATAL_WEBHOOK_URL)
+                                          → operator-configured HTTP collector
+NoOpAnalyticsTracker (fallback)
+  (used when Firebase clients null)</code></pre>
+<h3 id="11-android-contract--analyticstracker">1.1 Android contract —
+<code>AnalyticsTracker</code></h3>
+<p>File:
+<code>core/common/src/main/kotlin/lava/common/analytics/AnalyticsTracker.kt</code></p>
+<p>The project-wide interface declares two telemetry methods (lines 33,
+49):</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">fun</span> <span class="fu">recordNonFatal</span><span class="op">(</span><span class="va">throwable</span><span class="op">:</span> <span class="dt">Throwable</span><span class="op">,</span> <span class="va">context</span><span class="op">:</span> <span class="dt">Map</span>&lt;<span class="va">String</span><span class="op">,</span> <span class="va">String</span>&gt; <span class="op">=</span> emptyMap<span class="op">())</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="kw">fun</span> <span class="fu">recordWarning</span><span class="op">(</span><span class="va">message</span><span class="op">:</span> <span class="dt">String</span><span class="op">,</span> <span class="va">context</span><span class="op">:</span> <span class="dt">Map</span>&lt;<span class="va">String</span><span class="op">,</span> <span class="va">String</span>&gt; <span class="op">=</span> emptyMap<span class="op">())</span></span></code></pre></div>
+<p><code>recordNonFatal</code> handles <strong>throwable</strong>
+exceptions caught by production code. <code>recordWarning</code> handles
+<strong>non-throwable</strong> unexpected situations — degraded paths,
+cache misses, mDNS-returned-zero,
+capability-declared-but-feature-null.</p>
+<p>The <code>Params</code> object (lines 66–88) defines all canonical
+attribute keys in three tiers:</p>
+<table>
+<thead>
+<tr>
+<th>Tier</th>
+<th>Keys</th>
+<th>Source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>§6.AC mandatory</td>
+<td><code>feature</code>, <code>module</code>, <code>operation</code>,
+<code>error_class</code>, <code>error_message</code>,
+<code>screen</code></td>
+<td>Lines 67–73</td>
+</tr>
+<tr>
+<td>Domain-specific</td>
+<td><code>provider</code>, <code>query</code>, <code>category_id</code>,
+<code>topic_id</code>, <code>error</code>,
+<code>endpoint_kind</code></td>
+<td>Lines 76–81</td>
+</tr>
+<tr>
+<td>HTTP-layer diagnostic</td>
+<td><code>http_status</code>, <code>request_url</code>,
+<code>http_method</code>, <code>base_url_host</code></td>
+<td>Lines 83–88</td>
+</tr>
+</tbody>
+</table>
+<p>The HTTP-layer tier was added to enable structured triage of
+<code>ApiHttpException</code>-bearing failures without requiring
+Crashlytics dashboard access to the raw exception message.</p>
+<h3 id="12-android-implementation--firebaseanalyticstracker">1.2 Android
+implementation — <code>FirebaseAnalyticsTracker</code></h3>
+<p>File:
+<code>core/analytics-firebase/src/main/kotlin/lava/analytics/firebase/FirebaseAnalyticsTracker.kt</code></p>
+<p>Key implementation details:</p>
+<ul>
+<li><strong>Constructor</strong> (line ~20):
+<code>FirebaseAnalyticsTracker(analytics: FirebaseAnalytics?, crashlytics: FirebaseCrashlytics?)</code>
+— both clients are nullable. If both are null, the Hilt module installs
+<code>NoOpAnalyticsTracker</code> instead, so Firebase initialisation
+failure cannot crash production code.</li>
+<li><strong><code>recordNonFatal</code></strong> (lines 51–66):
+<ol type="1">
+<li>Calls <code>isCancellationOrWraps()</code> (lines 76–85) — filters
+<code>CancellationException</code> and any exception whose cause chain
+(up to depth 32) contains one. Forensic anchor: Crashlytics issue
+<code>7df61fdba64f9928b067624d6db395ca</code> was 8
+<code>JobCancellationException</code> events from
+<code>viewModelScope</code> teardown; those are structured-concurrency
+noise, not real failures.</li>
+<li>Sets each context entry as a Crashlytics custom key:
+<code>c.setCustomKey(key, value.take(MAX_VALUE_CHARS))</code> (line
+63).</li>
+<li>Calls <code>c.recordException(throwable)</code> (line 64) to surface
+in the non-fatal feed.</li>
+</ol></li>
+<li><strong><code>recordWarning</code></strong> (lines 96–105):
+<ol type="1">
+<li>Logs a breadcrumb:
+<code>c.log("WARN: ${message.take(MAX_VALUE_CHARS)} ctx=$context")</code>
+(line 101).</li>
+<li>Sets custom keys (line 102).</li>
+<li>Records <code>LavaNonFatalWarning(message)</code> (line 103) — a
+synthetic exception (line 129:
+<code>internal class LavaNonFatalWarning(message: String) : RuntimeException(message)</code>)
+so non-throwable warnings surface in the <strong>same</strong> non-fatal
+feed as real exceptions.</li>
+</ol></li>
+<li><strong><code>MAX_VALUE_CHARS = 1024</code></strong> (line 119):
+applied to every custom key value and to warning messages. Mirrors the
+Go side's <code>maxValueChars = 1024</code>
+(<code>nonfatal.go:91</code>).</li>
+</ul>
+<h3 id="13-go-implementation--observabilityrecordnonfatal">1.3 Go
+implementation — <code>observability.RecordNonFatal</code></h3>
+<p>File: <code>lava-api-go/internal/observability/nonfatal.go</code></p>
+<pre><code>RecordNonFatal(ctx, err, attrs)  :118
+RecordWarning(ctx, message, attrs)  :146</code></pre>
+<p>Two effects per call:</p>
+<ol type="1">
+<li><strong>Always</strong>: structured <code>slog.WarnContext</code>
+log (lines 133–138 for non-fatal, 148–153 for warning) via the OTLP
+pipeline → Loki/Grafana. The <code>error</code>,
+<code>error_class</code>, and every <code>attrs</code> key appear as
+queryable log fields.</li>
+<li><strong>Optionally</strong>: <code>webhookForward()</code> (line
+139/153) to an operator-configured HTTP endpoint when
+<code>LAVA_API_FIREBASE_CRASHLYTICS_ENABLED=true</code> AND
+<code>LAVA_API_NONFATAL_WEBHOOK_URL</code> is set.</li>
+</ol>
+<p>Cancellation filtering (lines 125–130): <code>context.Canceled</code>
+and <code>context.DeadlineExceeded</code> are silently skipped at DEBUG
+level — the Go-side symmetric of the Android
+<code>CancellationException</code> filter.</p>
+<p><code>classOf(err)</code> (line 238): walks the <code>Unwrap()</code>
+chain (max depth 32) to extract the deepest concrete type name via
+<code>%T</code> formatting. This was fixed in LVA-021: the prior
+fallback returned <code>"error"</code> for all
+<code>fmt.Errorf</code>-wrapped stdlib errors
+(<code>*net.OpError</code>, <code>*url.Error</code>, etc.), collapsing
+every backend HTTP failure into one Loki bucket.</p>
+<hr />
+<h2 id="2-search-failure-diagnosis-path-priority-walkthrough">2.
+Search-Failure Diagnosis Path (Priority Walkthrough)</h2>
+<p>This is the highest-value telemetry path: a user searches, a provider
+fails with HTTP 401 or connection-refused, and the operator needs to
+identify the failing provider + status code from a production
+Crashlytics or Loki record without a device attached.</p>
+<h3 id="step-by-step-android-client">Step-by-step (Android client)</h3>
+<p><strong>Source</strong>:
+<code>feature/search_result/src/main/kotlin/lava/search/result/SearchResultViewModel.kt</code>,
+<code>recordProviderFailure()</code> at line 175.</p>
+<p>When <code>sdk.streamMultiSearch()</code> (line 121) emits a
+<code>MultiSearchEvent.ProviderFailure</code>:</p>
+<pre><code>handleMultiSearchEvent()  :129
+  → case ProviderFailure → recordProviderFailure(event)  :140
+      builds baseContext  :176–182
+        feature=&quot;search&quot;, operation=&quot;streamMultiSearch&quot;,
+        screen=&quot;search_result&quot;, provider=event.providerId,
+        error_message=event.reason
+      if cause != null:  :183
+        cause.rethrowIfCancellation()  :185  ← drops CancellationException
+        if cause is ApiHttpException:  :191
+          extracts host-only from requestUrl  :192–198
+          enriches context with HTTP keys:  :199–204
+            http_status=cause.statusCode
+            request_url=cause.requestUrl   ← query-stripped, no credentials
+            http_method=cause.httpMethod
+            base_url_host=hostOnly
+          analytics.recordNonFatal(cause, enrichedContext)  :208
+        else:
+          analytics.recordNonFatal(cause, baseContext)  :208
+      else (no cause throwable):
+        analytics.recordWarning(event.reason, baseContext)  :210</code></pre>
+<p>The result in Crashlytics: a non-fatal record whose custom keys
+include <code>provider=rutracker</code>, <code>http_status=401</code>,
+<code>request_url=https://api.vasic.digital/v1/rutracker/search</code>,
+<code>base_url_host=api.vasic.digital</code>. This is the information
+the operator needs to determine whether the failure is an auth-key
+expiry, a LAN routing issue, or a tracker outage.</p>
+<p>Prior to this implementation the <code>ProviderFailure</code> branch
+was <code>-&gt; Unit</code> (the <code>// §6.AC</code> comment in
+<code>handleMultiSearchEvent</code> line 142 is the original silent
+no-op). The operator-reported "release-only search failure" on
+2026-06-22 was undiagnosable precisely because no context was
+captured.</p>
+<h3 id="the-apihttpexception-shape">The <code>ApiHttpException</code>
+shape</h3>
+<p>File:
+<code>core/tracker/client/src/main/kotlin/lava/tracker/client/ApiBackedTrackerClient.kt</code>,
+lines 48–54:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> ApiHttpException<span class="op">(</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">val</span> <span class="va">statusCode</span><span class="op">:</span> <span class="dt">Int</span><span class="op">,</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">val</span> <span class="va">requestUrl</span><span class="op">:</span> <span class="dt">String</span><span class="op">,</span>   <span class="co">// query-stripped by stripQueryForTelemetry(:328)</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">val</span> <span class="va">httpMethod</span><span class="op">:</span> <span class="dt">String</span><span class="op">,</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">val</span> <span class="va">responseSnippet</span><span class="op">:</span> <span class="dt">String</span><span class="op">?,</span>  <span class="co">// redacted+truncated to 200 chars (:346)</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    <span class="va">message</span><span class="op">:</span> <span class="dt">String</span><span class="op">,</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="op">)</span> <span class="op">:</span> <span class="dt">IOException</span><span class="op">(</span><span class="va">message</span><span class="op">)</span></span></code></pre></div>
+<p>Thrown at lines 268–281 (<code>getString</code>), 283–296
+(<code>getBytes</code>), 298–317 (<code>postJson</code>) whenever the
+upstream proxy returns a non-2xx status. Every throw already has
+query-stripped URL and credential-redacted response snippet — so the
+exception is safe to pass directly to <code>recordNonFatal</code>.</p>
+<h3 id="parallel-path-on-the-go-side">Parallel path on the Go side</h3>
+<p>File: <code>lava-api-go/internal/handlers/v1/handlers.go</code>,
+<code>writeProviderError()</code> at line 172.</p>
+<p>All v1 handlers call <code>writeProviderError(c, err)</code> for
+provider-layer failures. The function's <code>default</code> branch
+(line 182) records unexpected errors:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>observability<span class="op">.</span>RecordNonFatal<span class="op">(</span>c<span class="op">.</span>Request<span class="op">.</span>Context<span class="op">(),</span> err<span class="op">,</span> observability<span class="op">.</span>NonFatalAttributes<span class="op">{</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    observability<span class="op">.</span>AttrFeature<span class="op">:</span>   <span class="st">&quot;provider&quot;</span><span class="op">,</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    observability<span class="op">.</span>AttrOperation<span class="op">:</span> c<span class="op">.</span>FullPath<span class="op">(),</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    observability<span class="op">.</span>AttrEndpoint<span class="op">:</span>  c<span class="op">.</span>FullPath<span class="op">(),</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    observability<span class="op">.</span>AttrTrackerID<span class="op">:</span> currentProviderID<span class="op">(</span>c<span class="op">),</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    observability<span class="op">.</span>AttrRequestID<span class="op">:</span> requestID<span class="op">(</span>c<span class="op">),</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="op">})</span></span></code></pre></div>
+<p>Sentinel errors (<code>ErrNotFound</code>, <code>ErrForbidden</code>,
+<code>ErrUnauthorized</code>, <code>ErrCircuitOpen</code>) are
+intentionally NOT recorded as non-fatals — they represent expected
+provider responses and would flood the feed. Only the
+<code>default</code> branch (unexpected provider implementation bugs,
+network failures, parsing errors) fires telemetry.</p>
+<hr />
+<h2 id="3-mandatory-attributes-and-6h-redaction-rules">3. Mandatory
+Attributes and §6.H Redaction Rules</h2>
+<h3 id="31-mandatory-attribute-table">3.1 Mandatory attribute table</h3>
+<p>Both platforms share the same attribute vocabulary. The Go constants
+live in <code>nonfatal.go:69–87</code>; the Kotlin constants in
+<code>AnalyticsTracker.Params</code> at lines 66–88.</p>
+<table>
+<thead>
+<tr>
+<th>Attribute key</th>
+<th>Kotlin constant</th>
+<th>Go constant</th>
+<th>Mandatory when</th>
+<th>Example value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>feature</code></td>
+<td><code>Params.FEATURE</code></td>
+<td><code>AttrFeature</code></td>
+<td>Always</td>
+<td><code>"search"</code>, <code>"rutracker"</code>,
+<code>"auth"</code></td>
+</tr>
+<tr>
+<td><code>module</code></td>
+<td><code>Params.MODULE</code></td>
+<td>—</td>
+<td>Android only</td>
+<td><code>"SearchResultViewModel"</code></td>
+</tr>
+<tr>
+<td><code>operation</code></td>
+<td><code>Params.OPERATION</code></td>
+<td><code>AttrOperation</code></td>
+<td>Always</td>
+<td><code>"streamMultiSearch"</code>, <code>"login"</code></td>
+</tr>
+<tr>
+<td><code>error_class</code></td>
+<td><code>Params.ERROR_CLASS</code></td>
+<td><code>AttrErrorClass</code></td>
+<td>When known</td>
+<td><code>"ApiHttpException"</code>, <code>"*net.OpError"</code></td>
+</tr>
+<tr>
+<td><code>error_message</code></td>
+<td><code>Params.ERROR_MESSAGE</code></td>
+<td><code>AttrErrorMessage</code></td>
+<td>Always (truncated)</td>
+<td><code>"HTTP 401 for …"</code></td>
+</tr>
+<tr>
+<td><code>screen</code></td>
+<td><code>Params.SCREEN</code></td>
+<td>—</td>
+<td>Android only</td>
+<td><code>"search_result"</code></td>
+</tr>
+<tr>
+<td><code>endpoint</code></td>
+<td>—</td>
+<td><code>AttrEndpoint</code></td>
+<td>Go only</td>
+<td><code>"/v1/rutracker/search"</code></td>
+</tr>
+<tr>
+<td><code>request_id</code></td>
+<td>—</td>
+<td><code>AttrRequestID</code></td>
+<td>Go only</td>
+<td><code>"req-abc-123"</code></td>
+</tr>
+<tr>
+<td><code>tracker_id</code></td>
+<td>—</td>
+<td><code>AttrTrackerID</code></td>
+<td>Go only</td>
+<td><code>"rutracker"</code></td>
+</tr>
+<tr>
+<td><code>provider</code></td>
+<td><code>Params.PROVIDER</code></td>
+<td>—</td>
+<td>Android, multi-search</td>
+<td><code>"rutracker"</code></td>
+</tr>
+<tr>
+<td><code>http_status</code></td>
+<td><code>Params.HTTP_STATUS</code></td>
+<td>—</td>
+<td>Android, ApiHttpException</td>
+<td><code>"401"</code></td>
+</tr>
+<tr>
+<td><code>request_url</code></td>
+<td><code>Params.REQUEST_URL</code></td>
+<td>—</td>
+<td>Android, ApiHttpException</td>
+<td><code>"https://…/search"</code></td>
+</tr>
+<tr>
+<td><code>http_method</code></td>
+<td><code>Params.HTTP_METHOD</code></td>
+<td>—</td>
+<td>Android, ApiHttpException</td>
+<td><code>"GET"</code></td>
+</tr>
+<tr>
+<td><code>base_url_host</code></td>
+<td><code>Params.BASE_URL_HOST</code></td>
+<td>—</td>
+<td>Android, ApiHttpException</td>
+<td><code>"api.vasic.digital"</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="32-6h-redaction-rules--what-is-never-logged">3.2 §6.H redaction
+rules — what is NEVER logged</h3>
+<p>The following values are <strong>categorically forbidden</strong>
+from appearing in any telemetry attribute, log line, or webhook payload.
+Violations are a §6.H security incident.</p>
+<table>
+<thead>
+<tr>
+<th>Forbidden value class</th>
+<th>Examples</th>
+<th>Where the risk arises</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Tracker login credentials</td>
+<td>RuTracker username/password, Kinozal API key</td>
+<td><code>LoginRequestDto</code> in
+<code>ApiBackedTrackerClient</code></td>
+</tr>
+<tr>
+<td>Session cookies / tokens</td>
+<td>Tracker session cookie value, <code>sessionToken</code> field</td>
+<td><code>withAuth()</code> extension, <code>Auth-Token</code> header
+<strong>value</strong></td>
+</tr>
+<tr>
+<td>The <code>Lava-Auth</code> / <code>Auth-Token</code> header
+<strong>value</strong></td>
+<td>The tracker-specific base64 cookie string</td>
+<td>Attached by <code>withAuth()</code> at
+<code>ApiBackedTrackerClient.kt:124</code></td>
+</tr>
+<tr>
+<td>Signed URLs / query-string tokens</td>
+<td>Any <code>?token=</code>, <code>?key=</code>, <code>?auth=</code>
+query parameter</td>
+<td>Stripped by <code>stripQueryForTelemetry()</code> at line 328</td>
+</tr>
+<tr>
+<td>Firebase token (<code>LAVA_FIREBASE_TOKEN</code>)</td>
+<td>The CI token for App Distribution</td>
+<td>Never enters production code paths</td>
+</tr>
+<tr>
+<td>Database connection string</td>
+<td>Postgres DSN with password embedded</td>
+<td>Go only — never passes through handler layer</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Automatic redaction mechanisms:</strong></p>
+<ul>
+<li><strong>Android</strong> — <code>redactAndTruncate()</code> in
+<code>ApiBackedTrackerClient.kt:346</code> applies a regex over the
+response snippet before it reaches
+<code>ApiHttpException.responseSnippet</code>. Pattern:
+<code>(?i)(token|key|cookie|auth|bearer|password|secret)([=:\s]+)\S+</code>
+→ <code>$1$2[REDACTED]</code>.</li>
+<li><strong>Android</strong> — <code>request_url</code> carried by
+<code>ApiHttpException</code> is the output of
+<code>stripQueryForTelemetry()</code> (line 328–334), which strips
+<code>?...</code> and everything after it.</li>
+<li><strong>Go</strong> — <code>redactIfSensitive(key, value)</code> in
+<code>nonfatal.go:294</code> replaces the value with
+<code>"&lt;redacted&gt;"</code> for any attribute whose key
+substring-matches: <code>password</code>, <code>token</code>,
+<code>secret</code>, <code>api_key</code>, <code>apikey</code>,
+<code>cookie</code>, <code>authorization</code>, <code>hmac</code>,
+<code>pepper</code>.</li>
+<li><strong>Go</strong> — The same redaction is applied to the webhook
+<code>attrs</code> copy at <code>nonfatal.go:196–200</code> before JSON
+encoding, so credentials cannot leak to the webhook collector
+either.</li>
+</ul>
+<p>The <code>Auth-Token</code> header <strong>name</strong>
+(<code>"Auth-Token"</code>) is a §6.R-exempt wire-protocol constant at
+<code>ApiBackedTrackerClient.kt:356</code>. Its <strong>value</strong>
+(the session cookie) must never reach telemetry — only the header name
+is safe to reference in documentation.</p>
+<hr />
+<h2 id="4-coverage-checker--scriptscheck-non-fatal-coveragesh">4.
+Coverage Checker — <code>scripts/check-non-fatal-coverage.sh</code></h2>
+<p>The §6.AC coverage checker is a bash script that scans Kotlin source
+under <code>core/</code> and <code>feature/</code> for
+<code>catch</code> blocks and flags those lacking a
+<code>recordNonFatal</code> / <code>recordWarning</code> call or an
+explicit <code>// no-telemetry: &lt;reason&gt;</code> opt-out
+comment.</p>
+<h3 id="running-the-checker">Running the checker</h3>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Advisory mode (default) — prints violations, exits 0</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./scripts/check-non-fatal-coverage.sh</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Strict mode — exits 1 on any violation (used by scripts/ci.sh --full)</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="ex">./scripts/check-non-fatal-coverage.sh</span> <span class="at">--strict</span></span></code></pre></div>
+<h3 id="what-it-scans">What it scans</h3>
+<p>The checker looks for one of three coverage markers inside each
+<code>catch</code> block:</p>
+<table>
+<thead>
+<tr>
+<th>Marker</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>analytics.recordNonFatal(</code></td>
+<td>Real exception surfaced to telemetry</td>
+</tr>
+<tr>
+<td><code>analytics.recordWarning(</code></td>
+<td>Non-throwable warning surfaced to telemetry</td>
+</tr>
+<tr>
+<td><code>// no-telemetry:</code></td>
+<td>Explicit opt-out with a required reason</td>
+</tr>
+<tr>
+<td><code>rethrowIfCancellation()</code></td>
+<td>Followed by a recordNonFatal — CancellationException filtered
+first</td>
+</tr>
+</tbody>
+</table>
+<h3 id="legitimate--no-telemetry-opt-outs">Legitimate
+<code>// no-telemetry:</code> opt-outs</h3>
+<p>A <code>// no-telemetry:</code> opt-out is valid when the fallback is
+genuinely benign and recording it would create noise rather than signal.
+Two canonical examples already in the codebase:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co">// SearchResultViewModel.kt:141–143</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="co">// no-telemetry: a provider lacking TrackerCapability.SEARCH is a</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="co">// benign terminal state (skipped, not failed) per the</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co">// MultiSearchEvent KDoc — not an error worth a non-fatal.</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="kw">is</span> MultiSearchEvent<span class="op">.</span>ProviderUnsupported <span class="op">-&gt;</span> <span class="kw">Unit</span></span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co">// General pattern for CancellationException paths</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>cause<span class="op">.</span>rethrowIfCancellation<span class="op">()</span>   <span class="co">// rethrows if cancellation; continues if not</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>analytics<span class="op">.</span>recordNonFatal<span class="op">(</span>cause<span class="op">,</span> context<span class="op">)</span>  <span class="co">// only reached for real errors</span></span></code></pre></div>
+<h3 id="6ac-debt--mechanical-enforcement-status">§6.AC-debt — mechanical
+enforcement status</h3>
+<p>The checker currently runs in <strong>advisory mode</strong> by
+default. <code>scripts/ci.sh --changed-only</code> does NOT yet
+hard-fail on coverage gaps. <code>scripts/ci.sh --full</code> runs
+<code>--strict</code>. The Go-side equivalent
+(<code>check-non-fatal-coverage.sh</code> for Go) is owed and tracked
+under §6.AC-debt. Reviewers manually verify every commit that adds a
+<code>try/catch</code> or <code>runCatching</code> block.</p>
+<hr />
+<h2 id="5-operator-runbook">5. Operator Runbook</h2>
+<h3 id="51-android-non-fatal-dashboard--firebase-crashlytics">5.1
+Android non-fatal dashboard — Firebase Crashlytics</h3>
+<p><strong>Where</strong>: Firebase Console → Lava project → Crashlytics
+→ Non-fatals tab.</p>
+<p>Each non-fatal event surfaces with:</p>
+<ul>
+<li>The exception type (or <code>LavaNonFatalWarning</code> for
+warnings).</li>
+<li>The exception message.</li>
+<li>Crashlytics custom keys — these are the §6.AC attributes. Click any
+event → "Keys" tab.</li>
+</ul>
+<p><strong>Useful Crashlytics filter combinations:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Goal</th>
+<th>Filter</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>All search failures</td>
+<td>Non-fatals where <code>feature=search</code></td>
+</tr>
+<tr>
+<td>401 failures only</td>
+<td>Non-fatals where <code>http_status=401</code></td>
+</tr>
+<tr>
+<td>Failures on a specific provider</td>
+<td>Non-fatals where <code>provider=rutracker</code></td>
+</tr>
+<tr>
+<td>Failures hitting a specific backend</td>
+<td>Non-fatals where <code>base_url_host=api.vasic.digital</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Closing a Crashlytics issue</strong>: per §6.O, mark
+"Resolved" in the Console ONLY after the fix commit lands AND
+<code>.lava-ci-evidence/crashlytics-resolved/&lt;date&gt;-&lt;slug&gt;.md</code>
+exists with: issue ID, stack-trace summary, root-cause analysis, fix
+commit SHA, and links to the regression test. Do not close-mark before
+the test coverage exists.</p>
+<h3 id="52-go-service-dashboard--loki--grafana">5.2 Go service dashboard
+— Loki / Grafana</h3>
+<p><strong>Honest note</strong>: Firebase Crashlytics has <strong>no
+public server-side non-fatal ingest API</strong> — it is a
+mobile-SDK-only product. There is no POST endpoint that accepts
+non-fatal events from a Go server. The <code>nonfatal.go</code> package
+comment (lines 22–33) states this explicitly. The backend's primary
+telemetry surface is <strong>Loki/Grafana</strong> via the OTLP
+structured-log pipeline.</p>
+<p><strong>LogQL queries for common triage scenarios:</strong></p>
+<pre class="logql"><code># All non-fatal events from the Go service
+{service=&quot;lava-api-go&quot;} |= &quot;non-fatal event&quot;
+
+# Provider failures (unexpected errors in v1 handlers)
+{service=&quot;lava-api-go&quot;} |= &quot;non-fatal event&quot; | json | feature=&quot;provider&quot;
+
+# Failures for a specific tracker
+{service=&quot;lava-api-go&quot;} |= &quot;non-fatal event&quot; | json | tracker_id=&quot;rutracker&quot;
+
+# Warning events (fallbacks, capability mismatches)
+{service=&quot;lava-api-go&quot;} |= &quot;warning event&quot;
+
+# Cross-reference with a trace: find the request_id in Tempo
+{service=&quot;lava-api-go&quot;} |= &quot;non-fatal event&quot; | json | request_id=&quot;&lt;id&gt;&quot;</code></pre>
+<h3 id="53-webhook-bridge--optional-forward-to-external-collectors">5.3
+Webhook bridge — optional forward to external collectors</h3>
+<p>When <code>LAVA_API_FIREBASE_CRASHLYTICS_ENABLED=true</code> AND
+<code>LAVA_API_NONFATAL_WEBHOOK_URL</code> is set (both from
+<code>.env</code>, per §6.R — never hardcoded), the Go service posts a
+best-effort JSON payload for each non-fatal/warning event
+(<code>nonfatal.go:184–233</code>).</p>
+<p><strong>JSON shape</strong> (<code>webhookBody</code> struct at line
+164):</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;event&quot;</span><span class="fu">:</span> <span class="st">&quot;non_fatal&quot;</span><span class="fu">,</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;error_class&quot;</span><span class="fu">:</span> <span class="st">&quot;*url.Error&quot;</span><span class="fu">,</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;error_message&quot;</span><span class="fu">:</span> <span class="st">&quot;HTTP 502 for /v1/rutracker/search…&quot;</span><span class="fu">,</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;attrs&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;feature&quot;</span><span class="fu">:</span> <span class="st">&quot;provider&quot;</span><span class="fu">,</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;operation&quot;</span><span class="fu">:</span> <span class="st">&quot;/v1/:provider/search&quot;</span><span class="fu">,</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;tracker_id&quot;</span><span class="fu">:</span> <span class="st">&quot;rutracker&quot;</span><span class="fu">,</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;request_id&quot;</span><span class="fu">:</span> <span class="st">&quot;req-abc-123&quot;</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">},</span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;ts&quot;</span><span class="fu">:</span> <span class="st">&quot;2026-06-23T14:05:00Z&quot;</span></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<p>The webhook call:</p>
+<ul>
+<li>Runs in its own goroutine (fire-and-forget), <strong>never blocks
+the user request path</strong>.</li>
+<li>Has a 2-second timeout independent of the caller's context.</li>
+<li>Swallows all errors and recovers from panics
+(<code>nonfatal.go:219</code>).</li>
+<li>The <code>attrs</code> copy is credential-redacted before JSON
+encoding (<code>nonfatal.go:196–200</code>).</li>
+</ul>
+<p><strong>When the flag is set but the URL is empty</strong>, a
+one-time <code>WARN</code> log is emitted (<code>nonfatal.go:191</code>)
+and forwarding is silently disabled — the <code>sync.Once</code> at line
+160 ensures this appears only once per process.</p>
+<p><strong>What the webhook enables</strong>: routing non-fatals to a
+Grafana Loki push endpoint, a custom Cloud Function, a Slack webhook, or
+— if the operator wires a Cloud Function — into Firebase Crashlytics
+from the server side. The bridge itself is transport-agnostic; the
+operator chooses the collector.</p>
+<h3 id="54-checking-for-6h-credential-leaks-in-telemetry">5.4 Checking
+for §6.H credential leaks in telemetry</h3>
+<p>If a non-fatal event's Crashlytics record or Loki log line contains
+what appears to be a credential, session token, or signed URL, file a
+§6.H incident immediately:</p>
+<ol type="1">
+<li>Record the event details in
+<code>.lava-ci-evidence/sixth-law-incidents/&lt;date&gt;-&lt;slug&gt;.json</code>.</li>
+<li>Identify the call site where the attribute was constructed (the
+Crashlytics "Keys" tab shows exact key names; match to
+<code>AnalyticsTracker.Params.*</code> constants).</li>
+<li>Verify <code>stripQueryForTelemetry()</code> and
+<code>redactAndTruncate()</code> are both applied before the value
+reaches <code>ApiHttpException</code>. If a new HTTP call site bypasses
+these helpers, that is the fix location.</li>
+<li>On the Go side: verify <code>redactIfSensitive()</code> is applied.
+If a new attribute key name was introduced that doesn't contain one of
+the patterns in <code>sensitiveAttrPatterns</code> (line 98–108) but
+carries a sensitive value, add the pattern.</li>
+<li>Rotate the exposed credential per §6.H clause 6.</li>
+</ol>
+<hr />
+<h2 id="fileline-reference-index">File:Line Reference Index</h2>
+<table>
+<thead>
+<tr>
+<th>Description</th>
+<th>File</th>
+<th>Lines</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>AnalyticsTracker</code> interface —
+<code>recordNonFatal</code></td>
+<td><code>core/common/…/AnalyticsTracker.kt</code></td>
+<td>33</td>
+</tr>
+<tr>
+<td><code>AnalyticsTracker</code> interface —
+<code>recordWarning</code></td>
+<td><code>core/common/…/AnalyticsTracker.kt</code></td>
+<td>49</td>
+</tr>
+<tr>
+<td><code>Params</code> mandatory attribute constants</td>
+<td><code>core/common/…/AnalyticsTracker.kt</code></td>
+<td>66–73</td>
+</tr>
+<tr>
+<td><code>Params</code> HTTP-layer diagnostic constants</td>
+<td><code>core/common/…/AnalyticsTracker.kt</code></td>
+<td>83–88</td>
+</tr>
+<tr>
+<td><code>FirebaseAnalyticsTracker.recordNonFatal</code></td>
+<td><code>core/analytics-firebase/…/FirebaseAnalyticsTracker.kt</code></td>
+<td>51–66</td>
+</tr>
+<tr>
+<td><code>isCancellationOrWraps()</code> (CancellationException
+filter)</td>
+<td><code>core/analytics-firebase/…/FirebaseAnalyticsTracker.kt</code></td>
+<td>76–85</td>
+</tr>
+<tr>
+<td><code>recordWarning</code> → <code>LavaNonFatalWarning</code>
+synthetic exception</td>
+<td><code>core/analytics-firebase/…/FirebaseAnalyticsTracker.kt</code></td>
+<td>96–105, 129</td>
+</tr>
+<tr>
+<td><code>MAX_VALUE_CHARS = 1024</code></td>
+<td><code>core/analytics-firebase/…/FirebaseAnalyticsTracker.kt</code></td>
+<td>119</td>
+</tr>
+<tr>
+<td><code>ApiHttpException</code> class definition</td>
+<td><code>core/tracker/client/…/ApiBackedTrackerClient.kt</code></td>
+<td>48–54</td>
+</tr>
+<tr>
+<td><code>stripQueryForTelemetry()</code></td>
+<td><code>core/tracker/client/…/ApiBackedTrackerClient.kt</code></td>
+<td>328–334</td>
+</tr>
+<tr>
+<td><code>redactAndTruncate()</code></td>
+<td><code>core/tracker/client/…/ApiBackedTrackerClient.kt</code></td>
+<td>346–350</td>
+</tr>
+<tr>
+<td><code>AUTH_TOKEN_HEADER</code> constant (name only, §6.R
+exempt)</td>
+<td><code>core/tracker/client/…/ApiBackedTrackerClient.kt</code></td>
+<td>356</td>
+</tr>
+<tr>
+<td><code>recordProviderFailure()</code> — search-401 diagnosis
+path</td>
+<td><code>feature/search_result/…/SearchResultViewModel.kt</code></td>
+<td>175–212</td>
+</tr>
+<tr>
+<td><code>// no-telemetry:</code> opt-out example
+(ProviderUnsupported)</td>
+<td><code>feature/search_result/…/SearchResultViewModel.kt</code></td>
+<td>141–144</td>
+</tr>
+<tr>
+<td>Go <code>RecordNonFatal()</code></td>
+<td><code>lava-api-go/internal/observability/nonfatal.go</code></td>
+<td>118–140</td>
+</tr>
+<tr>
+<td>Go <code>RecordWarning()</code></td>
+<td><code>lava-api-go/internal/observability/nonfatal.go</code></td>
+<td>146–154</td>
+</tr>
+<tr>
+<td>Go <code>sensitiveAttrPatterns</code> (§6.H redaction list)</td>
+<td><code>lava-api-go/internal/observability/nonfatal.go</code></td>
+<td>98–108</td>
+</tr>
+<tr>
+<td>Go <code>webhookForward()</code> — optional bridge</td>
+<td><code>lava-api-go/internal/observability/nonfatal.go</code></td>
+<td>184–233</td>
+</tr>
+<tr>
+<td>Go <code>classOf(err)</code> — error type name extraction</td>
+<td><code>lava-api-go/internal/observability/nonfatal.go</code></td>
+<td>238–282</td>
+</tr>
+<tr>
+<td><code>writeProviderError()</code> — v1 handler non-fatal
+recording</td>
+<td><code>lava-api-go/internal/handlers/v1/handlers.go</code></td>
+<td>172–193</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

@@ -32,6 +32,30 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import kotlin.reflect.KClass
 
 /**
+ * Typed exception for non-2xx HTTP responses from the lava-api-go backend.
+ *
+ * Replaces the bare `error(...)` throws in [ApiBackedTrackerClient.getString],
+ * [getBytes], and [postJson] so callers (and Crashlytics §6.AC telemetry) can
+ * carry the HTTP status as a structured field while remaining a specific
+ * [IllegalStateException] subtype — preserving the long-standing contract that
+ * the HTTP helpers throw [IllegalStateException] on a non-2xx response (the
+ * `error(...)` behaviour this replaced) so existing catch-sites + tests keep working.
+ *
+ * §6.H: [responseSnippet] is capped at 200 chars and credential-redacted before
+ * storage. [requestUrl] carries host+path ONLY — query strings are stripped by
+ * [ApiBackedTrackerClient.stripQueryForTelemetry] before storage.
+ *
+ * §6.R: no hardcoded literals; all values come from the live HTTP response.
+ */
+class ApiHttpException(
+    val statusCode: Int,
+    val requestUrl: String,
+    val httpMethod: String,
+    val responseSnippet: String?,
+    message: String,
+) : IllegalStateException(message)
+
+/**
  * Dynamic Provider Discovery (2026-06-11, spec §4.2 / plan Task 4.1).
  *
  * A generic [TrackerClient] whose [descriptor] is a [RemoteTrackerDescriptor]
@@ -245,13 +269,31 @@ class ApiBackedTrackerClient(
 
     private fun getString(url: String): String =
         httpClient.newCall(Request.Builder().url(url).get().withAuth().build()).execute().use { resp ->
-            if (!resp.isSuccessful) error("API request failed: HTTP ${resp.code} for $url")
+            if (!resp.isSuccessful) {
+                val snippet = resp.body?.string()?.let { redactAndTruncate(it) }
+                throw ApiHttpException(
+                    statusCode = resp.code,
+                    requestUrl = stripQueryForTelemetry(url),
+                    httpMethod = "GET",
+                    responseSnippet = snippet,
+                    message = "API request failed: HTTP ${resp.code} for $url",
+                )
+            }
             resp.body?.string() ?: error("API request returned empty body for $url")
         }
 
     private fun getBytes(url: String): ByteArray =
         httpClient.newCall(Request.Builder().url(url).get().withAuth().build()).execute().use { resp ->
-            if (!resp.isSuccessful) error("API request failed: HTTP ${resp.code} for $url")
+            if (!resp.isSuccessful) {
+                val snippet = resp.body?.string()?.let { redactAndTruncate(it) }
+                throw ApiHttpException(
+                    statusCode = resp.code,
+                    requestUrl = stripQueryForTelemetry(url),
+                    httpMethod = "GET",
+                    responseSnippet = snippet,
+                    message = "API request failed: HTTP ${resp.code} for $url",
+                )
+            }
             resp.body?.bytes() ?: error("API request returned empty body for $url")
         }
 
@@ -262,9 +304,51 @@ class ApiBackedTrackerClient(
             .withAuth()
             .build()
         return httpClient.newCall(request).execute().use { resp ->
-            if (!resp.isSuccessful) error("API request failed: HTTP ${resp.code} for $url")
+            if (!resp.isSuccessful) {
+                val snippet = resp.body?.string()?.let { redactAndTruncate(it) }
+                throw ApiHttpException(
+                    statusCode = resp.code,
+                    requestUrl = stripQueryForTelemetry(url),
+                    httpMethod = "POST",
+                    responseSnippet = snippet,
+                    message = "API request failed: HTTP ${resp.code} for $url",
+                )
+            }
             resp.body?.string() ?: error("API request returned empty body for $url")
         }
+    }
+
+    /**
+     * Strips the query string from a URL before storing in telemetry context.
+     * Search queries can contain user-typed search terms which are fine to log at
+     * the path level; full query parameters add noise and may contain sensitive
+     * values in future routes. Returns host+path only, no `?…`.
+     *
+     * §6.R: no literals; §6.H: no credentials (those are in headers, never in
+     * the URLs this client builds).
+     */
+    private fun stripQueryForTelemetry(url: String): String = try {
+        val idx = url.indexOf('?')
+        if (idx >= 0) url.substring(0, idx) else url
+    } catch (_: Exception) {
+        // Defensive: if URL parsing fails, omit entirely rather than log something malformed.
+        "(url-parse-error)"
+    }
+
+    /**
+     * Caps [body] at 200 chars and redacts obvious credential patterns per §6.H.
+     * Patterns: `token=…`, `key=…`, `cookie:…`, `auth:…`, `bearer …`,
+     * `password=…`, `secret=…`. Case-insensitive. Replacements use `[REDACTED]`
+     * so the Crashlytics entry is clearly marked, not silently truncated.
+     *
+     * §6.H: the Auth-Token header value is NEVER in the response body (it is a
+     * request header), so this redaction covers server-side error messages that
+     * might echo credential fragments from a form POST or a session cookie.
+     */
+    private fun redactAndTruncate(body: String): String {
+        val truncated = if (body.length > 200) body.substring(0, 200) + "…" else body
+        return truncated
+            .replace(Regex("(?i)(token|key|cookie|auth|bearer|password|secret)([=:\\s]+)\\S+"), "$1$2[REDACTED]")
     }
 
     companion object {

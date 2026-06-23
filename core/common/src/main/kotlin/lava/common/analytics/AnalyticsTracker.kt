@@ -79,5 +79,11 @@ interface AnalyticsTracker {
         const val TOPIC_ID = "topic_id"
         const val ERROR = "error"
         const val ENDPOINT_KIND = "endpoint_kind"
+
+        // HTTP-layer diagnostic context (§6.AC, enriched by ApiHttpException fields)
+        const val HTTP_STATUS = "http_status"
+        const val REQUEST_URL = "request_url"
+        const val HTTP_METHOD = "http_method"
+        const val BASE_URL_HOST = "base_url_host"
     }
 }
