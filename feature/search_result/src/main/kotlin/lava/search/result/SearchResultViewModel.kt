@@ -313,8 +313,29 @@ internal class SearchResultViewModel @Inject constructor(
     private fun handleStreamEnd() = intent {
         val current = state.searchContent
         if (current is SearchResultContent.Streaming) {
+            // Operator-reported broken-search RECOVERY fix (2026-06-23):
+            // a stream that ended with NO items AND at least one provider in
+            // ERROR is a FAILURE, not an empty result. Rendering Empty
+            // ("Nothing found") for a failed search is the misleading shape
+            // §6.AB warns about — and it left onRetryClick's Error branch
+            // (lines 327-343) as unreachable dead code, so the user's only
+            // recovery affordance (the Error+Retry placeholder) never showed.
+            // Now: items empty + any ERROR row -> Error(reason) -> screen
+            // renders the Retry button -> RetryClick re-subscribes the stream.
+            // Covered by SearchResultViewModelRetryTest.
+            val anyProviderFailed = current.activeProviders.any { it.status == StreamStatus.ERROR }
             if (current.items.isEmpty()) {
-                reduce { state.copy(searchContent = SearchResultContent.Empty) }
+                if (anyProviderFailed) {
+                    reduce {
+                        state.copy(
+                            searchContent = SearchResultContent.Error(
+                                reason = "search failed",
+                            ),
+                        )
+                    }
+                } else {
+                    reduce { state.copy(searchContent = SearchResultContent.Empty) }
+                }
             } else {
                 reduce {
                     state.copy(

@@ -362,10 +362,16 @@ class SearchResultViewModelStreamingTest {
             assertEquals("search", recorded.context[AnalyticsTracker.Params.FEATURE])
 
             // User-visible consequence — the only provider failed, so the user
-            // gets nothing: Empty, never a misleading Content with results.
-            assertEquals(
-                SearchResultContent.Empty,
-                vm.container.stateFlow.value.searchContent,
+            // sees the Error state WITH a working Retry affordance, NOT a
+            // misleading "Nothing found" Empty. §11.4.120 reconcile: the
+            // corrected handleStreamEnd (4f8204e0 — failed stream → Error, not
+            // Empty) is the right behavior; this assertion is updated to match
+            // it rather than reverting the fix. The telemetry assertions above
+            // are the load-bearing §6.AC signal and are unchanged.
+            val finalContent = vm.container.stateFlow.value.searchContent
+            assertTrue(
+                "a fully-failed stream must render Error (Retry affordance), was $finalContent",
+                finalContent is SearchResultContent.Error,
             )
         }
 }
