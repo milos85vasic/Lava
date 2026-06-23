@@ -61,7 +61,11 @@ android {
         // in (Phase-1 Gate 4 requires a never-reused pepper). versionName is kept at
         // 1.3.11 deliberately: the user-facing release identity is unchanged; only
         // the binary that ships under it is corrected. Release identity: 1.3.11 (1070).
-        versionCode = 1070
+        // §6.Y post-distribute bump: 1.3.11 (1070) was distributed (debug 7dhneaj2he79g
+        // + release 2tjq0j3ab9e2g) with the §6.Z C00 device gate GREEN (thinker KVM,
+        // boot 33s, all_passed:true). 1071 is the next-cycle placeholder so the working
+        // tree reflects the next releasable code (versionName held until a user-visible change).
+        versionCode = 1071
         versionName = "1.3.11"
         // SP-3a Step 6 (2026-04-30): wire Hilt + Compose UI test infra so the
         // 8 Challenge Tests at app/src/androidTest/kotlin/lava/app/challenges/
