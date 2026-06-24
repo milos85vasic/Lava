@@ -70,9 +70,10 @@ func hangingServer(t *testing.T) *httptest.Server {
 // what the FIXED GetSearch handler provides before calling p.Search().
 //
 // PRIMARY ASSERTION (§6.J clause 3, user-visible):
-//   The HTTP response arrives within 20 s even when ALL mirrors hang.
-//   Without the handler fix, the call takes 32 s and the Android client
-//   sees a SocketTimeoutException.
+//
+//	The HTTP response arrives within 20 s even when ALL mirrors hang.
+//	Without the handler fix, the call takes 32 s and the Android client
+//	sees a SocketTimeoutException.
 func TestSearch_TotalDeadlineBoundsSlowMirrors(t *testing.T) {
 	// Four hanging mirrors — 4×8 s = 32 s worst case without a deadline.
 	slow1 := hangingServer(t)

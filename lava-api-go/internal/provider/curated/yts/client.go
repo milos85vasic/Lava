@@ -18,25 +18,39 @@ import (
 	"digital.vasic.lava.apigo/internal/provider"
 )
 
-// DefaultBaseURL is the canonical YTS JSON API base, kept for the single-URL
-// test seam. yts.mx is YTS's own movie-search API (protocol endpoint = the
-// provider's identity). §6.R: not a deployment address — it is this provider's
-// fixed upstream.
-const DefaultBaseURL = "https://yts.mx"
+// DefaultBaseURL is a stable YTS JSON API mirror, kept for the single-URL
+// test seam. §6.R: not a deployment address — it is this provider's fixed
+// upstream protocol mirror (same §6.R rationale as DefaultBaseURLs below).
+// Updated 2026-06-24: yts.mx is NXDOMAIN (dead); yts.bz is the fastest
+// responding live mirror measured at ~0.24–0.8s.
+const DefaultBaseURL = "https://yts.bz"
 
-// DefaultBaseURLs is the FAILOVER list of YTS API mirrors, tried in order. YTS
-// rotates its domain frequently under takedown pressure (yts.mx was observed
-// NXDOMAIN on public DNS on 2026-06-13 while yts.lt / yts.am served HTTP 200
-// "status":"ok" — see .lava-ci-evidence/bluff-hunt/2026-06-13-yts-domain-failover.json),
-// so hardcoding a single domain makes the provider silently unreachable the
-// moment that one domain drops. These are protocol mirrors of the SAME public
-// API (the provider's identity), not deployment addresses — package constants,
-// same §6.R rationale as publicTrackers below.
+// DefaultBaseURLs is the FAILOVER list of YTS API mirrors, tried in order.
+// YTS rotates its domain frequently under takedown pressure. These are
+// protocol mirrors of the SAME public API (the provider's identity), not
+// deployment addresses — package constants (§6.R).
+//
+// Mirror status as of 2026-06-24 (real-network verified):
+//
+//	yts.bz           — 200 OK, ~0.24–0.8s  ← FASTEST, listed first
+//	yts.lt           — 200 OK, ~0.8s
+//	yts.am           — 200 OK, ~0.7–5.8s   ← occasionally slow
+//	yts.gg           — DNS resolves, TLS connects, HTTP stalls from some
+//	                   networks; sub-second from phones/other regions
+//	movies-api.accel.li — same stall pattern from this host; the API's own
+//	                   NOTICE says "Base URL moving to https://movies-api.accel.li/api/v2/"
+//	                   but it stalls from some egress IPs; listed last as
+//	                   future-proofing when connectivity improves
+//	yts.mx           — NXDOMAIN (dead 2026-06-24); REMOVED from list
+//
+// The perAttemptTimeout (8s) protects against the stall-on-connect class
+// (yts.gg / movies-api.accel.li) so they cannot consume the full budget.
 var DefaultBaseURLs = []string{
-	"https://yts.mx",
 	"https://yts.bz",
 	"https://yts.lt",
 	"https://yts.am",
+	"https://yts.gg",
+	"https://movies-api.accel.li",
 }
 
 // searchPath is the YTS list_movies query endpoint.
