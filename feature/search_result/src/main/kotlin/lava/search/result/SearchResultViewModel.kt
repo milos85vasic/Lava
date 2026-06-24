@@ -4,10 +4,14 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.withTimeout
 import lava.common.analytics.AnalyticsTracker
 import lava.common.analytics.rethrowIfCancellation
 import lava.domain.model.PagingAction
@@ -64,6 +68,29 @@ internal class SearchResultViewModel @Inject constructor(
     private val mutableFilter = MutableStateFlow(savedStateHandle.filter)
     private val pagingActions = MutableSharedFlow<PagingAction>()
 
+    /**
+     * 2026-06-24 CANCEL-ON-BACK FIX (operator-reported "can't go back or
+     * interrupt" during a slow search — Crashlytics issue 9d4ad2f4…).
+     *
+     * The `observeStreamMultiSearch` intent blocks on
+     * `sdk.streamMultiSearch(...).collect {}`. Because Orbit `intent {}`
+     * blocks are individual coroutines on the container's scope, back-press
+     * (which only posts a `Back` side effect) never cancels that blocking
+     * collect — the user waits the full OkHttp readTimeout (30s) before
+     * the hung Streaming spinner transitions to Error/Empty.
+     *
+     * Fix: store the `Job` returned by the streaming intent so
+     * `onBackClick()` can cancel it explicitly before posting `Back`.
+     * The [withTimeout] in [observeStreamMultiSearch] provides a client-side
+     * deadline (25s < OkHttp 30s) so a slow-but-not-hung provider surfaces
+     * `Error + Retry` before the OS-level network stack times out.
+     *
+     * Thread-safety: written only from the container's single-threaded
+     * intent dispatcher; no external mutation.
+     */
+    @Volatile
+    private var activeSearchJob: Job? = null
+
     override val container: Container<SearchPageState, SearchResultSideEffect> = container(
         initialState = SearchPageState(mutableFilter.value),
         onCreate = {
@@ -92,10 +119,28 @@ internal class SearchResultViewModel @Inject constructor(
      * multi-provider search path — it fans out per-provider over
      * `GET /v1/{provider}/search`, served by both the on-device api-app and
      * the standalone lava-api-go. Renders into `SearchResultContent.Streaming`.
+     *
+     * 2026-06-24 cancel-on-back + timeout fixes:
+     *  - The returned [Job] is stored in [activeSearchJob] so [onBackClick]
+     *    can cancel the in-flight collection without waiting for the OS-level
+     *    network timeout (30s OkHttp readTimeout).
+     *  - [withTimeout] with [SEARCH_TIMEOUT_MS] (25s) gives the user an
+     *    actionable Error+Retry state before OkHttp's own 30s fires. A
+     *    [TimeoutCancellationException] is caught here; it does NOT propagate
+     *    as a coroutine-cancellation signal because `withTimeout` inside an
+     *    Orbit `intent {}` is a LOCAL timeout, not a scope cancel.
+     *  - Any other [Exception] (IOException, ApiHttpException, etc.) is also
+     *    caught and recorded so an unhandled throw cannot leave the UI stuck
+     *    on the Streaming spinner indefinitely. Back-press [Job.cancel] itself
+     *    throws [CancellationException] which is re-thrown so Orbit's scope
+     *    cleans up correctly (rethrowIfCancellation() in callers).
      */
     private fun observeStreamMultiSearch(filter: Filter) = intent {
         val providerIds = filter.providerIds
         if (providerIds.isNullOrEmpty()) return@intent
+
+        // Register this job so back-press can cancel it immediately.
+        activeSearchJob = currentCoroutineContext()[Job]
 
         reduce {
             state.copy(
@@ -118,11 +163,76 @@ internal class SearchResultViewModel @Inject constructor(
             sortOrder = SortOrder.DESCENDING,
         )
 
-        sdk.streamMultiSearch(request, providerIds).collect { event ->
-            handleMultiSearchEvent(event)
+        try {
+            withTimeout(SEARCH_TIMEOUT_MS) {
+                sdk.streamMultiSearch(request, providerIds).collect { event ->
+                    handleMultiSearchEvent(event)
+                }
+            }
+        } catch (e: TimeoutCancellationException) {
+            // Client-side deadline exceeded — the engine is slow but we don't want the
+            // user stuck on the Streaming spinner until OkHttp's own 30s readTimeout fires.
+            // Mark all still-SEARCHING providers as ERROR so handleStreamEnd() produces
+            // SearchResultContent.Error (with its Retry button) instead of Empty.
+            // §6.AC telemetry: record as a warning so the Crashlytics non-fatal feed shows
+            // how often providers exceed the client deadline (no credentials per §6.H).
+            analytics.recordWarning(
+                "streamMultiSearch timeout after ${SEARCH_TIMEOUT_MS}ms",
+                mapOf(
+                    AnalyticsTracker.Params.FEATURE to "search",
+                    AnalyticsTracker.Params.OPERATION to "streamMultiSearch",
+                    AnalyticsTracker.Params.SCREEN to "search_result",
+                    AnalyticsTracker.Params.ERROR_CLASS to "TimeoutCancellationException",
+                ),
+            )
+            reduce {
+                val current = state.searchContent
+                if (current is SearchResultContent.Streaming) {
+                    state.copy(
+                        searchContent = current.copy(
+                            activeProviders = current.activeProviders.map { p ->
+                                if (p.status == StreamStatus.SEARCHING) p.copy(status = StreamStatus.ERROR) else p
+                            },
+                        ),
+                    )
+                } else {
+                    state
+                }
+            }
+        } catch (e: Exception) {
+            e.rethrowIfCancellation()
+            // Unexpected whole-stream exception (e.g. connectivity lost before
+            // the first event). Record non-fatal and fall through to handleStreamEnd()
+            // which will see 0 items + ERROR providers → Error(reason).
+            analytics.recordNonFatal(
+                e,
+                mapOf(
+                    AnalyticsTracker.Params.FEATURE to "search",
+                    AnalyticsTracker.Params.OPERATION to "streamMultiSearch",
+                    AnalyticsTracker.Params.SCREEN to "search_result",
+                    AnalyticsTracker.Params.ERROR_CLASS to e::class.simpleName.orEmpty(),
+                    AnalyticsTracker.Params.ERROR_MESSAGE to (e.message?.take(512) ?: ""),
+                ),
+            )
+            reduce {
+                val current = state.searchContent
+                if (current is SearchResultContent.Streaming) {
+                    state.copy(
+                        searchContent = current.copy(
+                            activeProviders = current.activeProviders.map { p ->
+                                if (p.status == StreamStatus.SEARCHING) p.copy(status = StreamStatus.ERROR) else p
+                            },
+                        ),
+                    )
+                } else {
+                    state
+                }
+            }
+        } finally {
+            activeSearchJob = null
         }
-        // After the flow completes naturally, downgrade the Streaming
-        // state to Content (or Empty if no items arrived).
+        // After the flow completes (naturally or via timeout/exception),
+        // downgrade the Streaming state to Content / Error / Empty.
         handleStreamEnd()
     }
 
@@ -380,6 +490,13 @@ internal class SearchResultViewModel @Inject constructor(
     }
 
     private fun onBackClick() = intent {
+        // 2026-06-24 CANCEL-ON-BACK FIX (operator-reported "can't go back or
+        // interrupt" — Crashlytics 9d4ad2f4…). Cancel the in-flight streaming
+        // job BEFORE posting the Back side effect so the UI does not remain
+        // frozen on the Streaming spinner for the remaining OkHttp readTimeout
+        // (30s) after the user has already pressed Back. Cancellation of a
+        // completed (null) job is a safe no-op.
+        activeSearchJob?.cancel()
         postSideEffect(SearchResultSideEffect.Back)
     }
 
@@ -471,6 +588,23 @@ internal class SearchResultViewModel @Inject constructor(
                 providerId = topicModel.providerId,
             ),
         )
+    }
+
+    companion object {
+        /**
+         * Client-side deadline for the full multi-provider streaming search.
+         *
+         * Set 5 s below OkHttp's `readTimeout` (30 s — `NetworkModule`) so
+         * a slow provider surfaces [SearchResultContent.Error] with a Retry
+         * affordance BEFORE the OS-level network stack closes the socket.
+         * The remaining 5 s gives OkHttp time to drain its own buffers and
+         * fire its own cancellation cleanly — avoids a race where both the
+         * client timeout and the socket timeout fire simultaneously.
+         *
+         * Tested by [SearchResultViewModelCancelTimeoutTest
+         * .slow_provider_exceeding_timeout_surfaces_Error_with_Retry_affordance].
+         */
+        internal const val SEARCH_TIMEOUT_MS = 25_000L
     }
 }
 

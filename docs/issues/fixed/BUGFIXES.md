@@ -1,5 +1,9 @@
 # Lava — Bug Fix Audit Trail
 
+> **Revision §11.4.44 (2026-06-24):** appended search cancel/timeout fix —
+> `SearchResultViewModel` back-press coroutine cancellation + 25 s client-side
+> timeout via `withTimeout`. 3 falsifiable anti-bluff regression tests added.
+
 > **Revision §11.4.44 (2026-06-23):** appended five fixes from the 2026-06-23
 > session — H1 search-401 (AuthInterceptor handoff-key overwrite), api-app-17
 > stale-binary (§6.Z wrong-binary saga), ApiHttpException type regression, 
@@ -2066,3 +2070,57 @@ confirmed all 4 binaries of the 1072 cycle distributed correctly after the fix
 
 **Forensic anchor:** Observed in distribute loop output during the 1072 all-4 distribute cycle;
 re-run of client-debug distribute recorded correct `last-version-debug 1072` pointer.
+
+---
+
+### BUG-2026-06-24-A — Search streaming: back-press hang + no client-side timeout
+
+**Date:** 2026-06-24
+**Surface:** `feature/search_result` — `SearchResultViewModel`
+**Crashlytics §6.O closure log:** `.lava-ci-evidence/crashlytics-resolved/2026-06-24-search-timeout-cancel.md`
+
+**Root cause (Bug 1 — no cancellation on back-press):**
+`observeStreamMultiSearch()` starts an Orbit `intent {}` coroutine that blocks on
+`sdk.streamMultiSearch(...).collect {}`. Back-press dispatches a *new* `intent {}`
+(`onBackClick`) that only posts a `Back` side effect — it does NOT cancel the
+in-flight coroutine. On a slow provider (e.g. yts), the user taps Back, the screen
+navigates, but the streaming coroutine stays alive until OkHttp's 30 s `readTimeout`
+fires. User sees a ~30 s hang during which Back appears unresponsive.
+
+**Root cause (Bug 2 — no client-side timeout):**
+`observeStreamMultiSearch()` had no `withTimeout` guard. A slow-but-not-stalled
+provider holds the `SearchResultContent.Streaming` spinner for up to 30 s with no
+Retry affordance — the `handleStreamEnd()` → `Error` path only triggers once
+`collect {}` returns.
+
+**Affected files:**
+- `feature/search_result/src/main/kotlin/lava/search/result/SearchResultViewModel.kt`
+
+**Fix:**
+- Added `@Volatile private var activeSearchJob: Job? = null`.
+- Inside `observeStreamMultiSearch()` captured the coroutine `Job` via
+  `currentCoroutineContext()[Job]` and stored in `activeSearchJob`.
+- `onBackClick()` now calls `activeSearchJob?.cancel()` before posting `Back`.
+- Wrapped `collect {}` in `withTimeout(SEARCH_TIMEOUT_MS)` (25 000 ms, 5 s below
+  OkHttp's `readTimeout`); `TimeoutCancellationException` caught locally, marks
+  still-SEARCHING providers as `StreamStatus.ERROR`, falls through to
+  `handleStreamEnd()` → `SearchResultContent.Error` with Retry button.
+- Generic `Exception` catch with `rethrowIfCancellation()` guard handles
+  connectivity-lost failures similarly. §6.AC telemetry in both catch blocks.
+
+**Verification tests:**
+`feature/search_result/src/test/kotlin/lava/search/result/SearchResultViewModelCancelTimeoutTest.kt`
+— 3 tests, all using REAL `SearchResultViewModel` + REAL `LavaTrackerSdk` + REAL
+`DefaultTrackerRegistry`; only outer network boundary faked via `CompletableDeferred`-based
+clients (dispatcher-agnostic indefinite suspension):
+1. `back_press_while_streaming_cancels_inflight_search_and_emits_Back`
+2. `slow_provider_exceeding_timeout_surfaces_Error_with_Retry_affordance`
+3. `back_press_after_completed_search_preserves_Content_and_emits_Back`
+
+**Falsifiability confirmed (§6.N):**
+- Removed `activeSearchJob?.cancel()` → Test 1 `isStillCollecting` stays `true` → FAIL
+- Removed `withTimeout(SEARCH_TIMEOUT_MS)` → Test 2 times out waiting for `Error` state → FAIL
+
+**Fix commit:** pending (pre-commit at `7d5ffa5e6426a4c804a16fdd7d0eff94a4910cd4`)
+
+**Challenge Test:** owed — `C-SEARCH-CANCEL` per §6.AE (tracked in `docs/workable_items.db`).

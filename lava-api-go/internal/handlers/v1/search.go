@@ -61,7 +61,14 @@ func (h *SearchHandler) GetSearch(c *gin.Context) {
 		return
 	}
 
-	result, err := p.Search(c.Request.Context(), opts, creds)
+	// §6.Z / engine-side timeout fix: bound the total search time to 18 s so
+	// the response always arrives before the Android client's OkHttp
+	// readTimeout (30 s). Without this, the YTS failover loop can stall for
+	// perAttemptTimeout(8s) × 4 mirrors = 32 s > 30 s, causing a
+	// SocketTimeoutException on the device ("no results").
+	searchCtx, searchCancel := context.WithTimeout(c.Request.Context(), 18*time.Second)
+	defer searchCancel()
+	result, err := p.Search(searchCtx, opts, creds)
 	if err != nil {
 		writeProviderError(c, err)
 		return
