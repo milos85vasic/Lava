@@ -62,7 +62,7 @@
 	url = git@github.com:vasic-digital/DocProcessor.git
 [submodule "submodules/llm_orchestrator"]
 	path = submodules/llm_orchestrator
-	url = git@github.com:vasic-digital/LLMOrchestrator.git
+	url = git@github.com:HelixDevelopment/LLMOrchestrator.git
 [submodule "submodules/llm_provider"]
 	path = submodules/llm_provider
 	url = git@github.com:vasic-digital/LLMProvider.git
