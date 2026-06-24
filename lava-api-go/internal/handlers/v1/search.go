@@ -63,9 +63,10 @@ func (h *SearchHandler) GetSearch(c *gin.Context) {
 
 	// §6.Z / engine-side timeout fix: bound the total search time to 18 s so
 	// the response always arrives before the Android client's OkHttp
-	// readTimeout (30 s). Without this, the YTS failover loop can stall for
-	// perAttemptTimeout(8s) × 4 mirrors = 32 s > 30 s, causing a
-	// SocketTimeoutException on the device ("no results").
+	// readTimeout (30 s). Without this, a provider failover loop can stall for
+	// perAttemptTimeout(8s) × N mirrors (YTS now has 5) ≈ 40 s > 30 s, causing a
+	// SocketTimeoutException on the device ("no results"). The 18 s parent
+	// deadline caps the TOTAL regardless of mirror count.
 	searchCtx, searchCancel := context.WithTimeout(c.Request.Context(), 18*time.Second)
 	defer searchCancel()
 	result, err := p.Search(searchCtx, opts, creds)

@@ -139,6 +139,11 @@ internal class SearchResultViewModel @Inject constructor(
         val providerIds = filter.providerIds
         if (providerIds.isNullOrEmpty()) return@intent
 
+        // Defensive (code-review 2026-06-24): cancel any prior in-flight search
+        // before starting a new one so the single-slot activeSearchJob can never
+        // leak an earlier collection. Not reachable today (each new query opens a
+        // fresh ViewModel), but future-proofs against any double-invocation.
+        activeSearchJob?.cancel()
         // Register this job so back-press can cancel it immediately.
         activeSearchJob = currentCoroutineContext()[Job]
 
