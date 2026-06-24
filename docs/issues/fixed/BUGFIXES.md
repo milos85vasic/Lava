@@ -7,7 +7,8 @@
 > P1 LazyColumn 2nd-site nested-scroll FATAL (`c7c8cccad09f`, fix `feature/search_input/.../
 > SearchInputScreen.kt:96` `modifier = Modifier.weight(1f)` + §6.Q scanner CHECK 2 — scanner FAIL→PASS,
 > "no nested-scroll antipattern detected"), P2 TopicPageDto MissingFieldException NON_FATAL
-> (`8cde0ac208b3`, `commentsPage` default, §6.O closure log). Source:
+> (`8cde0ac208b3`, **PARTIAL** — `commentsPage` default only; the real IA crawl-topic payload omits
+> all 6 fields so the full fix is a tracked follow-up, §6.O closure log). Source:
 > `docs/issues/2026-06-24-crashlytics-full-triage.md`. All three are reproduce-first + Bluff-Audit'd
 > and ship in 1.3.11-1073.
 
@@ -2261,33 +2262,36 @@ written/modified since 1.2.5 is required to locate the second site.
 
 ## 2026-06-24 — P2 TopicPageDto MissingFieldException for Internet Archive crawl topics (Crashlytics 8cde0ac208b3)
 
-**Root cause:** `TopicPageDto.commentsPage` was a required field (no default) in the
-`@Serializable` data class. Internet Archive `WPO-*` crawl topic responses from lava-api-go omit
-`commentsPage` because archived web pages have no forum-comment section. When the user tapped
-topic `WPO-20230122202907-crawl897`, kotlinx.serialization threw `MissingFieldException: Fields
-[commentsPage] are required for type TopicPageDto, but they were missing at path: $`. The
-exception was caught as a non-fatal and the topic page displayed a "load failed" error. All
-Internet Archive `WPO-*` and crawl-format topics were silently unviewable.
+**STATUS: PARTIAL — not fully resolved in 1073 (honest §6.J self-audit correction).**
 
-**Affected files:**
+**Root cause (corrected after reading the FULL Crashlytics subtitle):** the exception lists
+`Fields [id, title, author, category, torrentData, commentsPage] are required … but they were
+missing` — kotlinx lists the MISSING fields, so the Internet Archive `WPO-*` crawl-topic `/topic2`
+response omits **ALL SIX** of `TopicPageDto`'s fields (an archived web page, not a torrent topic).
+Note `author`/`category`/`torrentData` are nullable but have NO default, so kotlinx still requires
+the keys present. (An earlier draft of this entry wrongly assumed only `[commentsPage]` was missing
+— that was based on a reproduction fixture that did not match the real payload.)
+
+**Affected files (the partial change that DID land):**
 - `core/network/api/src/main/kotlin/lava/network/dto/topic/TopicPageDto.kt` — `commentsPage`
   given default `= TopicPageCommentsDto(page = 1, pages = 1, posts = emptyList())` (line 13)
 - `core/network/api/src/test/kotlin/lava/network/dto/topic/TopicPageDtoSerializationTest.kt` —
-  new test file (2 tests)
+  new test file (2 tests, for the commentsPage-only case)
 
-**Fix:** Added a sensible empty-comments default to `commentsPage`. When the field is absent from
-the JSON, kotlinx.serialization uses the default; when it is present (rutracker/rutor topics), the
-explicit value is used. The fix is minimal and backward-compatible.
+**What 1073 does (necessary, NOT sufficient):** the `commentsPage` default removes ONE field from
+the required set. The other five (id, title, author, category, torrentData) remain required, so the
+real IA crawl-topic payload **still throws** (now listing 5). The 1073 change therefore does not, by
+itself, stop the reported crash; it is retained as a valid partial improvement.
 
-**Verification test/challenge:**
-- Unit test 1: `internet archive crawl topic without commentsPage parses with default commentsPage`
-  — decodes `WPO-*` JSON (no `commentsPage`), asserts defaults; falsifiable: revert default →
-  `MissingFieldException` thrown → test FAILS
-- Unit test 2: `rutracker topic with commentsPage present deserializes the explicit commentsPage`
-  — guards against over-defaulting; page=3/pages=10 explicit values must win
-- Challenge Test — OWED: load a `WPO-*` topic via the real API (§6.O clause 2 gate)
+**Why not a rushed blanket fix:** defaulting id/title to "" + author/category/torrentData to null
+would stop the throw but risks masking real malformed-topic bugs for normal rutracker/rutor topics
+(§6.J). The proper fix (lava-api-go populating the shape for crawl items, OR a dedicated sparse-topic
+DTO, OR not requesting `/topic2` for IA crawl topics) is a tracked FOLLOW-UP.
 
-**Fix commit:** uncommitted at log creation; ships in 1.3.11-1073
+**Impact + decision:** NON_FATAL, 1 event, niche (IA crawl topics only), not a regression — does NOT
+block 1073 (which fixes the P0 + P1 FATALs + the search timeout). Full fix ships in a later build.
+
+**Fix commit (partial):** `cb6f76b2` (commentsPage default only); honest correction in the follow-up commit
 **Forensic anchor:** Crashlytics issue `8cde0ac208b3…`, NON_FATAL, 1 event on Genymobile Pixel 9
 / Android 16, version 1.3.9-1066, topic `WPO-20230122202907-crawl897`.
 **§6.O closure log:** `.lava-ci-evidence/crashlytics-resolved/2026-06-24-topicpagedto-missing-field.md`

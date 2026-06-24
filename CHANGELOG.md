@@ -27,7 +27,7 @@ fast "Error — Retry" rather than a hang — that's the correct, honest behavio
   crashes — a locked-key state is now handled gracefully instead of throwing on the main thread.
 - **P1:** a second screen with an unbounded scrolling-list layout (the search input screen) that could crash on
   measure is fixed + guarded by a structural scanner so the class cannot recur.
-- **P2:** Internet Archive crawl topics that omit a comments section no longer fail to load.
+- **P2 (partial):** improved tolerance for Internet Archive crawl topics that omit a comments section; the full fix for IA crawl topics that omit most fields is a tracked follow-up (a niche, non-crashing case).
 
 ## Lava-API-App-0.2.11-19 — 2026-06-24 (on-device engine: search timeout fix)
 
