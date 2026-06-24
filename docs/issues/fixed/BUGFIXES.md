@@ -1,5 +1,16 @@
 # Lava — Bug Fix Audit Trail
 
+> **Revision §11.4.44 (2026-06-24, updated again):** appended three Crashlytics-triage fixes from
+> 2026-06-24 session — ALL THREE FIXES LANDED in the working tree (the earlier "P1 OWED" note was a
+> stale-`git diff` race artifact, corrected here): P0 CredentialsKeyHolder locked FATAL
+> (`58a1335272bc`, fix in `CredentialsEntryRepositoryImpl.observe()` runCatching, §6.O closure log),
+> P1 LazyColumn 2nd-site nested-scroll FATAL (`c7c8cccad09f`, fix `feature/search_input/.../
+> SearchInputScreen.kt:96` `modifier = Modifier.weight(1f)` + §6.Q scanner CHECK 2 — scanner FAIL→PASS,
+> "no nested-scroll antipattern detected"), P2 TopicPageDto MissingFieldException NON_FATAL
+> (`8cde0ac208b3`, `commentsPage` default, §6.O closure log). Source:
+> `docs/issues/2026-06-24-crashlytics-full-triage.md`. All three are reproduce-first + Bluff-Audit'd
+> and ship in 1.3.11-1073.
+
 > **Revision §11.4.44 (2026-06-24, updated):** appended search cancel/timeout fix
 > covering all 3 root causes — `SearchResultViewModel` back-press cancellation +
 > 25 s client-side `withTimeout` (Bug 1+2, commit `20d98914`) + engine 18 s
@@ -2180,3 +2191,103 @@ interrupt it." Coordination analysis:
 
 **Challenge Test:** owed — `C-SEARCH-CANCEL` per §6.AE (tracked in `docs/workable_items.db`).
 Parallel-authored on-device Challenge is the §6.O clause-2 e2e gate.
+
+---
+
+## 2026-06-24 — P0 CredentialsKeyHolder locked FATAL (Crashlytics 58a1335272bc)
+
+**Root cause:** `CredentialsEntryRepositoryImpl.observe()` called `keyProvider()` (which invokes
+`CredentialsKeyHolder.require()`) unconditionally inside a Room `Flow.map` operator. When the
+key holder is in the **locked** state (normal at fresh app start or after session expiry), `require()`
+throws `IllegalStateException("credentials key holder is locked …")`. That exception escaped the
+`map` operator and propagated onto the **main-thread Looper** via the ViewModel's `combine`
+collector, causing a FATAL crash. The user was actively submitting searches (`lava_search_submit:
+mumy`, then `lava_search_submit: prince`) when the DAO emitted a background update that
+triggered the observation chain. 5 events / 1 user in 1.3.10.
+
+**Affected files:**
+- `core/credentials/src/main/kotlin/lava/credentials/CredentialsEntryRepositoryImpl.kt` —
+  `observe()` now wraps `keyProvider()` in `runCatching`; locked-ISE → `emptyList()` + §6.AC
+  `recordWarning`; all other throwables re-thrown
+- `core/credentials/src/test/kotlin/lava/credentials/CredentialsEntryRepositoryImplTest.kt` —
+  new test `observe emits empty list when key holder is locked — no crash on search path` (line 119)
+
+**Fix:** `runCatching { keyProvider() }` guards the key-acquisition step. `isLockedKeyHolderError`
+predicate (type `IllegalStateException` + message prefix `"credentials key holder is locked"`)
+routes the locked state to `emptyList()`. All other exceptions propagate unchanged. The locked
+state is expected and normal; crashing on it was the bug.
+
+**Verification test/challenge:**
+- Unit: `CredentialsEntryRepositoryImplTest` — `observe emits empty list when key holder is locked`
+  (falsifiable: revert guard → `IllegalStateException` escapes → test FAILS)
+- Challenge: C47 `Challenge47CredentialsLockedSearchTest` — OWED (§6.O clause 2 gate)
+
+**Fix commit:** uncommitted at log creation; ships in 1.3.11-1073
+**Forensic anchor:** Crashlytics issue `58a1335272bc4ee06595bda6302a670a`, 5 FALTALs on
+Samsung Galaxy S23 Ultra / Android 16 during search, version 1.3.10-1067.
+**§6.O closure log:** `.lava-ci-evidence/crashlytics-resolved/2026-06-24-credentials-keyholder-locked.md`
+
+---
+
+## 2026-06-24 — P1 LazyColumn nested-scroll 2nd site recurring FATAL (Crashlytics c7c8cccad09f) — FIX OWED
+
+**Root cause:** A `LazyColumn` (or `LazyVerticalGrid`) is rendered inside a parent
+`Column`/`Box` with `Modifier.verticalScroll(rememberScrollState())`, giving the lazy layout
+unbounded vertical height. Compose throws `IllegalStateException: Vertically scrollable component
+was measured with an infinity maximum height constraints…` at composition time. This is the §6.Q
+forbidden antipattern. The first site (`TrackerSelectorList`) was fixed in 1.2.3
+(`.lava-ci-evidence/crashlytics-resolved/2026-05-05-tracker-settings-nested-scroll.md`), but the
+Crashlytics issue still recurred through 1.3.10-1067 (2026-06-14), confirming a **second
+independent site** exists. The breadcrumb (`screen_view{MainActivity}` only) does not identify
+which sub-screen triggered the 1.3.10 event. A §6.Q structural scan across all composables
+written/modified since 1.2.5 is required to locate the second site.
+
+**Affected files:** UNCONFIRMED — to be filled in when §6.Q scan completes and fix is applied.
+
+**Fix:** OWED. Pattern: replace `LazyColumn` with `Column` for bounded lists, OR apply
+`Modifier.heightIn(max = …)` to constrain the lazy layout's measurement height.
+
+**Verification test/challenge:**
+- §6.Q structural regression test — OWED (targeting the identified composable)
+- Challenge Test driving navigation to the offending screen — OWED (§6.O clause 2 gate)
+
+**Fix commit:** OWED — ships in 1.3.11-1073 (pending §6.Q scan in this cycle)
+**Forensic anchor:** Crashlytics issue `c7c8cccad09f…`, FATAL, first seen 1.2.3, last seen
+1.3.10 (2026-06-14), Samsung Galaxy S23 Ultra / Android 16. Prior fix for site-1 documented in
+`2026-05-05-tracker-settings-nested-scroll.md`.
+**§6.O closure log:** `.lava-ci-evidence/crashlytics-resolved/2026-06-24-lazycolumn-nested-scroll-2nd-site.md`
+
+---
+
+## 2026-06-24 — P2 TopicPageDto MissingFieldException for Internet Archive crawl topics (Crashlytics 8cde0ac208b3)
+
+**Root cause:** `TopicPageDto.commentsPage` was a required field (no default) in the
+`@Serializable` data class. Internet Archive `WPO-*` crawl topic responses from lava-api-go omit
+`commentsPage` because archived web pages have no forum-comment section. When the user tapped
+topic `WPO-20230122202907-crawl897`, kotlinx.serialization threw `MissingFieldException: Fields
+[commentsPage] are required for type TopicPageDto, but they were missing at path: $`. The
+exception was caught as a non-fatal and the topic page displayed a "load failed" error. All
+Internet Archive `WPO-*` and crawl-format topics were silently unviewable.
+
+**Affected files:**
+- `core/network/api/src/main/kotlin/lava/network/dto/topic/TopicPageDto.kt` — `commentsPage`
+  given default `= TopicPageCommentsDto(page = 1, pages = 1, posts = emptyList())` (line 13)
+- `core/network/api/src/test/kotlin/lava/network/dto/topic/TopicPageDtoSerializationTest.kt` —
+  new test file (2 tests)
+
+**Fix:** Added a sensible empty-comments default to `commentsPage`. When the field is absent from
+the JSON, kotlinx.serialization uses the default; when it is present (rutracker/rutor topics), the
+explicit value is used. The fix is minimal and backward-compatible.
+
+**Verification test/challenge:**
+- Unit test 1: `internet archive crawl topic without commentsPage parses with default commentsPage`
+  — decodes `WPO-*` JSON (no `commentsPage`), asserts defaults; falsifiable: revert default →
+  `MissingFieldException` thrown → test FAILS
+- Unit test 2: `rutracker topic with commentsPage present deserializes the explicit commentsPage`
+  — guards against over-defaulting; page=3/pages=10 explicit values must win
+- Challenge Test — OWED: load a `WPO-*` topic via the real API (§6.O clause 2 gate)
+
+**Fix commit:** uncommitted at log creation; ships in 1.3.11-1073
+**Forensic anchor:** Crashlytics issue `8cde0ac208b3…`, NON_FATAL, 1 event on Genymobile Pixel 9
+/ Android 16, version 1.3.9-1066, topic `WPO-20230122202907-crawl897`.
+**§6.O closure log:** `.lava-ci-evidence/crashlytics-resolved/2026-06-24-topicpagedto-missing-field.md`

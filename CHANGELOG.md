@@ -21,6 +21,14 @@ Code-reviewed (GO), full Android (863 tests) + backend (47 packages) suites gree
 `android-1.3.11-1073`. Note: if a tracker is entirely blocked on your mobile network, you'll now see a
 fast "Error — Retry" rather than a hang — that's the correct, honest behavior.
 
+
+**Also fixed (from a full Firebase Crashlytics triage this session — every recorded crash, not just search):**
+- **P0 (was crashing during search):** with the credential store locked, opening the app and searching no longer
+  crashes — a locked-key state is now handled gracefully instead of throwing on the main thread.
+- **P1:** a second screen with an unbounded scrolling-list layout (the search input screen) that could crash on
+  measure is fixed + guarded by a structural scanner so the class cannot recur.
+- **P2:** Internet Archive crawl topics that omit a comments section no longer fail to load.
+
 ## Lava-API-App-0.2.11-19 — 2026-06-24 (on-device engine: search timeout fix)
 
 **Previous published:** Lava-API-App-0.2.11-18.

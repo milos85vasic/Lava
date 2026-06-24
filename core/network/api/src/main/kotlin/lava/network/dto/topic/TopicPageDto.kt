@@ -10,7 +10,7 @@ data class TopicPageDto(
     val author: AuthorDto?,
     val category: CategoryDto?,
     val torrentData: TorrentDataDto?,
-    val commentsPage: TopicPageCommentsDto,
+    val commentsPage: TopicPageCommentsDto = TopicPageCommentsDto(page = 1, pages = 1, posts = emptyList()),
 )
 
 @Serializable

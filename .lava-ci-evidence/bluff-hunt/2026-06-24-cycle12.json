@@ -1,0 +1,65 @@
+{
+  "cycle": 12,
+  "date": "2026-06-24",
+  "operator_mandate_invocation": "§6.N anti-bluff hunt cycle 12",
+  "targets": [
+    {
+      "production_file": "lava-api-go/internal/archiveorg/flexstring.go",
+      "test_file": "lava-api-go/internal/archiveorg/flexstring_test.go",
+      "test_class": "TestFlexString_MalformedTokens_ReturnError",
+      "behavior_under_test": "flexString.UnmarshalJSON MUST return a non-nil error when it encounters a malformed string token (unterminated string literal). Swallowing the error would leave the caller's json.Unmarshal of the whole response believing success while the field is silently zero-valued — rendering empty creator/title/year to the user.",
+      "mutation": "In flexstring.go case '\"' branch, changed `return err` to `return nil` — swallowing the unmarshal error instead of surfacing it.",
+      "mutation_detail": "line 29: `return err` → `return nil // MUTATION: swallow error instead of returning it`",
+      "result": "GENUINE_FAIL",
+      "verbatim_failure": "=== RUN   TestFlexString_MalformedTokens_ReturnError/unterminated_string_token\n    flexstring_test.go:106: UnmarshalJSON(\"hello): malformed token MUST return an error, got nil (field=\"SENTINEL\")\n--- FAIL: TestFlexString_MalformedTokens_ReturnError (0.00s)\n    --- FAIL: TestFlexString_MalformedTokens_ReturnError/unterminated_string_token (0.00s)\n    --- PASS: TestFlexString_MalformedTokens_ReturnError/array_with_trailing_comma (0.00s)\n    --- PASS: TestFlexString_MalformedTokens_ReturnError/unterminated_array_token (0.00s)\nFAIL\nFAIL\tdigital.vasic.lava.apigo/internal/archiveorg\t0.291s",
+      "reverted": true,
+      "revert_command": "git checkout -- lava-api-go/internal/archiveorg/flexstring.go",
+      "rerun_green": true,
+      "rerun_output": "--- PASS: TestFlexString_MalformedTokens_ReturnError (0.00s)\nPASS\nok  \tdigital.vasic.lava.apigo/internal/archiveorg\t0.222s",
+      "verdict": "GENUINE — test catches the production break it claims to cover. Error-swallowing mutation causes the 'unterminated string token' subcase to silently return nil; test fails with clear assertion: 'malformed token MUST return an error, got nil'."
+    },
+    {
+      "production_file": "core/data/src/main/kotlin/lava/data/converters/Topic.kt",
+      "test_file": "core/data/src/test/kotlin/lava/data/converters/TopicConverterTest.kt",
+      "test_class": "TopicConverterTest",
+      "behavior_under_test": "TorrentStatusDto.toStatus() MUST map each wire-protocol status enum value to its exact domain TorrentStatus value. Wrong mapping (e.g. Closed→APPROVED instead of Closed→CLOSED) would cause the moderation badge rendered to the user to show the wrong status — a torrent that should appear CLOSED would instead show APPROVED.",
+      "mutation": "In Topic.kt TorrentStatusDto.toStatus() when-expression, changed `TorrentStatusDto.Closed -> TorrentStatus.CLOSED` to `TorrentStatusDto.Closed -> TorrentStatus.APPROVED`.",
+      "mutation_detail": "line 91: `TorrentStatusDto.Closed -> TorrentStatus.CLOSED` → `TorrentStatusDto.Closed -> TorrentStatus.APPROVED // MUTATION: wrong status mapping`",
+      "result": "GENUINE_FAIL",
+      "verbatim_failure": "java.lang.AssertionError: expected:<CLOSED> but was:<APPROVED>\n\tat org.junit.Assert.fail(Assert.java:89)\n\tat org.junit.Assert.failNotEquals(Assert.java:835)\n\tat org.junit.Assert.assertEquals(Assert.java:120)\n\tat org.junit.Assert.assertEquals(Assert.java:146)\n\tat lava.data.converters.TopicConverterTest.status dto maps to domain status(TopicConverterTest.kt:209)",
+      "reverted": true,
+      "revert_command": "git checkout -- core/data/src/main/kotlin/lava/data/converters/Topic.kt",
+      "rerun_green": true,
+      "rerun_output": "BUILD SUCCESSFUL in 16s",
+      "verdict": "GENUINE — test catches the production break it claims to cover. The wrong-status mutation causes an immediate assertEquals failure: 'expected:<CLOSED> but was:<APPROVED>' at TopicConverterTest.kt:209."
+    },
+    {
+      "production_file": "feature/bookmarks/src/main/kotlin/lava/forum/bookmarks/BookmarksViewModel.kt",
+      "test_file": "feature/bookmarks/src/test/kotlin/lava/forum/bookmarks/BookmarksViewModelTest.kt",
+      "test_class": "BookmarksViewModelTest",
+      "behavior_under_test": "BookmarksViewModel.observeBookmarks() MUST emit BookmarksState.BookmarksList when the repository emits a non-empty list and BookmarksState.Empty when the list is empty. Inverting the branch would cause the screen to show the empty placeholder when the user has bookmarks, and a broken empty list-state when they don't.",
+      "mutation": "In BookmarksViewModel.kt observeBookmarks(), swapped the two branches of the isEmpty() check so empty list → BookmarksList(emptyList) and non-empty list → Empty.",
+      "mutation_detail": "lines 50-53: swapped BookmarksState.Empty and BookmarksState.BookmarksList between the isEmpty() true and false branches",
+      "result": "GENUINE_FAIL",
+      "verbatim_failure": "app.cash.turbine.TurbineAssertionError: No value produced in 3s\n\tat app//app.cash.turbine.ChannelKt.awaitEvent(channel.kt:89)\n\tat app//app.cash.turbine.ChannelKt$awaitEvent$1.invokeSuspend(channel.kt)\n\tat app//kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:33)\n\tat app//kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:99)",
+      "reverted": true,
+      "revert_command": "git checkout -- feature/bookmarks/src/main/kotlin/lava/forum/bookmarks/BookmarksViewModel.kt",
+      "rerun_green": true,
+      "rerun_output": "BUILD SUCCESSFUL in 1m 18s (--rerun-tasks forced)",
+      "verdict": "GENUINE — test catches the production break it claims to cover. The inverted-branch mutation causes `awaitItemMatching { it is BookmarksState.BookmarksList }` to time out (3s Turbine timeout) because the non-empty emission now produces Empty instead of BookmarksList, so the predicate never matches."
+    }
+  ],
+  "summary": {
+    "total_targets": 3,
+    "genuine_fails": 3,
+    "bluffs_survived": 0,
+    "verdict": "ALL 3 GENUINE — zero bluffs found in cycle 12",
+    "targets_covered": [
+      "lava-api-go/internal/archiveorg/flexstring.go (Go parser error-return path)",
+      "core/data/src/main/kotlin/lava/data/converters/Topic.kt (Kotlin status-mapping converter)",
+      "feature/bookmarks/src/main/kotlin/lava/forum/bookmarks/BookmarksViewModel.kt (Kotlin Orbit MVI ViewModel branch logic)"
+    ],
+    "modules_covered": ["lava-api-go (Go)", "core:data (Kotlin converter layer)", "feature:bookmarks (Kotlin ViewModel layer)"],
+    "architectural_layers_covered": ["Go HTTP provider parser", "data/converter (domain mapping)", "feature ViewModel (MVI state emission)"]
+  }
+}

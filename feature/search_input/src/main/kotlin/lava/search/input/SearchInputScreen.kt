@@ -94,6 +94,7 @@ private fun SearchInputScreen(
                 onChipToggled = { providerId -> onAction(SearchInputAction.ProviderToggled(providerId)) },
             )
             LazyList(
+                modifier = Modifier.weight(1f),
                 contentPadding = PaddingValues(vertical = AppTheme.spaces.medium),
             ) {
                 items(items = state.suggests) { suggest ->

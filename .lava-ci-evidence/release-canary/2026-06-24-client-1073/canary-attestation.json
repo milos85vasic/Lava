@@ -1,0 +1,14 @@
+{
+  "apk": "/home/milosvasic/lava/releases/1.3.11/android-release/digital.vasic.lava.client-1.3.11-release.apk",
+  "boot_seconds": 31.004412582,
+  "commit_sha": "f89c2068",
+  "fatal_lines": "",
+  "image": "localhost/lava-android-emulator:api34-x86_64",
+  "package": "digital.vasic.lava.client",
+  "passed": true,
+  "pid_after_launch": "3457",
+  "resumed_activity": "topResumedActivity=ActivityRecord{22e75d5 u0 digital.vasic.lava.client/.MainActivity t8}",
+  "runner": "containers-submodule",
+  "runtime": "podman",
+  "timestamp": "2026-06-24T09:28:19Z"
+}

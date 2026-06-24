@@ -381,5 +381,12 @@ dependencies {
     // keeps room-runtime as `implementation`, so the Room entry point is not
     // on the app androidTest classpath transitively — declare it here.
     androidTestImplementation(libs.room.runtime)
+    // C47 (Challenge47CredentialsLockedSearchSurvivesTest) reaches the
+    // production CredentialsKeyHolder singleton via an @EntryPoint to force
+    // the locked state. :feature:credentials_manager and :feature:credentials
+    // both depend on :core:credentials via `implementation` (not `api`), so
+    // CredentialsKeyHolder is NOT on the app androidTest classpath transitively
+    // — declare it here using the same pattern as room.runtime above.
+    androidTestImplementation(project(":core:credentials"))
     kspAndroidTest(libs.hilt.compiler)
 }

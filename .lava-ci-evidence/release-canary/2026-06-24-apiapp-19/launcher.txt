@@ -1,0 +1,1 @@
+digital.vasic.lava.api/lava.api.app.MainActivity
