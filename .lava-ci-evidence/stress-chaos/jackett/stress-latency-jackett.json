@@ -1,20 +1,20 @@
 {
   "all_succeeded": true,
-  "captured_at": "2026-06-13T20:16:52Z",
+  "captured_at": "2026-06-24T08:35:00Z",
   "iterations": 200,
   "latency_human": {
-    "max": "402.709µs",
-    "min": "89.792µs",
-    "p50": "118.458µs",
-    "p95": "189.375µs",
-    "p99": "315.75µs"
+    "max": "20.688208ms",
+    "min": "916.584µs",
+    "p50": "2.270125ms",
+    "p95": "5.469833ms",
+    "p99": "7.323334ms"
   },
   "latency_ns": {
-    "max": 402709,
-    "min": 89792,
-    "p50": 118458,
-    "p95": 189375,
-    "p99": 315750
+    "max": 20688208,
+    "min": 916584,
+    "p50": 2270125,
+    "p95": 5469833,
+    "p99": 7323334
   },
   "results_per_iteration": 2,
   "surface": "jackett.Client.Search -\u003e ParseResults (real stack, fake Torznab upstream)",

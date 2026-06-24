@@ -1,0 +1,63 @@
+{
+  "cycle": 13,
+  "date": "2026-06-24",
+  "operator_invocation": "§6.N anti-bluff hunt cycle 13",
+  "targets": [
+    {
+      "id": "T1",
+      "lang": "Go",
+      "production_file": "lava-api-go/internal/provider/curated/nyaa/client.go",
+      "test_file": "lava-api-go/internal/provider/curated/nyaa/nyaa_test.go",
+      "test_run": "GOMAXPROCS=2 nice -n 12 go test -count=1 -run TestSearch_ParsesFixture ./internal/provider/curated/nyaa/",
+      "behavior_covered": "Nyaa RSS item field mapping: Seeders field must read it.Seeders (not it.Leechers); expected value 371 from fixture, Leechers=12",
+      "mutation": "In client.go line 137: changed `Seeders: atoiInt(it.Seeders)` to `Seeders: atoiInt(it.Leechers)` (wrong field — reads leecher count as seeder count)",
+      "observed_failure": "--- FAIL: TestSearch_ParsesFixture (0.00s)\n    nyaa_test.go:82: seeders = 12, want 371\nFAIL\nFAIL\tdigital.vasic.lava.apigo/internal/provider/curated/nyaa\t0.490s",
+      "verdict": "GENUINE",
+      "reverted": true,
+      "revert_command": "git checkout -- lava-api-go/internal/provider/curated/nyaa/client.go",
+      "rerun_result": "ok  \tdigital.vasic.lava.apigo/internal/provider/curated/nyaa\t0.224s"
+    },
+    {
+      "id": "T2",
+      "lang": "Kotlin",
+      "production_file": "core/domain/src/main/kotlin/lava/domain/usecase/ClearHistoryUseCase.kt",
+      "test_file": "core/domain/src/test/kotlin/lava/domain/usecase/ClearHistoryUseCaseTest.kt",
+      "test_run": "nice -n 12 ./gradlew :core:domain:testDebugUnitTest --tests \"lava.domain.usecase.ClearHistoryUseCaseTest\" -x spotlessCheck --max-workers=2",
+      "behavior_covered": "ClearHistoryUseCase.invoke() must fan-out clear() to all 4 user-history stores: suggests, searchHistory, favoriteSearch, visited. Dropping any one call leaves that store's rows visible to the user.",
+      "mutation": "In ClearHistoryUseCase.kt: replaced `visitedRepository.clear()` with a comment `// visitedRepository.clear()  ← mutation: dropped` — simulates a dropped fan-out clear",
+      "observed_failure": "ClearHistoryUseCaseTest > clear history wipes all four user-history stores FAILED\n    java.lang.AssertionError at ClearHistoryUseCaseTest.kt:72\n\n1 test completed, 1 failed\nBUILD FAILED in 25s",
+      "verdict": "GENUINE",
+      "reverted": true,
+      "revert_command": "git checkout -- core/domain/src/main/kotlin/lava/domain/usecase/ClearHistoryUseCase.kt",
+      "rerun_result": "BUILD SUCCESSFUL in 14s"
+    },
+    {
+      "id": "T3",
+      "lang": "Kotlin",
+      "production_file": "feature/category/src/main/kotlin/lava/forum/category/CategoryViewModel.kt",
+      "test_file": "feature/category/src/test/kotlin/lava/forum/category/CategoryViewModelTest.kt",
+      "test_run": "nice -n 12 ./gradlew :feature:category:testDebugUnitTest --tests \"lava.forum.category.CategoryViewModelTest\" -x spotlessCheck --max-workers=2",
+      "behavior_covered": "CategoryViewModel.onSearchClick() must post OpenSearch when Authorized and ShowLoginDialog when Unauthorized. Swapping branches silently breaks both user-visible flows simultaneously.",
+      "mutation": "In CategoryViewModel.kt onSearchClick(): swapped the two `when` arms — Authorized now posts ShowLoginDialog, Unauthorized now posts OpenSearch(categoryId)",
+      "observed_failure": "CategoryViewModelTest > SearchClick while unauthorized posts ShowLoginDialog FAILED\n    java.lang.AssertionError at Assert.java:89\n        Caused by: java.lang.AssertionError at CategoryViewModelTest.kt:160\n\nCategoryViewModelTest > SearchClick while authorized posts OpenSearch FAILED\n    java.lang.AssertionError at Assert.java:89\n        Caused by: java.lang.AssertionError at CategoryViewModelTest.kt:131\n\n5 tests completed, 2 failed\nBUILD FAILED in 13s",
+      "verdict": "GENUINE",
+      "reverted": true,
+      "revert_command": "git checkout -- feature/category/src/main/kotlin/lava/forum/category/CategoryViewModel.kt",
+      "rerun_result": "BUILD SUCCESSFUL in 14s"
+    }
+  ],
+  "summary": {
+    "targets_hunted": 3,
+    "bluffs_found": 0,
+    "genuine_tests": 3,
+    "verdict": "ALL GENUINE — 0 bluffs",
+    "cumulative_prior_cycles": 30,
+    "cumulative_total": 33,
+    "modules_covered_this_cycle": [
+      "lava-api-go/internal/provider/curated/nyaa (Go, RSS field-mapping)",
+      "core/domain ClearHistoryUseCase (Kotlin, 4-store fan-out)",
+      "feature/category CategoryViewModel (Kotlin, auth-gate side-effects)"
+    ],
+    "note": "All 3 mutations caused deterministic, localized failures at the exact assertions covering the mutated code path. No bluff survivors. Mutations reverted; all suites re-run green."
+  }
+}

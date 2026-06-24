@@ -1,0 +1,56 @@
+{
+  "cycle": 14,
+  "date": "2026-06-24",
+  "scope": "lava-api-go curated providers — bitsearch + tokyotosho",
+  "mandate": "§6.N light in-cycle bluff hunt (2 targets, go test only, no gradle)",
+  "operator_instruction": "LIGHT §6.N anti-bluff hunt cycle14 — lava-api-go providers ONLY, using go test (NOT gradle). ZERO-BLUFF: real mutations applied/run/observed/reverted.",
+  "constraint": "Excluded: nyaa (c13), flexstring/archiveorg (c12), yts, search.go, topic.go, archiveorg/, files with uncommitted changes. git status verified clean inside lava-api-go before mutations.",
+  "targets": [
+    {
+      "target": "bitsearch",
+      "file_mutated": "internal/provider/curated/bitsearch/client.go",
+      "test_file": "internal/provider/curated/bitsearch/bitsearch_test.go",
+      "test_run": "TestSearch_ParsesFixture",
+      "behavior_under_test": "Search() maps r.Seeders → SearchItem.Seeders and r.Leechers → SearchItem.Leechers; fixture has seeders=28 / leechers=41; test asserts first.Seeders==28 and first.Leechers==41.",
+      "mutation": {
+        "description": "Swap Seeders and Leechers field assignments in Search() — change 'Seeders: r.Seeders, Leechers: r.Leechers' to 'Seeders: r.Leechers, Leechers: r.Seeders'",
+        "hunk": "- Seeders:    r.Seeders,\n- Leechers:   r.Leechers,\n+ Seeders:    r.Leechers,\n+ Leechers:   r.Seeders,"
+      },
+      "test_command": "GOMAXPROCS=2 nice -n 15 go test -v -run TestSearch_ParsesFixture ./internal/provider/curated/bitsearch/",
+      "observed_failure": "=== RUN   TestSearch_ParsesFixture\n    bitsearch_test.go:85: seeders = 41, want 28\n    bitsearch_test.go:88: leechers = 28, want 41\n--- FAIL: TestSearch_ParsesFixture (0.00s)\nFAIL\nFAIL\tdigital.vasic.lava.apigo/internal/provider/curated/bitsearch\t0.239s",
+      "verdict": "GENUINE — test caught the field-swap immediately; both assertions fired on the correct mutated values",
+      "revert_command": "git checkout -- internal/provider/curated/bitsearch/client.go",
+      "re_run_after_revert": "ok  \tdigital.vasic.lava.apigo/internal/provider/curated/bitsearch\t0.198s",
+      "reverted": true,
+      "note": "Fresh mutation (swap Seeders/Leechers) — targets the user-visible 'how many seeds?' field rendered by the provider list. Wrong field would silently display leecher count as seeder count on every result row."
+    },
+    {
+      "target": "tokyotosho",
+      "file_mutated": "internal/provider/curated/tokyotosho/client.go",
+      "test_file": "internal/provider/curated/tokyotosho/tokyotosho_test.go",
+      "test_run": "TestParseHumanSize + TestSearch_ParsesFixture",
+      "behavior_under_test": "parseHumanSize() uses DECIMAL SI multipliers: 1e6 for MB, 1e9 for GB. TestParseHumanSize asserts '1.5GB' → 1500000000. TestSearch_ParsesFixture asserts '113.89MB' → 113890000 (fixture only exercises MB).",
+      "mutation": {
+        "description": "Change GB multiplier from 1e9 (decimal SI) to 1<<30 (IEC binary GiB) in sizeUnits slice — a FRESH mutation NOT in the existing KDoc rehearsals",
+        "hunk": "- {\"GB\", 1e9},\n+ {\"GB\", 1 << 30},"
+      },
+      "test_command": "GOMAXPROCS=2 nice -n 15 go test -v -run 'TestParseHumanSize|TestSearch_ParsesFixture' ./internal/provider/curated/tokyotosho/",
+      "observed_failure": "=== RUN   TestSearch_ParsesFixture\n--- PASS: TestSearch_ParsesFixture (0.00s)\n=== RUN   TestParseHumanSize\n    tokyotosho_test.go:181: parseHumanSize(\"Size: 1.5GB<br />\") = 1610612736, want 1500000000\n--- FAIL: TestParseHumanSize (0.00s)\nFAIL\nFAIL\tdigital.vasic.lava.apigo/internal/provider/curated/tokyotosho\t0.244s",
+      "verdict": "GENUINE — TestParseHumanSize caught the GB multiplier error (1.5 * 1073741824 = 1610612736 vs expected 1500000000)",
+      "secondary_finding": "TestSearch_ParsesFixture PASSED despite the mutation because the fixture only contains MB-sized rows (113.89MB, 5.93MB); GB entries are absent from the fixture. This is honest — TestSearch_ParsesFixture is fixture-scope complete; TestParseHumanSize provides the GB discriminator via direct unit testing of the parser. No bluff — the combination covers the production path.",
+      "revert_command": "git checkout -- internal/provider/curated/tokyotosho/client.go",
+      "re_run_after_revert": "ok  \tdigital.vasic.lava.apigo/internal/provider/curated/tokyotosho\t0.238s",
+      "reverted": true,
+      "note": "The 1e9→1<<30 GB mutation is the SI/IEC unit-confusion class. 1 GiB (1073741824) vs 1 GB (1e9) is a ~7% overcount — would silently corrupt the 'size' column for large torrents (films etc.)."
+    }
+  ],
+  "summary": {
+    "bluffs_found": 0,
+    "genuine_tests": 2,
+    "cumulative_cycle_count": 14,
+    "cumulative_total": "33 prior cycles + 2 this cycle = 35 total targets hunted (cycle14 contributes 2 GENUINE verdicts)",
+    "files_clean_before_mutation": "git status confirmed only .lava-ci-evidence/ and submodule markers dirty in parent; lava-api-go/ had zero uncommitted tracked-file changes",
+    "no_gradle_invoked": true,
+    "conclusion": "Both provider parsers are GENUINE anti-bluff tests. bitsearch catches seeders/leechers field swaps; tokyotosho catches SI vs IEC unit confusion at the GB boundary via TestParseHumanSize (fixture-based TestSearch_ParsesFixture is narrower but the combination is honest coverage)."
+  }
+}
