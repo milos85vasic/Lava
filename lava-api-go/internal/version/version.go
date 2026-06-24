@@ -9,14 +9,20 @@ package version
 
 const (
 	// Name is the service's semver. Tag prefix: Lava-API-Go-<Name>-<Code>.
+	// 2.3.33: SEARCH TIMEOUT FIX — bound the per-provider search handler to a
+	// total 18s request deadline (handlers/v1/search.go) so the engine ALWAYS
+	// responds before the Android client's 30s OkHttp readTimeout (was unbounded:
+	// failover×mirrors+retries could exceed 30s → client SocketTimeout → "no
+	// results"); + refreshed the stale YTS mirror list (dropped NXDOMAIN yts.mx,
+	// lead with live yts.bz + current canonical movies-api.accel.li).
 	// 2.3.32: §6.AC comprehensive non-fatal telemetry — RecordNonFatal on every
 	// provider error path (writeProviderError default branch) + search.go +
 	// the best-effort Firebase-Crashlytics-bridge webhook forwarder
 	// (LAVA_API_FIREBASE_CRASHLYTICS_ENABLED + LAVA_API_NONFATAL_WEBHOOK_URL).
-	Name = "2.3.32"
+	Name = "2.3.33"
 
 	// Code is the integer release counter. New tags MUST increment.
-	Code = 2332
+	Code = 2333
 )
 
 // SourceHash is the 64-hex sha256 of the EXACT lava-api-go source codebase that

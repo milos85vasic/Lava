@@ -1,4 +1,37 @@
 # Changelog
+
+## Lava-Android-1.3.11-1073 — 2026-06-24 (THE SEARCH FIX, part 2 — the real cause was a TIMEOUT)
+
+**Previous published:** Lava-Android-1.3.11-1072.
+
+1072 fixed a real auth bug (the 401 header overwrite), but the field Crashlytics telemetry from 1071/1072
+revealed the *actual* "no results" cause was a **`SocketTimeoutException`** — the on-device engine wasn't
+responding within the app's 30s network timeout, so search hung then showed nothing, and you couldn't go
+back or interrupt it. Three independently-verified root causes, each fixed with a failing-test-first:
+
+- **Engine never hung again:** the on-device search handler now has an 18s total deadline, so it ALWAYS
+  responds before the app's 30s timeout — with results, or a fast, actionable "Error — Retry".
+- **You can always back out now:** pressing back during a search cancels it immediately (it no longer
+  waits for the network timeout), and a slow provider surfaces Error+Retry instead of a stuck spinner.
+- **YTS actually returns results:** the engine's YTS server list was stale (its primary domain went
+  DNS-dead); refreshed to the current live endpoints (verified returning real results in under a second).
+
+Coordinated timeout ladder: engine 18s < client 25s < socket 30s — no single failure leaves you stuck.
+Code-reviewed (GO), full Android (863 tests) + backend (47 packages) suites green. Auth rotated
+`android-1.3.11-1073`. Note: if a tracker is entirely blocked on your mobile network, you'll now see a
+fast "Error — Retry" rather than a hang — that's the correct, honest behavior.
+
+## Lava-API-App-0.2.11-19 — 2026-06-24 (on-device engine: search timeout fix)
+
+**Previous published:** Lava-API-App-0.2.11-18.
+
+Embeds lava-api-go 2.3.33 — the search timeout fix on the on-device engine side:
+- 18s total request deadline on the per-provider search handler so the engine always responds before the
+  client's network timeout (was unbounded: mirror failover + retries could exceed 30s → client SocketTimeout).
+- Refreshed the stale YTS mirror list (dropped the NXDOMAIN primary, lead with live + current-canonical endpoints).
+
+Backend suite (47 packages: contract/e2e/parity/integration/stress) green against real Postgres in podman.
+
 ## Lava-Android-1.3.11-1072 — 2026-06-23 (THE SEARCH FIX — the on-device 401 root cause, fixed)
 
 **Previous published:** Lava-Android-1.3.11-1071.
