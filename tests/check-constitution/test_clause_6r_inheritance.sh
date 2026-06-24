@@ -23,10 +23,21 @@ is_helix_dev_owned() {
   return 1
 }
 
+# A submodule CLAUDE.md satisfies §6.R inheritance if it carries EITHER the
+# verbatim Lava clause heading OR the §6.AD-canonical
+# `## INHERITED FROM constitution/...` pointer block. §6.AD.8 declares that
+# pointer the canonical submodule-inheritance mechanism, and constitution
+# §11.4.28 (Submodules-As-Equal-Codebase + Decoupling) FORBIDS injecting
+# project-specific clause text into reusable submodules — so the pointer is
+# the compliant form for an upstream that has slimmed to inherit-from-
+# constitution. The no-hardcoding SOURCE scanners (scan-no-hardcoded-*.sh)
+# stay fully strict; this only governs the doc-presence inheritance gate.
+# Lockstep with scripts/check-constitution.sh doc_inherits_clause().
 missing=()
 for sub in submodules/*/CLAUDE.md; do
   is_helix_dev_owned "$sub" && continue
-  if ! grep -qF '## §6.R — No-Hardcoding Mandate' "$sub"; then
+  if ! grep -qF '## §6.R — No-Hardcoding Mandate' "$sub" \
+     && ! grep -qE '^## INHERITED FROM constitution/' "$sub"; then
     missing+=("$sub")
   fi
 done

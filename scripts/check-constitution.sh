@@ -35,6 +35,31 @@ is_helix_dev_owned() {
   return 1
 }
 
+# A submodule governance doc satisfies a §6.R/§6.S/§6.X inheritance gate if it
+# carries EITHER the verbatim Lava clause heading OR the §6.AD-canonical
+# `## INHERITED FROM constitution/...` pointer block.
+#
+# Why the pointer is an HONEST pass (not a relaxed bluff): §6.AD.8 declares the
+# `## INHERITED FROM constitution/` pointer the CANONICAL submodule-inheritance
+# mechanism, and constitution §11.4.28 (Submodules-As-Equal-Codebase +
+# Decoupling) FORBIDS injecting project-specific clause text into reusable
+# submodules. So an upstream that has slimmed its CLAUDE.md to the
+# inherit-from-constitution stub is the COMPLIANT form — it transitively
+# inherits §6.R/§6.S/§6.X via the constitution it points at. Forcing the
+# verbatim Lava headings back in (the pre-2026-06-24 gate behavior) would
+# itself violate §11.4.28. The no-hardcoding SOURCE scanners
+# (scan-no-hardcoded-{uuid,ipv4,hostport}.sh) remain FULLY STRICT below — this
+# helper only governs the DOC-presence inheritance gate, never behavior.
+# Falsifiability: a doc with NEITHER form returns 1 (gate fires) — proven by
+# the §6.N rehearsal in the commit that introduced this helper + the
+# tests/check-constitution/test_clause_6r_inheritance.sh fixture.
+doc_inherits_clause() {
+  local file=$1 heading=$2
+  grep -qF "$heading" "$file" && return 0
+  grep -qE '^## INHERITED FROM constitution/' "$file" && return 0
+  return 1
+}
+
 # ---------------------------------------------------------------------
 # 1. Root CLAUDE.md MUST contain clauses 6.D, 6.E, 6.F.
 # ---------------------------------------------------------------------
@@ -297,9 +322,10 @@ fi
 # HelixDevelopment-owned submodules are exempt (see HELIX_DEV_OWNED).
 for sub in submodules/*/CLAUDE.md; do
   is_helix_dev_owned "$sub" && continue
-  if ! grep -qF '## §6.R — No-Hardcoding Mandate' "$sub"; then
+  if ! doc_inherits_clause "$sub" '## §6.R — No-Hardcoding Mandate'; then
     echo "MISSING 6.R inheritance reference: $sub" >&2
-    echo "  → Append the §6.R heading paragraph per Phase 1 Task 1.3." >&2
+    echo "  → Append the §6.R heading paragraph, OR the §6.AD canonical" >&2
+    echo "    '## INHERITED FROM constitution/CLAUDE.md' pointer block." >&2
     exit 1
   fi
 done
@@ -367,9 +393,10 @@ fi
 # HelixDevelopment-owned submodules are exempt (see HELIX_DEV_OWNED).
 for sub in submodules/*/CLAUDE.md; do
   is_helix_dev_owned "$sub" && continue
-  if ! grep -qF '## §6.S — Continuation Document Maintenance Mandate' "$sub"; then
+  if ! doc_inherits_clause "$sub" '## §6.S — Continuation Document Maintenance Mandate'; then
     echo "MISSING 6.S inheritance reference: $sub" >&2
-    echo "  → Append the §6.S heading paragraph (mirror the §6.R pattern)." >&2
+    echo "  → Append the §6.S heading paragraph, OR the §6.AD canonical" >&2
+    echo "    '## INHERITED FROM constitution/CLAUDE.md' pointer block." >&2
     exit 1
   fi
 done
@@ -405,9 +432,10 @@ fi
 # HelixDevelopment-owned submodules are exempt (see HELIX_DEV_OWNED).
 for sub in submodules/*/CLAUDE.md submodules/*/AGENTS.md submodules/*/CONSTITUTION.md; do
   is_helix_dev_owned "$sub" && continue
-  if ! grep -qF '## §6.X — Container-Submodule Emulator Wiring Mandate' "$sub"; then
+  if ! doc_inherits_clause "$sub" '## §6.X — Container-Submodule Emulator Wiring Mandate'; then
     echo "MISSING 6.X inheritance reference: $sub" >&2
-    echo "  → Append the §6.X heading paragraph (mirror the §6.S pattern)." >&2
+    echo "  → Append the §6.X heading paragraph, OR the §6.AD canonical" >&2
+    echo "    '## INHERITED FROM constitution/...' pointer block." >&2
     exit 1
   fi
 done
