@@ -1,0 +1,68 @@
+{
+  "cycle": 11,
+  "date": "2026-06-24",
+  "operator_invocation": "§6.N anti-bluff hunt cycle 11 — modules NOT touched by in-flight search-fix rebuild",
+  "procedure": "read test → identify guaranteed behaviour → mutate production code → run test → capture FAIL → revert single-file → re-run GREEN",
+  "summary": {
+    "targets": 3,
+    "genuine": 3,
+    "bluffs_found": 0,
+    "cumulative_genuine_through_cycle11": 27
+  },
+  "targets": [
+    {
+      "id": "T1",
+      "module": "feature/visited + core/domain",
+      "test_file": "feature/visited/src/test/kotlin/lava/visited/VisitedViewModelTest.kt",
+      "test_name": "enrichment reflects favorite state from the favorites repository",
+      "behavior_guaranteed": "EnrichTopicsUseCase.invoke() cross-joins topics with FavoritesRepository.observeIds(); VisitedViewModel renders TopicModel.isFavorite=true only for topics whose id is in the favorites set",
+      "production_file_mutated": "core/domain/src/main/kotlin/lava/domain/usecase/EnrichTopicsUseCase.kt",
+      "mutation": "Line 28: hardcoded `isFavorite = false` — favorites join removed, every topic always reports isFavorite=false regardless of repository state",
+      "gradle_command": "./gradlew :feature:visited:testDebugUnitTest --tests 'lava.visited.VisitedViewModelTest.enrichment reflects favorite state from the favorites repository'",
+      "observed_failure": "java.lang.AssertionError: topic 1 is a favorite and MUST render isFavorite=true",
+      "full_failure_location": "VisitedViewModelTest.kt:186 (assertTrue)",
+      "verdict": "GENUINE — test failed immediately and precisely on the mutated assertion",
+      "reverted": true,
+      "revert_command": "git checkout -- core/domain/src/main/kotlin/lava/domain/usecase/EnrichTopicsUseCase.kt",
+      "re_run_result": "BUILD SUCCESSFUL"
+    },
+    {
+      "id": "T2",
+      "module": "core/domain",
+      "test_file": "core/domain/src/test/kotlin/lava/domain/usecase/AddLocalFavoriteUseCaseTest.kt",
+      "test_name": "adding a local favorite fetches the topic and persists it",
+      "behavior_guaranteed": "AddLocalFavoriteUseCase fetches the topic from TopicService and then calls FavoritesRepository.add(); the persisted result is user-visible on the Favorites screen",
+      "production_file_mutated": "core/domain/src/main/kotlin/lava/domain/usecase/AddLocalFavoriteUseCase.kt",
+      "mutation": "Line 17: `favoritesRepository.add(topic, providerId)` commented out — fetch occurs but persistence is silently skipped",
+      "gradle_command": "./gradlew :core:domain:testDebugUnitTest --tests 'lava.domain.usecase.AddLocalFavoriteUseCaseTest'",
+      "observed_failure": "java.lang.AssertionError: the favorite must be persisted after add",
+      "secondary_failure": "java.lang.AssertionError: expected:<[2]> but was:<[]>  (test 'only the requested topic id is saved')",
+      "full_failure_location": "AddLocalFavoriteUseCaseTest.kt:54 (assertTrue) and :69 (assertEquals)",
+      "verdict": "GENUINE — two tests failed; both trace directly to the removed persistence call",
+      "reverted": true,
+      "revert_command": "git checkout -- core/domain/src/main/kotlin/lava/domain/usecase/AddLocalFavoriteUseCase.kt",
+      "re_run_result": "BUILD SUCCESSFUL"
+    },
+    {
+      "id": "T3",
+      "module": "feature/forum",
+      "test_file": "feature/forum/src/test/kotlin/lava/forum/ForumViewModelTest.kt",
+      "test_name": "ExpandClick_expands_only_the_clicked_category",
+      "behavior_guaranteed": "ForumViewModel.onExpandClick() expands exactly the tapped category and collapses all others; a second category that was not tapped must stay collapsed",
+      "production_file_mutated": "feature/forum/src/main/kotlin/lava/forum/ForumViewModel.kt",
+      "mutation": "Lines 61-67: replaced if/else guard (only toggle clicked item, collapse others) with unconditional `expandable.copy(expanded = !expandable.expanded)` — all items toggle together regardless of which was clicked",
+      "gradle_command": "./gradlew :feature:forum:testDebugUnitTest --tests 'lava.forum.ForumViewModelTest.ExpandClick_expands_only_the_clicked_category'",
+      "observed_failure": "java.lang.AssertionError: second category must stay collapsed",
+      "full_failure_location": "ForumViewModelTest.kt:189 (assertTrue(!state.forum[1].expanded))",
+      "verdict": "GENUINE — test failed on the un-clicked category becoming expanded, exactly the broken behaviour introduced by the mutation",
+      "reverted": true,
+      "revert_command": "git checkout -- feature/forum/src/main/kotlin/lava/forum/ForumViewModel.kt",
+      "re_run_result": "BUILD SUCCESSFUL"
+    }
+  ],
+  "previously_hunted_modules": [
+    "cycles 4-10: ratelimit/cache/auth[go], version/middleware/discovery[go], EndpointConverter/PostConverters/ProbeMirror, Favorites/Credentials/ProviderConfig VMs, HostUtils/AuthServiceImpl/WorkBackgroundService, RuTor/RuTracker parsers, AuthState/gutenberg/kinozal"
+  ],
+  "constitutional_references": ["§6.N.1.1", "§6.N.2", "Seventh Law clause 5"],
+  "evidence_file": ".lava-ci-evidence/bluff-hunt/2026-06-24-cycle11.json"
+}

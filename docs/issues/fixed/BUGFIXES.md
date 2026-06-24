@@ -1,8 +1,12 @@
 # Lava — Bug Fix Audit Trail
 
-> **Revision §11.4.44 (2026-06-24):** appended search cancel/timeout fix —
-> `SearchResultViewModel` back-press coroutine cancellation + 25 s client-side
-> timeout via `withTimeout`. 3 falsifiable anti-bluff regression tests added.
+> **Revision §11.4.44 (2026-06-24, updated):** appended search cancel/timeout fix
+> covering all 3 root causes — `SearchResultViewModel` back-press cancellation +
+> 25 s client-side `withTimeout` (Bug 1+2, commit `20d98914`) + engine 18 s
+> total-search deadline in `handlers/v1/search.go` + stale YTS mirror refresh
+> (Bug 3, commits `0e81730b` + `1aa42536` + `3c1fa159`). 3 client regression
+> tests + 2 engine Go tests added; all falsifiable. Final SHAs confirmed from
+> `git show --stat`.
 
 > **Revision §11.4.44 (2026-06-23):** appended five fixes from the 2026-06-23
 > session — H1 search-401 (AuthInterceptor handoff-key overwrite), api-app-17
@@ -2093,34 +2097,86 @@ provider holds the `SearchResultContent.Streaming` spinner for up to 30 s with n
 Retry affordance — the `handleStreamEnd()` → `Error` path only triggers once
 `collect {}` returns.
 
+**Root cause (Bug 3 — engine unbounded search handler + stale YTS mirrors):**
+`lava-api-go/internal/handlers/v1/search.go` passed `c.Request.Context()` (no
+deadline) to `p.Search()`. YTS failover loop: 4 mirrors × `perAttemptTimeout(8 s)`
+= up to 32 s, exceeding OkHttp's 30 s `readTimeout` on the client — direct source
+of the `SocketTimeoutException` in Crashlytics issue `9d4ad2f4…`. Independently,
+the YTS mirror list led with `yts.mx` which is NXDOMAIN (confirmed 2026-06-24),
+forcing the client to burn all failover slots before timing out. Field evidence:
+Crashlytics key `provider=yts`, exception at `Http2Stream.takeHeaders` (read-headers
+hang, not a write/connect failure). Investigation doc:
+`docs/issues/2026-06-24-search-timeout-and-interrupt-rootcause.md`.
+
 **Affected files:**
 - `feature/search_result/src/main/kotlin/lava/search/result/SearchResultViewModel.kt`
+  (Bug 1 + Bug 2 — cancel-on-back + `withTimeout`)
+- `lava-api-go/internal/handlers/v1/search.go`
+  (Bug 3 — `context.WithTimeout(18 s)` deadline wrapping `p.Search()` at line 69)
+- `lava-api-go/internal/provider/curated/yts/client.go`
+  (Bug 3 — `DefaultBaseURLs` refreshed: dead `yts.mx` dropped, 5 live mirrors:
+  `yts.bz`, `yts.lt`, `yts.am`, `yts.gg`, `movies-api.accel.li`)
 
 **Fix:**
-- Added `@Volatile private var activeSearchJob: Job? = null`.
-- Inside `observeStreamMultiSearch()` captured the coroutine `Job` via
-  `currentCoroutineContext()[Job]` and stored in `activeSearchJob`.
-- `onBackClick()` now calls `activeSearchJob?.cancel()` before posting `Back`.
-- Wrapped `collect {}` in `withTimeout(SEARCH_TIMEOUT_MS)` (25 000 ms, 5 s below
-  OkHttp's `readTimeout`); `TimeoutCancellationException` caught locally, marks
-  still-SEARCHING providers as `StreamStatus.ERROR`, falls through to
-  `handleStreamEnd()` → `SearchResultContent.Error` with Retry button.
-- Generic `Exception` catch with `rethrowIfCancellation()` guard handles
-  connectivity-lost failures similarly. §6.AC telemetry in both catch blocks.
+- **Bug 1 (cancel-on-back):** Added `@Volatile private var activeSearchJob: Job? = null`.
+  Inside `observeStreamMultiSearch()` captured the coroutine `Job` via
+  `currentCoroutineContext()[Job]` and stored in `activeSearchJob`. `onBackClick()`
+  now cancels any prior `activeSearchJob` before posting `Back`.
+- **Bug 2 (client timeout):** Wrapped `collect {}` in `withTimeout(SEARCH_TIMEOUT_MS)`
+  (25 000 ms, 5 s below OkHttp's `readTimeout`); `TimeoutCancellationException`
+  caught locally, marks still-SEARCHING providers as `StreamStatus.ERROR`, routes to
+  `SearchResultContent.Error` with Retry button. Generic `Exception` catch with
+  `rethrowIfCancellation()` guard handles connectivity-lost similarly. §6.AC
+  telemetry in both catch blocks.
+- **Bug 3 (engine deadline + mirror refresh):** `handlers/v1/search.go:69` wraps
+  `p.Search()` in `context.WithTimeout(c.Request.Context(), 18*time.Second)` so the
+  engine ALWAYS returns (results or fast error) before the client's 30 s deadline.
+  `yts/client.go DefaultBaseURLs` refreshed to 5 live mirrors (dead `yts.mx`
+  dropped). Defensive prior-job cancel added in `observeStreamMultiSearch()` for
+  future double-invocation safety (cleanup `1aa42536`).
 
 **Verification tests:**
+
+*Client (Android):*
 `feature/search_result/src/test/kotlin/lava/search/result/SearchResultViewModelCancelTimeoutTest.kt`
-— 3 tests, all using REAL `SearchResultViewModel` + REAL `LavaTrackerSdk` + REAL
-`DefaultTrackerRegistry`; only outer network boundary faked via `CompletableDeferred`-based
-clients (dispatcher-agnostic indefinite suspension):
+— 3 tests using REAL `SearchResultViewModel` + REAL `LavaTrackerSdk` + REAL
+`DefaultTrackerRegistry`; only the outermost network boundary faked via
+`CompletableDeferred`-based clients (dispatcher-agnostic indefinite suspension):
 1. `back_press_while_streaming_cancels_inflight_search_and_emits_Back`
 2. `slow_provider_exceeding_timeout_surfaces_Error_with_Retry_affordance`
 3. `back_press_after_completed_search_preserves_Content_and_emits_Back`
 
-**Falsifiability confirmed (§6.N):**
-- Removed `activeSearchJob?.cancel()` → Test 1 `isStillCollecting` stays `true` → FAIL
-- Removed `withTimeout(SEARCH_TIMEOUT_MS)` → Test 2 times out waiting for `Error` state → FAIL
+*Engine (Go):*
+- `lava-api-go/internal/provider/curated/yts/search_total_deadline_test.go` —
+  `TestSearch_ExceedsDeadline_ReturnsContextDeadlineExceeded` (slow mock server +
+  18 s ctx deadline → confirms the engine surfaces an error, not a hang) +
+  `TestSearch_WithinDeadline_ReturnsResults`.
+- `lava-api-go/internal/provider/curated/yts/search_total_deadline_test.go` —
+  `TestReproduction_StaleMirrorListFails` (NewClientWithMirrors(["yts.mx"]).Search
+  → provider error; fresh list → real results in <2 s).
 
-**Fix commit:** pending (pre-commit at `7d5ffa5e6426a4c804a16fdd7d0eff94a4910cd4`)
+**Falsifiability confirmed (§6.N / Seventh Law clause 1):**
+- Removed `activeSearchJob?.cancel()` → Test 1 `isStillCollecting` stays `true` → FAIL
+- Removed `withTimeout(SEARCH_TIMEOUT_MS)` → Test 2 times out waiting for `Error` → FAIL
+- Reverted `DefaultBaseURLs` to `yts.mx`-only → `TestReproduction_StaleMirrorListFails`
+  reproduces `yts.mx: provider: unknown error` → FAIL; fresh list → PASS (Bluff-Audit
+  in commit body `0e81730b`).
+
+**Fix commits:**
+- `20d98914` — client Bug 1 (cancel-on-back) + Bug 2 (25 s `withTimeout`) +
+  engine Bug 3 (18 s handler deadline in `handlers/v1/search.go:69`)
+- `0e81730b` — YTS stale mirror refresh (`DefaultBaseURLs` + `TestReproduction_StaleMirrorListFails`)
+- `1aa42536` — code-review cleanups (defensive prior-job cancel; mirror-count comment fix)
+- `3c1fa159` — version bumps: lava-api-go 2.3.33, CHANGELOG / snapshots for 1.3.11-1073 / api-app 0.2.11-19
+
+**Forensic anchor:** Firebase Crashlytics NON_FATAL `9d4ad2f4d1a8b8697b1506402e045b81`
+(client release app `1:815513478335:android:456475e2ef4039d8cfd20a`),
+`SocketTimeoutException` at `Http2Stream.takeHeaders`, keys `feature=search /
+operation=streamMultiSearch / provider=yts`, device HUAWEI TXZ-W09 / Android 12.
+Operator report (2026-06-24): "search does not work — no results; can't go back or
+interrupt it." Coordination analysis:
+`docs/issues/2026-06-24-search-timeout-coordination-analysis.md`.
+§6.O closure log: `.lava-ci-evidence/crashlytics-resolved/2026-06-24-search-socket-timeout.md`
 
 **Challenge Test:** owed — `C-SEARCH-CANCEL` per §6.AE (tracked in `docs/workable_items.db`).
+Parallel-authored on-device Challenge is the §6.O clause-2 e2e gate.
