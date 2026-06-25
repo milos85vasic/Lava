@@ -16,7 +16,14 @@
 #     ABI ∈ { arm64-v8a, x86_64, armeabi-v7a }; default = all three.
 #
 # Env overrides:
-#   ANDROID_NDK_HOME   NDK root (default: ~/Library/Android/sdk/ndk/25.1.8937393)
+#   ANDROID_NDK_HOME   NDK root. If unset, it is resolved OS-aware in priority
+#                      order: (1) ANDROID_SDK_ROOT/ANDROID_HOME + ndk/<newest>;
+#                      (2) the OS-conventional SDK location (macOS:
+#                      ~/Library/Android/sdk, Linux: ~/Android/Sdk, Windows:
+#                      %LOCALAPPDATA%/Android/Sdk) + ndk/<newest>. The newest
+#                      ndk/* version dir is chosen via `sort -V`.
+#   ANDROID_SDK_ROOT / ANDROID_HOME   Android SDK root (used to derive the NDK
+#                      when ANDROID_NDK_HOME is unset).
 #   ANDROID_API        Android API level for the clang wrapper (default: 28)
 #
 # Anti-Bluff: this script reports REAL build output. A failed build or a missing
@@ -83,7 +90,64 @@ else
     echo "         hard fail, and the manifest will NOT be refreshed." >&2
 fi
 
-ANDROID_NDK_HOME="${ANDROID_NDK_HOME:-${HOME}/Library/Android/sdk/ndk/25.1.8937393}"
+# OS-aware NDK/SDK path resolution (§11.4.81 cross-platform parity). Priority:
+#   (a) an already-exported ANDROID_NDK_HOME is honored verbatim;
+#   (b) else derive from the SDK root (ANDROID_SDK_ROOT or ANDROID_HOME) +
+#       ndk/<newest> when that SDK root is known and has an ndk/ dir;
+#   (c) else fall back to the OS-conventional SDK location per `uname -s`
+#       (macOS: ~/Library/Android/sdk, Linux: ~/Android/Sdk,
+#       Windows/MSYS: %LOCALAPPDATA%/Android/Sdk) + ndk/<newest>.
+# The newest ndk/* version directory is selected via `sort -V`. A clear FATAL
+# is raised if no NDK can be located so the failure mode is loud, not silent.
+
+# Pick the highest-versioned ndk/<ver> dir under a given SDK root. Echoes the
+# absolute NDK path on success; echoes nothing if the SDK root has no ndk dirs.
+resolve_newest_ndk() {
+    local sdk_root="$1"
+    [[ -n "${sdk_root}" && -d "${sdk_root}/ndk" ]] || return 0
+    local newest
+    newest="$(ls -1 "${sdk_root}/ndk" 2>/dev/null | sort -V | tail -1)"
+    [[ -n "${newest}" ]] || return 0
+    echo "${sdk_root}/ndk/${newest}"
+}
+
+# OS-conventional SDK root per the running host.
+os_conventional_sdk_root() {
+    case "$(uname -s)" in
+        Darwin)            echo "${HOME}/Library/Android/sdk" ;;
+        Linux)             echo "${HOME}/Android/Sdk" ;;
+        MINGW*|MSYS*|CYGWIN*) echo "${LOCALAPPDATA:-${HOME}/AppData/Local}/Android/Sdk" ;;
+        *)                 echo "" ;;
+    esac
+}
+
+if [[ -z "${ANDROID_NDK_HOME:-}" ]]; then
+    # (b) Derive from a known SDK root (ANDROID_SDK_ROOT preferred, then ANDROID_HOME).
+    for sdk_root in "${ANDROID_SDK_ROOT:-}" "${ANDROID_HOME:-}"; do
+        [[ -n "${sdk_root}" ]] || continue
+        cand="$(resolve_newest_ndk "${sdk_root}")"
+        if [[ -n "${cand}" ]]; then
+            ANDROID_NDK_HOME="${cand}"
+            break
+        fi
+    done
+fi
+if [[ -z "${ANDROID_NDK_HOME:-}" ]]; then
+    # (c) Fall back to the OS-conventional SDK location.
+    conv_sdk_root="$(os_conventional_sdk_root)"
+    cand="$(resolve_newest_ndk "${conv_sdk_root}")"
+    if [[ -n "${cand}" ]]; then
+        ANDROID_NDK_HOME="${cand}"
+    fi
+fi
+if [[ -z "${ANDROID_NDK_HOME:-}" ]]; then
+    echo "FATAL: could not locate an Android NDK." >&2
+    echo "       Tried (in order): \$ANDROID_NDK_HOME, \$ANDROID_SDK_ROOT/ndk/*," >&2
+    echo "       \$ANDROID_HOME/ndk/*, and the OS-conventional SDK location" >&2
+    echo "       ('$(os_conventional_sdk_root)/ndk/*' on $(uname -s))." >&2
+    echo "       Install the NDK or export ANDROID_NDK_HOME to its root." >&2
+    exit 2
+fi
 ANDROID_API="${ANDROID_API:-28}"
 
 # Resolve the NDK toolchain bin dir. The prebuilt dir is named for the BUILD
