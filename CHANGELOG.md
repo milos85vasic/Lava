@@ -1,5 +1,30 @@
 # Changelog
 
+## Lava-Android-1.3.12-1076 — 2026-06-25 (search works again + Sync-toggle crash fixed + display fixes)
+
+**Previous published:** Lava-Android-1.3.11-1075.
+
+1076 ships **real user-facing fixes** (versionName bumped 1.3.11→1.3.12):
+
+- **Search works again.** Search was querying the wrong providers (a hardcoded 4-provider list divorced
+  from what you actually onboarded), so it returned zero results and showed "Something went wrong." Search
+  now uses **exactly the providers you onboarded** (single source of truth), with a proper loading indicator
+  and an empty-state instead of a blank screen, and the input/result provider chips now agree (no more
+  run-to-run variance). [§11.4.146 reproduce-first RED→GREEN]
+- **The "Sync this provider" toggle no longer crashes.** Toggling sync (or bind-credential / add-mirror) in a
+  provider's settings crashed the release build (a serialization error). Fixed at the root (the provider-config
+  module now generates + keeps its serializers). All three toggle/bind/mirror actions fixed.
+- **Display fixes:** provider chips show friendly names ("RuTracker", "Internet Archive") instead of raw ids;
+  the Welcome provider count matches the picker; discovered APIs show their friendly name; "Select all" no longer
+  silently enables providers that need credentials; cloud-preset subtitle corrected.
+
+**Known open:** the search→back navigation-teardown crash (LVA-008) is an **upstream androidx-navigation defect**
+(8 app-level fixes device-falsified; an upstream minimal-repro is authored for filing) — not fixed in this build.
+
+Test coverage: 13 new/rewritten Compose UI Challenges (C48–C57 + C31–C35) — the provider toggles, search chips,
+credentials, scaffold nav, rating, account, both apps. Auth rotated `android-1.3.12-1076` (fresh pepper). On-device
+R8-release + search verification at the §6.Z gate. **Channel:** firebase-app-distribution (debug `.dev` + release).
+
 ## Lava-Android-1.3.11-1075 — 2026-06-25 (ships the never-distributed search-timeout fix + anti-bluff test strengthening)
 
 **Previous published:** Lava-Android-1.3.11-1072. (1073 + 1074 were both built + gated but never distributed.)
@@ -53,6 +78,14 @@ fast "Error — Retry" rather than a hang — that's the correct, honest behavio
 - **P1:** a second screen with an unbounded scrolling-list layout (the search input screen) that could crash on
   measure is fixed + guarded by a structural scanner so the class cannot recur.
 - **P2 (partial):** improved tolerance for Internet Archive crawl topics that omit a comments section; the full fix for IA crawl topics that omit most fields is a tracked follow-up (a niche, non-crashing case).
+
+## Lava-API-App-0.2.11-22 — 2026-06-25 (version-parity cycle bump + androidTest fix)
+
+**Previous published:** Lava-API-App-0.2.11-21.
+
+Parity bump alongside the client 1076/1.3.12 cycle. Adds the okhttp-androidTest dependency-conflict fix
+(so `:api-app:assembleDebugAndroidTest` builds) + C06/C07 UI Challenges (Copy-key, Open-client) — test-only;
+no user-facing functional change → versionName held (0.2.11). **Channel:** firebase-app-distribution-api-app.
 
 ## Lava-API-App-0.2.11-21 — 2026-06-25 (version-parity cycle bump)
 

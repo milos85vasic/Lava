@@ -17,10 +17,15 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <application>
+        <!-- Lava is 100% Compose: the real UI theme (LavaTheme) is applied inside
+             setContent {}, so this host activity only needs a valid window theme.
+             A platform theme is used to avoid depending on an app XML @style (there
+             is no XML Theme.Lava — it is a Compose theme), which the androidTest
+             resource context cannot resolve. -->
         <activity
             android:name="lava.app.AccountTestHostActivity"
             android:exported="false"
-            android:theme="@style/Theme.Lava"
+            android:theme="@android:style/Theme.Material.NoActionBar"
             tools:ignore="MissingClass" />
     </application>
 </manifest>

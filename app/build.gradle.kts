@@ -60,16 +60,21 @@ android {
         // handoff key survives to the wire (wire-level MockWebServer test, provably safe
         // for both on-device + remote-API paths). Auth rotated android-1.3.11-1072
         // (fresh pepper, append-only). versionName held (same 1.3.11 user-facing release).
-        // 1075 (§6.Y, this cycle): ships the 1073 search-timeout fix (never distributed —
-        // last published was 1072) + C21/C29 Challenge strengthening (test-only). The
-        // LVA-008 nav-teardown candidate fix that 1074 bundled was FALSIFIED a 6th time at
-        // the §6.Z device gate (C06+C11 still crash with the identical NavBackStackEntry
-        // IllegalStateException on real KVM — see .lava-ci-evidence/1074-gate/) and was
-        // REVERTED. LVA-008 remains OPEN (all ranked candidates exhausted → needs fresh
-        // deep research). versionName HELD at 1.3.11 (the nav crash is unfixed; no new
-        // user-facing "fixed" claim). 1073/1074 burned (gated, never distributed).
-        versionCode = 1075
-        versionName = "1.3.11"
+        // 1076 / 1.3.12 (§6.Y, this cycle): ships REAL user-facing fixes → versionName BUMPED
+        // 1.3.11→1.3.12 (per §6.Y.3 user-facing bug fixes warrant a patch bump):
+        //   (1) FIXED the provider "Sync this provider" toggle CRASH (Settings→provider→toggle →
+        //       release-only SerializationException at ProviderConfigViewModel.kt:92 — missing
+        //       kotlinx-serialization plugin + no R8 keep-rules; all 3 wire classes; §11.4.146 RED→GREEN).
+        //   (2) FIXED search-unusable (SearchInputViewModel hardcoded a 4-provider list divorced
+        //       from the onboarded set → wrong providers → 0 results → "Something went wrong"; now
+        //       reads ProviderConfigRepository.observeAll() filtered+sorted; loading/empty state added).
+        //   (3) FIXED 5 display/onboarding bugs (result-chip names, provider count, API labels, select-all).
+        // Plus 13 new/rewritten Compose UI Challenges (C48–C57 + C31–C35 render/interaction).
+        // LVA-008 nav-teardown crash remains OPEN (conclusively upstream androidx defect, 8 candidates
+        // falsified — minimal-repro authored for upstream filing). Auth rotated android-1.3.12-1076
+        // (fresh pepper, active-list prepend). On-device R8-release + search verification at the §6.Z gate.
+        versionCode = 1076
+        versionName = "1.3.12"
         // SP-3a Step 6 (2026-04-30): wire Hilt + Compose UI test infra so the
         // 8 Challenge Tests at app/src/androidTest/kotlin/lava/app/challenges/
         // become runnable on a connected device. The custom runner installs
