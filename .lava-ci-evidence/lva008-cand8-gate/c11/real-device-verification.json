@@ -1,0 +1,22 @@
+{
+  "all_passed": false,
+  "finished_at": "2026-06-25T19:06:39+03:00",
+  "gating": true,
+  "rows": [
+    {
+      "avd": "default",
+      "api_level": 34,
+      "form_factor": "phone",
+      "boot_seconds": 27.263743623,
+      "test_class": "lava.app.challenges.Challenge11ArchiveOrgAnonymousSearchTest",
+      "test_passed": false,
+      "test_seconds": 55.095311666,
+      "test_error": "exit status 1",
+      "gradle_log_path": "default/gradle.log",
+      "diag": {},
+      "failure_summaries": [],
+      "concurrent": 1
+    }
+  ],
+  "started_at": "2026-06-25T19:05:13+03:00"
+}

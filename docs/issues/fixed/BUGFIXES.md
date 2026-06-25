@@ -2300,13 +2300,21 @@ block 1073 (which fixes the P0 + P1 FATALs + the search timeout). Full fix ships
 
 ## LVA-008 — C11/C06 nested-NavHost `search_input` teardown crash (Activity-scoped inner-host lifecycle)
 
-**Status:** STILL OPEN — the 2026-06-25 candidate fix (Activity-scoped inner-host `LocalLifecycleOwner`)
-was **FALSIFIED a 6th time at the §6.Z device gate** (thinker containerized-KVM, build 1074 @ `1310a922`):
-C06 + C11 reproduced the identical `IllegalStateException` on the `search/search_input` NavBackStackEntry
-at `MainActivity` destroy (evidence `.lava-ci-evidence/1074-gate/`). The fix was **REVERTED**; shipped as
-1075 WITHOUT it, crash documented KNOWN-OPEN in the 1075 CHANGELOG. All 6 app-level candidate classes are
-now exhausted-and-device-falsified — consistent with the conclusion that this is an upstream
-androidx-navigation defect. NEXT: androidx minimal repro + a fresh §11.4.150 deep multi-angle research cycle.
+**Status:** STILL OPEN — **7 app-level candidate fixes now device-FALSIFIED** (2026-06-25). The 6th
+(Activity-scoped inner-host `LocalLifecycleOwner`, build 1074 @ `1310a922`, evidence `.lava-ci-evidence/1074-gate/`)
+was reverted and 1075 shipped WITHOUT it. The 7th (Candidate #8 — `launchSingleTop=true` dedupe on
+`openSearchInput`, branch `lva-008-cand8-gate` @ `e8c81728`) was gated on thinker containerized-KVM:
+**C06 + C11 reproduced the byte-identical `IllegalStateException`** on the `search/search_input`
+NavBackStackEntry (destination `0xe36e02dd`) at `MainActivity` destroy (evidence
+`.lava-ci-evidence/lva008-cand8-gate/`). All 7 app-level candidate classes (nav-version, LenientTeardownRule,
+nested-host move, atomic popUpTo, NavTeardownGuard, Activity-scoped LifecycleOwner, launchSingleTop dedupe)
+are exhausted-and-device-falsified — **CONFIRMED upstream androidx-navigation defect** (§11.4.150 research:
+`b/244910446` family; no fixed-version through nav 2.10.0-alpha04; `docs/research/lva-008-nav-teardown-20260625/`).
+**NEXT (operator-prioritized):** (a) file an androidx minimal-repro issue (low-risk, the path to an upstream
+fix); (b) Candidate #7 — collapse the nested bottom-nav `NavHost` into a single outer `NavHost`
+(multi-back-stack pattern) — the only remaining app-level avenue, but a HIGH-blast-radius architectural
+refactor of working navigation (operator go-ahead recommended before attempting; a botched refactor is
+worse than the current single known teardown crash).
 **Type:** Bug · **Severity:** P1 · **Workable item:** LVA-008
 
 **Symptom (CONFIRMED on device, 2026-06-08):** the app PROCESS crashes at

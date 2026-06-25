@@ -1,0 +1,22 @@
+{
+  "all_passed": false,
+  "finished_at": "2026-06-25T18:55:51+03:00",
+  "gating": true,
+  "rows": [
+    {
+      "avd": "default",
+      "api_level": 34,
+      "form_factor": "phone",
+      "boot_seconds": 27.368783277,
+      "test_class": "lava.app.challenges.Challenge06DownloadTorrentFileTest",
+      "test_passed": false,
+      "test_seconds": 77.741015296,
+      "test_error": "exit status 1",
+      "gradle_log_path": "default/gradle.log",
+      "diag": {},
+      "failure_summaries": [],
+      "concurrent": 1
+    }
+  ],
+  "started_at": "2026-06-25T18:54:03+03:00"
+}
