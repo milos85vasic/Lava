@@ -61,6 +61,68 @@ Format per entry:
 
 ---
 
+## 2026-06-25 — provider "Sync this provider" toggle crashes (SerializationException, prod 1.3.11(1075) RELEASE)
+
+**Root cause:** `feature/provider_config/build.gradle.kts` applied only
+`lava.android.feature` + `lava.android.library.compose` — it did NOT apply the
+`lava.kotlin.serialization` convention plugin (which applies
+`org.jetbrains.kotlin.plugin.serialization`, the compiler plugin that GENERATES
+`$serializer` companions for `@Serializable` classes). The `kotlinx-serialization-json`
+RUNTIME + the `encodeToString` API leaked transitively into the module via the
+`:core:domain` dependency (core:domain applies the plugin), so
+`ProviderConfigViewModel`'s `json.encodeToString(WireToggle(...))` COMPILED — but no
+`$serializer` was ever generated for the module's own `@Serializable` wire classes, so
+at runtime kotlinx-serialization fell back to reflective serializer lookup and threw
+`kotlinx.serialization.SerializationException: Serializer for class 'WireToggle' is not
+found`. Settings → any provider → "Sync this provider" toggle → `ProviderConfigViewModel.kt:92`
+crash. Two compounding factors: (1) the same defect was LATENT in all three wire
+classes — `WireToggle` (ToggleSync), `WireBinding` (BindCredential / UnbindCredential),
+`WireMirror` (AddMirror / RemoveMirror); (2) `app/proguard-rules.pro` had NO
+kotlinx-serialization keep rules, so the RELEASE R8 build would strip the generated
+`$serializer` even after the plugin was applied → release-only crash class.
+
+**Affected files:**
+- `feature/provider_config/build.gradle.kts` — added `id("lava.kotlin.serialization")`.
+- `app/proguard-rules.pro` — added kotlinx-serialization keep rules (generic
+  `@Serializable` + `$serializer` rules + a targeted `lava.provider.config.**`
+  keep for the prod-crash surface).
+- `feature/provider_config/src/test/kotlin/lava/provider/config/ProviderConfigWireSerializationTest.kt`
+  — new reproduce-first regression test (covers all 3 wire classes).
+
+**Fix:** apply the project's serialization convention plugin (`lava.kotlin.serialization`,
+buildSrc id at `buildSrc/build.gradle.kts:62`) so the compiler plugin generates the
+`$serializer` companions for `WireToggle` / `WireBinding` / `WireMirror`; add R8 keep
+rules so the RELEASE build does not strip them. No production Kotlin source changed —
+the `@Serializable` annotations and `encodeToString` calls were already correct; only
+the missing build wiring + keep rules.
+
+**Verification test/challenge:** `ProviderConfigWireSerializationTest` — drives the REAL
+`ProviderConfigViewModel` `ToggleSync` / `BindCredential` / `AddMirror` actions with a
+recording `SyncOutbox`, asserting the production `json.encodeToString(Wire*(...))` path
+reaches `enqueue` with a VALID JSON payload (the user-observable "queued for sync"
+outcome) rather than crashing. Reproduce-first per §11.4.146.
+
+  RED (current/broken code, serialization plugin absent) — 3/3 FAIL:
+    `kotlinx.serialization.SerializationException: Serializer for class 'WireToggle' is not found.`
+    `kotlinx.serialization.SerializationException: Serializer for class 'WireBinding' is not found.`
+    `kotlinx.serialization.SerializationException: Serializer for class 'WireMirror' is not found.`
+    → assertion: "ToggleSync MUST enqueue a SYNC_TOGGLE payload — none was recorded
+      (serialization threw before enqueue). recorded=[]" (+ BINDING + USER_MIRROR).
+  GREEN (after fix) — `:feature:provider_config:compileDebugKotlin` BUILD SUCCESSFUL,
+    `:feature:provider_config:testDebugUnitTest` BUILD SUCCESSFUL, 3 tests / 0 failures.
+    The pre-existing `ProviderConfigViewModelTest` (3/0/0) also still passes — no regression.
+
+  RELEASE-variant R8-strip verification is OWED at the §6.Z device gate — a JVM unit
+  test cannot exercise R8 resource/code shrinking. The `proguard-rules.pro` keep rules
+  are the release-side fix; proving they hold requires the release APK on the gate.
+
+**Fix commit:** (this commit, worktree branch — not pushed; main stream bumps to 1076)
+**Forensic anchor:** Crashlytics issue `eaa80c1486d2d5d7526346ece016e15a` (prod 1.3.11(1075)
+RELEASE); §6.O closure log
+`.lava-ci-evidence/crashlytics-resolved/2026-06-25-provider-sync-toggle-serialization.md`.
+
+---
+
 ## 2026-06-16 — 3 circuit-breaker providers: transient timeout tripped the breaker (kinozal, nnmclub, rutracker)
 
 **Root cause:** kinozal, nnmclub, and rutracker wrap their HTTP calls in a circuit
