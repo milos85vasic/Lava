@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-06-14-readapikey-permission-variant-analysis</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1 id="read_api_key-permission--variant-safety-analysis">READ_API_KEY
+Permission — Variant-Safety Analysis</h1>
+<p><strong>Status:</strong> FIXED (P2-1, 2026-06-14). The permission
+name is now variant-suffixed via the <code>${apiKeyPermission}</code>
+manifest placeholder in BOTH apps — release keeps the byte-identical
+<code>digital.vasic.lava.permission.READ_API_KEY</code> (existing
+release grants survive); debug uses
+<code>digital.vasic.lava.permission.dev.READ_API_KEY</code>. A device
+with both variants installed can no longer hit
+<code>INSTALL_FAILED_DUPLICATE_PERMISSION</code>. Verified by
+<code>:app</code>/<code>:api-app</code>
+<code>processDebugManifest</code> + <code>processReleaseManifest</code>
+merges: debug resolves to the <code>.dev</code> name (uses-permission +
+<code>&lt;permission&gt;</code> + provider <code>readPermission</code>),
+release resolves byte-identically to the original. Runtime alignment:
+<code>ApiKeyProvider.attachInfoForTest</code> now reads the
+variant-aware <code>BuildConfig.API_KEY_PERMISSION</code> (api-app)
+instead of the release-only
+<code>AppLinkContract.PERMISSION_READ_API_KEY</code> constant. Changed
+files: <code>app/build.gradle.kts</code>,
+<code>api-app/build.gradle.kts</code>, both
+<code>AndroidManifest.xml</code>,
+<code>api-app/.../ApiKeyProvider.kt</code>. See §1.4 ("Minimal fix")
+below for the design.</p>
+<p><strong>Date:</strong> 2026-06-14 <strong>Author:</strong> analysis
+(read-only, manifest + build-file evidence only) <strong>Scope:</strong>
+Is the on-device search 401 (key read returned null because
+<code>digital.vasic.lava.permission.READ_API_KEY</code> was not granted)
+a real production permission-variant bug, or a test-VM artifact of mixed
+debug/release install history?</p>
+<hr />
+<h2 id="1-the-facts-manifest--build-file-cites">1. The facts (manifest +
+build-file cites)</h2>
+<h3 id="permission-name--fixed-literal-not-variant-suffixed">Permission
+NAME — FIXED literal, NOT variant-suffixed</h3>
+<ul>
+<li><strong>DEFINED</strong> by api-app:
+<code>api-app/src/main/AndroidManifest.xml:11-13</code>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode xml"><code class="sourceCode xml"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">permission</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="ot">android:name=</span><span class="st">&quot;digital.vasic.lava.permission.READ_API_KEY&quot;</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="ot">android:protectionLevel=</span><span class="st">&quot;signature&quot;</span> /&gt;</span></code></pre></div></li>
+<li><strong>GUARDS the provider</strong> (same fixed name):
+<code>api-app/src/main/AndroidManifest.xml:93</code>
+<code>android:readPermission="digital.vasic.lava.permission.READ_API_KEY"</code></li>
+<li><strong>USED</strong> by the client:
+<code>app/src/main/AndroidManifest.xml:9</code>
+<code>&lt;uses-permission android:name="digital.vasic.lava.permission.READ_API_KEY" /&gt;</code></li>
+</ul>
+<p>The permission name carries <strong>no <code>.dev</code> suffix and
+no <code>${...}</code> placeholder</strong> in either manifest. It is
+byte-identical across debug and release of BOTH apps.</p>
+<h3 id="protectionlevel--signature-the-safe-variant">protectionLevel —
+<code>signature</code> (the safe variant)</h3>
+<p><code>api-app/.../AndroidManifest.xml:13</code> declares
+<code>protectionLevel="signature"</code> (NOT
+<code>signatureOrSystem</code>, NOT <code>dangerous</code>). A signature
+permission is granted at install time to any app signed with the
+<strong>same certificate</strong> that signed the app which DEFINED the
+permission. No runtime grant dialog; the OS decides purely by cert
+match.</p>
+<h3 id="authority--variant-suffixed-correct">Authority —
+variant-suffixed (CORRECT)</h3>
+<p>The provider AUTHORITY, by contrast, IS variant-aware:</p>
+<ul>
+<li><code>api-app/.../AndroidManifest.xml:91</code>
+<code>android:authorities="${apiKeyAuthority}"</code></li>
+<li>Release placeholder: <code>api-app/build.gradle.kts:95</code>
+<code>manifestPlaceholders["apiKeyAuthority"] = "digital.vasic.lava.api.keyprovider"</code></li>
+<li>Debug placeholder: <code>api-app/build.gradle.kts:158</code>
+<code>manifestPlaceholders["apiKeyAuthority"] = "digital.vasic.lava.api.dev.keyprovider"</code></li>
+</ul>
+<p>The client mirrors this with <code>API_TARGET_PACKAGE</code>
+(<code>app/build.gradle.kts:116</code> release default
+<code>digital.vasic.lava.api</code>; <code>:173</code> debug override
+<code>digital.vasic.lava.api.dev</code>) — so the client queries the
+correct authority per variant. The authority dimension is sound and is
+not the subject of this bug.</p>
+<h3 id="applicationids">applicationIds</h3>
+<table>
+<thead>
+<tr>
+<th>App</th>
+<th>Release applicationId</th>
+<th>Debug applicationId</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>client (<code>app</code>)</td>
+<td><code>digital.vasic.lava.client</code> (build:51)</td>
+<td><code>…client.dev</code> (build:169
+<code>applicationIdSuffix = ".dev"</code>)</td>
+</tr>
+<tr>
+<td>api-app</td>
+<td><code>digital.vasic.lava.api</code> (build:71)</td>
+<td><code>…api.dev</code> (build:150
+<code>applicationIdSuffix = ".dev"</code>)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="signing--same-keystore-for-both-apps-per-build-type">Signing —
+same keystore for both apps, per build type</h3>
+<p>Both <code>app/build.gradle.kts:135-148</code> and
+<code>api-app/build.gradle.kts:116-129</code> use the IDENTICAL signing
+inputs: debug → <code>keystores/debug.keystore</code> (alias
+<code>debug</code>), release → <code>keystores/release.keystore</code>
+(alias <code>release</code>), passwords from the same <code>.env</code>.
+<code>api-app/build.gradle.kts:14-17</code> states this verbatim: "this
+module REUSES the EXACT signing block :app uses". Therefore:</p>
+<ul>
+<li><strong>release client cert == release api-app cert</strong>
+(release.keystore)</li>
+<li><strong>debug client cert == debug api-app cert</strong>
+(debug.keystore)</li>
+<li><strong>release cert != debug cert</strong> (different
+keystores)</li>
+</ul>
+<hr />
+<h2 id="2-per-install-combination-grant-verdict">2.
+Per-install-combination grant verdict</h2>
+<p>The signature-permission grant rule: the OS grants
+<code>READ_API_KEY</code> to the client at install time
+<strong>iff</strong> the client's signing cert == the cert of the app
+that DEFINED the permission (the api-app), AND the permission DEFINITION
+currently installed on the device belongs to a package signed with that
+same cert.</p>
+<h3
+id="a-release-client--release-api-app--the-production-pair--grants-white_check_mark">(a)
+release client + release api-app — THE PRODUCTION PAIR — GRANTS ✅</h3>
+<p>Both signed by <code>release.keystore</code>. The release api-app
+defines <code>READ_API_KEY</code> (signature). The release client
+requests it. Certs match → <strong>granted at install</strong>.
+<code>ApiKeyClient.read()</code> → provider query passes the
+<code>readPermission</code> check → key returned → search authenticates.
+<strong>SAFE.</strong></p>
+<h3
+id="b-debug-client--debug-api-app--matched-dev-pair--grants-white_check_mark">(b)
+debug client + debug api-app — matched dev pair — GRANTS ✅</h3>
+<p>Both signed by <code>debug.keystore</code>. Definition + request
+certs match → granted. Authority
+<code>digital.vasic.lava.api.dev.keyprovider</code> matches the debug
+<code>API_TARGET_PACKAGE</code> (<code>…api.dev</code>).
+<strong>SAFE</strong> (when cleanly installed — see §2d).</p>
+<h3
+id="c-both-release--debug-variants-co-installed--risk-warning-test-vm-trap">(c)
+BOTH release + debug variants co-installed — RISK ⚠️ (test-VM trap)</h3>
+<p>Because the permission NAME is a FIXED literal (no <code>.dev</code>
+suffix), the release api-app and the debug api-app BOTH try to DEFINE
+the <strong>same</strong> permission name
+<code>digital.vasic.lava.permission.READ_API_KEY</code>, but with
+<strong>different signatures</strong> (release.keystore vs
+debug.keystore). This is the classic Android duplicate- permission
+trap:</p>
+<ul>
+<li>The <strong>second</strong> api-app to install hits
+<code>INSTALL_FAILED_DUPLICATE_PERMISSION</code> (a permission with that
+name already exists, owned by a differently-signed package), OR</li>
+<li>If install ordering/PackageManager state lets both coexist, the
+permission's <em>owning definition</em> is whichever package
+PackageManager attributes it to. A client signed with the OTHER cert
+than the current definition-owner is then <strong>denied</strong> the
+grant — exactly the observed <code>ApiKeyClient.read()</code> → null →
+401.</li>
+</ul>
+<p>This is precisely the mixed debug/release install history described
+in the bug context, and it is the SAME root as the earlier
+<code>INSTALL_FAILED_DUPLICATE_PERMISSION</code>. It manifests ONLY when
+both differently- signed variants of the api-app are present on one
+device.</p>
+<h3
+id="d-upgrade-path-release-api-app-installed-then-updated--grants-white_check_mark">(d)
+Upgrade path: release api-app installed, then updated — GRANTS ✅</h3>
+<p>An update replaces the same package
+(<code>digital.vasic.lava.api</code>) signed by the same release cert.
+The permission definition is re-declared by the same owner with the same
+signature; no re-definition conflict. The already-installed release
+client's grant persists. <strong>SAFE.</strong></p>
+<hr />
+<h2 id="3-verdict">3. VERDICT</h2>
+<p><strong>Production (matched release pair, clean install) is
+SAFE.</strong> A user who installs ONLY the release client + ONLY the
+release api-app — both signed by <code>release.keystore</code>, the only
+combination shipped to end users via the Play Store / Firebase release
+channel — gets <code>READ_API_KEY</code> granted at install (§2a), so
+<code>ApiKeyClient.read()</code> returns the key and search
+authenticates. The fixed permission name is not a problem when only ONE
+signing identity defines it on the device.</p>
+<p><strong>The observed 401 is a test-VM artifact</strong>, not a
+production bug. It is caused by having <strong>both</strong>
+differently-signed api-app variants (debug <code>…api.dev</code> from
+debug.keystore AND release <code>…api</code> from release.keystore) in
+the install history of one VM (§2c). Two differently-signed packages
+contending to define the same fixed-name permission is what broke the
+grant — the same condition that earlier produced
+<code>INSTALL_FAILED_DUPLICATE_PERMISSION</code>. Real users do not
+co-install a debug and a release variant of the api-app.</p>
+<h3 id="is-there-a-latent-risk-worth-hardening">Is there a latent risk
+worth hardening?</h3>
+<p>Yes — a <strong>defense-in-depth</strong> one, not a
+production-breaking one. Today the permission name is a fixed literal
+while every other cross-app identifier (applicationId, provider
+authority, <code>API_TARGET_PACKAGE</code>) is correctly variant-
+suffixed. The fixed name is the ONE cross-app identifier that can
+collide between variants. It bites:</p>
+<ul>
+<li>developers/CI/QA running mixed debug+release installs (the present
+case), and</li>
+<li>theoretically any user who somehow ends up with both variants.</li>
+</ul>
+<h3
+id="minimal-fix-recommended--eliminates-the-collision-class-entirely">Minimal
+fix (recommended — eliminates the collision class entirely)</h3>
+<p><strong>Variant-suffix the permission name</strong> so debug and
+release never define the same name, exactly as the authority is already
+suffixed:</p>
+<ol type="1">
+<li>api-app: make the permission name a manifest placeholder, e.g.
+<code>android:name="${apiKeyPermission}"</code> on BOTH the
+<code>&lt;permission&gt;</code> (line 11-13) and the provider's
+<code>android:readPermission</code> (line 93), with
+<code>manifestPlaceholders["apiKeyPermission"]</code> set to
+<code>digital.vasic.lava.permission.READ_API_KEY</code> (release,
+build:~95) and
+<code>digital.vasic.lava.permission.dev.READ_API_KEY</code> (debug,
+build:~158).</li>
+<li>client (<code>app</code>): mirror the same placeholder on the
+<code>&lt;uses-permission&gt;</code> (line 9), with the matching
+per-variant value (release default + debug override under
+build:166-175), plus a <code>BuildConfig</code> field if any runtime
+code references the permission name (§6.R: no source literal — drive
+from the placeholder/BuildConfig, same pattern as
+<code>apiKeyAuthority</code> / <code>API_TARGET_PACKAGE</code>).</li>
+</ol>
+<p>After the fix, debug defines <code>…dev.READ_API_KEY</code> (debug
+cert) and release defines <code>…READ_API_KEY</code> (release cert); the
+two never collide, <code>INSTALL_FAILED_DUPLICATE_ PERMISSION</code>
+cannot recur, and a mixed-install VM grants each variant its own
+permission. This makes the test surface match production behavior and
+removes the last fixed-literal cross-app identifier.</p>
+<p><strong>Priority:</strong> LOW for production correctness (production
+is already safe per §2a/d); MEDIUM for developer/QA hygiene + anti-bluff
+fidelity (so the test VM exercises the same grant path real users hit,
+per §6.J — a test environment that can't grant the permission is testing
+a different thing than production).</p>
+<hr />
+<h2 id="evidence-index-line-cites">Evidence index (line cites)</h2>
+<table>
+<thead>
+<tr>
+<th>Fact</th>
+<th>File:line</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Permission DEFINED, fixed name, <code>signature</code></td>
+<td><code>api-app/.../AndroidManifest.xml:11-13</code></td>
+</tr>
+<tr>
+<td>Provider <code>readPermission</code>, same fixed name</td>
+<td><code>api-app/.../AndroidManifest.xml:93</code></td>
+</tr>
+<tr>
+<td>Provider authority = <code>${apiKeyAuthority}</code></td>
+<td><code>api-app/.../AndroidManifest.xml:91</code></td>
+</tr>
+<tr>
+<td>Client <code>&lt;uses-permission&gt;</code>, same fixed name</td>
+<td><code>app/.../AndroidManifest.xml:9</code></td>
+</tr>
+<tr>
+<td>api-app release applicationId</td>
+<td><code>api-app/build.gradle.kts:71</code></td>
+</tr>
+<tr>
+<td>api-app debug <code>.dev</code> suffix</td>
+<td><code>api-app/build.gradle.kts:150</code></td>
+</tr>
+<tr>
+<td>apiKeyAuthority release placeholder</td>
+<td><code>api-app/build.gradle.kts:95</code></td>
+</tr>
+<tr>
+<td>apiKeyAuthority debug placeholder</td>
+<td><code>api-app/build.gradle.kts:158</code></td>
+</tr>
+<tr>
+<td>api-app signing reuses :app block</td>
+<td><code>api-app/build.gradle.kts:14-17, 116-129</code></td>
+</tr>
+<tr>
+<td>client release applicationId</td>
+<td><code>app/build.gradle.kts:51</code></td>
+</tr>
+<tr>
+<td>client debug <code>.dev</code> suffix</td>
+<td><code>app/build.gradle.kts:169</code></td>
+</tr>
+<tr>
+<td>client API_TARGET_PACKAGE release/debug</td>
+<td><code>app/build.gradle.kts:116, 173</code></td>
+</tr>
+<tr>
+<td>client signing block</td>
+<td><code>app/build.gradle.kts:135-148</code></td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

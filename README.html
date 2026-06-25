@@ -235,6 +235,27 @@ href="https://play.google.com/store/apps/details?id=digital.vasic.lava.client"><
 href="https://github.com/milos85vasic/Lava/releases"><img src="badges/github-badge.png" alt="Get it on GitHub" height="90"></a>
 <a
 href="https://apps.rustore.ru/app/digital.vasic.lava.client"><img src="badges/rustore-badge.png" alt="Get it on RuStore" height="90"></a></p>
+<h2 id="run-the-lava-api-on-your-device-new">Run the Lava API on your
+device (new)</h2>
+<p>Lava is adding a standalone <strong>Lava API Android app</strong>
+that boots the full Lava API server <strong>in-process</strong> on a
+phone or tablet, backed by a local <strong>SQLite</strong> database, and
+exposes it on your Wi-Fi so other Lava devices can discover and use it —
+no separate server needed. The same <code>lava-api-go</code> server now
+supports an additive SQLite storage backend (selected by
+<code>LAVA_API_STORAGE_BACKEND</code>, default <code>postgres</code> —
+existing deployments are unchanged) and an in-process embed
+cross-compiled for Android.</p>
+<p>The storage backend + in-process embed (Phases A + B), the
+<code>:core:apiengine</code> Kotlin JNI wrapper (Phase C), and the
+standalone <code>:api-app</code> infrastructure (Phase D-infra — the
+foreground service that runs the API, the mDNS announcer, and the
+encrypted per-install access-key store) have landed. The on-screen
+control panel (Phase D-ui) is in progress. See <a
+href="docs/ON_DEVICE_API.md"><code>docs/ON_DEVICE_API.md</code></a> for
+the architecture and <a
+href="docs/guides/ON_DEVICE_API_USER_GUIDE.md"><code>docs/guides/ON_DEVICE_API_USER_GUIDE.md</code></a>
+for the user guide.</p>
 <h2 id="screenshots">Screenshots</h2>
 <details>
     <summary>Light</summary>

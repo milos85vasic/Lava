@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-06-02-lava-api-android-app</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1 id="lava-api-android-app--implementation-plan-sub-project-1">Lava
+API Android App — Implementation Plan (Sub-project 1)</h1>
+<blockquote>
+<p><strong>For agentic workers:</strong> REQUIRED SUB-SKILL: Use
+superpowers:subagent-driven-development (recommended) or
+superpowers:executing-plans to implement this plan task-by-task. Steps
+use checkbox (<code>- [ ]</code>) syntax for tracking.</p>
+</blockquote>
+<p><strong>Goal:</strong> Ship a standalone
+<code>digital.vasic.lava.api</code> Android app that boots the full Lava
+API in-process (cross-compiled Go via gomobile, SQLite-backed), exposes
+it on the LAN with mDNS, and is controllable (start/stop/restart/status)
+from a landing screen + foreground notification — without breaking the
+existing Postgres-backed Go API.</p>
+<p><strong>Architecture:</strong> Additive storage-backend selector in
+<code>lava-api-go</code> (postgres default untouched + new pure-Go
+SQLite impl) → thin <code>internal/mobile</code> gomobile surface →
+<code>gomobile bind</code> <code>.aar</code> →
+<code>:core:apiengine</code> Kotlin wrapper → <code>:api-app</code>
+Compose app with <code>ApiEngineService</code> (foreground), NsdManager
+advertisement, notification.</p>
+<p><strong>Tech Stack:</strong> Go 1.26, <code>modernc.org/sqlite</code>
+(pure-Go, CGo-free), <code>gomobile bind</code>, Android NDK,
+Kotlin/Jetpack Compose, Hilt, Orbit, NsdManager, JUnit4, orbit-test,
+Compose UI test / Espresso.</p>
+<hr />
+<h2
+id="pre-flight-do-once-before-phase-a-surface-blockers-honestly-per-6l1146">Pre-flight
+(do once, before Phase A; surface blockers honestly per
+§6.L/§11.4.6)</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>PF1: Verify Go
+toolchain.</strong> Run <code>go version</code> (expect ≥ go1.26).
+Record output.</label></li>
+<li><label><input type="checkbox" /><strong>PF2: Verify gomobile
+availability.</strong> Run <code>gomobile version</code> or
+<code>which gomobile</code>. If absent, note as a Phase-B blocker
+(install path:
+<code>go install golang.org/x/mobile/cmd/gomobile@latest &amp;&amp; gomobile init</code>);
+Phase A does NOT need gomobile.</label></li>
+<li><label><input type="checkbox" /><strong>PF3: Verify Android
+NDK.</strong> Check <code>$ANDROID_HOME/ndk</code> or
+<code>local.properties</code>. Needed for <code>gomobile bind</code>
+(Phase B) only.</label></li>
+<li><label><input type="checkbox" /><strong>PF4: Confirm
+<code>modernc.org/sqlite</code> resolvable.</strong> Run
+<code>go list -m modernc.org/sqlite</code> in <code>lava-api-go/</code>.
+If not a direct dep, <code>go get modernc.org/sqlite</code> is Task
+A2-step.</label></li>
+<li><label><input type="checkbox" />Record all PF outputs in the kickoff
+commit body. Any missing tool → name it as a blocker, do not bluff
+downstream phases.</label></li>
+</ul>
+<hr />
+<h2
+id="phase-a--lava-api-go-additive-sqlite-backend-no-android-fully-testable-locally">Phase
+A — <code>lava-api-go</code> additive SQLite backend (no Android, fully
+testable locally)</h2>
+<blockquote>
+<p><strong>Context every Phase-A task must load first:</strong> Read
+<code>lava-api-go/internal/config/config.go</code>,
+<code>lava-api-go/internal/cache/cache.go</code>,
+<code>lava-api-go/internal/server/</code> (composition root), and one
+existing <code>lava-api-go/internal/*/integration_test.go</code> to
+learn the REAL signatures (<code>config.Load</code>, server constructor,
+cache interface). Do not guess signatures — adapt the code below to what
+you find. Run Go tests with
+<code>cd lava-api-go &amp;&amp; GOMAXPROCS=2 nice -n 19 go test ./...</code>
+(§6.T.2 resource limits).</p>
+</blockquote>
+<h3
+id="task-a1-storage-backend-config-selector-additive-default--postgres">Task
+A1: Storage backend config selector (additive, default = postgres)</h3>
+<p><strong>Files:</strong></p>
+<ul>
+<li>Modify: <code>lava-api-go/internal/config/config.go</code></li>
+<li>Test:
+<code>lava-api-go/internal/config/config_storage_test.go</code>
+(new)</li>
+<li>Modify: <code>.env.example</code> (add placeholders)</li>
+</ul>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 1: Read</strong>
+<code>internal/config/config.go</code> fully; note the
+<code>Config</code> struct fields and <code>Load()</code> validation
+block (the <code>LAVA_API_PG_URL is required</code> error at ~line
+145).</label></li>
+<li><label><input type="checkbox" /><strong>Step 2: Write failing
+test</strong> <code>config_storage_test.go</code>:</label></li>
+</ul>
+<div class="sourceCode" id="cb1"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestLoad_DefaultBackendIsPostgresAndStillRequiresPGUrl<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    t<span class="op">.</span>Setenv<span class="op">(</span><span class="st">&quot;LAVA_API_PG_URL&quot;</span><span class="op">,</span> <span class="st">&quot;&quot;</span><span class="op">)</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> err <span class="op">:=</span> config<span class="op">.</span>Load<span class="op">()</span> <span class="co">// default backend = postgres</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span> t<span class="op">.</span>Fatal<span class="op">(</span><span class="st">&quot;expected PG_URL-required error on default backend&quot;</span><span class="op">)</span> <span class="op">}</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestLoad_SqliteBackendRequiresPathNotPGUrl<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    t<span class="op">.</span>Setenv<span class="op">(</span><span class="st">&quot;LAVA_API_STORAGE_BACKEND&quot;</span><span class="op">,</span> <span class="st">&quot;sqlite&quot;</span><span class="op">)</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    t<span class="op">.</span>Setenv<span class="op">(</span><span class="st">&quot;LAVA_API_PG_URL&quot;</span><span class="op">,</span> <span class="st">&quot;&quot;</span><span class="op">)</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    t<span class="op">.</span>Setenv<span class="op">(</span><span class="st">&quot;LAVA_API_SQLITE_PATH&quot;</span><span class="op">,</span> <span class="st">&quot;/tmp/lava-test.db&quot;</span><span class="op">)</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    cfg<span class="op">,</span> err <span class="op">:=</span> config<span class="op">.</span>Load<span class="op">()</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span> t<span class="op">.</span>Fatalf<span class="op">(</span><span class="st">&quot;sqlite backend must not require PG_URL: %v&quot;</span><span class="op">,</span> err<span class="op">)</span> <span class="op">}</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> cfg<span class="op">.</span>StorageBackend <span class="op">!=</span> <span class="st">&quot;sqlite&quot;</span> <span class="op">||</span> cfg<span class="op">.</span>SQLitePath <span class="op">!=</span> <span class="st">&quot;/tmp/lava-test.db&quot;</span> <span class="op">{</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>        t<span class="op">.</span>Fatalf<span class="op">(</span><span class="st">&quot;unexpected cfg: %+v&quot;</span><span class="op">,</span> cfg<span class="op">)</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestLoad_SqliteBackendRequiresPath<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    t<span class="op">.</span>Setenv<span class="op">(</span><span class="st">&quot;LAVA_API_STORAGE_BACKEND&quot;</span><span class="op">,</span> <span class="st">&quot;sqlite&quot;</span><span class="op">)</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    t<span class="op">.</span>Setenv<span class="op">(</span><span class="st">&quot;LAVA_API_SQLITE_PATH&quot;</span><span class="op">,</span> <span class="st">&quot;&quot;</span><span class="op">)</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> _<span class="op">,</span> err <span class="op">:=</span> config<span class="op">.</span>Load<span class="op">();</span> err <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span> t<span class="op">.</span>Fatal<span class="op">(</span><span class="st">&quot;sqlite backend must require SQLITE_PATH&quot;</span><span class="op">)</span> <span class="op">}</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 3: Run</strong>
+<code>go test ./internal/config/ -run TestLoad_ -v</code> → expect FAIL
+(fields/branch missing).</label></li>
+<li><label><input type="checkbox" /><strong>Step 4: Implement</strong>
+in <code>config.go</code>: add <code>StorageBackend string</code>
+(default <code>"postgres"</code> when env empty) and
+<code>SQLitePath string</code>; change the validation so
+<code>PGUrl</code> is required <strong>iff</strong>
+<code>StorageBackend == "postgres"</code>, and <code>SQLitePath</code>
+is required <strong>iff</strong>
+<code>StorageBackend == "sqlite"</code>; reject unknown
+backends.</label></li>
+<li><label><input type="checkbox" /><strong>Step 5: Run</strong> the
+test → expect PASS. Then run the <strong>full existing config
+suite</strong> <code>go test ./internal/config/</code> → expect ALL PASS
+(regression guard: existing tests set PG_URL and must be
+unaffected).</label></li>
+<li><label><input type="checkbox" /><strong>Step 6:</strong> Add
+<code>LAVA_API_STORAGE_BACKEND=postgres</code> and
+<code>LAVA_API_SQLITE_PATH=/data/lava-api.db</code> placeholders to
+<code>.env.example</code>.</label></li>
+<li><label><input type="checkbox" /><strong>Step 7: Commit</strong> with
+Bluff-Audit stamp (mutation: flip the <code>iff postgres</code> guard to
+unconditional; observe
+<code>TestLoad_SqliteBackendRequiresPathNotPGUrl</code> fails;
+revert).</label></li>
+</ul>
+<h3 id="task-a2-define-the-storage-interface-boundary">Task A2: Define
+the storage interface boundary</h3>
+<p><strong>Files:</strong></p>
+<ul>
+<li>Read: <code>lava-api-go/internal/cache/cache.go</code> (what the
+postgres cache provides today)</li>
+<li>Create: <code>lava-api-go/internal/storage/storage.go</code>
+(interface + types)</li>
+<li>Test: <code>lava-api-go/internal/storage/storage_test.go</code></li>
+</ul>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 1: Read</strong>
+<code>internal/cache/cache.go</code> and every caller of it
+(<code>grep -rn "cache\." internal/</code>) to enumerate the exact
+methods the server depends on (e.g. Get/Set/TTL, auth/session
+persistence). Write the enumerated method list into the commit body —
+this is the interface contract.</label></li>
+<li><label><input type="checkbox" /><strong>Step 2: Write</strong>
+<code>storage.go</code> declaring
+<code>type Storage interface { ... }</code> with exactly those methods,
+plus <code>type Backend string</code> constants. No
+implementation.</label></li>
+<li><label><input type="checkbox" /><strong>Step 3: Write</strong>
+<code>storage_test.go</code> with a <code>conformance</code> helper
+<code>func RunStorageConformance(t *testing.T, newStore func() Storage)</code>
+asserting behavioral invariants (set→get round-trip, TTL expiry,
+missing-key behavior) that BOTH backends must satisfy (this is the
+parity harness).</label></li>
+<li><label><input type="checkbox" /><strong>Step 4: Run</strong>
+<code>go test ./internal/storage/</code> → expect FAIL (no impls yet) —
+acceptable; the harness is consumed by A3/A4.</label></li>
+<li><label><input type="checkbox" /><strong>Step 5:
+Commit.</strong></label></li>
+</ul>
+<h3
+id="task-a3-postgres-impl--wrap-existing-behavior-no-behavior-change">Task
+A3: Postgres impl = wrap existing behavior (no behavior change)</h3>
+<p><strong>Files:</strong></p>
+<ul>
+<li>Create: <code>lava-api-go/internal/storage/postgres.go</code></li>
+<li>Test: <code>lava-api-go/internal/storage/postgres_test.go</code>
+(gated <code>-Pintegration</code>/<code>-tags=integration</code>, real
+Postgres in podman)</li>
+</ul>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 1:</strong> Implement
+<code>postgresStorage</code> delegating to the existing
+<code>internal/cache</code> postgres adapter — zero behavior
+change.</label></li>
+<li><label><input type="checkbox" /><strong>Step 2:</strong>
+<code>postgres_test.go</code> runs <code>RunStorageConformance</code>
+against a real podman Postgres (reuse existing integration-test harness;
+same build tag).</label></li>
+<li><label><input type="checkbox" /><strong>Step 3: Run</strong>
+integration test → PASS. Run full existing suite → PASS
+(regression).</label></li>
+<li><label><input type="checkbox" /><strong>Step 4: Commit</strong>
+(Bluff-Audit: break the get to return wrong value; conformance fails;
+revert).</label></li>
+</ul>
+<h3 id="task-a4-sqlite-impl-pure-go-moderncorgsqlite">Task A4: SQLite
+impl (pure-Go modernc.org/sqlite)</h3>
+<p><strong>Files:</strong></p>
+<ul>
+<li>Create: <code>lava-api-go/internal/storage/sqlite.go</code></li>
+<li>Create: <code>lava-api-go/migrations/sqlite/0001_init.sql</code>
+(SQLite-dialect schema mirroring the postgres migrations)</li>
+<li>Test: <code>lava-api-go/internal/storage/sqlite_test.go</code> (no
+external service — uses a temp-file DB)</li>
+</ul>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 1:</strong>
+<code>go get modernc.org/sqlite</code> if not present; import
+<code>_ "modernc.org/sqlite"</code> and <code>database/sql</code> with
+driver name <code>"sqlite"</code>.</label></li>
+<li><label><input type="checkbox" /><strong>Step 2: Write</strong>
+<code>sqlite_test.go</code> that builds a <code>sqliteStorage</code> on
+<code>t.TempDir()+"/t.db"</code> and runs
+<code>RunStorageConformance</code> — expect FAIL first.</label></li>
+<li><label><input type="checkbox" /><strong>Step 3: Implement</strong>
+<code>sqlite.go</code>: open DB, run
+<code>migrations/sqlite/*.sql</code>, implement every
+<code>Storage</code> method using SQL (TTL via an
+<code>expires_at</code> column + lazy expiry on read).</label></li>
+<li><label><input type="checkbox" /><strong>Step 4: Run</strong>
+<code>go test ./internal/storage/ -run Sqlite -v</code> →
+PASS.</label></li>
+<li><label><input type="checkbox" /><strong>Step 5: Commit</strong>
+(Bluff-Audit: make TTL expiry a no-op; conformance TTL case fails;
+revert).</label></li>
+</ul>
+<h3 id="task-a5-wire-backend-selection-into-the-composition-root">Task
+A5: Wire backend selection into the composition root</h3>
+<p><strong>Files:</strong></p>
+<ul>
+<li>Modify: <code>lava-api-go/internal/server/</code> composition root
+(where cache is constructed today) +
+<code>lava-api-go/cmd/lava-api-go/main.go</code></li>
+<li>Test: <code>lava-api-go/internal/storage/parity_test.go</code></li>
+</ul>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 1: Read</strong> the
+server constructor + <code>main.go</code> to find where the postgres
+cache is built and injected.</label></li>
+<li><label><input type="checkbox" /><strong>Step 2:</strong> Add a
+<code>storage.New(cfg) (Storage, error)</code> factory selecting impl by
+<code>cfg.StorageBackend</code>; inject the resulting
+<code>Storage</code> where the cache was used. Postgres path = identical
+to today.</label></li>
+<li><label><input type="checkbox" /><strong>Step 3: Write</strong>
+<code>parity_test.go</code>: spin the real HTTP handlers twice (once
+sqlite temp-file, once — gated — postgres), issue identical requests
+(health + a representative search/browse with a stubbed upstream),
+assert <strong>status + JSON body field-equality</strong>.</label></li>
+<li><label><input type="checkbox" /><strong>Step 4: Run</strong> parity
+test (sqlite leg always; postgres leg under integration tag) →
+PASS.</label></li>
+<li><label><input type="checkbox" /><strong>Step 5: Run the ENTIRE
+<code>lava-api-go</code> suite</strong> <code>go test ./...</code> → ALL
+PASS (final Phase-A regression gate).</label></li>
+<li><label><input type="checkbox" /><strong>Step 6: Commit</strong>
+(Bluff-Audit: point the factory at the wrong impl; parity field-equality
+fails; revert). <strong>Phase A done — the host API now runs on SQLite
+via config, Postgres untouched.</strong></label></li>
+</ul>
+<hr />
+<h2 id="phase-b--internalmobile-native-surface--c-shared-so-build">Phase
+B — <code>internal/mobile</code> native surface +
+<code>c-shared .so</code> build</h2>
+<blockquote>
+<p><strong>DECISION 2026-06-02 (operator):</strong>
+<code>gomobile bind</code> is BLOCKED by lava-api-go's 16 relative
+<code>replace ../submodules/*</code> directives (gomobile's
+overlay-module generator writes a 0-byte go.mod; proven on NDK 21.4 +
+25.1). Replaced with
+<strong><code>go build -buildmode=c-shared</code></strong> (honors
+replace directives) + a hand-written JNI bridge. Still in-process, still
+cross-compiled Go. The <code>internal/mobile</code> Go package (B1,
+commit <code>b03150eb</code>) is done + tested; the gomobile build
+script (B2, <code>d1022a1f</code>) is superseded by the c-shared build
+(B2'). Requires NDK clang as CGO cross-compiler (CGO_ENABLED=1, CC=NDK
+clang per ABI).</p>
+<p><strong>Scope fix:</strong> the embed must serve the FULL production
+router (the same handlers <code>cmd/lava-api-go</code> builds —
+search/browse/topic/auth), bound to <code>0.0.0.0</code> (designed
+network exposure) with a self-signed TLS cert generated at first boot,
+SQLite-backed — not just <code>/health</code>+<code>/ready</code> on
+loopback. Bind addr validated via <code>net.ParseIP</code>
+(security-review hardening) while explicitly allowing non-loopback.</p>
+</blockquote>
+<h3 id="task-b1-internalmobile-package">Task B1:
+<code>internal/mobile</code> package</h3>
+<p><strong>Files:</strong> Create
+<code>lava-api-go/internal/mobile/mobile.go</code>; Test
+<code>lava-api-go/internal/mobile/mobile_test.go</code>.</p>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 1: Write</strong>
+<code>mobile_test.go</code>: <code>Start(configJSON)</code> on a free
+loopback port (sqlite temp db), then a <strong>real
+<code>http.Get</code> to the server's health URL asserting 200 + real
+JSON body</strong>, then <code>Stop()</code>, then assert the port is
+closed. Status() returns JSON containing
+<code>"backend":"sqlite"</code>.</label></li>
+<li><label><input type="checkbox" /><strong>Step 2: Run</strong> →
+FAIL.</label></li>
+<li><label><input type="checkbox" /><strong>Step 3: Implement</strong>
+<code>mobile.go</code>: package-level server handle guarded by a mutex;
+<code>Start(configJSON string) error</code> parses JSON →
+<code>config.Config</code>, builds storage + server, listens on a
+goroutine, returns once accepting (or error); <code>Stop() error</code>
+graceful shutdown; <code>Status() string</code> returns JSON. Exported
+surface uses only string/error (clean gomobile/JNI types).</label></li>
+<li><label><input type="checkbox" /><strong>Step 4: Run</strong> →
+PASS.</label></li>
+<li><label><input type="checkbox" /><strong>Step 5: Commit</strong>
+(Bluff-Audit: make Start return before listening; the real http.Get
+fails; revert).</label></li>
+</ul>
+<h3 id="task-b2-gomobile-bind-build-script--reproducible-artifact">Task
+B2: gomobile bind build script + reproducible artifact</h3>
+<p><strong>Files:</strong> Create
+<code>lava-api-go/scripts/build-aar.sh</code>; Create
+<code>docs/scripts/build-aar.sh.md</code> (§11.4.18); output
+<code>lava-api-go/build/lavaapi.aar</code>.</p>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 1:</strong> Script runs
+<code>gomobile bind -target=android -androidapi 28 -o build/lavaapi.aar ./internal/mobile</code>
+with <code>GOMAXPROCS=2 nice -n19</code> and prints the output
+<code>.aar</code> sha256.</label></li>
+<li><label><input type="checkbox" /><strong>Step 2: Run</strong> the
+script → expect a real <code>.aar</code>; record sha256. If gomobile/NDK
+missing → BLOCKER, surface to operator.</label></li>
+<li><label><input type="checkbox" /><strong>Step 3:</strong> Decide
+artifact handling (prefer: built locally + cached, not committed;
+document in the <code>.md</code>). Add <code>build/</code> to
+<code>.gitignore</code> if needed.</label></li>
+<li><label><input type="checkbox" /><strong>Step 4: Commit</strong> the
+script + doc (not the binary).</label></li>
+</ul>
+<hr />
+<h2 id="phase-c--coreapiengine-kotlin-wrapper-module">Phase C —
+<code>:core:apiengine</code> Kotlin wrapper module</h2>
+<blockquote>
+<p>Context: Read <code>core/notifications/</code> + an existing
+<code>core/*</code> module's <code>build.gradle.kts</code> + a
+convention plugin in <code>buildSrc/</code> to mirror module setup.</p>
+</blockquote>
+<h3
+id="task-c1-module-skeleton--apiengine-interface--behaviorally-equivalent-fake">Task
+C1: Module skeleton + <code>ApiEngine</code> interface +
+behaviorally-equivalent fake</h3>
+<p><strong>Files:</strong> Create
+<code>core/apiengine/build.gradle.kts</code>,
+<code>core/apiengine/src/main/kotlin/lava/apiengine/ApiEngine.kt</code>,
+<code>.../ApiStatus.kt</code>, <code>core/testing</code> fake
+<code>FakeApiEngine</code>; modify <code>settings.gradle.kts</code>
+(<code>include(":core:apiengine")</code>); Test
+<code>core/apiengine/src/test/kotlin/lava/apiengine/FakeApiEngineTest.kt</code>.</p>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 1:</strong> Add module
+to settings; apply <code>lava.android.library</code> (or
+<code>lava.kotlin.library</code> if no Android dep needed beyond the aar
+— the aar needs Android, so android.library).</label></li>
+<li><label><input type="checkbox" /><strong>Step 2:</strong> Define
+<code>interface ApiEngine { suspend fun start(config: ApiConfig): Result&lt;ApiStatus&gt;; suspend fun stop(): Result&lt;Unit&gt;; fun status(): ApiStatus }</code>
+and
+<code>data class ApiStatus(state, bindAddr, port, requestCount, backend, version)</code>.</label></li>
+<li><label><input type="checkbox" /><strong>Step 3: Write</strong>
+<code>FakeApiEngineTest</code> asserting the fake enforces
+start-before-running and propagates a configured error (Third Law
+behavioral equivalence).</label></li>
+<li><label><input type="checkbox" /><strong>Step 4:</strong> Implement
+<code>FakeApiEngine</code> to pass.</label></li>
+<li><label><input type="checkbox" /><strong>Step 5: Run</strong>
+<code>./gradlew :core:apiengine:test</code> → PASS.
+<strong>Commit.</strong></label></li>
+</ul>
+<h3 id="task-c2-real-gomobileapiengine-delegating-to-the-aar">Task C2:
+Real <code>GomobileApiEngine</code> delegating to the
+<code>.aar</code></h3>
+<p><strong>Files:</strong> Create <code>.../GomobileApiEngine.kt</code>;
+add the <code>.aar</code> as a module dependency (flatDir or
+<code>libs/</code>).</p>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 1:</strong> Wire the
+<code>lavaapi.aar</code> into <code>core/apiengine</code>
+deps.</label></li>
+<li><label><input type="checkbox" /><strong>Step 2:</strong> Implement
+<code>GomobileApiEngine</code> calling the generated
+<code>Mobile.start/stop/status</code>, mapping JSON status →
+<code>ApiStatus</code>, dispatching on
+<code>Dispatchers.IO</code>.</label></li>
+<li><label><input type="checkbox" /><strong>Step 3:</strong> Compile
+(<code>./gradlew :core:apiengine:assembleDebug</code>). Real behavior is
+asserted by the instrumented Challenge in Phase E (in-process server
+can't fully run in a JVM unit test).
+<strong>Commit.</strong></label></li>
+</ul>
+<hr />
+<h2
+id="phase-d--api-app-module-compose-app-service-notification-mdns">Phase
+D — <code>:api-app</code> module (Compose app, Service, notification,
+mDNS)</h2>
+<blockquote>
+<p>Context: Read <code>app/build.gradle.kts</code>
+(appId/suffix/signing/version pattern),
+<code>app/src/main/AndroidManifest.xml</code>,
+<code>core/notifications/NotificationServiceImpl.kt</code>, and
+<code>core/data/.../LocalNetworkDiscoveryService*</code> (NsdManager
+usage) to mirror conventions.</p>
+</blockquote>
+<h3 id="task-d1-api-app-module--manifest--signing--appid">Task D1:
+<code>:api-app</code> module + manifest + signing + appId</h3>
+<p><strong>Files:</strong> Create <code>api-app/build.gradle.kts</code>,
+<code>api-app/src/main/AndroidManifest.xml</code>,
+<code>api-app/src/main/kotlin/lava/api/app/ApiApplication.kt</code>;
+modify <code>settings.gradle.kts</code>.</p>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 1:</strong>
+<code>applicationId = "digital.vasic.lava.api"</code>, debug
+<code>applicationIdSuffix = ".dev"</code>, independent
+<code>versionCode=1</code>/<code>versionName="0.1.0"</code>,
+<strong>same signing config as <code>:app</code></strong> (reuse the
+keystore config block), depend on <code>:core:apiengine</code>,
+<code>:core:designsystem</code>, <code>:core:notifications</code>.
+Permissions: <code>INTERNET</code>, <code>ACCESS_NETWORK_STATE</code>,
+<code>ACCESS_WIFI_STATE</code>,
+<code>CHANGE_WIFI_MULTICAST_STATE</code>,
+<code>FOREGROUND_SERVICE</code>,
+<code>FOREGROUND_SERVICE_DATA_SYNC</code>,
+<code>POST_NOTIFICATIONS</code>, <code>WAKE_LOCK</code>.</label></li>
+<li><label><input type="checkbox" /><strong>Step 2:</strong> Hilt
+<code>@HiltAndroidApp</code> Application. Compile
+<code>./gradlew :api-app:assembleDebug</code> → PASS.
+<strong>Commit.</strong></label></li>
+</ul>
+<h3
+id="task-d2-apiengineservice-foreground-service-startstoprestart-lifecycle--locks--mdns">Task
+D2: <code>ApiEngineService</code> foreground service (start/stop/restart
+lifecycle + locks + mDNS)</h3>
+<p><strong>Files:</strong> Create
+<code>api-app/src/main/kotlin/lava/api/app/service/ApiEngineService.kt</code>;
+Test
+<code>api-app/src/test/kotlin/lava/api/app/service/ApiEngineServiceLogicTest.kt</code>
+(logic extracted to a testable controller).</p>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 1:</strong> Extract
+lifecycle/state logic into
+<code>ApiEngineController(engine: ApiEngine, advertiser: MdnsAdvertiser, ...)</code>
+exposing <code>StateFlow&lt;ApiControlState&gt;</code> so it's
+unit-testable with <code>FakeApiEngine</code> + fake
+advertiser.</label></li>
+<li><label><input type="checkbox" /><strong>Step 2: Write</strong>
+<code>ApiEngineServiceLogicTest</code> (real controller +
+FakeApiEngine): start → state Running with url/ips; stop → Stopped;
+restart → Stopped→Starting→Running; engine error → Error state. Primary
+assertions on emitted state.</label></li>
+<li><label><input type="checkbox" /><strong>Step 3:</strong> Implement
+controller to pass; Service holds Multicast/Wifi/Wake locks while
+Running, releases on Stop.</label></li>
+<li><label><input type="checkbox" /><strong>Step 4: Run</strong>
+<code>./gradlew :api-app:testDebugUnitTest</code> → PASS.
+<strong>Commit</strong> (Bluff-Audit: make restart skip the Starting
+state; assertion fails; revert).</label></li>
+</ul>
+<h3
+id="task-d3-mdns-advertiser-nsdmanager-enginego-platformandroid-storagesqlite">Task
+D3: mDNS advertiser (NsdManager,
+<code>engine=go platform=android storage=sqlite</code>)</h3>
+<p><strong>Files:</strong> Create
+<code>.../service/MdnsAdvertiser.kt</code> (interface) +
+<code>NsdMdnsAdvertiser.kt</code>; Test
+<code>.../MdnsAdvertiserTxtTest.kt</code>.</p>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 1: Write</strong>
+<code>MdnsAdvertiserTxtTest</code> asserting the built
+<code>NsdServiceInfo</code> uses service type
+<code>_lava-api._tcp</code> (release) / <code>_lava-api-dev._tcp</code>
+(debug) and TXT attrs <code>engine=go</code>,
+<code>platform=android</code>, <code>storage=sqlite</code>,
+<code>version=…</code>. (Build the TXT map via a pure function so it's
+unit-testable.)</label></li>
+<li><label><input type="checkbox" /><strong>Step 2:</strong> Implement;
+register/unregister on start/stop.</label></li>
+<li><label><input type="checkbox" /><strong>Step 3: Run</strong> test →
+PASS. <strong>Commit.</strong></label></li>
+</ul>
+<h3 id="task-d4-landing-screen-mviorbit--notification">Task D4: Landing
+screen (MVI/Orbit) + notification</h3>
+<p><strong>Files:</strong> Create
+<code>.../control/ApiControlViewModel.kt</code>,
+<code>ApiControlState/Action/SideEffect.kt</code>,
+<code>.../control/ApiControlScreen.kt</code>,
+<code>.../notification/ApiNotification.kt</code>; Test
+<code>.../control/ApiControlViewModelTest.kt</code> (orbit-test, real
+controller, FakeApiEngine).</p>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 1: Write</strong>
+<code>ApiControlViewModelTest</code>: Start action → state transitions
+to Running with reachable URL + IP list + request count; Stop → Stopped;
+Restart → through Starting; error → Error message. No <code>_</code> in
+any rendered label (assert formatting helper).</label></li>
+<li><label><input type="checkbox" /><strong>Step 2:</strong> Implement
+ViewModel + state machine to pass.</label></li>
+<li><label><input type="checkbox" /><strong>Step 3:</strong> Compose
+<code>ApiControlScreen</code>: status indicator, Start/Stop/Restart
+buttons (enabled per state), reachable
+<code>https://&lt;ip&gt;:&lt;port&gt;</code>, all LAN IPs, request
+counter, plain-language explanation of what running means + how other
+devices connect.</label></li>
+<li><label><input type="checkbox" /><strong>Step 4:</strong> Foreground
+notification (channel via <code>core:notifications</code>): title/body
+with URL + count, <strong>Stop/Restart actions</strong>, tap → landing
+screen.</label></li>
+<li><label><input type="checkbox" /><strong>Step 5: Run</strong>
+<code>./gradlew :api-app:testDebugUnitTest</code> → PASS.
+<strong>Commit</strong> (Bluff-Audit: make Stop leave state Running;
+assertion fails; revert).</label></li>
+</ul>
+<hr />
+<h2
+id="phase-e--instrumented-challenge-tests-real-deviceemulator-real-evidence--6j6z6ae">Phase
+E — Instrumented Challenge tests (real device/emulator, real evidence —
+§6.J/§6.Z/§6.AE)</h2>
+<blockquote>
+<p>Runner: host-direct + HVF per §6.L 67th cycle (darwin/arm64).
+Requires a provisioned AVD; if none, execution is honestly BLOCKED, not
+faked. Each Challenge carries a FALSIFIABILITY REHEARSAL KDoc block.</p>
+</blockquote>
+<h3 id="task-e1-challenge01_apiappcoldstartsurvives">Task E1:
+<code>Challenge01_ApiAppColdStartSurvives</code></h3>
+<p><strong>Files:</strong> Create
+<code>api-app/src/androidTest/kotlin/lava/api/app/challenges/Challenge01ApiAppColdStartTest.kt</code>.</p>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 1:</strong>
+<code>pm clear digital.vasic.lava.api.dev</code>; launch; assert the
+landing screen renders (status visible) without crash.</label></li>
+<li><label><input type="checkbox" /><strong>Step 2:</strong>
+Falsifiability KDoc: throw in <code>ApiApplication.onCreate</code> →
+cold-start fails. <strong>Commit.</strong></label></li>
+</ul>
+<h3
+id="task-e2-challenge02_apiappbootandservesrealjson-load-bearing">Task
+E2: <code>Challenge02_ApiAppBootAndServesRealJson</code>
+(load-bearing)</h3>
+<p><strong>Files:</strong> Create
+<code>.../Challenge02ApiAppBootAndServeTest.kt</code>.</p>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 1:</strong> Launch →
+tap <strong>Start</strong> → wait until UI shows
+<strong>Running</strong> with a URL.</label></li>
+<li><label><input type="checkbox" /><strong>Step 2:</strong> From the
+test process, issue a <strong>real HTTPS request to the on-device
+server's health + a search/browse endpoint</strong>, assert <strong>200
++ real JSON body fields</strong> (primary assertion on the
+wire).</label></li>
+<li><label><input type="checkbox" /><strong>Step 3:</strong>
+Falsifiability KDoc: make <code>mobile.Start</code> bind but serve 500
+on health → the JSON assertion fails with a clear message.</label></li>
+<li><label><input type="checkbox" /><strong>Step 4:
+Commit.</strong></label></li>
+</ul>
+<h3
+id="task-e3-challenge03_stoprestart--challenge04_notificationactions">Task
+E3: <code>Challenge03_StopRestart</code> +
+<code>Challenge04_NotificationActions</code></h3>
+<p><strong>Files:</strong> Create the two Challenge files.</p>
+<ul class="task-list">
+<li><label><input type="checkbox" />Stop → UI Stopped + subsequent HTTPS
+request refused; Restart → back to Running + serving. Notification
+Stop/Restart actions drive the same transitions. Falsifiability KDoc
+each. <strong>Commit.</strong></label></li>
+</ul>
+<h3 id="task-e4-execute-the-challenge-matrix--capture-evidence">Task E4:
+Execute the Challenge matrix + capture evidence</h3>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 1:</strong> Build
+<code>:api-app:assembleDebug</code> +
+<code>:api-app:assembleDebugAndroidTest</code>.</label></li>
+<li><label><input type="checkbox" /><strong>Step 2:</strong> Run via the
+host-direct+HVF runner against a provisioned AVD (min API
+28/30/34/latest per §6.AE.2 where the AVD set exists). Capture
+<code>connectedDebugAndroidTest BUILD SUCCESSFUL</code>
+verbatim.</label></li>
+<li><label><input type="checkbox" /><strong>Step 3:</strong> Write
+<code>.lava-ci-evidence/&lt;...&gt;/api-app-real-device-verification.{md,json}</code>
+with per-(Challenge×AVD) rows (§6.I.4 Group-B fields). If the AVD set is
+incomplete → record honestly which API levels ran and which are
+BLOCKED.</label></li>
+<li><label><input type="checkbox" /><strong>Step 4: Commit</strong>
+evidence.</label></li>
+</ul>
+<hr />
+<h2 id="self-review-notes">Self-review notes</h2>
+<ul>
+<li><strong>Spec coverage:</strong> §2 spec→Phase A; §3.1
+<code>gomobile</code>→Phase B; §3.1 <code>:core:apiengine</code>→Phase
+C; §3.2/3.3/3.4/5→Phase D; §4 discovery→Task D3; §6 testing→Phases A
+tests + E. Roadmap §8 (sub-projects 2–4) intentionally out of this plan
+(own specs).</li>
+<li><strong>Type consistency:</strong>
+<code>ApiEngine.start/stop/status</code> +
+<code>ApiStatus(state,bindAddr,port,requestCount,backend,version)</code>
+used consistently C1→C2→D2→D4. <code>Storage</code> interface defined
+A2, implemented A3/A4, selected A5, consumed B1.</li>
+<li><strong>No placeholders:</strong> implementation steps that depend
+on unread signatures explicitly begin with a "read the named file" step
+(no-guessing §11.4.6) rather than fabricated signatures.</li>
+<li><strong>Honest blockers:</strong> PF2/PF3 (gomobile/NDK) gate Phase
+B; AVD gates Phase E; neither is faked.</li>
+</ul>
+</body>
+</html>

@@ -1,0 +1,1831 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>schema</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1 id="lava-database-schemas">Lava Database Schemas</h1>
+<p>Lava has <strong>two independent databases</strong>:</p>
+<ol type="1">
+<li><p><strong>Client (Android) — Room/SQLite</strong>,
+<code>lava.database.AppDatabase</code>, schema <strong>version
+11</strong>. The authoritative dump is the Room schema JSON at <a
+href="../../core/database/schemas/lava.database.AppDatabase/11.json"><code>core/database/schemas/lava.database.AppDatabase/11.json</code></a>
+(identity hash <code>72458bec62ab2a038aeb36fbfe05129d</code>). Every
+column / type / key below is taken verbatim from that file.</p></li>
+<li><p><strong>Server (lava-api-go) — Postgres</strong>, schema
+<code>lava_api</code>, managed by golang-migrate SQL files <a
+href="../../lava-api-go/migrations/"><code>lava-api-go/migrations/0001..0009</code></a>.
+Every column / type / key below is taken verbatim from the
+<code>*.up.sql</code> files.</p></li>
+</ol>
+<p>These two schemas are <strong>not</strong> mirrors of each other.
+They overlap on a small number of conceptual entities (provider
+config/credentials, provider selections) which evolved on both sides;
+see §3 (Parity) for the overlap.</p>
+<hr />
+<h2 id="1-client-schema-room--sqlite-version-11">1. Client schema (Room
+/ SQLite, version 11)</h2>
+<p>Room affinity → SQLite type: <code>TEXT</code>, <code>INTEGER</code>,
+<code>BLOB</code>. <code>notNull: true</code> = <code>NOT NULL</code>.
+Nullable columns omit the flag.</p>
+<h3 id="11-er-diagram-client">1.1 ER diagram (client)</h3>
+<p>The only declared relationship is <code>ForumCategoryEntity</code>'s
+self-referential <code>parentId → id</code> foreign key
+(<code>ON DELETE CASCADE</code>). All other tables are standalone (Room
+stores related data as serialized <code>TEXT</code>, e.g.
+<code>Bookmark.topics</code>, rather than via FKs).</p>
+<pre class="mermaid"><code>erDiagram
+    ForumCategoryEntity ||--o{ ForumCategoryEntity : &quot;parentId (CASCADE)&quot;
+
+    Bookmark {
+        TEXT id PK
+        INTEGER timestamp
+        TEXT category
+        TEXT topics
+        TEXT newTopics
+    }
+    cloned_provider {
+        TEXT syntheticId PK
+        TEXT sourceTrackerId
+        TEXT displayName
+        TEXT primaryUrl
+        INTEGER deletedAt &quot;nullable&quot;
+    }
+    credentials_entry {
+        TEXT id PK
+        TEXT displayName
+        TEXT type
+        BLOB ciphertext
+        INTEGER createdAt
+        INTEGER updatedAt
+        INTEGER deletedAt &quot;nullable&quot;
+    }
+    Endpoint {
+        TEXT id PK
+        TEXT type
+        TEXT host
+    }
+    FavoriteSearch {
+        INTEGER id PK
+    }
+    FavoriteTopic {
+        TEXT id PK
+        INTEGER timestamp
+        TEXT title
+        TEXT author &quot;nullable&quot;
+        TEXT category &quot;nullable&quot;
+        TEXT tags &quot;nullable&quot;
+        TEXT status &quot;nullable&quot;
+        INTEGER date &quot;nullable&quot;
+        TEXT size &quot;nullable&quot;
+        INTEGER seeds &quot;nullable&quot;
+        INTEGER leeches &quot;nullable&quot;
+        TEXT magnetLink &quot;nullable&quot;
+        INTEGER hasUpdate
+    }
+    ForumCategoryEntity {
+        TEXT id PK
+        TEXT name
+        TEXT parentId FK &quot;nullable&quot;
+        INTEGER orderIndex
+    }
+    ForumMetadata {
+        INTEGER id PK
+        INTEGER lastUpdatedTimestamp
+    }
+    forum_provider_selections {
+        INTEGER id PK &quot;autoincrement&quot;
+        TEXT category_id
+        TEXT provider_id
+        INTEGER created_at
+    }
+    tracker_mirror_health {
+        TEXT tracker_id PK
+        TEXT mirror_url PK
+        TEXT state
+        INTEGER last_check_at &quot;nullable&quot;
+        INTEGER consecutive_failures
+    }
+    provider_configs {
+        TEXT provider_id PK
+        INTEGER timeout_ms
+        TEXT preferred_mirror_url &quot;nullable&quot;
+        INTEGER is_enabled
+        INTEGER search_enabled
+        INTEGER browse_enabled
+        INTEGER download_enabled
+        INTEGER use_anonymous
+        TEXT sort_preference &quot;nullable&quot;
+        INTEGER updated_at
+    }
+    provider_credential_binding {
+        TEXT providerId PK
+        TEXT credentialId
+    }
+    provider_credentials {
+        TEXT provider_id PK
+        TEXT auth_type
+        TEXT username &quot;nullable&quot;
+        TEXT encrypted_password &quot;nullable&quot;
+        TEXT encrypted_token &quot;nullable&quot;
+        TEXT encrypted_api_key &quot;nullable&quot;
+        TEXT encrypted_api_secret &quot;nullable&quot;
+        TEXT cookie_value &quot;nullable&quot;
+        INTEGER expires_at &quot;nullable&quot;
+        INTEGER is_active
+        INTEGER last_used_at &quot;nullable&quot;
+        INTEGER created_at
+        INTEGER updated_at
+    }
+    provider_sync_toggle {
+        TEXT providerId PK
+        INTEGER enabled
+    }
+    Search {
+        INTEGER id PK
+        INTEGER timestamp
+        TEXT query &quot;nullable&quot;
+        TEXT sort
+        TEXT order
+        TEXT period
+        TEXT author &quot;nullable&quot;
+        TEXT categories &quot;nullable&quot;
+    }
+    search_provider_selections {
+        INTEGER id PK &quot;autoincrement&quot;
+        TEXT query_hash
+        TEXT provider_id
+        INTEGER is_selected
+        INTEGER created_at
+    }
+    Suggest {
+        INTEGER id PK
+        INTEGER timestamp
+        TEXT suggest
+    }
+    sync_outbox {
+        INTEGER id PK &quot;autoincrement&quot;
+        TEXT kind
+        TEXT payload
+        INTEGER createdAt
+    }
+    tracker_mirror_user {
+        TEXT tracker_id PK
+        TEXT url PK
+        INTEGER priority
+        TEXT protocol
+        INTEGER added_at
+    }
+    HistoryTopic {
+        TEXT id PK
+        INTEGER timestamp
+        TEXT title
+        TEXT author &quot;nullable&quot;
+        TEXT category &quot;nullable&quot;
+        TEXT tags &quot;nullable&quot;
+        TEXT status &quot;nullable&quot;
+        INTEGER date &quot;nullable&quot;
+        TEXT size &quot;nullable&quot;
+        INTEGER seeds &quot;nullable&quot;
+        INTEGER leeches &quot;nullable&quot;
+        TEXT magnetLink &quot;nullable&quot;
+    }</code></pre>
+<h3 id="12-tables-client--column-listing">1.2 Tables (client) — column
+listing</h3>
+<p>All columns below are exactly as declared in
+<code>11.json</code>.</p>
+<h4 id="bookmark--pk-id"><code>Bookmark</code> — PK <code>id</code></h4>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Affinity</th>
+<th>Not null</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>id</td>
+<td>TEXT</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>timestamp</td>
+<td>INTEGER</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>category</td>
+<td>TEXT</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>topics</td>
+<td>TEXT</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>newTopics</td>
+<td>TEXT</td>
+<td>yes</td>
+</tr>
+</tbody>
+</table>
+<h4 id="cloned_provider--pk-syntheticid"><code>cloned_provider</code> —
+PK <code>syntheticId</code></h4>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Affinity</th>
+<th>Not null</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>syntheticId</td>
+<td>TEXT</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>sourceTrackerId</td>
+<td>TEXT</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>displayName</td>
+<td>TEXT</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>primaryUrl</td>
+<td>TEXT</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>deletedAt</td>
+<td>INTEGER</td>
+<td>no</td>
+</tr>
+</tbody>
+</table>
+<h4 id="credentials_entry--pk-id"><code>credentials_entry</code> — PK
+<code>id</code></h4>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Affinity</th>
+<th>Not null</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>id</td>
+<td>TEXT</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>displayName</td>
+<td>TEXT</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>type</td>
+<td>TEXT</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>ciphertext</td>
+<td>BLOB</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>createdAt</td>
+<td>INTEGER</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>updatedAt</td>
+<td>INTEGER</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>deletedAt</td>
+<td>INTEGER</td>
+<td>no</td>
+</tr>
+</tbody>
+</table>
+<h4 id="endpoint--pk-id"><code>Endpoint</code> — PK <code>id</code></h4>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Affinity</th>
+<th>Not null</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>id</td>
+<td>TEXT</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>type</td>
+<td>TEXT</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>host</td>
+<td>TEXT</td>
+<td>yes</td>
+</tr>
+</tbody>
+</table>
+<h4 id="favoritesearch--pk-id"><code>FavoriteSearch</code> — PK
+<code>id</code></h4>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Affinity</th>
+<th>Not null</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>id</td>
+<td>INTEGER</td>
+<td>yes</td>
+</tr>
+</tbody>
+</table>
+<h4 id="favoritetopic--pk-id"><code>FavoriteTopic</code> — PK
+<code>id</code></h4>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Affinity</th>
+<th>Not null</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>id</td>
+<td>TEXT</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>timestamp</td>
+<td>INTEGER</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>title</td>
+<td>TEXT</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>author</td>
+<td>TEXT</td>
+<td>no</td>
+</tr>
+<tr>
+<td>category</td>
+<td>TEXT</td>
+<td>no</td>
+</tr>
+<tr>
+<td>tags</td>
+<td>TEXT</td>
+<td>no</td>
+</tr>
+<tr>
+<td>status</td>
+<td>TEXT</td>
+<td>no</td>
+</tr>
+<tr>
+<td>date</td>
+<td>INTEGER</td>
+<td>no</td>
+</tr>
+<tr>
+<td>size</td>
+<td>TEXT</td>
+<td>no</td>
+</tr>
+<tr>
+<td>seeds</td>
+<td>INTEGER</td>
+<td>no</td>
+</tr>
+<tr>
+<td>leeches</td>
+<td>INTEGER</td>
+<td>no</td>
+</tr>
+<tr>
+<td>magnetLink</td>
+<td>TEXT</td>
+<td>no</td>
+</tr>
+<tr>
+<td>hasUpdate</td>
+<td>INTEGER</td>
+<td>yes</td>
+</tr>
+</tbody>
+</table>
+<h4
+id="forumcategoryentity--pk-id-fk-parentid--forumcategoryentityid-on-delete-cascade-index-on-parentid"><code>ForumCategoryEntity</code>
+— PK <code>id</code>; FK <code>parentId → ForumCategoryEntity.id</code>
+(ON DELETE CASCADE); index on <code>parentId</code></h4>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Affinity</th>
+<th>Not null</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>id</td>
+<td>TEXT</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>name</td>
+<td>TEXT</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>parentId</td>
+<td>TEXT</td>
+<td>no</td>
+</tr>
+<tr>
+<td>orderIndex</td>
+<td>INTEGER</td>
+<td>yes</td>
+</tr>
+</tbody>
+</table>
+<h4 id="forummetadata--pk-id"><code>ForumMetadata</code> — PK
+<code>id</code></h4>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Affinity</th>
+<th>Not null</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>id</td>
+<td>INTEGER</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>lastUpdatedTimestamp</td>
+<td>INTEGER</td>
+<td>yes</td>
+</tr>
+</tbody>
+</table>
+<h4
+id="forum_provider_selections--pk-id-autoincrement"><code>forum_provider_selections</code>
+— PK <code>id</code> (AUTOINCREMENT)</h4>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Affinity</th>
+<th>Not null</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>id</td>
+<td>INTEGER</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>category_id</td>
+<td>TEXT</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>provider_id</td>
+<td>TEXT</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>created_at</td>
+<td>INTEGER</td>
+<td>yes</td>
+</tr>
+</tbody>
+</table>
+<h4
+id="tracker_mirror_health--composite-pk-tracker_id-mirror_url"><code>tracker_mirror_health</code>
+— composite PK (<code>tracker_id</code>, <code>mirror_url</code>)</h4>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Affinity</th>
+<th>Not null</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>tracker_id</td>
+<td>TEXT</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>mirror_url</td>
+<td>TEXT</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>state</td>
+<td>TEXT</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>last_check_at</td>
+<td>INTEGER</td>
+<td>no</td>
+</tr>
+<tr>
+<td>consecutive_failures</td>
+<td>INTEGER</td>
+<td>yes</td>
+</tr>
+</tbody>
+</table>
+<h4 id="provider_configs--pk-provider_id"><code>provider_configs</code>
+— PK <code>provider_id</code></h4>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Affinity</th>
+<th>Not null</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>provider_id</td>
+<td>TEXT</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>timeout_ms</td>
+<td>INTEGER</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>preferred_mirror_url</td>
+<td>TEXT</td>
+<td>no</td>
+</tr>
+<tr>
+<td>is_enabled</td>
+<td>INTEGER</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>search_enabled</td>
+<td>INTEGER</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>browse_enabled</td>
+<td>INTEGER</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>download_enabled</td>
+<td>INTEGER</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>use_anonymous</td>
+<td>INTEGER</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>sort_preference</td>
+<td>TEXT</td>
+<td>no</td>
+</tr>
+<tr>
+<td>updated_at</td>
+<td>INTEGER</td>
+<td>yes</td>
+</tr>
+</tbody>
+</table>
+<h4
+id="provider_credential_binding--pk-providerid"><code>provider_credential_binding</code>
+— PK <code>providerId</code></h4>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Affinity</th>
+<th>Not null</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>providerId</td>
+<td>TEXT</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>credentialId</td>
+<td>TEXT</td>
+<td>yes</td>
+</tr>
+</tbody>
+</table>
+<h4
+id="provider_credentials--pk-provider_id"><code>provider_credentials</code>
+— PK <code>provider_id</code></h4>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Affinity</th>
+<th>Not null</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>provider_id</td>
+<td>TEXT</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>auth_type</td>
+<td>TEXT</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>username</td>
+<td>TEXT</td>
+<td>no</td>
+</tr>
+<tr>
+<td>encrypted_password</td>
+<td>TEXT</td>
+<td>no</td>
+</tr>
+<tr>
+<td>encrypted_token</td>
+<td>TEXT</td>
+<td>no</td>
+</tr>
+<tr>
+<td>encrypted_api_key</td>
+<td>TEXT</td>
+<td>no</td>
+</tr>
+<tr>
+<td>encrypted_api_secret</td>
+<td>TEXT</td>
+<td>no</td>
+</tr>
+<tr>
+<td>cookie_value</td>
+<td>TEXT</td>
+<td>no</td>
+</tr>
+<tr>
+<td>expires_at</td>
+<td>INTEGER</td>
+<td>no</td>
+</tr>
+<tr>
+<td>is_active</td>
+<td>INTEGER</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>last_used_at</td>
+<td>INTEGER</td>
+<td>no</td>
+</tr>
+<tr>
+<td>created_at</td>
+<td>INTEGER</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>updated_at</td>
+<td>INTEGER</td>
+<td>yes</td>
+</tr>
+</tbody>
+</table>
+<h4
+id="provider_sync_toggle--pk-providerid"><code>provider_sync_toggle</code>
+— PK <code>providerId</code></h4>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Affinity</th>
+<th>Not null</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>providerId</td>
+<td>TEXT</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>enabled</td>
+<td>INTEGER</td>
+<td>yes</td>
+</tr>
+</tbody>
+</table>
+<h4 id="search--pk-id"><code>Search</code> — PK <code>id</code></h4>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Affinity</th>
+<th>Not null</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>id</td>
+<td>INTEGER</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>timestamp</td>
+<td>INTEGER</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>query</td>
+<td>TEXT</td>
+<td>no</td>
+</tr>
+<tr>
+<td>sort</td>
+<td>TEXT</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>order</td>
+<td>TEXT</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>period</td>
+<td>TEXT</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>author</td>
+<td>TEXT</td>
+<td>no</td>
+</tr>
+<tr>
+<td>categories</td>
+<td>TEXT</td>
+<td>no</td>
+</tr>
+</tbody>
+</table>
+<h4
+id="search_provider_selections--pk-id-autoincrement"><code>search_provider_selections</code>
+— PK <code>id</code> (AUTOINCREMENT)</h4>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Affinity</th>
+<th>Not null</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>id</td>
+<td>INTEGER</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>query_hash</td>
+<td>TEXT</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>provider_id</td>
+<td>TEXT</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>is_selected</td>
+<td>INTEGER</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>created_at</td>
+<td>INTEGER</td>
+<td>yes</td>
+</tr>
+</tbody>
+</table>
+<h4 id="suggest--pk-id"><code>Suggest</code> — PK <code>id</code></h4>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Affinity</th>
+<th>Not null</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>id</td>
+<td>INTEGER</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>timestamp</td>
+<td>INTEGER</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>suggest</td>
+<td>TEXT</td>
+<td>yes</td>
+</tr>
+</tbody>
+</table>
+<h4 id="sync_outbox--pk-id-autoincrement"><code>sync_outbox</code> — PK
+<code>id</code> (AUTOINCREMENT)</h4>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Affinity</th>
+<th>Not null</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>id</td>
+<td>INTEGER</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>kind</td>
+<td>TEXT</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>payload</td>
+<td>TEXT</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>createdAt</td>
+<td>INTEGER</td>
+<td>yes</td>
+</tr>
+</tbody>
+</table>
+<h4
+id="tracker_mirror_user--composite-pk-tracker_id-url"><code>tracker_mirror_user</code>
+— composite PK (<code>tracker_id</code>, <code>url</code>)</h4>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Affinity</th>
+<th>Not null</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>tracker_id</td>
+<td>TEXT</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>url</td>
+<td>TEXT</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>priority</td>
+<td>INTEGER</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>protocol</td>
+<td>TEXT</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>added_at</td>
+<td>INTEGER</td>
+<td>yes</td>
+</tr>
+</tbody>
+</table>
+<h4 id="historytopic--pk-id"><code>HistoryTopic</code> — PK
+<code>id</code></h4>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Affinity</th>
+<th>Not null</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>id</td>
+<td>TEXT</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>timestamp</td>
+<td>INTEGER</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>title</td>
+<td>TEXT</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>author</td>
+<td>TEXT</td>
+<td>no</td>
+</tr>
+<tr>
+<td>category</td>
+<td>TEXT</td>
+<td>no</td>
+</tr>
+<tr>
+<td>tags</td>
+<td>TEXT</td>
+<td>no</td>
+</tr>
+<tr>
+<td>status</td>
+<td>TEXT</td>
+<td>no</td>
+</tr>
+<tr>
+<td>date</td>
+<td>INTEGER</td>
+<td>no</td>
+</tr>
+<tr>
+<td>size</td>
+<td>TEXT</td>
+<td>no</td>
+</tr>
+<tr>
+<td>seeds</td>
+<td>INTEGER</td>
+<td>no</td>
+</tr>
+<tr>
+<td>leeches</td>
+<td>INTEGER</td>
+<td>no</td>
+</tr>
+<tr>
+<td>magnetLink</td>
+<td>TEXT</td>
+<td>no</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>Room schema JSONs for all migration versions are checked in under
+<code>core/database/schemas/lava.database.AppDatabase/</code>. The build
+verifies that migrations between consecutive versions reproduce the next
+version's schema.</p>
+</blockquote>
+<hr />
+<h2 id="2-server-schema-postgres-schema-lava_api">2. Server schema
+(Postgres, schema <code>lava_api</code>)</h2>
+<p>Tables live in the <code>lava_api</code> schema (created by migration
+0001). Source files: <a
+href="../../lava-api-go/migrations/"><code>lava-api-go/migrations/</code></a>.
+The one-shot <code>lava-migrate</code> compose service applies them with
+golang-migrate (see <a
+href="../deployment/README.md"><code>docs/deployment/README.md</code></a>).</p>
+<p>Migration history:</p>
+<table>
+<thead>
+<tr>
+<th>Migration</th>
+<th>Table / change</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0001</td>
+<td><code>response_cache</code> (initial) + <code>lava_api</code>
+schema</td>
+</tr>
+<tr>
+<td>0002</td>
+<td><code>request_audit</code></td>
+</tr>
+<tr>
+<td>0003</td>
+<td><code>rate_limit_bucket</code></td>
+</tr>
+<tr>
+<td>0004</td>
+<td><code>login_attempt</code></td>
+</tr>
+<tr>
+<td>0005</td>
+<td><code>response_cache</code> realign (DROP + re-CREATE; destructive
+on existing DBs)</td>
+</tr>
+<tr>
+<td>0006</td>
+<td><code>provider_credentials</code></td>
+</tr>
+<tr>
+<td>0007</td>
+<td><code>provider_configs</code></td>
+</tr>
+<tr>
+<td>0008</td>
+<td><code>search_provider_selections</code></td>
+</tr>
+<tr>
+<td>0009</td>
+<td><code>forum_provider_selections</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="21-er-diagram-server">2.1 ER diagram (server)</h3>
+<p>No foreign keys are declared between these tables; each is
+standalone. The diagram lists the post-migration column shape
+(<code>response_cache</code> as realigned by 0005).</p>
+<pre class="mermaid"><code>erDiagram
+    response_cache {
+        TEXT cache_key PK
+        BYTEA value
+        TIMESTAMPTZ expires_at &quot;nullable&quot;
+    }
+    request_audit {
+        BIGSERIAL id PK
+        TIMESTAMPTZ received_at
+        TEXT method
+        TEXT path
+        TEXT query &quot;nullable&quot;
+        INET client_ip &quot;nullable&quot;
+        TEXT auth_realm_hash &quot;nullable&quot;
+        SMALLINT upstream_status &quot;nullable&quot;
+        INTEGER upstream_ms &quot;nullable&quot;
+        TEXT cache_outcome
+        INTEGER bytes_out &quot;nullable&quot;
+    }
+    rate_limit_bucket {
+        INET client_ip PK
+        TEXT route_class PK
+        DOUBLE tokens
+        TIMESTAMPTZ last_refill_at
+    }
+    login_attempt {
+        BIGSERIAL id PK
+        INET client_ip
+        TEXT username_hash
+        BOOLEAN succeeded
+        TIMESTAMPTZ attempted_at
+    }
+    provider_credentials {
+        TEXT provider_id PK
+        TEXT auth_type
+        TEXT username &quot;nullable&quot;
+        TEXT encrypted_password &quot;nullable&quot;
+        TEXT encrypted_token &quot;nullable&quot;
+        TEXT encrypted_api_key &quot;nullable&quot;
+        TEXT encrypted_api_secret &quot;nullable&quot;
+        TEXT cookie_value &quot;nullable&quot;
+        TIMESTAMPTZ expires_at &quot;nullable&quot;
+        BOOLEAN is_active
+        TIMESTAMPTZ last_used_at &quot;nullable&quot;
+        TIMESTAMPTZ created_at
+        TIMESTAMPTZ updated_at
+    }
+    provider_configs {
+        TEXT provider_id PK
+        INTEGER timeout_ms
+        TEXT preferred_mirror_url &quot;nullable&quot;
+        BOOLEAN is_enabled
+        BOOLEAN search_enabled
+        BOOLEAN browse_enabled
+        BOOLEAN download_enabled
+        TEXT sort_preference &quot;nullable&quot;
+        TIMESTAMPTZ updated_at
+    }
+    search_provider_selections {
+        BIGSERIAL id PK
+        TEXT query_hash UK
+        TEXT provider_id UK
+        BOOLEAN is_selected
+        TIMESTAMPTZ created_at
+    }
+    forum_provider_selections {
+        BIGSERIAL id PK
+        TEXT category_id UK
+        TEXT provider_id UK
+        TIMESTAMPTZ created_at
+    }</code></pre>
+<h3 id="22-tables-server--column-listing">2.2 Tables (server) — column
+listing</h3>
+<h4
+id="lava_apiresponse_cache--pk-cache_key-post-0005-shape"><code>lava_api.response_cache</code>
+— PK <code>cache_key</code> (post-0005 shape)</h4>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Type</th>
+<th>Constraint</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>cache_key</td>
+<td>TEXT</td>
+<td>PRIMARY KEY</td>
+</tr>
+<tr>
+<td>value</td>
+<td>BYTEA</td>
+<td>NOT NULL</td>
+</tr>
+<tr>
+<td>expires_at</td>
+<td>TIMESTAMPTZ</td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<p>Index: <code>response_cache_expires_at_idx</code> on
+<code>expires_at</code>. The <code>submodules/cache/pkg/postgres</code>
+library has these three column names hardcoded in its INSERT/SELECT (see
+the comment block in 0001/0005).</p>
+<h4
+id="lava_apirequest_audit--pk-id"><code>lava_api.request_audit</code> —
+PK <code>id</code></h4>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Type</th>
+<th>Constraint</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>id</td>
+<td>BIGSERIAL</td>
+<td>PRIMARY KEY</td>
+</tr>
+<tr>
+<td>received_at</td>
+<td>TIMESTAMPTZ</td>
+<td>NOT NULL DEFAULT now()</td>
+</tr>
+<tr>
+<td>method</td>
+<td>TEXT</td>
+<td>NOT NULL</td>
+</tr>
+<tr>
+<td>path</td>
+<td>TEXT</td>
+<td>NOT NULL</td>
+</tr>
+<tr>
+<td>query</td>
+<td>TEXT</td>
+<td>—</td>
+</tr>
+<tr>
+<td>client_ip</td>
+<td>INET</td>
+<td>—</td>
+</tr>
+<tr>
+<td>auth_realm_hash</td>
+<td>TEXT</td>
+<td>—</td>
+</tr>
+<tr>
+<td>upstream_status</td>
+<td>SMALLINT</td>
+<td>—</td>
+</tr>
+<tr>
+<td>upstream_ms</td>
+<td>INTEGER</td>
+<td>—</td>
+</tr>
+<tr>
+<td>cache_outcome</td>
+<td>TEXT</td>
+<td>NOT NULL</td>
+</tr>
+<tr>
+<td>bytes_out</td>
+<td>INTEGER</td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<p>Index: <code>request_audit_received_at_idx</code> on
+<code>received_at</code>.</p>
+<h4
+id="lava_apirate_limit_bucket--composite-pk-client_ip-route_class"><code>lava_api.rate_limit_bucket</code>
+— composite PK (<code>client_ip</code>, <code>route_class</code>)</h4>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Type</th>
+<th>Constraint</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>client_ip</td>
+<td>INET</td>
+<td>NOT NULL, PK</td>
+</tr>
+<tr>
+<td>route_class</td>
+<td>TEXT</td>
+<td>NOT NULL, PK</td>
+</tr>
+<tr>
+<td>tokens</td>
+<td>DOUBLE PRECISION</td>
+<td>NOT NULL</td>
+</tr>
+<tr>
+<td>last_refill_at</td>
+<td>TIMESTAMPTZ</td>
+<td>NOT NULL</td>
+</tr>
+</tbody>
+</table>
+<h4
+id="lava_apilogin_attempt--pk-id"><code>lava_api.login_attempt</code> —
+PK <code>id</code></h4>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Type</th>
+<th>Constraint</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>id</td>
+<td>BIGSERIAL</td>
+<td>PRIMARY KEY</td>
+</tr>
+<tr>
+<td>client_ip</td>
+<td>INET</td>
+<td>NOT NULL</td>
+</tr>
+<tr>
+<td>username_hash</td>
+<td>TEXT</td>
+<td>NOT NULL</td>
+</tr>
+<tr>
+<td>succeeded</td>
+<td>BOOLEAN</td>
+<td>NOT NULL</td>
+</tr>
+<tr>
+<td>attempted_at</td>
+<td>TIMESTAMPTZ</td>
+<td>NOT NULL DEFAULT now()</td>
+</tr>
+</tbody>
+</table>
+<p>Index: <code>login_attempt_lookup_idx</code> on
+(<code>client_ip</code>, <code>attempted_at DESC</code>).</p>
+<h4
+id="lava_apiprovider_credentials--pk-provider_id"><code>lava_api.provider_credentials</code>
+— PK <code>provider_id</code></h4>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Type</th>
+<th>Constraint</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>provider_id</td>
+<td>TEXT</td>
+<td>PRIMARY KEY</td>
+</tr>
+<tr>
+<td>auth_type</td>
+<td>TEXT</td>
+<td>NOT NULL DEFAULT 'none'</td>
+</tr>
+<tr>
+<td>username</td>
+<td>TEXT</td>
+<td>—</td>
+</tr>
+<tr>
+<td>encrypted_password</td>
+<td>TEXT</td>
+<td>—</td>
+</tr>
+<tr>
+<td>encrypted_token</td>
+<td>TEXT</td>
+<td>—</td>
+</tr>
+<tr>
+<td>encrypted_api_key</td>
+<td>TEXT</td>
+<td>—</td>
+</tr>
+<tr>
+<td>encrypted_api_secret</td>
+<td>TEXT</td>
+<td>—</td>
+</tr>
+<tr>
+<td>cookie_value</td>
+<td>TEXT</td>
+<td>—</td>
+</tr>
+<tr>
+<td>expires_at</td>
+<td>TIMESTAMPTZ</td>
+<td>—</td>
+</tr>
+<tr>
+<td>is_active</td>
+<td>BOOLEAN</td>
+<td>NOT NULL DEFAULT true</td>
+</tr>
+<tr>
+<td>last_used_at</td>
+<td>TIMESTAMPTZ</td>
+<td>—</td>
+</tr>
+<tr>
+<td>created_at</td>
+<td>TIMESTAMPTZ</td>
+<td>NOT NULL DEFAULT now()</td>
+</tr>
+<tr>
+<td>updated_at</td>
+<td>TIMESTAMPTZ</td>
+<td>NOT NULL DEFAULT now()</td>
+</tr>
+</tbody>
+</table>
+<p>Index: <code>provider_credentials_active_idx</code> on
+(<code>is_active</code>, <code>updated_at DESC</code>).</p>
+<h4
+id="lava_apiprovider_configs--pk-provider_id"><code>lava_api.provider_configs</code>
+— PK <code>provider_id</code></h4>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Type</th>
+<th>Constraint</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>provider_id</td>
+<td>TEXT</td>
+<td>PRIMARY KEY</td>
+</tr>
+<tr>
+<td>timeout_ms</td>
+<td>INTEGER</td>
+<td>NOT NULL DEFAULT 10000</td>
+</tr>
+<tr>
+<td>preferred_mirror_url</td>
+<td>TEXT</td>
+<td>—</td>
+</tr>
+<tr>
+<td>is_enabled</td>
+<td>BOOLEAN</td>
+<td>NOT NULL DEFAULT true</td>
+</tr>
+<tr>
+<td>search_enabled</td>
+<td>BOOLEAN</td>
+<td>NOT NULL DEFAULT true</td>
+</tr>
+<tr>
+<td>browse_enabled</td>
+<td>BOOLEAN</td>
+<td>NOT NULL DEFAULT true</td>
+</tr>
+<tr>
+<td>download_enabled</td>
+<td>BOOLEAN</td>
+<td>NOT NULL DEFAULT true</td>
+</tr>
+<tr>
+<td>sort_preference</td>
+<td>TEXT</td>
+<td>—</td>
+</tr>
+<tr>
+<td>updated_at</td>
+<td>TIMESTAMPTZ</td>
+<td>NOT NULL DEFAULT now()</td>
+</tr>
+</tbody>
+</table>
+<h4
+id="lava_apisearch_provider_selections--pk-id"><code>lava_api.search_provider_selections</code>
+— PK <code>id</code></h4>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Type</th>
+<th>Constraint</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>id</td>
+<td>BIGSERIAL</td>
+<td>PRIMARY KEY</td>
+</tr>
+<tr>
+<td>query_hash</td>
+<td>TEXT</td>
+<td>NOT NULL</td>
+</tr>
+<tr>
+<td>provider_id</td>
+<td>TEXT</td>
+<td>NOT NULL</td>
+</tr>
+<tr>
+<td>is_selected</td>
+<td>BOOLEAN</td>
+<td>NOT NULL DEFAULT true</td>
+</tr>
+<tr>
+<td>created_at</td>
+<td>TIMESTAMPTZ</td>
+<td>NOT NULL DEFAULT now()</td>
+</tr>
+</tbody>
+</table>
+<p>Constraints: <code>UNIQUE (query_hash, provider_id)</code>; index
+<code>search_provider_selections_query_idx</code> on
+<code>query_hash</code>.</p>
+<h4
+id="lava_apiforum_provider_selections--pk-id"><code>lava_api.forum_provider_selections</code>
+— PK <code>id</code></h4>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Type</th>
+<th>Constraint</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>id</td>
+<td>BIGSERIAL</td>
+<td>PRIMARY KEY</td>
+</tr>
+<tr>
+<td>category_id</td>
+<td>TEXT</td>
+<td>NOT NULL</td>
+</tr>
+<tr>
+<td>provider_id</td>
+<td>TEXT</td>
+<td>NOT NULL</td>
+</tr>
+<tr>
+<td>created_at</td>
+<td>TIMESTAMPTZ</td>
+<td>NOT NULL DEFAULT now()</td>
+</tr>
+</tbody>
+</table>
+<p>Constraints: <code>UNIQUE (category_id, provider_id)</code>; index
+<code>forum_provider_selections_category_idx</code> on
+<code>category_id</code>.</p>
+<hr />
+<h2 id="3-room--postgres-parity">3. Room ↔︎ Postgres parity</h2>
+<p>The two databases serve different roles: the Room DB is the on-device
+client cache/state; the Postgres DB is the server-side
+cache/audit/credential store. Most tables exist on only one side. The
+conceptually overlapping entities:</p>
+<table>
+<thead>
+<tr>
+<th>Entity</th>
+<th>Client (Room)</th>
+<th>Server (Postgres)</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>provider_configs</code></td>
+<td>yes (PK <code>provider_id</code>)</td>
+<td>yes (PK <code>provider_id</code>)</td>
+<td>Same intent (per-provider toggles + timeout + preferred mirror).
+<strong>Column drift:</strong> the Room table has
+<code>use_anonymous</code> (INTEGER, NOT NULL) which the Postgres table
+does <strong>not</strong> have (migration 0007 predates it). Both have
+<code>is_enabled</code>/<code>search_enabled</code>/<code>browse_enabled</code>/<code>download_enabled</code>/<code>sort_preference</code>/<code>updated_at</code>.
+Types differ by platform (Room INTEGER booleans vs Postgres BOOLEAN;
+INTEGER epoch vs TIMESTAMPTZ).</td>
+</tr>
+<tr>
+<td><code>provider_credentials</code></td>
+<td>yes (PK <code>provider_id</code>)</td>
+<td>yes (PK <code>provider_id</code>)</td>
+<td>Same column set and intent (<code>auth_type</code>,
+<code>username</code>, <code>encrypted_*</code>,
+<code>cookie_value</code>, <code>expires_at</code>,
+<code>is_active</code>, <code>last_used_at</code>,
+<code>created_at</code>, <code>updated_at</code>). Type encoding differs
+by platform (Room TEXT/INTEGER vs Postgres
+TEXT/TIMESTAMPTZ/BOOLEAN).</td>
+</tr>
+<tr>
+<td><code>search_provider_selections</code></td>
+<td>yes (PK <code>id</code> AUTOINCREMENT)</td>
+<td>yes (PK <code>id</code> BIGSERIAL)</td>
+<td>Same intent (per-query provider selection). Both carry
+<code>query_hash</code>, <code>provider_id</code>,
+<code>is_selected</code>, <code>created_at</code>. The Postgres side
+adds a <code>UNIQUE (query_hash, provider_id)</code>; the Room JSON
+declares no equivalent unique index.</td>
+</tr>
+<tr>
+<td><code>forum_provider_selections</code></td>
+<td>yes (PK <code>id</code> AUTOINCREMENT)</td>
+<td>yes (PK <code>id</code> BIGSERIAL)</td>
+<td>Same intent (per-category provider selection). Room has
+<code>category_id</code>, <code>provider_id</code>,
+<code>created_at</code>. Postgres adds
+<code>UNIQUE (category_id, provider_id)</code>. Note: the Room table has
+<strong>no</strong> <code>is_selected</code> column, whereas
+<code>search_provider_selections</code> (both sides) does.</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><code>UNCONFIRMED:</code> whether the client syncs any of these
+overlapping tables to the server (e.g. via the Room
+<code>sync_outbox</code> table) is not asserted here — it was not
+verified against sync code in this docs pass. The tables overlap in
+<em>shape and intent</em>; the synchronization mechanism (if any) is out
+of scope for this schema reference.</p>
+</blockquote>
+<p>Client-only tables: <code>Bookmark</code>,
+<code>cloned_provider</code>, <code>credentials_entry</code>,
+<code>Endpoint</code>, <code>FavoriteSearch</code>,
+<code>FavoriteTopic</code>, <code>ForumCategoryEntity</code>,
+<code>ForumMetadata</code>, <code>tracker_mirror_health</code>,
+<code>provider_credential_binding</code>,
+<code>provider_sync_toggle</code>, <code>Search</code>,
+<code>Suggest</code>, <code>sync_outbox</code>,
+<code>tracker_mirror_user</code>, <code>HistoryTopic</code>.</p>
+<p>Server-only tables: <code>response_cache</code>,
+<code>request_audit</code>, <code>rate_limit_bucket</code>,
+<code>login_attempt</code>.</p>
+<hr />
+<h2 id="4-cross-references">4. Cross-references</h2>
+<ul>
+<li>Room schema dump: <a
+href="../../core/database/schemas/lava.database.AppDatabase/11.json"><code>core/database/schemas/lava.database.AppDatabase/11.json</code></a></li>
+<li>Postgres migrations: <a
+href="../../lava-api-go/migrations/"><code>lava-api-go/migrations/</code></a></li>
+<li>API reference: <a
+href="../api/README.md"><code>docs/api/README.md</code></a></li>
+<li>Deployment guide: <a
+href="../deployment/README.md"><code>docs/deployment/README.md</code></a></li>
+</ul>
+</body>
+</html>

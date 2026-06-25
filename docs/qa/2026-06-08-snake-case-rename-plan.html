@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-06-08-snake-case-rename-plan</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1 id="11429-camelcase--snake_case-upstream-repo-rename-plan">§11.4.29
+CamelCase → snake_case Upstream Repo Rename Plan</h1>
+<p><strong>Date:</strong> 2026-06-08 <strong>Status:</strong> PLAN ONLY
+— uncommitted, operator/main-agent executes deliberately.
+<strong>Mandate:</strong> HelixConstitution §11.4.29 (own-org repos use
+snake_case names). <strong>Constraints honored:</strong> §6.T.3 (no
+force-push, per-operation operator approval), §6.W (GitHub + GitLab
+parity only), §6.U (no sudo/su).</p>
+<hr />
+<h2
+id="0-executive-summary--the-actual-problem-is-smaller-than-it-looks">0.
+Executive summary — the actual problem is smaller than it looks</h2>
+<p>The 5 dep submodules are already <strong>mounted at snake_case
+paths</strong> on disk (<code>submodules/doc_processor</code>, …) and
+their Go <strong>module paths are already lowercase logical
+names</strong> (<code>digital.vasic.docprocessor</code>, …) that do NOT
+embed the repo name. The CamelCase only survives in three places:</p>
+<ol type="1">
+<li>The <strong>remote repo NAMES</strong> on GitHub + GitLab
+(<code>vasic-digital/DocProcessor</code>, …).</li>
+<li>The <strong><code>.gitmodules</code> <code>url=</code>
+entries</strong> in the Lava parent (PascalCase).</li>
+<li>A handful of
+<strong><code>replace … =&gt; ../&lt;PascalCasePath&gt;</code></strong>
+directives — and the load-bearing one (helixqa upstream
+<code>main</code> go.mod) is exactly why the helixqa pin must track
+<code>lava-pin/2026-06-08-android-executor</code> instead of
+<code>main</code>. The lava-pin branch already uses
+<code>../doc_processor</code>; only upstream <code>main</code> uses
+<code>../DocProcessor</code>.</li>
+</ol>
+<p>Because the Go module identifiers do not change, <strong>renaming the
+remote repos does NOT cascade into Go import paths or
+<code>go.sum</code> checksums.</strong> The rename is almost entirely a
+metadata operation (repo name + <code>.gitmodules</code> url + submodule
+remote URLs).</p>
+<p><strong>Bonus bug found (fix in the same effort):</strong>
+<code>submodules/llm_orchestrator/go.mod:18</code> is
+<code>replace digital.vasic.llmprovider =&gt; ../LLMProvider</code> but
+the disk path is <code>llm_provider</code>. This works only by macOS
+case-insensitivity and is broken on a case-sensitive volume. It must
+become <code>=&gt; ../llm_provider</code>.</p>
+<hr />
+<h2 id="a-mapping-table">(a) Mapping table</h2>
+<p>Verified via <code>git -C submodules/&lt;name&gt; remote -v</code>,
+<code>gh repo view</code>, <code>glab repo view</code>. snake_case
+targets confirmed to NOT yet exist on either provider.</p>
+<table>
+<thead>
+<tr>
+<th>submodule path</th>
+<th>current GitHub repo</th>
+<th>current GitLab repo</th>
+<th>proposed snake_case</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>submodules/doc_processor</code></td>
+<td><code>vasic-digital/DocProcessor</code> (origin); also
+<code>HelixDevelopment/DocProcessor</code> exists</td>
+<td><code>vasic-digital/DocProcessor</code></td>
+<td><code>doc_processor</code></td>
+</tr>
+<tr>
+<td><code>submodules/llm_orchestrator</code></td>
+<td><code>vasic-digital/LLMOrchestrator</code> (origin fetch); also
+<code>HelixDevelopment/LLMOrchestrator</code> exists</td>
+<td><code>vasic-digital/LLMOrchestrator</code></td>
+<td><code>llm_orchestrator</code></td>
+</tr>
+<tr>
+<td><code>submodules/llm_provider</code></td>
+<td><code>vasic-digital/LLMProvider</code> (origin); also
+<code>HelixDevelopment/LLMProvider</code> exists</td>
+<td><code>vasic-digital/LLMProvider</code></td>
+<td><code>llm_provider</code></td>
+</tr>
+<tr>
+<td><code>submodules/llms_verifier</code></td>
+<td><code>vasic-digital/LLMsVerifier</code> (origin)</td>
+<td><code>vasic-digital/LLMsVerifier</code></td>
+<td><code>llms_verifier</code></td>
+</tr>
+<tr>
+<td><code>submodules/vision_engine</code></td>
+<td><code>vasic-digital/VisionEngine</code> (origin fetch); also
+<code>HelixDevelopment/VisionEngine</code> exists</td>
+<td><code>vasic-digital/VisionEngine</code></td>
+<td><code>vision_engine</code></td>
+</tr>
+<tr>
+<td><code>panoptic</code> (other own-org CamelCase)</td>
+<td><code>vasic-digital/Panoptic</code></td>
+<td><code>vasic-digital/panoptic</code> (already lowercase on
+GitLab)</td>
+<td><code>panoptic</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Already snake_case / lowercase (NO rename needed):</strong>
+all 16 core submodules (<code>auth</code>, <code>cache</code>,
+<code>challenges</code>, <code>concurrency</code>, <code>config</code>,
+<code>containers</code>, <code>database</code>, <code>discovery</code>,
+<code>http3</code>, <code>mdns</code>, <code>middleware</code>,
+<code>observability</code>, <code>ratelimiter</code>,
+<code>recovery</code>, <code>security</code>, <code>tracker_sdk</code>).
+HelixConstitution (<code>HelixDevelopment/HelixConstitution</code>) is
+constitution-owned — out of scope, not subject to §11.4.29 lowercasing
+for Lava per §6.AD.1. <code>helixqa</code>
+(<code>HelixDevelopment/helixqa</code> on GitHub,
+<code>helixdevelopment1/HelixQA</code> on GitLab) is already lowercase
+on GitHub; the GitLab <code>HelixQA</code> casing is a
+HelixDevelopment-org concern.</p>
+<h3
+id="remote-inconsistency-flags-must-be-reconciled-see-c-step-0">Remote-inconsistency
+flags (MUST be reconciled, see §c step 0)</h3>
+<p>The 5 dep submodules have <strong>divergent, non-§6.W-compliant
+remote sets</strong> today:</p>
+<ul>
+<li><code>doc_processor</code>: clean (<code>origin</code>=GitHub
+vasic-digital, <code>gitlab</code>=GitLab vasic-digital). ✅</li>
+<li><code>llm_orchestrator</code>: <code>origin</code>
+fetch=<code>vasic-digital</code>, <code>origin</code>
+PUSH=<code>HelixDevelopment</code>; extra
+<code>github</code>+<code>upstream</code> to
+<code>HelixDevelopment</code>. ✗ mixed-org.</li>
+<li><code>llm_provider</code>: clean. ✅</li>
+<li><code>llms_verifier</code>: extra
+<code>github</code>+<code>upstream</code> duplicating
+<code>origin</code>; <code>origin</code> has a stray second PUSH url to
+GitLab. ✗ malformed.</li>
+<li><code>vision_engine</code>: <code>origin</code>
+fetch=<code>vasic-digital</code>, <code>origin</code>
+PUSH=<code>HelixDevelopment</code>; extra
+<code>github</code>+<code>upstream</code> to
+<code>HelixDevelopment</code>. ✗ mixed-org.</li>
+</ul>
+<p>These predate the rename and must be normalized to the §6.W 2-remote
+model (<code>origin</code>=GitHub, <code>gitlab</code>=GitLab, both
+<code>vasic-digital</code>) BEFORE renaming, so the rename targets are
+unambiguous.</p>
+<hr />
+<h2 id="b-blast-radius-inventory-fileline-evidence">(b) Blast-radius
+inventory (file:line evidence)</h2>
+<h3
+id="b1-parent-tracked-files-the-only-files-this-repos-commits-touch">B1.
+Parent-tracked files (the only files THIS repo's commits touch)</h3>
+<ul>
+<li><strong><code>.gitmodules</code></strong> — 5 dep url lines +
+panoptic:
+<ul>
+<li><code>url = git@github.com:vasic-digital/DocProcessor.git</code>
+(doc_processor block)</li>
+<li><code>url = git@github.com:vasic-digital/LLMOrchestrator.git</code>
+(llm_orchestrator block)</li>
+<li><code>url = git@github.com:vasic-digital/LLMProvider.git</code>
+(llm_provider block)</li>
+<li><code>url = git@github.com:vasic-digital/LLMsVerifier.git</code>
+(llms_verifier block)</li>
+<li><code>url = git@github.com:vasic-digital/VisionEngine.git</code>
+(vision_engine block)</li>
+<li><code>url = git@github.com:vasic-digital/Panoptic.git</code>
+(panoptic block)</li>
+</ul></li>
+<li><strong><code>docs/CONTINUATION.md</code></strong> — descriptive
+PascalCase references (§6.S doc, update text):
+<ul>
+<li><code>:17</code> — <code>replace ../DocProcessor</code>
+narrative</li>
+<li><code>:390</code> — <code>LLMOrchestrator</code> narrative</li>
+<li><code>:430-434</code> — pin-index table rows naming
+<code>vasic-digital/DocProcessor</code>, <code>…/LLMOrchestrator</code>,
+<code>…/LLMProvider</code>, <code>…/LLMsVerifier</code>,
+<code>…/VisionEngine</code></li>
+</ul></li>
+<li><strong><code>constitution/submodules-catalogue.md</code></strong> —
+constitution-submodule-owned; references the names. NOT a Lava-parent
+commit (lives in the <code>constitution/</code> submodule git-dir). Flag
+to operator: update upstream in HelixConstitution if it pins repo
+names.</li>
+</ul>
+<h3 id="b2-gomod--gosum-references-verified-by-grep">B2. go.mod / go.sum
+references (verified by grep)</h3>
+<pre><code>submodules/helixqa/go.mod:127   digital.vasic.docprocessor    =&gt; ../doc_processor   (lava-pin: already snake_case ✅)
+submodules/helixqa/go.mod:128   digital.vasic.llmorchestrator =&gt; ../llm_orchestrator (✅)
+submodules/helixqa/go.mod:129   digital.vasic.llmprovider     =&gt; ../llm_provider     (✅)
+submodules/helixqa/go.mod:130   digital.vasic.llmsverifier    =&gt; ../llms_verifier/llm-verifier (✅)
+submodules/helixqa/go.mod:132   digital.vasic.visionengine    =&gt; ../vision_engine    (✅)
+submodules/llm_orchestrator/go.mod:18  replace digital.vasic.llmprovider =&gt; ../LLMProvider  ✗ BROKEN PATH (disk is llm_provider)</code></pre>
+<ul>
+<li>helixqa <strong>upstream <code>main</code></strong> go.mod
+(<code>git show origin/main:go.mod</code>):126-132 uses
+<code>../DocProcessor</code>, <code>../LLMOrchestrator</code>,
+<code>../LLMProvider</code>, <code>../LLMsVerifier/llm-verifier</code>,
+<code>../VisionEngine</code> — PascalCase. This is the divergence the
+lava-pin branch fixes. Once the repos rename, the path-side fix can be
+merged upstream so <code>main</code> works on case-sensitive volumes and
+the pin can return to tracking <code>main</code>.</li>
+<li><strong>NO go.sum churn</strong> — module paths
+(<code>digital.vasic.*</code>) are unchanged by a repo rename; checksums
+unaffected.</li>
+<li><code>lava-api-go/go.mod</code> references only
+<code>digital.vasic.helixqa =&gt; ../submodules/helixqa</code> —
+unaffected.</li>
+</ul>
+<h3 id="b3-go-import-paths-in-source">B3. Go import paths in source</h3>
+<p><strong>None.</strong> Modules use logical
+<code>digital.vasic.*</code> identifiers, not
+<code>github.com/owner/Repo</code> paths. <code>grep</code> for
+<code>vasic-digital/&lt;Pascal&gt;</code> and
+<code>HelixDevelopment/&lt;Pascal&gt;</code> in <code>*.go</code>
+returned zero matches in tracked source.</p>
+<h3
+id="b4-submodule-internal-files-owned-by-the-submodule-repos-not-lava-parent">B4.
+Submodule-internal files (owned by the submodule repos, NOT Lava
+parent)</h3>
+<p>These change inside each submodule's own repo, in that repo's own
+commits — NOT in a Lava-parent commit. Listed so the operator updates
+them upstream:</p>
+<ul>
+<li><code>submodules/doc_processor/{README.md, USER_GUIDE.md, helix-deps.yaml, upstreams/VasicDigitalGitHub.sh, upstreams/VasicDigitalGitLab.sh, upstreams/GitHub.sh}</code></li>
+<li><code>submodules/llm_orchestrator/{helix-deps.yaml, CONTRIBUTING.md, USER_GUIDE.md, docs/test-coverage.md, upstreams/*.sh}</code></li>
+<li><code>submodules/llm_provider/{helix-deps.yaml, upstreams/*.sh}</code></li>
+<li><code>submodules/llms_verifier/{README.md, CLEANUP_CHECKLIST.md, *_PLAN.md, SCORING_SYSTEM_DOCUMENTATION.md, …}</code></li>
+<li><code>submodules/vision_engine/*</code> (analogous)</li>
+<li>Each <code>helix-deps.yaml</code> header comment names the repo
+(e.g. doc_processor's says "vasic-digital/DocProcessor") — cosmetic;
+update for §11.4.31 honesty.</li>
+<li>The <code>upstreams/*.sh</code> scripts hardcode the PascalCase repo
+in push URLs — <strong>functionally load-bearing inside the
+submodule</strong>; must be updated or they push to the now-redirected
+old name.</li>
+</ul>
+<h3 id="b5-ci--scripts-in-the-parent">B5. CI / scripts in the
+parent</h3>
+<p><code>grep</code> over <code>scripts/</code>,
+<code>Upstreams/</code>, <code>tools/</code> for the 5 PascalCase names:
+<strong>zero matches.</strong> The parent's mirror scripts do not name
+these repos. ✅</p>
+<hr />
+<h2 id="c-exact-ordered-command-sequence">(c) Exact ordered command
+sequence</h2>
+<blockquote>
+<p>Run from repo root <code>/Volumes/T7/Projects/Lava</code>. Read-only
+verification steps are safe; mutating steps
+(<code>gh repo rename</code>, <code>glab</code>,
+<code>git remote set-url</code>, edits, <code>git submodule sync</code>)
+are the deliberate execution.</p>
+</blockquote>
+<h3
+id="step-0--pre-flight-backup--remote-normalization-required-first">Step
+0 — Pre-flight backup + remote normalization (REQUIRED first)</h3>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 0a. §9 hardlinked .git backup before any metadata mutation</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">cp</span> <span class="at">-al</span> .git <span class="st">&quot;.git-backup-pre-snakecase-</span><span class="va">$(</span><span class="fu">date</span> +%Y%m%d-%H%M%S<span class="va">)</span><span class="st">/repo.git.mirror&quot;</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># 0b. Normalize the divergent submodule remotes to the §6.W 2-remote model.</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co">#     (Do this for llm_orchestrator, llms_verifier, vision_engine which have</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co">#      mixed-org / malformed remotes.)</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> s <span class="kw">in</span> llm_orchestrator vision_engine<span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">git</span> <span class="at">-C</span> submodules/<span class="va">$s</span> remote remove upstream  <span class="dv">2</span><span class="op">&gt;</span>/dev/null <span class="kw">||</span> <span class="fu">true</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">git</span> <span class="at">-C</span> submodules/<span class="va">$s</span> remote remove github    <span class="dv">2</span><span class="op">&gt;</span>/dev/null <span class="kw">||</span> <span class="fu">true</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">git</span> <span class="at">-C</span> submodules/<span class="va">$s</span> remote set-url origin git@github.com:vasic-digital/<span class="va">$(</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> <span class="va">$s</span> <span class="kw">in</span> <span class="ss">llm_orchestrator</span><span class="kw">)</span> <span class="bu">echo</span> LLMOrchestrator<span class="cf">;;</span> <span class="ss">vision_engine</span><span class="kw">)</span> <span class="bu">echo</span> VisionEngine<span class="cf">;;</span> <span class="cf">esac</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>  <span class="va">)</span>.git</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">git</span> <span class="at">-C</span> submodules/<span class="va">$s</span> remote set-url <span class="at">--push</span> origin git@github.com:vasic-digital/<span class="va">$(</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> <span class="va">$s</span> <span class="kw">in</span> <span class="ss">llm_orchestrator</span><span class="kw">)</span> <span class="bu">echo</span> LLMOrchestrator<span class="cf">;;</span> <span class="ss">vision_engine</span><span class="kw">)</span> <span class="bu">echo</span> VisionEngine<span class="cf">;;</span> <span class="cf">esac</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>  <span class="va">)</span>.git</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> <span class="at">-C</span> submodules/llms_verifier remote remove upstream <span class="dv">2</span><span class="op">&gt;</span>/dev/null <span class="kw">||</span> <span class="fu">true</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> <span class="at">-C</span> submodules/llms_verifier remote remove github   <span class="dv">2</span><span class="op">&gt;</span>/dev/null <span class="kw">||</span> <span class="fu">true</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> <span class="at">-C</span> submodules/llms_verifier remote set-url <span class="at">--add</span> <span class="at">--push</span> origin git@github.com:vasic-digital/LLMsVerifier.git <span class="co"># then drop the stray gitlab push</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="co"># Verify each ends up with exactly: origin=GitHub vasic-digital, gitlab=GitLab vasic-digital</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> s <span class="kw">in</span> doc_processor llm_orchestrator llm_provider llms_verifier vision_engine<span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>  <span class="bu">echo</span> <span class="st">&quot;== </span><span class="va">$s</span><span class="st"> ==&quot;</span><span class="kw">;</span> <span class="fu">git</span> <span class="at">-C</span> submodules/<span class="va">$s</span> remote <span class="at">-v</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span></span></code></pre></div>
+<blockquote>
+<p><strong>OPERATOR APPROVAL GATE 1</strong> — confirm the normalized
+remote sets before any rename.</p>
+</blockquote>
+<h3
+id="step-1--rename-the-remote-repos-github--gitlab-one-repo-at-a-time">Step
+1 — Rename the remote repos (GitHub + GitLab), one repo at a time</h3>
+<p>GitHub <code>gh repo rename</code> and GitLab path-rename both
+install permanent HTTP/SSH <strong>redirects</strong> from the old name,
+so existing clones keep fetching/pushing until their remote URL is
+updated. (GitHub: documented redirect. GitLab: documented "Repository
+path redirect" on project path change — verify the redirect is live with
+the fetch in Step 3 before deleting any old reference.)</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># doc_processor</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="ex">gh</span> repo rename doc_processor <span class="at">--repo</span> vasic-digital/DocProcessor</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="ex">glab</span> repo edit vasic-digital/DocProcessor <span class="at">--path</span> doc_processor     <span class="co"># path-rename on GitLab</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co"># llm_orchestrator</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="ex">gh</span> repo rename llm_orchestrator <span class="at">--repo</span> vasic-digital/LLMOrchestrator</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="ex">glab</span> repo edit vasic-digital/LLMOrchestrator <span class="at">--path</span> llm_orchestrator</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="co"># llm_provider</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="ex">gh</span> repo rename llm_provider <span class="at">--repo</span> vasic-digital/LLMProvider</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="ex">glab</span> repo edit vasic-digital/LLMProvider <span class="at">--path</span> llm_provider</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="co"># llms_verifier</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="ex">gh</span> repo rename llms_verifier <span class="at">--repo</span> vasic-digital/LLMsVerifier</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="ex">glab</span> repo edit vasic-digital/LLMsVerifier <span class="at">--path</span> llms_verifier</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="co"># vision_engine</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="ex">gh</span> repo rename vision_engine <span class="at">--repo</span> vasic-digital/VisionEngine</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a><span class="ex">glab</span> repo edit vasic-digital/VisionEngine <span class="at">--path</span> vision_engine</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a><span class="co"># panoptic (GitHub PascalCase → lowercase; GitLab already lowercase)</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a><span class="ex">gh</span> repo rename panoptic <span class="at">--repo</span> vasic-digital/Panoptic</span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a><span class="co"># glab: GitLab already vasic-digital/panoptic — no path change needed; verify only.</span></span></code></pre></div>
+<blockquote>
+<p>NOTE: <code>glab repo edit --path</code> is the GitLab path-rename
+verb. If the installed <code>glab</code> lacks <code>--path</code>, fall
+back to the GitLab REST PUT:
+<code>glab api --method PUT projects/vasic-digital%2FDocProcessor -f path=doc_processor</code>.
+Do NOT change the GitLab <strong>display name</strong>
+(<code>name</code>) — only the <strong>path</strong>.</p>
+</blockquote>
+<blockquote>
+<p><strong>OPERATOR APPROVAL GATE 2</strong> — the HelixDevelopment-org
+duplicates (<code>HelixDevelopment/DocProcessor</code>,
+<code>…/LLMOrchestrator</code>, <code>…/LLMProvider</code>,
+<code>…/VisionEngine</code>) ALSO exist. Decide per-repo whether they
+are stale and should be renamed/archived too, or left alone. They are
+NOT referenced by Lava's current <code>origin</code> set after Step 0,
+so they are non-blocking — but §11.4.29 applies to them if they are live
+own-org repos.</p>
+</blockquote>
+<h3
+id="step-2--point-each-submodules-local-remotes-at-the-new-names">Step 2
+— Point each submodule's local remotes at the new names</h3>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> <span class="at">-C</span> submodules/doc_processor    remote set-url origin git@github.com:vasic-digital/doc_processor.git</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> <span class="at">-C</span> submodules/doc_processor    remote set-url gitlab git@gitlab.com:vasic-digital/doc_processor.git</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> <span class="at">-C</span> submodules/llm_orchestrator remote set-url origin git@github.com:vasic-digital/llm_orchestrator.git</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> <span class="at">-C</span> submodules/llm_orchestrator remote set-url gitlab git@gitlab.com:vasic-digital/llm_orchestrator.git</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> <span class="at">-C</span> submodules/llm_provider     remote set-url origin git@github.com:vasic-digital/llm_provider.git</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> <span class="at">-C</span> submodules/llm_provider     remote set-url gitlab git@gitlab.com:vasic-digital/llm_provider.git</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> <span class="at">-C</span> submodules/llms_verifier    remote set-url origin git@github.com:vasic-digital/llms_verifier.git</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> <span class="at">-C</span> submodules/llms_verifier    remote set-url gitlab git@gitlab.com:vasic-digital/llms_verifier.git</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> <span class="at">-C</span> submodules/vision_engine    remote set-url origin git@github.com:vasic-digital/vision_engine.git</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> <span class="at">-C</span> submodules/vision_engine    remote set-url gitlab git@gitlab.com:vasic-digital/vision_engine.git</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> <span class="at">-C</span> panoptic                    remote set-url origin git@github.com:vasic-digital/panoptic.git</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> <span class="at">-C</span> panoptic                    remote set-url github git@github.com:vasic-digital/panoptic.git</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> <span class="at">-C</span> panoptic                    remote set-url gitlab git@gitlab.com:vasic-digital/panoptic.git</span></code></pre></div>
+<h3 id="step-3--update-parent-gitmodules--sync">Step 3 — Update parent
+<code>.gitmodules</code> + sync</h3>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Edit .gitmodules url= lines (PascalCase → snake_case):</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="co">#   vasic-digital/DocProcessor.git    -&gt; vasic-digital/doc_processor.git</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co">#   vasic-digital/LLMOrchestrator.git -&gt; vasic-digital/llm_orchestrator.git</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="co">#   vasic-digital/LLMProvider.git     -&gt; vasic-digital/llm_provider.git</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="co">#   vasic-digital/LLMsVerifier.git    -&gt; vasic-digital/llms_verifier.git</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="co">#   vasic-digital/VisionEngine.git    -&gt; vasic-digital/vision_engine.git</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="co">#   vasic-digital/Panoptic.git        -&gt; vasic-digital/panoptic.git</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="co"># (use an editor / Edit tool; paths in [submodule &quot;...&quot;] headers stay as-is —</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="co">#  they already match the snake_case on-disk paths.)</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> submodule sync <span class="at">--recursive</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Verify the redirect + new URL both resolve:</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> s <span class="kw">in</span> doc_processor llm_orchestrator llm_provider llms_verifier vision_engine<span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>  <span class="bu">echo</span> <span class="st">&quot;== </span><span class="va">$s</span><span class="st"> ==&quot;</span><span class="kw">;</span> <span class="fu">git</span> <span class="at">-C</span> submodules/<span class="va">$s</span> ls-remote origin <span class="at">-h</span> <span class="dv">2</span><span class="op">&gt;&amp;</span><span class="dv">1</span> <span class="kw">|</span> <span class="fu">head</span> <span class="at">-1</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span></span></code></pre></div>
+<h3 id="step-4--fix-the-brokenstale-replace-path-independent-bug">Step 4
+— Fix the broken/stale replace path (independent bug)</h3>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># submodules/llm_orchestrator/go.mod:18</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="co">#   replace digital.vasic.llmprovider =&gt; ../LLMProvider</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="co"># -&gt;</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co">#   replace digital.vasic.llmprovider =&gt; ../llm_provider</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Commit inside the llm_orchestrator repo, push to both mirrors.</span></span></code></pre></div>
+<h3
+id="step-5--submodule-internal-upstreamdoc-updates-each-in-its-own-repo">Step
+5 — Submodule-internal upstream/doc updates (each in its own repo)</h3>
+<p>For each of the 5 dep repos (and panoptic), inside the submodule:</p>
+<ul>
+<li>update <code>upstreams/*.sh</code> push URLs to the new lowercase
+repo name,</li>
+<li>update <code>helix-deps.yaml</code> header comment + any
+<code>ssh_url</code>/<code>org</code> field,</li>
+<li>update README/docs PascalCase repo references,</li>
+<li>commit + push to <code>origin</code> (GitHub) and
+<code>gitlab</code> (GitLab) — §6.W parity.</li>
+</ul>
+<h3
+id="step-6--helixqa-upstream-realignment-optional-but-closes-the-root-cause">Step
+6 — helixqa upstream realignment (optional but closes the root
+cause)</h3>
+<p>Once the repos are snake_case, the path-side fix
+(<code>../doc_processor</code> etc.) that lives on
+<code>lava-pin/2026-06-08-android-executor</code> can be merged into
+helixqa <code>main</code> (a normal PR, no force-push). After that the
+Lava helixqa pin can return to tracking <code>main</code> and the
+§11.4.29 OWED item + the lava-pin workaround both close. Update
+<code>docs/CONTINUATION.md</code> §0/§3 accordingly.</p>
+<h3 id="step-7--parent-commit-lava">Step 7 — Parent commit (Lava)</h3>
+<p>In ONE Lava-parent commit (branch off master first per commit
+policy):</p>
+<ul>
+<li><code>.gitmodules</code> url updates,</li>
+<li>the 6 submodule gitlink pins (if any submodule SHA advanced from
+Step 4/5),</li>
+<li><code>docs/CONTINUATION.md</code> updates (pin table rows, §11.4.29
+OWED → DONE, helixqa pin note),</li>
+<li>then push to GitHub + GitLab, verify §6.C 2-mirror convergence.</li>
+</ul>
+<hr />
+<h2 id="d-risk--sequencing-assessment">(d) Risk &amp; sequencing
+assessment</h2>
+<h3 id="independent-vs-cascading">Independent vs cascading</h3>
+<ul>
+<li><strong>The repo renames are mutually independent</strong> — no
+module-path changes, so renaming <code>doc_processor</code> does not
+ripple into <code>llm_orchestrator</code> etc. They can be done in any
+order.</li>
+<li><strong>The only intra-Go cascade</strong> is
+<code>llm_orchestrator → llm_provider</code> via the
+<code>replace ../LLMProvider</code> line — but that is a <em>path</em>
+fix (Step 4), not a <em>module-id</em> change, and is already correct on
+the helixqa side. Fix it regardless; it is currently broken on
+case-sensitive volumes.</li>
+<li><strong>Sequencing that matters:</strong> Step 0 (remote
+normalization) MUST precede Step 1 (rename) so the rename targets are
+unambiguous; Step 1 MUST precede Steps 2–3 (local URL updates rely on
+the new names existing + redirecting). Within Step 1, GitHub-then-GitLab
+order is interchangeable.</li>
+</ul>
+<h3 id="redirect-safety">Redirect safety</h3>
+<ul>
+<li>GitHub <code>gh repo rename</code> → permanent redirect; old clones
+keep working. LOW risk.</li>
+<li>GitLab path-rename → documented path redirect; <strong>verify with a
+live fetch (Step 3) before relying on it.</strong> MEDIUM risk (display
+name vs path confusion; only change <code>path</code>, never
+<code>name</code>).</li>
+</ul>
+<h3
+id="what-must-be-operator-approved-6t3--protected-branch-boundary">What
+MUST be operator-approved (§6.T.3 / protected-branch boundary)</h3>
+<ol type="1">
+<li><strong>GATE 1</strong> — the Step-0 remote-set normalization
+(removes <code>upstream</code>/<code>github</code> remotes; rewrites
+<code>origin</code> push URLs). Confirm before proceeding.</li>
+<li><strong>GATE 2</strong> — disposition of the duplicate
+<code>HelixDevelopment/*</code> repos (rename/archive/leave). §11.4.29
+applies if they are live own-org repos.</li>
+<li><strong>Any <code>glab api --method PUT</code></strong> path-rename
+fallback — a write API call; needs explicit approval.</li>
+<li><strong>helixqa <code>main</code> merge (Step 6)</strong> — touches
+a protected branch on an own-org repo via PR. Normal PR, NO force-push;
+still operator-approved per §6.T.3 because it changes a protected
+branch.</li>
+<li><strong>Panoptic GitHub rename</strong> — confirm panoptic is
+in-scope for §11.4.29 (it is an own-org <code>vasic-digital</code> repo;
+GitLab side is already lowercase).</li>
+</ol>
+<h3 id="non-risks-explicitly-verified">Non-risks (explicitly
+verified)</h3>
+<ul>
+<li><strong>No <code>go.sum</code> churn</strong> — module identifiers
+unchanged. No <code>go mod tidy</code> needed for the rename itself
+(Step 4's path fix does not change checksums either).</li>
+<li><strong>No Go import-path edits</strong> — zero
+<code>github.com/owner/Repo</code> import references.</li>
+<li><strong>No parent CI/script edits</strong> — <code>scripts/</code>,
+<code>Upstreams/</code>, <code>tools/</code> name none of these
+repos.</li>
+<li><strong>No force-push anywhere</strong> — all operations are
+renames, URL rewrites, normal commits, and a normal PR. §6.T.3
+satisfied.</li>
+</ul>
+<h3 id="recommended-execution-order-summary">Recommended execution order
+(summary)</h3>
+<p>Step 0 (backup + normalize, GATE 1) → Step 1 (rename GitHub+GitLab,
+GATE 2) → Step 2 (submodule remote URLs) → Step 3 (.gitmodules + sync +
+verify) → Step 4 (llm_orchestrator path fix) → Step 5
+(submodule-internal doc/upstream updates) → Step 6 (helixqa main
+realignment, GATE for protected branch) → Step 7 (single Lava-parent
+commit + 2-mirror push).</p>
+</body>
+</html>

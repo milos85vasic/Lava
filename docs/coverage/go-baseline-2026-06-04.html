@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>go-baseline-2026-06-04</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1 id="lava-api-go--go-coverage-baseline--2026-06-04">lava-api-go — Go
+coverage baseline — 2026-06-04</h1>
+<p>Completeness program Phase 2B. Captured via <code>make cover</code>
+(<code>GOMAXPROCS=2 go test ./... -coverprofile=coverage.out -covermode=atomic</code>).</p>
+<p>Host: darwin/arm64, Go 1.26.2.</p>
+<h2 id="scope-of-this-rollup">Scope of this rollup</h2>
+<p>This is the <strong>default (no-external-deps) rollup</strong>: unit
++ contract + e2e + parity tests that run against the host toolchain. The
+real-Postgres integration tests (<code>tests/integration</code>, gated
+behind <code>-Pintegration</code> / podman) are
+<strong>excluded</strong> from this number — they require a live
+Postgres container and are not part of the default
+<code>go test ./...</code> surface. The real coverage of DB-touching
+paths is higher than the headline once integration runs.</p>
+<h2 id="headline">Headline</h2>
+<p><strong>Overall: 44.5% of statements.</strong></p>
+<p>The overall number is dragged down by <code>cmd/*</code> and the
+generated <code>internal/gen/*</code> packages (0% — they are
+<code>oapi-codegen</code> output / thin main-package entrypoints
+exercised only by e2e binaries). The Lava-domain <code>internal/*</code>
+business packages sit substantially higher (see per-package below).</p>
+<h2 id="per-package-statements">Per-package (statements)</h2>
+<table>
+<thead>
+<tr>
+<th>Package</th>
+<th style="text-align: right;">Coverage</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>internal/provider</td>
+<td style="text-align: right;">100.0%</td>
+</tr>
+<tr>
+<td>internal/config</td>
+<td style="text-align: right;">93.9%</td>
+</tr>
+<tr>
+<td>internal/auth</td>
+<td style="text-align: right;">93.3%</td>
+</tr>
+<tr>
+<td>internal/qa/ticket</td>
+<td style="text-align: right;">93.2%</td>
+</tr>
+<tr>
+<td>internal/handlers</td>
+<td style="text-align: right;">93.1%</td>
+</tr>
+<tr>
+<td>internal/qa/validator</td>
+<td style="text-align: right;">92.5%</td>
+</tr>
+<tr>
+<td>internal/ratelimit</td>
+<td style="text-align: right;">90.0%</td>
+</tr>
+<tr>
+<td>internal/server</td>
+<td style="text-align: right;">90.1%</td>
+</tr>
+<tr>
+<td>internal/qa/evidence</td>
+<td style="text-align: right;">87.9%</td>
+</tr>
+<tr>
+<td>internal/firebase</td>
+<td style="text-align: right;">83.3%</td>
+</tr>
+<tr>
+<td>internal/qa/detector</td>
+<td style="text-align: right;">82.9%</td>
+</tr>
+<tr>
+<td>internal/gutenberg</td>
+<td style="text-align: right;">82.4%</td>
+</tr>
+<tr>
+<td>internal/mobile</td>
+<td style="text-align: right;">82.2%</td>
+</tr>
+<tr>
+<td>internal/archiveorg</td>
+<td style="text-align: right;">81.9%</td>
+</tr>
+<tr>
+<td>internal/observability</td>
+<td style="text-align: right;">81.7%</td>
+</tr>
+<tr>
+<td>internal/rutracker</td>
+<td style="text-align: right;">76.8%</td>
+</tr>
+<tr>
+<td>internal/cache</td>
+<td style="text-align: right;">69.7%</td>
+</tr>
+<tr>
+<td>internal/storage</td>
+<td style="text-align: right;">65.7%</td>
+</tr>
+<tr>
+<td>internal/discovery</td>
+<td style="text-align: right;">57.1%</td>
+</tr>
+<tr>
+<td>internal/handlers/v1</td>
+<td style="text-align: right;">53.5%</td>
+</tr>
+<tr>
+<td>internal/nnmclub</td>
+<td style="text-align: right;">49.5%</td>
+</tr>
+<tr>
+<td>internal/kinozal</td>
+<td style="text-align: right;">48.9%</td>
+</tr>
+<tr>
+<td>cmd/healthprobe</td>
+<td style="text-align: right;">42.9%</td>
+</tr>
+<tr>
+<td>internal/middleware</td>
+<td style="text-align: right;">33.9%</td>
+</tr>
+<tr>
+<td>cmd/lava-api-go</td>
+<td style="text-align: right;">0.0% (entrypoint; covered via e2e binary,
+not unit)</td>
+</tr>
+<tr>
+<td>internal/gen/client</td>
+<td style="text-align: right;">0.0% (generated)</td>
+</tr>
+<tr>
+<td>internal/gen/server</td>
+<td style="text-align: right;">0.0% (generated)</td>
+</tr>
+<tr>
+<td>internal/router</td>
+<td style="text-align: right;">0.0% (wiring; exercised by e2e)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="notable-lows-worth-raising-in-a-later-cycle">Notable lows worth
+raising in a later cycle</h2>
+<ul>
+<li><code>internal/middleware</code> (33.9%) and
+<code>internal/handlers/v1</code> (53.5%) are Lava-domain request-path
+code; the lowest business-logic coverage in the module.</li>
+<li><code>internal/kinozal</code> (48.9%) and
+<code>internal/nnmclub</code> (49.5%) — tracker scrapers whose deeper
+paths need real-tracker (<code>-PrealTrackers</code>) runs.</li>
+</ul>
+<h2 id="two-pre-existing-test-failures-during-the-rollup">Two
+pre-existing test failures during the rollup</h2>
+<p>The rollup completed and wrote <code>coverage.out</code>, but two
+packages were RED. Both reproduce on the clean baseline (verified by
+stashing the Phase 2B change) — they are pre-existing, not
+regressions:</p>
+<ul>
+<li><code>tests/contract</code> →
+<code>TestAuthFieldName_NoLiteralInProductionGoSource</code> (a §6.R
+literal <code>"Lava-Auth"</code> in
+<code>internal/mobile/mobile.go</code>).</li>
+<li><code>internal/qa/detector</code> →
+<code>TestCheckGoProcessByPID_Alive</code> (fakeRunner bypassed).</li>
+</ul>
+<p>See <code>docs/security/2026-06-04-golangci-triage.md</code> for
+detail.</p>
+<h2 id="evidence">Evidence</h2>
+<ul>
+<li><code>.lava-ci-evidence/completeness-program/coverage/go-baseline-2026-06-04/coverage.out</code></li>
+<li><code>.lava-ci-evidence/completeness-program/coverage/go-baseline-2026-06-04/coverage-func.txt</code></li>
+<li><code>.lava-ci-evidence/completeness-program/coverage/go-baseline-2026-06-04/test-run.log</code></li>
+<li><code>.lava-ci-evidence/completeness-program/coverage/go-baseline-2026-06-04/staticcheck-baseline.txt</code></li>
+</ul>
+</body>
+</html>

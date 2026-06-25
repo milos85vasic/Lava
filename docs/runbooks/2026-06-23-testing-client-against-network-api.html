@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-06-23-testing-client-against-network-api</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1
+id="runbook-testing-the-firebase-distributed-lava-client-against-the-thinker-network-api">Runbook:
+Testing the Firebase-Distributed Lava Client Against the Thinker Network
+API</h1>
+<p><strong>Date:</strong> 2026-06-23<br />
+<strong>Applies to:</strong> Client 1.3.11-1071 (debug
+<code>.client.dev</code> / release <code>.client</code>), api-app
+0.2.11-17<br />
+<strong>Purpose:</strong> Step-by-step procedure for an operator to
+verify that the Firebase-distributed Lava Android client can reach the
+live <code>lava-api-go</code> stack running on the "thinker" development
+host, and to read §6.AC search telemetry in Firebase Crashlytics to
+confirm or rule out the H1 auth-header-overwrite bug.</p>
+<hr />
+<h2 id="1-how-the-client-reaches-an-api-two-paths">1. How the Client
+Reaches an API: Two Paths</h2>
+<p>The client supports two distinct ways to talk to a Lava API service.
+Both are discovered through the onboarding <code>ApiSelectionStep</code>
+screen
+(<code>feature/onboarding/src/main/kotlin/lava/onboarding/steps/ApiSelectionStep.kt</code>).</p>
+<h3 id="path-a--on-device-api-app-engine-loopback">Path A — ON-DEVICE
+api-app engine (loopback)</h3>
+<p>The separately-installed <code>digital.vasic.lava.api</code> app runs
+<code>lava-api-go</code> as an Android background service on
+<code>127.0.0.1</code>. It exposes its per-install handoff key via a
+<code>ContentProvider</code>, which the client reads through
+<code>ApiKeyStore</code> and injects as the <code>Lava-Auth</code>
+header value <strong>before</strong> <code>AuthInterceptor</code> runs.
+The on-device engine advertises itself over mDNS as service type
+<code>_lava-api._tcp</code> with TXT record
+<code>platform=android</code>. When the <code>ApiSelectionStep</code>
+ViewModel scans via <code>LocalNetworkDiscoveryService</code> (Android
+<code>NsdManager</code>) it resolves this to
+<code>Endpoint.GoApi(host="127.0.0.1", port=&lt;dynamic&gt;)</code> with
+<code>platform="android"</code>. The subtitle rendered by
+<code>displaySubtitle()</code> reads "Lava API · Android device".</p>
+<h3 id="path-b--network-exposed-lava-api-go-on-thinker-lan-https">Path B
+— NETWORK-EXPOSED lava-api-go on thinker (LAN HTTPS)</h3>
+<p>The thinker host runs <code>lava-api-go</code> in
+<code>docker-compose.yml</code> with <code>network_mode: host</code>. It
+advertises two services:</p>
+<ul>
+<li><strong>Prod stack:</strong> <code>_lava-api._tcp</code> on port
+8443 — service instance name does NOT carry
+<code>platform=android</code></li>
+<li><strong>Dev stack:</strong> <code>_lava-api-dev._tcp</code> on port
+8543 — likewise</li>
+</ul>
+<p>When <code>NsdManager</code> discovers the thinker's
+<code>_lava-api._tcp</code> record,
+<code>LocalNetworkDiscoveryService</code> resolves it to
+<code>Endpoint.GoApi(host="192.168.0.228", port=8443)</code>. The TXT
+record's <code>engine=go</code> attribute is used; because
+<code>platform</code> is absent (or <code>platform=server</code>),
+<code>displaySubtitle()</code> renders "Lava API · On this network". The
+operator taps this entry and the ViewModel runs an HTTPS
+<code>/health</code> connectivity probe; on
+<code>{"status":"alive"}</code> it persists the endpoint and advances
+onboarding.</p>
+<p>A third section on the <code>ApiSelectionStep</code> screen ("Cloud /
+remote server") allows typing a custom <code>https://host:port</code>
+URL directly — useful when mDNS broadcast is not reachable across
+subnets.</p>
+<p><strong>Key difference for auth:</strong> Path A uses a per-install
+handoff key (Mechanism B). Path B uses the build-time UUID embedded in
+the APK at <code>LAVA_AUTH_UUID</code> (Mechanism A, injected by
+<code>AuthInterceptor</code>). The H1 hypothesis is that
+<code>AuthInterceptor</code> overwrites the Mechanism B key on Path A
+because both use the same <code>Lava-Auth</code> header field name. The
+Crashlytics <code>base_url_host</code> key distinguishes which path is
+actually in use when a 401 fires (see §4 below).</p>
+<hr />
+<h2 id="2-self-signed-cert-handling-no-on-device-trust-required">2.
+Self-Signed Cert Handling: No On-Device Trust Required</h2>
+<p>The thinker's <code>lava-api-go</code> stack uses a self-signed
+RSA-2048 certificate with SAN <code>IP:192.168.0.228</code>, valid to
+2027-06-23 (generated by
+<code>lava-api-go/scripts/gen-cert.sh</code>).</p>
+<p><strong>The operator does NOT need to install this certificate on the
+Android device.</strong></p>
+<p>The Lava client routes all <code>Endpoint.GoApi</code> traffic
+through the <code>@Named("lan")</code> <code>OkHttpClient</code> binding
+defined in
+<code>core/network/impl/src/main/kotlin/lava/network/di/NetworkModule.kt</code>
+(lines 149–180):</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="at">@Provides</span> <span class="at">@Singleton</span> <span class="at">@Named</span><span class="op">(</span><span class="st">&quot;lan&quot;</span><span class="op">)</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="kw">fun</span> <span class="fu">lanOkHttpClient</span><span class="op">(</span>...<span class="op">):</span> <span class="dt">OkHttpClient</span> <span class="op">{</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">val</span> <span class="va">permissiveTrustManager</span> <span class="op">=</span> <span class="kw">object</span> <span class="op">:</span> <span class="dt">X509TrustManager</span> <span class="op">{</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>        <span class="kw">override</span> <span class="kw">fun</span> <span class="fu">checkServerTrusted</span><span class="op">(</span><span class="va">chain</span><span class="op">:</span> <span class="dt">Array</span>&lt;<span class="va">X509Certificate</span>&gt;<span class="op">,</span> <span class="va">authType</span><span class="op">:</span> <span class="dt">String</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>            <span class="co">// No-op: trust any LAN-side server cert</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>        <span class="op">...</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    <span class="op">...</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span>sslSocketFactory<span class="op">(</span>sslContext<span class="op">.</span>socketFactory<span class="op">,</span> permissiveTrustManager<span class="op">)</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span>hostnameVerifier <span class="op">{</span> _<span class="op">,</span> _ <span class="op">-&gt;</span> <span class="kw">true</span> <span class="op">}</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span>build<span class="op">()</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>This client bypasses Android's <code>X509TrustManager</code> chain
+validation entirely — <code>checkServerTrusted</code> is a no-op. It
+also sets <code>hostnameVerifier { _, _ -&gt; true }</code>, so the
+IP-SAN in the cert need not match the IP the client connects to. TLS
+encryption is still active (TLS 1.3); the relaxation is authentication
+only. This is the same threat model the codebase already uses for
+cleartext on LAN mirrors.</p>
+<p><code>app/src/main/res/xml/network_security_config.xml</code> line 37
+explicitly documents this:</p>
+<blockquote>
+<p>"The <code>lava-api-go</code> HTTPS path on port 8443 does NOT depend
+on this section — that path is wired through the LAN-permissive
+OkHttpClient and bypasses NSC's trust-anchor resolution entirely."</p>
+</blockquote>
+<p>Android's <code>network_security_config.xml</code> only controls
+cleartext HTTP for the legacy Ktor proxy path on port 8080. It has no
+effect on HTTPS port 8443.</p>
+<hr />
+<h2 id="3-test-procedure-firebase-install--onboard--search">3. Test
+Procedure: Firebase Install → Onboard → Search</h2>
+<h3 id="31-prerequisites">3.1 Prerequisites</h3>
+<ul>
+<li>Thinker prod stack healthy (verify before starting):
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-k</span> https://192.168.0.228:8443/health   <span class="co"># → {&quot;status&quot;:&quot;alive&quot;}</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-k</span> https://192.168.0.228:8443/ready    <span class="co"># → {&quot;status&quot;:&quot;ready&quot;}</span></span></code></pre></div></li>
+<li>Android device on the same Wi-Fi subnet as thinker
+(<code>192.168.0.x</code>).</li>
+<li>Firebase App Distribution invite accepted; APK installed
+(<code>digital.vasic.lava.client.dev</code> for debug).</li>
+</ul>
+<h3 id="32-fresh-install-onboarding">3.2 Fresh-install onboarding</h3>
+<ol type="1">
+<li><strong>Launch the app.</strong> The <code>ApiSelectionStep</code>
+screen appears: "Searching for APIs on your network…" (spinner +
+<code>api-discovery-searching</code> content-description node
+visible).</li>
+<li><strong>Wait for discovery</strong> (up to ~10 s). The thinker's
+<code>_lava-api._tcp</code> advertisement should resolve. Expected:
+"Found 1 API:" + a row showing <code>192.168.0.228:8443</code> / "Lava
+API · On this network".</li>
+<li><strong>Tap the thinker row.</strong> The row enters probe state
+(spinner on row). The ViewModel calls
+<code>ConnectionService.isReachable</code> against
+<code>https://192.168.0.228:8443/health</code>.</li>
+<li><strong>On success:</strong> Onboarding advances to the
+provider-selection step. On failure: "Could not reach this API:
+<reason>" appears. See §5 for thinker controls.</li>
+<li><strong>Select at least one provider</strong> (e.g. RuTracker or
+Rutor) and complete onboarding.</li>
+<li><strong>Run a search.</strong> Enter any query and submit.</li>
+</ol>
+<h3 id="33-expected-outcomes">3.3 Expected outcomes</h3>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Expected result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Thinker reachable, auth correct</td>
+<td>Search results appear</td>
+</tr>
+<tr>
+<td>Thinker reachable, 401 returned</td>
+<td>No results; §6.AC non-fatal fires in Crashlytics</td>
+</tr>
+<tr>
+<td>mDNS not resolved</td>
+<td>"No APIs discovered" — use Cloud/remote-server section to type
+<code>https://192.168.0.228:8443</code></td>
+</tr>
+<tr>
+<td>Thinker unreachable</td>
+<td>Probe fails at onboarding; fix thinker stack (§5) before
+retrying</td>
+</tr>
+</tbody>
+</table>
+<h3 id="34-auth-status-quick-check-adb">3.4 Auth status quick-check
+(adb)</h3>
+<p>While the device is connected via USB:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">adb</span> logcat <span class="at">-s</span> LavaAuth:D ApiBackedTrackerClient:D SwitchingNetworkApi:D</span></code></pre></div>
+<p>Look for <code>401</code> responses and whether the logged endpoint
+host is <code>192.168.0.228</code> (thinker) or <code>127.0.0.1</code>
+(on-device engine). This confirms which auth path is active before
+checking Crashlytics.</p>
+<hr />
+<h2 id="4-reading-6ac-search-telemetry-in-firebase-crashlytics">4.
+Reading §6.AC Search Telemetry in Firebase Crashlytics</h2>
+<p>The client ships §6.AC comprehensive non-fatal telemetry. Every
+search HTTP failure calls
+<code>SearchResultViewModel.recordProviderFailure()</code> (line 175 of
+<code>docs/telemetry/2026-06-23-comprehensive-nonfatal-telemetry.md</code>),
+which enriches the <code>ApiHttpException</code> context and forwards it
+to <code>AnalyticsTracker.recordNonFatal()</code> →
+<code>FirebaseCrashlytics.recordException()</code>.</p>
+<h3 id="41-crashlytics-custom-keys-to-inspect">4.1 Crashlytics custom
+keys to inspect</h3>
+<p>Open the Firebase Console → Crashlytics → Non-fatals filter:
+<code>ApiHttpException</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>What it tells you</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>http_status</code></td>
+<td>HTTP response code. <code>401</code> = auth rejected by the
+server</td>
+</tr>
+<tr>
+<td><code>request_url</code></td>
+<td>Query-stripped URL path (e.g. <code>/api/rutracker/search</code>).
+Note: query params are redacted by <code>stripQueryForTelemetry()</code>
+(§6.H)</td>
+</tr>
+<tr>
+<td><code>http_method</code></td>
+<td><code>GET</code> or <code>POST</code></td>
+</tr>
+<tr>
+<td><code>base_url_host</code></td>
+<td><strong>The host the client connected to.</strong>
+<code>192.168.0.228</code> = thinker; <code>127.0.0.1</code> = on-device
+engine; <code>api.vasic.digital</code> = cloud</td>
+</tr>
+</tbody>
+</table>
+<h3 id="42-diagnosing-the-h1-hypothesis">4.2 Diagnosing the H1
+hypothesis</h3>
+<p><strong>H1 (HIGHEST priority):</strong> <code>AuthInterceptor</code>
+at
+<code>core/network/impl/src/main/kotlin/lava/network/impl/AuthInterceptor.kt</code>
+line 63 calls
+<code>request.newBuilder().header(fieldName, headerValue)</code> —
+<code>header()</code> (not <code>addHeader()</code>)
+<strong>replaces</strong> any existing value for that field. If the
+routing layer already set the per-install Mechanism B key from
+<code>ApiKeyStore</code> via <code>withAuth()</code>,
+<code>AuthInterceptor</code> overwrites it with the build-time UUID,
+causing the server's HMAC verification to fail with 401.</p>
+<p><strong>Crashlytics filter combination to confirm H1:</strong></p>
+<ol type="1">
+<li><code>http_status = 401</code></li>
+<li><code>base_url_host = 127.0.0.1</code> — confirms the 401 is hitting
+the ON-DEVICE engine (which uses Mechanism B keys), NOT the thinker
+(which uses Mechanism A UUID)</li>
+</ol>
+<p>If you see 401s with <code>base_url_host = 127.0.0.1</code>, H1 is
+confirmed: the on-device engine is rejecting the UUID because its
+<code>AuthActiveClients</code> list contains only the per-install key,
+not the build-time UUID.</p>
+<p>If 401s show <code>base_url_host = 192.168.0.228</code>, the thinker
+stack is rejecting the UUID — investigate
+<code>lava-api-go/internal/auth/middleware.go</code> and whether
+<code>LAVA_AUTH_UUID</code> in the APK matches the value in
+<code>lava-api-go</code>'s <code>.env</code>.</p>
+<p><strong>Note:</strong> Firebase Crashlytics has no server-side ingest
+API. The Go service (<code>lava-api-go</code>) emits errors to
+Loki/Grafana (OTLP pipeline) — not to Crashlytics. Server-side 401
+causes will appear in the thinker's container logs
+(<code>docker logs lava-api-go</code>), not in the Firebase Console.</p>
+<h3 id="43-crashlytics-filter-steps">4.3 Crashlytics filter steps</h3>
+<ol type="1">
+<li>Firebase Console → your project → Crashlytics.</li>
+<li>Switch to "Non-fatals" tab.</li>
+<li>Filter by issue title containing <code>ApiHttpException</code>.</li>
+<li>Open an event → scroll to "Keys" section.</li>
+<li>Check <code>http_status</code>, <code>base_url_host</code>,
+<code>request_url</code> as described above.</li>
+</ol>
+<hr />
+<h2 id="5-thinker-stack-controls">5. Thinker Stack Controls</h2>
+<h3 id="lan-urls">LAN URLs</h3>
+<table>
+<thead>
+<tr>
+<th>Stack</th>
+<th>Base URL</th>
+<th>mDNS type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Prod</td>
+<td><code>https://192.168.0.228:8443</code></td>
+<td><code>_lava-api._tcp</code></td>
+</tr>
+<tr>
+<td>Dev</td>
+<td><code>https://192.168.0.228:8543</code></td>
+<td><code>_lava-api-dev._tcp</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="health-check-commands-run-on-thinker">Health check commands (run
+on thinker)</h3>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Quick sanity — no auth required</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-k</span> https://192.168.0.228:8443/health   <span class="co"># {&quot;status&quot;:&quot;alive&quot;}</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-k</span> https://192.168.0.228:8443/ready    <span class="co"># {&quot;status&quot;:&quot;ready&quot;}</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Container status</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> ps <span class="at">--filter</span> name=lava-api-go <span class="at">--format</span> <span class="st">&quot;table {{.Names}}\t{{.Status}}&quot;</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Tail API logs (shows auth middleware decisions)</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> logs <span class="at">-f</span> lava-api-go</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Restart stack</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="ex">./stop.sh</span> <span class="kw">&amp;&amp;</span> <span class="ex">./start.sh</span></span></code></pre></div>
+<h3 id="mdns-advertisement-verification-on-device-or-lan-host">mDNS
+advertisement verification (on device or LAN host)</h3>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># On the Android device via adb (requires network-tools or mdns-scan on host)</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="ex">adb</span> shell <span class="st">&quot;getprop | grep nsd&quot;</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="co"># On the thinker host (if avahi-browse available)</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="ex">avahi-browse</span> <span class="at">-r</span> _lava-api._tcp</span></code></pre></div>
+<p>The <code>docker-compose.yml</code> uses
+<code>network_mode: host</code> so JmDNS broadcasts reach the LAN
+directly; no port-mapping is needed for mDNS to work.</p>
+<h3 id="cert-details">Cert details</h3>
+<ul>
+<li>Algorithm: RSA-2048</li>
+<li>SAN: <code>IP:192.168.0.228</code></li>
+<li>Valid to: 2027-06-23</li>
+<li>Generated by: <code>lava-api-go/scripts/gen-cert.sh</code></li>
+<li>No client-side installation required (LAN OkHttpClient bypasses
+validation — see §2)</li>
+</ul>
+<hr />
+<h2 id="source-citations-fileline">Source Citations (File:Line)</h2>
+<ol type="1">
+<li><p><strong>Cert handling (LAN permissive OkHttpClient):</strong>
+<code>core/network/impl/src/main/kotlin/lava/network/di/NetworkModule.kt:156–179</code>
+— <code>checkServerTrusted</code> is a no-op;
+<code>hostnameVerifier { _, _ -&gt; true }</code>. The KDoc at lines
+116–148 explicitly states the SP-3.1 rationale: self-signed LAN cert
+without device-side CA install.</p></li>
+<li><p><strong>NSC does not govern port 8443:</strong>
+<code>app/src/main/res/xml/network_security_config.xml:37</code> —
+Comment: "The <code>lava-api-go</code> HTTPS path on port 8443 does NOT
+depend on this section — that path is wired through the LAN-permissive
+OkHttpClient and bypasses NSC's trust-anchor resolution
+entirely."</p></li>
+<li><p><strong>mDNS discovery → Endpoint.GoApi resolution +
+displaySubtitle platform discriminator:</strong>
+<code>feature/onboarding/src/main/kotlin/lava/onboarding/steps/ApiSelectionStep.kt:337–346</code>
+— <code>displaySubtitle()</code> returns
+<code>"Lava API · ${discoveredApiLabel(platform)}"</code> for
+<code>Endpoint.GoApi</code>; <code>platform="android"</code>
+distinguishes the on-device api-app from the thinker network
+instance.</p></li>
+</ol>
+</body>
+</html>

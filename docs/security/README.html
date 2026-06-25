@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>README</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1 id="lava-security-hardening">Lava Security Hardening</h1>
+<blockquote>
+<p>Source-derived overview of Lava's security posture: the Lava-Auth
+mechanism (client + server), credential handling, TLS posture, the
+no-hardcoding scanners, and the static-analysis / dependency-scanning
+tooling. Every statement below is backed by a tracked source file, named
+inline. Anything that could not be verified from the repository is
+marked <code>UNCONFIRMED:</code>.</p>
+<p><code>Classification:</code> project-specific.</p>
+</blockquote>
+<h2 id="1-lava-auth--per-build-encrypted-client-identity">1. Lava-Auth —
+per-build encrypted client identity</h2>
+<p>Lava authenticates the <em>client app</em> (not the human user) to
+the <code>lava-api-go</code> service with a per-build encrypted UUID
+carried in a single request header. The header field name is
+<strong>not</strong> hardcoded — it comes from <code>.env</code> at
+build time per §6.R (see <a
+href="#4-no-hardcoding-mandate--scanners">§4</a>).</p>
+<h3 id="11-client-side--authinterceptor">1.1 Client side —
+<code>AuthInterceptor</code></h3>
+<p>Source: <a
+href="../../core/network/impl/src/main/kotlin/lava/network/impl/AuthInterceptor.kt"><code>core/network/impl/src/main/kotlin/lava/network/impl/AuthInterceptor.kt</code></a></p>
+<p>The OkHttp <code>AuthInterceptor</code> injects the encrypted UUID
+into each outbound request:</p>
+<ul>
+<li>It reads an encrypted <strong>blob</strong>,
+<strong>pepper</strong>, <strong>nonce</strong>, and the header
+<strong>field name</strong> from a <code>LavaAuthBlobProvider</code>
+(all build-time <code>.env</code>-derived, not literals in source).</li>
+<li>The AES-GCM key is derived via
+<code>HKDF(salt = signingCertHash[:16], ikm = pepper, info = "lava-auth-v1")</code>,
+with a 32-byte key and a 16-byte salt taken from the APK's signing-cert
+SHA-256 hash.</li>
+<li>It decrypts the blob to the plaintext UUID <code>ByteArray</code>,
+Base64-encodes it once into the header value, and sets that header on
+the request.</li>
+</ul>
+<p><strong>Re-signed-APK defence.</strong> Because the AES key is salted
+with the signing-cert hash, a re-signed APK produces a different cert
+hash → a different derived key → AES-GCM decryption fails with
+<code>AEADBadTagException</code>. The interceptor lets that surface as a
+network error rather than sending a malformed header (per the KDoc on
+<code>AuthInterceptor</code>).</p>
+<p><strong>Fail-closed stub state.</strong> When
+<code>LavaAuthBlobProvider.getBlob()</code> returns empty bytes (the
+Phase-10 stub state described in the KDoc), the interceptor is a no-op
+pass-through — no header is added.</p>
+<h3 id="12-auth-uuid-memory-hygiene">1.2 Auth UUID memory hygiene</h3>
+<p>Source: <a
+href="../../core/CLAUDE.md"><code>core/CLAUDE.md</code></a> — "Auth UUID
+memory hygiene" section, plus the <code>finally</code> block in
+<code>AuthInterceptor.intercept()</code>.</p>
+<p>The decrypted UUID is held <strong>only as a
+<code>ByteArray</code></strong>, never as a <code>String</code>. Both
+the derived key bytes and the UUID bytes are zeroized
+(<code>fill(0)</code>) in a <code>finally</code> block before
+<code>intercept()</code> returns. The Base64-encoded header
+<strong>value</strong> is a <code>String</code> (JVM strings are
+immutable, so it cannot be zeroized), but per
+<code>core/CLAUDE.md</code> it MUST NOT be logged, persisted, or
+assigned to a class field, and a pre-push grep enforces this. The
+constitution states <code>AuthInterceptor</code> is the
+<strong>only</strong> allowed consumer of the auth blob; reflective
+access from elsewhere is a violation.</p>
+<h3 id="13-server-side--authmiddleware">1.3 Server side —
+<code>AuthMiddleware</code></h3>
+<p>Source: <a
+href="../../lava-api-go/internal/auth/middleware.go"><code>lava-api-go/internal/auth/middleware.go</code></a></p>
+<p>The Gin middleware (<code>NewMiddleware</code>) enforces Lava-Auth on
+every request that flows through it. The field name and HMAC secret come
+from config (<code>cfg.AuthFieldName</code>,
+<code>cfg.AuthHMACSecret</code>), not literals.</p>
+<p>Per-request behaviour (from the source):</p>
+<table>
+<thead>
+<tr>
+<th>Condition</th>
+<th>Response</th>
+<th>Backoff effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Missing header</td>
+<td><code>401 Unauthorized</code></td>
+<td>none</td>
+</tr>
+<tr>
+<td>Malformed / non-Base64 / empty blob</td>
+<td><code>401 Unauthorized</code></td>
+<td><code>ladder.RecordFailure(ip)</code></td>
+</tr>
+<tr>
+<td>Hash in the <strong>active</strong> allowlist</td>
+<td><code>c.Next()</code> + sets <code>client_name</code></td>
+<td><code>ladder.Reset(ip)</code></td>
+</tr>
+<tr>
+<td>Hash in the <strong>retired</strong> allowlist</td>
+<td><code>426 Upgrade Required</code> + min-version JSON</td>
+<td>none (honest-but-outdated client)</td>
+</tr>
+<tr>
+<td>Unknown hash</td>
+<td><code>401 Unauthorized</code></td>
+<td><code>ladder.RecordFailure(ip)</code></td>
+</tr>
+</tbody>
+</table>
+<p>Key hardening details verified in source:</p>
+<ul>
+<li><strong>HMAC identity.</strong> The server stores
+<code>hex(HMAC-SHA256(blob, secret))</code>. The raw UUID is never
+persisted server-side — only its keyed hash
+(<code>hashUUIDBlob</code>).</li>
+<li><strong>Constant-time lookup.</strong>
+<code>constantTimeMapLookup</code> iterates <strong>all</strong>
+allowlist entries on every call using
+<code>subtle.ConstantTimeCompare</code>, deliberately defeating the
+timing side-channel a short-circuiting map lookup would leak (which
+buckets the attacker's hash collides with).</li>
+<li><strong>Blob zeroization (§6.H).</strong> The decoded blob bytes are
+zeroized (<code>blob[i] = 0</code>) immediately after hashing.</li>
+<li><strong>Backoff coupling.</strong> The middleware advances a shared
+<code>*ladder.Ladder</code> (from
+<code>digital.vasic.ratelimiter</code>) on failure; the same Ladder
+instance is consumed by a <code>BackoffMiddleware</code> (see
+<code>lava-api-go/internal/auth/backoff.go</code>) so repeated failures
+from an IP escalate into 429-style responses on later requests.</li>
+</ul>
+<p>The retired-client path returns a JSON body with
+<code>min_supported_version_name</code> and
+<code>min_supported_version_code</code>, letting an outdated client know
+it must upgrade rather than being treated as an attacker.</p>
+<h2 id="2-credential-handling">2. Credential handling</h2>
+<p>Lava's constitution (§6.H, Credential Security Inviolability) forbids
+any real credential, signing key, or API secret from ever appearing in a
+tracked file. The following are verified gitignored in <a
+href="../../.gitignore"><code>.gitignore</code></a>:</p>
+<table>
+<thead>
+<tr>
+<th>Path</th>
+<th>Contains</th>
+<th><code>.gitignore</code> line</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>.env</code>, <code>.env.*</code>, <code>.env.local</code></td>
+<td>All runtime secrets (auth field name, pepper, HMAC secret, tracker
+credentials, tokens)</td>
+<td><code>12</code>, <code>52</code>, <code>53</code></td>
+</tr>
+<tr>
+<td><code>keystores/</code></td>
+<td>APK signing keys</td>
+<td><code>13</code></td>
+</tr>
+<tr>
+<td><code>app/google-services.json</code>,
+<code>**/google-services.json</code></td>
+<td>Firebase project web API key</td>
+<td><code>59</code>, <code>60</code></td>
+</tr>
+<tr>
+<td><code>lava-api-go/firebase-web-config.json</code></td>
+<td>Firebase Web SDK config</td>
+<td><code>65</code></td>
+</tr>
+<tr>
+<td><code>lava-api-go/firebase-admin-key.json</code>,
+<code>**/firebase-admin-*.json</code></td>
+<td>Firebase Admin SDK service-account key (long-lived, highly
+sensitive)</td>
+<td><code>70</code>–<code>72</code></td>
+</tr>
+<tr>
+<td><code>firebase-debug.log</code>,
+<code>**/firebase-debug.log</code></td>
+<td>May leak request bodies / OAuth tokens</td>
+<td><code>76</code>, <code>77</code></td>
+</tr>
+<tr>
+<td><code>app/build/generated/lava-auth/</code></td>
+<td>Build-time generated <code>lava.auth.LavaAuthGenerated</code>
+source</td>
+<td><code>84</code></td>
+</tr>
+<tr>
+<td><code>.lava-ci-evidence/**/logcat-*.txt</code>,
+<code>.lava-ci-evidence/**/post-mortem/</code></td>
+<td>logcat captures may contain credentials</td>
+<td><code>89</code>, <code>90</code></td>
+</tr>
+</tbody>
+</table>
+<p><code>.env.example</code> is the committed placeholder file carrying
+dummy values for every variable a developer must set (per §6.R /
+§6.H).</p>
+<p>Per §6.H the project also runs a <strong>pre-push credential
+scan</strong> in <code>scripts/check-constitution.sh</code> that rejects
+pushes introducing <code>.env*</code> / keystore files or
+credential-pattern lines into tracked files.</p>
+<h2 id="3-tls--transport-posture">3. TLS / transport posture</h2>
+<p>Sources: <a
+href="../../app/src/main/AndroidManifest.xml"><code>app/src/main/AndroidManifest.xml</code></a>,
+<a
+href="../../app/src/main/res/xml/network_security_config.xml"><code>app/src/main/res/xml/network_security_config.xml</code></a>.</p>
+<ul>
+<li><strong><code>android:usesCleartextTraffic</code> is
+<code>true</code></strong> (verified in the manifest, line 48). This is
+deliberate: the <strong>legacy LAN Ktor proxy</strong> is reachable over
+cleartext <code>http://&lt;lan-ip&gt;:8080</code>. Public-internet
+endpoints (<code>rutracker.org</code> and mirrors) and the
+<code>lava-api-go</code> HTTPS path do not rely on cleartext.</li>
+<li><strong><code>android:networkSecurityConfig="@xml/network_security_config"</code></strong>
+is set (manifest line 49). The NSC file:
+<ul>
+<li><code>base-config cleartextTrafficPermitted="true"</code> with the
+<strong>system</strong> trust store as the trust anchor — the strict
+path for public-internet TLS.</li>
+<li>A <code>domain-config cleartextTrafficPermitted="true"</code>
+allow-list scoped to LAN hosts (<code>localhost</code>,
+<code>127.0.0.1</code>, <code>*.local</code> for mDNS, and common
+home-LAN gateway IPs) used only by the legacy-proxy code path.</li>
+</ul></li>
+<li><strong><code>lava-api-go</code> HTTPS on port 8443</strong> does
+<strong>not</strong> go through NSC trust-anchor resolution. Per the NSC
+file comments, the LAN HTTPS path is handled at the OkHttp layer via a
+LAN-permissive <code>@Named("lan")</code> <code>OkHttpClient</code> (see
+the KDoc in <code>core/network/impl/.../NetworkModule.kt</code>).
+<ul>
+<li>The previous "user installs the self-signed CA via device Settings"
+path was <strong>removed</strong> in SP-3.1 (2026-04-29) because it
+required a manual device-settings detour forbidden by Sixth-Law clause
+4. (NSC file header comment.)</li>
+</ul></li>
+<li>The on-device Lava API app serves <strong>HTTPS</strong> with a
+certificate it generates on the device on first run; see <a
+href="../guides/ON_DEVICE_API_USER_GUIDE.md"><code>docs/guides/ON_DEVICE_API_USER_GUIDE.md</code></a>.</li>
+<li>The <code>:app</code> ↔︎ on-device-API key handoff uses a
+<strong>signature-level Android permission</strong>
+(<code>digital.vasic.lava.permission.READ_API_KEY</code>, manifest line
+9): because both apps share the same keystore, only the genuine Lava
+client is granted access to the API app's key
+<code>ContentProvider</code> at install time.</li>
+</ul>
+<h2 id="4-no-hardcoding-mandate--scanners">4. No-Hardcoding Mandate —
+scanners</h2>
+<p>§6.R forbids any connection address, port, header field name,
+credential, key, salt, secret, or domain literal in tracked source.
+Three standalone scanners enforce subsets of this and are invoked by
+<code>scripts/check-constitution.sh</code> / the pre-push hook:</p>
+<table>
+<thead>
+<tr>
+<th>Scanner</th>
+<th>Detects</th>
+<th>Source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>scripts/scan-no-hardcoded-uuid.sh</code></td>
+<td>36-char UUID literals</td>
+<td><a href="../../scripts/scan-no-hardcoded-uuid.sh">link</a></td>
+</tr>
+<tr>
+<td><code>scripts/scan-no-hardcoded-ipv4.sh</code></td>
+<td>IPv4 literals (loopback / RFC 5737 docs IPs filtered out)</td>
+<td><a href="../../scripts/scan-no-hardcoded-ipv4.sh">link</a></td>
+</tr>
+<tr>
+<td><code>scripts/scan-no-hardcoded-hostport.sh</code></td>
+<td><code>scheme://host:port</code> URL literals
+(localhost/127.x/0.0.0.0 filtered out)</td>
+<td><a href="../../scripts/scan-no-hardcoded-hostport.sh">link</a></td>
+</tr>
+</tbody>
+</table>
+<p>Each scanner exits <code>1</code> (and prints offending paths to
+stderr) on a violation. Shared exemptions, kept in lockstep with the
+§6.R clause body, include: <code>.env.example</code>,
+<code>.lava-ci-evidence/</code>, <code>submodules/</code> (pinned
+vendored code), test sources (<code>*_test.go</code>,
+<code>*Test.kt</code>, <code>*Tests.kt</code>, <code>*Test.java</code>,
+<code>src/test/</code>, <code>src/androidTest/</code>,
+<code>fixtures/</code>), and external config/docs file types
+(<code>*.md</code>, <code>*.json</code>, <code>*.xml</code>,
+<code>*.yml</code>, <code>*.yaml</code>) — because config files like
+<code>network_security_config.xml</code> are the legitimate home for
+connection literals; §6.R targets the <em>code that reads them</em>.</p>
+<p>Per the §6.R clause, the schedule and algorithm-parameter literal
+classes (e.g. PBKDF2 iteration counts, AES key sizes) remain a
+code-review gate rather than a regex scanner, because they are
+indistinguishable from ordinary integers by pattern alone.</p>
+<h2 id="5-static-analysis--dependency-scanning">5. Static analysis &amp;
+dependency scanning</h2>
+<p>The completeness program (Phase 2) wired containerized, rootless,
+local-only scanning. See the per-tool triage docs in this directory:</p>
+<ul>
+<li><strong>Detekt</strong> (Kotlin static analysis) — <a
+href="2026-06-04-detekt-triage.md"><code>2026-06-04-detekt-triage.md</code></a>.
+Wired through the <code>StaticAnalysisConventionPlugin</code> buildSrc
+convention so every module is analysed with no per-module config
+(<code>io.gitlab.arturbosch.detekt</code> 1.23.8). Per-module baselines
+capture today's 674 deduplicated finding IDs
+(<code>build.maxIssues: 0</code>), so the gate is green going forward
+while any <strong>new</strong> finding fails the build.</li>
+<li><strong>Go quality gate</strong> (<code>go vet</code> +
+golangci-lint + coverage) — <a
+href="2026-06-04-golangci-triage.md"><code>2026-06-04-golangci-triage.md</code></a>.
+<code>go vet</code> is clean (0 findings); golangci-lint runs
+containerized via rootless podman
+(<code>scripts/golangci-lint.sh</code>) against a curated
+<code>.golangci.yml</code> and passes with 0 issues after curated
+excludes.</li>
+<li><strong>SonarQube + Snyk</strong> (containerized) — <a
+href="2026-06-04-sonarqube-snyk-setup.md"><code>2026-06-04-sonarqube-snyk-setup.md</code></a>.
+Rootless SonarQube CE + dedicated Postgres (bound to
+<code>127.0.0.1</code> only, no <code>--privileged</code>, no host
+sysctl) via <code>docker-compose.sonar.yml</code> +
+<code>scripts/sonar-scan.sh</code>; Snyk dependency + SAST via
+<code>scripts/snyk-scan.sh</code>. Tokens (<code>SONAR_TOKEN</code>,
+<code>SNYK_TOKEN</code>) are read from <code>.env</code> only. Per
+§6.J/§6.Z the scripts exit non-zero (never a fabricated "passed") when a
+token is absent or the server is not <code>UP</code>. See the triage doc
+for the precise ran-here vs. operator-blocked breakdown.</li>
+</ul>
+<p>All scanning is <strong>local-only</strong> by constitutional
+constraint — no hosted CI (GitHub Actions, GitLab pipelines, etc.) is
+used; the same scripts a developer runs locally are the gate.</p>
+<h2 id="6-constitutional-cross-references">6. Constitutional
+cross-references</h2>
+<ul>
+<li>§6.H — Credential Security Inviolability (root
+<code>CLAUDE.md</code>)</li>
+<li>§6.R — No-Hardcoding Mandate (root <code>CLAUDE.md</code>)</li>
+<li>§6.U — No sudo/su Mandate (root <code>CLAUDE.md</code>)</li>
+<li>"Auth UUID memory hygiene" — <code>core/CLAUDE.md</code></li>
+<li>"Local-Only CI/CD" — root <code>CLAUDE.md</code></li>
+</ul>
+</body>
+</html>

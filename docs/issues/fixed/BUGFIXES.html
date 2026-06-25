@@ -238,6 +238,57 @@
 </head>
 <body>
 <h1 id="lava--bug-fix-audit-trail">Lava — Bug Fix Audit Trail</h1>
+<blockquote>
+<p><strong>Revision §11.4.44 (2026-06-24, updated again):</strong>
+appended three Crashlytics-triage fixes from 2026-06-24 session — ALL
+THREE FIXES LANDED in the working tree (the earlier "P1 OWED" note was a
+stale-<code>git diff</code> race artifact, corrected here): P0
+CredentialsKeyHolder locked FATAL (<code>58a1335272bc</code>, fix in
+<code>CredentialsEntryRepositoryImpl.observe()</code> runCatching, §6.O
+closure log), P1 LazyColumn 2nd-site nested-scroll FATAL
+(<code>c7c8cccad09f</code>, fix
+<code>feature/search_input/.../ SearchInputScreen.kt:96</code>
+<code>modifier = Modifier.weight(1f)</code> + §6.Q scanner CHECK 2 —
+scanner FAIL→PASS, "no nested-scroll antipattern detected"), P2
+TopicPageDto MissingFieldException NON_FATAL (<code>8cde0ac208b3</code>,
+<strong>PARTIAL</strong> — <code>commentsPage</code> default only; the
+real IA crawl-topic payload omits all 6 fields so the full fix is a
+tracked follow-up, §6.O closure log). Source:
+<code>docs/issues/2026-06-24-crashlytics-full-triage.md</code>. All
+three are reproduce-first + Bluff-Audit'd and ship in 1.3.11-1073.</p>
+</blockquote>
+<blockquote>
+<p><strong>Revision §11.4.44 (2026-06-24, updated):</strong> appended
+search cancel/timeout fix covering all 3 root causes —
+<code>SearchResultViewModel</code> back-press cancellation + 25 s
+client-side <code>withTimeout</code> (Bug 1+2, commit
+<code>20d98914</code>) + engine 18 s total-search deadline in
+<code>handlers/v1/search.go</code> + stale YTS mirror refresh (Bug 3,
+commits <code>0e81730b</code> + <code>1aa42536</code> +
+<code>3c1fa159</code>). 3 client regression tests + 2 engine Go tests
+added; all falsifiable. Final SHAs confirmed from
+<code>git show --stat</code>.</p>
+</blockquote>
+<blockquote>
+<p><strong>Revision §11.4.44 (2026-06-23):</strong> appended five fixes
+from the 2026-06-23 session — H1 search-401 (AuthInterceptor handoff-key
+overwrite), api-app-17 stale-binary (§6.Z wrong-binary saga),
+ApiHttpException type regression, ApiKeyClientTest compile break, and
+firebase-distribute SIGPIPE. Each entry cites its real commit SHA
+verified against <code>git show --stat</code>.</p>
+</blockquote>
+<blockquote>
+<p><strong>Revision §11.4.44 (2026-06-08):</strong> appended the
+2026-06-08 session's six real defect fixes — the four §6.E
+capability-honesty bluffs (kinozal / nnmclub / rutor magnet wire-through
++ gutenberg <code>TORRENT_DOWNLOAD</code> drop), the HelixQA broken-pin
+go.mod conflict that broke <code>lava-api-go</code>'s build, and the
+nav-compose <code>2.9.0 → 2.9.1</code> test-teardown lifecycle race.
+Each entry below cites its real commit SHA + real files (verified
+against <code>git show --stat</code>). Per §11.4.6 no-guessing, details
+that could not be confirmed from git are marked
+<code>UNCONFIRMED</code>.</p>
+</blockquote>
 <p>Per constitutional clause <strong>§6.T.4 (Bugfix
 Documentation)</strong> — every bug fix in this project MUST be
 documented here with root cause analysis, affected files, fix
@@ -258,6 +309,607 @@ class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb1-1"><
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>**Verification test/challenge:** path or commit ref</span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>**Fix commit:** SHA</span>
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>**Forensic anchor:** (optional) what surfaced the bug</span></code></pre></div>
+<hr />
+<h2
+id="2026-06-16--3-circuit-breaker-providers-transient-timeout-tripped-the-breaker-kinozal-nnmclub-rutracker">2026-06-16
+— 3 circuit-breaker providers: transient timeout tripped the breaker
+(kinozal, nnmclub, rutracker)</h2>
+<p><strong>Root cause:</strong> kinozal, nnmclub, and rutracker wrap
+their HTTP calls in a circuit breaker
+(<code>c.breaker.Execute(closure)</code>). The closure had no retry, so
+a single transient timeout/5xx returned an error to the breaker →
+counted as a consecutive failure. ~5 transients would OPEN the breaker
+(~10 s lockout) — strictly WORSE than the plain single-attempt gap,
+because one slow upstream response could lock out the user for 10 s.</p>
+<p><strong>Affected files:</strong>
+<code>internal/kinozal/client.go</code>
+(Fetch/FetchWithHeaders/PostForm),
+<code>internal/nnmclub/client.go</code> (4 methods),
+<code>internal/rutracker/client.go</code> (5 methods)</p>
+<ul>
+<li>each provider's <code>*_test.go</code> (nnmclub's
+<code>client_test.go</code> is new). Added
+<code>maxAttempts=3</code>/<code>retryBackoff=500ms</code> + a
+<code>doWithRetry</code> helper used INSIDE each breaker Execute
+closure.</li>
+</ul>
+<p><strong>Fix:</strong> retry transient failures (network/timeout or
+5xx) INSIDE the breaker closure, so a recovered transient returns
+<code>nil</code> to the breaker (failure counter untouched, breaker
+stays Closed). Genuine post-retry failures still return one error to the
+breaker — real-outage counting is unchanged. Terminal errors
+(404/403/decode) never retried.</p>
+<p><strong>Verification test/challenge:</strong> per provider,
+<code>TestRetriesOnTransient5xx</code> (503-once-then-200 → recovers +
+asserts <code>breaker.GetFailures()==0</code> +
+<code>GetState()==StateClosed</code> — the load-bearing proof the
+transient did NOT trip the breaker) +
+<code>TestTerminalErrorNotRetried</code> (404 → 1 attempt, surfaced
+immediately). Falsifiability rehearsed all 3: bypassing the retry →
+<code>TestRetriesOnTransient5xx</code> FAILS ("expected transient 503 to
+be retried into success, got err: <provider> upstream 503"); reverted →
+<code>ok</code>. gofmt + go vet clean.</p>
+<p><strong>Fix commit:</strong> (this commit) — completes provider
+retry-resilience for all 10 HTTP providers (this 3 + the 7 below). Same
+undistributed api-go cycle (2.3.31). <strong>Forensic anchor:</strong>
+nezha audit (3-subagent fan-out) of every provider HTTP client.</p>
+<h2
+id="2026-06-16--6-sibling-providers-shared-the-tokyotosho-single-attempt-no-retry-gap-knaben-nyaa-bitsearch-torrentdownloads-gutenberg-flaresolverr">2026-06-16
+— 6 sibling providers shared the tokyotosho single-attempt-no-retry gap
+(knaben, nyaa, bitsearch, torrentdownloads, gutenberg,
+flaresolverr)</h2>
+<p><strong>Root cause:</strong> an audit of every provider HTTP client
+(triggered by the tokyotosho fix below) found the SAME
+single-attempt-no-retry class in 6 more providers: each issued one
+<code>http.Do</code> with no retry, so a transient upstream timeout/5xx
+surfaced a user-facing error even though the next request would succeed.
+Cited from source: knaben/client.go (single Do), nyaa/client.go,
+bitsearch/client.go, torrentdownloads/client.go,
+internal/gutenberg/client.go (getJSON + downloadBytes),
+internal/provider/flaresolverr/client.go (Get).</p>
+<p><strong>Affected files:</strong> the <code>client.go</code> of each
+of the 6 providers (refactored the inline fetch into a bounded-retry
+loop + a single-attempt helper classifying transient =
+network/timeout-from-http.Do OR 5xx; terminal = 404/403/401/decode never
+retried) + each provider's <code>*_test.go</code> (added retry +
+terminal-not-retried tests). flaresolverr uses maxAttempts=2 (its 90s
+solve budget is already long); gutenberg retries BOTH getJSON +
+downloadBytes via a shared helper.</p>
+<p><strong>Fix:</strong> same bounded-retry pattern as tokyotosho
+(maxAttempts=3 / 500ms backoff, ctx-bounded), adapted to each provider's
+response shape (RSS/JSON/HTML/latin-1).</p>
+<p><strong>Verification test/challenge:</strong> per provider,
+<code>TestSearch_RetriesOnTransient5xx</code> (+ download variant for
+gutenberg) and <code>TestSearch_TerminalErrorNotRetried</code>.
+Falsifiability rehearsed for ALL 6: bypassing the retry loop makes the
+retry test FAIL with the provider's exact
+<code>HTTP 503: ... unknown error</code> (e.g.
+<code>knaben: HTTP 503: provider: unknown error</code>); reverted →
+<code>ok</code>. go vet + gofmt clean.</p>
+<p><strong>Fix commit:</strong> (this commit) <strong>Forensic
+anchor:</strong> nezha real-tracker E2E surfaced tokyotosho; the
+systemic audit (3-subagent fan-out) surfaced the 6 siblings. Same api-go
+cycle (2.3.31).</p>
+<h2
+id="2026-06-16--tokyotosho-curated-provider-user-facing-unknown-error-on-slow-upstream-no-retry-on-transient-failure">2026-06-16
+— tokyotosho curated provider: user-facing "unknown error" on slow
+upstream (no retry on transient failure)</h2>
+<p><strong>Root cause:</strong>
+<code>internal/provider/curated/tokyotosho</code> issued a single HTTP
+request bounded by <code>DefaultTimeout = 20s</code>. Tokyo Toshokan's
+live latency is variable (measured on the nezha heavy-test node
+2026-06-16: typical 4–8 s, occasionally &gt;20 s). When a single request
+exceeded 20 s the client returned <code>provider: ErrUnknown</code>
+("unknown error") to the user — even though the very next request would
+have succeeded. Surfaced by the <code>realtrackers</code> live test
+<code>TestLive_SearchReturnsRealMagnets</code>, which PASSED at 16:14
+(16.5 s) and FAILED at 16:15 (the &gt;20 s case), confirming
+external-latency intermittency, not a parser bug (direct curl probes all
+returned HTTP 200 with valid RSS).</p>
+<p><strong>Affected files:</strong>
+<code>lava-api-go/internal/provider/curated/tokyotosho/client.go</code>
+(added <code>maxAttempts</code>/<code>retryBackoff</code>; refactored
+the inline fetch into <code>fetchFeed</code> (bounded-retry loop) +
+<code>fetchFeedOnce</code> (single attempt classifying transient vs
+terminal)). Terminal errors (404/403/401/decode) are NOT retried.</p>
+<p><strong>Fix:</strong> retry transient failures (network/timeout or
+5xx) up to 3 attempts with a 500 ms backoff, bounded by the caller's
+ctx. Converts transient upstream slowness into a successful search while
+leaving the user-visible result shape and the production
+<code>DefaultTimeout</code> unchanged.</p>
+<p><strong>Verification test/challenge:</strong>
+<code>tokyotosho_test.go::TestSearch_RetriesOnTransient5xx</code>
+(reproduce-first §6.T.1: 503-once-then-fixture → recovers, 2 results) +
+<code>TestSearch_TerminalErrorNotRetried</code> (404 → ErrNotFound after
+exactly 1 attempt). Falsifiability rehearsed: bypassing the retry loop →
+<code>TestSearch_RetriesOnTransient5xx</code> FAILS with "should recover
+via retry: tokyotosho: HTTP 503: provider: unknown error"; reverted →
+PASS.</p>
+<p><strong>Fix commit:</strong> (this commit) <strong>Forensic
+anchor:</strong> nezha.local heavy-testing enablement, real-tracker E2E
+run; operator chose "add bounded retry". Evidence:
+<code>.lava-ci-evidence/nezha/2026-06-16-system-boot.md</code>.</p>
+<h2
+id="2026-06-14--search-something-went-wrong-across-providers-via-the-on-device-api-apibackedtrackerclient-used-the-strict-client--no-per-endpoint-key">2026-06-14
+— search "Something went wrong" across providers via the on-device API
+(ApiBackedTrackerClient used the strict client + no per-endpoint
+key)</h2>
+<p><strong>Root cause:</strong> the dynamic
+<code>ApiBackedTrackerClient</code> (the client that issues
+<code>GET|POST /v1/{provider}/{op}</code> against the chosen lava-api-go
+/ on-device api-app) was wired in
+<code>core/tracker/client/.../di/TrackerClientModule.kt:275/302</code>
+with the <strong>unqualified <code>okHttpClient</code></strong> — which
+(per <code>NetworkModule.kt:101</code>) uses the system trust store only
+and is explicitly documented "MUST NOT be used for LAN endpoints." The
+on-device api-app serves over HTTPS with a <strong>self-signed LAN
+cert</strong>, so every search failed at the TLS handshake
+(<code>CertPathValidatorException</code>); and even past TLS,
+<code>ApiBackedTrackerClient</code> attached <strong>no per-endpoint
+Lava-Auth key</strong>, so the auth-gated
+<code>/v1/{provider}/search</code> returned <strong>HTTP 401</strong>.
+Either way <code>getString</code> threw →
+<code>SearchResultViewModel</code> mapped the Throwable to
+<code>error_something_goes_wrong</code> ("Something went wrong, please
+try again"). This is the exact SP-3.1 / Defect-A class that was fixed
+for the <code>/providers</code> catalogue fetch
+(<code>ProviderCatalogRepository</code> got the
+<code>@Named("lan")</code> client + <code>goApi.key</code>) but
+<strong>never fixed for the per-provider
+search/browse/topic/download/login</strong> path.</p>
+<p><strong>Affected files:</strong>
+<code>core/tracker/client/.../di/TrackerClientModule.kt</code> (factory
+→ <code>@Named("lan")</code> client +
+<code>@Named("authFieldName")</code> +
+<code>authKey = ApiBaseUrlHolder.currentKey()</code>);
+<code>core/tracker/client/.../ApiBackedTrackerClient.kt</code>
+(+<code>authFieldName</code>/<code>authKey</code> ctor params +
+<code>Request.Builder.withAuth()</code> on every request);
+<code>core/tracker/client/.../ApiBaseUrlHolder.kt</code> (now holds the
+per-endpoint key);
+<code>core/domain/.../RepopulateProvidersOnStartupUseCase.kt</code></p>
+<ul>
+<li><code>ActiveApiBaseUrlActivator</code> (cold-start threads the key);
+<code>feature/onboarding/.../OnboardingViewModel.kt</code>
+(<code>ApiBaseUrlHolder.set(apiBaseUrl, goApi.key)</code>);
+<code>app/.../StartupProvidersModule.kt</code>.</li>
+</ul>
+<p><strong>Fix:</strong> the dynamic client now uses the permissive-TLS
+<code>@Named("lan")</code> client (accepts the self-signed LAN cert) and
+attaches the active endpoint's per-instance key as the Lava-Auth header
+on EVERY <code>/v1</code> request — mirroring the proven Defect-A
+pattern. The key is threaded from onboarding AND the cold-start
+re-populate.</p>
+<p><strong>Verification test/challenge:</strong>
+<code>ApiBackedTrackerClientTest.search_attachesPerEndpointAuthKey_soAuthGatedApiReturnsResults</code>
+(real client + MockWebServer that 401s without the key → asserts a real
+result row</p>
+<ul>
+<li>the <code>Lava-Auth: k</code> header on the wire) +
+<code>…search_withoutAuthKey_throwsOnAuthGatedApi</code> (discriminator)
++ <code>RepopulateProvidersOnStartupUseCaseTest</code> (asserts the
+cold-start activator receives the key). Falsifiability (re-performed):
+neuter <code>ApiBackedTrackerClient.withAuth()</code> → the search test
+FAILS with HTTP 401; reverted → green. Device-level proof (search on the
+VM against the real api-app) is the final gate via the §6.AE/HelixQA
+video pass.</li>
+</ul>
+<p><strong>Fix commit:</strong> (this commit).</p>
+<p><strong>Forensic anchor:</strong> operator report (2026-06-14) —
+"onboarded RuTracker, YTS, Kinozal; searched 'prince' via the Android
+API with all 3 selected → 'Error, Something went wrong, please try
+again'."</p>
+<p><strong>Update (2026-06-14) — L5 root cause FOUND + fixed (api-app
+<code>ApiKeyProvider</code>), release scope now client + api-app,
+status: on-device verification in progress — NOT yet shipped.</strong>
+After the client-side fixes above (now framed as L1–L4 of a 5-layer
+cascade — see
+<code>docs/issues/2026-06-14-search-multilayer-rootcause.md</code>),
+search STILL returned 401 on a clean matched pair
+(<code>granted=true</code>, engine up). The load-bearing fifth layer
+(L5) was an <strong>api-app</strong> defect, not a client one:
+<code>api-app/src/main/kotlin/lava/api/app/handoff/ApiKeyProvider.kt</code>
+cached its key and port resolver lambdas in
+<code>ContentProvider.onCreate()</code>, gated on the
+<code>ApiApplication.controllerHolder</code>/<code>keyStoreHolder</code>
+being non-null, on the FALSE inline comment "ContentProvider.onCreate
+runs AFTER Application.onCreate." Android runs
+<code>ContentProvider.onCreate</code> <strong>BEFORE</strong>
+<code>Application.onCreate</code>, and the holders are set inside
+<code>ApiApplication.onCreate</code> (lines 46-49) — so at cache time
+the holders were <strong>always null</strong>, the resolver lambdas
+stayed <code>{ null }</code> for the whole process, and the provider
+served an <strong>empty cursor</strong>. The full key-loss chain: client
+<code>ApiKeyClient.read()</code> → null →
+<code>withLocalApiKeyIfMissing</code> → keyless endpoint →
+<code>ApiBaseUrlHolder.set(url, null)</code> →
+<code>ApiBackedTrackerClient</code> built with <code>authKey=null</code>
+→ no <code>Lava-Auth</code> header → every
+<code>/v1/{provider}/search</code> 401. Public routes
+(<code>/providers</code>, <code>/health</code>) need no key, so they
+worked — which is why search NEVER worked while everything else did. The
+existing <code>withFakes</code> unit test was a <strong>bluff</strong>:
+it injected the resolver lambdas through a test-only seam, bypassing the
+real <code>onCreate</code> → holder path where the bug lives, so it
+passed green against the empty-cursor production path. <strong>Fix
+(applied):</strong> <code>ApiKeyProvider</code> resolves the holders +
+the engine Running state <strong>LAZILY per
+<code>query()</code></strong> (<code>resolveRunningKey()</code> /
+<code>resolveRunningPort()</code> defaults), removing the
+<code>onCreate</code>-ordering dependency. <strong>On-device
+pinpoint:</strong>
+<code>.lava-ci-evidence/search-verification/2026-06-14-keyloss-pinpoint.md</code>
+(LAVAKEYDBG logcat
+<code>withLocalApiKey readerSet=true readLen=-1</code> = key read
+returned null at the source). <strong>Verification OWED:</strong> a
+real-holder regression test driving the actual <code>onCreate</code>
+ordering (no <code>withFakes</code> seam) so the empty-cursor defect
+fails RED before the fix. <strong>Release scope change:</strong> 1.3.9
+is NO LONGER client-only — the L5 fix is in the api-app, so
+<strong>client 1.3.9-1066 + api-app 0.2.9-14 ship together</strong>
+(§6.Y bump applied). <strong>Status: fix applied, on-device verification
+in progress — NOT yet shipped.</strong> Search is NOT claimed to work
+on-device until the device gate (authed
+<code>/v1/{provider}/search</code> → 200 + result rows) is GREEN.</p>
+<h2
+id="2026-06-13--curated-tpb--torrents-csv-providers-single-domain-rotation-risk-no-mirror-failover">2026-06-13
+— curated TPB + Torrents-CSV providers single-domain rotation risk (no
+mirror failover)</h2>
+<p><strong>Root cause:</strong> the embedded curated providers
+<code>thepiratebay</code> (apibay.org) and <code>torrentscsv</code>
+(torrents-csv.com) each hardcoded a SINGLE base domain in their
+<code>Client</code>. Public-tracker domains rotate frequently under
+takedown pressure — the companion YTS provider was caught by exactly
+this on 2026-06-13 (yts.mx went NXDOMAIN on public DNS while yts.bz
+still served HTTP 200). A single-domain client goes silently unreachable
+the moment that one domain drops, so the provider would appear in the
+on-device <code>GET /providers</code> catalogue but every search would
+error for the user — a reachability bluff waiting to happen.</p>
+<p><strong>Fix:</strong> refactored both clients to the YTS
+mirror-failover pattern —
+<code>NewClientWithMirrors(DefaultBaseURLs)</code>, a
+first-live-mirror-wins loop in <code>Search</code>, and a
+<code>perAttemptTimeout</code> (8s) cap per mirror so one dead/hanging
+host cannot stall the whole search. <code>New()</code> registration now
+goes through the mirror list. The failover ARCHITECTURE is the
+load-bearing change; the production <code>DefaultBaseURLs</code> for
+each provider deliberately contains only ONE host because live HTTP
+probing on 2026-06-13 found exactly one real endpoint per provider:</p>
+<ul>
+<li><strong>TPB:</strong> apibay.org/q.php = HTTP 200 JSON; the TPB
+frontend proxies (thepiratebay.org/apibay 302→SPA, tpb.party /
+thepiratebay10.xyz 404 /q.php) expose NO compatible JSON API. apibay.org
+is TPB's canonical internal API.</li>
+<li><strong>Torrents-CSV:</strong> torrents-csv.com/service/search =
+HTTP 200 JSON; torrents-csv.ml = 404, torrents-csv.org /
+api.torrents-csv.com = NXDOMAIN. torrents-csv.com is the canonical
+public instance (git.torrents-csv.com is the Gitea code repo, not a
+search API). Per §6.L, fabricating dead
+<code>.xyz</code>/<code>.party</code>/<code>.ml</code>/<code>.org</code>
+mirror entries would be a bluff (they'd only add latency + failover
+noise), so each list stays a real single-element slice; a future real
+mirror is a one-line addition with no client change. YTS itself
+genuinely has 4 live mirrors and keeps its multi-host list.</li>
+</ul>
+<p><strong>Affected files:</strong>
+<code>lava-api-go/internal/provider/curated/thepiratebay/client.go</code>,
+<code>.../thepiratebay/provider.go</code>,
+<code>.../thepiratebay/thepiratebay_test.go</code>,
+<code>.../torrentscsv/client.go</code>,
+<code>.../torrentscsv/provider.go</code>,
+<code>.../torrentscsv/torrentscsv_test.go</code>,
+<code>core/apiengine/src/main/resources/api-source.hash</code>
+(recomputed for the embed).</p>
+<p><strong>Verification test/challenge:</strong> new fast fixture
+(httptest, no live net) tests in each package:
+<code>TestSearch_FailsOverToHealthyMirror</code> (dead 503 first mirror
+→ returns the SECOND healthy mirror's real parsed
+<code>SearchItem</code> rows — primary assertion on user-visible
+info_hash, not a call count) +
+<code>TestSearch_AllMirrorsDownSurfacesError</code> (all mirrors error →
+no fake empty success).
+<code>go test ./internal/provider/curated/...</code> = all
+<code>ok</code>.</p>
+<p><strong>Bluff-Audit:</strong> TPB
+<code>TestSearch_FailsOverToHealthyMirror</code> — Mutation: add
+<code>return nil, lastErr</code> after the first loop iteration in
+<code>Search</code> (break failover after first mirror). Observed:
+<code>Search across [dead, healthy] mirrors should fail over, got error: thepiratebay: HTTP 503: provider: unknown error</code>.
+Torrents-CSV <code>TestSearch_FailsOverToHealthyMirror</code> — same
+mutation. Observed:
+<code>Search across [dead, healthy] mirrors should fail over, got error: torrentscsv: HTTP 503: provider: unknown error</code>.
+Reverted: yes (both re-run <code>ok</code>).</p>
+<p><strong>Fix commit:</strong> (this worktree commit — see git log)</p>
+<p><strong>Forensic anchor:</strong> YTS domain-failover fix
+<code>.lava-ci-evidence/bluff-hunt/2026-06-13-yts-domain-failover.json</code>;
+the same single-domain rotation class applied to the two sibling curated
+providers.</p>
+<h2
+id="2026-06-13--tokyo-toshokan-curated-provider-added-defect-b--animeasian-media-rss-honest-capsearch">2026-06-13
+— Tokyo Toshokan curated provider added (Defect B — anime/Asian-media
+RSS, honest CapSearch)</h2>
+<p><strong>Type:</strong> feature (curated embedded provider), logged
+here per §6.T.4 because it extends the user-reachable provider
+catalogue.</p>
+<p><strong>What:</strong> new compiled-in curated provider
+<code>tokyotosho</code>
+(<code>lava-api-go/internal/provider/curated/tokyotosho/</code>)
+sourcing the public Tokyo Toshokan RSS search feed
+(<code>https://www.tokyotosho.info/rss.php?terms=&lt;q&gt;</code>),
+AuthType NONE / SupportsAnonymous true, capabilities SEARCH +
+MAGNET_LINK. Registered in <code>curated.RegisterAll</code> (both
+startup paths). Broadens the anime/Asian-media niche alongside
+<code>nyaa</code>.</p>
+<p><strong>Wire-shape specifics (differ from nyaa):</strong> the magnet
+is embedded in each item's <code>&lt;description&gt;</code> CDATA HTML
+(<code>&lt;a href="magnet:?xt=urn:btih:&lt;HASH&gt;…"&gt;</code>),
+extracted by regex; the info_hash is BASE32 (32 chars), not 40-hex; the
+RSS carries NO seeders field, so <code>Seeders</code> defaults to 0
+(documented, honest absence); size is decimal SI (<code>113.89MB</code>
+→ 113890000 bytes), not nyaa's IEC.</p>
+<p><strong>§6.E honesty (the load-bearing check):</strong> the
+<code>terms=</code> parameter genuinely filters — verified LIVE
+2026-06-13 (real HTTP): <code>terms=naruto</code> → 93% of titles
+contain "naruto"; <code>terms=bleach</code> → 98% contain "bleach"; the
+empty feed contains neither; naruto vs bleach result sets are
+near-disjoint (2 of ~140 overlap). So CapSearch is honest — NOT the
+EZTV/Knaben-<code>search_type</code> no-op-query bluff. The
+<code>//go:build realtrackers</code>
+<code>TestLive_QueryActuallyFilters</code> encodes both proofs
+(term-match-rate ≥ 50% + ≤ 50% cross-query info_hash overlap) and PASSED
+against the real endpoint.</p>
+<p><strong>Affected files:</strong>
+<code>lava-api-go/internal/provider/curated/tokyotosho/{client.go,provider.go,tokyotosho_test.go,live_realtrackers_test.go,testdata/tokyotosho_naruto.xml}</code>
+(new); <code>lava-api-go/internal/provider/curated/curated.go</code>
+(one import + one <code>r.Register</code> line);
+<code>core/apiengine/src/main/resources/api-source.hash</code>
+(recomputed).</p>
+<p><strong>Verification:</strong> fixture test
+<code>tokyotosho_test.go</code> (real Client + httptest.Server serving
+captured real RSS bytes; asserts parsed
+title/infohash/magnet/size/no-magnet-filter)</p>
+<ul>
+<li>live <code>live_realtrackers_test.go</code>
+(<code>TestLive_SearchReturnsRealMagnets</code> +
+<code>TestLive_QueryActuallyFilters</code>, both PASS against the real
+endpoint). <code>go test ./internal/provider/curated/...</code> = all
+<code>ok</code>.</li>
+</ul>
+<p><strong>Bluff-Audit (§6.J clause 2 / Seventh Law clause
+1):</strong></p>
+<ul>
+<li>Mutation: <code>extractInfoHash</code> returns <code>""</code>
+unconditionally (magnet extraction off) →
+<code>TestSearch_ParsesFixture</code> FAILED
+<code>got 0 results, want 2 (the no-magnet row must be filtered)</code>.
+Reverted.</li>
+<li>Mutation: send the query as <code>xterms</code> not
+<code>terms</code> (query-not-sent under the honored name) →
+<code>TestSearch_SendsTermsParam</code> FAILED
+<code>Search: tokyotosho: HTTP 400: provider: unknown error</code>.
+Reverted.</li>
+<li>Mutation: <code>MB</code> multiplier <code>1e6 → 1&lt;&lt;20</code>
+(IEC instead of decimal SI) → <code>TestSearch_ParsesFixture</code>
+FAILED
+<code>sizeBytes = 119422320, want 113890000 (113.89 MB decimal)</code>.
+Reverted.</li>
+</ul>
+<p><strong>Fix commit:</strong> see this commit (worktree).</p>
+<hr />
+<h2
+id="2026-06-13--onboarding-catalogue-fetch-401-against-a-freshly-discovered-api-get-providers-auth-gated">2026-06-13
+— onboarding catalogue fetch 401 against a freshly-discovered API
+(<code>GET /providers</code> auth-gated)</h2>
+<p><strong>Root cause:</strong>
+<code>lava-api-go/internal/router/router.go</code> registered
+<code>engine.GET("/providers", …)</code> AFTER
+<code>engine.Use(auth.GinMiddleware())</code> (and the
+<code>auth.NewMiddleware</code> chain). The provider catalogue is the
+endpoint the Android client fetches during ONBOARDING against an API it
+has just discovered on the LAN — at which point the client holds no
+pre-shared <code>Lava-Auth</code> key with that API. The auth gate
+therefore rejected the fetch with HTTP 401 →
+<code>OnboardingViewModel</code> <code>fetchAndPopulateProviders</code>
+caught the failure and surfaced
+<code>PROVIDER_CATALOG_FALLBACK_NOTICE</code> ("Couldn't reach the
+selected API — showing bundled providers"), so a perfectly reachable API
+showed the bundled fallback. This is distinct from Defect A (2026-06-12,
+a TLS+missing-key client problem on the <em>client</em> side); Defect
+A's fix made the client send the key, but the api-app's allowlist need
+not include a just-discovered client at all — the catalogue is public
+metadata and must not be gated in the first place.</p>
+<p><strong>Affected files:</strong>
+<code>lava-api-go/internal/router/router.go</code> (registration moved
+before the auth middleware, with rationale comment + a NOTE where it
+used to live);
+<code>lava-api-go/internal/router/router_config_wiring_test.go</code>
+(+<code>TestBuild_ProvidersOpenWithFullAuthChain</code>);
+<code>lava-api-go/tests/contract/providers_public_auth_boundary_test.go</code>
+(new, real-binary 3-way boundary);
+<code>feature/onboarding/src/test/kotlin/lava/onboarding/OnboardingViewModelDynamicProvidersTest.kt</code>
+(+replace-not-merge success test + no-banner-on-success assertion);
+<code>core/apiengine/src/main/resources/api-source.hash</code>
+(recomputed).</p>
+<p><strong>Fix:</strong> register <code>GET /providers</code> BEFORE the
+auth middleware, alongside <code>/health</code>+<code>/ready</code>. It
+is public, non-sensitive provider metadata (ids, capabilities, authType,
+baseUrls — no credentials, no user data). Per-provider operations under
+<code>/v1/:provider/…</code> remain fully auth-gated. The standalone
+binary and the embedded api-app share the exact
+<code>router.Build</code>, so the one edit fixes both surfaces (DRY; a
+divergent embed router would be a §6.J bluff vector).</p>
+<p><strong>Verification test/challenge:</strong> server
+<code>TestBuild_ProvidersOpenWithFullAuthChain</code> (unit) +
+<code>TestProviders_PublicCatalogue_PerProviderStillGated</code>
+(real-binary e2e, proves unauth <code>/providers</code>→200 while unauth
+<code>/v1/…</code>→401 and authed <code>/v1/…</code> crosses the gate);
+client <code>OnboardingViewModelDynamicProvidersTest</code> (success →
+exactly the API's set, bundled-absent, no banner; failure → banner +
+non-blank). Every layer's falsifiability mutation re-performed by the
+main stream (not trusted from the subagent worktree): gate
+<code>/providers</code> → e2e sub-test A 401; drop
+<code>populateFrom</code> → replace test FAILED; success-emits-banner →
+assertNull FAILED. All reverted GREEN.</p>
+<p><strong>Fix commit:</strong> <code>9ae9ab90</code> (server fix) +
+<code>132d1b07</code> (real-binary e2e) +
+<code>99e5893a</code>/<code>6ce100bc</code> (client full-flow
+tests).</p>
+<p><strong>Forensic anchor:</strong> operator real-device report
+(2026-06-13) — "choose discovered API 192.168.0.107:8443 → next screen
+shows 'Couldn't reach the selected API — showing bundled providers'".
+Crashlytics non-fatal <code>47b000d5</code>
+(<code>provider_catalog_fetch_failed</code>, HTTP 401).</p>
+<h2
+id="2026-06-12--provider-catalogue-fetch-fails-self-signed-lan-tls-handshake-defect-a--only-4-providers">2026-06-12
+— provider-catalogue fetch fails self-signed-LAN TLS handshake (Defect A
+— "only 4 providers")</h2>
+<p><strong>Root cause:</strong> <code>ProviderCatalogRepository</code>
+injected the <em>unqualified</em> strict-TLS <code>OkHttpClient</code>
+(system trust store only) and sent no auth key. The on-device api-app
+serves <code>GET /providers</code> over a self-signed LAN cert behind
+the <code>Lava-Auth</code> gate, so every real-device fetch died at the
+TLS handshake
+(<code>CertPathValidatorException: Trust anchor … not found</code>) →
+<code>Result.failure</code> → onboarding fell back to the 4 bundled
+<code>verified &amp;&amp; apiSupported</code> descriptors.
+<strong>Real-device proof:</strong> Crashlytics NON_FATAL
+<code>042b9b61</code> (<code>provider_catalog_fetch_failed</code>),
+1.3.3-1060, Galaxy S23 Ultra / Android 16. <strong>Affected
+files:</strong> <code>core/data/.../ProviderCatalogRepository.kt</code>
+(inject <code>@Named("lan")</code> client +
+<code>@Named("authFieldName")</code>;
+<code>fetchProviders(apiBaseUrl, authKey)</code> +
+<code>withAuthKey</code>),
+<code>core/domain/.../FetchProvidersUseCase.kt</code> (thread
+<code>authKey</code>),
+<code>feature/onboarding/.../OnboardingViewModel.kt</code> (pass
+<code>Endpoint.GoApi.key</code>),
+<code>core/data/build.gradle.kts</code> +
+<code>gradle/libs.versions.toml</code> (okhttp-tls for self-signed-HTTPS
+tests). <strong>Fix:</strong> route the catalogue fetch through the
+permissive LAN client (accepts the self-signed cert) + attach the
+endpoint's per-instance key — mirrors the existing
+<code>NetworkApiRepositoryImpl.getApi()</code>
+<code>Endpoint.GoApi</code> path. <strong>Verification
+test/challenge:</strong> <code>ProviderCatalogRepositoryTest</code>
+rewritten to cross a real self-signed-HTTPS + auth-gated MockWebServer
+(6/6; <code>strictClientFailsTheHandshake</code> = codified pre-fix
+mutation; <code>missingAuthKeyIsRejectedByTheGate</code> proves the
+header is load-bearing);
+<code>OnboardingViewModelDynamicProvidersTest</code> green. <strong>Fix
+commit:</strong> <code>0deb54e7</code> <strong>Forensic anchor:</strong>
+operator "only 4 providers in onboarding wizard"; §6.O closure log
+<code>.lava-ci-evidence/crashlytics-resolved/2026-06-12-provider-catalog-fetch-tls.md</code>.
+<strong>Scope note:</strong> Defect B (embedded Jackett in the api-app)
+still OPEN — the client now shows whatever the api-app serves, but the
+api-app serves only native providers until embedded Jackett lands.</p>
+<hr />
+<h2
+id="2026-06-02--api-app-ondevice-challenges-three-defects--harness-isolation">2026-06-02
+— api-app-ondevice-challenges-three-defects + harness-isolation</h2>
+<p>The Containers <code>emulator-matrix</code> CLI gained a generic
+<code>--gradle-module</code> flag (Containers commit
+<code>9a61a153</code>); the Lava glue
+<code>scripts/run-api-app-challenge-matrix.sh</code> now forwards it so
+the <code>:api-app</code> Compose UI Challenges (C01–C04) finally
+<strong>execute</strong> against the <code>:api-app</code> module
+instead of a 0-test false-green against <code>:app</code>. Running them
+for real surfaced <strong>three latent product defects</strong> (all
+previously invisible because the tests had never actually run) plus a
+test-harness isolation flaw. All proven fixed: clean sequential 4/4
+green on a cold-booted Pixel_8/API35 via the Containers runner
+(host-direct+HVF, <code>gating=true</code>).</p>
+<p><strong>Root cause 1 (C02 — mDNS service-name shadow → API35
+crash):</strong> in <code>NsdMdnsAdvertiser.register()</code>,
+<code>NsdServiceInfo().apply { this.serviceName = serviceName }</code> —
+inside <code>apply{}</code> the implicit receiver is the
+<code>NsdServiceInfo</code>, whose own <code>serviceName</code> property
+<strong>shadowed</strong> the advertiser's constructor val, so the RHS
+<code>serviceName</code> resolved to the receiver's (null) value. The
+service registered with an EMPTY name → Android 15
+<code>NsdManager.validateService</code> threw
+<code>IllegalArgumentException</code> ("The service name or the service
+type is missing") → uncaught → engine start crashed → instrumentation
+process crash (C01 ok, C02 crashed, C03/C04 never ran).</p>
+<p><strong>Root cause 2 (C03 — cross-test native-engine
+pollution):</strong> the Go embed's <code>internal/mobile.current</code>
+is process-global, but Hilt rebuilds the
+<code>@Singleton ApiEngineController</code> per test. C02 starts the
+engine and never stops it; C03 then tries to Start →
+<code>mobile.Start</code> sees <code>current != nil</code> → "already
+running" → C03's start→Running wait times out.</p>
+<p><strong>Root cause 3 (C04 — notification
+restart-after-stop):</strong> two bugs. (a)
+<code>ApiEngineController.restart()</code> called <code>stop()</code>
+first unconditionally; after a Stop the engine is already stopped →
+<code>mobile.Stop</code> returns "no server running" →
+<code>Error</code> state → <code>restart()</code> bailed before
+<code>start()</code>. (b) <code>ApiEngineService</code>'s state
+collector called <code>stopSelf()</code> on ANY <code>Stopped</code>,
+including the INITIAL <code>Stopped</code> a freshly-recreated Service
+sees while handling an ACTION_RESTART — destroying the Service and
+cancelling the restart coroutine before it could drive the engine
+up.</p>
+<p><strong>Root cause 4 (harness isolation flakiness):</strong> the
+foreground <code>ApiEngineService</code> is a process-singleton that
+outlives the per-test Hilt <code>@Singleton</code> controller, so a
+stale Service from a prior test intercepted the next test's
+start/notification actions (driving the wrong, stale controller) —
+producing run-to-run inconsistent failures. Plus the on-device
+<code>OnDeviceApiClient</code> 15s readTimeout flaked the HTTP/2 stream
+(<code>SocketTimeoutException</code>) on the emulator's first
+cold-serve.</p>
+<p><strong>Affected files:</strong></p>
+<ul>
+<li><code>submodules/containers/.../cmd/emulator-matrix</code> +
+<code>pkg/emulator/*</code> (the <code>--gradle-module</code> flag,
+Containers commit <code>9a61a153</code>)</li>
+<li><code>scripts/run-api-app-challenge-matrix.sh</code> (forward
+<code>--gradle-module</code>)</li>
+<li><code>api-app/src/main/kotlin/lava/api/app/service/NsdMdnsAdvertiser.kt</code>
+(RC1)</li>
+<li><code>api-app/src/main/kotlin/lava/api/app/control/ApiEngineController.kt</code>
+(RC3a)</li>
+<li><code>api-app/src/main/kotlin/lava/api/app/service/ApiEngineService.kt</code>
+(RC3b)</li>
+<li><code>api-app/src/androidTest/.../Challenge0{1,2,3,4}*Test.kt</code>
+(RC2 + RC4 <code>@Before</code> reset + Service teardown)</li>
+<li><code>api-app/src/androidTest/.../OnDeviceApiClient.kt</code> (RC4
+timeout)</li>
+<li><code>lava-api-go/internal/mobile/restart_repro_test.go</code> (NEW
+Go same-port-restart coverage — proved the Go embed restart is
+innocent)</li>
+</ul>
+<p><strong>Fix:</strong></p>
+<ol type="1">
+<li>RC1 — capture <code>serviceName</code>/<code>serviceType</code> into
+LOCALS before the <code>apply{}</code> (kills the shadow) + wrap
+<code>registerService</code> in <code>runCatching</code> so a future
+platform rejection degrades gracefully instead of crashing the
+engine.</li>
+<li>RC2 + RC4 — each Challenge <code>@Before</code> resets the
+process-global native engine (<code>NativeApiEngine().stop()</code>) AND
+kills any stale foreground Service (<code>stopService</code>).</li>
+<li>RC3a — <code>restart()</code> skips <code>stop()</code> when already
+<code>Stopped</code> (just <code>start()</code>).</li>
+<li>RC3b — the Service collector self-stops only on a genuine
+running→stopped transition (<code>sawRunning</code> flag), never on the
+initial <code>Stopped</code>.</li>
+<li>RC4 — <code>OnDeviceApiClient</code> connect/read timeouts 10/15s →
+20/30s.</li>
+</ol>
+<p><strong>Verification test/challenge:</strong> <code>:api-app</code>
+Challenge C01–C04 EXECUTED green on cold-booted Pixel_8/API35 via the
+Containers runner (gating=true, host-direct+HVF). Evidence:
+<code>.lava-ci-evidence/phase-e-api-app/2026-06-02T11-32-48Z-gate/</code>
+(+ a confirmation run). Each fix falsifiability-rehearsed; the gate
+itself is the load-bearing on-device acceptance gate (§6.AE / §6.Z).
+<strong>Fix commit:</strong> <code>0deb54e7</code> (parent) + Containers
+<code>9a61a153</code>. <strong>Forensic anchor:</strong> the
+<code>--gradle-module</code> flag made the never-before-run
+<code>:api-app</code> Challenges execute for real — the textbook
+§6.J/§6.L payoff: three real product defects had been invisible behind a
+0-test false-green.</p>
 <hr />
 <h2 id="2026-05-06--phase1-distribute-three-bugs">2026-05-06 —
 phase1-distribute-three-bugs</h2>
@@ -596,5 +1248,2022 @@ that all existing tests and Challenges do work in anti-bluff manner ...
 they MUST confirm that all tested codebase really works as expected! ...
 execution of tests and Challenges MUST guarantee the quality, the
 completition and full usability by end users of the product!"</p>
+<hr />
+<h2 id="2026-06-02--apiengine-missing-serialization-plugin">2026-06-02 —
+apiengine-missing-serialization-plugin</h2>
+<p><strong>Root cause:</strong> <code>:core:apiengine</code>
+(<code>core/apiengine/build.gradle.kts</code>) applied only
+<code>id("lava.android.library")</code> and did NOT apply the
+kotlinx-serialization compiler plugin
+(<code>id("lava.kotlin.serialization")</code>).
+<code>NativeApiEngine.start()</code> calls
+<code>json.encodeToString(config.toDto())</code> on the
+<code>@Serializable ConfigDto</code> (and <code>status()</code> decodes
+<code>@Serializable StatusDto</code>), but without the compiler plugin
+no serializers are generated, so the reflective lookup threw at runtime:
+<code>kotlinx.serialization.SerializationException: Serializer for class 'ConfigDto' is not found. Please ensure that class is marked as '@Serializable' and that the serialization compiler plugin is applied.</code>
+This is independent of R8 — the DEBUG build reproduces it. The on-device
+controller mapped the failure to Error, so the :api-app landing screen
+never reached "Running"; the Phase E real-device Challenges C02/C03/C04
+timed out waiting for "Running". Fake-based unit tests (FakeApiEngine)
+passed because they bypass the real serializer — the canonical §6.J/§6.Z
+bluff class.</p>
+<p><strong>Affected files:</strong></p>
+<ul>
+<li><code>core/apiengine/build.gradle.kts</code> — applied
+<code>id("lava.kotlin.serialization")</code>; removed the now-redundant
+explicit <code>kotlinx.serialization.json</code> dep (the convention
+plugin contributes it).</li>
+<li><code>core/apiengine/src/main/kotlin/lava/apiengine/NativeApiEngine.kt</code>
+— <code>ConfigDto</code>/<code>StatusDto</code> +
+<code>toDto()</code>/<code>toApiStatus()</code> changed
+<code>private</code> → <code>internal</code>, and the
+<code>defaultJson</code> companion <code>private</code> →
+<code>internal</code>, so the JVM regression test exercises the EXACT
+production serializer path. (Public
+<code>ApiEngine</code>/<code>ApiConfig</code>/<code>ApiStatus</code> API
+unchanged.)</li>
+</ul>
+<p><strong>Fix:</strong> apply the project's kotlinx-serialization
+convention plugin so the <code>@Serializable</code> DTOs get generated
+serializers.</p>
+<p><strong>Verification test/challenge:</strong></p>
+<ul>
+<li><code>core/apiengine/src/test/kotlin/lava/apiengine/ConfigSerializationTest.kt</code>
+(cheap JVM, §6.T.1 reproduction). RED with plugin removed:
+<code>kotlinx.serialization.SerializationException: Serializer for class 'ConfigDto' is not found ...</code>
+(4/4 FAIL); GREEN with plugin applied:
+<code>:core:apiengine:testDebugUnitTest BUILD SUCCESSFUL</code>
+(13/13).</li>
+<li>Real-device re-run (Pixel_8 / API35 / arm64-v8a, host-direct+HVF
+cold boot): serialization fix PROVEN —
+<code>grep -c SerializationException</code> over the post-Start logcat
+is <strong>0</strong> (was the Phase E blocker). C01 PASS. Evidence:
+<code>.lava-ci-evidence/phase-e-api-app/2026-06-02-challenge-green-after-serialization-fix.md</code>.</li>
+</ul>
+<p><strong>Remaining defect (separate, out of this task's scope —
+reported, not fixed):</strong> The Challenge re-run surfaced a DISTINCT
+pre-existing native-linking defect in <code>lava-api-go/</code>: the
+prebuilt Go c-shared <code>liblavaapi.so</code> has no
+<code>SONAME</code>, so the JNI bridge <code>liblavaapi_jni.so</code>
+records the absolute host build path
+(<code>/Users/.../lava-api-go/build/jniLibs/arm64-v8a/liblavaapi.so</code>)
+as its <code>DT_NEEDED</code>, which the on-device linker cannot resolve
+→ <code>dlopen failed</code> → embed-start unreachable → C02/C03/C04
+still time out. Remediation (owed to <code>lava-api-go/</code>, NOT
+applied here): add
+<code>-ldflags="-extldflags=-Wl,-soname,liblavaapi.so"</code> to the
+<code>go build -buildmode=c-shared</code> in
+<code>lava-api-go/scripts/build-cshared.sh</code>. Full diagnosis in the
+evidence file above.</p>
+<p><strong>Fix commit:</strong> <em>(this commit)</em></p>
+<p><strong>Forensic anchor:</strong> Phase E real-device Challenge run
+caught the serialization defect
+(<code>.lava-ci-evidence/phase-e-api-app/2026-06-02-phase-e-challenge-execution.md</code>)
+— the §6.J/§6.Z bluff class: JVM unit tests green, real embed-start
+broken for every user.</p>
+<h2 id="2026-06-02--cshared-liblavaapi-missing-soname">2026-06-02 —
+cshared-liblavaapi-missing-soname</h2>
+<p><strong>Root cause:</strong> the prebuilt Go c-shared
+<code>liblavaapi.so</code> (built by
+<code>lava-api-go/scripts/build-cshared.sh</code> via
+<code>go build -buildmode=c-shared</code>) had NO
+<code>DT_SONAME</code>. The JNI bridge <code>liblavaapi_jni.so</code>
+(<code>lava-api-go/cmd/lavaapi-cshared/jni/CMakeLists.txt</code>)
+imports it as a CMake <code>IMPORTED SHARED</code> library via its
+absolute <code>IMPORTED_LOCATION</code>, so the NDK linker recorded the
+<strong>absolute host build path</strong>
+(<code>/Users/.../lava-api-go/build/jniLibs/arm64-v8a/liblavaapi.so</code>)
+as the bridge's <code>DT_NEEDED</code>. On-device, the Android dynamic
+linker cannot resolve a host filesystem path →
+<code>dlopen failed: library "/Users/.../liblavaapi.so" not found: needed by .../liblavaapi_jni.so</code>
+→ <code>LavaNative.nativeStart</code> is unreachable →
+<code>ApiEngineController.start()</code> maps to Error → the :api-app
+Challenges C02/C03/C04 time out waiting for "Running". Proven with
+<code>llvm-readelf -d</code>, NOT guessed. (This is the "remaining
+defect" the 2026-06-02 serialization-fix entry above recorded as
+out-of-scope; it is now fixed.)</p>
+<p><strong>Affected files:</strong></p>
+<ul>
+<li><code>lava-api-go/scripts/build-cshared.sh</code> — added the NDK
+linker soname flag to the c-shared <code>go build</code>:
+<code>-ldflags="-extldflags=-Wl,-soname,liblavaapi.so"</code>.</li>
+</ul>
+<p><strong>Fix:</strong> give the c-shared <code>.so</code> a real
+<code>DT_SONAME</code> (<code>liblavaapi.so</code>, relative) so any
+consumer linking against it records the SONAME — not the absolute host
+path — in <code>DT_NEEDED</code>. The Android linker then resolves it
+from the APK's lib dir at <code>dlopen</code> time.</p>
+<p><strong>Verification (ELF-level, definitive):</strong></p>
+<ul>
+<li><code>llvm-readelf -d</code> of all 3 rebuilt ABIs:
+<code>DT_SONAME = liblavaapi.so</code> present (was absent before).
+<code>go build</code> EXIT 0 for arm64-v8a / x86_64 / armeabi-v7a;
+<code>LavaApiStart</code> present in each dynamic symbol table.</li>
+<li><code>llvm-readelf -d</code> of <code>liblavaapi_jni.so</code>
+<strong>inside the rebuilt <code>api-app-debug.apk</code></strong>:
+<code>(NEEDED) liblavaapi.so</code> (relative) — was the absolute host
+path. The APK ships both <code>lib/arm64-v8a/liblavaapi.so</code> (53
+MB) + <code>liblavaapi_jni.so</code> (25 KB).
+<code>:api-app:assembleDebug :api-app:assembleDebugAndroidTest</code>
+BUILD SUCCESSFUL.</li>
+<li>Full evidence:
+<code>.lava-ci-evidence/phase-e-api-app/2026-06-02-soname-fix-and-containers-gate-blocker.md</code>.</li>
+</ul>
+<p><strong>Runtime gate status (honest, §6.Z/§6.J/§6.AG):</strong> the
+C01-04 runtime GREEN through the Containers submodule is OWED on a
+Containers <code>cmd/emulator-matrix</code> <code>--gradle-module</code>
+flag — the CLI is hardwired to
+<code>:app:connectedDebugAndroidTest</code>
+(<code>submodules/containers/pkg/emulator/{android,containerized}.go</code>)
+and cannot run <code>:api-app</code> Challenges; that submodule is out
+of this task's touch-list. The emulator boot itself WAS
+Containers-orchestrated (<code>--runner=auto</code>→host-direct+HVF,
+Pixel_8/API35 cold-booted AVD), proven by the runner's
+<code>[matrix-diag]</code> output. No green was faked; the wrong-module
+run was stopped before it could false-pass.
+<code>scripts/run-api-app-challenge-matrix.sh</code> (added this commit)
+is module-parameterised so the gate runs the moment Containers gains the
+flag.</p>
+<p><strong>Fix commit:</strong> <em>(this commit)</em></p>
+<p><strong>Forensic anchor:</strong> the soname defect was caught by the
+Phase E real-device Challenge re-run AFTER the serialization fix
+(<code>.lava-ci-evidence/phase-e-api-app/2026-06-02-challenge-green-after-serialization-fix.md</code>)
+— a native-ELF bluff vector invisible to every JVM/host test: the
+libraries link + the APK assembles fine on the host, but the embed
+cannot <code>dlopen</code> on the user's device.</p>
+<hr />
+<h2
+id="archiveorg-search-pagination-halved-totalpages-under-reported-page-count">archiveorg
+search pagination halved totalPages (under-reported page count)</h2>
+<p><strong>Discovered:</strong> 2026-06-06 (Completeness Program Phase
+4, Stream B), while adding anti-bluff unit tests for the Internet
+Archive DTO→domain mapping.</p>
+<p><strong>Root cause:</strong>
+<code>SearchResponseDto.toDomain()</code> computed
+<code>totalPages</code> with page size 100
+(<code>response.numFound / 100</code>), while the search request issued
+by <code>ArchiveOrgSearch</code> (and <code>ArchiveOrgBrowse</code>)
+uses <code>rows=50</code>. <code>toBrowseResult()</code> already used
+the correct <code>/50</code>. Because the divisor was double the real
+page size, <code>totalPages</code> for search results was under-reported
+by ~half — the search UI could not paginate into the back half of any
+result set with more than 50 hits (e.g. 1234 hits reported 13 pages
+instead of 25).</p>
+<p><strong>Affected files:</strong></p>
+<ul>
+<li><code>core/tracker/archiveorg/src/main/kotlin/lava/tracker/archiveorg/feature/ArchiveOrgDto.kt</code>
+— <code>toDomain()</code> divisor 100 → 50, matching the
+<code>rows=50</code> request and <code>toBrowseResult()</code>.</li>
+</ul>
+<p><strong>Fix:</strong> use page size 50 in <code>toDomain()</code> to
+derive <code>totalPages</code>, with a comment anchoring the value to
+the <code>rows=50</code> request in <code>ArchiveOrgSearch</code>.</p>
+<p><strong>Verification:</strong>
+<code>ArchiveOrgDtoTest.toDomain computes total pages by ceiling division of numFound by 50</code>
+asserts exact totalPages for 0/1/50/51/100/101/1234 hits.
+Falsifiability: re-introducing the <code>/100</code> divisor fails that
+test with the expected vs actual page-count mismatch; reverting to
+<code>/50</code> passes. The test matrix also covers
+<code>toBrowseResult</code> totalPages and the conditional metadata
+map.</p>
+<p><strong>Fix commit:</strong> <em>(this commit)</em></p>
+<hr />
+<h2
+id="formatsize-rendered-comma-decimal-separators-on-non-us-locales">formatSize
+rendered comma-decimal separators on non-US locales</h2>
+<p><strong>Discovered:</strong> 2026-06-06 (Completeness Program Phase
+3, Detekt correctness backlog).</p>
+<p><strong>Root cause:</strong>
+<code>core/tracker/rutracker/.../domain/Utils.kt:102</code>
+<code>formatSize</code> used <code>String.format("%.1f %sB", …)</code>
+without a <code>Locale</code>, so the JVM default locale applied. On any
+comma-decimal locale (de/ru/fr/…) a 1.5 MB torrent rendered as "1,5
+MB".</p>
+<p><strong>Fix:</strong> <code>String.format(Locale.ROOT, …)</code>.</p>
+<p><strong>Verification:</strong> <code>FormatSizeLocaleTest</code>
+forces <code>Locale.GERMANY</code>/<code>ru-RU</code> and asserts dot
+output. Falsifiability: Locale-less format → 2 of 4 tests FAIL (expected
+"1.5 MB" but was "1,5 MB"). <strong>Fix commit:</strong> bc0a478d.</p>
+<hr />
+<h2 id="downloadserviceimpl-cache-data-race">DownloadServiceImpl cache
+data race</h2>
+<p><strong>Discovered:</strong> 2026-06-06 (Completeness Program Phase
+3, Android leak/race sweep).</p>
+<p><strong>Root cause:</strong> <code>DownloadServiceImpl.cache</code>
+was a plain HashMap read on the caller's coroutine dispatcher
+(<code>downloadTorrentFile</code>) and written from the
+<code>DownloadManager</code> <code>BroadcastReceiver.onReceive</code>
+(main thread). Concurrent downloads touched a non-thread-safe map across
+two threads.</p>
+<p><strong>Fix:</strong> extracted <code>DownloadUriCache</code> backed
+by <code>ConcurrentHashMap</code> (pure-JVM, unit-testable per Fifth
+Law).</p>
+<p><strong>Verification:</strong>
+<code>DownloadUriCacheConcurrencyTest</code> (16 threads × 500 keys).
+Falsifiability: HashMap backing → test FAILS; ConcurrentHashMap → 3/3
+green. <strong>Fix commit:</strong> 76fb0879.</p>
+<hr />
+<h2
+id="apienginecontrollerstart-toctou-double-bind">ApiEngineController.start()
+TOCTOU double-bind</h2>
+<p><strong>Discovered:</strong> 2026-06-06 (Completeness Program Phase
+3/4).</p>
+<p><strong>Root cause:</strong> <code>ApiEngineController.start()</code>
+re-entry guard was a read-then-set on <code>MutableStateFlow</code>. The
+controller is a Hilt singleton driven by the ViewModel
+(Dispatchers.Default) and the Service (Main.immediate, ACTION_RESTART);
+two concurrent start() calls could both observe Stopped and both bind
+the embed ("address already in use").</p>
+<p><strong>Fix:</strong> atomic <code>_state.compareAndSet</code> guard
+loop + a <code>@VisibleForTesting</code> guard-checkpoint seam (Fifth
+Law: refactor for testability).</p>
+<p><strong>Verification:</strong>
+<code>ApiEngineControllerTest.concurrent start parked in the guard gap binds the embed exactly once</code>
+parks one caller in the read→set gap. Falsifiability: read-then-set →
+test FAILS (double-bind); compareAndSet → 8/8. <strong>Fix
+commit:</strong> 30e880c6.</p>
+<hr />
+<h2
+id="testsearchhistoryrepositoryremove-kept-the-matched-row-bluff-fake">TestSearchHistoryRepository.remove
+kept the matched row (bluff fake)</h2>
+<p><strong>Discovered:</strong> 2026-06-06 (Completeness Program Phase
+4, flagged independently by two subagent streams).</p>
+<p><strong>Root cause:</strong> the shared <code>:core:testing</code>
+fake's <code>remove(id)</code> did <code>filter { it.id == id }</code> —
+it KEPT the matched row and dropped the others, the inverse of the real
+<code>SearchHistoryRepositoryImpl.remove</code> (Room
+<code>delete(id)</code>). A Third-Law bluff fake.</p>
+<p><strong>Fix:</strong> <code>filterNot { it.id == id }</code>; added
+<code>TestSearchHistoryRepositoryTest</code>.</p>
+<p><strong>Verification:</strong> the test asserts remove(1) on [0,1,2]
+leaves [0,2]. Falsifiability: the shipped bug fails it (expected [0,2]
+but was [1]). feature/search + feature/menu stay green. <strong>Fix
+commit:</strong> <em>(this session)</em>.</p>
+<h2
+id="on-device-api-embed-could-silently-drift-from-the-lava-api-go-source-no-input-tracking">On-device
+API embed could silently drift from the lava-api-go source (no
+input-tracking)</h2>
+<p><strong>Discovered:</strong> 2026-06-06 (Completeness Program, STREAM
+API-SYNC).</p>
+<p><strong>Root cause:</strong> the <code>core:apiengine</code> Gradle
+<code>buildCshared</code> task declared ONLY
+<code>inputs.file(cSharedScript)</code> as its input. The lava-api-go
+SOURCE TREE that actually compiles into <code>liblavaapi.so</code> was
+NOT declared as a task input, so Gradle considered the task up-to-date
+whenever the per-ABI <code>.so/.h</code> outputs existed — even after
+the lava-api-go Go source changed. A developer who edited
+<code>lava-api-go/internal/...</code> and re-assembled the api-app got
+the OLD <code>.so</code>: the on-device API embed silently drifted from
+the current API codebase, while every other gate stayed green (a
+§11.4.69 / §6.J "tests pass, wrong-version feature" bluff vector). There
+was no mechanism asserting "the packaged embed equals the current API
+source".</p>
+<p><strong>Affected files:</strong></p>
+<ul>
+<li><code>core/apiengine/build.gradle.kts</code> (missing source inputs
+on <code>buildCshared</code>)</li>
+<li><code>lava-api-go/scripts/build-cshared.sh</code> (no source-hash
+injection / manifest)</li>
+<li><code>lava-api-go/internal/version/version.go</code>,
+<code>internal/mobile/mobile.go</code></li>
+<li><code>core/apiengine/.../ApiEngine.kt</code>,
+<code>NativeApiEngine.kt</code></li>
+</ul>
+<p><strong>Fix (drift-prevention mechanism):</strong></p>
+<ol type="1">
+<li><code>scripts/compute-api-source-hash.sh</code> — single source of
+truth: a deterministic sha256 over the exact non-test <code>.go</code>
+files under <code>cmd/lavaapi-cshared</code> + <code>internal</code>
+plus <code>go.mod</code>/<code>go.sum</code> (the file set that links
+into the <code>.so</code>).</li>
+<li><code>build-cshared.sh</code> injects that hash into
+<code>version.SourceHash</code> via <code>-ldflags -X</code> (the
+running <code>.so</code> reports it through
+<code>mobile.Status()</code>), and writes the committed manifest
+<code>core/apiengine/src/main/resources/api-source.hash</code> on every
+successful build.</li>
+<li><code>scripts/check-api-app-sync.sh</code> — CI gate (wired into
+<code>scripts/ci.sh</code>, both <code>--changed-only</code> and
+<code>--full</code>): recompute the live hash, compare to the committed
+manifest, exit 1 loudly on mismatch.</li>
+<li><code>core/apiengine/build.gradle.kts</code>
+<code>buildCshared</code> now declares the lava-api-go source dirs +
+<code>go.mod</code>/<code>go.sum</code> as <code>@InputFiles</code>, so
+Gradle re-runs <code>build-cshared.sh</code> on ANY embed-source change
+(kills the stale-cache drift).</li>
+<li>On-device proof: api-app Challenge C05
+(<code>Challenge05ApiEmbedSourceHashMatchesTest</code>) starts the real
+embed and asserts
+<code>ApiStatus.sourceHash == BuildConfig.LAVA_API_SOURCE_HASH</code>
+(no drift), with an empty-hash hard-fail discrimination.</li>
+</ol>
+<p><strong>Verification:</strong>
+<code>lava-api-go/tests/contract/sourcehash_contract_test.go</code>
+asserts hash stability, manifest-matches-live, and falsifiability (a
+content edit to a tracked embed-linked <code>.go</code> changes the
+hash). 3/3 PASS. The gate <code>scripts/check-api-app-sync.sh</code>
+PASSES on the seeded manifest; falsifiability rehearsal: appending a
+byte to <code>internal/version/version.go</code> → gate exits 1
+("on-device API embed is STALE"); revert → exit 0. <strong>Fix
+commit:</strong> <em>(this session)</em>.</p>
+<hr />
+<h2
+id="2026-06-08--kinozal-magnet-link-declared-but-null-6e-bluff">2026-06-08
+— kinozal-magnet-link-declared-but-null (§6.E bluff)</h2>
+<p><strong>Root cause:</strong> <code>KinozalDescriptor</code> declares
+the <code>MAGNET_LINK</code> capability, but
+<code>KinozalDownload.getMagnetLink()</code> returned <code>null</code>
+even though the magnet is parsed from the topic/search HTML — a
+declared-but-empty capability, i.e. a §6.E capability-honesty bluff. The
+<code>getMagnetLink</code> interface method is non-suspend and cannot
+itself fetch.</p>
+<p><strong>Affected files:</strong></p>
+<ul>
+<li><code>core/tracker/kinozal/src/main/kotlin/lava/tracker/kinozal/feature/KinozalDownload.kt</code></li>
+<li><code>core/tracker/kinozal/src/main/kotlin/lava/tracker/kinozal/feature/KinozalTopic.kt</code></li>
+<li><code>core/tracker/kinozal/src/main/kotlin/lava/tracker/kinozal/magnet/KinozalMagnetCache.kt</code>
+(NEW)</li>
+<li><code>core/tracker/kinozal/src/main/kotlin/lava/tracker/kinozal/KinozalClientFactory.kt</code></li>
+<li><code>core/tracker/kinozal/src/test/kotlin/lava/tracker/kinozal/feature/KinozalDownloadTest.kt</code></li>
+<li><code>core/tracker/kinozal/src/test/kotlin/lava/tracker/kinozal/feature/KinozalTopicTest.kt</code></li>
+<li><code>core/tracker/kinozal/src/test/kotlin/lava/tracker/kinozal/KinozalClientFactoryCloneUrlTest.kt</code></li>
+</ul>
+<p><strong>Fix:</strong> wire it honestly — a
+<code>@Singleton KinozalMagnetCache</code> populated by the real
+topic-view path (<code>KinozalTopic.getTopic</code>), read back
+synchronously by <code>getMagnetLink(id)</code>; honest
+<code>null</code> until a topic surfaces it. Same pattern RuTracker
+documents for <code>GetMagnetLinkUseCase</code>. Cache threaded through
+the clone-override path.</p>
+<p><strong>Verification test/challenge:</strong>
+<code>KinozalDownloadTest</code> — "getMagnetLink returns real magnet
+after the topic page has been viewed". Falsifiability rehearsal (per
+commit body): reverting <code>getMagnetLink</code> to
+<code>= null</code> (the original defect) FAILED with
+<code>AssertionError: magnet should be exposed after topic view (KinozalDownloadTest.kt:59)</code>;
+reverted, <code>core:tracker:kinozal:test</code> all green (forced
+<code>--rerun-tasks</code>).</p>
+<p><strong>Fix commit:</strong> <code>6fa31ad2</code></p>
+<p><strong>Forensic anchor:</strong> §6.E capability-honesty audit,
+2026-06-08 session.</p>
+<hr />
+<h2
+id="2026-06-08--nnmclub-magnet-link-declared-but-null-6e-bluff">2026-06-08
+— nnmclub-magnet-link-declared-but-null (§6.E bluff)</h2>
+<p><strong>Root cause:</strong> <code>NnmclubDescriptor</code> declares
+<code>MAGNET_LINK</code>, but
+<code>NnmclubDownload.getMagnetLink()</code> returned <code>null</code>
+though both <code>NnmclubSearchParser</code> and
+<code>NnmclubTopicParser</code> parse the genuine magnet from NNM-Club
+HTML — a §6.E bluff.</p>
+<p><strong>Affected files:</strong></p>
+<ul>
+<li><code>core/tracker/nnmclub/src/main/kotlin/lava/tracker/nnmclub/feature/NnmclubDownload.kt</code></li>
+<li><code>core/tracker/nnmclub/src/main/kotlin/lava/tracker/nnmclub/feature/NnmclubTopic.kt</code></li>
+<li><code>core/tracker/nnmclub/src/main/kotlin/lava/tracker/nnmclub/feature/NnmclubSearch.kt</code></li>
+<li><code>core/tracker/nnmclub/src/main/kotlin/lava/tracker/nnmclub/http/NnmclubMagnetCache.kt</code>
+(NEW)</li>
+<li><code>core/tracker/nnmclub/src/main/kotlin/lava/tracker/nnmclub/NnmclubClientFactory.kt</code></li>
+<li><code>core/tracker/nnmclub/src/test/kotlin/lava/tracker/nnmclub/feature/NnmclubMagnetExposureTest.kt</code>
+(NEW)</li>
+<li><code>core/tracker/nnmclub/src/test/kotlin/lava/tracker/nnmclub/feature/NnmclubDownloadTest.kt</code></li>
+<li><code>core/tracker/nnmclub/src/test/kotlin/lava/tracker/nnmclub/feature/NnmclubSearchTest.kt</code></li>
+<li><code>core/tracker/nnmclub/src/test/kotlin/lava/tracker/nnmclub/feature/NnmclubTopicTest.kt</code></li>
+<li><code>core/tracker/nnmclub/src/test/kotlin/lava/tracker/nnmclub/NnmclubClientTest.kt</code></li>
+<li><code>core/tracker/nnmclub/src/test/kotlin/lava/tracker/nnmclub/NnmclubClientFactoryCloneUrlTest.kt</code></li>
+<li><code>core/tracker/nnmclub/src/test/resources/fixtures/nnmclub/search/search-with-magnet-2026-06-08.html</code>
+(NEW fixture)</li>
+</ul>
+<p><strong>Fix:</strong> wire it honestly — a
+<code>@Singleton NnmclubMagnetCache</code> populated by the real
+topic-view (<code>NnmclubTopic.getTopic</code>) and search-row
+(<code>NnmclubSearch.search</code>) paths, read back by
+<code>getMagnetLink(id)</code>; honest <code>null</code> when nothing
+has surfaced it. Cache threaded through the clone-override path. Adds a
+real fixture (<code>search-with-magnet-2026-06-08.html</code>)
+containing a magnet row.</p>
+<p><strong>Verification test/challenge:</strong>
+<code>NnmclubMagnetExposureTest</code>
+(<code>lava.tracker.nnmclub.feature</code>). Falsifiability rehearsal
+(per commit body): reverting <code>getMagnetLink</code> to
+<code>return null</code> (the historical bluff) FAILED 2 of 3 — "exposes
+the parsed magnet after the topic page surfaces it" + "after a search
+row surfaces it" — <code>AssertionError</code> at
+<code>NnmclubMagnetExposureTest.kt:50</code> and <code>:82</code>;
+reverted, <code>core:tracker:nnmclub:test</code> 27 tests / 0 failures
+(forced <code>--rerun-tasks</code>).</p>
+<p><strong>Fix commit:</strong> <code>13703bc8</code></p>
+<p><strong>Forensic anchor:</strong> §6.E capability-honesty audit,
+2026-06-08 session.</p>
+<hr />
+<h2
+id="2026-06-08--rutor-magnet-link-declared-but-null--bluff-codifying-test-6e">2026-06-08
+— rutor-magnet-link-declared-but-null + bluff-codifying test (§6.E)</h2>
+<p><strong>Root cause:</strong> <code>RuTorDescriptor</code> declares
+<code>MAGNET_LINK</code> but <code>RuTorDownload.getMagnetLink()</code>
+returned an unconditional <code>null</code> though
+<code>RuTorTopicParser</code> + <code>RuTorSearchParser</code> parse the
+genuine magnet from RuTor HTML — a §6.E bluff. Worse, a pre-existing
+test "rutor has no synchronous magnet (Capability Honesty)" CODIFIED the
+bluff as intentional.</p>
+<p><strong>Affected files:</strong></p>
+<ul>
+<li><code>core/tracker/rutor/.../feature/RuTorDownload.kt</code></li>
+<li><code>core/tracker/rutor/.../feature/RuTorTopic.kt</code></li>
+<li><code>core/tracker/rutor/.../feature/RuTorSearch.kt</code></li>
+<li><code>core/tracker/rutor/.../magnet/RuTorMagnetCache.kt</code>
+(NEW)</li>
+<li><code>core/tracker/rutor/.../RuTorClientFactory.kt</code></li>
+<li><code>core/tracker/rutor/.../feature/RuTorMagnetExposureTest.kt</code>
+(NEW)</li>
+<li><code>core/tracker/rutor/.../feature/RuTorDownloadTest.kt</code></li>
+<li><code>core/tracker/rutor/.../feature/RuTorSearchTest.kt</code></li>
+<li><code>core/tracker/rutor/.../feature/RuTorTopicTest.kt</code></li>
+<li><code>core/tracker/rutor/.../RuTorClientTest.kt</code></li>
+<li><code>core/tracker/rutor/.../RuTorClientFactoryCloneUrlTest.kt</code></li>
+<li><code>.gitmodules</code> +
+<code>submodules/{doc_processor,llm_orchestrator,llm_provider,llms_verifier,vision_engine}</code>
+(the 5 HelixQA dep submodule gitlinks landed in this same commit; see
+the HelixQA pin entry below)</li>
+</ul>
+<blockquote>
+<p>UNCONFIRMED: the exact <code>core/tracker/rutor</code> source-root
+prefix is abbreviated above; <code>git show --stat 6d87019d</code>
+reports the file basenames but the path column is truncated in the stat
+output. The basenames + <code>feature/</code> / <code>magnet/</code>
+subdirs are confirmed.</p>
+</blockquote>
+<p><strong>Fix:</strong> wire it honestly via a
+<code>@Singleton RuTorMagnetCache</code> populated by the real
+topic-view + search-row paths, read back by
+<code>getMagnetLink(id)</code>; honest <code>null</code> on miss.
+Threaded through the clone-override path. The bluff-codifying test was
+replaced with honest-absence semantics.</p>
+<p><strong>Verification test/challenge:</strong>
+<code>RuTorMagnetExposureTest</code>. Falsifiability rehearsal (per
+commit body): reverting <code>getMagnetLink</code> to
+<code>return null</code> (the historical bluff) FAILED 2 of 3 — "exposes
+the parsed magnet after the topic page surfaces it" + "after a search
+row surfaces it" — <code>AssertionError</code> at
+<code>RuTorMagnetExposureTest.kt:57</code> and <code>:97</code>;
+reverted, <code>core:tracker:rutor:test</code> 76 tests / 0 failures;
+<code>RuTorMagnetExposureTest</code> 3/0/0 (forced
+<code>--rerun-tasks</code>).</p>
+<p><strong>Fix commit:</strong> <code>6d87019d</code></p>
+<p><strong>Forensic anchor:</strong> §6.E capability-honesty audit,
+2026-06-08 session — this one is the sharpest §6.J case of the four
+because a passing test had been encoding the bluff as the intended
+contract.</p>
+<hr />
+<h2
+id="2026-06-08--gutenberg-dishonest-torrent-download-capability-6e">2026-06-08
+— gutenberg-dishonest-torrent-download-capability (§6.E)</h2>
+<p><strong>Root cause:</strong> <code>GutenbergDescriptor</code>
+declared <code>TORRENT_DOWNLOAD</code> but the provider serves HTTP
+e-books (Gutendex EPUB/text/HTML), not <code>.torrent</code> files — a
+§6.E capability-honesty bluff. The downloaded artifact is not a bencoded
+<code>.torrent</code>.</p>
+<p><strong>Affected files:</strong></p>
+<ul>
+<li><code>core/tracker/gutenberg/src/main/kotlin/lava/tracker/gutenberg/GutenbergDescriptor.kt</code></li>
+<li><code>core/tracker/gutenberg/src/main/kotlin/lava/tracker/gutenberg/GutenbergClient.kt</code></li>
+<li><code>core/tracker/gutenberg/src/test/kotlin/lava/tracker/gutenberg/GutenbergCapabilityHonestyTest.kt</code>
+(NEW)</li>
+<li><code>core/tracker/gutenberg/src/test/kotlin/lava/tracker/gutenberg/GutenbergClientTest.kt</code></li>
+<li><code>core/tracker/gutenberg/src/test/kotlin/lava/tracker/gutenberg/GutenbergDescriptorTest.kt</code></li>
+</ul>
+<p><strong>Fix:</strong> mirror archiveorg's established honest pattern
+— drop <code>TORRENT_DOWNLOAD</code> from the descriptor;
+<code>GutenbergClient.getFeature( DownloadableTracker::class)</code>
+returns <code>null</code> explicitly (the <code>GutenbergDownload</code>
+impl stays wired but unexposed via the torrent surface). No enum/api
+change. Stale tests that encoded the bluff were removed.</p>
+<p><strong>Verification test/challenge:</strong>
+<code>GutenbergCapabilityHonestyTest</code> pins the contract.
+Falsifiability rehearsal (per commit body): re-declaring
+<code>TORRENT_DOWNLOAD</code> + re-gating <code>getFeature</code> so the
+EPUB-serving impl is again exposed via the torrent-download surface
+FAILED — "download capability is honest about the artifact it produces"
+—
+<code>AssertionError: TORRENT_DOWNLOAD declared but downloaded artifact is not a bencoded .torrent (first byte was 'e', expected 'd') (GutenbergCapabilityHonestyTest.kt:91)</code>;
+reverted, independently re-verified
+<code>GutenbergCapabilityHonestyTest</code> 2/0/0.</p>
+<p><strong>Fix commit:</strong> <code>b197f96d</code></p>
+<p><strong>Forensic anchor:</strong> §6.E capability-honesty audit,
+2026-06-08 session.</p>
+<hr />
+<h2
+id="2026-06-08--helixqa-broken-pin-gomod-conflict-markers-broke-lava-api-go-build">2026-06-08
+— helixqa-broken-pin-gomod-conflict-markers (broke lava-api-go
+build)</h2>
+<p><strong>Root cause:</strong> HelixQA's <code>go.mod</code>
+<code>replace</code> directives require 8 sibling own-org
+(<code>digital.vasic.*</code>) Go modules; 3 were present
+(challenges/containers/security), 5 were MISSING, so the full
+<code>helixqa</code> binary could not build. The broken pinned HelixQA
+<code>go.mod</code> also carried unresolved merge-conflict markers (at
+lines 124 / 131 / 138 per the commit body), which broke
+<code>lava-api-go</code>'s Go build.</p>
+<p><strong>Affected files:</strong></p>
+<ul>
+<li><code>submodules/helixqa</code> (pin bump <code>5112906</code> →
+<code>dd3cf1d</code>)</li>
+<li><code>docs/qa/helixqa-dependency-submodules.md</code> (NEW doc)</li>
+<li><code>docs/CONTINUATION.md</code> (§0 + §3 sync)</li>
+<li>(paired commit <code>6d87019d</code> adds the 5 dep submodule
+gitlinks
+<code>submodules/{doc_processor,llm_orchestrator,llm_provider,llms_verifier,vision_engine}</code>
+from
+<code>vasic-digital/{DocProcessor,LLMOrchestrator,LLMProvider,LLMsVerifier,VisionEngine}</code>)</li>
+</ul>
+<blockquote>
+<p>UNCONFIRMED: the conflict-marker line numbers 124/131/138 are quoted
+from the commit body, not independently re-diffed in this audit. The pin
+SHAs <code>5112906 → dd3cf1d</code> and the
+<code>submodules/helixqa</code> change are confirmed by
+<code>git show --stat dd72669b</code>.</p>
+</blockquote>
+<p><strong>Fix:</strong> bump the helixqa pin
+<code>5112906 → dd3cf1d</code> (clean <code>go.mod</code>); add the 5
+missing dep submodules (local paths lowercase snake_case per §11.4.29
+matching HelixQA's <code>../doc_processor</code> replace targets; URLs
+use the real CamelCase repo names per the must-not-break-technology
+carve-out).</p>
+<p><strong>Verification:</strong> physical proof recorded in the commit
+body — <code>go build ./cmd/helixqa</code> exit 0 → 29.7 MB binary;
+<code>helixqa version</code> → v0.2.0; and <code>lava-api-go</code>
+builds (exit 0).</p>
+<p><strong>Fix commit:</strong> <code>dd72669b</code> (pin bump + doc) —
+the 5 dep submodule gitlinks landed in companion commit
+<code>6d87019d</code>.</p>
+<p><strong>Forensic anchor:</strong> operator directive ("add all
+missing dependency Submodules from vasic-digital/HelixDevelopment") +
+§11.4.27/§11.4.28 (own-org deps reachable from root). OWED (tracked in
+CONTINUATION): §6.W GitLab mirrors for the 5 new submodules; §11.4.29
+upstream CamelCase→snake_case repo rename.</p>
+<hr />
+<h2
+id="2026-06-08--nav-compose-290-test-teardown-lifecycle-race">2026-06-08
+— nav-compose-2.9.0-test-teardown-lifecycle-race</h2>
+<p><strong>Root cause (confirmed, stack-trace-quoted in the
+systematic-debugging investigation):</strong>
+androidx-navigation-compose 2.9.0's single-top
+<code>NavBackStackEntry</code> lifecycle reaches <code>CREATED</code>
+asynchronously; the Espresso/Compose test-runner's immediate
+<code>Activity.performDestroy</code> then tries
+<code>INITIALIZED → DESTROYED</code> in one step →
+<code>IllegalStateException "State must be at least 'CREATED' to be moved to 'DESTROYED'"</code>.
+2.9.1 release note: "Fixed an issue that caused NavEntries instantiated
+using single top to never go beyond CREATED in their Lifecycle.State"
+([I043ba], b/421095236) — matches exactly (Lava uses
+<code>launchSingleTop=true</code>).</p>
+<p><strong>User impact:</strong> NONE — real users get intervening
+lifecycle pauses. It is a synthetic test-teardown artifact that had
+forced Challenge tests C04–C08 + deep C11 to be gutted to shallow
+versions. Blast radius LOW: single direct consumer
+(<code>core/navigation</code>); <code>-Xcontext-receivers</code> is
+orthogonal (a Kotlin compiler feature, not the nav lib).</p>
+<p><strong>Affected files:</strong></p>
+<ul>
+<li><code>gradle/libs.versions.toml</code> (pin
+<code>2.9.0 → 2.9.1</code>)</li>
+</ul>
+<p><strong>Fix:</strong> bump <code>androidx-navigation-compose</code>
+<code>2.9.0 → 2.9.1</code>.</p>
+<p><strong>Verification:</strong>
+<code>./gradlew :core:navigation:compileDebugKotlin</code> → BUILD
+SUCCESSFUL with 2.9.1.</p>
+<blockquote>
+<p>UNCONFIRMED / OWED (per commit body): the race-fix confirmation
+(restoring the deep C04–C08/C11 Challenges + proving the teardown crash
+is gone) is device-gated — requires the Genymotion VM / a real device,
+OWED when a device is booted. Not yet verified on-device in this
+session.</p>
+</blockquote>
+<p><strong>Fix commit:</strong> <code>7e6e7bcb</code></p>
+<p><strong>Forensic anchor:</strong> systematic-debugging investigation
+of the C04–C08/C11 shallow-test regression, 2026-06-08 session.</p>
+<hr />
+<h2
+id="6e--rutracker-magnet_link-declared-but-getmagnetlink-returned-null-2026-06-08">§6.E
+— RuTracker <code>MAGNET_LINK</code> declared but
+<code>getMagnetLink</code> returned null (2026-06-08)</h2>
+<p><strong>Class:</strong> §6.E capability-honesty bluff
+(declared-but-empty capability).</p>
+<p><strong>Symptom:</strong> <code>RuTrackerDescriptor</code> declares
+<code>TrackerCapability.MAGNET_LINK</code>
+(<code>RuTrackerDescriptor.kt:36</code>) and
+<code>getFeature(DownloadableTracker)</code> resolves to a non-null
+<code>RuTrackerDownload</code>, but the only reachable
+<code>getMagnetLink</code> impl (<code>GetMagnetLinkUseCase</code>)
+returned <code>null</code> unconditionally for EVERY id on the real
+stack — even though RuTracker genuinely parses the magnet
+(<code>TopicMapper.kt:121</code>). A user tapping "Magnet" on a
+RuTracker topic could never get the magnet the app had already parsed.
+Identical to the bluff RuTor closed with
+<code>RuTorMagnetCache</code>.</p>
+<p><strong>Root cause:</strong>
+<code>GetMagnetLinkUseCase.invoke(id) = null</code> stub; no path
+carried the parsed <code>TorrentItem.magnetUri</code> from the
+topic/search fetch to the synchronous
+<code>DownloadableTracker.getMagnetLink</code>. Audit:
+<code>docs/qa/magnet-label-honesty-audit-2026-06-08.md</code> (W4a).</p>
+<p><strong>Affected files:</strong></p>
+<ul>
+<li><code>core/tracker/rutracker/.../magnet/RuTrackerMagnetCache.kt</code>
+(new — RuTor pattern)</li>
+<li><code>core/tracker/rutracker/.../domain/GetMagnetLinkUseCase.kt</code>
+(reads the cache)</li>
+<li><code>core/tracker/rutracker/.../feature/RuTrackerTopic.kt</code>
+(populates on getTopic)</li>
+<li><code>core/tracker/rutracker/.../feature/RuTrackerSearch.kt</code>
+(populates per result row)</li>
+<li><code>core/tracker/rutracker/.../RuTrackerSubgraphBuilder.kt</code>
+(shared cache, clone path)</li>
+<li><code>core/tracker/client/.../di/TrackerClientModule.kt</code> (Hilt
+@Provides reads the cache)</li>
+</ul>
+<p><strong>Fix:</strong> adopt the RuTor magnet-cache pattern — a
+<code>@Singleton</code> process-lifetime
+<code>RuTrackerMagnetCache</code> populated by
+<code>RuTrackerTopic.getTopic</code> /
+<code>RuTrackerSearch.search</code> from the already-mapped
+<code>magnetUri</code>, read by <code>GetMagnetLinkUseCase</code>.
+Honest null preserved for ids never surfaced.</p>
+<p><strong>Verification (§6.T.1 reproduction-before-fix):</strong></p>
+<ul>
+<li>RED (pre-fix, against the stub):
+<code>RuTrackerMagnetExposureTest &gt; getMagnetLink exposes the magnet the topic mapper surfaced</code>
+FAILED — "§6.E BLUFF: ... getMagnetLink returned null".</li>
+<li>Mutation rehearsal (post-fix, <code>invoke → null</code>): same test
+FAILED again (exit 1).</li>
+<li>GREEN (fix): <code>RuTrackerMagnetExposureTest</code> 2/2 PASS;
+<code>:core:tracker:client:testDebugUnitTest</code> BUILD SUCCESSFUL
+(Hilt graph valid; enumeration gate 5/5 + 8/8).</li>
+</ul>
+<p><strong>Forensic anchor:</strong> SA4 §6.E honesty audit, 2026-06-08
+parallel-fleet session. Full-loop (topic fetch → cache → download)
+covered on-device by the restored C05/C06 Challenges (device run
+owed).</p>
+<hr />
+<h2
+id="6qc37--crosstrackerfallbackmodal-dead-ended-at-the-screen-layer-2026-06-08">§6.Q/C37
+— CrossTrackerFallbackModal dead-ended at the screen layer
+(2026-06-08)</h2>
+<p><strong>Class:</strong> dead-UI (capability present in code,
+unreachable by users — the §6.Q/C37 class).</p>
+<p><strong>Symptom:</strong> <code>feature/search_result</code> has a
+full cross-tracker-fallback feature —
+<code>CrossTrackerFallbackModal</code> composable +
+<code>SearchResultViewModel.proposeFallback</code>/
+<code>onFallbackAccept</code>/<code>onFallbackDismiss</code> +
+<code>SearchResultAction.FallbackAccept</code>/
+<code>FallbackDismiss</code> +
+<code>SearchResultState.crossTrackerFallback</code> — BUT
+<code>SearchResultScreen</code> never read
+<code>state.crossTrackerFallback</code> and never called
+<code>CrossTrackerFallbackModal(...)</code>. A real user whose search
+failed on one tracker could never see the "Try <other tracker>" offer.
+Found by the SA5 Challenge restoration audit (C07/C08 had to be written
+as contract guards, not the real flow, because the real flow was
+unreachable).</p>
+<p><strong>Affected files:</strong></p>
+<ul>
+<li><code>feature/search_result/.../SearchResultScreen.kt</code>
+(renders the modal)</li>
+<li><code>app/src/androidTest/.../challenges/Challenge07CrossTrackerFallbackAcceptTest.kt</code></li>
+<li><code>app/src/androidTest/.../challenges/Challenge08CrossTrackerFallbackDismissTest.kt</code></li>
+</ul>
+<p><strong>Fix:</strong> in <code>SearchResultScreen</code>, render
+<code>CrossTrackerFallbackModal(failedTracker, proposedTracker, onAccept = { onAction(FallbackAccept) }, onDismiss = { onAction( FallbackDismiss) })</code>
+when <code>state.crossTrackerFallback != null</code> (display names via
+the existing <code>state.providerDisplayNames</code>). C07/C08 upgraded
+from contract guards to real rendered-modal Compose tests (C30 pattern):
+render → assert "RuTracker is unavailable" + "Try RuTor"/"Cancel" → tap
+→ assert the callback fires.</p>
+<p><strong>Verification:</strong>
+<code>:feature:search_result:compileDebugKotlin</code> +
+<code>:app:compileDebugAndroidTestKotlin</code> BUILD SUCCESSFUL. §6.J
+falsifiability (KDoc): delete the
+<code>state.crossTrackerFallback?.let{}</code> block → dead-end returns;
+or change the confirm/dismiss label → the rendered test's
+<code>onNodeWithText</code> finds no node → assert fails. Device-run of
+C07/C08 owed on the VM (network-independent).</p>
+<p><strong>Forensic anchor:</strong> SA5 Challenge-restoration finding,
+2026-06-08 parallel-fleet session.</p>
+<hr />
+<h2
+id="6j-device-gate-correction--nav-compose-291-does-not-fully-fix-the-navbackstackentry-teardown-crash-2026-06-08">§6.J
+DEVICE-GATE CORRECTION — nav-compose 2.9.1 does NOT fully fix the
+NavBackStackEntry teardown crash (2026-06-08)</h2>
+<p><strong>Correcting the 2.9.0→2.9.1 entry (commit
+<code>7e6e7bcb</code>).</strong> That bump claimed to fix the
+test-teardown NavBackStackEntry lifecycle race and explicitly marked the
+device confirmation OWED. Device confirmation is now done — on the
+Genymotion Pixel 9 VM (API 35) — and it <strong>FALSIFIES the
+claim</strong> for the <code>search_input</code> route:
+<code>Challenge11ArchiveOrgAnonymousSearchTest</code> crashes the app at
+<code>MainActivity</code> destroy with
+<code>IllegalStateException: State must be at least 'CREATED' to be moved to 'DESTROYED'</code>
+on the <code>search/search_input?...</code> NavBackStackEntry
+(<code>LifecycleRegistry.kt:92</code>). 2.9.1 was necessary but NOT
+sufficient.</p>
+<p><strong>Status:</strong> OPEN. C00/C01/C07/C08 PASS on the VM (6/7);
+C11 RED. NOT bluffed green. Incident:
+<code>.lava-ci-evidence/sixth-law-incidents/2026-06-08-navbackstackentry-teardown-crash-2.9.1-incomplete.json</code>.
+Evidence:
+<code>.lava-ci-evidence/genymotion/9e7505b3-fleet-run/</code>.</p>
+<p><strong>Next:</strong> dedicated systematic-debugging cycle —
+evaluate a newer androidx-navigation OR a NavHost/teardown lifecycle
+guard, then device re-verify.</p>
+<h2
+id="api-sourcehash-manifest-staleness--6a-contract-test-redgreen-2026-06-08">api-source.hash
+manifest staleness — §6.A contract test RED→GREEN (2026-06-08)</h2>
+<p>Commit <code>7ce9c2b2</code> edited two embed-linked lava-api-go
+sources (<code>internal/cache/cache.go</code> +
+<code>internal/storage/sqlite.go</code>) without regenerating the
+API↔︎embed sync manifest, so
+<code>TestSourceHash_ManifestMatchesLive</code>
+(<code>lava-api-go/tests/contract</code>) failed: committed
+<code>95c36d1773362cee2b90db398f2e2827586fef83071ba3feb12ce51e02e12b9d</code>
+!= live
+<code>70ebb53a1a9c3365f651ae7ae651dd4404d58976b97b3b2589db39f4d7752470</code>.
+Root cause: the manifest at
+<code>core/apiengine/src/main/resources/api-source.hash</code> was last
+written at <code>e153d7c0</code> (2026-06-06), pre-dating
+<code>7ce9c2b2</code>. The contract test correctly caught real
+source/embed drift — exactly its §6.A purpose.</p>
+<p><strong>Fix:</strong> regenerated <code>api-source.hash</code> to the
+live <code>scripts/compute-api-source-hash.sh</code> value (the
+canonical mechanism <code>build-cshared.sh</code> uses). NOT a test edit
+— the regeneration the test's own error message prescribes. Verified:
+<code>go test ./tests/contract -run TestSourceHash</code> → 3/3 PASS
+(incl. the falsifiability sibling <code>…ContentEditChangesHash</code>);
+full <code>go test ./...</code> → exit 0 (39 packages ok, real
+Postgres-in-podman e2e ran).</p>
+<h2
+id="yts-curated-provider-unreachable--ytsmx-domain-rotated-out-of-dns-2026-06-13">YTS
+curated provider unreachable — yts.mx domain rotated out of DNS
+(2026-06-13)</h2>
+<p><strong>Symptom:</strong> the YTS curated provider (shipped
+2026-06-12, commit <code>462a0308</code>) passed all fixture unit tests
+but its LIVE call failed:
+<code>live Search: yts: provider: unknown error</code>. Surfaced by a
+main-stream §6.J re-verification (running the
+<code>-tags realtrackers</code> live tests instead of trusting the prior
+commit-body claim).</p>
+<p><strong>Root cause:</strong> the provider hardcoded a single base URL
+<code>https://yts.mx</code>. As of 2026-06-13 <code>yts.mx</code> has NO
+A record on public DNS (confirmed <code>dig @1.1.1.1</code> and
+<code>@8.8.8.8</code> both return <code>&lt;none&gt;</code>) — YTS
+rotated its domain since the provider shipped. The fixture parser was
+correct (unit tests green) while the feature was broken for real users
+(§6.G/§6.L fixture-green / feature-broken). The current live canonical
+host is <code>yts.bz</code> (yts.lt / yts.am 301-redirect to it).</p>
+<p><strong>Affected files:</strong>
+<code>lava-api-go/internal/provider/curated/yts/{client.go,provider.go,live_realtrackers_test.go,yts_test.go}</code>.</p>
+<p><strong>Fix:</strong> mirror failover — <code>Client</code> now holds
+a list of base URLs (<code>DefaultBaseURLs</code> = yts.mx, yts.bz,
+yts.lt, yts.am) tried in order; the first successful answer wins; each
+attempt is bounded by <code>perAttemptTimeout</code> (8s) so a
+dead/hanging mirror cannot stall the search.
+<code>NewClient(single)</code> preserved as the httptest seam;
+production <code>New()</code> uses
+<code>NewClientWithMirrors(DefaultBaseURLs)</code>. The live test now
+queries a real movie TITLE (<code>interstellar</code>;
+<code>1080p</code> matches no movie and legitimately returns 0) across
+the mirror list.</p>
+<p><strong>Verification:</strong> new
+<code>TestSearch_FailsOverToHealthyMirror</code> (falsifiable: break the
+failover loop →
+<code>Search across [dead, healthy] mirrors should fail over, got error: yts: HTTP 503</code>;
+reverted) + <code>TestSearch_AllMirrorsDownSurfacesError</code>. Live
+<code>-tags realtrackers</code> PASS in 0.559s (fast failover past dead
+yts.mx to a live mirror, real magnets). Full <code>go test ./...</code>
+→ 0 FAIL; embed source-hash regenerated <code>0d7da603</code>;
+<code>check-api-app-sync.sh</code> GREEN. Evidence:
+<code>.lava-ci-evidence/bluff-hunt/2026-06-13-yts-domain-failover.json</code>.</p>
+<p><strong>Follow-up:</strong> TPB (apibay.org) + Torrents-CSV
+(torrents-csv.com) still hardcode a single domain — same rotation-risk
+class; mirror-failover hardening noted as a follow-up.</p>
+<h2
+id="crashlytics-remediation-sweep--6-open-issues-2026-06-13">Crashlytics
+remediation sweep — 6 open issues (2026-06-13)</h2>
+<p>Operator directive: investigate ALL open Crashlytics issues,
+systematic-debug, fix/improve, cover with falsifiable validation tests +
+§6.O closure logs. Real data pulled from Firebase (project
+<code>lava-vasic-digital</code>, release app). Per-issue:</p>
+<ul>
+<li><p><strong><code>7df61fdb</code> NON_FATAL JobCancellationException
+(8 events, 1.2.21) — FIXED.</strong> Catch-site rethrow
+(defense-in-depth over the prior sink-level filter). New
+<code>Throwable.rethrowIfCancellation()</code> in
+<code>core/common/.../analytics/CancellationRethrow.kt</code> called
+first in every coroutine catch/onFailure that records a non-fatal across
+8 ViewModels (onboarding, login, menu, search_input, search_result,
+topic, bookmarks, favorites). Root cause: broad
+<code>catch (e: Exception)</code> swallowed Kotlin's
+structured-concurrency <code>CancellationException</code> — both
+telemetry pollution AND broken cooperative cancellation. Test:
+<code>core/common/.../CancellationRethrowTest.kt</code> (5 tests).
+Bluff-Audit: no-op the rethrow → 3 tests RED at
+CancellationRethrowTest.kt:75; reverted. Closure:
+<code>.lava-ci-evidence/crashlytics-resolved/2026-06-13-jobcancellation-catch-site-rethrow.md</code>.</p></li>
+<li><p><strong><code>40a62f97</code> FATAL painterResource layer-list
+(1.2.19) — VERIFIED already covered.</strong>
+<code>LavaIconsAppIconColorRegressionTest</code> + closure
+<code>2026-05-14-welcome-layerlist-painter-crash.md</code> already in
+place. No change.</p></li>
+<li><p><strong><code>39469d3b</code> FATAL okhttp schemeless URL
+"djdnjd" (1.2.21) — FIXED (owed regression test added).</strong> The
+prior closure admitted the use-case test was "owed in a follow-up"; this
+is it. New
+<code>ProbeMirrorUseCaseTest.schemeless URL returns Unreachable instead of crashing</code>
+(real <code>ProbeMirrorUseCase</code> + real OkHttpClient). Bluff-Audit:
+change the <code>catch (IllegalArgumentException)</code> to a
+non-matching type → test RED with the leaked
+<code>IllegalArgumentException</code> at :80; reverted. Closure:
+<code>.lava-ci-evidence/crashlytics-resolved/2026-06-13-probemirror-schemeless-url-regression.md</code>.</p></li>
+<li><p><strong><code>042b9b61</code> NON_FATAL CertPath trust-anchor
+(1.3.3) — VERIFIED already covered.</strong> Fixed at 1.3.4 (commit
+<code>0deb54e7</code>); <code>ProviderCatalogRepositoryTest</code> uses
+a self-signed-TLS MockWebServer; closure
+<code>2026-06-12-provider-catalog-fetch-tls.md</code> present. No
+change.</p></li>
+<li><p><strong><code>6519b490</code> NON_FATAL rutracker parseUserId
+"user-id not found" (1.2.22) — WORKING-AS-DESIGNED (no production
+change).</strong> New <code>GetCurrentProfileUseCaseUserIdTest</code>
+proves the 4 production selectors DO parse a logged-in page (not stale)
+and the non-fatal fires only on a genuine guest/expired page. The
+logged-in test is the future staleness canary. Bluff-Audit: reduce
+selectors to a non-matching one → canary RED at :100; reverted. Closure:
+<code>.lava-ci-evidence/crashlytics-resolved/2026-06-13-rutracker-parseuserid-guest-page.md</code>.</p></li>
+<li><p><strong><code>3937b7f0</code> NON_FATAL SSE "Unable to resolve
+host lava-api.local" (1.3.0) — IMPROVED.</strong>
+<code>SearchResultViewModel.applySseError</code> now classifies
+connectivity-class reasons (host-resolve / refused / timeout) as a
+lower-severity <code>recordWarning("sse_endpoint_unreachable")</code>
+instead of a crash-feed non-fatal; genuine backend errors stay
+non-fatals. User-visible Error + Retry UX unchanged. New
+<code>String.isConnectivityFailure()</code> helper. Test:
+<code>SearchResultSseConnectivityTelemetryTest</code> (2 tests).
+Bluff-Audit: force the classifier to <code>if (false)</code> →
+host-resolve test RED; reverted. Closure:
+<code>.lava-ci-evidence/crashlytics-resolved/2026-06-13-sse-host-resolve-telemetry-severity.md</code>.</p></li>
+</ul>
+<p><strong>Affected production files:</strong>
+<code>core/common/.../analytics/CancellationRethrow.kt</code> (new); 8
+feature ViewModels (rethrow calls);
+<code>core/common/build.gradle.kts</code> (coroutines-test dep);
+<code>feature/search_result/.../SearchResultViewModel.kt</code> (SSE
+severity classifier). <code>ProbeMirrorUseCase.kt</code> + rutracker
+<code>GetCurrentProfileUseCase.kt</code> UNCHANGED (already-correct
+fixes; tests added).</p>
+<h2
+id="6ac6o--jobcancellation-non-fatal-noise-download-catch-site-rethrow-2026-06-13">§6.AC/§6.O
+— JobCancellation non-fatal noise: download catch-site rethrow
+(2026-06-13)</h2>
+<p><strong>Crashlytics:</strong>
+<code>7df61fdba64f9928b067624d6db395ca</code> (NON_FATAL,
+<code>kotlinx.coroutines.JobCancellationException</code> —
+"StandaloneCoroutine was cancelled", 8 events / 1 user / first=last
+1.2.21; not recurring on 1.3.x).</p>
+<p><strong>Root cause.</strong>
+<code>DownloadServiceImpl.downloadHttpFile</code>
+(<code>core/downloads</code>) — a <code>suspend fun</code> — wrapped its
+write path in a broad <code>catch (t: Throwable)</code> that called
+<code>analytics.recordNonFatal(t, ...)</code>. When the download is
+abandoned mid-write (calling scope cancelled — user left the screen /
+ViewModel cleared), <code>CancellationException</code> was swallowed AND
+recorded as a non-fatal: false telemetry (issue <code>7df61fdb</code>
+dashboard noise) plus broken cooperative cancellation (the catch
+returned <code>null</code> instead of letting the cancellation
+propagate). A grep of every telemetry-recording <code>catch</code>
+across <code>core/ feature/ app/</code> main sources confirmed this was
+the ONLY remaining offending site — all 8 feature ViewModels +
+<code>LavaApplication</code> already call
+<code>rethrowIfCancellation()</code>.</p>
+<p><strong>Fix.</strong> <code>t.rethrowIfCancellation()</code> (the
+existing shared <code>lava.common.analytics</code> helper — reused, not
+re-created) is now the FIRST statement of the
+<code>downloadHttpFile</code> catch, before
+<code>recordNonFatal</code>.</p>
+<p><strong>Verification test.</strong>
+<code>core/downloads/src/test/.../DownloadServiceCancellationTest.kt</code>
+(new) —
+<code>cancellation during http write is rethrown and never recorded as non-fatal</code>.
+Real <code>DownloadServiceImpl</code> + recording
+<code>AnalyticsTracker</code>; only the outermost Android boundary
+(<code>Context</code> / the <code>Environment</code> static the write
+path uses) is faked to throw <code>CancellationException</code>
+mid-write. Asserts the cancellation PROPAGATES and the
+recorded-non-fatal count is <code>0</code>. Bluff-Audit: delete the
+rethrow line →
+<code>AssertionError: cancellation must propagate, not be swallowed into a null return</code>
+(<code>DownloadServiceCancellationTest.kt:87</code>); reverted → BUILD
+SUCCESSFUL.</p>
+<p><strong>Affected files:</strong>
+<code>core/downloads/.../DownloadServiceImpl.kt</code> (rethrow),
+<code>core/downloads/build.gradle.kts</code> (mockk + coroutines-test
+test deps + <code>returnDefaultValues</code>),
+<code>core/downloads/.../DownloadServiceCancellationTest.kt</code>
+(new). Closure log:
+<code>.lava-ci-evidence/crashlytics-resolved/2026-06-13-cancellation-noise-7df61fdb.md</code>.
+Queued for the 1.3.7 release cycle (version files NOT touched).</p>
+<h2
+id="chosen-online-server-appears-twice-in-settings--server-list-2026-06-14">chosen
+online server appears TWICE in Settings → Server list (2026-06-14)</h2>
+<p><strong>Symptom (operator-reported):</strong> "When we open settings
+Server list, the chosen online server appears TWICE in the list." The
+user onboarded with an online/cloud API endpoint; in Settings → the
+server/connection list, that chosen endpoint is shown duplicated.</p>
+<p><strong>Root cause:</strong>
+<code>core/data/src/main/kotlin/lava/data/converters/Endpoint.kt:69</code>
+builds the Room PRIMARY KEY id for an <code>Endpoint.GoApi</code> as
+<code>GoApi(${packHost()})</code>, and <code>packHost()</code>
+(<code>Endpoint.kt:52-60</code>) appends the additive
+<code>key</code>/<code>platform</code>/<code>storage</code> fields after
+a <code>#</code> sentinel. The SAME physical server (same host:port)
+reaches the persisted list via TWO paths that differ only in those
+additive fields:</p>
+<ul>
+<li>the cloud "Add server" flow
+(<code>feature/onboarding/.../OnboardingViewModel.kt:179 onAddCloudApi</code>
+→ <code>CloudApiDefaults.parse</code>) builds a BARE
+<code>GoApi(host, port)</code> (key=null, platform=null, storage=null) →
+id <code>GoApi(host:port)</code>;</li>
+<li>the on-device / mDNS-discovered flow
+(<code>OnboardingViewModel.kt:710 onOnDeviceApiReturned</code> carries a
+per-instance <code>key</code>;
+<code>OnboardingViewModel.kt:239 startApiDiscovery</code> carries
+<code>platform</code>+ <code>storage</code> TXT attributes) builds a
+KEYED <code>GoApi</code> → id <code>GoApi(host:port#k=…)</code>.</li>
+</ul>
+<p>Both call <code>endpointsRepository.add()</code> →
+<code>EndpointDao.insert(OnConflictStrategy.REPLACE)</code>. REPLACE
+de-dups ONLY on a matching primary-key id, so the two different ids
+produce TWO Room rows for the one server.
+<code>EndpointsRepositoryImpl.observeAll()</code> mapped the DAO list
+straight through with no de-dup by server identity, so the
+Connections/Server list
+(<code>feature/connection/.../ConnectionsViewModel.kt:79 observeConnections</code>
+→ <code>ObserveEndpointsStatusUseCase</code>) rendered the same
+host:port twice.</p>
+<p><strong>Affected files:</strong>
+<code>core/data/src/main/kotlin/lava/data/impl/repository/EndpointsRepositoryImpl.kt</code>
+(fix),
+<code>core/data/src/test/.../EndpointsRepositoryImplFilterTest.kt</code>
+(tests).</p>
+<p><strong>Fix:</strong>
+<code>EndpointsRepositoryImpl.observeAll()</code> now applies
+<code>.distinctBy(::serverIdentity)</code> after the model-map /
+Rutracker-filter step. <code>serverIdentity(GoApi)</code> is
+<code>"GoApi(host:port)"</code> — the transport-defining identity,
+deliberately EXCLUDING the additive
+<code>key</code>/<code>platform</code>/<code>storage</code> fields that
+bloat the Room id — so one row shows per actual server regardless of
+which path added it. <code>distinctBy</code> keeps the first occurrence
+(Room emits in insertion order). Per-endpoint auth is unaffected: the
+active endpoint's own key is persisted separately by
+<code>lava.securestorage.model.EndpointConverter</code>, not by this
+list path.</p>
+<p><strong>Verification test/challenge:</strong>
+<code>EndpointsRepositoryImplFilterTest.observeAll_deduplicates_same_server_added_via_two_paths</code>
+(new) — inserts the same host:port via a bare GoApi and a keyed GoApi,
+asserts the emitted list contains that server exactly once. Companion
+<code>observeAll_keeps_distinct_servers</code> guards that two genuinely
+different servers both survive (the de-dup is by identity, not a blanket
+collapse). Bluff-Audit: with the
+<code>.distinctBy(::serverIdentity)</code> line removed, the test FAILED
+<code>java.lang.AssertionError: The chosen online server MUST appear exactly ONCE in the Server list, not twice (operator defect 2026-06-14) expected:&lt;1&gt; but was:&lt;2&gt;</code>
+(<code>EndpointsRepositoryImplFilterTest.kt:125</code>); restored →
+BUILD SUCCESSFUL (5/5).</p>
+<p><strong>Fix commit:</strong> this commit. <strong>Forensic
+anchor:</strong> operator-reported 2026-06-14; reproduced before fix per
+§6.T.1. Version files NOT touched.</p>
+<h2
+id="search-something-went-wrong-across-providers-via-the-on-devicelan-api-2026-06-14">search
+"Something went wrong" across providers via the on-device/LAN API
+(2026-06-14)</h2>
+<p><strong>Symptom (operator-reported):</strong> onboarded RuTracker +
+YTS + Kinozal, searched "prince" on Home with all 3 selected, using the
+Android (on-device) API as the endpoint → "Error: Something went wrong,
+please try again." Every provider failed.</p>
+<p><strong>Root cause (CONFIRMED — same class as SP-3.1 / Defect-A,
+fixed for /providers but never for per-provider ops):</strong>
+<code>ApiBackedTrackerClient</code> per-provider requests
+(search/getString/getBytes/postJson/healthCheck) were built on the
+UNQUALIFIED, strict, system-trust <code>OkHttpClient</code> and carried
+NO per-instance auth key. The on-device / LAN API is self-signed (so the
+system-trust client fails the TLS handshake) AND auth-gated by the
+<code>Lava-Auth</code> header (so even on plain HTTP it 401s without the
+per-instance key). Either way the SDK surfaced the generic "Something
+went wrong." <code>NetworkModule.kt:101</code> documents that the
+unqualified client "MUST NOT be used for LAN endpoints"; only the
+<code>@Named("lan")</code> permissive client may.
+<code>/providers</code> had been migrated to the LAN client + key, but
+per-provider ops had not.</p>
+<p><strong>Affected files:</strong>
+<code>core/tracker/client/.../ApiBackedTrackerClient.kt</code> (+
+<code>withAuth()</code> on every request),
+<code>.../ApiBaseUrlHolder.kt</code> (per-endpoint key),
+<code>.../di/TrackerClientModule.kt</code> (factory now injects
+<code>@Named("lan")</code> client + <code>authFieldName</code> +
+<code>ApiBaseUrlHolder.currentKey()</code>),
+<code>feature/onboarding/.../OnboardingViewModel.kt</code>
+(<code>ApiBaseUrlHolder.set(url,key)</code>),
+<code>core/domain/.../RepopulateProvidersOnStartupUseCase.kt</code> +
+<code>app/.../StartupProvidersModule.kt</code> (cold-start key
+thread-through).</p>
+<p><strong>Fix:</strong> the active-API base URL is now stored WITH its
+per-instance key in <code>ApiBaseUrlHolder</code>;
+<code>TrackerClientModule</code> builds every
+<code>ApiBackedTrackerClient</code> with the <code>@Named("lan")</code>
+permissive-TLS client and threads
+<code>authFieldName</code>+<code>authKey</code>; <code>withAuth()</code>
+attaches <code>Lava-Auth: &lt;key&gt;</code> to every per-provider
+request. So search/browse/download against a self-signed, auth-gated
+on-device API succeed instead of failing the handshake or 401ing.</p>
+<p><strong>Verification test/challenge:</strong></p>
+<ul>
+<li>Unit (reproduction):
+<code>ApiBackedTrackerClientTest.search_attachesPerEndpointAuthKey_soAuthGatedApiReturnsResults</code>
+(on-device MockWebServer 401s without <code>Lava-Auth: k</code>, returns
+results with it)
+<ul>
+<li><code>search_withoutAuthKey_throwsOnAuthGatedApi</code>.
+Bluff-Audit: dropping <code>.withAuth()</code> → search 401s → test
+FAILED; restored → GREEN.</li>
+</ul></li>
+<li>Wiring contract: <code>LanHttpClientWiringContractTest</code>
+reflectively asserts the factory's OkHttpClient param is
+<code>@Named("lan")</code> (closes the gap that nothing asserted the
+registry was wired with the permissive client).</li>
+<li>Device: Challenge44ApiSearchAuthTest (on-device MockWebServer) —
+PASS on the Genymotion VM in the 1.3.8-1065 client gate (BUILD
+SUCCESSFUL).</li>
+</ul>
+<p><strong>Fix commit:</strong> landed in the 1.3.8-1065 cycle
+(search-auth thread-through). <strong>Forensic anchor:</strong>
+operator-reported 2026-06-14; reproduced before fix (§6.T.1).</p>
+<h2
+id="onboarding-pick-your-providers-select-all--deselect-all-control-2026-06-14">onboarding
+"Pick your providers": select-all / deselect-all control
+(2026-06-14)</h2>
+<p><strong>Symptom (operator request):</strong> "On pick your providers
+onboarding screen we must have check and uncheck all checker, especially
+if there are multiple choices in dozens." No way to toggle every
+provider at once.</p>
+<p><strong>Fix:</strong> added
+<code>OnboardingAction.ToggleAllProviders</code> +
+<code>OnboardingViewModel.onToggleAllProviders()</code> (computes a
+single target = <code>!(all currently selected)</code> and maps every
+provider to it — so it acts as select-all when not all are selected,
+deselect-all when all are). <code>ProvidersStep</code> renders a
+<code>select_all_providers</code>-tagged control when
+<code>providers.size &gt;= 2</code>. <strong>Affected files:</strong>
+<code>feature/onboarding/.../OnboardingAction.kt</code>,
+<code>OnboardingViewModel.kt</code>,
+<code>steps/ProvidersStep.kt</code>, <code>OnboardingScreen.kt</code>.
+<strong>Verification:</strong>
+Challenge41OnboardingSelectAllProvidersTest — PASS on the Genymotion VM
+(1.3.8-1065 gate). Drives the real ProvidersStep, taps select-all,
+asserts all selected; taps again, asserts all cleared. <strong>Fix
+commit:</strong> 1.3.8-1065 cycle.</p>
+<h2
+id="onboarding-provider-configure-password-field-masking--eye-toggle-2026-06-14">onboarding
+provider Configure: password field masking + eye toggle
+(2026-06-14)</h2>
+<p><strong>Symptom (operator request):</strong> "password field MUST
+behave like every regular password field — masking letters, with eye
+icon to show password." The Configure step's password was plain
+text.</p>
+<p><strong>Fix:</strong> <code>ConfigureStep</code> password field now
+uses
+<code>visualTransformation = if (passwordVisible) None else PasswordVisualTransformation()</code></p>
+<ul>
+<li><code>KeyboardType.Password</code> + a trailing eye control
+(<code>password_visibility_toggle</code>, content descriptions "Show
+password"/"Hide password") that flips <code>passwordVisible</code>.
+<strong>Affected files:</strong>
+<code>feature/onboarding/.../steps/ConfigureStep.kt</code>.
+<strong>Verification:</strong> Challenge42OnboardingPasswordMaskingTest
+— PASS on the Genymotion VM (1.3.8-1065 gate). NOTE (anti-bluff):
+Compose retains the RAW text in EditableText regardless of the visual
+mask, so <code>assertDoesNotExist(plaintext)</code> is INVALID — the
+test asserts the masking STATE via the eye control's content-description
+round-trip (Show→Hide→Show). The original
+<code>assertDoesNotExist</code> form FAILED on device; the device run
+caught the test bug (a real §6.Z win) and it was rewritten to the
+content-description contract. <strong>Fix commit:</strong> 1.3.8-1065
+cycle (test corrected in c366454f).</li>
+</ul>
+<h2
+id="api-app-foreground-service-crashes-after-6h--datasync--specialuse-2026-06-14">api-app
+foreground service crashes after ~6h — dataSync → specialUse
+(2026-06-14)</h2>
+<p><strong>Symptom (Crashlytics FATAL):</strong>
+<code>ForegroundServiceStartNotAllowedException</code> +
+<code>ForegroundServiceDidNotStopInTimeException</code> on the
+long-lived on-device API server after ~6h uptime (Galaxy S23 Ultra /
+Android 16). Issues <code>9ba8502ee0ba0d1fdd03987650b8acf8</code> +
+<code>b9baeaede585fc3bc9b515c27cde532c</code>.</p>
+<p><strong>Root cause (CONFIRMED):</strong>
+<code>ApiEngineService</code> used
+<code>foregroundServiceType="dataSync"</code>, which Android 14+ caps at
+~6h cumulative runtime/24h; the long-lived LAN API server exhausts the
+budget and <code>startForeground</code> then throws.</p>
+<p><strong>Fix (operator-approved specialUse):</strong>
+<code>foregroundServiceType</code> <code>dataSync</code> →
+<code>specialUse</code> (no time budget) +
+<code>FOREGROUND_SERVICE_SPECIAL_USE</code> permission +
+<code>PROPERTY_SPECIAL_USE_FGS_SUBTYPE</code> (Play-review
+justification). Defensive: <code>startForeground</code> wrapped in
+<code>try/catch (ForegroundServiceStartNotAllowedException)</code> →
+graceful <code>stopSelf</code>, and an
+<code>onTimeout(startId, fgsType)</code> override stops cleanly — so
+even a future budget degrades gracefully instead of crashing.
+<strong>Affected files:</strong>
+<code>api-app/src/main/AndroidManifest.xml</code>,
+<code>api-app/.../service/ApiEngineService.kt</code>. Design:
+<code>docs/issues/2026-06-14-apiapp-fgs-datasync-budget-fix-design.md</code>.
+<strong>Verification:</strong> <code>:api-app:compileDebugKotlin</code>
+SUCCESSFUL + the 0.2.8-12 release FGS <code>specialUse</code> cold-start
+canary on the Genymotion VM (the service starts under specialUse with no
+FGS exception — a misconfigured type would throw at startForeground →
+FATAL). §6.O closure log:
+<code>.lava-ci-evidence/crashlytics-resolved/2026-06-14-apiapp-fgs-datasync-budget.md</code>.
+<strong>Fix commit:</strong> <code>ed03cac2</code> (cherry-picked to
+master from 10f39f43).</p>
+<h2
+id="defect-b--api-app-crashlytics-telemetry-misattributed-to-the-client-firebase-app-2026-06-14">Defect
+B — api-app Crashlytics telemetry misattributed to the CLIENT Firebase
+app (2026-06-14)</h2>
+<p><strong>Symptom:</strong> api-app crashes/non-fatals (incl. the FGS
+FATALs above) landed under the CLIENT Firebase app's dashboard, not the
+api-app's own app — so api-app telemetry was indistinguishable from
+client telemetry.</p>
+<p><strong>Root cause (CONFIRMED via Firebase MCP):</strong> the tracked
+(gitignored) <code>api-app/google-services.json</code> mapped the
+api-app package names (<code>digital.vasic.lava.api</code> /
+<code>.api.dev</code>) to the CLIENT app's <code>mobilesdk_app_id</code>
+values. The <code>google-services</code> Gradle plugin matches the
+<code>client[]</code> entry by <code>package_name</code>, so the api-app
+build baked in the client app id and registered as the client app.</p>
+<p><strong>Fix:</strong> replaced
+<code>api-app/google-services.json</code> (gitignored, on-disk only —
+never committed per §6.H) with the correct config mapping the api-app
+packages to the real "Lava API (release)"
+<code>...d57b960e955645f6cfd20a</code> / "Lava API (debug)"
+<code>...2932451e07ca80a7cfd20a</code> app ids, fetched via Firebase MCP
+from project <code>lava-vasic-digital</code> (both api-app Firebase apps
+already exist — no creation needed). api-app rebuilt + re-staged for
+0.2.8-12. <strong>Affected files:</strong>
+<code>api-app/google-services.json</code> (gitignored secret — NOT
+committed). Findings:
+<code>docs/issues/2026-06-14-defect-b-telemetry-attribution-findings.md</code>.
+<strong>Verification:</strong> api-app rebuilt SUCCESSFUL with the
+corrected config + the FGS cold-start canary passes on the rebuilt
+artifact. Once 0.2.8-12 is distributed + observed, api-app crashes will
+appear under the api-app dashboard (operator confirms post-distribute).
+<strong>Fix commit:</strong> this cycle (config replaced on disk;
+findings doc <code>fb0bfec9</code>).</p>
+<h2
+id="search-does-not-work-in-any-scenario--5-layer-cascade-2026-06-14">search
+does not work in any scenario — 5-layer cascade (2026-06-14)</h2>
+<blockquote>
+<p><strong>STATUS (honest, §6.T.1/§11.4.6): search does NOT yet work
+on-device.</strong> Layers 1+2+3 are fixed (L1+L2 device-verified, L3
+RED→GREEN at the test layer). Layer 4 is proven a TEST-VM artifact
+(production grant is safe — clean matched-pair run showed
+<code>granted=true</code>). <strong>Layer 5 is OPEN/VERIFYING</strong> —
+even on a clean matched pair with the permission granted and the engine
+running, <code>/v1/{provider}/search</code> STILL 401s; the
+<code>Lava-Auth</code> key is not reaching the search request. A
+logcat-instrumentation run is in progress. <strong>1.3.9 (client-only)
+is NOT shipped</strong> until the L5 on-device gate is GREEN. api-app
+unchanged at 0.2.8-12. This entry was extended from 3 to 5 layers as the
+cascade was peeled back; do not read any "fixed" below as "search works"
+— it does not yet.</p>
+</blockquote>
+<p><strong>Symptom (operator-reported, 1.3.8-1065):</strong> "search
+still does not work in any scenario." Searching any query against the
+chosen on-device / LAN API returned no results across every provider.
+The HelixQA video-QA agent could not produce a search-results
+walkthrough because search genuinely failed.</p>
+<p><strong>Root cause (CONFIRMED — a CASCADE of three independent bugs,
+all proven from on-device evidence, not one):</strong></p>
+<ul>
+<li><strong>Layer 1 — onboarding never persisted the chosen API to
+<code>settings.endpoint</code>.</strong>
+<code>OnboardingViewModel.onSelectApi</code> wrote the selected API to
+the Room <code>Endpoint</code> list + <code>ApiBaseUrlHolder</code>
+(what <code>GET /providers</code> + the dynamic SDK clients read) but
+NEVER to <code>settings.endpoint</code>. The home search resolves its
+target host from <code>SettingsRepository.getSettings().endpoint</code>
+(<code>NetworkApiRepositoryImpl.endpoint()</code>), which therefore
+stayed at the default <code>Endpoint.GoApi("lava-api.local")</code> →
+<code>UnknownHostException</code> (the host never resolves on the LAN).
+So search targeted the wrong host even though <code>/providers</code>
+worked.</li>
+<li><strong>Layer 2 — GoApi search routed to
+<code>GET /v1/search</code>, a route NO backend serves.</strong>
+<code>SearchResultViewModel</code>'s dispatch sent every GoApi
+multi-provider search to <code>observeSseSearch</code> →
+<code>GET {base}/v1/search</code>. Verified across the whole Go
+codebase: <code>internal/router/router.go</code> serves
+<code>/providers</code> + <code>/v1/:provider/{op}</code> +
+<code>/jackett/search</code> + <code>/health/ready</code>; the
+standalone serves legacy <code>/search</code> +
+<code>/v1/{provider}/search</code>; <strong>neither registers
+<code>/v1/search</code></strong> → 404 for every GoApi user.</li>
+<li><strong>Layer 3 — mDNS-discovered endpoint persisted without its
+<code>Lava-Auth</code> key (FIXED, <code>21031f2a</code>).</strong>
+<code>onSelectApi</code> adopted a discovered API's host/port but never
+attached the locally-readable key, so the persisted
+<code>settings.endpoint</code> was keyless → <code>/v1</code> ops 401
+even when the key was readable. Fix: <code>onSelectApi</code> reads the
+local api-app key for keyless mDNS endpoints + an app-side cold-start
+key-restore heals an already-persisted keyless endpoint. Both RED→GREEN
+at the test layer.</li>
+<li><strong>Layer 4 — <code>READ_API_KEY</code> signature permission not
+granted on the test VM (TEST-VM ARTIFACT, production-safe).</strong>
+After L3, the key reader still returned null because the signature
+permission <code>digital.vasic.lava.permission.READ_API_KEY</code> was
+not granted to the client on the VM. Root cause (proven, full evidence
+in
+<code>docs/issues/2026-06-14-readapikey-permission-variant-analysis.md</code>):
+the permission name is a <strong>fixed literal</strong> (no
+<code>.dev</code> suffix) while every other cross-app identifier is
+variant-suffixed, and the VM had BOTH differently-signed api-app
+variants (debug <code>…api.dev</code> + release <code>…api</code>) in
+its install history → the Android
+<code>INSTALL_FAILED_DUPLICATE_PERMISSION</code> trap denies the grant.
+<strong>Production is SAFE</strong> — the shipped release-client +
+release-api-app pair shares one signing cert and grants the permission
+at install; <strong>a clean matched-pair install confirmed
+<code>granted=true</code> on-device.</strong> Real users never
+co-install debug
+<ul>
+<li>release variants. A MEDIUM-priority QA-fidelity hardening
+(variant-suffix the permission name, like the authority already is) is
+recommended so the test VM exercises the production grant path — not
+shipping-blocking.</li>
+</ul></li>
+<li><strong>Layer 5 — <code>Lava-Auth</code> key not reaching the
+<code>ApiBackedTrackerClient</code> search request (OPEN / VERIFYING —
+the load-bearing open layer).</strong> On a CLEAN matched pair (release
+client + release api-app, same signature, <code>granted=true</code>,
+engine running, fresh onboard), <code>/v1/{provider}/search</code> STILL
+returns 401. The key is granted and readable but is not reaching the
+search request. <strong>Evidence caveat:</strong> a public
+<code>GET /providers</code> → 200 proves reachability ONLY —
+<code>/providers</code> is registered BEFORE the auth middleware, so a
+200 there does NOT prove the key is present/valid; only an authed
+<code>/v1/{provider}/…</code> exercises the key. A
+logcat-instrumentation run is in progress to pinpoint exactly which link
+in the key-flow drops the key. <strong>Until this closes, search does
+NOT work on-device</strong> and no layer above it makes search
+functional on its own.</li>
+</ul>
+<p><strong>Affected files:</strong></p>
+<ul>
+<li><code>feature/onboarding/src/main/kotlin/lava/onboarding/OnboardingViewModel.kt</code>
+(<code>onSelectApi</code> now calls <code>SetEndpointUseCase</code> to
+persist the active <code>settings.endpoint</code>; nullable injected
+seam, real impl bound by Hilt).</li>
+<li><code>core/domain/src/main/kotlin/lava/domain/usecase/RepopulateProvidersOnStartupUseCase.kt</code>
+(<code>reconcileActiveEndpoint()</code> heals existing installs whose
+onboarding pre-dated the Layer-1 fix — adopts the Room GoApi when
+<code>settings.endpoint</code> is an orphan default).</li>
+<li><code>feature/search_result/src/main/kotlin/lava/search/result/SearchResultViewModel.kt</code>
+(GoApi multi-provider search re-routed from
+<code>observeSseSearch</code> → <code>/v1/search</code> to
+<code>observeStreamMultiSearch</code> →
+<code>sdk.streamMultiSearch</code> →
+<code>GET /v1/{provider}/search</code>, the served path that carries the
+per-instance <code>Lava-Auth</code> key + permissive-LAN client from the
+1.3.8 wiring). The dead <code>observeSseSearch</code> →
+<code>/v1/search</code> consumer + its 3 SSE bluff tests were deleted in
+<code>addaacd0</code>.</li>
+<li><code>feature/onboarding/.../OnboardingViewModel.kt</code> +
+<code>MainActivity</code> key-restore (Layer 3, <code>21031f2a</code>):
+<code>onSelectApi</code> reads the local api-app key for keyless
+mDNS-discovered endpoints; cold-start key-restore heals a persisted
+keyless endpoint.</li>
+</ul>
+<p><strong>Verification tests added (real-stack reproduction,
+falsifiability-rehearsed):</strong></p>
+<ul>
+<li><code>OnboardingViewModelDynamicProvidersTest</code> —
+<code>selecting an API persists it as the active settings endpoint the search path reads</code>
+(real ViewModel + <code>SetEndpointUseCase</code> seam; reproduces Layer
+1: without the persist write, the active endpoint stays the orphan
+default).</li>
+<li><code>RepopulateProvidersOnStartupUseCaseTest</code> —
+<code>cold start heals a stale orphan active endpoint to the onboarded server in the list</code>
+(real use case; reproduces the existing-install heal path).</li>
+</ul>
+<p><strong>On-device Chucker evidence (1.3.8 debug client, Genymotion
+VM):</strong> <code>GET https://10.0.3.16/providers</code> → 200;
+<code>GET https://lava-api.local/search?query=prince…</code> →
+<code>UnknownHostException</code> (host never resolves; api-app
+"Requests served: 0"). Traced via the flow-db <code>Endpoint</code> row
++ <code>chucker.db</code> transactions; surfaced by the HelixQA video-QA
+agent.</p>
+<p><strong>§6.J bluff removed:</strong>
+<code>SearchResultSseErrorRetryTest</code> drove
+<code>observeSseSearch</code> over a <code>MockWebServer</code> that
+SERVED <code>/v1/search</code> — the route no backend registers — and
+asserted SSE error/retry rendering. It passed green while the real
+feature 404'd (Seventh Law clause 4: mock served the endpoint production
+404s). Removed. Incident:
+<code>.lava-ci-evidence/sixth-law-incidents/2026-06-14-sse-search-v1search-unserved-bluff.json</code>.</p>
+<p><strong>Fix commits:</strong> <code>d05bc71e</code> (L1+L2),
+<code>21031f2a</code> (L3 key restore), <code>addaacd0</code> (L4
+cleanup — dropped ignored authority param + dead SSE path).</p>
+<p><strong>§6.J meta-lesson (this cycle):</strong> a verification
+subagent proposed an L4 fix — a hardcoded <code>".keyprovider"</code>
+authority string — and the main stream REJECTED it after reading the
+source: <code>MainActivity.buildApiKeyReader</code> returns
+<code>{ -&gt; client.read()?.key }</code>, which takes no authority arg
+and ignores any passed. The proposed change would not have touched the
+real grant condition (the signature match) → a §6.J bluff (and a §6.R
+hardcoded literal). Verify subagents root-cause; the main stream
+verifies a proposed change reaches the failing path before applying.</p>
+<p><strong>REMAINING / OPEN / VERIFYING (honest, per §6.T.1 / §11.4.6 —
+search does NOT yet work on-device):</strong></p>
+<ul>
+<li><strong>Layer 5 (OPEN, top priority):</strong> clean matched pair,
+<code>granted=true</code>, engine up, fresh onboard →
+<code>/v1/{provider}/search</code> STILL 401; the <code>Lava-Auth</code>
+key is read but not delivered on the search request.
+Logcat-instrumentation run in progress to find the drop point.
+<strong>1.3.9 (client-only) NOT shipped until this gate is
+GREEN.</strong> api-app unchanged at 0.2.8-12.</li>
+<li><strong>Layer 4 (OWED, MEDIUM/QA-fidelity):</strong> variant-suffix
+the <code>READ_API_KEY</code> permission name so the test VM exercises
+the production grant path; production grant is already safe. Not
+shipping-blocking.</li>
+<li>Existing installs that do NOT re-onboard get a keyless healed
+endpoint → <code>/v1</code> ops 401 (the per-instance key lives only in
+<code>settings.endpoint</code> via <code>EndpointConverter</code>, never
+in the Room <code>Endpoint</code> row). Fresh onboard flows the key
+correctly; the L3 cold-start key-restore addresses keyless mDNS
+endpoints, but a full existing-install key-restore is still
+<strong>owed</strong>.</li>
+<li>Dead SSE path <strong>CLOSED</strong> (<code>addaacd0</code>):
+<code>observeSseSearch</code> + the 3 SSE bluff tests serving the
+unserved <code>/v1/search</code> were removed. A server-side
+<code>/v1/search</code> SSE aggregator, if ever wanted, is a fresh
+feature, not a revival.</li>
+</ul>
+<h2
+id="auth-provider-search--auth-token-login-session-not-threaded-onto-dynamic-v1-requests-2026-06-14-p0-1">auth-provider
+search — Auth-Token (login session) not threaded onto dynamic /v1
+requests (2026-06-14, P0-1)</h2>
+<p><strong>Symptom:</strong> after the 5-layer search fix shipped
+(1.3.9), search returned real results for NO-AUTH providers (Internet
+Archive) but NOT for login-required RuTracker/Kinozal (the operator's
+original report). <strong>Root cause:</strong> the Go
+<code>/v1/{provider}/search</code> path needs TWO credentials —
+<code>Lava-Auth</code> (per-instance key, fixed in 1.3.9) AND
+<code>Auth-Token</code> (the provider login session,
+<code>{provider}:cookie:{session}</code>, parsed in
+<code>lava-api-go/internal/handlers/handlers.go:118</code>).
+<code>ApiBackedTrackerClient.withAuth()</code> attached only
+<code>Lava-Auth</code>, so authed providers reached the server anonymous
+(<code>Type:"none"</code>) → empty/login. <strong>Fix:</strong> new
+<code>ProviderSessionTokenHolder</code> seam (parallel to
+<code>ApiBaseUrlHolder</code>); <code>ProviderLoginViewModel</code>
+writes the session on login; <code>TrackerClientModule</code>'s factory
+reads it; <code>ApiBackedTrackerClient.withAuth()</code> attaches
+<code>Auth-Token: {trackerId}:cookie:{session}</code> IN ADDITION to
+<code>Lava-Auth</code> when present. Additive — no-auth providers attach
+nothing, unchanged. <strong>Affected files:</strong>
+<code>core/tracker/client/.../ApiBackedTrackerClient.kt</code>,
+<code>.../ProviderSessionTokenHolder.kt</code> (new),
+<code>.../di/TrackerClientModule.kt</code>,
+<code>feature/login/.../ProviderLoginViewModel.kt</code>.
+<strong>Verification:</strong>
+<code>ProviderSessionTokenEndToEndWiringTest</code> — real
+holder→factory→<code>withAuth</code> over MockWebServer with an
+auth-gated dispatcher; PRIMARY assertion
+<code>RecordedRequest.getHeader("Auth-Token")</code> present for authed
+/ absent for no-auth. Bluff-Audit: drop the attach →
+<code>authProviderSession_isThreaded_ontoTheAuthTokenHeader</code>
+FAILED (Auth-Token absent → 401); reverted → :core:tracker:client +
+:feature:login GREEN. <strong>ON-DEVICE VERIFY WITH REAL RUTRACKER CREDS
+OWED</strong> (subagent rate-limit) — shipped in 1.3.10 for tester
+verification. <strong>Fix commit:</strong> <code>3b1b6a14</code>.</p>
+<h2
+id="remotecloud-goapi-wrongly-given-the-local-api-app-key-2026-06-14-p1-4">remote/cloud
+GoApi wrongly given the LOCAL api-app key (2026-06-14, P1-4)</h2>
+<p><strong>Symptom (edge):</strong>
+<code>OnboardingViewModel.withLocalApiKeyIfMissing()</code> read the
+LOCAL on-device api-app key for ANY keyless <code>Endpoint.GoApi</code>
+— correct for the local api-app, but a remote/cloud GoApi would get the
+local key → 401. No tests covered it. <strong>Fix:</strong> gate the
+key-read on <code>String.isLocalHost()</code> (loopback / RFC-1918 /
+<code>.local</code>); remote hosts stay keyless.
+<strong>Affected:</strong>
+<code>feature/onboarding/.../OnboardingViewModel.kt</code> + test.
+Bluff-Audit: remove the <code>isLocalHost</code> guard → remote endpoint
+wrongly keyed → test FAILED; reverted → GREEN (6/6). On-device mDNS flow
+not regressed. <strong>Fix commit:</strong> <code>b3cb6de2</code>.</p>
+<h2
+id="read_api_key-permission-not-variant-suffixed--debugrelease-collide-2026-06-14-p2-1">READ_API_KEY
+permission not variant-suffixed → debug+release collide (2026-06-14,
+P2-1)</h2>
+<p><strong>Symptom (QA-fidelity/security):</strong> the signature
+permission <code>digital.vasic.lava.permission.READ_API_KEY</code> was a
+fixed literal (the authority was already variant-suffixed). A device
+with BOTH debug+release variants co-installed hit
+<code>INSTALL_FAILED_DUPLICATE_PERMISSION</code> / broken grant — which
+cost hours of test-VM debugging in the search cycle (it masked the real
+grant path). <strong>Fix:</strong> <code>${apiKeyPermission}</code>
+manifest placeholder per build type — release byte-identical
+<code>...permission.READ_API_KEY</code> (existing grants survive), debug
+<code>...permission.dev.READ_API_KEY</code>. Both manifests
+merge-verified; <code>ApiKeyProvider.attachInfoForTest</code> now reads
+the variant-aware <code>BuildConfig.API_KEY_PERMISSION</code>.
+<strong>Affected:</strong> <code>app/build.gradle.kts</code>,
+<code>api-app/build.gradle.kts</code>, both
+<code>AndroidManifest.xml</code>, <code>ApiKeyProvider.kt</code>.
+<strong>Fix commit:</strong> <code>4026756c</code>. Analysis:
+<code>docs/issues/2026-06-14-readapikey-permission-variant-analysis.md</code>.</p>
+<hr />
+<h2
+id="2026-06-23--h1-search-401-authinterceptor-overwrote-per-install-handoff-key">2026-06-23
+— H1 search-401: AuthInterceptor overwrote per-install handoff key</h2>
+<p><strong>Root cause:</strong> <code>AuthInterceptor</code> in
+<code>core/network/impl/</code> attached the build-time
+<code>LAVA_AUTH</code> UUID using OkHttp's
+<code>.header(fieldName, value)</code> (replace semantics). Interceptors
+fire last in the OkHttp chain, so it unconditionally overwrote the
+per-install handoff key that <code>ApiKeyClient</code> had already
+placed on the request under the same <code>Lava-Auth</code> header name.
+The engine received the wrong (build-time) credential and returned HTTP
+401, which the app surfaced as "Something went wrong" on every
+search.</p>
+<p><strong>Affected files:</strong>
+<code>core/network/impl/src/main/kotlin/lava/network/impl/AuthInterceptor.kt</code></p>
+<p><strong>Fix:</strong> Added an only-if-absent guard — the interceptor
+attaches the build-time UUID only when the request does not already
+carry the <code>Lava-Auth</code> header, so the per-install handoff key
+survives to the wire unchanged.</p>
+<p><strong>Verification test/challenge:</strong>
+<code>core/network/impl/.../AuthInterceptorHandoffKeyTest.kt</code>
+(JVM, 5 tests, falsifiability-proven: reverting the guard caused
+<code>whenPreExistingHandoffKeyIsPresent_interceptorMustNotOverwrite</code>
+to fail with
+<code>expected:&lt;[HANDOFF-KEY-B64]&gt; but was:&lt;[&lt;build-time-UUID-B64&gt;]&gt;</code>).
+Challenge45 (<code>C45</code>) exercises the full on-device search-auth
+flow end-to-end.</p>
+<p><strong>Fix commit:</strong> <code>b58ef78b</code></p>
+<p><strong>Forensic anchor:</strong>
+<code>docs/issues/2026-06-23-search-401-rootcause-deepening.md</code>;
+incident surfaced during operator testing of every search returning
+"Something went wrong".</p>
+<hr />
+<h2
+id="2026-06-23--api-app-17-release-stale-binary-6z-wrong-binary">2026-06-23
+— api-app-17-release stale-binary (§6.Z wrong-binary)</h2>
+<p><strong>Root cause:</strong> The 1071 rebuild failed mid-package at
+<code>:app:uploadCrashlyticsMappingFileRelease</code> (transient
+Crashlytics DNS error) before <code>:api-app:assembleRelease</code>
+finished. <code>:api-app:clean</code> was not run before the next
+attempt, so the leftover output file was named <code>*-17-*</code>
+(matching the new version name) but its embedded
+<code>android:versionCode</code> still declared <code>16</code> from the
+previous build. The <code>firebase-distribute.sh</code> filename-only
+picker matched the filename and distributed the stale binary; the
+api-app release channel shipped versionCode 16 as release 17.</p>
+<p><strong>Affected files:</strong>
+<code>scripts/firebase-distribute.sh</code></p>
+<p><strong>Fix:</strong> (1) api-app rebuilt clean
+(<code>./gradlew :api-app:clean :api-app:assembleRelease</code>) and
+distributed as version 18 (corrective). (2)
+<code>firebase-distribute.sh</code> hardened with a
+<code>_assert_apk_versioncode</code> guard that <code>aapt2</code>-dumps
+the picked APK's manifest and fatals if its actual
+<code>versionCode</code> differs from <code>APP_VERSION_CODE</code> —
+the filename matches the name, this gate matches the bytes.</p>
+<p><strong>Verification test/challenge:</strong>
+<code>tests/firebase/test_assert_apk_versioncode.sh</code> (hermetic;
+exercises the new aapt content-guard with a positive case and a
+stale-versionCode negative case).</p>
+<p><strong>Fix commit:</strong> <code>b58ef78b</code></p>
+<p><strong>Forensic anchor:</strong>
+<code>.lava-ci-evidence/sixth-law-incidents/2026-06-23-apiapp-17-release-stale-binary.json</code>;
+discovered by the conductor's own post-distribute aapt sweep, not a user
+report.</p>
+<hr />
+<h2
+id="2026-06-23--apihttpexception-type-regression-ioexception-vs-illegalstateexception">2026-06-23
+— ApiHttpException type regression (IOException vs
+IllegalStateException)</h2>
+<p><strong>Root cause:</strong> The §6.AC telemetry commit
+(<code>68b6e650</code>) introduced <code>ApiHttpException</code> as a
+typed HTTP-error wrapper extending <code>IOException</code>. Four
+existing tests in <code>core:tracker:client</code> asserted the
+historical contract that HTTP errors from
+<code>ApiBackedTrackerClient</code> extend
+<code>IllegalStateException</code>. The <code>IOException</code>
+supertype broke those assertions, causing 4 test failures surfaced
+during the integration test run after the telemetry commit landed.</p>
+<p><strong>Affected files:</strong>
+<code>core/tracker/client/src/main/kotlin/lava/tracker/client/ApiBackedTrackerClient.kt</code></p>
+<p><strong>Fix:</strong> Changed <code>ApiHttpException</code> to extend
+<code>IllegalStateException</code> instead of <code>IOException</code>,
+preserving the original HTTP-error contract while retaining the
+structured
+<code>statusCode</code>/<code>requestUrl</code>/<code>httpMethod</code>
+context fields needed for §6.AC telemetry enrichment.</p>
+<p><strong>Verification test/challenge:</strong> The 4 pre-existing
+<code>core:tracker:client</code> tests asserting the
+<code>IllegalStateException</code> HTTP-error contract; all 4 GREEN in
+the 860/0 full JVM suite attested at commit <code>a6d8cbf7</code>.
+Regression surfaced and fixed within the same session (caught by
+integration testing before distribute).</p>
+<p><strong>Fix commit:</strong> <code>68b6e650</code></p>
+<p><strong>Forensic anchor:</strong> Caught during the full
+<code>./gradlew testDebugUnitTest</code> run after the §6.AC telemetry
+commit; not a user report.</p>
+<hr />
+<h2
+id="2026-06-23--apikeyclienttest-compile-break-6ac-analytics-param-addition">2026-06-23
+— ApiKeyClientTest compile break (§6.AC analytics-param addition)</h2>
+<p><strong>Root cause:</strong> The §6.AC telemetry commit
+(<code>68b6e650</code>) added an
+<code>analytics: AnalyticsTracker</code> constructor parameter to
+<code>ApiKeyClient</code>. <code>ApiKeyClientTest</code> was not updated
+in the same commit, so it stopped compiling. The break was not caught by
+the session's targeted test runs (which built <code>androidTest</code>
+APKs, not <code>:app</code> JVM unit tests) and was only surfaced by the
+subsequent full-suite attestation run.</p>
+<p><strong>Affected files:</strong>
+<code>app/src/test/kotlin/lava/vasic/lava/client/handoff/ApiKeyClientTest.kt</code></p>
+<p><strong>Fix:</strong> Passed a no-op <code>AnalyticsTracker</code>
+boundary stub to <code>ApiKeyClient</code>'s constructor in the test.
+Telemetry is an outermost boundary per §6.AC; no SUT was mocked and no
+production code was touched. The test's 3 existing key-read assertions
+were byte-unchanged and remain GREEN.</p>
+<p><strong>Verification test/challenge:</strong>
+<code>ApiKeyClientTest</code> (3 tests); GREEN in the 860/0 full Android
+JVM suite attestation at commit <code>a6d8cbf7</code>
+(<code>.lava-ci-evidence/test-runs/2026-06-23-android-jvm-suite.md</code>).</p>
+<p><strong>Fix commit:</strong> <code>a6d8cbf7</code></p>
+<p><strong>Forensic anchor:</strong> Surfaced by the comprehensive
+full-suite attestation run that followed targeted C44/C45 on-device
+validation; not a user report.</p>
+<hr />
+<h2
+id="2026-06-23--firebase-distribute-sigpipe-on-head-7-truncation-process-discipline">2026-06-23
+— firebase-distribute SIGPIPE on head-7 truncation (process
+discipline)</h2>
+<p><strong>Root cause:</strong> A <code>head -7</code> truncation
+inserted in the distribute loop to limit output caused
+<code>SIGPIPE</code> to kill the upstream distribute process before it
+could write the <code>last-version-debug</code> pointer file. The first
+client-debug distribute of version 1072 appeared to succeed visually
+(Firebase upload completed) but left the pointer unwritten; the
+subsequent <code>--release-only</code> stage saw a stale pointer and
+blocked on the §6.AA release-after-debug-confirm gate.</p>
+<p><strong>Affected files:</strong>
+<code>scripts/firebase-distribute.sh</code> (process discipline note;
+the <code>head -7</code> was removed from the distribute loop output
+path).</p>
+<p><strong>Fix:</strong> Removed the <code>head -7</code> truncation
+from the distribute pipeline so the process completes cleanly before the
+shell closes the write end of the pipe. Pointer files are now written
+atomically after the full distribute subprocess exits.</p>
+<p><strong>Verification test/challenge:</strong> The §6.Z aapt
+content-guard (<code>_assert_apk_versioncode</code>) confirmed all 4
+binaries of the 1072 cycle distributed correctly after the fix
+(<code>.lava-ci-evidence/.../2026-06-23-C00-1072-PASS.json</code>). No
+dedicated hermetic test added (the SIGPIPE is a shell process-discipline
+issue, not a logic branch in the script).</p>
+<p><strong>Fix commit:</strong> <code>5dd7ae06</code></p>
+<p><strong>Forensic anchor:</strong> Observed in distribute loop output
+during the 1072 all-4 distribute cycle; re-run of client-debug
+distribute recorded correct <code>last-version-debug 1072</code>
+pointer.</p>
+<hr />
+<h3
+id="bug-2026-06-24-a--search-streaming-back-press-hang--no-client-side-timeout">BUG-2026-06-24-A
+— Search streaming: back-press hang + no client-side timeout</h3>
+<p><strong>Date:</strong> 2026-06-24 <strong>Surface:</strong>
+<code>feature/search_result</code> — <code>SearchResultViewModel</code>
+<strong>Crashlytics §6.O closure log:</strong>
+<code>.lava-ci-evidence/crashlytics-resolved/2026-06-24-search-timeout-cancel.md</code></p>
+<p><strong>Root cause (Bug 1 — no cancellation on back-press):</strong>
+<code>observeStreamMultiSearch()</code> starts an Orbit
+<code>intent {}</code> coroutine that blocks on
+<code>sdk.streamMultiSearch(...).collect {}</code>. Back-press
+dispatches a <em>new</em> <code>intent {}</code>
+(<code>onBackClick</code>) that only posts a <code>Back</code> side
+effect — it does NOT cancel the in-flight coroutine. On a slow provider
+(e.g. yts), the user taps Back, the screen navigates, but the streaming
+coroutine stays alive until OkHttp's 30 s <code>readTimeout</code>
+fires. User sees a ~30 s hang during which Back appears
+unresponsive.</p>
+<p><strong>Root cause (Bug 2 — no client-side timeout):</strong>
+<code>observeStreamMultiSearch()</code> had no <code>withTimeout</code>
+guard. A slow-but-not-stalled provider holds the
+<code>SearchResultContent.Streaming</code> spinner for up to 30 s with
+no Retry affordance — the <code>handleStreamEnd()</code> →
+<code>Error</code> path only triggers once <code>collect {}</code>
+returns.</p>
+<p><strong>Root cause (Bug 3 — engine unbounded search handler + stale
+YTS mirrors):</strong>
+<code>lava-api-go/internal/handlers/v1/search.go</code> passed
+<code>c.Request.Context()</code> (no deadline) to
+<code>p.Search()</code>. YTS failover loop: 4 mirrors ×
+<code>perAttemptTimeout(8 s)</code> = up to 32 s, exceeding OkHttp's 30
+s <code>readTimeout</code> on the client — direct source of the
+<code>SocketTimeoutException</code> in Crashlytics issue
+<code>9d4ad2f4…</code>. Independently, the YTS mirror list led with
+<code>yts.mx</code> which is NXDOMAIN (confirmed 2026-06-24), forcing
+the client to burn all failover slots before timing out. Field evidence:
+Crashlytics key <code>provider=yts</code>, exception at
+<code>Http2Stream.takeHeaders</code> (read-headers hang, not a
+write/connect failure). Investigation doc:
+<code>docs/issues/2026-06-24-search-timeout-and-interrupt-rootcause.md</code>.</p>
+<p><strong>Affected files:</strong></p>
+<ul>
+<li><code>feature/search_result/src/main/kotlin/lava/search/result/SearchResultViewModel.kt</code>
+(Bug 1 + Bug 2 — cancel-on-back + <code>withTimeout</code>)</li>
+<li><code>lava-api-go/internal/handlers/v1/search.go</code> (Bug 3 —
+<code>context.WithTimeout(18 s)</code> deadline wrapping
+<code>p.Search()</code> at line 69)</li>
+<li><code>lava-api-go/internal/provider/curated/yts/client.go</code>
+(Bug 3 — <code>DefaultBaseURLs</code> refreshed: dead
+<code>yts.mx</code> dropped, 5 live mirrors: <code>yts.bz</code>,
+<code>yts.lt</code>, <code>yts.am</code>, <code>yts.gg</code>,
+<code>movies-api.accel.li</code>)</li>
+</ul>
+<p><strong>Fix:</strong></p>
+<ul>
+<li><strong>Bug 1 (cancel-on-back):</strong> Added
+<code>@Volatile private var activeSearchJob: Job? = null</code>. Inside
+<code>observeStreamMultiSearch()</code> captured the coroutine
+<code>Job</code> via <code>currentCoroutineContext()[Job]</code> and
+stored in <code>activeSearchJob</code>. <code>onBackClick()</code> now
+cancels any prior <code>activeSearchJob</code> before posting
+<code>Back</code>.</li>
+<li><strong>Bug 2 (client timeout):</strong> Wrapped
+<code>collect {}</code> in <code>withTimeout(SEARCH_TIMEOUT_MS)</code>
+(25 000 ms, 5 s below OkHttp's <code>readTimeout</code>);
+<code>TimeoutCancellationException</code> caught locally, marks
+still-SEARCHING providers as <code>StreamStatus.ERROR</code>, routes to
+<code>SearchResultContent.Error</code> with Retry button. Generic
+<code>Exception</code> catch with <code>rethrowIfCancellation()</code>
+guard handles connectivity-lost similarly. §6.AC telemetry in both catch
+blocks.</li>
+<li><strong>Bug 3 (engine deadline + mirror refresh):</strong>
+<code>handlers/v1/search.go:69</code> wraps <code>p.Search()</code> in
+<code>context.WithTimeout(c.Request.Context(), 18*time.Second)</code> so
+the engine ALWAYS returns (results or fast error) before the client's 30
+s deadline. <code>yts/client.go DefaultBaseURLs</code> refreshed to 5
+live mirrors (dead <code>yts.mx</code> dropped). Defensive prior-job
+cancel added in <code>observeStreamMultiSearch()</code> for future
+double-invocation safety (cleanup <code>1aa42536</code>).</li>
+</ul>
+<p><strong>Verification tests:</strong></p>
+<p><em>Client (Android):</em>
+<code>feature/search_result/src/test/kotlin/lava/search/result/SearchResultViewModelCancelTimeoutTest.kt</code>
+— 3 tests using REAL <code>SearchResultViewModel</code> + REAL
+<code>LavaTrackerSdk</code> + REAL <code>DefaultTrackerRegistry</code>;
+only the outermost network boundary faked via
+<code>CompletableDeferred</code>-based clients (dispatcher-agnostic
+indefinite suspension):</p>
+<ol type="1">
+<li><code>back_press_while_streaming_cancels_inflight_search_and_emits_Back</code></li>
+<li><code>slow_provider_exceeding_timeout_surfaces_Error_with_Retry_affordance</code></li>
+<li><code>back_press_after_completed_search_preserves_Content_and_emits_Back</code></li>
+</ol>
+<p><em>Engine (Go):</em></p>
+<ul>
+<li><code>lava-api-go/internal/provider/curated/yts/search_total_deadline_test.go</code>
+— <code>TestSearch_ExceedsDeadline_ReturnsContextDeadlineExceeded</code>
+(slow mock server + 18 s ctx deadline → confirms the engine surfaces an
+error, not a hang) +
+<code>TestSearch_WithinDeadline_ReturnsResults</code>.</li>
+<li><code>lava-api-go/internal/provider/curated/yts/search_total_deadline_test.go</code>
+— <code>TestReproduction_StaleMirrorListFails</code>
+(NewClientWithMirrors(["yts.mx"]).Search → provider error; fresh list →
+real results in &lt;2 s).</li>
+</ul>
+<p><strong>Falsifiability confirmed (§6.N / Seventh Law clause
+1):</strong></p>
+<ul>
+<li>Removed <code>activeSearchJob?.cancel()</code> → Test 1
+<code>isStillCollecting</code> stays <code>true</code> → FAIL</li>
+<li>Removed <code>withTimeout(SEARCH_TIMEOUT_MS)</code> → Test 2 times
+out waiting for <code>Error</code> → FAIL</li>
+<li>Reverted <code>DefaultBaseURLs</code> to <code>yts.mx</code>-only →
+<code>TestReproduction_StaleMirrorListFails</code> reproduces
+<code>yts.mx: provider: unknown error</code> → FAIL; fresh list → PASS
+(Bluff-Audit in commit body <code>0e81730b</code>).</li>
+</ul>
+<p><strong>Fix commits:</strong></p>
+<ul>
+<li><code>20d98914</code> — client Bug 1 (cancel-on-back) + Bug 2 (25 s
+<code>withTimeout</code>) + engine Bug 3 (18 s handler deadline in
+<code>handlers/v1/search.go:69</code>)</li>
+<li><code>0e81730b</code> — YTS stale mirror refresh
+(<code>DefaultBaseURLs</code> +
+<code>TestReproduction_StaleMirrorListFails</code>)</li>
+<li><code>1aa42536</code> — code-review cleanups (defensive prior-job
+cancel; mirror-count comment fix)</li>
+<li><code>3c1fa159</code> — version bumps: lava-api-go 2.3.33, CHANGELOG
+/ snapshots for 1.3.11-1073 / api-app 0.2.11-19</li>
+</ul>
+<p><strong>Forensic anchor:</strong> Firebase Crashlytics NON_FATAL
+<code>9d4ad2f4d1a8b8697b1506402e045b81</code> (client release app
+<code>1:815513478335:android:456475e2ef4039d8cfd20a</code>),
+<code>SocketTimeoutException</code> at
+<code>Http2Stream.takeHeaders</code>, keys
+<code>feature=search / operation=streamMultiSearch / provider=yts</code>,
+device HUAWEI TXZ-W09 / Android 12. Operator report (2026-06-24):
+"search does not work — no results; can't go back or interrupt it."
+Coordination analysis:
+<code>docs/issues/2026-06-24-search-timeout-coordination-analysis.md</code>.
+§6.O closure log:
+<code>.lava-ci-evidence/crashlytics-resolved/2026-06-24-search-socket-timeout.md</code></p>
+<p><strong>Challenge Test:</strong> owed — <code>C-SEARCH-CANCEL</code>
+per §6.AE (tracked in <code>docs/workable_items.db</code>).
+Parallel-authored on-device Challenge is the §6.O clause-2 e2e gate.</p>
+<hr />
+<h2
+id="2026-06-24--p0-credentialskeyholder-locked-fatal-crashlytics-58a1335272bc">2026-06-24
+— P0 CredentialsKeyHolder locked FATAL (Crashlytics 58a1335272bc)</h2>
+<p><strong>Root cause:</strong>
+<code>CredentialsEntryRepositoryImpl.observe()</code> called
+<code>keyProvider()</code> (which invokes
+<code>CredentialsKeyHolder.require()</code>) unconditionally inside a
+Room <code>Flow.map</code> operator. When the key holder is in the
+<strong>locked</strong> state (normal at fresh app start or after
+session expiry), <code>require()</code> throws
+<code>IllegalStateException("credentials key holder is locked …")</code>.
+That exception escaped the <code>map</code> operator and propagated onto
+the <strong>main-thread Looper</strong> via the ViewModel's
+<code>combine</code> collector, causing a FATAL crash. The user was
+actively submitting searches (<code>lava_search_submit: mumy</code>,
+then <code>lava_search_submit: prince</code>) when the DAO emitted a
+background update that triggered the observation chain. 5 events / 1
+user in 1.3.10.</p>
+<p><strong>Affected files:</strong></p>
+<ul>
+<li><code>core/credentials/src/main/kotlin/lava/credentials/CredentialsEntryRepositoryImpl.kt</code>
+— <code>observe()</code> now wraps <code>keyProvider()</code> in
+<code>runCatching</code>; locked-ISE → <code>emptyList()</code> + §6.AC
+<code>recordWarning</code>; all other throwables re-thrown</li>
+<li><code>core/credentials/src/test/kotlin/lava/credentials/CredentialsEntryRepositoryImplTest.kt</code>
+— new test
+<code>observe emits empty list when key holder is locked — no crash on search path</code>
+(line 119)</li>
+</ul>
+<p><strong>Fix:</strong> <code>runCatching { keyProvider() }</code>
+guards the key-acquisition step. <code>isLockedKeyHolderError</code>
+predicate (type <code>IllegalStateException</code> + message prefix
+<code>"credentials key holder is locked"</code>) routes the locked state
+to <code>emptyList()</code>. All other exceptions propagate unchanged.
+The locked state is expected and normal; crashing on it was the bug.</p>
+<p><strong>Verification test/challenge:</strong></p>
+<ul>
+<li>Unit: <code>CredentialsEntryRepositoryImplTest</code> —
+<code>observe emits empty list when key holder is locked</code>
+(falsifiable: revert guard → <code>IllegalStateException</code> escapes
+→ test FAILS)</li>
+<li>Challenge: C47 <code>Challenge47CredentialsLockedSearchTest</code> —
+OWED (§6.O clause 2 gate)</li>
+</ul>
+<p><strong>Fix commit:</strong> uncommitted at log creation; ships in
+1.3.11-1073 <strong>Forensic anchor:</strong> Crashlytics issue
+<code>58a1335272bc4ee06595bda6302a670a</code>, 5 FALTALs on Samsung
+Galaxy S23 Ultra / Android 16 during search, version 1.3.10-1067.
+<strong>§6.O closure log:</strong>
+<code>.lava-ci-evidence/crashlytics-resolved/2026-06-24-credentials-keyholder-locked.md</code></p>
+<hr />
+<h2
+id="2026-06-24--p1-lazycolumn-nested-scroll-2nd-site-recurring-fatal-crashlytics-c7c8cccad09f--fix-owed">2026-06-24
+— P1 LazyColumn nested-scroll 2nd site recurring FATAL (Crashlytics
+c7c8cccad09f) — FIX OWED</h2>
+<p><strong>Root cause:</strong> A <code>LazyColumn</code> (or
+<code>LazyVerticalGrid</code>) is rendered inside a parent
+<code>Column</code>/<code>Box</code> with
+<code>Modifier.verticalScroll(rememberScrollState())</code>, giving the
+lazy layout unbounded vertical height. Compose throws
+<code>IllegalStateException: Vertically scrollable component was measured with an infinity maximum height constraints…</code>
+at composition time. This is the §6.Q forbidden antipattern. The first
+site (<code>TrackerSelectorList</code>) was fixed in 1.2.3
+(<code>.lava-ci-evidence/crashlytics-resolved/2026-05-05-tracker-settings-nested-scroll.md</code>),
+but the Crashlytics issue still recurred through 1.3.10-1067
+(2026-06-14), confirming a <strong>second independent site</strong>
+exists. The breadcrumb (<code>screen_view{MainActivity}</code> only)
+does not identify which sub-screen triggered the 1.3.10 event. A §6.Q
+structural scan across all composables written/modified since 1.2.5 is
+required to locate the second site.</p>
+<p><strong>Affected files:</strong> UNCONFIRMED — to be filled in when
+§6.Q scan completes and fix is applied.</p>
+<p><strong>Fix:</strong> OWED. Pattern: replace <code>LazyColumn</code>
+with <code>Column</code> for bounded lists, OR apply
+<code>Modifier.heightIn(max = …)</code> to constrain the lazy layout's
+measurement height.</p>
+<p><strong>Verification test/challenge:</strong></p>
+<ul>
+<li>§6.Q structural regression test — OWED (targeting the identified
+composable)</li>
+<li>Challenge Test driving navigation to the offending screen — OWED
+(§6.O clause 2 gate)</li>
+</ul>
+<p><strong>Fix commit:</strong> OWED — ships in 1.3.11-1073 (pending
+§6.Q scan in this cycle) <strong>Forensic anchor:</strong> Crashlytics
+issue <code>c7c8cccad09f…</code>, FATAL, first seen 1.2.3, last seen
+1.3.10 (2026-06-14), Samsung Galaxy S23 Ultra / Android 16. Prior fix
+for site-1 documented in
+<code>2026-05-05-tracker-settings-nested-scroll.md</code>. <strong>§6.O
+closure log:</strong>
+<code>.lava-ci-evidence/crashlytics-resolved/2026-06-24-lazycolumn-nested-scroll-2nd-site.md</code></p>
+<hr />
+<h2
+id="2026-06-24--p2-topicpagedto-missingfieldexception-for-internet-archive-crawl-topics-crashlytics-8cde0ac208b3">2026-06-24
+— P2 TopicPageDto MissingFieldException for Internet Archive crawl
+topics (Crashlytics 8cde0ac208b3)</h2>
+<p><strong>STATUS: PARTIAL — not fully resolved in 1073 (honest §6.J
+self-audit correction).</strong></p>
+<p><strong>Root cause (corrected after reading the FULL Crashlytics
+subtitle):</strong> the exception lists
+<code>Fields [id, title, author, category, torrentData, commentsPage] are required … but they were missing</code>
+— kotlinx lists the MISSING fields, so the Internet Archive
+<code>WPO-*</code> crawl-topic <code>/topic2</code> response omits
+<strong>ALL SIX</strong> of <code>TopicPageDto</code>'s fields (an
+archived web page, not a torrent topic). Note
+<code>author</code>/<code>category</code>/<code>torrentData</code> are
+nullable but have NO default, so kotlinx still requires the keys
+present. (An earlier draft of this entry wrongly assumed only
+<code>[commentsPage]</code> was missing — that was based on a
+reproduction fixture that did not match the real payload.)</p>
+<p><strong>Affected files (the partial change that DID
+land):</strong></p>
+<ul>
+<li><code>core/network/api/src/main/kotlin/lava/network/dto/topic/TopicPageDto.kt</code>
+— <code>commentsPage</code> given default
+<code>= TopicPageCommentsDto(page = 1, pages = 1, posts = emptyList())</code>
+(line 13)</li>
+<li><code>core/network/api/src/test/kotlin/lava/network/dto/topic/TopicPageDtoSerializationTest.kt</code>
+— new test file (2 tests, for the commentsPage-only case)</li>
+</ul>
+<p><strong>What 1073 does (necessary, NOT sufficient):</strong> the
+<code>commentsPage</code> default removes ONE field from the required
+set. The other five (id, title, author, category, torrentData) remain
+required, so the real IA crawl-topic payload <strong>still
+throws</strong> (now listing 5). The 1073 change therefore does not, by
+itself, stop the reported crash; it is retained as a valid partial
+improvement.</p>
+<p><strong>Why not a rushed blanket fix:</strong> defaulting id/title to
+"" + author/category/torrentData to null would stop the throw but risks
+masking real malformed-topic bugs for normal rutracker/rutor topics
+(§6.J). The proper fix (lava-api-go populating the shape for crawl
+items, OR a dedicated sparse-topic DTO, OR not requesting
+<code>/topic2</code> for IA crawl topics) is a tracked FOLLOW-UP.</p>
+<p><strong>Impact + decision:</strong> NON_FATAL, 1 event, niche (IA
+crawl topics only), not a regression — does NOT block 1073 (which fixes
+the P0 + P1 FATALs + the search timeout). Full fix ships in a later
+build.</p>
+<p><strong>Fix commit (partial):</strong> <code>cb6f76b2</code>
+(commentsPage default only); honest correction in the follow-up commit
+<strong>Forensic anchor:</strong> Crashlytics issue
+<code>8cde0ac208b3…</code>, NON_FATAL, 1 event on Genymobile Pixel 9 /
+Android 16, version 1.3.9-1066, topic
+<code>WPO-20230122202907-crawl897</code>. <strong>§6.O closure
+log:</strong>
+<code>.lava-ci-evidence/crashlytics-resolved/2026-06-24-topicpagedto-missing-field.md</code></p>
+<hr />
+<h2
+id="lva-008--c11c06-nested-navhost-search_input-teardown-crash-activity-scoped-inner-host-lifecycle">LVA-008
+— C11/C06 nested-NavHost <code>search_input</code> teardown crash
+(Activity-scoped inner-host lifecycle)</h2>
+<p><strong>Status:</strong> FIX LANDED in working tree — device-gate
+verification PENDING (see "Verification" below). <strong>Type:</strong>
+Bug · <strong>Severity:</strong> P1 · <strong>Workable item:</strong>
+LVA-008</p>
+<p><strong>Symptom (CONFIRMED on device, 2026-06-08):</strong> the app
+PROCESS crashes at <code>MainActivity</code> destroy with
+<code>java.lang.IllegalStateException: State must be at least 'CREATED' to be moved to 'DESTROYED'</code>
+(top frame
+<code>androidx.lifecycle.LifecycleRegistryKt.checkLifecycleStateTransition</code>,
+<code>LifecycleRegistry.kt:92</code>), on the inner
+<code>search/search_input?query={query}&amp;…</code> NavBackStackEntry.
+Reproduced by <code>Challenge11ArchiveOrgAnonymousSearchTest</code>
+(archive.org anonymous search) AND
+<code>Challenge06DownloadTorrentFileTest</code> (both deep-nav search →
+search_input → search_result → topic). Forensics:
+<code>.lava-ci-evidence/sixth-law-incidents/2026-06-08-navbackstackentry-teardown-crash-2.9.1-incomplete.json</code>.</p>
+<p><strong>Root cause (CONFIRMED):</strong> the bottom-nav graph is
+mounted as a NESTED <code>NavHost</code> from a parent
+<code>NavBackStackEntry</code> (<code>addNestedNavigation</code> in
+<code>app/.../navigation/MobileNavigation.kt</code>). The inner
+<code>NavController</code>'s host <code>LifecycleOwner</code> defaults
+to that parent entry. At activity-destroy the parent entry is driven
+straight to <code>DESTROYED</code>; the inner controller's
+host-lifecycle observer then walks its OWN back stack moving every entry
+to <code>DESTROYED</code> — including a <code>search_input</code> entry
+left <code>INITIALIZED</code> (created by the
+<code>popBackStack(); openSearchResult()</code> pattern + nested
+<code>saveState</code>/<code>restoreState</code>, never composed to
+<code>CREATED</code>). <code>LifecycleRegistry</code> rejects
+<code>INITIALIZED → DESTROYED</code>, killing the process.</p>
+<p><strong>Candidate-fix selection (per incident JSON ranking):</strong>
+prior device-FALSIFIED candidates — nav-compose
+<code>2.9.1 → 2.9.8</code>, <code>LenientTeardownRule</code>
+(uncatchable process death), move-search-to-outer-host, atomic
+<code>popUpTo</code> replace, and the <code>NavTeardownGuard</code>
+ON_STOP pruner (the stranded entry is NOT in the public
+<code>currentBackStack</code> StateFlow, so a public-API walk cannot
+reach it). The TOP-RANKED previously-UNTRIED candidate is the
+inner-NavHost lifecycle scoping
+(<code>next_hypotheses_untried[0]</code>: "Scope/lifecycle of the inner
+<code>rememberNestedNavigationController</code> vs the outer host at
+destroy"). That is what this fix implements.</p>
+<p><strong>Fix:</strong> bind the inner (nested) <code>NavHost</code>'s
+host <code>LifecycleOwner</code> to the Activity's view-tree
+<code>LifecycleOwner</code> instead of the parent
+<code>NavBackStackEntry</code>. The Activity reaches
+<code>CREATED</code> during its own normal lifecycle (driving inner
+entries to at least <code>CREATED</code> before any teardown) and its
+destroy path runs the inner entries through the regular
+<code>RESUMED → … → CREATED → DESTROYED</code> backward pass rather than
+the parent entry's abrupt collapse to <code>DESTROYED</code>. Only
+<code>LocalLifecycleOwner</code> is re-pointed —
+<code>LocalViewModelStoreOwner</code> +
+<code>LocalSavedStateRegistryOwner</code> remain the parent entry, so
+nested-graph ViewModels still clear when the nested destination leaves
+the back stack (no leak / no scope regression).</p>
+<p><strong>Affected files:</strong></p>
+<ul>
+<li><code>core/navigation/src/main/kotlin/lava/navigation/ui/NavigationHost.kt</code>
+— new <code>activityScopedLifecycle: Boolean = false</code> param; when
+true, wraps the <code>NavHost</code> in
+<code>CompositionLocalProvider(LocalLifecycleOwner provides &lt;view-tree owner&gt;)</code>;
+new private <code>rememberActivityScopedLifecycleOwner()</code> using
+<code>LocalView.findViewTreeLifecycleOwner()</code> (same pattern
+already used in <code>core/ui/.../ModalBottomDialog.kt</code>).</li>
+<li><code>core/navigation/src/main/kotlin/lava/navigation/ui/MobileNavigation.kt</code>
+— <code>NestedMobileNavigation</code> passes
+<code>activityScopedLifecycle = true</code> to its
+<code>NavigationHost</code> (the outer <code>MobileNavigation</code>
+host is unchanged → default <code>false</code>, preserving existing
+per-destination lifecycle scoping there).</li>
+</ul>
+<p><strong>Verification:</strong></p>
+<ul>
+<li><strong>Compile (DONE, captured):</strong>
+<code>./gradlew :core:navigation:compileDebugKotlin --max-workers=2 --no-daemon --offline</code>
+→ <code>BUILD SUCCESSFUL in 37s</code> (only pre-existing
+deprecation/context-receiver warnings). The added defaulted param keeps
+all existing <code>NavigationHost</code> callers source-compatible.</li>
+<li><strong>Regression tests = the device Challenges (device-gate
+PENDING):</strong> the load-bearing regression tests are the existing
+on-device <code>Challenge11ArchiveOrgAnonymousSearchTest</code> +
+<code>Challenge06DownloadTorrentFileTest</code>, which crash at teardown
+BEFORE this fix and must pass AFTER it. <strong>No JVM/Robolectric
+regression test is feasible:</strong> this is an androidx
+<code>LifecycleRegistry</code> teardown-ORDERING crash at real
+<code>Activity</code> destroy with a nested <code>NavHost</code> + a
+stranded <code>INITIALIZED</code> entry; the incident JSON proves it is
+even uncatchable by any in-process JUnit <code>TestRule</code> (it is
+process death inside
+<code>ActivityThread.performDestroyActivity</code>). Device-gate
+execution on this macOS host is BLOCKED by §6.AH-debt (container/VM
+emulator path does not yet boot here; no host-direct fallback
+permitted). The fix is therefore landed + compiled but <strong>NOT yet
+device-verified</strong> — it MUST be run on the Genymotion / emulator
+gate-host (C06 + C11) before this entry's status flips to
+"device-verified" and before any distribute. Prior sibling candidates
+were device-FALSIFIED, so this remains a
+hypothesis-with-strong-mechanism until the gate run, NOT a confirmed
+fix.</li>
+</ul>
+<p><strong>Falsifiability rehearsal (§6.N/§6.J, device-gate):</strong> a
+deliberate non-crashing break that the device Challenge would catch —
+revert <code>activityScopedLifecycle = true</code> to <code>false</code>
+in <code>NestedMobileNavigation</code> (the production state this fix
+changes). Expected on-device result: C06 + C11 crash again at
+<code>MainActivity</code> destroy with the identical
+<code>IllegalStateException: State must be at least 'CREATED' to be moved to 'DESTROYED'</code>
+on the inner <code>search_input</code> entry (reverting reproduces the
+exact prior failure). Re-apply <code>true</code>; re-run; the teardown
+crash must not recur. (The rehearsal is device-gated for the same reason
+the fix is: the failure is a real-Activity teardown-ordering event with
+no JVM equivalent.)</p>
+<p><strong>Fix commit:</strong> on the agent worktree branch (see
+<code>git log</code> for SHA; this entry authored in the same commit as
+the fix per §6.T.4). <strong>Forensic anchor / incident JSON (status
+updated):</strong>
+<code>.lava-ci-evidence/sixth-law-incidents/2026-06-08-navbackstackentry-teardown-crash-2.9.1-incomplete.json</code></p>
 </body>
 </html>

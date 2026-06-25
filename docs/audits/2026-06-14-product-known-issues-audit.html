@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-06-14-product-known-issues-audit</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1 id="product-known-issues--field-state-audit--2026-06-14">Product
+Known-Issues + Field-State Audit — 2026-06-14</h1>
+<table>
+<tbody>
+<tr>
+<td>Revision</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Created</td>
+<td>2026-06-14</td>
+</tr>
+<tr>
+<td>Author</td>
+<td>claude-opus-4-8 (READ-ONLY audit subagent)</td>
+</tr>
+<tr>
+<td>HEAD</td>
+<td><code>357f867</code> release(1.3.9/0.2.9)</td>
+</tr>
+<tr>
+<td>Mirrors</td>
+<td>GitHub + GitLab both at <code>357f867</code> (CONVERGED)</td>
+</tr>
+<tr>
+<td>Method</td>
+<td>Crashlytics MCP (<code>crashlytics_get_report</code>), incident
+JSONs, doc grep, <code>git status</code></td>
+</tr>
+</tbody>
+</table>
+<p>This is an evidence-cited audit of the broader PRODUCT known-issues /
+field state / open incidents / doc-sync gaps so the master plan can
+address them. Per §11.4.6: every row is fact-with-evidence or explicitly
+marked UNCONFIRMED.</p>
+<h2 id="prioritized-known-issues-table">Prioritized known-issues
+table</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Issue</th>
+<th>Status</th>
+<th>Severity</th>
+<th>Source-of-truth (evidence)</th>
+<th>Action needed</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><strong>LVA-008 — NavBackStackEntry <code>search_input</code>
+teardown crash</strong></td>
+<td><strong>OPEN</strong> (gate-RED)</td>
+<td><strong>CRITICAL</strong></td>
+<td><code>.lava-ci-evidence/sixth-law-incidents/2026-06-08-navbackstackentry-teardown-crash-2.9.1-incomplete.json</code></td>
+<td>Upstream androidx-navigation defect. 5 app-level fix classes
+device-FALSIFIED (nav-bump, LenientTeardownRule, nested-host move,
+atomic popUpTo, NavTeardownGuard). Real user-impact:
+search-then-activity-destroy (rotate/dark-mode/locale/process-death)
+crashes. Gates C06 (download) + C11 (archiveorg search).
+<strong>Operator decision owed:</strong> (a) file androidx minimal
+repro, OR (b) accept-with-§6.AC-telemetry + distribute.</td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>RuTracker password rotation OWED</strong> (historical
+git-history leak)</td>
+<td><strong>OPEN</strong> (operator action)</td>
+<td><strong>HIGH (security)</strong></td>
+<td><code>2026-05-17-credentials-historical-leak-h-violation.json</code>
++ <code>2026-05-13-tracker-credentials-in-git-history.json</code></td>
+<td>Live surface redacted in <code>d7d4572a</code>; working tree clean
+(<code>git ls-files | grep</code> empty). BUT per §6.H clause 6 the
+<strong>operator must still rotate</strong> the RuTracker
+(+RuTor/Kinozal/NNMClub) password — leaked creds remain valid at
+rutracker.org for anyone who pulled an older commit. History purge
+(force-push, §6.T.3) also OWED pending explicit operator
+authorization.</td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>issue3 search-results video — now PRODUCIBLE, OWED
+re-record</strong></td>
+<td><strong>OPEN</strong> (deliverable)</td>
+<td><strong>MEDIUM</strong></td>
+<td><code>.lava-ci-evidence/video-analysis/2026-06-14-issue-videos-rerecord.md</code>;
+CONTINUATION §0 (search FIXED in 1.3.9-1066)</td>
+<td>The 3 delivered videos (issue1/2/4) analyzer-PASS but were recorded
+against <strong>1.3.8-1065 where search was still broken</strong>, so
+issue3 was honestly NOT produced. Search is now FIXED (1.3.9-1066).
+issue3 (real "prince" results render) is now reproducible and should be
+re-recorded. <strong>None of the 4 issue videos are in
+<code>~/Downloads</code></strong> (only unrelated
+<code>HelixCode_TUI_…mp4</code>). Operator asked repeatedly for the 4
+success-videos in <code>~/Downloads</code> → still UNDELIVERED.</td>
+</tr>
+<tr>
+<td>4</td>
+<td><strong>2 FGS api-app FATAL issues still firing</strong>
+(<code>9ba8502e…</code> + <code>b9baeaede…</code>)</td>
+<td><strong>OPEN</strong> (Crashlytics)</td>
+<td><strong>MEDIUM</strong></td>
+<td><code>crashlytics_get_report</code> topIssues, app
+<code>456475e2…</code></td>
+<td>Both FATAL, <code>firstSeen=lastSeen=0.2.6</code>,
+<strong>SIGNAL_FRESH</strong> (first appeared in window).
+<code>ForegroundServiceStartNotAllowedException</code> /
+<code>ForegroundServiceDidNotStopInTimeException</code> on
+<code>ApiEngineService</code> dataSync. Closure logs exist
+(<code>2026-06-14-apiapp-fgs-datasync-budget.md</code>). Per §6.O: need
+console close-mark once the 0.2.9 fix is confirmed in the field.
+<strong>No 0.2.9-14 events yet</strong> (newest api-app field version is
+0.2.6-10) → cannot yet close-mark; field-confirm first.</td>
+</tr>
+<tr>
+<td>5</td>
+<td>ProviderCatalogRepository HTTP-401 NON_FATAL
+(<code>47b000d5…</code>)</td>
+<td>OPEN (Crashlytics, stale ver)</td>
+<td>LOW</td>
+<td><code>crashlytics_get_report</code>; closure
+<code>2026-06-13-providers-catalogue-401-auth-gated.md</code></td>
+<td>6 events / 1 user, <code>firstSeen 1.3.4 / lastSeen 1.3.5</code>.
+Auth-gated catalogue 401 — addressed by the 1.3.9 key-handoff fix.
+Field-confirm on 1.3.9 then close-mark.</td>
+</tr>
+<tr>
+<td>6</td>
+<td>OkHttp CertPath NON_FATAL (<code>042b9b61…</code>)</td>
+<td>OPEN (Crashlytics, stale ver)</td>
+<td>LOW</td>
+<td><code>crashlytics_get_report</code></td>
+<td>1 event, <code>1.3.3</code> only. Self-signed TLS trust-anchor;
+expected for LAN self-signed cert. Monitor; likely benign.</td>
+</tr>
+<tr>
+<td>7</td>
+<td>§6.X / §6.AH darwin-arm64 emulator gap (no in-container
+KVM/HVF)</td>
+<td>OPEN (debt)</td>
+<td>MEDIUM (process)</td>
+<td><code>2026-05-13-emulator-container-darwin-arm64-gap.json</code>;
+§6.AH-debt</td>
+<td>Container/VM emulator path does not boot on this macOS host. Gate
+runs use Genymotion VM (§6.AH path). Standing debt; not a
+field-crash.</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Genymotion surface-render timeout (PENDING_FORENSICS)</td>
+<td>RESOLVED-with-workaround</td>
+<td>LOW (env)</td>
+<td><code>2026-06-09-genymotion-surface-render-timeout.json</code></td>
+<td>Resolved by waking VM screen (<code>KEYCODE_WAKEUP</code> +
+<code>svc power stayon true</code>). PENDING_FORENSICS only on the
+durable GPU-accel fix; operational workaround in place.</td>
+</tr>
+<tr>
+<td>9</td>
+<td>emulator-boot-offline (2026-06-03) PENDING_FORENSICS</td>
+<td>OPEN (forensics)</td>
+<td>LOW (env)</td>
+<td><code>2026-06-03-emulator-boot-offline.json</code></td>
+<td>Host-direct+HVF macOS emulator wedge that birthed §6.AH. Superseded
+operationally by Genymotion path.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="field-state-summary-crashlytics">Field-state summary
+(Crashlytics)</h2>
+<ul>
+<li><strong>MCP available + authenticated</strong> —
+<code>crashlytics_get_report</code> returned live data.</li>
+<li>The appId <code>1:815513478335:android:456475e2ef4039d8cfd20a</code>
+is a <strong>single combined Crashlytics app</strong> receiving BOTH
+client (<code>1.3.x</code>) AND api-app (<code>0.2.x</code> /
+<code>digital.vasic.lava.api</code>) events. The <code>.api</code>
+(<code>d57b960e…</code>) and <code>.api.dev</code>
+(<code>2932451e…</code>) appIds returned <strong>no results</strong>
+(empty) — telemetry routes to the combined app.</li>
+<li><strong>Shipped builds 1.3.9-1066 / 0.2.9-14 (and 1067/15) have ZERO
+field events</strong> in the last 7 days — newest field versions are
+<strong>client 1.3.5-1062</strong> and <strong>api-app
+0.2.6-10</strong>. The shipped fixes have NOT yet been exercised by
+field users. <strong>No OPEN crash is attributed to the shipped
+versions</strong> — all OPEN issues are on older versions (≤1.3.5 /
+≤0.2.6).</li>
+<li>The 2 FGS FATALs (#4) are the only FATAL issues; both stale at
+0.2.6.</li>
+</ul>
+<h2 id="6h-credential-state-owed-operator-actions">§6.H credential state
+(OWED operator actions)</h2>
+<table>
+<thead>
+<tr>
+<th>Leak</th>
+<th>Committed?</th>
+<th>Rotated?</th>
+<th>Owed</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>RuTracker <code>nobody85perfect</code>/<code>ironman1985</code>
+(+RuTor/Kinozal/NNMClub)</td>
+<td>Was in git history; redacted <code>d7d4572a</code>; working tree
+clean</td>
+<td><strong>NO — rotation OWED</strong></td>
+<td>Operator: rotate passwords (§6.H cl.6). Optional: history purge +
+force-push (§6.T.3 auth).</td>
+</tr>
+<tr>
+<td>Firebase CI token echo (67th cycle)</td>
+<td>Never committed (transcript-only)</td>
+<td><strong>YES — RESOLVED</strong></td>
+<td>None (operator rotated in 68th cycle).</td>
+</tr>
+</tbody>
+</table>
+<h2 id="doc-sync--6s-state">Doc-sync / §6.S state</h2>
+<ul>
+<li><code>docs/CONTINUATION.md</code> §0 <strong>Last updated:
+2026-06-14</strong> — <strong>CURRENT</strong> with HEAD
+(<code>357f867</code>, 2026-06-14). Compliant.</li>
+<li><code>CHANGELOG.md</code> has entries for the distributed
+<code>1.3.9-1066</code> + <code>0.2.9-14</code>. The §6.Y
+post-distribute bump to <code>1067 / 15</code> correctly has
+<strong>no</strong> CHANGELOG entry (bump-first, nothing published at
+1067/15 yet) — §6.Y/§6.P compliant.</li>
+<li>No CLAUDE.md ↔︎ AGENTS.md ↔︎ QWEN.md drift surfaced in this pass (not
+exhaustively diffed — UNCONFIRMED beyond §0/CHANGELOG).</li>
+</ul>
+<h2 id="working-tree-noise-git-status--18-entries">Working-tree noise
+(<code>git status</code> — 18 entries)</h2>
+<table>
+<thead>
+<tr>
+<th>Path</th>
+<th>Kind</th>
+<th>Recommendation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>core/apiengine/src/main/resources/api-source.hash</code></td>
+<td>1-line regen drift (M)</td>
+<td>Commit with next build or <code>git checkout</code> if spurious</td>
+</tr>
+<tr>
+<td><code>submodules/tracker_sdk</code></td>
+<td>submodule pointer moved (M)</td>
+<td>Decide: intended pin bump (commit) vs accidental (reset) — pins are
+frozen by default per Decoupled-Reusable-Arch</td>
+</tr>
+<tr>
+<td><code>.lava-ci-evidence/stress-chaos/jackett/*.json</code> (5)</td>
+<td>§11.4.85 regen noise (M, 16±/16∓)</td>
+<td>Commit or revert; non-load-bearing churn</td>
+</tr>
+<tr>
+<td><code>.lava-ci-evidence/challenge-video/2026…/</code> (6 dirs,
+untracked)</td>
+<td>raw challenge recordings</td>
+<td>Curate-evidence-only per §11.4.128 (raw should be gitignored)</td>
+</tr>
+<tr>
+<td><code>.lava-ci-evidence/video-analysis/2026-06-14-rerecord/*.mp4</code>
+(4, untracked)</td>
+<td>raw issue videos</td>
+<td>Same — curate, don't commit raw mp4</td>
+</tr>
+<tr>
+<td><code>.lava-ci-evidence/search-verification/2026-06-14-results-screen.png</code>
+(untracked)</td>
+<td>search-fix proof screenshot</td>
+<td>Curated evidence — may commit</td>
+</tr>
+</tbody>
+</table>
+<h2 id="top-operator-owed-actions-for-the-master-plan">Top operator-owed
+actions (for the master plan)</h2>
+<ol type="1">
+<li><strong>DECIDE LVA-008</strong> (#1) — accept-with-§6.AC-telemetry +
+distribute, OR file androidx repro. This is the single CRITICAL gate
+blocker.</li>
+<li><strong>ROTATE RuTracker (+RuTor/Kinozal/NNMClub)
+credentials</strong> (#2) — standing §6.H clause-6 obligation, still
+OWED.</li>
+<li><strong>RE-RECORD issue3 search-results video on 1.3.9-1066 +
+DELIVER all 4 to <code>~/Downloads</code></strong> (#3) — search now
+works; the deliverable is producible and still undelivered.</li>
+<li><strong>Field-confirm + console close-mark the 2 FGS FATALs + the
+401 NON_FATAL</strong> (#4/#5) once 0.2.9/1.3.9 reach the field (no
+events yet).</li>
+</ol>
+</body>
+</html>

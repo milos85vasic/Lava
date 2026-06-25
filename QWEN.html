@@ -216,5 +216,22 @@ running any test.</p>
 Code has the codegraph MCP server wired via .qwen/settings.json — prefer
 its codegraph_search and codegraph_context tools over blind file
 scanning.</p>
+<h2 id="universal-action-prefix-recognition-layer-1-114140">Universal
+Action-Prefix Recognition (LAYER 1, §11.4.140)</h2>
+<p>When a user prompt's FIRST non-blank line starts with an uppercase
+action token followed by <code>::</code> (grammar
+<code>^([A-Z][A-Z0-9_]*)\s*::\s</code>, or the namespaced
+<code>PREFIX::ACTION ::</code> form): look the token up in
+<code>constitution/actions/registry.yaml</code> (or
+<code>$HELIX_ACTION_REGISTRY</code>); if registered, REPLACE the
+<code>ACTION_NAME ::</code> prefix with that action's
+<code>expansion</code> text, apply its <code>rules</code>, and execute
+the REMAINDER of the prompt under the expanded instruction
+(expand-then-rescan). Built-in: <code>BACKGROUND ::</code> → run the
+rest in the background, in parallel with all main work streams,
+subagent-driven, with rock-solid anti-bluff captured evidence. Unknown
+tokens are not actions — execute verbatim. The registry is the single
+source of truth (add actions as rows, not by editing this block). See
+root <code>CLAUDE.md</code> §6.AJ. Classification: universal.</p>
 </body>
 </html>

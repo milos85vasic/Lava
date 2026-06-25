@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>magnet-label-honesty-audit-2026-06-08</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1
+id="6e-capability-honesty-audit--magnet--download-label-2026-06-08">§6.E
+Capability-Honesty Audit — magnet &amp; download-label (2026-06-08)</h1>
+<p>Scope: three §6.E (Capability Honesty) questions across
+<code>core/tracker/{rutracker,rutor,gutenberg}</code>. Method: read
+descriptor capabilities, the feature impls they map to, the
+use-cases/parsers behind them, and the tests that pin the contract.
+Vocabulary follows §11.4.6 — claims are stated as fact with
+<code>file:line</code> evidence, or marked
+<code>UNCONFIRMED:</code>.</p>
+<p>All <code>file:line</code> references are against the working tree at
+audit time.</p>
+<hr />
+<h2 id="w4a--rutracker-sync-vs-async-magnet--bluff-confirmed">W4a —
+RuTracker sync vs async magnet → <strong>BLUFF (CONFIRMED)</strong></h2>
+<h3 id="declared-capability">Declared capability</h3>
+<p><code>RuTrackerDescriptor.capabilities</code> declares
+<code>TrackerCapability.MAGNET_LINK</code>:</p>
+<ul>
+<li><code>core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker/RuTrackerDescriptor.kt:36</code></li>
+</ul>
+<p><code>RuTrackerClient.getFeature(DownloadableTracker::class)</code>
+resolves to a non-null <code>RuTrackerDownload</code> (gated on
+<code>TORRENT_DOWNLOAD</code>, which is also declared):</p>
+<ul>
+<li><code>core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker/RuTrackerClient.kt:60</code></li>
+</ul>
+<p>So <code>MAGNET_LINK</code> is reachable through
+<code>DownloadableTracker.getMagnetLink</code>.</p>
+<h3 id="actual-code-behavior">Actual code behavior</h3>
+<p><code>DownloadableTracker.getMagnetLink</code> is documented as a
+<strong>synchronous</strong> surface that returns a magnet when one is
+available without an HTTP fetch, else null:</p>
+<ul>
+<li><code>core/tracker/api/src/main/kotlin/lava/tracker/api/feature/DownloadableTracker.kt:8-9</code></li>
+</ul>
+<p><code>RuTrackerDownload.getMagnetLink</code> delegates to
+<code>GetMagnetLinkUseCase</code>:</p>
+<ul>
+<li><code>core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker/feature/RuTrackerDownload.kt:28</code></li>
+</ul>
+<p><code>GetMagnetLinkUseCase.invoke</code> <strong>unconditionally
+returns null</strong> — it is a stub:</p>
+<ul>
+<li><code>core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker/domain/GetMagnetLinkUseCase.kt:13</code>
+→ <code>operator fun invoke(id: String): String? = null</code></li>
+</ul>
+<p>The production wiring uses exactly this stub (no cache, no alternate
+path):</p>
+<ul>
+<li><code>core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker/RuTrackerSubgraphBuilder.kt:94</code>
+→ <code>val getMagnetLink = GetMagnetLinkUseCase()</code></li>
+<li><code>core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker/RuTrackerSubgraphBuilder.kt:111</code>
+→
+<code>val download = RuTrackerDownload(getTorrentFile, getMagnetLink, tokenProvider)</code></li>
+</ul>
+<p>Therefore for EVERY id, on the production stack,
+<code>getMagnetLink</code> returns null.</p>
+<h3
+id="why-this-is-a-bluff-and-not-merely-an-honest-synchronous-absence">Why
+this is a bluff (and NOT merely an "honest synchronous absence")</h3>
+<p>RuTracker DOES carry the magnet — the production mappers populate
+<code>TorrentItem.magnetUri</code> from the parsed
+<code>magnetLink</code> for both topic and search surfaces:</p>
+<ul>
+<li>topic:
+<code>core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker/mapper/TopicMapper.kt:121</code>
+→ <code>magnetUri = data?.magnetLink</code></li>
+<li>search/torrent DTO:
+<code>core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker/mapper/RuTrackerDtoMappers.kt:305</code>
+and <code>:155</code></li>
+<li>the parsers extract it:
+<code>domain/ParseTorrentUseCase.kt:22</code>,
+<code>domain/ParseTopicPageUseCase.kt:56</code></li>
+</ul>
+<p>This is the <strong>identical situation</strong> RuTor was in before
+its W4b fix: the magnet is genuinely parsed and surfaced through
+topic/search, but the synchronous <code>getMagnetLink</code> ignores it
+and returns a hardcoded null. RuTor closed the gap with a
+process-lifetime <code>RuTorMagnetCache</code> populated on topic/search
+fetch (see W4b). RuTracker has NOT adopted that pattern — its
+<code>getMagnetLink</code> can never return non-null for any id under
+any sequence of user actions.</p>
+<p>A capability that is declared but whose only reachable implementation
+is a hardcoded <code>null</code> is the canonical §6.E bluff:
+"capability declared ⇒ feature interface returned ⇒ at least one
+real-stack test exists for the capability" (root CLAUDE.md §6.E). There
+is no real-stack test in which RuTracker's <code>getMagnetLink</code>
+returns a real magnet, because it cannot.</p>
+<h3
+id="verdict-bluff-magnet_link-is-declared-but-getmagnetlink-returns-null-for-all-ids">Verdict:
+<strong>BLUFF.</strong> <code>MAGNET_LINK</code> is declared but
+<code>getMagnetLink</code> returns <code>null</code> for all ids.</h3>
+<h3
+id="recommended-action-orchestrator--production-code-fix-required">Recommended
+action (orchestrator — production-code fix required)</h3>
+<p>Mirror the RuTor fix exactly:</p>
+<ol type="1">
+<li>Add a <code>RuTrackerMagnetCache</code> (or reuse a shared
+<code>MagnetCache</code>) — process-lifetime
+<code>ConcurrentHashMap&lt;String,String&gt;</code> keyed by rutracker
+<code>torrentId</code>.</li>
+<li>Populate it from the real parse path: in
+<code>RuTrackerTopic.getTopic</code> /
+<code>RuTrackerSearch.search</code>, call
+<code>cache.put(item.torrentId, item.magnetUri)</code> after mapping
+(the magnet is already present at <code>TopicMapper.kt:121</code> /
+<code>SearchPageMapper.kt:70</code>).</li>
+<li>Replace the <code>GetMagnetLinkUseCase</code> stub so
+<code>RuTrackerDownload.getMagnetLink</code> reads the cache (honest
+null only when no fetch has surfaced the id).</li>
+<li>Wire the shared cache instance through
+<code>RuTrackerSubgraphBuilder</code> (singleton-equivalent, one
+instance shared by topic/search/download — same as RuTor's clone
+path).</li>
+</ol>
+<p>Alternative (if the project decides RuTracker genuinely cannot expose
+a sync magnet): DROP <code>TrackerCapability.MAGNET_LINK</code> from
+<code>RuTrackerDescriptor.capabilities</code> (the LF-5 precedent at
+<code>RuTrackerDescriptor.kt:18-27</code> already did this for
+UPLOAD/USER_PROFILE). The cache fix is preferred because the data
+demonstrably exists.</p>
+<h3
+id="falsifiable-test-written-fails-now-passes-after-the-cache-fix">Falsifiable
+test written (FAILS now, PASSES after the cache fix)</h3>
+<p><code>core/tracker/rutracker/src/test/kotlin/lava/tracker/rutracker/feature/RuTrackerMagnetExposureTest.kt</code></p>
+<hr />
+<h2 id="w4b--rutor-sync-magnet--honest-confirmed">W4b — RuTor sync
+magnet → <strong>HONEST (CONFIRMED)</strong></h2>
+<h3 id="declared-capability-1">Declared capability</h3>
+<p><code>RuTorDescriptor.capabilities</code> declares
+<code>TrackerCapability.MAGNET_LINK</code>:</p>
+<ul>
+<li><code>core/tracker/rutor/src/main/kotlin/lava/tracker/rutor/RuTorDescriptor.kt:37</code></li>
+</ul>
+<h3
+id="actual-code-behavior--the-sync-path-genuinely-returns-a-parsed-magnet">Actual
+code behavior — the sync path genuinely returns a parsed magnet</h3>
+<p><code>RuTorDownload.getMagnetLink</code> reads from
+<code>RuTorMagnetCache</code>:</p>
+<ul>
+<li><code>core/tracker/rutor/src/main/kotlin/lava/tracker/rutor/feature/RuTorDownload.kt:43</code>
+→
+<code>override fun getMagnetLink(id: String): String? = magnetCache.get(id)</code></li>
+</ul>
+<p>The cache is populated by the REAL production topic/search fetch
+paths from genuinely-parsed <code>magnetUri</code>:</p>
+<ul>
+<li>topic:
+<code>core/tracker/rutor/src/main/kotlin/lava/tracker/rutor/feature/RuTorTopic.kt:64</code>
+→ <code>magnetCache.put(id, baseDetail.torrent.magnetUri)</code></li>
+<li>search:
+<code>core/tracker/rutor/src/main/kotlin/lava/tracker/rutor/feature/RuTorSearch.kt:65</code>
+→
+<code>result.items.forEach { magnetCache.put(it.torrentId, it.magnetUri) }</code></li>
+<li>cache impl:
+<code>core/tracker/rutor/src/main/kotlin/lava/tracker/rutor/magnet/RuTorMagnetCache.kt:37-43</code>
+(<code>put</code> ignores blanks; <code>get</code> returns the stored
+magnet or null)</li>
+</ul>
+<p>So after a user opens a topic OR runs a search that surfaces an id,
+<code>getMagnetLink(id)</code> returns the exact parsed
+<code>magnet:?xt=urn:btih:...</code> string — not a fabricated value,
+and an honest <code>null</code> only when no fetch has surfaced that id
+(matching the <code>DownloadableTracker</code> contract at
+<code>DownloadableTracker.kt:8</code>).</p>
+<h3 id="test-that-proves-it">Test that proves it</h3>
+<p><code>core/tracker/rutor/src/test/kotlin/lava/tracker/rutor/feature/RuTorMagnetExposureTest.kt</code></p>
+<ul>
+<li><code>getMagnetLink exposes the parsed magnet after the topic page surfaces it</code>
+(lines 57-94): drives real <code>RuTorTopic.getTopic</code> → asserts
+<code>download.getMagnetLink</code> equals
+<code>detail.torrent.magnetUri</code> and starts with
+<code>magnet:?xt=urn:btih:</code>.</li>
+<li><code>getMagnetLink exposes the parsed magnet after a search row surfaces it</code>
+(lines 96-124): same via real <code>RuTorSearch.search</code>.</li>
+<li><code>getMagnetLink returns null for an id never surfaced (honest absence)</code>
+(lines 126-134).</li>
+<li>Carries a documented FALSIFIABILITY REHEARSAL (lines 36-39):
+reverting <code>RuTorDownload.getMagnetLink</code> to
+<code>return null</code> fails the first two blocks.</li>
+</ul>
+<h3
+id="verdict-honest-declaration-matches-reality-a-real-stack-test-pins-it">Verdict:
+<strong>HONEST.</strong> Declaration matches reality; a real-stack test
+pins it.</h3>
+<h3 id="recommended-action">Recommended action</h3>
+<p>None. The honest contract is already pinned by
+<code>RuTorMagnetExposureTest</code>. No production fix needed. (No new
+regression test written — the existing one is sufficient and already
+covers the sync magnet contract end-to-end.)</p>
+<hr />
+<h2 id="w3--gutenberg-download-label--honest-confirmed">W3 — Gutenberg
+download label → <strong>HONEST (CONFIRMED)</strong></h2>
+<h3 id="declared-capability-2">Declared capability</h3>
+<p><code>GutenbergDescriptor.capabilities</code> declares ONLY
+<code>SEARCH</code>, <code>BROWSE</code>, <code>TOPIC</code>:</p>
+<ul>
+<li><code>core/tracker/gutenberg/src/main/kotlin/lava/tracker/gutenberg/GutenbergDescriptor.kt:32-38</code></li>
+<li><code>TORRENT_DOWNLOAD</code> and <code>MAGNET_LINK</code> are
+intentionally ABSENT, documented at
+<code>GutenbergDescriptor.kt:15-25</code> and <code>:36-37</code>.</li>
+</ul>
+<h3
+id="actual-code-behavior-matches-the-reality-http-e-books-not-torrent">Actual
+code behavior matches the reality (HTTP e-books, not .torrent)</h3>
+<ul>
+<li><code>GutenbergDownload.downloadTorrentFile</code> fetches book
+metadata and downloads the best EPUB/text/HTML format over HTTP — it
+does NOT produce a <code>.torrent</code>:
+<code>core/tracker/gutenberg/src/main/kotlin/lava/tracker/gutenberg/feature/GutenbergDownload.kt:29-39</code></li>
+<li><code>GutenbergDownload.getMagnetLink</code> returns null (Gutenberg
+has no magnets): <code>GutenbergDownload.kt:41</code></li>
+<li>Because <code>TORRENT_DOWNLOAD</code> is undeclared,
+<code>GutenbergClient.getFeature(DownloadableTracker::class)</code>
+returns null — the HTTP-download impl is wired but NOT exposed through
+the torrent-download surface. This is the documented "mirroring the
+Internet Archive provider" posture
+(<code>GutenbergDescriptor.kt:22-24</code>).</li>
+</ul>
+<h3 id="test-that-proves-it-1">Test that proves it</h3>
+<p><code>core/tracker/gutenberg/src/test/kotlin/lava/tracker/gutenberg/GutenbergCapabilityHonestyTest.kt</code></p>
+<ul>
+<li><code>every declared capability resolves to a non-null feature</code>
+(lines 65-88).</li>
+<li><code>download capability is honest about the artifact it produces</code>
+(lines 90-143): asserts that because <code>TORRENT_DOWNLOAD</code> is
+NOT declared, <code>getFeature(DownloadableTracker)</code> MUST be null
+— so a consumer never receives a non-<code>.torrent</code> artifact
+through the torrent-download surface (lines 128-142). The
+historical-bluff path (declare TORRENT_DOWNLOAD, return EPUB bytes) is
+asserted against by the bencode <code>'d'</code> first-byte check (lines
+122-127).</li>
+</ul>
+<h3
+id="verdict-honest-the-labelcapability-matches-reality-no-torrent-claimed-pinned-by">Verdict:
+<strong>HONEST.</strong> The label/capability matches reality (no
+<code>.torrent</code> claimed); pinned by</h3>
+<p><code>GutenbergCapabilityHonestyTest</code>.</p>
+<h3 id="recommended-action-1">Recommended action</h3>
+<p>None. The TORRENT_DOWNLOAD→correct-label fix has landed and is pinned
+by the existing honesty test. No production fix needed. (No new
+regression test written — existing coverage is sufficient.)</p>
+<hr />
+<h2 id="summary">Summary</h2>
+<table>
+<thead>
+<tr>
+<th>Q</th>
+<th>Provider</th>
+<th>Declared</th>
+<th>Reality</th>
+<th>Verdict</th>
+<th>Production fix needed</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>W4a</td>
+<td>RuTracker</td>
+<td><code>MAGNET_LINK</code></td>
+<td><code>getMagnetLink</code> returns <code>null</code> for all ids
+(stub), despite magnet being parsed &amp; present in mappers</td>
+<td><strong>BLUFF</strong></td>
+<td><strong>YES</strong> — adopt the RuTor cache pattern</td>
+</tr>
+<tr>
+<td>W4b</td>
+<td>RuTor</td>
+<td><code>MAGNET_LINK</code></td>
+<td><code>getMagnetLink</code> returns the genuinely-parsed magnet via
+cache populated on topic/search fetch</td>
+<td><strong>HONEST</strong></td>
+<td>No</td>
+</tr>
+<tr>
+<td>W3</td>
+<td>Gutenberg</td>
+<td><code>SEARCH/BROWSE/TOPIC</code> (no
+<code>TORRENT_DOWNLOAD</code>/<code>MAGNET_LINK</code>)</td>
+<td>HTTP e-books, download impl wired but unexposed via getFeature</td>
+<td><strong>HONEST</strong></td>
+<td>No</td>
+</tr>
+</tbody>
+</table>
+<p>Only <strong>W4a (RuTracker MAGNET_LINK)</strong> requires a
+production-code fix by the orchestrator. The falsifiable test for it is
+written and will FAIL against the current stub and PASS once the cache
+fix lands.</p>
+</body>
+</html>

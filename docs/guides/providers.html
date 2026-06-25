@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>providers</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1 id="lava-provider-guide">Lava Provider Guide</h1>
+<!-- §11.4.44 revision header -->
+
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Document</td>
+<td><code>docs/guides/providers.md</code></td>
+</tr>
+<tr>
+<td>Revision</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Last updated</td>
+<td>2026-06-08</td>
+</tr>
+<tr>
+<td>Status</td>
+<td>Current</td>
+</tr>
+<tr>
+<td>Scope</td>
+<td>User-facing guide to every provider Lava ships, its auth, its
+capabilities, and how downloads work</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>Every claim below is grounded in the real <code>*Descriptor.kt</code>
+and magnet-cache source files cited inline. Where a capability is
+declared on a descriptor but not yet exposed through the SDK, that gap
+is called out explicitly (no guessing — §11.4.6).</p>
+</blockquote>
+<hr />
+<h2 id="what-a-provider-is-in-lava">What a "provider" is in Lava</h2>
+<p>Lava is a multi-tracker client. Each supported site is a
+<strong>provider</strong> described by a <code>TrackerDescriptor</code>
+(the contract lives in
+<code>core/tracker/api/src/main/kotlin/lava/tracker/api/TrackerDescriptor.kt</code>).
+A descriptor declares:</p>
+<ul>
+<li><code>trackerId</code> / <code>displayName</code> — the stable id
+and the label you see in the app.</li>
+<li><code>baseUrls</code> — the primary site plus mirrors the SDK can
+fail over to.</li>
+<li><code>capabilities</code> — the exact set of features the SDK will
+resolve for that provider. Per <strong>Capability Honesty
+(constitutional clause §6.E)</strong> a declared capability MUST map to
+a real, working feature — a provider never advertises something it
+cannot actually do.</li>
+<li><code>authType</code> — how (or whether) you log in:
+<code>CAPTCHA_LOGIN</code>, <code>FORM_LOGIN</code>, or
+<code>NONE</code>.</li>
+<li><code>verified</code> — whether the provider's end-to-end flow has
+passed a real-device Challenge Test (§6.G).
+<code>verified = false</code> means the provider is wired but its full
+user flow has a known gap (see the per-provider notes).</li>
+</ul>
+<hr />
+<h2 id="capability-matrix">Capability matrix</h2>
+<p>Read directly from the six descriptor files. Legend: ✅ = declared
+and resolved through the SDK; ⚠️ = wired in code but
+<strong>not</strong> exposed via the descriptor (honest absence per
+§6.E); ✘ = not applicable to that provider.</p>
+<table>
+<thead>
+<tr>
+<th>Capability</th>
+<th>RuTracker</th>
+<th>RuTor</th>
+<th>Kinozal</th>
+<th>NNM-Club</th>
+<th>Internet Archive</th>
+<th>Project Gutenberg</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Auth type</td>
+<td><code>CAPTCHA_LOGIN</code></td>
+<td><code>FORM_LOGIN</code></td>
+<td><code>FORM_LOGIN</code></td>
+<td><code>FORM_LOGIN</code></td>
+<td><code>NONE</code></td>
+<td><code>NONE</code></td>
+</tr>
+<tr>
+<td>SEARCH</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>BROWSE</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>FORUM</td>
+<td>✅</td>
+<td>✘</td>
+<td>✘</td>
+<td>⚠️ not wired</td>
+<td>✅</td>
+<td>✘</td>
+</tr>
+<tr>
+<td>TOPIC</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>COMMENTS</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✘</td>
+<td>✘</td>
+</tr>
+<tr>
+<td>FAVORITES</td>
+<td>✅</td>
+<td>✘</td>
+<td>✘</td>
+<td>⚠️ no endpoint</td>
+<td>✘</td>
+<td>✘</td>
+</tr>
+<tr>
+<td>TORRENT_DOWNLOAD (<code>.torrent</code>)</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✘ HTTP only</td>
+<td>✘ HTTP only</td>
+</tr>
+<tr>
+<td>MAGNET_LINK</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✘</td>
+<td>✘</td>
+</tr>
+<tr>
+<td>RSS</td>
+<td>✘</td>
+<td>✅</td>
+<td>✘</td>
+<td>✘</td>
+<td>✘</td>
+<td>✘</td>
+</tr>
+<tr>
+<td>AUTH_REQUIRED</td>
+<td>✅</td>
+<td>✅ (optional)</td>
+<td>✅</td>
+<td>✅</td>
+<td>✘</td>
+<td>✘</td>
+</tr>
+<tr>
+<td>Anonymous browse/search</td>
+<td>✘</td>
+<td>✅</td>
+<td>✘</td>
+<td>✘</td>
+<td>✅ (implicit)</td>
+<td>✅ (implicit)</td>
+</tr>
+<tr>
+<td><code>verified</code> (Challenge-tested flow)</td>
+<td>✅ true</td>
+<td>✅ true</td>
+<td>❌ false</td>
+<td>❌ false</td>
+<td>✅ true</td>
+<td>✅ true</td>
+</tr>
+<tr>
+<td>Text encoding</td>
+<td>Windows-1251</td>
+<td>UTF-8</td>
+<td>windows-1251</td>
+<td>windows-1251</td>
+<td>UTF-8</td>
+<td>UTF-8</td>
+</tr>
+</tbody>
+</table>
+<p>Sources: <code>RuTrackerDescriptor.kt</code>,
+<code>RuTorDescriptor.kt</code>, <code>KinozalDescriptor.kt</code>,
+<code>NnmclubDescriptor.kt</code>, <code>ArchiveOrgDescriptor.kt</code>,
+<code>GutenbergDescriptor.kt</code> (all under
+<code>core/tracker/&lt;id&gt;/src/main/kotlin/lava/tracker/&lt;id&gt;/</code>).</p>
+<hr />
+<h2 id="per-provider-detail">Per-provider detail</h2>
+<h3 id="rutrackerorg-rutracker">RuTracker.org
+(<code>rutracker</code>)</h3>
+<ul>
+<li><strong>What it is:</strong> the largest Russian torrent tracker.
+Primary <code>https://rutracker.org</code>, with
+<code>rutracker.net</code> and <code>rutracker.cr</code> as failover
+mirrors.</li>
+<li><strong>Auth:</strong> <code>CAPTCHA_LOGIN</code> — login can
+present a CAPTCHA you must solve. This is the only provider with CAPTCHA
+in its capability set.</li>
+<li><strong>What you can do:</strong> search, browse forums
+(<code>FORUM</code>), open topics, read comments, keep favorites, and
+download both <code>.torrent</code> files and magnet links.</li>
+<li><strong>API support:</strong> RuTracker is the one provider with a
+working route family in the <code>lava-api-go</code> backend today
+(<code>apiSupported = true</code>; see the
+<code>RuTrackerDescriptor.kt</code> Phase-1 hotfix note).</li>
+<li><strong>Verified:</strong> yes — Challenge Tests C1, C2, C4, C5, C7,
+C8.</li>
+<li><strong>Note:</strong> <code>UPLOAD</code> and
+<code>USER_PROFILE</code> were intentionally dropped from the descriptor
+because no SDK feature interface backs them (clause §6.E); the legacy
+upload/profile plumbing still ships but is not advertised.</li>
+</ul>
+<h3 id="rutorinfo-rutor">RuTor.info (<code>rutor</code>)</h3>
+<ul>
+<li><strong>What it is:</strong> an anonymous-friendly Russian tracker.
+Mirrors include <code>rutor.info</code>, <code>rutor.is</code>, the
+<code>www.</code> variants, and an IPv6-only <code>6tor.org</code>.</li>
+<li><strong>Auth:</strong> <code>FORM_LOGIN</code> (a plain form POST —
+no CAPTCHA). <code>AUTH_REQUIRED</code> is declared so the SDK can
+expose optional actions like adding a comment, but <strong>search and
+browse work without logging in</strong>
+(<code>supportsAnonymous = true</code>).</li>
+<li><strong>What you can do:</strong> search, browse categories (no
+nested forum tree — <code>FORUM</code> is intentionally absent), open
+topics, read/add comments, RSS, and download <code>.torrent</code> +
+magnet.</li>
+<li><strong>Verified:</strong> yes — Challenge Tests C1, C3, C4, C6, C7,
+C8.</li>
+</ul>
+<h3 id="kinozaltv-kinozal">Kinozal.tv (<code>kinozal</code>)</h3>
+<ul>
+<li><strong>What it is:</strong> a Russian movie/media tracker. Mirrors
+<code>kinozal.tv</code>, <code>kinozal.me</code>.</li>
+<li><strong>Auth:</strong> <code>FORM_LOGIN</code>.</li>
+<li><strong>What you can do:</strong> search, browse, open topics, read
+comments, download <code>.torrent</code> + magnet.</li>
+<li><strong>Verified:</strong> <strong>no</strong>
+(<code>verified = false</code>). The descriptor records a known
+post-login navigation gap on the onboarding screen
+(<code>.lava-ci-evidence/sixth-law-incidents/2026-05-04-onboarding-navigation.json</code>).
+Treat Kinozal as wired-but-not-yet-fully-verified end to end.</li>
+</ul>
+<h3 id="nnm-club-nnmclub">NNM-Club (<code>nnmclub</code>)</h3>
+<ul>
+<li><strong>What it is:</strong> a Russian tracker with an embedded
+forum. Mirrors <code>nnmclub.to</code>, <code>nnm-club.me</code>.</li>
+<li><strong>Auth:</strong> <code>FORM_LOGIN</code>.</li>
+<li><strong>What you can do:</strong> search, browse, open topics, read
+comments, download <code>.torrent</code> + magnet.
+<strong><code>FORUM</code> is not wired</strong> through the SDK surface
+yet, and <strong><code>FAVORITES</code> has no scraping
+endpoint</strong> — both are honestly absent from the capability set
+(§6.E).</li>
+<li><strong>Verified:</strong> <strong>no</strong>
+(<code>verified = false</code>) — same post-login navigation gap as
+Kinozal.</li>
+</ul>
+<h3 id="internet-archive-archiveorg">Internet Archive
+(<code>archiveorg</code>)</h3>
+<ul>
+<li><strong>What it is:</strong> a digital library, <strong>not a
+torrent tracker</strong> — <code>archive.org</code>, served over JSON +
+HTTP.</li>
+<li><strong>Auth:</strong> <code>NONE</code> (implicitly
+anonymous).</li>
+<li><strong>What you can do:</strong> search, browse, open topic
+metadata, and browse a forum surface. <strong>No torrents and no
+magnets</strong> — files are served over HTTP, so
+<code>TORRENT_DOWNLOAD</code> and <code>MAGNET_LINK</code> are
+deliberately absent.</li>
+<li><strong>Verified:</strong> yes — Challenge Test C11 (continue →
+authorized main app).</li>
+</ul>
+<h3 id="project-gutenberg-gutenberg">Project Gutenberg
+(<code>gutenberg</code>)</h3>
+<ul>
+<li><strong>What it is:</strong> a free e-book library backed by the
+Gutendex JSON API (<code>https://gutendex.com</code>) — <strong>not a
+torrent tracker</strong>.</li>
+<li><strong>Auth:</strong> <code>NONE</code> (public, unauthenticated
+API).</li>
+<li><strong>What you can do:</strong> search, browse, open a book's
+topic page. It serves EPUB / plain-text / HTML e-books <strong>over
+HTTP, not <code>.torrent</code></strong> — declaring
+<code>TORRENT_DOWNLOAD</code> would be a §6.E bluff, so it is
+absent.</li>
+<li><strong>Verified:</strong> yes — Challenge Test C12.</li>
+</ul>
+<hr />
+<h2 id="how-downloads-work">How downloads work</h2>
+<p>Lava distinguishes two artifact kinds, by provider type.</p>
+<h3 id="torrent-providers-rutracker-rutor-kinozal-nnm-club">Torrent
+providers (RuTracker, RuTor, Kinozal, NNM-Club)</h3>
+<p>These providers expose <strong>two</strong> download paths:</p>
+<ol type="1">
+<li><p><strong><code>.torrent</code> file
+(<code>TORRENT_DOWNLOAD</code>).</strong> Lava fetches the actual
+torrent file from the tracker's download endpoint and hands it off. The
+bytes are validated as a real bencoded torrent before use — see
+<code>core/common/src/main/kotlin/lava/common/torrent/TorrentFileValidator.kt</code>
+and <code>Bencode.kt</code>.</p></li>
+<li><p><strong>Magnet link (<code>MAGNET_LINK</code>).</strong> This is
+where the §6.E "Capability Honesty" design matters. The
+<code>DownloadableTracker.getMagnetLink</code> method is
+<strong>synchronous</strong> (non-<code>suspend</code>), and its
+contract is to return the magnet only when it is available
+<strong>without</strong> an extra HTTP fetch — otherwise
+<code>null</code> (an honest absence, never a fabricated value).</p>
+<p>To make that honest, Kinozal and NNM-Club use an in-memory,
+process-lifetime <strong>magnet cache</strong>:</p>
+<ul>
+<li><code>core/tracker/kinozal/src/main/kotlin/lava/tracker/kinozal/magnet/KinozalMagnetCache.kt</code></li>
+<li><code>core/tracker/nnmclub/src/main/kotlin/lava/tracker/nnmclub/http/NnmclubMagnetCache.kt</code></li>
+</ul>
+<p>The flow: when you <strong>open a topic</strong> (or, for NNM-Club,
+when a <strong>search</strong> result row is parsed) the production
+parser extracts the genuinely-present magnet and writes it into the
+cache (<code>put(topicId, magnet)</code>). The download feature later
+reads it back (<code>get(topicId)</code>). So <strong>the magnet
+surfaces after you have viewed the topic/search</strong> — at that point
+the synchronous lookup returns the real magnet with no hidden
+round-trip. If you ask for a magnet for a topic you have never opened,
+the cache returns <code>null</code> rather than inventing one. Both
+caches are <code>@Singleton</code>, backed by a thread-safe
+<code>ConcurrentHashMap</code>, so the topic feature and the download
+feature share one instance per process. Magnet links are validated by
+<code>core/common/.../torrent/MagnetLinkValidator.kt</code>.</p></li>
+</ol>
+<h3 id="library-providers-internet-archive-project-gutenberg">Library
+providers (Internet Archive, Project Gutenberg)</h3>
+<p>These are <strong>HTTP downloads, not torrents.</strong> Internet
+Archive serves files directly; Project Gutenberg serves EPUB /
+plain-text / HTML e-books over HTTP via Gutendex. Neither declares
+<code>TORRENT_DOWNLOAD</code> or <code>MAGNET_LINK</code>. (Note from
+<code>GutenbergDescriptor.kt</code>: an HTTP-download implementation
+exists in code but is not exposed through <code>getFeature()</code>
+because <code>TrackerCapability</code> has no <code>HTTP_DOWNLOAD</code>
+value today — an honest not-yet-wired state.)</p>
+<hr />
+<h2 id="quick-reference-which-providers-need-credentials">Quick
+reference: which providers need credentials?</h2>
+<table>
+<thead>
+<tr>
+<th>Need to log in?</th>
+<th>Providers</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Yes (always)</td>
+<td>RuTracker (CAPTCHA), Kinozal, NNM-Club</td>
+</tr>
+<tr>
+<td>Optional (anonymous search/browse works)</td>
+<td>RuTor</td>
+</tr>
+<tr>
+<td>No (anonymous)</td>
+<td>Internet Archive, Project Gutenberg</td>
+</tr>
+</tbody>
+</table>
+<p>For how to enter and store credentials, see the in-app provider login
+flow; real credentials live only in the gitignored <code>.env</code>
+(§6.H) and are never committed.</p>
+</body>
+</html>

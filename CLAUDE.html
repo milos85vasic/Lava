@@ -251,13 +251,15 @@ policy, host-stability §6.M, no-hardcoding §6.R, CONTINUATION mandate
 §6.S, etc.), the existing Lava rule wins <strong>only when it is at
 least as strict</strong> as the Helix universal rule. The
 HelixConstitution submodule was incorporated 2026-05-14 (29th §6.L
-cycle). Implementation gaps (project-side gates not yet wired:
-<code>CM-COMMIT-DOCS-EXISTS</code>,
-<code>CM-FIXED-COLUMN-ALIGNMENT</code>,
-<code>CM-SCRIPT-DOCS-SYNC</code>,
-<code>CM-BUILD-RESOURCE-STATS-TRACKER</code>, etc.) are tracked under
-§6.AD-debt below; until they close, the inherited rules are
-operator-and-reviewer-verified manually.</p>
+cycle). Implementation gaps are tracked under §6.AD-debt below; until
+they close, the inherited rules are operator-and-reviewer-verified
+manually. (Status correction 2026-06-14 audit:
+<code>CM-COMMIT-DOCS-EXISTS</code>, <code>CM-SCRIPT-DOCS-SYNC</code>,
+and <code>CM-BUILD-RESOURCE-STATS-TRACKER</code> are now WIRED — see
+§6.AD-debt "Further closures" +
+<code>docs/helix-constitution-gates.md</code>;
+<code>CM-FIXED-COLUMN-ALIGNMENT</code> remains equivalence-mapped per
+§6.AD.3 Path B.)</p>
 <p>Claude Code's <code>@path/to/file</code> import syntax also resolves:
 <code>@constitution/CLAUDE.md</code> at the top of this document is
 equivalent to the pointer block above.</p>
@@ -910,29 +912,48 @@ cold-start canary + the full 37-class / 46-test Challenge suite on
 Pixel_8/API35 = 43 pass / 3 credential-skip / 0 fail. Linux x86_64
 containerized+KVM remains the Linux gate-host path;
 <code>.lava-ci-evidence/sixth-law-incidents/2026-05-13-emulator-container-darwin-arm64-gap.json</code>
-records the original gap); <strong>§6.Y-debt (added 2026-05-14)</strong>
-— pre-push hook + <code>scripts/check-constitution.sh</code> enforcement
-of the post-distribution version-bump-first rule; documented but not yet
-mechanically enforced; <strong>§6.Z-debt (added 2026-05-14)</strong> —
-<code>scripts/firebase-distribute.sh</code> Phase 1 Gate 6 + pre-push
-hook check that every distribute carries a test-evidence file with
-matching commit SHA + recent timestamp + BUILD SUCCESSFUL for the
-mandatory test set; documented but not yet mechanically enforced
-(operator + reviewer manually verify until close); <strong>§6.AA-debt
-(added 2026-05-14, PARTIAL CLOSE)</strong> — paired
-<code>last-version-{debug,release}</code> per-channel pointer split
-landed in commit TBD (firebase-distribute.sh now writes per-channel
-pointers + the §6.P monotonic-version gate consults the channel-matched
-pointer); default-mode flip to <code>--debug-only</code> + refusal of
-out-of-order <code>--release-only</code> without companion debug-stage
-evidence still OWED; <strong>§6.AB-debt (added 2026-05-14)</strong> —
-Detekt rule + Go-vet check for the §6.AB anti-bluff completeness
-checklist (per-feature rendering / state-machine / gating); documented
-but not yet mechanically enforced (operator + reviewer + sampled
-bluff-hunt manually verify until close); <strong>§6.AC-debt (added
-2026-05-14)</strong> — Detekt + Go-vet rules flagging
-<code>try / catch</code> blocks lacking <code>recordNonFatal</code> /
-<code>recordWarning</code> / explicit
+records the original gap); <strong>§6.Y-debt (added 2026-05-14; CLOSED
+2026-06-14, verified: <code>.githooks/pre-push:128-157</code> Check
+6)</strong> — pre-push hook enforcement of the post-distribution
+version-bump-first rule. Check 6 fires when a commit touches code
+(<code>.kt</code>/<code>.kts</code>/<code>.xml</code>/<code>.json</code>/<code>.go</code>)
+without bumping versionCode while the working-tree versionCode
+<code>&lt;=</code> <code>last-version-debug</code>, unless the commit
+body carries a
+<code>constitutional-plumbing-only</code>/<code>docs-only</code>/<code>version-bump-only</code>
+rationale; <del>documented but not yet mechanically enforced</del> now
+mechanically enforced; <strong>§6.Z-debt (added 2026-05-14; PARTIAL
+2026-06-14)</strong> — the pre-push hook portion is CLOSED (Check 7 at
+<code>.githooks/pre-push:159-193</code> rejects any commit that ADVANCES
+<code>last-version-{debug,release}</code> without a same-version
+<code>&lt;vname&gt;-&lt;code&gt;-test-evidence.{md,json}</code>
+companion). The RESIDUAL OPEN part:
+<code>scripts/firebase-distribute.sh</code> still has NO runtime Phase-1
+Gate 6 that validates the evidence file's matching commit SHA + ≤24h
+timestamp + <code>BUILD SUCCESSFUL</code> at distribute time (only the
+pointer-advance commit is gated, not the distribute invocation itself);
+operator + reviewer manually verify SHA/timestamp/BUILD-SUCCESSFUL until
+that runtime gate lands; <strong>§6.AA-debt (added 2026-05-14, PARTIAL
+CLOSE → CLOSED 2026-06-14, verified:
+<code>scripts/firebase-distribute.sh:46,150-151,198-214</code>)</strong>
+— paired <code>last-version-{debug,release}</code> per-channel pointer
+split (firebase-distribute.sh writes per-channel pointers at
+<code>:150-151</code> + the §6.P monotonic-version gate consults the
+channel-matched pointer at <code>:167-196</code>); <del>default-mode
+flip to <code>--debug-only</code> + refusal of out-of-order
+<code>--release-only</code> without companion debug-stage evidence still
+OWED</del> now CLOSED: <code>MODE="debug"</code> is the default
+(<code>:46</code>), and <code>--release-only</code> is rejected with
+<code>FATAL §6.AA</code> unless
+<code>last-version-debug &gt;= current versionCode</code>
+(<code>:204-214</code>, i.e. debug stage 1 already distributed this
+code); <strong>§6.AB-debt (added 2026-05-14)</strong> — Detekt rule +
+Go-vet check for the §6.AB anti-bluff completeness checklist
+(per-feature rendering / state-machine / gating); documented but not yet
+mechanically enforced (operator + reviewer + sampled bluff-hunt manually
+verify until close); <strong>§6.AC-debt (added 2026-05-14)</strong> —
+Detekt + Go-vet rules flagging <code>try / catch</code> blocks lacking
+<code>recordNonFatal</code> / <code>recordWarning</code> / explicit
 <code>// no-telemetry: &lt;reason&gt;</code> opt-out; pre-push hook
 integration; documented but not yet mechanically enforced;
 <strong>§6.AD-debt (added 2026-05-14, 29th §6.L cycle; PARTIAL CLOSE
@@ -970,14 +991,21 @@ equivalence-maps <code>CM-ITEM-STATUS-TRACKING</code> /
 <code>CM-OPERATOR-BLOCKED-SELF-RESOLUTION-AUDIT</code> to the existing
 <code>.lava-ci-evidence/</code> layout (CLOSED-BY-EQUIVALENCE per the
 constitution clause);
-<code>CM-UNIVERSAL-VS-PROJECT-CLASSIFICATION</code> CLOSED by Check 8;
-what truly remains: <code>CM-COMMIT-DOCS-EXISTS</code> (verify
-referenced docs in commit messages resolve),
-<code>CM-SCRIPT-DOCS-SYNC</code> (script ↔︎ docs/scripts/*.md sync —
-Phase 8 <code>scripts/check-canonical-root-and-upstreams.sh</code>
-covers root inheritance but not per-script sync),
-<code>CM-SUBAGENT-DELEGATION-AUDIT</code> (subagent delegation audit
-trail).</p>
+<code>CM-UNIVERSAL-VS-PROJECT-CLASSIFICATION</code> CLOSED by Check 8.
+<strong>Further closures (2026-06-14 audit, verified against
+artifacts):</strong> <del><code>CM-COMMIT-DOCS-EXISTS</code></del>
+CLOSED (<code>scripts/check-commit-docs-exists.sh</code> present +
+verify-all-wired at
+<code>scripts/verify-all-constitution-rules.sh:190</code>);
+<del><code>CM-SCRIPT-DOCS-SYNC</code></del> CLOSED
+(<code>scripts/check-script-docs-sync.sh</code> present + verify-all
+<code>:187</code> AND pre-push Check 9 at
+<code>.githooks/pre-push:195-212</code>);
+<del><code>CM-SUBAGENT-DELEGATION-AUDIT</code></del> CLOSED-as-scanner
+(<code>scripts/check-subagent-delegation-audit.sh</code> present +
+verify-all <code>:193</code>). Truly-remaining <code>CM-*</code> work is
+the per-clause <code>CM-COVENANT-114-*-PROPAGATION</code> literal-anchor
+gates for §11.4.79–141 (tracked under §6.AF-debt/§6.AI-debt).</p>
 <p><strong>Recently resolved debt</strong> (kept as forensic anchor, no
 longer load-bearing): §6.K-debt (closed 2026-05-07, <code>pkg/vm</code>
 + image-cache spec), §6.N-debt (closed 2026-05-05 evening, Group A-prime
@@ -2019,6 +2047,13 @@ specs):</p>
 <li><code>.env.example</code> — by definition carries placeholders</li>
 <li><code>.lava-ci-evidence/sixth-law-incidents/*.json</code> — forensic
 anchors quoting historical literals</li>
+<li><code>.lava-ci-evidence/**/running-devices.tsv</code> — real
+device-serial gate attestation evidence (Genymotion/emulator instance
+IDs are UUIDs; the serial IS the §6.I per-AVD proof a specific real
+device ran — redacting it would weaken the attestation, an anti-bluff
+regression). Added 2026-06-16 (nezha gate-host enablement).
+UUID-scanner-only exemption; IPv4/host:port still enforced
+everywhere.</li>
 <li><code>docs/superpowers/specs/*.md</code>,
 <code>docs/superpowers/plans/*.md</code> — design docs and
 implementation plans may show example values for clarity (placeholders
@@ -3592,12 +3627,18 @@ the summary/HTML/PDF/DOCX export pipeline (the binary emits
 Issues.md/Fixed.md only).
 <code>Catalogue-Check: reuse HelixDevelopment/HelixConstitution constitution/scripts/workable-items @883ccc1</code>.
 <code>Classification: project-specific</code>.</li>
-<li><strong>§11.4.79 / §11.4.80</strong> (own-org submodules IN
-codegraph index + sync automation) — <strong>OWED</strong>. Lava
-currently EXCLUDES <code>submodules/</code> from the codegraph index;
-§11.4.79 refines §11.4.78 step-2 to INCLUDE own-org submodules
-(credential exclusions per §11.4.10 stay applied). Reconciliation
-tracked as LVA-6.</li>
+<li><strong>§11.4.79</strong> (own-org submodules IN codegraph index) —
+<strong>CLOSED 2026-05-31 (LVA-6), re-verified 2026-06-14:
+<code>.codegraph/config.json:3</code> records LVA-6 CLOSED + the blanket
+<code>submodules/**</code> exclude is absent from the
+<code>exclude</code> list</strong> (own-org submodule SOURCE is
+in-scope; credential/build/vendor paths stay excluded per §11.4.10). The
+earlier "Lava EXCLUDES submodules" statement is RETRACTED.
+<strong>§11.4.80</strong> (codegraph sync automation — auto
+<code>git submodule init</code> before <code>codegraph index</code>)
+remains <strong>OPEN</strong> (precondition documented in
+<code>.codegraph/config.json:3</code>, automation script owed; tracked
+under §6.AF-debt).</li>
 <li><strong>§11.4.85</strong> (Stress + Chaos Test Mandate) —
 <strong>OWED / IN PROGRESS</strong>. No Lava equivalent today; first
 runnable scaffold targeting lava-api-go landed this cycle (design +
@@ -3702,6 +3743,214 @@ stance, not a universal-rule change. Composes with inherited §6.X / §6.V
 Containers-driven-emulator + no-live-device stance is Lava's; the
 underlying container-emulator capability is universal, inherited from
 the Containers submodule + §6.X/§6.V).</p>
+<h5
+id="6ah--virtual-devices--emulators-in-containers-or-vms-only-added-2026-06-03">6.AH
+— Virtual Devices / Emulators in Containers or VMs ONLY (added
+2026-06-03)</h5>
+<p><strong>Forensic anchor:</strong> 2026-06-03 operator directive: "Add
+rule / constraint that you will always remember: Any virtual devices or
+emulators MUST run in Containers or VMs!" — issued after a
+host-direct+HVF macOS emulator wedged for ~10 consecutive §6.Z gate
+attempts (qemu ran at ~398% CPU but the guest's adbd never reached
+<code>device</code> state; not the AVD — recreated fresh; not Kaspersky
+— closed; forensics
+<code>.lava-ci-evidence/sixth-law-incidents/2026-06-03-emulator-boot-offline.json</code>).
+Host-direct emulator execution is non-reproducible across machines AND
+proved fragile in exactly the way the anti-bluff gate cannot
+tolerate.</p>
+<p><strong>Rule.</strong> EVERY virtual device, Android emulator, or
+guest OS used ANYWHERE in this project — Challenge Tests,
+<code>connectedAndroidTest</code>, <code>-PdeviceTests=true</code>, the
+§6.AE matrix, the §6.Z release canary, any future iOS/desktop/other
+virtual device — MUST run inside a <strong>Container</strong>
+(podman/docker, via <code>submodules/containers/pkg/emulator/</code>) OR
+a <strong>VM</strong> (QEMU/<code>pkg/vm/</code>). <strong>Host-direct
+emulator/VM execution is FORBIDDEN</strong>, on every OS, with no
+exception — including macOS.</p>
+<ol type="1">
+<li><strong>Supersedes the §6.X macOS host-direct allowance.</strong>
+§6.X / §6.AG resolved the macOS gate path to host-direct+HVF because a
+Linux container cannot reach the host-only HVF API. §6.AH REMOVES that
+allowance: on macOS the emulator MUST still run in a container/VM. Since
+the podman <code>applehv</code> VM exposes neither <code>/dev/kvm</code>
+nor HVF passthrough, the container path uses <strong>TCG software
+emulation</strong> (slower) OR a QEMU full-system VM — the Containers
+submodule MUST be extended with whatever no-acceleration / VM support is
+missing so the container/VM path works on <strong>Linux + macOS
+both</strong>. Slower-but-reproducible beats fast-but-host-direct.</li>
+<li><strong>Runner enforcement.</strong>
+<code>scripts/run-challenge-matrix.sh</code> +
+<code>scripts/run-api-app-challenge-matrix.sh</code> MUST force
+<code>--runner=containerized</code> (or a <code>vm</code> runner) — NOT
+<code>--runner=auto</code> when auto would resolve to host-direct. A
+gate attestation whose <code>runner</code> is <code>host-direct</code>
+is NON-COMPLIANT and <code>scripts/tag.sh</code> MUST refuse it.</li>
+<li><strong>No host-direct fallback, ever.</strong> If the container/VM
+path cannot boot on a given host, the run is honestly BLOCKED (incident
+JSON) — it is NEVER silently redirected to a host-direct emulator or a
+physical device (§6.Z/§6.J/§6.AG — no bluffed pass).</li>
+<li><strong>Project-level</strong> (operator instruction + §11.4.35):
+lives in Lava's consumer governance
+(<code>CLAUDE.md</code>/<code>AGENTS.md</code>/<code>QWEN.md</code>-by-pointer),
+not the shared <code>constitution/</code>. Strengthens inherited
+§6.X/§6.V/§6.AG/§6.AE; MUST NOT relax any.</li>
+</ol>
+<p><strong>§6.AH-debt (added 2026-06-03):</strong> the container/VM path
+does not yet boot on this macOS host (the existing
+<code>containerized.go</code> hard-requires <code>/dev/kvm</code>; a
+no-KVM TCG mode + the macOS <code>/proc</code>-reap fix are OWED to the
+Containers submodule). Until that ships + boots, the §6.Z release canary
++ client gate are honestly BLOCKED per clause 3 — no host-direct
+fallback. The §6.X-debt darwin/arm64 entry folds into this.</p>
+<p><code>Classification:</code> project-specific (the no-host-direct
+stance is Lava's deployment policy; the container/VM emulator capability
+is universal, inherited from the Containers submodule).</p>
+<h5
+id="6ai--helixconstitution-114128114141-adoption-added-2026-06-09">6.AI
+— HelixConstitution §11.4.128–§11.4.141 Adoption (added 2026-06-09)</h5>
+<p><strong>Forensic anchor:</strong> 2026-06-09 operator directive —
+"Fetch and pull the latest version of constitution Submodule. It
+contains new critical improvements we shall analyze in depth and follow
+and respect completely!" The constitution pin advanced
+<code>7734c04</code> → <code>60e2d66</code> (16 upstream commits,
+1.2.0-dev), introducing universal clauses §11.4.128–§11.4.141 (plus the
+ATMosphere-TV-specific audio/SurfaceFlinger batch §11.4.135–139, which
+is project-specific to ATMosphere and NOT binding on Lava). The
+60e2d66-review confirms <strong>no constitution-mandated submodule is
+missing</strong> for Lava (Challenges, HelixQA, containers, codegraph
+all present). All universal clauses apply to Lava unconditionally per
+§6.AD inheritance. Per-clause adoption:</p>
+<ul>
+<li><strong>§11.4.131 (standing session-resumption file)</strong> —
+<strong>SATISFIED / EQUIVALENCE-MAPPED.</strong> Lava's canonical
+session-resumption file is
+<strong><code>docs/CONTINUATION.md</code></strong> (§6.S), declared here
+as the fixed §11.4.35 path; it carries the §7 RESUME PROMPT (SHORT
+one-paste first sentence + FULL paste-ready block per §11.4.127), points
+to <code>.remember/remember.md</code> +
+<code>docs/CONTINUATION.md</code> read-first + <code>git fetch</code>,
+and embeds live-state anchors (HEAD, ledger state, in-flight items).
+§6.S already enforces it is re-written on every state-changing commit +
+has <code>.html</code>/<code>.pdf</code> exports (§11.4.65).
+<code>CM-SESSION-RESUMPTION-FILE-PRESENT</code> ≡ the existing §6.S
+<code>scripts/check-constitution.sh</code> CONTINUATION checks.</li>
+<li><strong>§11.4.134 (code-review iterate-until-GO +
+rock-solid-evidence)</strong> — <strong>EQUIVALENCE-MAPPED</strong> to
+the existing <code>/code-review ultra</code> (multi-agent cloud review
+of the branch/PR) + the Anti-Bluff Pact's captured-evidence requirement
+(§6.J / Sixth+Seventh Laws). Iterate-until-GO is the standing posture
+for that command.</li>
+<li><strong>§11.4.132 (risk-ordered validation priority)</strong> —
+<strong>ADOPTED (practice).</strong> Lava test/validation runs go
+highest-risk-first: most-recently-worked + historically-most-problematic
++ highest-crash-likelihood (e.g. LVA-008 C11 nav-teardown, the
+freshly-fixed parsers/use-cases) validated first with captured evidence,
+then the rest of the suite. Composes with §6.J/§6.L.</li>
+<li><strong>§11.4.133 (Target-System + hardware safety)</strong> —
+<strong>ADOPTED (limited applicability).</strong> Lava's "target" is
+Android devices/emulators; it issues no hardware-level
+(voltage/regulator/firmware) writes, so the hardware-safety surface is
+narrow. The §12 Host Machine Stability Directive (host safety) + §6.AH
+(no host-direct VMs) + the no-destructive-ops discipline already cover
+Lava's target/host safety. No additional target-write gate needed for an
+Android client.</li>
+<li><strong>§11.4.129 (huge-blocker release protocol)</strong> +
+<strong>§11.4.130 (validate-fix-FIRST-after-redeploy)</strong> —
+<strong>ADOPTED (release discipline).</strong> On a release-blocking
+defect during validation: STOP all device testing → fix ALL discovered
+issues to root cause → process the §11.4.128 recorded slice → land
+rock-solid fixes + new tests of all types → full rebuild + clean reflash
+→ <strong>RESTART</strong> (not resume) the full validation from the
+last tag; and after any post-blocker reflash, the targeted last-failing
+guard tests run + pass FIRST before the full retest. Binds at
+<code>scripts/tag.sh</code> / Firebase distribute time; composes with
+§6.Z/§6.AA/§6.I.</li>
+<li><strong>§11.4.140 (universal action-prefix system)</strong> —
+<strong>ADOPTED (LAYER 1 wired this commit).</strong> The recognition
+block below is mirrored into root <code>CLAUDE.md</code> +
+<code>AGENTS.md</code> + <code>QWEN.md</code> (§11.4.35). The shared
+action registry is <code>constitution/actions/registry.yaml</code>
+(shipped by the bumped pin). LAYER 2: the <code>UserPromptSubmit</code>
+hook portion is <strong>CLOSED 2026-06-14, verified:
+<code>.claude/settings.json:14-22</code> wires
+<code>scripts/hooks/action-prefix-expand.sh</code> (present +
+executable) as the <code>UserPromptSubmit</code> hook, with
+<code>constitution/actions/registry.yaml</code> present as the action
+source-of-truth</strong>. The generated per-agent slash commands portion
+remains OWED via §6.AI-debt (not verified present).</li>
+<li><strong>§11.4.128 (always-on device-recording)</strong> —
+<strong>OWED (§6.AI-debt).</strong> Lava tests on the Genymotion VM +
+emulators; a background, side-effect-free, subagent-driven recorder
+(logcat / perf / crash-ANR) with the deterministic
+<code>&lt;root&gt;/YYYY-MM-DD/&lt;state-hash&gt;/&lt;DEVICE&gt;_&lt;SERIAL&gt;/recording_NNN/</code>
+layout, raw git-ignored + codegraph-excluded,
+curated-evidence-only-committed, is OWED. Default capture-and-store;
+analyse only at release-prep or on operator request.</li>
+<li><strong>§11.4.141 (token-efficiency mandate)</strong> — <strong>OWED
+/ PARTIALLY-PRACTICED (§6.AI-debt).</strong> Immediately practiced: keep
+<code>CLAUDE.md</code> + constitution byte-stable mid-session (batch
+governance edits — this commit batches all §6.AI edits), prompt-cache
+the static governance prefix, model-tier mechanical subagents +
+output-to-file (already the parallel-fleet pattern),
+CodeGraph/grep-scoped reads over full-file loads, terse conductor
+status. OWED: the thin-always-loaded-INDEX restructure of the 90K+-token
+consumer <code>CLAUDE.md</code> (de-dup §11.4.X bodies to the canonical
+<code>constitution/Constitution.md</code>, keeping each index line's
+literal <code>11.4.N</code> token so
+<code>CM-COVENANT-*-PROPAGATION</code> scans pass) + the measured
+anti-bluff token-reduction harness.</li>
+</ul>
+<p><code>Classification:</code> universal (the
+adopt-new-universal-clauses-on-pin-bump mechanism is reusable across any
+HelixConstitution-consuming project; the per-clause Lava mappings —
+CONTINUATION.md path, /code-review ultra, Genymotion recorder target —
+are project-specific and recorded as such above).</p>
+<h5
+id="6ai-debt--114128140-layer-2141-mechanical-wiring-constitutional-debt-2026-06-09">6.AI-debt
+— §11.4.128/140-LAYER-2/141 mechanical wiring (constitutional debt,
+2026-06-09)</h5>
+<p>OWED: (1) §11.4.128 background device-recorder (Genymotion/emulator)
+with the deterministic raw layout + gitignore + codegraph-exclude +
+curated-evidence-only; (2) §11.4.140 LAYER 2 — the
+<code>UserPromptSubmit</code> action-prefix expansion hook is CLOSED
+2026-06-14 (wired via <code>.claude/settings.json:14-22</code> →
+<code>scripts/hooks/action-prefix-expand.sh</code>;
+<code>constitution/actions/registry.yaml</code> present); the generated
+per-agent slash commands remain OWED; (3) §11.4.141 thin-index
+restructure of the consumer <code>CLAUDE.md</code> + the measured
+token-reduction harness; (4) per-clause
+<code>CM-COVENANT-114-{128,129,130,131,132,133,134,140,141}-PROPAGATION</code>
+literal-anchor gates. Until these close, the clauses are
+operator-and-reviewer-verified manually; the §6.AI enumeration is
+binding by transitive reference per §6.AD.8.</p>
+<h5
+id="6aj--universal-action-prefix-recognition-layer-1-114140-added-2026-06-09">6.AJ
+— Universal Action-Prefix Recognition (LAYER 1, §11.4.140, added
+2026-06-09)</h5>
+<p><strong>When a user prompt's FIRST non-blank line starts with an
+uppercase action token followed by <code>::</code></strong>, the agent
+MUST treat it as a registered action: (grammar
+<code>^([A-Z][A-Z0-9_]*)\s*::\s</code> — or the namespaced
+<code>PREFIX::ACTION ::</code> form — anchored at line start,
+UPPERCASE-only token). The agent MUST (1) look the token up in the
+shared action registry <code>constitution/actions/registry.yaml</code>
+(or <code>$HELIX_ACTION_REGISTRY</code>); (2) if registered, REPLACE the
+<code>ACTION_NAME ::</code> prefix with that action's
+<code>expansion</code> text and apply its <code>rules</code>; (3)
+execute the REMAINDER of the prompt under the expanded instruction
+(C-preprocessor expand-then-rescan).</p>
+<p>Built-in action (registry-backed):
+<strong><code>BACKGROUND ::</code></strong> → expansion: <em>"The
+following prompt MUST be executed in the background in parallel with all
+main work streams using the subagents-driven development approach; all
+work done MUST produce rock-solid evidence covered with hard physical
+proof(s) that everything works as expected and as specified, without any
+false results and without any bluff."</em> (i.e. dispatch via
+<code>Agent(run_in_background:true)</code> + anti-bluff captured
+evidence). Unknown tokens are NOT actions — execute the prompt verbatim.
+The registry is the single source of truth; new actions are added as
+registry rows, not by editing this block. <code>Classification:</code>
+universal.</p>
 <h5
 id="6l--anti-bluff-functional-reality-mandate-operators-standing-order-repeated-2026-05-04">6.L
 — Anti-Bluff Functional Reality Mandate (Operator's Standing Order,

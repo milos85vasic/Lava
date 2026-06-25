@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>helixqa-wiring-plan</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1
+id="helixqa-wiring-plan--lava-android-app-on-the-genymotion-vm">HelixQA
+Wiring Plan — Lava Android app on the Genymotion VM</h1>
+<table>
+<tbody>
+<tr>
+<td>Revision</td>
+<td>2</td>
+</tr>
+<tr>
+<td>Created</td>
+<td>2026-06-08</td>
+</tr>
+<tr>
+<td>Last modified</td>
+<td>2026-06-08</td>
+</tr>
+<tr>
+<td>Status</td>
+<td>active</td>
+</tr>
+</tbody>
+</table>
+<h2 id="table-of-contents">Table of contents</h2>
+<ul>
+<li><a href="#1-scope">1. Scope</a></li>
+<li><a
+href="#2-claude-code-as-the-llm--vision-provider-bridgedcliprovider">2.
+Claude Code as the LLM + Vision provider (BridgedCLIProvider)</a></li>
+<li><a
+href="#3-pointing-an-autonomous-session-at-the-lava-app-on-the-genymotion-vm">3.
+Pointing an autonomous session at the Lava app on the Genymotion
+VM</a></li>
+<li><a href="#4-test-banks-consumed-by-the-session">4. Test banks
+consumed by the session</a></li>
+<li><a href="#5-what-is-still-missing-concrete-task-list">5. What is
+still MISSING (concrete task list)</a></li>
+<li><a href="#6-constraints-honoured">6. Constraints honoured</a></li>
+</ul>
+<h2 id="1-scope">1. Scope</h2>
+<p>This document specifies how to drive a real HelixQA autonomous QA
+session against the <strong>Lava Android app</strong>
+(<code>digital.vasic.lava.client.dev</code>) installed on the
+<strong>Genymotion VM reachable at adb
+<code>127.0.0.1:6555</code></strong>, using <strong>Claude Code</strong>
+as the LLM + Vision provider. It also enumerates the concrete gaps that
+must be closed before a fully autonomous, end-to-end
+provider-multiplexed run is possible.</p>
+<p>The Lava-owned test banks this session consumes live at
+<code>lava-api-go/qa/banks/*.yaml</code> (seven banks; see §4).</p>
+<blockquote>
+<p>The HelixQA submodule itself (<code>submodules/helixqa</code>) is
+<strong>not modified</strong> by any step here — all configuration is
+supplied via env vars, CLI flags, and the Lava-owned banks
+directory.</p>
+</blockquote>
+<h2 id="2-claude-code-as-the-llm--vision-provider-bridgedcliprovider">2.
+Claude Code as the LLM + Vision provider (BridgedCLIProvider)</h2>
+<p>HelixQA already ships the bridge:
+<code>submodules/helixqa/pkg/llm/bridge_provider.go</code> defines
+<code>BridgedCLIProvider</code>, which shells out to a CLI LLM tool with
+<code>--json --print &lt;prompt&gt;</code> (plus <code>--model</code>
+and <code>--image</code> when set) and parses the JSON
+<code>result</code> / <code>content</code> / <code>text</code> field of
+the response.</p>
+<h3 id="21-how-discovery-works-zero-config">2.1 How discovery works
+(zero config)</h3>
+<p>The bridge discovery is <strong>inside the <code>cmdAutonomous</code>
+function</strong> (<code>cmd/helixqa/main.go:404</code>
+<code>func cmdAutonomous</code>), in the "Bridged CLI model discovery"
+block at
+<strong><code>cmd/helixqa/main.go:527</code>–<code>569</code></strong>
+(verified against the real <code>v0.2.0</code> binary). It iterates a
+fixed struct list — <code>{claude, qwen-coder, opencode}</code> (the
+<code>claude</code> entry is <code>{"claude", "claude", ""}</code> at
+<strong><code>main.go:538</code></strong>) — and for each runs
+<code>osexec.LookPath(cli.bin)</code>
+(<strong><code>main.go:542</code></strong>). If the binary is on
+<code>$PATH</code>, it is wrapped via
+<code>llm.NewBridgedCLIProvider(cliPath, cli.name, cli.model)</code>
+(<strong><code>main.go:546</code></strong>) and appended to the chat
+pool (<strong><code>main.go:553</code></strong>); when
+<code>bp.SupportsVision()</code> is true it is also appended to the
+vision pool (<strong><code>main.go:558</code></strong>).</p>
+<p><strong>Confirmed:</strong> <code>claude</code> IS on this host's
+<code>$PATH</code> at <code>/Users/milosvasic/.local/bin/claude</code>
+(<code>command -v claude</code>, verified this run).</p>
+<p>Because the block lives in <code>cmdAutonomous</code>, the bridge is
+wired ONLY when running an autonomous QA session
+(<code>helixqa autonomous</code>). The <code>helixqa list</code>
+subcommand (<code>cmdList</code>) does NOT touch the bridge — it parses
+banks with no LLM, which is why listing the 7 Lava banks (§4) succeeds
+with zero env/credentials.</p>
+<p>Consequences for Claude Code:</p>
+<ul>
+<li><strong>No env var or flag is required to enable the
+bridge.</strong> Putting the <code>claude</code> binary on
+<code>$PATH</code> is sufficient — discovery is
+<code>osexec.LookPath("claude")</code> at <code>main.go:542</code>. If
+<code>claude</code> is not found, the loop <code>continue</code>s
+(<code>main.go:544</code>) and the provider is simply absent; if NO
+API-key provider AND NO bridged CLI is found, <code>cmdAutonomous</code>
+exits 1 (<code>main.go:571</code>–<code>578</code>).</li>
+<li><strong>Vision is automatic for Claude.</strong>
+<code>BridgedCLIProvider.SupportsVision()</code> returns
+<code>true</code> only when <code>cliName == "claude"</code>
+(<code>pkg/llm/bridge_provider.go:133</code>–<code>135</code>), so the
+discovered <code>claude</code> provider is added to BOTH the chat pool
+and the vision pool. <code>Vision()</code>
+(<code>bridge_provider.go:183</code>) writes each screenshot to a temp
+PNG and passes it via <code>--image &lt;path&gt;</code>
+(<code>buildArgs</code> at
+<code>bridge_provider.go:250</code>–<code>261</code>). This is the
+screenshot-analysis path the autonomous VisionEngine needs.</li>
+<li><strong>Model</strong> is left empty (<code>""</code> at
+<code>main.go:538</code>), so the <code>--model</code> flag is omitted
+(<code>bridge_provider.go:254</code>–<code>256</code>) and the
+<code>claude</code> CLI uses its configured default. To pin a model, the
+discovery struct's <code>model</code> field must be non-empty — see the
+gap in §5 (the discovery list hardcodes <code>""</code>).</li>
+</ul>
+<h3
+id="envconfig-needed-for-an-autonomous-session-to-use-claude">Env/config
+needed for an autonomous session to use Claude</h3>
+<ol type="1">
+<li><code>claude</code> on <code>$PATH</code> (confirmed present here).
+Nothing else enables the bridge.</li>
+<li><code>claude --json --print "&lt;prompt&gt;"</code> MUST emit JSON
+the bridge can parse (<code>parseResponse</code> at
+<code>bridge_provider.go:286</code> reads <code>result</code> /
+<code>content</code> / <code>text</code>; on non-JSON it falls back to
+treating stdout as plain text —
+<code>bridge_provider.go:327</code>–<code>331</code>).</li>
+<li>Per-invocation timeout is <code>defaultBridgeTimeout = 120s</code>
+(<code>bridge_provider.go:20</code>); a single bridge call may not
+exceed it.</li>
+<li>No <code>ANTHROPIC_API_KEY</code> is required — the bridge shells
+out to the CLI, which carries its own auth. (An API-key provider is an
+<em>alternative</em>, not a prerequisite, per the
+<code>main.go:571</code> "no providers" guard.)</li>
+</ol>
+<h3 id="22-exact-invocation-the-bridge-issues">2.2 Exact invocation the
+bridge issues</h3>
+<p>For a chat turn the bridge runs (bridge_provider.go
+<code>buildArgs</code>):</p>
+<pre><code>claude --json --print &quot;&lt;concatenated prompt&gt;&quot;</code></pre>
+<p>For a vision turn (screenshot analysis):</p>
+<pre><code>claude --json --print &quot;&lt;prompt&gt;&quot; --image /tmp/helixqa-vision-XXXX.png</code></pre>
+<p>Per-invocation timeout defaults to 120 s
+(<code>defaultBridgeTimeout</code>).</p>
+<h3 id="23-pre-flight-checklist">2.3 Pre-flight checklist</h3>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="bu">command</span> <span class="at">-v</span> claude                 <span class="co"># MUST resolve — discovery is LookPath(&quot;claude&quot;)</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="ex">claude</span> <span class="at">--json</span> <span class="at">--print</span> <span class="st">&quot;ping&quot;</span>      <span class="co"># MUST return JSON with a result/content/text field</span></span></code></pre></div>
+<p>If <code>claude --json --print</code> does not emit a JSON object,
+the bridge falls back to treating stdout as plain text
+(<code>parseResponse</code>), which still works for chat but is
+lower-fidelity; prefer a <code>claude</code> build that honours
+<code>--json</code>.</p>
+<h2
+id="3-pointing-an-autonomous-session-at-the-lava-app-on-the-genymotion-vm">3.
+Pointing an autonomous session at the Lava app on the Genymotion VM</h2>
+<h3 id="31-inputs">3.1 Inputs</h3>
+<table>
+<thead>
+<tr>
+<th>Input</th>
+<th>Value</th>
+<th>Supplied via</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>App package</td>
+<td><code>digital.vasic.lava.client.dev</code></td>
+<td>env <code>HELIX_ANDROID_PACKAGE</code></td>
+</tr>
+<tr>
+<td>Device serial</td>
+<td><code>127.0.0.1:6555</code> (Genymotion)</td>
+<td>env <code>HELIX_ANDROID_DEVICE</code></td>
+</tr>
+<tr>
+<td>Platforms</td>
+<td><code>android</code></td>
+<td>flag <code>--platforms android</code></td>
+</tr>
+<tr>
+<td>Project root</td>
+<td>repo root (feature map from docs)</td>
+<td>flag <code>--project</code></td>
+</tr>
+<tr>
+<td>Env file</td>
+<td><code>.env</code> (gitignored, real secrets)</td>
+<td>flag <code>--env</code></td>
+</tr>
+<tr>
+<td>Output dir</td>
+<td><code>qa-results/</code></td>
+<td>flag <code>--output</code></td>
+</tr>
+<tr>
+<td>LLM + Vision</td>
+<td>Claude Code on <code>$PATH</code></td>
+<td>auto-discovery (§2)</td>
+</tr>
+</tbody>
+</table>
+<p>The env-var names are read directly in
+<code>cmd/helixqa/main.go</code>:
+<code>AndroidPackage: os.Getenv("HELIX_ANDROID_PACKAGE")</code> (~line
+662) and <code>AndroidDevice: os.Getenv("HELIX_ANDROID_DEVICE")</code>
+(~line 660). The autonomous flags (<code>--project</code>,
+<code>--platforms</code>, <code>--env</code>, <code>--timeout</code>,
+<code>--coverage-target</code>, <code>--output</code>,
+<code>--report</code>, <code>--curiosity</code>,
+<code>--curiosity-timeout</code>) are defined in the
+<code>autonomous</code> flagset (~line 404).</p>
+<h3 id="32-connect-adb-to-the-genymotion-vm">3.2 Connect adb to the
+Genymotion VM</h3>
+<p>Genymotion exposes adb over TCP. Connect the host's adb server to it
+first so the serial <code>127.0.0.1:6555</code> appears in
+<code>adb devices</code>:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">adb</span> connect 127.0.0.1:6555</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="ex">adb</span> devices                       <span class="co"># MUST list 127.0.0.1:6555 as &#39;device&#39; (not &#39;offline&#39;)</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="ex">adb</span> <span class="at">-s</span> 127.0.0.1:6555 shell pm list packages <span class="kw">|</span> <span class="fu">grep</span> digital.vasic.lava.client.dev</span></code></pre></div>
+<p>If the package is not installed, install the debug APK first:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">adb</span> <span class="at">-s</span> 127.0.0.1:6555 install <span class="at">-r</span> app/build/outputs/apk/debug/app-debug.apk</span></code></pre></div>
+<h3 id="33-the-env-real-secrets--gitignored-per-6h--11410">3.3 The
+<code>.env</code> (real secrets — gitignored per §6.H / §11.4.10)</h3>
+<p>Create a <code>.env</code> at the location passed to
+<code>--env</code>. It MUST NOT be committed. Real tracker credentials
+are referenced BY NAME in the banks and read at runtime here:</p>
+<pre class="dotenv"><code># Device / app targeting
+HELIX_ANDROID_DEVICE=127.0.0.1:6555
+HELIX_ANDROID_PACKAGE=digital.vasic.lava.client.dev
+
+# Tracker credentials consumed by the per-provider banks (NEVER hardcoded in YAML)
+RUTRACKER_USERNAME=...
+RUTRACKER_PASSWORD=...
+RUTOR_USERNAME=...
+RUTOR_PASSWORD=...
+KINOZAL_USERNAME=...
+KINOZAL_PASSWORD=...
+NNMCLUB_USERNAME=...
+NNMCLUB_PASSWORD=...
+# archiveorg + gutenberg are auth_type NONE — no credentials.
+
+# LLM + Vision: none required — Claude Code is auto-discovered on $PATH (§2).</code></pre>
+<h3 id="34-launch-command">3.4 Launch command</h3>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /Volumes/T7/Projects/Lava</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="ex">adb</span> connect 127.0.0.1:6555</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="ex">submodules/helixqa/bin/helixqa</span> autonomous <span class="dt">\</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">--project</span> . <span class="dt">\</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">--platforms</span> android <span class="dt">\</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">--env</span> ./.env <span class="dt">\</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">--timeout</span> 2h <span class="dt">\</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">--coverage-target</span> 0.9 <span class="dt">\</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">--output</span> qa-results/ <span class="dt">\</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">--report</span> markdown,html,json</span></code></pre></div>
+<p>Outputs land under <code>qa-results/</code> (report + tickets +
+videos), suitable as the <code>docs/qa/&lt;run-id&gt;/</code> end-user
+evidence required by §11.4.83.</p>
+<h3 id="35-the-sessions-4-phases-what-actually-happens">3.5 The
+session's 4 phases (what actually happens)</h3>
+<p>Per the HelixQA README, the autonomous session runs: (1)
+<strong>Setup</strong> — model selection + feature map from
+<code>--project</code> docs + spawn agents + init VisionEngine; (2)
+<strong>Doc-Driven Verification</strong> — workers verify documented
+features against the running app, capturing screenshots/video; (3)
+<strong>Curiosity-Driven Exploration</strong>; (4) <strong>Report &amp;
+Cleanup</strong>. The NavigationEngine's Android
+<code>ActionExecutor</code> drives the device over adb
+(taps/swipes/screencap); Claude (vision) interprets each screenshot to
+decide the next action and to verify the <code>expected</code> of each
+bank step.</p>
+<h2 id="4-test-banks-consumed-by-the-session">4. Test banks consumed by
+the session</h2>
+<p>Seven Lava-owned banks, all <code>platforms: [android]</code>.
+<strong>Verified against the real <code>helixqa v0.2.0</code>
+binary</strong> (built
+<code>go build -o /tmp/helixqa ./cmd/helixqa</code>, exit 0): all 7
+banks load with ZERO YAML fixes required — the banks were already
+schema-correct for the real <code>pkg/testbank</code> loader (the
+earlier PyYAML-only check is now superseded by real-binary proof). 32
+test cases total.</p>
+<h3 id="41-verbatim-real-binary-helixqa-list-output">4.1 VERBATIM
+real-binary <code>helixqa list</code> output</h3>
+<pre><code>$ /tmp/helixqa list --banks /Volumes/T7/Projects/Lava/lava-api-go/qa/banks
+Test cases: 32
+
+ID           NAME                                     CATEGORY     PRIORITY   PLATFORMS
+------------------------------------------------------------------------------------------
+LAVA-ARCHIVEORG-001 Onboard and select the Internet Archi... functional   critical   android
+LAVA-ARCHIVEORG-002 Continue anonymously without hanging ... functional   critical   android
+LAVA-ARCHIVEORG-003 Search Internet Archive for a realist... functional   high       android
+LAVA-ARCHIVEORG-004 Open an item and obtain a working HTT... functional   critical   android
+LAVA-GUTENBERG-001 Onboard and select the Project Gutenb... functional   critical   android
+LAVA-GUTENBERG-002 Continue anonymously without hanging ... functional   critical   android
+LAVA-GUTENBERG-003 Search Project Gutenberg for a realis... functional   high       android
+LAVA-GUTENBERG-004 Open an item and obtain a working dow... functional   critical   android
+LAVA-KINOZAL-001 Onboard and select the Kinozal provider  functional   critical   android
+LAVA-KINOZAL-002 Authenticate to Kinozal with form-log... functional   critical   android
+LAVA-KINOZAL-003 Search Kinozal for a realistic query ... functional   high       android
+LAVA-KINOZAL-004 Open a result and obtain a working do... functional   critical   android
+LAVA-NAV-001 Cold-start survival (no crash on firs... functional   critical   android
+LAVA-NAV-002 Welcome brand mark renders in colour,... ux           high       android
+LAVA-NAV-003 Full onboarding happy path reaches th... functional   critical   android
+LAVA-NAV-004 Back-press on the first onboarding sc... functional   critical   android
+LAVA-NAV-005 Configure multiple providers during o... functional   high       android
+LAVA-NAV-006 Open Trackers from Settings without a... functional   high       android
+LAVA-NAV-007 Theme switch and rotation preserve state ux           medium     android
+LAVA-NAV-008 Primary in-app navigation reaches sea... functional   high       android
+LAVA-NNMCLUB-001 Onboard and select the NNM-Club provider functional   critical   android
+LAVA-NNMCLUB-002 Authenticate to NNM-Club with form-lo... functional   critical   android
+LAVA-NNMCLUB-003 Search NNM-Club for a realistic query... functional   high       android
+LAVA-NNMCLUB-004 Open a result and obtain a working do... functional   critical   android
+LAVA-RUTOR-001 Onboard and select the RuTor provider    functional   critical   android
+LAVA-RUTOR-002 Authenticate to RuTor with form-login... functional   critical   android
+LAVA-RUTOR-003 Search RuTor for a realistic query an... functional   high       android
+LAVA-RUTOR-004 Open a result and obtain a working do... functional   critical   android
+LAVA-RUTRACKER-001 Onboard and select the RuTracker prov... functional   critical   android
+LAVA-RUTRACKER-002 Authenticate to RuTracker with captch... functional   critical   android
+LAVA-RUTRACKER-003 Search RuTracker for a realistic quer... functional   high       android
+LAVA-RUTRACKER-004 Open a result and obtain a working do... functional   critical   android</code></pre>
+<p>The <code>--platform android</code> variant
+(<code>list --banks ... --platform android</code>) emits the same 32
+cases (all Lava cases declare <code>platforms: [android]</code>), in
+load order rather than sorted. Both invocations exit 0.</p>
+<p>The 7 banks map to the table below:</p>
+<table>
+<thead>
+<tr>
+<th>Bank</th>
+<th>Provider</th>
+<th>auth_type</th>
+<th>Download deliverable verified</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>lava-rutracker-journey.yaml</code></td>
+<td>rutracker</td>
+<td>CAPTCHA_LOGIN</td>
+<td>torrent file / magnet</td>
+</tr>
+<tr>
+<td><code>lava-rutor-journey.yaml</code></td>
+<td>rutor</td>
+<td>FORM_LOGIN</td>
+<td>torrent file / magnet</td>
+</tr>
+<tr>
+<td><code>lava-kinozal-journey.yaml</code></td>
+<td>kinozal</td>
+<td>FORM_LOGIN</td>
+<td>torrent file / magnet</td>
+</tr>
+<tr>
+<td><code>lava-nnmclub-journey.yaml</code></td>
+<td>nnmclub</td>
+<td>FORM_LOGIN</td>
+<td>torrent file / magnet</td>
+</tr>
+<tr>
+<td><code>lava-archiveorg-journey.yaml</code></td>
+<td>archiveorg</td>
+<td>NONE</td>
+<td>HTTP file link (no torrent/magnet)</td>
+</tr>
+<tr>
+<td><code>lava-gutenberg-journey.yaml</code></td>
+<td>gutenberg</td>
+<td>NONE</td>
+<td>torrent file or HTTP file</td>
+</tr>
+<tr>
+<td><code>lava-onboarding-navigation.yaml</code></td>
+<td>(cross-cutting)</td>
+<td>—</td>
+<td>cold-start / gating / nav</td>
+</tr>
+</tbody>
+</table>
+<p>Auth types and download capabilities are taken from the real
+descriptors under
+<code>core/tracker/&lt;provider&gt;/.../&lt;Provider&gt;Descriptor.kt</code>.</p>
+<p>To reproduce the listing through the real binary:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /Volumes/T7/Projects/Lava/submodules/helixqa</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> build <span class="at">-o</span> /tmp/helixqa ./cmd/helixqa</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="ex">/tmp/helixqa</span> list <span class="at">--banks</span> /Volumes/T7/Projects/Lava/lava-api-go/qa/banks <span class="at">--platform</span> android</span></code></pre></div>
+<h2 id="5-what-is-still-missing-concrete-task-list">5. What is still
+MISSING (concrete task list)</h2>
+<p>These are the concrete gaps between "banks exist + bridge exists" and
+"a fully autonomous provider-multiplexed run executes against the
+Genymotion VM". None of them are solved by this document; each is an
+actionable task.</p>
+<ol type="1">
+<li><p><strong>RESOLVED — HelixQA binary now builds and lists the
+banks.</strong> The earlier blocker (unresolved go.mod conflict markers
++ uninitialized own-org deps) is closed: 5 own-org dependency submodules
+were added, and
+<code>cd submodules/helixqa &amp;&amp; go build -o /tmp/helixqa ./cmd/helixqa</code>
+now exits 0 and produces <code>helixqa v0.2.0</code>.
+<code>helixqa list</code> against <code>lava-api-go/qa/banks</code>
+loads all 7 banks / 32 cases (verbatim output in §4.1). No bank-YAML fix
+was needed — the banks already match the real <code>pkg/testbank</code>
+loader schema. <code>helixqa autonomous</code> is NOT exercised here (it
+needs a booted device/emulator, which is not available this run — see
+§3.2/§5.4/§5.5 for the remaining wiring).</p></li>
+<li><p><strong>Navigator adapter for Lava-specific screens
+(Q6).</strong> The autonomous <code>pkg/navigator</code> Android
+<code>ActionExecutor</code> drives generic adb taps/swipes and relies on
+Vision to locate controls. Lava's Compose screens expose specific
+semantics (onboarding step controls, provider rows, the captcha field,
+the torrent vs magnet download affordances). <strong>Task:</strong>
+define a Lava navigator adapter / semantics map (resource-ids or Compose
+<code>testTag</code>s for: provider list rows, login
+username/password/captcha fields, search input, result row, topic
+download + magnet controls) so the navigator can act deterministically
+instead of vision-guessing, with vision as the fallback. This is the
+open "Q6 navigator adapter" item.</p></li>
+<li><p><strong>Session config for the bridge + device is not
+templated.</strong> There is no committed <code>.env.example</code>
+enumerating <code>HELIX_ANDROID_DEVICE</code>,
+<code>HELIX_ANDROID_PACKAGE</code>, and the per-tracker credential VAR
+NAMES for a Lava autonomous run. <strong>Task:</strong> add a
+<code>lava-api-go/qa/.env.example</code> (placeholders only, no secrets
+— §6.R/§6.H) documenting every variable §3.3 lists, plus a
+<code>--model</code> pin decision for the bridge (the discovery block
+currently hardcodes model <code>""</code>; pinning a Claude model
+requires either a small upstream change to the discovery list or an
+env-driven override — itself a HelixQA-side task).</p></li>
+<li><p><strong>Per-provider multiplexing / orchestration is not
+wired.</strong> A single <code>helixqa autonomous</code> invocation
+points at one app + one feature map; it does not iterate the six
+provider banks as distinct credentialed journeys, nor reset app state
+(<code>pm clear</code>) between providers. <strong>Task:</strong> add a
+Lava-side thin runner (e.g.
+<code>lava-api-go/qa/run-provider-matrix.sh</code>) that, per provider:
+<code>adb connect 127.0.0.1:6555</code> →
+<code>pm clear digital.vasic.lava.client.dev</code> → export that
+provider's credential vars → invoke the session (or
+<code>helixqa run</code>) scoped to that provider's bank → collect
+<code>qa-results/&lt;provider&gt;/</code>. This is the multiplexing
+layer that turns seven banks into one matrix run.</p></li>
+<li><p><strong>adb-over-TCP reachability gate.</strong> The session
+assumes <code>127.0.0.1:6555</code> is in <code>adb devices</code> as
+<code>device</code>. <strong>Task:</strong> add a pre-flight step to the
+runner (#4) that runs <code>adb connect</code> + asserts the serial is
+online and the package is installed, failing loud (not silently testing
+nothing) per the anti-bluff posture.</p></li>
+<li><p><strong>Download-payload verification is described, not yet
+asserted programmatically.</strong> The banks specify "non-empty
+bencoded torrent" / "magnet:?xt=urn:btih:<hash>" / "HTTP 200 non-empty
+payload" as the <code>expected</code>. <strong>Task:</strong> ensure the
+navigator (or a post-step hook) actually captures the produced torrent
+bytes / magnet URI / HTTP file and validates the shape — so a green step
+proves a real working download, not merely that a button was tappable
+(§6.G / §11.4.69 sink-side evidence).</p></li>
+</ol>
+<h2 id="6-constraints-honoured">6. Constraints honoured</h2>
+<ul>
+<li><strong>§6.R / §6.H / §11.4.10</strong> — no credentials in any
+tracked file. The banks and this doc reference credential VARIABLE NAMES
+only; real values live in the gitignored <code>.env</code> loaded at
+runtime.</li>
+<li><strong>submodules/helixqa unmodified</strong> — all configuration
+is external (env, flags, Lava-owned banks). The build blocker in §5.1 is
+reported honestly, not worked around by editing the submodule.</li>
+<li><strong>CONST-046</strong> — banks describe structure + intent
+prose; they do not hardcode the exact user-facing literal strings the
+app must display as assertion-equality values.</li>
+</ul>
+<h2 id="sources-verified">Sources verified</h2>
+<p>Real-binary evidence captured 2026-06-08 with
+<code>helixqa v0.2.0</code>
+(<code>go build -o /tmp/helixqa ./cmd/helixqa</code>, exit 0):</p>
+<ul>
+<li><strong><code>helixqa list --banks lava-api-go/qa/banks [--platform android]</code></strong>
+— exit 0, 32 cases across the 7 Lava banks (verbatim in §4.1).
+Supersedes the prior PyYAML-only validation.</li>
+<li><code>submodules/helixqa/pkg/llm/bridge_provider.go</code> — bridge
+invocation (<code>buildArgs</code> :250, <code>--model</code> omit :254,
+<code>--image</code> :257), vision gating (<code>SupportsVision</code>
+:133), JSON/plain-text parse (<code>parseResponse</code> :286, fallback
+:327), <code>defaultBridgeTimeout = 120s</code> :20.</li>
+<li><code>submodules/helixqa/cmd/helixqa/main.go</code> — bridge
+discovery inside <code>cmdAutonomous</code> (:404): block :527–:569,
+<code>{"claude","claude",""}</code> :538,
+<code>osexec.LookPath(cli.bin)</code> :542,
+<code>NewBridgedCLIProvider(...)</code> :546, chat-pool append :553,
+vision-pool append :558, no-provider exit guard :571–:578. Autonomous
+flags + <code>HELIX_ANDROID_*</code> env-var reads as noted in
+§3.1.</li>
+<li><strong><code>command -v claude</code></strong> →
+<code>/Users/milosvasic/.local/bin/claude</code> (claude IS on
+<code>$PATH</code>, so the bridge would self-discover in an autonomous
+session).</li>
+<li><code>submodules/helixqa/README.md</code> — bank schema, autonomous
+4-phase model, <code>list</code>/<code>autonomous</code> CLI.</li>
+<li><code>core/tracker/&lt;provider&gt;/.../{&lt;Provider&gt;Descriptor}.kt</code>
+— per-provider id, displayName, authType, capabilities.</li>
+</ul>
+</body>
+</html>

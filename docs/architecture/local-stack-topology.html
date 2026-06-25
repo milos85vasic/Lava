@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>local-stack-topology</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1 id="local-stack-topology--deployment-architecture">Local-Stack
+Topology — Deployment Architecture</h1>
+<blockquote>
+<p><strong>Status:</strong> descriptive architecture reference. The
+Android client, the <code>lava-api-go</code> service, the root
+<code>docker-compose.yml</code>, and mDNS discovery are <strong>in-tree
+and operational</strong>. The <strong>Jackett + FlareSolverr
+sidecar</strong> is at <strong>Phase 1</strong> — the Torznab Go client
++ a compose fragment exist and are tested, but <strong>no container has
+been booted</strong> and <strong>no <code>lava-api-go</code> handler
+routes through Jackett yet</strong> (marked <strong>NOT YET
+WIRED</strong> below). Per HelixConstitution §11.4.6 (no-guessing
+vocabulary), the implemented-vs-pending split is read from source, not
+inferred.</p>
+<p><strong>Companion docs:</strong> <a
+href="../qa/jackett-local-stack-research.md"><code>docs/qa/jackett-local-stack-research.md</code></a>
+(research dossier, every external claim cited), <a
+href="../qa/jackett-local-stack-implementation.md"><code>docs/qa/jackett-local-stack-implementation.md</code></a>
+(Phase 1 implementation + verbatim test output), <a
+href="../LOCAL_NETWORK_DISCOVERY.md"><code>docs/LOCAL_NETWORK_DISCOVERY.md</code></a>
+(mDNS), <a
+href="tracker-sdk.md"><code>docs/architecture/tracker-sdk.md</code></a>
+(client-side SDK).</p>
+</blockquote>
+<hr />
+<h2 id="1-the-whole-stack-in-one-diagram">1. The whole stack in one
+diagram</h2>
+<p>The load-bearing invariant: <strong>the Android app only ever talks
+to <code>lava-api-go</code>.</strong> Jackett and FlareSolverr are
+server-side sidecars on the internal <code>lava-net</code> bridge; they
+are never advertised on the LAN and never reachable from the device.
+Credentials and the Jackett <code>api_key</code> stay server-side
+(§6.H).</p>
+<pre class="mermaid"><code>graph TD
+    APP[&quot;Android app&lt;br/&gt;digital.vasic.lava.client(.dev)&lt;br/&gt;core:data LocalNetworkDiscoveryService&quot;]
+
+    subgraph HOST[&quot;host machine (rootless podman/docker via Containers submodule)&quot;]
+        API[&quot;lava-api-go&lt;br/&gt;:8443 HTTP/3 + HTTP/2 TLS&lt;br/&gt;network_mode: host&lt;br/&gt;Lava-Auth HMAC gate&quot;]
+
+        subgraph BRIDGE[&quot;lava-net (bridge network)&quot;]
+            PG[(&quot;lava-postgres&lt;br/&gt;:5432 (127.0.0.1:8432 host)&quot;)]
+            JK[&quot;lava-jackett&lt;br/&gt;:9117 Torznab&lt;br/&gt;expose-only, NOT advertised&lt;br/&gt;NOT YET WIRED&quot;]
+            FS[&quot;lava-flaresolverr&lt;br/&gt;:8191 headless Chromium&lt;br/&gt;profile=cloudflare&lt;br/&gt;NOT YET WIRED&quot;]
+        end
+    end
+
+    APP --&gt;|&quot;mDNS _lava-api._tcp&lt;br/&gt;then TLS + Lava-Auth&quot;| API
+    API --&gt;|&quot;storage.Storage (Postgres adapter)&quot;| PG
+    API -.-&gt;|&quot;Torznab HTTP (server-side, holds api_key)&lt;br/&gt;NOT YET WIRED&quot;| JK
+    JK -.-&gt;|&quot;Cloudflare challenge solve&lt;br/&gt;(only when profile=cloudflare)&quot;| FS
+
+    classDef pending stroke-dasharray: 5 5;
+    class JK,FS pending;</code></pre>
+<p>Dashed boxes/edges = <strong>NOT YET WIRED</strong> (Phase 1: client
++ compose fragment exist, no boot, no handler). Solid = in-tree and
+operational.</p>
+<p>Grounding:</p>
+<ul>
+<li><code>network_mode: host</code> for <code>lava-api-go</code>,
+<code>lava-net</code> bridge for Postgres —
+<code>docker-compose.yml</code> (top comment: <em>"lava-api-go uses
+network_mode: host so JmDNS / mDNS advertisements reach the LAN;
+Postgres + observability containers use the lava-net bridge"</em>).</li>
+<li>mDNS <code>_lava-api._tcp</code>, <code>:8443</code> TLS, host-net —
+confirmed in <code>docs/qa/jackett-local-stack-research.md</code> §0
+against <code>lava-api-go/cmd/lava-api-go/main.go</code> +
+<code>internal/config/config.go</code>.</li>
+<li>Postgres service name <code>lava-postgres</code>, host port
+<code>127.0.0.1:8432:5432</code> — <code>docker-compose.yml</code>.</li>
+<li>Jackett / FlareSolverr compose fragment —
+<code>tools/lava-containers/docker-compose.jackett.yml</code> (per
+<code>docs/qa/jackett-local-stack-implementation.md</code> Part 2).</li>
+</ul>
+<hr />
+<h2 id="2-the-app-sees-one-endpoint">2. The app sees ONE endpoint</h2>
+<p>The client's entire view of the backend is a single
+<code>_lava-api._tcp</code> (or <code>_lava-api-dev._tcp</code> for dev)
+mDNS service that resolves to one
+<code>Endpoint.GoApi(host, port)</code>. Jackett is invisible to the app
+by design — it is a server-side capability that <code>lava-api-go</code>
+proxies over Torznab.</p>
+<pre class="mermaid"><code>sequenceDiagram
+    actor User
+    participant APP as Android app
+    participant NSD as NsdManager / LocalNetworkDiscoveryService
+    participant API as lava-api-go (:8443)
+    participant JK as lava-jackett (:9117)
+
+    User-&gt;&gt;APP: open Settings
+    APP-&gt;&gt;NSD: discover _lava-api._tcp (5s scan)
+    NSD--&gt;&gt;APP: Endpoint.GoApi(host, port)
+    User-&gt;&gt;APP: search &quot;ubuntu&quot;
+    APP-&gt;&gt;API: GET /v1/search (TLS + Lava-Auth HMAC)
+    Note over API,JK: NOT YET WIRED — when a Torznab provider lands:
+    API-&gt;&gt;JK: GET /api/v2.0/indexers/&lt;id&gt;/results/torznab/api?apikey=…&amp;t=search&amp;q=ubuntu
+    JK--&gt;&gt;API: RSS/Torznab XML (items + enclosures)
+    API--&gt;&gt;APP: JSON results (app never sees Jackett)
+    APP--&gt;&gt;User: render rows</code></pre>
+<p>Security consequences (from research dossier §7 + implementation
+§"Ports exposed to the LAN"):</p>
+<ul>
+<li>Neither <code>:9117</code> (Jackett) nor <code>:8191</code>
+(FlareSolverr) is published — they use <code>expose:</code>
+(intra-bridge only). Only <code>lava-api-go:8443</code> is
+LAN-visible.</li>
+<li>The discovery + auth model is unchanged: one endpoint, existing TLS
++ HMAC. <code>/health</code> and <code>/ready</code> answer without a
+credential so discovery probes work; any data endpoint returns 401
+without the correct Lava-Auth key (see
+<code>docs/LOCAL_NETWORK_DISCOVERY.md</code> "Authentication when
+connecting").</li>
+</ul>
+<hr />
+<h2 id="3-mdns-discovery-flow-in-tree-operational">3. mDNS discovery
+flow (in-tree, operational)</h2>
+<pre class="mermaid"><code>graph LR
+    ADV[&quot;lava-api-go advertiser&lt;br/&gt;_lava-api._tcp&lt;br/&gt;(LAVA_API_MDNS_TYPE)&quot;]
+    SVC[&quot;LocalNetworkDiscoveryService&lt;br/&gt;core:data — NsdManager + callbackFlow&quot;]
+    UC[&quot;DiscoverLocalEndpointsUseCase&lt;br/&gt;core:domain — firstOrNull + timeout&quot;]
+    VM[&quot;MenuViewModel&lt;br/&gt;feature:menu&quot;]
+    UI[&quot;MenuScreen bottom sheet&lt;br/&gt;feature:menu&quot;]
+
+    ADV --&gt;|&quot;multicast 5353/UDP&quot;| SVC
+    SVC --&gt;|&quot;Flow&amp;lt;DiscoveredEndpoint&amp;gt;&quot;| UC
+    UC --&gt;|&quot;DiscoverLocalEndpointsResult&quot;| VM
+    VM --&gt;|&quot;MenuSideEffect.OpenConnectionSettings&quot;| UI</code></pre>
+<p>Service types the client resolves (verbatim from
+<code>docs/LOCAL_NETWORK_DISCOVERY.md</code>):</p>
+<table>
+<thead>
+<tr>
+<th>Source</th>
+<th>Service type</th>
+<th>TXT records</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Host server (release)</td>
+<td><code>_lava-api._tcp</code></td>
+<td><code>engine=go</code>, <code>platform=server</code> (or
+absent)</td>
+</tr>
+<tr>
+<td>Host server (dev)</td>
+<td><code>_lava-api-dev._tcp</code></td>
+<td><code>engine=go-dev</code></td>
+</tr>
+<tr>
+<td>On-device app (release)</td>
+<td><code>_lava-api._tcp</code></td>
+<td><code>engine=go</code>, <code>platform=android</code>,
+<code>storage=sqlite</code></td>
+</tr>
+<tr>
+<td>On-device app (dev)</td>
+<td><code>_lava-api-dev._tcp</code></td>
+<td><code>engine=go-dev</code>, <code>platform=android</code>,
+<code>storage=sqlite</code></td>
+</tr>
+</tbody>
+</table>
+<p><code>LocalNetworkDiscoveryServiceImpl</code> resolves these to
+<code>Endpoint.GoApi(host, port)</code> via the authoritative TXT
+<code>engine</code> attribute (falling back to the service type). The
+on-device <strong>advertiser</strong> (a phone/tablet registering itself
+via <code>NsdManager</code>) is <strong>PENDING Phase D</strong> — see
+<code>docs/ON_DEVICE_API.md</code>. Client-side discovery is in-tree and
+unchanged.</p>
+<hr />
+<h2
+id="4-jackett-sidecar--phase-1-detail-not-yet-wired-into-a-handler">4.
+Jackett sidecar — Phase 1 detail (NOT YET WIRED into a handler)</h2>
+<h3 id="41-what-exists-today">4.1 What exists today</h3>
+<pre class="mermaid"><code>graph TD
+    subgraph &quot;lava-api-go/internal/jackett (in-tree, tested)&quot;
+        TZ[&quot;torznab.go&lt;br/&gt;encoding/xml decoder → Result struct&quot;]
+        CL[&quot;client.go&lt;br/&gt;Client: BuildSearchURL/BuildCapsURL&lt;br/&gt;Search, Download (302→magnet)&quot;]
+        TD[&quot;testdata/torznab_results.xml&lt;br/&gt;+ torznab_test.go (12 tests PASS)&quot;]
+    end
+    FRAG[&quot;tools/lava-containers/docker-compose.jackett.yml&lt;br/&gt;compose fragment (parses clean, no boot)&quot;]
+    HANDLER[&quot;lava-api-go HTTP handler / provider route&lt;br/&gt;NOT IMPLEMENTED&quot;]
+
+    CL --&gt; HANDLER
+    FRAG -.-&gt;|&quot;defines lava-jackett + lava-flaresolverr&quot;| HANDLER
+
+    classDef pending stroke-dasharray: 5 5;
+    class HANDLER pending;</code></pre>
+<p>Per <code>docs/qa/jackett-local-stack-implementation.md</code>:</p>
+<ul>
+<li><code>internal/jackett/torznab.go</code> + <code>client.go</code> +
+<code>torznab_test.go</code> exist; the test suite reports
+<code>ok digital.vasic.lava.apigo/internal/jackett</code> (12 tests
+PASS, verbatim output in the implementation doc).</li>
+<li><code>tools/lava-containers/docker-compose.jackett.yml</code> is a
+<strong>fragment</strong> merged at run time with the root
+<code>docker-compose.yml</code> via <code>-f</code>; it parses clean
+(<code>podman compose -f docker-compose.jackett.yml config --quiet</code>)
+but <strong>no container was booted</strong>.</li>
+<li><strong>NOT IMPLEMENTED:</strong> the <code>lava-api-go</code> HTTP
+handler / provider route that calls <code>jackett.Client</code>, the
+OpenAPI spec entry, indexer provisioning automation, and
+<code>.env</code> / <code>.env.example</code> keys.</li>
+</ul>
+<h3 id="42-the-302--magnet-handler-the-correctness-critical-bit">4.2 The
+302 → magnet handler (the correctness-critical bit)</h3>
+<p>Jackett answers a download link with <strong>HTTP 302 whose
+<code>Location</code> is a <code>magnet:</code> URI</strong>. A naive
+auto-following client tries to "<code>GET magnet:</code>" and fails.
+<code>jackett.Client</code> sets
+<code>http.Client.CheckRedirect = http.ErrUseLastResponse</code> (do
+<strong>not</strong> follow) and reads the <code>Location</code>
+header:</p>
+<pre class="mermaid"><code>graph TD
+    DL[&quot;Download(ctx, item.DownloadURL)&quot;]
+    Q{&quot;enclosure already magnet?&quot;}
+    SHORT[&quot;short-circuit → DownloadResult.Magnet&lt;br/&gt;(no HTTP round-trip)&quot;]
+    HTTP[&quot;HTTP GET (CheckRedirect = ErrUseLastResponse)&quot;]
+    R302{&quot;302?&quot;}
+    LOC{&quot;Location starts with magnet:?&quot;}
+    MAG[&quot;DownloadResult.Magnet (captured)&quot;]
+    ERR[&quot;explicit error&lt;br/&gt;(do NOT follow non-magnet redirect)&quot;]
+    BODY[&quot;HTTP 200 → DownloadResult.TorrentBytes + ContentType&quot;]
+
+    DL --&gt; Q
+    Q --&gt;|yes| SHORT
+    Q --&gt;|no| HTTP --&gt; R302
+    R302 --&gt;|yes| LOC
+    LOC --&gt;|yes| MAG
+    LOC --&gt;|no| ERR
+    R302 --&gt;|no, 200| BODY</code></pre>
+<p>This serves the download-confirmation goal (a valid
+<code>.torrent</code> byte stream OR a real magnet) and closes the known
+kinozal/nnmclub null-magnet gaps — and pairs with the client-side
+<code>TorrentFileValidator</code> / <code>MagnetLinkValidator</code>
+(<code>core/common/…/torrent/</code>, see <a
+href="tracker-sdk.md"><code>tracker-sdk.md</code> §7</a>) so a download
+is provably real on both sides of the boundary.</p>
+<h3 id="43-flaresolverr--profile-gated">4.3 FlareSolverr —
+profile-gated</h3>
+<p>FlareSolverr (headless Chromium, the RAM-heavy component) is gated
+behind a <code>cloudflare</code> compose profile so it is only up when a
+Cloudflare/DDoS-Guard indexer (e.g. IPTorrents) is enabled. For
+RuTracker/RuTor/NNMClub it stays off. Jackett points at it via a
+FlareSolverr URL in Jackett's config; readiness is
+<code>POST :8191/v1 {"cmd":"sessions.list"}</code> → 200 (no native
+<code>/health</code>). Source: research dossier §4.</p>
+<h3 id="44-who-holds-the-api_key">4.4 Who holds the api_key</h3>
+<pre class="mermaid"><code>graph LR
+    GEN[&quot;Jackett generates api_key on first run&quot;]
+    VOL[&quot;/config/ServerConfig.json&lt;br/&gt;(gitignored host volume&lt;br/&gt;LAVA_JACKETT_CONFIG_DIR)&quot;]
+    ENV[&quot;LAVA_JACKETT_API_KEY&lt;br/&gt;(env, populated by Containers glue)&quot;]
+    CFG[&quot;jackett.Config{ BaseURL, APIKey }&lt;br/&gt;in lava-api-go (server-side)&quot;]
+    DEV[&quot;Android device&lt;br/&gt;NEVER receives api_key&quot;]
+
+    GEN --&gt; VOL --&gt; ENV --&gt; CFG
+    CFG -. &quot;§6.H: never sent&quot; .-x DEV</code></pre>
+<p>The api_key is a §6.H secret: read server-side at startup,
+<strong>never</strong> hardcoded (§6.R), <strong>never</strong> sent to
+the device. Source:
+<code>docs/qa/jackett-local-stack-implementation.md</code> "Who holds
+the apikey".</p>
+<hr />
+<h2 id="5-orchestration--the-containers-submodule">5. Orchestration —
+the Containers submodule</h2>
+<p>The stack is brought up by
+<code>tools/lava-containers/cmd/lava-containers</code> (thin Lava-side
+glue), which auto-detects rootless podman/docker and merges the root
+<code>docker-compose.yml</code> with fragments. The Jackett fragment
+composes in as:</p>
+<pre><code>docker compose -f docker-compose.yml \
+  -f tools/lava-containers/docker-compose.jackett.yml \
+  --profile api-go --profile jackett config</code></pre>
+<p>Generic container-runtime concerns are owned by the
+<code>vasic-digital/Containers</code> submodule
+(<code>submodules/containers/</code>, pinned); the local CLI is thin
+glue per the Decoupled Reusable Architecture rule. <strong>Do not bring
+<code>docker-compose.yml</code> up directly</strong> — orchestration is
+owned by the CLI (<code>start.sh</code> / <code>stop.sh</code>).</p>
+<p>Compose profiles (from <code>docker-compose.yml</code> header):</p>
+<table>
+<thead>
+<tr>
+<th>Profile</th>
+<th>Brings up</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>api-go</code> (default)</td>
+<td><code>lava-postgres</code> + <code>lava-migrate</code> +
+<code>lava-api-go</code></td>
+</tr>
+<tr>
+<td><code>observability</code></td>
+<td>Prometheus + Loki + Promtail + Tempo + Grafana</td>
+</tr>
+<tr>
+<td><code>dev-docs</code></td>
+<td>Swagger UI mounting <code>api/openapi.yaml</code></td>
+</tr>
+<tr>
+<td><code>jackett</code> (fragment)</td>
+<td><code>lava-jackett</code> (<strong>NOT YET WIRED</strong>)</td>
+</tr>
+<tr>
+<td><code>cloudflare</code> (fragment)</td>
+<td><code>lava-flaresolverr</code> (<strong>NOT YET WIRED</strong>)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="6-healthchecks-6b--up-is-not-healthy">6. Healthchecks (§6.B —
+"Up" is not "healthy")</h2>
+<p><code>docker ps</code> reporting <code>Up</code> only means PID 1 is
+alive. Each service has an application-level probe:</p>
+<table>
+<thead>
+<tr>
+<th>Service</th>
+<th>Probe</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>lava-postgres</code></td>
+<td><code>pg_isready -U lava -d lava_api</code></td>
+<td>DB accepting connections (<code>docker-compose.yml</code>).</td>
+</tr>
+<tr>
+<td><code>lava-api-go</code></td>
+<td>Dockerfile <code>HEALTHCHECK</code> → <code>healthprobe</code> (real
+HTTP/3)</td>
+<td>distroless, no <code>/bin/sh</code>; §6.A contract test at
+<code>lava-api-go/tests/contract/healthcheck_contract_test.go</code>.</td>
+</tr>
+<tr>
+<td><code>lava-jackett</code> (planned)</td>
+<td>Torznab <code>t=caps</code> 200 + parseable
+<code>&lt;caps&gt;</code></td>
+<td>proves the Torznab surface is live AND api_key is valid — the real
+code path <code>lava-api-go</code> will consume (not a bare TCP
+probe).</td>
+</tr>
+<tr>
+<td><code>lava-flaresolverr</code> (planned)</td>
+<td><code>POST /v1 {"cmd":"sessions.list"}</code> → 200</td>
+<td>no native <code>/health</code>; a bare TCP-8191 would accept the
+Python proxy before Chromium is ready.</td>
+</tr>
+</tbody>
+</table>
+<p>Any future Lava-owned <code>healthprobe</code>-style binary used for
+the Jackett probe must gain a §6.A contract test asserting its flag set,
+mirroring <code>healthcheck_contract_test.go</code> (research dossier §0
+forensic anchor: the 569-consecutive-failing-healthcheck incident where
+the probe rejected a flag the compose file passed).</p>
+<hr />
+<h2 id="7-open-questions-carried-from-the-research-dossier">7. Open
+questions (carried from the research dossier)</h2>
+<p>These are operator/architecture decisions, not yet resolved (verbatim
+from <code>docs/qa/jackett-local-stack-research.md</code> §"OPEN
+QUESTIONS"):</p>
+<ul>
+<li><strong>Q1</strong> — Jackett vs Prowlarr final call (Prowlarr only
+wins on provisioning automation; consumption surface is ~equal
+Torznab).</li>
+<li><strong>Q2</strong> — Distribution mode for the Jackett image:
+reference <code>lscr.io/…</code> by digest vs. re-push into a Lava-owned
+registry (drives GPL-2.0 obligations).</li>
+<li><strong>Q3</strong> — Indexer provisioning path: internal admin HTTP
+endpoints (version-coupled, undocumented) vs. per-<code>/config</code>
+JSON (undocumented schema).</li>
+<li><strong>Q4</strong> — Jackett network mode: <code>lava-net</code>
+bridge (recommended) vs. host-net.</li>
+<li><strong>Q5</strong> — FlareSolverr arm64 Chromium boot under the
+podman VM on Apple Silicon must be boot-verified before it is
+gate-eligible.</li>
+</ul>
+<p><em>Last updated: 2026-06-08. Implemented-vs-pending split verified
+against the working tree + the qa/ Jackett docs.</em></p>
+</body>
+</html>

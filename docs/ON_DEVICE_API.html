@@ -1,0 +1,1467 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>ON_DEVICE_API</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1 id="on-device-lava-api-android">On-Device Lava API (Android)</h1>
+<blockquote>
+<p><strong>Status of this document (2026-06-02):</strong> Phases A, B,
+C, and D-infra of the <em>Lava API Android app</em> sub-project (spec <a
+href="superpowers/specs/2026-06-02-lava-api-android-app-design.md"><code>docs/superpowers/specs/2026-06-02-lava-api-android-app-design.md</code></a>,
+plan <a
+href="superpowers/plans/2026-06-02-lava-api-android-app.md"><code>docs/superpowers/plans/2026-06-02-lava-api-android-app.md</code></a>)
+have landed. This document describes <strong>only what the committed
+code does</strong> — the additive SQLite storage backend (Phase A), the
+in-process Go embed + c-shared/JNI native build (Phase B), the
+<code>:core:apiengine</code> Kotlin JNI wrapper (Phase C, commit
+<code>ef109760</code>), and the <code>:api-app</code> headless
+infrastructure (Phase D-infra, commit <code>e62e0fa8</code>: the
+foreground <code>ApiEngineService</code>, the
+<code>ApiEngineController</code> state machine, the
+<code>NsdManager</code> advertiser, and the per-install auth-key store).
+The <strong>landing UI / control screen + ViewModel</strong> (Phase
+D-ui), the instrumented <strong>Compose UI Challenge tests</strong>
+(Phase E), and the <strong>client-side distinct labelling</strong> of
+Android instances (sub-project 2) are <strong>PENDING</strong> and are
+explicitly marked as such below. Nothing in this doc describes behavior
+that is not yet in the tree.</p>
+<p><code>Classification:</code> project-specific (the on-device-API app
++ Go SQLite backend are Lava-specific; the additive-backend-selector
+pattern is universal and is noted as such inline).</p>
+</blockquote>
+<h2 id="1-motivation">1. Motivation</h2>
+<p>The existing Lava API (<code>lava-api-go</code>) runs on a host
+(server, NAS, or developer workstation) backed by Postgres, advertises
+itself on the LAN via mDNS, and the Android client discovers and talks
+to it over HTTPS. The on-device API sub-project lets a <strong>phone or
+tablet itself become a LAN-reachable Lava API</strong>: the same Go
+server, cross-compiled and embedded in-process, backed by a local SQLite
+file, bound to <code>0.0.0.0</code> so other devices on the same Wi-Fi
+can discover and use it.</p>
+<p>The design constraint the operator set is <em>additive</em>: "Nothing
+already working can be broken — only extended for more flexibility."
+Every existing Postgres deployment behaves byte-for-byte as before;
+SQLite and the embed are new, config-selected branches.</p>
+<h2 id="2-the-additive-sqlite-storage-backend-phase-a--landed">2. The
+additive SQLite storage backend (Phase A — landed)</h2>
+<h3 id="21-principle-universal-pattern">2.1 Principle (universal
+pattern)</h3>
+<p>A <strong>backend selector</strong> whose default reproduces today's
+behavior exactly. The existing code becomes "the Postgres branch," never
+"the only path." Any deployment that sets <code>LAVA_API_PG_URL</code>
+and nothing else behaves identically to before.</p>
+<p><code>Classification:</code> the selector pattern itself is
+universal; the two concrete backends are Lava-specific.</p>
+<h3 id="22-config-selection">2.2 Config selection</h3>
+<p>Source: <a
+href="../lava-api-go/internal/config/config.go"><code>lava-api-go/internal/config/config.go</code></a>.</p>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Meaning</th>
+<th>Required when</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>LAVA_API_STORAGE_BACKEND</code></td>
+<td><code>postgres</code> (default) or <code>sqlite</code></td>
+<td>never (defaults to <code>postgres</code>)</td>
+</tr>
+<tr>
+<td><code>LAVA_API_PG_URL</code></td>
+<td>Postgres connection URL</td>
+<td>iff backend is <code>postgres</code></td>
+</tr>
+<tr>
+<td><code>LAVA_API_SQLITE_PATH</code></td>
+<td>SQLite database file path (e.g. <code>/data/lava-api.db</code>;
+<code>:memory:</code> accepted)</td>
+<td>iff backend is <code>sqlite</code></td>
+</tr>
+</tbody>
+</table>
+<p><code>config.Load()</code> selects the branch in a
+<code>switch cfg.StorageBackend</code>:</p>
+<ul>
+<li><code>postgres</code> → require <code>PGUrl</code> (the historical
+hard dependency, now scoped to this branch so existing users are
+unaffected).</li>
+<li><code>sqlite</code> → require <code>SQLitePath</code>.</li>
+<li>anything else → reject with
+<code>unknown storage backend %q</code>.</li>
+</ul>
+<p>No env var was renamed or removed; the two new variables carry
+placeholders in <code>.env.example</code> (§6.R).
+<code>LAVA_API_TLS_CERT</code>/<code>LAVA_API_TLS_KEY</code> and a valid
+<code>LAVA_API_MDNS_PORT</code> remain required regardless of
+backend.</p>
+<h3 id="23-storage-boundary-and-parity-with-postgres">2.3 Storage
+boundary and parity with Postgres</h3>
+<p>Source: <a
+href="../lava-api-go/internal/storage/"><code>lava-api-go/internal/storage/</code></a>.</p>
+<p>The <code>storage.Storage</code> interface (<a
+href="../lava-api-go/internal/storage/storage.go"><code>storage.go</code></a>)
+declares <strong>exactly</strong> the cache operations the handlers
+depend on — enumerated from the real handler consumers, nothing
+more:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Storage <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    Get<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> key <span class="dt">string</span><span class="op">)</span> <span class="op">([]</span><span class="dt">byte</span><span class="op">,</span> cache<span class="op">.</span>Outcome<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    Set<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> key <span class="dt">string</span><span class="op">,</span> value <span class="op">[]</span><span class="dt">byte</span><span class="op">,</span> ttl time<span class="op">.</span>Duration<span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    Invalidate<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> key <span class="dt">string</span><span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    Close<span class="op">()</span> <span class="dt">error</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Two implementations satisfy it interchangeably:</p>
+<ul>
+<li><strong>postgres</strong> — wraps the existing
+<code>submodules/cache/pkg/postgres</code> adapter
+(<code>response_cache</code> table, schema <code>lava_api</code>,
+10-minute GC interval). Behavior is unchanged from the prior
+<code>main.go</code> path.</li>
+<li><strong>sqlite</strong> — pure-Go <a
+href="https://pkg.go.dev/modernc.org/sqlite"><code>modernc.org/sqlite</code></a>
+(CGo-free, so it cross-compiles cleanly for Android). Behavior parity
+with Postgres is the explicit goal and is verified by a shared
+conformance harness plus a cross-backend parity test (per the
+plan).</li>
+</ul>
+<p><code>storage.New(cfg)</code> (<a
+href="../lava-api-go/internal/storage/factory.go"><code>factory.go</code></a>)
+selects the implementation by <code>cfg.StorageBackend</code> and
+returns the <code>Storage</code> together with a
+<code>ReadinessFunc</code> (the <code>/ready</code> probe): Postgres
+uses <code>pgClient.HealthCheck</code>; SQLite does a trivial round-trip
+<code>Get</code> of a sentinel key to prove the handle answers
+queries.</p>
+<h3 id="24-sqlite-ttl-gc-and-wal-semantics">2.4 SQLite TTL, GC, and WAL
+semantics</h3>
+<p>Source: <a
+href="../lava-api-go/internal/storage/sqlite.go"><code>sqlite.go</code></a>,
+migration <a
+href="../lava-api-go/internal/migrations/sqlite/0001_init.sql"><code>migrations/sqlite/0001_init.sql</code></a>.</p>
+<p>Schema mirrors the Postgres <code>response_cache</code> table with
+portable types:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode sql"><code class="sourceCode sql"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> <span class="cf">IF</span> <span class="kw">NOT</span> <span class="kw">EXISTS</span> response_cache (</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    cache_key   TEXT <span class="kw">PRIMARY</span> <span class="kw">KEY</span>,</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">value</span>       <span class="dt">BLOB</span> <span class="kw">NOT</span> <span class="kw">NULL</span>,        <span class="co">-- BYTEA equivalent</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    expires_at  <span class="dt">INTEGER</span>               <span class="co">-- unix NANOSECONDS; NULL = never expires</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>);</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> <span class="cf">IF</span> <span class="kw">NOT</span> <span class="kw">EXISTS</span> response_cache_expires_at_idx <span class="kw">ON</span> response_cache (expires_at);</span></code></pre></div>
+<p>Behavioral details the committed code implements:</p>
+<ul>
+<li><strong>TTL</strong> is an absolute <code>expires_at</code> (unix
+nanoseconds). <code>Set</code> with <code>ttl &gt; 0</code> stores
+<code>now + ttl</code>; <code>ttl &lt;= 0</code> stores SQL
+<code>NULL</code> (never expires) — matching the Postgres
+<code>WHERE expires_at IS NULL OR expires_at &gt; NOW()</code>
+contract.</li>
+<li><strong>Lazy expiry on read.</strong> <code>Get</code> filters
+<code>expires_at IS NULL OR expires_at &gt; ?</code>, so an expired
+entry reads as an <code>OutcomeMiss</code>, never a stale hit. A real DB
+error returns <code>OutcomeBypass + err</code> so callers fall through
+to the upstream — identical to <code>cache.Client.Get</code>. A stored
+zero-length value is a <strong>hit</strong> (non-nil empty slice),
+matching Postgres <code>BYTEA</code> empty-value semantics.</li>
+<li><strong>Background GC.</strong> A goroutine runs
+<code>sweepExpired</code> every <strong>10 minutes</strong>
+(<code>sqliteGCInterval</code>, mirroring the Postgres GC cadence). It
+physically <code>DELETE</code>s rows whose <code>expires_at</code> is in
+the past and then runs <code>PRAGMA incremental_vacuum</code> to return
+freed pages to the free list. <code>Close()</code> cancels the
+goroutine's context and joins it (no leak); <code>Close()</code> is
+idempotent.</li>
+<li><strong>WAL + auto_vacuum</strong> (on-disk databases only; skipped
+for <code>:memory:</code>):
+<ul>
+<li>The DSN sets <code>journal_mode(WAL)</code> (concurrent readers
+don't block the single writer) and <code>busy_timeout(5000)</code> (ride
+out brief write locks).</li>
+<li><code>SetMaxOpenConns(1)</code> serializes access through one
+connection — the standard race-free choice for an embedded SQLite
+writer, and required so the connection-scoped <code>auto_vacuum</code>
+PRAGMA applies to the one connection every query uses.</li>
+<li><code>PRAGMA auto_vacuum=INCREMENTAL</code> followed by
+<code>VACUUM</code> is run <strong>before</strong> the migration (the
+VACUUM rewrites the DB header with the new flag; order is load-bearing —
+running the PRAGMA after a table exists leaves
+<code>auto_vacuum=0</code>).</li>
+<li>After migration, <code>PRAGMA journal_mode</code> is re-queried and
+the constructor <strong>fails loudly</strong> if WAL did not engage,
+refusing to run in a weaker (DELETE) journal mode that would drop the
+concurrent-reader guarantee.</li>
+</ul></li>
+</ul>
+<h2 id="3-the-in-process-go-embed-phase-b--landed">3. The in-process Go
+embed (Phase B — landed)</h2>
+<p>Source: <a
+href="../lava-api-go/internal/mobile/mobile.go"><code>lava-api-go/internal/mobile/mobile.go</code></a>
+and <a
+href="../lava-api-go/internal/mobile/tls.go"><code>tls.go</code></a>.</p>
+<p><code>internal/mobile</code> is the small, JNI-friendly lifecycle
+surface that boots the <strong>full production API in-process</strong>
+inside the Android app (Phases C/D will call it). Three exported
+functions, designed so only <code>string</code>/<code>error</code> cross
+the boundary:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> Start<span class="op">(</span>configJSON <span class="dt">string</span><span class="op">)</span> <span class="dt">error</span>  <span class="co">// parse config → SQLite + full router + TLS, listen, return when accepting</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> Stop<span class="op">()</span>  <span class="dt">error</span>                   <span class="co">// graceful shutdown + close storage; errors if nothing running</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> Status<span class="op">()</span> <span class="dt">string</span>                 <span class="co">// JSON: state, scheme, bindAddr, port, requestCount, backend, version, auth*</span></span></code></pre></div>
+<p><code>Start</code>'s <code>configJSON</code> shape:
+<code>{"bindAddr":"0.0.0.0","port":8443,"sqlitePath":"/data/x.db","authSharedKey":"&lt;base64-uuid&gt;","authFieldName":"&lt;header&gt;"}</code>
+— <code>bindAddr</code>/<code>port</code> optional (default
+<code>0.0.0.0:8443</code>); <code>sqlitePath</code> required;
+<code>authSharedKey</code>/<code>authFieldName</code> optional (see
+§3.4). Exactly one server instance may run per process (a package-level
+handle guarded by a mutex; <code>Start</code> while running returns an
+error).</p>
+<h3 id="31-why-c-shared-not-gomobile">3.1 Why c-shared, not
+gomobile</h3>
+<p>Source: <a
+href="../lava-api-go/cmd/lavaapi-cshared/main.go"><code>lava-api-go/cmd/lavaapi-cshared/main.go</code></a>.</p>
+<p><code>gomobile bind</code> is <strong>BLOCKED</strong> on this
+module. <code>lava-api-go</code>'s <code>go.mod</code> uses relative
+<code>replace ../submodules/*</code> directives for the 16 vasic-digital
+submodules; gomobile's overlay-module generator cannot resolve them (it
+writes a 0-byte <code>go.mod</code>; proven on NDK 21.4 + 25.1). The
+chosen replacement is
+<strong><code>go build -buildmode=c-shared</code></strong>, which uses
+ordinary Go module resolution and therefore HONORS the replace
+directives. It is still an in-process, cross-compiled Go artifact.</p>
+<p>The tradeoff: c-shared exports a flat C ABI, not a generated Java
+class hierarchy. A <strong>hand-written JNI bridge</strong> adapts the
+four exported C functions to the JNI naming convention the Kotlin side
+will bind.</p>
+<p>The exported C surface (all strings NUL-terminated UTF-8; every
+returned <code>char*</code> is heap-allocated by <code>C.CString</code>
+and the caller MUST release it via <code>LavaApiFree</code>):</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">extern</span> <span class="dt">char</span><span class="op">*</span> LavaApiStart<span class="op">(</span><span class="dt">char</span><span class="op">*</span> configJSON<span class="op">);</span>  <span class="co">// &quot;&quot; on success, else error msg</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="kw">extern</span> <span class="dt">char</span><span class="op">*</span> LavaApiStop<span class="op">(</span><span class="dt">void</span><span class="op">);</span>                <span class="co">// &quot;&quot; on success, else error msg</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="kw">extern</span> <span class="dt">char</span><span class="op">*</span> LavaApiStatus<span class="op">(</span><span class="dt">void</span><span class="op">);</span>              <span class="co">// status JSON document</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="kw">extern</span> <span class="dt">void</span>  LavaApiFree<span class="op">(</span><span class="dt">char</span><span class="op">*</span> p<span class="op">);</span>             <span class="co">// free a returned string</span></span></code></pre></div>
+<h3 id="32-the-jni-contract">3.2 The JNI contract</h3>
+<p>Source: <a
+href="../lava-api-go/cmd/lavaapi-cshared/jni/jni_bridge.c"><code>lava-api-go/cmd/lavaapi-cshared/jni/jni_bridge.c</code></a>
+and <a
+href="../lava-api-go/cmd/lavaapi-cshared/jni/CMakeLists.txt"><code>CMakeLists.txt</code></a>.</p>
+<p><code>jni_bridge.c</code> builds <code>liblavaapi_jni.so</code>,
+which links against the prebuilt <code>liblavaapi.so</code> (from the
+c-shared build) and exposes the entry points the Kotlin side will
+bind:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span> <span class="im">digital</span><span class="op">.</span><span class="im">vasic</span><span class="op">.</span><span class="im">lava</span><span class="op">.</span><span class="im">apigo</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="kw">object</span> LavaNative <span class="op">{</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">external</span> <span class="kw">fun</span> <span class="fu">nativeStart</span><span class="op">(</span><span class="va">configJson</span><span class="op">:</span> <span class="dt">String</span><span class="op">):</span> <span class="dt">String</span>  <span class="co">// &quot;&quot; on success, else error message</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">external</span> <span class="kw">fun</span> <span class="fu">nativeStop</span><span class="op">():</span> <span class="dt">String</span>                      <span class="co">// &quot;&quot; on success, else error message</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">external</span> <span class="kw">fun</span> <span class="fu">nativeStatus</span><span class="op">():</span> <span class="dt">String</span>                    <span class="co">// status JSON document</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>JNI symbol names (package dots → underscores, then class, then
+method):</p>
+<ul>
+<li><code>Java_digital_vasic_lava_apigo_LavaNative_nativeStart</code></li>
+<li><code>Java_digital_vasic_lava_apigo_LavaNative_nativeStop</code></li>
+<li><code>Java_digital_vasic_lava_apigo_LavaNative_nativeStatus</code></li>
+</ul>
+<p>A Kotlin <code>object</code> compiles to a final class with a static
+<code>INSTANCE</code>; its <code>external</code> functions register as
+native methods that receive a <code>jclass</code>, so the bridge
+functions take <code>(JNIEnv*, jclass, ...)</code>. The bridge copies
+each Go-returned C string into a JVM string via
+<code>NewStringUTF</code> and immediately releases the C buffer via
+<code>LavaApiFree</code> so nothing leaks across the boundary.</p>
+<p><code>jni_bridge.c</code> and its <code>CMakeLists.txt</code> live in
+the <code>jni/</code> <strong>subdirectory</strong>, NOT the cgo
+<code>main</code> package, because <code>jni_bridge.c</code>
+<code>#include</code>s <code>liblavaapi.h</code> — the
+cgo-<em>generated</em> header the c-shared build PRODUCES — so it cannot
+be compiled by the cgo build itself; it is compiled later by the Android
+NDK toolchain via
+<code>externalNativeBuild { cmake { ... } }</code>.</p>
+<blockquote>
+<p><strong>LANDED (Phase C, commit <code>ef109760</code>):</strong> the
+Kotlin <code>LavaNative</code> object, the <code>:core:apiengine</code>
+wrapper module, and the <code>externalNativeBuild</code> Gradle wiring
+that loads these native libraries now exist in the tree and match the
+contract above exactly. See <a
+href="#4a-phase-c--the-coreapiengine-jni-wrapper-landed">§4A — Phase
+C</a> for the full mapping.</p>
+</blockquote>
+<h3 id="33-what-the-embed-serves-full-production-router--tls">3.3 What
+the embed serves (full production router) + TLS</h3>
+<p>The embed builds the <strong>EXACT same Gin engine</strong> the
+production <code>cmd/lava-api-go</code> binary builds, via the shared
+<code>internal/router.Build</code> constructor (<a
+href="../lava-api-go/internal/router/router.go"><code>router.go</code></a>)
+— search / browse / topic / forum / torrent / login / favorites /
+captcha, <code>/v1/{provider}/...</code>, plus <code>/health</code> and
+<code>/ready</code>. The provider registry wires the same adapters
+production wires (rutracker, nnmclub, kinozal, archive.org, gutenberg).
+Sharing one router constructor is deliberate (§6.J): a divergent embed
+router would be a bluff vector — green tests against an embed serving
+different routes than production would guarantee nothing about
+production.</p>
+<p>The <strong>only</strong> transport difference from the LAN binary:
+the embed serves HTTP/1.1 + HTTP/2 over TLS using a standard
+<code>net/http</code> server; the binary additionally serves HTTP/3
+(QUIC). HTTP/3 is not required for the embed — LAN clients that discover
+the on-device API speak ordinary HTTPS. The embed explicitly disables
+Brotli / protocol-metric / AltSvc middlewares (transport tuning, not
+security) so repeated in-process <code>Start</code>/<code>Stop</code>
+cycles don't touch the Prometheus default registerer.</p>
+<p><strong>TLS</strong> (<a
+href="../lava-api-go/internal/mobile/tls.go"><code>tls.go</code></a>):</p>
+<ul>
+<li>A self-signed <strong>ECDSA P-256</strong> cert + key is generated
+on first boot and persisted next to the SQLite DB
+(<code>lava-embed-cert.pem</code> / <code>lava-embed-key.pem</code>; the
+key is written <code>0600</code>). Validity is 10 years (rotation
+handling is a later sub-project).</li>
+<li>If both files already exist and parse, they are
+<strong>reused</strong> across restarts, so a peer that pinned the leaf
+cert out-of-band does not see it change every boot.</li>
+<li><strong>IP SANs:</strong> loopback (IPv4 + IPv6) plus the host's
+non-loopback, non-link-local LAN IPs discovered at boot
+(<code>localIPs()</code>), so a peer addressing the server by LAN IP
+does not hit a host-mismatch error.</li>
+<li><strong>No wildcard DNS SAN.</strong> DNS SANs are limited to
+<code>localhost</code> — a bare <code>*</code> wildcard SAN matched ANY
+hostname and defeated name verification (a security-review finding;
+fixed in commit <code>6f751495</code>). Peers address the embed by LAN
+IP (covered by the IP SANs) or by <code>localhost</code> on-device.
+Out-of-band leaf trust on the consuming devices is the model for now
+(full client-trust / local-CA handling is a later sub-project).</li>
+</ul>
+<h3
+id="34-the-lava-auth-gate-on-the-embed-same-mechanism-as-the-host">3.4
+The Lava-Auth gate on the embed (same mechanism as the host)</h3>
+<p>Because the embed is network-exposed (§3.5), it <strong>MUST
+authenticate</strong> — there is no "trusted LAN" shortcut. It enforces
+the <strong>identical</strong> Lava-Auth gate the production LAN binary
+uses (<code>internal/auth.NewMiddleware</code> +
+<code>NewBackoffMiddleware</code>, source <a
+href="../lava-api-go/internal/auth/middleware.go"><code>middleware.go</code></a>):</p>
+<ul>
+<li>The client presents a credential in a configurable header (default
+<code>Lava-Auth</code>). The credential is
+<code>base64(16-byte UUID blob)</code>.</li>
+<li>The middleware base64-decodes the header, computes
+<code>hex(HMAC-SHA256(uuid_bytes, secret))</code>, and compares (in
+constant time, to defeat timing side-channels) against the
+active-clients allowlist.</li>
+<li>Active hash → request served (<code>client_name</code> set, backoff
+reset). Retired hash → 426 Upgrade Required. Missing / malformed /
+unknown → 401 and the per-IP backoff ladder advances; repeated failures
+escalate to 429 on the default ladder
+<code>2s,5s,10s,30s,1m,1h</code>.</li>
+<li><code>/health</code> and <code>/ready</code> are registered
+<strong>before</strong> the auth middleware so the orchestrator probes
+work without a credential.</li>
+</ul>
+<p>The embed's app-managed key flow:</p>
+<ul>
+<li>The host app supplies the credential via <code>authSharedKey</code>
+in the Start config.</li>
+<li><strong>If none is supplied, the embed GENERATES one</strong>
+(random 16-byte UUID, base64-encoded) so the gate is never disabled. The
+generated/in-effect key is surfaced via <code>Status()</code> (the
+<code>authKey</code> field) — and <strong>only</strong> there — so the
+app can display it for pairing. It is deliberately never written to a
+log line (§6.H / §6.AC redaction). The plaintext blob is zeroized after
+hashing.</li>
+<li><code>Status().authEnabled</code> is always <code>true</code> while
+running.</li>
+</ul>
+<blockquote>
+<p><strong>LANDED (Phase D-infra, commit
+<code>e62e0fa8</code>):</strong> persisting the key across app restarts
+is now the <code>:api-app</code> <code>ApiKeyStore</code>'s
+responsibility (a per-install base64-UUID blob held in
+<code>EncryptedSharedPreferences</code>); see <a
+href="#4b4-the-per-install-auth-key-store-apikeystore">§4B.4 — auth-key
+store</a>. The UI that shows it for pairing remains <strong>PENDING
+(Phase D-ui)</strong>. The Go embed surface here only ENFORCES whatever
+key is in effect and reports it via <code>Status()</code>.</p>
+</blockquote>
+<h3 id="35-network-exposure-0000-and-the-trust-boundary">3.5 Network
+exposure (0.0.0.0) and the trust boundary</h3>
+<p>The embed binds <strong><code>0.0.0.0</code></strong> by default —
+network exposure is the intended design. Loopback-only would defeat the
+feature (the whole point is that a phone running the embed becomes a
+LAN-reachable Lava API for tablets, TVs, and other phones). The bind
+address is validated with <code>net.ParseIP</code>; non-loopback
+(including the <code>0.0.0.0</code> wildcard) is explicitly allowed, and
+only unparseable IPs are rejected. The automated security-review
+suggestion of loopback-only was therefore explicitly overridden in the
+code, with the Lava-Auth gate (§3.4) as the compensating control: anyone
+on the LAN can <em>reach</em> the port, but only a holder of the auth
+key gets a non-401 response.</p>
+<h3 id="36-mdns-identity-android-instance-vs-host-instance">3.6 mDNS
+identity (Android instance vs host instance)</h3>
+<p>The embed is honestly the Go engine on Android with SQLite, so it
+will advertise:</p>
+<ul>
+<li>Service type <code>_lava-api._tcp</code> (release) /
+<code>_lava-api-dev._tcp</code> (debug) — the same types the client
+already watches (catalog in <a
+href="../core/data/src/main/kotlin/lava/data/api/service/DiscoveryServiceTypes.kt"><code>core/data/.../DiscoveryServiceTypes.kt</code></a>:
+<code>SERVICE_TYPE_GO = "_lava-api._tcp"</code>,
+<code>SERVICE_TYPE_GO_DEV = "_lava-api-dev._tcp"</code>,
+<code>SERVICE_TYPE_KTOR = "_lava._tcp"</code>).</li>
+<li>TXT: <code>engine=go</code>,
+<strong><code>platform=android</code></strong>,
+<code>storage=sqlite</code>, <code>version=&lt;n&gt;</code>.</li>
+</ul>
+<p>The existing host instance keeps advertising <code>engine=go</code>
+with <code>platform=server</code> (or absent) — unchanged; both appear
+in the client's list. The "distinct identity" is realized via the
+<code>platform</code> TXT key, which the client (sub-project 2) will
+label distinctly without any discovery re-architecture. Instances
+without <code>platform</code> render exactly as today (backward
+compatible).</p>
+<blockquote>
+<p><strong>LANDED (Phase D-infra, commit
+<code>e62e0fa8</code>):</strong> the on-device <code>NsdManager</code>
+<em>registration</em> (the embed advertising itself) now exists in
+<code>:api-app</code> as <code>NsdMdnsAdvertiser</code>; see <a
+href="#4b3-the-mdns-advertiser-nsdmdnsadvertiser">§4B.3 — mDNS
+advertiser</a>. The client-side <em>discovery</em> that consumes these
+TXT records already exists in <a
+href="../core/data/src/main/kotlin/lava/data/impl/service/LocalNetworkDiscoveryServiceImpl.kt"><code>LocalNetworkDiscoveryServiceImpl</code></a>
+and is described in <a
+href="LOCAL_NETWORK_DISCOVERY.md"><code>LOCAL_NETWORK_DISCOVERY.md</code></a>.</p>
+</blockquote>
+<h2 id="4a-phase-c--the-coreapiengine-jni-wrapper-landed">4A. Phase C —
+the <code>:core:apiengine</code> JNI wrapper (landed)</h2>
+<p>Source: <a href="../core/apiengine/"><code>core/apiengine/</code></a>
+(commit <code>ef109760</code>).</p>
+<p><code>:core:apiengine</code> is an Android library that exposes the
+embedded lava-api-go server (the Go c-shared library + JNI bridge from
+Phase B) behind an ordinary Kotlin <code>suspend</code>-function API.
+Consumers (<code>:api-app</code>, future wiring) depend ONLY on this
+module's public surface — never on <code>LavaNative</code> directly. Per
+the Decoupled Reusable Architecture rule this is Lava-domain glue: it
+introduces no logic another vasic-digital project would consume.</p>
+<h3 id="4a1-the-public-kotlin-surface-apiengine">4A.1 The public Kotlin
+surface (<code>ApiEngine</code>)</h3>
+<p>Source: <a
+href="../core/apiengine/src/main/kotlin/lava/apiengine/ApiEngine.kt"><code>ApiEngine.kt</code></a>
+(package <code>lava.apiengine</code>).</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">interface</span> ApiEngine <span class="op">{</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    suspend <span class="kw">fun</span> <span class="fu">start</span><span class="op">(</span><span class="va">config</span><span class="op">:</span> <span class="dt">ApiConfig</span><span class="op">):</span> <span class="dt">Result</span><span class="op">&lt;</span><span class="dt">ApiStatus</span><span class="op">&gt;</span>  <span class="co">// success → running ApiStatus; failure → native error</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">suspend</span> <span class="kw">fun</span> <span class="fu">stop</span><span class="op">():</span> <span class="dt">Result</span><span class="op">&lt;</span><span class="dt">Unit</span><span class="op">&gt;</span>                          <span class="co">// failure when nothing is running (not a silent no-op)</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">fun</span> <span class="fu">status</span><span class="op">():</span> <span class="dt">ApiStatus</span>                                   <span class="co">// non-suspending snapshot</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p><code>ApiConfig</code> is the start-time configuration, serialized to
+the exact JSON shape <code>internal/mobile.startConfig</code>
+parses:</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Default</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>bindAddr</code></td>
+<td><code>String</code></td>
+<td><code>"0.0.0.0"</code></td>
+<td>bind IP; wildcard so LAN peers can reach the API (loopback-only
+would defeat the feature)</td>
+</tr>
+<tr>
+<td><code>port</code></td>
+<td><code>Int</code></td>
+<td><code>8443</code></td>
+<td>TCP listener port, matching the production LAN listener</td>
+</tr>
+<tr>
+<td><code>sqlitePath</code></td>
+<td><code>String</code></td>
+<td><em>(required)</em></td>
+<td>absolute path to the SQLite DB file; TLS material is persisted
+beside it</td>
+</tr>
+<tr>
+<td><code>authSharedKey</code></td>
+<td><code>String?</code></td>
+<td><code>null</code></td>
+<td>the base64-UUID credential; when <code>null</code> the embed
+GENERATES one and surfaces it via <code>ApiStatus.authKey</code> (there
+is no unauthenticated mode)</td>
+</tr>
+<tr>
+<td><code>authFieldName</code></td>
+<td><code>String</code></td>
+<td><code>"Lava-Auth"</code></td>
+<td>HTTP header the credential is read from</td>
+</tr>
+</tbody>
+</table>
+<p><code>ApiStatus</code> mirrors the JSON
+<code>internal/mobile.Status()</code> returns: <code>state</code>
+(<code>"running"</code>/<code>"stopped"</code>), <code>bindAddr</code>,
+<code>port</code>, <code>requestCount</code>, <code>backend</code>
+(always <code>"sqlite"</code>), <code>version</code>,
+<code>scheme</code> (always <code>"https"</code>),
+<code>authEnabled</code> (always <code>true</code> while running),
+<code>authFieldName</code>, and the nullable <code>authKey</code> (the
+in-effect credential the host app can display for pairing;
+<code>null</code> when stopped).</p>
+<p>Exactly one server instance runs per process (enforced by the native
+side): <code>start</code> while already running returns a failed
+<code>Result</code>.</p>
+<h3 id="4a2-nativeapiengine--the-real-jni-backed-implementation">4A.2
+<code>NativeApiEngine</code> — the real JNI-backed implementation</h3>
+<p>Source: <a
+href="../core/apiengine/src/main/kotlin/lava/apiengine/NativeApiEngine.kt"><code>NativeApiEngine.kt</code></a>.</p>
+<p><code>NativeApiEngine</code> is the production
+<code>ApiEngine</code>. It maps the Kotlin surface onto the three
+<code>LavaNative</code> external functions:</p>
+<ul>
+<li><code>start(config)</code> serializes <code>config</code> to JSON
+via <code>kotlinx.serialization</code> (<code>ConfigDto</code> — field
+names
+<code>bindAddr</code>/<code>port</code>/<code>sqlitePath</code>/<code>authSharedKey</code>/
+<code>authFieldName</code> matching the Go <code>startConfig</code>
+tags; a <code>null</code> <code>authSharedKey</code> is emitted as
+<code>""</code>, which the Go side treats as "generate one"), calls
+<code>LavaNative.nativeStart(configJson)</code>, and — because the
+native Start/Stop contract is "empty string on success, error message
+otherwise" — maps a non-empty return to
+<code>Result.failure(ApiEngineException(err))</code>. On success it
+parses <code>LavaNative.nativeStatus()</code> into
+<code>ApiStatus</code>.</li>
+<li><code>stop()</code> calls <code>LavaNative.nativeStop()</code> and
+applies the same empty-string = success mapping.</li>
+<li><code>status()</code> parses <code>LavaNative.nativeStatus()</code>
+(the <code>StatusDto</code> fields are <code>omitempty</code> on the Go
+side when stopped, so they default to stopped-state zero values).</li>
+</ul>
+<p><code>start</code> and <code>stop</code> run on an injectable
+<code>CoroutineDispatcher</code> (default <code>Dispatchers.IO</code>)
+because the native calls may block on socket bind / TLS material
+generation / SQLite open. The class requires a real Android
+device/emulator (the native <code>.so</code> is Android-only), so it is
+NOT JVM-unit- testable; its behavioral contract is verified by the Phase
+E Compose UI Challenge against a real emulator (PENDING). The
+JVM-testable contract lives in <code>FakeApiEngine</code>.</p>
+<h3 id="4a3-lavanative--the-jni-binding">4A.3 <code>LavaNative</code> —
+the JNI binding</h3>
+<p>Source: <a
+href="../core/apiengine/src/main/kotlin/lava/apiengine/LavaNative.kt"><code>LavaNative.kt</code></a>
+(package <code>digital.vasic.lava.apigo</code> — chosen to match the JNI
+symbol encoding).</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span> <span class="im">digital</span><span class="op">.</span><span class="im">vasic</span><span class="op">.</span><span class="im">lava</span><span class="op">.</span><span class="im">apigo</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="kw">internal</span> <span class="kw">object</span> LavaNative <span class="op">{</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    init <span class="op">{</span> System<span class="op">.</span>loadLibrary<span class="op">(</span><span class="st">&quot;lavaapi_jni&quot;</span><span class="op">)</span> <span class="op">}</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">external</span> <span class="kw">fun</span> <span class="fu">nativeStart</span><span class="op">(</span><span class="va">configJson</span><span class="op">:</span> <span class="dt">String</span><span class="op">):</span> <span class="dt">String</span>  <span class="co">// &quot;&quot; on success, else error message</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">external</span> <span class="kw">fun</span> <span class="fu">nativeStop</span><span class="op">():</span> <span class="dt">String</span>                      <span class="co">// &quot;&quot; on success, else error message</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">external</span> <span class="kw">fun</span> <span class="fu">nativeStatus</span><span class="op">():</span> <span class="dt">String</span>                    <span class="co">// status JSON document</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>The package + object + method names MUST match the JNI symbol
+encoding in <code>jni_bridge.c</code> exactly (e.g.
+<code>Java_digital_vasic_lava_apigo_LavaNative_nativeStart</code>).
+<code>System.loadLibrary("lavaapi_jni")</code> resolves to
+<code>liblavaapi_jni.so</code>; its transitive dependency on
+<code>liblavaapi.so</code> (the prebuilt Go c-shared library) is
+satisfied because BOTH libraries are packaged into the same
+<code>jniLibs/&lt;abi&gt;/</code> directory of the APK. The object is
+<code>internal</code> — consumers go through
+<code>NativeApiEngine</code>, never here.</p>
+<h3 id="4a4-fakeapiengine--the-behaviorally-equivalent-jvm-fake">4A.4
+<code>FakeApiEngine</code> — the behaviorally-equivalent JVM fake</h3>
+<p>Source: <a
+href="../core/apiengine/src/main/kotlin/lava/apiengine/FakeApiEngine.kt"><code>FakeApiEngine.kt</code></a>.</p>
+<p>Per the Anti-Bluff Pact Third Law, the fake reproduces the production
+/ Go BRANCHES that affect callers — it is NOT a "simpler than reality"
+stub:</p>
+<ul>
+<li><strong>Single instance.</strong> <code>start</code> while already
+running fails with an "already running" error matching the Go
+<code>"mobile: server already running …"</code>.</li>
+<li><strong>Stop is not a no-op.</strong> <code>stop</code> without a
+running server fails with a "no server running" error matching
+<code>internal/mobile.Stop</code>.</li>
+<li><strong>Status reflects last start/stop.</strong>
+<code>stopped</code> before any start; <code>running</code> with the
+started config's bindAddr/port after <code>start</code>; reverts to
+<code>stopped</code> after <code>stop</code>.</li>
+<li><strong>Auth always on while running.</strong> <code>start</code>
+surfaces an auth key (the config's <code>authSharedKey</code> when
+provided, else a deterministic generated stand-in) and reports
+<code>authEnabled == true</code> — no unauthenticated mode.</li>
+<li><strong>Error injection.</strong> <code>failWith(error)</code> makes
+the next <code>start</code>/<code>stop</code> propagate a
+<code>Result.failure</code>, exercising callers' error paths.
+<code>recordRequests(count)</code> simulates inbound traffic so
+<code>status()</code> reports a non-zero count.</li>
+</ul>
+<h3
+id="4a5-the-native-build-pipeline-buildcshared--jnilibs--externalnativebuild">4A.5
+The native build pipeline (<code>buildCshared</code> → jniLibs →
+externalNativeBuild)</h3>
+<p>Source: <a
+href="../core/apiengine/build.gradle.kts"><code>core/apiengine/build.gradle.kts</code></a>.</p>
+<p>Two native libraries are packaged per ABI into this module's AAR, for
+the three ABIs <code>arm64-v8a</code> / <code>x86_64</code> /
+<code>armeabi-v7a</code> (NDK <code>25.1.8937393</code>, CMake
+<code>3.22.1</code>):</p>
+<ol type="1">
+<li><strong><code>liblavaapi.so</code></strong> — the prebuilt Go
+c-shared library. A <code>buildCshared</code> Gradle <code>Exec</code>
+task shells out to <code>lava-api-go/scripts/build-cshared.sh</code> for
+the module's ABIs, writing
+<code>lava-api-go/build/jniLibs/&lt;abi&gt;/liblavaapi.{so,h}</code>.
+The task declares those <code>.so</code>/<code>.h</code> as
+<code>outputs</code> so it is <strong>up-to-date when all expected
+outputs are already present</strong> — a clean assemble does not force a
+multi-minute Go rebuild when the artifacts are fresh. On a Windows build
+host the task fails honestly (the Go c-shared/JNI path is unsupported
+there) rather than producing a broken artifact.
+<code>sourceSets.main.jniLibs.srcDir(prebuiltJniLibsDir)</code> points
+AGP at that output dir so it packages <code>liblavaapi.so</code> per ABI
+directly (Go is NOT recompiled from Gradle — the script output is
+LOCATED and staged).</li>
+<li><strong><code>liblavaapi_jni.so</code></strong> — the hand-written
+JNI bridge. AGP's
+<code>externalNativeBuild { cmake { path = jniCmakeLists } }</code>
+points at the canonical
+<code>lava-api-go/cmd/lavaapi-cshared/jni/CMakeLists.txt</code>, which
+imports <code>liblavaapi.so</code> as an IMPORTED SHARED lib and links
+the bridge against it.
+<code>-DLAVAAPI_PREBUILT_DIR=&lt;abs path&gt;</code> is passed as a
+CMake argument so the CMakeLists finds the prebuilt
+<code>.so</code>/<code>.h</code> (laid out as
+<code>&lt;ABI&gt;/liblavaapi.{so,h}</code>).</li>
+</ol>
+<p>The native-build / jniLibs-merge tasks
+(<code>externalNativeBuild*</code>, <code>configureCMake*</code>,
+<code>buildCMake*</code>, <code>merge*JniLibFolders</code>) all
+<code>dependsOn(buildCshared)</code> so the prebuilt inputs exist before
+CMake configures and before the jniLibs merge reads the directory.</p>
+<h2 id="4b-phase-d-infra--the-api-app-module-landed">4B. Phase D-infra —
+the <code>:api-app</code> module (landed)</h2>
+<p>Source: <a href="../api-app/"><code>api-app/</code></a> (commit
+<code>e62e0fa8</code>).</p>
+<p><code>:api-app</code> is the standalone <em>Lava API</em> Android
+application. It hosts the embedded lava-api-go server (via
+<code>:core:apiengine</code>) as an on-device, LAN-reachable HTTPS API,
+advertised over mDNS so other devices discover it. Phase D-infra
+delivers the <strong>headless infrastructure</strong> only: the
+foreground Service, the Android-free lifecycle controller, the mDNS
+advertiser, and the per-install auth-key store. The Compose landing UI,
+the refined notification copy, and the ViewModel are <strong>Phase D-ui
+(PENDING)</strong>; this module ships a placeholder
+<code>MainActivity</code> (its <code>onCreate</code> calls
+<code>setContent { }</code>) so the manifest is valid and the APK
+assembles.</p>
+<h3 id="4b1-module-identity-signing-and-permissions">4B.1 Module
+identity, signing, and permissions</h3>
+<p>Source: <a
+href="../api-app/build.gradle.kts"><code>api-app/build.gradle.kts</code></a>,
+<a
+href="../api-app/src/main/AndroidManifest.xml"><code>AndroidManifest.xml</code></a>.</p>
+<ul>
+<li><strong>Application ID</strong> <code>digital.vasic.lava.api</code>;
+the debug build applies <code>applicationIdSuffix = ".dev"</code> →
+<code>digital.vasic.lava.api.dev</code>, so the release and dev variants
+install side-by-side and advertise distinct mDNS service types (§4B.3).
+<code>versionCode = 1</code>, <code>versionName = "0.1.0"</code>,
+<code>minSdk = 23</code> (the per-install auth-key store relies on
+<code>EncryptedSharedPreferences</code>, which requires API 23+; the
+client <code>:app</code> keeps <code>minSdk 21</code>).</li>
+<li><strong>Shared signing.</strong> The signing block mirrors
+<code>:app</code>'s <code>.env</code>-driven inputs verbatim — the SAME
+<code>KEYSTORE_PASSWORD</code> + <code>KEYSTORE_ROOT_DIR</code> keystore
+material (debug → <code>keystores/debug.keystore</code> alias
+<code>debug</code>; release → <code>keystores/release.keystore</code>
+alias <code>release</code>). No parallel signing scheme is invented
+(§6.R / §6.H). Release uses <code>postprocessing</code>
+(remove-unused-code + remove-unused-resources + optimize,
+<code>isObfuscate = false</code>).</li>
+<li><strong>Permissions</strong> the embed needs while serving:
+<code>INTERNET</code>, <code>ACCESS_NETWORK_STATE</code>,
+<code>ACCESS_WIFI_STATE</code>, <code>CHANGE_WIFI_MULTICAST_STATE</code>
+(mDNS multicast), <code>FOREGROUND_SERVICE</code> +
+<code>FOREGROUND_SERVICE_DATA_SYNC</code>,
+<code>POST_NOTIFICATIONS</code>, and <code>WAKE_LOCK</code>. The
+application sets <code>android:usesCleartextTraffic="true"</code>
+(matching the client <code>:app</code>). The Service is declared
+<code>android:exported="false"</code> with
+<code>android:foregroundServiceType="dataSync"</code> (the closest
+standard type for a process that continuously serves LAN requests +
+advertises over mDNS). The <code>ApiApplication</code> is a
+<code>@HiltAndroidApp</code> root; D-infra wires no Hilt modules (the
+Service constructs its controller directly) — the annotation is present
+so D-ui can add injected ViewModels without re-shaping the app.</li>
+</ul>
+<h3 id="4b2-the-foreground-apiengineservice--os-locks">4B.2 The
+foreground <code>ApiEngineService</code> + OS locks</h3>
+<p>Source: <a
+href="../api-app/src/main/kotlin/lava/api/app/service/ApiEngineService.kt"><code>service/ApiEngineService.kt</code></a>.</p>
+<p>A foreground <code>Service</code> that owns the Android-free
+<code>ApiEngineController</code> and drives it via intent actions:</p>
+<ul>
+<li><strong>Intent actions:</strong> <code>ACTION_START</code>
+(<code>lava.api.app.action.START</code>, the default),
+<code>ACTION_STOP</code>, <code>ACTION_RESTART</code>.
+<code>onStartCommand</code> promotes to foreground <em>immediately</em>
+(<code>startForeground</code> with a baseline notification) so the OS
+does not kill the process before the first state emission, then
+dispatches the matching <code>controller.start()</code> /
+<code>stop()</code> / <code>restart()</code> on a service-scoped
+<code>CoroutineScope</code> (cancelled in <code>onDestroy</code>). It
+returns <code>START_STICKY</code>.</li>
+<li><strong>OS locks held while serving</strong> (acquired on
+<code>Running</code>, released on <code>Stopped</code> /
+<code>Error</code> / <code>onDestroy</code>):
+<ul>
+<li>a Wi-Fi <strong><code>MulticastLock</code></strong> so mDNS
+multicast reaches the LAN;</li>
+<li>a Wi-Fi <strong><code>WifiLock</code></strong> in
+<code>WIFI_MODE_FULL_HIGH_PERF</code> so the radio stays up;</li>
+<li>a <strong>partial <code>WakeLock</code></strong>
+(<code>PARTIAL_WAKE_LOCK</code>) so the CPU keeps serving while the
+screen is off. All three are <code>setReferenceCounted(false)</code> and
+released the moment the API stops (idempotent release guarded by
+<code>isHeld</code>).</li>
+</ul></li>
+<li><strong>The controller is built</strong> with a
+<code>NativeApiEngine</code>, an <code>NsdMdnsAdvertiser</code> whose
+engine identity is <code>GO_DEV</code> when the package name ends in
+<code>.dev</code> else <code>GO</code>, an
+<code>ApiKeyStoreImpl.create(applicationContext)</code>, a
+<code>NetworkInterfaceLanIpProvider</code>, and a
+<code>sqlitePath</code> of <code>filesDir/lava-api.db</code>.</li>
+<li><strong>Foreground notification:</strong> an ongoing, low-importance
+notification on channel <code>lava.api.app.server</code>. When
+<code>Running</code> the body shows
+<code>"&lt;url&gt;  •  &lt;n&gt; req"</code> (reachable URL + live
+request count); it carries <strong>Stop</strong> +
+<strong>Restart</strong> actions (each a
+<code>PendingIntent.getService</code> with the matching action) and a
+content-intent back to <code>MainActivity</code>. The copy is
+intentionally minimal (Phase D-ui refines it).</li>
+</ul>
+<h3 id="4b2a-the-apienginecontroller-state-machine">4B.2a The
+<code>ApiEngineController</code> state machine</h3>
+<p>Source: <a
+href="../api-app/src/main/kotlin/lava/api/app/control/ApiEngineController.kt"><code>control/ApiEngineController.kt</code></a>,
+<a
+href="../api-app/src/main/kotlin/lava/api/app/control/ApiControlState.kt"><code>control/ApiControlState.kt</code></a>.</p>
+<p>The controller is the <strong>Android-free lifecycle core</strong> —
+it has NO Service / Context dependency, so it is unit-tested with the
+real controller wired to <code>FakeApiEngine</code> + fakes for the
+advertiser/keyStore (the load-bearing Anti-Bluff test
+<code>ApiEngineControllerTest</code>). It owns the
+<code>ApiEngine</code>, the <code>MdnsAdvertiser</code>, and the
+<code>ApiKeyStore</code>, and exposes
+<code>state: StateFlow&lt;ApiControlState&gt;</code> as the single
+source of truth the Service + UI observe.</p>
+<p>The <code>ApiControlState</code> sealed interface forms the cycle
+<code>Stopped → Starting → Running → Stopping → Stopped</code>, with
+<code>Error</code> reachable from
+<code>Starting</code>/<code>Stopping</code>:</p>
+<table>
+<thead>
+<tr>
+<th>State</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Stopped</code></td>
+<td>no server running (initial state)</td>
+</tr>
+<tr>
+<td><code>Starting</code></td>
+<td>a start was requested; the engine has not yet reported Running</td>
+</tr>
+<tr>
+<td><code>Running</code></td>
+<td>the embed is up; carries <code>url</code>, <code>lanIps</code>,
+<code>port</code>, <code>requestCount</code>, <code>authKey</code>,
+<code>authFieldName</code> — <strong>all from the real post-start
+<code>ApiStatus</code> + the host's discovered LAN IPs, never
+synthesized</strong></td>
+</tr>
+<tr>
+<td><code>Stopping</code></td>
+<td>a stop was requested; shutdown not yet confirmed</td>
+</tr>
+<tr>
+<td><code>Error(message)</code></td>
+<td>the last start/stop failed; <code>message</code> is the engine's
+error text</td>
+</tr>
+</tbody>
+</table>
+<p>Behavioral details the committed code implements:</p>
+<ul>
+<li><strong><code>start()</code></strong> emits <code>Starting</code>,
+fetches the persisted key via <code>keyStore.getOrCreate()</code>,
+builds an <code>ApiConfig</code> (port, sqlitePath, the key as
+<code>authSharedKey</code>, <code>keyStore.fieldName</code> as
+<code>authFieldName</code>), and calls
+<code>engine.start(config)</code>. On success it calls
+<code>onStarted(status)</code>: it resolves the host's LAN IPs
+(<code>lanIpProvider()</code>), <strong>registers the mDNS advertisement
+on the running port</strong>, and emits <code>Running</code> with the
+reachable URL built as
+<code>&lt;scheme&gt;://&lt;first LAN IP or 127.0.0.1&gt;:&lt;port&gt;</code>.
+On engine failure it emits <code>Error</code> and does
+<strong>NOT</strong> advertise.</li>
+<li><strong><code>stop()</code></strong> emits <code>Stopping</code>,
+<strong>unregisters the advertisement first</strong> (so a stale record
+never points at a dead listener), then calls <code>engine.stop()</code>:
+success → <code>Stopped</code>, failure → <code>Error</code>.</li>
+<li><strong><code>restart()</code></strong> is <code>stop()</code> then
+<code>start()</code>; if the <code>stop</code> surfaced an
+<code>Error</code> it halts there (a failed stop leaves the embed in an
+unknown state; surfacing Error is the honest behavior).</li>
+<li>The default <code>port</code> is read from <code>ApiConfig</code>'s
+own default so the literal lives in <code>:core:apiengine</code>, not
+duplicated here (§6.R). The host's LAN IPs come from
+<code>NetworkInterfaceLanIpProvider</code> (<a
+href="../api-app/src/main/kotlin/lava/api/app/net/LanIpProvider.kt"><code>net/LanIpProvider.kt</code></a>),
+which enumerates the real non-loopback, non-link-local IPv4 interface
+addresses — not a synthesized value (Sixth-Law clause 3: the URL the UI
+shows and the cert SANs the embed generates both depend on these being
+the TRUE reachable IPs).</li>
+</ul>
+<h3 id="4b3-the-mdns-advertiser-nsdmdnsadvertiser">4B.3 The mDNS
+advertiser (<code>NsdMdnsAdvertiser</code>)</h3>
+<p>Source: <a
+href="../api-app/src/main/kotlin/lava/api/app/service/MdnsAdvertiser.kt"><code>service/MdnsAdvertiser.kt</code></a>,
+<a
+href="../api-app/src/main/kotlin/lava/api/app/service/NsdMdnsAdvertiser.kt"><code>service/NsdMdnsAdvertiser.kt</code></a>.</p>
+<p><code>MdnsAdvertiser</code> is a two-method interface
+(<code>register(port)</code> / <code>unregister()</code>);
+<code>NsdMdnsAdvertiser</code> is the <code>NsdManager</code>-backed
+implementation. It registers a single <code>NsdServiceInfo</code> named
+<code>"Lava API"</code> for the build-appropriate service type, on the
+running port, with the TXT records the pure <code>buildTxtRecords</code>
+builder produces. <code>register</code> first calls
+<code>unregister()</code> (a previous registration is torn down before
+re-registering); <code>unregister</code> is safe to call when not
+registered.</p>
+<ul>
+<li><strong>Service types</strong> (matching
+<code>DiscoveryServiceTypeCatalog</code> in <code>core/data</code> — the
+cross-process mDNS protocol contract):
+<ul>
+<li>release build → <code>_lava-api._tcp</code> (engine identity
+<code>GO</code>)</li>
+<li>debug build → <code>_lava-api-dev._tcp</code> (engine identity
+<code>GO_DEV</code>)</li>
+</ul></li>
+<li><strong>TXT records</strong> (the pure, unit-testable wire contract
+via <code>buildTxtRecords</code> — verified by
+<code>MdnsAdvertiserTxtTest</code> without touching Android):
+<code>engine=go</code> (or <code>go-dev</code>),
+<code>platform=android</code>, <code>storage=sqlite</code>,
+<code>version=&lt;n&gt;</code>. The <code>version</code> is read from a
+<code>versionProvider</code> lambda
+(<code>engine.status().version</code>) at register time so the
+advertised version tracks the actual running embed, not a hardcoded
+literal (§6.R).</li>
+</ul>
+<p>The service-type + TXT literals are kept in <code>:api-app</code>
+(rather than depending on <code>:core:data</code>) so the API app does
+not pull in the entire client data layer; they are identical to
+<code>DiscoveryServiceTypeCatalog.SERVICE_TYPE_GO</code> /
+<code>SERVICE_TYPE_GO_DEV</code>.</p>
+<h3 id="4b4-the-per-install-auth-key-store-apikeystore">4B.4 The
+per-install auth-key store (<code>ApiKeyStore</code>)</h3>
+<p>Source: <a
+href="../api-app/src/main/kotlin/lava/api/app/auth/ApiKeyStore.kt"><code>auth/ApiKeyStore.kt</code></a>.</p>
+<p><code>ApiKeyStore</code> is a two-member interface —
+<code>getOrCreate(): String</code> and
+<code>val fieldName: String</code>. <code>ApiKeyStoreImpl</code>
+implements it:</p>
+<ul>
+<li>The credential is the <strong>production wire shape the Go embed
+accepts</strong>: the base64 (standard alphabet, padded, single line)
+encoding of a random 16-byte UUID blob. This is EXACTLY what
+<code>internal/mobile.generateAuthKey</code> mints and what
+<code>internal/auth.NewMiddleware</code> base64-decodes before HMAC-ing
+— so a key produced here is honoured by the embed when passed as
+<code>ApiConfig.authSharedKey</code>.</li>
+<li><strong>First run</strong> generates a fresh key with
+<code>SecureRandom</code> (16 bytes, <code>UUID_LEN</code>),
+base64-encodes it (<code>android.util.Base64</code>
+<code>NO_WRAP</code>, matching Go's <code>base64.StdEncoding</code>),
+and persists it; every subsequent call (this run or a later install
+lifetime) returns the SAME key so paired peer devices keep working.
+<code>getOrCreate</code> is <code>@Synchronized</code>.</li>
+<li><strong>Encrypted at rest:</strong>
+<code>ApiKeyStoreImpl.create(context)</code> builds an
+<code>EncryptedSharedPreferences</code> (AES256-SIV key encryption +
+AES256-GCM value encryption, <code>AES256_GCM</code> master key) in the
+<code>lava_api_auth</code> prefs file. Pure- JVM unit tests construct
+<code>ApiKeyStoreImpl</code> directly with an in-memory
+<code>SharedPreferences</code> fake + a
+<code>java.util.Base64</code>-backed <code>KeyEncoder</code> that yields
+the identical alphabet (the encoder is injectable for exactly this
+reason).</li>
+<li><strong>§6.H credential hygiene:</strong> the key is NEVER written
+to a log line, never concatenated into an exception message, never
+returned from <code>toString</code>. The plaintext blob is
+<code>fill(0)</code>'d in a <code>finally</code> block after encoding;
+the base64 <code>String</code> leaves the process only through the
+deliberate display/config path (D-ui). The default
+<code>fieldName</code> is <code>"Lava-Auth"</code>, matching the
+embed.</li>
+</ul>
+<blockquote>
+<p><strong>PENDING (Phase D-ui):</strong> the landing screen / control
+screen, the ViewModel, and the refined notification copy that DISPLAY
+the URL, the auth key (for pairing), and the live request count are not
+yet in the tree — <code>MainActivity</code> is a placeholder.
+<strong>PENDING (Phase E):</strong> the instrumented Compose UI
+Challenge tests that boot the embed on a real emulator and issue a real
+HTTPS request. <strong>PENDING (sub-project 2):</strong> the client-side
+distinct labelling of <code>platform=android</code> instances in the
+discovery list.</p>
+</blockquote>
+<h2 id="4-diagrams">4. Diagrams</h2>
+<h3 id="41-component--module-diagram-what-has-landed">4.1 Component /
+module diagram (what has landed)</h3>
+<pre class="mermaid"><code>flowchart TB
+    subgraph LavaApiGo[&quot;lava-api-go (Go)&quot;]
+        cfg[&quot;internal/config&lt;br/&gt;storage selector&lt;br/&gt;postgres | sqlite&quot;]
+        router[&quot;internal/router.Build&lt;br/&gt;FULL production Gin engine&lt;br/&gt;(shared by binary + embed)&quot;]
+        auth[&quot;internal/auth&lt;br/&gt;Lava-Auth gate&lt;br/&gt;HMAC-SHA256 + backoff ladder&quot;]
+        subgraph Storage[&quot;internal/storage&quot;]
+            iface[&quot;Storage interface&lt;br/&gt;Get / Set / Invalidate / Close&quot;]
+            pg[&quot;postgres impl&lt;br/&gt;(submodules/cache)&quot;]
+            sq[&quot;sqlite impl&lt;br/&gt;modernc.org/sqlite&lt;br/&gt;WAL + INCREMENTAL auto_vacuum + GC&quot;]
+        end
+        mobile[&quot;internal/mobile&lt;br/&gt;Start / Stop / Status&lt;br/&gt;0.0.0.0 + self-signed TLS&quot;]
+        cshared[&quot;cmd/lavaapi-cshared&lt;br/&gt;C ABI: LavaApiStart/Stop/Status/Free&quot;]
+    end
+
+    subgraph NativeBuild[&quot;c-shared build (build-cshared.sh)&quot;]
+        so[&quot;liblavaapi.so + liblavaapi.h&lt;br/&gt;per ABI: arm64-v8a / x86_64 / armeabi-v7a&quot;]
+        jni[&quot;jni_bridge.c + CMakeLists.txt&lt;br/&gt;liblavaapi_jni.so&quot;]
+    end
+
+    subgraph Android[&quot;Android :api-app + :core:apiengine&quot;]
+        kotlin[&quot;LavaNative (external fun)&lt;br/&gt;(Phase C — landed)&quot;]
+        engine[&quot;:core:apiengine&lt;br/&gt;ApiEngine / NativeApiEngine&lt;br/&gt;(Phase C — landed)&quot;]
+        ctrl[&quot;ApiEngineController&lt;br/&gt;Stopped/Starting/Running/Stopping/Error&lt;br/&gt;(Phase D-infra — landed)&quot;]
+        svc[&quot;ApiEngineService (foreground)&lt;br/&gt;Wifi/Multicast/Wake locks&lt;br/&gt;(Phase D-infra — landed)&quot;]
+        adv[&quot;NsdMdnsAdvertiser&lt;br/&gt;_lava-api(-dev)._tcp + TXT&lt;br/&gt;(Phase D-infra — landed)&quot;]
+        keys[&quot;ApiKeyStore&lt;br/&gt;EncryptedSharedPreferences&lt;br/&gt;(Phase D-infra — landed)&quot;]
+        ui[&quot;ApiControl landing UI + ViewModel&lt;br/&gt;(Phase D-ui — PENDING)&quot;]
+    end
+
+    cfg --&gt; Storage
+    iface --&gt; pg
+    iface --&gt; sq
+    mobile --&gt; router
+    router --&gt; auth
+    router --&gt; iface
+    mobile --&gt; sq
+    cshared --&gt; mobile
+    cshared --&gt; so
+    so -.includes.-&gt; jni
+    jni -- JNI --&gt; kotlin
+    kotlin --&gt; engine
+    svc --&gt; ctrl
+    ctrl --&gt; engine
+    ctrl --&gt; adv
+    ctrl --&gt; keys
+    svc -.-&gt; ui
+
+    classDef pending fill:#eee,stroke:#999,stroke-dasharray: 5 5;
+    class ui pending;</code></pre>
+<h3 id="42-start--stop--restart-lifecycle-state-machine">4.2 Start /
+Stop / Restart lifecycle state machine</h3>
+<pre class="mermaid"><code>stateDiagram-v2
+    [*] --&gt; Stopped
+    Stopped --&gt; Starting: Start(configJSON)
+    Starting --&gt; Running: listener accepting&lt;br/&gt;(net.Listen returned)
+    Starting --&gt; Error: bind / storage / TLS failure
+    Running --&gt; Stopping: Stop()
+    Stopping --&gt; Stopped: graceful shutdown + store.Close()
+    Running --&gt; Running: Start() while running → error&lt;br/&gt;(exactly one instance per process)
+    Error --&gt; Starting: Start(configJSON) retry
+    Stopped --&gt; Stopped: Stop() → error &quot;no server running&quot;
+
+    note right of Running
+        Status() reports:
+        state=running, scheme=https,
+        bindAddr, port, requestCount,
+        backend=sqlite, version,
+        authEnabled=true, authFieldName, authKey
+    end note</code></pre>
+<blockquote>
+<p>The Go embed itself exposes only <code>Stopped</code> and
+<code>Running</code> via <code>Status().state</code>. The
+<code>Starting</code>/<code>Stopping</code>/<code>Error</code> transient
+states are now realized in Kotlin by the <code>:api-app</code>
+<code>ApiEngineController</code> (Phase D-infra — landed; see §4B.2a):
+the controller emits <code>Starting</code> before
+<code>engine.start()</code> and <code>Stopping</code> before
+<code>engine.stop()</code>, and <code>Error(message)</code> when either
+fails. The UI that RENDERS these states is PENDING Phase D-ui.</p>
+</blockquote>
+<h3 id="43-mdns-discovery--authenticated-request-sequence">4.3 mDNS
+discovery + authenticated request sequence</h3>
+<pre class="mermaid"><code>sequenceDiagram
+    participant P as Phone running :api-app&lt;br/&gt;(ApiEngineService + controller — landed)
+    participant N as LAN (mDNS / multicast)
+    participant C as Other Lava client
+
+    P-&gt;&gt;P: Service.start → controller.start → engine.start&lt;br/&gt;(0.0.0.0:8443, SQLite, self-signed TLS)
+    P-&gt;&gt;P: ApiKeyStore.getOrCreate → Lava-Auth key (persisted, EncryptedSharedPreferences)
+    Note over P,N: Phase D-infra — NsdMdnsAdvertiser.register (NsdManager.registerService)
+    P-&gt;&gt;N: advertise _lava-api._tcp&lt;br/&gt;TXT engine=go, platform=android, storage=sqlite, version=n
+    C-&gt;&gt;N: NsdManager discover _lava-api._tcp (already in-tree)
+    N--&gt;&gt;C: resolved host:port + TXT
+    C-&gt;&gt;C: map to Endpoint.GoApi(host, port)&lt;br/&gt;label platform=android distinctly (PENDING sub-project 2)
+    C-&gt;&gt;P: HTTPS GET /health (no auth required)
+    P--&gt;&gt;C: 200 OK
+    C-&gt;&gt;P: HTTPS GET /v1/{provider}/search?... (Lava-Auth: &lt;key&gt;)
+    P-&gt;&gt;P: auth middleware: HMAC-SHA256 vs allowlist (constant-time)
+    alt valid key
+        P--&gt;&gt;C: 200 + real JSON
+    else missing / wrong key
+        P--&gt;&gt;C: 401; backoff ladder advances → 429 on repeat
+    end</code></pre>
+<h3 id="44-build-pipeline-go--per-abi-so--jnilibs--app">4.4 Build
+pipeline (Go → per-ABI .so → jniLibs → app)</h3>
+<pre class="mermaid"><code>flowchart LR
+    src[&quot;internal/mobile +&lt;br/&gt;cmd/lavaapi-cshared&quot;]
+    subgraph build[&quot;build-cshared.sh (per ABI)&quot;]
+        cc[&quot;CGO_ENABLED=1&lt;br/&gt;GOOS=android GOARCH=&amp;lt;arch&amp;gt;&lt;br/&gt;CC=NDK clang&quot;]
+        gob[&quot;go build -buildmode=c-shared&quot;]
+        verify[&quot;llvm-nm -D → assert LavaApiStart present&lt;br/&gt;+ sha256 + size&quot;]
+    end
+    out[&quot;build/jniLibs/&amp;lt;abi&amp;gt;/&lt;br/&gt;liblavaapi.{so,h}&lt;br/&gt;(gitignored)&quot;]
+    task[&quot;core:apiengine buildCshared task&lt;br/&gt;(invokes build-cshared.sh;&lt;br/&gt;up-to-date when outputs fresh)&quot;]
+    cmake[&quot;AGP externalNativeBuild → NDK CMake&lt;br/&gt;jni_bridge.c → liblavaapi_jni.so&lt;br/&gt;(Phase C — landed)&quot;]
+    jnilibs[&quot;core:apiengine jniLibs srcDir +&lt;br/&gt;externalNativeBuild output&lt;br/&gt;liblavaapi.so + liblavaapi_jni.so per ABI&lt;br/&gt;(Phase C — landed)&quot;]
+    app[&quot;:api-app APK (depends on :core:apiengine)&lt;br/&gt;(Phase D-infra — landed)&quot;]
+
+    src --&gt; cc --&gt; gob --&gt; verify --&gt; out
+    task --&gt; out
+    out --&gt; cmake --&gt; jnilibs --&gt; app</code></pre>
+<h2 id="5-building-the-native-libraries">5. Building the native
+libraries</h2>
+<p>See the script guide <a
+href="scripts/build-cshared.sh.md"><code>docs/scripts/build-cshared.sh.md</code></a>
+for the authoritative reference. In brief:</p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> lava-api-go</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./scripts/build-cshared.sh</span>                 <span class="co"># all three ABIs</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="ex">./scripts/build-cshared.sh</span> arm64-v8a       <span class="co"># just the critical ABI</span></span></code></pre></div>
+<table>
+<thead>
+<tr>
+<th>ABI</th>
+<th><code>GOARCH</code></th>
+<th>NDK clang wrapper (API=28 default)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>arm64-v8a</code></td>
+<td><code>arm64</code></td>
+<td><code>aarch64-linux-android28-clang</code></td>
+</tr>
+<tr>
+<td><code>x86_64</code></td>
+<td><code>amd64</code></td>
+<td><code>x86_64-linux-android28-clang</code></td>
+</tr>
+<tr>
+<td><code>armeabi-v7a</code></td>
+<td><code>arm</code></td>
+<td><code>armv7a-linux-androideabi28-clang</code></td>
+</tr>
+</tbody>
+</table>
+<p>Outputs land in
+<code>lava-api-go/build/jniLibs/&lt;abi&gt;/liblavaapi.{so,h}</code>
+(gitignored — only the source is committed). The script prints each
+<code>.so</code>'s size + sha256 and asserts <code>LavaApiStart</code>
+is in the dynamic symbol table via <code>llvm-nm</code>. A missing NDK
+toolchain or NDK clang is reported as a hard failure (exit 2 for config
+errors, 1 for build/symbol failures) — no <code>.so</code> is faked
+(§6.J / Anti-Bluff).</p>
+<blockquote>
+<p><strong>LANDED (Phases C + D-infra):</strong> the
+<code>:core:apiengine</code> wrapper (Phase C, commit
+<code>ef109760</code>) is now the Gradle consumer of these native
+libraries — its <code>buildCshared</code> task invokes
+<code>build-cshared.sh</code> and its <code>externalNativeBuild</code>
+packages <code>liblavaapi.so</code> + <code>liblavaapi_jni.so</code> per
+ABI (see §4A.5). The <code>:api-app</code> module (Phase D-infra, commit
+<code>e62e0fa8</code>) depends on <code>:core:apiengine</code> and ships
+the foreground service + controller + on-device mDNS advertiser +
+auth-key store (see §4B).</p>
+<p><strong>PENDING (Phases D-ui / E):</strong> the landing UI + control
+screen + ViewModel (Phase D-ui) and the instrumented Compose UI
+Challenge tests that boot the embed on a real emulator and issue a real
+HTTPS request (Phase E) are not yet in the tree.</p>
+</blockquote>
+<h2 id="5a-apiembed-sync-guarantee-no-drift--11469--6j">5A. API↔︎embed
+sync guarantee (no drift) — §11.4.69 / §6.J</h2>
+<p>The on-device embed (<code>liblavaapi.so</code>) MUST contain EXACTLY
+the current <code>lava-api-go</code> source codebase — a stale
+<code>.so</code> would serve old API behaviour while every other gate
+looked green (the canonical "tests pass, wrong-version feature" bluff).
+A four-part mechanism, anchored on ONE hash function, makes drift
+mechanically impossible to hide:</p>
+<ol type="1">
+<li><p><strong>Single source of truth —
+<code>scripts/compute-api-source-hash.sh</code>.</strong> A
+deterministic bare-64-hex sha256 over the EXACT file set that compiles
+into the <code>.so</code>: every non-test <code>.go</code> under
+<code>lava-api-go/cmd/lavaapi-cshared</code> +
+<code>lava-api-go/internal</code>, plus <code>go.mod</code> +
+<code>go.sum</code>. The list is byte-sorted and each file's relative
+path + content is hashed, so a rename, move, content edit, or dependency
+bump each change the digest; <code>*_test.go</code> and the other
+<code>cmd/</code> entrypoints are excluded (they do not link into the
+embed).</p></li>
+<li><p><strong>Build-time injection + committed manifest —
+<code>build-cshared.sh</code>.</strong> The build computes the hash via
+(1) and injects it into <code>internal/version.SourceHash</code> via
+<code>-ldflags -X</code>, so the RUNNING <code>.so</code> reports it
+through <code>mobile.Status()</code> (<code>sourceHash</code> field →
+Kotlin <code>ApiStatus.sourceHash</code>). On a successful build it also
+writes the committed manifest
+<code>core/apiengine/src/main/resources/api-source.hash</code>.</p></li>
+<li><p><strong>CI gate —
+<code>scripts/check-api-app-sync.sh</code>.</strong> Wired into
+<code>scripts/ci.sh</code> (both <code>--changed-only</code> and
+<code>--full</code>). Recomputes the live hash and compares it to the
+committed manifest; on mismatch it exits 1 loudly
+(<code>on-device API embed is STALE vs lava-api-go — rebuild liblavaapi.so via build-cshared.sh</code>).
+Pure bash + git, fast, no failure-swallow (§6.J).</p></li>
+<li><p><strong>Gradle input-correctness —
+<code>core/apiengine/build.gradle.kts</code>.</strong> The
+<code>buildCshared</code> task declares the lava-api-go embed-source
+dirs + <code>go.mod</code>/<code>go.sum</code> as inputs (and the
+manifest as an output), so Gradle re-runs <code>build-cshared.sh</code>
+on ANY embed-source change — killing the stale-cache drift at the root.
+(Before this fix the task declared only the script as an input and went
+up-to-date whenever the <code>.so</code> outputs existed, even after the
+Go source changed.)</p></li>
+</ol>
+<p><strong>Runtime proof on device — api-app Challenge C05.</strong>
+<code>Challenge05ApiEmbedSourceHashMatchesTest</code> starts the real
+embed (real UI → real controller → real <code>NativeApiEngine</code> →
+real <code>.so</code>) and asserts the running embed's
+<code>ApiStatus.sourceHash</code> equals the APK's
+<code>BuildConfig.LAVA_API_SOURCE_HASH</code> (both computed from the
+SAME script), with an empty-hash hard-fail. Equal hashes prove the
+packaged embed equals the source the APK was built against.</p>
+<p><strong>Go contract test.</strong>
+<code>lava-api-go/tests/contract/sourcehash_contract_test.go</code>
+asserts hash stability, manifest-matches-live, and falsifiability (a
+content edit to a tracked embed-linked <code>.go</code> changes the
+hash).</p>
+<p>Per-script guides: <a
+href="scripts/compute-api-source-hash.sh.md"><code>docs/scripts/compute-api-source-hash.sh.md</code></a>
+and <a
+href="scripts/check-api-app-sync.sh.md"><code>docs/scripts/check-api-app-sync.sh.md</code></a>.</p>
+<h2
+id="6-constitutional-alignment-what-the-landed-code-already-satisfies">6.
+Constitutional alignment (what the landed code already satisfies)</h2>
+<ul>
+<li><strong>§6.R No-Hardcoding</strong> — SQLite path, bind addr, port,
+header name, and NDK path/API level all come from config / env /
+Start-config, never literals.</li>
+<li><strong>§6.H Credential Security</strong> — the auth key is surfaced
+only via <code>Status()</code>, never logged; plaintext UUID blobs are
+zeroized after hashing.</li>
+<li><strong>§6.J Anti-Bluff</strong> — the embed reuses the production
+router so embed tests guarantee production behavior; the build script
+reports real <code>.so</code> evidence; <code>FakeApiEngine</code>
+reproduces the production branches (single-instance, stop-not- a-no-op,
+auth-always-on) rather than being a simpler stub;
+<code>ApiEngineController</code> is Android-free so its load-bearing
+test wires the REAL controller to the fake engine; <code>Running</code>
+state fields come from the real <code>ApiStatus</code> + real LAN IPs,
+never synthesized.</li>
+<li><strong>§6.U No sudo/su</strong> — the build uses user-local NDK
+tooling only.</li>
+</ul>
+<h3 id="what-phases-c--d-infra-add">What Phases C + D-infra add</h3>
+<ul>
+<li><strong>§6.R No-Hardcoding</strong> — the controller's default port
+is read from <code>ApiConfig</code>'s own default (the literal lives in
+<code>:core:apiengine</code>), the advertised <code>version</code> is
+read from <code>engine.status().version</code>, the LAN IPs are the real
+interface addresses, and <code>:api-app</code>'s signing reuses
+<code>:app</code>'s <code>.env</code>-driven keystore inputs rather than
+inventing keys.</li>
+<li><strong>§6.H Credential Security</strong> — <code>ApiKeyStore</code>
+holds the credential in <code>EncryptedSharedPreferences</code>,
+zeroizes the plaintext UUID blob after encoding, and never logs /
+<code>toString</code>s / exception-concatenates the key; it is surfaced
+only through the deliberate D-ui display path.</li>
+</ul>
+<h2 id="7-references">7. References</h2>
+<ul>
+<li>Spec: <a
+href="superpowers/specs/2026-06-02-lava-api-android-app-design.md"><code>docs/superpowers/specs/2026-06-02-lava-api-android-app-design.md</code></a></li>
+<li>Plan: <a
+href="superpowers/plans/2026-06-02-lava-api-android-app.md"><code>docs/superpowers/plans/2026-06-02-lava-api-android-app.md</code></a></li>
+<li>Script guide: <a
+href="scripts/build-cshared.sh.md"><code>docs/scripts/build-cshared.sh.md</code></a></li>
+<li>User guide: <a
+href="guides/ON_DEVICE_API_USER_GUIDE.md"><code>docs/guides/ON_DEVICE_API_USER_GUIDE.md</code></a></li>
+<li>Discovery flow: <a
+href="LOCAL_NETWORK_DISCOVERY.md"><code>docs/LOCAL_NETWORK_DISCOVERY.md</code></a></li>
+<li>Architecture overview: <a
+href="ARCHITECTURE.md"><code>docs/ARCHITECTURE.md</code></a></li>
+</ul>
+</body>
+</html>

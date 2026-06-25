@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-06-02-const-11.4.107-anti-forgetting-anchor</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1
+id="draft--helixconstitution-114107-anti-forgetting-enforcement-anchor">DRAFT
+— HelixConstitution §11.4.107 Anti-Forgetting Enforcement Anchor</h1>
+<p><strong>Status:</strong> DRAFT — NOT YET LANDED IN
+constitution/Constitution.md<br />
+<strong>Prepared by:</strong> Stream B subagent, 2026-06-02<br />
+<strong>Classification:</strong> universal (§11.4.17)<br />
+<strong>CONST-049 pipeline:</strong> see Part B below<br />
+<strong>BLOCKED-UNTIL:</strong> see Part C below</p>
+<hr />
+<h2 id="part-a--proposed-114107-clause-text">Part A — Proposed §11.4.107
+Clause Text</h2>
+<hr />
+<h3
+id="114107--mandatory-anti-forgetting-enforcement-pretooluse-guard-hook--subagent-constitutional-preamble--orchestrator-pre-action-checklist-operator-mandate">§11.4.107
+— Mandatory Anti-Forgetting Enforcement: PreToolUse Guard Hook +
+Subagent Constitutional Preamble + Orchestrator Pre-Action Checklist
+(Operator mandate)</h3>
+<p><strong>Short tag:</strong>
+<code>anti-forgetting-enforcement</code>.</p>
+<p><strong>Forensic anchor — operator mandate:</strong></p>
+<blockquote>
+<p>UNCONFIRMED: pending operator's verbatim anti-forgetting mandate
+quote (tracked: PENDING item 3 in the current session's CONTINUATION.md
+handoff).</p>
+</blockquote>
+<p>Background context (UNCONFIRMED quote omitted; factual description
+only): the motivating incident is documented in
+<code>docs/AGENT_GUARDRAILS.md</code> and in
+<code>scripts/hooks/guard-forbidden-commands.sh</code>'s in-source
+header. During an on-device-API build, emulator subagents ran raw
+host-direct <code>emulator</code>/<code>adb</code> commands instead of
+routing through the Containers submodule as required by the governing
+clauses (§6.X / §6.V / §6.AG in the consuming-project layer). The root
+cause was that the orchestrator <strong>forgot to inject the rule into
+subagent prompts</strong>. A rule the orchestrator forgets to paste is
+not enforcement — it is a social contract with the agent's memory, and
+that contract is broken by every cold-session start, context-window
+exhaustion, and sub-agent dispatch. The mechanical fix is twofold: (1) a
+<strong>PreToolUse guard hook</strong> that blocks the forbidden command
+classes at the tool-call boundary unconditionally, and (2) a
+<strong>canonical subagent preamble document</strong> that the
+orchestrator pastes verbatim into every dispatch, plus a
+<strong>pre-action checklist</strong> for the orchestrator's own
+actions. Together these are the "anti-forgetting" enforcement layer: the
+hook is the floor (commands cannot be executed even if the agent forgot
+every rule), the preamble is the ceiling (the full live ruleset, not
+just what the hook can pattern-match). This two-layer model was
+introduced in the Lava project (commit family on <code>master</code>,
+2026-06-01/02) and is explicitly designed to be universal —
+<code>scripts/hooks/guard-forbidden-commands.sh</code> carries
+<code>Classification: universal</code> in its header and is portable by
+design (no Lava-specific paths, no <code>jq</code> hard dependency).</p>
+<p><strong>Rule.</strong> Every HelixConstitution-consuming project MUST
+deploy the §11.4.107 anti-forgetting enforcement layer consisting of
+three components, all maintained together:</p>
+<p><strong>(A) PreToolUse guard hook — the mechanical
+floor.</strong></p>
+<p>A shell script MUST be wired as a <code>PreToolUse</code> hook in the
+AI agent runtime's project-scoped settings file (e.g.
+<code>.claude/settings.json</code> for Claude Code) to intercept every
+<code>Bash</code> tool call before execution and BLOCK the forbidden
+command classes at the tool-call boundary. The hook:</p>
+<ol type="1">
+<li><p>Reads the tool invocation as JSON from stdin
+(<code>.tool_name</code> + <code>.tool_input.command</code>).</p></li>
+<li><p>Exits 0 for non-Bash tools (pass-through) and empty/missing
+commands.</p></li>
+<li><p>For Bash tool calls, pattern-matches against the following
+mandatory blocked classes, each mapped to its governing clause:</p>
+<table>
+<thead>
+<tr>
+<th>Blocked class</th>
+<th>Governing clause(s)</th>
+<th>Examples</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Raw host-direct Android emulator launch / APK install /
+instrumentation run</td>
+<td>§11.4.76 (Containers mandate) + any project-layer emulator clause
+(e.g. §6.X / §6.V / §6.AG in Lava)</td>
+<td><code>emulator -avd …</code>,
+<code>$ANDROID_HOME/emulator/emulator …</code>,
+<code>adb install …</code>, <code>adb -s … install …</code>,
+<code>am instrument …</code></td>
+</tr>
+<tr>
+<td>Force-push / hook bypass / signature bypass</td>
+<td>§11.4.41 (pre-force-push merge-first) + §11.4.71 (pre-push fetch) +
+project-layer §6.T.3 equivalent</td>
+<td><code>git push --force</code>, <code>git push -f</code>,
+<code>git push --force-with-lease</code>, <code>--no-verify</code>,
+<code>--no-gpg-sign</code></td>
+</tr>
+<tr>
+<td>Privilege escalation</td>
+<td>§11.4 no-sudo (project-layer §6.U equivalent)</td>
+<td><code>sudo …</code>, <code>su</code>, <code>su -</code>,
+<code>su -l …</code></td>
+</tr>
+<tr>
+<td>Host power management</td>
+<td>§12 host-session-safety (all consuming projects)</td>
+<td><code>systemctl suspend/hibernate/poweroff/reboot/halt/kill-user/kill-session</code>,
+<code>loginctl …</code>, <code>pm-suspend/hibernate</code>,
+<code>shutdown …</code></td>
+</tr>
+</tbody>
+</table></li>
+<li><p>Exits 2 (block) when a match is found; the stderr text printed is
+fed back to the agent as the refusal reason, citing the governing
+clause.</p></li>
+<li><p>Supports a documented-exception escape hatch: a command
+containing the literal marker
+<code># guardrails:allow &lt;reason&gt;</code> is WARNED (stderr) but
+NOT blocked — EXCEPT for host-power commands, which are categorically
+non-overridable.</p></li>
+</ol>
+<p>The <strong>canonical implementation</strong> of this hook lives at
+<code>constitution/scripts/hooks/guard-forbidden-commands.sh</code> in
+this constitution submodule. Consuming projects MUST reference it at
+that path (inherited by reference per §11.4.80) — NEVER copy it locally
+(a copy diverges silently). The script is portable: no <code>jq</code>
+hard dependency (built-in awk fallback), no consumer-project-specific
+paths, no hardcoded credentials.</p>
+<p>Anti-bluff requirement: a hermetic test suite (at minimum 20 cases)
+MUST verify every blocked class exits 2, every allowed command exits 0,
+the escape hatch fires for non-power classes, and the host-power class
+rejects even with the escape marker. Paired §1.1 mutation: remove the
+<code>emulator -avd</code> pattern from the hook → the emulator-gate
+case exits 0 → test FAILs → restore → test PASSes.</p>
+<p><strong>(B) Subagent Constitutional Preamble — the semantic
+ceiling.</strong></p>
+<p>A canonical document MUST exist at
+<code>docs/AGENT_GUARDRAILS.md</code> (or the project's equivalent
+governance preamble path, recorded in the project's
+<code>CLAUDE.md</code>) containing:</p>
+<ol type="1">
+<li><strong>The SUBAGENT CONSTITUTIONAL PREAMBLE block</strong> — a
+verbatim, self-contained text block covering the top-10 mandatory
+constraints that cannot be pattern-matched by the hook alone (anti-bluff
+intent, resource caps, evidence honesty, continuation maintenance,
+hardcoding prohibition, distribute gate, remote policy, no-guessing
+vocabulary, etc.) plus the constraint classes that the hook already
+enforces (emulators, force-push, sudo, host-power) for
+completeness.</li>
+<li><strong>Clear instruction that the orchestrator MUST paste this
+block verbatim into every subagent dispatch.</strong></li>
+</ol>
+<p>The preamble is the semantic complement to the hook: the hook catches
+command-class violations; the preamble pre-informs the agent of all
+rules it must follow before it even issues a command. Together they
+eliminate the "agent forgot because the orchestrator didn't paste it"
+failure class.</p>
+<p>Anti-bluff requirement: the preamble MUST be structured so it can be
+mechanically verified to be present in
+<code>docs/AGENT_GUARDRAILS.md</code> by
+<code>check-constitution.sh</code> (or the project-equivalent sweep);
+the document MUST contain the anchor literal <code>11.4.107</code> once
+this clause lands. Paired §1.1 mutation: remove the preamble's
+hook-reference sentence → constitution checker detects absence →
+FAIL.</p>
+<p><strong>(C) Orchestrator Pre-Action Checklist — guard against
+self-forgetting.</strong></p>
+<p>The same <code>docs/AGENT_GUARDRAILS.md</code> document MUST contain
+an <strong>ORCHESTRATOR PRE-ACTION CHECKLIST</strong> covering at
+minimum:</p>
+<ul>
+<li>Before any subagent dispatch: confirm the preamble (sub-rule B) is
+pasted verbatim.</li>
+<li>Before any emulator/device action: confirm the run routes through
+the Containers submodule CLI, not host-direct; confirm no live device is
+targeted; confirm the gate host is eligible (otherwise honestly
+BLOCKED).</li>
+<li>Before any distribute action: confirm Challenge Tests EXECUTED (not
+compiled) against the exact artifact; version code bumped; CHANGELOG
+entry present; debug-stage evidence present if two-stage distribute
+applies.</li>
+<li>Before any push / destructive git action: confirm no force flags
+without per-operation operator approval; remote is the approved set
+only; for history rewrite, hardlinked <code>.git</code> backup made
+first.</li>
+<li>Before any host-affecting command: confirm the command is not in the
+host-power blocked class.</li>
+</ul>
+<p>Anti-bluff requirement: the checklist MUST be present in the preamble
+document and verifiable by <code>check-constitution.sh</code>. Each
+checklist item is traceable to a governing clause cited inline.</p>
+<p><strong>Mechanical enforcement.</strong></p>
+<p>Consuming-project <code>check-constitution.sh</code> (or
+<code>verify-all-constitution-rules.sh</code>) MUST verify ALL of:</p>
+<ol type="1">
+<li><code>constitution/scripts/hooks/guard-forbidden-commands.sh</code>
+exists at the canonical path in the constitution submodule.</li>
+<li>The consumer's AI-agent settings file
+(<code>.claude/settings.json</code> or equivalent) contains a
+<code>PreToolUse</code> hook entry referencing the canonical script
+path.</li>
+<li><code>docs/AGENT_GUARDRAILS.md</code> (or the equivalent preamble
+path) exists, contains the <code>SUBAGENT CONSTITUTIONAL PREAMBLE</code>
+heading, and contains the <code>ORCHESTRATOR PRE-ACTION CHECKLIST</code>
+heading.</li>
+<li>A hermetic test for the hook exists (at minimum, a file under
+<code>tests/hooks/</code> or equivalent) and passes.</li>
+<li>The anchor literal <code>11.4.107</code> is present in every
+per-scope governance file (<code>CLAUDE.md</code>,
+<code>AGENTS.md</code>, <code>QWEN.md</code>) of the consuming project
+and its owned submodules per §11.4.35 inheritance.</li>
+</ol>
+<p>Pre-build gate <code>CM-ANTI-FORGETTING-ENFORCEMENT</code> enforces
+(1)–(4). Propagation gate <code>CM-COVENANT-114-107-PROPAGATION</code>
+enforces (5). Paired §1.1 meta-test mutations: (a) remove the
+<code>PreToolUse</code> hook entry from the agent settings file → gate
+(2) FAILs; (b) delete <code>docs/AGENT_GUARDRAILS.md</code> → gate (3)
+FAILs; (c) remove the canonical hook script from the constitution
+submodule → gate (1) FAILs; (d) strip the <code>11.4.107</code> literal
+from a consumer <code>CLAUDE.md</code> → propagation gate FAILs.</p>
+<p><strong>Inheritance.</strong></p>
+<p>Applies recursively to every submodule, every feature, every new
+artifact, every project consuming this constitution. Submodule
+constitutions MAY add stricter rules (additional blocked command
+classes, additional checklist items, stricter test counts) but MUST NOT
+relax any clause. Per §11.4.35: this universal clause lives in the
+constitution submodule; consuming projects' <code>CLAUDE.md</code> /
+<code>AGENTS.md</code> / <code>QWEN.md</code> carry the inheritance
+pointer-block per §11.4.35 + the §11.4.107 literal per the propagation
+gate.</p>
+<p><strong>The principle this clause enshrines (in the fewest possible
+words):</strong> A constraint that depends on an agent remembering it is
+not a constraint — it is a hope. The PreToolUse hook converts the most
+dangerous command classes into hard-blocked failures regardless of agent
+memory. The preamble document converts the full ruleset into something
+the orchestrator can inject rather than recite from training. Together
+they are the minimum viable "anti-forgetting" enforcement posture for
+any AI-agent-assisted project under this constitution.</p>
+<p><strong>Composes with</strong> §11.4 + §11.4.1..§11.4.16 (anti-bluff
+covenant — the hook and preamble are the floor and ceiling of the
+anti-bluff enforcement layer), §11.4.6 (no-guessing — the escape hatch
+requires a <code>&lt;reason&gt;</code> exactly because undocumented
+exceptions are a guessing posture), §11.4.10 (credentials — the
+host-power class is categorically non-overridable, analogous to
+credential leaks), §11.4.75 (mechanical enforcement — §11.4.107 is the
+AI-agent-side specialisation of §11.4.75's git-hook mechanical
+enforcement; together they cover the full automated-and-agentic
+surface), §11.4.76 (Containers mandate — the emulator gate in the hook
+enforces §11.4.76 at the tool-call boundary), §11.4.78 / §11.4.79 /
+§11.4.80 (CodeGraph — the hook passes codegraph MCP calls through
+untouched; the preamble includes the anti-forgetting constraint about
+CodeGraph use), §11.4.81 (cross-platform parity — the hook script is
+portable bash/awk with no OS-specific primitives; per-OS blocked-class
+equivalents are addable via consuming-project extension), §11.4.84
+(working-tree quiescence — the pre-action checklist instructs agents to
+grep for mutation markers before staging), §11.4.98 (full-automation
+mandate — the hook's test suite MUST itself be fully self-driving
+end-to-end), §11.4.102 (systematic-debugging — any hook violation that
+surfaces should trigger the systematic-debugging arc, not a quick
+workaround), §12 (host-session-safety — the host-power class is
+non-overridable; §12 is the constitutional root of that
+prohibition).</p>
+<p><strong>Classification:</strong> universal (§11.4.17) — the
+PreToolUse guard hook + subagent preamble + orchestrator checklist
+pattern is vendor-neutral (defined against the JSON stdin contract that
+every Claude Code hook receives; the pattern ports to any agent runtime
+that exposes a pre-tool-call interception point) and reusable across ANY
+project that uses AI coding agents. The specific blocked command-class
+list at the UNIVERSAL layer covers the four classes that are
+unconditionally forbidden by this constitution (host-power, privilege
+escalation, force-push/bypass, raw emulator host-direct); consuming
+projects extend the list with project-specific additions per
+§11.4.35.</p>
+<p><strong>Non-compliance is a release blocker.</strong> No escape hatch
+— no <code>--skip-pretooluse-hook</code>,
+<code>--no-guardrails-doc</code>,
+<code>--anti-forgetting-optional</code>,
+<code>--single-layer-sufficient</code> flag exists. A project whose
+agent can forget a constitutional constraint and execute the forbidden
+command is constitutionally undefended, irrespective of how well the
+docs are written.</p>
+<p><strong>Canonical authority:</strong> this Constitution.md §11.4.107
+in the HelixConstitution submodule; reference implementation
+<code>constitution/scripts/hooks/guard-forbidden-commands.sh</code> +
+reference preamble document
+<code>constitution/docs/AGENT_GUARDRAILS.md</code> (path within the
+submodule). Consuming projects inherit by reference per §11.4.80.</p>
+<hr />
+<h2 id="part-b--const-049-landing-plan-7-step-pipeline">Part B —
+CONST-049 Landing Plan (7-Step Pipeline)</h2>
+<p>The CONST-049 pipeline for a constitution submodule change is:</p>
+<ol type="1">
+<li><p><strong>Fetch + pull --ff-only first (§11.4.26 step 1 /
+§11.4.37).</strong> Inside the <code>./constitution/</code>
+worktree:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> <span class="at">-C</span> constitution fetch <span class="at">--all</span> <span class="at">--prune</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> <span class="at">-C</span> constitution pull <span class="at">--ff-only</span> origin main</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Verify clean: git -C constitution status</span></span></code></pre></div>
+<p>If the pin is behind upstream (check
+<code>git -C constitution log HEAD..origin/main --oneline</code>),
+integrate before editing. The constitution pin at the parent level MUST
+be advanced in the same commit that lands the clause (step 7).</p></li>
+<li><p><strong>§11.4.32 verify-all sweep (pre-edit
+baseline).</strong></p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> scripts/verify-all-constitution-rules.sh</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Must exit 0 (all gates PASS) before any edit to constitution/.</span></span></code></pre></div></li>
+<li><p><strong>Add the clause AND lift the guard script.</strong></p>
+<ul>
+<li>Append <code>### §11.4.107 — ...</code> to
+<code>constitution/Constitution.md</code> immediately after the
+§11.4.106 block (before <code>## §12.</code>).</li>
+<li>Mirror the summary entry into <code>constitution/CLAUDE.md</code>,
+<code>constitution/AGENTS.md</code>, <code>constitution/QWEN.md</code>
+(the house style is: a brief paragraph + the
+<code>CM-COVENANT-114-107-PROPAGATION</code> gate reference +
+<code>Canonical authority</code> line — see §11.4.106 CLAUDE.md mirror
+for the exact format).</li>
+<li>Lift <code>scripts/hooks/guard-forbidden-commands.sh</code> to
+<code>constitution/scripts/hooks/guard-forbidden-commands.sh</code> (the
+<code>constitution/scripts/</code> directory already exists per §11.4.80
+<code>codegraph_update.sh</code> / <code>codegraph_sync.sh</code>
+precedent). The file is identical to the consuming-project version — it
+was written to be portable. Update <code>.mcp.json</code> /
+<code>.claude/settings.json</code> hook path references to point at the
+constitution-relative path for any project that inherits by
+reference.</li>
+<li>Lift <code>docs/AGENT_GUARDRAILS.md</code> to
+<code>constitution/docs/AGENT_GUARDRAILS.md</code> as the canonical
+reference document (consuming projects EITHER inherit this file by
+reference OR maintain their own at <code>docs/AGENT_GUARDRAILS.md</code>
+with an inheritance pointer).</li>
+<li>Update <code>constitution/docs/CODEGRAPH.md</code> if the
+constitution submodule maintains one, to reflect the new script
+location.</li>
+</ul></li>
+<li><p><strong>Regenerate exports (§11.4.65 universal markdown
+export).</strong> The constitution submodule's
+<code>constitution/Constitution.md</code> and the CLAUDE/AGENTS/QWEN
+mirrors gain new content; their <code>.html</code> + <code>.pdf</code>
+siblings MUST be regenerated:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> constitution</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="ex">pandoc</span> Constitution.md <span class="at">-o</span> Constitution.html</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="ex">pandoc</span> Constitution.md <span class="at">-o</span> Constitution.pdf  <span class="co"># or weasyprint Constitution.html Constitution.pdf</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Repeat for CLAUDE.md, AGENTS.md, QWEN.md mirrors</span></span></code></pre></div></li>
+<li><p><strong>Commit + push to ALL 4 HelixConstitution
+upstreams.</strong> HelixConstitution is HelixDevelopment-owned and
+maintains 4 upstreams (GitHub + GitLab + GitFlic + GitVerse) per the
+§6.AD.1 carve-out — unlike Lava's §6.W 2-mirror constraint. Stage ONLY
+the governance files (NEVER <code>git add -A</code> inside the
+submodule). Commit message MUST cite the operator mandate (once the
+verbatim quote is available) +
+<code>Classification: universal</code>:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> constitution</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add Constitution.md CLAUDE.md AGENTS.md QWEN.md <span class="dt">\</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>        scripts/hooks/guard-forbidden-commands.sh <span class="dt">\</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>        docs/AGENT_GUARDRAILS.md <span class="dt">\</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>        Constitution.html Constitution.pdf CLAUDE.html CLAUDE.pdf <span class="dt">\</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>        AGENTS.html AGENTS.pdf QWEN.html QWEN.pdf</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">&quot;feat(§11.4.107): anti-forgetting enforcement anchor</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="st">Adds the universal PreToolUse guard hook + subagent preamble + orchestrator</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="st">checklist mandate. Lifts guard-forbidden-commands.sh and AGENT_GUARDRAILS.md</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="st">to constitution/scripts/hooks/ and constitution/docs/ as canonical reference</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="st">implementations inherited by reference per §11.4.80.</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="st">Classification: universal</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="st">Catalogue-Check: reuse constitution/scripts/hooks (new path)</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="st">Co-Authored-By: Claude Sonnet 4.6 &lt;noreply@anthropic.com&gt;&quot;</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Push to all 4 HelixConstitution upstreams:</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> push github main</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> push gitlab main</span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> push gitflic main</span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> push gitverse main</span></code></pre></div></li>
+<li><p><strong>Verify §6.C convergence across all 4 upstreams.</strong>
+Confirm all 4 remotes report the same HEAD SHA:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> remote <span class="kw">in</span> github gitlab gitflic gitverse<span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="bu">echo</span> <span class="st">&quot;</span><span class="va">$remote</span><span class="st">: </span><span class="va">$(</span><span class="fu">git</span> <span class="at">-C</span> constitution ls-remote <span class="va">$remote</span> HEAD <span class="kw">|</span> <span class="fu">awk</span> <span class="st">&#39;{print $1}&#39;</span><span class="va">)</span><span class="st">&quot;</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="co"># All four must be identical.</span></span></code></pre></div></li>
+<li><p><strong>Bump parent <code>./constitution</code> pin + propagate
+inheritance pointers.</strong> In the Lava parent repo:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /Users/milosvasic/Projects/Lava</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> <span class="at">-C</span> constitution rev-parse HEAD   <span class="co"># capture the new SHA</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add constitution                 <span class="co"># stages the bumped submodule pointer</span></span></code></pre></div>
+<p>The same commit that bumps the pin MUST also:</p>
+<ul>
+<li>Add <code>§11.4.107</code> literal (or the compact anchor reference)
+to every per-scope governance file that needs it per
+<code>CM-COVENANT-114-107-PROPAGATION</code>. In Lava this means: root
+<code>CLAUDE.md</code> (the <code>§6.AF</code> block or a new
+<code>§6.AF-ext</code> note), root <code>AGENTS.md</code>, root
+<code>QWEN.md</code>, all 17 submodule
+CLAUDE.md/AGENTS.md/QWEN.md/CONSTITUTION.md,
+<code>lava-api-go/CLAUDE.md</code>, <code>lava-api-go/AGENTS.md</code>,
+<code>lava-api-go/CONSTITUTION.md</code>.</li>
+<li>Update <code>docs/CONTINUATION.md</code> per §6.S (same
+commit).</li>
+<li>Run <code>bash scripts/verify-all-constitution-rules.sh</code> to
+confirm the post-bump sweep is clean.</li>
+</ul></li>
+</ol>
+<hr />
+<h2 id="part-c--blocked-until-status">Part C — BLOCKED-UNTIL Status</h2>
+<p><strong>The clause CANNOT land with a real forensic-anchor quote
+until the operator pastes the verbatim anti-forgetting
+mandate.</strong></p>
+<p>Per §11.4.6 no-guessing mandate, the forensic anchor MUST be the
+operator's exact words. The current draft marks the placeholder:</p>
+<pre><code>UNCONFIRMED: pending operator&#39;s verbatim anti-forgetting mandate quote
+             (tracked: PENDING item 3 in the current session&#39;s CONTINUATION.md handoff)</code></pre>
+<p><strong>Two options for proceeding:</strong></p>
+<p><strong>Option (i) — Land now with the UNCONFIRMED: marker, fill the
+quote in a follow-up commit.</strong></p>
+<p>The clause is structurally complete; the UNCONFIRMED marker is
+§11.4.6-compliant (it explicitly signals that the quote is unverified).
+A follow-up commit fills the operator's actual words once provided. This
+is acceptable because: the hook exists, the preamble exists, the
+mechanical enforcement is fully specified — the forensic quote is
+narrative context, not a load-bearing technical constraint.</p>
+<p><strong>Steps:</strong></p>
+<ol type="1">
+<li>Execute the Part B 7-step pipeline with the UNCONFIRMED marker in
+place.</li>
+<li>Open a workable item (e.g. <code>LVA-N</code>): "Fill §11.4.107
+forensic-anchor quote — operator to provide verbatim mandate text."</li>
+<li>When the operator provides the quote, land a follow-up commit:
+<code>docs(§11.4.107): fill forensic-anchor operator mandate quote</code>.</li>
+</ol>
+<p><strong>Option (ii) — Hold until the operator pastes the verbatim
+mandate.</strong></p>
+<p>Do not execute the Part B pipeline. Keep this draft in
+<code>docs/superpowers/drafts/</code>. When the operator provides the
+quote, update the draft and then execute Part B in full as a single
+commit.</p>
+<p><strong>Recommendation:</strong> Option (i). The clause's substance
+(the hook, the preamble, the enforcement) is fully specified and
+§11.4.6-honest. The UNCONFIRMED marker tells every reader exactly what
+is pending. The follow-up is low-risk (docs-only, no gate changes).
+Landing the clause sooner means the
+<code>CM-COVENANT-114-107-PROPAGATION</code> gate starts enforcing the
+anchor literal across the fleet, which is the actual value the clause
+delivers.</p>
+<hr />
+<p><em>End of draft.</em></p>
+</body>
+</html>

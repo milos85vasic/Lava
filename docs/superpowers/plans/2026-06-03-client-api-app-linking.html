@@ -1,0 +1,1206 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-06-03-client-api-app-linking</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1
+id="client--api-app-bidirectional-linking--implementation-plan">Client ↔︎
+API-App Bidirectional Linking — Implementation Plan</h1>
+<blockquote>
+<p><strong>For agentic workers:</strong> REQUIRED SUB-SKILL: Use
+superpowers:subagent-driven-development (recommended) or
+superpowers:executing-plans to implement this plan task-by-task. Steps
+use checkbox (<code>- [ ]</code>) syntax for tracking.</p>
+</blockquote>
+<p><strong>Goal:</strong> Let the Lava client and the on-device API app
+launch each other in both directions (Play-Store fallback when either is
+absent), start the on-device API from the client's onboarding, and
+auto-connect the client to that API over loopback.</p>
+<p><strong>Architecture:</strong> A shared <code>core:applink</code>
+Android library holds the single-source cross-app intent contract + a
+side-effect-free <code>CrossAppLauncher</code> decision function. The
+API app exposes its access key + live loopback port through a
+signature-permission <code>ContentProvider</code>; the client reads it
+after the API app returns. The client's onboarding
+<code>ApiSelectionStep</code> gains an "On this device" section that
+drives the launch and, on return, builds a
+<code>127.0.0.1:&lt;port&gt;</code> <code>Endpoint.GoApi</code>, probes
+<code>/health</code>, and advances.</p>
+<p><strong>Tech Stack:</strong> Kotlin, Jetpack Compose, Orbit MVI,
+Hilt, Android
+<code>PackageManager</code>/<code>ContentProvider</code>/signature
+permissions, JUnit4 + <code>orbit-test</code> + Robolectric +
+MockWebServer (hermetic), Compose UI instrumented Challenge tests
+(on-device).</p>
+<p><strong>Reference (spec):</strong>
+<code>docs/superpowers/specs/2026-06-03-client-api-app-linking-design.md</code>.
+Read it before starting.</p>
+<p><strong>Constitutional cadence (applies to every commit):</strong>
+Conventional Commits; every <code>*Test.kt</code> commit carries a
+<code>Bluff-Audit:</code> stamp (Seventh Law cl.1); no force-push
+(§11.4.113) — push all to github+gitlab fast-forward; update
+<code>docs/CONTINUATION.md</code> in the commit that bumps versions /
+lands the module (§6.S);
+<code>Co-Authored-By: Claude Opus 4.8 &lt;noreply@anthropic.com&gt;</code>.
+Resource limits on test runs
+(<code>GOMAXPROCS</code>/<code>--max-workers=2</code>, §6.T.2).</p>
+<p><strong>Pre-flight for the implementer (read these exact signatures
+before writing code that touches them):</strong></p>
+<ul>
+<li><code>lava.models.settings.Endpoint</code> (the
+<code>GoApi(host, port, …)</code> shape + auth-key field) —
+<code>core/models</code>.</li>
+<li><code>ConnectionService.isReachable(...)</code> / the existing probe
+used by onboarding — search <code>core/data</code> +
+<code>core/domain</code>.</li>
+<li><code>OnboardingViewModel</code> / <code>OnboardingState</code> /
+<code>OnboardingAction</code> / <code>OnboardingSideEffect</code> /
+<code>ApiConnectivityState</code> —
+<code>feature/onboarding</code>.</li>
+<li><code>ApiServiceStarter</code>, <code>ApiEngineController</code>,
+<code>ApiKeyStore</code>,
+<code>ApiControlViewModel</code>/<code>ApiControlState</code> —
+<code>api-app/src/main/kotlin/lava/api/app/{service,control,auth}</code>.</li>
+<li><code>lava.designsystem.component.{Button,Text,Surface}</code>
+signatures — <code>core/designsystem</code>.</li>
+<li>The <code>lava.android.library</code> +
+<code>lava.android.hilt</code> convention plugins —
+<code>buildSrc</code>.</li>
+</ul>
+<hr />
+<h2 id="phase-0--scaffolding--version-bumps">Phase 0 — Scaffolding +
+version bumps</h2>
+<h3 id="task-01-6y-version-bumps-both-apps-continuation-note">Task 0.1:
+§6.Y version bumps (both apps), CONTINUATION note</h3>
+<p><strong>Files:</strong></p>
+<ul>
+<li>Modify: <code>app/build.gradle.kts</code> (versionCode +1,
+versionName minor bump)</li>
+<li>Modify: <code>api-app/build.gradle.kts</code> (versionCode +1,
+versionName minor bump)</li>
+<li>Modify: <code>docs/CONTINUATION.md</code> (§0 note: feature cycle
+started)</li>
+</ul>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 1:</strong> Read
+current <code>versionCode</code>/<code>versionName</code> in both gradle
+files and the last-distributed pointers under
+<code>.lava-ci-evidence/distribute-changelog/firebase-app-distribution/</code>.
+Bump each <code>versionCode</code> by 1 and <code>versionName</code> by
+a minor increment (new user-facing feature).</label></li>
+<li><label><input type="checkbox" /><strong>Step 2:</strong> Add a §0
+line to <code>docs/CONTINUATION.md</code>: "2026-06-03 — started
+client↔︎api-app linking feature (spec + plan landed); §6.Y bumps
+applied."</label></li>
+<li><label><input type="checkbox" /><strong>Step 3:
+Commit.</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add app/build.gradle.kts api-app/build.gradle.kts docs/CONTINUATION.md</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">&quot;chore(§6.Y): bump client + api-app versions for the app-linking feature cycle&quot;</span></span></code></pre></div>
+<h3 id="task-02-create-the-coreapplink-module-skeleton">Task 0.2: Create
+the <code>core:applink</code> module skeleton</h3>
+<p><strong>Files:</strong></p>
+<ul>
+<li>Create: <code>core/applink/build.gradle.kts</code></li>
+<li>Create: <code>core/applink/src/main/AndroidManifest.xml</code>
+(empty <code>&lt;manifest&gt;</code> — no components;
+<code>&lt;queries&gt;</code> live in the apps)</li>
+<li>Modify: <code>settings.gradle.kts</code> (add
+<code>include(":core:applink")</code>)</li>
+</ul>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 1:</strong> Write
+<code>core/applink/build.gradle.kts</code> applying the existing library
+convention plugin and declaring the variant-aware BuildConfig fields the
+contract reads. Use the project's <code>libs</code> catalog; do NOT
+hardcode versions.</label></li>
+</ul>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>plugins <span class="op">{</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    id<span class="op">(</span><span class="st">&quot;lava.android.library&quot;</span><span class="op">)</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>android <span class="op">{</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    namespace <span class="op">=</span> <span class="st">&quot;lava.applink&quot;</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    defaultConfig <span class="op">{</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Release package ids (used for Play-Store fallback, which always</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>        <span class="co">// targets the release listing — debug .dev builds are side-loaded).</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>        buildConfigField<span class="op">(</span><span class="st">&quot;String&quot;</span><span class="op">,</span> <span class="st">&quot;CLIENT_RELEASE_PACKAGE&quot;</span><span class="op">,</span> <span class="st">&quot;</span><span class="sc">\&quot;</span><span class="st">digital.vasic.lava.client</span><span class="sc">\&quot;</span><span class="st">&quot;</span><span class="op">)</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>        buildConfigField<span class="op">(</span><span class="st">&quot;String&quot;</span><span class="op">,</span> <span class="st">&quot;API_RELEASE_PACKAGE&quot;</span><span class="op">,</span> <span class="st">&quot;</span><span class="sc">\&quot;</span><span class="st">digital.vasic.lava.api</span><span class="sc">\&quot;</span><span class="st">&quot;</span><span class="op">)</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    buildFeatures <span class="op">{</span> buildConfig <span class="op">=</span> <span class="kw">true</span> <span class="op">}</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 2:</strong> Add
+<code>include(":core:applink")</code> to
+<code>settings.gradle.kts</code> next to the other <code>core:*</code>
+includes.</label></li>
+<li><label><input type="checkbox" /><strong>Step 3:</strong> Create the
+empty library manifest:</label></li>
+</ul>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode xml"><code class="sourceCode xml"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">&lt;?xml</span> <span class="ot">version=</span><span class="st">&quot;1.0&quot;</span> <span class="ot">encoding=</span><span class="st">&quot;utf-8&quot;</span><span class="fu">?&gt;</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">manifest</span> /&gt;</span></code></pre></div>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 4: Verify it
+configures.</strong> Run: <code>./gradlew :core:applink:help -q</code> —
+Expected: configures without error.</label></li>
+<li><label><input type="checkbox" /><strong>Step 5:
+Commit.</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add core/applink settings.gradle.kts</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">&quot;feat(core:applink): scaffold shared cross-app linking module&quot;</span></span></code></pre></div>
+<hr />
+<h2 id="phase-1--coreapplink-the-contract--launcher-tdd">Phase 1 —
+<code>core:applink</code>: the contract + launcher (TDD)</h2>
+<h3
+id="task-11-applinkcontract--single-source-of-truth-for-the-intent-contract">Task
+1.1: <code>AppLinkContract</code> — single source of truth for the
+intent contract</h3>
+<p><strong>Files:</strong></p>
+<ul>
+<li>Create:
+<code>core/applink/src/main/kotlin/lava/applink/AppLinkContract.kt</code></li>
+</ul>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 1:</strong> Write the
+contract constants. These are the ONLY place the ACTION/EXTRA strings +
+permission/authority names exist; both apps import them.</label></li>
+</ul>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span> <span class="im">lava</span><span class="op">.</span><span class="im">applink</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co">/**</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="co"> * Single source of truth for the client ↔ api-app intent contract.</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="co"> * Both :app and :api-app depend on this so the two ends cannot drift</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="co"> * (a drifted contract is a silent bluff: one app sends an extra the</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="co"> * other never reads). Package ids come from BuildConfig (variant-aware).</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="co"> */</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="kw">object</span> AppLinkContract <span class="op">{</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    <span class="co">/** Explicit-component launch carries these extras (client → api-app). */</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> <span class="kw">val</span> <span class="va">EXTRA_START_API</span> <span class="op">=</span> <span class="st">&quot;lava.applink.START_API&quot;</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> <span class="kw">val</span> <span class="va">EXTRA_RETURN_TO</span> <span class="op">=</span> <span class="st">&quot;lava.applink.RETURN_TO&quot;</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>    <span class="co">/** Return launch carries these (api-app → client). */</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> <span class="kw">val</span> <span class="va">EXTRA_API_HOST</span> <span class="op">=</span> <span class="st">&quot;lava.applink.API_HOST&quot;</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> <span class="kw">val</span> <span class="va">EXTRA_API_PORT</span> <span class="op">=</span> <span class="st">&quot;lava.applink.API_PORT&quot;</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>    <span class="co">/** Loopback host the on-device API binds for same-device callers. */</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> <span class="kw">val</span> <span class="va">LOOPBACK_HOST</span> <span class="op">=</span> <span class="st">&quot;127.0.0.1&quot;</span></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>    <span class="co">/** Signature-level permission guarding the key provider read. */</span></span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> <span class="kw">val</span> <span class="va">PERMISSION_READ_API_KEY</span> <span class="op">=</span> <span class="st">&quot;digital.vasic.lava.permission.READ_API_KEY&quot;</span></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>    <span class="co">/** Release package ids (Play-Store fallback target). */</span></span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>    <span class="kw">val</span> <span class="va">CLIENT_RELEASE_PACKAGE</span><span class="op">:</span> <span class="kw">String</span> <span class="kw">get</span><span class="op">()</span> <span class="op">=</span> BuildConfig<span class="op">.</span>CLIENT_RELEASE_PACKAGE</span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>    <span class="kw">val</span> <span class="va">API_RELEASE_PACKAGE</span><span class="op">:</span> <span class="kw">String</span> <span class="kw">get</span><span class="op">()</span> <span class="op">=</span> BuildConfig<span class="op">.</span>API_RELEASE_PACKAGE</span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>    <span class="co">/** market:// + web Play-Store URIs for a release package id. */</span></span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>    <span class="kw">fun</span> <span class="fu">marketUri</span><span class="op">(</span><span class="va">releasePackage</span><span class="op">:</span> <span class="dt">String</span><span class="op">)</span> <span class="op">=</span> <span class="st">&quot;market://details?id=</span><span class="ss">$releasePackage</span><span class="st">&quot;</span></span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>    <span class="kw">fun</span> <span class="fu">playWebUri</span><span class="op">(</span><span class="va">releasePackage</span><span class="op">:</span> <span class="dt">String</span><span class="op">)</span> <span class="op">=</span></span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;https://play.google.com/store/apps/details?id=</span><span class="ss">$releasePackage</span><span class="st">&quot;</span></span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 2:
+Commit.</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add core/applink/src/main/kotlin/lava/applink/AppLinkContract.kt</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">&quot;feat(core:applink): AppLinkContract — single-source intent/permission contract&quot;</span></span></code></pre></div>
+<h3 id="task-12-packagechecker--installed-ness-seam">Task 1.2:
+<code>PackageChecker</code> — installed-ness seam</h3>
+<p><strong>Files:</strong></p>
+<ul>
+<li>Create:
+<code>core/applink/src/main/kotlin/lava/applink/PackageChecker.kt</code></li>
+</ul>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 1:</strong> Write the
+interface + the real <code>PackageManager</code>-backed impl. The
+interface is the seam tests inject; the real impl is the only
+Android-coupled code.</label></li>
+</ul>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span> <span class="im">lava</span><span class="op">.</span><span class="im">applink</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="im">android</span><span class="op">.</span><span class="im">content</span><span class="op">.</span><span class="im">Context</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="im">android</span><span class="op">.</span><span class="im">content</span><span class="op">.</span><span class="im">Intent</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="co">/** Seam: &quot;is &lt;pkg&gt; installed, and what intent launches it?&quot; Tests fake this. */</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="kw">interface</span> PackageChecker <span class="op">{</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    <span class="kw">fun</span> <span class="fu">isInstalled</span><span class="op">(</span><span class="va">pkg</span><span class="op">:</span> <span class="dt">String</span><span class="op">):</span> <span class="dt">Boolean</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">fun</span> <span class="fu">launchIntentFor</span><span class="op">(</span><span class="va">pkg</span><span class="op">:</span> <span class="dt">String</span><span class="op">):</span> <span class="dt">Intent</span><span class="op">?</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="co">/**</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="co"> * Real impl. </span><span class="al">NOTE</span><span class="co">: getLaunchIntentForPackage returns null on API 30+ for an</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a><span class="co"> * INSTALLED app unless the caller declares a &lt;queries&gt; entry for it — both</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a><span class="co"> * app manifests MUST declare the counterpart package (see Tasks 2.3 / 3.6).</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a><span class="co"> */</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> <span class="fu">PackageManagerChecker</span><span class="op">(</span><span class="kw">private</span> <span class="kw">val</span> <span class="va">context</span><span class="op">:</span> <span class="dt">Context</span><span class="op">)</span> <span class="op">:</span> <span class="dt">PackageChecker</span> <span class="op">{</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>    <span class="kw">override</span> <span class="kw">fun</span> <span class="fu">isInstalled</span><span class="op">(</span><span class="va">pkg</span><span class="op">:</span> <span class="dt">String</span><span class="op">):</span> <span class="dt">Boolean</span> <span class="op">=</span></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>        context<span class="op">.</span>packageManager<span class="op">.</span>getLaunchIntentForPackage<span class="op">(</span>pkg<span class="op">)</span> <span class="op">!=</span> <span class="kw">null</span></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>    <span class="kw">override</span> <span class="kw">fun</span> <span class="fu">launchIntentFor</span><span class="op">(</span><span class="va">pkg</span><span class="op">:</span> <span class="dt">String</span><span class="op">):</span> <span class="dt">Intent</span><span class="op">?</span> <span class="op">=</span></span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>        context<span class="op">.</span>packageManager<span class="op">.</span>getLaunchIntentForPackage<span class="op">(</span>pkg<span class="op">)</span></span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 2:
+Commit.</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add core/applink/src/main/kotlin/lava/applink/PackageChecker.kt</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">&quot;feat(core:applink): PackageChecker seam + PackageManager impl&quot;</span></span></code></pre></div>
+<h3
+id="task-13-crossapplauncher--side-effect-free-launch-decision-tdd">Task
+1.3: <code>CrossAppLauncher</code> — side-effect-free launch decision
+(TDD)</h3>
+<p><strong>Files:</strong></p>
+<ul>
+<li>Create:
+<code>core/applink/src/main/kotlin/lava/applink/CrossAppLauncher.kt</code></li>
+<li>Test:
+<code>core/applink/src/test/kotlin/lava/applink/CrossAppLauncherTest.kt</code></li>
+</ul>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 1: Write the failing
+test.</strong> Uses a fake <code>PackageChecker</code>; asserts the
+exact decision (no Android runtime needed for the decision type — keep
+<code>LaunchDecision</code> free of <code>Intent</code> so it is
+pure-JVM testable; the launcher returns the package + extras and the
+caller builds the actual <code>Intent</code>).</label></li>
+</ul>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span> <span class="im">lava</span><span class="op">.</span><span class="im">applink</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="im">org</span><span class="op">.</span><span class="im">junit</span><span class="op">.</span><span class="im">Assert</span><span class="op">.</span><span class="im">assertEquals</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="im">org</span><span class="op">.</span><span class="im">junit</span><span class="op">.</span><span class="im">Assert</span><span class="op">.</span><span class="im">assertTrue</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="im">org</span><span class="op">.</span><span class="im">junit</span><span class="op">.</span><span class="im">Test</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> CrossAppLauncherTest <span class="op">{</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="kw">fun</span> <span class="fu">checker</span><span class="op">(</span><span class="va">installed</span><span class="op">:</span> <span class="dt">Set</span>&lt;<span class="va">String</span>&gt;<span class="op">)</span> <span class="op">=</span> <span class="kw">object</span> <span class="op">:</span> <span class="dt">PackageChecker</span> <span class="op">{</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>        <span class="kw">override</span> <span class="kw">fun</span> <span class="fu">isInstalled</span><span class="op">(</span><span class="va">pkg</span><span class="op">:</span> <span class="dt">String</span><span class="op">)</span> <span class="op">=</span> pkg <span class="kw">in</span> installed</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>        <span class="kw">override</span> <span class="kw">fun</span> <span class="fu">launchIntentFor</span><span class="op">(</span><span class="va">pkg</span><span class="op">:</span> <span class="dt">String</span><span class="op">)</span> <span class="op">=</span> <span class="kw">null</span> <span class="co">// not used by decide()</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Bluff-Audit target: decideLaunch must pick StoreRedirect when absent.</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">@Test</span> <span class="kw">fun</span> <span class="fu">installed_target_yields_Launch_with_extras</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>        <span class="kw">val</span> <span class="va">launcher</span> <span class="op">=</span> CrossAppLauncher<span class="op">(</span>checker<span class="op">(</span>setOf<span class="op">(</span><span class="st">&quot;digital.vasic.lava.api&quot;</span><span class="op">)))</span></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>        <span class="kw">val</span> <span class="va">d</span> <span class="op">=</span> launcher<span class="op">.</span>decideLaunch<span class="op">(</span></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>            targetPackage <span class="op">=</span> <span class="st">&quot;digital.vasic.lava.api&quot;</span><span class="op">,</span></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>            releasePackage <span class="op">=</span> <span class="st">&quot;digital.vasic.lava.api&quot;</span><span class="op">,</span></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>            extras <span class="op">=</span> mapOf<span class="op">(</span>AppLinkContract<span class="op">.</span>EXTRA_START_API to <span class="st">&quot;true&quot;</span><span class="op">),</span></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>        <span class="op">)</span></span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>        assertTrue<span class="op">(</span>d <span class="kw">is</span> LaunchDecision<span class="op">.</span>Launch<span class="op">)</span></span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>        d <span class="kw">as</span> LaunchDecision<span class="op">.</span>Launch</span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>        assertEquals<span class="op">(</span><span class="st">&quot;digital.vasic.lava.api&quot;</span><span class="op">,</span> d<span class="op">.</span>targetPackage<span class="op">)</span></span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>        assertEquals<span class="op">(</span><span class="st">&quot;true&quot;</span><span class="op">,</span> d<span class="op">.</span>extras<span class="op">[</span>AppLinkContract<span class="op">.</span>EXTRA_START_API<span class="op">])</span></span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a>    <span class="at">@Test</span> <span class="kw">fun</span> <span class="fu">absent_target_yields_StoreRedirect_to_release_listing</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a>        <span class="kw">val</span> <span class="va">launcher</span> <span class="op">=</span> CrossAppLauncher<span class="op">(</span>checker<span class="op">(</span>emptySet<span class="op">()))</span></span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a>        <span class="kw">val</span> <span class="va">d</span> <span class="op">=</span> launcher<span class="op">.</span>decideLaunch<span class="op">(</span></span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a>            targetPackage <span class="op">=</span> <span class="st">&quot;digital.vasic.lava.api.dev&quot;</span><span class="op">,</span></span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a>            releasePackage <span class="op">=</span> <span class="st">&quot;digital.vasic.lava.api&quot;</span><span class="op">,</span></span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a>            extras <span class="op">=</span> emptyMap<span class="op">(),</span></span>
+<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a>        <span class="op">)</span></span>
+<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a>        assertTrue<span class="op">(</span>d <span class="kw">is</span> LaunchDecision<span class="op">.</span>StoreRedirect<span class="op">)</span></span>
+<span id="cb9-35"><a href="#cb9-35" aria-hidden="true" tabindex="-1"></a>        d <span class="kw">as</span> LaunchDecision<span class="op">.</span>StoreRedirect</span>
+<span id="cb9-36"><a href="#cb9-36" aria-hidden="true" tabindex="-1"></a>        assertEquals<span class="op">(</span><span class="st">&quot;market://details?id=digital.vasic.lava.api&quot;</span><span class="op">,</span> d<span class="op">.</span>marketUri<span class="op">)</span></span>
+<span id="cb9-37"><a href="#cb9-37" aria-hidden="true" tabindex="-1"></a>        assertEquals<span class="op">(</span></span>
+<span id="cb9-38"><a href="#cb9-38" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;https://play.google.com/store/apps/details?id=digital.vasic.lava.api&quot;</span><span class="op">,</span></span>
+<span id="cb9-39"><a href="#cb9-39" aria-hidden="true" tabindex="-1"></a>            d<span class="op">.</span>webUri<span class="op">,</span></span>
+<span id="cb9-40"><a href="#cb9-40" aria-hidden="true" tabindex="-1"></a>        <span class="op">)</span></span>
+<span id="cb9-41"><a href="#cb9-41" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb9-42"><a href="#cb9-42" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 2: Run, verify it
+fails.</strong> Run:
+<code>./gradlew :core:applink:testDebugUnitTest --tests "lava.applink.CrossAppLauncherTest" --max-workers=2</code>
+— Expected: FAIL (<code>CrossAppLauncher</code> /
+<code>LaunchDecision</code> unresolved).</label></li>
+<li><label><input type="checkbox" /><strong>Step 3: Write the
+implementation.</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span> <span class="im">lava</span><span class="op">.</span><span class="im">applink</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="co">/** Pure decision — no Android side effects, so it is fully unit-testable. */</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="kw">sealed</span> <span class="kw">interface</span> LaunchDecision <span class="op">{</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">data</span> <span class="kw">class</span> Launch<span class="op">(</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>        <span class="kw">val</span> <span class="va">targetPackage</span><span class="op">:</span> <span class="dt">String</span><span class="op">,</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>        <span class="kw">val</span> <span class="va">extras</span><span class="op">:</span> <span class="dt">Map</span>&lt;<span class="va">String</span><span class="op">,</span> <span class="va">String</span>&gt;<span class="op">,</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">)</span> <span class="op">:</span> <span class="dt">LaunchDecision</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">data</span> <span class="kw">class</span> StoreRedirect<span class="op">(</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>        <span class="kw">val</span> <span class="va">marketUri</span><span class="op">:</span> <span class="dt">String</span><span class="op">,</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>        <span class="kw">val</span> <span class="va">webUri</span><span class="op">:</span> <span class="dt">String</span><span class="op">,</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>    <span class="op">)</span> <span class="op">:</span> <span class="dt">LaunchDecision</span></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> CrossAppLauncher<span class="op">(</span><span class="kw">private</span> <span class="kw">val</span> <span class="va">checker</span><span class="op">:</span> <span class="dt">PackageChecker</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>    <span class="co">/**</span></span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a><span class="co">     * @param targetPackage variant-aware package to launch (e.g. ….api.dev on debug)</span></span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a><span class="co">     * @param releasePackage the Play-Store listing id (always the release id)</span></span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a><span class="co">     */</span></span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>    <span class="kw">fun</span> <span class="fu">decideLaunch</span><span class="op">(</span></span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>        <span class="va">targetPackage</span><span class="op">:</span> <span class="dt">String</span><span class="op">,</span></span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>        <span class="va">releasePackage</span><span class="op">:</span> <span class="dt">String</span><span class="op">,</span></span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>        <span class="va">extras</span><span class="op">:</span> <span class="dt">Map</span>&lt;<span class="va">String</span><span class="op">,</span> <span class="va">String</span>&gt;<span class="op">,</span></span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a>    <span class="op">):</span> <span class="dt">LaunchDecision</span> <span class="op">=</span></span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">(</span>checker<span class="op">.</span>isInstalled<span class="op">(</span>targetPackage<span class="op">))</span> <span class="op">{</span></span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a>            LaunchDecision<span class="op">.</span>Launch<span class="op">(</span>targetPackage<span class="op">,</span> extras<span class="op">)</span></span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span> <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a>            LaunchDecision<span class="op">.</span>StoreRedirect<span class="op">(</span></span>
+<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a>                marketUri <span class="op">=</span> AppLinkContract<span class="op">.</span>marketUri<span class="op">(</span>releasePackage<span class="op">),</span></span>
+<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a>                webUri <span class="op">=</span> AppLinkContract<span class="op">.</span>playWebUri<span class="op">(</span>releasePackage<span class="op">),</span></span>
+<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a>            <span class="op">)</span></span>
+<span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb10-34"><a href="#cb10-34" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 4: Run, verify it
+passes.</strong> Run: same command as Step 2 — Expected: PASS (2
+tests).</label></li>
+<li><label><input type="checkbox" /><strong>Step 5: Falsifiability
+rehearsal.</strong> Temporarily change
+<code>if (checker.isInstalled(targetPackage))</code> to
+<code>if (true)</code>; re-run; confirm
+<code>absent_target_yields_StoreRedirect…</code> FAILs with a
+class-cast/assertion message; revert; re-run PASS. Capture for the
+Bluff-Audit stamp.</label></li>
+<li><label><input type="checkbox" /><strong>Step 6: Commit (with
+Bluff-Audit stamp).</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add core/applink/src/main/kotlin/lava/applink/CrossAppLauncher.kt <span class="dt">\</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>        core/applink/src/test/kotlin/lava/applink/CrossAppLauncherTest.kt</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> commit  <span class="co"># body includes:</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Bluff-Audit: CrossAppLauncherTest</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="co">#   Mutation: decideLaunch `if (checker.isInstalled(...))` → `if (true)`</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="co">#   Observed: absent_target_yields_StoreRedirect… FAILed (got Launch, expected StoreRedirect)</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="co">#   Reverted: yes</span></span></code></pre></div>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 7: Push</strong> github
++ gitlab (fast-forward).</label></li>
+</ul>
+<hr />
+<h2 id="phase-2--api-app-side">Phase 2 — API-app side</h2>
+<h3
+id="task-21-apikeyprovider-signature-permission-contentprovider--manifest">Task
+2.1: <code>ApiKeyProvider</code> (signature-permission ContentProvider)
++ manifest</h3>
+<p><strong>Files:</strong></p>
+<ul>
+<li>Create:
+<code>api-app/src/main/kotlin/lava/api/app/handoff/ApiKeyProvider.kt</code></li>
+<li>Modify: <code>api-app/src/main/AndroidManifest.xml</code> (declare
+permission + provider)</li>
+<li>Modify: <code>api-app/build.gradle.kts</code> (depend on
+<code>:core:applink</code>; BuildConfig: own authority + client release
+package)</li>
+<li>Test:
+<code>api-app/src/test/kotlin/lava/api/app/handoff/ApiKeyProviderTest.kt</code>
+(Robolectric)</li>
+</ul>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 1:</strong>
+<code>api-app/build.gradle.kts</code> — add
+<code>implementation(project(":core:applink"))</code>; add buildConfig
+fields <code>API_KEY_AUTHORITY</code>
+(<code>"${applicationId}.keyprovider"</code> resolved per-variant) and
+<code>CLIENT_RELEASE_PACKAGE</code>. (Resolve the per-variant authority
+via <code>applicationIdSuffix</code>-aware logic the same way other Lava
+build fields do — read the existing pattern in
+<code>api-app/build.gradle.kts</code> for how <code>applicationId</code>
++ <code>.dev</code> suffix is composed.)</label></li>
+<li><label><input type="checkbox" /><strong>Step 2: Write the failing
+Robolectric test.</strong> Assert: when the engine reports a running
+port + the key store has a key, <code>query()</code> returns one row
+<code>{access_key, loopback_port}</code>; when stopped, returns an empty
+cursor.</label></li>
+</ul>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span> <span class="im">lava</span><span class="op">.</span><span class="im">api</span><span class="op">.</span><span class="im">app</span><span class="op">.</span><span class="im">handoff</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="im">androidx</span><span class="op">.</span><span class="im">test</span><span class="op">.</span><span class="im">core</span><span class="op">.</span><span class="im">app</span><span class="op">.</span><span class="im">ApplicationProvider</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="im">org</span><span class="op">.</span><span class="im">junit</span><span class="op">.</span><span class="im">Assert</span><span class="op">.</span><span class="im">assertEquals</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="im">org</span><span class="op">.</span><span class="im">junit</span><span class="op">.</span><span class="im">Test</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="im">org</span><span class="op">.</span><span class="im">junit</span><span class="op">.</span><span class="im">runner</span><span class="op">.</span><span class="im">RunWith</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="im">org</span><span class="op">.</span><span class="im">robolectric</span><span class="op">.</span><span class="im">RobolectricTestRunner</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a><span class="at">@RunWith</span><span class="op">(</span>RobolectricTestRunner<span class="op">::</span><span class="kw">class</span>)</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> ApiKeyProviderTest <span class="op">{</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Bluff-Audit target: a running engine must surface key+port to the client.</span></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">@Test</span> <span class="kw">fun</span> <span class="fu">running_engine_exposes_key_and_port</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>        <span class="kw">val</span> <span class="va">provider</span> <span class="op">=</span> ApiKeyProvider<span class="op">().</span>withFakes<span class="op">(</span></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>            keyProvider <span class="op">=</span> <span class="op">{</span> <span class="st">&quot;test-key-123&quot;</span> <span class="op">},</span></span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>            portProvider <span class="op">=</span> <span class="op">{</span> <span class="dv">8443</span> <span class="op">},</span></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>        <span class="op">)</span></span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>        provider<span class="op">.</span>attachInfoForTest<span class="op">(</span>ApplicationProvider<span class="op">.</span>getApplicationContext<span class="op">())</span></span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>        <span class="kw">val</span> <span class="va">cursor</span> <span class="op">=</span> provider<span class="op">.</span>query<span class="op">(</span>provider<span class="op">.</span>contentUri<span class="op">(),</span> <span class="kw">null</span><span class="op">,</span> <span class="kw">null</span><span class="op">,</span> <span class="kw">null</span><span class="op">,</span> <span class="kw">null</span><span class="op">)!!</span></span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>        assertEquals<span class="op">(</span><span class="dv">1</span><span class="op">,</span> cursor<span class="op">.</span>count<span class="op">)</span></span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>        cursor<span class="op">.</span>moveToFirst<span class="op">()</span></span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>        assertEquals<span class="op">(</span><span class="st">&quot;test-key-123&quot;</span><span class="op">,</span> cursor<span class="op">.</span>getString<span class="op">(</span>cursor<span class="op">.</span>getColumnIndexOrThrow<span class="op">(</span><span class="st">&quot;access_key&quot;</span><span class="op">)))</span></span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>        assertEquals<span class="op">(</span><span class="dv">8443</span><span class="op">,</span> cursor<span class="op">.</span>getInt<span class="op">(</span>cursor<span class="op">.</span>getColumnIndexOrThrow<span class="op">(</span><span class="st">&quot;loopback_port&quot;</span><span class="op">)))</span></span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">@Test</span> <span class="kw">fun</span> <span class="fu">stopped_engine_exposes_empty_cursor</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a>        <span class="kw">val</span> <span class="va">provider</span> <span class="op">=</span> ApiKeyProvider<span class="op">().</span>withFakes<span class="op">(</span>keyProvider <span class="op">=</span> <span class="op">{</span> <span class="kw">null</span> <span class="op">},</span> portProvider <span class="op">=</span> <span class="op">{</span> <span class="kw">null</span> <span class="op">})</span></span>
+<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a>        provider<span class="op">.</span>attachInfoForTest<span class="op">(</span>ApplicationProvider<span class="op">.</span>getApplicationContext<span class="op">())</span></span>
+<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a>        <span class="kw">val</span> <span class="va">cursor</span> <span class="op">=</span> provider<span class="op">.</span>query<span class="op">(</span>provider<span class="op">.</span>contentUri<span class="op">(),</span> <span class="kw">null</span><span class="op">,</span> <span class="kw">null</span><span class="op">,</span> <span class="kw">null</span><span class="op">,</span> <span class="kw">null</span><span class="op">)!!</span></span>
+<span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a>        assertEquals<span class="op">(</span><span class="dv">0</span><span class="op">,</span> cursor<span class="op">.</span>count<span class="op">)</span></span>
+<span id="cb12-30"><a href="#cb12-30" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb12-31"><a href="#cb12-31" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 3: Run, verify it
+fails.</strong> Run:
+<code>./gradlew :api-app:testDebugUnitTest --tests "lava.api.app.handoff.ApiKeyProviderTest" --max-workers=2</code>
+— Expected: FAIL (unresolved).</label></li>
+<li><label><input type="checkbox" /><strong>Step 4: Implement
+<code>ApiKeyProvider</code>.</strong> A <code>ContentProvider</code>
+whose <code>query()</code> builds a
+<code>MatrixCursor(["access_key","loopback_port"])</code>; one row when
+both <code>keyProvider()</code> (reads <code>ApiKeyStore</code>) and
+<code>portProvider()</code> (reads the engine controller's live port)
+are non-null, else empty. Provide <code>withFakes(...)</code> +
+<code>attachInfoForTest(...)</code> + <code>contentUri()</code> test
+seams; production wires
+<code>keyProvider</code>/<code>portProvider</code> to the real
+<code>ApiKeyStore</code> + <code>ApiEngineController</code> (inject via
+the app's Hilt graph or a process-global accessor — follow how
+<code>ApiEngineService</code> reaches those).
+<code>insert/update/delete/getType</code> return
+null/0/unsupported.</label></li>
+<li><label><input type="checkbox" /><strong>Step 5:</strong> Manifest —
+declare the permission + provider:</label></li>
+</ul>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode xml"><code class="sourceCode xml"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">permission</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    <span class="ot">android:name=</span><span class="st">&quot;digital.vasic.lava.permission.READ_API_KEY&quot;</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    <span class="ot">android:protectionLevel=</span><span class="st">&quot;signature&quot;</span> /&gt;</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">provider</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    <span class="ot">android:name=</span><span class="st">&quot;.handoff.ApiKeyProvider&quot;</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    <span class="ot">android:authorities=</span><span class="st">&quot;${apiKeyAuthority}&quot;</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>    <span class="ot">android:exported=</span><span class="st">&quot;true&quot;</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>    <span class="ot">android:readPermission=</span><span class="st">&quot;digital.vasic.lava.permission.READ_API_KEY&quot;</span> /&gt;</span></code></pre></div>
+<p>Add <code>apiKeyAuthority</code> to the api-app
+<code>manifestPlaceholders</code> (variant-aware:
+<code>applicationId + ".keyprovider"</code>).</p>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 6: Run, verify it
+passes.</strong> Same command as Step 3 — Expected: PASS (2
+tests).</label></li>
+<li><label><input type="checkbox" /><strong>Step 7: Falsifiability
+rehearsal.</strong> Make <code>query()</code> always return an empty
+cursor; confirm <code>running_engine_exposes_key_and_port</code> FAILs;
+revert. Capture.</label></li>
+<li><label><input type="checkbox" /><strong>Step 8: Commit (Bluff-Audit
+stamp) + push.</strong></label></li>
+</ul>
+<h3
+id="task-22-api-app-mainactivity-auto-start-on-extra_start_api-expose-live-port">Task
+2.2: API-app <code>MainActivity</code> auto-start on
+<code>EXTRA_START_API</code>; expose live port</h3>
+<p><strong>Files:</strong></p>
+<ul>
+<li>Modify:
+<code>api-app/src/main/kotlin/lava/api/app/MainActivity.kt</code></li>
+<li>Modify:
+<code>api-app/src/main/kotlin/lava/api/app/control/ApiControlViewModel.kt</code>
+(+ <code>ApiControlState</code> if needed)</li>
+<li>Test:
+<code>api-app/src/test/kotlin/lava/api/app/control/ApiControlAutoStartTest.kt</code></li>
+</ul>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 1: Write the failing
+ViewModel test.</strong> Using <code>orbit-test</code> + a
+behaviorally-equivalent fake <code>ApiServiceStarter</code>/controller:
+dispatching the "start requested" action starts the engine and the state
+exposes the running loopback port. Primary assertion on the resulting
+<code>ApiControlState</code> (running + port).</label></li>
+<li><label><input type="checkbox" /><strong>Step 2: Run, verify it
+fails.</strong></label></li>
+<li><label><input type="checkbox" /><strong>Step 3: Implement.</strong>
+Add an <code>onStartRequested()</code> action handler to
+<code>ApiControlViewModel</code> that calls the existing
+<code>ApiServiceStarter</code> and reduces state to running + exposes
+the port from the controller. In
+<code>MainActivity.onCreate</code>/<code>onNewIntent</code>, read
+<code>intent.getBooleanExtra(AppLinkContract.EXTRA_START_API, false)</code>;
+if true, request the POST_NOTIFICATIONS permission (API 33+) then
+dispatch <code>onStartRequested()</code>. (Follow the existing
+<code>ApiControlScreen</code> ↔︎ <code>ApiControlViewModel</code>
+wiring.)</label></li>
+<li><label><input type="checkbox" /><strong>Step 4: Run, verify it
+passes.</strong></label></li>
+<li><label><input type="checkbox" /><strong>Step 5: Falsifiability
+rehearsal</strong> (make the handler not call the starter → state never
+becomes running → test fails). Capture.</label></li>
+<li><label><input type="checkbox" /><strong>Step 6: Commit (Bluff-Audit)
++ push.</strong></label></li>
+</ul>
+<h3
+id="task-23-api-app-back-to-lava-client--open-lava-client-button--queries">Task
+2.3: API-app "Back to Lava client" / "Open Lava client" button +
+<code>&lt;queries&gt;</code></h3>
+<p><strong>Files:</strong></p>
+<ul>
+<li>Modify:
+<code>api-app/src/main/kotlin/lava/api/app/ui/ApiControlScreen.kt</code>
+(+ labels in <code>ApiStatusLabels.kt</code>/strings)</li>
+<li>Modify:
+<code>api-app/src/main/kotlin/lava/api/app/control/ApiControlViewModel.kt</code>
++ <code>ApiControlAction.kt</code> +
+<code>ApiControlSideEffect.kt</code></li>
+<li>Modify: <code>api-app/src/main/AndroidManifest.xml</code>
+(<code>&lt;queries&gt;</code>)</li>
+<li>Test:
+<code>api-app/src/test/kotlin/lava/api/app/control/OpenClientDecisionTest.kt</code></li>
+</ul>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 1: Write the failing
+test.</strong> ViewModel "open client" action → emits a side effect
+carrying the
+<code>CrossAppLauncher.decideLaunch(client target, client release, returnExtras)</code>
+decision (Launch vs StoreRedirect), using a fake
+<code>PackageChecker</code>. When the activity was launched-from-client
+(a flag the ViewModel holds), the Launch extras include
+<code>EXTRA_API_HOST</code>/<code>EXTRA_API_PORT</code>.</label></li>
+<li><label><input type="checkbox" /><strong>Step 2: Run, verify it
+fails.</strong></label></li>
+<li><label><input type="checkbox" /><strong>Step 3: Implement.</strong>
+Add <code>OnOpenClient</code> action +
+<code>LaunchClient(decision)</code> side effect; the screen renders the
+button (label "Back to Lava client" when launched-from-client, else
+"Open Lava client") and the Activity executes the decision:
+<code>Launch</code> → build explicit <code>Intent</code> for
+<code>decision.targetPackage</code> with extras +
+<code>startActivity</code>; <code>StoreRedirect</code> →
+<code>Intent(ACTION_VIEW, marketUri)</code> with web fallback on
+<code>ActivityNotFoundException</code>. Wire the real
+<code>PackageManagerChecker</code>.</label></li>
+<li><label><input type="checkbox" /><strong>Step 4:</strong> Manifest
+<code>&lt;queries&gt;</code> (so the api-app can see the client package
++ the store):</label></li>
+</ul>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode xml"><code class="sourceCode xml"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">queries</span>&gt;</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">package</span> <span class="ot">android:name=</span><span class="st">&quot;digital.vasic.lava.client&quot;</span> /&gt;</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">package</span> <span class="ot">android:name=</span><span class="st">&quot;digital.vasic.lava.client.dev&quot;</span> /&gt;</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">intent</span>&gt;&lt;<span class="kw">action</span> <span class="ot">android:name=</span><span class="st">&quot;android.intent.action.VIEW&quot;</span> /&gt;&lt;<span class="kw">data</span> <span class="ot">android:scheme=</span><span class="st">&quot;market&quot;</span> /&gt;&lt;/<span class="kw">intent</span>&gt;</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">intent</span>&gt;&lt;<span class="kw">action</span> <span class="ot">android:name=</span><span class="st">&quot;android.intent.action.VIEW&quot;</span> /&gt;&lt;<span class="kw">data</span> <span class="ot">android:scheme=</span><span class="st">&quot;https&quot;</span> /&gt;&lt;/<span class="kw">intent</span>&gt;</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>&lt;/<span class="kw">queries</span>&gt;</span></code></pre></div>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 5: Run, verify it
+passes.</strong></label></li>
+<li><label><input type="checkbox" /><strong>Step 6: Falsifiability
+rehearsal</strong> (force the decision to always <code>Launch</code> →
+the not-installed test fails). Capture.</label></li>
+<li><label><input type="checkbox" /><strong>Step 7: Commit (Bluff-Audit)
++ push.</strong></label></li>
+</ul>
+<hr />
+<h2 id="phase-3--client-side">Phase 3 — Client side</h2>
+<h3 id="task-31-apikeyclient--read-the-provider">Task 3.1:
+<code>ApiKeyClient</code> — read the provider</h3>
+<p><strong>Files:</strong></p>
+<ul>
+<li>Create:
+<code>app/src/main/kotlin/digital/vasic/lava/client/handoff/ApiKeyClient.kt</code></li>
+<li>Modify: <code>app/build.gradle.kts</code> (depend on
+<code>:core:applink</code>; BuildConfig: api authority + api release
+package)</li>
+<li>Modify: <code>app/src/main/AndroidManifest.xml</code>
+(<code>uses-permission</code> signature)</li>
+<li>Test:
+<code>app/src/test/kotlin/digital/vasic/lava/client/handoff/ApiKeyClientTest.kt</code>
+(Robolectric)</li>
+</ul>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 1: Write the failing
+Robolectric test.</strong> Register a stub provider at the variant
+authority returning a <code>{key,port}</code> row; assert
+<code>ApiKeyClient.read()</code> returns
+<code>ApiHandoff(port, key)</code>; with no provider →
+null.</label></li>
+<li><label><input type="checkbox" /><strong>Step 2: Run, verify it
+fails.</strong></label></li>
+<li><label><input type="checkbox" /><strong>Step 3: Implement.</strong>
+<code>data class ApiHandoff(val port: Int, val key: String)</code>;
+<code>ApiKeyClient(context, authority)</code> does
+<code>contentResolver.query(content://$authority, …)</code>, maps the
+row, returns null on empty/absent/SecurityException. Authority from
+<code>BuildConfig</code> (variant-aware: api release id +
+<code>.dev</code> on debug + <code>.keyprovider</code>).</label></li>
+<li><label><input type="checkbox" /><strong>Step 4:</strong> Manifest:
+<code>&lt;uses-permission android:name="digital.vasic.lava.permission.READ_API_KEY" /&gt;</code>.</label></li>
+<li><label><input type="checkbox" /><strong>Step 5: Run, verify it
+passes.</strong></label></li>
+<li><label><input type="checkbox" /><strong>Step 6: Falsifiability
+rehearsal</strong> (map the wrong column → wrong value → test fails).
+Capture.</label></li>
+<li><label><input type="checkbox" /><strong>Step 7: Commit (Bluff-Audit)
++ push.</strong></label></li>
+</ul>
+<h3 id="task-32-onboarding-state--action--side-effect-additions">Task
+3.2: Onboarding state / action / side-effect additions</h3>
+<p><strong>Files:</strong></p>
+<ul>
+<li>Modify:
+<code>feature/onboarding/src/main/kotlin/lava/onboarding/OnboardingState.kt</code></li>
+<li>Modify:
+<code>feature/onboarding/src/main/kotlin/lava/onboarding/OnboardingAction.kt</code></li>
+<li>Modify:
+<code>feature/onboarding/src/main/kotlin/lava/onboarding/OnboardingSideEffect.kt</code></li>
+</ul>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 1:</strong> Add to
+<code>OnboardingState</code> (within the existing API-selection state):
+<code>onDeviceApiInstalled: Boolean</code>. Add actions:
+<code>object LaunchOnDeviceApi</code> and
+<code>data class OnDeviceApiReturned(val host: String, val port: Int)</code>.
+Add side effects:
+<code>data class LaunchApiApp(val decision: LaunchDecision)</code> and
+reuse/add
+<code>data class OpenPlayStore(val marketUri: String, val webUri: String)</code>.
+Import <code>lava.applink.LaunchDecision</code>.
+(<code>feature/onboarding/build.gradle.kts</code> → add
+<code>implementation(project(":core:applink"))</code>.)</label></li>
+<li><label><input type="checkbox" /><strong>Step 2:
+Compile-check.</strong> Run:
+<code>./gradlew :feature:onboarding:compileDebugKotlin --max-workers=2</code>
+— Expected: success.</label></li>
+<li><label><input type="checkbox" /><strong>Step 3: Commit +
+push.</strong></label></li>
+</ul>
+<h3
+id="task-33-onboardingviewmodel--launch-decision--loopback-auto-connect-tdd">Task
+3.3: <code>OnboardingViewModel</code> — launch decision + loopback
+auto-connect (TDD)</h3>
+<p><strong>Files:</strong></p>
+<ul>
+<li>Modify:
+<code>feature/onboarding/src/main/kotlin/lava/onboarding/OnboardingViewModel.kt</code></li>
+<li>Modify:
+<code>feature/onboarding/src/main/kotlin/lava/onboarding/OnboardingHiltModule.kt</code>
+(provide <code>CrossAppLauncher</code> + a key-read function seam)</li>
+<li>Test:
+<code>feature/onboarding/src/test/kotlin/lava/onboarding/OnDeviceApiFlowTest.kt</code></li>
+</ul>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 1: Write the failing
+test</strong> (<code>orbit-test</code>, real UseCase + real repo + fake
+<code>PackageChecker</code> + a fake key-reader enforcing the real
+<code>ApiHandoff</code> contract + real <code>ConnectionService</code>
+against a <code>MockWebServer</code> serving <code>/health</code>
+200):</label>
+<ul>
+<li><code>LaunchOnDeviceApi</code> when API installed →
+<code>LaunchApiApp(Launch(...))</code> side effect; when absent →
+<code>OpenPlayStore(...)</code>.</li>
+<li><code>OnDeviceApiReturned("127.0.0.1", &lt;mockPort&gt;)</code> →
+reads key → builds
+<code>Endpoint.GoApi("127.0.0.1", mockPort, key)</code> → probes the
+MockWebServer <code>/health</code> → the endpoint is
+<strong>persisted</strong> in the repo AND the step advances. Primary
+assertion on persisted repo state + advanced step.</li>
+</ul></li>
+<li><label><input type="checkbox" /><strong>Step 2: Run, verify it
+fails.</strong></label></li>
+<li><label><input type="checkbox" /><strong>Step 3: Implement</strong>
+the two handlers in <code>OnboardingViewModel</code>, reusing the
+existing probe/persist/advance code path that the cloud "Add server"
+flow already uses (so loopback goes through the SAME
+select→probe→persist→advance pipeline). Inject
+<code>CrossAppLauncher</code> + the key-reader via Hilt.</label></li>
+<li><label><input type="checkbox" /><strong>Step 4: Run, verify it
+passes.</strong></label></li>
+<li><label><input type="checkbox" /><strong>Step 5: Falsifiability
+rehearsal</strong> (make <code>OnDeviceApiReturned</code> skip the
+persist → repo assertion fails; AND break the probe → step does not
+advance). Capture both.</label></li>
+<li><label><input type="checkbox" /><strong>Step 6: Commit (Bluff-Audit)
++ push.</strong></label></li>
+</ul>
+<h3 id="task-34-apiselectionstep--on-this-device-section-ui">Task 3.4:
+<code>ApiSelectionStep</code> — "On this device" section UI</h3>
+<p><strong>Files:</strong></p>
+<ul>
+<li>Modify:
+<code>feature/onboarding/src/main/kotlin/lava/onboarding/steps/ApiSelectionStep.kt</code></li>
+<li>Test: covered by the Challenge (Phase 4) + a structural §6.Q check
+(no nested LazyColumn — the section is plain composables).</li>
+</ul>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 1:</strong> Add a third
+section "On this device" (between "On your network" and "Cloud / remote
+server") with a
+<code>semantics{ contentDescription = "api-section-ondevice" }</code>
+header, an explanatory line, and a single <code>Button</code>:</label>
+<ul>
+<li>label =
+<code>if (onDeviceApiInstalled) "Open Lava API app" else "Install Lava API app"</code>,
+<code>contentDescription = "api-ondevice-launch"</code>,
+<code>onClick = onLaunchOnDeviceApi</code>. Add the
+<code>onLaunchOnDeviceApi: () -&gt; Unit</code> +
+<code>onDeviceApiInstalled: Boolean</code> params (defaulted so existing
+call sites/Challenge26/30 still compile, matching the file's existing
+default-param convention).</li>
+</ul></li>
+<li><label><input type="checkbox" /><strong>Step 2:
+Compile-check.</strong> Run:
+<code>./gradlew :feature:onboarding:compileDebugKotlin --max-workers=2</code>
+— Expected: success.</label></li>
+<li><label><input type="checkbox" /><strong>Step 3:</strong> Confirm
+§6.Q: no <code>LazyColumn</code> added (the section is plain
+<code>Column</code> children).</label></li>
+<li><label><input type="checkbox" /><strong>Step 4: Commit +
+push.</strong></label></li>
+</ul>
+<h3
+id="task-35-onboardingscreen--execute-side-effects-via-crossapplauncher">Task
+3.5: <code>OnboardingScreen</code> — execute side effects via
+<code>CrossAppLauncher</code></h3>
+<p><strong>Files:</strong></p>
+<ul>
+<li>Modify:
+<code>feature/onboarding/src/main/kotlin/lava/onboarding/OnboardingScreen.kt</code></li>
+</ul>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 1:</strong> In the
+side-effect collector, handle <code>LaunchApiApp(decision)</code> and
+<code>OpenPlayStore</code>: <code>Launch</code> → build explicit
+<code>Intent</code> (set package, put extras incl.
+<code>EXTRA_START_API=true</code>,
+<code>EXTRA_RETURN_TO=&lt;client pkg&gt;</code>) and
+<code>context.startActivity</code>;
+<code>StoreRedirect</code>/<code>OpenPlayStore</code> →
+<code>ACTION_VIEW market://</code> with
+<code>try/catch ActivityNotFoundException</code> → web URI. Pass
+<code>onLaunchOnDeviceApi = { viewModel.onLaunchOnDeviceApi() }</code> +
+<code>onDeviceApiInstalled</code> into <code>ApiSelectionStep</code>. On
+<code>LaunchedEffect</code>/resume, set
+<code>onDeviceApiInstalled</code> via the injected
+<code>PackageChecker</code>.</label></li>
+<li><label><input type="checkbox" /><strong>Step 2:
+Compile-check</strong> <code>:feature:onboarding</code>.</label></li>
+<li><label><input type="checkbox" /><strong>Step 3: Commit +
+push.</strong></label></li>
+</ul>
+<h3
+id="task-36-client-mainactivity--handle-the-return-intent--queries">Task
+3.6: Client <code>MainActivity</code> — handle the return intent +
+<code>&lt;queries&gt;</code></h3>
+<p><strong>Files:</strong></p>
+<ul>
+<li>Modify:
+<code>app/src/main/kotlin/digital/vasic/lava/client/MainActivity.kt</code></li>
+<li>Modify: <code>app/src/main/AndroidManifest.xml</code>
+(<code>&lt;queries&gt;</code>)</li>
+</ul>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 1:</strong> In
+<code>MainActivity.onCreate</code>/<code>onNewIntent</code>, read
+<code>EXTRA_API_HOST</code>/<code>EXTRA_API_PORT</code>; if present,
+route to onboarding via
+<code>OnboardingViewModel.onOnDeviceApiReturned(host, port)</code> (the
+nav/VM is <code>singleInstance</code>, so <code>onNewIntent</code> is
+the path).</label></li>
+<li><label><input type="checkbox" /><strong>Step 2:</strong> Add
+<code>&lt;queries&gt;</code> to the client manifest mirroring Task 2.4
+but for the api package + market/https.</label></li>
+<li><label><input type="checkbox" /><strong>Step 3:
+Compile-check</strong>
+<code>:app:compileDebugKotlin</code>.</label></li>
+<li><label><input type="checkbox" /><strong>Step 4: Commit +
+push.</strong></label></li>
+</ul>
+<h3 id="task-37-full-hermetic-test-sweep">Task 3.7: Full hermetic test
+sweep</h3>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 1: Run</strong>
+<code>./gradlew :core:applink:testDebugUnitTest :api-app:testDebugUnitTest :feature:onboarding:testDebugUnitTest --max-workers=2</code>
+— Expected: all PASS.</label></li>
+<li><label><input type="checkbox" /><strong>Step 2: Run</strong>
+<code>./gradlew :app:compileDebugAndroidTestKotlin --max-workers=2</code>
+(compile the instrumented sources without a device) — Expected:
+success.</label></li>
+<li><label><input type="checkbox" /><strong>Step 3: Spotless.</strong>
+<code>./gradlew spotlessApply</code> then
+<code>spotlessCheck</code>.</label></li>
+<li><label><input type="checkbox" /><strong>Step 4: Commit any
+formatting + push.</strong></label></li>
+</ul>
+<hr />
+<h2
+id="phase-4--on-device-challenge-tests-authored-now-operator-runs-on-s23-ultra">Phase
+4 — On-device Challenge tests (authored now; operator runs on S23
+Ultra)</h2>
+<h3
+id="task-41-challenge--client-launches-api-app-auto-connects-on-return">Task
+4.1: Challenge — client launches API app, auto-connects on return</h3>
+<p><strong>Files:</strong></p>
+<ul>
+<li>Create:
+<code>app/src/androidTest/kotlin/lava/app/challenges/ChallengeNN_ClientLaunchesApiAppAndAutoConnectsTest.kt</code></li>
+</ul>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 1:</strong> Write a
+Compose UI instrumented test (Hilt) that drives onboarding to the API
+selection step, taps "Open Lava API app"
+(<code>api-ondevice-launch</code>), and — using Espresso
+<code>Intents</code> — asserts the explicit intent to
+<code>digital.vasic.lava.api(.dev)</code> with
+<code>EXTRA_START_API</code>. For the full round-trip (requires BOTH
+apps), the KDoc documents the manual rehearsal: install both APKs → run
+→ observe API app start → tap "Back to Lava" → assert client shows the
+loopback endpoint selected + onboarding advanced. Mark
+<code>@Test</code> with a KDoc FALSIFIABILITY REHEARSAL block + a clear
+note that the full two-app path is operator-executed on the S23
+Ultra.</label></li>
+<li><label><input type="checkbox" /><strong>Step 2:</strong> Do NOT
+claim execution. Add the test to the suite; it compiles (Task 3.7 Step 2
+covers compile).</label></li>
+<li><label><input type="checkbox" /><strong>Step 3: Commit (Bluff-Audit:
+documents the rehearsal as operator-PENDING) +
+push.</strong></label></li>
+</ul>
+<h3 id="task-42-challenge--not-installed--play-store">Task 4.2:
+Challenge — not-installed → Play Store</h3>
+<p><strong>Files:</strong></p>
+<ul>
+<li>Create:
+<code>app/src/androidTest/kotlin/lava/app/challenges/ChallengeNN_OnDeviceApiNotInstalledRedirectsToStoreTest.kt</code></li>
+</ul>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 1:</strong> With the
+API app NOT installed (the default on a bare emulator/device), tap
+"Install Lava API app" and assert (Espresso
+<code>Intents.intended</code>) an <code>ACTION_VIEW</code> with a
+<code>market://details?id=digital.vasic.lava.api</code> (or web) data
+URI. This one is fully assertable on a single device (no second app
+needed) — so it CAN be executed by the operator easily.</label></li>
+<li><label><input type="checkbox" /><strong>Step 2: Commit (Bluff-Audit)
++ push.</strong></label></li>
+</ul>
+<h3 id="task-43-challenge--api-app-opens-client">Task 4.3: Challenge —
+API app opens client</h3>
+<p><strong>Files:</strong></p>
+<ul>
+<li>Create:
+<code>api-app/src/androidTest/kotlin/lava/api/app/challenges/ChallengeNN_ApiAppOpensClientTest.kt</code>
+(create the api-app androidTest source set if absent — mirror the
+client's Hilt instrumented setup)</li>
+</ul>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 1:</strong> Drive the
+API control screen, tap "Open Lava client"; assert the explicit client
+intent (installed) or the market intent (absent) via Espresso
+<code>Intents</code>.</label></li>
+<li><label><input type="checkbox" /><strong>Step 2: Commit (Bluff-Audit)
++ push.</strong></label></li>
+</ul>
+<h3 id="task-44-manual-rehearsal-script--evidence-skeleton">Task 4.4:
+Manual rehearsal script + evidence skeleton</h3>
+<p><strong>Files:</strong></p>
+<ul>
+<li>Create: <code>scripts/rehearse-app-linking.md</code> (operator
+checklist: install both APKs, the command-by-command flow for both
+directions, what to screenshot)</li>
+<li>Create: <code>.lava-ci-evidence/app-linking/README.md</code> (where
+attestations land)</li>
+</ul>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 1:</strong> Write the
+checklist (device model, both app versions, the 2 directions, Play-Store
+fallback case, expected user-visible outcomes per step).</label></li>
+<li><label><input type="checkbox" /><strong>Step 2: Commit +
+push.</strong></label></li>
+</ul>
+<hr />
+<h2 id="phase-5--wrap-up">Phase 5 — Wrap-up</h2>
+<h3 id="task-51-continuation--final-sweep--push">Task 5.1: CONTINUATION
++ final sweep + push</h3>
+<p><strong>Files:</strong></p>
+<ul>
+<li>Modify: <code>docs/CONTINUATION.md</code></li>
+</ul>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 1:</strong> Update
+<code>docs/CONTINUATION.md</code> §0 + the relevant sections: feature
+landed (hermetic green), on-device Challenges authored +
+<strong>operator-run OWED on the S23 Ultra</strong> before any
+distribute (§6.Z gate explicitly open), <code>core:applink</code> module
+added, version bumps.</label></li>
+<li><label><input type="checkbox" /><strong>Step 2:</strong> Re-run the
+full hermetic sweep (Task 3.7) once more; confirm green.</label></li>
+<li><label><input type="checkbox" /><strong>Step 3: Commit +
+push</strong> all of main + any submodules touched (none expected — all
+changes are in the parent repo) to github + gitlab, fast-forward, no
+force.</label></li>
+<li><label><input type="checkbox" /><strong>Step 4:</strong> Report to
+the operator: hermetic evidence captured; the exact
+<code>connectedDebugAndroidTest</code> commands + the rehearsal
+checklist to run the on-device Challenges on the S23 Ultra; do NOT
+distribute until that evidence exists (§6.Z/§6.AA
+two-stage).</label></li>
+</ul>
+<hr />
+<h2 id="self-review-notes-coverage-map">Self-review notes (coverage
+map)</h2>
+<ul>
+<li>Spec §4 <code>core:applink</code> → Phase 0.2 + Phase 1. Spec §5
+provider/client → Tasks 2.1 + 3.1. Spec §6.1 Direction-1 → Tasks 2.2/2.3
++ 3.3/3.5/3.6. Spec §6.2 Direction-2 → Task 2.3 + Challenge 4.3. Spec §7
+error handling → Tasks 1.3 (store redirect), 3.3/3.5 (graceful fallback
++ web fallback), telemetry folded into each handler. Spec §8.1 hermetic
+→ Tasks 1.3, 2.1, 2.2, 2.3, 3.1, 3.3. Spec §8.2 on-device → Phase 4.
+Spec §3 variant targeting → BuildConfig fields in Tasks 0.2/2.1/3.1.
+Spec §10 process → Tasks 0.1, 5.1 + per-commit cadence.</li>
+<li>No placeholders: <code>ChallengeNN</code> numbers are assigned at
+execution time from the next free Challenge index (the implementer greps
+<code>app/src/androidTest/.../challenges/</code> for the highest
+existing N).</li>
+<li>Deferred §6.AC telemetry calls: each error branch in Tasks 2.x/3.x
+adds a <code>recordNonFatal</code>/<code>recordWarning</code> (the
+implementer follows the existing <code>AnalyticsTracker</code> usage in
+the touched modules).</li>
+</ul>
+</body>
+</html>

@@ -1,0 +1,1128 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>jackett-local-stack-research</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1
+id="jackett-in-the-lava-local-stack--deep-research-dossier">Jackett-in-the-Lava-Local-Stack
+— Deep Research Dossier</h1>
+<blockquote>
+<p>Status: <strong>research + recommendation only</strong> (no code
+written, no stack files modified). Author: research agent, 2026-06-08.
+Scope: integrating <strong>Jackett</strong> as a containerized service
+inside the Lava local stack, fronted by <code>lava-api-go</code> over
+<strong>Torznab</strong>, orchestrated via the
+<code>vasic-digital/Containers</code> submodule (rootless podman/docker,
+docker-compose, <code>_lava-api._tcp</code> mDNS) — the same model
+<code>lava-api-go</code> already uses. Jackett does <strong>not</strong>
+ship inside the APK; it is a LAN/host-side container. Every external
+claim is cited with a URL. Items that could not be confirmed from
+primary sources are explicitly marked <code>UNCONFIRMED:</code> per
+HelixConstitution §11.4.6 (no-guessing vocabulary).</p>
+</blockquote>
+<hr />
+<h2 id="0-how-this-maps-onto-the-existing-lava-stack-grounding">0. How
+this maps onto the existing Lava stack (grounding)</h2>
+<p>Verified from the working tree (<code>docker-compose.yml</code>,
+<code>lava-api-go/cmd/lava-api-go/main.go</code>):</p>
+<ul>
+<li><code>lava-api-go</code> runs with <code>network_mode: host</code>
+"because mDNS requires host net", advertises itself on the LAN via mDNS
+service type <strong><code>_lava-api._tcp</code></strong>
+(<code>LAVA_API_MDNS_TYPE</code> default in
+<code>lava-api-go/internal/config/config.go:102</code>), listens on
+<code>:8443</code> (HTTP/3 + HTTP/2, TLS).</li>
+<li>Postgres + observability containers use the <code>lava-net</code>
+bridge; only <code>lava-api-go</code> is host-net.</li>
+<li>The Android debug build auto-discovers <code>lava-api-go</code> via
+<code>_lava-api._tcp</code>. The app talks <strong>only</strong> to
+<code>lava-api-go</code>. Today there is <strong>no</strong>
+Jackett/Torznab code anywhere in <code>lava-api-go</code> or
+<code>core/</code> (grep for <code>jackett|torznab|9117</code> returns
+nothing).</li>
+<li>The compose file deliberately omits a <code>healthcheck:</code> on
+<code>lava-api-go</code> (distroless, no <code>/bin/sh</code>); it
+relies on the Dockerfile <code>HEALTHCHECK</code> exec-form calling
+<code>healthprobe</code>, with a §6.A contract test at
+<code>lava-api-go/tests/contract/healthcheck_contract_test.go</code>.
+<strong>Any Jackett healthcheck we add must follow the same §6.A/§6.B
+discipline.</strong></li>
+</ul>
+<p>This is the architecture Jackett must slot into: a <strong>new
+bridge-network service</strong> that only <code>lava-api-go</code> talks
+to; the app keeps seeing one endpoint.</p>
+<hr />
+<h2 id="1-jackett-container-image">1. Jackett container image</h2>
+<h3 id="images--registries">Images &amp; registries</h3>
+<ul>
+<li>Canonical community image: <strong>LinuxServer.io
+<code>linuxserver/jackett</code></strong>, primary pull path
+<code>lscr.io/linuxserver/jackett:latest</code>; also mirrored to GitHub
+Container Registry, GitLab Container Registry, Quay.io, and Docker Hub.
+(<a
+href="https://docs.linuxserver.io/images/docker-jackett/">docs.linuxserver.io</a>,
+<a
+href="https://hub.docker.com/r/linuxserver/jackett">hub.docker.com/r/linuxserver/jackett</a>)</li>
+<li>There is <strong>no separate official "jackett/jackett" Docker
+image</strong> maintained by the Jackett project as the recommended
+container; LinuxServer is the de-facto community standard, and the
+Jackett repo itself points users to binaries/installers. (<a
+href="https://github.com/Jackett/Jackett">github.com/Jackett/Jackett</a>)</li>
+</ul>
+<h3
+id="architecture-support-critical-for-the-apple-silicon-via-podman-vm--x86-linux-split">Architecture
+support (CRITICAL for the Apple-Silicon-via-podman-VM / x86-Linux
+split)</h3>
+<p>LinuxServer publishes a <strong>multi-arch manifest</strong> —
+<code>docker pull</code> auto-selects the right variant. Per the
+official LinuxServer image doc, the architecture table is:</p>
+<table>
+<thead>
+<tr>
+<th>Architecture</th>
+<th>Available</th>
+<th>Per-arch tag</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>x86-64 (amd64)</td>
+<td>✅</td>
+<td><code>amd64-&lt;version tag&gt;</code></td>
+</tr>
+<tr>
+<td>arm64 (arm64v8)</td>
+<td>✅</td>
+<td><code>arm64v8-&lt;version tag&gt;</code></td>
+</tr>
+</tbody>
+</table>
+<p>(<a
+href="https://docs.linuxserver.io/images/docker-jackett/">docs.linuxserver.io/images/docker-jackett</a>)</p>
+<p>→ <strong>Both <code>linux/amd64</code> and <code>linux/arm64</code>
+are first-class.</strong> This covers both Lava local-stack host
+profiles (Apple-Silicon macOS under the podman VM = arm64 guest; x86
+Linux = amd64). The Dockerfile confirms a dedicated
+<code>Dockerfile.aarch64</code>. (<a
+href="https://github.com/linuxserver/docker-jackett/blob/master/Dockerfile.aarch64">github.com/linuxserver/docker-jackett/blob/master/Dockerfile.aarch64</a>)</p>
+<h3 id="port-base-image-config-layout">Port, base image, config
+layout</h3>
+<ul>
+<li>Exposed port: <strong>9117</strong> (WebUI + API). (<a
+href="https://docs.linuxserver.io/images/docker-jackett/">docs.linuxserver.io/images/docker-jackett</a>)</li>
+<li>Base image: <strong>Alpine 3.22</strong> (as of the LinuxServer doc
+snapshot 2025-07-09). (<a
+href="https://docs.linuxserver.io/images/docker-jackett/">docs.linuxserver.io/images/docker-jackett</a>)</li>
+<li>Volumes: <strong><code>/config</code></strong> (Jackett
+configuration, including <code>ServerConfig.json</code> and per-indexer
+defs), optional <code>/downloads</code> (torrent blackhole). (<a
+href="https://docs.linuxserver.io/images/docker-jackett/">docs.linuxserver.io/images/docker-jackett</a>)</li>
+<li>Env vars: <code>PUID=1000</code>, <code>PGID=1000</code>,
+<code>TZ=Etc/UTC</code>, <code>AUTO_UPDATE=true</code> (note:
+auto-update is unavailable in read-only or non-root modes),
+<code>RUN_OPTS=</code>. (<a
+href="https://docs.linuxserver.io/images/docker-jackett/">docs.linuxserver.io/images/docker-jackett</a>)</li>
+<li><strong>Image size:</strong> <code>UNCONFIRMED:</code> the
+LinuxServer doc does not state a compressed/uncompressed size.
+Order-of-magnitude expectation from the Alpine base + .NET runtime is "a
+few hundred MB"; confirm by pulling and running
+<code>podman image inspect</code> before relying on a number. (No
+primary citation for a size figure was found.)</li>
+</ul>
+<h3 id="where-the-api-key-lives-in-config">Where the API key lives in
+<code>/config</code></h3>
+<ul>
+<li>Jackett generates the API key <strong>automatically on first
+run</strong> and stores it in <code>ServerConfig.json</code> (under the
+Jackett config dir, mapped to <code>/config</code> in the container).
+The key field is <code>api_key</code> in the DTO / <code>APIKey</code>
+in the on-disk config. Jackett does <strong>not</strong> rotate it
+afterward. (<a
+href="https://techsive.com/how-do-i-get-a-jackett-api-key/">techsive.com/how-do-i-get-a-jackett-api-key</a>,
+<a
+href="https://github.com/ahuacate/jackett/blob/master/ServerConfig.json">github.com/ahuacate/jackett/blob/master/ServerConfig.json</a>,
+<a
+href="https://github.com/Jackett/Jackett/blob/570ea5bb51b6c62a0f952a4f08e86abc8bfc3503/src/Jackett/Models/DTO/ServerConfig.cs">github.com/Jackett/Jackett
+<code>ServerConfig.cs</code></a>)</li>
+<li><code>ServerConfig</code> fields seen in the DTO:
+<code>api_key</code>, <code>port</code>, <code>external</code>,
+<code>blackholedir</code>, <code>updatedisabled</code>,
+<code>prerelease</code>, <code>password</code> (admin password),
+<code>logging</code>, <code>basepathoverride</code>,
+<code>omdbkey</code>, <code>app_version</code>, <code>proxy_url</code>,
+<code>proxy_port</code>, <code>proxy_username</code>,
+<code>proxy_password</code>. (The FlareSolverr URL is
+<strong>not</strong> in this DTO — it lives in the indexer/global
+config, see §4.) (<a
+href="https://github.com/Jackett/Jackett/blob/570ea5bb51b6c62a0f952a4f08e86abc8bfc3503/src/Jackett/Models/DTO/ServerConfig.cs">github.com/Jackett/Jackett
+<code>ServerConfig.cs</code></a>)</li>
+</ul>
+<hr />
+<h2 id="2-programmatic-configuration-no-web-ui">2. Programmatic
+configuration (no web UI)</h2>
+<p>The operator constraint is "configure Jackett without clicking the
+WebUI." Two complementary paths:</p>
+<h3 id="a-api-key--retrieve-dont-generate">(a) API key — retrieve, don't
+generate</h3>
+<ul>
+<li><strong>Preferred (automation-friendly):</strong> let Jackett create
+the key on first boot, then <strong>read <code>api_key</code> out of
+<code>/config/ServerConfig.json</code></strong> from the host (the
+volume is on the host). This is deterministic and avoids a
+chicken-and-egg.</li>
+<li><strong>Pre-seed:</strong> you may write a chosen
+<code>APIKey</code> value into <code>ServerConfig.json</code>
+<strong>before</strong> first start; Jackett honors the existing value
+rather than generating a new one. (<code>UNCONFIRMED:</code> the exact
+validation/length constraints Jackett applies to a pre-seeded key —
+confirm by test; the key it generates is a 32-char hex-like token per
+community reports.) (<a
+href="https://techsive.com/how-do-i-get-a-jackett-api-key/">techsive.com/how-do-i-get-a-jackett-api-key</a>,
+<a
+href="https://github.com/swizzin/swizzin/issues/259">github.com/swizzin/swizzin/issues/259</a>)</li>
+<li>There is <strong>no documented CLI flag to print/generate the API
+key</strong>; Jackett's CLI flags cover <code>--Port</code>,
+<code>--ListenPublic</code>, etc., not key emission. So "read it from
+the file" is the supported automation path. (<a
+href="https://github.com/Jackett/Jackett">github.com/Jackett/Jackett</a>)</li>
+</ul>
+<h3 id="b-indexer-configuration">(b) Indexer configuration</h3>
+<ul>
+<li>Jackett stores configured indexers as JSON under the config dir
+(per-indexer config files in <code>/config</code>). Two automation
+approaches:
+<ol type="1">
+<li><strong>Write indexer JSON into the config volume</strong>
+before/while the container is down, then restart. This is the most
+"declarative" path but the per-indexer JSON schema is
+<strong>version-coupled and not a stable public contract</strong>.
+<code>UNCONFIRMED:</code> Jackett does not publish a documented schema
+for these per-indexer files; treat them as opaque and capture by
+example.</li>
+<li><strong>Drive Jackett's own HTTP admin API</strong> (the same
+endpoints the WebUI calls) — e.g. <code>GET /api/v2.0/indexers</code>,
+<code>GET /api/v2.0/indexers/&lt;id&gt;/config</code>,
+<code>POST .../config</code>,
+<code>POST .../api/v2.0/indexers/&lt;id&gt;/config</code> to apply
+credentials/FlareSolverr URL. This is how tools script Jackett
+headlessly. <code>UNCONFIRMED:</code> these admin endpoints are
+<strong>not part of the stable Torznab surface</strong> and are
+effectively internal; pin the Jackett version and add a §6.A contract
+test if <code>lava-api-go</code> ever calls them.</li>
+</ol></li>
+<li><strong>§6.H secret handling:</strong> tracker credentials
+(RuTracker/RuTor/IPTorrents/NNMClub) entered into Jackett indexers end
+up in Jackett's <code>/config</code> on the host. That volume MUST be
+treated as a secrets store: gitignored, never committed, never logged.
+The Jackett <code>api_key</code> itself is a secret — read it at runtime
+into <code>lava-api-go</code>'s env from the host volume; do not
+hardcode it (§6.R). Credentials passed to Jackett come from Lava's
+<code>.env</code> (already gitignored), injected into the indexer config
+at provisioning time.</li>
+</ul>
+<blockquote>
+<p><strong>Recommendation:</strong> Use path (a)-read-from-file for the
+API key + path (b.2)-HTTP-admin-API for indexer setup, behind a small
+idempotent provisioning step in the Containers-submodule glue. Avoid
+hand-writing per-indexer JSON (b.1) as the primary path because the
+schema is undocumented.</p>
+</blockquote>
+<hr />
+<h2 id="3-torznab-client-in-go-lava-api-go--jackett">3. Torznab client
+in Go (<code>lava-api-go</code> → Jackett)</h2>
+<h3 id="endpoint--query">Endpoint &amp; query</h3>
+<ul>
+<li>Results endpoint (one per indexer):
+<code>http://&lt;jackett-host&gt;:9117/api/v2.0/indexers/&lt;indexer-id&gt;/results/torznab/api</code></li>
+<li>Capabilities: same path with
+<code>?t=caps&amp;apikey=&lt;key&gt;</code> — returns supported search
+modes + categories; use this as the <strong>readiness probe</strong> for
+a given indexer (see §6).</li>
+<li>Aggregate endpoint: indexer-id <strong><code>all</code></strong>
+queries every configured indexer at once.</li>
+<li>Core params: <code>apikey</code> (required), <code>t</code>
+(<code>search|tvsearch|movie|music|book|caps</code>), <code>q</code>
+(free text), <code>cat</code> (comma-separated category IDs),
+<code>imdbid</code>, <code>season</code>, <code>ep</code>,
+<code>cache=false</code> (bypass Jackett cache). (<a
+href="https://deepwiki.com/Jackett/Jackett/3-torznab-api-reference">deepwiki.com/Jackett/Jackett/3-torznab-api-reference</a>,
+<a
+href="https://github.com/Jackett/Jackett">github.com/Jackett/Jackett</a>)</li>
+</ul>
+<p>Example:
+<code>GET /api/v2.0/indexers/rutracker/results/torznab/api?apikey=KEY&amp;t=search&amp;q=ubuntu</code></p>
+<h3 id="response-shape-rssxml--torznab-namespace">Response shape
+(RSS/XML + torznab namespace)</h3>
+<p>Torznab returns an RSS 2.0 feed; all extended attrs live in namespace
+<code>xmlns:torznab="http://torznab.com/schemas/2015/feed"</code>. Each
+result is an <code>&lt;item&gt;</code> carrying standard RSS fields plus
+<code>&lt;torznab:attr name="..." value="..."/&gt;</code> entries
+(seeders, peers, infohash, magneturl, category, size,
+downloadvolumefactor, uploadvolumefactor, …) and an
+<code>&lt;enclosure&gt;</code>. (<a
+href="https://deepwiki.com/Jackett/Jackett/3-torznab-api-reference">deepwiki.com/Jackett/Jackett/3-torznab-api-reference</a>,
+<a
+href="https://torznab.github.io/spec-1.3-draft/torznab/Specification-v1.3.html">torznab.github.io
+spec v1.3</a>)</p>
+<p>The <strong>download link is conveyed via
+<code>&lt;enclosure&gt;</code></strong>, and torrents-vs-magnets use two
+enclosure type strings (verbatim from the Torznab torrent-support
+spec):</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode xml"><code class="sourceCode xml"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">&lt;!-- .torrent file --&gt;</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">enclosure</span> <span class="ot">url=</span><span class="st">&quot;https://yoursite.com/download.php?torrent=123</span><span class="er">&amp;</span><span class="st">passkey=123456&quot;</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>           <span class="ot">length=</span><span class="st">&quot;1460985071&quot;</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>           <span class="ot">type=</span><span class="st">&quot;application/x-bittorrent&quot;</span> /&gt;</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co">&lt;!-- magnet --&gt;</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">enclosure</span> <span class="ot">url=</span><span class="st">&quot;magnet:?xt=urn:btih:c12fe1c06bba254a9dc9f519b335aa7c1367a88a</span><span class="er">&amp;</span><span class="st">dn...&quot;</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>           <span class="ot">length=</span><span class="st">&quot;1460985071&quot;</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>           <span class="ot">type=</span><span class="st">&quot;application/x-bittorrent;x-scheme-handler/magnet&quot;</span> /&gt;</span></code></pre></div>
+<p>A magnet may <strong>also</strong> be supplied redundantly as
+<code>&lt;torznab:attr name="magneturl" value="magnet:?..."/&gt;</code>,
+and <code>&lt;torznab:attr name="infohash" value="..."/&gt;</code> may
+be present. "Multiple enclosures MAY be provided; clients SHOULD select
+the preferred enclosure." (<a
+href="https://torznab.github.io/spec-1.3-draft/revisions/1.0-Torznab-Torrent-Support.html">torznab.github.io
+1.0-Torznab-Torrent-Support</a>)</p>
+<h3 id="go-libraries">Go libraries</h3>
+<ul>
+<li><strong><code>github.com/cardigann/cardigann/torznab</code></strong>
+— MIT-licensed Go package with <code>ResultItem</code>,
+<code>ResultFeed</code>, <code>Capabilities</code>,
+<code>Category</code>, <code>Query</code>, an <code>Indexer</code>
+interface (<code>Info/Search/Download/ Capabilities</code>),
+<code>ParseQuery(url.Values)</code>, and <strong>XML marshaling</strong>
+(<code>MarshalXML</code> on items/feeds/caps). Usable as both
+client-side parsing helpers and server-side serialization.
+<strong>Caveat:</strong> last published <code>v1.10.2</code>
+(2018-06-30) — it is <strong>stale/unmaintained</strong>; vendor a
+known-good revision and pin it, or lift just the struct definitions. (<a
+href="https://pkg.go.dev/github.com/cardigann/cardigann/torznab">pkg.go.dev/github.com/cardigann/cardigann/torznab</a>)</li>
+<li><strong><code>github.com/mrobinsn/go-newznab</code></strong> —
+newznab/torznab XML client for Go
+(<code>newznab.New(url, key, userid, insecure)</code>, TV/movie search,
+RSS, <code>.nzb</code>/<code>.torrent</code> download). Also older;
+usable as a reference. A modernized fork exists at
+<code>github.com/ovrlord-app/go-newznab</code>. (<a
+href="https://github.com/mrobinsn/go-newznab">github.com/mrobinsn/go-newznab</a>,
+<a
+href="https://pkg.go.dev/github.com/ovrlord-app/go-newznab">pkg.go.dev/github.com/ovrlord-app/go-newznab</a>)</li>
+</ul>
+<blockquote>
+<p><strong>Recommendation:</strong> Don't pull a stale module as a
+runtime dependency. Torznab is "RSS-over-HTTP with a known namespace" —
+implement a <strong>small first-party Go decoder</strong> in
+<code>lava-api-go</code> using <code>encoding/xml</code> structs (item +
+enclosure + <code>torznab:attr</code> slice), borrowing the field set
+from <code>cardigann/torznab</code> (MIT — attribution-compatible). This
+keeps the §6.D behavioral-coverage contract tractable and avoids
+inheriting an unmaintained dep. Per the Decoupled-Reusable rule, a
+generic Torznab client is a candidate for a <code>vasic-digital</code>
+submodule if a second project would want it.</p>
+</blockquote>
+<h3 id="the-302--magnet-edge-case-must-handle">The 302 → magnet edge
+case (must handle)</h3>
+<p>Jackett often returns a <strong>302 redirect to a
+<code>magnet:</code> URI</strong> from its download/<code>/dl/</code>
+proxy link, and some indexers return the download field in Jackett's
+<strong>proxy-link format</strong> rather than a raw magnet.
+Concretely:</p>
+<ul>
+<li>Jackett wraps non-magnet downloads (and blackhole actions) through
+<code>serverService.ConvertToProxyLink()</code> (the <code>/dl/</code>
+endpoint); <strong>magnets are normally passed through raw and are NOT
+proxy-wrapped unless it's a blackhole action</strong>. (<a
+href="https://github.com/Jackett/Jackett/issues/8252">github.com/Jackett/Jackett/issues/8252</a>)</li>
+<li>When a client follows a Jackett download link, Jackett may answer
+<strong>HTTP 302 whose <code>Location</code> is a <code>magnet:</code>
+URI</strong>. A naive HTTP client that auto-follows redirects will try
+to "GET magnet:" and fail; the correct handling is to <strong>disable
+redirect-following and read the <code>Location</code> header</strong>.
+This is a known interop bug class (Prowlarr's generic-torznab had to fix
+exactly this). (<a
+href="https://github.com/Prowlarr/Prowlarr/issues/892">github.com/Prowlarr/Prowlarr/issues/892</a>,
+<a
+href="https://github.com/qbittorrent/qBittorrent/issues/11877">github.com/qbittorrent/qBittorrent/issues/11877</a>)</li>
+<li>Secondary hazards: some indexers emit <strong>improperly URI-escaped
+magnet links</strong> (e.g. 1337x), and reverse-proxy/SSL setups can
+produce <strong>wrong-scheme <code>http://</code> download
+links</strong>. (<a
+href="https://github.com/Jackett/Jackett/issues/8889">github.com/Jackett/Jackett/issues/8889</a>,
+<a
+href="https://github.com/Jackett/Jackett/issues/1464">github.com/Jackett/Jackett/issues/1464</a>)</li>
+</ul>
+<blockquote>
+<p><code>lava-api-go</code>'s Torznab client MUST: (1) configure its
+HTTP client with <code>CheckRedirect: http.ErrUseLastResponse</code> (or
+equivalent) on download fetches so it captures the
+<code>Location: magnet:</code> instead of following it; (2) prefer the
+<code>&lt;torznab:attr name="magneturl"&gt;</code> /
+<code>infohash</code> when present; (3) validate/normalize magnet URIs
+before handing them to the app. This directly serves the worklog's §2
+goal ("confirm a real working download: valid <code>.torrent</code>,
+real non-empty <code>.torrent</code>, OR 100%-valid magnet") and the
+known kinozal/nnmclub null-magnet gaps.</p>
+</blockquote>
+<hr />
+<h2 id="4-cloudflare--flaresolverr-critical-for-iptorrents">4.
+Cloudflare / FlareSolverr (critical for IPTorrents)</h2>
+<p>Several of the operator's target private trackers (notably
+<strong>IPTorrents</strong>) sit behind Cloudflare / DDoS-Guard.
+Jackett's answer is <strong>FlareSolverr</strong>, a separate proxy
+container running a headless browser that solves the challenge and
+returns cookies/HTML.</p>
+<ul>
+<li><strong>Integration model:</strong> FlareSolverr runs as its
+<strong>own container</strong> on port <strong>8191</strong>, exposing a
+JSON POST API at <strong><code>/v1</code></strong>
+(<code>request.get</code>, <code>request.post</code>,
+<code>sessions.create/list/destroy</code>). Jackett is pointed at it via
+a <strong>FlareSolverr URL</strong> in Jackett's config (e.g.
+<code>http://flaresolverr:8191</code>). Both Jackett and Prowlarr have
+built-in FlareSolverr support. (<a
+href="https://github.com/FlareSolverr/FlareSolverr">github.com/FlareSolverr/FlareSolverr</a>,
+<a
+href="https://github.com/Jackett/Jackett/issues/9029">github.com/Jackett/Jackett/issues/9029</a>,
+<a
+href="https://www.rapidseedbox.com/blog/flaresolverr-guide">rapidseedbox.com/blog/flaresolverr-guide</a>)</li>
+<li><strong>Architecture support:</strong> the FlareSolverr image
+targets <code>linux/386</code>, <code>linux/amd64</code>,
+<code>linux/arm/v7</code>, and
+<strong><code>linux/arm64</code></strong>, with Chromium bundled in the
+image. (<a
+href="https://hub.docker.com/r/flaresolverr/flaresolverr">hub.docker.com/r/flaresolverr/flaresolverr</a>,
+<a
+href="https://github.com/FlareSolverr/FlareSolverr">github.com/FlareSolverr/FlareSolverr</a>)
+<ul>
+<li><code>UNCONFIRMED:</code> FlareSolverr upstream has been in
+maintenance/low-activity mode and ARM Chromium has historically been the
+fragile path; <strong>verify an actual arm64 boot under the podman VM on
+the Apple-Silicon host</strong> before declaring it gate-ready (this
+matters because Lava's emulator gate already hit the "podman VM lacks
+/dev/kvm/HVF" class of host limitation — a Chromium-in-container boot is
+a separate but adjacent risk). No primary citation pins the
+arm64-under-podman-VM status.</li>
+</ul></li>
+<li><strong>RAM cost:</strong> "Web browsers consume a lot of memory. If
+you are running FlareSolverr on a machine with few RAM, do not make many
+requests at once. With each request a new browser is launched."
+Practically this is the <strong>heaviest</strong> part of the stack — a
+Chromium per concurrent challenge. (<a
+href="https://github.com/FlareSolverr/FlareSolverr">github.com/FlareSolverr/FlareSolverr</a>,
+<a
+href="https://www.zenrows.com/blog/flaresolverr">zenrows.com/blog/flaresolverr</a>)</li>
+<li><strong>Env / health:</strong> key env vars <code>LOG_LEVEL</code>,
+<code>LOG_FILE</code>, <code>PORT</code> (8191), <code>HOST</code>
+(0.0.0.0), <code>HEADLESS</code> (true),
+<code>PROMETHEUS_ENABLED</code>. Timeout is a per-request
+<code>maxTimeout</code> (ms), not an env var. <strong>No dedicated
+<code>/health</code> endpoint</strong> is documented; a
+<code>POST /v1 {"cmd":"sessions.list"}</code> (or a trivial
+<code>request.get</code>) is the de-facto liveness check. License:
+<strong>MIT</strong>. (<a
+href="https://github.com/FlareSolverr/FlareSolverr">github.com/FlareSolverr/FlareSolverr</a>)</li>
+</ul>
+<blockquote>
+<p><strong>Recommendation:</strong> Include FlareSolverr, but
+<strong>gate it behind a compose profile</strong> (e.g.
+<code>cloudflare</code>) so it's only up when an indexer that needs it
+(IPTorrents) is enabled. It is the only component that materially raises
+the stack's RAM floor, and it's the most fragile on arm64. For trackers
+that don't need Cloudflare bypass (RuTracker/RuTor/NNMClub), leave it
+off.</p>
+</blockquote>
+<hr />
+<h2
+id="5-prowlarr-comparison-operator-chose-jackett--does-prowlarr-materially-ease-automation">5.
+Prowlarr comparison (operator chose Jackett — does Prowlarr materially
+ease automation?)</h2>
+<table>
+<thead>
+<tr>
+<th>Dimension</th>
+<th><strong>Jackett</strong></th>
+<th><strong>Prowlarr</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Role</td>
+<td>Torznab/Newznab <strong>proxy</strong>; one endpoint per
+indexer</td>
+<td>Indexer <strong>manager</strong> that <em>pushes</em> indexers into
+*arr apps; also exposes Torznab/Newznab per indexer</td>
+</tr>
+<tr>
+<td>API for automation</td>
+<td>Torznab API (stable) + undocumented internal admin endpoints</td>
+<td>Full <strong>documented REST API</strong> (<code>/api/v1</code>,
+with an OpenAPI spec) for indexer CRUD, search, app sync</td>
+</tr>
+<tr>
+<td>Programmatic indexer mgmt</td>
+<td>Per-indexer JSON in <code>/config</code> (undocumented) or internal
+admin calls</td>
+<td>First-class: add/update/delete indexers, set FlareSolverr, test,
+search — all via REST</td>
+</tr>
+<tr>
+<td>Indexer coverage</td>
+<td><strong>Larger/older</strong> community catalog; many niche trackers
+Jackett-only</td>
+<td>Modern; some niche defs not yet ported</td>
+</tr>
+<tr>
+<td>Stack family</td>
+<td>standalone</td>
+<td>Servarr (.NET/React), same base as Sonarr/Radarr</td>
+</tr>
+<tr>
+<td>Arch</td>
+<td>amd64 + arm64 (LinuxServer)</td>
+<td>amd64 + arm64 (LinuxServer/Servarr)</td>
+</tr>
+<tr>
+<td>License</td>
+<td><strong>GPL-2.0</strong></td>
+<td><strong>GPL-3.0</strong> <code>UNCONFIRMED-EXACT:</code> Servarr
+family is GPL-3.0; the README badge wasn't quoted verbatim by the fetch
+— confirm on the repo LICENSE before relying on it</td>
+</tr>
+</tbody>
+</table>
+<p>Sources: (<a
+href="https://dev.to/selfhostingsh/prowlarr-vs-jackett-which-indexer-manager-al4">dev.to/selfhostingsh
+prowlarr-vs-jackett</a>, <a
+href="https://datahoarder.io/prowlarr-vs-jackett/">datahoarder.io/prowlarr-vs-jackett</a>,
+<a
+href="https://github.com/prowlarr/prowlarr">github.com/Prowlarr/Prowlarr</a>,
+<a
+href="https://github.com/Jackett/Jackett">github.com/Jackett/Jackett</a>)</p>
+<p><strong>Honest assessment for <em>this</em> use case (one
+<code>lava-api-go</code> consuming Torznab):</strong></p>
+<ul>
+<li>Prowlarr would <strong>materially ease programmatic indexer
+management</strong> because it has a real, documented REST API for
+adding/configuring/testing indexers and wiring FlareSolverr — versus
+Jackett's read-the-JSON-file / internal-admin-endpoint approach. If
+"configure indexers headlessly from <code>lava-api-go</code> or the
+Containers glue" is a hard requirement, Prowlarr is the lower-friction
+tool.</li>
+<li>However, Prowlarr's outward-facing <strong>search/Torznab surface
+that <code>lava-api-go</code> would consume is essentially the
+same</strong> Torznab-over-HTTP. The app-side integration in
+<code>lava-api-go</code> is nearly identical either way. Jackett's
+advantage is the <strong>broader niche-tracker catalog</strong>
+(relevant for RuTracker/RuTor/NNMClub/IPTorrents) and GPL-2.0 vs GPL-3.0
+distribution nuance.</li>
+<li><strong>Net:</strong> operator's Jackett choice is sound for
+<em>consumption</em>; the only place Prowlarr clearly wins is
+<em>provisioning automation</em>. If we adopt the "read api_key from
+file + drive Torznab only, configure indexers once via a provisioning
+step" topology below, Jackett's automation gap is bounded and
+acceptable. Flag this as a decision point (Open Question Q1).</li>
+</ul>
+<hr />
+<h2
+id="6-resource-footprint-lifecycle--health-for-the-6b-up--healthy-contract">6.
+Resource footprint, lifecycle &amp; health (for the §6.B "Up != healthy"
+contract)</h2>
+<h3 id="ram--cpu">RAM / CPU</h3>
+<ul>
+<li><strong>Jackett (idle / normal):</strong> community/issue data puts
+Jackett's working set at <strong>~100 MB</strong>, rising toward
+<strong>~300 MB</strong> after the .NET auto-update path or with many
+indexers; it's a .NET app with a per-indexer result
+<strong>cache</strong> (default cache TTL <strong>2100 s / 35
+min</strong>, configurable to bound RAM). Pathological CPU spikes (e.g.
+"600% CPU") have been reported under specific bad-indexer conditions, so
+treat CPU as bounded-but-not-zero. (<a
+href="https://github.com/Jackett/Jackett/issues/4844">github.com/Jackett/Jackett/issues/4844</a>,
+<a
+href="https://github.com/Jackett/Jackett/issues/4720">github.com/Jackett/Jackett/issues/4720</a>,
+<a
+href="https://github.com/Jackett/Jackett/issues/12244">github.com/Jackett/Jackett/issues/12244</a>)
+<ul>
+<li><code>UNCONFIRMED:</code> precise idle RSS on the LinuxServer Alpine
+arm64 image — the figures above are from issue reports across
+platforms/versions, not a single authoritative benchmark. Measure on the
+target host and record per §6.T.2 resource discipline.</li>
+</ul></li>
+<li><strong>FlareSolverr (under search):</strong> dominated by Chromium
+— <strong>one browser process per concurrent request</strong>; the
+single heaviest component. Idle is modest (a Python proxy) but each
+challenge spikes hundreds of MB. (<a
+href="https://github.com/FlareSolverr/FlareSolverr">github.com/FlareSolverr/FlareSolverr</a>)</li>
+</ul>
+<h3 id="startup-time">Startup time</h3>
+<ul>
+<li><code>UNCONFIRMED:</code> no primary source pins Jackett cold-start
+seconds; expect a few seconds for the .NET runtime + indexer-def load.
+FlareSolverr adds Chromium warm-up on first challenge. Measure and bake
+the observed value into the healthcheck <code>start_period</code>.</li>
+</ul>
+<h3 id="health--readiness--what-to-probe-no-native-health">Health /
+readiness — what to probe (no native <code>/health</code>)</h3>
+<ul>
+<li><strong>Jackett has no documented <code>/health</code>
+endpoint.</strong> "It is running" is verified in practice by hitting
+the dashboard at <code>:9117</code>. (<a
+href="https://github.com/Jackett/Jackett">github.com/Jackett/Jackett</a>)</li>
+<li><strong>§6.B-correct readiness (application-healthy, not just
+"Up"):</strong> probe a <strong>Torznab caps query</strong> on a known
+indexer (or <code>all</code>):
+<code>GET http://127.0.0.1:9117/api/v2.0/indexers/all/results/torznab/api?t=caps&amp;apikey=KEY</code>
+→ HTTP 200 + a parseable <code>&lt;caps&gt;</code> document means
+Jackett is up, the API key is valid, and at least the Torznab surface is
+live. This is the real user-visible code path <code>lava-api-go</code>
+will use, so it satisfies §6.B ("end-to-end functional request, not
+lifecycle plumbing"). A bare TCP-9117 or a <code>200</code> on
+<code>/</code> would be a bluff probe.</li>
+<li><strong>FlareSolverr readiness:</strong>
+<code>POST :8191/v1 {"cmd":"sessions.list"}</code> → 200.</li>
+<li>Add §6.A contract coverage: any compose
+<code>healthcheck:</code>/<code>healthprobe</code> invocation against
+Jackett must be flag-compatible with the binary it calls (same
+discipline as
+<code>lava-api-go/tests/contract/healthcheck_contract_test.go</code>).</li>
+</ul>
+<hr />
+<h2 id="7-mdns--discovery-fit">7. mDNS / discovery fit</h2>
+<ul>
+<li><strong>Jackett has no native mDNS/Bonjour advertisement.</strong>
+It only binds HTTP on 9117. (Nothing in the LinuxServer or Jackett docs
+advertises a service type.) (<a
+href="https://docs.linuxserver.io/images/docker-jackett/">docs.linuxserver.io/images/docker-jackett</a>)</li>
+<li>Lava's app already discovers exactly one service type,
+<strong><code>_lava-api._tcp</code></strong> (=
+<code>lava-api-go</code>), and talks only to
+<code>lava-api-go</code>.</li>
+</ul>
+<blockquote>
+<p><strong>Recommendation — <code>lava-api-go</code> proxies; Jackett is
+NOT separately advertised.</strong> Jackett stays on the internal
+<code>lava-net</code> bridge, reachable only by <code>lava-api-go</code>
+at <code>http://jackett:9117</code> (or <code>127.0.0.1:9117</code> if
+Jackett is also host-net). The app continues to see a single
+<code>_lava-api._tcp</code> endpoint; <code>lava-api-go</code> gains
+internal Torznab routes (e.g. a new tracker provider) that call Jackett
+server-side. This:</p>
+<ul>
+<li>keeps the app's discovery/auth model unchanged (one endpoint,
+existing TLS + HMAC auth),</li>
+<li>keeps the Jackett <code>api_key</code> and tracker credentials
+<strong>server-side only</strong> (never shipped to the device —
+§6.H),</li>
+<li>matches the Decoupled-Reusable boundary (Jackett = third-party
+capability; <code>lava-api-go</code> = Lava glue/domain). Advertising
+Jackett separately on the LAN would expose an unauthenticated 9117 admin
+surface to the network — <strong>reject that option</strong> on security
+grounds.</li>
+</ul>
+</blockquote>
+<hr />
+<h2 id="8-licensing-for-distribution">8. Licensing for distribution</h2>
+<ul>
+<li><strong>Jackett: GPL-2.0.</strong> Confirmed via the repo's license
+badge. (<a
+href="https://github.com/Jackett/Jackett">github.com/Jackett/Jackett</a>)</li>
+<li><strong>FlareSolverr: MIT.</strong> (<a
+href="https://github.com/FlareSolverr/FlareSolverr">github.com/FlareSolverr/FlareSolverr</a>)</li>
+<li><strong>Prowlarr (if ever chosen): GPL-3.0</strong>
+(<code>UNCONFIRMED-EXACT:</code> Servarr family is GPL-3.0; verify the
+LICENSE file before relying on it). (<a
+href="https://github.com/prowlarr/prowlarr">github.com/Prowlarr/Prowlarr</a>)</li>
+<li><strong><code>cardigann/torznab</code> Go package: MIT</strong>
+(attribution-compatible if we lift struct definitions). (<a
+href="https://pkg.go.dev/github.com/cardigann/cardigann/torznab">pkg.go.dev/github.com/cardigann/cardigann/torznab</a>)</li>
+</ul>
+<p><strong>What GPL-2.0 means when we ship Jackett as a container in a
+user-run local stack:</strong></p>
+<ul>
+<li><strong>We do not modify Jackett</strong> — we run an unmodified
+upstream/LinuxServer image. Distributing an <strong>unmodified GPL-2.0
+binary</strong> (as a referenced/pulled container image) triggers the
+GPL "convey" obligations: when we distribute the image/compose, we must
+<strong>either accompany it with the corresponding source or a written
+offer of source</strong>, and <strong>preserve copyright/license
+notices</strong>. Because we pull a published upstream image rather than
+re-hosting a modified one, the practical obligation is satisfied by: (a)
+<strong>not stripping</strong> Jackett's notices/license, and (b)
+<strong>pointing to the upstream source</strong>
+(<code>github.com/Jackett/Jackett</code>, tag-pinned) in our
+distribution docs/NOTICE. <code>UNCONFIRMED-LEGAL:</code> this is an
+engineering reading of GPL-2.0 §3, not legal advice — if Lava
+<strong>redistributes the image bytes</strong> (e.g. re-pushes Jackett
+to Lava's own registry) vs. <strong>merely references
+<code>lscr.io/...</code></strong> changes the offer-of-source burden;
+have the operator confirm the distribution mode. (<a
+href="https://github.com/Jackett/Jackett">github.com/Jackett/Jackett
+(GPL-2.0)</a>)</li>
+<li><strong>Compose/orchestration is "mere aggregation."</strong> Our
+docker-compose + <code>lava-api-go</code> calling Jackett over
+HTTP/Torznab is an <strong>arms-length aggregation</strong>, not a
+derivative work — GPL-2.0 does not reach <code>lava-api-go</code>
+through an HTTP boundary. So Lava's own (proprietary-or-otherwise) code
+is <strong>not</strong> forced under GPL by talking to Jackett over the
+network. (<code>UNCONFIRMED-LEGAL:</code> standard FOSS interpretation;
+not legal advice.)</li>
+<li><strong>Pin the Jackett image by digest</strong> (not
+<code>:latest</code>) for reproducibility + a stable source reference,
+consistent with the existing compose policy of pinning observability
+images.</li>
+</ul>
+<hr />
+<h2 id="recommended-local-stack-topology">Recommended local-stack
+topology</h2>
+<p>A new compose service set, fronted by <code>lava-api-go</code>, on
+the existing bridge. App-facing surface is unchanged (still one
+<code>_lava-api._tcp</code> endpoint).</p>
+<pre><code>Android app ──mDNS(_lava-api._tcp)──▶ lava-api-go (:8443, host-net, TLS+HMAC)
+                                            │  (server-side HTTP, holds api_key)
+                                            ▼
+                                       jackett (:9117)  ── on lava-net bridge, NOT advertised
+                                            │
+                              (only when needed, profile=cloudflare)
+                                            ▼
+                                    flaresolverr (:8191)  ── on lava-net bridge</code></pre>
+<h3 id="services-sketch--not-committed">Services (sketch — not
+committed)</h3>
+<table>
+<thead>
+<tr>
+<th>Service</th>
+<th>Image (pin by digest)</th>
+<th>Network</th>
+<th>Port</th>
+<th>Profile</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>lava-jackett</code></td>
+<td><code>lscr.io/linuxserver/jackett</code></td>
+<td><code>lava-net</code> (bridge)</td>
+<td>9117 (internal only)</td>
+<td><code>jackett</code></td>
+<td><code>/config</code> = gitignored host volume holding
+<code>ServerConfig.json</code> + indexer creds</td>
+</tr>
+<tr>
+<td><code>lava-flaresolverr</code></td>
+<td><code>flaresolverr/flaresolverr</code></td>
+<td><code>lava-net</code></td>
+<td>8191 (internal only)</td>
+<td><code>cloudflare</code></td>
+<td>only up when IPTorrents (or other CF tracker) enabled</td>
+</tr>
+<tr>
+<td><code>lava-api-go</code></td>
+<td>(existing)</td>
+<td>host-net</td>
+<td>8443</td>
+<td><code>api-go</code></td>
+<td>gains internal Torznab client + new provider; reads Jackett
+<code>api_key</code> from host volume at start</td>
+</tr>
+</tbody>
+</table>
+<h3 id="who-holds-the-apikey">Who holds the apikey</h3>
+<ul>
+<li><strong>Jackett generates it</strong> → persisted in the gitignored
+<code>/config/ServerConfig.json</code> host volume.</li>
+<li><strong><code>lava-api-go</code> reads it at startup</strong> from
+that host path (or an env var populated from it by the Containers glue)
+— <strong>never</strong> hardcoded (§6.R), <strong>never</strong> sent
+to the device (§6.H).</li>
+</ul>
+<h3 id="healthchecks-6b-correct">Healthchecks (§6.B-correct)</h3>
+<ul>
+<li>Jackett: <code>t=caps</code> Torznab probe (200 + parseable
+<code>&lt;caps&gt;</code>), <code>start_period</code> ≥ measured
+cold-start.</li>
+<li>FlareSolverr: <code>POST /v1 {"cmd":"sessions.list"}</code> →
+200.</li>
+<li>Add §6.A contract test for any healthprobe flags.</li>
+</ul>
+<h3
+id="flaresolverr-yes-but-profiled-include-it-for-iptorrents-keep-it-behind-a-cloudflare">FlareSolverr:
+<strong>yes, but profiled.</strong> Include it for IPTorrents; keep it
+behind a <code>cloudflare</code></h3>
+<p>profile so the RAM-heavy Chromium isn't running for
+RuTracker/RuTor/NNMClub-only sessions.</p>
+<h3 id="ports-exposed-to-lan">Ports exposed to LAN</h3>
+<ul>
+<li><strong>None</strong> for Jackett/FlareSolverr. Both stay internal
+to <code>lava-net</code>; only <code>lava-api-go:8443</code> is
+LAN-visible (security: no unauthenticated 9117 admin surface on the
+network).</li>
+</ul>
+<h3 id="torznab-client">Torznab client</h3>
+<ul>
+<li>First-party <code>encoding/xml</code> decoder in
+<code>lava-api-go</code> (struct field set borrowed from MIT
+<code>cardigann/torznab</code>); <strong>disable redirect-following on
+download fetches</strong> to capture <code>Location: magnet:</code>;
+prefer <code>torznab:attr magneturl</code>/<code>infohash</code>;
+validate magnet URIs. Candidate for a <code>vasic-digital</code>
+submodule if reused.</li>
+</ul>
+<hr />
+<h2 id="open-questions--unconfirmed">OPEN QUESTIONS / UNCONFIRMED</h2>
+<p><strong>Open questions (need an operator/architecture
+decision):</strong></p>
+<ul>
+<li><strong>Q1 — Jackett vs Prowlarr final call.</strong> Operator chose
+Jackett; Prowlarr only wins on <em>provisioning automation</em>
+(documented REST indexer CRUD). Accept Jackett's read-file +
+provision-once model, or switch to Prowlarr for headless indexer
+management? (Consumption side is ~equal.)</li>
+<li><strong>Q2 — Distribution mode for the Jackett image.</strong> Do we
+<em>reference</em> <code>lscr.io/...</code> by digest (lighter GPL
+offer-of-source burden) or <em>re-push</em> Jackett into a Lava-owned
+registry (heavier burden)? Drives §8 obligations.</li>
+<li><strong>Q3 — Indexer provisioning path.</strong> Drive Jackett's
+internal admin HTTP endpoints (version-coupled, undocumented) vs. write
+per-indexer <code>/config</code> JSON (undocumented schema)? Either
+needs a §6.A contract test + pinned Jackett version.</li>
+<li><strong>Q4 — Jackett network mode.</strong> Put Jackett on
+<code>lava-net</code> bridge (clean isolation; <code>lava-api-go</code>
+must reach it across host-net↔︎bridge — use
+<code>host.containers.internal:9117</code> like the Prometheus scrape
+already does) vs. host-net (simpler <code>127.0.0.1:9117</code> but more
+exposed). Bridge is recommended.</li>
+<li><strong>Q5 — FlareSolverr on arm64-under-podman-VM.</strong> Must be
+boot-verified on the Apple-Silicon host before it's gate-eligible (§6.AH
+container/VM-only emulation mandate spirit applies to any
+browser-in-container too).</li>
+</ul>
+<p><strong>UNCONFIRMED facts to verify by direct test before
+implementation:</strong></p>
+<ul>
+<li><code>UNCONFIRMED:</code> Jackett LinuxServer image size (no
+published figure).</li>
+<li><code>UNCONFIRMED:</code> Jackett idle RSS on the target arm64
+Alpine image (issue reports span versions/OSes).</li>
+<li><code>UNCONFIRMED:</code> Jackett cold-start seconds (set
+healthcheck <code>start_period</code> from measurement).</li>
+<li><code>UNCONFIRMED:</code> exact validation rules for a
+<em>pre-seeded</em> <code>api_key</code> value.</li>
+<li><code>UNCONFIRMED:</code> stability of Jackett's internal
+admin/indexer-config HTTP endpoints across versions (treat as internal;
+pin + contract-test).</li>
+<li><code>UNCONFIRMED:</code> per-indexer <code>/config</code> JSON
+schema (undocumented; capture by example).</li>
+<li><code>UNCONFIRMED:</code> FlareSolverr arm64 Chromium boot under the
+podman VM on macOS (README claims arm64 support; project is low-activity
+— verify live).</li>
+<li><code>UNCONFIRMED-EXACT:</code> Prowlarr LICENSE is GPL-3.0 (Servarr
+family is; confirm the file).</li>
+<li><code>UNCONFIRMED-LEGAL:</code> §8 GPL-2.0 convey/offer-of-source
+reading and "mere aggregation" of <code>lava-api-go</code>↔︎Jackett over
+HTTP — engineering interpretation, not legal advice.</li>
+</ul>
+<hr />
+<h2 id="source-index-all-external-claims">Source index (all external
+claims)</h2>
+<ul>
+<li>LinuxServer Jackett image doc — <a
+href="https://docs.linuxserver.io/images/docker-jackett/">https://docs.linuxserver.io/images/docker-jackett/</a></li>
+<li>LinuxServer Jackett on Docker Hub — <a
+href="https://hub.docker.com/r/linuxserver/jackett">https://hub.docker.com/r/linuxserver/jackett</a></li>
+<li>LinuxServer aarch64 Dockerfile — <a
+href="https://github.com/linuxserver/docker-jackett/blob/master/Dockerfile.aarch64">https://github.com/linuxserver/docker-jackett/blob/master/Dockerfile.aarch64</a></li>
+<li>Jackett repo (license GPL-2.0, CLI, default port) — <a
+href="https://github.com/Jackett/Jackett">https://github.com/Jackett/Jackett</a></li>
+<li>Jackett <code>ServerConfig.cs</code> DTO (api_key/proxy fields) — <a
+href="https://github.com/Jackett/Jackett/blob/570ea5bb51b6c62a0f952a4f08e86abc8bfc3503/src/Jackett/Models/DTO/ServerConfig.cs">https://github.com/Jackett/Jackett/blob/570ea5bb51b6c62a0f952a4f08e86abc8bfc3503/src/Jackett/Models/DTO/ServerConfig.cs</a></li>
+<li>Jackett API key location (ServerConfig.json) — <a
+href="https://techsive.com/how-do-i-get-a-jackett-api-key/">https://techsive.com/how-do-i-get-a-jackett-api-key/</a>
+; <a
+href="https://github.com/ahuacate/jackett/blob/master/ServerConfig.json">https://github.com/ahuacate/jackett/blob/master/ServerConfig.json</a>
+; <a
+href="https://github.com/swizzin/swizzin/issues/259">https://github.com/swizzin/swizzin/issues/259</a></li>
+<li>Torznab API reference (endpoint, params, namespace) — <a
+href="https://deepwiki.com/Jackett/Jackett/3-torznab-api-reference">https://deepwiki.com/Jackett/Jackett/3-torznab-api-reference</a></li>
+<li>Torznab spec v1.3 (extended attrs) — <a
+href="https://torznab.github.io/spec-1.3-draft/torznab/Specification-v1.3.html">https://torznab.github.io/spec-1.3-draft/torznab/Specification-v1.3.html</a></li>
+<li>Torznab torrent-support (enclosure/magnet XML) — <a
+href="https://torznab.github.io/spec-1.3-draft/revisions/1.0-Torznab-Torrent-Support.html">https://torznab.github.io/spec-1.3-draft/revisions/1.0-Torznab-Torrent-Support.html</a></li>
+<li>302→magnet / proxy link — <a
+href="https://github.com/Prowlarr/Prowlarr/issues/892">https://github.com/Prowlarr/Prowlarr/issues/892</a>
+; <a
+href="https://github.com/Jackett/Jackett/issues/8252">https://github.com/Jackett/Jackett/issues/8252</a>
+; <a
+href="https://github.com/qbittorrent/qBittorrent/issues/11877">https://github.com/qbittorrent/qBittorrent/issues/11877</a>
+; <a
+href="https://github.com/Jackett/Jackett/issues/8889">https://github.com/Jackett/Jackett/issues/8889</a>
+; <a
+href="https://github.com/Jackett/Jackett/issues/1464">https://github.com/Jackett/Jackett/issues/1464</a></li>
+<li>Go torznab libs — <a
+href="https://pkg.go.dev/github.com/cardigann/cardigann/torznab">https://pkg.go.dev/github.com/cardigann/cardigann/torznab</a>
+; <a
+href="https://github.com/mrobinsn/go-newznab">https://github.com/mrobinsn/go-newznab</a>
+; <a
+href="https://pkg.go.dev/github.com/ovrlord-app/go-newznab">https://pkg.go.dev/github.com/ovrlord-app/go-newznab</a></li>
+<li>FlareSolverr (arch, MIT, API, RAM) — <a
+href="https://github.com/FlareSolverr/FlareSolverr">https://github.com/FlareSolverr/FlareSolverr</a>
+; <a
+href="https://hub.docker.com/r/flaresolverr/flaresolverr">https://hub.docker.com/r/flaresolverr/flaresolverr</a>
+; <a
+href="https://www.rapidseedbox.com/blog/flaresolverr-guide">https://www.rapidseedbox.com/blog/flaresolverr-guide</a>
+; <a
+href="https://github.com/Jackett/Jackett/issues/9029">https://github.com/Jackett/Jackett/issues/9029</a>
+; <a
+href="https://www.zenrows.com/blog/flaresolverr">https://www.zenrows.com/blog/flaresolverr</a></li>
+<li>Jackett memory/CPU — <a
+href="https://github.com/Jackett/Jackett/issues/4844">https://github.com/Jackett/Jackett/issues/4844</a>
+; <a
+href="https://github.com/Jackett/Jackett/issues/4720">https://github.com/Jackett/Jackett/issues/4720</a>
+; <a
+href="https://github.com/Jackett/Jackett/issues/12244">https://github.com/Jackett/Jackett/issues/12244</a></li>
+<li>Prowlarr — <a
+href="https://github.com/prowlarr/prowlarr">https://github.com/prowlarr/prowlarr</a>
+; <a
+href="https://dev.to/selfhostingsh/prowlarr-vs-jackett-which-indexer-manager-al4">https://dev.to/selfhostingsh/prowlarr-vs-jackett-which-indexer-manager-al4</a>
+; <a
+href="https://datahoarder.io/prowlarr-vs-jackett/">https://datahoarder.io/prowlarr-vs-jackett/</a>
+; <a
+href="https://wiki.servarr.com/prowlarr/quick-start-guide">https://wiki.servarr.com/prowlarr/quick-start-guide</a></li>
+</ul>
+</body>
+</html>

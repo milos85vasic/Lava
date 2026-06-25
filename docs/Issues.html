@@ -185,19 +185,6 @@ operator-gated; decision owed on §6.AD.3 Path B vs SQLite DB.
 <strong>Source:</strong> self-discovered —
 .lava-ci-evidence/constitution-review/2026-05-31-68th-cycle-review.md</p>
 <h2
-id="lva-4--lva-workable-items-ticket-system-sqlite-db--go-cli--mdhtmlpdfdocx-export">LVA-4
-— LVA workable-items ticket system (SQLite DB + Go CLI +
-md/HTML/PDF/DOCX export)</h2>
-<p><strong>Status:</strong> In progress <strong>Type:</strong> Feature
-<strong>Severity:</strong> P1</p>
-<p>HelixConstitution §11.4.93/95/106 materialization. Go CLI
-(modernc.org/sqlite, no CGO) with
-init/add/update/close/reopen/gen/verify/import/export. Operator
-directive §6.L 68th invocation, key prefix LVA. Superseded by migration
-to the canonical constitution binary
-(docs/tickets/MIGRATION-TO-CANONICAL.md). <strong>Source:</strong>
-operator-report — docs/tickets/DESIGN.md</p>
-<h2
 id="lva-5--rotate-firebase-ci-token-printed-to-session-transcript">LVA-5
 — Rotate Firebase CI token (printed to session transcript)</h2>
 <p><strong>Status:</strong> Operator-blocked <strong>Type:</strong> Bug
@@ -208,23 +195,32 @@ rotate per §6.H clause 6 (firebase logout; firebase login:ci).
 <strong>Source:</strong> self-discovered —
 .lava-ci-evidence/sixth-law-incidents/2026-05-20-firebase-token-echo-leak.json</p>
 <h2
-id="lva-6--11479-reconcile-codegraph-index-policy-own-org-submodules-in-index">LVA-6
-— §11.4.79 reconcile codegraph index policy (own-org submodules IN
-index)</h2>
-<p><strong>Status:</strong> Queued <strong>Type:</strong> Task
+id="lva-008--c11-search_input-navbackstackentry-teardown-crash-nested-navhost-lifecycle">LVA-008
+— C11 search_input NavBackStackEntry teardown crash (nested-NavHost
+lifecycle)</h2>
+<p><strong>Status:</strong> In progress <strong>Type:</strong> Bug
+<strong>Severity:</strong> P1 <strong>Created-By:</strong> AI</p>
+<p>Challenge11ArchiveOrgAnonymousSearchTest crashes the app PROCESS at
+activity-destroy: IllegalStateException 'State must be at least CREATED
+to be moved to DESTROYED' on the inner search/search_input entry.
+Root-caused (2026-06-08): the inner nested NavController's host is the
+outer addNestedNavigation NavBackStackEntry, driven to DESTROYED out
+from under the inner controller while search_input is still INITIALIZED.
+FALSIFIED on device: nav 2.9.1-&gt;2.9.8, LenientTeardownRule
+(uncatchable process death), atomic popUpTo replace. Feature WORKS
+(result row renders pre-teardown). Candidate fixes ranked in incident
+JSON (inner NavHost Activity-scoped LifecycleOwner; move search to outer
+NavHost; ON_STOP pop). Forensics:
+.lava-ci-evidence/sixth-law-incidents/2026-06-08-navbackstackentry-teardown-crash-2.9.1-incomplete.json</p>
+<h2
+id="lva-036--llm_orchestrator-githubgitlab-pre-existing-mirror-fork-non-ff-blocks-6w-convergence">LVA-036
+— llm_orchestrator github↔︎gitlab pre-existing mirror fork (non-FF)
+blocks §6.W convergence</h2>
+<p><strong>Status:</strong> Operator-blocked <strong>Type:</strong> Task
 <strong>Severity:</strong> P2</p>
-<p>§11.4.79 (new) requires own-org submodules IN the codegraph index;
-Lava currently EXCLUDES submodules/ per docs/CODEGRAPH.md + 63rd-cycle
-policy. Reconcile .codegraph config + docs when pin is bumped.
-<strong>Source:</strong> self-discovered —
-.lava-ci-evidence/constitution-review/2026-05-31-68th-cycle-review.md</p>
-<h2 id="lva-7--11485-stress--chaos-test-scaffold">LVA-7 — §11.4.85
-stress + chaos test scaffold</h2>
-<p><strong>Status:</strong> Queued <strong>Type:</strong> Task
-<strong>Severity:</strong> P2</p>
-<p>§11.4.85 (new universal anchor) mandates a stress + chaos test class.
-Lava has no chaos/stress suite today. Assess + scaffold when pin is
-bumped. <strong>Source:</strong> self-discovered —
-.lava-ci-evidence/constitution-review/2026-05-31-68th-cycle-review.md</p>
+<p>github/master and gitlab/master diverged at d2a2151 with unique
+non-doc go.mod content each; LVA-030 commit landed gitlab+working-tree
+but github refused non-FF. Needs a content-merge decision
+(operator-gated, NO force-push per §6.T.3).</p>
 </body>
 </html>

@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-06-03-client-api-app-linking-design</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1
+id="design-bidirectional-client--api-app-linking--onboarding-api-config-extension">Design:
+Bidirectional Client ↔︎ API-App Linking + Onboarding API-Config
+Extension</h1>
+<ul>
+<li><strong>Date:</strong> 2026-06-03</li>
+<li><strong>Status:</strong> Approved (operator, 2026-06-03)</li>
+<li><strong>Classification:</strong> project-specific (Lava client +
+api-app integration; the generic launch-or-store pattern is a candidate
+future <code>vasic-digital</code> extraction — see §9).</li>
+<li><strong>Operator mandate (verbatim, 2026-06-03):</strong> "we must
+connect both apps to each other! For example from client we MUST be able
+to open API app, start the API and then from API app to go back to
+client APP. If any of two is not installed on the System user will be
+taken to play store to install it! This MUST work in both directions, we
+MUST create good UX! API configuration screen of the onboarding wizard
+of the client app MUST BE properly extended to support API and work with
+it! Make sure we cover everything with the tests! All tests MUST produce
+real evidence of everything working! There cannot be any false results
+or bluff(s) of any kind!"</li>
+</ul>
+<h2 id="1-goal">1. Goal</h2>
+<p>Wire the Lava <strong>client</strong>
+(<code>digital.vasic.lava.client</code>) and the on-device <strong>API
+app</strong> (<code>digital.vasic.lava.api</code>) so a user can move
+between them in BOTH directions, start the on-device API from the
+client, and — when either app is missing — be taken to the Play Store to
+install it. The client's onboarding <strong>API configuration
+step</strong> (<code>ApiSelectionStep</code>) is extended with an "On
+this device" section that drives this flow and, on return, auto-connects
+to the just-started local API.</p>
+<h2 id="2-approved-decisions-brainstorm-q1q4">2. Approved decisions
+(brainstorm Q1–Q4)</h2>
+<ol type="1">
+<li><strong>Connect model = loopback auto-connect.</strong> The API app
+conveys its live loopback <code>host:port</code>; the client
+auto-selects <code>127.0.0.1:&lt;port&gt;</code>, probes
+<code>/health</code>, and advances onboarding. mDNS-independent.</li>
+<li><strong>API-app behavior = auto-start + explicit "Back to Lava"
+button.</strong> On a start-intent the API app auto-starts the engine,
+handles the notification/foreground-service permission prompt, shows
+running status, and presents a prominent return button.</li>
+<li><strong>Key handoff = signature-permission ContentProvider.</strong>
+The API app exposes its access key + loopback port via a
+<code>ContentProvider</code> guarded by a <code>signature</code>-level
+permission. Both apps share the keystore, so only the genuine client can
+read it; the key never crosses an Intent or a log (§6.H).</li>
+<li><strong>End-to-end evidence = operator runs on the real Samsung S23
+Ultra.</strong> All hermetic tests run here with real pass/fail
+evidence; the two-APK cross-app Challenge tests are authored now and
+executed by the operator on the S23 Ultra (the emulator cannot boot on
+the macOS host — §6.AH-debt). Nothing is bluffed: hermetic evidence is
+real now; on-device evidence is real when the operator runs it.</li>
+</ol>
+<h2 id="3-variant-targeting">3. Variant targeting</h2>
+<p>Cross-launch is build-variant-aware: release client ↔︎ release API
+(<code>digital.vasic.lava.api</code>), debug client ↔︎ debug API
+(<code>digital.vasic.lava.api.dev</code>). Target package IDs + the
+provider authority are emitted as <code>BuildConfig</code> fields in
+each app (package IDs are build constants, NOT §6.R secrets). The
+Play-Store fallback ALWAYS targets the <strong>release</strong> package
+id (debug <code>.dev</code> builds are side-loaded and have no Play
+listing — see §6.4).</p>
+<h2 id="4-new-shared-module-coreapplink">4. New shared module:
+<code>core:applink</code></h2>
+<p>An Android library depended on by both <code>:app</code> and
+<code>:api-app</code>, holding the cross-app contract in ONE place so
+the two apps cannot drift (drift between two copies of an intent
+contract is a classic bluff vector).</p>
+<table>
+<thead>
+<tr>
+<th>Unit</th>
+<th>Responsibility</th>
+<th>Depends on</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>AppLinkContract</code></td>
+<td>Single source of truth for the ACTION string, EXTRA keys
+(<code>EXTRA_START_API</code>, <code>EXTRA_RETURN_TO</code>,
+<code>EXTRA_API_HOST</code>, <code>EXTRA_API_PORT</code>), and the
+provider authority/permission names. Pure constants fed by
+<code>BuildConfig</code>.</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>CrossAppLauncher</code></td>
+<td>Given a target package + a <code>PackageChecker</code>, returns a
+sealed <code>LaunchDecision</code>: <code>Launch(intent)</code> when
+installed (<code>getLaunchIntentForPackage</code> + extras), or
+<code>StoreRedirect(marketUri, webUri)</code> when absent. <strong>No
+side effects</strong> — pure decision, so it is fully
+unit-testable.</td>
+<td><code>PackageChecker</code> (interface; real impl wraps
+<code>PackageManager</code>)</td>
+</tr>
+<tr>
+<td><code>PackageChecker</code></td>
+<td><code>isInstalled(pkg): Boolean</code> +
+<code>launchIntentFor(pkg): Intent?</code>. Real impl wraps
+<code>PackageManager</code>; tests inject a fake.</td>
+<td>Android <code>PackageManager</code> (real impl only)</td>
+</tr>
+</tbody>
+</table>
+<p><code>&lt;queries&gt;</code> entries are added to BOTH apps'
+manifests (Android 11+ package visibility): each app queries the other's
+package + the <code>market</code>/<code>https</code> Play intents.
+Without this, <code>getLaunchIntentForPackage</code> returns null on API
+30+ even when the app IS installed (silent false "not installed" → Play
+Store loop = a real defect this clause prevents).</p>
+<h2 id="5-key-contentprovider">5. Key ContentProvider</h2>
+<ul>
+<li><strong>API app — <code>ApiKeyProvider</code></strong>
+(<code>ContentProvider</code>): one read-only row exposing
+<code>{ access_key, loopback_port }</code>. Declared in the api-app
+manifest with <code>android:exported="true"</code> +
+<code>android:readPermission="digital.vasic.lava.permission.READ_API_KEY"</code>;
+the permission is declared
+<code>android:protectionLevel="signature"</code>. Authority is
+variant-aware (<code>digital.vasic.lava.api[.dev].keyprovider</code>,
+from <code>BuildConfig</code>). Reads the key from the existing
+<code>ApiKeyStore</code> and the live port from the engine controller;
+returns an empty/❌ cursor when the engine is not running.</li>
+<li><strong>Client — <code>ApiKeyClient</code></strong>: reads the
+provider via <code>ContentResolver</code> using the variant-aware
+authority; declares the matching <code>uses-permission</code>. Returns
+<code>ApiHandoff(port, key)</code> or <code>null</code> (API app absent
+/ engine not started / permission denied). The signature permission
+means a third-party app signed with a different key cannot read it.</li>
+</ul>
+<h2 id="6-data-flows">6. Data flows</h2>
+<h3
+id="61-direction-1--client--api-app--client-onboarding-happy-path">6.1
+Direction 1 — client → API app → client (onboarding happy path)</h3>
+<ol type="1">
+<li>Onboarding <code>ApiSelectionStep</code> "On this device" button.
+<code>OnboardingViewModel</code> consults <code>CrossAppLauncher</code>
+for the API package: installed → emit <code>LaunchApiApp</code> side
+effect; absent → emit <code>OpenPlayStore</code> side effect.</li>
+<li>Client launches <code>…api[.dev]/MainActivity</code> with
+<code>EXTRA_START_API=true</code>,
+<code>EXTRA_RETURN_TO=&lt;client pkg&gt;</code>.</li>
+<li>API-app <code>MainActivity</code> detects
+<code>EXTRA_START_API</code> → auto-starts the engine via the existing
+<code>ApiServiceStarter</code> → requests POST_NOTIFICATIONS if needed →
+on <code>/health</code> healthy, renders "API running ✓ ·
+127.0.0.1:<code>&lt;port&gt;</code>" + a prominent <strong>"Back to Lava
+client"</strong> button.</li>
+<li>User taps it → API app launches client <code>MainActivity</code>
+with <code>EXTRA_API_HOST=127.0.0.1</code>,
+<code>EXTRA_API_PORT=&lt;port&gt;</code>.</li>
+<li>Client <code>MainActivity</code> receives the return intent → routes
+to <code>OnboardingViewModel.onOnDeviceApiReturned(host, port)</code> →
+reads the key via <code>ApiKeyClient</code> → builds
+<code>Endpoint.GoApi(127.0.0.1, port, key)</code> → probes
+<code>/health</code> (existing <code>ConnectionService</code>) →
+auto-selects the endpoint, persists it, advances the wizard.</li>
+</ol>
+<h3 id="62-direction-2--api-app--client-standalone">6.2 Direction 2 —
+API app → client (standalone)</h3>
+<p>API-app <code>MainActivity</code> always renders an <strong>"Open
+Lava client"</strong> button (independent of how it was launched).
+<code>CrossAppLauncher</code> for the client package: installed →
+launch; absent → Play Store (<code>…client</code> release id). When the
+API app was launched from the client (Direction 1), the same button
+additionally carries the loopback return extras.</p>
+<h2
+id="7-error-handling-no-silent-failure--6ac-telemetry-on-every-branch">7.
+Error handling (no silent failure — §6.AC telemetry on every
+branch)</h2>
+<ul>
+<li><strong>Target app not installed</strong> → Play Store via the
+release package id (<code>market://details?id=…</code>, with
+<code>https://play.google.com/store/apps/details?id=…</code> web
+fallback when the Play Store app is absent).</li>
+<li><strong>Debug-variant wrinkle:</strong> <code>.dev</code> ids have
+no Play listing. A debug build whose counterpart <code>.dev</code> app
+is absent shows an explicit "side-load the Lava {API|client} dev build"
+message instead of a dead <code>market://</code> link.</li>
+<li><strong>Engine start failure</strong> (API app) → API app shows an
+error state, emits no return result; the client side surfaces "couldn't
+start the on-device API" and stays on the API selection step.</li>
+<li><strong>Provider read failure / permission denied / engine not
+running</strong> → <code>ApiKeyClient</code> returns null → client falls
+back gracefully to the existing cloud + mDNS sections (the user can
+still pick another API).</li>
+<li><strong>Loopback <code>/health</code> probe failure</strong> → the
+existing <code>ApiConnectivityState.Failure</code> UI + "Try again"
+affordance.</li>
+<li>Each error path records a non-fatal telemetry event
+(<code>recordNonFatal</code>/<code>recordWarning</code>) per §6.AC, with
+redacted context (never the key).</li>
+</ul>
+<h2 id="8-testing">8. Testing</h2>
+<h3 id="81-hermetic--real-evidence-on-this-host">8.1 Hermetic — real
+evidence on this host</h3>
+<ul>
+<li><code>CrossAppLauncherTest</code>: installed → <code>Launch</code>
+with the exact explicit intent (component package +
+<code>EXTRA_START_API</code>/<code>EXTRA_RETURN_TO</code>); absent →
+<code>StoreRedirect</code> with the exact
+<code>market://details?id=&lt;release-id&gt;</code> + web URI; variant
+selection picks the right package per <code>BuildConfig</code>. Primary
+assertions on the produced <code>Intent</code>/<code>Uri</code>
+values.</li>
+<li><code>ApiKeyProviderTest</code> (Robolectric): provider returns
+<code>{key, port}</code> when the engine is running; empty cursor when
+stopped; signature-permission enforcement (a caller without the
+permission is denied). Primary assertion on the cursor contents + the
+SecurityException.</li>
+<li><code>ApiKeyClientTest</code> (Robolectric): resolves the
+variant-aware authority; maps a row to <code>ApiHandoff</code>; null on
+absent provider.</li>
+<li><code>OnboardingViewModelTest</code> (real UseCase + real repo +
+fake <code>PackageChecker</code> + real <code>ConnectionService</code>
+vs MockWebServer): <code>LaunchOnDeviceApi</code> → correct side effect
+(<code>LaunchApiApp</code> when installed / <code>OpenPlayStore</code>
+when not); <code>onOnDeviceApiReturned(127.0.0.1, port)</code> → reads
+key (fake provider reader enforcing the real contract) → builds loopback
+<code>Endpoint.GoApi</code> → probes the MockWebServer
+<code>/health</code> → selected endpoint persisted + step advanced.
+Primary assertion on persisted repository state + rendered state, per
+the feature Anti-Bluff law (no mocked UseCase).</li>
+<li><code>ApiControlViewModelTest</code> (api-app, real engine
+controller contract via a behaviorally-equivalent fake starter):
+<code>EXTRA_START_API</code> → engine started → live port exposed; "Back
+to Lava" → correct <code>CrossAppLauncher</code> decision.</li>
+<li>Each test class carries a documented falsifiability rehearsal
+(mutation → observed failure → revert) in its KDoc + the commit
+Bluff-Audit stamp (Seventh Law clause 1).</li>
+</ul>
+<h3
+id="82-on-device-challenge--authored-now-operator-runs-on-the-s23-ultra">8.2
+On-device Challenge — authored now, operator-runs on the S23 Ultra</h3>
+<ul>
+<li><code>ChallengeNN_ClientLaunchesApiAppAndAutoConnects</code>: with
+BOTH real APKs installed, drive client onboarding → "On this device" →
+API app opens → auto-starts → "Back to Lava" → client auto-connects to
+<code>127.0.0.1:&lt;port&gt;</code> → onboarding advances. Primary
+assertion on the rendered post-advance onboarding state + the persisted
+loopback endpoint.</li>
+<li><code>ChallengeNN_NotInstalledRedirectsToPlayStore</code>: API app
+NOT installed → tapping "On this device" fires the Play-Store intent
+(assert via Espresso intent capture).</li>
+<li><code>ChallengeNN_ApiAppOpensClient</code>: from the API app, "Open
+Lava client" launches the client (installed) / Play Store (absent).</li>
+<li>A manual rehearsal script + attestation recorded under
+<code>.lava-ci-evidence/&lt;run&gt;/</code> (device model, Android
+version, both app versions, command-by-command checklist,
+screenshots/video). Marked honestly PENDING until the operator executes
+it (§6.Z gate stays open — no release/distribute until run).</li>
+</ul>
+<h2
+id="9-decoupled-architecture-note-per-the-decoupled-reusable-architecture-rule">9.
+Decoupled-Architecture note (per the Decoupled Reusable Architecture
+rule)</h2>
+<p>The generic "launch the target app or redirect to its store listing"
+primitive (<code>CrossAppLauncher</code> + <code>PackageChecker</code>)
+is a candidate for extraction to a <code>vasic-digital</code> submodule
+(e.g. <code>vasic-digital/AppLink</code>) because any two-app product
+would want it. It is kept in-repo as <code>core:applink</code> for this
+iteration because (a) the package-ID + provider-authority contract is
+Lava-specific, and (b) the unit is small and tightly coupled to the Lava
+intent contract. <strong>Tracked as a deferred extraction TODO</strong>
+with target = a future <code>vasic-digital/AppLink</code> submodule, per
+the rule's "documented why-not-a-submodule decision" requirement. The
+signature-permission provider key-handoff stays Lava-specific (it embeds
+Lava permission names).</p>
+<h2 id="10-process--constitutional-compliance">10. Process /
+constitutional compliance</h2>
+<ul>
+<li><strong>§6.Y</strong> version bumps: both apps get a minor bump (new
+user-facing feature) as the FIRST commit of the cycle.</li>
+<li><strong>§6.S</strong> <code>docs/CONTINUATION.md</code> updated in
+lockstep (new module, new feature, version bumps).</li>
+<li><strong>§11.4.113 / §6.T.3</strong> no force-push: all pushes are
+fast-forward / merge-onto-latest-main; regular commit + push of all
+submodules + main to all upstreams.</li>
+<li><strong>§11.4.70</strong> subagent-driven implementation.</li>
+<li><strong>§6.Z / §6.AA</strong> no distribute until the on-device
+Challenges are executed on the S23 Ultra and the evidence file is
+present; two-stage debug-then-release distribute when that happens.</li>
+<li><strong>§6.Q</strong> the extended <code>ApiSelectionStep</code>
+keeps using <code>Column(verticalScroll)</code> with bounded plain
+composables (no nested LazyColumn).</li>
+</ul>
+<h2
+id="11-api-references-to-verify-at-implementation-time-1148--11499">11.
+API references to verify at implementation time (§11.4.8 /
+§11.4.99)</h2>
+<p>The implementation phase MUST verify the current behaviour of these
+Android APIs against official documentation before coding (they are
+version-sensitive and a frequent source of stale-knowledge defects):</p>
+<ul>
+<li>Package visibility / <code>&lt;queries&gt;</code> (Android 11+ / API
+30) — <code>getLaunchIntentForPackage</code> returning null without a
+<code>&lt;queries&gt;</code> entry.</li>
+<li><code>ContentProvider</code>
+<code>android:protectionLevel="signature"</code> permission semantics +
+same-signing-key enforcement.</li>
+<li>POST_NOTIFICATIONS runtime permission (API 33+) +
+<code>foregroundServiceType=dataSync</code> start constraints.</li>
+<li><code>market://details</code> +
+<code>https://play.google.com/store/apps/details</code> resolution + the
+"Play Store app absent" fallback.</li>
+</ul>
+<p><code>Sources verified &lt;date&gt;: &lt;urls&gt;</code> to be
+recorded in the implementing commits per §11.4.99.</p>
+<h2 id="12-out-of-scope-yagni">12. Out of scope (YAGNI)</h2>
+<ul>
+<li>No custom URL scheme / web deep-linking for the cross-app launch
+(explicit-component intents only — smaller attack surface; the existing
+rutracker.org VIEW filter is untouched).</li>
+<li>No TV (<code>TvActivity</code>) surface for the on-device API
+affordance in this iteration (phone/tablet onboarding only; the leanback
+launcher is unchanged).</li>
+<li>No multi-API-app support (one on-device API app per variant).</li>
+</ul>
+</body>
+</html>

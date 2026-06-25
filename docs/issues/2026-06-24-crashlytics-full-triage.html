@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-06-24-crashlytics-full-triage</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1 id="crashlytics-full-triage--2026-06-24">Crashlytics Full Triage —
+2026-06-24</h1>
+<p><strong>Pull method:</strong> Firebase MCP
+(<code>crashlytics_get_report</code> +
+<code>crashlytics_batch_get_events</code>)<br />
+<strong>Window:</strong> 2026-05-25 → 2026-06-24 (30 days)<br />
+<strong>Apps queried:</strong> 4 (client release, client debug, api-app
+release, api-app debug)<br />
+<strong>Pull timestamp:</strong> 2026-06-24T (today's session)<br />
+<strong>Current build at pull time:</strong> client 1.3.11-1073 /
+api-app 0.2.11-19 (shipping; in-cycle)</p>
+<p>Per §11.4.6: proven root causes are stated as facts based on stack
+evidence. Anything not directly confirmed by the event data is marked
+<code>UNCONFIRMED:</code>.</p>
+<hr />
+<h2 id="apps-with-zero-issues-in-the-30-day-window">Apps With Zero
+Issues in the 30-Day Window</h2>
+<table>
+<thead>
+<tr>
+<th>App Variant</th>
+<th>App ID (suffix)</th>
+<th>Issues</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Client DEBUG</td>
+<td><code>…54ca2ca3…</code></td>
+<td><strong>0 — no data</strong></td>
+</tr>
+<tr>
+<td>API-app RELEASE</td>
+<td><code>…d57b960e…</code></td>
+<td><strong>0 — no data</strong></td>
+</tr>
+<tr>
+<td>API-app DEBUG</td>
+<td><code>…2932451e…</code></td>
+<td><strong>0 — no data</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Interpretation: debug variants have negligible real-device install
+base (only local testing). API-app Crashlytics is misattributed to the
+client release app ID — the "Defect B" telemetry misattribution
+documented in
+<code>.lava-ci-evidence/crashlytics-resolved/2026-06-14-defect-b-telemetry-attribution-findings.md</code>.
+The two api-app crash issues (9ba8502e, b9baeaede) appear under the
+<strong>client release</strong> app ID because api-app's
+<code>google-services.json</code> currently maps to the client Firebase
+app.</p>
+<hr />
+<h2
+id="client-release-digitalvasiclavaclient--8-issues-in-window">Client
+RELEASE (<code>digital.vasic.lava.client</code>) — 8 Issues in
+Window</h2>
+<p><strong>Total issues returned:</strong> 8<br />
+<strong>Device in every event:</strong> Samsung SM-S918B (Galaxy S23
+Ultra), Android 16, ARM64<br />
+<strong>This is 1 real-world tester device</strong> (installationUuid
+<code>B5579AE9…</code> appears in most events).</p>
+<hr />
+<h3 id="issue-table">Issue Table</h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Issue ID (short)</th>
+<th>Title / Top Frame</th>
+<th>Type</th>
+<th>Events</th>
+<th>Users</th>
+<th>First Seen</th>
+<th>Last Seen</th>
+<th>State</th>
+<th>Classification</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>58a1335272bc</code></td>
+<td>CredentialsKeyHolder.require — locked</td>
+<td>FATAL</td>
+<td>5</td>
+<td>1</td>
+<td>1.3.10</td>
+<td>1.3.10</td>
+<td>OPEN</td>
+<td><strong>NEW/OPEN — HIGH PRIORITY</strong></td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>47b000d54ff6</code></td>
+<td>ProviderCatalogRepository — HTTP 401</td>
+<td>NON_FATAL</td>
+<td>6</td>
+<td>1</td>
+<td>1.3.4</td>
+<td>1.3.5</td>
+<td>OPEN</td>
+<td>ENVIRONMENTAL / monitored</td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>9ba8502ee0ba</code></td>
+<td>ApiEngineService.onStartCommand — FGS start not allowed</td>
+<td>FATAL</td>
+<td>5</td>
+<td>1</td>
+<td>0.2.6</td>
+<td>0.2.6</td>
+<td>OPEN</td>
+<td>ALREADY-FIXED (<code>ed03cac2</code>)</td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>c7c8cccad09f</code></td>
+<td>LazyColumn nested in verticalScroll — infinite constraint</td>
+<td>FATAL</td>
+<td>2</td>
+<td>1</td>
+<td>1.2.3</td>
+<td>1.3.10</td>
+<td>OPEN</td>
+<td><strong>NEW/OPEN — still recurring on 1.3.10</strong></td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>042b9b611cf1</code></td>
+<td>TLS CertPathValidatorException — self-signed cert</td>
+<td>NON_FATAL</td>
+<td>1</td>
+<td>1</td>
+<td>1.3.3</td>
+<td>1.3.3</td>
+<td>OPEN</td>
+<td>ENVIRONMENTAL / monitored</td>
+</tr>
+<tr>
+<td>6</td>
+<td><code>3937b7f08628</code></td>
+<td>SSE UnknownHost — lava-api.local unresolvable</td>
+<td>NON_FATAL</td>
+<td>1</td>
+<td>1</td>
+<td>1.3.0</td>
+<td>1.3.0</td>
+<td>OPEN</td>
+<td>ENVIRONMENTAL / noise</td>
+</tr>
+<tr>
+<td>7</td>
+<td><code>8cde0ac208b3</code></td>
+<td>TopicPageDto MissingFieldException — API schema mismatch</td>
+<td>NON_FATAL</td>
+<td>1</td>
+<td>1</td>
+<td>1.3.9</td>
+<td>1.3.9</td>
+<td>OPEN</td>
+<td><strong>NEW/OPEN — schema contract break</strong></td>
+</tr>
+<tr>
+<td>8</td>
+<td><code>b9baeaede585</code></td>
+<td>ApiEngineService FGS did not stop in time</td>
+<td>FATAL</td>
+<td>1</td>
+<td>1</td>
+<td>0.2.6</td>
+<td>0.2.6</td>
+<td>OPEN</td>
+<td>ALREADY-FIXED (<code>ed03cac2</code>)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="per-issue-deep-dive">Per-Issue Deep-Dive</h2>
+<hr />
+<h3
+id="issue-1--58a1335272bc--credentialskeyholder-fatal-red_circle-highest-priority">Issue
+1 — <code>58a1335272bc</code> — CredentialsKeyHolder FATAL (🔴 HIGHEST
+PRIORITY)</h3>
+<p><strong>Classification: NEW/OPEN — critical FATAL crash, 5 events, 1
+user, current version 1.3.10</strong></p>
+<p><strong>Stack (from sample event <code>6A3443DF…</code>,
+2026-06-18T19:16:16Z, v1.3.10-1067 release):</strong></p>
+<pre><code>java.lang.IllegalStateException: credentials key holder is locked — prompt user for passphrase first
+  at lava.credentials.session.CredentialsKeyHolder.require (CredentialsKeyHolder.java:23)
+  at lava.credentials.di.CredentialsModule.provideCredentialsKeyProvider$lambda$2 (CredentialsModule.java:77)
+  at lava.credentials.CredentialsEntryRepositoryImpl.decode (CredentialsEntryRepositoryImpl.kt:78)
+  at lava.credentials.CredentialsEntryRepositoryImpl$observe$$inlined$map$1$2.emit (CredentialsEntryRepositoryImpl.java:51)
+  at androidx.room.coroutines.FlowUtil$createFlow$$inlined$map$1$2.emit (FlowUtil.java:223)
+  at [Room Flow continuation chain]
+  at android.os.Looper.loop (Looper.java:392)
+  at android.app.ActivityThread.main (ActivityThread.java:10346)    ← MAIN THREAD CRASH</code></pre>
+<p><strong>Root cause (from stack):</strong>
+<code>CredentialsKeyHolder.require()</code> at line 23 throws
+unconditionally when the key holder is in the locked state. The call
+chain is: Room DB Flow emission →
+<code>CredentialsEntryRepositoryImpl.decode()</code> →
+<code>CredentialsModule.provideCredentialsKeyProvider$lambda$2()</code>
+→ <code>CredentialsKeyHolder.require()</code>. This is invoked on the
+<strong>main thread</strong> via a Room-emitting coroutine dispatched
+onto the main Looper. The key holder becomes locked when the user's
+session is in a state where the passphrase has not yet been provided
+(initial launch, session expiry, or app restore after process death).
+Crucially, this is not an edge-case: the breadcrumb shows two search
+submits (<code>lava_search_submit: mumy</code>, then
+<code>lava_search_submit: prince</code>) immediately preceding the crash
+— the user is actively using search, the credentials flow is observed in
+the background, and the observation of the (still-locked) key holder
+triggers the throw.</p>
+<p><strong>Impact:</strong> FATAL on main thread → full app crash.
+Occurred in 1.3.10 (current). 5 events across the session indicate
+repeated restarts then re-crash.</p>
+<p><strong>Action required:</strong></p>
+<ul>
+<li><code>CredentialsKeyHolder.require()</code> must not throw on the
+main thread when called from a Room Flow observer. The
+<code>decode()</code> function in
+<code>CredentialsEntryRepositoryImpl.kt:78</code> must guard against the
+locked state and return a sentinel (null / empty list) rather than
+propagating the throw into the main-thread Looper.</li>
+<li>A <code>§6.O</code> closure log must be authored when the fix
+lands.</li>
+<li>A regression Challenge Test is required: deliberately lock the key
+holder, trigger a search, assert the app does NOT crash and shows an
+appropriate re-auth prompt.</li>
+</ul>
+<hr />
+<h3 id="issue-2--47b000d54ff6--providercatalog-http-401-non_fatal">Issue
+2 — <code>47b000d54ff6</code> — ProviderCatalog HTTP 401 NON_FATAL</h3>
+<p><strong>Classification: ENVIRONMENTAL / monitored — behavior is
+by-design, telemetry severity is appropriate</strong></p>
+<p><strong>Stack (from sample event <code>6A2D984F…</code>,
+2026-06-13T17:51:55Z, v1.3.5-1062 release):</strong></p>
+<pre><code>java.lang.IllegalStateException: provider discovery failed: HTTP 401 for https://192.168.0.107:8443/providers
+  at lava.data.provider.ProviderCatalogRepository$fetchProviders$2.invokeSuspend (ProviderCatalogRepository.kt:112)</code></pre>
+<p><code>customKeys.error = provider_catalog_fetch_failed</code></p>
+<p><strong>Root cause:</strong> The client app calls
+<code>GET /providers</code> against the discovered LAN API
+(<code>192.168.0.107:8443</code>) with no auth token (or an
+expired/missing API key). The lava-api-go endpoint at
+<code>/providers</code> requires authentication from 1.3.x onward. The
+<code>ProviderCatalogRepository</code> correctly records this as a
+non-fatal and falls back to bundled providers.</p>
+<p><strong>Prior analysis:</strong> Documented in
+<code>.lava-ci-evidence/crashlytics-resolved/2026-06-13-providers-catalogue-401-auth-gated.md</code>.
+That log concluded the 401 is expected when the api-key exchange hasn't
+completed at first onboarding (race between API selection and the
+key-handshake). The last-seen version is 1.3.5 (before the auth-key flow
+was hardened in 1.3.7+). This issue has not recurred in
+1.3.7–1.3.10.</p>
+<p><strong>Action:</strong> Monitor; no code fix owed. If it reappears
+on 1.3.11+, the api-key provisioning flow needs investigation. The
+console state is OPEN because it was never close-marked.</p>
+<hr />
+<h3
+id="issue-3--9ba8502ee0ba--apiengineservice-fgs-start-not-allowed-fatal">Issue
+3 — <code>9ba8502ee0ba</code> — ApiEngineService FGS Start Not Allowed
+FATAL</h3>
+<p><strong>Classification: ALREADY-FIXED — fix commit
+<code>ed03cac2</code> (specialUse FGS type)</strong></p>
+<p><strong>Stack (from sample event <code>6A2E6C61…</code>,
+2026-06-14T08:54:57Z, api-app 0.2.6-10):</strong></p>
+<pre><code>android.app.ForegroundServiceStartNotAllowedException:
+  Service.startForeground() not allowed due to mAllowStartForeground false:
+  digital.vasic.lava.api/lava.api.app.service.ApiEngineService
+  at lava.api.app.service.ApiEngineService.onStartCommand (ApiEngineService.kt:113)</code></pre>
+<p><code>customKeys.artifact = api-app</code>,
+<code>version_code = 10</code> (0.2.6)</p>
+<p><strong>Root cause:</strong> Android 14+ <code>dataSync</code> FGS
+type has a 6h cumulative runtime budget. After</p>
+<blockquote>
+<p>6h uptime the OS disallows new <code>startForeground()</code> calls.
+First-seen and last-seen are both <code>0.2.6</code> (api-app code 10).
+Fixed in api-app <code>0.2.8-12</code> by migrating to
+<code>specialUse</code> FGS type.</p>
+</blockquote>
+<p><strong>Prior closure log:</strong>
+<code>.lava-ci-evidence/crashlytics-resolved/2026-06-14-apiapp-fgs-datasync-budget.md</code></p>
+<p><strong>Note:</strong> This event appears under the client release
+app ID due to the Defect B misattribution
+(<code>google-services.json</code> in api-app pointing to the client
+Firebase project).</p>
+<p><strong>Action:</strong> None — fix shipped in api-app 0.2.8.
+Operator should close-mark in Firebase Console once 0.2.11-19 is
+distributed and observed clean.</p>
+<hr />
+<h3
+id="issue-4--c7c8cccad09f--lazycolumn-in-verticalscroll-fatal-orange_circle-open--regression">Issue
+4 — <code>c7c8cccad09f</code> — LazyColumn in verticalScroll FATAL (🟠
+OPEN — REGRESSION)</h3>
+<p><strong>Classification: NEW/OPEN — expected to be fixed but still
+seen on 1.3.10</strong></p>
+<p><strong>Stack (from sample event <code>6A2EFA57…</code>,
+2026-06-14T19:01:27Z, v1.3.10-1067 release):</strong></p>
+<pre><code>java.lang.IllegalStateException: Vertically scrollable component was measured with an
+infinity maximum height constraints, which is disallowed. One of the common reasons is
+nesting layouts like LazyColumn and Column(Modifier.verticalScroll()).
+  at androidx.compose.foundation.internal.InlineClassHelperKt.throwIllegalStateException
+  at androidx.compose.foundation.CheckScrollableContainerConstraintsKt.checkScrollableContainerConstraints
+  at androidx.compose.foundation.lazy.LazyListKt$rememberLazyListMeasurePolicy$1$1.invoke</code></pre>
+<p><strong>Root cause:</strong> A <code>LazyColumn</code> is rendered
+inside a parent with <code>Modifier.verticalScroll()</code> (or
+equivalent unbounded-height parent). This is the §6.Q forbidden
+antipattern. This issue was first documented in the
+<code>.lava-ci-evidence/crashlytics-resolved/2026-05-05-tracker-settings-nested-scroll.md</code>
+closure log (2026-05-05, the TrackerSelectorList fix). However, the
+current sample event is from <strong>1.3.10-1067</strong> (2026-06-14),
+which is after that fix. Two possibilities:</p>
+<ol type="1">
+<li>The fix for <code>TrackerSelectorList</code> landed but a DIFFERENT
+screen also has the same nesting antipattern and was not addressed (e.g.
+another settings screen, the credentials manager screen, or a newly
+added screen after SP-3a).</li>
+<li>The original TrackerSelectorList fix was incomplete (the fix patched
+one code path but not all invocations of that composable).</li>
+</ol>
+<p>The <code>firstSeenVersion = 1.2.3</code> and
+<code>lastSeenVersion = 1.3.10</code> with the issue still OPEN confirms
+this recurs across many versions and has NOT been fully resolved. The
+breadcrumb shows <code>screen_view{MainActivity}</code> only — no
+navigation breadcrumb to which specific sub-screen triggered it.</p>
+<p><strong>Impact:</strong> FATAL crash. The user triggered it from an
+unidentified screen in 1.3.10. Needs a full codebase scan for remaining
+<code>LazyColumn</code>/<code>LazyVerticalGrid</code> inside
+<code>verticalScroll</code> parents (the §6.Q structural test was
+written for <code>TrackerSelectorList</code> specifically but may not
+cover all newly added composables).</p>
+<p><strong>Action required:</strong></p>
+<ul>
+<li>Run the §6.Q structural test suite against all composables; find the
+CURRENT offending screen.</li>
+<li>Fix the remaining nested-scroll violation(s).</li>
+<li>Add a specific regression Challenge Test for the screen that
+produced this 1.3.10 event.</li>
+<li>Author a §6.O closure log when the fix is confirmed clean.</li>
+</ul>
+<hr />
+<h3
+id="issue-5--042b9b611cf1--tls-certpathvalidatorexception-non_fatal">Issue
+5 — <code>042b9b611cf1</code> — TLS CertPathValidatorException
+NON_FATAL</h3>
+<p><strong>Classification: ENVIRONMENTAL — self-signed LAN certificate,
+expected on first-connection before cert pinning setup</strong></p>
+<p><strong>Stack (from sample event <code>6A2AC47F…</code>,
+2026-06-11T14:22:01Z, v1.3.3-1060 release):</strong></p>
+<pre><code>javax.net.ssl.SSLHandshakeException: java.security.cert.CertPathValidatorException:
+  Trust anchor for certification path not found.
+  at okhttp3.internal.connection.RealConnection.connectTls (RealConnection.kt:379)</code></pre>
+<p><code>customKeys.error = provider_catalog_fetch_failed</code> — this
+is the provider-catalog discovery call.</p>
+<p><strong>Root cause:</strong> The lava-api-go server uses a
+self-signed TLS certificate for the LAN HTTPS endpoint. The Android
+TrustManager (system trust store) does not accept self-signed certs by
+default. The <code>ProviderCatalogRepository</code> attempts HTTPS to
+<code>192.168.x.x:8443</code> before the user has added a cert trust
+exception or before the app's <code>network_security_config.xml</code>
+adds the server's certificate. This is documented in
+<code>.lava-ci-evidence/crashlytics-resolved/2026-06-12-provider-catalog-fetch-tls.md</code>.</p>
+<p><strong>Last seen:</strong> 1.3.3 (not seen since). The TLS trust was
+presumably resolved in the user's session after initial setup.</p>
+<p><strong>Action:</strong> Monitor; no code fix owed for this specific
+occurrence. If recurring in 1.3.11+, the onboarding cert-trust flow
+needs investigation. Console state is OPEN — operator should
+close-mark.</p>
+<hr />
+<h3
+id="issue-6--3937b7f08628--sse-unknownhost-lava-apilocal-non_fatal">Issue
+6 — <code>3937b7f08628</code> — SSE UnknownHost
+<code>lava-api.local</code> NON_FATAL</h3>
+<p><strong>Classification: ENVIRONMENTAL / noise — expected when API
+server is not on LAN</strong></p>
+<p><strong>Stack (from sample event <code>6A20DF91…</code>,
+2026-06-04T02:16:51Z, v1.3.0-1057 release):</strong></p>
+<pre><code>java.lang.IllegalStateException: SSE error: Connection failed:
+  Unable to resolve host &quot;lava-api.local&quot;: No address associated with hostname
+  at lava.search.result.SearchResultViewModel$observeSseSearch$1$2.emit</code></pre>
+<p><code>customKeys.query = prince</code></p>
+<p><strong>Root cause:</strong> mDNS <code>lava-api.local</code> cannot
+be resolved when the user's device is off the LAN where the lava-api-go
+server is running (e.g. mobile data, different WiFi, or server not
+started). The <code>SearchResultViewModel</code> treats this as a
+non-fatal. Documented in
+<code>.lava-ci-evidence/crashlytics-resolved/2026-06-13-sse-host-resolve-telemetry-severity.md</code>.
+The conclusion from that log: telemetry severity is appropriate
+(non-fatal, not crash), but the UX should show a clear "API not
+reachable" message rather than a generic error.</p>
+<p><strong>Last seen:</strong> 1.3.0 (one event only). Not recurring in
+1.3.1+.</p>
+<p><strong>Action:</strong> No code fix required for this specific
+Crashlytics issue. The UX improvement (better error message for offline
+state) is a product enhancement, not a crash fix.</p>
+<hr />
+<h3
+id="issue-7--8cde0ac208b3--topicpagedto-missingfieldexception-non_fatal-orange_circle-new--schema-contract-break">Issue
+7 — <code>8cde0ac208b3</code> — TopicPageDto MissingFieldException
+NON_FATAL (🟠 NEW — Schema Contract Break)</h3>
+<p><strong>Classification: NEW/OPEN — API response schema mismatch,
+topic loading broken for certain content</strong></p>
+<p><strong>Stack (from sample event <code>6A2ED1B3…</code>,
+2026-06-14T16:09:23Z, v1.3.9-1066 release, Genymobile Pixel
+9):</strong></p>
+<pre><code>io.ktor.serialization.JsonConvertException: Illegal input:
+  Fields [id, title, author, category, torrentData, commentsPage] are required for
+  type with serial name &#39;lava.network.dto.topic.TopicPageDto&#39;, but they were missing at path: $
+  at io.ktor.serialization.kotlinx.KotlinxSerializationConverter.deserialize
+  Caused by: kotlinx.serialization.MissingFieldException
+  at lava.network.dto.topic.TopicPageDto.&lt;init&gt; (TopicPageDto.kt:6)</code></pre>
+<p><code>customKeys.error = load_topic_failed</code><br />
+<code>customKeys.topic_id = WPO-20230122202907-crawl897</code></p>
+<p><strong>Breadcrumb log:</strong>
+<code>lava_view_topic { topic_id: WPO-20230122202907-crawl897 }</code> —
+the user tapped a specific topic ID starting with prefix
+<code>WPO-</code>.</p>
+<p><strong>Root cause (from stack):</strong> The topic response JSON
+returned for <code>WPO-20230122202907-crawl897</code> does not contain
+the expected top-level fields (<code>id</code>, <code>title</code>,
+<code>author</code>, <code>category</code>, <code>torrentData</code>,
+<code>commentsPage</code>). The <code>TopicPageDto</code> is a strict
+deserialization target with no <code>@Serializable</code> defaults for
+these required fields. When the JSON response has a different root shape
+(e.g. an error envelope, a redirect body, or a non-standard topic format
+from the <code>crawl</code> provider), the deserialization throws
+<code>MissingFieldException</code>.</p>
+<p>The topic ID prefix <code>WPO-20230122202907-crawl897</code>
+indicates this is an <strong>Internet Archive / crawl provider</strong>
+topic (not RuTracker or RuTor), based on the date-stamped crawl ID
+format. The <code>lava-api-go</code> proxy's response for this topic
+type likely returns a different JSON structure than
+<code>TopicPageDto</code> expects — either because the crawl provider's
+schema has different field names, or because the response is an
+error/empty object wrapped differently.</p>
+<p><strong>Impact:</strong> NON_FATAL, but the user sees a "topic load
+failed" error for any Internet Archive crawl topic they try to open.
+This renders the Internet Archive provider's content unviewable for
+topics with the <code>crawl</code> ID format.</p>
+<p><strong>Action required:</strong></p>
+<ul>
+<li>Inspect <code>lava-api-go</code>'s <code>/topic/{id}</code> response
+for <code>WPO-*</code> (Internet Archive crawl) IDs — compare the actual
+JSON shape to <code>TopicPageDto</code>'s required fields.</li>
+<li>Either: (a) make the missing fields optional with
+<code>@SerialName</code> + defaults in <code>TopicPageDto</code>; or (b)
+add a provider-specific DTO for Internet Archive crawl topics; or (c)
+fix the lava-api-go response to always include the required fields.</li>
+<li>A regression Challenge Test is required: load a <code>WPO-*</code>
+topic, assert the topic page renders (or shows a graceful error), not a
+crash/non-fatal.</li>
+<li>Author a §6.O closure log.</li>
+</ul>
+<hr />
+<h3
+id="issue-8--b9baeaede585--apiengineservice-fgs-did-not-stop-in-time-fatal">Issue
+8 — <code>b9baeaede585</code> — ApiEngineService FGS Did Not Stop In
+Time FATAL</h3>
+<p><strong>Classification: ALREADY-FIXED — same root cause as Issue 3,
+companion crash; fix commit <code>ed03cac2</code></strong></p>
+<p><strong>Stack (from sample event <code>6A2DB3C7…</code>,
+2026-06-14T01:47:53Z, api-app 0.2.6-10):</strong></p>
+<pre><code>android.app.RemoteServiceException$ForegroundServiceDidNotStopInTimeException:
+  A foreground service of type dataSync did not stop within its timeout:
+  ComponentInfo{digital.vasic.lava.api/lava.api.app.service.ApiEngineService}
+  at android.app.ActivityThread.generateForegroundServiceDidNotStopInTimeException</code></pre>
+<p><strong>Root cause:</strong> Companion crash to Issue 3 — when the 6h
+<code>dataSync</code> budget is exhausted and the service fails to
+start, Android also kills it with
+<code>ForegroundServiceDidNotStopInTimeException</code> if the service
+doesn't exit quickly. Both issues share the same fix
+(<code>specialUse</code> FGS type in <code>ed03cac2</code>).</p>
+<p><strong>Note:</strong> Misattributed to client Firebase app ID
+(Defect B, as with Issue 3).</p>
+<p><strong>Action:</strong> None — fix shipped in 0.2.8. Same close-mark
+action as Issue 3.</p>
+<hr />
+<h2 id="summary-by-classification">Summary by Classification</h2>
+<table>
+<thead>
+<tr>
+<th>Classification</th>
+<th>Count</th>
+<th>Issue IDs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>NEW/OPEN — needs fix</strong></td>
+<td><strong>3</strong></td>
+<td><code>58a13352</code> (P0 FATAL), <code>c7c8ccca</code> (P1 FATAL
+recurring), <code>8cde0ac2</code> (P2 NON_FATAL)</td>
+</tr>
+<tr>
+<td>ALREADY-FIXED</td>
+<td>2</td>
+<td><code>9ba8502e</code>, <code>b9baeae5</code> (both fixed in api-app
+0.2.8 / <code>ed03cac2</code>)</td>
+</tr>
+<tr>
+<td>ENVIRONMENTAL / monitored</td>
+<td>2</td>
+<td><code>47b000d5</code> (401 auth-gated catalog),
+<code>042b9b61</code> (TLS self-signed)</td>
+</tr>
+<tr>
+<td>ENVIRONMENTAL / noise</td>
+<td>1</td>
+<td><code>3937b7f0</code> (mDNS resolve on off-LAN)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="priority-action-list">Priority Action List</h2>
+<h3
+id="p0--fix-now-issue-1--credentialskeyholder-locked-crash-58a13352">P0
+— FIX NOW: Issue 1 — CredentialsKeyHolder locked crash
+(<code>58a13352</code>)</h3>
+<ul>
+<li><strong>Why P0:</strong> 5 FALTALs in 1.3.10 (current release). Main
+thread crash. User was actively using search when it hit.</li>
+<li><strong>Fix:</strong> Guard
+<code>CredentialsEntryRepositoryImpl.decode()</code> against the locked
+key holder state — return empty/null sentinel instead of propagating the
+throw. Add a passphrase-prompt side effect.</li>
+<li><strong>Files:</strong>
+<code>submodules/security/src/.../CredentialsKeyHolder.java:23</code>,
+<code>CredentialsEntryRepositoryImpl.kt:78</code>,
+<code>CredentialsModule.java:77</code></li>
+<li><strong>Test owed:</strong> Challenge test that locks key holder,
+submits search, verifies app stays alive and re-auth prompt
+appears.</li>
+</ul>
+<h3
+id="p1--fix-this-cycle-issue-4--lazycolumn-in-verticalscroll-recurring-c7c8ccca">P1
+— FIX THIS CYCLE: Issue 4 — LazyColumn in verticalScroll recurring
+(<code>c7c8ccca</code>)</h3>
+<ul>
+<li><strong>Why P1:</strong> FATAL crash recurring through 1.3.10
+despite a prior 1.2.3-era fix. There is an unresolved second nesting
+site still in production code.</li>
+<li><strong>Fix:</strong> Run §6.Q scanner across ALL composables
+written/added since 1.2.5; find the current offending screen; apply the
+bounded-height or item()-header pattern.</li>
+<li><strong>Test owed:</strong> §6.Q structural test must cover the
+offending screen. Challenge test must drive navigation to that screen
+and verify it renders.</li>
+</ul>
+<h3
+id="p2--fix-next-cycle-issue-7--topicpagedto-schema-mismatch-8cde0ac2">P2
+— FIX NEXT CYCLE: Issue 7 — TopicPageDto schema mismatch
+(<code>8cde0ac2</code>)</h3>
+<ul>
+<li><strong>Why P2:</strong> NON_FATAL, but Internet Archive crawl
+topics are silently unviewable. Impact is limited to one content
+provider but affects a user who browsed to a <code>WPO-*</code>
+topic.</li>
+<li><strong>Fix:</strong> Make <code>TopicPageDto</code> fields optional
+OR fix the lava-api-go response shape for crawl topics.</li>
+<li><strong>Test owed:</strong> Challenge test loading a crawl-format
+topic.</li>
+</ul>
+<hr />
+<h2 id="highest-impact-unaddressed-issue">Highest-Impact Unaddressed
+Issue</h2>
+<p><strong>Issue 1 — <code>58a1335272bc4ee06595bda6302a670a</code> —
+CredentialsKeyHolder locked FATAL</strong></p>
+<p>5 crashes in the <strong>current release version (1.3.10)</strong>
+from a single active user. Main-thread crash triggered during normal
+search use. No prior cycle has addressed this. This is the single bug
+most likely to cause the operator's tester to file "app crashes on me"
+in the next session.</p>
+<hr />
+<h2 id="notes-on-scope">Notes on Scope</h2>
+<ul>
+<li>The known SocketTimeout issue
+(<code>9d4ad2f4d1a8b8697b1506402e045b81</code>) is <strong>not in the
+top-8 for the 2026-05-25 → 2026-06-24 window</strong> — it did not
+appear in this 30-day pull's results. The fix commits
+(<code>20d98914</code> + <code>0e81730b</code> + <code>1aa42536</code> +
+<code>3c1fa159</code>) are shipping in 1.3.11-1073. The absence of this
+issue from the window confirms the fix cycle is contemporary with the
+window.</li>
+<li>All 8 issues involve <strong>1 real-device user</strong> (Galaxy S23
+Ultra / Android 16), consistent with a single tester. The operator's own
+device.</li>
+<li>The 3 other Firebase app variants (client debug, api-app release,
+api-app debug) returned no data in the 30-day window.</li>
+</ul>
+</body>
+</html>

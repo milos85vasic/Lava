@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-06-23-provide-to-continue</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1
+id="what-to-provide-so-i-can-continue--search-fix--device-gate--redistribute">What
+to provide so I can continue — search fix + device gate +
+redistribute</h1>
+<p><strong>Date:</strong> 2026-06-23 <strong>Author:</strong> Claude
+(Opus 4.8, 1M ctx) — agent handoff to operator <strong>Why this
+exists:</strong> the search-bug fix can be <em>diagnosed and
+code-fixed</em> without anything from you, but <strong>verifying it on a
+device and redistributing requires signing/build secrets that are not
+present in this environment.</strong> This guide lists exactly what to
+provide, where, and in what format, plus the one diagnostic readout I
+still need. Follow the parts in order; PART 1 unblocks the root cause
+immediately.</p>
+<blockquote>
+<p><strong>§6.H SECURITY — READ FIRST.</strong> Do <strong>NOT</strong>
+paste secret <em>values</em> into the chat. Place them as <strong>files
+on disk</strong> (they are all gitignored). The thinker login password
+you pasted earlier is now in the session transcript — <strong>please
+rotate it.</strong> I never stored/committed it, and I don't need it:
+passwordless SSH key access to thinker already works.</p>
+</blockquote>
+<hr />
+<h2 id="status-at-this-handoff">Status at this handoff</h2>
+<ul>
+<li><strong>Search bug:</strong> Phase-1 root-caused to the release
+<strong>key/auth OR engine-reachability</strong> layer —
+<code>ApiBackedTrackerClient.getString()</code> throwing on a non-2xx
+(likely <strong>401</strong>) or a connection failure; <em>not</em> a
+parse/R8 failure. The exact layer needs <strong>one HTTP datum</strong>
+(PART 1).</li>
+<li><strong>Shipped already (<code>922ecbca</code>, on both
+mirrors):</strong> a §6.AC fix so per-provider search failures are
+recorded to Crashlytics instead of silently dropped (they were
+undiagnosable in the field). This does <strong>not</strong> fix search —
+it makes the failure visible.</li>
+<li><strong>Blocked:</strong> device verification + redistribute — need
+the secrets in PART 2. <code>this environment</code> has
+<strong>no</strong> <code>.env</code>, <code>keystores/</code>,
+<code>app/google-services.json</code>, or
+<code>api-app/google-services.json</code>.</li>
+<li><strong>thinker:</strong> clone done at <code>~/lava</code> (KVM
+live, no cgroup cap); ready to be the device gate once secrets + Android
+SDK are in place.</li>
+</ul>
+<hr />
+<h2 id="part-1--immediate-needs-no-secrets-the-chucker-readout">PART 1 —
+Immediate, needs NO secrets: the Chucker readout</h2>
+<p>This pins the search root cause so I can write the real fix.</p>
+<ol type="1">
+<li><strong>Uninstall</strong> the release <code>Lava</code> client +
+<code>Lava API</code> app (clean slate).</li>
+<li>From <strong>Firebase App Distribution</strong>, install
+<strong>both <code>.dev</code> debug builds</strong> (latest = client
+<strong>1.3.10-1067</strong> <code>.client.dev</code> + api-app
+<strong>0.2.10-15</strong> <code>.api.dev</code>). They are already
+distributed — no rebuild.</li>
+<li>Open <strong><code>Lava API</code> (<code>.api.dev</code>)</strong>
+→ start the engine → confirm its foreground notification shows it
+running.</li>
+<li>In the client: <strong>fresh onboarding</strong> → pick the
+on-device API → <strong>search</strong> (e.g. "ubuntu").</li>
+<li>Open <strong>Chucker</strong> (its notification, or its separate
+launcher icon) → open the most recent
+<strong><code>/v1/{provider}/search</code></strong> transaction.</li>
+</ol>
+<p><strong>Report these three facts:</strong></p>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Status of
+<code>/v1/{provider}/search</code></strong> — <code>200</code> /
+<code>401</code> / <code>404</code> / <code>5xx</code>,
+<strong>or</strong> "no such request appears".</label></li>
+<li><label><input type="checkbox" />Is there a
+<strong><code>/providers</code></strong> request, and is it
+<strong>200</strong>?</label></li>
+<li><label><input type="checkbox" />Does search <strong>work</strong> on
+this debug pair (results render)?</label></li>
+</ul>
+<blockquote>
+<p>Decoder: <code>/providers</code> 200 <strong>+</strong>
+<code>/v1/...search</code> 401 → key/auth layer. Both fail / no request
+→ on-device engine unreachable. Works on debug but you reported release
+broken → release-only (R8/signing/config).</p>
+</blockquote>
+<hr />
+<h2
+id="part-2--signingbuild-secrets-unblock-device-verification--redistribute">PART
+2 — Signing/build secrets: unblock device verification +
+redistribute</h2>
+<p>All four are <strong>gitignored</strong> and will never be committed.
+Place them as files. The canonical template for <code>.env</code> is
+<strong><code>.env.example</code></strong> at the repo root — copy it
+and fill real values.</p>
+<h3 id="2a--env-at-the-repo-root">2A — <code>.env</code> at the repo
+root</h3>
+<p>Copy <code>.env.example</code> → <code>.env</code>, then set at
+minimum (the <strong>build-critical</strong> subset; the Android build's
+auth-blob codegen reads these and the build FAILS without them):</p>
+<pre><code>KEYSTORE_PASSWORD=&lt;real signing password&gt;
+KEYSTORE_ROOT_DIR=keystores
+LAVA_AUTH_FIELD_NAME=Lava-Auth
+LAVA_AUTH_CURRENT_CLIENT_NAME=&lt;e.g. android-1.3.11-1068&gt;
+LAVA_AUTH_ACTIVE_CLIENTS=&lt;client-name&gt;:&lt;uuid&gt;[,&lt;older&gt;:&lt;uuid&gt;...]
+LAVA_AUTH_OBFUSCATION_PEPPER=&lt;base64 pepper&gt;
+LAVA_AUTH_HMAC_SECRET=&lt;base64 hmac secret&gt;   # API side</code></pre>
+<p><strong>Additionally, to Firebase-redistribute</strong> (PART 3 step
+"ship"):</p>
+<pre><code>LAVA_FIREBASE_TOKEN=&lt;from `firebase login:ci`&gt;
+LAVA_FIREBASE_PROJECT_ID=&lt;project id&gt;
+LAVA_FIREBASE_ANDROID_APP_ID / _DEV_APP_ID    # client .client/.client.dev
+LAVA_FIREBASE_API_APP_ID / _DEV_APP_ID        # api-app .api/.api.dev
+LAVA_FIREBASE_TESTERS_OWNER/_DEVELOPER/_TESTER=&lt;emails&gt;</code></pre>
+<p><strong>Tracker credentials</strong> (<code>RUTRACKER_*</code>,
+<code>KINOZAL_*</code>, …) are <strong>only</strong> needed for the
+credentialed Challenge Tests (C2/C9/C10). The search bug is on the
+<strong>no-auth Internet Archive</strong> provider, so they are
+<strong>not</strong> required to repro/verify it — provide them later if
+you want the full matrix.</p>
+<h3 id="2b--keystores-directory">2B — <code>keystores/</code>
+directory</h3>
+<p>Place the two signing keystores referenced by
+<code>app/build.gradle.kts</code> (same names for
+<code>api-app</code>):</p>
+<pre><code>keystores/debug.keystore     # keyAlias &quot;debug&quot;,   store+key password = KEYSTORE_PASSWORD
+keystores/release.keystore   # keyAlias &quot;release&quot;, store+key password = KEYSTORE_PASSWORD</code></pre>
+<p>The <strong>release</strong> keystore MUST be the <em>same</em> one
+that signed the distributed 1.3.x releases (so the matched-pair
+signature permission grant works and existing installs upgrade).</p>
+<h3 id="2c--appgoogle-servicesjson">2C —
+<code>app/google-services.json</code></h3>
+<p>The client Firebase config. MUST contain the client packages
+<strong><code>digital.vasic.lava.client</code></strong> and
+<strong><code>digital.vasic.lava.client.dev</code></strong>. Without it
+the Google-Services Gradle plugin fails the <code>:app</code> build.</p>
+<h3 id="2d--api-appgoogle-servicesjson">2D —
+<code>api-app/google-services.json</code></h3>
+<p>The api-app Firebase config. MUST map the api-app packages
+<strong><code>digital.vasic.lava.api</code></strong> and
+<strong><code>digital.vasic.lava.api.dev</code></strong> to their
+<strong>own</strong> Firebase app ids (this file previously had the
+<em>client's</em> app id by mistake — Defect B, fixed 2026-06-14;
+double-check it maps the <code>.api</code> ids). Without it the
+<code>:api-app</code> build fails.</p>
+<h3 id="where-to-place-the-secrets--pick-one">Where to place the secrets
+— pick one</h3>
+<ul>
+<li><strong>Option A (recommended): this working tree</strong>
+(<code>/Volumes/T7/Projects/lava</code>). This Mac already has the
+Android SDK + a working Gradle, so I can build the signed APKs here and
+transfer them to thinker for the emulator run. Drop the files at the
+paths above; they're gitignored.</li>
+<li><strong>Option B: on thinker</strong> at <code>~/lava/</code> (same
+relative paths). Then I build everything on thinker. I will install the
+Android SDK on thinker myself (secrets-free) — you only provide the four
+secret artifacts.</li>
+</ul>
+<blockquote>
+<p>Transfer suggestion (either option):
+<code>scp</code>/<code>rsync</code> the files directly, or drop them in
+place. Do <strong>not</strong> email/paste secret contents.</p>
+</blockquote>
+<hr />
+<h2 id="part-3--what-i-do-once-each-part-lands">PART 3 — What I do once
+each part lands</h2>
+<table>
+<thead>
+<tr>
+<th>You provide</th>
+<th>I do (autonomous, anti-bluff)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>PART 1 Chucker readout</strong></td>
+<td>Root-cause the exact layer → write the real search fix + a
+falsifiability-proven unit test (no secrets needed) → push.</td>
+</tr>
+<tr>
+<td><strong>PART 2 secrets</strong></td>
+<td>Build the matched debug pair → install on the thinker <strong>KVM
+emulator</strong> → reproduce + confirm the fix on device (§6.Z
+evidence) → §6.AE Challenge matrix.</td>
+</tr>
+<tr>
+<td><strong>PART 2 + Firebase keys</strong></td>
+<td>§6.AA two-stage redistribute (debug → verify → release), both apps,
+with §6.Z device-gated evidence. §6.Y version bump applied.</td>
+</tr>
+</tbody>
+</table>
+<p>I will <strong>not</strong> build/sign/distribute with placeholders
+(that is the §6.L bluff that bricked 1.2.19) — only with the real
+artifacts above.</p>
+<hr />
+<h2
+id="part-4--two-operator-decisions-still-open-not-blocking-part-1">PART
+4 — Two operator decisions still open (not blocking PART 1)</h2>
+<ol type="1">
+<li><strong>The <code>11f29ff8</code> "Auto-commit" pin sweep.</strong>
+An external automation on your machine swept all 20 submodule pins to
+upstream HEAD (19 clean forward moves, 1 divergent:
+<code>llm_orchestrator</code>), bypassing the freeze-by-default rule
+(<code>constitution</code> is supposed to advance only via CONST-049).
+My recommendation: <strong>don't mass-revert</strong> (targets are
+legit), but <strong>neutralize the auto-committer</strong> (find the
+cron/launchd/IDE job emitting "Auto-commit") and <strong>deliberately
+review</strong> just the <code>constitution</code> +
+<code>llm_orchestrator</code> pins. Tell me how you want to
+proceed.</li>
+<li><strong>§6.AB WEAK Challenge backlog (10).</strong> Closing the 8
+Tier-1 ones needs widening some feature composables
+<code>private → public</code> (a product-surface change you gate) + the
+device matrix to falsifiability-rehearse. Want me to do that as part of
+the device-gate work once PART 2 lands?</li>
+</ol>
+<hr />
+<h2 id="security-recap-6h">Security recap (§6.H)</h2>
+<ul>
+<li>Provide secrets as <strong>files</strong>, never as chat text.</li>
+<li>All four artifacts are <strong>gitignored</strong> — I will never
+<code>git add</code> them (verified: <code>.gitignore</code> covers
+<code>.env</code>, <code>keystores/</code>,
+<code>**/google-services.json</code>).</li>
+<li><strong>Rotate the thinker password</strong> you pasted
+earlier.</li>
+<li>If any real credential ends up in a tracked file, that's a §6.H
+incident — I'll halt and flag it.</li>
+</ul>
+</body>
+</html>

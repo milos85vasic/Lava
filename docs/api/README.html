@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>README</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1 id="lava-rest-api-reference">Lava REST API Reference</h1>
+<p>The Lava JSON API is served by the <strong>lava-api-go</strong>
+service (Go / Gin), the sole API implementation since the legacy
+Kotlin/Ktor proxy was removed (<code>build_and_release.sh:16</code>,
+<code>docker-compose.yml:2</code>). It proxies and structures content
+from <code>rutracker.org</code> (and, on the
+<code>/v1/{provider}/...</code> surface, additional providers) and
+applies response caching, audit logging, and per-IP rate limiting at the
+API tier.</p>
+<p>This page is derived from:</p>
+<ul>
+<li><code>lava-api-go/api/openapi.yaml</code> — the spec-first wire
+contract (<code>info.version: 2.0.0</code>), source of truth for the
+<strong>legacy / unprefixed</strong> route group and every DTO
+schema.</li>
+<li><code>lava-api-go/internal/router/router.go</code> — the single
+production Gin engine construction (middleware chain + route
+registration).</li>
+<li><code>lava-api-go/internal/handlers/handlers.go</code> — the
+unprefixed handler registration.</li>
+<li><code>lava-api-go/internal/handlers/v1/handlers.go</code> — the
+<code>/v1/{provider}/...</code> route group.</li>
+<li><code>lava-api-go/internal/auth/middleware.go</code> — the
+<code>Lava-Auth</code> HMAC gate.</li>
+</ul>
+<blockquote>
+<p><strong>Scope note.</strong> The OpenAPI document at
+<code>api/openapi.yaml</code> describes only the
+<strong>unprefixed</strong> route group and was authored against the
+legacy Ktor proxy's wire shape (the two backends were required to be
+byte-equivalent; see <code>tests/parity/</code>). The router
+additionally mounts a <strong><code>/v1/{provider}/...</code></strong>
+provider-agnostic group (<code>router.go:102-105</code>) and the
+<strong><code>/health</code> + <code>/ready</code></strong> probes
+(<code>router.go:69-70</code>) that are <strong>not</strong> in
+<code>openapi.yaml</code>. Both surfaces are documented below; where a
+fact is not backed by a source file it is marked
+<code>UNCONFIRMED:</code>.</p>
+</blockquote>
+<hr />
+<h2 id="1-servers-and-transport">1. Servers and transport</h2>
+<p>From <code>api/openapi.yaml</code> <code>servers:</code> and
+<code>docker-compose.yml</code>:</p>
+<table>
+<thead>
+<tr>
+<th>URL</th>
+<th>Transport</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>https://localhost:8443</code></td>
+<td>HTTP/3 (QUIC) + HTTP/2-over-TLS</td>
+<td>Default Go-service listener (<code>LAVA_API_LISTEN: ":8443"</code>,
+<code>docker-compose.yml:66</code>). The container exposes
+<code>8443/udp</code> (QUIC) and <code>8443/tcp</code>
+(<code>Dockerfile:52</code>).</td>
+</tr>
+</tbody>
+</table>
+<p>mDNS service type for the Go service is <code>_lava-api._tcp</code>
+(<code>api/openapi.yaml</code> <code>info.description</code>; advertised
+via <code>discovery.Announce(...)</code>,
+<code>cmd/lava-api-go/main.go:189</code>).</p>
+<p>A separate metrics listener binds <code>:9091</code>
+(<code>LAVA_API_METRICS_LISTEN</code>,
+<code>docker-compose.yml:73</code>) — Prometheus scrape endpoint, not
+part of this API.</p>
+<hr />
+<h2 id="2-authentication">2. Authentication</h2>
+<p>There are <strong>two distinct authentication concepts</strong> in
+this API. Do not conflate them.</p>
+<h3
+id="21-lava-auth-hmac-client-attestation-header-gates-the-whole-api">2.1
+<code>Lava-Auth</code> HMAC client-attestation header (gates the whole
+API)</h3>
+<p>Source: <code>lava-api-go/internal/auth/middleware.go</code>, wired
+in <code>router.go:82-85</code>.</p>
+<p>Every request to the <strong>business</strong> routes (everything
+except <code>/health</code> and <code>/ready</code>) must carry a
+client-attestation header. The header <strong>name is not
+hardcoded</strong> — it is read from <code>cfg.AuthFieldName</code>
+(<code>LAVA_AUTH_FIELD_NAME</code>, <code>docker-compose.yml:77</code>),
+per the §6.R no-hardcoding mandate.</p>
+<p>The header <strong>value</strong> is:</p>
+<pre><code>base64( UUID-blob )           # the raw bytes the client sends on the wire</code></pre>
+<p>The server decodes the base64 (<code>middleware.go:61</code>), then
+computes <code>hex( HMAC-SHA256( blob, LAVA_AUTH_HMAC_SECRET ) )</code>
+(<code>hashUUIDBlob</code>, <code>middleware.go:118-122</code>) and
+matches the result against the configured <strong>active</strong> and
+<strong>retired</strong> client allowlists
+(<code>LAVA_AUTH_ACTIVE_CLIENTS</code> /
+<code>LAVA_AUTH_RETIRED_CLIENTS</code>,
+<code>docker-compose.yml:81-82</code>). The lookup is constant-time
+(<code>constantTimeMapLookup</code>,
+<code>middleware.go:101</code>).</p>
+<p>Outcomes (<code>middleware.go:55-94</code>):</p>
+<table>
+<thead>
+<tr>
+<th>Condition</th>
+<th>HTTP status</th>
+<th>Body</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Header absent (<code>hdr == ""</code>)</td>
+<td><code>401 Unauthorized</code></td>
+<td><code>{"error":"unauthorized"}</code></td>
+</tr>
+<tr>
+<td>Header present but not valid base64 / empty blob</td>
+<td><code>401 Unauthorized</code> (backoff counter advances)</td>
+<td><code>{"error":"unauthorized"}</code></td>
+</tr>
+<tr>
+<td>Hash in <strong>active</strong> allowlist</td>
+<td>passes to handler</td>
+<td>— (sets <code>client_name</code>, resets backoff)</td>
+</tr>
+<tr>
+<td>Hash in <strong>retired</strong> allowlist</td>
+<td><code>426 Upgrade Required</code> (no backoff advance)</td>
+<td><code>{"error":"client_version_unsupported","client_name":...,"min_supported_version_name":...,"min_supported_version_code":...}</code></td>
+</tr>
+<tr>
+<td>Unknown hash</td>
+<td><code>401 Unauthorized</code> (backoff counter advances)</td>
+<td><code>{"error":"unauthorized"}</code></td>
+</tr>
+</tbody>
+</table>
+<p>A backoff/ladder middleware (<code>auth.NewBackoffMiddleware</code>,
+<code>router.go:83</code>) runs <strong>in front</strong> of the auth
+middleware; IPs that accumulate failures are short-circuited with
+<code>429</code> + <code>Retry-After</code> before the auth middleware
+can advance the counter again (<code>router.go:78-84</code>).</p>
+<p>The minimum supported client version returned in the <code>426</code>
+body comes from <code>LAVA_AUTH_MIN_SUPPORTED_VERSION_NAME</code> /
+<code>_CODE</code> (<code>docker-compose.yml:78-79</code>, defaults
+<code>1.2.6</code> / <code>1026</code>).</p>
+<h3
+id="22-auth-token-upstream-session-header-per-request-rutracker-cookie">2.2
+<code>Auth-Token</code> upstream session header (per-request rutracker
+cookie)</h3>
+<p>Source: <code>api/openapi.yaml</code>
+<code>components.parameters.AuthToken</code>.</p>
+<p><code>Auth-Token</code> is an <strong>optional</strong> request
+header carrying the opaque rutracker session identifier, forwarded as a
+cookie to the upstream tracker. Absent/empty is permitted; routes that
+genuinely require an authenticated upstream session (favorites, comment
+posting, non-public downloads) will return an upstream error or empty
+result when it is missing.</p>
+<blockquote>
+<p><code>Auth-Token</code> is the <em>upstream</em> credential;
+<code>Lava-Auth</code> is the <em>API-tier</em> client attestation. A
+request needs <code>Lava-Auth</code> to reach a handler at all, and
+<code>Auth-Token</code> only to satisfy rutracker for user-scoped
+routes.</p>
+</blockquote>
+<hr />
+<h2 id="3-endpoint-catalogue--unprefixed-routes">3. Endpoint catalogue —
+unprefixed routes</h2>
+<p>Registered in <code>internal/handlers/handlers.go:105-139</code>;
+documented in <code>api/openapi.yaml</code> <code>paths:</code>. All
+routes accept the optional <code>Auth-Token</code> header and require
+<code>Lava-Auth</code> (§2.1). Status codes below are from the OpenAPI
+<code>responses:</code> blocks plus the handler error mapper
+(<code>writeUpstreamError</code>, <code>handlers.go:177-196</code>).</p>
+<p>The upstream-error mapping (<code>handlers.go:184-195</code>) is:
+<code>ErrNotFound → 404</code>, <code>ErrForbidden → 403</code>,
+<code>ErrUnauthorized → 401</code>, <code>ErrCircuitOpen → 503</code>,
+anything else → <code>502</code>. Error response bodies are
+<code>{}</code> for parity with the Ktor proxy's
+<code>StatusPages</code> plugin (<code>handlers.go:178-183</code>).</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>operationId</th>
+<th>Purpose</th>
+<th>Success body</th>
+<th>Notable statuses</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GET</td>
+<td><code>/</code></td>
+<td><code>getRoot</code></td>
+<td>Health probe — returns <code>checkAuthorized(token)</code></td>
+<td>JSON boolean</td>
+<td>200, 500</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/index</code></td>
+<td><code>getIndex</code></td>
+<td>Alias of <code>/</code></td>
+<td>JSON boolean</td>
+<td>200, 500</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/login</code></td>
+<td><code>postLogin</code></td>
+<td>Log in to rutracker</td>
+<td><code>AuthResponseDto</code></td>
+<td>200, 400</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/forum</code></td>
+<td><code>getForum</code></td>
+<td>Top-level forum tree</td>
+<td><code>ForumDto</code></td>
+<td>200, 500</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/forum/{id}</code></td>
+<td><code>getCategoryPage</code></td>
+<td>Paginated category page</td>
+<td><code>CategoryPageDto</code></td>
+<td>200, 404</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/search</code></td>
+<td><code>getSearch</code></td>
+<td>Search torrents</td>
+<td><code>SearchPageDto</code></td>
+<td>200, 400</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/topic/{id}</code></td>
+<td><code>getTopic</code></td>
+<td>Topic page (polymorphic)</td>
+<td><code>ForumTopicDto</code></td>
+<td>200, 404</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/topic2/{id}</code></td>
+<td><code>getTopicPage</code></td>
+<td>Topic page (modern shape)</td>
+<td><code>TopicPageDto</code></td>
+<td>200, 404</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/comments/{id}</code></td>
+<td><code>getCommentsPage</code></td>
+<td>Paginated comments</td>
+<td><code>CommentsPageDto</code></td>
+<td>200, 404</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/comments/{id}/add</code></td>
+<td><code>postComment</code></td>
+<td>Submit a comment</td>
+<td>JSON boolean</td>
+<td>200</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/torrent/{id}</code></td>
+<td><code>getTorrent</code></td>
+<td>Torrent metadata</td>
+<td><code>TorrentDto</code></td>
+<td>200, 404</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/download/{id}</code></td>
+<td><code>getDownload</code></td>
+<td>Download <code>.torrent</code> (binary)</td>
+<td><code>application/octet-stream</code></td>
+<td>200, 404</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/captcha/{path}</code></td>
+<td><code>getCaptcha</code></td>
+<td>Fetch captcha image</td>
+<td>image bytes</td>
+<td>200, 400</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/favorites</code></td>
+<td><code>getFavorites</code></td>
+<td>User's favorited topics</td>
+<td><code>FavoritesDto</code></td>
+<td>200</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/favorites/add/{id}</code></td>
+<td><code>postFavoritesAdd</code></td>
+<td>Add to favorites</td>
+<td>JSON boolean</td>
+<td>200</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/favorites/remove/{id}</code></td>
+<td><code>postFavoritesRemove</code></td>
+<td>Remove from favorites</td>
+<td>JSON boolean</td>
+<td>200</td>
+</tr>
+</tbody>
+</table>
+<h3 id="per-endpoint-parameters">Per-endpoint parameters</h3>
+<p>(From <code>api/openapi.yaml</code> <code>paths:</code>.)</p>
+<ul>
+<li><strong><code>GET /</code> , <code>GET /index</code></strong> —
+header <code>Auth-Token</code> (optional). Returns a JSON boolean from
+<code>NetworkApi.checkAuthorized(token)</code>; absent/empty token
+typically yields <code>false</code>.</li>
+<li><strong><code>POST /login</code></strong> —
+<code>application/x-www-form-urlencoded</code> body. Required:
+<code>username</code>, <code>password</code>. Optional captcha fields:
+<code>cap_sid</code>, <code>cap_code</code>, <code>cap_val</code>. Never
+cached. Response is a polymorphic <code>AuthResponseDto</code>
+(discriminator <code>type</code>: <code>Success</code> |
+<code>WrongCredits</code> | <code>CaptchaRequired</code> |
+<code>ServiceUnavailable</code>). <code>400</code> when required form
+params are missing.</li>
+<li><strong><code>GET /forum</code></strong> — header
+<code>Auth-Token</code> (optional, not consumed by the legacy Ktor
+handler).</li>
+<li><strong><code>GET /forum/{id}</code></strong> — path <code>id</code>
+(rutracker category id); query <code>page</code> (1-based int32, omitted
+→ first page). <code>404</code> for unknown id.</li>
+<li><strong><code>GET /search</code></strong> — query (all optional):
+<code>query</code>, <code>categories</code> (comma-separated ids),
+<code>author</code>, <code>authorId</code>, <code>sort</code>
+(<code>SearchSortTypeDto</code>:
+<code>Date</code>/<code>Title</code>/<code>Downloaded</code>/<code>Seeds</code>/<code>Leeches</code>/<code>Size</code>),
+<code>order</code> (<code>SearchSortOrderDto</code>:
+<code>Ascending</code>/<code>Descending</code>), <code>period</code>
+(<code>SearchPeriodDto</code>:
+<code>AllTime</code>/<code>Today</code>/<code>LastThreeDays</code>/<code>LastWeek</code>/
+<code>LastTwoWeeks</code>/<code>LastMonth</code>), <code>page</code>
+(1-based int32). <code>400</code> on invalid enum constant. Enum values
+must match the Kotlin enum NAMES exactly.</li>
+<li><strong><code>GET /topic/{id}</code> , <code>GET /topic2/{id}</code>
+, <code>GET /comments/{id}</code></strong> — path <code>id</code>; query
+<code>page</code> (1-based int32). <code>404</code> for unknown id.
+<code>/topic</code> returns the polymorphic <code>ForumTopicDto</code>;
+<code>/topic2</code> returns the simpler <code>TopicPageDto</code>;
+<code>/comments</code> returns <code>CommentsPageDto</code>.</li>
+<li><strong><code>POST /comments/{id}/add</code></strong> — path
+<code>id</code>; body is raw comment text (<code>text/plain</code>, read
+via <code>call.receiveText()</code>). <code>Auth-Token</code> required
+(anonymous posting rejected by rutracker). Returns JSON boolean.</li>
+<li><strong><code>GET /torrent/{id}</code></strong> — path
+<code>id</code>. <code>404</code> unknown.</li>
+<li><strong><code>GET /download/{id}</code></strong> — path
+<code>id</code>; <code>Auth-Token</code> required for non-public
+torrents. Streams the <code>.torrent</code> binary; sets
+<code>Content-Disposition</code> (e.g.
+<code>attachment; filename="rutracker_&lt;id&gt;.torrent"</code>) and
+<code>Content-Type</code> (typically
+<code>application/x-bittorrent</code>). Never cached. <code>404</code>
+unknown/refused.</li>
+<li><strong><code>GET /captcha/{path}</code></strong> — path
+<code>path</code> is the URL-safe Base64 encoding of the upstream
+captcha image URL; decoded server-side and fetched verbatim.
+<code>400</code> if not valid URL-safe Base64.</li>
+<li><strong><code>GET /favorites</code></strong> —
+<code>Auth-Token</code> required (without it rutracker returns an empty
+bookmarks page).</li>
+<li><strong><code>POST /favorites/add/{id}</code> ,
+<code>POST /favorites/remove/{id}</code></strong> — path
+<code>id</code>; <code>Auth-Token</code> required. Returns JSON boolean.
+Idempotent in practice.</li>
+</ul>
+<hr />
+<h2 id="4-endpoint-catalogue--v1provider-provider-agnostic-routes">4.
+Endpoint catalogue — <code>/v1/{provider}/...</code> provider-agnostic
+routes</h2>
+<p>Registered in <code>internal/handlers/v1/handlers.go:44-75</code>
+under the Gin group <code>/v1/:provider</code>
+(<code>router.go:102</code>). These mirror the unprefixed routes but are
+parameterised by a provider id resolved from the path (provider
+middleware, <code>internal/middleware/provider.go</code> per the package
+doc at <code>handlers/v1/handlers.go:5-6</code>). Registered providers
+(<code>cmd/lava-api-go/main.go:132-137</code>): <code>rutracker</code>,
+<code>nnmclub</code>, <code>kinozal</code>, <code>archiveorg</code>
+(Internet Archive), <code>gutenberg</code>.</p>
+<blockquote>
+<p><code>UNCONFIRMED:</code> these <code>/v1/{provider}/...</code>
+routes are not described in <code>api/openapi.yaml</code>; the
+request/response shapes are not re-asserted here beyond the route
+templates below. Read the per-handler files for the wire shape of
+each.</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>Route-template constant</th>
+<th>Source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GET</td>
+<td><code>/v1/{provider}/search</code></td>
+<td>—</td>
+<td><code>handlers/v1/search.go</code></td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/v1/{provider}/browse/{id}</code></td>
+<td><code>/v1/{provider}/browse/{id}</code></td>
+<td><code>handlers/v1/browse.go:17</code></td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/v1/{provider}/forum</code></td>
+<td><code>/v1/{provider}/forum</code></td>
+<td><code>handlers/v1/forum.go:16</code></td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/v1/{provider}/topic/{id}</code></td>
+<td>—</td>
+<td><code>handlers/v1/topic.go</code></td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/v1/{provider}/torrent/{id}</code></td>
+<td>—</td>
+<td><code>handlers/v1/torrent.go</code></td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/v1/{provider}/download/{id}</code></td>
+<td>—</td>
+<td><code>handlers/v1/torrent.go</code></td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/v1/{provider}/comments/{id}</code></td>
+<td><code>/v1/{provider}/comments/{id}</code></td>
+<td><code>handlers/v1/comments.go:17</code></td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/v1/{provider}/comments/{id}/add</code></td>
+<td><code>/v1/{provider}/comments/{id}/add</code></td>
+<td><code>handlers/v1/comments.go:18</code></td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/v1/{provider}/favorites</code></td>
+<td><code>/v1/{provider}/favorites</code></td>
+<td><code>handlers/v1/favorites.go:16</code></td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/v1/{provider}/favorites/add/{id}</code></td>
+<td>—</td>
+<td><code>handlers/v1/favorites.go</code></td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/v1/{provider}/favorites/remove/{id}</code></td>
+<td>—</td>
+<td><code>handlers/v1/favorites.go</code></td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/v1/{provider}/login</code></td>
+<td>—</td>
+<td><code>handlers/v1/login.go</code></td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/v1/{provider}/captcha/{path}</code></td>
+<td><code>/v1/{provider}/captcha/{path}</code></td>
+<td><code>handlers/v1/captcha.go:9</code></td>
+</tr>
+</tbody>
+</table>
+<p>Provider error sentinels map to HTTP statuses via
+<code>writeProviderError</code>
+(<code>handlers/v1/handlers.go:121-128+</code>):
+<code>ErrNotFound → 404</code>, <code>ErrForbidden → 403</code>,
+<code>ErrUnauthorized → 401</code> (read the file for the full set).</p>
+<hr />
+<h2 id="5-liveness--readiness-probes-not-gated-by-lava-auth">5. Liveness
+/ readiness probes (not gated by <code>Lava-Auth</code>)</h2>
+<p>Registered <strong>before</strong> the auth middleware
+(<code>router.go:69-70</code>) so orchestrator probes (the podman
+<code>HEALTHCHECK</code> via the <code>healthprobe</code> binary, and
+the distribute scripts' health wait) can reach them without a
+<code>Lava-Auth</code> header.</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>Handler</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GET</td>
+<td><code>/health</code></td>
+<td><code>observability.LivenessHandler()</code></td>
+<td>Liveness — process is up</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/ready</code></td>
+<td><code>observability.ReadinessHandler(...)</code></td>
+<td>Readiness — storage probe
+(<code>observability.ReadinessProbe(storeReady)</code>,
+<code>main.go:170</code>)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="6-schemas-dtos">6. Schemas (DTOs)</h2>
+<p>All DTO schemas are defined in <code>api/openapi.yaml</code>
+<code>components.schemas</code>. Sealed-class hierarchies are encoded by
+kotlinx.serialization with the default discriminator field
+<code>type</code>, whose value is the <code>@SerialName</code> of the
+concrete subclass; the spec mirrors this with <code>oneOf</code> +
+<code>discriminator</code>. Key polymorphic families:</p>
+<ul>
+<li><strong><code>AuthResponseDto</code></strong> — <code>Success</code>
+(carries <code>UserDto</code>) | <code>WrongCredits</code> (optional
+<code>CaptchaDto</code>) | <code>CaptchaRequired</code> (optional
+<code>CaptchaDto</code>) | <code>ServiceUnavailable</code> (carries
+<code>reason</code>; see note below).</li>
+<li><strong><code>ForumTopicDto</code></strong> — <code>Topic</code> |
+<code>Torrent</code> | <code>CommentsPage</code>.</li>
+<li><strong><code>PostElementDto</code></strong> — 19 variants
+(<code>Text</code>, <code>Box</code>, <code>Align</code>,
+<code>Size</code>, <code>Color</code>, <code>Bold</code>,
+<code>Italic</code>, <code>Underscore</code>, <code>Crossed</code>,
+<code>Quote</code>, <code>Code</code>, <code>Spoiler</code>,
+<code>Image</code>, <code>ImageAligned</code>, <code>Link</code>,
+<code>List</code>, <code>Hr</code>, <code>Br</code>,
+<code>PostBr</code>) — the rich-text post-content tree.</li>
+<li><strong><code>ColorValue</code></strong> — <code>Hex</code> |
+<code>Name</code>.</li>
+</ul>
+<blockquote>
+<p><strong><code>AuthResponseDtoServiceUnavailable</code></strong> is an
+Android-client variant. Per the spec's own note
+(<code>openapi.yaml:166-181</code>), the lava-api-go Go server does
+<strong>not</strong> currently emit it — its rutracker scraper returns
+structured <code>Success | WrongCredits | CaptchaRequired</code> only.
+The variant exists in the spec so the Android Kotlin SDK wire shape
+stays forward-compatible.</p>
+</blockquote>
+<p>Enumerations: <code>TorrentStatusDto</code>,
+<code>SearchPeriodDto</code>, <code>SearchSortOrderDto</code>,
+<code>SearchSortTypeDto</code>. Object DTOs: <code>UserDto</code>,
+<code>CaptchaDto</code>, <code>CategoryDto</code>,
+<code>SectionDto</code>, <code>ForumDto</code>,
+<code>CategoryPageDto</code>, <code>AuthorDto</code>,
+<code>PostDto</code>, <code>TorrentDescriptionDto</code>,
+<code>TorrentDataDto</code>, <code>TopicPageDto</code>,
+<code>TopicPageCommentsDto</code>, <code>SearchPageDto</code>,
+<code>FavoritesDto</code>, <code>ProfileDto</code>, <code>Error</code>.
+See <code>api/openapi.yaml</code> for the field-level shape of each.</p>
+<p>The canonical, browsable form of these schemas is the OpenAPI
+document itself; the <code>dev-docs</code> compose profile serves it via
+Swagger UI at <code>http://127.0.0.1:8081</code>
+(<code>docker-compose.yml:156-165</code>).</p>
+<hr />
+<h2 id="7-caching-auditing-rate-limiting">7. Caching, auditing, rate
+limiting</h2>
+<ul>
+<li><strong>Response caching</strong> — handlers compute a deterministic
+cache key against the OpenAPI route-template form (e.g.
+<code>/forum/{id}</code>, not the Gin <code>:id</code> form;
+<code>handlers.go:30-34</code>) and read-through / write-through a
+Postgres-backed cache (<code>lava_api.response_cache</code>; see <a
+href="../db/schema.md"><code>docs/db/schema.md</code></a>).
+<code>/login</code>, <code>/download/{id}</code>, and captcha are never
+cached (per <code>openapi.yaml</code>).</li>
+<li><strong>Request audit</strong> — <code>lava_api.request_audit</code>
+records method/path/IP/ auth-realm-hash/upstream-status/cache-outcome
+per request.</li>
+<li><strong>Rate limiting</strong> — per-IP backoff ladder in front of
+auth (<code>router.go:83</code>); route-class token buckets persisted in
+<code>lava_api.rate_limit_bucket</code>.</li>
+</ul>
+<hr />
+<h2 id="8-cross-references">8. Cross-references</h2>
+<ul>
+<li>OpenAPI source of truth: <a
+href="../../lava-api-go/api/openapi.yaml"><code>lava-api-go/api/openapi.yaml</code></a></li>
+<li>Router construction: <a
+href="../../lava-api-go/internal/router/router.go"><code>lava-api-go/internal/router/router.go</code></a></li>
+<li>Unprefixed handlers: <a
+href="../../lava-api-go/internal/handlers/"><code>lava-api-go/internal/handlers/</code></a></li>
+<li>Provider routes: <a
+href="../../lava-api-go/internal/handlers/v1/"><code>lava-api-go/internal/handlers/v1/</code></a></li>
+<li>Auth middleware: <a
+href="../../lava-api-go/internal/auth/middleware.go"><code>lava-api-go/internal/auth/middleware.go</code></a></li>
+<li>Database schema: <a
+href="../db/schema.md"><code>docs/db/schema.md</code></a></li>
+<li>Deployment: <a
+href="../deployment/README.md"><code>docs/deployment/README.md</code></a></li>
+</ul>
+</body>
+</html>

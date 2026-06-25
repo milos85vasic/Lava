@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-06-14-governance-debt-audit</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1 id="governance--constitution-debt-status-audit">Governance /
+Constitution Debt Status Audit</h1>
+<p><strong>Date:</strong> 2026-06-14 <strong>Scope:</strong> Read-only
+verification of every <code>§6.*-debt</code> entry + <code>CM-*</code>
+paper-only/owed gate in root <code>CLAUDE.md</code>, cross-checked
+against the actual code/scripts/hooks at HEAD <code>357f867a</code>.
+<strong>Method:</strong> Each row's "actual-status" is verified against
+a real artifact (file existence, hook line, verify-all wiring), not
+against the CLAUDE.md prose. Where CLAUDE.md prose disagrees with the
+artifact, the row is flagged STALE. <strong>Anti-bluff
+(§11.4.6):</strong> Every claim is cited to a file/line or "absent". No
+guessed status.</p>
+<hr />
+<h2 id="debt-item-status-table">Debt-item status table</h2>
+<table>
+<thead>
+<tr>
+<th>debt-id</th>
+<th>requires</th>
+<th>actual-status</th>
+<th>evidence (file:line / absent)</th>
+<th>est-effort</th>
+<th>blocking?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>§6.X-debt</td>
+<td>Emulator PID inside podman/docker container managed by
+<code>pkg/runtime</code>; <code>--runner=containerized</code> for gate
+runs on every OS</td>
+<td><strong>PARTIAL</strong></td>
+<td><code>submodules/containers/pkg/emulator/containerized.go</code>
+exists with <code>kvmDevicePath</code>/<code>kvmAvailable</code> logic
+(<code>containerized.go:14-35</code>); but the gate path on macOS still
+resolves <code>RESOLVED_RUNNER="host-direct"</code>
+(<code>scripts/run-challenge-matrix.sh:198,215</code>). Linux x86_64+KVM
+path works; macOS gate-host BLOCKED. Superseded in practice by
+§6.AH-debt.</td>
+<td>L</td>
+<td>YES (blocks §6.AE/§6.Z gate runs on macOS)</td>
+</tr>
+<tr>
+<td>§6.Y-debt</td>
+<td>Pre-push hook rejects code-touching commit after a distribute that
+did not bump versionCode</td>
+<td><strong>CLOSED</strong></td>
+<td><code>.githooks/pre-push:128-157</code> Check 6 implements §6.Y
+bump-first ordering against <code>last-version-debug</code>. CLAUDE.md
+still lists it OWED → STALE.</td>
+<td>—</td>
+<td>no</td>
+</tr>
+<tr>
+<td>§6.Z-debt</td>
+<td>firebase-distribute Phase-1 Gate 6 (evidence file: matching SHA +
+≤24h + BUILD SUCCESSFUL) + pre-push check + <code>tests/firebase/</code>
+hermetic test</td>
+<td><strong>PARTIAL</strong></td>
+<td>Pre-push Check 7 enforces evidence-file presence on pointer advance
+(<code>.githooks/pre-push:159-193</code>). But
+<code>scripts/firebase-distribute.sh</code> has NO runtime Gate 6 that
+validates SHA/timestamp/BUILD-SUCCESSFUL — only a comment reference
+(<code>firebase-distribute.sh:40-41</code>).
+<code>tests/firebase/</code> exists but tests
+version-monotonicity/pepper, not the §6.Z evidence gate
+(<code>tests/firebase/</code>).</td>
+<td>M</td>
+<td>partial (release-distribute risk)</td>
+</tr>
+<tr>
+<td>§6.AA-debt</td>
+<td>Default <code>--debug-only</code>; reject
+<code>--release-only</code> without companion debug evidence; split
+<code>last-version-{debug,release}</code>; <code>tests/firebase/</code>
+hermetic test</td>
+<td><strong>CLOSED</strong></td>
+<td><code>firebase-distribute.sh:46</code> <code>MODE="debug"</code>
+default; <code>:199-210</code> rejects <code>--release-only</code> when
+<code>last-version-debug &lt; current vc</code>; split pointers
+<code>:150,171</code>. CLAUDE.md still lists PARTIAL → STALE.</td>
+<td>—</td>
+<td>no</td>
+</tr>
+<tr>
+<td>§6.AB-debt</td>
+<td>Detekt/go-vet rule for per-feature anti-bluff completeness
+(rendering/state-machine/gating)</td>
+<td><strong>OPEN</strong></td>
+<td>No Detekt rule; <code>config/detekt/</code> contains only
+<code>detekt.yml</code> (<code>config/detekt/</code> listing). The
+related <code>scripts/check-challenge-discrimination.sh</code>
+exists+STRICT but covers Challenge falsifiability markers, not the §6.AB
+completeness checklist.</td>
+<td>M</td>
+<td>no</td>
+</tr>
+<tr>
+<td>§6.AC-debt</td>
+<td>Detekt rule <code>config/detekt/lava-non-fatal-required.kts</code> +
+go-vet <code>lava-api-go/scripts/check-non-fatal-coverage.sh</code> +
+pre-push + <code>tests/non-fatal-coverage/</code></td>
+<td><strong>OPEN</strong></td>
+<td><code>config/detekt/lava-non-fatal-required.kts</code> ABSENT;
+<code>lava-api-go/scripts/check-non-fatal-coverage.sh</code> ABSENT;
+<code>tests/non-fatal-coverage/</code> ABSENT. A bash scanner
+<code>scripts/check-non-fatal-coverage.sh</code> exists (Kotlin-only,
+STRICT) but the Go vet + Detekt custom rule + hermetic tests are not
+built.</td>
+<td>M</td>
+<td>no</td>
+</tr>
+<tr>
+<td>§6.AD-debt (1) per-submodule pointer propagation</td>
+<td><code>## INHERITED FROM</code> block in all per-scope
+CLAUDE.md/AGENTS.md/CONSTITUTION.md</td>
+<td><strong>CLOSED</strong></td>
+<td><code>scripts/check-constitution.sh</code> 6.AD(4) enforces 54
+in-scope files (<code>docs/helix-constitution-gates.md:56</code>).</td>
+<td>—</td>
+<td>no</td>
+</tr>
+<tr>
+<td>§6.AD-debt (2) <code>CM-COMMIT-DOCS-EXISTS</code></td>
+<td>verify referenced docs in commit messages resolve</td>
+<td><strong>CLOSED</strong></td>
+<td><code>scripts/check-commit-docs-exists.sh</code> exists + wired in
+verify-all (<code>scripts/verify-all-constitution-rules.sh:190</code>).
+CLAUDE.md lists OWED → STALE.</td>
+<td>—</td>
+<td>no</td>
+</tr>
+<tr>
+<td>§6.AD-debt (2) <code>CM-SCRIPT-DOCS-SYNC</code></td>
+<td>script ↔︎ docs/scripts/*.md sync gate</td>
+<td><strong>CLOSED</strong></td>
+<td><code>scripts/check-script-docs-sync.sh</code> exists + verify-all
+<code>:187</code>; AND pre-push Check 9
+(<code>.githooks/pre-push:195-212</code>). CLAUDE.md lists OWED →
+STALE.</td>
+<td>—</td>
+<td>no</td>
+</tr>
+<tr>
+<td>§6.AD-debt (2) <code>CM-SUBAGENT-DELEGATION-AUDIT</code></td>
+<td>subagent delegation audit trail</td>
+<td><strong>CLOSED (scanner)</strong></td>
+<td><code>scripts/check-subagent-delegation-audit.sh</code> exists +
+verify-all <code>:193</code>. Gate-doc + CLAUDE.md call it paper-only →
+STALE.</td>
+<td>—</td>
+<td>no</td>
+</tr>
+<tr>
+<td>§6.AD-debt (2) <code>CM-COMMIT-DOCS-EXISTS</code>/others
+equivalence-mapped</td>
+<td><code>CM-ITEM-STATUS/TYPE-TRACKING</code>,
+<code>CM-FIXED-COLUMN-ALIGNMENT</code>, operator-blocked gates</td>
+<td><strong>CLOSED-BY-EQUIVALENCE</strong></td>
+<td>§6.AD.3 Path B maps these to <code>.lava-ci-evidence/</code> ledgers
+(<code>docs/helix-constitution-gates.md:14,16,19-22,36-37</code>).
+Intentional; no scanner owed.</td>
+<td>—</td>
+<td>no</td>
+</tr>
+<tr>
+<td>§6.AD-debt (5) build-resource stats tracker</td>
+<td><code>CM-BUILD-RESOURCE-STATS-TRACKER</code></td>
+<td><strong>CLOSED</strong></td>
+<td><code>scripts/build-stats-sample.sh</code> +
+<code>scripts/build-stats-report.sh</code> + registry exist
+(<code>docs/helix-constitution-gates.md:18</code>). CLAUDE.md
+§6.AD-debt-5 still lists OWED → STALE.</td>
+<td>—</td>
+<td>no</td>
+</tr>
+<tr>
+<td>§6.AE-debt</td>
+<td><code>check-challenge-coverage.sh</code> strict-mode flip +
+per-feature backfill</td>
+<td><strong>CLOSED (strict)</strong></td>
+<td><code>scripts/check-challenge-coverage.sh:39</code>
+<code>STRICT="${LAVA_CHALLENGE_COVERAGE_STRICT:-1}"</code> (STRICT
+default); verify-all invokes it (<code>:163</code>). Gate-doc says
+"advisory" → STALE. Runner host-gap is §6.X/§6.AH, not §6.AE.</td>
+<td>—</td>
+<td>no</td>
+</tr>
+<tr>
+<td>§6.AF-debt (2) chaos/stress §11.4.85 (LVA-7)</td>
+<td>runnable chaos/stress beyond phase-1 lava-api-go</td>
+<td><strong>PARTIAL</strong></td>
+<td><code>scripts/run-chaos-stress.sh</code> exists (63 lines,
+scaffold); <code>docs/chaos-stress/DESIGN.md</code> +
+<code>EVIDENCE-phase1.md</code> exist. NOT wired into verify-all (no
+<code>chaos</code> gate in
+<code>scripts/verify-all-constitution-rules.sh</code>). Phase-2+
+owed.</td>
+<td>M</td>
+<td>no</td>
+</tr>
+<tr>
+<td>§6.AF-debt (LVA-6) codegraph own-org submodule inclusion</td>
+<td>§11.4.79 — index own-org submodule SOURCE</td>
+<td><strong>CLOSED</strong></td>
+<td><code>.codegraph/config.json:3</code> <code>_policy</code> records
+LVA-6 CLOSED 2026-05-31 (1,842 submodule files indexed; cross-submodule
+probe resolves); blanket <code>submodules/**</code> exclude removed.
+CLAUDE.md §6.AF lists OWED → STALE.</td>
+<td>—</td>
+<td>no</td>
+</tr>
+<tr>
+<td>§6.AF-debt (4) per-clause <code>CM-COVENANT-114-*-PROPAGATION</code>
+gates</td>
+<td>literal-anchor scan gates for §11.4.79–106</td>
+<td><strong>OPEN</strong></td>
+<td>Only <code>CM-COVENANT-114-16-PROPAGATION</code> row present
+(<code>docs/helix-constitution-gates.md:14</code>); no per-clause
+propagation scanner for the new 79–106 anchors.</td>
+<td>S</td>
+<td>no</td>
+</tr>
+<tr>
+<td>§6.AF-debt (5) §11.4.80 codegraph sync automation</td>
+<td>auto <code>git submodule init</code> before index</td>
+<td><strong>OPEN</strong></td>
+<td>Precondition documented in <code>.codegraph/config.json:3</code> but
+no automation script that runs <code>git submodule init</code> before
+<code>codegraph index</code>.</td>
+<td>S</td>
+<td>no</td>
+</tr>
+<tr>
+<td>§6.AG (no separate -debt)</td>
+<td>Containers-driven emulators, no live ADB device</td>
+<td><strong>PARTIAL</strong></td>
+<td>Policy is in CLAUDE.md §6.AG; runner enforced via
+<code>run-challenge-matrix.sh</code>; but the no-host-direct requirement
+is superseded/tightened by §6.AH and blocked by §6.AH-debt.</td>
+<td>—</td>
+<td>inherits §6.AH</td>
+</tr>
+<tr>
+<td>§6.AH-debt</td>
+<td>Container/VM emulator path that BOOTS on macOS (no-KVM TCG mode +
+macOS /proc-reap fix in Containers submodule); no host-direct
+fallback</td>
+<td><strong>OPEN</strong></td>
+<td><code>containerized.go</code> hard-requires <code>/dev/kvm</code>
+for acceleration (<code>containerized.go:19-21,34</code>); no TCG/no-KVM
+software-emulation mode; <code>run-challenge-matrix.sh:215</code> still
+resolves macOS→<code>host-direct</code>. Incident recorded
+<code>.lava-ci-evidence/sixth-law-incidents/2026-06-03-emulator-boot-offline.json</code>
+(present). §6.Z release canary + client gate honestly BLOCKED on this
+macOS host.</td>
+<td>L</td>
+<td>YES (blocks all macOS gate/release-canary runs)</td>
+</tr>
+<tr>
+<td>§6.AI-debt (1) §11.4.128 device recorder</td>
+<td>background Genymotion/emulator recorder w/ deterministic layout</td>
+<td><strong>PARTIAL/CLOSED?</strong></td>
+<td><code>scripts/record-device-session.sh</code> exists;
+<code>tests/device-recording/</code> exists. Whether it implements the
+full deterministic <code>YYYY-MM-DD/&lt;state-hash&gt;/...</code> layout
++ gitignore/codegraph-exclude was not fully verified — marked PARTIAL
+pending deeper check.</td>
+<td>S</td>
+<td>no</td>
+</tr>
+<tr>
+<td>§6.AI-debt (2) §11.4.140 LAYER 2 action-prefix hook</td>
+<td><code>UserPromptSubmit</code> hook + generated slash commands</td>
+<td><strong>CLOSED (hook)</strong></td>
+<td><code>scripts/hooks/action-prefix-expand.sh</code> exists + wired in
+<code>.claude/settings.json:14-22</code>
+(<code>UserPromptSubmit</code>);
+<code>constitution/actions/registry.yaml</code> present. Generated
+per-agent slash commands not verified. CLAUDE.md lists OWED → STALE for
+the hook portion.</td>
+<td>S</td>
+<td>no</td>
+</tr>
+<tr>
+<td>§6.AI-debt (3) §11.4.141 thin-index restructure + token harness</td>
+<td>de-dup 90K-token CLAUDE.md to index lines</td>
+<td><strong>OPEN</strong></td>
+<td>No evidence of a thin-index restructure; root <code>CLAUDE.md</code>
+remains a full-body document.</td>
+<td>L</td>
+<td>no</td>
+</tr>
+<tr>
+<td>§6.AI-debt (4) per-clause
+<code>CM-COVENANT-114-{128..141}-PROPAGATION</code> gates</td>
+<td>literal-anchor gates for §11.4.128–141</td>
+<td><strong>OPEN</strong></td>
+<td>Not present in <code>docs/helix-constitution-gates.md</code> gate
+inventory.</td>
+<td>S</td>
+<td>no</td>
+</tr>
+<tr>
+<td><code>CM-COVERAGE-LEDGER</code></td>
+<td>§11.4.25 — strict-flip after baseline (Phase 7-debt)</td>
+<td><strong>CLOSED (strict)</strong></td>
+<td><code>scripts/check-coverage-ledger.sh:41</code>
+<code>STRICT=${LAVA_COVERAGE_LEDGER_STRICT:-1}</code>; verify-all
+<code>:156</code> invokes <code>--strict</code>. Gate-doc + CLAUDE.md
+mark it "advisory / STRICT flip OWED" → STALE.</td>
+<td>—</td>
+<td>no</td>
+</tr>
+<tr>
+<td><code>CM-LVA-TICKETS-SYNC</code> →
+<code>CM-WORKABLE-ITEMS-SYNC</code></td>
+<td>canonical workable-items binary; strict-flip</td>
+<td><strong>PARTIAL</strong></td>
+<td><code>scripts/check-workable-items.sh</code> exists + verify-all
+<code>:202</code>. Gate-doc still names the retired
+<code>CM-LVA-TICKETS-SYNC</code>/<code>scripts/check-lva-tickets.sh</code>
+(<code>docs/helix-constitution-gates.md:25</code>) → STALE; CLAUDE.md
+§6.AF notes migration to canonical done. Upstream
+<code>update</code>/<code>reopen</code>/<code>block</code> + export
+pipeline OWED (non-blocking).</td>
+<td>S</td>
+<td>no</td>
+</tr>
+<tr>
+<td><code>CM-COVENANT-114-16-PROPAGATION</code> + item-tracking
+paper-only gates</td>
+<td>§11.4.15/16/19/21 trackers</td>
+<td><strong>CLOSED-BY-EQUIVALENCE</strong></td>
+<td>Intentional Path-B mapping
+(<code>docs/helix-constitution-gates.md:14,19-24</code>). Not true
+debt.</td>
+<td>—</td>
+<td>no</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2
+id="stale-claim-findings-claudemdgate-doc-says-open-but-artifact-is-closed">STALE-claim
+findings (CLAUDE.md/gate-doc says OPEN but artifact is CLOSED)</h2>
+<p>These are documentation drift, not real work. A master plan should
+NOT schedule work for them — only doc corrections:</p>
+<ol type="1">
+<li><strong>§6.Y-debt</strong> — pre-push Check 6 is live
+(<code>.githooks/pre-push:128</code>). CLAUDE.md lists OWED.</li>
+<li><strong>§6.AA-debt</strong> — default flipped to
+<code>--debug-only</code>; release-only companion check live
+(<code>firebase-distribute.sh:46,199</code>). CLAUDE.md lists
+PARTIAL.</li>
+<li><strong>§6.AD-debt items 2</strong> —
+<code>check-commit-docs-exists.sh</code>,
+<code>check-script-docs-sync.sh</code>,
+<code>check-subagent-delegation-audit.sh</code> all exist +
+verify-all-wired + pre-push Check 9. Gate-doc marks several ⚠️
+paper-only.</li>
+<li><strong>§6.AD-debt item 5</strong> — build-stats tracker shipped
+(<code>build-stats-sample.sh</code>/<code>build-stats-report.sh</code>).
+CLAUDE.md still lists OWED.</li>
+<li><strong>§6.AE-debt</strong> —
+<code>check-challenge-coverage.sh</code> is STRICT-default
+(<code>:39</code>). Gate-doc says advisory.</li>
+<li><strong><code>CM-COVERAGE-LEDGER</code></strong> — STRICT-default
+(<code>check-coverage-ledger.sh:41</code>, verify-all
+<code>--strict</code>). CLAUDE.md + gate-doc say advisory / Phase-7-debt
+OWED.</li>
+<li><strong>LVA-6 (codegraph submodules)</strong> — CLOSED per
+<code>.codegraph/config.json:3</code>. CLAUDE.md §6.AF lists OWED.</li>
+<li><strong>§6.AI LAYER 2 action hook</strong> — wired in
+<code>.claude/settings.json:14</code>. CLAUDE.md lists OWED.</li>
+<li><strong><code>docs/helix-constitution-gates.md</code> itself is
+stale</strong> — "Last updated 2026-05-16"; predates §6.AF/AG/AH/AI (May
+31 – Jun 9). Several rows describe pre-strict-flip state.</li>
+</ol>
+<hr />
+<h2 id="truly-open-debts-real-work-to-schedule">Truly-open debts (real
+work to schedule)</h2>
+<table>
+<thead>
+<tr>
+<th>debt-id</th>
+<th>one-line</th>
+<th>effort</th>
+<th>blocking</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>§6.AH-debt</strong></td>
+<td>macOS container/VM (TCG no-KVM) emulator path that actually boots;
+no host-direct fallback</td>
+<td>L</td>
+<td>YES</td>
+</tr>
+<tr>
+<td><strong>§6.X-debt</strong></td>
+<td>container-bound emulator gate path on macOS (folds into §6.AH)</td>
+<td>L</td>
+<td>YES</td>
+</tr>
+<tr>
+<td><strong>§6.AC-debt</strong></td>
+<td>Detekt <code>lava-non-fatal-required.kts</code> + Go-vet
+<code>check-non-fatal-coverage.sh</code> +
+<code>tests/non-fatal-coverage/</code></td>
+<td>M</td>
+<td>no</td>
+</tr>
+<tr>
+<td><strong>§6.AB-debt</strong></td>
+<td>Detekt/go-vet per-feature anti-bluff completeness rule</td>
+<td>M</td>
+<td>no</td>
+</tr>
+<tr>
+<td><strong>§6.Z-debt (residual)</strong></td>
+<td>runtime Gate 6 inside <code>firebase-distribute.sh</code>
+(SHA/24h/BUILD-SUCCESSFUL) + hermetic test</td>
+<td>M</td>
+<td>partial</td>
+</tr>
+<tr>
+<td><strong>§6.AF-debt chaos (LVA-7)</strong></td>
+<td>chaos/stress §11.4.85 beyond phase-1; wire into verify-all</td>
+<td>M</td>
+<td>no</td>
+</tr>
+<tr>
+<td><strong>§6.AI-debt §11.4.141</strong></td>
+<td>thin-index restructure of CLAUDE.md + token-reduction harness</td>
+<td>L</td>
+<td>no</td>
+</tr>
+<tr>
+<td><strong>§6.AF/AI per-clause <code>CM-COVENANT-*-PROPAGATION</code>
+gates</strong></td>
+<td>literal-anchor scanners for §11.4.79–141</td>
+<td>S</td>
+<td>no</td>
+</tr>
+<tr>
+<td><strong>§6.AF-debt §11.4.80</strong></td>
+<td>auto <code>git submodule init</code> before codegraph index</td>
+<td>S</td>
+<td>no</td>
+</tr>
+<tr>
+<td><strong>§6.AI-debt §11.4.128</strong></td>
+<td>verify/complete deterministic device-recorder layout</td>
+<td>S</td>
+<td>no</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="prioritized-recommendations">Prioritized recommendations</h2>
+<ol type="1">
+<li><strong>§6.AH-debt + §6.X-debt (TOP — both BLOCKING).</strong>
+Single coordinated effort in the Containers submodule: add a no-KVM TCG
+software-emulation runner + the macOS <code>/proc</code>-reap fix so the
+container/VM emulator path boots on darwin/arm64. Until this lands,
+EVERY §6.AE matrix gate, §6.Z release canary, and tag-time attestation
+on the operator's macOS host is honestly BLOCKED — this is the single
+highest-leverage debt because it unblocks the entire release
+pipeline.</li>
+<li><strong>§6.Z-debt residual (firebase Gate 6).</strong> Add the
+runtime evidence gate inside <code>firebase-distribute.sh</code> (the
+pre-push Check 7 only fires on the commit that advances the pointer, not
+at distribute time). Cheaper than #1 and closes a real
+distribute-faulty-version vector.</li>
+<li><strong>§6.AC-debt (non-fatal telemetry lint).</strong> Build the
+Detekt custom rule + Go-vet check +
+<code>tests/non-fatal-coverage/</code>. Currently only a Kotlin bash
+scanner exists; the Go side has zero enforcement. Pairs naturally with
+§6.AB-debt (same Detekt-rule-authoring effort).</li>
+</ol>
+<p><strong>Doc-hygiene action (not scheduled work, but should precede
+the plan):</strong> correct the 9 STALE claims above in
+<code>CLAUDE.md</code> + regenerate
+<code>docs/helix-constitution-gates.md</code> (stale since 2026-05-16)
+so the master plan is built on accurate status. Several debts are
+already done.</p>
+<p><strong>Open vs closed count:</strong> Of ~27 distinct debt/gate
+items examined: <strong>10 truly-open</strong> (2 BLOCKING, 1
+partial-blocking, 7 non-blocking), <strong>3 PARTIAL</strong>, **~14
+CLOSED or closed-by-equivalence** (9 of which are STALE-marked-open in
+CLAUDE.md/gate-doc).</p>
+</body>
+</html>

@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-06-24-search-timeout-and-interrupt-rootcause</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1
+id="2026-06-24--search-no-results--cant-go-backinterrupt--root-cause-investigation">2026-06-24
+— Search "no results" + "can't go back/interrupt" — root-cause
+investigation</h1>
+<p>Operator (2026-06-24, released apps 1.3.11-1072 + api-app 0.2.11-18):
+"search and UX around it does not work — we still do not get any
+results; onboarded with just YTS, same issue; once we enter search and
+start it we can't go back or interrupt it."</p>
+<p>Investigation per §6.T.1 (Reproduction-Before-Fix) + constitution
+§11.4.152 (Crashlytics-monitoring</p>
+<ul>
+<li>systematic-debug + regression-test-coverage). systematic-debugging
+Phase 1.</li>
+</ul>
+<h2
+id="decisive-field-evidence-firebase-crashlytics--the-6ac-telemetry-shipped-in-10711072">Decisive
+field evidence (Firebase Crashlytics — the §6.AC telemetry shipped in
+1071/1072)</h2>
+<p>Client release app
+<code>1:815513478335:android:456475e2ef4039d8cfd20a</code>, top
+NON_FATAL issue <code>9d4ad2f4d1a8b8697b1506402e045b81</code>, sample
+event <code>…_2233309019041036508</code> (2026-06-24T07:39:36Z):</p>
+<ul>
+<li>Exception:
+<strong><code>java.net.SocketTimeoutException: timeout</code></strong>
+at <code>okhttp3.internal.http2.Http2Stream.takeHeaders</code> →
+<code>Http2ExchangeCodec.readResponseHeaders</code> (the request was
+SENT through the full OkHttp chain incl.
+<code>AuthInterceptor.kt:43</code>; only the <strong>response headers
+never arrived</strong> → HTTP/2 read-headers timeout).</li>
+<li>customKeys (from
+<code>SearchResultViewModel.recordProviderFailure</code>):
+<code>feature=search</code>, <code>operation=streamMultiSearch</code>,
+<code>provider=yts</code>, <code>screen=search_result</code>,
+<code>error_message=timeout</code>, <code>build_type=release</code>,
+<code>version=1.3.11 (1072)</code>. Device HUAWEI TXZ-W09 / Android 12 /
+LANDSCAPE.</li>
+<li>api-app (engine) Crashlytics <code>…:d57b960e…</code> over the same
+window: <strong>NO issues</strong> — the engine is NOT crashing; it is
+running but <strong>not responding</strong> to the search within the
+client's timeout.</li>
+</ul>
+<h2
+id="root-cause-a--no-results-engine-response-exceeds-the-client-read-timeout">Root
+cause A — "no results": engine response exceeds the client read
+timeout</h2>
+<ul>
+<li>Client <code>@Named("lan")</code> OkHttpClient:
+<code>readTimeout = 30s</code>
+(<code>core/network/impl/.../NetworkModule.kt:174</code>).</li>
+<li>Engine yts client: <code>DefaultTimeout = 20s</code> (whole client),
+<code>perAttemptTimeout = 8s</code> per mirror
+(<code>lava-api-go/internal/provider/curated/yts/client.go:46,51</code>).
+Failover across N mirrors × 8s (+ §11.4.85 bounded retries) can exceed
+the client's 30s — especially when yts.mx is slow/ unreachable from the
+phone's network. The engine's GET /v1/yts/search does NOT stream/return-
+partial; the client waits for the whole search →
+<code>readResponseHeaders</code> times out at 30s.</li>
+<li>The §6.AC ProviderFailure → <code>handleStreamEnd()</code>
+Error+Retry fix (cfe838bc) DOES fire — but only AFTER the 30s hang, so
+the user-visible experience is "stuck 30s, then no results."</li>
+</ul>
+<p><strong>Fix direction:</strong> bound the engine's TOTAL
+search-handler time to well under the client's read timeout (a
+request-context deadline, e.g. ~15s) so the engine ALWAYS responds in
+time with results OR a fast "provider timed out/unreachable" error —
+never leaving the client to time out.</p>
+<h2
+id="root-cause-b--cant-go-back--interrupt-hung-search-no-cancel">Root
+cause B — "can't go back / interrupt": hung search, no cancel</h2>
+<ul>
+<li><code>observeStreamMultiSearch</code> fires in
+<code>container.onCreate</code> and blocks on
+<code>sdk.streamMultiSearch(...) .collect{}</code> for up to 30s. There
+is NO cancel affordance and <code>onBackClick()</code> only posts a
+<code>Back</code> side effect — it does NOT cancel the in-flight search
+job. (No <code>BackHandler</code> swallows back in the search screens,
+so it is not a back-swallow.) The exact UI block (Orbit intent
+serialization vs a blocking loading state) is confirmed by the
+reproduction test below.</li>
+</ul>
+<p><strong>Fix direction:</strong> track the streamMultiSearch job and
+cancel it on <code>BackClick</code> (and on a new search); make the
+in-flight search interruptible immediately; surface the loading state
+without blocking back.</p>
+<h2
+id="reproduce-first-plan-failing-tests-per-6t1--operator-mandate">Reproduce-first
+plan (failing tests, per §6.T.1 / operator mandate)</h2>
+<ul>
+<li>CLIENT: a VM test where the search flow is slow/throws
+SocketTimeoutException → assert (1) the VM renders Error+Retry (not
+stuck Streaming/Empty), and (2) BackClick during an in-flight search
+CANCELS the search + emits Back. Currently FAILS (no cancellation) →
+reproduction.</li>
+<li>ENGINE: a Go test where the yts upstream is slow → the search
+handler must return within a request-context deadline &lt; the client
+timeout. Currently FAILS if unbounded → reproduction.</li>
+<li>Then fix root causes A + B, code review, rebuild, retest, validate
+(no false results, no bluff).</li>
+</ul>
+</body>
+</html>

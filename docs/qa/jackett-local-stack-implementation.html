@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>jackett-local-stack-implementation</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1
+id="jackett-in-the-lava-local-stack--implementation-phase-1">Jackett-in-the-Lava-Local-Stack
+— Implementation (Phase 1)</h1>
+<blockquote>
+<p>Status: <strong>first concrete, testable slice landed</strong>
+(Torznab XML client in Go + compose service definition). No container
+booted; no commit/push. Author: implementation agent, 2026-06-08.
+Companion research dossier: <a
+href="./jackett-local-stack-research.md"><code>jackett-local-stack-research.md</code></a>.
+Operator decision implemented: <strong>Jackett sidecar in the Lava local
+stack, fronted by <code>lava-api-go</code>.</strong></p>
+</blockquote>
+<p>This document describes (Part 1) the Torznab client that lava-api-go
+uses to talk to Jackett, and (Part 2) the compose service definition
+that runs Jackett (+ FlareSolverr) on the existing <code>lava-net</code>
+bridge.</p>
+<hr />
+<h2 id="part-1--torznab-xml-client-lava-api-gointernaljackett">Part 1 —
+Torznab XML client (<code>lava-api-go/internal/jackett</code>)</h2>
+<h3 id="files">Files</h3>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>lava-api-go/internal/jackett/torznab.go</code></td>
+<td><code>encoding/xml</code> decoder + clean <code>Result</code>
+struct</td>
+</tr>
+<tr>
+<td><code>lava-api-go/internal/jackett/client.go</code></td>
+<td><code>Client</code> (URL building, <code>Search</code>,
+<code>Download</code> with the 302→magnet handler)</td>
+</tr>
+<tr>
+<td><code>lava-api-go/internal/jackett/torznab_test.go</code></td>
+<td>Unit tests with real field assertions</td>
+</tr>
+<tr>
+<td><code>lava-api-go/internal/jackett/testdata/torznab_results.xml</code></td>
+<td>Hand-authored realistic Torznab feed (one <code>.torrent</code> item
++ one magnet item)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="what-it-parses">What it parses</h3>
+<p>A Torznab results feed is RSS 2.0 with the extension namespace
+<code>xmlns:torznab="http://torznab.com/schemas/2015/feed"</code>. Each
+<code>&lt;item&gt;</code> carries:</p>
+<ul>
+<li><code>&lt;title&gt;</code>, <code>&lt;guid&gt;</code>,</li>
+<li><code>&lt;enclosure url=… length=… type=…&gt;</code> — the download
+link, where <code>type</code> is <code>application/x-bittorrent</code>
+(a <code>.torrent</code> file) or
+<code>application/x-bittorrent;x-scheme-handler/magnet</code> (a
+magnet), and</li>
+<li><code>&lt;torznab:attr name=… value=…/&gt;</code> entries — we
+extract <code>seeders</code>, <code>size</code>, <code>magneturl</code>,
+<code>infohash</code>.</li>
+</ul>
+<p>These map to the exported <code>jackett.Result</code>:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Result <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    Title         <span class="dt">string</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    GUID          <span class="dt">string</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    DownloadURL   <span class="dt">string</span> <span class="co">// &lt;enclosure url&gt;</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    EnclosureType <span class="dt">string</span> <span class="co">// EnclosureTypeTorrent | EnclosureTypeMagnet</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    Seeders       <span class="dt">int</span>    <span class="co">// -1 == unknown (distinguishes absent from a real 0)</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    Size          <span class="dt">int64</span>  <span class="co">// size attr, falling back to &lt;enclosure length&gt;</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    MagnetURL     <span class="dt">string</span> <span class="co">// magneturl attr, or the enclosure URL if it&#39;s a magnet</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    Infohash      <span class="dt">string</span> <span class="co">// lower-cased</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Parsing notes that matter for correctness:</p>
+<ul>
+<li><strong><code>Seeders</code> defaults to <code>-1</code></strong> so
+"no seeders attribute" is not silently reported as "0 seeders" (a
+download-confirmation lie).</li>
+<li><strong><code>Size</code> falls back to
+<code>&lt;enclosure length&gt;</code></strong> when no <code>size</code>
+attr is present.</li>
+<li><strong><code>Infohash</code> is lower-cased</strong> (feeds emit
+upper-case; consumers expect lower).</li>
+<li>The decoder matches on the XML local name <code>attr</code>, so it
+also catches the <code>newznab:attr</code> spelling some indexers
+emit.</li>
+</ul>
+<h3 id="url-building-6r--nothing-hardcoded">URL building (§6.R — nothing
+hardcoded)</h3>
+<p><code>Client</code> is constructed from a
+<code>jackett.Config{ BaseURL, APIKey, Timeout }</code>. Both
+<code>BaseURL</code> and <code>APIKey</code> are
+<strong>injected</strong>, never literals (see Part 2 for where they
+come from). <code>BuildSearchURL</code> produces the documented Torznab
+path:</p>
+<pre><code>&lt;base&gt;/api/v2.0/indexers/&lt;indexerID&gt;/results/torznab/api?apikey=&lt;key&gt;&amp;t=search&amp;q=&lt;query&gt;</code></pre>
+<p><code>BuildCapsURL</code> produces the <code>t=caps</code> variant
+used as the readiness probe. The Torznab path segments themselves
+(<code>/api/v2.0/...</code>, <code>t</code>, <code>search</code>,
+<code>caps</code>) are protocol constants, not deployment addresses —
+they live as package constants, which is consistent with §6.R (the rule
+targets connection addresses, ports, and secrets, all of which live in
+<code>Config</code>).</p>
+<h3 id="the-302--magnet-edge-case-handled-not-auto-followed">The 302 →
+magnet edge case (handled, not auto-followed)</h3>
+<p>Jackett answers a download/<code>/dl/</code> link with <strong>HTTP
+302 whose <code>Location</code> is a <code>magnet:</code> URI</strong>.
+A naive HTTP client that auto-follows redirects would try to
+"<code>GET magnet:</code>" and fail. <code>jackett.Client</code>
+therefore configures
+<code>http.Client.CheckRedirect = http.ErrUseLastResponse</code> (do NOT
+follow), and <code>Download</code> captures the <code>Location</code>
+header verbatim:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>dr<span class="op">,</span> _ <span class="op">:=</span> c<span class="op">.</span>Download<span class="op">(</span>ctx<span class="op">,</span> item<span class="op">.</span>DownloadURL<span class="op">)</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> dr<span class="op">.</span>IsMagnet<span class="op">()</span> <span class="op">{</span> use<span class="op">(</span>dr<span class="op">.</span>Magnet<span class="op">)</span> <span class="op">}</span> <span class="cf">else</span> <span class="op">{</span> writeTorrent<span class="op">(</span>dr<span class="op">.</span>TorrentBytes<span class="op">)</span> <span class="op">}</span></span></code></pre></div>
+<p><code>Download</code> returns
+<code>DownloadResult{ Magnet | TorrentBytes }</code>:</p>
+<ul>
+<li>enclosure already a magnet → short-circuits, no HTTP
+round-trip;</li>
+<li>HTTP 302 with <code>Location: magnet:…</code> → captured into
+<code>Magnet</code>;</li>
+<li>HTTP 302 with a non-magnet <code>Location</code> → explicit error
+(don't follow blindly);</li>
+<li>HTTP 200 → body returned as <code>TorrentBytes</code> +
+<code>ContentType</code>.</li>
+</ul>
+<p>This directly serves the worklog's download-confirmation goal (valid
+<code>.torrent</code> bytes OR a real magnet) and the known
+kinozal/nnmclub null-magnet gaps.</p>
+<h3 id="tests--verbatim-go-test-output">Tests + verbatim
+<code>go test</code> output</h3>
+<p>The unit tests assert parsed fields against the hand-authored fixture
+(both an enclosure-<code>.torrent</code> item AND a magneturl/infohash
+item), the <code>-1</code>-vs-<code>0</code> seeders distinction, URL
+building from config, and the 302→magnet handler (via
+<code>httptest</code>).</p>
+<p>Command:</p>
+<pre><code>cd lava-api-go &amp;&amp; go test ./internal/jackett/... -run . -count=1</code></pre>
+<p>Verbatim output:</p>
+<pre><code>ok      digital.vasic.lava.apigo/internal/jackett   0.267s</code></pre>
+<p>Verbose run (per-test):</p>
+<pre><code>=== RUN   TestParseResults_TorrentEnclosureItem
+--- PASS: TestParseResults_TorrentEnclosureItem (0.00s)
+=== RUN   TestParseResults_MagnetItem
+--- PASS: TestParseResults_MagnetItem (0.00s)
+=== RUN   TestParseResults_SeedersUnknownVsZero
+--- PASS: TestParseResults_SeedersUnknownVsZero (0.00s)
+=== RUN   TestParseResults_EmptyFeed
+--- PASS: TestParseResults_EmptyFeed (0.00s)
+=== RUN   TestParseResults_MalformedXML
+--- PASS: TestParseResults_MalformedXML (0.00s)
+=== RUN   TestBuildSearchURL
+--- PASS: TestBuildSearchURL (0.00s)
+=== RUN   TestBuildCapsURL
+--- PASS: TestBuildCapsURL (0.00s)
+=== RUN   TestNewClient_MissingConfig
+--- PASS: TestNewClient_MissingConfig (0.00s)
+=== RUN   TestDownload_302ToMagnet
+--- PASS: TestDownload_302ToMagnet (0.00s)
+=== RUN   TestDownload_TorrentFile
+--- PASS: TestDownload_TorrentFile (0.00s)
+=== RUN   TestDownload_MagnetEnclosureShortCircuits
+--- PASS: TestDownload_MagnetEnclosureShortCircuits (0.00s)
+=== RUN   TestSearch_EndToEnd
+--- PASS: TestSearch_EndToEnd (0.00s)
+PASS
+ok      digital.vasic.lava.apigo/internal/jackett   0.368s</code></pre>
+<blockquote>
+<p>Per the Decoupled Reusable rule: this first-party Torznab decoder
+(struct set borrowed from MIT <code>cardigann/torznab</code>) is a
+candidate for extraction into a <code>vasic-digital</code> submodule if
+a second project needs it.</p>
+</blockquote>
+<hr />
+<h2 id="part-2--local-stack-compose-service-definition">Part 2 —
+Local-stack compose service definition</h2>
+<h3 id="file">File</h3>
+<p><code>tools/lava-containers/docker-compose.jackett.yml</code> — a
+<strong>compose fragment</strong> that adds <code>lava-jackett</code> (+
+optional <code>lava-flaresolverr</code>) to the Lava stack. It is a
+fragment (not edits to the root <code>docker-compose.yml</code>) so it
+composes in via <code>-f</code> and the root file keeps owning the
+bridge + the api-go/observability profiles.</p>
+<h3 id="topology">Topology</h3>
+<pre><code>Android app ──mDNS(_lava-api._tcp)──▶ lava-api-go (:8443, host-net, TLS+HMAC)
+                                            │  (server-side HTTP, holds api_key)
+                                            ▼
+                                       lava-jackett (:9117)   ── lava-net, NOT advertised
+                                            │
+                              (only when profile=cloudflare)
+                                            ▼
+                                  lava-flaresolverr (:8191)   ── lava-net</code></pre>
+<h3 id="services">Services</h3>
+<table>
+<thead>
+<tr>
+<th>Service</th>
+<th>Image (digest-pin in <code>.env</code>)</th>
+<th>Network</th>
+<th>Port</th>
+<th>Profile</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>lava-jackett</code></td>
+<td><code>lscr.io/linuxserver/jackett</code> (multi-arch
+amd64+arm64)</td>
+<td><code>lava-net</code> (bridge)</td>
+<td>9117 <strong>internal only</strong> (<code>expose</code>, no
+<code>ports</code>)</td>
+<td><code>jackett</code>, <code>cloudflare</code></td>
+<td><code>/config</code> = gitignored host volume holding
+<code>ServerConfig.json</code> (api_key) + indexer creds</td>
+</tr>
+<tr>
+<td><code>lava-flaresolverr</code></td>
+<td><code>ghcr.io/flaresolverr/flaresolverr</code></td>
+<td><code>lava-net</code></td>
+<td>8191 <strong>internal only</strong></td>
+<td><code>cloudflare</code></td>
+<td>RAM-heavy headless Chromium; up only when IPTorrents (or other CF
+tracker) is enabled</td>
+</tr>
+</tbody>
+</table>
+<h3 id="ports-exposed-to-the-lan-none">Ports exposed to the LAN:
+<strong>none</strong></h3>
+<p>Neither 9117 nor 8191 is published. They use <code>expose:</code>
+(intra-bridge only). Only <code>lava-api-go:8443</code> is LAN-visible.
+This is a security requirement — an unauthenticated Jackett admin
+surface on the LAN is rejected by the dossier §7.</p>
+<h3 id="who-holds-the-apikey--how-lava-api-go-consumes-it">Who holds the
+apikey + how lava-api-go consumes it</h3>
+<ul>
+<li><strong>Jackett generates the api_key on first run</strong> and
+persists it in the gitignored <code>/config/ServerConfig.json</code>
+host volume (<code>${LAVA_JACKETT_CONFIG_DIR}</code> →
+<code>/config</code>).</li>
+<li><strong><code>lava-api-go</code> reads it server-side at
+startup</strong> (env <code>LAVA_JACKETT_API_KEY</code>, populated by
+the Containers glue from that host file) and constructs a
+<code>jackett.Config{ BaseURL: "http://lava-jackett:9117", APIKey: &lt;key&gt; }</code>.</li>
+<li>The api_key is a <strong>§6.H secret</strong>: server-side only,
+<strong>never</strong> hardcoded (§6.R), <strong>never</strong> sent to
+the device. The app talks only to <code>lava-api-go</code>, which
+proxies Torznab. The app never sees Jackett directly.</li>
+</ul>
+<h3
+id="readiness-healthcheck-6b-correct--not-a-bare-tcp-probe">Readiness
+healthcheck (§6.B-correct — not a bare TCP probe)</h3>
+<ul>
+<li><strong>Jackett:</strong> a Torznab <code>t=caps</code> probe —
+<code>wget http://127.0.0.1:9117/api/v2.0/indexers/&lt;id&gt;/results/torznab/api?t=caps&amp;apikey=&lt;key&gt;</code>.
+A 200 + non-empty body proves the Torznab surface is live AND the
+api_key is valid — the same code path <code>lava-api-go</code> consumes.
+A bare TCP-9117 or a <code>200</code> on <code>/</code> would be a bluff
+probe (§6.B: "Up" != application-healthy).
+<code>start_period: 40s</code> covers the .NET cold-start (UNCONFIRMED
+seconds per the dossier — tighten once measured on the target
+host).</li>
+<li><strong>FlareSolverr:</strong>
+<code>POST /v1 {"cmd":"sessions.list"}</code> → 200 (no
+<code>/health</code> endpoint exists; a bare TCP-8191 check would accept
+the Python proxy before Chromium is ready).</li>
+</ul>
+<blockquote>
+<p>§6.A follow-up (owed when wiring the actual healthprobe into the
+gate): if a Lava-owned <code>healthprobe</code>-style binary is ever
+used for the Jackett probe instead of in-container <code>wget</code>, it
+MUST gain a contract test asserting its flag set, mirroring
+<code>lava-api-go/tests/contract/healthcheck_contract_test.go</code>.</p>
+</blockquote>
+<h3
+id="6r-env-inventory-placeholders-belong-in-envexample-real-values-in-gitignored-env">§6.R
+env inventory (placeholders belong in <code>.env.example</code>; real
+values in gitignored <code>.env</code>)</h3>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Purpose</th>
+<th>Default in fragment</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>LAVA_JACKETT_IMAGE</code></td>
+<td>Jackett image, <strong>pin by digest</strong></td>
+<td><code>lscr.io/linuxserver/jackett:latest</code></td>
+</tr>
+<tr>
+<td><code>LAVA_FLARESOLVERR_IMAGE</code></td>
+<td>FlareSolverr image, pin by digest</td>
+<td><code>ghcr.io/flaresolverr/flaresolverr:latest</code></td>
+</tr>
+<tr>
+<td><code>LAVA_JACKETT_CONFIG_DIR</code></td>
+<td>host path for <code>/config</code> (gitignored secrets store)</td>
+<td><code>./.jackett-config</code></td>
+</tr>
+<tr>
+<td><code>LAVA_JACKETT_API_KEY</code></td>
+<td>api_key read from <code>/config</code> (healthcheck +
+lava-api-go)</td>
+<td>(required — no default)</td>
+</tr>
+<tr>
+<td><code>LAVA_JACKETT_HEALTH_INDEXER</code></td>
+<td>indexer id used by the caps probe</td>
+<td><code>all</code></td>
+</tr>
+<tr>
+<td><code>LAVA_JACKETT_PUID</code> / <code>_PGID</code> /
+<code>_TZ</code></td>
+<td>LinuxServer user/group/timezone</td>
+<td><code>1000</code> / <code>1000</code> / <code>Etc/UTC</code></td>
+</tr>
+<tr>
+<td><code>LAVA_FLARESOLVERR_LOG_LEVEL</code></td>
+<td>FlareSolverr log level</td>
+<td><code>info</code></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>These <code>.env</code> / <code>.env.example</code> keys are
+<strong>owed</strong> to the parent <code>.env.example</code> when this
+slice is wired into orchestration; this phase touches only the
+compose/tools/jackett-doc surface per scope, so the variables are
+documented here and defaulted in the fragment rather than added to
+<code>.env.example</code> yet.</p>
+</blockquote>
+<h3 id="parse-verification-no-boot">Parse verification (no boot)</h3>
+<pre><code>cd tools/lava-containers
+LAVA_JACKETT_API_KEY=placeholder podman compose -f docker-compose.jackett.yml config --quiet   # → parses clean</code></pre>
+<p>No container was started; orchestration remains owned by
+<code>tools/lava-containers/cmd/lava-containers</code>. The fragment is
+merged with the root compose at run time, e.g.:</p>
+<pre><code>docker compose -f docker-compose.yml -f tools/lava-containers/docker-compose.jackett.yml \
+  --profile api-go --profile jackett config</code></pre>
+<hr />
+<h2 id="what-is-intentionally-not-in-this-phase">What is intentionally
+NOT in this phase</h2>
+<ul>
+<li>No indexer provisioning automation (dossier Open Question Q3 — admin
+HTTP vs per-<code>/config</code> JSON; both need a §6.A contract test +
+pinned Jackett version).</li>
+<li>No <code>lava-api-go</code> route/provider wiring (the
+<code>jackett.Client</code> exists and is tested; hooking it into a
+handler + the OpenAPI spec is the next slice).</li>
+<li>No <code>.env</code> / <code>.env.example</code> edits (out of this
+phase's scope; variables inventoried above).</li>
+<li>No container boot, no commit, no push.</li>
+</ul>
+</body>
+</html>

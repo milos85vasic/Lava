@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>video-challenge-recording</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1
+id="video-qa-harness-record--validate-challenges-on-the-genymotion-vm">Video-QA
+Harness: record + validate Challenges on the Genymotion VM</h1>
+<blockquote>
+<p>Status: harness scaffolded
+(<code>scripts/record-challenge-video.sh</code>). NOT yet run end-to-end
+— the under-test fixes for the reported issues are still landing. Run
+the runbook in §4 once those fixes are in the working tree.</p>
+<p><code>Classification:</code> project-specific (Lava's Genymotion +
+<code>$HOME</code> delivery flow; the underlying recorder + Challenge
+runner are inherited from §11.4.128 + §6.AG/§6.AH).</p>
+</blockquote>
+<p>This note documents (1) what the HelixQA submodule REALLY provides
+for video QA, (2) the recording + validation flow this harness uses and
+why, and (3) the exact commands to record + validate the reported-issue
+Challenges with video.</p>
+<hr />
+<h2 id="1-helixqas-real-capabilities-with-honest-gaps">1. HelixQA's REAL
+capabilities (with honest gaps)</h2>
+<p>The HelixQA submodule (<code>submodules/helixqa/</code>) has a far
+larger surface than its README's architecture diagram lists — 50
+<code>pkg/</code> dirs and 24 <code>cmd/</code> binaries. All three
+concerns the operator named exist as real Go code:</p>
+<h3 id="a-autonomous-test-banks--exists">(a) Autonomous test banks —
+EXISTS</h3>
+<ul>
+<li><code>submodules/helixqa/pkg/testbank/generator.go</code> —
+<code>TestGenerator</code> interface (<code>generator.go:36</code>):
+<code>GenerateTests(ctx, Feature)</code> +
+<code>GenerateEdgeCases(ctx, TestCase)</code>, LLM-backed
+(<code>generator.go:33</code>), degrades to nil without an agent.
+<code>GenerateFromFeatureMap</code> (<code>generator.go:53</code>) turns
+product <code>Feature</code>s into <code>[]TestCase</code>;
+<code>ExpandEdgeCases</code> (<code>generator.go:96</code>) adds edge
+variants.</li>
+<li><code>pkg/testbank/{loader,manager,schema,dispatch}.go</code> —
+loads/manages/dispatches YAML test banks (the <code>test_cases:</code>
+schema documented in HelixQA's README).</li>
+<li><code>pkg/autonomous/</code> (46 files; <code>pipeline.go</code>,
+<code>coordinator.go</code>, <code>structured_executor.go</code>) — the
+4-phase Setup → Doc-Driven Verification → Curiosity-Driven Exploration →
+Report autonomous session; <code>pkg/planning/</code> generates
+platform-specific test plans (incl. an Android-TV-Channels
+framework).</li>
+</ul>
+<h3 id="b-video-recording--exists-real-drivers-not-stubs">(b) Video
+recording — EXISTS (real drivers, not stubs)</h3>
+<ul>
+<li><code>pkg/video/scrcpy.go</code> — <code>ScrcpyRecorder</code> with
+four real <code>RecordMethod</code>s (<code>scrcpy.go:26</code>):
+<code>MethodScrcpy</code>, <code>MethodADBScreenrecord</code>
+(<code>adb shell screenrecord</code>),
+<code>MethodScreenshotAssembly</code>, <code>MethodAuto</code>. Carries
+a documented fix (<code>scrcpy.go:48</code>) that loops + ffmpeg-concats
+segments to beat Android screenrecord's 180 s hard limit. 16 Mbps
+(<code>scrcpy.go:46</code>).</li>
+<li><code>pkg/video/ffmpeg_recorder.go</code> —
+<code>FFmpegRecorder</code> (<code>ffmpeg_recorder.go:17</code>), real
+<code>x11grab</code> 30fps/libx264/MP4 for web/desktop.</li>
+<li><code>pkg/capture/</code> (android/linux/macos/windows),
+<code>pkg/screenshot/</code> (per-platform),
+<code>pkg/gst/frame_extractor.go</code>,
+<code>pkg/video/frames.go</code>.</li>
+<li>Note: <code>pkg/session/video.go</code>'s <code>VideoManager</code>
+is state/timing tracking only ("does not execute ffmpeg/adb directly",
+<code>video.go:11-15</code>) — the real recorders are the
+<code>video/</code> + <code>capture/</code> drivers.</li>
+</ul>
+<h3
+id="c-validate-whats-happening-on-the-recorded-video--exists-cv--ocr--llm-vision">(c)
+Validate what's happening on the recorded video — EXISTS (CV + OCR +
+LLM-vision)</h3>
+<p>This is the strongest finding — HelixQA has purpose-built post-hoc
+video-frame validation, not just text/log verdicts:</p>
+<ul>
+<li><code>cmd/recording-analyzer/main.go</code> — extracts frames via
+ffmpeg, OCRs each frame via Tesseract, optionally Whisper-transcribes
+audio, and emits PASS/FAIL/UNKNOWN per (frame, event) on whether the
+expected content appeared on the expected display. Built to catch
+"PASS-bluffs where a feature claims to have worked but the user-visible
+recording disagrees" (<code>main.go:1-40</code>).</li>
+<li><code>cmd/recording-analyzer/posthoc.go</code> — the §11.4.107
+liveness correlator (<code>posthoc.go:1-45</code>): SKIP (no
+ffprobe/ffmpeg), FAIL (frame count &lt; min, frozen decoder, or
+first-frame == prior content's last frame = stale), PASS (frames advance
++ not stale). Self-validated with golden-good/golden-bad fixtures.</li>
+<li><code>pkg/analysis/vision.go</code> — <code>VisionAnalyzer</code>
+(<code>vision.go:49</code>): <code>AnalyzeScreenshot</code> →
+<code>provider.Vision(ctx, imageData, prompt)</code>
+(<code>vision.go:72</code>) with QA-analyst prompts;
+<code>CompareScreenshots</code> for before/after regression.</li>
+<li><code>pkg/llm/anthropic.go</code> — real Anthropic vision API;
+<code>pkg/llm/{openai,google, ollama,astica}.go</code> +
+<code>vision_ranking.go</code> are other vision providers.</li>
+<li><code>pkg/vision/</code> — <code>detector.go</code> (UI element
+detection), <code>ocr_tesseract.go</code> + <code>ocr_paddle.go</code>
+(two OCR engines), <code>diff.go</code>, <code>perceptual/</code>,
+<code>hash/</code>; <code>pkg/gpu/infer/</code> (Triton/KServe v2),
+<code>pkg/visionnav/</code>, <code>pkg/issuedetector/</code>.</li>
+</ul>
+<h3 id="honest-gap-none-in-helixqa-all-in-the-wiring">Honest GAP: none
+in HelixQA, all in the WIRING</h3>
+<p><code>lava-api-go/internal/qa/</code> wraps ONLY HelixQA's
+text/verdict layer — <code>config</code>, <code>detector</code>
+(crash/ANR), <code>evidence</code> (server-side text traces),
+<code>ticket</code> (§6.O closure logs via
+<code>pkg/ticket.Generator</code>,
+<code>internal/qa/ticket/generator.go:173</code>). There is ZERO import
+of HelixQA's <code>video</code>, <code>capture</code>,
+<code>analysis</code>, <code>vision</code>, <code>screenshot</code>,
+<code>llm</code>, or <code>cmd/recording-analyzer</code> from anywhere
+in Lava. So:</p>
+<ul>
+<li><strong>Today, Lava cannot call HelixQA's video-vision validation
+through any wired adapter.</strong> Those capabilities run as HelixQA
+CLIs/packages, configured via HelixQA's own <code>.env</code>
+(vision-provider keys, ffmpeg/scrcpy paths). Reaching them is a future
+wiring task (a Go adapter in <code>lava-api-go/internal/qa/video</code>
++ <code>lava-api-go/internal/qa/vision</code>), tracked separately.</li>
+<li><strong>Therefore this harness does NOT claim AI-vision validation
+in its gate path.</strong> It uses the deterministic, honest alternative
+below.</li>
+</ul>
+<hr />
+<h2 id="2-the-recording--validation-flow-this-harness-uses-and-why">2.
+The recording + validation flow this harness uses (and why)</h2>
+<p><code>scripts/record-challenge-video.sh</code> is thin glue that
+composes two existing, proven pieces:</p>
+<ol type="1">
+<li><strong>Serial resolution</strong> via the Containers submodule
+<code>cmd/genymotion</code> CLI (the §6.AG "driven by the Containers
+submodule" requirement). The Genymotion VM is an authorized
+non-host-direct surface under §6.AH; a live/physical ADB device is NEVER
+targeted (§6.AG: those are used by other projects). Default serial when
+explicitly supplied: <code>127.0.0.1:6555</code>
+(<code>scripts/run-helixqa-provider-qa.sh:37</code>).</li>
+<li><strong>Screen recording</strong> via
+<code>scripts/record-device-session.sh --screenrecord</code> (the
+§11.4.128 always-on recorder). It runs
+<code>adb -s &lt;serial&gt; shell screenrecord --time-limit 180 /sdcard/lava-rec.mp4</code>
+then <code>adb pull</code> into the deterministic
+<code>&lt;root&gt;/YYYY-MM-DD/&lt;state-hash&gt;/&lt;DEVICE&gt;_&lt;SERIAL&gt;/recording_NNN/</code>
+layout (<code>record-device-session.sh:9, 203-205</code>). Read-only
+w.r.t. the app under test (no <code>pm clear</code> /
+<code>am force-stop</code>).</li>
+<li><strong>The Challenge</strong> via
+<code>:app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=&lt;FQCN&gt;</code>
+— the SAME invocation
+<code>scripts/run-genymotion-challenges.sh:113-116</code> uses, under
+<code>--no-daemon --max-workers=2 nice</code> (§6.T.2 resource
+caps).</li>
+</ol>
+<h3
+id="the-validation-test-pass-is-the-gate-the-video-is-the-watchable-proof">The
+validation: test-PASS is the gate; the video is the watchable proof</h3>
+<ul>
+<li><strong>Ground truth = the <code>connectedAndroidTest</code>
+verdict</strong> (§11.4.69 / §6.J): PASS ONLY when gradle exits 0 AND
+the verbatim string <code>BUILD SUCCESSFUL</code> is in the captured
+<code>connected-test.log</code>. A Lava Challenge asserts on
+user-visible Compose state, so its green is "a real user can complete
+this flow," not "the wiring compiles."</li>
+<li><strong>The <code>.mp4</code> is the human-watchable artifact of
+that exact run.</strong> The operator watches the screen do what the
+Challenge asserted. This is the most rigorous REAL alternative to
+AI-vision validation: it makes no claim the tooling cannot honestly
+back. It does NOT fabricate "the AI watched the video and it's
+fine."</li>
+<li><strong>A deterministic frame-liveness check is available as a next
+layer</strong> (not in the gate today): pointing HelixQA's
+<code>cmd/recording-analyzer/posthoc.go</code> at the delivered
+<code>.mp4</code> answers "did the recording show live, advancing frames
+(not a black/frozen screen)." Adding it is a documented enhancement, not
+a blocker.</li>
+</ul>
+<h3 id="delivery-rule-success-videos-only">Delivery rule (success videos
+only)</h3>
+<p>On PASS the script copies <code>&lt;name&gt;.mp4</code> to BOTH
+<code>$HOME/&lt;name&gt;.mp4</code> AND
+<code>$HOME/Downloads/&lt;name&gt;.mp4</code> (creating
+<code>Downloads</code> if missing). On FAIL it copies nothing. A
+delivered video is therefore itself proof the Challenge passed — there
+is no path by which a FAIL leaves a video in <code>$HOME</code>. If a
+Challenge passes but no <code>.mp4</code> was captured, the script EXITS
+1 rather than claim a delivered video that does not exist (§6.J
+honesty).</p>
+<hr />
+<h2 id="3-prerequisites-run-order">3. Prerequisites (run order)</h2>
+<ol type="1">
+<li>A Genymotion VM booted (e.g. "Google Pixel 9", API 35, arm64). The
+Containers <code>cmd/genymotion</code> CLI resolves its serial; or pass
+<code>--serial 127.0.0.1:6555</code>.</li>
+<li><code>adb</code> on <code>PATH</code> (the script + recorder both
+gate on <code>command -v adb</code>).</li>
+<li>The debug APK + androidTest APK build for the connected device (the
+script builds them unless <code>--no-build</code>).</li>
+<li>The under-test fixes for the reported issues present in the working
+tree. (Do NOT run the full pipeline before this — there is nothing yet
+to validate.)</li>
+</ol>
+<hr />
+<h2
+id="4-runbook--record--validate-the-reported-issue-challenges-with-video">4.
+Runbook — record + validate the reported-issue Challenges with
+video</h2>
+<p>The four operator-reported issues map to these existing Challenge
+classes under
+<code>app/src/androidTest/kotlin/lava/app/challenges/</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Reported issue (what the user saw)</th>
+<th>Challenge class (FQCN under <code>lava.app.challenges</code>)</th>
+<th>Output name</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>"Select-all": search pre-selects providers never onboarded</td>
+<td><code>Challenge16ApiSupportedFilterTest</code> (provider-filter
+default)</td>
+<td><code>select-all</code></td>
+</tr>
+<tr>
+<td>Tracker selection / launch (the select surface)</td>
+<td><code>Challenge01AppLaunchAndTrackerSelectionTest</code></td>
+<td><code>tracker-select</code></td>
+</tr>
+<tr>
+<td>Password / login shows wrong message on valid creds</td>
+<td><code>Challenge36LoginServiceUnavailableShowsAccurateMessageTest</code></td>
+<td><code>password-login</code></td>
+</tr>
+<tr>
+<td>Search (authenticated)</td>
+<td><code>Challenge02AuthenticatedSearchOnRuTrackerTest</code></td>
+<td><code>search-auth</code></td>
+</tr>
+<tr>
+<td>Search (anonymous provider)</td>
+<td><code>Challenge03AnonymousSearchOnRuTorTest</code></td>
+<td><code>search-anon</code></td>
+</tr>
+<tr>
+<td>Server-list: RuTracker "Main" wrongly in the server list</td>
+<td><code>Challenge26RutrackerMainAbsentFromServerListTest</code></td>
+<td><code>server-list</code></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>Adjust the class list to whichever Challenges the landing fixes touch
+— per §6.Z.3 every <code>Cn</code> whose target file appears in the
+cycle's <code>git diff</code> MUST run.</p>
+</blockquote>
+<h3 id="one-challenge-one-video-positional-shorthand">One Challenge, one
+video (positional shorthand)</h3>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Boots/locates the Genymotion VM, records, runs ONE Challenge, delivers on PASS.</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="ex">scripts/record-challenge-video.sh</span> <span class="dt">\</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  lava.app.challenges.Challenge16ApiSupportedFilterTest <span class="dt">\</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  select-all</span></code></pre></div>
+<h3 id="explicit-serial-skip-containers-detection">Explicit serial (skip
+Containers detection)</h3>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">scripts/record-challenge-video.sh</span> <span class="dt">\</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">--test-class</span> lava.app.challenges.Challenge36LoginServiceUnavailableShowsAccurateMessageTest <span class="dt">\</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">--name</span> password-login <span class="dt">\</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">--serial</span> 127.0.0.1:6555</span></code></pre></div>
+<h3 id="all-four-reported-issue-areas-in-sequence">All four
+reported-issue areas in sequence</h3>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="bu">set</span> <span class="at">-e</span>   <span class="co"># stop on the first FAILED Challenge (no video delivered for it)</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="ex">scripts/record-challenge-video.sh</span> lava.app.challenges.Challenge16ApiSupportedFilterTest                       select-all</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="ex">scripts/record-challenge-video.sh</span> lava.app.challenges.Challenge01AppLaunchAndTrackerSelectionTest             tracker-select <span class="at">--no-build</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="ex">scripts/record-challenge-video.sh</span> lava.app.challenges.Challenge36LoginServiceUnavailableShowsAccurateMessageTest password-login <span class="at">--no-build</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="ex">scripts/record-challenge-video.sh</span> lava.app.challenges.Challenge02AuthenticatedSearchOnRuTrackerTest           search-auth    <span class="at">--no-build</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="ex">scripts/record-challenge-video.sh</span> lava.app.challenges.Challenge03AnonymousSearchOnRuTorTest                   search-anon    <span class="at">--no-build</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="ex">scripts/record-challenge-video.sh</span> lava.app.challenges.Challenge26RutrackerMainAbsentFromServerListTest        server-list    <span class="at">--no-build</span></span></code></pre></div>
+<p>After a green run you will find, per passing Challenge:</p>
+<ul>
+<li><code>$HOME/&lt;name&gt;.mp4</code></li>
+<li><code>$HOME/Downloads/&lt;name&gt;.mp4</code></li>
+<li><code>.lava-ci-evidence/challenge-video/&lt;ts&gt;/</code> with
+<code>connected-test.log</code>, <code>verdict.txt</code>,
+<code>device-identity.txt</code>, and the
+<code>&lt;name&gt;.mp4</code>.</li>
+<li>The raw recording under
+<code>.lava-ci-evidence/device-recordings/&lt;date&gt;/&lt;hash&gt;/ &lt;DEVICE&gt;_&lt;SERIAL&gt;/recording_NNN/screen.mp4</code>
+(git-ignored per §11.4.128).</li>
+</ul>
+<hr />
+<h2 id="5-exit-codes">5. Exit codes</h2>
+<table>
+<thead>
+<tr>
+<th>Exit</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>Challenge PASSED, video captured + delivered to <code>$HOME</code> +
+Downloads</td>
+</tr>
+<tr>
+<td>1</td>
+<td>Challenge FAILED (no video delivered) OR
+passed-but-no-video-captured</td>
+</tr>
+<tr>
+<td>2</td>
+<td>config / usage / device error (missing args, no <code>adb</code>, no
+VM, no <code>$HOME</code>)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="6-honest-limitations--next-layers-not-blockers">6. Honest
+limitations + next layers (not blockers)</h2>
+<ul>
+<li><strong>180 s screenrecord cap.</strong> A single Challenge fits
+well within it; a longer flow needs the segmented path (HelixQA
+<code>pkg/video/scrcpy.go:48</code> does segment+concat — wiring it in
+is the enhancement).</li>
+<li><strong>No AI-vision validation in the gate.</strong> By design (§1
+gap). The deterministic next layer is
+<code>cmd/recording-analyzer/posthoc.go</code> (frame-liveness
+PASS/FAIL); the richer layer is <code>pkg/analysis/vision.go</code>
+(LLM-vision) once a <code>lava-api-go/internal/qa/{video,vision}</code>
+adapter is wired. Both are documented here so the path is auditable;
+neither is claimed today.</li>
+<li><strong>macOS host gap (§6.AH-debt).</strong> Containerized/QEMU
+AVDs do not yet boot on the darwin/arm64 podman VM. The Genymotion VM IS
+a VM (§6.AH-compliant), so this harness targets it directly — that is
+the authorized path while §6.AH-debt is open.</li>
+</ul>
+</body>
+</html>

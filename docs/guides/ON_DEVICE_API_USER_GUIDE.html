@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>ON_DEVICE_API_USER_GUIDE</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1 id="lava-api-on-your-device--user-guide">Lava API on Your Device —
+User Guide</h1>
+<blockquote>
+<p><strong>Status (2026-06-02):</strong> This guide describes the
+<em>Lava API on this device</em> feature. The engine that powers it (the
+Lava API server, cross-compiled to run inside an Android app, with a
+local database) is built and tested. The <strong>Lava API app itself now
+exists</strong> (the <code>:api-app</code> module): it installs, runs
+the server as a background service with a system notification,
+discovers/announces itself on the network, and remembers its access key
+across restarts. What is still being built is the <strong>on-screen
+control panel</strong> — the screen you tap to see status, start/stop,
+and read the access key. Sections that describe on-screen buttons, the
+displayed key, and the notification copy are marked <strong>PENDING
+Phase D-ui (screenshots to follow)</strong>. This guide is written so it
+is ready the moment that screen lands. Nothing here promises a screen
+that does not yet exist.</p>
+</blockquote>
+<h2 id="what-is-the-lava-api-app">What is the Lava API app?</h2>
+<p>Normally the Lava API runs on a computer, a home server, or a NAS,
+and your phone connects to it over your home Wi-Fi. The Lava API app
+turns that around: <strong>it lets your phone or tablet itself run the
+Lava API</strong>, so other devices on the same Wi-Fi can connect to
+your device instead of a separate server.</p>
+<p>In plain terms:</p>
+<ul>
+<li>You install one extra app (the Lava API app) alongside the normal
+Lava client.</li>
+<li>You tap <strong>Start</strong>, and your device becomes a Lava API
+that lives on your home network.</li>
+<li>Other Lava apps on the same Wi-Fi — another phone, a tablet, a TV —
+can find it automatically and use it.</li>
+<li>You can <strong>Stop</strong> it any time, or
+<strong>Restart</strong> it.</li>
+</ul>
+<p>It stores its data in a small local database file on the device (no
+separate database server needed), and it talks to other devices securely
+over HTTPS.</p>
+<h2 id="is-it-the-same-as-the-normal-lava-client">Is it the same as the
+normal Lava client?</h2>
+<p>No. There are two separate apps:</p>
+<ul>
+<li><strong>The Lava client</strong> — the app you use to search and
+browse trackers. This is unchanged.</li>
+<li><strong>The Lava API app</strong> — the new app whose only job is to
+<em>run the API</em> on your device so the network can use it.</li>
+</ul>
+<p>They have different names on your device so you can tell them apart.
+The API app ships in two variants with distinct identifiers, so a tester
+can install both side-by-side: a dev/debug variant
+(<code>digital.vasic.lava.api.dev</code>) and a release variant
+(<code>digital.vasic.lava.api</code>). The two variants announce
+themselves under distinct network identities (the dev variant under a
+<code>-dev</code> service type), so they never collide when both are
+running on the same Wi-Fi.</p>
+<h2 id="how-to-start-stop-and-restart-it">How to start, stop, and
+restart it</h2>
+<blockquote>
+<p><strong>PENDING Phase D-ui (screenshots to follow).</strong> The
+control screen and its buttons are still being built (the underlying
+start/stop/restart logic and the notification controls already work —
+Phase D-infra). When the screen lands, this section will show the exact
+buttons and a screenshot of each state. The intended behavior is:</p>
+</blockquote>
+<ol type="1">
+<li>Open the Lava API app.</li>
+<li>You see a clear status indicator: <strong>Stopped</strong>,
+<strong>Running</strong>, or an error message.</li>
+<li>Tap <strong>Start</strong> to bring the API up. The status changes
+to <strong>Running</strong> and the screen shows the address other
+devices can use (something like
+<code>https://&lt;your-lan-ip&gt;:8443</code>) and a live counter of how
+many requests it has served.</li>
+<li>Tap <strong>Stop</strong> to bring it down. The status returns to
+<strong>Stopped</strong>.</li>
+<li>Tap <strong>Restart</strong> to stop and start again in one step
+(useful if you changed your network).</li>
+</ol>
+<h2 id="what-does-running-mean">What does "Running" mean?</h2>
+<p>When the app says <strong>Running</strong>, it means:</p>
+<ul>
+<li>The Lava API server is live inside your device.</li>
+<li>It is listening on your local network (not just on the device
+itself), so other devices on the same Wi-Fi can reach it.</li>
+<li>It is reachable at
+<code>https://&lt;your-lan-ip&gt;:&lt;port&gt;</code> (the screen shows
+the exact address and all the local IP addresses other devices can
+use).</li>
+<li>It requires a key to answer requests (see <em>Pairing</em> below) —
+being on the same Wi-Fi is not enough; the connecting device must
+present the correct key.</li>
+</ul>
+<p>When it says <strong>Stopped</strong>, the server is fully shut down
+and nothing on the network can reach it.</p>
+<h2 id="how-other-devices-on-the-network-find-and-connect-to-it">How
+other devices on the network find and connect to it</h2>
+<p>Other Lava clients on the same Wi-Fi discover your device
+<strong>automatically</strong> using mDNS (the same "find devices on the
+local network" mechanism printers use). Your running API announces
+itself on the network (this announcing is built and working — Phase
+D-infra), and other Lava apps list it as an available API instance. The
+announcement carries tags that mark it as the Go engine running on an
+Android device with a local SQLite database, plus the running
+version.</p>
+<p>Because your device is running the API itself, it appears in the list
+with an identity that marks it as running on an Android device — so
+users can tell it apart from a server-hosted API. (The label that
+distinguishes "an Android device on this network" is <strong>PENDING
+sub-project 2</strong> in the Lava client; until then it appears as a
+normal Lava API instance.)</p>
+<p>Requirements for discovery to work:</p>
+<ul>
+<li>Both devices must be on the <strong>same local network</strong>
+(same Wi-Fi or LAN).</li>
+<li>The network must allow multicast traffic (most home routers do by
+default).</li>
+<li>The API app must be <strong>Running</strong> on your device.</li>
+</ul>
+<h2 id="the-access-key-pairing">The access key (pairing)</h2>
+<p>The on-device API is protected. Being on the same Wi-Fi does
+<strong>not</strong> automatically grant access — a connecting device
+must present the correct <strong>access key</strong>. This is the same
+security mechanism the server-hosted Lava API uses.</p>
+<ul>
+<li>When you start the API, it uses an access key. If you have not set
+one, the app <strong>generates one for you</strong> automatically (a
+random key created on the device) so the API is never left open.</li>
+<li>The key is <strong>remembered across restarts</strong> — it is
+stored encrypted on the device, so devices you have paired keep working
+after you stop and start the API or reboot your phone (this storage is
+built — Phase D-infra).</li>
+<li>The key will be shown in the app so you can share it with the other
+devices you want to allow (this is "pairing").</li>
+</ul>
+<blockquote>
+<p><strong>PENDING Phase D-ui (screenshots to follow).</strong> Where
+the key is shown on screen and how you copy or share it are part of the
+control screen still being built. When it lands, this section will show
+exactly where to find and share the key. The key is stored encrypted and
+is never written to logs.</p>
+</blockquote>
+<h2 id="the-system-notification">The system notification</h2>
+<p>While the API is running, the app shows a <strong>persistent system
+notification</strong> so you always know it is on and can control it
+without reopening the app (this is built — Phase D-infra). The
+notification shows the reachable address and a live request count,
+carries <strong>Stop</strong> and <strong>Restart</strong> buttons, and
+tapping it opens the app.</p>
+<blockquote>
+<p><strong>PENDING Phase D-ui (screenshots to follow).</strong> The
+notification's exact wording is intentionally minimal for now and will
+be refined alongside the control screen. A screenshot will be added when
+the screen lands.</p>
+</blockquote>
+<h2 id="privacy-and-safety">Privacy and safety</h2>
+<ul>
+<li>Your device's API is reachable by other devices on your
+<strong>local network only</strong> — it is not exposed to the public
+internet by this feature.</li>
+<li>Access requires the access key; repeated wrong-key attempts from a
+device are slowed down automatically (a backoff that escalates if
+someone keeps guessing).</li>
+<li>The connection is encrypted (HTTPS) using a certificate the app
+generates on your device the first time it runs.</li>
+<li>The access key is shown only in the app and is never written to
+logs.</li>
+</ul>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<table>
+<thead>
+<tr>
+<th>Issue</th>
+<th>What to check</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Other devices can't find my API</td>
+<td>Make sure the API app shows <strong>Running</strong>, both devices
+are on the same Wi-Fi, and your router allows multicast (port
+5353/UDP).</td>
+</tr>
+<tr>
+<td>A device finds it but gets rejected</td>
+<td>The connecting device needs the correct access key (see
+<em>Pairing</em>).</td>
+</tr>
+<tr>
+<td>It won't start</td>
+<td>Make sure you granted the app notification permission and that no
+other copy of the API is already running on the device.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="see-also">See also</h2>
+<ul>
+<li>Architecture and internals: <a
+href="../ON_DEVICE_API.md"><code>docs/ON_DEVICE_API.md</code></a></li>
+<li>Local network discovery: <a
+href="../LOCAL_NETWORK_DISCOVERY.md"><code>docs/LOCAL_NETWORK_DISCOVERY.md</code></a></li>
+</ul>
+<p><code>Classification:</code> project-specific.</p>
+</body>
+</html>

@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>README</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1 id="qa-evidence-bundle--nezha-overnight-session-2026-06-16">QA
+Evidence Bundle — nezha overnight session (2026-06-16)</h1>
+<p><strong>§11.4.83 consolidated end-to-end QA evidence bundle.</strong>
+This is a <em>pointer-based index</em> into already-committed captured
+evidence from the 2026-06-16 overnight session run on the dedicated
+heavy-testing node <code>nezha.local</code>. Every claim below cites a
+real, verified file path or commit SHA. No evidence is re-derived here;
+this file aggregates what was already proven and recorded.</p>
+<p><strong>Run-id:</strong> <code>2026-06-16-nezha-overnight</code>
+<strong>Host:</strong> <code>nezha.local</code> (i7/8-core, 64 GB, NVMe,
+<code>/dev/kvm</code> live, rootless Podman 5.7.1 + podman-compose
+1.5.0) <strong>Verified-against HEAD at bundle authoring:</strong>
+<code>d256ed1a</code> <strong>Anti-bluff posture:</strong> every shipped
+item carries a falsifiability rehearsal (Bluff-Audit stamp) captured in
+the commit body. Deferred items are marked NOT-YET-PROVEN — never as
+done.</p>
+<hr />
+<h2 id="cross-reference-closure-discipline-6o--6t4">Cross-reference:
+closure discipline (§6.O / §6.T.4)</h2>
+<ul>
+<li><strong>§6.T.4 (Bugfix Documentation):</strong> the provider fixes
+are recorded in <code>docs/issues/fixed/BUGFIXES.md</code> (verified
+present; entries dated 2026-06-16 for tokyotosho + the 6 sibling
+providers).</li>
+<li><strong>§6.O (Crashlytics-Resolved Coverage):</strong> N/A this
+session — the fixes are server-side Go provider/test-infra fixes
+surfaced by nezha real-tracker E2E and by ENOSPC during a hermetic-test
+run, not Crashlytics-recorded client crashes. No
+<code>.lava-ci-evidence/crashlytics-resolved/</code> entry is owed for
+these.</li>
+</ul>
+<hr />
+<h2 id="1-nezha-whole-system-boot--real-http-verification--pass">1.
+nezha whole-System boot + real-HTTP verification — PASS</h2>
+<p><strong>What was tested:</strong> distributed boot of the whole Lava
+System (10 containers: prod + dev <code>lava-api-go</code>, 2 Postgres,
+Prometheus/Loki/Tempo/Grafana, Jackett, FlareSolverr) on
+<code>nezha.local</code>, built natively (x86_64) from the synced repo,
+with real HTTP verification at the same surfaces a user/orchestrator
+touches (§6.B — not <code>podman ps</code>).</p>
+<p><strong>Captured-evidence artifact:</strong>
+<code>.lava-ci-evidence/nezha/2026-06-16-system-boot.md</code> (verified
+present).</p>
+<ul>
+<li>Real <code>podman ps</code> inventory (2026-06-16T16:08:17Z) — all
+10 Up.</li>
+<li>Real HTTP: prod <code>/health {"status":"alive"}</code>,
+<code>/ready {"status":"ready"}</code>, <code>/providers</code> = 13
+providers, version <code>lava-api-go 2.3.30 (build 2330)</code>; dev
+<code>/health</code> alive; Prometheus + Grafana healthy. golang-migrate
+v9 head on both DBs.</li>
+<li>4 boot issues root-caused (evidence, not guess) and fixed in the
+same doc: incomplete submodule init; api-go crash-loop (dynamic-link /
+missing <code>CGO_ENABLED=0</code>); TLS <code>permission denied</code>
+(cert perms under rootless userns); co-tenant port collisions.</li>
+</ul>
+<p><strong>Commit:</strong> <code>d6f8fdad</code> —
+<code>infra(nezha): boot whole Lava System on nezha.local …</code>
+(verified present). <strong>Status:</strong> PASS (real-HTTP verified at
+the live surfaces).</p>
+<h2 id="2-heavy-go-suite--49-ok--0-fail--pass">2. Heavy Go suite — 49 ok
+/ 0 fail — PASS</h2>
+<p><strong>What was tested:</strong> the full <code>lava-api-go</code>
+heavy test suite (e2e / contract / parity / integration) against real
+podman Postgres on nezha, plus realtrackers across 20 providers.</p>
+<p><strong>Captured-evidence pointer:</strong>
+<code>docs/CONTINUATION.md:15</code> (verified present) records "heavy
+Go suite <strong>49 ok / 0 fail</strong> (real podman Postgres
+e2e/contract/parity/ integration); realtrackers 20 providers green" as
+the Phase 1-4 DONE state.</p>
+<p><strong>Status:</strong> PASS per the recorded CONTINUATION state.
+<strong>Honesty note:</strong> the 49-ok count is recorded in
+<code>docs/CONTINUATION.md</code>; a standalone per-suite captured log
+file under <code>.lava-ci-evidence/nezha/</code> was not located for
+this bundle. The count is cited from CONTINUATION, not re-derived.</p>
+<h2
+id="3-10-provider-retry-resilience-bounded-retry-on-transient-upstream-failure--pass">3.
+10-provider retry resilience (bounded-retry on transient upstream
+failure) — PASS</h2>
+<p><strong>What was tested:</strong> transient-failure handling
+(network/timeout or 5xx) on the HTTP-backed providers. nezha
+real-tracker E2E surfaced the gap on Tokyo Toshokan (live test PASSED
+16:14 / FAILED 16:15 on a slow upstream → single unretried attempt
+produced a user-facing "unknown error"). The fix was then propagated to
+every sibling sharing the single-attempt class, completing all 10 HTTP
+providers.</p>
+<p><strong>Captured-evidence artifacts:</strong></p>
+<ul>
+<li><code>docs/issues/fixed/BUGFIXES.md</code> (verified present) —
+2026-06-16 entries: "tokyotosho curated provider: user-facing 'unknown
+error' on slow upstream" (root cause + affected files + verification
+test) and "6 sibling providers shared the tokyotosho
+single-attempt-no-retry gap".</li>
+</ul>
+<p><strong>Commits + falsifiability rehearsals (Bluff-Audit stamps, all
+verified in commit bodies):</strong></p>
+<ul>
+<li><code>a88467df</code> — tokyotosho bounded retry. Mutation: bypass
+the retry loop in <code>fetchFeed</code>. Observed-Failure:
+<code>TestSearch_RetriesOnTransient5xx</code> FAIL ("…recover via retry:
+tokyotosho: HTTP 503: provider: unknown error"). Reverted: yes.</li>
+<li><code>cd54341c</code> — propagate to 6 siblings (knaben, nyaa,
+bitsearch, torrentdownloads, gutenberg, flaresolverr). Mutation: bypass
+the retry loop. Observed-Failure: retry test FAIL, all 6 ("…recover via
+retry: knaben: HTTP 503: …unknown error"). Reverted: yes (all 6).</li>
+<li><code>307b4a5d</code> — retry-inside-breaker for
+kinozal/nnmclub/rutracker (a transient timeout/5xx had been counting as
+a breaker failure). Mutation: bypass the in-closure retry.
+Observed-Failure: <code>TestRetriesOnTransient5xx</code> FAIL, all 3;
+load-bearing checks <code>GetFailures()==0</code> +
+<code>StateClosed</code>. Reverted: yes (all 3).</li>
+</ul>
+<p><strong>Status:</strong> PASS — "ALL 10 HTTP providers" fixed (per
+<code>307b4a5d</code> body) with a falsifiability-proven regression test
+per provider.</p>
+<h2 id="4-repo-pollution-cleanup--hermetic-test-infra-fix-6j--pass">4.
+Repo-pollution cleanup + hermetic test-infra fix (§6.J) — PASS</h2>
+<p><strong>What was tested:</strong> the check-constitution hermetic
+tests used unguarded <code>f=$(mktemp -d)</code>; under ENOSPC
+<code>mktemp</code> returns empty → <code>git -C ""</code> operated on
+the REAL repo, planting 19 stray fixture commits into local master
+(cleaned; never pushed — origin stayed clean). The fix introduces a
+guarded <code>_safe_tmpdir()</code> (FATAL abort if <code>mktemp</code>
+fails or returns a non-absolute path) replacing every
+<code>$(mktemp -d)</code>.</p>
+<p><strong>Captured-evidence artifact:</strong> commit
+<code>d256ed1a</code> body (verified present) — full root-cause + fix +
+captured falsifiability.</p>
+<p><strong>Falsifiability rehearsal (captured in <code>d256ed1a</code>
+body):</strong> re-ran all 8 tests; ENOSPC recurred <em>during</em> the
+run, and HEAD stayed <code>307b4a5d</code> with ZERO new commits</p>
+<ul>
+<li>ZERO planted files — the guard fired (FATAL refusal instead of
+pollution), while the 6 tests that ran before disk-fill passed. Pre-fix
+this exact ENOSPC produced the 19-commit pollution; post-fix it produces
+a clean refusal. Classification: project-specific.</li>
+</ul>
+<p><strong>Commit:</strong> <code>d256ed1a</code> —
+<code>fix(tests): guard hermetic-test mktemp against ENOSPC repo-pollution (§6.J test-infra bug)</code>.
+<strong>Status:</strong> PASS. <strong>Honesty note:</strong> this
+test-infra fix is documented in the <code>d256ed1a</code> commit body
+(the authoritative record), not in <code>BUGFIXES.md</code>;
+<code>BUGFIXES.md</code> covers the §3 provider fixes.</p>
+<hr />
+<h2 id="deferred--not-yet-proven-no-bluff">DEFERRED / NOT-YET-PROVEN (no
+bluff)</h2>
+<p>These items are NOT claimed as passing in this session. They remain
+blocked.</p>
+<ul>
+<li><p><strong>Phase 5 — emulator/Challenge matrix on nezha:</strong>
+NOT-YET-PROVEN, <strong>nezha-load blocked.</strong> The dedicated node
+was under co-tenant load (shared host; see
+<code>.lava-ci-evidence/nezha/2026-06-16-system-boot.md</code> §4
+port-collisions) and the authoring host hit ENOSPC mid-session (see
+<code>2026-06-16-releasable-state-sweep.md</code> — multiple Bash calls
+failed at the harness layer with ENOSPC). No per-AVD attestation rows
+were produced. Per §6.AE/§6.I a green matrix is a SET of per-AVD rows;
+absent those, this is NOT proven.</p></li>
+<li><p><strong>Phase 8 — Firebase redistribute:</strong> NOT-YET-PROVEN,
+<strong>§6.Z-gated.</strong> No artifact is distributed in this session.
+§6.Z forbids distributing without the Compose UI Challenge Tests
+EXECUTED against the exact artifact; that execution did not occur this
+session (Phase 5 blocked, above). Redistribute remains held.</p></li>
+<li><p><strong>Gate-health sweep (releasable-state):</strong>
+<code>.lava-ci-evidence/nezha/ 2026-06-16-releasable-state-sweep.md</code>
+(verified present) is an HONEST read-only audit that recorded gate FAILs
+(e.g. non-fatal-coverage §6.AC, markdown-export §11.4.65,
+coverage-ledger §11.4.25, several hermetic suites) with
+advisory-vs-strict status partly UNKNOWN because ENOSPC prevented the
+sweep from printing its overall verdict. These are recorded as findings,
+NOT as passing. This bundle does not claim the gate sweep is
+green.</p></li>
+</ul>
+<hr />
+<h2
+id="evidence-inventory-all-pathsshas-verified-present-at-authoring-time">Evidence
+inventory (all paths/SHAs verified present at authoring time)</h2>
+<table>
+<thead>
+<tr>
+<th>Ref</th>
+<th>Path / SHA</th>
+<th>Verified</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>nezha boot</td>
+<td><code>.lava-ci-evidence/nezha/2026-06-16-system-boot.md</code></td>
+<td>yes (<code>ls</code>)</td>
+</tr>
+<tr>
+<td>gate sweep</td>
+<td><code>.lava-ci-evidence/nezha/2026-06-16-releasable-state-sweep.md</code></td>
+<td>yes (<code>ls</code>)</td>
+</tr>
+<tr>
+<td>bugfixes (§6.T.4)</td>
+<td><code>docs/issues/fixed/BUGFIXES.md</code></td>
+<td>yes (<code>ls</code> + grep entries)</td>
+</tr>
+<tr>
+<td>heavy Go 49 ok</td>
+<td><code>docs/CONTINUATION.md:15</code></td>
+<td>yes (<code>sed</code>)</td>
+</tr>
+<tr>
+<td>boot commit</td>
+<td><code>d6f8fdad</code></td>
+<td>yes (<code>git log -1</code>)</td>
+</tr>
+<tr>
+<td>tokyotosho retry</td>
+<td><code>a88467df</code></td>
+<td>yes (<code>git log -1</code> + Bluff-Audit)</td>
+</tr>
+<tr>
+<td>6-sibling retry</td>
+<td><code>cd54341c</code></td>
+<td>yes (<code>git log -1</code> + Bluff-Audit)</td>
+</tr>
+<tr>
+<td>breaker retry (3)</td>
+<td><code>307b4a5d</code></td>
+<td>yes (<code>git log -1</code> + Bluff-Audit)</td>
+</tr>
+<tr>
+<td>ENOSPC test-infra</td>
+<td><code>d256ed1a</code></td>
+<td>yes (<code>git log -1</code> + full body)</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

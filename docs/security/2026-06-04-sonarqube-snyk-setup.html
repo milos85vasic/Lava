@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-06-04-sonarqube-snyk-setup</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1
+id="containerized-sonarqube--snyk-scanning--setup-status-blockers">Containerized
+SonarQube + Snyk scanning — setup, status, blockers</h1>
+<p><strong>Date:</strong> 2026-06-04 · <strong>Program:</strong>
+completeness program, Phase 2C <strong>Author:</strong>
+completeness-program agent · <strong>Classification:</strong>
+project-specific</p>
+<p>This document describes the rootless, containerized SonarQube (static
+analysis + coverage aggregation) and Snyk (dependency + SAST) scanning
+IaC added to Lava, EXACTLY what ran on this host vs. what is blocked,
+and the gate-host / operator steps to complete each. It is deliberately
+honest per §6.J / §6.Z: nothing here claims a scan ran that did not
+run.</p>
+<h2 id="what-was-added">What was added</h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>docker-compose.sonar.yml</code></td>
+<td>Rootless SonarQube CE + dedicated Postgres, bound to
+<code>127.0.0.1</code> only, named volumes, no <code>privileged</code>,
+no host sysctl.</td>
+</tr>
+<tr>
+<td><code>sonar-project.properties</code></td>
+<td>Sonar scanner config: Kotlin (<code>app,core,feature</code>) + Go
+(<code>lava-api-go</code>) sources; excludes <code>submodules/</code>,
+<code>releases/</code>, <code>**/build/**</code>, generated code; wires
+Detekt + Kover + Go coverage report paths.</td>
+</tr>
+<tr>
+<td><code>scripts/sonar-scan.sh</code></td>
+<td>Thin glue: auto-detect podman/docker (no sudo), up/down/status/scan,
+scanner via <code>sonarsource/sonar-scanner-cli</code>,
+<code>SONAR_TOKEN</code> from <code>.env</code> only.</td>
+</tr>
+<tr>
+<td><code>scripts/snyk-scan.sh</code></td>
+<td>Thin glue: containerized <code>snyk/snyk</code>
+<code>snyk test</code> + <code>snyk code test</code>;
+<code>SNYK_TOKEN</code> from <code>.env</code> only; exits (no fake
+pass) if absent.</td>
+</tr>
+<tr>
+<td><code>.snyk</code></td>
+<td>Ignore/patch policy (empty placeholders + reason/expiry
+convention).</td>
+</tr>
+<tr>
+<td><code>.env.example</code></td>
+<td>Adds <code>SONAR_TOKEN</code>, <code>SNYK_TOKEN</code>,
+<code>SONAR_DB_*</code> placeholders.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="constitutional-posture">Constitutional posture</h2>
+<ul>
+<li><strong>§6.U — no sudo/su.</strong> Neither the compose file nor the
+scripts invoke any privilege escalation. SonarQube's Elasticsearch
+<code>vm.max_map_count</code> requirement is NOT met by a sysctl tweak
+in our scripts; where the runtime VM/kernel value is below 262144,
+raising it is an operator/gate-host action OUTSIDE this repo.</li>
+<li><strong>§6.R — no hardcoding.</strong> Tokens are read from
+<code>.env</code> / environment only, never as literals in any tracked
+file.</li>
+<li><strong>§6.J / §6.Z — no bluff.</strong> A scan runs only against a
+server that reports <code>UP</code>; a missing token or down server
+produces a clear non-zero exit, never a fabricated "passed" result.</li>
+<li><strong>Local-Only CI/CD.</strong> Both scanners run on the
+developer's / gate-host's machine via rootless containers; no hosted-CI
+configuration is introduced.</li>
+</ul>
+<h2 id="what-ran-on-this-host-darwinarm64-rootless-podman">What ran on
+THIS host (Darwin/arm64, rootless podman)</h2>
+<h3 id="sonarqube--brought-up-successfully-status-up">SonarQube —
+BROUGHT UP SUCCESSFULLY (status UP)</h3>
+<p><code>./scripts/sonar-scan.sh up</code> pulled
+<code>sonarqube:community</code> (26.6.0.123539) +
+<code>postgres:16-alpine</code> and the server reached
+<code>{"status":"UP"}</code> in ~2 minutes.</p>
+<p>The <code>vm.max_map_count</code> blocker did <strong>not</strong>
+materialize on this host: the podman <code>applehv</code> VM reports
+<code>/proc/sys/vm/max_map_count = 1048576</code> (well above the 262144
+minimum), so Elasticsearch started cleanly with no root change.
+Evidence:
+<code>.lava-ci-evidence/completeness-program/sonar/2026-06-04/bring-up-2026-06-04.md</code>.
+The stack was torn down afterward
+(<code>./scripts/sonar-scan.sh down</code>).</p>
+<p>The <strong>scanner step was NOT run</strong> here: it requires
+<code>SONAR_TOKEN</code>, which is generated in the Sonar UI after the
+first admin login (one-time interactive step). Server-up is proven; the
+scan is the operator's next action.</p>
+<h3 id="snyk--blocked-on-missing-snyk_token-honest-refusal">Snyk —
+BLOCKED on missing SNYK_TOKEN (honest refusal)</h3>
+<p><code>./scripts/snyk-scan.sh deps</code> exited <code>1</code> with a
+clear "set SNYK_TOKEN in .env" message — no token, no scan, no fake
+pass. Evidence:
+<code>.lava-ci-evidence/completeness-program/snyk/2026-06-04/run-attempt-2026-06-04.md</code>.</p>
+<h2 id="how-to-run-locally-rootless">How to run locally (rootless)</h2>
+<h3 id="sonarqube">SonarQube</h3>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">./scripts/sonar-scan.sh</span> up           <span class="co"># start server + db (127.0.0.1 only)</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./scripts/sonar-scan.sh</span> status       <span class="co"># poll until {&quot;status&quot;:&quot;UP&quot;}</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co"># First time only: open http://127.0.0.1:9000 (admin/admin), change password,</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co">#   then My Account → Security → Generate Tokens. Put it in .env:</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co">#   SONAR_TOKEN=&lt;generated-token&gt;</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="ex">./scripts/sonar-scan.sh</span> scan         <span class="co"># analyze the workspace</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="ex">./scripts/sonar-scan.sh</span> down         <span class="co"># tear down</span></span></code></pre></div>
+<h3 id="snyk">Snyk</h3>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Put SNYK_TOKEN=&lt;token&gt; in .env (from https://app.snyk.io/account)</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./scripts/snyk-scan.sh</span>               <span class="co"># deps + SAST</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="ex">./scripts/snyk-scan.sh</span> deps          <span class="co"># dependency scan only</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="ex">./scripts/snyk-scan.sh</span> code          <span class="co"># SAST only</span></span></code></pre></div>
+<h2
+id="blocked-on-this-host--operator-action-summary">Blocked-on-this-host
+/ operator-action summary</h2>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Status</th>
+<th>Action to complete</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SonarQube server up</td>
+<td>✅ ran (UP) on this host</td>
+<td>none (worked)</td>
+</tr>
+<tr>
+<td><code>vm.max_map_count &gt;= 262144</code></td>
+<td>✅ already 1048576 in this podman VM</td>
+<td>On a host below 262144: operator raises it OUTSIDE this repo (NO
+sudo in our scripts). podman/macOS: in the runtime VM; Linux: an
+operator-owned <code>/etc/sysctl.d/99-sonarqube.conf</code>
+drop-in.</td>
+</tr>
+<tr>
+<td>SonarQube scan</td>
+<td>⏳ operator-action</td>
+<td>Generate <code>SONAR_TOKEN</code> in the UI, set in
+<code>.env</code>, run <code>sonar-scan.sh scan</code>.</td>
+</tr>
+<tr>
+<td>Detekt / Kover / Go coverage reports</td>
+<td>⏳ sibling-stream-dependent</td>
+<td>Produced by Phase 2A (Detekt + Kover) and Phase 2B (Go coverage);
+<code>sonar-project.properties</code> references their expected paths
+and the scanner skips absent reports.</td>
+</tr>
+<tr>
+<td>Snyk scan</td>
+<td>⏳ operator-action</td>
+<td>Set <code>SNYK_TOKEN</code> in <code>.env</code>, run
+<code>snyk-scan.sh</code>.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="cish-wiring-recommendation--not-done-here-per-task-scope">ci.sh
+wiring (recommendation — NOT done here per task scope)</h2>
+<p><code>scripts/ci.sh</code> is intentionally NOT modified by this
+stream. When wired, both scanners should be hooked as
+<strong>token-gated, opt-in security gates</strong> in the
+<code>--full</code> path (e.g. behind a <code>--security</code> flag or
+a presence check on <code>SONAR_TOKEN</code> / <code>SNYK_TOKEN</code>):
+skip-with-notice when the token/server is absent (so default offline
+runs aren't broken), run when present. They MUST stay
+non-blocking-on-absent-token but blocking-on-found-high-severity once
+enabled, to preserve the anti-bluff posture (a security gate that
+silently passes because it never ran is itself a bluff).</p>
+</body>
+</html>

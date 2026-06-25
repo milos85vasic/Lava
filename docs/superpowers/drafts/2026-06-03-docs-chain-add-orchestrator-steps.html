@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-06-03-docs-chain-add-orchestrator-steps</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1
+id="orchestrator-steps-git-submodule-add-docs_chain-into-lava">Orchestrator
+Steps: <code>git submodule add</code> docs_chain into Lava</h1>
+<p><strong>Date:</strong> 2026-06-03<br />
+<strong>Author:</strong> Stream C subagent (prep/analysis — read-only on
+parent; verified against upstream + gate scripts)<br />
+<strong>Classification:</strong> project-specific</p>
+<hr />
+<h2 id="1-convergence-verification">1. Convergence Verification</h2>
+<p>Both mirrors report the same HEAD — §6.C satisfied before the
+add:</p>
+<table>
+<thead>
+<tr>
+<th>Mirror</th>
+<th>SHA</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>git@github.com:vasic-digital/docs_chain.git</code> HEAD</td>
+<td><code>c606978ea702e72fd5f3a088cbb589cbea386b1f</code></td>
+</tr>
+<tr>
+<td><code>git@gitlab.com:vasic-digital/docs_chain.git</code> HEAD</td>
+<td><code>c606978ea702e72fd5f3a088cbb589cbea386b1f</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Pin to:</strong>
+<code>c606978ea702e72fd5f3a088cbb589cbea386b1f</code></p>
+<hr />
+<h2 id="2-parity-presence-findings-at-sha-c606978e">2. Parity-Presence
+Findings (at SHA <code>c606978e</code>)</h2>
+<p>Shallow-cloned from GitHub; HEAD verified =
+<code>c606978e</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Artifact</th>
+<th>Present?</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>helix-deps.yaml</code></td>
+<td>YES</td>
+<td>Schema v1, <code>deps: []</code>, leaf submodule</td>
+</tr>
+<tr>
+<td><code>install_upstreams.sh</code></td>
+<td>YES</td>
+<td>Executable, <code>--push</code> / <code>--dry-run</code> flags</td>
+</tr>
+<tr>
+<td><code>Upstreams/GitHub.sh</code></td>
+<td>YES</td>
+<td><code>UPSTREAMABLE_REPOSITORY=git@github.com:vasic-digital/docs_chain.git</code></td>
+</tr>
+<tr>
+<td><code>Upstreams/GitLab.sh</code></td>
+<td>YES</td>
+<td><code>UPSTREAMABLE_REPOSITORY=git@gitlab.com:vasic-digital/docs_chain.git</code></td>
+</tr>
+<tr>
+<td><code>CLAUDE.md</code></td>
+<td>YES</td>
+<td>Opens with <code>## INHERITED FROM constitution/CLAUDE.md</code> at
+line 3</td>
+</tr>
+<tr>
+<td><code>AGENTS.md</code></td>
+<td>YES</td>
+<td>Opens with <code>## INHERITED FROM constitution/AGENTS.md</code> at
+line 3</td>
+</tr>
+<tr>
+<td><code>CONSTITUTION.md</code></td>
+<td>YES</td>
+<td>Opens with
+<code>## INHERITED FROM constitution/Constitution.md</code> at line
+3</td>
+</tr>
+<tr>
+<td><code>QWEN.md</code></td>
+<td>YES</td>
+<td>Pointer file + <code>## INHERITED FROM constitution/CLAUDE.md</code>
+marker</td>
+</tr>
+<tr>
+<td><code>go.mod</code></td>
+<td>YES</td>
+<td><code>module digital.vasic.docs_chain</code>, go 1.25.0</td>
+</tr>
+</tbody>
+</table>
+<p><strong>§6.C mirror convergence:</strong> CONFIRMED (both mirrors =
+<code>c606978e</code>)<br />
+<strong>§11.4.36 install_upstreams:</strong> PRESENT<br />
+<strong>§6.AD pointer-blocks:</strong> PRESENT in all three governance
+files</p>
+<hr />
+<h2 id="3-mount-path-determination">3. Mount Path Determination</h2>
+<p>Existing submodule naming observed in <code>.gitmodules</code> and
+<code>submodules/</code>:</p>
+<ul>
+<li>CamelCase subdirectories (physical dir): <code>Auth</code>,
+<code>Cache</code>, <code>Challenges</code>, <code>Concurrency</code>,
+<code>Config</code>, <code>Containers</code>, <code>Database</code>,
+<code>Discovery</code>, <code>HelixQA</code>, <code>HTTP3</code>,
+<code>Mdns</code>, <code>Middleware</code>, <code>Observability</code>,
+<code>RateLimiter</code>, <code>Recovery</code>,
+<code>Security</code></li>
+<li>snake_case subdirectories: <code>tracker_sdk</code></li>
+<li>HelixQA, HTTP3 use mixed-case/acronym convention</li>
+<li><code>.gitmodules</code> <code>path =</code> values are ALL
+lowercase or snake_case: <code>submodules/containers</code>,
+<code>submodules/auth</code>, <code>submodules/tracker_sdk</code>,
+<code>submodules/helixqa</code></li>
+</ul>
+<p><strong>Conclusion:</strong> <code>.gitmodules</code> paths use
+lowercase/snake_case. Physical directory case is determined by git at
+add-time. For <code>docs_chain</code> (already snake_case in the GitHub
+repo name), the mount path is:</p>
+<pre><code>submodules/docs_chain</code></pre>
+<hr />
+<h2 id="4-orchestrator-command-sequence">4. Orchestrator Command
+Sequence</h2>
+<p>Execute these commands <strong>in order</strong> from the Lava repo
+root. Do NOT run them out of order. The orchestrator owns the parent
+index — do not run these in parallel with any other
+parent-index-touching work.</p>
+<h3
+id="step-0--pre-flight-confirm-convergence-already-verified-above-re-run-for-freshness">Step
+0 — Pre-flight: confirm convergence (already verified above, re-run for
+freshness)</h3>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Re-confirm both mirrors report the same SHA</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> ls-remote git@github.com:vasic-digital/docs_chain.git HEAD</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> ls-remote git@gitlab.com:vasic-digital/docs_chain.git HEAD</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Both MUST print: c606978ea702e72fd5f3a088cbb589cbea386b1f</span></span></code></pre></div>
+<h3 id="step-1--add-the-submodule">Step 1 — Add the submodule</h3>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> submodule add <span class="at">-b</span> main <span class="dt">\</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  git@github.com:vasic-digital/docs_chain.git <span class="dt">\</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  submodules/docs_chain</span></code></pre></div>
+<p>This will:</p>
+<ul>
+<li>Create <code>submodules/docs_chain/</code> populated from
+<code>c606978e</code> (current HEAD of <code>main</code>)</li>
+<li>Append the following stanza to <code>.gitmodules</code>:
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode ini"><code class="sourceCode ini"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">[submodule &quot;submodules/docs_chain&quot;]</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="dt">  path </span><span class="ot">=</span><span class="st"> submodules/docs_chain</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="dt">  url </span><span class="ot">=</span><span class="st"> git@github.com:vasic-digital/docs_chain.git</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="dt">  branch </span><span class="ot">=</span><span class="st"> main</span></span></code></pre></div></li>
+<li>Stage <code>.gitmodules</code> and
+<code>submodules/docs_chain</code> in the parent index</li>
+</ul>
+<h3 id="step-2--pin-the-submodule-to-the-verified-sha">Step 2 — Pin the
+submodule to the verified SHA</h3>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># The add checks out HEAD of main; pin explicitly to the verified SHA</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> <span class="at">-C</span> submodules/docs_chain checkout c606978ea702e72fd5f3a088cbb589cbea386b1f</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Re-stage the submodule pointer at the pinned SHA</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add submodules/docs_chain</span></code></pre></div>
+<h3
+id="step-3--apply-required-governance-file-patches-in-docs_chain-pre-commit-fix">Step
+3 — Apply required governance-file patches in docs_chain (PRE-COMMIT
+FIX)</h3>
+<p><strong>This step is MANDATORY before committing</strong> — see
+Gate-by-Gate table below; 5 gates will FAIL at pre-push if these fixes
+are not applied first.</p>
+<p>In <code>submodules/docs_chain/CLAUDE.md</code>, replace the existing
+partial §6.S heading and add the missing §6.R and §6.X sections. The
+orchestrator should run
+<code>scripts/inject-helix-inheritance-block.sh</code> or apply the
+patches manually.</p>
+<p><strong>Patch A —
+<code>submodules/docs_chain/CLAUDE.md</code></strong> (apply upstream in
+docs_chain, then bump pin):</p>
+<p>Replace the existing §6.S section:</p>
+<pre><code>## §6.S — Continuation Document Maintenance (inherited)</code></pre>
+<p>With the exact heading the gate requires:</p>
+<pre><code>## §6.S — Continuation Document Maintenance Mandate (inherited 2026-06-03, per §6.F)</code></pre>
+<p>(The body text <code>See parent root '/CLAUDE.md' §6.S. ...</code> is
+acceptable as-is — only the heading string is checked by the gate.)</p>
+<p>Add immediately after the current §6.S section (or at end of file
+before any <code>---</code> dividers):</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">## §6.R — No-Hardcoding Mandate (inherited 2026-05-06, per §6.F)</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>See root <span class="in">`/CLAUDE.md`</span> §6.R. No connection address, port, header field name, credential, key, salt, secret, schedule, algorithm parameter, or domain literal in tracked source code. Every such value MUST come from <span class="in">`.env`</span> (gitignored), generated config, runtime env var, or mounted file. Submodule MAY add stricter rules but MUST NOT relax.</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="fu">## §6.X — Container-Submodule Emulator Wiring Mandate (inherited 2026-05-13, per §6.F)</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>See root <span class="in">`/CLAUDE.md`</span> §6.X. Every Android emulator instance the project depends on for testing MUST execute its emulator process INSIDE a podman/docker container managed by <span class="in">`Submodules/Containers/`</span>, NOT be host-direct-launched by Containers-submodule code that runs on the host. The Containers submodule&#39;s <span class="in">`pkg/runtime/`</span> (rootless podman/docker auto-detection) brings the container up; <span class="in">`pkg/emulator/`</span> orchestrates the AVD lifecycle inside it. Lava-side <span class="in">`scripts/run-emulator-tests.sh`</span> is thin glue forwarding to the Containers CLI. The container-bound path is the gate — host-direct emulators are permitted for workstation iteration only. §6.X-debt tracks the wiring implementation owed to <span class="in">`Submodules/Containers/`</span>. This submodule MAY add stricter rules but MUST NOT relax.</span></code></pre></div>
+<p><strong>Patch B —
+<code>submodules/docs_chain/AGENTS.md</code></strong> — add at end:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">## §6.X — Container-Submodule Emulator Wiring Mandate (inherited 2026-05-13, per §6.F)</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>Inherited verbatim from parent Lava <span class="in">`/CLAUDE.md`</span> §6.X. Every Android emulator instance MUST execute INSIDE a podman/docker container managed by <span class="in">`Submodules/Containers/`</span>. Host-direct emulator launches are permitted for workstation iteration only; the constitutional gate run (release tagging, real-device verification) MUST go through the container-bound path. <span class="in">`pkg/runtime/`</span> brings the container up; <span class="in">`pkg/emulator/`</span> orchestrates the AVD lifecycle inside it. §6.X-debt tracks the wiring implementation owed to the Containers submodule. This submodule MAY add stricter rules but MUST NOT relax.</span></code></pre></div>
+<p><strong>Patch C —
+<code>submodules/docs_chain/CONSTITUTION.md</code></strong> — add at
+end:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">## §6.X — Container-Submodule Emulator Wiring Mandate (inherited 2026-05-13, per §6.F)</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>See root <span class="in">`/CLAUDE.md`</span> §6.X. Every Android emulator instance the project depends on for testing MUST execute its emulator process INSIDE a podman/docker container managed by <span class="in">`Submodules/Containers/`</span>, NOT be host-direct-launched by Containers-submodule code that runs on the host. The Containers submodule&#39;s <span class="in">`pkg/runtime/`</span> (rootless podman/docker auto-detection) brings the container up; <span class="in">`pkg/emulator/`</span> orchestrates the AVD lifecycle inside it. Lava-side <span class="in">`scripts/run-emulator-tests.sh`</span> is thin glue forwarding to the Containers CLI. The container-bound path is the gate — host-direct emulators are permitted for workstation iteration only. §6.X-debt tracks the wiring implementation owed to <span class="in">`Submodules/Containers/`</span>. This submodule MAY add stricter rules but MUST NOT relax.</span></code></pre></div>
+<p><strong>After applying patches upstream in docs_chain:</strong></p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># In the docs_chain repo:</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add CLAUDE.md AGENTS.md CONSTITUTION.md</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">&quot;fix(governance): add §6.R + §6.S exact heading + §6.X mandate to CLAUDE/AGENTS/CONSTITUTION</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="st">Required by Lava parent check-constitution.sh gates:</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="st">- §6.R gate: grep -qF &#39;## §6.R — No-Hardcoding Mandate&#39;</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="st">- §6.S gate: grep -qF &#39;## §6.S — Continuation Document Maintenance Mandate&#39;</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="st">- §6.X gate: grep -qF &#39;## §6.X — Container-Submodule Emulator Wiring Mandate&#39;</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a><span class="st">Co-Authored-By: Orchestrator &lt;noreply@anthropic.com&gt;&quot;</span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> push github main</span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> push gitlab main</span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a><span class="va">NEW_SHA</span><span class="op">=</span><span class="va">$(</span><span class="fu">git</span> rev-parse HEAD<span class="va">)</span></span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;New pin SHA: </span><span class="va">$NEW_SHA</span><span class="st">&quot;</span></span></code></pre></div>
+<p>Then in the Lava parent:</p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> <span class="at">-C</span> submodules/docs_chain checkout <span class="st">&quot;</span><span class="va">$NEW_SHA</span><span class="st">&quot;</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add submodules/docs_chain</span></code></pre></div>
+<h3 id="step-4--update-docscontinuationmd-3-pin-index">Step 4 — Update
+docs/CONTINUATION.md §3 pin index</h3>
+<p>Add the following line to the §3 "Submodule Pin Index" table in
+<code>docs/CONTINUATION.md</code>:</p>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> docs_chain <span class="pp">|</span> submodules/docs_chain <span class="pp">|</span> <span class="in">`&lt;NEW_SHA&gt;`</span> <span class="pp">|</span> main <span class="pp">|</span> git@github.com:vasic-digital/docs_chain.git <span class="pp">|</span></span></code></pre></div>
+<p>(Replace <code>&lt;NEW_SHA&gt;</code> with the actual SHA after the
+upstream fix commit in Step 3.)</p>
+<h3
+id="step-5--run-the-constitution-gates-dry-run-read-only-verification">Step
+5 — Run the constitution gates dry-run (read-only verification)</h3>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> scripts/check-constitution.sh</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> scripts/check-canonical-root-and-upstreams.sh <span class="at">--strict</span></span></code></pre></div>
+<p>Both MUST exit 0 before proceeding.</p>
+<h3 id="step-6--commit-to-parent">Step 6 — Commit to parent</h3>
+<div class="sourceCode" id="cb15"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add .gitmodules submodules/docs_chain docs/CONTINUATION.md</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">&quot;feat(submodules): add docs_chain as submodules/docs_chain at &lt;SHA&gt;</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="st">Pinned to SHA &lt;SHA&gt; — full parity with Lava parent gates:</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="st">- §6.AD pointer-blocks in CLAUDE.md, AGENTS.md, CONSTITUTION.md</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="st">- §11.4.36 install_upstreams.sh present</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="st">- helix-deps.yaml (leaf; deps: [])</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a><span class="st">- §6.R + §6.S + §6.X headings in all governance files</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a><span class="st">- §6.W: GitHub + GitLab mirrors both at same SHA (§6.C verified)</span></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a><span class="st">docs/CONTINUATION.md §3 pin index updated.</span></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a><span class="st">Co-Authored-By: Orchestrator &lt;noreply@anthropic.com&gt;&quot;</span></span></code></pre></div>
+<h3 id="step-7--push-to-both-mirrors">Step 7 — Push to both mirrors</h3>
+<div class="sourceCode" id="cb16"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> push github master</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> push gitlab master</span></code></pre></div>
+<hr />
+<h2 id="5-resulting-gitmodules-stanza">5. Resulting
+<code>.gitmodules</code> Stanza</h2>
+<p>After Step 1, <code>.gitmodules</code> will gain:</p>
+<div class="sourceCode" id="cb17"><pre
+class="sourceCode ini"><code class="sourceCode ini"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="kw">[submodule &quot;submodules/docs_chain&quot;]</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="dt">    path </span><span class="ot">=</span><span class="st"> submodules/docs_chain</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="dt">    url </span><span class="ot">=</span><span class="st"> git@github.com:vasic-digital/docs_chain.git</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="dt">    branch </span><span class="ot">=</span><span class="st"> main</span></span></code></pre></div>
+<p>No <code>git config -f .gitmodules</code> tweaks required beyond what
+<code>git submodule add -b main</code> produces.</p>
+<hr />
+<h2 id="6-docscontinuationmd-3-pin-index-line">6.
+<code>docs/CONTINUATION.md</code> §3 Pin-Index Line</h2>
+<p>Draft line for the orchestrator to splice into the §3 table (update
+SHA after Step 3's fix commit):</p>
+<pre><code>| docs_chain | submodules/docs_chain | `&lt;SHA-after-fix-commit&gt;` | main | git@github.com:vasic-digital/docs_chain.git |</code></pre>
+<hr />
+<h2 id="7-gate-by-gate-pass--risk-table">7. Gate-by-Gate PASS / RISK
+Table</h2>
+<p>All gates run inside <code>scripts/check-constitution.sh</code>
+(invoked by <code>.githooks/pre-push</code> →
+<code>scripts/ci.sh --changed-only</code>).</p>
+<h3
+id="scriptscheck-constitutionsh-gates"><code>scripts/check-constitution.sh</code>
+gates</h3>
+<table>
+<thead>
+<tr>
+<th>Gate</th>
+<th>Script location</th>
+<th>Requirement</th>
+<th>docs_chain at <code>c606978e</code></th>
+<th>After upstream fix</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>§6.R heading in <code>submodules/*/CLAUDE.md</code></td>
+<td>line 292–299</td>
+<td><code>grep -qF '## §6.R — No-Hardcoding Mandate'</code></td>
+<td>NOT present</td>
+<td>After Patch A</td>
+<td><strong>RISK → PASS after fix</strong></td>
+</tr>
+<tr>
+<td>§6.S heading in <code>submodules/*/CLAUDE.md</code></td>
+<td>line 354–361</td>
+<td><code>grep -qF '## §6.S — Continuation Document Maintenance Mandate'</code></td>
+<td>Wrong: <code>…(inherited)</code> not <code>…Mandate</code></td>
+<td>After Patch A</td>
+<td><strong>RISK → PASS after fix</strong></td>
+</tr>
+<tr>
+<td>§6.X heading in <code>submodules/*/CLAUDE.md</code></td>
+<td>line 392–399</td>
+<td><code>grep -qF '## §6.X — Container-Submodule Emulator Wiring Mandate'</code></td>
+<td>NOT present</td>
+<td>After Patch A</td>
+<td><strong>RISK → PASS after fix</strong></td>
+</tr>
+<tr>
+<td>§6.X heading in <code>submodules/*/AGENTS.md</code></td>
+<td>line 392–399</td>
+<td>same pattern</td>
+<td>NOT present</td>
+<td>After Patch B</td>
+<td><strong>RISK → PASS after fix</strong></td>
+</tr>
+<tr>
+<td>§6.X heading in <code>submodules/*/CONSTITUTION.md</code></td>
+<td>line 392–399</td>
+<td>same pattern</td>
+<td>NOT present</td>
+<td>After Patch C</td>
+<td><strong>RISK → PASS after fix</strong></td>
+</tr>
+<tr>
+<td>§6.AD(4) pointer-block <code>submodules/*/CLAUDE.md</code></td>
+<td>line 490–503</td>
+<td><code>grep -qE '^## INHERITED FROM constitution/'</code></td>
+<td>PRESENT (line 3)</td>
+<td>No change needed</td>
+<td><strong>PASS</strong></td>
+</tr>
+<tr>
+<td>§6.AD(4) pointer-block <code>submodules/*/AGENTS.md</code></td>
+<td>line 490–503</td>
+<td>same</td>
+<td>PRESENT (line 3)</td>
+<td>No change needed</td>
+<td><strong>PASS</strong></td>
+</tr>
+<tr>
+<td>§6.AD(4) pointer-block
+<code>submodules/*/CONSTITUTION.md</code></td>
+<td>line 490–503</td>
+<td>same</td>
+<td>PRESENT (line 3)</td>
+<td>No change needed</td>
+<td><strong>PASS</strong></td>
+</tr>
+<tr>
+<td>§6.N propagation (<code>submodules/$sm/CLAUDE.md</code>)</td>
+<td>line 192–209</td>
+<td>iterates hardcoded 16-name list (no <code>docs_chain</code>)</td>
+<td>n/a — not in list</td>
+<td>Not applicable</td>
+<td><strong>NOT CHECKED — PASS (skip)</strong></td>
+</tr>
+<tr>
+<td>§6.O propagation</td>
+<td>line 216–224</td>
+<td>same 16-name list</td>
+<td>n/a</td>
+<td>Not applicable</td>
+<td><strong>NOT CHECKED — PASS (skip)</strong></td>
+</tr>
+<tr>
+<td>§6.P propagation</td>
+<td>line 231–239</td>
+<td>same 16-name list</td>
+<td>n/a</td>
+<td>Not applicable</td>
+<td><strong>NOT CHECKED — PASS (skip)</strong></td>
+</tr>
+<tr>
+<td>§6.Q propagation</td>
+<td>line 246–254</td>
+<td>same 16-name list</td>
+<td>n/a</td>
+<td>Not applicable</td>
+<td><strong>NOT CHECKED — PASS (skip)</strong></td>
+</tr>
+<tr>
+<td>§6.W remote-host scan (<code>submodules/*/</code>)</td>
+<td>line 572–582</td>
+<td>no <code>gitflic</code>/<code>gitverse</code> remotes</td>
+<td>No remotes configured at add-time</td>
+<td>PASS</td>
+<td><strong>PASS</strong></td>
+</tr>
+<tr>
+<td>§11.4.6 no-guessing vocabulary</td>
+<td>delegated to <code>check-no-guessing-vocabulary.sh</code></td>
+<td>scans <code>.lava-ci-evidence/sixth-law-incidents/</code> +
+<code>crashlytics-resolved/</code> only</td>
+<td>does not scan submodule content</td>
+<td>Not applicable</td>
+<td><strong>PASS</strong></td>
+</tr>
+<tr>
+<td>§6.K containers emulator</td>
+<td>line 146–169</td>
+<td>conditional on <code>submodules/containers/pkg/emulator/</code>
+existing</td>
+<td>not about docs_chain</td>
+<td>Not applicable</td>
+<td><strong>PASS</strong></td>
+</tr>
+<tr>
+<td>Credential scan (§6.H)</td>
+<td>line 103–129</td>
+<td>scans <code>git ls-files</code> — submodule content NOT in parent's
+<code>git ls-files</code></td>
+<td>not applicable</td>
+<td>Not applicable</td>
+<td><strong>PASS</strong></td>
+</tr>
+</tbody>
+</table>
+<h3
+id="scriptscheck-canonical-root-and-upstreamssh-gates"><code>scripts/check-canonical-root-and-upstreams.sh</code>
+gates</h3>
+<table>
+<thead>
+<tr>
+<th>Gate</th>
+<th>Requirement</th>
+<th>docs_chain at <code>c606978e</code></th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>§11.4.35(a) root CLAUDE.md + AGENTS.md inherit pointer</td>
+<td>only checked for PARENT root (not submodules)</td>
+<td>n/a</td>
+<td><strong>PASS (not checked for submodules)</strong></td>
+</tr>
+<tr>
+<td>§11.4.36 <code>install_upstreams.sh</code> in
+<code>submodules/docs_chain/</code></td>
+<td><code>install_upstreams.sh</code> OR variants present</td>
+<td><code>install_upstreams.sh</code> PRESENT at root</td>
+<td><strong>PASS</strong></td>
+</tr>
+</tbody>
+</table>
+<h3
+id="scan-no-hardcoded-ipv4sh--scan-no-hardcoded-hostportsh--scan-no-hardcoded-uuidsh"><code>scan-no-hardcoded-ipv4.sh</code>
++ <code>scan-no-hardcoded-hostport.sh</code> +
+<code>scan-no-hardcoded-uuid.sh</code></h3>
+<p>These scanners explicitly exclude <code>submodules/</code> via
+<code>grep -zvE '...|^submodules/|...'</code> — submodule content is
+excluded from the parent's <code>git ls-files</code> anyway (appears as
+a gitlink blob, not individual files).</p>
+<table>
+<thead>
+<tr>
+<th>Scanner</th>
+<th>docs_chain impact</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>scan-no-hardcoded-uuid.sh</code></td>
+<td>Excluded — submodules/ path excluded</td>
+<td><strong>PASS</strong></td>
+</tr>
+<tr>
+<td><code>scan-no-hardcoded-ipv4.sh</code></td>
+<td>Excluded — <code>^submodules/</code> in exclusion regex</td>
+<td><strong>PASS</strong></td>
+</tr>
+<tr>
+<td><code>scan-no-hardcoded-hostport.sh</code></td>
+<td>Excluded — same exclusion</td>
+<td><strong>PASS</strong></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="8-summary-pre-add-actions-required">8. Summary: Pre-Add Actions
+Required</h2>
+<p><strong>Before running <code>git submodule add</code></strong>, the
+upstream docs_chain repo at <code>c606978e</code> has <strong>5 gate
+failures</strong> that will cause <code>check-constitution.sh</code> to
+exit 1 on the parent's first push:</p>
+<ol type="1">
+<li><strong>CLAUDE.md §6.R</strong>: missing
+<code>## §6.R — No-Hardcoding Mandate</code> heading → add Patch A</li>
+<li><strong>CLAUDE.md §6.S</strong>: wrong heading
+(<code>…(inherited)</code> vs <code>…Mandate</code>) → fix in Patch
+A</li>
+<li><strong>CLAUDE.md §6.X</strong>: missing
+<code>## §6.X — Container-Submodule Emulator Wiring Mandate</code> → add
+Patch A</li>
+<li><strong>AGENTS.md §6.X</strong>: same missing heading → add Patch
+B</li>
+<li><strong>CONSTITUTION.md §6.X</strong>: same missing heading → add
+Patch C</li>
+</ol>
+<p><strong>Recommended flow:</strong> apply Patches A+B+C to docs_chain
+upstream, push to both mirrors, get the new SHA, THEN run
+<code>git submodule add</code> pointing at that new SHA.</p>
+<p><strong>Alternative (if orchestrator prefers one-shot):</strong> run
+<code>git submodule add</code> at <code>c606978e</code>, apply the
+patches to <code>submodules/docs_chain/</code> locally, push the
+governance fixes to both docs_chain mirrors, bump the parent pin to the
+new SHA, commit once.</p>
+<hr />
+<h2 id="9-forensic-note-6n-6o-6p-6q-not-required-for-docs_chain">9.
+Forensic Note: §6.N, §6.O, §6.P, §6.Q NOT Required for docs_chain</h2>
+<p>The propagation checks for §6.N, §6.O, §6.P, §6.Q in
+<code>check-constitution.sh</code> iterate a <strong>hardcoded
+16-element list</strong>
+(<code>Auth Cache Challenges Concurrency Config Containers Database Discovery HTTP3 Mdns Middleware Observability RateLimiter Recovery Security Tracker-SDK</code>).
+<code>docs_chain</code> is not in this list. Therefore these four
+propagation gates DO NOT apply to
+<code>submodules/docs_chain/CLAUDE.md</code>. No additions for
+§6.N/§6.O/§6.P/§6.Q are required. If the list is ever extended to
+include <code>docs_chain</code> in a future commit, those sections must
+be added at that time.</p>
+</body>
+</html>

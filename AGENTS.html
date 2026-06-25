@@ -274,10 +274,51 @@ application written in Kotlin, using Jetpack Compose for the UI.</li>
 headless Go/Gin server (SP-2 onward) that scrapes rutracker.org and
 exposes a JSON REST API over HTTP/3 and HTTP/2. This is the primary
 backend.</li>
-<li><strong>Proxy Server</strong> (<code>:proxy</code>) — a legacy
-Ktor/Netty server that also scrapes rutracker.org. It is built as a fat
-JAR and containerized with Docker. Retained as an opt-in fallback.</li>
+<li><strong>Proxy Server</strong> (<code>:proxy</code>) —
+<strong>REMOVED 2026-05-06.</strong> The legacy Ktor/Netty proxy was
+deleted when the SP-2 migration made <code>lava-api-go</code> the sole
+backend. There is no <code>proxy/</code> directory, it is not in
+<code>settings.gradle.kts</code>, and there is no <code>--legacy</code>
+fallback. (<code>build_and_release.sh</code>,
+<code>docker-compose.yml</code>, and <code>start.sh</code> carry
+comments documenting the removal.)</li>
 </ol>
+<p>A fourth artifact is in progress: the <strong>Lava API Android
+app</strong> (<code>:api-app</code>, applicationId
+<code>digital.vasic.lava.api</code>, debug <code>.dev</code>) — a
+standalone app that boots the full <code>lava-api-go</code> server
+<strong>in-process</strong> on a phone/tablet, backed by a local SQLite
+database, and exposes it on the LAN via mDNS. Phases A (additive SQLite
+storage backend, selected by <code>LAVA_API_STORAGE_BACKEND</code>;
+Postgres default unchanged), B (the <code>internal/mobile</code>
+<code>Start</code>/<code>Stop</code>/<code>Status</code> embed + the
+<code>go build -buildmode=c-shared</code> native build at
+<code>lava-api-go/scripts/build-cshared.sh</code> + JNI bridge
+<code>digital.vasic.lava.apigo.LavaNative</code>), C (the
+<code>:core:apiengine</code> Kotlin JNI wrapper —
+<code>ApiEngine</code>/<code>NativeApiEngine</code>/<code>FakeApiEngine</code>
++ the <code>buildCshared</code>→jniLibs→<code>externalNativeBuild</code>
+Gradle pipeline packaging <code>liblavaapi.so</code> +
+<code>liblavaapi_jni.so</code> per ABI; commit <code>ef109760</code>),
+and D-infra (the <code>:api-app</code> module: foreground
+<code>ApiEngineService</code> with Wifi/Multicast/Wake locks, the
+Android-free <code>ApiEngineController</code>
+Stopped/Starting/Running/Stopping/Error state machine, the
+<code>NsdMdnsAdvertiser</code> emitting
+<code>_lava-api._tcp</code>/<code>_lava-api-dev._tcp</code> + TXT
+<code>engine</code>/<code>platform=android</code>/<code>storage=sqlite</code>/<code>version</code>,
+and the per-install <code>ApiKeyStore</code> base64-UUID credential in
+<code>EncryptedSharedPreferences</code>; commit <code>e62e0fa8</code>)
+have landed. The landing UI + control screen + ViewModel (D-ui), the
+instrumented Compose UI Challenge tests (E), and the client-side
+distinct labelling of Android instances (sub-project 2) are
+<strong>PENDING</strong>. See <a
+href="docs/ON_DEVICE_API.md"><code>docs/ON_DEVICE_API.md</code></a> and
+<a
+href="docs/scripts/build-cshared.sh.md"><code>docs/scripts/build-cshared.sh.md</code></a>.
+Note: <code>gomobile bind</code> is blocked on this module by the
+relative <code>replace ../submodules/*</code> directives — c-shared is
+the chosen path.</p>
 <p>The project is a fork of <code>andrikeev/Flow</code>, maintained
 under <code>milos85vasic/Lava</code>. All source code, comments, and
 documentation are in <strong>English</strong>.</p>
@@ -433,8 +474,7 @@ is centralized in <code>buildSrc</code> as custom convention
 plugins.</p>
 <pre><code>Lava/
 ├── app/                    # Android application module
-├── proxy/                  # Ktor proxy server module (legacy)
-├── lava-api-go/            # Go API service (SP-2 onward, primary backend)
+├── lava-api-go/            # Go API service (SP-2 onward, sole backend)
 ├── buildSrc/               # Custom Gradle convention plugins
 ├── core/                   # 25 core library modules
 │   ├── auth/api, auth/impl
@@ -466,11 +506,20 @@ The exact count fluctuates as SP-N projects extract or fold modules.</p>
 <li><code>:app</code> — Entry point. Contains <code>Application</code>,
 <code>MainActivity</code>, <code>TvActivity</code>, and the top-level
 navigation graph. Depends on every core and feature module.</li>
-<li><code>:proxy</code> — Ktor/Netty server exposing REST endpoints.
-Built as a fat JAR and containerized with Docker. Legacy fallback.</li>
+<li><code>:proxy</code> — <strong>REMOVED 2026-05-06</strong> (legacy
+Ktor/Netty server). Superseded by <code>lava-api-go</code>; no
+<code>proxy/</code> module remains.</li>
 <li><code>lava-api-go/</code> — Go/Gin server exposing REST endpoints
-over HTTP/3 + HTTP/2. Primary backend. Built as a static binary and a
-distroless Docker image.</li>
+over HTTP/3 + HTTP/2. Sole backend. Built as a static binary and a
+distroless Docker image. Also hosts the on-device-API additions:
+<code>internal/storage/</code> (backend-agnostic cache boundary with
+<code>postgres</code> + pure-Go <code>sqlite</code> impls),
+<code>internal/mobile/</code> (the in-process
+<code>Start</code>/<code>Stop</code>/<code>Status</code> embed), and
+<code>cmd/lavaapi-cshared/</code> (the
+<code>go build -buildmode=c-shared</code> native entry +
+<code>jni/</code> bridge). See <a
+href="docs/ON_DEVICE_API.md"><code>docs/ON_DEVICE_API.md</code></a>.</li>
 <li><code>core:*</code> — Shared libraries. Pure Kotlin modules
 (<code>models</code>, <code>common</code>, <code>auth/api</code>,
 <code>network/api</code>, <code>tracker:api</code>,
@@ -480,6 +529,20 @@ distroless Docker image.</li>
 Android dependency</strong>. The Android-bearing tracker module is
 <code>:core:tracker:client</code> (Hilt + WorkManager + Room
 access).</li>
+<li><code>:core:apiengine</code> — Android library wrapping the embedded
+<code>lava-api-go</code> server (a Go c-shared <code>.so</code> loaded
+over JNI) behind the Kotlin <code>ApiEngine</code> API
+(<code>NativeApiEngine</code> real impl + <code>FakeApiEngine</code> JVM
+fake). Consumed by <code>:api-app</code>; packages
+<code>liblavaapi.so</code> + <code>liblavaapi_jni.so</code> per ABI via
+a <code>buildCshared</code> task + <code>externalNativeBuild</code>
+CMake. Phase C of the on-device-API sub-project; see <a
+href="docs/ON_DEVICE_API.md"><code>docs/ON_DEVICE_API.md</code></a>.</li>
+<li><code>:api-app</code> — standalone Lava API Android app
+(<code>digital.vasic.lava.api</code>, debug <code>.dev</code>);
+foreground service hosting the embed + mDNS advertiser + per-install
+auth-key store (Phase D-infra). See <a
+href="docs/ON_DEVICE_API.md"><code>docs/ON_DEVICE_API.md</code></a>.</li>
 <li><code>feature:*</code> — Screen-level modules. Each feature
 typically contains a ViewModel (Orbit MVI), Compose screens, and a
 navigation contract.</li>
@@ -762,8 +825,10 @@ configuration</li>
 <h3 id="key-build-files">Key build files</h3>
 <ul>
 <li><code>settings.gradle.kts</code> — Includes <code>:app</code>,
-<code>:proxy</code>, all <code>core:*</code> and <code>feature:*</code>
-modules, plus the <code>Tracker-SDK</code> composite build.</li>
+<code>:api-app</code>, all <code>core:*</code> and
+<code>feature:*</code> modules, plus the <code>Tracker-SDK</code>
+composite build. (The legacy <code>:proxy</code> was removed
+2026-05-06.)</li>
 <li><code>gradle/libs.versions.toml</code> — Version catalog with
 libraries, plugins, and bundles (<code>coil</code>, <code>ktor</code>,
 <code>orbit</code>, <code>room</code>, <code>work</code>).</li>
@@ -782,8 +847,8 @@ class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Build the Android app (release)</span></span>
 <span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="ex">./gradlew</span> :app:assembleRelease</span>
 <span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Build the proxy fat JAR</span></span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="ex">./gradlew</span> :proxy:buildFatJar</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="co"># (The legacy `:proxy:buildFatJar` task was removed 2026-05-06 — the</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="co">#  backend is now lava-api-go; build it with `cd lava-api-go &amp;&amp; make build`.)</span></span>
 <span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Run Spotless formatting/checks</span></span>
 <span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="ex">./gradlew</span> spotlessApply</span>
@@ -1521,42 +1586,25 @@ class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="
 </ul></li>
 <li><p><strong>Orchestration:</strong> <code>docker-compose.yml</code>
 at the project root defines services for Postgres, migrations,
-lava-api-go, legacy proxy, and an observability stack (Prometheus, Loki,
-Grafana, Tempo). Use <code>./start.sh</code> and <code>./stop.sh</code>
-to manage the stack.</p></li>
+lava-api-go, and an observability stack (Prometheus, Loki, Grafana,
+Tempo). Use <code>./start.sh</code> and <code>./stop.sh</code> to manage
+the stack. (The legacy proxy service was removed 2026-05-06.)</p></li>
 </ol>
-<h3 id="proxy-server-legacy">Proxy Server (Legacy)</h3>
-<p>The proxy is built as a Ktor fat JAR and deployed as a Docker
-image.</p>
-<ol type="1">
-<li><p><strong>Build the fat JAR:</strong></p>
-<div class="sourceCode" id="cb9"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="ex">./gradlew</span> :proxy:buildFatJar</span></code></pre></div>
-<p>Output: <code>proxy/build/libs/app.jar</code></p></li>
-<li><p><strong>Build &amp; push the Docker image:</strong></p>
-<div class="sourceCode" id="cb10"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="ex">./build_and_push_docker_image.sh</span></span></code></pre></div>
-<p>The script does the following:</p>
-<div class="sourceCode" id="cb11"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> build <span class="at">-t</span> lava-app-proxy ./proxy</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> tag lava-app-proxy registry.digitalocean.com/lava-app/lava-app-proxy</span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> push registry.digitalocean.com/lava-app/lava-app-proxy</span></code></pre></div></li>
-<li><p><strong>Dockerfile</strong> (<code>proxy/Dockerfile</code>):</p>
-<ul>
-<li>Base image: <code>openjdk:17.0.1-jdk-slim</code>
-(<code>linux/amd64</code>)</li>
-<li>Exposes port <code>8080</code></li>
-<li>Entrypoint: <code>java -jar /app/app.jar</code></li>
-</ul></li>
-</ol>
+<h3 id="proxy-server-legacy--removed-2026-05-06">Proxy Server (Legacy) —
+REMOVED 2026-05-06</h3>
+<p>The legacy Ktor/Netty proxy was deleted in the SP-2 migration;
+<code>lava-api-go</code> is the sole backend. There is no
+<code>proxy/</code> directory, no <code>:proxy:buildFatJar</code> task,
+and <code>build_and_push_docker_image.sh</code> now builds the
+lava-api-go image. To build/deploy the backend, see the lava-api-go
+deployment section and
+<code>cd lava-api-go &amp;&amp; make build &amp;&amp; make image</code>.</p>
 <h2 id="security-considerations">Security Considerations</h2>
 <ul>
-<li><p><strong>Proxy auth</strong> — The proxy expects an
-<code>Auth-Token</code> header but does not implement OAuth or JWT; it
-forwards rutracker session state.</p></li>
 <li><p><strong>Go API auth</strong> — The Go API uses passthrough auth
 middleware that forwards the <code>Auth-Token</code> header as a cookie
-to upstream rutracker.org.</p></li>
+to upstream rutracker.org. (The legacy <code>:proxy</code>'s equivalent
+auth was removed with the module on 2026-05-06.)</p></li>
 <li><p><strong>Encrypted preferences</strong> —
 <code>core:preferences</code> uses
 <code>androidx.security:security-crypto-ktx</code>
@@ -2282,5 +2330,22 @@ required and it makes sense version MUST BE increased as well!"
 Inheritance: applies recursively to every submodule's distributable
 artifacts and every new artifact added to the project. Submodule
 constitutions MAY add stricter rules but MUST NOT relax this clause.</p>
+<h2 id="universal-action-prefix-recognition-layer-1-114140">Universal
+Action-Prefix Recognition (LAYER 1, §11.4.140)</h2>
+<p>When a user prompt's FIRST non-blank line starts with an uppercase
+action token followed by <code>::</code> (grammar
+<code>^([A-Z][A-Z0-9_]*)\s*::\s</code>, or the namespaced
+<code>PREFIX::ACTION ::</code> form): look the token up in
+<code>constitution/actions/registry.yaml</code> (or
+<code>$HELIX_ACTION_REGISTRY</code>); if registered, REPLACE the
+<code>ACTION_NAME ::</code> prefix with that action's
+<code>expansion</code> text, apply its <code>rules</code>, and execute
+the REMAINDER of the prompt under the expanded instruction
+(expand-then-rescan). Built-in: <code>BACKGROUND ::</code> → run the
+rest in the background, in parallel with all main work streams,
+subagent-driven, with rock-solid anti-bluff captured evidence. Unknown
+tokens are not actions — execute verbatim. The registry is the single
+source of truth (add actions as rows, not by editing this block). See
+root <code>CLAUDE.md</code> §6.AJ. Classification: universal.</p>
 </body>
 </html>

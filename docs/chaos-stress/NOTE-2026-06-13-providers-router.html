@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>NOTE-2026-06-13-providers-router</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1
+id="stress--chaos--phase-1c-real-routerbuild-providers--health-lva-007">Stress
++ Chaos — Phase 1.c: real <code>router.Build</code> /providers + /health
+(LVA-007)</h1>
+<p><strong>Date:</strong> 2026-06-13. <strong>Status:</strong> RAN,
+verdict <strong>PASS</strong>, <code>go test</code>
+<strong>EXIT=0</strong>. <strong>Builds on:</strong>
+<code>DESIGN.md</code> (Phase 1 scaffold) +
+<code>EVIDENCE-phase1.md</code>.</p>
+<h2 id="what-this-phase-adds">What this phase adds</h2>
+<p>Phase 1 (<code>api_stress_test.go</code>) drove a
+<strong>synthetic</strong> Gin handler (a hand-rolled
+<code>/health</code>); <code>provider_middleware_stress_test.go</code>
+drove the real <code>ProviderMiddleware</code> in isolation.
+<strong>Neither booted <code>internal/router.Build</code></strong> — the
+SINGLE production router that both <code>cmd/lava-api-go/main.go</code>
+and <code>internal/mobile</code> (the on-device embed) call. Phase 1.c
+closes that gap.</p>
+<p>New file
+<code>lava-api-go/tests/stress/providers_router_stress_test.go</code>
+(<code>TestStressProvidersRouter</code>, build tag <code>stress</code>)
+boots <code>router.Build</code> via <code>httptest</code> and stresses
+the two <strong>public, pre-auth</strong> endpoints the Android
+onboarding wizard depends on — focused on <code>GET /providers</code>,
+the now-load-bearing catalogue endpoint (Crashlytics
+<code>47b000d5</code>, v1.3.4, was a real production failure where this
+fetch broke and the wizard fell back to bundled providers).</p>
+<p><code>Cfg=nil</code>/<code>AuthLadder=nil</code> is deliberate: with
+those nil, <code>router.Build</code> serves <code>/providers</code> +
+<code>/health</code> + <code>/ready</code> exactly as production does
+for an un-paired onboarding client (those routes are registered BEFORE
+the auth middleware). The Cache/Scraper route-resolution stubs
+(<code>router_stubs.go</code>, mirrored verbatim from the in-tree
+<code>internal/router/router_test.go</code>) are never touched by the
+catalogue path.</p>
+<h2 id="dimensions">Dimensions</h2>
+<table>
+<thead>
+<tr>
+<th>Dim</th>
+<th>Name</th>
+<th>N</th>
+<th>Asserts (primary = user-visible)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SR1</td>
+<td>router-providers-sustained</td>
+<td>500</td>
+<td>0×5xx; p99&lt;250ms; <strong>parsed JSON body provider-count ==
+2</strong> (50-sample)</td>
+</tr>
+<tr>
+<td>SR2</td>
+<td>router-health-sustained</td>
+<td>300</td>
+<td>0×5xx; p99&lt;250ms; liveness 200</td>
+</tr>
+<tr>
+<td>SR3</td>
+<td>router-providers-concurrent</td>
+<td>64</td>
+<td>all complete; all 200; <strong>all bodies right count</strong> (no
+torn registry read); <code>-race</code> clean</td>
+</tr>
+<tr>
+<td>CR1</td>
+<td>dependency-down isolation+recovery</td>
+<td>500</td>
+<td>chaos — see below</td>
+</tr>
+</tbody>
+</table>
+<p><strong>CR1 chaos</strong> injects a real fault at a <strong>real
+seam</strong>: <code>chaosReadiness.probe</code> is the exact
+<code>observability.ReadinessProbe</code> <code>router.Build</code>
+wires into <code>GET /ready</code>. Flipping it down mid-stream
+simulates the real DB/breaker going unavailable. The test asserts
+graceful degradation, NOT a cascade:</p>
+<ul>
+<li><code>/ready</code> returns a clean <strong>503</strong> for all 150
+fault-window requests (no panic/hang);</li>
+<li><code>/health</code> + <code>/providers</code> <strong>stay 200 with
+correct bodies</strong> throughout (fault isolated);</li>
+<li><code>/ready</code> <strong>recovers to 200 within 1
+request</strong> after the fault clears.</li>
+</ul>
+<p>The <code>firebase noop RecordNonFatal ... 503 on GET /ready</code>
+lines in the run output are REAL production §6.AC telemetry firing —
+proof the chaos request crossed the actual production middleware chain,
+not a synthetic handler.</p>
+<h2 id="slo--measured-numbers-verbatim-from-the-run">SLO + measured
+numbers (verbatim from the run)</h2>
+<p>SLO: <code>0 × 5xx</code> under load + <code>p99 &lt; 250ms</code> +
+correct catalogue body.</p>
+<pre><code>SR1: 500 req ~6.6k req/s  p50 0.137ms p95 0.219ms p99 0.322ms max 1.012ms  errRate 0.000  5xx 0
+SR2: 300 req              p50 0.109ms p95 0.184ms p99 0.249ms max 0.305ms  errRate 0.000  5xx 0
+SR3: 64 concurrent        p50 0.960ms p95 1.606ms p99 1.770ms              all-complete  5xx 0  -race clean
+CR1: /ready 503=150/150 during fault | /health+/providers bad=0 5xx=0 | recovery=1 req</code></pre>
+<p>Leak guards: goroutines 3→4, open FDs 0→0. Verdict
+<strong>PASS</strong>.</p>
+<h2
+id="falsifiability-all-reverted--see-lava-ci-evidencechaos-stress2026-06-13-providers-stress-runtxt">Falsifiability
+(all reverted — see
+<code>.lava-ci-evidence/chaos-stress/2026-06-13-providers-stress-run.txt</code>)</h2>
+<ul>
+<li><strong>Mutation A</strong> — <code>time.Sleep(300ms)</code> in
+<code>ProvidersHandler.GetProviders</code> → SR1 FAILED
+<code>p99=305.83ms(SLO&lt;250)</code>. The latency SLO trips on a real
+hot-path bottleneck.</li>
+<li><strong>Mutation B</strong> — <code>chaosReadiness.probe</code>
+never recovers → CR1 FAILED <code>recov=0 (want 1)</code>, while
+SR1/SR2/SR3 stayed PASS (failure <strong>localized</strong> to the
+recovery path).</li>
+<li><strong>Mutation C</strong> — <code>GetProviders</code> returns an
+empty list → SR1 <code>badBody=50</code>, SR3 <code>concBad=64</code>,
+CR1 <code>healthyBad=150</code> — all status 200 but every parsed body
+wrong. This is the exact empty-but-200 shape of the
+Crashlytics-<code>47b000d5</code> fallback class; the body-content
+assertion (not status) is what catches it (§6.AB).</li>
+</ul>
+<h2 id="run-command">Run command</h2>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> lava-api-go</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="va">GOMAXPROCS</span><span class="op">=</span>2 <span class="fu">nice</span> <span class="at">-n</span> 19 go test <span class="at">-tags</span> stress <span class="at">-count</span><span class="op">=</span>1 <span class="at">-v</span> <span class="dt">\</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">-run</span> TestStressProvidersRouter ./tests/stress/...</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># also: ... -race ...   (no data race in the concurrent registry read)</span></span></code></pre></div>
+<h2 id="build-prerequisite-on-a-fresh-worktree">Build prerequisite on a
+fresh worktree</h2>
+<p><code>lava-api-go/go.mod</code> <code>replace</code>s
+<code>digital.vasic.*</code> to <code>../submodules/*</code>. A git
+worktree created without initialized submodules has an empty
+<code>submodules/</code>. Symlink the required submodule trees read-only
+from the parent checkout before running (the §11.4.79 own-org-submodule
+pattern prior agents used):</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> d <span class="kw">in</span> auth cache challenges concurrency config containers database discovery <span class="dt">\</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>         helixqa http3 mdns middleware observability ratelimiter recovery security<span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ln</span> <span class="at">-s</span> <span class="st">&quot;/abs/path/to/parent/submodules/</span><span class="va">$d</span><span class="st">&quot;</span> <span class="st">&quot;submodules/</span><span class="va">$d</span><span class="st">&quot;</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span></span></code></pre></div>
+<h2 id="honest-status">Honest status</h2>
+<ul>
+<li>§11.4.85 in-process minimums (N≥100 sustained with p50/p95/p99; N≥10
+concurrent all-complete no-race; fault injection + recovery on
+user-visible state): <strong>MET</strong> by this phase against the REAL
+production router.</li>
+<li>C3 (Postgres-kill) + C4b (pool-exhaustion) remain
+<strong>OPERATOR_GATED</strong> in the sibling
+<code>api_stress_test.go</code> (need real Postgres under podman);
+recorded <code>ran=false</code>, NOT faked.</li>
+<li>Constitution pin NOT bumped (CONST-049 / operator-gated). Version
+files NOT touched (1.3.7 queue). <code>-tags realtrackers</code> NOT run
+(no outbound calls).</li>
+</ul>
+</body>
+</html>

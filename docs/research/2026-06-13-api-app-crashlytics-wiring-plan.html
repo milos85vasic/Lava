@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-06-13-api-app-crashlytics-wiring-plan</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1
+id="api-app-firebase-crashlytics-wiring--implementation-plan"><code>:api-app</code>
+Firebase Crashlytics Wiring — Implementation Plan</h1>
+<ul>
+<li><strong>Date:</strong> 2026-06-13</li>
+<li><strong>Status:</strong> PLAN — not implemented. Touches
+<code>google-services.json</code> (§6.H-sensitive) → operator approval
+required before any code lands.</li>
+<li><strong>Constitutional bindings:</strong> §6.AC (Comprehensive
+Non-Fatal Telemetry Mandate), §6.O (Crashlytics-Resolved Issue
+Coverage), §6.H (Credential Security), Decoupled Reusable Architecture
+rule (no copy-paste between apps), §11.4.6 (no-guessing — file evidence
+captured; unverified items marked <code>UNCONFIRMED:</code>).</li>
+<li><strong>Investigation method:</strong> read-only file inspection. No
+builds run, no secrets printed, no code edited.</li>
+</ul>
+<hr />
+<h2 id="0-verdict-read-first">0. Verdict (read first)</h2>
+<p><strong>The audit's framing ("api-app has NO Crashlytics, needs
+operator to generate google-services.json") is PARTLY OUTDATED.</strong>
+Two facts change the picture:</p>
+<ol type="1">
+<li><p><strong>CONFIRMED — the gradle Firebase plugins are ALREADY
+applied to <code>:api-app</code>.</strong> The
+<code>lava.android.application</code> convention plugin
+(<code>buildSrc/src/main/kotlin/AndroidApplicationConventionPlugin.kt:18-19</code>)
+applies <code>com.google.gms.google-services</code> AND
+<code>com.google.firebase.crashlytics</code> to <em>every</em> module
+using <code>id("lava.android.application")</code> — and
+<code>api-app/build.gradle.kts:21</code> applies exactly that. So the
+plugin wiring is inherited, not missing.</p></li>
+<li><p><strong>CONFIRMED — <code>api-app/google-services.json</code>
+ALREADY EXISTS</strong> (1163 bytes, dated 2026-06-02, gitignored via
+<code>.gitignore:66</code> <code>**/google-services.json</code>). It
+registers BOTH api-app application-ids:</p>
+<ul>
+<li><code>digital.vasic.lava.api</code> (release)</li>
+<li><code>digital.vasic.lava.api.dev</code> (debug) (Verified by
+grepping <code>package_name</code> keys only — NO secret values were
+read or printed. <code>mobilesdk_app_id</code> count = 2, matching the
+two app-ids.)</li>
+</ul></li>
+</ol>
+<p><strong>What is ACTUALLY missing</strong> (the real §6.AC/§6.O gap
+that makes runtime Crashlytics report 404 / no telemetry):</p>
+<ul>
+<li><code>:api-app/build.gradle.kts</code> does NOT depend on the
+Firebase BOM / analytics / crashlytics artifacts (CONFIRMED:
+<code>grep -nE "firebase|core:common|analytics"</code> returns
+nothing).</li>
+<li><code>ApiApplication.onCreate()</code> does NOT initialize Firebase
+(CONFIRMED: <code>ApiApplication.kt</code> only publishes
+<code>controllerHolder</code>/<code>keyStoreHolder</code>; no
+<code>Firebase.crashlytics</code>, no
+<code>FirebaseInitializer</code>).</li>
+<li>There is NO <code>AnalyticsTracker</code> binding in the api-app
+Hilt graph, so the embedded server's Go-side errors and the app's own
+catch paths have no client-side sink.</li>
+</ul>
+<p><strong>Verdict: READY TO IMPLEMENT once the operator confirms the
+existing <code>api-app/google-services.json</code> is the genuine
+console-generated file for these two app-ids (see §6 checklist item
+OA-1).</strong> The blocking §6.H artifact appears already present;
+everything else is code the agent can write. The one thing the agent
+cannot self-verify is whether the existing JSON is a real console export
+vs. a placeholder — that is an operator confirmation, not a generation
+task.</p>
+<hr />
+<h2 id="1-api-app-module-map-evidence">1. <code>:api-app</code> module
+map (evidence)</h2>
+<table>
+<thead>
+<tr>
+<th>Concern</th>
+<th>File</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Gradle module decl</td>
+<td><code>settings.gradle.kts:22</code>
+<code>include(":api-app")</code></td>
+<td>sibling <code>:core:apiengine</code> at line 23</td>
+</tr>
+<tr>
+<td>Build script</td>
+<td><code>api-app/build.gradle.kts</code></td>
+<td>plugins: <code>lava.android.application</code> +
+<code>lava.android.hilt</code></td>
+</tr>
+<tr>
+<td>Release app-id</td>
+<td><code>api-app/build.gradle.kts</code>
+<code>applicationId = "digital.vasic.lava.api"</code></td>
+<td>versionCode 8 / versionName 0.2.4, minSdk 23</td>
+</tr>
+<tr>
+<td>Debug app-id</td>
+<td><code>applicationIdSuffix = ".dev"</code> →
+<code>digital.vasic.lava.api.dev</code></td>
+<td></td>
+</tr>
+<tr>
+<td>Manifest</td>
+<td><code>api-app/src/main/AndroidManifest.xml</code></td>
+<td><code>android:name=".ApiApplication"</code>; foreground
+<code>ApiEngineService</code>; <code>ApiKeyProvider</code>
+(signature-permission ContentProvider)</td>
+</tr>
+<tr>
+<td>Application class</td>
+<td><code>api-app/src/main/kotlin/lava/api/app/ApiApplication.kt</code></td>
+<td><code>@HiltAndroidApp</code>; injects
+<code>ApiEngineController</code> + <code>ApiKeyStore</code>; publishes
+process-wide holders in <code>onCreate()</code></td>
+</tr>
+<tr>
+<td>Embedded server boot</td>
+<td><code>:core:apiengine</code> (<code>NativeApiEngine</code>) →
+<code>liblavaapi.so</code></td>
+<td>driven by <code>ApiEngineController</code>
+(<code>api-app/.../control/ApiEngineController.kt</code>), run inside
+foreground <code>ApiEngineService</code>
+(<code>.../service/ApiEngineService.kt</code>); APK packages the Go
+<code>.so</code> via <code>:core:apiengine</code></td>
+</tr>
+<tr>
+<td>Compose UI</td>
+<td><code>.../ui/ApiControlScreen.kt</code> +
+<code>ApiControlViewModel</code> (Orbit MVI)</td>
+<td></td>
+</tr>
+<tr>
+<td>Challenge tests</td>
+<td><code>api-app/src/androidTest/.../challenges/Challenge0{1..5}*Test.kt</code></td>
+<td>C05 asserts embed source-hash sync</td>
+</tr>
+</tbody>
+</table>
+<p>The embedded Go server's errors are already routed Go-side through
+<code>observability.RecordNonFatal</code>
+(<code>lava-api-go/internal/observability/nonfatal.go</code>) which (1)
+always logs structured WARNING/ERROR via OTLP, and (2) optionally posts
+to Firebase Crashlytics REST when
+<code>LAVA_API_FIREBASE_CRASHLYTICS_ENABLED=true</code>.</p>
+<hr />
+<h2 id="2-the-app-crashlytics-pattern-to-mirror-evidence">2. The
+<code>:app</code> Crashlytics pattern to mirror (evidence)</h2>
+<h3
+id="2a-gradle-plugins-inherited-not-in-appbuildgradlekts-directly">2a.
+Gradle plugins (inherited, not in <code>app/build.gradle.kts</code>
+directly)</h3>
+<p><code>AndroidApplicationConventionPlugin.kt</code>:</p>
+<pre><code>apply(&quot;com.google.gms.google-services&quot;)
+apply(&quot;com.google.firebase.crashlytics&quot;)</code></pre>
+<p>Plugin classpath in <code>buildSrc/build.gradle.kts</code>:
+<code>libs.firebase.crashlytics.gradlePlugin</code> +
+<code>libs.google.services.gradlePlugin</code>. Catalog
+(<code>gradle/libs.versions.toml</code>):
+<code>firebaseCrashlyticsGradlePlugin = "3.0.4"</code>,
+<code>firebaseBom = "33.15.0"</code>; libs <code>firebase-bom</code>,
+<code>firebase-analytics</code>, <code>firebase-crashlytics</code>,
+<code>firebase-perf</code>.</p>
+<h3 id="2b-runtime-deps-appbuildgradlekts301-304">2b. Runtime deps
+(<code>app/build.gradle.kts:301-304</code>)</h3>
+<pre><code>implementation(platform(libs.firebase.bom))
+implementation(libs.firebase.analytics)
+implementation(libs.firebase.crashlytics)
+implementation(libs.firebase.perf)</code></pre>
+<h3 id="2c-application-init-appsrcmainlavaapplicationkt">2c. Application
+init (<code>app/src/main/.../LavaApplication.kt</code>)</h3>
+<ul>
+<li>FirebaseApp is auto-initialized by <code>FirebaseInitProvider</code>
+(a ContentProvider the google-services plugin injects) BEFORE
+<code>Application.onCreate()</code> — so NO manual
+<code>initializeApp()</code> (manual init was a 2026-05-05 Crashlytics
+incident root cause).</li>
+<li><code>LavaApplication.onCreate()</code> calls
+<code>FirebaseInitializer.initialize(...)</code> (defensively wrapped)
+passing nullable SDK accessors, isDebug, versionName/Code,
+applicationId, and a <code>warn</code> logger.</li>
+<li>Then <code>NavTeardownCrashReporter.install(analytics)</code> tags a
+known upstream crash.</li>
+</ul>
+<h3 id="2d-the-telemetry-surface-the-6ac-contract">2d. The telemetry
+surface (the §6.AC contract)</h3>
+<ul>
+<li><strong>Interface (reusable, in <code>core:common</code>):</strong>
+<code>lava.common.analytics.AnalyticsTracker</code> —
+<code>recordNonFatal(throwable, context)</code>,
+<code>recordWarning(message, context)</code>,
+<code>event/setUserId/setProperty/log</code>, plus <code>Params</code>
+(feature/module/operation/error_class/error_message/screen) +
+<code>Events</code>.
+<code>core/common/src/main/kotlin/lava/common/analytics/AnalyticsTracker.kt</code>.</li>
+<li><strong>Impl + DI + initializer (CURRENTLY app-private —
+<code>digital.vasic.lava.client.firebase</code>):</strong>
+<ul>
+<li><code>FirebaseAnalyticsTracker.kt</code> — nullable-SDK-safe;
+filters <code>CancellationException</code>; truncates values to 1024
+chars; <code>recordWarning</code> records a synthetic
+<code>LavaNonFatalWarning</code>.</li>
+<li><code>FirebaseProvidesModule.kt</code> — Hilt
+<code>@InstallIn(SingletonComponent)</code>; <code>@Provides</code> for
+<code>FirebaseAnalytics?</code>/<code>FirebaseCrashlytics?</code>/<code>FirebasePerformance?</code>
+(all runCatching → nullable) and <code>analyticsTracker(...)</code>
+returning real tracker or <code>NoOpAnalyticsTracker</code>.</li>
+<li><code>FirebaseInitializer.kt</code> — <code>internal object</code>,
+JVM-unit-testable, per-SDK guarded.</li>
+<li><code>NoOpAnalyticsTracker.kt</code> — fallback.</li>
+</ul></li>
+</ul>
+<hr />
+<h2 id="3-step-by-step-plan-to-wire-api-app">3. Step-by-step plan to
+wire <code>:api-app</code></h2>
+<blockquote>
+<p><strong>Decoupled Reusable Architecture note (load-bearing design
+decision):</strong> the Firebase impl/DI/initializer in
+<code>app/.../firebase/</code> are <code>internal</code> to
+<code>:app</code> and reference
+<code>digital.vasic.lava.client.BuildConfig</code>. Copy-pasting them
+into <code>:api-app</code> is a forbidden bluff vector (behaviour
+drifts, fixes don't propagate — the exact failure mode the rule names).
+<strong>Preferred approach: extract the reusable Firebase wiring to a
+shared module; have BOTH <code>:app</code> and <code>:api-app</code>
+consume it.</strong> A copy-paste fallback is documented but
+discouraged.</p>
+</blockquote>
+<h3
+id="option-a-recommended--extract-to-a-shared-coreanalytics-firebase-module">Option
+A (RECOMMENDED) — extract to a shared
+<code>:core:analytics-firebase</code> module</h3>
+<ol type="1">
+<li><strong>Create module <code>core/analytics-firebase/</code></strong>
+applying <code>lava.android.library</code> +
+<code>lava.android.hilt</code>, depending on <code>:core:common</code>
+(for <code>AnalyticsTracker</code>) + the Firebase
+BOM/analytics/crashlytics deps.</li>
+<li><strong>Move</strong> <code>FirebaseAnalyticsTracker</code>,
+<code>FirebaseProvidesModule</code>, <code>FirebaseInitializer</code>,
+<code>NoOpAnalyticsTracker</code> into it under a neutral package (e.g.
+<code>lava.analytics.firebase</code>). Make
+<code>FirebaseInitializer.initialize(...)</code> take
+applicationId/versionName/versionCode as params (already does) so it is
+app-agnostic — no <code>BuildConfig</code> reference inside the
+module.</li>
+<li><strong><code>:app</code></strong> drops the 4 firebase
+<code>implementation(...)</code> lines + the moved files; adds
+<code>implementation(project(":core:analytics-firebase"))</code>.
+<code>LavaApplication</code> keeps calling
+<code>FirebaseInitializer.initialize(...)</code> with
+<code>BuildConfig.*</code> (now imported from the shared module).</li>
+<li><strong><code>:api-app</code></strong> adds
+<code>implementation(project(":core:analytics-firebase"))</code> +
+<code>implementation(project(":core:common"))</code>. (The Firebase
+BOM/deps come transitively from the shared module's
+<code>api(...)</code> or are re-declared as needed.)</li>
+<li><code>NavTeardownCrashReporter</code> is client-nav-specific → STAYS
+in <code>:app</code> (the api-app has no androidx-navigation back-stack
+teardown crash).</li>
+</ol>
+<h3
+id="option-b-fallback-discouraged--add-deps--copy-wiring-into-api-app">Option
+B (fallback, discouraged) — add deps + copy wiring into
+<code>:api-app</code></h3>
+<ul>
+<li>Add to <code>api-app/build.gradle.kts</code> dependencies:
+<code>implementation(platform(libs.firebase.bom))</code>,
+<code>firebase.analytics</code>, <code>firebase.crashlytics</code>,
+<code>firebase.perf</code>,
+<code>implementation(project(":core:common"))</code>.</li>
+<li>Recreate the 4 firebase files under
+<code>lava.api.app.firebase</code> referencing
+<code>lava.api.app.BuildConfig</code>.</li>
+<li>This duplicates ~250 lines and violates the spirit of the Decoupled
+rule; only acceptable as a time-boxed transitional step with a tracked
+extraction TODO.</li>
+</ul>
+<h3
+id="application-init-both-options--apiapplicationoncreate">Application
+init (both options) — <code>ApiApplication.onCreate()</code></h3>
+<p>Mirror <code>LavaApplication</code> exactly:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="at">@Inject</span> <span class="kw">lateinit</span> <span class="kw">var</span> <span class="va">analytics</span><span class="op">:</span> AnalyticsTracker   <span class="co">// from the Hilt graph</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co">// ... in onCreate(), AFTER super.onCreate():</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>FirebaseInitializer<span class="op">.</span>initialize<span class="op">(</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    crashlytics <span class="op">=</span> <span class="op">{</span> runCatching <span class="op">{</span> Firebase<span class="op">.</span>crashlytics <span class="op">}.</span>getOrNull<span class="op">()</span> <span class="op">},</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    analytics   <span class="op">=</span> <span class="op">{</span> runCatching <span class="op">{</span> Firebase<span class="op">.</span>analytics <span class="op">}.</span>getOrNull<span class="op">()</span> <span class="op">},</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    performance <span class="op">=</span> <span class="op">{</span> runCatching <span class="op">{</span> Firebase<span class="op">.</span>performance <span class="op">}.</span>getOrNull<span class="op">()</span> <span class="op">},</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    isDebug <span class="op">=</span> BuildConfig<span class="op">.</span>DEBUG<span class="op">,</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    versionName <span class="op">=</span> BuildConfig<span class="op">.</span>VERSION_NAME<span class="op">,</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    versionCode <span class="op">=</span> BuildConfig<span class="op">.</span>VERSION_CODE<span class="op">,</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    applicationId <span class="op">=</span> BuildConfig<span class="op">.</span>APPLICATION_ID<span class="op">,</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    warn <span class="op">=</span> <span class="op">{</span> msg<span class="op">,</span> t <span class="op">-&gt;</span> Log<span class="op">.</span>w<span class="op">(</span>TAG<span class="op">,</span> msg<span class="op">,</span> t<span class="op">)</span> <span class="op">},</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span></code></pre></div>
+<p>Set a Crashlytics custom key distinguishing the artifact (e.g.
+<code>setCustomKey("artifact", "api-app")</code>) so api-app vs client
+crashes are separable in the shared Firebase project.</p>
+<h3 id="manifest-both-options">Manifest (both options)</h3>
+<p>No manifest change strictly required —
+<code>FirebaseInitProvider</code> is contributed by the google-services
+plugin's merged manifest automatically (same as <code>:app</code>). Keep
+<code>ApiApplication</code> as <code>android:name</code>.
+(<code>UNCONFIRMED:</code> whether <code>firebase-perf</code> adds a
+manifest provider that needs an explicit <code>tools:node="merge"</code>
+— <code>:app</code> builds fine without one, so api-app should too, but
+a build is required to prove the manifest merges cleanly; no build was
+run per task constraint.)</p>
+<h3
+id="wiring-the-embedded-go-servers-errors-to-client-side-crashlytics-optional-6ac-bridge">Wiring
+the embedded Go server's errors to client-side Crashlytics (optional,
+§6.AC bridge)</h3>
+<p>Two independent paths already exist; the plan only needs to pick how
+they reach the dashboard:</p>
+<ul>
+<li><strong>Go REST bridge (server-side → Firebase directly):</strong>
+set <code>LAVA_API_FIREBASE_CRASHLYTICS_ENABLED=true</code> for the
+embedded server. The embed reads env;
+<code>ApiEngineController</code>/<code>ApiEngineService</code> would
+need to pass that env into <code>NativeApiEngine</code>.
+(<code>UNCONFIRMED:</code> whether the embed currently forwards
+arbitrary env vars to the Go runtime — needs a read of
+<code>:core:apiengine</code> <code>NativeApiEngine</code> env-passing
+surface, out of scope for this read-only pass; flag for the
+implementation cycle.)</li>
+<li><strong>Kotlin bridge (server-side → app
+<code>AnalyticsTracker</code>):</strong> if
+<code>NativeApiEngine.status()</code> / the engine exposes recent errors
+to Kotlin, the controller can forward them via
+<code>analytics.recordNonFatal(...)</code> with
+<code>feature="api-embed"</code>. This keeps a single client-side sink
+and avoids shipping a Go-side Firebase API key. <strong>RECOMMENDED over
+the REST bridge</strong> because it avoids putting Firebase credentials
+into the Go embed (§6.H surface reduction).</li>
+</ul>
+<hr />
+<h2 id="4-6h--operator-action-items-the-blocking-items">4. §6.H /
+operator-action items (the blocking items)</h2>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Item</th>
+<th>Who</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>OA-1</strong></td>
+<td>Confirm <code>api-app/google-services.json</code> (already present,
+2026-06-02, gitignored) is the GENUINE Firebase-console export for
+app-ids <code>digital.vasic.lava.api</code> +
+<code>digital.vasic.lava.api.dev</code> — NOT a placeholder. The agent
+registered the package_names exist but cannot validate the API keys /
+mobilesdk_app_ids are real console values without reading secrets.</td>
+<td><strong>Operator</strong></td>
+<td><strong>Likely already done — needs confirmation only.</strong></td>
+</tr>
+<tr>
+<td>OA-2</td>
+<td>Confirm both api-app Firebase apps exist in the SAME Firebase
+project as the client apps (so api-app + client crashes share one
+dashboard). The <code>package_name</code> evidence shows all 4 app-ids;
+project-level co-location is <code>UNCONFIRMED:</code> (would require
+reading project_id from the JSONs — a secret-adjacent value, not read
+per task constraint).</td>
+<td><strong>Operator</strong></td>
+<td>Confirm in Firebase console.</td>
+</tr>
+<tr>
+<td>OA-3</td>
+<td>If the Go REST bridge path (§3) is chosen, the operator must provide
+the Firebase Crashlytics REST credentials/config for the embed and
+accept the §6.H risk of a key inside the Go <code>.so</code>.
+<strong>Avoidable</strong> by choosing the Kotlin-bridge path
+instead.</td>
+<td><strong>Operator</strong></td>
+<td>Only if REST bridge chosen.</td>
+</tr>
+<tr>
+<td>OA-4</td>
+<td>Do NOT commit either <code>google-services.json</code> (both already
+gitignored via <code>**/google-services.json</code>). Verify no agent
+step stages them.</td>
+<td>Agent + reviewer</td>
+<td>Enforced by <code>.gitignore</code> + pre-push.</td>
+</tr>
+</tbody>
+</table>
+<p>The agent CANNOT and MUST NOT invent a
+<code>google-services.json</code> (§6.H). The good news: it does not
+need to — one already exists for the correct app-ids. The remaining
+operator action is <strong>confirmation/validation</strong>, not
+generation.</p>
+<hr />
+<h2
+id="5-anti-bluff--verification-owed-at-implementation-time-not-done-here">5.
+Anti-bluff / verification owed at implementation time (not done
+here)</h2>
+<ul>
+<li>§6.O closure-log + validation test + Challenge for any Crashlytics
+issue this surfaces.</li>
+<li>A real-stack test that the api-app's <code>AnalyticsTracker</code>
+binding resolves and <code>recordNonFatal</code> reaches Crashlytics
+(mirror <code>FirebaseInitializerTest</code> /
+<code>FirebaseProvidesModule</code> coverage from
+<code>:app</code>).</li>
+<li>§6.AC: confirm every catch path in <code>:api-app</code> production
+code (<code>ApiEngineController</code>, <code>ApiEngineService</code>,
+<code>MdnsAdvertiser</code>, <code>ApiKeyStore</code>) records
+non-fatals — currently they have no sink.</li>
+<li>A build MUST be run (by the gradle-owning stream) to prove the
+google-services plugin accepts the existing api-app JSON and the
+manifest merges — this plan ran NO build per task constraint.</li>
+</ul>
+<hr />
+<h2 id="6-file-evidence-index-all-read-only-this-session">6. File
+evidence index (all read-only, this session)</h2>
+<ul>
+<li><code>settings.gradle.kts</code> — <code>:api-app</code> +
+<code>:core:apiengine</code> includes.</li>
+<li><code>api-app/build.gradle.kts</code> — app-ids, plugins, deps (no
+firebase/core:common).</li>
+<li><code>api-app/src/main/AndroidManifest.xml</code> —
+<code>ApiApplication</code>, services, provider.</li>
+<li><code>api-app/src/main/kotlin/lava/api/app/ApiApplication.kt</code>
+— no Firebase init present.</li>
+<li><code>buildSrc/src/main/kotlin/AndroidApplicationConventionPlugin.kt</code>
+— google-services + crashlytics plugins applied to all apps.</li>
+<li><code>buildSrc/build.gradle.kts</code> — firebase/google-services
+gradle-plugin classpath.</li>
+<li><code>gradle/libs.versions.toml</code> — firebase BOM/plugin
+versions + libs.</li>
+<li><code>app/build.gradle.kts:301-304</code> — firebase runtime
+deps.</li>
+<li><code>app/src/main/.../LavaApplication.kt</code> — init
+pattern.</li>
+<li><code>app/src/main/.../firebase/{FirebaseAnalyticsTracker,FirebaseProvidesModule,FirebaseInitializer,NoOpAnalyticsTracker}.kt</code>
+— impl/DI/initializer (app-private).</li>
+<li><code>core/common/src/main/kotlin/lava/common/analytics/AnalyticsTracker.kt</code>
+— reusable interface.</li>
+<li><code>lava-api-go/internal/observability/nonfatal.go</code> —
+Go-side RecordNonFatal + optional REST bridge.</li>
+<li><code>api-app/google-services.json</code> +
+<code>app/google-services.json</code> — present, gitignored;
+package_names only inspected (no secret values read/printed).</li>
+</ul>
+</body>
+</html>

@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-06-11-dynamic-provider-discovery</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1 id="dynamic-provider-discovery-implementation-plan">Dynamic Provider
+Discovery Implementation Plan</h1>
+<blockquote>
+<p><strong>For agentic workers:</strong> REQUIRED SUB-SKILL: Use
+superpowers:subagent-driven-development to implement this plan
+task-by-task. Steps use checkbox (<code>- [ ]</code>) syntax for
+tracking. Every test commit carries the Anti-Bluff
+<code>Bluff-Audit:</code> stamp (Mutation/Observed/Reverted) per
+§6.J/§6.L. Commit + push after each task; keep
+<code>scripts/check-constitution.sh</code> GREEN.</p>
+</blockquote>
+<p><strong>Goal:</strong> The Android client populates its provider list
+AND per-provider auth/sign-in UI dynamically from the chosen API
+instance; every configured Jackett indexer becomes a first-class
+discoverable provider usable with all client features.</p>
+<p><strong>Architecture:</strong> Add <code>GET /v1/providers</code> to
+lava-api-go returning the full provider catalogue (native + one entry
+per Jackett indexer). The client fetches it, maps each entry to a
+<code>RemoteTrackerDescriptor</code>, and registers a generic
+<code>ApiBackedTrackerClient</code> per provider that routes every
+operation through <code>/v1/{id}/{op}</code>. The compiled-in 7-provider
+registry becomes an offline fallback.</p>
+<p><strong>Tech Stack:</strong> Go 1.26 (Gin, oapi-codegen),
+Kotlin/Jetpack Compose, Orbit MVI, Hilt, kotlinx-serialization,
+Retrofit/OkHttp network layer, JUnit4 + MockWebServer, Robolectric,
+Compose UI Challenge tests on Genymotion via Containers submodule,
+HelixQA.</p>
+<p><strong>Spec:</strong>
+<code>docs/superpowers/specs/2026-06-11-dynamic-provider-discovery-design.md</code></p>
+<hr />
+<h2 id="phase-0--submodule-sync-deliberate-build-verified">Phase 0 —
+Submodule sync (deliberate, build-verified)</h2>
+<h3 id="task-01-pull-leaf-code-dependency-submodules">Task 0.1: Pull
+leaf code-dependency submodules</h3>
+<p><strong>Files:</strong>
+<code>submodules/{auth,cache,concurrency,config,database,ratelimiter,recovery,security,http3,mdns,middleware,observability}</code>
+(gitlinks), <code>.gitmodules</code> (unchanged)</p>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 1:</strong> For each
+leaf submodule:
+<code>git -C submodules/&lt;x&gt; fetch origin &amp;&amp; git -C submodules/&lt;x&gt; log --oneline HEAD..origin/HEAD | head</code>
+— record what's incoming.</label></li>
+<li><label><input type="checkbox" /><strong>Step 2:</strong>
+<code>git -C submodules/&lt;x&gt; pull --ff-only</code> for each. If a
+non-ff is needed, STOP and report (don't force).</label></li>
+<li><label><input type="checkbox" /><strong>Step 3:</strong> Rebuild the
+Go module:
+<code>cd lava-api-go &amp;&amp; go build ./... &amp;&amp; GOMAXPROCS=2 nice -n 19 go test ./internal/... 2&gt;&amp;1 | tail -20</code>.
+Expected: build OK, tests pass.</label></li>
+<li><label><input type="checkbox" /><strong>Step 4:</strong> If green,
+stage the pin bumps: <code>git add submodules/&lt;x&gt; …</code>; commit
+<code>chore(submodules): pull leaf deps to latest (build+test green)</code>.</label></li>
+<li><label><input type="checkbox" /><strong>Step 5:</strong> Push to
+github + gitlab.</label></li>
+</ul>
+<h3 id="task-02-pull-containers--challenges--helixqa--tracker_sdk">Task
+0.2: Pull containers + challenges + helixqa + tracker_sdk</h3>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 1:</strong>
+<code>git -C submodules/containers pull --ff-only</code>;
+<code>git -C submodules/challenges pull --ff-only</code>;
+<code>git -C submodules/helixqa pull --ff-only</code> (per the
+always-track-upstream waiver, §6.AD);
+<code>git -C submodules/tracker_sdk pull --ff-only</code>.</label></li>
+<li><label><input type="checkbox" /><strong>Step 2:</strong> Rebuild
+Android:
+<code>./gradlew :app:assembleDebug -x lint 2&gt;&amp;1 | tail -5</code>.
+Rebuild Go. Run
+<code>scripts/run-genymotion-challenges.sh --test-class lava.app.challenges.Challenge00CrashSurvivalTest</code>
+(if a VM is up) as a smoke gate.</label></li>
+<li><label><input type="checkbox" /><strong>Step 3:</strong> On green,
+commit the pin bumps + push.</label></li>
+<li><label><input type="checkbox" /><strong>Step 4:</strong>
+<code>constitution</code> + <code>panoptic</code>: do NOT pull here.
+Note in CONTINUATION that they advance via CONST-049 separately; flag
+any new mandatory rules for a follow-up adoption cycle.</label></li>
+</ul>
+<hr />
+<h2 id="phase-1--api-provider-catalogue-endpoint">Phase 1 — API:
+provider catalogue endpoint</h2>
+<h3
+id="task-11-extend-the-provider-interface-with-catalogue-metadata">Task
+1.1: Extend the <code>Provider</code> interface with catalogue
+metadata</h3>
+<p><strong>Files:</strong></p>
+<ul>
+<li>Modify: <code>lava-api-go/internal/provider/provider.go</code> (the
+<code>Provider</code> interface ~244-275)</li>
+<li>Test:
+<code>lava-api-go/internal/provider/provider_meta_test.go</code></li>
+</ul>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 1 (test
+first):</strong> Write
+<code>TestProvider_CatalogueMetadataDefaults</code> asserting a minimal
+fake provider exposes <code>Kind() == "native"</code>,
+<code>SupportsAnonymous() == false</code>,
+<code>BaseURLs() == nil</code> by default.</label></li>
+<li><label><input type="checkbox" /><strong>Step 2:</strong> Run
+<code>cd lava-api-go &amp;&amp; go test ./internal/provider/ -run TestProvider_CatalogueMetadata -v</code>.
+Expected: FAIL (methods undefined).</label></li>
+<li><label><input type="checkbox" /><strong>Step 3:</strong> Add to the
+<code>Provider</code> interface: <code>Kind() string</code>,
+<code>SupportsAnonymous() bool</code>, <code>BaseURLs() []string</code>.
+Provide a <code>BaseProvider</code> embeddable struct (or default
+helper) so existing providers compile with defaults
+(<code>Kind()="native"</code>). Update existing native provider impls
+(rutracker, rutor, nnmclub, kinozal, archiveorg, gutenberg, iptorrents)
+to return their real <code>BaseURLs</code> +
+<code>SupportsAnonymous</code>.</label></li>
+<li><label><input type="checkbox" /><strong>Step 4:</strong>
+<code>go build ./... &amp;&amp; go test ./internal/provider/ -v</code>.
+Expected: PASS.</label></li>
+<li><label><input type="checkbox" /><strong>Step 5:</strong> Commit with
+Bluff-Audit stamp; push.</label></li>
+</ul>
+<h3 id="task-12-get-v1providers-handler">Task 1.2:
+<code>GET /v1/providers</code> handler</h3>
+<p><strong>Files:</strong></p>
+<ul>
+<li>Create:
+<code>lava-api-go/internal/handlers/v1/providers.go</code></li>
+<li>Test:
+<code>lava-api-go/internal/handlers/v1/providers_test.go</code></li>
+<li>Modify: <code>lava-api-go/internal/handlers/v1/handlers.go</code>
+(register route before the <code>/:provider/</code> group)</li>
+<li>Modify: <code>lava-api-go/api/openapi.yaml</code> (add the path +
+ProviderDescriptor schema); regenerate
+<code>internal/gen/server</code></li>
+</ul>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 1 (test):</strong>
+<code>TestProvidersHandler_ReturnsCatalogue</code> — real
+<code>httptest</code> Gin engine with a registry holding 2 fake
+providers (one native, one with kind=jackett); assert
+<code>GET /v1/providers</code> 200 + JSON body has both, with fields
+<code>id,displayName,kind,capabilities,authType,encoding,baseUrls,supportsAnonymous</code>
+(and <code>indexer</code> for the jackett one). Primary assertion on the
+response BODY (§6.AB), not the status alone.</label></li>
+<li><label><input type="checkbox" /><strong>Step 2:</strong> Run it →
+FAIL (handler undefined).</label></li>
+<li><label><input type="checkbox" /><strong>Step 3:</strong> Implement
+<code>ProvidersHandler.GetProviders(c *gin.Context)</code> building the
+DTO list from <code>registry.All()</code>; map capability enums → string
+names; §6.AC telemetry on any error. Register at
+<code>group.GET("/providers", providers.GetProviders)</code> BEFORE the
+<code>/:provider</code> middleware group in <code>handlers.go</code>.
+Add the path to <code>openapi.yaml</code>; <code>make generate</code>
+(oapi-codegen) → ensure empty diff gate still passes.</label></li>
+<li><label><input type="checkbox" /><strong>Step 4:</strong>
+<code>go test ./internal/handlers/v1/ -run TestProviders -v</code> →
+PASS. <code>go test ./internal/... </code> → PASS.</label></li>
+<li><label><input type="checkbox" /><strong>Step 5:</strong> Commit
+(Bluff-Audit) + push.</label></li>
+</ul>
+<h3 id="task-13-contract-test--discovery-over-real-http">Task 1.3:
+Contract test — discovery over real HTTP</h3>
+<p><strong>Files:</strong> Create
+<code>lava-api-go/tests/contract/providers_contract_test.go</code></p>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 1 (test):</strong> Boot
+the real router (real registry, no Postgres needed for discovery),
+<code>GET /v1/providers</code>, assert every returned provider's
+declared capabilities each resolve to a non-501 on
+<code>/v1/{id}/{cap-route}</code> (capability honesty, §6.E) — at least
+the SEARCH route returns != 501/404 for each.</label></li>
+<li><label><input type="checkbox" /><strong>Step 2:</strong>
+<code>go test ./tests/contract/ -run TestProvidersContract -v</code> →
+FAIL.</label></li>
+<li><label><input type="checkbox" /><strong>Step 3:</strong> (No new
+prod code — this validates Task 1.2.) If it fails because a provider
+declares a cap with no route, fix the
+registration/declaration.</label></li>
+<li><label><input type="checkbox" /><strong>Step 4:</strong> → PASS.
+Commit + push.</label></li>
+</ul>
+<hr />
+<h2 id="phase-2--api-jackett-indexers-as-providers">Phase 2 — API:
+Jackett indexers as providers</h2>
+<h3 id="task-21-enumerate-jackett-indexers">Task 2.1: Enumerate Jackett
+indexers</h3>
+<p><strong>Files:</strong></p>
+<ul>
+<li>Create: <code>lava-api-go/internal/jackett/indexers.go</code></li>
+<li>Test: <code>lava-api-go/internal/jackett/indexers_test.go</code> (+
+testdata fixture of Jackett <code>/api/v2.0/indexers</code> JSON)</li>
+</ul>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 1 (test):</strong>
+<code>TestListIndexers_ParsesConfigured</code> — MockWebServer-style
+<code>httptest</code> server returning a captured Jackett indexers JSON;
+assert <code>ListIndexers(ctx)</code> returns the expected
+<code>[]IndexerInfo{ID,Name,Caps}</code> (configured indexers only).
+Real HTTP (not mocked client).</label></li>
+<li><label><input type="checkbox" /><strong>Step 2:</strong> Run →
+FAIL.</label></li>
+<li><label><input type="checkbox" /><strong>Step 3:</strong> Implement
+<code>Client.ListIndexers(ctx) ([]IndexerInfo, error)</code> →
+<code>GET {base}/api/v2.0/indexers?configured=true&amp;apikey=…</code>
+(apikey from config, §6.H), parse JSON.</label></li>
+<li><label><input type="checkbox" /><strong>Step 4:</strong> → PASS.
+Commit (Bluff-Audit) + push.</label></li>
+</ul>
+<h3 id="task-22-jackettindexerprovider-implements-provider">Task 2.2:
+<code>JackettIndexerProvider</code> implements
+<code>Provider</code></h3>
+<p><strong>Files:</strong></p>
+<ul>
+<li>Create:
+<code>lava-api-go/internal/provider/jackettprovider/provider.go</code></li>
+<li>Test:
+<code>lava-api-go/internal/provider/jackettprovider/provider_test.go</code></li>
+</ul>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 1 (test):</strong>
+<code>TestJackettIndexerProvider_SearchDelegates</code> — a
+<code>JackettIndexerProvider{indexer:"1337x", client:&lt;fake jackett searcher&gt;}</code>;
+assert <code>ID()=="1337x"</code>, <code>Kind()=="jackett"</code>,
+<code>AuthType()==AuthNone</code>, <code>Capabilities()</code> contains
+SEARCH+MAGNET_LINK+TORRENT_DOWNLOAD; <code>Search(...)</code> calls the
+jackett client with indexer "1337x" and maps to
+<code>provider.SearchResult</code>. <code>GetForumTree</code> etc.
+return the not-implemented error.</label></li>
+<li><label><input type="checkbox" /><strong>Step 2:</strong> Run →
+FAIL.</label></li>
+<li><label><input type="checkbox" /><strong>Step 3:</strong> Implement
+the type. Search/DownloadFile delegate to the jackett client; extended
+caps return <code>provider.ErrNotImplemented</code>.</label></li>
+<li><label><input type="checkbox" /><strong>Step 4:</strong> → PASS.
+Commit + push.</label></li>
+</ul>
+<h3
+id="task-23-register-a-provider-per-indexer-at-startup-with-collision-guard">Task
+2.3: Register a provider per indexer at startup (with collision
+guard)</h3>
+<p><strong>Files:</strong></p>
+<ul>
+<li>Modify: <code>lava-api-go/internal/router/router.go</code> (the
+<code>JackettEnabled</code> wiring block ~117-125)</li>
+<li>Test:
+<code>lava-api-go/internal/router/jackett_registration_test.go</code></li>
+</ul>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 1 (test):</strong>
+<code>TestJackettProvidersRegistered</code> — build the router with
+Jackett enabled + a stub <code>ListIndexers</code> returning
+<code>["1337x","rutracker"]</code>; assert the registry now contains
+<code>1337x</code> as a jackett provider AND that <code>rutracker</code>
+(collision with a native id) was NOT overwritten (native wins) + a
+warning recorded.</label></li>
+<li><label><input type="checkbox" /><strong>Step 2:</strong> Run →
+FAIL.</label></li>
+<li><label><input type="checkbox" /><strong>Step 3:</strong> In router
+wiring: when Jackett enabled, <code>ListIndexers</code> → for each, if
+<code>registry.Get(id)==nil</code> register a
+<code>JackettIndexerProvider</code>; else skip +
+<code>observability.RecordWarning</code>. Enumeration failure → log
+§6.AC, continue with native providers.</label></li>
+<li><label><input type="checkbox" /><strong>Step 4:</strong> → PASS;
+<code>GET /v1/providers</code> now includes jackett indexers (extend
+Task 1.2 test data via an integration check). Commit +
+push.</label></li>
+</ul>
+<h3 id="task-24-e2e--discover--search-a-jackett-provider">Task 2.4: e2e
+— discover → search a Jackett provider</h3>
+<p><strong>Files:</strong> Create
+<code>lava-api-go/tests/e2e/jackett_provider_e2e_test.go</code></p>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 1 (test):</strong> Real
+router + a stub Jackett upstream (httptest serving Torznab XML);
+<code>GET /v1/providers</code> lists the indexer;
+<code>GET /v1/{indexer}/search?query=ubuntu</code> returns mapped
+results; <code>GET /v1/{indexer}/download/{id}</code> returns the
+magnet/torrent. Assert on the result body.</label></li>
+<li><label><input type="checkbox" /><strong>Step 2-4:</strong> Run → fix
+wiring if needed → PASS. Commit + push.</label></li>
+</ul>
+<hr />
+<h2 id="phase-3--client-catalogue-fetch--remote-descriptor">Phase 3 —
+Client: catalogue fetch + remote descriptor</h2>
+<h3 id="task-31-providerdescriptordto--json-parse">Task 3.1:
+<code>ProviderDescriptorDto</code> + JSON parse</h3>
+<p><strong>Files:</strong></p>
+<ul>
+<li>Create:
+<code>core/network/src/main/kotlin/lava/network/dto/ProviderDescriptorDto.kt</code>
+(or the existing dto package)</li>
+<li>Test:
+<code>core/network/src/test/kotlin/lava/network/dto/ProviderDescriptorDtoTest.kt</code></li>
+</ul>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 1 (test):</strong>
+Parse a captured <code>GET /v1/providers</code> JSON (native + jackett
+entries) → assert fields incl. <code>kind</code>, optional
+<code>indexer</code>, <code>capabilities</code> list,
+<code>authType</code>, <code>supportsAnonymous</code>.</label></li>
+<li><label><input type="checkbox" /><strong>Step 2:</strong> Run
+<code>./gradlew :core:network:test --tests "*ProviderDescriptorDtoTest"</code>
+→ FAIL.</label></li>
+<li><label><input type="checkbox" /><strong>Step 3:</strong>
+<code>@Serializable data class ProviderDescriptorDto(...)</code> +
+<code>data class ProvidersResponseDto(val providers: List&lt;ProviderDescriptorDto&gt;)</code>.</label></li>
+<li><label><input type="checkbox" /><strong>Step 4:</strong> → PASS.
+Commit (Bluff-Audit) + push.</label></li>
+</ul>
+<h3 id="task-32-remotetrackerdescriptor-mapping">Task 3.2:
+<code>RemoteTrackerDescriptor</code> mapping</h3>
+<p><strong>Files:</strong></p>
+<ul>
+<li>Create:
+<code>core/tracker/api/src/main/kotlin/lava/tracker/api/RemoteTrackerDescriptor.kt</code></li>
+<li>Test:
+<code>core/tracker/api/src/test/kotlin/lava/tracker/api/RemoteTrackerDescriptorTest.kt</code></li>
+</ul>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 1 (test):</strong>
+Given a <code>ProviderDescriptorDto</code>,
+<code>RemoteTrackerDescriptor.from(dto)</code> yields a
+<code>TrackerDescriptor</code> with <code>trackerId</code>,
+<code>displayName</code>,
+<code>capabilities: Set&lt;TrackerCapability&gt;</code> (string→enum,
+unknown values dropped with a logged warning, NOT a crash),
+<code>authType: AuthType</code>,
+<code>baseUrls: List&lt;MirrorUrl&gt;</code>,
+<code>apiSupported=true</code>, <code>verified=true</code>,
+<code>supportsAnonymous</code> from dto. Assert an unknown capability
+string does not throw.</label></li>
+<li><label><input type="checkbox" /><strong>Step 2-4:</strong> FAIL →
+implement mapping (tolerant enum parse) → PASS. Commit +
+push.</label></li>
+</ul>
+<h3 id="task-33-providercatalogrepository--fetchprovidersusecase">Task
+3.3: <code>ProviderCatalogRepository</code> +
+<code>FetchProvidersUseCase</code></h3>
+<p><strong>Files:</strong></p>
+<ul>
+<li>Create:
+<code>core/data/src/main/kotlin/lava/data/provider/ProviderCatalogRepository.kt</code></li>
+<li>Create:
+<code>core/domain/src/main/kotlin/lava/domain/usecase/FetchProvidersUseCase.kt</code></li>
+<li>Test:
+<code>core/data/src/test/kotlin/lava/data/provider/ProviderCatalogRepositoryTest.kt</code>
+(MockWebServer)</li>
+</ul>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 1 (test):</strong>
+MockWebServer serving <code>/v1/providers</code>;
+<code>repository.fetchProviders(baseUrl)</code> returns the mapped
+<code>List&lt;RemoteTrackerDescriptor&gt;</code>. Add a failure case:
+500 / timeout → returns <code>Result.failure</code> (or empty + flag),
+does NOT throw. Real OkHttp, real parse (§6.J — not mocked
+SUT).</label></li>
+<li><label><input type="checkbox" /><strong>Step 2-4:</strong> FAIL →
+implement repo (real network call + parse + map) + the use case wrapping
+it → PASS. Commit + push.</label></li>
+</ul>
+<hr />
+<h2
+id="phase-4--client-generic-api-backed-client--dynamic-registry">Phase 4
+— Client: generic API-backed client + dynamic registry</h2>
+<h3 id="task-41-apibackedtrackerclient">Task 4.1:
+<code>ApiBackedTrackerClient</code></h3>
+<p><strong>Files:</strong></p>
+<ul>
+<li>Create:
+<code>core/tracker/client/src/main/kotlin/lava/tracker/client/ApiBackedTrackerClient.kt</code></li>
+<li>Test:
+<code>core/tracker/client/src/test/kotlin/lava/tracker/client/ApiBackedTrackerClientTest.kt</code>
+(MockWebServer)</li>
+</ul>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 1 (test):</strong>
+Construct with a <code>RemoteTrackerDescriptor</code>
+(caps={SEARCH,TORRENT_DOWNLOAD}, authType=NONE) + a network api pointed
+at MockWebServer. Assert:
+<code>getFeature(SearchableTracker::class)</code> non-null;
+<code>search(q)</code> issues <code>GET /v1/{id}/search?query=q</code>
+and maps the response to domain <code>SearchResult</code>;
+<code>getFeature(BrowsableTracker::class)</code> is NULL (cap not
+declared — capability honesty); <code>download(id)</code> hits
+<code>/v1/{id}/download/{id}</code>. Primary assertion: the request path
++ the parsed result (§6.AB).</label></li>
+<li><label><input type="checkbox" /><strong>Step 2-4:</strong> FAIL →
+implement the client delegating each feature to the network layer keyed
+by <code>descriptor.trackerId</code>; <code>getFeature&lt;T&gt;</code>
+gated on <code>descriptor.capabilities</code> → PASS. Commit +
+push.</label></li>
+</ul>
+<h3 id="task-42-dynamictrackerregistrypopulatefrom">Task 4.2:
+<code>DynamicTrackerRegistry.populateFrom</code></h3>
+<p><strong>Files:</strong></p>
+<ul>
+<li>Modify:
+<code>core/tracker/registry/.../DefaultTrackerRegistry.kt</code> (add
+<code>populateFrom(descriptors, clientFactory)</code>)</li>
+<li>Modify:
+<code>core/tracker/client/.../di/TrackerClientModule.kt</code> (registry
+becomes runtime-populatable; bundled 7 are the fallback)</li>
+<li>Test:
+<code>core/tracker/registry/src/test/kotlin/.../DynamicRegistryTest.kt</code></li>
+</ul>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 1 (test):</strong>
+<code>populateFrom([descA, descB])</code> registers an
+<code>ApiBackedTrackerClient</code> for each;
+<code>listAvailableTrackers()</code> returns A+B; re-populate replaces;
+empty list → falls back to bundled descriptors (assert the 7 bundled
+appear when populate is given empty).</label></li>
+<li><label><input type="checkbox" /><strong>Step 2-4:</strong> FAIL →
+implement → PASS. Commit + push.</label></li>
+</ul>
+<hr />
+<h2 id="phase-5--client-onboarding-wiring--auth-ui">Phase 5 — Client:
+onboarding wiring + auth UI</h2>
+<h3
+id="task-51-onboarding-fetches-the-catalogue-after-api-selection">Task
+5.1: Onboarding fetches the catalogue after API selection</h3>
+<p><strong>Files:</strong></p>
+<ul>
+<li>Modify: <code>feature/onboarding/.../OnboardingViewModel.kt</code>
+(after ApiSelection probe success → FetchProvidersUseCase → populate
+registry → advance)</li>
+<li>Test:
+<code>feature/onboarding/src/test/kotlin/.../OnboardingViewModelDynamicProvidersTest.kt</code></li>
+</ul>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 1 (test):</strong> Real
+OnboardingViewModel + real FetchProvidersUseCase + MockWebServer API;
+drive ApiSelection→probe→fetch; assert state.providers reflects the
+API's list (incl. a provider the bundled registry does NOT have, e.g. a
+jackett indexer); assert fetch-failure path shows the bundled fallback +
+a non-blocking notice (NOT a blank list — §6.AB).</label></li>
+<li><label><input type="checkbox" /><strong>Step 2-4:</strong> FAIL →
+wire it → PASS. Commit + push.</label></li>
+</ul>
+<h3
+id="task-52-provider-list--auth-ui-render-from-dynamic-descriptors">Task
+5.2: Provider list + auth UI render from dynamic descriptors</h3>
+<p><strong>Files:</strong></p>
+<ul>
+<li>Modify (verify/extend):
+<code>feature/login/.../ProviderLoginViewModel.kt</code>,
+<code>ProviderLoginScreen.kt</code> (ensure
+NONE/API_KEY/FORM_LOGIN/CAPTCHA all render; add API_KEY field if
+missing)</li>
+<li>Test:
+<code>feature/login/src/test/kotlin/.../ProviderLoginAuthUiTest.kt</code></li>
+</ul>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 1 (test):</strong> For
+each AuthType, the form composable shows the right fields
+(NONE→Continue; FORM_LOGIN→user+pass; CAPTCHA_LOGIN→user+pass+captcha;
+API_KEY→key field). Robolectric/Compose test asserting node presence
+(rendered UI state, §6.AB clause 1).</label></li>
+<li><label><input type="checkbox" /><strong>Step 2-4:</strong> FAIL →
+add API_KEY rendering branch → PASS. Commit + push.</label></li>
+</ul>
+<hr />
+<h2 id="phase-6--challenge-tests--helixqa">Phase 6 — Challenge tests +
+HelixQA</h2>
+<h3 id="task-61-challenge39dynamicproviderdiscoverytest">Task 6.1:
+<code>Challenge39DynamicProviderDiscoveryTest</code></h3>
+<p><strong>Files:</strong> Create
+<code>app/src/androidTest/kotlin/lava/app/challenges/Challenge39DynamicProviderDiscoveryTest.kt</code></p>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 1:</strong> Drive
+onboarding → choose the API → assert the provider list is populated FROM
+the API (a provider the bundled set lacks appears) → select it → search
+→ assert a real result row renders. KDoc carries the FALSIFIABILITY
+REHEARSAL block (break the fetch → list falls back/empty → test
+fails).</label></li>
+<li><label><input type="checkbox" /><strong>Step 2:</strong> Run on the
+Genymotion VM:
+<code>scripts/run-genymotion-challenges.sh --test-class lava.app.challenges.Challenge39DynamicProviderDiscoveryTest</code>.
+Expected: BUILD SUCCESSFUL + PASS. Capture evidence.</label></li>
+<li><label><input type="checkbox" /><strong>Step 3:</strong> Perform the
+falsifiability rehearsal; record in the commit Bluff-Audit. Commit +
+push.</label></li>
+</ul>
+<h3 id="task-62-challenge40jackettindexerprovidertest">Task 6.2:
+<code>Challenge40JackettIndexerProviderTest</code></h3>
+<p><strong>Files:</strong> Create
+<code>app/src/androidTest/kotlin/lava/app/challenges/Challenge40JackettIndexerProviderTest.kt</code></p>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 1:</strong> A Jackett
+indexer appears as a provider → select → search → result → download
+reachable. Falsifiability block.</label></li>
+<li><label><input type="checkbox" /><strong>Step 2:</strong> Run on VM,
+capture evidence. Commit + push.</label></li>
+</ul>
+<h3 id="task-63-helixqa-qa-session-over-the-dynamic-onboarding">Task
+6.3: HelixQA QA session over the dynamic onboarding</h3>
+<p><strong>Files:</strong> Add/extend a HelixQA challenge script invoked
+by <code>scripts/run-helixqa-challenges.sh</code></p>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 1:</strong> Author a
+QA-session scenario: launch → onboarding → choose API → provider list
+from API → pick a provider → search. Vision-guided.</label></li>
+<li><label><input type="checkbox" /><strong>Step 2:</strong>
+<code>bash scripts/run-helixqa-challenges.sh --only dynamic-provider-discovery --runner host</code>
+(or containerized). Capture evidence under
+<code>.lava-ci-evidence/.../helixqa-challenges/</code>.</label></li>
+<li><label><input type="checkbox" /><strong>Step 3:</strong> Commit +
+push.</label></li>
+</ul>
+<h3 id="task-64-coverage-scanner--challenge-coverage-gate">Task 6.4:
+coverage scanner + challenge-coverage gate</h3>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 1:</strong> Run
+<code>scripts/check-challenge-coverage.sh</code> — confirm the
+onboarding/provider features map to the new Challenges. Run
+<code>scripts/check-challenge-discrimination.sh</code> STRICT on
+C39/C40.</label></li>
+<li><label><input type="checkbox" /><strong>Step 2:</strong> Run
+<code>scripts/check-constitution.sh</code> GREEN. Commit any gate-doc
+updates.</label></li>
+</ul>
+<hr />
+<h2
+id="phase-7--full-build-device-verification-evidence-continuation">Phase
+7 — Full build, device verification, evidence, CONTINUATION</h2>
+<h3 id="task-71-full-rebuild--full-test-suite">Task 7.1: Full rebuild +
+full test suite</h3>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 1:</strong>
+<code>cd lava-api-go &amp;&amp; GOMAXPROCS=2 nice -n 19 go test ./... 2&gt;&amp;1 | tail -30</code>
+→ all PASS.</label></li>
+<li><label><input type="checkbox" /><strong>Step 2:</strong>
+<code>./gradlew testDebugUnitTest 2&gt;&amp;1 | tail -20</code> → all
+PASS.</label></li>
+<li><label><input type="checkbox" /><strong>Step 3:</strong>
+<code>build_and_release.sh</code> → 4 APKs + api-go binary/image build.
+Capture.</label></li>
+</ul>
+<h3 id="task-72-device-gate-genymotion-via-containers-6ah">Task 7.2:
+Device gate (Genymotion via Containers, §6.AH)</h3>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 1:</strong>
+<code>scripts/run-genymotion-challenges.sh</code> core set (C00/C01) +
+C39/C40 + the existing provider Challenges (C02/C03/C09-12/C38). All
+PASS, evidence captured.</label></li>
+<li><label><input type="checkbox" /><strong>Step 2:</strong> Record the
+per-AVD evidence.</label></li>
+</ul>
+<h3 id="task-73-continuation--ledger--push">Task 7.3: CONTINUATION +
+ledger + push</h3>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 1:</strong> Update
+<code>docs/CONTINUATION.md</code> §0 (feature landed, evidence paths).
+Record LVA items for the feature in <code>docs/workable_items.db</code>;
+regen Issues/Fixed; sync gate GREEN.</label></li>
+<li><label><input type="checkbox" /><strong>Step 2:</strong> Commit +
+push to both mirrors; verify convergence +
+<code>check-constitution</code> GREEN.</label></li>
+<li><label><input type="checkbox" /><strong>Step 3:</strong> Report to
+operator. (Distribute is a SEPARATE operator-gated step — do not
+distribute without explicit go-ahead per §6.AA/§6.Z; the auth rotation +
+two-stage + canary runbook applies.)</label></li>
+</ul>
+<hr />
+<h2 id="self-review-notes">Self-review notes</h2>
+<ul>
+<li><strong>Spec coverage:</strong> §4.1 → Phase 1+2; §4.2 → Phase
+3+4+5; §4.3 dataflow → exercised by Phase 6; §5 error handling → Tasks
+3.3/5.1 (fallback) + 1.2/2.3 (telemetry); §6 testing → Phases 1-2 (Go),
+3-5 (Kotlin), 6 (Challenge+HelixQA); §7 submodules → Phase 0; §9
+distribute → Task 7.3 note (gated).</li>
+<li><strong>No placeholders:</strong> every task names exact files,
+signatures, test intent, and run commands. Implementation bodies are
+produced via TDD by the executing subagent against the stated tests +
+the spec's concrete interfaces.</li>
+<li><strong>Type consistency:</strong>
+<code>RemoteTrackerDescriptor.from(dto)</code>,
+<code>ProviderCatalogRepository.fetchProviders(baseUrl)</code>,
+<code>FetchProvidersUseCase</code>, <code>ApiBackedTrackerClient</code>,
+<code>DefaultTrackerRegistry.populateFrom</code>,
+<code>ProvidersHandler.GetProviders</code>,
+<code>JackettIndexerProvider</code>, <code>Client.ListIndexers</code> —
+names used consistently across tasks.</li>
+</ul>
+</body>
+</html>

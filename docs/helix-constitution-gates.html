@@ -175,10 +175,16 @@
 <h1
 id="helixconstitution-gates--lava-implementation-status">HelixConstitution
 Gates — Lava Implementation Status</h1>
-<p><strong>Last updated:</strong> 2026-05-16 (HelixQA Phase 4-debt
-closed — upstream PR <code>b13ba7c</code> landed
-<code>helix-deps.yaml</code> + <code>install_upstreams.sh</code>;
-Lava-side waivers removed; 17/17 own-org submodules satisfy
+<p><strong>Last updated:</strong> 2026-06-14 (governance-debt audit
+<code>173e9747</code> re-verification: corrected stale rows —
+<code>CM-SUBAGENT-DELEGATION-AUDIT</code> scanner now exists +
+verify-all-wired; <code>CM-COVERAGE-LEDGER</code> is STRICT-default;
+<code>CM-CHALLENGE-COVERAGE</code> scanner STRICT-default; retired
+<code>CM-LVA-TICKETS-SYNC</code> → <code>CM-WORKABLE-ITEMS-SYNC</code>;
+build-stats tracker + script-docs-sync confirmed wired). Prior:
+2026-05-16 (HelixQA Phase 4-debt closed — upstream PR
+<code>b13ba7c</code> landed <code>helix-deps.yaml</code> +
+<code>install_upstreams.sh</code>; 17/17 own-org submodules satisfy
 <code>CM-HELIX-DEPS-MANIFEST</code> +
 <code>CM-CANONICAL-ROOT-CLARITY</code> +
 <code>CM-INSTALL-UPSTREAMS-RAN</code> in fully STRICT mode)
@@ -213,8 +219,12 @@ Issues/Issues_Summary trackers; equivalence documented in §6.AD.3)</td>
 <tr>
 <td><code>CM-COMMIT-DOCS-EXISTS</code></td>
 <td>§11.4.22 (lightweight commit path)</td>
-<td><code>scripts/commit_all.sh</code> exists + executable; verified by
-<code>scripts/check-constitution.sh</code> 6.AD(5)</td>
+<td><code>scripts/check-commit-docs-exists.sh</code> (present +
+executable; verify-all-wired at
+<code>scripts/verify-all-constitution-rules.sh:190</code> over
+<code>LAVA_COMMIT_RANGE='HEAD~5..HEAD'</code>) — verifies docs
+referenced in recent commit messages resolve (2026-06-14
+re-verification)</td>
 <td>✅ wired</td>
 </tr>
 <tr>
@@ -286,35 +296,35 @@ not in use)</td>
 <tr>
 <td><code>CM-SUBAGENT-DELEGATION-AUDIT</code></td>
 <td>§11.4.20 (subagent-driven-by-default mandate)</td>
-<td>n/a (no automated audit of subagent vs. foreground delegation in
-Lava; would require either Claude Code telemetry integration or manual
-operator review)</td>
-<td>⚠️ paper-only</td>
+<td><code>scripts/check-subagent-delegation-audit.sh</code> (present +
+executable; verify-all-wired at
+<code>scripts/verify-all-constitution-rules.sh:193</code> over
+<code>LAVA_COMMIT_RANGE='HEAD~5..HEAD'</code>) — scanner-level audit of
+the commit-range delegation trail (2026-06-14 re-verification;
+CLAUDE.md/this-doc previously marked ⚠️ paper-only)</td>
+<td>✅ wired (scanner)</td>
 </tr>
 <tr>
-<td><code>CM-LVA-TICKETS-SYNC</code></td>
+<td><code>CM-WORKABLE-ITEMS-SYNC</code> (formerly
+<code>CM-LVA-TICKETS-SYNC</code>)</td>
 <td>§11.4.93 (SQLite single-source-of-truth) + §11.4.95 (DB
 tracked-in-git, never gitignored) + §11.4.106 (byte-identical doc↔︎DB
 round-trip) + §11.4.33/34 (closure + reopen schema guards)</td>
-<td><code>scripts/check-lva-tickets.sh</code> (verifies (a)
-<code>docs/tickets/tickets.db</code> exists + is NOT gitignored, (b) the
-REAL <code>tools/lava-tickets verify</code> binary reports
-byte-identical trackers — §6.A real-binary contract, not a bash re-impl,
-(c) the five §11.4.33/34 schema-integrity triggers are present via a
-<code>sqlite_master</code> query; builds the binary via
-<code>go build</code> if absent; discovers <code>sqlite3</code> on
-PATH/Homebrew/Android platform-tools;
-<code>LAVA_LVA_TICKETS_STRICT=0</code> / <code>--advisory</code> for
-incremental adoption). Hermetic test:
-<code>tests/check-lva-tickets/test_check_lva_tickets.sh</code> (10
-sub-tests: clean PASS + falsifiability — corrupt-tracker FAIL/restore
-PASS, drop-§11.4.33-trigger FAIL, drop-§11.4.34-trigger FAIL,
-gitignored-DB FAIL/un-ignore PASS, missing-DB FAIL, advisory exits 0).
-Evidence: <code>tests/check-lva-tickets/EVIDENCE.md</code>. Wired into
-<code>scripts/verify-all-constitution-rules.sh</code> in
-<code>--advisory</code> mode (build-advisory-then-strict-flip
-convention; strict-flip OWED after baseline stabilizes)</td>
-<td>✅ wired (advisory)</td>
+<td><strong>2026-06-14 correction:</strong> the LVA-specific
+<code>tools/lava-tickets/</code> system +
+<code>scripts/check-lva-tickets.sh</code> were RETIRED (per §6.AF, LVA-3
+migrated to the canonical <code>workable-items</code> Go binary; the old
+script is ABSENT). Current gate:
+<code>scripts/check-workable-items.sh</code> (present + executable;
+verify-all-wired at
+<code>scripts/verify-all-constitution-rules.sh:202</code>) operates on
+<code>docs/workable_items.db</code> via the canonical
+<code>constitution/scripts/workable-items</code> binary
+(<code>validate</code>+<code>diff</code>+DB-tracked). Hermetic test:
+<code>tests/check-workable-items/</code>. Upstream
+<code>update</code>/<code>reopen</code>/<code>block</code> + full export
+pipeline OWED upstream (non-blocking).</td>
+<td>✅ wired</td>
 </tr>
 <tr>
 <td><code>CM-UNIVERSAL-MARKDOWN-EXPORT-SYNC</code></td>
@@ -513,10 +523,14 @@ Hermetic test:
 <code>tests/check-constitution/test_coverage_ledger.sh</code> (6
 fixtures: clean-fixture-passes, missing-ledger-rejected,
 missing-row-rejected, stale-ledger-rejected, advisory-mode-returns-zero,
-generator-deterministic). Default: --advisory in verify-all sweep until
-per-row backfill stabilises baseline; STRICT flip OWED via Phase
-7-debt</td>
-<td>✅ wired (advisory) (Phase 7 of constitution-compliance plan)</td>
+generator-deterministic). <strong>2026-06-14 correction:</strong> STRICT
+flip is DONE — <code>scripts/check-coverage-ledger.sh:41</code>
+<code>STRICT=${LAVA_COVERAGE_LEDGER_STRICT:-1}</code> (strict default)
+and verify-all invokes it <code>--strict</code>
+(<code>scripts/verify-all-constitution-rules.sh:156</code>).
+Phase-7-debt STRICT-flip CLOSED.</td>
+<td>✅ wired + STRICT (Phase 7 of constitution-compliance plan;
+STRICT-flip closed)</td>
 </tr>
 <tr>
 <td><code>CM-CLOSURE-STATUS-VOCAB-COMPLIANCE</code></td>
@@ -728,27 +742,25 @@ source-of-truth handoff per §6.S) plus per-issue closure logs in
 (per §6.O). The substance is equivalent (status + type + history); the
 file structure differs. Lava does not plan to migrate to the
 HelixConstitution file structure unless / until the operator commissions
-that work; the equivalence is documented in §6.AD.3.</p></li>
-<li><p><strong>Build-resource stats tracker</strong> (§11.4.24 /
-<code>CM-BUILD-RESOURCE-STATS-TRACKER</code>): Requires a host-side
-sampler that captures memory / CPU / IO at fixed interval, computes
-per-metric min/max/mean/p95, appends to a TSV registry, derives
-Stats.{md,html,pdf} via the §11.4.22 lightweight commit path.
-Substantial implementation work (~200+ lines plus a viewer). Tracked
-under §6.AD-debt item 5 for a future cycle.</p></li>
-<li><p><strong>Subagent-delegation audit</strong> (§11.4.20 /
-<code>CM-SUBAGENT-DELEGATION-AUDIT</code>): Requires either Claude Code
-telemetry integration (not yet exposed by the platform) or
-operator-driven self-audit. Tracked under §6.AD-debt for a future cycle
-when telemetry surfaces become available.</p></li>
-<li><p><strong>Script documentation sync</strong> (§11.4.18 /
-<code>CM-SCRIPT-DOCS-SYNC</code>): The doc files exist
-(<code>docs/scripts/commit_all.sh.md</code>,
-<code>docs/scripts/inject-helix-inheritance-block.sh.md</code>) but no
-pre-push gate yet enforces "modifying <code>scripts/X.sh</code> requires
-modifying <code>docs/scripts/X.sh.md</code> in the same commit". The
-pre-push gate is straightforward to add when the doc-set is more
-complete. Tracked under §6.AD-debt.</p></li>
+that work; the equivalence is documented in §6.AD.3.</p>
+<p>(2026-06-14 correction: <strong>Build-resource stats tracker</strong>
+(§11.4.24 / <code>CM-BUILD-RESOURCE-STATS-TRACKER</code>) is now WIRED —
+<code>scripts/build-stats-sample.sh</code> +
+<code>scripts/build-stats-report.sh</code> are present + executable; see
+the gate-inventory row above. <strong>Subagent-delegation audit</strong>
+(§11.4.20 / <code>CM-SUBAGENT-DELEGATION-AUDIT</code>) now has a scanner
+— <code>scripts/check-subagent-delegation-audit.sh</code>,
+verify-all-wired. <strong>Script documentation sync</strong> (§11.4.18 /
+<code>CM-SCRIPT-DOCS-SYNC</code>) now has BOTH the verify-all scanner
+<code>scripts/check-script-docs-sync.sh</code> AND pre-push Check 9 at
+<code>.githooks/pre-push:195-212</code>. The three entries below are
+RETAINED only as historical context; their current status is ✅ in the
+inventory.)</p></li>
+<li><p><strong>Issues / Issues_Summary / Fixed / Fixed_Summary
+trackers</strong> remain the only genuinely ⚠️ paper-only /
+equivalence-mapped class — they are intentionally mapped to
+<code>.lava-ci-evidence/</code> ledgers per §6.AD.3 Path B
+(CLOSED-BY-EQUIVALENCE), not pending work.</p></li>
 </ul>
 <h2 id="how-to-read-this-document">How to read this document</h2>
 <ul>

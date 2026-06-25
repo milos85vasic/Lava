@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-06-14-search-multilayer-rootcause</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1
+id="search-does-not-work-in-any-scenario--consolidated-5-layer-root-cause-2026-06-14">Search
+"does not work in any scenario" — consolidated 5-layer root-cause
+(2026-06-14)</h1>
+<p><strong>Status:</strong> Layers 1 + 2 + 3 fixed (L1+L2
+on-device-verified; L3 RED→GREEN at the test layer). Layer 4
+(<code>READ_API_KEY</code> permission grant) proven to be a
+<strong>TEST-VM ARTIFACT, production-safe</strong>. Layer 5
+(<code>Lava-Auth</code> key not reaching the search request) is now
+<strong>ROOT-CAUSE-FOUND + FIX-APPLIED (on-device verification in
+progress)</strong>: the api-app's <code>ApiKeyProvider</code>
+ContentProvider cached its key/port resolver lambdas in
+<code>onCreate()</code> gated on the <code>ApiApplication</code> holders
+being non-null, on a FALSE assumption about Android's lifecycle ordering
+(<code>ContentProvider.onCreate</code> runs BEFORE
+<code>Application.onCreate</code>, not after) — so the holders were
+always null at cache time and the provider served an EMPTY cursor for
+the whole process, dropping the key. The fix resolves the holders LAZILY
+per <code>query()</code>. <strong>The fix is applied and the root cause
+is understood; the on-device proof that search returns RESULTS is still
+running</strong> — so search is <strong>NOT yet claimed to work
+on-device</strong> and 1.3.9 is <strong>not shipped</strong> until that
+device gate is GREEN.</p>
+<p><strong>Release scope change:</strong> 1.3.9 is <strong>NO LONGER
+client-only</strong> — the L5 fix is in the <strong>api-app</strong>, so
+<strong>client 1.3.9-1066 + api-app 0.2.9-14 ship together</strong>
+(§6.Y bump applied).</p>
+<p><strong>Fix commits:</strong> <code>d05bc71e</code> (L1+L2),
+<code>21031f2a</code> (L3 key restore), <code>addaacd0</code> (L4
+cleanup — dropped ignored authority param + dead SSE path), plus the L5
+api-app <code>ApiKeyProvider</code> lazy-resolution fix (this cycle).
+<strong>Operator report:</strong> "search still does not work in any
+scenario" (1.3.8-1065).</p>
+<p><strong>No-guessing note (§11.4.6):</strong> every claim below is
+anchored to git truth (the fix diffs + the incident JSON
+<code>.lava-ci-evidence/sixth-law-incidents/2026-06-14-sse-search-v1search-unserved-bluff.json</code></p>
+<ul>
+<li>the L4 analysis
+<code>docs/issues/2026-06-14-readapikey-permission-variant-analysis.md</code></li>
+<li>the L5 on-device pinpoint
+<code>.lava-ci-evidence/search-verification/2026-06-14-keyloss-pinpoint.md</code>)
+or marked <code>VERIFYING</code> / <code>OWED</code>. The L5 root cause
+and fix are asserted as fact (anchored to the source + the LAVAKEYDBG
+logcat pinpoint); the on-device proof that <strong>search returns
+results</strong> is <code>VERIFYING</code> (in progress) — search is
+<strong>NOT claimed to work on-device</strong> until that gate is
+GREEN.</li>
+</ul>
+<hr />
+<h2 id="1-the-cascade-five-independent-bugs-one-symptom">1. The cascade
+(five independent bugs, one symptom)</h2>
+<p>A single user-visible failure ("search returns nothing / error in any
+scenario") was the surface of FIVE independent defects stacked on the
+GoApi search path. Each had to be addressed; fixing only some still
+leaves search broken. The cascade was peeled back one layer at a time
+from on-device evidence across this cycle: the first three were
+client-side code defects, the fourth a test-environment artifact, and
+the fifth (root-caused + fixed this cycle, on-device verification in
+progress) is an <strong>api-app</strong> defect — the per-request auth
+key was being dropped at its source (the key ContentProvider served an
+empty cursor for the whole process) so it never reached the search
+call.</p>
+<h3 id="layer-1--onboarding-never-wrote-settingsendpoint">Layer 1 —
+onboarding never wrote <code>settings.endpoint</code></h3>
+<p><code>OnboardingViewModel.onSelectApi</code> persisted the chosen API
+to:</p>
+<ul>
+<li>the Room <code>Endpoint</code> list
+(<code>endpointsRepository.add(endpoint)</code>), and</li>
+<li><code>ApiBaseUrlHolder</code> (the dynamic-SDK /
+<code>GET /providers</code> seam),</li>
+</ul>
+<p>but <strong>never</strong> to <code>settings.endpoint</code>. The
+home search resolves its target host from
+<code>SettingsRepository.getSettings().endpoint</code> via
+<code>NetworkApiRepositoryImpl.endpoint()</code> — a DIFFERENT store
+from the two above. It stayed at the default
+<code>Endpoint.GoApi("lava-api.local")</code>, which does not resolve on
+the LAN → <code>UnknownHostException</code>. So <code>/providers</code>
+worked (it reads <code>ApiBaseUrlHolder</code>) while search died (it
+reads <code>settings.endpoint</code>).</p>
+<p><strong>Fix:</strong> <code>onSelectApi</code> now invokes
+<code>SetEndpointUseCase(endpoint)</code> (nullable injected seam, real
+impl bound by Hilt; null default preserves direct-construction tests).
+<code>RepopulateProvidersOnStartupUseCase.reconcileActiveEndpoint()</code>
+heals existing installs whose onboarding pre-dated this fix — when
+<code>settings.endpoint</code> is the orphan default, it adopts the
+persisted Room GoApi.</p>
+<p><strong>On-device proof:</strong> post-fix, search reaches
+<code>10.0.3.16</code>, no longer <code>lava-api.local</code>.</p>
+<h3
+id="layer-2--goapi-search-routed-to-get-v1search-a-route-no-backend-serves">Layer
+2 — GoApi search routed to <code>GET /v1/search</code>, a route NO
+backend serves</h3>
+<p><code>SearchResultViewModel</code>'s multi-provider dispatch sent
+every GoApi search to <code>observeSseSearch</code> →
+<code>GET {base}/v1/search</code>. That route is registered by
+<strong>no backend</strong> (see §3). Result: 404 for every GoApi user,
+regardless of host or auth.</p>
+<p><strong>Fix:</strong> route GoApi multi-provider search to
+<code>observeStreamMultiSearch</code> →
+<code>sdk.streamMultiSearch</code> →
+<code>GET /v1/{provider}/search</code> (the served path; carries the
+per-instance <code>Lava-Auth</code> key + the permissive-LAN OkHttp
+client wired in 1.3.8 via <code>ApiBaseUrlHolder</code>). The dispatch
+change appears in both <code>searchClicked</code>-class entry points in
+<code>SearchResultViewModel</code>.</p>
+<h3
+id="layer-3--mdns-discovered-endpoint-persisted-without-its-lava-auth-key-fixed">Layer
+3 — mDNS-discovered endpoint persisted without its
+<code>Lava-Auth</code> key (FIXED)</h3>
+<p>After Layers 1+2, the endpoint that onboarding persisted for an
+mDNS-discovered API carried <strong>no per-instance key</strong>:
+<code>onSelectApi</code> adopted the discovery record
+(host/port/platform) but never attached the locally-readable
+<code>Lava-Auth</code> key, so the persisted
+<code>settings.endpoint</code> was keyless → every <code>/v1</code> op
+401'd even when the key was readable on the device.</p>
+<p><strong>Fix (<code>21031f2a</code>):</strong>
+<code>onSelectApi</code> now reads the local api-app key (via the
+variant-aware key reader) for keyless mDNS-discovered endpoints and
+persists the GoApi WITH its key; an app-side cold-start key-restore path
+heals an already persisted keyless endpoint by re-reading the local key.
+Both the onboarding-time and the startup-restore paths were RED→GREEN at
+the test layer (the reproduction asserts the persisted endpoint carries
+the key; without the read, the endpoint stays keyless).</p>
+<h3
+id="layer-4--read_api_key-permission-not-granted-on-the-test-vm-test-vm-artifact-production-safe">Layer
+4 — <code>READ_API_KEY</code> permission not granted on the test VM
+(TEST-VM ARTIFACT, production-safe)</h3>
+<p>After Layer 3, <code>/v1/{provider}/search</code> STILL 401'd on the
+Genymotion VM because the variant-aware key reader returned null — the
+signature permission
+<code>digital.vasic.lava.permission.READ_API_KEY</code> that guards the
+api-app's key ContentProvider was <strong>not granted</strong> to the
+client on the VM.</p>
+<p><strong>Root cause (proven, not guessed — full evidence in
+<code>docs/issues/2026-06-14-readapikey-permission-variant-analysis.md</code>):</strong>
+the permission name is a <strong>fixed literal</strong> (no
+<code>.dev</code> suffix, no placeholder) in both manifests, while every
+other cross-app identifier (applicationId, provider authority
+<code>${apiKeyAuthority}</code>, <code>API_TARGET_PACKAGE</code>) IS
+variant-suffixed. The VM had <strong>both</strong> differently-signed
+api-app variants in its install history (debug <code>…api.dev</code>
+from <code>debug.keystore</code> AND release <code>…api</code> from
+<code>release.keystore</code>). Two differently-signed packages
+contending to DEFINE the same fixed-name signature permission is the
+classic Android <code>INSTALL_FAILED_DUPLICATE_PERMISSION</code> trap:
+the client signed with the OTHER cert than the current definition-owner
+is denied the grant → reader returns null → 401.</p>
+<p><strong>Verdict: production is SAFE.</strong> The shipped pair
+(release client + release api-app, both <code>release.keystore</code>,
+the only combination end users install) grants <code>READ_API_KEY</code>
+at install — certs match. <strong>A clean-install matched-pair run
+confirmed this on-device: <code>granted=true</code>.</strong> The
+observed 401 was the test VM's mixed debug/release co-install, which
+real users never reproduce.</p>
+<p><strong>Recommended hardening (MEDIUM priority, QA-fidelity not
+production-correctness):</strong> variant-suffix the permission name
+(same pattern as the authority) so debug and release never define the
+same name. This makes the test VM exercise the same grant path
+production hits (§6.J — a test environment that can't grant the
+permission is testing a different thing than production). Not
+shipping-blocking; production already grants it.</p>
+<h3
+id="layer-5--api-app-apikeyprovider-served-an-empty-cursor-for-the-whole-process-root-cause-found--fix-applied-device-verify-in-progress">Layer
+5 — api-app <code>ApiKeyProvider</code> served an empty cursor for the
+whole process (ROOT-CAUSE-FOUND + FIX-APPLIED; device-verify in
+progress)</h3>
+<p>This was the <strong>load-bearing layer</strong> and is now
+<strong>root-caused and fixed in code</strong>; the on-device proof that
+search returns RESULTS is still running. On a CLEAN matched pair —
+release client + release api-app, same signature,
+<code>granted=true</code>, engine running, fresh onboard —
+<code>/v1/{provider}/search</code> STILL returned 401 because the
+per-instance <code>Lava-Auth</code> key was being dropped <strong>at its
+source on the api-app side</strong> before the client could ever read
+it.</p>
+<p><strong>Root cause (proven, not guessed):</strong>
+<code>api-app/src/main/kotlin/lava/api/app/handoff/ApiKeyProvider.kt</code>
+cached its key and port resolver lambdas in
+<code>ContentProvider.onCreate()</code>, gated on
+<code>ApiApplication.controllerHolder</code> /
+<code>keyStoreHolder</code> being non-null, on the FALSE inline comment
+"ContentProvider.onCreate runs AFTER Application.onCreate." Android runs
+<code>ContentProvider.onCreate</code> <strong>BEFORE</strong>
+<code>Application.onCreate</code>. The holders are set inside
+<code>ApiApplication.onCreate</code> (lines 46-49), so at
+<code>ApiKeyProvider.onCreate</code> time they were <strong>always
+null</strong> → the resolver lambdas stayed <code>{ null }</code> for
+the entire process lifetime → every <code>query()</code> served an
+<strong>empty cursor</strong>. The client's
+<code>ApiKeyClient.read()</code> therefore got null →
+<code>withLocalApiKeyIfMissing</code> produced a keyless endpoint →
+<code>ApiBaseUrlHolder.set(url, null)</code> →
+<code>ApiBackedTrackerClient</code> was built with
+<code>authKey=null</code> → no <code>Lava-Auth</code> header → every
+<code>/v1/{provider}/search</code> 401'd. Public routes
+(<code>/providers</code>, <code>/health</code>) need no key so they
+worked — which is exactly why search NEVER worked while everything else
+did.</p>
+<p><strong>On-device pinpoint evidence:</strong>
+<code>.lava-ci-evidence/search-verification/2026-06-14-keyloss-pinpoint.md</code>
+— the LAVAKEYDBG logcat line
+<code>withLocalApiKey readerSet=true readLen=-1</code> shows the key
+read returned null <strong>at the source</strong> (reader wired, read
+length -1), pinning the drop to the ContentProvider, not the client.</p>
+<p><strong>The withFakes bluff:</strong> the existing
+<code>ApiKeyProvider</code> unit test exercised the provider through a
+test-only <code>withFakes</code> seam that injected the resolver lambdas
+directly, <strong>bypassing the real <code>onCreate</code> → holder
+path</strong> — i.e. it skipped the exact lifecycle ordering where the
+bug lives. It passed green while the production path served an empty
+cursor. A real-holder regression test (driving the real
+<code>onCreate</code> ordering) is being added so this class of defect
+cannot recur green.</p>
+<p><strong>Fix (applied):</strong> <code>ApiKeyProvider</code> no longer
+caches resolvers in <code>onCreate()</code>. It resolves the holders +
+the engine's Running state <strong>LAZILY per
+<code>query()</code></strong> (via <code>resolveRunningKey()</code> /
+<code>resolveRunningPort()</code> defaults), removing the
+<code>onCreate</code>-ordering dependency entirely. By the time any
+<code>query()</code> arrives the client process has long since finished
+<code>ApiApplication.onCreate</code>, so the holders are populated and
+the real key flows.</p>
+<p><strong>Important evidence caveat (unchanged):</strong> a public
+<code>GET /providers</code> → 200 on the same host proves only
+<strong>reachability + that the host/TLS path works</strong> —
+<code>/providers</code> is registered BEFORE the auth middleware (the
+2026-06-13 onboarding fix), so a 200 there does NOT prove the
+<code>Lava-Auth</code> key is present or valid. Only an authed
+<code>/v1/{provider}/…</code> request exercises the key.</p>
+<p><strong>Status:</strong> the fix is applied and the root cause is
+understood. The on-device proof that search returns RESULTS (authed
+<code>/v1/{provider}/search</code> → 200 + result rows) is
+<strong>VERIFYING (in progress)</strong>. Until that run is GREEN,
+<strong>search is not claimed to work on-device</strong> and the bundled
+release (client 1.3.9-1066 + api-app 0.2.9-14) does not ship. No layer
+above this one makes search functional on its own.</p>
+<hr />
+<h2 id="2-the-two-search-dispatch-paths">2. The two search dispatch
+paths</h2>
+<p><code>SearchResultViewModel</code> chooses a search transport per the
+current filter + endpoint:</p>
+<table>
+<thead>
+<tr>
+<th>Path</th>
+<th>Transport</th>
+<th>HTTP route</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>observePagingData</code></td>
+<td>paging (legacy)</td>
+<td><code>GET /search</code></td>
+<td>served (legacy/standalone)</td>
+</tr>
+<tr>
+<td><del><code>observeSseSearch</code></del></td>
+<td><del>SSE consumer</del></td>
+<td><del><code>GET /v1/search</code></del></td>
+<td><strong>REMOVED (<code>addaacd0</code>) — was DEAD, no backend
+served it</strong></td>
+</tr>
+<tr>
+<td><code>observeStreamMultiSearch</code></td>
+<td><code>sdk.streamMultiSearch</code> (client-side fan-out)</td>
+<td><code>GET /v1/{provider}/search</code></td>
+<td><strong>served by both backends — the working path</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Before the fix, GoApi multi-provider search took the
+<strong>dead</strong> <code>observeSseSearch</code> →
+<code>/v1/search</code> branch. After the fix it takes
+<code>observeStreamMultiSearch</code> →
+<code>/v1/{provider}/search</code>, fanning out per provider
+client-side. The dead <code>observeSseSearch</code> →
+<code>/v1/search</code> consumer was <strong>deleted entirely</strong>
+in <code>addaacd0</code> (no backend ever served
+<code>/v1/search</code>), so the dispatch can no longer regress onto
+it.</p>
+<hr />
+<h2 id="3-served-route-facts-verified-across-the-go-codebase">3.
+Served-route facts (verified across the Go codebase)</h2>
+<ul>
+<li><code>internal/router/router.go</code> (embedded api-app + shared
+via <code>internal/mobile</code>): serves <code>/providers</code>,
+<code>/v1/:provider/{op}</code>, <code>/jackett/search</code>,
+<code>/health/ready</code>.</li>
+<li>The standalone <code>lava-api-go</code>: serves legacy
+<code>/search</code> and <code>/v1/{provider}/search</code>.</li>
+<li><strong>Neither registers <code>/v1/search</code>.</strong> That is
+why the (now-removed) <code>observeSseSearch</code> 404'd for every
+GoApi user.</li>
+</ul>
+<hr />
+<h2 id="4-the-endpoint-store-split-why-layer-1-was-invisible">4. The
+endpoint-store split (why Layer 1 was invisible)</h2>
+<p>There are <strong>three</strong> distinct places "the active API" is
+recorded, and the search path reads a different one than onboarding
+wrote:</p>
+<ol type="1">
+<li><strong>Room <code>Endpoint</code> table</strong> — the user's saved
+endpoint list (<code>endpointsRepository</code>). Holds
+host/platform/storage; the per-instance auth key is NOT a column
+here.</li>
+<li><strong><code>settings.endpoint</code></strong> — a single
+serialized active <code>Endpoint</code> inside settings, stored/decoded
+via <code>EndpointConverter</code>. This serialized form <strong>carries
+the per-instance <code>Lava-Auth</code> key</strong>.
+<code>NetworkApiRepositoryImpl.endpoint()</code> (the search/network
+host resolver) reads THIS.</li>
+<li><strong><code>ApiBaseUrlHolder</code></strong> — an in-memory
+active-base-URL + key holder consumed by the dynamic SDK clients
+(<code>ApiBackedTrackerClient</code>) +
+<code>GET /providers</code>.</li>
+</ol>
+<p>Onboarding wrote (1) and (3) but not (2) → search read a stale (2).
+The key-bearing nature of (2) via <code>EndpointConverter</code> is also
+why an existing-install heal that adopts the keyless Room row (1) yields
+a 401 (see §6).</p>
+<hr />
+<h2
+id="5-the-key-flow-how-the-per-instance-lava-auth-key-reaches-a-request">5.
+The key-flow (how the per-instance Lava-Auth key reaches a request)</h2>
+<p><code>ApiKeyClient</code> (variant-aware ContentProvider reader) →
+<code>goApi.key</code> → <code>setEndpoint</code> persists the GoApi
+WITH its key into <code>settings.endpoint</code> (via
+<code>EndpointConverter</code>) AND
+<code>ApiBaseUrlHolder.set(url, key)</code>. The GoApi branch of
+<code>NetworkApiRepositoryImpl</code> then turns
+<code>host:port + key</code> into a permissive-LAN client +
+<code>withKeyOverride</code> request, so
+<code>/v1/{provider}/search</code> SHOULD carry
+<code>Lava-Auth: &lt;key&gt;</code>. The key lives in (2) and (3) above
+— never in the Room row (1). When the ContentProvider read returns null
+(the L4 permission-not-granted condition), the key is absent and
+<code>/v1</code> ops 401. <strong>L5 is the case this chain does NOT yet
+explain:</strong> the key IS readable (<code>granted=true</code>) yet
+<code>/v1/{provider}/search</code> still 401s — so the key is being
+dropped SOMEWHERE between a non-null read and the outgoing header.
+Pinpointing that link is the open L5 work.</p>
+<hr />
+<h2 id="6-open-follow-ups-open--owed--verifying">6. Open follow-ups
+(OPEN / OWED / VERIFYING)</h2>
+<ul>
+<li><strong>Layer 5 — api-app <code>ApiKeyProvider</code> empty-cursor
+(FIX-APPLIED; device-verify in progress).</strong> Root cause found +
+fixed: the key ContentProvider cached its resolver lambdas in
+<code>onCreate()</code> gated on holders that are still null at that
+point (ContentProvider.onCreate runs BEFORE Application.onCreate) →
+empty cursor → keyless endpoint → <code>/v1/{provider}/search</code>
+401. Fix: lazy per-<code>query()</code> holder resolution. The on-device
+proof that search returns RESULTS is <strong>VERIFYING (in
+progress)</strong> — the load-bearing gate for the bundled 1.3.9
+release. <strong>Release scope: client 1.3.9-1066 + api-app 0.2.9-14
+ship together (§6.Y bumped).</strong> A real-holder regression test
+(real <code>onCreate</code> ordering, no <code>withFakes</code> seam) is
+OWED to retire the bypass-bluff. <strong>Search is not claimed to work
+on-device until the device gate is GREEN.</strong></li>
+<li><strong>Layer 4 — variant-suffix the permission name (OWED,
+MEDIUM/QA-fidelity).</strong> Production grant is already safe (§1 Layer
+4); the suffix makes the test VM exercise the production grant path so a
+mixed-install VM can never recreate the
+<code>INSTALL_FAILED_DUPLICATE_PERMISSION</code> collision. Not
+shipping-blocking.</li>
+<li><strong>Existing-install key-restore (OWED).</strong> Installs that
+do NOT re-onboard get a keyless healed endpoint → <code>/v1</code> ops
+401, because the key lives only in
+<code>settings.endpoint</code>/<code>ApiBaseUrlHolder</code> and the old
+onboarding never wrote it, and the heal adopts the keyless Room row.
+Fresh onboard flows the key correctly; the L3 cold-start key-restore
+(<code>21031f2a</code>) addresses the keyless mDNS endpoint but a full
+existing-install restore is still owed.</li>
+<li><strong>Dormant SSE path (CLOSED by <code>addaacd0</code>).</strong>
+The dead <code>observeSseSearch</code> → <code>/v1/search</code>
+consumer was removed entirely (no backend served
+<code>/v1/search</code>). Three SSE bluff tests were removed alongside
+it. If a server-side <code>/v1/search</code> SSE aggregator is ever
+wanted, it is a fresh feature, not a revival.</li>
+</ul>
+<hr />
+<h2 id="7-tests--evidence">7. Tests + evidence</h2>
+<ul>
+<li><strong>Reproduction tests (real-stack, falsifiability-rehearsed, on
+the REAL path):</strong>
+<ul>
+<li><code>OnboardingViewModelDynamicProvidersTest</code> —
+<code>selecting an API persists it as the active settings endpoint the search path reads</code>
+(Layer 1).</li>
+<li><code>RepopulateProvidersOnStartupUseCaseTest</code> —
+<code>cold start heals a stale orphan active endpoint to the onboarded server in the list</code>
+(heal path).</li>
+</ul></li>
+<li><strong>Bluffs removed:</strong>
+<code>SearchResultSseErrorRetryTest</code> (served
+<code>/v1/search</code> over a mock no backend serves) + the two
+remaining SSE consumer tests removed with the dead
+<code>observeSseSearch</code> path in <code>addaacd0</code>. Incident
+JSON:
+<code>.lava-ci-evidence/sixth-law-incidents/2026-06-14-sse-search-v1search-unserved-bluff.json</code>.</li>
+<li><strong>On-device Chucker evidence (L1/L2):</strong>
+<code>GET https://10.0.3.16/providers</code> → 200;
+<code>GET https://lava-api.local/search?query=prince…</code> →
+<code>UnknownHostException</code> (api-app "Requests served: 0").
+Surfaced by the HelixQA video-QA agent; traced via the flow-db
+<code>Endpoint</code> row + <code>chucker.db</code> transactions.</li>
+<li><strong>On-device evidence (L4):</strong> clean matched-pair install
+→ <code>READ_API_KEY</code> <code>granted=true</code> (production grant
+path confirmed). Analysis:
+<code>docs/issues/2026-06-14-readapikey-permission-variant-analysis.md</code>.</li>
+<li><strong>On-device evidence (L5, FIX-APPLIED):</strong> clean matched
+pair, <code>granted=true</code>, engine running →
+<code>/v1/{provider}/search</code> was STILL 401 because the api-app
+<code>ApiKeyProvider</code> served an empty cursor (LAVAKEYDBG logcat
+<code>withLocalApiKey readerSet=true readLen=-1</code> = key read
+returned null at the source). Pinpoint:
+<code>.lava-ci-evidence/search-verification/2026-06-14-keyloss-pinpoint.md</code>.
+Fix applied (lazy per-<code>query()</code> holder resolution); on-device
+proof that search returns RESULTS is VERIFYING (in progress). Public
+<code>/providers</code> → 200 still proves reachability only, NOT key
+validity.</li>
+<li><strong>§6.T.4 BUGFIXES entry:</strong>
+<code>docs/issues/fixed/BUGFIXES.md</code> — "search does not work in
+any scenario" (5-layer cascade, 2026-06-14).</li>
+</ul>
+<hr />
+<h2
+id="8-6j-meta-lesson--verify-subagents-root-cause-the-main-stream-verifies-before-applying">8.
+§6.J meta-lesson — verify subagents root-cause, the main stream verifies
+before applying</h2>
+<p>A §6.J governance lesson surfaced this cycle and is recorded so it
+does not recur. <strong>A verification subagent proposed an L4 fix and
+the main stream REJECTED it after reading the source.</strong></p>
+<p><strong>The rejected theory (worked example):</strong> the verify
+subagent proposed wiring a hardcoded <code>".keyprovider"</code>
+authority string into the key-read path as the L4 fix. The main stream
+read the source before applying and found the proposal inert:
+<code>MainActivity.buildApiKeyReader</code> returns
+<code>{ -&gt; client.read()?.key }</code> — a lambda that takes
+<strong>no authority argument and ignores any authority passed</strong>.
+Threading a <code>".keyprovider"</code> authority into that call site
+changes nothing the reader uses; the read still goes through the
+variant-aware client unchanged. Applying the "fix" would have produced a
+green-looking diff that does not touch the actual grant condition (which
+is the signature-permission match, §1 Layer 4) — a §6.J bluff by
+construction (a change that claims to fix the thing it cannot affect).
+It would also have introduced a hardcoded literal in violation of
+§6.R.</p>
+<p><strong>The lesson:</strong> a verification subagent's job is to
+<strong>root-cause and report</strong>, not to auto-apply fixes.
+Subagent-proposed code changes MUST be read against the production
+source by the main stream before they land. A proposal that "looks like
+a fix" but does not touch the real defect path is a bluff regardless of
+the subagent's confidence. This is the same discipline §6.L restates:
+green-looking output is necessary, never sufficient — the main stream
+confirms the proposed change actually reaches the failing code path
+before it is applied.</p>
+<p><strong>The L5 §6.J meta-lesson — a test that bypasses the real
+lifecycle via a test-only seam is a bluff by construction.</strong> The
+<code>ApiKeyProvider</code> unit test drove the provider through a
+<code>withFakes</code> seam that injected the resolver lambdas directly,
+never going through the real <code>onCreate</code> →
+<code>ApiApplication</code> holder path. The L5 bug lived in
+<strong>exactly the path the seam skipped</strong> — the
+<code>ContentProvider.onCreate</code>-before-<code>Application.onCreate</code>
+ordering that left the holders null and the cached resolvers
+<code>{ null }</code>. So the test passed green while the production
+provider served an empty cursor for the whole process. This is the
+canonical Sixth-Law clause-1 failure: the test did not traverse the
+production code path the user's action triggers. A seam that exists to
+make a unit test easier MUST NOT skip the lifecycle ordering or wiring
+where the defect can live; when it does, the test guarantees nothing
+about the real path. The remediation is a real-holder regression test
+that drives the actual <code>onCreate</code> ordering (no
+<code>withFakes</code>), so the empty-cursor defect would fail RED
+before the fix.</p>
+</body>
+</html>

@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-06-02-lava-api-android-app-design</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1 id="lava-api-android-app--design-spec">Lava API Android App — Design
+Spec</h1>
+<ul>
+<li><strong>Date:</strong> 2026-06-02</li>
+<li><strong>Status:</strong> Approved (operator approved all
+sub-projects; subagent-driven execution authorized)</li>
+<li><strong>Author:</strong> Claude (Opus 4.8) under operator
+direction</li>
+<li><strong>Classification:</strong> project-specific (the on-device-API
+app + Go SQLite backend are Lava-specific; the additive-backend-selector
+pattern is universal and noted as such inline)</li>
+<li><strong>Origin:</strong> Operator directive 2026-06-02 — "We MUST
+HAVE as a separate installable application … the API service … bootup
+the whole API on an Android device locally and expose it to the whole
+network … User should be able to stop/restart/track/start … proper
+System notification … extend client app (onboarding + settings) …
+download-or-launch flow … API appears in the list of available API
+instances … other users on the same network discover &amp; use it …
+in-depth docs/diagrams … maximal test coverage with real evidence, zero
+bluffs … distribute all three apps (API, Client, new API Android)
+debug+release via Firebase, same signing key."</li>
+</ul>
+<h2 id="0-operator-decisions-locked">0. Operator decisions (locked)</h2>
+<ol type="1">
+<li><strong>Runtime:</strong> Extend <code>lava-api-go</code> to support
+a <strong>SQLite</strong> storage backend as an <em>additive,
+config-selectable</em> option. Postgres remains the default and is
+<strong>not modified in behavior</strong>. The new Android app
+<strong>wraps the cross-compiled Go server</strong> and uses SQLite.
+"Nothing already working can be broken — only extended for more
+flexibility."</li>
+<li><strong>Go embedding:</strong> <strong>In-process via
+<code>gomobile bind</code></strong> (<code>.aar</code>), not a child
+process. Still a cross-compiled Go artifact; cleaner
+<code>Start/Stop/Status</code> lifecycle; real-HTTP instrumented
+testing.</li>
+<li><strong>Discovery identity:</strong> New, <strong>distinct</strong>
+on-device identity in the client's instances list, while the existing
+host Go/Postgres instance keeps working unchanged.</li>
+<li><strong>Scope:</strong> Decomposed into sequenced sub-projects;
+build the API app first. All sub-projects approved.</li>
+<li><strong>Distribution:</strong> Full-auto build → test → distribute,
+with a <strong>hard §6.Z refusal</strong> if Challenge tests do not
+execute green against the exact artifact, and any missing secret/device
+surfaced as a hard blocker (no bluff).</li>
+</ol>
+<h2 id="1-sub-project-decomposition-all-approved">1. Sub-project
+decomposition (all approved)</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Sub-project</th>
+<th>This spec</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><strong>Lava API Android app</strong> + the additive
+<code>lava-api-go</code> SQLite/Android extension it depends on</td>
+<td><strong>Detailed below</strong></td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>Client integration</strong> — onboarding API step + Settings
+"Run API on this device" with install-or-launch flow; clear
+non-confusing copy</td>
+<td>Roadmap §8; own spec later</td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>Docs/diagrams/guides</strong> — architecture, on-device API
+flow, mDNS, user manual; extend all existing docs</td>
+<td>Roadmap §8; own spec later</td>
+</tr>
+<tr>
+<td>4</td>
+<td><strong>Build + full test + dual-variant Firebase
+distribution</strong> of all 3 apps (API host service artifacts, Client
+Android, new Lava API Android), same keystore, via Firebase CLI, §6.Z
+gate enforced</td>
+<td>Roadmap §8; own spec later</td>
+</tr>
+</tbody>
+</table>
+<p>Each sub-project gets its own <code>spec → plan → impl</code> cycle.
+This document fully specifies #1 and records #2–#4 as committed roadmap
+so the sequencing is unambiguous.</p>
+<h2
+id="2-lava-api-go-additive-sqlite-backend-the-only-existing-code-touched">2.
+<code>lava-api-go</code> additive SQLite backend (the only existing code
+touched)</h2>
+<h3 id="21-principle-universal-pattern">2.1 Principle (universal
+pattern)</h3>
+<p>Introduce a <strong>backend selector</strong> whose default
+reproduces today's behavior byte-for-byte. The current code becomes "the
+postgres branch," never "the only path." Every existing deployment that
+sets <code>LAVA_API_PG_URL</code> and nothing else behaves
+identically.</p>
+<h3 id="22-config-additive">2.2 Config (additive)</h3>
+<ul>
+<li><code>LAVA_API_STORAGE_BACKEND</code> ∈ {<code>postgres</code>
+(default), <code>sqlite</code>}.</li>
+<li><code>LAVA_API_SQLITE_PATH</code> (required iff
+backend=<code>sqlite</code>).</li>
+<li><code>LAVA_API_PG_URL</code> required <strong>iff</strong>
+backend=<code>postgres</code> (today's hard-dep, now conditional on the
+default branch — unchanged for existing users).</li>
+<li>No env var renamed or removed. New vars carry placeholders in
+<code>.env.example</code> (§6.R).</li>
+</ul>
+<h3 id="23-storage-boundary">2.3 Storage boundary</h3>
+<ul>
+<li>Define a Go <code>storage</code> interface over what the
+<code>internal/cache</code> (and any other Postgres-bound) layer
+needs.</li>
+<li>Two implementations:
+<ul>
+<li><strong>postgres</strong> — wraps the existing
+<code>submodules/cache/pkg/postgres</code> adapter; behavior
+unchanged.</li>
+<li><strong>sqlite</strong> — backed by
+<strong><code>modernc.org/sqlite</code></strong> (pure-Go, no CGo →
+cross-compiles cleanly for Android arm64/arm/amd64; already a transitive
+dep from the LVA tickets work). Migrations adapted for SQLite dialect
+under <code>migrations/sqlite/</code>.</li>
+</ul></li>
+<li>Selection happens once at startup in the composition root;
+handlers/middleware are backend-agnostic.</li>
+</ul>
+<h3 id="24-internalmobile-package-gomobile-surface">2.4
+<code>internal/mobile</code> package (gomobile surface)</h3>
+<ul>
+<li><code>Start(configJSON string) error</code> — parse config, init
+SQLite storage, start the existing server on the configured bind/port,
+return when listening (or error).</li>
+<li><code>Stop() error</code> — graceful shutdown of the running
+server.</li>
+<li><code>Status() string</code> — JSON: state, bind addr, port, request
+count, storage backend, version.</li>
+<li>Designed for <code>gomobile bind</code> (exported types kept to
+strings/ints/errors for a clean JNI surface).</li>
+</ul>
+<h3 id="25-regression--parity-guards-6a--6j">2.5 Regression &amp; parity
+guards (§6.A / §6.J)</h3>
+<ul>
+<li>Existing Postgres unit/contract/parity/e2e tests remain
+<strong>untouched and green</strong>.</li>
+<li>New <code>*_sqlite_test.go</code> mirror the Postgres suites and
+assert <strong>identical JSON contract</strong> (a parity test feeds the
+same requests to both backends and asserts equal response shape + status
++ key fields).</li>
+<li><code>internal/mobile</code> test: call <code>Start</code> against a
+loopback port, issue a <strong>real HTTP request</strong>, assert real
+JSON body, <code>Stop</code>, assert port closed. Falsifiability
+rehearsal recorded in commit body.</li>
+</ul>
+<h2 id="3-android-app--module--component-architecture">3. Android app —
+module &amp; component architecture</h2>
+<h3 id="31-new-gradle-modules">3.1 New Gradle modules</h3>
+<ul>
+<li><strong><code>:api-app</code></strong> — applies
+<code>lava.android.application</code>;
+<code>applicationId = digital.vasic.lava.api</code>, debug
+<code>applicationIdSuffix = .dev</code> →
+<code>digital.vasic.lava.api.dev</code>;
+<code>versionCode</code>/<code>versionName</code> independent of the
+client, tracked in <code>.lava-ci-evidence/distribute-changelog/</code>.
+Reuses <code>core:designsystem</code>, <code>core:notifications</code>,
+Compose, Hilt, Orbit.</li>
+<li><strong><code>:core:apiengine</code></strong> — thin Kotlin wrapper
+over the generated <code>gomobile</code> <code>.aar</code>:
+<code>ApiEngine</code> interface (<code>start(config): Result</code>,
+<code>stop()</code>, <code>status(): ApiStatus</code>), a real impl
+delegating to the <code>.aar</code>, and a <code>FakeApiEngine</code>
+for unit tests that is <strong>behaviorally equivalent</strong>
+(enforces start-before-status, error propagation — §Third Law).</li>
+<li>The <code>.aar</code> is produced by a build step
+(<code>gomobile bind</code>) wired into the module; checked-in vs
+built-on-demand decided in the plan (prefer reproducible local build per
+Local-Only CI/CD; cache the artifact).</li>
+</ul>
+<h3 id="32-apiengineservice-foreground-service">3.2
+<code>ApiEngineService</code> (foreground Service)</h3>
+<ul>
+<li>Owns the Go server lifecycle: <strong>Start / Stop /
+Restart</strong>.</li>
+<li>Holds <strong><code>WifiManager.MulticastLock</code></strong>
+(mDNS), <strong><code>WifiManager.WifiLock</code></strong>, and a
+partial <strong><code>WakeLock</code></strong> so the server survives
+doze while running; all released on Stop.</li>
+<li>Registers/unregisters the mDNS service via
+<strong><code>NsdManager</code></strong> (see §4).</li>
+<li>Emits/updates the foreground notification (see §5).</li>
+<li>Survives configuration changes; exposes state via a
+<code>StateFlow</code> the UI observes.</li>
+</ul>
+<h3 id="33-landing-ui-mvi--orbit">3.3 Landing UI (MVI / Orbit)</h3>
+<ul>
+<li><code>ApiControlViewModel : ContainerHost&lt;ApiControlState, ApiControlSideEffect&gt;</code>
++ sealed <code>ApiControlAction</code>.</li>
+<li>State machine:
+<code>Stopped → Starting → Running(url, ips, requestCount) → Stopping → Stopped</code>,
+plus <code>Error(message)</code>.</li>
+<li>Screen shows: big status indicator; <strong>Start / Stop /
+Restart</strong> buttons (enabled per state); reachable URL
+<code>https://&lt;lan-ip&gt;:&lt;port&gt;</code>; all LAN IPs other
+devices can use; live request counter; a clear one-line explanation of
+what "running" means and how other devices connect. <strong>No
+<code>_</code> in any user-facing label</strong> (§6.L 60th
+lesson).</li>
+</ul>
+<h3 id="34-storage--tls">3.4 Storage &amp; TLS</h3>
+<ul>
+<li>SQLite DB at <code>filesDir/lava-api.db</code>.</li>
+<li><strong>TLS:</strong> generate a self-signed cert + key at first
+boot, persist under <code>filesDir</code>; serve HTTPS on the configured
+port (default 8443) so the on-device server matches the host's HTTPS
+surface. Cert-trust strategy for clients documented in sub-project
+2/3.</li>
+<li>Bind <strong><code>0.0.0.0</code></strong> so other LAN devices
+reach it.</li>
+</ul>
+<h2 id="4-network-discovery-identity-truthful--non-breaking">4. Network
+discovery identity (truthful + non-breaking)</h2>
+<ul>
+<li>The on-device server <strong>is</strong> the Go engine on Android
+with SQLite, so it honestly advertises:
+<ul>
+<li>Service type <strong><code>_lava-api._tcp</code></strong> (release)
+/ <strong><code>_lava-api-dev._tcp</code></strong> (debug) — same types
+the client already watches.</li>
+<li>TXT: <code>engine=go</code>,
+<strong><code>platform=android</code></strong>,
+<code>storage=sqlite</code>, <code>version=&lt;n&gt;</code>.</li>
+</ul></li>
+<li>The existing <strong>host</strong> instance keeps advertising
+<code>engine=go, platform=server</code> (or absent platform) —
+<strong>unchanged</strong>; both appear in the client's list.</li>
+<li>The "distinct identity" the operator chose is realized via the
+<strong><code>platform</code></strong> TXT key: the client (sub-project
+2) labels <code>platform=android</code> instances distinctly (e.g. "On
+this network · Android device") without any discovery re-architecture.
+Backward compatible: instances without <code>platform</code> render
+exactly as today.</li>
+</ul>
+<h2 id="5-notification">5. Notification</h2>
+<ul>
+<li>Dedicated channel via <code>core:notifications</code>.</li>
+<li>Persistent foreground notification while running: title "Lava API
+running"; body with reachable
+<code>https://&lt;ip&gt;:&lt;port&gt;</code> + live request count;
+<strong>action buttons: Stop, Restart</strong>; tap opens the landing
+screen.</li>
+<li>Stopped/Error states reflected (or notification removed on full
+stop).</li>
+</ul>
+<h2 id="6-testing--maximal-coverage-real-evidence-6j--6z--6ae">6.
+Testing — maximal coverage, real evidence (§6.J / §6.Z / §6.AE)</h2>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>What</th>
+<th>Primary assertion</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Go unit</td>
+<td>config selector, sqlite storage impl</td>
+<td>correct branch chosen; CRUD correctness</td>
+</tr>
+<tr>
+<td>Go contract/parity</td>
+<td>sqlite vs postgres identical JSON</td>
+<td>field-level response equality</td>
+</tr>
+<tr>
+<td>Go mobile</td>
+<td><code>Start/Stop/Status</code> real loopback HTTP</td>
+<td>real JSON body on the wire</td>
+</tr>
+<tr>
+<td>Android unit</td>
+<td><code>ApiControlViewModel</code> w/ real engine wrapper (fake only
+Service boundary); NSD TXT parsing</td>
+<td>rendered state == server state</td>
+</tr>
+<tr>
+<td>Instrumented Challenge</td>
+<td><code>ChallengeNN_ApiAppBootAndServe</code>: launch → Start → UI
+shows <strong>Running</strong> AND a real <strong>HTTPS request to the
+on-device server returns real JSON</strong></td>
+<td>user-visible UI text + on-the-wire JSON</td>
+</tr>
+<tr>
+<td>Challenge</td>
+<td>cold-start (C00-equiv), Stop, Restart, notification actions</td>
+<td>user-visible state transitions</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>Every Challenge carries the mandatory <strong>falsifiability
+rehearsal</strong> block (deliberately-broken-but-non-crashing mutation
++ observed assertion failure).</li>
+<li>Execution on the <strong>host-direct + HVF</strong> runner (per the
+§6.L 67th cycle resolution of the §6.X darwin/arm64 sub-debt) against a
+provisioned AVD; evidence under <code>.lava-ci-evidence/</code>.</li>
+<li><strong>§6.Z:</strong> no APK of this app is distributed unless its
+Challenge set executed <strong>green against the exact
+artifact</strong>, with the evidence file present (matching commit SHA,
+≤24h, BUILD SUCCESSFUL captured verbatim).</li>
+</ul>
+<h2 id="7-risks--honest-blockers">7. Risks &amp; honest blockers</h2>
+<ul>
+<li><strong>gomobile toolchain</strong> must be present locally (Go 1.26
++ <code>gomobile</code>/<code>gobind</code> + Android NDK). If absent,
+the <code>.aar</code> build is a hard blocker surfaced to the operator
+(no bluff).</li>
+<li><strong>On-device Challenge execution</strong> needs a provisioned
+AVD reachable by the HVF runner; if absent, execution is honestly
+BLOCKED, not faked.</li>
+<li><strong>Firebase distribution</strong> (sub-project 4) needs the new
+app's <code>google-services.json</code>, the shared keystore, and
+<code>LAVA_FIREBASE_TOKEN</code>; missing any → blocker, not bluff.</li>
+<li><strong>SQLite migration parity</strong> with Postgres dialect is
+the main correctness risk; the parity test is the guard.</li>
+</ul>
+<h2 id="8-roadmap-for-sub-projects-24-committed-sequencing">8. Roadmap
+for sub-projects 2–4 (committed sequencing)</h2>
+<ol start="2" type="1">
+<li><strong>Client integration:</strong> extend the existing onboarding
+API step + add Settings entry "Run API on this device":
+<code>PackageManager</code> check → if
+<code>digital.vasic.lava.api[.dev]</code> installed, launch it + trigger
+boot (it then appears in the instances list via mDNS); else deep-link to
+its Firebase/Play download. Clear copy eliminating confusion about
+controlling the local instance.</li>
+<li><strong>Docs:</strong> new <code>docs/ON_DEVICE_API.md</code> +
+diagrams (architecture, lifecycle, mDNS sequence); extend
+<code>docs/ARCHITECTURE.md</code>,
+<code>docs/LOCAL_NETWORK_DISCOVERY.md</code>, <code>AGENTS.md</code>,
+<code>README.md</code>, <code>docs/CONTINUATION.md</code>; user
+guide/manual.</li>
+<li><strong>Distribution:</strong> §6.Y version bumps; build all 3 apps
+both variants inside the container/host path; run full tests + Challenge
+matrix; §6.Z evidence; two-stage (§6.AA) debug→verify→release Firebase
+distribution via Firebase CLI, same keystore; commit+push all submodules
++ parent to all upstreams.</li>
+</ol>
+<h2 id="9-definition-of-done-sub-project-1">9. Definition of done
+(sub-project 1)</h2>
+<ul>
+<li><code>lava-api-go</code> runs on SQLite via config with all existing
+Postgres tests green + new parity tests green.</li>
+<li><code>:api-app</code> builds (debug+release), boots the in-process
+Go server, serves real JSON over HTTPS on the LAN, advertises via mDNS
+with <code>platform=android</code>.</li>
+<li>Start/Stop/Restart/Status work from the landing UI; foreground
+notification with actions works.</li>
+<li>Full test matrix green with real evidence; Challenge set executed
+green against the built artifact (or honestly BLOCKED with the blocker
+named).</li>
+</ul>
+</body>
+</html>
