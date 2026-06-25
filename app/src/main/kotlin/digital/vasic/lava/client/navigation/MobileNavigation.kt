@@ -24,17 +24,16 @@ import lava.login.addLogin
 import lava.login.openLogin
 import lava.menu.MenuScreen
 import lava.navigation.NavigationController
+import lava.navigation.NestedNavigationController
 import lava.navigation.model.NavigationBarItem
 import lava.navigation.model.NavigationGraphBuilder
 import lava.navigation.model.buildRoute
-import lava.navigation.rememberNestedNavigationController
-import lava.navigation.ui.MobileNavigation
+import lava.navigation.ui.MobileNavigationWithBottomBar
 import lava.navigation.ui.NavigationAnimations
 import lava.navigation.ui.NavigationAnimations.Companion.slideInLeft
 import lava.navigation.ui.NavigationAnimations.Companion.slideInRight
 import lava.navigation.ui.NavigationAnimations.Companion.slideOutLeft
 import lava.navigation.ui.NavigationAnimations.Companion.slideOutRight
-import lava.navigation.ui.NestedMobileNavigation
 import lava.provider.config.addProviderConfig
 import lava.provider.config.openProviderConfig
 import lava.search.addSearchHistory
@@ -46,10 +45,59 @@ import lava.topic.addTopic
 import lava.topic.openTopic
 import lava.visited.VisitedScreen
 
+/**
+ * LVA-008 Candidate #7 — single-NavHost multiple-back-stack collapse.
+ *
+ * Previously this composed a nested NavHost (the four bottom-nav graphs) INSIDE
+ * an outer-host `addNestedNavigation` destination, which made a parent
+ * NavBackStackEntry the inner host's LifecycleOwner and stranded an INITIALIZED
+ * `search_input` entry at Activity destroy (LVA-008 teardown crash).
+ *
+ * Now there is exactly ONE Activity-hosted NavHost. The four bottom-nav graphs
+ * (search/forum/topics/menu) are TOP-LEVEL destinations in that same host,
+ * alongside the detail destinations (login, credentials, provider config,
+ * category, topic, and the top-level search_input/search_result detail screens
+ * reached from forum/category). The bottom bar is rendered by
+ * [MobileNavigationWithBottomBar] and shown only on the bottom-nav graph routes;
+ * tab switching uses the official multi-back-stack pattern (preserved in
+ * [NestedNavigationController]).
+ *
+ * All destinations that existed before remain reachable (§11.4.122 — no screen
+ * dropped): the four bottom-nav graphs PLUS every modal/detail destination.
+ */
 @Composable
-fun MobileNavigation(navigationController: NavigationController) {
-    MobileNavigation(navigationController) {
+fun MobileNavigation(navigationController: NestedNavigationController) {
+    val navigationBarItems = remember { BottomRoute.entries.map(BottomRoute::navigationBarItem) }
+    MobileNavigationWithBottomBar(
+        navigationController = navigationController,
+        navigationBarItems = navigationBarItems,
+    ) {
         with(navigationController) {
+            // --- Bottom-nav graphs: TOP-LEVEL in the single host (search = start) ---
+            addSearch(
+                openLogin = { openLogin() },
+                openTopic = { id, providerId -> openTopic(id, providerId) },
+            )
+            addForum(
+                openSearchInput = { openSearchInput(it) },
+                openLogin = { openLogin() },
+                // forum/category topics are single-tracker → active-tracker default.
+                openTopic = { id -> openTopic(id, null) },
+            )
+            addTopics(
+                // LVA-070 — favorites/visited persist the source provider (Room
+                // providerId column), so a favorited/visited archiveorg/gutenberg
+                // topic reopens with `?p=<providerId>` and routes to HTTP_DOWNLOAD.
+                // Null ⇒ active-tracker fallback (legacy rows).
+                openTopic = { id, providerId -> openTopic(id, providerId) },
+            )
+            addMenu(
+                openLogin = { openLogin() },
+                openCredentials = { openCredentialsManager() },
+                openProviderConfig = { openProviderConfig(it) },
+            )
+
+            // --- Detail / modal destinations: TOP-LEVEL siblings (bottom bar hidden) ---
             addLogin(
                 back = ::popBackStack,
                 animations = NavigationAnimations.ScaleInOutAnimation,
@@ -103,58 +151,6 @@ fun MobileNavigation(navigationController: NavigationController) {
                 openSearch = { openSearchResult(it) },
                 deepLinkUrls = DeepLinks.topicUrls,
                 animations = NavigationAnimations.ScaleInOutAnimation,
-            )
-            addNestedNavigation(
-                openSearchInput = { openSearchInput(it) },
-                openLogin = { openLogin() },
-                openTopic = { id, providerId -> openTopic(id, providerId) },
-                openCredentials = { openCredentialsManager() },
-                openProviderConfig = { openProviderConfig(it) },
-            )
-        }
-    }
-}
-
-context(NavigationGraphBuilder)
-private fun addNestedNavigation(
-    openSearchInput: (id: String) -> Unit,
-    openLogin: () -> Unit,
-    // LVA-052 — providerId threads the source provider for the topic download
-    // branch. The bottom-nav Search tab (which runs multi-search across
-    // archiveorg/gutenberg/rutracker) supplies it; forum/favorites/visited
-    // pass null (→ active-tracker fallback).
-    openTopic: (id: String, providerId: String?) -> Unit,
-    openCredentials: () -> Unit,
-    openProviderConfig: (String) -> Unit,
-) = addDestination {
-    val navigationBarItems = remember { BottomRoute.entries.map(BottomRoute::navigationBarItem) }
-    val navigationController = rememberNestedNavigationController()
-    with(navigationController) {
-        NestedMobileNavigation(
-            navigationController = navigationController,
-            navigationBarItems = navigationBarItems,
-        ) {
-            addSearch(
-                openLogin = openLogin,
-                openTopic = openTopic,
-            )
-            addForum(
-                openSearchInput = openSearchInput,
-                openLogin = openLogin,
-                // forum/category topics are single-tracker → active-tracker default.
-                openTopic = { id -> openTopic(id, null) },
-            )
-            addTopics(
-                // LVA-070 — favorites/visited now persist the source provider
-                // (Room providerId column), so a favorited/visited archiveorg/
-                // gutenberg topic reopens with `?p=<providerId>` and routes to
-                // HTTP_DOWNLOAD. Null ⇒ active-tracker fallback (legacy rows).
-                openTopic = { id, providerId -> openTopic(id, providerId) },
-            )
-            addMenu(
-                openLogin = openLogin,
-                openCredentials = openCredentials,
-                openProviderConfig = openProviderConfig,
             )
         }
     }

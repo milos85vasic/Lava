@@ -10,6 +10,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.navigation.NavDeepLinkRequest
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
@@ -27,6 +28,24 @@ interface NestedNavigationController : NavigationController {
     fun navigateTopLevel(route: String)
     val currentTopLevelRouteFlow: Flow<String>
     val canPopBackFlow: Flow<Boolean>
+
+    /**
+     * LVA-008 Candidate #7 (single-NavHost multi-back-stack collapse).
+     *
+     * Emits whether the bottom navigation bar should be visible for the current
+     * destination, i.e. whether the current top-level route is one of the
+     * supplied [bottomNavRoutes]. When the user navigates to a non-bottom-nav
+     * top-level destination (login, topic, category, the top-level
+     * search_input/search_result detail screens) the bottom bar hides.
+     *
+     * This exists because in the collapsed single-host architecture the bottom
+     * navigation graphs live as TOP-LEVEL destinations in the SAME
+     * Activity-hosted [NavHostController] as the detail destinations — there is
+     * no longer a nested NavHost, so bottom-bar visibility is derived from the
+     * single controller's current destination rather than from a separate inner
+     * controller's existence.
+     */
+    fun bottomBarVisibleFlow(bottomNavRoutes: Set<String>): Flow<Boolean>
 }
 
 private open class NavigationControllerImpl(
@@ -114,6 +133,12 @@ private class NestedNavigationControllerImpl(
             }
     }
 
+    override fun bottomBarVisibleFlow(bottomNavRoutes: Set<String>): Flow<Boolean> {
+        return currentTopLevelRouteFlow
+            .map { it in bottomNavRoutes }
+            .onEach { logger.d { "bottomBarVisible: $it" } }
+    }
+
     override fun popBackStack(): Boolean {
         return when {
             navHostController.navigateUp() -> true
@@ -152,8 +177,14 @@ private class NestedNavigationControllerImpl(
         retain: Boolean,
     ) {
         logger.d { "navigate: route=$route; addHistory=$addBackStack; retain=$retain" }
+        // LVA-008 Candidate #7 — the OFFICIAL single-NavHost multiple-back-stack
+        // bottom-nav switch: popUpTo(graph.findStartDestination){saveState} +
+        // launchSingleTop + restoreState. findStartDestination() is the canonical
+        // anchor (matches the Android Navigation bottom-nav guide); it resolves to
+        // the start of the (single) Activity-hosted graph rather than the root
+        // graph node id, so per-tab back-stacks save/restore correctly.
         navHostController.navigate(route = route) {
-            popUpTo(navHostController.graph.id) { saveState = retain }
+            popUpTo(navHostController.graph.findStartDestination().id) { saveState = retain }
             launchSingleTop = true
             restoreState = retain
         }
@@ -195,4 +226,13 @@ internal fun NestedNavigationController.currentTopLevelRouteAsState(): State<Str
 @Composable
 internal fun NestedNavigationController.canPopBackAsState(): State<Boolean> {
     return canPopBackFlow.collectAsState(false)
+}
+
+@Composable
+internal fun NestedNavigationController.bottomBarVisibleAsState(
+    bottomNavRoutes: Set<String>,
+): State<Boolean> {
+    // Initial value true: in the collapsed single host the start destination is
+    // always a bottom-nav graph, so the bar is visible on first composition.
+    return bottomBarVisibleFlow(bottomNavRoutes).collectAsState(true)
 }

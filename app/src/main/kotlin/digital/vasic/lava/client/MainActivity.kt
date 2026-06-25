@@ -41,7 +41,7 @@ import lava.main.MainViewModel
 import lava.models.settings.Theme
 import lava.navigation.DeepLinks
 import lava.navigation.LocalDeepLinks
-import lava.navigation.rememberNavigationController
+import lava.navigation.rememberNestedNavigationController
 import lava.onboarding.OnboardingAction
 import lava.onboarding.OnboardingScreen
 import lava.onboarding.OnboardingViewModel
@@ -178,7 +178,11 @@ open class MainActivity : ComponentActivity() {
                             )
                         }
                     } else if (showOnboarding == false) {
-                        val navigationController = rememberNavigationController()
+                        // LVA-008 Candidate #7 — single-NavHost multiple-back-stack
+                        // collapse: the WHOLE app navigation now runs on ONE
+                        // Activity-hosted controller that also drives the bottom-nav
+                        // multi-back-stack switch (no nested NavHost).
+                        val navigationController = rememberNestedNavigationController()
                         RatingDialog()
                         MainScreen(
                             theme = theme,
